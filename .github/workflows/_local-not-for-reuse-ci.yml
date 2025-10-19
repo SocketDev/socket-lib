@@ -1,0 +1,51 @@
+name: 🚀 CI Pipeline
+
+# Dependencies:
+#   - SocketDev/socket-registry/.github/workflows/ci.yml
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Run CI Pipeline
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@a912e5bd8ec469d2ee13abf592a6b2e5898c006c # main
+    with:
+      coverage-script: 'pnpm run test:unit:coverage'
+      coverage-report-script: 'pnpm run coverage:percent --json'
+      fail-fast: false
+      lint-script: 'pnpm run lint-ci'
+      lint-setup-script: 'pnpm run build'
+      node-versions: '[20, 22, 24]'
+      os-versions: '["ubuntu-latest", "windows-latest"]'
+      test-script: 'pnpm run test-ci'
+      test-setup-script: 'pnpm run build'
+      type-check-script: 'pnpm run type-ci'
+      type-check-setup-script: 'pnpm run build'
+
+  test-npm-packages:
+    name: Test NPM Packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@51be85d39d3b4a42dd9d4712948b9d30a2e04794 # main
+        with:
+          node-version: 22
+
+      - uses: SocketDev/socket-registry/.github/actions/cache-npm-packages@51be85d39d3b4a42dd9d4712948b9d30a2e04794 # main
+
+      - name: Build registry
+        run: pnpm run build
+
+      - name: Run npm package tests
+        run: pnpm run test:npm:packages:ci

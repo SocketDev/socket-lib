@@ -1,0 +1,92 @@
+name: ⚡ Socket Fix Auto Pull Request
+
+# Dependencies:
+#   - SocketDev/socket-registry/.github/actions/setup-and-install
+
+# Recommended schedule for calling workflows:
+# schedule:
+#   - cron: '0 0 * * *'   # Run daily at midnight UTC
+#   - cron: '0 12 * * *'  # Run daily at noon UTC
+
+on:
+  workflow_call:
+    inputs:
+      autopilot:
+        description: 'Enable autopilot mode (e.g., true for automatic fixes, false for manual review)'
+        required: false
+        type: boolean
+        default: true
+      debug:
+        description: 'Enable debug output (e.g., "0" or "1")'
+        required: false
+        type: string
+        default: '0'
+      git-user-email:
+        description: 'Git user email for commits (e.g., "bot@example.com")'
+        required: false
+        type: string
+        default: '94589996+socket-bot@users.noreply.github.com'
+      git-user-name:
+        description: 'Git user name for commits (e.g., "Socket Bot")'
+        required: false
+        type: string
+        default: 'Socket Bot'
+      glob-pattern:
+        description: 'Glob pattern for files to fix (e.g., "**/*.js", "src/**/*.ts")'
+        required: false
+        type: string
+        default: ''
+      node-version:
+        description: 'Node version to use (e.g., "20", "22", "24")'
+        required: false
+        type: string
+        default: '22'
+      timeout-minutes:
+        description: 'Timeout in minutes (e.g., 10 for quick fixes, 30 for extensive changes)'
+        required: false
+        type: number
+        default: 10
+    secrets:
+      gh_token:
+        required: true
+      socket_cli_api_token:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: false  # Don't cancel auto-fix PRs
+
+jobs:
+  socket-auto-pr:
+    name: Run Socket Fix Autopilot
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@51be85d39d3b4a42dd9d4712948b9d30a2e04794 # main
+        with:
+          node-version: ${{ inputs.node-version }}
+          debug: ${{ inputs.debug }}
+
+      - name: Run Socket Fix CLI
+        env:
+          SOCKET_CLI_GITHUB_TOKEN: ${{ secrets.gh_token }}
+          SOCKET_CLI_GIT_USER_EMAIL: ${{ inputs.git-user-email }}
+          SOCKET_CLI_GIT_USER_NAME: ${{ inputs.git-user-name }}
+          SOCKET_CLI_API_TOKEN: ${{ secrets.socket_cli_api_token }}
+        run: |
+          AUTOPILOT_FLAG=""
+          GLOB_FLAG=""
+
+          if [[ "${{ inputs.autopilot }}" == "true" ]]; then
+            AUTOPILOT_FLAG="--autopilot"
+          fi
+
+          if [[ -n "${{ inputs.glob-pattern }}" ]]; then
+            GLOB_FLAG="--glob '${{ inputs.glob-pattern }}'"
+          fi
+
+          pnpm dlx @socketsecurity/cli fix $AUTOPILOT_FLAG $GLOB_FLAG

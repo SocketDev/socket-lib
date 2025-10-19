@@ -1,0 +1,54 @@
+name: ⚡ Claude Code
+
+# Dependencies:
+#   - actions/checkout@v5.0.0
+#   - anthropics/claude-code-action@v1.0.9
+#     - oven-sh/setup-bun@v2.0.2
+#   - SocketDev/socket-registry/.github/actions/debug
+
+on:
+  workflow_call:
+    inputs:
+      debug:
+        description: 'Enable debug output (e.g., "0" or "1")'
+        required: false
+        type: string
+        default: '0'
+      timeout-minutes:
+        description: 'Timeout in minutes (e.g., 10 for standard tasks, 30 for complex operations)'
+        required: false
+        type: number
+        default: 10
+    secrets:
+      anthropic_api_key:
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  claude:
+    name: Run Claude Code
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Setup debug
+        uses: SocketDev/socket-registry/.github/actions/debug@51be85d39d3b4a42dd9d4712948b9d30a2e04794 # main
+        with:
+          debug: ${{ inputs.debug }}
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@426380f01bad0a17200865605a85cb28926dccbf # v1.0.9
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}

@@ -1,0 +1,56 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug output'
+        required: false
+        default: '0'
+        type: choice
+        options:
+          - '0'
+          - '1'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm run build
+
+      - name: Ensure npm version 11.5.1+ for trusted publishing
+        run: |
+          NPM_VERSION=$(npm --version)
+          echo "Current npm version: $NPM_VERSION"
+          if ! npx --yes semver "$NPM_VERSION" -r ">=11.5.1"; then
+            echo "Installing npm 11.5.1+ for trusted publishing..."
+            npm install -g npm@latest
+            echo "Updated npm version: $(npm --version)"
+          else
+            echo "npm version $NPM_VERSION meets the 11.5.1+ requirement"
+          fi
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
