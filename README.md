@@ -69,13 +69,13 @@ Access utility modules for common operations:
 
 ```typescript
 // File system utilities
-import { readJsonFile, writeJsonFile } from '@socketsecurity/lib/lib/fs'
+import { readJsonFile, writeJsonFile } from '@socketsecurity/lib/fs'
 
 // Package utilities
-import { parsePackageSpec } from '@socketsecurity/lib/lib/packages'
+import { parsePackageSpec } from '@socketsecurity/lib/packages'
 
 // Path utilities
-import { normalizePath } from '@socketsecurity/lib/lib/paths'
+import { normalizePath } from '@socketsecurity/lib/paths'
 
 // And many more...
 ```
