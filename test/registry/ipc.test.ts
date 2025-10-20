@@ -17,7 +17,7 @@ import {
   readIpcStub,
   writeIpcStub,
 } from '@socketsecurity/lib/ipc'
-import { runWithTempDir } from '../../utils/temp-file-helper.mts'
+import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('ipc', () => {
   describe('createIpcChannelId', () => {
