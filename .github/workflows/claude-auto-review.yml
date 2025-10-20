@@ -1,75 +1,20 @@
-name: ⚡ Claude Auto Review
+name: Claude Auto Review
 
 # Dependencies:
-#   - actions/checkout@v5.0.0
-#   - anthropics/claude-code-action@v1.0.9
-#     - oven-sh/setup-bun@v2.0.2
-#   - SocketDev/socket-registry/.github/actions/debug
+#   - SocketDev/socket-registry/.github/workflows/claude-auto-review.yml
 
 on:
-  workflow_call:
-    inputs:
-      allowed_tools:
-        description: 'Allowed tools for the review'
-        required: false
-        type: string
-        default: 'mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff'
-      debug:
-        description: 'Enable debug output (e.g., "0" or "1")'
-        required: false
-        type: string
-        default: '0'
-      direct_prompt:
-        description: 'Prompt for the review'
-        required: false
-        type: string
-        default: |
-          Please review this pull request and provide actionable feedback.
-
-          Focus on:
-          - Code quality and best practices
-          - Potential bugs or issues
-          - Performance considerations
-          - Security implications
-          - Overall architecture and design decisions
-
-          Provide constructive feedback with specific suggestions for improvement.
-          Use inline comments to highlight specific areas of concern. Be concise and clear in your feedback.
-      timeout_minutes:
-        description: 'Timeout in minutes (e.g., "60" for code reviews, "120" for extensive reviews)'
-        required: false
-        type: string
-        default: '60'
-    secrets:
-      anthropic_api_key:
-        required: true
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
 
 permissions:
   contents: read
   id-token: write
   pull-requests: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 jobs:
   auto-review:
-    name: Run Auto Review
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-
-      - name: Setup debug
-        uses: SocketDev/socket-registry/.github/actions/debug@51be85d39d3b4a42dd9d4712948b9d30a2e04794 # main
-        with:
-          debug: ${{ inputs.debug }}
-
-      - name: Automatic PR Review
-        uses: anthropics/claude-code-action@426380f01bad0a17200865605a85cb28926dccbf # v1.0.9
-        with:
-          allowed_tools: ${{ inputs.allowed_tools }}
-          anthropic_api_key: ${{ secrets.anthropic_api_key }}
-          direct_prompt: ${{ inputs.direct_prompt }}
-          timeout_minutes: ${{ inputs.timeout_minutes }}
+    uses: SocketDev/socket-registry/.github/workflows/claude-auto-review.yml@a912e5bd8ec469d2ee13abf592a6b2e5898c006c # main
+    secrets:
+      anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

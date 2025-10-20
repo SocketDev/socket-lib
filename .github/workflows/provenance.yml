@@ -1,181 +1,29 @@
-name: ⚡ Publish to npm registry
+name: Publish to npm registry
 
 # Dependencies:
-#   - SocketDev/socket-registry/.github/actions/setup-and-install
+#   - SocketDev/socket-registry/.github/workflows/provenance.yml
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      access-script:
-        description: 'pnpm script to run for access control (e.g., "package:npm:access")'
-        required: false
-        type: string
-        default: ''
       debug:
-        description: 'Enable debug output (e.g., "0" or "1")'
+        description: 'Enable debug output'
         required: false
-        type: string
         default: '0'
-      force-publish:
-        description: 'Force publish without commit checks'
-        required: false
-        type: boolean
-        default: false
-      node-version:
-        description: 'Node version to use (e.g., "20", "22", "24")'
-        required: false
         type: string
-        default: '22'
-      package-name:
-        description: 'Package name (e.g., "@socketregistry/sdk") - used when scripts are not provided'
-        required: false
-        type: string
-        default: ''
-      publish-script:
-        description: 'pnpm script to run for publishing (e.g., "package:npm:publish")'
-        required: false
-        type: string
-        default: ''
-      registry-url:
-        description: 'npm registry URL'
-        required: false
-        type: string
-        default: 'https://registry.npmjs.org'
-      scope:
-        description: 'npm registry scope for package authentication'
-        required: false
-        type: string
-        default: ''
-      setup-script:
-        description: 'Setup script before publishing (e.g., "pnpm run build")'
-        required: false
-        type: string
-        default: ''
-      timeout-minutes:
-        description: 'Timeout in minutes'
-        required: false
-        type: number
-        default: 10
-      use-trusted-publishing:
-        description: 'Use npm trusted publishing with OIDC instead of npm token'
-        required: false
-        type: boolean
-        default: false
-    secrets:
-      npm_token:
-        required: false
+        options:
+          - '0'
+          - '1'
 
 permissions:
   contents: write
   id-token: write
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: false  # Don't cancel publishing
-
 jobs:
-  build-and-publish:
-    name: Build and Publish
-    runs-on: ubuntu-latest
-    timeout-minutes: ${{ inputs.timeout-minutes }}
-    steps:
-      - name: Validate inputs
-        run: |
-          if [ "${{ inputs.use-trusted-publishing }}" = "false" ]; then
-            if [ -z "${{ inputs.publish-script }}" ] && [ -z "${{ inputs.access-script }}" ] && [ -z "${{ inputs.package-name }}" ]; then
-              echo "Error: package-name is required when publish-script and access-script are not provided"
-              exit 1
-            fi
-            if [ -z "${{ secrets.npm_token }}" ]; then
-              echo "Error: npm_token secret is required when use-trusted-publishing is false"
-              exit 1
-            fi
-          else
-            if [ -z "${{ inputs.publish-script }}" ] && [ -z "${{ inputs.package-name }}" ]; then
-              echo "Error: package-name is required when publish-script is not provided"
-              exit 1
-            fi
-          fi
-
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@51be85d39d3b4a42dd9d4712948b9d30a2e04794 # main
-        with:
-          node-version: ${{ inputs.node-version }}
-          debug: ${{ inputs.debug }}
-          scope: ${{ inputs.scope }}
-          registry-url: ${{ inputs.registry-url }}
-
-      - name: Ensure npm version 11.5.1+ for trusted publishing
-        if: inputs.use-trusted-publishing == true
-        run: |
-          NPM_VERSION=$(npm --version)
-          echo "Current npm version: $NPM_VERSION"
-          # Check if npm version is >= 11.5.1
-          if ! npx --yes semver "$NPM_VERSION" -r ">=11.5.1"; then
-            echo "Installing npm 11.5.1+ for trusted publishing..."
-            npm install -g npm@latest
-            echo "Updated npm version: $(npm --version)"
-          else
-            echo "npm version $NPM_VERSION meets the 11.5.1+ requirement for trusted publishing"
-          fi
-
-      - run: ${{ inputs.setup-script }}
-        if: inputs.setup-script != ''
-
-      - name: Setup npm authentication (token-based)
-        if: inputs.use-trusted-publishing == false
-        run: pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.npm_token }}
-
-      - name: Publish with custom script (token-based)
-        if: inputs.publish-script != '' && inputs.use-trusted-publishing == false
-        run: |
-          if [ "${{ inputs.force-publish }}" = "true" ]; then
-            pnpm run ${{ inputs.publish-script }} -- --force-publish
-          else
-            pnpm run ${{ inputs.publish-script }}
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
-
-      - name: Publish with custom script (trusted publishing)
-        if: inputs.publish-script != '' && inputs.use-trusted-publishing == true
-        run: |
-          if [ "${{ inputs.force-publish }}" = "true" ]; then
-            pnpm run ${{ inputs.publish-script }} -- --force-publish
-          else
-            pnpm run ${{ inputs.publish-script }}
-          fi
-
-      - name: Publish package (token-based)
-        if: inputs.publish-script == '' && inputs.package-name != '' && inputs.use-trusted-publishing == false
-        run: pnpm publish --provenance --access public --no-git-checks --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
-
-      - name: Publish package (trusted publishing)
-        if: inputs.publish-script == '' && inputs.package-name != '' && inputs.use-trusted-publishing == true
-        run: npm publish --access public
-        env:
-          NPM_CONFIG_IGNORE_SCRIPTS: true
-
-      - name: Set package access (token-based)
-        if: inputs.access-script != '' && inputs.use-trusted-publishing == false
-        run: pnpm run ${{ inputs.access-script }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
-
-      - name: Set package access (trusted publishing)
-        if: inputs.access-script != '' && inputs.use-trusted-publishing == true
-        run: pnpm run ${{ inputs.access-script }}
-
-      - name: Set MFA automation (token-based)
-        if: inputs.access-script == '' && inputs.package-name != '' && inputs.use-trusted-publishing == false
-        run: pnpm access set mfa=automation ${{ inputs.package-name }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
-
-      - name: Set MFA automation (trusted publishing)
-        if: inputs.access-script == '' && inputs.package-name != '' && inputs.use-trusted-publishing == true
-        run: |
-          echo "Skipping MFA automation - npm access commands require npm_token authentication"
-          echo "Trusted publishing uses OIDC tokens which don't support npm access commands"
-          echo "MFA settings should be configured through npm web interface for trusted publishing"
+  publish:
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@a912e5bd8ec469d2ee13abf592a6b2e5898c006c # main
+    with:
+      debug: ${{ inputs.debug }}
+      package-name: '@socketregistry/lib'
+      setup-script: 'pnpm run build'
+      use-trusted-publishing: true
