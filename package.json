@@ -688,8 +688,7 @@
       "types": "./dist/utils/get-ipc.d.ts",
       "default": "./dist/utils/get-ipc.js"
     },
-    "./extensions.json": "./extensions.json",
-    "./manifest.json": "./manifest.json",
+    "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json"
@@ -704,8 +703,7 @@
   },
   "files": [
     "dist",
-    "manifest.json",
-    "extensions.json",
+    "data/extensions.json",
     "CHANGELOG.md"
   ],
   "engines": {
