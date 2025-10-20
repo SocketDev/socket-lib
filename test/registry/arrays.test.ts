@@ -2,7 +2,6 @@
  * @fileoverview Unit tests for array utility functions.
  */
 
-import { describe, expect, it } from 'vitest'
 import {
   arrayChunk,
   arrayUnique,
@@ -10,6 +9,7 @@ import {
   joinAnd,
   joinOr,
 } from '@socketsecurity/lib/arrays'
+import { describe, expect, it } from 'vitest'
 
 describe('arrays', () => {
   describe('arrayChunk', () => {

@@ -2,7 +2,6 @@
  * @fileoverview Unit tests for string manipulation utilities.
  */
 
-import { describe, expect, it } from 'vitest'
 import {
   ansiRegex,
   applyLinePrefix,
@@ -19,6 +18,7 @@ import {
   toKebabCase,
   trimNewlines,
 } from '@socketsecurity/lib/strings'
+import { describe, expect, it } from 'vitest'
 
 describe('strings', () => {
   describe('ansiRegex', () => {

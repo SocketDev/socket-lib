@@ -5,7 +5,6 @@
 import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
 import {
   cleanupIpcStubs,
   createIpcChannelId,
@@ -17,6 +16,7 @@ import {
   readIpcStub,
   writeIpcStub,
 } from '@socketsecurity/lib/ipc'
+import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('ipc', () => {

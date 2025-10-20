@@ -2,7 +2,6 @@
  * @fileoverview Unit tests for promise utilities.
  */
 
-import { describe, expect, it, vi } from 'vitest'
 import {
   normalizeIterationOptions,
   normalizeRetryOptions,
@@ -11,6 +10,7 @@ import {
   pRetry,
   resolveRetryOptions,
 } from '@socketsecurity/lib/promises'
+import { describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {
   describe('resolveRetryOptions', () => {

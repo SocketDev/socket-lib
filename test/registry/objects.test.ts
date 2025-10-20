@@ -2,7 +2,6 @@
  * @fileoverview Unit tests for object manipulation utilities.
  */
 
-import { describe, expect, it } from 'vitest'
 import {
   createLazyGetter,
   defineGetter,
@@ -22,6 +21,7 @@ import {
   toSortedObject,
   toSortedObjectFromEntries,
 } from '@socketsecurity/lib/objects'
+import { describe, expect, it } from 'vitest'
 
 describe('objects', () => {
   describe('createLazyGetter', () => {
