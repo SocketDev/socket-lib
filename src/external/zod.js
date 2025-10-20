@@ -1,1 +1,2 @@
-module.exports = require('zod')
+const { z } = require('zod')
+module.exports = { z }
