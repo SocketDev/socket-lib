@@ -17,4 +17,5 @@ Thumbs.db
 **/*.tgz
 **/*.tsbuildinfo
 
+# Allow specific files
 !/.vscode/settings.json
