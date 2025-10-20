@@ -103,7 +103,7 @@ try {
   } else {
     printError('Coverage failed')
     // Show relevant output on failure for debugging
-    if (!testSummaryMatch && !coverageMatch) {
+    if (!testSummaryMatch && !coverageHeaderMatch) {
       console.log('\n--- Output ---')
       console.log(output)
     }
