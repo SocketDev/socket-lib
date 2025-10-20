@@ -516,6 +516,10 @@
       "types": "./dist/packages/provenance.d.ts",
       "default": "./dist/packages/provenance.js"
     },
+    "./packages/registry": {
+      "types": "./dist/packages/registry.d.ts",
+      "default": "./dist/packages/registry.js"
+    },
     "./packages/specs": {
       "types": "./dist/packages/specs.d.ts",
       "default": "./dist/packages/specs.js"
@@ -523,10 +527,6 @@
     "./packages/validation": {
       "types": "./dist/packages/validation.d.ts",
       "default": "./dist/packages/validation.js"
-    },
-    "./parse-args": {
-      "types": "./dist/argv/parse.d.ts",
-      "default": "./dist/argv/parse.js"
     },
     "./path": {
       "types": "./dist/path.d.ts",
@@ -675,6 +675,10 @@
     "./words": {
       "types": "./dist/words.d.ts",
       "default": "./dist/words.js"
+    },
+    "./zod": {
+      "types": "./dist/zod.d.ts",
+      "default": "./dist/zod.js"
     },
     "./plugins/babel-plugin-inline-require-calls": {
       "types": "./plugins/babel-plugin-inline-require-calls.d.ts",
