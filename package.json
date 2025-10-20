@@ -717,6 +717,7 @@
     "build:externals": "node scripts/build-externals.mjs",
     "build:watch": "node scripts/build-js.mjs --watch",
     "check": "node scripts/check.mjs",
+    "claude": "node scripts/claude.mjs",
     "clean": "del-cli dist '**/*.tsbuildinfo'",
     "cover": "node scripts/cover.mjs",
     "dev": "pnpm run build:watch",
