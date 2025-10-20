@@ -16,7 +16,7 @@ import {
   parseIpcMessage,
   readIpcStub,
   writeIpcStub,
-} from '../../../src/lib/ipc'
+} from '@socketsecurity/lib/ipc'
 import { runWithTempDir } from '../../utils/temp-file-helper.mts'
 
 describe('ipc', () => {

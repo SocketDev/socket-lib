@@ -18,7 +18,7 @@ import {
   stripBom,
   toKebabCase,
   trimNewlines,
-} from '../../../src/lib/strings'
+} from '@socketsecurity/lib/strings'
 
 describe('strings', () => {
   describe('ansiRegex', () => {

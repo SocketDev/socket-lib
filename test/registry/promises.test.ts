@@ -10,7 +10,7 @@ import {
   pFilter,
   pRetry,
   resolveRetryOptions,
-} from '../../../src/lib/promises'
+} from '@socketsecurity/lib/promises'
 
 describe('promises', () => {
   describe('resolveRetryOptions', () => {

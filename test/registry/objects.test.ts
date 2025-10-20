@@ -21,7 +21,7 @@ import {
   objectFreeze,
   toSortedObject,
   toSortedObjectFromEntries,
-} from '../../../src/lib/objects'
+} from '@socketsecurity/lib/objects'
 
 describe('objects', () => {
   describe('createLazyGetter', () => {

@@ -9,7 +9,7 @@ import {
   isArray,
   joinAnd,
   joinOr,
-} from '../../../src/lib/arrays'
+} from '@socketsecurity/lib/arrays'
 
 describe('arrays', () => {
   describe('arrayChunk', () => {
