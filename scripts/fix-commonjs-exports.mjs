@@ -12,7 +12,7 @@ import {
   printFooter,
   printHeader,
   printSuccess,
-} from '../../scripts/utils/cli-helpers.mjs'
+} from './utils/helpers.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')

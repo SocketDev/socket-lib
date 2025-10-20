@@ -4,13 +4,12 @@
  */
 // eslint-disable-next-line n/no-extraneous-import
 import { build, context } from 'esbuild'
-
-import { printError, printSuccess } from '../../scripts/utils/cli-helpers.mjs'
 import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
 } from '../.config/esbuild.config.mjs'
+import { printError, printSuccess } from './utils/helpers.mjs'
 
 const isQuiet = process.argv.includes('--quiet')
 const isVerbose = process.argv.includes('--verbose')

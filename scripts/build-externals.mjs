@@ -10,16 +10,16 @@ import { fileURLToPath } from 'node:url'
 
 const require = createRequire(import.meta.url)
 
-// Use esbuild from root node_modules since registry package is zero-dependency.
-import esbuild from '../../node_modules/esbuild/lib/main.js'
+// Use esbuild from node_modules.
+import esbuild from 'esbuild'
+import { createCherryPickEntry } from './cherry-pick-entries.mjs'
+import { createNonBarrelEntry } from './non-barrel-imports.mjs'
 import {
   printError,
   printFooter,
   printHeader,
   printSuccess,
-} from '../../scripts/utils/cli-helpers.mjs'
-import { createCherryPickEntry } from './cherry-pick-entries.mjs'
-import { createNonBarrelEntry } from './non-barrel-imports.mjs'
+} from './utils/helpers.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')

@@ -1,9 +1,20 @@
 /**
- * @fileoverview Simplified helpers for socket-registry scripts.
+ * @fileoverview Simplified helpers for socket-lib scripts.
  * These are local utilities that don't depend on dist/lib.
  */
 
 import { promises as fs } from 'node:fs'
+
+// Re-export unified print functions from cli-helpers.
+export {
+  printDivider,
+  printError,
+  printFooter,
+  printHeader,
+  printInfo,
+  printSuccess,
+  printWarning,
+} from './cli-helpers.mjs'
 
 // Simple logger without any dependencies on dist.
 export const logger = {
