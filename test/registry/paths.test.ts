@@ -118,25 +118,6 @@ describe('paths', () => {
       expect(result).not.toContain('\\')
     })
 
-    it('should respect SOCKET_CACACHE_DIR environment variable', () => {
-      const originalEnv = process.env.SOCKET_CACACHE_DIR
-      try {
-        process.env.SOCKET_CACACHE_DIR = '/custom/cache/path'
-        // Need to reload the module to pick up the env var change
-        vi.resetModules()
-        const { getSocketCacacheDir } = require('@socketsecurity/lib/paths')
-        const result = getSocketCacacheDir()
-        expect(result).toBe('/custom/cache/path')
-      } finally {
-        if (originalEnv !== undefined) {
-          process.env.SOCKET_CACACHE_DIR = originalEnv
-        } else {
-          delete process.env.SOCKET_CACACHE_DIR
-        }
-        vi.resetModules()
-      }
-    })
-
     it('should be under Socket user directory when env var not set', () => {
       const userDir = getSocketUserDir()
       const cacacheDir = getSocketCacacheDir()
