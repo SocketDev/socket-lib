@@ -18,6 +18,7 @@ const args = [
   'biome',
   'check',
   '--write',
+  '--unsafe',
   '.',
   ...process.argv.slice(2),
 ]
