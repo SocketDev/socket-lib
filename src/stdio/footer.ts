@@ -3,7 +3,7 @@
  * Provides consistent footer and summary formatting for CLI applications.
  */
 
-import colors from '../../external/yoctocolors-cjs'
+import colors from '../external/yoctocolors-cjs'
 import { repeatString } from '../strings'
 
 export interface FooterOptions {

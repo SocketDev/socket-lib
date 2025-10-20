@@ -3,7 +3,7 @@
  * Provides string processing, prefix application, and terminal output utilities.
  */
 
-import { eastAsianWidth } from '../external/get-east-asian-width'
+import { eastAsianWidth } from './external/get-east-asian-width'
 import { ansiRegex, stripAnsi } from './ansi'
 // Import get-east-asian-width from external wrapper.
 // This library implements Unicode Standard Annex #11 (East Asian Width).

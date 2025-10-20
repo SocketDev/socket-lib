@@ -78,13 +78,13 @@ function getNpmPackageArg() {
   return _npmPackageArg as typeof import('npm-package-arg')
 }
 
-let _pack: typeof import('../../external/libnpmpack') | undefined
+let _pack: typeof import('../external/libnpmpack') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPack() {
   if (_pack === undefined) {
-    _pack = /*@__PURE__*/ require('../../external/libnpmpack')
+    _pack = /*@__PURE__*/ require('../external/libnpmpack')
   }
-  return _pack as typeof import('../../external/libnpmpack')
+  return _pack as typeof import('../external/libnpmpack')
 }
 
 let _PackageURL:

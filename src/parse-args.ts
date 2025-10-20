@@ -1,4 +1,4 @@
-import yargsParser from '../external/yargs-parser'
+import yargsParser from './external/yargs-parser'
 
 /**
  * Yargs parser options interface.

@@ -3,7 +3,7 @@
  * Provides various progress indicators including bars, percentages, and spinners.
  */
 
-import colors from '../../external/yoctocolors-cjs'
+import colors from '../external/yoctocolors-cjs'
 import { repeatString, stripAnsi } from '../strings'
 
 export interface ProgressBarOptions {

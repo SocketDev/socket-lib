@@ -6,8 +6,8 @@
 import { getSpinner } from '#constants/process'
 import { DEBUG } from '#env/debug'
 import { SOCKET_DEBUG } from '#env/socket-debug'
-import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
-import debugJs from '../external/debug'
+import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
+import debugJs from './external/debug'
 
 import { logger } from './logger'
 import { hasOwn } from './objects'

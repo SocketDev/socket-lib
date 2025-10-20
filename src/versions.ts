@@ -1,6 +1,6 @@
 /** @fileoverview Version comparison and validation utilities for Socket ecosystem. */
 
-import semver from '../external/semver'
+import semver from './external/semver'
 
 /**
  * Coerce a version string to valid semver format.

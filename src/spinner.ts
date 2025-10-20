@@ -7,7 +7,7 @@ import type { Writable } from 'node:stream'
 
 // Note: getAbortSignal is imported lazily to avoid circular dependencies.
 import { CI } from '#env/ci'
-import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
+import yoctoSpinner from './external/@socketregistry/yocto-spinner'
 
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {

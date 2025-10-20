@@ -33,7 +33,7 @@ import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import { z } from '../external/zod'
+import { z } from './external/zod'
 
 // Define BufferEncoding type for TypeScript compatibility.
 type BufferEncoding = globalThis.BufferEncoding

@@ -3,8 +3,8 @@
  * Provides enhanced console methods with formatted output capabilities.
  */
 
-import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
-import yoctocolorsCjs from '../external/yoctocolors-cjs'
+import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
+import yoctocolorsCjs from './external/yoctocolors-cjs'
 import { objectAssign, objectFreeze } from './objects'
 import { applyLinePrefix, isBlankString } from './strings'
 

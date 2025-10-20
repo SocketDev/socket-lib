@@ -3,7 +3,7 @@
  * Provides consistent header formatting for CLI applications.
  */
 
-import colors from '../../external/yoctocolors-cjs'
+import colors from '../external/yoctocolors-cjs'
 import { centerText, repeatString } from '../strings'
 
 export interface HeaderOptions {
