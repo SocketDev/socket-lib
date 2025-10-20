@@ -8,7 +8,6 @@ import { spawn } from 'node:child_process'
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseArgs } from 'node:util'
 
 import colors from 'yoctocolors-cjs'
 
@@ -17,6 +16,52 @@ const rootPath = path.join(__dirname, '..')
 const parentPath = path.join(rootPath, '..')
 const claudeDir = path.join(rootPath, '.claude')
 const WIN32 = process.platform === 'win32'
+
+/**
+ * Simplified parseArgs implementation for claude.mjs.
+ * Handles basic boolean and string options without external dependencies.
+ */
+function parseArgs(config) {
+  const { options = {}, args = process.argv.slice(2) } = config
+  const values = {}
+  const positionals = []
+
+  // Initialize defaults.
+  for (const [key, opt] of Object.entries(options)) {
+    if (opt.default !== undefined) {
+      values[key] = opt.default
+    }
+  }
+
+  // Parse arguments.
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+
+    if (arg === '--') {
+      // Everything after -- is positional.
+      positionals.push(...args.slice(i + 1))
+      break
+    }
+
+    if (arg.startsWith('--')) {
+      const key = arg.slice(2)
+      const opt = options[key]
+
+      if (opt) {
+        if (opt.type === 'boolean') {
+          values[key] = true
+        } else if (opt.type === 'string') {
+          values[key] = args[++i]
+        }
+      }
+    } else if (!arg.startsWith('-')) {
+      // Positional argument.
+      positionals.push(arg)
+    }
+  }
+
+  return { positionals, values }
+}
 
 // Socket project names.
 const SOCKET_PROJECTS = [
