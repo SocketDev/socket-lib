@@ -316,7 +316,7 @@ export async function writeIpcStub(
  *
  * @unused Reserved for future implementation
  */
-export async function readIpcStub(stubPath: string): Promise<any> {
+export async function readIpcStub(stubPath: string): Promise<unknown> {
   try {
     const content = await fs.readFile(stubPath, 'utf8')
     const parsed = JSON.parse(content)
@@ -415,10 +415,15 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
  * @unused Reserved for bidirectional communication implementation
  */
 export function sendIpc(
-  process: NodeJS.Process | any,
+  process: NodeJS.Process | unknown,
   message: IpcMessage,
 ): boolean {
-  if (process && typeof process.send === 'function') {
+  if (
+    process &&
+    typeof process === 'object' &&
+    'send' in process &&
+    typeof process.send === 'function'
+  ) {
     try {
       // Validate message structure before sending.
       const validated = IpcMessageSchema.parse(message)
@@ -457,7 +462,7 @@ export function sendIpc(
  * @unused Reserved for bidirectional communication
  */
 export function onIpc(handler: (message: IpcMessage) => void): () => void {
-  const listener = (message: any) => {
+  const listener = (message: unknown) => {
     const parsed = parseIpcMessage(message)
     if (parsed) {
       handler(parsed)
@@ -500,7 +505,7 @@ export function onIpc(handler: (message: IpcMessage) => void): () => void {
  *
  * @unused Reserved for request-response pattern implementation
  */
-export function waitForIpc<T = any>(
+export function waitForIpc<T = unknown>(
   messageType: string,
   options: IpcOptions = {},
 ): Promise<T> {
@@ -556,7 +561,7 @@ export function waitForIpc<T = any>(
  *
  * @unused Reserved for future message creation needs
  */
-export function createIpcMessage<T = any>(
+export function createIpcMessage<T = unknown>(
   type: string,
   data: T,
 ): IpcMessage<T> {
@@ -589,10 +594,13 @@ export function createIpcMessage<T = any>(
  *
  * @unused Reserved for IPC availability detection
  */
-export function hasIpcChannel(process: any): boolean {
+export function hasIpcChannel(process: unknown): boolean {
   return Boolean(
     process &&
+      typeof process === 'object' &&
+      'send' in process &&
       typeof process.send === 'function' &&
+      'channel' in process &&
       process.channel !== undefined,
   )
 }
@@ -623,7 +631,7 @@ export function hasIpcChannel(process: any): boolean {
  *
  * @unused Reserved for message validation needs
  */
-export function parseIpcMessage(message: any): IpcMessage | null {
+export function parseIpcMessage(message: unknown): IpcMessage | null {
   try {
     // Use Zod schema for comprehensive validation.
     const validated = IpcMessageSchema.parse(message)

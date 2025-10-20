@@ -79,9 +79,9 @@ export async function execBin(
   }
 
   // Execute the binary directly.
-  // biome-ignore lint/style/noNonNullAssertion: which always returns non-empty array.
   const binCommand = Array.isArray(resolvedPath)
-    ? resolvedPath[0]!
+    ? // biome-ignore lint/style/noNonNullAssertion: which always returns non-empty array.
+      resolvedPath[0]!
     : resolvedPath
   return await spawn(binCommand, args ?? [], options)
 }
@@ -259,13 +259,9 @@ export function findRealPnpm(): string {
   const commonPaths = WIN32
     ? [
         // Windows common paths.
-        // biome-ignore lint/style/noNonNullAssertion: APPDATA and LOCALAPPDATA are always defined on Windows.
         path?.join(APPDATA as string, 'npm', 'pnpm.cmd'),
-        // biome-ignore lint/style/noNonNullAssertion: APPDATA and LOCALAPPDATA are always defined on Windows.
         path?.join(APPDATA as string, 'npm', 'pnpm'),
-        // biome-ignore lint/style/noNonNullAssertion: APPDATA and LOCALAPPDATA are always defined on Windows.
         path?.join(LOCALAPPDATA as string, 'pnpm', 'pnpm.cmd'),
-        // biome-ignore lint/style/noNonNullAssertion: APPDATA and LOCALAPPDATA are always defined on Windows.
         path?.join(LOCALAPPDATA as string, 'pnpm', 'pnpm'),
         'C:\\Program Files\\nodejs\\pnpm.cmd',
         'C:\\Program Files\\nodejs\\pnpm',
@@ -278,7 +274,6 @@ export function findRealPnpm(): string {
           (XDG_DATA_HOME as string) || `${HOME as string}/.local/share`,
           'pnpm/pnpm',
         ),
-        // biome-ignore lint/style/noNonNullAssertion: HOME is always defined on Unix systems.
         path?.join(HOME as string, '.pnpm/pnpm'),
       ].filter(Boolean)
 
@@ -295,9 +290,7 @@ export function findRealYarn(): string {
   const commonPaths = [
     '/usr/local/bin/yarn',
     '/usr/bin/yarn',
-    // biome-ignore lint/style/noNonNullAssertion: HOME is always defined on Unix systems.
     path?.join(HOME as string, '.yarn/bin/yarn'),
-    // biome-ignore lint/style/noNonNullAssertion: HOME is always defined on Unix systems.
     path?.join(HOME as string, '.config/yarn/global/node_modules/.bin/yarn'),
   ].filter(Boolean)
 
