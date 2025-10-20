@@ -525,8 +525,8 @@
       "default": "./dist/packages/validation.js"
     },
     "./parse-args": {
-      "types": "./dist/parse-args.d.ts",
-      "default": "./dist/parse-args.js"
+      "types": "./dist/argv/parse.d.ts",
+      "default": "./dist/argv/parse.js"
     },
     "./path": {
       "types": "./dist/path.d.ts",
