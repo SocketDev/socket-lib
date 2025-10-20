@@ -14,7 +14,7 @@ import {
   getSocketRegistryGithubCacheDir,
   getSocketUserDir,
 } from '@socketsecurity/lib/paths'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 describe('paths', () => {
   describe('getSocketHomePath', () => {
