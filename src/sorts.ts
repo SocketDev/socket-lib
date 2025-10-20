@@ -56,7 +56,7 @@ export function naturalSorter<T>(
   arrayToSort: T[],
 ): ReturnType<FastSortFunction> {
   if (_naturalSorter === undefined) {
-    const fastSort = /*@__PURE__*/ require('../external/fast-sort')
+    const fastSort = /*@__PURE__*/ require('./external/fast-sort')
     // biome-ignore lint/suspicious/noExplicitAny: Fast-sort API requires dynamic method access.
     _naturalSorter = (fastSort as any).createNewSortInstance({
       comparer: naturalCompare,
@@ -78,7 +78,7 @@ export function compareStr(a: string, b: string): number {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
-  const semver = /*@__PURE__*/ require('../external/semver')
+  const semver = /*@__PURE__*/ require('./external/semver')
   const validA = semver.valid(a)
   const validB = semver.valid(b)
 
