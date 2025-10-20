@@ -70,7 +70,7 @@ export default defineConfig({
     hookTimeout: 10_000,
     server: {
       deps: {
-        inline: isCoverageEnabled ? [/@socketsecurity\/lib/] : [],
+        inline: isCoverageEnabled ? [/@socketsecurity\/lib/, 'zod'] : ['zod'],
       },
     },
     coverage: {

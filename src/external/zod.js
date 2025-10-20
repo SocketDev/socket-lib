@@ -1,1 +1,2 @@
-module.exports = require('zod')
+export { z } from 'zod'
+export * from 'zod'
