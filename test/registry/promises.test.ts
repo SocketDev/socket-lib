@@ -152,7 +152,11 @@ describe('promises', () => {
 
       await pRetry(fn, { retries: 2, baseDelayMs: 10, onRetry })
       expect(onRetry).toHaveBeenCalledTimes(1)
-      expect(onRetry).toHaveBeenCalledWith(1, expect.any(Error), expect.any(Number))
+      expect(onRetry).toHaveBeenCalledWith(
+        1,
+        expect.any(Error),
+        expect.any(Number),
+      )
     })
 
     it('should cancel retry if onRetry returns false', async () => {

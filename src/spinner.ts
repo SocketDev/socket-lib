@@ -7,8 +7,6 @@ import type { Writable } from 'node:stream'
 
 // Note: getAbortSignal is imported lazily to avoid circular dependencies.
 import { CI } from '#env/ci'
-import yoctoSpinner from './external/@socketregistry/yocto-spinner'
-
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
   ShimmerColorGradient,
@@ -17,6 +15,7 @@ import type {
   ShimmerState,
 } from './effects/text-shimmer'
 import { applyShimmer, COLOR_INHERIT, DIR_LTR } from './effects/text-shimmer'
+import yoctoSpinner from './external/@socketregistry/yocto-spinner'
 import { hasOwn } from './objects'
 import { isBlankString, stringWidth } from './strings'
 

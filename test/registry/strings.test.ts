@@ -13,9 +13,9 @@ import {
   isNonEmptyString,
   repeatString,
   search,
+  stringWidth,
   stripAnsi,
   stripBom,
-  stringWidth,
   toKebabCase,
   trimNewlines,
 } from '../../../src/lib/strings'

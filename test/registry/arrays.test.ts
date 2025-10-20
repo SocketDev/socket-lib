@@ -16,7 +16,11 @@ describe('arrays', () => {
     it('should split array into chunks of specified size', () => {
       const arr = [1, 2, 3, 4, 5, 6]
       const result = arrayChunk(arr, 2)
-      expect(result).toEqual([[1, 2], [3, 4], [5, 6]])
+      expect(result).toEqual([
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ])
     })
 
     it('should handle uneven chunks', () => {
@@ -28,7 +32,10 @@ describe('arrays', () => {
     it('should default to chunk size of 2', () => {
       const arr = [1, 2, 3, 4]
       const result = arrayChunk(arr)
-      expect(result).toEqual([[1, 2], [3, 4]])
+      expect(result).toEqual([
+        [1, 2],
+        [3, 4],
+      ])
     })
 
     it('should handle single element arrays', () => {
@@ -45,8 +52,12 @@ describe('arrays', () => {
 
     it('should throw error for chunk size <= 0', () => {
       const arr = [1, 2, 3]
-      expect(() => arrayChunk(arr, 0)).toThrow('Chunk size must be greater than 0')
-      expect(() => arrayChunk(arr, -1)).toThrow('Chunk size must be greater than 0')
+      expect(() => arrayChunk(arr, 0)).toThrow(
+        'Chunk size must be greater than 0',
+      )
+      expect(() => arrayChunk(arr, -1)).toThrow(
+        'Chunk size must be greater than 0',
+      )
     })
 
     it('should handle chunk size larger than array', () => {
@@ -58,7 +69,10 @@ describe('arrays', () => {
     it('should work with readonly arrays', () => {
       const arr: readonly number[] = [1, 2, 3, 4]
       const result = arrayChunk(arr, 2)
-      expect(result).toEqual([[1, 2], [3, 4]])
+      expect(result).toEqual([
+        [1, 2],
+        [3, 4],
+      ])
     })
   })
 
