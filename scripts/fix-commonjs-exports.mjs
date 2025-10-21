@@ -33,6 +33,7 @@ async function processDirectory(dir) {
         fixedCount += await processDirectory(fullPath)
       } else if (entry.isFile() && entry.name.endsWith('.js')) {
         let content = await fs.readFile(fullPath, 'utf8')
+        let modified = false
 
         // Check if this is a single default export.
         if (content.includes('exports.default =')) {
@@ -44,7 +45,22 @@ async function processDirectory(dir) {
             /Object\.defineProperty\(exports, "__esModule", \{ value: true \}\);\n?/g,
             '',
           )
+          modified = true
+        }
 
+        // Fix relative paths from ../ to ./ in dist files.
+        // After compilation, both main files and subdirectories are in dist/,
+        // so references should use ./ instead of ../.
+        if (content.includes('require("../')) {
+          content = content.replace(/require\("\.\.\//g, 'require("./')
+          modified = true
+        }
+        if (content.includes("require('../")) {
+          content = content.replace(/require\('\.\.\//g, "require('./")
+          modified = true
+        }
+
+        if (modified) {
           await fs.writeFile(fullPath, content)
           const relativePath = path.relative(distDir, fullPath)
           console.log(`    Fixed ${relativePath}`)
