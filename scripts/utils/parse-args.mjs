@@ -21,10 +21,10 @@ import { parseArgs as nodeParseArgs } from 'node:util'
  */
 export function parseArgs(config = {}) {
   const {
+    allowPositionals = true,
     args = process.argv.slice(2),
     options = {},
     strict = false,
-    allowPositionals = true,
   } = config
 
   try {
