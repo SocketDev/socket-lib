@@ -444,13 +444,13 @@ describe('fs', () => {
         await fs.mkdir(nonEmptyDir)
         await fs.writeFile(path.join(nonEmptyDir, 'file.txt'), '', 'utf8')
 
-        // With ignore patterns, the empty-dir should be included because .git is ignored
+        // With ignore patterns and includeEmpty: false, directories containing only ignored files are excluded
         const result = await readDirNames(tmpDir, {
           ignore: ['.git'],
           includeEmpty: false,
         })
         expect(result).toContain('non-empty-dir')
-        expect(result).toContain('empty-dir')
+        expect(result).not.toContain('empty-dir')
       }, 'readDirNames-ignore-')
     })
   })
