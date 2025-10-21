@@ -24,6 +24,7 @@ const { values } = parseArgs({
 })
 
 printHeader('Test Coverage')
+console.log('')
 
 // Run vitest with coverage enabled, capturing output
 // Filter out custom flags that vitest doesn't understand
