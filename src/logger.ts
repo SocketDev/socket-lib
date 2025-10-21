@@ -313,10 +313,10 @@ export class Logger {
    */
   #stripSymbols(text: string): string {
     // Strip both unicode and emoji forms of log symbols from the start.
-    // Matches: ✖, ×, ✖️, ⚠, ‼, ⚠️, ✔, √, ✔️, ℹ, ℹ️
+    // Matches: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️
     // Also handles variation selectors (U+FE0F) and whitespace after symbol.
     // Note: We don't strip standalone 'i' to avoid breaking words like 'info'.
-    return text.replace(/^[✖×⚠‼✔√ℹ]\uFE0F?\s*/u, '')
+    return text.replace(/^[✖✗×⚠‼✔✓√ℹ]\uFE0F?\s*/u, '')
   }
 
   /**
