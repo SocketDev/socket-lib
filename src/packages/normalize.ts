@@ -53,7 +53,7 @@ let _normalizePackageData: typeof import('normalize-package-data') | undefined
 function getNormalizePackageData() {
   if (_normalizePackageData === undefined) {
     _normalizePackageData =
-      /*@__PURE__*/ require('../../external/normalize-package-data')
+      /*@__PURE__*/ require('../external/normalize-package-data')
   }
   return _normalizePackageData as typeof import('normalize-package-data')
 }

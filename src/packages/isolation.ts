@@ -128,7 +128,7 @@ export async function isolatePackage(
     packageName = pkgJson.name as string
   } else {
     // Parse as npm package spec.
-    const npa = /*@__PURE__*/ require('../../external/npm-package-arg')
+    const npa = /*@__PURE__*/ require('../external/npm-package-arg')
     const parsed = npa(packageSpec)
 
     packageName = parsed.name

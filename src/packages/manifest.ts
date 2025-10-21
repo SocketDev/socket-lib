@@ -27,7 +27,7 @@ let _npmPackageArg: typeof import('npm-package-arg') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getNpmPackageArg() {
   if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('../../external/npm-package-arg')
+    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
   }
   return _npmPackageArg as typeof import('npm-package-arg')
 }
@@ -36,7 +36,7 @@ let _pacote: typeof import('pacote') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPacote() {
   if (_pacote === undefined) {
-    _pacote = /*@__PURE__*/ require('../../external/pacote')
+    _pacote = /*@__PURE__*/ require('../external/pacote')
   }
   return _pacote as typeof import('pacote')
 }
@@ -46,7 +46,7 @@ let _semver: typeof import('semver') | undefined
 function getSemver() {
   if (_semver === undefined) {
     // The 'semver' package is browser safe.
-    _semver = /*@__PURE__*/ require('../../external/semver')
+    _semver = /*@__PURE__*/ require('../external/semver')
   }
   return _semver as typeof import('semver')
 }

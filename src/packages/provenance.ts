@@ -22,7 +22,7 @@ let _fetcher: typeof import('make-fetch-happen') | undefined
 function getFetcher() {
   if (_fetcher === undefined) {
     const makeFetchHappen =
-      /*@__PURE__*/ require('../../external/make-fetch-happen')
+      /*@__PURE__*/ require('../external/make-fetch-happen')
     // Lazy load constants to avoid circular dependencies.
     const { getPacoteCachePath } =
       /*@__PURE__*/ require('../../constants/packages')

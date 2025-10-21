@@ -12,7 +12,7 @@ let _validateNpmPackageName:
 function getValidateNpmPackageName() {
   if (_validateNpmPackageName === undefined) {
     _validateNpmPackageName =
-      /*@__PURE__*/ require('../../external/validate-npm-package-name')
+      /*@__PURE__*/ require('../external/validate-npm-package-name')
   }
   return _validateNpmPackageName as typeof import('validate-npm-package-name')
 }
