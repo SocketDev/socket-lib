@@ -39,7 +39,7 @@ async function buildSource(options = {}) {
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/load.cjs', 'clean', '--dist', '--quiet'],
+        args: ['scripts/clean.mjs', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -90,13 +90,13 @@ async function buildTypes(options = {}) {
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/load.cjs', 'clean', '--types', '--quiet'],
+      args: ['scripts/clean.mjs', '--types', '--quiet'],
       command: 'node',
     })
   }
 
   commands.push({
-    args: ['exec', 'tsgo', '--project', '.config/tsconfig.dts.json'],
+    args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
     command: 'pnpm',
   })
 
@@ -389,7 +389,7 @@ async function main() {
       }
       exitCode = await runSequence([
         {
-          args: ['scripts/load.cjs', 'clean', '--dist', '--types', '--quiet'],
+          args: ['scripts/clean.mjs', '--dist', '--types', '--quiet'],
           command: 'node',
         },
       ])
