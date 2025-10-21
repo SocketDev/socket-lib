@@ -6,12 +6,9 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import {
-  printError,
-  printFooter,
-  printHeader,
-  printSuccess,
-} from './utils/cli-helpers.mjs'
+import colors from 'yoctocolors-cjs'
+
+import { printError, printHeader, replaceHeader } from './utils/cli-helpers.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
@@ -208,8 +205,7 @@ async function fixDefaultReferences() {
 
   try {
     await processDirectory(distDir)
-    printSuccess('Default references fixed')
-    printFooter()
+    replaceHeader(colors.green('✓ Default references fixed'))
   } catch (error) {
     printError(`Failed to fix default references: ${error.message}`)
     process.exitCode = 1
