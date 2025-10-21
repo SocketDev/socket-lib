@@ -3016,7 +3016,7 @@ Let's work through this together to get CI passing.`
   // Monitor workflow with retries
   let retryCount = 0
   let lastRunId = null
-  const pushTime = Date.now()
+  let pushTime = Date.now()
 
   while (retryCount < maxRetries) {
     log.progress(`Checking CI status (attempt ${retryCount + 1}/${maxRetries})`)
@@ -3161,6 +3161,8 @@ Let's work through this together to get CI passing.`
             cwd: rootPath,
           },
         )
+        // Add newline after progress indicator before next output
+        console.log('')
 
         // Analyze and fix with Claude
         log.progress('Analyzing CI failure with Claude')
@@ -3250,6 +3252,15 @@ Fix all CI failures now by making the necessary changes.`
 
         if (fixStatusResult.stdout.trim()) {
           log.progress('Committing CI fixes')
+
+          // Show what files were changed
+          const changedFiles = fixStatusResult.stdout
+            .trim()
+            .split('\n')
+            .map(line => line.substring(3))
+            .join(', ')
+          log.substep(`Changed files: ${changedFiles}`)
+
           await runCommand('git', ['add', '.'], { cwd: rootPath })
           await runCommand(
             'git',
@@ -3263,7 +3274,7 @@ Fix all CI failures now by making the necessary changes.`
           )
           await runCommand('git', ['push'], { cwd: rootPath })
 
-          // Update SHA for next check
+          // Update SHA and push time for next check
           const newShaResult = await runCommandWithOutput(
             'git',
             ['rev-parse', 'HEAD'],
@@ -3272,6 +3283,7 @@ Fix all CI failures now by making the necessary changes.`
             },
           )
           currentSha = newShaResult.stdout.trim()
+          pushTime = Date.now()
         }
 
         retryCount++
