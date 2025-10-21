@@ -27,7 +27,7 @@ let _streamingIterables:
 /*@__NO_SIDE_EFFECTS__*/
 function getStreamingIterables() {
   if (_streamingIterables === undefined) {
-    _streamingIterables = /*@__PURE__*/ require('../external/streaming-iterables')
+    _streamingIterables = /*@__PURE__*/ require('./external/streaming-iterables')
   }
   return _streamingIterables
 }

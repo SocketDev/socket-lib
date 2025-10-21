@@ -44,7 +44,7 @@ export interface RemoveOptions {
  * Get the cacache module for cache operations.
  */
 function getCacache() {
-  return /*@__PURE__*/ require('../external/cacache')
+  return /*@__PURE__*/ require('./external/cacache')
 }
 
 /**
