@@ -6,11 +6,11 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import { isQuiet } from '@socketsecurity/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { getChangedFiles, getStagedFiles } from '@socketsecurity/lib/git'
-import { logger } from '@socketsecurity/lib/logger'
-import { printHeader } from '@socketsecurity/lib/stdio/header'
+import { isQuiet } from './utils/flags.mjs'
+import { getChangedFiles, getStagedFiles } from './utils/git.mjs'
+import { printHeader } from './utils/helpers.mjs'
+import { logger } from './utils/logger.mjs'
+import { parseArgs } from './utils/parse-args.mjs'
 
 import { runCommandQuiet } from './utils/run-command.mjs'
 

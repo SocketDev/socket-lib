@@ -9,10 +9,10 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
-import { isQuiet } from '@socketsecurity/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { logger } from '@socketsecurity/lib/logger'
-import { createSectionHeader } from '@socketsecurity/lib/stdio/header'
+import { isQuiet } from './utils/flags.mjs'
+import { printHeader } from './utils/helpers.mjs'
+import { logger } from './utils/logger.mjs'
+import { parseArgs } from './utils/parse-args.mjs'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -184,9 +184,7 @@ async function main() {
     }
 
     if (!quiet) {
-      console.log(
-        createSectionHeader('Clean Runner', { width: 56, borderChar: '=' }),
-      )
+      printHeader('Clean Runner')
       logger.step('Cleaning project directories')
     }
 

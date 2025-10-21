@@ -2,7 +2,7 @@
 
 import { spawn, spawnSync } from 'node:child_process'
 
-import { logger } from '@socketsecurity/lib/logger'
+import { logger } from './logger.mjs'
 
 /**
  * Run a command and return a promise that resolves with the exit code.
