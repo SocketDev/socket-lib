@@ -19,7 +19,6 @@ function getPath() {
 
     _path = /*@__PURE__*/ require('node:path')
   }
-  // biome-ignore lint/style/noNonNullAssertion: Initialized above.
   return _path!
 }
 

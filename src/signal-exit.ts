@@ -36,7 +36,6 @@
 const ReflectApply = Reflect.apply
 const globalProcess = globalThis.process as
   | (NodeJS.Process & {
-      // biome-ignore lint/suspicious/noExplicitAny: Signal exit emitter can be any event emitter.
       __signal_exit_emitter__?: any
       reallyExit?: (code?: number | undefined) => never
     })
@@ -211,7 +210,6 @@ function processEmit(
   this: NodeJS.Process,
   eventName: string,
   exitCode?: number | undefined,
-  // biome-ignore lint/suspicious/noExplicitAny: Process emit args can be any type.
   ...args: any[]
 ): boolean {
   if (eventName === 'exit') {

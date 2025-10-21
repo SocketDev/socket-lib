@@ -11,7 +11,6 @@ export interface GetOptions {
 export interface PutOptions {
   integrity?: string | undefined
   size?: number | undefined
-  // biome-ignore lint/suspicious/noExplicitAny: User-provided arbitrary metadata.
   metadata?: any | undefined
   memoize?: boolean | undefined
 }
@@ -20,7 +19,6 @@ export interface CacheEntry {
   data: Buffer
   integrity: string
   key: string
-  // biome-ignore lint/suspicious/noExplicitAny: User-provided arbitrary metadata.
   metadata?: any | undefined
   path: string
   size: number
@@ -172,7 +170,6 @@ export async function get(
       'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
     )
   }
-  // biome-ignore lint/suspicious/noExplicitAny: cacache types are incomplete.
   const cacache = getCacache() as any
   return await cacache.get(getSocketCacacheDir(), key, options)
 }
@@ -207,7 +204,6 @@ export async function remove(key: string): Promise<unknown> {
       'Cache key cannot contain wildcards (*). Use clear({ prefix: "pattern*" }) to remove multiple entries.',
     )
   }
-  // biome-ignore lint/suspicious/noExplicitAny: cacache types are incomplete.
   const cacache = getCacache() as any
   return await cacache.rm.entry(getSocketCacacheDir(), key)
 }
@@ -238,7 +234,6 @@ export async function withTmp<T>(
   return (await cacache.tmp.withTmp(
     getSocketCacacheDir(),
     {},
-    // biome-ignore lint/suspicious/noExplicitAny: cacache types are incomplete.
     callback as any,
   )) as T
 }

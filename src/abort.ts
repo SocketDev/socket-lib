@@ -15,7 +15,6 @@ export function createCompositeAbortSignal(
   }
 
   if (validSignals.length === 1) {
-    // biome-ignore lint/style/noNonNullAssertion: Length check ensures array has exactly one element.
     return validSignals[0]!
   }
 

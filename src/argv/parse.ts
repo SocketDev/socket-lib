@@ -245,7 +245,6 @@ export function getPositionalArgs(startIndex = 2): string[] {
   let i = 0
 
   while (i < args.length) {
-    // biome-ignore lint/style/noNonNullAssertion: Loop condition ensures index is within bounds.
     const arg = args[i]!
     // Stop at first flag
     if (arg.startsWith('-')) {

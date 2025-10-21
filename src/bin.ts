@@ -24,7 +24,6 @@ function getFs() {
 
     _fs = /*@__PURE__*/ require('node:fs')
   }
-  // biome-ignore lint/style/noNonNullAssertion: Initialized above.
   return _fs!
 }
 
@@ -39,7 +38,6 @@ function getPath() {
 
     _path = /*@__PURE__*/ require('node:path')
   }
-  // biome-ignore lint/style/noNonNullAssertion: Initialized above.
   return _path!
 }
 
@@ -52,7 +50,6 @@ function getWhich() {
   if (_which === undefined) {
     _which = /*@__PURE__*/ require('./external/which')
   }
-  // biome-ignore lint/style/noNonNullAssertion: Initialized above.
   return _which!
 }
 
@@ -80,8 +77,7 @@ export async function execBin(
 
   // Execute the binary directly.
   const binCommand = Array.isArray(resolvedPath)
-    ? // biome-ignore lint/style/noNonNullAssertion: which always returns non-empty array.
-      resolvedPath[0]!
+    ? resolvedPath[0]!
     : resolvedPath
   return await spawn(binCommand, args ?? [], options)
 }
@@ -311,14 +307,12 @@ export function resolveBinPathSync(binPath: string): string {
     try {
       const resolved = whichBinSync(binPath)
       if (resolved) {
-        // biome-ignore lint/style/noParameterAssign: Reassigning for normalization.
         binPath = resolved as string
       }
     } catch {}
   }
 
   // Normalize the path once for consistent pattern matching.
-  // biome-ignore lint/style/noParameterAssign: Normalizing path for consistent handling.
   binPath = normalizePath(binPath)
 
   // Handle empty string that normalized to '.' (current directory)
@@ -339,9 +333,7 @@ export function resolveBinPathSync(binPath: string): string {
     const voltaPlatform = readJsonSync(
       path?.join(voltaUserPath, 'platform.json'),
       { throws: false },
-    ) as
-      // biome-ignore lint/suspicious/noExplicitAny: Volta platform config structure is dynamic.
-      any
+    ) as any
     const voltaNodeVersion = voltaPlatform?.node?.runtime
     const voltaNpmVersion = voltaPlatform?.node?.npm
     let voltaBinPath = ''
@@ -367,9 +359,7 @@ export function resolveBinPathSync(binPath: string): string {
       const binInfo = readJsonSync(
         path?.join(voltaUserBinPath, `${basename}.json`),
         { throws: false },
-      ) as
-        // biome-ignore lint/suspicious/noExplicitAny: Volta bin info structure is dynamic.
-        any
+      ) as any
       const binPackage = binInfo?.package
       if (binPackage) {
         voltaBinPath = path?.join(
@@ -581,7 +571,6 @@ export function resolveBinPathSync(binPath: string): string {
         relPath = /(?<="\$basedir\/).*(?=" $args\n)/.exec(source)?.[0] || ''
       }
       if (relPath) {
-        // biome-ignore lint/style/noParameterAssign: Resolving wrapper script target.
         binPath = normalizePath(path?.resolve(path?.dirname(binPath), relPath))
       }
     }
@@ -607,7 +596,6 @@ export function resolveBinPathSync(binPath: string): string {
           const stats = fs?.statSync(baseBinPath)
           // Only use this path if it's a file (the shell script).
           if (stats.isFile()) {
-            // biome-ignore lint/style/noParameterAssign: Fixing pnpm nested bin structure.
             binPath = normalizePath(baseBinPath)
             // Recompute hasNoExt since we changed the path.
             hasNoExt = !path?.extname(binPath)
@@ -670,7 +658,6 @@ export function resolveBinPathSync(binPath: string): string {
 
       if (relPath) {
         // Resolve the relative path to handle .. segments properly.
-        // biome-ignore lint/style/noParameterAssign: Resolving shell script target.
         binPath = normalizePath(path?.resolve(path?.dirname(binPath), relPath))
       }
     }
