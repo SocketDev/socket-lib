@@ -7,26 +7,21 @@ import {
   includeIgnoreFile,
 } from '@eslint/compat'
 import js from '@eslint/js'
-import { readPackageJsonSync } from '@socketsecurity/registry/lib/packages'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { flatConfigs as origImportXFlatConfigs } from 'eslint-plugin-import-x'
 import nodePlugin from 'eslint-plugin-n'
 import sortDestructureKeysPlugin from 'eslint-plugin-sort-destructure-keys'
 import unicornPlugin from 'eslint-plugin-unicorn'
-import fastGlob from 'fast-glob'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
-import constants from '../scripts/constants.mjs'
 
 // Resolve current module paths for proper configuration loading.
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
 
-const { gitIgnoreFile, npmPackagesPath, relNpmPackagesPath, rootTsConfigPath } =
-  constants
-
 const rootPath = path.dirname(__dirname)
+const rootTsConfigPath = path.join(rootPath, 'tsconfig.json')
 
 // Convert Node.js globals to readonly format for ESLint configuration.
 // This ensures Node.js built-ins are recognized but not modifiable.
@@ -56,33 +51,18 @@ const gitIgnores = {
 // Enable only for comprehensive checks before releases.
 if (process.env.LINT_EXTERNAL) {
   const isNotExternalGlobPattern = p => !/(?:^|[\\/])external/.test(p)
-  biomeIgnores.ignores = biomeIgnores.ignores?.filter(isNotExternalGlobPattern)
-  gitIgnores.ignores = gitIgnores.ignores?.filter(isNotExternalGlobPattern)
+  if (biomeIgnores.ignores) {
+    biomeIgnores.ignores = biomeIgnores.ignores.filter(isNotExternalGlobPattern)
+  }
+  if (gitIgnores.ignores) {
+    gitIgnores.ignores = gitIgnores.ignores.filter(isNotExternalGlobPattern)
+  }
 }
 
-// OPTIMIZATION: Dynamically generate ignore patterns based on package types.
-// This prevents ESLint from checking incompatible module types, reducing
-// false positives and improving linting performance by skipping unnecessary files.
-function getIgnores(isEsm) {
-  return constants.npmPackageNames.flatMap(sockRegPkgName => {
-    const pkgPath = path.join(npmPackagesPath, sockRegPkgName)
-    const { type } = readPackageJsonSync(pkgPath)
-    const ignored = []
-    if (isEsm ? type !== 'module' : type === 'module') {
-      ignored.push(`${relNpmPackagesPath}/${sockRegPkgName}/*`)
-    } else if (!isEsm) {
-      ignored.push(`${relNpmPackagesPath}/${sockRegPkgName}/*.mjs`)
-      if (
-        fastGlob.globSync(['**/*.cjs'], {
-          cwd: pkgPath,
-          ignores: constants.ignoreGlobs,
-        }).length
-      ) {
-        ignored.push(`${relNpmPackagesPath}/${sockRegPkgName}/*.js`)
-      }
-    }
-    return ignored
-  })
+// OPTIMIZATION: For socket-lib (single package), no dynamic ignore patterns needed.
+// This is a simplified version for non-monorepo usage.
+function getIgnores(_isEsm) {
+  return []
 }
 
 function getImportXFlatConfigs(isEsm) {
@@ -156,14 +136,14 @@ function configs(sourceType) {
       'error',
       {
         ignores: ['Object.groupBy'],
-        version: constants.maintainedNodeVersions.current,
+        version: '>=22',
       },
     ],
     'n/no-unsupported-features/es-syntax': [
       'error',
       {
         ignores: ['object-map-groupby'],
-        version: constants.maintainedNodeVersions.current,
+        version: '>=22',
       },
     ],
     'n/no-unsupported-features/node-builtins': [
@@ -182,7 +162,7 @@ function configs(sourceType) {
           'ReadableStream',
           'Response',
         ],
-        version: constants.maintainedNodeVersions.current,
+        version: '>=22',
       },
     ],
     'n/prefer-node-protocol': 'error',
@@ -337,7 +317,7 @@ function configs(sourceType) {
 }
 
 export default [
-  gitIgnoreFile,
+  gitIgnores,
   biomeIgnores,
   {
     ignores: [
