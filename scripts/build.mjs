@@ -54,11 +54,7 @@ async function main() {
   try {
     // Clean first if running full build
     if (runAll) {
-      await runCommand(
-        'pnpm',
-        ['run', 'clean'],
-        'Cleaning Build Artifacts',
-      )
+      await runCommand('pnpm', ['run', 'clean'], 'Cleaning Build Artifacts')
     }
 
     // Build JS
@@ -74,7 +70,14 @@ async function main() {
     if (runAll || flags.types) {
       await runCommand(
         'pnpm',
-        ['exec', 'tsgo', '--project', 'tsconfig.dts.json', '--declaration', '--emitDeclarationOnly'],
+        [
+          'exec',
+          'tsgo',
+          '--project',
+          'tsconfig.dts.json',
+          '--declaration',
+          '--emitDeclarationOnly',
+        ],
         'Building Types',
       )
     }
