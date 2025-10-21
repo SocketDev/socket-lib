@@ -734,7 +734,6 @@
     "test-ci": "vitest run",
     "type-ci": "pnpm run check"
   },
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "7.28.4",
     "@babel/parser": "7.28.4",
@@ -742,6 +741,8 @@
     "@babel/types": "7.28.4",
     "@biomejs/biome": "2.2.4",
     "@dotenvx/dotenvx": "1.49.0",
+    "@eslint/compat": "1.4.0",
+    "@eslint/js": "9.38.0",
     "@inquirer/confirm": "5.1.16",
     "@inquirer/input": "4.2.2",
     "@inquirer/password": "4.0.18",
@@ -763,7 +764,11 @@
     "del-cli": "6.0.0",
     "esbuild": "0.25.11",
     "eslint": "9.35.0",
+    "eslint-import-resolver-typescript": "4.4.4",
+    "eslint-plugin-import-x": "4.16.1",
     "eslint-plugin-n": "17.23.1",
+    "eslint-plugin-sort-destructure-keys": "2.0.0",
+    "eslint-plugin-unicorn": "61.0.2",
     "fast-glob": "3.3.3",
     "fast-sort": "3.4.1",
     "get-east-asian-width": "1.3.0",
