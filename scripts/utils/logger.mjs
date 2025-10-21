@@ -69,4 +69,18 @@ export const logger = {
     console.log(message)
     return this
   },
+
+  clearLine() {
+    // Clear the current line by moving cursor to the beginning
+    if (process.stdout.isTTY) {
+      process.stdout.clearLine(0)
+      process.stdout.cursorTo(0)
+    }
+    return this
+  },
+
+  done(...args) {
+    console.log(LOG_SYMBOLS.success, ...args)
+    return this
+  },
 }
