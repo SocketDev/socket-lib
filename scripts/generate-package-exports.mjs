@@ -1,13 +1,33 @@
 /** @fileoverview Update registry package.json with exports, browser fields, and Node.js engine range. */
 
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.json' with {
   type: 'json',
 }
-
 import fastGlob from 'fast-glob'
-import constants from '../../scripts/constants.mjs'
+
 import { readPackageJson, toSortedObject } from './utils/helpers.mjs'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Constants for socket-lib
+const constants = {
+  EXT_DTS: '.d.ts',
+  EXT_JSON: '.json',
+  registryPkgPath: path.join(__dirname, '..'),
+  ignoreGlobs: [
+    '**/node_modules/**',
+    '**/.git/**',
+    '**/dist/**',
+    '**/coverage/**',
+    '**/.cache/**',
+    '**/tmp/**',
+    '**/.DS_Store',
+  ],
+  PACKAGE_DEFAULT_NODE_RANGE: '>=22',
+}
 
 const { EXT_DTS, EXT_JSON } = constants
 
@@ -43,7 +63,12 @@ async function main() {
     ...(await fastGlob.glob(['**/*.{cjs,js,json,d.ts}'], {
       cwd: registryPkgPath,
       ignore: [
-        ...constants.ignoreGlobs.filter(p => p !== '**/dist'),
+        '**/node_modules/**',
+        '**/.git/**',
+        '**/coverage/**',
+        '**/.cache/**',
+        '**/tmp/**',
+        '**/.DS_Store',
         'dist/external/**',
         'scripts/**',
         'src/**',
