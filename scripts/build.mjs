@@ -112,6 +112,64 @@ async function buildTypes(options = {}) {
 }
 
 /**
+ * Build external dependencies.
+ * Returns exitCode for external logging.
+ */
+async function buildExternals(options = {}) {
+  const { quiet = false } = options
+
+  if (!quiet) {
+    logger.substep('Building external dependencies')
+  }
+
+  const exitCode = await runSequence([
+    {
+      args: ['scripts/build-externals.mjs'],
+      command: 'node',
+    },
+  ])
+
+  if (exitCode !== 0) {
+    if (!quiet) {
+      logger.error('External dependencies build failed')
+    }
+  }
+
+  return exitCode
+}
+
+/**
+ * Fix exports after build.
+ * Returns exitCode for external logging.
+ */
+async function fixExports(options = {}) {
+  const { quiet = false } = options
+
+  if (!quiet) {
+    logger.substep('Fixing CommonJS exports')
+  }
+
+  const exitCode = await runSequence([
+    {
+      args: ['scripts/generate-package-exports.mjs'],
+      command: 'node',
+    },
+    {
+      args: ['scripts/fix-commonjs-exports.mjs'],
+      command: 'node',
+    },
+  ])
+
+  if (exitCode !== 0) {
+    if (!quiet) {
+      logger.error('Export fixing failed')
+    }
+  }
+
+  return exitCode
+}
+
+/**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
 async function watchBuild(options = {}) {
@@ -343,14 +401,15 @@ async function main() {
         return
       }
 
-      // Run source and types builds in parallel
-      const [srcResult, typesExitCode] = await Promise.all([
+      // Run source, externals, and types builds in parallel
+      const [srcResult, externalsExitCode, typesExitCode] = await Promise.all([
         buildSource({
           quiet,
           verbose,
           skipClean: true,
           analyze: values.analyze,
         }),
+        buildExternals({ quiet }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
 
@@ -369,12 +428,31 @@ async function main() {
           }
         }
 
+        if (externalsExitCode === 0) {
+          logger.substep('External dependencies bundled')
+        }
+
         if (typesExitCode === 0) {
           logger.substep('Type declarations built')
         }
       }
 
-      exitCode = srcResult.exitCode !== 0 ? srcResult.exitCode : typesExitCode
+      // Check if any of the parallel builds failed
+      exitCode =
+        srcResult.exitCode !== 0
+          ? srcResult.exitCode
+          : externalsExitCode !== 0
+            ? externalsExitCode
+            : typesExitCode
+
+      // If all parallel builds succeeded, fix exports
+      if (exitCode === 0) {
+        const fixExitCode = await fixExports({ quiet })
+        if (fixExitCode === 0 && !quiet) {
+          logger.substep('Exports fixed')
+        }
+        exitCode = fixExitCode
+      }
     }
 
     // Print final status and footer
