@@ -48,16 +48,20 @@ async function processDirectory(dir) {
           modified = true
         }
 
-        // Fix relative paths from ../ to ./ in dist files.
-        // After compilation, both main files and subdirectories are in dist/,
-        // so references should use ./ instead of ../.
-        if (content.includes('require("../')) {
-          content = content.replace(/require\("\.\.\//g, 'require("./')
-          modified = true
-        }
-        if (content.includes("require('../")) {
-          content = content.replace(/require\('\.\.\//g, "require('./")
-          modified = true
+        // Fix relative paths ONLY for files in the root dist directory.
+        // Files in subdirectories (e.g., dist/effects/) need to keep ../ to reference parent modules.
+        const isRootFile = path.dirname(fullPath) === distDir
+        if (isRootFile && (content.includes('require("../') || content.includes("require('../"))) {
+          // After compilation, external/ and constants/ subdirectories are in dist/,
+          // so root-level files should use ./ instead of ../.
+          if (content.includes('require("../')) {
+            content = content.replace(/require\("\.\.\//g, 'require("./')
+            modified = true
+          }
+          if (content.includes("require('../")) {
+            content = content.replace(/require\('\.\.\//g, "require('./")
+            modified = true
+          }
         }
 
         if (modified) {
