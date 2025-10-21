@@ -12,7 +12,7 @@ let _npmPackageArg: typeof import('npm-package-arg') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getNpmPackageArg() {
   if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('../../external/npm-package-arg')
+    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
   }
   return _npmPackageArg as typeof import('npm-package-arg')
 }

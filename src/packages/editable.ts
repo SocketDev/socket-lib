@@ -165,11 +165,11 @@ function getUtil() {
 export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
   if (_EditablePackageJsonClass === undefined) {
     const EditablePackageJsonBase =
-      /*@__PURE__*/ require('../../external/@npmcli/package-json')
+      /*@__PURE__*/ require('../external/@npmcli/package-json')
     const { parse, read } =
-      /*@__PURE__*/ require('../../external/@npmcli/package-json/lib/read-package')
+      /*@__PURE__*/ require('../external/@npmcli/package-json/lib/read-package')
     const { packageSort } =
-      /*@__PURE__*/ require('../../external/@npmcli/package-json/lib/sort')
+      /*@__PURE__*/ require('../external/@npmcli/package-json/lib/sort')
     _EditablePackageJsonClass =
       class EditablePackageJson extends (EditablePackageJsonBase as EditablePackageJsonConstructor) {
         static override fixSteps = EditablePackageJsonBase.fixSteps

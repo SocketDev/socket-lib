@@ -38,7 +38,7 @@ let _cacache: typeof import('cacache') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getCacache() {
   if (_cacache === undefined) {
-    _cacache = /*@__PURE__*/ require('../../external/cacache')
+    _cacache = /*@__PURE__*/ require('../external/cacache')
   }
   return _cacache as typeof import('cacache')
 }
@@ -57,7 +57,7 @@ let _fetcher: MakeFetchHappenFetcher | undefined
 function getFetcher() {
   if (_fetcher === undefined) {
     const makeFetchHappen =
-      /*@__PURE__*/ require('../../external/make-fetch-happen')
+      /*@__PURE__*/ require('../external/make-fetch-happen')
     _fetcher = makeFetchHappen.defaults({
       cachePath: pacoteCachePath,
       // Prefer-offline: Staleness checks for cached data will be bypassed, but
@@ -73,7 +73,7 @@ let _npmPackageArg: typeof import('npm-package-arg') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getNpmPackageArg() {
   if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('../../external/npm-package-arg')
+    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
   }
   return _npmPackageArg as typeof import('npm-package-arg')
 }
@@ -95,7 +95,7 @@ function getPackageURL() {
   if (_PackageURL === undefined) {
     // The 'packageurl-js' package is browser safe.
     const packageUrlJs =
-      /*@__PURE__*/ require('../../external/@socketregistry/packageurl-js')
+      /*@__PURE__*/ require('../external/@socketregistry/packageurl-js')
     _PackageURL = packageUrlJs.PackageURL
   }
   return _PackageURL as typeof import('@socketregistry/packageurl-js').PackageURL
@@ -105,7 +105,7 @@ let _pacote: typeof import('pacote') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPacote() {
   if (_pacote === undefined) {
-    _pacote = /*@__PURE__*/ require('../../external/pacote')
+    _pacote = /*@__PURE__*/ require('../external/pacote')
   }
   return _pacote as typeof import('pacote')
 }
@@ -115,7 +115,7 @@ let _semver: typeof import('semver') | undefined
 function getSemver() {
   if (_semver === undefined) {
     // The 'semver' package is browser safe.
-    _semver = /*@__PURE__*/ require('../../external/semver')
+    _semver = /*@__PURE__*/ require('../external/semver')
   }
   return _semver as typeof import('semver')
 }

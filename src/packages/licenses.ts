@@ -36,7 +36,7 @@ let _spdxCorrect: typeof import('spdx-correct') | undefined
 function getSpdxCorrect() {
   if (_spdxCorrect === undefined) {
     // The 'spdx-correct' package is browser safe.
-    _spdxCorrect = /*@__PURE__*/ require('../../external/spdx-correct')
+    _spdxCorrect = /*@__PURE__*/ require('../external/spdx-correct')
   }
   return _spdxCorrect as typeof import('spdx-correct')
 }
@@ -46,7 +46,7 @@ let _spdxExpParse: typeof import('spdx-expression-parse') | undefined
 function getSpdxExpParse() {
   if (_spdxExpParse === undefined) {
     // The 'spdx-expression-parse' package is browser safe.
-    _spdxExpParse = /*@__PURE__*/ require('../../external/spdx-expression-parse')
+    _spdxExpParse = /*@__PURE__*/ require('../external/spdx-expression-parse')
   }
   return _spdxExpParse as typeof import('spdx-expression-parse')
 }
