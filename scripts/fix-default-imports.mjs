@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
 
 async function fixDefaultReferences() {
-  printHeader('Fixing Default References')
+  printHeader('Default References')
 
   const constantNames = [
     'AT_LATEST',

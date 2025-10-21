@@ -18,7 +18,7 @@ import { runParallel } from './utils/run-command.mjs'
 
 async function main() {
   try {
-    printHeader('Running Checks')
+    printHeader('Code Checks')
 
     const checks = [
       {

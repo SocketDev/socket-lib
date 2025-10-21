@@ -96,7 +96,7 @@ async function main() {
       await runCommand(
         'pnpm',
         ['run', 'fix:exports'],
-        'Fixing CommonJS Exports',
+        'CommonJS Exports',
       )
     }
 

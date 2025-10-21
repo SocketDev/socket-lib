@@ -48,7 +48,7 @@ async function main() {
       await runCommand(
         'node',
         [path.join(__dirname, 'generate-package-exports.mjs')],
-        'Generating Package Exports',
+        'Package Exports',
       )
     } else {
       printHeader('Skipping Package Exports (dist/ not found)')
@@ -58,7 +58,7 @@ async function main() {
     await runCommand(
       'node',
       [path.join(__dirname, 'fix-default-imports.mjs')],
-      'Fixing Default Imports',
+      'Default Imports',
     )
 
     // Step 3: Run Biome auto-fix
@@ -73,7 +73,7 @@ async function main() {
         '.',
         ...process.argv.slice(2),
       ],
-      'Running Auto-fix',
+      'Biome Auto-fix',
     )
 
     process.exitCode = 0

@@ -22,7 +22,7 @@ const { values } = parseArgs({
   strict: false,
 })
 
-printHeader('Running Coverage')
+printHeader('Test Coverage')
 
 // Run vitest with coverage enabled, capturing output
 // Filter out custom flags that vitest doesn't understand

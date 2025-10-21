@@ -529,7 +529,7 @@ async function copyScopedFiles() {
 }
 
 async function main() {
-  printHeader('Building External Bundles')
+  printHeader('External Bundles')
 
   // Ensure dist/external directory exists.
   await ensureDir(distExternalDir)

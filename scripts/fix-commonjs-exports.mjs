@@ -63,7 +63,7 @@ async function processDirectory(dir) {
 }
 
 async function fixConstantExports() {
-  printHeader('Fixing CommonJS Exports')
+  printHeader('CommonJS Exports')
 
   try {
     const fixedCount = await processDirectory(distDir)
