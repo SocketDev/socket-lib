@@ -86,6 +86,9 @@
       }
     }
   },
+  "assist": {
+    "enabled": false
+  },
   "overrides": [
     {
       "includes": ["packages/npm/**/*.d.ts"],
