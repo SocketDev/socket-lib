@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync as del } from 'del'
 import colors from 'yoctocolors-cjs'
 
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
+import { parseArgs } from './utils/parse-args.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')

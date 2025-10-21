@@ -8,17 +8,15 @@ import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
 import colors from 'yoctocolors-cjs'
-
-import { isQuiet } from '@socketsecurity/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { logger } from '@socketsecurity/lib/logger'
-import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
-
 import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
 } from '../.config/esbuild.config.mjs'
+import { isQuiet } from './utils/flags.mjs'
+import { printFooter, printHeader } from './utils/helpers.mjs'
+import { logger } from './utils/logger.mjs'
+import { parseArgs } from './utils/parse-args.mjs'
 import { runSequence } from './utils/run-command.mjs'
 
 const rootPath = path.resolve(

@@ -7,14 +7,12 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { logger } from '@socketsecurity/lib/logger'
-import { onExit } from '@socketsecurity/lib/signal-exit'
-import { spinner } from '@socketsecurity/lib/spinner'
-import { printHeader } from '@socketsecurity/lib/stdio/header'
-
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
+import { printHeader } from './utils/helpers.mjs'
+import { logger } from './utils/logger.mjs'
+import { parseArgs } from './utils/parse-args.mjs'
+import { onExit } from './utils/signal-exit.mjs'
+import { spinner } from './utils/spinner.mjs'
 
 const WIN32 = process.platform === 'win32'
 
@@ -233,7 +231,9 @@ async function runTests(options, positionals = []) {
   } else {
     const modeText = mode === 'staged' ? 'staged' : 'changed'
     logger.step(`Running tests for ${modeText} files:`)
-    testsToRun.forEach(test => logger.substep(test))
+    testsToRun.forEach(test => {
+      logger.substep(test)
+    })
     vitestArgs.push(...testsToRun)
   }
 

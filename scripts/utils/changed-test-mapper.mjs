@@ -6,11 +6,8 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import {
-  getChangedFilesSync,
-  getStagedFilesSync,
-} from '@socketsecurity/lib/git'
-import { normalizePath } from '@socketsecurity/lib/path'
+import { getChangedFilesSync, getStagedFilesSync } from './git.mjs'
+import { normalizePath } from './path.mjs'
 
 const rootPath = path.resolve(process.cwd())
 
