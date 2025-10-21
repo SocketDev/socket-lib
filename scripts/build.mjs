@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { printError, printHeader } from './utils/cli-helpers.mjs'
+import { printError, printHeader, printSuccess } from './utils/cli-helpers.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -55,6 +55,7 @@ async function main() {
     // Clean first if running full build
     if (runAll) {
       await runCommand('pnpm', ['run', 'clean'], 'Cleaning Build Artifacts')
+      printSuccess('Build artifacts cleaned')
     }
 
     // Build JS
@@ -64,6 +65,7 @@ async function main() {
         [path.join(__dirname, 'build-js.mjs')],
         'Building JavaScript',
       )
+      printSuccess('JavaScript built')
     }
 
     // Build types
@@ -80,6 +82,7 @@ async function main() {
         ],
         'Building Types',
       )
+      printSuccess('Types built')
     }
 
     // Build externals
@@ -89,15 +92,13 @@ async function main() {
         [path.join(__dirname, 'build-externals.mjs')],
         'Building Externals',
       )
+      printSuccess('Externals built')
     }
 
     // Fix exports at the end if running full build
     if (runAll) {
-      await runCommand(
-        'pnpm',
-        ['run', 'fix:exports'],
-        'CommonJS Exports',
-      )
+      await runCommand('pnpm', ['run', 'fix:exports'], 'CommonJS Exports')
+      printSuccess('CommonJS exports fixed')
     }
 
     process.exitCode = 0
