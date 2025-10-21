@@ -18,6 +18,7 @@ const { values } = parseArgs({
   options: {
     'code-only': { type: 'boolean', default: false },
     'type-only': { type: 'boolean', default: false },
+    summary: { type: 'boolean', default: false },
   },
   strict: false,
 })
@@ -26,7 +27,7 @@ printHeader('Test Coverage')
 
 // Run vitest with coverage enabled, capturing output
 // Filter out custom flags that vitest doesn't understand
-const customFlags = ['--code-only', '--type-only']
+const customFlags = ['--code-only', '--type-only', '--summary']
 const vitestArgs = [
   'exec',
   'vitest',
@@ -83,7 +84,7 @@ try {
     const testSummaryMatch = output.match(
       /Test Files\s+\d+[^\n]*\n[\s\S]*?Duration\s+[\d.]+m?s[^\n]*/,
     )
-    if (testSummaryMatch) {
+    if (!values.summary && testSummaryMatch) {
       console.log()
       console.log(testSummaryMatch[0])
       console.log()
@@ -96,13 +97,15 @@ try {
     const allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|[^\n]*/)
 
     if (coverageHeaderMatch && allFilesMatch) {
-      console.log(' % Coverage report from v8')
-      console.log(coverageHeaderMatch[1])
-      console.log(coverageHeaderMatch[2])
-      console.log(coverageHeaderMatch[1])
-      console.log(allFilesMatch[0])
-      console.log(coverageHeaderMatch[1])
-      console.log()
+      if (!values.summary) {
+        console.log(' % Coverage report from v8')
+        console.log(coverageHeaderMatch[1])
+        console.log(coverageHeaderMatch[2])
+        console.log(coverageHeaderMatch[1])
+        console.log(allFilesMatch[0])
+        console.log(coverageHeaderMatch[1])
+        console.log()
+      }
 
       const codeCoveragePercent = Number.parseFloat(allFilesMatch[1])
       console.log(' Coverage Summary')
@@ -153,20 +156,22 @@ try {
     )
 
     // Display output
-    if (testSummaryMatch) {
+    if (!values.summary && testSummaryMatch) {
       console.log()
       console.log(testSummaryMatch[0])
       console.log()
     }
 
     if (coverageHeaderMatch && allFilesMatch) {
-      console.log(' % Coverage report from v8')
-      console.log(coverageHeaderMatch[1])
-      console.log(coverageHeaderMatch[2])
-      console.log(coverageHeaderMatch[1])
-      console.log(allFilesMatch[0])
-      console.log(coverageHeaderMatch[1])
-      console.log()
+      if (!values.summary) {
+        console.log(' % Coverage report from v8')
+        console.log(coverageHeaderMatch[1])
+        console.log(coverageHeaderMatch[2])
+        console.log(coverageHeaderMatch[1])
+        console.log(allFilesMatch[0])
+        console.log(coverageHeaderMatch[1])
+        console.log()
+      }
 
       // Display cumulative summary
       if (typeCoverageMatch) {
