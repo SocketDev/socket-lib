@@ -19,7 +19,6 @@ type LogSymbols = {
 type LoggerMethods = {
   [K in keyof typeof console]: (typeof console)[K] extends (
     ...args: infer A
-    // biome-ignore lint/suspicious/noExplicitAny: Console method return types are dynamic.
   ) => any
     ? (...args: A) => Logger
     : (typeof console)[K]
@@ -53,7 +52,6 @@ function constructConsole(...args: unknown[]) {
     _Console = nodeConsole.Console
   }
   return ReflectConstruct(
-    // biome-ignore lint/style/noNonNullAssertion: Initialized above.
     _Console! as new (
       ...args: unknown[]
     ) => Console, // eslint-disable-line no-undef
@@ -138,9 +136,7 @@ const boundConsoleEntries = [
   'trace',
   'warn',
 ]
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic console method access.
   .filter(n => typeof (globalConsole as any)[n] === 'function')
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic console method access.
   .map(n => [n, (globalConsole as any)[n].bind(globalConsole)])
 
 const consolePropAttributes = {
@@ -155,7 +151,6 @@ const privateConsole = new WeakMap()
 const consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
 export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
 const kGroupIndentationWidthSymbol =
-  // biome-ignore lint/suspicious/noExplicitAny: Symbol property access.
   consoleSymbols.find(s => (s as any).label === 'kGroupIndentWidth') ??
   Symbol('kGroupIndentWidth')
 export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
@@ -302,7 +297,6 @@ export class Logger {
       logArgs,
     )
     this[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]))
-    // biome-ignore lint/suspicious/noExplicitAny: Symbol method access.
     ;(this as any)[incLogCallCountSymbol]()
     return this
   }
@@ -344,7 +338,6 @@ export class Logger {
       ...extras,
     )
     this.#lastWasBlank = false
-    // biome-ignore lint/suspicious/noExplicitAny: Symbol method access.
     ;(this as any)[incLogCallCountSymbol]()
     return this
   }
@@ -394,9 +387,7 @@ export class Logger {
     }
     const con = privateConsole.get(this)
     con.clear()
-    // biome-ignore lint/suspicious/noExplicitAny: Internal console property access.
     if ((con as any)._stdout.isTTY) {
-      // biome-ignore lint/suspicious/noExplicitAny: Symbol method access.
       ;(this as any)[lastWasBlankSymbol](true)
       this.#logCallCount = 0
     }
@@ -496,12 +487,9 @@ export class Logger {
     if (length) {
       ReflectApply(this.log, this, label)
     }
-    // biome-ignore lint/suspicious/noExplicitAny: Symbol property access.
     this.indent((this as any)[kGroupIndentationWidthSymbol])
     if (length) {
-      // biome-ignore lint/suspicious/noExplicitAny: Symbol method access.
       ;(this as any)[lastWasBlankSymbol](false)
-      // biome-ignore lint/suspicious/noExplicitAny: Symbol method access.
       ;(this as any)[incLogCallCountSymbol]()
     }
     return this
@@ -520,7 +508,6 @@ export class Logger {
    * End the current log group.
    */
   groupEnd() {
-    // biome-ignore lint/suspicious/noExplicitAny: Symbol property access.
     this.dedent((this as any)[kGroupIndentationWidthSymbol])
     return this
   }
@@ -731,13 +718,11 @@ Object.defineProperties(
         ],
       ]
       for (const { 0: key, 1: value } of Object.entries(globalConsole)) {
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic prototype check.
         if (!(Logger.prototype as any)[key] && typeof value === 'function') {
           // Dynamically name the log method without using Object.defineProperty.
           const { [key]: func } = {
             [key](...args: unknown[]) {
               const con = privateConsole.get(this)
-              // biome-ignore lint/suspicious/noExplicitAny: Dynamic console method access.
               const result = (con as any)[key](...args)
               return result === undefined || result === con ? this : result
             },

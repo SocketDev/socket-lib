@@ -223,7 +223,6 @@ interface NodeSpawnOptions {
   cwd?: string | URL | undefined
   env?: NodeJS.ProcessEnv | undefined
   argv0?: string | undefined
-  // biome-ignore lint/suspicious/noExplicitAny: Stdio can be complex union of types from Node.js.
   stdio?: any
   detached?: boolean | undefined
   uid?: number | undefined
@@ -243,7 +242,6 @@ interface ChildProcessType {
   stdin: NodeJS.WritableStream | null
   stdout: NodeJS.ReadableStream | null
   stderr: NodeJS.ReadableStream | null
-  // biome-ignore lint/suspicious/noExplicitAny: IPC channel type from Node.js.
   readonly channel?: any
   readonly stdio: [
     NodeJS.WritableStream | null,
@@ -260,21 +258,15 @@ interface ChildProcessType {
   readonly spawnargs: string[]
   readonly spawnfile: string
   kill(signal?: NodeJS.Signals | number): boolean
-  // biome-ignore lint/suspicious/noExplicitAny: IPC message type from Node.js.
   send(message: any, callback?: (error: Error | null) => void): boolean
   send(
-    // biome-ignore lint/suspicious/noExplicitAny: IPC message and handle types from Node.js.
     message: any,
-    // biome-ignore lint/suspicious/noExplicitAny: IPC message and handle types from Node.js.
     sendHandle?: any | undefined,
     callback?: (error: Error | null) => void,
   ): boolean
   send(
-    // biome-ignore lint/suspicious/noExplicitAny: IPC message, handle, and options types from Node.js.
     message: any,
-    // biome-ignore lint/suspicious/noExplicitAny: IPC message, handle, and options types from Node.js.
     sendHandle?: any | undefined,
-    // biome-ignore lint/suspicious/noExplicitAny: IPC message, handle, and options types from Node.js.
     options?: any | undefined,
     callback?: (error: Error | null) => void,
   ): boolean
@@ -294,17 +286,13 @@ interface WritableStreamType {
   writableCorked: number
   destroyed: boolean
   write(
-    // biome-ignore lint/suspicious/noExplicitAny: Stream chunk can be any type.
     chunk: any,
     encoding?: BufferEncoding | undefined,
     callback?: (error?: Error | null) => void,
   ): boolean
-  // biome-ignore lint/suspicious/noExplicitAny: Stream chunk can be any type.
   write(chunk: any, callback?: (error?: Error | null) => void): boolean
   end(cb?: () => void): this
-  // biome-ignore lint/suspicious/noExplicitAny: Stream chunk can be any type.
   end(chunk: any, cb?: () => void): this
-  // biome-ignore lint/suspicious/noExplicitAny: Stream chunk can be any type.
   end(chunk: any, encoding?: BufferEncoding | undefined, cb?: () => void): this
   cork(): void
   uncork(): void

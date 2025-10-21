@@ -176,7 +176,6 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   // In-memory cache for hot data
-  // biome-ignore lint/suspicious/noExplicitAny: Generic cache for any value type.
   const memoCache = new Map<string, TtlCacheEntry<any>>()
 
   // Ensure ttl is defined
@@ -192,10 +191,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   /**
    * Check if entry is expired.
    */
-  function isExpired(
-    // biome-ignore lint/suspicious/noExplicitAny: Generic check for any entry type.
-    entry: TtlCacheEntry<any>,
-  ): boolean {
+  function isExpired(entry: TtlCacheEntry<any>): boolean {
     return Date.now() > entry.expiresAt
   }
 
@@ -294,7 +290,6 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Check persistent cache for entries not in memory.
     const cacheDir = (await import('./paths')).getSocketCacacheDir()
-    // biome-ignore lint/suspicious/noExplicitAny: cacache types are incomplete.
     const cacacheModule = (await import('./cacache')) as any
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 

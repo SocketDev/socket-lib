@@ -8,7 +8,6 @@ declare namespace Cacache {
   interface PutOptions {
     integrity?: string | undefined
     size?: number | undefined
-    // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
     metadata?: any | undefined
     memoize?: boolean | undefined
   }
@@ -17,7 +16,6 @@ declare namespace Cacache {
     data: Buffer
     integrity: string
     key: string
-    // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
     metadata?: any | undefined
     path: string
     size: number
@@ -30,7 +28,6 @@ declare namespace Cacache {
     path: string
     time: number
     size: number
-    // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
     metadata?: any | undefined
   }
 }
@@ -79,14 +76,10 @@ declare const cacache: {
   tmp: {
     withTmp: (
       cache: string,
-      // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
       opts: any,
-      // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
       callback: (tmpDirPath: string) => Promise<any>,
-      // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
     ) => Promise<any>
   }
-  // biome-ignore lint/suspicious/noExplicitAny: External third-party type definition
   [key: string]: any
 }
 

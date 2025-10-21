@@ -132,6 +132,7 @@ function configs(sourceType) {
     // patterns used in package.json "files" fields. In those cases we simplify
     // the glob patterns used.
     'n/no-unpublished-bin': 'error',
+    'no-unexpected-multiline': 'off',
     'n/no-unsupported-features/es-builtins': [
       'error',
       {

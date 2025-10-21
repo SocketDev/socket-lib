@@ -18,7 +18,6 @@ function setupSuppression(): void {
   // Only wrap once - store the original on first call.
   if (!originalEmitWarning) {
     originalEmitWarning = process.emitWarning
-    // biome-ignore lint/suspicious/noExplicitAny: Process emitWarning accepts variable args.
     process.emitWarning = (warning: string | Error, ...args: any[]) => {
       // Check both string warnings and warning objects.
       if (typeof warning === 'string') {
@@ -110,7 +109,6 @@ export function setMaxEventTargetListeners(
   if (kMaxEventTargetListeners) {
     // The default events.defaultMaxListeners value is 10.
     // https://nodejs.org/api/events.html#eventsdefaultmaxlisteners
-    // biome-ignore lint/suspicious/noExplicitAny: Setting Node.js internal symbol property.
     ;(target as any)[kMaxEventTargetListeners] = maxListeners
   }
 }

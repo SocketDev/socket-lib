@@ -207,11 +207,9 @@ export function getCliSpinners(
   styleName?: string | undefined,
 ): SpinnerStyle | Record<string, SpinnerStyle> | undefined {
   if (_cliSpinners === undefined) {
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing internal yocto-spinner constructor.
     const YoctoCtor = yoctoSpinner as any
     // Get the YoctoSpinner class to access static properties.
     const tempInstance = YoctoCtor({})
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing internal yocto-spinner class.
     const YoctoSpinnerClass = tempInstance.constructor as any
     // Extend the standard cli-spinners collection with Socket custom spinners.
     _cliSpinners = {
@@ -254,14 +252,12 @@ let _defaultSpinner: SpinnerStyle | undefined
 /*@__NO_SIDE_EFFECTS__*/
 export function Spinner(options?: SpinnerOptions | undefined): Spinner {
   if (_Spinner === undefined) {
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing internal yocto-spinner constructor.
     const YoctoCtor = yoctoSpinner as any
     // Get the actual YoctoSpinner class from an instance
     const tempInstance = YoctoCtor({})
     const YoctoSpinnerClass = tempInstance.constructor
 
     /*@__PURE__*/
-    // biome-ignore lint/suspicious/noExplicitAny: Extending yocto-spinner class.
     _Spinner = class SpinnerClass extends (YoctoSpinnerClass as any) {
       declare isSpinning: boolean
       #baseText: string = ''
