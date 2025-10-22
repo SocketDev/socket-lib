@@ -19,6 +19,8 @@ import {
   readFileUtf8Sync,
   readJson,
   readJsonSync,
+  safeDelete,
+  safeDeleteSync,
   safeReadFile,
   safeReadFileSync,
   safeStats,
@@ -28,7 +30,7 @@ import {
   writeJsonSync,
 } from '@socketsecurity/lib/fs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../utils/temp-file-helper'
+import { runWithTempDir } from '../utils/temp-file-helper.mjs'
 
 describe('fs', () => {
   describe('findUp', () => {
@@ -1118,7 +1120,9 @@ describe('fs', () => {
 
         await writeJson(testFile, testData, {
           replacer: (key, value) => {
-            if (key === 'secret') return undefined
+            if (key === 'secret') {
+              return undefined
+            }
             return value
           },
         })
