@@ -241,7 +241,7 @@ describe('functions', () => {
     })
 
     it('should handle promise rejections', async () => {
-      const fn = async () => Promise.reject(new Error('rejected'))
+      const fn = async () => await Promise.reject(new Error('rejected'))
       const wrappedFn = silentWrapAsync(fn)
 
       const result = await wrappedFn()
@@ -263,7 +263,9 @@ describe('functions', () => {
         n: number,
         acc = 1,
       ): number | (() => number) {
-        if (n <= 1) return acc
+        if (n <= 1) {
+          return acc
+        }
         return () => fact(n - 1, n * acc)
       })
 
@@ -276,7 +278,9 @@ describe('functions', () => {
         n: number,
         acc = 0,
       ): number | (() => number) {
-        if (n === 0) return acc
+        if (n === 0) {
+          return acc
+        }
         return () => sumN(n - 1, acc + n)
       })
 
@@ -287,7 +291,9 @@ describe('functions', () => {
 
     it('should handle functions that return functions multiple levels deep', () => {
       const fn = trampoline((depth: number): number | (() => number) => {
-        if (depth === 0) return 0
+        if (depth === 0) {
+          return 0
+        }
         return () => () => () => fn(depth - 1)
       })
 
@@ -302,7 +308,9 @@ describe('functions', () => {
           n: number,
           acc = 0,
         ): number | (() => number) {
-          if (n === 0) return acc + this.value
+          if (n === 0) {
+            return acc + this.value
+          }
           return () => this.countdown(n - 1, acc + n)
         }),
       }
@@ -326,8 +334,12 @@ describe('functions', () => {
         a = 0,
         b = 1,
       ): number | (() => number) {
-        if (n === 0) return a
-        if (n === 1) return b
+        if (n === 0) {
+          return a
+        }
+        if (n === 1) {
+          return b
+        }
         return () => fibonacci(n - 1, b, a + b)
       })
 
@@ -339,7 +351,9 @@ describe('functions', () => {
 
     it('should handle functions returning functions that return values', () => {
       const fn = trampoline((x: number): number | (() => number) => {
-        if (x === 0) return 42
+        if (x === 0) {
+          return 42
+        }
         return () => fn(x - 1)
       })
 
@@ -351,7 +365,9 @@ describe('functions', () => {
       const deepRecursion = trampoline(function deep(
         n: number,
       ): number | (() => number) {
-        if (n === 0) return 0
+        if (n === 0) {
+          return 0
+        }
         return () => deep(n - 1)
       })
 
