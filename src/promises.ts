@@ -23,7 +23,7 @@ export interface RetryOptions {
     attempt: number,
     error: unknown,
     delay: number,
-  ) => boolean | undefined
+  ) => boolean | number | undefined
   onRetryCancelOnFalse?: boolean
   onRetryRethrow?: boolean
   retries?: number
@@ -322,6 +322,10 @@ export async function pRetry<T>(
           const result = onRetry((retries as number) - attempts, e, waitTime)
           if (result === false && onRetryCancelOnFalse) {
             break
+          }
+          // If onRetry returns a number, use it as the custom delay.
+          if (typeof result === 'number' && result >= 0) {
+            waitTime = Math.min(result, maxDelayMs as number)
           }
         } catch (e) {
           if (onRetryRethrow) {
