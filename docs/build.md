@@ -1,163 +1,139 @@
 # Build Architecture
 
-## External Dependencies
+## Overview
 
-### Overview
+Socket Lib uses a specialized architecture for dependencies to optimize bundle size and ensure clean separation between bundled and external code.
 
-The registry uses a specialized architecture for managing dependencies to optimize bundle size and ensure clean separation between bundled and external code.
+## Key Concepts
 
-### Dependency Types
+**Vendored Dependencies**: Source code copied into `src/external/` and bundled
+**External Dependencies**: Listed in `dependencies` and used at runtime
+**Validation**: Automated checking via `node scripts/validate-external.mjs`
 
-#### dependencies (Runtime)
+## Dependency Types
 
-The following package is a **runtime dependency** because it's a separate package:
+### Runtime Dependencies
 
 ```json
 "@socketregistry/packageurl-js": "1.3.0"
 ```
 
-This package:
-- Is a separate package that depends on registry
+Separate packages that:
 - Can be re-exported from `src/external/`
-- Is listed in ALLOWED_EXTERNAL_PACKAGES
+- Listed in ALLOWED_EXTERNAL_PACKAGES
+- Required at runtime
 
-#### devDependencies (Build-time, Vendored)
+### Vendored Dependencies (Build-time)
 
-Other @socketregistry and @socketsecurity packages are **vendored** into `src/external/`:
-- The source code is copied directly into external files
-- They do NOT need to be listed in any dependencies
-- They are standalone, bundled code
+Other @socketregistry and @socketsecurity packages:
+- Source code copied into `src/external/`
+- NOT listed in dependencies
+- Bundled at build time
 
-### The src/external/ Layer
+## Import Rules
 
-#### Purpose
-
-`src/external/` contains **vendored/bundled source code** from dependencies.
-
-#### Import Rules
-
-**Inside src/external/**: Files must contain bundled/vendored code
+**Inside `src/external/`**: Must contain bundled/vendored code
 ```javascript
 // src/external/@socketregistry/is-unicode-supported.js
-// Contains the full source code, not a re-export
 module.exports = function isUnicodeSupported() {
   // ... implementation ...
 }
 ```
 
-**Outside src/external/**: Must use relative paths
+**Outside `src/external/`**: Use relative paths
 ```javascript
-// src/lib/logger.ts - CORRECT
-require('../external/@socketregistry/is-unicode-supported')()
+// ✅ CORRECT
+require('../external/@socketregistry/is-unicode-supported')
 
-// src/lib/logger.ts - INCORRECT
+// ❌ WRONG
 require('@socketregistry/is-unicode-supported')
 ```
 
-### Validation
+## Validation
 
-The `scripts/validate-external.mjs` script enforces these rules:
-
-- Scans all files in `src/external/`
-- Detects re-exports of `@socketregistry/*` and `@socketsecurity/*` packages (except allowed)
-- Ensures external files contain bundled code, not `require('@package')` re-exports
-
-Run validation:
+Run validation before build:
 ```bash
 node scripts/validate-external.mjs
 ```
 
-Forbidden patterns in `src/external/` (except ALLOWED_EXTERNAL_PACKAGES):
+Detects forbidden patterns in `src/external/` (except ALLOWED_EXTERNAL_PACKAGES):
 - `require('@socketregistry/package-name')`
-- `from '@socketregistry/package-name'`
 - `require('@socketsecurity/package-name')`
+- `from '@socketregistry/package-name'`
 - `from '@socketsecurity/package-name'`
 
-Allowed:
-- `@socketregistry/packageurl-js` - separate package, listed in dependencies
+## Build Process
 
-### Build Process
+1. Validate external files (must be bundled code)
+2. Copy `src/external/` to `dist/external/`
+3. Rollup externalizes Node.js built-ins, node_modules, and `/external/` paths
 
-#### src/external/ Files
+## Common Patterns
 
-Files in `src/external/`:
-1. Are validated before build (must be bundled code)
-2. Copied to `dist/external/` by `scripts/rollup/build-external.mjs`
-3. The bundled code is included in the dist output
+### ✅ Correct
 
-#### Rollup Configuration
-
-The main rollup config (`.config/rollup.dist.config.mjs`) externalizes:
-- Node.js built-ins
-- `node_modules` dependencies
-- Paths containing `/external/`
-
-### Why This Architecture?
-
-1. **No Runtime Dependencies**: Vendored code means no external dependencies needed
-2. **Clear Boundaries**: `src/external/` contains only bundled/vendored code
-3. **Build-time Validation**: Automatic detection of accidental re-exports
-4. **Smaller Bundles**: Only include what's actually used
-5. **Maintainability**: Clear rules about what external files can contain
-
-### Common Mistakes
-
-❌ **Re-exporting from npm in src/external/**
+**Vendored code:**
 ```javascript
-// src/external/@socketregistry/yocto-spinner.js - WRONG
-module.exports = require('@socketregistry/yocto-spinner')
+// src/external/@socketregistry/yocto-spinner.js
+module.exports = function yoctoSpinner(options) {
+  // ... full bundled implementation ...
+}
 ```
 
-❌ **Adding vendored packages to devDependencies**
+**Relative import:**
+```javascript
+// src/lib/logger.ts
+require('../external/@socketregistry/is-unicode-supported')
+```
+
+**Runtime dependency:**
+```json
+"dependencies": {
+  "@socketregistry/packageurl-js": "1.3.0"
+}
+```
+
+### ❌ Wrong
+
+**Re-exporting in external:**
+```javascript
+// src/external/@socketregistry/yocto-spinner.js
+module.exports = require('@socketregistry/yocto-spinner')  // WRONG
+```
+
+**Vendored package in devDependencies:**
 ```json
 "devDependencies": {
   "@socketregistry/yocto-spinner": "1.0.24"  // WRONG - it's vendored
 }
 ```
 
-❌ **Bare imports outside src/external/**
+**Bare import outside external:**
 ```javascript
-// src/lib/logger.ts - WRONG
-require('@socketregistry/is-unicode-supported')
+// src/lib/logger.ts
+require('@socketregistry/is-unicode-supported')  // WRONG
 ```
 
-✅ **Correct patterns**
-```javascript
-// src/external/@socketregistry/yocto-spinner.js - CORRECT
-module.exports = function yoctoSpinner(options) {
-  // ... full bundled implementation ...
-}
-```
+## Troubleshooting
 
-```javascript
-// src/lib/logger.ts - CORRECT
-require('../external/@socketregistry/is-unicode-supported')
-```
+**"Cannot find module '@socketregistry/package-name'"**
+- Should it be vendored into `src/external/` as bundled code?
+- Should it be added to `dependencies` and ALLOWED_EXTERNAL_PACKAGES?
 
-```json
-// package.json - CORRECT
-"dependencies": {
-  "@socketregistry/packageurl-js": "1.3.0"
-}
-```
-
-### Troubleshooting
-
-**"Cannot find module '@socketregistry/package-name'" at runtime**
-
-This means a package is being required directly but isn't in dependencies. Check if:
-1. It should be vendored into `src/external/` as bundled code
-2. It should be added to `dependencies` and ALLOWED_EXTERNAL_PACKAGES
-
-**Validation fails for external file**
-
-The external file contains a re-export instead of bundled code. Either:
-1. Vendor the source code directly into the file
-2. Add the package to ALLOWED_EXTERNAL_PACKAGES and `dependencies` if it's meant to be a runtime dependency
+**Validation fails**
+- File contains re-export instead of bundled code
+- Either vendor the source directly or add to ALLOWED_EXTERNAL_PACKAGES
 
 **How to vendor a new dependency**
-
-1. Copy the source code into `src/external/@scope/package-name.js`
+1. Copy source into `src/external/@scope/package-name.js`
 2. Ensure it doesn't `require()` the npm package
-3. Run `pnpm run validate:external` to verify
-4. The code will be bundled during build
+3. Run `pnpm run validate:external`
+4. Code will bundle during build
+
+## Why This Architecture?
+
+1. **No Runtime Dependencies**: Vendored code eliminates external dependencies
+2. **Clear Boundaries**: `src/external/` contains only bundled code
+3. **Build-time Validation**: Automatic detection of re-exports
+4. **Smaller Bundles**: Include only what's used
+5. **Maintainability**: Clear rules for external files
