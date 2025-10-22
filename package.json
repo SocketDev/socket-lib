@@ -732,7 +732,8 @@
     "prepublishOnly": "pnpm run build",
     "test": "node scripts/test.mjs",
     "test-ci": "vitest run",
-    "type-ci": "pnpm run check"
+    "type-ci": "pnpm run check",
+    "update": "node scripts/update.mjs"
   },
   "devDependencies": {
     "@babel/core": "7.28.4",
