@@ -12,8 +12,6 @@ const require = createRequire(import.meta.url)
 
 // Use esbuild from node_modules.
 import esbuild from 'esbuild'
-import { createCherryPickEntry } from './cherry-pick-entries.mjs'
-import { createNonBarrelEntry } from './non-barrel-imports.mjs'
 import {
   printError,
   printFooter,
@@ -149,8 +147,6 @@ function getPackageSpecificOptions(packageName) {
 async function bundlePackage(packageName, outputPath) {
   console.log(`  Bundling ${packageName}...`)
 
-  let cherryPickedEntry
-
   try {
     // Check if package is installed.
     let packagePath
@@ -191,24 +187,6 @@ async function bundlePackage(packageName, outputPath) {
         throw new Error(
           `Package "${packageName}" is not installed. Please install it with: pnpm add -D ${packageName}`,
         )
-      }
-    }
-
-    // Check if we have a cherry-pick optimization for this package first.
-    const cherryPickEntry = await createCherryPickEntry(packageName, null)
-    if (cherryPickEntry) {
-      console.log(`  Using cherry-picked imports for ${packageName}`)
-      packagePath = cherryPickEntry
-      // For cleanup tracking.
-      cherryPickedEntry = cherryPickEntry
-    } else {
-      // Fall back to non-barrel import optimization.
-      const nonBarrelEntry = await createNonBarrelEntry(packageName, null)
-      if (nonBarrelEntry) {
-        console.log(`  Using non-barrel imports for ${packageName}`)
-        packagePath = nonBarrelEntry
-        // For cleanup tracking.
-        cherryPickedEntry = nonBarrelEntry
       }
     }
 
@@ -449,12 +427,6 @@ ${bundleContent}`
     const stats = await fs.stat(outputPath)
     const sizeKB = Math.round(stats.size / 1024)
     console.log(`    ✓ Bundled ${packageName} (${sizeKB}KB)`)
-
-    // Clean up temp directory if we created one.
-    if (cherryPickedEntry) {
-      const tmpDir = path.join(process.cwd(), '.tmp-build')
-      await fs.rm(tmpDir, { recursive: true, force: true })
-    }
   } catch (error) {
     console.error(`    ✗ Failed to bundle ${packageName}:`, error.message)
     // Create error stub.
@@ -464,12 +436,6 @@ ${bundleContent}`
 throw new Error('Failed to bundle ${packageName}')
 `
     await fs.writeFile(outputPath, stubContent)
-  } finally {
-    // Always clean up temp directory if we created one.
-    if (cherryPickedEntry) {
-      const tmpDir = path.join(process.cwd(), '.tmp-build')
-      await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-    }
   }
 }
 
