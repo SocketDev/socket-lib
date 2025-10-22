@@ -239,20 +239,11 @@ function configs(sourceType) {
         parser: tsEslint.parser,
         parserOptions: {
           ...importFlatConfigs.typescript.languageOptions?.parserOptions,
-          projectService: {
-            ...importFlatConfigs.typescript.languageOptions?.parserOptions
-              ?.projectService,
-            allowDefaultProject: [
-              // Add constants type definitions.
-              'registry/src/lib/constants/*.d.ts',
-            ],
-            defaultProject: 'tsconfig.json',
-            // PERFORMANCE TRADEOFF: Increase file match limit from default 8 to 1000.
-            // This slows initial parsing but allows TypeScript-aware linting of all
-            // npm package overrides without requiring individual tsconfig files.
-            maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 1000,
-            tsconfigRootDir: rootPath,
-          },
+          project: [
+            path.join(rootPath, 'tsconfig.json'),
+            path.join(rootPath, 'tsconfig.test.json'),
+          ],
+          tsconfigRootDir: rootPath,
         },
       },
       plugins: {
@@ -354,11 +345,14 @@ export default [
     },
   },
   {
-    // Disable import resolution rules for test files importing from scripts.
-    files: ['test/**/*.ts'],
+    // Relax rules for test files - testing code has different conventions
+    files: ['test/**/*.ts', 'test/**/*.mts'],
     rules: {
       'n/no-missing-import': 'off',
       'import-x/no-unresolved': 'off',
+      'line-comment-position': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'no-undef': 'off', // TypeScript handles this
     },
   },
   {
