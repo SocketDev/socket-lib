@@ -21,24 +21,6 @@ export const printHeader = title => {
   console.log(`  ${title}`)
   printDivider()
 }
-export const replaceHeader = (title, extraLines = 0) => {
-  // Move cursor up to rewrite the header (3 lines for header + any extra output lines)
-  const linesToMove = 3 + extraLines
-  process.stdout.write(`\x1b[${linesToMove}A`) // Move up N lines
-  process.stdout.write('\x1b[K') // Clear top divider line
-  printDivider()
-  process.stdout.write('\x1b[K') // Clear title line
-  console.log(`  ${title}`)
-  process.stdout.write('\x1b[K') // Clear old bottom divider
-  // Clear any extra lines from previous output
-  for (let i = 0; i < extraLines; i++) {
-    process.stdout.write('\x1b[K\n') // Clear line and move to next
-  }
-  // Move cursor back up to position after the new header
-  if (extraLines > 0) {
-    process.stdout.write(`\x1b[${extraLines}A`)
-  }
-}
 export const printFooterLine = () => console.log('─'.repeat(55))
 export const printDottedLine = () => console.log('·'.repeat(55))
 export const printDiamondLine = () => console.log('◆'.repeat(55))
@@ -48,7 +30,7 @@ export const printFooter = msg => {
     console.log(colors.green(msg))
   }
 }
-export const printHelpHeader = name => console.log(`Socket Lib ${name}`)
+export const printHelpHeader = name => console.log(`Socket Registry ${name}`)
 export const printSuccess = msg => console.log(colors.green(`✓ ${msg}`))
 export const printError = msg => console.error(colors.red(`✗ ${msg}`))
 export const printWarning = msg => console.warn(colors.yellow(`⚠ ${msg}`))
