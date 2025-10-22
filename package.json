@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -697,7 +697,8 @@
     "./package.json": "./package.json",
     "./taze.config.json": "./taze.config.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
-    "./tsconfig.json": "./tsconfig.json"
+    "./tsconfig.json": "./tsconfig.json",
+    "./tsconfig.test.json": "./tsconfig.test.json"
   },
   "imports": {
     "#constants/*": "./dist/constants/*.js",
