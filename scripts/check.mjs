@@ -24,10 +24,16 @@ async function main() {
       {
         args: ['exec', 'biome', 'check', '.'],
         command: 'pnpm',
+        options: {
+          ...(process.platform === 'win32' && { shell: true }),
+        },
       },
       {
         args: ['exec', 'tsgo', '--noEmit'],
         command: 'pnpm',
+        options: {
+          ...(process.platform === 'win32' && { shell: true }),
+        },
       },
     ]
 
