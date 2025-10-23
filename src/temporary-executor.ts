@@ -3,6 +3,7 @@
  * Identifies and handles temporary execution contexts such as npx, pnpm dlx, and yarn dlx.
  */
 
+import { WIN32 } from '#constants/platform'
 import { normalizePath } from './path'
 
 /**
@@ -46,7 +47,7 @@ export function isRunningInTemporaryExecutor(cwd = process.cwd()): boolean {
   ]
 
   // Yarn on Windows uses AppData/Local/Temp/xfs- pattern.
-  if (process.platform === 'win32') {
+  if (WIN32) {
     tempPatterns.push('AppData/Local/Temp/xfs-')
   }
 

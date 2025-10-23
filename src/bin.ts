@@ -8,6 +8,7 @@ import { HOME } from '#env/home'
 import { LOCALAPPDATA } from '#env/localappdata'
 import { XDG_DATA_HOME } from '#env/xdg-data-home'
 
+import { WIN32 } from '#constants/platform'
 import { readJsonSync } from './fs'
 import { getOwn } from './objects'
 import { isPath, normalizePath } from './path'
@@ -79,7 +80,11 @@ export async function execBin(
   const binCommand = Array.isArray(resolvedPath)
     ? resolvedPath[0]!
     : resolvedPath
-  return await spawn(binCommand, args ?? [], options)
+  // On Windows, binaries are often .cmd files that require shell to execute.
+  return await spawn(binCommand, args ?? [], {
+    shell: WIN32,
+    ...options,
+  })
 }
 
 /**
@@ -248,7 +253,6 @@ export function findRealNpm(): string {
  * Find the real pnpm executable, bypassing any aliases and shadow bins.
  */
 export function findRealPnpm(): string {
-  const WIN32 = require('../constants/platform').WIN32
   const path = getPath()
 
   // Try common pnpm locations.
@@ -381,7 +385,6 @@ export function resolveBinPathSync(binPath: string): string {
       return voltaBinPath
     }
   }
-  const WIN32 = require('../constants/platform').WIN32
   if (WIN32) {
     const hasKnownExt =
       extLowered === '' ||
