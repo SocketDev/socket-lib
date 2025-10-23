@@ -26,7 +26,15 @@ export interface HeaderOptions {
    * Color to apply to the title text.
    * @default 'cyan'
    */
-  color?: 'cyan' | 'green' | 'yellow' | 'blue' | 'magenta' | 'red' | 'gray' | undefined
+  color?:
+    | 'cyan'
+    | 'green'
+    | 'yellow'
+    | 'blue'
+    | 'magenta'
+    | 'red'
+    | 'gray'
+    | undefined
   /**
    * Apply bold styling to title.
    * @default true

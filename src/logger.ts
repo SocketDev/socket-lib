@@ -1216,7 +1216,10 @@ export class Logger {
    * })
    * ```
    */
-  table(tabularData: unknown, properties?: readonly string[] | undefined): this {
+  table(
+    tabularData: unknown,
+    properties?: readonly string[] | undefined,
+  ): this {
     const con = privateConsole.get(this)
     con.table(tabularData, properties)
     this[lastWasBlankSymbol](false)

@@ -762,8 +762,7 @@ export async function isChanged(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd =
-    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -814,8 +813,7 @@ export function isChangedSync(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd =
-    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -865,8 +863,7 @@ export async function isUnstaged(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd =
-    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -917,8 +914,7 @@ export function isUnstagedSync(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd =
-    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -967,8 +963,7 @@ export async function isStaged(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd =
-    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -1018,8 +1013,7 @@ export function isStagedSync(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd =
-    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
