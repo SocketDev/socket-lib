@@ -520,12 +520,14 @@ describe('path utilities', () => {
 
       it('should handle Windows file URLs', () => {
         if (process.platform === 'win32') {
-          expect(pathLikeToString(new URL('file:///C:/Windows'))).toMatch(
-            /^C:[\\/]/,
-          )
-          expect(pathLikeToString(new URL('file:///D:/data/file.txt'))).toMatch(
-            /^D:[\\/]/,
-          )
+          expect(
+            normalizePath(pathLikeToString(new URL('file:///C:/Windows'))),
+          ).toMatch(/^C:\//)
+          expect(
+            normalizePath(
+              pathLikeToString(new URL('file:///D:/data/file.txt')),
+            ),
+          ).toMatch(/^D:\//)
         }
       })
 
