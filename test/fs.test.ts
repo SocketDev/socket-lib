@@ -30,7 +30,7 @@ import {
   writeJsonSync,
 } from '@socketsecurity/lib/fs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../utils/temp-file-helper.mjs'
+import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
 describe('fs', () => {
   describe('findUp', () => {
@@ -661,14 +661,14 @@ describe('fs', () => {
         const testData = { date: '2024-01-01T00:00:00.000Z' }
         await fs.writeFile(testFile, JSON.stringify(testData), 'utf8')
 
-        const result = await readJson(testFile, {
+        const result = (await readJson(testFile, {
           reviver: (key, value) => {
             if (key === 'date' && typeof value === 'string') {
               return new Date(value)
             }
             return value
           },
-        })
+        })) as unknown as { date: Date }
 
         expect(result.date).toBeInstanceOf(Date)
       }, 'readJson-reviver-')
