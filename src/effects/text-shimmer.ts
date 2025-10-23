@@ -14,6 +14,7 @@
 
 import { ANSI_RESET, stripAnsi } from '../ansi'
 import { isArray } from '../arrays'
+import { CI } from '#env/ci'
 
 import type {
   ShimmerColorGradient,
@@ -250,8 +251,8 @@ export function applyShimmer(
   // Strip ANSI codes to get plain text.
   const plainText = stripAnsi(text)
 
-  // No shimmer effect.
-  if (!plainText || direction === DIR_NONE) {
+  // No shimmer effect in CI or when direction is 'none'.
+  if (CI || !plainText || direction === DIR_NONE) {
     const styleCode = stylesToAnsi(styles)
 
     // Support gradient colors (array of colors, one per character).
