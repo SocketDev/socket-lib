@@ -92,8 +92,7 @@ describe('dlx-binary', () => {
 
       expect(cachePath).toBeDefined()
       expect(cachePath).toContain('.socket')
-      expect(cachePath).toContain('cache')
-      expect(cachePath).toContain('dlx')
+      expect(cachePath).toContain('_dlx')
       // Should not contain backslashes on any platform
       expect(cachePath.includes('\\')).toBe(false)
     })
