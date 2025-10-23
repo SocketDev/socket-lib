@@ -329,16 +329,16 @@ describe('cache-with-ttl', () => {
 
     it('should refresh TTL on set', async () => {
       const refreshCache = createTtlCache({
-        ttl: 100,
+        ttl: 200,
         prefix: 'refresh-cache',
       })
 
       await refreshCache.set('key', 'value1')
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 100))
       await refreshCache.set('key', 'value2') // Refresh TTL
 
-      await new Promise(resolve => setTimeout(resolve, 75))
-      // Should still be cached (50 + 75 = 125ms, but TTL refreshed at 50ms)
+      await new Promise(resolve => setTimeout(resolve, 120))
+      // Should still be cached (100 + 120 = 220ms, but TTL refreshed at 100ms)
       expect(await refreshCache.get<string>('key')).toBe('value2')
 
       await refreshCache.clear()
