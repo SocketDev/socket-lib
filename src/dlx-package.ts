@@ -9,6 +9,11 @@
  * - Each unique spec gets its own directory: ~/.socket/_dlx/<hash>/
  * - Allows caching multiple versions of the same package
  *
+ * Version range handling:
+ * - Exact versions (1.0.0) use cache if available
+ * - Range versions (^1.0.0, ~1.0.0) auto-force to get latest within range
+ * - User can override with explicit force: false
+ *
  * Key difference from dlx-binary.ts:
  * - dlx-binary.ts: Downloads standalone binaries from URLs
  * - dlx-package.ts: Installs npm packages from registries
@@ -24,6 +29,12 @@ import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
+
+/**
+ * Regex to check if a version string contains range operators.
+ * Matches any version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
+ */
+const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
 
 export interface DlxPackageOptions {
   /**
@@ -182,6 +193,8 @@ function findBinaryPath(
  *
  * This is the Socket equivalent of npx/pnpm dlx/yarn dlx, but using
  * our own cache directory (~/.socket/_dlx) and installation logic.
+ *
+ * Auto-forces reinstall for version ranges to get latest within range.
  */
 export async function dlxPackage(
   args: readonly string[] | string[],
@@ -189,7 +202,7 @@ export async function dlxPackage(
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxPackageResult> {
   const {
-    force = false,
+    force: userForce,
     package: packageSpec,
     spawnOptions,
   } = { __proto__: null, ...options } as DlxPackageOptions
@@ -197,6 +210,12 @@ export async function dlxPackage(
   // Parse package spec.
   const { name: packageName, version: packageVersion } =
     parsePackageSpec(packageSpec)
+
+  // Auto-force for version ranges to get latest within range.
+  // User can still override with explicit force: false if they want cache.
+  const isVersionRange =
+    packageVersion !== undefined && rangeOperatorsRegExp.test(packageVersion)
+  const force = userForce !== undefined ? userForce : isVersionRange
 
   // Build full package spec for installation.
   const fullPackageSpec = packageVersion
