@@ -279,12 +279,15 @@ describe('spawn', () => {
       expect(result.code).toBe(0)
     })
 
-    it('should handle shell as string path', async () => {
-      const result = await spawn('echo', ['hello'], {
-        shell: '/bin/sh',
-      })
-      expect(result.code).toBe(0)
-    })
+    it.skipIf(process.platform === 'win32')(
+      'should handle shell as string path',
+      async () => {
+        const result = await spawn('echo', ['hello'], {
+          shell: '/bin/sh',
+        })
+        expect(result.code).toBe(0)
+      },
+    )
 
     it('should handle undefined args', async () => {
       const result = await spawn('pwd', undefined)
@@ -415,12 +418,15 @@ describe('spawn', () => {
       expect(result.status).toBe(0)
     })
 
-    it('should handle shell as string path', () => {
-      const result = spawnSync('echo', ['hello'], {
-        shell: '/bin/sh',
-      })
-      expect(result.status).toBe(0)
-    })
+    it.skipIf(process.platform === 'win32')(
+      'should handle shell as string path',
+      () => {
+        const result = spawnSync('echo', ['hello'], {
+          shell: '/bin/sh',
+        })
+        expect(result.status).toBe(0)
+      },
+    )
 
     it('should handle undefined args', () => {
       const result = spawnSync('pwd', undefined)
