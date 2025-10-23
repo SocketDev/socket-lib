@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-10-23
+
+### Added
+
+- Added `filterOutput` option to `stdio/mask` for filtering output chunks before display/buffering
+- Added `overrideExitCode` option to `stdio/mask` for customizing exit codes based on captured output
+- Added comprehensive JSDoc documentation across entire library for enhanced VSCode IntelliSense
+  - Detailed @param, @returns, @template, @throws tags
+  - Practical @example blocks with real-world usage patterns
+  - @default tags showing default values
+  - Enhanced interface property documentation
+
+### Changed
+
+- Improved TypeScript type hints and tooltips throughout library
+- Enhanced documentation for all core utilities (arrays, fs, git, github, http-request, json, logger, objects, path, promises, spawn, spinner, strings)
+- Enhanced documentation for stdio utilities (clear, divider, footer, header, mask, progress, prompts, stderr, stdout)
+- Enhanced documentation for validation utilities (json-parser, types)
+
 ## [1.0.5] - 2025-10-22
 
 ### Added
