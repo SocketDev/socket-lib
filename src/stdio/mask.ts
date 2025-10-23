@@ -26,25 +26,97 @@ import { clearLine } from './clear.js'
 import { write } from './stdout.js'
 
 export interface OutputMaskOptions {
-  /** Current working directory */
-  cwd?: string
-  /** Environment variables */
-  env?: NodeJS.ProcessEnv
-  /** Progress message to display */
-  message?: string
-  /** Show output by default instead of masking it */
-  showOutput?: boolean
-  /** Text to show after "ctrl+o" in spinner */
-  toggleText?: string
+  /**
+   * Current working directory for spawned process.
+   * @default process.cwd()
+   */
+  cwd?: string | undefined
+  /**
+   * Environment variables for spawned process.
+   * @default process.env
+   */
+  env?: NodeJS.ProcessEnv | undefined
+  /**
+   * Filter output before displaying or buffering.
+   * Return `false` to skip the line, `true` to include it.
+   *
+   * Useful for filtering non-fatal warnings or noise from test runners.
+   * The filter runs on every chunk of output before display/buffering.
+   *
+   * @param text - The output text chunk (may include ANSI codes)
+   * @param stream - Whether this came from 'stdout' or 'stderr'
+   * @returns `true` to include this output, `false` to skip it
+   *
+   * @example
+   * ```ts
+   * filterOutput: (text, stream) => {
+   *   // Skip vitest worker termination errors
+   *   if (text.includes('Terminating worker thread')) return false
+   *   return true
+   * }
+   * ```
+   */
+  filterOutput?:
+    | ((text: string, stream: 'stdout' | 'stderr') => boolean)
+    | undefined
+  /**
+   * Progress message to display in spinner.
+   * @default 'Running…'
+   */
+  message?: string | undefined
+  /**
+   * Override the exit code based on captured output.
+   *
+   * Useful for handling non-fatal errors that shouldn't fail the build.
+   * Called after the process exits with the original code and all captured output.
+   * Return a number to override the exit code, or `undefined` to keep original.
+   *
+   * @param code - Original exit code from the process
+   * @param stdout - All captured stdout (even filtered lines are captured)
+   * @param stderr - All captured stderr (even filtered lines are captured)
+   * @returns New exit code, or `undefined` to keep original
+   *
+   * @example
+   * ```ts
+   * overrideExitCode: (code, stdout, stderr) => {
+   *   // If only worker termination errors, treat as success
+   *   const output = stdout + stderr
+   *   const hasWorkerError = output.includes('Terminating worker thread')
+   *   const hasRealFailure = output.includes('FAIL')
+   *   if (code !== 0 && hasWorkerError && !hasRealFailure) {
+   *     return 0 // Override to success
+   *   }
+   *   return undefined // Keep original
+   * }
+   * ```
+   */
+  overrideExitCode?:
+    | ((code: number, stdout: string, stderr: string) => number | undefined)
+    | undefined
+  /**
+   * Start with output visible instead of masked.
+   * When `true`, output shows immediately without needing ctrl+o.
+   * @default false
+   */
+  showOutput?: boolean | undefined
+  /**
+   * Text to show after "ctrl+o" in spinner message.
+   * @default 'to see full output'
+   */
+  toggleText?: string | undefined
 }
 
 export interface OutputMask {
-  /** Whether output is currently visible */
-  verbose: boolean
-  /** Buffered output lines */
-  outputBuffer: string[]
   /** Whether spinner is currently active */
   isSpinning: boolean
+  /** Buffered output lines */
+  outputBuffer: string[]
+  /** All stderr captured (for exit code override) */
+  stderrCapture: string
+  /** All stdout captured (for exit code override) */
+  stdoutCapture: string
+  /** Whether output is currently visible */
+  verbose: boolean
 }
 
 /**
@@ -56,9 +128,11 @@ export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
   const { showOutput = false } = options
 
   return {
-    verbose: showOutput,
-    outputBuffer: [],
     isSpinning: !showOutput,
+    outputBuffer: [],
+    stderrCapture: '',
+    stdoutCapture: '',
+    verbose: showOutput,
   }
 }
 
@@ -181,6 +255,16 @@ export function attachOutputMask(
     if (child.stdout) {
       child.stdout.on('data', data => {
         const text = data.toString()
+
+        // Always capture for exit code override.
+        mask.stdoutCapture += text
+
+        // Apply filter if provided.
+        if (options.filterOutput && !options.filterOutput(text, 'stdout')) {
+          // Skip this output.
+          return undefined
+        }
+
         if (mask.verbose) {
           write(text)
         } else {
@@ -202,6 +286,16 @@ export function attachOutputMask(
     if (child.stderr) {
       child.stderr.on('data', data => {
         const text = data.toString()
+
+        // Always capture for exit code override.
+        mask.stderrCapture += text
+
+        // Apply filter if provided.
+        if (options.filterOutput && !options.filterOutput(text, 'stderr')) {
+          // Skip this output.
+          return undefined
+        }
+
         if (mask.verbose) {
           process.stderr.write(text)
         } else {
@@ -217,8 +311,21 @@ export function attachOutputMask(
         process.stdin.setRawMode(false)
       }
 
+      // Allow caller to override exit code based on output.
+      let finalCode = code || 0
+      if (options.overrideExitCode) {
+        const overridden = options.overrideExitCode(
+          finalCode,
+          mask.stdoutCapture,
+          mask.stderrCapture,
+        )
+        if (overridden !== undefined) {
+          finalCode = overridden
+        }
+      }
+
       if (mask.isSpinning) {
-        if (code === 0) {
+        if (finalCode === 0) {
           spinner.successAndStop(`${message} completed`)
         } else {
           spinner.failAndStop(`${message} failed`)
@@ -232,7 +339,7 @@ export function attachOutputMask(
         }
       }
 
-      resolve(code || 0)
+      resolve(finalCode)
     })
 
     child.on('error', error => {
