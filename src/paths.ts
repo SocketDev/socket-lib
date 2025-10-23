@@ -4,8 +4,10 @@
  *
  * Directory Structure:
  * ~/.socket/
- * ├── _cacache/           # Content-addressable cache (shared)
- * ├── _dlx/               # DLX tool installations (shared)
+ * ├── _cacache/           # Content-addressable cache for npm packages
+ * ├── _dlx/               # DLX installations (content-addressed by hash)
+ * │   ├── <hash>/         # npm package installs (dlx-package)
+ * │   └── <hash>/         # binary downloads (dlx-binary)
  * ├── _socket/            # Socket CLI app directory
  * ├── _registry/          # Socket Registry app directory
  * └── _sfw/               # Socket Firewall app directory
