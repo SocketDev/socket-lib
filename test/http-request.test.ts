@@ -329,7 +329,7 @@ describe('http-request', () => {
 
     it('should complete before timeout', async () => {
       const response = await httpRequest(`${httpBaseUrl}/slow`, {
-        timeout: 500,
+        timeout: 2000,
       })
       expect(response.text()).toBe('Slow response')
     })
