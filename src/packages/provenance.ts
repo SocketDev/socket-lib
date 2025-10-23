@@ -25,7 +25,7 @@ function getFetcher() {
       /*@__PURE__*/ require('../external/make-fetch-happen')
     // Lazy load constants to avoid circular dependencies.
     const { getPacoteCachePath } =
-      /*@__PURE__*/ require('../../constants/packages')
+      /*@__PURE__*/ require('../constants/packages')
     _fetcher = makeFetchHappen.defaults({
       cachePath: getPacoteCachePath(),
       // Prefer-offline: Staleness checks for cached data will be bypassed, but
