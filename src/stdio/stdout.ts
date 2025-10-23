@@ -1,5 +1,5 @@
 /**
- * Standard output stream utilities.
+ * @fileoverview Standard output stream utilities.
  * Provides utilities for writing to stdout with formatting and control.
  */
 
@@ -9,14 +9,31 @@ import { WriteStream } from 'node:tty'
 const stdout: NodeJS.WriteStream = process.stdout
 
 /**
- * Write a line to stdout.
+ * Write a line to stdout with trailing newline.
+ *
+ * @param text - Text to write
+ * @default text ''
+ *
+ * @example
+ * ```ts
+ * writeLine('Hello, world!')
+ * writeLine() // Write empty line
+ * ```
  */
 export function writeLine(text: string = ''): void {
   stdout.write(`${text}\n`)
 }
 
 /**
- * Write text to stdout without newline.
+ * Write text to stdout without adding a newline.
+ *
+ * @param text - Text to write
+ *
+ * @example
+ * ```ts
+ * write('Loading...')
+ * // Later: clear and update
+ * ```
  */
 export function write(text: string): void {
   stdout.write(text)
@@ -24,6 +41,14 @@ export function write(text: string): void {
 
 /**
  * Clear the current line on stdout.
+ * Only works in TTY environments.
+ *
+ * @example
+ * ```ts
+ * write('Processing...')
+ * clearLine()
+ * write('Done!')
+ * ```
  */
 export function clearLine(): void {
   if (stdout.isTTY) {
@@ -33,16 +58,33 @@ export function clearLine(): void {
 }
 
 /**
- * Move cursor to position on stdout.
+ * Move cursor to specific position on stdout.
+ * Only works in TTY environments.
+ *
+ * @param x - Column position (0-based)
+ * @param y - Row position (0-based, optional)
+ *
+ * @example
+ * ```ts
+ * cursorTo(0) // Move to start of line
+ * cursorTo(10, 5) // Move to column 10, row 5
+ * ```
  */
-export function cursorTo(x: number, y?: number): void {
+export function cursorTo(x: number, y?: number | undefined): void {
   if (stdout.isTTY) {
     stdout.cursorTo(x, y)
   }
 }
 
 /**
- * Clear screen from cursor down.
+ * Clear screen from cursor position down to bottom.
+ * Only works in TTY environments.
+ *
+ * @example
+ * ```ts
+ * cursorTo(0, 5)
+ * clearScreenDown() // Clear from row 5 to bottom
+ * ```
  */
 export function clearScreenDown(): void {
   if (stdout.isTTY) {
@@ -51,28 +93,65 @@ export function clearScreenDown(): void {
 }
 
 /**
- * Check if stdout is a TTY.
+ * Check if stdout is connected to a TTY (terminal).
+ *
+ * @returns `true` if stdout is a TTY, `false` if piped/redirected
+ *
+ * @example
+ * ```ts
+ * if (isTTY()) {
+ *   // Show interactive UI
+ * } else {
+ *   // Use simple text output
+ * }
+ * ```
  */
 export function isTTY(): boolean {
   return stdout.isTTY || false
 }
 
 /**
- * Get terminal columns for stdout.
+ * Get the number of columns (width) in the terminal.
+ *
+ * @returns Terminal width in characters
+ * @default 80
+ *
+ * @example
+ * ```ts
+ * const width = getColumns()
+ * console.log(`Terminal is ${width} characters wide`)
+ * ```
  */
 export function getColumns(): number {
   return stdout.columns || 80
 }
 
 /**
- * Get terminal rows for stdout.
+ * Get the number of rows (height) in the terminal.
+ *
+ * @returns Terminal height in lines
+ * @default 24
+ *
+ * @example
+ * ```ts
+ * const height = getRows()
+ * console.log(`Terminal is ${height} lines tall`)
+ * ```
  */
 export function getRows(): number {
   return stdout.rows || 24
 }
 
 /**
- * Hide cursor on stdout.
+ * Hide the cursor on stdout.
+ * Useful for cleaner output during animations.
+ *
+ * @example
+ * ```ts
+ * hideCursor()
+ * // Show animation
+ * showCursor()
+ * ```
  */
 export function hideCursor(): void {
   if (stdout.isTTY && stdout instanceof WriteStream) {
@@ -81,7 +160,15 @@ export function hideCursor(): void {
 }
 
 /**
- * Show cursor on stdout.
+ * Show the cursor on stdout.
+ * Should be called after `hideCursor()`.
+ *
+ * @example
+ * ```ts
+ * hideCursor()
+ * // Show animation
+ * showCursor()
+ * ```
  */
 export function showCursor(): void {
   if (stdout.isTTY && stdout instanceof WriteStream) {
@@ -90,7 +177,16 @@ export function showCursor(): void {
 }
 
 /**
- * Ensure cursor is shown on exit.
+ * Register handlers to ensure cursor is shown on process exit.
+ * Prevents hidden cursor after abnormal termination.
+ * Handles SIGINT (Ctrl+C) and SIGTERM signals.
+ *
+ * @example
+ * ```ts
+ * ensureCursorOnExit()
+ * hideCursor()
+ * // Even if process crashes, cursor will be restored
+ * ```
  */
 export function ensureCursorOnExit(): void {
   process.on('exit', showCursor)

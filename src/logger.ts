@@ -8,14 +8,38 @@ import yoctocolorsCjs from './external/yoctocolors-cjs'
 import { objectAssign, objectFreeze } from './objects'
 import { applyLinePrefix, isBlankString } from './strings'
 
-// Type definitions
+/**
+ * Log symbols for terminal output with colored indicators.
+ *
+ * Each symbol provides visual feedback for different message types, with
+ * Unicode and ASCII fallback support.
+ *
+ * @example
+ * ```typescript
+ * import { LOG_SYMBOLS } from '@socketsecurity/lib'
+ *
+ * console.log(`${LOG_SYMBOLS.success} Operation completed`)
+ * console.log(`${LOG_SYMBOLS.fail} Operation failed`)
+ * console.log(`${LOG_SYMBOLS.warn} Warning message`)
+ * console.log(`${LOG_SYMBOLS.info} Information message`)
+ * ```
+ */
 type LogSymbols = {
+  /** Red colored failure symbol (✖ or × in ASCII) */
   fail: string
+  /** Blue colored information symbol (ℹ or i in ASCII) */
   info: string
+  /** Green colored success symbol (✔ or √ in ASCII) */
   success: string
+  /** Yellow colored warning symbol (⚠ or ‼ in ASCII) */
   warn: string
 }
 
+/**
+ * Type definition for logger methods that mirror console methods.
+ *
+ * All methods return the logger instance for method chaining.
+ */
 type LoggerMethods = {
   [K in keyof typeof console]: (typeof console)[K] extends (
     ...args: infer A
@@ -24,7 +48,27 @@ type LoggerMethods = {
     : (typeof console)[K]
 }
 
+/**
+ * A task that can be executed with automatic start/complete logging.
+ *
+ * @example
+ * ```typescript
+ * const task = logger.createTask('Database migration')
+ * task.run(() => {
+ *   // Migration logic here
+ * })
+ * // Logs: "Starting task: Database migration"
+ * // Logs: "Completed task: Database migration"
+ * ```
+ */
 interface Task {
+  /**
+   * Executes the task function with automatic logging.
+   *
+   * @template T - The return type of the task function
+   * @param f - The function to execute
+   * @returns The result of the task function
+   */
   run<T>(f: () => T): T
 }
 
@@ -68,6 +112,25 @@ function getYoctocolors() {
   return yoctocolorsCjs
 }
 
+/**
+ * Log symbols for terminal output with colored indicators.
+ *
+ * Provides colored Unicode symbols (✔, ✖, ⚠, ℹ) with ASCII fallbacks (√, ×, ‼, i)
+ * for terminals that don't support Unicode. Symbols are color-coded: green for
+ * success, red for failure, yellow for warnings, blue for info.
+ *
+ * The symbols are lazily initialized on first access and then frozen for immutability.
+ *
+ * @example
+ * ```typescript
+ * import { LOG_SYMBOLS } from '@socketsecurity/lib'
+ *
+ * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Green ✔
+ * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Red ✖
+ * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Yellow ⚠
+ * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Blue ℹ
+ * ```
+ */
 export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   const target: Record<string, string> = {
     __proto__: null,
@@ -149,18 +212,96 @@ const maxIndentation = 1000
 const privateConsole = new WeakMap()
 
 const consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
+
+/**
+ * Symbol for incrementing the internal log call counter.
+ *
+ * This is an internal symbol used to track the number of times logging
+ * methods have been called on a logger instance.
+ */
 export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
+
 const kGroupIndentationWidthSymbol =
   consoleSymbols.find(s => (s as any).label === 'kGroupIndentWidth') ??
   Symbol('kGroupIndentWidth')
+
+/**
+ * Symbol for tracking whether the last logged line was blank.
+ *
+ * This is used internally to prevent multiple consecutive blank lines
+ * and to determine whether to add spacing before certain messages.
+ */
 export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
 
 /**
- * Custom Logger class that wraps console with additional features.
- * Supports indentation, symbols, and blank line tracking.
+ * Enhanced console logger with indentation, colored symbols, and stream management.
+ *
+ * Provides a fluent API for logging with automatic indentation tracking, colored
+ * status symbols, separate stderr/stdout management, and method chaining. All
+ * methods return `this` for easy chaining.
+ *
+ * Features:
+ * - Automatic line prefixing with indentation
+ * - Colored status symbols (success, fail, warn, info)
+ * - Separate indentation tracking for stderr and stdout
+ * - Stream-bound logger instances via `.stderr` and `.stdout`
+ * - Group/indentation management
+ * - Progress indicators with clearable lines
+ * - Task execution with automatic logging
+ *
+ * @example
+ * ```typescript
+ * import { logger } from '@socketsecurity/lib'
+ *
+ * // Basic logging with symbols
+ * logger.success('Build completed')
+ * logger.fail('Build failed')
+ * logger.warn('Deprecated API')
+ * logger.info('Starting process')
+ *
+ * // Indentation and grouping
+ * logger.log('Processing files:')
+ * logger.indent()
+ * logger.log('file1.js')
+ * logger.log('file2.js')
+ * logger.dedent()
+ *
+ * // Method chaining
+ * logger
+ *   .log('Step 1')
+ *   .indent()
+ *   .log('Substep 1.1')
+ *   .log('Substep 1.2')
+ *   .dedent()
+ *   .log('Step 2')
+ *
+ * // Stream-specific logging
+ * logger.stdout.log('Normal output')
+ * logger.stderr.error('Error message')
+ *
+ * // Progress indicators
+ * logger.progress('Processing...')
+ * // ... do work ...
+ * logger.clearLine()
+ * logger.success('Done')
+ *
+ * // Task execution
+ * const task = logger.createTask('Migration')
+ * task.run(() => {
+ *   // Migration logic
+ * })
+ * ```
  */
 /*@__PURE__*/
 export class Logger {
+  /**
+   * Static reference to log symbols for convenience.
+   *
+   * @example
+   * ```typescript
+   * console.log(`${Logger.LOG_SYMBOLS.success} Done`)
+   * ```
+   */
   static LOG_SYMBOLS = LOG_SYMBOLS
 
   #parent?: Logger
@@ -174,6 +315,27 @@ export class Logger {
   #constructorArgs: unknown[]
   #options: Record<string, unknown>
 
+  /**
+   * Creates a new Logger instance.
+   *
+   * When called without arguments, creates a logger using the default
+   * `process.stdout` and `process.stderr` streams. Can accept custom
+   * console constructor arguments for advanced use cases.
+   *
+   * @param args - Optional console constructor arguments
+   *
+   * @example
+   * ```typescript
+   * // Default logger
+   * const logger = new Logger()
+   *
+   * // Custom streams (advanced)
+   * const customLogger = new Logger({
+   *   stdout: customWritableStream,
+   *   stderr: customErrorStream
+   * })
+   * ```
+   */
   constructor(...args: unknown[]) {
     // Store constructor args for child loggers
     this.#constructorArgs = args
@@ -203,8 +365,25 @@ export class Logger {
   }
 
   /**
-   * Get a logger instance bound to stderr.
-   * All operations on this instance will use stderr.
+   * Gets a logger instance bound exclusively to stderr.
+   *
+   * All logging operations on this instance will write to stderr only.
+   * Indentation is tracked separately from stdout. The instance is
+   * cached and reused on subsequent accesses.
+   *
+   * @returns A logger instance bound to stderr
+   *
+   * @example
+   * ```typescript
+   * // Write errors to stderr
+   * logger.stderr.error('Configuration invalid')
+   * logger.stderr.warn('Using fallback settings')
+   *
+   * // Indent only affects stderr
+   * logger.stderr.indent()
+   * logger.stderr.error('Nested error details')
+   * logger.stderr.dedent()
+   * ```
    */
   get stderr(): Logger {
     if (!this.#stderrLogger) {
@@ -219,8 +398,25 @@ export class Logger {
   }
 
   /**
-   * Get a logger instance bound to stdout.
-   * All operations on this instance will use stdout.
+   * Gets a logger instance bound exclusively to stdout.
+   *
+   * All logging operations on this instance will write to stdout only.
+   * Indentation is tracked separately from stderr. The instance is
+   * cached and reused on subsequent accesses.
+   *
+   * @returns A logger instance bound to stdout
+   *
+   * @example
+   * ```typescript
+   * // Write normal output to stdout
+   * logger.stdout.log('Processing started')
+   * logger.stdout.log('Items processed: 42')
+   *
+   * // Indent only affects stdout
+   * logger.stdout.indent()
+   * logger.stdout.log('Detailed output')
+   * logger.stdout.dedent()
+   * ```
    */
   get stdout(): Logger {
     if (!this.#stdoutLogger) {
@@ -343,14 +539,31 @@ export class Logger {
   }
 
   /**
-   * Get the current log call count.
+   * Gets the total number of log calls made on this logger instance.
+   *
+   * Tracks all logging method calls including `log()`, `error()`, `warn()`,
+   * `success()`, `fail()`, etc. Useful for testing and monitoring logging activity.
+   *
+   * @returns The number of times logging methods have been called
+   *
+   * @example
+   * ```typescript
+   * logger.log('Message 1')
+   * logger.error('Message 2')
+   * console.log(logger.logCallCount) // 2
+   * ```
    */
   get logCallCount() {
     return this.#logCallCount
   }
 
   /**
-   * Increment the log call count.
+   * Increments the internal log call counter.
+   *
+   * This is called automatically by logging methods and should not
+   * be called directly in normal usage.
+   *
+   * @returns The logger instance for chaining
    */
   [incLogCallCountSymbol]() {
     this.#logCallCount += 1
@@ -358,7 +571,13 @@ export class Logger {
   }
 
   /**
-   * Set whether the last logged line was blank.
+   * Sets whether the last logged line was blank.
+   *
+   * Used internally to track blank lines and prevent duplicate spacing.
+   * This is called automatically by logging methods.
+   *
+   * @param value - Whether the last line was blank
+   * @returns The logger instance for chaining
    */
   [lastWasBlankSymbol](value: unknown): this {
     this.#lastWasBlank = !!value
@@ -366,7 +585,22 @@ export class Logger {
   }
 
   /**
-   * Log an assertion.
+   * Logs an assertion failure message if the value is falsy.
+   *
+   * Works like `console.assert()` but returns the logger for chaining.
+   * If the value is truthy, nothing is logged. If falsy, logs an error
+   * message with an assertion failure.
+   *
+   * @param value - The value to test
+   * @param message - Optional message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.assert(true, 'This will not log')
+   * logger.assert(false, 'Assertion failed: value is false')
+   * logger.assert(items.length > 0, 'No items found')
+   * ```
    */
   assert(value: unknown, ...message: unknown[]): this {
     const con = privateConsole.get(this)
@@ -376,8 +610,23 @@ export class Logger {
   }
 
   /**
-   * Clear the visible terminal screen.
-   * Only available on the main logger instance.
+   * Clears the visible terminal screen.
+   *
+   * Only available on the main logger instance, not on stream-bound instances
+   * (`.stderr` or `.stdout`). Resets the log call count and blank line tracking
+   * if the output is a TTY.
+   *
+   * @returns The logger instance for chaining
+   * @throws {Error} If called on a stream-bound logger instance
+   *
+   * @example
+   * ```typescript
+   * logger.log('Some output')
+   * logger.clearVisible()  // Screen is now clear
+   *
+   * // Error: Can't call on stream-bound instance
+   * logger.stderr.clearVisible()  // throws
+   * ```
    */
   clearVisible() {
     if (this.#boundStream) {
@@ -395,9 +644,23 @@ export class Logger {
   }
 
   /**
-   * Log a count for the given label.
+   * Increments and logs a counter for the given label.
+   *
+   * Each unique label maintains its own counter. Works like `console.count()`.
+   *
+   * @param label - Optional label for the counter
+   * @default 'default'
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.count('requests')  // requests: 1
+   * logger.count('requests')  // requests: 2
+   * logger.count('errors')    // errors: 1
+   * logger.count()            // default: 1
+   * ```
    */
-  count(label?: string): this {
+  count(label?: string | undefined): this {
     const con = privateConsole.get(this)
     con.count(label)
     this[lastWasBlankSymbol](false)
@@ -405,7 +668,26 @@ export class Logger {
   }
 
   /**
-   * Create a task with a given name.
+   * Creates a task that logs start and completion messages automatically.
+   *
+   * Returns a task object with a `run()` method that executes the provided
+   * function and logs "Starting task: {name}" before execution and
+   * "Completed task: {name}" after completion.
+   *
+   * @param name - The name of the task
+   * @returns A task object with a `run()` method
+   *
+   * @example
+   * ```typescript
+   * const task = logger.createTask('Database Migration')
+   * const result = task.run(() => {
+   *   // Logs: "Starting task: Database Migration"
+   *   migrateDatabase()
+   *   return 'success'
+   *   // Logs: "Completed task: Database Migration"
+   * })
+   * console.log(result)  // 'success'
+   * ```
    */
   createTask(name: string): Task {
     return {
@@ -419,9 +701,33 @@ export class Logger {
   }
 
   /**
-   * Decrease indentation level.
-   * If called on main logger, affects both streams.
-   * If called on stream-bound logger, affects only that stream.
+   * Decreases the indentation level by removing spaces from the prefix.
+   *
+   * When called on the main logger, affects both stderr and stdout indentation.
+   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects
+   * only that stream's indentation.
+   *
+   * @param spaces - Number of spaces to remove from indentation
+   * @default 2
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.indent()
+   * logger.log('Indented')
+   * logger.dedent()
+   * logger.log('Back to normal')
+   *
+   * // Remove custom amount
+   * logger.indent(4)
+   * logger.log('Four spaces')
+   * logger.dedent(4)
+   *
+   * // Stream-specific dedent
+   * logger.stdout.indent()
+   * logger.stdout.log('Indented stdout')
+   * logger.stdout.dedent()
+   * ```
    */
   dedent(spaces = 2) {
     if (this.#boundStream) {
@@ -439,9 +745,24 @@ export class Logger {
   }
 
   /**
-   * Display an object's properties.
+   * Displays an object's properties in a formatted way.
+   *
+   * Works like `console.dir()` with customizable options for depth,
+   * colors, etc. Useful for inspecting complex objects.
+   *
+   * @param obj - The object to display
+   * @param options - Optional formatting options (Node.js inspect options)
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * const obj = { a: 1, b: { c: 2, d: { e: 3 } } }
+   * logger.dir(obj)
+   * logger.dir(obj, { depth: 1 })  // Limit nesting depth
+   * logger.dir(obj, { colors: true })  // Enable colors
+   * ```
    */
-  dir(obj: unknown, options?: unknown): this {
+  dir(obj: unknown, options?: unknown | undefined): this {
     const con = privateConsole.get(this)
     con.dir(obj, options)
     this[lastWasBlankSymbol](false)
@@ -449,7 +770,18 @@ export class Logger {
   }
 
   /**
-   * Display data as XML.
+   * Displays data as XML/HTML in a formatted way.
+   *
+   * Works like `console.dirxml()`. In Node.js, behaves the same as `dir()`.
+   *
+   * @param data - The data to display
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.dirxml(document.body)  // In browser environments
+   * logger.dirxml(xmlObject)       // In Node.js
+   * ```
    */
   dirxml(...data: unknown[]): this {
     const con = privateConsole.get(this)
@@ -459,28 +791,90 @@ export class Logger {
   }
 
   /**
-   * Log an error message.
+   * Logs an error message to stderr.
+   *
+   * Automatically applies current indentation. All arguments are formatted
+   * and logged like `console.error()`.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.error('Build failed')
+   * logger.error('Error code:', 500)
+   * logger.error('Details:', { message: 'Not found' })
+   * ```
    */
   error(...args: unknown[]): this {
     return this.#apply('error', args)
   }
 
   /**
-   * Log a newline to stderr if last line wasn't blank.
+   * Logs a newline to stderr only if the last line wasn't already blank.
+   *
+   * Prevents multiple consecutive blank lines. Useful for adding spacing
+   * between sections without creating excessive whitespace.
+   *
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.error('Error message')
+   * logger.errorNewline()  // Adds blank line
+   * logger.errorNewline()  // Does nothing (already blank)
+   * logger.error('Next section')
+   * ```
    */
   errorNewline() {
     return this.#lastWasBlank ? this : this.error('')
   }
 
   /**
-   * Log a failure message with symbol.
+   * Logs a failure message with a red colored fail symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.fail` (red ✖).
+   * Always outputs to stderr. If the message starts with an existing
+   * symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.fail('Build failed')
+   * logger.fail('Test suite failed:', { passed: 5, failed: 3 })
+   * ```
    */
   fail(...args: unknown[]): this {
     return this.#symbolApply('fail', args)
   }
 
   /**
-   * Start a new log group.
+   * Starts a new indented log group.
+   *
+   * If a label is provided, it's logged before increasing indentation.
+   * Groups can be nested. Each group increases indentation by the
+   * `kGroupIndentWidth` (default 2 spaces). Call `groupEnd()` to close.
+   *
+   * @param label - Optional label to display before the group
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.group('Processing files:')
+   * logger.log('file1.js')
+   * logger.log('file2.js')
+   * logger.groupEnd()
+   *
+   * // Nested groups
+   * logger.group('Outer')
+   * logger.log('Outer content')
+   * logger.group('Inner')
+   * logger.log('Inner content')
+   * logger.groupEnd()
+   * logger.groupEnd()
+   * ```
    */
   group(...label: unknown[]): this {
     const { length } = label
@@ -496,7 +890,20 @@ export class Logger {
   }
 
   /**
-   * Start a new collapsed log group (alias for group).
+   * Starts a new collapsed log group (alias for `group()`).
+   *
+   * In browser consoles, this creates a collapsed group. In Node.js,
+   * it behaves identically to `group()`.
+   *
+   * @param label - Optional label to display before the group
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.groupCollapsed('Details')
+   * logger.log('Hidden by default in browsers')
+   * logger.groupEnd()
+   * ```
    */
   // groupCollapsed is an alias of group.
   // https://nodejs.org/api/console.html#consolegroupcollapsed
@@ -505,7 +912,19 @@ export class Logger {
   }
 
   /**
-   * End the current log group.
+   * Ends the current log group and decreases indentation.
+   *
+   * Must be called once for each `group()` or `groupCollapsed()` call
+   * to properly close the group and restore indentation.
+   *
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.group('Group 1')
+   * logger.log('Content')
+   * logger.groupEnd()  // Closes 'Group 1'
+   * ```
    */
   groupEnd() {
     this.dedent((this as any)[kGroupIndentationWidthSymbol])
@@ -513,9 +932,35 @@ export class Logger {
   }
 
   /**
-   * Increase indentation level.
-   * If called on main logger, affects both streams.
-   * If called on stream-bound logger, affects only that stream.
+   * Increases the indentation level by adding spaces to the prefix.
+   *
+   * When called on the main logger, affects both stderr and stdout indentation.
+   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects
+   * only that stream's indentation. Maximum indentation is 1000 spaces.
+   *
+   * @param spaces - Number of spaces to add to indentation
+   * @default 2
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.log('Level 0')
+   * logger.indent()
+   * logger.log('Level 1')
+   * logger.indent()
+   * logger.log('Level 2')
+   * logger.dedent()
+   * logger.dedent()
+   *
+   * // Custom indent amount
+   * logger.indent(4)
+   * logger.log('Indented 4 spaces')
+   * logger.dedent(4)
+   *
+   * // Stream-specific indent
+   * logger.stdout.indent()
+   * logger.stdout.log('Only stdout is indented')
+   * ```
    */
   indent(spaces = 2) {
     const spacesToAdd = ' '.repeat(Math.min(spaces, maxIndentation))
@@ -534,30 +979,89 @@ export class Logger {
   }
 
   /**
-   * Log an info message with symbol.
+   * Logs an informational message with a blue colored info symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.info` (blue ℹ).
+   * Always outputs to stderr. If the message starts with an existing
+   * symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.info('Starting build process')
+   * logger.info('Configuration loaded:', config)
+   * logger.info('Using cache directory:', cacheDir)
+   * ```
    */
   info(...args: unknown[]): this {
     return this.#symbolApply('info', args)
   }
 
   /**
-   * Log a message.
+   * Logs a message to stdout.
+   *
+   * Automatically applies current indentation. All arguments are formatted
+   * and logged like `console.log()`. This is the primary method for
+   * standard output.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.log('Processing complete')
+   * logger.log('Items processed:', 42)
+   * logger.log('Results:', { success: true, count: 10 })
+   *
+   * // Method chaining
+   * logger.log('Step 1').log('Step 2').log('Step 3')
+   * ```
    */
   log(...args: unknown[]): this {
     return this.#apply('log', args)
   }
 
   /**
-   * Log a newline to stdout if last line wasn't blank.
+   * Logs a newline to stdout only if the last line wasn't already blank.
+   *
+   * Prevents multiple consecutive blank lines. Useful for adding spacing
+   * between sections without creating excessive whitespace.
+   *
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.log('Section 1')
+   * logger.logNewline()  // Adds blank line
+   * logger.logNewline()  // Does nothing (already blank)
+   * logger.log('Section 2')
+   * ```
    */
   logNewline() {
     return this.#lastWasBlank ? this : this.log('')
   }
 
   /**
-   * Reset indentation to zero.
-   * If called on main logger, resets both streams.
-   * If called on stream-bound logger, resets only that stream.
+   * Resets all indentation to zero.
+   *
+   * When called on the main logger, resets both stderr and stdout indentation.
+   * When called on a stream-bound logger (`.stderr` or `.stdout`), resets
+   * only that stream's indentation.
+   *
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.indent().indent().indent()
+   * logger.log('Very indented')
+   * logger.resetIndent()
+   * logger.log('Back to zero indentation')
+   *
+   * // Reset only stdout
+   * logger.stdout.resetIndent()
+   * ```
    */
   resetIndent() {
     if (this.#boundStream) {
@@ -572,7 +1076,30 @@ export class Logger {
   }
 
   /**
-   * Log a main step with blank line before (stateless).
+   * Logs a main step message with a blank line before it (stateless).
+   *
+   * Automatically adds a blank line before the message unless the last
+   * line was already blank. Useful for marking major steps in a process
+   * with clear visual separation.
+   *
+   * @param msg - The step message to log
+   * @param extras - Additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.step('Building project')
+   * logger.log('Compiling TypeScript...')
+   * logger.step('Running tests')
+   * logger.log('Running test suite...')
+   * // Output:
+   * // [blank line]
+   * // Building project
+   * // Compiling TypeScript...
+   * // [blank line]
+   * // Running tests
+   * // Running test suite...
+   * ```
    */
   step(msg: string, ...extras: unknown[]): this {
     // Add blank line before the step message.
@@ -585,7 +1112,27 @@ export class Logger {
   }
 
   /**
-   * Log an indented substep (stateless).
+   * Logs an indented substep message (stateless).
+   *
+   * Adds a 2-space indent to the message without affecting the logger's
+   * indentation state. Useful for showing sub-items under a main step.
+   *
+   * @param msg - The substep message to log
+   * @param extras - Additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.log('Installing dependencies:')
+   * logger.substep('Installing react')
+   * logger.substep('Installing typescript')
+   * logger.substep('Installing eslint')
+   * // Output:
+   * // Installing dependencies:
+   * //   Installing react
+   * //   Installing typescript
+   * //   Installing eslint
+   * ```
    */
   substep(msg: string, ...extras: unknown[]): this {
     // Add 2-space indent to the message.
@@ -595,24 +1142,81 @@ export class Logger {
   }
 
   /**
-   * Log a success message with symbol.
+   * Logs a success message with a green colored success symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.success` (green ✔).
+   * Always outputs to stderr. If the message starts with an existing
+   * symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.success('Build completed')
+   * logger.success('Tests passed:', { total: 42, passed: 42 })
+   * logger.success('Deployment successful')
+   * ```
    */
   success(...args: unknown[]): this {
     return this.#symbolApply('success', args)
   }
 
   /**
-   * Log a done message (alias for success).
-   * Does NOT auto-clear. Call clearLine() first if needed after progress().
+   * Logs a completion message with a success symbol (alias for `success()`).
+   *
+   * Provides semantic clarity when marking something as "done". Does NOT
+   * automatically clear the current line - call `clearLine()` first if
+   * needed after using `progress()`.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.done('Task completed')
+   *
+   * // After progress indicator
+   * logger.progress('Processing...')
+   * // ... do work ...
+   * logger.clearLine()
+   * logger.done('Processing complete')
+   * ```
    */
   done(...args: unknown[]): this {
     return this.#symbolApply('success', args)
   }
 
   /**
-   * Display data in a table format.
+   * Displays data in a table format.
+   *
+   * Works like `console.table()`. Accepts arrays of objects or
+   * objects with nested objects. Optionally specify which properties
+   * to include in the table.
+   *
+   * @param tabularData - The data to display as a table
+   * @param properties - Optional array of property names to include
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * // Array of objects
+   * logger.table([
+   *   { name: 'Alice', age: 30 },
+   *   { name: 'Bob', age: 25 }
+   * ])
+   *
+   * // Specify properties to show
+   * logger.table(users, ['name', 'email'])
+   *
+   * // Object with nested objects
+   * logger.table({
+   *   user1: { name: 'Alice', age: 30 },
+   *   user2: { name: 'Bob', age: 25 }
+   * })
+   * ```
    */
-  table(tabularData: unknown, properties?: readonly string[]): this {
+  table(tabularData: unknown, properties?: readonly string[] | undefined): this {
     const con = privateConsole.get(this)
     con.table(tabularData, properties)
     this[lastWasBlankSymbol](false)
@@ -620,9 +1224,29 @@ export class Logger {
   }
 
   /**
-   * End a timer and log the elapsed time.
+   * Ends a timer and logs the elapsed time.
+   *
+   * Logs the duration since `console.time()` was called with the same
+   * label. The timer is stopped and removed.
+   *
+   * @param label - Optional label for the timer
+   * @default 'default'
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * console.time('operation')
+   * // ... do work ...
+   * logger.timeEnd('operation')
+   * // Logs: "operation: 123.456ms"
+   *
+   * console.time()
+   * // ... do work ...
+   * logger.timeEnd()
+   * // Logs: "default: 123.456ms"
+   * ```
    */
-  timeEnd(label?: string): this {
+  timeEnd(label?: string | undefined): this {
     const con = privateConsole.get(this)
     con.timeEnd(label)
     this[lastWasBlankSymbol](false)
@@ -630,9 +1254,30 @@ export class Logger {
   }
 
   /**
-   * Log the current timer value.
+   * Logs the current value of a timer without stopping it.
+   *
+   * Logs the duration since `console.time()` was called with the same
+   * label, but keeps the timer running. Can include additional data
+   * to log alongside the time.
+   *
+   * @param label - Optional label for the timer
+   * @param data - Additional data to log with the time
+   * @default 'default'
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * console.time('process')
+   * // ... partial work ...
+   * logger.timeLog('process', 'Checkpoint 1')
+   * // Logs: "process: 123.456ms Checkpoint 1"
+   * // ... more work ...
+   * logger.timeLog('process', 'Checkpoint 2')
+   * // Logs: "process: 234.567ms Checkpoint 2"
+   * console.timeEnd('process')
+   * ```
    */
-  timeLog(label?: string, ...data: unknown[]): this {
+  timeLog(label?: string | undefined, ...data: unknown[]): this {
     const con = privateConsole.get(this)
     con.timeLog(label, ...data)
     this[lastWasBlankSymbol](false)
@@ -640,9 +1285,26 @@ export class Logger {
   }
 
   /**
-   * Log a stack trace.
+   * Logs a stack trace to the console.
+   *
+   * Works like `console.trace()`. Shows the call stack leading to
+   * where this method was called. Useful for debugging.
+   *
+   * @param message - Optional message to display with the trace
+   * @param args - Additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * function debugFunction() {
+   *   logger.trace('Debug point reached')
+   * }
+   *
+   * logger.trace('Trace from here')
+   * logger.trace('Error context:', { userId: 123 })
+   * ```
    */
-  trace(message?: unknown, ...args: unknown[]): this {
+  trace(message?: unknown | undefined, ...args: unknown[]): this {
     const con = privateConsole.get(this)
     con.trace(message, ...args)
     this[lastWasBlankSymbol](false)
@@ -650,14 +1312,46 @@ export class Logger {
   }
 
   /**
-   * Log a warning message with symbol.
+   * Logs a warning message with a yellow colored warning symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.warn` (yellow ⚠).
+   * Always outputs to stderr. If the message starts with an existing
+   * symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.warn('Deprecated API used')
+   * logger.warn('Low memory:', { available: '100MB' })
+   * logger.warn('Missing optional configuration')
+   * ```
    */
   warn(...args: unknown[]): this {
     return this.#symbolApply('warn', args)
   }
 
   /**
-   * Write to stdout without a newline or indentation.
+   * Writes text directly to stdout without a newline or indentation.
+   *
+   * Useful for progress indicators or custom formatting where you need
+   * low-level control. Does not apply any indentation or formatting.
+   *
+   * @param text - The text to write
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.write('Processing... ')
+   * // ... do work ...
+   * logger.write('done\n')
+   *
+   * // Build a line incrementally
+   * logger.write('Step 1')
+   * logger.write('... Step 2')
+   * logger.write('... Step 3\n')
+   * ```
    */
   write(text: string): this {
     const con = privateConsole.get(this)
@@ -667,8 +1361,29 @@ export class Logger {
   }
 
   /**
-   * Show a progress indicator (can be cleared with clearLine).
-   * Simple status message without spinner animation.
+   * Shows a progress indicator that can be cleared with `clearLine()`.
+   *
+   * Displays a simple status message with a '∴' prefix. Does not include
+   * animation or spinner. Intended to be cleared once the operation completes.
+   * The output stream (stderr or stdout) depends on whether the logger is
+   * stream-bound.
+   *
+   * @param text - The progress message to display
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.progress('Processing files...')
+   * // ... do work ...
+   * logger.clearLine()
+   * logger.success('Files processed')
+   *
+   * // Stream-specific progress
+   * logger.stdout.progress('Loading...')
+   * // ... do work ...
+   * logger.stdout.clearLine()
+   * logger.stdout.log('Done')
+   * ```
    */
   progress(text: string): this {
     const con = privateConsole.get(this)
@@ -680,7 +1395,32 @@ export class Logger {
   }
 
   /**
-   * Clear the current line.
+   * Clears the current line in the terminal.
+   *
+   * Moves the cursor to the beginning of the line and clears all content.
+   * Works in both TTY and non-TTY environments. Useful for clearing
+   * progress indicators created with `progress()`.
+   *
+   * The stream to clear (stderr or stdout) depends on whether the logger
+   * is stream-bound.
+   *
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.progress('Loading...')
+   * // ... do work ...
+   * logger.clearLine()
+   * logger.success('Loaded')
+   *
+   * // Clear multiple progress updates
+   * for (const file of files) {
+   *   logger.progress(`Processing ${file}`)
+   *   processFile(file)
+   *   logger.clearLine()
+   * }
+   * logger.success('All files processed')
+   * ```
    */
   clearLine(): this {
     const con = privateConsole.get(this)
@@ -741,4 +1481,22 @@ Object.defineProperties(
   ),
 )
 
+/**
+ * Default logger instance for the application.
+ *
+ * A pre-configured `Logger` instance that uses the standard `process.stdout`
+ * and `process.stderr` streams. This is the recommended logger to import
+ * and use throughout your application.
+ *
+ * @example
+ * ```typescript
+ * import { logger } from '@socketsecurity/lib'
+ *
+ * logger.log('Application started')
+ * logger.success('Configuration loaded')
+ * logger.indent()
+ * logger.log('Using port 3000')
+ * logger.dedent()
+ * ```
+ */
 export const logger = new Logger()
