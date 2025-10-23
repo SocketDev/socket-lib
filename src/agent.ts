@@ -25,6 +25,7 @@
 
 import { CI } from '#env/ci'
 
+import { WIN32 } from '#constants/platform'
 import { execBin } from './bin'
 import { isDebug } from './debug'
 import { findUpSync } from './fs'
@@ -128,6 +129,8 @@ export function execNpm(args: string[], options?: SpawnOptions | undefined) {
     ],
     {
       __proto__: null,
+      // On Windows, npm is a .cmd file that requires shell to execute.
+      shell: WIN32,
       ...options,
     } as SpawnOptions,
   )
