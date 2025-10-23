@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v1.2.0) - 2025-10-23
+
+### Added
+
+- Added `dlx-package` module for installing and executing npm packages directly
+  - Content-addressed caching using SHA256 hash (like npm's _npx)
+  - Auto-force for version ranges (^, ~, >, <) to get latest within range
+  - Cross-platform support with comprehensive tests (30 tests)
+  - Parses scoped and unscoped package specs correctly
+  - Resolves binaries from package.json bin field
+
+### Changed
+
+- Unified DLX storage under `~/.socket/_dlx/` directory
+  - Binary downloads now use `~/.socket/_dlx/` instead of non-existent cache path
+  - Both npm packages and binaries share parent directory with content-addressed hashing
+- Updated paths.ts documentation to clarify unified directory structure
+
 ## [1.1.2] - 2025-10-23
 
 ### Fixed
