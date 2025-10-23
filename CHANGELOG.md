@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.0) - 2025-10-23
+
+### Added
+
+- Added `validateFiles()` utility function to `fs` module for defensive file access validation
+  - Returns `ValidateFilesResult` with `validPaths` and `invalidPaths` arrays
+  - Filters out unreadable files before processing (common with Yarn Berry PnP virtual filesystem, pnpm symlinks)
+  - Prevents ENOENT errors when files exist in glob results but are not accessible
+  - Comprehensive test coverage for all validation scenarios
+
 ## [1.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v1.2.0) - 2025-10-23
 
 ### Added
