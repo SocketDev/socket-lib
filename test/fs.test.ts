@@ -1208,7 +1208,7 @@ describe('fs', () => {
         await fs.writeFile(file1, '{}', 'utf8')
         await fs.writeFile(file2, '{}', 'utf8')
 
-        const { validPaths, invalidPaths } = validateFiles([file1, file2])
+        const { invalidPaths, validPaths } = validateFiles([file1, file2])
 
         expect(validPaths).toHaveLength(2)
         expect(validPaths).toContain(file1)
@@ -1223,7 +1223,7 @@ describe('fs', () => {
         const nonExistentFile = path.join(tmpDir, 'does-not-exist.json')
         await fs.writeFile(existingFile, '{}', 'utf8')
 
-        const { validPaths, invalidPaths } = validateFiles([
+        const { invalidPaths, validPaths } = validateFiles([
           existingFile,
           nonExistentFile,
         ])
@@ -1240,7 +1240,7 @@ describe('fs', () => {
         const file1 = path.join(tmpDir, 'missing1.json')
         const file2 = path.join(tmpDir, 'missing2.json')
 
-        const { validPaths, invalidPaths } = validateFiles([file1, file2])
+        const { invalidPaths, validPaths } = validateFiles([file1, file2])
 
         expect(validPaths).toHaveLength(0)
         expect(invalidPaths).toHaveLength(2)
@@ -1250,7 +1250,7 @@ describe('fs', () => {
     })
 
     it('should handle empty file array', () => {
-      const { validPaths, invalidPaths } = validateFiles([])
+      const { invalidPaths, validPaths } = validateFiles([])
 
       expect(validPaths).toHaveLength(0)
       expect(invalidPaths).toHaveLength(0)
@@ -1262,7 +1262,7 @@ describe('fs', () => {
         await fs.writeFile(file1, '{}', 'utf8')
 
         const readonlyArray: readonly string[] = [file1] as const
-        const { validPaths, invalidPaths } = validateFiles(readonlyArray)
+        const { invalidPaths, validPaths } = validateFiles(readonlyArray)
 
         expect(validPaths).toHaveLength(1)
         expect(validPaths).toContain(file1)
@@ -1280,7 +1280,7 @@ describe('fs', () => {
         await fs.writeFile(valid1, '{}', 'utf8')
         await fs.writeFile(valid2, '{}', 'utf8')
 
-        const { validPaths, invalidPaths } = validateFiles([
+        const { invalidPaths, validPaths } = validateFiles([
           valid1,
           invalid1,
           valid2,
