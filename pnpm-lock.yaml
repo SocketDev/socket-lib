@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      package:
-        specifier: ^1.0.1
-        version: 1.0.1
     devDependencies:
       '@babel/core':
         specifier: 7.28.4
@@ -2488,10 +2484,6 @@ packages:
 
   package-manager-detector@1.5.0:
     resolution: {integrity: sha512-uBj69dVlYe/+wxj8JOpr97XfsxH/eumMt6HqjNTmJDf/6NO9s+0uxeOneIz3AsPt2m6y9PqzDzd3ATcU17MNfw==}
-
-  package@1.0.1:
-    resolution: {integrity: sha512-g6xZR6CO7okjie83sIRJodgGvaXqymfE5GLhN8N2TmZGShmHc/V23hO/vWbdnuy3D81As3pfovw72gGi42l9qA==}
-    engines: {node: '>= 0.6.0'}
 
   pacote@21.0.1:
     resolution: {integrity: sha512-LHGIUQUrcDIJUej53KJz1BPvUuHrItrR2yrnN0Kl9657cJ0ZT6QJHk9wWPBnQZhYT5KLyZWrk9jaYc2aKDu4yw==}
@@ -5555,8 +5547,6 @@ snapshots:
   package-json-from-dist@1.0.1: {}
 
   package-manager-detector@1.5.0: {}
-
-  package@1.0.1: {}
 
   pacote@21.0.1:
     dependencies:
