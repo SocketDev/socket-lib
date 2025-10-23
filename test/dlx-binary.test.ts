@@ -140,6 +140,8 @@ describe('dlx-binary', () => {
             name: 'cached-binary',
             url,
           })
+          // Catch spawn promise immediately to prevent unhandled rejection on Windows.
+          result1.spawnPromise.catch(() => {})
           expect(result1.downloaded).toBe(true)
 
           // Second call - should use cache
@@ -147,10 +149,10 @@ describe('dlx-binary', () => {
             name: 'cached-binary',
             url,
           })
+          // Catch spawn promise immediately to prevent unhandled rejection on Windows.
+          result2.spawnPromise.catch(() => {})
           expect(result2.downloaded).toBe(false)
           expect(result2.binaryPath).toBe(result1.binaryPath)
-          await result1.spawnPromise.catch(() => {})
-          await result2.spawnPromise.catch(() => {})
         } finally {
           restoreHome()
         }
@@ -326,6 +328,8 @@ describe('dlx-binary', () => {
             name: 'ttl-binary',
             url,
           })
+          // Catch spawn promise immediately to prevent unhandled rejection on Windows.
+          result.spawnPromise.catch(() => {})
 
           expect(result.downloaded).toBe(true)
 
@@ -338,10 +342,10 @@ describe('dlx-binary', () => {
             name: 'ttl-binary',
             url,
           })
+          // Catch spawn promise immediately to prevent unhandled rejection on Windows.
+          result2.spawnPromise.catch(() => {})
 
           expect(result2.downloaded).toBe(true)
-          await result.spawnPromise.catch(() => {})
-          await result2.spawnPromise.catch(() => {})
         } finally {
           restoreHome()
         }
@@ -1109,6 +1113,8 @@ describe('dlx-binary', () => {
             name: 'concurrent-binary',
             url,
           })
+          // Catch spawn promise immediately to prevent unhandled rejection on Windows.
+          result1.spawnPromise.catch(() => {})
           expect(result1.downloaded).toBe(true)
 
           // Second download should use cache
@@ -1116,9 +1122,9 @@ describe('dlx-binary', () => {
             name: 'concurrent-binary',
             url,
           })
+          // Catch spawn promise immediately to prevent unhandled rejection on Windows.
+          result2.spawnPromise.catch(() => {})
           expect(result2.downloaded).toBe(false)
-          await result1.spawnPromise.catch(() => {})
-          await result2.spawnPromise.catch(() => {})
         } finally {
           restoreHome()
         }

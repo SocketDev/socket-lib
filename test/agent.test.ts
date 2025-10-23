@@ -473,9 +473,9 @@ describe('agent', () => {
     describe('execNpm argument transformation', () => {
       it('should have a function that returns a promise', () => {
         const result = execNpm(['--version'])
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
 
       it('should be a function', () => {
@@ -486,9 +486,9 @@ describe('agent', () => {
     describe('execPnpm argument transformation', () => {
       it('should have a function that returns a promise', () => {
         const result = execPnpm(['--version'])
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
 
       it('should be a function', () => {
@@ -499,9 +499,9 @@ describe('agent', () => {
     describe('execYarn argument transformation', () => {
       it('should have a function that returns a promise', () => {
         const result = execYarn(['--version'])
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
 
       it('should be a function', () => {
@@ -512,9 +512,9 @@ describe('agent', () => {
     describe('execScript argument transformation', () => {
       it('should have a function that returns a promise', () => {
         const result = execScript('test')
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
 
       it('should be a function', () => {
@@ -523,25 +523,25 @@ describe('agent', () => {
 
       it('should handle script name with array args', () => {
         const result = execScript('test', ['--coverage'])
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
 
       it('should handle script name with options object', () => {
         const result = execScript('test', { cwd: process.cwd() })
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
 
       it('should handle script name with args and options', () => {
         const result = execScript('test', ['--coverage'], {
           cwd: process.cwd(),
         })
-        expect(result).toBeInstanceOf(Promise)
-        // Catch promise to prevent unhandled rejection on Windows.
+        // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
       })
     })
   })
