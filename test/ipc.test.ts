@@ -17,7 +17,7 @@ import {
   writeIpcStub,
 } from '@socketsecurity/lib/ipc'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../utils/temp-file-helper.mjs'
+import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
 describe('ipc', () => {
   describe('createIpcChannelId', () => {

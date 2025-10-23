@@ -21,13 +21,13 @@ describe('functions', () => {
     })
 
     it('should not throw with any arguments', () => {
-      expect(() => noop(1, 2, 3)).not.toThrow()
-      expect(() => noop('test', { foo: 'bar' })).not.toThrow()
+      expect(() => (noop as any)(1, 2, 3)).not.toThrow()
+      expect(() => (noop as any)('test', { foo: 'bar' })).not.toThrow()
     })
 
     it('should always return undefined regardless of arguments', () => {
-      expect(noop(1, 2, 3)).toBeUndefined()
-      expect(noop('test', { foo: 'bar' })).toBeUndefined()
+      expect((noop as any)(1, 2, 3)).toBeUndefined()
+      expect((noop as any)('test', { foo: 'bar' })).toBeUndefined()
     })
   })
 
@@ -261,12 +261,12 @@ describe('functions', () => {
       // Factorial using trampoline
       const factorial = trampoline(function fact(
         n: number,
-        acc = 1,
+        acc: number = 1,
       ): number | (() => number) {
         if (n <= 1) {
-          return acc
+          return acc as number
         }
-        return () => fact(n - 1, n * acc)
+        return (() => fact(n - 1, n * acc)) as any
       })
 
       expect(factorial(5)).toBe(120)
@@ -276,12 +276,12 @@ describe('functions', () => {
     it('should handle tail-recursive sum', () => {
       const sum = trampoline(function sumN(
         n: number,
-        acc = 0,
+        acc: number = 0,
       ): number | (() => number) {
         if (n === 0) {
-          return acc
+          return acc as number
         }
-        return () => sumN(n - 1, acc + n)
+        return (() => sumN(n - 1, acc + n)) as any
       })
 
       expect(sum(5)).toBe(15) // 5 + 4 + 3 + 2 + 1
@@ -294,7 +294,7 @@ describe('functions', () => {
         if (depth === 0) {
           return 0
         }
-        return () => () => () => fn(depth - 1)
+        return (() => () => () => fn(depth - 1)) as any
       })
 
       expect(fn(5)).toBe(0)
@@ -304,14 +304,14 @@ describe('functions', () => {
       const context = {
         value: 10,
         countdown: trampoline(function (
-          this: { value: number },
+          this: { value: number; countdown: any },
           n: number,
-          acc = 0,
+          acc: number = 0,
         ): number | (() => number) {
           if (n === 0) {
-            return acc + this.value
+            return (acc + this.value) as number
           }
-          return () => this.countdown(n - 1, acc + n)
+          return (() => this.countdown(n - 1, acc + n)) as any
         }),
       }
 
@@ -331,16 +331,16 @@ describe('functions', () => {
     it('should handle tail-recursive fibonacci', () => {
       const fib = trampoline(function fibonacci(
         n: number,
-        a = 0,
-        b = 1,
+        a: number = 0,
+        b: number = 1,
       ): number | (() => number) {
         if (n === 0) {
-          return a
+          return a as number
         }
         if (n === 1) {
-          return b
+          return b as number
         }
-        return () => fibonacci(n - 1, b, a + b)
+        return (() => fibonacci(n - 1, b, a + b)) as any
       })
 
       expect(fib(0)).toBe(0)
@@ -354,7 +354,7 @@ describe('functions', () => {
         if (x === 0) {
           return 42
         }
-        return () => fn(x - 1)
+        return (() => fn(x - 1)) as any
       })
 
       expect(fn(3)).toBe(42)
@@ -368,7 +368,7 @@ describe('functions', () => {
         if (n === 0) {
           return 0
         }
-        return () => deep(n - 1)
+        return (() => deep(n - 1)) as any
       })
 
       // Test with a large number that would normally overflow

@@ -191,7 +191,7 @@ describe('text-shimmer', () => {
 
       it('should apply gradient colors to text', () => {
         const text = 'Test'
-        const gradient: readonly (readonly [number, number, number])[] = [
+        const gradient: ReadonlyArray<readonly [number, number, number]> = [
           [255, 0, 0],
           [0, 255, 0],
           [0, 0, 255],
