@@ -983,17 +983,30 @@ function relative(from: string, to: string): string {
   let i = 0
 
   for (; i < length; i += 1) {
-    const fromCode = actualFrom.charCodeAt(fromStart + i)
-    const toCode = actualTo.charCodeAt(toStart + i)
+    let fromCode = actualFrom.charCodeAt(fromStart + i)
+    let toCode = actualTo.charCodeAt(toStart + i)
 
     // Paths diverge at this character.
+    // On Windows, perform case-insensitive comparison.
+    if (WIN32) {
+      // Normalize to lowercase for case-insensitive comparison.
+      // Convert A-Z (65-90) to a-z (97-122).
+      if (fromCode >= CHAR_UPPERCASE_A && fromCode <= CHAR_UPPERCASE_Z) {
+        fromCode += 32
+      }
+      if (toCode >= CHAR_UPPERCASE_A && toCode <= CHAR_UPPERCASE_Z) {
+        toCode += 32
+      }
+    }
+
     if (fromCode !== toCode) {
       break
     }
 
     // Track directory separators (both forward and backslash for Windows compatibility).
     // We need this to ensure we only split at directory boundaries.
-    if (isPathSeparator(fromCode)) {
+    // Use original fromCode from actualFrom (before case normalization).
+    if (isPathSeparator(actualFrom.charCodeAt(fromStart + i))) {
       lastCommonSep = i
     }
   }
