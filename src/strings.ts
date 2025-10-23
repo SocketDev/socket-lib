@@ -25,11 +25,35 @@ export type EmptyString = string & { [EmptyStringBrand]: true }
 export const fromCharCode = String.fromCharCode
 
 export interface ApplyLinePrefixOptions {
-  prefix?: string
+  /**
+   * The prefix to add to each line.
+   * @default ''
+   */
+  prefix?: string | undefined
 }
 
 /**
  * Apply a prefix to each line of a string.
+ *
+ * Prepends the specified prefix to the beginning of each line in the input string.
+ * If the string contains newlines, the prefix is added after each newline as well.
+ * When no prefix is provided or prefix is empty, returns the original string unchanged.
+ *
+ * @param str - The string to add prefixes to
+ * @param options - Configuration options
+ * @returns The string with prefix applied to each line
+ *
+ * @example
+ * ```ts
+ * applyLinePrefix('hello\nworld', { prefix: '> ' })
+ * // Returns: '> hello\n> world'
+ *
+ * applyLinePrefix('single line', { prefix: '  ' })
+ * // Returns: '  single line'
+ *
+ * applyLinePrefix('no prefix')
+ * // Returns: 'no prefix'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function applyLinePrefix(
@@ -47,6 +71,32 @@ export function applyLinePrefix(
 
 /**
  * Convert a camelCase string to kebab-case.
+ *
+ * Transforms camelCase strings by converting uppercase letters to lowercase
+ * and inserting hyphens before uppercase sequences. Handles consecutive
+ * uppercase letters (like "XMLHttpRequest") by treating them as a single word.
+ * Returns empty string for empty input.
+ *
+ * Note: This function only handles camelCase. For mixed formats including
+ * snake_case, use `toKebabCase()` instead.
+ *
+ * @param str - The camelCase string to convert
+ * @returns The kebab-case string
+ *
+ * @example
+ * ```ts
+ * camelToKebab('helloWorld')
+ * // Returns: 'hello-world'
+ *
+ * camelToKebab('XMLHttpRequest')
+ * // Returns: 'xmlhttprequest'
+ *
+ * camelToKebab('iOS')
+ * // Returns: 'ios'
+ *
+ * camelToKebab('')
+ * // Returns: ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function camelToKebab(str: string): string {
@@ -98,11 +148,35 @@ export function camelToKebab(str: string): string {
 }
 
 export interface IndentStringOptions {
-  count?: number
+  /**
+   * Number of spaces to indent each line.
+   * @default 1
+   */
+  count?: number | undefined
 }
 
 /**
  * Indent each line of a string with spaces.
+ *
+ * Adds the specified number of spaces to the beginning of each non-empty line
+ * in the input string. Empty lines (containing only whitespace) are not indented.
+ * Uses a regular expression to efficiently handle multi-line strings.
+ *
+ * @param str - The string to indent
+ * @param options - Configuration options
+ * @returns The indented string
+ *
+ * @example
+ * ```ts
+ * indentString('hello\nworld', { count: 2 })
+ * // Returns: '  hello\n  world'
+ *
+ * indentString('line1\n\nline3', { count: 4 })
+ * // Returns: '    line1\n\n    line3'
+ *
+ * indentString('single line')
+ * // Returns: ' single line' (default: 1 space)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function indentString(
@@ -115,6 +189,34 @@ export function indentString(
 
 /**
  * Check if a value is a blank string (empty or only whitespace).
+ *
+ * A blank string is defined as a string that is either:
+ * - Completely empty (length 0)
+ * - Contains only whitespace characters (spaces, tabs, newlines, etc.)
+ *
+ * This is useful for validation when you need to ensure user input
+ * contains actual content, not just whitespace.
+ *
+ * @param value - The value to check
+ * @returns `true` if the value is a blank string, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * isBlankString('')
+ * // Returns: true
+ *
+ * isBlankString('   ')
+ * // Returns: true
+ *
+ * isBlankString('\n\t  ')
+ * // Returns: true
+ *
+ * isBlankString('hello')
+ * // Returns: false
+ *
+ * isBlankString(null)
+ * // Returns: false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isBlankString(value: unknown): value is BlankString {
@@ -123,6 +225,32 @@ export function isBlankString(value: unknown): value is BlankString {
 
 /**
  * Check if a value is a non-empty string.
+ *
+ * Returns `true` only if the value is a string with at least one character.
+ * This includes strings containing only whitespace (use `isBlankString()` if
+ * you want to exclude those). Type guard ensures TypeScript knows the value
+ * is a string after this check.
+ *
+ * @param value - The value to check
+ * @returns `true` if the value is a non-empty string, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * isNonEmptyString('hello')
+ * // Returns: true
+ *
+ * isNonEmptyString('   ')
+ * // Returns: true (contains whitespace)
+ *
+ * isNonEmptyString('')
+ * // Returns: false
+ *
+ * isNonEmptyString(null)
+ * // Returns: false
+ *
+ * isNonEmptyString(123)
+ * // Returns: false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNonEmptyString(
@@ -132,11 +260,45 @@ export function isNonEmptyString(
 }
 
 export interface SearchOptions {
-  fromIndex?: number
+  /**
+   * The position in the string to begin searching from.
+   * Negative values count back from the end of the string.
+   * @default 0
+   */
+  fromIndex?: number | undefined
 }
 
 /**
  * Search for a regular expression in a string starting from an index.
+ *
+ * Similar to `String.prototype.search()` but allows specifying a starting
+ * position. Returns the index of the first match at or after `fromIndex`,
+ * or -1 if no match is found. Negative `fromIndex` values count back from
+ * the end of the string.
+ *
+ * This is more efficient than using `str.slice(fromIndex).search()` when
+ * you need the absolute position in the original string, as it handles
+ * the offset calculation for you.
+ *
+ * @param str - The string to search in
+ * @param regexp - The regular expression to search for
+ * @param options - Configuration options
+ * @returns The index of the first match, or -1 if not found
+ *
+ * @example
+ * ```ts
+ * search('hello world hello', /hello/, { fromIndex: 0 })
+ * // Returns: 0 (first 'hello')
+ *
+ * search('hello world hello', /hello/, { fromIndex: 6 })
+ * // Returns: 12 (second 'hello')
+ *
+ * search('hello world', /goodbye/, { fromIndex: 0 })
+ * // Returns: -1 (not found)
+ *
+ * search('hello world', /hello/, { fromIndex: -5 })
+ * // Returns: -1 (starts searching from 'world', no match)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function search(
@@ -159,6 +321,30 @@ export function search(
 
 /**
  * Strip the Byte Order Mark (BOM) from the beginning of a string.
+ *
+ * The BOM (U+FEFF) is a Unicode character that can appear at the start of
+ * a text file to indicate byte order and encoding. In UTF-16 (JavaScript's
+ * internal string representation), it appears as 0xFEFF. This function
+ * removes it if present, leaving the rest of the string unchanged.
+ *
+ * Most text processing doesn't need to handle the BOM explicitly, but it
+ * can cause issues when parsing JSON, CSV, or other structured data formats
+ * that don't expect a leading invisible character.
+ *
+ * @param str - The string to strip BOM from
+ * @returns The string without BOM
+ *
+ * @example
+ * ```ts
+ * stripBom('\uFEFFhello world')
+ * // Returns: 'hello world'
+ *
+ * stripBom('hello world')
+ * // Returns: 'hello world' (no BOM to strip)
+ *
+ * stripBom('')
+ * // Returns: ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stripBom(str: string): string {
@@ -277,52 +463,83 @@ try {
 
 /**
  * Get the visual width of a string in terminal columns.
- * Strips ANSI escape codes and accounts for wide characters.
  *
- * Based on string-width:
+ * Calculates how many columns a string will occupy when displayed in a terminal,
+ * accounting for:
+ * - ANSI escape codes (stripped before calculation)
+ * - Wide characters (CJK ideographs, fullwidth forms) that take 2 columns
+ * - Emoji (including complex sequences) that take 2 columns
+ * - Combining marks and zero-width characters (take 0 columns)
+ * - East Asian Width properties (Fullwidth, Wide, Halfwidth, Narrow, etc.)
+ *
+ * Based on string-width by Sindre Sorhus:
  * https://socket.dev/npm/package/string-width/overview/7.2.0
  * MIT License
  * Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
  *
  * Terminal emulators display characters in a grid of cells (columns).
  * Most ASCII characters take 1 column, but some characters (especially
- * emoji and CJK characters) take 2 columns.
- *
- * This function calculates how many columns a string will occupy when
- * displayed in a terminal, which is crucial for:
- * - Aligning text properly
+ * emoji and CJK characters) take 2 columns. This function calculates
+ * the actual visual width, which is crucial for:
+ * - Aligning text properly in tables or columns
  * - Preventing text from jumping when characters change
- * - Calculating padding/spacing
+ * - Calculating padding/spacing for spinners and progress bars
+ * - Wrapping text at the correct column width
  *
- * Logic:
- * - Segment graphemes to match how terminals render clusters.
- * - Width rules:
- *   1. Skip non-printing clusters (Default_Ignorable, Control, pure Mark, lone Surrogates).
- *   2. RGI emoji clusters (\p{RGI_Emoji}) are double-width.
- *   3. Otherwise use East Asian Width of the cluster's first visible code point.
- *   4. Add widths for trailing Halfwidth/Fullwidth Forms within the same cluster.
+ * Algorithm Overview:
+ * 1. Strip ANSI escape codes (invisible in terminal)
+ * 2. Segment into grapheme clusters (user-perceived characters)
+ * 3. For each cluster:
+ *    - Skip zero-width/non-printing clusters (width = 0)
+ *    - RGI emoji clusters are double-width (width = 2)
+ *    - Otherwise use East Asian Width of first visible code point
+ *    - Add width for trailing Halfwidth/Fullwidth Forms
  *
- * East Asian Width categories (Unicode Standard Annex #11):
+ * East Asian Width Categories (Unicode Standard Annex #11):
  * - F (Fullwidth): 2 columns - e.g., fullwidth Latin letters (Ａ, Ｂ)
  * - W (Wide): 2 columns - e.g., CJK ideographs (漢字), emoji (⚡, 😀)
  * - H (Halfwidth): 1 column - e.g., halfwidth Katakana (ｱ, ｲ)
  * - Na (Narrow): 1 column - e.g., ASCII (a-z, 0-9)
- * - A (Ambiguous): Context-dependent, we treat as 1 column
+ * - A (Ambiguous): Context-dependent, treated as 1 column by default
  * - N (Neutral): 1 column - e.g., most symbols (✦, ✧, ⋆)
  *
- * Why this matters for Socket spinners:
+ * Why This Matters for Socket:
  * - Lightning bolt (⚡) takes 2 columns
  * - Stars (✦, ✧, ⋆) take 1 column
- * - Without compensation, text jumps when frames change
- * - We use this to calculate padding for consistent alignment
+ * - Without proper width calculation, spinner text jumps between frames
+ * - This function enables consistent alignment by calculating padding
+ *
+ * @param text - The string to measure
+ * @returns The visual width in terminal columns
  *
  * @example
- * stringWidth('hello') // => 5 (5 ASCII chars = 5 columns)
- * stringWidth('⚡') // => 2 (lightning bolt is wide)
- * stringWidth('✦') // => 1 (star is narrow)
- * stringWidth('\x1b[31mred\x1b[0m') // => 3 (ANSI codes stripped, 'red' = 3)
+ * ```ts
+ * stringWidth('hello')
+ * // Returns: 5 (5 ASCII chars = 5 columns)
  *
- * @throws {TypeError} When input is not a string.
+ * stringWidth('⚡')
+ * // Returns: 2 (lightning bolt is wide)
+ *
+ * stringWidth('✦')
+ * // Returns: 1 (star is narrow)
+ *
+ * stringWidth('漢字')
+ * // Returns: 4 (2 CJK characters × 2 columns each)
+ *
+ * stringWidth('\x1b[31mred\x1b[0m')
+ * // Returns: 3 (ANSI codes stripped, 'red' = 3)
+ *
+ * stringWidth('👍🏽')
+ * // Returns: 2 (emoji with skin tone = 1 grapheme cluster = 2 columns)
+ *
+ * stringWidth('é')
+ * // Returns: 1 (combining accent doesn't add width)
+ *
+ * stringWidth('')
+ * // Returns: 0
+ * ```
+ *
+ * @throws {TypeError} When input is not a string
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stringWidth(text: string): number {
@@ -479,6 +696,35 @@ export function stringWidth(text: string): number {
 
 /**
  * Convert a string to kebab-case (handles camelCase and snake_case).
+ *
+ * Transforms strings from camelCase or snake_case to kebab-case by:
+ * - Converting uppercase letters to lowercase
+ * - Inserting hyphens before uppercase letters (for camelCase)
+ * - Replacing underscores with hyphens (for snake_case)
+ *
+ * This is more comprehensive than `camelToKebab()` as it handles mixed
+ * formats including snake_case. Returns empty string for empty input.
+ *
+ * @param str - The string to convert
+ * @returns The kebab-case string
+ *
+ * @example
+ * ```ts
+ * toKebabCase('helloWorld')
+ * // Returns: 'hello-world'
+ *
+ * toKebabCase('hello_world')
+ * // Returns: 'hello-world'
+ *
+ * toKebabCase('XMLHttpRequest')
+ * // Returns: 'xmlhttp-request'
+ *
+ * toKebabCase('iOS_Version')
+ * // Returns: 'io-s-version'
+ *
+ * toKebabCase('')
+ * // Returns: ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function toKebabCase(str: string): string {
@@ -497,6 +743,36 @@ export function toKebabCase(str: string): string {
 
 /**
  * Trim newlines from the beginning and end of a string.
+ *
+ * Removes all leading and trailing newline characters (both `\n` and `\r`)
+ * from a string, while preserving any newlines in the middle. This is similar
+ * to `String.prototype.trim()` but specifically targets newlines instead of
+ * all whitespace.
+ *
+ * Optimized for performance by checking the first and last characters before
+ * doing any string manipulation. Returns the original string unchanged if no
+ * newlines are found at the edges.
+ *
+ * @param str - The string to trim
+ * @returns The string with leading and trailing newlines removed
+ *
+ * @example
+ * ```ts
+ * trimNewlines('\n\nhello\n\n')
+ * // Returns: 'hello'
+ *
+ * trimNewlines('\r\nworld\r\n')
+ * // Returns: 'world'
+ *
+ * trimNewlines('hello\nworld')
+ * // Returns: 'hello\nworld' (middle newline preserved)
+ *
+ * trimNewlines('  hello  ')
+ * // Returns: '  hello  ' (spaces not trimmed, only newlines)
+ *
+ * trimNewlines('hello')
+ * // Returns: 'hello'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function trimNewlines(str: string): string {
@@ -535,6 +811,29 @@ export function trimNewlines(str: string): string {
 
 /**
  * Repeat a string n times.
+ *
+ * Creates a new string by repeating the input string the specified number of times.
+ * Returns an empty string if count is zero or negative. This is a simple wrapper
+ * around `String.prototype.repeat()` with guard for non-positive counts.
+ *
+ * @param str - The string to repeat
+ * @param count - The number of times to repeat the string
+ * @returns The repeated string, or empty string if count <= 0
+ *
+ * @example
+ * ```ts
+ * repeatString('hello', 3)
+ * // Returns: 'hellohellohello'
+ *
+ * repeatString('x', 5)
+ * // Returns: 'xxxxx'
+ *
+ * repeatString('hello', 0)
+ * // Returns: ''
+ *
+ * repeatString('hello', -1)
+ * // Returns: ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function repeatString(str: string, count: number): string {
@@ -546,6 +845,36 @@ export function repeatString(str: string, count: number): string {
 
 /**
  * Center text within a given width.
+ *
+ * Adds spaces before and after the text to center it within the specified width.
+ * Distributes padding evenly on both sides. When the padding is odd, the extra
+ * space is added to the right side. Strips ANSI codes before calculating text
+ * length to ensure accurate centering of colored text.
+ *
+ * If the text is already wider than or equal to the target width, returns the
+ * original text unchanged (no truncation occurs).
+ *
+ * @param text - The text to center (may include ANSI codes)
+ * @param width - The target width in columns
+ * @returns The centered text with padding
+ *
+ * @example
+ * ```ts
+ * centerText('hello', 11)
+ * // Returns: '   hello   ' (3 spaces on each side)
+ *
+ * centerText('hi', 10)
+ * // Returns: '    hi    ' (4 spaces on each side)
+ *
+ * centerText('odd', 8)
+ * // Returns: '  odd   ' (2 left, 3 right)
+ *
+ * centerText('\x1b[31mred\x1b[0m', 7)
+ * // Returns: '  \x1b[31mred\x1b[0m  ' (ANSI codes preserved, 'red' centered)
+ *
+ * centerText('too long text', 5)
+ * // Returns: 'too long text' (no truncation, returned as-is)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function centerText(text: string, width: number): string {

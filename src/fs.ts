@@ -26,7 +26,10 @@ import { objectFreeze, type Remap } from './objects'
 import { normalizePath, pathLikeToString } from './path'
 import { naturalCompare } from './sorts'
 
-// Type definitions
+/**
+ * Supported text encodings for Node.js Buffers.
+ * Includes ASCII, UTF-8/16, base64, binary, and hexadecimal encodings.
+ */
 export type BufferEncoding =
   | 'ascii'
   | 'utf8'
@@ -40,37 +43,116 @@ export type BufferEncoding =
   | 'binary'
   | 'hex'
 
+/**
+ * Represents any valid JSON content type.
+ */
 export type JsonContent = unknown
 
+/**
+ * Options for asynchronous `findUp` operations.
+ */
 export interface FindUpOptions {
-  cwd?: string
-  onlyDirectories?: boolean
-  onlyFiles?: boolean
-  signal?: AbortSignal
+  /**
+   * Starting directory for the search.
+   * @default process.cwd()
+   */
+  cwd?: string | undefined
+  /**
+   * Only match directories, not files.
+   * @default false
+   */
+  onlyDirectories?: boolean | undefined
+  /**
+   * Only match files, not directories.
+   * @default true
+   */
+  onlyFiles?: boolean | undefined
+  /**
+   * Abort signal to cancel the search operation.
+   */
+  signal?: AbortSignal | undefined
 }
 
+/**
+ * Options for synchronous `findUpSync` operations.
+ */
 export interface FindUpSyncOptions {
-  cwd?: string
-  stopAt?: string
-  onlyDirectories?: boolean
-  onlyFiles?: boolean
+  /**
+   * Starting directory for the search.
+   * @default process.cwd()
+   */
+  cwd?: string | undefined
+  /**
+   * Directory to stop searching at (inclusive).
+   * When provided, search will stop at this directory even if the root hasn't been reached.
+   */
+  stopAt?: string | undefined
+  /**
+   * Only match directories, not files.
+   * @default false
+   */
+  onlyDirectories?: boolean | undefined
+  /**
+   * Only match files, not directories.
+   * @default true
+   */
+  onlyFiles?: boolean | undefined
 }
 
+/**
+ * Options for checking if a directory is empty.
+ */
 export interface IsDirEmptyOptions {
+  /**
+   * Glob patterns for files to ignore when checking emptiness.
+   * Files matching these patterns are not counted.
+   * @default defaultIgnore
+   */
   ignore?: string[] | readonly string[] | undefined
 }
 
+/**
+ * Options for read operations with abort support.
+ */
 export interface ReadOptions extends Abortable {
-  encoding?: BufferEncoding | string
-  flag?: string
+  /**
+   * Character encoding to use for reading.
+   * @default 'utf8'
+   */
+  encoding?: BufferEncoding | string | undefined
+  /**
+   * File system flag for reading behavior.
+   * @default 'r'
+   */
+  flag?: string | undefined
 }
 
+/**
+ * Options for reading directories with filtering and sorting.
+ */
 export interface ReadDirOptions {
+  /**
+   * Glob patterns for directories to ignore.
+   * @default undefined
+   */
   ignore?: string[] | readonly string[] | undefined
+  /**
+   * Include empty directories in results.
+   * When `false`, empty directories are filtered out.
+   * @default true
+   */
   includeEmpty?: boolean | undefined
+  /**
+   * Sort directory names alphabetically using natural sort order.
+   * @default true
+   */
   sort?: boolean | undefined
 }
 
+/**
+ * Options for reading files with encoding and abort support.
+ * Can be either an options object, an encoding string, or null.
+ */
 export type ReadFileOptions =
   | Remap<
       ObjectEncodingOptions &
@@ -81,35 +163,125 @@ export type ReadFileOptions =
   | BufferEncoding
   | null
 
+/**
+ * Options for reading and parsing JSON files.
+ */
 export type ReadJsonOptions = Remap<
   ReadFileOptions & {
+    /**
+     * Whether to throw errors on parse failure.
+     * When `false`, returns `undefined` on error instead of throwing.
+     * @default true
+     */
     throws?: boolean | undefined
-    reviver?: Parameters<typeof JSON.parse>[1]
+    /**
+     * JSON reviver function to transform parsed values.
+     * Same as the second parameter to `JSON.parse()`.
+     */
+    reviver?: Parameters<typeof JSON.parse>[1] | undefined
   }
 >
 
+/**
+ * Options for file/directory removal operations.
+ */
 export interface RemoveOptions {
-  force?: boolean
-  maxRetries?: number
-  recursive?: boolean
-  retryDelay?: number
-  signal?: AbortSignal
+  /**
+   * Force deletion even outside normally safe directories.
+   * When `false`, prevents deletion outside temp, cacache, and ~/.socket.
+   * @default true for safe directories, false otherwise
+   */
+  force?: boolean | undefined
+  /**
+   * Maximum number of retry attempts on failure.
+   * @default 3
+   */
+  maxRetries?: number | undefined
+  /**
+   * Recursively delete directories and contents.
+   * @default true
+   */
+  recursive?: boolean | undefined
+  /**
+   * Delay in milliseconds between retry attempts.
+   * @default 200
+   */
+  retryDelay?: number | undefined
+  /**
+   * Abort signal to cancel the operation.
+   */
+  signal?: AbortSignal | undefined
 }
 
+/**
+ * Options for safe read operations that don't throw on errors.
+ */
 export interface SafeReadOptions extends ReadOptions {
-  defaultValue?: unknown
+  /**
+   * Default value to return on read failure.
+   * If not provided, `undefined` is returned on error.
+   */
+  defaultValue?: unknown | undefined
 }
 
+/**
+ * Options for write operations with encoding and mode control.
+ */
 export interface WriteOptions extends Abortable {
-  encoding?: BufferEncoding | string
-  mode?: number
-  flag?: string
+  /**
+   * Character encoding for writing.
+   * @default 'utf8'
+   */
+  encoding?: BufferEncoding | string | undefined
+  /**
+   * File mode (permissions) to set.
+   * Uses standard Unix permission bits (e.g., 0o644).
+   * @default 0o666 (read/write for all, respecting umask)
+   */
+  mode?: number | undefined
+  /**
+   * File system flag for write behavior.
+   * @default 'w' (create or truncate)
+   */
+  flag?: string | undefined
 }
 
+/**
+ * Options for writing JSON files with formatting control.
+ */
 export interface WriteJsonOptions extends WriteOptions {
+  /**
+   * End-of-line sequence to use.
+   * @default '\n'
+   * @example
+   * ```ts
+   * // Windows-style line endings
+   * writeJson('data.json', data, { EOL: '\r\n' })
+   * ```
+   */
   EOL?: string | undefined
+  /**
+   * Whether to add a final newline at end of file.
+   * @default true
+   */
   finalEOL?: boolean | undefined
+  /**
+   * JSON replacer function to transform values during stringification.
+   * Same as the second parameter to `JSON.stringify()`.
+   */
   replacer?: JsonReviver | undefined
+  /**
+   * Number of spaces for indentation, or string to use for indentation.
+   * @default 2
+   * @example
+   * ```ts
+   * // Use tabs instead of spaces
+   * writeJson('data.json', data, { spaces: '\t' })
+   *
+   * // Use 4 spaces for indentation
+   * writeJson('data.json', data, { spaces: 4 })
+   * ```
+   */
   spaces?: number | string | undefined
 }
 
@@ -124,6 +296,10 @@ const defaultRemoveOptions = objectFreeze({
 let _fs: typeof import('fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js fs module
+ * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
@@ -138,6 +314,9 @@ function getFs() {
 let _path: typeof import('path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -153,6 +332,9 @@ function getPath() {
 let _os: typeof import('os') | undefined
 /**
  * Lazily load the os module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js os module
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -167,6 +349,13 @@ function getOs() {
 
 /**
  * Process directory entries and filter for directories.
+ * Filters entries to include only directories, optionally excluding empty ones.
+ * Applies ignore patterns and natural sorting.
+ *
+ * @param dirents - Directory entries from readdir
+ * @param dirname - Parent directory path
+ * @param options - Filtering and sorting options
+ * @returns Array of directory names, optionally sorted
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -196,6 +385,14 @@ function innerReadDirNames(
 
 /**
  * Stringify JSON with custom formatting options.
+ * Formats JSON with configurable line endings and indentation.
+ *
+ * @param json - Value to stringify
+ * @param EOL - End-of-line sequence
+ * @param finalEOL - Whether to add final newline
+ * @param replacer - JSON replacer function
+ * @param spaces - Indentation spaces or string
+ * @returns Formatted JSON string
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -213,6 +410,24 @@ function stringify(
 
 /**
  * Find a file or directory by traversing up parent directories.
+ * Searches from the starting directory upward to the filesystem root.
+ * Useful for finding configuration files or project roots.
+ *
+ * @param name - Filename(s) to search for
+ * @param options - Search options including cwd and type filters
+ * @returns Normalized absolute path if found, undefined otherwise
+ *
+ * @example
+ * ```ts
+ * // Find package.json starting from current directory
+ * const pkgPath = await findUp('package.json')
+ *
+ * // Find any of multiple config files
+ * const configPath = await findUp(['.config.js', '.config.json'])
+ *
+ * // Find a directory instead of file
+ * const nodeModules = await findUp('node_modules', { onlyDirectories: true })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function findUp(
@@ -262,6 +477,27 @@ export async function findUp(
 
 /**
  * Synchronously find a file or directory by traversing up parent directories.
+ * Searches from the starting directory upward to the filesystem root or `stopAt` directory.
+ * Useful for finding configuration files or project roots in synchronous contexts.
+ *
+ * @param name - Filename(s) to search for
+ * @param options - Search options including cwd, stopAt, and type filters
+ * @returns Normalized absolute path if found, undefined otherwise
+ *
+ * @example
+ * ```ts
+ * // Find package.json starting from current directory
+ * const pkgPath = findUpSync('package.json')
+ *
+ * // Find .git directory but stop at home directory
+ * const gitPath = findUpSync('.git', {
+ *   onlyDirectories: true,
+ *   stopAt: process.env.HOME
+ * })
+ *
+ * // Find any of multiple config files
+ * const configPath = findUpSync(['.eslintrc.js', '.eslintrc.json'])
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function findUpSync(
@@ -325,6 +561,17 @@ export function findUpSync(
 
 /**
  * Check if a path is a directory asynchronously.
+ * Returns `true` for directories, `false` for files or non-existent paths.
+ *
+ * @param filepath - Path to check
+ * @returns `true` if path is a directory, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * if (await isDir('./src')) {
+ *   console.log('src is a directory')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function isDir(filepath: PathLike) {
@@ -333,6 +580,17 @@ export async function isDir(filepath: PathLike) {
 
 /**
  * Check if a path is a directory synchronously.
+ * Returns `true` for directories, `false` for files or non-existent paths.
+ *
+ * @param filepath - Path to check
+ * @returns `true` if path is a directory, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * if (isDirSync('./src')) {
+ *   console.log('src is a directory')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isDirSync(filepath: PathLike) {
@@ -341,6 +599,21 @@ export function isDirSync(filepath: PathLike) {
 
 /**
  * Check if a directory is empty synchronously.
+ * A directory is considered empty if it contains no files after applying ignore patterns.
+ * Uses glob patterns to filter ignored files.
+ *
+ * @param dirname - Directory path to check
+ * @param options - Options including ignore patterns
+ * @returns `true` if directory is empty (or doesn't exist), `false` otherwise
+ *
+ * @example
+ * ```ts
+ * // Check if directory is completely empty
+ * isDirEmptySync('./build')
+ *
+ * // Check if directory is empty, ignoring .DS_Store files
+ * isDirEmptySync('./cache', { ignore: ['.DS_Store'] })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isDirEmptySync(
@@ -380,6 +653,17 @@ export function isDirEmptySync(
 
 /**
  * Check if a path is a symbolic link synchronously.
+ * Uses `lstat` to check the link itself, not the target.
+ *
+ * @param filepath - Path to check
+ * @returns `true` if path is a symbolic link, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * if (isSymLinkSync('./my-link')) {
+ *   console.log('Path is a symbolic link')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isSymLinkSync(filepath: PathLike) {
@@ -392,6 +676,24 @@ export function isSymLinkSync(filepath: PathLike) {
 
 /**
  * Read directory names asynchronously with filtering and sorting.
+ * Returns only directory names (not files), with optional filtering for empty directories
+ * and glob-based ignore patterns. Results are naturally sorted by default.
+ *
+ * @param dirname - Directory path to read
+ * @param options - Options for filtering and sorting
+ * @returns Array of directory names, empty array on error
+ *
+ * @example
+ * ```ts
+ * // Get all subdirectories, sorted naturally
+ * const dirs = await readDirNames('./packages')
+ *
+ * // Get non-empty directories only
+ * const nonEmpty = await readDirNames('./cache', { includeEmpty: false })
+ *
+ * // Get directories without sorting
+ * const unsorted = await readDirNames('./src', { sort: false })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readDirNames(
@@ -415,6 +717,24 @@ export async function readDirNames(
 
 /**
  * Read directory names synchronously with filtering and sorting.
+ * Returns only directory names (not files), with optional filtering for empty directories
+ * and glob-based ignore patterns. Results are naturally sorted by default.
+ *
+ * @param dirname - Directory path to read
+ * @param options - Options for filtering and sorting
+ * @returns Array of directory names, empty array on error
+ *
+ * @example
+ * ```ts
+ * // Get all subdirectories, sorted naturally
+ * const dirs = readDirNamesSync('./packages')
+ *
+ * // Get non-empty directories only, ignoring node_modules
+ * const nonEmpty = readDirNamesSync('./src', {
+ *   includeEmpty: false,
+ *   ignore: ['node_modules']
+ * })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readDirNamesSync(dirname: PathLike, options?: ReadDirOptions) {
@@ -435,6 +755,21 @@ export function readDirNamesSync(dirname: PathLike, options?: ReadDirOptions) {
 
 /**
  * Read a file as binary data asynchronously.
+ * Returns a Buffer without encoding the contents.
+ * Useful for reading images, archives, or other binary formats.
+ *
+ * @param filepath - Path to file
+ * @param options - Read options (encoding is forced to null for binary)
+ * @returns Promise resolving to Buffer containing file contents
+ *
+ * @example
+ * ```ts
+ * // Read an image file
+ * const imageBuffer = await readFileBinary('./image.png')
+ *
+ * // Read with abort signal
+ * const buffer = await readFileBinary('./data.bin', { signal: abortSignal })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readFileBinary(
@@ -453,6 +788,21 @@ export async function readFileBinary(
 
 /**
  * Read a file as UTF-8 text asynchronously.
+ * Returns a string with the file contents decoded as UTF-8.
+ * This is the most common way to read text files.
+ *
+ * @param filepath - Path to file
+ * @param options - Read options including encoding and abort signal
+ * @returns Promise resolving to string containing file contents
+ *
+ * @example
+ * ```ts
+ * // Read a text file
+ * const content = await readFileUtf8('./README.md')
+ *
+ * // Read with custom encoding
+ * const content = await readFileUtf8('./data.txt', { encoding: 'utf-8' })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readFileUtf8(
@@ -470,6 +820,21 @@ export async function readFileUtf8(
 
 /**
  * Read a file as binary data synchronously.
+ * Returns a Buffer without encoding the contents.
+ * Useful for reading images, archives, or other binary formats.
+ *
+ * @param filepath - Path to file
+ * @param options - Read options (encoding is forced to null for binary)
+ * @returns Buffer containing file contents
+ *
+ * @example
+ * ```ts
+ * // Read an image file
+ * const imageBuffer = readFileBinarySync('./logo.png')
+ *
+ * // Read a compressed file
+ * const gzipData = readFileBinarySync('./archive.gz')
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readFileBinarySync(
@@ -487,6 +852,21 @@ export function readFileBinarySync(
 
 /**
  * Read a file as UTF-8 text synchronously.
+ * Returns a string with the file contents decoded as UTF-8.
+ * This is the most common way to read text files synchronously.
+ *
+ * @param filepath - Path to file
+ * @param options - Read options including encoding
+ * @returns String containing file contents
+ *
+ * @example
+ * ```ts
+ * // Read a configuration file
+ * const config = readFileUtf8Sync('./config.txt')
+ *
+ * // Read with custom options
+ * const data = readFileUtf8Sync('./data.txt', { encoding: 'utf8' })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readFileUtf8Sync(
@@ -503,6 +883,32 @@ export function readFileUtf8Sync(
 
 /**
  * Read and parse a JSON file asynchronously.
+ * Reads the file as UTF-8 text and parses it as JSON.
+ * Optionally accepts a reviver function to transform parsed values.
+ *
+ * @param filepath - Path to JSON file
+ * @param options - Read and parse options
+ * @returns Promise resolving to parsed JSON value, or undefined if throws is false and an error occurs
+ *
+ * @example
+ * ```ts
+ * // Read and parse package.json
+ * const pkg = await readJson('./package.json')
+ *
+ * // Read JSON with custom reviver
+ * const data = await readJson('./data.json', {
+ *   reviver: (key, value) => {
+ *     if (key === 'date') return new Date(value)
+ *     return value
+ *   }
+ * })
+ *
+ * // Don't throw on parse errors
+ * const config = await readJson('./config.json', { throws: false })
+ * if (config === undefined) {
+ *   console.log('Failed to parse config')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readJson(
@@ -540,6 +946,31 @@ export async function readJson(
 
 /**
  * Read and parse a JSON file synchronously.
+ * Reads the file as UTF-8 text and parses it as JSON.
+ * Optionally accepts a reviver function to transform parsed values.
+ *
+ * @param filepath - Path to JSON file
+ * @param options - Read and parse options
+ * @returns Parsed JSON value, or undefined if throws is false and an error occurs
+ *
+ * @example
+ * ```ts
+ * // Read and parse tsconfig.json
+ * const tsconfig = readJsonSync('./tsconfig.json')
+ *
+ * // Read JSON with custom reviver
+ * const data = readJsonSync('./data.json', {
+ *   reviver: (key, value) => {
+ *     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+ *       return new Date(value)
+ *     }
+ *     return value
+ *   }
+ * })
+ *
+ * // Don't throw on parse errors
+ * const config = readJsonSync('./config.json', { throws: false })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readJsonSync(
@@ -579,7 +1010,25 @@ export function readJsonSync(
  * Safely delete a file or directory asynchronously with built-in protections.
  * Uses `del` for safer deletion that prevents removing cwd and above by default.
  * Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories.
- * @throws {Error} When attempting to delete protected paths without force option.
+ *
+ * @param filepath - Path or array of paths to delete (supports glob patterns)
+ * @param options - Deletion options including force, retries, and recursion
+ * @throws {Error} When attempting to delete protected paths without force option
+ *
+ * @example
+ * ```ts
+ * // Delete a single file
+ * await safeDelete('./temp-file.txt')
+ *
+ * // Delete a directory recursively
+ * await safeDelete('./build', { recursive: true })
+ *
+ * // Delete multiple paths
+ * await safeDelete(['./dist', './coverage'])
+ *
+ * // Delete with custom retry settings
+ * await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function safeDelete(
@@ -652,7 +1101,25 @@ export async function safeDelete(
  * Safely delete a file or directory synchronously with built-in protections.
  * Uses `del` for safer deletion that prevents removing cwd and above by default.
  * Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories.
- * @throws {Error} When attempting to delete protected paths without force option.
+ *
+ * @param filepath - Path or array of paths to delete (supports glob patterns)
+ * @param options - Deletion options including force, retries, and recursion
+ * @throws {Error} When attempting to delete protected paths without force option
+ *
+ * @example
+ * ```ts
+ * // Delete a single file
+ * safeDeleteSync('./temp-file.txt')
+ *
+ * // Delete a directory recursively
+ * safeDeleteSync('./build', { recursive: true })
+ *
+ * // Delete multiple paths with globs
+ * safeDeleteSync(['./dist/**', './coverage/**'])
+ *
+ * // Force delete a protected path (use with caution)
+ * safeDeleteSync('./important', { force: true })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function safeDeleteSync(
@@ -723,6 +1190,24 @@ export function safeDeleteSync(
 
 /**
  * Safely read a file asynchronously, returning undefined on error.
+ * Useful when you want to attempt reading a file without handling errors explicitly.
+ * Returns undefined for any error (file not found, permission denied, etc.).
+ *
+ * @param filepath - Path to file
+ * @param options - Read options including encoding and default value
+ * @returns Promise resolving to file contents, or undefined on error
+ *
+ * @example
+ * ```ts
+ * // Try to read a file, get undefined if it doesn't exist
+ * const content = await safeReadFile('./optional-config.txt')
+ * if (content) {
+ *   console.log('Config found:', content)
+ * }
+ *
+ * // Read with specific encoding
+ * const data = await safeReadFile('./data.txt', { encoding: 'utf8' })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function safeReadFile(
@@ -742,6 +1227,21 @@ export async function safeReadFile(
 
 /**
  * Safely get file stats asynchronously, returning undefined on error.
+ * Useful for checking file existence and properties without error handling.
+ * Returns undefined for any error (file not found, permission denied, etc.).
+ *
+ * @param filepath - Path to check
+ * @returns Promise resolving to Stats object, or undefined on error
+ *
+ * @example
+ * ```ts
+ * // Check if file exists and get its stats
+ * const stats = await safeStats('./file.txt')
+ * if (stats) {
+ *   console.log('File size:', stats.size)
+ *   console.log('Modified:', stats.mtime)
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function safeStats(filepath: PathLike) {
@@ -754,6 +1254,22 @@ export async function safeStats(filepath: PathLike) {
 
 /**
  * Safely get file stats synchronously, returning undefined on error.
+ * Useful for checking file existence and properties without error handling.
+ * Returns undefined for any error (file not found, permission denied, etc.).
+ *
+ * @param filepath - Path to check
+ * @param options - Read options (currently unused but kept for API consistency)
+ * @returns Stats object, or undefined on error
+ *
+ * @example
+ * ```ts
+ * // Check if file exists and get its size
+ * const stats = safeStatsSync('./file.txt')
+ * if (stats) {
+ *   console.log('File size:', stats.size)
+ *   console.log('Is directory:', stats.isDirectory())
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function safeStatsSync(
@@ -774,6 +1290,24 @@ export function safeStatsSync(
 
 /**
  * Safely read a file synchronously, returning undefined on error.
+ * Useful when you want to attempt reading a file without handling errors explicitly.
+ * Returns undefined for any error (file not found, permission denied, etc.).
+ *
+ * @param filepath - Path to file
+ * @param options - Read options including encoding and default value
+ * @returns File contents, or undefined on error
+ *
+ * @example
+ * ```ts
+ * // Try to read a config file
+ * const config = safeReadFileSync('./config.txt')
+ * if (config) {
+ *   console.log('Config loaded successfully')
+ * }
+ *
+ * // Read binary file safely
+ * const buffer = safeReadFileSync('./image.png', { encoding: null })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function safeReadFileSync(
@@ -793,6 +1327,23 @@ export function safeReadFileSync(
 
 /**
  * Generate a unique filepath by adding number suffix if the path exists.
+ * Appends `-1`, `-2`, etc. before the file extension until a non-existent path is found.
+ * Useful for creating files without overwriting existing ones.
+ *
+ * @param filepath - Desired file path
+ * @returns Normalized unique filepath (original if it doesn't exist, or with number suffix)
+ *
+ * @example
+ * ```ts
+ * // If 'report.pdf' exists, returns 'report-1.pdf'
+ * const uniquePath = uniqueSync('./report.pdf')
+ *
+ * // If 'data.json' and 'data-1.json' exist, returns 'data-2.json'
+ * const path = uniqueSync('./data.json')
+ *
+ * // If 'backup' doesn't exist, returns 'backup' unchanged
+ * const backupPath = uniqueSync('./backup')
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function uniqueSync(filepath: PathLike): string {
@@ -821,6 +1372,31 @@ export function uniqueSync(filepath: PathLike): string {
 
 /**
  * Write JSON content to a file asynchronously with formatting.
+ * Stringifies the value with configurable indentation and line endings.
+ * Automatically adds a final newline by default for POSIX compliance.
+ *
+ * @param filepath - Path to write to
+ * @param jsonContent - Value to stringify and write
+ * @param options - Write options including formatting and encoding
+ * @returns Promise that resolves when write completes
+ *
+ * @example
+ * ```ts
+ * // Write formatted JSON with default 2-space indentation
+ * await writeJson('./data.json', { name: 'example', version: '1.0.0' })
+ *
+ * // Write with custom indentation
+ * await writeJson('./config.json', config, { spaces: 4 })
+ *
+ * // Write with tabs instead of spaces
+ * await writeJson('./data.json', data, { spaces: '\t' })
+ *
+ * // Write without final newline
+ * await writeJson('./inline.json', obj, { finalEOL: false })
+ *
+ * // Write with Windows line endings
+ * await writeJson('./win.json', data, { EOL: '\r\n' })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function writeJson(
@@ -850,6 +1426,27 @@ export async function writeJson(
 
 /**
  * Write JSON content to a file synchronously with formatting.
+ * Stringifies the value with configurable indentation and line endings.
+ * Automatically adds a final newline by default for POSIX compliance.
+ *
+ * @param filepath - Path to write to
+ * @param jsonContent - Value to stringify and write
+ * @param options - Write options including formatting and encoding
+ *
+ * @example
+ * ```ts
+ * // Write formatted JSON with default 2-space indentation
+ * writeJsonSync('./package.json', pkg)
+ *
+ * // Write with custom indentation
+ * writeJsonSync('./tsconfig.json', tsconfig, { spaces: 4 })
+ *
+ * // Write with tabs for indentation
+ * writeJsonSync('./data.json', data, { spaces: '\t' })
+ *
+ * // Write compacted (no indentation)
+ * writeJsonSync('./compact.json', data, { spaces: 0 })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function writeJsonSync(

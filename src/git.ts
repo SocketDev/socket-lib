@@ -7,22 +7,108 @@ import { stripAnsi } from './strings'
 
 /**
  * Options for git diff operations.
+ *
+ * Controls how git diff results are processed and returned.
+ *
+ * @example
+ * ```typescript
+ * // Get absolute file paths
+ * const files = await getChangedFiles({ absolute: true })
+ * // => ['/path/to/repo/src/file.ts']
+ *
+ * // Get relative paths with caching disabled
+ * const files = await getChangedFiles({ cache: false })
+ * // => ['src/file.ts']
+ *
+ * // Get files from specific directory
+ * const files = await getChangedFiles({ cwd: '/path/to/repo/src' })
+ * ```
  */
 export interface GitDiffOptions {
-  absolute?: boolean
-  cache?: boolean
-  cwd?: string
-  porcelain?: boolean
-  asSet?: boolean
+  /**
+   * Return absolute file paths instead of relative paths.
+   *
+   * @default false
+   */
+  absolute?: boolean | undefined
+  /**
+   * Cache git diff results to avoid repeated git subprocess calls.
+   *
+   * Caching is keyed by the git command and options used, so different
+   * option combinations maintain separate cache entries.
+   *
+   * @default true
+   */
+  cache?: boolean | undefined
+  /**
+   * Working directory for git operations.
+   *
+   * Git operations will be run from this directory, and returned paths
+   * will be relative to the git repository root. Symlinks are resolved
+   * using `fs.realpathSync()`.
+   *
+   * @default process.cwd()
+   */
+  cwd?: string | undefined
+  /**
+   * Parse git porcelain format output (status codes like `M`, `A`, `??`).
+   *
+   * When `true`, strips the two-character status code and space from the
+   * beginning of each line. Automatically enabled for `getChangedFiles()`.
+   *
+   * @default false
+   */
+  porcelain?: boolean | undefined
+  /**
+   * Return results as a `Set` instead of an array.
+   *
+   * @default false
+   */
+  asSet?: boolean | undefined
+  /**
+   * Additional options passed to glob matcher.
+   *
+   * Supports options like `dot`, `ignore`, `nocase` for filtering results.
+   */
   [key: string]: unknown
 }
 
 /**
- * Options for package filtering operations.
+ * Options for filtering packages by git changes.
+ *
+ * Used to determine which packages in a monorepo have changed files.
+ *
+ * @example
+ * ```typescript
+ * // Filter packages with changes
+ * const changed = filterPackagesByChanges(packages)
+ *
+ * // Force include all packages
+ * const all = filterPackagesByChanges(packages, { force: true })
+ *
+ * // Use custom package key
+ * const changed = filterPackagesByChanges(
+ *   packages,
+ *   { packageKey: 'directory' }
+ * )
+ * ```
  */
 export interface FilterPackagesByChangesOptions {
-  force?: boolean
-  packageKey?: string
+  /**
+   * Force include all packages regardless of changes.
+   *
+   * @default false
+   */
+  force?: boolean | undefined
+  /**
+   * Key to access package path in package objects.
+   *
+   * @default 'path'
+   */
+  packageKey?: string | undefined
+  /**
+   * Additional options for filtering.
+   */
   [key: string]: unknown
 }
 
@@ -38,7 +124,18 @@ const gitDiffCache = new Map<string, string[]>()
 
 let _fs: typeof import('fs') | undefined
 /**
- * Lazily load the fs module to avoid Webpack errors.
+ * Lazily load the `fs` module to avoid Webpack errors.
+ *
+ * Uses non-`node:` prefixed require internally to prevent Webpack from
+ * attempting to bundle Node.js built-in modules.
+ *
+ * @returns The Node.js `fs` module.
+ *
+ * @example
+ * ```typescript
+ * const fs = getFs()
+ * const exists = fs.existsSync('/path/to/file')
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
@@ -52,7 +149,18 @@ function getFs() {
 
 let _path: typeof import('path') | undefined
 /**
- * Lazily load the path module to avoid Webpack errors.
+ * Lazily load the `path` module to avoid Webpack errors.
+ *
+ * Uses non-`node:` prefixed require internally to prevent Webpack from
+ * attempting to bundle Node.js built-in modules.
+ *
+ * @returns The Node.js `path` module.
+ *
+ * @example
+ * ```typescript
+ * const path = getPath()
+ * const joined = path.join('/foo', 'bar')
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
@@ -63,21 +171,59 @@ function getPath() {
 }
 
 /**
- * Get git executable path.
+ * Get the git executable path.
+ *
+ * Currently always returns `'git'`, relying on the system PATH to resolve
+ * the git binary location. This may be extended in the future to support
+ * custom git paths.
+ *
+ * @returns The git executable name or path.
+ *
+ * @example
+ * ```typescript
+ * const git = getGitPath()
+ * // => 'git'
+ * ```
  */
 function getGitPath(): string {
   return 'git'
 }
 
 /**
- * Get current working directory for git operations.
- * Returns the real path to handle symlinks like /tmp -> /private/tmp.
+ * Get the current working directory for git operations.
+ *
+ * Returns the real path to handle symlinks correctly. This is important
+ * because symlinked directories like `/tmp -> /private/tmp` can cause
+ * path mismatches when comparing git output.
+ *
+ * @returns The resolved real path of `process.cwd()`.
+ *
+ * @example
+ * ```typescript
+ * const cwd = getCwd()
+ * // In /tmp (symlink to /private/tmp):
+ * // => '/private/tmp'
+ * ```
  */
 function getCwd(): string {
   return getFs().realpathSync(process.cwd())
 }
 
-function getGitDiffSpawnArgs(cwd?: string): GitDiffSpawnArgs {
+/**
+ * Get spawn arguments for different git diff operations.
+ *
+ * Prepares argument arrays for `spawn()`/`spawnSync()` calls that retrieve:
+ * - `all`: All changed files (staged, unstaged, untracked) via `git status --porcelain`
+ * - `unstaged`: Unstaged modifications via `git diff --name-only`
+ * - `staged`: Staged changes via `git diff --cached --name-only`
+ *
+ * Automatically resolves symlinks in the provided `cwd` and enables shell
+ * mode on Windows for proper command execution.
+ *
+ * @param cwd - Working directory for git operations, defaults to `process.cwd()`.
+ * @returns Object containing spawn arguments for all, unstaged, and staged operations.
+ */
+function getGitDiffSpawnArgs(cwd?: string | undefined): GitDiffSpawnArgs {
   const resolvedCwd = cwd ? getFs().realpathSync(cwd) : getCwd()
   return {
     all: [
@@ -106,9 +252,19 @@ function getGitDiffSpawnArgs(cwd?: string): GitDiffSpawnArgs {
   }
 }
 
+/**
+ * Execute git diff command asynchronously and parse results.
+ *
+ * Internal helper for async git operations. Handles caching, command execution,
+ * and result parsing. Returns empty array on git command failure.
+ *
+ * @param args - Spawn arguments tuple `[command, args, options]`.
+ * @param options - Git diff options for caching and parsing.
+ * @returns Promise resolving to array of file paths.
+ */
 async function innerDiff(
   args: SpawnArgs,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<string[]> {
   const { cache = true, ...parseOptions } = { __proto__: null, ...options }
   const cacheKey = cache ? JSON.stringify({ args, parseOptions }) : undefined
@@ -141,7 +297,20 @@ async function innerDiff(
   return result
 }
 
-function innerDiffSync(args: SpawnArgs, options?: GitDiffOptions): string[] {
+/**
+ * Execute git diff command synchronously and parse results.
+ *
+ * Internal helper for sync git operations. Handles caching, command execution,
+ * and result parsing. Returns empty array on git command failure.
+ *
+ * @param args - Spawn arguments tuple `[command, args, options]`.
+ * @param options - Git diff options for caching and parsing.
+ * @returns Array of file paths.
+ */
+function innerDiffSync(
+  args: SpawnArgs,
+  options?: GitDiffOptions | undefined,
+): string[] {
   const { cache = true, ...parseOptions } = { __proto__: null, ...options }
   const cacheKey = cache ? JSON.stringify({ args, parseOptions }) : undefined
   if (cache && cacheKey) {
@@ -175,8 +344,24 @@ function innerDiffSync(args: SpawnArgs, options?: GitDiffOptions): string[] {
 
 /**
  * Find git repository root by walking up from the given directory.
- * Returns the directory itself if it contains .git, or the original path if no .git found.
- * Exported for testing.
+ *
+ * Searches for a `.git` directory or file by traversing parent directories
+ * upward until found or filesystem root is reached. Returns the original path
+ * if no git repository is found.
+ *
+ * This function is exported primarily for testing purposes.
+ *
+ * @param startPath - Directory path to start searching from.
+ * @returns Git repository root path, or `startPath` if not found.
+ *
+ * @example
+ * ```typescript
+ * const root = findGitRoot('/path/to/repo/src/subdir')
+ * // => '/path/to/repo'
+ *
+ * const notFound = findGitRoot('/not/a/repo')
+ * // => '/not/a/repo'
+ * ```
  */
 export function findGitRoot(startPath: string): string {
   const fs = getFs()
@@ -202,10 +387,29 @@ export function findGitRoot(startPath: string): string {
   }
 }
 
+/**
+ * Parse git diff stdout output into file path array.
+ *
+ * Internal helper that processes raw git command output by:
+ * 1. Finding git repository root from spawn cwd
+ * 2. Stripping ANSI codes and splitting into lines
+ * 3. Parsing porcelain format status codes if requested
+ * 4. Normalizing and optionally making paths absolute
+ * 5. Filtering paths based on cwd and glob options
+ *
+ * Git always returns paths relative to the repository root, regardless of
+ * where the command was executed. This function handles the path resolution
+ * correctly by finding the repo root and adjusting paths accordingly.
+ *
+ * @param stdout - Raw stdout from git command.
+ * @param options - Git diff options for path processing.
+ * @param spawnCwd - Working directory where git command was executed.
+ * @returns Array of processed file paths.
+ */
 function parseGitDiffStdout(
   stdout: string,
-  options?: GitDiffOptions,
-  spawnCwd?: string,
+  options?: GitDiffOptions | undefined,
+  spawnCwd?: string | undefined,
 ): string[] {
   // Find git repo root from spawnCwd. Git always returns paths relative to the repo root,
   // not the cwd where it was run. So we need to find the repo root to correctly parse paths.
@@ -269,13 +473,44 @@ function parseGitDiffStdout(
 
 /**
  * Get all changed files including staged, unstaged, and untracked files.
+ *
  * Uses `git status --porcelain` which returns the full working tree status
- * with status codes (M=modified, A=added, D=deleted, ??=untracked, etc.).
+ * with status codes:
+ * - `M` - Modified
+ * - `A` - Added
+ * - `D` - Deleted
+ * - `??` - Untracked
+ * - `R` - Renamed
+ * - `C` - Copied
+ *
  * This is the most comprehensive check - captures everything that differs
- * from the last commit.
+ * from the last commit, including:
+ * - Files modified and staged with `git add`
+ * - Files modified but not staged
+ * - New files not yet tracked by git
+ *
+ * Status codes are automatically stripped from the output.
+ *
+ * @param options - Options controlling path format and filtering.
+ * @returns Promise resolving to array of changed file paths.
+ *
+ * @example
+ * ```typescript
+ * // Get all changed files as relative paths
+ * const files = await getChangedFiles()
+ * // => ['src/foo.ts', 'src/bar.ts', 'newfile.ts']
+ *
+ * // Get absolute paths
+ * const files = await getChangedFiles({ absolute: true })
+ * // => ['/path/to/repo/src/foo.ts', ...]
+ *
+ * // Get changed files in specific directory
+ * const files = await getChangedFiles({ cwd: '/path/to/repo/src' })
+ * // => ['foo.ts', 'bar.ts']
+ * ```
  */
 export async function getChangedFiles(
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<string[]> {
   const args = getGitDiffSpawnArgs(options?.cwd).all
   return await innerDiff(args, {
@@ -287,12 +522,45 @@ export async function getChangedFiles(
 
 /**
  * Get all changed files including staged, unstaged, and untracked files.
- * Uses `git status --porcelain` which returns the full working tree status
- * with status codes (M=modified, A=added, D=deleted, ??=untracked, etc.).
+ *
+ * Synchronous version of `getChangedFiles()`. Uses `git status --porcelain`
+ * which returns the full working tree status with status codes:
+ * - `M` - Modified
+ * - `A` - Added
+ * - `D` - Deleted
+ * - `??` - Untracked
+ * - `R` - Renamed
+ * - `C` - Copied
+ *
  * This is the most comprehensive check - captures everything that differs
- * from the last commit.
+ * from the last commit, including:
+ * - Files modified and staged with `git add`
+ * - Files modified but not staged
+ * - New files not yet tracked by git
+ *
+ * Status codes are automatically stripped from the output.
+ *
+ * @param options - Options controlling path format and filtering.
+ * @returns Array of changed file paths.
+ *
+ * @example
+ * ```typescript
+ * // Get all changed files as relative paths
+ * const files = getChangedFilesSync()
+ * // => ['src/foo.ts', 'src/bar.ts', 'newfile.ts']
+ *
+ * // Get absolute paths
+ * const files = getChangedFilesSync({ absolute: true })
+ * // => ['/path/to/repo/src/foo.ts', ...]
+ *
+ * // Get changed files in specific directory
+ * const files = getChangedFilesSync({ cwd: '/path/to/repo/src' })
+ * // => ['foo.ts', 'bar.ts']
+ * ```
  */
-export function getChangedFilesSync(options?: GitDiffOptions): string[] {
+export function getChangedFilesSync(
+  options?: GitDiffOptions | undefined,
+): string[] {
   const args = getGitDiffSpawnArgs(options?.cwd).all
   return innerDiffSync(args, {
     __proto__: null,
@@ -303,12 +571,36 @@ export function getChangedFilesSync(options?: GitDiffOptions): string[] {
 
 /**
  * Get unstaged modified files (changes not yet staged for commit).
+ *
  * Uses `git diff --name-only` which returns only unstaged modifications
- * to tracked files. Does not include untracked files or staged changes.
- * This is a focused check for uncommitted changes to existing files.
+ * to tracked files. Does NOT include:
+ * - Untracked files (new files not added to git)
+ * - Staged changes (files added with `git add`)
+ *
+ * This is a focused check for uncommitted changes to existing tracked files.
+ * Useful for detecting work-in-progress modifications before staging.
+ *
+ * @param options - Options controlling path format and filtering.
+ * @returns Promise resolving to array of unstaged file paths.
+ *
+ * @example
+ * ```typescript
+ * // Get unstaged files
+ * const files = await getUnstagedFiles()
+ * // => ['src/foo.ts', 'src/bar.ts']
+ *
+ * // After staging some files
+ * await spawn('git', ['add', 'src/foo.ts'])
+ * const files = await getUnstagedFiles()
+ * // => ['src/bar.ts'] (foo.ts no longer included)
+ *
+ * // Get absolute paths
+ * const files = await getUnstagedFiles({ absolute: true })
+ * // => ['/path/to/repo/src/bar.ts']
+ * ```
  */
 export async function getUnstagedFiles(
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<string[]> {
   const args = getGitDiffSpawnArgs(options?.cwd).unstaged
   return await innerDiff(args, options)
@@ -316,23 +608,73 @@ export async function getUnstagedFiles(
 
 /**
  * Get unstaged modified files (changes not yet staged for commit).
- * Uses `git diff --name-only` which returns only unstaged modifications
- * to tracked files. Does not include untracked files or staged changes.
- * This is a focused check for uncommitted changes to existing files.
+ *
+ * Synchronous version of `getUnstagedFiles()`. Uses `git diff --name-only`
+ * which returns only unstaged modifications to tracked files. Does NOT include:
+ * - Untracked files (new files not added to git)
+ * - Staged changes (files added with `git add`)
+ *
+ * This is a focused check for uncommitted changes to existing tracked files.
+ * Useful for detecting work-in-progress modifications before staging.
+ *
+ * @param options - Options controlling path format and filtering.
+ * @returns Array of unstaged file paths.
+ *
+ * @example
+ * ```typescript
+ * // Get unstaged files
+ * const files = getUnstagedFilesSync()
+ * // => ['src/foo.ts', 'src/bar.ts']
+ *
+ * // After staging some files
+ * spawnSync('git', ['add', 'src/foo.ts'])
+ * const files = getUnstagedFilesSync()
+ * // => ['src/bar.ts'] (foo.ts no longer included)
+ *
+ * // Get absolute paths
+ * const files = getUnstagedFilesSync({ absolute: true })
+ * // => ['/path/to/repo/src/bar.ts']
+ * ```
  */
-export function getUnstagedFilesSync(options?: GitDiffOptions): string[] {
+export function getUnstagedFilesSync(
+  options?: GitDiffOptions | undefined,
+): string[] {
   const args = getGitDiffSpawnArgs(options?.cwd).unstaged
   return innerDiffSync(args, options)
 }
 
 /**
  * Get staged files ready for commit (changes added with `git add`).
+ *
  * Uses `git diff --cached --name-only` which returns only staged changes.
- * Does not include unstaged modifications or untracked files.
+ * Does NOT include:
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files (new files not added to git)
+ *
  * This is a focused check for what will be included in the next commit.
+ * Useful for validating changes before committing or running pre-commit hooks.
+ *
+ * @param options - Options controlling path format and filtering.
+ * @returns Promise resolving to array of staged file paths.
+ *
+ * @example
+ * ```typescript
+ * // Get currently staged files
+ * const files = await getStagedFiles()
+ * // => ['src/foo.ts']
+ *
+ * // Stage more files
+ * await spawn('git', ['add', 'src/bar.ts'])
+ * const files = await getStagedFiles()
+ * // => ['src/foo.ts', 'src/bar.ts']
+ *
+ * // Get absolute paths
+ * const files = await getStagedFiles({ absolute: true })
+ * // => ['/path/to/repo/src/foo.ts', ...]
+ * ```
  */
 export async function getStagedFiles(
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<string[]> {
   const args = getGitDiffSpawnArgs(options?.cwd).staged
   return await innerDiff(args, options)
@@ -340,21 +682,78 @@ export async function getStagedFiles(
 
 /**
  * Get staged files ready for commit (changes added with `git add`).
- * Uses `git diff --cached --name-only` which returns only staged changes.
- * Does not include unstaged modifications or untracked files.
+ *
+ * Synchronous version of `getStagedFiles()`. Uses `git diff --cached --name-only`
+ * which returns only staged changes. Does NOT include:
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files (new files not added to git)
+ *
  * This is a focused check for what will be included in the next commit.
+ * Useful for validating changes before committing or running pre-commit hooks.
+ *
+ * @param options - Options controlling path format and filtering.
+ * @returns Array of staged file paths.
+ *
+ * @example
+ * ```typescript
+ * // Get currently staged files
+ * const files = getStagedFilesSync()
+ * // => ['src/foo.ts']
+ *
+ * // Stage more files
+ * spawnSync('git', ['add', 'src/bar.ts'])
+ * const files = getStagedFilesSync()
+ * // => ['src/foo.ts', 'src/bar.ts']
+ *
+ * // Get absolute paths
+ * const files = getStagedFilesSync({ absolute: true })
+ * // => ['/path/to/repo/src/foo.ts', ...]
+ * ```
  */
-export function getStagedFilesSync(options?: GitDiffOptions): string[] {
+export function getStagedFilesSync(
+  options?: GitDiffOptions | undefined,
+): string[] {
   const args = getGitDiffSpawnArgs(options?.cwd).staged
   return innerDiffSync(args, options)
 }
 
 /**
- * Check if pathname has any changes (staged, unstaged, or untracked).
+ * Check if a file or directory has any git changes.
+ *
+ * Checks if the given pathname has any changes including:
+ * - Staged modifications (added with `git add`)
+ * - Unstaged modifications (not yet staged)
+ * - Untracked status (new file/directory not in git)
+ *
+ * For directories, returns `true` if ANY file within the directory has changes.
+ *
+ * Symlinks in the pathname and cwd are automatically resolved using
+ * `fs.realpathSync()` before comparison.
+ *
+ * @param pathname - File or directory path to check.
+ * @param options - Options for the git status check.
+ * @returns Promise resolving to `true` if path has any changes, `false` otherwise.
+ *
+ * @example
+ * ```typescript
+ * // Check if file is changed
+ * const changed = await isChanged('src/foo.ts')
+ * // => true
+ *
+ * // Check if directory has any changes
+ * const changed = await isChanged('src/')
+ * // => true (if any file in src/ is changed)
+ *
+ * // Check from different cwd
+ * const changed = await isChanged(
+ *   '/path/to/repo/src/foo.ts',
+ *   { cwd: '/path/to/repo' }
+ * )
+ * ```
  */
 export async function isChanged(
   pathname: string,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<boolean> {
   const files = await getChangedFiles({
     __proto__: null,
@@ -363,17 +762,50 @@ export async function isChanged(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd =
+    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
 
 /**
- * Check if pathname has any changes (staged, unstaged, or untracked).
+ * Check if a file or directory has any git changes.
+ *
+ * Synchronous version of `isChanged()`. Checks if the given pathname has
+ * any changes including:
+ * - Staged modifications (added with `git add`)
+ * - Unstaged modifications (not yet staged)
+ * - Untracked status (new file/directory not in git)
+ *
+ * For directories, returns `true` if ANY file within the directory has changes.
+ *
+ * Symlinks in the pathname and cwd are automatically resolved using
+ * `fs.realpathSync()` before comparison.
+ *
+ * @param pathname - File or directory path to check.
+ * @param options - Options for the git status check.
+ * @returns `true` if path has any changes, `false` otherwise.
+ *
+ * @example
+ * ```typescript
+ * // Check if file is changed
+ * const changed = isChangedSync('src/foo.ts')
+ * // => true
+ *
+ * // Check if directory has any changes
+ * const changed = isChangedSync('src/')
+ * // => true (if any file in src/ is changed)
+ *
+ * // Check from different cwd
+ * const changed = isChangedSync(
+ *   '/path/to/repo/src/foo.ts',
+ *   { cwd: '/path/to/repo' }
+ * )
+ * ```
  */
 export function isChangedSync(
   pathname: string,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): boolean {
   const files = getChangedFilesSync({
     __proto__: null,
@@ -382,17 +814,49 @@ export function isChangedSync(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd =
+    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
 
 /**
- * Check if pathname has unstaged changes (modified but not staged).
+ * Check if a file or directory has unstaged changes.
+ *
+ * Checks if the given pathname has modifications that are not yet staged
+ * for commit (changes not added with `git add`). Does NOT include:
+ * - Staged changes (already added with `git add`)
+ * - Untracked files (new files not in git)
+ *
+ * For directories, returns `true` if ANY file within the directory has
+ * unstaged changes.
+ *
+ * Symlinks in the pathname and cwd are automatically resolved using
+ * `fs.realpathSync()` before comparison.
+ *
+ * @param pathname - File or directory path to check.
+ * @param options - Options for the git diff check.
+ * @returns Promise resolving to `true` if path has unstaged changes, `false` otherwise.
+ *
+ * @example
+ * ```typescript
+ * // Check if file has unstaged changes
+ * const unstaged = await isUnstaged('src/foo.ts')
+ * // => true
+ *
+ * // After staging the file
+ * await spawn('git', ['add', 'src/foo.ts'])
+ * const unstaged = await isUnstaged('src/foo.ts')
+ * // => false
+ *
+ * // Check directory
+ * const unstaged = await isUnstaged('src/')
+ * // => true (if any file in src/ has unstaged changes)
+ * ```
  */
 export async function isUnstaged(
   pathname: string,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<boolean> {
   const files = await getUnstagedFiles({
     __proto__: null,
@@ -401,17 +865,50 @@ export async function isUnstaged(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd =
+    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
 
 /**
- * Check if pathname has unstaged changes (modified but not staged).
+ * Check if a file or directory has unstaged changes.
+ *
+ * Synchronous version of `isUnstaged()`. Checks if the given pathname has
+ * modifications that are not yet staged for commit (changes not added with
+ * `git add`). Does NOT include:
+ * - Staged changes (already added with `git add`)
+ * - Untracked files (new files not in git)
+ *
+ * For directories, returns `true` if ANY file within the directory has
+ * unstaged changes.
+ *
+ * Symlinks in the pathname and cwd are automatically resolved using
+ * `fs.realpathSync()` before comparison.
+ *
+ * @param pathname - File or directory path to check.
+ * @param options - Options for the git diff check.
+ * @returns `true` if path has unstaged changes, `false` otherwise.
+ *
+ * @example
+ * ```typescript
+ * // Check if file has unstaged changes
+ * const unstaged = isUnstagedSync('src/foo.ts')
+ * // => true
+ *
+ * // After staging the file
+ * spawnSync('git', ['add', 'src/foo.ts'])
+ * const unstaged = isUnstagedSync('src/foo.ts')
+ * // => false
+ *
+ * // Check directory
+ * const unstaged = isUnstagedSync('src/')
+ * // => true (if any file in src/ has unstaged changes)
+ * ```
  */
 export function isUnstagedSync(
   pathname: string,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): boolean {
   const files = getUnstagedFilesSync({
     __proto__: null,
@@ -420,17 +917,48 @@ export function isUnstagedSync(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd =
+    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
 
 /**
- * Check if pathname is staged for commit.
+ * Check if a file or directory is staged for commit.
+ *
+ * Checks if the given pathname has changes staged with `git add` that will
+ * be included in the next commit. Does NOT include:
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files (new files not in git)
+ *
+ * For directories, returns `true` if ANY file within the directory is staged.
+ *
+ * Symlinks in the pathname and cwd are automatically resolved using
+ * `fs.realpathSync()` before comparison.
+ *
+ * @param pathname - File or directory path to check.
+ * @param options - Options for the git diff check.
+ * @returns Promise resolving to `true` if path is staged, `false` otherwise.
+ *
+ * @example
+ * ```typescript
+ * // Check if file is staged
+ * const staged = await isStaged('src/foo.ts')
+ * // => false
+ *
+ * // Stage the file
+ * await spawn('git', ['add', 'src/foo.ts'])
+ * const staged = await isStaged('src/foo.ts')
+ * // => true
+ *
+ * // Check directory
+ * const staged = await isStaged('src/')
+ * // => true (if any file in src/ is staged)
+ * ```
  */
 export async function isStaged(
   pathname: string,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): Promise<boolean> {
   const files = await getStagedFiles({
     __proto__: null,
@@ -439,17 +967,49 @@ export async function isStaged(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd =
+    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
 
 /**
- * Check if pathname is staged for commit.
+ * Check if a file or directory is staged for commit.
+ *
+ * Synchronous version of `isStaged()`. Checks if the given pathname has
+ * changes staged with `git add` that will be included in the next commit.
+ * Does NOT include:
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files (new files not in git)
+ *
+ * For directories, returns `true` if ANY file within the directory is staged.
+ *
+ * Symlinks in the pathname and cwd are automatically resolved using
+ * `fs.realpathSync()` before comparison.
+ *
+ * @param pathname - File or directory path to check.
+ * @param options - Options for the git diff check.
+ * @returns `true` if path is staged, `false` otherwise.
+ *
+ * @example
+ * ```typescript
+ * // Check if file is staged
+ * const staged = isStagedSync('src/foo.ts')
+ * // => false
+ *
+ * // Stage the file
+ * spawnSync('git', ['add', 'src/foo.ts'])
+ * const staged = isStagedSync('src/foo.ts')
+ * // => true
+ *
+ * // Check directory
+ * const staged = isStagedSync('src/')
+ * // => true (if any file in src/ is staged)
+ * ```
  */
 export function isStagedSync(
   pathname: string,
-  options?: GitDiffOptions,
+  options?: GitDiffOptions | undefined,
 ): boolean {
   const files = getStagedFilesSync({
     __proto__: null,
@@ -458,7 +1018,8 @@ export function isStagedSync(
   })
   // Resolve pathname to handle symlinks before computing relative path.
   const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const baseCwd =
+    options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }

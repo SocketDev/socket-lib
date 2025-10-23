@@ -19,6 +19,10 @@ import yoctoSpinner from './external/@socketregistry/yocto-spinner'
 import { hasOwn } from './objects'
 import { isBlankString, stringWidth } from './strings'
 
+/**
+ * Named color values supported by the spinner.
+ * Maps to standard terminal colors with bright variants.
+ */
 export type ColorName =
   | 'black'
   | 'blue'
@@ -37,12 +41,28 @@ export type ColorName =
   | 'yellow'
   | 'yellowBright'
 
+/**
+ * Special 'inherit' color value that uses the spinner's current color.
+ * Used with shimmer effects to dynamically inherit the spinner color.
+ */
 export type ColorInherit = 'inherit'
 
+/**
+ * RGB color tuple with values 0-255 for red, green, and blue channels.
+ * @example [140, 82, 255] // Socket purple
+ * @example [255, 0, 0]    // Red
+ */
 export type ColorRgb = readonly [number, number, number]
 
+/**
+ * Union of all supported color types: named colors or RGB tuples.
+ */
 export type ColorValue = ColorName | ColorRgb
 
+/**
+ * Symbol types for status messages.
+ * Maps to log symbols: success (✓), fail (✗), info (ℹ), warn (⚠).
+ */
 export type SymbolType = 'fail' | 'info' | 'success' | 'warn'
 
 // Map color names to RGB values.
@@ -67,14 +87,19 @@ const colorToRgb: Record<ColorName, ColorRgb> = {
 } as Record<ColorName, ColorRgb>
 
 /**
- * Check if value is RGB tuple.
+ * Type guard to check if a color value is an RGB tuple.
+ * @param value - Color value to check
+ * @returns `true` if value is an RGB tuple, `false` if it's a color name
  */
 function isRgbTuple(value: ColorValue): value is ColorRgb {
   return Array.isArray(value)
 }
 
 /**
- * Convert ColorValue to RGB tuple.
+ * Convert a color value to RGB tuple format.
+ * Named colors are looked up in the `colorToRgb` map, RGB tuples are returned as-is.
+ * @param color - Color name or RGB tuple
+ * @returns RGB tuple with values 0-255
  */
 function toRgb(color: ColorValue): ColorRgb {
   if (isRgbTuple(color)) {
@@ -83,84 +108,203 @@ function toRgb(color: ColorValue): ColorRgb {
   return colorToRgb[color]
 }
 
+/**
+ * Progress tracking information for display in spinner.
+ * Used by `progress()` and `progressStep()` methods to show animated progress bars.
+ */
 export type ProgressInfo = {
+  /** Current progress value */
   current: number
+  /** Total/maximum progress value */
   total: number
+  /** Optional unit label displayed after the progress count (e.g., 'files', 'items') */
   unit?: string | undefined
 }
 
+/**
+ * Internal shimmer state with color configuration.
+ * Extends `ShimmerState` with additional color property that can be inherited from spinner.
+ */
 export type ShimmerInfo = ShimmerState & {
+  /** Color for shimmer effect - can inherit from spinner, use explicit color, or gradient */
   color: ColorInherit | ColorValue | ShimmerColorGradient
 }
 
+/**
+ * Spinner instance for displaying animated loading indicators.
+ * Provides methods for status updates, progress tracking, and text shimmer effects.
+ *
+ * KEY BEHAVIORS:
+ * - Methods WITHOUT "AndStop" keep the spinner running (e.g., `success()`, `fail()`)
+ * - Methods WITH "AndStop" auto-clear the spinner line (e.g., `successAndStop()`, `failAndStop()`)
+ * - Status messages (done, success, fail, info, warn, step, substep) go to stderr
+ * - Data messages (`log()`) go to stdout
+ *
+ * @example
+ * ```ts
+ * import { Spinner } from '@socketsecurity/registry/lib/spinner'
+ *
+ * const spinner = Spinner({ text: 'Loading…' })
+ * spinner.start()
+ *
+ * // Show success while continuing to spin
+ * spinner.success('Step 1 complete')
+ *
+ * // Stop the spinner with success message
+ * spinner.successAndStop('All done!')
+ * ```
+ */
 export type Spinner = {
+  /** Current spinner color as RGB tuple */
   color: ColorRgb
+  /** Current spinner animation style */
   spinner: SpinnerStyle
 
+  /** Whether spinner is currently animating */
   get isSpinning(): boolean
 
+  /** Clear the current line without stopping the spinner */
   clear(): Spinner
+
+  /** Show debug message without stopping (only if debug mode enabled) */
   debug(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show debug message and stop the spinner (only if debug mode enabled) */
   debugAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+
+  /** Alias for `fail()` - show error without stopping */
   error(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Alias for `failAndStop()` - show error and stop */
   errorAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+
+  /** Show failure (✗) without stopping the spinner */
   fail(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show failure (✗) and stop the spinner, auto-clearing the line */
   failAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
-  // text property returns a method via _textMethod override
+  /** Get current spinner text (getter) or set new text (setter) */
   text(value: string): Spinner
   text(): string
 
+  /** Increase indentation by specified spaces (default: 2) */
   indent(spaces?: number | undefined): Spinner
+  /** Decrease indentation by specified spaces (default: 2) */
   dedent(spaces?: number | undefined): Spinner
 
+  /** Show info (ℹ) message without stopping the spinner */
   info(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show info (ℹ) message and stop the spinner, auto-clearing the line */
   infoAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+
+  /** Log to stdout without stopping the spinner */
   log(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Log and stop the spinner, auto-clearing the line */
   logAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Start spinning with optional text */
   start(text?: string | undefined): Spinner
+  /** Stop spinning and clear internal state, auto-clearing the line */
   stop(text?: string | undefined): Spinner
+  /** Stop and show final text without clearing the line */
   stopAndPersist(text?: string | undefined): Spinner
 
+  /** Show main step message to stderr without stopping */
   step(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show indented substep message to stderr without stopping */
   substep(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Show success (✓) without stopping the spinner */
   success(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show success (✓) and stop the spinner, auto-clearing the line */
   successAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Alias for `success()` - show success without stopping */
   done(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Alias for `successAndStop()` - show success and stop */
   doneAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Update progress bar with current/total values and optional unit */
   progress(current: number, total: number, unit?: string | undefined): Spinner
+  /** Increment progress by specified amount (default: 1) */
   progressStep(amount?: number): Spinner
 
+  /** Toggle shimmer effect on/off */
   shimmer(enabled: boolean): Spinner
+  /** Update shimmer configuration or set direction */
   shimmer(config: Partial<ShimmerConfig> | ShimmerDirection): Spinner
 
+  /** Show warning (⚠) without stopping the spinner */
   warn(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show warning (⚠) and stop the spinner, auto-clearing the line */
   warnAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 }
 
+/**
+ * Configuration options for creating a spinner instance.
+ */
 export type SpinnerOptions = {
+  /**
+   * Spinner color as RGB tuple or color name.
+   * @default [140, 82, 255] Socket purple
+   */
   readonly color?: ColorValue | undefined
+  /**
+   * Shimmer effect configuration or direction string.
+   * When enabled, text will have an animated shimmer effect.
+   * @default undefined No shimmer effect
+   */
   readonly shimmer?: ShimmerConfig | ShimmerDirection | undefined
+  /**
+   * Animation style with frames and timing.
+   * @default 'socket' Custom Socket animation in CLI, minimal in CI
+   */
   readonly spinner?: SpinnerStyle | undefined
+  /**
+   * Abort signal for cancelling the spinner.
+   * @default getAbortSignal() from process constants
+   */
   readonly signal?: AbortSignal | undefined
+  /**
+   * Output stream for spinner rendering.
+   * @default process.stderr
+   */
   readonly stream?: Writable | undefined
+  /**
+   * Initial text to display with the spinner.
+   * @default undefined No initial text
+   */
   readonly text?: string | undefined
 }
 
+/**
+ * Animation style definition for spinner frames.
+ * Defines the visual appearance and timing of the spinner animation.
+ */
 export type SpinnerStyle = {
+  /** Array of animation frames (strings to display sequentially) */
   readonly frames: string[]
+  /**
+   * Milliseconds between frame changes.
+   * @default 80 Standard frame rate
+   */
   readonly interval?: number | undefined
 }
 
+/**
+ * Minimal spinner style for CI environments.
+ * Uses empty frame and max interval to effectively disable animation in CI.
+ */
 export const ciSpinner: SpinnerStyle = {
   frames: [''],
   interval: 2_147_483_647,
 }
 
+/**
+ * Create a property descriptor for defining non-enumerable properties.
+ * Used for adding aliased methods to the Spinner prototype.
+ * @param value - Value for the property
+ * @returns Property descriptor object
+ * @private
+ */
 function desc(value: unknown) {
   return {
     __proto__: null,
@@ -170,10 +314,24 @@ function desc(value: unknown) {
   }
 }
 
+/**
+ * Normalize text input by trimming leading whitespace.
+ * Non-string values are converted to empty string.
+ * @param value - Text to normalize
+ * @returns Normalized string with leading whitespace removed
+ * @private
+ */
 function normalizeText(value: unknown) {
   return typeof value === 'string' ? value.trimStart() : ''
 }
 
+/**
+ * Format progress information as a visual progress bar with percentage and count.
+ * @param progress - Progress tracking information
+ * @returns Formatted string with colored progress bar, percentage, and count
+ * @private
+ * @example "███████░░░░░░░░░░░░░ 35% (7/20 files)"
+ */
 function formatProgress(progress: ProgressInfo): string {
   const { current, total, unit } = progress
   const percentage = Math.round((current / total) * 100)
@@ -182,6 +340,14 @@ function formatProgress(progress: ProgressInfo): string {
   return `${bar} ${percentage}% (${count})`
 }
 
+/**
+ * Render a progress bar using block characters (█ for filled, ░ for empty).
+ * @param percentage - Progress percentage (0-100)
+ * @param width - Total width of progress bar in characters
+ * @returns Colored progress bar string
+ * @default width=20
+ * @private
+ */
 function renderProgressBar(percentage: number, width: number = 20): string {
   const filled = Math.round((percentage / 100) * width)
   const empty = width - filled
@@ -197,10 +363,22 @@ let _cliSpinners: Record<string, SpinnerStyle> | undefined
  * Get available CLI spinner styles or a specific style by name.
  * Extends the standard cli-spinners collection with Socket custom spinners.
  *
- * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
- *
  * Custom spinners:
  * - `socket` (default): Socket pulse animation with sparkles and lightning
+ *
+ * @param styleName - Optional name of specific spinner style to retrieve
+ * @returns Specific spinner style if name provided, all styles if omitted, `undefined` if style not found
+ * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
+ *
+ * @example
+ * ```ts
+ * // Get all available spinner styles
+ * const allSpinners = getCliSpinners()
+ *
+ * // Get specific style
+ * const socketStyle = getCliSpinners('socket')
+ * const dotsStyle = getCliSpinners('dots')
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getCliSpinners(
@@ -231,23 +409,54 @@ let _defaultSpinner: SpinnerStyle | undefined
 
 /**
  * Create a spinner instance for displaying loading indicators.
+ * Provides an animated CLI spinner with status messages, progress tracking, and shimmer effects.
  *
  * AUTO-CLEAR BEHAVIOR:
  * - All *AndStop() methods AUTO-CLEAR the spinner line via yocto-spinner.stop()
- *   Examples: doneAndStop(), successAndStop(), failAndStop(), etc.
+ *   Examples: `doneAndStop()`, `successAndStop()`, `failAndStop()`, etc.
  *
  * - Methods WITHOUT "AndStop" do NOT clear (spinner keeps spinning)
- *   Examples: done(), success(), fail(), etc.
+ *   Examples: `done()`, `success()`, `fail()`, etc.
  *
  * STREAM USAGE:
  * - Spinner animation: stderr (yocto-spinner default)
  * - Status methods (done, success, fail, info, warn, step, substep): stderr
- * - Data methods (log): stdout
+ * - Data methods (`log()`): stdout
  *
  * COMPARISON WITH LOGGER:
- * - logger.done() does NOT auto-clear (requires manual logger.clearLine())
- * - spinner.doneAndStop() DOES auto-clear (built into yocto-spinner.stop())
- * - Pattern: logger.clearLine().done() vs spinner.doneAndStop()
+ * - `logger.done()` does NOT auto-clear (requires manual `logger.clearLine()`)
+ * - `spinner.doneAndStop()` DOES auto-clear (built into yocto-spinner.stop())
+ * - Pattern: `logger.clearLine().done()` vs `spinner.doneAndStop()`
+ *
+ * @param options - Configuration options for the spinner
+ * @returns New spinner instance
+ *
+ * @example
+ * ```ts
+ * import { Spinner } from '@socketsecurity/registry/lib/spinner'
+ *
+ * // Basic usage
+ * const spinner = Spinner({ text: 'Loading data…' })
+ * spinner.start()
+ * await fetchData()
+ * spinner.successAndStop('Data loaded!')
+ *
+ * // With custom color
+ * const spinner = Spinner({
+ *   text: 'Processing…',
+ *   color: [255, 0, 0] // Red
+ * })
+ *
+ * // With shimmer effect
+ * const spinner = Spinner({
+ *   text: 'Building…',
+ *   shimmer: { dir: 'ltr', speed: 0.5 }
+ * })
+ *
+ * // Show progress
+ * spinner.progress(5, 10, 'files')
+ * spinner.progressStep() // Increment by 1
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function Spinner(options?: SpinnerOptions | undefined): Spinner {
@@ -487,35 +696,55 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Show a debug message without stopping the spinner (only if debug mode enabled).
+       * Show a debug message (ℹ) without stopping the spinner.
+       * Only displays if debug mode is enabled via environment variable.
        * Outputs to stderr and continues spinning.
+       *
+       * @param text - Debug message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      debug(...args: unknown[]) {
+      debug(text?: string | undefined, ...extras: unknown[]) {
         const { isDebug } = /*@__PURE__*/ require('./debug.js')
         if (isDebug()) {
-          return this.#showStatusAndKeepSpinning('info', args)
+          return this.#showStatusAndKeepSpinning('info', [text, ...extras])
         }
         return this
       }
 
       /**
-       * Show a debug message and stop the spinner (only if debug mode enabled).
+       * Show a debug message (ℹ) and stop the spinner.
+       * Only displays if debug mode is enabled via environment variable.
        * Auto-clears the spinner line before displaying the message.
+       *
+       * @param text - Debug message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      debugAndStop(...args: unknown[]) {
+      debugAndStop(text?: string | undefined, ...extras: unknown[]) {
         const { isDebug } = /*@__PURE__*/ require('./debug.js')
         if (isDebug()) {
-          return this.#apply('info', args)
+          return this.#apply('info', [text, ...extras])
         }
         return this
       }
 
       /**
-       * Decrease indentation level.
-       * Pass 0 to reset indentation to zero.
-       * @param spaces - Number of spaces to remove (default: 2)
+       * Decrease indentation level by removing spaces from the left.
+       * Pass 0 to reset indentation to zero completely.
+       *
+       * @param spaces - Number of spaces to remove
+       * @returns This spinner for chaining
+       * @default spaces=2
+       *
+       * @example
+       * ```ts
+       * spinner.dedent()    // Remove 2 spaces
+       * spinner.dedent(4)   // Remove 4 spaces
+       * spinner.dedent(0)   // Reset to zero indentation
+       * ```
        */
-      dedent(spaces?: number) {
+      dedent(spaces?: number | undefined) {
         // Pass 0 to reset indentation
         if (spaces === 0) {
           this.#indentation = ''
@@ -529,46 +758,74 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Alias for success() (shorter name).
-       * DESIGN DECISION: Unlike yocto-spinner, our done() does NOT stop the spinner.
-       * Use doneAndStop() if you want to stop the spinner.
+       * Show a done/success message (✓) without stopping the spinner.
+       * Alias for `success()` with a shorter name.
+       *
+       * DESIGN DECISION: Unlike yocto-spinner, our `done()` does NOT stop the spinner.
+       * Use `doneAndStop()` if you want to stop the spinner.
+       *
+       * @param text - Message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      done(...args: unknown[]) {
-        return this.#showStatusAndKeepSpinning('success', args)
+      done(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('success', [text, ...extras])
       }
 
       /**
-       * Show a done message and stop the spinner.
+       * Show a done/success message (✓) and stop the spinner.
        * Auto-clears the spinner line before displaying the success message.
+       *
+       * @param text - Message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      doneAndStop(...args: unknown[]) {
-        return this.#apply('success', args)
+      doneAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('success', [text, ...extras])
       }
 
       /**
-       * Show a failure message without stopping the spinner.
-       * DESIGN DECISION: Unlike yocto-spinner, our fail() does NOT stop the spinner.
+       * Show a failure message (✗) without stopping the spinner.
+       * DESIGN DECISION: Unlike yocto-spinner, our `fail()` does NOT stop the spinner.
        * This allows displaying errors while continuing to spin.
-       * Use failAndStop() if you want to stop the spinner.
+       * Use `failAndStop()` if you want to stop the spinner.
+       *
+       * @param text - Error message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      fail(...args: unknown[]) {
-        return this.#showStatusAndKeepSpinning('fail', args)
+      fail(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('fail', [text, ...extras])
       }
 
       /**
-       * Show a failure message and stop the spinner.
+       * Show a failure message (✗) and stop the spinner.
        * Auto-clears the spinner line before displaying the error message.
+       *
+       * @param text - Error message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      failAndStop(...args: unknown[]) {
-        return this.#apply('error', args)
+      failAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('error', [text, ...extras])
       }
 
       /**
-       * Increase indentation level.
-       * Pass 0 to reset indentation to zero.
-       * @param spaces - Number of spaces to add (default: 2)
+       * Increase indentation level by adding spaces to the left.
+       * Pass 0 to reset indentation to zero completely.
+       *
+       * @param spaces - Number of spaces to add
+       * @returns This spinner for chaining
+       * @default spaces=2
+       *
+       * @example
+       * ```ts
+       * spinner.indent()    // Add 2 spaces
+       * spinner.indent(4)   // Add 4 spaces
+       * spinner.indent(0)   // Reset to zero indentation
+       * ```
        */
-      indent(spaces?: number) {
+      indent(spaces?: number | undefined) {
         // Pass 0 to reset indentation
         if (spaces === 0) {
           this.#indentation = ''
@@ -581,24 +838,35 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Show an info message without stopping the spinner.
+       * Show an info message (ℹ) without stopping the spinner.
        * Outputs to stderr and continues spinning.
+       *
+       * @param text - Info message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      info(...args: unknown[]) {
-        return this.#showStatusAndKeepSpinning('info', args)
+      info(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('info', [text, ...extras])
       }
 
       /**
-       * Show an info message and stop the spinner.
+       * Show an info message (ℹ) and stop the spinner.
        * Auto-clears the spinner line before displaying the message.
+       *
+       * @param text - Info message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      infoAndStop(...args: unknown[]) {
-        return this.#apply('info', args)
+      infoAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('info', [text, ...extras])
       }
 
       /**
        * Log a message to stdout without stopping the spinner.
-       * Unlike other methods, this outputs to stdout for data logging.
+       * Unlike other status methods, this outputs to stdout for data logging.
+       *
+       * @param args - Values to log to stdout
+       * @returns This spinner for chaining
        */
       log(...args: unknown[]) {
         const { logger } = /*@__PURE__*/ require('./logger.js')
@@ -607,19 +875,31 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Log a message and stop the spinner.
+       * Log a message to stdout and stop the spinner.
        * Auto-clears the spinner line before displaying the message.
+       *
+       * @param text - Message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      logAndStop(...args: unknown[]) {
-        return this.#apply('stop', args)
+      logAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('stop', [text, ...extras])
       }
 
       /**
        * Update progress information displayed with the spinner.
        * Shows a progress bar with percentage and optional unit label.
+       *
        * @param current - Current progress value
-       * @param total - Total progress value
+       * @param total - Total/maximum progress value
        * @param unit - Optional unit label (e.g., 'files', 'items')
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.progress(5, 10)            // "███████░░░░░░░░░░░░░ 50% (5/10)"
+       * spinner.progress(7, 20, 'files')   // "███████░░░░░░░░░░░░░ 35% (7/20 files)"
+       * ```
        */
       progress = (
         current: number,
@@ -639,7 +919,18 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       /**
        * Increment progress by a specified amount.
        * Updates the progress bar displayed with the spinner.
-       * @param amount - Amount to increment (default: 1)
+       * Clamps the result between 0 and the total value.
+       *
+       * @param amount - Amount to increment by
+       * @returns This spinner for chaining
+       * @default amount=1
+       *
+       * @example
+       * ```ts
+       * spinner.progress(0, 10, 'files')
+       * spinner.progressStep()    // Progress: 1/10
+       * spinner.progressStep(3)   // Progress: 4/10
+       * ```
        */
       progressStep(amount: number = 1) {
         if (this.#progress) {
@@ -657,8 +948,17 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
 
       /**
        * Start the spinner animation with optional text.
-       * Begins displaying the animated spinner.
+       * Begins displaying the animated spinner on stderr.
+       *
        * @param text - Optional text to display with the spinner
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.start('Loading…')
+       * // Later:
+       * spinner.successAndStop('Done!')
+       * ```
        */
       start(...args: unknown[]) {
         if (args.length) {
@@ -681,16 +981,26 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       /**
        * Log a main step message to stderr without stopping the spinner.
        * Adds a blank line before the message for visual separation.
-       * Aligns with logger.step() to use stderr for status messages.
+       * Aligns with `logger.step()` to use stderr for status messages.
+       *
+       * @param text - Step message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.step('Building application')
+       * spinner.substep('Compiling TypeScript')
+       * spinner.substep('Bundling assets')
+       * ```
        */
-      step(...args: unknown[]) {
-        const text = args[0]
+      step(text?: string | undefined, ...extras: unknown[]) {
         const { logger } = /*@__PURE__*/ require('./logger.js')
         if (typeof text === 'string') {
           // Add blank line before step for visual separation.
           logger.error('')
           // Use error (stderr) to align with logger.step() default stream.
-          logger.error(text, ...args.slice(1))
+          logger.error(text, ...extras)
         }
         return this
       }
@@ -698,15 +1008,25 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       /**
        * Log an indented substep message to stderr without stopping the spinner.
        * Adds 2-space indentation to the message.
-       * Aligns with logger.substep() to use stderr for status messages.
+       * Aligns with `logger.substep()` to use stderr for status messages.
+       *
+       * @param text - Substep message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.step('Building application')
+       * spinner.substep('Compiling TypeScript')
+       * spinner.substep('Bundling assets')
+       * ```
        */
-      substep(...args: unknown[]) {
-        const text = args[0]
+      substep(text?: string | undefined, ...extras: unknown[]) {
         if (typeof text === 'string') {
           // Add 2-space indent for substep.
           const { logger } = /*@__PURE__*/ require('./logger.js')
           // Use error (stderr) to align with logger.substep() default stream.
-          logger.error(`  ${text}`, ...args.slice(1))
+          logger.error(`  ${text}`, ...extras)
         }
         return this
       }
@@ -715,7 +1035,18 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * Stop the spinner animation and clear internal state.
        * Auto-clears the spinner line via yocto-spinner.stop().
        * Resets progress, shimmer, and text state.
+       *
        * @param text - Optional final text to display after stopping
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.start('Processing…')
+       * // Do work
+       * spinner.stop() // Just stop, no message
+       * // or
+       * spinner.stop('Finished processing')
+       * ```
        */
       stop(...args: unknown[]) {
         // Clear internal state.
@@ -735,29 +1066,49 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Show a success message without stopping the spinner.
-       * DESIGN DECISION: Unlike yocto-spinner, our success() does NOT stop the spinner.
+       * Show a success message (✓) without stopping the spinner.
+       * DESIGN DECISION: Unlike yocto-spinner, our `success()` does NOT stop the spinner.
        * This allows displaying success messages while continuing to spin for multi-step operations.
-       * Use successAndStop() if you want to stop the spinner.
+       * Use `successAndStop()` if you want to stop the spinner.
+       *
+       * @param text - Success message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      success(...args: unknown[]) {
-        return this.#showStatusAndKeepSpinning('success', args)
+      success(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('success', [text, ...extras])
       }
 
       /**
-       * Show a success message and stop the spinner.
+       * Show a success message (✓) and stop the spinner.
        * Auto-clears the spinner line before displaying the success message.
+       *
+       * @param text - Success message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      successAndStop(...args: unknown[]) {
-        return this.#apply('success', args)
+      successAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('success', [text, ...extras])
       }
 
       /**
        * Get or set the spinner text.
-       * When called with no arguments, returns the current text.
-       * When called with text, updates the display and returns the spinner.
+       * When called with no arguments, returns the current base text.
+       * When called with text, updates the display and returns the spinner for chaining.
+       *
        * @param value - Text to display (omit to get current text)
        * @returns Current text (getter) or this spinner (setter)
+       *
+       * @example
+       * ```ts
+       * // Setter
+       * spinner.text('Loading data…')
+       * spinner.text('Processing…')
+       *
+       * // Getter
+       * const current = spinner.text()
+       * console.log(current) // "Processing…"
+       * ```
        */
       text(): string
       text(value: string): Spinner
@@ -774,19 +1125,27 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Show a warning message without stopping the spinner.
+       * Show a warning message (⚠) without stopping the spinner.
        * Outputs to stderr and continues spinning.
+       *
+       * @param text - Warning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      warn(...args: unknown[]) {
-        return this.#showStatusAndKeepSpinning('warn', args)
+      warn(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('warn', [text, ...extras])
       }
 
       /**
-       * Show a warning message and stop the spinner.
+       * Show a warning message (⚠) and stop the spinner.
        * Auto-clears the spinner line before displaying the warning message.
+       *
+       * @param text - Warning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
        */
-      warnAndStop(...args: unknown[]) {
-        return this.#apply('warning', args)
+      warnAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('warning', [text, ...extras])
       }
 
       /**
@@ -938,9 +1297,21 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
 }
 
 let _spinner: ReturnType<typeof Spinner> | undefined
+
 /**
  * Get the default spinner instance.
  * Lazily creates the spinner to avoid circular dependencies during module initialization.
+ * Reuses the same instance across calls.
+ *
+ * @returns Shared default spinner instance
+ *
+ * @example
+ * ```ts
+ * import { getDefaultSpinner } from '@socketsecurity/registry/lib/spinner'
+ *
+ * const spinner = getDefaultSpinner()
+ * spinner.start('Loading…')
+ * ```
  */
 export function getDefaultSpinner(): ReturnType<typeof Spinner> {
   if (_spinner === undefined) {
@@ -950,7 +1321,21 @@ export function getDefaultSpinner(): ReturnType<typeof Spinner> {
 }
 
 /**
+ * Default shared spinner instance (lazily initialized).
+ *
  * @deprecated Use `getDefaultSpinner()` function instead for better tree-shaking and to avoid circular dependencies.
+ *
+ * @example
+ * ```ts
+ * // Old (deprecated):
+ * import { spinner } from '@socketsecurity/registry/lib/spinner'
+ * spinner.start('Loading…')
+ *
+ * // New (recommended):
+ * import { getDefaultSpinner } from '@socketsecurity/registry/lib/spinner'
+ * const spinner = getDefaultSpinner()
+ * spinner.start('Loading…')
+ * ```
  */
 export const spinner = /* @__PURE__ */ (() => {
   // Lazy initialization to prevent circular dependency issues during module loading.
@@ -966,16 +1351,28 @@ export const spinner = /* @__PURE__ */ (() => {
   })
 })()
 
+/**
+ * Configuration options for `withSpinner()` helper.
+ * @template T - Return type of the async operation
+ */
 export type WithSpinnerOptions<T> = {
+  /** Message to display while the spinner is running */
   message: string
+  /** Async function to execute while spinner is active */
   operation: () => Promise<T>
+  /**
+   * Optional spinner instance to use.
+   * If not provided, operation runs without spinner.
+   */
   spinner?: Spinner | undefined
 }
 
 /**
  * Execute an async operation with spinner lifecycle management.
- * Ensures spinner.stop() is always called via try/finally, even if the operation throws.
+ * Ensures `spinner.stop()` is always called via try/finally, even if the operation throws.
+ * Provides safe cleanup and consistent spinner behavior.
  *
+ * @template T - Return type of the operation
  * @param options - Configuration object
  * @param options.message - Message to display while spinner is running
  * @param options.operation - Async function to execute
@@ -984,10 +1381,13 @@ export type WithSpinnerOptions<T> = {
  * @throws Re-throws any error from operation after stopping spinner
  *
  * @example
- * import { spinner, withSpinner } from '@socketsecurity/registry/lib/spinner'
+ * ```ts
+ * import { Spinner, withSpinner } from '@socketsecurity/registry/lib/spinner'
+ *
+ * const spinner = Spinner()
  *
  * // With spinner instance
- * await withSpinner({
+ * const result = await withSpinner({
  *   message: 'Processing…',
  *   operation: async () => {
  *     return await processData()
@@ -995,13 +1395,14 @@ export type WithSpinnerOptions<T> = {
  *   spinner
  * })
  *
- * // Without spinner instance (no-op)
- * await withSpinner({
+ * // Without spinner instance (no-op, just runs operation)
+ * const result = await withSpinner({
  *   message: 'Processing…',
  *   operation: async () => {
  *     return await processData()
  *   }
  * })
+ * ```
  */
 export async function withSpinner<T>(
   options: WithSpinnerOptions<T>,
@@ -1023,27 +1424,37 @@ export async function withSpinner<T>(
   }
 }
 
+/**
+ * Configuration options for `withSpinnerRestore()` helper.
+ * @template T - Return type of the async operation
+ */
 export type WithSpinnerRestoreOptions<T> = {
+  /** Async function to execute while spinner is stopped */
   operation: () => Promise<T>
+  /** Optional spinner instance to restore after operation */
   spinner?: Spinner | undefined
+  /** Whether spinner was spinning before the operation (used to conditionally restart) */
   wasSpinning: boolean
 }
 
 /**
  * Execute an async operation with conditional spinner restart.
  * Useful when you need to temporarily stop a spinner for an operation,
- * then restore it to its previous state.
+ * then restore it to its previous state (if it was spinning).
  *
+ * @template T - Return type of the operation
  * @param options - Configuration object
  * @param options.operation - Async function to execute
  * @param options.spinner - Optional spinner instance to manage
- * @param options.wasSpinning - Whether spinner was spinning before
+ * @param options.wasSpinning - Whether spinner was spinning before the operation
  * @returns Result of the operation
  * @throws Re-throws any error from operation after restoring spinner state
  *
  * @example
- * import { spinner, withSpinnerRestore } from '@socketsecurity/registry/lib/spinner'
+ * ```ts
+ * import { getDefaultSpinner, withSpinnerRestore } from '@socketsecurity/registry/lib/spinner'
  *
+ * const spinner = getDefaultSpinner()
  * const wasSpinning = spinner.isSpinning
  * spinner.stop()
  *
@@ -1055,6 +1466,8 @@ export type WithSpinnerRestoreOptions<T> = {
  *   spinner,
  *   wasSpinning
  * })
+ * // Spinner is automatically restarted if wasSpinning was true
+ * ```
  */
 export async function withSpinnerRestore<T>(
   options: WithSpinnerRestoreOptions<T>,
@@ -1073,25 +1486,40 @@ export async function withSpinnerRestore<T>(
   }
 }
 
+/**
+ * Configuration options for `withSpinnerSync()` helper.
+ * @template T - Return type of the sync operation
+ */
 export type WithSpinnerSyncOptions<T> = {
+  /** Message to display while the spinner is running */
   message: string
+  /** Synchronous function to execute while spinner is active */
   operation: () => T
+  /**
+   * Optional spinner instance to use.
+   * If not provided, operation runs without spinner.
+   */
   spinner?: Spinner | undefined
 }
 
 /**
  * Execute a synchronous operation with spinner lifecycle management.
- * Ensures spinner.stop() is always called via try/finally, even if the operation throws.
+ * Ensures `spinner.stop()` is always called via try/finally, even if the operation throws.
+ * Provides safe cleanup and consistent spinner behavior for sync operations.
  *
+ * @template T - Return type of the operation
  * @param options - Configuration object
  * @param options.message - Message to display while spinner is running
- * @param options.operation - Function to execute
+ * @param options.operation - Synchronous function to execute
  * @param options.spinner - Optional spinner instance (if not provided, no spinner is used)
  * @returns Result of the operation
  * @throws Re-throws any error from operation after stopping spinner
  *
  * @example
- * import { spinner, withSpinnerSync} from '@socketsecurity/registry/lib/spinner'
+ * ```ts
+ * import { Spinner, withSpinnerSync } from '@socketsecurity/registry/lib/spinner'
+ *
+ * const spinner = Spinner()
  *
  * const result = withSpinnerSync({
  *   message: 'Processing…',
@@ -1100,6 +1528,7 @@ export type WithSpinnerSyncOptions<T> = {
  *   },
  *   spinner
  * })
+ * ```
  */
 export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
   const { message, operation, spinner } = {
