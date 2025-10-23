@@ -164,8 +164,8 @@ Or use `scripts/generate-package-exports.mjs` to auto-generate exports.
 ### Testing
 
 #### Test Structure
-- **Directories**: `test/registry/` - Registry-style tests
-- **Naming**: Match source structure (e.g., `test/registry/lib/spinner.test.ts` for `src/lib/spinner.ts`)
+- **Directories**: `test/` - All test files
+- **Naming**: Match source structure (e.g., `test/spinner.test.ts` for `src/spinner.ts`)
 - **Framework**: Vitest
 - **Coverage**: c8/v8 coverage via Vitest
 
@@ -221,7 +221,7 @@ Use `pnpm run build:watch` or `pnpm run dev` for development with automatic rebu
 3. Add type definitions
 4. Add to `src/index.ts` if public API
 5. Update `package.json` exports if direct export needed
-6. Add tests in `test/registry/` matching structure
+6. Add tests in `test/` matching structure
 7. Update types and build
 
 ### Common Patterns

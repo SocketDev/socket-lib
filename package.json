@@ -148,6 +148,10 @@
       "types": "./dist/dlx-binary.d.ts",
       "default": "./dist/dlx-binary.js"
     },
+    "./dlx-package": {
+      "types": "./dist/dlx-package.d.ts",
+      "default": "./dist/dlx-package.js"
+    },
     "./download-lock": {
       "types": "./dist/download-lock.d.ts",
       "default": "./dist/download-lock.js"
