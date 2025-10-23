@@ -7,6 +7,56 @@ import os from 'node:os'
 import path from 'node:path'
 
 /**
+ * Mock the home directory for cross-platform testing.
+ * On Unix: Sets HOME
+ * On Windows: Sets USERPROFILE, HOMEDRIVE, HOMEPATH
+ */
+export function mockHomeDir(homeDir: string): () => void {
+  const originalEnv = {
+    HOME: process.env['HOME'],
+    HOMEDRIVE: process.env['HOMEDRIVE'],
+    HOMEPATH: process.env['HOMEPATH'],
+    USERPROFILE: process.env['USERPROFILE'],
+  }
+
+  // Set Unix home.
+  process.env['HOME'] = homeDir
+
+  // Set Windows home.
+  if (process.platform === 'win32') {
+    const drive = homeDir.slice(0, 2) // e.g., 'C:'
+    const pathWithoutDrive = homeDir.slice(2) // e.g., '\Users\test'
+    process.env['HOMEDRIVE'] = drive
+    process.env['HOMEPATH'] = pathWithoutDrive
+    process.env['USERPROFILE'] = homeDir
+  }
+
+  // Return restore function.
+  return () => {
+    if (originalEnv.HOME === undefined) {
+      delete process.env['HOME']
+    } else {
+      process.env['HOME'] = originalEnv.HOME
+    }
+    if (originalEnv.USERPROFILE === undefined) {
+      delete process.env['USERPROFILE']
+    } else {
+      process.env['USERPROFILE'] = originalEnv.USERPROFILE
+    }
+    if (originalEnv.HOMEDRIVE === undefined) {
+      delete process.env['HOMEDRIVE']
+    } else {
+      process.env['HOMEDRIVE'] = originalEnv.HOMEDRIVE
+    }
+    if (originalEnv.HOMEPATH === undefined) {
+      delete process.env['HOMEPATH']
+    } else {
+      process.env['HOMEPATH'] = originalEnv.HOMEPATH
+    }
+  }
+}
+
+/**
  * Creates a unique temporary directory for testing.
  * The directory is created in the system's temp directory with a unique name.
  */

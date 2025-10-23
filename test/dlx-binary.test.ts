@@ -15,7 +15,7 @@ import {
   listDlxCache,
 } from '@socketsecurity/lib/dlx-binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper.mjs'
+import { mockHomeDir, runWithTempDir } from './utils/temp-file-helper.mjs'
 
 // Test server setup
 let httpServer: http.Server
@@ -108,9 +108,7 @@ describe('dlx-binary', () => {
   describe('dlxBinary', () => {
     it('should download and cache binary', async () => {
       await runWithTempDir(async tmpDir => {
-        // Mock getSocketHomePath to use temp directory
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -125,15 +123,14 @@ describe('dlx-binary', () => {
           expect(result.spawnPromise).toBeDefined()
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-download-')
     })
 
     it('should use cached binary on second call', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -155,15 +152,14 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
           await result2.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-cached-')
     })
 
     it('should force re-download when force option is true', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -184,15 +180,14 @@ describe('dlx-binary', () => {
           expect(result.downloaded).toBe(true)
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-force-')
     })
 
     it('should verify checksum when provided', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const content = '#!/bin/bash\necho "verified binary"'
@@ -210,15 +205,14 @@ describe('dlx-binary', () => {
           expect(result.downloaded).toBe(true)
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-checksum-')
     })
 
     it('should throw on checksum mismatch', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary-invalid-checksum`
@@ -232,15 +226,14 @@ describe('dlx-binary', () => {
             }),
           ).rejects.toThrow(/Checksum mismatch/)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-bad-checksum-')
     })
 
     it('should throw on download failure', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary-404`
@@ -252,15 +245,14 @@ describe('dlx-binary', () => {
             }),
           ).rejects.toThrow(/Failed to download binary/)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-404-')
     })
 
     it('should throw on server error', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary-500`
@@ -272,15 +264,14 @@ describe('dlx-binary', () => {
             }),
           ).rejects.toThrow(/Failed to download binary/)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-500-')
     })
 
     it('should use default binary name if not provided', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -294,15 +285,14 @@ describe('dlx-binary', () => {
           )
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-default-name-')
     })
 
     it('should pass spawn options to spawn', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -318,15 +308,14 @@ describe('dlx-binary', () => {
           expect(result.spawnPromise).toBeDefined()
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-spawn-options-')
     })
 
     it('should use custom cacheTtl', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -354,15 +343,14 @@ describe('dlx-binary', () => {
           await result.spawnPromise.catch(() => {})
           await result2.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-ttl-')
     })
 
     it('should re-download if metadata is invalid', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -389,15 +377,14 @@ describe('dlx-binary', () => {
           expect(result2.downloaded).toBe(true)
           await result2.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-invalid-meta-')
     })
 
     it('should handle missing metadata file', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -424,15 +411,14 @@ describe('dlx-binary', () => {
           expect(result.downloaded).toBe(true)
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-missing-meta-')
     })
 
     it('should handle metadata with non-object value', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -459,15 +445,14 @@ describe('dlx-binary', () => {
           expect(result.downloaded).toBe(true)
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-array-meta-')
     })
 
     it('should handle metadata with missing checksum', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -498,15 +483,14 @@ describe('dlx-binary', () => {
           expect(result.downloaded).toBe(true)
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-no-checksum-meta-')
     })
 
     it('should pass args to spawn', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -520,7 +504,7 @@ describe('dlx-binary', () => {
           expect(result.spawnPromise).toBeDefined()
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-args-')
     })
@@ -529,22 +513,20 @@ describe('dlx-binary', () => {
   describe('cleanDlxCache', () => {
     it('should return 0 if cache directory does not exist', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cleaned = await cleanDlxCache()
           expect(cleaned).toBe(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-no-dir-')
     })
 
     it('should clean expired cache entries', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -564,15 +546,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(100)
           expect(cleaned).toBeGreaterThan(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-expired-')
     })
 
     it('should not clean non-expired entries', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -588,15 +569,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(7 * 24 * 60 * 60 * 1000) // 7 days
           expect(cleaned).toBe(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-fresh-')
     })
 
     it('should skip non-directory entries', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -608,15 +588,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache()
           expect(cleaned).toBe(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-skip-files-')
     })
 
     it('should skip entries with invalid metadata', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -633,15 +612,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(0)
           expect(cleaned).toBe(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-invalid-meta-')
     })
 
     it('should skip entries with array metadata', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -658,15 +636,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(0)
           expect(cleaned).toBe(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-array-meta-')
     })
 
     it('should clean empty directories', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -676,15 +653,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(0)
           expect(cleaned).toBeGreaterThanOrEqual(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-empty-')
     })
 
     it('should handle entries without metadata', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -697,15 +673,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(0)
           expect(cleaned).toBeGreaterThanOrEqual(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-no-meta-')
     })
 
     it('should handle metadata with missing timestamp', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -722,15 +697,14 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache(0)
           expect(cleaned).toBeGreaterThan(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-no-timestamp-')
     })
 
     it('should use default maxAge', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -746,7 +720,7 @@ describe('dlx-binary', () => {
           const cleaned = await cleanDlxCache()
           expect(cleaned).toBe(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'cleanDlxCache-default-')
     })
@@ -755,22 +729,20 @@ describe('dlx-binary', () => {
   describe('listDlxCache', () => {
     it('should return empty array if cache directory does not exist', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const list = await listDlxCache()
           expect(list).toEqual([])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-no-dir-')
     })
 
     it('should list cached binaries', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -794,15 +766,14 @@ describe('dlx-binary', () => {
           expect(entry.size).toBeGreaterThan(0)
           expect(entry.age).toBeGreaterThanOrEqual(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-basic-')
     })
 
     it('should skip non-directory entries', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -814,15 +785,14 @@ describe('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list).toEqual([])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-skip-files-')
     })
 
     it('should skip entries with invalid metadata', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -839,15 +809,14 @@ describe('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list).toEqual([])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-invalid-meta-')
     })
 
     it('should skip entries with array metadata', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -864,15 +833,14 @@ describe('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list).toEqual([])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-array-meta-')
     })
 
     it('should skip entries without binary file', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -895,15 +863,14 @@ describe('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list).toEqual([])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-no-binary-')
     })
 
     it('should handle metadata with missing fields', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -929,15 +896,14 @@ describe('dlx-binary', () => {
           expect(entry.arch).toBe('unknown')
           expect(entry.checksum).toBe('')
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-partial-meta-')
     })
 
     it('should calculate age correctly', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -956,15 +922,14 @@ describe('dlx-binary', () => {
           expect(list.length).toBe(1)
           expect(list[0].age).toBeGreaterThan(0)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-age-')
     })
 
     it('should handle multiple cached binaries', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           // Download multiple binaries
@@ -986,15 +951,14 @@ describe('dlx-binary', () => {
           const names = list.map(e => e.name).sort()
           expect(names).toEqual(['binary-1', 'binary-2'])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-multiple-')
     })
 
     it('should handle entries that fail to stat', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const cachePath = getDlxCachePath()
@@ -1025,7 +989,7 @@ describe('dlx-binary', () => {
           // Should skip entry that fails to stat
           expect(list).toEqual([])
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'listDlxCache-stat-fail-')
     })
@@ -1038,8 +1002,7 @@ describe('dlx-binary', () => {
       'should handle .cmd files with shell on Windows',
       async () => {
         await runWithTempDir(async tmpDir => {
-          const originalEnv = process.env['HOME']
-          process.env['HOME'] = tmpDir
+          const restoreHome = mockHomeDir(tmpDir)
 
           try {
             // Mock Windows platform
@@ -1058,7 +1021,7 @@ describe('dlx-binary', () => {
             expect(result.binaryPath).toContain('.cmd')
             await result.spawnPromise.catch(() => {})
           } finally {
-            process.env['HOME'] = originalEnv
+            restoreHome()
             Object.defineProperty(process, 'platform', {
               configurable: true,
               value: originalPlatform,
@@ -1072,8 +1035,7 @@ describe('dlx-binary', () => {
       'should handle .bat files with shell on Windows',
       async () => {
         await runWithTempDir(async tmpDir => {
-          const originalEnv = process.env['HOME']
-          process.env['HOME'] = tmpDir
+          const restoreHome = mockHomeDir(tmpDir)
 
           try {
             Object.defineProperty(process, 'platform', {
@@ -1091,7 +1053,7 @@ describe('dlx-binary', () => {
             expect(result.binaryPath).toContain('.bat')
             await result.spawnPromise.catch(() => {})
           } finally {
-            process.env['HOME'] = originalEnv
+            restoreHome()
             Object.defineProperty(process, 'platform', {
               configurable: true,
               value: originalPlatform,
@@ -1105,8 +1067,7 @@ describe('dlx-binary', () => {
       'should handle .ps1 files with shell on Windows',
       async () => {
         await runWithTempDir(async tmpDir => {
-          const originalEnv = process.env['HOME']
-          process.env['HOME'] = tmpDir
+          const restoreHome = mockHomeDir(tmpDir)
 
           try {
             Object.defineProperty(process, 'platform', {
@@ -1124,7 +1085,7 @@ describe('dlx-binary', () => {
             expect(result.binaryPath).toContain('.ps1')
             await result.spawnPromise.catch(() => {})
           } finally {
-            process.env['HOME'] = originalEnv
+            restoreHome()
             Object.defineProperty(process, 'platform', {
               configurable: true,
               value: originalPlatform,
@@ -1138,8 +1099,7 @@ describe('dlx-binary', () => {
   describe('edge cases', () => {
     it('should handle concurrent downloads of same binary', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -1160,15 +1120,14 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
           await result2.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-concurrent-')
     })
 
     it('should create cache directory if it does not exist', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -1194,15 +1153,14 @@ describe('dlx-binary', () => {
             .catch(() => false)
           expect(existsAfter).toBe(true)
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-create-dir-')
     })
 
     it('should handle download with empty args array', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -1218,15 +1176,14 @@ describe('dlx-binary', () => {
             // Ignore spawn errors in tests
           })
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-no-args-')
     })
 
     it('should normalize binary path', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -1243,15 +1200,14 @@ describe('dlx-binary', () => {
             // Ignore spawn errors in tests
           })
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-normalized-')
     })
 
     it('should handle metadata read errors during cache validation', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalEnv = process.env['HOME']
-        process.env['HOME'] = tmpDir
+        const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary`
@@ -1282,7 +1238,7 @@ describe('dlx-binary', () => {
           // Wait for second spawn to complete
           await result.spawnPromise.catch(() => {})
         } finally {
-          process.env['HOME'] = originalEnv
+          restoreHome()
         }
       }, 'dlxBinary-read-error-')
     })
