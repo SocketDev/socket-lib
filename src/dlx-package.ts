@@ -4,18 +4,24 @@
  * This module provides functionality to install and execute npm packages
  * in the ~/.socket/_dlx directory, similar to npx but with Socket's own cache.
  *
+ * Uses content-addressed storage like npm's _npx:
+ * - Hash is generated from package spec (name@version)
+ * - Each unique spec gets its own directory: ~/.socket/_dlx/<hash>/
+ * - Allows caching multiple versions of the same package
+ *
  * Key difference from dlx-binary.ts:
  * - dlx-binary.ts: Downloads standalone binaries from URLs
  * - dlx-package.ts: Installs npm packages from registries
  */
 
+import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 import { WIN32 } from './constants/platform'
-import { getDlxInstalledPackageDir, getDlxPackageDir } from './dlx'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
+import { getSocketDlxDir } from './paths'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
 
@@ -43,6 +49,14 @@ export interface DlxPackageResult {
   installed: boolean
   /** The spawn promise for the running process. */
   spawnPromise: ReturnType<typeof spawn>
+}
+
+/**
+ * Generate a cache key from package spec, similar to npm's _npx.
+ * Uses first 16 hex characters of SHA256 hash.
+ */
+function generatePackageCacheKey(packageSpec: string): string {
+  return createHash('sha256').update(packageSpec).digest('hex').slice(0, 16)
 }
 
 /**
@@ -85,15 +99,18 @@ function parsePackageSpec(spec: string): {
 }
 
 /**
- * Install package to ~/.socket/_dlx if not already installed.
+ * Install package to ~/.socket/_dlx/<hash>/ if not already installed.
  */
 async function ensurePackageInstalled(
+  packageSpec: string,
   packageName: string,
-  packageVersion: string | undefined,
   force: boolean,
 ): Promise<{ installed: boolean; packageDir: string }> {
-  const packageDir = getDlxPackageDir(packageName)
-  const installedDir = getDlxInstalledPackageDir(packageName)
+  const cacheKey = generatePackageCacheKey(packageSpec)
+  const packageDir = normalizePath(path.join(getSocketDlxDir(), cacheKey))
+  const installedDir = normalizePath(
+    path.join(packageDir, 'node_modules', packageName),
+  )
 
   // Check if already installed (unless force).
   if (!force && existsSync(installedDir)) {
@@ -103,11 +120,6 @@ async function ensurePackageInstalled(
       return { installed: false, packageDir }
     }
   }
-
-  // Install package using npm.
-  const packageSpec = packageVersion
-    ? `${packageName}@${packageVersion}`
-    : packageName
 
   // Use npm install --prefix to install to specific directory.
   await spawn(
@@ -123,7 +135,6 @@ async function ensurePackageInstalled(
       packageSpec,
     ],
     {
-      // Suppress npm output
       stdio: 'pipe',
     },
   )
@@ -134,8 +145,14 @@ async function ensurePackageInstalled(
 /**
  * Find the binary path for an installed package.
  */
-function findBinaryPath(packageName: string, binaryName?: string): string {
-  const installedDir = getDlxInstalledPackageDir(packageName)
+function findBinaryPath(
+  packageDir: string,
+  packageName: string,
+  binaryName?: string,
+): string {
+  const installedDir = normalizePath(
+    path.join(packageDir, 'node_modules', packageName),
+  )
   const pkgJsonPath = path.join(installedDir, 'package.json')
 
   // Read package.json to find bin entry.
@@ -181,15 +198,20 @@ export async function dlxPackage(
   const { name: packageName, version: packageVersion } =
     parsePackageSpec(packageSpec)
 
+  // Build full package spec for installation.
+  const fullPackageSpec = packageVersion
+    ? `${packageName}@${packageVersion}`
+    : packageName
+
   // Ensure package is installed.
   const { installed, packageDir } = await ensurePackageInstalled(
+    fullPackageSpec,
     packageName,
-    packageVersion,
     force,
   )
 
   // Find binary path.
-  const binaryPath = findBinaryPath(packageName)
+  const binaryPath = findBinaryPath(packageDir, packageName)
 
   // Make binary executable on Unix systems.
   if (!WIN32 && existsSync(binaryPath)) {
