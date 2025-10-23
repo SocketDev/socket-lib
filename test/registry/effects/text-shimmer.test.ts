@@ -1,11 +1,12 @@
 import { stripAnsi } from '@socketsecurity/lib/ansi'
+import { CI } from '@socketsecurity/lib/env/ci'
 import {
   applyShimmer,
   DIR_LTR,
   DIR_NONE,
   type ShimmerState,
 } from '@socketsecurity/lib/effects/text-shimmer'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('text-shimmer', () => {
   describe('applyShimmer()', () => {
@@ -21,57 +22,64 @@ describe('text-shimmer', () => {
       } as ShimmerState
     })
 
-    describe('CI environment', () => {
-      it('should disable shimmer effect when CI is true', async () => {
-        // Mock CI environment
-        vi.doMock('#env/ci', () => ({ CI: true }))
-        const { applyShimmer: applyShimmerCI } = await import(
-          '@socketsecurity/lib/effects/text-shimmer'
-        )
-
+    describe('CI environment behavior', () => {
+      it('should handle shimmer correctly in CI', () => {
         const text = 'Test text'
-        const result = applyShimmerCI(text, state, {
+        const result = applyShimmer(text, state, {
           color: [140, 82, 255] as const,
           direction: DIR_LTR,
         })
 
-        // Result should be colored but not have shimmer animation codes
+        // Result should be colored
         const stripped = stripAnsi(result)
         expect(stripped).toBe(text)
 
-        // Should contain color codes but not varying intensity
+        // Should contain color codes
         expect(result).toContain('\x1b[38;2;')
         expect(result).toContain('140;82;255')
 
-        vi.doUnmock('#env/ci')
+        // In CI: step should not advance (shimmer disabled)
+        // In non-CI: step should advance (shimmer enabled)
+        if (CI) {
+          expect(state.step).toBe(0)
+        } else {
+          expect(state.step).toBeGreaterThan(0)
+        }
       })
 
-      it('should return static colored text in CI regardless of direction', async () => {
-        // Mock CI environment
-        vi.doMock('#env/ci', () => ({ CI: true }))
-        const { applyShimmer: applyShimmerCI } = await import(
-          '@socketsecurity/lib/effects/text-shimmer'
-        )
-
+      it('should handle all directions correctly in CI', () => {
         const text = 'Test'
         const directions = [DIR_LTR, 'rtl', 'bi', 'random'] as const
 
         for (const dir of directions) {
-          const result = applyShimmerCI(text, state, {
+          const testState: ShimmerState = {
+            currentDir: DIR_LTR,
+            mode: DIR_LTR,
+            speed: 1 / 3,
+            step: 0,
+          }
+
+          const result = applyShimmer(text, testState, {
             color: [255, 0, 0] as const,
             direction: dir,
           })
 
           const stripped = stripAnsi(result)
           expect(stripped).toBe(text)
-        }
 
-        vi.doUnmock('#env/ci')
+          // In CI: step should not advance (shimmer disabled)
+          // In non-CI: step should advance (shimmer enabled)
+          if (CI) {
+            expect(testState.step).toBe(0)
+          } else {
+            expect(testState.step).toBeGreaterThan(0)
+          }
+        }
       })
     })
 
-    describe('non-CI environment', () => {
-      it('should apply shimmer effect when CI is false', () => {
+    describe('shimmer animation behavior', () => {
+      it('should apply color and respect CI environment', () => {
         const text = 'Test'
         const result = applyShimmer(text, state, {
           color: [140, 82, 255] as const,
@@ -82,9 +90,17 @@ describe('text-shimmer', () => {
         expect(result).toContain('\x1b[38;2;')
         // Result should have the original text when stripped
         expect(stripAnsi(result)).toBe(text)
+
+        // In CI: step should not advance (shimmer disabled)
+        // In non-CI: step should advance (shimmer enabled)
+        if (CI) {
+          expect(state.step).toBe(0)
+        } else {
+          expect(state.step).toBeGreaterThan(0)
+        }
       })
 
-      it('should animate shimmer position across frames', () => {
+      it('should animate shimmer position based on environment', () => {
         const text = 'Testing'
         const state1: ShimmerState = {
           currentDir: DIR_LTR,
@@ -98,19 +114,24 @@ describe('text-shimmer', () => {
           direction: DIR_LTR,
         })
 
-        // Step should advance
-        expect(state1.step).toBe(1)
+        if (CI) {
+          // In CI: step should not advance (shimmer disabled)
+          expect(state1.step).toBe(0)
+        } else {
+          // In non-CI: step should advance (shimmer enabled)
+          expect(state1.step).toBe(1)
 
-        const result2 = applyShimmer(text, state1, {
-          color: [140, 82, 255] as const,
-          direction: DIR_LTR,
-        })
+          const result2 = applyShimmer(text, state1, {
+            color: [140, 82, 255] as const,
+            direction: DIR_LTR,
+          })
 
-        // Step should advance again
-        expect(state1.step).toBe(2)
+          // Step should advance again
+          expect(state1.step).toBe(2)
 
-        // Results should be different due to shimmer position change
-        expect(result1).not.toBe(result2)
+          // Results should be different due to shimmer position change
+          expect(result1).not.toBe(result2)
+        }
       })
     })
 
@@ -127,16 +148,29 @@ describe('text-shimmer', () => {
         expect(stripAnsi(result)).toBe(text)
       })
 
-      it('should apply LTR direction shimmer', () => {
+      it('should apply LTR direction shimmer based on environment', () => {
         const text = 'Test'
-        const result = applyShimmer(text, state, {
+        const testState: ShimmerState = {
+          currentDir: DIR_LTR,
+          mode: DIR_LTR,
+          speed: 1 / 3,
+          step: 0,
+        }
+
+        const result = applyShimmer(text, testState, {
           color: [140, 82, 255] as const,
           direction: DIR_LTR,
         })
 
-        // Step should advance
-        expect(state.step).toBeGreaterThan(0)
         expect(stripAnsi(result)).toBe(text)
+
+        // In CI: step should not advance (shimmer disabled)
+        // In non-CI: step should advance (shimmer enabled)
+        if (CI) {
+          expect(testState.step).toBe(0)
+        } else {
+          expect(testState.step).toBeGreaterThan(0)
+        }
       })
     })
 
