@@ -11,7 +11,7 @@ import { isDir, readJson, safeDelete } from './fs'
 import { httpRequest } from './http-request'
 import { isObjectObject } from './objects'
 import { normalizePath } from './path'
-import { getSocketHomePath } from './paths'
+import { getSocketDlxDir } from './paths'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
 
@@ -334,9 +334,10 @@ export async function dlxBinary(
 /**
  * Get the DLX binary cache directory path.
  * Returns normalized path for cross-platform compatibility.
+ * Uses same directory as dlx-package for unified DLX storage.
  */
 export function getDlxCachePath(): string {
-  return normalizePath(path.join(getSocketHomePath(), 'cache', 'dlx'))
+  return getSocketDlxDir()
 }
 
 /**
