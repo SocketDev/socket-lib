@@ -1,0 +1,213 @@
+/**
+ * @fileoverview DLX package execution - Install and execute npm packages.
+ *
+ * This module provides functionality to install and execute npm packages
+ * in the ~/.socket/_dlx directory, similar to npx but with Socket's own cache.
+ *
+ * Key difference from dlx-binary.ts:
+ * - dlx-binary.ts: Downloads standalone binaries from URLs
+ * - dlx-package.ts: Installs npm packages from registries
+ */
+
+import { existsSync } from 'node:fs'
+import path from 'node:path'
+
+import { WIN32 } from './constants/platform'
+import { getDlxInstalledPackageDir, getDlxPackageDir } from './dlx'
+import { readJsonSync } from './fs'
+import { normalizePath } from './path'
+import type { SpawnExtra, SpawnOptions } from './spawn'
+import { spawn } from './spawn'
+
+export interface DlxPackageOptions {
+  /**
+   * Package to install (e.g., '@cyclonedx/cdxgen@10.0.0').
+   */
+  package: string
+  /**
+   * Force reinstallation even if package exists.
+   */
+  force?: boolean | undefined
+  /**
+   * Additional spawn options for the execution.
+   */
+  spawnOptions?: SpawnOptions | undefined
+}
+
+export interface DlxPackageResult {
+  /** Path to the installed package directory. */
+  packageDir: string
+  /** Path to the binary that was executed. */
+  binaryPath: string
+  /** Whether the package was newly installed. */
+  installed: boolean
+  /** The spawn promise for the running process. */
+  spawnPromise: ReturnType<typeof spawn>
+}
+
+/**
+ * Parse package spec into name and version.
+ * Examples:
+ * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
+ * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
+ * - 'lodash' → { name: 'lodash', version: undefined }
+ */
+function parsePackageSpec(spec: string): {
+  name: string
+  version: string | undefined
+} {
+  // Handle scoped packages (@scope/name@version).
+  if (spec.startsWith('@')) {
+    const parts = spec.split('@')
+    if (parts.length === 3) {
+      // @scope@version -> Invalid, but handle gracefully.
+      return { name: parts[1], version: parts[2] }
+    }
+    if (parts.length === 2) {
+      // @scope/name with no version.
+      return { name: `@${parts[1]}`, version: undefined }
+    }
+    // @scope/name@version.
+    const scopeAndName = `@${parts[1]}`
+    return { name: scopeAndName, version: parts[2] }
+  }
+
+  // Handle unscoped packages (name@version).
+  const atIndex = spec.lastIndexOf('@')
+  if (atIndex === -1) {
+    return { name: spec, version: undefined }
+  }
+
+  return {
+    name: spec.slice(0, atIndex),
+    version: spec.slice(atIndex + 1),
+  }
+}
+
+/**
+ * Install package to ~/.socket/_dlx if not already installed.
+ */
+async function ensurePackageInstalled(
+  packageName: string,
+  packageVersion: string | undefined,
+  force: boolean,
+): Promise<{ installed: boolean; packageDir: string }> {
+  const packageDir = getDlxPackageDir(packageName)
+  const installedDir = getDlxInstalledPackageDir(packageName)
+
+  // Check if already installed (unless force).
+  if (!force && existsSync(installedDir)) {
+    // Verify package.json exists.
+    const pkgJsonPath = path.join(installedDir, 'package.json')
+    if (existsSync(pkgJsonPath)) {
+      return { installed: false, packageDir }
+    }
+  }
+
+  // Install package using npm.
+  const packageSpec = packageVersion
+    ? `${packageName}@${packageVersion}`
+    : packageName
+
+  // Use npm install --prefix to install to specific directory.
+  await spawn(
+    'npm',
+    [
+      'install',
+      '--prefix',
+      packageDir,
+      '--no-save',
+      '--no-package-lock',
+      '--no-audit',
+      '--no-fund',
+      packageSpec,
+    ],
+    {
+      // Suppress npm output
+      stdio: 'pipe',
+    },
+  )
+
+  return { installed: true, packageDir }
+}
+
+/**
+ * Find the binary path for an installed package.
+ */
+function findBinaryPath(packageName: string, binaryName?: string): string {
+  const installedDir = getDlxInstalledPackageDir(packageName)
+  const pkgJsonPath = path.join(installedDir, 'package.json')
+
+  // Read package.json to find bin entry.
+  const pkgJson = readJsonSync(pkgJsonPath) as Record<string, unknown>
+  const bin = pkgJson['bin']
+
+  let binPath: string | undefined
+
+  if (typeof bin === 'string') {
+    // Single binary.
+    binPath = bin
+  } else if (typeof bin === 'object' && bin !== null) {
+    // Multiple binaries - use binaryName or package name.
+    const binName = binaryName || packageName.split('/').pop()
+    binPath = (bin as Record<string, string>)[binName!]
+  }
+
+  if (!binPath) {
+    throw new Error(`No binary found for package "${packageName}"`)
+  }
+
+  return normalizePath(path.join(installedDir, binPath))
+}
+
+/**
+ * Execute a package via DLX - install if needed and run its binary.
+ *
+ * This is the Socket equivalent of npx/pnpm dlx/yarn dlx, but using
+ * our own cache directory (~/.socket/_dlx) and installation logic.
+ */
+export async function dlxPackage(
+  args: readonly string[] | string[],
+  options?: DlxPackageOptions | undefined,
+  spawnExtra?: SpawnExtra | undefined,
+): Promise<DlxPackageResult> {
+  const {
+    force = false,
+    package: packageSpec,
+    spawnOptions,
+  } = { __proto__: null, ...options } as DlxPackageOptions
+
+  // Parse package spec.
+  const { name: packageName, version: packageVersion } =
+    parsePackageSpec(packageSpec)
+
+  // Ensure package is installed.
+  const { installed, packageDir } = await ensurePackageInstalled(
+    packageName,
+    packageVersion,
+    force,
+  )
+
+  // Find binary path.
+  const binaryPath = findBinaryPath(packageName)
+
+  // Make binary executable on Unix systems.
+  if (!WIN32 && existsSync(binaryPath)) {
+    const { chmodSync } = require('node:fs')
+    try {
+      chmodSync(binaryPath, 0o755)
+    } catch {
+      // Ignore chmod errors.
+    }
+  }
+
+  // Execute binary.
+  const spawnPromise = spawn(binaryPath, args, spawnOptions, spawnExtra)
+
+  return {
+    binaryPath,
+    installed,
+    packageDir,
+    spawnPromise,
+  }
+}
