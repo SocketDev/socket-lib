@@ -80,17 +80,19 @@ describe('build-externals', () => {
         fs.stat(file),
       ])
       const relativePath = path.relative(distExternalDir, file)
+      // Normalize path separators to forward slashes for cross-platform comparison
+      const normalizedPath = relativePath.replace(/\\/g, '/')
       const issues: Array<{ file: string; reason: string }> = []
 
       // Skip intentional stub files
-      if (intentionalStubs.some(stub => relativePath.endsWith(stub))) {
+      if (intentionalStubs.some(stub => normalizedPath.endsWith(stub))) {
         return issues
       }
 
       // Check for stub re-export patterns
       if (isStubReexport(content)) {
         issues.push({
-          file: relativePath,
+          file: normalizedPath,
           reason: 'Contains stub re-export pattern',
         })
       }
@@ -99,7 +101,7 @@ describe('build-externals', () => {
       // Exclude files that are intentionally small (like 1-2KB minified)
       if (stat.size < 50 && isStubReexport(content)) {
         issues.push({
-          file: relativePath,
+          file: normalizedPath,
           reason: `Very small file (${stat.size} bytes) that appears to be a stub`,
         })
       }
