@@ -272,7 +272,6 @@ export function createConstantsObject(
  * console.log(Object.keys(obj)) // [] (non-enumerable)
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function defineGetter<T>(
   object: object,
   propKey: PropertyKey,
@@ -309,7 +308,6 @@ export function defineGetter<T>(
  * console.log(obj.data) // Returns same data without logging
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function defineLazyGetter<T>(
   object: object,
   propKey: PropertyKey,
@@ -346,7 +344,6 @@ export function defineLazyGetter<T>(
  * console.log(stats.initialized) // Set(['user', 'config'])
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function defineLazyGetters(
   object: object,
   getterDefObj: GetterDefObj | undefined,
@@ -356,11 +353,7 @@ export function defineLazyGetters(
     const keys = ReflectOwnKeys(getterDefObj)
     for (let i = 0, { length } = keys; i < length; i += 1) {
       const key = keys[i] as PropertyKey
-      defineLazyGetter(
-        object,
-        key,
-        createLazyGetter(key, getterDefObj[key] as () => unknown, stats),
-      )
+      defineLazyGetter(object, key, getterDefObj[key] as () => unknown, stats)
     }
   }
   return object
