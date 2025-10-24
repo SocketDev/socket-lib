@@ -21,6 +21,9 @@ export const printHeader = title => {
   console.log(`  ${title}`)
   printDivider()
 }
+export const printCompletedHeader = title => {
+  console.log(colors.green(`✓ ${title}`))
+}
 export const printFooterLine = () => console.log('─'.repeat(55))
 export const printDottedLine = () => console.log('·'.repeat(55))
 export const printDiamondLine = () => console.log('◆'.repeat(55))
