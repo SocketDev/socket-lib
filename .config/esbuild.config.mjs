@@ -22,6 +22,38 @@ const entryPoints = fg.sync('**/*.{ts,mts,cts}', {
   ignore: ['**/*.d.ts', '**/types/**', '**/external/**'],
 })
 
+/**
+ * Plugin to handle local package aliases when bundle: false
+ * esbuild's built-in alias only works with bundle: true, so we need a custom plugin
+ */
+function createAliasPlugin() {
+  const aliases = getLocalPackageAliases(rootPath)
+
+  // Only create plugin if we have local aliases
+  if (Object.keys(aliases).length === 0) {
+    return null
+  }
+
+  return {
+    name: 'local-package-aliases',
+    setup(build) {
+      // Intercept imports for aliased packages
+      for (const [packageName, aliasPath] of Object.entries(aliases)) {
+        build.onResolve({ filter: new RegExp(`^${packageName}$`) }, () => {
+          // Return the path to the local package dist
+          return { path: aliasPath, external: true }
+        })
+
+        // Handle subpath imports like '@socketsecurity/lib/spinner'
+        build.onResolve({ filter: new RegExp(`^${packageName}/`) }, args => {
+          const subpath = args.path.slice(packageName.length + 1)
+          return { path: path.join(aliasPath, subpath), external: true }
+        })
+      }
+    },
+  }
+}
+
 // Build configuration for CommonJS output
 export const buildConfig = {
   entryPoints,
@@ -40,8 +72,8 @@ export const buildConfig = {
   metafile: true,
   logLevel: 'info',
 
-  // Alias local packages when available (dev mode).
-  alias: getLocalPackageAliases(rootPath),
+  // Use plugin for local package aliases (built-in alias requires bundle: true)
+  plugins: [createAliasPlugin()].filter(Boolean),
 
   // Note: Cannot use "external" with bundle: false
   // esbuild automatically treats all imports as external when not bundling
