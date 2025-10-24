@@ -148,7 +148,7 @@ async function buildExternals(options = {}) {
 async function fixExports(options = {}) {
   const { quiet = false, verbose = false } = options
 
-  const fixArgs = ['scripts/fix-commonjs-exports.mjs']
+  const fixArgs = ['scripts/fix-build.mjs']
   if (quiet) {
     fixArgs.push('--quiet')
   }
@@ -158,10 +158,6 @@ async function fixExports(options = {}) {
 
   const exitCode = await runSequence([
     {
-      args: ['scripts/generate-package-exports.mjs'],
-      command: 'node',
-    },
-    {
       args: fixArgs,
       command: 'node',
     },
@@ -169,7 +165,7 @@ async function fixExports(options = {}) {
 
   if (exitCode !== 0) {
     if (!quiet) {
-      logger.error('Export fixing failed')
+      logger.error('Build fixing failed')
     }
   }
 

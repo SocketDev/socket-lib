@@ -151,18 +151,18 @@ export async function buildExternals(options = {}) {
   // Default behavior: show header but not individual packages (concise)
   // --verbose: show all package details
   // --quiet: show nothing
-  const showDetails = verbose
+  const showDetails = verbose && !quiet
 
   // Ensure dist/external directory exists.
   await ensureDir(distExternalDir)
 
   // Bundle all packages
   const { bundledCount, totalSize } = await bundleAllPackages({
-    quiet: !showDetails,
+    quiet: quiet || !showDetails,
   })
 
   // Copy declaration files
-  const filesCopied = await copyAllFiles(!showDetails)
+  const filesCopied = await copyAllFiles(quiet || !showDetails)
 
   return { bundledCount, totalSize, filesCopied }
 }
