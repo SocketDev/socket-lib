@@ -14,7 +14,11 @@ import {
   watchConfig,
 } from '../.config/esbuild.config.mjs'
 import { isQuiet } from './utils/flags.mjs'
-import { printFooter, printHeader } from './utils/helpers.mjs'
+import {
+  printCompletedHeader,
+  printFooter,
+  printHeader,
+} from './utils/helpers.mjs'
 import { logger } from './utils/logger.mjs'
 import { parseArgs } from './utils/parse-args.mjs'
 import { runSequence } from './utils/run-command.mjs'
@@ -30,10 +34,6 @@ const rootPath = path.resolve(
  */
 async function buildSource(options = {}) {
   const { quiet = false, skipClean = false, verbose = false } = options
-
-  if (!quiet) {
-    logger.substep('Building source code')
-  }
 
   // Clean dist directory if needed
   if (!skipClean) {
@@ -82,10 +82,6 @@ async function buildTypes(options = {}) {
     verbose: _verbose = false,
   } = options
 
-  if (!quiet) {
-    logger.substep('Building TypeScript declarations')
-  }
-
   const commands = []
 
   if (!skipClean) {
@@ -119,15 +115,19 @@ async function buildTypes(options = {}) {
  * Returns exitCode for external logging.
  */
 async function buildExternals(options = {}) {
-  const { quiet = false } = options
+  const { quiet = false, verbose = false } = options
 
-  if (!quiet) {
-    logger.substep('Building external dependencies')
+  const args = ['scripts/build-externals.mjs']
+  if (quiet) {
+    args.push('--quiet')
+  }
+  if (verbose) {
+    args.push('--verbose')
   }
 
   const exitCode = await runSequence([
     {
-      args: ['scripts/build-externals.mjs'],
+      args,
       command: 'node',
     },
   ])
@@ -146,10 +146,14 @@ async function buildExternals(options = {}) {
  * Returns exitCode for external logging.
  */
 async function fixExports(options = {}) {
-  const { quiet = false } = options
+  const { quiet = false, verbose = false } = options
 
-  if (!quiet) {
-    logger.substep('Fixing CommonJS exports')
+  const fixArgs = ['scripts/fix-commonjs-exports.mjs']
+  if (quiet) {
+    fixArgs.push('--quiet')
+  }
+  if (verbose) {
+    fixArgs.push('--verbose')
   }
 
   const exitCode = await runSequence([
@@ -158,7 +162,7 @@ async function fixExports(options = {}) {
       command: 'node',
     },
     {
-      args: ['scripts/fix-commonjs-exports.mjs'],
+      args: fixArgs,
       command: 'node',
     },
   ])
@@ -336,20 +340,19 @@ async function main() {
       return
     }
 
-    if (!quiet) {
-      printHeader('Build Runner')
-    }
-
     let exitCode = 0
 
     // Handle watch mode
     if (values.watch) {
+      if (!quiet) {
+        printHeader('Build Runner (Watch Mode)')
+      }
       exitCode = await watchBuild({ quiet, verbose })
     }
     // Build types only
     else if (values.types && !values.src) {
       if (!quiet) {
-        logger.step('Building TypeScript declarations only')
+        printHeader('Building TypeScript Declarations')
       }
       exitCode = await buildTypes({ quiet, verbose })
       if (exitCode === 0 && !quiet) {
@@ -359,7 +362,7 @@ async function main() {
     // Build source only
     else if (values.src && !values.types) {
       if (!quiet) {
-        logger.step('Building source only')
+        printHeader('Building Source')
       }
       const {
         buildTime,
@@ -383,13 +386,9 @@ async function main() {
     // Build everything (default)
     else {
       if (!quiet) {
-        logger.step('Building package (source + types)')
+        printHeader('Building Package')
       }
 
-      // Clean all directories first (once)
-      if (!quiet) {
-        logger.substep('Cleaning build directories')
-      }
       exitCode = await runSequence([
         {
           args: ['scripts/clean.mjs', '--dist', '--types', '--quiet'],
@@ -404,6 +403,10 @@ async function main() {
         return
       }
 
+      if (!quiet) {
+        printCompletedHeader('Build Cleaned')
+      }
+
       // Run source, externals, and types builds in parallel
       const [srcResult, externalsExitCode, typesExitCode] = await Promise.all([
         buildSource({
@@ -412,32 +415,18 @@ async function main() {
           skipClean: true,
           analyze: values.analyze,
         }),
-        buildExternals({ quiet }),
+        buildExternals({ quiet, verbose }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
 
-      // Log completion messages in order
-      if (!quiet) {
-        if (srcResult.exitCode === 0) {
-          logger.substep(`Source build complete in ${srcResult.buildTime}ms`)
-
-          if (values.analyze && srcResult.result?.metafile) {
-            const analysis = analyzeMetafile(srcResult.result.metafile)
-            logger.info('Build output:')
-            for (const file of analysis.files) {
-              logger.substep(`${file.name}: ${file.size}`)
-            }
-            logger.step(`Total bundle size: ${analysis.totalSize}`)
-          }
+      // Log completion messages if analyze flag is set
+      if (!quiet && values.analyze && srcResult.result?.metafile) {
+        const analysis = analyzeMetafile(srcResult.result.metafile)
+        logger.info('Build output:')
+        for (const file of analysis.files) {
+          logger.substep(`${file.name}: ${file.size}`)
         }
-
-        if (externalsExitCode === 0) {
-          logger.substep('External dependencies bundled')
-        }
-
-        if (typesExitCode === 0) {
-          logger.substep('Type declarations built')
-        }
+        logger.step(`Total bundle size: ${analysis.totalSize}`)
       }
 
       // Check if any of the parallel builds failed
@@ -450,10 +439,7 @@ async function main() {
 
       // If all parallel builds succeeded, fix exports
       if (exitCode === 0) {
-        const fixExitCode = await fixExports({ quiet })
-        if (fixExitCode === 0 && !quiet) {
-          logger.substep('Exports fixed')
-        }
+        const fixExitCode = await fixExports({ quiet, verbose })
         exitCode = fixExitCode
       }
     }

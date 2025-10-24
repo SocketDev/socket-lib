@@ -7,20 +7,20 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import {
-  printError,
-  printFooter,
-  printHeader,
-  printSuccess,
-} from './utils/helpers.mjs'
+import { isQuiet } from './utils/flags.mjs'
+import { printCompletedHeader, printError } from './utils/helpers.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
 
 /**
  * Process files in a directory and fix CommonJS exports.
+ *
+ * @param {string} dir - Directory to process
+ * @param {boolean} verbose - Show individual file fixes
+ * @returns {Promise<number>} Number of files fixed
  */
-async function processDirectory(dir) {
+async function processDirectory(dir, verbose = false) {
   let fixedCount = 0
 
   try {
@@ -30,7 +30,7 @@ async function processDirectory(dir) {
       const fullPath = path.join(dir, entry.name)
 
       if (entry.isDirectory()) {
-        fixedCount += await processDirectory(fullPath)
+        fixedCount += await processDirectory(fullPath, verbose)
       } else if (entry.isFile() && entry.name.endsWith('.js')) {
         let content = await fs.readFile(fullPath, 'utf8')
         let modified = false
@@ -69,8 +69,10 @@ async function processDirectory(dir) {
 
         if (modified) {
           await fs.writeFile(fullPath, content)
-          const relativePath = path.relative(distDir, fullPath)
-          console.log(`    Fixed ${relativePath}`)
+          if (verbose) {
+            const relativePath = path.relative(distDir, fullPath)
+            console.log(`    Fixed ${relativePath}`)
+          }
           fixedCount += 1
         }
       }
@@ -86,17 +88,19 @@ async function processDirectory(dir) {
 }
 
 async function fixConstantExports() {
-  printHeader('CommonJS Exports')
+  const verbose = process.argv.includes('--verbose')
+  const quiet = isQuiet()
 
   try {
-    const fixedCount = await processDirectory(distDir)
+    const fixedCount = await processDirectory(distDir, verbose)
 
-    if (fixedCount > 0) {
-      printSuccess(`Fixed ${fixedCount} file${fixedCount === 1 ? '' : 's'}`)
-    } else {
-      printSuccess('No files needed fixing')
+    if (!quiet) {
+      const title =
+        fixedCount > 0
+          ? `CommonJS Exports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
+          : 'CommonJS Exports (no changes)'
+      printCompletedHeader(title)
     }
-    printFooter()
   } catch (error) {
     printError(`Failed to fix CommonJS exports: ${error.message}`)
     process.exitCode = 1
