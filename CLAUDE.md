@@ -277,6 +277,11 @@ Use path utilities from `#lib/paths`:
 import { normalizePath } from '#lib/paths'
 ```
 
+#### Working Directory
+- **🚨 NEVER use `process.chdir()`** - use `{ cwd }` options and absolute paths instead
+  - Breaks tests, worker threads, and causes race conditions
+  - Always pass `{ cwd: absolutePath }` to spawn/exec/fs operations
+
 ### Debugging
 
 #### Common Issues
