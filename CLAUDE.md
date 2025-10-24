@@ -13,15 +13,13 @@
 
 ## 📚 SHARED STANDARDS
 
-**See canonical reference:** `../socket-registry/CLAUDE.md`
+**Canonical reference**: `../socket-registry/CLAUDE.md`
 
-For all shared Socket standards (git workflow, testing, code style, imports, sorting, error handling, cross-platform, CI, etc.), refer to socket-registry/CLAUDE.md.
+All shared standards (git, testing, code style, cross-platform, CI) defined in socket-registry/CLAUDE.md.
 
-**Git Workflow Reminder**: When user says "commit changes" → create actual commits, use small atomic commits, follow all CLAUDE.md rules:
-- Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) style: `<type>(<scope>): <description>`
-- NO AI attribution in commit messages
-
-**Package.json Scripts**: Prefer `pnpm run foo --<flag>` over multiple `foo:bar` scripts (see socket-registry/CLAUDE.md)
+**Quick references**:
+- Commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) `<type>(<scope>): <description>` - NO AI attribution
+- Scripts: Prefer `pnpm run foo --flag` over `foo:bar` scripts
 
 ---
 
@@ -66,26 +64,38 @@ import colors from 'yoctocolors-cjs'
 ## 🏗️ LIB-SPECIFIC
 
 ### Architecture
-Socket utilities library - Core infrastructure for Socket.dev security tools
 
-**Core Structure**:
-- **Entry**: `src/index.ts` - Main export barrel
-- **Constants**: `src/constants/` - Node.js, npm, package manager constants
-- **Environment**: `src/env/` - Typed environment variable access
-- **Utilities**: `src/lib/` - Core utility functions
-- **Types**: `src/types.ts` - TypeScript type definitions
-- **External**: `src/external/` - Vendored external dependencies
-- **Scripts**: `scripts/` - Build and development scripts
+Core infrastructure library for Socket.dev security tools.
 
-**Path Aliases**:
-- `#constants/*` → `src/constants/*`
-- `#env/*` → `src/env/*`
-- `#lib/*` → `src/lib/*`
-- `#packages/*` → `src/lib/packages/*`
-- `#types` → `src/types`
-- `#utils/*` → `src/utils/*`
+**Directory structure**:
+```
+src/
+├── index.ts           # Main export barrel
+├── types.ts           # TypeScript type definitions
+├── constants/         # Node.js, npm, package manager constants
+├── env/              # Typed environment variable access
+├── lib/              # Core utility functions
+│   └── packages/     # Package management utilities
+├── external/         # Vendored external dependencies
+└── utils/            # Shared utilities
 
-**Features**: Type-safe utilities, environment variable helpers, file system operations, package management utilities, path normalization, spawn utilities, CLI effects
+dist/                 # Build output (CommonJS)
+├── external/         # Bundled external dependencies
+└── ...               # Compiled source files
+
+scripts/              # Build and development scripts
+test/                 # Test files
+```
+
+**Path aliases**:
+```
+#constants/* → src/constants/*
+#env/*       → src/env/*
+#lib/*       → src/lib/*
+#packages/*  → src/lib/packages/*
+#types       → src/types
+#utils/*     → src/utils/*
+```
 
 ### Commands
 - **Build**: `pnpm build` (production build)
