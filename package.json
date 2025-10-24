@@ -699,7 +699,6 @@
     "./biome.json": "./biome.json",
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
-    "./taze.config.json": "./taze.config.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json",
     "./tsconfig.test.json": "./tsconfig.test.json"
