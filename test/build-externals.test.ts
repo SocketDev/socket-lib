@@ -54,7 +54,9 @@ describe('build-externals', () => {
     try {
       await fs.access(distExternalDir)
     } catch {
-      expect.fail(`dist/external directory does not exist at ${distExternalDir}`)
+      expect.fail(
+        `dist/external directory does not exist at ${distExternalDir}`,
+      )
     }
   })
 
@@ -110,9 +112,7 @@ describe('build-externals', () => {
     if (allIssues.length > 0) {
       const errorMessage = [
         'Found unexpected stub re-exports in dist/external:',
-        ...allIssues.map(
-          f => `  - ${f.file}: ${f.reason}`,
-        ),
+        ...allIssues.map(f => `  - ${f.file}: ${f.reason}`),
         '',
         'Make sure these packages are added to the bundling configuration in scripts/build-externals.mjs',
         'or add them to the intentionalStubs list if they should remain as stubs.',
@@ -123,7 +123,13 @@ describe('build-externals', () => {
   })
 
   it('should have @inquirer modules properly bundled', async () => {
-    const requiredInquirerModules = ['input', 'password', 'search', 'confirm', 'select']
+    const requiredInquirerModules = [
+      'input',
+      'password',
+      'search',
+      'confirm',
+      'select',
+    ]
     const inquirerDir = path.join(distExternalDir, '@inquirer')
 
     try {
@@ -142,14 +148,18 @@ describe('build-externals', () => {
         ])
 
         if (stat.size <= 1000) {
-          expect.fail(`@inquirer/${module} should be properly bundled (> 1KB), got ${stat.size} bytes`)
+          expect.fail(
+            `@inquirer/${module} should be properly bundled (> 1KB), got ${stat.size} bytes`,
+          )
         }
 
         if (isStubReexport(content)) {
           expect.fail(`@inquirer/${module} should not be a stub re-export`)
         }
       } catch (error) {
-        expect.fail(`@inquirer/${module} not found or not properly bundled at ${modulePath}: ${error instanceof Error ? error.message : String(error)}`)
+        expect.fail(
+          `@inquirer/${module} not found or not properly bundled at ${modulePath}: ${error instanceof Error ? error.message : String(error)}`,
+        )
       }
     })
 
