@@ -729,7 +729,7 @@
     "cover": "node scripts/cover.mjs",
     "dev": "pnpm run build:watch",
     "fix": "node scripts/lint.mjs --fix",
-    "fix:exports": "node scripts/generate-package-exports.mjs && node scripts/fix-commonjs-exports.mjs",
+    "fix:build": "node scripts/fix-build.mjs",
     "lint": "node scripts/lint.mjs",
     "lint-ci": "pnpm run lint",
     "prepare": "husky",
