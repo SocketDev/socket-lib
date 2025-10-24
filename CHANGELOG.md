@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.1) - 2025-10-24
+
+### Fixed
+
+- Fixed @inquirer modules (`input`, `password`, `search`) not being properly bundled into `dist/external/`
+  - Resolves build failures in downstream packages (socket-cli) that depend on socket-lib
+  - Added missing packages to bundling configuration in `scripts/build-externals.mjs`
+  - All @inquirer packages now ship as zero-dependency bundles
+
+### Added
+
+- Added tests to prevent rogue external stubs in `dist/external/`
+  - Detects stub re-export patterns that indicate incomplete bundling
+  - Verifies all @inquirer modules are properly bundled (> 1KB)
+  - Catches bundling regressions early in CI pipeline
+
 ## [1.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.0) - 2025-10-23
 
 ### Added
