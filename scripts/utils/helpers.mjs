@@ -7,6 +7,7 @@ import { promises as fs } from 'node:fs'
 
 // Re-export unified print functions from cli-helpers.
 export {
+  printCompletedHeader,
   printDivider,
   printError,
   printFooter,
