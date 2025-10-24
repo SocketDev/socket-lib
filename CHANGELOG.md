@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.3) - 2025-10-24
+
+### Fixed
+
+- Fixed lazy getter bug in `objects` module where `defineGetter`, `defineLazyGetter`, and `defineLazyGetters` had incorrect `/*@__NO_SIDE_EFFECTS__*/` annotations
+  - These functions mutate objects by defining properties, so marking them as side-effect-free caused esbuild to incorrectly tree-shake the calls during bundling
+  - Lazy getters were returning `undefined` instead of their computed values
+  - Removed double wrapping in `defineLazyGetters` where `createLazyGetter` was being called unnecessarily
+
 ## [1.3.2](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.2) - 2025-10-24
 
 ### Fixed
