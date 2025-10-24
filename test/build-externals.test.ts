@@ -1,6 +1,7 @@
 /**
  * @fileoverview Tests to ensure external dependencies are properly bundled.
- * This prevents accidental stub re-exports in dist/external.
+ * This prevents accidental stub re-exports in dist/external and ensures
+ * external packages aren't imported outside dist/external.
  */
 
 import { promises as fs } from 'node:fs'
@@ -8,7 +9,18 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const rootDir = process.cwd()
+const distDir = path.join(rootDir, 'dist')
 const distExternalDir = path.join(rootDir, 'dist', 'external')
+
+/**
+ * Read devDependencies from package.json
+ */
+async function getDevDependencies(): Promise<string[]> {
+  const packageJsonPath = path.join(rootDir, 'package.json')
+  const packageJsonContent = await fs.readFile(packageJsonPath, 'utf8')
+  const packageJson = JSON.parse(packageJsonContent)
+  return Object.keys(packageJson.devDependencies || {})
+}
 
 // Stub re-export patterns that indicate incomplete bundling
 const STUB_PATTERNS = [
@@ -50,6 +62,44 @@ async function getAllJsFiles(dir: string): Promise<string[]> {
 }
 
 describe('build-externals', () => {
+  it('should have empty dependencies in package.json', async () => {
+    const devDependencies = await getDevDependencies()
+    const packageJsonPath = path.join(rootDir, 'package.json')
+    const packageJsonContent = await fs.readFile(packageJsonPath, 'utf8')
+    const packageJson = JSON.parse(packageJsonContent)
+
+    // Dependencies must be undefined or an empty object
+    const dependencies = packageJson.dependencies
+
+    // Check that dependencies is either undefined or an empty object
+    const isUndefined = dependencies === undefined
+    const isEmptyObject =
+      dependencies !== null &&
+      typeof dependencies === 'object' &&
+      Object.keys(dependencies).length === 0
+
+    if (!isUndefined && !isEmptyObject) {
+      const dependencyList = dependencies
+        ? Object.keys(dependencies).join(', ')
+        : 'invalid value'
+      expect.fail(
+        [
+          'package.json dependencies must be undefined or an empty object.',
+          `Found dependencies: ${dependencyList}`,
+          '',
+          'All dependencies should be either:',
+          '  - Bundled in dist/external (add to devDependencies)',
+          '  - Peer dependencies (add to peerDependencies)',
+          '',
+          'This prevents unnecessary package installations for library consumers.',
+        ].join('\n'),
+      )
+    }
+
+    // Ensure we have devDependencies to validate the test is working
+    expect(devDependencies.length).toBeGreaterThan(0)
+  })
+
   it('should have bundled dist/external directory', async () => {
     try {
       await fs.access(distExternalDir)
@@ -166,5 +216,69 @@ describe('build-externals', () => {
     })
 
     await Promise.all(checkPromises)
+  })
+
+  it('should not import external packages outside dist/external', async () => {
+    const [allDistFiles, devDependencies] = await Promise.all([
+      getAllJsFiles(distDir),
+      getDevDependencies(),
+    ])
+
+    // Filter to files outside dist/external
+    const nonExternalFiles = allDistFiles.filter(
+      file => !file.startsWith(distExternalDir),
+    )
+
+    // Should have files to check
+    expect(nonExternalFiles.length).toBeGreaterThan(0)
+    expect(devDependencies.length).toBeGreaterThan(0)
+
+    const violations: Array<{ file: string; packages: string[] }> = []
+
+    const checkPromises = nonExternalFiles.map(async file => {
+      const content = await fs.readFile(file, 'utf8')
+      const relativePath = path.relative(distDir, file)
+      const foundPackages: string[] = []
+
+      // Check for require() or import statements of devDependencies
+      for (const pkg of devDependencies) {
+        // Escape special regex characters in package name
+        const escapedPkg = pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+        // Match require('pkg') or require("pkg") or from 'pkg' or from "pkg"
+        const requirePattern = new RegExp(
+          `(?:require\\s*\\(\\s*['"]${escapedPkg}['"]\\s*\\)|from\\s+['"]${escapedPkg}['"])`,
+          'g',
+        )
+
+        if (requirePattern.test(content)) {
+          foundPackages.push(pkg)
+        }
+      }
+
+      if (foundPackages.length > 0) {
+        violations.push({
+          file: relativePath,
+          packages: foundPackages,
+        })
+      }
+    })
+
+    await Promise.all(checkPromises)
+
+    if (violations.length > 0) {
+      const errorMessage = [
+        'Found devDependency imports outside dist/external:',
+        ...violations.map(
+          v =>
+            `  - ${v.file}:\n    ${v.packages.map(p => `require('${p}')`).join(', ')}`,
+        ),
+        '',
+        'devDependencies should only be bundled in dist/external.',
+        'These files should import from dist/external or have the imports rewritten during build.',
+      ].join('\n')
+
+      expect.fail(errorMessage)
+    }
   })
 })
