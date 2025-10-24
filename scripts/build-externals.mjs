@@ -101,7 +101,16 @@ const scopedPackages = [
   { scope: '@npmcli', name: 'promise-spawn', bundle: true },
   {
     scope: '@inquirer',
-    packages: ['checkbox', 'confirm', 'core', 'prompts', 'select'],
+    packages: [
+      'checkbox',
+      'confirm',
+      'core',
+      'input',
+      'password',
+      'prompts',
+      'search',
+      'select',
+    ],
     optional: true,
   },
   {
