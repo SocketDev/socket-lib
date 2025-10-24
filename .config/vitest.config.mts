@@ -16,6 +16,7 @@ const isCoverageEnabled =
   process.argv.some(arg => arg.includes('coverage'))
 
 export default defineConfig({
+  cacheDir: path.resolve(projectRoot, '.cache/vitest'),
   resolve: {
     preserveSymlinks: false,
     extensions: isCoverageEnabled
@@ -55,19 +56,42 @@ export default defineConfig({
         : [path.resolve(projectRoot, 'test/npm/**')]),
     ],
     reporters: ['default'],
+    // Optimize test execution for speed
+    // Threads are faster than forks
     pool: 'threads',
     poolOptions: {
       threads: {
+        // Maximize parallelism for speed
+        // During coverage, use single thread for deterministic execution
         singleThread: isCoverageEnabled,
         maxThreads: isCoverageEnabled ? 1 : 16,
         minThreads: isCoverageEnabled ? 1 : 4,
-        // Use isolate: false for performance and test compatibility
+        // IMPORTANT: isolate: false for performance and test compatibility
+        //
+        // Tradeoff Analysis:
+        // - isolate: true  = Full isolation, slower, breaks nock/module mocking
+        // - isolate: false = Shared worker context, faster, mocking works
+        //
+        // We choose isolate: false because:
+        // 1. Significant performance improvement (faster test runs)
+        // 2. HTTP mocking works correctly across all test files
+        // 3. Vi.mock() module mocking functions properly
+        // 4. Test state pollution is prevented through proper beforeEach/afterEach
+        // 5. Our tests are designed to clean up after themselves
         isolate: false,
         useAtomics: true,
       },
     },
+    // Reduce timeouts for faster failures
     testTimeout: 10_000,
     hookTimeout: 10_000,
+    // Speed optimizations
+    sequence: {
+      // Run tests concurrently within suites
+      concurrent: true,
+    },
+    // Bail early on first failure in CI
+    bail: process.env.CI ? 1 : 0,
     server: {
       deps: {
         inline: isCoverageEnabled ? [/@socketsecurity\/lib/, 'zod'] : ['zod'],

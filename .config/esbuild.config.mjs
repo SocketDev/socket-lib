@@ -7,6 +7,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import fg from 'fast-glob'
 
+import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 const srcPath = path.join(rootPath, 'src')
@@ -31,15 +33,25 @@ export const buildConfig = {
   platform: 'node',
   target: 'node18',
   sourcemap: true,
-  // Library code should be readable.
-  minify: false,
-  // Can't tree-shake without bundling.
-  treeShaking: false,
+  // Minify for production builds (can be overridden in watch mode)
+  minify: true,
+  // Tree-shaking optimization
+  treeShaking: true,
   metafile: true,
   logLevel: 'info',
 
+  // Alias local packages when available (dev mode).
+  alias: getLocalPackageAliases(rootPath),
+
   // Note: Cannot use "external" with bundle: false
   // esbuild automatically treats all imports as external when not bundling
+
+  // Define constants for optimization
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(
+      process.env.NODE_ENV || 'production',
+    ),
+  },
 
   // Banner for generated code
   banner: {
