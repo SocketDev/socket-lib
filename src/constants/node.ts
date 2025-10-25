@@ -77,6 +77,43 @@ export function supportsNodeRun(): boolean {
   )
 }
 
+export function supportsNodeDisableSigusr1Flag(): boolean {
+  const major = getNodeMajorVersion()
+  // --disable-sigusr1 added in v22.14.0, v23.7.0.
+  // Stabilized in v22.20.0, v24.8.0.
+  if (major >= 24) {
+    const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+    return minor >= 8
+  }
+  if (major === 23) {
+    const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+    return minor >= 7
+  }
+  if (major === 22) {
+    const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+    return minor >= 14
+  }
+  return false
+}
+
+let _nodeDisableSigusr1Flags: string[]
+export function getNodeDisableSigusr1Flags(): string[] {
+  if (_nodeDisableSigusr1Flags === undefined) {
+    // SIGUSR1 is reserved by Node.js for starting the debugger/inspector.
+    // In production CLI environments, we want to prevent debugger attachment.
+    //
+    // --disable-sigusr1: Prevents Signal I/O Thread from listening to SIGUSR1 (v22.14.0+).
+    // --no-inspect: Disables inspector on older Node versions that don't support --disable-sigusr1.
+    //
+    // Note: --disable-sigusr1 is the correct solution (prevents thread creation entirely).
+    // --no-inspect is a fallback that still creates the signal handler thread but blocks later.
+    _nodeDisableSigusr1Flags = supportsNodeDisableSigusr1Flag()
+      ? ['--disable-sigusr1']
+      : ['--no-inspect']
+  }
+  return _nodeDisableSigusr1Flags
+}
+
 export function supportsProcessSend(): boolean {
   return typeof process.send === 'function'
 }
