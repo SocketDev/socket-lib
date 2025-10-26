@@ -379,7 +379,9 @@ describe('env', () => {
 
       it('should support set operation with overrides', () => {
         const base = { PATH: '/usr/bin' }
-        const overrides: Record<string, string | undefined> = { NODE_ENV: 'test' }
+        const overrides: Record<string, string | undefined> = {
+          NODE_ENV: 'test',
+        }
         const proxy = createEnvProxy(base, overrides)
         ;(proxy as any).NEW_VAR = 'new-value'
         expect((proxy as any).NEW_VAR).toBe('new-value')
