@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.5](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.5) - 2025-10-26
+
+### Added
+
+- Added `createEnvProxy()` utility function to `env` module for Windows-compatible environment variable access
+  - Provides case-insensitive environment variable access (e.g., PATH, Path, path all work)
+  - Smart priority system: overrides > exact match > case-insensitive fallback
+  - Full Proxy implementation with proper handlers for get, set, has, ownKeys, getOwnPropertyDescriptor
+  - Opt-in helper for users who need Windows env var compatibility
+  - Well-documented with usage examples and performance notes
+- Added `findCaseInsensitiveEnvKey()` utility function to `env` module
+  - Searches for environment variable keys using case-insensitive matching
+  - Optimized with length fast path to minimize expensive `toUpperCase()` calls
+  - Useful for cross-platform env var access where case may vary (e.g., PATH vs Path vs path)
+- Added comprehensive test suite for `env` module with 71 tests
+  - Covers `envAsBoolean()`, `envAsNumber()`, `envAsString()` conversion utilities
+  - Tests `createEnvProxy()` with Windows environment variables and edge cases
+  - Validates `findCaseInsensitiveEnvKey()` optimization and behavior
+
+### Fixed
+
+- Fixed `spawn` module to preserve Windows `process.env` Proxy behavior
+  - When no custom environment variables are provided, use `process.env` directly instead of spreading it
+  - Preserves Windows case-insensitive environment variable access (PATH vs Path)
+  - Fixes empty CLI output issue on Windows CI runners
+  - Only spreads `process.env` when merging custom environment variables
+
 ## [1.3.4](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.4) - 2025-10-26
 
 ### Added
