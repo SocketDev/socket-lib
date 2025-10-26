@@ -731,12 +731,9 @@
     "fix": "node scripts/lint.mjs --fix",
     "fix:build": "node scripts/fix-build.mjs",
     "lint": "node scripts/lint.mjs",
-    "lint-ci": "pnpm run lint",
     "prepare": "husky",
     "prepublishOnly": "pnpm run build",
     "test": "node scripts/test.mjs",
-    "test-ci": "vitest run",
-    "type-ci": "pnpm run check",
     "update": "node scripts/update.mjs"
   },
   "devDependencies": {
