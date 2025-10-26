@@ -12,67 +12,22 @@ const NumberIsFinite = Number.isFinite
 const NumberParseInt = Number.parseInt
 const StringCtor = String
 
-/**
- * Convert an environment variable value to a boolean.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function envAsBoolean(value: unknown, defaultValue = false): boolean {
-  if (typeof value === 'string') {
-    const trimmed = value.trim()
-    return trimmed === '1' || trimmed.toLowerCase() === 'true'
-  }
-  if (value === null || value === undefined) {
-    return !!defaultValue
-  }
-  return !!value
-}
-
-/**
- * Convert an environment variable value to a number.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function envAsNumber(value: unknown, defaultValue = 0): number {
-  const numOrNaN = NumberParseInt(String(value), 10)
-  const numMayBeNegZero = NumberIsFinite(numOrNaN)
-    ? numOrNaN
-    : NumberCtor(defaultValue)
-  // Ensure -0 is treated as 0.
-  return numMayBeNegZero || 0
-}
-
-/**
- * Convert an environment variable value to a trimmed string.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function envAsString(value: unknown, defaultValue = ''): string {
-  if (typeof value === 'string') {
-    return value.trim()
-  }
-  if (value === null || value === undefined) {
-    return defaultValue === '' ? defaultValue : StringCtor(defaultValue).trim()
-  }
-  return StringCtor(value).trim()
-}
-
-/**
- * Helper to find a case-insensitive key match in an object.
- * Uses fast path checks to minimize expensive toUpperCase() calls.
- */
-function findCaseInsensitiveKey(
-  obj: Record<string, string | undefined>,
-  upperProp: string,
-): string | undefined {
-  const targetLength = upperProp.length
-  for (const key of Object.keys(obj)) {
-    // Fast path: bail early if lengths don't match.
-    if (key.length !== targetLength) continue
-    // Only call toUpperCase if length matches.
-    if (key.toUpperCase() === upperProp) {
-      return key
-    }
-  }
-  return undefined
-}
+// Common environment variables that have case sensitivity issues on Windows.
+// These are checked with case-insensitive matching when exact matches fail.
+const caseInsensitiveKeys = new Set([
+  'APPDATA',
+  'COMSPEC',
+  'HOME',
+  'LOCALAPPDATA',
+  'PATH',
+  'PATHEXT',
+  'PROGRAMFILES',
+  'SYSTEMROOT',
+  'TEMP',
+  'TMP',
+  'USERPROFILE',
+  'WINDIR',
+])
 
 /**
  * Create a case-insensitive environment variable Proxy for Windows compatibility.
@@ -112,22 +67,6 @@ export function createEnvProxy(
   base: NodeJS.ProcessEnv,
   overrides?: Record<string, string | undefined>,
 ): NodeJS.ProcessEnv {
-  // Common environment variables that have case sensitivity issues on Windows.
-  // These are checked with case-insensitive matching when exact matches fail.
-  const caseInsensitiveKeys = new Set([
-    'PATH',
-    'TEMP',
-    'TMP',
-    'HOME',
-    'USERPROFILE',
-    'APPDATA',
-    'LOCALAPPDATA',
-    'PROGRAMFILES',
-    'SYSTEMROOT',
-    'WINDIR',
-    'COMSPEC',
-    'PATHEXT',
-  ])
 
   return new Proxy(
     {},
@@ -152,13 +91,13 @@ export function createEnvProxy(
         if (caseInsensitiveKeys.has(upperProp)) {
           // Check overrides with case variations.
           if (overrides) {
-            const key = findCaseInsensitiveKey(overrides, upperProp)
+            const key = findCaseInsensitiveEnvKey(overrides, upperProp)
             if (key !== undefined) {
               return overrides[key]
             }
           }
           // Check base with case variations.
-          const key = findCaseInsensitiveKey(base, upperProp)
+          const key = findCaseInsensitiveEnvKey(base, upperProp)
           if (key !== undefined) {
             return base[key]
           }
@@ -210,10 +149,10 @@ export function createEnvProxy(
         // Case-insensitive check.
         const upperProp = prop.toUpperCase()
         if (caseInsensitiveKeys.has(upperProp)) {
-          if (overrides && findCaseInsensitiveKey(overrides, upperProp) !== undefined) {
+          if (overrides && findCaseInsensitiveEnvKey(overrides, upperProp) !== undefined) {
             return true
           }
-          if (findCaseInsensitiveKey(base, upperProp) !== undefined) {
+          if (findCaseInsensitiveEnvKey(base, upperProp) !== undefined) {
             return true
           }
         }
@@ -230,4 +169,93 @@ export function createEnvProxy(
       },
     },
   ) as NodeJS.ProcessEnv
+}
+
+/**
+ * Convert an environment variable value to a boolean.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function envAsBoolean(value: unknown, defaultValue = false): boolean {
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed === '1' || trimmed.toLowerCase() === 'true'
+  }
+  if (value === null || value === undefined) {
+    return !!defaultValue
+  }
+  return !!value
+}
+
+/**
+ * Convert an environment variable value to a number.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function envAsNumber(value: unknown, defaultValue = 0): number {
+  const numOrNaN = NumberParseInt(String(value), 10)
+  const numMayBeNegZero = NumberIsFinite(numOrNaN)
+    ? numOrNaN
+    : NumberCtor(defaultValue)
+  // Ensure -0 is treated as 0.
+  return numMayBeNegZero || 0
+}
+
+/**
+ * Convert an environment variable value to a trimmed string.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function envAsString(value: unknown, defaultValue = ''): string {
+  if (typeof value === 'string') {
+    return value.trim()
+  }
+  if (value === null || value === undefined) {
+    return defaultValue === '' ? defaultValue : StringCtor(defaultValue).trim()
+  }
+  return StringCtor(value).trim()
+}
+
+/**
+ * Find a case-insensitive environment variable key match.
+ * Searches for an environment variable key that matches the given uppercase name,
+ * using optimized fast-path checks to minimize expensive toUpperCase() calls.
+ *
+ * **Use Cases:**
+ * - Finding PATH when env object has "Path" or "path"
+ * - Cross-platform env var access where case may vary
+ * - Custom case-insensitive env lookups
+ *
+ * **Performance:**
+ * - Fast path: Checks length first (O(1)) before toUpperCase (expensive)
+ * - Only converts to uppercase when length matches
+ * - Early exit on first match
+ *
+ * @param env - Environment object or env-like record to search
+ * @param upperEnvVarName - Uppercase environment variable name to find (e.g., 'PATH')
+ * @returns The actual key from env that matches (e.g., 'Path'), or undefined
+ *
+ * @example
+ * // Find PATH regardless of case
+ * const envObj = { Path: 'C:\\Windows', NODE_ENV: 'test' }
+ * const key = findCaseInsensitiveEnvKey(envObj, 'PATH')
+ * console.log(key)  // 'Path'
+ * console.log(envObj[key])  // 'C:\\Windows'
+ *
+ * @example
+ * // Not found returns undefined
+ * const key = findCaseInsensitiveEnvKey({}, 'MISSING')
+ * console.log(key)  // undefined
+ */
+export function findCaseInsensitiveEnvKey(
+  env: Record<string, string | undefined>,
+  upperEnvVarName: string,
+): string | undefined {
+  const targetLength = upperEnvVarName.length
+  for (const key of Object.keys(env)) {
+    // Fast path: bail early if lengths don't match.
+    if (key.length !== targetLength) continue
+    // Only call toUpperCase if length matches.
+    if (key.toUpperCase() === upperEnvVarName) {
+      return key
+    }
+  }
+  return undefined
 }
