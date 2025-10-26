@@ -2,13 +2,15 @@
  * Node.js runtime: versions, features, flags, and capabilities.
  */
 
+const NODE_VERSION = process.version
+
 // Version detection.
 export function getNodeVersion(): string {
-  return process.version
+  return NODE_VERSION
 }
 
 export function getNodeMajorVersion(): number {
-  return Number.parseInt(process.version.slice(1).split('.')[0] || '0', 10)
+  return Number.parseInt(NODE_VERSION.slice(1).split('.')[0] || '0', 10)
 }
 
 // Maintained Node.js versions.
@@ -64,7 +66,7 @@ export function supportsNodeRequireModule(): boolean {
   return (
     major >= 23 ||
     (major === 22 &&
-      Number.parseInt(process.version.split('.')[1] || '0', 10) >= 12)
+      Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10) >= 12)
   )
 }
 
@@ -73,7 +75,7 @@ export function supportsNodeRun(): boolean {
   return (
     major >= 23 ||
     (major === 22 &&
-      Number.parseInt(process.version.split('.')[1] || '0', 10) >= 11)
+      Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10) >= 11)
   )
 }
 
@@ -82,15 +84,15 @@ export function supportsNodeDisableSigusr1Flag(): boolean {
   // --disable-sigusr1 added in v22.14.0, v23.7.0.
   // Stabilized in v22.20.0, v24.8.0.
   if (major >= 24) {
-    const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+    const minor = Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10)
     return minor >= 8
   }
   if (major === 23) {
-    const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+    const minor = Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10)
     return minor >= 7
   }
   if (major === 22) {
-    const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+    const minor = Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10)
     return minor >= 14
   }
   return false
