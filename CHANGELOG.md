@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.4](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.4) - 2025-10-26
+
+### Added
+
+- Added Node.js SIGUSR1 signal handler prevention utilities in `constants/node` module
+  - `supportsNodeDisableSigusr1Flag()`: Detects if Node supports `--disable-sigusr1` flag (v22.14+, v23.7+, v24.8+)
+  - `getNodeDisableSigusr1Flags()`: Returns appropriate flags to prevent debugger attachment
+    - Returns `['--disable-sigusr1']` on supported versions (prevents Signal I/O Thread creation)
+    - Falls back to `['--no-inspect']` on Node 18+ (blocks debugger but still creates thread)
+  - Enables production CLI environments to prevent SIGUSR1 debugger signal handling for security
+
 ## [1.3.3](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.3) - 2025-10-24
 
 ### Fixed
