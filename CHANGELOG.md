@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.6) - 2025-10-26
+
+### Fixed
+
+- Fixed `debug` module functions being incorrectly tree-shaken as no-ops in bundled output
+  - Removed incorrect `/*@__NO_SIDE_EFFECTS__*/` annotations from `debug()`, `debugDir()`, `debugLog()`, and their `*Ns` variants
+  - These functions have side effects (logging output, spinner manipulation) and should not be removed by bundlers
+  - Fixes issue where `debugLog()` and `debugDir()` were compiled to empty no-op functions
+
 ## [1.3.5](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.5) - 2025-10-26
 
 ### Added
