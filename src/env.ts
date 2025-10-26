@@ -55,6 +55,26 @@ export function envAsString(value: unknown, defaultValue = ''): string {
 }
 
 /**
+ * Helper to find a case-insensitive key match in an object.
+ * Uses fast path checks to minimize expensive toUpperCase() calls.
+ */
+function findCaseInsensitiveKey(
+  obj: Record<string, string | undefined>,
+  upperProp: string,
+): string | undefined {
+  const targetLength = upperProp.length
+  for (const key of Object.keys(obj)) {
+    // Fast path: bail early if lengths don't match.
+    if (key.length !== targetLength) continue
+    // Only call toUpperCase if length matches.
+    if (key.toUpperCase() === upperProp) {
+      return key
+    }
+  }
+  return undefined
+}
+
+/**
  * Create a case-insensitive environment variable Proxy for Windows compatibility.
  * On Windows, environment variables are case-insensitive (PATH vs Path vs path).
  * This Proxy provides consistent access regardless of case, with priority given
@@ -132,17 +152,15 @@ export function createEnvProxy(
         if (caseInsensitiveKeys.has(upperProp)) {
           // Check overrides with case variations.
           if (overrides) {
-            for (const key of Object.keys(overrides)) {
-              if (key.toUpperCase() === upperProp) {
-                return overrides[key]
-              }
+            const key = findCaseInsensitiveKey(overrides, upperProp)
+            if (key !== undefined) {
+              return overrides[key]
             }
           }
           // Check base with case variations.
-          for (const key of Object.keys(base)) {
-            if (key.toUpperCase() === upperProp) {
-              return base[key]
-            }
+          const key = findCaseInsensitiveKey(base, upperProp)
+          if (key !== undefined) {
+            return base[key]
           }
         }
 
@@ -192,17 +210,11 @@ export function createEnvProxy(
         // Case-insensitive check.
         const upperProp = prop.toUpperCase()
         if (caseInsensitiveKeys.has(upperProp)) {
-          if (overrides) {
-            for (const key of Object.keys(overrides)) {
-              if (key.toUpperCase() === upperProp) {
-                return true
-              }
-            }
+          if (overrides && findCaseInsensitiveKey(overrides, upperProp) !== undefined) {
+            return true
           }
-          for (const key of Object.keys(base)) {
-            if (key.toUpperCase() === upperProp) {
-              return true
-            }
+          if (findCaseInsensitiveKey(base, upperProp) !== undefined) {
+            return true
           }
         }
 
