@@ -614,14 +614,22 @@ export function spawn(
   // third-party code, Node.js built-ins, or JavaScript built-in methods.
   // https://github.com/npm/promise-spawn
   // https://github.com/nodejs/node/blob/v24.0.1/lib/child_process.js#L674-L678
+  // Preserve Windows process.env Proxy behavior when no custom env is provided.
+  // On Windows, process.env is a Proxy that provides case-insensitive access
+  // (PATH vs Path vs path). Spreading creates a plain object that loses this.
+  // Only spread when we have custom environment variables to merge.
+  const envToUse = env
+    ? ({
+        __proto__: null,
+        ...process.env,
+        ...env,
+      } as unknown as NodeJS.ProcessEnv)
+    : process.env
+
   const promiseSpawnOpts = {
     __proto__: null,
     cwd: typeof spawnOptions.cwd === 'string' ? spawnOptions.cwd : undefined,
-    env: {
-      __proto__: null,
-      ...process.env,
-      ...env,
-    } as unknown as NodeJS.ProcessEnv,
+    env: envToUse,
     signal: abortSignal,
     stdio: spawnOptions.stdio,
     stdioString,
