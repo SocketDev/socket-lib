@@ -67,7 +67,6 @@ export function createEnvProxy(
   base: NodeJS.ProcessEnv,
   overrides?: Record<string, string | undefined>,
 ): NodeJS.ProcessEnv {
-
   return new Proxy(
     {},
     {
@@ -149,7 +148,10 @@ export function createEnvProxy(
         // Case-insensitive check.
         const upperProp = prop.toUpperCase()
         if (caseInsensitiveKeys.has(upperProp)) {
-          if (overrides && findCaseInsensitiveEnvKey(overrides, upperProp) !== undefined) {
+          if (
+            overrides &&
+            findCaseInsensitiveEnvKey(overrides, upperProp) !== undefined
+          ) {
             return true
           }
           if (findCaseInsensitiveEnvKey(base, upperProp) !== undefined) {
@@ -251,7 +253,9 @@ export function findCaseInsensitiveEnvKey(
   const targetLength = upperEnvVarName.length
   for (const key of Object.keys(env)) {
     // Fast path: bail early if lengths don't match.
-    if (key.length !== targetLength) continue
+    if (key.length !== targetLength) {
+      continue
+    }
     // Only call toUpperCase if length matches.
     if (key.toUpperCase() === upperEnvVarName) {
       return key
