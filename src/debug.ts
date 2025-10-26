@@ -197,7 +197,6 @@ function isEnabled(namespaces: string | undefined) {
 /**
  * Debug output for object inspection with caller info.
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debugDirNs(
   namespacesOrOpts: NamespacesOrOptions,
   obj: unknown,
@@ -245,7 +244,6 @@ let pointingTriangle: string | undefined
 /**
  * Debug output with caller info.
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debugNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
   const options = extractOptions(namespacesOrOpts)
   const { namespaces } = options
@@ -281,7 +279,6 @@ function debugNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
 /**
  * Debug logging function with caller info.
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debugLogNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
   const options = extractOptions(namespacesOrOpts)
   const { namespaces } = options
@@ -323,7 +320,6 @@ function debugLogNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
  * Second argument is the cache key or message.
  * Optional third argument is metadata object.
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debugCacheNs(
   namespacesOrOpts: NamespacesOrOptions,
   operation: string,
@@ -391,7 +387,6 @@ function isDebugNs(namespaces: string | undefined): boolean {
 /**
  * Debug output with caller info (wrapper for debugNs with default namespace).
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debug(...args: unknown[]): void {
   debugNs('*', ...args)
 }
@@ -399,7 +394,6 @@ function debug(...args: unknown[]): void {
 /**
  * Debug output for object inspection (wrapper for debugDirNs with default namespace).
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debugDir(
   obj: unknown,
   inspectOpts?: InspectOptions | undefined,
@@ -410,7 +404,6 @@ function debugDir(
 /**
  * Debug logging function (wrapper for debugLogNs with default namespace).
  */
-/*@__NO_SIDE_EFFECTS__*/
 function debugLog(...args: unknown[]): void {
   debugLogNs('*', ...args)
 }
