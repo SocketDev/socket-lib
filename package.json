@@ -556,6 +556,10 @@
       "types": "./dist/paths.d.ts",
       "default": "./dist/paths.js"
     },
+    "./paths/rewire": {
+      "types": "./dist/paths/rewire.d.ts",
+      "default": "./dist/paths/rewire.js"
+    },
     "./performance": {
       "types": "./dist/performance.d.ts",
       "default": "./dist/performance.js"

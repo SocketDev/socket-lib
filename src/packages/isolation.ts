@@ -10,19 +10,9 @@ import { WIN32 } from '#constants/platform'
 import type { PackageJson } from '../packages'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../path'
 import { readPackageJson } from './operations'
+import { getOsTmpDir } from '#lib/paths'
 
-let _os: typeof import('node:os') | undefined
 let _path: typeof import('node:path') | undefined
-
-/*@__NO_SIDE_EFFECTS__*/
-function getOs() {
-  if (_os === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _os = /*@__PURE__*/ require('node:os')
-  }
-  return _os as typeof import('node:os')
-}
 
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
@@ -97,7 +87,6 @@ export async function isolatePackage(
   packageSpec: string,
   options?: IsolatePackageOptions | undefined,
 ): Promise<IsolatePackageResult> {
-  const os = getOs()
   const path = getPath()
   const opts = { __proto__: null, ...options } as IsolatePackageOptions
   const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
@@ -111,7 +100,7 @@ export async function isolatePackage(
     // File system path.
     // Handle edge case on Windows where path.relative() returns an absolute path
     // when paths are on different drives, and the test prepends './' to it.
-    // Example: './C:\Users\...' should be treated as 'C:\Users\...'.
+    // Example: './C:\path\to\file' should be treated as 'C:\path\to\file'.
     const trimmedPath = trimLeadingDotSlash(packageSpec)
     const pathToResolve = isAbsolute(trimmedPath) ? trimmedPath : packageSpec
     sourcePath = path.resolve(pathToResolve)
@@ -159,7 +148,7 @@ export async function isolatePackage(
   // Create temp directory for this package.
   const sanitizedName = packageName.replace(/[@/]/g, '-')
   const tempDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), `socket-test-${sanitizedName}-`),
+    path.join(getOsTmpDir(), `socket-test-${sanitizedName}-`),
   )
   const packageTempDir = path.join(tempDir, sanitizedName)
   await fs.mkdir(packageTempDir, { recursive: true })

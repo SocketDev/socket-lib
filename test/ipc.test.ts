@@ -15,7 +15,8 @@ import {
   parseIpcMessage,
   readIpcStub,
   writeIpcStub,
-} from '@socketsecurity/lib/ipc'
+} from '../src/ipc'
+import { resetPaths, setPath } from '../src/paths/rewire'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
@@ -63,8 +64,7 @@ describe('ipc', () => {
     it('should write stub file with valid data', async () => {
       await runWithTempDir(async tmpDir => {
         // Override temp directory for testing.
-        const originalTmpdir = os.tmpdir
-        os.tmpdir = () => tmpDir
+        setPath('tmpdir', tmpDir)
 
         try {
           const data = { apiToken: 'test-token', config: { foo: 'bar' } }
@@ -79,15 +79,14 @@ describe('ipc', () => {
           expect(parsed.timestamp).toBeTypeOf('number')
           expect(parsed.data).toEqual(data)
         } finally {
-          os.tmpdir = originalTmpdir
+          resetPaths()
         }
       }, 'ipc-write-test-')
     })
 
     it('should create directory structure if not exists', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalTmpdir = os.tmpdir
-        os.tmpdir = () => tmpDir
+        setPath('tmpdir', tmpDir)
 
         try {
           const stubPath = await writeIpcStub('new-app', {
@@ -99,7 +98,7 @@ describe('ipc', () => {
             .catch(() => false)
           expect(dirExists).toBe(true)
         } finally {
-          os.tmpdir = originalTmpdir
+          resetPaths()
         }
       }, 'ipc-mkdir-test-')
     })
@@ -108,8 +107,7 @@ describe('ipc', () => {
   describe('readIpcStub', () => {
     it('should read valid stub file', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalTmpdir = os.tmpdir
-        os.tmpdir = () => tmpDir
+        setPath('tmpdir', tmpDir)
 
         try {
           const testData = { message: 'Hello IPC!' }
@@ -118,7 +116,7 @@ describe('ipc', () => {
           const readData = await readIpcStub(stubPath)
           expect(readData).toEqual(testData)
         } finally {
-          os.tmpdir = originalTmpdir
+          resetPaths()
         }
       }, 'ipc-read-test-')
     })
@@ -140,8 +138,7 @@ describe('ipc', () => {
 
     it('should return null and cleanup stale files', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalTmpdir = os.tmpdir
-        os.tmpdir = () => tmpDir
+        setPath('tmpdir', tmpDir)
 
         try {
           const stubPath = await writeIpcStub('stale-test', {
@@ -172,7 +169,7 @@ describe('ipc', () => {
             .catch(() => false)
           expect(exists).toBe(false)
         } finally {
-          os.tmpdir = originalTmpdir
+          resetPaths()
         }
       }, 'ipc-stale-test-')
     })
@@ -181,8 +178,7 @@ describe('ipc', () => {
   describe('cleanupIpcStubs', () => {
     it('should clean up stale stub files', async () => {
       await runWithTempDir(async tmpDir => {
-        const originalTmpdir = os.tmpdir
-        os.tmpdir = () => tmpDir
+        setPath('tmpdir', tmpDir)
 
         try {
           // Create some stub files.
@@ -244,7 +240,7 @@ describe('ipc', () => {
           expect(fresh1Exists).toBe(true)
           expect(fresh2Exists).toBe(true)
         } finally {
-          os.tmpdir = originalTmpdir
+          resetPaths()
         }
       }, 'ipc-cleanup-test-')
     })
