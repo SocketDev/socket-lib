@@ -1,5 +1,5 @@
 import { stripAnsi } from '@socketsecurity/lib/ansi'
-import { CI } from '@socketsecurity/lib/env/ci'
+import { getCI } from '@socketsecurity/lib/env/ci'
 import {
   applyShimmer,
   DIR_LTR,
@@ -8,8 +8,8 @@ import {
 } from '@socketsecurity/lib/effects/text-shimmer'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-describe('text-shimmer', () => {
-  describe('applyShimmer()', () => {
+describe.sequential('text-shimmer', () => {
+  describe.sequential('applyShimmer()', () => {
     let state: ShimmerState
 
     beforeEach(() => {
@@ -40,7 +40,7 @@ describe('text-shimmer', () => {
 
         // In CI: step should not advance (shimmer disabled)
         // In non-CI: step should advance (shimmer enabled)
-        if (CI) {
+        if (getCI()) {
           expect(state.step).toBe(0)
         } else {
           expect(state.step).toBeGreaterThan(0)
@@ -69,7 +69,7 @@ describe('text-shimmer', () => {
 
           // In CI: step should not advance (shimmer disabled)
           // In non-CI: step should advance (shimmer enabled)
-          if (CI) {
+          if (getCI()) {
             expect(testState.step).toBe(0)
           } else {
             expect(testState.step).toBeGreaterThan(0)
@@ -93,7 +93,7 @@ describe('text-shimmer', () => {
 
         // In CI: step should not advance (shimmer disabled)
         // In non-CI: step should advance (shimmer enabled)
-        if (CI) {
+        if (getCI()) {
           expect(state.step).toBe(0)
         } else {
           expect(state.step).toBeGreaterThan(0)
@@ -114,7 +114,7 @@ describe('text-shimmer', () => {
           direction: DIR_LTR,
         })
 
-        if (CI) {
+        if (getCI()) {
           // In CI: step should not advance (shimmer disabled)
           expect(state1.step).toBe(0)
         } else {
@@ -166,7 +166,7 @@ describe('text-shimmer', () => {
 
         // In CI: step should not advance (shimmer disabled)
         // In non-CI: step should advance (shimmer enabled)
-        if (CI) {
+        if (getCI()) {
           expect(testState.step).toBe(0)
         } else {
           expect(testState.step).toBeGreaterThan(0)

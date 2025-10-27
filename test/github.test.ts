@@ -13,46 +13,49 @@ import {
   getGitHubTokenFromGitConfig,
   getGitHubTokenWithFallback,
 } from '@socketsecurity/lib/github'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-describe('github', () => {
+describe.sequential('github', () => {
   beforeEach(() => {
     // Clear environment variables
-    delete process.env.GITHUB_TOKEN
-    delete process.env.GH_TOKEN
-    delete process.env.SOCKET_CLI_GITHUB_TOKEN
+    resetEnv()
     clearRefCache()
+  })
+
+  afterEach(() => {
+    resetEnv()
   })
 
   describe('getGitHubToken', () => {
     it('should return GITHUB_TOKEN from environment', () => {
-      process.env.GITHUB_TOKEN = 'test-token'
+      setEnv('GITHUB_TOKEN', 'test-token')
       const token = getGitHubToken()
       expect(token).toBe('test-token')
     })
 
     it('should return GH_TOKEN from environment', () => {
-      process.env.GH_TOKEN = 'gh-test-token'
+      setEnv('GH_TOKEN', 'gh-test-token')
       const token = getGitHubToken()
       expect(token).toBe('gh-test-token')
     })
 
     it('should return SOCKET_CLI_GITHUB_TOKEN from environment', () => {
-      process.env.SOCKET_CLI_GITHUB_TOKEN = 'cli-token'
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli-token')
       const token = getGitHubToken()
       expect(token).toBe('cli-token')
     })
 
     it('should prefer GITHUB_TOKEN over GH_TOKEN', () => {
-      process.env.GITHUB_TOKEN = 'github-token'
-      process.env.GH_TOKEN = 'gh-token'
+      setEnv('GITHUB_TOKEN', 'github-token')
+      setEnv('GH_TOKEN', 'gh-token')
       const token = getGitHubToken()
       expect(token).toBe('github-token')
     })
 
     it('should prefer GITHUB_TOKEN over SOCKET_CLI_GITHUB_TOKEN', () => {
-      process.env.GITHUB_TOKEN = 'github-token'
-      process.env.SOCKET_CLI_GITHUB_TOKEN = 'cli-token'
+      setEnv('GITHUB_TOKEN', 'github-token')
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli-token')
       const token = getGitHubToken()
       expect(token).toBe('github-token')
     })
@@ -97,13 +100,13 @@ describe('github', () => {
 
   describe('getGitHubTokenWithFallback', () => {
     it('should return token from GITHUB_TOKEN environment first', async () => {
-      process.env.GITHUB_TOKEN = 'env-token'
+      setEnv('GITHUB_TOKEN', 'env-token')
       const token = await getGitHubTokenWithFallback()
       expect(token).toBe('env-token')
     })
 
     it('should return token from GH_TOKEN when GITHUB_TOKEN is not set', async () => {
-      process.env.GH_TOKEN = 'gh-token'
+      setEnv('GH_TOKEN', 'gh-token')
       const token = await getGitHubTokenWithFallback()
       expect(token).toBe('gh-token')
     })
@@ -173,42 +176,39 @@ describe('github', () => {
 
   describe('token priority and fallback', () => {
     it('should prioritize GITHUB_TOKEN over other env vars', () => {
-      process.env.GITHUB_TOKEN = 'token1'
-      process.env.GH_TOKEN = 'token2'
-      process.env.SOCKET_CLI_GITHUB_TOKEN = 'token3'
+      setEnv('GITHUB_TOKEN', 'token1')
+      setEnv('GH_TOKEN', 'token2')
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
 
       const token = getGitHubToken()
       expect(token).toBe('token1')
     })
 
     it('should use GH_TOKEN when GITHUB_TOKEN is not set', () => {
-      delete process.env.GITHUB_TOKEN
-      process.env.GH_TOKEN = 'token2'
-      process.env.SOCKET_CLI_GITHUB_TOKEN = 'token3'
+      setEnv('GH_TOKEN', 'token2')
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
 
       const token = getGitHubToken()
       expect(token).toBe('token2')
     })
 
     it('should use SOCKET_CLI_GITHUB_TOKEN as last resort', () => {
-      delete process.env.GITHUB_TOKEN
-      delete process.env.GH_TOKEN
-      process.env.SOCKET_CLI_GITHUB_TOKEN = 'token3'
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
 
       const token = getGitHubToken()
       expect(token).toBe('token3')
     })
 
     it('should handle empty string tokens', () => {
-      process.env.GITHUB_TOKEN = ''
-      process.env.GH_TOKEN = 'token2'
+      setEnv('GITHUB_TOKEN', '')
+      setEnv('GH_TOKEN', 'token2')
 
       const token = getGitHubToken()
       expect(token).toBe('token2')
     })
 
     it('should handle whitespace tokens', () => {
-      process.env.GITHUB_TOKEN = '   '
+      setEnv('GITHUB_TOKEN', '   ')
       const token = getGitHubToken()
       expect(token).toBeTruthy()
     })
@@ -245,16 +245,12 @@ describe('github', () => {
 
   describe('getGitHubTokenWithFallback', () => {
     it('should prefer environment over git config', async () => {
-      process.env.GITHUB_TOKEN = 'env-token'
+      setEnv('GITHUB_TOKEN', 'env-token')
       const token = await getGitHubTokenWithFallback()
       expect(token).toBe('env-token')
     })
 
     it('should handle when both sources are unavailable', async () => {
-      delete process.env.GITHUB_TOKEN
-      delete process.env.GH_TOKEN
-      delete process.env.SOCKET_CLI_GITHUB_TOKEN
-
       const token = await getGitHubTokenWithFallback()
       expect(typeof token === 'string' || token === undefined).toBe(true)
     })
@@ -271,25 +267,25 @@ describe('github', () => {
 
   describe('edge cases and error handling', () => {
     it('should handle rapid token changes', () => {
-      process.env.GITHUB_TOKEN = 'token1'
+      setEnv('GITHUB_TOKEN', 'token1')
       expect(getGitHubToken()).toBe('token1')
 
-      process.env.GITHUB_TOKEN = 'token2'
+      setEnv('GITHUB_TOKEN', 'token2')
       expect(getGitHubToken()).toBe('token2')
 
-      delete process.env.GITHUB_TOKEN
+      setEnv('GITHUB_TOKEN', undefined)
       expect(getGitHubToken()).toBeUndefined()
     })
 
     it('should handle token with special characters', () => {
-      process.env.GITHUB_TOKEN = 'ghp_abc123!@#$%^&*()'
+      setEnv('GITHUB_TOKEN', 'ghp_abc123!@#$%^&*()')
       const token = getGitHubToken()
       expect(token).toContain('ghp_abc123')
     })
 
     it('should handle very long tokens', () => {
       const longToken = `ghp_${'x'.repeat(1000)}`
-      process.env.GITHUB_TOKEN = longToken
+      setEnv('GITHUB_TOKEN', longToken)
       const token = getGitHubToken()
       expect(token).toBe(longToken)
     })
@@ -307,7 +303,7 @@ describe('github', () => {
 
   describe('concurrent operations', () => {
     it('should handle concurrent token reads', () => {
-      process.env.GITHUB_TOKEN = 'token'
+      setEnv('GITHUB_TOKEN', 'token')
       const results = Array.from({ length: 10 }, () => getGitHubToken())
       expect(results).toEqual(Array(10).fill('token'))
     })

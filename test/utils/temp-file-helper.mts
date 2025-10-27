@@ -6,52 +6,59 @@ import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+
 /**
  * Mock the home directory for cross-platform testing.
+ * Uses env rewiring for thread-safe test isolation.
  * On Unix: Sets HOME
- * On Windows: Sets USERPROFILE, HOMEDRIVE, HOMEPATH
+ * On Windows: Sets USERPROFILE
+ * Also sets SOCKET_DLX_DIR for DLX cache isolation.
  */
 export function mockHomeDir(homeDir: string): () => void {
+  // Use rewiring system for thread-safe env mocking.
+  // Also set process.env for subprocess compatibility.
   const originalEnv = {
     HOME: process.env['HOME'],
-    HOMEDRIVE: process.env['HOMEDRIVE'],
-    HOMEPATH: process.env['HOMEPATH'],
+    SOCKET_DLX_DIR: process.env['SOCKET_DLX_DIR'],
     USERPROFILE: process.env['USERPROFILE'],
   }
 
-  // Set Unix home.
+  // Set Unix home via rewiring.
+  setEnv('HOME', homeDir)
   process.env['HOME'] = homeDir
 
-  // Set Windows home.
+  // Set DLX directory override for test isolation.
+  const dlxDir = path.join(homeDir, '.socket', '_dlx')
+  setEnv('SOCKET_DLX_DIR', dlxDir)
+  process.env['SOCKET_DLX_DIR'] = dlxDir
+
+  // Set Windows home via rewiring.
   if (process.platform === 'win32') {
-    const drive = homeDir.slice(0, 2) // e.g., 'C:'
-    const pathWithoutDrive = homeDir.slice(2) // e.g., '\Users\test'
-    process.env['HOMEDRIVE'] = drive
-    process.env['HOMEPATH'] = pathWithoutDrive
+    setEnv('USERPROFILE', homeDir)
     process.env['USERPROFILE'] = homeDir
   }
 
   // Return restore function.
   return () => {
+    clearEnv('HOME')
+    clearEnv('SOCKET_DLX_DIR')
+    clearEnv('USERPROFILE')
+
     if (originalEnv.HOME === undefined) {
       delete process.env['HOME']
     } else {
       process.env['HOME'] = originalEnv.HOME
     }
+    if (originalEnv.SOCKET_DLX_DIR === undefined) {
+      delete process.env['SOCKET_DLX_DIR']
+    } else {
+      process.env['SOCKET_DLX_DIR'] = originalEnv.SOCKET_DLX_DIR
+    }
     if (originalEnv.USERPROFILE === undefined) {
       delete process.env['USERPROFILE']
     } else {
       process.env['USERPROFILE'] = originalEnv.USERPROFILE
-    }
-    if (originalEnv.HOMEDRIVE === undefined) {
-      delete process.env['HOMEDRIVE']
-    } else {
-      process.env['HOMEDRIVE'] = originalEnv.HOMEDRIVE
-    }
-    if (originalEnv.HOMEPATH === undefined) {
-      delete process.env['HOMEPATH']
-    } else {
-      process.env['HOMEPATH'] = originalEnv.HOMEPATH
     }
   }
 }

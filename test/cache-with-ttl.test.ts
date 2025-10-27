@@ -2,13 +2,25 @@
  * @fileoverview Unit tests for TTL cache utilities.
  */
 
+import { tmpdir } from 'node:os'
+import * as path from 'node:path'
+
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe('cache-with-ttl', () => {
+describe.sequential('cache-with-ttl', () => {
   let cache: ReturnType<typeof createTtlCache>
+  let testCacheDir: string
 
   beforeEach(() => {
+    // Create a unique cache directory for each test to ensure isolation
+    testCacheDir = path.join(
+      tmpdir(),
+      `socket-test-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
+    setEnv('SOCKET_CACACHE_DIR', testCacheDir)
+
     // Create a fresh cache instance for each test
     cache = createTtlCache({
       ttl: 1000, // 1 second for tests
@@ -20,6 +32,8 @@ describe('cache-with-ttl', () => {
   afterEach(async () => {
     // Clean up after each test
     await cache.clear()
+    // Reset environment overrides
+    resetEnv()
   })
 
   describe('createTtlCache', () => {
