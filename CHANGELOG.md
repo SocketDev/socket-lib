@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.0.0) - 2025-10-27
+
+### Breaking Changes
+
+**Environment Variable System Refactor**
+
+This release completely refactors the environment variable system, consolidating 60+ individual env constant files into grouped getter modules with AsyncLocalStorage-based test rewiring.
+
+**Consolidated env files** - Individual files replaced with grouped modules:
+- `env/github.ts` - All GitHub-related env vars (GITHUB_TOKEN, GH_TOKEN, GITHUB_API_URL, etc.)
+- `env/socket.ts` - Socket-specific env vars (SOCKET_API_TOKEN, SOCKET_CACACHE_DIR, etc.)
+- `env/socket-cli.ts` - Socket CLI env vars (SOCKET_CLI_API_TOKEN, SOCKET_CLI_CONFIG, etc.)
+- `env/npm.ts` - NPM-related env vars
+- `env/locale.ts` - Locale env vars (LANG, LC_ALL, LC_MESSAGES)
+- `env/windows.ts` - Windows-specific env vars (USERPROFILE, LOCALAPPDATA, APPDATA, COMSPEC)
+- `env/xdg.ts` - XDG base directory env vars
+- `env/temp-dir.ts` - Temp directory env vars (TEMP, TMP, TMPDIR)
+- `env/test.ts` - Test framework env vars (VITEST, JEST_WORKER_ID)
+
+**Constants → Getter functions** - All env constants converted to functions:
+```typescript
+// Before (v1.x):
+import { GITHUB_TOKEN } from '#env/github-token'
+
+// After (v2.x):
+import { getGithubToken } from '#env/github'
+```
+
+**Deleted files** - Removed 60+ individual env constant files:
+- `env/github-token.ts`, `env/socket-api-token.ts`, etc. → Consolidated into grouped files
+- `env/getters.ts` → Functions moved to their respective grouped files
+
+### Added
+
+**AsyncLocalStorage-Based Test Rewiring**
+
+New `env/rewire.ts` and `path/rewire.ts` modules provides context-isolated environment variable overrides for testing:
+
+```typescript
+import { withEnv, setEnv, resetEnv, getEnvValue } from '#env/rewire'
+
+// Option 1: Isolated context with AsyncLocalStorage
+await withEnv({ CI: '1', NODE_ENV: 'test' }, async () => {
+  // CI env var is '1' only within this block
+  // Concurrent tests don't interfere
+})
+
+// Option 2: Traditional beforeEach/afterEach pattern
+beforeEach(() => {
+  setEnv('CI', '1')
+})
+
+afterEach(() => {
+  resetEnv()
+})
+```
+
+**Features:**
+- Allows toggling between snapshot and live behavior
+- Compatible with `vi.stubEnv()` as fallback
+
+### Changed
+
+- Updated all dynamic `require()` statements to use path aliases (`#constants/*`, `#packages/*`)
+- Improved logger blank line tracking per stream (separate stderr/stdout tracking)
+- Exported `getCacache()` function for external use
+
 ## [1.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.6) - 2025-10-26
 
 ### Fixed
