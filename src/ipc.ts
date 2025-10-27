@@ -32,7 +32,7 @@ import crypto from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import { safeDelete } from './fs'
+import { safeDeleteSync } from './fs'
 import { getOsTmpDir } from './paths'
 import { z } from './zod'
 
@@ -329,7 +329,11 @@ export async function readIpcStub(stubPath: string): Promise<unknown> {
     const maxAgeMs = 5 * 60 * 1000
     if (ageMs > maxAgeMs) {
       // Clean up stale file. IPC stubs are always in tmpdir, so use force: true.
-      await safeDelete(stubPath, { force: true }).catch(() => {})
+      try {
+        safeDeleteSync(stubPath, { force: true })
+      } catch {
+        // Ignore deletion errors
+      }
       return null
     }
     return validated.data
@@ -396,7 +400,7 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
 
             if (isStale) {
               // IPC stubs are always in tmpdir, so we can use force: true to skip path checks
-              await safeDelete(filePath, { force: true })
+              safeDeleteSync(filePath, { force: true })
             }
           } catch {
             // Ignore errors for individual files.
