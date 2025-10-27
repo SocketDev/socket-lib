@@ -9,6 +9,9 @@ import { defineConfig } from 'vitest/config'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
 
+// Normalize paths for cross-platform glob patterns (forward slashes on Windows)
+const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
+
 // Coverage mode detection
 const isCoverageEnabled =
   process.env.COVERAGE === 'true' ||
@@ -46,14 +49,16 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     include: [
-      path.resolve(projectRoot, 'test/**/*.test.{js,ts,mjs,mts,cjs,cts}'),
+      toGlobPath(
+        path.resolve(projectRoot, 'test/**/*.test.{js,ts,mjs,mts,cjs,cts}'),
+      ),
     ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       ...(process.env.INCLUDE_NPM_TESTS
         ? []
-        : [path.resolve(projectRoot, 'test/npm/**')]),
+        : [toGlobPath(path.resolve(projectRoot, 'test/npm/**'))]),
     ],
     reporters: ['default'],
     // Optimize test execution for speed
