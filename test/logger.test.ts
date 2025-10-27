@@ -785,7 +785,7 @@ describe('Logger', () => {
     })
   })
 
-  describe('indentation with stream-bound loggers', () => {
+  describe.sequential('indentation with stream-bound loggers', () => {
     it('should only affect stderr when dedenting stderr logger', () => {
       testLogger.indent()
       testLogger.indent()
@@ -833,7 +833,7 @@ describe('Logger', () => {
     })
   })
 
-  describe('logCallCount', () => {
+  describe.sequential('logCallCount', () => {
     it('should start at 0', () => {
       expect(testLogger.logCallCount).toBe(0)
     })
@@ -943,7 +943,7 @@ describe('Logger', () => {
     })
   })
 
-  describe('blank line tracking', () => {
+  describe.sequential('blank line tracking', () => {
     it('should track when last line was blank', () => {
       testLogger.log('')
       testLogger.logNewline()
@@ -980,7 +980,7 @@ describe('Logger', () => {
     })
   })
 
-  describe('edge cases', () => {
+  describe.sequential('edge cases', () => {
     it('should handle empty strings', () => {
       testLogger.log('')
       testLogger.error('')

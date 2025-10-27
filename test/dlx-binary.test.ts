@@ -85,7 +85,7 @@ afterAll(async () => {
   })
 })
 
-describe('dlx-binary', () => {
+describe.sequential('dlx-binary', () => {
   describe('getDlxCachePath', () => {
     it('should return normalized cache path', () => {
       const cachePath = getDlxCachePath()
@@ -367,7 +367,10 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
 
           // Corrupt metadata
-          const cacheKey = createHash('sha256').update(url).digest('hex')
+          const name = 'invalid-meta-binary'
+          const cacheKey = createHash('sha256')
+            .update(`${url}:${name}`)
+            .digest('hex')
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.writeFile(metaPath, 'invalid json', 'utf8')
@@ -401,7 +404,10 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
 
           // Delete metadata
-          const cacheKey = createHash('sha256').update(url).digest('hex')
+          const name = 'missing-meta-binary'
+          const cacheKey = createHash('sha256')
+            .update(`${url}:${name}`)
+            .digest('hex')
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.unlink(metaPath)
@@ -435,7 +441,10 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
 
           // Write array as metadata (invalid)
-          const cacheKey = createHash('sha256').update(url).digest('hex')
+          const name = 'array-meta-binary'
+          const cacheKey = createHash('sha256')
+            .update(`${url}:${name}`)
+            .digest('hex')
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.writeFile(metaPath, JSON.stringify([]), 'utf8')
@@ -469,7 +478,10 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
 
           // Write metadata without checksum
-          const cacheKey = createHash('sha256').update(url).digest('hex')
+          const name = 'no-checksum-meta-binary'
+          const cacheKey = createHash('sha256')
+            .update(`${url}:${name}`)
+            .digest('hex')
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.writeFile(
@@ -1227,7 +1239,10 @@ describe('dlx-binary', () => {
           await result1.spawnPromise.catch(() => {})
 
           // Make metadata unreadable (change permissions)
-          const cacheKey = createHash('sha256').update(url).digest('hex')
+          const name = 'read-error-binary'
+          const cacheKey = createHash('sha256')
+            .update(`${url}:${name}`)
+            .digest('hex')
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
 

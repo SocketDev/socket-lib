@@ -21,7 +21,7 @@ import {
   isUnstagedSync,
 } from '@socketsecurity/lib/git'
 import { spawnSync } from '@socketsecurity/lib/spawn'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
 describe('git extended tests', () => {
@@ -192,15 +192,7 @@ describe('git extended tests', () => {
   })
 
   describe('real git operations', () => {
-    let originalCwd: string
-
-    beforeEach(async () => {
-      originalCwd = process.cwd()
-    })
-
-    afterEach(async () => {
-      process.chdir(originalCwd)
-    })
+    // Note: No need to save/restore cwd - we always use explicit cwd options
 
     it('should work with a temporary git repository', async () => {
       await runWithTempDir(async tmpDir => {
