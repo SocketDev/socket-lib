@@ -149,8 +149,8 @@ describe('ipc', () => {
           })
 
           // Make the file stale by modifying its timestamp.
-          // 6 minutes ago.
-          const staleTimestamp = Date.now() - 6 * 60 * 1000
+          // 10 minutes ago (well past the 5-minute threshold for robustness).
+          const staleTimestamp = Date.now() - 10 * 60 * 1000
           const staleStub = {
             data: { data: 'old' },
             pid: process.pid,
@@ -196,8 +196,8 @@ describe('ipc', () => {
           // Make one file stale.
           const dir = path.dirname(stubPath1)
           const staleFile = path.join(dir, 'stub-99999.json')
-          // 6 minutes ago.
-          const staleTimestamp = Date.now() - 6 * 60 * 1000
+          // 10 minutes ago (well past the 5-minute threshold for robustness).
+          const staleTimestamp = Date.now() - 10 * 60 * 1000
           const staleStub = {
             data: { test: 'stale' },
             pid: 99_999,
@@ -211,6 +211,9 @@ describe('ipc', () => {
           // Set the file's modification time to match the stale timestamp.
           const staleTime = new Date(staleTimestamp)
           await fs.utimes(staleFile, staleTime, staleTime)
+
+          // Small delay to ensure filesystem operations are fully committed
+          await new Promise(resolve => setTimeout(resolve, 50))
 
           await cleanupIpcStubs('cleanup-test')
 
