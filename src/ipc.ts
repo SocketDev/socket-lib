@@ -346,7 +346,7 @@ export async function readIpcStub(stubPath: string): Promise<unknown> {
  * periodically or on application startup.
  *
  * ## Cleanup Rules:
- * - Files older than 5 minutes are removed
+ * - Files older than 5 minutes are removed (checked via both filesystem mtime and JSON timestamp)
  * - Only stub files (stub-*.json) are processed
  * - Errors are silently ignored (best-effort cleanup)
  *
@@ -375,9 +375,25 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
         if (file.startsWith('stub-') && file.endsWith('.json')) {
           const filePath = path.join(stubDir, file)
           try {
+            // Check both filesystem mtime and JSON timestamp for more reliable detection
             const stats = await fs.stat(filePath)
-            const ageMs = now - stats.mtimeMs
-            if (ageMs > maxAgeMs) {
+            const mtimeAge = now - stats.mtimeMs
+
+            // Also check the timestamp inside the JSON file for accuracy
+            let isStale = mtimeAge > maxAgeMs
+            if (!isStale) {
+              try {
+                const content = await fs.readFile(filePath, 'utf8')
+                const parsed = JSON.parse(content)
+                const validated = IpcStubSchema.parse(parsed)
+                const contentAge = now - validated.timestamp
+                isStale = contentAge > maxAgeMs
+              } catch {
+                // If we can't read/parse the file, rely on mtime
+              }
+            }
+
+            if (isStale) {
               await fs.unlink(filePath)
             }
           } catch {
