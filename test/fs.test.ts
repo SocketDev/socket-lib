@@ -729,7 +729,6 @@ describe('fs', () => {
   })
 
   describe('safeDelete', () => {
-
     it('should delete files in temp directory', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'delete-me.txt')
@@ -804,7 +803,6 @@ describe('fs', () => {
   })
 
   describe('safeDeleteSync', () => {
-
     it('should delete files in temp directory', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'delete-me.txt')
