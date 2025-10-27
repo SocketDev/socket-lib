@@ -49,7 +49,7 @@ function mapSourceToTests(filepath) {
 
   // Map specific files to their test files
   const basename = path.basename(normalized, path.extname(normalized))
-  const testFile = `test/${basename}.test.mts`
+  const testFile = `test/${basename}.test.ts`
 
   // Check if corresponding test exists
   if (existsSync(path.join(rootPath, testFile))) {
@@ -58,16 +58,16 @@ function mapSourceToTests(filepath) {
 
   // Special mappings
   if (normalized.includes('src/package-url.ts')) {
-    return ['test/package-url.test.mts', 'test/integration.test.mts']
+    return ['test/package-url.test.ts', 'test/integration.test.ts']
   }
   if (normalized.includes('src/package-url-builder.ts')) {
-    return ['test/package-url-builder.test.mts', 'test/integration.test.mts']
+    return ['test/package-url-builder.test.ts', 'test/integration.test.ts']
   }
   if (normalized.includes('src/url-converter.ts')) {
-    return ['test/url-converter.test.mts']
+    return ['test/url-converter.test.ts']
   }
   if (normalized.includes('src/result.ts')) {
-    return ['test/result.test.mts']
+    return ['test/result.test.ts']
   }
 
   // If no specific mapping, run all tests to be safe
@@ -152,11 +152,11 @@ export function getTestsToRun(options = {}) {
     // Data changes run integration tests
     if (normalized.startsWith('data/')) {
       // Skip deleted files.
-      if (existsSync(path.join(rootPath, 'test/integration.test.mts'))) {
-        testFiles.add('test/integration.test.mts')
+      if (existsSync(path.join(rootPath, 'test/integration.test.ts'))) {
+        testFiles.add('test/integration.test.ts')
       }
-      if (existsSync(path.join(rootPath, 'test/purl-types.test.mts'))) {
-        testFiles.add('test/purl-types.test.mts')
+      if (existsSync(path.join(rootPath, 'test/purl-types.test.ts'))) {
+        testFiles.add('test/purl-types.test.ts')
       }
     }
   }
