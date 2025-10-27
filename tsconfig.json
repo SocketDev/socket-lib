@@ -40,6 +40,6 @@
       "pacote": ["./src/external/pacote"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist/**/*", "lib", "test", "src/**/*.js"]
 }
