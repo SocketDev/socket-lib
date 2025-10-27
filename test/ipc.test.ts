@@ -222,6 +222,27 @@ describe('ipc', () => {
             .access(staleFile)
             .then(() => true)
             .catch(() => false)
+
+          // If file still exists, check if it's the same file we created
+          if (staleExists) {
+            const content = await fs.readFile(staleFile, 'utf8')
+            const parsed = JSON.parse(content)
+            // If timestamp doesn't match, file was deleted and recreated
+            if (parsed.timestamp !== staleTimestamp) {
+              console.log(
+                'File was deleted and recreated with new timestamp:',
+                parsed.timestamp,
+              )
+            } else {
+              console.log(
+                'File still exists with original timestamp:',
+                staleTimestamp,
+              )
+              console.log('File mtime:', (await fs.stat(staleFile)).mtimeMs)
+              console.log('Current time:', Date.now())
+            }
+          }
+
           expect(staleExists).toBe(false)
 
           // Fresh files should still exist.
