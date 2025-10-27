@@ -25,24 +25,17 @@ import { getUserprofile } from '#env/windows'
 
 import { normalizePath } from './path'
 
+let _cachedOsTmpDir: string | undefined
+
 /**
- * Get the user's home directory.
- * Uses environment variables directly to support test mocking.
- * Falls back to os.homedir() if env vars not set.
+ * Get the OS temporary directory.
+ * Result is memoized for performance.
  */
-function _getUserHomeDir(): string {
-  // Try HOME first (Unix)
-  const home = getHome()
-  if (home) {
-    return home
+export function getOsTmpDir(): string {
+  if (_cachedOsTmpDir === undefined) {
+    _cachedOsTmpDir = os.tmpdir()
   }
-  // Try USERPROFILE (Windows)
-  const userProfile = getUserprofile()
-  if (userProfile) {
-    return userProfile
-  }
-  // Fallback to os.homedir()
-  return os.homedir()
+  return _cachedOsTmpDir
 }
 
 /**
@@ -53,16 +46,22 @@ export function getSocketHomePath(): string {
   return getSocketUserDir()
 }
 
+let _cachedSocketUserDir: string | undefined
+
 /**
  * Get the Socket user directory (~/.socket).
+ * Result is memoized for performance.
  */
 export function getSocketUserDir(): string {
-  return normalizePath(
-    path.join(
-      _getUserHomeDir(),
-      /*@__INLINE__*/ require('#constants/paths').DOT_SOCKET_DIR,
-    ),
-  )
+  if (_cachedSocketUserDir === undefined) {
+    _cachedSocketUserDir = normalizePath(
+      path.join(
+        getUserHomeDir(),
+        /*@__INLINE__*/ require('#constants/paths').DOT_SOCKET_DIR,
+      ),
+    )
+  }
+  return _cachedSocketUserDir
 }
 
 /**
@@ -77,20 +76,29 @@ export function getSocketAppDir(appName: string): string {
   )
 }
 
+let _cachedSocketCacacheDir: string | undefined
+
 /**
  * Get the Socket cacache directory (~/.socket/_cacache).
  * Can be overridden with SOCKET_CACACHE_DIR environment variable for testing.
+ * Result is memoized for performance.
  */
 export function getSocketCacacheDir(): string {
-  if (getSocketCacacheDirEnv()) {
-    return normalizePath(getSocketCacacheDirEnv() as string)
+  if (_cachedSocketCacacheDir === undefined) {
+    if (getSocketCacacheDirEnv()) {
+      _cachedSocketCacacheDir = normalizePath(
+        getSocketCacacheDirEnv() as string,
+      )
+    } else {
+      _cachedSocketCacacheDir = normalizePath(
+        path.join(
+          getSocketUserDir(),
+          `${/*@__INLINE__*/ require('#constants/socket').SOCKET_APP_PREFIX}cacache`,
+        ),
+      )
+    }
   }
-  return normalizePath(
-    path.join(
-      getSocketUserDir(),
-      `${/*@__INLINE__*/ require('#constants/socket').SOCKET_APP_PREFIX}cacache`,
-    ),
-  )
+  return _cachedSocketCacacheDir
 }
 
 /**
@@ -163,4 +171,24 @@ export function getSocketRegistryGithubCacheDir(): string {
       /*@__INLINE__*/ require('#constants/github').CACHE_GITHUB_DIR,
     ),
   )
+}
+
+/**
+ * Get the user's home directory.
+ * Uses environment variables directly to support test mocking.
+ * Falls back to os.homedir() if env vars not set.
+ */
+export function getUserHomeDir(): string {
+  // Try HOME first (Unix)
+  const home = getHome()
+  if (home) {
+    return home
+  }
+  // Try USERPROFILE (Windows)
+  const userProfile = getUserprofile()
+  if (userProfile) {
+    return userProfile
+  }
+  // Fallback to os.homedir()
+  return os.homedir()
 }

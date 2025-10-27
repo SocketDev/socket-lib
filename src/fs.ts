@@ -329,24 +329,6 @@ function getPath() {
   return _path as typeof import('path')
 }
 
-let _os: typeof import('os') | undefined
-/**
- * Lazily load the os module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js os module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getOs() {
-  if (_os === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _os = /*@__PURE__*/ require('node:os')
-  }
-  return _os as typeof import('os')
-}
-
 /**
  * Process directory entries and filter for directories.
  * Filters entries to include only directories, optionally excluding empty ones.
@@ -1074,38 +1056,6 @@ export function readJsonSync(
   })
 }
 
-// Lazy cache for allowed directories to avoid re-resolving on every safeDelete call
-let _cachedAllowedDirs: string[] | undefined
-
-/**
- * Get allowed directories for safe deletion with lazy caching.
- * These directories don't change during process lifetime, so we cache them.
- */
-function getAllowedDirectories(): string[] {
-  if (_cachedAllowedDirs === undefined) {
-    const os = getOs()
-    const path = getPath()
-    const {
-      getSocketCacacheDir,
-      getSocketUserDir,
-    } = /*@__PURE__*/ require('#lib/paths')
-
-    const tmpDir = os.tmpdir()
-    const resolvedTmpDir = path.resolve(tmpDir)
-    const cacacheDir = getSocketCacacheDir()
-    const resolvedCacacheDir = path.resolve(cacacheDir)
-    const socketUserDir = getSocketUserDir()
-    const resolvedSocketUserDir = path.resolve(socketUserDir)
-
-    _cachedAllowedDirs = [
-      resolvedTmpDir,
-      resolvedCacacheDir,
-      resolvedSocketUserDir,
-    ]
-  }
-  return _cachedAllowedDirs
-}
-
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
  * Uses `del` for safer deletion that prevents removing cwd and above by default.
@@ -1146,7 +1096,18 @@ export async function safeDelete(
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
     const path = getPath()
-    const allowedDirs = getAllowedDirectories()
+    const {
+      getOsTmpDir,
+      getSocketCacacheDir,
+      getSocketUserDir,
+    } = /*@__PURE__*/ require('#lib/paths')
+
+    // Get allowed directories (all are memoized for performance)
+    const allowedDirs = [
+      path.resolve(getOsTmpDir()),
+      path.resolve(getSocketCacacheDir()),
+      path.resolve(getSocketUserDir()),
+    ]
 
     // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
@@ -1221,7 +1182,18 @@ export function safeDeleteSync(
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
     const path = getPath()
-    const allowedDirs = getAllowedDirectories()
+    const {
+      getOsTmpDir,
+      getSocketCacacheDir,
+      getSocketUserDir,
+    } = /*@__PURE__*/ require('#lib/paths')
+
+    // Get allowed directories (all are memoized for performance)
+    const allowedDirs = [
+      path.resolve(getOsTmpDir()),
+      path.resolve(getSocketCacacheDir()),
+      path.resolve(getSocketUserDir()),
+    ]
 
     // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
