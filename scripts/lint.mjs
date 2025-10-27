@@ -223,8 +223,8 @@ async function runLintOnFiles(files, options = {}) {
 
   if (!quiet) {
     logger.clearLine().done('Linting passed')
-    // Add newline after message (use error to write to same stream)
-    logger.error('')
+    // Add newline after message
+    console.log('')
   }
 
   return 0
@@ -297,8 +297,8 @@ async function runLintOnAll(options = {}) {
 
   if (!quiet) {
     logger.clearLine().done('Linting passed')
-    // Add newline after message (use error to write to same stream)
-    logger.error('')
+    // Add newline after message
+    console.log('')
   }
 
   return 0
