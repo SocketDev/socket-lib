@@ -328,8 +328,8 @@ export async function readIpcStub(stubPath: string): Promise<unknown> {
     // 5 minutes.
     const maxAgeMs = 5 * 60 * 1000
     if (ageMs > maxAgeMs) {
-      // Clean up stale file.
-      await safeDelete(stubPath).catch(() => {})
+      // Clean up stale file. IPC stubs are always in tmpdir, so use force: true.
+      await safeDelete(stubPath, { force: true }).catch(() => {})
       return null
     }
     return validated.data
@@ -395,7 +395,8 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
             }
 
             if (isStale) {
-              await safeDelete(filePath)
+              // IPC stubs are always in tmpdir, so we can use force: true to skip path checks
+              await safeDelete(filePath, { force: true })
             }
           } catch {
             // Ignore errors for individual files.
