@@ -310,7 +310,8 @@ export class Logger {
   #stdoutLogger?: Logger
   #stderrIndention = ''
   #stdoutIndention = ''
-  #lastWasBlank = false
+  #stderrLastWasBlank = false
+  #stdoutLastWasBlank = false
   #logCallCount = 0
   #constructorArgs: unknown[]
   #options: Record<string, unknown>
@@ -461,6 +462,30 @@ export class Logger {
   }
 
   /**
+   * Get lastWasBlank state for a specific stream.
+   * @private
+   */
+  #getLastWasBlank(stream: 'stderr' | 'stdout'): boolean {
+    const root = this.#getRoot()
+    return stream === 'stderr'
+      ? root.#stderrLastWasBlank
+      : root.#stdoutLastWasBlank
+  }
+
+  /**
+   * Set lastWasBlank state for a specific stream.
+   * @private
+   */
+  #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
+    const root = this.#getRoot()
+    if (stream === 'stderr') {
+      root.#stderrLastWasBlank = value
+    } else {
+      root.#stdoutLastWasBlank = value
+    }
+  }
+
+  /**
    * Get the target stream for this logger instance.
    * @private
    */
@@ -492,7 +517,7 @@ export class Logger {
       con,
       logArgs,
     )
-    this[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]))
+    this[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]), targetStream)
     ;(this as any)[incLogCallCountSymbol]()
     return this
   }
@@ -533,7 +558,7 @@ export class Logger {
       }),
       ...extras,
     )
-    this.#lastWasBlank = false
+    this[lastWasBlankSymbol](false, 'stderr')
     ;(this as any)[incLogCallCountSymbol]()
     return this
   }
@@ -554,7 +579,8 @@ export class Logger {
    * ```
    */
   get logCallCount() {
-    return this.#logCallCount
+    const root = this.#getRoot()
+    return root.#logCallCount
   }
 
   /**
@@ -566,7 +592,8 @@ export class Logger {
    * @returns The logger instance for chaining
    */
   [incLogCallCountSymbol]() {
-    this.#logCallCount += 1
+    const root = this.#getRoot()
+    root.#logCallCount += 1
     return this
   }
 
@@ -577,10 +604,21 @@ export class Logger {
    * This is called automatically by logging methods.
    *
    * @param value - Whether the last line was blank
+   * @param stream - Optional stream to update (defaults to both streams if not bound, or target stream if bound)
    * @returns The logger instance for chaining
    */
-  [lastWasBlankSymbol](value: unknown): this {
-    this.#lastWasBlank = !!value
+  [lastWasBlankSymbol](value: unknown, stream?: 'stderr' | 'stdout'): this {
+    if (stream) {
+      // Explicit stream specified
+      this.#setLastWasBlank(stream, !!value)
+    } else if (this.#boundStream) {
+      // Stream-bound logger - affect only the bound stream
+      this.#setLastWasBlank(this.#boundStream, !!value)
+    } else {
+      // Root logger with no stream specified - affect both streams
+      this.#setLastWasBlank('stderr', !!value)
+      this.#setLastWasBlank('stdout', !!value)
+    }
     return this
   }
 
@@ -827,7 +865,7 @@ export class Logger {
    * ```
    */
   errorNewline() {
-    return this.#lastWasBlank ? this : this.error('')
+    return this.#getLastWasBlank('stderr') ? this : this.error('')
   }
 
   /**
@@ -1040,7 +1078,7 @@ export class Logger {
    * ```
    */
   logNewline() {
-    return this.#lastWasBlank ? this : this.log('')
+    return this.#getLastWasBlank('stdout') ? this : this.log('')
   }
 
   /**
@@ -1103,7 +1141,7 @@ export class Logger {
    */
   step(msg: string, ...extras: unknown[]): this {
     // Add blank line before the step message.
-    if (!this.#lastWasBlank) {
+    if (!this.#getLastWasBlank('stdout')) {
       // Use this.log() to properly track the blank line.
       this.log('')
     }
