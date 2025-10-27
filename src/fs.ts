@@ -1056,6 +1056,31 @@ export function readJsonSync(
   })
 }
 
+// Cache for resolved allowed directories
+let _cachedAllowedDirs: string[] | undefined
+
+/**
+ * Get resolved allowed directories for safe deletion with lazy caching.
+ * These directories are resolved once and cached for the process lifetime.
+ */
+function getAllowedDirectories(): string[] {
+  if (_cachedAllowedDirs === undefined) {
+    const path = getPath()
+    const {
+      getOsTmpDir,
+      getSocketCacacheDir,
+      getSocketUserDir,
+    } = /*@__PURE__*/ require('#lib/paths')
+
+    _cachedAllowedDirs = [
+      path.resolve(getOsTmpDir()),
+      path.resolve(getSocketCacacheDir()),
+      path.resolve(getSocketUserDir()),
+    ]
+  }
+  return _cachedAllowedDirs
+}
+
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
  * Uses `del` for safer deletion that prevents removing cwd and above by default.
@@ -1096,18 +1121,7 @@ export async function safeDelete(
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
     const path = getPath()
-    const {
-      getOsTmpDir,
-      getSocketCacacheDir,
-      getSocketUserDir,
-    } = /*@__PURE__*/ require('#lib/paths')
-
-    // Get allowed directories (all are memoized for performance)
-    const allowedDirs = [
-      path.resolve(getOsTmpDir()),
-      path.resolve(getSocketCacacheDir()),
-      path.resolve(getSocketUserDir()),
-    ]
+    const allowedDirs = getAllowedDirectories()
 
     // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
@@ -1182,18 +1196,7 @@ export function safeDeleteSync(
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
     const path = getPath()
-    const {
-      getOsTmpDir,
-      getSocketCacacheDir,
-      getSocketUserDir,
-    } = /*@__PURE__*/ require('#lib/paths')
-
-    // Get allowed directories (all are memoized for performance)
-    const allowedDirs = [
-      path.resolve(getOsTmpDir()),
-      path.resolve(getSocketCacacheDir()),
-      path.resolve(getSocketUserDir()),
-    ]
+    const allowedDirs = getAllowedDirectories()
 
     // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
