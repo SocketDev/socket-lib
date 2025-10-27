@@ -40,11 +40,13 @@ export interface DlxBinaryResult {
 }
 
 /**
- * Generate a cache directory name from URL, similar to pnpm/npx.
+ * Generate a cache directory name from URL and binary name.
  * Uses SHA256 hash to create content-addressed storage.
+ * Includes binary name to prevent collisions when multiple binaries
+ * are downloaded from the same URL with different names.
  */
-function generateCacheKey(url: string): string {
-  return createHash('sha256').update(url).digest('hex')
+function generateCacheKey(url: string, name: string): string {
+  return createHash('sha256').update(`${url}:${name}`).digest('hex')
 }
 
 /**
@@ -72,9 +74,12 @@ async function isCacheValid(
       return false
     }
     const now = Date.now()
-    const age =
-      now -
-      (((metadata as Record<string, unknown>)['timestamp'] as number) || 0)
+    const timestamp = (metadata as Record<string, unknown>)['timestamp']
+    // If timestamp is missing or invalid, cache is invalid
+    if (typeof timestamp !== 'number' || timestamp <= 0) {
+      return false
+    }
+    const age = now - timestamp
 
     return age < cacheTtl
   } catch {
@@ -166,7 +171,7 @@ async function writeMetadata(
  * Clean expired entries from the DLX cache.
  */
 export async function cleanDlxCache(
-  maxAge: number = /*@__INLINE__*/ require('../constants/time').DLX_BINARY_CACHE_TTL,
+  maxAge: number = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
 ): Promise<number> {
   const cacheDir = getDlxCachePath()
 
@@ -197,9 +202,12 @@ export async function cleanDlxCache(
       ) {
         continue
       }
+      const timestamp = (metadata as Record<string, unknown>)['timestamp']
+      // If timestamp is missing or invalid, treat as expired (age = infinity)
       const age =
-        now -
-        (((metadata as Record<string, unknown>)['timestamp'] as number) || 0)
+        typeof timestamp === 'number' && timestamp > 0
+          ? now - timestamp
+          : Number.POSITIVE_INFINITY
 
       if (age > maxAge) {
         // Remove entire cache entry directory.
@@ -234,7 +242,7 @@ export async function dlxBinary(
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxBinaryResult> {
   const {
-    cacheTtl = /*@__INLINE__*/ require('../constants/time').DLX_BINARY_CACHE_TTL,
+    cacheTtl = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
     checksum,
     force = false,
     name,
@@ -244,9 +252,9 @@ export async function dlxBinary(
 
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
-  const cacheKey = generateCacheKey(url)
-  const cacheEntryDir = path.join(cacheDir, cacheKey)
   const binaryName = name || `binary-${process.platform}-${os.arch()}`
+  const cacheKey = generateCacheKey(url, binaryName)
+  const cacheEntryDir = path.join(cacheDir, cacheKey)
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
 
   let downloaded = false

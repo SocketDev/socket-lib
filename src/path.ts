@@ -389,8 +389,8 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
  * normalizePath('foo/bar/../baz')            // 'foo/baz'
  *
  * // Windows paths
- * normalizePath('C:\\Users\\John\\file.txt') // 'C:/Users/John/file.txt'
- * normalizePath('foo\\bar\\baz')             // 'foo/bar/baz'
+ * normalizePath('C:\\Users\\username\\file.txt') // 'C:/Users/username/file.txt'
+ * normalizePath('foo\\bar\\baz')                 // 'foo/bar/baz'
  *
  * // UNC paths
  * normalizePath('\\\\server\\share\\file')   // '//server/share/file'
@@ -706,7 +706,6 @@ export function pathLikeToString(
       // On Windows, strip the leading slash only for malformed URLs that lack drive letters
       // (e.g., `/path` should be `path`, but `/C:/path` should be `C:/path`).
       // On Unix, keep the leading slash for absolute paths (e.g., `/home/user`).
-      const WIN32 = require('../constants/platform').WIN32
       if (WIN32 && decodedPathname.startsWith('/')) {
         // Check for drive letter pattern following Node.js source: /[a-zA-Z]:/
         // Character at index 1 should be a letter, character at index 2 should be ':'
@@ -950,8 +949,6 @@ function relative(from: string, to: string): string {
   if (actualFrom === actualTo) {
     return ''
   }
-
-  const WIN32 = require('../constants/platform').WIN32
 
   // Windows: perform case-insensitive comparison.
   // NTFS and FAT32 preserve case but are case-insensitive for lookups.

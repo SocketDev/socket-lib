@@ -16,9 +16,34 @@
 import * as os from 'node:os'
 import * as path from 'node:path'
 
-import { SOCKET_CACACHE_DIR } from '#env/socket-cacache-dir'
+import { getHome } from '#env/home'
+import {
+  getSocketCacacheDir as getSocketCacacheDirEnv,
+  getSocketDlxDirEnv,
+} from '#env/socket'
+import { getUserprofile } from '#env/windows'
 
 import { normalizePath } from './path'
+
+/**
+ * Get the user's home directory.
+ * Uses environment variables directly to support test mocking.
+ * Falls back to os.homedir() if env vars not set.
+ */
+function _getUserHomeDir(): string {
+  // Try HOME first (Unix)
+  const home = getHome()
+  if (home) {
+    return home
+  }
+  // Try USERPROFILE (Windows)
+  const userProfile = getUserprofile()
+  if (userProfile) {
+    return userProfile
+  }
+  // Fallback to os.homedir()
+  return os.homedir()
+}
 
 /**
  * Get the Socket home directory (~/.socket).
@@ -34,8 +59,8 @@ export function getSocketHomePath(): string {
 export function getSocketUserDir(): string {
   return normalizePath(
     path.join(
-      os.homedir(),
-      /*@__INLINE__*/ require('./constants/paths').DOT_SOCKET_DIR,
+      _getUserHomeDir(),
+      /*@__INLINE__*/ require('#constants/paths').DOT_SOCKET_DIR,
     ),
   )
 }
@@ -47,7 +72,7 @@ export function getSocketAppDir(appName: string): string {
   return normalizePath(
     path.join(
       getSocketUserDir(),
-      `${/*@__INLINE__*/ require('./constants/socket').SOCKET_APP_PREFIX}${appName}`,
+      `${/*@__INLINE__*/ require('#constants/socket').SOCKET_APP_PREFIX}${appName}`,
     ),
   )
 }
@@ -57,25 +82,29 @@ export function getSocketAppDir(appName: string): string {
  * Can be overridden with SOCKET_CACACHE_DIR environment variable for testing.
  */
 export function getSocketCacacheDir(): string {
-  if (SOCKET_CACACHE_DIR) {
-    return normalizePath(SOCKET_CACACHE_DIR)
+  if (getSocketCacacheDirEnv()) {
+    return normalizePath(getSocketCacacheDirEnv() as string)
   }
   return normalizePath(
     path.join(
       getSocketUserDir(),
-      `${/*@__INLINE__*/ require('./constants/socket').SOCKET_APP_PREFIX}cacache`,
+      `${/*@__INLINE__*/ require('#constants/socket').SOCKET_APP_PREFIX}cacache`,
     ),
   )
 }
 
 /**
  * Get the Socket DLX directory (~/.socket/_dlx).
+ * Can be overridden with SOCKET_DLX_DIR environment variable for testing.
  */
 export function getSocketDlxDir(): string {
+  if (getSocketDlxDirEnv()) {
+    return normalizePath(getSocketDlxDirEnv() as string)
+  }
   return normalizePath(
     path.join(
       getSocketUserDir(),
-      `${/*@__INLINE__*/ require('./constants/socket').SOCKET_APP_PREFIX}${/*@__INLINE__*/ require('./constants/socket').SOCKET_DLX_APP_NAME}`,
+      `${/*@__INLINE__*/ require('#constants/socket').SOCKET_APP_PREFIX}${/*@__INLINE__*/ require('#constants/socket').SOCKET_DLX_APP_NAME}`,
     ),
   )
 }
@@ -87,7 +116,7 @@ export function getSocketAppCacheDir(appName: string): string {
   return normalizePath(
     path.join(
       getSocketAppDir(appName),
-      /*@__INLINE__*/ require('./constants/paths').CACHE_DIR,
+      /*@__INLINE__*/ require('#constants/paths').CACHE_DIR,
     ),
   )
 }
@@ -99,7 +128,7 @@ export function getSocketAppCacheTtlDir(appName: string): string {
   return normalizePath(
     path.join(
       getSocketAppCacheDir(appName),
-      /*@__INLINE__*/ require('./constants/paths').CACHE_TTL_DIR,
+      /*@__INLINE__*/ require('#constants/paths').CACHE_TTL_DIR,
     ),
   )
 }
@@ -109,7 +138,7 @@ export function getSocketAppCacheTtlDir(appName: string): string {
  */
 export function getSocketCliDir(): string {
   return getSocketAppDir(
-    /*@__INLINE__*/ require('./constants/socket').SOCKET_CLI_APP_NAME,
+    /*@__INLINE__*/ require('#constants/socket').SOCKET_CLI_APP_NAME,
   )
 }
 
@@ -118,7 +147,7 @@ export function getSocketCliDir(): string {
  */
 export function getSocketRegistryDir(): string {
   return getSocketAppDir(
-    /*@__INLINE__*/ require('./constants/socket').SOCKET_REGISTRY_APP_NAME,
+    /*@__INLINE__*/ require('#constants/socket').SOCKET_REGISTRY_APP_NAME,
   )
 }
 
@@ -129,9 +158,9 @@ export function getSocketRegistryGithubCacheDir(): string {
   return normalizePath(
     path.join(
       getSocketAppCacheTtlDir(
-        /*@__INLINE__*/ require('./constants/socket').SOCKET_REGISTRY_APP_NAME,
+        /*@__INLINE__*/ require('#constants/socket').SOCKET_REGISTRY_APP_NAME,
       ),
-      /*@__INLINE__*/ require('./constants/github').CACHE_GITHUB_DIR,
+      /*@__INLINE__*/ require('#constants/github').CACHE_GITHUB_DIR,
     ),
   )
 }

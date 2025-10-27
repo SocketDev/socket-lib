@@ -1118,7 +1118,7 @@ export async function safeDelete(
     const {
       getSocketCacacheDir,
       getSocketUserDir,
-    } = /*@__PURE__*/ require('./paths')
+    } = /*@__PURE__*/ require('#lib/paths')
 
     // Get allowed directories
     const tmpDir = os.tmpdir()
@@ -1209,7 +1209,7 @@ export function safeDeleteSync(
     const {
       getSocketCacacheDir,
       getSocketUserDir,
-    } = /*@__PURE__*/ require('./paths')
+    } = /*@__PURE__*/ require('#lib/paths')
 
     // Get allowed directories
     const tmpDir = os.tmpdir()

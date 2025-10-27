@@ -120,6 +120,46 @@ function getSemver() {
   return _semver as typeof import('semver')
 }
 
+let _toEditablePackageJson:
+  | ((pkgJson: PackageJson, options?: unknown) => Promise<PackageJson>)
+  | undefined
+/**
+ * Get the toEditablePackageJson function from editable module.
+ * Lazy loaded to avoid circular dependency.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function _getToEditablePackageJson() {
+  if (_toEditablePackageJson === undefined) {
+    // Use path alias for reliable resolution in both test and production environments.
+    _toEditablePackageJson =
+      /*@__PURE__*/ require('#packages/editable').toEditablePackageJson
+  }
+  return _toEditablePackageJson as (
+    pkgJson: PackageJson,
+    options?: unknown,
+  ) => Promise<PackageJson>
+}
+
+let _toEditablePackageJsonSync:
+  | ((pkgJson: PackageJson, options?: unknown) => PackageJson)
+  | undefined
+/**
+ * Get the toEditablePackageJsonSync function from editable module.
+ * Lazy loaded to avoid circular dependency.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function _getToEditablePackageJsonSync() {
+  if (_toEditablePackageJsonSync === undefined) {
+    // Use path alias for reliable resolution in both test and production environments.
+    _toEditablePackageJsonSync =
+      /*@__PURE__*/ require('#packages/editable').toEditablePackageJsonSync
+  }
+  return _toEditablePackageJsonSync as (
+    pkgJson: PackageJson,
+    options?: unknown,
+  ) => PackageJson
+}
+
 /**
  * Extract a package to a destination directory.
  */
@@ -256,8 +296,7 @@ export async function readPackageJson(
   })) as PackageJson | undefined
   if (pkgJson) {
     if (editable) {
-      // Import toEditablePackageJson to avoid circular dependency.
-      const { toEditablePackageJson } = require('./editable')
+      const toEditablePackageJson = _getToEditablePackageJson()
       return await toEditablePackageJson(pkgJson, {
         path: filepath,
         normalize,
@@ -290,8 +329,7 @@ export function readPackageJsonSync(
     | undefined
   if (pkgJson) {
     if (editable) {
-      // Import toEditablePackageJsonSync to avoid circular dependency.
-      const { toEditablePackageJsonSync } = require('./editable')
+      const toEditablePackageJsonSync = _getToEditablePackageJsonSync()
       return toEditablePackageJsonSync(pkgJson, {
         path: filepath,
         normalize,

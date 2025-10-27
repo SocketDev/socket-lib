@@ -23,7 +23,7 @@
  * file resolution, because Node.js properly escapes each array element.
  */
 
-import { CI } from '#env/ci'
+import { getCI } from '#env/ci'
 
 import { WIN32 } from '#constants/platform'
 import { execBin } from './bin'
@@ -109,7 +109,7 @@ export function execNpm(args: string[], options?: SpawnOptions | undefined) {
   //
   // We also use the npm binary wrapper instead of calling cli.js directly because
   // cli.js exports a function that needs to be invoked with process as an argument.
-  const npmBin = /*@__PURE__*/ require('../constants/agents').NPM_BIN_PATH
+  const npmBin = /*@__PURE__*/ require('#constants/agents').NPM_BIN_PATH
   return spawn(
     npmBin,
     [
@@ -179,7 +179,7 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
   // we need to explicitly add --no-frozen-lockfile in CI mode if not already present.
   const frozenLockfileArgs = []
   if (
-    CI &&
+    getCI() &&
     allowLockfileUpdate &&
     firstArg &&
     isPnpmInstallCommand(firstArg) &&
@@ -374,7 +374,7 @@ export function execScript(
   }
 
   const useNodeRun =
-    !prepost && /*@__PURE__*/ require('../constants/node').SUPPORTS_NODE_RUN
+    !prepost && /*@__PURE__*/ require('#constants/node').supportsNodeRun()
 
   // Detect package manager based on lockfile by traversing up from current directory.
   const cwd =
@@ -382,7 +382,7 @@ export function execScript(
 
   // Check for pnpm-lock.yaml.
   const pnpmLockPath = findUpSync(
-    /*@__INLINE__*/ require('../constants/agents').PNPM_LOCK_YAML,
+    /*@__INLINE__*/ require('#constants/agents').PNPM_LOCK_YAML,
     { cwd },
   ) as string | undefined
   if (pnpmLockPath) {
@@ -392,7 +392,7 @@ export function execScript(
   // Check for package-lock.json.
   // When in an npm workspace, use npm run to ensure workspace binaries are available.
   const packageLockPath = findUpSync(
-    /*@__INLINE__*/ require('../constants/agents').PACKAGE_LOCK_JSON,
+    /*@__INLINE__*/ require('#constants/agents').PACKAGE_LOCK_JSON,
     { cwd },
   ) as string | undefined
   if (packageLockPath) {
@@ -401,7 +401,7 @@ export function execScript(
 
   // Check for yarn.lock.
   const yarnLockPath = findUpSync(
-    /*@__INLINE__*/ require('../constants/agents').YARN_LOCK,
+    /*@__INLINE__*/ require('#constants/agents').YARN_LOCK,
     { cwd },
   ) as string | undefined
   if (yarnLockPath) {
@@ -409,13 +409,13 @@ export function execScript(
   }
 
   return spawn(
-    /*@__PURE__*/ require('../constants/node').getExecPath(),
+    /*@__PURE__*/ require('#constants/node').getExecPath(),
     [
-      .../*@__PURE__*/ require('../constants/node').getNodeNoWarningsFlags(),
+      .../*@__PURE__*/ require('#constants/node').getNodeNoWarningsFlags(),
       ...(useNodeRun
         ? ['--run']
         : [
-            /*@__PURE__*/ require('../constants/agents').NPM_REAL_EXEC_PATH,
+            /*@__PURE__*/ require('#constants/agents').NPM_REAL_EXEC_PATH,
             'run',
           ]),
       scriptName,
