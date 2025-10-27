@@ -213,20 +213,16 @@ describe('ipc', () => {
 
           await cleanupIpcStubs('cleanup-test')
 
-          // Stale file should be deleted or have a different timestamp (deleted and recreated).
+          // Add delay to allow async deletion to complete in slow CI environments
+          await new Promise(resolve => setTimeout(resolve, 100))
+
+          // Stale file should be deleted
           const staleExists = await fs
             .access(staleFile)
             .then(() => true)
             .catch(() => false)
 
-          if (staleExists) {
-            // File exists, check if it's a different file (timestamp changed)
-            const content = await fs.readFile(staleFile, 'utf8')
-            const parsed = JSON.parse(content)
-            // Test passes if timestamp changed (file was deleted and recreated)
-            expect(parsed.timestamp).not.toBe(staleTimestamp)
-          }
-          // If file doesn't exist, test passes
+          expect(staleExists).toBe(false)
 
           // Fresh files should still exist.
           const fresh1Exists = await fs
