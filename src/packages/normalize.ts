@@ -58,6 +58,26 @@ function getNormalizePackageData() {
   return _normalizePackageData as typeof import('normalize-package-data')
 }
 
+let _findPackageExtensions:
+  | ((name: string, version: string) => unknown)
+  | undefined
+/**
+ * Get the findPackageExtensions function from operations module.
+ * Lazy loaded to avoid circular dependency.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function _getFindPackageExtensions() {
+  if (_findPackageExtensions === undefined) {
+    // Dynamically import to avoid circular dependency.
+    // Use path alias for reliable resolution in both test and production environments.
+    const operations: {
+      findPackageExtensions: (name: string, version: string) => unknown
+    } = require('#packages/operations')
+    _findPackageExtensions = operations.findPackageExtensions
+  }
+  return _findPackageExtensions as (name: string, version: string) => unknown
+}
+
 /**
  * Normalize a package.json object with standard npm package normalization.
  */
@@ -86,10 +106,13 @@ export function normalizePackageJson(
   ]
   const normalizePackageData = getNormalizePackageData()
   normalizePackageData(pkgJson)
-  // Import findPackageExtensions from operations to avoid circular dependency.
-  const { findPackageExtensions } = require('./operations')
+  // Apply package extensions if name and version are present.
   if (pkgJson.name && pkgJson.version) {
-    merge(pkgJson, findPackageExtensions(pkgJson.name, pkgJson.version))
+    const findPackageExtensions = _getFindPackageExtensions()
+    const extensions = findPackageExtensions(pkgJson.name, pkgJson.version)
+    if (extensions && typeof extensions === 'object') {
+      merge(pkgJson, extensions)
+    }
   }
   // Revert/remove properties we don't care to have normalized.
   // Properties with undefined values are omitted when saved as JSON.

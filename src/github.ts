@@ -23,6 +23,8 @@
 
 import type { TtlCache } from './cache-with-ttl'
 import { createTtlCache } from './cache-with-ttl'
+import { getGhToken, getGithubToken } from '#env/github'
+import { getSocketCliGithubToken } from '#env/socket-cli'
 import { httpRequest } from './http-request'
 import type { SpawnOptions } from './spawn'
 import { spawn } from './spawn'
@@ -105,12 +107,8 @@ export interface GitHubRateLimitError extends Error {
  * ```
  */
 export function getGitHubToken(): string | undefined {
-  const { env } = process
   return (
-    env['GITHUB_TOKEN'] ||
-    env['GH_TOKEN'] ||
-    env['SOCKET_CLI_GITHUB_TOKEN'] ||
-    undefined
+    getGithubToken() || getGhToken() || getSocketCliGithubToken() || undefined
   )
 }
 
