@@ -1,8 +1,10 @@
 /**
- * PATH environment variable snapshot.
+ * PATH environment variable getter.
  * System executable search paths.
  */
 
-import { env } from 'node:process'
+import { getEnvValue } from '#env/rewire'
 
-export const PATH = env['PATH']
+export function getPath(): string | undefined {
+  return getEnvValue('PATH')
+}

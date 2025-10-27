@@ -1,8 +1,10 @@
 /**
- * TERM environment variable snapshot.
+ * TERM environment variable getter.
  * Terminal type identifier.
  */
 
-import { env } from 'node:process'
+import { getEnvValue } from '#env/rewire'
 
-export const TERM = env['TERM']
+export function getTerm(): string | undefined {
+  return getEnvValue('TERM')
+}

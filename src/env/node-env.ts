@@ -1,8 +1,10 @@
 /**
- * NODE_ENV environment variable snapshot.
+ * NODE_ENV environment variable getter.
  * Indicates the Node.js environment mode (production, development, test).
  */
 
-import { env } from 'node:process'
+import { getEnvValue } from '#env/rewire'
 
-export const NODE_ENV = env['NODE_ENV']
+export function getNodeEnv(): string | undefined {
+  return getEnvValue('NODE_ENV')
+}
