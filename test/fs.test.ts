@@ -734,10 +734,7 @@ describe('fs', () => {
     })
   })
 
-  describe.skip('safeDelete', () => {
-    // Note: These tests are skipped because they require the external 'del' module
-    // which has module resolution issues in the test environment.
-    // The functionality is covered by integration tests elsewhere.
+  describe('safeDelete', () => {
 
     it('should delete files in temp directory', async () => {
       await runWithTempDir(async tmpDir => {
@@ -812,10 +809,7 @@ describe('fs', () => {
     })
   })
 
-  describe.skip('safeDeleteSync', () => {
-    // Note: These tests are skipped because they require the external 'del' module
-    // which has module resolution issues in the test environment.
-    // The functionality is covered by integration tests elsewhere.
+  describe('safeDeleteSync', () => {
 
     it('should delete files in temp directory', async () => {
       await runWithTempDir(async tmpDir => {
