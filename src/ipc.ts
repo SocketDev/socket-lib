@@ -378,19 +378,19 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
             // Check both filesystem mtime and JSON timestamp for more reliable detection
             const stats = await fs.stat(filePath)
             const mtimeAge = now - stats.mtimeMs
-
-            // Also check the timestamp inside the JSON file for accuracy
             let isStale = mtimeAge > maxAgeMs
-            if (!isStale) {
-              try {
-                const content = await fs.readFile(filePath, 'utf8')
-                const parsed = JSON.parse(content)
-                const validated = IpcStubSchema.parse(parsed)
-                const contentAge = now - validated.timestamp
-                isStale = contentAge > maxAgeMs
-              } catch {
-                // If we can't read/parse the file, rely on mtime
-              }
+
+            // Always check the timestamp inside the JSON file for accuracy
+            // This is more reliable than filesystem mtime in some environments
+            try {
+              const content = await fs.readFile(filePath, 'utf8')
+              const parsed = JSON.parse(content)
+              const validated = IpcStubSchema.parse(parsed)
+              const contentAge = now - validated.timestamp
+              // File is stale if EITHER check indicates staleness
+              isStale = isStale || contentAge > maxAgeMs
+            } catch {
+              // If we can't read/parse the file, rely on mtime check
             }
 
             if (isStale) {
