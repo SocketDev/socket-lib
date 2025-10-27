@@ -597,7 +597,7 @@
     "magic-string": "0.30.17",
     "make-fetch-happen": "15.0.2",
     "normalize-package-data": "8.0.0",
-    "npm-package-arg": "13.0.0",
+    "npm-package-arg": "13.0.1",
     "npm-run-all2": "8.0.4",
     "pacote": "21.0.1",
     "picomatch": "2.3.1",
