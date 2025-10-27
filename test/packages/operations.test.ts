@@ -14,7 +14,6 @@ import {
   readPackageJsonSync,
   resolveGitHubTgzUrl,
   resolvePackageName,
-  resolveRegistryPackageName,
 } from '@socketsecurity/lib/packages/operations'
 import type { PackageJson } from '@socketsecurity/lib/packages'
 import { describe, expect, it } from 'vitest'
