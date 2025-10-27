@@ -297,10 +297,7 @@ describe('fs', () => {
       expect(result).toBe(false)
     })
 
-    it.skip('should ignore files matching ignore patterns', async () => {
-      // Note: This test is skipped due to glob matcher pattern complexity.
-      // The ignore patterns work but require specific glob patterns that
-      // are tested indirectly through other functions.
+    it('should ignore files matching ignore patterns', async () => {
       await runWithTempDir(async tmpDir => {
         const gitDir = path.join(tmpDir, '.git')
         await fs.mkdir(gitDir)
@@ -435,10 +432,7 @@ describe('fs', () => {
       expect(result).toEqual([])
     })
 
-    it.skip('should use ignore patterns with includeEmpty false', async () => {
-      // Note: This test is skipped due to glob matcher pattern complexity with isDirEmptySync.
-      // The ignore patterns require **/ prefix for picomatch to match correctly.
-      // This functionality needs to be refactored to handle both simple patterns and glob patterns.
+    it('should use ignore patterns with includeEmpty false', async () => {
       await runWithTempDir(async tmpDir => {
         const emptyDir = path.join(tmpDir, 'empty-dir')
         await fs.mkdir(emptyDir)
