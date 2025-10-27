@@ -33,6 +33,7 @@ import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+import { safeDelete } from './fs'
 import { z } from './zod'
 
 // Define BufferEncoding type for TypeScript compatibility.
@@ -328,7 +329,7 @@ export async function readIpcStub(stubPath: string): Promise<unknown> {
     const maxAgeMs = 5 * 60 * 1000
     if (ageMs > maxAgeMs) {
       // Clean up stale file.
-      await fs.unlink(stubPath).catch(() => {})
+      await safeDelete(stubPath).catch(() => {})
       return null
     }
     return validated.data
@@ -394,7 +395,7 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
             }
 
             if (isStale) {
-              await fs.unlink(filePath)
+              await safeDelete(filePath)
             }
           } catch {
             // Ignore errors for individual files.
