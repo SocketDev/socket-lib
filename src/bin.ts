@@ -3,10 +3,9 @@
  * Provides cross-platform bin path lookup, command execution, and path normalization.
  */
 
-import { APPDATA } from '#env/appdata'
-import { HOME } from '#env/home'
-import { LOCALAPPDATA } from '#env/localappdata'
-import { XDG_DATA_HOME } from '#env/xdg-data-home'
+import { getHome } from '#env/home'
+import { getAppdata, getLocalappdata } from '#env/windows'
+import { getXdgDataHome } from '#env/xdg'
 
 import { WIN32 } from '#constants/platform'
 import { readJsonSync } from './fs'
@@ -259,10 +258,10 @@ export function findRealPnpm(): string {
   const commonPaths = WIN32
     ? [
         // Windows common paths.
-        path?.join(APPDATA as string, 'npm', 'pnpm.cmd'),
-        path?.join(APPDATA as string, 'npm', 'pnpm'),
-        path?.join(LOCALAPPDATA as string, 'pnpm', 'pnpm.cmd'),
-        path?.join(LOCALAPPDATA as string, 'pnpm', 'pnpm'),
+        path?.join(getAppdata() as string, 'npm', 'pnpm.cmd'),
+        path?.join(getAppdata() as string, 'npm', 'pnpm'),
+        path?.join(getLocalappdata() as string, 'pnpm', 'pnpm.cmd'),
+        path?.join(getLocalappdata() as string, 'pnpm', 'pnpm'),
         'C:\\Program Files\\nodejs\\pnpm.cmd',
         'C:\\Program Files\\nodejs\\pnpm',
       ].filter(Boolean)
@@ -271,10 +270,10 @@ export function findRealPnpm(): string {
         '/usr/local/bin/pnpm',
         '/usr/bin/pnpm',
         path?.join(
-          (XDG_DATA_HOME as string) || `${HOME as string}/.local/share`,
+          (getXdgDataHome() as string) || `${getHome() as string}/.local/share`,
           'pnpm/pnpm',
         ),
-        path?.join(HOME as string, '.pnpm/pnpm'),
+        path?.join(getHome() as string, '.pnpm/pnpm'),
       ].filter(Boolean)
 
   return findRealBin('pnpm', commonPaths) ?? ''
@@ -290,8 +289,11 @@ export function findRealYarn(): string {
   const commonPaths = [
     '/usr/local/bin/yarn',
     '/usr/bin/yarn',
-    path?.join(HOME as string, '.yarn/bin/yarn'),
-    path?.join(HOME as string, '.config/yarn/global/node_modules/.bin/yarn'),
+    path?.join(getHome() as string, '.yarn/bin/yarn'),
+    path?.join(
+      getHome() as string,
+      '.config/yarn/global/node_modules/.bin/yarn',
+    ),
   ].filter(Boolean)
 
   return findRealBin('yarn', commonPaths) ?? ''
@@ -585,7 +587,7 @@ export function resolveBinPathSync(binPath: string): string {
 
     // Handle special case where pnpm path in CI has extra segments.
     // In setup-pnpm GitHub Action, the path might be malformed like:
-    // /home/runner/setup-pnpm/node_modules/.bin/pnpm/bin/pnpm.cjs
+    // /home/user/setup-pnpm/node_modules/.bin/pnpm/bin/pnpm.cjs
     // This happens when the shell script contains a relative path that
     // when resolved, creates an invalid nested structure.
     if (isPnpmOrYarn && binPath.includes('/.bin/pnpm/bin/')) {

@@ -4,8 +4,8 @@
  */
 
 import { getSpinner } from '#constants/process'
-import { DEBUG } from '#env/debug'
-import { SOCKET_DEBUG } from '#env/socket-debug'
+import { getDebug } from '#env/debug'
+import { getSocketDebug } from '#env/socket'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import debugJs from './external/debug'
 
@@ -48,8 +48,8 @@ function getDebugJsInstance(namespace: string) {
     return inst
   }
   if (
-    !DEBUG &&
-    SOCKET_DEBUG &&
+    !getDebug() &&
+    getSocketDebug() &&
     (namespace === 'error' || namespace === 'notice')
   ) {
     debugJs.enable(namespace)
@@ -166,7 +166,7 @@ function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
 /*@__NO_SIDE_EFFECTS__*/
 function isEnabled(namespaces: string | undefined) {
   // Check if debugging is enabled at all
-  if (!SOCKET_DEBUG) {
+  if (!getSocketDebug()) {
     return false
   }
   if (typeof namespaces !== 'string' || !namespaces || namespaces === '*') {
@@ -360,7 +360,7 @@ export function debugCache(
   key: string,
   meta?: unknown | undefined,
 ): void {
-  if (!SOCKET_DEBUG) {
+  if (!getSocketDebug()) {
     return
   }
   // Get caller info with stack offset of 3 (caller -> debugCache -> getCallerInfo).
@@ -381,7 +381,7 @@ export function debugCache(
  */
 /*@__NO_SIDE_EFFECTS__*/
 function isDebugNs(namespaces: string | undefined): boolean {
-  return !!SOCKET_DEBUG && isEnabled(namespaces)
+  return !!getSocketDebug() && isEnabled(namespaces)
 }
 
 /**
@@ -413,7 +413,7 @@ function debugLog(...args: unknown[]): void {
  */
 /*@__NO_SIDE_EFFECTS__*/
 function isDebug(): boolean {
-  return !!SOCKET_DEBUG
+  return !!getSocketDebug()
 }
 
 /**

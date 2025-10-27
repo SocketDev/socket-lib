@@ -160,8 +160,8 @@ Blank lines between groups, alphabetical within groups.
 
 #### Path Aliases Usage
 - **Internal imports**: Always use path aliases for internal modules
-  - ✅ `import { CI } from '#env/ci'`
-  - ❌ `import { CI } from '../env/ci'`
+  - ✅ `import { getCI } from '#env/ci'`
+  - ❌ `import { getCI } from '../env/ci'`
 - **External modules**: Regular imports
   - ✅ `import path from 'node:path'`
 
@@ -252,12 +252,36 @@ Use `pnpm run build:watch` or `pnpm run dev` for development with automatic rebu
 ### Common Patterns
 
 #### Environment Variables
-Access via typed helpers in `src/env/`:
+Access via typed getter functions in `src/env/`:
 ```typescript
-import { CI } from '#env/ci'
-import { NODE_ENV } from '#env/node-env'
-import { getEnv } from '#env/getters'
+import { getCI } from '#env/ci'
+import { getNodeEnv } from '#env/node-env'
+import { isTest } from '#env/test'
 ```
+
+Each env module exports a pure getter function that accesses only its own environment variable. For fallback logic, compose multiple getters:
+```typescript
+import { getHome } from '#env/home'
+import { getUserProfile } from '#env/userprofile'
+
+const homeDir = getHome() || getUserProfile()  // Cross-platform fallback
+```
+
+**Testing with rewiring:**
+Environment getters support test rewiring without modifying `process.env`:
+```typescript
+import { setEnv, clearEnv, resetEnv } from '#env/rewire'
+import { getCI } from '#env/ci'
+
+// In test
+setEnv('CI', '1')
+expect(getCI()).toBe(true)
+
+clearEnv('CI')  // Clear single override
+resetEnv()      // Clear all overrides (use in afterEach)
+```
+
+This allows isolated tests without polluting the global process.env state.
 
 #### File System Operations
 Use utilities from `#lib/fs`:
