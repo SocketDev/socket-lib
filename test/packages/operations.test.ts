@@ -124,35 +124,6 @@ describe('packages/operations', () => {
     })
   })
 
-  describe.skip('resolveRegistryPackageName', () => {
-    // These tests are skipped because they require @socketsecurity/registry module
-    // which may not be available in all test environments
-    it('should convert unscoped package name', () => {
-      const result = resolveRegistryPackageName('package')
-      expect(result).toBe('package')
-    })
-
-    it('should convert scoped package name with registry delimiter', () => {
-      const result = resolveRegistryPackageName('@scope/package')
-      // Should use REGISTRY_SCOPE_DELIMITER which is typically '--'
-      expect(result).toContain('scope')
-      expect(result).toContain('package')
-    })
-
-    it('should handle various scoped package formats', () => {
-      const result1 = resolveRegistryPackageName('@org/pkg')
-      expect(result1).toBeTruthy()
-
-      const result2 = resolveRegistryPackageName('@socketregistry/test')
-      expect(result2).toBeTruthy()
-    })
-
-    it('should return unscoped name unchanged', () => {
-      const result = resolveRegistryPackageName('simple-package')
-      expect(result).toBe('simple-package')
-    })
-  })
-
   describe('readPackageJson', () => {
     it('should read and parse package.json from directory', async () => {
       await runWithTempDir(async tmpDir => {
@@ -706,13 +677,6 @@ describe('packages/operations', () => {
       await expect(packPackage('/non/existent')).rejects.toThrow()
     }, 30000)
 
-    it.skip('should lazy load PackageURL on first use', () => {
-      // Skipped: requires @socketsecurity/registry module
-      // resolveRegistryPackageName should lazy load PackageURL
-      const result = resolveRegistryPackageName('package')
-      expect(result).toBe('package')
-    })
-
     it('should lazy load pacote on first use', async () => {
       // extractPackage should lazy load pacote
       await expect(
@@ -825,19 +789,6 @@ describe('packages/operations', () => {
         const updated = await readPackageJson(tmpDir)
         expect(updated?.version).toBe('2.0.0')
       }, 'integration-editable-workflow-')
-    })
-
-    it.skip('should handle scoped package name conversions', () => {
-      // Skipped: requires @socketsecurity/registry module
-      const scopedName = '@scope/package'
-      const registryName = resolveRegistryPackageName(scopedName)
-
-      // Should contain both parts
-      expect(registryName).toContain('scope')
-      expect(registryName).toContain('package')
-
-      // Should be different from original
-      expect(registryName !== scopedName || !scopedName.startsWith('@')).toBe(true)
     })
 
     it('should handle release tag extraction for various formats', () => {
