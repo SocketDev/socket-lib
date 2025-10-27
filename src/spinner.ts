@@ -6,7 +6,7 @@
 import type { Writable } from 'node:stream'
 
 // Note: getAbortSignal is imported lazily to avoid circular dependencies.
-import { CI } from '#env/ci'
+import { getCI } from '#env/ci'
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
   ShimmerColorGradient,
@@ -1286,7 +1286,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       warning: desc(_Spinner.prototype.warn),
       warningAndStop: desc(_Spinner.prototype.warnAndStop),
     })
-    _defaultSpinner = CI
+    _defaultSpinner = getCI()
       ? ciSpinner
       : (getCliSpinners('socket') as SpinnerStyle)
   }
