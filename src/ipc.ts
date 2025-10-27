@@ -30,10 +30,10 @@
 
 import crypto from 'node:crypto'
 import { promises as fs } from 'node:fs'
-import os from 'node:os'
 import path from 'node:path'
 
 import { safeDelete } from './fs'
+import { getOsTmpDir } from './paths'
 import { z } from './zod'
 
 // Define BufferEncoding type for TypeScript compatibility.
@@ -206,7 +206,7 @@ export function createIpcChannelId(prefix = 'socket'): string {
  */
 export function getIpcStubPath(appName: string): string {
   // Get the system's temporary directory - this is platform-specific.
-  const tempDir = os.tmpdir()
+  const tempDir = getOsTmpDir()
 
   // Create a hidden directory structure for Socket IPC files.
   // The dot prefix makes it hidden on Unix-like systems.
@@ -363,7 +363,7 @@ export async function readIpcStub(stubPath: string): Promise<unknown> {
  * @unused Reserved for future implementation
  */
 export async function cleanupIpcStubs(appName: string): Promise<void> {
-  const tempDir = os.tmpdir()
+  const tempDir = getOsTmpDir()
   const stubDir = path.join(tempDir, '.socket-ipc', appName)
   try {
     const files = await fs.readdir(stubDir)

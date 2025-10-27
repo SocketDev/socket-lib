@@ -24,6 +24,7 @@ import type { JsonReviver } from './json'
 import { jsonParse } from './json'
 import { objectFreeze, type Remap } from './objects'
 import { normalizePath, pathLikeToString } from './path'
+import { registerCacheInvalidation } from './paths/rewire'
 import { naturalCompare } from './sorts'
 
 /**
@@ -1080,6 +1081,19 @@ function getAllowedDirectories(): string[] {
   }
   return _cachedAllowedDirs
 }
+
+/**
+ * Invalidate the cached allowed directories.
+ * Called automatically by the paths/rewire module when paths are overridden in tests.
+ *
+ * @internal Used for test rewiring
+ */
+export function invalidatePathCache(): void {
+  _cachedAllowedDirs = undefined
+}
+
+// Register cache invalidation with the rewire module
+registerCacheInvalidation(invalidatePathCache)
 
 /**
  * Safely delete a file or directory asynchronously with built-in protections.

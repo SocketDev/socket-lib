@@ -24,18 +24,24 @@ import {
 import { getUserprofile } from '#env/windows'
 
 import { normalizePath } from './path'
+import { getPathValue, registerCacheInvalidation } from './paths/rewire'
 
-let _cachedOsTmpDir: string | undefined
+/**
+ * Get the OS home directory.
+ * Can be overridden in tests using setPath('homedir', ...) from paths/rewire.
+ */
+export function getOsHomeDir(): string {
+  // Always check for overrides - don't cache when using rewire
+  return getPathValue('homedir', () => os.homedir())
+}
 
 /**
  * Get the OS temporary directory.
- * Result is memoized for performance.
+ * Can be overridden in tests using setPath('tmpdir', ...) from paths/rewire.
  */
 export function getOsTmpDir(): string {
-  if (_cachedOsTmpDir === undefined) {
-    _cachedOsTmpDir = os.tmpdir()
-  }
-  return _cachedOsTmpDir
+  // Always check for overrides - don't cache when using rewire
+  return getPathValue('tmpdir', () => os.tmpdir())
 }
 
 /**
@@ -190,5 +196,19 @@ export function getUserHomeDir(): string {
     return userProfile
   }
   // Fallback to os.homedir()
-  return os.homedir()
+  return getOsHomeDir()
 }
+
+/**
+ * Invalidate all cached path values.
+ * Called automatically by the paths/rewire module when setPath/clearPath/resetPaths are used.
+ *
+ * @internal Used for test rewiring
+ */
+export function invalidateCache(): void {
+  _cachedSocketUserDir = undefined
+  _cachedSocketCacacheDir = undefined
+}
+
+// Register cache invalidation with the rewire module
+registerCacheInvalidation(invalidateCache)
