@@ -1,8 +1,10 @@
 /**
- * HOME environment variable snapshot.
+ * HOME environment variable getter.
  * Points to the user's home directory.
  */
 
-import { env } from 'node:process'
+import { getEnvValue } from '#env/rewire'
 
-export const HOME = env['HOME']
+export function getHome(): string | undefined {
+  return getEnvValue('HOME')
+}

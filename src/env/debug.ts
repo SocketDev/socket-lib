@@ -1,8 +1,10 @@
 /**
- * DEBUG environment variable snapshot.
+ * DEBUG environment variable getter.
  * Controls debug output for the debug package.
  */
 
-import { env } from 'node:process'
+import { getEnvValue } from '#env/rewire'
 
-export const DEBUG = env['DEBUG']
+export function getDebug(): string | undefined {
+  return getEnvValue('DEBUG')
+}

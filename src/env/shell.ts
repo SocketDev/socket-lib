@@ -1,8 +1,10 @@
 /**
- * SHELL environment variable snapshot.
+ * SHELL environment variable getter.
  * Unix/macOS default shell path.
  */
 
-import { env } from 'node:process'
+import { getEnvValue } from '#env/rewire'
 
-export const SHELL = env['SHELL']
+export function getShell(): string | undefined {
+  return getEnvValue('SHELL')
+}
