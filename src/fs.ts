@@ -1074,6 +1074,38 @@ export function readJsonSync(
   })
 }
 
+// Lazy cache for allowed directories to avoid re-resolving on every safeDelete call
+let _cachedAllowedDirs: string[] | undefined
+
+/**
+ * Get allowed directories for safe deletion with lazy caching.
+ * These directories don't change during process lifetime, so we cache them.
+ */
+function getAllowedDirectories(): string[] {
+  if (_cachedAllowedDirs === undefined) {
+    const os = getOs()
+    const path = getPath()
+    const {
+      getSocketCacacheDir,
+      getSocketUserDir,
+    } = /*@__PURE__*/ require('#lib/paths')
+
+    const tmpDir = os.tmpdir()
+    const resolvedTmpDir = path.resolve(tmpDir)
+    const cacacheDir = getSocketCacacheDir()
+    const resolvedCacacheDir = path.resolve(cacacheDir)
+    const socketUserDir = getSocketUserDir()
+    const resolvedSocketUserDir = path.resolve(socketUserDir)
+
+    _cachedAllowedDirs = [
+      resolvedTmpDir,
+      resolvedCacacheDir,
+      resolvedSocketUserDir,
+    ]
+  }
+  return _cachedAllowedDirs
+}
+
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
  * Uses `del` for safer deletion that prevents removing cwd and above by default.
@@ -1113,31 +1145,15 @@ export async function safeDelete(
   // Check if we're deleting within allowed directories.
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
-    const os = getOs()
     const path = getPath()
-    const {
-      getSocketCacacheDir,
-      getSocketUserDir,
-    } = /*@__PURE__*/ require('#lib/paths')
-
-    // Get allowed directories
-    const tmpDir = os.tmpdir()
-    const resolvedTmpDir = path.resolve(tmpDir)
-    const cacacheDir = getSocketCacacheDir()
-    const resolvedCacacheDir = path.resolve(cacacheDir)
-    const socketUserDir = getSocketUserDir()
-    const resolvedSocketUserDir = path.resolve(socketUserDir)
+    const allowedDirs = getAllowedDirectories()
 
     // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
       const resolvedPath = path.resolve(pattern)
 
       // Check each allowed directory
-      for (const allowedDir of [
-        resolvedTmpDir,
-        resolvedCacacheDir,
-        resolvedSocketUserDir,
-      ]) {
+      for (const allowedDir of allowedDirs) {
         const isInAllowedDir =
           resolvedPath.startsWith(allowedDir + path.sep) ||
           resolvedPath === allowedDir
@@ -1204,31 +1220,15 @@ export function safeDeleteSync(
   // Check if we're deleting within allowed directories.
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
-    const os = getOs()
     const path = getPath()
-    const {
-      getSocketCacacheDir,
-      getSocketUserDir,
-    } = /*@__PURE__*/ require('#lib/paths')
-
-    // Get allowed directories
-    const tmpDir = os.tmpdir()
-    const resolvedTmpDir = path.resolve(tmpDir)
-    const cacacheDir = getSocketCacacheDir()
-    const resolvedCacacheDir = path.resolve(cacacheDir)
-    const socketUserDir = getSocketUserDir()
-    const resolvedSocketUserDir = path.resolve(socketUserDir)
+    const allowedDirs = getAllowedDirectories()
 
     // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
       const resolvedPath = path.resolve(pattern)
 
       // Check each allowed directory
-      for (const allowedDir of [
-        resolvedTmpDir,
-        resolvedCacacheDir,
-        resolvedSocketUserDir,
-      ]) {
+      for (const allowedDir of allowedDirs) {
         const isInAllowedDir =
           resolvedPath.startsWith(allowedDir + path.sep) ||
           resolvedPath === allowedDir
