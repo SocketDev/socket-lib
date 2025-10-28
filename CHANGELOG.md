@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.2.0) - 2025-10-28
+
+### Added
+
+- **Logger step symbol**: `logger.step()` now displays a cyan arrow symbol (→ or > in ASCII) before step messages for improved visual separation
+  - New `LOG_SYMBOLS.step` symbol added to the symbol palette
+  - Automatic stripping of existing symbols from step messages
+  - Maintains existing blank line behavior for clear step separation
+
 ## [2.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.1.0) - 2025-10-28
 
 ### Added
