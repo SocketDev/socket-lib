@@ -320,6 +320,7 @@ export class Logger {
   #logCallCount = 0
   #constructorArgs: unknown[]
   #options: Record<string, unknown>
+  #originalStdout?: any
 
   /**
    * Creates a new Logger instance.
@@ -350,6 +351,8 @@ export class Logger {
     const options = args['0']
     if (typeof options === 'object' && options !== null) {
       this.#options = { __proto__: null, ...options }
+      // Store reference to original stdout stream to bypass Console formatting
+      this.#originalStdout = (options as any).stdout
     } else {
       this.#options = { __proto__: null }
     }
@@ -1416,7 +1419,16 @@ export class Logger {
    */
   write(text: string): this {
     const con = privateConsole.get(this)
-    con._stdout.write(text)
+    // Write directly to the original stdout stream to bypass Console formatting
+    // (e.g., group indentation). Try multiple approaches to get the raw stream:
+    // 1. Use stored reference from constructor options
+    // 2. Try to get from constructor args
+    // 3. Fall back to con._stdout (which applies formatting)
+    const stdout =
+      this.#originalStdout ||
+      (this.#constructorArgs[0] as any)?.stdout ||
+      con._stdout
+    stdout.write(text)
     this[lastWasBlankSymbol](false)
     return this
   }

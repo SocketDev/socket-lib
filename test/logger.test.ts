@@ -657,12 +657,16 @@ describe('Logger', () => {
 
   describe('write() method', () => {
     it('should write text to stdout without newline', () => {
+      // Explicitly clear chunks before test (defensive against CI isolation issues)
+      stdoutChunks.length = 0
       testLogger.write('raw text')
       const output = stdoutChunks.join('')
       expect(output).toBe('raw text')
     })
 
     it('should not apply indentation', () => {
+      // Explicitly clear chunks before test (defensive against CI isolation issues)
+      stdoutChunks.length = 0
       testLogger.indent()
       testLogger.write('no indent')
       const output = stdoutChunks.join('')
@@ -670,6 +674,8 @@ describe('Logger', () => {
     })
 
     it('should return logger instance for chaining', () => {
+      // Explicitly clear chunks before test (defensive against CI isolation issues)
+      stdoutChunks.length = 0
       const result = testLogger.write('text')
       expect(result).toBe(testLogger)
     })
