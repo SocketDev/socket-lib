@@ -212,6 +212,10 @@
       "types": "./dist/env/npm.d.ts",
       "default": "./dist/env/npm.js"
     },
+    "./env/package-manager": {
+      "types": "./dist/env/package-manager.d.ts",
+      "default": "./dist/env/package-manager.js"
+    },
     "./env/path": {
       "types": "./dist/env/path.d.ts",
       "default": "./dist/env/path.js"
