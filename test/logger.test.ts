@@ -18,15 +18,17 @@ describe('LOG_SYMBOLS', () => {
     expect(LOG_SYMBOLS.fail).toContain('')
     expect(LOG_SYMBOLS.warn).toContain('')
     expect(LOG_SYMBOLS.info).toContain('')
+    expect(LOG_SYMBOLS.step).toContain('')
   })
 
   it('should provide colored symbols', () => {
     // Access all symbols to ensure lazy initialization
-    const { fail, info, success, warn } = LOG_SYMBOLS
+    const { fail, info, step, success, warn } = LOG_SYMBOLS
     expect(success).toBeTruthy()
     expect(fail).toBeTruthy()
     expect(warn).toBeTruthy()
     expect(info).toBeTruthy()
+    expect(step).toBeTruthy()
   })
 
   it('should freeze symbols after initialization', () => {
@@ -377,6 +379,22 @@ describe('Logger', () => {
       testLogger.step('Step')
       // Should not add another blank line
       expect(stdoutChunks.length).toBe(beforeCount + 1)
+    })
+
+    it('should include arrow symbol in step message', () => {
+      testLogger.step('Step 1')
+      const output = stdoutChunks.join('')
+      // Check for either Unicode → or ASCII > fallback
+      expect(output).toMatch(/[→>]/)
+      expect(output).toContain('Step 1')
+    })
+
+    it('should strip existing symbols from step message', () => {
+      testLogger.step('→ Step 1')
+      const output = stdoutChunks.join('')
+      // Should have the symbol added by step(), not doubled
+      const arrowCount = (output.match(/[→>]/g) || []).length
+      expect(arrowCount).toBe(1)
     })
 
     it('should return logger instance for chaining', () => {
