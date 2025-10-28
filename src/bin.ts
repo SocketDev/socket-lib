@@ -9,7 +9,6 @@ import { getXdgDataHome } from '#env/xdg'
 
 import { WIN32 } from '#constants/platform'
 import { readJsonSync } from './fs'
-import { getOwn } from './objects'
 import { isPath, normalizePath } from './path'
 import { spawn } from './spawn'
 
@@ -87,23 +86,60 @@ export async function execBin(
 }
 
 /**
+ * Options for the which function.
+ */
+export interface WhichOptions {
+  /** If true, return all matches instead of just the first one. */
+  all?: boolean | undefined
+  /** If true, return null instead of throwing when no match is found. */
+  nothrow?: boolean | undefined
+  /** Path to search in. */
+  path?: string | undefined
+  /** Path separator character. */
+  pathExt?: string | undefined
+  /** Environment variables to use. */
+  env?: Record<string, string | undefined>  | undefined
+}
+
+/**
+ * Find an executable in the system PATH asynchronously.
+ * Wrapper around the which package for lazy loading.
+ */
+export async function which(
+  binName: string,
+  options?: WhichOptions,
+): Promise<string | string[] | undefined> {
+  return await getWhich()(binName, options)
+}
+
+/**
+ * Find an executable in the system PATH synchronously.
+ * Wrapper around the which package for lazy loading.
+ */
+export function whichSync(
+  binName: string,
+  options?: WhichOptions,
+): string | string[] | undefined {
+  return getWhich().sync(binName, options)
+}
+
+/**
  * Find and resolve a binary in the system PATH asynchronously.
- * @template {import('which').Options} T
  * @throws {Error} If the binary is not found and nothrow is false.
  */
 export async function whichBin(
   binName: string,
-  options?: import('which').Options,
+  options?: WhichOptions,
 ): Promise<string | string[] | undefined> {
   const which = getWhich()
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { nothrow: true, ...options }
   // Depending on options `which` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
-  const result = await which?.(binName, opts)
+  const result = await which(binName, opts)
 
   // When 'all: true' is specified, ensure we always return an array.
-  if (options?.all) {
+  if (opts?.all) {
     const paths = Array.isArray(result)
       ? result
       : typeof result === 'string'
@@ -123,21 +159,20 @@ export async function whichBin(
 
 /**
  * Find and resolve a binary in the system PATH synchronously.
- * @template {import('which').Options} T
  * @throws {Error} If the binary is not found and nothrow is false.
  */
 export function whichBinSync(
   binName: string,
-  options?: import('which').Options,
+  options?: WhichOptions,
 ): string | string[] | undefined {
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { nothrow: true, ...options }
   // Depending on options `which` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
-  const result = getWhich()?.sync(binName, opts)
+  const result = whichSync(binName, opts)
 
   // When 'all: true' is specified, ensure we always return an array.
-  if (getOwn(options, 'all')) {
+  if (opts.all) {
     const paths = Array.isArray(result)
       ? result
       : typeof result === 'string'
@@ -152,7 +187,7 @@ export function whichBinSync(
     return undefined
   }
 
-  return resolveBinPathSync(result)
+  return resolveBinPathSync(result as string)
 }
 
 /**
