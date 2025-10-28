@@ -17,13 +17,20 @@
  * Key difference from dlx-binary.ts:
  * - dlx-binary.ts: Downloads standalone binaries from URLs
  * - dlx-package.ts: Installs npm packages from registries
+ *
+ * Implementation:
+ * - Uses pacote for package installation (no npm CLI required)
+ * - Split into downloadPackage() and executePackage() for flexibility
+ * - dlxPackage() combines both for convenience
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
+import pacote from './external/pacote'
 import { WIN32 } from './constants/platform'
+import { getPacoteCachePath } from './constants/packages'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
@@ -35,6 +42,15 @@ import { spawn } from './spawn'
  * Matches any version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
  */
 const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
+
+export interface DownloadPackageResult {
+  /** Path to the installed package directory. */
+  packageDir: string
+  /** Path to the binary. */
+  binaryPath: string
+  /** Whether the package was newly installed. */
+  installed: boolean
+}
 
 export interface DlxPackageOptions {
   /**
@@ -111,6 +127,7 @@ function parsePackageSpec(spec: string): {
 
 /**
  * Install package to ~/.socket/_dlx/<hash>/ if not already installed.
+ * Uses pacote for installation (no npm CLI required).
  */
 async function ensurePackageInstalled(
   packageSpec: string,
@@ -132,23 +149,16 @@ async function ensurePackageInstalled(
     }
   }
 
-  // Use npm install --prefix to install to specific directory.
-  await spawn(
-    'npm',
-    [
-      'install',
-      '--prefix',
-      packageDir,
-      '--no-save',
-      '--no-package-lock',
-      '--no-audit',
-      '--no-fund',
-      packageSpec,
-    ],
-    {
-      stdio: 'pipe',
-    },
-  )
+  // Ensure package directory exists.
+  await fs.mkdir(packageDir, { recursive: true })
+
+  // Use pacote to extract the package.
+  // Pacote leverages npm cache when available but doesn't require npm CLI.
+  const pacoteCachePath = getPacoteCachePath()
+  await pacote.extract(packageSpec, installedDir, {
+    // Use consistent pacote cache path (respects npm cache locations when available).
+    cache: pacoteCachePath || path.join(packageDir, '.cache'),
+  })
 
   return { installed: true, packageDir }
 }
@@ -195,17 +205,62 @@ function findBinaryPath(
  * our own cache directory (~/.socket/_dlx) and installation logic.
  *
  * Auto-forces reinstall for version ranges to get latest within range.
+ *
+ * @example
+ * ```typescript
+ * // Download and execute cdxgen
+ * const result = await dlxPackage(
+ *   ['--version'],
+ *   { package: '@cyclonedx/cdxgen@10.0.0' }
+ * )
+ * await result.spawnPromise
+ * ```
  */
 export async function dlxPackage(
   args: readonly string[] | string[],
   options?: DlxPackageOptions | undefined,
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxPackageResult> {
-  const {
-    force: userForce,
-    package: packageSpec,
-    spawnOptions,
-  } = { __proto__: null, ...options } as DlxPackageOptions
+  // Download the package.
+  const downloadResult = await downloadPackage(options!)
+
+  // Execute the binary.
+  const spawnPromise = executePackage(
+    downloadResult.binaryPath,
+    args,
+    options?.spawnOptions,
+    spawnExtra,
+  )
+
+  return {
+    ...downloadResult,
+    spawnPromise,
+  }
+}
+
+/**
+ * Download and install a package without executing it.
+ * This is useful for self-update or when you need the package files
+ * but don't want to run the binary immediately.
+ *
+ * @example
+ * ```typescript
+ * // Install @socketsecurity/cli without running it
+ * const result = await downloadPackage({
+ *   package: '@socketsecurity/cli@1.2.0',
+ *   force: true
+ * })
+ * console.log('Installed to:', result.packageDir)
+ * console.log('Binary at:', result.binaryPath)
+ * ```
+ */
+export async function downloadPackage(
+  options: DlxPackageOptions,
+): Promise<DownloadPackageResult> {
+  const { force: userForce, package: packageSpec } = {
+    __proto__: null,
+    ...options,
+  } as DlxPackageOptions
 
   // Parse package spec.
   const { name: packageName, version: packageVersion } =
@@ -242,13 +297,33 @@ export async function dlxPackage(
     }
   }
 
-  // Execute binary.
-  const spawnPromise = spawn(binaryPath, args, spawnOptions, spawnExtra)
-
   return {
     binaryPath,
     installed,
     packageDir,
-    spawnPromise,
   }
+}
+
+/**
+ * Execute a package's binary.
+ * The package must already be installed (use downloadPackage first).
+ *
+ * @example
+ * ```typescript
+ * // Execute an already-installed package
+ * const downloaded = await downloadPackage({ package: 'cowsay@1.5.0' })
+ * const result = await executePackage(
+ *   downloaded.binaryPath,
+ *   ['Hello World'],
+ *   { stdio: 'inherit' }
+ * )
+ * ```
+ */
+export function executePackage(
+  binaryPath: string,
+  args: readonly string[] | string[],
+  spawnOptions?: SpawnOptions | undefined,
+  spawnExtra?: SpawnExtra | undefined,
+): ReturnType<typeof spawn> {
+  return spawn(binaryPath, args, spawnOptions, spawnExtra)
 }
