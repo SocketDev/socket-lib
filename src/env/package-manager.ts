@@ -65,7 +65,10 @@ export function detectPackageManager(): PackageManagerType {
       return 'bun'
     }
     // If in node_modules but no other match, assume npm.
-    if (argv0.includes('/node_modules/') || argv0.includes('\\node_modules\\')) {
+    if (
+      argv0.includes('/node_modules/') ||
+      argv0.includes('\\node_modules\\')
+    ) {
       return 'npm'
     }
   }
