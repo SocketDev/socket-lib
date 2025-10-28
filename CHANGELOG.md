@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.2.1) - 2025-10-28
+
+### Fixed
+
+- **Logger write() method**: Fixed `write()` to bypass Console formatting when outputting raw text
+  - Previously, `write()` used Console's internal `_stdout` stream which applied unintended formatting like group indentation
+  - Now stores a reference to the original stdout stream in a dedicated private field (`#originalStdout`) during construction
+  - The `write()` method uses this stored reference to write directly to the raw stream, bypassing all Console formatting layers
+  - Ensures raw text output without any formatting applied, fixing test failures in CI environments where writes after `indent()` were unexpectedly formatted
+
 ## [2.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.2.0) - 2025-10-28
 
 ### Added
