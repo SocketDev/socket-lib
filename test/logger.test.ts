@@ -391,9 +391,14 @@ describe('Logger', () => {
 
     it('should strip existing symbols from step message', () => {
       testLogger.step('→ Step 1')
-      const output = stdoutChunks.join('')
-      // Should have the symbol added by step(), not doubled
-      const arrowCount = (output.match(/[→>]/g) || []).length
+      // Get the last chunk (the actual step line, not the blank line)
+      const stepLine = stdoutChunks[stdoutChunks.length - 1]
+      // Strip ANSI color codes for easier testing
+      const stripped = stepLine.replace(/\x1b\[\d+m/g, '')
+      // Should have exactly one arrow symbol and the message text
+      expect(stripped).toMatch(/^[→>] Step 1\n$/)
+      // Verify the arrow appears exactly once at the start
+      const arrowCount = (stripped.match(/[→>]/g) || []).length
       expect(arrowCount).toBe(1)
     })
 
