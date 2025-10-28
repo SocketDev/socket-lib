@@ -22,6 +22,7 @@ import { applyLinePrefix, isBlankString } from './strings'
  * console.log(`${LOG_SYMBOLS.fail} Operation failed`)
  * console.log(`${LOG_SYMBOLS.warn} Warning message`)
  * console.log(`${LOG_SYMBOLS.info} Information message`)
+ * console.log(`${LOG_SYMBOLS.step} Processing step`)
  * ```
  */
 type LogSymbols = {
@@ -29,6 +30,8 @@ type LogSymbols = {
   fail: string
   /** Blue colored information symbol (ℹ or i in ASCII) */
   info: string
+  /** Cyan colored step symbol (→ or > in ASCII) */
+  step: string
   /** Green colored success symbol (✔ or √ in ASCII) */
   success: string
   /** Yellow colored warning symbol (⚠ or ‼ in ASCII) */
@@ -115,9 +118,9 @@ function getYoctocolors() {
 /**
  * Log symbols for terminal output with colored indicators.
  *
- * Provides colored Unicode symbols (✔, ✖, ⚠, ℹ) with ASCII fallbacks (√, ×, ‼, i)
+ * Provides colored Unicode symbols (✔, ✖, ⚠, ℹ, →) with ASCII fallbacks (√, ×, ‼, i, >)
  * for terminals that don't support Unicode. Symbols are color-coded: green for
- * success, red for failure, yellow for warnings, blue for info.
+ * success, red for failure, yellow for warnings, blue for info, cyan for step.
  *
  * The symbols are lazily initialized on first access and then frozen for immutability.
  *
@@ -129,6 +132,7 @@ function getYoctocolors() {
  * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Red ✖
  * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Yellow ⚠
  * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Blue ℹ
+ * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Cyan →
  * ```
  */
 export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
@@ -145,6 +149,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     objectAssign(target, {
       fail: colors.red(supported ? '✖' : '×'),
       info: colors.blue(supported ? 'ℹ' : 'i'),
+      step: colors.cyan(supported ? '→' : '>'),
       success: colors.green(supported ? '✔' : '√'),
       warn: colors.yellow(supported ? '⚠' : '‼'),
     })
@@ -528,10 +533,10 @@ export class Logger {
    */
   #stripSymbols(text: string): string {
     // Strip both unicode and emoji forms of log symbols from the start.
-    // Matches: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️
+    // Matches: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, >
     // Also handles variation selectors (U+FE0F) and whitespace after symbol.
-    // Note: We don't strip standalone 'i' to avoid breaking words like 'info'.
-    return text.replace(/^[✖✗×⚠‼✔✓√ℹ]\uFE0F?\s*/u, '')
+    // Note: We don't strip standalone 'i' or '>' to avoid breaking words.
+    return text.replace(/^[✖✗×⚠‼✔✓√ℹ→]\uFE0F?\s*/u, '')
   }
 
   /**
@@ -1114,11 +1119,13 @@ export class Logger {
   }
 
   /**
-   * Logs a main step message with a blank line before it (stateless).
+   * Logs a main step message with a cyan arrow symbol and blank line before it.
    *
-   * Automatically adds a blank line before the message unless the last
-   * line was already blank. Useful for marking major steps in a process
-   * with clear visual separation.
+   * Automatically prefixes the message with `LOG_SYMBOLS.step` (cyan →) and
+   * adds a blank line before the message unless the last line was already blank.
+   * Useful for marking major steps in a process with clear visual separation.
+   * Always outputs to stdout. If the message starts with an existing symbol,
+   * it will be stripped and replaced.
    *
    * @param msg - The step message to log
    * @param extras - Additional arguments to log
@@ -1132,10 +1139,10 @@ export class Logger {
    * logger.log('Running test suite...')
    * // Output:
    * // [blank line]
-   * // Building project
+   * // → Building project
    * // Compiling TypeScript...
    * // [blank line]
-   * // Running tests
+   * // → Running tests
    * // Running test suite...
    * ```
    */
@@ -1145,8 +1152,21 @@ export class Logger {
       // Use this.log() to properly track the blank line.
       this.log('')
     }
-    // Let log() handle all tracking.
-    return this.log(msg, ...extras)
+    // Strip existing symbols from the message.
+    const text = this.#stripSymbols(msg)
+    // Note: Step messages always go to stdout (unlike info/fail/etc which go to stderr).
+    const indent = this.#getIndent('stdout')
+    const con = privateConsole.get(this) as typeof console &
+      Record<string, unknown>
+    con.log(
+      applyLinePrefix(`${LOG_SYMBOLS.step} ${text}`, {
+        prefix: indent,
+      }),
+      ...extras,
+    )
+    this[lastWasBlankSymbol](false, 'stdout')
+    ;(this as any)[incLogCallCountSymbol]()
+    return this
   }
 
   /**
