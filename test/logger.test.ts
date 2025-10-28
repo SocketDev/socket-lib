@@ -394,6 +394,7 @@ describe('Logger', () => {
       // Get the last chunk (the actual step line, not the blank line)
       const stepLine = stdoutChunks[stdoutChunks.length - 1]
       // Strip ANSI color codes for easier testing
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence needed for stripping color codes
       const stripped = stepLine.replace(/\x1b\[\d+m/g, '')
       // Should have exactly one arrow symbol and the message text
       expect(stripped).toMatch(/^[→>] Step 1\n$/)
