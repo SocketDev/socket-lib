@@ -111,6 +111,33 @@ export function getDlxPackageNodeModulesDir(packageName: string): string {
 }
 
 /**
+ * Check if a file path is within the Socket DLX directory.
+ * This is useful for determining if a binary or file is managed by Socket's DLX system.
+ *
+ * @param filePath - Absolute or relative path to check
+ * @returns true if the path is within ~/.socket/_dlx/, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isInSocketDlx('/home/user/.socket/_dlx/abc123/bin/socket') // true
+ * isInSocketDlx('/usr/local/bin/socket') // false
+ * isInSocketDlx(process.argv[0]) // Check if current binary is in DLX
+ * ```
+ */
+export function isInSocketDlx(filePath: string): boolean {
+  if (!filePath) {
+    return false
+  }
+
+  const path = getPath()
+  const dlxDir = getSocketDlxDir()
+  const absolutePath = path.resolve(filePath)
+
+  // Check if the absolute path starts with the DLX directory.
+  return absolutePath.startsWith(dlxDir + path.sep)
+}
+
+/**
  * Check if a package is installed in DLX.
  */
 export function isDlxPackageInstalled(packageName: string): boolean {
