@@ -20,12 +20,13 @@ import {
   isUnstaged,
   isUnstagedSync,
 } from '@socketsecurity/lib/git'
+import { normalizePath } from '@socketsecurity/lib/path'
 import { spawnSync } from '@socketsecurity/lib/spawn'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
 describe('git extended tests', () => {
-  const projectRoot = process.cwd()
+  const projectRoot = normalizePath(process.cwd())
 
   describe('cache functionality', () => {
     it('should cache results by default', async () => {
