@@ -166,7 +166,6 @@ describe('utils/get-ipc', () => {
       const ipc = await getIpc()
 
       expect(() => {
-        // @ts-expect-error - testing immutability
         ipc.SOCKET_CLI_FIX = 'modified'
       }).toThrow()
     })
@@ -175,7 +174,6 @@ describe('utils/get-ipc', () => {
       const ipc = await getIpc()
 
       expect(() => {
-        // @ts-expect-error - testing immutability
         ipc.NEW_PROPERTY = 'value'
       }).toThrow()
     })
@@ -186,7 +184,6 @@ describe('utils/get-ipc', () => {
 
       if (keys.length > 0) {
         expect(() => {
-          // @ts-expect-error - testing immutability
           delete ipc[keys[0]]
         }).toThrow()
       }

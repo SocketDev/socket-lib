@@ -679,7 +679,6 @@ describe('json', () => {
       it('should handle array-like objects with non-number first element', () => {
         // Tests line 166-171: length > 0 but obj[0] is not a number
         expect(() => {
-          // @ts-expect-error - testing runtime behavior
           jsonParse({
             length: 1,
             0: 'not a number',
@@ -692,7 +691,6 @@ describe('json', () => {
       it('should handle objects without proper constructor', () => {
         // Tests line 174-177: constructor.isBuffer checks
         expect(() => {
-          // @ts-expect-error - testing runtime behavior
           jsonParse({
             length: 0,
             copy: () => {},
@@ -702,7 +700,6 @@ describe('json', () => {
         }).toThrow()
 
         expect(() => {
-          // @ts-expect-error - testing runtime behavior
           jsonParse({
             length: 0,
             copy: () => {},
@@ -721,7 +718,6 @@ describe('json', () => {
         expect(isJsonPrimitive(0)).toBe(true)
         expect(isJsonPrimitive(false)).toBe(true)
         expect(isJsonPrimitive('')).toBe(true)
-        // @ts-expect-error - testing runtime behavior
         expect(isJsonPrimitive(Number.NaN)).toBe(true) // NaN is a number
       })
 

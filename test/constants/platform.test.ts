@@ -203,7 +203,7 @@ describe('constants/platform', () => {
     it('should support platform-conditional binary extensions', () => {
       const binaryName = WIN32 ? 'app.exe' : 'app'
       if (WIN32) {
-        expect(binaryName).toEndWith('.exe')
+        expect(binaryName.endsWith('.exe')).toBe(true)
       } else {
         expect(binaryName).not.toContain('.')
       }
