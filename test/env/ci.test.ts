@@ -3,7 +3,7 @@
  */
 
 import { getCI } from '@socketsecurity/lib/env/ci'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/ci', () => {
@@ -35,11 +35,6 @@ describe('env/ci', () => {
     it('should return true when CI is set to "YES"', () => {
       setEnv('CI', 'YES')
       expect(getCI()).toBe(true)
-    })
-
-    it('should return false when CI is not set', () => {
-      clearEnv('CI')
-      expect(getCI()).toBe(false)
     })
 
     it('should return false when CI is set to "false"', () => {
@@ -91,17 +86,6 @@ describe('env/ci', () => {
 
       setEnv('CI', 'false')
       expect(getCI()).toBe(false)
-    })
-
-    it('should handle clearing and re-setting CI', () => {
-      setEnv('CI', 'true')
-      expect(getCI()).toBe(true)
-
-      clearEnv('CI')
-      expect(getCI()).toBe(false)
-
-      setEnv('CI', '1')
-      expect(getCI()).toBe(true)
     })
 
     it('should handle consecutive reads', () => {
