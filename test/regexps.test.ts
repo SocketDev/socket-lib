@@ -58,6 +58,7 @@ describe('regexps', () => {
     })
 
     it('should escape multiple special characters', () => {
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: Testing regex escape for curly braces
       expect(escapeRegExp('.*+?^${}()|[]')).toBe(
         '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]',
       )

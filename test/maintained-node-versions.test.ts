@@ -75,7 +75,9 @@ describe('maintained-node-versions', () => {
         .map(v => v.split('.').map(Number))
         .sort((a, b) => {
           for (let i = 0; i < 3; i++) {
-            if (a[i] !== b[i]) {return a[i] - b[i]}
+            if (a[i] !== b[i]) {
+              return a[i] - b[i]
+            }
           }
           return 0
         })
@@ -106,28 +108,24 @@ describe('maintained-node-versions', () => {
   describe('immutability', () => {
     it('should not allow modification of array elements', () => {
       expect(() => {
-        // @ts-expect-error - testing immutability
         maintainedNodeVersions[0] = '99.99.99'
       }).toThrow()
     })
 
     it('should not allow push', () => {
       expect(() => {
-        // @ts-expect-error - testing immutability
         maintainedNodeVersions.push('99.99.99')
       }).toThrow()
     })
 
     it('should not allow pop', () => {
       expect(() => {
-        // @ts-expect-error - testing immutability
         maintainedNodeVersions.pop()
       }).toThrow()
     })
 
     it('should not allow modification of named properties', () => {
       expect(() => {
-        // @ts-expect-error - testing immutability
         maintainedNodeVersions.current = '99.99.99'
       }).toThrow()
     })

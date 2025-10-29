@@ -249,7 +249,6 @@ describe('suppress-warnings', () => {
     })
 
     it('should restore warnings after callback', async () => {
-      const _original = process.emitWarning
       const warningSpy = vi.fn()
 
       await withSuppressedWarnings('ExperimentalWarning', () => {
