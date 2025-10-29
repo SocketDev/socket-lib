@@ -417,28 +417,27 @@ describe('paths/rewire', () => {
 
   describe('performance characteristics', () => {
     it('should cache expensive computations', () => {
-      let computeTime = 0
+      let callCount = 0
       const expensiveFn = () => {
-        const start = Date.now()
+        callCount++
         // Simulate work
         for (let i = 0; i < 1000; i++) {
           Math.random()
         }
-        computeTime = Date.now() - start
         return '/computed'
       }
 
       // First call - computes
       getPathValue('testKey', expensiveFn)
-      const firstTime = computeTime
+      expect(callCount).toBe(1)
 
-      // Second call - should be instant (cached)
-      const start = Date.now()
+      // Second call - should use cache (not call function)
       getPathValue('testKey', expensiveFn)
-      const cachedTime = Date.now() - start
+      expect(callCount).toBe(1)
 
-      // Cached call should be much faster
-      expect(cachedTime).toBeLessThan(firstTime)
+      // Third call - still cached
+      getPathValue('testKey', expensiveFn)
+      expect(callCount).toBe(1)
     })
   })
 })
