@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.6.0) - 2025-10-28
+
+### Changed
+
+- **Process locking aligned with npm npx**: Enhanced process-lock module to match npm's npx locking strategy
+  - Reduced stale timeout from 10 seconds to 5 seconds (matches npm npx)
+  - Added periodic lock touching (2-second interval) to prevent false stale detection during long operations
+  - Implemented second-level granularity for mtime comparison to avoid APFS floating-point precision issues
+  - Added automatic touch timer cleanup on process exit
+  - Timers use `unref()` to prevent keeping process alive
+  - Aligns with npm's npx implementation per https://github.com/npm/cli/pull/8512
+
 ## [2.5.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.5.0) - 2025-10-28
 
 ### Added
