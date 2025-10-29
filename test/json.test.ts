@@ -632,5 +632,105 @@ describe('json', () => {
         }
       })
     })
+
+    describe('isBuffer internal function edge cases', () => {
+      it('should handle falsy values that are not Buffers', () => {
+        // Tests line 156: if (!x || typeof x !== 'object')
+        expect(jsonParse('null')).toBe(null)
+        expect(jsonParse('false')).toBe(false)
+        expect(jsonParse('0')).toBe(0)
+      })
+
+      it('should handle objects without length property', () => {
+        // Tests line 160-161: typeof obj['length'] !== 'number'
+        // jsonParse with an object that looks nothing like a Buffer should fail gracefully
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior with invalid input
+          jsonParse({ some: 'object' })
+        }).toThrow()
+      })
+
+      it('should handle objects with non-number length', () => {
+        // Tests line 160-161: typeof obj['length'] !== 'number'
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({ length: 'not a number' })
+        }).toThrow()
+      })
+
+      it('should handle objects missing copy/slice methods', () => {
+        // Tests line 163-164: missing copy or slice methods
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({ length: 10 })
+        }).toThrow()
+
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({ length: 10, copy: 'not a function' })
+        }).toThrow()
+
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({ length: 10, slice: 'not a function' })
+        }).toThrow()
+      })
+
+      it('should handle array-like objects with non-number first element', () => {
+        // Tests line 166-171: length > 0 but obj[0] is not a number
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({
+            length: 1,
+            0: 'not a number',
+            copy: () => {},
+            slice: () => {},
+          })
+        }).toThrow()
+      })
+
+      it('should handle objects without proper constructor', () => {
+        // Tests line 174-177: constructor.isBuffer checks
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({
+            length: 0,
+            copy: () => {},
+            slice: () => {},
+            constructor: {}, // No isBuffer method
+          })
+        }).toThrow()
+
+        expect(() => {
+          // @ts-expect-error - testing runtime behavior
+          jsonParse({
+            length: 0,
+            copy: () => {},
+            slice: () => {},
+            constructor: { isBuffer: 'not a function' },
+          })
+        }).toThrow()
+      })
+    })
+
+    describe('isJsonPrimitive edge cases', () => {
+      it('should handle all falsy values correctly', () => {
+        // Tests line 200: value === null
+        expect(isJsonPrimitive(null)).toBe(true)
+        expect(isJsonPrimitive(undefined)).toBe(false)
+        expect(isJsonPrimitive(0)).toBe(true)
+        expect(isJsonPrimitive(false)).toBe(true)
+        expect(isJsonPrimitive('')).toBe(true)
+        // @ts-expect-error - testing runtime behavior
+        expect(isJsonPrimitive(Number.NaN)).toBe(true) // NaN is a number
+      })
+
+      it('should handle special number values', () => {
+        expect(isJsonPrimitive(Number.POSITIVE_INFINITY)).toBe(true)
+        expect(isJsonPrimitive(Number.NEGATIVE_INFINITY)).toBe(true)
+        expect(isJsonPrimitive(Number.MAX_VALUE)).toBe(true)
+        expect(isJsonPrimitive(Number.MIN_VALUE)).toBe(true)
+      })
+    })
   })
 })
