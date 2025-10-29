@@ -47,6 +47,11 @@ describe('stdio/stderr', () => {
     cursorToSpy = vi.spyOn(stderr, 'cursorTo').mockImplementation(() => {})
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     clearLineSpy = vi.spyOn(stderr, 'clearLine').mockImplementation(() => {})
+
+    // Clear any calls made during setup
+    writeSpy.mockClear()
+    cursorToSpy.mockClear()
+    clearLineSpy.mockClear()
   })
 
   afterEach(() => {
