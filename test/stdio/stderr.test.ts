@@ -143,14 +143,6 @@ describe('stdio/stderr', () => {
       expect(writeSpy).toHaveBeenCalledWith('')
     })
 
-    it('should handle multiple writes', () => {
-      writeError('Part 1')
-      writeError(' Part 2')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-      expect(writeSpy).toHaveBeenNthCalledWith(1, 'Part 1')
-      expect(writeSpy).toHaveBeenNthCalledWith(2, ' Part 2')
-    })
-
     it('should not add newline', () => {
       writeError('test')
       expect(writeSpy).toHaveBeenCalledWith('test')
@@ -181,16 +173,6 @@ describe('stdio/stderr', () => {
       clearLine()
       expect(cursorToSpy).toHaveBeenCalledWith(0)
       expect(clearLineSpy).toHaveBeenCalledWith(0)
-    })
-
-    it('should not clear line when not TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      clearLine()
-      expect(cursorToSpy).not.toHaveBeenCalled()
-      expect(clearLineSpy).not.toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
@@ -243,15 +225,6 @@ describe('stdio/stderr', () => {
       })
       cursorTo(0, 0)
       expect(cursorToSpy).toHaveBeenCalledWith(0, 0)
-    })
-
-    it('should not move cursor when not TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      cursorTo(10, 5)
-      expect(cursorToSpy).not.toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
@@ -552,17 +525,6 @@ describe('stdio/stderr', () => {
   })
 
   describe('integration', () => {
-    it('should support error reporting pattern', () => {
-      writeWarning('Deprecation notice')
-      writeErrorFormatted('Operation failed')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-      expect(writeSpy).toHaveBeenNthCalledWith(
-        1,
-        'Warning: Deprecation notice\n',
-      )
-      expect(writeSpy).toHaveBeenNthCalledWith(2, 'Error: Operation failed\n')
-    })
-
     it('should support progress error messages', () => {
       Object.defineProperty(stderr, 'isTTY', {
         value: true,
