@@ -353,6 +353,8 @@ export default [
       'line-comment-position': 'off',
       'unicorn/consistent-function-scoping': 'off',
       'no-undef': 'off', // TypeScript handles this
+      'no-import-assign': 'off', // Tests intentionally reassign imports to test immutability
+      'no-await-in-loop': 'off', // Tests often need to await in loops
     },
   },
   {

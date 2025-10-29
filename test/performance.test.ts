@@ -69,7 +69,7 @@ describe('performance', () => {
 
   describe('measure', () => {
     it('should measure async function duration', async () => {
-      const { result, duration } = await measure('async-op', async () => {
+      const { duration, result } = await measure('async-op', async () => {
         await new Promise(resolve => setTimeout(resolve, 50))
         return 'test-result'
       })
@@ -98,7 +98,7 @@ describe('performance', () => {
 
   describe('measureSync', () => {
     it('should measure sync function duration', () => {
-      const { result, duration } = measureSync('sync-op', () => {
+      const { duration, result } = measureSync('sync-op', () => {
         // Simulate some work
         let sum = 0
         for (let i = 0; i < 1000; i++) {
