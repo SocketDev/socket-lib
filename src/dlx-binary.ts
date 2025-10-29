@@ -7,6 +7,7 @@ import path from 'node:path'
 
 import { WIN32 } from '#constants/platform'
 
+import { generateCacheKey } from './dlx'
 import { downloadWithLock } from './download-lock'
 import { isDir, readJson, safeDelete } from './fs'
 import { isObjectObject } from './objects'
@@ -37,34 +38,6 @@ export interface DlxBinaryResult {
   downloaded: boolean
   /** The spawn promise for the running process. */
   spawnPromise: ReturnType<typeof spawn>
-}
-
-/**
- * Generate a cache directory name using npm/npx approach.
- * Uses first 16 characters of SHA-512 hash (like npm/npx).
- *
- * Rationale for SHA-512 truncated (vs full SHA-256):
- * - Matches npm/npx ecosystem behavior
- * - Shorter paths for Windows MAX_PATH compatibility (260 chars)
- * - 16 hex chars = 64 bits = acceptable collision risk for local cache
- * - Collision probability ~1 in 18 quintillion with 1000 entries
- *
- * Input strategy (aligned with npx):
- * - npx uses package spec strings (e.g., '@scope/pkg@1.0.0', 'prettier@3.0.0')
- * - Caller provides complete spec string with version for accurate cache keying
- * - For package installs: Use PURL-style spec with version
- *   Examples: 'npm:prettier@3.0.0', 'pypi:requests@2.31.0', 'gem:rails@7.0.0'
- *   Note: Socket uses shorthand format without 'pkg:' prefix
- *   (handled by @socketregistry/packageurl-js)
- * - For binary downloads: Use URL for uniqueness
- *
- * Reference: npm/cli v11.6.2 libnpmexec/lib/index.js#L233-L244
- * https://github.com/npm/cli/blob/v11.6.2/workspaces/libnpmexec/lib/index.js#L233-L244
- * Implementation: packages.map().sort().join('\n') → SHA-512 → slice(0,16)
- * npx hashes the package spec (name@version), not just name
- */
-function generateCacheKey(spec: string): string {
-  return createHash('sha512').update(spec).digest('hex').substring(0, 16)
 }
 
 /**

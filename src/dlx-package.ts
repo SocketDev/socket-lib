@@ -30,13 +30,13 @@
  * - dlxPackage() combines both for convenience
  */
 
-import { createHash } from 'node:crypto'
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import pacote from './external/pacote'
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
+import { generateCacheKey } from './dlx'
+import pacote from './external/pacote'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
@@ -83,14 +83,6 @@ export interface DlxPackageResult {
   installed: boolean
   /** The spawn promise for the running process. */
   spawnPromise: ReturnType<typeof spawn>
-}
-
-/**
- * Generate a cache key from package spec, similar to npm's _npx.
- * Uses first 16 hex characters of SHA256 hash.
- */
-function generatePackageCacheKey(packageSpec: string): string {
-  return createHash('sha256').update(packageSpec).digest('hex').slice(0, 16)
 }
 
 /**
@@ -142,7 +134,7 @@ async function ensurePackageInstalled(
   packageName: string,
   force: boolean,
 ): Promise<{ installed: boolean; packageDir: string }> {
-  const cacheKey = generatePackageCacheKey(packageSpec)
+  const cacheKey = generateCacheKey(packageSpec)
   const packageDir = normalizePath(path.join(getSocketDlxDir(), cacheKey))
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
