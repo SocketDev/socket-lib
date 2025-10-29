@@ -73,7 +73,8 @@ describe('packages/paths', () => {
 
     it('should handle empty string', () => {
       const result = resolvePackageJsonDirname('')
-      expect(result).toBe('')
+      // Empty string is normalized to '.' (current directory)
+      expect(result).toBe('.')
     })
 
     it('should normalize paths', () => {
@@ -161,6 +162,7 @@ describe('packages/paths', () => {
 
     it('should handle empty string', () => {
       const result = resolvePackageJsonPath('')
+      // path.join('', 'package.json') returns 'package.json'
       expect(result).toBe('package.json')
     })
 
