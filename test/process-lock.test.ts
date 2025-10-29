@@ -48,7 +48,7 @@ describe.sequential('process-lock', () => {
 
       // Second acquire should fail
       await expect(
-        processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 })
+        processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
       ).rejects.toThrow(/Lock already exists/)
 
       release1()
@@ -73,12 +73,12 @@ describe.sequential('process-lock', () => {
       fs.mkdirSync(testLockPath, { recursive: false })
 
       // Modify mtime to make it appear stale
-      const oldTime = Date.now() - 15000 // 15 seconds ago
+      const oldTime = Date.now() - 15_000 // 15 seconds ago
       fs.utimesSync(testLockPath, oldTime / 1000, oldTime / 1000)
 
       // Should detect and remove stale lock
       const release = await processLock.acquire(testLockPath, {
-        staleMs: 10000,
+        staleMs: 10_000,
       })
 
       expect(existsSync(testLockPath)).toBe(true)
@@ -134,7 +134,7 @@ describe.sequential('process-lock', () => {
         processLock.withLock(testLockPath, async () => {
           expect(existsSync(testLockPath)).toBe(true)
           throw error
-        })
+        }),
       ).rejects.toThrow('test error')
 
       // Lock should be released
@@ -160,7 +160,7 @@ describe.sequential('process-lock', () => {
         async () => {
           executions.push(3)
         },
-        { retries: 5, baseDelayMs: 50 }
+        { retries: 5, baseDelayMs: 50 },
       )
 
       await Promise.all([promise1, promise2])
@@ -181,7 +181,7 @@ describe.sequential('process-lock', () => {
       await expect(
         processLock.withLock(testLockPath, async () => {
           throw new Error('immediate error')
-        })
+        }),
       ).rejects.toThrow('immediate error')
 
       expect(existsSync(testLockPath)).toBe(false)
@@ -220,7 +220,7 @@ describe.sequential('process-lock', () => {
           retries: 3,
           baseDelayMs: 1000,
           maxDelayMs: 50, // Cap delays at 50ms
-        })
+        }),
       ).rejects.toThrow()
 
       const elapsed = Date.now() - startTime
@@ -234,7 +234,7 @@ describe.sequential('process-lock', () => {
   describe('stale detection', () => {
     it('should not consider fresh locks as stale', async () => {
       const release = await processLock.acquire(testLockPath, {
-        staleMs: 10000,
+        staleMs: 10_000,
       })
 
       expect(existsSync(testLockPath)).toBe(true)
@@ -244,8 +244,8 @@ describe.sequential('process-lock', () => {
         processLock.acquire(testLockPath, {
           retries: 1,
           baseDelayMs: 10,
-          staleMs: 10000,
-        })
+          staleMs: 10_000,
+        }),
       ).rejects.toThrow(/Lock already exists/)
 
       release()
@@ -258,12 +258,12 @@ describe.sequential('process-lock', () => {
       fs.mkdirSync(testLockPath, { recursive: false })
 
       // Set mtime to make it stale
-      const staleTime = Date.now() - 11000 // 11 seconds ago
+      const staleTime = Date.now() - 11_000 // 11 seconds ago
       fs.utimesSync(testLockPath, staleTime / 1000, staleTime / 1000)
 
       // Should successfully acquire by removing stale lock
       const release = await processLock.acquire(testLockPath, {
-        staleMs: 10000,
+        staleMs: 10_000,
       })
 
       expect(existsSync(testLockPath)).toBe(true)
@@ -310,7 +310,7 @@ describe.sequential('process-lock', () => {
 
       // Should work even with nested path
       await expect(
-        processLock.acquire(deepPath, { retries: 1 })
+        processLock.acquire(deepPath, { retries: 1 }),
       ).rejects.toThrow()
 
       // mkdir with recursive: false should fail for non-existent parent
