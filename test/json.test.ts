@@ -679,11 +679,12 @@ describe('json', () => {
       it('should handle array-like objects with non-number first element', () => {
         // Tests line 166-171: length > 0 but obj[0] is not a number
         expect(() => {
-          // @ts-expect-error - Testing Buffer-like object with invalid method signatures
           jsonParse({
             length: 1,
             0: 'not a number',
+            // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             copy: () => {},
+            // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             slice: () => {},
           })
         }).toThrow()
@@ -692,22 +693,28 @@ describe('json', () => {
       it('should handle objects without proper constructor', () => {
         // Tests line 174-177: constructor.isBuffer checks
         expect(() => {
-          // @ts-expect-error - Testing Buffer-like object with invalid method signatures
           jsonParse({
             length: 0,
+            // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             copy: () => {},
+            // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             slice: () => {},
+            // @ts-expect-error - Testing Buffer-like object with missing isBuffer method
             constructor: {}, // No isBuffer method
           })
         }).toThrow()
 
         expect(() => {
-          // @ts-expect-error - Testing Buffer-like object with invalid method signatures
           jsonParse({
             length: 0,
+            // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             copy: () => {},
+            // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             slice: () => {},
-            constructor: { isBuffer: 'not a function' },
+            constructor: {
+              // @ts-expect-error - Testing Buffer-like object with non-function isBuffer
+              isBuffer: 'not a function',
+            },
           })
         }).toThrow()
       })

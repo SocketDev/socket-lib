@@ -41,8 +41,11 @@ describe('stdio/stderr', () => {
     }
 
     // Create spies
+    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     writeSpy = vi.spyOn(stderr, 'write').mockImplementation(() => true)
+    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     cursorToSpy = vi.spyOn(stderr, 'cursorTo').mockImplementation(() => {})
+    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     clearLineSpy = vi.spyOn(stderr, 'clearLine').mockImplementation(() => {})
   })
 
@@ -204,6 +207,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       clearLine()
+      // @ts-expect-error - Vitest toHaveBeenCalledBefore matcher not recognized by TypeScript
       expect(cursorToSpy).toHaveBeenCalledBefore(clearLineSpy)
     })
   })

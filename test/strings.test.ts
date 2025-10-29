@@ -620,6 +620,7 @@ describe('strings', () => {
         // Tests line 546-547: typeof check and !text.length
         expect(stringWidth(null)).toBe(0)
         expect(stringWidth(undefined)).toBe(0)
+        // @ts-expect-error - Testing runtime behavior with invalid argument type
         expect(stringWidth(123)).toBe(0)
       })
 

@@ -15,6 +15,7 @@ describe('stdio/header', () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
+    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
   })
 
