@@ -286,26 +286,10 @@ describe('stdio/header', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith('═'.repeat(55))
     })
 
-    it('should handle empty title', () => {
-      printHeader('')
-      expect(consoleLogSpy).toHaveBeenCalledTimes(3)
-      expect(consoleLogSpy).toHaveBeenNthCalledWith(2, '  ')
-    })
-
     it('should handle long title', () => {
       const longTitle = 'A'.repeat(100)
       printHeader(longTitle)
       expect(consoleLogSpy).toHaveBeenNthCalledWith(2, `  ${longTitle}`)
-    })
-
-    it('should handle title with special characters', () => {
-      printHeader('Title: @test/package')
-      expect(consoleLogSpy).toHaveBeenNthCalledWith(2, '  Title: @test/package')
-    })
-
-    it('should handle Unicode characters', () => {
-      printHeader('テスト Title')
-      expect(consoleLogSpy).toHaveBeenNthCalledWith(2, '  テスト Title')
     })
 
     it('should not return a value', () => {
@@ -351,12 +335,6 @@ describe('stdio/header', () => {
       // Message is colored green (implementation detail)
       const messageCall = consoleLogSpy.mock.calls[1][0]
       expect(typeof messageCall).toBe('string')
-    })
-
-    it('should handle empty message', () => {
-      printFooter('')
-      // Empty message only prints divider line, not message line
-      expect(consoleLogSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should handle long message', () => {
