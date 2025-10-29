@@ -32,19 +32,20 @@ describe('stdio/stderr', () => {
     originalColumns = stderr.columns
     originalRows = stderr.rows
 
-    // Add TTY methods if they don't exist (for non-TTY environments)
-    if (!stderr.cursorTo) {
-      ;(stderr as any).cursorTo = () => {}
-    }
-    if (!stderr.clearLine) {
-      ;(stderr as any).clearLine = () => {}
-    }
-
-    // Create spies
+    // Create spies (add methods if they don't exist in non-TTY environments)
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     writeSpy = vi.spyOn(stderr, 'write').mockImplementation(() => true)
+
+    // Create stubs for TTY methods only if they don't exist, then spy on them
+    if (!stderr.cursorTo) {
+      ;(stderr as any).cursorTo = vi.fn()
+    }
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     cursorToSpy = vi.spyOn(stderr, 'cursorTo').mockImplementation(() => {})
+
+    if (!stderr.clearLine) {
+      ;(stderr as any).clearLine = vi.fn()
+    }
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     clearLineSpy = vi.spyOn(stderr, 'clearLine').mockImplementation(() => {})
   })
