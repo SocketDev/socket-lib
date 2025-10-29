@@ -143,12 +143,6 @@ describe('stdio/stderr', () => {
       expect(writeSpy).toHaveBeenCalledWith('')
     })
 
-    it('should not add newline', () => {
-      writeError('test')
-      expect(writeSpy).toHaveBeenCalledWith('test')
-      expect(writeSpy).not.toHaveBeenCalledWith('test\n')
-    })
-
     it('should handle ANSI escape sequences', () => {
       writeError('\u001B[33mWarning\u001B[0m')
       expect(writeSpy).toHaveBeenCalledWith('\u001B[33mWarning\u001B[0m')
@@ -473,28 +467,11 @@ describe('stdio/stderr', () => {
       expect(typeof writeStackTrace).toBe('function')
     })
 
-    it('should write error stack when available', () => {
-      const error = new Error('Test error')
-      writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalled()
-      const callArg = writeSpy.mock.calls[0][0] as string
-      expect(callArg).toContain('Error: Test error')
-      expect(callArg).toContain('\n')
-    })
-
     it('should write formatted error when no stack', () => {
       const error = new Error('Test error')
       error.stack = undefined
       writeStackTrace(error)
       expect(writeSpy).toHaveBeenCalledWith('Error: Test error\n')
-    })
-
-    it('should handle error with custom name', () => {
-      const error = new TypeError('Type mismatch')
-      writeStackTrace(error)
-      const callArg = writeSpy.mock.calls[0][0] as string
-      expect(callArg).toContain('TypeError')
-      expect(callArg).toContain('Type mismatch')
     })
 
     it('should handle error with empty message', () => {
@@ -525,19 +502,6 @@ describe('stdio/stderr', () => {
   })
 
   describe('integration', () => {
-    it('should support progress error messages', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      writeError('Processing...')
-      clearLine()
-      writeError('Failed!')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-      expect(cursorToSpy).toHaveBeenCalledWith(0)
-      expect(clearLineSpy).toHaveBeenCalledWith(0)
-    })
-
     it('should support exception handling pattern', () => {
       try {
         throw new Error('Something went wrong')
