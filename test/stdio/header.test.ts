@@ -339,7 +339,8 @@ describe('stdio/header', () => {
 
     it('should handle empty message', () => {
       printFooter('')
-      expect(consoleLogSpy).toHaveBeenCalledTimes(2)
+      // Empty message only prints divider line, not message line
+      expect(consoleLogSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should handle long message', () => {
