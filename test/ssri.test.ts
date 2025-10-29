@@ -16,7 +16,9 @@ describe('ssri', () => {
     it('should convert sha256 SSRI to hex', () => {
       const ssri = 'sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY='
       const hex = ssriToHex(ssri)
-      expect(hex).toBe('76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856')
+      expect(hex).toBe(
+        '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856',
+      )
     })
 
     it('should convert sha512 SSRI to hex', () => {
@@ -62,7 +64,8 @@ describe('ssri', () => {
 
   describe('hexToSsri', () => {
     it('should convert hex to sha256 SSRI', () => {
-      const hex = '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856'
+      const hex =
+        '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856'
       const ssri = hexToSsri(hex)
       expect(ssri).toBe('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')
     })
@@ -114,7 +117,9 @@ describe('ssri', () => {
 
   describe('isValidSsri', () => {
     it('should validate correct sha256 SSRI', () => {
-      expect(isValidSsri('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')).toBe(true)
+      expect(
+        isValidSsri('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY='),
+      ).toBe(true)
     })
 
     it('should validate correct sha512 SSRI', () => {
@@ -139,7 +144,11 @@ describe('ssri', () => {
     })
 
     it('should invalidate plain hex', () => {
-      expect(isValidSsri('76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856')).toBe(false)
+      expect(
+        isValidSsri(
+          '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856',
+        ),
+      ).toBe(false)
     })
 
     it('should invalidate missing algorithm', () => {
@@ -189,7 +198,9 @@ describe('ssri', () => {
     })
 
     it('should invalidate SSRI format', () => {
-      expect(isValidHex('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')).toBe(false)
+      expect(
+        isValidHex('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY='),
+      ).toBe(false)
     })
 
     it('should invalidate non-hex characters', () => {
@@ -215,9 +226,13 @@ describe('ssri', () => {
 
   describe('parseSsri', () => {
     it('should parse sha256 SSRI', () => {
-      const result = parseSsri('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')
+      const result = parseSsri(
+        'sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=',
+      )
       expect(result.algorithm).toBe('sha256')
-      expect(result.base64Hash).toBe('dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')
+      expect(result.base64Hash).toBe(
+        'dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=',
+      )
     })
 
     it('should parse sha512 SSRI', () => {
@@ -276,7 +291,8 @@ describe('ssri', () => {
 
   describe('roundtrip conversion', () => {
     it('should roundtrip hex to SSRI and back', () => {
-      const originalHex = '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856'
+      const originalHex =
+        '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856'
       const ssri = hexToSsri(originalHex)
       const hex = ssriToHex(ssri)
       expect(hex).toBe(originalHex)
@@ -340,7 +356,8 @@ describe('ssri', () => {
   describe('integration', () => {
     it('should work with real world hashes', () => {
       // Real world sha256 hash
-      const hex = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae'
+      const hex =
+        '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae'
       const ssri = hexToSsri(hex)
       expect(isValidSsri(ssri)).toBe(true)
       expect(ssriToHex(ssri)).toBe(hex)

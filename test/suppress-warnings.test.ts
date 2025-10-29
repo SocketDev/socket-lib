@@ -9,7 +9,7 @@ import {
   suppressWarningType,
   withSuppressedWarnings,
 } from '@socketsecurity/lib/suppress-warnings'
-import { afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('suppress-warnings', () => {
   let originalEmitWarning: typeof process.emitWarning

@@ -2,7 +2,11 @@
  * @fileoverview Unit tests for locale environment variable getters.
  */
 
-import { getLang, getLcAll, getLcMessages } from '@socketsecurity/lib/env/locale'
+import {
+  getLang,
+  getLcAll,
+  getLcMessages,
+} from '@socketsecurity/lib/env/locale'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 

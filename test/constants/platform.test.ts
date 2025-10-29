@@ -165,7 +165,7 @@ describe('constants/platform', () => {
       if (!DARWIN && !WIN32) {
         // Likely Linux or other Unix
         expect(['linux', 'freebsd', 'openbsd', 'sunos', 'aix']).toContain(
-          process.platform
+          process.platform,
         )
       }
     })

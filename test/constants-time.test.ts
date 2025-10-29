@@ -19,17 +19,17 @@ describe('constants/time', () => {
 
     it('MILLISECONDS_PER_MINUTE should be 60 seconds', () => {
       expect(MILLISECONDS_PER_MINUTE).toBe(60 * 1000)
-      expect(MILLISECONDS_PER_MINUTE).toBe(60000)
+      expect(MILLISECONDS_PER_MINUTE).toBe(60_000)
     })
 
     it('MILLISECONDS_PER_HOUR should be 60 minutes', () => {
       expect(MILLISECONDS_PER_HOUR).toBe(60 * 60 * 1000)
-      expect(MILLISECONDS_PER_HOUR).toBe(3600000)
+      expect(MILLISECONDS_PER_HOUR).toBe(3_600_000)
     })
 
     it('MILLISECONDS_PER_DAY should be 24 hours', () => {
       expect(MILLISECONDS_PER_DAY).toBe(24 * 60 * 60 * 1000)
-      expect(MILLISECONDS_PER_DAY).toBe(86400000)
+      expect(MILLISECONDS_PER_DAY).toBe(86_400_000)
     })
   })
 
@@ -51,14 +51,14 @@ describe('constants/time', () => {
     })
 
     it('should have correct second to day ratio', () => {
-      expect(MILLISECONDS_PER_DAY / MILLISECONDS_PER_SECOND).toBe(86400)
+      expect(MILLISECONDS_PER_DAY / MILLISECONDS_PER_SECOND).toBe(86_400)
     })
   })
 
   describe('DLX_BINARY_CACHE_TTL', () => {
     it('should be 7 days in milliseconds', () => {
       expect(DLX_BINARY_CACHE_TTL).toBe(7 * MILLISECONDS_PER_DAY)
-      expect(DLX_BINARY_CACHE_TTL).toBe(604800000)
+      expect(DLX_BINARY_CACHE_TTL).toBe(604_800_000)
     })
 
     it('should be exactly 7 days', () => {
@@ -70,7 +70,7 @@ describe('constants/time', () => {
     })
 
     it('should be 10080 minutes', () => {
-      expect(DLX_BINARY_CACHE_TTL / MILLISECONDS_PER_MINUTE).toBe(10080)
+      expect(DLX_BINARY_CACHE_TTL / MILLISECONDS_PER_MINUTE).toBe(10_080)
     })
   })
 
@@ -78,19 +78,19 @@ describe('constants/time', () => {
     it('should calculate timeouts correctly', () => {
       // 30 second timeout
       const timeout = 30 * MILLISECONDS_PER_SECOND
-      expect(timeout).toBe(30000)
+      expect(timeout).toBe(30_000)
     })
 
     it('should calculate delays correctly', () => {
       // 5 minute delay
       const delay = 5 * MILLISECONDS_PER_MINUTE
-      expect(delay).toBe(300000)
+      expect(delay).toBe(300_000)
     })
 
     it('should calculate cache durations correctly', () => {
       // 1 hour cache
       const cacheDuration = 1 * MILLISECONDS_PER_HOUR
-      expect(cacheDuration).toBe(3600000)
+      expect(cacheDuration).toBe(3_600_000)
     })
 
     it('should work with Date arithmetic', () => {
@@ -149,7 +149,7 @@ describe('constants/time', () => {
     it('should handle large time spans', () => {
       // 30 days
       const thirtyDays = 30 * MILLISECONDS_PER_DAY
-      expect(thirtyDays).toBe(2592000000)
+      expect(thirtyDays).toBe(2_592_000_000)
     })
 
     it('should work with multiplication', () => {
@@ -159,7 +159,7 @@ describe('constants/time', () => {
 
     it('should work with division', () => {
       const secondsInDay = MILLISECONDS_PER_DAY / MILLISECONDS_PER_SECOND
-      expect(secondsInDay).toBe(86400)
+      expect(secondsInDay).toBe(86_400)
     })
   })
 
@@ -167,7 +167,7 @@ describe('constants/time', () => {
     it('should calculate rate limiting windows', () => {
       // 100 requests per hour
       const windowSize = MILLISECONDS_PER_HOUR
-      expect(windowSize / 100).toBe(36000) // 36 seconds between requests
+      expect(windowSize / 100).toBe(36_000) // 36 seconds between requests
     })
 
     it('should calculate retry delays', () => {
@@ -179,7 +179,7 @@ describe('constants/time', () => {
     it('should calculate session timeouts', () => {
       // 30 minute session
       const sessionTimeout = 30 * MILLISECONDS_PER_MINUTE
-      expect(sessionTimeout).toBe(1800000)
+      expect(sessionTimeout).toBe(1_800_000)
     })
 
     it('should calculate polling intervals', () => {

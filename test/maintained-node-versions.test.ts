@@ -25,7 +25,7 @@ describe('maintained-node-versions', () => {
     })
 
     it('should contain only strings', () => {
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         expect(typeof version).toBe('string')
       })
     })
@@ -64,7 +64,7 @@ describe('maintained-node-versions', () => {
 
     it('should have valid semver format for all versions', () => {
       const semverPattern = /^\d+\.\d+\.\d+$/
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         expect(version).toMatch(semverPattern)
       })
     })
@@ -72,14 +72,14 @@ describe('maintained-node-versions', () => {
     it('should have versions in ascending order', () => {
       const versions = [...maintainedNodeVersions]
       const sortedVersions = versions
-        .map((v) => v.split('.').map(Number))
+        .map(v => v.split('.').map(Number))
         .sort((a, b) => {
           for (let i = 0; i < 3; i++) {
             if (a[i] !== b[i]) return a[i] - b[i]
           }
           return 0
         })
-        .map((v) => v.join('.'))
+        .map(v => v.join('.'))
 
       expect(versions).toEqual(sortedVersions)
     })
@@ -87,9 +87,7 @@ describe('maintained-node-versions', () => {
 
   describe('version properties match array', () => {
     it('should have current in array', () => {
-      expect(maintainedNodeVersions).toContain(
-        maintainedNodeVersions.current,
-      )
+      expect(maintainedNodeVersions).toContain(maintainedNodeVersions.current)
     })
 
     it('should have last in array', () => {
@@ -101,9 +99,7 @@ describe('maintained-node-versions', () => {
     })
 
     it('should have previous in array', () => {
-      expect(maintainedNodeVersions).toContain(
-        maintainedNodeVersions.previous,
-      )
+      expect(maintainedNodeVersions).toContain(maintainedNodeVersions.previous)
     })
   })
 
@@ -139,12 +135,8 @@ describe('maintained-node-versions', () => {
 
   describe('version relationships', () => {
     it('should have current >= previous', () => {
-      const current = maintainedNodeVersions.current
-        .split('.')
-        .map(Number)
-      const previous = maintainedNodeVersions.previous
-        .split('.')
-        .map(Number)
+      const current = maintainedNodeVersions.current.split('.').map(Number)
+      const previous = maintainedNodeVersions.previous.split('.').map(Number)
 
       const currentMajor = current[0]
       const previousMajor = previous[0]
@@ -153,9 +145,7 @@ describe('maintained-node-versions', () => {
     })
 
     it('should have previous >= last', () => {
-      const previous = maintainedNodeVersions.previous
-        .split('.')
-        .map(Number)
+      const previous = maintainedNodeVersions.previous.split('.').map(Number)
       const last = maintainedNodeVersions.last.split('.').map(Number)
 
       const previousMajor = previous[0]
@@ -166,9 +156,7 @@ describe('maintained-node-versions', () => {
 
     it('should have next >= current', () => {
       const next = maintainedNodeVersions.next.split('.').map(Number)
-      const current = maintainedNodeVersions.current
-        .split('.')
-        .map(Number)
+      const current = maintainedNodeVersions.current.split('.').map(Number)
 
       const nextMajor = next[0]
       const currentMajor = current[0]
@@ -179,7 +167,7 @@ describe('maintained-node-versions', () => {
 
   describe('realistic version numbers', () => {
     it('should have major versions in reasonable range', () => {
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         const major = Number.parseInt(version.split('.')[0], 10)
         expect(major).toBeGreaterThanOrEqual(10)
         expect(major).toBeLessThanOrEqual(100)
@@ -187,7 +175,7 @@ describe('maintained-node-versions', () => {
     })
 
     it('should have minor versions in valid range', () => {
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         const minor = Number.parseInt(version.split('.')[1], 10)
         expect(minor).toBeGreaterThanOrEqual(0)
         expect(minor).toBeLessThanOrEqual(99)
@@ -195,7 +183,7 @@ describe('maintained-node-versions', () => {
     })
 
     it('should have patch versions in valid range', () => {
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         const patch = Number.parseInt(version.split('.')[2], 10)
         expect(patch).toBeGreaterThanOrEqual(0)
         expect(patch).toBeLessThanOrEqual(99)
@@ -206,28 +194,26 @@ describe('maintained-node-versions', () => {
   describe('array operations', () => {
     it('should support forEach iteration', () => {
       const versions: string[] = []
-      maintainedNodeVersions.forEach((v) => versions.push(v))
+      maintainedNodeVersions.forEach(v => versions.push(v))
       expect(versions).toHaveLength(4)
     })
 
     it('should support map operation', () => {
-      const majors = maintainedNodeVersions.map((v) =>
+      const majors = maintainedNodeVersions.map(v =>
         Number.parseInt(v.split('.')[0], 10),
       )
       expect(majors).toHaveLength(4)
-      majors.forEach((m) => expect(typeof m).toBe('number'))
+      majors.forEach(m => expect(typeof m).toBe('number'))
     })
 
     it('should support filter operation', () => {
-      const filtered = maintainedNodeVersions.filter((v) =>
-        v.startsWith('2'),
-      )
+      const filtered = maintainedNodeVersions.filter(v => v.startsWith('2'))
       expect(Array.isArray(filtered)).toBe(true)
     })
 
     it('should support find operation', () => {
       const found = maintainedNodeVersions.find(
-        (v) => v === maintainedNodeVersions.current,
+        v => v === maintainedNodeVersions.current,
       )
       expect(found).toBe(maintainedNodeVersions.current)
     })
@@ -263,7 +249,7 @@ describe('maintained-node-versions', () => {
 
   describe('edge cases', () => {
     it('should handle string operations on versions', () => {
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         expect(version.length).toBeGreaterThan(0)
         expect(version.includes('.')).toBe(true)
         expect(version.split('.').length).toBe(3)
@@ -276,7 +262,7 @@ describe('maintained-node-versions', () => {
     })
 
     it('should not have empty strings', () => {
-      maintainedNodeVersions.forEach((version) => {
+      maintainedNodeVersions.forEach(version => {
         expect(version.length).toBeGreaterThan(0)
         expect(version.trim()).toBe(version)
       })

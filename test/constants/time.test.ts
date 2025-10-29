@@ -98,12 +98,12 @@ describe('constants/time', () => {
     it('should support Date calculations', () => {
       const now = Date.now()
       const oneMinuteLater = now + MILLISECONDS_PER_MINUTE
-      expect(oneMinuteLater - now).toBe(60000)
+      expect(oneMinuteLater - now).toBe(60_000)
     })
 
     it('should support duration formatting', () => {
       const duration = 2 * MILLISECONDS_PER_HOUR + 30 * MILLISECONDS_PER_MINUTE
-      expect(duration).toBe(9000000) // 2.5 hours in ms
+      expect(duration).toBe(9_000_000) // 2.5 hours in ms
     })
 
     it('should support cache expiry checks', () => {

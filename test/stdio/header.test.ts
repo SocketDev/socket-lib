@@ -106,10 +106,25 @@ describe('stdio/header', () => {
     })
 
     it('should handle all color options', () => {
-      const colors = ['cyan', 'green', 'yellow', 'blue', 'magenta', 'red', 'gray']
+      const colors = [
+        'cyan',
+        'green',
+        'yellow',
+        'blue',
+        'magenta',
+        'red',
+        'gray',
+      ]
       for (const color of colors) {
         const result = createHeader('Title', {
-          color: color as 'cyan' | 'green' | 'yellow' | 'blue' | 'magenta' | 'red' | 'gray',
+          color: color as
+            | 'cyan'
+            | 'green'
+            | 'yellow'
+            | 'blue'
+            | 'magenta'
+            | 'red'
+            | 'gray',
         })
         expect(result).toContain('Title')
       }

@@ -16,7 +16,7 @@ describe('stdio/footer', () => {
   beforeEach(() => {
     originalDateNow = Date.now
     // Mock Date.now() to return a fixed timestamp
-    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1000000)
+    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_000_000)
   })
 
   beforeEach(() => {
@@ -94,8 +94,8 @@ describe('stdio/footer', () => {
     it('should handle message with timestamp', () => {
       const result = createFooter('Complete', { showTimestamp: true })
       const lines = result.split('\n')
-      expect(lines.some((line) => line.includes('Complete'))).toBe(true)
-      expect(lines.some((line) => line.includes('Completed at:'))).toBe(true)
+      expect(lines.some(line => line.includes('Complete'))).toBe(true)
+      expect(lines.some(line => line.includes('Completed at:'))).toBe(true)
     })
 
     it('should handle empty message', () => {
@@ -125,7 +125,7 @@ describe('stdio/footer', () => {
     })
 
     it('should format duration correctly', () => {
-      Date.now = vi.fn(() => 10500)
+      Date.now = vi.fn(() => 10_500)
       const result = createFooter('Done', {
         showDuration: true,
         startTime: 1000,
@@ -155,10 +155,25 @@ describe('stdio/footer', () => {
     })
 
     it('should handle all color options', () => {
-      const colors = ['cyan', 'green', 'yellow', 'blue', 'magenta', 'red', 'gray']
+      const colors = [
+        'cyan',
+        'green',
+        'yellow',
+        'blue',
+        'magenta',
+        'red',
+        'gray',
+      ]
       for (const color of colors) {
         const result = createFooter('Message', {
-          color: color as 'cyan' | 'green' | 'yellow' | 'blue' | 'magenta' | 'red' | 'gray',
+          color: color as
+            | 'cyan'
+            | 'green'
+            | 'yellow'
+            | 'blue'
+            | 'magenta'
+            | 'red'
+            | 'gray',
         })
         expect(result).toContain('Message')
       }
@@ -331,7 +346,7 @@ describe('stdio/footer', () => {
     })
 
     it('should show duration when provided', () => {
-      Date.now = vi.fn(() => 10000)
+      Date.now = vi.fn(() => 10_000)
       const result = createSummaryFooter({
         total: 100,
         duration: 5000,
@@ -364,8 +379,8 @@ describe('stdio/footer', () => {
 
     it('should handle large numbers', () => {
       const result = createSummaryFooter({
-        total: 999999,
-        success: 999998,
+        total: 999_999,
+        success: 999_998,
         failed: 1,
       })
       expect(result).toContain('Total: 999999')
@@ -387,7 +402,7 @@ describe('stdio/footer', () => {
 
   describe('integration', () => {
     it('should create complete report footer', () => {
-      Date.now = vi.fn(() => 10000)
+      Date.now = vi.fn(() => 10_000)
       const footer = createFooter('Analysis complete', {
         showTimestamp: true,
         showDuration: true,
@@ -430,10 +445,10 @@ describe('stdio/footer', () => {
     })
 
     it('should handle build report footer', () => {
-      Date.now = vi.fn(() => 15000)
+      Date.now = vi.fn(() => 15_000)
       const footer = createFooter('Build successful', {
         showDuration: true,
-        startTime: 10000,
+        startTime: 10_000,
         color: 'green',
         width: 70,
       })
@@ -480,7 +495,7 @@ describe('stdio/footer', () => {
       Date.now = vi.fn(() => 1000)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: 10000,
+        startTime: 10_000,
       })
       // Negative duration
       expect(result).toContain('Duration:')
@@ -532,14 +547,14 @@ describe('stdio/footer', () => {
     })
 
     it('should create build summary', () => {
-      Date.now = vi.fn(() => 45000)
+      Date.now = vi.fn(() => 45_000)
       const summary = createSummaryFooter(
         {
           total: 350,
           success: 348,
           failed: 2,
           warnings: 25,
-          duration: 15000,
+          duration: 15_000,
         },
         { color: 'blue' },
       )
@@ -576,11 +591,11 @@ describe('stdio/footer', () => {
     })
 
     it('should create analysis report footer', () => {
-      Date.now = vi.fn(() => 30000)
+      Date.now = vi.fn(() => 30_000)
       const footer = createFooter('Security analysis complete', {
         showTimestamp: true,
         showDuration: true,
-        startTime: 15000,
+        startTime: 15_000,
         width: 80,
       })
       expect(footer).toContain('Security analysis complete')

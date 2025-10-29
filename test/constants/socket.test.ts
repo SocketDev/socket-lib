@@ -164,7 +164,9 @@ describe('constants/socket', () => {
     it('should all be lowercase', () => {
       expect(SOCKET_CLI_APP_NAME).toBe(SOCKET_CLI_APP_NAME.toLowerCase())
       expect(SOCKET_DLX_APP_NAME).toBe(SOCKET_DLX_APP_NAME.toLowerCase())
-      expect(SOCKET_FIREWALL_APP_NAME).toBe(SOCKET_FIREWALL_APP_NAME.toLowerCase())
+      expect(SOCKET_FIREWALL_APP_NAME).toBe(
+        SOCKET_FIREWALL_APP_NAME.toLowerCase(),
+      )
       expect(SOCKET_REGISTRY_APP_NAME).toBe(
         SOCKET_REGISTRY_APP_NAME.toLowerCase(),
       )

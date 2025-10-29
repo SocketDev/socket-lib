@@ -171,7 +171,8 @@ describe('constants/testing', () => {
     })
 
     it('should support conditional test execution', () => {
-      const shouldRunCITests = process.env[CI] === '1' || process.env[CI] === 'true'
+      const shouldRunCITests =
+        process.env[CI] === '1' || process.env[CI] === 'true'
       expect(typeof shouldRunCITests).toBe('boolean')
     })
   })

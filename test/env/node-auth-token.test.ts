@@ -31,7 +31,9 @@ describe('env/node-auth-token', () => {
 
     it('should handle GitHub Packages token', () => {
       setEnv('NODE_AUTH_TOKEN', 'ghp_1234567890abcdefGHIJKLMNOPQRSTUVWXYZ')
-      expect(getNodeAuthToken()).toBe('ghp_1234567890abcdefGHIJKLMNOPQRSTUVWXYZ')
+      expect(getNodeAuthToken()).toBe(
+        'ghp_1234567890abcdefGHIJKLMNOPQRSTUVWXYZ',
+      )
     })
 
     it('should handle GitLab token', () => {
@@ -113,10 +115,10 @@ describe('env/node-auth-token', () => {
     it('should handle JWT-style token', () => {
       setEnv(
         'NODE_AUTH_TOKEN',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123'
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123',
       )
       expect(getNodeAuthToken()).toBe(
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123'
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123',
       )
     })
 
@@ -133,7 +135,7 @@ describe('env/node-auth-token', () => {
     it('should handle Azure DevOps PAT', () => {
       setEnv('NODE_AUTH_TOKEN', 'pat-1234567890abcdefghijklmnopqrstuvwxyz')
       expect(getNodeAuthToken()).toBe(
-        'pat-1234567890abcdefghijklmnopqrstuvwxyz'
+        'pat-1234567890abcdefghijklmnopqrstuvwxyz',
       )
     })
 

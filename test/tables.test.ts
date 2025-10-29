@@ -50,7 +50,9 @@ describe('tables', () => {
 
     it('should handle alignment left', () => {
       const data = [{ value: 'test' }]
-      const columns = [{ key: 'value', header: 'Value', align: 'left' as const }]
+      const columns = [
+        { key: 'value', header: 'Value', align: 'left' as const },
+      ]
 
       const result = formatTable(data, columns)
       expect(result).toContain('test')
@@ -58,7 +60,9 @@ describe('tables', () => {
 
     it('should handle alignment right', () => {
       const data = [{ value: '42' }]
-      const columns = [{ key: 'value', header: 'Number', align: 'right' as const }]
+      const columns = [
+        { key: 'value', header: 'Number', align: 'right' as const },
+      ]
 
       const result = formatTable(data, columns)
       expect(result).toContain('42')
@@ -127,7 +131,9 @@ describe('tables', () => {
     })
 
     it('should handle wide content', () => {
-      const data = [{ text: 'A very long piece of text that should be handled' }]
+      const data = [
+        { text: 'A very long piece of text that should be handled' },
+      ]
       const columns = [{ key: 'text', header: 'Text' }]
 
       const result = formatTable(data, columns)
@@ -227,7 +233,9 @@ describe('tables', () => {
 
     it('should handle alignment left', () => {
       const data = [{ value: 'test' }]
-      const columns = [{ key: 'value', header: 'Value', align: 'left' as const }]
+      const columns = [
+        { key: 'value', header: 'Value', align: 'left' as const },
+      ]
 
       const result = formatSimpleTable(data, columns)
       expect(result).toContain('test')
@@ -235,7 +243,9 @@ describe('tables', () => {
 
     it('should handle alignment right', () => {
       const data = [{ value: '42' }]
-      const columns = [{ key: 'value', header: 'Number', align: 'right' as const }]
+      const columns = [
+        { key: 'value', header: 'Number', align: 'right' as const },
+      ]
 
       const result = formatSimpleTable(data, columns)
       expect(result).toContain('42')
@@ -375,7 +385,10 @@ describe('tables', () => {
     it('should handle very long headers', () => {
       const data = [{ x: '1' }]
       const columns = [
-        { key: 'x', header: 'This is a very long header name that extends far' },
+        {
+          key: 'x',
+          header: 'This is a very long header name that extends far',
+        },
       ]
 
       const result = formatTable(data, columns)

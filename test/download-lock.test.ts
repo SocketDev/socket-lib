@@ -86,10 +86,14 @@ describe('downloadWithLock', () => {
       await writeFile(destPath, 'content')
 
       // Should acquire lock immediately since existing lock is stale
-      const result = await downloadWithLock('https://example.com/test.txt', destPath, {
-        locksDir: lockDir,
-        staleTimeout: 10_000, // 10 second stale timeout
-      })
+      const result = await downloadWithLock(
+        'https://example.com/test.txt',
+        destPath,
+        {
+          locksDir: lockDir,
+          staleTimeout: 10_000, // 10 second stale timeout
+        },
+      )
 
       expect(result.path).toBe(destPath)
     })
@@ -115,9 +119,13 @@ describe('downloadWithLock', () => {
       await writeFile(destPath, 'content')
 
       // Should acquire lock immediately since the process doesn't exist
-      const result = await downloadWithLock('https://example.com/test.txt', destPath, {
-        locksDir: lockDir,
-      })
+      const result = await downloadWithLock(
+        'https://example.com/test.txt',
+        destPath,
+        {
+          locksDir: lockDir,
+        },
+      )
 
       expect(result.path).toBe(destPath)
     })
@@ -153,9 +161,13 @@ describe('downloadWithLock', () => {
       // Pre-create file
       await writeFile(destPath, 'content')
 
-      const result = await downloadWithLock('https://example.com/test.txt', destPath, {
-        locksDir: lockDir,
-      })
+      const result = await downloadWithLock(
+        'https://example.com/test.txt',
+        destPath,
+        {
+          locksDir: lockDir,
+        },
+      )
 
       expect(result.path).toBe(destPath)
 
@@ -172,9 +184,13 @@ describe('downloadWithLock', () => {
       // Pre-create file
       await writeFile(destPath, 'content')
 
-      const result = await downloadWithLock('https://example.com/test.txt', destPath, {
-        locksDir: customLockDir,
-      })
+      const result = await downloadWithLock(
+        'https://example.com/test.txt',
+        destPath,
+        {
+          locksDir: customLockDir,
+        },
+      )
 
       // Download should succeed
       expect(result.path).toBe(destPath)
@@ -205,10 +221,14 @@ describe('downloadWithLock', () => {
       await writeFile(destPath, 'content')
 
       // With staleTimeout of 1000ms, the lock should be considered stale
-      const result = await downloadWithLock('https://example.com/test.txt', destPath, {
-        locksDir: lockDir,
-        staleTimeout: 1000,
-      })
+      const result = await downloadWithLock(
+        'https://example.com/test.txt',
+        destPath,
+        {
+          locksDir: lockDir,
+          staleTimeout: 1000,
+        },
+      )
 
       expect(result.path).toBe(destPath)
     })

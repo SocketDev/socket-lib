@@ -57,11 +57,7 @@ describe('streams', () => {
 
     it('should accept options object', async () => {
       const input = [1, 2, 3]
-      const result = parallelMap(
-        input,
-        async x => x * 2,
-        { concurrency: 2 },
-      )
+      const result = parallelMap(input, async x => x * 2, { concurrency: 2 })
       const output = await collect(result)
       expect(output).toEqual([2, 4, 6])
     })
@@ -75,7 +71,10 @@ describe('streams', () => {
 
     it('should handle objects', async () => {
       const input = [{ id: 1 }, { id: 2 }]
-      const result = parallelMap(input, async x => ({ ...x, doubled: x.id * 2 }))
+      const result = parallelMap(input, async x => ({
+        ...x,
+        doubled: x.id * 2,
+      }))
       const output = await collect(result)
       expect(output).toEqual([
         { id: 1, doubled: 2 },

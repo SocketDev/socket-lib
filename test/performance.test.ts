@@ -107,7 +107,7 @@ describe('performance', () => {
         return sum
       })
 
-      expect(result).toBe(499500)
+      expect(result).toBe(499_500)
       expect(duration).toBeGreaterThanOrEqual(0)
 
       const metrics = getPerformanceMetrics()

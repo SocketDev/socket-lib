@@ -72,7 +72,7 @@ describe('socket env', () => {
   describe('getSocketApiTimeout', () => {
     it('should return timeout number when set', () => {
       setEnv('SOCKET_API_TIMEOUT', '30000')
-      expect(getSocketApiTimeout()).toBe(30000)
+      expect(getSocketApiTimeout()).toBe(30_000)
     })
 
     it('should return 0 when not set', () => {

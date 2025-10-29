@@ -31,7 +31,9 @@ describe('env/path', () => {
 
     it('should handle Windows PATH with semicolon separator', () => {
       setEnv('PATH', 'C:\\Windows\\System32;C:\\Windows;C:\\Program Files')
-      expect(getPath()).toBe('C:\\Windows\\System32;C:\\Windows;C:\\Program Files')
+      expect(getPath()).toBe(
+        'C:\\Windows\\System32;C:\\Windows;C:\\Program Files',
+      )
     })
 
     it('should handle PATH with single entry', () => {
@@ -70,7 +72,9 @@ describe('env/path', () => {
     })
 
     it('should handle PATH with many entries', () => {
-      const longPath = Array.from({ length: 20 }, (_, i) => `/path${i}`).join(':')
+      const longPath = Array.from({ length: 20 }, (_, i) => `/path${i}`).join(
+        ':',
+      )
       setEnv('PATH', longPath)
       expect(getPath()).toBe(longPath)
     })
@@ -142,13 +146,23 @@ describe('env/path', () => {
     })
 
     it('should handle PATH with flatpak', () => {
-      setEnv('PATH', '/usr/local/bin:/usr/bin:/bin:/var/lib/flatpak/exports/bin')
-      expect(getPath()).toBe('/usr/local/bin:/usr/bin:/bin:/var/lib/flatpak/exports/bin')
+      setEnv(
+        'PATH',
+        '/usr/local/bin:/usr/bin:/bin:/var/lib/flatpak/exports/bin',
+      )
+      expect(getPath()).toBe(
+        '/usr/local/bin:/usr/bin:/bin:/var/lib/flatpak/exports/bin',
+      )
     })
 
     it('should handle PATH with Android SDK', () => {
-      setEnv('PATH', '/usr/local/bin:/usr/bin:/bin:~/Android/Sdk/platform-tools')
-      expect(getPath()).toBe('/usr/local/bin:/usr/bin:/bin:~/Android/Sdk/platform-tools')
+      setEnv(
+        'PATH',
+        '/usr/local/bin:/usr/bin:/bin:~/Android/Sdk/platform-tools',
+      )
+      expect(getPath()).toBe(
+        '/usr/local/bin:/usr/bin:/bin:~/Android/Sdk/platform-tools',
+      )
     })
 
     it('should handle WSL PATH', () => {

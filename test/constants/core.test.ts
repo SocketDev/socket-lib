@@ -26,7 +26,7 @@ describe('constants/core', () => {
 
     it('should have correct description for kInternalsSymbol', () => {
       expect(kInternalsSymbol.toString()).toBe(
-        'Symbol(@socketregistry.constants.internals)'
+        'Symbol(@socketregistry.constants.internals)',
       )
     })
 

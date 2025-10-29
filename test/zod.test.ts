@@ -55,11 +55,10 @@ describe('zod', () => {
     })
 
     it('should support optional fields', () => {
-      const schema = z
-        .object({
-          name: z.string(),
-          age: z.number().optional(),
-        })
+      const schema = z.object({
+        name: z.string(),
+        age: z.number().optional(),
+      })
       expect(schema.parse({ name: 'test' })).toEqual({ name: 'test' })
       expect(schema.parse({ name: 'test', age: 25 })).toEqual({
         name: 'test',
@@ -95,7 +94,7 @@ describe('zod', () => {
     })
 
     it('should support refinements', () => {
-      const schema = z.string().refine((val) => val.length > 3, {
+      const schema = z.string().refine(val => val.length > 3, {
         message: 'String must be longer than 3 characters',
       })
       expect(schema.parse('test')).toBe('test')
@@ -103,7 +102,7 @@ describe('zod', () => {
     })
 
     it('should support transformations', () => {
-      const schema = z.string().transform((val) => val.toUpperCase())
+      const schema = z.string().transform(val => val.toUpperCase())
       expect(schema.parse('test')).toBe('TEST')
     })
 

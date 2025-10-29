@@ -2,11 +2,7 @@
  * @fileoverview Unit tests for temporary directory environment variable getters.
  */
 
-import {
-  getTemp,
-  getTmp,
-  getTmpdir,
-} from '@socketsecurity/lib/env/temp-dir'
+import { getTemp, getTmp, getTmpdir } from '@socketsecurity/lib/env/temp-dir'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 

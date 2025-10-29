@@ -170,7 +170,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should clear line in TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearLine()
       expect(cursorToSpy).toHaveBeenCalledWith(0)
       expect(clearLineSpy).toHaveBeenCalledWith(0)
@@ -187,13 +190,19 @@ describe('stdio/stderr', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = clearLine()
       expect(result).toBeUndefined()
     })
 
     it('should move cursor to start of line before clearing', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearLine()
       expect(cursorToSpy).toHaveBeenCalledBefore(clearLineSpy)
     })
@@ -205,19 +214,28 @@ describe('stdio/stderr', () => {
     })
 
     it('should move cursor to x position in TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(10)
       expect(cursorToSpy).toHaveBeenCalledWith(10, undefined)
     })
 
     it('should move cursor to x,y position in TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(10, 5)
       expect(cursorToSpy).toHaveBeenCalledWith(10, 5)
     })
 
     it('should move cursor to 0,0', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(0, 0)
       expect(cursorToSpy).toHaveBeenCalledWith(0, 0)
     })
@@ -232,19 +250,28 @@ describe('stdio/stderr', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = cursorTo(0)
       expect(result).toBeUndefined()
     })
 
     it('should handle large coordinates', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(1000, 500)
       expect(cursorToSpy).toHaveBeenCalledWith(1000, 500)
     })
 
     it('should handle negative coordinates', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(-1, -1)
       expect(cursorToSpy).toHaveBeenCalledWith(-1, -1)
     })
@@ -256,7 +283,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should return true when stderr is TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       expect(isTTY()).toBe(true)
     })
 
@@ -287,7 +317,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should return actual columns when set', () => {
-      Object.defineProperty(stderr, 'columns', { value: 120, configurable: true })
+      Object.defineProperty(stderr, 'columns', {
+        value: 120,
+        configurable: true,
+      })
       expect(getColumns()).toBe(120)
     })
 
@@ -305,12 +338,18 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle small terminal width', () => {
-      Object.defineProperty(stderr, 'columns', { value: 40, configurable: true })
+      Object.defineProperty(stderr, 'columns', {
+        value: 40,
+        configurable: true,
+      })
       expect(getColumns()).toBe(40)
     })
 
     it('should handle large terminal width', () => {
-      Object.defineProperty(stderr, 'columns', { value: 300, configurable: true })
+      Object.defineProperty(stderr, 'columns', {
+        value: 300,
+        configurable: true,
+      })
       expect(getColumns()).toBe(300)
     })
 
@@ -384,7 +423,9 @@ describe('stdio/stderr', () => {
 
     it('should handle special characters in message', () => {
       writeWarning('Path contains \\n escape')
-      expect(writeSpy).toHaveBeenCalledWith('Warning: Path contains \\n escape\n')
+      expect(writeSpy).toHaveBeenCalledWith(
+        'Warning: Path contains \\n escape\n',
+      )
     })
 
     it('should handle Unicode in message', () => {
@@ -510,12 +551,18 @@ describe('stdio/stderr', () => {
       writeWarning('Deprecation notice')
       writeErrorFormatted('Operation failed')
       expect(writeSpy).toHaveBeenCalledTimes(2)
-      expect(writeSpy).toHaveBeenNthCalledWith(1, 'Warning: Deprecation notice\n')
+      expect(writeSpy).toHaveBeenNthCalledWith(
+        1,
+        'Warning: Deprecation notice\n',
+      )
       expect(writeSpy).toHaveBeenNthCalledWith(2, 'Error: Operation failed\n')
     })
 
     it('should support progress error messages', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       writeError('Processing...')
       clearLine()
       writeError('Failed!')
@@ -543,7 +590,10 @@ describe('stdio/stderr', () => {
 
     it('should handle graceful degradation from TTY to non-TTY', () => {
       // Start with TTY
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearLine()
       expect(clearLineSpy).toHaveBeenCalled()
 
@@ -571,7 +621,7 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle very long error messages', () => {
-      const longMessage = 'x'.repeat(10000)
+      const longMessage = 'x'.repeat(10_000)
       writeErrorLine(longMessage)
       expect(writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
     })
@@ -583,7 +633,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle rapid cursor movements', () => {
-      Object.defineProperty(stderr, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stderr, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       for (let i = 0; i < 100; i++) {
         cursorTo(i, i)
       }
@@ -591,10 +644,16 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle terminal dimension changes', () => {
-      Object.defineProperty(stderr, 'columns', { value: 80, configurable: true })
+      Object.defineProperty(stderr, 'columns', {
+        value: 80,
+        configurable: true,
+      })
       expect(getColumns()).toBe(80)
 
-      Object.defineProperty(stderr, 'columns', { value: 120, configurable: true })
+      Object.defineProperty(stderr, 'columns', {
+        value: 120,
+        configurable: true,
+      })
       expect(getColumns()).toBe(120)
     })
 
@@ -660,7 +719,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle terminal size queries', () => {
-      Object.defineProperty(stderr, 'columns', { value: 120, configurable: true })
+      Object.defineProperty(stderr, 'columns', {
+        value: 120,
+        configurable: true,
+      })
       Object.defineProperty(stderr, 'rows', { value: 40, configurable: true })
       const width = getColumns()
       const height = getRows()
