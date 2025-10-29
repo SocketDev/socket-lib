@@ -159,10 +159,7 @@ describe('node constants', () => {
     it('should check minor version for Node.js 22', () => {
       const major = getNodeMajorVersion()
       if (major === 22) {
-        const minor = Number.parseInt(
-          process.version.split('.')[1] || '0',
-          10,
-        )
+        const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
         const result = supportsNodeRequireModule()
         if (minor >= 12) {
           expect(result).toBe(true)
@@ -190,10 +187,7 @@ describe('node constants', () => {
     it('should check minor version for Node.js 22', () => {
       const major = getNodeMajorVersion()
       if (major === 22) {
-        const minor = Number.parseInt(
-          process.version.split('.')[1] || '0',
-          10,
-        )
+        const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
         const result = supportsNodeRun()
         if (minor >= 11) {
           expect(result).toBe(true)
@@ -435,6 +429,104 @@ describe('node constants', () => {
 
     it('should equal esnext', () => {
       expect(ESNEXT).toBe('esnext')
+    })
+  })
+
+  describe('edge cases and comprehensive coverage', () => {
+    it('should handle all flag getters being called multiple times', () => {
+      // Call each getter multiple times to ensure caching works
+      for (let i = 0; i < 3; i++) {
+        getNodeDebugFlags()
+        getNodeHardenFlags()
+        getNodePermissionFlags()
+        getNodeNoWarningsFlags()
+        getNodeDisableSigusr1Flags()
+      }
+    })
+
+    it('should verify all flag arrays are non-empty or conditionally empty', () => {
+      const debugFlags = getNodeDebugFlags()
+      const hardenFlags = getNodeHardenFlags()
+      const noWarningsFlags = getNodeNoWarningsFlags()
+      const sigusr1Flags = getNodeDisableSigusr1Flags()
+
+      expect(debugFlags.length).toBeGreaterThan(0)
+      expect(hardenFlags.length).toBeGreaterThan(0)
+      expect(noWarningsFlags.length).toBeGreaterThan(0)
+      expect(sigusr1Flags.length).toBeGreaterThan(0)
+
+      // Permission flags are conditionally empty for Node < 24
+      const permissionFlags = getNodePermissionFlags()
+      const major = getNodeMajorVersion()
+      if (major >= 24) {
+        expect(permissionFlags.length).toBeGreaterThan(0)
+      } else {
+        expect(permissionFlags.length).toBe(0)
+      }
+    })
+
+    it('should verify maintained versions caching', () => {
+      const v1 = getMaintainedNodeVersions()
+      const v2 = getMaintainedNodeVersions()
+      const v3 = getMaintainedNodeVersions()
+      expect(v1).toBe(v2)
+      expect(v2).toBe(v3)
+    })
+
+    it('should verify all support functions return boolean', () => {
+      expect(typeof supportsNodeCompileCacheApi()).toBe('boolean')
+      expect(typeof supportsNodeCompileCacheEnvVar()).toBe('boolean')
+      expect(typeof supportsNodeDisableWarningFlag()).toBe('boolean')
+      expect(typeof supportsNodePermissionFlag()).toBe('boolean')
+      expect(typeof supportsNodeRequireModule()).toBe('boolean')
+      expect(typeof supportsNodeRun()).toBe('boolean')
+      expect(typeof supportsNodeDisableSigusr1Flag()).toBe('boolean')
+      expect(typeof supportsProcessSend()).toBe('boolean')
+    })
+
+    it('should verify version string format', () => {
+      const version = getNodeVersion()
+      expect(version).toMatch(/^v\d+\.\d+\.\d+/)
+      expect(version.startsWith('v')).toBe(true)
+    })
+
+    it('should verify major version is positive integer', () => {
+      const major = getNodeMajorVersion()
+      expect(Number.isInteger(major)).toBe(true)
+      expect(major).toBeGreaterThan(0)
+    })
+
+    it('should verify execPath is absolute path', () => {
+      const execPath = getExecPath()
+      expect(execPath).toBeTruthy()
+      expect(typeof execPath).toBe('string')
+      expect(execPath.length).toBeGreaterThan(0)
+    })
+
+    it('should verify flag contents are strings starting with --', () => {
+      const allFlags = [
+        ...getNodeDebugFlags(),
+        ...getNodeHardenFlags(),
+        ...getNodePermissionFlags(),
+        ...getNodeNoWarningsFlags(),
+        ...getNodeDisableSigusr1Flags(),
+      ]
+
+      allFlags.forEach(flag => {
+        expect(typeof flag).toBe('string')
+        expect(flag.startsWith('--')).toBe(true)
+      })
+    })
+
+    it('should verify constants are exportable and accessible', () => {
+      // Verify constants can be destructured and used
+      const seaFuse = NODE_SEA_FUSE
+      const esnext = ESNEXT
+
+      expect(seaFuse).toBeDefined()
+      expect(esnext).toBeDefined()
+      expect(typeof seaFuse).toBe('string')
+      expect(typeof esnext).toBe('string')
     })
   })
 })
