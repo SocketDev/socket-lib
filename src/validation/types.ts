@@ -110,7 +110,7 @@ export interface JsonParseOptions {
    * Maximum allowed size of JSON string in bytes.
    * Prevents memory exhaustion from extremely large payloads.
    *
-   * @default 10485760 (10 MB)
+   * @default 10_485_760 (10 MB)
    *
    * @example
    * ```ts

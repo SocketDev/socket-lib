@@ -370,7 +370,7 @@ describe('packages/operations', () => {
           .catch(() => false)
         expect(exists).toBe(true)
       }, 'extract-pkg-')
-    }, 30000)
+    }, 30_000)
 
     it('should call callback with destination path', async () => {
       await runWithTempDir(async tmpDir => {
@@ -384,7 +384,7 @@ describe('packages/operations', () => {
 
         expect(callbackPath).toBe(dest)
       }, 'extract-pkg-callback-')
-    }, 30000)
+    }, 30_000)
 
     it('should use temporary directory when dest not provided', async () => {
       let tmpPath = ''
@@ -400,7 +400,7 @@ describe('packages/operations', () => {
       }) as any)
 
       expect(tmpPath).toBeTruthy()
-    }, 30000)
+    }, 30_000)
 
     it('should handle function as second argument', async () => {
       let called = false
@@ -410,7 +410,7 @@ describe('packages/operations', () => {
       }) as any)
 
       expect(called).toBe(true)
-    }, 30000)
+    }, 30_000)
 
     it('should pass extract options to pacote', async () => {
       await runWithTempDir(async tmpDir => {
@@ -429,7 +429,7 @@ describe('packages/operations', () => {
           .catch(() => false)
         expect(exists).toBe(true)
       }, 'extract-pkg-options-')
-    }, 30000)
+    }, 30_000)
 
     it('should use tmpPrefix option for temp directory', async () => {
       let tmpPath = ''
@@ -442,7 +442,7 @@ describe('packages/operations', () => {
       )
 
       expect(tmpPath).toBeTruthy()
-    }, 30000)
+    }, 30_000)
   })
 
   describe('packPackage', () => {
@@ -467,7 +467,7 @@ describe('packages/operations', () => {
         expect(tarball).toBeDefined()
         expect(Buffer.isBuffer(tarball)).toBe(true)
       }, 'pack-pkg-')
-    }, 30000)
+    }, 30_000)
 
     it('should pack package with options', async () => {
       await runWithTempDir(async tmpDir => {
@@ -481,13 +481,13 @@ describe('packages/operations', () => {
         const tarball = await packPackage(tmpDir, { preferOffline: true })
         expect(tarball).toBeDefined()
       }, 'pack-pkg-options-')
-    }, 30000)
+    }, 30_000)
 
     it('should pack remote package spec', async () => {
       const tarball = await packPackage('is-number@7.0.0')
       expect(tarball).toBeDefined()
       expect(Buffer.isBuffer(tarball)).toBe(true)
-    }, 30000)
+    }, 30_000)
   })
 
   describe('resolveGitHubTgzUrl', () => {
@@ -517,7 +517,7 @@ describe('packages/operations', () => {
         // Should return the URL itself if it's already a tarball URL
         expect(typeof result).toBe('string')
       }, 'resolve-github-tgz-spec-')
-    }, 30000)
+    }, 30_000)
 
     it('should accept package.json object as where parameter', async () => {
       const pkgJson: PackageJson = {
@@ -529,7 +529,7 @@ describe('packages/operations', () => {
       const result = await resolveGitHubTgzUrl('test-package', pkgJson)
       // Should return empty string or valid URL
       expect(typeof result).toBe('string')
-    }, 30000)
+    }, 30_000)
 
     it('should return empty string when no repository URL', async () => {
       const pkgJson: PackageJson = {
@@ -550,7 +550,7 @@ describe('packages/operations', () => {
 
       const result = await resolveGitHubTgzUrl('github:user/repo#main', pkgJson)
       expect(typeof result).toBe('string')
-    }, 30000)
+    }, 30_000)
 
     it('should try version with v prefix first', async () => {
       const pkgJson: PackageJson = {
@@ -562,7 +562,7 @@ describe('packages/operations', () => {
       const result = await resolveGitHubTgzUrl('test', pkgJson)
       // Will return empty string if tag doesn't exist, which is expected
       expect(typeof result).toBe('string')
-    }, 30000)
+    }, 30_000)
 
     it('should fallback to version without v prefix', async () => {
       const pkgJson: PackageJson = {
@@ -573,7 +573,7 @@ describe('packages/operations', () => {
 
       const result = await resolveGitHubTgzUrl('test', pkgJson)
       expect(typeof result).toBe('string')
-    }, 30000)
+    }, 30_000)
 
     it('should handle repository as string', async () => {
       const pkgJson: PackageJson = {
@@ -584,7 +584,7 @@ describe('packages/operations', () => {
 
       const result = await resolveGitHubTgzUrl('test', pkgJson)
       expect(typeof result).toBe('string')
-    }, 30000)
+    }, 30_000)
   })
 
   describe('edge cases and error handling', () => {
@@ -592,13 +592,13 @@ describe('packages/operations', () => {
       await expect(
         extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' })
       ).rejects.toThrow()
-    }, 30000)
+    }, 30_000)
 
     it('should handle packPackage with invalid path', async () => {
       await expect(
         packPackage('/non/existent/path')
       ).rejects.toThrow()
-    }, 30000)
+    }, 30_000)
 
     it('should handle readPackageJson with invalid JSON', async () => {
       await runWithTempDir(async tmpDir => {
@@ -650,7 +650,7 @@ describe('packages/operations', () => {
         called = true
       }) as any)
       expect(called).toBe(true)
-    }, 30000)
+    }, 30_000)
 
     it('should lazy load fetcher on first use', async () => {
       // This test verifies that make-fetch-happen is only loaded when needed
@@ -663,7 +663,7 @@ describe('packages/operations', () => {
       await resolveGitHubTgzUrl('test', pkgJson)
       // If we get here without error, lazy loading worked
       expect(true).toBe(true)
-    }, 30000)
+    }, 30_000)
 
     it('should lazy load npm-package-arg on first use', () => {
       // Using getReleaseTag should not load npm-package-arg
@@ -674,14 +674,14 @@ describe('packages/operations', () => {
     it('should lazy load pack on first use', async () => {
       // packPackage should lazy load the pack module
       await expect(packPackage('/non/existent')).rejects.toThrow()
-    }, 30000)
+    }, 30_000)
 
     it('should lazy load pacote on first use', async () => {
       // extractPackage should lazy load pacote
       await expect(
         extractPackage('invalid-spec-xyz', { dest: '/tmp/test' })
       ).rejects.toThrow()
-    }, 30000)
+    }, 30_000)
 
     it('should lazy load semver on first use', () => {
       // findPackageExtensions should lazy load semver
@@ -708,7 +708,7 @@ describe('packages/operations', () => {
           .catch(() => false)
         expect(exists).toBe(true)
       }, 'extract-all-opts-')
-    }, 30000)
+    }, 30_000)
 
     it('should handle readPackageJson with all options', async () => {
       await runWithTempDir(async tmpDir => {
