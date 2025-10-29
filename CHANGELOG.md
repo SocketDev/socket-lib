@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.5.0) - 2025-10-28
+
+### Added
+
+- **Process locking utilities**: Added `ProcessLockManager` class providing cross-platform inter-process synchronization using file-system based locks
+  - Atomic lock acquisition via `mkdir()` for thread-safe operations
+  - Stale lock detection with automatic cleanup (default 10 seconds, aligned with npm's npx strategy)
+  - Exponential backoff with jitter for retry attempts
+  - Process exit handlers for guaranteed cleanup even on abnormal termination
+  - Three main APIs: `acquire()`, `release()`, and `withLock()` (recommended)
+  - Comprehensive test suite with `describe.sequential` for proper isolation
+  - Export: `@socketsecurity/lib/process-lock`
+
+### Changed
+
+- **Script refactoring**: Renamed `spinner.succeed()` to `spinner.success()` for consistency
+- **Script cleanup**: Removed redundant spinner cleanup in interactive-runner
+
 ## [2.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.4.0) - 2025-10-28
 
 ### Changed
