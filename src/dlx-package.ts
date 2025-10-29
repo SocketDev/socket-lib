@@ -9,6 +9,12 @@
  * - Each unique spec gets its own directory: ~/.socket/_dlx/<hash>/
  * - Allows caching multiple versions of the same package
  *
+ * Concurrency protection:
+ * - Uses process-lock to prevent concurrent installation corruption
+ * - Lock file created at ~/.socket/_dlx/<hash>/.lock
+ * - Aligned with npm npx's concurrency.lock strategy (5s stale, 2s touching)
+ * - Prevents multiple processes from corrupting the same package installation
+ *
  * Version range handling:
  * - Exact versions (1.0.0) use cache if available
  * - Range versions (^1.0.0, ~1.0.0) auto-force to get latest within range
@@ -34,6 +40,7 @@ import { getPacoteCachePath } from './constants/packages'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
+import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
 
@@ -128,6 +135,7 @@ function parsePackageSpec(spec: string): {
 /**
  * Install package to ~/.socket/_dlx/<hash>/ if not already installed.
  * Uses pacote for installation (no npm CLI required).
+ * Protected by process lock to prevent concurrent installation corruption.
  */
 async function ensurePackageInstalled(
   packageSpec: string,
@@ -140,27 +148,42 @@ async function ensurePackageInstalled(
     path.join(packageDir, 'node_modules', packageName),
   )
 
-  // Check if already installed (unless force).
-  if (!force && existsSync(installedDir)) {
-    // Verify package.json exists.
-    const pkgJsonPath = path.join(installedDir, 'package.json')
-    if (existsSync(pkgJsonPath)) {
-      return { installed: false, packageDir }
-    }
-  }
+  // Use process lock to prevent concurrent installations.
+  // Similar to npm npx's concurrency.lock approach.
+  const lockPath = path.join(packageDir, '.lock')
 
-  // Ensure package directory exists.
-  await fs.mkdir(packageDir, { recursive: true })
+  return await processLock.withLock(
+    lockPath,
+    async () => {
+      // Double-check if already installed (unless force).
+      // Another process may have installed while waiting for lock.
+      if (!force && existsSync(installedDir)) {
+        // Verify package.json exists.
+        const pkgJsonPath = path.join(installedDir, 'package.json')
+        if (existsSync(pkgJsonPath)) {
+          return { installed: false, packageDir }
+        }
+      }
 
-  // Use pacote to extract the package.
-  // Pacote leverages npm cache when available but doesn't require npm CLI.
-  const pacoteCachePath = getPacoteCachePath()
-  await pacote.extract(packageSpec, installedDir, {
-    // Use consistent pacote cache path (respects npm cache locations when available).
-    cache: pacoteCachePath || path.join(packageDir, '.cache'),
-  })
+      // Ensure package directory exists.
+      await fs.mkdir(packageDir, { recursive: true })
 
-  return { installed: true, packageDir }
+      // Use pacote to extract the package.
+      // Pacote leverages npm cache when available but doesn't require npm CLI.
+      const pacoteCachePath = getPacoteCachePath()
+      await pacote.extract(packageSpec, installedDir, {
+        // Use consistent pacote cache path (respects npm cache locations when available).
+        cache: pacoteCachePath || path.join(packageDir, '.cache'),
+      })
+
+      return { installed: true, packageDir }
+    },
+    {
+      // Align with npm npx locking strategy.
+      staleMs: 5000,
+      touchIntervalMs: 2000,
+    },
+  )
 }
 
 /**
