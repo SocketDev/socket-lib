@@ -38,14 +38,20 @@ describe('npm env', () => {
     })
 
     it('should return user agent for pnpm', () => {
-      setEnv('npm_config_user_agent', 'pnpm/7.14.0 npm/? node/v18.12.0 darwin arm64')
+      setEnv(
+        'npm_config_user_agent',
+        'pnpm/7.14.0 npm/? node/v18.12.0 darwin arm64',
+      )
       expect(getNpmConfigUserAgent()).toBe(
         'pnpm/7.14.0 npm/? node/v18.12.0 darwin arm64',
       )
     })
 
     it('should return user agent for yarn', () => {
-      setEnv('npm_config_user_agent', 'yarn/1.22.19 npm/? node/v18.12.0 darwin arm64')
+      setEnv(
+        'npm_config_user_agent',
+        'yarn/1.22.19 npm/? node/v18.12.0 darwin arm64',
+      )
       expect(getNpmConfigUserAgent()).toBe(
         'yarn/1.22.19 npm/? node/v18.12.0 darwin arm64',
       )

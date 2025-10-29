@@ -130,21 +130,24 @@ describe('env/socket-cli-shadow', () => {
     it('should handle Windows binary path', () => {
       setEnv('SOCKET_CLI_SHADOW_BIN', 'C:\\Program Files\\Socket\\socket.exe')
       expect(getSocketCliShadowBin()).toBe(
-        'C:\\Program Files\\Socket\\socket.exe'
+        'C:\\Program Files\\Socket\\socket.exe',
       )
     })
 
     it('should handle npm global binary path', () => {
-      setEnv('SOCKET_CLI_SHADOW_BIN', '/usr/local/lib/node_modules/@socketsecurity/cli/bin/socket')
+      setEnv(
+        'SOCKET_CLI_SHADOW_BIN',
+        '/usr/local/lib/node_modules/@socketsecurity/cli/bin/socket',
+      )
       expect(getSocketCliShadowBin()).toBe(
-        '/usr/local/lib/node_modules/@socketsecurity/cli/bin/socket'
+        '/usr/local/lib/node_modules/@socketsecurity/cli/bin/socket',
       )
     })
 
     it('should handle pnpm global binary path', () => {
       setEnv('SOCKET_CLI_SHADOW_BIN', '/home/user/.local/share/pnpm/socket')
       expect(getSocketCliShadowBin()).toBe(
-        '/home/user/.local/share/pnpm/socket'
+        '/home/user/.local/share/pnpm/socket',
       )
     })
 

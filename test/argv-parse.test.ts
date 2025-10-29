@@ -319,7 +319,13 @@ describe('argv/parse', () => {
     it('should stop at first flag', () => {
       const originalArgv = process.argv
       try {
-        process.argv = ['node', 'script.js', 'file1.js', '--verbose', 'file2.js']
+        process.argv = [
+          'node',
+          'script.js',
+          'file1.js',
+          '--verbose',
+          'file2.js',
+        ]
         const result = getPositionalArgs()
         expect(result).toEqual(['file1.js'])
       } finally {
@@ -330,7 +336,13 @@ describe('argv/parse', () => {
     it('should handle custom start index', () => {
       const originalArgv = process.argv
       try {
-        process.argv = ['node', 'script.js', 'subcommand', 'file1.js', 'file2.js']
+        process.argv = [
+          'node',
+          'script.js',
+          'subcommand',
+          'file1.js',
+          'file2.js',
+        ]
         const result = getPositionalArgs(3)
         expect(result).toEqual(['file1.js', 'file2.js'])
       } finally {

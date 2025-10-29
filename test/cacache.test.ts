@@ -360,8 +360,8 @@ describe('cacache', () => {
 
     it('should support async callbacks', async () => {
       try {
-        const result = await withTmp(async (tmpDir) => {
-          await new Promise((resolve) => setTimeout(resolve, 1))
+        const result = await withTmp(async tmpDir => {
+          await new Promise(resolve => setTimeout(resolve, 1))
           return tmpDir.length
         })
         expect(typeof result).toBe('number')
@@ -435,7 +435,7 @@ describe('cacache', () => {
 
       try {
         // Put multiple entries
-        await Promise.all(keys.map((key) => put(key, `data-${key}`)))
+        await Promise.all(keys.map(key => put(key, `data-${key}`)))
 
         // Clear with prefix
         const removed = await clear({ prefix })
@@ -444,7 +444,7 @@ describe('cacache', () => {
 
         // Verify cleared
         const results = await Promise.all(keys.map(safeGet))
-        results.forEach((result) => expect(result).toBeUndefined())
+        results.forEach(result => expect(result).toBeUndefined())
       } catch (e) {
         expect(e).toBeDefined()
       }
@@ -455,7 +455,7 @@ describe('cacache', () => {
       const keys = [`${prefix}:abc:1`, `${prefix}:abc:2`, `${prefix}:xyz:1`]
 
       try {
-        await Promise.all(keys.map((key) => put(key, `data-${key}`)))
+        await Promise.all(keys.map(key => put(key, `data-${key}`)))
 
         // Clear with wildcard - only abc entries
         const removed = await clear({ prefix: `${prefix}:abc*` })
@@ -558,15 +558,18 @@ describe('cacache', () => {
     })
 
     it('should handle concurrent operations', async () => {
-      const keys = Array.from({ length: 10 }, (_, i) => `concurrent-${Date.now()}-${i}`)
+      const keys = Array.from(
+        { length: 10 },
+        (_, i) => `concurrent-${Date.now()}-${i}`,
+      )
 
       try {
         // Concurrent puts
-        await Promise.all(keys.map((key) => put(key, `data-${key}`)))
+        await Promise.all(keys.map(key => put(key, `data-${key}`)))
 
         // Concurrent gets
         const entries = await Promise.all(keys.map(safeGet))
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (entry) {
             expect(entry).toBeDefined()
           }

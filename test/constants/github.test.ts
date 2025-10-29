@@ -171,7 +171,7 @@ describe('constants/github', () => {
       const repo = 'socket'
       const url = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/releases/latest`
       expect(url).toBe(
-        'https://api.github.com/repos/socketdev/socket/releases/latest'
+        'https://api.github.com/repos/socketdev/socket/releases/latest',
       )
     })
 

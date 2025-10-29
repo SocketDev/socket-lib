@@ -143,7 +143,7 @@ describe('sea', () => {
       isSeaBinary()
 
       // Subsequent calls should be cached and very fast
-      const iterations = 10000
+      const iterations = 10_000
       const start = Date.now()
       for (let i = 0; i < iterations; i++) {
         isSeaBinary()
@@ -174,7 +174,7 @@ describe('sea', () => {
       }
 
       // All boolean results should be identical
-      const boolResults = results.filter((r) => typeof r === 'boolean')
+      const boolResults = results.filter(r => typeof r === 'boolean')
       expect(new Set(boolResults).size).toBe(1)
     })
 
@@ -187,7 +187,7 @@ describe('sea', () => {
         })),
       )
 
-      return Promise.all(promises).then((results) => {
+      return Promise.all(promises).then(results => {
         // All results should be identical
         const first = results[0]
         for (const result of results) {

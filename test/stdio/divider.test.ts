@@ -387,14 +387,16 @@ describe('stdio/divider', () => {
     })
 
     it('should handle NaN width', () => {
-      const result = divider({ width: NaN })
+      const result = divider({ width: Number.NaN })
       // NaN coerces to 0 or empty
       expect(typeof result).toBe('string')
     })
 
     it('should handle Infinity width', () => {
       // String.repeat(Infinity) throws RangeError
-      expect(() => divider({ width: Infinity })).toThrow(RangeError)
+      expect(() => divider({ width: Number.POSITIVE_INFINITY })).toThrow(
+        RangeError,
+      )
     })
 
     it('should handle special Unicode characters', () => {
@@ -441,10 +443,7 @@ describe('stdio/divider', () => {
       console.log('Second section')
 
       expect(consoleLogSpy).toHaveBeenCalledTimes(3)
-      expect(consoleLogSpy).toHaveBeenNthCalledWith(
-        2,
-        `\n${'═'.repeat(55)}\n`,
-      )
+      expect(consoleLogSpy).toHaveBeenNthCalledWith(2, `\n${'═'.repeat(55)}\n`)
     })
 
     it('should support custom-width dividers for narrow terminals', () => {

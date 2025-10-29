@@ -134,15 +134,13 @@ describe('constants/encoding', () => {
   describe('real-world usage', () => {
     it('should support case-insensitive comparisons', () => {
       const aCode = 'A'.charCodeAt(0)
-      const isUppercase =
-        aCode >= CHAR_UPPERCASE_A && aCode <= CHAR_UPPERCASE_Z
+      const isUppercase = aCode >= CHAR_UPPERCASE_A && aCode <= CHAR_UPPERCASE_Z
       expect(isUppercase).toBe(true)
     })
 
     it('should support lowercase detection', () => {
       const zCode = 'z'.charCodeAt(0)
-      const isLowercase =
-        zCode >= CHAR_LOWERCASE_A && zCode <= CHAR_LOWERCASE_Z
+      const isLowercase = zCode >= CHAR_LOWERCASE_A && zCode <= CHAR_LOWERCASE_Z
       expect(isLowercase).toBe(true)
     })
 
