@@ -36,27 +36,29 @@ describe('stdio/stdout', () => {
     originalColumns = stdout.columns
     originalRows = stdout.rows
 
-    // Add TTY methods if they don't exist (for non-TTY environments)
-    if (!stdout.cursorTo) {
-      ;(stdout as any).cursorTo = () => {}
-    }
-    if (!stdout.clearLine) {
-      ;(stdout as any).clearLine = () => {}
-    }
-    if (!stdout.clearScreenDown) {
-      ;(stdout as any).clearScreenDown = () => {}
-    }
-
     // Make stdout appear as a WriteStream instance for hide/showCursor tests
     Object.setPrototypeOf(stdout, WriteStream.prototype)
 
-    // Create spies
+    // Create spies (add methods if they don't exist in non-TTY environments)
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     writeSpy = vi.spyOn(stdout, 'write').mockImplementation(() => true)
+
+    // Create stubs for TTY methods only if they don't exist, then spy on them
+    if (!stdout.cursorTo) {
+      ;(stdout as any).cursorTo = vi.fn()
+    }
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     cursorToSpy = vi.spyOn(stdout, 'cursorTo').mockImplementation(() => {})
+
+    if (!stdout.clearLine) {
+      ;(stdout as any).clearLine = vi.fn()
+    }
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     clearLineSpy = vi.spyOn(stdout, 'clearLine').mockImplementation(() => {})
+
+    if (!stdout.clearScreenDown) {
+      ;(stdout as any).clearScreenDown = vi.fn()
+    }
     // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     clearScreenDownSpy = vi
       .spyOn(stdout, 'clearScreenDown')
