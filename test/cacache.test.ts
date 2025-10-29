@@ -443,6 +443,7 @@ describe('cacache', () => {
         expect(removed).toBeGreaterThanOrEqual(0)
 
         // Verify cleared
+        // @ts-expect-error - safeGet signature doesn't match map callback but works at runtime
         const results = await Promise.all(keys.map(safeGet))
         results.forEach(result => expect(result).toBeUndefined())
       } catch (e) {
@@ -568,6 +569,7 @@ describe('cacache', () => {
         await Promise.all(keys.map(key => put(key, `data-${key}`)))
 
         // Concurrent gets
+        // @ts-expect-error - safeGet signature doesn't match map callback but works at runtime
         const entries = await Promise.all(keys.map(safeGet))
         entries.forEach(entry => {
           if (entry) {
