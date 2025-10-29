@@ -199,7 +199,7 @@ describe('packages/validation', () => {
     it('should return false for names with special characters', () => {
       expect(isValidPackageName('my!package')).toBe(true) // validForOldPackages allows !
       expect(isValidPackageName('package@name')).toBe(false)
-      expect(isValidPackageName('package#name')).toBe(true) // validForOldPackages allows #
+      expect(isValidPackageName('package#name')).toBe(false) // # is not valid
     })
 
     it('should return false for names starting with dot', () => {

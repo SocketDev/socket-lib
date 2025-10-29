@@ -184,7 +184,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should clear line in TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearLine()
       expect(cursorToSpy).toHaveBeenCalledWith(0)
       expect(clearLineSpy).toHaveBeenCalledWith(0)
@@ -201,13 +204,19 @@ describe('stdio/stdout', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = clearLine()
       expect(result).toBeUndefined()
     })
 
     it('should move cursor to start of line before clearing', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearLine()
       expect(cursorToSpy).toHaveBeenCalledBefore(clearLineSpy)
     })
@@ -219,19 +228,28 @@ describe('stdio/stdout', () => {
     })
 
     it('should move cursor to x position in TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(10)
       expect(cursorToSpy).toHaveBeenCalledWith(10, undefined)
     })
 
     it('should move cursor to x,y position in TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(10, 5)
       expect(cursorToSpy).toHaveBeenCalledWith(10, 5)
     })
 
     it('should move cursor to 0,0', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(0, 0)
       expect(cursorToSpy).toHaveBeenCalledWith(0, 0)
     })
@@ -246,19 +264,28 @@ describe('stdio/stdout', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = cursorTo(0)
       expect(result).toBeUndefined()
     })
 
     it('should handle large coordinates', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(1000, 500)
       expect(cursorToSpy).toHaveBeenCalledWith(1000, 500)
     })
 
     it('should handle negative coordinates', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(-1, -1)
       expect(cursorToSpy).toHaveBeenCalledWith(-1, -1)
     })
@@ -270,7 +297,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should clear screen down in TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearScreenDown()
       expect(clearScreenDownSpy).toHaveBeenCalled()
     })
@@ -285,7 +315,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = clearScreenDown()
       expect(result).toBeUndefined()
     })
@@ -297,7 +330,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should return true when stdout is TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       expect(isTTY()).toBe(true)
     })
 
@@ -328,7 +364,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should return actual columns when set', () => {
-      Object.defineProperty(stdout, 'columns', { value: 120, configurable: true })
+      Object.defineProperty(stdout, 'columns', {
+        value: 120,
+        configurable: true,
+      })
       expect(getColumns()).toBe(120)
     })
 
@@ -346,12 +385,18 @@ describe('stdio/stdout', () => {
     })
 
     it('should handle small terminal width', () => {
-      Object.defineProperty(stdout, 'columns', { value: 40, configurable: true })
+      Object.defineProperty(stdout, 'columns', {
+        value: 40,
+        configurable: true,
+      })
       expect(getColumns()).toBe(40)
     })
 
     it('should handle large terminal width', () => {
-      Object.defineProperty(stdout, 'columns', { value: 300, configurable: true })
+      Object.defineProperty(stdout, 'columns', {
+        value: 300,
+        configurable: true,
+      })
       expect(getColumns()).toBe(300)
     })
 
@@ -404,7 +449,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should write hide cursor sequence in TTY WriteStream', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       hideCursor()
       expect(writeSpy).toHaveBeenCalledWith('\u001B[?25l')
     })
@@ -419,7 +467,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = hideCursor()
       expect(result).toBeUndefined()
     })
@@ -431,7 +482,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should write show cursor sequence in TTY WriteStream', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       showCursor()
       expect(writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
@@ -446,7 +500,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should not return a value', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       const result = showCursor()
       expect(result).toBeUndefined()
     })
@@ -496,7 +553,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should support clearing and rewriting', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       write('Processing...')
       clearLine()
       write('Complete!')
@@ -506,7 +566,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should support cursor positioning and writing', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       cursorTo(0, 0)
       write('Top left')
       cursorTo(0, 10)
@@ -516,7 +579,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should support hide/show cursor pattern', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       hideCursor()
       write('Animation frame 1')
       write('Animation frame 2')
@@ -527,7 +593,10 @@ describe('stdio/stdout', () => {
 
     it('should handle graceful degradation from TTY to non-TTY', () => {
       // Start with TTY
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       clearLine()
       expect(clearLineSpy).toHaveBeenCalled()
 
@@ -558,7 +627,7 @@ describe('stdio/stdout', () => {
     })
 
     it('should handle very long text', () => {
-      const longText = 'x'.repeat(10000)
+      const longText = 'x'.repeat(10_000)
       writeLine(longText)
       expect(writeSpy).toHaveBeenCalledWith(`${longText}\n`)
     })
@@ -570,7 +639,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should handle rapid cursor movements', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       for (let i = 0; i < 100; i++) {
         cursorTo(i, i)
       }
@@ -578,10 +650,16 @@ describe('stdio/stdout', () => {
     })
 
     it('should handle terminal dimension changes', () => {
-      Object.defineProperty(stdout, 'columns', { value: 80, configurable: true })
+      Object.defineProperty(stdout, 'columns', {
+        value: 80,
+        configurable: true,
+      })
       expect(getColumns()).toBe(80)
 
-      Object.defineProperty(stdout, 'columns', { value: 120, configurable: true })
+      Object.defineProperty(stdout, 'columns', {
+        value: 120,
+        configurable: true,
+      })
       expect(getColumns()).toBe(120)
     })
 
@@ -599,18 +677,25 @@ describe('stdio/stdout', () => {
 
   describe('real-world usage', () => {
     it('should support progress indicator pattern', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       write('Loading...')
       clearLine()
       write('Loading... 50%')
       clearLine()
       write('Loading... 100%')
       writeLine(' Done!')
-      expect(writeSpy).toHaveBeenCalledTimes(7) // 3 writes, 2 clears (cursorTo + clearLine), 1 writeLine
+      // Actual calls: 3 writes + 1 writeLine = 4 calls (clearLine calls cursorTo and clearLine internally but not write)
+      expect(writeSpy).toHaveBeenCalledTimes(4)
     })
 
     it('should support spinner pattern', () => {
-      Object.defineProperty(stdout, 'isTTY', { value: true, configurable: true })
+      Object.defineProperty(stdout, 'isTTY', {
+        value: true,
+        configurable: true,
+      })
       hideCursor()
       const frames = ['⠋', '⠙', '⠹', '⠸']
       for (const frame of frames) {
@@ -649,7 +734,10 @@ describe('stdio/stdout', () => {
     })
 
     it('should handle terminal size queries', () => {
-      Object.defineProperty(stdout, 'columns', { value: 120, configurable: true })
+      Object.defineProperty(stdout, 'columns', {
+        value: 120,
+        configurable: true,
+      })
       Object.defineProperty(stdout, 'rows', { value: 40, configurable: true })
       const width = getColumns()
       const height = getRows()
