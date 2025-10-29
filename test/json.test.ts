@@ -679,6 +679,7 @@ describe('json', () => {
       it('should handle array-like objects with non-number first element', () => {
         // Tests line 166-171: length > 0 but obj[0] is not a number
         expect(() => {
+          // @ts-expect-error - Testing Buffer-like object with invalid method signatures
           jsonParse({
             length: 1,
             0: 'not a number',
@@ -691,6 +692,7 @@ describe('json', () => {
       it('should handle objects without proper constructor', () => {
         // Tests line 174-177: constructor.isBuffer checks
         expect(() => {
+          // @ts-expect-error - Testing Buffer-like object with invalid method signatures
           jsonParse({
             length: 0,
             copy: () => {},
@@ -700,6 +702,7 @@ describe('json', () => {
         }).toThrow()
 
         expect(() => {
+          // @ts-expect-error - Testing Buffer-like object with invalid method signatures
           jsonParse({
             length: 0,
             copy: () => {},

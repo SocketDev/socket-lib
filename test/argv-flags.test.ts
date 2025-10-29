@@ -415,12 +415,16 @@ describe('argv/flags', () => {
 
   describe('edge cases', () => {
     it('should handle truthy values as boolean true', () => {
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
       expect(isDebug({ debug: 1 } as FlagValues)).toBe(true)
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
       expect(isVerbose({ verbose: 'yes' } as FlagValues)).toBe(true)
     })
 
     it('should handle falsy values as boolean false', () => {
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
       expect(isDebug({ debug: 0 } as FlagValues)).toBe(false)
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
       expect(isDebug({ debug: '' } as FlagValues)).toBe(false)
     })
 
