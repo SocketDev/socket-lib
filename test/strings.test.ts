@@ -569,6 +569,193 @@ describe('strings', () => {
       it('should handle mixed everything', () => {
         expect(toKebabCase('get_HTML5_Document')).toBe('get-html5-document')
       })
+
+      it('should handle empty string early return', () => {
+        // Tests line 731: if (!str.length)
+        const result = toKebabCase('')
+        expect(result).toBe('')
+      })
+    })
+
+    describe('camelToKebab additional edge cases', () => {
+      it('should handle break condition in inner loop', () => {
+        // Tests lines 111-112: if (!char) break
+        expect(camelToKebab('Test')).toBe('test')
+      })
+
+      it('should handle uppercase sequence collection', () => {
+        // Tests lines 124-140: consecutive uppercase handling
+        expect(camelToKebab('XMLHTTPRequest')).toBe('xmlhttprequest')
+        expect(camelToKebab('IOError')).toBe('ioerror')
+      })
+
+      it('should handle non-uppercase continuation', () => {
+        // Tests lines 136-139: stop when hitting non-uppercase
+        expect(camelToKebab('HTTPSConnection')).toBe('httpsconnection')
+      })
+
+      it('should handle mixed case with numbers', () => {
+        // Tests lines 141-145: lowercase letters, digits, other chars
+        expect(camelToKebab('base64Encode')).toBe('base64-encode')
+        expect(camelToKebab('sha256Hash')).toBe('sha256-hash')
+      })
+    })
+
+    describe('search additional edge cases', () => {
+      it('should return -1 when fromIndex >= length', () => {
+        // Tests line 311-312: if (fromIndex >= length)
+        const result = search('hello', /l/, { fromIndex: 10 })
+        expect(result).toBe(-1)
+      })
+
+      it('should use fast path when fromIndex === 0', () => {
+        // Tests line 314-315: if (fromIndex === 0)
+        const result = search('hello world', /world/, { fromIndex: 0 })
+        expect(result).toBe(6)
+      })
+    })
+
+    describe('stringWidth edge cases', () => {
+      it('should return 0 for non-string input', () => {
+        // Tests line 546-547: typeof check and !text.length
+        // @ts-expect-error - testing runtime behavior
+        expect(stringWidth(null)).toBe(0)
+        // @ts-expect-error - testing runtime behavior
+        expect(stringWidth(undefined)).toBe(0)
+        // @ts-expect-error - testing runtime behavior
+        expect(stringWidth(123)).toBe(0)
+      })
+
+      it('should return 0 for empty string', () => {
+        // Tests line 546-547
+        expect(stringWidth('')).toBe(0)
+      })
+
+      it('should return 0 for string with only ANSI codes', () => {
+        // Tests line 555-556: plainText.length check
+        expect(stringWidth('\x1b[31m\x1b[0m')).toBe(0)
+      })
+
+      it('should skip zero-width clusters', () => {
+        // Tests line 604-605: zeroWidthClusterRegex
+        expect(stringWidth('hello\u200Bworld')).toBe(10) // Zero-width space
+        expect(stringWidth('test\t')).toBe(4) // Tab is control char
+      })
+
+      it('should handle RGI emoji as double-width', () => {
+        // Tests line 623-625: emojiRegex
+        expect(stringWidth('👍')).toBeGreaterThanOrEqual(2)
+        expect(stringWidth('😀')).toBeGreaterThanOrEqual(2)
+      })
+
+      it('should use East Asian Width for non-emoji', () => {
+        // Tests line 639-640: baseSegment and codePointAt
+        expect(stringWidth('漢')).toBeGreaterThanOrEqual(2) // CJK
+        expect(stringWidth('ｱ')).toBe(1) // Halfwidth Katakana
+      })
+
+      it('should handle trailing halfwidth/fullwidth forms', () => {
+        // Tests line 678-690: segment.length > 1 and charCode checks
+        const textWithHalfwidth = 'aﾞ' // 'a' + halfwidth dakuten
+        expect(stringWidth(textWithHalfwidth)).toBeGreaterThanOrEqual(1)
+      })
+    })
+
+    describe('trimNewlines comprehensive edge cases', () => {
+      it('should return empty string for length 0', () => {
+        // Tests line 780-781: if (length === 0)
+        expect(trimNewlines('')).toBe('')
+      })
+
+      it('should handle single newline character', () => {
+        // Tests line 785-786: if (length === 1) with newline
+        expect(trimNewlines('\n')).toBe('')
+        expect(trimNewlines('\r')).toBe('')
+      })
+
+      it('should handle single non-newline character', () => {
+        // Tests line 785-786: if (length === 1) with non-newline
+        expect(trimNewlines('a')).toBe('a')
+      })
+
+      it('should return original if no edge newlines', () => {
+        // Tests line 790-791: noFirstNewline && noLastNewline
+        expect(trimNewlines('hello')).toBe('hello')
+        expect(trimNewlines('a\nb')).toBe('a\nb')
+      })
+
+      it('should handle newlines at start', () => {
+        // Tests line 795-800: while loop for start
+        expect(trimNewlines('\n\r\nhello')).toBe('hello')
+      })
+
+      it('should handle newlines at end', () => {
+        // Tests line 802-807: while loop for end
+        expect(trimNewlines('hello\r\n\n')).toBe('hello')
+      })
+
+      it('should handle newlines at both ends', () => {
+        // Tests both loops
+        expect(trimNewlines('\r\n\rhello\n\r')).toBe('hello')
+      })
+    })
+
+    describe('centerText edge cases', () => {
+      it('should return original text when >= width', () => {
+        // Tests line 882: if (textLength >= width)
+        expect(centerText('hello', 5)).toBe('hello')
+        expect(centerText('hello', 3)).toBe('hello')
+        expect(centerText('longer text', 5)).toBe('longer text')
+      })
+
+      it('should center text with odd padding', () => {
+        // Tests padding calculation
+        expect(centerText('hi', 5)).toBe(' hi  ')
+        expect(centerText('a', 7)).toBe('   a   ')
+      })
+
+      it('should center text with even padding', () => {
+        expect(centerText('test', 8)).toBe('  test  ')
+      })
+    })
+
+    describe('indentString edge cases', () => {
+      it('should handle empty lines correctly', () => {
+        // Tests line 186-187: regex with empty line handling
+        const result = indentString('line1\n\nline3', { count: 2 })
+        expect(result).toBe('  line1\n\n  line3')
+      })
+
+      it('should use default count of 1', () => {
+        const result = indentString('hello')
+        expect(result).toBe(' hello')
+      })
+
+      it('should handle large count values', () => {
+        const result = indentString('test', { count: 10 })
+        expect(result).toBe(`${' '.repeat(10)}test`)
+      })
+    })
+
+    describe('isBlankString edge cases', () => {
+      it('should handle various whitespace types', () => {
+        // Tests line 223: /^\s+$/.test(value)
+        expect(isBlankString(' \t\n\r ')).toBe(true)
+        expect(isBlankString('\n\n\n')).toBe(true)
+        expect(isBlankString('\t\t\t')).toBe(true)
+      })
+
+      it('should return false for non-blank strings', () => {
+        expect(isBlankString(' a ')).toBe(false)
+        expect(isBlankString('  \n  x  ')).toBe(false)
+      })
+
+      it('should handle non-string types', () => {
+        expect(isBlankString(null)).toBe(false)
+        expect(isBlankString(undefined)).toBe(false)
+        expect(isBlankString(123)).toBe(false)
+        expect(isBlankString({})).toBe(false)
+      })
     })
   })
 })
