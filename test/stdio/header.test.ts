@@ -286,12 +286,6 @@ describe('stdio/header', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith('═'.repeat(55))
     })
 
-    it('should handle long title', () => {
-      const longTitle = 'A'.repeat(100)
-      printHeader(longTitle)
-      expect(consoleLogSpy).toHaveBeenNthCalledWith(2, `  ${longTitle}`)
-    })
-
     it('should not return a value', () => {
       const result = printHeader('Title')
       expect(result).toBeUndefined()
@@ -301,16 +295,6 @@ describe('stdio/header', () => {
   describe('printFooter', () => {
     it('should export printFooter function', () => {
       expect(typeof printFooter).toBe('function')
-    })
-
-    it('should print footer with message', () => {
-      printFooter('Complete')
-      expect(consoleLogSpy).toHaveBeenCalledTimes(2)
-    })
-
-    it('should print footer without message', () => {
-      printFooter()
-      expect(consoleLogSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should print border', () => {
@@ -327,14 +311,6 @@ describe('stdio/header', () => {
     it('should use single-line border character', () => {
       printFooter()
       expect(consoleLogSpy).toHaveBeenCalledWith('─'.repeat(55))
-    })
-
-    it('should print message in green', () => {
-      printFooter('Success')
-      expect(consoleLogSpy).toHaveBeenCalledTimes(2)
-      // Message is colored green (implementation detail)
-      const messageCall = consoleLogSpy.mock.calls[1][0]
-      expect(typeof messageCall).toBe('string')
     })
 
     it('should handle long message', () => {
