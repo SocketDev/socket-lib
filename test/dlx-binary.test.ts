@@ -368,9 +368,11 @@ describe.sequential('dlx-binary', () => {
 
           // Corrupt metadata
           const name = 'invalid-meta-binary'
-          const cacheKey = createHash('sha256')
-            .update(`${url}:${name}`)
+          const spec = `${url}:${name}`
+          const cacheKey = createHash('sha512')
+            .update(spec)
             .digest('hex')
+            .substring(0, 16)
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.writeFile(metaPath, 'invalid json', 'utf8')
@@ -405,9 +407,11 @@ describe.sequential('dlx-binary', () => {
 
           // Delete metadata
           const name = 'missing-meta-binary'
-          const cacheKey = createHash('sha256')
-            .update(`${url}:${name}`)
+          const spec = `${url}:${name}`
+          const cacheKey = createHash('sha512')
+            .update(spec)
             .digest('hex')
+            .substring(0, 16)
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.unlink(metaPath)
@@ -442,9 +446,11 @@ describe.sequential('dlx-binary', () => {
 
           // Write array as metadata (invalid)
           const name = 'array-meta-binary'
-          const cacheKey = createHash('sha256')
-            .update(`${url}:${name}`)
+          const spec = `${url}:${name}`
+          const cacheKey = createHash('sha512')
+            .update(spec)
             .digest('hex')
+            .substring(0, 16)
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.writeFile(metaPath, JSON.stringify([]), 'utf8')
@@ -479,9 +485,11 @@ describe.sequential('dlx-binary', () => {
 
           // Write metadata without checksum
           const name = 'no-checksum-meta-binary'
-          const cacheKey = createHash('sha256')
-            .update(`${url}:${name}`)
+          const spec = `${url}:${name}`
+          const cacheKey = createHash('sha512')
+            .update(spec)
             .digest('hex')
+            .substring(0, 16)
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
           await fs.writeFile(
@@ -1240,9 +1248,11 @@ describe.sequential('dlx-binary', () => {
 
           // Make metadata unreadable (change permissions)
           const name = 'read-error-binary'
-          const cacheKey = createHash('sha256')
-            .update(`${url}:${name}`)
+          const spec = `${url}:${name}`
+          const cacheKey = createHash('sha512')
+            .update(spec)
             .digest('hex')
+            .substring(0, 16)
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
 
