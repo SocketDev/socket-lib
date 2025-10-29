@@ -31,11 +31,7 @@ describe('utils/get-ipc', () => {
     })
 
     it('should return same reference every time', async () => {
-      const results = await Promise.all([
-        getIpc(),
-        getIpc(),
-        getIpc(),
-      ])
+      const results = await Promise.all([getIpc(), getIpc(), getIpc()])
       expect(results[0]).toBe(results[1])
       expect(results[1]).toBe(results[2])
     })
@@ -218,9 +214,7 @@ describe('utils/get-ipc', () => {
       const keys = Object.keys(ipc) as Array<keyof IpcObject>
 
       if (keys.length > 0) {
-        const results = await Promise.all(
-          keys.map(key => getIpc(key))
-        )
+        const results = await Promise.all(keys.map(key => getIpc(key)))
 
         results.forEach((result, i) => {
           expect(result).toBe(ipc[keys[i]])
@@ -302,7 +296,7 @@ describe('utils/get-ipc', () => {
       const keys = Object.keys(ipc)
 
       keys.forEach(key => {
-        expect(ipc.hasOwnProperty(key)).toBe(true)
+        expect(Object.hasOwn(ipc, key)).toBe(true)
       })
     })
 
@@ -310,7 +304,7 @@ describe('utils/get-ipc', () => {
       const ipc = await getIpc()
 
       expect('toString' in ipc).toBe(true) // inherited
-      expect(ipc.hasOwnProperty('toString')).toBe(false) // not own property
+      expect(Object.hasOwn(ipc, 'toString')).toBe(false) // not own property
     })
   })
 })
