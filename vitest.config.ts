@@ -7,6 +7,16 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'node',
+    coverage: {
+      exclude: [
+        '**/dist/external/**',
+        '**/src/external/**',
+        '**/node_modules/**',
+        '**/test/**',
+        '**/*.test.ts',
+        '**/*.d.ts',
+      ],
+    },
   },
   resolve: {
     alias: {

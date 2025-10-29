@@ -105,23 +105,27 @@ export interface WhichOptions {
  * Find an executable in the system PATH asynchronously.
  * Wrapper around the which package for lazy loading.
  */
+/* c8 ignore start */
 export async function which(
   binName: string,
   options?: WhichOptions,
 ): Promise<string | string[] | undefined> {
   return await getWhich()(binName, options)
 }
+/* c8 ignore stop */
 
 /**
  * Find an executable in the system PATH synchronously.
  * Wrapper around the which package for lazy loading.
  */
+/* c8 ignore start */
 export function whichSync(
   binName: string,
   options?: WhichOptions,
 ): string | string[] | undefined {
   return getWhich().sync(binName, options)
 }
+/* c8 ignore stop */
 
 /**
  * Find and resolve a binary in the system PATH asynchronously.

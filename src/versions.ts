@@ -194,5 +194,9 @@ export function versionDiff(
   | 'prepatch'
   | 'prerelease'
   | undefined {
-  return semver.diff(version1, version2) || undefined
+  try {
+    return semver.diff(version1, version2) || undefined
+  } catch {
+    return undefined
+  }
 }

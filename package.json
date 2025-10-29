@@ -284,6 +284,9 @@
       "types": "./dist/globs.d.ts",
       "default": "./dist/globs.js"
     },
+    "./html/assets/index-DOkKC3NI": {
+      "default": "./html/assets/index-DOkKC3NI.js"
+    },
     "./http-request": {
       "types": "./dist/http-request.d.ts",
       "default": "./dist/http-request.js"

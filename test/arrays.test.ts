@@ -201,4 +201,108 @@ describe('arrays', () => {
       expect(result).toBe('one, two, three, four, or five')
     })
   })
+
+  describe('formatter caching', () => {
+    it('should reuse conjunction formatter across calls', () => {
+      // First call initializes formatter
+      const result1 = joinAnd(['a', 'b'])
+      // Second call reuses cached formatter
+      const result2 = joinAnd(['c', 'd'])
+      expect(result1).toBe('a and b')
+      expect(result2).toBe('c and d')
+    })
+
+    it('should reuse disjunction formatter across calls', () => {
+      // First call initializes formatter
+      const result1 = joinOr(['a', 'b'])
+      // Second call reuses cached formatter
+      const result2 = joinOr(['c', 'd'])
+      expect(result1).toBe('a or b')
+      expect(result2).toBe('c or d')
+    })
+  })
+
+  describe('edge cases and special characters', () => {
+    it('arrayChunk should handle strings', () => {
+      const arr = ['a', 'b', 'c', 'd', 'e']
+      const result = arrayChunk(arr, 3)
+      expect(result).toEqual([
+        ['a', 'b', 'c'],
+        ['d', 'e'],
+      ])
+    })
+
+    it('arrayUnique should preserve first occurrence order', () => {
+      const arr = [3, 1, 2, 1, 3, 2]
+      const result = arrayUnique(arr)
+      expect(result).toEqual([3, 1, 2])
+    })
+
+    it('joinAnd should handle special characters', () => {
+      const result = joinAnd(['🍎', '🍌', '🍒'])
+      expect(result).toBe('🍎, 🍌, and 🍒')
+    })
+
+    it('joinOr should handle special characters', () => {
+      const result = joinOr(['#ff0000', '#00ff00', '#0000ff'])
+      expect(result).toBe('#ff0000, #00ff00, or #0000ff')
+    })
+
+    it('joinAnd should handle numbers as strings', () => {
+      const result = joinAnd(['1', '2', '3'])
+      expect(result).toBe('1, 2, and 3')
+    })
+
+    it('joinOr should handle numbers as strings', () => {
+      const result = joinOr(['100', '200', '300'])
+      expect(result).toBe('100, 200, or 300')
+    })
+  })
+
+  describe('array type compatibility', () => {
+    it('arrayChunk should work with const assertions', () => {
+      const arr = [1, 2, 3, 4] as const
+      const result = arrayChunk(arr, 2)
+      expect(result).toEqual([
+        [1, 2],
+        [3, 4],
+      ])
+    })
+
+    it('arrayUnique should work with const assertions', () => {
+      const arr = [1, 2, 2, 3] as const
+      const result = arrayUnique(arr)
+      expect(result).toEqual([1, 2, 3])
+    })
+
+    it('joinAnd should work with const assertions', () => {
+      const arr = ['a', 'b', 'c'] as const
+      const result = joinAnd(arr)
+      expect(result).toBe('a, b, and c')
+    })
+
+    it('joinOr should work with const assertions', () => {
+      const arr = ['x', 'y', 'z'] as const
+      const result = joinOr(arr)
+      expect(result).toBe('x, y, or z')
+    })
+  })
+
+  describe('performance and large arrays', () => {
+    it('arrayChunk should handle large arrays efficiently', () => {
+      const largeArr = Array.from({ length: 1000 }, (_, i) => i)
+      const result = arrayChunk(largeArr, 10)
+      expect(result.length).toBe(100)
+      expect(result[0]).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+      expect(result[99]).toEqual([
+        990, 991, 992, 993, 994, 995, 996, 997, 998, 999,
+      ])
+    })
+
+    it('arrayUnique should handle large arrays with duplicates', () => {
+      const largeArr = Array.from({ length: 1000 }, (_, i) => i % 100)
+      const result = arrayUnique(largeArr)
+      expect(result.length).toBe(100)
+    })
+  })
 })
