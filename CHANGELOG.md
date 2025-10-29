@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.0) - 2025-10-29
+
+### Changed
+
+- **Enhanced DLX cache key generation with npm/npx compatibility**: Updated cache key strategy to align with npm/npx ecosystem patterns
+  - Changed from SHA-256 (64 chars) to SHA-512 truncated to 16 chars (matching npm/npx)
+  - Optimized for Windows MAX_PATH compatibility (260 character limit)
+  - Accepts collision risk for shorter paths (~1 in 18 quintillion with 1000 entries)
+  - Added support for PURL-style package specifications (e.g., `npm:prettier@3.0.0`, `pypi:requests@2.31.0`)
+  - Documented Socket's shorthand format (without `pkg:` prefix) handled by `@socketregistry/packageurl-js`
+  - References npm/cli v11.6.2 implementation for consistency
+
 ## [2.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.7.0) - 2025-10-28
 
 ### Added
