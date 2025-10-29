@@ -393,9 +393,8 @@ describe('stdio/divider', () => {
     })
 
     it('should handle Infinity width', () => {
-      const result = divider({ width: Infinity })
-      // Should handle gracefully without hanging
-      expect(typeof result).toBe('string')
+      // String.repeat(Infinity) throws RangeError
+      expect(() => divider({ width: Infinity })).toThrow(RangeError)
     })
 
     it('should handle special Unicode characters', () => {

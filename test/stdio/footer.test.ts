@@ -94,7 +94,7 @@ describe('stdio/footer', () => {
     it('should handle message with timestamp', () => {
       const result = createFooter('Complete', { showTimestamp: true })
       const lines = result.split('\n')
-      expect(lines).toContain(expect.stringContaining('Complete'))
+      expect(lines.some((line) => line.includes('Complete'))).toBe(true)
       expect(lines.some((line) => line.includes('Completed at:'))).toBe(true)
     })
 

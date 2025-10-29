@@ -47,6 +47,9 @@ describe('stdio/stdout', () => {
       ;(stdout as any).clearScreenDown = () => {}
     }
 
+    // Make stdout appear as a WriteStream instance for hide/showCursor tests
+    Object.setPrototypeOf(stdout, WriteStream.prototype)
+
     // Create spies
     writeSpy = vi.spyOn(stdout, 'write').mockImplementation(() => true)
     cursorToSpy = vi.spyOn(stdout, 'cursorTo').mockImplementation(() => {})
