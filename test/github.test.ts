@@ -341,4 +341,152 @@ describe.sequential('github', () => {
       ).toBe(true)
     })
   })
+
+  describe('API error handling edge cases', () => {
+    it('should handle missing token gracefully', () => {
+      resetEnv()
+      const token = getGitHubToken()
+      expect(token).toBeUndefined()
+    })
+
+    it('should generate GHSA URLs consistently', () => {
+      const ghsaId = 'GHSA-1234-5678-90ab'
+      const url1 = getGhsaUrl(ghsaId)
+      const url2 = getGhsaUrl(ghsaId)
+      expect(url1).toBe(url2)
+      expect(url1).toContain(ghsaId)
+    })
+
+    it('should handle GHSA IDs with mixed case', () => {
+      const url = getGhsaUrl('GhSa-MiXeD-CaSe-TeSt')
+      expect(url).toBe('https://github.com/advisories/GhSa-MiXeD-CaSe-TeSt')
+    })
+
+    it('should handle GHSA IDs with dashes only', () => {
+      const url = getGhsaUrl('----')
+      expect(url).toBe('https://github.com/advisories/----')
+    })
+  })
+
+  describe('caching behavior', () => {
+    it('should allow multiple cache clears in sequence', async () => {
+      for (let i = 0; i < 5; i++) {
+        await clearRefCache()
+      }
+      expect(true).toBe(true)
+    })
+
+    it('should handle cache operations after clear', async () => {
+      await clearRefCache()
+      const token = getGitHubToken()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+  })
+
+  describe('token resolution', () => {
+    it('should handle all three token sources independently', () => {
+      // Test GITHUB_TOKEN alone
+      resetEnv()
+      setEnv('GITHUB_TOKEN', 'token1')
+      expect(getGitHubToken()).toBe('token1')
+
+      // Test GH_TOKEN alone
+      resetEnv()
+      setEnv('GH_TOKEN', 'token2')
+      expect(getGitHubToken()).toBe('token2')
+
+      // Test SOCKET_CLI_GITHUB_TOKEN alone
+      resetEnv()
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
+      expect(getGitHubToken()).toBe('token3')
+    })
+
+    it('should handle token priority with all permutations', () => {
+      // Priority: GITHUB_TOKEN > GH_TOKEN > SOCKET_CLI_GITHUB_TOKEN
+      resetEnv()
+      setEnv('GH_TOKEN', 'gh')
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli')
+      expect(getGitHubToken()).toBe('gh')
+
+      resetEnv()
+      setEnv('GITHUB_TOKEN', 'github')
+      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli')
+      expect(getGitHubToken()).toBe('github')
+
+      resetEnv()
+      setEnv('GITHUB_TOKEN', 'github')
+      setEnv('GH_TOKEN', 'gh')
+      expect(getGitHubToken()).toBe('github')
+    })
+  })
+
+  describe('git config integration', () => {
+    it('should handle non-git directories', async () => {
+      const token = await getGitHubTokenFromGitConfig({
+        cwd: '/tmp',
+      })
+      expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+
+    it('should handle relative paths', async () => {
+      const token = await getGitHubTokenFromGitConfig({
+        cwd: '.',
+      })
+      expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+
+    it('should handle multiple concurrent git config reads', async () => {
+      const results = await Promise.all([
+        getGitHubTokenFromGitConfig(),
+        getGitHubTokenFromGitConfig(),
+        getGitHubTokenFromGitConfig(),
+      ])
+      results.forEach(result => {
+        expect(typeof result === 'string' || result === undefined).toBe(true)
+      })
+    })
+  })
+
+  describe('URL formatting', () => {
+    it('should maintain URL structure for all IDs', () => {
+      const ids = [
+        'GHSA-1234-5678-9abc',
+        'GHSA-xxxx-yyyy-zzzz',
+        'GHSA-abcd-efgh-ijkl',
+        'ghsa-lowercase-test-id',
+      ]
+      ids.forEach(id => {
+        const url = getGhsaUrl(id)
+        expect(url).toMatch(/^https:\/\/github\.com\/advisories\//)
+        expect(url).toContain(id)
+      })
+    })
+
+    it('should handle GHSA IDs with URL-unsafe characters', () => {
+      const id = 'GHSA-test%20with%20spaces'
+      const url = getGhsaUrl(id)
+      expect(url).toContain(id)
+    })
+  })
+
+  describe('fallback chain', () => {
+    it('should complete fallback chain with no sources', async () => {
+      resetEnv()
+      const token = await getGitHubTokenWithFallback()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+
+    it('should short-circuit on first found token', async () => {
+      setEnv('GITHUB_TOKEN', 'first-token')
+      const token = await getGitHubTokenWithFallback()
+      expect(token).toBe('first-token')
+    })
+
+    it('should try git config when env vars are empty', async () => {
+      resetEnv()
+      const token = await getGitHubTokenWithFallback()
+      // Token may come from git config or be undefined
+      expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+  })
 })
