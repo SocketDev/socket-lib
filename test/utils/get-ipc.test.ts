@@ -174,6 +174,7 @@ describe('utils/get-ipc', () => {
       const ipc = await getIpc()
 
       expect(() => {
+        // @ts-expect-error - Testing immutability by assigning to non-existent property
         ipc.NEW_PROPERTY = 'value'
       }).toThrow()
     })

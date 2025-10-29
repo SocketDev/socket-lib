@@ -16,6 +16,7 @@ describe('stdio/footer', () => {
   beforeEach(() => {
     originalDateNow = Date.now
     // Mock Date.now() to return a fixed timestamp
+    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
     dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_000_000)
   })
 

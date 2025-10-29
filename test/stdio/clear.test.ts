@@ -68,6 +68,7 @@ describe('stdio/clear', () => {
 
       clearLine(mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toContain('\r') // Carriage return
       expect(written).toContain('\x1b[K') // Clear to end of line
@@ -153,6 +154,7 @@ describe('stdio/clear', () => {
 
       clearLines(1, mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toContain('\x1b[1A') // Move up one line
       expect(written).toContain('\x1b[2K') // Erase entire line
@@ -355,6 +357,7 @@ describe('stdio/clear', () => {
 
       hideCursor(mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toBe('\x1b[?25l')
     })
@@ -403,6 +406,7 @@ describe('stdio/clear', () => {
 
       showCursor(mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toBe('\x1b[?25h')
     })
@@ -451,6 +455,7 @@ describe('stdio/clear', () => {
 
       saveCursor(mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toBe('\x1b7')
     })
@@ -499,6 +504,7 @@ describe('stdio/clear', () => {
 
       restoreCursor(mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toBe('\x1b8')
     })
@@ -579,6 +585,7 @@ describe('stdio/clear', () => {
 
       clearLines(1, mockStream)
 
+      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
       const written = mockStream.write.mock.calls[0][0] as string
       expect(written).toContain('\x1b[1A') // Up one line
       expect(written).toContain('\x1b[2K') // Clear line
