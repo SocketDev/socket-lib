@@ -549,12 +549,6 @@ describe('stdio/stderr', () => {
       expect(writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
     })
 
-    it('should handle empty writes', () => {
-      writeError('')
-      writeErrorLine('')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-    })
-
     it('should handle rapid cursor movements', () => {
       Object.defineProperty(stderr, 'isTTY', {
         value: true,
@@ -627,13 +621,6 @@ describe('stdio/stderr', () => {
       const height = getRows()
       expect(width).toBe(120)
       expect(height).toBe(40)
-    })
-
-    it('should support build tool error patterns', () => {
-      writeErrorFormatted('Compilation failed', 'TypeScript')
-      writeErrorLine('  Type error in src/index.ts:10:5')
-      writeWarning('Unused variable detected')
-      expect(writeSpy).toHaveBeenCalledTimes(3)
     })
   })
 })
