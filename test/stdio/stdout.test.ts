@@ -47,10 +47,10 @@ describe('stdio/stdout', () => {
 
   afterEach(() => {
     // Restore spies
-    writeSpy.mockRestore()
-    cursorToSpy.mockRestore()
-    clearLineSpy.mockRestore()
-    clearScreenDownSpy.mockRestore()
+    writeSpy?.mockRestore()
+    cursorToSpy?.mockRestore()
+    clearLineSpy?.mockRestore()
+    clearScreenDownSpy?.mockRestore()
 
     // Restore original properties
     Object.defineProperty(stdout, 'isTTY', {
