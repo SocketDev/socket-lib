@@ -3,7 +3,7 @@
  */
 
 import { existsSync } from 'node:fs'
-import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { downloadWithLock } from '@socketsecurity/lib/download-lock'

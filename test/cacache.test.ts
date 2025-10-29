@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for cacache utility wrapper.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   clear,

@@ -19,7 +19,7 @@ describe('stdio/footer', () => {
     dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_000_000)
   })
 
-  beforeEach(() => {
+  afterEach(() => {
     if (dateNowSpy) {
       dateNowSpy.mockRestore()
     }

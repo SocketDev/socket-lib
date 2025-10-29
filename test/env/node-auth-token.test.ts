@@ -82,7 +82,7 @@ describe('env/node-auth-token', () => {
       expect(getNodeAuthToken()).toBe('test-token')
 
       clearEnv('NODE_AUTH_TOKEN')
-      const result = clearEnv('NODE_AUTH_TOKEN')
+      const _result = clearEnv('NODE_AUTH_TOKEN')
       expect(typeof getNodeAuthToken()).toMatch(/string|undefined/)
 
       setEnv('NODE_AUTH_TOKEN', 'new-token')

@@ -111,7 +111,7 @@ describe('env/home', () => {
     })
 
     it('should handle very long paths', () => {
-      const longPath = '/home/' + 'a'.repeat(200)
+      const longPath = `/home/${'a'.repeat(200)}`
       setEnv('HOME', longPath)
       expect(getHome()).toBe(longPath)
     })

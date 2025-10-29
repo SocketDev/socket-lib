@@ -75,7 +75,7 @@ describe('env/temp-dir', () => {
     })
 
     it('should handle long tmpdir path', () => {
-      const longPath = '/a'.repeat(100) + '/tmp'
+      const longPath = `${'/a'.repeat(100)}/tmp`
       setEnv('TMPDIR', longPath)
       expect(getTmpdir()).toBe(longPath)
     })

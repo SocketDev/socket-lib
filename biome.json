@@ -143,7 +143,18 @@
           },
           "suspicious": {
             "noExplicitAny": "off",
+            "noImportAssign": "off",
             "noShadowRestrictedNames": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["test/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noImportAssign": "off"
           }
         }
       }
