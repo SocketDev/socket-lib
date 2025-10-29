@@ -34,7 +34,7 @@ class SimpleSpinner {
     return this
   }
 
-  succeed(message) {
+  success(message) {
     this.stop()
     if (message) {
       console.log(`✓ ${message}`)
