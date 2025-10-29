@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.7.0) - 2025-10-28
+
+### Added
+
+- **DLX cache locking for concurrent installation protection**: Added process-lock protection to dlx-package installation operations
+  - Lock file created at `~/.socket/_dlx/<hash>/.lock` (similar to npm npx's `concurrency.lock`)
+  - Prevents concurrent installations from corrupting the same package cache
+  - Uses 5-second stale timeout and 2-second periodic touching (aligned with npm npx)
+  - Double-check pattern verifies installation after acquiring lock to avoid redundant work
+  - Completes 100% alignment with npm's npx locking strategy
+
 ## [2.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.6.0) - 2025-10-28
 
 ### Changed
