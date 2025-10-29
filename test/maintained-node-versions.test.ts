@@ -75,7 +75,7 @@ describe('maintained-node-versions', () => {
         .map(v => v.split('.').map(Number))
         .sort((a, b) => {
           for (let i = 0; i < 3; i++) {
-            if (a[i] !== b[i]) return a[i] - b[i]
+            if (a[i] !== b[i]) {return a[i] - b[i]}
           }
           return 0
         })
