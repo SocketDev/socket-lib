@@ -130,7 +130,8 @@ describe('packages/paths', () => {
 
     it('should handle current directory', () => {
       const result = resolvePackageJsonPath('.')
-      expect(result).toBe('./package.json')
+      // normalizePath normalizes '.' to remove './' prefix
+      expect(result).toBe('package.json')
     })
 
     it('should handle parent directory', () => {
@@ -145,7 +146,8 @@ describe('packages/paths', () => {
 
     it('should handle relative paths', () => {
       const result = resolvePackageJsonPath('./some/path')
-      expect(result).toBe('./some/path/package.json')
+      // normalizePath normalizes paths to remove './' prefix
+      expect(result).toBe('some/path/package.json')
     })
 
     it('should handle Windows-style paths', () => {
@@ -255,10 +257,12 @@ describe('packages/paths', () => {
     it('should handle relative path conversions', () => {
       const relativeDir = './project'
       const pkgJsonPath = resolvePackageJsonPath(relativeDir)
-      expect(pkgJsonPath).toBe('./project/package.json')
+      // normalizePath removes './' prefix
+      expect(pkgJsonPath).toBe('project/package.json')
 
       const extractedDir = resolvePackageJsonDirname(pkgJsonPath)
-      expect(extractedDir).toBe(relativeDir)
+      // normalizePath normalizes to 'project' (without './' prefix)
+      expect(extractedDir).toBe('project')
     })
   })
 
