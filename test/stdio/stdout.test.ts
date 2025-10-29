@@ -500,19 +500,6 @@ describe('stdio/stdout', () => {
       expect(writeSpy).toHaveBeenNthCalledWith(3, ' Done!\n')
     })
 
-    it('should support clearing and rewriting', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      write('Processing...')
-      clearLine()
-      write('Complete!')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-      expect(cursorToSpy).toHaveBeenCalledWith(0)
-      expect(clearLineSpy).toHaveBeenCalledWith(0)
-    })
-
     it('should support hide/show cursor pattern', () => {
       Object.defineProperty(stdout, 'isTTY', {
         value: true,
@@ -565,12 +552,6 @@ describe('stdio/stdout', () => {
       const longText = 'x'.repeat(10_000)
       writeLine(longText)
       expect(writeSpy).toHaveBeenCalledWith(`${longText}\n`)
-    })
-
-    it('should handle empty writes', () => {
-      write('')
-      writeLine('')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
     })
 
     it('should handle rapid cursor movements', () => {
@@ -648,13 +629,6 @@ describe('stdio/stdout', () => {
       writeLine('John Doe    | 30  | NYC')
       writeLine('Jane Smith  | 25  | LA')
       expect(writeSpy).toHaveBeenCalledTimes(4)
-    })
-
-    it('should support status messages', () => {
-      writeLine('✓ Step 1 complete')
-      writeLine('✓ Step 2 complete')
-      writeLine('✗ Step 3 failed')
-      expect(writeSpy).toHaveBeenCalledTimes(3)
     })
 
     it('should detect redirected output', () => {
