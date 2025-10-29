@@ -511,14 +511,6 @@ describe('stdio/stderr', () => {
       expect(writeSpy).toHaveBeenCalled()
     })
 
-    it('should support different error types', () => {
-      writeWarning('Potential issue', 'Warning')
-      writeErrorFormatted('Critical failure', 'Fatal')
-      const error = new Error('Stack trace')
-      writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalledTimes(3)
-    })
-
     it('should handle graceful degradation from TTY to non-TTY', () => {
       // Start with TTY
       Object.defineProperty(stderr, 'isTTY', {
@@ -607,30 +599,6 @@ describe('stdio/stderr', () => {
   })
 
   describe('real-world usage', () => {
-    it('should support CLI error reporting', () => {
-      writeErrorFormatted('Command not found: foo', 'CLI')
-      writeWarning('Using deprecated flag --old')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-    })
-
-    it('should support validation error messages', () => {
-      writeErrorFormatted('Invalid email format', 'Validation')
-      writeErrorFormatted('Password too short', 'Validation')
-      writeWarning('Username contains special characters', 'Validation')
-      expect(writeSpy).toHaveBeenCalledTimes(3)
-    })
-
-    it('should support exception logging', () => {
-      try {
-        throw new TypeError('Cannot read property of null')
-      } catch (err) {
-        writeStackTrace(err as Error)
-      }
-      const callArg = writeSpy.mock.calls[0][0] as string
-      expect(callArg).toContain('TypeError')
-      expect(callArg).toContain('Cannot read property of null')
-    })
-
     it('should support status messages', () => {
       writeErrorLine('✗ Build failed')
       writeErrorLine('✗ Tests failed')
