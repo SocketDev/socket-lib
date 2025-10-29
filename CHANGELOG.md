@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.4.0) - 2025-10-28
+
+### Changed
+
+- **Download locking aligned with npm**: Reduced default `staleTimeout` in `downloadWithLock()` from 300 seconds to 10 seconds to align with npm's npx locking strategy
+  - Prevents stale locks from blocking downloads for extended periods
+  - Matches npm's battle-tested timeout range (5-10 seconds)
+  - Binary downloads now protected against concurrent corruption
+- **Binary download protection**: `dlxBinary.downloadBinary()` now uses `downloadWithLock()` to prevent corruption when multiple processes download the same binary concurrently
+  - Eliminates race conditions during parallel binary downloads
+  - Maintains checksum verification and executable permissions
+
 ## [2.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.3.0) - 2025-10-28
 
 ### Added
