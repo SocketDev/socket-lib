@@ -36,6 +36,17 @@ describe('stdio/stdout', () => {
     originalColumns = stdout.columns
     originalRows = stdout.rows
 
+    // Add TTY methods if they don't exist (for non-TTY environments)
+    if (!stdout.cursorTo) {
+      ;(stdout as any).cursorTo = () => {}
+    }
+    if (!stdout.clearLine) {
+      ;(stdout as any).clearLine = () => {}
+    }
+    if (!stdout.clearScreenDown) {
+      ;(stdout as any).clearScreenDown = () => {}
+    }
+
     // Create spies
     writeSpy = vi.spyOn(stdout, 'write').mockImplementation(() => true)
     cursorToSpy = vi.spyOn(stdout, 'cursorTo').mockImplementation(() => {})

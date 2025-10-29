@@ -32,6 +32,14 @@ describe('stdio/stderr', () => {
     originalColumns = stderr.columns
     originalRows = stderr.rows
 
+    // Add TTY methods if they don't exist (for non-TTY environments)
+    if (!stderr.cursorTo) {
+      ;(stderr as any).cursorTo = () => {}
+    }
+    if (!stderr.clearLine) {
+      ;(stderr as any).clearLine = () => {}
+    }
+
     // Create spies
     writeSpy = vi.spyOn(stderr, 'write').mockImplementation(() => true)
     cursorToSpy = vi.spyOn(stderr, 'cursorTo').mockImplementation(() => {})
