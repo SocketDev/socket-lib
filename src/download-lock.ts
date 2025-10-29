@@ -30,7 +30,8 @@ export interface DownloadWithLockOptions extends HttpDownloadOptions {
   pollInterval?: number | undefined
   /**
    * Maximum age of a lock before it's considered stale in milliseconds.
-   * @default 300000 (5 minutes)
+   * Aligned with npm's npx locking strategy (5-10 seconds).
+   * @default 10000 (10 seconds)
    */
   staleTimeout?: number | undefined
 }
@@ -191,7 +192,7 @@ export async function downloadWithLock(
     lockTimeout = 60_000,
     locksDir,
     pollInterval = 1000,
-    staleTimeout = 300_000,
+    staleTimeout = 10_000, // Aligned with npm's npx locking (5-10s range)
     ...downloadOptions
   } = { __proto__: null, ...options } as DownloadWithLockOptions
 

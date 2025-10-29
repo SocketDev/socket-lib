@@ -7,8 +7,8 @@ import path from 'node:path'
 
 import { WIN32 } from '#constants/platform'
 
+import { downloadWithLock } from './download-lock'
 import { isDir, readJson, safeDelete } from './fs'
-import { httpRequest } from './http-request'
 import { isObjectObject } from './objects'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
@@ -88,63 +88,42 @@ async function isCacheValid(
 }
 
 /**
- * Download a file from a URL with integrity checking.
+ * Download a file from a URL with integrity checking and concurrent download protection.
+ * Uses downloadWithLock to prevent multiple processes from downloading the same binary simultaneously.
  */
 async function downloadBinary(
   url: string,
   destPath: string,
   checksum?: string | undefined,
 ): Promise<string> {
-  const response = await httpRequest(url)
-  if (!response.ok) {
+  // Use downloadWithLock to handle concurrent download protection.
+  // This prevents corruption when multiple processes try to download the same binary.
+  await downloadWithLock(url, destPath, {
+    staleTimeout: 10_000, // Align with npm's npx locking strategy
+    lockTimeout: 120_000, // Allow up to 2 minutes for large binary downloads
+  })
+
+  // Compute checksum of downloaded file.
+  const fileBuffer = await fs.readFile(destPath)
+  const hasher = createHash('sha256')
+  hasher.update(fileBuffer)
+  const actualChecksum = hasher.digest('hex')
+
+  // Verify checksum if provided.
+  if (checksum && actualChecksum !== checksum) {
+    // Clean up invalid file.
+    await safeDelete(destPath)
     throw new Error(
-      `Failed to download binary: ${response.status} ${response.statusText}`,
+      `Checksum mismatch: expected ${checksum}, got ${actualChecksum}`,
     )
   }
 
-  // Create a temporary file first.
-  const tempPath = `${destPath}.download`
-  const hasher = createHash('sha256')
-
-  try {
-    // Ensure directory exists.
-    await fs.mkdir(path.dirname(destPath), { recursive: true })
-
-    // Get the response as a buffer and compute hash.
-    const buffer = response.body
-
-    // Compute hash.
-    hasher.update(buffer)
-    const actualChecksum = hasher.digest('hex')
-
-    // Verify checksum if provided.
-    if (checksum && actualChecksum !== checksum) {
-      throw new Error(
-        `Checksum mismatch: expected ${checksum}, got ${actualChecksum}`,
-      )
-    }
-
-    // Write to temp file.
-    await fs.writeFile(tempPath, buffer)
-
-    // Make executable on POSIX systems.
-    if (!WIN32) {
-      await fs.chmod(tempPath, 0o755)
-    }
-
-    // Move temp file to final location.
-    await fs.rename(tempPath, destPath)
-
-    return actualChecksum
-  } catch (e) {
-    // Clean up temp file on error.
-    try {
-      await safeDelete(tempPath)
-    } catch {
-      // Ignore cleanup errors.
-    }
-    throw e
+  // Make executable on POSIX systems.
+  if (!WIN32) {
+    await fs.chmod(destPath, 0o755)
   }
+
+  return actualChecksum
 }
 
 /**
