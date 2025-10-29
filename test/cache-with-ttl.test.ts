@@ -272,6 +272,93 @@ describe.sequential('cache-with-ttl', () => {
     it('should support getAll method', () => {
       expect(typeof cache.getAll).toBe('function')
     })
+
+    it('should return all entries with wildcard pattern', async () => {
+      await cache.set('user:1', { name: 'Alice' })
+      await cache.set('user:2', { name: 'Bob' })
+      await cache.set('post:1', { title: 'Hello' })
+
+      const users = await cache.getAll<{ name: string }>('user:*')
+      expect(users.size).toBe(2)
+      expect(users.get('user:1')).toEqual({ name: 'Alice' })
+      expect(users.get('user:2')).toEqual({ name: 'Bob' })
+      expect(users.has('post:1')).toBe(false)
+    })
+
+    it('should return all entries with star pattern', async () => {
+      await cache.set('key1', 'value1')
+      await cache.set('key2', 'value2')
+      await cache.set('key3', 'value3')
+
+      const all = await cache.getAll<string>('*')
+      expect(all.size).toBeGreaterThanOrEqual(3)
+      expect(all.get('key1')).toBe('value1')
+      expect(all.get('key2')).toBe('value2')
+      expect(all.get('key3')).toBe('value3')
+    })
+
+    it('should return empty map when no entries match', async () => {
+      await cache.set('user:1', 'data')
+
+      const posts = await cache.getAll('post:*')
+      expect(posts.size).toBe(0)
+    })
+
+    it('should skip expired entries in getAll', async () => {
+      const shortCache = createTtlCache({
+        ttl: 50,
+        prefix: 'expiry-getall-test',
+      })
+
+      await shortCache.set('key1', 'value1')
+      await shortCache.set('key2', 'value2')
+
+      // Wait for TTL to expire
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const all = await shortCache.getAll<string>('*')
+      expect(all.size).toBe(0)
+
+      await shortCache.clear()
+    })
+
+    it('should handle complex wildcard patterns', async () => {
+      await cache.set('npm/lodash/1.0.0', 'data1')
+      await cache.set('npm/lodash/2.0.0', 'data2')
+      await cache.set('npm/react/1.0.0', 'data3')
+
+      const lodash = await cache.getAll<string>('npm/lodash/*')
+      expect(lodash.size).toBe(2)
+      expect(lodash.get('npm/lodash/1.0.0')).toBe('data1')
+      expect(lodash.get('npm/lodash/2.0.0')).toBe('data2')
+    })
+
+    it('should return entries from both memory and persistent cache', async () => {
+      // Set some entries
+      await cache.set('mem1', 'value1')
+      await cache.set('mem2', 'value2')
+
+      // Clear only memory cache to force reading from persistent
+      await cache.clear({ memoOnly: true })
+
+      // Set a new entry (will be in memory only initially)
+      await cache.set('mem3', 'value3')
+
+      // getAll should return all entries from both sources
+      const all = await cache.getAll<string>('*')
+      expect(all.size).toBeGreaterThanOrEqual(2)
+    })
+
+    it('should handle non-wildcard patterns as prefix match', async () => {
+      await cache.set('users:1', 'alice')
+      await cache.set('users:2', 'bob')
+      await cache.set('posts:1', 'hello')
+
+      const users = await cache.getAll<string>('users')
+      expect(users.size).toBe(2)
+      expect(users.get('users:1')).toBe('alice')
+      expect(users.get('users:2')).toBe('bob')
+    })
   })
 
   describe('clear', () => {
