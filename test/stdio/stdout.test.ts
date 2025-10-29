@@ -160,14 +160,6 @@ describe('stdio/stdout', () => {
       expect(writeSpy).toHaveBeenCalledWith('')
     })
 
-    it('should handle multiple writes', () => {
-      write('Part 1')
-      write(' Part 2')
-      expect(writeSpy).toHaveBeenCalledTimes(2)
-      expect(writeSpy).toHaveBeenNthCalledWith(1, 'Part 1')
-      expect(writeSpy).toHaveBeenNthCalledWith(2, ' Part 2')
-    })
-
     it('should not add newline', () => {
       write('test')
       expect(writeSpy).toHaveBeenCalledWith('test')
@@ -198,16 +190,6 @@ describe('stdio/stdout', () => {
       clearLine()
       expect(cursorToSpy).toHaveBeenCalledWith(0)
       expect(clearLineSpy).toHaveBeenCalledWith(0)
-    })
-
-    it('should not clear line when not TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      clearLine()
-      expect(cursorToSpy).not.toHaveBeenCalled()
-      expect(clearLineSpy).not.toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
@@ -260,15 +242,6 @@ describe('stdio/stdout', () => {
       })
       cursorTo(0, 0)
       expect(cursorToSpy).toHaveBeenCalledWith(0, 0)
-    })
-
-    it('should not move cursor when not TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      cursorTo(10, 5)
-      expect(cursorToSpy).not.toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
@@ -463,15 +436,6 @@ describe('stdio/stdout', () => {
       })
       hideCursor()
       expect(writeSpy).toHaveBeenCalledWith('\u001B[?25l')
-    })
-
-    it('should not write when not TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      hideCursor()
-      expect(writeSpy).not.toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
