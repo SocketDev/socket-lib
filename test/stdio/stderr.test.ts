@@ -40,9 +40,9 @@ describe('stdio/stderr', () => {
 
   afterEach(() => {
     // Restore spies
-    writeSpy.mockRestore()
-    cursorToSpy.mockRestore()
-    clearLineSpy.mockRestore()
+    writeSpy?.mockRestore()
+    cursorToSpy?.mockRestore()
+    clearLineSpy?.mockRestore()
 
     // Restore original properties
     Object.defineProperty(stderr, 'isTTY', {
