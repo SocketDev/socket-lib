@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.1) - 2025-10-29
+
+### Changed
+
+- **Consolidated DLX cache key generation**: Extracted `generateCacheKey` function to shared `dlx.ts` module
+  - Eliminates code duplication between `dlx-binary.ts` and `dlx-package.ts`
+  - Enables consistent cache key generation across the Socket ecosystem
+  - Exports function for use in dependent packages (e.g., socket-cli)
+  - Maintains SHA-512 truncated to 16 chars strategy from v2.8.0
+
 ## [2.8.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.0) - 2025-10-29
 
 ### Changed
