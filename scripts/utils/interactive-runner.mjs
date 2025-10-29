@@ -205,15 +205,9 @@ export async function runWithOutput(command, args = [], options = {}) {
 
       if (isSpinning) {
         if (finalCode === 0) {
-          spinner.stop()
           spinner.success(`${message} completed`)
-          // Ensure spinner is fully cleared and we're on a fresh line
-          process.stdout.write('\r\x1b[K')
         } else {
-          spinner.stop()
           spinner.fail(`${message} failed`)
-          // Ensure spinner is fully cleared and we're on a fresh line
-          process.stdout.write('\r\x1b[K')
           // Show output on error if configured
           if (showOnError && outputBuffer.length > 0) {
             console.log('\n--- Output ---')
@@ -233,10 +227,7 @@ export async function runWithOutput(command, args = [], options = {}) {
       }
 
       if (isSpinning) {
-        spinner.stop()
         spinner.fail(`${message} error: ${error.message}`)
-        // Ensure spinner is fully cleared and we're on a fresh line
-        process.stdout.write('\r\x1b[K')
       }
       reject(error)
     })
