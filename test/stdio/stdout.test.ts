@@ -62,12 +62,6 @@ describe('stdio/stdout', () => {
       .spyOn(stdout, 'clearScreenDown')
       // @ts-expect-error - Vitest mock type doesn't match expected implementation signature
       .mockImplementation(() => {})
-
-    // Clear any calls made during setup
-    writeSpy.mockClear()
-    cursorToSpy.mockClear()
-    clearLineSpy.mockClear()
-    clearScreenDownSpy.mockClear()
   })
 
   afterEach(() => {
