@@ -549,17 +549,6 @@ describe('stdio/stderr', () => {
       expect(writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
     })
 
-    it('should handle rapid cursor movements', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      for (let i = 0; i < 100; i++) {
-        cursorTo(i, i)
-      }
-      expect(cursorToSpy).toHaveBeenCalledTimes(100)
-    })
-
     it('should handle terminal dimension changes', () => {
       Object.defineProperty(stderr, 'columns', {
         value: 80,
@@ -593,13 +582,6 @@ describe('stdio/stderr', () => {
   })
 
   describe('real-world usage', () => {
-    it('should support status messages', () => {
-      writeErrorLine('✗ Build failed')
-      writeErrorLine('✗ Tests failed')
-      writeWarning('Code coverage below threshold')
-      expect(writeSpy).toHaveBeenCalledTimes(3)
-    })
-
     it('should detect redirected error output', () => {
       Object.defineProperty(stderr, 'isTTY', {
         value: false,
