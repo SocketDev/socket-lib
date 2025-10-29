@@ -127,7 +127,7 @@ describe('constants/licenses', () => {
       const licenses = getCopyLeftLicenses()
       for (const license of licenses) {
         // SPDX identifiers use hyphens and dots
-        expect(license).toMatch(/^[A-Z0-9.-]+$/)
+        expect(license).toMatch(/^[A-Z0-9.\-]+$/)
       }
     })
 
