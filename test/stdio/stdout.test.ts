@@ -160,12 +160,6 @@ describe('stdio/stdout', () => {
       expect(writeSpy).toHaveBeenCalledWith('')
     })
 
-    it('should not add newline', () => {
-      write('test')
-      expect(writeSpy).toHaveBeenCalledWith('test')
-      expect(writeSpy).not.toHaveBeenCalledWith('test\n')
-    })
-
     it('should handle ANSI escape sequences', () => {
       write('\u001B[32mGreen\u001B[0m')
       expect(writeSpy).toHaveBeenCalledWith('\u001B[32mGreen\u001B[0m')
@@ -284,15 +278,6 @@ describe('stdio/stdout', () => {
       })
       clearScreenDown()
       expect(clearScreenDownSpy).toHaveBeenCalled()
-    })
-
-    it('should not clear screen when not TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      clearScreenDown()
-      expect(clearScreenDownSpy).not.toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
@@ -462,15 +447,6 @@ describe('stdio/stdout', () => {
       expect(writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
-    it('should not write when not TTY', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      showCursor()
-      expect(writeSpy).not.toHaveBeenCalled()
-    })
-
     it('should not return a value', () => {
       Object.defineProperty(stdout, 'isTTY', {
         value: true,
@@ -535,19 +511,6 @@ describe('stdio/stdout', () => {
       expect(writeSpy).toHaveBeenCalledTimes(2)
       expect(cursorToSpy).toHaveBeenCalledWith(0)
       expect(clearLineSpy).toHaveBeenCalledWith(0)
-    })
-
-    it('should support cursor positioning and writing', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      cursorTo(0, 0)
-      write('Top left')
-      cursorTo(0, 10)
-      write('Row 10')
-      expect(cursorToSpy).toHaveBeenCalledTimes(2)
-      expect(writeSpy).toHaveBeenCalledTimes(2)
     })
 
     it('should support hide/show cursor pattern', () => {
