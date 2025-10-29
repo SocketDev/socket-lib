@@ -192,7 +192,8 @@ export async function downloadWithLock(
     lockTimeout = 60_000,
     locksDir,
     pollInterval = 1000,
-    staleTimeout = 10_000, // Aligned with npm's npx locking (5-10s range)
+    // Aligned with npm's npx locking (5-10s range).
+    staleTimeout = 10_000,
     ...downloadOptions
   } = { __proto__: null, ...options } as DownloadWithLockOptions
 

@@ -99,8 +99,10 @@ async function downloadBinary(
   // Use downloadWithLock to handle concurrent download protection.
   // This prevents corruption when multiple processes try to download the same binary.
   await downloadWithLock(url, destPath, {
-    staleTimeout: 10_000, // Align with npm's npx locking strategy
-    lockTimeout: 120_000, // Allow up to 2 minutes for large binary downloads
+    // Align with npm's npx locking strategy.
+    staleTimeout: 10_000,
+    // Allow up to 2 minutes for large binary downloads.
+    lockTimeout: 120_000,
   })
 
   // Compute checksum of downloaded file.
