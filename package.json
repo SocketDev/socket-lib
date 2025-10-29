@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
