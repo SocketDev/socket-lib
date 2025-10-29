@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for shadow binary installation utilities.
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import { shouldSkipShadow } from '@socketsecurity/lib/shadow'
 
@@ -11,7 +11,7 @@ describe('shadow', () => {
     describe('Windows behavior', () => {
       it('should skip shadow when win32 is true and binPath exists', () => {
         expect(
-          shouldSkipShadow('/usr/bin/npm', { win32: true, cwd: '/home/user' })
+          shouldSkipShadow('/usr/bin/npm', { win32: true, cwd: '/home/user' }),
         ).toBe(true)
       })
 
@@ -20,7 +20,7 @@ describe('shadow', () => {
           shouldSkipShadow('C:\\Program Files\\nodejs\\npm.cmd', {
             win32: true,
             cwd: 'C:\\Users\\user\\project',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -35,7 +35,7 @@ describe('shadow', () => {
           shouldSkipShadow('/usr/bin/npm', {
             win32: false,
             cwd: '/home/user',
-          })
+          }),
         ).toBe(false)
       })
     })
@@ -54,22 +54,21 @@ describe('shadow', () => {
       it('should skip shadow when user agent contains "exec"', () => {
         process.env['npm_config_user_agent'] = 'npm/8.19.2 node/v18.12.0 exec'
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user' })).toBe(
-          true
+          true,
         )
       })
 
       it('should skip shadow when user agent contains "npx"', () => {
         process.env['npm_config_user_agent'] = 'npm/8.19.2 node/v18.12.0 npx'
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user' })).toBe(
-          true
+          true,
         )
       })
 
       it('should skip shadow when user agent contains "dlx"', () => {
-        process.env['npm_config_user_agent'] =
-          'pnpm/8.6.0 node/v18.12.0 dlx'
+        process.env['npm_config_user_agent'] = 'pnpm/8.6.0 node/v18.12.0 dlx'
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user' })).toBe(
-          true
+          true,
         )
       })
 
@@ -77,14 +76,14 @@ describe('shadow', () => {
         process.env['npm_config_user_agent'] =
           'npm/8.19.2 node/v18.12.0 darwin x64'
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user' })).toBe(
-          false
+          false,
         )
       })
 
       it('should not skip when user agent is undefined', () => {
         delete process.env['npm_config_user_agent']
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user' })).toBe(
-          false
+          false,
         )
       })
     })
@@ -103,7 +102,7 @@ describe('shadow', () => {
       it('should skip shadow when running from npm cache', () => {
         process.env['npm_config_cache'] = '/home/user/.npm'
         expect(
-          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/.npm/_npx/123' })
+          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/.npm/_npx/123' }),
         ).toBe(true)
       })
 
@@ -112,21 +111,21 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('C:\\Program Files\\nodejs\\npm.cmd', {
             cwd: 'C:\\Users\\user\\AppData\\npm-cache\\_npx\\123',
-          })
+          }),
         ).toBe(true)
       })
 
       it('should not skip when cwd is outside npm cache', () => {
         process.env['npm_config_cache'] = '/home/user/.npm'
         expect(
-          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/project' })
+          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/project' }),
         ).toBe(false)
       })
 
       it('should not skip when npm_config_cache is not set', () => {
         delete process.env['npm_config_cache']
         expect(
-          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/.npm/_npx/123' })
+          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/.npm/_npx/123' }),
         ).toBe(true) // Still skips due to _npx pattern
       })
     })
@@ -136,7 +135,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/npm', {
             cwd: '/home/user/.npm/_npx/abc123',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -144,13 +143,13 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/pnpm', {
             cwd: '/home/user/.pnpm-store/dlx-123',
-          })
+          }),
         ).toBe(true)
       })
 
       it('should skip shadow when cwd contains dlx-', () => {
         expect(
-          shouldSkipShadow('/usr/bin/pnpm', { cwd: '/tmp/dlx-abc123' })
+          shouldSkipShadow('/usr/bin/pnpm', { cwd: '/tmp/dlx-abc123' }),
         ).toBe(true)
       })
 
@@ -158,7 +157,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/yarn', {
             cwd: '/home/user/project/.yarn/$$/package',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -166,13 +165,13 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('C:\\Program Files\\nodejs\\yarn.cmd', {
             cwd: 'C:\\Users\\user\\AppData\\Local\\Temp\\xfs-abc123',
-          })
+          }),
         ).toBe(true)
       })
 
       it('should not skip shadow for normal project directory', () => {
         expect(
-          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/my-project' })
+          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/my-project' }),
         ).toBe(false)
       })
 
@@ -180,7 +179,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/npm', {
             cwd: '/home/user/project/node_modules/.bin',
-          })
+          }),
         ).toBe(false)
       })
     })
@@ -190,7 +189,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('C:\\npm.cmd', {
             cwd: 'C:\\Users\\user\\.npm\\_npx\\123',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -198,7 +197,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/npm', {
             cwd: '/home/user/.npm/_npx/123',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -206,7 +205,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('C:/Program Files/nodejs/npm.cmd', {
             cwd: 'C:/Users/user/.npm/_npx/123',
-          })
+          }),
         ).toBe(true)
       })
     })
@@ -219,7 +218,7 @@ describe('shadow', () => {
 
       it('should default win32 to false', () => {
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user' })).toBe(
-          false
+          false,
         )
       })
 
@@ -256,7 +255,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/npm', {
             cwd: '/home/user/.npm/_npx/123',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -268,7 +267,7 @@ describe('shadow', () => {
           shouldSkipShadow('C:\\npm.cmd', {
             win32: true,
             cwd: 'C:\\Users\\user\\project',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -277,7 +276,7 @@ describe('shadow', () => {
         expect(
           shouldSkipShadow('/usr/bin/npm', {
             cwd: '/home/user/.npm/_npx/123',
-          })
+          }),
         ).toBe(true)
       })
 
@@ -288,7 +287,7 @@ describe('shadow', () => {
           shouldSkipShadow('/usr/bin/npm', {
             win32: false,
             cwd: '/home/user/my-project',
-          })
+          }),
         ).toBe(false)
       })
     })
@@ -317,12 +316,12 @@ describe('shadow', () => {
 
       it('should be case-sensitive for pattern matching', () => {
         expect(
-          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/_NPX/123' })
+          shouldSkipShadow('/usr/bin/npm', { cwd: '/home/user/_NPX/123' }),
         ).toBe(false) // _NPX (uppercase) should not match _npx pattern
       })
 
       it('should handle very long paths', () => {
-        const longPath = '/home/user/' + 'a'.repeat(200) + '/_npx/123'
+        const longPath = `/home/user/${'a'.repeat(200)}/_npx/123`
         expect(shouldSkipShadow('/usr/bin/npm', { cwd: longPath })).toBe(true)
       })
     })

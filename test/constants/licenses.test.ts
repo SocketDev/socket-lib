@@ -126,8 +126,8 @@ describe('constants/licenses', () => {
     it('should contain only SPDX-style identifiers', () => {
       const licenses = getCopyLeftLicenses()
       for (const license of licenses) {
-        // SPDX identifiers use hyphens and dots
-        expect(license).toMatch(/^[A-Z0-9.\-]+$/)
+        // SPDX identifiers use letters, digits, hyphens, and dots
+        expect(license).toMatch(/^[A-Za-z0-9.-]+$/)
       }
     })
 
@@ -153,22 +153,22 @@ describe('constants/licenses', () => {
   describe('copy-left license categories', () => {
     it('should have all AGPL variants', () => {
       const licenses = getCopyLeftLicenses()
-      const agplLicenses = Array.from(licenses).filter(l => l.startsWith('AGPL'))
+      const agplLicenses = Array.from(licenses).filter(l =>
+        l.startsWith('AGPL'),
+      )
       expect(agplLicenses.length).toBe(6)
     })
 
     it('should have all GPL variants', () => {
       const licenses = getCopyLeftLicenses()
-      const gplLicenses = Array.from(licenses).filter(l =>
-        l.startsWith('GPL-')
-      )
+      const gplLicenses = Array.from(licenses).filter(l => l.startsWith('GPL-'))
       expect(gplLicenses.length).toBe(9)
     })
 
     it('should have all CC-BY-SA variants', () => {
       const licenses = getCopyLeftLicenses()
       const ccLicenses = Array.from(licenses).filter(l =>
-        l.startsWith('CC-BY-SA')
+        l.startsWith('CC-BY-SA'),
       )
       expect(ccLicenses.length).toBe(4)
     })
@@ -182,7 +182,7 @@ describe('constants/licenses', () => {
     it('should have all EUPL variants', () => {
       const licenses = getCopyLeftLicenses()
       const euplLicenses = Array.from(licenses).filter(l =>
-        l.startsWith('EUPL')
+        l.startsWith('EUPL'),
       )
       expect(euplLicenses.length).toBe(2)
     })
@@ -198,7 +198,7 @@ describe('constants/licenses', () => {
     it('should include -or-later variants', () => {
       const licenses = getCopyLeftLicenses()
       const orLaterVariants = Array.from(licenses).filter(l =>
-        l.includes('-or-later')
+        l.includes('-or-later'),
       )
       expect(orLaterVariants.length).toBeGreaterThan(0)
     })
