@@ -264,7 +264,7 @@ describe.sequential('dlx-binary', () => {
               name: 'error-binary',
               url,
             }),
-          ).rejects.toThrow(/Failed to download binary/)
+          ).rejects.toThrow(/Download failed: HTTP 500/)
         } finally {
           restoreHome()
         }
