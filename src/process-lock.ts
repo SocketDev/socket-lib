@@ -128,7 +128,7 @@ class ProcessLockManager {
       baseDelayMs = 100,
       maxDelayMs = 1000,
       retries = 3,
-      staleMs = 10000,
+      staleMs = 10_000,
     } = options
 
     // Ensure exit handler is registered before any lock acquisition
