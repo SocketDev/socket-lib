@@ -79,7 +79,7 @@ describe('env/socket-cli-shadow', () => {
     })
 
     it('should handle long API token', () => {
-      const longToken = 'sock_' + 'a'.repeat(100)
+      const longToken = `sock_${'a'.repeat(100)}`
       setEnv('SOCKET_CLI_SHADOW_API_TOKEN', longToken)
       expect(getSocketCliShadowApiToken()).toBe(longToken)
     })

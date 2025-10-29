@@ -98,7 +98,7 @@ describe('constants/packages', () => {
     it('should be iterable with for-of', () => {
       const extensions = getPackageExtensions()
       let count = 0
-      for (const [key, value] of extensions) {
+      for (const [key, _value] of extensions) {
         expect(typeof key).toBe('string')
         count++
       }
@@ -172,7 +172,7 @@ describe('constants/packages', () => {
 
     it('should be mutable Map', () => {
       const cache = getPackumentCache()
-      const key = 'test-key-' + Date.now()
+      const key = `test-key-${Date.now()}`
       const value = { test: true }
 
       cache.set(key, value)
