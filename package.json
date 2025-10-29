@@ -384,6 +384,10 @@
       "types": "./plugins/babel-plugin-inline-require-calls.d.ts",
       "default": "./plugins/babel-plugin-inline-require-calls.js"
     },
+    "./process-lock": {
+      "types": "./dist/process-lock.d.ts",
+      "default": "./dist/process-lock.js"
+    },
     "./promise-queue": {
       "types": "./dist/promise-queue.d.ts",
       "default": "./dist/promise-queue.js"
