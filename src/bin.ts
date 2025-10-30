@@ -67,7 +67,17 @@ export async function execBin(
     : await whichBin(binPath)
 
   if (!resolvedPath) {
-    const error = new Error(`Binary not found: ${binPath}`) as Error & {
+    const error = new Error(
+      `Binary not found: ${binPath}\n` +
+        'Possible causes:\n' +
+        `  - Binary "${binPath}" is not installed or not in PATH\n` +
+        '  - Binary name is incorrect or misspelled\n' +
+        '  - Installation directory is not in system PATH\n' +
+        'To resolve:\n' +
+        `  1. Verify "${binPath}" is installed: which ${binPath} (Unix) or where ${binPath} (Windows)\n` +
+        `  2. Install the binary if missing: npm install -g ${binPath}\n` +
+        '  3. Check PATH environment variable includes the binary location',
+    ) as Error & {
       code: string
     }
     error.code = 'ENOENT'
