@@ -984,6 +984,21 @@ export async function readJson(
     })
   } catch (e) {
     if (shouldThrow) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (code === 'ENOENT') {
+        throw new Error(
+          `JSON file not found: ${filepath}\n` +
+            'Ensure the file exists or create it with the expected structure.',
+          { cause: e },
+        )
+      }
+      if (code === 'EACCES' || code === 'EPERM') {
+        throw new Error(
+          `Permission denied reading JSON file: ${filepath}\n` +
+            'Check file permissions or run with appropriate access.',
+          { cause: e },
+        )
+      }
       throw e
     }
     return undefined
@@ -1046,6 +1061,21 @@ export function readJsonSync(
     })
   } catch (e) {
     if (shouldThrow) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (code === 'ENOENT') {
+        throw new Error(
+          `JSON file not found: ${filepath}\n` +
+            'Ensure the file exists or create it with the expected structure.',
+          { cause: e },
+        )
+      }
+      if (code === 'EACCES' || code === 'EPERM') {
+        throw new Error(
+          `Permission denied reading JSON file: ${filepath}\n` +
+            'Check file permissions or run with appropriate access.',
+          { cause: e },
+        )
+      }
       throw e
     }
     return undefined

@@ -200,7 +200,11 @@ async function ensurePackageInstalled(
             { cause: e },
           )
         }
-        if (code === 'ENOTFOUND' || code === 'ETIMEDOUT' || code === 'EAI_AGAIN') {
+        if (
+          code === 'ENOTFOUND' ||
+          code === 'ETIMEDOUT' ||
+          code === 'EAI_AGAIN'
+        ) {
           throw new Error(
             `Network error installing ${packageSpec}\n` +
               'Check your internet connection and try again.',
