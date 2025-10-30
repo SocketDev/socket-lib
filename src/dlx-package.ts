@@ -130,8 +130,8 @@ function parsePackageSpec(spec: string): {
  * Protected by process lock to prevent concurrent installation corruption.
  */
 async function ensurePackageInstalled(
-  packageSpec: string,
   packageName: string,
+  packageSpec: string,
   force: boolean,
 ): Promise<{ installed: boolean; packageDir: string }> {
   const cacheKey = generateCacheKey(packageSpec)
@@ -294,8 +294,8 @@ export async function downloadPackage(
 
   // Ensure package is installed.
   const { installed, packageDir } = await ensurePackageInstalled(
-    fullPackageSpec,
     packageName,
+    fullPackageSpec,
     force,
   )
 
