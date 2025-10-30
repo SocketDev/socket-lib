@@ -1,7 +1,43 @@
 /**
  * @fileoverview Process locking utilities with stale detection and exit cleanup.
- * Provides cross-platform inter-process synchronization using file-system based locks.
+ * Provides cross-platform inter-process synchronization using directory-based locks.
  * Aligned with npm's npx locking strategy (5-second stale timeout, periodic touching).
+ *
+ * ## Why directories instead of files?
+ *
+ * This implementation uses `mkdir()` to create lock directories (not files) because:
+ *
+ * 1. **Atomic guarantee**: `mkdir()` is guaranteed atomic across ALL filesystems,
+ *    including NFS. Only ONE process can successfully create the directory. If it
+ *    exists, `mkdir()` fails with EEXIST instantly with no race conditions.
+ *
+ * 2. **File-based locking issues**:
+ *    - `writeFile()` with `flag: 'wx'` - atomicity can fail on NFS
+ *    - `open()` with `O_EXCL` - not guaranteed atomic on older NFS
+ *    - Traditional lockfiles - can have race conditions on network filesystems
+ *
+ * 3. **Simplicity**: No need to write/read file content, track PIDs, or manage
+ *    file descriptors. Just create/delete directory and check mtime.
+ *
+ * 4. **Historical precedent**: Well-known Unix locking pattern used by package
+ *    managers for decades. Git uses similar approach for `.git/index.lock`.
+ *
+ * ## The mtime trick
+ *
+ * We periodically update the lock directory's mtime (modification time) by
+ * "touching" it to signal "I'm still actively working". This prevents other
+ * processes from treating the lock as stale and removing it.
+ *
+ * **The lock directory remains empty** - it's just a sentinel that signals
+ * "locked". The mtime is the only data needed to track lock freshness.
+ *
+ * ## npm npx compatibility
+ *
+ * This implementation matches npm npx's concurrency.lock approach:
+ * - Lock created via `mkdir(path.join(installDir, 'concurrency.lock'))`
+ * - 5-second stale timeout (if mtime is older than 5s, lock is stale)
+ * - 2-second touching interval (updates mtime every 2s to keep lock fresh)
+ * - Automatic cleanup on process exit
  */
 
 import { existsSync, mkdirSync, statSync, utimesSync } from 'node:fs'
@@ -232,14 +268,45 @@ class ProcessLockManager {
           // Return release function.
           return () => this.release(lockPath)
         } catch (error) {
-          // Handle lock contention.
-          if (error instanceof Error && (error as any).code === 'EEXIST') {
+          const code = (error as NodeJS.ErrnoException).code
+
+          // Handle lock contention - lock already exists.
+          if (code === 'EEXIST') {
             if (this.isStale(lockPath, staleMs)) {
               throw new Error(`Stale lock detected: ${lockPath}`)
             }
             throw new Error(`Lock already exists: ${lockPath}`)
           }
-          throw error
+
+          // Handle permission errors - not retryable.
+          if (code === 'EACCES' || code === 'EPERM') {
+            throw new Error(
+              `Permission denied creating lock: ${lockPath}. ` +
+                'Check directory permissions or run with appropriate access.',
+              { cause: error },
+            )
+          }
+
+          // Handle read-only filesystem - not retryable.
+          if (code === 'EROFS') {
+            throw new Error(
+              `Cannot create lock on read-only filesystem: ${lockPath}`,
+              { cause: error },
+            )
+          }
+
+          // Handle parent path issues - not retryable.
+          if (code === 'ENOTDIR' || code === 'ENOENT') {
+            throw new Error(
+              `Lock parent directory does not exist or is not a directory: ${lockPath}`,
+              { cause: error },
+            )
+          }
+
+          // Re-throw other errors with context.
+          throw new Error(`Failed to acquire lock: ${lockPath}`, {
+            cause: error,
+          })
         }
       },
       {
