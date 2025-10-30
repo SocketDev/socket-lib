@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.3](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.3) - 2025-10-30
+
+### Fixed
+
+- **Logger now fully defers all console access for Node.js internal bootstrap compatibility**: Completed lazy initialization to prevent ERR_CONSOLE_WRITABLE_STREAM errors
+  - Deferred `Object.getOwnPropertySymbols(console)` call until first logger use
+  - Deferred `kGroupIndentationWidth` symbol lookup
+  - Deferred `Object.entries(console)` and prototype method initialization
+  - Ensures logger can be safely imported in Node.js internal bootstrap contexts (e.g., `lib/internal/bootstrap/*.js`) before stdout is initialized
+  - Builds on v2.8.2 console deferring to complete early bootstrap compatibility
+
 ## [2.8.2](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.2) - 2025-10-29
 
 ### Changed
