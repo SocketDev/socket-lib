@@ -1,6 +1,7 @@
 import path from 'node:path'
 
 import { WIN32 } from '#constants/platform'
+import { debugNs } from './debug'
 import { getGlobMatcher } from './globs'
 import { normalizePath } from './path'
 import { spawn, spawnSync } from './spawn'
@@ -289,7 +290,16 @@ async function innerDiff(
     const spawnCwd =
       typeof args[2]['cwd'] === 'string' ? args[2]['cwd'] : undefined
     result = parseGitDiffStdout(stdout, parseOptions, spawnCwd)
-  } catch {
+  } catch (e) {
+    // Git command failed. This is expected if:
+    // - Not in a git repository
+    // - Git is not installed
+    // - Permission issues accessing .git directory
+    // Log warning in debug mode for troubleshooting.
+    debugNs(
+      'git',
+      `Git command failed (${args[0]} ${args[1].join(' ')}): ${(e as Error).message}`,
+    )
     return []
   }
   if (cache && cacheKey) {
@@ -334,7 +344,16 @@ function innerDiffSync(
     const spawnCwd =
       typeof args[2]['cwd'] === 'string' ? args[2]['cwd'] : undefined
     result = parseGitDiffStdout(stdout, parseOptions, spawnCwd)
-  } catch {
+  } catch (e) {
+    // Git command failed. This is expected if:
+    // - Not in a git repository
+    // - Git is not installed
+    // - Permission issues accessing .git directory
+    // Log warning in debug mode for troubleshooting.
+    debugNs(
+      'git',
+      `Git command failed (${args[0]} ${args[1].join(' ')}): ${(e as Error).message}`,
+    )
     return []
   }
   if (cache && cacheKey) {
