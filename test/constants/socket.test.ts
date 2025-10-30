@@ -9,13 +9,18 @@ import {
   REGISTRY,
   REGISTRY_SCOPE_DELIMITER,
   SOCKET_API_BASE_URL,
+  SOCKET_API_TOKENS_URL,
   SOCKET_APP_PREFIX,
   SOCKET_CLI_APP_NAME,
+  SOCKET_CONTACT_URL,
+  SOCKET_DASHBOARD_URL,
   SOCKET_DLX_APP_NAME,
+  SOCKET_DOCS_URL,
   SOCKET_FIREWALL_APP_NAME,
   SOCKET_GITHUB_ORG,
   SOCKET_IPC_HANDSHAKE,
   SOCKET_OVERRIDE_SCOPE,
+  SOCKET_PRICING_URL,
   SOCKET_PUBLIC_API_KEY,
   SOCKET_PUBLIC_API_TOKEN,
   SOCKET_REGISTRY_APP_NAME,
@@ -24,6 +29,8 @@ import {
   SOCKET_REGISTRY_REPO_NAME,
   SOCKET_REGISTRY_SCOPE,
   SOCKET_SECURITY_SCOPE,
+  SOCKET_STATUS_URL,
+  SOCKET_WEBSITE_URL,
 } from '@socketsecurity/lib/constants/socket'
 
 describe('constants/socket', () => {
@@ -72,6 +79,94 @@ describe('constants/socket', () => {
 
     it('should have API key format', () => {
       expect(SOCKET_PUBLIC_API_KEY.startsWith('sktsec_')).toBe(true)
+    })
+  })
+
+  describe('Socket.dev URLs', () => {
+    it('should export SOCKET_WEBSITE_URL', () => {
+      expect(SOCKET_WEBSITE_URL).toBe('https://socket.dev')
+    })
+
+    it('should export SOCKET_CONTACT_URL', () => {
+      expect(SOCKET_CONTACT_URL).toBe('https://socket.dev/contact')
+    })
+
+    it('should export SOCKET_DASHBOARD_URL', () => {
+      expect(SOCKET_DASHBOARD_URL).toBe('https://socket.dev/dashboard')
+    })
+
+    it('should export SOCKET_API_TOKENS_URL', () => {
+      expect(SOCKET_API_TOKENS_URL).toBe(
+        'https://socket.dev/dashboard/settings/api-tokens',
+      )
+    })
+
+    it('should export SOCKET_PRICING_URL', () => {
+      expect(SOCKET_PRICING_URL).toBe('https://socket.dev/pricing')
+    })
+
+    it('should export SOCKET_STATUS_URL', () => {
+      expect(SOCKET_STATUS_URL).toBe('https://status.socket.dev')
+    })
+
+    it('should export SOCKET_DOCS_URL', () => {
+      expect(SOCKET_DOCS_URL).toBe('https://docs.socket.dev')
+    })
+
+    it('should all be valid HTTPS URLs', () => {
+      const urls = [
+        SOCKET_WEBSITE_URL,
+        SOCKET_CONTACT_URL,
+        SOCKET_DASHBOARD_URL,
+        SOCKET_API_TOKENS_URL,
+        SOCKET_PRICING_URL,
+        SOCKET_STATUS_URL,
+        SOCKET_DOCS_URL,
+      ]
+      urls.forEach(url => {
+        expect(url).toMatch(/^https:\/\//)
+        expect(() => new URL(url)).not.toThrow()
+      })
+    })
+
+    it('should all contain socket.dev domain', () => {
+      const urls = [
+        SOCKET_WEBSITE_URL,
+        SOCKET_CONTACT_URL,
+        SOCKET_DASHBOARD_URL,
+        SOCKET_API_TOKENS_URL,
+        SOCKET_PRICING_URL,
+        SOCKET_STATUS_URL,
+        SOCKET_DOCS_URL,
+      ]
+      urls.forEach(url => {
+        expect(url).toContain('socket.dev')
+      })
+    })
+
+    it('should not have trailing slashes', () => {
+      const urls = [
+        SOCKET_WEBSITE_URL,
+        SOCKET_CONTACT_URL,
+        SOCKET_DASHBOARD_URL,
+        SOCKET_API_TOKENS_URL,
+        SOCKET_PRICING_URL,
+        SOCKET_STATUS_URL,
+        SOCKET_DOCS_URL,
+      ]
+      urls.forEach(url => {
+        expect(url.endsWith('/')).toBe(false)
+      })
+    })
+
+    it('should support URL path construction', () => {
+      const orgDashboard = `${SOCKET_DASHBOARD_URL}/org/myorg`
+      expect(orgDashboard).toBe('https://socket.dev/dashboard/org/myorg')
+    })
+
+    it('should support documentation path construction', () => {
+      const guidePath = `${SOCKET_DOCS_URL}/docs/getting-started`
+      expect(guidePath).toBe('https://docs.socket.dev/docs/getting-started')
     })
   })
 
