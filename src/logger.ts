@@ -214,7 +214,27 @@ const consolePropAttributes = {
   configurable: true,
 }
 const maxIndentation = 1000
+
+/**
+ * WeakMap storing the Console instance for each Logger.
+ *
+ * Console creation is lazy - deferred until first logging method call.
+ * This allows logger to be imported during early Node.js bootstrap before
+ * stdout is ready, avoiding ERR_CONSOLE_WRITABLE_STREAM errors.
+ */
 const privateConsole = new WeakMap()
+
+/**
+ * WeakMap storing constructor arguments for lazy Console initialization.
+ *
+ * WeakMap is required instead of a private field (#constructorArgs) because:
+ * 1. Private fields can't be accessed from dynamically created functions
+ * 2. Logger adds console methods dynamically to its prototype (lines 1560+)
+ * 3. These dynamic methods need constructor args for lazy initialization
+ * 4. WeakMap allows both regular methods and dynamic functions to access args
+ *
+ * The args are deleted from the WeakMap after Console is created (memory cleanup).
+ */
 const privateConstructorArgs = new WeakMap()
 
 const consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
@@ -319,7 +339,6 @@ export class Logger {
   #stderrLastWasBlank = false
   #stdoutLastWasBlank = false
   #logCallCount = 0
-  #constructorArgs: unknown[]
   #options: Record<string, unknown>
   #originalStdout?: any
 
@@ -345,8 +364,7 @@ export class Logger {
    * ```
    */
   constructor(...args: unknown[]) {
-    // Store constructor args for child loggers
-    this.#constructorArgs = args
+    // Store constructor args for lazy Console initialization.
     privateConstructorArgs.set(this, args)
 
     // Store options if provided (for future extensibility)
@@ -377,8 +395,9 @@ export class Logger {
     let con = privateConsole.get(this)
     if (!con) {
       // Lazy initialization - create Console on first use.
-      if (this.#constructorArgs.length) {
-        con = constructConsole(...this.#constructorArgs)
+      const ctorArgs = privateConstructorArgs.get(this) ?? []
+      if (ctorArgs.length) {
+        con = constructConsole(...ctorArgs)
       } else {
         // Create a new console that acts like the builtin one so that it will
         // work with Node's --frozen-intrinsics flag.
@@ -420,8 +439,9 @@ export class Logger {
    */
   get stderr(): Logger {
     if (!this.#stderrLogger) {
-      // Pass parent's constructor args to maintain config
-      const instance = new Logger(...this.#constructorArgs)
+      // Pass parent's constructor args to maintain config.
+      const ctorArgs = privateConstructorArgs.get(this) ?? []
+      const instance = new Logger(...ctorArgs)
       instance.#parent = this
       instance.#boundStream = 'stderr'
       instance.#options = { __proto__: null, ...this.#options }
@@ -453,8 +473,9 @@ export class Logger {
    */
   get stdout(): Logger {
     if (!this.#stdoutLogger) {
-      // Pass parent's constructor args to maintain config
-      const instance = new Logger(...this.#constructorArgs)
+      // Pass parent's constructor args to maintain config.
+      const ctorArgs = privateConstructorArgs.get(this) ?? []
+      const instance = new Logger(...ctorArgs)
       instance.#parent = this
       instance.#boundStream = 'stdout'
       instance.#options = { __proto__: null, ...this.#options }
@@ -1447,9 +1468,10 @@ export class Logger {
     // 1. Use stored reference from constructor options
     // 2. Try to get from constructor args
     // 3. Fall back to con._stdout (which applies formatting)
+    const ctorArgs = privateConstructorArgs.get(this) ?? []
     const stdout =
       this.#originalStdout ||
-      (this.#constructorArgs[0] as any)?.stdout ||
+      (ctorArgs[0] as any)?.stdout ||
       con._stdout
     stdout.write(text)
     this[lastWasBlankSymbol](false)
@@ -1564,9 +1586,11 @@ Object.defineProperties(
               if (con === undefined) {
                 // Lazy initialization - this will only happen if someone calls a
                 // dynamically added console method before any core logger method.
-                const constructorArgs = privateConstructorArgs.get(this) || []
-                if (constructorArgs.length) {
-                  con = constructConsole(...constructorArgs)
+                const ctorArgs = privateConstructorArgs.get(this) ?? []
+                // Clean up constructor args - no longer needed after Console creation.
+                privateConstructorArgs.delete(this)
+                if (ctorArgs.length) {
+                  con = constructConsole(...ctorArgs)
                 } else {
                   con = constructConsole({
                     stdout: process.stdout,
@@ -1577,8 +1601,7 @@ Object.defineProperties(
                   }
                 }
                 privateConsole.set(this, con)
-                // Clean up constructor args - no longer needed after Console creation.
-                privateConstructorArgs.delete(this)
+
               }
               const result = (con as any)[key](...args)
               return result === undefined || result === con ? this : result
