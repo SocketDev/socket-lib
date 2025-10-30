@@ -65,6 +65,25 @@ export interface DlxPackageOptions {
    */
   package: string
   /**
+   * Binary name to execute (optional - auto-detected in most cases).
+   *
+   * Auto-detection logic:
+   * 1. If package has only one binary, uses it automatically
+   * 2. Tries user-provided binaryName
+   * 3. Tries last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
+   * 4. Falls back to first binary
+   *
+   * Only needed when package has multiple binaries and auto-detection fails.
+   *
+   * @example
+   * // Auto-detected (single binary)
+   * { package: '@socketsecurity/cli' }  // Finds 'socket' binary automatically
+   *
+   * // Explicit (multiple binaries)
+   * { package: 'some-tool', binaryName: 'specific-tool' }
+   */
+  binaryName?: string | undefined
+  /**
    * Force reinstallation even if package exists.
    */
   force?: boolean | undefined
@@ -231,6 +250,7 @@ async function ensurePackageInstalled(
 
 /**
  * Find the binary path for an installed package.
+ * Intelligently handles packages with single or multiple binaries.
  */
 function findBinaryPath(
   packageDir: string,
@@ -249,12 +269,40 @@ function findBinaryPath(
   let binPath: string | undefined
 
   if (typeof bin === 'string') {
-    // Single binary.
+    // Single binary - use it directly.
     binPath = bin
   } else if (typeof bin === 'object' && bin !== null) {
-    // Multiple binaries - use binaryName or package name.
-    const binName = binaryName || packageName.split('/').pop()
-    binPath = (bin as Record<string, string>)[binName!]
+    const binObj = bin as Record<string, string>
+    const binKeys = Object.keys(binObj)
+
+    // If only one binary, use it regardless of name.
+    if (binKeys.length === 1) {
+      binPath = binObj[binKeys[0]!]
+    } else {
+      // Multiple binaries - try to find the right one:
+      // 1. User-provided binaryName
+      // 2. Last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
+      // 3. Full package name without scope (e.g., 'cli' from '@socketsecurity/cli')
+      // 4. First binary as fallback
+      const lastSegment = packageName.split('/').pop()
+      const candidates = [
+        binaryName,
+        lastSegment,
+        packageName.replace(/^@[^/]+\//, ''),
+      ].filter(Boolean)
+
+      for (const candidate of candidates) {
+        if (candidate && binObj[candidate]) {
+          binPath = binObj[candidate]
+          break
+        }
+      }
+
+      // Fallback to first binary if nothing matched.
+      if (!binPath && binKeys.length > 0) {
+        binPath = binObj[binKeys[0]!]
+      }
+    }
   }
 
   if (!binPath) {
@@ -323,7 +371,7 @@ export async function dlxPackage(
 export async function downloadPackage(
   options: DlxPackageOptions,
 ): Promise<DownloadPackageResult> {
-  const { force: userForce, package: packageSpec } = {
+  const { binaryName, force: userForce, package: packageSpec } = {
     __proto__: null,
     ...options,
   } as DlxPackageOptions
@@ -351,7 +399,7 @@ export async function downloadPackage(
   )
 
   // Find binary path.
-  const binaryPath = findBinaryPath(packageDir, packageName)
+  const binaryPath = findBinaryPath(packageDir, packageName, binaryName)
 
   // Make binary executable on Unix systems.
   if (!WIN32 && existsSync(binaryPath)) {

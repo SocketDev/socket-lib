@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.9.1) - 2025-10-30
+
+### Added
+
+- **Smart binary detection in dlxPackage**: Automatically finds the correct binary even when package name doesn't match binary name
+  - If package has single binary, uses it automatically regardless of name
+  - Resolves packages like `@socketsecurity/cli` (binary: `socket`) without manual configuration
+  - Falls back to intelligent name matching for multi-binary packages
+- **Optional binaryName parameter**: Added `binaryName` option to `DlxPackageOptions` for explicit binary selection when auto-detection isn't sufficient
+
+### Fixed
+
+- **Binary resolution for scoped packages**: Fixed issue where `dlxPackage` couldn't find binaries when package name didn't match binary name (e.g., `@socketsecurity/cli` with `bin: { socket: '...' }`)
+
 ## [2.9.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.9.0) - 2025-10-30
 
 ### Added
