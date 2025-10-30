@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.9.0) - 2025-10-30
+
+### Added
+
+- **Socket.dev URL constants**: Added centralized URL constants for Socket.dev services
+  - `SOCKET_WEBSITE_URL`: Main Socket.dev website
+  - `SOCKET_CONTACT_URL`: Contact page
+  - `SOCKET_DASHBOARD_URL`: Dashboard homepage
+  - `SOCKET_API_TOKENS_URL`: API tokens settings page
+  - `SOCKET_PRICING_URL`: Pricing information
+  - `SOCKET_STATUS_URL`: Service status page
+  - `SOCKET_DOCS_URL`: Documentation site
+  - Available via `@socketsecurity/lib/constants/socket`
+
+### Changed
+
+- **Enhanced error messages across library**: Comprehensive audit and improvement of error handling
+  - Added actionable error messages with resolution steps throughout modules
+  - Improved file system operation errors (permissions, read-only filesystems, path issues)
+  - Enhanced DLX error messages with clear troubleshooting guidance
+  - Better error context in process locking, binary downloads, and package operations
+  - Consistent error formatting with helpful user guidance
+- **Consolidated process locking**: Standardized on directory-based lock format across all modules
+  - All locking operations now use `process-lock` module exclusively
+  - Lock directories provide atomic guarantees across all filesystems including NFS
+  - Consistent mtime-based stale detection with 5-second timeout (aligned with npm npx)
+  - Automatic cleanup on process exit with proper signal handling
+
 ## [2.8.4](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.4) - 2025-10-30
 
 ### Added

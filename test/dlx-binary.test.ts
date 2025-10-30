@@ -245,7 +245,7 @@ describe.sequential('dlx-binary', () => {
               name: 'not-found-binary',
               url,
             }),
-          ).rejects.toThrow(/Download failed: HTTP 404/)
+          ).rejects.toThrow(/Failed to download binary from/)
         } finally {
           restoreHome()
         }
@@ -264,7 +264,7 @@ describe.sequential('dlx-binary', () => {
               name: 'error-binary',
               url,
             }),
-          ).rejects.toThrow(/Download failed: HTTP 500/)
+          ).rejects.toThrow(/Failed to download binary from/)
         } finally {
           restoreHome()
         }
