@@ -1203,8 +1203,7 @@ export class Logger {
     const text = this.#stripSymbols(msg)
     // Note: Step messages always go to stdout (unlike info/fail/etc which go to stderr).
     const indent = this.#getIndent('stdout')
-    const con = this.#getConsole() as typeof console &
-      Record<string, unknown>
+    const con = this.#getConsole() as typeof console & Record<string, unknown>
     con.log(
       applyLinePrefix(`${LOG_SYMBOLS.step} ${text}`, {
         prefix: indent,
@@ -1470,9 +1469,7 @@ export class Logger {
     // 3. Fall back to con._stdout (which applies formatting)
     const ctorArgs = privateConstructorArgs.get(this) ?? []
     const stdout =
-      this.#originalStdout ||
-      (ctorArgs[0] as any)?.stdout ||
-      con._stdout
+      this.#originalStdout || (ctorArgs[0] as any)?.stdout || con._stdout
     stdout.write(text)
     this[lastWasBlankSymbol](false)
     return this
@@ -1601,7 +1598,6 @@ Object.defineProperties(
                   }
                 }
                 privateConsole.set(this, con)
-
               }
               const result = (con as any)[key](...args)
               return result === undefined || result === con ? this : result
