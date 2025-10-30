@@ -101,6 +101,10 @@ describe.sequential('cache-with-ttl', () => {
 
     it('should overwrite existing value', async () => {
       await cache.set('key', 'value1')
+      // Ensure first write completes before second write.
+      const firstValue = await cache.get<string>('key')
+      expect(firstValue).toBe('value1')
+
       await cache.set('key', 'value2')
       const value = await cache.get<string>('key')
       expect(value).toBe('value2')
