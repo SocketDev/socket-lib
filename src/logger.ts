@@ -215,6 +215,7 @@ const consolePropAttributes = {
 }
 const maxIndentation = 1000
 const privateConsole = new WeakMap()
+const privateConstructorArgs = new WeakMap()
 
 const consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
 
@@ -346,6 +347,7 @@ export class Logger {
   constructor(...args: unknown[]) {
     // Store constructor args for child loggers
     this.#constructorArgs = args
+    privateConstructorArgs.set(this, args)
 
     // Store options if provided (for future extensibility)
     const options = args['0']
@@ -357,20 +359,40 @@ export class Logger {
       this.#options = { __proto__: null }
     }
 
-    if (args.length) {
-      privateConsole.set(this, constructConsole(...args))
-    } else {
-      // Create a new console that acts like the builtin one so that it will
-      // work with Node's --frozen-intrinsics flag.
-      const con = constructConsole({
-        stdout: process.stdout,
-        stderr: process.stderr,
-      }) as typeof console & Record<string, unknown>
-      for (const { 0: key, 1: method } of boundConsoleEntries) {
-        con[key] = method
+    // Note: Console initialization is now lazy (happens on first use).
+    // This allows logger to be imported during early bootstrap before
+    // stdout is ready, avoiding ERR_CONSOLE_WRITABLE_STREAM errors.
+  }
+
+  /**
+   * Get the Console instance for this logger, creating it lazily on first access.
+   *
+   * This lazy initialization allows the logger to be imported during early
+   * Node.js bootstrap before stdout is ready, avoiding Console initialization
+   * errors (ERR_CONSOLE_WRITABLE_STREAM).
+   *
+   * @private
+   */
+  #getConsole(): typeof console & Record<string, unknown> {
+    let con = privateConsole.get(this)
+    if (!con) {
+      // Lazy initialization - create Console on first use.
+      if (this.#constructorArgs.length) {
+        con = constructConsole(...this.#constructorArgs)
+      } else {
+        // Create a new console that acts like the builtin one so that it will
+        // work with Node's --frozen-intrinsics flag.
+        con = constructConsole({
+          stdout: process.stdout,
+          stderr: process.stderr,
+        }) as typeof console & Record<string, unknown>
+        for (const { 0: key, 1: method } of boundConsoleEntries) {
+          con[key] = method
+        }
       }
       privateConsole.set(this, con)
     }
+    return con
   }
 
   /**
@@ -510,8 +532,7 @@ export class Logger {
     args: unknown[],
     stream?: 'stderr' | 'stdout',
   ): this {
-    const con = privateConsole.get(this) as typeof console &
-      Record<string, unknown>
+    const con = this.#getConsole()
     const text = args.at(0)
     const hasText = typeof text === 'string'
     // Determine which stream this method writes to
@@ -547,7 +568,7 @@ export class Logger {
    * @private
    */
   #symbolApply(symbolType: string, args: unknown[]): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     let text = args.at(0)
     // biome-ignore lint/suspicious/noImplicitAnyLet: Flexible argument handling.
     let extras
@@ -649,7 +670,7 @@ export class Logger {
    * ```
    */
   assert(value: unknown, ...message: unknown[]): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.assert(value, ...message)
     this[lastWasBlankSymbol](false)
     return value ? this : this[incLogCallCountSymbol]()
@@ -680,7 +701,7 @@ export class Logger {
         'clearVisible() is only available on the main logger instance, not on stream-bound instances',
       )
     }
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.clear()
     if ((con as any)._stdout.isTTY) {
       ;(this as any)[lastWasBlankSymbol](true)
@@ -707,7 +728,7 @@ export class Logger {
    * ```
    */
   count(label?: string | undefined): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.count(label)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -809,7 +830,7 @@ export class Logger {
    * ```
    */
   dir(obj: unknown, options?: unknown | undefined): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.dir(obj, options)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -830,7 +851,7 @@ export class Logger {
    * ```
    */
   dirxml(...data: unknown[]): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.dirxml(data)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -1159,7 +1180,7 @@ export class Logger {
     const text = this.#stripSymbols(msg)
     // Note: Step messages always go to stdout (unlike info/fail/etc which go to stderr).
     const indent = this.#getIndent('stdout')
-    const con = privateConsole.get(this) as typeof console &
+    const con = this.#getConsole() as typeof console &
       Record<string, unknown>
     con.log(
       applyLinePrefix(`${LOG_SYMBOLS.step} ${text}`, {
@@ -1281,7 +1302,7 @@ export class Logger {
     tabularData: unknown,
     properties?: readonly string[] | undefined,
   ): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.table(tabularData, properties)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -1311,7 +1332,7 @@ export class Logger {
    * ```
    */
   timeEnd(label?: string | undefined): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.timeEnd(label)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -1342,7 +1363,7 @@ export class Logger {
    * ```
    */
   timeLog(label?: string | undefined, ...data: unknown[]): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.timeLog(label, ...data)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -1369,7 +1390,7 @@ export class Logger {
    * ```
    */
   trace(message?: unknown | undefined, ...args: unknown[]): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     con.trace(message, ...args)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
@@ -1418,7 +1439,7 @@ export class Logger {
    * ```
    */
   write(text: string): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     // Write directly to the original stdout stream to bypass Console formatting
     // (e.g., group indentation). Try multiple approaches to get the raw stream:
     // 1. Use stored reference from constructor options
@@ -1459,7 +1480,7 @@ export class Logger {
    * ```
    */
   progress(text: string): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     const stream = this.#getTargetStream()
     const streamObj = stream === 'stderr' ? con._stderr : con._stdout
     streamObj.write(`∴ ${text}`)
@@ -1496,7 +1517,7 @@ export class Logger {
    * ```
    */
   clearLine(): this {
-    const con = privateConsole.get(this)
+    const con = this.#getConsole()
     const stream = this.#getTargetStream()
     const streamObj = stream === 'stderr' ? con._stderr : con._stdout
     if (streamObj.isTTY) {
@@ -1534,8 +1555,27 @@ Object.defineProperties(
         if (!(Logger.prototype as any)[key] && typeof value === 'function') {
           // Dynamically name the log method without using Object.defineProperty.
           const { [key]: func } = {
-            [key](...args: unknown[]) {
-              const con = privateConsole.get(this)
+            [key](this: Logger, ...args: unknown[]) {
+              // Access Console via WeakMap directly since private methods can't be
+              // called from dynamically created functions.
+              let con = privateConsole.get(this)
+              if (!con) {
+                // Lazy initialization - this will only happen if someone calls a
+                // dynamically added console method before any core logger method.
+                const constructorArgs = privateConstructorArgs.get(this) || []
+                if (constructorArgs.length) {
+                  con = constructConsole(...constructorArgs)
+                } else {
+                  con = constructConsole({
+                    stdout: process.stdout,
+                    stderr: process.stderr,
+                  }) as typeof console & Record<string, unknown>
+                  for (const { 0: k, 1: method } of boundConsoleEntries) {
+                    con[k] = method
+                  }
+                }
+                privateConsole.set(this, con)
+              }
               const result = (con as any)[key](...args)
               return result === undefined || result === con ? this : result
             },
