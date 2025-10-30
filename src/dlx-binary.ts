@@ -81,8 +81,9 @@ async function isCacheValid(
 /**
  * Download a file from a URL with integrity checking and concurrent download protection.
  * Uses downloadWithLock to prevent multiple processes from downloading the same binary simultaneously.
+ * Internal helper function for downloading binary files.
  */
-async function downloadBinary(
+async function downloadBinaryFile(
   url: string,
   destPath: string,
   checksum?: string | undefined,
@@ -270,7 +271,7 @@ export async function dlxBinary(
     await fs.mkdir(cacheEntryDir, { recursive: true })
 
     // Download the binary.
-    computedChecksum = await downloadBinary(url, binaryPath, checksum)
+    computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
     await writeMetadata(cacheEntryDir, url, computedChecksum || '')
   }
 
@@ -311,6 +312,102 @@ export async function dlxBinary(
     downloaded,
     spawnPromise,
   }
+}
+
+/**
+ * Download a binary from a URL with caching (without execution).
+ * Similar to downloadPackage from dlx-package.
+ *
+ * @returns Object containing the path to the cached binary and whether it was downloaded
+ */
+export async function downloadBinary(
+  options: Omit<DlxBinaryOptions, 'spawnOptions'>,
+): Promise<{ binaryPath: string; downloaded: boolean }> {
+  const {
+    cacheTtl = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
+    checksum,
+    force = false,
+    name,
+    url,
+  } = { __proto__: null, ...options } as DlxBinaryOptions
+
+  // Generate cache paths similar to pnpm/npx structure.
+  const cacheDir = getDlxCachePath()
+  const binaryName = name || `binary-${process.platform}-${os.arch()}`
+  // Create spec from URL and binary name for unique cache identity.
+  const spec = `${url}:${binaryName}`
+  const cacheKey = generateCacheKey(spec)
+  const cacheEntryDir = path.join(cacheDir, cacheKey)
+  const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
+
+  let downloaded = false
+
+  // Check if we need to download.
+  if (
+    !force &&
+    existsSync(cacheEntryDir) &&
+    (await isCacheValid(cacheEntryDir, cacheTtl))
+  ) {
+    // Binary is cached and valid.
+    downloaded = false
+  } else {
+    // Ensure cache directory exists.
+    await fs.mkdir(cacheEntryDir, { recursive: true })
+
+    // Download the binary.
+    const computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
+    await writeMetadata(cacheEntryDir, url, computedChecksum || '')
+    downloaded = true
+  }
+
+  return {
+    binaryPath,
+    downloaded,
+  }
+}
+
+/**
+ * Execute a cached binary without re-downloading.
+ * Similar to executePackage from dlx-package.
+ * Binary must have been previously downloaded via downloadBinary or dlxBinary.
+ *
+ * @param binaryPath Path to the cached binary (from downloadBinary result)
+ * @param args Arguments to pass to the binary
+ * @param spawnOptions Spawn options for execution
+ * @param spawnExtra Extra spawn configuration
+ * @returns The spawn promise for the running process
+ */
+export function executeBinary(
+  binaryPath: string,
+  args: readonly string[] | string[],
+  spawnOptions?: SpawnOptions | undefined,
+  spawnExtra?: SpawnExtra | undefined,
+): ReturnType<typeof spawn> {
+  // On Windows, script files (.bat, .cmd, .ps1) require shell: true because
+  // they are not executable on their own and must be run through cmd.exe.
+  // Note: .exe files are actual binaries and don't need shell mode.
+  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
+
+  // Windows cmd.exe PATH resolution behavior:
+  // When shell: true on Windows with .cmd/.bat/.ps1 files, spawn will automatically
+  // strip the full path down to just the basename without extension. Windows cmd.exe
+  // then searches for the binary in directories listed in PATH.
+  //
+  // Since our binaries are downloaded to a custom cache directory that's not in PATH,
+  // we must prepend the cache directory to PATH so cmd.exe can locate the binary.
+  const cacheEntryDir = path.dirname(binaryPath)
+  const finalSpawnOptions = needsShell
+    ? {
+        ...spawnOptions,
+        env: {
+          ...spawnOptions?.env,
+          PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
+        },
+        shell: true,
+      }
+    : spawnOptions
+
+  return spawn(binaryPath, args, finalSpawnOptions, spawnExtra)
 }
 
 /**
