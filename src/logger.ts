@@ -694,7 +694,7 @@ export class Logger {
    */
   assert(value: unknown, ...message: unknown[]): this {
     const con = this.#getConsole()
-    con.assert(value, ...message)
+    con.assert(value, message[0] as string, ...message.slice(1))
     this[lastWasBlankSymbol](false)
     return value ? this : this[incLogCallCountSymbol]()
   }
@@ -1503,7 +1503,9 @@ export class Logger {
   progress(text: string): this {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
-    const streamObj = stream === 'stderr' ? con._stderr : con._stdout
+    const streamObj = (
+      stream === 'stderr' ? con._stderr : con._stdout
+    ) as NodeJS.WriteStream & { write: (text: string) => boolean }
     streamObj.write(`∴ ${text}`)
     this[lastWasBlankSymbol](false)
     return this
@@ -1540,7 +1542,14 @@ export class Logger {
   clearLine(): this {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
-    const streamObj = stream === 'stderr' ? con._stderr : con._stdout
+    const streamObj = (
+      stream === 'stderr' ? con._stderr : con._stdout
+    ) as NodeJS.WriteStream & {
+      isTTY: boolean
+      cursorTo: (x: number) => void
+      clearLine: (dir: number) => void
+      write: (text: string) => boolean
+    }
     if (streamObj.isTTY) {
       streamObj.cursorTo(0)
       streamObj.clearLine(0)
