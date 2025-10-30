@@ -75,7 +75,7 @@ export async function execBin(
         '  - Installation directory is not in system PATH\n' +
         'To resolve:\n' +
         `  1. Verify "${binPath}" is installed: which ${binPath} (Unix) or where ${binPath} (Windows)\n` +
-        `  2. Install the binary if missing: npm install -g ${binPath}\n` +
+        `  2. Install the binary if missing, ex: npm install -g ${binPath}\n` +
         '  3. Check PATH environment variable includes the binary location',
     ) as Error & {
       code: string
