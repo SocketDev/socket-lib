@@ -8,11 +8,12 @@ import path from 'node:path'
 import { WIN32 } from '#constants/platform'
 
 import { generateCacheKey } from './dlx'
-import { downloadWithLock } from './download-lock'
+import { httpDownload } from './http-request'
 import { isDir, readJson, safeDelete } from './fs'
 import { isObjectObject } from './objects'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
+import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
 
@@ -80,7 +81,7 @@ async function isCacheValid(
 
 /**
  * Download a file from a URL with integrity checking and concurrent download protection.
- * Uses downloadWithLock to prevent multiple processes from downloading the same binary simultaneously.
+ * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
  * Internal helper function for downloading binary files.
  */
 async function downloadBinaryFile(
@@ -88,36 +89,66 @@ async function downloadBinaryFile(
   destPath: string,
   checksum?: string | undefined,
 ): Promise<string> {
-  // Use downloadWithLock to handle concurrent download protection.
-  // This prevents corruption when multiple processes try to download the same binary.
-  await downloadWithLock(url, destPath, {
-    // Align with npm's npx locking strategy.
-    staleTimeout: 10_000,
-    // Allow up to 2 minutes for large binary downloads.
-    lockTimeout: 120_000,
-  })
+  // Use process lock to prevent concurrent downloads.
+  // Lock is placed in the cache entry directory as 'concurrency.lock'.
+  const cacheEntryDir = path.dirname(destPath)
+  const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
 
-  // Compute checksum of downloaded file.
-  const fileBuffer = await fs.readFile(destPath)
-  const hasher = createHash('sha256')
-  hasher.update(fileBuffer)
-  const actualChecksum = hasher.digest('hex')
+  return await processLock.withLock(
+    lockPath,
+    async () => {
+      // Check if file was downloaded while waiting for lock.
+      if (existsSync(destPath)) {
+        const stats = await fs.stat(destPath)
+        if (stats.size > 0) {
+          // File exists, compute and return checksum.
+          const fileBuffer = await fs.readFile(destPath)
+          const hasher = createHash('sha256')
+          hasher.update(fileBuffer)
+          return hasher.digest('hex')
+        }
+      }
 
-  // Verify checksum if provided.
-  if (checksum && actualChecksum !== checksum) {
-    // Clean up invalid file.
-    await safeDelete(destPath)
-    throw new Error(
-      `Checksum mismatch: expected ${checksum}, got ${actualChecksum}`,
-    )
-  }
+      // Download the file.
+      try {
+        await httpDownload(url, destPath)
+      } catch (e) {
+        throw new Error(
+          `Failed to download binary from ${url}\n` +
+            `Destination: ${destPath}\n` +
+            'Check your internet connection or verify the URL is accessible.',
+          { cause: e },
+        )
+      }
 
-  // Make executable on POSIX systems.
-  if (!WIN32) {
-    await fs.chmod(destPath, 0o755)
-  }
+      // Compute checksum of downloaded file.
+      const fileBuffer = await fs.readFile(destPath)
+      const hasher = createHash('sha256')
+      hasher.update(fileBuffer)
+      const actualChecksum = hasher.digest('hex')
 
-  return actualChecksum
+      // Verify checksum if provided.
+      if (checksum && actualChecksum !== checksum) {
+        // Clean up invalid file.
+        await safeDelete(destPath)
+        throw new Error(
+          `Checksum mismatch: expected ${checksum}, got ${actualChecksum}`,
+        )
+      }
+
+      // Make executable on POSIX systems.
+      if (!WIN32) {
+        await fs.chmod(destPath, 0o755)
+      }
+
+      return actualChecksum
+    },
+    {
+      // Align with npm npx locking strategy.
+      staleMs: 5000,
+      touchIntervalMs: 2000,
+    },
+  )
 }
 
 /**
@@ -267,8 +298,30 @@ export async function dlxBinary(
   }
 
   if (downloaded) {
-    // Ensure cache directory exists.
-    await fs.mkdir(cacheEntryDir, { recursive: true })
+    // Ensure cache directory exists before downloading.
+    try {
+      await fs.mkdir(cacheEntryDir, { recursive: true })
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (code === 'EACCES' || code === 'EPERM') {
+        throw new Error(
+          `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
+            'Please check directory permissions or run with appropriate access.',
+          { cause: e },
+        )
+      }
+      if (code === 'EROFS') {
+        throw new Error(
+          `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
+            'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
+          { cause: e },
+        )
+      }
+      throw new Error(
+        `Failed to create binary cache directory: ${cacheEntryDir}`,
+        { cause: e },
+      )
+    }
 
     // Download the binary.
     computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
@@ -351,8 +404,30 @@ export async function downloadBinary(
     // Binary is cached and valid.
     downloaded = false
   } else {
-    // Ensure cache directory exists.
-    await fs.mkdir(cacheEntryDir, { recursive: true })
+    // Ensure cache directory exists before downloading.
+    try {
+      await fs.mkdir(cacheEntryDir, { recursive: true })
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (code === 'EACCES' || code === 'EPERM') {
+        throw new Error(
+          `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
+            'Please check directory permissions or run with appropriate access.',
+          { cause: e },
+        )
+      }
+      if (code === 'EROFS') {
+        throw new Error(
+          `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
+            'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
+          { cause: e },
+        )
+      }
+      throw new Error(
+        `Failed to create binary cache directory: ${cacheEntryDir}`,
+        { cause: e },
+      )
+    }
 
     // Download the binary.
     const computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)

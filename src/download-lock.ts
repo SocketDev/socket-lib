@@ -1,4 +1,13 @@
-/** @fileoverview Download locking utilities to prevent concurrent downloads of the same resource. Uses file-based locking for cross-process synchronization. */
+/**
+ * @fileoverview Download locking utilities to prevent concurrent downloads of the same resource. Uses file-based locking for cross-process synchronization.
+ * @deprecated This module is deprecated in favor of `process-lock.ts` which uses
+ * directory-based locking (via `mkdir()`) that's more reliable across all filesystems
+ * including NFS. See process-lock.ts for detailed explanation of why directory-based
+ * locking is superior to file-based locking.
+ *
+ * Migration: Use `processLock.withLock()` from `./process-lock` instead of
+ * `downloadWithLock()` from this module.
+ */
 
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
@@ -38,11 +47,14 @@ export interface DownloadWithLockOptions extends HttpDownloadOptions {
 
 /**
  * Get the path to the lock file for a destination path.
+ * Uses npm npx's concurrency.lock naming convention.
+ * For downloads, we use a subdirectory per destination to isolate locks.
  */
 function getLockFilePath(destPath: string, locksDir?: string): string {
-  const dir = locksDir || `${dirname(destPath)}/.locks`
-  const filename = `${destPath.replace(/[^\w.-]/g, '_')}.lock`
-  return join(dir, filename)
+  // Create a unique subdirectory for each destination using sanitized path.
+  const sanitized = destPath.replace(/[^\w.-]/g, '_')
+  const dir = locksDir || join(dirname(destPath), '.locks', sanitized)
+  return join(dir, 'concurrency.lock')
 }
 
 /**
