@@ -371,7 +371,11 @@ export async function dlxPackage(
 export async function downloadPackage(
   options: DlxPackageOptions,
 ): Promise<DownloadPackageResult> {
-  const { binaryName, force: userForce, package: packageSpec } = {
+  const {
+    binaryName,
+    force: userForce,
+    package: packageSpec,
+  } = {
     __proto__: null,
     ...options,
   } as DlxPackageOptions
