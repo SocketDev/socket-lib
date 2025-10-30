@@ -391,6 +391,8 @@ export class Logger {
         }
       }
       privateConsole.set(this, con)
+      // Clean up constructor args - no longer needed after Console creation.
+      privateConstructorArgs.delete(this)
     }
     return con
   }
@@ -1559,7 +1561,7 @@ Object.defineProperties(
               // Access Console via WeakMap directly since private methods can't be
               // called from dynamically created functions.
               let con = privateConsole.get(this)
-              if (!con) {
+              if (con === undefined) {
                 // Lazy initialization - this will only happen if someone calls a
                 // dynamically added console method before any core logger method.
                 const constructorArgs = privateConstructorArgs.get(this) || []
@@ -1575,6 +1577,8 @@ Object.defineProperties(
                   }
                 }
                 privateConsole.set(this, con)
+                // Clean up constructor args - no longer needed after Console creation.
+                privateConstructorArgs.delete(this)
               }
               const result = (con as any)[key](...args)
               return result === undefined || result === con ? this : result
