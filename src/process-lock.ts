@@ -296,9 +296,29 @@ class ProcessLockManager {
           }
 
           // Handle parent path issues - not retryable.
-          if (code === 'ENOTDIR' || code === 'ENOENT') {
+          if (code === 'ENOTDIR') {
+            const parentDir = lockPath.slice(0, lockPath.lastIndexOf('/'))
             throw new Error(
-              `Lock parent directory does not exist or is not a directory: ${lockPath}`,
+              `Cannot create lock directory: ${lockPath}\n` +
+                'A path component is a file when it should be a directory.\n' +
+                `Parent path: ${parentDir}\n` +
+                'To resolve:\n' +
+                `  1. Check if "${parentDir}" contains a file instead of a directory\n` +
+                '  2. Remove any conflicting files in the path\n' +
+                '  3. Ensure the full parent directory structure exists',
+              { cause: error },
+            )
+          }
+
+          if (code === 'ENOENT') {
+            const parentDir = lockPath.slice(0, lockPath.lastIndexOf('/'))
+            throw new Error(
+              `Cannot create lock directory: ${lockPath}\n` +
+                `Parent directory does not exist: ${parentDir}\n` +
+                'To resolve:\n' +
+                `  1. Ensure the parent directory "${parentDir}" exists\n` +
+                `  2. Create the directory structure: mkdir -p "${parentDir}"\n` +
+                '  3. Check filesystem permissions allow directory creation',
               { cause: error },
             )
           }
