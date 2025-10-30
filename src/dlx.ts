@@ -238,8 +238,32 @@ export function removeDlxPackageSync(packageName: string): void {
   try {
     rmSync(packageDir, { recursive: true, force: true })
   } catch (e) {
-    throw new Error(`Failed to remove DLX package "${packageName}"`, {
-      cause: e,
-    })
+    const code = (e as NodeJS.ErrnoException).code
+    if (code === 'EACCES' || code === 'EPERM') {
+      throw new Error(
+        `Permission denied removing DLX package "${packageName}"\n` +
+          `Directory: ${packageDir}\n` +
+          'To resolve:\n' +
+          '  1. Check file/directory permissions\n' +
+          '  2. Close any programs using files in this directory\n' +
+          '  3. Try running with elevated privileges if necessary\n' +
+          `  4. Manually remove: rm -rf "${packageDir}"`,
+        { cause: e },
+      )
+    }
+    if (code === 'EROFS') {
+      throw new Error(
+        `Cannot remove DLX package "${packageName}" from read-only filesystem\n` +
+          `Directory: ${packageDir}\n` +
+          'The filesystem is mounted read-only.',
+        { cause: e },
+      )
+    }
+    throw new Error(
+      `Failed to remove DLX package "${packageName}"\n` +
+        `Directory: ${packageDir}\n` +
+        'Check permissions and ensure no programs are using this directory.',
+      { cause: e },
+    )
   }
 }
