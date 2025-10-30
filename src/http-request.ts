@@ -601,10 +601,27 @@ async function httpRequestAttempt(
     )
 
     request.on('error', (error: Error) => {
-      const err = new Error(`HTTP request failed: ${error.message}`, {
-        cause: error,
-      })
-      reject(err)
+      const code = (error as NodeJS.ErrnoException).code
+      let message = `HTTP request failed for ${url}: ${error.message}\n`
+
+      if (code === 'ENOTFOUND') {
+        message +=
+          'DNS lookup failed. Check the hostname and your network connection.'
+      } else if (code === 'ECONNREFUSED') {
+        message +=
+          'Connection refused. Verify the server is running and accessible.'
+      } else if (code === 'ETIMEDOUT') {
+        message +=
+          'Request timed out. Check your network or increase the timeout value.'
+      } else if (code === 'ECONNRESET') {
+        message +=
+          'Connection reset. The server may have closed the connection unexpectedly.'
+      } else {
+        message +=
+          'Check your network connection and verify the URL is correct.'
+      }
+
+      reject(new Error(message, { cause: error }))
     })
 
     request.on('timeout', () => {
@@ -811,10 +828,27 @@ async function httpDownloadAttempt(
 
     request.on('error', (error: Error) => {
       closeStream()
-      const err = new Error(`HTTP download failed: ${error.message}`, {
-        cause: error,
-      })
-      reject(err)
+      const code = (error as NodeJS.ErrnoException).code
+      let message = `HTTP download failed for ${url}: ${error.message}\n`
+
+      if (code === 'ENOTFOUND') {
+        message +=
+          'DNS lookup failed. Check the hostname and your network connection.'
+      } else if (code === 'ECONNREFUSED') {
+        message +=
+          'Connection refused. Verify the server is running and accessible.'
+      } else if (code === 'ETIMEDOUT') {
+        message +=
+          'Request timed out. Check your network or increase the timeout value.'
+      } else if (code === 'ECONNRESET') {
+        message +=
+          'Connection reset. The server may have closed the connection unexpectedly.'
+      } else {
+        message +=
+          'Check your network connection and verify the URL is correct.'
+      }
+
+      reject(new Error(message, { cause: error }))
     })
 
     request.on('timeout', () => {

@@ -121,8 +121,16 @@ async function acquireLock(
         } else {
           // Lock is valid, check timeout
           if (Date.now() - startTime > lockTimeout) {
+            const lockAge = Date.now() - lockInfo.startTime
             throw new Error(
-              `Lock acquisition timed out after ${lockTimeout}ms (held by PID ${lockInfo.pid})`,
+              `Download lock timed out after ${lockTimeout}ms\n` +
+                `Lock held by process ${lockInfo.pid} for ${lockAge}ms\n` +
+                `Resource: ${lockInfo.url}\n` +
+                `Started: ${new Date(lockInfo.startTime).toISOString()}\n` +
+                'To resolve:\n' +
+                `  1. Check if process ${lockInfo.pid} is still running: ps -p ${lockInfo.pid}\n` +
+                `  2. If stale, remove lock file: rm "${lockPath}"\n` +
+                '  3. Or increase lockTimeout option',
             )
           }
 
