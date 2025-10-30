@@ -11,8 +11,8 @@
  *
  * Concurrency protection:
  * - Uses process-lock to prevent concurrent installation corruption
- * - Lock file created at ~/.socket/_dlx/<hash>/.lock
- * - Aligned with npm npx's concurrency.lock strategy (5s stale, 2s touching)
+ * - Lock file created at ~/.socket/_dlx/<hash>/concurrency.lock
+ * - Uses npm npx's concurrency.lock naming convention (5s stale, 2s touching)
  * - Prevents multiple processes from corrupting the same package installation
  *
  * Version range handling:
@@ -140,9 +140,34 @@ async function ensurePackageInstalled(
     path.join(packageDir, 'node_modules', packageName),
   )
 
+  // Ensure package directory exists before creating lock.
+  // The lock directory will be created inside this directory.
+  try {
+    await fs.mkdir(packageDir, { recursive: true })
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException).code
+    if (code === 'EACCES' || code === 'EPERM') {
+      throw new Error(
+        `Permission denied creating package directory: ${packageDir}\n` +
+          'Please check directory permissions or run with appropriate access.',
+        { cause: e },
+      )
+    }
+    if (code === 'EROFS') {
+      throw new Error(
+        `Cannot create package directory on read-only filesystem: ${packageDir}\n` +
+          'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
+        { cause: e },
+      )
+    }
+    throw new Error(`Failed to create package directory: ${packageDir}`, {
+      cause: e,
+    })
+  }
+
   // Use process lock to prevent concurrent installations.
-  // Similar to npm npx's concurrency.lock approach.
-  const lockPath = path.join(packageDir, '.lock')
+  // Uses npm npx's concurrency.lock naming convention.
+  const lockPath = path.join(packageDir, 'concurrency.lock')
 
   return await processLock.withLock(
     lockPath,
@@ -157,16 +182,38 @@ async function ensurePackageInstalled(
         }
       }
 
-      // Ensure package directory exists.
-      await fs.mkdir(packageDir, { recursive: true })
-
       // Use pacote to extract the package.
       // Pacote leverages npm cache when available but doesn't require npm CLI.
       const pacoteCachePath = getPacoteCachePath()
-      await pacote.extract(packageSpec, installedDir, {
-        // Use consistent pacote cache path (respects npm cache locations when available).
-        cache: pacoteCachePath || path.join(packageDir, '.cache'),
-      })
+      try {
+        await pacote.extract(packageSpec, installedDir, {
+          // Use consistent pacote cache path (respects npm cache locations when available).
+          cache: pacoteCachePath || path.join(packageDir, '.cache'),
+        })
+      } catch (e) {
+        const code = (e as any).code
+        if (code === 'E404' || code === 'ETARGET') {
+          throw new Error(
+            `Package not found: ${packageSpec}\n` +
+              'Verify the package exists on npm registry and check the version.\n' +
+              `Visit https://www.npmjs.com/package/${packageName} to see available versions.`,
+            { cause: e },
+          )
+        }
+        if (code === 'ENOTFOUND' || code === 'ETIMEDOUT' || code === 'EAI_AGAIN') {
+          throw new Error(
+            `Network error installing ${packageSpec}\n` +
+              'Check your internet connection and try again.',
+            { cause: e },
+          )
+        }
+        throw new Error(
+          `Failed to install package: ${packageSpec}\n` +
+            `Destination: ${installedDir}\n` +
+            'Check npm registry connectivity or package name.',
+          { cause: e },
+        )
+      }
 
       return { installed: true, packageDir }
     },
