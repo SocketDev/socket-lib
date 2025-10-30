@@ -237,7 +237,20 @@ const privateConsole = new WeakMap()
  */
 const privateConstructorArgs = new WeakMap()
 
-const consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
+/**
+ * Lazily get console symbols on first access.
+ *
+ * Deferred to avoid accessing global console during early Node.js bootstrap
+ * before stdout is ready.
+ * @private
+ */
+let _consoleSymbols: symbol[] | undefined
+function getConsoleSymbols(): symbol[] {
+  if (_consoleSymbols === undefined) {
+    _consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
+  }
+  return _consoleSymbols
+}
 
 /**
  * Symbol for incrementing the internal log call counter.
@@ -247,9 +260,19 @@ const consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
  */
 export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
 
-const kGroupIndentationWidthSymbol =
-  consoleSymbols.find(s => (s as any).label === 'kGroupIndentWidth') ??
-  Symbol('kGroupIndentWidth')
+/**
+ * Lazily get kGroupIndentationWidth symbol on first access.
+ * @private
+ */
+let _kGroupIndentationWidthSymbol: symbol | undefined
+function getKGroupIndentationWidthSymbol(): symbol {
+  if (_kGroupIndentationWidthSymbol === undefined) {
+    _kGroupIndentationWidthSymbol =
+      getConsoleSymbols().find(s => (s as any).label === 'kGroupIndentWidth') ??
+      Symbol('kGroupIndentWidth')
+  }
+  return _kGroupIndentationWidthSymbol
+}
 
 /**
  * Symbol for tracking whether the last logged line was blank.
@@ -392,6 +415,9 @@ export class Logger {
    * @private
    */
   #getConsole(): typeof console & Record<string, unknown> {
+    // Ensure prototype is initialized before creating Console.
+    ensurePrototypeInitialized()
+
     let con = privateConsole.get(this)
     if (!con) {
       // Lazy initialization - create Console on first use.
@@ -971,7 +997,7 @@ export class Logger {
     if (length) {
       ReflectApply(this.log, this, label)
     }
-    this.indent((this as any)[kGroupIndentationWidthSymbol])
+    this.indent((this as any)[getKGroupIndentationWidthSymbol()])
     if (length) {
       ;(this as any)[lastWasBlankSymbol](false)
       ;(this as any)[incLogCallCountSymbol]()
@@ -1017,7 +1043,7 @@ export class Logger {
    * ```
    */
   groupEnd() {
-    this.dedent((this as any)[kGroupIndentationWidthSymbol])
+    this.dedent((this as any)[getKGroupIndentationWidthSymbol()])
     return this
   }
 
@@ -1560,71 +1586,79 @@ export class Logger {
   }
 }
 
-Object.defineProperties(
-  Logger.prototype,
-  Object.fromEntries(
-    (() => {
-      const entries: Array<[string | symbol, PropertyDescriptor]> = [
-        [
-          kGroupIndentationWidthSymbol,
-          {
-            ...consolePropAttributes,
-            value: 2,
-          },
-        ],
-        [
-          Symbol.toStringTag,
-          {
-            __proto__: null,
-            configurable: true,
-            value: 'logger',
-          } as PropertyDescriptor,
-        ],
-      ]
-      for (const { 0: key, 1: value } of Object.entries(globalConsole)) {
-        if (!(Logger.prototype as any)[key] && typeof value === 'function') {
-          // Dynamically name the log method without using Object.defineProperty.
-          const { [key]: func } = {
-            [key](this: Logger, ...args: unknown[]) {
-              // Access Console via WeakMap directly since private methods can't be
-              // called from dynamically created functions.
-              let con = privateConsole.get(this)
-              if (con === undefined) {
-                // Lazy initialization - this will only happen if someone calls a
-                // dynamically added console method before any core logger method.
-                const ctorArgs = privateConstructorArgs.get(this) ?? []
-                // Clean up constructor args - no longer needed after Console creation.
-                privateConstructorArgs.delete(this)
-                if (ctorArgs.length) {
-                  con = constructConsole(...ctorArgs)
-                } else {
-                  con = constructConsole({
-                    stdout: process.stdout,
-                    stderr: process.stderr,
-                  }) as typeof console & Record<string, unknown>
-                  for (const { 0: k, 1: method } of boundConsoleEntries) {
-                    con[k] = method
-                  }
-                }
-                privateConsole.set(this, con)
+/**
+ * Lazily add dynamic console methods to Logger prototype.
+ *
+ * This is deferred until first access to avoid calling Object.entries(globalConsole)
+ * during early Node.js bootstrap before stdout is ready.
+ * @private
+ */
+let _prototypeInitialized = false
+function ensurePrototypeInitialized() {
+  if (_prototypeInitialized) {
+    return
+  }
+  _prototypeInitialized = true
+
+  const entries: Array<[string | symbol, PropertyDescriptor]> = [
+    [
+      getKGroupIndentationWidthSymbol(),
+      {
+        ...consolePropAttributes,
+        value: 2,
+      },
+    ],
+    [
+      Symbol.toStringTag,
+      {
+        __proto__: null,
+        configurable: true,
+        value: 'logger',
+      } as PropertyDescriptor,
+    ],
+  ]
+  for (const { 0: key, 1: value } of Object.entries(globalConsole)) {
+    if (!(Logger.prototype as any)[key] && typeof value === 'function') {
+      // Dynamically name the log method without using Object.defineProperty.
+      const { [key]: func } = {
+        [key](this: Logger, ...args: unknown[]) {
+          // Access Console via WeakMap directly since private methods can't be
+          // called from dynamically created functions.
+          let con = privateConsole.get(this)
+          if (con === undefined) {
+            // Lazy initialization - this will only happen if someone calls a
+            // dynamically added console method before any core logger method.
+            const ctorArgs = privateConstructorArgs.get(this) ?? []
+            // Clean up constructor args - no longer needed after Console creation.
+            privateConstructorArgs.delete(this)
+            if (ctorArgs.length) {
+              con = constructConsole(...ctorArgs)
+            } else {
+              con = constructConsole({
+                stdout: process.stdout,
+                stderr: process.stderr,
+              }) as typeof console & Record<string, unknown>
+              for (const { 0: k, 1: method } of boundConsoleEntries) {
+                con[k] = method
               }
-              const result = (con as any)[key](...args)
-              return result === undefined || result === con ? this : result
-            },
+            }
+            privateConsole.set(this, con)
           }
-          entries.push([
-            key,
-            {
-              ...consolePropAttributes,
-              value: func,
-            },
-          ])
-        }
+          const result = (con as any)[key](...args)
+          return result === undefined || result === con ? this : result
+        },
       }
-      return entries
-    })(),
-  ),
-)
+      entries.push([
+        key,
+        {
+          ...consolePropAttributes,
+          value: func,
+        },
+      ])
+    }
+  }
+  Object.defineProperties(Logger.prototype, Object.fromEntries(entries))
+}
 
 /**
  * Default logger instance for the application.
