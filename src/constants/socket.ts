@@ -9,6 +9,16 @@ export const SOCKET_PUBLIC_API_KEY =
 // Alias for backward compatibility.
 export const SOCKET_PUBLIC_API_TOKEN = SOCKET_PUBLIC_API_KEY
 
+// Socket.dev URLs.
+export const SOCKET_WEBSITE_URL = 'https://socket.dev'
+export const SOCKET_CONTACT_URL = 'https://socket.dev/contact'
+export const SOCKET_DASHBOARD_URL = 'https://socket.dev/dashboard'
+export const SOCKET_API_TOKENS_URL =
+  'https://socket.dev/dashboard/settings/api-tokens'
+export const SOCKET_PRICING_URL = 'https://socket.dev/pricing'
+export const SOCKET_STATUS_URL = 'https://status.socket.dev'
+export const SOCKET_DOCS_URL = 'https://docs.socket.dev'
+
 // Socket.dev scopes.
 export const SOCKET_REGISTRY_SCOPE = '@socketregistry'
 export const SOCKET_SECURITY_SCOPE = '@socketsecurity'
