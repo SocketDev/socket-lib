@@ -30,8 +30,7 @@
  * - dlxPackage() combines both for convenience
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
-import path from 'path'
+import path from 'node:path'
 
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
@@ -55,8 +54,8 @@ let _fs: typeof import('fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
-    // eslint-disable-next-line n/prefer-node-protocol
-    _fs = /*@__PURE__*/ require('fs')
+
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('fs')
 }

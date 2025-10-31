@@ -3,9 +3,8 @@
  * Provides enhanced fs operations, glob matching, and directory traversal functions.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
-import type { Abortable } from 'events'
-// eslint-disable-next-line n/prefer-node-protocol
+import type { Abortable } from 'node:events'
+
 import type {
   Dirent,
   MakeDirectoryOptions,
@@ -14,7 +13,7 @@ import type {
   PathLike,
   StatSyncOptions,
   WriteFileOptions,
-} from 'fs'
+} from 'node:fs'
 
 import { getAbortSignal } from '#constants/process'
 
@@ -309,7 +308,7 @@ let _fs: typeof import('fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('fs')
 }
@@ -327,7 +326,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('path')
 }

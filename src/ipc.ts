@@ -28,12 +28,11 @@
  * @module ipc
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
-import crypto from 'crypto'
-// eslint-disable-next-line n/prefer-node-protocol
-import { promises as fs } from 'fs'
-// eslint-disable-next-line n/prefer-node-protocol
-import path from 'path'
+import crypto from 'node:crypto'
+
+import { promises as fs } from 'node:fs'
+
+import path from 'node:path'
 
 import { safeDeleteSync } from './fs'
 import { getOsTmpDir } from './paths'

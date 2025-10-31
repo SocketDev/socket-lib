@@ -1,5 +1,4 @@
-// eslint-disable-next-line n/prefer-node-protocol
-import path from 'path'
+import path from 'node:path'
 
 import { WIN32 } from '#constants/platform'
 import { debugNs } from './debug'

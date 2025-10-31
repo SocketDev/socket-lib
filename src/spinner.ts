@@ -3,7 +3,7 @@
  * Provides animated progress indicators with CI environment detection.
  */
 
-import type { Writable } from 'stream'
+import type { Writable } from 'node:stream'
 
 // Note: getAbortSignal is imported lazily to avoid circular dependencies.
 import { getCI } from '#env/ci'
