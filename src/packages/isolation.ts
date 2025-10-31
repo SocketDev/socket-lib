@@ -3,7 +3,7 @@
  * Provides tools to set up isolated test environments for packages.
  */
 
-import { existsSync, promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'fs'
 
 import { WIN32 } from '#constants/platform'
 
