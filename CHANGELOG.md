@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.1) - 2025-10-31
+
+### Fixed
+
+- **Process lock directory creation**: Use recursive mkdir to ensure parent directories exist when creating lock directory
+- **Node.js debug flags**: Remove buggy `getNodeDebugFlags()` function that returned debug flags without required argument values
+
 ## [2.10.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.0) - 2025-10-30
 
 ### Added

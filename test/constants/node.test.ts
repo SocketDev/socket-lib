@@ -7,7 +7,6 @@ import {
   NODE_SEA_FUSE,
   getExecPath,
   getMaintainedNodeVersions,
-  getNodeDebugFlags,
   getNodeDisableSigusr1Flags,
   getNodeHardenFlags,
   getNodeMajorVersion,
@@ -245,28 +244,6 @@ describe('node constants', () => {
     })
   })
 
-  describe('getNodeDebugFlags', () => {
-    it('should return array of debug flags', () => {
-      const flags = getNodeDebugFlags()
-      expect(Array.isArray(flags)).toBe(true)
-      expect(flags.length).toBeGreaterThan(0)
-    })
-
-    it('should include inspect flags', () => {
-      const flags = getNodeDebugFlags()
-      expect(flags).toContain('--inspect')
-      expect(flags).toContain('--inspect-brk')
-      expect(flags).toContain('--inspect-port')
-      expect(flags).toContain('--inspect-publish-uid')
-    })
-
-    it('should return same instance on multiple calls', () => {
-      const first = getNodeDebugFlags()
-      const second = getNodeDebugFlags()
-      expect(first).toBe(second)
-    })
-  })
-
   describe('getNodeHardenFlags', () => {
     it('should return array of hardening flags', () => {
       const flags = getNodeHardenFlags()
@@ -436,7 +413,6 @@ describe('node constants', () => {
     it('should handle all flag getters being called multiple times', () => {
       // Call each getter multiple times to ensure caching works
       for (let i = 0; i < 3; i++) {
-        getNodeDebugFlags()
         getNodeHardenFlags()
         getNodePermissionFlags()
         getNodeNoWarningsFlags()
@@ -445,12 +421,10 @@ describe('node constants', () => {
     })
 
     it('should verify all flag arrays are non-empty or conditionally empty', () => {
-      const debugFlags = getNodeDebugFlags()
       const hardenFlags = getNodeHardenFlags()
       const noWarningsFlags = getNodeNoWarningsFlags()
       const sigusr1Flags = getNodeDisableSigusr1Flags()
 
-      expect(debugFlags.length).toBeGreaterThan(0)
       expect(hardenFlags.length).toBeGreaterThan(0)
       expect(noWarningsFlags.length).toBeGreaterThan(0)
       expect(sigusr1Flags.length).toBeGreaterThan(0)
@@ -505,7 +479,6 @@ describe('node constants', () => {
 
     it('should verify flag contents are strings starting with --', () => {
       const allFlags = [
-        ...getNodeDebugFlags(),
         ...getNodeHardenFlags(),
         ...getNodePermissionFlags(),
         ...getNodeNoWarningsFlags(),

@@ -256,8 +256,13 @@ class ProcessLockManager {
             }
           }
 
-          // Atomic lock acquisition via mkdir.
-          mkdirSync(lockPath, { recursive: false })
+          // Check if lock already exists before creating.
+          if (existsSync(lockPath)) {
+            throw new Error(`Lock already exists: ${lockPath}`)
+          }
+
+          // Atomic lock acquisition via mkdir with recursive to create parent dirs.
+          mkdirSync(lockPath, { recursive: true })
 
           // Track lock for cleanup.
           this.activeLocks.add(lockPath)

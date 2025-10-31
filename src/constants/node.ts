@@ -121,19 +121,6 @@ export function supportsProcessSend(): boolean {
 }
 
 // Node.js flags.
-let _nodeDebugFlags: string[]
-export function getNodeDebugFlags(): string[] {
-  if (_nodeDebugFlags === undefined) {
-    _nodeDebugFlags = [
-      '--inspect',
-      '--inspect-brk',
-      '--inspect-port',
-      '--inspect-publish-uid',
-    ]
-  }
-  return _nodeDebugFlags
-}
-
 let _nodeHardenFlags: string[]
 export function getNodeHardenFlags(): string[] {
   if (_nodeHardenFlags === undefined) {

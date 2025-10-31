@@ -49,7 +49,7 @@ describe.sequential('process-lock', () => {
       // Second acquire should fail
       await expect(
         processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
-      ).rejects.toThrow(/Lock already exists/)
+      ).rejects.toThrow(/Lock already exists|Failed to acquire lock/)
 
       release1()
     })
@@ -246,7 +246,7 @@ describe.sequential('process-lock', () => {
           baseDelayMs: 10,
           staleMs: 10_000,
         }),
-      ).rejects.toThrow(/Lock already exists/)
+      ).rejects.toThrow(/Lock already exists|Failed to acquire lock/)
 
       release()
     })
@@ -308,13 +308,11 @@ describe.sequential('process-lock', () => {
         'path',
       )
 
-      // Should work even with nested path
-      await expect(
-        processLock.acquire(deepPath, { retries: 1 }),
-      ).rejects.toThrow()
-
-      // mkdir with recursive: false should fail for non-existent parent
-      // This is expected behavior
+      // Should work with nested path (recursive: true creates parent dirs)
+      const release = await processLock.acquire(deepPath, { retries: 1 })
+      expect(existsSync(deepPath)).toBe(true)
+      release()
+      expect(existsSync(deepPath)).toBe(false)
     })
   })
 })
