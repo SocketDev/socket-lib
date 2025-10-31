@@ -81,12 +81,14 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should set and get different types', async () => {
+      // Set values sequentially to avoid any potential race conditions.
       await cache.set('string', 'hello')
       await cache.set('number', 42)
       await cache.set('boolean', true)
       await cache.set('object', { foo: 'bar' })
       await cache.set('array', [1, 2, 3])
 
+      // Verify each value independently to isolate any failures.
       expect(await cache.get<string>('string')).toBe('hello')
       expect(await cache.get<number>('number')).toBe(42)
       expect(await cache.get<boolean>('boolean')).toBe(true)
