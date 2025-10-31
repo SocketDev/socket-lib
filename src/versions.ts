@@ -5,7 +5,7 @@ let _semver: typeof import('semver') | undefined
 function getSemver() {
   if (_semver === undefined) {
     // The 'semver' package is browser safe.
-    _semver = /*@__PURE__*/ require('../external/semver')
+    _semver = /*@__PURE__*/ require('./external/semver')
   }
   return _semver as typeof import('semver')
 }
