@@ -2,6 +2,7 @@
  * Platform detection and OS-specific constants.
  */
 
+// eslint-disable-next-line n/prefer-node-protocol
 import { platform } from 'os'
 
 // Platform detection.

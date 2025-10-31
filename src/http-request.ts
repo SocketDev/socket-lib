@@ -14,8 +14,10 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
+// eslint-disable-next-line n/prefer-node-protocol
 import { createWriteStream } from 'fs'
 
+// eslint-disable-next-line n/prefer-node-protocol
 import type { IncomingMessage } from 'http'
 
 let _http: typeof import('http') | undefined

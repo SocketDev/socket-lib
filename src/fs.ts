@@ -3,7 +3,9 @@
  * Provides enhanced fs operations, glob matching, and directory traversal functions.
  */
 
+// eslint-disable-next-line n/prefer-node-protocol
 import type { Abortable } from 'events'
+// eslint-disable-next-line n/prefer-node-protocol
 import type {
   Dirent,
   MakeDirectoryOptions,

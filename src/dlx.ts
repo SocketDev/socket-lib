@@ -1,5 +1,6 @@
 /** @fileoverview DLX (execute package) utilities for Socket ecosystem shared installations. */
 
+// eslint-disable-next-line n/prefer-node-protocol
 import { createHash } from 'crypto'
 
 import { readDirNamesSync, safeDelete, safeMkdir, safeMkdirSync } from './fs'
@@ -19,6 +20,7 @@ let _fs: typeof import('fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
+    // eslint-disable-next-line n/prefer-node-protocol
     _fs = /*@__PURE__*/ require('fs')
   }
   return _fs as typeof import('fs')
