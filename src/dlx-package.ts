@@ -30,18 +30,34 @@
  * - dlxPackage() combines both for convenience
  */
 
-import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
 import { generateCacheKey } from './dlx'
-import { readJsonSync } from './fs'
+import { readJsonSync, safeMkdir } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
 import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
+
+let _fs: typeof import('fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js fs module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('fs')
+}
 
 let _npmPackageArg: typeof import('npm-package-arg') | undefined
 /*@__NO_SIDE_EFFECTS__*/
@@ -183,7 +199,7 @@ async function ensurePackageInstalled(
   // Ensure package directory exists before creating lock.
   // The lock directory will be created inside this directory.
   try {
-    await fs.mkdir(packageDir, { recursive: true })
+    await safeMkdir(packageDir, { recursive: true })
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {
@@ -212,12 +228,13 @@ async function ensurePackageInstalled(
   return await processLock.withLock(
     lockPath,
     async () => {
+      const fs = getFs()
       // Double-check if already installed (unless force).
       // Another process may have installed while waiting for lock.
-      if (!force && existsSync(installedDir)) {
+      if (!force && fs.existsSync(installedDir)) {
         // Verify package.json exists.
         const pkgJsonPath = path.join(installedDir, 'package.json')
-        if (existsSync(pkgJsonPath)) {
+        if (fs.existsSync(pkgJsonPath)) {
           return { installed: false, packageDir }
         }
       }
@@ -392,6 +409,7 @@ export async function dlxPackage(
 export async function downloadPackage(
   options: DlxPackageOptions,
 ): Promise<DownloadPackageResult> {
+  const fs = getFs()
   const {
     binaryName,
     force: userForce,
@@ -427,10 +445,9 @@ export async function downloadPackage(
   const binaryPath = findBinaryPath(packageDir, packageName, binaryName)
 
   // Make binary executable on Unix systems.
-  if (!WIN32 && existsSync(binaryPath)) {
-    const { chmodSync } = require('node:fs')
+  if (!WIN32 && fs.existsSync(binaryPath)) {
     try {
-      chmodSync(binaryPath, 0o755)
+      fs.chmodSync(binaryPath, 0o755)
     } catch {
       // Ignore chmod errors.
     }
