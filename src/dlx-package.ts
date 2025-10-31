@@ -36,6 +36,7 @@ import path from 'node:path'
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
 import { generateCacheKey } from './dlx'
+import { getNpmPackageArg } from './external/npm-package-arg'
 import { getPacote } from './external/pacote'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
@@ -105,7 +106,7 @@ export interface DlxPackageResult {
 }
 
 /**
- * Parse package spec into name and version.
+ * Parse package spec into name and version using npm-package-arg.
  * Examples:
  * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
  * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
@@ -115,33 +116,35 @@ function parsePackageSpec(spec: string): {
   name: string
   version: string | undefined
 } {
-  // Handle scoped packages (@scope/name@version).
-  if (spec.startsWith('@')) {
-    const parts = spec.split('@')
-    // parts[0] is empty string (before leading @)
-    // parts[1] is scope/name
-    // parts[2] is version (if present)
-    if (parts.length === 3) {
-      // @scope/name@version.
-      return { name: `@${parts[1]}`, version: parts[2] }
-    }
-    if (parts.length === 2) {
-      // @scope/name with no version.
-      return { name: `@${parts[1]}`, version: undefined }
-    }
-    // Fallback for malformed input.
-    return { name: spec, version: undefined }
-  }
+  try {
+    const npa = getNpmPackageArg()
+    const parsed = npa(spec)
 
-  // Handle unscoped packages (name@version).
-  const atIndex = spec.lastIndexOf('@')
-  if (atIndex === -1) {
-    return { name: spec, version: undefined }
-  }
+    // Extract version from different types of specs.
+    // For registry specs, use fetchSpec (the version/range).
+    // For git/file/etc, version will be undefined.
+    const version =
+      parsed.type === 'tag'
+        ? parsed.fetchSpec
+        : parsed.type === 'version' || parsed.type === 'range'
+          ? parsed.fetchSpec
+          : undefined
 
-  return {
-    name: spec.slice(0, atIndex),
-    version: spec.slice(atIndex + 1),
+    return {
+      name: parsed.name || spec,
+      version,
+    }
+  } catch {
+    // Fallback to simple parsing if npm-package-arg fails.
+    const atIndex = spec.lastIndexOf('@')
+    if (atIndex === -1 || spec.startsWith('@')) {
+      // No version or scoped package without version.
+      return { name: spec, version: undefined }
+    }
+    return {
+      name: spec.slice(0, atIndex),
+      version: spec.slice(atIndex + 1),
+    }
   }
 }
 
