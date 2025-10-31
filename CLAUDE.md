@@ -190,6 +190,8 @@ Or use `scripts/generate-package-exports.mjs` to auto-generate exports.
 
 ### Testing
 
+**Vitest Configuration**: This repo uses the shared vitest configuration pattern documented in `../socket-registry/CLAUDE.md` (see "Vitest Configuration Variants" section). Main config: `.config/vitest.config.mts`
+
 #### Test Structure
 - **Directories**: `test/` - All test files
 - **Naming**: Match source structure (e.g., `test/spinner.test.ts` for `src/spinner.ts`)
@@ -227,10 +229,42 @@ Some dependencies are vendored in `src/external/`:
 ```
 
 ### CI Integration
-- **Workflow**: `.github/workflows/ci.yml`
-- **Reusable workflow**: References `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>`
-- **🚨 MANDATORY**: Use full commit SHA, not tags
-- **Format**: `@662bbcab1b7533e24ba8e3446cffd8a7e5f7617e # main`
+
+#### Optimized CI Pipeline
+**Workflow**: `.github/workflows/ci.yml` - Custom optimized pipeline
+
+**Key Optimizations**:
+- **Separate lint job**: Runs once (not 6x in matrix) - saves ~10s
+- **Build caching**: Build runs once, artifacts cached for all jobs - eliminates 5 rebuilds (~8s saved)
+- **Parallel execution**: Lint, build, test, type-check run in parallel where possible
+- **Smart dependencies**: Type-check runs after build completes, tests wait for lint + build
+- **Matrix strategy**: Tests run on Node 20/22/24 × Ubuntu/Windows (6 combinations)
+
+**Performance**:
+- Build time: ~1.6s (esbuild, parallelized)
+- Test execution: ~5s (4582 tests, multi-threaded)
+- Total CI time: ~40-60% faster than previous setup
+- Status check job: Single required check for branch protection
+
+**Job Structure**:
+1. **lint** - Runs Biome linting (once, Node 22/Ubuntu)
+2. **build** - Compiles source, caches dist + node_modules
+3. **test** - Runs test suite on all matrix combinations (uses cached build)
+4. **type-check** - TypeScript type checking (uses cached build)
+5. **ci-success** - Aggregates all job results for branch protection
+
+**Cache Strategy**:
+```yaml
+key: build-${{ github.sha }}-${{ runner.os }}
+path: |
+  dist
+  node_modules
+```
+
+**Previous Setup** (for reference):
+- Used reusable workflow: `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>`
+- 🚨 MANDATORY: Use full commit SHA, not tags
+- Format: `@662bbcab1b7533e24ba8e3446cffd8a7e5f7617e # main`
 
 ### Development Workflow
 
