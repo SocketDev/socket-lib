@@ -17,20 +17,33 @@ export function getSocketCliAcceptRisks(): boolean {
 
 /**
  * Socket CLI API base URL (alternative name).
+ * Checks SOCKET_CLI_API_BASE_URL first, then falls back to legacy SOCKET_SECURITY_API_BASE_URL.
  *
  * @returns API base URL or undefined
  */
 export function getSocketCliApiBaseUrl(): string | undefined {
-  return getEnvValue('SOCKET_CLI_API_BASE_URL')
+  return (
+    getEnvValue('SOCKET_CLI_API_BASE_URL') ||
+    getEnvValue('SOCKET_SECURITY_API_BASE_URL')
+  )
 }
 
 /**
  * Proxy URL for Socket CLI API requests (alternative name).
+ * Checks SOCKET_CLI_API_PROXY, SOCKET_SECURITY_API_PROXY, then standard proxy env vars.
+ * Follows the same precedence as v1.x: HTTPS_PROXY → https_proxy → HTTP_PROXY → http_proxy.
  *
  * @returns API proxy URL or undefined
  */
 export function getSocketCliApiProxy(): string | undefined {
-  return getEnvValue('SOCKET_CLI_API_PROXY')
+  return (
+    getEnvValue('SOCKET_CLI_API_PROXY') ||
+    getEnvValue('SOCKET_SECURITY_API_PROXY') ||
+    getEnvValue('HTTPS_PROXY') ||
+    getEnvValue('https_proxy') ||
+    getEnvValue('HTTP_PROXY') ||
+    getEnvValue('http_proxy')
+  )
 }
 
 /**
@@ -44,11 +57,18 @@ export function getSocketCliApiTimeout(): number {
 
 /**
  * Socket CLI API authentication token (alternative name).
+ * Checks SOCKET_CLI_API_TOKEN, SOCKET_CLI_API_KEY, SOCKET_SECURITY_API_TOKEN, SOCKET_SECURITY_API_KEY.
+ * Maintains full v1.x backward compatibility.
  *
  * @returns API token or undefined
  */
 export function getSocketCliApiToken(): string | undefined {
-  return getEnvValue('SOCKET_CLI_API_TOKEN')
+  return (
+    getEnvValue('SOCKET_CLI_API_TOKEN') ||
+    getEnvValue('SOCKET_CLI_API_KEY') ||
+    getEnvValue('SOCKET_SECURITY_API_TOKEN') ||
+    getEnvValue('SOCKET_SECURITY_API_KEY')
+  )
 }
 
 /**
@@ -89,11 +109,12 @@ export function getSocketCliOptimize(): boolean {
 
 /**
  * Socket CLI organization slug identifier (alternative name).
+ * Checks SOCKET_CLI_ORG_SLUG first, then falls back to SOCKET_ORG_SLUG.
  *
  * @returns Organization slug or undefined
  */
 export function getSocketCliOrgSlug(): string | undefined {
-  return getEnvValue('SOCKET_CLI_ORG_SLUG')
+  return getEnvValue('SOCKET_CLI_ORG_SLUG') || getEnvValue('SOCKET_ORG_SLUG')
 }
 
 /**
@@ -107,9 +128,14 @@ export function getSocketCliViewAllRisks(): boolean {
 
 /**
  * Socket CLI GitHub authentication token.
+ * Checks SOCKET_CLI_GITHUB_TOKEN, SOCKET_SECURITY_GITHUB_PAT, then falls back to GITHUB_TOKEN.
  *
  * @returns GitHub token or undefined
  */
 export function getSocketCliGithubToken(): string | undefined {
-  return getEnvValue('SOCKET_CLI_GITHUB_TOKEN')
+  return (
+    getEnvValue('SOCKET_CLI_GITHUB_TOKEN') ||
+    getEnvValue('SOCKET_SECURITY_GITHUB_PAT') ||
+    getEnvValue('GITHUB_TOKEN')
+  )
 }
