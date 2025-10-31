@@ -36,14 +36,30 @@ import path from 'node:path'
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
 import { generateCacheKey } from './dlx'
-import { getNpmPackageArg } from './external/npm-package-arg'
-import { getPacote } from './external/pacote'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
 import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
+
+let _npmPackageArg: typeof import('npm-package-arg') | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getNpmPackageArg() {
+  if (_npmPackageArg === undefined) {
+    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
+  }
+  return _npmPackageArg as typeof import('npm-package-arg')
+}
+
+let _pacote: typeof import('pacote') | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getPacote() {
+  if (_pacote === undefined) {
+    _pacote = /*@__PURE__*/ require('../external/pacote')
+  }
+  return _pacote as typeof import('pacote')
+}
 
 /**
  * Regex to check if a version string contains range operators.

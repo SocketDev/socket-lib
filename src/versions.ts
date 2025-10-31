@@ -1,6 +1,14 @@
 /** @fileoverview Version comparison and validation utilities for Socket ecosystem. */
 
-import { getSemver } from './external/semver'
+let _semver: typeof import('semver') | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getSemver() {
+  if (_semver === undefined) {
+    // The 'semver' package is browser safe.
+    _semver = /*@__PURE__*/ require('../external/semver')
+  }
+  return _semver as typeof import('semver')
+}
 
 /**
  * Coerce a version string to valid semver format.
