@@ -41,7 +41,7 @@ type CacheEntry<T> = {
  * @returns Memoized version of the function
  *
  * @example
- * import { memoize } from '@socketsecurity/registry/lib/memoization'
+ * import { memoize } from '@socketsecurity/lib/memoization'
  *
  * const expensiveOperation = memoize((n: number) => {
  *   // Heavy computation
@@ -130,7 +130,7 @@ export function memoize<Args extends unknown[], Result>(
  * @returns Memoized version of the async function
  *
  * @example
- * import { memoizeAsync } from '@socketsecurity/registry/lib/memoization'
+ * import { memoizeAsync } from '@socketsecurity/lib/memoization'
  *
  * const fetchUser = memoizeAsync(async (id: string) => {
  *   const response = await fetch(`/api/users/${id}`)
@@ -233,7 +233,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
  * @returns Modified descriptor with memoized method
  *
  * @example
- * import { Memoize } from '@socketsecurity/registry/lib/memoization'
+ * import { Memoize } from '@socketsecurity/lib/memoization'
  *
  * class Calculator {
  *   @Memoize()
@@ -279,7 +279,7 @@ export function clearAllMemoizationCaches(): void {
  * @returns Memoized version using WeakMap
  *
  * @example
- * import { memoizeWeak } from '@socketsecurity/registry/lib/memoization'
+ * import { memoizeWeak } from '@socketsecurity/lib/memoization'
  *
  * const processConfig = memoizeWeak((config: Config) => {
  *   return expensiveTransform(config)
@@ -316,7 +316,7 @@ export function memoizeWeak<K extends object, Result>(
  * @returns Memoized version that only executes once
  *
  * @example
- * import { once } from '@socketsecurity/registry/lib/memoization'
+ * import { once } from '@socketsecurity/lib/memoization'
  *
  * const initialize = once(() => {
  *   console.log('Initializing…')
@@ -352,7 +352,7 @@ export function once<Result>(fn: () => Result): () => Result {
  * @returns Debounced memoized function
  *
  * @example
- * import { memoizeDebounced } from '@socketsecurity/registry/lib/memoization'
+ * import { memoizeDebounced } from '@socketsecurity/lib/memoization'
  *
  * const search = memoizeDebounced(
  *   (query: string) => performSearch(query),

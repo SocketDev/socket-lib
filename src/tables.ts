@@ -59,7 +59,7 @@ function padText(
  * @returns Formatted table string
  *
  * @example
- * import { formatTable } from '@socketsecurity/registry/lib/tables'
+ * import { formatTable } from '@socketsecurity/lib/tables'
  * import colors from 'yoctocolors-cjs'
  *
  * const data = [
@@ -146,7 +146,7 @@ export function formatTable(
  * @returns Formatted table string
  *
  * @example
- * import { formatSimpleTable } from '@socketsecurity/registry/lib/tables'
+ * import { formatSimpleTable } from '@socketsecurity/lib/tables'
  * import colors from 'yoctocolors-cjs'
  *
  * const data = [

@@ -48,7 +48,7 @@ function setupSuppression(): void {
  * This is useful in tests or scripts where multiple listeners are expected.
  *
  * @example
- * import { suppressMaxListenersWarning } from '@socketsecurity/registry/lib/suppress-warnings'
+ * import { suppressMaxListenersWarning } from '@socketsecurity/lib/suppress-warnings'
  *
  * suppressMaxListenersWarning()
  */
@@ -63,7 +63,7 @@ export function suppressMaxListenersWarning(): void {
  * @param warningType - The warning type to suppress (e.g., 'DeprecationWarning', 'ExperimentalWarning')
  *
  * @example
- * import { suppressWarningType } from '@socketsecurity/registry/lib/suppress-warnings'
+ * import { suppressWarningType } from '@socketsecurity/lib/suppress-warnings'
  *
  * suppressWarningType('ExperimentalWarning')
  */
@@ -90,7 +90,7 @@ export function suppressWarningType(warningType: string): void {
  * @param maxListeners - Maximum number of listeners (defaults to 10, the Node.js default)
  *
  * @example
- * import { setMaxEventTargetListeners } from '@socketsecurity/registry/lib/suppress-warnings'
+ * import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
  *
  * const controller = new AbortController()
  * setMaxEventTargetListeners(controller.signal)
@@ -133,7 +133,7 @@ export function restoreWarnings(): void {
  * @returns The result of the callback
  *
  * @example
- * import { withSuppressedWarnings } from '@socketsecurity/registry/lib/suppress-warnings'
+ * import { withSuppressedWarnings } from '@socketsecurity/lib/suppress-warnings'
  *
  * const result = await withSuppressedWarnings('ExperimentalWarning', async () => {
  *   // Code that triggers experimental warnings
