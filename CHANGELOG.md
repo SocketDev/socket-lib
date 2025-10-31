@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.2](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.2) - 2025-10-31
+
+### Changed
+
+- **Package spec parsing**: Refactored to use official `npm-package-arg` library for robust handling of all npm package specification formats (versions, ranges, tags, git URLs)
+  - Improves reliability when parsing complex package specs
+  - Better handles edge cases in version ranges and scoped packages
+  - Falls back to simple parsing if npm-package-arg fails
+
+### Fixed
+
+- **Scoped package version parsing**: Fixed critical bug where parsePackageSpec was stripping the `@` prefix from scoped packages with versions
+  - Example: `@coana-tech/cli@~14.12.51` was incorrectly parsed as `coana-tech/cli@~14.12.51`
+  - Caused package installation failures for scoped packages in DLX system
+
 ## [2.10.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.1) - 2025-10-31
 
 ### Fixed
