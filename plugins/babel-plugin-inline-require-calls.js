@@ -1,4 +1,7 @@
+'use strict'
+
 const { createRequire } = require('node:module')
+const fs = require('node:fs')
 const path = require('node:path')
 
 /**
@@ -69,7 +72,6 @@ module.exports = function inlineRequireCalls(babel) {
           ]
 
           // Find the first path that exists.
-          const fs = require('node:fs')
           let resolvedPath = absolutePath
           for (const testPath of possiblePaths) {
             try {
