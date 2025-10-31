@@ -9,7 +9,7 @@
  * - Thread-safe for concurrent test execution
  */
 
-import { AsyncLocalStorage } from 'node:async_hooks'
+import { AsyncLocalStorage } from 'async_hooks'
 
 type EnvOverrides = Map<string, string | undefined>
 

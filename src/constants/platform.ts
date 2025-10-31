@@ -2,7 +2,7 @@
  * Platform detection and OS-specific constants.
  */
 
-import { platform } from 'node:os'
+import { platform } from 'os'
 
 // Platform detection.
 const _platform = platform()

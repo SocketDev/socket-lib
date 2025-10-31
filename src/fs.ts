@@ -3,7 +3,7 @@
  * Provides enhanced fs operations, glob matching, and directory traversal functions.
  */
 
-import type { Abortable } from 'node:events'
+import type { Abortable } from 'events'
 import type {
   Dirent,
   MakeDirectoryOptions,
@@ -12,7 +12,7 @@ import type {
   PathLike,
   StatSyncOptions,
   WriteFileOptions,
-} from 'node:fs'
+} from 'fs'
 
 import { getAbortSignal } from '#constants/process'
 

@@ -14,9 +14,9 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
-import { createWriteStream } from 'node:fs'
+import { createWriteStream } from 'fs'
 
-import type { IncomingMessage } from 'node:http'
+import type { IncomingMessage } from 'http'
 
 let _http: typeof import('http') | undefined
 let _https: typeof import('https') | undefined
