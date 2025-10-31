@@ -2,7 +2,7 @@
  * @fileoverview Code coverage utilities for parsing v8 coverage data.
  */
 
-import { promises as fs } from 'node:fs'
+import { promises as fs } from 'fs'
 
 import { readJson } from '../fs'
 import { isObjectObject } from '../objects'

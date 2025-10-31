@@ -1,6 +1,6 @@
 /** @fileoverview DLX (execute package) utilities for Socket ecosystem shared installations. */
 
-import { createHash } from 'node:crypto'
+import { createHash } from 'crypto'
 
 import { readDirNamesSync, safeDelete, safeMkdir, safeMkdirSync } from './fs'
 import { normalizePath } from './path'
