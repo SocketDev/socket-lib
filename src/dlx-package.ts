@@ -36,7 +36,7 @@ import path from 'node:path'
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
 import { generateCacheKey } from './dlx'
-import pacote from './external/pacote'
+import { getPacote } from './external/pacote'
 import { readJsonSync } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
@@ -118,17 +118,19 @@ function parsePackageSpec(spec: string): {
   // Handle scoped packages (@scope/name@version).
   if (spec.startsWith('@')) {
     const parts = spec.split('@')
+    // parts[0] is empty string (before leading @)
+    // parts[1] is scope/name
+    // parts[2] is version (if present)
     if (parts.length === 3) {
-      // @scope@version -> Invalid, but handle gracefully.
-      return { name: parts[1], version: parts[2] }
+      // @scope/name@version.
+      return { name: `@${parts[1]}`, version: parts[2] }
     }
     if (parts.length === 2) {
       // @scope/name with no version.
       return { name: `@${parts[1]}`, version: undefined }
     }
-    // @scope/name@version.
-    const scopeAndName = `@${parts[1]}`
-    return { name: scopeAndName, version: parts[2] }
+    // Fallback for malformed input.
+    return { name: spec, version: undefined }
   }
 
   // Handle unscoped packages (name@version).
@@ -205,7 +207,7 @@ async function ensurePackageInstalled(
       // Pacote leverages npm cache when available but doesn't require npm CLI.
       const pacoteCachePath = getPacoteCachePath()
       try {
-        await pacote.extract(packageSpec, installedDir, {
+        await getPacote().extract(packageSpec, installedDir, {
           // Use consistent pacote cache path (respects npm cache locations when available).
           cache: pacoteCachePath || path.join(packageDir, '.cache'),
         })
