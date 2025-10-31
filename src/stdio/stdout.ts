@@ -3,7 +3,7 @@
  * Provides utilities for writing to stdout with formatting and control.
  */
 
-import { WriteStream } from 'node:tty'
+import { WriteStream } from 'tty'
 
 // Get the actual stdout stream
 const stdout: NodeJS.WriteStream = process.stdout

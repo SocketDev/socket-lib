@@ -1,8 +1,8 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
-import { createHash } from 'node:crypto'
-import os from 'node:os'
-import path from 'node:path'
+import { createHash } from 'crypto'
+import os from 'os'
+import path from 'path'
 
 import { WIN32 } from '#constants/platform'
 

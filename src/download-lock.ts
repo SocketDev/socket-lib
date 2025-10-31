@@ -9,9 +9,9 @@
  * `downloadWithLock()` from this module.
  */
 
-import { existsSync } from 'node:fs'
-import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { existsSync } from 'fs'
+import { mkdir, readFile, rm, stat, writeFile } from 'fs/promises'
+import { dirname, join } from 'path'
 import type { HttpDownloadOptions, HttpDownloadResult } from './http-request'
 import { httpDownload } from './http-request'
 

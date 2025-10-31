@@ -30,7 +30,7 @@
  * - dlxPackage() combines both for convenience
  */
 
-import path from 'node:path'
+import path from 'path'
 
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
