@@ -307,8 +307,7 @@ let _fs: typeof import('fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
+    _fs = /*@__PURE__*/ require('fs')
   }
   return _fs as typeof import('fs')
 }
@@ -326,7 +325,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('node:path')
+    _path = /*@__PURE__*/ require('path')
   }
   return _path as typeof import('path')
 }
@@ -1407,6 +1406,43 @@ export async function safeReadFile(
 }
 
 /**
+ * Safely read a file synchronously, returning undefined on error.
+ * Useful when you want to attempt reading a file without handling errors explicitly.
+ * Returns undefined for any error (file not found, permission denied, etc.).
+ *
+ * @param filepath - Path to file
+ * @param options - Read options including encoding and default value
+ * @returns File contents, or undefined on error
+ *
+ * @example
+ * ```ts
+ * // Try to read a config file
+ * const config = safeReadFileSync('./config.txt')
+ * if (config) {
+ *   console.log('Config loaded successfully')
+ * }
+ *
+ * // Read binary file safely
+ * const buffer = safeReadFileSync('./image.png', { encoding: null })
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function safeReadFileSync(
+  filepath: PathLike,
+  options?: SafeReadOptions | undefined,
+) {
+  const opts = typeof options === 'string' ? { encoding: options } : options
+  const fs = getFs()
+  try {
+    return fs.readFileSync(filepath, {
+      __proto__: null,
+      ...opts,
+    } as ObjectEncodingOptions)
+  } catch {}
+  return undefined
+}
+
+/**
  * Safely get file stats asynchronously, returning undefined on error.
  * Useful for checking file existence and properties without error handling.
  * Returns undefined for any error (file not found, permission denied, etc.).
@@ -1465,43 +1501,6 @@ export function safeStatsSync(
       throwIfNoEntry: false,
       ...opts,
     } as StatSyncOptions)
-  } catch {}
-  return undefined
-}
-
-/**
- * Safely read a file synchronously, returning undefined on error.
- * Useful when you want to attempt reading a file without handling errors explicitly.
- * Returns undefined for any error (file not found, permission denied, etc.).
- *
- * @param filepath - Path to file
- * @param options - Read options including encoding and default value
- * @returns File contents, or undefined on error
- *
- * @example
- * ```ts
- * // Try to read a config file
- * const config = safeReadFileSync('./config.txt')
- * if (config) {
- *   console.log('Config loaded successfully')
- * }
- *
- * // Read binary file safely
- * const buffer = safeReadFileSync('./image.png', { encoding: null })
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function safeReadFileSync(
-  filepath: PathLike,
-  options?: SafeReadOptions | undefined,
-) {
-  const opts = typeof options === 'string' ? { encoding: options } : options
-  const fs = getFs()
-  try {
-    return fs.readFileSync(filepath, {
-      __proto__: null,
-      ...opts,
-    } as ObjectEncodingOptions)
   } catch {}
   return undefined
 }
