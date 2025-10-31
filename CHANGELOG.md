@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.0) - 2025-10-30
+
+### Added
+
+- **Unified DLX metadata schema**: Standardized `.dlx-metadata.json` format across TypeScript and C++ implementations
+  - Exported `DlxMetadata` interface as canonical schema reference
+  - Core fields: `version`, `cache_key`, `timestamp`, `checksum`, `checksum_algorithm`, `platform`, `arch`, `size`, `source`
+  - Support for `source` tracking (download vs decompression origin)
+  - Reserved `extra` field for implementation-specific data
+  - Comprehensive documentation with examples for both download and decompression use cases
+
+### Changed
+
+- **DLX binary metadata structure**: Updated `writeMetadata()` to use unified schema with additional fields
+  - Now includes `cache_key` (first 16 chars of SHA-512 hash)
+  - Added `size` field for cached binary size
+  - Added `checksum_algorithm` field (currently "sha256")
+  - Restructured to use `source.type` and `source.url` for origin tracking
+  - Maintains backward compatibility in `listDlxCache()` reader
+
 ## [2.9.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.9.1) - 2025-10-30
 
 ### Added
