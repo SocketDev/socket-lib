@@ -2,6 +2,7 @@
  * @fileoverview Code coverage utilities for parsing v8 coverage data.
  */
 
+// eslint-disable-next-line n/prefer-node-protocol
 import { promises as fs } from 'fs'
 
 import { readJson } from '../fs'

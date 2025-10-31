@@ -9,6 +9,7 @@
  * - Thread-safe for concurrent test execution
  */
 
+// eslint-disable-next-line n/prefer-node-protocol
 import { AsyncLocalStorage } from 'async_hooks'
 
 type EnvOverrides = Map<string, string | undefined>
