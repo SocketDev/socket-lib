@@ -6,6 +6,7 @@
 import type { Abortable } from 'node:events'
 import type {
   Dirent,
+  MakeDirectoryOptions,
   ObjectEncodingOptions,
   OpenMode,
   PathLike,
@@ -1273,6 +1274,99 @@ export function safeDeleteSync(
     force: shouldForce,
     onlyFiles: false,
   })
+}
+
+/**
+ * Safely create a directory asynchronously, ignoring EEXIST errors.
+ * This function wraps fs.promises.mkdir and handles the race condition where
+ * the directory might already exist, which is common in concurrent code.
+ *
+ * Unlike fs.promises.mkdir with recursive:true, this function:
+ * - Silently ignores EEXIST errors (directory already exists)
+ * - Re-throws all other errors (permissions, invalid path, etc.)
+ * - Works reliably in multi-process/concurrent scenarios
+ *
+ * @param path - Directory path to create
+ * @param options - Options including recursive and mode settings
+ * @returns Promise that resolves when directory is created or already exists
+ *
+ * @example
+ * ```ts
+ * // Create a directory, no error if it exists
+ * await safeMkdir('./config')
+ *
+ * // Create nested directories
+ * await safeMkdir('./data/cache/temp', { recursive: true })
+ *
+ * // Create with specific permissions
+ * await safeMkdir('./secure', { mode: 0o700 })
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export async function safeMkdir(
+  path: PathLike,
+  options?: MakeDirectoryOptions | undefined,
+): Promise<void> {
+  const fs = getFs()
+  try {
+    await fs.promises.mkdir(path, options)
+  } catch (e: unknown) {
+    // Ignore EEXIST error - directory already exists.
+    if (
+      typeof e === 'object' &&
+      e !== null &&
+      'code' in e &&
+      e.code !== 'EEXIST'
+    ) {
+      throw e
+    }
+  }
+}
+
+/**
+ * Safely create a directory synchronously, ignoring EEXIST errors.
+ * This function wraps fs.mkdirSync and handles the race condition where
+ * the directory might already exist, which is common in concurrent code.
+ *
+ * Unlike fs.mkdirSync with recursive:true, this function:
+ * - Silently ignores EEXIST errors (directory already exists)
+ * - Re-throws all other errors (permissions, invalid path, etc.)
+ * - Works reliably in multi-process/concurrent scenarios
+ *
+ * @param path - Directory path to create
+ * @param options - Options including recursive and mode settings
+ *
+ * @example
+ * ```ts
+ * // Create a directory, no error if it exists
+ * safeMkdirSync('./config')
+ *
+ * // Create nested directories
+ * safeMkdirSync('./data/cache/temp', { recursive: true })
+ *
+ * // Create with specific permissions
+ * safeMkdirSync('./secure', { mode: 0o700 })
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function safeMkdirSync(
+  path: PathLike,
+  options?: MakeDirectoryOptions | undefined,
+): void {
+  const fs = getFs()
+  try {
+    fs.mkdirSync(path, options)
+  } catch (e: unknown) {
+    // Ignore EEXIST error - directory already exists.
+    if (
+      typeof e === 'object' &&
+      e !== null &&
+      'code' in e &&
+      e.code !== 'EEXIST'
+    ) {
+      throw e
+    }
+  }
 }
 
 /**
