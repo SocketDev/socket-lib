@@ -166,7 +166,7 @@ function configs(sourceType) {
         version: '>=22',
       },
     ],
-    'n/prefer-node-protocol': 'error',
+    'n/prefer-node-protocol': 'off',
     'unicorn/consistent-function-scoping': 'error',
     curly: 'error',
     'no-await-in-loop': 'error',
