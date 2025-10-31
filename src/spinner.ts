@@ -142,7 +142,7 @@ export type ShimmerInfo = ShimmerState & {
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/registry/lib/spinner'
+ * import { Spinner } from '@socketsecurity/lib/spinner'
  *
  * const spinner = Spinner({ text: 'Loading…' })
  * spinner.start()
@@ -433,7 +433,7 @@ let _defaultSpinner: SpinnerStyle | undefined
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/registry/lib/spinner'
+ * import { Spinner } from '@socketsecurity/lib/spinner'
  *
  * // Basic usage
  * const spinner = Spinner({ text: 'Loading data…' })
@@ -1307,7 +1307,7 @@ let _spinner: ReturnType<typeof Spinner> | undefined
  *
  * @example
  * ```ts
- * import { getDefaultSpinner } from '@socketsecurity/registry/lib/spinner'
+ * import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
  *
  * const spinner = getDefaultSpinner()
  * spinner.start('Loading…')
@@ -1328,11 +1328,11 @@ export function getDefaultSpinner(): ReturnType<typeof Spinner> {
  * @example
  * ```ts
  * // Old (deprecated):
- * import { spinner } from '@socketsecurity/registry/lib/spinner'
+ * import { spinner } from '@socketsecurity/lib/spinner'
  * spinner.start('Loading…')
  *
  * // New (recommended):
- * import { getDefaultSpinner } from '@socketsecurity/registry/lib/spinner'
+ * import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
  * const spinner = getDefaultSpinner()
  * spinner.start('Loading…')
  * ```
@@ -1382,7 +1382,7 @@ export type WithSpinnerOptions<T> = {
  *
  * @example
  * ```ts
- * import { Spinner, withSpinner } from '@socketsecurity/registry/lib/spinner'
+ * import { Spinner, withSpinner } from '@socketsecurity/lib/spinner'
  *
  * const spinner = Spinner()
  *
@@ -1452,7 +1452,7 @@ export type WithSpinnerRestoreOptions<T> = {
  *
  * @example
  * ```ts
- * import { getDefaultSpinner, withSpinnerRestore } from '@socketsecurity/registry/lib/spinner'
+ * import { getDefaultSpinner, withSpinnerRestore } from '@socketsecurity/lib/spinner'
  *
  * const spinner = getDefaultSpinner()
  * const wasSpinning = spinner.isSpinning
@@ -1517,7 +1517,7 @@ export type WithSpinnerSyncOptions<T> = {
  *
  * @example
  * ```ts
- * import { Spinner, withSpinnerSync } from '@socketsecurity/registry/lib/spinner'
+ * import { Spinner, withSpinnerSync } from '@socketsecurity/lib/spinner'
  *
  * const spinner = Spinner()
  *

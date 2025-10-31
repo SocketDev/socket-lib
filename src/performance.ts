@@ -36,7 +36,7 @@ function isPerfEnabled(): boolean {
  * @returns Stop function that completes the timing
  *
  * @example
- * import { perfTimer } from '@socketsecurity/registry/lib/performance'
+ * import { perfTimer } from '@socketsecurity/lib/performance'
  *
  * const stop = perfTimer('api-call')
  * await fetchData()
@@ -78,7 +78,7 @@ export function perfTimer(
  * @returns Result of the function and duration
  *
  * @example
- * import { measure } from '@socketsecurity/registry/lib/performance'
+ * import { measure } from '@socketsecurity/lib/performance'
  *
  * const { result, duration } = await measure('fetch-packages', async () => {
  *   return await fetchPackages()
@@ -116,7 +116,7 @@ export async function measure<T>(
  * @returns Result of the function and duration
  *
  * @example
- * import { measureSync } from '@socketsecurity/registry/lib/performance'
+ * import { measureSync } from '@socketsecurity/lib/performance'
  *
  * const { result, duration } = measureSync('parse-json', () => {
  *   return JSON.parse(data)
@@ -151,7 +151,7 @@ export function measureSync<T>(
  * @returns Array of performance metrics
  *
  * @example
- * import { getPerformanceMetrics } from '@socketsecurity/registry/lib/performance'
+ * import { getPerformanceMetrics } from '@socketsecurity/lib/performance'
  *
  * const metrics = getPerformanceMetrics()
  * console.log(metrics)
@@ -164,7 +164,7 @@ export function getPerformanceMetrics(): PerformanceMetrics[] {
  * Clear all collected performance metrics.
  *
  * @example
- * import { clearPerformanceMetrics } from '@socketsecurity/registry/lib/performance'
+ * import { clearPerformanceMetrics } from '@socketsecurity/lib/performance'
  *
  * clearPerformanceMetrics()
  */
@@ -179,7 +179,7 @@ export function clearPerformanceMetrics(): void {
  * @returns Summary of metrics grouped by operation
  *
  * @example
- * import { getPerformanceSummary } from '@socketsecurity/registry/lib/performance'
+ * import { getPerformanceSummary } from '@socketsecurity/lib/performance'
  *
  * const summary = getPerformanceSummary()
  * console.log(summary)
@@ -251,7 +251,7 @@ export function getPerformanceSummary(): Record<
  * Only prints when DEBUG=perf is enabled.
  *
  * @example
- * import { printPerformanceSummary } from '@socketsecurity/registry/lib/performance'
+ * import { printPerformanceSummary } from '@socketsecurity/lib/performance'
  *
  * printPerformanceSummary()
  * // Performance Summary:
@@ -292,7 +292,7 @@ export function printPerformanceSummary(): void {
  * @param metadata - Optional metadata
  *
  * @example
- * import { perfCheckpoint } from '@socketsecurity/registry/lib/performance'
+ * import { perfCheckpoint } from '@socketsecurity/lib/performance'
  *
  * perfCheckpoint('start-scan')
  * // ... do work ...
@@ -328,7 +328,7 @@ export function perfCheckpoint(
  * @returns Memory usage in MB
  *
  * @example
- * import { trackMemory } from '@socketsecurity/registry/lib/performance'
+ * import { trackMemory } from '@socketsecurity/lib/performance'
  *
  * const memBefore = trackMemory('before-operation')
  * await heavyOperation()
@@ -368,7 +368,7 @@ export function trackMemory(label: string): number {
  * @returns Formatted performance report
  *
  * @example
- * import { generatePerformanceReport } from '@socketsecurity/registry/lib/performance'
+ * import { generatePerformanceReport } from '@socketsecurity/lib/performance'
  *
  * console.log(generatePerformanceReport())
  * // ╔═══════════════════════════════════════════════╗
