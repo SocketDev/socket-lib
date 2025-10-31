@@ -42,6 +42,90 @@ export interface DlxBinaryResult {
 }
 
 /**
+ * Metadata structure for cached binaries (.dlx-metadata.json).
+ * Unified schema shared across TypeScript (dlxBinary) and C++ (socket_macho_decompress).
+ *
+ * Core Fields (present in all implementations):
+ * - version: Schema version (currently "1.0.0")
+ * - cache_key: First 16 chars of SHA-512 hash (matches directory name)
+ * - timestamp: Unix timestamp in milliseconds
+ * - checksum: Full hash of cached binary (SHA-512 for C++, SHA-256 for TypeScript)
+ * - checksum_algorithm: "sha512" or "sha256"
+ * - platform: "darwin" | "linux" | "win32"
+ * - arch: "x64" | "arm64"
+ * - size: Size of cached binary in bytes
+ * - source: Origin information
+ *   - type: "download" (from URL) or "decompression" (from embedded binary)
+ *   - url: Download URL (if type is "download")
+ *   - path: Source binary path (if type is "decompression")
+ *
+ * Extra Fields (implementation-specific):
+ * - For C++ decompression:
+ *   - compressed_size: Size of compressed data in bytes
+ *   - compression_algorithm: Brotli level (numeric)
+ *   - compression_ratio: original_size / compressed_size
+ *
+ * Example (TypeScript download):
+ * ```json
+ * {
+ *   "version": "1.0.0",
+ *   "cache_key": "a1b2c3d4e5f67890",
+ *   "timestamp": 1730332800000,
+ *   "checksum": "sha256-abc123...",
+ *   "checksum_algorithm": "sha256",
+ *   "platform": "darwin",
+ *   "arch": "arm64",
+ *   "size": 15000000,
+ *   "source": {
+ *     "type": "download",
+ *     "url": "https://example.com/binary"
+ *   }
+ * }
+ * ```
+ *
+ * Example (C++ decompression):
+ * ```json
+ * {
+ *   "version": "1.0.0",
+ *   "cache_key": "0123456789abcdef",
+ *   "timestamp": 1730332800000,
+ *   "checksum": "sha512-def456...",
+ *   "checksum_algorithm": "sha512",
+ *   "platform": "darwin",
+ *   "arch": "arm64",
+ *   "size": 13000000,
+ *   "source": {
+ *     "type": "decompression",
+ *     "path": "/usr/local/bin/socket"
+ *   },
+ *   "extra": {
+ *     "compressed_size": 1700000,
+ *     "compression_algorithm": 3,
+ *     "compression_ratio": 7.647
+ *   }
+ * }
+ * ```
+ *
+ * @internal This interface documents the metadata file format.
+ */
+export interface DlxMetadata {
+  version: string
+  cache_key: string
+  timestamp: number
+  checksum: string
+  checksum_algorithm: string
+  platform: string
+  arch: string
+  size: number
+  source?: {
+    type: 'download' | 'decompression'
+    url?: string
+    path?: string
+  }
+  extra?: Record<string, unknown>
+}
+
+/**
  * Get metadata file path for a cached binary.
  */
 function getMetadataPath(cacheEntryPath: string): string {
@@ -153,20 +237,32 @@ async function downloadBinaryFile(
 
 /**
  * Write metadata for a cached binary.
+ * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
+ * Schema documentation: See DlxMetadata interface in this file (exported).
+ * Core fields: version, cache_key, timestamp, checksum, checksum_algorithm, platform, arch, size, source
+ * Note: This implementation uses SHA-256 checksums instead of SHA-512.
  */
 async function writeMetadata(
   cacheEntryPath: string,
+  cacheKey: string,
   url: string,
   checksum: string,
+  size: number,
 ): Promise<void> {
   const metaPath = getMetadataPath(cacheEntryPath)
   const metadata = {
-    arch: os.arch(),
-    checksum,
-    platform: os.platform(),
-    timestamp: Date.now(),
-    url,
     version: '1.0.0',
+    cache_key: cacheKey,
+    timestamp: Date.now(),
+    checksum,
+    checksum_algorithm: 'sha256',
+    platform: os.platform(),
+    arch: os.arch(),
+    size,
+    source: {
+      type: 'download',
+      url,
+    },
   }
   await fs.writeFile(metaPath, JSON.stringify(metadata, null, 2))
 }
@@ -325,7 +421,16 @@ export async function dlxBinary(
 
     // Download the binary.
     computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
-    await writeMetadata(cacheEntryDir, url, computedChecksum || '')
+
+    // Get file size for metadata.
+    const stats = await fs.stat(binaryPath)
+    await writeMetadata(
+      cacheEntryDir,
+      cacheKey,
+      url,
+      computedChecksum || '',
+      stats.size,
+    )
   }
 
   // Execute the binary.
@@ -431,7 +536,16 @@ export async function downloadBinary(
 
     // Download the binary.
     const computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
-    await writeMetadata(cacheEntryDir, url, computedChecksum || '')
+
+    // Get file size for metadata.
+    const stats = await fs.stat(binaryPath)
+    await writeMetadata(
+      cacheEntryDir,
+      cacheKey,
+      url,
+      computedChecksum || '',
+      stats.size,
+    )
     downloaded = true
   }
 
@@ -537,6 +651,14 @@ export async function listDlxCache(): Promise<
         continue
       }
 
+      const metaObj = metadata as Record<string, unknown>
+
+      // Get URL from unified schema (source.url) or legacy schema (url).
+      // Allow empty URL for backward compatibility with partial metadata.
+      const source = metaObj['source'] as Record<string, unknown> | undefined
+      const url =
+        (source?.['url'] as string) || (metaObj['url'] as string) || ''
+
       // Find the binary file in the directory.
       // eslint-disable-next-line no-await-in-loop
       const files = await fs.readdir(entryPath)
@@ -547,7 +669,6 @@ export async function listDlxCache(): Promise<
         // eslint-disable-next-line no-await-in-loop
         const binaryStats = await fs.stat(binaryPath)
 
-        const metaObj = metadata as Record<string, unknown>
         results.push({
           age: now - ((metaObj['timestamp'] as number) || 0),
           arch: (metaObj['arch'] as string) || 'unknown',
@@ -555,7 +676,7 @@ export async function listDlxCache(): Promise<
           name: binaryFile,
           platform: (metaObj['platform'] as string) || 'unknown',
           size: binaryStats.size,
-          url: (metaObj['url'] as string) || '',
+          url,
         })
       }
     } catch {}
