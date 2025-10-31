@@ -40,7 +40,7 @@
  * - Automatic cleanup on process exit
  */
 
-import { existsSync, mkdirSync, statSync, utimesSync } from 'fs'
+import { existsSync, mkdirSync, statSync, utimesSync } from 'node:fs'
 
 import { safeDeleteSync } from './fs'
 import { logger } from './logger'

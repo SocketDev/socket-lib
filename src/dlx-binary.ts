@@ -1,11 +1,10 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
-// eslint-disable-next-line n/prefer-node-protocol
-import { createHash } from 'crypto'
-// eslint-disable-next-line n/prefer-node-protocol
-import os from 'os'
-// eslint-disable-next-line n/prefer-node-protocol
-import path from 'path'
+import { createHash } from 'node:crypto'
+
+import os from 'node:os'
+
+import path from 'node:path'
 
 import { WIN32 } from '#constants/platform'
 
@@ -31,8 +30,8 @@ let _fs: typeof import('fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
-    // eslint-disable-next-line n/prefer-node-protocol
-    _fs = /*@__PURE__*/ require('fs')
+
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('fs')
 }

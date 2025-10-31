@@ -9,12 +9,11 @@
  * `downloadWithLock()` from this module.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
-import { existsSync } from 'fs'
-// eslint-disable-next-line n/prefer-node-protocol
-import { mkdir, readFile, rm, stat, writeFile } from 'fs/promises'
-// eslint-disable-next-line n/prefer-node-protocol
-import { dirname, join } from 'path'
+import { existsSync } from 'node:fs'
+
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+
+import { dirname, join } from 'node:path'
 import type { HttpDownloadOptions, HttpDownloadResult } from './http-request'
 import { httpDownload } from './http-request'
 
