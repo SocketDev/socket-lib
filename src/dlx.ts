@@ -1,12 +1,28 @@
 /** @fileoverview DLX (execute package) utilities for Socket ecosystem shared installations. */
 
 import { createHash } from 'node:crypto'
-import { existsSync, promises as fs } from 'node:fs'
 
-import { readDirNamesSync, safeDelete } from './fs'
+import { readDirNamesSync, safeDelete, safeMkdir, safeMkdirSync } from './fs'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
 import { pEach } from './promises'
+
+let _fs: typeof import('fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js fs module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('fs')
+}
 
 /**
  * Generate a cache directory name using npm/npx approach.
@@ -73,15 +89,17 @@ export function clearDlxSync(): void {
  * Check if the DLX directory exists.
  */
 export function dlxDirExists(): boolean {
-  return existsSync(getSocketDlxDir())
+  const fs = getFs()
+  return fs.existsSync(getSocketDlxDir())
 }
 
 /**
  * Check if the DLX directory exists asynchronously.
  */
 export async function dlxDirExistsAsync(): Promise<boolean> {
+  const fs = getFs()
   try {
-    await fs.access(getSocketDlxDir())
+    await fs.promises.access(getSocketDlxDir())
     return true
   } catch {
     return false
@@ -92,15 +110,14 @@ export async function dlxDirExistsAsync(): Promise<boolean> {
  * Ensure the DLX directory exists, creating it if necessary.
  */
 export async function ensureDlxDir(): Promise<void> {
-  await fs.mkdir(getSocketDlxDir(), { recursive: true })
+  await safeMkdir(getSocketDlxDir(), { recursive: true })
 }
 
 /**
  * Ensure the DLX directory exists synchronously, creating it if necessary.
  */
 export function ensureDlxDirSync(): void {
-  const { mkdirSync } = require('node:fs')
-  mkdirSync(getSocketDlxDir(), { recursive: true })
+  safeMkdirSync(getSocketDlxDir(), { recursive: true })
 }
 
 /**
@@ -170,7 +187,8 @@ export function isInSocketDlx(filePath: string): boolean {
  * Check if a package is installed in DLX.
  */
 export function isDlxPackageInstalled(packageName: string): boolean {
-  return existsSync(getDlxInstalledPackageDir(packageName))
+  const fs = getFs()
+  return fs.existsSync(getDlxInstalledPackageDir(packageName))
 }
 
 /**
@@ -179,8 +197,9 @@ export function isDlxPackageInstalled(packageName: string): boolean {
 export async function isDlxPackageInstalledAsync(
   packageName: string,
 ): Promise<boolean> {
+  const fs = getFs()
   try {
-    await fs.access(getDlxInstalledPackageDir(packageName))
+    await fs.promises.access(getDlxInstalledPackageDir(packageName))
     return true
   } catch {
     return false
@@ -202,8 +221,9 @@ export function listDlxPackages(): string[] {
  * List all packages installed in DLX asynchronously.
  */
 export async function listDlxPackagesAsync(): Promise<string[]> {
+  const fs = getFs()
   try {
-    const entries = await fs.readdir(getSocketDlxDir(), {
+    const entries = await fs.promises.readdir(getSocketDlxDir(), {
       withFileTypes: true,
     })
     return entries
@@ -233,10 +253,10 @@ export async function removeDlxPackage(packageName: string): Promise<void> {
  * Remove a DLX package installation synchronously.
  */
 export function removeDlxPackageSync(packageName: string): void {
-  const { rmSync } = require('node:fs')
+  const fs = getFs()
   const packageDir = getDlxPackageDir(packageName)
   try {
-    rmSync(packageDir, { recursive: true, force: true })
+    fs.rmSync(packageDir, { recursive: true, force: true })
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {

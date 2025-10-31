@@ -1,7 +1,6 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
 import { createHash } from 'node:crypto'
-import { existsSync, promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -9,13 +8,30 @@ import { WIN32 } from '#constants/platform'
 
 import { generateCacheKey } from './dlx'
 import { httpDownload } from './http-request'
-import { isDir, readJson, safeDelete } from './fs'
+import { isDir, readJson, safeDelete, safeMkdir } from './fs'
 import { isObjectObject } from './objects'
 import { normalizePath } from './path'
 import { getSocketDlxDir } from './paths'
 import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
+
+let _fs: typeof import('fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js fs module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('fs')
+}
 
 export interface DlxBinaryOptions {
   /** URL to download the binary from. */
@@ -139,9 +155,10 @@ async function isCacheValid(
   cacheEntryPath: string,
   cacheTtl: number,
 ): Promise<boolean> {
+  const fs = getFs()
   try {
     const metaPath = getMetadataPath(cacheEntryPath)
-    if (!existsSync(metaPath)) {
+    if (!fs.existsSync(metaPath)) {
       return false
     }
 
@@ -181,12 +198,13 @@ async function downloadBinaryFile(
   return await processLock.withLock(
     lockPath,
     async () => {
+      const fs = getFs()
       // Check if file was downloaded while waiting for lock.
-      if (existsSync(destPath)) {
-        const stats = await fs.stat(destPath)
+      if (fs.existsSync(destPath)) {
+        const stats = await fs.promises.stat(destPath)
         if (stats.size > 0) {
           // File exists, compute and return checksum.
-          const fileBuffer = await fs.readFile(destPath)
+          const fileBuffer = await fs.promises.readFile(destPath)
           const hasher = createHash('sha256')
           hasher.update(fileBuffer)
           return hasher.digest('hex')
@@ -206,7 +224,7 @@ async function downloadBinaryFile(
       }
 
       // Compute checksum of downloaded file.
-      const fileBuffer = await fs.readFile(destPath)
+      const fileBuffer = await fs.promises.readFile(destPath)
       const hasher = createHash('sha256')
       hasher.update(fileBuffer)
       const actualChecksum = hasher.digest('hex')
@@ -222,7 +240,7 @@ async function downloadBinaryFile(
 
       // Make executable on POSIX systems.
       if (!WIN32) {
-        await fs.chmod(destPath, 0o755)
+        await fs.promises.chmod(destPath, 0o755)
       }
 
       return actualChecksum
@@ -264,7 +282,8 @@ async function writeMetadata(
       url,
     },
   }
-  await fs.writeFile(metaPath, JSON.stringify(metadata, null, 2))
+  const fs = getFs()
+  await fs.promises.writeFile(metaPath, JSON.stringify(metadata, null, 2))
 }
 
 /**
@@ -274,14 +293,15 @@ export async function cleanDlxCache(
   maxAge: number = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
 ): Promise<number> {
   const cacheDir = getDlxCachePath()
+  const fs = getFs()
 
-  if (!existsSync(cacheDir)) {
+  if (!fs.existsSync(cacheDir)) {
     return 0
   }
 
   let cleaned = 0
   const now = Date.now()
-  const entries = await fs.readdir(cacheDir)
+  const entries = await fs.promises.readdir(cacheDir)
 
   for (const entry of entries) {
     const entryPath = path.join(cacheDir, entry)
@@ -319,7 +339,7 @@ export async function cleanDlxCache(
       // If we can't read metadata, check if directory is empty or corrupted.
       try {
         // eslint-disable-next-line no-await-in-loop
-        const contents = await fs.readdir(entryPath)
+        const contents = await fs.promises.readdir(entryPath)
         if (!contents.length) {
           // Remove empty directory.
           // eslint-disable-next-line no-await-in-loop
@@ -358,6 +378,7 @@ export async function dlxBinary(
   const cacheKey = generateCacheKey(spec)
   const cacheEntryDir = path.join(cacheDir, cacheKey)
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
+  const fs = getFs()
 
   let downloaded = false
   let computedChecksum = checksum
@@ -365,7 +386,7 @@ export async function dlxBinary(
   // Check if we need to download.
   if (
     !force &&
-    existsSync(cacheEntryDir) &&
+    fs.existsSync(cacheEntryDir) &&
     (await isCacheValid(cacheEntryDir, cacheTtl))
   ) {
     // Binary is cached and valid, read the checksum from metadata.
@@ -396,7 +417,7 @@ export async function dlxBinary(
   if (downloaded) {
     // Ensure cache directory exists before downloading.
     try {
-      await fs.mkdir(cacheEntryDir, { recursive: true })
+      await safeMkdir(cacheEntryDir, { recursive: true })
     } catch (e) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'EACCES' || code === 'EPERM') {
@@ -423,7 +444,7 @@ export async function dlxBinary(
     computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
 
     // Get file size for metadata.
-    const stats = await fs.stat(binaryPath)
+    const stats = await fs.promises.stat(binaryPath)
     await writeMetadata(
       cacheEntryDir,
       cacheKey,
@@ -497,13 +518,14 @@ export async function downloadBinary(
   const cacheKey = generateCacheKey(spec)
   const cacheEntryDir = path.join(cacheDir, cacheKey)
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
+  const fs = getFs()
 
   let downloaded = false
 
   // Check if we need to download.
   if (
     !force &&
-    existsSync(cacheEntryDir) &&
+    fs.existsSync(cacheEntryDir) &&
     (await isCacheValid(cacheEntryDir, cacheTtl))
   ) {
     // Binary is cached and valid.
@@ -511,7 +533,7 @@ export async function downloadBinary(
   } else {
     // Ensure cache directory exists before downloading.
     try {
-      await fs.mkdir(cacheEntryDir, { recursive: true })
+      await safeMkdir(cacheEntryDir, { recursive: true })
     } catch (e) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'EACCES' || code === 'EPERM') {
@@ -538,7 +560,7 @@ export async function downloadBinary(
     const computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
 
     // Get file size for metadata.
-    const stats = await fs.stat(binaryPath)
+    const stats = await fs.promises.stat(binaryPath)
     await writeMetadata(
       cacheEntryDir,
       cacheKey,
@@ -623,14 +645,15 @@ export async function listDlxCache(): Promise<
   }>
 > {
   const cacheDir = getDlxCachePath()
+  const fs = getFs()
 
-  if (!existsSync(cacheDir)) {
+  if (!fs.existsSync(cacheDir)) {
     return []
   }
 
   const results = []
   const now = Date.now()
-  const entries = await fs.readdir(cacheDir)
+  const entries = await fs.promises.readdir(cacheDir)
 
   for (const entry of entries) {
     const entryPath = path.join(cacheDir, entry)
@@ -661,13 +684,13 @@ export async function listDlxCache(): Promise<
 
       // Find the binary file in the directory.
       // eslint-disable-next-line no-await-in-loop
-      const files = await fs.readdir(entryPath)
+      const files = await fs.promises.readdir(entryPath)
       const binaryFile = files.find(f => !f.startsWith('.'))
 
       if (binaryFile) {
         const binaryPath = path.join(entryPath, binaryFile)
         // eslint-disable-next-line no-await-in-loop
-        const binaryStats = await fs.stat(binaryPath)
+        const binaryStats = await fs.promises.stat(binaryPath)
 
         results.push({
           age: now - ((metaObj['timestamp'] as number) || 0),
