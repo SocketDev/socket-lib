@@ -199,7 +199,11 @@ async function runBuild() {
   return 0
 }
 
-async function runTests(options, positionals = []) {
+async function runTests(
+  options,
+  positionals = [],
+  configPath = '.config/vitest.config.mts',
+) {
   const { all, coverage, force, staged, update } = options
   const runAll = all || force
 
@@ -217,7 +221,7 @@ async function runTests(options, positionals = []) {
   const vitestCmd = WIN32 ? 'vitest.cmd' : 'vitest'
   const vitestPath = path.join(nodeModulesBinPath, vitestCmd)
 
-  const vitestArgs = ['--config', '.config/vitest.config.mts', 'run']
+  const vitestArgs = ['--config', configPath, 'run']
 
   // Add coverage if requested
   if (coverage) {
@@ -306,6 +310,57 @@ async function runTests(options, positionals = []) {
   // Override exit code if we only have worker termination errors
   if (result.code !== 0 && hasWorkerTerminationError && !hasTestFailures) {
     return 0
+  }
+
+  return result.code
+}
+
+async function runIsolatedTests(options) {
+  const { coverage } = options
+
+  logger.step('Running isolated tests')
+
+  // Prepare vitest command
+  const vitestCmd = WIN32 ? 'vitest.cmd' : 'vitest'
+  const vitestPath = path.join(nodeModulesBinPath, vitestCmd)
+
+  const vitestArgs = ['--config', '.config/vitest.config.isolated.mts', 'run']
+
+  // Add coverage if requested
+  if (coverage) {
+    vitestArgs.push('--coverage')
+  }
+
+  const spawnOptions = {
+    cwd: rootPath,
+    env: {
+      ...process.env,
+      NODE_OPTIONS:
+        `${process.env.NODE_OPTIONS || ''} --max-old-space-size=${process.env.CI ? 8192 : 4096} --unhandled-rejections=warn`.trim(),
+    },
+    stdio: 'inherit',
+  }
+
+  // Use dotenvx to load test environment
+  const dotenvxCmd = WIN32 ? 'dotenvx.cmd' : 'dotenvx'
+  const dotenvxPath = path.join(nodeModulesBinPath, dotenvxCmd)
+
+  // Always use direct execution for isolated tests (simpler, more predictable)
+  const result = await runCommandWithOutput(
+    dotenvxPath,
+    ['-q', 'run', '-f', '.env.test', '--', vitestPath, ...vitestArgs],
+    {
+      ...spawnOptions,
+      stdio: ['inherit', 'pipe', 'pipe'],
+    },
+  )
+
+  // Print output
+  if (result.stdout) {
+    process.stdout.write(result.stdout)
+  }
+  if (result.stderr) {
+    process.stderr.write(result.stderr)
   }
 
   return result.code
@@ -420,14 +475,23 @@ async function main() {
       }
     }
 
-    // Run tests
+    // Run main tests
     exitCode = await runTests(
       { ...values, coverage: withCoverage },
       positionals,
     )
 
     if (exitCode !== 0) {
-      logger.error('Tests failed')
+      logger.error('Main tests failed')
+      process.exitCode = exitCode
+      return
+    }
+
+    // Run isolated tests
+    exitCode = await runIsolatedTests({ coverage: withCoverage })
+
+    if (exitCode !== 0) {
+      logger.error('Isolated tests failed')
       process.exitCode = exitCode
     } else {
       logger.success('All tests passed!')
