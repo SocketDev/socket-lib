@@ -3,9 +3,8 @@
  * Type-safe theming for spinners, loggers, prompts, and links.
  */
 
-import type { ColorValue } from '../spinner'
+import type { ColorValue, SpinnerStyle } from '../spinner'
 import type { ShimmerDirection } from '../effects/text-shimmer'
-import type { SpinnerStyle } from '../spinner'
 
 /**
  * Color reference — direct value or semantic keyword.
