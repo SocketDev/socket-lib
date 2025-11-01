@@ -13,10 +13,14 @@ import {
   withTheme,
   withThemeSync,
 } from '@socketsecurity/lib/themes'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('themes', () => {
-  // Reset theme to default after each test to ensure isolation
+  // Reset theme to default before and after each test to ensure isolation
+  beforeEach(() => {
+    setTheme('socket')
+  })
+
   afterEach(() => {
     setTheme('socket')
   })
