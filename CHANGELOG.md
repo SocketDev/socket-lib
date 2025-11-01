@@ -36,38 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.10.4](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.4) - 2025-10-31
+# Changelog
 
-### Added
+All notable changes to this project will be documented in this file.
 
-- **Safe directory creation utilities**: Added `safeMkdir()` and `safeMkdirSync()` functions to the `fs` module that gracefully handle concurrent directory creation
-  - Automatically ignores `EEXIST` errors when directory already exists (prevents race conditions)
-  - Re-throws all other errors for proper error handling
-  - Uses TypeScript `unknown` type for proper type narrowing in error handling
-  - Exported from `@socketsecurity/lib/fs`
-
-### Changed
-
-- **DLX modules now use lazy-loaded file system access**: Refactored `dlx.ts`, `dlx-package.ts`, and `dlx-binary.ts` to use `getFs()` pattern for better bundler compatibility
-  - Prevents Webpack bundling errors with Node.js built-in modules
-  - Lazy initialization of `fs` module only when needed
-  - Maintains consistent pattern across entire DLX subsystem
-- **Consistent bare imports for Node.js built-ins**: Replaced all `'node:'` prefixed imports with bare imports (e.g., `'node:fs'` → `'fs'`) across 17 source files
-  - Better compatibility with legacy bundlers and build tools
-  - Maintains functionality while improving tooling support
-- **All directory creation now uses safe utilities**: Updated all `fs.promises.mkdir()` and `fs.mkdirSync()` calls to use `safeMkdir()` and `safeMkdirSync()` throughout DLX modules
-  - Eliminates manual `EEXIST` error handling code duplication
-  - Cleaner, more maintainable codebase
-
-### Fixed
-
-- **v1.x environment variable backward compatibility**: Restored complete environment variable fallback chains from CLI v1.1.25
-  - `SOCKET_CLI_API_BASE_URL` now falls back to `SOCKET_SECURITY_API_BASE_URL`
-  - `SOCKET_CLI_API_PROXY` has 6-level fallback chain (including HTTPS_PROXY, https_proxy, HTTP_PROXY, http_proxy)
-  - `SOCKET_CLI_API_TOKEN` has 4-level fallback chain (SOCKET_CLI_API_KEY, SOCKET_SECURITY_API_TOKEN, SOCKET_SECURITY_API_KEY)
-  - `SOCKET_CLI_ORG_SLUG` falls back to `SOCKET_ORG_SLUG`
-  - `SOCKET_CLI_GITHUB_TOKEN` has 3-level fallback chain (SOCKET_SECURITY_GITHUB_PAT, GITHUB_TOKEN)
-  - Ensures seamless migration from CLI v1.x to v2.x
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.10.3](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.3) - 2025-10-31
 
