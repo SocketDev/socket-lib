@@ -18,6 +18,8 @@ import { applyShimmer, COLOR_INHERIT, DIR_LTR } from './effects/text-shimmer'
 import yoctoSpinner from './external/@socketregistry/yocto-spinner'
 import { hasOwn } from './objects'
 import { isBlankString, stringWidth } from './strings'
+import { getTheme } from './themes/context'
+import { resolveColor } from './themes/utils'
 
 /**
  * Named color values supported by the spinner.
@@ -485,8 +487,25 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       constructor(options?: SpinnerOptions | undefined) {
         const opts = { __proto__: null, ...options } as SpinnerOptions
 
-        // Convert color option to RGB (default to Socket purple).
-        const spinnerColor = opts.color ?? ([140, 82, 255] as const)
+        // Get default color from theme if not specified
+        const theme = getTheme()
+        let defaultColor: ColorValue = theme.colors.primary
+        if (theme.effects?.spinner?.color) {
+          const resolved = resolveColor(
+            theme.effects.spinner.color,
+            theme.colors,
+          )
+          // resolveColor can return 'inherit' or gradients which aren't valid for spinner
+          // Fall back to primary for these cases
+          if (resolved === 'inherit' || Array.isArray(resolved[0])) {
+            defaultColor = theme.colors.primary
+          } else {
+            defaultColor = resolved as ColorValue
+          }
+        }
+
+        // Convert color option to RGB (default from theme).
+        const spinnerColor = opts.color ?? defaultColor
 
         // Validate RGB tuple if provided.
         if (
