@@ -1,5 +1,5 @@
 /**
- * @fileoverview Theme utility functions for color resolution and theme manipulation.
+ * @fileoverview Theme utilities — color resolution and composition.
  */
 
 import { RAINBOW_GRADIENT } from '../effects/ultra'
@@ -8,18 +8,17 @@ import type { ShimmerColorGradient } from '../effects/text-shimmer'
 import type { Theme, ThemeColors, ColorReference } from './types'
 
 /**
- * Resolve a color reference to an actual ColorValue.
- * Handles special references like 'primary', 'secondary', 'rainbow', 'inherit'.
+ * Resolve color reference to concrete value.
+ * Handles semantic keywords: 'primary', 'secondary', 'rainbow', 'inherit'
  *
- * @param value - Color reference to resolve
- * @param colors - Theme colors to resolve references against
- * @returns Resolved color value
+ * @param value - Color reference
+ * @param colors - Theme palette
+ * @returns Resolved color
  *
  * @example
  * ```ts
- * resolveColor('primary', theme.colors)  // Returns theme.colors.primary
- * resolveColor('red', theme.colors)      // Returns 'red'
- * resolveColor([255, 0, 0], theme.colors) // Returns [255, 0, 0]
+ * resolveColor('primary', theme.colors)
+ * resolveColor([255, 0, 0], theme.colors)
  * ```
  */
 export function resolveColor(
@@ -39,24 +38,22 @@ export function resolveColor(
     if (value === 'rainbow') {
       return RAINBOW_GRADIENT
     }
-    // Otherwise it's a ColorName like 'red', 'cyan'
     return value as ColorValue
   }
   return value as ColorValue
 }
 
 /**
- * Resolve shimmer color configuration, handling gradients and special keywords.
+ * Resolve shimmer color with gradient support.
  *
- * @param value - Shimmer color value to resolve
- * @param theme - Theme to resolve against
- * @returns Resolved shimmer color (single, gradient, or 'inherit')
+ * @param value - Shimmer color
+ * @param theme - Theme context
+ * @returns Resolved color
  *
  * @example
  * ```ts
- * resolveShimmerColor('rainbow', theme)    // Returns RAINBOW_GRADIENT
- * resolveShimmerColor('primary', theme)    // Returns theme.colors.primary
- * resolveShimmerColor('inherit', theme)    // Returns 'inherit'
+ * resolveShimmerColor('rainbow', theme)
+ * resolveShimmerColor('primary', theme)
  * ```
  */
 export function resolveShimmerColor(
@@ -84,20 +81,18 @@ export function resolveShimmerColor(
 }
 
 /**
- * Create a custom theme by extending an existing theme with overrides.
- * Performs a deep merge of colors and effects.
+ * Extend existing theme with custom overrides.
+ * Deep merge of colors and effects.
  *
- * @param base - Base theme to extend
- * @param overrides - Partial theme overrides
- * @returns New theme with merged properties
+ * @param base - Base theme
+ * @param overrides - Custom overrides
+ * @returns Extended theme
  *
  * @example
  * ```ts
- * const myTheme = extendTheme(SOCKET_THEME, {
- *   name: 'my-theme',
- *   colors: {
- *     primary: [255, 100, 200]  // Override primary color
- *   }
+ * const custom = extendTheme(SOCKET_THEME, {
+ *   name: 'custom',
+ *   colors: { primary: [255, 100, 200] }
  * })
  * ```
  */
@@ -158,26 +153,26 @@ export function extendTheme(
 }
 
 /**
- * Create a new theme from scratch with sensible defaults.
+ * Create new theme from complete specification.
  *
  * @param config - Theme configuration
- * @returns Complete theme object
+ * @returns Theme object
  *
  * @example
  * ```ts
  * const theme = createTheme({
- *   name: 'my-theme',
- *   displayName: 'My Theme',
+ *   name: 'custom',
+ *   displayName: 'Custom',
  *   colors: {
  *     primary: [255, 100, 200],
- *     success: 'green',
- *     error: 'red',
- *     warning: 'yellow',
- *     info: 'blue',
- *     step: 'cyan',
+ *     success: 'greenBright',
+ *     error: 'redBright',
+ *     warning: 'yellowBright',
+ *     info: 'blueBright',
+ *     step: 'cyanBright',
  *     text: 'white',
  *     textDim: 'gray',
- *     link: 'cyan',
+ *     link: 'cyanBright',
  *     prompt: 'primary'
  *   }
  * })

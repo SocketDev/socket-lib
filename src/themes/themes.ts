@@ -1,24 +1,28 @@
 /**
- * @fileoverview Default theme definitions for Socket libraries.
- * Provides pre-configured themes for Socket Security, Coana, Firewall, Python CLI, and special effects.
+ * @fileoverview Elegant theme definitions for Socket libraries.
+ * Sophisticated color palettes crafted for clarity and visual harmony.
+ *
+ * Philosophy: Every color choice serves a purpose. Bright variants ensure
+ * terminal legibility without compromising sophistication. Minimal emoji use,
+ * refined symbols with color—elegance in restraint.
  */
 
 import type { Theme } from './types'
 
 /**
- * Socket Security theme (default).
- * Purple branding with shimmer effects.
+ * Socket Security — The signature theme.
+ * Refined violet with subtle shimmer, designed for focus and elegance.
  */
 export const SOCKET_THEME: Theme = {
   name: 'socket',
   displayName: 'Socket Security',
   colors: {
     primary: [140, 82, 255],
-    success: 'green',
-    error: 'red',
-    warning: 'yellow',
-    info: 'blue',
-    step: 'cyan',
+    success: 'greenBright',
+    error: 'redBright',
+    warning: 'yellowBright',
+    info: 'blueBright',
+    step: 'cyanBright',
     text: 'white',
     textDim: 'gray',
     link: 'cyanBright',
@@ -37,14 +41,14 @@ export const SOCKET_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Official Socket Security theme with purple branding',
+    description: 'Signature theme with refined violet and subtle shimmer',
     version: '1.0.0',
   },
 }
 
 /**
- * Coana theme.
- * Blue branding for Coana analysis tools.
+ * Coana — Analytical intelligence.
+ * Crisp azure tones for precision and clarity in code analysis.
  */
 export const COANA_THEME: Theme = {
   name: 'coana',
@@ -69,14 +73,14 @@ export const COANA_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Coana theme with blue branding',
+    description: 'Analytical theme with crisp azure for precision',
     version: '1.0.0',
   },
 }
 
 /**
- * Socket Firewall theme.
- * Orange/red branding for security and firewall features.
+ * Socket Firewall — Vigilant protection.
+ * Warm ember tones balanced with cool accents for security with confidence.
  */
 export const FIREWALL_THEME: Theme = {
   name: 'socket-firewall',
@@ -84,11 +88,11 @@ export const FIREWALL_THEME: Theme = {
   colors: {
     primary: [255, 100, 50],
     secondary: [255, 150, 100],
-    success: 'green',
+    success: 'greenBright',
     error: 'redBright',
-    warning: 'yellow',
-    info: 'blue',
-    step: 'cyan',
+    warning: 'yellowBright',
+    info: 'blueBright',
+    step: 'cyanBright',
     text: 'white',
     textDim: 'gray',
     link: 'secondary',
@@ -107,14 +111,14 @@ export const FIREWALL_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Socket Firewall theme with orange/red branding',
+    description: 'Protective theme with warm ember and balanced contrast',
     version: '1.0.0',
   },
 }
 
 /**
- * Socket CLI Python theme.
- * Blue and yellow branding inspired by Python.
+ * Socket Python — Elegant simplicity.
+ * Steel blue with golden accents, embodying Python's philosophy of clarity.
  */
 export const PYTHON_THEME: Theme = {
   name: 'socket-cli-python',
@@ -122,11 +126,11 @@ export const PYTHON_THEME: Theme = {
   colors: {
     primary: [70, 130, 180],
     secondary: [255, 215, 0],
-    success: 'green',
-    error: 'red',
+    success: 'greenBright',
+    error: 'redBright',
     warning: 'yellowBright',
     info: 'blueBright',
-    step: 'cyan',
+    step: 'cyanBright',
     text: 'white',
     textDim: 'gray',
     link: 'cyanBright',
@@ -139,18 +143,18 @@ export const PYTHON_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Socket Python CLI theme with Python-inspired colors',
+    description: 'Python-inspired theme with steel blue and golden harmony',
     version: '1.0.0',
   },
 }
 
 /**
- * Ultrathink theme.
- * Rainbow gradient effects for intensive operations.
+ * Ultra — Premium intensity.
+ * Prismatic shimmer for deep analysis, where complexity meets elegance.
  */
 export const ULTRA_THEME: Theme = {
   name: 'ultra',
-  displayName: 'Ultrathink',
+  displayName: 'Ultra',
   colors: {
     primary: [140, 82, 255],
     success: 'greenBright',
@@ -176,13 +180,13 @@ export const ULTRA_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Rainbow gradient theme for intensive thinking operations',
+    description: 'Premium theme with prismatic shimmer for deep analysis',
     version: '1.0.0',
   },
 }
 
 /**
- * Theme registry mapping theme names to theme definitions.
+ * Theme registry — Curated palette collection.
  */
 export const THEMES = {
   __proto__: null,
@@ -194,6 +198,6 @@ export const THEMES = {
 } as const
 
 /**
- * Union type of all available theme names.
+ * Available theme identifiers.
  */
 export type ThemeName = keyof typeof THEMES
