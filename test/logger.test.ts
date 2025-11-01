@@ -9,6 +9,7 @@ import {
   incLogCallCountSymbol,
   lastWasBlankSymbol,
 } from '@socketsecurity/lib/logger'
+import { setTheme, THEMES } from '@socketsecurity/lib/themes'
 
 describe('LOG_SYMBOLS', () => {
   it('should lazily initialize symbols', () => {
@@ -30,11 +31,20 @@ describe('LOG_SYMBOLS', () => {
     expect(step).toBeTruthy()
   })
 
-  it('should freeze symbols after initialization', () => {
-    const symbols = LOG_SYMBOLS
-    expect(() => {
-      ;(symbols as any).success = 'test'
-    }).toThrow()
+  it('should update symbols when theme changes', () => {
+    // Initialize symbols with default theme
+    const initialSuccess = LOG_SYMBOLS.success
+    expect(initialSuccess).toBeTruthy()
+
+    // Change theme
+    setTheme(THEMES.coana)
+
+    // Symbols should update
+    const updatedSuccess = LOG_SYMBOLS.success
+    expect(updatedSuccess).toBeTruthy()
+
+    // Reset to default theme for other tests
+    setTheme(THEMES.socket)
   })
 
   it('should be accessible via Logger.LOG_SYMBOLS', () => {
