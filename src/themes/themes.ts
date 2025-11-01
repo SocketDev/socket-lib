@@ -47,23 +47,23 @@ export const SOCKET_THEME: Theme = {
 }
 
 /**
- * Sunset — Crisp azure.
- * Clean analytical theme with precise blue tones.
+ * Sunset — Vibrant twilight gradient.
+ * Warm sunset palette with orange and purple/pink tones.
  */
 export const SUNSET_THEME: Theme = {
   name: 'sunset',
   displayName: 'Sunset',
   colors: {
-    primary: [100, 200, 255],
-    secondary: [50, 150, 200],
+    primary: [255, 140, 100],
+    secondary: [200, 100, 180],
     success: 'greenBright',
     error: 'redBright',
     warning: 'yellowBright',
-    info: 'blueBright',
-    step: 'cyanBright',
+    info: 'magentaBright',
+    step: 'primary',
     text: 'white',
     textDim: 'gray',
-    link: 'cyanBright',
+    link: 'primary',
     prompt: 'primary',
   },
   effects: {
@@ -71,20 +71,26 @@ export const SUNSET_THEME: Theme = {
       color: 'primary',
       style: 'dots',
     },
+    shimmer: {
+      enabled: true,
+      color: ['secondary', 'primary'],
+      direction: 'ltr',
+      speed: 0.4,
+    },
   },
   meta: {
-    description: 'Crisp azure theme for precision and clarity',
-    version: '1.0.0',
+    description: 'Warm sunset theme with purple-to-orange gradient',
+    version: '2.0.0',
   },
 }
 
 /**
- * Brick — Solid warmth.
+ * Terracotta — Solid warmth.
  * Rich terracotta and ember tones for grounded confidence.
  */
-export const BRICK_THEME: Theme = {
-  name: 'brick',
-  displayName: 'Brick',
+export const TERRACOTTA_THEME: Theme = {
+  name: 'terracotta',
+  displayName: 'Terracotta',
   colors: {
     primary: [255, 100, 50],
     secondary: [255, 150, 100],
@@ -192,7 +198,7 @@ export const THEMES = {
   __proto__: null,
   socket: SOCKET_THEME,
   sunset: SUNSET_THEME,
-  brick: BRICK_THEME,
+  terracotta: TERRACOTTA_THEME,
   lush: LUSH_THEME,
   ultra: ULTRA_THEME,
 } as const

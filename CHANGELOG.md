@@ -54,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Theme system with 5 built-in themes: `socket`, `sunset`, `brick`, `lush`, `ultra`
+- Theme system with 5 built-in themes: `socket`, `sunset`, `terracotta`, `lush`, `ultra`
 - `setTheme()`, `getTheme()`, `withTheme()`, `withThemeSync()` for theme management
 - `createTheme()`, `extendTheme()`, `resolveColor()` helper functions
 - `onThemeChange()` event listener for theme reactivity

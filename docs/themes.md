@@ -6,20 +6,20 @@ Socket Lib provides a comprehensive theming system for consistent branding acros
 
 | Theme | Use Case | Primary Color | Special Effects |
 |-------|----------|---------------|-----------------|
-| **`socket`** (default) | Socket Security | Purple `#8C52FF` | Subtle shimmer |
-| **`coana`** | Coana analysis | Azure blue | Clean dots |
-| **`socket-firewall`** | Firewall security | Orange/Ember | Security warnings |
-| **`socket-cli-python`** | Python CLI | Steel blue + Gold | Python branding |
-| **`ultra`** | Celebrations 🎉 | 🌈 Rainbow | Maximum flair |
+| **`socket`** (default) | Socket Security | Violet `#8C52FF` | Subtle shimmer |
+| **`sunset`** | Vibrant twilight | Orange `#FF8C64` + Pink `#C864B4` | Purple-to-orange gradient |
+| **`terracotta`** | Solid warmth | Terracotta `#FF6432` | Rich shimmer |
+| **`lush`** | Steel elegance | Steel blue `#4682B4` + Gold `#FFD700` | Elegant harmony |
+| **`ultra`** | Premium intensity | 🌈 Prismatic | Rainbow shimmer |
 
 ### Quick Start
 
 ```typescript
 import { setTheme, Spinner } from '@socketsecurity/lib'
 
-setTheme('socket-firewall')  // Set once at startup
+setTheme('terracotta')  // Set once at startup
 const spinner = Spinner({ text: 'Scanning...' })
-spinner.start()              // Uses firewall theme automatically
+spinner.start()         // Uses terracotta theme automatically
 ```
 
 ---
@@ -71,15 +71,15 @@ Themes use a stack model for temporary changes:
 // ┌──────────┐
 // │  ultra   │ ← popTheme() removes this
 // ├──────────┤
-// │  coana   │ ← pushTheme() adds here
+// │  sunset  │ ← pushTheme() adds here
 // ├──────────┤
 // │  socket  │ ← Base theme
 // └──────────┘
 
-pushTheme('coana')        // Add to stack
+pushTheme('sunset')       // Add to stack
 pushTheme('ultra')        // Add another
-popTheme()                // Remove ultra → back to coana
-popTheme()                // Remove coana → back to socket
+popTheme()                // Remove ultra → back to sunset
+popTheme()                // Remove sunset → back to socket
 ```
 
 ### 🎯 Scoped Themes (Recommended)
@@ -89,22 +89,22 @@ Use `withTheme()` for automatic cleanup:
 ```typescript
 import { withTheme } from '@socketsecurity/lib/themes'
 
-// Before: coana theme
+// Before: sunset theme
 await withTheme('ultra', async () => {
   // Inside: ultra theme 🌈
   const spinner = Spinner({ text: 'MAXIMUM POWER!' })
   await epicOperation()
 })
-// After: coana theme (auto-restored)
+// After: sunset theme (auto-restored)
 ```
 
 **Visual Flow:**
 ```
-Normal Flow    → [coana] → [coana] → [coana]
+Normal Flow    → [sunset] → [sunset] → [sunset]
                     ↓
-withTheme()    → [coana] → [ultra] → [coana]
-                          ↑─────────↑
-                          Auto-restore
+withTheme()    → [sunset] → [ultra] → [sunset]
+                           ↑─────────↑
+                           Auto-restore
 ```
 
 ---
@@ -119,10 +119,10 @@ setTheme('socket')
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary Color** | `#8C52FF` (Purple) |
+| **Primary Color** | `#8C52FF` (Refined violet) |
 | **Best For** | Socket.dev tools, security scanning |
 | **Spinner** | Socket style with subtle shimmer |
-| **Visual Style** | Professional, focused, elegant |
+| **Visual Style** | Signature theme designed for focus and elegance |
 
 **Preview:**
 ```
@@ -132,44 +132,48 @@ setTheme('socket')
 → Installing dependencies...    # Cyan
 ```
 
-### 🔵 Coana
+### 🌅 Sunset
 
 ```typescript
-setTheme('coana')
+setTheme('sunset')
 ```
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary Color** | `#64C8FF` (Azure blue) |
-| **Best For** | Code analysis, static analysis tools |
+| **Primary Color** | `#FF8C64` (Warm orange) |
+| **Secondary Color** | `#C864B4` (Purple/pink) |
+| **Best For** | Coana branding, warm interfaces, twilight aesthetics |
 | **Spinner** | Dots style, clean animations |
-| **Visual Style** | Analytical, precise, professional |
+| **Effects** | Purple-to-orange gradient shimmer |
+| **Visual Style** | Vibrant twilight gradient with warm sunset tones |
 
-### 🟠 Socket Firewall
+### 🟠 Terracotta
 
 ```typescript
-setTheme('socket-firewall')
+setTheme('terracotta')
 ```
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary Color** | `#FF6432` (Ember orange) |
-| **Best For** | Security tools, threat detection |
-| **Spinner** | Socket style with emphasis |
-| **Visual Style** | Vigilant, protective, alert |
+| **Primary Color** | `#FF6432` (Terracotta) |
+| **Secondary Color** | `#FF9664` (Light terracotta) |
+| **Best For** | Grounded confidence, warm interfaces |
+| **Spinner** | Socket style with rich shimmer |
+| **Visual Style** | Solid theme with rich terracotta and ember warmth |
 
-### 🔷 Socket CLI Python
+### 🔷 Lush
 
 ```typescript
-setTheme('socket-cli-python')
+setTheme('lush')
 ```
 
 | Attribute | Value |
 |-----------|-------|
 | **Primary Color** | `#4682B4` (Steel blue) |
 | **Secondary Color** | `#FFD700` (Gold) |
-| **Best For** | Python package management |
-| **Visual Style** | Python-inspired elegance |
+| **Best For** | Elegant interfaces, harmonious design |
+| **Spinner** | Dots style, clean animations |
+| **Visual Style** | Elegant theme with steel blue and golden harmony |
 
 ### 🌈 Ultra
 
@@ -179,16 +183,17 @@ setTheme('ultra')
 
 | Attribute | Value |
 |-----------|-------|
-| **Primary Color** | Rainbow gradient |
-| **Best For** | Celebrations, special moments 🎉 |
-| **Effects** | Maximum shimmer, rainbow everything |
-| **Visual Style** | Exciting, joyful, maximum flair |
+| **Primary Color** | `#8C52FF` with rainbow shimmer |
+| **Best For** | Deep analysis, premium experiences |
+| **Effects** | Prismatic shimmer, bidirectional rainbow |
+| **Spinner** | Socket style with rainbow effects |
+| **Visual Style** | Premium intensity where complexity meets elegance |
 
 **When to use Ultra:**
-- Successful completion of long operations
-- Milestone celebrations
-- Demo/presentation mode
-- April Fools' Day 😄
+- Complex analysis operations
+- Premium feature demonstrations
+- Deep diagnostic sessions
+- Maximum visual impact needed
 
 ---
 
@@ -203,7 +208,7 @@ Set global theme (use at app startup)
 import { setTheme } from '@socketsecurity/lib/themes'
 
 // By name
-setTheme('socket-firewall')
+setTheme('terracotta')
 
 // By custom object
 setTheme(myCustomTheme)
@@ -241,7 +246,7 @@ Auto-managed theme scope (async)
 ```typescript
 import { withTheme } from '@socketsecurity/lib/themes'
 
-await withTheme('coana', async () => {
+await withTheme('sunset', async () => {
   await doAnalysis()
 })
 // Theme auto-restored
@@ -253,7 +258,7 @@ Auto-managed theme scope (sync)
 ```typescript
 import { withThemeSync } from '@socketsecurity/lib/themes'
 
-const result = withThemeSync('socket-firewall', () => {
+const result = withThemeSync('terracotta', () => {
   return processSecurity()
 })
 ```
@@ -346,18 +351,18 @@ Logger symbols use theme colors:
 ```typescript
 import { logger, setTheme } from '@socketsecurity/lib'
 
-setTheme('socket-firewall')
+setTheme('terracotta')
 
-logger.success('Firewall enabled')   // ✓ in green
-logger.error('Threat detected')      // ✗ in red
+logger.success('Build complete')     // ✓ in green
+logger.error('Build failed')         // ✗ in red
 logger.warn('Update available')      // ⚠ in yellow
 logger.info('System status: OK')     // ℹ in blue
 ```
 
 **Output Preview:**
 ```
-✓ Firewall enabled         # Theme success color
-✗ Threat detected          # Theme error color
+✓ Build complete           # Theme success color
+✗ Build failed             # Theme error color
 ⚠ Update available         # Theme warning color
 ℹ System status: OK        # Theme info color
 ```
@@ -374,7 +379,7 @@ console.log(link('Documentation', 'https://socket.dev'))
 
 // Override theme
 console.log(link('API', 'https://api.socket.dev', {
-  theme: 'coana'
+  theme: 'sunset'
 }))
 
 // Show URL fallback
@@ -445,10 +450,10 @@ colors: {
 import { setTheme, Spinner } from '@socketsecurity/lib'
 
 // Set theme once at startup
-setTheme('socket-firewall')
+setTheme('terracotta')
 
 // All components inherit theme
-const spinner = Spinner({ text: 'Scanning for threats...' })
+const spinner = Spinner({ text: 'Building project...' })
 spinner.start()
 ```
 
@@ -601,8 +606,8 @@ colors: {
 }
 
 // Changes automatically when theme changes!
-setTheme('coana')      // Links become blue
-setTheme('firewall')   // Links become orange
+setTheme('sunset')       // Links become warm orange
+setTheme('terracotta')   // Links become warm peachy coral (secondary)
 ```
 
 ### Q: Theme not restoring after crash?

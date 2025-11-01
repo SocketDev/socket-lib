@@ -7,7 +7,7 @@
  * import { setTheme, THEMES } from '@socketsecurity/lib/themes'
  *
  * // Set global theme
- * setTheme('brick')
+ * setTheme('terracotta')
  * ```
  *
  * @example
@@ -55,10 +55,10 @@ export type {
 
 // Curated themes
 export {
-  BRICK_THEME,
   LUSH_THEME,
   SOCKET_THEME,
   SUNSET_THEME,
+  TERRACOTTA_THEME,
   THEMES,
   ULTRA_THEME,
   type ThemeName,
