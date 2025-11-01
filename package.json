@@ -396,14 +396,6 @@
       "types": "./dist/promises.d.ts",
       "default": "./dist/promises.js"
     },
-    "./prompts": {
-      "types": "./dist/prompts/index.d.ts",
-      "default": "./dist/prompts/index.js"
-    },
-    "./prompts/index": {
-      "types": "./dist/prompts/index.d.ts",
-      "default": "./dist/prompts/index.js"
-    },
     "./regexps": {
       "types": "./dist/regexps.d.ts",
       "default": "./dist/regexps.js"
