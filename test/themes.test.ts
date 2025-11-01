@@ -26,7 +26,7 @@ describe('themes', () => {
       expect(THEMES).toHaveProperty('socket')
       expect(THEMES).toHaveProperty('sunset')
       expect(THEMES).toHaveProperty('brick')
-      expect(THEMES).toHaveProperty('jungle')
+      expect(THEMES).toHaveProperty('lush')
       expect(THEMES).toHaveProperty('ultra')
     })
 

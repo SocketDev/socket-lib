@@ -117,12 +117,12 @@ export const BRICK_THEME: Theme = {
 }
 
 /**
- * Jungle — Steel elegance.
+ * Lush — Steel elegance.
  * Python-inspired steel blue with golden accents.
  */
-export const JUNGLE_THEME: Theme = {
-  name: 'jungle',
-  displayName: 'Jungle',
+export const LUSH_THEME: Theme = {
+  name: 'lush',
+  displayName: 'Lush',
   colors: {
     primary: [70, 130, 180],
     secondary: [255, 215, 0],
@@ -193,7 +193,7 @@ export const THEMES = {
   socket: SOCKET_THEME,
   sunset: SUNSET_THEME,
   brick: BRICK_THEME,
-  jungle: JUNGLE_THEME,
+  lush: LUSH_THEME,
   ultra: ULTRA_THEME,
 } as const
 
