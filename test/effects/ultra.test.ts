@@ -153,7 +153,9 @@ describe('effects/ultra', () => {
       expect(gradient).toHaveLength(1000)
       // Spot check some positions
       expect(gradient[0]).toEqual(RAINBOW_GRADIENT[0])
-      expect(gradient[999]).toEqual(RAINBOW_GRADIENT[999 % RAINBOW_GRADIENT.length])
+      expect(gradient[999]).toEqual(
+        RAINBOW_GRADIENT[999 % RAINBOW_GRADIENT.length],
+      )
     })
 
     it('should generate consistent results for same input', () => {

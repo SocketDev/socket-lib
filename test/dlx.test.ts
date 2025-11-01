@@ -28,7 +28,7 @@ import {
 } from '@socketsecurity/lib/dlx'
 import { getSocketDlxDir } from '@socketsecurity/lib/paths'
 
-describe('dlx', () => {
+describe.sequential('dlx', () => {
   const testPackageName = 'test-package'
   const dlxDir = getSocketDlxDir()
 
@@ -83,9 +83,11 @@ describe('dlx', () => {
     })
 
     it('async version should return false when directory does not exist', async () => {
-      // Ensure it doesn't exist
-      if (fs.existsSync(dlxDir)) {
-        fs.rmSync(dlxDir, { recursive: true, force: true })
+      // Ensure it doesn't exist (use async version for consistency)
+      try {
+        await fs.promises.rm(dlxDir, { recursive: true, force: true })
+      } catch {
+        // Directory might not exist, which is fine
       }
       expect(await dlxDirExistsAsync()).toBe(false)
     })
