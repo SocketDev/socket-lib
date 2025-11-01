@@ -2,39 +2,91 @@
 
 Socket Lib's build system optimizes for zero runtime dependencies while supporting vendored packages.
 
-## 🎯 Core Concept
+## Quick Reference
 
+| Task | Command | Purpose |
+|------|---------|---------|
+| **Full build** | `pnpm run build` | Complete production build |
+| **JavaScript only** | `pnpm run build:js` | Compile TypeScript → JavaScript |
+| **Types only** | `pnpm run build:types` | Generate .d.ts files |
+| **Bundle externals** | `pnpm run build:externals` | Bundle vendored dependencies |
+| **Fix exports** | `pnpm run fix:exports` | Fix CommonJS exports |
+| **Watch mode** | `pnpm run dev` | Auto-rebuild on changes |
+| **Clean** | `pnpm run clean` | Remove dist/ |
+| **Validate** | `pnpm run validate:externals` | Check dependency rules |
+
+---
+
+## Core Concept
+
+**Dependency Strategy:**
 ```
-┌────────────────────────────────────────┐
-│  Production Build Strategy             │
-├────────────────────────────────────────┤
-│  Vendored (Bundled)   External (Deps)  │
-│  ├─ socket packages   @socketregistry/ │
-│  ├─ small utilities   packageurl-js    │
-│  └─ type defs         (runtime dep)    │
-└────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                Production Build Strategy                  │
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  Vendored (Bundled in dist/)     Runtime (Dependencies)  │
+│  ├─ Socket packages               @socketregistry/       │
+│  ├─ Small utilities                 packageurl-js        │
+│  ├─ Tight version control           (1 runtime dep)     │
+│  └─ Type definitions                                     │
+│                                                           │
+│  Goal: Minimize dependencies, maximize control           │
+└──────────────────────────────────────────────────────────┘
 ```
 
-**Goal:** Minimize runtime dependencies, maximize bundle control
+**When to Vendor vs Runtime:**
+
+| Factor | Vendor (src/external/) | Runtime (dependencies) |
+|--------|------------------------|------------------------|
+| **Size** | Small utilities | Large/complex packages |
+| **Ownership** | Socket-owned packages | Third-party packages |
+| **Version control** | Need tight control | Standard semver OK |
+| **Updates** | Rarely changes | Frequent updates |
+| **Examples** | yoctocolors-cjs, ansi-regex | @socketregistry/packageurl-js |
+
+---
 
 ## Build Pipeline
 
+**Complete Build Flow:**
 ```
-Source        Compile         Post-Process     Output
-─────────────────────────────────────────────────────
-src/          esbuild         scripts/         dist/
-├─ *.ts   →   │           →   ├─ fix exports → *.js
-├─ external/  │               ├─ bundle deps  → *.d.ts
-└─ themes/    │               └─ validate
-              ↓
-           CommonJS
-           ES2022
+┌─────────────┐       ┌──────────────┐       ┌──────────────┐       ┌─────────────┐
+│   Source    │       │   Compile    │       │ Post-Process │       │   Output    │
+│   (src/)    │──────→│   (esbuild)  │──────→│  (scripts/)  │──────→│   (dist/)   │
+└─────────────┘       └──────────────┘       └──────────────┘       └─────────────┘
+     ↓                      ↓                       ↓                      ↓
+ ├─ *.ts               - CommonJS              - Fix exports          ├─ *.js
+ ├─ external/          - ES2022                - Bundle deps          ├─ *.d.ts
+ ├─ themes/            - Preserve modules      - Validate             └─ external/
+ └─ lib/               - ~1.6s (parallel)      - ~300ms
+     ↓
+ tsgo (types)
+ ~2s (parallel)
 ```
 
-**Tools:**
-- **esbuild** — Fast TypeScript → JavaScript compilation
-- **tsgo** — Type definition generation (TypeScript Native Preview)
-- **Babel AST** — Post-build transformations
+**Build Steps Breakdown:**
+
+| Step | Tool | Input | Output | Time |
+|------|------|-------|--------|------|
+| 1️⃣ **Clean** | fs.rm | `dist/` | Empty dir | ~10ms |
+| 2️⃣ **Compile JS** | esbuild | `src/**/*.ts` | `dist/**/*.js` | ~1.6s |
+| 3️⃣ **Generate Types** | tsgo | `src/**/*.ts` | `dist/**/*.d.ts` | ~2s |
+| 4️⃣ **Bundle Externals** | esbuild | `src/external/` | `dist/external/` | ~200ms |
+| 5️⃣ **Fix Exports** | Babel AST | `dist/**/*.js` | Fixed CommonJS | ~100ms |
+| 6️⃣ **Validate** | Custom | `dist/` | Checks pass | ~50ms |
+
+**Total: ~4s** (steps 2 & 3 run in parallel)
+
+**Key Tools:**
+
+| Tool | Purpose | Why This Tool? |
+|------|---------|----------------|
+| **esbuild** | TypeScript → JavaScript | Written in Go, extremely fast (~1.6s) |
+| **tsgo** | Type definitions (.d.ts) | TypeScript Native Preview, Rust-based |
+| **Babel AST** | Post-build transforms | Surgical code changes with source maps |
+
+---
 
 ## Dependency Types
 
@@ -48,97 +100,120 @@ src/          esbuild         scripts/         dist/
 }
 ```
 
-✅ **Use when:**
-- Package is large or complex
-- Package needs separate versioning
-- Package is already a published dependency
+| Criteria | Decision |
+|----------|----------|
+| **Use when** | Package is large or complex |
+| | Package needs separate versioning |
+| | Package is already a published dependency |
+| | Frequent security/bug updates expected |
+| **Current Count** | 1 runtime dependency |
 
 ### Vendored Dependencies (src/external/)
 
 ```
 src/external/
 ├── @socketregistry/
-│   ├── is-unicode-supported.js
-│   ├── ansi-regex.js
-│   └── ...
-├── yoctocolors-cjs/
-└── ...
+│   ├── is-unicode-supported.js    # Small utility
+│   ├── ansi-regex.js              # Tight control needed
+│   └── strip-ansi.js              # Socket-owned
+├── yoctocolors-cjs/               # Color utilities
+└── ... (40+ packages)             # Bundle in dist/
 ```
 
-✅ **Use when:**
-- Small utility packages
-- Socket-owned packages
-- Tight version control needed
-- Reducing dependency tree
+| Criteria | Decision |
+|----------|----------|
+| **Use when** | Small utility packages (<50 KB) |
+| | Socket-owned packages |
+| | Tight version control needed |
+| | Reducing dependency tree |
+| **Current Count** | 40+ vendored packages |
+
+---
 
 ## Import Rules
 
-### Inside src/external/ ✅
-
-Vendored code lives here — no bare imports allowed:
-
-```javascript
-// ✅ Correct - vendored implementation
-// src/external/@socketregistry/is-unicode-supported.js
-module.exports = function isUnicodeSupported() {
-  // ... implementation
-}
+**Visual Decision Tree:**
+```
+Is it in src/external/?
+    ├─ YES → Vendored code
+    │         ├─ Inside src/external/ → Implement directly
+    │         └─ Outside src/external/ → Use relative path
+    └─ NO → Runtime dependency
+              └─ Use bare import (must be in ALLOWED list)
 ```
 
-### Outside src/external/ ✅
+### Import Pattern Reference
 
-Use relative paths for vendored deps:
+| Location | Dependency Type | Import Style | Example |
+|----------|----------------|--------------|---------|
+| **Inside src/external/** | Vendored code | Direct implementation | `module.exports = function() { ... }` |
+| **Outside src/external/** | Vendored | Relative path | `import foo from '../external/foo'` |
+| **Anywhere** | Runtime | Bare import | `import { PackageURL } from '@socketregistry/packageurl-js'` |
 
-```typescript
-// ✅ Correct
-import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
+### Examples
 
-// ❌ Wrong - bare imports not allowed
-import isUnicodeSupported from '@socketregistry/is-unicode-supported'
-```
-
-### Runtime Dependencies ✅
-
-Only allowed dependencies use bare imports:
+**✅ Correct Patterns:**
 
 ```typescript
-// ✅ Correct - runtime dependency
+// 1. Runtime dependency (in ALLOWED_EXTERNAL_PACKAGES)
 import { PackageURL } from '@socketregistry/packageurl-js'
+
+// 2. Vendored dependency (relative path)
+import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
+import colors from '../external/yoctocolors-cjs'
+
+// 3. Internal module (path alias)
+import { getCI } from '#env/ci'
 ```
+
+**❌ Wrong Patterns:**
+
+```typescript
+// ❌ Bare import for vendored package
+import isUnicodeSupported from '@socketregistry/is-unicode-supported'
+
+// ❌ Relative import for runtime dependency
+import { PackageURL } from '../../../node_modules/@socketregistry/packageurl-js'
+
+// ❌ Unapproved runtime dependency
+import axios from 'axios'  // Not in ALLOWED list
+```
+
+---
 
 ## Build Commands
 
-```bash
-# Full build
-pnpm run build
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `pnpm run build` | Full production build | Before release/testing |
+| `pnpm run build:js` | Compile TypeScript → JavaScript | JS changes only |
+| `pnpm run build:types` | Generate .d.ts files | Type changes only |
+| `pnpm run build:externals` | Bundle external dependencies | After vendoring new package |
+| `pnpm run fix:exports` | Fix CommonJS exports | After build troubleshooting |
+| `pnpm run dev` | Watch mode (auto-rebuild) | Active development |
+| `pnpm run clean` | Remove dist/ | Clean slate rebuild |
+| `pnpm run validate:externals` | Check dependency rules | After adding dependencies |
 
-# Individual steps
-pnpm run build:js        # Compile TypeScript → JavaScript
-pnpm run build:types     # Generate .d.ts files
-pnpm run build:externals # Bundle external dependencies
-pnpm run fix:exports     # Fix CommonJS exports
-
-# Development
-pnpm run dev             # Watch mode
-pnpm run clean           # Remove dist/
-```
+---
 
 ## Build Scripts
 
-All build scripts are Node.js modules (`.mjs`):
+All build scripts are Node.js modules (`.mjs`) for cross-platform compatibility:
 
 ```
 scripts/
-├── build.mjs                    # Main build orchestrator
-├── build-js.mjs                 # esbuild JavaScript compilation
-├── build-externals.mjs          # Bundle external dependencies
-├── fix-commonjs-exports.mjs     # Post-build CommonJS fixes
-├── fix-default-imports.mjs      # Fix default import patterns
+├── build.mjs                       # Main build orchestrator
+├── build-js.mjs                    # esbuild JavaScript compilation
+├── build-externals.mjs             # Bundle external dependencies
+├── fix-commonjs-exports.mjs        # Post-build CommonJS fixes
+├── fix-default-imports.mjs         # Fix default import patterns
+├── validate-external.mjs           # Dependency validation
 └── babel/
-    └── transform-*.mjs          # AST transformations
+    ├── transform-commonjs-exports.mjs  # AST transformations
+    └── README.md                       # Transform documentation
 ```
 
-**No shell scripts (`.sh`)** — Node.js only for cross-platform compatibility.
+**No shell scripts (`.sh`)** — Node.js only for cross-platform compatibility (Windows support).
 
 ## Post-Build Transformations
 
@@ -185,43 +260,37 @@ Vendored dependencies are bundled during build:
 pnpm run validate:externals
 ```
 
+---
+
 ## Adding Dependencies
 
 ### Adding a Runtime Dependency
 
-```bash
-# 1. Install package
-pnpm add @socketregistry/new-package
+| Step | Action | Command/Code |
+|------|--------|--------------|
+| 1 | Install package | `pnpm add @socketregistry/new-package` |
+| 2 | Add to allowed list | Edit `scripts/validate-external.mjs` |
+| 3 | Use in code | `import { Thing } from '@socketregistry/new-package'` |
+| 4 | Validate | `pnpm run validate:externals` |
 
-# 2. Add to allowed list in scripts/validate-external.mjs
+**Allowed list example:**
+```javascript
 const ALLOWED_EXTERNAL_PACKAGES = [
   '@socketregistry/packageurl-js',
   '@socketregistry/new-package',  // ← Add here
 ]
-
-# 3. Use in code with bare import
-import { Thing } from '@socketregistry/new-package'
-
-# 4. Validate
-pnpm run validate:externals
 ```
 
 ### Vendoring a Package
 
-```bash
-# 1. Copy package source to src/external/
-mkdir -p src/external/@socketregistry/my-util
-cp node_modules/@socketregistry/my-util/index.js src/external/@socketregistry/my-util/
+| Step | Action | Command/Code |
+|------|--------|--------------|
+| 1 | Copy source | `mkdir -p src/external/@socketregistry/my-util`<br>`cp node_modules/@socketregistry/my-util/index.js src/external/@socketregistry/my-util/` |
+| 2 | Import with relative path | `import myUtil from '../external/@socketregistry/my-util'` |
+| 3 | Build | `pnpm run build` |
+| 4 | Validate | `pnpm run validate:externals` |
 
-# 2. Import with relative path
-import myUtil from '../external/@socketregistry/my-util'
-
-# 3. Build will bundle it
-pnpm run build
-
-# 4. Validate
-pnpm run validate:externals
-```
+---
 
 ## Performance
 
@@ -238,10 +307,14 @@ pnpm run validate:externals
 
 ### Optimization Strategies
 
-- **Parallel builds** — JavaScript and types compile concurrently
-- **Incremental** — Only rebuild changed files in watch mode
-- **Native tools** — esbuild (Go), tsgo (Rust) for speed
-- **No bundling** — Preserve module structure (faster than Rollup)
+| Strategy | Benefit | Impact |
+|----------|---------|--------|
+| **Parallel builds** | JavaScript and types compile concurrently | ~50% faster |
+| **Incremental** | Only rebuild changed files in watch mode | Near-instant rebuilds |
+| **Native tools** | esbuild (Go), tsgo (Rust) | 10-100x faster than JS tools |
+| **No bundling** | Preserve module structure | Faster than Rollup/Webpack |
+
+---
 
 ## Build Output
 
@@ -268,43 +341,47 @@ dist/
 
 **Target:** ES2022 (Node.js 20+)
 
+---
+
 ## Troubleshooting
 
 ### Build Fails
 
+**Quick fixes:**
 ```bash
-# Check build output
-pnpm run build
-
-# Try clean build
-pnpm run clean && pnpm run build
+pnpm run build                  # Check build output
+pnpm run clean && pnpm run build # Clean rebuild
 ```
 
-**Common Issues:**
-- Missing `dist/` directory → Run `pnpm run build`
-- TypeScript errors → Run `pnpm run check`
-- Path alias issues → Check `tsconfig.json` paths
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| Missing dist/ | `Cannot find module` errors | Run `pnpm run build` |
+| TypeScript errors | Build fails with type errors | Run `pnpm run check` |
+| Path alias issues | Module not found | Check `tsconfig.json` paths match src/ structure |
+| Stale cache | Outdated output | Run `pnpm run clean` first |
 
 ### Validation Errors
 
+**Check dependencies:**
 ```bash
 pnpm run validate:externals
 ```
 
-**Common Issues:**
-- Bare import in wrong place → Use relative path
-- Unapproved dependency → Add to ALLOWED_EXTERNAL_PACKAGES
-- Missing vendored file → Copy to `src/external/`
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| Bare import in vendored code | Validation error | Use relative path: `'../external/pkg'` |
+| Unapproved dependency | Import not in ALLOWED list | Add to `ALLOWED_EXTERNAL_PACKAGES` in `scripts/validate-external.mjs` |
+| Missing vendored file | Module not found | Copy to `src/external/` |
 
 ### Watch Mode Not Working
 
-```bash
-# Stop existing watch process
-# Kill any running pnpm dev
+| Issue | Solution |
+|-------|----------|
+| Port already in use | Kill existing process: `pkill -f "pnpm dev"` |
+| Changes not detected | Restart: `pnpm run dev` |
+| Build errors | Check console output for specific error |
 
-# Restart watch
-pnpm run dev
-```
+---
 
 ## Advanced: Babel Transformations
 

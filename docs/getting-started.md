@@ -2,6 +2,22 @@
 
 Developer guide for building and contributing to `@socketsecurity/lib`.
 
+## Quick Reference
+
+| Task | Command | When to Use |
+|------|---------|-------------|
+| **First time** | `pnpm install` | After cloning repo |
+| **Build** | `pnpm run build` | Full production build |
+| **Dev mode** | `pnpm run dev` | Auto-rebuild on changes |
+| **Run tests** | `pnpm test` | All tests + checks |
+| **Fast test** | `pnpm vitest run` | Tests only (~5s) |
+| **Single test** | `pnpm vitest run file.test.ts` | One file |
+| **Coverage** | `pnpm run cover` | With coverage report |
+| **Type check** | `pnpm run check` | TypeScript validation |
+| **Lint** | `pnpm run lint` | Check code style |
+| **Auto-fix** | `pnpm run fix` | Fix formatting + lint |
+| **Clean** | `pnpm run clean` | Remove build artifacts |
+
 ## Quick Setup
 
 ```bash
@@ -14,6 +30,8 @@ pnpm test
 
 ✅ You're ready to develop!
 
+---
+
 ## Prerequisites
 
 | Tool | Version | Install |
@@ -22,63 +40,82 @@ pnpm test
 | **pnpm** | 10.16+ | `npm i -g pnpm` |
 | Git | 2.0+ | [git-scm.com](https://git-scm.com) |
 
+---
+
 ## Commands
 
-### Build
+### Build Commands
 
-```bash
-pnpm run build       # Full production build
-pnpm run dev         # Watch mode (auto-rebuild)
-pnpm run clean       # Remove build artifacts
-```
+| Command | Purpose | Output |
+|---------|---------|--------|
+| `pnpm run build` | Full production build | `dist/` (CommonJS + types) |
+| `pnpm run dev` | Watch mode (auto-rebuild) | Continuous `dist/` updates |
+| `pnpm run clean` | Remove build artifacts | Deletes `dist/` |
 
 **Build Output:**
-- `dist/` — Compiled JavaScript (CommonJS)
-- `dist/**/*.d.ts` — Type definitions
-
-### Test
-
-```bash
-pnpm test                     # All tests + checks
-pnpm vitest run              # Tests only (fast)
-pnpm run cover               # With coverage report
-pnpm vitest run path.test.ts # Single file
 ```
+dist/
+├── *.js          → Compiled JavaScript (CommonJS, ES2022)
+└── *.d.ts        → TypeScript type definitions
+```
+
+### Test Commands
+
+| Command | Speed | Output | Use Case |
+|---------|-------|--------|----------|
+| `pnpm test` | ~7s | Full suite + checks | Before commit |
+| `pnpm vitest run` | ~5s | Tests only | Quick iteration |
+| `pnpm run cover` | ~8s | With coverage report | Coverage analysis |
+| `pnpm vitest run file.test.ts` | ~1s | Single file | Focused debugging |
 
 **Test Stats:** 4600+ tests · 100 test files · ~5s runtime
 
-### Quality
+### Quality Commands
 
-```bash
-pnpm run check       # TypeScript type checking
-pnpm run lint        # Biome linting
-pnpm run fix         # Auto-fix formatting + lint issues
-```
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `pnpm run check` | TypeScript type checking | After type changes |
+| `pnpm run lint` | Biome linting | Check code style |
+| `pnpm run fix` | Auto-fix formatting + lint | Before every commit |
+
+---
 
 ## Project Structure
 
 ```
 socket-lib/
 ├── src/                    # TypeScript source (183 files)
-│   ├── constants/          # 14 constant modules
-│   ├── env/                # 68 environment getters
-│   ├── packages/           # 12 package utilities
-│   ├── effects/            # 4 CLI visual effects
-│   ├── stdio/              # 9 standard I/O utilities
-│   ├── themes/             # Theme system
-│   ├── external/           # 40+ vendored dependencies
-│   └── ... 60+ more
+│   ├── constants/          # 14 constant modules (NODE_MODULES, paths, etc.)
+│   ├── env/                # 68 environment getters (CI, HOME, PATH, etc.)
+│   ├── lib/
+│   │   ├── packages/       # 12 package utilities (npm, pnpm, yarn)
+│   │   ├── fs/             # File system utilities
+│   │   ├── spawn/          # Process spawning
+│   │   └── ...             # 60+ utility modules
+│   ├── effects/            # 4 CLI visual effects (spinner, shimmer, pulse)
+│   ├── stdio/              # 9 standard I/O utilities (logger, prompts)
+│   ├── themes/             # Theme system (socket, coana, ultra, etc.)
+│   └── external/           # 40+ vendored dependencies
 │
 ├── test/                   # Test files (100 files, 4600+ tests)
 │   ├── constants/          # Constant tests
 │   ├── env/                # Environment tests
 │   ├── packages/           # Package tests
-│   └── ... more
+│   └── ...                 # More test files
 │
 ├── dist/                   # Build output (gitignored)
+│   ├── *.js                # Compiled JavaScript (CommonJS)
+│   └── *.d.ts              # Type definitions
+│
 ├── scripts/                # Build and dev scripts
+│   ├── build-js.mjs        # Main JavaScript compilation
+│   ├── build-externals.mjs # External dependency bundling
 │   └── babel/              # AST transformation scripts
+│
 ├── .config/                # Tool configurations
+│   ├── vitest.config.mts   # Test configuration
+│   └── biome.json          # Linting + formatting
+│
 ├── docs/                   # Documentation
 │   ├── getting-started.md  # ← You are here
 │   ├── themes.md           # Theme system guide
@@ -89,7 +126,18 @@ socket-lib/
 └── package.json            # 120+ granular exports
 ```
 
+---
+
 ## Development Workflow
+
+**Visual Flow:**
+```
+┌──────────────────────────────────────────────────────────────┐
+│  1. Edit → 2. Test → 3. Export → 4. Build → 5. Commit       │
+│    ↓         ↓          ↓          ↓          ↓             │
+│  src/    test/    package.json  dist/    git commit         │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ### 1. Make Changes
 
@@ -148,47 +196,71 @@ pnpm run check    # Type check
 pnpm test         # Full test suite
 ```
 
+---
+
 ## Path Aliases
 
-Use path aliases for internal imports:
+Use path aliases for internal imports (configured in `tsconfig.json`):
 
-```typescript
-// ✅ Correct
-import { getCI } from '#env/ci'
-import { NODE_MODULES } from '#constants/packages'
-
-// ❌ Wrong
-import { getCI } from '../env/ci'
-import { NODE_MODULES } from '../../constants/packages'
+**Alias Mapping:**
+```
+#constants/*  →  src/constants/*   (NODE_MODULES, paths, etc.)
+#env/*        →  src/env/*         (CI, HOME, PATH getters)
+#lib/*        →  src/lib/*         (Core utilities)
+#packages/*   →  src/lib/packages/* (npm, pnpm, yarn utils)
+#utils/*      →  src/utils/*       (Shared utilities)
+#types        →  src/types         (Type definitions)
 ```
 
-**Available Aliases:**
-- `#constants/*` → `src/constants/*`
-- `#env/*` → `src/env/*`
-- `#lib/*` → `src/lib/*`
-- `#packages/*` → `src/lib/packages/*`
-- `#utils/*` → `src/utils/*`
-- `#types` → `src/types`
+**Usage Examples:**
+
+| ✅ Use Path Aliases | ❌ Avoid Relative Paths |
+|---------------------|-------------------------|
+| `import { getCI } from '#env/ci'` | `import { getCI } from '../env/ci'` |
+| `import { NODE_MODULES } from '#constants/packages'` | `import { NODE_MODULES } from '../../constants/packages'` |
+| `import { spawn } from '#lib/spawn'` | `import { spawn } from '../lib/spawn'` |
+
+**Why Use Aliases?**
+- ✅ Cleaner imports
+- ✅ Refactor-friendly (no path updates needed)
+- ✅ Consistent across codebase
+- ✅ Better IDE autocomplete
+
+---
 
 ## Build System
 
-Socket Lib uses a custom build pipeline:
+Socket Lib uses a custom optimized build pipeline:
 
 ```
-TypeScript → esbuild → CommonJS → Post-Processing
-   (src/)      |         (dist/)         |
-               ↓                          ↓
-         - Fast compilation      - Fix CommonJS exports
-         - ES2022 target         - Bundle externals
-         - Preserve modules      - Generate types
+┌────────────┐       ┌─────────┐       ┌──────────┐       ┌────────────────┐
+│ TypeScript │──────→│ esbuild │──────→│ CommonJS │──────→│ Post-Processing│
+│   (src/)   │       │         │       │  (dist/) │       │                │
+└────────────┘       └─────────┘       └──────────┘       └────────────────┘
+                          ↓                                        ↓
+                  - Fast compilation                    - Fix CommonJS exports
+                  - ES2022 target                       - Bundle externals
+                  - Preserve modules                    - Generate types (tsgo)
+                  - ~1.6s build time                    - AST transformations
 ```
 
 **Key Tools:**
-- **esbuild** — Fast JavaScript compilation
-- **tsgo** — Type definition generation (TypeScript Native Preview)
-- **Babel AST** — Post-build transformations
 
-👉 See [**Build Architecture**](./build.md) for details
+| Tool | Purpose | Performance |
+|------|---------|-------------|
+| **esbuild** | JavaScript compilation | ~1.6s (parallelized) |
+| **tsgo** | Type definition generation | TypeScript Native Preview |
+| **Babel AST** | Post-build transformations | Export fixes, bundling |
+
+**Build Scripts** (all in `scripts/`):
+- `build-js.mjs` — Main JavaScript compilation
+- `build-externals.mjs` — External dependency bundling
+- `fix-commonjs-exports.mjs` — CommonJS export fixes
+- `generate-package-exports.mjs` — Auto-generate exports
+
+👉 See [**Build Architecture**](./build.md) for complete details
+
+---
 
 ## Common Tasks
 
@@ -238,6 +310,8 @@ EOF
 
 See the workflow above — same pattern applies to all modules.
 
+---
+
 ## Debugging
 
 ### TypeScript Errors
@@ -276,53 +350,87 @@ pnpm run dev       # Auto-rebuild on changes
 
 Useful for iterative development.
 
+---
+
 ## Best Practices
 
-✅ **Do:**
-- Use path aliases for internal imports
-- Add tests for all new code
-- Follow existing code patterns
-- Run `pnpm run fix` before committing
-- Keep functions small and focused
-- Document public APIs with JSDoc
+### Do's
 
-❌ **Don't:**
-- Use `any` type (use `unknown` or specific types)
-- Use `process.chdir()` (use `{ cwd }` options)
-- Add runtime dependencies without approval
-- Skip tests or type checking
-- Use relative imports for internal modules
+| Practice | Reason | Example |
+|----------|--------|---------|
+| Use path aliases | Cleaner, refactor-friendly | `import { getCI } from '#env/ci'` |
+| Add tests for all code | Maintain 100% coverage | `test/my-util.test.ts` |
+| Follow existing patterns | Consistency across codebase | Check similar modules |
+| Run `pnpm run fix` before commit | Auto-fix style issues | Before every commit |
+| Keep functions small | Easier to test and maintain | Single responsibility |
+| Document public APIs | Better DX for consumers | JSDoc comments |
+
+### Don'ts
+
+| Avoid | Why | Alternative |
+|-------|-----|-------------|
+| `any` type | Loses type safety | Use `unknown` or specific types |
+| `process.chdir()` | Breaks tests, race conditions | Use `{ cwd }` options |
+| Runtime dependencies | Bloats bundle | Vendor or inline code |
+| Skip tests | Breaks CI | Always run `pnpm test` |
+| Relative imports | Hard to refactor | Use path aliases |
+
+---
 
 ## CI Pipeline
 
-Every push runs:
+Every push triggers an optimized CI pipeline:
 
 ```
-┌─────────────────────────────────────┐
-│  Lint → Build → Test × 6 → Success │
-└─────────────────────────────────────┘
-         ↓       ↓                ↓
-      Biome   esbuild    Node 20/22/24
-                         × Ubuntu/Windows
+┌──────────────────────────────────────────────────────────┐
+│                     CI Pipeline Flow                      │
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  Lint ────┐                                              │
+│  (Biome)  │                                              │
+│           ↓                                              │
+│  Build ───┼────→ Type Check                             │
+│  (esbuild)│      (TypeScript)                           │
+│   ~1.6s   │                                              │
+│           ↓                                              │
+│  Test × 6 (Matrix: Node 20/22/24 × Ubuntu/Windows)      │
+│   ~5s     ────→ Coverage Report                         │
+│                                                           │
+│           ↓                                              │
+│  CI Success (Required check for merge)                   │
+└──────────────────────────────────────────────────────────┘
 ```
 
-**Matrix:** Node 20, 22, 24 × Ubuntu, Windows = 6 jobs
+**Matrix Strategy:** Node 20, 22, 24 × Ubuntu, Windows = **6 parallel test jobs**
 
-All must pass before merge.
+**Performance:**
+- Build: ~1.6s (cached for all jobs)
+- Tests: ~5s per job (4600+ tests)
+- Total: ~40-60% faster than previous setup
+
+**All checks must pass** before merge to main.
+
+---
 
 ## Getting Help
 
-- **Issues:** [GitHub Issues](https://github.com/SocketDev/socket-lib/issues)
-- **Standards:** See [CLAUDE.md](../CLAUDE.md)
-- **Build:** See [build.md](./build.md)
-- **Themes:** See [themes.md](./themes.md)
+| Resource | Link | Description |
+|----------|------|-------------|
+| **Issues** | [GitHub Issues](https://github.com/SocketDev/socket-lib/issues) | Bug reports, feature requests |
+| **Standards** | [CLAUDE.md](../CLAUDE.md) | Coding standards & patterns |
+| **Build** | [build.md](./build.md) | Build system architecture |
+| **Themes** | [themes.md](./themes.md) | Theme system guide |
+
+---
 
 ## Next Steps
 
-- 📖 Read [CLAUDE.md](../CLAUDE.md) for coding standards
-- 🎨 Explore [Theme System](./themes.md)
-- 🏗️ Learn [Build Architecture](./build.md)
-- 🐛 Check [open issues](https://github.com/SocketDev/socket-lib/issues)
+| Step | Resource | What You'll Learn |
+|------|----------|-------------------|
+| 1 | [CLAUDE.md](../CLAUDE.md) | Coding standards, patterns, best practices |
+| 2 | [Theme System](./themes.md) | Visual theming for CLI tools |
+| 3 | [Build Architecture](./build.md) | Build pipeline deep dive |
+| 4 | [Open Issues](https://github.com/SocketDev/socket-lib/issues) | Ways to contribute |
 
 ---
 
