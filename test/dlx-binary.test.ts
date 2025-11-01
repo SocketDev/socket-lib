@@ -187,6 +187,55 @@ describe.sequential('dlx-binary', () => {
       }, 'dlxBinary-force-')
     })
 
+    it('should force re-download when yes option is true (CLI-style)', async () => {
+      await runWithTempDir(async tmpDir => {
+        const restoreHome = mockHomeDir(tmpDir)
+
+        try {
+          const url = `${httpBaseUrl}/binary`
+
+          // First call
+          const result1 = await dlxBinary(['--version'], {
+            name: 'yes-binary',
+            url,
+          })
+          await result1.spawnPromise.catch(() => {})
+
+          // Second call with yes (should behave like force)
+          const result = await dlxBinary(['--version'], {
+            name: 'yes-binary',
+            url,
+            yes: true,
+          })
+          expect(result.downloaded).toBe(true)
+          await result.spawnPromise.catch(() => {})
+        } finally {
+          restoreHome()
+        }
+      }, 'dlxBinary-yes-')
+    })
+
+    it('should accept quiet option (CLI-style, reserved)', async () => {
+      await runWithTempDir(async tmpDir => {
+        const restoreHome = mockHomeDir(tmpDir)
+
+        try {
+          const url = `${httpBaseUrl}/binary`
+
+          // Call with quiet option - currently reserved for future use
+          const result = await dlxBinary(['--version'], {
+            name: 'quiet-binary',
+            quiet: true,
+            url,
+          })
+          expect(result.downloaded).toBe(true)
+          await result.spawnPromise.catch(() => {})
+        } finally {
+          restoreHome()
+        }
+      }, 'dlxBinary-quiet-')
+    })
+
     it('should verify checksum when provided', async () => {
       await runWithTempDir(async tmpDir => {
         const restoreHome = mockHomeDir(tmpDir)
