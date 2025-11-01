@@ -1,12 +1,30 @@
 /**
  * @fileoverview User prompt utilities for interactive scripts.
- * Provides inquirer.js integration with spinner support and context handling.
+ * Provides inquirer.js integration with spinner support, context handling, and theming.
  */
 
 import { getAbortSignal, getSpinner } from '#constants/process'
+import type { ColorValue } from '../spinner'
+import { getTheme } from '../themes/context'
+import { resolveColor } from '../themes/utils'
+import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 const abortSignal = getAbortSignal()
 const spinner = getSpinner()
+
+/**
+ * Apply a color to text using yoctocolors.
+ * Handles both named colors and RGB tuples.
+ * @private
+ */
+function applyColor(text: string, color: ColorValue): string {
+  if (typeof color === 'string') {
+    // Named color like 'green', 'red', etc.
+    return (yoctocolorsCjs as any)[color](text)
+  }
+  // RGB tuple [r, g, b]
+  return yoctocolorsCjs.rgb(color[0], color[1], color[2])(text)
+}
 
 // Type definitions
 
@@ -79,13 +97,53 @@ declare class SeparatorType {
 export type Separator = SeparatorType
 
 /**
- * Wrap an inquirer prompt with spinner handling and signal injection.
- * Automatically stops/starts spinners during prompt display and injects abort signals.
- * Trims string results and handles cancellation gracefully.
+ * Convert Socket theme to @inquirer theme format.
+ * Maps our theme colors to inquirer's style functions.
+ *
+ * @param theme - Socket theme
+ * @returns @inquirer theme object
+ */
+function createInquirerTheme(theme: import('../themes/types').Theme) {
+  const promptColor = resolveColor(theme.colors.prompt, theme.colors) as ColorValue
+  const textDimColor = resolveColor(theme.colors.textDim, theme.colors) as ColorValue
+  const errorColor = theme.colors.error
+  const successColor = theme.colors.success
+  const primaryColor = theme.colors.primary
+
+  return {
+    style: {
+      // Message text (uses colors.prompt)
+      message: (text: string) => applyColor(text, promptColor),
+      // Answer text (uses primary color)
+      answer: (text: string) => applyColor(text, primaryColor),
+      // Help text / descriptions (uses textDim)
+      help: (text: string) => applyColor(text, textDimColor),
+      description: (text: string) => applyColor(text, textDimColor),
+      // Disabled items (uses textDim)
+      disabled: (text: string) => applyColor(text, textDimColor),
+      // Error messages (uses error color)
+      error: (text: string) => applyColor(text, errorColor),
+      // Highlight/active (uses primary color)
+      highlight: (text: string) => applyColor(text, primaryColor),
+    },
+    icon: {
+      // Use success color for confirmed items
+      checked: applyColor('✓', successColor),
+      unchecked: ' ',
+      // Cursor uses primary color
+      cursor: applyColor('❯', primaryColor),
+    },
+  }
+}
+
+/**
+ * Wrap an inquirer prompt with spinner handling, theme injection, and signal injection.
+ * Automatically stops/starts spinners during prompt display, injects the current theme,
+ * and injects abort signals. Trims string results and handles cancellation gracefully.
  *
  * @template T - Type of the prompt result
  * @param inquirerPrompt - The inquirer prompt function to wrap
- * @returns Wrapped prompt function with spinner and signal handling
+ * @returns Wrapped prompt function with spinner, theme, and signal handling
  *
  * @example
  * const myPrompt = wrapPrompt(rawInquirerPrompt)
@@ -104,6 +162,15 @@ export function wrapPrompt<T = unknown>(
     const spinnerInstance =
       contextSpinner !== undefined ? contextSpinner : spinner
     const signal = abortSignal
+
+    // Inject theme into config (args[0])
+    const config = args[0] as Record<string, unknown>
+    if (config && typeof config === 'object' && !config.theme) {
+      const theme = getTheme()
+      config.theme = createInquirerTheme(theme)
+    }
+
+    // Inject signal into context (args[1])
     if (origContext) {
       args[1] = {
         signal,
@@ -112,6 +179,7 @@ export function wrapPrompt<T = unknown>(
     } else {
       args[1] = { signal }
     }
+
     const wasSpinning = !!spinnerInstance?.isSpinning
     spinnerInstance?.stop()
     let result: unknown
