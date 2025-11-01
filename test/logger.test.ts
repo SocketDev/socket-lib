@@ -8,7 +8,6 @@ import {
   Logger,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
-  logger,
 } from '@socketsecurity/lib/logger'
 
 describe('LOG_SYMBOLS', () => {
@@ -994,19 +993,6 @@ describe('Logger', () => {
       testLogger.logNewline()
       // Should add blank line after non-blank
       expect(stdoutChunks.length).toBe(3)
-    })
-  })
-
-  describe('default logger instance', () => {
-    it('should export a default logger instance', () => {
-      expect(logger).toBeInstanceOf(Logger)
-    })
-
-    it('should be usable for logging', () => {
-      // Just verify it doesn't throw
-      expect(() => {
-        logger.log('test')
-      }).not.toThrow()
     })
   })
 

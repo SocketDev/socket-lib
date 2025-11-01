@@ -2,7 +2,7 @@
  * @fileoverview Tests for getDefaultLogger function.
  */
 
-import { getDefaultLogger, logger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { describe, expect, it } from 'vitest'
 
 describe('getDefaultLogger', () => {
@@ -18,12 +18,6 @@ describe('getDefaultLogger', () => {
     const log1 = getDefaultLogger()
     const log2 = getDefaultLogger()
     expect(log1).toBe(log2)
-  })
-
-  it('should be a different instance from direct logger export', () => {
-    const defaultLogger = getDefaultLogger()
-    // The exported 'logger' is a separate instance
-    expect(defaultLogger).not.toBe(logger)
   })
 
   it('should be usable for logging', () => {

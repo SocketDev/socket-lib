@@ -45,13 +45,8 @@ export interface RetryOptions {
    */
   baseDelayMs?: number | undefined
 
-  /**
-   * Legacy alias for `backoffFactor`. Use `backoffFactor` instead.
-   *
-   * @deprecated Use `backoffFactor` instead
-   * @default 2
-   */
-  factor?: number | undefined
+  // REMOVED: Deprecated `factor` option
+  // Migration: Use `backoffFactor` instead
 
   /**
    * Whether to apply randomness to spread out retries and avoid thundering herd.
@@ -72,21 +67,11 @@ export interface RetryOptions {
    */
   maxDelayMs?: number | undefined
 
-  /**
-   * Legacy alias for `maxDelayMs`. Use `maxDelayMs` instead.
-   *
-   * @deprecated Use `maxDelayMs` instead
-   * @default 10000
-   */
-  maxTimeout?: number | undefined
+  // REMOVED: Deprecated `maxTimeout` option
+  // Migration: Use `maxDelayMs` instead
 
-  /**
-   * Legacy alias for `baseDelayMs`. Use `baseDelayMs` instead.
-   *
-   * @deprecated Use `baseDelayMs` instead
-   * @default 200
-   */
-  minTimeout?: number | undefined
+  // REMOVED: Deprecated `minTimeout` option
+  // Migration: Use `baseDelayMs` instead
 
   /**
    * Callback invoked on each retry attempt.
@@ -303,13 +288,13 @@ export function normalizeRetryOptions(
     // Arguments to pass to the callback function.
     args = [],
     // Multiplier for exponential backoff (e.g., 2 doubles delay each retry).
-    backoffFactor = resolved.factor || 2,
+    backoffFactor = 2,
     // Initial delay before the first retry (in milliseconds).
-    baseDelayMs = resolved.minTimeout || 200,
+    baseDelayMs = 200,
     // Whether to apply randomness to spread out retries.
     jitter = true,
     // Upper limit for any backoff delay (in milliseconds).
-    maxDelayMs = resolved.maxTimeout || 10_000,
+    maxDelayMs = 10_000,
     // Optional callback invoked on each retry attempt:
     // (attempt: number, error: unknown, delay: number) => void
     onRetry,
@@ -318,7 +303,7 @@ export function normalizeRetryOptions(
     // Whether onRetry will rethrow errors.
     onRetryRethrow = false,
     // Number of retry attempts (0 = no retries, only initial attempt).
-    retries = resolved.retries || 0,
+    retries = 0,
     // AbortSignal used to support cancellation.
     signal = abortSignal,
   } = resolved
@@ -328,8 +313,6 @@ export function normalizeRetryOptions(
     baseDelayMs,
     jitter,
     maxDelayMs,
-    minTimeout: baseDelayMs,
-    maxTimeout: maxDelayMs,
     onRetry,
     onRetryCancelOnFalse,
     onRetryRethrow,
@@ -362,9 +345,9 @@ export function resolveRetryOptions(
   const defaults = {
     __proto__: null,
     retries: 0,
-    minTimeout: 200,
-    maxTimeout: 10_000,
-    factor: 2,
+    baseDelayMs: 200,
+    maxDelayMs: 10_000,
+    backoffFactor: 2,
   }
 
   if (typeof options === 'number') {

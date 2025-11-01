@@ -9,9 +9,7 @@ import type { Writable } from 'stream'
 import { getCI } from '#env/ci'
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
-  ShimmerColor,
   ShimmerColorGradient,
-  ShimmerColorRgb,
   ShimmerConfig,
   ShimmerDirection,
   ShimmerState,
@@ -232,17 +230,14 @@ export type Spinner = {
   /** Increment progress by specified amount (default: 1) */
   progressStep(amount?: number): Spinner
 
-  /** Push current options onto stack and apply new temporary options */
-  pushOptions(
-    options: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>>,
-  ): Spinner
-  /** Pop and restore previous options from stack */
-  popOptions(): Spinner
-
-  /** Toggle shimmer effect on/off */
-  shimmer(enabled: boolean): Spinner
-  /** Update shimmer configuration or set direction */
-  shimmer(config: Partial<ShimmerConfig> | ShimmerDirection): Spinner
+  /** Enable shimmer effect (restores saved config or uses defaults) */
+  enableShimmer(): Spinner
+  /** Disable shimmer effect (preserves config for later re-enable) */
+  disableShimmer(): Spinner
+  /** Set complete shimmer configuration */
+  setShimmer(config: ShimmerConfig): Spinner
+  /** Update partial shimmer configuration */
+  updateShimmer(config: Partial<ShimmerConfig>): Spinner
 
   /** Show warning (⚠) without stopping the spinner */
   warn(text?: string | undefined, ...extras: unknown[]): Spinner
@@ -486,10 +481,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       #progress?: ProgressInfo | undefined
       #shimmer?: ShimmerInfo | undefined
       #shimmerSavedConfig?: ShimmerInfo | undefined
-      #optionsStack: Array<{
-        color: ColorRgb
-        shimmer: ShimmerInfo | undefined
-      }> = []
 
       constructor(options?: SpinnerOptions | undefined) {
         const opts = { __proto__: null, ...options } as SpinnerOptions
@@ -977,119 +968,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Push current spinner options onto the stack and apply new temporary options.
-       * Use `popOptions()` to restore the previous options.
-       * Supports nested calls - each push must be paired with a pop.
-       *
-       * @param options - Temporary options to apply (color, shimmer)
-       * @returns This spinner for chaining
-       *
-       * @example
-       * ```ts
-       * const spinner = Spinner({ color: 'cyan' })
-       * spinner.start('Processing...')
-       *
-       * // Temporarily change to red for error handling
-       * spinner.pushOptions({ color: 'red' })
-       * spinner.text('Handling error')
-       * // ... do error work ...
-       * spinner.popOptions() // Restore cyan
-       *
-       * // Nested example
-       * spinner.pushOptions({ color: 'yellow' })
-       * spinner.pushOptions({ color: 'red' })
-       * spinner.popOptions() // Back to yellow
-       * spinner.popOptions() // Back to cyan
-       * ```
-       */
-      pushOptions(
-        options: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>>,
-      ): Spinner {
-        const opts = { __proto__: null, ...options } as Partial<
-          Pick<SpinnerOptions, 'color' | 'shimmer'>
-        >
-
-        // Save current state
-        const savedState = {
-          color: this.color,
-          shimmer: this.shimmerState
-            ? {
-                color: this.#shimmer!.color,
-                currentDir: this.#shimmer!.currentDir,
-                mode: this.#shimmer!.mode,
-                speed: this.#shimmer!.speed,
-                step: this.#shimmer!.step,
-              }
-            : undefined,
-        }
-        this.#optionsStack.push(savedState)
-
-        // Apply new options
-        if (opts.color !== undefined) {
-          this.color = toRgb(opts.color)
-        }
-        if (opts.shimmer !== undefined) {
-          this.shimmer(opts.shimmer)
-        }
-
-        return this as unknown as Spinner
-      }
-
-      /**
-       * Pop and restore the previous spinner options from the stack.
-       * Must be paired with a previous `pushOptions()` call.
-       * If stack is empty, this method does nothing.
-       *
-       * @returns This spinner for chaining
-       *
-       * @example
-       * ```ts
-       * spinner.pushOptions({ color: 'red' })
-       * // ... do work with red spinner ...
-       * spinner.popOptions() // Restore previous color
-       * ```
-       */
-      popOptions(): Spinner {
-        const savedState = this.#optionsStack.pop()
-        if (!savedState) {
-          // Stack is empty, nothing to restore
-          return this as unknown as Spinner
-        }
-
-        // Restore color
-        this.color = savedState.color
-
-        // Restore shimmer state
-        if (savedState.shimmer) {
-          const shimmerColor = savedState.shimmer.color
-          let restoredColor: ShimmerColor | ShimmerColorGradient | undefined
-          if (shimmerColor === COLOR_INHERIT) {
-            restoredColor = COLOR_INHERIT
-          } else if (Array.isArray(shimmerColor)) {
-            // Check if it's a gradient (array of arrays) or single RGB
-            if (shimmerColor.length > 0 && Array.isArray(shimmerColor[0])) {
-              restoredColor = shimmerColor as ShimmerColorGradient
-            } else {
-              restoredColor = shimmerColor as unknown as ShimmerColorRgb
-            }
-          } else if (typeof shimmerColor === 'string') {
-            // It's a named color, convert to RGB
-            restoredColor = toRgb(shimmerColor as ColorName)
-          }
-          this.shimmer({
-            color: restoredColor,
-            dir: savedState.shimmer.mode,
-            speed: savedState.shimmer.speed,
-          })
-        } else {
-          // Shimmer was disabled before
-          this.shimmer(false)
-        }
-
-        return this as unknown as Spinner
-      }
-
-      /**
        * Start the spinner animation with optional text.
        * Begins displaying the animated spinner on stderr.
        *
@@ -1294,128 +1172,140 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Toggle shimmer effect or update shimmer configuration.
-       * Preserves shimmer config when toggling off, allowing easy re-enable.
-       * Supports partial config updates to tweak specific properties.
+       * Enable shimmer effect.
+       * Restores saved config or uses defaults if no saved config exists.
        *
-       * @param enabledOrConfig - Boolean to toggle, partial config to update, or direction string
        * @returns This spinner for chaining
        *
        * @example
-       * // Toggle off (preserves config for later re-enable)
-       * spinner.shimmer(false)
-       *
-       * // Toggle on (restores saved config or uses defaults)
-       * spinner.shimmer(true)
-       *
-       * // Update specific properties
-       * spinner.shimmer({ speed: 0.5 })
-       * spinner.shimmer({ color: [255, 0, 0] })
-       *
-       * // Set direction
-       * spinner.shimmer('rtl')
+       * spinner.enableShimmer()
        */
-      shimmer(
-        enabledOrConfig:
-          | boolean
-          | Partial<ShimmerConfig>
-          | ShimmerDirection
-          | undefined,
-      ): Spinner {
-        if (enabledOrConfig === false) {
-          // Disable shimmer but preserve config.
-          this.#shimmer = undefined
-        } else if (enabledOrConfig === true) {
-          // Re-enable with saved config or defaults.
-          if (this.#shimmerSavedConfig) {
-            // Restore saved config.
-            this.#shimmer = { ...this.#shimmerSavedConfig }
-          } else {
-            // Create default config.
-            this.#shimmer = {
-              color: COLOR_INHERIT,
-              currentDir: DIR_LTR,
-              mode: DIR_LTR,
-              speed: 1 / 3,
-              step: 0,
-            } as ShimmerInfo
-            this.#shimmerSavedConfig = this.#shimmer
-          }
-        } else if (typeof enabledOrConfig === 'string') {
-          // Direction string - update existing or create new.
-          if (this.#shimmer) {
-            // Update existing shimmer direction.
-            this.#shimmer = {
-              ...this.#shimmer,
-              mode: enabledOrConfig,
-            }
-            this.#shimmerSavedConfig = this.#shimmer
-          } else if (this.#shimmerSavedConfig) {
-            // Restore and update.
-            this.#shimmer = {
-              ...this.#shimmerSavedConfig,
-              mode: enabledOrConfig,
-            }
-            this.#shimmerSavedConfig = this.#shimmer
-          } else {
-            // Create new with direction.
-            this.#shimmer = {
-              color: COLOR_INHERIT,
-              currentDir: DIR_LTR,
-              mode: enabledOrConfig,
-              speed: 1 / 3,
-              step: 0,
-            } as ShimmerInfo
-            this.#shimmerSavedConfig = this.#shimmer
-          }
-        } else if (enabledOrConfig && typeof enabledOrConfig === 'object') {
-          // Partial config update - merge with existing or saved config.
-          const partialConfig = {
-            __proto__: null,
-            ...enabledOrConfig,
-          } as Partial<ShimmerConfig>
+      enableShimmer(): Spinner {
+        if (this.#shimmerSavedConfig) {
+          // Restore saved config.
+          this.#shimmer = { ...this.#shimmerSavedConfig }
+        } else {
+          // Create default config.
+          this.#shimmer = {
+            color: COLOR_INHERIT,
+            currentDir: DIR_LTR,
+            mode: DIR_LTR,
+            speed: 1 / 3,
+            step: 0,
+          } as ShimmerInfo
+          this.#shimmerSavedConfig = this.#shimmer
+        }
 
-          if (this.#shimmer) {
-            // Update existing shimmer.
-            this.#shimmer = {
-              ...this.#shimmer,
-              ...(partialConfig.color !== undefined
-                ? { color: partialConfig.color }
-                : {}),
-              ...(partialConfig.dir !== undefined
-                ? { mode: partialConfig.dir }
-                : {}),
-              ...(partialConfig.speed !== undefined
-                ? { speed: partialConfig.speed }
-                : {}),
-            } as ShimmerInfo
-            this.#shimmerSavedConfig = this.#shimmer
-          } else if (this.#shimmerSavedConfig) {
-            // Restore and update.
-            this.#shimmer = {
-              ...this.#shimmerSavedConfig,
-              ...(partialConfig.color !== undefined
-                ? { color: partialConfig.color }
-                : {}),
-              ...(partialConfig.dir !== undefined
-                ? { mode: partialConfig.dir }
-                : {}),
-              ...(partialConfig.speed !== undefined
-                ? { speed: partialConfig.speed }
-                : {}),
-            } as ShimmerInfo
-            this.#shimmerSavedConfig = this.#shimmer
-          } else {
-            // Create new with partial config.
-            this.#shimmer = {
-              color: partialConfig.color ?? COLOR_INHERIT,
-              currentDir: DIR_LTR,
-              mode: partialConfig.dir ?? DIR_LTR,
-              speed: partialConfig.speed ?? 1 / 3,
-              step: 0,
-            } as ShimmerInfo
-            this.#shimmerSavedConfig = this.#shimmer
-          }
+        this.#updateSpinnerText()
+        return this as unknown as Spinner
+      }
+
+      /**
+       * Disable shimmer effect.
+       * Preserves config for later re-enable via enableShimmer().
+       *
+       * @returns This spinner for chaining
+       *
+       * @example
+       * spinner.disableShimmer()
+       */
+      disableShimmer(): Spinner {
+        // Disable shimmer but preserve config.
+        this.#shimmer = undefined
+        this.#updateSpinnerText()
+        return this as unknown as Spinner
+      }
+
+      /**
+       * Set complete shimmer configuration.
+       * Replaces any existing shimmer config with the provided values.
+       *
+       * @param config - Complete shimmer configuration
+       * @returns This spinner for chaining
+       *
+       * @example
+       * spinner.setShimmer({
+       *   color: [255, 0, 0],
+       *   dir: 'rtl',
+       *   speed: 0.5
+       * })
+       */
+      setShimmer(config: ShimmerConfig): Spinner {
+        this.#shimmer = {
+          color: config.color,
+          currentDir: DIR_LTR,
+          mode: config.dir,
+          speed: config.speed,
+          step: 0,
+        } as ShimmerInfo
+        this.#shimmerSavedConfig = this.#shimmer
+        this.#updateSpinnerText()
+        return this as unknown as Spinner
+      }
+
+      /**
+       * Update partial shimmer configuration.
+       * Merges with existing config, enabling shimmer if currently disabled.
+       *
+       * @param config - Partial shimmer configuration to merge
+       * @returns This spinner for chaining
+       *
+       * @example
+       * // Update just the speed
+       * spinner.updateShimmer({ speed: 0.5 })
+       *
+       * // Update direction
+       * spinner.updateShimmer({ dir: 'rtl' })
+       *
+       * // Update multiple properties
+       * spinner.updateShimmer({ color: [255, 0, 0], speed: 0.8 })
+       */
+      updateShimmer(config: Partial<ShimmerConfig>): Spinner {
+        const partialConfig = {
+          __proto__: null,
+          ...config,
+        } as Partial<ShimmerConfig>
+
+        if (this.#shimmer) {
+          // Update existing shimmer.
+          this.#shimmer = {
+            ...this.#shimmer,
+            ...(partialConfig.color !== undefined
+              ? { color: partialConfig.color }
+              : {}),
+            ...(partialConfig.dir !== undefined
+              ? { mode: partialConfig.dir }
+              : {}),
+            ...(partialConfig.speed !== undefined
+              ? { speed: partialConfig.speed }
+              : {}),
+          } as ShimmerInfo
+          this.#shimmerSavedConfig = this.#shimmer
+        } else if (this.#shimmerSavedConfig) {
+          // Restore and update.
+          this.#shimmer = {
+            ...this.#shimmerSavedConfig,
+            ...(partialConfig.color !== undefined
+              ? { color: partialConfig.color }
+              : {}),
+            ...(partialConfig.dir !== undefined
+              ? { mode: partialConfig.dir }
+              : {}),
+            ...(partialConfig.speed !== undefined
+              ? { speed: partialConfig.speed }
+              : {}),
+          } as ShimmerInfo
+          this.#shimmerSavedConfig = this.#shimmer
+        } else {
+          // Create new with partial config.
+          this.#shimmer = {
+            color: partialConfig.color ?? COLOR_INHERIT,
+            currentDir: DIR_LTR,
+            mode: partialConfig.dir ?? DIR_LTR,
+            speed: partialConfig.speed ?? 1 / 3,
+            step: 0,
+          } as ShimmerInfo
+          this.#shimmerSavedConfig = this.#shimmer
         }
 
         this.#updateSpinnerText()
@@ -1465,36 +1355,9 @@ export function getDefaultSpinner(): ReturnType<typeof Spinner> {
   return _spinner
 }
 
-/**
- * Default shared spinner instance (lazily initialized).
- *
- * @deprecated Use `getDefaultSpinner()` function instead for better tree-shaking and to avoid circular dependencies.
- *
- * @example
- * ```ts
- * // Old (deprecated):
- * import { spinner } from '@socketsecurity/lib/spinner'
- * spinner.start('Loading…')
- *
- * // New (recommended):
- * import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
- * const spinner = getDefaultSpinner()
- * spinner.start('Loading…')
- * ```
- */
-export const spinner = /* @__PURE__ */ (() => {
-  // Lazy initialization to prevent circular dependency issues during module loading.
-  let _lazySpinner: ReturnType<typeof Spinner> | undefined
-  return new Proxy({} as ReturnType<typeof Spinner>, {
-    get(_target, prop) {
-      if (_lazySpinner === undefined) {
-        _lazySpinner = Spinner()
-      }
-      const value = _lazySpinner[prop as keyof ReturnType<typeof Spinner>]
-      return typeof value === 'function' ? value.bind(_lazySpinner) : value
-    },
-  })
-})()
+// REMOVED: Deprecated `spinner` export
+// Migration: Use getDefaultSpinner() instead
+// See: getDefaultSpinner() function above
 
 /**
  * Configuration options for `withSpinner()` helper.
@@ -1567,9 +1430,22 @@ export async function withSpinner<T>(
     return await operation()
   }
 
-  // Push options if provided
-  if (withOptions) {
-    spinner.pushOptions(withOptions)
+  // Save current options if we're going to change them
+  const savedColor =
+    withOptions?.color !== undefined ? spinner.color : undefined
+  const savedShimmerState =
+    withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
+
+  // Apply temporary options
+  if (withOptions?.color !== undefined) {
+    spinner.color = toRgb(withOptions.color)
+  }
+  if (withOptions?.shimmer !== undefined) {
+    if (typeof withOptions.shimmer === 'string') {
+      spinner.updateShimmer({ dir: withOptions.shimmer })
+    } else {
+      spinner.setShimmer(withOptions.shimmer)
+    }
   }
 
   spinner.start(message)
@@ -1577,9 +1453,20 @@ export async function withSpinner<T>(
     return await operation()
   } finally {
     spinner.stop()
-    // Pop options if they were pushed
-    if (withOptions) {
-      spinner.popOptions()
+    // Restore previous options
+    if (savedColor !== undefined) {
+      spinner.color = savedColor
+    }
+    if (withOptions?.shimmer !== undefined) {
+      if (savedShimmerState) {
+        spinner.setShimmer({
+          color: savedShimmerState.color as any,
+          dir: savedShimmerState.mode,
+          speed: savedShimmerState.speed,
+        })
+      } else {
+        spinner.disableShimmer()
+      }
     }
   }
 }
@@ -1706,9 +1593,22 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
     return operation()
   }
 
-  // Push options if provided
-  if (withOptions) {
-    spinner.pushOptions(withOptions)
+  // Save current options if we're going to change them
+  const savedColor =
+    withOptions?.color !== undefined ? spinner.color : undefined
+  const savedShimmerState =
+    withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
+
+  // Apply temporary options
+  if (withOptions?.color !== undefined) {
+    spinner.color = toRgb(withOptions.color)
+  }
+  if (withOptions?.shimmer !== undefined) {
+    if (typeof withOptions.shimmer === 'string') {
+      spinner.updateShimmer({ dir: withOptions.shimmer })
+    } else {
+      spinner.setShimmer(withOptions.shimmer)
+    }
   }
 
   spinner.start(message)
@@ -1716,9 +1616,20 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
     return operation()
   } finally {
     spinner.stop()
-    // Pop options if they were pushed
-    if (withOptions) {
-      spinner.popOptions()
+    // Restore previous options
+    if (savedColor !== undefined) {
+      spinner.color = savedColor
+    }
+    if (withOptions?.shimmer !== undefined) {
+      if (savedShimmerState) {
+        spinner.setShimmer({
+          color: savedShimmerState.color as any,
+          dir: savedShimmerState.mode,
+          speed: savedShimmerState.speed,
+        })
+      } else {
+        spinner.disableShimmer()
+      }
     }
   }
 }

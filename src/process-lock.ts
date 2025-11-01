@@ -43,9 +43,11 @@
 import { existsSync, mkdirSync, statSync, utimesSync } from 'fs'
 
 import { safeDeleteSync } from './fs'
-import { logger } from './logger'
+import { getDefaultLogger } from './logger'
 import { pRetry } from './promises'
 import { onExit } from './signal-exit'
+
+const logger = getDefaultLogger()
 
 /**
  * Lock acquisition options.
