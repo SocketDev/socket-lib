@@ -37,17 +37,47 @@ function getFs() {
 }
 
 export interface DlxBinaryOptions {
-  /** URL to download the binary from. */
+  /**
+   * URL to download the binary from.
+   */
   url: string
-  /** Optional name for the cached binary (defaults to URL hash). */
+
+  /**
+   * Optional name for the cached binary (defaults to URL hash).
+   */
   name?: string | undefined
-  /** Expected checksum (sha256) for verification. */
+
+  /**
+   * Expected checksum (sha256) for verification.
+   */
   checksum?: string | undefined
-  /** Cache TTL in milliseconds (default: 7 days). */
+
+  /**
+   * Cache TTL in milliseconds (default: 7 days).
+   */
   cacheTtl?: number | undefined
-  /** Force re-download even if cached. */
+
+  /**
+   * Force re-download even if cached.
+   * Aligns with npm/npx --force flag.
+   */
   force?: boolean | undefined
-  /** Additional spawn options. */
+
+  /**
+   * Skip confirmation prompts (auto-approve).
+   * Aligns with npx --yes/-y flag.
+   */
+  yes?: boolean | undefined
+
+  /**
+   * Suppress output (quiet mode).
+   * Aligns with npx --quiet/-q and pnpm --silent/-s flags.
+   */
+  quiet?: boolean | undefined
+
+  /**
+   * Additional spawn options.
+   */
   spawnOptions?: SpawnOptions | undefined
 }
 
@@ -367,11 +397,15 @@ export async function dlxBinary(
   const {
     cacheTtl = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
     checksum,
-    force = false,
+    force: userForce = false,
     name,
     spawnOptions,
     url,
+    yes,
   } = { __proto__: null, ...options } as DlxBinaryOptions
+
+  // Map --yes flag to force behavior (auto-approve/skip prompts)
+  const force = yes === true ? true : userForce
 
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
