@@ -80,7 +80,7 @@ jobs:
 
   # Test matrix - reuses build artifacts
   test:
-    name: Test (Node ${{ matrix.node }} / ${{ matrix.os }})
+    name: Test
     needs: [lint, build]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
