@@ -36,7 +36,7 @@
 const ReflectApply = Reflect.apply
 const globalProcess = globalThis.process as
   | (NodeJS.Process & {
-      __signal_exit_emitter__?: any
+      __signal_exit_emitter__?: import('node:events').EventEmitter
       reallyExit?: (code?: number | undefined) => never
     })
   | undefined
