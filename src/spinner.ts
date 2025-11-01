@@ -362,7 +362,8 @@ function renderProgressBar(percentage: number, width: number = 20): string {
   const empty = width - filled
   const bar = '█'.repeat(filled) + '░'.repeat(empty)
   // Use cyan color for the progress bar
-  const colors = /*@__PURE__*/ require('./external/yoctocolors-cjs')
+  const colors =
+    /*@__PURE__*/ require('./external/yoctocolors-cjs') as typeof import('yoctocolors-cjs')
   return colors.cyan(bar)
 }
 
@@ -394,10 +395,10 @@ export function getCliSpinners(
   styleName?: string | undefined,
 ): SpinnerStyle | Record<string, SpinnerStyle> | undefined {
   if (_cliSpinners === undefined) {
-    const YoctoCtor = yoctoSpinner as any
+    const YoctoCtor: any = yoctoSpinner as any
     // Get the YoctoSpinner class to access static properties.
-    const tempInstance = YoctoCtor({})
-    const YoctoSpinnerClass = tempInstance.constructor as any
+    const tempInstance: any = YoctoCtor({})
+    const YoctoSpinnerClass: any = tempInstance.constructor as any
     // Extend the standard cli-spinners collection with Socket custom spinners.
     _cliSpinners = {
       __proto__: null,

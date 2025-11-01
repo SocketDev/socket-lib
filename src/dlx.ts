@@ -182,7 +182,7 @@ export function isInSocketDlx(filePath: string): boolean {
 
   // Check if the absolute path starts with the DLX directory.
   // Both paths are normalized to use forward slashes for consistent comparison.
-  return absolutePath.startsWith(dlxDir + '/')
+  return absolutePath.startsWith(`${dlxDir}/`)
 }
 
 /**
