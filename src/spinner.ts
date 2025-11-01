@@ -9,7 +9,9 @@ import type { Writable } from 'stream'
 import { getCI } from '#env/ci'
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
+  ShimmerColor,
   ShimmerColorGradient,
+  ShimmerColorRgb,
   ShimmerConfig,
   ShimmerDirection,
   ShimmerState,
@@ -101,7 +103,7 @@ function isRgbTuple(value: ColorValue): value is ColorRgb {
  * @param color - Color name or RGB tuple
  * @returns RGB tuple with values 0-255
  */
-function toRgb(color: ColorValue): ColorRgb {
+export function toRgb(color: ColorValue): ColorRgb {
   if (isRgbTuple(color)) {
     return color
   }
@@ -162,6 +164,9 @@ export type Spinner = {
 
   /** Whether spinner is currently animating */
   get isSpinning(): boolean
+
+  /** Get current shimmer state (enabled/disabled and configuration) */
+  get shimmerState(): ShimmerInfo | undefined
 
   /** Clear the current line without stopping the spinner */
   clear(): Spinner
@@ -226,6 +231,13 @@ export type Spinner = {
   progress(current: number, total: number, unit?: string | undefined): Spinner
   /** Increment progress by specified amount (default: 1) */
   progressStep(amount?: number): Spinner
+
+  /** Push current options onto stack and apply new temporary options */
+  pushOptions(
+    options: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>>,
+  ): Spinner
+  /** Pop and restore previous options from stack */
+  popOptions(): Spinner
 
   /** Toggle shimmer effect on/off */
   shimmer(enabled: boolean): Spinner
@@ -474,6 +486,10 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       #progress?: ProgressInfo | undefined
       #shimmer?: ShimmerInfo | undefined
       #shimmerSavedConfig?: ShimmerInfo | undefined
+      #optionsStack: Array<{
+        color: ColorRgb
+        shimmer: ShimmerInfo | undefined
+      }> = []
 
       constructor(options?: SpinnerOptions | undefined) {
         const opts = { __proto__: null, ...options } as SpinnerOptions
@@ -581,6 +597,20 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       // Override color setter to always convert to RGB before passing to yocto-spinner.
       set color(value: ColorValue | ColorRgb) {
         super.color = isRgbTuple(value) ? value : toRgb(value)
+      }
+
+      // Getter to expose current shimmer state.
+      get shimmerState(): ShimmerInfo | undefined {
+        if (!this.#shimmer) {
+          return undefined
+        }
+        return {
+          color: this.#shimmer.color,
+          currentDir: this.#shimmer.currentDir,
+          mode: this.#shimmer.mode,
+          speed: this.#shimmer.speed,
+          step: this.#shimmer.step,
+        } as ShimmerInfo
       }
 
       /**
@@ -947,6 +977,119 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
+       * Push current spinner options onto the stack and apply new temporary options.
+       * Use `popOptions()` to restore the previous options.
+       * Supports nested calls - each push must be paired with a pop.
+       *
+       * @param options - Temporary options to apply (color, shimmer)
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * const spinner = Spinner({ color: 'cyan' })
+       * spinner.start('Processing...')
+       *
+       * // Temporarily change to red for error handling
+       * spinner.pushOptions({ color: 'red' })
+       * spinner.text('Handling error')
+       * // ... do error work ...
+       * spinner.popOptions() // Restore cyan
+       *
+       * // Nested example
+       * spinner.pushOptions({ color: 'yellow' })
+       * spinner.pushOptions({ color: 'red' })
+       * spinner.popOptions() // Back to yellow
+       * spinner.popOptions() // Back to cyan
+       * ```
+       */
+      pushOptions(
+        options: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>>,
+      ): Spinner {
+        const opts = { __proto__: null, ...options } as Partial<
+          Pick<SpinnerOptions, 'color' | 'shimmer'>
+        >
+
+        // Save current state
+        const savedState = {
+          color: this.color,
+          shimmer: this.shimmerState
+            ? {
+                color: this.#shimmer!.color,
+                currentDir: this.#shimmer!.currentDir,
+                mode: this.#shimmer!.mode,
+                speed: this.#shimmer!.speed,
+                step: this.#shimmer!.step,
+              }
+            : undefined,
+        }
+        this.#optionsStack.push(savedState)
+
+        // Apply new options
+        if (opts.color !== undefined) {
+          this.color = toRgb(opts.color)
+        }
+        if (opts.shimmer !== undefined) {
+          this.shimmer(opts.shimmer)
+        }
+
+        return this as unknown as Spinner
+      }
+
+      /**
+       * Pop and restore the previous spinner options from the stack.
+       * Must be paired with a previous `pushOptions()` call.
+       * If stack is empty, this method does nothing.
+       *
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.pushOptions({ color: 'red' })
+       * // ... do work with red spinner ...
+       * spinner.popOptions() // Restore previous color
+       * ```
+       */
+      popOptions(): Spinner {
+        const savedState = this.#optionsStack.pop()
+        if (!savedState) {
+          // Stack is empty, nothing to restore
+          return this as unknown as Spinner
+        }
+
+        // Restore color
+        this.color = savedState.color
+
+        // Restore shimmer state
+        if (savedState.shimmer) {
+          const shimmerColor = savedState.shimmer.color
+          let restoredColor: ShimmerColor | ShimmerColorGradient | undefined
+          if (shimmerColor === COLOR_INHERIT) {
+            restoredColor = COLOR_INHERIT
+          } else if (Array.isArray(shimmerColor)) {
+            // Check if it's a gradient (array of arrays) or single RGB
+            if (shimmerColor.length > 0 && Array.isArray(shimmerColor[0])) {
+              restoredColor = shimmerColor as ShimmerColorGradient
+            } else {
+              restoredColor = shimmerColor as unknown as ShimmerColorRgb
+            }
+          } else if (typeof shimmerColor === 'string') {
+            // It's a named color, convert to RGB
+            restoredColor = toRgb(shimmerColor as ColorName)
+          }
+          this.shimmer({
+            color: restoredColor,
+            dir: savedState.shimmer.mode,
+            speed: savedState.shimmer.speed,
+          })
+        } else {
+          // Shimmer was disabled before
+          this.shimmer(false)
+        }
+
+        return this as unknown as Spinner
+      }
+
+      /**
        * Start the spinner animation with optional text.
        * Begins displaying the animated spinner on stderr.
        *
@@ -975,7 +1118,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         }
 
         this.#updateSpinnerText()
-        return this.#apply('start', args)
+        // Don't pass text to yocto-spinner.start() since we already set it via #updateSpinnerText().
+        // Passing args would cause duplicate message output.
+        return this.#apply('start', [])
       }
 
       /**
@@ -1365,6 +1510,12 @@ export type WithSpinnerOptions<T> = {
    * If not provided, operation runs without spinner.
    */
   spinner?: Spinner | undefined
+  /**
+   * Optional spinner options to apply during the operation.
+   * These options will be pushed when the operation starts and popped when it completes.
+   * Supports color and shimmer configuration.
+   */
+  withOptions?: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>> | undefined
 }
 
 /**
@@ -1407,7 +1558,7 @@ export type WithSpinnerOptions<T> = {
 export async function withSpinner<T>(
   options: WithSpinnerOptions<T>,
 ): Promise<T> {
-  const { message, operation, spinner } = {
+  const { message, operation, spinner, withOptions } = {
     __proto__: null,
     ...options,
   } as WithSpinnerOptions<T>
@@ -1416,11 +1567,20 @@ export async function withSpinner<T>(
     return await operation()
   }
 
+  // Push options if provided
+  if (withOptions) {
+    spinner.pushOptions(withOptions)
+  }
+
   spinner.start(message)
   try {
     return await operation()
   } finally {
     spinner.stop()
+    // Pop options if they were pushed
+    if (withOptions) {
+      spinner.popOptions()
+    }
   }
 }
 
@@ -1500,6 +1660,12 @@ export type WithSpinnerSyncOptions<T> = {
    * If not provided, operation runs without spinner.
    */
   spinner?: Spinner | undefined
+  /**
+   * Optional spinner options to apply during the operation.
+   * These options will be pushed when the operation starts and popped when it completes.
+   * Supports color and shimmer configuration.
+   */
+  withOptions?: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>> | undefined
 }
 
 /**
@@ -1531,7 +1697,7 @@ export type WithSpinnerSyncOptions<T> = {
  * ```
  */
 export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
-  const { message, operation, spinner } = {
+  const { message, operation, spinner, withOptions } = {
     __proto__: null,
     ...options,
   } as WithSpinnerSyncOptions<T>
@@ -1540,10 +1706,19 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
     return operation()
   }
 
+  // Push options if provided
+  if (withOptions) {
+    spinner.pushOptions(withOptions)
+  }
+
   spinner.start(message)
   try {
     return operation()
   } finally {
     spinner.stop()
+    // Pop options if they were pushed
+    if (withOptions) {
+      spinner.popOptions()
+    }
   }
 }
