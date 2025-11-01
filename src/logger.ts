@@ -7,6 +7,8 @@ import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
 import { objectAssign, objectFreeze } from './objects'
 import { applyLinePrefix, isBlankString } from './strings'
+import type { ColorValue } from './spinner'
+import { getTheme } from './themes/context'
 
 /**
  * Log symbols for terminal output with colored indicators.
@@ -116,23 +118,43 @@ function getYoctocolors() {
 }
 
 /**
+ * Apply a color to text using yoctocolors.
+ * Handles both named colors and RGB tuples.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function applyColor(
+  text: string,
+  color: ColorValue,
+  colors: typeof yoctocolorsCjs,
+): string {
+  if (typeof color === 'string') {
+    // Named color like 'green', 'red', etc.
+    return (colors as any)[color](text)
+  }
+  // RGB tuple [r, g, b]
+  return colors.rgb(color[0], color[1], color[2])(text)
+}
+
+/**
  * Log symbols for terminal output with colored indicators.
  *
  * Provides colored Unicode symbols (✔, ✖, ⚠, ℹ, →) with ASCII fallbacks (√, ×, ‼, i, >)
- * for terminals that don't support Unicode. Symbols are color-coded: green for
- * success, red for failure, yellow for warnings, blue for info, cyan for step.
+ * for terminals that don't support Unicode. Symbols are colored according to the active
+ * theme's color palette (success, error, warning, info, step).
  *
  * The symbols are lazily initialized on first access and then frozen for immutability.
+ * Colors are determined by the theme active at initialization time.
  *
  * @example
  * ```typescript
  * import { LOG_SYMBOLS } from '@socketsecurity/lib'
  *
- * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Green ✔
- * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Red ✖
- * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Yellow ⚠
- * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Blue ℹ
- * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Cyan →
+ * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
+ * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Theme error color ✖
+ * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Theme warning color ⚠
+ * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Theme info color ℹ
+ * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Theme step color →
  * ```
  */
 export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
@@ -146,12 +168,21 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   const init = () => {
     const supported = isUnicodeSupported()
     const colors = getYoctocolors()
+    const theme = getTheme()
+
+    // Get colors from theme
+    const successColor = theme.colors.success
+    const errorColor = theme.colors.error
+    const warningColor = theme.colors.warning
+    const infoColor = theme.colors.info
+    const stepColor = theme.colors.step
+
     objectAssign(target, {
-      fail: colors.red(supported ? '✖' : '×'),
-      info: colors.blue(supported ? 'ℹ' : 'i'),
-      step: colors.cyan(supported ? '→' : '>'),
-      success: colors.green(supported ? '✔' : '√'),
-      warn: colors.yellow(supported ? '⚠' : '‼'),
+      fail: applyColor(supported ? '✖' : '×', errorColor, colors),
+      info: applyColor(supported ? 'ℹ' : 'i', infoColor, colors),
+      step: applyColor(supported ? '→' : '>', stepColor, colors),
+      success: applyColor(supported ? '✔' : '√', successColor, colors),
+      warn: applyColor(supported ? '⚠' : '‼', warningColor, colors),
     })
     objectFreeze(target)
     // The handler of a Proxy is mutable after proxy instantiation.
