@@ -2,6 +2,7 @@
  * @fileoverview Tests for themed prompt stubs.
  */
 
+import type { Choice } from '../src/prompts/index'
 import { confirm, input, select } from '@socketsecurity/lib/prompts'
 import { describe, expect, it } from 'vitest'
 
@@ -34,7 +35,7 @@ describe('prompts', () => {
           choices: [
             { label: 'Option 1', value: '1' },
             { label: 'Option 2', value: '2' },
-          ],
+          ] as Array<Choice<string>>,
         }),
       ).rejects.toThrow('select() not yet implemented')
     })
