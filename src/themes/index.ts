@@ -7,7 +7,7 @@
  * import { setTheme, THEMES } from '@socketsecurity/lib/themes'
  *
  * // Set global theme
- * setTheme('socket-firewall')
+ * setTheme('brick')
  * ```
  *
  * @example
@@ -55,10 +55,10 @@ export type {
 
 // Curated themes
 export {
-  COANA_THEME,
-  FIREWALL_THEME,
-  PYTHON_THEME,
+  BRICK_THEME,
+  JUNGLE_THEME,
   SOCKET_THEME,
+  SUNSET_THEME,
   THEMES,
   ULTRA_THEME,
   type ThemeName,
