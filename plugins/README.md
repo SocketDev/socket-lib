@@ -1,6 +1,6 @@
 # Babel Plugins
 
-Shared transformation plugins for Socket registry builds.
+Babel transformation plugins exported by `@socketsecurity/lib`.
 
 ## `babel-plugin-inline-require-calls`
 
