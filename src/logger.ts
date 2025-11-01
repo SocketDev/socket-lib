@@ -1660,22 +1660,47 @@ function ensurePrototypeInitialized() {
   Object.defineProperties(Logger.prototype, Object.fromEntries(entries))
 }
 
+// Private singleton instance
+let _logger: Logger | undefined
+
+/**
+ * Get the default logger instance.
+ * Lazily creates the logger to avoid circular dependencies during module initialization.
+ * Reuses the same instance across calls.
+ *
+ * @returns Shared default logger instance
+ *
+ * @example
+ * ```ts
+ * import { getDefaultLogger } from '@socketsecurity/lib/logger'
+ *
+ * const logger = getDefaultLogger()
+ * logger.log('Application started')
+ * logger.success('Configuration loaded')
+ * ```
+ */
+export function getDefaultLogger(): Logger {
+  if (_logger === undefined) {
+    _logger = new Logger()
+  }
+  return _logger
+}
+
 /**
  * Default logger instance for the application.
  *
- * A pre-configured `Logger` instance that uses the standard `process.stdout`
- * and `process.stderr` streams. This is the recommended logger to import
- * and use throughout your application.
+ * @deprecated Use `getDefaultLogger()` function instead for better tree-shaking and to avoid circular dependencies.
  *
  * @example
  * ```typescript
+ * // Old (deprecated):
  * import { logger } from '@socketsecurity/lib'
- *
  * logger.log('Application started')
- * logger.success('Configuration loaded')
- * logger.indent()
- * logger.log('Using port 3000')
- * logger.dedent()
+ *
+ * // New (recommended):
+ * import { getDefaultLogger } from '@socketsecurity/lib/logger'
+ * const logger = getDefaultLogger()
+ * logger.log('Application started')
  * ```
  */
 export const logger = new Logger()
