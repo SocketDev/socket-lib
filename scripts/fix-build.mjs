@@ -1,6 +1,6 @@
 /**
  * @fileoverview Orchestrates all post-build fix scripts.
- * Runs generate-package-exports, fix-commonjs-exports, and fix-external-imports in sequence.
+ * Runs generate-package-exports and fix-external-imports in sequence.
  */
 
 import { isQuiet } from './utils/flags.mjs'
@@ -28,10 +28,7 @@ async function main() {
       args: ['scripts/generate-package-exports.mjs', ...fixArgs],
       command: 'node',
     },
-    {
-      args: ['scripts/fix-commonjs-exports.mjs', ...fixArgs],
-      command: 'node',
-    },
+    // fix-commonjs-exports no longer needed - unminified esbuild output is ESM-compatible
     {
       args: ['scripts/fix-external-imports.mjs', ...fixArgs],
       command: 'node',
