@@ -2,9 +2,9 @@ name: 🚀 CI Pipeline
 
 # Optimized CI with:
 # - Separate lint job (1x instead of 6x)
-# - Cached build artifacts (5 rebuilds eliminated)
+# - Separate build verification job
 # - Parallel job execution
-# - Smart test runner with change detection
+# - pnpm dependency caching via setup-node
 
 on:
   push:
@@ -70,14 +70,6 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      - name: Cache build artifacts
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            dist
-            node_modules
-          key: build-${{ github.sha }}-${{ runner.os }}
-
   # Test matrix - reuses build artifacts (main test suite)
   test:
     name: Test
@@ -104,26 +96,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: 'pnpm'
 
-      - name: Restore build artifacts (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            dist
-            node_modules
-          key: build-${{ github.sha }}-Linux
-          fail-on-cache-miss: true
-
-      - name: Restore build artifacts (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: dist
-          key: build-${{ github.sha }}-Linux
-          fail-on-cache-miss: true
-
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run main tests
@@ -150,14 +123,8 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Restore build artifacts
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            dist
-            node_modules
-          key: build-${{ github.sha }}-Linux
-          fail-on-cache-miss: true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run isolated tests
         run: pnpm exec vitest --config .config/vitest.config.isolated.mts run
@@ -183,14 +150,8 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Restore build artifacts
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            dist
-            node_modules
-          key: build-${{ github.sha }}-${{ runner.os }}
-          fail-on-cache-miss: true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run type check
         run: pnpm run check
