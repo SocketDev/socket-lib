@@ -13,15 +13,20 @@ import {
   withTheme,
   withThemeSync,
 } from '@socketsecurity/lib/themes'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 describe('themes', () => {
+  // Reset theme to default after each test to ensure isolation
+  afterEach(() => {
+    setTheme('socket')
+  })
+
   describe('THEMES', () => {
     it('should have all default themes', () => {
       expect(THEMES).toHaveProperty('socket')
-      expect(THEMES).toHaveProperty('coana')
-      expect(THEMES).toHaveProperty('socket-firewall')
-      expect(THEMES).toHaveProperty('socket-cli-python')
+      expect(THEMES).toHaveProperty('sunset')
+      expect(THEMES).toHaveProperty('brick')
+      expect(THEMES).toHaveProperty('jungle')
       expect(THEMES).toHaveProperty('ultra')
     })
 
@@ -39,13 +44,13 @@ describe('themes', () => {
 
   describe('setTheme / getTheme', () => {
     it('should set and get theme', () => {
-      setTheme('coana')
-      expect(getTheme().name).toBe('coana')
+      setTheme('sunset')
+      expect(getTheme().name).toBe('sunset')
     })
 
     it('should set theme by object', () => {
-      setTheme(THEMES['socket-firewall'])
-      expect(getTheme().name).toBe('socket-firewall')
+      setTheme(THEMES['brick'])
+      expect(getTheme().name).toBe('brick')
     })
 
     it('should default to socket theme', () => {
@@ -55,8 +60,8 @@ describe('themes', () => {
 
   describe('withTheme', () => {
     it('should apply theme for async operation', async () => {
-      const result = await withTheme('coana', async () => {
-        expect(getTheme().name).toBe('coana')
+      const result = await withTheme('sunset', async () => {
+        expect(getTheme().name).toBe('sunset')
         return 42
       })
 
@@ -67,7 +72,7 @@ describe('themes', () => {
 
     it('should restore theme even if operation throws', async () => {
       await expect(
-        withTheme('coana', async () => {
+        withTheme('sunset', async () => {
           throw new Error('test error')
         }),
       ).rejects.toThrow('test error')
@@ -76,23 +81,23 @@ describe('themes', () => {
     })
 
     it('should isolate themes in nested async contexts', async () => {
-      await withTheme('coana', async () => {
-        expect(getTheme().name).toBe('coana')
+      await withTheme('sunset', async () => {
+        expect(getTheme().name).toBe('sunset')
 
         await withTheme('ultra', async () => {
           expect(getTheme().name).toBe('ultra')
         })
 
         // Theme automatically restored by AsyncLocalStorage
-        expect(getTheme().name).toBe('coana')
+        expect(getTheme().name).toBe('sunset')
       })
     })
   })
 
   describe('withThemeSync', () => {
     it('should apply theme for sync operation', () => {
-      const result = withThemeSync('coana', () => {
-        expect(getTheme().name).toBe('coana')
+      const result = withThemeSync('sunset', () => {
+        expect(getTheme().name).toBe('sunset')
         return 42
       })
 
@@ -103,7 +108,7 @@ describe('themes', () => {
 
     it('should restore theme even if operation throws', () => {
       expect(() => {
-        withThemeSync('coana', () => {
+        withThemeSync('sunset', () => {
           throw new Error('test error')
         })
       }).toThrow('test error')
@@ -119,7 +124,7 @@ describe('themes', () => {
     })
 
     it('should resolve secondary color reference', () => {
-      const resolved = resolveColor('secondary', THEMES.coana.colors)
+      const resolved = resolveColor('secondary', THEMES.sunset.colors)
       expect(resolved).toEqual([50, 150, 200])
     })
 
@@ -154,7 +159,7 @@ describe('themes', () => {
       })
 
       expect(extended.colors.primary).toEqual([255, 100, 200])
-      expect(extended.colors.success).toBe('green') // Preserved
+      expect(extended.colors.success).toBe('greenBright') // Preserved
     })
 
     it('should extend theme with new name', () => {

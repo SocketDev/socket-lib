@@ -47,12 +47,12 @@ export const SOCKET_THEME: Theme = {
 }
 
 /**
- * Coana — Analytical intelligence.
- * Crisp azure tones for precision and clarity in code analysis.
+ * Sunset — Crisp azure.
+ * Clean analytical theme with precise blue tones.
  */
-export const COANA_THEME: Theme = {
-  name: 'coana',
-  displayName: 'Coana',
+export const SUNSET_THEME: Theme = {
+  name: 'sunset',
+  displayName: 'Sunset',
   colors: {
     primary: [100, 200, 255],
     secondary: [50, 150, 200],
@@ -73,18 +73,18 @@ export const COANA_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Analytical theme with crisp azure for precision',
+    description: 'Crisp azure theme for precision and clarity',
     version: '1.0.0',
   },
 }
 
 /**
- * Socket Firewall — Vigilant protection.
- * Warm ember tones balanced with cool accents for security with confidence.
+ * Brick — Solid warmth.
+ * Rich terracotta and ember tones for grounded confidence.
  */
-export const FIREWALL_THEME: Theme = {
-  name: 'socket-firewall',
-  displayName: 'Socket Firewall',
+export const BRICK_THEME: Theme = {
+  name: 'brick',
+  displayName: 'Brick',
   colors: {
     primary: [255, 100, 50],
     secondary: [255, 150, 100],
@@ -111,18 +111,18 @@ export const FIREWALL_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Protective theme with warm ember and balanced contrast',
+    description: 'Solid theme with rich terracotta and ember warmth',
     version: '1.0.0',
   },
 }
 
 /**
- * Socket Python — Elegant simplicity.
- * Steel blue with golden accents, embodying Python's philosophy of clarity.
+ * Jungle — Steel elegance.
+ * Python-inspired steel blue with golden accents.
  */
-export const PYTHON_THEME: Theme = {
-  name: 'socket-cli-python',
-  displayName: 'Socket Python',
+export const JUNGLE_THEME: Theme = {
+  name: 'jungle',
+  displayName: 'Jungle',
   colors: {
     primary: [70, 130, 180],
     secondary: [255, 215, 0],
@@ -143,7 +143,7 @@ export const PYTHON_THEME: Theme = {
     },
   },
   meta: {
-    description: 'Python-inspired theme with steel blue and golden harmony',
+    description: 'Elegant theme with steel blue and golden harmony',
     version: '1.0.0',
   },
 }
@@ -191,9 +191,9 @@ export const ULTRA_THEME: Theme = {
 export const THEMES = {
   __proto__: null,
   socket: SOCKET_THEME,
-  coana: COANA_THEME,
-  'socket-firewall': FIREWALL_THEME,
-  'socket-cli-python': PYTHON_THEME,
+  sunset: SUNSET_THEME,
+  brick: BRICK_THEME,
+  jungle: JUNGLE_THEME,
   ultra: ULTRA_THEME,
 } as const
 

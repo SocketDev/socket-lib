@@ -37,7 +37,7 @@ describe('LOG_SYMBOLS', () => {
     expect(initialSuccess).toBeTruthy()
 
     // Change theme
-    setTheme(THEMES.coana)
+    setTheme(THEMES.sunset)
 
     // Symbols should update
     const updatedSuccess = LOG_SYMBOLS.success
