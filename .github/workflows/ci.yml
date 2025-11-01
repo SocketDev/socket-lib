@@ -110,7 +110,7 @@ jobs:
           path: |
             dist
             node_modules
-          key: build-${{ github.sha }}-ubuntu-latest
+          key: build-${{ github.sha }}-Linux
           fail-on-cache-miss: true
 
       - name: Install dependencies (Windows)
