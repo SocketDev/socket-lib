@@ -14,9 +14,13 @@
       "pacote": ["../src/external/pacote"],
       "@socketsecurity/lib": ["../../socket-lib/dist/index.d.ts"],
       "@socketsecurity/lib/*": ["../../socket-lib/dist/*"],
-      "@socketsecurity/registry": ["../../socket-registry/registry/dist/index.d.ts"],
+      "@socketsecurity/registry": [
+        "../../socket-registry/registry/dist/index.d.ts"
+      ],
       "@socketsecurity/registry/*": ["../../socket-registry/registry/dist/*"],
-      "@socketregistry/packageurl-js": ["../../socket-packageurl-js/dist/index.d.ts"],
+      "@socketregistry/packageurl-js": [
+        "../../socket-packageurl-js/dist/index.d.ts"
+      ],
       "@socketregistry/packageurl-js/*": ["../../socket-packageurl-js/dist/*"],
       "@socketsecurity/sdk": ["../../socket-sdk-js/dist/index.d.ts"],
       "@socketsecurity/sdk/*": ["../../socket-sdk-js/dist/*"]
