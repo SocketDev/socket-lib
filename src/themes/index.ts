@@ -1,50 +1,50 @@
 /**
- * @fileoverview Theme system for Socket libraries.
- * Provides unified theming across spinners, logger, prompts, and links.
+ * @fileoverview Elegant theming system for Socket libraries.
+ * Unified visual language across spinners, loggers, prompts, and links.
  *
  * @example
  * ```ts
- * import { setTheme, THEMES, Spinner } from '@socketsecurity/lib'
+ * import { setTheme, THEMES } from '@socketsecurity/lib/themes'
  *
  * // Set global theme
  * setTheme('socket-firewall')
- *
- * // Create themed spinner
- * const spinner = Spinner({ text: 'Loading...' })
- * spinner.start()  // Uses firewall theme (orange)
  * ```
  *
  * @example
  * ```ts
- * import { withTheme, createTheme } from '@socketsecurity/lib/themes'
+ * import { withTheme } from '@socketsecurity/lib/themes'
  *
- * // Scoped theme usage
+ * // Scoped theme context
  * await withTheme('ultra', async () => {
- *   // All operations use ultra theme (rainbow)
+ *   // All operations inherit Ultra theme
  * })
+ * ```
  *
- * // Custom theme
+ * @example
+ * ```ts
+ * import { createTheme } from '@socketsecurity/lib/themes'
+ *
+ * // Custom theme creation
  * const myTheme = createTheme({
- *   name: 'my-theme',
- *   displayName: 'My Theme',
+ *   name: 'custom',
+ *   displayName: 'Custom Theme',
  *   colors: {
  *     primary: [255, 100, 200],
- *     success: 'green',
- *     error: 'red',
- *     warning: 'yellow',
- *     info: 'blue',
- *     step: 'cyan',
+ *     success: 'greenBright',
+ *     error: 'redBright',
+ *     warning: 'yellowBright',
+ *     info: 'blueBright',
+ *     step: 'cyanBright',
  *     text: 'white',
  *     textDim: 'gray',
- *     link: 'cyan',
+ *     link: 'cyanBright',
  *     prompt: 'primary'
  *   }
  * })
- * setTheme(myTheme)
  * ```
  */
 
-// Re-export types
+// Type system
 export type {
   ColorReference,
   Theme,
@@ -53,7 +53,7 @@ export type {
   ThemeMeta,
 } from './types'
 
-// Re-export theme definitions
+// Curated themes
 export {
   COANA_THEME,
   FIREWALL_THEME,
@@ -64,7 +64,7 @@ export {
   type ThemeName,
 } from './themes'
 
-// Re-export context management
+// Context management
 export {
   getTheme,
   onThemeChange,
@@ -74,7 +74,7 @@ export {
   type ThemeChangeListener,
 } from './context'
 
-// Re-export utilities
+// Composition utilities
 export {
   createTheme,
   extendTheme,

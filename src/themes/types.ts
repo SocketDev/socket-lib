@@ -1,6 +1,6 @@
 /**
- * @fileoverview Theme type definitions for Socket libraries.
- * Provides type-safe theming across spinners, logger, prompts, and links.
+ * @fileoverview Elegant theme type system.
+ * Type-safe theming for spinners, loggers, prompts, and links.
  */
 
 import type { ColorValue } from '../spinner'
@@ -8,8 +8,8 @@ import type { ShimmerDirection } from '../effects/text-shimmer'
 import type { SpinnerStyle } from '../spinner'
 
 /**
- * Color reference that can be a direct color value or a reference to a theme color.
- * Special values: 'primary', 'secondary', 'inherit', 'rainbow'
+ * Color reference — direct value or semantic keyword.
+ * Keywords: 'primary', 'secondary', 'inherit', 'rainbow'
  */
 export type ColorReference =
   | ColorValue
@@ -19,91 +19,91 @@ export type ColorReference =
   | 'rainbow'
 
 /**
- * Theme color palette defining all semantic and UI colors.
+ * Theme color palette — semantic colors for visual harmony.
  */
 export type ThemeColors = {
-  /** Primary brand color */
+  /** Primary brand identity */
   primary: ColorValue
-  /** Secondary/accent brand color */
+  /** Secondary accent (optional) */
   secondary?: ColorValue | undefined
 
-  /** Success/completion color (✓) */
+  /** Success indicator ✓ */
   success: ColorValue
-  /** Error/failure color (✗) */
+  /** Error indicator ✗ */
   error: ColorValue
-  /** Warning/caution color (⚠) */
+  /** Warning indicator ⚠ */
   warning: ColorValue
-  /** Information color (ℹ) */
+  /** Information indicator ℹ */
   info: ColorValue
-  /** Step/progress color (→) */
+  /** Progress indicator → */
   step: ColorValue
 
-  /** Default text color */
+  /** Primary text */
   text: ColorValue
-  /** Dimmed/secondary text color */
+  /** Dimmed text */
   textDim: ColorValue
-  /** Hyperlink color (can reference 'primary', 'secondary') */
+  /** Hyperlinks */
   link: ColorReference
-  /** Interactive prompt color (can reference 'primary', 'secondary') */
+  /** Interactive prompts */
   prompt: ColorReference
 }
 
 /**
- * Theme effects configuration for animations and visual enhancements.
+ * Theme effects — animations and visual enhancements.
  */
 export type ThemeEffects = {
-  /** Spinner-specific configuration */
+  /** Spinner configuration */
   spinner?: {
-    /** Spinner color (can reference theme colors via 'primary'/'secondary') */
+    /** Color (supports theme references) */
     color?: ColorReference | undefined
-    /** Spinner animation style name or definition */
+    /** Animation style */
     style?: SpinnerStyle | string | undefined
   }
 
-  /** Shimmer effect configuration */
+  /** Shimmer configuration */
   shimmer?: {
-    /** Enable shimmer animations */
+    /** Enable shimmer */
     enabled?: boolean | undefined
-    /** Shimmer color (single, gradient, or special keywords) */
+    /** Color (single, gradient, or keyword) */
     color?: ColorReference | ColorValue[] | undefined
-    /** Shimmer direction */
+    /** Direction */
     direction?: ShimmerDirection | undefined
-    /** Animation speed (steps per frame) */
+    /** Speed (steps per frame) */
     speed?: number | undefined
   }
 
-  /** Pulse animation configuration */
+  /** Pulse configuration */
   pulse?: {
-    /** Pulse animation speed in milliseconds */
+    /** Speed (milliseconds) */
     speed?: number | undefined
   }
 }
 
 /**
- * Theme metadata (optional descriptive information).
+ * Theme metadata — descriptive information.
  */
 export type ThemeMeta = {
-  /** Human-readable description of the theme */
+  /** Description */
   description?: string | undefined
-  /** Theme author/maintainer */
+  /** Author */
   author?: string | undefined
-  /** Theme version */
+  /** Version */
   version?: string | undefined
 }
 
 /**
- * Complete theme definition.
+ * Theme definition — complete visual identity.
  */
 export type Theme = {
-  /** Unique theme identifier (kebab-case) */
+  /** Unique identifier (kebab-case) */
   name: string
-  /** Human-readable display name */
+  /** Display name */
   displayName: string
 
   /** Color palette */
   colors: ThemeColors
 
-  /** Visual effects configuration (optional) */
+  /** Visual effects (optional) */
   effects?: ThemeEffects | undefined
 
   /** Metadata (optional) */
