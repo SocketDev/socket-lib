@@ -96,8 +96,10 @@ export interface DownloadPackageResult {
 export interface DlxPackageOptions {
   /**
    * Package to install (e.g., '@cyclonedx/cdxgen@10.0.0').
+   * Aligns with npx --package flag.
    */
   package: string
+
   /**
    * Binary name to execute (optional - auto-detected in most cases).
    *
@@ -117,10 +119,31 @@ export interface DlxPackageOptions {
    * { package: 'some-tool', binaryName: 'specific-tool' }
    */
   binaryName?: string | undefined
+
   /**
    * Force reinstallation even if package exists.
+   * Aligns with npx --yes/-y flag behavior.
    */
   force?: boolean | undefined
+
+  /**
+   * Skip confirmation prompts (auto-approve).
+   * Aligns with npx --yes/-y flag.
+   */
+  yes?: boolean | undefined
+
+  /**
+   * Suppress output (quiet mode).
+   * Aligns with npx --quiet/-q and pnpm --silent/-s flags.
+   */
+  quiet?: boolean | undefined
+
+  /**
+   * Shell command to execute in package context.
+   * Aligns with npx --call flag.
+   */
+  call?: string | undefined
+
   /**
    * Additional spawn options for the execution.
    */
@@ -449,6 +472,7 @@ export async function downloadPackage(
     binaryName,
     force: userForce,
     package: packageSpec,
+    yes,
   } = {
     __proto__: null,
     ...options,
@@ -458,11 +482,14 @@ export async function downloadPackage(
   const { name: packageName, version: packageVersion } =
     parsePackageSpec(packageSpec)
 
-  // Auto-force for version ranges to get latest within range.
-  // User can still override with explicit force: false if they want cache.
+  // Determine force behavior:
+  // 1. Explicit force takes precedence
+  // 2. --yes flag implies force (auto-approve/skip prompts)
+  // 3. Version ranges auto-force to get latest
   const isVersionRange =
     packageVersion !== undefined && rangeOperatorsRegExp.test(packageVersion)
-  const force = userForce !== undefined ? userForce : isVersionRange
+  const force =
+    userForce !== undefined ? userForce : yes === true ? true : isVersionRange
 
   // Build full package spec for installation.
   const fullPackageSpec = packageVersion
