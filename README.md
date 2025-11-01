@@ -6,7 +6,7 @@
 
 **Core infrastructure library for Socket.dev security tools** — utilities, constants, and helpers with zero dependencies.
 
-## 🎯 Quick Start
+## Quick Start
 
 ```bash
 pnpm add @socketsecurity/lib
@@ -28,19 +28,19 @@ spinner.stop()
 
 ```
 @socketsecurity/lib
-├── 🎨 Visual Effects       ← Spinners, shimmer, themes, logger
-├── 📁 File System          ← fs, paths, globs, temp files
-├── 📦 Package Management   ← npm, pnpm, yarn utilities
-├── 🔧 Process & Spawn      ← Safe process spawning, IPC
-├── 🌍 Environment          ← 68 typed env getters (CI, paths, etc)
-├── 🎯 Constants            ← Node.js, npm, platform constants
-├── 🧩 Utilities            ← Arrays, objects, strings, promises
-└── 📝 Types                ← Full TypeScript definitions
+├── Visual Effects       → Spinners, shimmer, themes, logger
+├── File System          → fs, paths, globs, temp files
+├── Package Management   → npm, pnpm, yarn utilities
+├── Process & Spawn      → Safe process spawning, IPC
+├── Environment          → 68 typed env getters (CI, paths, etc)
+├── Constants            → Node.js, npm, platform constants
+├── Utilities            → Arrays, objects, strings, promises
+└── Types                → Full TypeScript definitions
 ```
 
 ## 💡 Key Features
 
-### 🎨 Visual Effects
+### Visual Effects
 
 **Themed spinners and text effects:**
 
@@ -57,7 +57,7 @@ spinner.start()
 
 👉 [**Theme System Docs**](./docs/themes.md)
 
-### 📁 File System
+### File System
 
 **Safe, typed file operations:**
 
@@ -68,7 +68,7 @@ const pkg = await readJsonFile<PackageJson>('./package.json')
 await writeJsonFile('./output.json', { data: pkg })
 ```
 
-### 📦 Package Management
+### Package Management
 
 **Parse and validate package specs:**
 
@@ -79,7 +79,7 @@ const spec = parsePackageSpec('lodash@^4.17.0')
 // { name: 'lodash', version: '^4.17.0', type: 'range', ... }
 ```
 
-### 🌍 Environment Variables
+### Environment Variables
 
 **68 typed environment getters:**
 
@@ -93,7 +93,7 @@ if (getCI()) {
 }
 ```
 
-### 🎯 Constants
+### Constants
 
 **Access platform and Node.js constants:**
 
@@ -107,7 +107,7 @@ import {
 import { DARWIN, WIN32 } from '@socketsecurity/lib/constants/platform'
 ```
 
-## 📚 Common Patterns
+## Common Patterns
 
 ### Spinner with Progress
 
@@ -156,7 +156,7 @@ const result = await timeout(fetchData(), 5000)
 const data = await retry(() => fetchData(), { maxAttempts: 3 })
 ```
 
-## 🗂️ Module Organization
+## Module Organization
 
 **120+ granular exports** organized by category:
 
@@ -198,7 +198,7 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
   └─ utils         → Color resolution, theme creation
 ```
 
-## 🎓 Documentation
+## Documentation
 
 | Doc | Description |
 |-----|-------------|
@@ -207,7 +207,7 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
 | [**Build Architecture**](./docs/build.md) | Vendored dependencies, build system |
 | [**CLAUDE.md**](./CLAUDE.md) | Coding standards and patterns |
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -230,7 +230,7 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
 └─────────────────────────────────────────────────────┘
 ```
 
-## 🛠️ Development
+## Development
 
 ```bash
 # Setup
@@ -252,7 +252,7 @@ pnpm run lint        # Lint code
 pnpm run fix         # Auto-fix issues
 ```
 
-## 📊 Stats
+## Stats
 
 - **183** TypeScript modules
 - **120+** granular exports
@@ -261,7 +261,7 @@ pnpm run fix         # Auto-fix issues
 - **4600+** tests passing
 - **Zero** runtime dependencies
 
-## 🤝 Contributing
+## Contributing
 
 See [CLAUDE.md](./CLAUDE.md) for:
 - Code style and patterns
@@ -269,7 +269,7 @@ See [CLAUDE.md](./CLAUDE.md) for:
 - Testing guidelines
 - Build system details
 
-## 📄 License
+## License
 
 MIT
 
