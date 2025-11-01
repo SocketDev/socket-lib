@@ -1,14 +1,12 @@
 /**
- * @fileoverview Main entry point for Socket Registry v2.0.
+ * @fileoverview Main entry point for @socketsecurity/lib.
  * Clean, organized exports for better developer experience.
  */
 
-// Direct exports for commonly used items
-// Alias for backward compatibility with GitHub version
-export {
-  SocketRegistry,
-  SocketRegistry as SocketSecurityRegistry,
-} from './packages/registry'
+// Export logger utilities for convenience
+export { getDefaultLogger, Logger, LOG_SYMBOLS } from './logger'
+// Export spinner utilities for convenience
+export { getDefaultSpinner, Spinner } from './spinner'
 // Export types
 export * from './types'
 
@@ -47,4 +45,4 @@ export function getManifestData(ecosystem?: string, packageName?: string) {
 }
 
 // Version export
-export const version = '2.0.0'
+export const version = '3.0.1'
