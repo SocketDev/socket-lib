@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
 import { printHeader } from './utils/helpers.mjs'
 import { logger } from './utils/logger.mjs'
@@ -34,6 +35,13 @@ process.on('unhandledRejection', (reason, _promise) => {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
+
+// Detect if external Socket packages are available for type checking
+const localAliases = getLocalPackageAliases(rootPath)
+const hasExternalPackages = Object.keys(localAliases).length > 0
+const tsconfigPath = hasExternalPackages
+  ? '.config/tsconfig.external-aliases.json'
+  : '.config/tsconfig.check.json'
 
 // Track running processes for cleanup
 const runningProcesses = new Set()
@@ -166,18 +174,14 @@ async function runCheck() {
 
   // Run TypeScript check
   spinner.start('Checking TypeScript...')
-  exitCode = await runCommand(
-    'tsgo',
-    ['--noEmit', '-p', '.config/tsconfig.check.json'],
-    {
-      stdio: 'pipe',
-    },
-  )
+  exitCode = await runCommand('tsgo', ['--noEmit', '-p', tsconfigPath], {
+    stdio: 'pipe',
+  })
   if (exitCode !== 0) {
     spinner.stop()
     logger.error('TypeScript check failed')
     // Re-run with output to show errors
-    await runCommand('tsgo', ['--noEmit', '-p', '.config/tsconfig.check.json'])
+    await runCommand('tsgo', ['--noEmit', '-p', tsconfigPath])
     return exitCode
   }
   spinner.stop()
