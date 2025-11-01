@@ -4,40 +4,14 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
-import os from 'node:os'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import type { DlxPackageOptions, DlxPackageResult } from '../src/dlx-package'
+import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
 describe('dlx-package', () => {
-  let tempDir: string
-  let originalSocketHome: string | undefined
-
-  beforeEach(() => {
-    // Create temp directory for testing.
-    tempDir = path.join(os.tmpdir(), `dlx-test-${Date.now()}`)
-    mkdirSync(tempDir, { recursive: true })
-
-    // Override Socket home for testing.
-    originalSocketHome = process.env['SOCKET_HOME']
-    process.env['SOCKET_HOME'] = tempDir
-  })
-
-  afterEach(() => {
-    // Cleanup.
-    if (existsSync(tempDir)) {
-      rmSync(tempDir, { recursive: true, force: true })
-    }
-    // Restore original env.
-    if (originalSocketHome === undefined) {
-      delete process.env['SOCKET_HOME']
-    } else {
-      process.env['SOCKET_HOME'] = originalSocketHome
-    }
-  })
-
   describe('generatePackageCacheKey', () => {
     it('should generate consistent 16-char hex hash', () => {
       const spec = 'cowsay@1.6.0'
@@ -120,70 +94,78 @@ describe('dlx-package', () => {
   })
 
   describe('path construction (cross-platform)', () => {
-    it('should construct normalized paths on current platform', () => {
-      const dlxDir = path.join(tempDir, '_dlx')
-      const hash = '0a80f0fb114540fe'
-      const packageDir = path.join(dlxDir, hash)
+    it('should construct normalized paths on current platform', async () => {
+      await runWithTempDir(async tempDir => {
+        const dlxDir = path.join(tempDir, '_dlx')
+        const hash = '0a80f0fb114540fe'
+        const packageDir = path.join(dlxDir, hash)
 
-      // Verify path uses platform-specific separators.
-      if (process.platform === 'win32') {
-        expect(packageDir).toContain('\\')
-      } else {
-        expect(packageDir).toContain('/')
-      }
+        // Verify path uses platform-specific separators.
+        if (process.platform === 'win32') {
+          expect(packageDir).toContain('\\')
+        } else {
+          expect(packageDir).toContain('/')
+        }
 
-      // Verify path is absolute.
-      expect(path.isAbsolute(packageDir)).toBe(true)
+        // Verify path is absolute.
+        expect(path.isAbsolute(packageDir)).toBe(true)
+      }, 'dlx-pkg-path-')
     })
 
-    it('should handle scoped package names in paths', () => {
-      const packageDir = path.join(tempDir, 'node_modules')
-      const scopedName = '@cyclonedx/cdxgen'
+    it('should handle scoped package names in paths', async () => {
+      await runWithTempDir(async tempDir => {
+        const packageDir = path.join(tempDir, 'node_modules')
+        const scopedName = '@cyclonedx/cdxgen'
 
-      // Node.js path.join handles forward slashes in package names.
-      const installedDir = path.join(packageDir, scopedName)
+        // Node.js path.join handles forward slashes in package names.
+        const installedDir = path.join(packageDir, scopedName)
 
-      // Verify path is constructed correctly.
-      expect(installedDir).toContain(packageDir)
-      expect(installedDir).toContain('cyclonedx')
-      expect(installedDir).toContain('cdxgen')
+        // Verify path is constructed correctly.
+        expect(installedDir).toContain(packageDir)
+        expect(installedDir).toContain('cyclonedx')
+        expect(installedDir).toContain('cdxgen')
 
-      // On Windows, forward slash in package name becomes backslash.
-      if (process.platform === 'win32') {
-        expect(installedDir).toContain('\\@cyclonedx\\cdxgen')
-      } else {
-        expect(installedDir).toContain('/@cyclonedx/cdxgen')
-      }
+        // On Windows, forward slash in package name becomes backslash.
+        if (process.platform === 'win32') {
+          expect(installedDir).toContain('\\@cyclonedx\\cdxgen')
+        } else {
+          expect(installedDir).toContain('/@cyclonedx/cdxgen')
+        }
+      }, 'dlx-pkg-scoped-')
     })
 
-    it('should handle binary paths from package.json', () => {
-      const installedDir = path.join(tempDir, 'node_modules', 'pkg')
-      const binPath = './bin/cli.js' // From package.json (always forward slashes).
+    it('should handle binary paths from package.json', async () => {
+      await runWithTempDir(async tempDir => {
+        const installedDir = path.join(tempDir, 'node_modules', 'pkg')
+        const binPath = './bin/cli.js' // From package.json (always forward slashes).
 
-      // path.join normalizes forward slashes to platform separator.
-      const fullBinPath = path.join(installedDir, binPath)
+        // path.join normalizes forward slashes to platform separator.
+        const fullBinPath = path.join(installedDir, binPath)
 
-      // Verify path is constructed correctly.
-      expect(fullBinPath).toContain('bin')
-      expect(fullBinPath).toContain('cli.js')
+        // Verify path is constructed correctly.
+        expect(fullBinPath).toContain('bin')
+        expect(fullBinPath).toContain('cli.js')
 
-      if (process.platform === 'win32') {
-        expect(fullBinPath).toContain('\\bin\\cli.js')
-      } else {
-        expect(fullBinPath).toContain('/bin/cli.js')
-      }
+        if (process.platform === 'win32') {
+          expect(fullBinPath).toContain('\\bin\\cli.js')
+        } else {
+          expect(fullBinPath).toContain('/bin/cli.js')
+        }
+      }, 'dlx-pkg-binpath-')
     })
 
-    it('should normalize mixed separators in paths', () => {
-      const basePath = tempDir
-      const relativePath = 'node_modules/@scope/pkg/bin/cli.js'
+    it('should normalize mixed separators in paths', async () => {
+      await runWithTempDir(async tempDir => {
+        const basePath = tempDir
+        const relativePath = 'node_modules/@scope/pkg/bin/cli.js'
 
-      // path.join handles mixed separators.
-      const fullPath = path.join(basePath, relativePath)
+        // path.join handles mixed separators.
+        const fullPath = path.join(basePath, relativePath)
 
-      expect(path.isAbsolute(fullPath)).toBe(true)
-      expect(fullPath).toContain('node_modules')
-      expect(fullPath).toContain('cli.js')
+        expect(path.isAbsolute(fullPath)).toBe(true)
+        expect(fullPath).toContain('node_modules')
+        expect(fullPath).toContain('cli.js')
+      }, 'dlx-pkg-mixed-')
     })
   })
 
@@ -223,15 +205,6 @@ describe('dlx-package', () => {
       }
 
       expect(options.quiet).toBe(true)
-    })
-
-    it('should accept call option (CLI-style, reserved)', () => {
-      const options: DlxPackageOptions = {
-        call: 'ls -la',
-        package: 'cowsay@1.6.0',
-      }
-
-      expect(options.call).toBe('ls -la')
     })
 
     it('should accept spawn options', () => {
@@ -282,31 +255,35 @@ describe('dlx-package', () => {
       expect(typeof isWindows).toBe('boolean')
     })
 
-    it('should handle binary permissions on Unix', () => {
+    it('should handle binary permissions on Unix', async () => {
       if (process.platform === 'win32') {
         // Skip on Windows.
         return
       }
 
-      // Create a mock binary file.
-      const binPath = path.join(tempDir, 'test-binary')
-      writeFileSync(binPath, '#!/bin/bash\necho "test"')
+      await runWithTempDir(async tempDir => {
+        // Create a mock binary file.
+        const binPath = path.join(tempDir, 'test-binary')
+        writeFileSync(binPath, '#!/bin/bash\necho "test"')
 
-      // Verify file exists.
-      expect(existsSync(binPath)).toBe(true)
+        // Verify file exists.
+        expect(existsSync(binPath)).toBe(true)
+      }, 'dlx-pkg-unix-')
     })
 
-    it('should skip chmod on Windows', () => {
+    it('should skip chmod on Windows', async () => {
       if (process.platform !== 'win32') {
         // Skip on non-Windows.
         return
       }
 
-      // On Windows, chmod is skipped (no-op).
-      const binPath = path.join(tempDir, 'test.bat')
-      writeFileSync(binPath, '@echo off\necho test')
+      await runWithTempDir(async tempDir => {
+        // On Windows, chmod is skipped (no-op).
+        const binPath = path.join(tempDir, 'test.bat')
+        writeFileSync(binPath, '@echo off\necho test')
 
-      expect(existsSync(binPath)).toBe(true)
+        expect(existsSync(binPath)).toBe(true)
+      }, 'dlx-pkg-win-')
     })
   })
 
@@ -406,353 +383,371 @@ describe('dlx-package', () => {
   })
 
   describe('binary resolution with cross-platform wrappers', () => {
-    it('should resolve .cmd wrapper on Windows', () => {
+    it('should resolve .cmd wrapper on Windows', async () => {
       if (process.platform !== 'win32') {
         return
       }
 
-      // Create mock package structure
-      const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
-      mkdirSync(nodeModules, { recursive: true })
+      await runWithTempDir(async tempDir => {
+        // Create mock package structure
+        const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Create package.json with binary
-      const pkgJson = {
-        name: 'test-pkg',
-        version: '1.0.0',
-        bin: {
-          'test-cli': './bin/cli.js',
-        },
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
+        // Create package.json with binary
+        const pkgJson = {
+          name: 'test-pkg',
+          version: '1.0.0',
+          bin: {
+            'test-cli': './bin/cli.js',
+          },
+        }
+        writeFileSync(
+          path.join(nodeModules, 'package.json'),
+          JSON.stringify(pkgJson),
+        )
 
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
 
-      // Create .cmd wrapper (Windows shim created by npm)
-      writeFileSync(
-        path.join(binDir, 'cli.js.cmd'),
-        '@echo off\nnode "%~dp0cli.js" %*',
-      )
+        // Create .cmd wrapper (Windows shim created by npm)
+        writeFileSync(
+          path.join(binDir, 'cli.js.cmd'),
+          '@echo off\nnode "%~dp0cli.js" %*',
+        )
 
-      // Also create the actual JS file
-      writeFileSync(
-        path.join(binDir, 'cli.js'),
-        '#!/usr/bin/env node\nconsole.log("test")',
-      )
+        // Also create the actual JS file
+        writeFileSync(
+          path.join(binDir, 'cli.js'),
+          '#!/usr/bin/env node\nconsole.log("test")',
+        )
 
-      // Binary resolution should find the .cmd wrapper
-      expect(existsSync(path.join(binDir, 'cli.js.cmd'))).toBe(true)
+        // Binary resolution should find the .cmd wrapper
+        expect(existsSync(path.join(binDir, 'cli.js.cmd'))).toBe(true)
+      }, 'dlx-pkg-cmd-')
     })
 
-    it('should resolve .ps1 wrapper on Windows', () => {
+    it('should resolve .ps1 wrapper on Windows', async () => {
       if (process.platform !== 'win32') {
         return
       }
 
-      // Create mock package structure
-      const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
-      mkdirSync(nodeModules, { recursive: true })
+      await runWithTempDir(async tempDir => {
+        // Create mock package structure
+        const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Create package.json
-      const pkgJson = {
-        name: 'test-pkg',
-        version: '1.0.0',
-        bin: './bin/cli.js',
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
-
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
-
-      // Create .ps1 wrapper (PowerShell wrapper)
-      writeFileSync(
-        path.join(binDir, 'cli.js.ps1'),
-        '#!/usr/bin/env pwsh\n$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\nnode "$basedir/cli.js" $args',
-      )
-
-      // Create the actual JS file
-      writeFileSync(
-        path.join(binDir, 'cli.js'),
-        '#!/usr/bin/env node\nconsole.log("test")',
-      )
-
-      // Binary resolution should find the .ps1 wrapper
-      expect(existsSync(path.join(binDir, 'cli.js.ps1'))).toBe(true)
-    })
-
-    it('should resolve .exe binary on Windows', () => {
-      if (process.platform !== 'win32') {
-        return
-      }
-
-      // Create mock package structure
-      const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
-      mkdirSync(nodeModules, { recursive: true })
-
-      // Create package.json
-      const pkgJson = {
-        name: 'test-pkg',
-        version: '1.0.0',
-        bin: './bin/tool',
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
-
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
-
-      // Create .exe binary (native executable)
-      writeFileSync(path.join(binDir, 'tool.exe'), 'MZ\x90\x00') // Minimal PE header
-
-      // Binary resolution should find the .exe
-      expect(existsSync(path.join(binDir, 'tool.exe'))).toBe(true)
-    })
-
-    it('should use bare path on Unix', () => {
-      if (process.platform === 'win32') {
-        return
-      }
-
-      // Create mock package structure
-      const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
-      mkdirSync(nodeModules, { recursive: true })
-
-      // Create package.json
-      const pkgJson = {
-        name: 'test-pkg',
-        version: '1.0.0',
-        bin: './bin/cli',
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
-
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
-
-      // Create bare executable (no wrapper needed on Unix)
-      writeFileSync(
-        path.join(binDir, 'cli'),
-        '#!/usr/bin/env node\nconsole.log("test")',
-      )
-
-      // Binary resolution should use the bare path directly
-      expect(existsSync(path.join(binDir, 'cli'))).toBe(true)
-    })
-
-    it('should handle missing binary error', () => {
-      // Create mock package without bin field
-      const nodeModules = path.join(tempDir, 'node_modules', 'no-bin-pkg')
-      mkdirSync(nodeModules, { recursive: true })
-
-      // Create package.json without bin field
-      const pkgJson = {
-        name: 'no-bin-pkg',
-        version: '1.0.0',
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
-
-      // Reading package.json should work but bin field is missing
-      expect(existsSync(path.join(nodeModules, 'package.json'))).toBe(true)
-      const pkg = JSON.parse(
-        require('node:fs').readFileSync(
+        // Create package.json
+        const pkgJson = {
+          name: 'test-pkg',
+          version: '1.0.0',
+          bin: './bin/cli.js',
+        }
+        writeFileSync(
           path.join(nodeModules, 'package.json'),
-          'utf8',
-        ),
-      )
-      expect(pkg.bin).toBeUndefined()
+          JSON.stringify(pkgJson),
+        )
+
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
+
+        // Create .ps1 wrapper (PowerShell wrapper)
+        writeFileSync(
+          path.join(binDir, 'cli.js.ps1'),
+          '#!/usr/bin/env pwsh\n$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\nnode "$basedir/cli.js" $args',
+        )
+
+        // Create the actual JS file
+        writeFileSync(
+          path.join(binDir, 'cli.js'),
+          '#!/usr/bin/env node\nconsole.log("test")',
+        )
+
+        // Binary resolution should find the .ps1 wrapper
+        expect(existsSync(path.join(binDir, 'cli.js.ps1'))).toBe(true)
+      }, 'dlx-pkg-ps1-')
     })
 
-    it('should auto-select single binary', () => {
-      // Create mock package with single binary
-      const nodeModules = path.join(tempDir, 'node_modules', 'single-bin')
-      mkdirSync(nodeModules, { recursive: true })
+    it('should resolve .exe binary on Windows', async () => {
+      await runWithTempDir(async tempDir => {
+        if (process.platform !== 'win32') {
+          return
+        }
 
-      // Create package.json with single binary
-      const pkgJson = {
-        name: 'single-bin',
-        version: '1.0.0',
-        bin: './cli.js',
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
+        // Create mock package structure
+        const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Create binary
-      writeFileSync(
-        path.join(nodeModules, 'cli.js'),
-        '#!/usr/bin/env node\nconsole.log("test")',
-      )
-
-      // Should auto-select the single binary
-      expect(existsSync(path.join(nodeModules, 'cli.js'))).toBe(true)
-      const pkg = JSON.parse(
-        require('node:fs').readFileSync(
+        // Create package.json
+        const pkgJson = {
+          name: 'test-pkg',
+          version: '1.0.0',
+          bin: './bin/tool',
+        }
+        writeFileSync(
           path.join(nodeModules, 'package.json'),
-          'utf8',
-        ),
-      )
-      expect(typeof pkg.bin).toBe('string')
-      expect(pkg.bin).toBe('./cli.js')
+          JSON.stringify(pkgJson),
+        )
+
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
+
+        // Create .exe binary (native executable)
+        writeFileSync(path.join(binDir, 'tool.exe'), 'MZ\x90\x00') // Minimal PE header
+
+        // Binary resolution should find the .exe
+        expect(existsSync(path.join(binDir, 'tool.exe'))).toBe(true)
+      }, 'dlx-pkg-exe-')
     })
 
-    it('should select correct binary from multiple options', () => {
-      // Create mock package with multiple binaries
-      const nodeModules = path.join(
-        tempDir,
-        'node_modules',
-        '@scope',
-        'multi-bin',
-      )
-      mkdirSync(nodeModules, { recursive: true })
+    it('should use bare path on Unix', async () => {
+      await runWithTempDir(async tempDir => {
+        if (process.platform === 'win32') {
+          return
+        }
 
-      // Create package.json with multiple binaries
-      const pkgJson = {
-        name: '@scope/multi-bin',
-        version: '1.0.0',
-        bin: {
-          'tool-a': './bin/a.js',
-          'tool-b': './bin/b.js',
-          'multi-bin': './bin/main.js',
-        },
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
+        // Create mock package structure
+        const nodeModules = path.join(tempDir, 'node_modules', 'test-pkg')
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
-
-      // Create all binaries
-      writeFileSync(
-        path.join(binDir, 'a.js'),
-        '#!/usr/bin/env node\nconsole.log("a")',
-      )
-      writeFileSync(
-        path.join(binDir, 'b.js'),
-        '#!/usr/bin/env node\nconsole.log("b")',
-      )
-      writeFileSync(
-        path.join(binDir, 'main.js'),
-        '#!/usr/bin/env node\nconsole.log("main")',
-      )
-
-      // Should find the binary matching last segment of package name
-      const pkg = JSON.parse(
-        require('node:fs').readFileSync(
+        // Create package.json
+        const pkgJson = {
+          name: 'test-pkg',
+          version: '1.0.0',
+          bin: './bin/cli',
+        }
+        writeFileSync(
           path.join(nodeModules, 'package.json'),
-          'utf8',
-        ),
-      )
-      expect(pkg.bin['multi-bin']).toBe('./bin/main.js')
+          JSON.stringify(pkgJson),
+        )
 
-      // Test fallback to first binary
-      expect(Object.keys(pkg.bin)[0]).toBe('tool-a')
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
+
+        // Create bare executable (no wrapper needed on Unix)
+        writeFileSync(
+          path.join(binDir, 'cli'),
+          '#!/usr/bin/env node\nconsole.log("test")',
+        )
+
+        // Binary resolution should use the bare path directly
+        expect(existsSync(path.join(binDir, 'cli'))).toBe(true)
+      }, 'dlx-pkg-unix-')
     })
 
-    it('should fallback to first binary when name does not match', () => {
-      // Create mock package with multiple binaries
-      const nodeModules = path.join(tempDir, 'node_modules', 'fallback-pkg')
-      mkdirSync(nodeModules, { recursive: true })
+    it('should handle missing binary error', async () => {
+      await runWithTempDir(async tempDir => {
+        // Create mock package without bin field
+        const nodeModules = path.join(tempDir, 'node_modules', 'no-bin-pkg')
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Create package.json where no binary name matches package name
-      const pkgJson = {
-        name: 'fallback-pkg',
-        version: '1.0.0',
-        bin: {
-          'other-a': './bin/a.js',
-          'other-b': './bin/b.js',
-        },
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
-
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
-
-      // Create binaries
-      writeFileSync(
-        path.join(binDir, 'a.js'),
-        '#!/usr/bin/env node\nconsole.log("a")',
-      )
-      writeFileSync(
-        path.join(binDir, 'b.js'),
-        '#!/usr/bin/env node\nconsole.log("b")',
-      )
-
-      // Should fall back to first binary (other-a)
-      const pkg = JSON.parse(
-        require('node:fs').readFileSync(
+        // Create package.json without bin field
+        const pkgJson = {
+          name: 'no-bin-pkg',
+          version: '1.0.0',
+        }
+        writeFileSync(
           path.join(nodeModules, 'package.json'),
-          'utf8',
-        ),
-      )
-      const firstBinary = Object.keys(pkg.bin)[0]
-      expect(firstBinary).toBe('other-a')
-      expect(pkg.bin[firstBinary]).toBe('./bin/a.js')
+          JSON.stringify(pkgJson),
+        )
+
+        // Reading package.json should work but bin field is missing
+        expect(existsSync(path.join(nodeModules, 'package.json'))).toBe(true)
+        const pkg = JSON.parse(
+          require('node:fs').readFileSync(
+            path.join(nodeModules, 'package.json'),
+            'utf8',
+          ),
+        )
+        expect(pkg.bin).toBeUndefined()
+      }, 'dlx-pkg-missing-')
     })
 
-    it('should prioritize wrapper extensions on Windows', () => {
-      if (process.platform !== 'win32') {
-        return
-      }
+    it('should auto-select single binary', async () => {
+      await runWithTempDir(async tempDir => {
+        // Create mock package with single binary
+        const nodeModules = path.join(tempDir, 'node_modules', 'single-bin')
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Create mock package structure
-      const nodeModules = path.join(tempDir, 'node_modules', 'wrapper-test')
-      mkdirSync(nodeModules, { recursive: true })
+        // Create package.json with single binary
+        const pkgJson = {
+          name: 'single-bin',
+          version: '1.0.0',
+          bin: './cli.js',
+        }
+        writeFileSync(
+          path.join(nodeModules, 'package.json'),
+          JSON.stringify(pkgJson),
+        )
 
-      // Create package.json
-      const pkgJson = {
-        name: 'wrapper-test',
-        version: '1.0.0',
-        bin: './bin/tool',
-      }
-      writeFileSync(
-        path.join(nodeModules, 'package.json'),
-        JSON.stringify(pkgJson),
-      )
+        // Create binary
+        writeFileSync(
+          path.join(nodeModules, 'cli.js'),
+          '#!/usr/bin/env node\nconsole.log("test")',
+        )
 
-      // Create binary directory
-      const binDir = path.join(nodeModules, 'bin')
-      mkdirSync(binDir, { recursive: true })
+        // Should auto-select the single binary
+        expect(existsSync(path.join(nodeModules, 'cli.js'))).toBe(true)
+        const pkg = JSON.parse(
+          require('node:fs').readFileSync(
+            path.join(nodeModules, 'package.json'),
+            'utf8',
+          ),
+        )
+        expect(typeof pkg.bin).toBe('string')
+        expect(pkg.bin).toBe('./cli.js')
+      }, 'dlx-pkg-single-')
+    })
 
-      // Create multiple wrappers - .cmd should be prioritized
-      writeFileSync(path.join(binDir, 'tool.cmd'), '@echo off\nnode tool.js')
-      writeFileSync(
-        path.join(binDir, 'tool.ps1'),
-        '#!/usr/bin/env pwsh\nnode tool.js',
-      )
-      writeFileSync(path.join(binDir, 'tool'), '#!/bin/sh\nnode tool.js')
+    it('should select correct binary from multiple options', async () => {
+      await runWithTempDir(async tempDir => {
+        // Create mock package with multiple binaries
+        const nodeModules = path.join(
+          tempDir,
+          'node_modules',
+          '@scope',
+          'multi-bin',
+        )
+        mkdirSync(nodeModules, { recursive: true })
 
-      // Verify all wrappers exist
-      expect(existsSync(path.join(binDir, 'tool.cmd'))).toBe(true)
-      expect(existsSync(path.join(binDir, 'tool.ps1'))).toBe(true)
-      expect(existsSync(path.join(binDir, 'tool'))).toBe(true)
+        // Create package.json with multiple binaries
+        const pkgJson = {
+          name: '@scope/multi-bin',
+          version: '1.0.0',
+          bin: {
+            'tool-a': './bin/a.js',
+            'tool-b': './bin/b.js',
+            'multi-bin': './bin/main.js',
+          },
+        }
+        writeFileSync(
+          path.join(nodeModules, 'package.json'),
+          JSON.stringify(pkgJson),
+        )
 
-      // Resolution should prefer .cmd (npm's default wrapper format)
-      // This tests the priority order: .cmd, .bat, .ps1, .exe, bare
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
+
+        // Create all binaries
+        writeFileSync(
+          path.join(binDir, 'a.js'),
+          '#!/usr/bin/env node\nconsole.log("a")',
+        )
+        writeFileSync(
+          path.join(binDir, 'b.js'),
+          '#!/usr/bin/env node\nconsole.log("b")',
+        )
+        writeFileSync(
+          path.join(binDir, 'main.js'),
+          '#!/usr/bin/env node\nconsole.log("main")',
+        )
+
+        // Should find the binary matching last segment of package name
+        const pkg = JSON.parse(
+          require('node:fs').readFileSync(
+            path.join(nodeModules, 'package.json'),
+            'utf8',
+          ),
+        )
+        expect(pkg.bin['multi-bin']).toBe('./bin/main.js')
+
+        // Test fallback to first binary
+        expect(Object.keys(pkg.bin)[0]).toBe('tool-a')
+      }, 'dlx-pkg-multi-')
+    })
+
+    it('should fallback to first binary when name does not match', async () => {
+      await runWithTempDir(async tempDir => {
+        // Create mock package with multiple binaries
+        const nodeModules = path.join(tempDir, 'node_modules', 'fallback-pkg')
+        mkdirSync(nodeModules, { recursive: true })
+
+        // Create package.json where no binary name matches package name
+        const pkgJson = {
+          name: 'fallback-pkg',
+          version: '1.0.0',
+          bin: {
+            'other-a': './bin/a.js',
+            'other-b': './bin/b.js',
+          },
+        }
+        writeFileSync(
+          path.join(nodeModules, 'package.json'),
+          JSON.stringify(pkgJson),
+        )
+
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
+
+        // Create binaries
+        writeFileSync(
+          path.join(binDir, 'a.js'),
+          '#!/usr/bin/env node\nconsole.log("a")',
+        )
+        writeFileSync(
+          path.join(binDir, 'b.js'),
+          '#!/usr/bin/env node\nconsole.log("b")',
+        )
+
+        // Should fall back to first binary (other-a)
+        const pkg = JSON.parse(
+          require('node:fs').readFileSync(
+            path.join(nodeModules, 'package.json'),
+            'utf8',
+          ),
+        )
+        const firstBinary = Object.keys(pkg.bin)[0]
+        expect(firstBinary).toBe('other-a')
+        expect(pkg.bin[firstBinary]).toBe('./bin/a.js')
+      }, 'dlx-pkg-fallback-')
+    })
+
+    it('should prioritize wrapper extensions on Windows', async () => {
+      await runWithTempDir(async tempDir => {
+        if (process.platform !== 'win32') {
+          return
+        }
+
+        // Create mock package structure
+        const nodeModules = path.join(tempDir, 'node_modules', 'wrapper-test')
+        mkdirSync(nodeModules, { recursive: true })
+
+        // Create package.json
+        const pkgJson = {
+          name: 'wrapper-test',
+          version: '1.0.0',
+          bin: './bin/tool',
+        }
+        writeFileSync(
+          path.join(nodeModules, 'package.json'),
+          JSON.stringify(pkgJson),
+        )
+
+        // Create binary directory
+        const binDir = path.join(nodeModules, 'bin')
+        mkdirSync(binDir, { recursive: true })
+
+        // Create multiple wrappers - .cmd should be prioritized
+        writeFileSync(path.join(binDir, 'tool.cmd'), '@echo off\nnode tool.js')
+        writeFileSync(
+          path.join(binDir, 'tool.ps1'),
+          '#!/usr/bin/env pwsh\nnode tool.js',
+        )
+        writeFileSync(path.join(binDir, 'tool'), '#!/bin/sh\nnode tool.js')
+
+        // Verify all wrappers exist
+        expect(existsSync(path.join(binDir, 'tool.cmd'))).toBe(true)
+        expect(existsSync(path.join(binDir, 'tool.ps1'))).toBe(true)
+        expect(existsSync(path.join(binDir, 'tool'))).toBe(true)
+
+        // Resolution should prefer .cmd (npm's default wrapper format)
+        // This tests the priority order: .cmd, .bat, .ps1, .exe, bare
+      }, 'dlx-pkg-priority-')
     })
   })
 })

@@ -139,12 +139,6 @@ export interface DlxPackageOptions {
   quiet?: boolean | undefined
 
   /**
-   * Shell command to execute in package context.
-   * Aligns with npx --call flag.
-   */
-  call?: string | undefined
-
-  /**
    * Additional spawn options for the execution.
    */
   spawnOptions?: SpawnOptions | undefined
