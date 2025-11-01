@@ -56,7 +56,7 @@ export type {
 // Curated themes
 export {
   BRICK_THEME,
-  JUNGLE_THEME,
+  LUSH_THEME,
   SOCKET_THEME,
   SUNSET_THEME,
   THEMES,
