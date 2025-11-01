@@ -347,6 +347,16 @@ describe.sequential('cache-with-ttl', () => {
       // Clear only memory cache to force reading from persistent
       await cache.clear({ memoOnly: true })
 
+      // Verify persistent cache has the entries by reading them back
+      // This ensures the persistent writes have completed
+      const mem1FromPersistent = await cache.get<string>('mem1')
+      const mem2FromPersistent = await cache.get<string>('mem2')
+      expect(mem1FromPersistent).toBe('value1')
+      expect(mem2FromPersistent).toBe('value2')
+
+      // Clear memory again after verification reads (which populate memory)
+      await cache.clear({ memoOnly: true })
+
       // Set a new entry (will be in memory only initially)
       await cache.set('mem3', 'value3')
 
