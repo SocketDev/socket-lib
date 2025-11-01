@@ -29,7 +29,7 @@ describe('themes', () => {
     it('should have all default themes', () => {
       expect(THEMES).toHaveProperty('socket')
       expect(THEMES).toHaveProperty('sunset')
-      expect(THEMES).toHaveProperty('brick')
+      expect(THEMES).toHaveProperty('terracotta')
       expect(THEMES).toHaveProperty('lush')
       expect(THEMES).toHaveProperty('ultra')
     })
@@ -53,8 +53,8 @@ describe('themes', () => {
     })
 
     it('should set theme by object', () => {
-      setTheme(THEMES['brick'])
-      expect(getTheme().name).toBe('brick')
+      setTheme(THEMES['terracotta'])
+      expect(getTheme().name).toBe('terracotta')
     })
 
     it('should default to socket theme', () => {
@@ -129,7 +129,7 @@ describe('themes', () => {
 
     it('should resolve secondary color reference', () => {
       const resolved = resolveColor('secondary', THEMES.sunset.colors)
-      expect(resolved).toEqual([50, 150, 200])
+      expect(resolved).toEqual([200, 100, 180])
     })
 
     it('should resolve secondary to primary if not defined', () => {
