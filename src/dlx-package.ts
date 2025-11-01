@@ -288,8 +288,39 @@ async function ensurePackageInstalled(
 }
 
 /**
+ * Resolve binary path with cross-platform wrapper support.
+ * On Windows, checks for .cmd, .bat, .ps1, .exe wrappers in order.
+ * On Unix, uses path directly.
+ *
+ * Aligns with npm/npx binary resolution strategy.
+ */
+function resolveBinaryPath(basePath: string): string {
+  const fs = getFs()
+
+  if (!WIN32) {
+    // Unix: use path directly
+    return basePath
+  }
+
+  // Windows: check for wrappers in priority order
+  // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
+  const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
+
+  for (const ext of extensions) {
+    const testPath = basePath + ext
+    if (fs.existsSync(testPath)) {
+      return testPath
+    }
+  }
+
+  // Fallback to original path if no wrapper found
+  return basePath
+}
+
+/**
  * Find the binary path for an installed package.
  * Intelligently handles packages with single or multiple binaries.
+ * Resolves platform-specific wrappers (.cmd, .ps1, etc.) on Windows.
  */
 function findBinaryPath(
   packageDir: string,
@@ -348,7 +379,10 @@ function findBinaryPath(
     throw new Error(`No binary found for package "${packageName}"`)
   }
 
-  return normalizePath(path.join(installedDir, binPath))
+  const rawPath = normalizePath(path.join(installedDir, binPath))
+
+  // Resolve platform-specific wrapper (Windows .cmd/.ps1/etc.)
+  return resolveBinaryPath(rawPath)
 }
 
 /**
@@ -462,8 +496,11 @@ export async function downloadPackage(
 }
 
 /**
- * Execute a package's binary.
+ * Execute a package's binary with cross-platform shell handling.
  * The package must already be installed (use downloadPackage first).
+ *
+ * On Windows, script files (.bat, .cmd, .ps1) require shell: true.
+ * Matches npm/npx execution behavior.
  *
  * @example
  * ```typescript
@@ -482,5 +519,17 @@ export function executePackage(
   spawnOptions?: SpawnOptions | undefined,
   spawnExtra?: SpawnExtra | undefined,
 ): ReturnType<typeof spawn> {
-  return spawn(binaryPath, args, spawnOptions, spawnExtra)
+  // On Windows, script files (.bat, .cmd, .ps1) require shell: true
+  // because they are not executable on their own and must be run through cmd.exe.
+  // .exe files are actual binaries and don't need shell mode.
+  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
+
+  const finalOptions = needsShell
+    ? {
+        ...spawnOptions,
+        shell: true,
+      }
+    : spawnOptions
+
+  return spawn(binaryPath, args, finalOptions, spawnExtra)
 }
