@@ -1686,21 +1686,6 @@ export function getDefaultLogger(): Logger {
   return _logger
 }
 
-/**
- * Default logger instance for the application.
- *
- * @deprecated Use `getDefaultLogger()` function instead for better tree-shaking and to avoid circular dependencies.
- *
- * @example
- * ```typescript
- * // Old (deprecated):
- * import { logger } from '@socketsecurity/lib'
- * logger.log('Application started')
- *
- * // New (recommended):
- * import { getDefaultLogger } from '@socketsecurity/lib/logger'
- * const logger = getDefaultLogger()
- * logger.log('Application started')
- * ```
- */
-export const logger = new Logger()
+// REMOVED: Deprecated `logger` export
+// Migration: Use getDefaultLogger() instead
+// See: getDefaultLogger() function above

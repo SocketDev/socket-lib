@@ -21,7 +21,7 @@
 import type { ChildProcess, SpawnOptions } from 'child_process'
 import { spawn } from 'child_process'
 import readline from 'readline'
-import { spinner } from '../spinner.js'
+import { getDefaultSpinner } from '../spinner.js'
 import { clearLine } from './clear.js'
 import { write } from './stdout.js'
 
@@ -158,7 +158,7 @@ export function createKeyboardHandler(
       if (mask.verbose) {
         // Stop spinner and show buffered output.
         if (mask.isSpinning) {
-          spinner.stop()
+          getDefaultSpinner().stop()
           mask.isSpinning = false
         }
 
@@ -191,7 +191,7 @@ export function createKeyboardHandler(
         // Clear the buffer and restart spinner.
         mask.outputBuffer = []
         if (!mask.isSpinning) {
-          spinner.start(`${message} (ctrl+o ${toggleText})`)
+          getDefaultSpinner().start(`${message} (ctrl+o ${toggleText})`)
           mask.isSpinning = true
         }
       }
@@ -228,7 +228,7 @@ export function attachOutputMask(
 
     // Start spinner if not verbose.
     if (mask.isSpinning && process.stdout.isTTY) {
-      spinner.start(
+      getDefaultSpinner().start(
         `${message} (ctrl+o ${options.toggleText || 'to see full output'})`,
       )
     }
@@ -325,6 +325,7 @@ export function attachOutputMask(
       }
 
       if (mask.isSpinning) {
+        const spinner = getDefaultSpinner()
         if (finalCode === 0) {
           spinner.successAndStop(`${message} completed`)
         } else {
@@ -349,7 +350,7 @@ export function attachOutputMask(
       }
 
       if (mask.isSpinning) {
-        spinner.failAndStop(`${message} error`)
+        getDefaultSpinner().failAndStop(`${message} error`)
       }
       reject(error)
     })

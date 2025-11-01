@@ -10,55 +10,6 @@ import {
 import { describe, expect, it } from 'vitest'
 
 describe('spinner', () => {
-  describe('pushOptions/popOptions', () => {
-    it('should save and restore color', () => {
-      const spinner = Spinner({ color: [140, 82, 255] })
-      const originalColor = spinner.color
-
-      spinner.pushOptions({ color: [255, 0, 0] })
-      expect(spinner.color).toEqual([255, 0, 0])
-
-      spinner.popOptions()
-      expect(spinner.color).toEqual(originalColor)
-    })
-
-    it('should save and restore shimmer', () => {
-      const spinner = Spinner({ shimmer: { dir: 'ltr', speed: 0.5 } })
-      const originalShimmer = spinner.shimmerState
-
-      spinner.pushOptions({ shimmer: { dir: 'rtl' } })
-      expect(spinner.shimmerState?.mode).toBe('rtl')
-
-      spinner.popOptions()
-      expect(spinner.shimmerState?.mode).toBe(originalShimmer?.mode)
-      expect(spinner.shimmerState?.speed).toBe(originalShimmer?.speed)
-    })
-
-    it('should support nested push/pop', () => {
-      const spinner = Spinner({ color: 'cyan' })
-
-      spinner.pushOptions({ color: 'yellow' })
-      expect(spinner.color).toEqual([255, 255, 0])
-
-      spinner.pushOptions({ color: 'red' })
-      expect(spinner.color).toEqual([255, 0, 0])
-
-      spinner.popOptions()
-      expect(spinner.color).toEqual([255, 255, 0])
-
-      spinner.popOptions()
-      expect(spinner.color).toEqual([0, 255, 255])
-    })
-
-    it('should handle popOptions when stack is empty', () => {
-      const spinner = Spinner({ color: 'cyan' })
-      const originalColor = spinner.color
-
-      spinner.popOptions() // Should be a no-op
-      expect(spinner.color).toEqual(originalColor)
-    })
-  })
-
   describe('withSpinner', () => {
     it('should restore color after operation', async () => {
       const spinner = Spinner({ color: [140, 82, 255] })

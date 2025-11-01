@@ -19,22 +19,22 @@ describe('promises', () => {
     it('should resolve number to retries option', () => {
       const options = resolveRetryOptions(3)
       expect(options.retries).toBe(3)
-      expect(options.minTimeout).toBe(200)
-      expect(options.maxTimeout).toBe(10_000)
+      expect(options.baseDelayMs).toBe(200)
+      expect(options.maxDelayMs).toBe(10_000)
     })
 
     it('should merge provided options with defaults', () => {
-      const options = resolveRetryOptions({ retries: 5, minTimeout: 100 })
+      const options = resolveRetryOptions({ retries: 5, baseDelayMs: 100 })
       expect(options.retries).toBe(5)
-      expect(options.minTimeout).toBe(100)
-      expect(options.maxTimeout).toBe(10_000)
+      expect(options.baseDelayMs).toBe(100)
+      expect(options.maxDelayMs).toBe(10_000)
     })
 
     it('should return defaults when no options provided', () => {
       const options = resolveRetryOptions()
       expect(options.retries).toBe(0)
-      expect(options.minTimeout).toBe(200)
-      expect(options.maxTimeout).toBe(10_000)
+      expect(options.baseDelayMs).toBe(200)
+      expect(options.maxDelayMs).toBe(10_000)
     })
   })
 
@@ -51,11 +51,6 @@ describe('promises', () => {
     it('should use custom backoff factor', () => {
       const options = normalizeRetryOptions({ retries: 3, backoffFactor: 3 })
       expect(options.backoffFactor).toBe(3)
-    })
-
-    it('should use factor as backoffFactor fallback', () => {
-      const options = normalizeRetryOptions({ retries: 3, factor: 1.5 })
-      expect(options.backoffFactor).toBe(1.5)
     })
 
     it('should include all retry options', () => {
@@ -864,46 +859,7 @@ describe('promises', () => {
     })
   })
 
-  describe('normalizeRetryOptions - Legacy Properties', () => {
-    it('should use minTimeout as baseDelayMs fallback', () => {
-      const options = normalizeRetryOptions({ retries: 3, minTimeout: 500 })
-      expect(options.baseDelayMs).toBe(500)
-      expect(options.minTimeout).toBe(500)
-    })
-
-    it('should use maxTimeout as maxDelayMs fallback', () => {
-      const options = normalizeRetryOptions({ retries: 3, maxTimeout: 5000 })
-      expect(options.maxDelayMs).toBe(5000)
-      expect(options.maxTimeout).toBe(5000)
-    })
-
-    it('should prioritize baseDelayMs over minTimeout', () => {
-      const options = normalizeRetryOptions({
-        retries: 3,
-        baseDelayMs: 300,
-        minTimeout: 500,
-      })
-      expect(options.baseDelayMs).toBe(300)
-    })
-
-    it('should prioritize maxDelayMs over maxTimeout', () => {
-      const options = normalizeRetryOptions({
-        retries: 3,
-        maxDelayMs: 3000,
-        maxTimeout: 5000,
-      })
-      expect(options.maxDelayMs).toBe(3000)
-    })
-
-    it('should prioritize backoffFactor over factor', () => {
-      const options = normalizeRetryOptions({
-        retries: 3,
-        backoffFactor: 3,
-        factor: 1.5,
-      })
-      expect(options.backoffFactor).toBe(3)
-    })
-
+  describe('normalizeRetryOptions - Additional Options', () => {
     it('should include args in normalized options', () => {
       const args = [1, 2, 3]
       const options = normalizeRetryOptions({ retries: 3, args })
@@ -1041,26 +997,26 @@ describe('promises', () => {
     it('should handle undefined options', () => {
       const options = resolveRetryOptions(undefined)
       expect(options.retries).toBe(0)
-      expect(options.minTimeout).toBe(200)
-      expect(options.maxTimeout).toBe(10_000)
-      expect(options.factor).toBe(2)
+      expect(options.baseDelayMs).toBe(200)
+      expect(options.maxDelayMs).toBe(10_000)
+      expect(options.backoffFactor).toBe(2)
     })
 
     it('should preserve custom options', () => {
       const onRetry = vi.fn()
       const options = resolveRetryOptions({
         retries: 5,
-        minTimeout: 300,
-        maxTimeout: 15_000,
-        factor: 3,
+        baseDelayMs: 300,
+        maxDelayMs: 15_000,
+        backoffFactor: 3,
         onRetry,
         onRetryCancelOnFalse: true,
         onRetryRethrow: true,
       })
       expect(options.retries).toBe(5)
-      expect(options.minTimeout).toBe(300)
-      expect(options.maxTimeout).toBe(15_000)
-      expect(options.factor).toBe(3)
+      expect(options.baseDelayMs).toBe(300)
+      expect(options.maxDelayMs).toBe(15_000)
+      expect(options.backoffFactor).toBe(3)
       expect(options.onRetry).toBe(onRetry)
       expect(options.onRetryCancelOnFalse).toBe(true)
       expect(options.onRetryRethrow).toBe(true)
