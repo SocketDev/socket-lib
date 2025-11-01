@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.0) - 2025-11-01
+
+### Added
+
+- Theme system with 5 built-in themes: `socket`, `sunset`, `brick`, `lush`, `ultra`
+- `setTheme()`, `getTheme()`, `withTheme()`, `withThemeSync()` for theme management
+- `createTheme()`, `extendTheme()`, `resolveColor()` helper functions
+- `onThemeChange()` event listener for theme reactivity
+- `link()` function for themed terminal hyperlinks in `@socketsecurity/lib/links`
+- Logger and spinner now inherit theme colors automatically
+- Spinner methods: `enableShimmer()`, `disableShimmer()`, `setShimmer()`, `updateShimmer()`
+- DLX cross-platform binary resolution (`.cmd`, `.bat`, `.ps1` on Windows)
+- DLX programmatic options aligned with CLI conventions (`force`, `quiet`, `package`)
+
+### Changed
+
+- Theme context uses AsyncLocalStorage instead of manual stack management
+- Promise retry options renamed: `factor` → `backoffFactor`, `minTimeout` → `baseDelayMs`, `maxTimeout` → `maxDelayMs`
+
+### Removed
+
+**BREAKING CHANGES:**
+
+- `pushTheme()` and `popTheme()` - use `withTheme()` or `withThemeSync()` instead
+- `logger` export - use `getDefaultLogger()` instead
+- `spinner` export - use `getDefaultSpinner()` instead
+- `download-lock.ts` - use `process-lock.ts` instead
+- Promise option aliases: `factor`, `minTimeout`, `maxTimeout`
+
+---
+
 ## [2.10.4](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.4) - 2025-10-31
 
 ### Added
