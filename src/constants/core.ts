@@ -18,7 +18,7 @@ export const EMPTY_FILE = '/* empty */\n'
 export const EMPTY_VALUE = '<value>'
 
 // Undefined token.
-export const UNDEFINED_TOKEN = undefined
+export const UNDEFINED_TOKEN: undefined = undefined
 
 // Miscellaneous.
 export const V = 'v'

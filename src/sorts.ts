@@ -56,12 +56,13 @@ export function naturalSorter<T>(
   arrayToSort: T[],
 ): ReturnType<FastSortFunction> {
   if (_naturalSorter === undefined) {
-    const fastSort = /*@__PURE__*/ require('./external/fast-sort')
-    _naturalSorter = (fastSort as any).createNewSortInstance({
+    const fastSort =
+      /*@__PURE__*/ require('./external/fast-sort') as typeof import('fast-sort')
+    _naturalSorter = fastSort.createNewSortInstance({
       comparer: naturalCompare,
-    })
+    }) as FastSortFunction
   }
-  return _naturalSorter?.(arrayToSort)
+  return (_naturalSorter as FastSortFunction)(arrayToSort)
 }
 
 /**
@@ -77,9 +78,10 @@ export function compareStr(a: string, b: string): number {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
-  const semver = /*@__PURE__*/ require('./external/semver')
-  const validA = semver.valid(a)
-  const validB = semver.valid(b)
+  const semver =
+    /*@__PURE__*/ require('./external/semver') as typeof import('semver')
+  const validA: string | null = semver.valid(a)
+  const validB: string | null = semver.valid(b)
 
   if (!validA && !validB) {
     return 0
@@ -90,5 +92,5 @@ export function compareSemver(a: string, b: string): number {
   if (!validB) {
     return 1
   }
-  return (semver as any).compare(a, b)
+  return semver.compare(a, b) as number
 }

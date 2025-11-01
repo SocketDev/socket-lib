@@ -104,8 +104,12 @@ let _fastGlob: typeof import('fast-glob') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFastGlob() {
   if (_fastGlob === undefined) {
-    const globExport = /*@__PURE__*/ require('./external/fast-glob')
-    _fastGlob = globExport.default || globExport
+    const globExport = /*@__PURE__*/ require('./external/fast-glob') as
+      | (typeof import('fast-glob') & { default?: typeof import('fast-glob') })
+      | typeof import('fast-glob')
+    _fastGlob = (
+      'default' in globExport ? globExport.default : globExport
+    ) as typeof import('fast-glob')
   }
   return _fastGlob as typeof import('fast-glob')
 }
@@ -129,18 +133,15 @@ export function globStreamLicenses(
     '**/*.{cjs,cts,js,json,mjs,mts,ts}',
   ]
   if (ignoreOriginals) {
-    ignore.push(
-      /*@__INLINE__*/ require('#constants/paths')
-        .LICENSE_ORIGINAL_GLOB_RECURSIVE,
-    )
+    const { LICENSE_ORIGINAL_GLOB_RECURSIVE } =
+      /*@__INLINE__*/ require('#constants/paths') as typeof import('#constants/paths')
+    ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
   }
   const fastGlob = getFastGlob()
+  const paths =
+    /*@__INLINE__*/ require('#constants/paths') as typeof import('#constants/paths')
   return fastGlob.globStream(
-    [
-      recursive
-        ? /*@__INLINE__*/ require('#constants/paths').LICENSE_GLOB_RECURSIVE
-        : /*@__INLINE__*/ require('#constants/paths').LICENSE_GLOB,
-    ],
+    [recursive ? paths.LICENSE_GLOB_RECURSIVE : paths.LICENSE_GLOB],
     {
       __proto__: null,
       absolute: true,
@@ -152,7 +153,7 @@ export function globStreamLicenses(
   )
 }
 
-const matcherCache = new Map()
+const matcherCache = new Map<string, (path: string) => boolean>()
 /**
  * Get a cached glob matcher function.
  */
@@ -163,7 +164,7 @@ export function getGlobMatcher(
 ): (path: string) => boolean {
   const patterns = Array.isArray(glob) ? glob : [glob]
   const key = JSON.stringify({ patterns, options })
-  let matcher = matcherCache.get(key)
+  let matcher: ((path: string) => boolean) | undefined = matcherCache.get(key)
   if (matcher) {
     return matcher
   }
@@ -187,7 +188,7 @@ export function getGlobMatcher(
   matcher = picomatch(
     positivePatterns.length > 0 ? positivePatterns : patterns,
     matchOptions,
-  )
+  ) as (path: string) => boolean
 
   matcherCache.set(key, matcher)
   return matcher
