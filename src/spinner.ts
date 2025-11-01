@@ -640,7 +640,11 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         }
         const wasSpinning = this.isSpinning
         const normalized = normalizeText(text)
-        super[methodName](normalized)
+        if (methodName === 'stop' && !normalized) {
+          super[methodName]()
+        } else {
+          super[methodName](normalized)
+        }
         const {
           getDefaultLogger,
           incLogCallCountSymbol,
