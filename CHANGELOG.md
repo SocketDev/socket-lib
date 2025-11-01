@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Restored missing exports: `password`, `search`, `Separator`, and added `createSeparator()` helper
   - Fixed `Choice` type to use correct `name` property (matching `@inquirer` API, not erroneous `label`)
 
+### Added
+
+- **Theme integration for prompts**: Prompts now automatically use the active theme colors
+  - Prompt messages styled with `colors.prompt`
+  - Descriptions and disabled items styled with `colors.textDim`
+  - Answers and highlights styled with `colors.primary`
+  - Error messages styled with `colors.error`
+  - Success indicators styled with `colors.success`
+  - Consistent visual experience with Logger and Spinner theme integration
+
 ## [3.0.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.4) - 2025-11-01
 
 ### Changed
