@@ -1,139 +1,331 @@
 # Build Architecture
 
-## Overview
+Socket Lib's build system optimizes for zero runtime dependencies while supporting vendored packages.
 
-Socket Lib uses a specialized architecture for dependencies to optimize bundle size and ensure clean separation between bundled and external code.
+## 🎯 Core Concept
 
-## Key Concepts
+```
+┌────────────────────────────────────────┐
+│  Production Build Strategy             │
+├────────────────────────────────────────┤
+│  Vendored (Bundled)   External (Deps)  │
+│  ├─ socket packages   @socketregistry/ │
+│  ├─ small utilities   packageurl-js    │
+│  └─ type defs         (runtime dep)    │
+└────────────────────────────────────────┘
+```
 
-**Vendored Dependencies**: Source code copied into `src/external/` and bundled
-**External Dependencies**: Listed in `dependencies` and used at runtime
-**Validation**: Automated checking via `node scripts/validate-external.mjs`
+**Goal:** Minimize runtime dependencies, maximize bundle control
+
+## Build Pipeline
+
+```
+Source        Compile         Post-Process     Output
+─────────────────────────────────────────────────────
+src/          esbuild         scripts/         dist/
+├─ *.ts   →   │           →   ├─ fix exports → *.js
+├─ external/  │               ├─ bundle deps  → *.d.ts
+└─ themes/    │               └─ validate
+              ↓
+           CommonJS
+           ES2022
+```
+
+**Tools:**
+- **esbuild** — Fast TypeScript → JavaScript compilation
+- **tsgo** — Type definition generation (TypeScript Native Preview)
+- **Babel AST** — Post-build transformations
 
 ## Dependency Types
 
-### Runtime Dependencies
+### Runtime Dependencies (package.json)
 
 ```json
-"@socketregistry/packageurl-js": "1.3.0"
-```
-
-Separate packages that:
-- Can be re-exported from `src/external/`
-- Listed in ALLOWED_EXTERNAL_PACKAGES
-- Required at runtime
-
-### Vendored Dependencies (Build-time)
-
-Other @socketregistry and @socketsecurity packages:
-- Source code copied into `src/external/`
-- NOT listed in dependencies
-- Bundled at build time
-
-## Import Rules
-
-**Inside `src/external/`**: Must contain bundled/vendored code
-```javascript
-// src/external/@socketregistry/is-unicode-supported.js
-module.exports = function isUnicodeSupported() {
-  // ... implementation ...
+{
+  "dependencies": {
+    "@socketregistry/packageurl-js": "1.3.0"
+  }
 }
 ```
 
-**Outside `src/external/`**: Use relative paths
-```javascript
-// ✅ CORRECT
-require('../external/@socketregistry/is-unicode-supported')
+✅ **Use when:**
+- Package is large or complex
+- Package needs separate versioning
+- Package is already a published dependency
 
-// ❌ WRONG
-require('@socketregistry/is-unicode-supported')
+### Vendored Dependencies (src/external/)
+
+```
+src/external/
+├── @socketregistry/
+│   ├── is-unicode-supported.js
+│   ├── ansi-regex.js
+│   └── ...
+├── yoctocolors-cjs/
+└── ...
+```
+
+✅ **Use when:**
+- Small utility packages
+- Socket-owned packages
+- Tight version control needed
+- Reducing dependency tree
+
+## Import Rules
+
+### Inside src/external/ ✅
+
+Vendored code lives here — no bare imports allowed:
+
+```javascript
+// ✅ Correct - vendored implementation
+// src/external/@socketregistry/is-unicode-supported.js
+module.exports = function isUnicodeSupported() {
+  // ... implementation
+}
+```
+
+### Outside src/external/ ✅
+
+Use relative paths for vendored deps:
+
+```typescript
+// ✅ Correct
+import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
+
+// ❌ Wrong - bare imports not allowed
+import isUnicodeSupported from '@socketregistry/is-unicode-supported'
+```
+
+### Runtime Dependencies ✅
+
+Only allowed dependencies use bare imports:
+
+```typescript
+// ✅ Correct - runtime dependency
+import { PackageURL } from '@socketregistry/packageurl-js'
+```
+
+## Build Commands
+
+```bash
+# Full build
+pnpm run build
+
+# Individual steps
+pnpm run build:js        # Compile TypeScript → JavaScript
+pnpm run build:types     # Generate .d.ts files
+pnpm run build:externals # Bundle external dependencies
+pnpm run fix:exports     # Fix CommonJS exports
+
+# Development
+pnpm run dev             # Watch mode
+pnpm run clean           # Remove dist/
+```
+
+## Build Scripts
+
+All build scripts are Node.js modules (`.mjs`):
+
+```
+scripts/
+├── build.mjs                    # Main build orchestrator
+├── build-js.mjs                 # esbuild JavaScript compilation
+├── build-externals.mjs          # Bundle external dependencies
+├── fix-commonjs-exports.mjs     # Post-build CommonJS fixes
+├── fix-default-imports.mjs      # Fix default import patterns
+└── babel/
+    └── transform-*.mjs          # AST transformations
+```
+
+**No shell scripts (`.sh`)** — Node.js only for cross-platform compatibility.
+
+## Post-Build Transformations
+
+### CommonJS Export Fixes
+
+TypeScript compiles `export default X` to `exports.default = X`, requiring `.default` accessor. We fix this:
+
+```javascript
+// Before (TypeScript output)
+exports.default = WIN32
+
+// After (our fix)
+module.exports = WIN32
+```
+
+This allows cleaner imports:
+
+```javascript
+// ✅ After fix
+const WIN32 = require('./WIN32')
+
+// ❌ Before fix
+const WIN32 = require('./WIN32').default
+```
+
+### External Bundling
+
+Vendored dependencies are bundled during build:
+
+```javascript
+// Build bundles src/external/* → dist/external/*
+// Preserves module structure for selective imports
 ```
 
 ## Validation
 
-Run validation before build:
+`scripts/validate-external.mjs` ensures:
+
+✅ All `src/external/` packages are properly vendored (no bare imports)
+✅ Only allowed runtime dependencies are used
+✅ No accidental external package imports
+
 ```bash
-node scripts/validate-external.mjs
+pnpm run validate:externals
 ```
 
-Detects forbidden patterns in `src/external/` (except ALLOWED_EXTERNAL_PACKAGES):
-- `require('@socketregistry/package-name')`
-- `require('@socketsecurity/package-name')`
-- `from '@socketregistry/package-name'`
-- `from '@socketsecurity/package-name'`
+## Adding Dependencies
 
-## Build Process
+### Adding a Runtime Dependency
 
-1. Validate external files (must be bundled code)
-2. Copy `src/external/` to `dist/external/`
-3. Rollup externalizes Node.js built-ins, node_modules, and `/external/` paths
+```bash
+# 1. Install package
+pnpm add @socketregistry/new-package
 
-## Common Patterns
+# 2. Add to allowed list in scripts/validate-external.mjs
+const ALLOWED_EXTERNAL_PACKAGES = [
+  '@socketregistry/packageurl-js',
+  '@socketregistry/new-package',  // ← Add here
+]
 
-### ✅ Correct
+# 3. Use in code with bare import
+import { Thing } from '@socketregistry/new-package'
 
-**Vendored code:**
-```javascript
-// src/external/@socketregistry/yocto-spinner.js
-module.exports = function yoctoSpinner(options) {
-  // ... full bundled implementation ...
-}
+# 4. Validate
+pnpm run validate:externals
 ```
 
-**Relative import:**
-```javascript
-// src/lib/logger.ts
-require('../external/@socketregistry/is-unicode-supported')
+### Vendoring a Package
+
+```bash
+# 1. Copy package source to src/external/
+mkdir -p src/external/@socketregistry/my-util
+cp node_modules/@socketregistry/my-util/index.js src/external/@socketregistry/my-util/
+
+# 2. Import with relative path
+import myUtil from '../external/@socketregistry/my-util'
+
+# 3. Build will bundle it
+pnpm run build
+
+# 4. Validate
+pnpm run validate:externals
 ```
 
-**Runtime dependency:**
-```json
-"dependencies": {
-  "@socketregistry/packageurl-js": "1.3.0"
-}
+## Performance
+
+### Build Times
+
+| Step | Time | Tool |
+|------|------|------|
+| Clean | ~10ms | fs.rm |
+| JavaScript | ~1.6s | esbuild |
+| Types | ~2s | tsgo |
+| Externals | ~200ms | esbuild |
+| Post-process | ~100ms | Babel AST |
+| **Total** | **~4s** | |
+
+### Optimization Strategies
+
+- **Parallel builds** — JavaScript and types compile concurrently
+- **Incremental** — Only rebuild changed files in watch mode
+- **Native tools** — esbuild (Go), tsgo (Rust) for speed
+- **No bundling** — Preserve module structure (faster than Rollup)
+
+## Build Output
+
+```
+dist/
+├── constants/
+│   ├── packages.js
+│   ├── packages.d.ts
+│   └── ...
+├── env/
+│   ├── ci.js
+│   ├── ci.d.ts
+│   └── ...
+├── external/
+│   ├── @socketregistry/
+│   └── ...
+├── effects/
+├── stdio/
+├── themes/
+└── ... (matches src/ structure)
 ```
 
-### ❌ Wrong
+**Format:** CommonJS (`.js`) + TypeScript definitions (`.d.ts`)
 
-**Re-exporting in external:**
-```javascript
-// src/external/@socketregistry/yocto-spinner.js
-module.exports = require('@socketregistry/yocto-spinner')  // WRONG
-```
-
-**Vendored package in devDependencies:**
-```json
-"devDependencies": {
-  "@socketregistry/yocto-spinner": "1.0.24"  // WRONG - it's vendored
-}
-```
-
-**Bare import outside external:**
-```javascript
-// src/lib/logger.ts
-require('@socketregistry/is-unicode-supported')  // WRONG
-```
+**Target:** ES2022 (Node.js 20+)
 
 ## Troubleshooting
 
-**"Cannot find module '@socketregistry/package-name'"**
-- Should it be vendored into `src/external/` as bundled code?
-- Should it be added to `dependencies` and ALLOWED_EXTERNAL_PACKAGES?
+### Build Fails
 
-**Validation fails**
-- File contains re-export instead of bundled code
-- Either vendor the source directly or add to ALLOWED_EXTERNAL_PACKAGES
+```bash
+# Check build output
+pnpm run build
 
-**How to vendor a new dependency**
-1. Copy source into `src/external/@scope/package-name.js`
-2. Ensure it doesn't `require()` the npm package
-3. Run `pnpm run validate:external`
-4. Code will bundle during build
+# Try clean build
+pnpm run clean && pnpm run build
+```
 
-## Why This Architecture?
+**Common Issues:**
+- Missing `dist/` directory → Run `pnpm run build`
+- TypeScript errors → Run `pnpm run check`
+- Path alias issues → Check `tsconfig.json` paths
 
-1. **No Runtime Dependencies**: Vendored code eliminates external dependencies
-2. **Clear Boundaries**: `src/external/` contains only bundled code
-3. **Build-time Validation**: Automatic detection of re-exports
-4. **Smaller Bundles**: Include only what's used
-5. **Maintainability**: Clear rules for external files
+### Validation Errors
+
+```bash
+pnpm run validate:externals
+```
+
+**Common Issues:**
+- Bare import in wrong place → Use relative path
+- Unapproved dependency → Add to ALLOWED_EXTERNAL_PACKAGES
+- Missing vendored file → Copy to `src/external/`
+
+### Watch Mode Not Working
+
+```bash
+# Stop existing watch process
+# Kill any running pnpm dev
+
+# Restart watch
+pnpm run dev
+```
+
+## Advanced: Babel Transformations
+
+Socket Lib uses Babel AST + magic-string for post-build transformations.
+
+**Pattern:**
+1. Parse with Babel → Get AST
+2. Walk with Babel traverse → Find nodes
+3. Edit with magic-string → Surgical changes
+4. Preserve source maps → magic-string maintains mappings
+
+**Available Transforms:**
+- `transform-commonjs-exports.mjs` — Fix `exports.default`
+- See `scripts/babel/README.md` for details
+
+## References
+
+- [esbuild Documentation](https://esbuild.github.io/)
+- [tsgo Repository](https://github.com/microsoft/TypeScript/tree/main/src/tsgo)
+- [Babel Parser](https://babeljs.io/docs/babel-parser)
+
+---
+
+**Back to:** [Getting Started](./getting-started.md) · [README](../README.md)

@@ -296,6 +296,14 @@
       "types": "./dist/json.d.ts",
       "default": "./dist/json.js"
     },
+    "./links": {
+      "types": "./dist/links/index.d.ts",
+      "default": "./dist/links/index.js"
+    },
+    "./links/index": {
+      "types": "./dist/links/index.d.ts",
+      "default": "./dist/links/index.js"
+    },
     "./logger": {
       "types": "./dist/logger.d.ts",
       "default": "./dist/logger.js"
@@ -397,8 +405,12 @@
       "default": "./dist/promises.js"
     },
     "./prompts": {
-      "types": "./dist/prompts.d.ts",
-      "default": "./dist/prompts.js"
+      "types": "./dist/prompts/index.d.ts",
+      "default": "./dist/prompts/index.js"
+    },
+    "./prompts/index": {
+      "types": "./dist/prompts/index.d.ts",
+      "default": "./dist/prompts/index.js"
     },
     "./regexps": {
       "types": "./dist/regexps.d.ts",
@@ -487,6 +499,30 @@
     "./temporary-executor": {
       "types": "./dist/temporary-executor.d.ts",
       "default": "./dist/temporary-executor.js"
+    },
+    "./themes": {
+      "types": "./dist/themes/index.d.ts",
+      "default": "./dist/themes/index.js"
+    },
+    "./themes/context": {
+      "types": "./dist/themes/context.d.ts",
+      "default": "./dist/themes/context.js"
+    },
+    "./themes/index": {
+      "types": "./dist/themes/index.d.ts",
+      "default": "./dist/themes/index.js"
+    },
+    "./themes/themes": {
+      "types": "./dist/themes/themes.d.ts",
+      "default": "./dist/themes/themes.js"
+    },
+    "./themes/types": {
+      "types": "./dist/themes/types.d.ts",
+      "default": "./dist/themes/types.js"
+    },
+    "./themes/utils": {
+      "types": "./dist/themes/utils.d.ts",
+      "default": "./dist/themes/utils.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
