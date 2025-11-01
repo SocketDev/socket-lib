@@ -18,14 +18,14 @@ const spinner = getSpinner()
 export interface Choice<Value = unknown> {
   /** The value returned when this choice is selected */
   value: Value
-  /** Whether this choice is disabled, or a reason string */
-  disabled?: boolean | string | undefined
-  /** Additional description text shown below the choice */
-  description?: string | undefined
   /** Display name for the choice (defaults to value.toString()) */
   name?: string | undefined
+  /** Additional description text shown below the choice */
+  description?: string | undefined
   /** Short text shown after selection (defaults to name) */
   short?: string | undefined
+  /** Whether this choice is disabled, or a reason string */
+  disabled?: boolean | string | undefined
 }
 
 /**
@@ -202,3 +202,28 @@ export const search: typeof searchRaw = wrapPrompt(searchRaw)
 export const select: typeof selectRaw = wrapPrompt(selectRaw)
 
 export { ActualSeparator as Separator }
+
+/**
+ * Create a separator for select prompts.
+ * Creates a visual separator line in choice lists.
+ *
+ * @param text - Optional separator text (defaults to '───────')
+ * @returns Separator instance
+ *
+ * @example
+ * import { select, createSeparator } from '@socketsecurity/lib/stdio/prompts'
+ *
+ * const choice = await select({
+ *   message: 'Choose an option:',
+ *   choices: [
+ *     { name: 'Option 1', value: 1 },
+ *     createSeparator(),
+ *     { name: 'Option 2', value: 2 }
+ *   ]
+ * })
+ */
+export function createSeparator(
+  text?: string,
+): InstanceType<typeof ActualSeparator> {
+  return new ActualSeparator(text)
+}
