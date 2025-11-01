@@ -60,7 +60,7 @@ export const SUNSET_THEME: Theme = {
     error: 'redBright',
     warning: 'yellowBright',
     info: 'magentaBright',
-    step: 'primary',
+    step: 'magentaBright',
     text: 'white',
     textDim: 'gray',
     link: 'primary',
@@ -73,7 +73,10 @@ export const SUNSET_THEME: Theme = {
     },
     shimmer: {
       enabled: true,
-      color: ['secondary', 'primary'],
+      color: [
+        [200, 100, 180],
+        [255, 140, 100],
+      ],
       direction: 'ltr',
       speed: 0.4,
     },
