@@ -78,7 +78,7 @@ export async function withTheme<T>(
   theme: Theme | ThemeName,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const resolvedTheme = typeof theme === 'string' ? THEMES[theme] : theme
+  const resolvedTheme: Theme = typeof theme === 'string' ? THEMES[theme] : theme
   return await themeStorage.run(resolvedTheme, async () => {
     emitThemeChange(resolvedTheme)
     return await fn()
@@ -102,7 +102,7 @@ export async function withTheme<T>(
  * ```
  */
 export function withThemeSync<T>(theme: Theme | ThemeName, fn: () => T): T {
-  const resolvedTheme = typeof theme === 'string' ? THEMES[theme] : theme
+  const resolvedTheme: Theme = typeof theme === 'string' ? THEMES[theme] : theme
   return themeStorage.run(resolvedTheme, () => {
     emitThemeChange(resolvedTheme)
     return fn()
