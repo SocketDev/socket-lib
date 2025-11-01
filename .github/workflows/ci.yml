@@ -99,6 +99,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build project
+        run: pnpm run build
+
       - name: Run main tests
         run: pnpm exec vitest --config .config/vitest.config.mts run
 
@@ -125,6 +128,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: pnpm run build
 
       - name: Run isolated tests
         run: pnpm exec vitest --config .config/vitest.config.isolated.mts run
