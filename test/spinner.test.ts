@@ -19,6 +19,7 @@ describe('spinner', () => {
   describe('withSpinner', () => {
     // Note: These tests require full logger context which isn't available in unit test env
     // They are marked as todo until proper integration test setup is implemented
+    // Tracked in: https://github.com/SocketDev/socket-lib/issues/14
     it.todo('should restore color after operation', async () => {
       const spinner = Spinner({ color: [140, 82, 255] })
       const originalColor = spinner.color
