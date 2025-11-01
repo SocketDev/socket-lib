@@ -68,9 +68,6 @@ export {
 export {
   getTheme,
   onThemeChange,
-  popTheme,
-  pushTheme,
-  resetThemeContext,
   setTheme,
   withTheme,
   withThemeSync,

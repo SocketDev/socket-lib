@@ -8,21 +8,14 @@ import {
   createTheme,
   extendTheme,
   getTheme,
-  popTheme,
-  pushTheme,
-  resetThemeContext,
   resolveColor,
   setTheme,
   withTheme,
   withThemeSync,
 } from '@socketsecurity/lib/themes'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 describe('themes', () => {
-  afterEach(() => {
-    resetThemeContext()
-  })
-
   describe('THEMES', () => {
     it('should have all default themes', () => {
       expect(THEMES).toHaveProperty('socket')
@@ -60,90 +53,62 @@ describe('themes', () => {
     })
   })
 
-  describe('pushTheme / popTheme', () => {
-    it('should push and pop themes', () => {
-      setTheme('socket')
-      expect(getTheme().name).toBe('socket')
-
-      pushTheme('coana')
-      expect(getTheme().name).toBe('coana')
-
-      popTheme()
-      expect(getTheme().name).toBe('socket')
-    })
-
-    it('should support nested push/pop', () => {
-      setTheme('socket')
-
-      pushTheme('coana')
-      expect(getTheme().name).toBe('coana')
-
-      pushTheme('ultra')
-      expect(getTheme().name).toBe('ultra')
-
-      popTheme()
-      expect(getTheme().name).toBe('coana')
-
-      popTheme()
-      expect(getTheme().name).toBe('socket')
-    })
-
-    it('should handle pop with empty stack', () => {
-      setTheme('socket')
-      popTheme() // Should be a no-op
-      expect(getTheme().name).toBe('socket')
-    })
-  })
-
   describe('withTheme', () => {
     it('should apply theme for async operation', async () => {
-      setTheme('socket')
-
       const result = await withTheme('coana', async () => {
         expect(getTheme().name).toBe('coana')
         return 42
       })
 
       expect(result).toBe(42)
-      expect(getTheme().name).toBe('socket')
+      // Theme is automatically restored via AsyncLocalStorage
+      expect(getTheme().name).toBe('socket') // Falls back to default
     })
 
     it('should restore theme even if operation throws', async () => {
-      setTheme('socket')
-
       await expect(
         withTheme('coana', async () => {
           throw new Error('test error')
         }),
       ).rejects.toThrow('test error')
 
-      expect(getTheme().name).toBe('socket')
+      expect(getTheme().name).toBe('socket') // Falls back to default
+    })
+
+    it('should isolate themes in nested async contexts', async () => {
+      await withTheme('coana', async () => {
+        expect(getTheme().name).toBe('coana')
+
+        await withTheme('ultra', async () => {
+          expect(getTheme().name).toBe('ultra')
+        })
+
+        // Theme automatically restored by AsyncLocalStorage
+        expect(getTheme().name).toBe('coana')
+      })
     })
   })
 
   describe('withThemeSync', () => {
     it('should apply theme for sync operation', () => {
-      setTheme('socket')
-
       const result = withThemeSync('coana', () => {
         expect(getTheme().name).toBe('coana')
         return 42
       })
 
       expect(result).toBe(42)
-      expect(getTheme().name).toBe('socket')
+      // Theme is automatically restored via AsyncLocalStorage
+      expect(getTheme().name).toBe('socket') // Falls back to default
     })
 
     it('should restore theme even if operation throws', () => {
-      setTheme('socket')
-
       expect(() => {
         withThemeSync('coana', () => {
           throw new Error('test error')
         })
       }).toThrow('test error')
 
-      expect(getTheme().name).toBe('socket')
+      expect(getTheme().name).toBe('socket') // Falls back to default
     })
   })
 

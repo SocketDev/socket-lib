@@ -1,7 +1,9 @@
 /**
- * @fileoverview Global theme context management.
- * Provides stateful theme management with stack-based scoping and event notifications.
+ * @fileoverview Theme context management using AsyncLocalStorage.
+ * Provides async-aware theme management with automatic context isolation.
  */
+
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 import type { Theme } from './types'
 import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
@@ -12,25 +14,22 @@ import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
 export type ThemeChangeListener = (theme: Theme) => void
 
 /**
- * Global theme context.
+ * AsyncLocalStorage for theme context.
+ * Automatically isolates theme state across async boundaries.
  */
-type ThemeContext = {
-  current: Theme
-  stack: Theme[]
-}
+const themeStorage = new AsyncLocalStorage<Theme>()
 
-// Global state
-// Default theme
-let context: ThemeContext = {
-  current: SOCKET_THEME,
-  stack: [],
-}
+/**
+ * Fallback theme when no async context is active.
+ */
+let fallbackTheme: Theme = SOCKET_THEME
 
 // Event listeners
 const listeners: Set<ThemeChangeListener> = new Set()
 
 /**
- * Set the global theme.
+ * Set the fallback theme (used when no async context is active).
+ * This replaces the previous global theme setter.
  *
  * @param theme - Theme object or theme name
  *
@@ -46,12 +45,12 @@ const listeners: Set<ThemeChangeListener> = new Set()
  * ```
  */
 export function setTheme(theme: Theme | ThemeName): void {
-  context.current = typeof theme === 'string' ? THEMES[theme] : theme
-  emitThemeChange(context.current)
+  fallbackTheme = typeof theme === 'string' ? THEMES[theme] : theme
+  emitThemeChange(fallbackTheme)
 }
 
 /**
- * Get the current global theme.
+ * Get the current theme from async context or fallback.
  *
  * @returns Current theme
  *
@@ -64,53 +63,13 @@ export function setTheme(theme: Theme | ThemeName): void {
  * ```
  */
 export function getTheme(): Theme {
-  return context.current
-}
-
-/**
- * Push a new theme onto the stack and activate it.
- * Use `popTheme()` to restore the previous theme.
- *
- * @param theme - Theme object or theme name
- *
- * @example
- * ```ts
- * import { pushTheme, popTheme } from '@socketsecurity/lib/themes'
- *
- * pushTheme('ultra')
- * // ... operations with ultra theme ...
- * popTheme()  // Restore previous theme
- * ```
- */
-export function pushTheme(theme: Theme | ThemeName): void {
-  context.stack.push(context.current)
-  setTheme(theme)
-}
-
-/**
- * Pop and restore the previous theme from the stack.
- * If the stack is empty, the current theme remains unchanged.
- *
- * @example
- * ```ts
- * import { pushTheme, popTheme } from '@socketsecurity/lib/themes'
- *
- * pushTheme('socket-firewall')
- * // ... operations ...
- * popTheme()  // Back to previous theme
- * ```
- */
-export function popTheme(): void {
-  const previous = context.stack.pop()
-  if (previous) {
-    context.current = previous
-    emitThemeChange(context.current)
-  }
+  return themeStorage.getStore() ?? fallbackTheme
 }
 
 /**
  * Execute an async operation with a temporary theme.
- * Automatically restores the previous theme when the operation completes.
+ * Uses AsyncLocalStorage for automatic context isolation.
+ * Theme is automatically restored when the operation completes.
  *
  * @template T - Return type of the operation
  * @param theme - Theme to use during operation
@@ -128,24 +87,24 @@ export function popTheme(): void {
  *   await heavyOperation()
  *   spinner.stop()
  * })
- * // Theme automatically restored
+ * // Theme automatically restored via AsyncLocalStorage
  * ```
  */
 export async function withTheme<T>(
   theme: Theme | ThemeName,
   fn: () => Promise<T>,
 ): Promise<T> {
-  pushTheme(theme)
-  try {
+  const resolvedTheme = typeof theme === 'string' ? THEMES[theme] : theme
+  return await themeStorage.run(resolvedTheme, async () => {
+    emitThemeChange(resolvedTheme)
     return await fn()
-  } finally {
-    popTheme()
-  }
+  })
 }
 
 /**
  * Execute a synchronous operation with a temporary theme.
- * Automatically restores the previous theme when the operation completes.
+ * Uses AsyncLocalStorage for automatic context isolation.
+ * Theme is automatically restored when the operation completes.
  *
  * @template T - Return type of the operation
  * @param theme - Theme to use during operation
@@ -163,12 +122,11 @@ export async function withTheme<T>(
  * ```
  */
 export function withThemeSync<T>(theme: Theme | ThemeName, fn: () => T): T {
-  pushTheme(theme)
-  try {
+  const resolvedTheme = typeof theme === 'string' ? THEMES[theme] : theme
+  return themeStorage.run(resolvedTheme, () => {
+    emitThemeChange(resolvedTheme)
     return fn()
-  } finally {
-    popTheme()
-  }
+  })
 }
 
 /**
@@ -204,16 +162,4 @@ function emitThemeChange(theme: Theme): void {
   for (const listener of listeners) {
     listener(theme)
   }
-}
-
-/**
- * Reset theme context to default state (for testing).
- * @private
- */
-export function resetThemeContext(): void {
-  context = {
-    current: SOCKET_THEME,
-    stack: [],
-  }
-  listeners.clear()
 }
