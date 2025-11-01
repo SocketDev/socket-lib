@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.1) - 2025-11-01
+
+### Added
+
+- **Convenience exports from main index**: Added logger and spinner exports to ease v2→v3 migration
+  - Logger: `getDefaultLogger()`, `Logger`, `LOG_SYMBOLS` now available from `@socketsecurity/lib`
+  - Spinner: `getDefaultSpinner()`, `Spinner` now available from `@socketsecurity/lib`
+  - Both main index (`@socketsecurity/lib`) and subpath (`@socketsecurity/lib/logger`, `@socketsecurity/lib/spinner`) imports now work
+  - Both import paths return the same singleton instances
+
+### Fixed
+
+- **Critical: Spinner crashes when calling logger**: Fixed spinner internal calls to use `getDefaultLogger()` instead of removed `logger` export
+  - Spinner methods (`start()`, `stop()`, `success()`, `fail()`, etc.) no longer crash with "logger is not defined" errors
+  - All 5 internal logger access points updated to use the correct v3 API
+  - Resolves runtime errors when using spinners with hoisted variables
+
+### Changed
+
+- **Migration path improvement**: Users can now import logger/spinner from either main index or subpaths, reducing breaking change impact from v3.0.0
+
 ## [3.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.0) - 2025-11-01
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -355,10 +355,6 @@
     "./packages/provenance": {
       "types": "./dist/packages/provenance.d.ts",
       "default": "./dist/packages/provenance.js"
-    },
-    "./packages/registry": {
-      "types": "./dist/packages/registry.d.ts",
-      "default": "./dist/packages/registry.js"
     },
     "./packages/specs": {
       "types": "./dist/packages/specs.d.ts",
