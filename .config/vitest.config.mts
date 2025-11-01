@@ -56,6 +56,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      toGlobPath(path.resolve(projectRoot, 'test/isolated/**')),
       ...(process.env.INCLUDE_NPM_TESTS
         ? []
         : [toGlobPath(path.resolve(projectRoot, 'test/npm/**'))]),
