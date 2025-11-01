@@ -5,10 +5,9 @@
 
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
-import { objectAssign, objectFreeze } from './objects'
 import { applyLinePrefix, isBlankString } from './strings'
 import type { ColorValue } from './spinner'
-import { getTheme } from './themes/context'
+import { getTheme, onThemeChange } from './themes/context'
 
 /**
  * Log symbols for terminal output with colored indicators.
@@ -143,8 +142,9 @@ function applyColor(
  * for terminals that don't support Unicode. Symbols are colored according to the active
  * theme's color palette (success, error, warning, info, step).
  *
- * The symbols are lazily initialized on first access and then frozen for immutability.
- * Colors are determined by the theme active at initialization time.
+ * The symbols are lazily initialized on first access and automatically update when the
+ * fallback theme changes (via setTheme()). Note that LOG_SYMBOLS reflect the global
+ * fallback theme, not async-local theme contexts from withTheme().
  *
  * @example
  * ```typescript
@@ -161,11 +161,15 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   const target: Record<string, string> = {
     __proto__: null,
   } as unknown as Record<string, string>
+
+  let initialized = false
+
   // Mutable handler to simulate a frozen target.
   const handler: ProxyHandler<Record<string, string>> = {
     __proto__: null,
   } as unknown as ProxyHandler<Record<string, string>>
-  const init = () => {
+
+  const updateSymbols = () => {
     const supported = isUnicodeSupported()
     const colors = getYoctocolors()
     const theme = getTheme()
@@ -177,20 +181,38 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     const infoColor = theme.colors.info
     const stepColor = theme.colors.step
 
-    objectAssign(target, {
-      fail: applyColor(supported ? '✖' : '×', errorColor, colors),
-      info: applyColor(supported ? 'ℹ' : 'i', infoColor, colors),
-      step: applyColor(supported ? '→' : '>', stepColor, colors),
-      success: applyColor(supported ? '✔' : '√', successColor, colors),
-      warn: applyColor(supported ? '⚠' : '‼', warningColor, colors),
-    })
-    objectFreeze(target)
+    // Update symbol values
+    target.fail = applyColor(supported ? '✖' : '×', errorColor, colors)
+    target.info = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
+    target.step = applyColor(supported ? '→' : '>', stepColor, colors)
+    target.success = applyColor(supported ? '✔' : '√', successColor, colors)
+    target.warn = applyColor(supported ? '⚠' : '‼', warningColor, colors)
+  }
+
+  const init = () => {
+    if (initialized) {
+      return
+    }
+
+    updateSymbols()
+    initialized = true
+
     // The handler of a Proxy is mutable after proxy instantiation.
-    // We delete the traps to defer to native behavior.
+    // We delete the traps to defer to native behavior for better performance.
     for (const trapName in handler) {
       delete handler[trapName as keyof ProxyHandler<Record<string, string>>]
     }
   }
+
+  const reset = () => {
+    if (!initialized) {
+      return
+    }
+
+    // Update symbols with new theme colors
+    updateSymbols()
+  }
+
   for (const trapName of Reflect.ownKeys(Reflect)) {
     const fn = (Reflect as Record<PropertyKey, unknown>)[trapName]
     if (typeof fn === 'function') {
@@ -202,6 +224,12 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
       }
     }
   }
+
+  // Listen for theme changes and reset symbols
+  onThemeChange(() => {
+    reset()
+  })
+
   return new Proxy(target, handler)
 })()
 
