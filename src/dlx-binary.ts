@@ -337,7 +337,7 @@ async function writeMetadata(
         url,
       },
     })
-  } catch (error) {
+  } catch {
     // Silently ignore manifest write errors - not critical.
     // The per-directory metadata is the source of truth for now.
   }
