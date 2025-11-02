@@ -20,14 +20,6 @@
     "url": "https://socket.dev"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./index": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
     "./abort": {
       "types": "./dist/abort.d.ts",
       "default": "./dist/abort.js"
