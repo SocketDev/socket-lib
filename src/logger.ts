@@ -8,6 +8,7 @@ import yoctocolorsCjs from './external/yoctocolors-cjs'
 import { applyLinePrefix, isBlankString } from './strings'
 import type { ColorValue } from './spinner'
 import { getTheme, onThemeChange } from './themes/context'
+import { THEMES } from './themes/themes'
 
 /**
  * Log symbols for terminal output with colored indicators.
@@ -423,6 +424,7 @@ export class Logger {
   #logCallCount = 0
   #options: Record<string, unknown>
   #originalStdout?: any
+  #theme?: import('./themes/types').Theme
 
   /**
    * Creates a new Logger instance.
@@ -455,6 +457,18 @@ export class Logger {
       this.#options = { __proto__: null, ...options }
       // Store reference to original stdout stream to bypass Console formatting
       this.#originalStdout = (options as any).stdout
+
+      // Handle theme option
+      const themeOption = (options as any).theme
+      if (themeOption) {
+        if (typeof themeOption === 'string') {
+          // Theme name - resolve to Theme object
+          this.#theme = THEMES[themeOption]
+        } else {
+          // Theme object
+          this.#theme = themeOption
+        }
+      }
     } else {
       this.#options = { __proto__: null }
     }
@@ -530,6 +544,7 @@ export class Logger {
       instance.#parent = this
       instance.#boundStream = 'stderr'
       instance.#options = { __proto__: null, ...this.#options }
+      instance.#theme = this.#theme
       this.#stderrLogger = instance
     }
     return this.#stderrLogger
@@ -564,6 +579,7 @@ export class Logger {
       instance.#parent = this
       instance.#boundStream = 'stdout'
       instance.#options = { __proto__: null, ...this.#options }
+      instance.#theme = this.#theme
       this.#stdoutLogger = instance
     }
     return this.#stdoutLogger
@@ -575,6 +591,34 @@ export class Logger {
    */
   #getRoot(): Logger {
     return this.#parent || this
+  }
+
+  /**
+   * Get the resolved theme for this logger instance.
+   * Returns instance theme if set, otherwise falls back to context theme.
+   * @private
+   */
+  #getTheme(): import('./themes/types').Theme {
+    return this.#theme ?? getTheme()
+  }
+
+  /**
+   * Get logger-specific symbols using the resolved theme.
+   * @private
+   */
+  #getSymbols(): LogSymbols {
+    const theme = this.#getTheme()
+    const supported = isUnicodeSupported()
+    const colors = getYoctocolors()
+
+    return {
+      __proto__: null,
+      fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
+      info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
+      step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
+      success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
+      warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
+    } as LogSymbols
   }
 
   /**
@@ -689,8 +733,9 @@ export class Logger {
     }
     // Note: Meta status messages (info/fail/etc) always go to stderr.
     const indent = this.#getIndent('stderr')
+    const symbols = this.#getSymbols()
     con.error(
-      applyLinePrefix(`${LOG_SYMBOLS[symbolType]} ${text}`, {
+      applyLinePrefix(`${symbols[symbolType]} ${text}`, {
         prefix: indent,
       }),
       ...extras,
@@ -1288,9 +1333,10 @@ export class Logger {
     const text = this.#stripSymbols(msg)
     // Note: Step messages always go to stdout (unlike info/fail/etc which go to stderr).
     const indent = this.#getIndent('stdout')
+    const symbols = this.#getSymbols()
     const con = this.#getConsole() as typeof console & Record<string, unknown>
     con.log(
-      applyLinePrefix(`${LOG_SYMBOLS.step} ${text}`, {
+      applyLinePrefix(`${symbols.step} ${text}`, {
         prefix: indent,
       }),
       ...extras,

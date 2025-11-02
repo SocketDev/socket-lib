@@ -15,6 +15,9 @@
 import { ANSI_RESET, stripAnsi } from '../ansi'
 import { isArray } from '../arrays'
 import { getCI } from '#env/ci'
+import { resolveColor } from '../themes/utils'
+import { THEMES } from '../themes/themes'
+import type { ColorValue } from '../spinner'
 
 import type {
   ShimmerColorGradient,
@@ -95,6 +98,7 @@ type ShimmerOptions = {
   readonly direction?: ShimmerDirection | undefined
   readonly shimmerWidth?: number | undefined
   readonly styles?: TextStyles | undefined
+  readonly theme?: import('../themes/types').Theme | import('../themes/themes').ThemeName | undefined
 }
 
 export const COLOR_INHERIT = 'inherit'
@@ -242,8 +246,23 @@ export function applyShimmer(
   const opts = { __proto__: null, ...options } as ShimmerOptions
   const direction = opts.direction ?? DIR_NONE
   const shimmerWidth = opts.shimmerWidth ?? 2.5
-  // Socket purple.
-  const color = opts.color ?? ([140, 82, 255] as const)
+
+  // Resolve color from theme or use provided color or default Socket purple.
+  let color: ShimmerColorRgb | ShimmerColorGradient
+  if (opts.theme) {
+    // Resolve theme to Theme object
+    const theme = typeof opts.theme === 'string'
+      ? THEMES[opts.theme]
+      : opts.theme
+    // Use theme's primary color
+    const themeColor = resolveColor(theme.colors.primary, theme.colors) as ColorValue
+    // Convert ColorValue to ShimmerColorRgb
+    color = typeof themeColor === 'string'
+      ? ([140, 82, 255] as const) // Fallback if color is a string
+      : themeColor
+  } else {
+    color = opts.color ?? ([140, 82, 255] as const)
+  }
 
   // Detect text formatting styles from original text.
   const styles = opts.styles ?? detectStyles(text)
