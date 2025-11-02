@@ -22,6 +22,10 @@ export function getPackageSpecificOptions(packageName) {
   } else if (packageName.startsWith('@inquirer/')) {
     // Inquirer packages have heavy dependencies we might not need.
     opts.external = [...(opts.external || []), 'rxjs/operators']
+  } else if (packageName === '@socketregistry/packageurl-js') {
+    // packageurl-js imports from socket-lib, creating a circular dependency.
+    // Mark socket-lib imports as external to avoid bundling issues.
+    opts.external = [...(opts.external || []), '@socketsecurity/lib/*']
   } else if (packageName === 'yargs-parser') {
     // yargs-parser uses import.meta.url which isn't available in CommonJS.
     // Replace import.meta.url with __filename wrapped in pathToFileURL.
