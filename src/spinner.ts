@@ -1116,6 +1116,12 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       stop(...args: unknown[]) {
+        // Clear the spinner text BEFORE stopping to prevent ghost frames.
+        // This ensures the terminal line is fully cleared before we stop the animation.
+        if (!args.length || !args[0]) {
+          super.text = ''
+        }
+
         // Clear internal state.
         this.#baseText = ''
         this.#progress = undefined
@@ -1124,10 +1130,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           this.#shimmer.currentDir = DIR_LTR
           this.#shimmer.step = 0
         }
-        // Call parent stop first (clears screen, sets isSpinning = false).
+        // Call parent stop (clears screen, sets isSpinning = false).
         const result = this.#apply('stop', args)
-        // Then clear text to avoid blank frame render.
-        // This is safe now because isSpinning is false.
+        // Ensure text is cleared after stop completes.
         super.text = ''
         return result
       }
