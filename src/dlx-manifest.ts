@@ -121,8 +121,7 @@ export class DlxManifest {
 
   constructor(options: DlxManifestOptions = {}) {
     this.manifestPath =
-      options.manifestPath ??
-      path.join(getSocketDlxDir(), MANIFEST_FILE_NAME)
+      options.manifestPath ?? path.join(getSocketDlxDir(), MANIFEST_FILE_NAME)
     this.lockPath = `${this.manifestPath}.lock`
   }
 
