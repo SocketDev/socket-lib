@@ -111,14 +111,14 @@ export async function dlxDirExistsAsync(): Promise<boolean> {
  * Ensure the DLX directory exists, creating it if necessary.
  */
 export async function ensureDlxDir(): Promise<void> {
-  await safeMkdir(getSocketDlxDir(), { recursive: true })
+  await safeMkdir(getSocketDlxDir())
 }
 
 /**
  * Ensure the DLX directory exists synchronously, creating it if necessary.
  */
 export function ensureDlxDirSync(): void {
-  safeMkdirSync(getSocketDlxDir(), { recursive: true })
+  safeMkdirSync(getSocketDlxDir())
 }
 
 /**

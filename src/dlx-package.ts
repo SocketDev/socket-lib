@@ -217,7 +217,7 @@ async function ensurePackageInstalled(
   // Ensure package directory exists before creating lock.
   // The lock directory will be created inside this directory.
   try {
-    await safeMkdir(packageDir, { recursive: true })
+    await safeMkdir(packageDir)
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {

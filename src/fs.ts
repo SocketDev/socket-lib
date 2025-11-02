@@ -1285,21 +1285,25 @@ export function safeDeleteSync(
  * - Silently ignores EEXIST errors (directory already exists)
  * - Re-throws all other errors (permissions, invalid path, etc.)
  * - Works reliably in multi-process/concurrent scenarios
+ * - Defaults to recursive: true for convenient nested directory creation
  *
  * @param path - Directory path to create
- * @param options - Options including recursive and mode settings
+ * @param options - Options including recursive (default: true) and mode settings
  * @returns Promise that resolves when directory is created or already exists
  *
  * @example
  * ```ts
- * // Create a directory, no error if it exists
+ * // Create a directory recursively by default, no error if it exists
  * await safeMkdir('./config')
  *
- * // Create nested directories
- * await safeMkdir('./data/cache/temp', { recursive: true })
+ * // Create nested directories (recursive: true is the default)
+ * await safeMkdir('./data/cache/temp')
  *
  * // Create with specific permissions
  * await safeMkdir('./secure', { mode: 0o700 })
+ *
+ * // Explicitly disable recursive behavior
+ * await safeMkdir('./single-level', { recursive: false })
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -1308,8 +1312,9 @@ export async function safeMkdir(
   options?: MakeDirectoryOptions | undefined,
 ): Promise<void> {
   const fs = getFs()
+  const opts = { __proto__: null, recursive: true, ...options }
   try {
-    await fs.promises.mkdir(path, options)
+    await fs.promises.mkdir(path, opts)
   } catch (e: unknown) {
     // Ignore EEXIST error - directory already exists.
     if (
@@ -1332,20 +1337,24 @@ export async function safeMkdir(
  * - Silently ignores EEXIST errors (directory already exists)
  * - Re-throws all other errors (permissions, invalid path, etc.)
  * - Works reliably in multi-process/concurrent scenarios
+ * - Defaults to recursive: true for convenient nested directory creation
  *
  * @param path - Directory path to create
- * @param options - Options including recursive and mode settings
+ * @param options - Options including recursive (default: true) and mode settings
  *
  * @example
  * ```ts
- * // Create a directory, no error if it exists
+ * // Create a directory recursively by default, no error if it exists
  * safeMkdirSync('./config')
  *
- * // Create nested directories
- * safeMkdirSync('./data/cache/temp', { recursive: true })
+ * // Create nested directories (recursive: true is the default)
+ * safeMkdirSync('./data/cache/temp')
  *
  * // Create with specific permissions
  * safeMkdirSync('./secure', { mode: 0o700 })
+ *
+ * // Explicitly disable recursive behavior
+ * safeMkdirSync('./single-level', { recursive: false })
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -1354,8 +1363,9 @@ export function safeMkdirSync(
   options?: MakeDirectoryOptions | undefined,
 ): void {
   const fs = getFs()
+  const opts = { __proto__: null, recursive: true, ...options }
   try {
-    fs.mkdirSync(path, options)
+    fs.mkdirSync(path, opts)
   } catch (e: unknown) {
     // Ignore EEXIST error - directory already exists.
     if (

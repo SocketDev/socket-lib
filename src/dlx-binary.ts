@@ -454,7 +454,7 @@ export async function dlxBinary(
   if (downloaded) {
     // Ensure cache directory exists before downloading.
     try {
-      await safeMkdir(cacheEntryDir, { recursive: true })
+      await safeMkdir(cacheEntryDir)
     } catch (e) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'EACCES' || code === 'EPERM') {
@@ -570,7 +570,7 @@ export async function downloadBinary(
   } else {
     // Ensure cache directory exists before downloading.
     try {
-      await safeMkdir(cacheEntryDir, { recursive: true })
+      await safeMkdir(cacheEntryDir)
     } catch (e) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'EACCES' || code === 'EPERM') {
