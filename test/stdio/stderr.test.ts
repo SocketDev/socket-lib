@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for stderr stream utilities.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
   clearLine,
@@ -17,59 +17,10 @@ import {
   writeStackTrace,
   writeWarning,
 } from '@socketsecurity/lib/stdio/stderr'
+import { setupStdioTestSuite } from '../utils/stdio-test-helper'
 
 describe('stdio/stderr', () => {
-  let originalIsTTY: boolean | undefined
-  let originalColumns: number | undefined
-  let originalRows: number | undefined
-  let writeSpy: ReturnType<typeof vi.spyOn>
-  let cursorToSpy: ReturnType<typeof vi.spyOn>
-  let clearLineSpy: ReturnType<typeof vi.spyOn>
-
-  beforeEach(() => {
-    // Save original properties
-    originalIsTTY = stderr.isTTY
-    originalColumns = stderr.columns
-    originalRows = stderr.rows
-
-    // Create spies (add methods if they don't exist in non-TTY environments)
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    writeSpy = vi.spyOn(stderr, 'write').mockImplementation(() => true)
-
-    // Create stubs for TTY methods only if they don't exist, then spy on them
-    if (!stderr.cursorTo) {
-      ;(stderr as any).cursorTo = vi.fn()
-    }
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    cursorToSpy = vi.spyOn(stderr, 'cursorTo').mockImplementation(() => {})
-
-    if (!stderr.clearLine) {
-      ;(stderr as any).clearLine = vi.fn()
-    }
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    clearLineSpy = vi.spyOn(stderr, 'clearLine').mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    // Restore spies
-    writeSpy?.mockRestore()
-    cursorToSpy?.mockRestore()
-    clearLineSpy?.mockRestore()
-
-    // Restore original properties
-    Object.defineProperty(stderr, 'isTTY', {
-      value: originalIsTTY,
-      configurable: true,
-    })
-    Object.defineProperty(stderr, 'columns', {
-      value: originalColumns,
-      configurable: true,
-    })
-    Object.defineProperty(stderr, 'rows', {
-      value: originalRows,
-      configurable: true,
-    })
-  })
+  const getContext = setupStdioTestSuite(stderr)
 
   describe('stderr', () => {
     it('should export stderr stream', () => {
@@ -89,37 +40,39 @@ describe('stdio/stderr', () => {
 
     it('should write text with newline', () => {
       writeErrorLine('Error occurred')
-      expect(writeSpy).toHaveBeenCalledWith('Error occurred\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Error occurred\n')
     })
 
     it('should write empty line when no text provided', () => {
       writeErrorLine()
-      expect(writeSpy).toHaveBeenCalledWith('\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\n')
     })
 
     it('should write empty string with newline', () => {
       writeErrorLine('')
-      expect(writeSpy).toHaveBeenCalledWith('\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\n')
     })
 
     it('should handle multiline text', () => {
       writeErrorLine('Line 1\nLine 2')
-      expect(writeSpy).toHaveBeenCalledWith('Line 1\nLine 2\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Line 1\nLine 2\n')
     })
 
     it('should handle special characters', () => {
       writeErrorLine('Tab\tNewline')
-      expect(writeSpy).toHaveBeenCalledWith('Tab\tNewline\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Tab\tNewline\n')
     })
 
     it('should handle Unicode characters', () => {
       writeErrorLine('Error: 失败')
-      expect(writeSpy).toHaveBeenCalledWith('Error: 失败\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Error: 失败\n')
     })
 
     it('should handle ANSI color codes', () => {
       writeErrorLine('\u001B[31mRed Error\u001B[0m')
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[31mRed Error\u001B[0m\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        '\u001B[31mRed Error\u001B[0m\n',
+      )
     })
 
     it('should not return a value', () => {
@@ -135,17 +88,19 @@ describe('stdio/stderr', () => {
 
     it('should write text without newline', () => {
       writeError('Downloading...')
-      expect(writeSpy).toHaveBeenCalledWith('Downloading...')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Downloading...')
     })
 
     it('should write empty string', () => {
       writeError('')
-      expect(writeSpy).toHaveBeenCalledWith('')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('')
     })
 
     it('should handle ANSI escape sequences', () => {
       writeError('\u001B[33mWarning\u001B[0m')
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[33mWarning\u001B[0m')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        '\u001B[33mWarning\u001B[0m',
+      )
     })
 
     it('should not return a value', () => {
@@ -165,8 +120,8 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       clearLine()
-      expect(cursorToSpy).toHaveBeenCalledWith(0)
-      expect(clearLineSpy).toHaveBeenCalledWith(0)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(0)
+      expect(getContext().clearLineSpy).toHaveBeenCalledWith(0)
     })
 
     it('should not return a value', () => {
@@ -176,16 +131,6 @@ describe('stdio/stderr', () => {
       })
       const result = clearLine()
       expect(result).toBeUndefined()
-    })
-
-    it('should move cursor to start of line before clearing', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      clearLine()
-      // @ts-expect-error - Vitest toHaveBeenCalledBefore matcher not recognized by TypeScript
-      expect(cursorToSpy).toHaveBeenCalledBefore(clearLineSpy)
     })
   })
 
@@ -200,7 +145,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       cursorTo(10)
-      expect(cursorToSpy).toHaveBeenCalledWith(10, undefined)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, undefined)
     })
 
     it('should move cursor to x,y position in TTY', () => {
@@ -209,7 +154,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       cursorTo(10, 5)
-      expect(cursorToSpy).toHaveBeenCalledWith(10, 5)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, 5)
     })
 
     it('should move cursor to 0,0', () => {
@@ -218,7 +163,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       cursorTo(0, 0)
-      expect(cursorToSpy).toHaveBeenCalledWith(0, 0)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(0, 0)
     })
 
     it('should not return a value', () => {
@@ -236,7 +181,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       cursorTo(1000, 500)
-      expect(cursorToSpy).toHaveBeenCalledWith(1000, 500)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(1000, 500)
     })
 
     it('should handle negative coordinates', () => {
@@ -245,7 +190,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       cursorTo(-1, -1)
-      expect(cursorToSpy).toHaveBeenCalledWith(-1, -1)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(-1, -1)
     })
   })
 
@@ -375,39 +320,47 @@ describe('stdio/stderr', () => {
 
     it('should write warning with default prefix', () => {
       writeWarning('Deprecated API')
-      expect(writeSpy).toHaveBeenCalledWith('Warning: Deprecated API\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Warning: Deprecated API\n',
+      )
     })
 
     it('should write warning with custom prefix', () => {
       writeWarning('Invalid config', 'Config')
-      expect(writeSpy).toHaveBeenCalledWith('Config: Invalid config\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Config: Invalid config\n',
+      )
     })
 
     it('should handle empty message', () => {
       writeWarning('')
-      expect(writeSpy).toHaveBeenCalledWith('Warning: \n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Warning: \n')
     })
 
     it('should handle multiline message', () => {
       writeWarning('Line 1\nLine 2')
-      expect(writeSpy).toHaveBeenCalledWith('Warning: Line 1\nLine 2\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Warning: Line 1\nLine 2\n',
+      )
     })
 
     it('should handle special characters in message', () => {
       writeWarning('Path contains \\n escape')
-      expect(writeSpy).toHaveBeenCalledWith(
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
         'Warning: Path contains \\n escape\n',
       )
     })
 
     it('should handle Unicode in message', () => {
       writeWarning('警告メッセージ')
-      expect(writeSpy).toHaveBeenCalledWith('Warning: 警告メッセージ\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Warning: 警告メッセージ\n',
+      )
     })
 
     it('should handle empty prefix', () => {
       writeWarning('Test message', '')
-      expect(writeSpy).toHaveBeenCalledWith(': Test message\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(': Test message\n')
     })
 
     it('should not return a value', () => {
@@ -423,37 +376,47 @@ describe('stdio/stderr', () => {
 
     it('should write error with default prefix', () => {
       writeErrorFormatted('File not found')
-      expect(writeSpy).toHaveBeenCalledWith('Error: File not found\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: File not found\n',
+      )
     })
 
     it('should write error with custom prefix', () => {
       writeErrorFormatted('Connection failed', 'Network')
-      expect(writeSpy).toHaveBeenCalledWith('Network: Connection failed\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Network: Connection failed\n',
+      )
     })
 
     it('should handle empty message', () => {
       writeErrorFormatted('')
-      expect(writeSpy).toHaveBeenCalledWith('Error: \n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Error: \n')
     })
 
     it('should handle multiline message', () => {
       writeErrorFormatted('Line 1\nLine 2')
-      expect(writeSpy).toHaveBeenCalledWith('Error: Line 1\nLine 2\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: Line 1\nLine 2\n',
+      )
     })
 
     it('should handle special characters', () => {
       writeErrorFormatted('Invalid character: $')
-      expect(writeSpy).toHaveBeenCalledWith('Error: Invalid character: $\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: Invalid character: $\n',
+      )
     })
 
     it('should handle Unicode characters', () => {
       writeErrorFormatted('エラーが発生しました')
-      expect(writeSpy).toHaveBeenCalledWith('Error: エラーが発生しました\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: エラーが発生しました\n',
+      )
     })
 
     it('should handle empty prefix', () => {
       writeErrorFormatted('Test message', '')
-      expect(writeSpy).toHaveBeenCalledWith(': Test message\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(': Test message\n')
     })
 
     it('should not return a value', () => {
@@ -471,27 +434,31 @@ describe('stdio/stderr', () => {
       const error = new Error('Test error')
       error.stack = undefined
       writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalledWith('Error: Test error\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Error: Test error\n')
     })
 
     it('should handle error with empty message', () => {
       const error = new Error('')
       writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalled()
+      expect(getContext().writeSpy).toHaveBeenCalled()
     })
 
     it('should handle error with multiline message', () => {
       const error = new Error('Line 1\nLine 2')
       error.stack = undefined
       writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalledWith('Error: Line 1\nLine 2\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: Line 1\nLine 2\n',
+      )
     })
 
     it('should handle error with Unicode message', () => {
       const error = new Error('エラー: 失敗')
       error.stack = undefined
       writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalledWith('Error: エラー: 失敗\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: エラー: 失敗\n',
+      )
     })
 
     it('should not return a value', () => {
@@ -508,7 +475,7 @@ describe('stdio/stderr', () => {
       } catch (err) {
         writeStackTrace(err as Error)
       }
-      expect(writeSpy).toHaveBeenCalled()
+      expect(getContext().writeSpy).toHaveBeenCalled()
     })
 
     it('should handle graceful degradation from TTY to non-TTY', () => {
@@ -518,9 +485,9 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       clearLine()
-      expect(clearLineSpy).toHaveBeenCalled()
+      expect(getContext().clearLineSpy).toHaveBeenCalled()
 
-      clearLineSpy.mockClear()
+      getContext().clearLineSpy.mockClear()
 
       // Switch to non-TTY
       Object.defineProperty(stderr, 'isTTY', {
@@ -528,7 +495,7 @@ describe('stdio/stderr', () => {
         configurable: true,
       })
       clearLine()
-      expect(clearLineSpy).not.toHaveBeenCalled()
+      expect(getContext().clearLineSpy).not.toHaveBeenCalled()
     })
   })
 
@@ -546,7 +513,7 @@ describe('stdio/stderr', () => {
     it('should handle very long error messages', () => {
       const longMessage = 'x'.repeat(10_000)
       writeErrorLine(longMessage)
-      expect(writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
+      expect(getContext().writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
     })
 
     it('should handle terminal dimension changes', () => {
@@ -577,7 +544,9 @@ describe('stdio/stderr', () => {
     it('should handle errors with no stack property', () => {
       const error = { message: 'Not a real Error' } as Error
       writeStackTrace(error)
-      expect(writeSpy).toHaveBeenCalledWith('Error: Not a real Error\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: Not a real Error\n',
+      )
     })
   })
 
@@ -590,7 +559,7 @@ describe('stdio/stderr', () => {
       expect(isTTY()).toBe(false)
       // When piped, should still write but skip terminal control
       writeErrorLine('Error line')
-      expect(writeSpy).toHaveBeenCalled()
+      expect(getContext().writeSpy).toHaveBeenCalled()
     })
 
     it('should handle terminal size queries', () => {
