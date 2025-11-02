@@ -6,10 +6,10 @@ Socket Lib provides a comprehensive theming system for consistent branding acros
 
 | Theme | Use Case | Primary Color | Special Effects |
 |-------|----------|---------------|-----------------|
+| **`lush`** | Steel elegance | Steel blue `#4682B4` + Gold `#FFD700` | Elegant harmony |
 | **`socket`** (default) | Socket Security | Violet `#8C52FF` | Subtle shimmer |
 | **`sunset`** | Vibrant twilight | Orange `#FF8C64` + Pink `#C864B4` | Purple-to-orange gradient |
 | **`terracotta`** | Solid warmth | Terracotta `#FF6432` | Rich shimmer |
-| **`lush`** | Steel elegance | Steel blue `#4682B4` + Gold `#FFD700` | Elegant harmony |
 | **`ultra`** | Premium intensity | 🌈 Prismatic | Rainbow shimmer |
 
 ### Quick Start
@@ -111,6 +111,20 @@ withTheme()    → [sunset] → [ultra] → [sunset]
 
 ## Built-in Themes
 
+### 🔷 Lush
+
+```typescript
+setTheme('lush')
+```
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Color** | `#4682B4` (Steel blue) |
+| **Secondary Color** | `#FFD700` (Gold) |
+| **Best For** | Elegant interfaces, harmonious design |
+| **Spinner** | Dots style, clean animations |
+| **Visual Style** | Elegant theme with steel blue and golden harmony |
+
 ### 🟣 Socket Security (Default)
 
 ```typescript
@@ -160,20 +174,6 @@ setTheme('terracotta')
 | **Best For** | Grounded confidence, warm interfaces |
 | **Spinner** | Socket style with rich shimmer |
 | **Visual Style** | Solid theme with rich terracotta and ember warmth |
-
-### 🔷 Lush
-
-```typescript
-setTheme('lush')
-```
-
-| Attribute | Value |
-|-----------|-------|
-| **Primary Color** | `#4682B4` (Steel blue) |
-| **Secondary Color** | `#FFD700` (Gold) |
-| **Best For** | Elegant interfaces, harmonious design |
-| **Spinner** | Dots style, clean animations |
-| **Visual Style** | Elegant theme with steel blue and golden harmony |
 
 ### 🌈 Ultra
 
