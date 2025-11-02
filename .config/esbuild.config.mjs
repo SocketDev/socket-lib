@@ -57,7 +57,7 @@ function createPathShorteningPlugin() {
              * Shorten a module path and detect conflicts.
              */
             // eslint-disable-next-line unicorn/consistent-function-scoping
-            const shortenPath = (longPath) => {
+            const shortenPath = longPath => {
               if (pathMap.has(longPath)) {
                 return pathMap.get(longPath)
               }
@@ -134,7 +134,7 @@ function createPathShorteningPlugin() {
               }
 
               // Walk through all string literals in __commonJS calls
-              const walk = (node) => {
+              const walk = node => {
                 if (!node || typeof node !== 'object') {
                   return
                 }
