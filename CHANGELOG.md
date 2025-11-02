@@ -25,6 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Error messages styled with `colors.error`
   - Success indicators styled with `colors.success`
   - Consistent visual experience with Logger and Spinner theme integration
+  - Exported `createInquirerTheme()` function for converting Socket themes to @inquirer format
+
+- **Theme parameter support**: Logger, Spinner, Prompts, and text effects now accept `theme` parameter
+  - Pass theme names (`'socket'`, `'sunset'`, `'terracotta'`, `'lush'`, `'ultra'`) or Theme objects
+  - Logger: `new Logger({ theme: 'sunset' })` - uses theme-specific symbols
+  - Spinner: `new Spinner({ theme: 'lush' })` - uses theme colors for spinner and text
+  - Prompts: `await input({ message: 'Name:', theme: 'ultra' })` - uses theme for prompt styling
+  - Text effects: `applyShimmer(text, state, { theme: 'terracotta' })` - uses theme for shimmer colors
+  - Instance-specific themes override global theme context
+  - Falls back to global theme context when no instance theme specified
 
 ## [3.0.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.4) - 2025-11-01
 
