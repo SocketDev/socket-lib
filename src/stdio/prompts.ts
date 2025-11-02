@@ -6,6 +6,8 @@
 import { getAbortSignal, getSpinner } from '#constants/process'
 import type { ColorValue } from '../spinner'
 import { getTheme } from '../themes/context'
+import { THEMES, type ThemeName } from '../themes/themes'
+import type { Theme } from '../themes/types'
 import { resolveColor } from '../themes/utils'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
@@ -97,13 +99,22 @@ declare class SeparatorType {
 export type Separator = SeparatorType
 
 /**
+ * Resolve theme name or object to Theme.
+ * @param theme - Theme name or object
+ * @returns Resolved Theme
+ */
+function resolveTheme(theme: Theme | ThemeName): Theme {
+  return typeof theme === 'string' ? THEMES[theme] : theme
+}
+
+/**
  * Convert Socket theme to @inquirer theme format.
  * Maps our theme colors to inquirer's style functions.
  *
  * @param theme - Socket theme
  * @returns @inquirer theme object
  */
-function createInquirerTheme(theme: import('../themes/types').Theme) {
+function createInquirerTheme(theme: Theme) {
   const promptColor = resolveColor(theme.colors.prompt, theme.colors) as ColorValue
   const textDimColor = resolveColor(theme.colors.textDim, theme.colors) as ColorValue
   const errorColor = theme.colors.error
@@ -165,9 +176,23 @@ export function wrapPrompt<T = unknown>(
 
     // Inject theme into config (args[0])
     const config = args[0] as Record<string, unknown>
-    if (config && typeof config === 'object' && !config.theme) {
-      const theme = getTheme()
-      config.theme = createInquirerTheme(theme)
+    if (config && typeof config === 'object') {
+      if (!config.theme) {
+        // No theme provided, use current theme
+        const theme = getTheme()
+        config.theme = createInquirerTheme(theme)
+      } else if (
+        typeof config.theme === 'string' ||
+        (typeof config.theme === 'object' &&
+          config.theme !== null &&
+          'name' in config.theme &&
+          'colors' in config.theme)
+      ) {
+        // Socket theme name or Theme object - convert to @inquirer format
+        const socketTheme = resolveTheme(config.theme as Theme | ThemeName)
+        config.theme = createInquirerTheme(socketTheme)
+      }
+      // Otherwise it's already an @inquirer theme, leave as-is
     }
 
     // Inject signal into context (args[1])
