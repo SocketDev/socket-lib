@@ -5,9 +5,8 @@
 
 import type { Writable } from 'stream'
 
-import { isDebug } from './debug'
-// Note: getAbortSignal is imported lazily to avoid circular dependencies.
 import { getCI } from '#env/ci'
+import { isDebug } from './debug'
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
   ShimmerColorGradient,
