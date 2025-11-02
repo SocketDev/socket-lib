@@ -7,6 +7,13 @@
 export type SocketFramesOptions = {
   readonly baseColor?: readonly [number, number, number] | undefined
   readonly interval?: number | undefined
+  /**
+   * Theme to use for pulse colors.
+   * Can be a theme name ('socket', 'sunset', etc.) or a Theme object.
+   * Note: Currently frames only contain brightness modifiers.
+   * Colors are applied by yocto-spinner based on spinner.color.
+   */
+  readonly theme?: import('../themes/types').Theme | import('../themes/themes').ThemeName | undefined
 }
 
 /**

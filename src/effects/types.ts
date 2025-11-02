@@ -26,6 +26,12 @@ export type ShimmerConfig = {
    * Default: 1/3 (~0.33).
    */
   readonly speed?: number | undefined
+  /**
+   * Theme to use for shimmer colors.
+   * Can be a theme name ('socket', 'sunset', etc.) or a Theme object.
+   * If provided, overrides the color option.
+   */
+  readonly theme?: import('../themes/types').Theme | import('../themes/themes').ThemeName | undefined
 }
 
 /**

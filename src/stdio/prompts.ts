@@ -108,43 +108,85 @@ function resolveTheme(theme: Theme | ThemeName): Theme {
 }
 
 /**
+ * Check if value is a Socket Theme object.
+ * @param value - Value to check
+ * @returns True if value is a Socket Theme
+ */
+function isSocketTheme(value: unknown): value is Theme {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'name' in value &&
+    'colors' in value
+  )
+}
+
+/**
  * Convert Socket theme to @inquirer theme format.
  * Maps our theme colors to inquirer's style functions.
+ * Handles theme names, Theme objects, and passes through @inquirer themes.
  *
- * @param theme - Socket theme
+ * @param theme - Socket theme name, Theme object, or @inquirer theme
  * @returns @inquirer theme object
+ *
+ * @example
+ * ```ts
+ * // Socket theme name
+ * createInquirerTheme('sunset')
+ *
+ * // Socket Theme object
+ * createInquirerTheme(SUNSET_THEME)
+ *
+ * // @inquirer theme (passes through)
+ * createInquirerTheme({ style: {...}, icon: {...} })
+ * ```
  */
-function createInquirerTheme(theme: Theme) {
-  const promptColor = resolveColor(theme.colors.prompt, theme.colors) as ColorValue
-  const textDimColor = resolveColor(theme.colors.textDim, theme.colors) as ColorValue
-  const errorColor = theme.colors.error
-  const successColor = theme.colors.success
-  const primaryColor = theme.colors.primary
+export function createInquirerTheme(
+  theme: Theme | ThemeName | unknown,
+): Record<string, unknown> {
+  // If it's a string (theme name) or Socket Theme object, convert it
+  if (typeof theme === 'string' || isSocketTheme(theme)) {
+    const socketTheme = resolveTheme(theme as Theme | ThemeName)
+    const promptColor = resolveColor(
+      socketTheme.colors.prompt,
+      socketTheme.colors,
+    ) as ColorValue
+    const textDimColor = resolveColor(
+      socketTheme.colors.textDim,
+      socketTheme.colors,
+    ) as ColorValue
+    const errorColor = socketTheme.colors.error
+    const successColor = socketTheme.colors.success
+    const primaryColor = socketTheme.colors.primary
 
-  return {
-    style: {
-      // Message text (uses colors.prompt)
-      message: (text: string) => applyColor(text, promptColor),
-      // Answer text (uses primary color)
-      answer: (text: string) => applyColor(text, primaryColor),
-      // Help text / descriptions (uses textDim)
-      help: (text: string) => applyColor(text, textDimColor),
-      description: (text: string) => applyColor(text, textDimColor),
-      // Disabled items (uses textDim)
-      disabled: (text: string) => applyColor(text, textDimColor),
-      // Error messages (uses error color)
-      error: (text: string) => applyColor(text, errorColor),
-      // Highlight/active (uses primary color)
-      highlight: (text: string) => applyColor(text, primaryColor),
-    },
-    icon: {
-      // Use success color for confirmed items
-      checked: applyColor('✓', successColor),
-      unchecked: ' ',
-      // Cursor uses primary color
-      cursor: applyColor('❯', primaryColor),
-    },
+    return {
+      style: {
+        // Message text (uses colors.prompt)
+        message: (text: string) => applyColor(text, promptColor),
+        // Answer text (uses primary color)
+        answer: (text: string) => applyColor(text, primaryColor),
+        // Help text / descriptions (uses textDim)
+        help: (text: string) => applyColor(text, textDimColor),
+        description: (text: string) => applyColor(text, textDimColor),
+        // Disabled items (uses textDim)
+        disabled: (text: string) => applyColor(text, textDimColor),
+        // Error messages (uses error color)
+        error: (text: string) => applyColor(text, errorColor),
+        // Highlight/active (uses primary color)
+        highlight: (text: string) => applyColor(text, primaryColor),
+      },
+      icon: {
+        // Use success color for confirmed items
+        checked: applyColor('✓', successColor),
+        unchecked: ' ',
+        // Cursor uses primary color
+        cursor: applyColor('❯', primaryColor),
+      },
+    }
   }
+
+  // Otherwise it's already an @inquirer theme, return as-is
+  return theme as Record<string, unknown>
 }
 
 /**
@@ -179,20 +221,11 @@ export function wrapPrompt<T = unknown>(
     if (config && typeof config === 'object') {
       if (!config.theme) {
         // No theme provided, use current theme
-        const theme = getTheme()
-        config.theme = createInquirerTheme(theme)
-      } else if (
-        typeof config.theme === 'string' ||
-        (typeof config.theme === 'object' &&
-          config.theme !== null &&
-          'name' in config.theme &&
-          'colors' in config.theme)
-      ) {
-        // Socket theme name or Theme object - convert to @inquirer format
-        const socketTheme = resolveTheme(config.theme as Theme | ThemeName)
-        config.theme = createInquirerTheme(socketTheme)
+        config.theme = createInquirerTheme(getTheme())
+      } else {
+        // Theme provided - let createInquirerTheme handle detection
+        config.theme = createInquirerTheme(config.theme)
       }
-      // Otherwise it's already an @inquirer theme, leave as-is
     }
 
     // Inject signal into context (args[1])
