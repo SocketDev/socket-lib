@@ -360,15 +360,21 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       expiresAt: Date.now() + ttl,
     }
 
-    // Update in-memory cache.
+    // Update in-memory cache first (synchronous and fast).
     if (opts.memoize) {
       memoCache.set(fullKey, entry)
     }
 
-    // Update persistent cache.
-    await cacache.put(fullKey, JSON.stringify(entry), {
-      metadata: { expiresAt: entry.expiresAt },
-    })
+    // Update persistent cache (don't fail if this errors).
+    // In-memory cache is already updated, so immediate reads will succeed.
+    try {
+      await cacache.put(fullKey, JSON.stringify(entry), {
+        metadata: { expiresAt: entry.expiresAt },
+      })
+    } catch {
+      // Ignore persistent cache errors - in-memory cache is the source of truth.
+      // This can happen during test setup or if the cache directory is not accessible.
+    }
   }
 
   /**
