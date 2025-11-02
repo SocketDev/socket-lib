@@ -24,17 +24,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Answers and highlights styled with `colors.primary`
   - Error messages styled with `colors.error`
   - Success indicators styled with `colors.success`
-  - Consistent visual experience with Logger and Spinner theme integration
   - Exported `createInquirerTheme()` function for converting Socket themes to @inquirer format
+  - Consistent visual experience with Logger and Spinner theme integration
 
-- **Theme parameter support**: Logger, Spinner, Prompts, and text effects now accept `theme` parameter
+- **Theme parameter support**: Logger, Prompts, and text effects now accept optional `theme` parameter
   - Pass theme names (`'socket'`, `'sunset'`, `'terracotta'`, `'lush'`, `'ultra'`) or Theme objects
-  - Logger: `new Logger({ theme: 'sunset' })` - uses theme-specific symbols
-  - Spinner: `new Spinner({ theme: 'lush' })` - uses theme colors for spinner and text
-  - Prompts: `await input({ message: 'Name:', theme: 'ultra' })` - uses theme for prompt styling
-  - Text effects: `applyShimmer(text, state, { theme: 'terracotta' })` - uses theme for shimmer colors
-  - Instance-specific themes override global theme context
+  - **Logger**: `new Logger({ theme: 'sunset' })` - uses theme-specific symbol colors
+  - **Prompts**: `await input({ message: 'Name:', theme: 'ultra' })` - uses theme for prompt styling
+  - **Text effects**: `applyShimmer(text, state, { theme: 'terracotta' })` - uses theme for shimmer colors
+  - Instance-specific themes override global theme context when provided
   - Falls back to global theme context when no instance theme specified
+  - **Note**: Spinner already had theme parameter support in v3.0.0
+
+### Removed
+
+- **Unused index entrypoint**: Removed `src/index.ts` and package exports for `"."` and `"./index"`
+  - This was a leftover from socket-registry and not needed for this library
+  - Users should import specific modules directly (e.g., `@socketsecurity/lib/logger`)
+  - Breaking: `import { getDefaultLogger } from '@socketsecurity/lib'` no longer works
+  - Use: `import { getDefaultLogger } from '@socketsecurity/lib/logger'` instead
 
 ## [3.0.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.4) - 2025-11-01
 
