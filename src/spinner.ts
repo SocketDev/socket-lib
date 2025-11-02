@@ -669,7 +669,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           getDefaultLogger,
           incLogCallCountSymbol,
           lastWasBlankSymbol,
-        } = /*@__PURE__*/ require('./logger.js')
+        } = /*@__PURE__*/ require('./logger')
         const logger = getDefaultLogger()
         if (methodName === 'stop') {
           if (wasSpinning && normalized) {
@@ -748,7 +748,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         const {
           LOG_SYMBOLS,
           getDefaultLogger,
-        } = /*@__PURE__*/ require('./logger.js')
+        } = /*@__PURE__*/ require('./logger')
         // Note: Status messages always go to stderr.
         const logger = getDefaultLogger()
         logger.error(`${LOG_SYMBOLS[symbolType]} ${text}`, ...extras)
@@ -775,7 +775,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @returns This spinner for chaining
        */
       debug(text?: string | undefined, ...extras: unknown[]) {
-        const { isDebug } = /*@__PURE__*/ require('./debug.js')
+        const { isDebug } = /*@__PURE__*/ require('./debug')
         if (isDebug()) {
           return this.#showStatusAndKeepSpinning('info', [text, ...extras])
         }
@@ -792,7 +792,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @returns This spinner for chaining
        */
       debugAndStop(text?: string | undefined, ...extras: unknown[]) {
-        const { isDebug } = /*@__PURE__*/ require('./debug.js')
+        const { isDebug } = /*@__PURE__*/ require('./debug')
         if (isDebug()) {
           return this.#apply('info', [text, ...extras])
         }
@@ -939,7 +939,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @returns This spinner for chaining
        */
       log(...args: unknown[]) {
-        const { getDefaultLogger } = /*@__PURE__*/ require('./logger.js')
+        const { getDefaultLogger } = /*@__PURE__*/ require('./logger')
         const logger = getDefaultLogger()
         logger.log(...args)
         return this
@@ -1068,7 +1068,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       step(text?: string | undefined, ...extras: unknown[]) {
-        const { getDefaultLogger } = /*@__PURE__*/ require('./logger.js')
+        const { getDefaultLogger } = /*@__PURE__*/ require('./logger')
         if (typeof text === 'string') {
           const logger = getDefaultLogger()
           // Add blank line before step for visual separation.
@@ -1098,7 +1098,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       substep(text?: string | undefined, ...extras: unknown[]) {
         if (typeof text === 'string') {
           // Add 2-space indent for substep.
-          const { getDefaultLogger } = /*@__PURE__*/ require('./logger.js')
+          const { getDefaultLogger } = /*@__PURE__*/ require('./logger')
           const logger = getDefaultLogger()
           // Use error (stderr) to align with logger.substep() default stream.
           logger.error(`  ${text}`, ...extras)
