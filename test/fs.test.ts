@@ -21,6 +21,8 @@ import {
   readJsonSync,
   safeDelete,
   safeDeleteSync,
+  safeMkdir,
+  safeMkdirSync,
   safeReadFile,
   safeReadFileSync,
   safeStats,
@@ -1297,6 +1299,142 @@ describe('fs', () => {
         expect(validPaths[1]).toBe(file1)
         expect(validPaths[2]).toBe(file2)
       }, 'validateFiles-order-')
+    })
+  })
+
+  describe('safeMkdir', () => {
+    it('should create a single directory', async () => {
+      await runWithTempDir(async tmpDir => {
+        const newDir = path.join(tmpDir, 'test-dir')
+        await safeMkdir(newDir)
+
+        const stats = await fs.stat(newDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdir-single-')
+    })
+
+    it('should create nested directories by default (recursive: true)', async () => {
+      await runWithTempDir(async tmpDir => {
+        const nestedDir = path.join(tmpDir, 'level1', 'level2', 'level3')
+        await safeMkdir(nestedDir)
+
+        const stats = await fs.stat(nestedDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdir-nested-')
+    })
+
+    it('should not throw when directory already exists', async () => {
+      await runWithTempDir(async tmpDir => {
+        const newDir = path.join(tmpDir, 'existing')
+        await fs.mkdir(newDir)
+
+        await expect(safeMkdir(newDir)).resolves.toBeUndefined()
+
+        const stats = await fs.stat(newDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdir-exists-')
+    })
+
+    it('should respect recursive: false option', async () => {
+      await runWithTempDir(async tmpDir => {
+        const nestedDir = path.join(tmpDir, 'level1', 'level2')
+
+        await expect(
+          safeMkdir(nestedDir, { recursive: false }),
+        ).rejects.toThrow()
+      }, 'safeMkdir-no-recursive-')
+    })
+
+    it('should create directory with custom mode', async () => {
+      await runWithTempDir(async tmpDir => {
+        const newDir = path.join(tmpDir, 'custom-mode')
+        await safeMkdir(newDir, { mode: 0o755 })
+
+        const stats = await fs.stat(newDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdir-mode-')
+    })
+
+    it('should throw on permission denied', async () => {
+      // Test skipped on Windows as permission handling differs
+      if (process.platform === 'win32') {
+        return
+      }
+
+      await runWithTempDir(async tmpDir => {
+        const readonlyDir = path.join(tmpDir, 'readonly')
+        await fs.mkdir(readonlyDir, { mode: 0o444 })
+
+        const newDir = path.join(readonlyDir, 'should-fail')
+        await expect(safeMkdir(newDir)).rejects.toThrow()
+      }, 'safeMkdir-permission-')
+    })
+  })
+
+  describe('safeMkdirSync', () => {
+    it('should create a single directory', async () => {
+      await runWithTempDir(async tmpDir => {
+        const newDir = path.join(tmpDir, 'test-dir')
+        safeMkdirSync(newDir)
+
+        const stats = await fs.stat(newDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdirSync-single-')
+    })
+
+    it('should create nested directories by default (recursive: true)', async () => {
+      await runWithTempDir(async tmpDir => {
+        const nestedDir = path.join(tmpDir, 'level1', 'level2', 'level3')
+        safeMkdirSync(nestedDir)
+
+        const stats = await fs.stat(nestedDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdirSync-nested-')
+    })
+
+    it('should not throw when directory already exists', async () => {
+      await runWithTempDir(async tmpDir => {
+        const newDir = path.join(tmpDir, 'existing')
+        await fs.mkdir(newDir)
+
+        expect(() => safeMkdirSync(newDir)).not.toThrow()
+
+        const stats = await fs.stat(newDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdirSync-exists-')
+    })
+
+    it('should respect recursive: false option', async () => {
+      await runWithTempDir(async tmpDir => {
+        const nestedDir = path.join(tmpDir, 'level1', 'level2')
+
+        expect(() => safeMkdirSync(nestedDir, { recursive: false })).toThrow()
+      }, 'safeMkdirSync-no-recursive-')
+    })
+
+    it('should create directory with custom mode', async () => {
+      await runWithTempDir(async tmpDir => {
+        const newDir = path.join(tmpDir, 'custom-mode')
+        safeMkdirSync(newDir, { mode: 0o755 })
+
+        const stats = await fs.stat(newDir)
+        expect(stats.isDirectory()).toBe(true)
+      }, 'safeMkdirSync-mode-')
+    })
+
+    it('should throw on permission denied', async () => {
+      // Test skipped on Windows as permission handling differs
+      if (process.platform === 'win32') {
+        return
+      }
+
+      await runWithTempDir(async tmpDir => {
+        const readonlyDir = path.join(tmpDir, 'readonly')
+        await fs.mkdir(readonlyDir, { mode: 0o444 })
+
+        const newDir = path.join(readonlyDir, 'should-fail')
+        expect(() => safeMkdirSync(newDir)).toThrow()
+      }, 'safeMkdirSync-permission-')
     })
   })
 })
