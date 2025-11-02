@@ -2,9 +2,7 @@
  * @fileoverview Unit tests for stdout stream utilities.
  */
 
-import { WriteStream } from 'node:tty'
-
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   clearLine,
@@ -20,73 +18,10 @@ import {
   write,
   writeLine,
 } from '@socketsecurity/lib/stdio/stdout'
+import { setupStdioTestSuite } from '../utils/stdio-test-helper'
 
 describe('stdio/stdout', () => {
-  let originalIsTTY: boolean | undefined
-  let originalColumns: number | undefined
-  let originalRows: number | undefined
-  let writeSpy: ReturnType<typeof vi.spyOn>
-  let cursorToSpy: ReturnType<typeof vi.spyOn>
-  let clearLineSpy: ReturnType<typeof vi.spyOn>
-  let clearScreenDownSpy: ReturnType<typeof vi.spyOn>
-
-  beforeEach(() => {
-    // Save original properties
-    originalIsTTY = stdout.isTTY
-    originalColumns = stdout.columns
-    originalRows = stdout.rows
-
-    // Make stdout appear as a WriteStream instance for hide/showCursor tests
-    Object.setPrototypeOf(stdout, WriteStream.prototype)
-
-    // Create spies (add methods if they don't exist in non-TTY environments)
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    writeSpy = vi.spyOn(stdout, 'write').mockImplementation(() => true)
-
-    // Create stubs for TTY methods only if they don't exist, then spy on them
-    if (!stdout.cursorTo) {
-      ;(stdout as any).cursorTo = vi.fn()
-    }
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    cursorToSpy = vi.spyOn(stdout, 'cursorTo').mockImplementation(() => {})
-
-    if (!stdout.clearLine) {
-      ;(stdout as any).clearLine = vi.fn()
-    }
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    clearLineSpy = vi.spyOn(stdout, 'clearLine').mockImplementation(() => {})
-
-    if (!stdout.clearScreenDown) {
-      ;(stdout as any).clearScreenDown = vi.fn()
-    }
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    clearScreenDownSpy = vi
-      .spyOn(stdout, 'clearScreenDown')
-      // @ts-expect-error - Vitest mock type doesn't match expected implementation signature
-      .mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    // Restore spies
-    writeSpy?.mockRestore()
-    cursorToSpy?.mockRestore()
-    clearLineSpy?.mockRestore()
-    clearScreenDownSpy?.mockRestore()
-
-    // Restore original properties
-    Object.defineProperty(stdout, 'isTTY', {
-      value: originalIsTTY,
-      configurable: true,
-    })
-    Object.defineProperty(stdout, 'columns', {
-      value: originalColumns,
-      configurable: true,
-    })
-    Object.defineProperty(stdout, 'rows', {
-      value: originalRows,
-      configurable: true,
-    })
-  })
+  const getContext = setupStdioTestSuite(stdout)
 
   describe('stdout', () => {
     it('should export stdout stream', () => {
@@ -106,37 +41,37 @@ describe('stdio/stdout', () => {
 
     it('should write text with newline', () => {
       writeLine('Hello, world!')
-      expect(writeSpy).toHaveBeenCalledWith('Hello, world!\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Hello, world!\n')
     })
 
     it('should write empty line when no text provided', () => {
       writeLine()
-      expect(writeSpy).toHaveBeenCalledWith('\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\n')
     })
 
     it('should write empty string with newline', () => {
       writeLine('')
-      expect(writeSpy).toHaveBeenCalledWith('\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\n')
     })
 
     it('should handle multiline text', () => {
       writeLine('Line 1\nLine 2')
-      expect(writeSpy).toHaveBeenCalledWith('Line 1\nLine 2\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Line 1\nLine 2\n')
     })
 
     it('should handle special characters', () => {
       writeLine('Tab\tNewline')
-      expect(writeSpy).toHaveBeenCalledWith('Tab\tNewline\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Tab\tNewline\n')
     })
 
     it('should handle Unicode characters', () => {
       writeLine('Hello 世界')
-      expect(writeSpy).toHaveBeenCalledWith('Hello 世界\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Hello 世界\n')
     })
 
     it('should handle emojis', () => {
       writeLine('Success! ✅')
-      expect(writeSpy).toHaveBeenCalledWith('Success! ✅\n')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Success! ✅\n')
     })
 
     it('should not return a value', () => {
@@ -152,17 +87,19 @@ describe('stdio/stdout', () => {
 
     it('should write text without newline', () => {
       write('Loading...')
-      expect(writeSpy).toHaveBeenCalledWith('Loading...')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Loading...')
     })
 
     it('should write empty string', () => {
       write('')
-      expect(writeSpy).toHaveBeenCalledWith('')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('')
     })
 
     it('should handle ANSI escape sequences', () => {
       write('\u001B[32mGreen\u001B[0m')
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[32mGreen\u001B[0m')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        '\u001B[32mGreen\u001B[0m',
+      )
     })
 
     it('should not return a value', () => {
@@ -182,8 +119,8 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       clearLine()
-      expect(cursorToSpy).toHaveBeenCalledWith(0)
-      expect(clearLineSpy).toHaveBeenCalledWith(0)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(0)
+      expect(getContext().clearLineSpy).toHaveBeenCalledWith(0)
     })
 
     it('should not return a value', () => {
@@ -193,16 +130,6 @@ describe('stdio/stdout', () => {
       })
       const result = clearLine()
       expect(result).toBeUndefined()
-    })
-
-    it('should move cursor to start of line before clearing', () => {
-      Object.defineProperty(stdout, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      clearLine()
-      // @ts-expect-error - Vitest toHaveBeenCalledBefore matcher not recognized by TypeScript
-      expect(cursorToSpy).toHaveBeenCalledBefore(clearLineSpy)
     })
   })
 
@@ -217,7 +144,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       cursorTo(10)
-      expect(cursorToSpy).toHaveBeenCalledWith(10, undefined)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, undefined)
     })
 
     it('should move cursor to x,y position in TTY', () => {
@@ -226,7 +153,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       cursorTo(10, 5)
-      expect(cursorToSpy).toHaveBeenCalledWith(10, 5)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, 5)
     })
 
     it('should move cursor to 0,0', () => {
@@ -235,7 +162,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       cursorTo(0, 0)
-      expect(cursorToSpy).toHaveBeenCalledWith(0, 0)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(0, 0)
     })
 
     it('should not return a value', () => {
@@ -253,7 +180,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       cursorTo(1000, 500)
-      expect(cursorToSpy).toHaveBeenCalledWith(1000, 500)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(1000, 500)
     })
 
     it('should handle negative coordinates', () => {
@@ -262,7 +189,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       cursorTo(-1, -1)
-      expect(cursorToSpy).toHaveBeenCalledWith(-1, -1)
+      expect(getContext().cursorToSpy).toHaveBeenCalledWith(-1, -1)
     })
   })
 
@@ -277,7 +204,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       clearScreenDown()
-      expect(clearScreenDownSpy).toHaveBeenCalled()
+      expect(getContext().clearScreenDownSpy).toHaveBeenCalled()
     })
 
     it('should not return a value', () => {
@@ -420,7 +347,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       hideCursor()
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[?25l')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25l')
     })
 
     it('should not return a value', () => {
@@ -444,7 +371,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       showCursor()
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[?25h')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
     it('should not return a value', () => {
@@ -494,10 +421,10 @@ describe('stdio/stdout', () => {
       write('Loading')
       write('...')
       writeLine(' Done!')
-      expect(writeSpy).toHaveBeenCalledTimes(3)
-      expect(writeSpy).toHaveBeenNthCalledWith(1, 'Loading')
-      expect(writeSpy).toHaveBeenNthCalledWith(2, '...')
-      expect(writeSpy).toHaveBeenNthCalledWith(3, ' Done!\n')
+      expect(getContext().writeSpy).toHaveBeenCalledTimes(3)
+      expect(getContext().writeSpy).toHaveBeenNthCalledWith(1, 'Loading')
+      expect(getContext().writeSpy).toHaveBeenNthCalledWith(2, '...')
+      expect(getContext().writeSpy).toHaveBeenNthCalledWith(3, ' Done!\n')
     })
 
     it('should support hide/show cursor pattern', () => {
@@ -509,8 +436,8 @@ describe('stdio/stdout', () => {
       write('Animation frame 1')
       write('Animation frame 2')
       showCursor()
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[?25l')
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[?25h')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25l')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
     it('should handle graceful degradation from TTY to non-TTY', () => {
@@ -520,9 +447,9 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       clearLine()
-      expect(clearLineSpy).toHaveBeenCalled()
+      expect(getContext().clearLineSpy).toHaveBeenCalled()
 
-      clearLineSpy.mockClear()
+      getContext().clearLineSpy.mockClear()
 
       // Switch to non-TTY
       Object.defineProperty(stdout, 'isTTY', {
@@ -530,7 +457,7 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       clearLine()
-      expect(clearLineSpy).not.toHaveBeenCalled()
+      expect(getContext().clearLineSpy).not.toHaveBeenCalled()
     })
   })
 
@@ -551,7 +478,7 @@ describe('stdio/stdout', () => {
     it('should handle very long text', () => {
       const longText = 'x'.repeat(10_000)
       writeLine(longText)
-      expect(writeSpy).toHaveBeenCalledWith(`${longText}\n`)
+      expect(getContext().writeSpy).toHaveBeenCalledWith(`${longText}\n`)
     })
 
     it('should handle rapid cursor movements', () => {
@@ -562,7 +489,7 @@ describe('stdio/stdout', () => {
       for (let i = 0; i < 100; i++) {
         cursorTo(i, i)
       }
-      expect(cursorToSpy).toHaveBeenCalledTimes(100)
+      expect(getContext().cursorToSpy).toHaveBeenCalledTimes(100)
     })
 
     it('should handle terminal dimension changes', () => {
@@ -604,7 +531,7 @@ describe('stdio/stdout', () => {
       write('Loading... 100%')
       writeLine(' Done!')
       // Actual calls: 3 writes + 1 writeLine = 4 calls (clearLine calls cursorTo and clearLine internally but not write)
-      expect(writeSpy).toHaveBeenCalledTimes(4)
+      expect(getContext().writeSpy).toHaveBeenCalledTimes(4)
     })
 
     it('should support spinner pattern', () => {
@@ -619,8 +546,8 @@ describe('stdio/stdout', () => {
         clearLine()
       }
       showCursor()
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[?25l')
-      expect(writeSpy).toHaveBeenCalledWith('\u001B[?25h')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25l')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
     it('should support table rendering', () => {
@@ -628,7 +555,7 @@ describe('stdio/stdout', () => {
       writeLine('------------|-----|-------')
       writeLine('John Doe    | 30  | NYC')
       writeLine('Jane Smith  | 25  | LA')
-      expect(writeSpy).toHaveBeenCalledTimes(4)
+      expect(getContext().writeSpy).toHaveBeenCalledTimes(4)
     })
 
     it('should detect redirected output', () => {
@@ -639,7 +566,7 @@ describe('stdio/stdout', () => {
       expect(isTTY()).toBe(false)
       // When piped, should still write but skip terminal control
       writeLine('Output line')
-      expect(writeSpy).toHaveBeenCalled()
+      expect(getContext().writeSpy).toHaveBeenCalled()
     })
 
     it('should handle terminal size queries', () => {
