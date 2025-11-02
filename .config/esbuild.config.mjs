@@ -238,18 +238,18 @@ export const buildConfig = {
   platform: 'node',
   target: 'node18',
   sourcemap: true,
-  // Don't minify - this is a library and minification breaks ESM/CJS interop
+  // Don't minify - this is a library and minification breaks ESM/CJS interop.
   minify: false,
-  // Tree-shaking optimization
+  // Tree-shaking optimization.
   treeShaking: true,
   metafile: true,
   logLevel: 'info',
 
-  // Use plugin for local package aliases (built-in alias requires bundle: true)
+  // Use plugin for local package aliases (built-in alias requires bundle: true).
   plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),
 
-  // Note: Cannot use "external" with bundle: false
-  // esbuild automatically treats all imports as external when not bundling
+  // Note: Cannot use "external" with bundle: false.
+  // esbuild automatically treats all imports as external when not bundling.
 
   // Define constants for optimization
   define: {
