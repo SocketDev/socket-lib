@@ -140,6 +140,10 @@
       "types": "./dist/dlx-binary.d.ts",
       "default": "./dist/dlx-binary.js"
     },
+    "./dlx-manifest": {
+      "types": "./dist/dlx-manifest.d.ts",
+      "default": "./dist/dlx-manifest.js"
+    },
     "./dlx-package": {
       "types": "./dist/dlx-package.d.ts",
       "default": "./dist/dlx-package.js"
