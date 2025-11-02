@@ -139,3 +139,23 @@ export function getSocketCliGithubToken(): string | undefined {
     getEnvValue('GITHUB_TOKEN')
   )
 }
+
+/**
+ * Bootstrap package spec (e.g., @socketsecurity/cli@^2.0.11).
+ * Set by bootstrap wrappers (SEA/smol/npm) to pass package spec to CLI.
+ *
+ * @returns Bootstrap package spec or undefined
+ */
+export function getSocketCliBootstrapSpec(): string | undefined {
+  return getEnvValue('SOCKET_CLI_BOOTSTRAP_SPEC')
+}
+
+/**
+ * Bootstrap cache directory path.
+ * Set by bootstrap wrappers to pass dlx cache location to CLI.
+ *
+ * @returns Bootstrap cache directory or undefined
+ */
+export function getSocketCliBootstrapCacheDir(): string | undefined {
+  return getEnvValue('SOCKET_CLI_BOOTSTRAP_CACHE_DIR')
+}

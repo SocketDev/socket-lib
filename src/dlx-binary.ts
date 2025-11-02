@@ -9,6 +9,7 @@ import path from 'path'
 import { WIN32 } from '#constants/platform'
 
 import { generateCacheKey } from './dlx'
+import { dlxManifest } from './dlx-manifest'
 import { httpDownload } from './http-request'
 import { isDir, readJson, safeDelete, safeMkdir } from './fs'
 import { isObjectObject } from './objects'
@@ -288,6 +289,8 @@ async function downloadBinaryFile(
 
 /**
  * Write metadata for a cached binary.
+ * Writes to both per-directory metadata file (for backward compatibility)
+ * and global manifest (~/.socket/_dlx/.dlx-manifest.json).
  * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
  * Schema documentation: See DlxMetadata interface in this file (exported).
  * Core fields: version, cache_key, timestamp, checksum, checksum_algorithm, platform, arch, size, source
@@ -297,9 +300,11 @@ async function writeMetadata(
   cacheEntryPath: string,
   cacheKey: string,
   url: string,
+  binaryName: string,
   checksum: string,
   size: number,
 ): Promise<void> {
+  // Write per-directory metadata file for backward compatibility.
   const metaPath = getMetadataPath(cacheEntryPath)
   const metadata = {
     version: '1.0.0',
@@ -317,6 +322,25 @@ async function writeMetadata(
   }
   const fs = getFs()
   await fs.promises.writeFile(metaPath, JSON.stringify(metadata, null, 2))
+
+  // Write to global manifest.
+  try {
+    const spec = `${url}:${binaryName}`
+    await dlxManifest.setBinaryEntry(spec, cacheKey, {
+      checksum,
+      checksum_algorithm: 'sha256',
+      platform: os.platform(),
+      arch: os.arch(),
+      size,
+      source: {
+        type: 'download',
+        url,
+      },
+    })
+  } catch (error) {
+    // Silently ignore manifest write errors - not critical.
+    // The per-directory metadata is the source of truth for now.
+  }
 }
 
 /**
@@ -486,6 +510,7 @@ export async function dlxBinary(
       cacheEntryDir,
       cacheKey,
       url,
+      binaryName,
       computedChecksum || '',
       stats.size,
     )
@@ -602,6 +627,7 @@ export async function downloadBinary(
       cacheEntryDir,
       cacheKey,
       url,
+      binaryName,
       computedChecksum || '',
       stats.size,
     )
