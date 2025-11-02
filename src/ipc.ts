@@ -377,7 +377,7 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
     // 5 minutes.
     const maxAgeMs = 5 * 60 * 1000
     // Process each file in parallel for efficiency.
-    await Promise.all(
+    await Promise.allSettled(
       files.map(async file => {
         if (file.startsWith('stub-') && file.endsWith('.json')) {
           const filePath = path.join(stubDir, file)

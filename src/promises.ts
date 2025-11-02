@@ -410,7 +410,7 @@ export async function pEach<T>(
     }
     // Process each item in the chunk concurrently.
     // eslint-disable-next-line no-await-in-loop
-    await Promise.all(
+    await Promise.allSettled(
       chunk.map((item: T) =>
         pRetry((...args: unknown[]) => callbackFn(args[0] as T), {
           ...retries,
@@ -573,7 +573,7 @@ export async function pFilterChunk<T>(
     } else {
       const chunk = chunks[i] as T[]
       // eslint-disable-next-line no-await-in-loop
-      const predicateResults = await Promise.all(
+      const settled = await Promise.allSettled(
         chunk.map(value =>
           pRetry((...args: unknown[]) => callbackFn(args[0] as T), {
             ...retryOpts,
@@ -581,6 +581,7 @@ export async function pFilterChunk<T>(
           }),
         ),
       )
+      const predicateResults = settled.map(r => r.status === 'fulfilled' ? r.value : false)
       filteredChunks[i] = chunk.filter((_v, i) => predicateResults[i])
     }
   }
