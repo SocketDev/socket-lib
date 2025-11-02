@@ -1271,6 +1271,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       /**
        * Set complete shimmer configuration.
        * Replaces any existing shimmer config with the provided values.
+       * Undefined properties will use default values.
        *
        * @param config - Complete shimmer configuration
        * @returns This spinner for chaining
@@ -1284,10 +1285,10 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       setShimmer(config: ShimmerConfig): Spinner {
         this.#shimmer = {
-          color: config.color,
+          color: config.color ?? COLOR_INHERIT,
           currentDir: DIR_LTR,
-          mode: config.dir,
-          speed: config.speed,
+          mode: config.dir ?? DIR_LTR,
+          speed: config.speed ?? 1 / 3,
           step: 0,
         } as ShimmerInfo
         this.#shimmerSavedConfig = this.#shimmer
