@@ -282,6 +282,12 @@ export type SpinnerOptions = {
    * @default undefined No initial text
    */
   readonly text?: string | undefined
+  /**
+   * Theme to use for spinner colors.
+   * Accepts theme name ('socket', 'sunset', etc.) or Theme object.
+   * @default Current theme from getTheme()
+   */
+  readonly theme?: import('./themes/types').Theme | import('./themes/themes').ThemeName | undefined
 }
 
 /**
@@ -488,8 +494,19 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       constructor(options?: SpinnerOptions | undefined) {
         const opts = { __proto__: null, ...options } as SpinnerOptions
 
+        // Get theme from options or current theme
+        let theme = getTheme()
+        if (opts.theme) {
+          // Resolve theme name or use Theme object directly
+          if (typeof opts.theme === 'string') {
+            const { THEMES } = /*@__PURE__*/ require('./themes/themes')
+            theme = THEMES[opts.theme]
+          } else {
+            theme = opts.theme
+          }
+        }
+
         // Get default color from theme if not specified
-        const theme = getTheme()
         let defaultColor: ColorValue = theme.colors.primary
         if (theme.effects?.spinner?.color) {
           const resolved = resolveColor(
