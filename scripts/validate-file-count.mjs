@@ -34,8 +34,9 @@ async function validateStagedFileCount() {
       },
     )
 
+    // Not a git repository
     if (!gitRoot.trim()) {
-      return null // Not a git repository
+      return null
     }
 
     // Get list of staged files
