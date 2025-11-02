@@ -288,7 +288,10 @@ export type SpinnerOptions = {
    * Accepts theme name ('socket', 'sunset', etc.) or Theme object.
    * @default Current theme from getTheme()
    */
-  readonly theme?: import('./themes/types').Theme | import('./themes/themes').ThemeName | undefined
+  readonly theme?:
+    | import('./themes/types').Theme
+    | import('./themes/themes').ThemeName
+    | undefined
 }
 
 /**

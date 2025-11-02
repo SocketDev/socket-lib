@@ -31,7 +31,10 @@ export type ShimmerConfig = {
    * Can be a theme name ('socket', 'sunset', etc.) or a Theme object.
    * If provided, overrides the color option.
    */
-  readonly theme?: import('../themes/types').Theme | import('../themes/themes').ThemeName | undefined
+  readonly theme?:
+    | import('../themes/types').Theme
+    | import('../themes/themes').ThemeName
+    | undefined
 }
 
 /**
