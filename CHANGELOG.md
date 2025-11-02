@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.6) - 2025-11-01
+
+### Added
+
+- **Build validation**: Added guard against `link:` protocol dependencies in package.json
+  - New `validate-no-link-deps.mjs` script automatically runs during `pnpm run check`
+  - Prevents accidental publication with `link:` dependencies which can cause issues
+  - Recommends using `workspace:` for monorepos or `catalog:` for centralized version management
+  - Validates all dependency fields: dependencies, devDependencies, peerDependencies, optionalDependencies
+
+### Changed
+
+- **Dependencies**: Updated `@socketregistry/packageurl-js` to 1.3.3
+- **Git hooks**: Committed pre-commit and pre-push hook configurations for version control
+- **Scripts**: Removed shebang from `validate-no-link-deps` script (Node.js script, not shell)
+
 ## [3.0.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.5) - 2025-11-01
 
 ### Fixed
