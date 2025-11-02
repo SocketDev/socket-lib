@@ -581,7 +581,9 @@ export async function pFilterChunk<T>(
           }),
         ),
       )
-      const predicateResults = settled.map(r => r.status === 'fulfilled' ? r.value : false)
+      const predicateResults = settled.map(r =>
+        r.status === 'fulfilled' ? r.value : false,
+      )
       filteredChunks[i] = chunk.filter((_v, i) => predicateResults[i])
     }
   }
