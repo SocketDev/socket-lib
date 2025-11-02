@@ -126,7 +126,7 @@ async function findFiles(dir, files = []) {
         }
       }
     }
-  } catch (_error) {
+  } catch {
     // Skip directories we can't read
   }
 
@@ -172,7 +172,7 @@ async function checkFile(filePath) {
     }
 
     return violations
-  } catch (_error) {
+  } catch {
     // Skip files we can't read
     return []
   }
