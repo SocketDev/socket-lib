@@ -98,7 +98,10 @@ type ShimmerOptions = {
   readonly direction?: ShimmerDirection | undefined
   readonly shimmerWidth?: number | undefined
   readonly styles?: TextStyles | undefined
-  readonly theme?: import('../themes/types').Theme | import('../themes/themes').ThemeName | undefined
+  readonly theme?:
+    | import('../themes/types').Theme
+    | import('../themes/themes').ThemeName
+    | undefined
 }
 
 export const COLOR_INHERIT = 'inherit'
@@ -251,15 +254,17 @@ export function applyShimmer(
   let color: ShimmerColorRgb | ShimmerColorGradient
   if (opts.theme) {
     // Resolve theme to Theme object
-    const theme = typeof opts.theme === 'string'
-      ? THEMES[opts.theme]
-      : opts.theme
+    const theme =
+      typeof opts.theme === 'string' ? THEMES[opts.theme] : opts.theme
     // Use theme's primary color
-    const themeColor = resolveColor(theme.colors.primary, theme.colors) as ColorValue
+    const themeColor = resolveColor(
+      theme.colors.primary,
+      theme.colors,
+    ) as ColorValue
     // Convert ColorValue to ShimmerColorRgb
-    color = typeof themeColor === 'string'
-      ? ([140, 82, 255] as const) // Fallback if color is a string
-      : themeColor
+    // Fallback to Socket purple if color is a string
+    color =
+      typeof themeColor === 'string' ? ([140, 82, 255] as const) : themeColor
   } else {
     color = opts.color ?? ([140, 82, 255] as const)
   }

@@ -13,7 +13,10 @@ export type SocketFramesOptions = {
    * Note: Currently frames only contain brightness modifiers.
    * Colors are applied by yocto-spinner based on spinner.color.
    */
-  readonly theme?: import('../themes/types').Theme | import('../themes/themes').ThemeName | undefined
+  readonly theme?:
+    | import('../themes/types').Theme
+    | import('../themes/themes').ThemeName
+    | undefined
 }
 
 /**

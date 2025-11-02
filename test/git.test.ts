@@ -330,7 +330,7 @@ describe('git', () => {
     })
 
     it('should handle files in subdirectories', async () => {
-      const result = await isChanged('src/index.ts', { cwd: projectRoot })
+      const result = await isChanged('src/logger.ts', { cwd: projectRoot })
       expect(typeof result).toBe('boolean')
     })
   })
