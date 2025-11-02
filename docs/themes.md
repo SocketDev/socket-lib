@@ -526,49 +526,6 @@ setTheme(myProductTheme)
 
 ---
 
-## Migration Guide
-
-### From Hard-Coded Colors
-
-**Before:**
-```typescript
-const spinner = Spinner({
-  text: 'Loading...',
-  color: [140, 82, 255]  // Hard-coded Socket purple
-})
-```
-
-**After:**
-```typescript
-import { setTheme, Spinner } from '@socketsecurity/lib'
-
-setTheme('socket')
-const spinner = Spinner({ text: 'Loading...' })
-// Uses theme colors automatically
-```
-
-### From Manual Color Management
-
-**Before:**
-```typescript
-const colors = {
-  success: 'green',
-  error: 'red',
-  warning: 'yellow'
-}
-
-logger.log(colors.success + ' Success!')
-```
-
-**After:**
-```typescript
-import { logger, setTheme } from '@socketsecurity/lib'
-
-setTheme('socket')
-logger.success('Success!')  // Uses theme colors
-```
-
----
 
 ## Troubleshooting
 
@@ -692,10 +649,3 @@ type ColorReference = ColorValue | 'primary' | 'secondary' | 'inherit' | 'rainbo
 | [**Build Architecture**](./build.md) | How the build system works |
 | [**CLAUDE.md**](../CLAUDE.md) | Coding standards & patterns |
 
----
-
-## Contributing
-
-Found a bug or want to add a new theme? See [CLAUDE.md](../CLAUDE.md) for contribution guidelines.
-
-**Ideas for new themes?** We'd love to see your custom themes! Share them in issues or PRs.
