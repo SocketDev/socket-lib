@@ -23,6 +23,177 @@ const entryPoints = fg.sync('**/*.{ts,mts,cts}', {
 })
 
 /**
+ * Plugin to shorten module paths in bundled output with conflict detection.
+ * Uses @babel/parser and magic-string for precise AST-based modifications.
+ */
+function createPathShorteningPlugin() {
+  return {
+    name: 'shorten-module-paths',
+    setup(build) {
+      build.onEnd(async result => {
+        if (!result.outputFiles && result.metafile) {
+          // Dynamic imports to avoid adding to production dependencies
+          const fs = await import('node:fs/promises')
+          const { parse } = await import('@babel/parser')
+          const MagicString = (await import('magic-string')).default
+
+          const outputs = Object.keys(result.metafile.outputs).filter(f =>
+            f.endsWith('.js'),
+          )
+
+          for (const outputPath of outputs) {
+            // eslint-disable-next-line no-await-in-loop
+            const content = await fs.readFile(outputPath, 'utf8')
+            const magicString = new MagicString(content)
+
+            // Track module paths and their shortened versions
+            // Map<originalPath, shortenedPath>
+            const pathMap = new Map()
+            // Track shortened paths to detect conflicts
+            // Map<shortenedPath, originalPath>
+            const conflictDetector = new Map()
+
+            /**
+             * Shorten a module path and detect conflicts.
+             */
+            // eslint-disable-next-line unicorn/consistent-function-scoping
+            const shortenPath = (longPath) => {
+              if (pathMap.has(longPath)) {
+                return pathMap.get(longPath)
+              }
+
+              let shortPath = longPath
+
+              // Handle pnpm scoped packages
+              // node_modules/.pnpm/@scope+pkg@version/node_modules/@scope/pkg/dist/file.js
+              // -> @scope/pkg/dist/file.js
+              const scopedPnpmMatch = longPath.match(
+                /node_modules\/\.pnpm\/@([^+/]+)\+([^@/]+)@[^/]+\/node_modules\/(@[^/]+\/[^/]+)\/(.+)/,
+              )
+              if (scopedPnpmMatch) {
+                const [, _scope, _pkg, packageName, subpath] = scopedPnpmMatch
+                shortPath = `${packageName}/${subpath}`
+              } else {
+                // Handle pnpm non-scoped packages
+                // node_modules/.pnpm/pkg@version/node_modules/pkg/dist/file.js
+                // -> pkg/dist/file.js
+                const pnpmMatch = longPath.match(
+                  /node_modules\/\.pnpm\/([^@/]+)@[^/]+\/node_modules\/([^/]+)\/(.+)/,
+                )
+                if (pnpmMatch) {
+                  const [, _pkgName, packageName, subpath] = pnpmMatch
+                  shortPath = `${packageName}/${subpath}`
+                }
+              }
+
+              // Detect conflicts
+              if (conflictDetector.has(shortPath)) {
+                const existingPath = conflictDetector.get(shortPath)
+                if (existingPath !== longPath) {
+                  // Conflict detected - keep original path
+                  console.warn(
+                    `⚠ Path conflict detected:\n  "${shortPath}"\n  Maps to: "${existingPath}"\n  Also from: "${longPath}"\n  Keeping original paths to avoid conflict.`,
+                  )
+                  shortPath = longPath
+                }
+              } else {
+                conflictDetector.set(shortPath, longPath)
+              }
+
+              pathMap.set(longPath, shortPath)
+              return shortPath
+            }
+
+            // Parse AST to find all string literals containing module paths
+            try {
+              const ast = parse(content, {
+                sourceType: 'module',
+                plugins: [],
+              })
+
+              // Walk through all comments (esbuild puts module paths in comments)
+              for (const comment of ast.comments || []) {
+                if (
+                  comment.type === 'CommentLine' &&
+                  comment.value.includes('node_modules')
+                ) {
+                  const originalPath = comment.value.trim()
+                  const shortPath = shortenPath(originalPath)
+
+                  if (shortPath !== originalPath) {
+                    // Replace in comment
+                    const commentStart = comment.start
+                    const commentEnd = comment.end
+                    magicString.overwrite(
+                      commentStart,
+                      commentEnd,
+                      `// ${shortPath}`,
+                    )
+                  }
+                }
+              }
+
+              // Walk through all string literals in __commonJS calls
+              const walk = (node) => {
+                if (!node || typeof node !== 'object') {
+                  return
+                }
+
+                // Check for string literals containing node_modules paths
+                if (
+                  node.type === 'StringLiteral' &&
+                  node.value &&
+                  node.value.includes('node_modules')
+                ) {
+                  const originalPath = node.value
+                  const shortPath = shortenPath(originalPath)
+
+                  if (shortPath !== originalPath) {
+                    // Replace the string content (keep quotes)
+                    magicString.overwrite(
+                      node.start + 1,
+                      node.end - 1,
+                      shortPath,
+                    )
+                  }
+                }
+
+                // Recursively walk all properties
+                for (const key of Object.keys(node)) {
+                  if (key === 'start' || key === 'end' || key === 'loc') {
+                    continue
+                  }
+                  const value = node[key]
+                  if (Array.isArray(value)) {
+                    for (const item of value) {
+                      walk(item)
+                    }
+                  } else {
+                    walk(value)
+                  }
+                }
+              }
+
+              walk(ast.program)
+
+              // Write the modified content
+              // eslint-disable-next-line no-await-in-loop
+              await fs.writeFile(outputPath, magicString.toString(), 'utf8')
+            } catch (error) {
+              console.error(
+                `Failed to shorten paths in ${outputPath}:`,
+                error.message,
+              )
+              // Continue without failing the build
+            }
+          }
+        }
+      })
+    },
+  }
+}
+
+/**
  * Plugin to handle local package aliases when bundle: false
  * esbuild's built-in alias only works with bundle: true, so we need a custom plugin
  */
@@ -75,7 +246,7 @@ export const buildConfig = {
   logLevel: 'info',
 
   // Use plugin for local package aliases (built-in alias requires bundle: true)
-  plugins: [createAliasPlugin()].filter(Boolean),
+  plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),
 
   // Note: Cannot use "external" with bundle: false
   // esbuild automatically treats all imports as external when not bundling
