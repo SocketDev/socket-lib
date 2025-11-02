@@ -164,8 +164,9 @@ function validateFilename(filePath) {
   const relativePath = path.relative(rootPath, filePath)
 
   // README.md and LICENSE are special - allowed anywhere
+  // Valid - allowed in any location
   if (nameWithoutExt === 'README' || nameWithoutExt === 'LICENSE') {
-    return null // Valid - allowed in any location
+    return null
   }
 
   // Check if it's an allowed SCREAMING_CASE file
@@ -179,7 +180,8 @@ function validateFilename(filePath) {
         suggestion: `Move to root, docs/, or .claude/, or rename to ${filename.toLowerCase().replace(/_/g, '-')}`,
       }
     }
-    return null // Valid
+    // Valid
+    return null
   }
 
   // Check if it's in SCREAMING_CASE but not allowed
@@ -229,7 +231,8 @@ function validateFilename(filePath) {
     }
   }
 
-  return null // Valid
+  // Valid
+  return null
 }
 
 /**
