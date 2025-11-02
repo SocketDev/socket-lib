@@ -14,7 +14,7 @@ export const NPX = 'npx'
 // NPM binary path - resolved at runtime using which.
 export const NPM_BIN_PATH = /*@__PURE__*/ (() => {
   try {
-    const which = /*@__PURE__*/ require('which')
+    const which = /*@__PURE__*/ require('../external/which')
     return which.sync('npm', { nothrow: true }) || 'npm'
   } catch {
     return 'npm'
@@ -28,7 +28,7 @@ export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
   try {
     const { existsSync } = /*@__PURE__*/ require('node:fs')
     const path = /*@__PURE__*/ require('node:path')
-    const which = /*@__PURE__*/ require('which')
+    const which = /*@__PURE__*/ require('../external/which')
     // Find npm binary using which.
     const npmBin = which.sync('npm', { nothrow: true })
     if (!npmBin) {

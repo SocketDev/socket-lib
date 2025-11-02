@@ -3,4 +3,4 @@
  * Provides access to zod's schema builder through the z object.
  */
 
-export { z } from 'zod'
+export { z } from './external/zod'
