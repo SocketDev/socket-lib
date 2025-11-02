@@ -6,6 +6,7 @@
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 import type { ColorName } from '../spinner'
 import { getTheme } from '../themes/context'
+import { THEMES } from '../themes/themes'
 import { resolveColor } from '../themes/utils'
 import type { Theme } from '../themes/types'
 import type { ThemeName } from '../themes/themes'
@@ -58,7 +59,7 @@ export function link(text: string, url: string, options?: LinkOptions): string {
   // Resolve theme
   const theme =
     typeof opts.theme === 'string'
-      ? require('../themes/themes').THEMES[opts.theme]
+      ? THEMES[opts.theme]
       : (opts.theme ?? getTheme())
 
   // Resolve link color

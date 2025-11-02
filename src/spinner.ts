@@ -19,6 +19,7 @@ import yoctoSpinner from './external/@socketregistry/yocto-spinner'
 import { hasOwn } from './objects'
 import { isBlankString, stringWidth } from './strings'
 import { getTheme } from './themes/context'
+import { THEMES } from './themes/themes'
 import { resolveColor } from './themes/utils'
 
 /**
@@ -499,7 +500,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         if (opts.theme) {
           // Resolve theme name or use Theme object directly
           if (typeof opts.theme === 'string') {
-            const { THEMES } = /*@__PURE__*/ require('./themes/themes')
             theme = THEMES[opts.theme]
           } else {
             theme = opts.theme

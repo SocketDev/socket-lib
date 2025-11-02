@@ -176,7 +176,6 @@ export async function isolatePackage(
       await install(packageTempDir)
     } else {
       const { spawn } = /*@__PURE__*/ require('../spawn')
-      const WIN32 = require('../constants/platform').WIN32
       const packageInstallSpec = spec.startsWith('https://')
         ? spec
         : `${packageName}@${spec}`
@@ -245,7 +244,6 @@ export async function isolatePackage(
     await install(installedPath)
   } else {
     const { spawn } = /*@__PURE__*/ require('../spawn')
-    const WIN32 = require('../constants/platform').WIN32
     await spawn('pnpm', ['install'], {
       cwd: installedPath,
       shell: WIN32,
