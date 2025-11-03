@@ -66,6 +66,12 @@ export function teardownStdioTest(
   stream: NodeJS.WriteStream & Writable,
   context: StdioTestContext,
 ): void {
+  // Clear call history before restoring
+  context.writeSpy?.mockClear()
+  context.cursorToSpy?.mockClear()
+  context.clearLineSpy?.mockClear()
+  context.clearScreenDownSpy?.mockClear()
+
   // Restore spies
   context.writeSpy?.mockRestore()
   context.cursorToSpy?.mockRestore()
