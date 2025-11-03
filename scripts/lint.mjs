@@ -6,8 +6,12 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import {
+  getChangedFilesSync,
+  getStagedFilesSync,
+} from '@socketsecurity/lib/git'
+
 import { isQuiet } from './utils/flags.mjs'
-import { getChangedFiles, getStagedFiles } from './utils/git.mjs'
 import { printHeader } from './utils/helpers.mjs'
 import { logger } from './utils/logger.mjs'
 import { parseArgs } from './utils/parse-args.mjs'
@@ -322,20 +326,20 @@ async function getFilesToLint(options) {
 
   if (staged) {
     mode = 'staged'
-    changedFiles = await getStagedFiles({ absolute: false })
+    changedFiles = getStagedFilesSync({ absolute: false })
     if (!changedFiles.length) {
       return { files: null, reason: 'no staged files', mode }
     }
   } else if (changed) {
     mode = 'changed'
-    changedFiles = await getChangedFiles({ absolute: false })
+    changedFiles = getChangedFilesSync({ absolute: false })
     if (!changedFiles.length) {
       return { files: null, reason: 'no changed files', mode }
     }
   } else {
     // Default to changed files if no specific flag
     mode = 'changed'
-    changedFiles = await getChangedFiles({ absolute: false })
+    changedFiles = getChangedFilesSync({ absolute: false })
     if (!changedFiles.length) {
       return { files: null, reason: 'no changed files', mode }
     }
