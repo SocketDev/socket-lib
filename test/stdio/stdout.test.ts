@@ -488,10 +488,12 @@ describe('stdio/stdout', () => {
       })
       // Clear spy calls from any previous tests to ensure accurate count
       getContext().cursorToSpy.mockClear()
+      const callsBefore = getContext().cursorToSpy.mock.calls.length
       for (let i = 0; i < 100; i++) {
         cursorTo(i, i)
       }
-      expect(getContext().cursorToSpy).toHaveBeenCalledTimes(100)
+      const callsAfter = getContext().cursorToSpy.mock.calls.length
+      expect(callsAfter - callsBefore).toBe(100)
     })
 
     it('should handle terminal dimension changes', () => {
