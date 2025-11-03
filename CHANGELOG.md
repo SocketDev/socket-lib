@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.3) - 2025-11-03
+
+### Internal
+
+- **Build system**: Added stub infrastructure for external dependency bundling
+  - Created organized `scripts/build-externals/stubs/` directory with utility and active stubs
+  - Added conservative stubs for unused dependencies: `encoding`/`iconv-lite` and `debug`
+  - Reduces external bundle size by ~18KB (9KB from encoding stubs, 9KB from debug stubs)
+
 ## [3.2.2](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.2) - 2025-11-03
 
 ### Added
