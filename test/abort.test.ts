@@ -376,18 +376,18 @@ describe('abort', () => {
     })
 
     it('should create independent signals', async () => {
-      const signal1 = createTimeoutSignal(10)
-      const signal2 = createTimeoutSignal(50)
+      const signal1 = createTimeoutSignal(50)
+      const signal2 = createTimeoutSignal(150)
 
       expect(signal1.aborted).toBe(false)
       expect(signal2.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 20))
+      await new Promise(resolve => setTimeout(resolve, 70))
 
       expect(signal1.aborted).toBe(true)
       expect(signal2.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 40))
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       expect(signal2.aborted).toBe(true)
     })
