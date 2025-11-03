@@ -1,4 +1,4 @@
-name: 🚀 CI Pipeline
+name: ⚡ CI
 
 # Optimized CI with:
 # - Separate lint job (1x instead of 6x)
