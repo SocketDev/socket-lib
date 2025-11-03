@@ -262,7 +262,7 @@ async function main() {
       return
     }
 
-    logger.fail('Markdown filename violations found')
+    logger.error('Markdown filename violations found')
     logger.log('')
     logger.log('Special files (allowed anywhere):')
     logger.log('  README.md, LICENSE')
@@ -291,12 +291,12 @@ async function main() {
 
     process.exitCode = 1
   } catch (error) {
-    logger.fail(`Validation failed: ${error.message}`)
+    logger.error(`Validation failed: ${error.message}`)
     process.exitCode = 1
   }
 }
 
 main().catch(error => {
-  logger.fail(`Validation failed: ${error}`)
+  logger.error(`Validation failed: ${error}`)
   process.exitCode = 1
 })

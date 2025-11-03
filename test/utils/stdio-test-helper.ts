@@ -20,7 +20,9 @@ interface StdioTestContext {
  * Sets up common mocks and spies for stdio stream testing.
  * Reduces ~50 lines of duplicate setup code per test file.
  */
-export function setupStdioTest(stream: NodeJS.WriteStream & Writable): StdioTestContext {
+export function setupStdioTest(
+  stream: NodeJS.WriteStream & Writable,
+): StdioTestContext {
   const context: StdioTestContext = {
     originalIsTTY: stream.isTTY,
     originalColumns: stream.columns,
@@ -35,17 +37,23 @@ export function setupStdioTest(stream: NodeJS.WriteStream & Writable): StdioTest
   if (!stream.cursorTo) {
     ;(stream as any).cursorTo = vi.fn()
   }
-  context.cursorToSpy = vi.spyOn(stream, 'cursorTo' as any).mockImplementation(() => {}) as any
+  context.cursorToSpy = vi
+    .spyOn(stream, 'cursorTo' as any)
+    .mockImplementation(() => {}) as any
 
   if (!stream.clearLine) {
     ;(stream as any).clearLine = vi.fn()
   }
-  context.clearLineSpy = vi.spyOn(stream, 'clearLine' as any).mockImplementation(() => {}) as any
+  context.clearLineSpy = vi
+    .spyOn(stream, 'clearLine' as any)
+    .mockImplementation(() => {}) as any
 
   if (!stream.clearScreenDown) {
     ;(stream as any).clearScreenDown = vi.fn()
   }
-  context.clearScreenDownSpy = vi.spyOn(stream, 'clearScreenDown' as any).mockImplementation(() => {}) as any
+  context.clearScreenDownSpy = vi
+    .spyOn(stream, 'clearScreenDown' as any)
+    .mockImplementation(() => {}) as any
 
   return context
 }
