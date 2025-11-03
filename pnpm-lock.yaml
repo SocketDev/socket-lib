@@ -57,11 +57,11 @@ importers:
         specifier: 1.3.5
         version: 1.3.5
       '@socketregistry/yocto-spinner':
-        specifier: 1.0.19
-        version: 1.0.19
+        specifier: 1.0.25
+        version: 1.0.25
       '@socketsecurity/lib-stable':
         specifier: https://registry.npmjs.org/@socketsecurity/lib/-/lib-3.2.0.tgz
-        version: '@socketsecurity/lib@3.2.0(typescript@5.9.2)'
+        version: 'link:'
       '@types/node':
         specifier: 24.9.2
         version: 24.9.2
@@ -927,18 +927,9 @@ packages:
     resolution: {integrity: sha512-Fl4GNUJ/z3IBJBGj4IsJfuRGUBCRMgX0df0mb5x5buaCPDKC+NhMhAFuxpc3viLSHV12CO2rGaNCf4fBYWI0FA==}
     engines: {node: '>=18', pnpm: '>=10.16.0'}
 
-  '@socketregistry/yocto-spinner@1.0.19':
-    resolution: {integrity: sha512-O2AQ1AsltIXuNScFt++WfLwpR47sH5jmaDXDg4N7xudrkl7zdfXccUyQpb/CorTi1Lkp022VJjGABg1m4cagBQ==}
-    engines: {node: '>=18.20.8'}
-
-  '@socketsecurity/lib@3.2.0':
-    resolution: {integrity: sha512-x9hgZQQtR4SmRP7X9nWsYizwpdx+QDgRQugBLDrNWEVk8xmH7S729qsAiNaHYmrNJyoHvWfe3novmmrJ+qB7Ng==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      typescript: '>=5.0.0'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
+  '@socketregistry/yocto-spinner@1.0.25':
+    resolution: {integrity: sha512-f8AqJMH1+BL15G6bHDzb1jyY+wW4gOYQs5JumSxmnE/H/+KgqbIZgaPwDdRwoeciDGojoSVrRHiTZjbe7n7dJA==}
+    engines: {node: '>=18'}
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -971,8 +962,8 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
-  '@types/emscripten@1.41.4':
-    resolution: {integrity: sha512-ECf0qTibhAi2Z0K6FIY96CvBTVkVIuVunOfbTUgbaAmGmbwsc33dbK9KZPROWsmzHotddy6C5pIqYqOmsBoJEw==}
+  '@types/emscripten@1.41.5':
+    resolution: {integrity: sha512-cMQm7pxu6BxtHyqJ7mQZ2kXWV5SLmugybFdHCBbJ5eHzOo6VhBckEgAT3//rP5FwPHNPeEiq4SmQ5ucBwsOo4Q==}
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -1566,8 +1557,8 @@ packages:
   es-module-lexer@1.7.0:
     resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
 
-  es-toolkit@1.40.0:
-    resolution: {integrity: sha512-8o6w0KFmU0CiIl0/Q/BCEOabF2IJaELM1T2PWj6e8KqzHv1gdx+7JtFnDwOx1kJH/isJ5NwlDG1nCr1HrRF94Q==}
+  es-toolkit@1.41.0:
+    resolution: {integrity: sha512-bDd3oRmbVgqZCJS6WmeQieOrzpl3URcWBUVDXxOELlUW2FuW+0glPOz1n0KnRie+PdyvUZcXz2sOn00c6pPRIA==}
 
   esbuild@0.25.11:
     resolution: {integrity: sha512-KohQwyzrKTQmhXDW1PjCv3Tyspn9n5GcY2RTDqeORIdIJY8yKIF7sTSopFmn/wpMPW4rdPXI0UE5LJLuq3bx0Q==}
@@ -3783,13 +3774,9 @@ snapshots:
 
   '@socketregistry/packageurl-js@1.3.5': {}
 
-  '@socketregistry/yocto-spinner@1.0.19':
+  '@socketregistry/yocto-spinner@1.0.25':
     dependencies:
       yoctocolors-cjs: 2.1.3
-
-  '@socketsecurity/lib@3.2.0(typescript@5.9.2)':
-    optionalDependencies:
-      typescript: 5.9.2
 
   '@standard-schema/spec@1.0.0': {}
 
@@ -3825,7 +3812,7 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
-  '@types/emscripten@1.41.4': {}
+  '@types/emscripten@1.41.5': {}
 
   '@types/estree@1.0.8': {}
 
@@ -4117,7 +4104,7 @@ snapshots:
       cross-spawn: 7.0.6
       diff: 5.2.0
       dotenv: 16.6.1
-      es-toolkit: 1.40.0
+      es-toolkit: 1.41.0
       fast-glob: 3.3.3
       got: 11.8.6
       hpagent: 1.2.0
@@ -4142,7 +4129,7 @@ snapshots:
 
   '@yarnpkg/libzip@3.2.2(@yarnpkg/fslib@3.1.3)':
     dependencies:
-      '@types/emscripten': 1.41.4
+      '@types/emscripten': 1.41.5
       '@yarnpkg/fslib': 3.1.3
       tslib: 2.8.1
 
@@ -4438,7 +4425,7 @@ snapshots:
 
   es-module-lexer@1.7.0: {}
 
-  es-toolkit@1.40.0: {}
+  es-toolkit@1.41.0: {}
 
   esbuild@0.25.11:
     optionalDependencies:
