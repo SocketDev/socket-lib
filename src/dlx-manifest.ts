@@ -33,6 +33,8 @@ import { getDefaultLogger } from './logger'
 import { getSocketDlxDir } from './paths'
 import { processLock } from './process-lock'
 
+const logger = getDefaultLogger()
+
 /**
  * Manifest file name.
  */
@@ -147,7 +149,7 @@ export class DlxManifest {
 
       return JSON.parse(content) as Record<string, ManifestEntry | StoreRecord>
     } catch (error) {
-      getDefaultLogger().warn(
+      logger.warn(
         `Failed to read manifest: ${error instanceof Error ? error.message : String(error)}`,
       )
       return Object.create(null)
@@ -240,7 +242,7 @@ export class DlxManifest {
     try {
       safeMkdirSync(manifestDir, { recursive: true })
     } catch (error) {
-      getDefaultLogger().warn(
+      logger.warn(
         `Failed to create manifest directory: ${error instanceof Error ? error.message : String(error)}`,
       )
     }
@@ -291,7 +293,7 @@ export class DlxManifest {
           }
         }
       } catch (error) {
-        getDefaultLogger().warn(
+        logger.warn(
           `Failed to read existing manifest: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
@@ -304,7 +306,7 @@ export class DlxManifest {
       try {
         safeMkdirSync(manifestDir, { recursive: true })
       } catch (error) {
-        getDefaultLogger().warn(
+        logger.warn(
           `Failed to create manifest directory: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
@@ -360,7 +362,7 @@ export class DlxManifest {
         const updatedContent = JSON.stringify(data, null, 2)
         writeFileSync(this.manifestPath, updatedContent, 'utf8')
       } catch (error) {
-        getDefaultLogger().warn(
+        logger.warn(
           `Failed to clear cache for ${name}: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
@@ -377,7 +379,7 @@ export class DlxManifest {
           unlinkSync(this.manifestPath)
         }
       } catch (error) {
-        getDefaultLogger().warn(
+        logger.warn(
           `Failed to clear all cache: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
@@ -418,7 +420,7 @@ export class DlxManifest {
       const data = JSON.parse(content) as Record<string, StoreRecord>
       return Object.keys(data)
     } catch (error) {
-      getDefaultLogger().warn(
+      logger.warn(
         `Failed to get package list: ${error instanceof Error ? error.message : String(error)}`,
       )
       return []
