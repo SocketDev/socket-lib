@@ -9,7 +9,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
+import { getDefaultSpinner } from '#socketsecurity/lib/spinner'
 import { printHeader } from '#socketsecurity/lib/stdio/header'
 
 import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
