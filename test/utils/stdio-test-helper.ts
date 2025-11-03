@@ -96,6 +96,11 @@ export function setupStdioTestSuite(stream: NodeJS.WriteStream & Writable) {
 
   beforeEach(() => {
     context = setupStdioTest(stream)
+    // Clear call history to ensure tests start with clean slate
+    context.writeSpy.mockClear()
+    context.cursorToSpy?.mockClear()
+    context.clearLineSpy?.mockClear()
+    context.clearScreenDownSpy?.mockClear()
   })
 
   afterEach(() => {
