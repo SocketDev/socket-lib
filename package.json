@@ -598,7 +598,7 @@
     "@socketsecurity/lib-stable": "https://registry.npmjs.org/@socketsecurity/lib/-/lib-3.2.1.tgz",
     "@types/node": "24.9.2",
     "@typescript/native-preview": "7.0.0-dev.20250920.1",
-    "@vitest/coverage-v8": "4.0.3",
+    "@vitest/coverage-v8": "4.0.4",
     "@vitest/ui": "4.0.3",
     "@yarnpkg/extensions": "2.0.6",
     "cacache": "20.0.1",
