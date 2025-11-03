@@ -69,6 +69,15 @@ function getNpmPackageArg() {
   return _npmPackageArg as typeof import('npm-package-arg')
 }
 
+let _libnpmexec: typeof import('./external/libnpmexec') | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getLibnpmexec() {
+  if (_libnpmexec === undefined) {
+    _libnpmexec = /*@__PURE__*/ require('./external/libnpmexec')
+  }
+  return _libnpmexec!
+}
+
 let _pacote: typeof import('pacote') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPacote() {
@@ -336,8 +345,14 @@ function resolveBinaryPath(basePath: string): string {
 
 /**
  * Find the binary path for an installed package.
- * Intelligently handles packages with single or multiple binaries.
+ * Uses npm's bin resolution strategy with user-friendly fallbacks.
  * Resolves platform-specific wrappers (.cmd, .ps1, etc.) on Windows.
+ *
+ * Resolution strategy (cherry-picked from libnpmexec):
+ * 1. Use npm's getBinFromManifest (handles aliases and standard cases)
+ * 2. Fall back to user-provided binaryName if npm's strategy fails
+ * 3. Try last segment of package name as final fallback
+ * 4. Use first binary as last resort
  */
 function findBinaryPath(
   packageDir: string,
@@ -353,6 +368,7 @@ function findBinaryPath(
   const pkgJson = readJsonSync(pkgJsonPath) as Record<string, unknown>
   const bin = pkgJson['bin']
 
+  let binName: string | undefined
   let binPath: string | undefined
 
   if (typeof bin === 'string') {
@@ -364,30 +380,43 @@ function findBinaryPath(
 
     // If only one binary, use it regardless of name.
     if (binKeys.length === 1) {
-      binPath = binObj[binKeys[0]!]
+      binName = binKeys[0]!
+      binPath = binObj[binName]
     } else {
-      // Multiple binaries - try to find the right one:
-      // 1. User-provided binaryName
-      // 2. Last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
-      // 3. Full package name without scope (e.g., 'cli' from '@socketsecurity/cli')
-      // 4. First binary as fallback
-      const lastSegment = packageName.split('/').pop()
-      const candidates = [
-        binaryName,
-        lastSegment,
-        packageName.replace(/^@[^/]+\//, ''),
-      ].filter(Boolean)
+      // Multiple binaries - use npm's battle-tested resolution strategy first.
+      try {
+        const { getBinFromManifest } = getLibnpmexec()
+        binName = getBinFromManifest({
+          name: packageName,
+          bin: binObj,
+          _id: `${packageName}@${(pkgJson as any).version || 'unknown'}`,
+        })
+        binPath = binObj[binName]
+      } catch {
+        // npm's strategy failed - fall back to user-friendly resolution:
+        // 1. User-provided binaryName
+        // 2. Last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
+        // 3. First binary as fallback
+        const lastSegment = packageName.split('/').pop()
+        const candidates = [
+          binaryName,
+          lastSegment,
+          packageName.replace(/^@[^/]+\//, ''),
+        ].filter(Boolean)
 
-      for (const candidate of candidates) {
-        if (candidate && binObj[candidate]) {
-          binPath = binObj[candidate]
-          break
+        for (const candidate of candidates) {
+          if (candidate && binObj[candidate]) {
+            binName = candidate
+            binPath = binObj[candidate]
+            break
+          }
         }
-      }
 
-      // Fallback to first binary if nothing matched.
-      if (!binPath && binKeys.length > 0) {
-        binPath = binObj[binKeys[0]!]
+        // Fallback to first binary if nothing matched.
+        if (!binPath && binKeys.length > 0) {
+          binName = binKeys[0]!
+          binPath = binObj[binName]
+        }
       }
     }
   }
@@ -443,6 +472,71 @@ export async function dlxPackage(
 }
 
 /**
+ * Make all binaries in an installed package executable.
+ * Reads the package.json bin field and makes all binaries executable (chmod 0o755).
+ * Handles both single binary (string) and multiple binaries (object) formats.
+ *
+ * Aligns with npm's approach:
+ * - Uses 0o755 permission (matches npm's cmd-shim)
+ * - Reads bin field from package.json (matches npm's bin-links and libnpmexec)
+ * - Handles both string and object bin formats
+ *
+ * References:
+ * - npm cmd-shim: https://github.com/npm/cmd-shim/blob/main/lib/index.js
+ * - npm getBinFromManifest: https://github.com/npm/libnpmexec/blob/main/lib/get-bin-from-manifest.js
+ */
+function makePackageBinsExecutable(
+  packageDir: string,
+  packageName: string,
+): void {
+  if (WIN32) {
+    // Windows doesn't need chmod
+    return
+  }
+
+  const fs = getFs()
+  const installedDir = normalizePath(
+    path.join(packageDir, 'node_modules', packageName),
+  )
+  const pkgJsonPath = path.join(installedDir, 'package.json')
+
+  try {
+    const pkgJson = readJsonSync(pkgJsonPath) as Record<string, unknown>
+    const bin = pkgJson['bin']
+
+    if (!bin) {
+      return
+    }
+
+    const binPaths: string[] = []
+
+    if (typeof bin === 'string') {
+      // Single binary
+      binPaths.push(bin)
+    } else if (typeof bin === 'object' && bin !== null) {
+      // Multiple binaries
+      const binObj = bin as Record<string, string>
+      binPaths.push(...Object.values(binObj))
+    }
+
+    // Make all binaries executable
+    for (const binPath of binPaths) {
+      const fullPath = normalizePath(path.join(installedDir, binPath))
+      if (fs.existsSync(fullPath)) {
+        try {
+          fs.chmodSync(fullPath, 0o755)
+        } catch {
+          // Ignore chmod errors on individual binaries
+        }
+      }
+    }
+  } catch {
+    // Ignore errors reading package.json or making binaries executable
+    // This is non-critical functionality
+  }
+}
+
+/**
  * Download and install a package without executing it.
  * This is useful for self-update or when you need the package files
  * but don't want to run the binary immediately.
@@ -461,7 +555,6 @@ export async function dlxPackage(
 export async function downloadPackage(
   options: DlxPackageOptions,
 ): Promise<DownloadPackageResult> {
-  const fs = getFs()
   const {
     binaryName,
     force: userForce,
@@ -500,14 +593,8 @@ export async function downloadPackage(
   // Find binary path.
   const binaryPath = findBinaryPath(packageDir, packageName, binaryName)
 
-  // Make binary executable on Unix systems.
-  if (!WIN32 && fs.existsSync(binaryPath)) {
-    try {
-      fs.chmodSync(binaryPath, 0o755)
-    } catch {
-      // Ignore chmod errors.
-    }
-  }
+  // Make all binaries in the package executable on Unix systems.
+  makePackageBinsExecutable(packageDir, packageName)
 
   return {
     binaryPath,
