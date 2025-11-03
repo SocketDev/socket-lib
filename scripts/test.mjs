@@ -7,13 +7,16 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
+
 import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
 import { printHeader } from './utils/helpers.mjs'
 import { logger } from './utils/logger.mjs'
 import { parseArgs } from './utils/parse-args.mjs'
 import { onExit } from './utils/signal-exit.mjs'
-import { spinner } from './utils/spinner.mjs'
+
+const spinner = getDefaultSpinner()
 
 const WIN32 = process.platform === 'win32'
 
