@@ -10,6 +10,7 @@ export const externalPackages = [
   { name: 'cacache', bundle: true },
   { name: 'pacote', bundle: true },
   { name: 'make-fetch-happen', bundle: true },
+  // libnpmexec - vendored getBinFromManifest directly in src/external/libnpmexec.js, no bundle needed
   { name: 'libnpmpack', bundle: true },
   { name: 'npm-package-arg', bundle: true },
   { name: 'normalize-package-data', bundle: true },
