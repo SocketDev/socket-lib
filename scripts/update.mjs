@@ -8,8 +8,12 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { log, printFooter, printHeader } from './utils/cli-helpers.mjs'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
+
 import { parseArgs } from './utils/parse-args.mjs'
+
+const _logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')

@@ -9,14 +9,16 @@ import path from 'node:path'
 import {
   getChangedFilesSync,
   getStagedFilesSync,
-} from '@socketsecurity/lib/git'
+} from '#socketsecurity/lib/git'
 
-import { isQuiet } from './utils/flags.mjs'
-import { printHeader } from './utils/helpers.mjs'
-import { logger } from './utils/logger.mjs'
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { printHeader } from '#socketsecurity/lib/stdio/header'
+
 import { parseArgs } from './utils/parse-args.mjs'
-
 import { runCommandQuiet } from './utils/run-command.mjs'
+
+const logger = getDefaultLogger()
 
 // Files that trigger a full lint when changed
 const CORE_FILES = new Set([

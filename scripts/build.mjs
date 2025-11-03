@@ -8,20 +8,23 @@ import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
 import colors from 'yoctocolors-cjs'
+
 import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
 } from '../.config/esbuild.config.mjs'
-import { isQuiet } from './utils/flags.mjs'
-import {
-  printCompletedHeader,
-  printFooter,
-  printHeader,
-} from './utils/helpers.mjs'
-import { logger } from './utils/logger.mjs'
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
+
 import { parseArgs } from './utils/parse-args.mjs'
 import { runSequence } from './utils/run-command.mjs'
+
+const logger = getDefaultLogger()
+
+// Helper for completed headers (simple wrapper)
+const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

@@ -3,9 +3,13 @@
  * Runs generate-package-exports and fix-external-imports in sequence.
  */
 
-import { isQuiet } from './utils/flags.mjs'
-import { printError, printFooter, printHeader } from './utils/helpers.mjs'
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
+
 import { runSequence } from './utils/run-command.mjs'
+
+const logger = getDefaultLogger()
 
 async function main() {
   const verbose = process.argv.includes('--verbose')
@@ -40,12 +44,12 @@ async function main() {
   }
 
   if (exitCode !== 0) {
-    printError('Build fixing failed')
+    logger.error('Build fixing failed')
     process.exitCode = exitCode
   }
 }
 
 main().catch(error => {
-  printError(`Build fixing failed: ${error.message || error}`)
+  logger.error(`Build fixing failed: ${error.message || error}`)
   process.exitCode = 1
 })

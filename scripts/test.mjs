@@ -7,15 +7,17 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
+import { printHeader } from '#socketsecurity/lib/stdio/header'
 
 import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
-import { printHeader } from './utils/helpers.mjs'
-import { logger } from './utils/logger.mjs'
 import { parseArgs } from './utils/parse-args.mjs'
 import { onExit } from './utils/signal-exit.mjs'
 
+const logger = getDefaultLogger()
 const spinner = getDefaultSpinner()
 
 const WIN32 = process.platform === 'win32'
