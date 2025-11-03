@@ -528,6 +528,8 @@ describe('stdio/stdout', () => {
         value: true,
         configurable: true,
       })
+      // Clear spy to ensure this test runs in isolation
+      getContext().writeSpy.mockClear()
       write('Loading...')
       clearLine()
       write('Loading... 50%')
@@ -555,6 +557,8 @@ describe('stdio/stdout', () => {
     })
 
     it('should support table rendering', () => {
+      // Clear spy to ensure this test runs in isolation
+      getContext().writeSpy.mockClear()
       writeLine('Name        | Age | City')
       writeLine('------------|-----|-------')
       writeLine('John Doe    | 30  | NYC')
