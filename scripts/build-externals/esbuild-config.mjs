@@ -2,6 +2,59 @@
  * @fileoverview esbuild configuration for external package bundling.
  */
 
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const stubsDir = path.join(__dirname, 'stubs')
+
+/**
+ * Stub configuration - maps module patterns to stub files.
+ * Only includes conservative stubs that are safe to use.
+ */
+const STUB_MAP = {
+  // Character encoding - we only use UTF-8
+  '^(encoding|iconv-lite)$': 'encoding.cjs',
+
+  // Debug logging - already disabled via process.env.DEBUG = undefined
+  '^debug$': 'debug.cjs',
+}
+
+/**
+ * Create esbuild plugin to stub modules using files from stubs/ directory.
+ *
+ * @param {Record<string, string>} stubMap - Map of regex patterns to stub filenames
+ * @returns {import('esbuild').Plugin}
+ */
+function createStubPlugin(stubMap = STUB_MAP) {
+  // Pre-compile regex patterns and load stub contents
+  const stubs = Object.entries(stubMap).map(([pattern, filename]) => ({
+    filter: new RegExp(pattern),
+    contents: readFileSync(path.join(stubsDir, filename), 'utf8'),
+    stubFile: filename,
+  }))
+
+  return {
+    name: 'stub-modules',
+    setup(build) {
+      for (const { contents, filter, stubFile } of stubs) {
+        // Resolve: mark modules as stubbed
+        build.onResolve({ filter }, args => ({
+          path: args.path,
+          namespace: `stub:${stubFile}`,
+        }))
+
+        // Load: return stub file contents
+        build.onLoad({ filter: /.*/, namespace: `stub:${stubFile}` }, () => ({
+          contents,
+          loader: 'js',
+        }))
+      }
+    },
+  }
+}
+
 /**
  * Get package-specific esbuild options.
  *
@@ -81,23 +134,7 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
       '@socketsecurity/registry',
       ...(packageOpts.external || []),
     ],
-    plugins: [
-      {
-        name: 'stub-encoding',
-        setup(build) {
-          // Stub out encoding and iconv-lite packages.
-          build.onResolve({ filter: /^(encoding|iconv-lite)$/ }, args => ({
-            path: args.path,
-            namespace: 'stub-encoding',
-          }))
-
-          build.onLoad({ filter: /.*/, namespace: 'stub-encoding' }, () => ({
-            contents: 'module.exports = {};',
-            loader: 'js',
-          }))
-        },
-      },
-    ],
+    plugins: [createStubPlugin()],
     minify: true,
     sourcemap: false,
     metafile: true,
