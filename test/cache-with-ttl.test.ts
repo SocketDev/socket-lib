@@ -76,8 +76,6 @@ describe.sequential('cache-with-ttl', () => {
   describe('set and get', () => {
     it('should set and get a value', async () => {
       await cache.set('key1', 'value1')
-      // Small delay to ensure cache write completes before read
-      await new Promise(resolve => setTimeout(resolve, 10))
       const value = await cache.get<string>('key1')
       expect(value).toBe('value1')
     })
