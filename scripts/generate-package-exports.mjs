@@ -1,5 +1,6 @@
 /** @fileoverview Update registry package.json with exports, browser fields, and Node.js engine range. */
 
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -8,7 +9,14 @@ import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.j
 }
 import fastGlob from 'fast-glob'
 
-import { readPackageJson, toSortedObject } from './utils/helpers.mjs'
+import { toSortedObject } from '#socketsecurity/lib/objects'
+import { readPackageJson } from '#socketsecurity/lib/packages'
+
+// Helper to write package.json with proper formatting
+async function writePackageJson(filePath, data) {
+  const content = `${JSON.stringify(data, null, 2)}\n`
+  await fs.writeFile(filePath, content, 'utf8')
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -44,7 +52,6 @@ async function main() {
   const registryEditablePkgJson = {
     content: registryPkgJsonData,
     save: async function () {
-      const { writePackageJson } = await import('./utils/helpers.mjs')
       await writePackageJson(registryPkgJsonPath, this.content)
     },
     update: function (updates) {

@@ -5,9 +5,15 @@
  * Entry point that wraps the modular build-externals system.
  */
 
-import { isQuiet } from './utils/flags.mjs'
-import { printCompletedHeader, printError } from './utils/helpers.mjs'
+import colors from 'yoctocolors-cjs'
+
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
 import { buildExternals } from './build-externals/index.mjs'
+
+const logger = getDefaultLogger()
+const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 async function main() {
   // Check for verbose mode via isVerbose or manual check
@@ -25,12 +31,12 @@ async function main() {
       printCompletedHeader(title)
     }
   } catch (error) {
-    printError(`Build failed: ${error.message || error}`)
+    logger.error(`Build failed: ${error.message || error}`)
     process.exitCode = 1
   }
 }
 
 main().catch(error => {
-  printError(`Build failed: ${error.message || error}`)
+  logger.error(`Build failed: ${error.message || error}`)
   process.exitCode = 1
 })

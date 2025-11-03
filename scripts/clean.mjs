@@ -9,10 +9,13 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
-import { isQuiet } from './utils/flags.mjs'
-import { printHeader } from './utils/helpers.mjs'
-import { logger } from './utils/logger.mjs'
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { printHeader } from '#socketsecurity/lib/stdio/header'
+
 import { parseArgs } from './utils/parse-args.mjs'
+
+const logger = getDefaultLogger()
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

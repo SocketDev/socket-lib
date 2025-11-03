@@ -7,10 +7,15 @@ import { parse } from '@babel/parser'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import MagicString from 'magic-string'
 
-import { isQuiet } from './utils/flags.mjs'
-import { printCompletedHeader, printError } from './utils/helpers.mjs'
+import MagicString from 'magic-string'
+import colors from 'yoctocolors-cjs'
+
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
+const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
@@ -221,12 +226,12 @@ async function fixConstantExports() {
       printCompletedHeader(title)
     }
   } catch (error) {
-    printError(`Failed to fix CommonJS exports: ${error.message}`)
+    logger.error(`Failed to fix CommonJS exports: ${error.message}`)
     process.exitCode = 1
   }
 }
 
 fixConstantExports().catch(error => {
-  printError(`Build failed: ${error.message || error}`)
+  logger.error(`Build failed: ${error.message || error}`)
   process.exitCode = 1
 })

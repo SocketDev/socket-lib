@@ -7,9 +7,15 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import colors from 'yoctocolors-cjs'
+
+import { isQuiet } from '#socketsecurity/lib/argv/flags'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
 import { externalPackages, scopedPackages } from './build-externals/config.mjs'
-import { isQuiet } from './utils/flags.mjs'
-import { printCompletedHeader, printError } from './utils/helpers.mjs'
+
+const logger = getDefaultLogger()
+const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
@@ -141,12 +147,12 @@ async function fixExternalImports() {
       printCompletedHeader(title)
     }
   } catch (error) {
-    printError(`Failed to fix external imports: ${error.message}`)
+    logger.error(`Failed to fix external imports: ${error.message}`)
     process.exitCode = 1
   }
 }
 
 fixExternalImports().catch(error => {
-  printError(`Build failed: ${error.message || error}`)
+  logger.error(`Build failed: ${error.message || error}`)
   process.exitCode = 1
 })

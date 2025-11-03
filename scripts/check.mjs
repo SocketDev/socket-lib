@@ -8,13 +8,12 @@
  *   node scripts/check.mjs
  */
 
-import {
-  printError,
-  printFooter,
-  printHeader,
-  printSuccess,
-} from './utils/cli-helpers.mjs'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
+
 import { runParallel } from './utils/run-command.mjs'
+
+const logger = getDefaultLogger()
 
 async function main() {
   try {
@@ -90,14 +89,14 @@ async function main() {
     const failed = exitCodes.some(code => code !== 0)
 
     if (failed) {
-      printError('Some checks failed')
+      logger.error('Some checks failed')
       process.exitCode = 1
     } else {
-      printSuccess('All checks passed')
+      logger.success('All checks passed')
       printFooter()
     }
   } catch (error) {
-    printError(`Check failed: ${error.message}`)
+    logger.error(`Check failed: ${error.message}`)
     process.exitCode = 1
   }
 }

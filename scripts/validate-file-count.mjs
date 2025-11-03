@@ -11,7 +11,9 @@ import { exec } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
-import { logger } from './utils/logger.mjs'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
 
 const execAsync = promisify(exec)
 
