@@ -491,6 +491,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
     // Get the actual YoctoSpinner class from an instance
     const tempInstance = YoctoCtor({})
     const YoctoSpinnerClass = tempInstance.constructor
+    const logger = getDefaultLogger()
 
     /*@__PURE__*/
     _Spinner = class SpinnerClass extends (YoctoSpinnerClass as any) {
@@ -671,7 +672,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         } else {
           super[methodName](normalized)
         }
-        const logger = getDefaultLogger()
         if (methodName === 'stop') {
           if (wasSpinning && normalized) {
             logger[lastWasBlankSymbol](isBlankString(normalized))
@@ -747,7 +747,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         }
 
         // Note: Status messages always go to stderr.
-        const logger = getDefaultLogger()
         logger.error(`${LOG_SYMBOLS[symbolType]} ${text}`, ...extras)
         return this
       }
@@ -934,7 +933,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @returns This spinner for chaining
        */
       log(...args: unknown[]) {
-        const logger = getDefaultLogger()
         logger.log(...args)
         return this
       }
@@ -1063,7 +1061,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       step(text?: string | undefined, ...extras: unknown[]) {
         if (typeof text === 'string') {
-          const logger = getDefaultLogger()
           // Add blank line before step for visual separation.
           logger.error('')
           // Use error (stderr) to align with logger.step() default stream.
@@ -1091,7 +1088,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       substep(text?: string | undefined, ...extras: unknown[]) {
         if (typeof text === 'string') {
           // Add 2-space indent for substep.
-          const logger = getDefaultLogger()
           // Use error (stderr) to align with logger.substep() default stream.
           logger.error(`  ${text}`, ...extras)
         }
