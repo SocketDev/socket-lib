@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **DLX**: Binary permission management with chmod 0o755 for all package binaries
+  - New `makePackageBinsExecutable()` function ensures all binaries in installed packages are executable
+  - Aligns with npm's cmd-shim approach for binary permissions
+  - Handles both single and multiple binary packages
+  - No-op on Windows (permissions not needed)
+
+- **DLX**: npm-compatible bin resolution via vendored `getBinFromManifest`
+  - Cherry-picked `getBinFromManifest` from libnpmexec@10.1.8 (~1.5 KB)
+  - Avoids 1.1 MB bundle by vendoring single function instead of full package
+  - Provides battle-tested npm bin resolution strategy
+  - Maintains user-friendly fallbacks for edge cases
+
+### Changed
+
+- **DLX**: Enhanced `findBinaryPath()` with npm's resolution strategy
+  - Primary: npm's `getBinFromManifest` (handles standard cases and aliases)
+  - Fallback: user-provided `binaryName` parameter
+  - Fallback: last segment of package name
+  - Last resort: first binary in list
+
+### Performance
+
+- **External modules**: Minimized exports to reduce bundle size
+  - `fast-sort`: Now exports only `{ createNewSortInstance }` (2.1 KB, 96% reduction from ~56 KB)
+  - `fast-glob`: Now exports only `{ globStream }` (82 KB bundle)
+  - `del`: Now exports only `{ deleteAsync, deleteSync }` (100 KB bundle)
+  - `streaming-iterables`: Now exports only `{ parallelMap, transform }` (11 KB, 93% reduction from ~168 KB)
+  - Total direct savings: ~211 KB from fast-sort and streaming-iterables alone
+  - Enables better tree-shaking for consumers
+  - Establishes pattern for future external module additions
+
 ## [3.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.1) - 2025-11-02
 
 ### Changed
