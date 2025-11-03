@@ -486,6 +486,8 @@ describe('stdio/stdout', () => {
         value: true,
         configurable: true,
       })
+      // Clear spy calls from any previous tests to ensure accurate count
+      getContext().cursorToSpy.mockClear()
       for (let i = 0; i < 100; i++) {
         cursorTo(i, i)
       }
