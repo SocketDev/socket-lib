@@ -580,7 +580,7 @@
   "devDependencies": {
     "@babel/core": "7.28.4",
     "@babel/parser": "7.28.4",
-    "@babel/traverse": "7.28.4",
+    "@babel/traverse": "7.28.5",
     "@babel/types": "7.28.4",
     "@biomejs/biome": "2.2.4",
     "@eslint/compat": "1.4.0",
