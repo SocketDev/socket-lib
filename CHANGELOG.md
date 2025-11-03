@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.2](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.2) - 2025-11-03
+
 ### Added
 
 - **DLX**: Binary permission management with chmod 0o755 for all package binaries
@@ -31,13 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
-- **External modules**: Minimized exports to reduce bundle size
-  - `fast-sort`: Now exports only `{ createNewSortInstance }` (2.1 KB, 96% reduction from ~56 KB)
-  - `fast-glob`: Now exports only `{ globStream }` (82 KB bundle)
-  - `del`: Now exports only `{ deleteAsync, deleteSync }` (100 KB bundle)
-  - `streaming-iterables`: Now exports only `{ parallelMap, transform }` (11 KB, 93% reduction from ~168 KB)
-  - Total direct savings: ~211 KB from fast-sort and streaming-iterables alone
-  - Enables better tree-shaking for consumers
+- **Optimized package size**: Reduced bundle size through strategic export minimization and vendoring
+  - Vendored `getBinFromManifest` function instead of bundling full libnpmexec (~1.1 MB savings)
+  - Minimized external module exports for better tree-shaking:
+    - `fast-sort`: Now exports only `{ createNewSortInstance }` (2.1 KB, 96% reduction from ~56 KB)
+    - `fast-glob`: Now exports only `{ globStream }` (82 KB bundle)
+    - `del`: Now exports only `{ deleteAsync, deleteSync }` (100 KB bundle)
+    - `streaming-iterables`: Now exports only `{ parallelMap, transform }` (11 KB, 93% reduction from ~168 KB)
+  - Total savings: ~1.3 MB (1.1 MB from vendoring + 211 KB from minimized exports)
   - Establishes pattern for future external module additions
 
 ## [3.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.1) - 2025-11-02
