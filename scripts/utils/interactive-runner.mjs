@@ -3,7 +3,7 @@
  * Standardized across all socket-* repositories.
  */
 
-import { runWithMask } from '@socketsecurity/lib/stdio/mask'
+import { runWithMask } from '#socketsecurity/lib/stdio/mask'
 
 /**
  * Run a command with interactive output control.
