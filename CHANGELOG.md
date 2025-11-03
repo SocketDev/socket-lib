@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.1) - 2025-11-02
+
+### Changed
+
+- **Logger/Spinner**: Use module-level constants to prevent duplicate and rogue spinner indicators
+  - Call `getDefaultLogger()` and `getDefaultSpinner()` once at module scope instead of repeated calls
+  - Prevents multiple spinner instances that can cause duplicate or lingering indicators in terminal output
+  - Applied in `src/dlx-manifest.ts`, `src/stdio/mask.ts`, and `src/spinner.ts`
+  - Follows DRY principle and aligns with socket-registry/socket-sdk-js patterns
+
+### Fixed
+
+- **Scripts**: Fixed undefined logger variable in update script
+  - Replaced undefined `log` references with `_logger` throughout `scripts/update.mjs`
+  - Resolves ESLint errors that blocked test execution
+- **Tests**: Improved stdout test stability by checking call delta instead of absolute counts
+  - Fixed flaky CI failures where spy call count was 101 instead of expected 100
+  - More robust approach handles potential state leakage between tests
+- **Tests**: Removed unnecessary 10ms delay in cache-with-ttl test
+  - Cache with memoization enabled updates in-memory storage synchronously
+  - Delay was insufficient in CI and unnecessary given synchronous behavior
+  - Resolves flaky CI failures where cached values returned undefined
+
+## [3.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.0) - 2025-11-02
+
+### Added
+
+- **DLX**: Unified manifest for packages and binaries
+  - Centralized manifest system for tracking DLX-compatible packages
+  - Simplifies package and binary lookups for dependency-free execution
+
 ## [3.1.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.1.3) - 2025-11-02
 
 ### Changed
