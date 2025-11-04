@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for table formatting utilities.
+ * @fileoverview Unit tests for terminal table formatting utilities.
+ *
+ * Tests table formatting for CLI output:
+ * - formatTable() creates formatted tables with headers and alignment
+ * - formatSimpleTable() simpler table format without borders
+ * - Column alignment (left, right, center)
+ * - Color support via yoctocolors-cjs
+ * - Empty data handling, wrapping, truncation
+ * Used by Socket CLI for displaying package lists, scan results, and reports.
  */
 
 import colors from 'yoctocolors-cjs'

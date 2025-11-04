@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for regular expression utilities.
+ *
+ * Tests regex helper functions:
+ * - escapeRegExp() escapes special characters for safe regex construction
+ * - Handles all regex metacharacters: \, |, {, }, [, ], (, ), *, +, ?, ., ^, $
+ * - Prevents regex injection vulnerabilities
+ * - Used for dynamic pattern building from user input
+ * Used throughout Socket tools for safe regex pattern construction.
  */
 
 import { escapeRegExp } from '@socketsecurity/lib/regexps'
