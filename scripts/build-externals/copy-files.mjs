@@ -16,7 +16,8 @@ export async function ensureDir(dir) {
 }
 
 /**
- * Copy local TypeScript declaration files.
+ * Copy local TypeScript declaration files only.
+ * JavaScript files are either bundled by esbuild or manually vendored (handled separately).
  *
  * @param {string} srcDir - Source directory
  * @param {string} destDir - Destination directory
@@ -24,12 +25,17 @@ export async function ensureDir(dir) {
  * @returns {Promise<number>} Number of files copied
  */
 export async function copyLocalFiles(srcDir, destDir, quiet = false) {
-  const dtsFiles = await fs.readdir(srcDir)
+  const files = await fs.readdir(srcDir)
   let count = 0
 
-  for (const file of dtsFiles) {
+  for (const file of files) {
+    // Only copy .d.ts files (hand-written type definitions)
+    // .js files are either bundled by esbuild or don't need to be in dist
     if (file.endsWith('.d.ts')) {
-      await fs.copyFile(path.join(srcDir, file), path.join(destDir, file))
+      const srcPath = path.join(srcDir, file)
+      const destPath = path.join(destDir, file)
+
+      await fs.copyFile(srcPath, destPath)
       if (!quiet) {
         console.log(`  Copied ${file}`)
       }
