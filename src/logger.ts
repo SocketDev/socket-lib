@@ -1462,10 +1462,11 @@ export class Logger {
   }
 
   /**
-   * Ends a timer and logs the elapsed time.
+   * Starts a timer for measuring elapsed time.
    *
-   * Logs the duration since `console.time()` was called with the same
-   * label. The timer is stopped and removed.
+   * Creates a timer with the given label. Use `timeEnd()` with the same
+   * label to stop the timer and log the elapsed time, or use `timeLog()`
+   * to check the time without stopping the timer.
    *
    * @param label - Optional label for the timer
    * @default 'default'
@@ -1473,12 +1474,41 @@ export class Logger {
    *
    * @example
    * ```typescript
-   * console.time('operation')
+   * logger.time('operation')
    * // ... do work ...
    * logger.timeEnd('operation')
    * // Logs: "operation: 123.456ms"
    *
-   * console.time()
+   * logger.time()
+   * // ... do work ...
+   * logger.timeEnd()
+   * // Logs: "default: 123.456ms"
+   * ```
+   */
+  time(label?: string | undefined): this {
+    const con = this.#getConsole()
+    con.time(label)
+    return this
+  }
+
+  /**
+   * Ends a timer and logs the elapsed time.
+   *
+   * Logs the duration since `console.time()` or `logger.time()` was called
+   * with the same label. The timer is stopped and removed.
+   *
+   * @param label - Optional label for the timer
+   * @default 'default'
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.time('operation')
+   * // ... do work ...
+   * logger.timeEnd('operation')
+   * // Logs: "operation: 123.456ms"
+   *
+   * logger.time()
    * // ... do work ...
    * logger.timeEnd()
    * // Logs: "default: 123.456ms"
