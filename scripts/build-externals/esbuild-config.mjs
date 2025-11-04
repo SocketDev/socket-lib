@@ -21,6 +21,102 @@ const STUB_MAP = {
   '^debug$': 'debug.cjs',
 }
 
+// Import createRequire at top level
+import { createRequire } from 'node:module'
+
+const requireResolve = createRequire(import.meta.url)
+
+/**
+ * Create esbuild plugin to force npm packages to resolve from node_modules.
+ * This prevents tsconfig.json path mappings from creating circular dependencies.
+ *
+ * @returns {import('esbuild').Plugin}
+ */
+function createForceNodeModulesPlugin() {
+  /**
+   * Packages that must be resolved from node_modules to prevent circular dependencies.
+   *
+   * THE PROBLEM:
+   * ────────────
+   * Some packages have tsconfig.json path mappings like:
+   *   "cacache": ["./src/external/cacache"]
+   *
+   * This creates a circular dependency during bundling:
+   *
+   *   ┌─────────────────────────────────────────────────┐
+   *   │                                                 │
+   *   │  esbuild bundles: src/external/cacache.js      │
+   *   │       ↓                                         │
+   *   │  File contains: require('cacache')             │
+   *   │       ↓                                         │
+   *   │  tsconfig redirects: 'cacache' → src/external/ │ ← LOOP!
+   *   │       ↓                                         │
+   *   │  esbuild tries to bundle: src/external/cacache │
+   *   │       ↓                                         │
+   *   │  Circular reference! ⚠️                         │
+   *   └─────────────────────────────────────────────────┘
+   *
+   * THE SOLUTION:
+   * ─────────────
+   * This plugin intercepts resolution and forces these packages to resolve
+   * from node_modules, bypassing the tsconfig path mappings:
+   *
+   *   src/external/cacache.js
+   *       ↓
+   *   require('cacache')
+   *       ↓
+   *   Plugin intercepts → node_modules/cacache ✓
+   *
+   * PACKAGES WITH ACTUAL TSCONFIG MAPPINGS (as of now):
+   * ────────────────────────────────────────────────────
+   * ✓ cacache              - line 37 in tsconfig.json
+   * ✓ make-fetch-happen    - line 38 in tsconfig.json
+   * ✓ fast-sort            - line 39 in tsconfig.json
+   * ✓ pacote               - line 40 in tsconfig.json
+   *
+   * ADDITIONAL PACKAGES (defensive):
+   * ────────────────────────────────
+   * · libnpmexec           - Related to pacote, included for consistency
+   * · libnpmpack           - Related to pacote, included for consistency
+   * · npm-package-arg      - Related to pacote, included for consistency
+   * · normalize-package-data - Related to npm packages, included for consistency
+   *
+   * NOTE: Other external packages (debug, del, semver, etc.) don't have
+   * tsconfig mappings, so they naturally resolve from node_modules without
+   * needing to be listed here.
+   */
+  const packagesWithPathMappings = [
+    'cacache',
+    'make-fetch-happen',
+    'fast-sort',
+    'pacote',
+    'libnpmexec',
+    'libnpmpack',
+    'npm-package-arg',
+    'normalize-package-data',
+  ]
+
+  return {
+    name: 'force-node-modules',
+    setup(build) {
+      for (const pkg of packagesWithPathMappings) {
+        build.onResolve({ filter: new RegExp(`^${pkg}$`) }, args => {
+          // Only intercept if not already in node_modules
+          if (!args.importer.includes('node_modules')) {
+            try {
+              return { path: requireResolve.resolve(pkg), external: false }
+            } catch {
+              // Package not found, let esbuild handle the error
+              return null
+            }
+          }
+          return null
+        })
+      }
+    },
+  }
+}
+
 /**
  * Create esbuild plugin to stub modules using files from stubs/ directory.
  *
@@ -134,7 +230,7 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
       '@socketsecurity/registry',
       ...(packageOpts.external || []),
     ],
-    plugins: [createStubPlugin()],
+    plugins: [createForceNodeModulesPlugin(), createStubPlugin()],
     minify: true,
     sourcemap: false,
     metafile: true,
