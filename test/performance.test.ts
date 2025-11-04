@@ -20,20 +20,16 @@ describe('performance', () => {
   })
 
   describe('basic performance measurements', () => {
-    it(
-      'should measure elapsed time',
-      { retry: 3 },
-      async () => {
-        const start = performance.now()
-        await new Promise(resolve => setTimeout(resolve, 10))
-        const end = performance.now()
-        const elapsed = end - start
-        expect(elapsed).toBeGreaterThan(0)
-        // Allow for timer imprecision (9ms threshold instead of 10ms)
-        // setTimeout is not guaranteed to be exact due to OS scheduling
-        expect(elapsed).toBeGreaterThanOrEqual(9)
-      },
-    )
+    it('should measure elapsed time', { retry: 3 }, async () => {
+      const start = performance.now()
+      await new Promise(resolve => setTimeout(resolve, 10))
+      const end = performance.now()
+      const elapsed = end - start
+      expect(elapsed).toBeGreaterThan(0)
+      // Allow for timer imprecision (9ms threshold instead of 10ms)
+      // setTimeout is not guaranteed to be exact due to OS scheduling
+      expect(elapsed).toBeGreaterThanOrEqual(9)
+    })
 
     it('should support performance.now()', () => {
       const now = performance.now()
