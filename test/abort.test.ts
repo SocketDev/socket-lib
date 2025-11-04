@@ -1,5 +1,12 @@
 /**
- * @fileoverview Unit tests for abort signal utilities.
+ * @fileoverview Unit tests for abort signal composition utilities.
+ *
+ * Tests AbortSignal composition and timeout utilities:
+ * - createCompositeAbortSignal() combines multiple abort signals into one
+ * - createTimeoutSignal() creates signal that aborts after timeout
+ * - Signal lifecycle: abort propagation, event listeners, cleanup
+ * - Edge cases: null signals, already-aborted signals, single signals
+ * Used by Socket tools for cancellable async operations and timeout management.
  */
 
 import {

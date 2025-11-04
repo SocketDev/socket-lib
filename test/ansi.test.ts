@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for ANSI escape code utilities.
+ *
+ * Tests ANSI escape code constants and utilities:
+ * - Constants: ANSI_BOLD, ANSI_DIM, ANSI_ITALIC, ANSI_UNDERLINE, ANSI_STRIKETHROUGH, ANSI_RESET
+ * - stripAnsi() removes ANSI escape codes from strings
+ * - ansiRegex() provides regex pattern for matching ANSI codes
+ * - Terminal formatting and color code handling
+ * Used by Socket logger and output utilities for terminal text styling.
  */
 
 import {

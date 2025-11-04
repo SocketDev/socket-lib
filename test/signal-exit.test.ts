@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for signal-exit utilities.
+ * @fileoverview Unit tests for process signal handling utilities.
+ *
+ * Tests signal-exit event handling:
+ * - load() initializes signal handlers
+ * - unload() removes signal handlers
+ * - onExit() registers cleanup callbacks for process termination
+ * - signals() returns current signal handler state
+ * - SIGINT, SIGTERM, SIGHUP signal handling
+ * Used by Socket CLI for graceful shutdown and cleanup on process exit.
  */
 
 import { load, onExit, signals, unload } from '@socketsecurity/lib/signal-exit'
