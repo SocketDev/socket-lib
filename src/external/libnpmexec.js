@@ -1,5 +1,3 @@
-'use strict'
-
 // Export only what we use from libnpmexec to reduce bundle size
 // libnpmexec provides the npm exec (npx) programmatic API
 
