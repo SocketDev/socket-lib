@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for Socket CLI environment variable getters.
+ *
+ * Tests getSocketCli() for Socket CLI detection and configuration.
+ * Returns SOCKET_CLI value or undefined. Used to detect CLI environment.
+ * Uses rewire for test isolation. Critical for CLI vs programmatic API behavior.
  */
 
 import {

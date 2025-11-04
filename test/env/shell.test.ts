@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for SHELL environment variable getter.
+ *
+ * Tests getShell() for user's default shell (SHELL env var, e.g., /bin/bash, /bin/zsh).
+ * Returns shell path string or undefined. Unix/Linux standard.
+ * Uses rewire for test isolation. Used for shell-specific behavior and command execution.
  */
 
 import { getShell } from '@socketsecurity/lib/env/shell'

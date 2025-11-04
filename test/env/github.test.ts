@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for GitHub environment variable getters.
+ *
+ * Tests GitHub Actions environment variable accessors:
+ * - getGithubToken() / getGhToken() - authentication tokens (GITHUB_TOKEN, GH_TOKEN)
+ * - getGithubRepository() - repository slug (owner/repo)
+ * - getGithubApiUrl() - API endpoint URL
+ * - getGithubServerUrl() - GitHub server URL
+ * - getGithubRefName() / getGithubRefType() / getGithubBaseRef() - Git ref information
+ * Uses rewire for test isolation. Critical for GitHub Actions integration.
  */
 
 import {
