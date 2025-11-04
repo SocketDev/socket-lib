@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for JSON validation and parsing utilities.
+ *
+ * Tests secure JSON parsing with protection against common vulnerabilities:
+ * - safeJsonParse() blocks prototype pollution attacks (__proto__, constructor, prototype)
+ * - tryJsonParse() provides non-throwing JSON parsing with undefined fallback
+ * - Size limit enforcement to prevent DoS attacks via massive JSON payloads
+ * - Reviver function support for custom parsing logic
+ * - Handles malformed JSON, nested objects, and edge cases
+ * - Validates security controls work correctly while allowing legitimate data
  */
 
 import {

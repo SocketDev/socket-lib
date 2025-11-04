@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for performance measurement utilities.
+ *
+ * Tests high-resolution time measurement via the Performance API:
+ * - performance.now() provides monotonic timestamps in milliseconds
+ * - Validates timing accuracy for elapsed time measurements
+ * - Tests module import and basic functionality
+ * - Ensures compatibility with Node.js performance hooks
+ * Used for benchmarking, profiling, and timing operations in Socket tools.
  */
 
 import { describe, expect, it, beforeEach } from 'vitest'

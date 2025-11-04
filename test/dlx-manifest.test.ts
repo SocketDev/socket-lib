@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for dlx manifest utilities.
+ *
+ * Tests type guards and utilities for dlx (download and execute) manifest entries:
+ * - isPackageEntry() validates package-type manifest entries
+ * - isBinaryEntry() validates binary-type manifest entries
+ * - ManifestEntry discriminated union with 'package' or 'binary' types
+ * - Tests type narrowing, cache_key validation, and timestamp handling
+ * - Ensures TypeScript type guards work correctly for manifest parsing
+ * dlx manifests track cached npm packages and binaries for npx-like execution.
  */
 
 import {

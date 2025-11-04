@@ -1,5 +1,14 @@
 /**
  * @fileoverview Unit tests for theme context management.
+ *
+ * Tests AsyncLocalStorage-based theme context management for scoped theming:
+ * - getTheme() retrieves the current theme from context
+ * - setTheme() sets the global theme (name string or Theme object)
+ * - withTheme() runs async functions with a scoped theme, restoring previous on completion
+ * - withThemeSync() provides synchronous scoped theme execution
+ * - onThemeChange() registers listeners for theme changes with cleanup
+ * - Handles nested theme scopes, rapid theme switches, and listener management
+ * Enables theme isolation across concurrent operations in Socket CLI tools.
  */
 
 import {
