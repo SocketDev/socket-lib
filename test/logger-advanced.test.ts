@@ -17,7 +17,9 @@ import { Writable } from 'node:stream'
 import { Logger } from '@socketsecurity/lib/logger'
 import { describe, expect, it, beforeEach } from 'vitest'
 
-describe('Logger - Advanced Features', () => {
+// Disable concurrent execution for this suite to prevent state sharing between tests
+// The logger and stream state must be isolated for accurate testing
+describe.sequential('Logger - Advanced Features', () => {
   let stdout: Writable
   let stderr: Writable
   let stdoutData: string[]

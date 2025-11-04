@@ -155,7 +155,7 @@ describe('argv/parse', () => {
       // Arguments after -- may be in positionals or in the raw['--'] array
       const hasFlag =
         result.positionals.includes('--not-a-flag') ||
-        result.raw['--']?.includes('--not-a-flag')
+        (result.raw['--'] && result.raw['--'].includes('--not-a-flag'))
       expect(hasFlag).toBe(true)
     })
 
