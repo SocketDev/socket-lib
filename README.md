@@ -28,12 +28,12 @@ spinner.stop()
 
 ```
 @socketsecurity/lib
-├── Visual Effects       → Spinners, shimmer, themes, logger
+├── Visual Effects       → 5 themes, spinners, shimmer, logger
 ├── File System          → fs, paths, globs, temp files
-├── Package Management   → npm, pnpm, yarn utilities
+├── Package Management   → 11 utilities (npm, pnpm, yarn, dlx)
 ├── Process & Spawn      → Safe process spawning, IPC
-├── Environment          → 68 typed env getters (CI, paths, etc)
-├── Constants            → Node.js, npm, platform constants
+├── Environment          → 22 modules with 68 typed env getters
+├── Constants            → 14 modules (Node.js, npm, platform)
 ├── Utilities            → Arrays, objects, strings, promises
 └── Types                → Full TypeScript definitions
 ```
@@ -47,13 +47,12 @@ spinner.stop()
 ```typescript
 import { Spinner, setTheme } from '@socketsecurity/lib'
 
-setTheme('ultra')  // 🌈 Rainbow mode!
+setTheme('ultra')  // 🌈 Rainbow shimmer!
 const spinner = Spinner({ text: 'Processing...' })
-spinner.enableShimmer()
 spinner.start()
 ```
 
-**5 Built-in Themes:** `socket` (purple) · `coana` · `socket-firewall` · `socket-cli-python` · `ultra` (rainbow)
+**5 Built-in Themes:** `socket` (violet) · `sunset` (twilight) · `terracotta` (warm) · `lush` (steel blue) · `ultra` (rainbow)
 
 👉 [**Theme System Docs**](./docs/themes.md)
 
@@ -168,15 +167,15 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
   ├─ time          → MILLISECONDS_PER_*, DLX_BINARY_CACHE_TTL
   └─ encoding      → UTF8, CHAR_* codes
 
-/env/              → 68 typed environment getters
+/env/              → 22 modules providing 68 typed getters
   ├─ ci            → getCI() - Detect CI environment
   ├─ home          → getHome() - User home directory
   ├─ node-env      → getNodeEnv() - NODE_ENV value
-  └─ ...           → And 65 more!
+  └─ ...           → And 19 more modules!
 
-/packages/         → Package management utilities
+/packages/         → Package management utilities (11 modules)
   ├─ validation    → Package name/version validation
-  ├─ operations    → Install, extract, manifest
+  ├─ operations    → Install, extract, manifest, dlx
   ├─ registry      → npm registry utilities
   └─ editable      → Editable installs detection
 
@@ -191,9 +190,9 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
   ├─ clear         → Clear terminal
   └─ footer        → Terminal footers
 
-/themes/           → Theme system for consistent branding
+/themes/           → Theme system for consistent branding (5 modules)
   ├─ types         → Theme type definitions
-  ├─ themes        → 5 built-in themes
+  ├─ themes        → 5 themes (socket, sunset, terracotta, lush, ultra)
   ├─ context       → Global theme management
   └─ utils         → Color resolution, theme creation
 ```
@@ -216,13 +215,13 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
 ├─────────────────────────────────────────────────────┤
 │  src/                                               │
 │  ├── constants/        14 modules                   │
-│  ├── env/              68 getters                   │
-│  ├── packages/         12 utilities                 │
+│  ├── env/              22 modules (68 getters)      │
+│  ├── packages/         11 utilities                 │
 │  ├── effects/           4 visual effects            │
 │  ├── stdio/             9 I/O utilities             │
-│  ├── themes/            Theme system                │
-│  ├── external/         40+ vendored deps            │
-│  └── ... 60+ more modules                           │
+│  ├── themes/            5 theme definitions         │
+│  ├── external/         16 vendored deps             │
+│  └── ... 62+ more modules                           │
 ├─────────────────────────────────────────────────────┤
 │  Build: esbuild → CommonJS (ES2022)                │
 │  Types: tsgo (TypeScript Native Preview)            │
@@ -254,10 +253,12 @@ pnpm run fix         # Auto-fix issues
 
 ## Stats
 
-- **183** TypeScript modules
+- **143** TypeScript modules
 - **120+** granular exports
 - **68** typed environment getters
+- **22** environment modules
 - **14** constant modules
+- **5** theme definitions
 - **4600+** tests passing
 - **Zero** runtime dependencies
 
