@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.4) - 2025-11-04
+
+### Added
+
+- **Logger**: New `time()` method for timing operations with automatic duration reporting
+  - Starts a named timer and returns a `stop()` function
+  - Automatically logs completion with formatted duration (e.g., "Operation completed in 1.23s")
+  - Useful for performance monitoring and debugging
+
+### Fixed
+
+- **Spinner effects**: Fixed star spinner frames by adding trailing space for consistent spacing
+- **Build system**: Fixed external dependency bundling issues
+  - Bundle `@npmcli/package-json` with subpath exports support
+  - Use `src/external` files as bundle entry points for proper module resolution
+  - Bundle libnpmexec from npm instead of using vendored version
+  - Prevent circular dependencies with `createForceNodeModulesPlugin()` to force resolution from node_modules
+
 ## [3.2.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.3) - 2025-11-03
 
 ### Internal
