@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for argument parsing utilities.
+ * @fileoverview Unit tests for command-line argument parsing utilities.
+ *
+ * Tests argv parsing utilities built on Node.js util.parseArgs():
+ * - parseArgs() wrapper for util.parseArgs with type safety
+ * - parseArgsWithDefaults() applies default values to parsed args
+ * - commonParseArgsConfig() shared configuration for common flags
+ * - getPositionalArgs() extracts positional arguments
+ * - hasFlag() checks for boolean flag presence
+ * Used by Socket CLI for command-line argument processing.
  */
 
 import {
