@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for sorting comparison functions.
+ * @fileoverview Unit tests for sorting and comparison utilities.
+ *
+ * Tests comparison functions for array sorting:
+ * - localeCompare() locale-aware string comparison
+ * - naturalCompare() natural/human-friendly string sorting (handles numbers)
+ * - compareStr() basic string comparison
+ * - compareSemver() semantic version comparison
+ * - naturalSorter() factory for natural sort comparisons
+ * Used by Socket tools for sorting package names, versions, and file paths.
  */
 
 import {

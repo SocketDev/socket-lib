@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for stream processing utilities.
+ * @fileoverview Unit tests for async stream processing utilities.
+ *
+ * Tests async iterable stream transformers:
+ * - parallelMap() transforms async iterables with parallel mapping
+ * - parallelEach() iterates async iterables with side effects
+ * - transform() creates custom stream transformations
+ * - Concurrency control for async streams
+ * - Error handling in stream pipelines
+ * Used by Socket tools for processing large datasets and streaming operations.
  */
 
 import {

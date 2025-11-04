@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for promise utilities.
+ * @fileoverview Unit tests for async iteration and retry utilities.
+ *
+ * Tests promise-based iteration and retry helpers:
+ * - pEach(), pEachChunk() iterate async operations with concurrency control
+ * - pFilter(), pFilterChunk() filter arrays with async predicates
+ * - pRetry() retries failed async operations with exponential backoff
+ * - normalizeIterationOptions(), normalizeRetryOptions() option normalizers
+ * - resolveRetryOptions() retry configuration resolver
+ * Used by Socket tools for batch operations and fault-tolerant API calls.
  */
 
 import {

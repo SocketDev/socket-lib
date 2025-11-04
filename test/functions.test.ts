@@ -1,5 +1,12 @@
 /**
- * @fileoverview Unit tests for function utilities.
+ * @fileoverview Unit tests for functional programming utilities.
+ *
+ * Tests function composition and control flow helpers:
+ * - noop() no-operation function (returns undefined)
+ * - once() ensures function executes exactly once
+ * - silentWrapAsync() wraps async functions with error suppression
+ * - trampoline() enables tail-call optimization for recursive functions
+ * Used throughout Socket tools for callback handling and recursion optimization.
  */
 
 import {
