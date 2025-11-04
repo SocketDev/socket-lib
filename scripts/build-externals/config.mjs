@@ -34,7 +34,12 @@ export const externalPackages = [
 
 // Scoped packages need special handling.
 export const scopedPackages = [
-  { scope: '@npmcli', name: 'promise-spawn', bundle: true },
+  {
+    scope: '@npmcli',
+    packages: ['package-json', 'promise-spawn'],
+    bundle: true,
+    subpaths: ['package-json/lib/read-package.js', 'package-json/lib/sort.js'],
+  },
   {
     scope: '@inquirer',
     packages: [
