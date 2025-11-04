@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for stdio user prompt utilities.
+ *
+ * Tests inquirer.js integration and prompt utilities for interactive CLI prompts:
+ * - createInquirerTheme() converts Socket themes to inquirer-compatible theme objects
+ * - Choice<T> type for prompt options with value, name, description, short text, and disabled states
+ * - Context type for prompt configuration (signal, input/output streams, clearPromptOnDone)
+ * - Validates theme passthrough for non-Socket themes
+ * - Tests type definitions for building type-safe interactive CLI prompts
+ * Used by Socket CLI tools for user interactions like selecting options, confirming actions.
  */
 
 import {

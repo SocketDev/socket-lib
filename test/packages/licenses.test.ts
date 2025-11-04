@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for SPDX license parsing and analysis.
+ *
+ * Tests SPDX (Software Package Data Exchange) license expression parsing and validation:
+ * - collectIncompatibleLicenses() for detecting copyleft licenses (GPL, LGPL, AGPL, MPL, etc.)
+ * - collectLicenseWarnings() for identifying risky or unknown licenses
+ * - parseSpdxExp() for parsing complex license expressions with AND/OR operators
+ * - AST node creation (createAstNode, createBinaryOperationNode, createLicenseNode)
+ * - Handles nested expressions, OR fallbacks, GPL compatibility, and unknown licenses
  */
 
 import {

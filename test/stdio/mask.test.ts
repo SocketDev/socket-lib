@@ -1,5 +1,14 @@
 /**
  * @fileoverview Unit tests for stdio output masking utilities.
+ *
+ * Tests CLI output masking for hiding/showing command output during execution:
+ * - createOutputMask() creates mask objects with spinner and buffer control
+ * - isSpinning flag indicates whether output should be masked (spinner active)
+ * - verbose/showOutput modes to control visibility of underlying command output
+ * - outputBuffer stores captured output for later replay
+ * - stdoutCapture/stderrCapture track stream data during masking
+ * Used by CLI tools to show spinners during long operations then replay output on errors.
+ * NOT related to password masking - this is for CLI output visibility control.
  */
 
 import {

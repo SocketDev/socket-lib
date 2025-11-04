@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for CLI flag utilities.
+ *
+ * Tests boolean flag checking functions for common CLI options:
+ * - getLogLevel() determines logging verbosity (silent/info/debug) with priority handling
+ * - Flag checkers: isDebug, isVerbose, isQuiet, isHelp, isJson, isForce, isDryRun
+ * - Additional flags: isAll, isChanged, isCoverage, isFix, isStaged, isUpdate, isWatch
+ * - Handles arrays of strings (process.argv) and FlagValues objects
+ * - Tests flag priority (quiet > debug > verbose) and default values
+ * - Validates both long-form flags (--verbose) and flag objects ({ verbose: true })
  */
 
 import {

@@ -1,5 +1,15 @@
 /**
  * @fileoverview Unit tests for argument parsing utilities.
+ *
+ * Tests Node.js-compatible argument parsing (util.parseArgs-like API):
+ * - parseArgs() parses process.argv-style arrays into structured options and positionals
+ * - Boolean options (--verbose), string options (--name value), short aliases (-v, -n)
+ * - Default values, multiple values (arrays), kebab-case to camelCase conversion
+ * - Coerce functions for type transformations (string → number, etc.)
+ * - Handles -- separator for terminating option parsing
+ * - Boolean negation (--no-color), equals syntax (--name=value), option groups (-abc)
+ * - strict/allowPositionals/allowNegative modes for controlling parsing behavior
+ * - Returns { values, positionals, raw } matching Node.js util.parseArgs structure
  */
 
 import {

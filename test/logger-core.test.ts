@@ -1,5 +1,9 @@
 /**
  * @fileoverview Core tests for Logger class - basic functionality.
+ *
+ * Tests core logging methods (log, info, warn, error, debug), LOG_SYMBOLS constants,
+ * stream-bound loggers (stdout/stderr), method chaining, and indentation control.
+ * Uses custom Writable streams to capture and verify output without console pollution.
  */
 
 import { Writable } from 'node:stream'
