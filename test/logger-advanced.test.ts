@@ -29,14 +29,14 @@ describe('Logger - Advanced Features', () => {
     stderrData = []
 
     stdout = new Writable({
-      write(chunk, encoding, callback) {
+      write(chunk, _encoding, callback) {
         stdoutData.push(chunk.toString())
         callback()
       },
     })
 
     stderr = new Writable({
-      write(chunk, encoding, callback) {
+      write(chunk, _encoding, callback) {
         stderrData.push(chunk.toString())
         callback()
       },

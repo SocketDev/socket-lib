@@ -169,6 +169,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/external/**/*.js", "src/external/**/*.cjs"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noRedundantUseStrict": "off"
+          }
+        }
+      }
     }
   ]
 }

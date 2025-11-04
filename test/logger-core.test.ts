@@ -23,14 +23,14 @@ describe('Logger', () => {
     stderrData = []
 
     stdout = new Writable({
-      write(chunk, encoding, callback) {
+      write(chunk, _encoding, callback) {
         stdoutData.push(chunk.toString())
         callback()
       },
     })
 
     stderr = new Writable({
-      write(chunk, encoding, callback) {
+      write(chunk, _encoding, callback) {
         stderrData.push(chunk.toString())
         callback()
       },
@@ -164,7 +164,12 @@ describe('Logger', () => {
     })
 
     it('should support method chaining with indentation', () => {
-      logger.log('level 0').indent().log('level 1').dedent().log('level 0 again')
+      logger
+        .log('level 0')
+        .indent()
+        .log('level 1')
+        .dedent()
+        .log('level 0 again')
       expect(stdoutData.length).toBeGreaterThan(0)
     })
 

@@ -12,11 +12,7 @@
  * - Returns { values, positionals, raw } matching Node.js util.parseArgs structure
  */
 
-import {
-  parseArgs,
-  type ParseArgsConfig,
-  type ParsedArgs,
-} from '@socketsecurity/lib/argv/parse'
+import { parseArgs, type ParseArgsConfig } from '@socketsecurity/lib/argv/parse'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/parse', () => {
@@ -157,8 +153,9 @@ describe('argv/parse', () => {
       })
       expect(result.values.verbose).toBe(true)
       // Arguments after -- may be in positionals or in the raw['--'] array
-      const hasFlag = result.positionals.includes('--not-a-flag') ||
-                      (result.raw['--'] && result.raw['--'].includes('--not-a-flag'))
+      const hasFlag =
+        result.positionals.includes('--not-a-flag') ||
+        result.raw['--']?.includes('--not-a-flag')
       expect(hasFlag).toBe(true)
     })
 
@@ -168,7 +165,7 @@ describe('argv/parse', () => {
         options: {
           port: {
             type: 'string',
-            coerce: (val) => Number(val),
+            coerce: val => Number(val),
           },
         },
       })
@@ -366,7 +363,7 @@ describe('argv/parse', () => {
         options: {
           port: {
             type: 'string',
-            coerce: (val) => parseInt(val as string, 10),
+            coerce: val => Number.parseInt(val as string, 10),
           },
         },
       })
@@ -379,7 +376,7 @@ describe('argv/parse', () => {
         options: {
           env: {
             type: 'string',
-            coerce: (val) => (val as string).toUpperCase(),
+            coerce: val => (val as string).toUpperCase(),
           },
         },
       })
@@ -392,7 +389,7 @@ describe('argv/parse', () => {
         options: {
           tags: {
             type: 'string',
-            coerce: (val) => (val as string).split(','),
+            coerce: val => (val as string).split(','),
           },
         },
       })

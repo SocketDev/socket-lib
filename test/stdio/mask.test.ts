@@ -80,7 +80,7 @@ describe('stdio/mask', () => {
     })
 
     it('should handle options with filter function', () => {
-      const filterFn = (text: string, stream: 'stdout' | 'stderr') => {
+      const filterFn = (text: string, _stream: 'stdout' | 'stderr') => {
         return !text.includes('ignore')
       }
       const options: OutputMaskOptions = {
@@ -91,7 +91,7 @@ describe('stdio/mask', () => {
     })
 
     it('should handle options with override exit code function', () => {
-      const overrideFn = (code: number, stdout: string, stderr: string) => {
+      const overrideFn = (code: number, _stdout: string, stderr: string) => {
         if (code !== 0 && stderr.includes('non-fatal')) {
           return 0
         }
@@ -124,9 +124,9 @@ describe('stdio/mask', () => {
       const options: OutputMaskOptions = {
         cwd: '/test',
         env: { TEST: '1' },
-        filterOutput: (text) => !text.includes('skip'),
+        filterOutput: text => !text.includes('skip'),
         message: 'Testing...',
-        overrideExitCode: (code) => (code === 1 ? 0 : undefined),
+        overrideExitCode: code => (code === 1 ? 0 : undefined),
         showOutput: true,
         toggleText: 'to toggle',
       }
@@ -200,7 +200,7 @@ describe('stdio/mask', () => {
       const options: OutputMaskOptions = {
         overrideExitCode: (
           code: number,
-          stdout: string,
+          _stdout: string,
           stderr: string,
         ): number | undefined => {
           if (code === 1 && stderr.includes('warning')) {

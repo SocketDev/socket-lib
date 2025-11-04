@@ -9,7 +9,7 @@
  * Used for benchmarking, profiling, and timing operations in Socket tools.
  */
 
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 describe('performance', () => {
   describe('module import', () => {

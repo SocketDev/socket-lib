@@ -129,7 +129,7 @@ describe('themes/context', () => {
 
     it('should handle promises', async () => {
       const result = await withTheme('socket', async () => {
-        return Promise.resolve('test-value')
+        return await Promise.resolve('test-value')
       })
 
       expect(result).toBe('test-value')
@@ -251,7 +251,7 @@ describe('themes/context', () => {
 
     it('should call listener with new theme', () => {
       let capturedTheme: any
-      const unsubscribe = onThemeChange((theme) => {
+      const unsubscribe = onThemeChange(theme => {
         capturedTheme = theme
       })
       unsubscribers.push(unsubscribe)
@@ -266,8 +266,12 @@ describe('themes/context', () => {
       let count1 = 0
       let count2 = 0
 
-      const unsub1 = onThemeChange(() => { count1++ })
-      const unsub2 = onThemeChange(() => { count2++ })
+      const unsub1 = onThemeChange(() => {
+        count1++
+      })
+      const unsub2 = onThemeChange(() => {
+        count2++
+      })
       unsubscribers.push(unsub1, unsub2)
 
       setTheme('sunset')
