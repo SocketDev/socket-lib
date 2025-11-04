@@ -1,7 +1,12 @@
 /**
- * @fileoverview Tests to ensure external dependencies are properly bundled.
- * This prevents accidental stub re-exports in dist/external and ensures
- * external packages aren't imported outside dist/external.
+ * @fileoverview Build validation tests for external dependency bundling.
+ *
+ * Tests build integrity for vendored external dependencies:
+ * - Validates dist/external/ contains real bundled code (not stubs)
+ * - Ensures external packages are only imported from dist/external/
+ * - Prevents accidental stub re-exports in distribution
+ * - Verifies devDependencies aren't leaked into production build
+ * Critical for ensuring proper dependency bundling and tree-shaking.
  */
 
 import { promises as fs } from 'node:fs'

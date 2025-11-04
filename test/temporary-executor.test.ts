@@ -1,5 +1,12 @@
 /**
- * @fileoverview Unit tests for temporary package executor detection.
+ * @fileoverview Unit tests for temporary package executor detection (npx/dlx).
+ *
+ * Tests detection of temporary package executor environments:
+ * - isRunningInTemporaryExecutor() detects npx, pnpm dlx, yarn dlx
+ * - User agent parsing from npm_config_user_agent
+ * - Environment variable inspection
+ * - Package manager version detection
+ * Used by Socket CLI to adapt behavior when running via npx/dlx.
  */
 
 import { afterEach, describe, expect, it } from 'vitest'

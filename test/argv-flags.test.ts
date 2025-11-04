@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for CLI flag utilities.
+ * @fileoverview Unit tests for CLI flag detection utilities.
+ *
+ * Tests command-line flag checker functions:
+ * - COMMON_FLAGS constant with standard CLI flags
+ * - Flag detectors: isHelp(), isVerbose(), isQuiet(), isDebug(), isForce()
+ * - Mode flags: isDryRun(), isFix(), isUpdate(), isCoverage(), isJson()
+ * - Context flags: isAll(), isChanged(), isStaged()
+ * - getLogLevel() extracts log level from parsed args
+ * Used by Socket CLI for command-line argument interpretation.
  */
 
 import {
