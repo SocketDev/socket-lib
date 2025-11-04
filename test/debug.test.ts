@@ -1,5 +1,15 @@
 /**
  * @fileoverview Comprehensive tests for debug logging utilities.
+ *
+ * Tests debug namespace logging utilities:
+ * - debug(), debugNs() create namespaced debug loggers
+ * - debugLog(), debugLogNs() log with namespace prefix
+ * - debugDir(), debugDirNs() inspect objects with util.inspect
+ * - debugCache(), debugCacheNs() for cache operations debugging
+ * - debuglog() Node.js-style debug logger
+ * - Namespace filtering via DEBUG environment variable
+ * - CI detection: debug output disabled in CI environments
+ * Used throughout Socket tools for conditional development/debug logging.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
