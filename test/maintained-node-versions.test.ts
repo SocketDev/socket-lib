@@ -1,5 +1,12 @@
 /**
- * @fileoverview Unit tests for maintained Node.js versions module.
+ * @fileoverview Unit tests for maintained Node.js versions data module.
+ *
+ * Tests maintained Node.js versions constant:
+ * - Default export contains array of actively maintained Node.js major versions
+ * - Data is frozen to prevent runtime modifications
+ * - Version format validation (numeric major versions)
+ * - Sorted in ascending order
+ * Used by Socket tools to validate Node.js version compatibility and requirements.
  */
 
 import { describe, expect, it } from 'vitest'

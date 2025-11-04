@@ -1,6 +1,13 @@
 /**
  * @fileoverview Extended integration tests for git utility functions.
- * These tests provide comprehensive coverage including cache, error handling, and real git operations.
+ *
+ * Tests advanced git operations with comprehensive coverage:
+ * - Cache behavior: result caching and cache invalidation
+ * - Error handling: invalid paths, non-git directories, permission issues
+ * - Edge cases: empty repositories, untracked files, submodules
+ * - Performance: cache hit rates, bulk operations
+ * - Real git operations: actual repository state manipulation
+ * Complements git.test.ts with deeper coverage of error paths and caching logic.
  */
 
 import { promises as fs } from 'node:fs'

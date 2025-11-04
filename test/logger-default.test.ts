@@ -1,5 +1,12 @@
 /**
- * @fileoverview Tests for getDefaultLogger function.
+ * @fileoverview Unit tests for getDefaultLogger singleton factory.
+ *
+ * Tests default logger instance creation and caching:
+ * - getDefaultLogger() returns singleton Logger instance
+ * - All logging methods available (log, success, error, info, warn, debug)
+ * - Instance reuse across multiple calls (singleton pattern)
+ * - Integration with global logging configuration
+ * Used by Socket tools for centralized logging without explicit Logger instantiation.
  */
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger'

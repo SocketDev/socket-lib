@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for spinner utility functions.
+ * @fileoverview Unit tests for spinner animation utilities.
+ *
+ * Tests spinner animation wrappers and lifecycle:
+ * - withSpinner() wraps async operations with animated spinner
+ * - withSpinnerSync() wraps sync operations with spinner
+ * - Spinner class for manual control (start, stop, update text)
+ * - Color preservation after spinner operations
+ * - CI detection: spinners disabled in CI environments
+ * Used by Socket CLI for long-running operations (package scanning, API calls).
  */
 
 import {
