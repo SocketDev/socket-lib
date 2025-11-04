@@ -1,5 +1,17 @@
 /**
  * @fileoverview Unit tests for object manipulation utilities.
+ *
+ * Tests advanced object manipulation and lazy property patterns:
+ * - Lazy getters: createLazyGetter(), defineLazyGetter(), defineLazyGetters() with memoization
+ * - Property definition: defineGetter() for custom getters on objects
+ * - Object utilities: merge(), toSortedObject(), toSortedObjectFromEntries()
+ * - Type guards: isObject(), isObjectObject() (excludes arrays/null)
+ * - Property access: getOwn(), hasOwn(), getKeys(), hasKeys(), getOwnPropertyValues()
+ * - Aliases: objectAssign, objectEntries, objectFreeze (direct references to Object.*)
+ * - Constants: createConstantsObject() for frozen objects with typed getters
+ * - Sorting: entryKeyComparator() for consistent key ordering
+ * Tests validate lazy evaluation, memoization, stats tracking, type narrowing, and edge cases.
+ * Lazy getters are critical for performance - deferring expensive computations until needed.
  */
 
 import type { GetterDefObj } from '@socketsecurity/lib/objects'

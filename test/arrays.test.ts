@@ -1,5 +1,14 @@
 /**
  * @fileoverview Unit tests for array utility functions.
+ *
+ * Tests array manipulation and formatting utilities:
+ * - arrayChunk() splits arrays into fixed-size chunks with proper remainder handling
+ * - arrayUnique() removes duplicates using Set (preserves first occurrence order)
+ * - isArray() alias for Array.isArray with type guard support
+ * - joinAnd() formats arrays as grammatical lists with "and" (uses Intl.ListFormat)
+ * - joinOr() formats arrays as grammatical lists with "or" (uses Intl.ListFormat)
+ * Tests cover edge cases: empty arrays, single elements, readonly arrays, large arrays,
+ * error conditions (negative chunk sizes), and formatter caching behavior.
  */
 
 import {

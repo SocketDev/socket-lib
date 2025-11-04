@@ -1,5 +1,18 @@
 /**
  * @fileoverview Unit tests for path manipulation utilities.
+ *
+ * Tests cross-platform path manipulation and validation:
+ * - isNodeModules() detects node_modules in paths (Unix and Windows separators)
+ * - isAbsolute() checks for absolute paths (handles both / and C:\ styles)
+ * - isRelative() validates relative paths
+ * - isPath() validates path-like strings
+ * - normalizePath() converts Windows backslashes to forward slashes
+ * - pathLikeToString() converts PathLike to string
+ * - relativeResolve() resolves paths relative to base directories
+ * - splitPath() splits paths into components
+ * - trimLeadingDotSlash() removes ./ prefix
+ * Tests extensively validate Windows vs Unix path handling, edge cases (empty paths, dots),
+ * and proper separation of path segments. Critical for cross-platform file operations.
  */
 
 import {
