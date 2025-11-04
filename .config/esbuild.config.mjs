@@ -260,7 +260,7 @@ export const buildConfig = {
 
   // Banner for generated code
   banner: {
-    js: '/* Socket Lib - Built with esbuild */',
+    js: '"use strict";\n/* Socket Lib - Built with esbuild */',
   },
 }
 

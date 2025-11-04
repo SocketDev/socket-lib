@@ -174,5 +174,9 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
       ...packageOpts.define,
     },
     charset: 'utf8',
+    // Banner for generated code
+    banner: {
+      js: '"use strict";',
+    },
   }
 }

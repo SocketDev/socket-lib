@@ -89,11 +89,14 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
 
     // Add a header comment to the bundled file.
     const bundleContent = await fs.readFile(outputPath, 'utf8')
-    const finalContent = `/**
+    // Strip 'use strict' from bundle content if present (will be re-added at top)
+    const contentWithoutStrict = bundleContent.replace(/^"use strict";\n/, '')
+    const finalContent = `"use strict";
+/**
  * Bundled from ${packageName}
  * This is a zero-dependency bundle created by esbuild.
  */
-${bundleContent}`
+${contentWithoutStrict}`
     await fs.writeFile(outputPath, finalContent)
 
     // Get file size for logging.

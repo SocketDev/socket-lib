@@ -1,3 +1,5 @@
+'use strict'
+
 // Export only what we use to reduce bundle size
 const fastGlob = require('fast-glob')
 
