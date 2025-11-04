@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for license identifier constants and copy-left license detection.
+ *
+ * Tests SPDX license constants:
+ * - COPYLEFT_LICENSES set (GPL, LGPL, AGPL, MPL, etc.)
+ * - PERMISSIVE_LICENSES set (MIT, Apache-2.0, BSD, ISC)
+ * - License compatibility rules
+ * Frozen constants for license validation and risk assessment.
  */
 
 import { describe, expect, it } from 'vitest'

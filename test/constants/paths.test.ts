@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for file paths, directory names, extensions, and glob patterns.
+ *
+ * Tests file path constants and patterns:
+ * - Common paths: node_modules, package.json, LICENSE files
+ * - Glob patterns: LICENSE_GLOB, gitignore patterns, recursive globs
+ * - File extensions: .js, .ts, .json, .md
+ * Frozen constants for file discovery and filtering.
  */
 
 import { describe, expect, it } from 'vitest'

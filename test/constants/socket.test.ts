@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for Socket.dev APIs, scopes, organizations, and application names.
+ *
+ * Tests Socket ecosystem constants:
+ * - API URLs: SOCKET_API_BASE_URL, SOCKET_REGISTRY_URL
+ * - Application names: socket-cli, socket-npm, socket-firewall
+ * - Organization/scope identifiers
+ * - Config paths: SOCKET_HOME, SOCKET_CONFIG_FILE
+ * Frozen constants for Socket tool configuration.
  */
 
 import { describe, expect, it } from 'vitest'

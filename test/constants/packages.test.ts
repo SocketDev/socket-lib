@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for package constants and utilities.
+ *
+ * Tests npm/package-related constants:
+ * - NPM_REGISTRY_URL, NPM_PUBLIC_REGISTRY (registry endpoints)
+ * - Package.json field names (dependencies, devDependencies, scripts)
+ * - Package manager identifiers (npm, yarn, pnpm, bun)
+ * Frozen constants for consistent package operations.
  */
 
 import {
