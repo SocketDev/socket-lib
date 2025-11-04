@@ -4,13 +4,12 @@
  */
 
 // Define which packages need bundling (ones that are actual npm packages).
-// Skip ones that are just local re-exports.
 export const externalPackages = [
   // NPM internals
   { name: 'cacache', bundle: true },
   { name: 'pacote', bundle: true },
   { name: 'make-fetch-happen', bundle: true },
-  // libnpmexec - vendored getBinFromManifest directly in src/external/libnpmexec.js, no bundle needed
+  { name: 'libnpmexec', bundle: true },
   { name: 'libnpmpack', bundle: true },
   { name: 'npm-package-arg', bundle: true },
   { name: 'normalize-package-data', bundle: true },
