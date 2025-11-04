@@ -1,5 +1,14 @@
 /**
- * @fileoverview Unit tests for process lock utilities.
+ * @fileoverview Unit tests for inter-process locking utilities.
+ *
+ * Tests file-based process locking for concurrency control:
+ * - processLock() acquires exclusive locks using lock files
+ * - Automatic stale lock detection and cleanup
+ * - Timeout-based lock acquisition with retry logic
+ * - Lock release and cleanup on process exit
+ * - Race condition handling for concurrent processes
+ * - Cross-platform lock file support
+ * Used by Socket CLI to prevent concurrent operations on shared resources.
  */
 
 import { existsSync } from 'node:fs'

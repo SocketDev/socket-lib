@@ -1,5 +1,15 @@
 /**
- * @fileoverview Unit tests for memoization utilities.
+ * @fileoverview Unit tests for function memoization utilities.
+ *
+ * Tests memoization and caching decorators:
+ * - memoize() caches synchronous function results
+ * - memoizeAsync() caches async function results with promise deduplication
+ * - memoizeWeak() uses WeakMap for object key caching
+ * - memoizeDebounced() combines memoization with debouncing
+ * - once() ensures function executes exactly once
+ * - Memoize() decorator for class methods
+ * - clearAllMemoizationCaches() global cache clearing
+ * Used by Socket tools to optimize expensive operations and API calls.
  */
 
 import {

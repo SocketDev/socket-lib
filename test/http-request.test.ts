@@ -1,5 +1,14 @@
 /**
  * @fileoverview Unit tests for HTTP/HTTPS request utilities.
+ *
+ * Tests HTTP client utilities with local test server:
+ * - httpRequest() low-level HTTP request function
+ * - httpGetText() fetches and returns text content
+ * - httpGetJson() fetches and parses JSON responses
+ * - httpDownload() downloads files to disk
+ * - Redirect following, timeout handling, error cases
+ * - Custom headers, user agent, retry logic
+ * Used by Socket tools for API communication (registry, GitHub, GHSA).
  */
 
 import { promises as fs } from 'node:fs'
