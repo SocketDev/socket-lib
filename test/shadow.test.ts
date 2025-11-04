@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for shadow binary installation utilities.
+ * @fileoverview Unit tests for shadow binary installation decision logic.
+ *
+ * Tests shadow binary installation logic:
+ * - shouldSkipShadow() determines if shadow binary installation should be skipped
+ * - Windows-specific behavior: always skips shadow on Windows
+ * - CI environment handling: skips shadow in CI
+ * - Path validation: checks if binary path exists and is valid
+ * - Platform detection: win32, darwin, linux
+ * Used by Socket CLI to decide whether to install package manager wrappers.
  */
 
 import { afterEach, describe, expect, it } from 'vitest'

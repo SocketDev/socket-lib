@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for URL parsing and validation utilities.
+ *
+ * Tests URL manipulation and query parameter utilities:
+ * - isUrl() validates URL strings
+ * - parseUrl() parses URLs with error handling
+ * - createRelativeUrl() constructs relative URLs
+ * - urlSearchParamAs*() typed query parameter extractors (String, Number, Boolean, Array)
+ * - urlSearchParamsGet*() URLSearchParams helper methods
+ * Used by Socket tools for API URL construction and query parameter parsing.
  */
 
 import {

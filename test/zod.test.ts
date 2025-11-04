@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for zod schema validation library wrapper.
+ * @fileoverview Unit tests for Zod schema validation library wrapper.
+ *
+ * Tests Zod validation library re-export:
+ * - z object export for schema building
+ * - String, number, boolean, array, object schemas
+ * - Type inference from schemas
+ * - Parse validation and error handling
+ * - Used as centralized import point for Zod in Socket tools
+ * Ensures consistent Zod version across all Socket packages.
  */
 
 import { describe, expect, it } from 'vitest'
