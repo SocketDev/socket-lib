@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 import { bundlePackage } from './bundler.mjs'
 import { externalPackages, scopedPackages } from './config.mjs'
-import { copyLocalFiles, copyScopedFiles, ensureDir } from './copy-files.mjs'
+import { ensureDir } from './copy-files.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..', '..')
@@ -112,32 +112,6 @@ async function bundleAllPackages(options = {}) {
 }
 
 /**
- * Copy all declaration files.
- *
- * @param {boolean} quiet - Suppress output
- * @returns {Promise<number>} Number of files copied
- */
-async function copyAllFiles(quiet = false) {
-  if (!quiet) {
-    console.log('\nCopying declaration files...')
-  }
-
-  const localCount = await copyLocalFiles(
-    srcExternalDir,
-    distExternalDir,
-    quiet,
-  )
-  const scopedCount = await copyScopedFiles(
-    srcExternalDir,
-    distExternalDir,
-    scopedPackages,
-    quiet,
-  )
-
-  return localCount + scopedCount
-}
-
-/**
  * Main build function.
  *
  * @param {object} options - Build options
@@ -161,8 +135,5 @@ export async function buildExternals(options = {}) {
     quiet: quiet || !showDetails,
   })
 
-  // Copy declaration files
-  const filesCopied = await copyAllFiles(quiet || !showDetails)
-
-  return { bundledCount, totalSize, filesCopied }
+  return { bundledCount, totalSize }
 }
