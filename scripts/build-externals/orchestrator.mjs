@@ -1,6 +1,6 @@
 /**
  * @fileoverview Main entry point for bundling external dependencies.
- * Orchestrates bundling, copying, and reporting.
+ * Orchestrates bundling and reporting.
  */
 
 import path from 'node:path'
