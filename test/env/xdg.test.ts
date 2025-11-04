@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for XDG Base Directory environment variable getters.
+ *
+ * Tests XDG Base Directory Specification getters (freedesktop.org standard):
+ * - getXdgCacheHome() - cache directory (XDG_CACHE_HOME, default ~/.cache)
+ * - getXdgConfigHome() - config directory (XDG_CONFIG_HOME, default ~/.config)
+ * - getXdgDataHome() - data directory (XDG_DATA_HOME, default ~/.local/share)
+ * Uses rewire for test isolation. Linux/Unix standard for user directory organization.
  */
 
 import {

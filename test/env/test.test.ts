@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for test environment variable getters and detection.
+ *
+ * Tests isTest() for detecting test execution environment.
+ * Checks NODE_ENV=test or test runner indicators (Vitest, Jest, etc.).
+ * Uses rewire for test isolation. Used for conditional test-only behavior.
  */
 
 import {

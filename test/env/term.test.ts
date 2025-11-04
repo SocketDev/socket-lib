@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for TERM environment variable getter.
+ *
+ * Tests getTerm() for terminal type detection (TERM env var, e.g., "xterm-256color").
+ * Returns terminal type string or undefined. Used for terminal capability detection.
+ * Uses rewire for test isolation. Critical for ANSI color and formatting support.
  */
 
 import { getTerm } from '@socketsecurity/lib/env/term'

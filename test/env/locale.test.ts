@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for locale environment variable getters.
+ *
+ * Tests getLang() for locale/language settings (LANG, LC_ALL, LC_MESSAGES).
+ * Returns locale string (e.g., "en_US.UTF-8") or undefined if not set.
+ * Uses rewire for test isolation. Critical for internationalization and character encoding.
  */
 
 import {

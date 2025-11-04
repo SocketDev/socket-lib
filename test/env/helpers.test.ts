@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for environment variable type conversion helpers.
+ *
+ * Tests type coercion utilities for environment variables:
+ * - envAsBoolean() converts strings to boolean ("true", "1", "yes" → true)
+ * - envAsNumber() parses strings to numbers with fallback
+ * - envAsString() ensures string type
+ * Used for consistent environment variable type handling across Socket tools.
+ * No rewire needed - these are pure functions without env access.
  */
 
 import {

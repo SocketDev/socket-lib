@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for NPM environment variable getters.
+ *
+ * Tests npm-specific environment variable accessors:
+ * - getNpmConfigRegistry() - npm registry URL (npm_config_registry)
+ * - getNpmConfigUserAgent() - npm user agent string
+ * - getNpmLifecycleEvent() - current lifecycle hook (preinstall, install, etc.)
+ * - getNpmRegistry() - registry URL
+ * - getNpmToken() - npm authentication token
+ * Uses rewire for test isolation. Critical for npm integration and package publishing.
  */
 
 import {

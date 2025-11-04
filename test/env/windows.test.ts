@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for Windows environment variable getters.
+ *
+ * Tests Windows-specific environment variable accessors:
+ * - getUserprofile() - user profile directory (USERPROFILE, Windows equivalent of HOME)
+ * - getAppdata() - application data directory (APPDATA)
+ * - getLocalappdata() - local application data directory (LOCALAPPDATA)
+ * - getComspec() - command interpreter path (COMSPEC, typically cmd.exe)
+ * Uses rewire for test isolation. Critical for Windows path resolution and app storage.
  */
 
 import {

@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for environment variable utilities.
+ *
+ * Tests core environment variable utility functions:
+ * - Type conversion: envAsBoolean(), envAsNumber(), envAsString()
+ * - Case-insensitive key lookup: findCaseInsensitiveEnvKey()
+ * - Proxy creation: createEnvProxy() for controlled env access
+ * - Validation: isValidEnvValue(), parseEnvValue()
+ * These utilities provide a foundation for consistent env var handling.
+ * No rewire needed - tests pure functions and proxy creation.
  */
 
 import {

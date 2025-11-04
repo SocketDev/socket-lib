@@ -1,5 +1,10 @@
 /**
  * @fileoverview Unit tests for HOME environment variable getter.
+ *
+ * Tests getHome() which retrieves the user's home directory path via HOME env var.
+ * Returns home path string or undefined if not set. Unix/Linux standard.
+ * On Windows, use getUserprofile() instead (USERPROFILE env var).
+ * Uses rewire for isolated testing. Critical for resolving user-specific paths.
  */
 
 import { getHome } from '@socketsecurity/lib/env/home'

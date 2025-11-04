@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for Socket CLI shadow mode environment variables.
+ *
+ * Tests getSocketCliShadow() for shadow CLI mode detection.
+ * Returns SOCKET_CLI_SHADOW value or undefined. Used for CLI testing and development.
+ * Uses rewire for test isolation. Enables shadow mode for Socket CLI operations.
  */
 
 import {

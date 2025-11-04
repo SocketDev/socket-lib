@@ -1,5 +1,9 @@
 /**
  * @fileoverview Unit tests for PATH environment variable getter.
+ *
+ * Tests getPath() for system executable search paths (PATH env var).
+ * Returns colon/semicolon-separated path string or undefined.
+ * Uses rewire for test isolation. Critical for executable resolution.
  */
 
 import { getPath } from '@socketsecurity/lib/env/path'
