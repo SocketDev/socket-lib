@@ -1,5 +1,17 @@
 /**
  * @fileoverview Unit tests for string manipulation utilities.
+ *
+ * Tests comprehensive string processing functions:
+ * - ANSI handling: ansiRegex(), stripAnsi() for terminal color code processing
+ * - Line manipulation: applyLinePrefix(), indentString(), trimNewlines()
+ * - Case conversion: camelToKebab(), toKebabCase() with snake_case support
+ * - Text formatting: centerText(), repeatString()
+ * - Width calculation: stringWidth() accounts for CJK characters, emoji, combining marks
+ * - Type guards: isBlankString(), isNonEmptyString()
+ * - Utilities: stripBom(), search() with fromIndex support
+ * Tests include extensive edge cases for Unicode (emoji, CJK, zero-width chars),
+ * ANSI escape codes, platform line endings, and terminal column width calculations.
+ * stringWidth() based on string-width by Sindre Sorhus (MIT).
  */
 
 import {

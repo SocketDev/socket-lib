@@ -1,5 +1,16 @@
 /**
  * @fileoverview Unit tests for glob pattern matching utilities.
+ *
+ * Tests glob pattern matching and file filtering using picomatch and fast-glob:
+ * - defaultIgnore array with npm-packlist patterns (.git, node_modules, .env, etc.)
+ * - getGlobMatcher() creates cached matchers for glob patterns with picomatch
+ * - globStreamLicenses() streams license file paths matching LICENSE* patterns
+ * - Supports negative patterns (!*.test.js), multiple patterns, case-insensitive matching
+ * - Options: dot files, ignore patterns, recursive depth, base name matching
+ * - Matcher caching to avoid recompiling identical patterns
+ * - defaultIgnore is frozen (immutable) to prevent accidental modifications
+ * Tests validate pattern matching, exclusions, options handling, and edge cases.
+ * Used by Socket tools for file discovery and npm package analysis.
  */
 
 import {

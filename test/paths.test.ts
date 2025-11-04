@@ -1,5 +1,18 @@
 /**
  * @fileoverview Unit tests for Socket ecosystem path utilities.
+ *
+ * Tests Socket-specific directory path getters for caching and storage:
+ * - getSocketHomePath() / getSocketUserDir() - base ~/.socket directory
+ * - getSocketAppDir() - application directory
+ * - getSocketAppCacheDir() - app-level cache storage
+ * - getSocketAppCacheTtlDir() - TTL-based cache directory
+ * - getSocketCacacheDir() - cacache (content-addressable cache) directory
+ * - getSocketCliDir() - CLI-specific directory
+ * - getSocketDlxDir() - dlx (download and execute) directory
+ * - getSocketRegistryDir() - registry data storage
+ * - getSocketRegistryGithubCacheDir() - GitHub API response cache
+ * Tests validate path existence, normalization, cross-platform consistency, and aliasing.
+ * These paths are critical for Socket tool state management and caching strategies.
  */
 
 import {
