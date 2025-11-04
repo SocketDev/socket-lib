@@ -1,5 +1,14 @@
 /**
- * @fileoverview Unit tests for IPC (Inter-Process Communication) module.
+ * @fileoverview Unit tests for Inter-Process Communication utilities.
+ *
+ * Tests IPC (Inter-Process Communication) utilities:
+ * - createIpcChannelId() generates unique channel IDs
+ * - createIpcMessage(), parseIpcMessage() for message serialization
+ * - writeIpcStub(), readIpcStub() for file-based IPC
+ * - getIpcStubPath() resolves IPC stub file paths
+ * - hasIpcChannel() checks for active channels
+ * - cleanupIpcStubs() removes stale stub files
+ * Used by Socket CLI for parent-child process communication.
  */
 
 import { promises as fs } from 'node:fs'

@@ -1,5 +1,14 @@
 /**
- * @fileoverview Tests for prompt exports.
+ * @fileoverview Unit tests for interactive prompt exports.
+ *
+ * Tests prompt function exports and types:
+ * - confirm() boolean yes/no prompts
+ * - input() text input prompts
+ * - password() masked password input
+ * - select() single-choice selection
+ * - search() searchable list selection
+ * - Separator and createSeparator() for visual grouping
+ * Used by Socket CLI for interactive user input and configuration.
  */
 
 import {
