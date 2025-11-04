@@ -237,7 +237,7 @@ export const buildConfig = {
   format: 'cjs',
   platform: 'node',
   target: 'node18',
-  sourcemap: true,
+  sourcemap: false,
   // Don't minify - this is a library and minification breaks ESM/CJS interop.
   minify: false,
   // Tree-shaking optimization.
