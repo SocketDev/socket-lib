@@ -1,9 +1,14 @@
 /**
- * @fileoverview Tests for GitHub utilities.
+ * @fileoverview Unit tests for GitHub API integration utilities.
  *
- * Note: HTTP-dependent tests are limited because httpRequest cannot be easily
- * mocked due to how modules are resolved when importing from src/. These tests
- * focus on environment variable handling, URL generation, and caching logic.
+ * Tests GitHub API helpers and authentication:
+ * - getGitHubToken(), getGitHubTokenFromGitConfig() token retrieval
+ * - getGitHubTokenWithFallback() multi-source token resolution
+ * - getGhsaUrl() constructs GitHub Security Advisory URLs
+ * - clearRefCache() clears git reference cache
+ * - Environment variable handling (GITHUB_TOKEN, GH_TOKEN)
+ * - Note: HTTP tests limited due to module resolution constraints
+ * Used by Socket tools for GitHub API authentication and GHSA lookups.
  */
 
 import {

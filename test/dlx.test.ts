@@ -1,5 +1,13 @@
 /**
- * @fileoverview Tests for DLX utilities.
+ * @fileoverview Unit tests for DLX (Download and Execute) cache management utilities.
+ *
+ * Tests DLX cache directory and package management:
+ * - getDlxPackageDir(), getDlxPackageJsonPath() path resolution
+ * - ensureDlxDir(), ensureDlxDirSync() cache directory creation
+ * - clearDlx(), clearDlxSync() cache cleanup
+ * - dlxDirExists(), dlxDirExistsAsync() cache existence checks
+ * - generateCacheKey() creates unique cache keys for packages
+ * Used by Socket CLI for pnpm dlx / npx-style package execution.
  */
 
 import fs from 'node:fs'

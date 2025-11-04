@@ -1,6 +1,13 @@
 /**
- * @fileoverview Tests for dlx-package module.
- * Tests package installation, binary resolution, and cross-platform compatibility.
+ * @fileoverview Unit tests for DLX package installation and resolution.
+ *
+ * Tests DLX package installation and binary resolution:
+ * - generatePackageCacheKey() creates SHA256-based cache keys
+ * - Package installation to cache directory
+ * - Binary resolution from installed packages
+ * - Cross-platform compatibility (Windows, Unix)
+ * - node_modules structure validation
+ * Used by Socket CLI dlxBinary() for package extraction and execution.
  */
 
 import { createHash } from 'node:crypto'
