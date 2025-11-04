@@ -12,7 +12,7 @@ import { ensureDir } from './copy-files.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..', '..')
-const srcExternalDir = path.join(rootDir, 'src', 'external')
+const _srcExternalDir = path.join(rootDir, 'src', 'external')
 const distExternalDir = path.join(rootDir, 'dist', 'external')
 
 /**
