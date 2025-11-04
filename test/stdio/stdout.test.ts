@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for stdout stream utilities.
+ *
+ * Tests stdout output utilities:
+ * - writeStdout() writes to stdout stream
+ * - Output formatting and buffering
+ * - Stream detection (TTY vs pipe)
+ * - Color support detection for stdout
+ * Used by Socket tools for standard output and interactive CLI features.
  */
 
 import { describe, expect, it, vi } from 'vitest'

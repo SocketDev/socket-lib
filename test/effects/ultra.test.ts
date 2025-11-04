@@ -1,5 +1,12 @@
 /**
  * @fileoverview Tests for ultrathink rainbow gradient effect.
+ *
+ * Tests ultrathink visual effect (rainbow gradient animation):
+ * - createUltraEffect() generates rainbow gradient frames
+ * - Multi-color spectrum transitions
+ * - Smooth color interpolation
+ * - Frame rate and timing control
+ * Used by Socket CLI for /ultrathink mode visual feedback and emphasis.
  */
 
 import { describe, expect, it } from 'vitest'

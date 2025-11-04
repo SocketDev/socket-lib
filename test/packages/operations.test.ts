@@ -1,5 +1,13 @@
 /**
- * @fileoverview Unit tests for package operations including extraction, packing, and I/O.
+ * @fileoverview Unit tests for package manipulation operations.
+ *
+ * Tests package operation utilities:
+ * - Extraction: extractPackage() unpacks tarballs to directories
+ * - Packing: packPackage() creates tarballs from directories
+ * - Reading: readPackageJson(), readPackageJsonSync() parse package.json files
+ * - Resolution: resolveGitHubTgzUrl() resolves GitHub tarball URLs
+ * - Tag parsing: getReleaseTag() extracts version tags from package specs
+ * Used by Socket tools for package management and dependency operations.
  */
 
 import { promises as fs } from 'node:fs'

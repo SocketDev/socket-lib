@@ -1,3 +1,14 @@
+/**
+ * @fileoverview Unit tests for text shimmer animation effect.
+ *
+ * Tests text shimmer animation utilities:
+ * - applyShimmer() applies animated color gradient to text
+ * - Direction modes: LTR, RTL, bidirectional, random, none
+ * - CI detection: shimmer disabled in CI environments
+ * - Color gradients: single color and multi-color gradient support
+ * Used by Socket CLI for animated text effects in /ultrathink mode.
+ */
+
 import { stripAnsi } from '@socketsecurity/lib/ansi'
 import { getCI } from '@socketsecurity/lib/env/ci'
 import {

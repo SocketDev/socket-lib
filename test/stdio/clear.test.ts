@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for terminal clearing and cursor utilities.
+ *
+ * Tests terminal control utilities:
+ * - clearScreen() clears terminal display
+ * - clearLine() clears current line
+ * - moveCursor() repositions cursor
+ * - ANSI escape sequences for terminal control
+ * Used by Socket CLI for interactive output, spinners, and progress indicators.
  */
 
 import { describe, expect, it, vi } from 'vitest'
