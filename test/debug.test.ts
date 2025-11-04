@@ -303,15 +303,18 @@ describe('debug', () => {
     })
 
     it('should handle empty label', () => {
+      debugtime('')
       expect(() => debugtime('')).not.toThrow()
     })
 
     it('should handle undefined label', () => {
+      debugtime(undefined as unknown as string)
       expect(() => debugtime(undefined as unknown as string)).not.toThrow()
     })
 
-    it('should handle ending non-existent timer', () => {
-      expect(() => debugtime('non-existent-timer')).not.toThrow()
+    it('should handle starting and stopping timer with same label', () => {
+      debugtime('test-timer')
+      expect(() => debugtime('test-timer')).not.toThrow()
     })
   })
 
