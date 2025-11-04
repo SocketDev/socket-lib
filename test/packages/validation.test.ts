@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for package name validation utilities.
+ *
+ * Tests package validation utilities:
+ * - isBlessedPackageName() checks if package is Socket official (socket, sfw, @socket*)
+ * - isValidPackageName() validates npm package name format and rules
+ * - isRegistryFetcherType() checks if type is registry-based (alias/range/tag/version)
+ * - Scoped package validation (@scope/name patterns)
+ * Used by Socket tools for package filtering, security checks, and name validation.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for package.json path resolution utilities.
+ *
+ * Tests path resolution utilities for package.json files:
+ * - resolvePackageJsonPath() converts directories to package.json paths
+ * - resolvePackageJsonDirname() extracts directory from package.json paths
+ * - Normalization and cross-platform path handling
+ * - Support for scoped packages, node_modules, and monorepo workspaces
+ * Used by Socket tools for package.json file discovery and path manipulation.
  */
 
 import path from 'node:path'
