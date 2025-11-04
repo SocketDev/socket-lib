@@ -609,18 +609,21 @@ describe('Logger', () => {
 
   describe('timeEnd() method', () => {
     it('should end timer and log duration', () => {
+      testLogger.time('timer-test-1')
       const beforeCount = testLogger.logCallCount
       testLogger.timeEnd('timer-test-1')
       expect(testLogger.logCallCount).toBe(beforeCount + 1)
     })
 
-    it('should work with default label', () => {
+    it('should work with non-existent timer', () => {
+      testLogger.time('existing-timer')
       const beforeCount = testLogger.logCallCount
-      testLogger.timeEnd('non-existent-timer')
+      testLogger.timeEnd('existing-timer')
       expect(testLogger.logCallCount).toBe(beforeCount + 1)
     })
 
     it('should return logger instance for chaining', () => {
+      testLogger.time('some-label')
       const result = testLogger.timeEnd('some-label')
       expect(result).toBe(testLogger)
     })
@@ -628,20 +631,26 @@ describe('Logger', () => {
 
   describe('timeLog() method', () => {
     it('should log current timer value without stopping', () => {
+      testLogger.time('timer-test-2')
       const beforeCount = testLogger.logCallCount
       testLogger.timeLog('timer-test-2', 'checkpoint')
       expect(testLogger.logCallCount).toBe(beforeCount + 1)
+      testLogger.timeEnd('timer-test-2')
     })
 
     it('should support additional data', () => {
+      testLogger.time('timer-test-3')
       const beforeCount = testLogger.logCallCount
       testLogger.timeLog('timer-test-3', 'data1', 'data2')
       expect(testLogger.logCallCount).toBe(beforeCount + 1)
+      testLogger.timeEnd('timer-test-3')
     })
 
     it('should return logger instance for chaining', () => {
+      testLogger.time('some-timer')
       const result = testLogger.timeLog('some-timer')
       expect(result).toBe(testLogger)
+      testLogger.timeEnd('some-timer')
     })
   })
 
@@ -1065,6 +1074,7 @@ describe('Logger', () => {
     })
 
     it('should support timeEnd without errors', () => {
+      testLogger.time('any-timer')
       expect(() => {
         testLogger.timeEnd('any-timer')
       }).not.toThrow()
