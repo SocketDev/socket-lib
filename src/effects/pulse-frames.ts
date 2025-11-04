@@ -50,9 +50,9 @@ export function generateSocketSpinnerFrames(
   // - Yocto-spinner adds 1 space after each frame
   // - Success/fail symbols also get 1 space (consistent)
   const lightning = '⚡\uFE0E'
-  const starFilled = '✦\uFE0E'
-  const starOutline = '✧\uFE0E'
-  const starTiny = '⋆\uFE0E'
+  const starFilled = '✦\uFE0E '
+  const starOutline = '✧\uFE0E '
+  const starTiny = '⋆\uFE0E '
 
   // Pulse frames with brightness modifiers only.
   // Each frame gets colored by yocto-spinner based on current spinner.color.
