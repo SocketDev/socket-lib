@@ -9,6 +9,7 @@ import colors from 'yoctocolors-cjs'
 
 import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { pluralize } from '#socketsecurity/lib/words'
 
 import { buildExternals } from './build-externals/orchestrator.mjs'
 
@@ -26,7 +27,7 @@ async function main() {
     if (!quiet) {
       const title =
         bundledCount > 0
-          ? `External Bundles (${bundledCount} package${bundledCount === 1 ? '' : 's'})`
+          ? `External Bundles (${bundledCount} ${pluralize('package', { count: bundledCount })})`
           : 'External Bundles (no packages)'
       printCompletedHeader(title)
     }
