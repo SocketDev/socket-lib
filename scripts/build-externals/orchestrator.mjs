@@ -12,7 +12,6 @@ import { ensureDir } from './copy-files.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..', '..')
-const _srcExternalDir = path.join(rootDir, 'src', 'external')
 const distExternalDir = path.join(rootDir, 'dist', 'external')
 
 /**
@@ -43,7 +42,7 @@ async function bundleAllPackages(options = {}) {
   }
 
   // Bundle scoped packages.
-  for (const { name, optional, packages, scope } of scopedPackages) {
+  for (const { name, optional, packages, scope, subpaths } of scopedPackages) {
     const scopeDir = path.join(distExternalDir, scope)
     await ensureDir(scopeDir)
 
@@ -103,6 +102,24 @@ async function bundleAllPackages(options = {}) {
             bundledCount++
             totalSize += size
           }
+        }
+      }
+    }
+
+    // Bundle subpath exports (e.g., @npmcli/package-json/lib/read-package)
+    if (subpaths) {
+      for (const subpath of subpaths) {
+        const outputPath = path.join(distExternalDir, scope, subpath)
+        const packageName = `${scope}/${subpath}`
+        // Ensure parent directory exists
+        await ensureDir(path.dirname(outputPath))
+        const size = await bundlePackage(packageName, outputPath, {
+          quiet,
+          rootDir,
+        })
+        if (size) {
+          bundledCount++
+          totalSize += size
         }
       }
     }
