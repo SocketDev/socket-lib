@@ -1,5 +1,14 @@
 /**
- * @fileoverview Unit tests for DLX binary execution utilities.
+ * @fileoverview Unit tests for DLX binary execution and caching.
+ *
+ * Tests DLX binary execution with HTTP server integration:
+ * - dlxBinary() downloads and executes package binaries
+ * - getDlxCachePath() resolves cache directory paths
+ * - listDlxCache() enumerates cached packages
+ * - cleanDlxCache() removes cached packages
+ * - Cross-platform binary execution
+ * - HTTP download with integrity verification
+ * Used by Socket CLI for secure one-off package execution.
  */
 
 import { createHash } from 'node:crypto'

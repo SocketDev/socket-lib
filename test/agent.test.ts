@@ -1,6 +1,13 @@
 /**
  * @fileoverview Comprehensive tests for package manager agent execution utilities.
- * Tests cover npm, pnpm, yarn execution, script running, and flag detection.
+ *
+ * Tests package manager execution wrappers:
+ * - execNpm(), execPnpm(), execYarn() execute package manager commands
+ * - execScript() runs package.json scripts via appropriate PM
+ * - Flag detection: isNpm*Flag() functions for npm-specific flags
+ * - Audit, fund, loglevel, node-options, progress flag helpers
+ * - Cross-platform package manager command execution
+ * Used by Socket CLI for package manager operations with flag filtering.
  */
 
 import {
