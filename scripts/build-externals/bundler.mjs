@@ -39,24 +39,42 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
     // Check if package is installed.
     let packagePath
 
-    // First, check for local workspace/sibling versions (dev mode).
-    const localPath = await getLocalPackagePath(packageName, rootDir)
-    if (localPath) {
+    // First, check if src/external/{packageName}.js exists - use as entry point.
+    // Preserve scope for scoped packages like @socketregistry/yocto-spinner
+    const srcExternalPath = path.join(
+      rootDir,
+      'src',
+      'external',
+      `${packageName}.js`,
+    )
+    try {
+      await fs.access(srcExternalPath)
+      packagePath = srcExternalPath
       if (!quiet) {
         console.log(
-          `  Using local version from ${path.relative(rootDir, localPath)}`,
+          `  Using entry point ${path.relative(rootDir, srcExternalPath)}`,
         )
       }
-      packagePath = await resolveLocalEntryPoint(localPath)
-    } else {
-      // Fall back to installed version.
-      try {
-        packagePath = require.resolve(packageName)
-      } catch {
-        // Package must be installed for bundling - no fallbacks.
-        throw new Error(
-          `Package "${packageName}" is not installed. Please install it with: pnpm add -D ${packageName}`,
-        )
+    } catch {
+      // No src/external file, check for local workspace/sibling versions (dev mode).
+      const localPath = await getLocalPackagePath(packageName, rootDir)
+      if (localPath) {
+        if (!quiet) {
+          console.log(
+            `  Using local version from ${path.relative(rootDir, localPath)}`,
+          )
+        }
+        packagePath = await resolveLocalEntryPoint(localPath)
+      } else {
+        // Fall back to installed version.
+        try {
+          packagePath = require.resolve(packageName)
+        } catch {
+          // Package must be installed for bundling - no fallbacks.
+          throw new Error(
+            `Package "${packageName}" is not installed. Please install it with: pnpm add -D ${packageName}`,
+          )
+        }
       }
     }
 
