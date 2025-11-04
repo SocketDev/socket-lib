@@ -90,7 +90,7 @@ describe('dlx-manifest', () => {
         timestamp: Date.now(),
         details: {
           installed_version: '1.0.0',
-          size: 12345,
+          size: 12_345,
           update_check: {
             last_check: Date.now(),
             last_notification: Date.now(),

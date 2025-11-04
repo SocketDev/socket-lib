@@ -170,7 +170,7 @@ describe('stdio/prompts', () => {
 
   describe('Choice arrays', () => {
     it('should accept array of choices', () => {
-      const choices: Choice<number>[] = [
+      const choices: Array<Choice<number>> = [
         { value: 1, name: 'One' },
         { value: 2, name: 'Two' },
         { value: 3, name: 'Three' },
@@ -180,7 +180,7 @@ describe('stdio/prompts', () => {
     })
 
     it('should accept mixed enabled/disabled choices', () => {
-      const choices: Choice<string>[] = [
+      const choices: Array<Choice<string>> = [
         { value: 'option1', name: 'Option 1' },
         { value: 'option2', name: 'Option 2', disabled: true },
         { value: 'option3', name: 'Option 3', disabled: 'Coming soon' },
