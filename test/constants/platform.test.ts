@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for platform detection and OS-specific constants.
+ *
+ * Tests platform/OS constants:
+ * - IS_WINDOWS, IS_MAC, IS_LINUX (boolean flags)
+ * - PLATFORM (win32, darwin, linux from process.platform)
+ * - EOL (line ending: \\r\\n on Windows, \\n on Unix)
+ * - Architecture detection (x64, arm64)
+ * Frozen constants for cross-platform compatibility.
  */
 
 import { describe, expect, it } from 'vitest'

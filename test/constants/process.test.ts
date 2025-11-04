@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for process control utilities: abort signals and spinner.
+ *
+ * Tests process control constants:
+ * - Exit codes: SUCCESS (0), FAILURE (1), error codes
+ * - Signal names: SIGINT, SIGTERM, SIGUSR1
+ * - AbortSignal/AbortController utilities
+ * Frozen constants for process lifecycle management.
  */
 
 import { describe, expect, it } from 'vitest'

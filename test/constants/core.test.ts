@@ -1,5 +1,13 @@
 /**
  * @fileoverview Unit tests for core primitives and fundamental constants.
+ *
+ * Tests fundamental constants and symbols:
+ * - Symbols: kInternalsSymbol for internal state access
+ * - Sentinel values: EMPTY_VALUE, UNKNOWN_VALUE, UNDEFINED_TOKEN, LOOP_SENTINEL
+ * - Limits: COLUMN_LIMIT for terminal formatting
+ * - Tokens: NODE_AUTH_TOKEN, NODE_ENV keys, UNKNOWN_ERROR
+ * - Version markers: V (void 0)
+ * All frozen to prevent modification. Foundation for type-safe constant usage.
  */
 
 import { describe, expect, it } from 'vitest'

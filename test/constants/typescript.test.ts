@@ -1,5 +1,12 @@
 /**
  * @fileoverview Unit tests for TypeScript availability checks.
+ *
+ * Tests TypeScript-related constants:
+ * - Compiler availability detection
+ * - Target/module constants (ES2022, ESNext, CommonJS)
+ * - tsconfig.json paths and defaults
+ * - Type declaration patterns
+ * Frozen constants for TypeScript tooling.
  */
 
 import { describe, expect, it } from 'vitest'

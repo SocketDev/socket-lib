@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for package manager agent constants.
+ *
+ * Tests package manager detection and user agent constants:
+ * - Agent names: npm, pnpm, yarn, bun detection
+ * - USER_AGENT strings for HTTP requests
+ * - Package manager version detection
+ * Frozen constants for identifying package manager context and HTTP client identification.
  */
 
 import { describe, expect, it } from 'vitest'

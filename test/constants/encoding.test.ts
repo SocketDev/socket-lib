@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for encoding and character code constants.
+ *
+ * Tests character encoding and code point constants:
+ * - DEFAULT_ENCODING ("utf8" for Node.js)
+ * - Character codes: BOM (U+FEFF), null bytes, line endings
+ * - Buffer encoding validation
+ * Frozen constants for consistent text encoding across Socket tools.
  */
 
 import { describe, expect, it } from 'vitest'

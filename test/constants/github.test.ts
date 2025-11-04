@@ -1,5 +1,11 @@
 /**
  * @fileoverview Unit tests for GitHub API and cache configuration constants.
+ *
+ * Tests GitHub integration constants:
+ * - API URLs: GITHUB_API_BASE_URL, GITHUB_BASE_URL
+ * - Cache configuration: TTL, paths, headers
+ * - Default refs and branch names
+ * Frozen constants for GitHub API access and response caching.
  */
 
 import { describe, expect, it } from 'vitest'
