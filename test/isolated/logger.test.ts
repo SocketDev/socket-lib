@@ -1,5 +1,14 @@
 /**
- * @fileoverview Comprehensive tests for logger module with 99%+ coverage.
+ * @fileoverview Comprehensive isolated tests for logger module with 99%+ coverage.
+ *
+ * Tests Logger class in isolation with full coverage:
+ * - All logging levels (log, info, warn, error, debug, success, fail)
+ * - LOG_SYMBOLS constants and lazy initialization
+ * - Stream handling (stdout/stderr), indentation, method chaining
+ * - Task management, assertions, object inspection
+ * - Theme integration and color support
+ * - Internal state tracking (logCallCount, lastWasBlank)
+ * Uses custom Writable streams to capture output without console pollution.
  */
 import { Writable } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

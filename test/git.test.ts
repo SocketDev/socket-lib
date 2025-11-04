@@ -1,6 +1,13 @@
 /**
  * @fileoverview Integration tests for git utility functions.
- * These tests work with the actual git repository state.
+ *
+ * Tests git repository operations against actual repository state:
+ * - findGitRoot() locates .git directory from any path
+ * - getChangedFiles(), getStagedFiles(), getUnstagedFiles() track working tree state
+ * - isChanged(), isStaged(), isUnstaged() check individual file status
+ * - Sync variants for all operations (*Sync)
+ * - Real git integration (not mocked - tests actual repository)
+ * Used by Socket CLI for git-aware operations (pre-commit hooks, file filtering).
  */
 
 import { promises as fs } from 'node:fs'
