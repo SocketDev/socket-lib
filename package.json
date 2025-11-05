@@ -288,6 +288,10 @@
       "types": "./dist/json.d.ts",
       "default": "./dist/json.js"
     },
+    "./lifecycle-script-names": {
+      "types": "./dist/lifecycle-script-names.d.ts",
+      "default": "./dist/lifecycle-script-names.js"
+    },
     "./links": {
       "types": "./dist/links/index.d.ts",
       "default": "./dist/links/index.js"
@@ -311,6 +315,18 @@
     "./objects": {
       "types": "./dist/objects.d.ts",
       "default": "./dist/objects.js"
+    },
+    "./package-default-node-range": {
+      "types": "./dist/package-default-node-range.d.ts",
+      "default": "./dist/package-default-node-range.js"
+    },
+    "./package-default-socket-categories": {
+      "types": "./dist/package-default-socket-categories.d.ts",
+      "default": "./dist/package-default-socket-categories.js"
+    },
+    "./package-extensions": {
+      "types": "./dist/package-extensions.d.ts",
+      "default": "./dist/package-extensions.js"
     },
     "./packages": {
       "types": "./dist/packages.d.ts",
