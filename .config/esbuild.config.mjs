@@ -194,6 +194,55 @@ function createPathShorteningPlugin() {
 }
 
 /**
+ * Plugin to resolve internal path aliases (#lib/*, #constants/*, etc.) to relative paths
+ */
+function createPathAliasPlugin() {
+  return {
+    name: 'internal-path-aliases',
+    setup(build) {
+      // Map of path aliases to their actual directories
+      const pathAliases = {
+        '#lib/': srcPath,
+        '#constants/': path.join(srcPath, 'constants'),
+        '#env/': path.join(srcPath, 'env'),
+        '#packages/': path.join(srcPath, 'packages'),
+        '#utils/': path.join(srcPath, 'utils'),
+        '#types': path.join(srcPath, 'types'),
+      }
+
+      // Intercept imports for path aliases
+      for (const [alias, basePath] of Object.entries(pathAliases)) {
+        const isExact = !alias.endsWith('/')
+        const filter = isExact
+          ? new RegExp(`^${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
+          : new RegExp(`^${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+
+        build.onResolve({ filter }, args => {
+          // Calculate the subpath after the alias
+          const subpath = isExact ? '' : args.path.slice(alias.length)
+          const targetPath = subpath ? path.join(basePath, subpath) : basePath
+
+          // Calculate relative path from the importing file to the target
+          const importer = args.importer || srcPath
+          const importerDir = path.dirname(importer)
+          let relativePath = path.relative(importerDir, targetPath)
+
+          // Ensure relative paths start with ./ or ../
+          if (!relativePath.startsWith('.')) {
+            relativePath = `./${relativePath}`
+          }
+
+          // Normalize to forward slashes for consistency
+          relativePath = relativePath.replace(/\\/g, '/')
+
+          return { path: relativePath, external: true }
+        })
+      }
+    },
+  }
+}
+
+/**
  * Plugin to handle local package aliases when bundle: false
  * esbuild's built-in alias only works with bundle: true, so we need a custom plugin
  */
@@ -246,7 +295,11 @@ export const buildConfig = {
   logLevel: 'info',
 
   // Use plugin for local package aliases (built-in alias requires bundle: true).
-  plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),
+  plugins: [
+    createPathShorteningPlugin(),
+    createPathAliasPlugin(),
+    createAliasPlugin(),
+  ].filter(Boolean),
 
   // Note: Cannot use "external" with bundle: false.
   // esbuild automatically treats all imports as external when not bundling.
