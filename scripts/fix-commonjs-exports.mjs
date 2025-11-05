@@ -133,7 +133,117 @@ async function processDirectory(dir, verbose = false) {
           modified = true
         }
 
-        // Check if this is a single default export
+        // Check if this is a single default export with __toCommonJS pattern
+        if (
+          content.includes('module.exports = __toCommonJS(') &&
+          content.includes('default: () => ')
+        ) {
+          // Parse AST to find the export pattern and value identifier
+          try {
+            const ast = parse(content, {
+              sourceType: 'module',
+              plugins: [],
+            })
+
+            let valueIdentifier = null
+            let exportCallStart = null
+            let exportCallEnd = null
+            let toCommonJSStart = null
+            let toCommonJSEnd = null
+
+            // Find __export call with default export
+            const walk = node => {
+              if (!node || typeof node !== 'object') {
+                return
+              }
+
+              // Look for: __export(name, { default: () => value_identifier })
+              if (
+                node.type === 'CallExpression' &&
+                node.callee?.type === 'Identifier' &&
+                node.callee.name === '__export' &&
+                node.arguments?.length === 2 &&
+                node.arguments[1].type === 'ObjectExpression'
+              ) {
+                const defaultProp = node.arguments[1].properties?.find(
+                  p =>
+                    p.type === 'ObjectProperty' &&
+                    p.key?.name === 'default' &&
+                    p.value?.type === 'ArrowFunctionExpression',
+                )
+                if (defaultProp?.value.body?.name) {
+                  valueIdentifier = defaultProp.value.body.name
+                  exportCallStart = node.start
+                  exportCallEnd = node.end
+                }
+              }
+
+              // Look for: module.exports = __toCommonJS(name)
+              if (
+                node.type === 'AssignmentExpression' &&
+                node.left?.type === 'MemberExpression' &&
+                node.left.object?.name === 'module' &&
+                node.left.property?.name === 'exports' &&
+                node.right?.type === 'CallExpression' &&
+                node.right.callee?.name === '__toCommonJS'
+              ) {
+                toCommonJSStart = node.start
+                toCommonJSEnd = node.end
+              }
+
+              // Recursively walk
+              for (const key of Object.keys(node)) {
+                if (key === 'start' || key === 'end' || key === 'loc') {
+                  continue
+                }
+                const value = node[key]
+                if (Array.isArray(value)) {
+                  for (const item of value) {
+                    walk(item)
+                  }
+                } else {
+                  walk(value)
+                }
+              }
+            }
+
+            walk(ast.program)
+
+            if (
+              valueIdentifier &&
+              exportCallStart !== null &&
+              toCommonJSStart !== null
+            ) {
+              // Remove the __export call and surrounding statement
+              // Find the semicolon and newline after the call
+              let removeEnd = exportCallEnd
+              while (
+                removeEnd < content.length &&
+                (content[removeEnd] === ';' || content[removeEnd] === '\n')
+              ) {
+                removeEnd++
+              }
+              s.remove(exportCallStart, removeEnd)
+
+              // Replace module.exports = __toCommonJS(name) with comment placeholder
+              // We'll add the actual export at the end of the file
+              s.overwrite(
+                toCommonJSStart,
+                toCommonJSEnd,
+                '/* module.exports will be set at end of file */',
+              )
+
+              // Add module.exports at the end of the file
+              s.append(`\nmodule.exports = ${valueIdentifier};\n`)
+
+              modified = true
+            }
+          } catch {
+            // If parsing fails, skip this optimization
+          }
+        }
+
+        // Check if this is a single default export (legacy pattern)
         if (content.includes('exports.default =')) {
           // Transform exports.default = value to module.exports = value
           let pos = 0
@@ -161,6 +271,61 @@ async function processDirectory(dir, verbose = false) {
             }
             modified = true
           }
+        }
+
+        // Fix require().default references for fixed modules using AST
+        try {
+          const ast = parse(content, {
+            sourceType: 'module',
+            plugins: [],
+          })
+
+          // Walk the AST to find MemberExpression nodes with .default
+          const walk = node => {
+            if (!node || typeof node !== 'object') {
+              return
+            }
+
+            // Look for patterns like: require("./module").default
+            if (
+              node.type === 'MemberExpression' &&
+              node.property?.type === 'Identifier' &&
+              node.property.name === 'default' &&
+              node.object?.type === 'CallExpression' &&
+              node.object.callee?.type === 'Identifier' &&
+              node.object.callee.name === 'require' &&
+              node.object.arguments?.length === 1 &&
+              node.object.arguments[0].type === 'StringLiteral'
+            ) {
+              const modulePath = node.object.arguments[0].value
+              // Only fix relative imports (not external packages)
+              if (modulePath.startsWith('./') || modulePath.startsWith('../')) {
+                // Remove the .default property access
+                // Keep the require() call but remove .default
+                s.remove(node.object.end, node.end)
+                modified = true
+              }
+            }
+
+            // Recursively walk all properties
+            for (const key of Object.keys(node)) {
+              if (key === 'start' || key === 'end' || key === 'loc') {
+                continue
+              }
+              const value = node[key]
+              if (Array.isArray(value)) {
+                for (const item of value) {
+                  walk(item)
+                }
+              } else {
+                walk(value)
+              }
+            }
+          }
+
+          walk(ast.program)
+        } catch {
+          // If parsing fails, skip AST-based fixes for this file
         }
 
         // Fix relative paths ONLY for files in the root dist directory
