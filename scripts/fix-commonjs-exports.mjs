@@ -266,11 +266,15 @@ async function processDirectory(dir, verbose = false) {
             // Check if this is preceded by 'module.' or 'moduleN.' (from esbuild CommonJS wrapper)
             const beforeModule = pos - 'module.'.length
             const beforeModule2 = pos - 'module2.'.length
-            const isModule = beforeModule >= 0 && content.slice(beforeModule, pos) === 'module.'
-            const isModule2 = beforeModule2 >= 0 && content.slice(beforeModule2, pos) === 'module2.'
+            const isModule =
+              beforeModule >= 0 &&
+              content.slice(beforeModule, pos) === 'module.'
+            const isModule2 =
+              beforeModule2 >= 0 &&
+              content.slice(beforeModule2, pos) === 'module2.'
             // Also check for generic moduleN. pattern
             const beforeText = content.slice(Math.max(0, pos - 10), pos)
-            const hasModuleNPrefix = /module\d*\.$/  .test(beforeText)
+            const hasModuleNPrefix = /module\d*\.$/.test(beforeText)
 
             if (isModule || isModule2 || hasModuleNPrefix) {
               // Skip moduleN.exports.default (it's already from esbuild wrapper)
