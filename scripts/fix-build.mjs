@@ -34,6 +34,10 @@ async function main() {
     },
     // fix-commonjs-exports no longer needed - unminified esbuild output is ESM-compatible
     {
+      args: ['scripts/fix-path-aliases.mjs', ...fixArgs],
+      command: 'node',
+    },
+    {
       args: ['scripts/fix-external-imports.mjs', ...fixArgs],
       command: 'node',
     },
