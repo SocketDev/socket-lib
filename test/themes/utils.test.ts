@@ -17,25 +17,33 @@ describe('themes/utils', () => {
   describe('resolveColor', () => {
     it('should resolve primary keyword', () => {
       const result = resolveColor('primary', {
-        primary: 'blue',
-        secondary: 'green',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        secondary: 'green' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       expect(result).toBe('blue')
     })
 
     it('should resolve secondary keyword with fallback', () => {
       const result = resolveColor('secondary', {
-        primary: 'blue',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       // Falls back to primary when secondary is undefined
       expect(result).toBe('blue')
@@ -43,65 +51,85 @@ describe('themes/utils', () => {
 
     it('should resolve secondary when defined', () => {
       const result = resolveColor('secondary', {
-        primary: 'blue',
-        secondary: 'magenta',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        secondary: 'magenta' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       expect(result).toBe('magenta')
     })
 
     it('should resolve inherit keyword', () => {
       const result = resolveColor('inherit', {
-        primary: 'blue',
-        secondary: 'green',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        secondary: 'green' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       expect(result).toBe('inherit')
     })
 
     it('should pass through color values', () => {
       const result = resolveColor('red', {
-        primary: 'blue',
-        secondary: 'green',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        secondary: 'green' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       expect(result).toBe('red')
     })
 
     it('should pass through RGB tuples', () => {
       const result = resolveColor([255, 100, 50], {
-        primary: 'blue',
-        secondary: 'green',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        secondary: 'green' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       expect(result).toEqual([255, 100, 50])
     })
 
     it('should resolve primary as RGB tuple', () => {
       const result = resolveColor('primary', {
-        primary: [100, 150, 200],
-        secondary: 'green',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: [100, 150, 200] as const,
+        secondary: 'green' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
       expect(result).toEqual([100, 150, 200])
     })
@@ -110,29 +138,37 @@ describe('themes/utils', () => {
   describe('color resolution edge cases', () => {
     it('should handle mixed color value types', () => {
       const colors = {
-        primary: 'blue',
-        secondary: [100, 150, 200] as [number, number, number],
-        success: 'green',
-        error: [255, 0, 0] as [number, number, number],
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+        primary: 'blue' as const,
+        secondary: [100, 150, 200] as const,
+        success: 'green' as const,
+        error: [255, 0, 0] as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       }
       expect(resolveColor('primary', colors)).toBe('blue')
       expect(resolveColor('secondary', colors)).toEqual([100, 150, 200])
     })
 
     it('should handle arbitrary color names', () => {
-      const result = resolveColor('brightYellow', {
-        primary: 'blue',
-        secondary: 'green',
-        success: 'green',
-        error: 'red',
-        warning: 'yellow',
-        info: 'cyan',
-        step: 'cyan',
+      const result = resolveColor('yellowBright' as any, {
+        primary: 'blue' as const,
+        secondary: 'green' as const,
+        success: 'green' as const,
+        error: 'red' as const,
+        warning: 'yellow' as const,
+        info: 'cyan' as const,
+        step: 'cyan' as const,
+        text: 'white' as const,
+        textDim: 'gray' as const,
+        link: 'blue' as const,
+        prompt: 'cyan' as const,
       })
-      expect(result).toBe('brightYellow')
+      expect(result).toBe('yellowBright')
     })
   })
 })
