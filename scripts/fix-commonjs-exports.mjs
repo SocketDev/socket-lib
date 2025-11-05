@@ -359,6 +359,12 @@ async function processDirectory(dir, verbose = false) {
             /[ \t]*module2\.module\.exports\s*=\s*[^;]+;[ \t]*\n?/g
           const matches = [...content.matchAll(pattern)]
 
+          if (matches.length > 0 && verbose) {
+            console.log(
+              `    Removing ${matches.length} module2.module.exports lines from ${path.basename(fullPath)}`,
+            )
+          }
+
           // Process matches in reverse order to maintain correct indices
           for (let i = matches.length - 1; i >= 0; i--) {
             const match = matches[i]
