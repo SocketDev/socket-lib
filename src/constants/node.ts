@@ -24,18 +24,7 @@ let _maintainedNodeVersions:
   | undefined
 export function getMaintainedNodeVersions() {
   if (_maintainedNodeVersions === undefined) {
-    try {
-      _maintainedNodeVersions = require('../lib/maintained-node-versions')
-    } catch {
-      _maintainedNodeVersions = Object.freeze(
-        Object.assign([], {
-          current: '',
-          last: '',
-          next: '',
-          previous: '',
-        }),
-      ) as typeof _maintainedNodeVersions
-    }
+    _maintainedNodeVersions = require('../maintained-node-versions')
   }
   return _maintainedNodeVersions
 }
