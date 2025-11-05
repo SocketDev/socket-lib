@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.2.8](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.8) - 2025-11-05
+
+### Fixed
+
+- **build**: Fix CommonJS export script edge cases
+  - Fixed stray semicolons after comment placeholders in transformed modules
+  - Fixed incorrect transformation of `module.exports.default` to `module.module.exports`
+  - Ensures external dependencies and default exports work correctly
 
 ## [3.2.7](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.7) - 2025-11-05
 
