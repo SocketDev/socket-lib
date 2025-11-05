@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.6) - 2025-11-05
+
+### Fixed
+
+- **logger**: Replace yoctocolors-cjs rgb() with manual ANSI codes
+  - The yoctocolors-cjs package doesn't have an rgb() method
+  - Manually construct ANSI escape sequences for RGB colors (ESC[38;2;r;g;bm...ESC[39m)
+  - Affects `src/logger.ts` and `src/stdio/prompts.ts` applyColor() functions
+
 ## [3.2.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.5) - 2025-11-05
 
 ### Added
