@@ -21,7 +21,7 @@ export function getAbortSignal(): AbortSignal {
 let _spinner: Spinner | null | undefined
 export function getSpinner(): Spinner | null {
   if (_spinner === undefined) {
-    const { Spinner: SpinnerFn } = require('../spinner')
+    const { Spinner: SpinnerFn } = require('#lib/spinner')
     _spinner = SpinnerFn() ?? null
   }
   return _spinner ?? null

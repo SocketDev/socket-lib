@@ -20,7 +20,8 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 // Package default Node range.
 export function getPackageDefaultNodeRange(): string | undefined {
   if (_packageDefaultNodeRange === undefined) {
-    _packageDefaultNodeRange = require('../package-default-node-range')
+    _packageDefaultNodeRange =
+      require('#lib/package-default-node-range').default
   }
   return _packageDefaultNodeRange
 }
@@ -28,7 +29,8 @@ export function getPackageDefaultNodeRange(): string | undefined {
 // Package default Socket categories.
 export function getPackageDefaultSocketCategories() {
   if (_packageDefaultSocketCategories === undefined) {
-    _packageDefaultSocketCategories = require('../package-default-socket-categories')
+    _packageDefaultSocketCategories =
+      require('#lib/package-default-socket-categories').default
   }
   return _packageDefaultSocketCategories
 }
@@ -36,7 +38,7 @@ export function getPackageDefaultSocketCategories() {
 // Package extensions.
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (_packageExtensions === undefined) {
-    const exts = require('../package-extensions')
+    const exts = require('#lib/package-extensions').default
     _packageExtensions = Object.entries(exts)
   }
   return _packageExtensions
@@ -50,7 +52,8 @@ export function getNpmLifecycleEvent(): string | undefined {
 // Lifecycle script names.
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
-    _lifecycleScriptNames = require('../lifecycle-script-names')
+    const scriptNamesSet = require('#lib/lifecycle-script-names').default
+    _lifecycleScriptNames = Array.from(scriptNamesSet)
   }
   return _lifecycleScriptNames
 }
@@ -67,8 +70,8 @@ export function getPackumentCache(): Map<string, unknown> {
 export function getPacoteCachePath(): string {
   if (_pacoteCachePath === undefined) {
     try {
-      const pacote = require('../external/pacote')
-      const { normalizePath } = require('../path')
+      const pacote = require('pacote')
+      const { normalizePath } = require('#lib/path')
       const proto = Reflect.getPrototypeOf(
         (pacote as { RegistryFetcher: { prototype: object } }).RegistryFetcher
           .prototype,
