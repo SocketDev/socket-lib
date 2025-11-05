@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.7](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.7) - 2025-11-05
+
+### Fixed
+
+- **build-externals**: Disable minification to preserve exports
+  - External dependencies are no longer minified during bundling
+  - Prevents export name mangling that breaks CommonJS interop
+  - Fixes `semver.parse()` and `semver.major()` being undefined
+
+- **build**: Fix CommonJS export interop for TypeScript default exports
+  - Modules with `export default` now work without requiring `.default` accessor
+
+### Changed
+
+- **docs**: Moved packages README to correct location (`src/packages/README.md`)
+
 ## [3.2.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.6) - 2025-11-05
 
 ### Fixed
