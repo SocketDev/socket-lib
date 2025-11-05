@@ -231,7 +231,7 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
       ...(packageOpts.external || []),
     ],
     plugins: [createForceNodeModulesPlugin(), createStubPlugin()],
-    minify: true,
+    minify: false,
     sourcemap: false,
     metafile: true,
     logLevel: 'error',
@@ -242,9 +242,6 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
     pure: ['console.log', 'console.debug', 'console.warn'],
     drop: ['debugger', 'console'],
     ignoreAnnotations: false,
-    minifyWhitespace: true,
-    minifyIdentifiers: true,
-    minifySyntax: true,
     // Define compile-time constants for dead code elimination.
     define: {
       'process.env.NODE_ENV': '"production"',
