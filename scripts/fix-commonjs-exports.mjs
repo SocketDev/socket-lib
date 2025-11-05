@@ -225,11 +225,25 @@ async function processDirectory(dir, verbose = false) {
               }
               s.remove(exportCallStart, removeEnd)
 
-              // Replace module.exports = __toCommonJS(name) with comment placeholder
-              // We'll add the actual export at the end of the file
+              // Replace the entire statement: module.exports = __toCommonJS(name);
+              // Find and include the semicolon
+              let statementEnd = toCommonJSEnd
+              while (
+                statementEnd < content.length &&
+                (content[statementEnd] === ';' ||
+                  content[statementEnd] === ' ' ||
+                  content[statementEnd] === '\n')
+              ) {
+                if (content[statementEnd] === ';') {
+                  statementEnd++
+                  break
+                }
+                statementEnd++
+              }
+              // Replace the entire statement with a comment
               s.overwrite(
                 toCommonJSStart,
-                toCommonJSEnd,
+                statementEnd,
                 '/* module.exports will be set at end of file */',
               )
 
@@ -244,10 +258,18 @@ async function processDirectory(dir, verbose = false) {
         }
 
         // Check if this is a single default export (legacy pattern)
+        // Only match 'exports.default =' that is NOT preceded by 'module.'
         if (content.includes('exports.default =')) {
           // Transform exports.default = value to module.exports = value
           let pos = 0
           while ((pos = content.indexOf('exports.default = ', pos)) !== -1) {
+            // Check if this is preceded by 'module.'
+            const beforePos = pos - 'module.'.length
+            if (beforePos >= 0 && content.slice(beforePos, pos) === 'module.') {
+              // Skip module.exports.default (it's already correct)
+              pos += 1
+              continue
+            }
             s.overwrite(
               pos,
               pos + 'exports.default = '.length,
