@@ -32,13 +32,16 @@ async function main() {
       args: ['scripts/generate-package-exports.mjs', ...fixArgs],
       command: 'node',
     },
-    // fix-commonjs-exports no longer needed - unminified esbuild output is ESM-compatible
     {
       args: ['scripts/fix-path-aliases.mjs', ...fixArgs],
       command: 'node',
     },
     {
       args: ['scripts/fix-external-imports.mjs', ...fixArgs],
+      command: 'node',
+    },
+    {
+      args: ['scripts/fix-commonjs-exports.mjs', ...fixArgs],
       command: 'node',
     },
   ])
