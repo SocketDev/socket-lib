@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * @fileoverview Validates that there are no CDN references in the codebase.
  *
