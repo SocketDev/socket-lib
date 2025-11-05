@@ -350,6 +350,25 @@ async function processDirectory(dir, verbose = false) {
           // If parsing fails, skip AST-based fixes for this file
         }
 
+        // Fix module2.module.exports pattern (from external bundling)
+        // This is always incorrect and causes "Cannot set properties of undefined"
+        if (content.includes('module2.module.exports')) {
+          // Find and remove all occurrences of module2.module.exports lines
+          // Pattern matches: "    module2.module.exports = value;\n"
+          const pattern =
+            /[ \t]*module2\.module\.exports\s*=\s*[^;]+;[ \t]*\n?/g
+          const matches = [...content.matchAll(pattern)]
+
+          // Process matches in reverse order to maintain correct indices
+          for (let i = matches.length - 1; i >= 0; i--) {
+            const match = matches[i]
+            const start = match.index
+            const end = start + match[0].length
+            s.remove(start, end)
+            modified = true
+          }
+        }
+
         // Fix relative paths ONLY for files in the root dist directory
         const isRootFile = path.dirname(fullPath) === distDir
         if (
