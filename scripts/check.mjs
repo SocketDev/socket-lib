@@ -42,7 +42,7 @@ async function main() {
         },
       },
       {
-        args: ['scripts/validate-bundle-deps.mjs'],
+        args: ['scripts/validate-no-extraneous-dependencies.mjs'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
