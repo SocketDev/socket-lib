@@ -204,7 +204,7 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
 
 | Doc | Description |
 |-----|-------------|
-| [**Getting Started**](./docs/getting-started.md) | Development workflow, commands, architecture |
+| [**Getting Started**](./docs/getting-started.md) | Quick start for contributors (5 min setup) |
 | [**Theme System**](./docs/themes.md) | Themed spinners, colors, and effects |
 | [**Build Architecture**](./docs/build.md) | Vendored dependencies, build system |
 | [**CLAUDE.md**](./CLAUDE.md) | Coding standards and patterns |
@@ -234,23 +234,13 @@ const data = await retry(() => fetchData(), { maxAttempts: 3 })
 
 ## Development
 
+**New to the project?** See the [**Getting Started Guide**](./docs/getting-started.md) for setup, workflow, and contribution guidelines.
+
+**Quick commands:**
 ```bash
-# Setup
-git clone https://github.com/SocketDev/socket-lib.git
-cd socket-lib
-pnpm install
-
-# Build
-pnpm run build       # Production build
+pnpm install         # Install dependencies
 pnpm run dev         # Watch mode
-
-# Test
-pnpm test            # Run all tests
-pnpm run cover       # With coverage
-
-# Quality
-pnpm run check       # Type check
-pnpm run lint        # Lint code
+pnpm test            # Run tests
 pnpm run fix         # Auto-fix issues
 ```
 
@@ -266,6 +256,8 @@ pnpm run fix         # Auto-fix issues
 - **Zero** runtime dependencies
 
 ## Contributing
+
+**Ready to contribute?** Start with the [Getting Started Guide](./docs/getting-started.md) for a quick setup walkthrough.
 
 See [CLAUDE.md](./CLAUDE.md) for:
 - Code style and patterns
