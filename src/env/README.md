@@ -434,4 +434,10 @@ if (getGitHubActions()) {
 
 ---
 
+## 📚 Documentation
+
+- **[Getting Started Guide](../../docs/getting-started.md)** — Quick setup for contributors
+- **[CLAUDE.md](../../CLAUDE.md)** — Development standards and patterns
+- **[Main README](../../README.md)** — Package overview and API reference
+
 **Complete list of all 68 getters available in source files.**

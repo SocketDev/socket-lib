@@ -415,4 +415,10 @@ describe('detectPackageManager', () => {
 
 ---
 
+## 📚 Documentation
+
+- **[Getting Started Guide](../../../docs/getting-started.md)** — Quick setup for contributors
+- **[CLAUDE.md](../../../CLAUDE.md)** — Development standards and patterns
+- **[Main README](../../../README.md)** — Package overview and API reference
+
 **See individual module files for complete API documentation and advanced options.**
