@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.5) - 2025-11-05
+
+### Added
+
+- **scripts**: Add path alias resolution script (`fix-path-aliases.mjs`)
+  - Resolves internal path aliases (`#lib/*`, `#constants/*`, etc.) to relative paths in built CommonJS files
+
+- **build**: Integrate path alias resolution into build pipeline
+  - Add path alias plugin to esbuild config
+  - Integrate `fix-path-aliases.mjs` into build process
+  - Ensures path aliases work correctly in compiled CommonJS output
+
 ## [3.2.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.4) - 2025-11-04
 
 ### Added
