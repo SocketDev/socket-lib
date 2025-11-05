@@ -24,8 +24,10 @@ function applyColor(text: string, color: ColorValue): string {
     // Named color like 'green', 'red', etc.
     return (yoctocolorsCjs as any)[color](text)
   }
-  // RGB tuple [r, g, b]
-  return yoctocolorsCjs.rgb(color[0], color[1], color[2])(text)
+  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
+  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
+  const { 0: r, 1: g, 2: b } = color
+  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
 }
 
 // Type definitions
