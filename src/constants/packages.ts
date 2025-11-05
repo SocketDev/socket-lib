@@ -20,8 +20,7 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 // Package default Node range.
 export function getPackageDefaultNodeRange(): string | undefined {
   if (_packageDefaultNodeRange === undefined) {
-    _packageDefaultNodeRange =
-      require('#lib/package-default-node-range').default
+    _packageDefaultNodeRange = require('#lib/package-default-node-range')
   }
   return _packageDefaultNodeRange
 }
@@ -30,7 +29,7 @@ export function getPackageDefaultNodeRange(): string | undefined {
 export function getPackageDefaultSocketCategories() {
   if (_packageDefaultSocketCategories === undefined) {
     _packageDefaultSocketCategories =
-      require('#lib/package-default-socket-categories').default
+      require('#lib/package-default-socket-categories')
   }
   return _packageDefaultSocketCategories
 }
@@ -38,7 +37,7 @@ export function getPackageDefaultSocketCategories() {
 // Package extensions.
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (_packageExtensions === undefined) {
-    const exts = require('#lib/package-extensions').default
+    const exts = require('#lib/package-extensions')
     _packageExtensions = Object.entries(exts)
   }
   return _packageExtensions
@@ -52,7 +51,7 @@ export function getNpmLifecycleEvent(): string | undefined {
 // Lifecycle script names.
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
-    const scriptNamesSet = require('#lib/lifecycle-script-names').default
+    const scriptNamesSet = require('#lib/lifecycle-script-names')
     _lifecycleScriptNames = Array.from(scriptNamesSet)
   }
   return _lifecycleScriptNames
