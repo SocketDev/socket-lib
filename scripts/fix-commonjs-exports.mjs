@@ -258,15 +258,22 @@ async function processDirectory(dir, verbose = false) {
         }
 
         // Check if this is a single default export (legacy pattern)
-        // Only match 'exports.default =' that is NOT preceded by 'module.'
+        // Only match 'exports.default =' that is NOT preceded by 'module.' or 'moduleN.'
         if (content.includes('exports.default =')) {
           // Transform exports.default = value to module.exports = value
           let pos = 0
           while ((pos = content.indexOf('exports.default = ', pos)) !== -1) {
-            // Check if this is preceded by 'module.'
-            const beforePos = pos - 'module.'.length
-            if (beforePos >= 0 && content.slice(beforePos, pos) === 'module.') {
-              // Skip module.exports.default (it's already correct)
+            // Check if this is preceded by 'module.' or 'moduleN.' (from esbuild CommonJS wrapper)
+            const beforeModule = pos - 'module.'.length
+            const beforeModule2 = pos - 'module2.'.length
+            const isModule = beforeModule >= 0 && content.slice(beforeModule, pos) === 'module.'
+            const isModule2 = beforeModule2 >= 0 && content.slice(beforeModule2, pos) === 'module2.'
+            // Also check for generic moduleN. pattern
+            const beforeText = content.slice(Math.max(0, pos - 10), pos)
+            const hasModuleNPrefix = /module\d*\.$/  .test(beforeText)
+
+            if (isModule || isModule2 || hasModuleNPrefix) {
+              // Skip moduleN.exports.default (it's already from esbuild wrapper)
               pos += 1
               continue
             }
@@ -359,19 +366,21 @@ async function processDirectory(dir, verbose = false) {
             /[ \t]*module2\.module\.exports\s*=\s*[^;]+;[ \t]*\n?/g
           const matches = [...content.matchAll(pattern)]
 
-          if (matches.length > 0 && verbose) {
-            console.log(
-              `    Removing ${matches.length} module2.module.exports lines from ${path.basename(fullPath)}`,
-            )
-          }
+          if (matches.length > 0) {
+            if (verbose) {
+              console.log(
+                `    Removing ${matches.length} module2.module.exports lines from ${path.basename(fullPath)}`,
+              )
+            }
 
-          // Process matches in reverse order to maintain correct indices
-          for (let i = matches.length - 1; i >= 0; i--) {
-            const match = matches[i]
-            const start = match.index
-            const end = start + match[0].length
-            s.remove(start, end)
-            modified = true
+            // Process matches in reverse order to maintain correct indices
+            for (let i = matches.length - 1; i >= 0; i--) {
+              const match = matches[i]
+              const start = match.index
+              const end = start + match[0].length
+              s.remove(start, end)
+              modified = true
+            }
           }
         }
 
