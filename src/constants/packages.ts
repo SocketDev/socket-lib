@@ -20,11 +20,7 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 // Package default Node range.
 export function getPackageDefaultNodeRange(): string | undefined {
   if (_packageDefaultNodeRange === undefined) {
-    try {
-      _packageDefaultNodeRange = require('../lib/package-default-node-range')
-    } catch {
-      _packageDefaultNodeRange = '>=18'
-    }
+    _packageDefaultNodeRange = require('../package-default-node-range')
   }
   return _packageDefaultNodeRange
 }
@@ -32,11 +28,7 @@ export function getPackageDefaultNodeRange(): string | undefined {
 // Package default Socket categories.
 export function getPackageDefaultSocketCategories() {
   if (_packageDefaultSocketCategories === undefined) {
-    try {
-      _packageDefaultSocketCategories = require('../lib/package-default-socket-categories')
-    } catch {
-      _packageDefaultSocketCategories = []
-    }
+    _packageDefaultSocketCategories = require('../package-default-socket-categories')
   }
   return _packageDefaultSocketCategories
 }
@@ -44,12 +36,8 @@ export function getPackageDefaultSocketCategories() {
 // Package extensions.
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (_packageExtensions === undefined) {
-    try {
-      const exts = require('../lib/package-extensions')
-      _packageExtensions = Object.entries(exts)
-    } catch {
-      _packageExtensions = []
-    }
+    const exts = require('../package-extensions')
+    _packageExtensions = Object.entries(exts)
   }
   return _packageExtensions
 }
@@ -62,11 +50,7 @@ export function getNpmLifecycleEvent(): string | undefined {
 // Lifecycle script names.
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
-    try {
-      _lifecycleScriptNames = require('../lib/lifecycle-script-names')
-    } catch {
-      _lifecycleScriptNames = []
-    }
+    _lifecycleScriptNames = require('../lifecycle-script-names')
   }
   return _lifecycleScriptNames
 }
@@ -84,7 +68,7 @@ export function getPacoteCachePath(): string {
   if (_pacoteCachePath === undefined) {
     try {
       const pacote = require('../external/pacote')
-      const { normalizePath } = require('../lib/path')
+      const { normalizePath } = require('../path')
       const proto = Reflect.getPrototypeOf(
         (pacote as { RegistryFetcher: { prototype: object } }).RegistryFetcher
           .prototype,
