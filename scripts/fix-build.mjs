@@ -44,6 +44,10 @@ async function main() {
       args: ['scripts/fix-commonjs-exports.mjs', ...fixArgs],
       command: 'node',
     },
+    {
+      args: ['scripts/validate-dist-exports.mjs', ...fixArgs],
+      command: 'node',
+    },
   ])
 
   if (!quiet) {
