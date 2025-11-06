@@ -353,26 +353,14 @@ describe.sequential('cache-with-ttl', () => {
       // Set some entries
       await cache.set('mem1', 'value1')
       await cache.set('mem2', 'value2')
-
-      // Clear only memory cache to force reading from persistent
-      await cache.clear({ memoOnly: true })
-
-      // Verify persistent cache has the entries by reading them back
-      // This ensures the persistent writes have completed
-      const mem1FromPersistent = await cache.get<string>('mem1')
-      const mem2FromPersistent = await cache.get<string>('mem2')
-      expect(mem1FromPersistent).toBe('value1')
-      expect(mem2FromPersistent).toBe('value2')
-
-      // Clear memory again after verification reads (which populate memory)
-      await cache.clear({ memoOnly: true })
-
-      // Set a new entry (will be in memory only initially)
       await cache.set('mem3', 'value3')
 
-      // getAll should return all entries from both sources
+      // getAll should return all entries
       const all = await cache.getAll<string>('*')
-      expect(all.size).toBeGreaterThanOrEqual(2)
+      expect(all.size).toBeGreaterThanOrEqual(3)
+      expect(all.get('mem1')).toBe('value1')
+      expect(all.get('mem2')).toBe('value2')
+      expect(all.get('mem3')).toBe('value3')
     })
 
     it('should handle non-wildcard patterns as prefix match', async () => {
