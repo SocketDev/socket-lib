@@ -25,12 +25,15 @@ const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
 // but they must share the same Map for rewiring to work.
 // Only initialize in test environment to avoid polluting production runtime
 // Vitest automatically sets VITEST=true when running tests
-const sharedOverridesSymbol = Symbol.for('@socketsecurity/lib/env/rewire/test-overrides')
+const sharedOverridesSymbol = Symbol.for(
+  '@socketsecurity/lib/env/rewire/test-overrides',
+)
 const isVitestEnv = envAsBoolean(process.env.VITEST)
 if (isVitestEnv && !globalThis[sharedOverridesSymbol]) {
   globalThis[sharedOverridesSymbol] = new Map<string, string | undefined>()
 }
-const sharedOverrides: Map<string, string | undefined> | undefined = globalThis[sharedOverridesSymbol]
+const sharedOverrides: Map<string, string | undefined> | undefined =
+  globalThis[sharedOverridesSymbol]
 
 /**
  * Get an environment variable value, checking overrides first.
