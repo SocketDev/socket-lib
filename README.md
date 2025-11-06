@@ -57,8 +57,6 @@ spinner.start()
 
 **5 Built-in Themes:** `socket` (violet) · `sunset` (twilight) · `terracotta` (warm) · `lush` (steel blue) · `ultra` (rainbow)
 
-👉 [**Theme System Docs**](./docs/themes.md)
-
 ### File System
 
 **Safe, typed file operations:**
@@ -158,83 +156,7 @@ const result = await timeout(fetchData(), 5000)
 const data = await retry(() => fetchData(), { maxAttempts: 3 })
 ```
 
-## Module Organization
-
-**120+ granular exports** organized by category:
-
-```
-/constants/        → Node.js, npm, platform constants
-  ├─ packages      → PACKAGE_JSON, NODE_MODULES, etc.
-  ├─ platform      → DARWIN, WIN32, S_IXUSR, etc.
-  ├─ node          → NODE_VERSION, NODE_PATH, etc.
-  ├─ time          → MILLISECONDS_PER_*, DLX_BINARY_CACHE_TTL
-  └─ encoding      → UTF8, CHAR_* codes
-
-/env/              → 22 modules providing 68 typed getters
-  ├─ ci            → getCI() - Detect CI environment
-  ├─ home          → getHome() - User home directory
-  ├─ node-env      → getNodeEnv() - NODE_ENV value
-  └─ ...           → And 19 more modules!
-
-/packages/         → Package management utilities (11 modules)
-  ├─ validation    → Package name/version validation
-  ├─ operations    → Install, extract, manifest, dlx
-  ├─ registry      → npm registry utilities
-  └─ editable      → Editable installs detection
-
-/effects/          → Visual effects for CLI
-  ├─ text-shimmer  → Animated gradient text
-  ├─ pulse-frames  → Pulsing text effect
-  └─ ultra         → Rainbow gradients
-
-/stdio/            → Terminal I/O utilities
-  ├─ stdout        → Safe stdout operations
-  ├─ stderr        → Safe stderr operations
-  ├─ clear         → Clear terminal
-  └─ footer        → Terminal footers
-
-/themes/           → Theme system for consistent branding (5 modules)
-  ├─ types         → Theme type definitions
-  ├─ themes        → 5 themes (socket, sunset, terracotta, lush, ultra)
-  ├─ context       → Global theme management
-  └─ utils         → Color resolution, theme creation
-```
-
-## Documentation
-
-| Doc | Description |
-|-----|-------------|
-| [**Getting Started**](./docs/getting-started.md) | Quick start for contributors (5 min setup) |
-| [**Theme System**](./docs/themes.md) | Themed spinners, colors, and effects |
-| [**Build Architecture**](./docs/build.md) | Vendored dependencies, build system |
-| [**CLAUDE.md**](./CLAUDE.md) | Coding standards and patterns |
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│  @socketsecurity/lib                                │
-│  Zero runtime dependencies                          │
-├─────────────────────────────────────────────────────┤
-│  src/                                               │
-│  ├── constants/        14 modules                   │
-│  ├── env/              22 modules (68 getters)      │
-│  ├── packages/         11 utilities                 │
-│  ├── effects/           4 visual effects            │
-│  ├── stdio/             9 I/O utilities             │
-│  ├── themes/            5 theme definitions         │
-│  ├── external/         16 vendored deps             │
-│  └── ... 62+ more modules                           │
-├─────────────────────────────────────────────────────┤
-│  Build: esbuild → CommonJS (ES2022)                │
-│  Types: tsgo (TypeScript Native Preview)            │
-│  Tests: Vitest (4600+ tests, 100% coverage)        │
-└─────────────────────────────────────────────────────┘
-```
-
 ## Development
-
-**New to the project?** See the [**Getting Started Guide**](./docs/getting-started.md) for setup, workflow, and contribution guidelines.
 
 **Quick commands:**
 ```bash
@@ -244,31 +166,6 @@ pnpm test            # Run tests
 pnpm run fix         # Auto-fix issues
 ```
 
-## Stats
-
-- **143** TypeScript modules
-- **120+** granular exports
-- **68** typed environment getters
-- **22** environment modules
-- **14** constant modules
-- **5** theme definitions
-- **4600+** tests passing
-- **Zero** runtime dependencies
-
-## Contributing
-
-**Ready to contribute?** Start with the [Getting Started Guide](./docs/getting-started.md) for a quick setup walkthrough.
-
-See [CLAUDE.md](./CLAUDE.md) for:
-- Code style and patterns
-- Path alias usage
-- Testing guidelines
-- Build system details
-
 ## License
 
 MIT
-
----
-
-**Built by Socket.dev** — [socket.dev](https://socket.dev) | [@SocketSecurity](https://twitter.com/SocketSecurity)
