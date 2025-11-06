@@ -26,7 +26,6 @@ export default defineConfig({
       ? ['.ts', '.mts', '.cts', '.js', '.mjs', '.cjs', '.json']
       : ['.mts', '.ts', '.mjs', '.js', '.json'],
     alias: {
-      '#env/ci': path.resolve(projectRoot, 'src/env/ci.ts'),
       '#env': path.resolve(projectRoot, 'src/env'),
       '#constants': path.resolve(projectRoot, 'src/constants'),
       '#lib': path.resolve(projectRoot, 'src/lib'),
@@ -88,6 +87,7 @@ export default defineConfig({
         // 3. Vi.mock() module mocking functions properly
         // 4. Test state pollution is prevented through proper beforeEach/afterEach
         // 5. Our tests are designed to clean up after themselves
+        // 6. The rewire module uses globalThis singleton to handle coverage module duplication
         isolate: false,
         useAtomics: true,
       },
@@ -104,6 +104,8 @@ export default defineConfig({
     bail: process.env.CI ? 1 : 0,
     server: {
       deps: {
+        // Note: inlining @socketsecurity/lib in coverage mode would cause duplicate module instances
+        // The rewire module uses globalThis singleton to handle this, so inlining is not needed
         inline: isCoverageEnabled ? [/@socketsecurity\/lib/, 'zod'] : ['zod'],
       },
     },
