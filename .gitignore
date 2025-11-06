@@ -5,8 +5,9 @@ Thumbs.db
 /.env
 /.env.local
 /.env.*.local
-/.pnpmfile.cjs
+/.node-version
 /.nvm
+/.pnpmfile.cjs
 /.type-coverage
 /.vscode
 /npm-debug.log
