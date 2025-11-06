@@ -11,34 +11,47 @@
 
 import { AsyncLocalStorage } from 'async_hooks'
 
+import { envAsBoolean } from '#env/helpers'
+
 type EnvOverrides = Map<string, string | undefined>
 
-const envStorage = new AsyncLocalStorage<EnvOverrides>()
+// Isolated execution context storage for nested overrides (withEnv/withEnvSync)
+// AsyncLocalStorage creates isolated contexts that don't leak between concurrent code
+const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
 
-// Per-test overrides (used by setEnv/clearEnv/resetEnv in test hooks)
-// Each test file gets its own instance due to Vitest's module isolation
-const testOverrides = new Map<string, string | undefined>()
+// Shared test hook overrides (setEnv/clearEnv/resetEnv in beforeEach/afterEach)
+// IMPORTANT: Use globalThis to ensure singleton across duplicate module instances
+// In coverage mode, both src and dist versions of this module may be loaded,
+// but they must share the same Map for rewiring to work.
+// Only initialize in test environment to avoid polluting production runtime
+// Vitest automatically sets VITEST=true when running tests
+const sharedOverridesSymbol = Symbol.for('@socketsecurity/lib/env/rewire/test-overrides')
+const isVitestEnv = envAsBoolean(process.env.VITEST)
+if (isVitestEnv && !globalThis[sharedOverridesSymbol]) {
+  globalThis[sharedOverridesSymbol] = new Map<string, string | undefined>()
+}
+const sharedOverrides: Map<string, string | undefined> | undefined = globalThis[sharedOverridesSymbol]
 
 /**
  * Get an environment variable value, checking overrides first.
  *
  * Resolution order:
- * 1. AsyncLocalStorage context (set via withEnv)
- * 2. Test overrides (set via setEnv in beforeEach)
+ * 1. Isolated overrides (temporary - set via withEnv/withEnvSync)
+ * 2. Shared overrides (persistent - set via setEnv in beforeEach)
  * 3. process.env (including vi.stubEnv modifications)
  *
  * @internal Used by env getters to support test rewiring
  */
 export function getEnvValue(key: string): string | undefined {
-  // Check AsyncLocalStorage context first (highest priority)
-  const contextOverrides = envStorage.getStore()
-  if (contextOverrides?.has(key)) {
-    return contextOverrides.get(key)
+  // Check isolated overrides first (highest priority - temporary via withEnv)
+  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  if (isolatedOverrides?.has(key)) {
+    return isolatedOverrides.get(key)
   }
 
-  // Check test overrides (set via setEnv in beforeEach)
-  if (testOverrides.has(key)) {
-    return testOverrides.get(key)
+  // Check shared overrides (persistent via setEnv in beforeEach)
+  if (sharedOverrides?.has(key)) {
+    return sharedOverrides.get(key)
   }
 
   // Fall back to process.env (works with vi.stubEnv)
@@ -71,14 +84,14 @@ export function getEnvValue(key: string): string | undefined {
  * ```
  */
 export function setEnv(key: string, value: string | undefined): void {
-  testOverrides.set(key, value)
+  sharedOverrides?.set(key, value)
 }
 
 /**
  * Clear a specific environment variable override.
  */
 export function clearEnv(key: string): void {
-  testOverrides.delete(key)
+  sharedOverrides?.delete(key)
 }
 
 /**
@@ -95,15 +108,15 @@ export function clearEnv(key: string): void {
  * ```
  */
 export function resetEnv(): void {
-  testOverrides.clear()
+  sharedOverrides?.clear()
 }
 
 /**
  * Check if an environment variable has been overridden.
  */
 export function hasOverride(key: string): boolean {
-  const contextOverrides = envStorage.getStore()
-  return contextOverrides?.has(key) || testOverrides.has(key)
+  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  return !!(isolatedOverrides?.has(key) || sharedOverrides?.has(key))
 }
 
 /**
@@ -128,13 +141,13 @@ export function hasOverride(key: string): boolean {
  * @example
  * ```typescript
  * // Nested overrides work correctly
- * setEnv('CI', '1') // Test-level override
+ * setEnv('CI', '1') // Shared override (persistent)
  *
  * await withEnv({ CI: '0' }, async () => {
- *   expect(getCI()).toBe(false) // Context override takes precedence
+ *   expect(getCI()).toBe(false) // Isolated override takes precedence
  * })
  *
- * expect(getCI()).toBe(true) // Back to test-level override
+ * expect(getCI()).toBe(true) // Back to shared override
  * ```
  */
 export async function withEnv<T>(
@@ -142,7 +155,7 @@ export async function withEnv<T>(
   fn: () => T | Promise<T>,
 ): Promise<T> {
   const map = new Map(Object.entries(overrides))
-  return await envStorage.run(map, fn)
+  return await isolatedOverridesStorage.run(map, fn)
 }
 
 /**
@@ -164,5 +177,5 @@ export function withEnvSync<T>(
   fn: () => T,
 ): T {
   const map = new Map(Object.entries(overrides))
-  return envStorage.run(map, fn)
+  return isolatedOverridesStorage.run(map, fn)
 }
