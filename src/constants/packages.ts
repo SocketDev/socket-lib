@@ -69,7 +69,7 @@ export function getPackumentCache(): Map<string, unknown> {
 export function getPacoteCachePath(): string {
   if (_pacoteCachePath === undefined) {
     try {
-      const pacote = require('pacote')
+      const pacote = require('../external/pacote')
       const { normalizePath } = require('#lib/path')
       const proto = Reflect.getPrototypeOf(
         (pacote as { RegistryFetcher: { prototype: object } }).RegistryFetcher
