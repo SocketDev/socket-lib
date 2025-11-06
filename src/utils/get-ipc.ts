@@ -70,5 +70,3 @@ export async function getIpc(
 
   return key ? _ipcObject[key] : _ipcObject
 }
-
-export default getIpc
