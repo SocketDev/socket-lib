@@ -1,31 +1,38 @@
+# OS
 .DS_Store
 ._.DS_Store
 Thumbs.db
-/.claude
-/.env
-/.env.local
-/.env.*.local
-/.node-version
-/.nvm
-/.pnpmfile.cjs
-/.type-coverage
-/.vscode
-/npm-debug.log
-/yarn.lock
 
-# Editor files
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local config
+.node-version
+.npmrc.local
+.pnpmfile.cjs
+
+# Build artifacts
+.cache/
+.type-coverage/
+coverage/
+dist/
+*.tsbuildinfo
+*.tgz
+
+# Editors
+.vscode/
+!.vscode/settings.json
+.idea/
 *.swp
 *.swo
-#*#
-.#*
-**/.cache
-**/coverage
-**/dist
-**/html
-**/node_modules
-**/*.tgz
-**/*.tmp
-**/*.tsbuildinfo
 
-# Allow specific files
-!/.vscode/settings.json
+# Logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencies
+node_modules/
+yarn.lock
