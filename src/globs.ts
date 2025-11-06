@@ -104,12 +104,7 @@ let _fastGlob: typeof import('fast-glob') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFastGlob() {
   if (_fastGlob === undefined) {
-    const globExport = /*@__PURE__*/ require('./external/fast-glob') as
-      | (typeof import('fast-glob') & { default?: typeof import('fast-glob') })
-      | typeof import('fast-glob')
-    _fastGlob = (
-      'default' in globExport ? globExport.default : globExport
-    ) as typeof import('fast-glob')
+    _fastGlob = /*@__PURE__*/ require('./external/fast-glob')
   }
   return _fastGlob as typeof import('fast-glob')
 }
