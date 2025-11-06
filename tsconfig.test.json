@@ -4,11 +4,6 @@
     "rootDir": ".",
     "types": ["node", "vitest"]
   },
-  "include": [
-    "test/**/*.ts",
-    "test/**/*.mts",
-    "src/**/*.ts",
-    "vitest.config.ts"
-  ],
+  "include": ["test/**/*.ts", "test/**/*.mts", "src/**/*.ts"],
   "exclude": ["node_modules", "dist/**/*"]
 }
