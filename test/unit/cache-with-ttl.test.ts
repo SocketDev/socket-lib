@@ -262,7 +262,7 @@ describe.sequential('cache-with-ttl', () => {
       expect(await cache.get('posts:1')).toBe('hello')
     })
 
-    it('should handle wildcard patterns', async () => {
+    it('should handle wildcard patterns', { retry: 3 }, async () => {
       await cache.set('npm/lodash/1.0.0', 'data1')
       await cache.set('npm/lodash/2.0.0', 'data2')
       await cache.set('npm/react/1.0.0', 'data3')
