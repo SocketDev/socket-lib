@@ -7,8 +7,13 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import fg from 'fast-glob'
 
-import { envAsBoolean } from '#socketsecurity/lib/env/utils'
 import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
+
+// Helper to check boolean env vars
+const envAsBoolean = name => {
+  const value = process.env[name]
+  return value === 'true' || value === '1'
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')

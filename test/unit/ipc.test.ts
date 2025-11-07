@@ -24,8 +24,8 @@ import {
   parseIpcMessage,
   readIpcStub,
   writeIpcStub,
-} from '../src/ipc'
-import { resetPaths, setPath } from '../src/paths/rewire'
+} from '../../src/ipc'
+import { resetPaths, setPath } from '../../src/paths/rewire'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
