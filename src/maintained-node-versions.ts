@@ -22,7 +22,7 @@ const current = '22.20.0'
 const previous = '20.19.5'
 const last = '18.20.8'
 
-export default ObjectFreeze(
+const maintainedNodeVersions = ObjectFreeze(
   Object.assign([last, previous, current, next], {
     current,
     last,
@@ -35,3 +35,6 @@ export default ObjectFreeze(
   next: string
   previous: string
 }
+
+export default maintainedNodeVersions
+export { maintainedNodeVersions as 'module.exports' }
