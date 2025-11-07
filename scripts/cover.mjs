@@ -218,6 +218,26 @@ try {
     }
   }
 
+  // Filter coverage data to exclude dist/ and external files
+  if (exitCode === 0) {
+    logger.info('Filtering coverage data to src/ files only...')
+    try {
+      const filterResult = await spawn(
+        'node',
+        ['scripts/filter-coverage.mjs'],
+        {
+          cwd: rootPath,
+          stdio: 'inherit',
+        },
+      )
+      if (filterResult.code !== 0) {
+        logger.warn('Coverage filtering had issues but continuing...')
+      }
+    } catch (filterError) {
+      logger.warn(`Coverage filtering failed: ${filterError.message}`)
+    }
+  }
+
   if (exitCode === 0) {
     logger.success('Coverage completed successfully')
   } else {

@@ -132,13 +132,21 @@ export default defineConfig({
         'test/**',
         'packages/**',
         'perf/**',
-        '**/dist/**',
+        // Exclude all dist directory and its contents
         'dist/**',
+        '**/dist/**',
+        '**/{dist,build,out}/**',
+        // Exclude external bundled dependencies
         'src/external/**',
+        '**/external/**',
         'src/types.ts',
         'scripts/**',
       ],
-      include: ['src/**/*.{ts,mts,cts}'],
+      include: [
+        'src/**/*.{ts,mts,cts}',
+        // Explicitly exclude external from include
+        '!src/external/**',
+      ],
       excludeAfterRemap: true,
       all: true,
       clean: true,
