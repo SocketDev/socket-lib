@@ -15,7 +15,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import type { DlxPackageOptions, DlxPackageResult } from '../src/dlx-package'
+import type { DlxPackageOptions, DlxPackageResult } from '../../src/dlx-package'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
 describe('dlx-package', () => {

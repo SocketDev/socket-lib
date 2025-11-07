@@ -53,7 +53,16 @@ export default defineConfig({
     environment: 'node',
     include: [
       toGlobPath(
-        path.resolve(projectRoot, 'test/**/*.test.{js,ts,mjs,mts,cjs,cts}'),
+        path.resolve(
+          projectRoot,
+          'test/unit/**/*.test.{js,ts,mjs,mts,cjs,cts}',
+        ),
+      ),
+      toGlobPath(
+        path.resolve(
+          projectRoot,
+          'test/integration/**/*.test.{js,ts,mjs,mts,cjs,cts}',
+        ),
       ),
     ],
     exclude: [
