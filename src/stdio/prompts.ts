@@ -4,7 +4,7 @@
  */
 
 import { getAbortSignal, getSpinner } from '#constants/process'
-import type { ColorValue } from '../spinner'
+import type { ColorValue } from '../colors'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'

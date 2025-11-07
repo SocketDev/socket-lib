@@ -3,7 +3,7 @@
  */
 
 import { RAINBOW_GRADIENT } from '../effects/ultra'
-import type { ColorValue } from '../spinner'
+import type { ColorValue } from '../colors'
 import type { ShimmerColorGradient } from '../effects/text-shimmer'
 import type { Theme, ThemeColors, ColorReference } from './types'
 

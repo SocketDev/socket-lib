@@ -56,6 +56,10 @@
       "types": "./dist/cache-with-ttl.d.ts",
       "default": "./dist/cache-with-ttl.js"
     },
+    "./colors": {
+      "types": "./dist/colors.d.ts",
+      "default": "./dist/colors.js"
+    },
     "./constants/agents": {
       "types": "./dist/constants/agents.d.ts",
       "default": "./dist/constants/agents.js"

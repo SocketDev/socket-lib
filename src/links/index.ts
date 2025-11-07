@@ -3,8 +3,8 @@
  * Provides colored hyperlinks using theme configuration.
  */
 
+import type { ColorName } from '../colors'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
-import type { ColorName } from '../spinner'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
 import { resolveColor } from '../themes/utils'
