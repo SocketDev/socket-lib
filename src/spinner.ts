@@ -976,8 +976,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       reasonAndStop(text?: string | undefined, ...extras: unknown[]) {
         this.#apply('stop', [])
-        if (typeof text === 'string') {
-          logger.error(`${LOG_SYMBOLS.reason} ${text}`, ...extras)
+        const normalized = normalizeText(text)
+        if (normalized) {
+          logger.error(`${LOG_SYMBOLS.reason} ${normalized}`, ...extras)
         }
         return this
       }
