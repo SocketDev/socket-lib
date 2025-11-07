@@ -155,10 +155,10 @@ export default defineConfig({
       skipFull: false,
       ignoreClassMethods: ['constructor'],
       thresholds: {
-        lines: 1,
-        functions: 68,
+        lines: 68,
+        functions: 70,
         branches: 70,
-        statements: 1,
+        statements: 68,
       },
     },
   },
