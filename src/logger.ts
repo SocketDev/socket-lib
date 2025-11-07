@@ -25,6 +25,7 @@ import { THEMES } from './themes/themes'
  * console.log(`${LOG_SYMBOLS.warn} Warning message`)
  * console.log(`${LOG_SYMBOLS.info} Information message`)
  * console.log(`${LOG_SYMBOLS.step} Processing step`)
+ * console.log(`${LOG_SYMBOLS.reason} Working through logic`)
  * ```
  */
 type LogSymbols = {
@@ -32,6 +33,8 @@ type LogSymbols = {
   fail: string
   /** Blue colored information symbol (ℹ or i in ASCII) */
   info: string
+  /** Dimmed yellow reasoning/working symbol (∴ or :. in ASCII) */
+  reason: string
   /** Cyan colored step symbol (→ or > in ASCII) */
   step: string
   /** Green colored success symbol (✔ or √ in ASCII) */
@@ -141,9 +144,9 @@ function applyColor(
 /**
  * Log symbols for terminal output with colored indicators.
  *
- * Provides colored Unicode symbols (✔, ✖, ⚠, ℹ, →) with ASCII fallbacks (√, ×, ‼, i, >)
+ * Provides colored Unicode symbols (✖, ℹ, ∴, →, ✔, ⚠) with ASCII fallbacks (×, i, :., >, √, ‼)
  * for terminals that don't support Unicode. Symbols are colored according to the active
- * theme's color palette (success, error, warning, info, step).
+ * theme's color palette (error, info, reason, step, success, warning).
  *
  * The symbols are lazily initialized on first access and automatically update when the
  * fallback theme changes (via setTheme()). Note that LOG_SYMBOLS reflect the global
@@ -153,11 +156,12 @@ function applyColor(
  * ```typescript
  * import { LOG_SYMBOLS } from '@socketsecurity/lib'
  *
- * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
  * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Theme error color ✖
- * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Theme warning color ⚠
  * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Theme info color ℹ
+ * console.log(`${LOG_SYMBOLS.reason} Analyzing dependencies`) // Dimmed yellow ∴
  * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Theme step color →
+ * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
+ * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Theme warning color ⚠
  * ```
  */
 export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
@@ -187,6 +191,9 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     // Update symbol values
     target.fail = applyColor(supported ? '✖' : '×', errorColor, colors)
     target.info = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
+    target.reason = colors.dim(
+      applyColor(supported ? '∴' : ':.', warningColor, colors),
+    )
     target.step = applyColor(supported ? '→' : '>', stepColor, colors)
     target.success = applyColor(supported ? '✔' : '√', successColor, colors)
     target.warn = applyColor(supported ? '⚠' : '‼', warningColor, colors)
@@ -617,6 +624,9 @@ export class Logger {
       __proto__: null,
       fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
       info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
+      reason: colors.dim(
+        applyColor(supported ? '∴' : ':.', theme.colors.warning, colors),
+      ),
       step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
       success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
       warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
@@ -711,10 +721,11 @@ export class Logger {
    */
   #stripSymbols(text: string): string {
     // Strip both unicode and emoji forms of log symbols from the start.
-    // Matches: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, >
+    // Matches Unicode: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, ∴
+    // Matches ASCII fallbacks: ×, ‼, √, i, >, :.
     // Also handles variation selectors (U+FE0F) and whitespace after symbol.
-    // Note: We don't strip standalone 'i' or '>' to avoid breaking words.
-    return text.replace(/^[✖✗×⚠‼✔✓√ℹ→]\uFE0F?\s*/u, '')
+    // Note: We don't strip standalone 'i' or '>' to avoid breaking words, but we do strip ':.' as it's unambiguous.
+    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴]|\:\.)[\uFE0F\s]*/u, '')
   }
 
   /**
@@ -1295,6 +1306,30 @@ export class Logger {
       this.#setIndent('stdout', '')
     }
     return this
+  }
+
+  /**
+   * Logs a reasoning/working message with a dimmed yellow therefore symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.reason` (dimmed yellow ∴).
+   * Useful for showing intermediate reasoning, logic steps, or "working" output
+   * that leads to a conclusion. Always outputs to stderr. If the message starts
+   * with an existing symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.step('Analyzing package security')
+   * logger.reason('Found 3 direct dependencies')
+   * logger.reason('Checking 47 transitive dependencies')
+   * logger.reason('Risk score: 8.5/10')
+   * logger.fail('Package blocked due to high risk')
+   * ```
+   */
+  reason(...args: unknown[]): this {
+    return this.#symbolApply('reason', args)
   }
 
   /**

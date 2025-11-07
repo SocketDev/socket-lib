@@ -7,7 +7,7 @@
 
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 
-**Core infrastructure library for Socket.dev security tools** — utilities, constants, and helpers with zero dependencies.
+Core library for Socket.dev tools.
 
 ## Install
 
@@ -43,9 +43,9 @@ spinner.stop()
 
 ```bash
 pnpm install    # Install
-pnpm dev        # Watch mode
-pnpm test       # Test
 pnpm build      # Build
+pnpm test       # Test
+pnpm dev        # Watch mode
 ```
 
 ## License
