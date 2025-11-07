@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "3.2.8",
+  "version": "3.3.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -582,16 +582,16 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/build/main.mjs",
     "check": "node scripts/check.mjs",
-    "clean": "node scripts/clean.mjs",
-    "cover": "node scripts/cover.mjs",
-    "dev": "node scripts/build.mjs --watch",
+    "clean": "node scripts/build/clean.mjs",
+    "cover": "node scripts/test/cover.mjs",
+    "dev": "node scripts/build/main.mjs --watch",
     "fix": "node scripts/lint.mjs --fix",
     "lint": "node scripts/lint.mjs",
     "prepare": "husky",
     "prepublishOnly": "pnpm run build",
-    "test": "node scripts/test.mjs",
+    "test": "node scripts/test/main.mjs",
     "update": "node scripts/update.mjs"
   },
   "devDependencies": {

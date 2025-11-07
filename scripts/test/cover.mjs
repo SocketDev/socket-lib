@@ -225,14 +225,10 @@ try {
   if (exitCode === 0) {
     logger.info('Filtering coverage data to src/ files only...')
     try {
-      const filterResult = await spawn(
-        'node',
-        ['scripts/test/filter.mjs'],
-        {
-          cwd: rootPath,
-          stdio: 'inherit',
-        },
-      )
+      const filterResult = await spawn('node', ['scripts/test/filter.mjs'], {
+        cwd: rootPath,
+        stdio: 'inherit',
+      })
       if (filterResult.code !== 0) {
         logger.warn('Coverage filtering had issues but continuing...')
       }
