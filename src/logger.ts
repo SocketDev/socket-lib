@@ -725,7 +725,7 @@ export class Logger {
     // Matches ASCII fallbacks: ×, ‼, √, i, >, :.
     // Also handles variation selectors (U+FE0F) and whitespace after symbol.
     // Note: We don't strip standalone 'i' or '>' to avoid breaking words, but we do strip ':.' as it's unambiguous.
-    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴]|\:\.)[\uFE0F\s]*/u, '')
+    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴]|:.)[\uFE0F\s]*/u, '')
   }
 
   /**

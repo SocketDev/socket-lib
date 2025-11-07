@@ -975,7 +975,11 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @returns This spinner for chaining
        */
       reasonAndStop(text?: string | undefined, ...extras: unknown[]) {
-        return this.#apply('reason', [text, ...extras])
+        this.#apply('stop', [])
+        if (typeof text === 'string') {
+          logger.error(`${LOG_SYMBOLS.reason} ${text}`, ...extras)
+        }
+        return this
       }
 
       /**

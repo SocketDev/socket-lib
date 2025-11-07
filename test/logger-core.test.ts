@@ -45,6 +45,7 @@ describe('Logger', () => {
       expect(LOG_SYMBOLS).toHaveProperty('fail')
       expect(LOG_SYMBOLS).toHaveProperty('warn')
       expect(LOG_SYMBOLS).toHaveProperty('info')
+      expect(LOG_SYMBOLS).toHaveProperty('reason')
       expect(LOG_SYMBOLS).toHaveProperty('step')
     })
 
@@ -53,6 +54,7 @@ describe('Logger', () => {
       expect(typeof LOG_SYMBOLS.fail).toBe('string')
       expect(typeof LOG_SYMBOLS.warn).toBe('string')
       expect(typeof LOG_SYMBOLS.info).toBe('string')
+      expect(typeof LOG_SYMBOLS.reason).toBe('string')
       expect(typeof LOG_SYMBOLS.step).toBe('string')
     })
 
@@ -61,6 +63,7 @@ describe('Logger', () => {
       expect(LOG_SYMBOLS.fail.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.warn.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.info.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS.reason.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.step.length).toBeGreaterThan(0)
     })
 
@@ -193,6 +196,12 @@ describe('Logger', () => {
     it('should support fail method', () => {
       const result = logger.fail('fail message')
       expect(result).toBe(logger)
+    })
+
+    it('should support reason method', () => {
+      const result = logger.reason('reasoning message')
+      expect(result).toBe(logger)
+      expect(stderrData.join('')).toContain('reasoning message')
     })
 
     it('should support step method', () => {
