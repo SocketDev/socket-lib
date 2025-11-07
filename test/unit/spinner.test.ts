@@ -11,6 +11,7 @@
  */
 
 import {
+  getCliSpinners,
   Spinner,
   withSpinner,
   withSpinnerSync,
@@ -677,6 +678,42 @@ describe('spinner', () => {
       const spinner = Spinner()
       const result = spinner.dedent().dedent().dedent()
       expect(result).toBe(spinner)
+    })
+  })
+
+  describe('getCliSpinners', () => {
+    it('should return socket custom spinner', () => {
+      const socket = getCliSpinners('socket')
+      expect(socket).toBeDefined()
+      expect(socket.frames).toBeDefined()
+      expect(socket.interval).toBeDefined()
+    })
+
+    it('should return undefined for non-existent spinner', () => {
+      const result = getCliSpinners('non-existent-spinner')
+      expect(result).toBeUndefined()
+    })
+
+    it('should cache spinner styles', () => {
+      const first = getCliSpinners()
+      const second = getCliSpinners()
+      expect(first).toBe(second)
+    })
+  })
+
+  describe('Stream handling', () => {
+    it('should accept custom stream', () => {
+      const customStream = process.stderr
+      const spinner = Spinner({ stream: customStream })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should work with stderr', () => {
+      const spinner = Spinner({ stream: process.stderr })
+      spinner.start()
+      spinner.text('test')
+      spinner.stop()
+      expect(spinner.isSpinning).toBe(false)
     })
   })
 })
