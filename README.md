@@ -2,7 +2,7 @@
 
 [![Socket Badge](https://socket.dev/api/badge/npm/package/@socketsecurity/lib)](https://socket.dev/npm/package/@socketsecurity/lib)
 [![CI](https://github.com/SocketDev/socket-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/SocketDev/socket-lib/actions/workflows/ci.yml)
-![Test Coverage](https://img.shields.io/badge/test--coverage-37.75%25-orange)
+![Test Coverage](https://img.shields.io/badge/test--coverage-68.17%25-yellow)
 ![Type Coverage](https://img.shields.io/badge/type--coverage-97.68%25-brightgreen)
 
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
