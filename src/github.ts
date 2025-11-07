@@ -185,7 +185,9 @@ export async function fetchGitHub<T = unknown>(
     headers['Authorization'] = `Bearer ${token}`
   }
 
+  /* c8 ignore start - External GitHub API call */
   const response = await httpRequest(url, { headers })
+  /* c8 ignore stop */
 
   if (!response.ok) {
     if (response.status === 403) {
@@ -503,6 +505,7 @@ export async function clearRefCache(): Promise<void> {
 export async function getGitHubTokenFromGitConfig(
   options?: SpawnOptions | undefined,
 ): Promise<string | undefined> {
+  /* c8 ignore start - External git process call */
   try {
     const result = await spawn('git', ['config', 'github.token'], {
       ...options,
@@ -515,6 +518,7 @@ export async function getGitHubTokenFromGitConfig(
     // Ignore errors - git config may not have token.
   }
   return undefined
+  /* c8 ignore stop */
 }
 
 /**
@@ -662,6 +666,7 @@ export async function fetchGhsaDetails(
   ghsaId: string,
   options?: GitHubFetchOptions | undefined,
 ): Promise<GhsaDetails> {
+  /* c8 ignore start - External GitHub API call */
   const url = `https://api.github.com/advisories/${ghsaId}`
   const data = await fetchGitHub<{
     aliases?: string[]
@@ -681,6 +686,7 @@ export async function fetchGhsaDetails(
     }>
     withdrawn_at: string
   }>(url, options)
+  /* c8 ignore stop */
 
   return {
     ghsaId: data.ghsa_id,

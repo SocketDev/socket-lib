@@ -83,23 +83,26 @@ function filterCoverageFile(filePath) {
 logger.info('Filtering coverage data...\n')
 
 const finalStats = filterCoverageFile(coverageFinalPath)
-logger.info(`coverage-final.json:`)
+logger.info('coverage-final.json:')
 logger.success(`  Kept ${finalStats.kept} src/ TypeScript files`)
 if (finalStats.filtered > 0) {
   logger.info(`  Filtered ${finalStats.filtered} files:`)
-  if (finalStats.details.distCount)
+  if (finalStats.details.distCount) {
     logger.info(`    - ${finalStats.details.distCount} dist/ compiled files`)
-  if (finalStats.details.externalCount)
+  }
+  if (finalStats.details.externalCount) {
     logger.info(
       `    - ${finalStats.details.externalCount} external dependencies`,
     )
-  if (finalStats.details.testCount)
+  }
+  if (finalStats.details.testCount) {
     logger.info(`    - ${finalStats.details.testCount} test files`)
+  }
 }
 logger.info(`  Total: ${finalStats.total} files\n`)
 
 const summaryStats = filterCoverageFile(coverageSummaryPath)
-logger.info(`coverage-summary.json:`)
+logger.info('coverage-summary.json:')
 logger.success(`  Kept ${summaryStats.kept} src/ files`)
 if (summaryStats.filtered > 0) {
   logger.info(`  Filtered ${summaryStats.filtered} files`)

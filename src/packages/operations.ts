@@ -185,6 +185,7 @@ export async function extractPackage(
     preferOffline: true,
     ...extractOptions_,
   }
+  /* c8 ignore start - External package registry extraction */
   const pacote = getPacote()
   if (typeof dest === 'string') {
     await pacote.extract(pkgNameOrId, dest, extractOptions)
@@ -206,6 +207,7 @@ export async function extractPackage(
       },
     )
   }
+  /* c8 ignore stop */
 }
 
 /**
@@ -269,6 +271,7 @@ export async function packPackage(
   spec: string,
   options?: PacoteOptions,
 ): Promise<unknown> {
+  /* c8 ignore start - External package registry packing */
   const pack = getPack()
   return await pack(spec, {
     __proto__: null,
@@ -277,6 +280,7 @@ export async function packPackage(
     packumentCache,
     preferOffline: true,
   } as PacoteOptions)
+  /* c8 ignore stop */
 }
 
 /**
@@ -372,6 +376,7 @@ export async function resolveGitHubTgzUrl(
     ? parsedSpec.hosted
     : getRepoUrlDetails(repository?.url)) || { project: '', user: '' }
 
+  /* c8 ignore start - External GitHub API calls */
   if (user && project) {
     let apiUrl = ''
     if (isGitHubUrl) {
@@ -399,6 +404,7 @@ export async function resolveGitHubTgzUrl(
       }
     }
   }
+  /* c8 ignore stop */
   return ''
 }
 

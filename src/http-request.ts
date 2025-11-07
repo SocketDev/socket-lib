@@ -521,6 +521,7 @@ async function httpRequestAttempt(
       timeout,
     }
 
+    /* c8 ignore start - External HTTP/HTTPS request */
     const request = httpModule.request(
       requestOptions,
       (res: IncomingMessage) => {
@@ -635,6 +636,7 @@ async function httpRequestAttempt(
     }
 
     request.end()
+    /* c8 ignore stop */
   })
 }
 
@@ -768,6 +770,7 @@ async function httpDownloadAttempt(
       }
     }
 
+    /* c8 ignore start - External HTTP/HTTPS download request */
     const request = httpModule.request(
       requestOptions,
       (res: IncomingMessage) => {
@@ -858,6 +861,7 @@ async function httpDownloadAttempt(
     })
 
     request.end()
+    /* c8 ignore stop */
   })
 }
 
