@@ -116,20 +116,22 @@ try {
     const coverageHeaderMatch = output.match(
       / % Coverage report from v8\n([-|]+)\n([^\n]+)\n\1/,
     )
-    const allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|[^\n]*/)
+    // Use src/ directory coverage instead of "All files" to exclude dist/external
+    const srcCoverageMatch = output.match(/ src\s+\|\s+([\d.]+)\s+\|[^\n]*/)
+    const _allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|[^\n]*/)
 
-    if (coverageHeaderMatch && allFilesMatch) {
+    if (coverageHeaderMatch && srcCoverageMatch) {
       if (!values.summary) {
         console.log(' % Coverage report from v8')
         console.log(coverageHeaderMatch[1])
         console.log(coverageHeaderMatch[2])
         console.log(coverageHeaderMatch[1])
-        console.log(allFilesMatch[0])
+        console.log(srcCoverageMatch[0])
         console.log(coverageHeaderMatch[1])
         console.log()
       }
 
-      const codeCoveragePercent = Number.parseFloat(allFilesMatch[1])
+      const codeCoveragePercent = Number.parseFloat(srcCoverageMatch[1])
       console.log(' Coverage Summary')
       console.log(' ───────────────────────────────')
       console.log(` Code Coverage: ${codeCoveragePercent.toFixed(2)}%`)
@@ -163,11 +165,12 @@ try {
       /Test Files\s+\d+[^\n]*\n[\s\S]*?Duration\s+[\d.]+m?s[^\n]*/,
     )
 
-    // Extract coverage summary
+    // Extract coverage summary - use src/ directory coverage instead of "All files"
     const coverageHeaderMatch = output.match(
       / % Coverage report from v8\n([-|]+)\n([^\n]+)\n\1/,
     )
-    const allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|[^\n]*/)
+    const srcCoverageMatch = output.match(/ src\s+\|\s+([\d.]+)\s+\|[^\n]*/)
+    const _allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|[^\n]*/)
 
     // Extract type coverage
     const typeCoverageOutput = (
@@ -184,20 +187,20 @@ try {
       console.log()
     }
 
-    if (coverageHeaderMatch && allFilesMatch) {
+    if (coverageHeaderMatch && srcCoverageMatch) {
       if (!values.summary) {
         console.log(' % Coverage report from v8')
         console.log(coverageHeaderMatch[1])
         console.log(coverageHeaderMatch[2])
         console.log(coverageHeaderMatch[1])
-        console.log(allFilesMatch[0])
+        console.log(srcCoverageMatch[0])
         console.log(coverageHeaderMatch[1])
         console.log()
       }
 
       // Display cumulative summary
       if (typeCoverageMatch) {
-        const codeCoveragePercent = Number.parseFloat(allFilesMatch[1])
+        const codeCoveragePercent = Number.parseFloat(srcCoverageMatch[1])
         const typeCoveragePercent = Number.parseFloat(typeCoverageMatch[1])
         const cumulativePercent = (
           (codeCoveragePercent + typeCoveragePercent) /
