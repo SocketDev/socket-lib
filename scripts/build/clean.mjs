@@ -13,12 +13,13 @@ import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { printHeader } from '#socketsecurity/lib/stdio/header'
 
-import { parseArgs } from './utils/parse-args.mjs'
+import { parseArgs } from '../utils/parse-args.mjs'
 
 const logger = getDefaultLogger()
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
+  '..',
   '..',
 )
 

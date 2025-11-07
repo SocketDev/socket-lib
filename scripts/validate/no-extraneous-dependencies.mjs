@@ -26,7 +26,7 @@ import * as t from '@babel/types'
 const traverse = traverseModule.default
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+const rootPath = path.join(__dirname, '..', '..')
 
 // Node.js builtins to recognize (including node: prefix variants)
 const BUILTIN_MODULES = new Set([

@@ -13,13 +13,13 @@ import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
-} from '../.config/esbuild.config.mjs'
+} from '../../.config/esbuild.config.mjs'
 import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
 
-import { parseArgs } from './utils/parse-args.mjs'
-import { runSequence } from './utils/run-command.mjs'
+import { parseArgs } from '../utils/parse-args.mjs'
+import { runSequence } from '../utils/run-command.mjs'
 
 const logger = getDefaultLogger()
 
@@ -28,6 +28,7 @@ const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
+  '..',
   '..',
 )
 
@@ -42,7 +43,7 @@ async function buildSource(options = {}) {
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/clean.mjs', '--dist', '--quiet'],
+        args: ['scripts/build/clean.mjs', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -89,7 +90,7 @@ async function buildTypes(options = {}) {
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/clean.mjs', '--types', '--quiet'],
+      args: ['scripts/build/clean.mjs', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -120,7 +121,7 @@ async function buildTypes(options = {}) {
 async function buildExternals(options = {}) {
   const { quiet = false, verbose = false } = options
 
-  const args = ['scripts/build-externals.mjs']
+  const args = ['scripts/build/externals.mjs']
   if (quiet) {
     args.push('--quiet')
   }
@@ -151,7 +152,7 @@ async function buildExternals(options = {}) {
 async function fixExports(options = {}) {
   const { quiet = false, verbose = false } = options
 
-  const fixArgs = ['scripts/fix-build.mjs']
+  const fixArgs = ['scripts/fix/main.mjs']
   if (quiet) {
     fixArgs.push('--quiet')
   }
@@ -390,7 +391,7 @@ async function main() {
 
       exitCode = await runSequence([
         {
-          args: ['scripts/clean.mjs', '--dist', '--types', '--quiet'],
+          args: ['scripts/build/clean.mjs', '--dist', '--types', '--quiet'],
           command: 'node',
         },
       ])

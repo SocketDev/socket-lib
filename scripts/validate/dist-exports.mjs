@@ -10,12 +10,16 @@ import { fileURLToPath } from 'node:url'
 
 import colors from 'yoctocolors-cjs'
 
-import { isQuiet } from '#socketsecurity/lib/argv/flags'
-import { pluralize } from '#socketsecurity/lib/words'
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', 'dist')
+const distDir = path.resolve(__dirname, '..', '..', 'dist')
 const require = createRequire(import.meta.url)
+
+// Normalize path for cross-platform (converts backslashes to forward slashes)
+const normalizePath = p => p.split(path.sep).join('/')
+
+// Import CommonJS modules using require
+const { isQuiet } = require('#socketsecurity/lib/argv/flags')
+const { pluralize } = require('#socketsecurity/lib/words')
 
 /**
  * Get all .js files in a directory recursively.
@@ -43,7 +47,9 @@ function checkExport(filePath) {
   // Skip external packages - they are internal implementation details
   // used by public dist/* modules. We only validate public exports.
   const relativePath = path.relative(distDir, filePath)
-  if (relativePath.startsWith('external/')) {
+  // Normalize path for cross-platform compatibility (Windows uses backslashes)
+  const normalizedPath = normalizePath(relativePath)
+  if (normalizedPath.startsWith('external/')) {
     return { path: filePath, ok: true, skipped: true }
   }
 

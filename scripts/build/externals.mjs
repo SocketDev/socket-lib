@@ -11,7 +11,7 @@ import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { pluralize } from '#socketsecurity/lib/words'
 
-import { buildExternals } from './build-externals/orchestrator.mjs'
+import { buildExternals } from '../build-externals/orchestrator.mjs'
 
 const logger = getDefaultLogger()
 const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))

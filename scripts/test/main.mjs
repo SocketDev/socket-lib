@@ -12,10 +12,10 @@ import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { getDefaultSpinner } from '#socketsecurity/lib/spinner'
 import { printHeader } from '#socketsecurity/lib/stdio/header'
 
-import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
-import { getTestsToRun } from './utils/changed-test-mapper.mjs'
-import { parseArgs } from './utils/parse-args.mjs'
-import { onExit } from './utils/signal-exit.mjs'
+import { getLocalPackageAliases } from '../utils/get-local-package-aliases.mjs'
+import { getTestsToRun } from '../utils/changed-test-mapper.mjs'
+import { parseArgs } from '../utils/parse-args.mjs'
+import { onExit } from '../utils/signal-exit.mjs'
 
 const logger = getDefaultLogger()
 const spinner = getDefaultSpinner()
@@ -268,7 +268,7 @@ async function runTests(
 
   // Use interactive runner for interactive Ctrl+O experience when appropriate
   if (process.stdout.isTTY) {
-    const { runTests } = await import('./utils/interactive-runner.mjs')
+    const { runTests } = await import('../utils/interactive-runner.mjs')
     return runTests(vitestPath, vitestArgs, {
       env: spawnOptions.env,
       cwd: spawnOptions.cwd,
