@@ -68,6 +68,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      '**/dist/external/**',
       toGlobPath(path.resolve(projectRoot, 'test/isolated/**')),
       ...(process.env.INCLUDE_NPM_TESTS
         ? []
@@ -136,8 +137,9 @@ export default defineConfig({
         'dist/**',
         '**/dist/**',
         '**/{dist,build,out}/**',
-        // Exclude external bundled dependencies
+        // Exclude external bundled dependencies from both src and dist
         'src/external/**',
+        'dist/external/**',
         '**/external/**',
         'src/types.ts',
         'scripts/**',
