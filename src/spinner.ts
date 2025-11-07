@@ -70,9 +70,9 @@ export type ColorValue = ColorName | ColorRgb
 
 /**
  * Symbol types for status messages.
- * Maps to log symbols: success (✓), fail (✗), info (ℹ), warn (⚠).
+ * Maps to log symbols: fail (✗), info (ℹ), reason (∴), success (✓), warn (⚠).
  */
-export type SymbolType = 'fail' | 'info' | 'success' | 'warn'
+export type SymbolType = 'fail' | 'info' | 'reason' | 'success' | 'warn'
 
 // Map color names to RGB values.
 const colorToRgb: Record<ColorName, ColorRgb> = {
@@ -146,7 +146,7 @@ export type ShimmerInfo = ShimmerState & {
  * KEY BEHAVIORS:
  * - Methods WITHOUT "AndStop" keep the spinner running (e.g., `success()`, `fail()`)
  * - Methods WITH "AndStop" auto-clear the spinner line (e.g., `successAndStop()`, `failAndStop()`)
- * - Status messages (done, success, fail, info, warn, step, substep) go to stderr
+ * - Status messages (done, success, fail, info, warn, reason, step, substep) go to stderr
  * - Data messages (`log()`) go to stdout
  *
  * @example
@@ -211,6 +211,11 @@ export type Spinner = {
   log(text?: string | undefined, ...extras: unknown[]): Spinner
   /** Log and stop the spinner, auto-clearing the line */
   logAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+
+  /** Show reasoning (∴) message without stopping the spinner */
+  reason(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show reasoning (∴) message and stop the spinner, auto-clearing the line */
+  reasonAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
   /** Start spinning with optional text */
   start(text?: string | undefined): Spinner
@@ -947,6 +952,30 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       logAndStop(text?: string | undefined, ...extras: unknown[]) {
         return this.#apply('stop', [text, ...extras])
+      }
+
+      /**
+       * Show a reasoning/working message (∴) without stopping the spinner.
+       * Outputs to stderr and continues spinning.
+       *
+       * @param text - Reasoning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      reason(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('reason', [text, ...extras])
+      }
+
+      /**
+       * Show a reasoning/working message (∴) and stop the spinner.
+       * Auto-clears the spinner line before displaying the message.
+       *
+       * @param text - Reasoning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      reasonAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('reason', [text, ...extras])
       }
 
       /**
