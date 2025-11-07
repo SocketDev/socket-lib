@@ -9,7 +9,7 @@ const { freeze: ObjectFreeze } = Object
 
 const yarnPkgExtensions = require('./external/@yarnpkg/extensions')
 
-export default ObjectFreeze(
+const packageExtensions = ObjectFreeze(
   [
     yarnPkgExtensions.packageExtensions,
     [
@@ -50,3 +50,6 @@ export default ObjectFreeze(
     return 0
   }),
 )
+
+export default packageExtensions
+export { packageExtensions as 'module.exports' }

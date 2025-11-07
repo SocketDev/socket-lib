@@ -3,4 +3,7 @@
  */
 
 // Default category for new packages
-export default Object.freeze(['cleanup'])
+const packageDefaultSocketCategories = Object.freeze(['cleanup'])
+
+export default packageDefaultSocketCategories
+export { packageDefaultSocketCategories as 'module.exports' }

@@ -5,7 +5,7 @@
  * https://docs.npmjs.com/cli/v10/using-npm/scripts#life-cycle-scripts
  */
 
-export default new Set(
+const lifecycleScriptNames = new Set(
   [
     'dependencies',
     'prepublishOnly',
@@ -21,3 +21,6 @@ export default new Set(
     ].map(n => [`pre${n}`, n, `post${n}`]),
   ].flat(),
 )
+
+export default lifecycleScriptNames
+export { lifecycleScriptNames as 'module.exports' }
