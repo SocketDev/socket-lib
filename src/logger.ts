@@ -488,6 +488,34 @@ export class Logger {
   }
 
   /**
+   * Apply a console method with indentation.
+   * @private
+   */
+  #apply(
+    methodName: string,
+    args: unknown[],
+    stream?: 'stderr' | 'stdout',
+  ): this {
+    const con = this.#getConsole()
+    const text = args.at(0)
+    const hasText = typeof text === 'string'
+    // Determine which stream this method writes to
+    const targetStream = stream || (methodName === 'log' ? 'stdout' : 'stderr')
+    const indent = this.#getIndent(targetStream)
+    const logArgs = hasText
+      ? [applyLinePrefix(text, { prefix: indent }), ...args.slice(1)]
+      : args
+    ReflectApply(
+      con[methodName] as (...args: unknown[]) => unknown,
+      con,
+      logArgs,
+    )
+    this[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]), targetStream)
+    ;(this as any)[incLogCallCountSymbol]()
+    return this
+  }
+
+  /**
    * Get the Console instance for this logger, creating it lazily on first access.
    *
    * This lazy initialization allows the logger to be imported during early
@@ -522,6 +550,142 @@ export class Logger {
       privateConstructorArgs.delete(this)
     }
     return con
+  }
+
+  /**
+   * Get indentation for a specific stream.
+   * @private
+   */
+  #getIndent(stream: 'stderr' | 'stdout'): string {
+    const root = this.#getRoot()
+    return stream === 'stderr' ? root.#stderrIndention : root.#stdoutIndention
+  }
+
+  /**
+   * Get lastWasBlank state for a specific stream.
+   * @private
+   */
+  #getLastWasBlank(stream: 'stderr' | 'stdout'): boolean {
+    const root = this.#getRoot()
+    return stream === 'stderr'
+      ? root.#stderrLastWasBlank
+      : root.#stdoutLastWasBlank
+  }
+
+  /**
+   * Get the root logger (for accessing shared indentation state).
+   * @private
+   */
+  #getRoot(): Logger {
+    return this.#parent || this
+  }
+
+  /**
+   * Get logger-specific symbols using the resolved theme.
+   * @private
+   */
+  #getSymbols(): LogSymbols {
+    const theme = this.#getTheme()
+    const supported = isUnicodeSupported()
+    const colors = getYoctocolors()
+
+    return {
+      __proto__: null,
+      fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
+      info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
+      reason: colors.dim(
+        applyColor(supported ? '∴' : ':.', theme.colors.warning, colors),
+      ),
+      step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
+      success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
+      warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
+    } as LogSymbols
+  }
+
+  /**
+   * Get the target stream for this logger instance.
+   * @private
+   */
+  #getTargetStream(): 'stderr' | 'stdout' {
+    return this.#boundStream || 'stderr'
+  }
+
+  /**
+   * Get the resolved theme for this logger instance.
+   * Returns instance theme if set, otherwise falls back to context theme.
+   * @private
+   */
+  #getTheme(): import('./themes/types').Theme {
+    return this.#theme ?? getTheme()
+  }
+
+  /**
+   * Set indentation for a specific stream.
+   * @private
+   */
+  #setIndent(stream: 'stderr' | 'stdout', value: string): void {
+    const root = this.#getRoot()
+    if (stream === 'stderr') {
+      root.#stderrIndention = value
+    } else {
+      root.#stdoutIndention = value
+    }
+  }
+
+  /**
+   * Set lastWasBlank state for a specific stream.
+   * @private
+   */
+  #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
+    const root = this.#getRoot()
+    if (stream === 'stderr') {
+      root.#stderrLastWasBlank = value
+    } else {
+      root.#stdoutLastWasBlank = value
+    }
+  }
+
+  /**
+   * Strip log symbols from the start of text.
+   * @private
+   */
+  #stripSymbols(text: string): string {
+    // Strip both unicode and emoji forms of log symbols from the start.
+    // Matches Unicode: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, ∴
+    // Matches ASCII fallbacks: ×, ‼, √, i, >, :.
+    // Also handles variation selectors (U+FE0F) and whitespace after symbol.
+    // Note: We don't strip standalone 'i' or '>' to avoid breaking words, but we do strip ':.' as it's unambiguous.
+    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴]|:.)[\uFE0F\s]*/u, '')
+  }
+
+  /**
+   * Apply a method with a symbol prefix.
+   * @private
+   */
+  #symbolApply(symbolType: string, args: unknown[]): this {
+    const con = this.#getConsole()
+    let text = args.at(0)
+    // biome-ignore lint/suspicious/noImplicitAnyLet: Flexible argument handling.
+    let extras
+    if (typeof text === 'string') {
+      text = this.#stripSymbols(text)
+      extras = args.slice(1)
+    } else {
+      extras = args
+      text = ''
+    }
+    // Note: Meta status messages (info/fail/etc) always go to stderr.
+    const indent = this.#getIndent('stderr')
+    const symbols = this.#getSymbols()
+    con.error(
+      applyLinePrefix(`${symbols[symbolType]} ${text}`, {
+        prefix: indent,
+      }),
+      ...extras,
+    )
+    this[lastWasBlankSymbol](false, 'stderr')
+    ;(this as any)[incLogCallCountSymbol]()
+    return this
   }
 
   /**
@@ -592,170 +756,6 @@ export class Logger {
       this.#stdoutLogger = instance
     }
     return this.#stdoutLogger
-  }
-
-  /**
-   * Get the root logger (for accessing shared indentation state).
-   * @private
-   */
-  #getRoot(): Logger {
-    return this.#parent || this
-  }
-
-  /**
-   * Get the resolved theme for this logger instance.
-   * Returns instance theme if set, otherwise falls back to context theme.
-   * @private
-   */
-  #getTheme(): import('./themes/types').Theme {
-    return this.#theme ?? getTheme()
-  }
-
-  /**
-   * Get logger-specific symbols using the resolved theme.
-   * @private
-   */
-  #getSymbols(): LogSymbols {
-    const theme = this.#getTheme()
-    const supported = isUnicodeSupported()
-    const colors = getYoctocolors()
-
-    return {
-      __proto__: null,
-      fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
-      info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
-      reason: colors.dim(
-        applyColor(supported ? '∴' : ':.', theme.colors.warning, colors),
-      ),
-      step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
-      success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
-      warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
-    } as LogSymbols
-  }
-
-  /**
-   * Get indentation for a specific stream.
-   * @private
-   */
-  #getIndent(stream: 'stderr' | 'stdout'): string {
-    const root = this.#getRoot()
-    return stream === 'stderr' ? root.#stderrIndention : root.#stdoutIndention
-  }
-
-  /**
-   * Set indentation for a specific stream.
-   * @private
-   */
-  #setIndent(stream: 'stderr' | 'stdout', value: string): void {
-    const root = this.#getRoot()
-    if (stream === 'stderr') {
-      root.#stderrIndention = value
-    } else {
-      root.#stdoutIndention = value
-    }
-  }
-
-  /**
-   * Get lastWasBlank state for a specific stream.
-   * @private
-   */
-  #getLastWasBlank(stream: 'stderr' | 'stdout'): boolean {
-    const root = this.#getRoot()
-    return stream === 'stderr'
-      ? root.#stderrLastWasBlank
-      : root.#stdoutLastWasBlank
-  }
-
-  /**
-   * Set lastWasBlank state for a specific stream.
-   * @private
-   */
-  #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
-    const root = this.#getRoot()
-    if (stream === 'stderr') {
-      root.#stderrLastWasBlank = value
-    } else {
-      root.#stdoutLastWasBlank = value
-    }
-  }
-
-  /**
-   * Get the target stream for this logger instance.
-   * @private
-   */
-  #getTargetStream(): 'stderr' | 'stdout' {
-    return this.#boundStream || 'stderr'
-  }
-
-  /**
-   * Apply a console method with indentation.
-   * @private
-   */
-  #apply(
-    methodName: string,
-    args: unknown[],
-    stream?: 'stderr' | 'stdout',
-  ): this {
-    const con = this.#getConsole()
-    const text = args.at(0)
-    const hasText = typeof text === 'string'
-    // Determine which stream this method writes to
-    const targetStream = stream || (methodName === 'log' ? 'stdout' : 'stderr')
-    const indent = this.#getIndent(targetStream)
-    const logArgs = hasText
-      ? [applyLinePrefix(text, { prefix: indent }), ...args.slice(1)]
-      : args
-    ReflectApply(
-      con[methodName] as (...args: unknown[]) => unknown,
-      con,
-      logArgs,
-    )
-    this[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]), targetStream)
-    ;(this as any)[incLogCallCountSymbol]()
-    return this
-  }
-
-  /**
-   * Strip log symbols from the start of text.
-   * @private
-   */
-  #stripSymbols(text: string): string {
-    // Strip both unicode and emoji forms of log symbols from the start.
-    // Matches Unicode: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, ∴
-    // Matches ASCII fallbacks: ×, ‼, √, i, >, :.
-    // Also handles variation selectors (U+FE0F) and whitespace after symbol.
-    // Note: We don't strip standalone 'i' or '>' to avoid breaking words, but we do strip ':.' as it's unambiguous.
-    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴]|:.)[\uFE0F\s]*/u, '')
-  }
-
-  /**
-   * Apply a method with a symbol prefix.
-   * @private
-   */
-  #symbolApply(symbolType: string, args: unknown[]): this {
-    const con = this.#getConsole()
-    let text = args.at(0)
-    // biome-ignore lint/suspicious/noImplicitAnyLet: Flexible argument handling.
-    let extras
-    if (typeof text === 'string') {
-      text = this.#stripSymbols(text)
-      extras = args.slice(1)
-    } else {
-      extras = args
-      text = ''
-    }
-    // Note: Meta status messages (info/fail/etc) always go to stderr.
-    const indent = this.#getIndent('stderr')
-    const symbols = this.#getSymbols()
-    con.error(
-      applyLinePrefix(`${symbols[symbolType]} ${text}`, {
-        prefix: indent,
-      }),
-      ...extras,
-    )
-    this[lastWasBlankSymbol](false, 'stderr')
-    ;(this as any)[incLogCallCountSymbol]()
-    return this
   }
 
   /**
@@ -840,6 +840,54 @@ export class Logger {
     con.assert(value, message[0] as string, ...message.slice(1))
     this[lastWasBlankSymbol](false)
     return value ? this : this[incLogCallCountSymbol]()
+  }
+
+  /**
+   * Clears the current line in the terminal.
+   *
+   * Moves the cursor to the beginning of the line and clears all content.
+   * Works in both TTY and non-TTY environments. Useful for clearing
+   * progress indicators created with `progress()`.
+   *
+   * The stream to clear (stderr or stdout) depends on whether the logger
+   * is stream-bound.
+   *
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.progress('Loading...')
+   * // ... do work ...
+   * logger.clearLine()
+   * logger.success('Loaded')
+   *
+   * // Clear multiple progress updates
+   * for (const file of files) {
+   *   logger.progress(`Processing ${file}`)
+   *   processFile(file)
+   *   logger.clearLine()
+   * }
+   * logger.success('All files processed')
+   * ```
+   */
+  clearLine(): this {
+    const con = this.#getConsole()
+    const stream = this.#getTargetStream()
+    const streamObj = (
+      stream === 'stderr' ? con._stderr : con._stdout
+    ) as NodeJS.WriteStream & {
+      isTTY: boolean
+      cursorTo: (x: number) => void
+      clearLine: (dir: number) => void
+      write: (text: string) => boolean
+    }
+    if (streamObj.isTTY) {
+      streamObj.cursorTo(0)
+      streamObj.clearLine(0)
+    } else {
+      streamObj.write('\r\x1b[K')
+    }
+    return this
   }
 
   /**
@@ -1021,6 +1069,31 @@ export class Logger {
     con.dirxml(data)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
+  }
+
+  /**
+   * Logs a completion message with a success symbol (alias for `success()`).
+   *
+   * Provides semantic clarity when marking something as "done". Does NOT
+   * automatically clear the current line - call `clearLine()` first if
+   * needed after using `progress()`.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.done('Task completed')
+   *
+   * // After progress indicator
+   * logger.progress('Processing...')
+   * // ... do work ...
+   * logger.clearLine()
+   * logger.done('Processing complete')
+   * ```
+   */
+  done(...args: unknown[]): this {
+    return this.#symbolApply('success', args)
   }
 
   /**
@@ -1277,6 +1350,66 @@ export class Logger {
   }
 
   /**
+   * Shows a progress indicator that can be cleared with `clearLine()`.
+   *
+   * Displays a simple status message with a '∴' prefix. Does not include
+   * animation or spinner. Intended to be cleared once the operation completes.
+   * The output stream (stderr or stdout) depends on whether the logger is
+   * stream-bound.
+   *
+   * @param text - The progress message to display
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.progress('Processing files...')
+   * // ... do work ...
+   * logger.clearLine()
+   * logger.success('Files processed')
+   *
+   * // Stream-specific progress
+   * logger.stdout.progress('Loading...')
+   * // ... do work ...
+   * logger.stdout.clearLine()
+   * logger.stdout.log('Done')
+   * ```
+   */
+  progress(text: string): this {
+    const con = this.#getConsole()
+    const stream = this.#getTargetStream()
+    const streamObj = (
+      stream === 'stderr' ? con._stderr : con._stdout
+    ) as NodeJS.WriteStream & { write: (text: string) => boolean }
+    streamObj.write(`∴ ${text}`)
+    this[lastWasBlankSymbol](false)
+    return this
+  }
+
+  /**
+   * Logs a reasoning/working message with a dimmed yellow therefore symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.reason` (dimmed yellow ∴).
+   * Useful for showing intermediate reasoning, logic steps, or "working" output
+   * that leads to a conclusion. Always outputs to stderr. If the message starts
+   * with an existing symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.step('Analyzing package security')
+   * logger.reason('Found 3 direct dependencies')
+   * logger.reason('Checking 47 transitive dependencies')
+   * logger.reason('Risk score: 8.5/10')
+   * logger.fail('Package blocked due to high risk')
+   * ```
+   */
+  reason(...args: unknown[]): this {
+    return this.#symbolApply('reason', args)
+  }
+
+  /**
    * Resets all indentation to zero.
    *
    * When called on the main logger, resets both stderr and stdout indentation.
@@ -1306,30 +1439,6 @@ export class Logger {
       this.#setIndent('stdout', '')
     }
     return this
-  }
-
-  /**
-   * Logs a reasoning/working message with a dimmed yellow therefore symbol.
-   *
-   * Automatically prefixes the message with `LOG_SYMBOLS.reason` (dimmed yellow ∴).
-   * Useful for showing intermediate reasoning, logic steps, or "working" output
-   * that leads to a conclusion. Always outputs to stderr. If the message starts
-   * with an existing symbol, it will be stripped and replaced.
-   *
-   * @param args - Message and additional arguments to log
-   * @returns The logger instance for chaining
-   *
-   * @example
-   * ```typescript
-   * logger.step('Analyzing package security')
-   * logger.reason('Found 3 direct dependencies')
-   * logger.reason('Checking 47 transitive dependencies')
-   * logger.reason('Risk score: 8.5/10')
-   * logger.fail('Package blocked due to high risk')
-   * ```
-   */
-  reason(...args: unknown[]): this {
-    return this.#symbolApply('reason', args)
   }
 
   /**
@@ -1431,31 +1540,6 @@ export class Logger {
    * ```
    */
   success(...args: unknown[]): this {
-    return this.#symbolApply('success', args)
-  }
-
-  /**
-   * Logs a completion message with a success symbol (alias for `success()`).
-   *
-   * Provides semantic clarity when marking something as "done". Does NOT
-   * automatically clear the current line - call `clearLine()` first if
-   * needed after using `progress()`.
-   *
-   * @param args - Message and additional arguments to log
-   * @returns The logger instance for chaining
-   *
-   * @example
-   * ```typescript
-   * logger.done('Task completed')
-   *
-   * // After progress indicator
-   * logger.progress('Processing...')
-   * // ... do work ...
-   * logger.clearLine()
-   * logger.done('Processing complete')
-   * ```
-   */
-  done(...args: unknown[]): this {
     return this.#symbolApply('success', args)
   }
 
@@ -1670,90 +1754,6 @@ export class Logger {
       this.#originalStdout || (ctorArgs[0] as any)?.stdout || con._stdout
     stdout.write(text)
     this[lastWasBlankSymbol](false)
-    return this
-  }
-
-  /**
-   * Shows a progress indicator that can be cleared with `clearLine()`.
-   *
-   * Displays a simple status message with a '∴' prefix. Does not include
-   * animation or spinner. Intended to be cleared once the operation completes.
-   * The output stream (stderr or stdout) depends on whether the logger is
-   * stream-bound.
-   *
-   * @param text - The progress message to display
-   * @returns The logger instance for chaining
-   *
-   * @example
-   * ```typescript
-   * logger.progress('Processing files...')
-   * // ... do work ...
-   * logger.clearLine()
-   * logger.success('Files processed')
-   *
-   * // Stream-specific progress
-   * logger.stdout.progress('Loading...')
-   * // ... do work ...
-   * logger.stdout.clearLine()
-   * logger.stdout.log('Done')
-   * ```
-   */
-  progress(text: string): this {
-    const con = this.#getConsole()
-    const stream = this.#getTargetStream()
-    const streamObj = (
-      stream === 'stderr' ? con._stderr : con._stdout
-    ) as NodeJS.WriteStream & { write: (text: string) => boolean }
-    streamObj.write(`∴ ${text}`)
-    this[lastWasBlankSymbol](false)
-    return this
-  }
-
-  /**
-   * Clears the current line in the terminal.
-   *
-   * Moves the cursor to the beginning of the line and clears all content.
-   * Works in both TTY and non-TTY environments. Useful for clearing
-   * progress indicators created with `progress()`.
-   *
-   * The stream to clear (stderr or stdout) depends on whether the logger
-   * is stream-bound.
-   *
-   * @returns The logger instance for chaining
-   *
-   * @example
-   * ```typescript
-   * logger.progress('Loading...')
-   * // ... do work ...
-   * logger.clearLine()
-   * logger.success('Loaded')
-   *
-   * // Clear multiple progress updates
-   * for (const file of files) {
-   *   logger.progress(`Processing ${file}`)
-   *   processFile(file)
-   *   logger.clearLine()
-   * }
-   * logger.success('All files processed')
-   * ```
-   */
-  clearLine(): this {
-    const con = this.#getConsole()
-    const stream = this.#getTargetStream()
-    const streamObj = (
-      stream === 'stderr' ? con._stderr : con._stdout
-    ) as NodeJS.WriteStream & {
-      isTTY: boolean
-      cursorTo: (x: number) => void
-      clearLine: (dir: number) => void
-      write: (text: string) => boolean
-    }
-    if (streamObj.isTTY) {
-      streamObj.cursorTo(0)
-      streamObj.clearLine(0)
-    } else {
-      streamObj.write('\r\x1b[K')
-    }
     return this
   }
 }

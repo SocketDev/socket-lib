@@ -183,6 +183,20 @@ export type Spinner = {
   /** Show debug message and stop the spinner (only if debug mode enabled) */
   debugAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Decrease indentation by specified spaces (default: 2) */
+  dedent(spaces?: number | undefined): Spinner
+
+  /** Disable shimmer effect (preserves config for later re-enable) */
+  disableShimmer(): Spinner
+
+  /** Alias for `success()` - show success without stopping */
+  done(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Alias for `successAndStop()` - show success and stop */
+  doneAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+
+  /** Enable shimmer effect (restores saved config or uses defaults) */
+  enableShimmer(): Spinner
+
   /** Alias for `fail()` - show error without stopping */
   error(text?: string | undefined, ...extras: unknown[]): Spinner
   /** Alias for `failAndStop()` - show error and stop */
@@ -193,14 +207,8 @@ export type Spinner = {
   /** Show failure (✗) and stop the spinner, auto-clearing the line */
   failAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
-  /** Get current spinner text (getter) or set new text (setter) */
-  text(value: string): Spinner
-  text(): string
-
   /** Increase indentation by specified spaces (default: 2) */
   indent(spaces?: number | undefined): Spinner
-  /** Decrease indentation by specified spaces (default: 2) */
-  dedent(spaces?: number | undefined): Spinner
 
   /** Show info (ℹ) message without stopping the spinner */
   info(text?: string | undefined, ...extras: unknown[]): Spinner
@@ -212,20 +220,30 @@ export type Spinner = {
   /** Log and stop the spinner, auto-clearing the line */
   logAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Update progress bar with current/total values and optional unit */
+  progress(current: number, total: number, unit?: string | undefined): Spinner
+  /** Increment progress by specified amount (default: 1) */
+  progressStep(amount?: number): Spinner
+
   /** Show reasoning (∴) message without stopping the spinner */
   reason(text?: string | undefined, ...extras: unknown[]): Spinner
   /** Show reasoning (∴) message and stop the spinner, auto-clearing the line */
   reasonAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
+  /** Set complete shimmer configuration */
+  setShimmer(config: ShimmerConfig): Spinner
+
   /** Start spinning with optional text */
   start(text?: string | undefined): Spinner
+
+  /** Show main step message to stderr without stopping */
+  step(text?: string | undefined, ...extras: unknown[]): Spinner
+
   /** Stop spinning and clear internal state, auto-clearing the line */
   stop(text?: string | undefined): Spinner
   /** Stop and show final text without clearing the line */
   stopAndPersist(text?: string | undefined): Spinner
 
-  /** Show main step message to stderr without stopping */
-  step(text?: string | undefined, ...extras: unknown[]): Spinner
   /** Show indented substep message to stderr without stopping */
   substep(text?: string | undefined, ...extras: unknown[]): Spinner
 
@@ -234,22 +252,10 @@ export type Spinner = {
   /** Show success (✓) and stop the spinner, auto-clearing the line */
   successAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
-  /** Alias for `success()` - show success without stopping */
-  done(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Alias for `successAndStop()` - show success and stop */
-  doneAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Get current spinner text (getter) or set new text (setter) */
+  text(value: string): Spinner
+  text(): string
 
-  /** Update progress bar with current/total values and optional unit */
-  progress(current: number, total: number, unit?: string | undefined): Spinner
-  /** Increment progress by specified amount (default: 1) */
-  progressStep(amount?: number): Spinner
-
-  /** Enable shimmer effect (restores saved config or uses defaults) */
-  enableShimmer(): Spinner
-  /** Disable shimmer effect (preserves config for later re-enable) */
-  disableShimmer(): Spinner
-  /** Set complete shimmer configuration */
-  setShimmer(config: ShimmerConfig): Spinner
   /** Update partial shimmer configuration */
   updateShimmer(config: Partial<ShimmerConfig>): Spinner
 
@@ -740,6 +746,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       /**
        * Show a status message without stopping the spinner.
        * Outputs the symbol and message to stderr, then continues spinning.
+       * @private
        */
       #showStatusAndKeepSpinning(symbolType: SymbolType, args: unknown[]) {
         let text = args.at(0)
@@ -827,6 +834,22 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
+       * Disable shimmer effect.
+       * Preserves config for later re-enable via enableShimmer().
+       *
+       * @returns This spinner for chaining
+       *
+       * @example
+       * spinner.disableShimmer()
+       */
+      disableShimmer(): Spinner {
+        // Disable shimmer but preserve config.
+        this.#shimmer = undefined
+        this.#updateSpinnerText()
+        return this as unknown as Spinner
+      }
+
+      /**
        * Show a done/success message (✓) without stopping the spinner.
        * Alias for `success()` with a shorter name.
        *
@@ -851,6 +874,35 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       doneAndStop(text?: string | undefined, ...extras: unknown[]) {
         return this.#apply('success', [text, ...extras])
+      }
+
+      /**
+       * Enable shimmer effect.
+       * Restores saved config or uses defaults if no saved config exists.
+       *
+       * @returns This spinner for chaining
+       *
+       * @example
+       * spinner.enableShimmer()
+       */
+      enableShimmer(): Spinner {
+        if (this.#shimmerSavedConfig) {
+          // Restore saved config.
+          this.#shimmer = { ...this.#shimmerSavedConfig }
+        } else {
+          // Create default config.
+          this.#shimmer = {
+            color: COLOR_INHERIT,
+            currentDir: DIR_LTR,
+            mode: DIR_LTR,
+            speed: 1 / 3,
+            step: 0,
+          } as ShimmerInfo
+          this.#shimmerSavedConfig = this.#shimmer
+        }
+
+        this.#updateSpinnerText()
+        return this as unknown as Spinner
       }
 
       /**
@@ -955,45 +1007,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Show a reasoning/working message (∴) without stopping the spinner.
-       * Outputs to stderr and continues spinning.
-       *
-       * @param text - Reasoning message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       */
-      reason(text?: string | undefined, ...extras: unknown[]) {
-        return this.#showStatusAndKeepSpinning('reason', [text, ...extras])
-      }
-
-      /**
-       * Show a reasoning/working message (∴) and stop the spinner.
-       * Auto-clears the spinner line before displaying the message.
-       *
-       * Implementation note: Unlike other *AndStop methods (successAndStop, failAndStop, etc.),
-       * this method cannot use #apply() with a 'reason' method name because yocto-spinner
-       * doesn't have a built-in 'reason' method. Instead, we manually stop the spinner then
-       * log the message with the reason symbol. This matches the pattern used by methods
-       * like debugAndStop() and maintains consistency with normalizeText() usage and empty
-       * string handling (see #apply's stop method handling for the pattern).
-       *
-       * @param text - Reasoning message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       */
-      reasonAndStop(text?: string | undefined, ...extras: unknown[]) {
-        // Stop spinner first (can't use #apply('reason') since yocto-spinner has no 'reason' method)
-        this.#apply('stop', [])
-        // Normalize text (trim leading whitespace) like other methods
-        const normalized = normalizeText(text)
-        // Only log if we have actual content (consistent with #apply's stop method handling)
-        if (normalized) {
-          logger.error(`${LOG_SYMBOLS.reason} ${normalized}`, ...extras)
-        }
-        return this
-      }
-
-      /**
        * Update progress information displayed with the spinner.
        * Shows a progress bar with percentage and optional unit label.
        *
@@ -1051,6 +1064,73 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           this.#updateSpinnerText()
         }
         return this
+      }
+
+      /**
+       * Show a reasoning/working message (∴) without stopping the spinner.
+       * Outputs to stderr and continues spinning.
+       *
+       * @param text - Reasoning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      reason(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('reason', [text, ...extras])
+      }
+
+      /**
+       * Show a reasoning/working message (∴) and stop the spinner.
+       * Auto-clears the spinner line before displaying the message.
+       *
+       * Implementation note: Unlike other *AndStop methods (successAndStop, failAndStop, etc.),
+       * this method cannot use #apply() with a 'reason' method name because yocto-spinner
+       * doesn't have a built-in 'reason' method. Instead, we manually stop the spinner then
+       * log the message with the reason symbol. This matches the pattern used by methods
+       * like debugAndStop() and maintains consistency with normalizeText() usage and empty
+       * string handling (see #apply's stop method handling for the pattern).
+       *
+       * @param text - Reasoning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      reasonAndStop(text?: string | undefined, ...extras: unknown[]) {
+        // Stop spinner first (can't use #apply('reason') since yocto-spinner has no 'reason' method)
+        this.#apply('stop', [])
+        // Normalize text (trim leading whitespace) like other methods
+        const normalized = normalizeText(text)
+        // Only log if we have actual content (consistent with #apply's stop method handling)
+        if (normalized) {
+          logger.error(`${LOG_SYMBOLS.reason} ${normalized}`, ...extras)
+        }
+        return this
+      }
+
+      /**
+       * Set complete shimmer configuration.
+       * Replaces any existing shimmer config with the provided values.
+       * Undefined properties will use default values.
+       *
+       * @param config - Complete shimmer configuration
+       * @returns This spinner for chaining
+       *
+       * @example
+       * spinner.setShimmer({
+       *   color: [255, 0, 0],
+       *   dir: 'rtl',
+       *   speed: 0.5
+       * })
+       */
+      setShimmer(config: ShimmerConfig): Spinner {
+        this.#shimmer = {
+          color: config.color ?? COLOR_INHERIT,
+          currentDir: DIR_LTR,
+          mode: config.dir ?? DIR_LTR,
+          speed: config.speed ?? 1 / 3,
+          step: 0,
+        } as ShimmerInfo
+        this.#shimmerSavedConfig = this.#shimmer
+        this.#updateSpinnerText()
+        return this as unknown as Spinner
       }
 
       /**
@@ -1114,31 +1194,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Log an indented substep message to stderr without stopping the spinner.
-       * Adds 2-space indentation to the message.
-       * Aligns with `logger.substep()` to use stderr for status messages.
-       *
-       * @param text - Substep message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       *
-       * @example
-       * ```ts
-       * spinner.step('Building application')
-       * spinner.substep('Compiling TypeScript')
-       * spinner.substep('Bundling assets')
-       * ```
-       */
-      substep(text?: string | undefined, ...extras: unknown[]) {
-        if (typeof text === 'string') {
-          // Add 2-space indent for substep.
-          // Use error (stderr) to align with logger.substep() default stream.
-          logger.error(`  ${text}`, ...extras)
-        }
-        return this
-      }
-
-      /**
        * Stop the spinner animation and clear internal state.
        * Auto-clears the spinner line via yocto-spinner.stop().
        * Resets progress, shimmer, and text state.
@@ -1175,6 +1230,31 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         // Ensure text is cleared after stop completes.
         super.text = ''
         return result
+      }
+
+      /**
+       * Log an indented substep message to stderr without stopping the spinner.
+       * Adds 2-space indentation to the message.
+       * Aligns with `logger.substep()` to use stderr for status messages.
+       *
+       * @param text - Substep message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       *
+       * @example
+       * ```ts
+       * spinner.step('Building application')
+       * spinner.substep('Compiling TypeScript')
+       * spinner.substep('Bundling assets')
+       * ```
+       */
+      substep(text?: string | undefined, ...extras: unknown[]) {
+        if (typeof text === 'string') {
+          // Add 2-space indent for substep.
+          // Use error (stderr) to align with logger.substep() default stream.
+          logger.error(`  ${text}`, ...extras)
+        }
+        return this
       }
 
       /**
@@ -1232,103 +1312,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         }
         // Setter: update base text and refresh display
         this.#baseText = value ?? ''
-        this.#updateSpinnerText()
-        return this as unknown as Spinner
-      }
-
-      /**
-       * Show a warning message (⚠) without stopping the spinner.
-       * Outputs to stderr and continues spinning.
-       *
-       * @param text - Warning message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       */
-      warn(text?: string | undefined, ...extras: unknown[]) {
-        return this.#showStatusAndKeepSpinning('warn', [text, ...extras])
-      }
-
-      /**
-       * Show a warning message (⚠) and stop the spinner.
-       * Auto-clears the spinner line before displaying the warning message.
-       *
-       * @param text - Warning message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       */
-      warnAndStop(text?: string | undefined, ...extras: unknown[]) {
-        return this.#apply('warning', [text, ...extras])
-      }
-
-      /**
-       * Enable shimmer effect.
-       * Restores saved config or uses defaults if no saved config exists.
-       *
-       * @returns This spinner for chaining
-       *
-       * @example
-       * spinner.enableShimmer()
-       */
-      enableShimmer(): Spinner {
-        if (this.#shimmerSavedConfig) {
-          // Restore saved config.
-          this.#shimmer = { ...this.#shimmerSavedConfig }
-        } else {
-          // Create default config.
-          this.#shimmer = {
-            color: COLOR_INHERIT,
-            currentDir: DIR_LTR,
-            mode: DIR_LTR,
-            speed: 1 / 3,
-            step: 0,
-          } as ShimmerInfo
-          this.#shimmerSavedConfig = this.#shimmer
-        }
-
-        this.#updateSpinnerText()
-        return this as unknown as Spinner
-      }
-
-      /**
-       * Disable shimmer effect.
-       * Preserves config for later re-enable via enableShimmer().
-       *
-       * @returns This spinner for chaining
-       *
-       * @example
-       * spinner.disableShimmer()
-       */
-      disableShimmer(): Spinner {
-        // Disable shimmer but preserve config.
-        this.#shimmer = undefined
-        this.#updateSpinnerText()
-        return this as unknown as Spinner
-      }
-
-      /**
-       * Set complete shimmer configuration.
-       * Replaces any existing shimmer config with the provided values.
-       * Undefined properties will use default values.
-       *
-       * @param config - Complete shimmer configuration
-       * @returns This spinner for chaining
-       *
-       * @example
-       * spinner.setShimmer({
-       *   color: [255, 0, 0],
-       *   dir: 'rtl',
-       *   speed: 0.5
-       * })
-       */
-      setShimmer(config: ShimmerConfig): Spinner {
-        this.#shimmer = {
-          color: config.color ?? COLOR_INHERIT,
-          currentDir: DIR_LTR,
-          mode: config.dir ?? DIR_LTR,
-          speed: config.speed ?? 1 / 3,
-          step: 0,
-        } as ShimmerInfo
-        this.#shimmerSavedConfig = this.#shimmer
         this.#updateSpinnerText()
         return this as unknown as Spinner
       }
@@ -1400,6 +1383,30 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
 
         this.#updateSpinnerText()
         return this as unknown as Spinner
+      }
+
+      /**
+       * Show a warning message (⚠) without stopping the spinner.
+       * Outputs to stderr and continues spinning.
+       *
+       * @param text - Warning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      warn(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('warn', [text, ...extras])
+      }
+
+      /**
+       * Show a warning message (⚠) and stop the spinner.
+       * Auto-clears the spinner line before displaying the warning message.
+       *
+       * @param text - Warning message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      warnAndStop(text?: string | undefined, ...extras: unknown[]) {
+        return this.#apply('warning', [text, ...extras])
       }
     } as unknown as {
       new (options?: SpinnerOptions | undefined): Spinner
