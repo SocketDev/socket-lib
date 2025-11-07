@@ -24,7 +24,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const constants = {
   EXT_DTS: '.d.ts',
   EXT_JSON: '.json',
-  registryPkgPath: path.join(__dirname, '..'),
+  registryPkgPath: path.join(__dirname, '..', '..'),
   ignoreGlobs: [
     '**/node_modules/**',
     '**/.git/**',

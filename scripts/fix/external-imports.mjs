@@ -12,7 +12,7 @@ import colors from 'yoctocolors-cjs'
 import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 
-import { externalPackages, scopedPackages } from './build-externals/config.mjs'
+import { externalPackages, scopedPackages } from '../build-externals/config.mjs'
 
 const logger = getDefaultLogger()
 const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
