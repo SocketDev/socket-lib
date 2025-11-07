@@ -7,6 +7,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import fg from 'fast-glob'
 
+import { envAsBoolean } from '#socketsecurity/lib/env/utils'
 import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -286,7 +287,8 @@ export const buildConfig = {
   format: 'cjs',
   platform: 'node',
   target: 'node18',
-  sourcemap: false,
+  // Enable source maps for coverage (set COVERAGE=true env var)
+  sourcemap: envAsBoolean('COVERAGE'),
   // Don't minify - this is a library and minification breaks ESM/CJS interop.
   minify: false,
   // Tree-shaking optimization.
