@@ -231,4 +231,29 @@ describe('spinner', () => {
       expect(spinner.color).toEqual(originalColor)
     })
   })
+
+  describe('Spinner methods', () => {
+    it('should support reason() method', () => {
+      const spinner = Spinner()
+      const result = spinner.reason('reasoning message')
+      expect(result).toBe(spinner)
+    })
+
+    it('should support reasonAndStop() method', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.reasonAndStop('final reasoning')
+      expect(result).toBe(spinner)
+      expect(spinner.isSpinning).toBe(false)
+    })
+
+    it('should chain reason() calls', () => {
+      const spinner = Spinner()
+      const result = spinner
+        .reason('first reason')
+        .reason('second reason')
+        .reason('third reason')
+      expect(result).toBe(spinner)
+    })
+  })
 })
