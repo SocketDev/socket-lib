@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.0) - 2025-11-07
+
+### Added
+
+- **Spinner**: New `reason()` and `reasonAndStop()` methods for displaying working/thinking output
+  - `reason(text)`: Display reason text alongside spinner (e.g., "Analyzing dependencies...")
+  - `reasonAndStop(text)`: Display reason text and stop spinner in one call
+  - Normalizes text formatting consistently with other spinner methods
+  - Useful for communicating progress steps during long-running operations
+
+- **Logger**: New `reason()` method and symbol for working/thinking output
+  - `LOG_SYMBOLS.reason`: New symbol for reason output (distinct from info/step symbols)
+  - `reason(message)`: Display reason messages with dedicated symbol
+  - Complements existing info/step/success/error/warning methods
+
 ## [3.2.8](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.8) - 2025-11-05
 
 ### Fixed
