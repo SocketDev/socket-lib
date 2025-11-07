@@ -55,9 +55,9 @@ describe('spawn integration', () => {
         cwd: '/tmp',
       })
       expect(result.code).toBe(0)
-      // macOS uses /private/tmp symlink
+      // macOS uses /private/tmp symlink, Windows Git Bash uses /d/tmp or similar
       expect(result.stdout.toString().trim()).toMatch(
-        /^(\/tmp|\/private\/tmp)$/,
+        /^(\/tmp|\/private\/tmp|\/[a-z]\/tmp)$/,
       )
     })
 
