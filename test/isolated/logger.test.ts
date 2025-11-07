@@ -1077,6 +1077,84 @@ describe('Logger', () => {
     })
   })
 
+  describe('reason() method', () => {
+    it('should log reason message with symbol', () => {
+      testLogger.reason('processing dependencies')
+      const output = stderrChunks.join('')
+      expect(output).toContain('processing dependencies')
+    })
+
+    it('should support multiple arguments', () => {
+      testLogger.reason('Found', 3, 'issues')
+      const output = stderrChunks.join('')
+      expect(output).toContain('Found')
+    })
+
+    it('should return logger instance for chaining', () => {
+      const result = testLogger.reason('analyzing...')
+      expect(result).toBe(testLogger)
+    })
+
+    it('should handle empty reason', () => {
+      testLogger.reason()
+      expect(stderrChunks.length).toBeGreaterThan(0)
+    })
+
+    it('should strip existing symbols', () => {
+      testLogger.reason('∴ already has symbol')
+      const output = stderrChunks.join('')
+      expect(output).toContain('already has symbol')
+    })
+  })
+
+  describe('time() method', () => {
+    it('should start a timer with a label', () => {
+      expect(() => {
+        testLogger.time('test-timer')
+      }).not.toThrow()
+    })
+
+    it('should return logger instance for chaining', () => {
+      const result = testLogger.time('chain-timer')
+      expect(result).toBe(testLogger)
+    })
+
+    it('should handle timer without label', () => {
+      expect(() => {
+        testLogger.time()
+      }).not.toThrow()
+    })
+
+    it('should work with timeEnd', () => {
+      testLogger.time('duration-timer')
+      expect(() => {
+        testLogger.timeEnd('duration-timer')
+      }).not.toThrow()
+      const output = stdoutChunks.join('')
+      expect(output).toContain('duration-timer')
+    })
+
+    it('should work with timeLog', () => {
+      testLogger.time('log-timer')
+      expect(() => {
+        testLogger.timeLog('log-timer', 'checkpoint')
+      }).not.toThrow()
+      const output = stdoutChunks.join('')
+      expect(output).toContain('log-timer')
+    })
+
+    it('should handle multiple concurrent timers', () => {
+      testLogger.time('timer-1')
+      testLogger.time('timer-2')
+      testLogger.time('timer-3')
+      expect(() => {
+        testLogger.timeEnd('timer-1')
+        testLogger.timeEnd('timer-2')
+        testLogger.timeEnd('timer-3')
+      }).not.toThrow()
+    })
+  })
+
   describe('console methods proxy', () => {
     it('should have Symbol.toStringTag', () => {
       expect(Object.prototype.toString.call(testLogger)).toBe('[object logger]')
