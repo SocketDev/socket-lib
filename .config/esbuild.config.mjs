@@ -8,7 +8,6 @@ import { fileURLToPath } from 'node:url'
 import fg from 'fast-glob'
 
 import { envAsBoolean } from '#socketsecurity/lib/env/helpers'
-import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -243,40 +242,6 @@ function createPathAliasPlugin() {
   }
 }
 
-/**
- * Plugin to handle local package aliases when bundle: false
- * esbuild's built-in alias only works with bundle: true, so we need a custom plugin
- */
-function createAliasPlugin() {
-  const aliases = getLocalPackageAliases(rootPath)
-
-  // Only create plugin if we have local aliases
-  if (Object.keys(aliases).length === 0) {
-    return null
-  }
-
-  return {
-    name: 'local-package-aliases',
-    setup(build) {
-      // Intercept imports for aliased packages
-      for (const [packageName, aliasPath] of Object.entries(aliases)) {
-        // Match both exact package name and subpath imports
-        build.onResolve(
-          { filter: new RegExp(`^${packageName}(/|$)`) },
-          args => {
-            // Handle subpath imports like '@socketsecurity/lib/spinner'
-            const subpath = args.path.slice(packageName.length + 1)
-            const resolvedPath = subpath
-              ? path.join(aliasPath, subpath)
-              : aliasPath
-            return { path: resolvedPath, external: true }
-          },
-        )
-      }
-    },
-  }
-}
-
 // Build configuration for CommonJS output
 export const buildConfig = {
   entryPoints,
@@ -296,12 +261,10 @@ export const buildConfig = {
   metafile: true,
   logLevel: 'info',
 
-  // Use plugin for local package aliases (built-in alias requires bundle: true).
-  plugins: [
-    createPathShorteningPlugin(),
-    createPathAliasPlugin(),
-    createAliasPlugin(),
-  ].filter(Boolean),
+  // Use plugins for path shortening and aliases
+  plugins: [createPathShorteningPlugin(), createPathAliasPlugin()].filter(
+    Boolean,
+  ),
 
   // Note: Cannot use "external" with bundle: false.
   // esbuild automatically treats all imports as external when not bundling.
