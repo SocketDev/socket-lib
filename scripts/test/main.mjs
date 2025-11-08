@@ -12,7 +12,6 @@ import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { getDefaultSpinner } from '#socketsecurity/lib/spinner'
 import { printHeader } from '#socketsecurity/lib/stdio/header'
 
-import { getLocalPackageAliases } from '../utils/get-local-package-aliases.mjs'
 import { getTestsToRun } from '../utils/changed-test-mapper.mjs'
 import { parseArgs } from '../utils/parse-args.mjs'
 import { onExit } from '../utils/signal-exit.mjs'
@@ -41,12 +40,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 
-// Detect if external Socket packages are available for type checking
-const localAliases = getLocalPackageAliases(rootPath)
-const hasExternalPackages = Object.keys(localAliases).length > 0
-const tsconfigPath = hasExternalPackages
-  ? '.config/tsconfig.external-aliases.json'
-  : '.config/tsconfig.check.json'
+const tsconfigPath = '.config/tsconfig.check.json'
 
 // Track running processes for cleanup
 const runningProcesses = new Set()
