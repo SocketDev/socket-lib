@@ -11,11 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import maintainedNodeVersionsModule from '@socketsecurity/lib/maintained-node-versions'
-
-// Handle ESM/CJS interop - the module may be double-wrapped
-const maintainedNodeVersions =
-  (maintainedNodeVersionsModule as any).default || maintainedNodeVersionsModule
+import { maintainedNodeVersions } from '@socketsecurity/lib/maintained-node-versions'
 
 describe('maintained-node-versions', () => {
   describe('default export', () => {
