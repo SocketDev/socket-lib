@@ -201,6 +201,21 @@ Blank lines between groups, alphabetical within groups.
 - **External modules**: Regular imports
   - ✅ `import path from 'node:path'`
 
+#### Export Patterns
+- **Named exports ONLY**: 🚨 MANDATORY for all library modules
+  - ✅ `export { value }` - Direct named export
+  - ✅ `export { foo, bar, baz }` - Multiple named exports
+  - ❌ `export default value` - FORBIDDEN (breaks dual CJS/ESM compatibility)
+  - ❌ `export default X; export { X as 'module.exports' }` - FORBIDDEN (dual export pattern)
+- **Rationale**: Dual-format (CJS/ESM) compatibility requires consistent named exports
+  - Named exports work identically in both module systems
+  - Default exports require `.default` access, breaking consistency
+  - Build validation enforces this pattern (enabled in CI)
+- **Enforcement**:
+  - Biome linting rule: `"noDefaultExport": "error"`
+  - Build-time validation: `scripts/validate/esm-named-exports.mjs`
+  - CI validation: `scripts/validate/dist-exports.mjs`
+
 ### Package Exports
 
 #### Export Structure
