@@ -38,3 +38,6 @@ pnpm-debug.log*
 node_modules/
 yarn.lock
 **/.claude/
+
+# Archive directories
+**/docs/archive/
