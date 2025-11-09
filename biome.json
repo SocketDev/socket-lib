@@ -68,6 +68,7 @@
         "useLiteralKeys": "off"
       },
       "style": {
+        "noDefaultExport": "error",
         "noParameterAssign": "off",
         "noNonNullAssertion": "off",
         "useAsConstAssertion": "error",
