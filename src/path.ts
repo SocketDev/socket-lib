@@ -381,6 +381,13 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
  * @param {string | Buffer | URL} pathLike - The path to normalize
  * @returns {string} The normalized path with forward slashes and collapsed segments
  *
+ * @security
+ * **WARNING**: This function resolves `..` patterns as part of normalization, which means
+ * paths like `/../etc/passwd` become `/etc/passwd`. When processing untrusted user input
+ * (HTTP requests, file uploads, URL parameters), you MUST validate for path traversal
+ * attacks BEFORE calling this function. Check for patterns like `..`, `%2e%2e`, `\..`,
+ * and other traversal encodings first.
+ *
  * @example
  * ```typescript
  * // Basic normalization
@@ -401,6 +408,10 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
  * normalizePath('..')                        // '..'
  * normalizePath('///foo///bar///')           // '/foo/bar'
  * normalizePath('foo/../..')                 // '..'
+ *
+ * // Security: Path traversal is resolved (intended behavior for trusted paths)
+ * normalizePath('/../etc/passwd')            // '/etc/passwd' ⚠️
+ * normalizePath('/safe/../../unsafe')        // '/unsafe' ⚠️
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
