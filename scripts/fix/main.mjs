@@ -44,15 +44,14 @@ async function main() {
       args: ['scripts/fix/commonjs-exports.mjs', ...fixArgs],
       command: 'node',
     },
-    // TEMP: Re-enable once export patterns are fixed
-    // {
-    //   args: ['scripts/validate/esm-named-exports.mjs', ...fixArgs],
-    //   command: 'node',
-    // },
-    // {
-    //   args: ['scripts/validate/dist-exports.mjs', ...fixArgs],
-    //   command: 'node',
-    // },
+    {
+      args: ['scripts/validate/esm-named-exports.mjs', ...fixArgs],
+      command: 'node',
+    },
+    {
+      args: ['scripts/validate/dist-exports.mjs', ...fixArgs],
+      command: 'node',
+    },
   ])
 
   if (!quiet) {
