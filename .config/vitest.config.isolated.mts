@@ -13,7 +13,7 @@ const projectRoot = path.resolve(__dirname, '..')
 // Normalize paths for cross-platform glob patterns (forward slashes on Windows)
 const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
 
-export default defineConfig({
+const vitestConfigIsolated = defineConfig({
   cacheDir: path.resolve(projectRoot, '.cache/vitest-isolated'),
   resolve: {
     preserveSymlinks: false,
@@ -70,3 +70,6 @@ export default defineConfig({
     },
   },
 })
+
+export { vitestConfigIsolated }
+export default vitestConfigIsolated

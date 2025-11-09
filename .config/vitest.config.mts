@@ -18,7 +18,7 @@ const isCoverageEnabled =
   process.env.npm_lifecycle_event?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
-export default defineConfig({
+const vitestConfig = defineConfig({
   cacheDir: path.resolve(projectRoot, '.cache/vitest'),
   resolve: {
     preserveSymlinks: false,
@@ -163,3 +163,6 @@ export default defineConfig({
     },
   },
 })
+
+export { vitestConfig }
+export default vitestConfig
