@@ -8,7 +8,7 @@ const path = require('node:path')
  * @param {object} babel - Babel API object
  * @returns {object} Babel plugin object
  */
-module.exports = function inlineRequireCalls(babel) {
+function inlineRequireCalls(babel) {
   const { types: t } = babel
 
   return {
@@ -254,3 +254,5 @@ function valueToASTNode(t, value) {
   }
   throw new Error(`Unsupported value type: ${typeof value}`)
 }
+
+module.exports = { inlineRequireCalls }

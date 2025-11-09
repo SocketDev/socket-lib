@@ -1,4 +1,4 @@
-export default function ({ types: t }) {
+export function transformUrlParse({ types: t }) {
   return {
     name: 'transform-url-parse',
     visitor: {

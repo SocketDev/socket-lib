@@ -17,7 +17,7 @@ function unwrapProto(node, t) {
   }
 }
 
-export default function ({ types: t }) {
+export function transformSetProto({ types: t }) {
   return {
     name: 'transform-set-proto',
     visitor: {

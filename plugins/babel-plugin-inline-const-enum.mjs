@@ -28,7 +28,7 @@
  * @param {boolean} [options.scanDeclarations=false] - Auto-detect enum declarations
  * @returns {object} Babel plugin object
  */
-export default function inlineConstEnum(babel, options = {}) {
+export function inlineConstEnum(babel, options = {}) {
   const { types: t } = babel
   const { enums = {}, scanDeclarations = false } = options
 

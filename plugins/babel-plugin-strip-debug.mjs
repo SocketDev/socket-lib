@@ -23,7 +23,7 @@
  * @param {string[]} [options.identifiers=['DEBUG']] - Debug identifiers to strip
  * @returns {object} Babel plugin object
  */
-export default function stripDebug(babel, options = {}) {
+export function stripDebug(babel, options = {}) {
   const { types: t } = babel
   const { identifiers = ['DEBUG'] } = options
   const debugIds = new Set(identifiers)
