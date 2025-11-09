@@ -36,5 +36,4 @@ const maintainedNodeVersions = ObjectFreeze(
   previous: string
 }
 
-export default maintainedNodeVersions
-export { maintainedNodeVersions as 'module.exports' }
+export { maintainedNodeVersions }

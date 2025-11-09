@@ -51,5 +51,4 @@ const packageExtensions = ObjectFreeze(
   }),
 )
 
-export default packageExtensions
-export { packageExtensions as 'module.exports' }
+export { packageExtensions }
