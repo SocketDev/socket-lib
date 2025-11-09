@@ -22,5 +22,4 @@ const lifecycleScriptNames = new Set(
   ].flat(),
 )
 
-export default lifecycleScriptNames
-export { lifecycleScriptNames as 'module.exports' }
+export { lifecycleScriptNames }
