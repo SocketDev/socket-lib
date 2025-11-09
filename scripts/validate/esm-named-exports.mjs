@@ -67,7 +67,16 @@ function checkEsmNamedExports(filePath) {
     const hasNamedExportsObject = /module\.exports\s*=\s*{/.test(source)
 
     // Also check by actually requiring the module
-    const mod = require(filePath)
+    let mod
+    try {
+      mod = require(filePath)
+    } catch (requireError) {
+      return {
+        path: filePath,
+        ok: false,
+        reason: `Failed to require: ${requireError.message}`,
+      }
+    }
 
     // If it's a primitive, it can't have named exports
     if (typeof mod !== 'object' || mod === null) {
@@ -106,8 +115,14 @@ function checkEsmNamedExports(filePath) {
       }
     }
 
-    // If we have an empty object
+    // If we have an empty object, check if it's a type-only file
     if (keys.length === 0) {
+      // Type-only files (e.g., cover/types.js, effects/types.js) have no runtime exports
+      // These are expected and OK
+      const isTypeOnlyFile = normalizedPath.endsWith('/types.js')
+      if (isTypeOnlyFile) {
+        return { path: filePath, ok: true }
+      }
       return {
         path: filePath,
         ok: false,
