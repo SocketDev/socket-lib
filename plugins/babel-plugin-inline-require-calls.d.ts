@@ -2,6 +2,6 @@
 
 import type { PluginObj, PluginPass } from '@babel/core'
 
-export default function inlineRequireCalls(babel: {
+export function inlineRequireCalls(babel: {
   types: typeof import('@babel/types')
 }): PluginObj<PluginPass>

@@ -31,7 +31,7 @@
  * process.env.NODE_ENV // → 'production'
  * process.env.DEBUG // → unchanged (not in env)
  */
-export default function inlineProcessEnv(babel, options = {}) {
+export function inlineProcessEnv(babel, options = {}) {
   const { types: t } = babel
   const { env = process.env, exclude = [], include = [] } = options
 
