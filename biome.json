@@ -180,6 +180,16 @@
           }
         }
       }
+    },
+    {
+      "includes": [".config/**/*"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
     }
   ]
 }
