@@ -1,6 +1,6 @@
 import { defineConfig } from 'taze'
 
-export default defineConfig({
+const tazeConfig = defineConfig({
   // Exclude these packages.
   exclude: [
     'debug',
@@ -22,3 +22,6 @@ export default defineConfig({
   // Write to package.json automatically.
   write: true,
 })
+
+export { tazeConfig }
+export default tazeConfig

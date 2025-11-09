@@ -308,7 +308,7 @@ function configs(sourceType) {
   ]
 }
 
-export default [
+const eslintConfig = [
   gitIgnores,
   biomeIgnores,
   {
@@ -366,3 +366,6 @@ export default [
     },
   },
 ]
+
+export { eslintConfig }
+export default eslintConfig
