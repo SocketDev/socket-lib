@@ -600,7 +600,7 @@
     "@babel/traverse": "7.28.4",
     "@babel/types": "7.28.4",
     "@biomejs/biome": "2.2.4",
-    "@eslint/compat": "1.4.0",
+    "@eslint/compat": "1.4.1",
     "@eslint/js": "9.38.0",
     "@inquirer/confirm": "5.1.16",
     "@inquirer/input": "4.2.2",
