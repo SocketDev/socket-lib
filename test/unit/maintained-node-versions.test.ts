@@ -111,25 +111,33 @@ describe('maintained-node-versions', () => {
   describe('immutability', () => {
     it('should not allow modification of array elements', () => {
       expect(() => {
-        maintainedNodeVersions[0] = '99.99.99'
+        // Testing runtime immutability (readonly array)
+        const arr = maintainedNodeVersions as any
+        arr[0] = '99.99.99'
       }).toThrow()
     })
 
     it('should not allow push', () => {
       expect(() => {
-        maintainedNodeVersions.push('99.99.99')
+        // Testing runtime immutability (readonly array)
+        const arr = maintainedNodeVersions as any
+        arr.push('99.99.99')
       }).toThrow()
     })
 
     it('should not allow pop', () => {
       expect(() => {
-        maintainedNodeVersions.pop()
+        // Testing runtime immutability (readonly array)
+        const arr = maintainedNodeVersions as any
+        arr.pop()
       }).toThrow()
     })
 
     it('should not allow modification of named properties', () => {
       expect(() => {
-        maintainedNodeVersions.current = '99.99.99'
+        // Testing runtime immutability (readonly properties)
+        const obj = maintainedNodeVersions as any
+        obj.current = '99.99.99'
       }).toThrow()
     })
   })

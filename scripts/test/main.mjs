@@ -37,7 +37,7 @@ process.on('unhandledRejection', (reason, _promise) => {
 })
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.resolve(__dirname, '..')
+const rootPath = path.resolve(__dirname, '../..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 
 const tsconfigPath = '.config/tsconfig.check.json'
