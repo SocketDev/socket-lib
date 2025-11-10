@@ -8,8 +8,6 @@ import { readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', '..', 'dist')
 const require = createRequire(import.meta.url)
@@ -19,7 +17,10 @@ const normalizePath = p => p.split(path.sep).join('/')
 
 // Import CommonJS modules using require
 const { isQuiet } = require('#socketsecurity/lib/argv/flags')
+const { getDefaultLogger } = require('#socketsecurity/lib/logger')
 const { pluralize } = require('#socketsecurity/lib/words')
+
+const logger = getDefaultLogger()
 
 /**
  * Get all .js files in a directory recursively.
@@ -92,7 +93,7 @@ async function main() {
   const verbose = process.argv.includes('--verbose')
 
   if (!quiet && verbose) {
-    console.log(`${colors.cyan('→')} Validating dist exports`)
+    logger.step('Validating dist exports')
   }
 
   const files = getJsFiles(distDir)
@@ -103,28 +104,26 @@ async function main() {
 
   if (failures.length > 0) {
     if (!quiet) {
-      console.error(
-        colors.red('✗') +
-          ` Found ${failures.length} public ${pluralize('export', { count: failures.length })} with incorrect exports:`,
+      logger.error(
+        `Found ${failures.length} public ${pluralize('export', { count: failures.length })} with incorrect exports:`,
       )
       for (const failure of failures) {
         const relativePath = path.relative(distDir, failure.path)
-        console.error(`  ${colors.red('✗')} ${relativePath}`)
-        console.error(`    ${failure.reason}`)
+        logger.error(`  ${relativePath}`)
+        logger.substep(failure.reason)
       }
     }
     process.exitCode = 1
   } else {
     if (!quiet) {
-      console.log(
-        colors.green('✓') +
-          ` Validated ${checked.length} public ${pluralize('export', { count: checked.length })} - all work without .default`,
+      logger.success(
+        `Validated ${checked.length} public ${pluralize('export', { count: checked.length })} - all work without .default`,
       )
     }
   }
 }
 
 main().catch(error => {
-  console.error(`${colors.red('✗')} Validation failed:`, error.message)
+  logger.error(`Validation failed: ${error.message}`)
   process.exitCode = 1
 })

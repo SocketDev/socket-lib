@@ -9,8 +9,6 @@ import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', '..', 'dist')
 const require = createRequire(import.meta.url)
@@ -20,7 +18,10 @@ const normalizePath = p => p.split(path.sep).join('/')
 
 // Import CommonJS modules using require
 const { isQuiet } = require('#socketsecurity/lib/argv/flags')
+const { getDefaultLogger } = require('#socketsecurity/lib/logger')
 const { pluralize } = require('#socketsecurity/lib/words')
+
+const logger = getDefaultLogger()
 
 /**
  * Get all .js files in a directory recursively.
@@ -145,7 +146,7 @@ async function main() {
   const verbose = process.argv.includes('--verbose')
 
   if (!quiet && verbose) {
-    console.log(`${colors.cyan('→')} Validating ESM-compatible named exports`)
+    logger.step('Validating ESM-compatible named exports')
   }
 
   const files = getJsFiles(distDir)
@@ -156,33 +157,29 @@ async function main() {
 
   if (failures.length > 0) {
     if (!quiet) {
-      console.error(
-        colors.red('✗') +
-          ` Found ${failures.length} ${pluralize('file', { count: failures.length })} without ESM-compatible named exports:`,
+      logger.error(
+        `Found ${failures.length} ${pluralize('file', { count: failures.length })} without ESM-compatible named exports:`,
       )
       for (const failure of failures) {
         const relativePath = path.relative(distDir, failure.path)
-        console.error(`  ${colors.red('✗')} ${relativePath}`)
-        console.error(`    ${failure.reason}`)
+        logger.error(`  ${relativePath}`)
+        logger.substep(failure.reason)
       }
-      console.error(
-        '\n' +
-          colors.yellow('Hint:') +
-          ' Use module.exports = { foo, bar } pattern for ESM compatibility',
+      logger.warn(
+        'Hint: Use module.exports = { foo, bar } pattern for ESM compatibility',
       )
     }
     process.exitCode = 1
   } else {
     if (!quiet) {
-      console.log(
-        colors.green('✓') +
-          ` Validated ${checked.length} ${pluralize('file', { count: checked.length })} - all have ESM-compatible named exports`,
+      logger.success(
+        `Validated ${checked.length} ${pluralize('file', { count: checked.length })} - all have ESM-compatible named exports`,
       )
     }
   }
 }
 
 main().catch(error => {
-  console.error(`${colors.red('✗')} Validation failed:`, error.message)
+  logger.error(`Validation failed: ${error.message}`)
   process.exitCode = 1
 })

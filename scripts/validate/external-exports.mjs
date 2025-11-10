@@ -9,8 +9,6 @@ import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')
 const require = createRequire(import.meta.url)
@@ -20,7 +18,10 @@ const normalizePath = p => p.split(path.sep).join('/')
 
 // Import CommonJS modules using require
 const { isQuiet } = require('#socketsecurity/lib/argv/flags')
+const { getDefaultLogger } = require('#socketsecurity/lib/logger')
 const { pluralize } = require('#socketsecurity/lib/words')
+
+const logger = getDefaultLogger()
 
 // Modules that only export { default } but are correctly handled in code
 // via .default accessor (e.g., confirmExport.default ?? confirmExport)
@@ -163,16 +164,14 @@ async function main() {
   const verbose = process.argv.includes('--verbose')
 
   if (!quiet && verbose) {
-    console.log(`${colors.cyan('→')} Validating dist/external exports`)
+    logger.step('Validating dist/external exports')
   }
 
   const modules = getExternalModules(externalDir)
 
   if (modules.length === 0) {
     if (!quiet) {
-      console.log(
-        colors.yellow('⚠') + ' No external modules found to validate',
-      )
+      logger.warn('No external modules found to validate')
     }
     return
   }
@@ -182,13 +181,12 @@ async function main() {
 
   if (failures.length > 0) {
     if (!quiet) {
-      console.error(
-        colors.red('✗') +
-          ` Found ${failures.length} external ${pluralize('module', { count: failures.length })} with export issues:`,
+      logger.error(
+        `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with export issues:`,
       )
       for (const failure of failures) {
-        console.error(`  ${colors.red('✗')} ${failure.path}`)
-        console.error(`    ${failure.reason}`)
+        logger.error(`  ${failure.path}`)
+        logger.substep(failure.reason)
       }
     }
     process.exitCode = 1
@@ -198,15 +196,14 @@ async function main() {
         (sum, r) => sum + (typeof r.keys === 'number' ? r.keys : 0),
         0,
       )
-      console.log(
-        colors.green('✓') +
-          ` Validated ${results.length} external ${pluralize('module', { count: results.length })} - all usable without .default (${totalKeys} total exports)`,
+      logger.success(
+        `Validated ${results.length} external ${pluralize('module', { count: results.length })} - all usable without .default (${totalKeys} total exports)`,
       )
     }
   }
 }
 
 main().catch(error => {
-  console.error(`${colors.red('✗')} Validation failed:`, error.message)
+  logger.error(`Validation failed: ${error.message}`)
   process.exitCode = 1
 })
