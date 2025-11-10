@@ -252,7 +252,8 @@ class CostTracker {
 
   showSessionSummary() {
     const duration = Date.now() - this.startTime
-    logger.log(colors.cyan('\n💰 Cost Summary:'))
+    logger.log('')
+    logger.log(colors.cyan('💰 Cost Summary:'))
     logger.log(`  Input tokens: ${this.session.input.toLocaleString()}`)
     logger.log(`  Output tokens: ${this.session.output.toLocaleString()}`)
     if (this.session.cacheWrite > 0) {
@@ -398,7 +399,8 @@ class ProgressTracker {
     const totalElapsed = Date.now() - this.startTime
     const eta = this.getTotalETA()
 
-    logger.log(colors.cyan('\n⏱️  Progress:'))
+    logger.log('')
+    logger.log(colors.cyan('⏱️  Progress:'))
     logger.log(`  Elapsed: ${formatDuration(totalElapsed)}`)
     if (eta) {
       logger.log(`  ETA: ${formatDuration(eta)}`)
@@ -415,6 +417,7 @@ class ProgressTracker {
 
     // Show completed phases.
     if (this.phases.length > 0) {
+      logger.log('')
       logger.log(colors.gray('  Completed:'))
       this.phases.forEach(p => {
         logger.log(
@@ -491,7 +494,8 @@ class SnapshotManager {
   }
 
   listSnapshots() {
-    logger.log(colors.cyan('\n📸 Available Snapshots:'))
+    logger.log('')
+    logger.log(colors.cyan('📸 Available Snapshots:'))
     this.snapshots.forEach((snap, i) => {
       const age = formatDuration(Date.now() - snap.timestamp)
       logger.log(
@@ -621,7 +625,8 @@ async function celebrateSuccess(costTracker, stats = {}) {
 
   // Show fix details if available.
   if (stats.fixCount > 0) {
-    logger.log(colors.cyan('\n📊 Session Stats:'))
+    logger.log('')
+    logger.log(colors.cyan('📊 Session Stats:'))
     logger.log(`  Fixes applied: ${stats.fixCount}`)
     logger.log(`  Retries: ${stats.retries || 0}`)
   }
@@ -649,7 +654,8 @@ async function celebrateSuccess(costTracker, stats = {}) {
 
     await fs.writeFile(streakPath, JSON.stringify(streak, null, 2))
 
-    logger.log(colors.cyan('\n🔥 Success Streak:'))
+    logger.log('')
+    logger.log(colors.cyan('🔥 Success Streak:'))
     logger.log(`  Current: ${streak.current}`)
     logger.log(`  Best: ${streak.best}`)
   } catch {
@@ -854,7 +860,8 @@ function displayAnalysis(analysis) {
     return
   }
 
-  logger.log(colors.cyan('\n🔍 Root Cause Analysis:'))
+  logger.log('')
+  logger.log(colors.cyan('🔍 Root Cause Analysis:'))
   logger.log(
     `  Cause: ${analysis.rootCause} ${colors.gray(`(${analysis.confidence}% confident)`)}`,
   )
@@ -867,6 +874,7 @@ function displayAnalysis(analysis) {
       ),
     )
     if (analysis.environmentalFactors.length > 0) {
+      logger.log('')
       logger.log(colors.yellow('  Factors to check:'))
       analysis.environmentalFactors.forEach(factor => {
         logger.log(colors.yellow(`    - ${factor}`))
@@ -888,7 +896,9 @@ function displayAnalysis(analysis) {
   }
 
   if (analysis.explanation) {
-    logger.log(colors.cyan('\n📖 Explanation:'))
+    logger.log('')
+    logger.log(colors.cyan('📖 Explanation:'))
+    logger.log('')
     logger.log(colors.gray(`  ${analysis.explanation}`))
   }
 }
@@ -1249,7 +1259,8 @@ async function ensureClaudeAuthenticated(claudeCmd) {
 
     // Not authenticated, provide instructions for manual authentication
     log.warn('Claude Code login required')
-    logger.log(colors.yellow('\nClaude Code needs to be authenticated.'))
+    logger.log('')
+    logger.log(colors.yellow('Claude Code needs to be authenticated.'))
     logger.log('\nTo authenticate:')
     logger.log('  1. Open a new terminal')
     logger.log(`  2. Run: ${colors.green('claude')}`)
@@ -1300,7 +1311,8 @@ async function ensureGitHubAuthenticated() {
 
     // Not authenticated, prompt for login
     log.warn('GitHub authentication required')
-    logger.log(colors.yellow('\nYou need to authenticate with GitHub.'))
+    logger.log('')
+    logger.log(colors.yellow('You need to authenticate with GitHub.'))
     logger.log('Follow the prompts to complete authentication.\n')
 
     // Run gh auth login interactively
@@ -1315,10 +1327,12 @@ async function ensureGitHubAuthenticated() {
       await new Promise(resolve => setTimeout(resolve, 2000))
     } else {
       log.failed('Login process failed')
-      logger.log(colors.red('\nLogin failed. Please try again.'))
+      logger.log('')
+      logger.log(colors.red('Login failed. Please try again.'))
 
       if (attempts < maxAttempts) {
-        logger.log(colors.yellow(`\nAttempt ${attempts + 1} of ${maxAttempts}`))
+        logger.log('')
+        logger.log(colors.yellow(`Attempt ${attempts + 1} of ${maxAttempts}`))
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
     }
@@ -4412,12 +4426,14 @@ Let's work through this together to get CI passing.`
 
       // Provide debugging information
       if (runsResult.stderr) {
-        logger.log(colors.red('\nError details:'))
+        logger.log('')
+        logger.log(colors.red('Error details:'))
         logger.log(runsResult.stderr)
       }
 
       // Common troubleshooting steps
-      logger.log(colors.yellow('\nTroubleshooting:'))
+      logger.log('')
+      logger.log(colors.yellow('Troubleshooting:'))
       logger.log('1. Check GitHub CLI authentication:')
       logger.log(`   ${colors.green('gh auth status')}`)
       logger.log('\n2. If not authenticated, login:')
@@ -4543,13 +4559,15 @@ Let's work through this together to get CI passing.`
         // Show available snapshots for reference.
         const snapshotList = snapshots.listSnapshots()
         if (snapshotList.length > 0) {
-          logger.log(colors.cyan('\n📸 Available Snapshots:'))
+          logger.log('')
+          logger.log(colors.cyan('📸 Available Snapshots:'))
           snapshotList.slice(0, 5).forEach(snap => {
             logger.log(
               `  ${snap.label} ${colors.gray(`(${formatDuration(Date.now() - snap.timestamp)} ago)`)}`,
             )
           })
           if (snapshotList.length > 5) {
+            logger.log('')
             logger.log(colors.gray(`  ... and ${snapshotList.length - 5} more`))
           }
         }
