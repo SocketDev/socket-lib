@@ -13,12 +13,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')
 const require = createRequire(import.meta.url)
 
-// Normalize path for cross-platform (converts backslashes to forward slashes)
-const normalizePath = p => p.split(path.sep).join('/')
-
 // Import CommonJS modules using require
 const { isQuiet } = require('#socketsecurity/lib/argv/flags')
 const { getDefaultLogger } = require('#socketsecurity/lib/logger')
+const { normalizePath } = require('#socketsecurity/lib/path')
 const { pluralize } = require('#socketsecurity/lib/words')
 
 const logger = getDefaultLogger()

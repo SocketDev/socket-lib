@@ -12,7 +12,7 @@
  */
 
 import { createRequire } from 'node:module'
-import { readdirSync, statSync } from 'node:fs'
+import { readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { pathToFileURL } from 'node:url'
@@ -21,12 +21,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')
 const require = createRequire(import.meta.url)
 
-// Normalize path for cross-platform (converts backslashes to forward slashes)
-const normalizePath = p => p.split(path.sep).join('/')
-
 // Import CommonJS modules using require
 const { isQuiet } = require('#socketsecurity/lib/argv/flags')
 const { getDefaultLogger } = require('#socketsecurity/lib/logger')
+const { normalizePath } = require('#socketsecurity/lib/path')
 const { pluralize } = require('#socketsecurity/lib/words')
 
 const logger = getDefaultLogger()
@@ -88,7 +86,8 @@ async function checkModuleExports(filePath) {
 
   // Validate CJS export structure
   const cjsType = typeof cjsModule
-  const cjsKeys = cjsType === 'object' && cjsModule !== null ? Object.keys(cjsModule) : []
+  const cjsKeys =
+    cjsType === 'object' && cjsModule !== null ? Object.keys(cjsModule) : []
 
   // Check for problematic CJS patterns
   if (cjsType === 'object' && cjsModule !== null) {
@@ -101,7 +100,9 @@ async function checkModuleExports(filePath) {
 
     // Empty object is suspicious
     if (cjsKeys.length === 0) {
-      issues.push('CJS: Module exports empty object - may indicate bundling issue')
+      issues.push(
+        'CJS: Module exports empty object - may indicate bundling issue',
+      )
     }
 
     // Check if .default shadows the main export
@@ -112,7 +113,9 @@ async function checkModuleExports(filePath) {
         // If there are other exports, this might be intentional (like @inquirer modules)
         // We'll check ESM compatibility below
         if (nonDefaultKeys.length === 0) {
-          issues.push('CJS: Module has .default but no other exports - may be wrapped')
+          issues.push(
+            'CJS: Module has .default but no other exports - may be wrapped',
+          )
         }
       }
     }
@@ -150,7 +153,9 @@ async function checkModuleExports(filePath) {
     if ('default' in cjsModule && cjsModule.default !== cjsModule) {
       // ESM should have the default export
       if (esmDefault === undefined) {
-        issues.push('ESM: Missing default export, but CJS has .default property')
+        issues.push(
+          'ESM: Missing default export, but CJS has .default property',
+        )
       }
 
       // Named exports should be accessible in ESM's default import
@@ -170,7 +175,9 @@ async function checkModuleExports(filePath) {
         const esmDefaultKeys = Object.keys(esmDefault)
         for (const key of cjsKeys) {
           if (!esmDefaultKeys.includes(key)) {
-            issues.push(`ESM: Named export '${key}' missing from default object`)
+            issues.push(
+              `ESM: Named export '${key}' missing from default object`,
+            )
           }
         }
       }
@@ -278,7 +285,9 @@ async function main() {
       // Summary statistics
       const totalCjsKeys = successes.reduce((sum, r) => sum + r.cjsKeys, 0)
       const modulesWithDefault = successes.filter(r => r.hasEsmDefault).length
-      const functionExports = successes.filter(r => r.cjsType === 'function').length
+      const functionExports = successes.filter(
+        r => r.cjsType === 'function',
+      ).length
       const objectExports = successes.filter(r => r.cjsType === 'object').length
 
       logger.success(
