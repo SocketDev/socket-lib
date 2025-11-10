@@ -18,7 +18,8 @@ export const SOCKET_API_TOKENS_URL =
 export const SOCKET_PRICING_URL = 'https://socket.dev/pricing'
 export const SOCKET_STATUS_URL = 'https://status.socket.dev'
 export const SOCKET_DOCS_URL = 'https://docs.socket.dev'
-export const SOCKET_DOCS_CONTACT_URL = 'https://docs.socket.dev/docs/contact-support'
+export const SOCKET_DOCS_CONTACT_URL =
+  'https://docs.socket.dev/docs/contact-support'
 
 // Socket.dev scopes.
 export const SOCKET_REGISTRY_SCOPE = '@socketregistry'

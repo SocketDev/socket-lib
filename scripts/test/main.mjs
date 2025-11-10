@@ -416,9 +416,7 @@ async function main() {
         '  pnpm test                  # Run checks, build, and tests for changed files',
       )
       logger.log('  pnpm test --all            # Run all tests')
-      logger.log(
-        '  pnpm test --fast           # Skip checks for quick testing',
-      )
+      logger.log('  pnpm test --fast           # Skip checks for quick testing')
       logger.log('  pnpm test --cover          # Run with coverage report')
       logger.log('  pnpm test --fast --cover   # Quick test with coverage')
       logger.log('  pnpm test --update         # Update test snapshots')

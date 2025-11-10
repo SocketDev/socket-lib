@@ -65,7 +65,7 @@ function getExternalModules(dir) {
         }
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // External directory might not exist in some build states
     return []
   }
