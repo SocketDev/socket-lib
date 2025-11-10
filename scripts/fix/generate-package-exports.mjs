@@ -9,8 +9,11 @@ import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.j
 }
 import fastGlob from 'fast-glob'
 
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { toSortedObject } from '#socketsecurity/lib/objects'
 import { readPackageJson } from '#socketsecurity/lib/packages'
+
+const logger = getDefaultLogger()
 
 // Helper to write package.json with proper formatting
 async function writePackageJson(filePath, data) {
@@ -86,8 +89,8 @@ async function main() {
 
   const isDebug = !!process.env.DEBUG
   if (isDebug) {
-    console.log('Found', registryPkgFiles.length, 'files')
-    console.log('First 10:', registryPkgFiles.slice(0, 10))
+    logger.log('Found', registryPkgFiles.length, 'files')
+    logger.log('First 10:', registryPkgFiles.slice(0, 10))
   }
 
   const jsonExports = {}
@@ -237,4 +240,7 @@ async function main() {
   await registryEditablePkgJson.save()
 }
 
-main().catch(console.error)
+main().catch(error => {
+  logger.error(error.message || error)
+  process.exitCode = 1
+})

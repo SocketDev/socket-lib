@@ -9,13 +9,11 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import MagicString from 'magic-string'
-import colors from 'yoctocolors-cjs'
 
 import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
-const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
@@ -205,7 +203,7 @@ async function processDirectory(dir, verbose = false) {
           await fs.writeFile(fullPath, s.toString())
           if (verbose) {
             const relativePath = path.relative(distDir, fullPath)
-            console.log(`    Fixed ${relativePath}`)
+            logger.log(`    Fixed ${relativePath}`)
           }
           fixedCount += 1
         }
@@ -233,7 +231,7 @@ async function fixConstantExports() {
         fixedCount > 0
           ? `CommonJS Exports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
           : 'CommonJS Exports (no changes)'
-      printCompletedHeader(title)
+      logger.success(title)
     }
   } catch (error) {
     logger.error(`Failed to fix CommonJS exports: ${error.message}`)

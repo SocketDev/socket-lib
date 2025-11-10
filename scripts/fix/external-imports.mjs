@@ -7,15 +7,12 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 
 import { externalPackages, scopedPackages } from '../build-externals/config.mjs'
 
 const logger = getDefaultLogger()
-const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', 'dist')
@@ -85,7 +82,7 @@ async function fixFileImports(filePath, verbose = false) {
     await fs.writeFile(filePath, content)
     if (verbose) {
       const relativePath = path.relative(distDir, filePath)
-      console.log(`    Fixed ${relativePath}`)
+      logger.log(`    Fixed ${relativePath}`)
     }
   }
 
@@ -144,7 +141,7 @@ async function fixExternalImports() {
         fixedCount > 0
           ? `External Imports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
           : 'External Imports (no changes)'
-      printCompletedHeader(title)
+      logger.success(title)
     }
   } catch (error) {
     logger.error(`Failed to fix external imports: ${error.message}`)

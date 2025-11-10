@@ -60,7 +60,7 @@ async function cleanDirectories(tasks, options = {}) {
     } catch (error) {
       if (!quiet) {
         logger.error(`Failed to clean ${name}`)
-        console.error(error.message)
+        logger.error(error.message)
       }
       return 1
     }
@@ -211,4 +211,7 @@ async function main() {
   }
 }
 
-main().catch(console.error)
+main().catch(error => {
+  logger.error(error.message || error)
+  process.exitCode = 1
+})

@@ -29,7 +29,7 @@ const { values } = parseArgs({
 })
 
 printHeader('Test Coverage')
-console.log('')
+logger.log('')
 
 // Rebuild with source maps enabled for coverage
 logger.info('Building with source maps for coverage...')
@@ -81,11 +81,11 @@ try {
 
     if (typeCoverageMatch) {
       const typeCoveragePercent = Number.parseFloat(typeCoverageMatch[1])
-      console.log()
-      console.log(' Coverage Summary')
-      console.log(' ───────────────────────────────')
-      console.log(` Type Coverage: ${typeCoveragePercent.toFixed(2)}%`)
-      console.log()
+      logger.log()
+      logger.log(' Coverage Summary')
+      logger.log(' ───────────────────────────────')
+      logger.log(` Type Coverage: ${typeCoveragePercent.toFixed(2)}%`)
+      logger.log()
     }
   }
   // Handle --code-only flag
@@ -107,9 +107,9 @@ try {
       /Test Files\s+\d+[^\n]*\n[\s\S]*?Duration\s+[\d.]+m?s[^\n]*/,
     )
     if (!values.summary && testSummaryMatch) {
-      console.log()
-      console.log(testSummaryMatch[0])
-      console.log()
+      logger.log()
+      logger.log(testSummaryMatch[0])
+      logger.log()
     }
 
     // Extract and display coverage summary
@@ -122,23 +122,23 @@ try {
 
     if (coverageHeaderMatch && srcCoverageMatch) {
       if (!values.summary) {
-        console.log(' % Coverage report from v8')
-        console.log(coverageHeaderMatch[1])
-        console.log(coverageHeaderMatch[2])
-        console.log(coverageHeaderMatch[1])
-        console.log(srcCoverageMatch[0])
-        console.log(coverageHeaderMatch[1])
-        console.log()
+        logger.log(' % Coverage report from v8')
+        logger.log(coverageHeaderMatch[1])
+        logger.log(coverageHeaderMatch[2])
+        logger.log(coverageHeaderMatch[1])
+        logger.log(srcCoverageMatch[0])
+        logger.log(coverageHeaderMatch[1])
+        logger.log()
       }
 
       const codeCoveragePercent = Number.parseFloat(srcCoverageMatch[1])
-      console.log(' Coverage Summary')
-      console.log(' ───────────────────────────────')
-      console.log(` Code Coverage: ${codeCoveragePercent.toFixed(2)}%`)
-      console.log()
+      logger.log(' Coverage Summary')
+      logger.log(' ───────────────────────────────')
+      logger.log(` Code Coverage: ${codeCoveragePercent.toFixed(2)}%`)
+      logger.log()
     } else if (exitCode !== 0) {
-      console.log('\n--- Output ---')
-      console.log(output)
+      logger.log('\n--- Output ---')
+      logger.log(output)
     }
   }
   // Default: run both code and type coverage
@@ -182,20 +182,20 @@ try {
 
     // Display output
     if (!values.summary && testSummaryMatch) {
-      console.log()
-      console.log(testSummaryMatch[0])
-      console.log()
+      logger.log()
+      logger.log(testSummaryMatch[0])
+      logger.log()
     }
 
     if (coverageHeaderMatch && srcCoverageMatch) {
       if (!values.summary) {
-        console.log(' % Coverage report from v8')
-        console.log(coverageHeaderMatch[1])
-        console.log(coverageHeaderMatch[2])
-        console.log(coverageHeaderMatch[1])
-        console.log(srcCoverageMatch[0])
-        console.log(coverageHeaderMatch[1])
-        console.log()
+        logger.log(' % Coverage report from v8')
+        logger.log(coverageHeaderMatch[1])
+        logger.log(coverageHeaderMatch[2])
+        logger.log(coverageHeaderMatch[1])
+        logger.log(srcCoverageMatch[0])
+        logger.log(coverageHeaderMatch[1])
+        logger.log()
       }
 
       // Display cumulative summary
@@ -207,17 +207,17 @@ try {
           2
         ).toFixed(2)
 
-        console.log(' Coverage Summary')
-        console.log(' ───────────────────────────────')
-        console.log(` Type Coverage: ${typeCoveragePercent.toFixed(2)}%`)
-        console.log(` Code Coverage: ${codeCoveragePercent.toFixed(2)}%`)
-        console.log(' ───────────────────────────────')
-        console.log(` Cumulative:    ${cumulativePercent}%`)
-        console.log()
+        logger.log(' Coverage Summary')
+        logger.log(' ───────────────────────────────')
+        logger.log(` Type Coverage: ${typeCoveragePercent.toFixed(2)}%`)
+        logger.log(` Code Coverage: ${codeCoveragePercent.toFixed(2)}%`)
+        logger.log(' ───────────────────────────────')
+        logger.log(` Cumulative:    ${cumulativePercent}%`)
+        logger.log()
       }
     } else if (exitCode !== 0) {
-      console.log('\n--- Output ---')
-      console.log(output)
+      logger.log('\n--- Output ---')
+      logger.log(output)
     }
   }
 

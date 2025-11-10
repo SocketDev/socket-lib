@@ -7,7 +7,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
-import colors from 'yoctocolors-cjs'
 
 import {
   analyzeMetafile,
@@ -22,9 +21,6 @@ import { parseArgs } from '../utils/parse-args.mjs'
 import { runSequence } from '../utils/run-command.mjs'
 
 const logger = getDefaultLogger()
-
-// Helper for completed headers (simple wrapper)
-const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -69,7 +65,7 @@ async function buildSource(options = {}) {
   } catch (error) {
     if (!quiet) {
       logger.error('Source build failed')
-      console.error(error)
+      logger.error(error)
     }
     return { exitCode: 1, buildTime: 0, result: null }
   }
@@ -300,28 +296,28 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      console.log('Build Runner')
-      console.log('\nUsage: pnpm build [options]')
-      console.log('\nOptions:')
-      console.log('  --help       Show this help message')
-      console.log('  --src        Build source code only')
-      console.log('  --types      Build TypeScript declarations only')
-      console.log(
+      logger.log('Build Runner')
+      logger.log('\nUsage: pnpm build [options]')
+      logger.log('\nOptions:')
+      logger.log('  --help       Show this help message')
+      logger.log('  --src        Build source code only')
+      logger.log('  --types      Build TypeScript declarations only')
+      logger.log(
         '  --watch      Watch mode with incremental builds (68% faster rebuilds)',
       )
-      console.log('  --needed     Only build if dist files are missing')
-      console.log('  --analyze    Show bundle size analysis')
-      console.log('  --quiet, --silent  Suppress progress messages')
-      console.log('  --verbose    Show detailed build output')
-      console.log('\nExamples:')
-      console.log('  pnpm build              # Full build (source + types)')
-      console.log('  pnpm build --src        # Build source only')
-      console.log('  pnpm build --types      # Build types only')
-      console.log(
+      logger.log('  --needed     Only build if dist files are missing')
+      logger.log('  --analyze    Show bundle size analysis')
+      logger.log('  --quiet, --silent  Suppress progress messages')
+      logger.log('  --verbose    Show detailed build output')
+      logger.log('\nExamples:')
+      logger.log('  pnpm build              # Full build (source + types)')
+      logger.log('  pnpm build --src        # Build source only')
+      logger.log('  pnpm build --types      # Build types only')
+      logger.log(
         '  pnpm build --watch      # Watch mode with incremental builds',
       )
-      console.log('  pnpm build --analyze    # Build with size analysis')
-      console.log(
+      logger.log('  pnpm build --analyze    # Build with size analysis')
+      logger.log(
         '\nNote: Watch mode uses esbuild context API for 68% faster rebuilds',
       )
       process.exitCode = 0
@@ -404,7 +400,7 @@ async function main() {
       }
 
       if (!quiet) {
-        printCompletedHeader('Build Cleaned')
+        logger.success('Build Cleaned')
       }
 
       // Run source, externals, and types builds in parallel
@@ -447,9 +443,9 @@ async function main() {
     // Print final status and footer
     if (!quiet) {
       if (exitCode === 0) {
-        console.log(colors.green('✓ Build completed successfully!'))
+        logger.success('Build completed successfully!')
       } else {
-        console.error(colors.red('✗ Build failed'))
+        logger.error('Build failed')
       }
       printFooter()
     }
@@ -463,4 +459,7 @@ async function main() {
   }
 }
 
-main().catch(console.error)
+main().catch(error => {
+  logger.error(error.message || error)
+  process.exitCode = 1
+})

@@ -5,8 +5,6 @@
  * Entry point that wraps the modular build-externals system.
  */
 
-import colors from 'yoctocolors-cjs'
-
 import { isQuiet } from '#socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 import { pluralize } from '#socketsecurity/lib/words'
@@ -14,7 +12,6 @@ import { pluralize } from '#socketsecurity/lib/words'
 import { buildExternals } from '../build-externals/orchestrator.mjs'
 
 const logger = getDefaultLogger()
-const printCompletedHeader = title => console.log(colors.green(`✓ ${title}`))
 
 async function main() {
   // Check for verbose mode via isVerbose or manual check
@@ -29,7 +26,7 @@ async function main() {
         bundledCount > 0
           ? `External Bundles (${bundledCount} ${pluralize('package', { count: bundledCount })})`
           : 'External Bundles (no packages)'
-      printCompletedHeader(title)
+      logger.success(title)
     }
   } catch (error) {
     logger.error(`Build failed: ${error.message || error}`)

@@ -23,6 +23,9 @@ import { parse } from '@babel/parser'
 import traverseModule from '@babel/traverse'
 import * as t from '@babel/types'
 
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
 const traverse = traverseModule.default
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -193,7 +196,7 @@ async function validateNoExtraneousDependencies() {
   const allFiles = await findDistFiles(distPath)
 
   if (allFiles.length === 0) {
-    console.log('ℹ No dist files found - run build first')
+    logger.info('No dist files found - run build first')
     return { errors: [] }
   }
 
@@ -280,44 +283,44 @@ async function main() {
     const { errors } = await validateNoExtraneousDependencies()
 
     if (errors.length === 0) {
-      console.log('✓ No extraneous dependencies found')
+      logger.success('No extraneous dependencies found')
       process.exitCode = 0
       return
     }
 
-    console.error('✗ Found extraneous or missing dependencies:\n')
+    logger.error('Found extraneous or missing dependencies:\n')
 
     for (const error of errors) {
       if (error.type === 'missing-dependency') {
-        console.error(
+        logger.error(
           `  ${error.file}:${error.line}:${error.column} - ${error.message}`,
         )
-        console.error(`    require('${error.specifier}')`)
+        logger.error(`    require('${error.specifier}')`)
         if (
           error.message.includes('is in devDependencies but required in dist/')
         ) {
-          console.error(
+          logger.error(
             `    Fix: Move "${error.packageName}" to dependencies OR bundle it (add to esbuild external exclusion)\n`,
           )
         } else {
-          console.error(
+          logger.error(
             `    Fix: Add "${error.packageName}" to dependencies or peerDependencies\n`,
           )
         }
       } else if (error.type === 'missing-file') {
-        console.error(
+        logger.error(
           `  ${error.file}:${error.line}:${error.column} - ${error.message}`,
         )
-        console.error(`    require('${error.specifier}')`)
-        console.error('    Fix: Create the missing file or fix the path\n')
+        logger.error(`    require('${error.specifier}')`)
+        logger.error('    Fix: Create the missing file or fix the path\n')
       } else if (error.type === 'parse-error') {
-        console.error(`  ${error.file} - ${error.message}\n`)
+        logger.error(`  ${error.file} - ${error.message}\n`)
       }
     }
 
     process.exitCode = 1
   } catch (error) {
-    console.error('Validation failed:', error.message)
+    logger.error('Validation failed:', error.message)
     process.exitCode = 1
   }
 }

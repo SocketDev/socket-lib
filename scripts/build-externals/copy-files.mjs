@@ -5,6 +5,10 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
+
 /**
  * Ensure directory exists.
  *
@@ -37,7 +41,7 @@ export async function copyLocalFiles(srcDir, destDir, quiet = false) {
 
       await fs.copyFile(srcPath, destPath)
       if (!quiet) {
-        console.log(`  Copied ${file}`)
+        logger.log(`  Copied ${file}`)
       }
       count++
     }
@@ -82,7 +86,7 @@ export async function copyRecursive(
         // File doesn't exist, copy it.
         await fs.copyFile(srcEntry, destEntry)
         if (!quiet) {
-          console.log(`  Copied ${relPath}`)
+          logger.log(`  Copied ${relPath}`)
         }
         count++
       }

@@ -7,6 +7,8 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import esbuild from 'esbuild'
+import { getDefaultLogger } from '#socketsecurity/lib/logger'
+
 import {
   getEsbuildConfig,
   getPackageSpecificOptions,
@@ -17,6 +19,7 @@ import {
 } from './local-packages.mjs'
 
 const require = createRequire(import.meta.url)
+const logger = getDefaultLogger()
 
 /**
  * Bundle a single package with esbuild.
@@ -32,7 +35,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
   const { quiet = false, rootDir } = options
 
   if (!quiet) {
-    console.log(`  Bundling ${packageName}...`)
+    logger.log(`  Bundling ${packageName}...`)
   }
 
   try {
@@ -51,7 +54,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
       await fs.access(srcExternalPath)
       packagePath = srcExternalPath
       if (!quiet) {
-        console.log(
+        logger.log(
           `  Using entry point ${path.relative(rootDir, srcExternalPath)}`,
         )
       }
@@ -60,7 +63,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
       const localPath = await getLocalPackagePath(packageName, rootDir)
       if (localPath) {
         if (!quiet) {
-          console.log(
+          logger.log(
             `  Using local version from ${path.relative(rootDir, localPath)}`,
           )
         }
@@ -103,12 +106,12 @@ ${contentWithoutStrict}`
     const stats = await fs.stat(outputPath)
     const sizeKB = Math.round(stats.size / 1024)
     if (!quiet) {
-      console.log(`    ✓ Bundled ${packageName} (${sizeKB}KB)`)
+      logger.log(`    ✓ Bundled ${packageName} (${sizeKB}KB)`)
     }
     return sizeKB
   } catch (error) {
     if (!quiet) {
-      console.error(`    ✗ Failed to bundle ${packageName}:`, error.message)
+      logger.log(`    ✗ Failed to bundle ${packageName}: ${error.message}`)
     }
     // Create error stub.
     const stubContent = `'use strict'
