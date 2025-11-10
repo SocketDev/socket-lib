@@ -56,6 +56,10 @@ async function main() {
       args: ['scripts/validate/external-exports.mjs', ...fixArgs],
       command: 'node',
     },
+    {
+      args: ['scripts/validate/external-esm-cjs.mjs', ...fixArgs],
+      command: 'node',
+    },
   ])
 
   if (!quiet) {
