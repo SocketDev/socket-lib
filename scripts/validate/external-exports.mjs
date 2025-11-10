@@ -23,16 +23,6 @@ const { pluralize } = require('#socketsecurity/lib/words')
 
 const logger = getDefaultLogger()
 
-// Modules that only export { default } but are correctly handled in code
-// via .default accessor (e.g., confirmExport.default ?? confirmExport)
-const KNOWN_DEFAULT_ONLY_MODULES = new Set([
-  '@inquirer/confirm.js',
-  '@inquirer/input.js',
-  '@inquirer/password.js',
-  '@inquirer/search.js',
-  '@inquirer/select.js',
-])
-
 /**
  * Get all .js files and directories in the external directory.
  */
@@ -90,16 +80,6 @@ function checkExternalExport(filePath) {
 
       // If only key is 'default', it's wrapped incorrectly
       if (keys.length === 1 && keys[0] === 'default') {
-        // Check if this is a known module that's correctly handled in code
-        if (KNOWN_DEFAULT_ONLY_MODULES.has(normalizedPath)) {
-          return {
-            path: normalizedPath,
-            ok: true,
-            keys: 'default-only (handled)',
-            note: 'Uses .default accessor in code',
-          }
-        }
-
         return {
           path: normalizedPath,
           ok: false,

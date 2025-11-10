@@ -171,6 +171,10 @@ export function getPackageSpecificOptions(packageName) {
   } else if (packageName.startsWith('@inquirer/')) {
     // Inquirer packages have heavy dependencies we might not need.
     opts.external = [...(opts.external || []), 'rxjs/operators']
+    // Inquirer packages export default only - unwrap for CJS compatibility
+    opts.footer = {
+      js: 'if (module.exports && module.exports.default && Object.keys(module.exports).length === 1) { module.exports = module.exports.default; }',
+    }
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.
@@ -270,6 +274,9 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
     // Banner for generated code
     banner: {
       js: '"use strict";',
+      ...packageOpts.banner,
     },
+    // Footer for generated code (if needed)
+    ...(packageOpts.footer && { footer: packageOpts.footer }),
   }
 }
