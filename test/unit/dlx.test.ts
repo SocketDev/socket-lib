@@ -205,7 +205,12 @@ describe.sequential('dlx', () => {
 
   describe('isInSocketDlx', () => {
     it('should return true for paths within DLX directory', () => {
-      const dlxPath = path.join(getSocketDlxDir(), 'some-package', 'bin', 'binary')
+      const dlxPath = path.join(
+        getSocketDlxDir(),
+        'some-package',
+        'bin',
+        'binary',
+      )
       expect(isInSocketDlx(dlxPath)).toBe(true)
     })
 
@@ -360,7 +365,6 @@ describe.sequential('dlx', () => {
 
     it('should not throw when DLX directory does not exist', async () => {
       // Ensure directory doesn't exist
-      const dlxDir = getSocketDlxDir()
       if (fs.existsSync(getSocketDlxDir())) {
         fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
@@ -387,7 +391,6 @@ describe.sequential('dlx', () => {
 
     it('sync version should not throw when DLX directory does not exist', () => {
       // Ensure directory doesn't exist
-      const dlxDir = getSocketDlxDir()
       if (fs.existsSync(getSocketDlxDir())) {
         fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
