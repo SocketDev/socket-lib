@@ -44,6 +44,7 @@ export const scopedPackages = [
     scope: '@inquirer',
     packages: [
       // Only bundle packages that are in devDependencies
+      'checkbox',
       'confirm',
       'input',
       'password',
