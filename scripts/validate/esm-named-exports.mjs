@@ -155,12 +155,12 @@ async function main() {
 
   if (failures.length > 0) {
     if (!quiet) {
-      logger.error(
+      logger.fail(
         `Found ${failures.length} ${pluralize('file', { count: failures.length })} without ESM-compatible named exports:`,
       )
       for (const failure of failures) {
         const relativePath = path.relative(distDir, failure.path)
-        logger.error(`  ${relativePath}`)
+        logger.log(`  ${relativePath}`)
         logger.substep(failure.reason)
       }
       logger.warn(
@@ -178,6 +178,6 @@ async function main() {
 }
 
 main().catch(error => {
-  logger.error(`Validation failed: ${error.message}`)
+  logger.fail(`Validation failed: ${error.message}`)
   process.exitCode = 1
 })

@@ -76,7 +76,7 @@ async function main() {
       return
     }
 
-    logger.error('Too many files staged for commit')
+    logger.fail('Too many files staged for commit')
     logger.log('')
     logger.log(`Staged files: ${violation.count}`)
     logger.log(`Maximum allowed: ${violation.limit}`)
@@ -102,12 +102,12 @@ async function main() {
 
     process.exitCode = 1
   } catch (error) {
-    logger.error(`Validation failed: ${error.message}`)
+    logger.fail(`Validation failed: ${error.message}`)
     process.exitCode = 1
   }
 }
 
 main().catch(error => {
-  logger.error(`Validation failed: ${error}`)
+  logger.fail(`Validation failed: ${error}`)
   process.exitCode = 1
 })

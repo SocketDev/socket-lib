@@ -117,7 +117,7 @@ async function main() {
       return
     }
 
-    logger.error('File size violations found')
+    logger.fail('File size violations found')
     logger.log('')
     logger.log(`Maximum allowed file size: ${formatBytes(MAX_FILE_SIZE)}`)
     logger.log('')
@@ -140,12 +140,12 @@ async function main() {
 
     process.exitCode = 1
   } catch (error) {
-    logger.error(`Validation failed: ${error.message}`)
+    logger.fail(`Validation failed: ${error.message}`)
     process.exitCode = 1
   }
 }
 
 main().catch(error => {
-  logger.error(`Validation failed: ${error}`)
+  logger.fail(`Validation failed: ${error}`)
   process.exitCode = 1
 })

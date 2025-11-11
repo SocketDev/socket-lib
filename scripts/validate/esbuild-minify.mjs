@@ -50,7 +50,7 @@ async function validateEsbuildMinify() {
 
     return violations
   } catch (error) {
-    logger.error(`Failed to load esbuild config: ${error.message}`)
+    logger.fail(`Failed to load esbuild config: ${error.message}`)
     process.exitCode = 1
     return []
   }
@@ -65,25 +65,23 @@ async function main() {
     return
   }
 
-  logger.error('esbuild minify validation failed\n')
+  logger.fail('esbuild minify validation failed\n')
 
   for (const violation of violations) {
-    logger.error(`  ${violation.message}`)
-    logger.error(`  Found: minify: ${violation.value}`)
-    logger.error('  Expected: minify: false')
-    logger.error(`  Location: ${violation.location}`)
-    logger.error('')
+    logger.log(`  ${violation.message}`)
+    logger.log(`  Found: minify: ${violation.value}`)
+    logger.log('  Expected: minify: false')
+    logger.log(`  Location: ${violation.location}`)
+    logger.log('')
   }
 
-  logger.error(
-    'Minification breaks ESM/CJS interop and makes debugging harder.',
-  )
-  logger.error('')
+  logger.log('Minification breaks ESM/CJS interop and makes debugging harder.')
+  logger.log('')
 
   process.exitCode = 1
 }
 
 main().catch(error => {
-  logger.error('Validation failed:', error)
+  logger.fail('Validation failed:', error)
   process.exitCode = 1
 })

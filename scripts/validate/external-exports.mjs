@@ -159,11 +159,11 @@ async function main() {
 
   if (failures.length > 0) {
     if (!quiet) {
-      logger.error(
+      logger.fail(
         `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with export issues:`,
       )
       for (const failure of failures) {
-        logger.error(`  ${failure.path}`)
+        logger.log(`  ${failure.path}`)
         logger.substep(failure.reason)
       }
     }
@@ -182,6 +182,6 @@ async function main() {
 }
 
 main().catch(error => {
-  logger.error(`Validation failed: ${error.message}`)
+  logger.fail(`Validation failed: ${error.message}`)
   process.exitCode = 1
 })

@@ -288,39 +288,39 @@ async function main() {
       return
     }
 
-    logger.error('Found extraneous or missing dependencies:\n')
+    logger.fail('Found extraneous or missing dependencies:\n')
 
     for (const error of errors) {
       if (error.type === 'missing-dependency') {
-        logger.error(
+        logger.log(
           `  ${error.file}:${error.line}:${error.column} - ${error.message}`,
         )
-        logger.error(`    require('${error.specifier}')`)
+        logger.log(`    require('${error.specifier}')`)
         if (
           error.message.includes('is in devDependencies but required in dist/')
         ) {
-          logger.error(
+          logger.log(
             `    Fix: Move "${error.packageName}" to dependencies OR bundle it (add to esbuild external exclusion)\n`,
           )
         } else {
-          logger.error(
+          logger.log(
             `    Fix: Add "${error.packageName}" to dependencies or peerDependencies\n`,
           )
         }
       } else if (error.type === 'missing-file') {
-        logger.error(
+        logger.log(
           `  ${error.file}:${error.line}:${error.column} - ${error.message}`,
         )
-        logger.error(`    require('${error.specifier}')`)
-        logger.error('    Fix: Create the missing file or fix the path\n')
+        logger.log(`    require('${error.specifier}')`)
+        logger.log('    Fix: Create the missing file or fix the path\n')
       } else if (error.type === 'parse-error') {
-        logger.error(`  ${error.file} - ${error.message}\n`)
+        logger.log(`  ${error.file} - ${error.message}\n`)
       }
     }
 
     process.exitCode = 1
   } catch (error) {
-    logger.error('Validation failed:', error.message)
+    logger.fail('Validation failed:', error.message)
     process.exitCode = 1
   }
 }

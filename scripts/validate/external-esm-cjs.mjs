@@ -256,11 +256,11 @@ async function main() {
 
   if (failures.length > 0) {
     if (!quiet) {
-      logger.error(
+      logger.fail(
         `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with ESM/CJS export issues:`,
       )
       for (const failure of failures) {
-        logger.error(`  ${failure.path}`)
+        logger.log(`  ${failure.path}`)
         for (const issue of failure.issues) {
           logger.substep(issue)
         }
@@ -322,7 +322,7 @@ async function main() {
 }
 
 main().catch(error => {
-  logger.error(`Validation failed: ${error.message}`)
+  logger.fail(`Validation failed: ${error.message}`)
   if (!isQuiet() && error.stack) {
     logger.log(error.stack)
   }

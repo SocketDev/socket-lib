@@ -121,26 +121,26 @@ async function main() {
   }
 
   if (allViolations.length > 0) {
-    logger.error('Found link: dependencies (prohibited)')
-    logger.error('')
-    logger.error(
+    logger.fail('Found link: dependencies (prohibited)')
+    logger.log('')
+    logger.log(
       'Use workspace: protocol for monorepo packages or catalog: for centralized versions.',
     )
-    logger.error('')
+    logger.log('')
 
     for (const violation of allViolations) {
       const relativePath = path.relative(rootPath, violation.file)
-      logger.error(`  ${relativePath}`)
-      logger.error(
+      logger.log(`  ${relativePath}`)
+      logger.log(
         `    ${violation.field}.${violation.package}: "${violation.value}"`,
       )
     }
 
-    logger.error('')
-    logger.error('Replace link: with:')
-    logger.error('  - workspace: for monorepo packages')
-    logger.error('  - catalog: for centralized version management')
-    logger.error('')
+    logger.log('')
+    logger.log('Replace link: with:')
+    logger.log('  - workspace: for monorepo packages')
+    logger.log('  - catalog: for centralized version management')
+    logger.log('')
 
     process.exitCode = 1
   } else {
@@ -149,6 +149,6 @@ async function main() {
 }
 
 main().catch(error => {
-  logger.error('Validation failed:', error)
+  logger.fail('Validation failed:', error)
   process.exitCode = 1
 })
