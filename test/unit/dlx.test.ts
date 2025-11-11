@@ -11,6 +11,7 @@
  */
 
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -38,9 +39,15 @@ import { getSocketDlxDir } from '@socketsecurity/lib/paths'
 
 describe.sequential('dlx', () => {
   const testPackageName = 'test-package'
-  const dlxDir = getSocketDlxDir()
+  let originalEnv: string | undefined
+  let testDlxDir: string
 
   beforeEach(async () => {
+    // Save original env and create isolated test directory
+    originalEnv = process.env.SOCKET_DLX_DIR
+    testDlxDir = path.join(os.tmpdir(), `socket-dlx-test-${Date.now()}`)
+    process.env.SOCKET_DLX_DIR = testDlxDir
+
     // Clean up any existing test artifacts
     await clearDlx().catch(() => {})
   })
@@ -48,6 +55,18 @@ describe.sequential('dlx', () => {
   afterEach(async () => {
     // Clean up after tests
     await clearDlx().catch(() => {})
+
+    // Remove test directory
+    try {
+      await fs.promises.rm(testDlxDir, { recursive: true, force: true })
+    } catch {}
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.SOCKET_DLX_DIR
+    } else {
+      process.env.SOCKET_DLX_DIR = originalEnv
+    }
   })
 
   describe('generateCacheKey', () => {
@@ -79,8 +98,8 @@ describe.sequential('dlx', () => {
   describe('dlxDirExists / dlxDirExistsAsync', () => {
     it('should return false when DLX directory does not exist', () => {
       // Ensure it doesn't exist
-      if (fs.existsSync(dlxDir)) {
-        fs.rmSync(dlxDir, { recursive: true, force: true })
+      if (fs.existsSync(getSocketDlxDir())) {
+        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
       expect(dlxDirExists()).toBe(false)
     })
@@ -109,11 +128,11 @@ describe.sequential('dlx', () => {
   describe('ensureDlxDir / ensureDlxDirSync', () => {
     it('should create DLX directory if it does not exist', async () => {
       // Ensure it doesn't exist
-      if (fs.existsSync(dlxDir)) {
-        fs.rmSync(dlxDir, { recursive: true, force: true })
+      if (fs.existsSync(getSocketDlxDir())) {
+        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
       await ensureDlxDir()
-      expect(fs.existsSync(dlxDir)).toBe(true)
+      expect(fs.existsSync(getSocketDlxDir())).toBe(true)
     })
 
     it('should not throw if DLX directory already exists', async () => {
@@ -123,11 +142,11 @@ describe.sequential('dlx', () => {
 
     it('sync version should create DLX directory if it does not exist', () => {
       // Ensure it doesn't exist
-      if (fs.existsSync(dlxDir)) {
-        fs.rmSync(dlxDir, { recursive: true, force: true })
+      if (fs.existsSync(getSocketDlxDir())) {
+        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
       ensureDlxDirSync()
-      expect(fs.existsSync(dlxDir)).toBe(true)
+      expect(fs.existsSync(getSocketDlxDir())).toBe(true)
     })
 
     it('sync version should not throw if DLX directory already exists', () => {
@@ -139,7 +158,7 @@ describe.sequential('dlx', () => {
   describe('getDlxPackageDir', () => {
     it('should return path to package directory', () => {
       const packageDir = getDlxPackageDir(testPackageName)
-      expect(packageDir).toContain(dlxDir)
+      expect(packageDir).toContain(getSocketDlxDir())
       expect(packageDir).toContain(testPackageName)
     })
 
@@ -153,7 +172,7 @@ describe.sequential('dlx', () => {
   describe('getDlxPackageNodeModulesDir', () => {
     it('should return path to node_modules directory', () => {
       const nodeModulesDir = getDlxPackageNodeModulesDir(testPackageName)
-      expect(nodeModulesDir).toContain(dlxDir)
+      expect(nodeModulesDir).toContain(getSocketDlxDir())
       expect(nodeModulesDir).toContain(testPackageName)
       expect(nodeModulesDir).toContain('node_modules')
     })
@@ -162,7 +181,7 @@ describe.sequential('dlx', () => {
   describe('getDlxInstalledPackageDir', () => {
     it('should return path to installed package directory', () => {
       const installedDir = getDlxInstalledPackageDir(testPackageName)
-      expect(installedDir).toContain(dlxDir)
+      expect(installedDir).toContain(getSocketDlxDir())
       expect(installedDir).toContain(testPackageName)
       expect(installedDir).toContain('node_modules')
     })
@@ -170,7 +189,7 @@ describe.sequential('dlx', () => {
     it('should handle scoped packages', () => {
       const scopedPackage = '@socket/test'
       const installedDir = getDlxInstalledPackageDir(scopedPackage)
-      expect(installedDir).toContain(dlxDir)
+      expect(installedDir).toContain(getSocketDlxDir())
       expect(installedDir).toContain('@socket/test')
     })
   })
@@ -178,7 +197,7 @@ describe.sequential('dlx', () => {
   describe('getDlxPackageJsonPath', () => {
     it('should return path to package.json', () => {
       const packageJsonPath = getDlxPackageJsonPath(testPackageName)
-      expect(packageJsonPath).toContain(dlxDir)
+      expect(packageJsonPath).toContain(getSocketDlxDir())
       expect(packageJsonPath).toContain(testPackageName)
       expect(packageJsonPath).toContain('package.json')
     })
@@ -186,7 +205,7 @@ describe.sequential('dlx', () => {
 
   describe('isInSocketDlx', () => {
     it('should return true for paths within DLX directory', () => {
-      const dlxPath = path.join(dlxDir, 'some-package', 'bin', 'binary')
+      const dlxPath = path.join(getSocketDlxDir(), 'some-package', 'bin', 'binary')
       expect(isInSocketDlx(dlxPath)).toBe(true)
     })
 
@@ -205,7 +224,7 @@ describe.sequential('dlx', () => {
     })
 
     it('should handle paths with trailing separators', () => {
-      const dlxPath = path.join(dlxDir, 'package', '')
+      const dlxPath = path.join(getSocketDlxDir(), 'package', '')
       expect(isInSocketDlx(dlxPath)).toBe(true)
     })
   })
@@ -282,7 +301,7 @@ describe.sequential('dlx', () => {
       const packages = await listDlxPackagesAsync()
       expect(packages).toContain('package-1')
       expect(packages).toContain('package-2')
-      expect(packages.length).toBeGreaterThanOrEqual(2)
+      expect(packages).toHaveLength(2)
     })
   })
 
@@ -341,8 +360,9 @@ describe.sequential('dlx', () => {
 
     it('should not throw when DLX directory does not exist', async () => {
       // Ensure directory doesn't exist
-      if (fs.existsSync(dlxDir)) {
-        fs.rmSync(dlxDir, { recursive: true, force: true })
+      const dlxDir = getSocketDlxDir()
+      if (fs.existsSync(getSocketDlxDir())) {
+        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
       await expect(clearDlx()).resolves.not.toThrow()
     })
@@ -367,8 +387,9 @@ describe.sequential('dlx', () => {
 
     it('sync version should not throw when DLX directory does not exist', () => {
       // Ensure directory doesn't exist
-      if (fs.existsSync(dlxDir)) {
-        fs.rmSync(dlxDir, { recursive: true, force: true })
+      const dlxDir = getSocketDlxDir()
+      if (fs.existsSync(getSocketDlxDir())) {
+        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
       }
       expect(() => clearDlxSync()).not.toThrow()
     })
