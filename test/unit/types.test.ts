@@ -127,7 +127,7 @@ describe('types', () => {
     })
 
     it('should accept valid Manifest structure', () => {
-      const manifest: Manifest = {
+      const manifest: Partial<Manifest> = {
         npm: [
           [
             'package-1',

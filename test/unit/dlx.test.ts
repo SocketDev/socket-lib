@@ -112,7 +112,10 @@ describe.sequential('dlx', () => {
     it('async version should return false when directory does not exist', async () => {
       // Ensure it doesn't exist (use async version for consistency)
       try {
-        await fs.promises.rm(dlxDir, { recursive: true, force: true })
+        await fs.promises.rm(getSocketDlxDir(), {
+          recursive: true,
+          force: true,
+        })
       } catch {
         // Directory might not exist, which is fine
       }
