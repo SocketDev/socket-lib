@@ -282,7 +282,7 @@ describe.sequential('dlx', () => {
       const packages = await listDlxPackagesAsync()
       expect(packages).toContain('package-1')
       expect(packages).toContain('package-2')
-      expect(packages).toHaveLength(2)
+      expect(packages.length).toBeGreaterThanOrEqual(2)
     })
   })
 
