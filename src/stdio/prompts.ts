@@ -260,18 +260,30 @@ export function wrapPrompt<T = unknown>(
 }
 
 // c8 ignore start - Third-party inquirer library requires and exports not testable in isolation.
-const confirmExport = /*@__PURE__*/ require('../external/@inquirer/confirm')
-const inputExport = /*@__PURE__*/ require('../external/@inquirer/input')
-const passwordExport = /*@__PURE__*/ require('../external/@inquirer/password')
-const searchExport = /*@__PURE__*/ require('../external/@inquirer/search')
-const selectExport = /*@__PURE__*/ require('../external/@inquirer/select')
-const confirmRaw = confirmExport.default ?? confirmExport
-const inputRaw = inputExport.default ?? inputExport
-const passwordRaw = passwordExport.default ?? passwordExport
-const searchRaw = searchExport.default ?? searchExport
-const selectRaw = selectExport.default ?? selectExport
-const ActualSeparator = selectExport.Separator
+const checkboxRaw = /*@__PURE__*/ require('../external/@inquirer/checkbox')
+const confirmRaw = /*@__PURE__*/ require('../external/@inquirer/confirm')
+const inputRaw = /*@__PURE__*/ require('../external/@inquirer/input')
+const passwordRaw = /*@__PURE__*/ require('../external/@inquirer/password')
+const searchRaw = /*@__PURE__*/ require('../external/@inquirer/search')
+const selectRaw = /*@__PURE__*/ require('../external/@inquirer/select')
+const ActualSeparator = selectRaw.Separator
 // c8 ignore stop
+
+/**
+ * Prompt to select multiple items from a list of choices.
+ * Wrapped with spinner handling and abort signal support.
+ *
+ * @example
+ * const choices = await checkbox({
+ *   message: 'Select options:',
+ *   choices: [
+ *     { name: 'Option 1', value: 'opt1' },
+ *     { name: 'Option 2', value: 'opt2' },
+ *     { name: 'Option 3', value: 'opt3' }
+ *   ]
+ * })
+ */
+export const checkbox: typeof checkboxRaw = wrapPrompt(checkboxRaw)
 
 /**
  * Prompt for a yes/no confirmation.
