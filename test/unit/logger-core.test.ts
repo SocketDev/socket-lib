@@ -45,6 +45,7 @@ describe('Logger', () => {
       expect(LOG_SYMBOLS).toHaveProperty('fail')
       expect(LOG_SYMBOLS).toHaveProperty('warn')
       expect(LOG_SYMBOLS).toHaveProperty('info')
+      expect(LOG_SYMBOLS).toHaveProperty('progress')
       expect(LOG_SYMBOLS).toHaveProperty('reason')
       expect(LOG_SYMBOLS).toHaveProperty('step')
     })
@@ -54,6 +55,7 @@ describe('Logger', () => {
       expect(typeof LOG_SYMBOLS.fail).toBe('string')
       expect(typeof LOG_SYMBOLS.warn).toBe('string')
       expect(typeof LOG_SYMBOLS.info).toBe('string')
+      expect(typeof LOG_SYMBOLS.progress).toBe('string')
       expect(typeof LOG_SYMBOLS.reason).toBe('string')
       expect(typeof LOG_SYMBOLS.step).toBe('string')
     })
@@ -63,6 +65,7 @@ describe('Logger', () => {
       expect(LOG_SYMBOLS.fail.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.warn.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.info.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS.progress.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.reason.length).toBeGreaterThan(0)
       expect(LOG_SYMBOLS.step.length).toBeGreaterThan(0)
     })
@@ -70,6 +73,16 @@ describe('Logger', () => {
     it('should be accessible from Logger.LOG_SYMBOLS', () => {
       expect(Logger.LOG_SYMBOLS).toBe(LOG_SYMBOLS)
       expect(Logger.LOG_SYMBOLS.success).toBe(LOG_SYMBOLS.success)
+    })
+
+    it('should have progress symbol containing therefore character', () => {
+      // Progress symbol should contain ∴ (Unicode) or :. (ASCII fallback)
+      expect(LOG_SYMBOLS.progress).toMatch(/[∴:]/)
+    })
+
+    it('should have reason symbol containing therefore character', () => {
+      // Reason symbol should contain ∴ (Unicode) or :. (ASCII fallback)
+      expect(LOG_SYMBOLS.reason).toMatch(/[∴:]/)
     })
   })
 
@@ -198,6 +211,12 @@ describe('Logger', () => {
       expect(result).toBe(logger)
     })
 
+    it('should support progress method', () => {
+      const result = logger.progress('progress message')
+      expect(result).toBe(logger)
+      expect(stderrData.join('')).toContain('progress message')
+    })
+
     it('should support reason method', () => {
       const result = logger.reason('reasoning message')
       expect(result).toBe(logger)
@@ -207,6 +226,26 @@ describe('Logger', () => {
     it('should support step method', () => {
       const result = logger.step('step message')
       expect(result).toBe(logger)
+    })
+
+    it('should include progress symbol in progress output', () => {
+      logger.progress('test')
+      const output = stderrData.join('')
+      // Should contain the therefore symbol (∴ or :.)
+      expect(output).toMatch(/[∴:]/)
+    })
+
+    it('should write progress to stderr by default', () => {
+      stdoutData = []
+      stderrData = []
+      logger.progress('testing stderr')
+      expect(stderrData.length).toBeGreaterThan(0)
+      expect(stderrData.join('')).toContain('testing stderr')
+    })
+
+    it('should support stdout logger progress method', () => {
+      const result = logger.stdout.progress('testing stdout')
+      expect(result).toBe(logger.stdout)
     })
   })
 

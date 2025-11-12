@@ -25,6 +25,7 @@ import { THEMES } from './themes/themes'
  * console.log(`${LOG_SYMBOLS.warn} Warning message`)
  * console.log(`${LOG_SYMBOLS.info} Information message`)
  * console.log(`${LOG_SYMBOLS.step} Processing step`)
+ * console.log(`${LOG_SYMBOLS.progress} Working on task`)
  * console.log(`${LOG_SYMBOLS.reason} Working through logic`)
  * ```
  */
@@ -33,6 +34,8 @@ type LogSymbols = {
   fail: string
   /** Blue colored information symbol (ℹ or i in ASCII) */
   info: string
+  /** Cyan colored progress indicator symbol (∴ or :. in ASCII) */
+  progress: string
   /** Dimmed yellow reasoning/working symbol (∴ or :. in ASCII) */
   reason: string
   /** Cyan colored step symbol (→ or > in ASCII) */
@@ -158,6 +161,7 @@ function applyColor(
  *
  * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Theme error color ✖
  * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Theme info color ℹ
+ * console.log(`${LOG_SYMBOLS.progress} Working on task`)   // Theme step color ∴
  * console.log(`${LOG_SYMBOLS.reason} Analyzing dependencies`) // Dimmed yellow ∴
  * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Theme step color →
  * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
@@ -191,6 +195,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     // Update symbol values
     target.fail = applyColor(supported ? '✖' : '×', errorColor, colors)
     target.info = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
+    target.progress = applyColor(supported ? '∴' : ':.', stepColor, colors)
     target.reason = colors.dim(
       applyColor(supported ? '∴' : ':.', warningColor, colors),
     )
@@ -593,6 +598,7 @@ export class Logger {
       __proto__: null,
       fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
       info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
+      progress: applyColor(supported ? '∴' : ':.', theme.colors.step, colors),
       reason: colors.dim(
         applyColor(supported ? '∴' : ':.', theme.colors.warning, colors),
       ),
@@ -1380,7 +1386,8 @@ export class Logger {
     const streamObj = (
       stream === 'stderr' ? con._stderr : con._stdout
     ) as NodeJS.WriteStream & { write: (text: string) => boolean }
-    streamObj.write(`∴ ${text}`)
+    const symbols = this.#getSymbols()
+    streamObj.write(`${symbols.progress} ${text}`)
     this[lastWasBlankSymbol](false)
     return this
   }
