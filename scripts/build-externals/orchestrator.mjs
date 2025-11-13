@@ -209,8 +209,8 @@ async function fixNodeGypStrings(dir, options = {}) {
       if (contents.includes('node-gyp/bin/node-gyp.js')) {
         // Replace literal string with concatenated version
         const fixed = contents.replace(
-          /require\.resolve\(["']node-gyp\/bin\/node-gyp\.js["']\)/g,
-          'require.resolve("node-" + "gyp/bin/node-gyp.js")',
+          /["']node-gyp\/bin\/node-gyp\.js["']/g,
+          '"node-" + "gyp/bin/node-gyp.js"',
         )
 
         await fs.writeFile(filePath, fixed, 'utf8')
