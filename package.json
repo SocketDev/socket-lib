@@ -1,7 +1,7 @@
 {
   "name": "@socketsecurity/lib",
   "version": "3.3.1",
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@10.22.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -649,7 +649,7 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=18",
+    "node": ">=22",
     "pnpm": ">=10.21.0"
   },
   "sideEffects": false,
@@ -680,6 +680,7 @@
     "@inquirer/password": "4.0.18",
     "@inquirer/search": "3.1.1",
     "@inquirer/select": "4.3.2",
+    "@npmcli/arborist": "9.1.4",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",
     "@socketregistry/is-unicode-supported": "1.0.5",
@@ -690,6 +691,7 @@
     "@typescript/native-preview": "7.0.0-dev.20250920.1",
     "@vitest/coverage-v8": "4.0.3",
     "@vitest/ui": "4.0.3",
+    "@yarnpkg/core": "4.5.0",
     "@yarnpkg/extensions": "2.0.6",
     "cacache": "20.0.1",
     "debug": "4.4.3",

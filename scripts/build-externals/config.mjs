@@ -36,7 +36,7 @@ export const externalPackages = [
 export const scopedPackages = [
   {
     scope: '@npmcli',
-    packages: ['package-json', 'promise-spawn'],
+    packages: ['arborist', 'package-json', 'promise-spawn'],
     bundle: true,
     subpaths: ['package-json/lib/read-package.js', 'package-json/lib/sort.js'],
   },

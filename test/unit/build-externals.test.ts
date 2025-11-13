@@ -223,6 +223,32 @@ describe('build-externals', () => {
     await Promise.all(checkPromises)
   })
 
+  it('should have @npmcli/arborist properly bundled', async () => {
+    const arboristPath = path.join(distExternalDir, '@npmcli', 'arborist.js')
+
+    try {
+      const [stat, content] = await Promise.all([
+        fs.stat(arboristPath),
+        fs.readFile(arboristPath, 'utf8'),
+      ])
+
+      // Arborist is a large package, should be substantially bundled
+      if (stat.size <= 1000) {
+        expect.fail(
+          `@npmcli/arborist should be properly bundled (> 1KB), got ${stat.size} bytes`,
+        )
+      }
+
+      if (isStubReexport(content)) {
+        expect.fail('@npmcli/arborist should not be a stub re-export')
+      }
+    } catch (error) {
+      expect.fail(
+        `@npmcli/arborist not found or not properly bundled at ${arboristPath}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  })
+
   it('should not import external packages outside dist/external', async () => {
     const [allDistFiles, devDependencies] = await Promise.all([
       getAllJsFiles(distDir),

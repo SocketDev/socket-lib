@@ -87,6 +87,15 @@ function getPacote() {
   return _pacote as typeof import('pacote')
 }
 
+let _arborist: typeof import('@npmcli/arborist') | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getArborist() {
+  if (_arborist === undefined) {
+    _arborist = /*@__PURE__*/ require('./external/@npmcli/arborist')
+  }
+  return _arborist!
+}
+
 /**
  * Regex to check if a version string contains range operators.
  * Matches any version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
@@ -274,6 +283,30 @@ async function ensurePackageInstalled(
           // Use consistent pacote cache path (respects npm cache locations when available).
           cache: pacoteCachePath || path.join(packageDir, '.cache'),
         })
+
+        // Install dependencies using Arborist.
+        // pacote.extract() only extracts the package tarball, it does NOT install dependencies.
+        // We must use Arborist to install dependencies after extraction.
+        const Arborist = getArborist()
+        const arb = new Arborist({
+          path: installedDir,
+          cache: pacoteCachePath || path.join(packageDir, '.cache'),
+          // Skip devDependencies (production-only like npx).
+          omit: ['dev'],
+          // Security: Skip install/preinstall/postinstall scripts to prevent arbitrary code execution.
+          ignoreScripts: true,
+          // Security: Enable binary links (needed for dlx to execute the package binary).
+          binLinks: true,
+          // Suppress funding messages (unneeded for ephemeral dlx installs).
+          fund: false,
+          // Skip audit (unneeded for ephemeral dlx installs).
+          audit: false,
+          // Suppress output (unneeded for ephemeral dlx installs).
+          silent: true,
+        })
+
+        await arb.buildIdealTree()
+        await arb.reify({ save: false })
       } catch (e) {
         const code = (e as any).code
         if (code === 'E404' || code === 'ETARGET') {
