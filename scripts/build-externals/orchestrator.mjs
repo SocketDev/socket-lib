@@ -175,5 +175,52 @@ export async function buildExternals(options = {}) {
     quiet: quiet || !showDetails,
   })
 
+  // Post-process: Fix node-gyp strings to prevent bundler issues for consumers
+  await fixNodeGypStrings(distExternalDir, { quiet })
+
   return { bundledCount, totalSize }
+}
+
+/**
+ * Post-process bundled files to break node-gyp require.resolve strings.
+ * This prevents consumers trying to bundle socket-lib from having issues with node-gyp.
+ *
+ * @param {string} dir - Directory to process
+ * @param {object} options - Options
+ * @param {boolean} options.quiet - Suppress output
+ */
+async function fixNodeGypStrings(dir, options = {}) {
+  const { quiet = false } = options
+
+  // Find all .js files in dist/external
+  const files = await fs.readdir(dir, { withFileTypes: true })
+
+  for (const file of files) {
+    const filePath = path.join(dir, file.name)
+
+    if (file.isDirectory()) {
+      // Recursively process subdirectories
+      await fixNodeGypStrings(filePath, options)
+    } else if (file.name.endsWith('.js')) {
+      // Read file contents
+      const contents = await fs.readFile(filePath, 'utf8')
+
+      // Check if file contains the problematic pattern
+      if (contents.includes('node-gyp/bin/node-gyp.js')) {
+        // Replace literal string with concatenated version
+        const fixed = contents.replace(
+          /require\.resolve\(["']node-gyp\/bin\/node-gyp\.js["']\)/g,
+          'require.resolve("node-" + "gyp/bin/node-gyp.js")',
+        )
+
+        await fs.writeFile(filePath, fixed, 'utf8')
+
+        if (!quiet) {
+          console.log(
+            `  Fixed node-gyp string in ${path.relative(path.join(dir, '..', '..'), filePath)}`,
+          )
+        }
+      }
+    }
+  }
 }
