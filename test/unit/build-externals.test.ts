@@ -225,26 +225,36 @@ describe('build-externals', () => {
 
   it('should have @npmcli/arborist properly bundled', async () => {
     const arboristPath = path.join(distExternalDir, '@npmcli', 'arborist.js')
+    const npmPackPath = path.join(distExternalDir, 'npm-pack.js')
 
     try {
-      const [stat, content] = await Promise.all([
+      const [arboristStat, arboristContent, npmPackStat] = await Promise.all([
         fs.stat(arboristPath),
         fs.readFile(arboristPath, 'utf8'),
+        fs.stat(npmPackPath),
       ])
 
-      // Arborist is a large package, should be substantially bundled
-      if (stat.size <= 1000) {
+      // Arborist should be a thin wrapper re-exporting from npm-pack
+      if (arboristStat.size > 500) {
         expect.fail(
-          `@npmcli/arborist should be properly bundled (> 1KB), got ${stat.size} bytes`,
+          `@npmcli/arborist should be a thin wrapper (< 500B), got ${arboristStat.size} bytes`,
         )
       }
 
-      if (isStubReexport(content)) {
-        expect.fail('@npmcli/arborist should not be a stub re-export')
+      // Should re-export from npm-pack bundle
+      if (!arboristContent.includes("require('../npm-pack')")) {
+        expect.fail('@npmcli/arborist should re-export from npm-pack bundle')
+      }
+
+      // npm-pack bundle should contain arborist
+      if (npmPackStat.size <= 1_000_000) {
+        expect.fail(
+          `npm-pack.js should be a large bundle (> 1MB), got ${npmPackStat.size} bytes`,
+        )
       }
     } catch (error) {
       expect.fail(
-        `@npmcli/arborist not found or not properly bundled at ${arboristPath}: ${error instanceof Error ? error.message : String(error)}`,
+        `@npmcli/arborist not found or not properly configured at ${arboristPath}: ${error instanceof Error ? error.message : String(error)}`,
       )
     }
   })
