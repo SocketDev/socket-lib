@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('cacache')
+// Re-export from npm-pack bundle for better deduplication
+const { cacache } = require('./npm-pack')
+module.exports = cacache

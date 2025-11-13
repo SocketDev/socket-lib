@@ -3,6 +3,7 @@
  * Orchestrates bundling and reporting.
  */
 
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -26,7 +27,7 @@ async function bundleAllPackages(options = {}) {
   let bundledCount = 0
   let totalSize = 0
 
-  // Bundle each external package.
+  // Bundle each external package or copy non-bundled files.
   for (const { bundle, name } of externalPackages) {
     if (bundle) {
       const outputPath = path.join(distExternalDir, `${name}.js`)
@@ -38,18 +39,40 @@ async function bundleAllPackages(options = {}) {
         bundledCount++
         totalSize += size
       }
+    } else {
+      // Copy non-bundled file as-is (thin re-export wrapper)
+      const srcPath = path.join(rootDir, 'src', 'external', `${name}.js`)
+      const destPath = path.join(distExternalDir, `${name}.js`)
+      await fs.copyFile(srcPath, destPath)
     }
   }
 
   // Bundle scoped packages.
-  for (const { name, optional, packages, scope, subpaths } of scopedPackages) {
+  for (const {
+    bundle,
+    name,
+    optional,
+    packages,
+    scope,
+    subpaths,
+  } of scopedPackages) {
     const scopeDir = path.join(distExternalDir, scope)
     await ensureDir(scopeDir)
 
     if (name) {
       // Single package in scope.
       const outputPath = path.join(scopeDir, `${name}.js`)
-      if (optional) {
+      if (bundle === false) {
+        // Copy non-bundled file as-is (thin re-export wrapper)
+        const srcPath = path.join(
+          rootDir,
+          'src',
+          'external',
+          scope,
+          `${name}.js`,
+        )
+        await fs.copyFile(srcPath, outputPath)
+      } else if (optional) {
         try {
           const size = await bundlePackage(`${scope}/${name}`, outputPath, {
             quiet,

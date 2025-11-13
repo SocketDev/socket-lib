@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('libnpmpack')
+// Re-export from npm-pack bundle for better deduplication
+const { libnpmpack } = require('./npm-pack')
+module.exports = libnpmpack

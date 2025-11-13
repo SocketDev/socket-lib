@@ -1,4 +1,5 @@
 'use strict'
 
-const Arborist = require('@npmcli/arborist')
+// Re-export from npm-pack bundle for better deduplication
+const { Arborist } = require('../npm-pack')
 module.exports = Arborist

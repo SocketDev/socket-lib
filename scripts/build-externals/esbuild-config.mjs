@@ -100,11 +100,15 @@ function createForceNodeModulesPlugin() {
     name: 'force-node-modules',
     setup(build) {
       for (const pkg of packagesWithPathMappings) {
-        build.onResolve({ filter: new RegExp(`^${pkg}$`) }, args => {
+        // Match both bare package name and subpath imports (e.g., pkg/lib/foo.js)
+        build.onResolve({ filter: new RegExp(`^${pkg}(/|$)`) }, args => {
           // Only intercept if not already in node_modules
           if (!args.importer.includes('node_modules')) {
             try {
-              return { path: requireResolve.resolve(pkg), external: false }
+              return {
+                path: requireResolve.resolve(args.path),
+                external: false,
+              }
             } catch {
               // Package not found, let esbuild handle the error
               return null

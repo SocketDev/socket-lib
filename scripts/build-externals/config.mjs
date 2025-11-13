@@ -5,14 +5,20 @@
 
 // Define which packages need bundling (ones that are actual npm packages).
 export const externalPackages = [
-  // NPM internals
-  { name: 'cacache', bundle: true },
-  { name: 'pacote', bundle: true },
-  { name: 'make-fetch-happen', bundle: true },
+  // NPM bundles - grouped for better deduplication
+  // npm-core: npm-package-arg, normalize-package-data, semver
+  { name: 'npm-core', bundle: true },
+  // npm-pack: arborist, cacache, libnpmpack, make-fetch-happen, pacote
+  { name: 'npm-pack', bundle: true },
+  // NPM internals - individual packages now just re-export from bundles (no bundling needed)
+  { name: 'cacache', bundle: false },
+  { name: 'pacote', bundle: false },
+  { name: 'make-fetch-happen', bundle: false },
   { name: 'libnpmexec', bundle: true },
-  { name: 'libnpmpack', bundle: true },
-  { name: 'npm-package-arg', bundle: true },
-  { name: 'normalize-package-data', bundle: true },
+  { name: 'libnpmpack', bundle: false },
+  { name: 'npm-package-arg', bundle: false },
+  { name: 'normalize-package-data', bundle: false },
+  { name: 'semver', bundle: false },
   // Utilities
   { name: 'debug', bundle: true },
   { name: 'del', bundle: true },
@@ -20,7 +26,6 @@ export const externalPackages = [
   { name: 'fast-sort', bundle: true },
   { name: 'get-east-asian-width', bundle: true },
   { name: 'picomatch', bundle: true },
-  { name: 'semver', bundle: true },
   { name: 'spdx-correct', bundle: true },
   { name: 'spdx-expression-parse', bundle: true },
   { name: 'streaming-iterables', bundle: true },
@@ -36,7 +41,13 @@ export const externalPackages = [
 export const scopedPackages = [
   {
     scope: '@npmcli',
-    packages: ['arborist', 'package-json', 'promise-spawn'],
+    // arborist re-exports from npm-pack bundle (no separate bundling needed)
+    name: 'arborist',
+    bundle: false,
+  },
+  {
+    scope: '@npmcli',
+    packages: ['package-json', 'promise-spawn'],
     bundle: true,
     subpaths: ['package-json/lib/read-package.js', 'package-json/lib/sort.js'],
   },

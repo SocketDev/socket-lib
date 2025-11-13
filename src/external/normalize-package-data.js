@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('normalize-package-data')
+// Re-export from npm-core bundle for better deduplication
+const { normalizePackageData } = require('./npm-core')
+module.exports = normalizePackageData
