@@ -9,6 +9,7 @@ import { getEnvValue } from '#env/rewire'
  * APPDATA environment variable.
  * Points to the Application Data directory on Windows.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getAppdata(): string | undefined {
   return getEnvValue('APPDATA')
 }
@@ -17,6 +18,7 @@ export function getAppdata(): string | undefined {
  * LOCALAPPDATA environment variable.
  * Points to the Local Application Data directory on Windows.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getLocalappdata(): string | undefined {
   return getEnvValue('LOCALAPPDATA')
 }
@@ -25,6 +27,7 @@ export function getLocalappdata(): string | undefined {
  * USERPROFILE environment variable.
  * Windows user home directory path.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getUserprofile(): string | undefined {
   return getEnvValue('USERPROFILE')
 }
@@ -33,6 +36,7 @@ export function getUserprofile(): string | undefined {
  * COMSPEC environment variable.
  * Points to the Windows command processor (typically cmd.exe).
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getComspec(): string | undefined {
   return getEnvValue('COMSPEC')
 }

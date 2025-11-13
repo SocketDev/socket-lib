@@ -18,6 +18,7 @@ export const LATEST = 'latest'
 export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 
 // Package default Node range.
+/*@__NO_SIDE_EFFECTS__*/
 export function getPackageDefaultNodeRange(): string | undefined {
   if (_packageDefaultNodeRange === undefined) {
     _packageDefaultNodeRange =
@@ -27,6 +28,7 @@ export function getPackageDefaultNodeRange(): string | undefined {
 }
 
 // Package default Socket categories.
+/*@__NO_SIDE_EFFECTS__*/
 export function getPackageDefaultSocketCategories() {
   if (_packageDefaultSocketCategories === undefined) {
     _packageDefaultSocketCategories =
@@ -36,6 +38,7 @@ export function getPackageDefaultSocketCategories() {
 }
 
 // Package extensions.
+/*@__NO_SIDE_EFFECTS__*/
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (_packageExtensions === undefined) {
     const { packageExtensions } = require('#lib/package-extensions')
@@ -45,11 +48,13 @@ export function getPackageExtensions(): Iterable<[string, unknown]> {
 }
 
 // NPM lifecycle event.
+/*@__NO_SIDE_EFFECTS__*/
 export function getNpmLifecycleEvent(): string | undefined {
   return getNpmLifecycleEventEnv()
 }
 
 // Lifecycle script names.
+/*@__NO_SIDE_EFFECTS__*/
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
     const { lifecycleScriptNames } = require('#lib/lifecycle-script-names')
@@ -59,6 +64,7 @@ export function getLifecycleScriptNames(): string[] {
 }
 
 // Packument cache.
+/*@__NO_SIDE_EFFECTS__*/
 export function getPackumentCache(): Map<string, unknown> {
   if (_packumentCache === undefined) {
     _packumentCache = new Map()
@@ -67,6 +73,7 @@ export function getPackumentCache(): Map<string, unknown> {
 }
 
 // Pacote cache path.
+/*@__NO_SIDE_EFFECTS__*/
 export function getPacoteCachePath(): string {
   if (_pacoteCachePath === undefined) {
     try {

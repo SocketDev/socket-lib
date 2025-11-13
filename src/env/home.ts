@@ -5,6 +5,7 @@
 
 import { getEnvValue } from '#env/rewire'
 
+/*@__NO_SIDE_EFFECTS__*/
 export function getHome(): string | undefined {
   return getEnvValue('HOME')
 }

@@ -2,6 +2,7 @@
  * @fileoverview Environment variable type conversion helpers.
  */
 
+/*@__NO_SIDE_EFFECTS__*/
 export function envAsBoolean(value: string | undefined): boolean {
   if (!value) {
     return false
@@ -10,6 +11,7 @@ export function envAsBoolean(value: string | undefined): boolean {
   return lower === 'true' || lower === '1' || lower === 'yes'
 }
 
+/*@__NO_SIDE_EFFECTS__*/
 export function envAsNumber(value: string | undefined): number {
   if (!value) {
     return 0
@@ -18,6 +20,7 @@ export function envAsNumber(value: string | undefined): number {
   return Number.isNaN(num) ? 0 : num
 }
 
+/*@__NO_SIDE_EFFECTS__*/
 export function envAsString(value: string | undefined): string {
   return value || ''
 }

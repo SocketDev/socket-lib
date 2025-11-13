@@ -11,6 +11,7 @@ import { getEnvValue } from '#env/rewire'
  * JEST_WORKER_ID environment variable.
  * Set when running tests with Jest.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getJestWorkerId(): string {
   return envAsString(getEnvValue('JEST_WORKER_ID'))
 }
@@ -19,6 +20,7 @@ export function getJestWorkerId(): string {
  * VITEST environment variable.
  * Set when running tests with Vitest.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getVitest(): boolean {
   return envAsBoolean(getEnvValue('VITEST'))
 }
@@ -27,6 +29,7 @@ export function getVitest(): boolean {
  * Check if code is running in a test environment.
  * Checks NODE_ENV, VITEST, and JEST_WORKER_ID.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function isTest(): boolean {
   const nodeEnv = envAsString(getNodeEnv())
   return nodeEnv === 'test' || getVitest() || !!getJestWorkerId()

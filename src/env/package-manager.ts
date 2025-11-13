@@ -35,6 +35,7 @@ export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | null
  * detectPackageManager() // null
  * ```
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function detectPackageManager(): PackageManagerType {
   const userAgent = getPackageManagerUserAgent()
 
@@ -86,6 +87,7 @@ export function detectPackageManager(): PackageManagerType {
  * // { name: 'pnpm', version: '8.15.1' }
  * ```
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getPackageManagerInfo(): {
   name: string
   version: string
@@ -120,6 +122,7 @@ export function getPackageManagerInfo(): {
  * // yarn: "yarn/1.22.19 npm/? node/v20.11.0 darwin arm64"
  * ```
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getPackageManagerUserAgent(): string | undefined {
   return getEnvValue('npm_config_user_agent')
 }

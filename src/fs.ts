@@ -1150,7 +1150,6 @@ registerCacheInvalidation(invalidatePathCache)
  * await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function safeDelete(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
@@ -1224,7 +1223,6 @@ export async function safeDelete(
  * safeDeleteSync('./important', { force: true })
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function safeDeleteSync(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
@@ -1304,7 +1302,6 @@ export function safeDeleteSync(
  * await safeMkdir('./single-level', { recursive: false })
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function safeMkdir(
   path: PathLike,
   options?: MakeDirectoryOptions | undefined,
@@ -1355,7 +1352,6 @@ export async function safeMkdir(
  * safeMkdirSync('./single-level', { recursive: false })
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function safeMkdirSync(
   path: PathLike,
   options?: MakeDirectoryOptions | undefined,
@@ -1587,7 +1583,6 @@ export function uniqueSync(filepath: PathLike): string {
  * await writeJson('./win.json', data, { EOL: '\r\n' })
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function writeJson(
   filepath: PathLike,
   jsonContent: unknown,
@@ -1637,7 +1632,6 @@ export async function writeJson(
  * writeJsonSync('./compact.json', data, { spaces: 0 })
  * ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function writeJsonSync(
   filepath: PathLike,
   jsonContent: unknown,

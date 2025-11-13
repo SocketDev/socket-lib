@@ -9,6 +9,7 @@ import { getEnvValue } from '#env/rewire'
  * TMPDIR environment variable.
  * Unix/macOS temporary directory path.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getTmpdir(): string | undefined {
   return getEnvValue('TMPDIR')
 }
@@ -17,6 +18,7 @@ export function getTmpdir(): string | undefined {
  * TEMP environment variable.
  * Windows temporary directory path.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getTemp(): string | undefined {
   return getEnvValue('TEMP')
 }
@@ -25,6 +27,7 @@ export function getTemp(): string | undefined {
  * TMP environment variable.
  * Alternative temporary directory path.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getTmp(): string | undefined {
   return getEnvValue('TMP')
 }

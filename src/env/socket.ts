@@ -9,6 +9,7 @@ import { getEnvValue } from '#env/rewire'
  * SOCKET_ACCEPT_RISKS environment variable getter.
  * Whether to accept all Socket Security risks.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketAcceptRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_ACCEPT_RISKS'))
 }
@@ -17,6 +18,7 @@ export function getSocketAcceptRisks(): boolean {
  * SOCKET_API_BASE_URL environment variable getter.
  * Socket Security API base URL.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiBaseUrl(): string | undefined {
   return getEnvValue('SOCKET_API_BASE_URL')
 }
@@ -25,6 +27,7 @@ export function getSocketApiBaseUrl(): string | undefined {
  * SOCKET_API_PROXY environment variable getter.
  * Proxy URL for Socket Security API requests.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiProxy(): string | undefined {
   return getEnvValue('SOCKET_API_PROXY')
 }
@@ -33,6 +36,7 @@ export function getSocketApiProxy(): string | undefined {
  * SOCKET_API_TIMEOUT environment variable getter.
  * Timeout in milliseconds for Socket Security API requests.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiTimeout(): number {
   return envAsNumber(getEnvValue('SOCKET_API_TIMEOUT'))
 }
@@ -41,6 +45,7 @@ export function getSocketApiTimeout(): number {
  * SOCKET_API_TOKEN environment variable getter.
  * Socket Security API authentication token.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiToken(): string | undefined {
   return getEnvValue('SOCKET_API_TOKEN')
 }
@@ -49,6 +54,7 @@ export function getSocketApiToken(): string | undefined {
  * SOCKET_CACACHE_DIR environment variable getter.
  * Overrides the default Socket cacache directory location.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCacacheDir(): string | undefined {
   return getEnvValue('SOCKET_CACACHE_DIR')
 }
@@ -57,6 +63,7 @@ export function getSocketCacacheDir(): string | undefined {
  * SOCKET_CONFIG environment variable getter.
  * Socket Security configuration file path.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketConfig(): string | undefined {
   return getEnvValue('SOCKET_CONFIG')
 }
@@ -65,6 +72,7 @@ export function getSocketConfig(): string | undefined {
  * SOCKET_DEBUG environment variable getter.
  * Controls Socket-specific debug output.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketDebug(): string | undefined {
   return getEnvValue('SOCKET_DEBUG')
 }
@@ -73,6 +81,7 @@ export function getSocketDebug(): string | undefined {
  * SOCKET_DLX_DIR environment variable getter.
  * Overrides the default Socket DLX directory location.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketDlxDirEnv(): string | undefined {
   return getEnvValue('SOCKET_DLX_DIR')
 }
@@ -81,6 +90,7 @@ export function getSocketDlxDirEnv(): string | undefined {
  * SOCKET_HOME environment variable getter.
  * Socket Security home directory path.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketHome(): string | undefined {
   return getEnvValue('SOCKET_HOME')
 }
@@ -89,6 +99,7 @@ export function getSocketHome(): string | undefined {
  * SOCKET_NO_API_TOKEN environment variable getter.
  * Whether to skip Socket Security API token requirement.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketNoApiToken(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_NO_API_TOKEN'))
 }
@@ -97,6 +108,7 @@ export function getSocketNoApiToken(): boolean {
  * SOCKET_NPM_REGISTRY environment variable getter.
  * Socket NPM registry URL (alternative name).
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketNpmRegistry(): string | undefined {
   return getEnvValue('SOCKET_NPM_REGISTRY')
 }
@@ -105,6 +117,7 @@ export function getSocketNpmRegistry(): string | undefined {
  * SOCKET_ORG_SLUG environment variable getter.
  * Socket Security organization slug identifier.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketOrgSlug(): string | undefined {
   return getEnvValue('SOCKET_ORG_SLUG')
 }
@@ -113,6 +126,7 @@ export function getSocketOrgSlug(): string | undefined {
  * SOCKET_REGISTRY_URL environment variable getter.
  * Socket Registry URL for package installation.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketRegistryUrl(): string | undefined {
   return getEnvValue('SOCKET_REGISTRY_URL')
 }
@@ -121,6 +135,7 @@ export function getSocketRegistryUrl(): string | undefined {
  * SOCKET_VIEW_ALL_RISKS environment variable getter.
  * Whether to view all Socket Security risks.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketViewAllRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_VIEW_ALL_RISKS'))
 }

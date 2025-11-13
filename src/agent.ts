@@ -83,7 +83,6 @@ const yarnInstallLikeCommands = new Set([
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
  * in the args array are properly escaped by Node.js when passed to spawn().
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function execNpm(args: string[], options?: SpawnOptions | undefined) {
   const useDebug = isDebug()
   const terminatorPos = args.indexOf('--')
@@ -146,8 +145,6 @@ export interface PnpmOptions extends SpawnOptions {
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
  * in the args array are properly escaped by Node.js when passed to execBin().
  */
-/*@__NO_SIDE_EFFECTS__*/
-
 export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
   const { allowLockfileUpdate, ...extBinOpts } = {
     __proto__: null,
@@ -215,7 +212,6 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
  * in the args array are properly escaped by Node.js when passed to execBin().
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function execYarn(
   args: string[],
   options?: import('./spawn').SpawnOptions,
@@ -347,7 +343,6 @@ export interface ExecScriptOptions extends SpawnOptions {
   prepost?: boolean | undefined
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function execScript(
   scriptName: string,
   args?: string[] | readonly string[] | ExecScriptOptions | undefined,

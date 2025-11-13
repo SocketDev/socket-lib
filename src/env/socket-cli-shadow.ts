@@ -11,6 +11,7 @@ import { getEnvValue } from '#env/rewire'
  *
  * @returns Whether to accept all risks in shadow mode
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliShadowAcceptRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_SHADOW_ACCEPT_RISKS'))
 }
@@ -20,6 +21,7 @@ export function getSocketCliShadowAcceptRisks(): boolean {
  *
  * @returns Shadow mode API token or undefined
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliShadowApiToken(): string | undefined {
   return getEnvValue('SOCKET_CLI_SHADOW_API_TOKEN')
 }
@@ -29,6 +31,7 @@ export function getSocketCliShadowApiToken(): string | undefined {
  *
  * @returns Shadow mode binary path or undefined
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliShadowBin(): string | undefined {
   return getEnvValue('SOCKET_CLI_SHADOW_BIN')
 }
@@ -38,6 +41,7 @@ export function getSocketCliShadowBin(): string | undefined {
  *
  * @returns Whether to show progress in shadow mode
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliShadowProgress(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_SHADOW_PROGRESS'))
 }
@@ -47,6 +51,7 @@ export function getSocketCliShadowProgress(): boolean {
  *
  * @returns Whether shadow mode should operate silently
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliShadowSilent(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_SHADOW_SILENT'))
 }

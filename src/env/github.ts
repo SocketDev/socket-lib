@@ -9,6 +9,7 @@ import { getEnvValue } from '#env/rewire'
  * GITHUB_API_URL environment variable.
  * GitHub API URL (e.g., https://api.github.com).
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubApiUrl(): string | undefined {
   return getEnvValue('GITHUB_API_URL')
 }
@@ -17,6 +18,7 @@ export function getGithubApiUrl(): string | undefined {
  * GITHUB_BASE_REF environment variable.
  * GitHub pull request base branch.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubBaseRef(): string | undefined {
   return getEnvValue('GITHUB_BASE_REF')
 }
@@ -25,6 +27,7 @@ export function getGithubBaseRef(): string | undefined {
  * GITHUB_REF_NAME environment variable.
  * GitHub branch or tag name.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubRefName(): string | undefined {
   return getEnvValue('GITHUB_REF_NAME')
 }
@@ -33,6 +36,7 @@ export function getGithubRefName(): string | undefined {
  * GITHUB_REF_TYPE environment variable.
  * GitHub ref type (branch or tag).
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubRefType(): string | undefined {
   return getEnvValue('GITHUB_REF_TYPE')
 }
@@ -41,6 +45,7 @@ export function getGithubRefType(): string | undefined {
  * GITHUB_REPOSITORY environment variable.
  * GitHub repository name in owner/repo format.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubRepository(): string | undefined {
   return getEnvValue('GITHUB_REPOSITORY')
 }
@@ -49,6 +54,7 @@ export function getGithubRepository(): string | undefined {
  * GITHUB_SERVER_URL environment variable.
  * GitHub server URL (e.g., https://github.com).
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubServerUrl(): string | undefined {
   return getEnvValue('GITHUB_SERVER_URL')
 }
@@ -57,6 +63,7 @@ export function getGithubServerUrl(): string | undefined {
  * GITHUB_TOKEN environment variable.
  * GitHub authentication token for API access.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGithubToken(): string | undefined {
   return getEnvValue('GITHUB_TOKEN')
 }
@@ -65,6 +72,7 @@ export function getGithubToken(): string | undefined {
  * GH_TOKEN environment variable.
  * Alternative GitHub authentication token for API access (used by GitHub CLI).
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getGhToken(): string | undefined {
   return getEnvValue('GH_TOKEN')
 }

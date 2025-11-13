@@ -9,6 +9,7 @@ import { getEnvValue } from '#env/rewire'
  * npm_config_registry environment variable.
  * NPM registry URL configured by package managers.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getNpmConfigRegistry(): string | undefined {
   return getEnvValue('npm_config_registry')
 }
@@ -17,6 +18,7 @@ export function getNpmConfigRegistry(): string | undefined {
  * npm_config_user_agent environment variable.
  * User agent string set by npm/pnpm/yarn package managers.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getNpmConfigUserAgent(): string | undefined {
   return getEnvValue('npm_config_user_agent')
 }
@@ -25,6 +27,7 @@ export function getNpmConfigUserAgent(): string | undefined {
  * npm_lifecycle_event environment variable.
  * The name of the npm lifecycle event that's currently running.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getNpmLifecycleEvent(): string | undefined {
   return getEnvValue('npm_lifecycle_event')
 }
@@ -33,6 +36,7 @@ export function getNpmLifecycleEvent(): string | undefined {
  * NPM_REGISTRY environment variable.
  * NPM registry URL override.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getNpmRegistry(): string | undefined {
   return getEnvValue('NPM_REGISTRY')
 }
@@ -41,6 +45,7 @@ export function getNpmRegistry(): string | undefined {
  * NPM_TOKEN environment variable.
  * Authentication token for NPM registry access.
  */
+/*@__NO_SIDE_EFFECTS__*/
 export function getNpmToken(): string | undefined {
   return getEnvValue('NPM_TOKEN')
 }
