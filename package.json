@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "3.3.8",
+  "version": "3.3.9",
   "packageManager": "pnpm@10.22.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -749,6 +749,7 @@
       "@npmcli/run-script": "10.0.0",
       "semver": "7.7.2",
       "ansi-regex": "6.2.2",
+      "strip-ansi": "7.1.2",
       "lru-cache": "11.2.2"
     },
     "patchedDependencies": {
