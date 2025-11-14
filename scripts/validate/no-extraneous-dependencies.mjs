@@ -20,13 +20,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
-import traverseModule from '@babel/traverse'
+import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 
 import { getDefaultLogger } from '#socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
-const traverse = traverseModule.default
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..', '..')

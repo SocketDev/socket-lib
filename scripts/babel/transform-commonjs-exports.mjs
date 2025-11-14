@@ -15,7 +15,7 @@ import { isBuiltin } from 'node:module'
 import path from 'node:path'
 
 import { parse } from '@babel/parser'
-import traverseModule from '@babel/traverse'
+import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
@@ -24,8 +24,6 @@ import MagicString from 'magic-string'
 // - @babel/traverse@7.28.4
 // - @babel/types@7.28.4
 // - magic-string@0.30.19
-
-const traverse = traverseModule.default
 
 /**
  * Parse JavaScript code into AST.
