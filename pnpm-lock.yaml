@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@npmcli/run-script@9.1.0':
+    hash: 65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc
+    path: patches/@npmcli__run-script@9.1.0.patch
+  node-gyp@11.5.0:
+    hash: 140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9
+    path: patches/node-gyp@11.5.0.patch
+
 importers:
 
   .:
@@ -3689,7 +3697,7 @@ snapshots:
       '@npmcli/package-json': 6.2.0
       '@npmcli/query': 4.0.1
       '@npmcli/redact': 3.2.2
-      '@npmcli/run-script': 9.1.0
+      '@npmcli/run-script': 9.1.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
       bin-links: 5.0.0
       cacache: 19.0.1
       common-ancestor-path: 1.0.1
@@ -3848,18 +3856,18 @@ snapshots:
       '@npmcli/node-gyp': 4.0.0
       '@npmcli/package-json': 7.0.0
       '@npmcli/promise-spawn': 8.0.3
-      node-gyp: 11.5.0
+      node-gyp: 11.5.0(patch_hash=140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9)
       proc-log: 5.0.0
       which: 5.0.0
     transitivePeerDependencies:
       - supports-color
 
-  '@npmcli/run-script@9.1.0':
+  '@npmcli/run-script@9.1.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)':
     dependencies:
       '@npmcli/node-gyp': 4.0.0
       '@npmcli/package-json': 6.2.0
       '@npmcli/promise-spawn': 8.0.3
-      node-gyp: 11.5.0
+      node-gyp: 11.5.0(patch_hash=140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9)
       proc-log: 5.0.0
       which: 5.0.0
     transitivePeerDependencies:
@@ -5435,7 +5443,7 @@ snapshots:
 
   node-fetch-native@1.6.7: {}
 
-  node-gyp@11.5.0:
+  node-gyp@11.5.0(patch_hash=140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9):
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.3

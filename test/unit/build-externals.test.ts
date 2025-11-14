@@ -259,6 +259,46 @@ describe('build-externals', () => {
     }
   })
 
+  it('should not bundle node-gyp in npm-pack', async () => {
+    const npmPackPath = path.join(distExternalDir, 'npm-pack.js')
+
+    try {
+      const content = await fs.readFile(npmPackPath, 'utf8')
+
+      // node-gyp should NOT be bundled - check for its code
+      // We look for specific node-gyp implementation details that would only
+      // be present if it was bundled (not just string references)
+      const nodeGypMarkers = [
+        'Find-VisualStudio.cs',
+        'node-gyp rebuild',
+        'MSBUILD_PATH',
+      ]
+
+      const foundMarkers = nodeGypMarkers.filter(marker =>
+        content.includes(marker),
+      )
+
+      if (foundMarkers.length > 1) {
+        expect.fail(
+          [
+            'node-gyp appears to be bundled in npm-pack.js',
+            `Found markers: ${foundMarkers.join(', ')}`,
+            '',
+            'node-gyp should be external and handled by patches.',
+            'Check:',
+            '  - pnpm.patchedDependencies in package.json',
+            '  - patches/node-gyp@*.patch exists',
+            '  - patches/@npmcli__run-script@*.patch exists',
+          ].join('\n'),
+        )
+      }
+    } catch (error) {
+      expect.fail(
+        `npm-pack.js not found at ${npmPackPath}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  })
+
   it('should not import external packages outside dist/external', async () => {
     const [allDistFiles, devDependencies] = await Promise.all([
       getAllJsFiles(distDir),

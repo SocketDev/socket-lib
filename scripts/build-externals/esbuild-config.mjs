@@ -223,7 +223,6 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
       'http',
       'https',
       'net',
-      'node-gyp',
       'os',
       'path',
       'perf_hooks',
