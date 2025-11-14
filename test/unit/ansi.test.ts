@@ -1,5 +1,10 @@
 /**
  * @fileoverview Tests for ANSI escape code utilities.
+ *
+ * IMPORTANT: This test imports from dist/ to catch bundling compatibility issues.
+ * The original bug occurred when strip-ansi@6.0.1 was bundled with ansi-regex@6.2.2,
+ * causing "stripAnsi22 is not a function" errors. Testing the bundled dist/ ensures
+ * we catch ESM/CJS interop issues that only appear after bundling.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -13,7 +18,7 @@ import {
   ANSI_UNDERLINE,
   ansiRegex,
   stripAnsi,
-} from '../../src/ansi.js'
+} from '../../dist/ansi.js'
 
 describe('ansi', () => {
   describe('constants', () => {
