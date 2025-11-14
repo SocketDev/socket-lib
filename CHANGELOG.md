@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.7](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.7) - 2025-11-13
+
+### Changed
+
+- **refactor**: Add explicit `.js` extensions to external require calls
+  - Improves module resolution clarity and compatibility with modern bundlers
+  - Updated 18 require calls across 10 source files
+
 ## [3.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.6) - 2025-11-13
 
 ### Changed
