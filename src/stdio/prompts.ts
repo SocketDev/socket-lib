@@ -264,9 +264,11 @@ const checkboxRaw = /*@__PURE__*/ require('../external/@inquirer/checkbox')
 const confirmRaw = /*@__PURE__*/ require('../external/@inquirer/confirm')
 const inputRaw = /*@__PURE__*/ require('../external/@inquirer/input')
 const passwordRaw = /*@__PURE__*/ require('../external/@inquirer/password')
-const searchRaw = /*@__PURE__*/ require('../external/@inquirer/search')
-const selectRaw = /*@__PURE__*/ require('../external/@inquirer/select')
-const ActualSeparator = selectRaw.Separator
+// Search and select export additional named exports, so we access .default.
+const searchRaw = /*@__PURE__*/ require('../external/@inquirer/search').default
+const selectModule = /*@__PURE__*/ require('../external/@inquirer/select')
+const selectRaw = selectModule.default
+const ActualSeparator = selectModule.Separator
 // c8 ignore stop
 
 /**

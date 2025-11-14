@@ -19,6 +19,7 @@ import {
   password,
   search,
   select,
+  Separator,
   wrapPrompt,
   type Choice,
   type Context,
@@ -450,6 +451,72 @@ describe('stdio/prompts', () => {
 
     it('should export select function', () => {
       expect(typeof select).toBe('function')
+    })
+  })
+
+  describe('prompt functions are properly unwrapped', () => {
+    it('should unwrap checkbox from module exports', () => {
+      // Verify checkbox is a function, not an object with .default.
+      expect(typeof checkbox).toBe('function')
+      expect(checkbox).not.toHaveProperty('default')
+    })
+
+    it('should unwrap confirm from module exports', () => {
+      // Verify confirm is a function, not an object with .default.
+      expect(typeof confirm).toBe('function')
+      expect(confirm).not.toHaveProperty('default')
+    })
+
+    it('should unwrap input from module exports', () => {
+      // Verify input is a function, not an object with .default.
+      expect(typeof input).toBe('function')
+      expect(input).not.toHaveProperty('default')
+    })
+
+    it('should unwrap password from module exports', () => {
+      // Verify password is a function, not an object with .default.
+      expect(typeof password).toBe('function')
+      expect(password).not.toHaveProperty('default')
+    })
+
+    it('should unwrap search from module exports with named exports', () => {
+      // Search has named exports in addition to default, must use .default accessor.
+      expect(typeof search).toBe('function')
+      expect(search).not.toHaveProperty('default')
+    })
+
+    it('should unwrap select from module exports with named exports', () => {
+      // Select has Separator export in addition to default, must use .default accessor.
+      expect(typeof select).toBe('function')
+      expect(select).not.toHaveProperty('default')
+      expect(select).not.toHaveProperty('Separator')
+    })
+
+    it('should be callable without "inquirerPrompt is not a function" error', async () => {
+      // This test verifies the fix for the bug where wrapPrompt received.
+      // an object instead of a function for modules with multiple exports.
+      // All wrapped prompts should be callable.
+      const prompts = [checkbox, confirm, input, password, search, select]
+      for (const prompt of prompts) {
+        expect(() => wrapPrompt(prompt)).not.toThrow()
+      }
+    })
+
+    it('should export Separator class separately from select', () => {
+      // Separator should be exported as a named export, not a property on select.
+      expect(Separator).toBeDefined()
+      expect(typeof Separator).toBe('function')
+      expect(Separator.name).toBe('Separator')
+
+      // Verify we can instantiate Separator.
+      const sep = new Separator()
+      expect(sep.type).toBe('separator')
+    })
+
+    it('should create Separator instances with custom text', () => {
+      const customSep = new Separator('---custom---')
+      expect(customSep.type).toBe('separator')
+      expect(customSep.separator).toBe('---custom---')
     })
   })
 
