@@ -32,9 +32,15 @@ import { resolveColor } from './themes/utils'
 
 /**
  * Symbol types for status messages.
- * Maps to log symbols: fail (✗), info (ℹ), reason (∴), success (✓), warn (⚠).
+ * Maps to log symbols: fail (✗), info (ℹ), reason (∴), skip (↻), success (✓), warn (⚠).
  */
-export type SymbolType = 'fail' | 'info' | 'reason' | 'success' | 'warn'
+export type SymbolType =
+  | 'fail'
+  | 'info'
+  | 'reason'
+  | 'skip'
+  | 'success'
+  | 'warn'
 
 /**
  * Progress tracking information for display in spinner.
@@ -151,6 +157,11 @@ export type Spinner = {
 
   /** Set complete shimmer configuration */
   setShimmer(config: ShimmerConfig): Spinner
+
+  /** Show skip (↻) message without stopping the spinner */
+  skip(text?: string | undefined, ...extras: unknown[]): Spinner
+  /** Show skip (↻) message and stop the spinner, auto-clearing the line */
+  skipAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
   /** Start spinning with optional text */
   start(text?: string | undefined): Spinner
@@ -1020,6 +1031,42 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         // Only log if we have actual content (consistent with #apply's stop method handling)
         if (normalized) {
           logger.error(`${LOG_SYMBOLS.reason} ${normalized}`, ...extras)
+        }
+        return this
+      }
+
+      /**
+       * Show a skip message (↻) without stopping the spinner.
+       * Outputs to stderr and continues spinning.
+       *
+       * @param text - Skip message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      skip(text?: string | undefined, ...extras: unknown[]) {
+        return this.#showStatusAndKeepSpinning('skip', [text, ...extras])
+      }
+
+      /**
+       * Show a skip message (↻) and stop the spinner.
+       * Auto-clears the spinner line before displaying the message.
+       *
+       * Implementation note: Similar to reasonAndStop(), this method cannot use #apply()
+       * with a 'skip' method name because yocto-spinner doesn't have a built-in 'skip'
+       * method. Instead, we manually stop the spinner then log the message with the skip symbol.
+       *
+       * @param text - Skip message to display
+       * @param extras - Additional values to log
+       * @returns This spinner for chaining
+       */
+      skipAndStop(text?: string | undefined, ...extras: unknown[]) {
+        // Stop spinner first (can't use #apply('skip') since yocto-spinner has no 'skip' method)
+        this.#apply('stop', [])
+        // Normalize text (trim leading whitespace) like other methods
+        const normalized = normalizeText(text)
+        // Only log if we have actual content (consistent with #apply's stop method handling)
+        if (normalized) {
+          logger.error(`${LOG_SYMBOLS.skip} ${normalized}`, ...extras)
         }
         return this
       }

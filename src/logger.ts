@@ -38,6 +38,8 @@ type LogSymbols = {
   progress: string
   /** Dimmed yellow reasoning/working symbol (∴ or :. in ASCII) */
   reason: string
+  /** Cyan colored skip symbol (↻ or @ in ASCII) */
+  skip: string
   /** Cyan colored step symbol (→ or > in ASCII) */
   step: string
   /** Green colored success symbol (✔ or √ in ASCII) */
@@ -199,6 +201,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     target.reason = colors.dim(
       applyColor(supported ? '∴' : ':.', warningColor, colors),
     )
+    target.skip = applyColor(supported ? '↻' : '@', stepColor, colors)
     target.step = applyColor(supported ? '→' : '>', stepColor, colors)
     target.success = applyColor(supported ? '✔' : '√', successColor, colors)
     target.warn = applyColor(supported ? '⚠' : '‼', warningColor, colors)
@@ -602,6 +605,7 @@ export class Logger {
       reason: colors.dim(
         applyColor(supported ? '∴' : ':.', theme.colors.warning, colors),
       ),
+      skip: applyColor(supported ? '↻' : '@', theme.colors.step, colors),
       step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
       success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
       warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
@@ -657,11 +661,11 @@ export class Logger {
    */
   #stripSymbols(text: string): string {
     // Strip both unicode and emoji forms of log symbols from the start.
-    // Matches Unicode: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, ∴
-    // Matches ASCII fallbacks: ×, ‼, √, i, >, :.
+    // Matches Unicode: ✖, ✗, ×, ✖️, ⚠, ‼, ⚠️, ✔, ✓, √, ✔️, ✓️, ℹ, ℹ️, →, ∴, ↻
+    // Matches ASCII fallbacks: ×, ‼, √, i, >, :., @
     // Also handles variation selectors (U+FE0F) and whitespace after symbol.
-    // Note: We don't strip standalone 'i' or '>' to avoid breaking words, but we do strip ':.' as it's unambiguous.
-    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴]|:.)[\uFE0F\s]*/u, '')
+    // Note: We don't strip standalone 'i', '>', or '@' to avoid breaking words, but we do strip ':.' as it's unambiguous.
+    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[\uFE0F\s]*/u, '')
   }
 
   /**
@@ -1446,6 +1450,27 @@ export class Logger {
       this.#setIndent('stdout', '')
     }
     return this
+  }
+
+  /**
+   * Logs a skip message with a cyan colored skip symbol.
+   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.skip` (cyan ↻).
+   * Always outputs to stderr. If the message starts with an existing
+   * symbol, it will be stripped and replaced.
+   *
+   * @param args - Message and additional arguments to log
+   * @returns The logger instance for chaining
+   *
+   * @example
+   * ```typescript
+   * logger.skip('Test skipped due to environment')
+   * logger.skip('Skipping optional step')
+   * logger.skip('Feature disabled, skipping')
+   * ```
+   */
+  skip(...args: unknown[]): this {
+    return this.#symbolApply('skip', args)
   }
 
   /**

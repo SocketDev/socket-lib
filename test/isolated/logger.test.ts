@@ -27,16 +27,18 @@ describe('LOG_SYMBOLS', () => {
     expect(LOG_SYMBOLS.fail).toContain('')
     expect(LOG_SYMBOLS.warn).toContain('')
     expect(LOG_SYMBOLS.info).toContain('')
+    expect(LOG_SYMBOLS.skip).toContain('')
     expect(LOG_SYMBOLS.step).toContain('')
   })
 
   it('should provide colored symbols', () => {
     // Access all symbols to ensure lazy initialization
-    const { fail, info, step, success, warn } = LOG_SYMBOLS
+    const { fail, info, skip, step, success, warn } = LOG_SYMBOLS
     expect(success).toBeTruthy()
     expect(fail).toBeTruthy()
     expect(warn).toBeTruthy()
     expect(info).toBeTruthy()
+    expect(skip).toBeTruthy()
     expect(step).toBeTruthy()
   })
 
@@ -1104,6 +1106,44 @@ describe('Logger', () => {
       testLogger.reason('∴ already has symbol')
       const output = stderrChunks.join('')
       expect(output).toContain('already has symbol')
+    })
+  })
+
+  describe('skip() method', () => {
+    it('should log skip message with symbol', () => {
+      testLogger.skip('Test skipped')
+      const output = stderrChunks.join('')
+      expect(output).toContain('Test skipped')
+    })
+
+    it('should support multiple arguments', () => {
+      testLogger.skip('Skipped', 5, 'tests')
+      const output = stderrChunks.join('')
+      expect(output).toContain('Skipped')
+    })
+
+    it('should return logger instance for chaining', () => {
+      const result = testLogger.skip('skipping step')
+      expect(result).toBe(testLogger)
+    })
+
+    it('should handle empty skip message', () => {
+      testLogger.skip()
+      expect(stderrChunks.length).toBeGreaterThan(0)
+    })
+
+    it('should strip existing symbols', () => {
+      testLogger.skip('↻ already has symbol')
+      const output = stderrChunks.join('')
+      expect(output).toContain('already has symbol')
+    })
+
+    it('should output to stderr', () => {
+      const beforeStderr = stderrChunks.length
+      const beforeStdout = stdoutChunks.length
+      testLogger.skip('skip message')
+      expect(stderrChunks.length).toBe(beforeStderr + 1)
+      expect(stdoutChunks.length).toBe(beforeStdout)
     })
   })
 

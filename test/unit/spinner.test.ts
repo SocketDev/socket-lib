@@ -256,6 +256,29 @@ describe('spinner', () => {
         .reason('third reason')
       expect(result).toBe(spinner)
     })
+
+    it('should support skip() method', () => {
+      const spinner = Spinner()
+      const result = spinner.skip('skip message')
+      expect(result).toBe(spinner)
+    })
+
+    it('should support skipAndStop() method', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.skipAndStop('final skip')
+      expect(result).toBe(spinner)
+      expect(spinner.isSpinning).toBe(false)
+    })
+
+    it('should chain skip() calls', () => {
+      const spinner = Spinner()
+      const result = spinner
+        .skip('first skip')
+        .skip('second skip')
+        .skip('third skip')
+      expect(result).toBe(spinner)
+    })
   })
 
   describe('Status methods (show status while continuing to spin)', () => {
@@ -303,6 +326,14 @@ describe('spinner', () => {
       const spinner = Spinner()
       spinner.start()
       const result = spinner.log('log message')
+      expect(result).toBe(spinner)
+      expect(spinner.isSpinning).toBe(true)
+    })
+
+    it('should support skip() method', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.skip('skip message')
       expect(result).toBe(spinner)
       expect(spinner.isSpinning).toBe(true)
     })
@@ -387,6 +418,14 @@ describe('spinner', () => {
       const spinner = Spinner()
       spinner.start()
       const result = spinner.logAndStop('log message')
+      expect(result).toBe(spinner)
+      expect(spinner.isSpinning).toBe(false)
+    })
+
+    it('should support skipAndStop() method', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.skipAndStop('skip message')
       expect(result).toBe(spinner)
       expect(spinner.isSpinning).toBe(false)
     })
