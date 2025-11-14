@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "3.3.5",
+  "version": "3.3.6",
   "packageManager": "pnpm@10.22.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -744,8 +744,15 @@
     }
   },
   "pnpm": {
+    "overrides": {
+      "@npmcli/arborist": "9.1.6",
+      "@npmcli/run-script": "10.0.0",
+      "semver": "7.7.2",
+      "ansi-regex": "6.2.2",
+      "lru-cache": "11.2.2"
+    },
     "patchedDependencies": {
-      "@npmcli/run-script@9.1.0": "patches/@npmcli__run-script@9.1.0.patch",
+      "@npmcli/run-script@10.0.0": "patches/@npmcli__run-script@10.0.0.patch",
       "node-gyp@11.5.0": "patches/node-gyp@11.5.0.patch"
     }
   }

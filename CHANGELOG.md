@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.6) - 2025-11-13
+
+### Changed
+
+- **deps**: Add pnpm overrides to consolidate package versions
+  - Force single versions: `@npmcli/arborist@9.1.6`, `@npmcli/run-script@10.0.0`, `semver@7.7.2`, `ansi-regex@6.2.2`, `lru-cache@11.2.2`
+  - Update patch from `@npmcli/run-script@9.1.0` to `@npmcli/run-script@10.0.0`
+  - Reduces duplicate dependencies and potential version conflicts
+
 ## [3.3.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.5) - 2025-11-13
 
 ### Fixed
