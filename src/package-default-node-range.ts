@@ -3,7 +3,7 @@
  */
 
 const { maintainedNodeVersions } = require('#lib/maintained-node-versions')
-const semver = require('./external/semver')
+const semver = require('./external/semver.js')
 
 const packageDefaultNodeRange = `>=${semver.parse(maintainedNodeVersions.last).major}`
 

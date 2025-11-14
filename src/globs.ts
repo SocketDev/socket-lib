@@ -91,7 +91,7 @@ let _picomatch: typeof import('picomatch') | undefined
 function getPicomatch() {
   if (_picomatch === undefined) {
     // The 'picomatch' package is browser safe.
-    _picomatch = /*@__PURE__*/ require('./external/picomatch')
+    _picomatch = /*@__PURE__*/ require('./external/picomatch.js')
   }
   return _picomatch as typeof import('picomatch')
 }
@@ -104,7 +104,7 @@ let _fastGlob: typeof import('fast-glob') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFastGlob() {
   if (_fastGlob === undefined) {
-    _fastGlob = /*@__PURE__*/ require('./external/fast-glob')
+    _fastGlob = /*@__PURE__*/ require('./external/fast-glob.js')
   }
   return _fastGlob as typeof import('fast-glob')
 }

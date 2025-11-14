@@ -64,7 +64,7 @@ let _npmPackageArg: typeof import('npm-package-arg') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getNpmPackageArg() {
   if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('./external/npm-package-arg')
+    _npmPackageArg = /*@__PURE__*/ require('./external/npm-package-arg.js')
   }
   return _npmPackageArg as typeof import('npm-package-arg')
 }
@@ -73,7 +73,7 @@ let _libnpmexec: typeof import('./external/libnpmexec') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getLibnpmexec() {
   if (_libnpmexec === undefined) {
-    _libnpmexec = /*@__PURE__*/ require('./external/libnpmexec')
+    _libnpmexec = /*@__PURE__*/ require('./external/libnpmexec.js')
   }
   return _libnpmexec!
 }
@@ -82,7 +82,7 @@ let _pacote: typeof import('pacote') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPacote() {
   if (_pacote === undefined) {
-    _pacote = /*@__PURE__*/ require('./external/pacote')
+    _pacote = /*@__PURE__*/ require('./external/pacote.js')
   }
   return _pacote as typeof import('pacote')
 }
@@ -91,7 +91,7 @@ let _arborist: typeof import('@npmcli/arborist') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getArborist() {
   if (_arborist === undefined) {
-    _arborist = /*@__PURE__*/ require('./external/@npmcli/arborist')
+    _arborist = /*@__PURE__*/ require('./external/@npmcli/arborist.js')
   }
   return _arborist!
 }

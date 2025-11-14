@@ -132,7 +132,7 @@ let _npmCliPromiseSpawn:
 /*@__NO_SIDE_EFFECTS__*/
 function getNpmcliPromiseSpawn() {
   if (_npmCliPromiseSpawn === undefined) {
-    _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn')
+    _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn.js')
   }
   return _npmCliPromiseSpawn as unknown as typeof import('@npmcli/promise-spawn')
 }

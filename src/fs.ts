@@ -1154,7 +1154,7 @@ export async function safeDelete(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
 ) {
-  const { deleteAsync } = /*@__PURE__*/ require('./external/del')
+  const { deleteAsync } = /*@__PURE__*/ require('./external/del.js')
   const opts = { __proto__: null, ...options } as RemoveOptions
   const patterns = isArray(filepath)
     ? filepath.map(pathLikeToString)
@@ -1227,7 +1227,7 @@ export function safeDeleteSync(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
 ) {
-  const { deleteSync } = /*@__PURE__*/ require('./external/del')
+  const { deleteSync } = /*@__PURE__*/ require('./external/del.js')
   const opts = { __proto__: null, ...options } as RemoveOptions
   const patterns = isArray(filepath)
     ? filepath.map(pathLikeToString)

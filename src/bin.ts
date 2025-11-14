@@ -47,7 +47,7 @@ let _which: typeof import('which') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getWhich() {
   if (_which === undefined) {
-    _which = /*@__PURE__*/ require('./external/which')
+    _which = /*@__PURE__*/ require('./external/which.js')
   }
   return _which!
 }

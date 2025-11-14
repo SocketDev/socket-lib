@@ -7,7 +7,7 @@
 
 const { freeze: ObjectFreeze } = Object
 
-const yarnPkgExtensions = require('./external/@yarnpkg/extensions')
+const yarnPkgExtensions = require('./external/@yarnpkg/extensions.js')
 
 const packageExtensions = ObjectFreeze(
   [
