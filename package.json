@@ -672,6 +672,7 @@
     "@babel/traverse": "7.28.4",
     "@babel/types": "7.28.4",
     "@biomejs/biome": "2.2.4",
+    "@dotenvx/dotenvx": "1.49.0",
     "@eslint/compat": "1.4.0",
     "@eslint/js": "9.38.0",
     "@inquirer/checkbox": "4.3.1",
