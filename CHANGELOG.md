@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.4.0) - 2025-11-14
+
+### Added
+
+- **Spinner**: New `skip()` and `skipAndStop()` methods for displaying skipped operations
+  - `skip(text)`: Display skip message alongside spinner (e.g., "Skipping optional step...")
+  - `skipAndStop(text)`: Display skip message and stop spinner in one call
+  - Uses cyan ↻ (refresh/reload) symbol with @ ASCII fallback
+  - Normalizes text formatting consistently with other spinner methods
+  - Useful for communicating skipped steps during long-running operations
+
+- **Logger**: New `skip()` method and symbol for skipped operations
+  - `LOG_SYMBOLS.skip`: New cyan ↻ symbol for skip output (@ ASCII fallback)
+  - `skip(message)`: Display skip messages with dedicated symbol
+  - Complements existing info/step/success/error/warning/reason methods
+
 ## [3.3.11](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.11) - 2025-11-14
 
 ### Fixed
