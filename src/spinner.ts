@@ -270,17 +270,6 @@ function desc(value: unknown) {
 }
 
 /**
- * Normalize text input by trimming leading whitespace.
- * Non-string values are converted to empty string.
- * @param value - Text to normalize
- * @returns Normalized string with leading whitespace removed
- * @private
- */
-function normalizeText(value: unknown) {
-  return typeof value === 'string' ? value.trimStart() : ''
-}
-
-/**
  * Format progress information as a visual progress bar with percentage and count.
  * @param progress - Progress tracking information
  * @returns Formatted string with colored progress bar, percentage, and count
@@ -293,6 +282,17 @@ function formatProgress(progress: ProgressInfo): string {
   const bar = renderProgressBar(percentage)
   const count = unit ? `${current}/${total} ${unit}` : `${current}/${total}`
   return `${bar} ${percentage}% (${count})`
+}
+
+/**
+ * Normalize text input by trimming leading whitespace.
+ * Non-string values are converted to empty string.
+ * @param value - Text to normalize
+ * @returns Normalized string with leading whitespace removed
+ * @private
+ */
+function normalizeText(value: unknown) {
+  return typeof value === 'string' ? value.trimStart() : ''
 }
 
 /**
@@ -1130,24 +1130,15 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       stop(...args: unknown[]) {
-        // Clear the spinner text BEFORE stopping to prevent ghost frames.
-        // This ensures the terminal line is fully cleared before we stop the animation.
-        if (!args.length || !args[0]) {
-          super.text = ''
-        }
-
         // Clear internal state.
         this.#baseText = ''
         this.#progress = undefined
-        // Reset shimmer animation state if shimmer is enabled.
-        if (this.#shimmer) {
-          this.#shimmer.currentDir = DIR_LTR
-          this.#shimmer.step = 0
-        }
+        // Reset shimmer animation state.
+        this.#shimmer = undefined
+
         // Call parent stop (clears screen, sets isSpinning = false).
         const result = this.#apply('stop', args)
-        // Ensure text is cleared after stop completes.
-        super.text = ''
+
         return result
       }
 
@@ -1468,7 +1459,19 @@ export async function withSpinner<T>(
   try {
     return await operation()
   } finally {
+    const wasSpinning = spinner.isSpinning
     spinner.stop()
+
+    // Clear any remaining spinner artifacts that yocto-spinner's clear() misses.
+    // Despite yocto-spinner calling clear(), ANSI-colored spinner frames can sometimes
+    // leave visual artifacts on the line. A final explicit clear ensures clean output.
+    // Only clear if spinner was actually running (which means it was already interactive).
+    if (wasSpinning) {
+      // Clear current line thoroughly (where spinner was).
+      // Use \r to move to start, \x1B[2K to clear entire line.
+      process.stderr.write('\r\x1B[2K')
+    }
+
     // Restore previous options
     if (savedColor !== undefined) {
       spinner.color = savedColor
