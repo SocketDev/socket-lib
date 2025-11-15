@@ -32,15 +32,9 @@ import { resolveColor } from './themes/utils'
 
 /**
  * Symbol types for status messages.
- * Maps to log symbols: fail (✗), info (ℹ), reason (∴), skip (↻), success (✓), warn (⚠).
+ * Maps to log symbols: fail (✗), info (ℹ), skip (↻), success (✓), warn (⚠).
  */
-export type SymbolType =
-  | 'fail'
-  | 'info'
-  | 'reason'
-  | 'skip'
-  | 'success'
-  | 'warn'
+export type SymbolType = 'fail' | 'info' | 'skip' | 'success' | 'warn'
 
 /**
  * Progress tracking information for display in spinner.
@@ -149,11 +143,6 @@ export type Spinner = {
   progress(current: number, total: number, unit?: string | undefined): Spinner
   /** Increment progress by specified amount (default: 1) */
   progressStep(amount?: number): Spinner
-
-  /** Show reasoning (∴) message without stopping the spinner */
-  reason(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show reasoning (∴) message and stop the spinner, auto-clearing the line */
-  reasonAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
 
   /** Set complete shimmer configuration */
   setShimmer(config: ShimmerConfig): Spinner
@@ -997,45 +986,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       }
 
       /**
-       * Show a reasoning/working message (∴) without stopping the spinner.
-       * Outputs to stderr and continues spinning.
-       *
-       * @param text - Reasoning message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       */
-      reason(text?: string | undefined, ...extras: unknown[]) {
-        return this.#showStatusAndKeepSpinning('reason', [text, ...extras])
-      }
-
-      /**
-       * Show a reasoning/working message (∴) and stop the spinner.
-       * Auto-clears the spinner line before displaying the message.
-       *
-       * Implementation note: Unlike other *AndStop methods (successAndStop, failAndStop, etc.),
-       * this method cannot use #apply() with a 'reason' method name because yocto-spinner
-       * doesn't have a built-in 'reason' method. Instead, we manually stop the spinner then
-       * log the message with the reason symbol. This matches the pattern used by methods
-       * like debugAndStop() and maintains consistency with normalizeText() usage and empty
-       * string handling (see #apply's stop method handling for the pattern).
-       *
-       * @param text - Reasoning message to display
-       * @param extras - Additional values to log
-       * @returns This spinner for chaining
-       */
-      reasonAndStop(text?: string | undefined, ...extras: unknown[]) {
-        // Stop spinner first (can't use #apply('reason') since yocto-spinner has no 'reason' method)
-        this.#apply('stop', [])
-        // Normalize text (trim leading whitespace) like other methods
-        const normalized = normalizeText(text)
-        // Only log if we have actual content (consistent with #apply's stop method handling)
-        if (normalized) {
-          logger.error(`${LOG_SYMBOLS.reason} ${normalized}`, ...extras)
-        }
-        return this
-      }
-
-      /**
        * Show a skip message (↻) without stopping the spinner.
        * Outputs to stderr and continues spinning.
        *
@@ -1051,9 +1001,10 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * Show a skip message (↻) and stop the spinner.
        * Auto-clears the spinner line before displaying the message.
        *
-       * Implementation note: Similar to reasonAndStop(), this method cannot use #apply()
-       * with a 'skip' method name because yocto-spinner doesn't have a built-in 'skip'
-       * method. Instead, we manually stop the spinner then log the message with the skip symbol.
+       * Implementation note: Unlike other *AndStop methods (successAndStop, failAndStop, etc.),
+       * this method cannot use #apply() with a 'skip' method name because yocto-spinner doesn't
+       * have a built-in 'skip' method. Instead, we manually stop the spinner then log the message
+       * with the skip symbol.
        *
        * @param text - Skip message to display
        * @param extras - Additional values to log

@@ -1079,36 +1079,6 @@ describe('Logger', () => {
     })
   })
 
-  describe('reason() method', () => {
-    it('should log reason message with symbol', () => {
-      testLogger.reason('processing dependencies')
-      const output = stderrChunks.join('')
-      expect(output).toContain('processing dependencies')
-    })
-
-    it('should support multiple arguments', () => {
-      testLogger.reason('Found', 3, 'issues')
-      const output = stderrChunks.join('')
-      expect(output).toContain('Found')
-    })
-
-    it('should return logger instance for chaining', () => {
-      const result = testLogger.reason('analyzing...')
-      expect(result).toBe(testLogger)
-    })
-
-    it('should handle empty reason', () => {
-      testLogger.reason()
-      expect(stderrChunks.length).toBeGreaterThan(0)
-    })
-
-    it('should strip existing symbols', () => {
-      testLogger.reason('∴ already has symbol')
-      const output = stderrChunks.join('')
-      expect(output).toContain('already has symbol')
-    })
-  })
-
   describe('skip() method', () => {
     it('should log skip message with symbol', () => {
       testLogger.skip('Test skipped')

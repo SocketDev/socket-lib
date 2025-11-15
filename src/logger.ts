@@ -26,7 +26,6 @@ import { THEMES } from './themes/themes'
  * console.log(`${LOG_SYMBOLS.info} Information message`)
  * console.log(`${LOG_SYMBOLS.step} Processing step`)
  * console.log(`${LOG_SYMBOLS.progress} Working on task`)
- * console.log(`${LOG_SYMBOLS.reason} Working through logic`)
  * ```
  */
 type LogSymbols = {
@@ -36,8 +35,6 @@ type LogSymbols = {
   info: string
   /** Cyan colored progress indicator symbol (∴ or :. in ASCII) */
   progress: string
-  /** Dimmed yellow reasoning/working symbol (∴ or :. in ASCII) */
-  reason: string
   /** Cyan colored skip symbol (↻ or @ in ASCII) */
   skip: string
   /** Cyan colored step symbol (→ or > in ASCII) */
@@ -164,7 +161,6 @@ function applyColor(
  * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Theme error color ✖
  * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Theme info color ℹ
  * console.log(`${LOG_SYMBOLS.progress} Working on task`)   // Theme step color ∴
- * console.log(`${LOG_SYMBOLS.reason} Analyzing dependencies`) // Dimmed yellow ∴
  * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Theme step color →
  * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
  * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Theme warning color ⚠
@@ -602,9 +598,6 @@ export class Logger {
       fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
       info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
       progress: applyColor(supported ? '∴' : ':.', theme.colors.step, colors),
-      reason: colors.dim(
-        applyColor(supported ? '∴' : ':.', theme.colors.warning, colors),
-      ),
       skip: applyColor(supported ? '↻' : '@', theme.colors.step, colors),
       step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
       success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
@@ -1394,30 +1387,6 @@ export class Logger {
     streamObj.write(`${symbols.progress} ${text}`)
     this[lastWasBlankSymbol](false)
     return this
-  }
-
-  /**
-   * Logs a reasoning/working message with a dimmed yellow therefore symbol.
-   *
-   * Automatically prefixes the message with `LOG_SYMBOLS.reason` (dimmed yellow ∴).
-   * Useful for showing intermediate reasoning, logic steps, or "working" output
-   * that leads to a conclusion. Always outputs to stderr. If the message starts
-   * with an existing symbol, it will be stripped and replaced.
-   *
-   * @param args - Message and additional arguments to log
-   * @returns The logger instance for chaining
-   *
-   * @example
-   * ```typescript
-   * logger.step('Analyzing package security')
-   * logger.reason('Found 3 direct dependencies')
-   * logger.reason('Checking 47 transitive dependencies')
-   * logger.reason('Risk score: 8.5/10')
-   * logger.fail('Package blocked due to high risk')
-   * ```
-   */
-  reason(...args: unknown[]): this {
-    return this.#symbolApply('reason', args)
   }
 
   /**
