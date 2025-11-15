@@ -3,8 +3,8 @@
 import { createHash } from 'crypto'
 
 import { readDirNamesSync, safeDelete, safeMkdir, safeMkdirSync } from './fs'
-import { normalizePath } from './path'
-import { getSocketDlxDir } from './paths'
+import { normalizePath } from './paths/normalize'
+import { getSocketDlxDir } from './paths/socket'
 import { pEach } from './promises'
 
 let _fs: typeof import('fs') | undefined

@@ -10,15 +10,36 @@
 
 import { describe, expect, it } from 'vitest'
 
+// Filenames
+import {
+  CHANGELOG_MD,
+  DOT_PACKAGE_LOCK_JSON,
+  ESLINT_CONFIG_JS,
+  EXTENSIONS_JSON,
+  GITIGNORE,
+  LICENSE,
+  LICENSE_MD,
+  LICENSE_ORIGINAL,
+  MANIFEST_JSON,
+  PACKAGE_JSON,
+  README_MD,
+  TSCONFIG_JSON,
+} from '@socketsecurity/lib/paths/filenames'
+
+// Directory names
 import {
   CACHE_DIR,
   CACHE_TTL_DIR,
-  CHANGELOG_MD,
   DOT_GIT_DIR,
   DOT_GITHUB,
-  DOT_PACKAGE_LOCK_JSON,
   DOT_SOCKET_DIR,
-  ESLINT_CONFIG_JS,
+  NODE_MODULES,
+  NODE_MODULES_GLOB_RECURSIVE,
+  SLASH_NODE_MODULES_SLASH,
+} from '@socketsecurity/lib/paths/dirnames'
+
+// File extensions
+import {
   EXT_CJS,
   EXT_CMD,
   EXT_CTS,
@@ -33,27 +54,17 @@ import {
   EXT_PS1,
   EXT_YAML,
   EXT_YML,
-  EXTENSIONS,
-  EXTENSIONS_JSON,
-  GITIGNORE,
-  LICENSE,
+} from '@socketsecurity/lib/paths/exts'
+
+// Glob patterns
+import {
   LICENSE_GLOB,
   LICENSE_GLOB_RECURSIVE,
-  LICENSE_MD,
-  LICENSE_ORIGINAL,
   LICENSE_ORIGINAL_GLOB,
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
-  MANIFEST_JSON,
-  NODE_MODULES,
-  NODE_MODULES_GLOB_RECURSIVE,
-  PACKAGE_JSON,
   README_GLOB,
   README_GLOB_RECURSIVE,
-  README_MD,
-  ROLLUP_EXTERNAL_SUFFIX,
-  SLASH_NODE_MODULES_SLASH,
-  TSCONFIG_JSON,
-} from '@socketsecurity/lib/constants/paths'
+} from '@socketsecurity/lib/paths/globs'
 
 describe('constants/paths', () => {
   describe('file names', () => {
@@ -316,21 +327,6 @@ describe('constants/paths', () => {
     })
   })
 
-  describe('miscellaneous constants', () => {
-    it('should export EXTENSIONS', () => {
-      expect(EXTENSIONS).toBe('extensions')
-    })
-
-    it('should export ROLLUP_EXTERNAL_SUFFIX', () => {
-      expect(ROLLUP_EXTERNAL_SUFFIX).toBe('__rollup_external')
-    })
-
-    it('should be strings', () => {
-      expect(typeof EXTENSIONS).toBe('string')
-      expect(typeof ROLLUP_EXTERNAL_SUFFIX).toBe('string')
-    })
-  })
-
   describe('constant relationships', () => {
     it('should have LICENSE_MD contain LICENSE', () => {
       expect(LICENSE_MD).toContain(LICENSE)
@@ -338,10 +334,6 @@ describe('constants/paths', () => {
 
     it('should have LICENSE_ORIGINAL contain LICENSE', () => {
       expect(LICENSE_ORIGINAL).toContain(LICENSE)
-    })
-
-    it('should have EXTENSIONS_JSON contain EXTENSIONS', () => {
-      expect(EXTENSIONS_JSON).toContain(EXTENSIONS)
     })
 
     it('should have consistent cache directory naming', () => {

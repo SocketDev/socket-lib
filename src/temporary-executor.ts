@@ -4,7 +4,7 @@
  */
 
 import { WIN32 } from '#constants/platform'
-import { normalizePath } from './path'
+import { normalizePath } from './paths/normalize'
 
 /**
  * Detects if the current process is running in a temporary package execution context

@@ -30,71 +30,22 @@
  * - dlxPackage() combines both for convenience
  */
 
+import fs from 'node:fs'
 import path from 'path'
 
 import { WIN32 } from './constants/platform'
 import { getPacoteCachePath } from './constants/packages'
 import { generateCacheKey } from './dlx'
+import Arborist from './external/@npmcli/arborist'
+import libnpmexec from './external/libnpmexec'
+import npmPackageArg from './external/npm-package-arg'
+import pacote from './external/pacote'
 import { readJsonSync, safeMkdir } from './fs'
-import { normalizePath } from './path'
-import { getSocketDlxDir } from './paths'
+import { normalizePath } from './paths/normalize'
+import { getSocketDlxDir } from './paths/socket'
 import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
-
-let _fs: typeof import('fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js fs module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('fs')
-}
-
-let _npmPackageArg: typeof import('npm-package-arg') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getNpmPackageArg() {
-  if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('./external/npm-package-arg.js')
-  }
-  return _npmPackageArg as typeof import('npm-package-arg')
-}
-
-let _libnpmexec: typeof import('./external/libnpmexec') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getLibnpmexec() {
-  if (_libnpmexec === undefined) {
-    _libnpmexec = /*@__PURE__*/ require('./external/libnpmexec.js')
-  }
-  return _libnpmexec!
-}
-
-let _pacote: typeof import('pacote') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getPacote() {
-  if (_pacote === undefined) {
-    _pacote = /*@__PURE__*/ require('./external/pacote.js')
-  }
-  return _pacote as typeof import('pacote')
-}
-
-let _arborist: typeof import('@npmcli/arborist') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getArborist() {
-  if (_arborist === undefined) {
-    _arborist = /*@__PURE__*/ require('./external/@npmcli/arborist.js')
-  }
-  return _arborist!
-}
 
 /**
  * Regex to check if a version string contains range operators.
@@ -185,8 +136,8 @@ function parsePackageSpec(spec: string): {
   version: string | undefined
 } {
   try {
-    const npa = getNpmPackageArg()
-    const parsed = npa(spec)
+    // npmPackageArg is imported at the top
+    const parsed = npmPackageArg(spec)
 
     // Extract version from different types of specs.
     // For registry specs, use fetchSpec (the version/range).
@@ -264,7 +215,7 @@ async function ensurePackageInstalled(
   return await processLock.withLock(
     lockPath,
     async () => {
-      const fs = getFs()
+      // fs is imported at the top
       // Double-check if already installed (unless force).
       // Another process may have installed while waiting for lock.
       if (!force && fs.existsSync(installedDir)) {
@@ -279,7 +230,7 @@ async function ensurePackageInstalled(
       // Pacote leverages npm cache when available but doesn't require npm CLI.
       const pacoteCachePath = getPacoteCachePath()
       try {
-        await getPacote().extract(packageSpec, installedDir, {
+        await pacote.extract(packageSpec, installedDir, {
           // Use consistent pacote cache path (respects npm cache locations when available).
           cache: pacoteCachePath || path.join(packageDir, '.cache'),
         })
@@ -287,7 +238,7 @@ async function ensurePackageInstalled(
         // Install dependencies using Arborist.
         // pacote.extract() only extracts the package tarball, it does NOT install dependencies.
         // We must use Arborist to install dependencies after extraction.
-        const Arborist = getArborist()
+        // Arborist is imported at the top
         const arb = new Arborist({
           path: installedDir,
           cache: pacoteCachePath || path.join(packageDir, '.cache'),
@@ -354,7 +305,7 @@ async function ensurePackageInstalled(
  * Aligns with npm/npx binary resolution strategy.
  */
 function resolveBinaryPath(basePath: string): string {
-  const fs = getFs()
+  // fs is imported at the top
 
   if (!WIN32) {
     // Unix: use path directly
@@ -418,7 +369,7 @@ function findBinaryPath(
     } else {
       // Multiple binaries - use npm's battle-tested resolution strategy first.
       try {
-        const { getBinFromManifest } = getLibnpmexec()
+        const { getBinFromManifest } = libnpmexec
         binName = getBinFromManifest({
           name: packageName,
           bin: binObj,
@@ -527,7 +478,7 @@ function makePackageBinsExecutable(
     return
   }
 
-  const fs = getFs()
+  // fs is imported at the top
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
   )

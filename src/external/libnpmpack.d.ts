@@ -1,2 +1,1 @@
-declare function libnpmpack(spec: string, options?: any): Promise<any>
-export = libnpmpack
+export default function libnpmpack(spec: string, options?: any): Promise<any>

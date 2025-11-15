@@ -5,7 +5,7 @@
 
 import { WIN32 } from '#constants/platform'
 
-import { search } from './strings'
+import { search } from '../strings'
 
 // Character code constants.
 // '\'

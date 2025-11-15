@@ -55,7 +55,7 @@ import {
 import {
   resolvePackageJsonDirname,
   resolvePackageJsonPath,
-} from './packages/paths'
+} from './paths/packages'
 import {
   fetchPackageProvenance,
   getProvenanceDetails,

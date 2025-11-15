@@ -4,7 +4,15 @@
  */
 
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
+import * as fastGlob from './external/fast-glob.js'
+import picomatch from './external/picomatch.js'
+
 import { objectFreeze as ObjectFreeze } from './objects'
+import {
+  LICENSE_GLOB,
+  LICENSE_GLOB_RECURSIVE,
+  LICENSE_ORIGINAL_GLOB_RECURSIVE,
+} from './paths/globs'
 
 // Type definitions
 type Pattern = string
@@ -82,33 +90,6 @@ export const defaultIgnore = ObjectFreeze([
   '**/bower_components',
 ])
 
-let _picomatch: typeof import('picomatch') | undefined
-/**
- * Lazily load the picomatch module.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPicomatch() {
-  if (_picomatch === undefined) {
-    // The 'picomatch' package is browser safe.
-    _picomatch = /*@__PURE__*/ require('./external/picomatch.js')
-  }
-  return _picomatch as typeof import('picomatch')
-}
-
-let _fastGlob: typeof import('fast-glob') | undefined
-/**
- * Lazily load the fast-glob module.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFastGlob() {
-  if (_fastGlob === undefined) {
-    _fastGlob = /*@__PURE__*/ require('./external/fast-glob.js')
-  }
-  return _fastGlob as typeof import('fast-glob')
-}
-
 /**
  * Create a stream of license file paths matching glob patterns.
  */
@@ -128,15 +109,10 @@ export function globStreamLicenses(
     '**/*.{cjs,cts,js,json,mjs,mts,ts}',
   ]
   if (ignoreOriginals) {
-    const { LICENSE_ORIGINAL_GLOB_RECURSIVE } =
-      /*@__INLINE__*/ require('#constants/paths') as typeof import('#constants/paths')
     ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
   }
-  const fastGlob = getFastGlob()
-  const paths =
-    /*@__INLINE__*/ require('#constants/paths') as typeof import('#constants/paths')
   return fastGlob.globStream(
-    [recursive ? paths.LICENSE_GLOB_RECURSIVE : paths.LICENSE_GLOB],
+    [recursive ? LICENSE_GLOB_RECURSIVE : LICENSE_GLOB],
     {
       __proto__: null,
       absolute: true,
@@ -169,8 +145,6 @@ export function getGlobMatcher(
   const negativePatterns = patterns
     .filter(p => p.startsWith('!'))
     .map(p => p.slice(1))
-
-  const picomatch = getPicomatch()
 
   // Use ignore option for negation patterns.
   const matchOptions = {

@@ -7,22 +7,14 @@ import { existsSync, promises as fs } from 'fs'
 
 import { WIN32 } from '#constants/platform'
 
+import path from 'node:path'
+import npmPackageArg from '../external/npm-package-arg'
+import { spawn } from '../spawn'
+
 import type { PackageJson } from '../packages'
-import { isAbsolute, isPath, trimLeadingDotSlash } from '../path'
+import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { readPackageJson } from './operations'
-import { getOsTmpDir } from '#lib/paths'
-
-let _path: typeof import('node:path') | undefined
-
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('path')
-}
+import { getOsTmpDir } from '../paths/socket'
 
 /**
  * Copy options for fs.cp with cross-platform retry support.
@@ -41,7 +33,7 @@ const FS_CP_OPTIONS = {
  * Resolve a path to its real location, handling symlinks.
  */
 async function resolveRealPath(pathStr: string): Promise<string> {
-  const path = getPath()
+  // path is imported at the top
   return await fs.realpath(pathStr).catch(() => path.resolve(pathStr))
 }
 
@@ -87,7 +79,7 @@ export async function isolatePackage(
   packageSpec: string,
   options?: IsolatePackageOptions | undefined,
 ): Promise<IsolatePackageResult> {
-  const path = getPath()
+  // path is imported at the top
   const opts = { __proto__: null, ...options } as IsolatePackageOptions
   const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
 
@@ -117,8 +109,8 @@ export async function isolatePackage(
     packageName = pkgJson.name as string
   } else {
     // Parse as npm package spec.
-    const npa = /*@__PURE__*/ require('../external/npm-package-arg')
-    const parsed = npa(packageSpec)
+    // npmPackageArg is imported at the top
+    const parsed = npmPackageArg(packageSpec)
 
     packageName = parsed.name
 
@@ -175,7 +167,7 @@ export async function isolatePackage(
     if (install) {
       await install(packageTempDir)
     } else {
-      const { spawn } = /*@__PURE__*/ require('../spawn')
+      // spawn is imported at the top
       const packageInstallSpec = spec.startsWith('https://')
         ? spec
         : `${packageName}@${spec}`
@@ -243,7 +235,7 @@ export async function isolatePackage(
   if (install) {
     await install(installedPath)
   } else {
-    const { spawn } = /*@__PURE__*/ require('../spawn')
+    // spawn is imported at the top
     await spawn('pnpm', ['install'], {
       cwd: installedPath,
       shell: WIN32,

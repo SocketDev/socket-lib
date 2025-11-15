@@ -1,15 +1,13 @@
-interface FetchOptions {
+export interface FetchOptions {
   cache?: string
   headers?: Record<string, string>
   [key: string]: any
 }
 
-declare function makeFetchHappen(
-  url: string,
-  opts?: FetchOptions,
-): Promise<Response>
-declare namespace makeFetchHappen {
-  function defaults(opts: FetchOptions): typeof makeFetchHappen
+export interface MakeFetchHappen {
+  (url: string, opts?: FetchOptions): Promise<Response>
+  defaults(opts: FetchOptions): MakeFetchHappen
 }
 
-export = makeFetchHappen
+declare const makeFetchHappen: MakeFetchHappen
+export default makeFetchHappen

@@ -2,7 +2,7 @@
  * @fileoverview Package.json path resolution utilities.
  */
 
-import { normalizePath } from '../path'
+import { normalizePath } from './normalize'
 
 let _path: typeof import('path') | undefined
 /**

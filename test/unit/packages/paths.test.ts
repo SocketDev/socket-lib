@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest'
 import {
   resolvePackageJsonDirname,
   resolvePackageJsonPath,
-} from '@socketsecurity/lib/packages/paths'
+} from '@socketsecurity/lib/paths/packages'
 
 describe('packages/paths', () => {
   describe('resolvePackageJsonDirname', () => {

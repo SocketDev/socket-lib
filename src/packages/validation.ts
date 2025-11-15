@@ -2,20 +2,7 @@
  * @fileoverview Package name validation utilities.
  */
 
-let _validateNpmPackageName:
-  | typeof import('validate-npm-package-name')
-  | undefined
-/**
- * Get the validate-npm-package-name module.
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getValidateNpmPackageName() {
-  if (_validateNpmPackageName === undefined) {
-    _validateNpmPackageName =
-      /*@__PURE__*/ require('../external/validate-npm-package-name')
-  }
-  return _validateNpmPackageName as typeof import('validate-npm-package-name')
-}
+import validateNpmPackageName from '../external/validate-npm-package-name'
 
 /**
  * Check if package name is a blessed Socket.dev package.
@@ -49,6 +36,6 @@ export function isRegistryFetcherType(type: string): boolean {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isValidPackageName(name: string): boolean {
-  const validateNpmPackageName = getValidateNpmPackageName()
+  // validateNpmPackageName is imported at the top
   return validateNpmPackageName(name).validForOldPackages
 }

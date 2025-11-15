@@ -35,7 +35,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 import { safeDeleteSync } from './fs'
-import { getOsTmpDir } from './paths'
+import { getOsTmpDir } from './paths/socket'
 import { z } from './zod'
 
 // Define BufferEncoding type for TypeScript compatibility.

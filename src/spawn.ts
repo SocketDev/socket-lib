@@ -28,7 +28,12 @@
 
 import { getAbortSignal, getSpinner } from '#constants/process'
 
+import npmCliPromiseSpawn from './external/@npmcli/promise-spawn'
+import path from 'node:path'
+
 import { isArray } from './arrays'
+import { whichSync } from './bin'
+import { isPath } from './paths/normalize'
 
 const abortSignal = getAbortSignal()
 const spinner = getSpinner()
@@ -110,51 +115,6 @@ export type PromiseSpawnResult = Promise<{
 }> & {
   process: ChildProcessType
   stdin: WritableStreamType | null
-}
-
-let _npmCliPromiseSpawn:
-  | ((
-      cmd: string,
-      args: string[],
-      options?: PromiseSpawnOptions | undefined,
-      extra?: SpawnExtra | undefined,
-    ) => PromiseSpawnResult)
-  | undefined
-/**
- * Lazily load the `@npmcli/promise-spawn` module for async process spawning.
- *
- * @returns The promise-spawn module that provides Promise-based spawn functionality
- *
- * @example
- * const promiseSpawn = getNpmcliPromiseSpawn()
- * await promiseSpawn('git', ['status'])
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getNpmcliPromiseSpawn() {
-  if (_npmCliPromiseSpawn === undefined) {
-    _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn.js')
-  }
-  return _npmCliPromiseSpawn as unknown as typeof import('@npmcli/promise-spawn')
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the `path` module to avoid Webpack bundling issues.
- *
- * @returns The Node.js `path` module
- *
- * @example
- * const path = getPath()
- * const basename = path.basename('/foo/bar.txt')
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
 }
 
 /**
@@ -560,6 +520,28 @@ export function spawn(
   options?: SpawnOptions | undefined,
   extra?: SpawnExtra | undefined,
 ): SpawnResult {
+  const {
+    spinner: optionsSpinner = spinner,
+    stripAnsi: shouldStripAnsi = true,
+    ...rawSpawnOptions
+  } = { __proto__: null, ...options } as SpawnOptions
+  const spinnerInstance = optionsSpinner
+  const spawnOptions = { __proto__: null, ...rawSpawnOptions }
+  const { env, shell, stdio, stdioString = true } = spawnOptions
+  const cwd = spawnOptions.cwd ? String(spawnOptions.cwd) : undefined
+  // Resolve binary names to full paths using which.
+  // If cmd is not a path (absolute or relative), resolve it via PATH.
+  // If cmd is already a path, use it as-is.
+  let actualCmd = cmd
+  if (!isPath(cmd)) {
+    // Binary name - resolve via PATH using which
+    const resolved = whichSync(cmd, { cwd, nothrow: true })
+    if (resolved && typeof resolved === 'string') {
+      actualCmd = resolved
+    }
+    // If which returns null, keep original cmd and let spawn fail naturally
+  }
+
   // Windows cmd.exe command resolution for .cmd/.bat/.ps1 files:
   //
   // When shell: true is used on Windows with script files (.cmd, .bat, .ps1),
@@ -584,22 +566,13 @@ export function spawn(
   // - execa: uses cross-spawn under the hood for Windows support
   //
   // See: https://github.com/nodejs/node/issues/3675
-  const shell = getOwn(options, 'shell')
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
-  let actualCmd = cmd
   if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
-    const path = getPath()
+    // path is imported at the top
     // Extract just the command name without path and extension.
     actualCmd = path.basename(actualCmd, path.extname(actualCmd))
   }
-  const {
-    spinner: optionsSpinner = spinner,
-    stripAnsi: shouldStripAnsi = true,
-    ...spawnOptions
-  } = { __proto__: null, ...options } as SpawnOptions
-  const spinnerInstance = optionsSpinner
-  const { env, stdio, stdioString = true } = spawnOptions
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
   const wasSpinning = !!spinnerInstance?.isSpinning
@@ -609,7 +582,7 @@ export function spawn(
   if (shouldStopSpinner) {
     spinnerInstance.stop()
   }
-  const npmCliPromiseSpawn = getNpmcliPromiseSpawn()
+  // npmCliPromiseSpawn is imported at the top
   // Use __proto__: null to prevent prototype pollution when passing to
   // third-party code, Node.js built-ins, or JavaScript built-in methods.
   // https://github.com/npm/promise-spawn
@@ -739,14 +712,29 @@ export function spawnSync(
   args?: string[] | readonly string[],
   options?: SpawnSyncOptions | undefined,
 ): SpawnSyncReturns<string | Buffer> {
+  // Resolve binary names to full paths using whichSync.
+  // If cmd is not a path (absolute or relative), resolve it via PATH.
+  // If cmd is already a path, use it as-is.
+  let actualCmd = cmd
+  if (!isPath(cmd)) {
+    // Binary name - resolve via PATH using whichSync
+    const resolved = whichSync(cmd, {
+      cwd: getOwn(options, 'cwd') as string | undefined,
+      nothrow: true,
+    })
+    if (resolved && typeof resolved === 'string') {
+      actualCmd = resolved
+    }
+    // If whichSync returns null, keep original cmd and let spawn fail naturally
+  }
+
   // Windows cmd.exe command resolution for .cmd/.bat/.ps1 files:
   // See spawn() function above for detailed explanation of this approach.
   const shell = getOwn(options, 'shell')
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
-  let actualCmd = cmd
   if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
-    const path = getPath()
+    // path is imported at the top
     // Extract just the command name without path and extension.
     actualCmd = path.basename(actualCmd, path.extname(actualCmd))
   }

@@ -3,6 +3,9 @@
  * Provides various comparison utilities for arrays and collections.
  */
 
+import * as fastSort from './external/fast-sort.js'
+import * as semver from './external/semver.js'
+
 let _localeCompare: ((x: string, y: string) => number) | undefined
 /**
  * Compare two strings using locale-aware comparison.
@@ -56,8 +59,6 @@ export function naturalSorter<T>(
   arrayToSort: T[],
 ): ReturnType<FastSortFunction> {
   if (_naturalSorter === undefined) {
-    const fastSort =
-      /*@__PURE__*/ require('./external/fast-sort.js') as typeof import('fast-sort')
     _naturalSorter = fastSort.createNewSortInstance({
       comparer: naturalCompare,
     }) as FastSortFunction
@@ -78,8 +79,6 @@ export function compareStr(a: string, b: string): number {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
-  const semver =
-    /*@__PURE__*/ require('./external/semver.js') as typeof import('semver')
   const validA: string | null = semver.valid(a)
   const validB: string | null = semver.valid(b)
 

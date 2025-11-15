@@ -1,4 +1,4 @@
-interface Debug {
+export interface Debug {
   (namespace: string): DebugInstance
   enable(namespaces: string): void
   disable(): void
@@ -11,7 +11,7 @@ interface Debug {
   }
 }
 
-interface DebugInstance {
+export interface DebugInstance {
   (...args: any[]): void
   enabled: boolean
   log: (...args: any[]) => void
@@ -19,4 +19,4 @@ interface DebugInstance {
 }
 
 declare const debug: Debug
-export = debug
+export default debug

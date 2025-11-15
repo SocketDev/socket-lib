@@ -1,18 +1,18 @@
-declare namespace Cacache {
-  interface GetOptions {
+export namespace Cacache {
+  export interface GetOptions {
     integrity?: string | undefined
     size?: number | undefined
     memoize?: boolean | undefined
   }
 
-  interface PutOptions {
+  export interface PutOptions {
     integrity?: string | undefined
     size?: number | undefined
     metadata?: any | undefined
     memoize?: boolean | undefined
   }
 
-  interface CacheEntry {
+  export interface CacheEntry {
     data: Buffer
     integrity: string
     key: string
@@ -22,7 +22,7 @@ declare namespace Cacache {
     time: number
   }
 
-  interface LsEntry {
+  export interface LsEntry {
     key: string
     integrity: string
     path: string
@@ -32,7 +32,7 @@ declare namespace Cacache {
   }
 }
 
-declare const cacache: {
+export interface CacacheInstance {
   get: {
     (
       cache: string,
@@ -83,4 +83,5 @@ declare const cacache: {
   [key: string]: any
 }
 
-export = cacache
+declare const cacache: CacacheInstance
+export default cacache

@@ -1,2 +1,1 @@
-declare function isUnicodeSupported(): boolean
-export = isUnicodeSupported
+export default function isUnicodeSupported(): boolean

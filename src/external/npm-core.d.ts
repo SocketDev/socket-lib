@@ -9,4 +9,4 @@ export interface NpmCore {
 }
 
 declare const npmCore: NpmCore
-export = npmCore
+export default npmCore

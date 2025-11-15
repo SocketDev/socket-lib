@@ -15,6 +15,10 @@ const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
 const packumentCache = getPackumentCache()
 
+import npmPackageArg from '../external/npm-package-arg'
+import pacote from '../external/pacote'
+import semver from '../external/semver'
+
 import { isArray } from '../arrays'
 import { isObjectObject, objectEntries } from '../objects'
 import type { PackageJson, PacoteOptions } from '../packages'
@@ -22,34 +26,6 @@ import { resolvePackageJsonEntryExports } from './exports'
 import { isRegistryFetcherType } from './validation'
 
 const pkgScopePrefixRegExp = /^@socketregistry\//
-
-let _npmPackageArg: typeof import('npm-package-arg') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getNpmPackageArg() {
-  if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
-  }
-  return _npmPackageArg as typeof import('npm-package-arg')
-}
-
-let _pacote: typeof import('pacote') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getPacote() {
-  if (_pacote === undefined) {
-    _pacote = /*@__PURE__*/ require('../external/pacote')
-  }
-  return _pacote as typeof import('pacote')
-}
-
-let _semver: typeof import('semver') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getSemver() {
-  if (_semver === undefined) {
-    // The 'semver' package is browser safe.
-    _semver = /*@__PURE__*/ require('../external/semver')
-  }
-  return _semver as typeof import('semver')
-}
 
 /**
  * Create a package.json object for a Socket registry package.
@@ -107,7 +83,7 @@ export function createPackageJson(
               const strKey = String(pair[0])
               const result: [string, unknown] = [strKey, pair[1]]
               if (strKey === 'node') {
-                const semver = getSemver()
+                // module is imported at the top
                 const { 1: range } = result
                 if (
                   typeof range === 'string' &&
@@ -163,7 +139,7 @@ export async function fetchPackageManifest(
   if (signal?.aborted) {
     return undefined
   }
-  const pacote = getPacote()
+  // module is imported at the top
   let result: unknown
   try {
     result = await pacote.manifest(pkgNameOrId, pacoteOptions)
@@ -172,7 +148,7 @@ export async function fetchPackageManifest(
     return undefined
   }
   if (result) {
-    const npmPackageArg = getNpmPackageArg()
+    // module is imported at the top
     const spec = npmPackageArg(pkgNameOrId, pacoteOptions.where)
     if (isRegistryFetcherType(spec.type)) {
       return result
@@ -197,7 +173,7 @@ export async function fetchPackagePackument(
   pkgNameOrId: string,
   options?: PacoteOptions,
 ): Promise<unknown> {
-  const pacote = getPacote()
+  // module is imported at the top
   try {
     return await pacote.packument(pkgNameOrId, {
       __proto__: null,

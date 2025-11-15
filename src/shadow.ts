@@ -3,7 +3,7 @@
  * Provides logic to determine when shadow binary installation should be skipped.
  */
 
-import { normalizePath } from './path'
+import { normalizePath } from './paths/normalize'
 
 export interface ShadowInstallationOptions {
   cwd?: string | undefined

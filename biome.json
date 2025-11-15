@@ -172,6 +172,19 @@
       }
     },
     {
+      "includes": ["src/external/**/*.d.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/external/**/*.js", "src/external/**/*.cjs"],
       "linter": {
         "rules": {

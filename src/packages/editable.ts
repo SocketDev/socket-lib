@@ -2,15 +2,19 @@
  * @fileoverview Editable package.json manipulation utilities.
  */
 
+import EditablePackageJsonBase from '../external/@npmcli/package-json'
+import { parse, read } from '../external/@npmcli/package-json/lib/read-package'
+import { packageSort } from '../external/@npmcli/package-json/lib/sort'
+
 import type {
   EditablePackageJsonOptions,
   NormalizeOptions,
   PackageJson,
   SaveOptions,
 } from '../packages'
-import { isNodeModules } from '../path'
+import { isNodeModules } from '../paths/normalize'
 import { normalizePackageJson } from './normalize'
-import { resolvePackageJsonDirname } from './paths'
+import { resolvePackageJsonDirname } from '../paths/packages'
 
 const identSymbol = Symbol.for('indent')
 const newlineSymbol = Symbol.for('newline')
@@ -164,12 +168,7 @@ function getUtil() {
 /*@__NO_SIDE_EFFECTS__*/
 export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
   if (_EditablePackageJsonClass === undefined) {
-    const EditablePackageJsonBase =
-      /*@__PURE__*/ require('../external/@npmcli/package-json')
-    const { parse, read } =
-      /*@__PURE__*/ require('../external/@npmcli/package-json/lib/read-package')
-    const { packageSort } =
-      /*@__PURE__*/ require('../external/@npmcli/package-json/lib/sort')
+    // module is imported at the top
     _EditablePackageJsonClass =
       class EditablePackageJson extends (EditablePackageJsonBase as EditablePackageJsonConstructor) {
         static override fixSteps = EditablePackageJsonBase.fixSteps

@@ -3,6 +3,13 @@
  */
 
 import { getNpmLifecycleEvent as getNpmLifecycleEventEnv } from '#env/npm'
+import { lifecycleScriptNames as lifecycleScriptNamesImport } from '../lifecycle-script-names'
+import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from '../package-default-node-range'
+import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from '../package-default-socket-categories'
+import { packageExtensions as packageExtensionsImport } from '../package-extensions'
+
+import pacote from '../external/pacote'
+import { normalizePath } from '../paths/normalize'
 
 let _lifecycleScriptNames: string[]
 let _packageDefaultNodeRange: string | undefined
@@ -21,8 +28,8 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 /*@__NO_SIDE_EFFECTS__*/
 export function getPackageDefaultNodeRange(): string | undefined {
   if (_packageDefaultNodeRange === undefined) {
-    _packageDefaultNodeRange =
-      require('#lib/package-default-node-range').packageDefaultNodeRange
+    // packageDefaultNodeRange is imported at the top
+    _packageDefaultNodeRange = packageDefaultNodeRangeImport
   }
   return _packageDefaultNodeRange
 }
@@ -31,8 +38,8 @@ export function getPackageDefaultNodeRange(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getPackageDefaultSocketCategories() {
   if (_packageDefaultSocketCategories === undefined) {
-    _packageDefaultSocketCategories =
-      require('#lib/package-default-socket-categories').packageDefaultSocketCategories
+    // packageDefaultSocketCategories is imported at the top
+    _packageDefaultSocketCategories = packageDefaultSocketCategoriesImport
   }
   return _packageDefaultSocketCategories
 }
@@ -41,8 +48,8 @@ export function getPackageDefaultSocketCategories() {
 /*@__NO_SIDE_EFFECTS__*/
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (_packageExtensions === undefined) {
-    const { packageExtensions } = require('#lib/package-extensions')
-    _packageExtensions = Object.entries(packageExtensions)
+    // packageExtensions is imported at the top
+    _packageExtensions = Object.entries(packageExtensionsImport)
   }
   return _packageExtensions
 }
@@ -57,8 +64,8 @@ export function getNpmLifecycleEvent(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
-    const { lifecycleScriptNames } = require('#lib/lifecycle-script-names')
-    _lifecycleScriptNames = Array.from(lifecycleScriptNames)
+    // lifecycleScriptNames is imported at the top
+    _lifecycleScriptNames = Array.from(lifecycleScriptNamesImport)
   }
   return _lifecycleScriptNames
 }
@@ -77,8 +84,7 @@ export function getPackumentCache(): Map<string, unknown> {
 export function getPacoteCachePath(): string {
   if (_pacoteCachePath === undefined) {
     try {
-      const pacote = require('../external/pacote')
-      const { normalizePath } = require('#lib/path')
+      // module is imported at the top
       const proto = Reflect.getPrototypeOf(
         (pacote as { RegistryFetcher: { prototype: object } }).RegistryFetcher
           .prototype,

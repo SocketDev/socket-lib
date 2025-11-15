@@ -1,27 +1,25 @@
-declare module '@npmcli/arborist' {
-  class Arborist {
-    constructor(options?: Arborist.Options)
-    buildIdealTree(options?: Arborist.BuildIdealTreeOptions): Promise<void>
-    reify(options?: Arborist.ReifyOptions): Promise<void>
+declare namespace ArboristTypes {
+  export interface Options {
+    path?: string
+    cache?: string
+    omit?: Array<'dev' | 'optional' | 'peer'>
+    [key: string]: unknown
   }
 
-  namespace Arborist {
-    interface Options {
-      path?: string
-      cache?: string
-      omit?: Array<'dev' | 'optional' | 'peer'>
-      [key: string]: unknown
-    }
-
-    interface BuildIdealTreeOptions {
-      [key: string]: unknown
-    }
-
-    interface ReifyOptions {
-      save?: boolean
-      [key: string]: unknown
-    }
+  export interface BuildIdealTreeOptions {
+    [key: string]: unknown
   }
 
-  export = Arborist
+  export interface ReifyOptions {
+    save?: boolean
+    [key: string]: unknown
+  }
 }
+
+export default class Arborist {
+  constructor(options?: ArboristTypes.Options)
+  buildIdealTree(options?: ArboristTypes.BuildIdealTreeOptions): Promise<void>
+  reify(options?: ArboristTypes.ReifyOptions): Promise<void>
+}
+
+export { ArboristTypes }

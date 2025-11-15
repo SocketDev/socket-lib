@@ -1,6 +1,7 @@
 /** @fileoverview Cacache utilities for Socket ecosystem shared content-addressable cache. */
 
-import { getSocketCacacheDir } from './paths'
+import cacache from './external/cacache'
+import { getSocketCacacheDir } from './paths/socket'
 
 export interface GetOptions {
   integrity?: string | undefined
@@ -42,7 +43,8 @@ export interface RemoveOptions {
  * Get the cacache module for cache operations.
  */
 export function getCacache() {
-  return /*@__PURE__*/ require('./external/cacache.js')
+  // cacache is imported at the top
+  return cacache
 }
 
 /**

@@ -18,6 +18,7 @@ import type {
 import { getAbortSignal } from '#constants/process'
 
 import { isArray } from './arrays'
+import { deleteAsync, deleteSync } from './external/del'
 
 const abortSignal = getAbortSignal()
 
@@ -25,8 +26,13 @@ import { defaultIgnore, getGlobMatcher } from './globs'
 import type { JsonReviver } from './json'
 import { jsonParse } from './json'
 import { objectFreeze, type Remap } from './objects'
-import { normalizePath, pathLikeToString } from './path'
+import { normalizePath, pathLikeToString } from './paths/normalize'
 import { registerCacheInvalidation } from './paths/rewire'
+import {
+  getOsTmpDir,
+  getSocketCacacheDir,
+  getSocketUserDir,
+} from './paths/socket'
 import { naturalCompare } from './sorts'
 
 /**
@@ -1098,11 +1104,6 @@ let _cachedAllowedDirs: string[] | undefined
 function getAllowedDirectories(): string[] {
   if (_cachedAllowedDirs === undefined) {
     const path = getPath()
-    const {
-      getOsTmpDir,
-      getSocketCacacheDir,
-      getSocketUserDir,
-    } = /*@__PURE__*/ require('#lib/paths')
 
     _cachedAllowedDirs = [
       path.resolve(getOsTmpDir()),
@@ -1154,7 +1155,7 @@ export async function safeDelete(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
 ) {
-  const { deleteAsync } = /*@__PURE__*/ require('./external/del.js')
+  // deleteAsync is imported at the top
   const opts = { __proto__: null, ...options } as RemoveOptions
   const patterns = isArray(filepath)
     ? filepath.map(pathLikeToString)
@@ -1227,7 +1228,7 @@ export function safeDeleteSync(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
 ) {
-  const { deleteSync } = /*@__PURE__*/ require('./external/del.js')
+  // deleteSync is imported at the top
   const opts = { __proto__: null, ...options } as RemoveOptions
   const patterns = isArray(filepath)
     ? filepath.map(pathLikeToString)

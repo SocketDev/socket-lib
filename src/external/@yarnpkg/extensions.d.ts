@@ -1,4 +1,3 @@
-declare const extensions: {
-  packageExtensions: any[]
-}
-export = extensions
+export const packageExtensions: ReadonlyArray<
+  readonly [string, Record<string, unknown>]
+>

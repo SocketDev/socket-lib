@@ -2,20 +2,10 @@
  * @fileoverview Package spec parsing and GitHub URL utilities.
  */
 
+import npmPackageArg from '../external/npm-package-arg'
+
 import { isObjectObject } from '../objects'
 import { isNonEmptyString } from '../strings'
-
-let _npmPackageArg: typeof import('npm-package-arg') | undefined
-/**
- * Get the npm-package-arg module.
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getNpmPackageArg() {
-  if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
-  }
-  return _npmPackageArg as typeof import('npm-package-arg')
-}
 
 /**
  * Extract user and project from GitHub repository URL.
@@ -65,7 +55,7 @@ export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
   if (isObjectObject(spec)) {
     parsedSpec = spec
   } else {
-    const npmPackageArg = getNpmPackageArg()
+    // module is imported at the top
     parsedSpec = npmPackageArg(spec as string, where)
   }
   const typedSpec = parsedSpec as { type?: string; saveSpec?: string }
@@ -83,7 +73,7 @@ export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {
   if (isObjectObject(spec)) {
     parsedSpec = spec
   } else {
-    const npmPackageArg = getNpmPackageArg()
+    // module is imported at the top
     parsedSpec = npmPackageArg(spec as string, where)
   }
   const typedSpec = parsedSpec as {

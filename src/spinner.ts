@@ -5,6 +5,8 @@
 
 import type { Writable } from 'stream'
 
+import colors from './external/yoctocolors-cjs'
+
 import type { ColorInherit, ColorRgb, ColorValue } from './colors'
 import { isRgbTuple, toRgb } from './colors'
 import { getCI } from '#env/ci'
@@ -308,8 +310,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
   const empty = width - filled
   const bar = '█'.repeat(filled) + '░'.repeat(empty)
   // Use cyan color for the progress bar
-  const colors =
-    /*@__PURE__*/ require('./external/yoctocolors-cjs.js') as typeof import('yoctocolors-cjs')
+  // colors is imported at the top
   return colors.cyan(bar)
 }
 

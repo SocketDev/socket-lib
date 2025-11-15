@@ -2,6 +2,8 @@
  * Node.js runtime: versions, features, flags, and capabilities.
  */
 
+import { maintainedNodeVersions } from '../maintained-node-versions'
+
 const NODE_VERSION = process.version
 
 // Version detection.
@@ -14,20 +16,8 @@ export function getNodeMajorVersion(): number {
 }
 
 // Maintained Node.js versions.
-let _maintainedNodeVersions:
-  | (readonly string[] & {
-      current: string
-      last: string
-      next: string
-      previous: string
-    })
-  | undefined
 export function getMaintainedNodeVersions() {
-  if (_maintainedNodeVersions === undefined) {
-    _maintainedNodeVersions =
-      require('#lib/maintained-node-versions').maintainedNodeVersions
-  }
-  return _maintainedNodeVersions
+  return maintainedNodeVersions
 }
 
 // Feature detection.

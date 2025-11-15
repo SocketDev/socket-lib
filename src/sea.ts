@@ -4,7 +4,7 @@
  * as a Node.js Single Executable Application.
  */
 
-import { normalizePath } from './path'
+import { normalizePath } from './paths/normalize'
 
 /**
  * Cached SEA detection result.

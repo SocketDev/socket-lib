@@ -27,7 +27,7 @@ import {
   isUnstaged,
   isUnstagedSync,
 } from '@socketsecurity/lib/git'
-import { normalizePath } from '@socketsecurity/lib/path'
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib/spawn'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'

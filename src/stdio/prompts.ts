@@ -4,6 +4,14 @@
  */
 
 import { getAbortSignal, getSpinner } from '#constants/process'
+
+import checkboxRaw from '../external/@inquirer/checkbox'
+import confirmRaw from '../external/@inquirer/confirm'
+import inputRaw from '../external/@inquirer/input'
+import passwordRaw from '../external/@inquirer/password'
+import * as searchModule from '../external/@inquirer/search'
+import * as selectModuleImport from '../external/@inquirer/select'
+
 import type { ColorValue } from '../colors'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
@@ -13,6 +21,12 @@ import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 const abortSignal = getAbortSignal()
 const spinner = getSpinner()
+
+// Modules imported at the top - extract default and Separator
+const searchRaw = searchModule.default
+const selectModule = selectModuleImport as any
+const selectRaw = selectModule.default
+const ActualSeparator = selectModule.Separator
 
 /**
  * Apply a color to text using yoctocolors.
@@ -258,18 +272,6 @@ export function wrapPrompt<T = unknown>(
       | undefined
   }
 }
-
-// c8 ignore start - Third-party inquirer library requires and exports not testable in isolation.
-const checkboxRaw = /*@__PURE__*/ require('../external/@inquirer/checkbox')
-const confirmRaw = /*@__PURE__*/ require('../external/@inquirer/confirm')
-const inputRaw = /*@__PURE__*/ require('../external/@inquirer/input')
-const passwordRaw = /*@__PURE__*/ require('../external/@inquirer/password')
-// Search and select export additional named exports, so we access .default.
-const searchRaw = /*@__PURE__*/ require('../external/@inquirer/search').default
-const selectModule = /*@__PURE__*/ require('../external/@inquirer/select')
-const selectRaw = selectModule.default
-const ActualSeparator = selectModule.Separator
-// c8 ignore stop
 
 /**
  * Prompt to select multiple items from a list of choices.

@@ -30,7 +30,7 @@ import path from 'path'
 
 import { readFileUtf8Sync, safeMkdirSync } from './fs'
 import { getDefaultLogger } from './logger'
-import { getSocketDlxDir } from './paths'
+import { getSocketDlxDir } from './paths/socket'
 import { processLock } from './process-lock'
 
 const logger = getDefaultLogger()

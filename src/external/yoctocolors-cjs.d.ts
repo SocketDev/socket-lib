@@ -1,4 +1,4 @@
-interface YoctoColors {
+export interface YoctoColors {
   // Modifiers
   reset: (text: string) => string
   bold: (text: string) => string
@@ -48,5 +48,4 @@ interface YoctoColors {
 }
 
 declare const yoctocolorsCjs: YoctoColors
-
-export = yoctocolorsCjs
+export default yoctocolorsCjs

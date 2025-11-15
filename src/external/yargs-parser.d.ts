@@ -1,2 +1,2 @@
 declare const yargsParser: any
-export = yargsParser
+export default yargsParser

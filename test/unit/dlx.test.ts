@@ -35,7 +35,7 @@ import {
   removeDlxPackage,
   removeDlxPackageSync,
 } from '@socketsecurity/lib/dlx'
-import { getSocketDlxDir } from '@socketsecurity/lib/paths'
+import { getSocketDlxDir } from '@socketsecurity/lib/paths/socket'
 
 describe.sequential('dlx', () => {
   const testPackageName = 'test-package'

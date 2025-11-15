@@ -26,8 +26,9 @@ export interface PackageManifest {
  */
 export function getBinFromManifest(manifest: PackageManifest): string
 
-declare const libnpmexec: {
+export interface LibnpmexecDefault {
   getBinFromManifest: typeof getBinFromManifest
 }
 
-export = libnpmexec
+declare const libnpmexec: LibnpmexecDefault
+export default libnpmexec

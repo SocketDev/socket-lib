@@ -1,4 +1,4 @@
-declare class YoctoSpinner {
+export default class YoctoSpinner {
   constructor(options?: { text?: string })
   start(text?: string): this
   stop(): this
@@ -8,5 +8,3 @@ declare class YoctoSpinner {
   info(text?: string): this
   clear(): this
 }
-
-export = YoctoSpinner

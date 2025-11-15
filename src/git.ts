@@ -3,7 +3,7 @@ import path from 'path'
 import { WIN32 } from '#constants/platform'
 import { debugNs } from './debug'
 import { getGlobMatcher } from './globs'
-import { normalizePath } from './path'
+import { normalizePath } from './paths/normalize'
 import { spawn, spawnSync } from './spawn'
 import { stripAnsi } from './strings'
 

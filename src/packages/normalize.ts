@@ -2,6 +2,12 @@
  * @fileoverview Package.json normalization utilities.
  */
 
+import {
+  REGISTRY_SCOPE_DELIMITER,
+  SOCKET_REGISTRY_SCOPE,
+} from '../constants/socket'
+import { escapeRegExp } from '../regexps'
+import normalizePackageData from '../external/normalize-package-data'
 import { merge } from '../objects'
 
 import type { NormalizeOptions, PackageJson } from '../packages'
@@ -9,53 +15,11 @@ import type { NormalizeOptions, PackageJson } from '../packages'
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn
 
-// Lazy load constants to avoid circular dependencies.
-let _REGISTRY_SCOPE_DELIMITER: string | undefined
-function getRegistryScopeDelimiter(): string {
-  if (_REGISTRY_SCOPE_DELIMITER === undefined) {
-    _REGISTRY_SCOPE_DELIMITER =
-      /*@__INLINE__*/ require('../constants/socket').REGISTRY_SCOPE_DELIMITER
-  }
-  return _REGISTRY_SCOPE_DELIMITER as string
-}
-
-let _SOCKET_REGISTRY_SCOPE: string | undefined
-function getSocketRegistryScope(): string {
-  if (_SOCKET_REGISTRY_SCOPE === undefined) {
-    _SOCKET_REGISTRY_SCOPE =
-      /*@__INLINE__*/ require('../constants/socket').SOCKET_REGISTRY_SCOPE
-  }
-  return _SOCKET_REGISTRY_SCOPE as string
-}
-
-let _escapeRegExp: ((s: string) => string) | undefined
-function getEscapeRegExp(): (s: string) => string {
-  if (_escapeRegExp === undefined) {
-    _escapeRegExp = /*@__PURE__*/ require('../regexps').escapeRegExp
-  }
-  return _escapeRegExp as (s: string) => string
-}
-
 function getEscapedScopeRegExp(): RegExp {
-  const REGISTRY_SCOPE_DELIMITER = getRegistryScopeDelimiter()
-  const escapeRegExp = getEscapeRegExp()
   const firstChar = REGISTRY_SCOPE_DELIMITER[0] as string
   return new RegExp(
     `^[^${escapeRegExp(firstChar)}]+${escapeRegExp(REGISTRY_SCOPE_DELIMITER)}(?!${escapeRegExp(firstChar)})`,
   )
-}
-
-let _normalizePackageData: typeof import('normalize-package-data') | undefined
-/**
- * Get the normalize-package-data module.
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getNormalizePackageData() {
-  if (_normalizePackageData === undefined) {
-    _normalizePackageData =
-      /*@__PURE__*/ require('../external/normalize-package-data')
-  }
-  return _normalizePackageData as typeof import('normalize-package-data')
 }
 
 let _findPackageExtensions:
@@ -65,7 +29,6 @@ let _findPackageExtensions:
  * Get the findPackageExtensions function from operations module.
  * Lazy loaded to avoid circular dependency.
  */
-/*@__NO_SIDE_EFFECTS__*/
 function _getFindPackageExtensions() {
   if (_findPackageExtensions === undefined) {
     // Dynamically import to avoid circular dependency.
@@ -104,7 +67,6 @@ export function normalizePackageJson(
         ])
       : []),
   ]
-  const normalizePackageData = getNormalizePackageData()
   normalizePackageData(pkgJson)
   // Apply package extensions if name and version are present.
   if (pkgJson.name && pkgJson.version) {
@@ -139,7 +101,6 @@ export function resolveEscapedScope(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveOriginalPackageName(sockRegPkgName: string): string {
-  const SOCKET_REGISTRY_SCOPE = getSocketRegistryScope()
   const name = sockRegPkgName.startsWith(`${SOCKET_REGISTRY_SCOPE}/`)
     ? sockRegPkgName.slice(SOCKET_REGISTRY_SCOPE.length + 1)
     : sockRegPkgName
@@ -154,6 +115,5 @@ export function resolveOriginalPackageName(sockRegPkgName: string): string {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unescapeScope(escapedScope: string): string {
-  const REGISTRY_SCOPE_DELIMITER = getRegistryScopeDelimiter()
   return `@${escapedScope.slice(0, -REGISTRY_SCOPE_DELIMITER.length)}`
 }

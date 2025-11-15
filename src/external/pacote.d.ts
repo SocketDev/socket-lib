@@ -1,9 +1,9 @@
-declare class RegistryFetcher {
+export class RegistryFetcher {
   constructor(spec: string, opts?: any)
   cache: string
 }
 
-declare const pacote: {
+export interface Pacote {
   RegistryFetcher: typeof RegistryFetcher
   extract(spec: string, dest: string, opts?: any): Promise<any>
   manifest(spec: string, opts?: any): Promise<any>
@@ -11,4 +11,5 @@ declare const pacote: {
   tarball(spec: string, opts?: any): Promise<Buffer>
 }
 
-export = pacote
+declare const pacote: Pacote
+export default pacote

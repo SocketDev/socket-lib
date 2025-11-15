@@ -13,4 +13,4 @@ export interface NpmPack {
 }
 
 declare const npmPack: NpmPack
-export = npmPack
+export default npmPack

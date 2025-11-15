@@ -5,51 +5,20 @@
 import { LOOP_SENTINEL } from '#constants/core'
 import { getCopyLeftLicenses } from '#constants/licenses'
 
+import path from 'node:path'
+import spdxCorrect from '../external/spdx-correct'
+import spdxExpParse from '../external/spdx-expression-parse'
+
 const copyLeftLicenses = getCopyLeftLicenses()
 
 import { hasOwn } from '../objects'
 import type { LicenseNode } from '../packages'
-import { normalizePath } from '../path'
+import { normalizePath } from '../paths/normalize'
 
 const BINARY_OPERATION_NODE_TYPE = 'BinaryOperation'
 const LICENSE_NODE_TYPE = 'License'
 
 const fileReferenceRegExp = /^SEE LICEN[CS]E IN (.+)$/
-
-let _path: typeof import('path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('path')
-}
-
-let _spdxCorrect: typeof import('spdx-correct') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getSpdxCorrect() {
-  if (_spdxCorrect === undefined) {
-    // The 'spdx-correct' package is browser safe.
-    _spdxCorrect = /*@__PURE__*/ require('../external/spdx-correct')
-  }
-  return _spdxCorrect as typeof import('spdx-correct')
-}
-
-let _spdxExpParse: typeof import('spdx-expression-parse') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getSpdxExpParse() {
-  if (_spdxExpParse === undefined) {
-    // The 'spdx-expression-parse' package is browser safe.
-    _spdxExpParse = /*@__PURE__*/ require('../external/spdx-expression-parse')
-  }
-  return _spdxExpParse as typeof import('spdx-expression-parse')
-}
 
 // Duplicated from spdx-expression-parse - AST node types.
 export interface SpdxLicenseNode {
@@ -192,11 +161,11 @@ export function createLicenseNode(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseSpdxExp(spdxExp: string): SpdxAstNode | undefined {
-  const spdxExpParse = getSpdxExpParse()
+  // spdxExpParse is imported at the top
   try {
     return spdxExpParse(spdxExp)
   } catch {}
-  const spdxCorrect = getSpdxCorrect()
+  // spdxCorrect is imported at the top
   const corrected = spdxCorrect(spdxExp)
   return corrected ? spdxExpParse(corrected) : undefined
 }
@@ -222,7 +191,7 @@ export function resolvePackageLicenses(
   // https://github.com/kemitchell/validate-npm-package-license.js/blob/v3.0.4/index.js#L48-L53
   const match = fileReferenceRegExp.exec(licenseFieldValue)
   if (match) {
-    const path = getPath()
+    // path is imported at the top
     return [
       {
         license: licenseFieldValue,

@@ -7,14 +7,15 @@ import os from 'os'
 import path from 'path'
 
 import { WIN32 } from '#constants/platform'
+import { DLX_BINARY_CACHE_TTL } from '#constants/time'
 
 import { generateCacheKey } from './dlx'
 import { dlxManifest } from './dlx-manifest'
 import { httpDownload } from './http-request'
 import { isDir, readJson, safeDelete, safeMkdir } from './fs'
 import { isObjectObject } from './objects'
-import { normalizePath } from './path'
-import { getSocketDlxDir } from './paths'
+import { normalizePath } from './paths/normalize'
+import { getSocketDlxDir } from './paths/socket'
 import { processLock } from './process-lock'
 import type { SpawnExtra, SpawnOptions } from './spawn'
 import { spawn } from './spawn'
@@ -347,7 +348,7 @@ async function writeMetadata(
  * Clean expired entries from the DLX cache.
  */
 export async function cleanDlxCache(
-  maxAge: number = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
+  maxAge: number = DLX_BINARY_CACHE_TTL,
 ): Promise<number> {
   const cacheDir = getDlxCachePath()
   const fs = getFs()
@@ -419,7 +420,7 @@ export async function dlxBinary(
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxBinaryResult> {
   const {
-    cacheTtl = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
+    cacheTtl = DLX_BINARY_CACHE_TTL,
     checksum,
     force: userForce = false,
     name,
@@ -565,7 +566,7 @@ export async function downloadBinary(
   options: Omit<DlxBinaryOptions, 'spawnOptions'>,
 ): Promise<{ binaryPath: string; downloaded: boolean }> {
   const {
-    cacheTtl = /*@__INLINE__*/ require('#constants/time').DLX_BINARY_CACHE_TTL,
+    cacheTtl = DLX_BINARY_CACHE_TTL,
     checksum,
     force = false,
     name,

@@ -10,10 +10,27 @@ import {
 import { getAbortSignal } from '#constants/process'
 import { REGISTRY_SCOPE_DELIMITER } from '#constants/socket'
 
+import cacache from '../external/cacache'
+import libnpmpack from '../external/libnpmpack'
+import makeFetchHappen from '../external/make-fetch-happen'
+import npmPackageArg from '../external/npm-package-arg'
+import { PackageURL } from '../external/@socketregistry/packageurl-js'
+import pacote from '../external/pacote'
+import * as semver from '../external/semver'
+
 const abortSignal = getAbortSignal()
 const packageExtensions = getPackageExtensions()
 const packumentCache = getPackumentCache()
 const pacoteCachePath = getPacoteCachePath()
+
+// Initialize fetcher with cache settings
+const fetcher = makeFetchHappen.defaults({
+  cachePath: pacoteCachePath,
+  // Prefer-offline: Staleness checks for cached data will be bypassed, but
+  // missing data will be requested from the server.
+  // https://github.com/npm/make-fetch-happen?tab=readme-ov-file#--optscache
+  cache: 'force-cache',
+})
 
 import { readJson, readJsonSync } from '../fs'
 import { isObjectObject, merge } from '../objects'
@@ -25,7 +42,7 @@ import type {
   ReadPackageJsonOptions,
 } from '../packages'
 import { normalizePackageJson } from './normalize'
-import { resolvePackageJsonPath } from './paths'
+import { resolvePackageJsonPath } from '../paths/packages'
 import {
   getRepoUrlDetails,
   gitHubTagRefUrl,
@@ -33,92 +50,6 @@ import {
   isGitHubTgzSpec,
   isGitHubUrlSpec,
 } from './specs'
-
-let _cacache: typeof import('cacache') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getCacache() {
-  if (_cacache === undefined) {
-    _cacache = /*@__PURE__*/ require('../external/cacache')
-  }
-  return _cacache as typeof import('cacache')
-}
-
-// Type for make-fetch-happen fetcher function.
-type MakeFetchHappenFetcher = ((
-  url: string,
-  opts?: unknown,
-) => Promise<Response>) & {
-  defaults: (opts: unknown) => MakeFetchHappenFetcher
-  delete: (url: string, opts?: unknown) => Promise<boolean>
-}
-
-let _fetcher: MakeFetchHappenFetcher | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getFetcher() {
-  if (_fetcher === undefined) {
-    const makeFetchHappen =
-      /*@__PURE__*/ require('../external/make-fetch-happen')
-    _fetcher = makeFetchHappen.defaults({
-      cachePath: pacoteCachePath,
-      // Prefer-offline: Staleness checks for cached data will be bypassed, but
-      // missing data will be requested from the server.
-      // https://github.com/npm/make-fetch-happen?tab=readme-ov-file#--optscache
-      cache: 'force-cache',
-    })
-  }
-  return _fetcher as MakeFetchHappenFetcher
-}
-
-let _npmPackageArg: typeof import('npm-package-arg') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getNpmPackageArg() {
-  if (_npmPackageArg === undefined) {
-    _npmPackageArg = /*@__PURE__*/ require('../external/npm-package-arg')
-  }
-  return _npmPackageArg as typeof import('npm-package-arg')
-}
-
-let _pack: typeof import('../external/libnpmpack') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getPack() {
-  if (_pack === undefined) {
-    _pack = /*@__PURE__*/ require('../external/libnpmpack')
-  }
-  return _pack as typeof import('../external/libnpmpack')
-}
-
-let _PackageURL:
-  | typeof import('@socketregistry/packageurl-js').PackageURL
-  | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getPackageURL() {
-  if (_PackageURL === undefined) {
-    // The 'packageurl-js' package is browser safe.
-    const packageUrlJs =
-      /*@__PURE__*/ require('../external/@socketregistry/packageurl-js')
-    _PackageURL = packageUrlJs.PackageURL
-  }
-  return _PackageURL as typeof import('@socketregistry/packageurl-js').PackageURL
-}
-
-let _pacote: typeof import('pacote') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getPacote() {
-  if (_pacote === undefined) {
-    _pacote = /*@__PURE__*/ require('../external/pacote')
-  }
-  return _pacote as typeof import('pacote')
-}
-
-let _semver: typeof import('semver') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getSemver() {
-  if (_semver === undefined) {
-    // The 'semver' package is browser safe.
-    _semver = /*@__PURE__*/ require('../external/semver')
-  }
-  return _semver as typeof import('semver')
-}
 
 let _toEditablePackageJson:
   | ((pkgJson: PackageJson, options?: unknown) => Promise<PackageJson>)
@@ -186,7 +117,7 @@ export async function extractPackage(
     ...extractOptions_,
   }
   /* c8 ignore start - External package registry extraction */
-  const pacote = getPacote()
+  // pacote is imported at the top
   if (typeof dest === 'string') {
     await pacote.extract(pkgNameOrId, dest, extractOptions)
     if (typeof actualCallback === 'function') {
@@ -195,7 +126,7 @@ export async function extractPackage(
   } else {
     // The DefinitelyTyped types for cacache.tmp.withTmp are incorrect.
     // It DOES returns a promise.
-    const cacache = getCacache()
+    // cacache is imported at the top
     await cacache.tmp.withTmp(
       pacoteCachePath,
       { tmpPrefix },
@@ -225,7 +156,7 @@ export function findPackageExtensions(
     const lastAtSignIndex = selector.lastIndexOf('@')
     const name = selector.slice(0, lastAtSignIndex)
     if (pkgName === name) {
-      const semver = getSemver()
+      // semver is imported at the top
       const range = selector.slice(lastAtSignIndex + 1)
       if (semver.satisfies(pkgVer, range)) {
         if (result === undefined) {
@@ -272,8 +203,8 @@ export async function packPackage(
   options?: PacoteOptions,
 ): Promise<unknown> {
   /* c8 ignore start - External package registry packing */
-  const pack = getPack()
-  return await pack(spec, {
+  // libnpmpack is imported at the top as libnpmpack
+  return await libnpmpack(spec, {
     __proto__: null,
     signal: abortSignal,
     ...options,
@@ -361,7 +292,7 @@ export async function resolveGitHubTgzUrl(
     return ''
   }
   const { version } = pkgJson
-  const npmPackageArg = getNpmPackageArg()
+  // npmPackageArg is imported at the top
   const parsedSpec = npmPackageArg(
     pkgNameOrId,
     whereIsPkgJson ? undefined : (where as string),
@@ -382,7 +313,7 @@ export async function resolveGitHubTgzUrl(
     if (isGitHubUrl) {
       apiUrl = gitHubTagRefUrl(user, project, parsedSpec.gitCommittish || '')
     } else {
-      const fetcher = getFetcher()
+      // fetcher is initialized at the top
       const versionStr = version as string
       // First try to resolve the sha for a tag starting with "v", e.g. v1.2.3.
       apiUrl = gitHubTagRefUrl(user, project, `v${versionStr}`)
@@ -395,7 +326,7 @@ export async function resolveGitHubTgzUrl(
       }
     }
     if (apiUrl) {
-      const fetcher = getFetcher()
+      // fetcher is initialized at the top
       const resp = await fetcher(apiUrl)
       const json = (await resp.json()) as { object?: { sha?: string } }
       const sha = json?.object?.sha
@@ -425,7 +356,7 @@ export function resolvePackageName(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveRegistryPackageName(pkgName: string): string {
-  const purlObj = getPackageURL().fromString(`pkg:npm/${pkgName}`)
+  const purlObj = PackageURL.fromString(`pkg:npm/${pkgName}`)
   return purlObj.namespace
     ? `${purlObj.namespace.slice(1)}${REGISTRY_SCOPE_DELIMITER}${purlObj.name}`
     : pkgName

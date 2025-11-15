@@ -385,6 +385,31 @@ async function main() {
         printHeader('Building Package')
       }
 
+      // Validate external type definitions before building
+      const validateArgs = ['scripts/validate/external-types.mjs']
+      if (quiet) {
+        validateArgs.push('--quiet')
+      }
+      if (verbose) {
+        validateArgs.push('--verbose')
+      }
+
+      const validateExitCode = await runSequence([
+        {
+          args: validateArgs,
+          command: 'node',
+        },
+      ])
+
+      // Only warn on validation failure, don't block build
+      // (some external modules may still use export = for now)
+      if (validateExitCode !== 0 && verbose && !quiet) {
+        logger.warn('Some external type definitions use legacy patterns')
+        logger.substep(
+          'Build will continue, but consider migrating to ES6 exports',
+        )
+      }
+
       exitCode = await runSequence([
         {
           args: ['scripts/build/clean.mjs', '--dist', '--types', '--quiet'],

@@ -2,8 +2,8 @@
  * @fileoverview Unit tests for binary path resolution and execution utilities.
  *
  * Tests binary discovery and execution helpers:
- * - whichBin(), whichBinSync() find binaries in PATH
- * - resolveBinPathSync() resolves package bin paths
+ * - whichReal(), whichRealSync() find binaries in PATH and resolve to real script files
+ * - resolveRealBinSync() resolves wrapper scripts to underlying .js files
  * - findRealNpm(), findRealPnpm(), findRealYarn() locate real package manager binaries
  * - findRealBin() generic real binary locator (bypasses shadow bins)
  * - execBin() executes binaries with options
@@ -20,9 +20,9 @@ import {
   findRealPnpm,
   findRealYarn,
   isShadowBinPath,
-  resolveBinPathSync,
-  whichBin,
-  whichBinSync,
+  resolveRealBinSync,
+  whichReal,
+  whichRealSync,
 } from '@socketsecurity/lib/bin'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
@@ -77,9 +77,9 @@ describe('bin', () => {
     })
   })
 
-  describe('whichBinSync', () => {
+  describe('whichRealSync', () => {
     it('should find node executable', () => {
-      const result = whichBinSync('node')
+      const result = whichRealSync('node')
       expect(result).toBeDefined()
       expect(typeof result).toBe('string')
       if (typeof result === 'string') {
@@ -88,18 +88,18 @@ describe('bin', () => {
     })
 
     it('should return undefined for non-existent binary', () => {
-      const result = whichBinSync('totally-nonexistent-binary-12345')
+      const result = whichRealSync('totally-nonexistent-binary-12345')
       expect(result).toBeUndefined()
     })
 
     it('should return undefined by default when binary not found', () => {
-      const result = whichBinSync('nonexistent-bin')
+      const result = whichRealSync('nonexistent-bin')
       expect(result).toBeUndefined()
     })
 
     it('should respect nothrow option set to false', () => {
       try {
-        const result = whichBinSync('nonexistent-bin-xyz', { nothrow: false })
+        const result = whichRealSync('nonexistent-bin-xyz', { nothrow: false })
         // If it doesn't throw, expect undefined
         expect(result).toBeUndefined()
       } catch (error) {
@@ -109,7 +109,7 @@ describe('bin', () => {
     })
 
     it('should return array when all option is true', () => {
-      const result = whichBinSync('node', { all: true })
+      const result = whichRealSync('node', { all: true })
       expect(Array.isArray(result)).toBe(true)
       if (Array.isArray(result) && result.length > 0) {
         expect(result[0]).toContain('node')
@@ -117,12 +117,12 @@ describe('bin', () => {
     })
 
     it('should return undefined array when all is true and binary not found', () => {
-      const result = whichBinSync('nonexistent-binary-12345', { all: true })
+      const result = whichRealSync('nonexistent-binary-12345', { all: true })
       expect(result).toBeUndefined()
     })
 
     it('should resolve path when all is false', () => {
-      const result = whichBinSync('node', { all: false })
+      const result = whichRealSync('node', { all: false })
       if (result) {
         expect(typeof result).toBe('string')
         expect(result).not.toContain('\\')
@@ -130,14 +130,14 @@ describe('bin', () => {
     })
 
     it('should handle empty binary name', () => {
-      const result = whichBinSync('')
+      const result = whichRealSync('')
       expect(result).toBeUndefined()
     })
   })
 
-  describe('whichBin', () => {
+  describe('whichReal', () => {
     it('should find node executable', async () => {
-      const result = await whichBin('node')
+      const result = await whichReal('node')
       expect(result).toBeDefined()
       expect(typeof result).toBe('string')
       if (typeof result === 'string') {
@@ -146,12 +146,12 @@ describe('bin', () => {
     })
 
     it('should return undefined for non-existent binary', async () => {
-      const result = await whichBin('totally-nonexistent-binary-12345')
+      const result = await whichReal('totally-nonexistent-binary-12345')
       expect(result).toBeUndefined()
     })
 
     it('should return array when all option is true', async () => {
-      const result = await whichBin('node', { all: true })
+      const result = await whichReal('node', { all: true })
       expect(Array.isArray(result)).toBe(true)
       if (Array.isArray(result) && result.length > 0) {
         expect(result[0]).toContain('node')
@@ -159,12 +159,12 @@ describe('bin', () => {
     })
 
     it('should return undefined array when all is true and binary not found', async () => {
-      const result = await whichBin('nonexistent-binary-12345', { all: true })
+      const result = await whichReal('nonexistent-binary-12345', { all: true })
       expect(result).toBeUndefined()
     })
 
     it('should resolve paths when all is true', async () => {
-      const result = await whichBin('node', { all: true })
+      const result = await whichReal('node', { all: true })
       if (Array.isArray(result) && result.length > 0) {
         result.forEach(p => {
           expect(typeof p).toBe('string')
@@ -174,31 +174,31 @@ describe('bin', () => {
     })
 
     it('should handle nothrow option', async () => {
-      const result = await whichBin('nonexistent-bin', { nothrow: true })
+      const result = await whichReal('nonexistent-bin', { nothrow: true })
       expect(result).toBeUndefined()
     })
 
     it('should return single path when all is false', async () => {
-      const result = await whichBin('node', { all: false })
+      const result = await whichReal('node', { all: false })
       if (result) {
         expect(typeof result).toBe('string')
       }
     })
 
     it('should handle empty binary name', async () => {
-      const result = await whichBin('')
+      const result = await whichReal('')
       expect(result).toBeUndefined()
     })
   })
 
-  describe('resolveBinPathSync', () => {
+  describe('resolveRealBinSync', () => {
     it('should normalize path with forward slashes', () => {
-      const result = resolveBinPathSync('/usr/bin/node')
+      const result = resolveRealBinSync('/usr/bin/node')
       expect(result).not.toContain('\\')
     })
 
     it('should return "." for empty string', () => {
-      const result = resolveBinPathSync('')
+      const result = resolveRealBinSync('')
       expect(result).toBe('.')
     })
 
@@ -208,7 +208,7 @@ describe('bin', () => {
         await fs.writeFile(binFile, '#!/bin/sh\necho "test"', 'utf8')
         await fs.chmod(binFile, 0o755)
 
-        const result = resolveBinPathSync(binFile)
+        const result = resolveRealBinSync(binFile)
         expect(result).toBeTruthy()
         expect(result).not.toContain('\\')
       }, 'resolveBin-relative-')
@@ -223,7 +223,7 @@ describe('bin', () => {
         try {
           await fs.symlink(targetFile, linkFile)
 
-          const result = resolveBinPathSync(linkFile)
+          const result = resolveRealBinSync(linkFile)
           expect(result).toBeTruthy()
           // Should resolve to real path
           expect(result).toContain('target')
@@ -243,28 +243,28 @@ describe('bin', () => {
     })
 
     it('should handle non-absolute paths', () => {
-      const result = resolveBinPathSync('node')
+      const result = resolveRealBinSync('node')
       expect(result).toBeTruthy()
     })
 
     it('should normalize Windows-style paths', () => {
-      const result = resolveBinPathSync('C:\\Program Files\\nodejs\\node.exe')
+      const result = resolveRealBinSync('C:\\Program Files\\nodejs\\node.exe')
       expect(result).not.toContain('\\')
     })
 
     it('should handle paths with spaces', () => {
-      const result = resolveBinPathSync('/usr/local/bin/my binary')
+      const result = resolveRealBinSync('/usr/local/bin/my binary')
       expect(result).toBeTruthy()
     })
 
     it('should return normalized path when realpath fails', async () => {
-      const result = resolveBinPathSync('/nonexistent/path/to/binary')
+      const result = resolveRealBinSync('/nonexistent/path/to/binary')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
   })
 
-  describe('resolveBinPathSync - Windows scenarios', () => {
+  describe('resolveRealBinSync - Windows scenarios', () => {
     it('should handle extensionless npm on Windows', async () => {
       await runWithTempDir(async tmpDir => {
         const npmBin = path.join(tmpDir, 'npm')
@@ -284,7 +284,7 @@ exec node "$NPM_CLI_JS" "$@"
 `
         await fs.writeFile(npmBin, npmScript, 'utf8')
 
-        const result = resolveBinPathSync(npmBin)
+        const result = resolveRealBinSync(npmBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-npm-ext-')
     })
@@ -306,7 +306,7 @@ exec node "$NPX_CLI_JS" "$@"
 `
         await fs.writeFile(npxBin, npxScript, 'utf8')
 
-        const result = resolveBinPathSync(npxBin)
+        const result = resolveRealBinSync(npxBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-npx-ext-')
     })
@@ -332,7 +332,7 @@ CALL :find_dp0
 `
         await fs.writeFile(binCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(binCmd)
+        const result = resolveRealBinSync(binCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-cmd-')
     })
@@ -351,13 +351,13 @@ $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
 `
         await fs.writeFile(binPs1, ps1Script, 'utf8')
 
-        const result = resolveBinPathSync(binPs1)
+        const result = resolveRealBinSync(binPs1)
         expect(result).toBeTruthy()
       }, 'resolveBin-ps1-')
     })
   })
 
-  describe('resolveBinPathSync - Unix scenarios', () => {
+  describe('resolveRealBinSync - Unix scenarios', () => {
     it('should handle extensionless pnpm shell script', async () => {
       await runWithTempDir(async tmpDir => {
         const pnpmBin = path.join(tmpDir, 'pnpm')
@@ -375,7 +375,7 @@ exec node "$basedir/../pnpm/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(pnpmBin, pnpmScript, 'utf8')
 
-        const result = resolveBinPathSync(pnpmBin)
+        const result = resolveRealBinSync(pnpmBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-unix-')
     })
@@ -397,7 +397,7 @@ exec node "$basedir/../yarn/bin/yarn.js" "$@"
 `
         await fs.writeFile(yarnBin, yarnScript, 'utf8')
 
-        const result = resolveBinPathSync(yarnBin)
+        const result = resolveRealBinSync(yarnBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-yarn-unix-')
     })
@@ -418,7 +418,7 @@ exec "$basedir/node" "$basedir/.tools/pnpm/1.0.0/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(pnpmBin, pnpmScript, 'utf8')
 
-        const result = resolveBinPathSync(pnpmBin)
+        const result = resolveRealBinSync(pnpmBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-tools-')
     })
@@ -438,13 +438,13 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(correctPnpmBin, pnpmScript, 'utf8')
 
-        const result = resolveBinPathSync(correctPnpmBin)
+        const result = resolveRealBinSync(correctPnpmBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-ci-')
     })
   })
 
-  describe('resolveBinPathSync - Volta scenarios', () => {
+  describe('resolveRealBinSync - Volta scenarios', () => {
     it('should handle Volta-managed npm', async () => {
       await runWithTempDir(async tmpDir => {
         // Create Volta directory structure
@@ -483,7 +483,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
         await fs.mkdir(path.dirname(voltaNpmPath), { recursive: true })
         await fs.writeFile(voltaNpmPath, '#!/bin/sh\necho "npm"', 'utf8')
 
-        const result = resolveBinPathSync(voltaNpmPath)
+        const result = resolveRealBinSync(voltaNpmPath)
         expect(result).toBeTruthy()
       }, 'resolveBin-volta-npm-')
     })
@@ -518,7 +518,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
         await fs.mkdir(path.dirname(voltaNpxPath), { recursive: true })
         await fs.writeFile(voltaNpxPath, '#!/bin/sh\necho "npx"', 'utf8')
 
-        const result = resolveBinPathSync(voltaNpxPath)
+        const result = resolveRealBinSync(voltaNpxPath)
         expect(result).toBeTruthy()
       }, 'resolveBin-volta-npx-')
     })
@@ -556,14 +556,14 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
         await fs.mkdir(path.dirname(voltaTscPath), { recursive: true })
         await fs.writeFile(voltaTscPath, '#!/bin/sh\necho "tsc"', 'utf8')
 
-        const result = resolveBinPathSync(voltaTscPath)
+        const result = resolveRealBinSync(voltaTscPath)
         expect(result).toBeTruthy()
       }, 'resolveBin-volta-package-')
     })
 
     it('should skip Volta resolution for node binary', () => {
       // Node binary should not go through Volta resolution
-      const result = resolveBinPathSync('/path/to/.volta/bin/node')
+      const result = resolveRealBinSync('/path/to/.volta/bin/node')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
@@ -755,47 +755,47 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
     })
   })
 
-  describe('resolveBinPathSync - edge cases', () => {
+  describe('resolveRealBinSync - edge cases', () => {
     it('should handle paths with special characters', () => {
-      const result = resolveBinPathSync('/usr/bin/test-binary-name')
+      const result = resolveRealBinSync('/usr/bin/test-binary-name')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
 
     it('should handle Windows drive letters', () => {
-      const result = resolveBinPathSync('C:/Windows/System32/cmd.exe')
+      const result = resolveRealBinSync('C:/Windows/System32/cmd.exe')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
 
     it('should handle UNC paths', () => {
-      const result = resolveBinPathSync('//server/share/bin/executable')
+      const result = resolveRealBinSync('//server/share/bin/executable')
       expect(result).toBeTruthy()
     })
 
     it('should handle current directory reference', () => {
-      const result = resolveBinPathSync('./node')
+      const result = resolveRealBinSync('./node')
       expect(result).toBeTruthy()
     })
 
     it('should handle parent directory reference', () => {
-      const result = resolveBinPathSync('../bin/node')
+      const result = resolveRealBinSync('../bin/node')
       expect(result).toBeTruthy()
     })
 
     it('should handle multiple path separators', () => {
-      const result = resolveBinPathSync('/usr//local//bin///node')
+      const result = resolveRealBinSync('/usr//local//bin///node')
       expect(result).toBeTruthy()
       expect(result).not.toMatch(/\/\//)
     })
 
     it('should handle trailing slash', () => {
-      const result = resolveBinPathSync('/usr/bin/node/')
+      const result = resolveRealBinSync('/usr/bin/node/')
       expect(result).toBeTruthy()
     })
   })
 
-  describe('resolveBinPathSync - pnpm edge cases', () => {
+  describe('resolveRealBinSync - pnpm edge cases', () => {
     it('should handle pnpm with missing pnpm/ prefix in path', async () => {
       await runWithTempDir(async tmpDir => {
         const pnpmBin = path.join(tmpDir, 'pnpm')
@@ -811,7 +811,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(pnpmBin, pnpmScript, 'utf8')
 
-        const result = resolveBinPathSync(pnpmBin)
+        const result = resolveRealBinSync(pnpmBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-malformed-')
     })
@@ -829,7 +829,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(pnpmCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(pnpmCmd)
+        const result = resolveRealBinSync(pnpmCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-cmd-node-')
     })
@@ -847,7 +847,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(yarnCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(yarnCmd)
+        const result = resolveRealBinSync(yarnCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-yarn-cmd-node-')
     })
@@ -866,7 +866,7 @@ exec node  "$basedir/.tools/pnpm/8.0.0/bin/pnpm.cjs" "$@"
 `
         await fs.writeFile(pnpmBin, pnpmScript, 'utf8')
 
-        const result = resolveBinPathSync(pnpmBin)
+        const result = resolveRealBinSync(pnpmBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-exec-')
     })
@@ -886,7 +886,7 @@ $NPM_CLI_JS="$PSScriptRoot/node_modules/npm/bin/npm-cli.js"
 `
         await fs.writeFile(npmPs1, ps1Script, 'utf8')
 
-        const result = resolveBinPathSync(npmPs1)
+        const result = resolveRealBinSync(npmPs1)
         expect(result).toBeTruthy()
       }, 'resolveBin-npm-ps1-')
     })
@@ -906,7 +906,7 @@ $NPX_CLI_JS="$PSScriptRoot/node_modules/npm/bin/npx-cli.js"
 `
         await fs.writeFile(npxPs1, ps1Script, 'utf8')
 
-        const result = resolveBinPathSync(npxPs1)
+        const result = resolveRealBinSync(npxPs1)
         expect(result).toBeTruthy()
       }, 'resolveBin-npx-ps1-')
     })
@@ -925,7 +925,7 @@ $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
 `
         await fs.writeFile(pnpmPs1, ps1Script, 'utf8')
 
-        const result = resolveBinPathSync(pnpmPs1)
+        const result = resolveRealBinSync(pnpmPs1)
         expect(result).toBeTruthy()
       }, 'resolveBin-pnpm-ps1-')
     })
@@ -944,13 +944,13 @@ $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
 `
         await fs.writeFile(yarnPs1, ps1Script, 'utf8')
 
-        const result = resolveBinPathSync(yarnPs1)
+        const result = resolveRealBinSync(yarnPs1)
         expect(result).toBeTruthy()
       }, 'resolveBin-yarn-ps1-')
     })
   })
 
-  describe('resolveBinPathSync - npm CMD variations', () => {
+  describe('resolveRealBinSync - npm CMD variations', () => {
     it('should handle npm.cmd with quick path', async () => {
       await runWithTempDir(async tmpDir => {
         const npmCmd = path.join(tmpDir, 'npm.cmd')
@@ -965,7 +965,7 @@ node "%NPM_CLI_JS%" %*\r
 `
         await fs.writeFile(npmCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(npmCmd)
+        const result = resolveRealBinSync(npmCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-npm-cmd-quick-')
     })
@@ -984,13 +984,13 @@ node "%NPX_CLI_JS%" %*\r
 `
         await fs.writeFile(npxCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(npxCmd)
+        const result = resolveRealBinSync(npxCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-npx-cmd-')
     })
   })
 
-  describe('resolveBinPathSync - Volta fallback paths', () => {
+  describe('resolveRealBinSync - Volta fallback paths', () => {
     it('should fallback to node_modules for Volta npm when primary path missing', async () => {
       await runWithTempDir(async tmpDir => {
         const voltaDir = path.join(tmpDir, '.volta')
@@ -1025,7 +1025,7 @@ node "%NPX_CLI_JS%" %*\r
         await fs.mkdir(path.dirname(voltaNpmPath), { recursive: true })
         await fs.writeFile(voltaNpmPath, '#!/bin/sh\necho "npm"', 'utf8')
 
-        const result = resolveBinPathSync(voltaNpmPath)
+        const result = resolveRealBinSync(voltaNpmPath)
         expect(result).toBeTruthy()
       }, 'resolveBin-volta-npm-fallback-')
     })
@@ -1062,58 +1062,58 @@ node "%NPX_CLI_JS%" %*\r
         await fs.mkdir(path.dirname(voltaCmdPath), { recursive: true })
         await fs.writeFile(voltaCmdPath, '#!/bin/sh\necho "somecmd"', 'utf8')
 
-        const result = resolveBinPathSync(voltaCmdPath)
+        const result = resolveRealBinSync(voltaCmdPath)
         expect(result).toBeTruthy()
       }, 'resolveBin-volta-cmd-')
     })
   })
 
-  describe('resolveBinPathSync - non-existent file scenarios', () => {
+  describe('resolveRealBinSync - non-existent file scenarios', () => {
     it('should handle non-existent .cmd file', () => {
-      const result = resolveBinPathSync('/nonexistent/path/test.cmd')
+      const result = resolveRealBinSync('/nonexistent/path/test.cmd')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
 
     it('should handle non-existent .ps1 file', () => {
-      const result = resolveBinPathSync('/nonexistent/path/test.ps1')
+      const result = resolveRealBinSync('/nonexistent/path/test.ps1')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
 
     it('should handle non-existent extensionless file', () => {
-      const result = resolveBinPathSync('/nonexistent/path/test')
+      const result = resolveRealBinSync('/nonexistent/path/test')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
 
     it('should handle non-existent .exe file', () => {
-      const result = resolveBinPathSync('/nonexistent/path/test.exe')
+      const result = resolveRealBinSync('/nonexistent/path/test.exe')
       expect(result).toBeTruthy()
       expect(result).not.toContain('\\')
     })
   })
 
-  describe('whichBinSync and whichBin - options coverage', () => {
+  describe('whichRealSync and whichReal - options coverage', () => {
     it('should handle options with all explicitly set to undefined', () => {
-      const result = whichBinSync('node', { all: undefined as any })
+      const result = whichRealSync('node', { all: undefined as any })
       expect(result).toBeDefined()
     })
 
     it('should handle async version with all explicitly set to undefined', async () => {
-      const result = await whichBin('node', { all: undefined as any })
+      const result = await whichReal('node', { all: undefined as any })
       expect(result).toBeDefined()
     })
 
     it('should handle multiple paths when all is true', () => {
-      const result = whichBinSync('node', { all: true, nothrow: true })
+      const result = whichRealSync('node', { all: true, nothrow: true })
       if (result && Array.isArray(result)) {
         expect(result.length).toBeGreaterThan(0)
       }
     })
 
     it('should handle async multiple paths when all is true', async () => {
-      const result = await whichBin('node', { all: true, nothrow: true })
+      const result = await whichReal('node', { all: true, nothrow: true })
       if (result && Array.isArray(result)) {
         expect(result.length).toBeGreaterThan(0)
       }
@@ -1161,7 +1161,7 @@ node "%NPX_CLI_JS%" %*\r
     })
   })
 
-  describe('resolveBinPathSync - comprehensive format coverage', () => {
+  describe('resolveRealBinSync - comprehensive format coverage', () => {
     it('should handle empty relPath in cmd file', async () => {
       await runWithTempDir(async tmpDir => {
         const testCmd = path.join(tmpDir, 'test.cmd')
@@ -1171,7 +1171,7 @@ echo "test"
 `
         await fs.writeFile(testCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(testCmd)
+        const result = resolveRealBinSync(testCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-empty-relpath-')
     })
@@ -1197,7 +1197,7 @@ endLocal & goto #_undefined_# 2>NUL || title %COMSPEC% & "%_prog%" "%dp0%\\lib\\
 `
         await fs.writeFile(npmCmd, cmdScript, 'utf8')
 
-        const result = resolveBinPathSync(npmCmd)
+        const result = resolveRealBinSync(npmCmd)
         expect(result).toBeTruthy()
       }, 'resolveBin-npm-standard-')
     })
@@ -1211,7 +1211,7 @@ echo "test"
 `
         await fs.writeFile(testBin, script, 'utf8')
 
-        const result = resolveBinPathSync(testBin)
+        const result = resolveRealBinSync(testBin)
         expect(result).toBeTruthy()
       }, 'resolveBin-no-relpath-')
     })

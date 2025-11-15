@@ -3,6 +3,9 @@
  */
 
 import { NPM_REGISTRY_URL } from '#constants/agents'
+import { getPacoteCachePath } from '#constants/packages'
+
+import makeFetchHappen from '../external/make-fetch-happen'
 
 import { createCompositeAbortSignal, createTimeoutSignal } from '../abort'
 import type { ProvenanceOptions } from '../packages'
@@ -21,11 +24,7 @@ let _fetcher: typeof import('make-fetch-happen') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFetcher() {
   if (_fetcher === undefined) {
-    const makeFetchHappen =
-      /*@__PURE__*/ require('../external/make-fetch-happen')
-    // Lazy load constants to avoid circular dependencies.
-    const { getPacoteCachePath } =
-      /*@__PURE__*/ require('../constants/packages')
+    // module is imported at the top
     _fetcher = makeFetchHappen.defaults({
       cachePath: getPacoteCachePath(),
       // Prefer-offline: Staleness checks for cached data will be bypassed, but
