@@ -15,8 +15,12 @@ import { isBuiltin } from 'node:module'
 import path from 'node:path'
 
 import { parse } from '@babel/parser'
-import { default as traverse } from '@babel/traverse'
+import traverseModule from '@babel/traverse'
 import * as t from '@babel/types'
+
+// Handle @babel/traverse CommonJS/ESM interop
+const traverse = traverseModule.default
+
 import MagicString from 'magic-string'
 
 // Pinned versions required:
