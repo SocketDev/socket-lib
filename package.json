@@ -111,6 +111,10 @@
       "types": "./dist/argv/parse.d.ts",
       "default": "./dist/argv/parse.js"
     },
+    "./argv/quote": {
+      "types": "./dist/argv/quote.d.ts",
+      "default": "./dist/argv/quote.js"
+    },
     "./arrays": {
       "types": "./dist/arrays.d.ts",
       "default": "./dist/arrays.js"
