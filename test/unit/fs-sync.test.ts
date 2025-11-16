@@ -10,6 +10,7 @@
  * - readFileBinary() for reading binary files
  */
 
+import { randomUUID } from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -30,11 +31,11 @@ import {
 } from '@socketsecurity/lib/fs'
 import { beforeEach, describe, expect, it, afterEach } from 'vitest'
 
-describe('fs - Sync Functions', () => {
+describe.sequential('fs - Sync Functions', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = join(tmpdir(), `socket-lib-test-${Date.now()}`)
+    testDir = join(tmpdir(), `socket-lib-test-${randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 

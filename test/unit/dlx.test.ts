@@ -10,6 +10,7 @@
  * Used by Socket CLI for pnpm dlx / npx-style package execution.
  */
 
+import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -45,7 +46,7 @@ describe.sequential('dlx', () => {
   beforeEach(async () => {
     // Save original env and create isolated test directory
     originalEnv = process.env.SOCKET_DLX_DIR
-    testDlxDir = path.join(os.tmpdir(), `socket-dlx-test-${Date.now()}`)
+    testDlxDir = path.join(os.tmpdir(), `socket-dlx-test-${randomUUID()}`)
     process.env.SOCKET_DLX_DIR = testDlxDir
 
     // Clean up any existing test artifacts
