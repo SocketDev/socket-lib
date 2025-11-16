@@ -1114,3 +1114,60 @@ export function relativeResolve(from: string, to: string): string {
   }
   return normalizePath(rel)
 }
+
+/**
+ * Convert Windows paths to Unix-style POSIX paths for Git Bash tools.
+ *
+ * Git for Windows tools (like tar, git, etc.) expect POSIX-style paths with
+ * forward slashes and Unix drive letter notation (/c/ instead of C:\).
+ * This function handles the conversion for cross-platform compatibility.
+ *
+ * Conversion rules:
+ * - On Windows: Normalizes separators and converts drive letters
+ *   - `C:\path\to\file` becomes `/c/path/to/file`
+ *   - `D:/Users/name` becomes `/d/Users/name`
+ *   - Drive letters are always lowercase in the output
+ * - On Unix: Returns the path unchanged (passes through normalization)
+ *
+ * This is particularly important for:
+ * - Git Bash tools that interpret `D:\` as a remote hostname
+ * - Cross-platform build scripts using tar, git archive, etc.
+ * - CI/CD environments where Git for Windows is used
+ *
+ * @param {string | Buffer | URL} pathLike - The path to convert
+ * @returns {string} Unix-style POSIX path (e.g., `/c/path/to/file`)
+ *
+ * @example
+ * ```typescript
+ * // Windows drive letter paths
+ * toUnixPath('C:\\path\\to\\file.txt')     // '/c/path/to/file.txt'
+ * toUnixPath('D:/projects/foo/bar')        // '/d/projects/foo/bar'
+ *
+ * // Already forward slashes (still converts drive letter)
+ * toUnixPath('C:/Windows/System32')        // '/c/Windows/System32'
+ *
+ * // Unix paths (unchanged on Unix platforms)
+ * toUnixPath('/home/user/file')            // '/home/user/file'
+ * toUnixPath('/var/log/app.log')           // '/var/log/app.log'
+ *
+ * // UNC paths (Windows network shares)
+ * toUnixPath('\\\\server\\share\\file')    // '//server/share/file'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function toUnixPath(pathLike: string | Buffer | URL): string {
+  // Always normalize first to ensure consistent behavior across platforms
+  // (e.g., empty string → '.', backslashes → forward slashes)
+  const normalized = normalizePath(pathLike)
+
+  // On Windows, convert drive letters to Unix-style: C:/path → /c/path
+  if (WIN32) {
+    return normalized.replace(
+      /^([A-Z]):/i,
+      (_, letter) => `/${letter.toLowerCase()}`,
+    )
+  }
+
+  // On Unix, just return the normalized path
+  return normalized
+}
