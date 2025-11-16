@@ -467,37 +467,99 @@ describe('spinner', () => {
         .enableShimmer()
       expect(result).toBe(spinner)
     })
+
+    it('should handle shimmer with active spinner', async () => {
+      const spinner = Spinner()
+      spinner.start('Processing')
+      spinner.enableShimmer()
+
+      // Wait for shimmer animation to trigger callbacks
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      expect(spinner.shimmerState).toBeDefined()
+      spinner.stop()
+    })
+
+    it('should update shimmer state during animation', async () => {
+      const spinner = Spinner()
+      spinner.start('Loading')
+      spinner.enableShimmer()
+      spinner.updateShimmer({ dir: 'rtl' })
+
+      // Let animation run
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(spinner.shimmerState?.mode).toBe('rtl')
+      spinner.disableShimmer()
+      expect(spinner.shimmerState).toBeUndefined()
+      spinner.stop()
+    })
   })
 
   describe('Progress methods', () => {
-    it('should update progress', () => {
+    it('should update progress', async () => {
       const spinner = Spinner()
       spinner.start()
       const result = spinner.progress(50, 100)
+      // Wait for animation frame to render progress
+      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
+      spinner.stop()
     })
 
-    it('should update progress with unit', () => {
+    it('should update progress with unit', async () => {
       const spinner = Spinner()
       spinner.start()
       const result = spinner.progress(25, 100, 'files')
+      // Wait for animation frame to render progress
+      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
+      spinner.stop()
     })
 
-    it('should increment progress step', () => {
+    it('should increment progress step', async () => {
       const spinner = Spinner()
       spinner.start()
       spinner.progress(0, 100)
       const result = spinner.progressStep(10)
+      // Wait for animation frame to render progress
+      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
+      spinner.stop()
     })
 
-    it('should increment progress step by default amount', () => {
+    it('should increment progress step by default amount', async () => {
       const spinner = Spinner()
       spinner.start()
       spinner.progress(0, 100)
       const result = spinner.progressStep()
+      // Wait for animation frame to render progress
+      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
+      spinner.stop()
+    })
+
+    it('should render progress bar with various percentages', async () => {
+      const spinner = Spinner()
+      spinner.start('Processing')
+
+      // Test different progress values to trigger formatProgress and renderProgressBar
+      spinner.progress(0, 100)
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      spinner.progress(25, 100)
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      spinner.progress(50, 100)
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      spinner.progress(75, 100)
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      spinner.progress(100, 100, 'items')
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      spinner.stop()
     })
 
     it('should chain progress calls', () => {
@@ -619,6 +681,27 @@ describe('spinner', () => {
       // Getter always returns RGB
       expect(spinner.color).toEqual([0, 255, 255])
     })
+
+    it('should convert string color to RGB via setter', () => {
+      const spinner = Spinner()
+      spinner.color = [255, 0, 255]
+      // Setter and getter both work with RGB
+      expect(spinner.color).toEqual([255, 0, 255])
+    })
+
+    it('should handle color changes during animation', async () => {
+      const spinner = Spinner({ color: 'blue' })
+      spinner.start('Testing')
+
+      // Wait for first frame
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      // Change color during animation
+      spinner.color = [0, 255, 0]
+      expect(spinner.color).toEqual([0, 255, 0])
+
+      spinner.stop()
+    })
   })
 
   describe('Method chaining', () => {
@@ -697,6 +780,28 @@ describe('spinner', () => {
     })
   })
 
+  describe('Theme handling', () => {
+    it('should accept theme as string name', () => {
+      const spinner = Spinner({ theme: 'socket' })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should accept theme lush', () => {
+      const spinner = Spinner({ theme: 'lush' })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should accept theme sunset', () => {
+      const spinner = Spinner({ theme: 'sunset' })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should accept theme ultra', () => {
+      const spinner = Spinner({ theme: 'ultra' })
+      expect(spinner).toBeDefined()
+    })
+  })
+
   describe('getCliSpinners', () => {
     it('should return socket custom spinner', () => {
       const socket = getCliSpinners('socket')
@@ -729,6 +834,452 @@ describe('spinner', () => {
       spinner.start()
       spinner.text('test')
       spinner.stop()
+      expect(spinner.isSpinning).toBe(false)
+    })
+  })
+
+  describe('Progress bars', () => {
+    it('should show progress with percentage', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.progress(25, 100)
+      expect(result).toBe(spinner)
+    })
+
+    it('should show progress with unit parameter', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.progress(50, 200, 'files')
+      expect(result).toBe(spinner)
+    })
+
+    it('should show progress with unit', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.progress(5, 10, 'files')
+      expect(result).toBe(spinner)
+    })
+
+    it('should handle progress at 0%', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.progress(0, 100)
+      expect(result).toBe(spinner)
+    })
+
+    it('should handle progress at 100%', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.progress(100, 100)
+      expect(result).toBe(spinner)
+    })
+
+    it('should handle progress with decimal current value', () => {
+      const spinner = Spinner()
+      spinner.start()
+      const result = spinner.progress(33, 100)
+      expect(result).toBe(spinner)
+    })
+
+    it('should handle progressStep increments', () => {
+      const spinner = Spinner()
+      spinner.start()
+      spinner.progress(0, 10)
+      const result = spinner.progressStep()
+      expect(result).toBe(spinner)
+    })
+
+    it('should handle progressStep with custom increments', () => {
+      const spinner = Spinner()
+      spinner.start()
+      spinner.progress(0, 10)
+      const result = spinner.progressStep(5)
+      expect(result).toBe(spinner)
+    })
+
+    it('should handle progress with different units', () => {
+      const spinner = Spinner()
+      spinner.start()
+      spinner.progress(1, 5, 'packages')
+      const result = spinner.progress(2, 5, 'modules')
+      expect(result).toBe(spinner)
+    })
+
+    it('should allow progress updates while spinning', () => {
+      const spinner = Spinner()
+      spinner.start('Processing...')
+      spinner.progress(10, 100, 'items')
+      spinner.progressStep(10)
+      spinner.progressStep(10)
+      spinner.stop()
+      expect(spinner.isSpinning).toBe(false)
+    })
+
+    it('should chain progress with other methods', () => {
+      const spinner = Spinner()
+      const result = spinner
+        .start('Processing...')
+        .progress(50, 100, 'files')
+        .progressStep(10)
+        .text('Still processing...')
+        .stop()
+      expect(result).toBe(spinner)
+    })
+  })
+
+  describe('withSpinner error handling', () => {
+    it('should handle errors gracefully', async () => {
+      const spinner = Spinner()
+      const error = new Error('Test error')
+
+      await expect(
+        withSpinner({
+          message: 'Testing error...',
+          operation: async () => {
+            throw error
+          },
+          spinner,
+        }),
+      ).rejects.toThrow('Test error')
+    })
+
+    it('should run operation without spinner when spinner is undefined', async () => {
+      const result = await withSpinner({
+        message: 'Test',
+        operation: async () => 42,
+        spinner: undefined,
+      })
+      expect(result).toBe(42)
+    })
+
+    it('should handle shimmer string option in withSpinner', async () => {
+      const spinner = Spinner()
+      spinner.enableShimmer()
+      const savedState = spinner.shimmerState
+
+      const result = await withSpinner({
+        message: 'Testing shimmer...',
+        operation: async () => 'done',
+        spinner,
+        withOptions: { shimmer: 'rtl' },
+      })
+
+      expect(result).toBe('done')
+      // Should restore original shimmer state
+      expect(spinner.shimmerState).toEqual(savedState)
+    })
+
+    it('should handle shimmer object option in withSpinner', async () => {
+      const spinner = Spinner()
+      spinner.enableShimmer()
+      spinner.updateShimmer({ dir: 'ltr', speed: 2 })
+
+      const result = await withSpinner({
+        message: 'Testing shimmer...',
+        operation: async () => 'complete',
+        spinner,
+        withOptions: {
+          shimmer: {
+            color: [0, 255, 255] as [number, number, number],
+            dir: 'rtl',
+            speed: 3,
+          },
+        },
+      })
+
+      expect(result).toBe('complete')
+    })
+
+    it('should restore spinner state after error', async () => {
+      const spinner = Spinner({ color: 'cyan' })
+      const originalColor = spinner.color
+
+      await expect(
+        withSpinner({
+          message: 'Testing error...',
+          operation: async () => {
+            throw new Error('Test error')
+          },
+          spinner,
+          withOptions: {
+            color: 'red',
+          },
+        }),
+      ).rejects.toThrow()
+
+      expect(spinner.color).toEqual(originalColor)
+    })
+
+    it('should handle async errors in withSpinner', async () => {
+      await expect(
+        withSpinner({
+          message: 'Testing...',
+          operation: async () => {
+            await new Promise(resolve => setTimeout(resolve, 1))
+            throw new Error('Async error')
+          },
+        }),
+      ).rejects.toThrow('Async error')
+    })
+  })
+
+  describe('withSpinnerSync error handling', () => {
+    it('should handle errors gracefully', () => {
+      const spinner = Spinner()
+      const error = new Error('Sync test error')
+
+      expect(() =>
+        withSpinnerSync({
+          message: 'Testing error...',
+          operation: () => {
+            throw error
+          },
+          spinner,
+        }),
+      ).toThrow('Sync test error')
+    })
+
+    it('should run operation without spinner when spinner is undefined', () => {
+      const result = withSpinnerSync({
+        message: 'Test',
+        operation: () => 42,
+        spinner: undefined,
+      })
+      expect(result).toBe(42)
+    })
+
+    it('should handle shimmer string option in withSpinnerSync', () => {
+      const spinner = Spinner()
+      spinner.enableShimmer()
+      const savedState = spinner.shimmerState
+
+      const result = withSpinnerSync({
+        message: 'Testing shimmer...',
+        operation: () => 'done',
+        spinner,
+        withOptions: { shimmer: 'rtl' },
+      })
+
+      expect(result).toBe('done')
+      // Should restore original shimmer state
+      expect(spinner.shimmerState).toEqual(savedState)
+    })
+
+    it('should handle shimmer object option in withSpinnerSync', () => {
+      const spinner = Spinner()
+      spinner.enableShimmer()
+      spinner.updateShimmer({ dir: 'ltr', speed: 2 })
+
+      const result = withSpinnerSync({
+        message: 'Testing shimmer...',
+        operation: () => 'complete',
+        spinner,
+        withOptions: {
+          shimmer: {
+            color: [0, 255, 255] as [number, number, number],
+            dir: 'rtl',
+            speed: 3,
+          },
+        },
+      })
+
+      expect(result).toBe('complete')
+    })
+
+    it('should restore spinner state after sync error', () => {
+      const spinner = Spinner({ color: 'cyan' })
+      const originalColor = spinner.color
+
+      expect(() =>
+        withSpinnerSync({
+          message: 'Testing error...',
+          operation: () => {
+            throw new Error('Sync test error')
+          },
+          spinner,
+          withOptions: {
+            color: 'red',
+          },
+        }),
+      ).toThrow()
+
+      expect(spinner.color).toEqual(originalColor)
+    })
+
+    it('should return operation result on success', () => {
+      const result = withSpinnerSync({
+        message: 'Computing...',
+        operation: () => 42,
+      })
+      expect(result).toBe(42)
+    })
+  })
+
+  describe('Spinner with various configurations', () => {
+    it('should create spinner with color array', () => {
+      const spinner = Spinner({ color: [255, 100, 50] })
+      expect(spinner.color).toEqual([255, 100, 50])
+    })
+
+    it('should create spinner with named color', () => {
+      const spinner = Spinner({ color: 'magenta' })
+      expect(spinner.color).toBeDefined()
+    })
+
+    it('should create spinner with shimmer config', () => {
+      const spinner = Spinner({ shimmer: { dir: 'rtl', speed: 2.0 } })
+      expect(spinner.shimmerState).toBeDefined()
+      expect(spinner.shimmerState?.mode).toBe('rtl')
+      expect(spinner.shimmerState?.speed).toBe(2.0)
+    })
+
+    it('should create spinner with socket style', () => {
+      const spinner = Spinner()
+      expect(spinner).toBeDefined()
+    })
+
+    it('should create spinner with theme name', () => {
+      const spinner = Spinner({ theme: 'socket' })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should handle spinner with indent methods', () => {
+      const spinner = Spinner()
+      spinner.start('Test')
+      spinner.indent(2)
+      spinner.dedent()
+      spinner.stop()
+      expect(spinner.isSpinning).toBe(false)
+    })
+
+    it('should handle all status methods', () => {
+      const spinner = Spinner()
+      spinner.start()
+      spinner.debug('Debug message')
+      spinner.done('Done message')
+      spinner.error('Error message')
+      spinner.fail('Fail message')
+      spinner.info('Info message')
+      spinner.log('Log message')
+      spinner.skip('Skip message')
+      spinner.step('Step message')
+      spinner.substep('Substep message')
+      spinner.success('Success message')
+      spinner.warn('Warn message')
+      spinner.stop()
+      expect(spinner.isSpinning).toBe(false)
+    })
+
+    it('should call AndStop methods', () => {
+      const spinner = Spinner()
+
+      // Call each AndStop method - they should execute without error
+      spinner.start()
+      const result1 = spinner.debugAndStop('Debug')
+      expect(result1).toBe(spinner)
+
+      spinner.start()
+      const result2 = spinner.doneAndStop('Done')
+      expect(result2).toBe(spinner)
+
+      spinner.start()
+      const result3 = spinner.errorAndStop('Error')
+      expect(result3).toBe(spinner)
+
+      spinner.start()
+      const result4 = spinner.failAndStop('Fail')
+      expect(result4).toBe(spinner)
+
+      spinner.start()
+      const result5 = spinner.infoAndStop('Info')
+      expect(result5).toBe(spinner)
+
+      spinner.start()
+      const result6 = spinner.logAndStop('Log')
+      expect(result6).toBe(spinner)
+
+      spinner.start()
+      const result7 = spinner.skipAndStop('Skip')
+      expect(result7).toBe(spinner)
+
+      spinner.start()
+      const result8 = spinner.successAndStop('Success')
+      expect(result8).toBe(spinner)
+
+      spinner.start()
+      const result9 = spinner.warnAndStop('Warn')
+      expect(result9).toBe(spinner)
+    })
+  })
+
+  describe('Complex spinner workflows', () => {
+    it('should handle complex async workflow', async () => {
+      const result = await withSpinner({
+        message: 'Processing...',
+        operation: async () => {
+          await new Promise(resolve => setTimeout(resolve, 1))
+          return 'completed'
+        },
+        withOptions: {
+          color: 'green',
+          shimmer: { dir: 'ltr' },
+        },
+      })
+      expect(result).toBe('completed')
+    })
+
+    it('should handle spinner text updates during operation', async () => {
+      const spinner = Spinner()
+      await withSpinner({
+        message: 'Starting...',
+        operation: async () => {
+          spinner.text('Middle...')
+          await new Promise(resolve => setTimeout(resolve, 1))
+          spinner.text('Finishing...')
+        },
+        spinner,
+      })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should handle progress updates during withSpinner', async () => {
+      const spinner = Spinner()
+      await withSpinner({
+        message: 'Processing files...',
+        operation: async () => {
+          spinner.progress(0, 3, 'files')
+          await new Promise(resolve => setTimeout(resolve, 1))
+          spinner.progressStep()
+          await new Promise(resolve => setTimeout(resolve, 1))
+          spinner.progressStep()
+          await new Promise(resolve => setTimeout(resolve, 1))
+          spinner.progressStep()
+        },
+        spinner,
+      })
+      expect(spinner).toBeDefined()
+    })
+
+    it('should handle multiple spinner instances', () => {
+      const spinner1 = Spinner({ color: 'cyan' })
+      const spinner2 = Spinner({ color: 'magenta' })
+
+      spinner1.start('Task 1')
+      spinner2.start('Task 2')
+
+      spinner1.stop()
+      spinner2.stop()
+
+      expect(spinner1.isSpinning).toBe(false)
+      expect(spinner2.isSpinning).toBe(false)
+    })
+
+    it('should handle rapid start/stop cycles', () => {
+      const spinner = Spinner()
+      for (let i = 0; i < 5; i++) {
+        spinner.start(`Iteration ${i}`)
+        spinner.stop()
+      }
       expect(spinner.isSpinning).toBe(false)
     })
   })

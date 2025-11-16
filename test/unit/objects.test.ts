@@ -847,4 +847,51 @@ describe('objects', () => {
       expect(hasKeys(obj)).toBe(false)
     })
   })
+
+  describe('createConstantsObject - additional tests', () => {
+    it('should handle getters with lazyGetterStats tracking', () => {
+      const obj = createConstantsObject(
+        {},
+        {
+          getters: {
+            computed: () => 'value',
+          },
+        },
+      )
+      // Access the getter
+      expect((obj as any).computed).toBe('value')
+      // Accessing again should still work (memoized)
+      expect((obj as any).computed).toBe('value')
+    })
+
+    it('should handle multiple lazy getters', () => {
+      const obj = createConstantsObject(
+        { base: 1 },
+        {
+          getters: {
+            first: () => 'one',
+            second: () => 'two',
+          },
+        },
+      )
+      expect((obj as any).first).toBe('one')
+      expect((obj as any).second).toBe('two')
+      expect((obj as any).base).toBe(1)
+    })
+
+    it('should memoize lazy getter results across multiple accesses', () => {
+      let count = 0
+      const obj = createConstantsObject(
+        {},
+        {
+          getters: {
+            counter: () => ++count,
+          },
+        },
+      )
+      expect((obj as any).counter).toBe(1)
+      expect((obj as any).counter).toBe(1) // Should return cached value
+      expect(count).toBe(1) // Function only called once
+    })
+  })
 })

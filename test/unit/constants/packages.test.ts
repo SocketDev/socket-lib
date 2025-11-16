@@ -288,6 +288,91 @@ describe('constants/packages', () => {
       const scripts = getLifecycleScriptNames()
       expect(scripts.length).toBeGreaterThanOrEqual(0)
     })
+
+    it('should handle repeated calls to getPackageDefaultNodeRange', () => {
+      for (let i = 0; i < 5; i++) {
+        const range = getPackageDefaultNodeRange()
+        expect(typeof range === 'string' || typeof range === 'undefined').toBe(
+          true,
+        )
+      }
+    })
+
+    it('should handle repeated calls to getPackageDefaultSocketCategories', () => {
+      for (let i = 0; i < 5; i++) {
+        const categories = getPackageDefaultSocketCategories()
+        expect(Array.isArray(categories)).toBe(true)
+      }
+    })
+
+    it('should handle repeated calls to getPackageExtensions', () => {
+      for (let i = 0; i < 5; i++) {
+        const extensions = getPackageExtensions()
+        expect(extensions).toBeDefined()
+      }
+    })
+
+    it('should handle repeated calls to getLifecycleScriptNames', () => {
+      for (let i = 0; i < 5; i++) {
+        const scripts = getLifecycleScriptNames()
+        expect(Array.isArray(scripts)).toBe(true)
+      }
+    })
+
+    it('should handle repeated calls to getPackumentCache', () => {
+      const caches = []
+      for (let i = 0; i < 5; i++) {
+        caches.push(getPackumentCache())
+      }
+      // All should be the same instance
+      for (let i = 1; i < caches.length; i++) {
+        expect(caches[i]).toBe(caches[0])
+      }
+    })
+
+    it('should handle repeated calls to getPacoteCachePath', () => {
+      for (let i = 0; i < 5; i++) {
+        const path = getPacoteCachePath()
+        expect(typeof path).toBe('string')
+      }
+    })
+
+    it('should handle large packument cache', () => {
+      const cache = getPackumentCache()
+      const initialSize = cache.size
+      const entries = 100
+
+      for (let i = 0; i < entries; i++) {
+        cache.set(`large-test-${i}-${Date.now()}`, { index: i })
+      }
+
+      expect(cache.size).toBeGreaterThanOrEqual(initialSize + entries)
+
+      // Clean up
+      for (let i = 0; i < entries; i++) {
+        cache.delete(`large-test-${i}-${Date.now()}`)
+      }
+    })
+
+    it('should handle package extensions with spread operator', () => {
+      const extensions = getPackageExtensions()
+      const arr = [...extensions]
+      expect(Array.isArray(arr)).toBe(true)
+    })
+
+    it('should handle lifecycle script names with spread operator', () => {
+      const scripts = getLifecycleScriptNames()
+      const arr = [...scripts]
+      expect(Array.isArray(arr)).toBe(true)
+      expect(arr).toEqual(scripts)
+    })
+
+    it('should handle package extensions iterator multiple times', () => {
+      const extensions = getPackageExtensions()
+      const arr1 = Array.from(extensions)
+      const arr2 = Array.from(extensions)
+      expect(arr1.length).toBe(arr2.length)
+    })
   })
 
   describe('type checks', () => {

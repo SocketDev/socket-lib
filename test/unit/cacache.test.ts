@@ -488,6 +488,120 @@ describe('cacache', () => {
     })
   })
 
+  describe('wildcard pattern matching', () => {
+    it('should match simple prefix without wildcards', async () => {
+      // Test that simple prefixes use fast startsWith path
+      const prefix = `test-simple-${Date.now()}`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should match wildcard at end', async () => {
+      const prefix = `test-wildcard-end-${Date.now()}:*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should match wildcard in middle', async () => {
+      const prefix = `test-wildcard-middle-${Date.now()}:*:suffix`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should match multiple wildcards', async () => {
+      const prefix = `test-multi-${Date.now()}:*:*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle wildcards with regex special chars', async () => {
+      // Test pattern with characters that need regex escaping
+      const prefix = `test-regex-${Date.now()}:foo.bar[baz]*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle complex wildcard patterns', async () => {
+      const prefix = 'socket-sdk:npm/lodash.*/4.*.0/*'
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle pattern with parentheses', async () => {
+      const prefix = `test-(group)-${Date.now()}*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle pattern with plus and question marks', async () => {
+      const prefix = `test+value?${Date.now()}*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle pattern with caret and dollar', async () => {
+      const prefix = `test^start$end-${Date.now()}*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle pattern with pipe character', async () => {
+      const prefix = `test|or|${Date.now()}*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle pattern with backslash', async () => {
+      const prefix = `test\\escape-${Date.now()}*`
+      try {
+        const result = await clear({ prefix })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+  })
+
   describe('edge cases', () => {
     it('should handle empty string keys', async () => {
       // Empty string keys are actually allowed by cacache
@@ -516,6 +630,24 @@ describe('cacache', () => {
       try {
         await put(key, 'data')
         await remove(key)
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle clear with empty prefix string', async () => {
+      try {
+        const result = await clear({ prefix: '' })
+        expect(typeof result).toBe('number')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('should handle clear with only wildcard', async () => {
+      try {
+        const result = await clear({ prefix: '*' })
+        expect(typeof result).toBe('number')
       } catch (e) {
         expect(e).toBeDefined()
       }

@@ -313,4 +313,157 @@ describe('streams', () => {
       expect(output).toEqual([1, 2, 3])
     })
   })
+
+  describe('error handling and retries', () => {
+    it('should handle errors in parallelMap', async () => {
+      const input = [1, 2, 3]
+      const result = parallelMap(input, async x => {
+        if (x === 2) {
+          throw new Error('Test error')
+        }
+        return x * 2
+      })
+      await expect(collect(result)).rejects.toThrow('Test error')
+    })
+
+    it('should handle errors in transform', async () => {
+      const input = [1, 2, 3]
+      const result = transform(input, async x => {
+        if (x === 2) {
+          throw new Error('Transform error')
+        }
+        return x * 2
+      })
+      await expect(collect(result)).rejects.toThrow('Transform error')
+    })
+
+    it('should handle errors in parallelEach', async () => {
+      const input = [1, 2, 3]
+      const results: number[] = []
+      await expect(
+        parallelEach(input, async x => {
+          if (x === 2) {
+            throw new Error('Each error')
+          }
+          results.push(x)
+        }),
+      ).rejects.toThrow('Each error')
+    })
+
+    it('should work with retry options - success after retry', async () => {
+      const input = [1, 2, 3]
+      let attempt = 0
+      const result = parallelMap(
+        input,
+        async x => {
+          if (x === 2 && attempt++ === 0) {
+            throw new Error('Temporary error')
+          }
+          return x * 2
+        },
+        { concurrency: 1, retries: { retries: 2 } },
+      )
+      const output = await collect(result)
+      expect(output).toEqual([2, 4, 6])
+    })
+
+    it('should respect concurrency limit in parallelMap', async () => {
+      const input = [1, 2, 3, 4, 5]
+      let concurrent = 0
+      let maxConcurrent = 0
+      const result = parallelMap(
+        input,
+        async x => {
+          concurrent++
+          maxConcurrent = Math.max(maxConcurrent, concurrent)
+          await new Promise(resolve => setTimeout(resolve, 10))
+          concurrent--
+          return x
+        },
+        { concurrency: 2 },
+      )
+      await collect(result)
+      expect(maxConcurrent).toBeLessThanOrEqual(2)
+    })
+
+    it('should respect concurrency limit in transform', async () => {
+      const input = [1, 2, 3, 4, 5]
+      let concurrent = 0
+      let maxConcurrent = 0
+      const result = transform(
+        input,
+        async x => {
+          concurrent++
+          maxConcurrent = Math.max(maxConcurrent, concurrent)
+          await new Promise(resolve => setTimeout(resolve, 10))
+          concurrent--
+          return x
+        },
+        { concurrency: 2 },
+      )
+      await collect(result)
+      expect(maxConcurrent).toBeLessThanOrEqual(2)
+    })
+
+    it('should handle async iterable errors', async () => {
+      async function* errorIterable() {
+        yield 1
+        yield 2
+        throw new Error('Iterable error')
+      }
+      const result = parallelMap(errorIterable(), async x => x * 2)
+      await expect(collect(result)).rejects.toThrow('Iterable error')
+    })
+
+    it('should handle undefined options gracefully', async () => {
+      const input = [1, 2, 3]
+      const result = parallelMap(input, async x => x * 2, undefined)
+      const output = await collect(result)
+      expect(output).toEqual([2, 4, 6])
+    })
+
+    it('should handle null-like values in data', async () => {
+      const input = [null, undefined, 0, '', false]
+      const result = parallelMap(input, async x => String(x))
+      const output = await collect(result)
+      expect(output).toEqual(['null', 'undefined', '0', '', 'false'])
+    })
+
+    it('should work with higher concurrency than items', async () => {
+      const input = [1, 2]
+      const result = parallelMap(input, async x => x * 2, { concurrency: 10 })
+      const output = await collect(result)
+      expect(output).toEqual([2, 4])
+    })
+
+    it('should handle promises that resolve to undefined', async () => {
+      const input = [1, 2, 3]
+      const result = parallelMap(input, async () => undefined)
+      const output = await collect(result)
+      expect(output).toEqual([undefined, undefined, undefined])
+    })
+
+    it('should handle transform with different output types', async () => {
+      const input = [1, 2, 3]
+      const result = transform(input, async x => `item-${x}`)
+      const output = await collect(result)
+      expect(output).toEqual(['item-1', 'item-2', 'item-3'])
+    })
+
+    it('should handle parallelEach with async delays', async () => {
+      const input = [1, 2, 3]
+      const results: Array<{ value: number; time: number }> = []
+      const start = Date.now()
+      await parallelEach(
+        input,
+        async x => {
+          await new Promise(resolve => setTimeout(resolve, 5))
+          results.push({ value: x, time: Date.now() - start })
+        },
+        { concurrency: 3 },
+      )
+      expect(results.length).toBe(3)
+      expect(results.map(r => r.value).sort()).toEqual([1, 2, 3])
+    })
+  })
 })
