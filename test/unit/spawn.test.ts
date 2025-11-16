@@ -164,11 +164,17 @@ describe('spawn', () => {
     })
 
     it('should handle options with env', async () => {
-      const result = await spawn('echo', ['$TEST_VAR'], {
-        env: { TEST_VAR: 'test-value' },
-        shell: true,
-      })
+      // Test that custom env is passed to spawned process
+      // Use node to read env var directly without shell expansion
+      const result = await spawn(
+        'node',
+        ['-e', 'console.log(process.env.TEST_VAR)'],
+        {
+          env: { ...process.env, TEST_VAR: 'test-value' },
+        },
+      )
       expect(result.code).toBe(0)
+      expect(result.stdout?.toString().trim()).toBe('test-value')
     })
 
     it('should handle stdio: pipe (default)', async () => {
@@ -211,20 +217,28 @@ describe('spawn', () => {
 
     it('should strip ANSI codes by default', async () => {
       // Test with a command that outputs ANSI codes
-      const result = await spawn('echo', ['-e', '\x1b[31mred\x1b[0m'], {
-        shell: true,
-      })
+      const result = await spawn(
+        'node',
+        ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
+        {},
+      )
       expect(result.code).toBe(0)
-      // ANSI codes should be stripped
+      // ANSI codes should be stripped (default behavior)
       expect(result.stdout).not.toContain('\x1b[31m')
+      expect(result.stdout).toContain('red')
     })
 
     it('should not strip ANSI codes when stripAnsi: false', async () => {
-      const result = await spawn('echo', ['-e', '\x1b[31mred\x1b[0m'], {
-        shell: true,
-        stripAnsi: false,
-      })
+      const result = await spawn(
+        'node',
+        ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
+        {
+          stripAnsi: false,
+        },
+      )
       expect(result.code).toBe(0)
+      // ANSI codes should NOT be stripped
+      expect(result.stdout).toContain('\x1b[31m')
     })
 
     it('should handle readonly args array', async () => {
@@ -279,13 +293,6 @@ describe('spawn', () => {
       } else {
         expect(true).toBe(true) // Skip on non-Windows
       }
-    })
-
-    it('should handle shell option', async () => {
-      const result = await spawn('echo', ['$HOME'], {
-        shell: true,
-      })
-      expect(result.code).toBe(0)
     })
 
     it.skipIf(process.platform === 'win32')(
@@ -350,11 +357,20 @@ describe('spawn', () => {
     })
 
     it('should handle options with env', () => {
-      const result = spawnSync('echo', ['$TEST_VAR'], {
-        env: { TEST_VAR: 'test-value' },
-        shell: true,
-      })
+      // Test that custom env is passed to spawned process
+      const result = spawnSync(
+        'node',
+        ['-e', 'console.log(process.env.TEST_VAR)'],
+        {
+          env: { ...process.env, TEST_VAR: 'test-value' },
+        },
+      )
       expect(result.status).toBe(0)
+      const output =
+        typeof result.stdout === 'string'
+          ? result.stdout.trim()
+          : result.stdout?.toString().trim()
+      expect(output).toBe('test-value')
     })
 
     it('should handle stdioString: true (default)', () => {
@@ -374,18 +390,36 @@ describe('spawn', () => {
     })
 
     it('should strip ANSI codes by default', () => {
-      const result = spawnSync('echo', ['-e', '\x1b[31mred\x1b[0m'], {
-        shell: true,
-      })
+      const result = spawnSync(
+        'node',
+        ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
+        {},
+      )
       expect(result.status).toBe(0)
+      // ANSI codes should be stripped (default behavior)
+      const output =
+        typeof result.stdout === 'string'
+          ? result.stdout
+          : result.stdout?.toString()
+      expect(output).not.toContain('\x1b[31m')
+      expect(output).toContain('red')
     })
 
     it('should not strip ANSI codes when stripAnsi: false', () => {
-      const result = spawnSync('echo', ['-e', '\x1b[31mred\x1b[0m'], {
-        shell: true,
-        stripAnsi: false,
-      })
+      const result = spawnSync(
+        'node',
+        ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
+        {
+          stripAnsi: false,
+        },
+      )
       expect(result.status).toBe(0)
+      // ANSI codes should NOT be stripped
+      const output =
+        typeof result.stdout === 'string'
+          ? result.stdout
+          : result.stdout?.toString()
+      expect(output).toContain('\x1b[31m')
     })
 
     it('should handle readonly args array', () => {
@@ -418,13 +452,6 @@ describe('spawn', () => {
       } else {
         expect(true).toBe(true) // Skip on non-Windows
       }
-    })
-
-    it('should handle shell option', () => {
-      const result = spawnSync('echo', ['$HOME'], {
-        shell: true,
-      })
-      expect(result.status).toBe(0)
     })
 
     it.skipIf(process.platform === 'win32')(

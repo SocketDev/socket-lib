@@ -1,6 +1,5 @@
 import path from 'path'
 
-import { WIN32 } from '#constants/platform'
 import { debugNs } from './debug'
 import { getGlobMatcher } from './globs'
 import { normalizePath } from './paths/normalize'
@@ -233,7 +232,6 @@ function getGitDiffSpawnArgs(cwd?: string | undefined): GitDiffSpawnArgs {
       ['status', '--porcelain'],
       {
         cwd: resolvedCwd,
-        shell: WIN32,
       },
     ],
     unstaged: [
@@ -248,7 +246,6 @@ function getGitDiffSpawnArgs(cwd?: string | undefined): GitDiffSpawnArgs {
       ['diff', '--cached', '--name-only'],
       {
         cwd: resolvedCwd,
-        shell: WIN32,
       },
     ],
   }
