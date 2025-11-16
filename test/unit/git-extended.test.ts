@@ -216,7 +216,7 @@ describe('git extended tests', () => {
         await fs.writeFile(testFile, 'test content', 'utf8')
 
         // File should appear as changed (untracked)
-        const changed = await getChangedFiles({ cwd: tmpDir })
+        const changed = await getChangedFiles({ cache: false, cwd: tmpDir })
         expect(changed).toContain('test.txt')
 
         // Stage the file
@@ -277,7 +277,7 @@ describe('git extended tests', () => {
         const untracked = path.join(tmpDir, 'untracked.txt')
         await fs.writeFile(untracked, 'untracked', 'utf8')
 
-        const changed = await getChangedFiles({ cwd: tmpDir })
+        const changed = await getChangedFiles({ cache: false, cwd: tmpDir })
         expect(changed).toContain('untracked.txt')
 
         // Untracked files should not appear in unstaged (they're not tracked)
@@ -300,7 +300,7 @@ describe('git extended tests', () => {
         const nestedFile = path.join(subdir, 'nested.txt')
         await fs.writeFile(nestedFile, 'nested content', 'utf8')
 
-        const changed = await getChangedFiles({ cwd: tmpDir })
+        const changed = await getChangedFiles({ cache: false, cwd: tmpDir })
         // Git may show directory or full path depending on config
         expect(changed.length).toBeGreaterThan(0)
         const hasFile = changed.some(
@@ -327,7 +327,7 @@ describe('git extended tests', () => {
         const testFile = path.join(tmpDir, 'sync-test.txt')
         await fs.writeFile(testFile, 'sync content', 'utf8')
 
-        const changedSync = getChangedFilesSync({ cwd: tmpDir })
+        const changedSync = getChangedFilesSync({ cache: false, cwd: tmpDir })
         expect(changedSync).toContain('sync-test.txt')
 
         spawnSync('git', ['add', 'sync-test.txt'], { cwd: tmpDir })
