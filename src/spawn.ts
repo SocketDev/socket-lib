@@ -81,14 +81,14 @@ function getChildProcess() {
  */
 export type PromiseSpawnOptions = {
   cwd?: string | undefined
-  stdioString?: boolean | undefined
-  stdio?: StdioType | undefined
   env?: NodeJS.ProcessEnv | undefined
+  gid?: number | undefined
   shell?: boolean | string | undefined
   signal?: AbortSignal | undefined
+  stdio?: StdioType | undefined
+  stdioString?: boolean | undefined
   timeout?: number | undefined
   uid?: number | undefined
-  gid?: number | undefined
 }
 
 /**

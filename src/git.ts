@@ -34,6 +34,12 @@ export interface GitDiffOptions {
    */
   absolute?: boolean | undefined
   /**
+   * Return results as a `Set` instead of an array.
+   *
+   * @default false
+   */
+  asSet?: boolean | undefined
+  /**
    * Cache git diff results to avoid repeated git subprocess calls.
    *
    * Caching is keyed by the git command and options used, so different
@@ -61,12 +67,6 @@ export interface GitDiffOptions {
    * @default false
    */
   porcelain?: boolean | undefined
-  /**
-   * Return results as a `Set` instead of an array.
-   *
-   * @default false
-   */
-  asSet?: boolean | undefined
   /**
    * Additional options passed to glob matcher.
    *
