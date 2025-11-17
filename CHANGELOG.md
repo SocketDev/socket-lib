@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.1.0) - 2025-11-17
+
+### Added
+
+- **constants/node**: New version helper functions for cleaner version detection
+  - `getNodeMinorVersion()`: Extract minor version number
+  - `getNodePatchVersion()`: Extract patch version number
+
+### Fixed
+
+- **constants/node**: Improve Node.js flag management in `getNodeHardenFlags()`
+  - Properly guard `--experimental-permission` for Node 20-23 only
+  - Properly guard `--permission` for Node 24+ only
+  - Properly guard `--force-node-api-uncaught-exceptions-policy` for Node 22+ (was incorrectly applied to all versions)
+  - Automatically include permission grants from `getNodePermissionFlags()` for Node 24+
+  - Remove `--experimental-policy` flag (no policy file provided)
+
 ## [4.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v4.0.1) - 2025-11-17
 
 ### Changed
