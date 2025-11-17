@@ -70,14 +70,15 @@ function getChildProcess() {
  * Options for spawning a child process with promise-based completion.
  *
  * @property {string | undefined} cwd - Current working directory for the process
- * @property {boolean | undefined} stdioString - Convert stdio output to strings (default: `true`)
- * @property {StdioType | undefined} stdio - Stdio configuration (`'pipe'`, `'ignore'`, `'inherit'`, or array)
  * @property {NodeJS.ProcessEnv | undefined} env - Environment variables for the process
+ * @property {number | undefined} gid - Group identity of the process (POSIX only)
  * @property {boolean | string | undefined} shell - Whether to run command in shell, or path to shell
  * @property {AbortSignal | undefined} signal - Signal to abort the process
+ * @property {StdioType | undefined} stdio - Stdio configuration (`'pipe'`, `'ignore'`, `'inherit'`, or array)
+ * @property {boolean | undefined} stdioString - Convert stdio output to strings (default: `true`)
  * @property {number | undefined} timeout - Maximum time in milliseconds before killing the process
  * @property {number | undefined} uid - User identity of the process (POSIX only)
- * @property {number | undefined} gid - Group identity of the process (POSIX only)
+ * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or escape arguments on Windows (requires shell: true). Use when you need exact argument control. Default: false
  */
 export type PromiseSpawnOptions = {
   cwd?: string | undefined
@@ -89,6 +90,7 @@ export type PromiseSpawnOptions = {
   stdioString?: boolean | undefined
   timeout?: number | undefined
   uid?: number | undefined
+  windowsVerbatimArguments?: boolean | undefined
 }
 
 /**
@@ -413,17 +415,18 @@ interface WritableStreamType {
  * Options for spawning a child process with {@link spawn}.
  * Extends Node.js spawn options with additional Socket-specific functionality.
  *
- * @property {import('./spinner').Spinner | undefined} spinner - Spinner instance to pause during execution
- * @property {boolean | undefined} stdioString - Convert output to strings (default: `true`)
- * @property {boolean | undefined} stripAnsi - Remove ANSI codes from output (default: `true`)
  * @property {string | URL | undefined} cwd - Current working directory
  * @property {NodeJS.ProcessEnv | undefined} env - Environment variables
- * @property {StdioType | undefined} stdio - Stdio configuration
- * @property {boolean | string | undefined} shell - Run command in shell
- * @property {number | undefined} timeout - Timeout in milliseconds
- * @property {AbortSignal | undefined} signal - Abort signal
- * @property {number | undefined} uid - User identity (POSIX)
  * @property {number | undefined} gid - Group identity (POSIX)
+ * @property {boolean | string | undefined} shell - Run command in shell
+ * @property {AbortSignal | undefined} signal - Abort signal
+ * @property {import('./spinner').Spinner | undefined} spinner - Spinner instance to pause during execution
+ * @property {StdioType | undefined} stdio - Stdio configuration
+ * @property {boolean | undefined} stdioString - Convert output to strings (default: `true`)
+ * @property {boolean | undefined} stripAnsi - Remove ANSI codes from output (default: `true`)
+ * @property {number | undefined} timeout - Timeout in milliseconds
+ * @property {number | undefined} uid - User identity (POSIX)
+ * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or escape arguments on Windows (requires shell: true). Use when you need exact argument control. Default: false
  */
 export type SpawnOptions = import('./objects').Remap<
   NodeSpawnOptions & {
@@ -607,6 +610,7 @@ export function spawn(
     stdio: spawnOptions.stdio,
     stdioString,
     shell: spawnOptions.shell,
+    windowsVerbatimArguments: spawnOptions.windowsVerbatimArguments,
     timeout: spawnOptions.timeout,
     uid: spawnOptions.uid,
     gid: spawnOptions.gid,
