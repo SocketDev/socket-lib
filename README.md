@@ -31,13 +31,13 @@ spinner.stop()
 
 ## What's Inside
 
-- **Visual Effects** → Spinners, themes, logger
-- **File System** → fs, paths, globs
-- **Package Management** → npm, pnpm, yarn, dlx
-- **Process & Spawn** → Safe process spawning
-- **Environment** → 68 typed env getters
-- **Constants** → Node.js, npm, platform
-- **Utilities** → Arrays, objects, strings, promises
+- **Visual Effects** → logger, spinner, themes
+- **File System** → fs, globs, paths
+- **Package Management** → dlx, npm, pnpm, yarn
+- **Process & Spawn** → process spawning
+- **Environment** → env getters
+- **Constants** → node, npm, platform
+- **Utilities** → arrays, objects, promises, strings
 
 ## Development
 
