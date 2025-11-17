@@ -3,7 +3,7 @@
  * Provides access to XDG user directories on Unix systems.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * XDG_CACHE_HOME environment variable.

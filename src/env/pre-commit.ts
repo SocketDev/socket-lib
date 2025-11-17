@@ -3,8 +3,8 @@
  * Whether running in a pre-commit hook context.
  */
 
-import { envAsBoolean } from '#env/helpers'
-import { getEnvValue } from '#env/rewire'
+import { envAsBoolean } from './helpers'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getPreCommit(): boolean {

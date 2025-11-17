@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url'
 
 import MagicString from 'magic-string'
 
-import { isQuiet } from '#socketsecurity/lib/argv/flags'
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 

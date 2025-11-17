@@ -3,7 +3,7 @@
  * Authentication token for Node.js package registry access.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getNodeAuthToken(): string | undefined {

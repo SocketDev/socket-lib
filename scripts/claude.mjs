@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync as del } from 'del'
 import colors from 'yoctocolors-cjs'
 
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import { parseArgs } from './utils/parse-args.mjs'
 

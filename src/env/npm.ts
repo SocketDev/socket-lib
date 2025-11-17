@@ -3,7 +3,7 @@
  * Provides access to NPM and package manager environment variables.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * npm_config_registry environment variable.

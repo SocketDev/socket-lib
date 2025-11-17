@@ -11,6 +11,7 @@ import normalizePackageData from '../external/normalize-package-data'
 import { merge } from '../objects'
 
 import type { NormalizeOptions, PackageJson } from '../packages'
+import { findPackageExtensions } from './operations'
 
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn
@@ -20,25 +21,6 @@ function getEscapedScopeRegExp(): RegExp {
   return new RegExp(
     `^[^${escapeRegExp(firstChar)}]+${escapeRegExp(REGISTRY_SCOPE_DELIMITER)}(?!${escapeRegExp(firstChar)})`,
   )
-}
-
-let _findPackageExtensions:
-  | ((name: string, version: string) => unknown)
-  | undefined
-/**
- * Get the findPackageExtensions function from operations module.
- * Lazy loaded to avoid circular dependency.
- */
-function _getFindPackageExtensions() {
-  if (_findPackageExtensions === undefined) {
-    // Dynamically import to avoid circular dependency.
-    // Use path alias for reliable resolution in both test and production environments.
-    const operations: {
-      findPackageExtensions: (name: string, version: string) => unknown
-    } = require('#packages/operations')
-    _findPackageExtensions = operations.findPackageExtensions
-  }
-  return _findPackageExtensions as (name: string, version: string) => unknown
 }
 
 /**
@@ -70,7 +52,6 @@ export function normalizePackageJson(
   normalizePackageData(pkgJson)
   // Apply package extensions if name and version are present.
   if (pkgJson.name && pkgJson.version) {
-    const findPackageExtensions = _getFindPackageExtensions()
     const extensions = findPackageExtensions(pkgJson.name, pkgJson.version)
     if (extensions && typeof extensions === 'object') {
       merge(pkgJson, extensions)

@@ -5,7 +5,7 @@
 
 import { existsSync, promises as fs } from 'fs'
 
-import { WIN32 } from '#constants/platform'
+import { WIN32 } from '../constants/platform'
 
 import path from 'node:path'
 import npmPackageArg from '../external/npm-package-arg'

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Validate that dist/* files export named exports compatible with ESM imports
  * Ensures that module.exports = { foo, bar } pattern is used (not module.exports.default)
- * so that ESM code can do: import { foo, bar } from '#socketsecurity/lib/module'
+ * so that ESM code can do: import { foo, bar } from '@socketsecurity/lib-stable/module'
  */
 
 import { createRequire } from 'node:module'
@@ -14,10 +14,10 @@ const distDir = path.resolve(__dirname, '..', '..', 'dist')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
-const { isQuiet } = require('#socketsecurity/lib/argv/flags')
-const { getDefaultLogger } = require('#socketsecurity/lib/logger')
-const { normalizePath } = require('#socketsecurity/lib/paths/normalize')
-const { pluralize } = require('#socketsecurity/lib/words')
+const { isQuiet } = require('@socketsecurity/lib-stable/argv/flags')
+const { getDefaultLogger } = require('@socketsecurity/lib-stable/logger')
+const { normalizePath } = require('@socketsecurity/lib-stable/paths/normalize')
+const { pluralize } = require('@socketsecurity/lib-stable/words')
 
 const logger = getDefaultLogger()
 

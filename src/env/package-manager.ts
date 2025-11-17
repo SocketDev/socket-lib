@@ -3,7 +3,7 @@
  * Provides utilities to detect which package manager (npm/pnpm/yarn/bun) is running.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * Package manager type detected from environment.

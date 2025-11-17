@@ -3,9 +3,9 @@
  * Provides access to test framework environment variables and utilities.
  */
 
-import { envAsBoolean, envAsString } from '#env/helpers'
-import { getNodeEnv } from '#env/node-env'
-import { getEnvValue } from '#env/rewire'
+import { envAsBoolean, envAsString } from './helpers'
+import { getNodeEnv } from './node-env'
+import { getEnvValue } from './rewire'
 
 /**
  * JEST_WORKER_ID environment variable.

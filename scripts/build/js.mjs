@@ -10,7 +10,7 @@ import {
   buildConfig,
   watchConfig,
 } from '../../.config/esbuild.config.mjs'
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 

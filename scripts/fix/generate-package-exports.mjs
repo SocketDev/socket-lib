@@ -9,9 +9,9 @@ import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.j
 }
 import fastGlob from 'fast-glob'
 
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { toSortedObject } from '#socketsecurity/lib/objects'
-import { readPackageJson } from '#socketsecurity/lib/packages'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { toSortedObject } from '@socketsecurity/lib-stable/objects'
+import { readPackageJson } from '@socketsecurity/lib-stable/packages'
 
 const logger = getDefaultLogger()
 

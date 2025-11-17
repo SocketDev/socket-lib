@@ -3,7 +3,7 @@
  * Provides access to system locale settings.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * LANG environment variable.

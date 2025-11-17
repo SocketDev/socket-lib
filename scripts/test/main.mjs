@@ -8,9 +8,9 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { getDefaultSpinner } from '#socketsecurity/lib/spinner'
-import { printHeader } from '#socketsecurity/lib/stdio/header'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner'
+import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { getTestsToRun } from '../utils/changed-test-mapper.mjs'
 import { parseArgs } from '../utils/parse-args.mjs'

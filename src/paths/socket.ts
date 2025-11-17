@@ -16,19 +16,19 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import { CACHE_GITHUB_DIR } from '#constants/github'
+import { CACHE_GITHUB_DIR } from '../constants/github'
 import {
   SOCKET_APP_PREFIX,
   SOCKET_CLI_APP_NAME,
   SOCKET_DLX_APP_NAME,
   SOCKET_REGISTRY_APP_NAME,
-} from '#constants/socket'
-import { getHome } from '#env/home'
+} from '../constants/socket'
+import { getHome } from '../env/home'
 import {
   getSocketCacacheDir as getSocketCacacheDirEnv,
   getSocketDlxDirEnv,
-} from '#env/socket'
-import { getUserprofile } from '#env/windows'
+} from '../env/socket'
+import { getUserprofile } from '../env/windows'
 
 import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR } from './dirnames'
 import { normalizePath } from './normalize'

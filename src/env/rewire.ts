@@ -11,7 +11,7 @@
 
 import { AsyncLocalStorage } from 'async_hooks'
 
-import { envAsBoolean } from '#env/helpers'
+import { envAsBoolean } from './helpers'
 
 type EnvOverrides = Map<string, string | undefined>
 
@@ -70,8 +70,8 @@ export function getEnvValue(key: string): string | undefined {
  *
  * @example
  * ```typescript
- * import { setEnv, resetEnv } from '#env/rewire'
- * import { getCI } from '#env/ci'
+ * import { setEnv, resetEnv } from './rewire'
+ * import { getCI } from './ci'
  *
  * beforeEach(() => {
  *   setEnv('CI', '1')
@@ -103,7 +103,7 @@ export function clearEnv(key: string): void {
  *
  * @example
  * ```typescript
- * import { resetEnv } from '#env/rewire'
+ * import { resetEnv } from './rewire'
  *
  * afterEach(() => {
  *   resetEnv()
@@ -131,8 +131,8 @@ export function hasOverride(key: string): boolean {
  *
  * @example
  * ```typescript
- * import { withEnv } from '#env/rewire'
- * import { getCI } from '#env/ci'
+ * import { withEnv } from './rewire'
+ * import { getCI } from './ci'
  *
  * // Temporary override in isolated context
  * await withEnv({ CI: '1' }, async () => {
@@ -166,8 +166,8 @@ export async function withEnv<T>(
  *
  * @example
  * ```typescript
- * import { withEnvSync } from '#env/rewire'
- * import { getCI } from '#env/ci'
+ * import { withEnvSync } from './rewire'
+ * import { getCI } from './ci'
  *
  * const result = withEnvSync({ CI: '1' }, () => {
  *   return getCI()

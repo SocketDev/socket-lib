@@ -3,7 +3,7 @@
  * System executable search paths.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getPath(): string | undefined {

@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
-import { isQuiet } from '#socketsecurity/lib/argv/flags'
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { printHeader } from '#socketsecurity/lib/stdio/header'
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { parseArgs } from '../utils/parse-args.mjs'
 

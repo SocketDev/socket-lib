@@ -6,8 +6,8 @@ import os from 'os'
 
 import path from 'path'
 
-import { WIN32 } from '#constants/platform'
-import { DLX_BINARY_CACHE_TTL } from '#constants/time'
+import { WIN32 } from './constants/platform'
+import { DLX_BINARY_CACHE_TTL } from './constants/time'
 
 import { generateCacheKey } from './dlx'
 import { dlxManifest } from './dlx-manifest'

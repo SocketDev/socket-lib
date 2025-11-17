@@ -7,7 +7,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import esbuild from 'esbuild'
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import {
   getEsbuildConfig,

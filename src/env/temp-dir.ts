@@ -3,7 +3,7 @@
  * Different platforms use different environment variables for temp directories.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * TMPDIR environment variable.

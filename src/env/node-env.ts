@@ -3,7 +3,7 @@
  * Indicates the Node.js environment mode (production, development, test).
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getNodeEnv(): string | undefined {

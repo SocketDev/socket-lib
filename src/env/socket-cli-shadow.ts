@@ -3,8 +3,8 @@
  * Provides typed getters for SOCKET_CLI_SHADOW_* environment variables.
  */
 
-import { envAsBoolean } from '#env/helpers'
-import { getEnvValue } from '#env/rewire'
+import { envAsBoolean } from './helpers'
+import { getEnvValue } from './rewire'
 
 /**
  * Controls Socket CLI shadow mode risk acceptance.

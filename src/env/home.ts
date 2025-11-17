@@ -3,7 +3,7 @@
  * Points to the user's home directory.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getHome(): string | undefined {

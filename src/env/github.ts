@@ -3,7 +3,7 @@
  * Provides access to GitHub Actions CI/CD environment variables.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * GITHUB_API_URL environment variable.

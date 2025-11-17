@@ -646,15 +646,6 @@
     "./tsconfig.json": "./tsconfig.json",
     "./tsconfig.test.json": "./tsconfig.test.json"
   },
-  "imports": {
-    "#constants/*": "./dist/constants/*.js",
-    "#env/*": "./dist/env/*.js",
-    "#lib/*": "./dist/*.js",
-    "#packages/*": "./dist/packages/*.js",
-    "#socketsecurity/lib/*": "@socketsecurity/lib-stable/*",
-    "#types": "./dist/types.js",
-    "#utils/*": "./dist/utils/*.js"
-  },
   "files": [
     "dist",
     "data/extensions.json",

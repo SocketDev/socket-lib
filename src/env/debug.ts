@@ -3,7 +3,7 @@
  * Controls debug output for the debug package.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getDebug(): string | undefined {

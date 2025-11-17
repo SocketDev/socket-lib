@@ -23,8 +23,8 @@
 
 import type { TtlCache } from './cache-with-ttl'
 import { createTtlCache } from './cache-with-ttl'
-import { getGhToken, getGithubToken } from '#env/github'
-import { getSocketCliGithubToken } from '#env/socket-cli'
+import { getGhToken, getGithubToken } from './env/github'
+import { getSocketCliGithubToken } from './env/socket-cli'
 import { httpRequest } from './http-request'
 import type { SpawnOptions } from './spawn'
 import { spawn } from './spawn'

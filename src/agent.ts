@@ -29,14 +29,14 @@ import {
   PACKAGE_LOCK_JSON,
   PNPM_LOCK_YAML,
   YARN_LOCK,
-} from '#constants/agents'
+} from './constants/agents'
 import {
   getExecPath,
   getNodeNoWarningsFlags,
   supportsNodeRun,
-} from '#constants/node'
-import { WIN32 } from '#constants/platform'
-import { getCI } from '#env/ci'
+} from './constants/node'
+import { WIN32 } from './constants/platform'
+import { getCI } from './env/ci'
 
 import { execBin } from './bin'
 import { isDebug } from './debug'

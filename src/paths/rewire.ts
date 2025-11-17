@@ -118,7 +118,7 @@ export function resetPaths(): void {
  * @example
  * ```typescript
  * import { setPath, resetPaths } from '#paths/rewire'
- * import { getOsTmpDir } from '#lib/paths'
+ * import { getOsTmpDir } from './'
  *
  * beforeEach(() => {
  *   setPath('tmpdir', '/custom/tmp')

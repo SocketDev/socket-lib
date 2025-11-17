@@ -15,7 +15,7 @@ import type {
   WriteFileOptions,
 } from 'fs'
 
-import { getAbortSignal } from '#constants/process'
+import { getAbortSignal } from './constants/process'
 
 import { isArray } from './arrays'
 import { deleteAsync, deleteSync } from './external/del'

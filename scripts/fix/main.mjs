@@ -3,9 +3,12 @@
  * Runs generate-package-exports and fix-external-imports in sequence.
  */
 
-import { isQuiet } from '#socketsecurity/lib/argv/flags'
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import {
+  printFooter,
+  printHeader,
+} from '@socketsecurity/lib-stable/stdio/header'
 
 import { runSequence } from '../utils/run-command.mjs'
 

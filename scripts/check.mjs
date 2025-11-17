@@ -8,8 +8,11 @@
  *   node scripts/check.mjs
  */
 
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { printFooter, printHeader } from '#socketsecurity/lib/stdio/header'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import {
+  printFooter,
+  printHeader,
+} from '@socketsecurity/lib-stable/stdio/header'
 
 import { runParallel } from './utils/run-command.mjs'
 

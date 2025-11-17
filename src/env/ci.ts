@@ -3,8 +3,8 @@
  * Determines if code is running in a Continuous Integration environment.
  */
 
-import { envAsBoolean } from '#env/helpers'
-import { getEnvValue } from '#env/rewire'
+import { envAsBoolean } from './helpers'
+import { getEnvValue } from './rewire'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getCI(): boolean {

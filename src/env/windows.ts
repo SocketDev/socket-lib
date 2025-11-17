@@ -3,7 +3,7 @@
  * Provides access to Windows-specific user directory paths.
  */
 
-import { getEnvValue } from '#env/rewire'
+import { getEnvValue } from './rewire'
 
 /**
  * APPDATA environment variable.

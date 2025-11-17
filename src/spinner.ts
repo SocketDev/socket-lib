@@ -9,7 +9,8 @@ import colors from './external/yoctocolors-cjs'
 
 import type { ColorInherit, ColorRgb, ColorValue } from './colors'
 import { isRgbTuple, toRgb } from './colors'
-import { getCI } from '#env/ci'
+import { getAbortSignal } from './constants/process'
+import { getCI } from './env/ci'
 import { isDebug } from './debug'
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
@@ -522,7 +523,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
 
         // eslint-disable-next-line constructor-super
         super({
-          signal: require('#constants/process').getAbortSignal(),
+          signal: getAbortSignal(),
           ...opts,
           // Pass RGB color directly to yocto-spinner (it now supports RGB).
           color: spinnerColorRgb,

@@ -3,9 +3,9 @@
  * Provides Socket CLI specific debug functionality and logging formatters.
  */
 
-import { getSpinner } from '#constants/process'
-import { getDebug } from '#env/debug'
-import { getSocketDebug } from '#env/socket'
+import { getSpinner } from './constants/process'
+import { getDebug } from './env/debug'
+import { getSocketDebug } from './env/socket'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import debugJs from './external/debug'
 

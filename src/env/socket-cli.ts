@@ -3,8 +3,8 @@
  * Provides typed getters for SOCKET_CLI_* environment variables (excluding shadow).
  */
 
-import { envAsBoolean, envAsNumber } from '#env/helpers'
-import { getEnvValue } from '#env/rewire'
+import { envAsBoolean, envAsNumber } from './helpers'
+import { getEnvValue } from './rewire'
 
 /**
  * Whether to accept all Socket CLI risks (alternative name).

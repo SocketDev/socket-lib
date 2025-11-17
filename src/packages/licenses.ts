@@ -2,8 +2,8 @@
  * @fileoverview SPDX license parsing and analysis utilities.
  */
 
-import { LOOP_SENTINEL } from '#constants/core'
-import { getCopyLeftLicenses } from '#constants/licenses'
+import { LOOP_SENTINEL } from '../constants/core'
+import { getCopyLeftLicenses } from '../constants/licenses'
 
 import path from 'node:path'
 import spdxCorrect from '../external/spdx-correct'

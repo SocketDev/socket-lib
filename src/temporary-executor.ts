@@ -3,7 +3,7 @@
  * Identifies and handles temporary execution contexts such as npx, pnpm dlx, and yarn dlx.
  */
 
-import { WIN32 } from '#constants/platform'
+import { WIN32 } from './constants/platform'
 import { normalizePath } from './paths/normalize'
 
 /**

@@ -11,10 +11,10 @@
  *   --apply    Apply updates (default is check-only)
  */
 
-import { isQuiet, isVerbose } from '#socketsecurity/lib/argv/flags'
-import { getDefaultLogger } from '#socketsecurity/lib/logger'
-import { WIN32 } from '#socketsecurity/lib/constants/platform'
-import { spawn } from '#socketsecurity/lib/spawn'
+import { isQuiet, isVerbose } from '@socketsecurity/lib-stable/argv/flags'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { spawn } from '@socketsecurity/lib-stable/spawn'
 
 async function main() {
   const quiet = isQuiet()

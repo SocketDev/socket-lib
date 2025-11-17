@@ -6,9 +6,12 @@ import {
   getPackageDefaultNodeRange,
   getPackageDefaultSocketCategories,
   getPackumentCache,
-} from '#constants/packages'
-import { getAbortSignal } from '#constants/process'
-import { SOCKET_GITHUB_ORG, SOCKET_REGISTRY_REPO_NAME } from '#constants/socket'
+} from '../constants/packages'
+import { getAbortSignal } from '../constants/process'
+import {
+  SOCKET_GITHUB_ORG,
+  SOCKET_REGISTRY_REPO_NAME,
+} from '../constants/socket'
 
 const abortSignal = getAbortSignal()
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
