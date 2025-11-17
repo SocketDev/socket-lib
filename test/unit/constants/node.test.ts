@@ -17,7 +17,9 @@ import {
   getNodeDisableSigusr1Flags,
   getNodeHardenFlags,
   getNodeMajorVersion,
+  getNodeMinorVersion,
   getNodeNoWarningsFlags,
+  getNodePatchVersion,
   getNodePermissionFlags,
   getNodeVersion,
   supportsNodeCompileCacheApi,
@@ -51,10 +53,36 @@ describe('node constants', () => {
 
     it('should match process.version major', () => {
       const expected = Number.parseInt(
-        process.version.slice(1).split('.')[0] || '0',
+        process.version.slice(1).split('.')[0] ?? '0',
         10,
       )
       expect(getNodeMajorVersion()).toBe(expected)
+    })
+  })
+
+  describe('getNodeMinorVersion', () => {
+    it('should return minor version number', () => {
+      const minor = getNodeMinorVersion()
+      expect(typeof minor).toBe('number')
+      expect(minor).toBeGreaterThanOrEqual(0)
+    })
+
+    it('should match process.version minor', () => {
+      const expected = Number.parseInt(process.version.split('.')[1] ?? '0', 10)
+      expect(getNodeMinorVersion()).toBe(expected)
+    })
+  })
+
+  describe('getNodePatchVersion', () => {
+    it('should return patch version number', () => {
+      const patch = getNodePatchVersion()
+      expect(typeof patch).toBe('number')
+      expect(patch).toBeGreaterThanOrEqual(0)
+    })
+
+    it('should match process.version patch', () => {
+      const expected = Number.parseInt(process.version.split('.')[2] ?? '0', 10)
+      expect(getNodePatchVersion()).toBe(expected)
     })
   })
 
@@ -165,7 +193,7 @@ describe('node constants', () => {
     it('should check minor version for Node.js 22', () => {
       const major = getNodeMajorVersion()
       if (major === 22) {
-        const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+        const minor = getNodeMinorVersion()
         const result = supportsNodeRequireModule()
         if (minor >= 12) {
           expect(result).toBe(true)
@@ -193,7 +221,7 @@ describe('node constants', () => {
     it('should check minor version for Node.js 22', () => {
       const major = getNodeMajorVersion()
       if (major === 22) {
-        const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+        const minor = getNodeMinorVersion()
         const result = supportsNodeRun()
         if (minor >= 11) {
           expect(result).toBe(true)
@@ -212,7 +240,7 @@ describe('node constants', () => {
 
     it('should check version-specific support', () => {
       const major = getNodeMajorVersion()
-      const minor = Number.parseInt(process.version.split('.')[1] || '0', 10)
+      const minor = getNodeMinorVersion()
       const result = supportsNodeDisableSigusr1Flag()
 
       if (major >= 24) {
@@ -263,29 +291,52 @@ describe('node constants', () => {
       expect(flags).toContain('--disable-proto=delete')
     })
 
-    it('should include force-node-api flag', () => {
-      const flags = getNodeHardenFlags()
-      expect(flags).toContain('--force-node-api-uncaught-exceptions-policy')
-    })
-
-    it('should use --permission for Node.js 24+', () => {
+    it('should use --permission for Node.js 24+ with explicit grants', () => {
       const major = getNodeMajorVersion()
       const flags = getNodeHardenFlags()
       if (major >= 24) {
         expect(flags).toContain('--permission')
         expect(flags).not.toContain('--experimental-permission')
-        expect(flags).not.toContain('--experimental-policy')
+        // Should include permission grants from getNodePermissionFlags()
+        expect(flags).toContain('--allow-fs-read=*')
+        expect(flags).toContain('--allow-fs-write=*')
+        expect(flags).toContain('--allow-child-process')
+      } else {
+        expect(flags).not.toContain('--permission')
+        // Permission grants should not be included for Node < 24
+        expect(flags).not.toContain('--allow-fs-read=*')
+        expect(flags).not.toContain('--allow-fs-write=*')
+        expect(flags).not.toContain('--allow-child-process')
       }
     })
 
-    it('should use --experimental-permission for Node.js < 24', () => {
+    it('should use --experimental-permission for Node.js 20-23', () => {
       const major = getNodeMajorVersion()
       const flags = getNodeHardenFlags()
-      if (major < 24) {
+      if (major >= 20 && major < 24) {
         expect(flags).toContain('--experimental-permission')
-        expect(flags).toContain('--experimental-policy')
+        expect(flags).not.toContain('--permission')
+      } else if (major < 20) {
+        expect(flags).not.toContain('--experimental-permission')
         expect(flags).not.toContain('--permission')
       }
+    })
+
+    it('should include --force-node-api-uncaught-exceptions-policy for Node.js 22+', () => {
+      const major = getNodeMajorVersion()
+      const flags = getNodeHardenFlags()
+      if (major >= 22) {
+        expect(flags).toContain('--force-node-api-uncaught-exceptions-policy')
+      } else {
+        expect(flags).not.toContain(
+          '--force-node-api-uncaught-exceptions-policy',
+        )
+      }
+    })
+
+    it('should not include --experimental-policy', () => {
+      const flags = getNodeHardenFlags()
+      expect(flags).not.toContain('--experimental-policy')
     })
 
     it('should return same instance on multiple calls', () => {

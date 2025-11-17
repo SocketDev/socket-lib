@@ -12,7 +12,15 @@ export function getNodeVersion(): string {
 }
 
 export function getNodeMajorVersion(): number {
-  return Number.parseInt(NODE_VERSION.slice(1).split('.')[0] || '0', 10)
+  return Number.parseInt(NODE_VERSION.slice(1).split('.')[0] ?? '0', 10)
+}
+
+export function getNodeMinorVersion(): number {
+  return Number.parseInt(NODE_VERSION.split('.')[1] ?? '0', 10)
+}
+
+export function getNodePatchVersion(): number {
+  return Number.parseInt(NODE_VERSION.split('.')[2] ?? '0', 10)
 }
 
 // Maintained Node.js versions.
@@ -43,36 +51,26 @@ export function supportsNodePermissionFlag(): boolean {
 
 export function supportsNodeRequireModule(): boolean {
   const major = getNodeMajorVersion()
-  return (
-    major >= 23 ||
-    (major === 22 &&
-      Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10) >= 12)
-  )
+  return major >= 23 || (major === 22 && getNodeMinorVersion() >= 12)
 }
 
 export function supportsNodeRun(): boolean {
   const major = getNodeMajorVersion()
-  return (
-    major >= 23 ||
-    (major === 22 &&
-      Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10) >= 11)
-  )
+  return major >= 23 || (major === 22 && getNodeMinorVersion() >= 11)
 }
 
 export function supportsNodeDisableSigusr1Flag(): boolean {
   const major = getNodeMajorVersion()
+  const minor = getNodeMinorVersion()
   // --disable-sigusr1 added in v22.14.0, v23.7.0.
   // Stabilized in v22.20.0, v24.8.0.
   if (major >= 24) {
-    const minor = Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10)
     return minor >= 8
   }
   if (major === 23) {
-    const minor = Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10)
     return minor >= 7
   }
   if (major === 22) {
-    const minor = Number.parseInt(NODE_VERSION.split('.')[1] || '0', 10)
     return minor >= 14
   }
   return false
@@ -102,27 +100,6 @@ export function supportsProcessSend(): boolean {
 
 // Node.js flags.
 let _nodeHardenFlags: string[]
-export function getNodeHardenFlags(): string[] {
-  if (_nodeHardenFlags === undefined) {
-    const major = getNodeMajorVersion()
-    const flags = [
-      '--disable-proto=delete',
-      // Node.js 24+ uses --permission instead of --experimental-permission.
-      // The permission model graduated from experimental to production-ready.
-      major >= 24 ? '--permission' : '--experimental-permission',
-      // Force uncaught exceptions policy for N-API addons (Node.js 22+).
-      '--force-node-api-uncaught-exceptions-policy',
-    ]
-    // Only add policy flag if we're using experimental permission (Node < 24).
-    // Node 24+ --policy requires a policy file which we don't have.
-    if (major < 24) {
-      flags.push('--experimental-policy')
-    }
-    _nodeHardenFlags = flags
-  }
-  return _nodeHardenFlags
-}
-
 let _nodePermissionFlags: string[]
 export function getNodePermissionFlags(): string[] {
   if (_nodePermissionFlags === undefined) {
@@ -145,6 +122,32 @@ export function getNodePermissionFlags(): string[] {
     }
   }
   return _nodePermissionFlags
+}
+
+export function getNodeHardenFlags(): string[] {
+  if (_nodeHardenFlags === undefined) {
+    const major = getNodeMajorVersion()
+    const flags: string[] = ['--disable-proto=delete']
+
+    // Permission model: Experimental in Node 20-23, stable in Node 24+.
+    // Node 20-23: --experimental-permission (no explicit grants needed).
+    // Node 24+: --permission (requires explicit grants via getNodePermissionFlags()).
+    if (major >= 24) {
+      flags.push('--permission')
+      // Add permission-specific grants for Node 24+.
+      flags.push(...getNodePermissionFlags())
+    } else if (major >= 20) {
+      flags.push('--experimental-permission')
+    }
+
+    // Force uncaught exceptions policy for N-API addons (Node.js 22+).
+    if (major >= 22) {
+      flags.push('--force-node-api-uncaught-exceptions-policy')
+    }
+
+    _nodeHardenFlags = flags
+  }
+  return _nodeHardenFlags
 }
 
 let _nodeNoWarningsFlags: string[]
