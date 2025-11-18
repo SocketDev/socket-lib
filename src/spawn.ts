@@ -38,6 +38,8 @@ import { getOwn, hasOwn } from './objects'
 import { getDefaultSpinner } from './spinner'
 import { stripAnsi } from './strings'
 
+import type { EventEmitter } from 'node:events'
+
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
 
@@ -98,7 +100,7 @@ export type PromiseSpawnOptions = {
  * This is a Promise that resolves with process exit information and output,
  * with additional properties for accessing the running process and stdin stream.
  *
- * @property {ChildProcessType} process - The running child process instance
+ * @property {ChildProcess} process - The running child process instance
  * @property {WritableStreamType | null} stdin - Writable stream for process stdin, or `null` if not piped
  *
  * @example
@@ -115,7 +117,7 @@ export type PromiseSpawnResult = Promise<{
   stdout: string | Buffer
   stderr: string | Buffer
 }> & {
-  process: ChildProcessType
+  process: ChildProcess
   stdin: WritableStreamType | null
 }
 
@@ -350,7 +352,7 @@ interface NodeSpawnOptions {
 
 // Duplicated from Node.js child_process.ChildProcess
 // This represents a spawned child process
-interface ChildProcessType {
+interface ChildProcess extends EventEmitter {
   stdin: NodeJS.WritableStream | null
   stdout: NodeJS.ReadableStream | null
   stderr: NodeJS.ReadableStream | null
