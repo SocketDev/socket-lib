@@ -3,7 +3,7 @@
  * Provides inquirer.js integration with spinner support, context handling, and theming.
  */
 
-import { getAbortSignal, getSpinner } from '../constants/process'
+import { getAbortSignal } from '../constants/process'
 
 import checkboxRaw from '../external/@inquirer/checkbox'
 import confirmRaw from '../external/@inquirer/confirm'
@@ -14,13 +14,14 @@ import * as selectModuleImport from '../external/@inquirer/select'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 import type { ColorValue } from '../colors'
+import { getDefaultSpinner } from '../spinner'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
 import { resolveColor } from '../themes/utils'
 
 const abortSignal = getAbortSignal()
-const spinner = getSpinner()
+const spinner = getDefaultSpinner()
 
 // Modules imported at the top - extract default and Separator
 const searchRaw = searchModule.default

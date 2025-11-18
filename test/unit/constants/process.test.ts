@@ -13,7 +13,6 @@ import { describe, expect, it } from 'vitest'
 import {
   getAbortController,
   getAbortSignal,
-  getSpinner,
 } from '@socketsecurity/lib/constants/process'
 
 describe('constants/process', () => {
@@ -74,30 +73,6 @@ describe('constants/process', () => {
     })
   })
 
-  describe('getSpinner', () => {
-    it('should return null or a Spinner object', () => {
-      const spinner = getSpinner()
-      expect(spinner === null || typeof spinner === 'object').toBe(true)
-    })
-
-    it('should return same instance on multiple calls (cached)', () => {
-      const first = getSpinner()
-      const second = getSpinner()
-      expect(first).toBe(second)
-    })
-
-    it('should handle spinner module not being available', () => {
-      // Should not throw even if spinner module is unavailable
-      expect(() => getSpinner()).not.toThrow()
-    })
-
-    it('should return null when spinner cannot be loaded', () => {
-      const spinner = getSpinner()
-      // In test environment, spinner might not be available
-      expect([null, 'object'].includes(typeof spinner)).toBe(true)
-    })
-  })
-
   describe('integration', () => {
     it('should allow AbortController and Signal to work together', () => {
       const controller = getAbortController()
@@ -137,14 +112,6 @@ describe('constants/process', () => {
       const allSame = signals.every(sig => sig === signals[0])
       expect(allSame).toBe(true)
     })
-
-    it('should cache spinner result', () => {
-      const first = getSpinner()
-      const second = getSpinner()
-      const third = getSpinner()
-      expect(first).toBe(second)
-      expect(second).toBe(third)
-    })
   })
 
   describe('error handling', () => {
@@ -154,10 +121,6 @@ describe('constants/process', () => {
 
     it('should not throw when getting AbortSignal', () => {
       expect(() => getAbortSignal()).not.toThrow()
-    })
-
-    it('should gracefully handle spinner loading errors', () => {
-      expect(() => getSpinner()).not.toThrow()
     })
   })
 

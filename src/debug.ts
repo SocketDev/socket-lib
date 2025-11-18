@@ -3,7 +3,6 @@
  * Provides Socket CLI specific debug functionality and logging formatters.
  */
 
-import { getSpinner } from './constants/process'
 import { getDebug } from './env/debug'
 import { getSocketDebug } from './env/socket'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
@@ -11,6 +10,7 @@ import debugJs from './external/debug'
 
 import { getDefaultLogger } from './logger'
 import { hasOwn } from './objects'
+import { getDefaultSpinner } from './spinner'
 import { applyLinePrefix } from './strings'
 
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
@@ -232,7 +232,7 @@ function debugDirNs(
       } as InspectOptions
     }
   }
-  const spinnerInstance = options.spinner || getSpinner()
+  const spinnerInstance = options.spinner || getDefaultSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
   logger.info(`[DEBUG] ${callerName} ${pointingTriangle} object inspection:`)
@@ -269,7 +269,7 @@ function debugNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
           ...args.slice(1),
         ]
       : args
-  const spinnerInstance = options.spinner || getSpinner()
+  const spinnerInstance = options.spinner || getDefaultSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
   ReflectApply(logger.info, logger, logArgs)
@@ -307,7 +307,7 @@ function debugLogNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
         ]
       : [`[DEBUG] ${callerName} ${pointingTriangle}`, ...args]
 
-  const spinnerInstance = options.spinner || getSpinner()
+  const spinnerInstance = options.spinner || getDefaultSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
   ReflectApply(logger.info, logger, logArgs)
@@ -344,7 +344,7 @@ function debugCacheNs(
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const logArgs = meta !== undefined ? [prefix, meta] : [prefix]
 
-  const spinnerInstance = options.spinner || getSpinner()
+  const spinnerInstance = options.spinner || getDefaultSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
   ReflectApply(logger.info, logger, logArgs)

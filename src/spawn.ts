@@ -26,7 +26,7 @@
  * - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
  */
 
-import { getAbortSignal, getSpinner } from './constants/process'
+import { getAbortSignal } from './constants/process'
 
 import npmCliPromiseSpawn from './external/@npmcli/promise-spawn'
 import path from 'node:path'
@@ -35,10 +35,11 @@ import { isArray } from './arrays'
 import { whichSync } from './bin'
 import { isPath } from './paths/normalize'
 import { getOwn, hasOwn } from './objects'
+import { getDefaultSpinner } from './spinner'
 import { stripAnsi } from './strings'
 
 const abortSignal = getAbortSignal()
-const spinner = getSpinner()
+const spinner = getDefaultSpinner()
 
 // Define BufferEncoding type for TypeScript compatibility.
 type BufferEncoding = globalThis.BufferEncoding
