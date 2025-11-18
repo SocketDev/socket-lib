@@ -13,11 +13,6 @@ import {
   SOCKET_REGISTRY_REPO_NAME,
 } from '../constants/socket'
 
-const abortSignal = getAbortSignal()
-const packageDefaultNodeRange = getPackageDefaultNodeRange()
-const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
-const packumentCache = getPackumentCache()
-
 import npmPackageArg from '../external/npm-package-arg'
 import pacote from '../external/pacote'
 import semver from '../external/semver'
@@ -27,6 +22,11 @@ import { isObjectObject, objectEntries } from '../objects'
 import type { PackageJson, PacoteOptions } from '../packages'
 import { resolvePackageJsonEntryExports } from './exports'
 import { isRegistryFetcherType } from './validation'
+
+const abortSignal = getAbortSignal()
+const packageDefaultNodeRange = getPackageDefaultNodeRange()
+const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
+const packumentCache = getPackumentCache()
 
 const pkgScopePrefixRegExp = /^@socketregistry\//
 

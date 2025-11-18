@@ -18,20 +18,6 @@ import { PackageURL } from '../external/@socketregistry/packageurl-js'
 import pacote from '../external/pacote'
 import * as semver from '../external/semver'
 
-const abortSignal = getAbortSignal()
-const packageExtensions = getPackageExtensions()
-const packumentCache = getPackumentCache()
-const pacoteCachePath = getPacoteCachePath()
-
-// Initialize fetcher with cache settings
-const fetcher = makeFetchHappen.defaults({
-  cachePath: pacoteCachePath,
-  // Prefer-offline: Staleness checks for cached data will be bypassed, but
-  // missing data will be requested from the server.
-  // https://github.com/npm/make-fetch-happen?tab=readme-ov-file#--optscache
-  cache: 'force-cache',
-})
-
 import { readJson, readJsonSync } from '../fs'
 import { isObjectObject, merge } from '../objects'
 import type {
@@ -51,6 +37,20 @@ import {
   isGitHubUrlSpec,
 } from './specs'
 import { toEditablePackageJson, toEditablePackageJsonSync } from './editable'
+
+const abortSignal = getAbortSignal()
+const packageExtensions = getPackageExtensions()
+const packumentCache = getPackumentCache()
+const pacoteCachePath = getPacoteCachePath()
+
+// Initialize fetcher with cache settings
+const fetcher = makeFetchHappen.defaults({
+  cachePath: pacoteCachePath,
+  // Prefer-offline: Staleness checks for cached data will be bypassed, but
+  // missing data will be requested from the server.
+  // https://github.com/npm/make-fetch-happen?tab=readme-ov-file#--optscache
+  cache: 'force-cache',
+})
 
 /**
  * Extract a package to a destination directory.

@@ -11,13 +11,13 @@ import inputRaw from '../external/@inquirer/input'
 import passwordRaw from '../external/@inquirer/password'
 import * as searchModule from '../external/@inquirer/search'
 import * as selectModuleImport from '../external/@inquirer/select'
+import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 import type { ColorValue } from '../colors'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
 import { resolveColor } from '../themes/utils'
-import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 const abortSignal = getAbortSignal()
 const spinner = getSpinner()

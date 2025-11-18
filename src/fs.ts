@@ -19,9 +19,6 @@ import { getAbortSignal } from './constants/process'
 
 import { isArray } from './arrays'
 import { deleteAsync, deleteSync } from './external/del'
-
-const abortSignal = getAbortSignal()
-
 import { defaultIgnore, getGlobMatcher } from './globs'
 import type { JsonReviver } from './json'
 import { jsonParse } from './json'
@@ -34,6 +31,8 @@ import {
   getSocketUserDir,
 } from './paths/socket'
 import { naturalCompare } from './sorts'
+
+const abortSignal = getAbortSignal()
 
 /**
  * Supported text encodings for Node.js Buffers.

@@ -34,12 +34,11 @@ import path from 'node:path'
 import { isArray } from './arrays'
 import { whichSync } from './bin'
 import { isPath } from './paths/normalize'
+import { getOwn, hasOwn } from './objects'
+import { stripAnsi } from './strings'
 
 const abortSignal = getAbortSignal()
 const spinner = getSpinner()
-
-import { getOwn, hasOwn } from './objects'
-import { stripAnsi } from './strings'
 
 // Define BufferEncoding type for TypeScript compatibility.
 type BufferEncoding = globalThis.BufferEncoding
