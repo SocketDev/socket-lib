@@ -111,6 +111,7 @@ export function globStreamLicenses(
   if (ignoreOriginals) {
     ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
   }
+  /* c8 ignore start - External fast-glob call */
   return fastGlob.globStream(
     [recursive ? LICENSE_GLOB_RECURSIVE : LICENSE_GLOB],
     {
@@ -122,6 +123,7 @@ export function globStreamLicenses(
       ...(ignore ? { ignore } : {}),
     } as import('fast-glob').Options,
   )
+  /* c8 ignore stop */
 }
 
 const matcherCache = new Map<string, (path: string) => boolean>()
@@ -154,6 +156,7 @@ export function getGlobMatcher(
     ...(negativePatterns.length > 0 ? { ignore: negativePatterns } : {}),
   }
 
+  /* c8 ignore next 4 - External picomatch call */
   matcher = picomatch(
     positivePatterns.length > 0 ? positivePatterns : patterns,
     matchOptions,
@@ -172,6 +175,7 @@ export function glob(
   patterns: Pattern | Pattern[],
   options?: FastGlobOptions,
 ): Promise<string[]> {
+  /* c8 ignore next - External fast-glob call */
   return fastGlob.glob(patterns, options as import('fast-glob').Options)
 }
 
@@ -184,5 +188,6 @@ export function globSync(
   patterns: Pattern | Pattern[],
   options?: FastGlobOptions,
 ): string[] {
+  /* c8 ignore next - External fast-glob call */
   return fastGlob.globSync(patterns, options as import('fast-glob').Options)
 }

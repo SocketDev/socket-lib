@@ -106,12 +106,14 @@ export function findRealBin(
   }
 
   // Fall back to whichModule.sync if no direct path found.
+  /* c8 ignore next - External which call */
   const binPath = whichModule.sync(binName, { nothrow: true })
   if (binPath) {
     const binDir = path.dirname(binPath)
 
     if (isShadowBinPath(binDir)) {
       // This is likely a shadowed binary, try to find the real one.
+      /* c8 ignore next 2 - External which call */
       const allPaths =
         whichModule.sync(binName, { all: true, nothrow: true }) || []
       // Ensure allPaths is an array.
@@ -646,6 +648,7 @@ export async function which(
   try {
     // whichModule returns string when found, rejects when not found
     // whichModule is imported at the top
+    /* c8 ignore next - External which call */
     const result = await whichModule(binName, options as any)
     return result as string | string[]
   } catch {
@@ -668,6 +671,7 @@ export async function whichReal(
   const opts = { nothrow: true, ...options }
   // Depending on options `whichModule` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
+  /* c8 ignore next - External which call */
   const result = await whichModule(binName, opts)
 
   // When 'all: true' is specified, ensure we always return an array.

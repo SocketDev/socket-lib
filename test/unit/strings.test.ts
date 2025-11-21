@@ -19,6 +19,7 @@ import {
   applyLinePrefix,
   camelToKebab,
   centerText,
+  fromCharCode,
   indentString,
   isBlankString,
   isNonEmptyString,
@@ -765,6 +766,85 @@ describe('strings', () => {
         expect(isBlankString(undefined)).toBe(false)
         expect(isBlankString(123)).toBe(false)
         expect(isBlankString({})).toBe(false)
+      })
+    })
+
+    describe('fromCharCode', () => {
+      it('should convert char codes to string', () => {
+        expect(fromCharCode(65)).toBe('A')
+        expect(fromCharCode(97)).toBe('a')
+        expect(fromCharCode(48)).toBe('0')
+      })
+
+      it('should handle multiple char codes', () => {
+        expect(fromCharCode(72, 105)).toBe('Hi')
+        expect(fromCharCode(65, 66, 67)).toBe('ABC')
+      })
+
+      it('should handle unicode char codes', () => {
+        // fromCharCode works with BMP characters (U+0000 to U+FFFF)
+        expect(fromCharCode(0x4e_2d)).toBe('中')
+        expect(fromCharCode(0x00_e9)).toBe('é')
+      })
+
+      it('should handle special characters', () => {
+        expect(fromCharCode(10)).toBe('\n')
+        expect(fromCharCode(13)).toBe('\r')
+        expect(fromCharCode(9)).toBe('\t')
+      })
+    })
+
+    describe('search additional cases', () => {
+      it('should find pattern with fromIndex', () => {
+        const result = search('hello world hello', /hello/, { fromIndex: 6 })
+        expect(result).toBe(12)
+      })
+
+      it('should return -1 when not found after fromIndex', () => {
+        const result = search('hello world', /hello/, { fromIndex: 6 })
+        expect(result).toBe(-1)
+      })
+
+      it('should handle fromIndex of 0', () => {
+        const result = search('test string', /test/, { fromIndex: 0 })
+        expect(result).toBe(0)
+      })
+
+      it('should handle negative fromIndex by converting to positive', () => {
+        // Negative fromIndex: -2 in 'test string' (length 11) = index 9
+        // Pattern at beginning should be found when negative index allows it
+        const result = search('test string', /test/, { fromIndex: -100 })
+        expect(result).toBe(0) // Large negative wraps to 0, finds 'test' at start
+      })
+
+      it('should work without options object', () => {
+        const result = search('test string', /string/)
+        expect(result).toBe(5)
+      })
+    })
+
+    describe('repeatString edge cases', () => {
+      it('should repeat string multiple times', () => {
+        expect(repeatString('ab', 3)).toBe('ababab')
+        expect(repeatString('x', 5)).toBe('xxxxx')
+      })
+
+      it('should handle count of 0', () => {
+        expect(repeatString('test', 0)).toBe('')
+      })
+
+      it('should handle count of 1', () => {
+        expect(repeatString('test', 1)).toBe('test')
+      })
+
+      it('should handle empty string', () => {
+        expect(repeatString('', 5)).toBe('')
+      })
+
+      it('should handle large counts', () => {
+        const result = repeatString('a', 100)
+        expect(result.length).toBe(100)
+        expect(result).toBe('a'.repeat(100))
       })
     })
   })

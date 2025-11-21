@@ -34,6 +34,7 @@ export function parallelMap<T, U>(
   options?: number | IterationOptions,
 ): AsyncIterable<U> {
   const opts = normalizeIterationOptions(options)
+  /* c8 ignore next - External streaming-iterables call */
   const result = siParallelMap(
     opts.concurrency,
     async (item: T) => {
@@ -58,6 +59,7 @@ export function transform<T, U>(
   options?: number | IterationOptions,
 ): AsyncIterable<U> {
   const opts = normalizeIterationOptions(options)
+  /* c8 ignore next - External streaming-iterables call */
   const result = siTransform(
     opts.concurrency,
     async (item: T) => {

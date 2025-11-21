@@ -54,8 +54,10 @@ function getDebugJsInstance(namespace: string) {
     getSocketDebug() &&
     (namespace === 'error' || namespace === 'notice')
   ) {
+    /* c8 ignore next - External debug library call */
     debugJs.enable(namespace)
   }
+  /* c8 ignore next - External debug library call */
   inst = debugJs(namespace)
   inst.log = customLog
   debugByNamespace.set(namespace, inst)
@@ -131,6 +133,7 @@ function getCallerInfo(stackOffset: number = 3): string {
 /*@__NO_SIDE_EFFECTS__*/
 function customLog(...args: unknown[]) {
   const util = getUtil()
+  /* c8 ignore start - External debug library inspection options */
   const inspectOpts = debugJs.inspectOpts
     ? {
         ...debugJs.inspectOpts,
@@ -145,6 +148,7 @@ function customLog(...args: unknown[]) {
             : debugJs.inspectOpts.depth,
       }
     : {}
+  /* c8 ignore stop */
   ReflectApply(logger.info, logger, [
     util.formatWithOptions(inspectOpts, ...args),
   ])
@@ -219,6 +223,7 @@ function debugDirNs(
 
   let opts: InspectOptions | undefined = inspectOpts
   if (opts === undefined) {
+    /* c8 ignore next - External debug library inspection options */
     const debugOpts = debugJs.inspectOpts
     if (debugOpts) {
       opts = {

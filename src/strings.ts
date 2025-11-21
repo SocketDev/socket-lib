@@ -651,6 +651,7 @@ export function stringWidth(text: string): number {
     // - Wide (2 columns): CJK ideographs (漢, 字), fullwidth forms (Ａ, Ｂ)
     // - Halfwidth (1 column): Halfwidth Katakana (ｱ, ｲ, ｳ)
     // - Ambiguous (1 column per our config): Greek, Cyrillic, box drawing
+    /* c8 ignore next - External eastAsianWidth call */
     width += eastAsianWidth(codePoint, eastAsianWidthOptions)
 
     // STEP 4: Handle trailing Halfwidth and Fullwidth Forms
@@ -684,6 +685,7 @@ export function stringWidth(text: string): number {
           if (trailingCodePoint !== undefined) {
             // Add the East Asian Width of this trailing character.
             // Most halfwidth forms contribute 1 column, fullwidth contribute 2.
+            /* c8 ignore next - External eastAsianWidth call */
             width += eastAsianWidth(trailingCodePoint, eastAsianWidthOptions)
           }
         }

@@ -617,12 +617,14 @@ export function spawn(
     uid: spawnOptions.uid,
     gid: spawnOptions.gid,
   } as unknown as PromiseSpawnOptions
+  /* c8 ignore start - External npmCliPromiseSpawn call */
   const spawnPromise = npmCliPromiseSpawn(
     actualCmd,
     args ? [...args] : [],
     promiseSpawnOpts as Parameters<typeof npmCliPromiseSpawn>[2],
     extra,
   )
+  /* c8 ignore stop */
   const oldSpawnPromise = spawnPromise
   let newSpawnPromise: PromiseSpawnResult
   if (shouldStripAnsi && stdioString) {

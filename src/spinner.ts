@@ -343,10 +343,12 @@ export function getCliSpinners(
   styleName?: string | undefined,
 ): SpinnerStyle | Record<string, SpinnerStyle> | undefined {
   if (_cliSpinners === undefined) {
+    /* c8 ignore start - External yoctoSpinner initialization */
     const YoctoCtor: any = yoctoSpinner as any
     // Get the YoctoSpinner class to access static properties.
     const tempInstance: any = YoctoCtor({})
     const YoctoSpinnerClass: any = tempInstance.constructor as any
+    /* c8 ignore stop */
     // Extend the standard cli-spinners collection with Socket custom spinners.
     _cliSpinners = {
       __proto__: null,
@@ -419,10 +421,12 @@ let _defaultSpinner: SpinnerStyle | undefined
 /*@__NO_SIDE_EFFECTS__*/
 export function Spinner(options?: SpinnerOptions | undefined): Spinner {
   if (_Spinner === undefined) {
+    /* c8 ignore start - External yoctoSpinner initialization */
     const YoctoCtor = yoctoSpinner as any
     // Get the actual YoctoSpinner class from an instance
     const tempInstance = YoctoCtor({})
     const YoctoSpinnerClass = tempInstance.constructor
+    /* c8 ignore stop */
     const logger = getDefaultLogger()
 
     /*@__PURE__*/

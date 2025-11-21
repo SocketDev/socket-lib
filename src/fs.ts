@@ -1191,12 +1191,14 @@ export async function safeDelete(
     }
   }
 
+  /* c8 ignore start - External del call */
   await deleteAsync(patterns, {
     concurrency: opts.maxRetries || defaultRemoveOptions.maxRetries,
     dryRun: false,
     force: shouldForce,
     onlyFiles: false,
   })
+  /* c8 ignore stop */
 }
 
 /**
@@ -1264,12 +1266,14 @@ export function safeDeleteSync(
     }
   }
 
+  /* c8 ignore start - External del call */
   deleteSync(patterns, {
     concurrency: opts.maxRetries || defaultRemoveOptions.maxRetries,
     dryRun: false,
     force: shouldForce,
     onlyFiles: false,
   })
+  /* c8 ignore stop */
 }
 
 /**

@@ -42,6 +42,16 @@ describe('ansi', () => {
       expect(regex.global).toBe(true)
     })
 
+    it('should create a global regex with empty options object', () => {
+      const regex = ansiRegex({})
+      expect(regex.global).toBe(true)
+    })
+
+    it('should create a global regex when onlyFirst is false', () => {
+      const regex = ansiRegex({ onlyFirst: false })
+      expect(regex.global).toBe(true)
+    })
+
     it('should create a non-global regex when onlyFirst is true', () => {
       const regex = ansiRegex({ onlyFirst: true })
       expect(regex.global).toBe(false)

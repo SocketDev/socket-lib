@@ -313,5 +313,36 @@ describe('arrays', () => {
       const result = arrayUnique(largeArr)
       expect(result.length).toBe(100)
     })
+
+    it('arrayChunk should handle chunk size of 1', () => {
+      const arr = [1, 2, 3, 4, 5]
+      const result = arrayChunk(arr, 1)
+      expect(result).toEqual([[1], [2], [3], [4], [5]])
+    })
+
+    it('arrayUnique should handle boolean values', () => {
+      const arr = [true, false, true, false, true]
+      const result = arrayUnique(arr)
+      expect(result).toEqual([true, false])
+    })
+
+    it('arrayUnique should handle null and undefined', () => {
+      const arr = [null, undefined, null, undefined, 1, null]
+      const result = arrayUnique(arr)
+      expect(result).toEqual([null, undefined, 1])
+    })
+
+    it('joinAnd should handle numbers coerced to strings', () => {
+      const result = joinAnd(['1', '2', '3', '4', '5', '6'])
+      expect(result).toBe('1, 2, 3, 4, 5, and 6')
+    })
+
+    it('joinOr should handle long lists', () => {
+      const arr = Array.from({ length: 10 }, (_, i) => `item${i}`)
+      const result = joinOr(arr)
+      expect(result).toContain('or')
+      expect(result).toContain('item0')
+      expect(result).toContain('item9')
+    })
   })
 })

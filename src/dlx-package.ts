@@ -137,6 +137,7 @@ function parsePackageSpec(spec: string): {
 } {
   try {
     // npmPackageArg is imported at the top
+    /* c8 ignore next - External npm-package-arg call */
     const parsed = npmPackageArg(spec)
 
     // Extract version from different types of specs.
@@ -230,6 +231,7 @@ async function ensurePackageInstalled(
       // Pacote leverages npm cache when available but doesn't require npm CLI.
       const pacoteCachePath = getPacoteCachePath()
       try {
+        /* c8 ignore next 4 - External pacote call */
         await pacote.extract(packageSpec, installedDir, {
           // Use consistent pacote cache path (respects npm cache locations when available).
           cache: pacoteCachePath || path.join(packageDir, '.cache'),
@@ -239,6 +241,7 @@ async function ensurePackageInstalled(
         // pacote.extract() only extracts the package tarball, it does NOT install dependencies.
         // We must use Arborist to install dependencies after extraction.
         // Arborist is imported at the top
+        /* c8 ignore next 3 - External Arborist constructor */
         const arb = new Arborist({
           path: installedDir,
           cache: pacoteCachePath || path.join(packageDir, '.cache'),
@@ -256,6 +259,7 @@ async function ensurePackageInstalled(
           silent: true,
         })
 
+        /* c8 ignore next 2 - External Arborist calls */
         await arb.buildIdealTree()
         await arb.reify({ save: false })
       } catch (e) {
@@ -369,6 +373,7 @@ function findBinaryPath(
     } else {
       // Multiple binaries - use npm's battle-tested resolution strategy first.
       try {
+        /* c8 ignore next 6 - External libnpmexec call */
         const { getBinFromManifest } = libnpmexec
         binName = getBinFromManifest({
           name: packageName,

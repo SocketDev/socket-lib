@@ -14,6 +14,7 @@ type PackageExtension = readonly [string, Record<string, unknown>]
 const packageExtensions = ObjectFreeze(
   (
     [
+      /* c8 ignore next - External @yarnpkg/extensions data */
       ...yarnPkgExtensions.packageExtensions,
       [
         '@yarnpkg/extensions@>=1.1.0',

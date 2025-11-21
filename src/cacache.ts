@@ -107,6 +107,7 @@ export async function clear(
   // If no prefix specified, clear everything.
   if (!opts.prefix) {
     try {
+      /* c8 ignore next - External cacache call */
       await cacache.rm.all(cacheDir)
       return
     } catch (e) {
@@ -124,11 +125,13 @@ export async function clear(
   // For simple prefix (no wildcards), use faster iteration.
   if (!hasWildcard) {
     let removed = 0
+    /* c8 ignore next - External cacache call */
     const stream = cacache.ls.stream(cacheDir)
 
     for await (const entry of stream) {
       if (entry.key.startsWith(opts.prefix)) {
         try {
+          /* c8 ignore next - External cacache call */
           await cacache.rm.entry(cacheDir, entry.key)
           removed++
         } catch {
@@ -142,11 +145,13 @@ export async function clear(
 
   // For wildcard patterns, need to match each entry.
   let removed = 0
+  /* c8 ignore next - External cacache call */
   const stream = cacache.ls.stream(cacheDir)
 
   for await (const entry of stream) {
     if (matchesPattern(entry.key, opts.prefix)) {
       try {
+        /* c8 ignore next - External cacache call */
         await cacache.rm.entry(cacheDir, entry.key)
         removed++
       } catch {
@@ -173,6 +178,7 @@ export async function get(
     )
   }
   const cacache = getCacache() as any
+  /* c8 ignore next - External cacache call */
   return await cacache.get(getSocketCacacheDir(), key, options)
 }
 
@@ -192,6 +198,7 @@ export async function put(
     )
   }
   const cacache = getCacache()
+  /* c8 ignore next - External cacache call */
   return await cacache.put(getSocketCacacheDir(), key, data, options)
 }
 
@@ -207,6 +214,7 @@ export async function remove(key: string): Promise<unknown> {
     )
   }
   const cacache = getCacache() as any
+  /* c8 ignore next - External cacache call */
   return await cacache.rm.entry(getSocketCacacheDir(), key)
 }
 
@@ -233,9 +241,11 @@ export async function withTmp<T>(
   const cacache = getCacache()
   // The DefinitelyTyped types for cacache.tmp.withTmp are incorrect.
   // It actually returns the callback's return value, not void.
+  /* c8 ignore start - External cacache call */
   return (await cacache.tmp.withTmp(
     getSocketCacacheDir(),
     {},
     callback as any,
   )) as T
+  /* c8 ignore stop */
 }

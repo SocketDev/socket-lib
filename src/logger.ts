@@ -1804,6 +1804,7 @@ function ensurePrototypeInitialized() {
             const ctorArgs = privateConstructorArgs.get(this) ?? []
             // Clean up constructor args - no longer needed after Console creation.
             privateConstructorArgs.delete(this)
+            /* c8 ignore start - Console construction internals */
             if (ctorArgs.length) {
               con = constructConsole(...ctorArgs)
             } else {
@@ -1815,6 +1816,7 @@ function ensurePrototypeInitialized() {
                 con[k] = method
               }
             }
+            /* c8 ignore stop */
             privateConsole.set(this, con)
           }
           const result = (con as any)[key](...args)

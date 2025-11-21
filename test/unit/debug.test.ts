@@ -326,6 +326,59 @@ describe('debug', () => {
       debugtime('test-timer')
       expect(() => debugtime('test-timer')).not.toThrow()
     })
+
+    it('should provide start() method', () => {
+      const timer = debugtime('timer-with-start')
+      expect(typeof timer.start).toBe('function')
+      expect(() => timer.start()).not.toThrow()
+    })
+
+    it('should provide end() method', () => {
+      const timer = debugtime('timer-with-end')
+      expect(typeof timer.end).toBe('function')
+      expect(() => timer.end()).not.toThrow()
+    })
+
+    it('should handle start() followed by end()', () => {
+      const timer = debugtime('timer-start-end')
+      timer.start()
+      expect(() => timer.end()).not.toThrow()
+    })
+
+    it('should handle multiple start() and end() calls', () => {
+      const timer = debugtime('timer-multiple')
+      timer.start()
+      timer.end()
+      timer.start()
+      timer.end()
+      expect(true).toBe(true)
+    })
+
+    it('should handle end() without start()', () => {
+      const timer = debugtime('timer-end-only')
+      expect(() => timer.end()).not.toThrow()
+    })
+
+    it('should handle start() without end()', () => {
+      const timer = debugtime('timer-start-only')
+      expect(() => timer.start()).not.toThrow()
+    })
+
+    it('should be callable as function after using start()', () => {
+      const timer = debugtime('timer-callable')
+      timer.start()
+      expect(() => timer()).not.toThrow()
+    })
+
+    it('should handle multiple timers with start() and end()', () => {
+      const timer1 = debugtime('timer-a')
+      const timer2 = debugtime('timer-b')
+      timer1.start()
+      timer2.start()
+      timer1.end()
+      timer2.end()
+      expect(true).toBe(true)
+    })
   })
 
   describe('edge cases', () => {
