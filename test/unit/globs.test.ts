@@ -13,10 +13,13 @@
  * Used by Socket tools for file discovery and npm package analysis.
  */
 
+import path from 'node:path'
 import {
   defaultIgnore,
   getGlobMatcher,
+  glob,
   globStreamLicenses,
+  globSync,
 } from '@socketsecurity/lib/globs'
 import { describe, expect, it } from 'vitest'
 
@@ -174,6 +177,18 @@ describe('globs', () => {
       expect(matcher('src/app.js')).toBe(true)
       expect(matcher('src/utils/helper.js')).toBe(true)
     })
+
+    it('should handle only negative patterns', () => {
+      const matcher = getGlobMatcher(['!*.test.js', '!*.spec.js'])
+      expect(typeof matcher).toBe('function')
+    })
+
+    it('should map negative patterns correctly', () => {
+      const matcher = getGlobMatcher(['*.js', '!test/*.js', '!spec/*.js'])
+      expect(matcher('app.js')).toBe(true)
+      expect(matcher('test/app.js')).toBe(false)
+      expect(matcher('spec/app.js')).toBe(false)
+    })
   })
 
   describe('globStreamLicenses', () => {
@@ -182,6 +197,19 @@ describe('globs', () => {
       expect(stream).toBeDefined()
       expect(typeof stream.on).toBe('function')
       expect(typeof stream.pipe).toBe('function')
+    })
+
+    it('should stream license files', async () => {
+      const files: string[] = []
+      const stream = globStreamLicenses(process.cwd(), { recursive: false })
+
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (file: string) => files.push(file))
+        stream.on('end', () => resolve())
+        stream.on('error', reject)
+      })
+
+      expect(Array.isArray(files)).toBe(true)
     })
 
     it('should accept dirname parameter', () => {
@@ -194,19 +222,50 @@ describe('globs', () => {
       expect(() => globStreamLicenses('.', { recursive: true })).not.toThrow()
     })
 
-    it('should handle ignoreOriginals option', () => {
-      const stream = globStreamLicenses('.', { ignoreOriginals: true })
-      expect(stream).toBeDefined()
+    it('should handle ignoreOriginals option', async () => {
+      const files: string[] = []
+      const stream = globStreamLicenses(process.cwd(), {
+        ignoreOriginals: true,
+        recursive: false,
+      })
+
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (file: string) => files.push(file))
+        stream.on('end', () => resolve())
+        stream.on('error', reject)
+      })
+
+      // Should not include files matching *.original pattern
+      expect(files.every(f => !f.includes('.original'))).toBe(true)
     })
 
-    it('should handle recursive option', () => {
-      const stream = globStreamLicenses('.', { recursive: false })
-      expect(stream).toBeDefined()
+    it('should handle recursive option', async () => {
+      const files: string[] = []
+      const stream = globStreamLicenses(process.cwd(), { recursive: true })
+
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (file: string) => files.push(file))
+        stream.on('end', () => resolve())
+        stream.on('error', reject)
+      })
+
+      expect(Array.isArray(files)).toBe(true)
     })
 
-    it('should handle custom ignore patterns', () => {
-      const stream = globStreamLicenses('.', { ignore: ['**/node_modules/**'] })
-      expect(stream).toBeDefined()
+    it('should handle custom ignore patterns as array', async () => {
+      const files: string[] = []
+      const stream = globStreamLicenses(process.cwd(), {
+        ignore: ['**/test/**', '**/node_modules/**'],
+        recursive: false,
+      })
+
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (file: string) => files.push(file))
+        stream.on('end', () => resolve())
+        stream.on('error', reject)
+      })
+
+      expect(Array.isArray(files)).toBe(true)
     })
 
     it('should handle absolute option', () => {
@@ -229,14 +288,22 @@ describe('globs', () => {
       expect(stream).toBeDefined()
     })
 
-    it('should handle multiple options together', () => {
-      const stream = globStreamLicenses('.', {
+    it('should handle multiple options together', async () => {
+      const files: string[] = []
+      const stream = globStreamLicenses(process.cwd(), {
         recursive: true,
         ignoreOriginals: true,
         dot: true,
         absolute: true,
       })
-      expect(stream).toBeDefined()
+
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (file: string) => files.push(file))
+        stream.on('end', () => resolve())
+        stream.on('error', reject)
+      })
+
+      expect(Array.isArray(files)).toBe(true)
     })
 
     it('should be a function', () => {
@@ -247,6 +314,178 @@ describe('globs', () => {
       const stream = globStreamLicenses('.')
       expect(stream).toBeDefined()
       expect(typeof stream.on).toBe('function')
+    })
+  })
+
+  describe('glob', () => {
+    it('should be a function', () => {
+      expect(typeof glob).toBe('function')
+    })
+
+    it('should return a promise', () => {
+      const result = glob('*.js')
+      expect(result).toBeInstanceOf(Promise)
+    })
+
+    it('should find files matching pattern', async () => {
+      const files = await glob('*.json', { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.length).toBeGreaterThan(0)
+      expect(files.some(f => f.includes('package.json'))).toBe(true)
+    })
+
+    it('should accept array of patterns', async () => {
+      const files = await glob(['*.json', '*.md'], { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should respect cwd option', async () => {
+      const files = await glob('*.ts', { cwd: 'src' })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should handle ignore patterns', async () => {
+      const files = await glob('**/*.ts', {
+        cwd: 'src',
+        ignore: ['**/paths/**'],
+      })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.every(f => !f.includes('paths/'))).toBe(true)
+    })
+
+    it('should handle absolute option', async () => {
+      const files = await glob('*.json', {
+        cwd: process.cwd(),
+        absolute: true,
+      })
+      expect(Array.isArray(files)).toBe(true)
+      if (files.length > 0) {
+        expect(path.isAbsolute(files[0])).toBe(true)
+      }
+    })
+
+    it('should handle onlyFiles option', async () => {
+      const files = await glob('*', { cwd: process.cwd(), onlyFiles: true })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should handle dot option', async () => {
+      const files = await glob('.*', { cwd: process.cwd(), dot: true })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should handle empty pattern array', async () => {
+      const files = await glob([], { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.length).toBe(0)
+    })
+
+    it('should handle single pattern string', async () => {
+      const files = await glob('package.json', { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.some(f => f.includes('package.json'))).toBe(true)
+    })
+
+    it('should handle negation patterns', async () => {
+      const files = await glob(['*.json', '!package-lock.json'], {
+        cwd: process.cwd(),
+      })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.every(f => !f.includes('package-lock.json'))).toBe(true)
+    })
+
+    it('should work without options parameter', async () => {
+      const files = await glob('*.json')
+      expect(Array.isArray(files)).toBe(true)
+    })
+  })
+
+  describe('globSync', () => {
+    it('should be a function', () => {
+      expect(typeof globSync).toBe('function')
+    })
+
+    it('should return an array', () => {
+      const result = globSync('*.json', { cwd: process.cwd() })
+      expect(Array.isArray(result)).toBe(true)
+    })
+
+    it('should find files matching pattern', () => {
+      const files = globSync('*.json', { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.length).toBeGreaterThan(0)
+      expect(files.some(f => f.includes('package.json'))).toBe(true)
+    })
+
+    it('should accept array of patterns', () => {
+      const files = globSync(['*.json', '*.md'], { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should respect cwd option', () => {
+      const files = globSync('*.ts', { cwd: 'src' })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should handle ignore patterns', () => {
+      const files = globSync('**/*.ts', {
+        cwd: 'src',
+        ignore: ['**/paths/**'],
+      })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.every(f => !f.includes('paths/'))).toBe(true)
+    })
+
+    it('should handle absolute option', () => {
+      const files = globSync('*.json', {
+        cwd: process.cwd(),
+        absolute: true,
+      })
+      expect(Array.isArray(files)).toBe(true)
+      if (files.length > 0) {
+        expect(path.isAbsolute(files[0])).toBe(true)
+      }
+    })
+
+    it('should handle onlyFiles option', () => {
+      const files = globSync('*', { cwd: process.cwd(), onlyFiles: true })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should handle dot option', () => {
+      const files = globSync('.*', { cwd: process.cwd(), dot: true })
+      expect(Array.isArray(files)).toBe(true)
+    })
+
+    it('should return same results as async glob', async () => {
+      const syncFiles = globSync('*.json', { cwd: process.cwd() })
+      const asyncFiles = await glob('*.json', { cwd: process.cwd() })
+      expect(syncFiles.sort()).toEqual(asyncFiles.sort())
+    })
+
+    it('should handle empty pattern array', () => {
+      const files = globSync([], { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.length).toBe(0)
+    })
+
+    it('should handle single pattern string', () => {
+      const files = globSync('package.json', { cwd: process.cwd() })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.some(f => f.includes('package.json'))).toBe(true)
+    })
+
+    it('should handle negation patterns', () => {
+      const files = globSync(['*.json', '!package-lock.json'], {
+        cwd: process.cwd(),
+      })
+      expect(Array.isArray(files)).toBe(true)
+      expect(files.every(f => !f.includes('package-lock.json'))).toBe(true)
+    })
+
+    it('should work without options parameter', () => {
+      const files = globSync('*.json')
+      expect(Array.isArray(files)).toBe(true)
     })
   })
 

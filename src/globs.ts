@@ -162,3 +162,27 @@ export function getGlobMatcher(
   matcherCache.set(key, matcher)
   return matcher
 }
+
+/**
+ * Asynchronously find files matching glob patterns.
+ * Wrapper around fast-glob.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function glob(
+  patterns: Pattern | Pattern[],
+  options?: FastGlobOptions,
+): Promise<string[]> {
+  return fastGlob.glob(patterns, options as import('fast-glob').Options)
+}
+
+/**
+ * Synchronously find files matching glob patterns.
+ * Wrapper around fast-glob.sync.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function globSync(
+  patterns: Pattern | Pattern[],
+  options?: FastGlobOptions,
+): string[] {
+  return fastGlob.globSync(patterns, options as import('fast-glob').Options)
+}
