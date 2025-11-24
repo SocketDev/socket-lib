@@ -722,7 +722,7 @@
     "npm-package-arg": "13.0.0",
     "pacote": "21.0.1",
     "picomatch": "2.3.1",
-    "semver": "7.7.2",
+    "semver": "7.7.3",
     "spdx-correct": "3.2.0",
     "spdx-expression-parse": "4.0.0",
     "streaming-iterables": "8.0.1",
@@ -751,7 +751,7 @@
     "overrides": {
       "@npmcli/arborist": "9.1.6",
       "@npmcli/run-script": "10.0.0",
-      "semver": "7.7.2",
+      "semver": "7.7.3",
       "ansi-regex": "6.2.2",
       "strip-ansi": "7.1.2",
       "string-width": "8.1.0",
