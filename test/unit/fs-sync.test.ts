@@ -200,13 +200,13 @@ describe.sequential('fs - Sync Functions', () => {
   })
 
   describe('safeReadFileSync', () => {
-    it('should read existing file', () => {
+    it('should read existing file as utf8 string by default', () => {
       const file = join(testDir, 'safe-read.txt')
       writeFileSync(file, 'safe content')
 
       const result = safeReadFileSync(file)
-      expect(Buffer.isBuffer(result)).toBe(true)
-      expect(result?.toString()).toBe('safe content')
+      expect(typeof result).toBe('string')
+      expect(result).toBe('safe content')
     })
 
     it('should return undefined for non-existent files', () => {
@@ -220,8 +220,8 @@ describe.sequential('fs - Sync Functions', () => {
       writeFileSync(emptyFile, '')
 
       const result = safeReadFileSync(emptyFile)
-      expect(Buffer.isBuffer(result)).toBe(true)
-      expect(result?.toString()).toBe('')
+      expect(typeof result).toBe('string')
+      expect(result).toBe('')
     })
 
     it('should read files with special characters', () => {
@@ -231,6 +231,16 @@ describe.sequential('fs - Sync Functions', () => {
       writeFileSync(file, content)
 
       const result = safeReadFileSync(file)
+      expect(typeof result).toBe('string')
+      expect(result).toBe(content)
+    })
+
+    it('should read as buffer when encoding is explicitly null', () => {
+      const file = join(testDir, 'buffer-read.txt')
+      const content = 'buffer content'
+      writeFileSync(file, content)
+
+      const result = safeReadFileSync(file, { encoding: null })
       expect(Buffer.isBuffer(result)).toBe(true)
       expect(result?.toString()).toBe(content)
     })
@@ -301,8 +311,8 @@ describe.sequential('fs - Sync Functions', () => {
       writeFileSync(file1, 'content1')
       writeFileSync(file2, 'content2')
 
-      expect(safeReadFileSync(file1)?.toString()).toBe('content1')
-      expect(safeReadFileSync(file2)?.toString()).toBe('content2')
+      expect(safeReadFileSync(file1)).toBe('content1')
+      expect(safeReadFileSync(file2)).toBe('content2')
       expect(safeReadFileSync(file3)).toBeUndefined()
 
       expect(safeStatsSync(file1)?.isFile()).toBe(true)

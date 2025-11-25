@@ -301,6 +301,26 @@ const defaultRemoveOptions = objectFreeze({
   retryDelay: 200,
 })
 
+let _buffer: typeof import('node:buffer') | undefined
+/**
+ * Lazily load the buffer module.
+ *
+ * Performs on-demand loading of Node.js buffer module to avoid initialization
+ * overhead and potential Webpack bundling errors.
+ *
+ * @private
+ * @returns {typeof import('node:buffer')} The buffer module
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getBuffer() {
+  if (_buffer === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _buffer = /*@__PURE__*/ require('node:buffer')
+  }
+  return _buffer as typeof import('node:buffer')
+}
+
 let _fs: typeof import('fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
@@ -983,8 +1003,8 @@ export async function readJson(
   try {
     content = await fs.promises.readFile(filepath, {
       __proto__: null,
-      encoding: 'utf8',
       ...fsOptions,
+      encoding: 'utf8',
     } as unknown as Parameters<typeof fs.promises.readFile>[1] & {
       encoding: string
     })
@@ -1060,8 +1080,8 @@ export function readJsonSync(
   try {
     content = fs.readFileSync(filepath, {
       __proto__: null,
-      encoding: 'utf8',
       ...fsOptions,
+      encoding: 'utf8',
     } as unknown as Parameters<typeof fs.readFileSync>[1] & {
       encoding: string
     })
@@ -1381,14 +1401,15 @@ export function safeMkdirSync(
  * Safely read a file asynchronously, returning undefined on error.
  * Useful when you want to attempt reading a file without handling errors explicitly.
  * Returns undefined for any error (file not found, permission denied, etc.).
+ * Defaults to UTF-8 encoding, returning a string unless encoding is explicitly set to null.
  *
  * @param filepath - Path to file
  * @param options - Read options including encoding and default value
- * @returns Promise resolving to file contents, or undefined on error
+ * @returns Promise resolving to file contents (string by default), or undefined on error
  *
  * @example
  * ```ts
- * // Try to read a file, get undefined if it doesn't exist
+ * // Try to read a file as UTF-8 string (default), get undefined if it doesn't exist
  * const content = await safeReadFile('./optional-config.txt')
  * if (content) {
  *   console.log('Config found:', content)
@@ -1396,59 +1417,117 @@ export function safeMkdirSync(
  *
  * // Read with specific encoding
  * const data = await safeReadFile('./data.txt', { encoding: 'utf8' })
+ *
+ * // Read as Buffer by setting encoding to null
+ * const buffer = await safeReadFile('./binary.dat', { encoding: null })
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function safeReadFile(
   filepath: PathLike,
+  options: SafeReadOptions & { encoding: null },
+): Promise<Buffer | undefined>
+/*@__NO_SIDE_EFFECTS__*/
+export async function safeReadFile(
+  filepath: PathLike,
   options?: SafeReadOptions | undefined,
-) {
-  const opts = typeof options === 'string' ? { encoding: options } : options
+): Promise<string | undefined>
+/*@__NO_SIDE_EFFECTS__*/
+export async function safeReadFile(
+  filepath: PathLike,
+  options?: SafeReadOptions | undefined,
+): Promise<string | Buffer | undefined> {
+  const opts =
+    typeof options === 'string'
+      ? { __proto__: null, encoding: options }
+      : ({ __proto__: null, ...options } as SafeReadOptions)
+  const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
+  const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
+  const { encoding = 'utf8' } = readOpts
+  const shouldReturnBuffer = encoding === null
   const fs = getFs()
   try {
     return await fs.promises.readFile(filepath, {
+      __proto__: null,
       signal: abortSignal,
-      ...opts,
+      ...readOpts,
+      encoding,
     } as Abortable)
   } catch {}
-  return undefined
+  if (defaultValue === undefined) {
+    return undefined
+  }
+  if (shouldReturnBuffer) {
+    const { Buffer } = getBuffer()
+    return Buffer.isBuffer(defaultValue) ? defaultValue : undefined
+  }
+  return typeof defaultValue === 'string' ? defaultValue : String(defaultValue)
 }
 
 /**
  * Safely read a file synchronously, returning undefined on error.
  * Useful when you want to attempt reading a file without handling errors explicitly.
  * Returns undefined for any error (file not found, permission denied, etc.).
+ * Defaults to UTF-8 encoding, returning a string unless encoding is explicitly set to null.
  *
  * @param filepath - Path to file
  * @param options - Read options including encoding and default value
- * @returns File contents, or undefined on error
+ * @returns File contents (string by default), or undefined on error
  *
  * @example
  * ```ts
- * // Try to read a config file
+ * // Try to read a config file as UTF-8 string (default)
  * const config = safeReadFileSync('./config.txt')
  * if (config) {
  *   console.log('Config loaded successfully')
  * }
  *
- * // Read binary file safely
+ * // Read with explicit encoding
+ * const data = safeReadFileSync('./data.txt', { encoding: 'utf8' })
+ *
+ * // Read binary file by setting encoding to null
  * const buffer = safeReadFileSync('./image.png', { encoding: null })
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function safeReadFileSync(
   filepath: PathLike,
+  options: SafeReadOptions & { encoding: null },
+): Buffer | undefined
+/*@__NO_SIDE_EFFECTS__*/
+export function safeReadFileSync(
+  filepath: PathLike,
   options?: SafeReadOptions | undefined,
-) {
-  const opts = typeof options === 'string' ? { encoding: options } : options
+): string | undefined
+/*@__NO_SIDE_EFFECTS__*/
+export function safeReadFileSync(
+  filepath: PathLike,
+  options?: SafeReadOptions | undefined,
+): string | Buffer | undefined {
+  const opts =
+    typeof options === 'string'
+      ? { __proto__: null, encoding: options }
+      : ({ __proto__: null, ...options } as SafeReadOptions)
+  const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
+  const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
+  const { encoding = 'utf8' } = readOpts
+  const shouldReturnBuffer = encoding === null
   const fs = getFs()
   try {
     return fs.readFileSync(filepath, {
       __proto__: null,
-      ...opts,
+      ...readOpts,
+      encoding,
     } as ObjectEncodingOptions)
   } catch {}
-  return undefined
+  if (defaultValue === undefined) {
+    return undefined
+  }
+  if (shouldReturnBuffer) {
+    const { Buffer } = getBuffer()
+    return Buffer.isBuffer(defaultValue) ? defaultValue : undefined
+  }
+  return typeof defaultValue === 'string' ? defaultValue : String(defaultValue)
 }
 
 /**

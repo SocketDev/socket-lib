@@ -875,7 +875,7 @@ describe('fs', () => {
   })
 
   describe('safeReadFile', () => {
-    it('should read existing file', async () => {
+    it('should read existing file with explicit encoding', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'test.txt')
         const testContent = 'test content'
@@ -891,20 +891,33 @@ describe('fs', () => {
       expect(result).toBeUndefined()
     })
 
-    it('should read as buffer when no encoding specified', async () => {
+    it('should read as utf8 string by default when no encoding specified', async () => {
+      await runWithTempDir(async tmpDir => {
+        const testFile = path.join(tmpDir, 'text.txt')
+        const testContent = 'default encoding test'
+        await fs.writeFile(testFile, testContent, 'utf8')
+
+        const result = await safeReadFile(testFile)
+        expect(typeof result).toBe('string')
+        expect(result).toBe(testContent)
+      }, 'safeReadFile-default-')
+    })
+
+    it('should read as buffer when encoding is explicitly null', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'binary.dat')
         const testData = Buffer.from([0x01, 0x02, 0x03])
         await fs.writeFile(testFile, testData)
 
-        const result = await safeReadFile(testFile)
+        const result = await safeReadFile(testFile, { encoding: null })
         expect(Buffer.isBuffer(result)).toBe(true)
+        expect(result).toEqual(testData)
       }, 'safeReadFile-buffer-')
     })
   })
 
   describe('safeReadFileSync', () => {
-    it('should read existing file', async () => {
+    it('should read existing file with explicit encoding', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'test.txt')
         const testContent = 'test content'
@@ -920,14 +933,27 @@ describe('fs', () => {
       expect(result).toBeUndefined()
     })
 
-    it('should read as buffer when no encoding specified', async () => {
+    it('should read as utf8 string by default when no encoding specified', async () => {
+      await runWithTempDir(async tmpDir => {
+        const testFile = path.join(tmpDir, 'text.txt')
+        const testContent = 'default encoding test'
+        await fs.writeFile(testFile, testContent, 'utf8')
+
+        const result = safeReadFileSync(testFile)
+        expect(typeof result).toBe('string')
+        expect(result).toBe(testContent)
+      }, 'safeReadFileSync-default-')
+    })
+
+    it('should read as buffer when encoding is explicitly null', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'binary.dat')
         const testData = Buffer.from([0x01, 0x02, 0x03])
         await fs.writeFile(testFile, testData)
 
-        const result = safeReadFileSync(testFile)
+        const result = safeReadFileSync(testFile, { encoding: null })
         expect(Buffer.isBuffer(result)).toBe(true)
+        expect(result).toEqual(testData)
       }, 'safeReadFileSync-buffer-')
     })
   })
