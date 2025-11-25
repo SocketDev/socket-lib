@@ -357,6 +357,144 @@ function getPath() {
 }
 
 /**
+ * Move the "slow cases" to a separate function to make sure this function gets
+ * inlined properly. That prioritizes the common case.
+ *
+ * Based on Node.js internal/util.js normalizeEncoding implementation.
+ * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
+ *
+ * @param enc - Encoding to normalize
+ * @returns Normalized encoding string or undefined if no match
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function slowCases(enc: string): BufferEncoding | undefined {
+  switch (enc.length) {
+    case 4:
+      if (enc === 'UTF8') {
+        return 'utf8'
+      }
+      if (enc === 'ucs2' || enc === 'UCS2') {
+        return 'utf16le'
+      }
+      enc = enc.toLowerCase()
+      if (enc === 'utf8') {
+        return 'utf8'
+      }
+      if (enc === 'ucs2') {
+        return 'utf16le'
+      }
+      break
+    case 3:
+      if (enc === 'hex' || enc === 'HEX' || enc.toLowerCase() === 'hex') {
+        return 'hex'
+      }
+      break
+    case 5:
+      if (enc === 'ascii') {
+        return 'ascii'
+      }
+      if (enc === 'ucs-2') {
+        return 'utf16le'
+      }
+      if (enc === 'UTF-8') {
+        return 'utf8'
+      }
+      if (enc === 'ASCII') {
+        return 'ascii'
+      }
+      if (enc === 'UCS-2') {
+        return 'utf16le'
+      }
+      enc = enc.toLowerCase()
+      if (enc === 'utf-8') {
+        return 'utf8'
+      }
+      if (enc === 'ascii') {
+        return 'ascii'
+      }
+      if (enc === 'ucs-2') {
+        return 'utf16le'
+      }
+      break
+    case 6:
+      if (enc === 'base64') {
+        return 'base64'
+      }
+      if (enc === 'latin1' || enc === 'binary') {
+        return 'latin1'
+      }
+      if (enc === 'BASE64') {
+        return 'base64'
+      }
+      if (enc === 'LATIN1' || enc === 'BINARY') {
+        return 'latin1'
+      }
+      enc = enc.toLowerCase()
+      if (enc === 'base64') {
+        return 'base64'
+      }
+      if (enc === 'latin1' || enc === 'binary') {
+        return 'latin1'
+      }
+      break
+    case 7:
+      if (
+        enc === 'utf16le' ||
+        enc === 'UTF16LE' ||
+        enc.toLowerCase() === 'utf16le'
+      ) {
+        return 'utf16le'
+      }
+      break
+    case 8:
+      if (
+        enc === 'utf-16le' ||
+        enc === 'UTF-16LE' ||
+        enc.toLowerCase() === 'utf-16le'
+      ) {
+        return 'utf16le'
+      }
+      break
+    case 9:
+      if (
+        enc === 'base64url' ||
+        enc === 'BASE64URL' ||
+        enc.toLowerCase() === 'base64url'
+      ) {
+        return 'base64url'
+      }
+      break
+    default:
+      if (enc === '') {
+        return 'utf8'
+      }
+  }
+  return undefined
+}
+
+/**
+ * Normalize encoding string to canonical form.
+ * Handles common encodings inline for performance, delegates to slowCases for others.
+ *
+ * Based on Node.js internal/util.js normalizeEncoding implementation.
+ * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
+ *
+ * @param enc - Encoding to normalize (can be null/undefined)
+ * @returns Normalized encoding string, defaults to 'utf8'
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function normalizeEncoding(
+  enc: BufferEncoding | string | null | undefined,
+): BufferEncoding {
+  if (enc == null || enc === 'utf8' || enc === 'utf-8') {
+    return 'utf8'
+  }
+  return slowCases(enc) ?? 'utf8'
+}
+
+/**
  * Process directory entries and filter for directories.
  * Filters entries to include only directories, optionally excluding empty ones.
  * Applies ignore patterns and natural sorting.
@@ -1443,7 +1581,9 @@ export async function safeReadFile(
       : ({ __proto__: null, ...options } as SafeReadOptions)
   const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
   const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
-  const { encoding = 'utf8' } = readOpts
+  let { encoding = 'utf8' } = readOpts
+  // Normalize encoding to canonical form.
+  encoding = encoding === null ? null : normalizeEncoding(encoding)
   const shouldReturnBuffer = encoding === null
   const fs = getFs()
   try {
@@ -1510,7 +1650,9 @@ export function safeReadFileSync(
       : ({ __proto__: null, ...options } as SafeReadOptions)
   const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
   const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
-  const { encoding = 'utf8' } = readOpts
+  let { encoding = 'utf8' } = readOpts
+  // Normalize encoding to canonical form.
+  encoding = encoding === null ? null : normalizeEncoding(encoding)
   const shouldReturnBuffer = encoding === null
   const fs = getFs()
   try {
