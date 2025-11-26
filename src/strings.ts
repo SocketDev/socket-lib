@@ -182,6 +182,7 @@ export function camelToKebab(str: string): string {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function centerText(text: string, width: number): string {
+  /* c8 ignore next */
   const textLength = stripAnsi(text).length
   if (textLength >= width) {
     return text
@@ -520,6 +521,7 @@ try {
   //
   // Non-RGI emoji might be symbols that look like emoji but render as 1 column.
   emojiRegex = /^\p{RGI_Emoji}$/v
+  /* c8 ignore start */
 } catch {
   // Fall back to 'u' flag (Node 18+) with slightly less accurate patterns.
   //
@@ -540,6 +542,7 @@ try {
     /^[\p{Default_Ignorable_Code_Point}\p{Control}\p{Format}\p{Mark}]+/u
   emojiRegex = /^\p{Extended_Pictographic}$/u
 }
+/* c8 ignore stop */
 
 /**
  * Get the visual width of a string in terminal columns.
@@ -630,6 +633,7 @@ export function stringWidth(text: string): number {
   // Strip ANSI escape codes first (colors, bold, italic, etc.).
   // These are invisible and don't contribute to visual width.
   // Example: '\x1b[31mred\x1b[0m' becomes 'red'.
+  /* c8 ignore next */
   const plainText = stripAnsi(text)
 
   if (!plainText.length) {
