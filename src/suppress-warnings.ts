@@ -144,11 +144,16 @@ export async function withSuppressedWarnings<T>(
   warningType: string,
   callback: () => T | Promise<T>,
 ): Promise<T> {
+  const wasAlreadySuppressed = suppressedWarnings.has(warningType)
   const original = process.emitWarning
   suppressWarningType(warningType)
   try {
     return await callback()
   } finally {
+    // Only remove from suppressed set if we added it.
+    if (!wasAlreadySuppressed) {
+      suppressedWarnings.delete(warningType)
+    }
     process.emitWarning = original
   }
 }
