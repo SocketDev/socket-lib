@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.4.0) - 2025-11-25
+
+### Added
+
+- **fs**: Exported `normalizeEncoding()` function for robust encoding string normalization
+  - Handles case-insensitive encoding names (e.g., 'UTF-8', 'utf8', 'UTF8')
+  - Supports encoding aliases (e.g., 'binary' → 'latin1', 'ucs-2' → 'utf16le')
+  - Fast-path optimization for common encodings
+  - Defaults to 'utf8' for invalid or null encodings
+  - Export: `@socketsecurity/lib/fs`
+
+### Fixed
+
+- **fs**: `safeReadFile()` and `safeReadFileSync()` type signatures and encoding handling
+  - Corrected type overloads: `encoding: null` → `Buffer | undefined`, no encoding → `string | undefined` (UTF-8 default)
+  - Fixed implementation to properly handle `encoding: null` for Buffer returns
+
+- **suppress-warnings**: `withSuppressedWarnings()` now properly restores warning state
+  - Fixed state restoration to only remove warning types that were added by the function
+  - Prevents accidental removal of warnings that were already suppressed
+  - Ensures correct cleanup behavior when warning types are nested or reused
+
 ## [4.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.3.0) - 2025-11-20
 
 ### Added
