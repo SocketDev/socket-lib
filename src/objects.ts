@@ -106,51 +106,6 @@ const __defineGetter__ = Object.prototype.__defineGetter__
 const ReflectOwnKeys = Reflect.ownKeys
 
 /**
- * Create a lazy getter function that memoizes its result.
- *
- * The returned function will only call the getter once, caching the result
- * for subsequent calls. This is useful for expensive computations or
- * operations that should only happen when needed.
- *
- * @param name - The property key name for the getter (used for debugging and stats)
- * @param getter - Function that computes the value on first access
- * @param stats - Optional stats object to track initialization
- * @returns A memoized getter function
- *
- * @example
- * ```ts
- * const stats = { initialized: new Set() }
- * const getLargeData = createLazyGetter('data', () => {
- *   console.log('Computing expensive data...')
- *   return { large: 'dataset' }
- * }, stats)
- *
- * getLargeData() // Logs "Computing expensive data..." and returns data
- * getLargeData() // Returns cached data without logging
- * console.log(stats.initialized.has('data')) // true
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function createLazyGetter<T>(
-  name: PropertyKey,
-  getter: () => T,
-  stats?: LazyGetterStats | undefined,
-): () => T {
-  let lazyValue: T | typeof UNDEFINED_TOKEN = UNDEFINED_TOKEN
-  // Dynamically name the getter without using Object.defineProperty.
-  const { [name]: lazyGetter } = {
-    [name]() {
-      if (lazyValue === UNDEFINED_TOKEN) {
-        stats?.initialized?.add(name)
-        lazyValue = getter()
-      }
-      return lazyValue as T
-    },
-  } as LazyGetterRecord<T>
-  return lazyGetter as unknown as () => T
-}
-
-/**
  * Create a frozen constants object with lazy getters and internal properties.
  *
  * This function creates an immutable object with:
@@ -250,6 +205,51 @@ export function createConstantsObject(
     )
   }
   return ObjectFreeze(object)
+}
+
+/**
+ * Create a lazy getter function that memoizes its result.
+ *
+ * The returned function will only call the getter once, caching the result
+ * for subsequent calls. This is useful for expensive computations or
+ * operations that should only happen when needed.
+ *
+ * @param name - The property key name for the getter (used for debugging and stats)
+ * @param getter - Function that computes the value on first access
+ * @param stats - Optional stats object to track initialization
+ * @returns A memoized getter function
+ *
+ * @example
+ * ```ts
+ * const stats = { initialized: new Set() }
+ * const getLargeData = createLazyGetter('data', () => {
+ *   console.log('Computing expensive data...')
+ *   return { large: 'dataset' }
+ * }, stats)
+ *
+ * getLargeData() // Logs "Computing expensive data..." and returns data
+ * getLargeData() // Returns cached data without logging
+ * console.log(stats.initialized.has('data')) // true
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function createLazyGetter<T>(
+  name: PropertyKey,
+  getter: () => T,
+  stats?: LazyGetterStats | undefined,
+): () => T {
+  let lazyValue: T | typeof UNDEFINED_TOKEN = UNDEFINED_TOKEN
+  // Dynamically name the getter without using Object.defineProperty.
+  const { [name]: lazyGetter } = {
+    [name]() {
+      if (lazyValue === UNDEFINED_TOKEN) {
+        stats?.initialized?.add(name)
+        lazyValue = getter()
+      }
+      return lazyValue as T
+    },
+  } as LazyGetterRecord<T>
+  return lazyGetter as unknown as () => T
 }
 
 /**
@@ -620,61 +620,6 @@ export function isObjectObject(
 export const objectAssign = Object.assign
 
 /**
- * Get all own property entries (key-value pairs) from an object.
- *
- * Unlike `Object.entries()`, this includes non-enumerable properties and
- * symbol keys. Returns an empty array for null/undefined.
- *
- * @param obj - The object to get entries from
- * @returns Array of [key, value] tuples, or empty array for null/undefined
- *
- * @example
- * ```ts
- * objectEntries({ a: 1, b: 2 }) // [['a', 1], ['b', 2]]
- * const sym = Symbol('key')
- * objectEntries({ [sym]: 'value', x: 10 }) // [[Symbol(key), 'value'], ['x', 10]]
- * objectEntries(null) // []
- * objectEntries(undefined) // []
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function objectEntries(obj: unknown): Array<[PropertyKey, unknown]> {
-  if (obj === null || obj === undefined) {
-    return []
-  }
-  const keys = ReflectOwnKeys(obj as object)
-  const { length } = keys
-  const entries = Array(length)
-  const record = obj as Record<PropertyKey, unknown>
-  for (let i = 0; i < length; i += 1) {
-    const key = keys[i] as PropertyKey
-    entries[i] = [key, record[key]]
-  }
-  return entries
-}
-
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-
-/**
- * Alias for native `Object.freeze`.
- *
- * Freezes an object, preventing new properties from being added and existing
- * properties from being removed or modified. Makes the object immutable.
- *
- * @example
- * ```ts
- * const obj = { a: 1 }
- * objectFreeze(obj)
- * obj.a = 2 // Silently fails in non-strict mode, throws in strict mode
- * obj.b = 3 // Silently fails in non-strict mode, throws in strict mode
- * ```
- */
-export const objectFreeze = Object.freeze
-
-/**
  * Deep merge source object into target object.
  *
  * Recursively merges properties from `source` into `target`. Arrays in source
@@ -759,6 +704,61 @@ export function merge<T extends object, U extends object>(
   }
   return target as T & U
 }
+
+/**
+ * Get all own property entries (key-value pairs) from an object.
+ *
+ * Unlike `Object.entries()`, this includes non-enumerable properties and
+ * symbol keys. Returns an empty array for null/undefined.
+ *
+ * @param obj - The object to get entries from
+ * @returns Array of [key, value] tuples, or empty array for null/undefined
+ *
+ * @example
+ * ```ts
+ * objectEntries({ a: 1, b: 2 }) // [['a', 1], ['b', 2]]
+ * const sym = Symbol('key')
+ * objectEntries({ [sym]: 'value', x: 10 }) // [[Symbol(key), 'value'], ['x', 10]]
+ * objectEntries(null) // []
+ * objectEntries(undefined) // []
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function objectEntries(obj: unknown): Array<[PropertyKey, unknown]> {
+  if (obj === null || obj === undefined) {
+    return []
+  }
+  const keys = ReflectOwnKeys(obj as object)
+  const { length } = keys
+  const entries = Array(length)
+  const record = obj as Record<PropertyKey, unknown>
+  for (let i = 0; i < length; i += 1) {
+    const key = keys[i] as PropertyKey
+    entries[i] = [key, record[key]]
+  }
+  return entries
+}
+
+// IMPORTANT: Do not use destructuring here - use direct assignment instead.
+// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
+// `exports.SomeName = void 0;` which causes runtime errors.
+// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
+
+/**
+ * Alias for native `Object.freeze`.
+ *
+ * Freezes an object, preventing new properties from being added and existing
+ * properties from being removed or modified. Makes the object immutable.
+ *
+ * @example
+ * ```ts
+ * const obj = { a: 1 }
+ * objectFreeze(obj)
+ * obj.a = 2 // Silently fails in non-strict mode, throws in strict mode
+ * obj.b = 3 // Silently fails in non-strict mode, throws in strict mode
+ * ```
+ */
+export const objectFreeze = Object.freeze
 
 /**
  * Convert an object to a new object with sorted keys.

@@ -301,6 +301,27 @@ const defaultRemoveOptions = objectFreeze({
   retryDelay: 200,
 })
 
+// Cache for resolved allowed directories
+let _cachedAllowedDirs: string[] | undefined
+
+/**
+ * Get resolved allowed directories for safe deletion with lazy caching.
+ * These directories are resolved once and cached for the process lifetime.
+ * @private
+ */
+function getAllowedDirectories(): string[] {
+  if (_cachedAllowedDirs === undefined) {
+    const path = getPath()
+
+    _cachedAllowedDirs = [
+      path.resolve(getOsTmpDir()),
+      path.resolve(getSocketCacacheDir()),
+      path.resolve(getSocketUserDir()),
+    ]
+  }
+  return _cachedAllowedDirs
+}
+
 let _buffer: typeof import('node:buffer') | undefined
 /**
  * Lazily load the buffer module.
@@ -707,6 +728,19 @@ export function findUpSync(
 }
 
 /**
+ * Invalidate the cached allowed directories.
+ * Called automatically by the paths/rewire module when paths are overridden in tests.
+ *
+ * @internal Used for test rewiring
+ */
+export function invalidatePathCache(): void {
+  _cachedAllowedDirs = undefined
+}
+
+// Register cache invalidation with the rewire module
+registerCacheInvalidation(invalidatePathCache)
+
+/**
  * Check if a path is a directory asynchronously.
  * Returns `true` for directories, `false` for files or non-existent paths.
  *
@@ -819,74 +853,6 @@ export function isSymLinkSync(filepath: PathLike) {
     return fs.lstatSync(filepath).isSymbolicLink()
   } catch {}
   return false
-}
-
-/**
- * Result of file readability validation.
- * Contains lists of valid and invalid file paths.
- */
-export interface ValidateFilesResult {
-  /**
-   * File paths that passed validation and are readable.
-   */
-  validPaths: string[]
-  /**
-   * File paths that failed validation (unreadable, permission denied, or non-existent).
-   * Common with Yarn Berry PnP virtual filesystem, pnpm symlinks, or filesystem race conditions.
-   */
-  invalidPaths: string[]
-}
-
-/**
- * Validate that file paths are readable before processing.
- * Filters out files from glob results that cannot be accessed (common with
- * Yarn Berry PnP virtual filesystem, pnpm content-addressable store symlinks,
- * or filesystem race conditions in CI/CD environments).
- *
- * This defensive pattern prevents ENOENT errors when files exist in glob
- * results but are not accessible via standard filesystem operations.
- *
- * @param filepaths - Array of file paths to validate
- * @returns Object with `validPaths` (readable) and `invalidPaths` (unreadable)
- *
- * @example
- * ```ts
- * import { validateFiles } from '@socketsecurity/lib/fs'
- *
- * const files = ['package.json', '.pnp.cjs/virtual-file.json']
- * const { validPaths, invalidPaths } = validateFiles(files)
- *
- * console.log(`Valid: ${validPaths.length}`)
- * console.log(`Invalid: ${invalidPaths.length}`)
- * ```
- *
- * @example
- * ```ts
- * // Typical usage in Socket CLI commands
- * const packagePaths = await getPackageFilesForScan(targets)
- * const { validPaths } = validateFiles(packagePaths)
- * await sdk.uploadManifestFiles(orgSlug, validPaths)
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function validateFiles(
-  filepaths: string[] | readonly string[],
-): ValidateFilesResult {
-  const fs = getFs()
-  const validPaths: string[] = []
-  const invalidPaths: string[] = []
-  const { R_OK } = fs.constants
-
-  for (const filepath of filepaths) {
-    try {
-      fs.accessSync(filepath, R_OK)
-      validPaths.push(filepath)
-    } catch {
-      invalidPaths.push(filepath)
-    }
-  }
-
-  return { __proto__: null, validPaths, invalidPaths } as ValidateFilesResult
 }
 
 /**
@@ -1251,39 +1217,6 @@ export function readJsonSync(
   })
 }
 
-// Cache for resolved allowed directories
-let _cachedAllowedDirs: string[] | undefined
-
-/**
- * Get resolved allowed directories for safe deletion with lazy caching.
- * These directories are resolved once and cached for the process lifetime.
- */
-function getAllowedDirectories(): string[] {
-  if (_cachedAllowedDirs === undefined) {
-    const path = getPath()
-
-    _cachedAllowedDirs = [
-      path.resolve(getOsTmpDir()),
-      path.resolve(getSocketCacacheDir()),
-      path.resolve(getSocketUserDir()),
-    ]
-  }
-  return _cachedAllowedDirs
-}
-
-/**
- * Invalidate the cached allowed directories.
- * Called automatically by the paths/rewire module when paths are overridden in tests.
- *
- * @internal Used for test rewiring
- */
-export function invalidatePathCache(): void {
-  _cachedAllowedDirs = undefined
-}
-
-// Register cache invalidation with the rewire module
-registerCacheInvalidation(invalidatePathCache)
-
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
  * Uses `del` for safer deletion that prevents removing cwd and above by default.
@@ -1581,10 +1514,12 @@ export async function safeReadFile(
       : ({ __proto__: null, ...options } as SafeReadOptions)
   const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
   const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
-  let { encoding = 'utf8' } = readOpts
-  // Normalize encoding to canonical form.
-  encoding = encoding === null ? null : normalizeEncoding(encoding)
-  const shouldReturnBuffer = encoding === null
+  // Check for null encoding before normalization to preserve Buffer return type.
+  const shouldReturnBuffer = readOpts.encoding === null
+  // Normalize encoding to canonical form (only if not null).
+  const encoding = shouldReturnBuffer
+    ? null
+    : normalizeEncoding(readOpts.encoding)
   const fs = getFs()
   try {
     return await fs.promises.readFile(filepath, {
@@ -1650,10 +1585,12 @@ export function safeReadFileSync(
       : ({ __proto__: null, ...options } as SafeReadOptions)
   const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
   const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
-  let { encoding = 'utf8' } = readOpts
-  // Normalize encoding to canonical form.
-  encoding = encoding === null ? null : normalizeEncoding(encoding)
-  const shouldReturnBuffer = encoding === null
+  // Check for null encoding before normalization to preserve Buffer return type.
+  const shouldReturnBuffer = readOpts.encoding === null
+  // Normalize encoding to canonical form (only if not null).
+  const encoding = shouldReturnBuffer
+    ? null
+    : normalizeEncoding(readOpts.encoding)
   const fs = getFs()
   try {
     return fs.readFileSync(filepath, {
@@ -1778,6 +1715,74 @@ export function uniqueSync(filepath: PathLike): string {
   } while (fs.existsSync(uniquePath))
 
   return normalizePath(uniquePath)
+}
+
+/**
+ * Result of file readability validation.
+ * Contains lists of valid and invalid file paths.
+ */
+export interface ValidateFilesResult {
+  /**
+   * File paths that passed validation and are readable.
+   */
+  validPaths: string[]
+  /**
+   * File paths that failed validation (unreadable, permission denied, or non-existent).
+   * Common with Yarn Berry PnP virtual filesystem, pnpm symlinks, or filesystem race conditions.
+   */
+  invalidPaths: string[]
+}
+
+/**
+ * Validate that file paths are readable before processing.
+ * Filters out files from glob results that cannot be accessed (common with
+ * Yarn Berry PnP virtual filesystem, pnpm content-addressable store symlinks,
+ * or filesystem race conditions in CI/CD environments).
+ *
+ * This defensive pattern prevents ENOENT errors when files exist in glob
+ * results but are not accessible via standard filesystem operations.
+ *
+ * @param filepaths - Array of file paths to validate
+ * @returns Object with `validPaths` (readable) and `invalidPaths` (unreadable)
+ *
+ * @example
+ * ```ts
+ * import { validateFiles } from '@socketsecurity/lib/fs'
+ *
+ * const files = ['package.json', '.pnp.cjs/virtual-file.json']
+ * const { validPaths, invalidPaths } = validateFiles(files)
+ *
+ * console.log(`Valid: ${validPaths.length}`)
+ * console.log(`Invalid: ${invalidPaths.length}`)
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Typical usage in Socket CLI commands
+ * const packagePaths = await getPackageFilesForScan(targets)
+ * const { validPaths } = validateFiles(packagePaths)
+ * await sdk.uploadManifestFiles(orgSlug, validPaths)
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function validateFiles(
+  filepaths: string[] | readonly string[],
+): ValidateFilesResult {
+  const fs = getFs()
+  const validPaths: string[] = []
+  const invalidPaths: string[] = []
+  const { R_OK } = fs.constants
+
+  for (const filepath of filepaths) {
+    try {
+      fs.accessSync(filepath, R_OK)
+      validPaths.push(filepath)
+    } catch {
+      invalidPaths.push(filepath)
+    }
+  }
+
+  return { __proto__: null, validPaths, invalidPaths } as ValidateFilesResult
 }
 
 /**

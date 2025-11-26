@@ -216,6 +216,34 @@ Blank lines between groups, alphabetical within groups.
   - Build-time validation: `scripts/validate/esm-named-exports.mjs`
   - CI validation: `scripts/validate/dist-exports.mjs`
 
+#### Function Organization
+- **Alphabetical ordering**: 🚨 MANDATORY for all files with 3+ exported functions
+  - **Private functions first**: Non-exported helpers, getters, utilities (alphabetically sorted)
+  - **Exported functions second**: All public API functions (alphabetically sorted)
+  - **Constants/types before functions**: Interfaces, types, constants at top of file
+- **Benefits**:
+  - Predictable function location for navigation
+  - Reduced merge conflicts when adding new functions
+  - Easier code review (spot missing/duplicate exports)
+  - Consistent structure across entire codebase
+- **Example**:
+  ```typescript
+  // 1. Imports
+  import { foo } from 'bar'
+
+  // 2. Types/Constants
+  export interface Options { ... }
+
+  // 3. Private functions (alphabetical)
+  function helperA() { ... }
+  function helperB() { ... }
+
+  // 4. Exported functions (alphabetical)
+  export function publicA() { ... }
+  export function publicB() { ... }
+  export function publicC() { ... }
+  ```
+
 ### Package Exports
 
 #### Export Structure

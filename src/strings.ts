@@ -147,6 +147,53 @@ export function camelToKebab(str: string): string {
   return result
 }
 
+/**
+ * Center text within a given width.
+ *
+ * Adds spaces before and after the text to center it within the specified width.
+ * Distributes padding evenly on both sides. When the padding is odd, the extra
+ * space is added to the right side. Strips ANSI codes before calculating text
+ * length to ensure accurate centering of colored text.
+ *
+ * If the text is already wider than or equal to the target width, returns the
+ * original text unchanged (no truncation occurs).
+ *
+ * @param text - The text to center (may include ANSI codes)
+ * @param width - The target width in columns
+ * @returns The centered text with padding
+ *
+ * @example
+ * ```ts
+ * centerText('hello', 11)
+ * // Returns: '   hello   ' (3 spaces on each side)
+ *
+ * centerText('hi', 10)
+ * // Returns: '    hi    ' (4 spaces on each side)
+ *
+ * centerText('odd', 8)
+ * // Returns: '  odd   ' (2 left, 3 right)
+ *
+ * centerText('\x1b[31mred\x1b[0m', 7)
+ * // Returns: '  \x1b[31mred\x1b[0m  ' (ANSI codes preserved, 'red' centered)
+ *
+ * centerText('too long text', 5)
+ * // Returns: 'too long text' (no truncation, returned as-is)
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function centerText(text: string, width: number): string {
+  const textLength = stripAnsi(text).length
+  if (textLength >= width) {
+    return text
+  }
+
+  const padding = width - textLength
+  const leftPad = Math.floor(padding / 2)
+  const rightPad = padding - leftPad
+
+  return ' '.repeat(leftPad) + text + ' '.repeat(rightPad)
+}
+
 export interface IndentStringOptions {
   /**
    * Number of spaces to indent each line.
@@ -257,6 +304,39 @@ export function isNonEmptyString(
   value: unknown,
 ): value is Exclude<string, EmptyString> {
   return typeof value === 'string' && value.length > 0
+}
+
+/**
+ * Repeat a string a specified number of times.
+ *
+ * Creates a new string by repeating the input string `count` times.
+ * Returns an empty string if count is 0 or negative.
+ *
+ * @param str - The string to repeat
+ * @param count - The number of times to repeat the string
+ * @returns The repeated string, or empty string if count <= 0
+ *
+ * @example
+ * ```ts
+ * repeatString('hello', 3)
+ * // Returns: 'hellohellohello'
+ *
+ * repeatString('x', 5)
+ * // Returns: 'xxxxx'
+ *
+ * repeatString('hello', 0)
+ * // Returns: ''
+ *
+ * repeatString('hello', -1)
+ * // Returns: ''
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function repeatString(str: string, count: number): string {
+  if (count <= 0) {
+    return ''
+  }
+  return str.repeat(count)
 }
 
 export interface SearchOptions {
@@ -809,85 +889,4 @@ export function trimNewlines(str: string): string {
     end -= 1
   }
   return start === 0 && end === length ? str : str.slice(start, end)
-}
-
-/**
- * Repeat a string n times.
- *
- * Creates a new string by repeating the input string the specified number of times.
- * Returns an empty string if count is zero or negative. This is a simple wrapper
- * around `String.prototype.repeat()` with guard for non-positive counts.
- *
- * @param str - The string to repeat
- * @param count - The number of times to repeat the string
- * @returns The repeated string, or empty string if count <= 0
- *
- * @example
- * ```ts
- * repeatString('hello', 3)
- * // Returns: 'hellohellohello'
- *
- * repeatString('x', 5)
- * // Returns: 'xxxxx'
- *
- * repeatString('hello', 0)
- * // Returns: ''
- *
- * repeatString('hello', -1)
- * // Returns: ''
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function repeatString(str: string, count: number): string {
-  if (count <= 0) {
-    return ''
-  }
-  return str.repeat(count)
-}
-
-/**
- * Center text within a given width.
- *
- * Adds spaces before and after the text to center it within the specified width.
- * Distributes padding evenly on both sides. When the padding is odd, the extra
- * space is added to the right side. Strips ANSI codes before calculating text
- * length to ensure accurate centering of colored text.
- *
- * If the text is already wider than or equal to the target width, returns the
- * original text unchanged (no truncation occurs).
- *
- * @param text - The text to center (may include ANSI codes)
- * @param width - The target width in columns
- * @returns The centered text with padding
- *
- * @example
- * ```ts
- * centerText('hello', 11)
- * // Returns: '   hello   ' (3 spaces on each side)
- *
- * centerText('hi', 10)
- * // Returns: '    hi    ' (4 spaces on each side)
- *
- * centerText('odd', 8)
- * // Returns: '  odd   ' (2 left, 3 right)
- *
- * centerText('\x1b[31mred\x1b[0m', 7)
- * // Returns: '  \x1b[31mred\x1b[0m  ' (ANSI codes preserved, 'red' centered)
- *
- * centerText('too long text', 5)
- * // Returns: 'too long text' (no truncation, returned as-is)
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function centerText(text: string, width: number): string {
-  const textLength = stripAnsi(text).length
-  if (textLength >= width) {
-    return text
-  }
-
-  const padding = width - textLength
-  const leftPad = Math.floor(padding / 2)
-  const rightPad = padding - leftPad
-
-  return ' '.repeat(leftPad) + text + ' '.repeat(rightPad)
 }

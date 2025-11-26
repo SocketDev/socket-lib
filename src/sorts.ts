@@ -6,6 +6,36 @@
 import * as fastSort from './external/fast-sort.js'
 import * as semver from './external/semver.js'
 
+/**
+ * Compare semantic versions.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function compareSemver(a: string, b: string): number {
+  /* c8 ignore next 2 - External semver calls */
+  const validA: string | null = semver.valid(a)
+  const validB: string | null = semver.valid(b)
+
+  if (!validA && !validB) {
+    return 0
+  }
+  if (!validA) {
+    return -1
+  }
+  if (!validB) {
+    return 1
+  }
+  /* c8 ignore next - External semver call */
+  return semver.compare(a, b) as number
+}
+
+/**
+ * Simple string comparison.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function compareStr(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
 let _localeCompare: ((x: string, y: string) => number) | undefined
 /**
  * Compare two strings using locale-aware comparison.
@@ -65,34 +95,4 @@ export function naturalSorter<T>(
     }) as FastSortFunction
   }
   return (_naturalSorter as FastSortFunction)(arrayToSort)
-}
-
-/**
- * Simple string comparison.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function compareStr(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0
-}
-
-/**
- * Compare semantic versions.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function compareSemver(a: string, b: string): number {
-  /* c8 ignore next 2 - External semver calls */
-  const validA: string | null = semver.valid(a)
-  const validB: string | null = semver.valid(b)
-
-  if (!validA && !validB) {
-    return 0
-  }
-  if (!validA) {
-    return -1
-  }
-  if (!validB) {
-    return 1
-  }
-  /* c8 ignore next - External semver call */
-  return semver.compare(a, b) as number
 }

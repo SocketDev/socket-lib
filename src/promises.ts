@@ -322,42 +322,6 @@ export function normalizeRetryOptions(
 }
 
 /**
- * Resolve retry options from various input formats.
- *
- * Converts shorthand and partial options into a base configuration that can be
- * further normalized. This is an internal helper for option processing.
- *
- * @param options - Retry count as number, or partial options object, or undefined
- * @returns Resolved retry options with defaults for basic properties
- *
- * @example
- * resolveRetryOptions(3)
- * // => { retries: 3, minTimeout: 200, maxTimeout: 10000, factor: 2 }
- *
- * @example
- * resolveRetryOptions({ retries: 5, maxTimeout: 5000 })
- * // => { retries: 5, minTimeout: 200, maxTimeout: 5000, factor: 2 }
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function resolveRetryOptions(
-  options?: number | RetryOptions | undefined,
-): RetryOptions {
-  const defaults = {
-    __proto__: null,
-    retries: 0,
-    baseDelayMs: 200,
-    maxDelayMs: 10_000,
-    backoffFactor: 2,
-  }
-
-  if (typeof options === 'number') {
-    return { ...defaults, retries: options }
-  }
-
-  return options ? { ...defaults, ...options } : defaults
-}
-
-/**
  * Execute an async function for each array element with concurrency control.
  *
  * Processes array items in parallel batches (chunks) with configurable concurrency.
@@ -765,4 +729,40 @@ export async function pRetry<T>(
     throw error
   }
   return undefined
+}
+
+/**
+ * Resolve retry options from various input formats.
+ *
+ * Converts shorthand and partial options into a base configuration that can be
+ * further normalized. This is an internal helper for option processing.
+ *
+ * @param options - Retry count as number, or partial options object, or undefined
+ * @returns Resolved retry options with defaults for basic properties
+ *
+ * @example
+ * resolveRetryOptions(3)
+ * // => { retries: 3, minTimeout: 200, maxTimeout: 10000, factor: 2 }
+ *
+ * @example
+ * resolveRetryOptions({ retries: 5, maxTimeout: 5000 })
+ * // => { retries: 5, minTimeout: 200, maxTimeout: 5000, factor: 2 }
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function resolveRetryOptions(
+  options?: number | RetryOptions | undefined,
+): RetryOptions {
+  const defaults = {
+    __proto__: null,
+    retries: 0,
+    baseDelayMs: 200,
+    maxDelayMs: 10_000,
+    backoffFactor: 2,
+  }
+
+  if (typeof options === 'number') {
+    return { ...defaults, retries: options }
+  }
+
+  return options ? { ...defaults, ...options } : defaults
 }
