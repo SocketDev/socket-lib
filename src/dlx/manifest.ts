@@ -28,10 +28,10 @@
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import path from 'path'
 
-import { readFileUtf8Sync, safeMkdirSync } from './fs'
-import { getDefaultLogger } from './logger'
-import { getSocketDlxDir } from './paths/socket'
-import { processLock } from './process-lock'
+import { readFileUtf8Sync, safeMkdirSync } from '../fs'
+import { getDefaultLogger } from '../logger'
+import { getSocketDlxDir } from '../paths/socket'
+import { processLock } from '../process-lock'
 
 const logger = getDefaultLogger()
 

@@ -10,7 +10,7 @@ import {
   pkgJsonToEditable,
   toEditablePackageJson,
   toEditablePackageJsonSync,
-} from './packages/editable'
+} from './packages/edit'
 import {
   findTypesForSubpath,
   getExportFilePaths,
@@ -80,7 +80,7 @@ type PackageExports = {
 
 // Re-export the EditablePackageJson instance type for convenient access
 export type EditablePackageJson =
-  import('./packages/editable').EditablePackageJsonInstance
+  import('./packages/edit').EditablePackageJsonInstance
 
 /**
  * Extended PackageJson type based on NPMCliPackageJson.Content with Socket-specific additions.

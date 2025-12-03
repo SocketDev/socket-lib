@@ -6,19 +6,19 @@ import os from 'os'
 
 import path from 'path'
 
-import { WIN32 } from './constants/platform'
-import { DLX_BINARY_CACHE_TTL } from './constants/time'
+import { WIN32 } from '../constants/platform'
+import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 
-import { generateCacheKey } from './dlx'
-import { dlxManifest } from './dlx-manifest'
-import { httpDownload } from './http-request'
-import { isDir, readJson, safeDelete, safeMkdir } from './fs'
-import { isObjectObject } from './objects'
-import { normalizePath } from './paths/normalize'
-import { getSocketDlxDir } from './paths/socket'
-import { processLock } from './process-lock'
-import type { SpawnExtra, SpawnOptions } from './spawn'
-import { spawn } from './spawn'
+import { generateCacheKey } from './cache'
+import { dlxManifest } from './manifest'
+import { httpDownload } from '../http-request'
+import { isDir, readJson, safeDelete, safeMkdir } from '../fs'
+import { isObjectObject } from '../objects'
+import { normalizePath } from '../paths/normalize'
+import { getSocketDlxDir } from '../paths/socket'
+import { processLock } from '../process-lock'
+import type { SpawnExtra, SpawnOptions } from '../spawn'
+import { spawn } from '../spawn'
 
 let _fs: typeof import('fs') | undefined
 /**

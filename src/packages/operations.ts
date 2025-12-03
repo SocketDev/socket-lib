@@ -36,7 +36,7 @@ import {
   isGitHubTgzSpec,
   isGitHubUrlSpec,
 } from './specs'
-import { toEditablePackageJson, toEditablePackageJsonSync } from './editable'
+import { toEditablePackageJson, toEditablePackageJsonSync } from './edit'
 
 const abortSignal = getAbortSignal()
 const packageExtensions = getPackageExtensions()

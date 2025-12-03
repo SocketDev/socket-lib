@@ -3,9 +3,9 @@
  */
 
 import { getNpmLifecycleEvent as getNpmLifecycleEventEnv } from '../env/npm'
-import { lifecycleScriptNames as lifecycleScriptNamesImport } from '../lifecycle-script-names'
-import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from '../package-default-node-range'
-import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from '../package-default-socket-categories'
+import { lifecycleScriptNames as lifecycleScriptNamesImport } from './lifecycle-script-names'
+import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from './package-default-node-range'
+import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from './package-default-socket-categories'
 import { packageExtensions as packageExtensionsImport } from '../package-extensions'
 
 import pacote from '../external/pacote'

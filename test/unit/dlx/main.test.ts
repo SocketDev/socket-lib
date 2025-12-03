@@ -16,6 +16,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { generateCacheKey } from '@socketsecurity/lib/dlx/cache'
 import {
   clearDlx,
   clearDlxSync,
@@ -23,19 +24,22 @@ import {
   dlxDirExistsAsync,
   ensureDlxDir,
   ensureDlxDirSync,
-  generateCacheKey,
-  getDlxInstalledPackageDir,
-  getDlxPackageDir,
-  getDlxPackageJsonPath,
-  getDlxPackageNodeModulesDir,
+} from '@socketsecurity/lib/dlx/dir'
+import {
   isDlxPackageInstalled,
   isDlxPackageInstalledAsync,
-  isInSocketDlx,
   listDlxPackages,
   listDlxPackagesAsync,
   removeDlxPackage,
   removeDlxPackageSync,
-} from '@socketsecurity/lib/dlx'
+} from '@socketsecurity/lib/dlx/packages'
+import {
+  getDlxInstalledPackageDir,
+  getDlxPackageDir,
+  getDlxPackageJsonPath,
+  getDlxPackageNodeModulesDir,
+  isInSocketDlx,
+} from '@socketsecurity/lib/dlx/paths'
 import { getSocketDlxDir } from '@socketsecurity/lib/paths/socket'
 
 describe.sequential('dlx', () => {

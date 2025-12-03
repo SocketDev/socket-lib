@@ -756,7 +756,7 @@ describe('json', () => {
     const { join } = require('node:path')
     const { mkdtemp, readFile, rm, writeFile } = require('node:fs/promises')
     const { getEditableJsonClass } =
-      require('@socketsecurity/lib/json/editable') as typeof import('@socketsecurity/lib/json/editable')
+      require('@socketsecurity/lib/json/edit') as typeof import('@socketsecurity/lib/json/edit')
 
     let testDir: string
 

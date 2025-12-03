@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for default Socket security categories.
  */
 
-import { packageDefaultSocketCategories } from '@socketsecurity/lib/package-default-socket-categories'
+import { packageDefaultSocketCategories } from '@socketsecurity/lib/constants/package-default-socket-categories'
 import { describe, expect, it } from 'vitest'
 
 describe('package-default-socket-categories', () => {

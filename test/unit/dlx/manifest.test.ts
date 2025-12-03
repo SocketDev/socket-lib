@@ -21,7 +21,7 @@ import {
   type PackageDetails,
   type BinaryDetails,
   type StoreRecord,
-} from '@socketsecurity/lib/dlx-manifest'
+} from '@socketsecurity/lib/dlx/manifest'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('dlx-manifest', () => {

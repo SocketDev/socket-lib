@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for default Node.js version range.
  */
 
-import { packageDefaultNodeRange } from '@socketsecurity/lib/package-default-node-range'
+import { packageDefaultNodeRange } from '@socketsecurity/lib/constants/package-default-node-range'
 import { describe, expect, it } from 'vitest'
 
 describe('package-default-node-range', () => {

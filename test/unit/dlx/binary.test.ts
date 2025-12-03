@@ -22,9 +22,9 @@ import {
   dlxBinary,
   getDlxCachePath,
   listDlxCache,
-} from '@socketsecurity/lib/dlx-binary'
+} from '@socketsecurity/lib/dlx/binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { mockHomeDir, runWithTempDir } from './utils/temp-file-helper.mjs'
+import { mockHomeDir, runWithTempDir } from '../utils/temp-file-helper.mjs'
 
 // Test server setup
 let httpServer: http.Server

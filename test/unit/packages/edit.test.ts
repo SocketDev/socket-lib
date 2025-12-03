@@ -18,7 +18,7 @@ import {
   pkgJsonToEditable,
   toEditablePackageJson,
   toEditablePackageJsonSync,
-} from '@socketsecurity/lib/packages/editable'
+} from '@socketsecurity/lib/packages/edit'
 import { describe, expect, it } from 'vitest'
 
 import { runWithTempDir } from '../utils/temp-file-helper.mjs'

@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for NPM lifecycle script names.
  */
 
-import { lifecycleScriptNames } from '@socketsecurity/lib/lifecycle-script-names'
+import { lifecycleScriptNames } from '@socketsecurity/lib/constants/lifecycle-script-names'
 import { describe, expect, it } from 'vitest'
 
 describe('lifecycle-script-names', () => {

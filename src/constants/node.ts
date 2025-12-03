@@ -2,7 +2,7 @@
  * Node.js runtime: versions, features, flags, and capabilities.
  */
 
-import { maintainedNodeVersions } from '../maintained-node-versions'
+import { maintainedNodeVersions } from './maintained-node-versions'
 
 const NODE_VERSION = process.version
 

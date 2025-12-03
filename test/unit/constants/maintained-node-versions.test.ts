@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { maintainedNodeVersions } from '@socketsecurity/lib/maintained-node-versions'
+import { maintainedNodeVersions } from '@socketsecurity/lib/constants/maintained-node-versions'
 
 describe('maintained-node-versions', () => {
   describe('default export', () => {

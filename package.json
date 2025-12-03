@@ -151,9 +151,25 @@
       "types": "./dist/constants/licenses.d.ts",
       "default": "./dist/constants/licenses.js"
     },
+    "./constants/lifecycle-script-names": {
+      "types": "./dist/constants/lifecycle-script-names.d.ts",
+      "default": "./dist/constants/lifecycle-script-names.js"
+    },
+    "./constants/maintained-node-versions": {
+      "types": "./dist/constants/maintained-node-versions.d.ts",
+      "default": "./dist/constants/maintained-node-versions.js"
+    },
     "./constants/node": {
       "types": "./dist/constants/node.d.ts",
       "default": "./dist/constants/node.js"
+    },
+    "./constants/package-default-node-range": {
+      "types": "./dist/constants/package-default-node-range.d.ts",
+      "default": "./dist/constants/package-default-node-range.js"
+    },
+    "./constants/package-default-socket-categories": {
+      "types": "./dist/constants/package-default-socket-categories.d.ts",
+      "default": "./dist/constants/package-default-socket-categories.js"
     },
     "./constants/packages": {
       "types": "./dist/constants/packages.d.ts",
@@ -203,21 +219,33 @@
       "types": "./dist/debug.d.ts",
       "default": "./dist/debug.js"
     },
-    "./dlx": {
-      "types": "./dist/dlx.d.ts",
-      "default": "./dist/dlx.js"
+    "./dlx/binary": {
+      "types": "./dist/dlx/binary.d.ts",
+      "default": "./dist/dlx/binary.js"
     },
-    "./dlx-binary": {
-      "types": "./dist/dlx-binary.d.ts",
-      "default": "./dist/dlx-binary.js"
+    "./dlx/cache": {
+      "types": "./dist/dlx/cache.d.ts",
+      "default": "./dist/dlx/cache.js"
     },
-    "./dlx-manifest": {
-      "types": "./dist/dlx-manifest.d.ts",
-      "default": "./dist/dlx-manifest.js"
+    "./dlx/dir": {
+      "types": "./dist/dlx/dir.d.ts",
+      "default": "./dist/dlx/dir.js"
     },
-    "./dlx-package": {
-      "types": "./dist/dlx-package.d.ts",
-      "default": "./dist/dlx-package.js"
+    "./dlx/manifest": {
+      "types": "./dist/dlx/manifest.d.ts",
+      "default": "./dist/dlx/manifest.js"
+    },
+    "./dlx/package": {
+      "types": "./dist/dlx/package.d.ts",
+      "default": "./dist/dlx/package.js"
+    },
+    "./dlx/packages": {
+      "types": "./dist/dlx/packages.d.ts",
+      "default": "./dist/dlx/packages.js"
+    },
+    "./dlx/paths": {
+      "types": "./dist/dlx/paths.d.ts",
+      "default": "./dist/dlx/paths.js"
     },
     "./effects/pulse-frames": {
       "types": "./dist/effects/pulse-frames.d.ts",
@@ -355,9 +383,9 @@
       "types": "./dist/ipc.d.ts",
       "default": "./dist/ipc.js"
     },
-    "./json/editable": {
-      "types": "./dist/json/editable.d.ts",
-      "default": "./dist/json/editable.js"
+    "./json/edit": {
+      "types": "./dist/json/edit.d.ts",
+      "default": "./dist/json/edit.js"
     },
     "./json/format": {
       "types": "./dist/json/format.d.ts",
@@ -371,10 +399,6 @@
       "types": "./dist/json/types.d.ts",
       "default": "./dist/json/types.js"
     },
-    "./lifecycle-script-names": {
-      "types": "./dist/lifecycle-script-names.d.ts",
-      "default": "./dist/lifecycle-script-names.js"
-    },
     "./links": {
       "types": "./dist/links/index.d.ts",
       "default": "./dist/links/index.js"
@@ -387,10 +411,6 @@
       "types": "./dist/logger.d.ts",
       "default": "./dist/logger.js"
     },
-    "./maintained-node-versions": {
-      "types": "./dist/maintained-node-versions.d.ts",
-      "default": "./dist/maintained-node-versions.js"
-    },
     "./memoization": {
       "types": "./dist/memoization.d.ts",
       "default": "./dist/memoization.js"
@@ -398,14 +418,6 @@
     "./objects": {
       "types": "./dist/objects.d.ts",
       "default": "./dist/objects.js"
-    },
-    "./package-default-node-range": {
-      "types": "./dist/package-default-node-range.d.ts",
-      "default": "./dist/package-default-node-range.js"
-    },
-    "./package-default-socket-categories": {
-      "types": "./dist/package-default-socket-categories.d.ts",
-      "default": "./dist/package-default-socket-categories.js"
     },
     "./package-extensions": {
       "types": "./dist/package-extensions.d.ts",
@@ -415,9 +427,9 @@
       "types": "./dist/packages.d.ts",
       "default": "./dist/packages.js"
     },
-    "./packages/editable": {
-      "types": "./dist/packages/editable.d.ts",
-      "default": "./dist/packages/editable.js"
+    "./packages/edit": {
+      "types": "./dist/packages/edit.d.ts",
+      "default": "./dist/packages/edit.js"
     },
     "./packages/exports": {
       "types": "./dist/packages/exports.d.ts",
