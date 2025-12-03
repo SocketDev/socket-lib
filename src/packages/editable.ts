@@ -5,6 +5,12 @@
 import EditablePackageJsonBase from '../external/@npmcli/package-json'
 import { parse, read } from '../external/@npmcli/package-json/lib/read-package'
 import { packageSort } from '../external/@npmcli/package-json/lib/sort'
+import {
+  getFormattingFromContent,
+  shouldSave as shouldSaveUtil,
+  stringifyWithFormatting,
+  stripFormattingSymbols,
+} from '../json/format'
 
 import type {
   EditablePackageJsonOptions,
@@ -15,9 +21,6 @@ import type {
 import { isNodeModules } from '../paths/normalize'
 import { normalizePackageJson } from './normalize'
 import { resolvePackageJsonDirname } from '../paths/packages'
-
-const identSymbol = Symbol.for('indent')
-const newlineSymbol = Symbol.for('newline')
 
 // Define the interface for the dynamic class
 interface EditablePackageJsonConstructor {
@@ -330,50 +333,32 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           if (!this._canSave || this.content === undefined) {
             throw new Error('No package.json to save to')
           }
-          const { ignoreWhitespace = false, sort = false } = {
-            __proto__: null,
-            ...options,
-          } as SaveOptions
-          const {
-            [identSymbol]: indent,
-            [newlineSymbol]: newline,
-            ...rest
-          } = this.content as Record<string | symbol, unknown>
-          const content = sort ? packageSort(rest) : rest
-          const {
-            [identSymbol]: _indent,
-            [newlineSymbol]: _newline,
-            ...origContent
-          } = (this._readFileJson || {}) as Record<string | symbol, unknown>
 
+          // Check if save is needed, using packageSort for package.json
           if (
-            ignoreWhitespace &&
-            getUtil().isDeepStrictEqual(content, origContent)
+            !shouldSaveUtil(
+              this.content as Record<string | symbol, unknown>,
+              this._readFileJson as Record<string | symbol, unknown>,
+              this._readFileContent,
+              { ...options, sortFn: options?.sort ? packageSort : undefined },
+            )
           ) {
             return false
           }
 
-          const format =
-            indent === undefined || indent === null
-              ? '  '
-              : (indent as string | number)
-          const eol =
-            newline === undefined || newline === null
-              ? '\n'
-              : (newline as string)
-          const fileContent = `${JSON.stringify(
-            content,
-            undefined,
-            format,
-          )}\n`.replace(/\n/g, eol)
+          // Get content and formatting
+          const content = stripFormattingSymbols(
+            this.content as Record<string | symbol, unknown>,
+          )
+          const sortedContent = options?.sort ? packageSort(content) : content
+          const formatting = getFormattingFromContent(
+            this.content as Record<string | symbol, unknown>,
+          )
 
-          if (
-            !ignoreWhitespace &&
-            fileContent.trim() === this._readFileContent.trim()
-          ) {
-            return false
-          }
+          // Generate file content
+          const fileContent = stringifyWithFormatting(sortedContent, formatting)
 
+          // Save to disk
           const { promises: fsPromises } = getFs()
           await fsPromises.writeFile(this.filename, fileContent)
           this._readFileContent = fileContent

@@ -355,9 +355,21 @@
       "types": "./dist/ipc.d.ts",
       "default": "./dist/ipc.js"
     },
-    "./json": {
-      "types": "./dist/json.d.ts",
-      "default": "./dist/json.js"
+    "./json/editable": {
+      "types": "./dist/json/editable.d.ts",
+      "default": "./dist/json/editable.js"
+    },
+    "./json/format": {
+      "types": "./dist/json/format.d.ts",
+      "default": "./dist/json/format.js"
+    },
+    "./json/parse": {
+      "types": "./dist/json/parse.d.ts",
+      "default": "./dist/json/parse.js"
+    },
+    "./json/types": {
+      "types": "./dist/json/types.d.ts",
+      "default": "./dist/json/types.js"
     },
     "./lifecycle-script-names": {
       "types": "./dist/lifecycle-script-names.d.ts",
