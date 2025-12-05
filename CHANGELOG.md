@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.0.0) - 2025-12-04
+
+### Added
+
+- **json/edit**: New `EditableJson` base class for generic JSON file manipulation with formatting preservation
+  - Extracted from `EditablePackageJson` to enable code reuse via composition pattern
+  - Supports reading, modifying, and writing JSON files while preserving formatting
+  - Export: `@socketsecurity/lib/json/edit`
+
+- **json/format**: New JSON formatting utilities for consistent JSON manipulation
+  - Functions for analyzing and preserving JSON formatting patterns
+  - Export: `@socketsecurity/lib/json/format`
+
+- **json/parse**: New JSON parsing utilities
+  - `isJsonPrimitive()`: Check if value is a JSON primitive type
+  - `jsonParse()`: Parse JSON with error handling
+  - Export: `@socketsecurity/lib/json/parse`
+
+- **json/types**: New JSON type definitions and interfaces
+  - Export: `@socketsecurity/lib/json/types`
+
+- **dlx/cache**: New DLX cache utilities
+  - `generateCacheKey()`: Generate cache keys for DLX packages
+  - Export: `@socketsecurity/lib/dlx/cache`
+
+- **dlx/dir**: New DLX directory management utilities
+  - `clearDlx()`, `clearDlxSync()`: Clear DLX directory
+  - `dlxDirExists()`, `dlxDirExistsAsync()`: Check if DLX directory exists
+  - `ensureDlxDir()`, `ensureDlxDirSync()`: Ensure DLX directory exists
+  - Export: `@socketsecurity/lib/dlx/dir`
+
+- **dlx/packages**: New DLX package management utilities
+  - `isDlxPackageInstalled()`, `isDlxPackageInstalledAsync()`: Check if package is installed
+  - `listDlxPackages()`, `listDlxPackagesAsync()`: List installed packages
+  - `removeDlxPackage()`, `removeDlxPackageSync()`: Remove installed packages
+  - Export: `@socketsecurity/lib/dlx/packages`
+
+- **dlx/paths**: New DLX path utilities
+  - `getDlxPackageDir()`: Get package directory path
+  - `getDlxInstalledPackageDir()`: Get installed package directory path
+  - `getDlxPackageJsonPath()`: Get package.json path
+  - `getDlxPackageNodeModulesDir()`: Get node_modules directory path
+  - `isInSocketDlx()`: Check if path is in DLX directory
+  - Export: `@socketsecurity/lib/dlx/paths`
+
+### Changed
+
+- **BREAKING**: Reorganized module paths for better structure and discoverability
+  - `@socketsecurity/lib/json/editable` → `@socketsecurity/lib/json/edit`
+  - `@socketsecurity/lib/packages/editable` → `@socketsecurity/lib/packages/edit`
+  - `@socketsecurity/lib/maintained-node-versions` → `@socketsecurity/lib/constants/maintained-node-versions`
+  - `@socketsecurity/lib/package-default-node-range` → `@socketsecurity/lib/constants/package-default-node-range`
+  - `@socketsecurity/lib/package-default-socket-categories` → `@socketsecurity/lib/constants/package-default-socket-categories`
+  - `@socketsecurity/lib/lifecycle-script-names` → `@socketsecurity/lib/constants/lifecycle-script-names`
+  - `@socketsecurity/lib/dlx` → Split into `@socketsecurity/lib/dlx/cache`, `@socketsecurity/lib/dlx/dir`, `@socketsecurity/lib/dlx/packages`, `@socketsecurity/lib/dlx/paths`
+  - `@socketsecurity/lib/dlx-binary` → `@socketsecurity/lib/dlx/binary`
+  - `@socketsecurity/lib/dlx-manifest` → `@socketsecurity/lib/dlx/manifest`
+  - `@socketsecurity/lib/dlx-package` → `@socketsecurity/lib/dlx/package`
+
+- **json**: Reorganized JSON utilities into modular submodules (json/edit, json/format, json/parse, json/types)
+  - Removed barrel index file in favor of direct submodule imports
+  - Better separation of concerns and tree-shaking
+
+- **dlx**: Split monolithic DLX module into focused submodules (cache, dir, packages, paths)
+  - Improved modularity and maintainability
+  - Better code organization and discoverability
+
 ## [4.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.4.0) - 2025-11-25
 
 ### Added
