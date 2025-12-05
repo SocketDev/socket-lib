@@ -346,7 +346,7 @@ const eslintConfig = [
   },
   {
     // Relax rules for test files - testing code has different conventions
-    files: ['test/**/*.ts', 'test/**/*.mts'],
+    files: ['test/**/*.ts', 'test/**/*.mts', 'test/**/*.mjs'],
     rules: {
       'n/no-missing-import': 'off',
       'import-x/no-unresolved': 'off',

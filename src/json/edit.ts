@@ -42,6 +42,44 @@ function getFs() {
 }
 
 /**
+ * Retry a file write operation with exponential backoff on Windows EPERM errors.
+ * Windows can have transient file locking issues with temp directories.
+ * @private
+ */
+async function retryWrite(
+  filepath: string,
+  content: string,
+  retries = 3,
+  baseDelay = 10,
+): Promise<void> {
+  const { promises: fsPromises } = getFs()
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await fsPromises.writeFile(filepath, content)
+      return
+    } catch (err) {
+      const isLastAttempt = attempt === retries
+      const isEperm =
+        err instanceof Error &&
+        'code' in err &&
+        (err.code === 'EPERM' || err.code === 'EBUSY')
+
+      // Only retry on Windows EPERM/EBUSY errors, and not on the last attempt
+      if (!isEperm || isLastAttempt) {
+        throw err
+      }
+
+      // Exponential backoff: 10ms, 20ms, 40ms
+      const delay = baseDelay * 2 ** attempt
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+}
+
+/**
  * Parse JSON content and extract formatting metadata.
  * @private
  */
@@ -216,9 +254,8 @@ export function getEditableJsonClass<
         // Generate file content
         const fileContent = stringifyWithFormatting(sortedContent, formatting)
 
-        // Save to disk
-        const { promises: fsPromises } = getFs()
-        await fsPromises.writeFile(this.filename, fileContent)
+        // Save to disk with retry logic for Windows file locking issues
+        await retryWrite(this.filename, fileContent)
         this._readFileContent = fileContent
         this._readFileJson = parseJson(fileContent)
         return true

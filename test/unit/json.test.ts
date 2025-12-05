@@ -16,6 +16,7 @@
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 import { safeDelete } from '@socketsecurity/lib/fs'
 import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
@@ -766,7 +767,25 @@ describe('json', () => {
 
     afterEach(async () => {
       if (testDir) {
-        await safeDelete(testDir)
+        // On Windows, add retry logic for directory deletion due to file handle timing
+        if (process.platform === 'win32') {
+          let retries = 5
+          while (retries > 0) {
+            try {
+              await sleep(50)
+              await safeDelete(testDir)
+              break
+            } catch (err) {
+              retries--
+              if (retries === 0) {
+                throw err
+              }
+              await sleep(100)
+            }
+          }
+        } else {
+          await safeDelete(testDir)
+        }
       }
     })
 
