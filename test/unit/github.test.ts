@@ -12,14 +12,19 @@
  */
 
 import {
+  cacheFetchGhsa,
   clearRefCache,
+  fetchGhsaDetails,
+  fetchGitHub,
   getGhsaUrl,
   getGitHubToken,
   getGitHubTokenFromGitConfig,
   getGitHubTokenWithFallback,
+  resolveRefToSha,
 } from '@socketsecurity/lib/github'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import nock from 'nock'
 
 describe.sequential('github', () => {
   beforeEach(() => {
@@ -492,6 +497,269 @@ describe.sequential('github', () => {
       const token = await getGitHubTokenWithFallback()
       // Token may come from git config or be undefined
       expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+  })
+
+  describe('fetchGitHub', () => {
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should fetch from GitHub API successfully', async () => {
+      const mockData = { name: 'test-repo', full_name: 'owner/test-repo' }
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(200, mockData)
+
+      const result = await fetchGitHub(
+        'https://api.github.com/repos/owner/repo',
+      )
+      expect(result).toEqual(mockData)
+    })
+
+    it('should include authorization header when token provided', async () => {
+      nock('https://api.github.com')
+        .get('/user')
+        .matchHeader('Authorization', 'Bearer test-token')
+        .reply(200, { login: 'testuser' })
+
+      const result = await fetchGitHub('https://api.github.com/user', {
+        token: 'test-token',
+      })
+      expect(result).toHaveProperty('login')
+    })
+
+    it('should handle rate limit errors with reset time', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(403, 'rate limit exceeded', {
+          'x-ratelimit-remaining': '0',
+          'x-ratelimit-reset': String(Math.floor(Date.now() / 1000) + 3600),
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow('GitHub API rate limit exceeded')
+    })
+
+    it('should handle rate limit errors without reset time', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(403, 'rate limit exceeded', {
+          'x-ratelimit-remaining': '0',
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow('GitHub API rate limit exceeded')
+    })
+
+    it('should handle non-rate-limit 403 errors', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/private')
+        .reply(403, 'Forbidden', {
+          'x-ratelimit-remaining': '50',
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/private'),
+      ).rejects.toThrow('GitHub API error 403')
+    })
+
+    it('should handle 404 errors', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/nonexistent')
+        .reply(404, 'Not Found')
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/nonexistent'),
+      ).rejects.toThrow('GitHub API error 404')
+    })
+
+    it('should include custom headers', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .matchHeader('X-Custom-Header', 'custom-value')
+        .reply(200, {})
+
+      await fetchGitHub('https://api.github.com/repos/owner/repo', {
+        headers: { 'X-Custom-Header': 'custom-value' },
+      })
+    })
+  })
+
+  describe('resolveRefToSha', () => {
+    beforeEach(() => {
+      setEnv('DISABLE_GITHUB_CACHE', '1')
+    })
+
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should resolve tag to SHA', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/v1.0.0')
+        .reply(200, {
+          ref: 'refs/tags/v1.0.0',
+          object: {
+            sha: 'abc123',
+            type: 'commit',
+            url: 'https://api.github.com/repos/owner/repo/git/commits/abc123',
+          },
+        })
+
+      const sha = await resolveRefToSha('owner', 'repo', 'v1.0.0')
+      expect(sha).toBe('abc123')
+    })
+
+    it('should resolve annotated tag to commit SHA', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/v2.0.0')
+        .reply(200, {
+          ref: 'refs/tags/v2.0.0',
+          object: {
+            sha: 'tag456',
+            type: 'tag',
+            url: 'https://api.github.com/repos/owner/repo/git/tags/tag456',
+          },
+        })
+        .get('/repos/owner/repo/git/tags/tag456')
+        .reply(200, {
+          tag: 'v2.0.0',
+          sha: 'tag456',
+          object: {
+            sha: 'commit789',
+            type: 'commit',
+          },
+        })
+
+      const sha = await resolveRefToSha('owner', 'repo', 'v2.0.0')
+      expect(sha).toBe('commit789')
+    })
+
+    it('should resolve branch to SHA', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/main')
+        .reply(404)
+        .get('/repos/owner/repo/git/refs/heads/main')
+        .reply(200, {
+          ref: 'refs/heads/main',
+          object: {
+            sha: 'branch123',
+            type: 'commit',
+          },
+        })
+
+      const sha = await resolveRefToSha('owner', 'repo', 'main')
+      expect(sha).toBe('branch123')
+    })
+
+    it('should resolve commit SHA directly', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/abc123def456')
+        .reply(404)
+        .get('/repos/owner/repo/git/refs/heads/abc123def456')
+        .reply(404)
+        .get('/repos/owner/repo/commits/abc123def456')
+        .reply(200, {
+          sha: 'abc123def456789012345678901234567890abcd',
+          commit: {},
+        })
+
+      const sha = await resolveRefToSha('owner', 'repo', 'abc123def456')
+      expect(sha).toBe('abc123def456789012345678901234567890abcd')
+    })
+
+    it('should throw error when ref cannot be resolved', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/nonexistent')
+        .reply(404)
+        .get('/repos/owner/repo/git/refs/heads/nonexistent')
+        .reply(404)
+        .get('/repos/owner/repo/commits/nonexistent')
+        .reply(404)
+
+      await expect(
+        resolveRefToSha('owner', 'repo', 'nonexistent'),
+      ).rejects.toThrow('failed to resolve ref')
+    })
+  })
+
+  describe('fetchGhsaDetails', () => {
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should fetch GHSA details', async () => {
+      const mockGhsa = {
+        ghsa_id: 'GHSA-xxxx-yyyy-zzzz',
+        summary: 'Test vulnerability',
+        details: 'Detailed description',
+        severity: 'high',
+        aliases: ['CVE-2024-1234'],
+        published_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+        withdrawn_at: null,
+        references: [{ url: 'https://example.com/advisory' }],
+        vulnerabilities: [
+          {
+            package: { ecosystem: 'npm', name: 'test-package' },
+            vulnerableVersionRange: '< 1.0.0',
+            firstPatchedVersion: { identifier: '1.0.0' },
+          },
+        ],
+        cvss: {
+          score: 7.5,
+          vectorString: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N',
+        },
+        cwes: [
+          { cweId: 'CWE-79', name: 'XSS', description: 'Cross-site scripting' },
+        ],
+      }
+
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-xxxx-yyyy-zzzz')
+        .reply(200, mockGhsa)
+
+      const result = await fetchGhsaDetails('GHSA-xxxx-yyyy-zzzz')
+      expect(result.ghsaId).toBe('GHSA-xxxx-yyyy-zzzz')
+      expect(result.severity).toBe('high')
+      expect(result.aliases).toContain('CVE-2024-1234')
+    })
+  })
+
+  describe('cacheFetchGhsa', () => {
+    beforeEach(async () => {
+      await clearRefCache()
+    })
+
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should fetch and cache GHSA details', async () => {
+      const mockGhsa = {
+        ghsa_id: 'GHSA-cache-test-0001',
+        summary: 'Cached test',
+        details: 'Details',
+        severity: 'medium',
+        aliases: [],
+        published_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        withdrawn_at: null,
+        references: [],
+        vulnerabilities: [],
+        cvss: null,
+        cwes: [],
+      }
+
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-cache-test-0001')
+        .reply(200, mockGhsa)
+
+      const result = await cacheFetchGhsa('GHSA-cache-test-0001')
+      expect(result.ghsaId).toBe('GHSA-cache-test-0001')
     })
   })
 })

@@ -893,5 +893,70 @@ describe('objects', () => {
       expect((obj as any).counter).toBe(1) // Should return cached value
       expect(count).toBe(1) // Function only called once
     })
+
+    it('should provide access to internal attributes and stats', () => {
+      const obj = createConstantsObject(
+        { a: 1 },
+        {
+          getters: {
+            computed: () => 'value',
+          },
+        },
+      )
+      const internals = (obj as any).kInternalsSymbol
+      const objWithSymbol = obj as any
+      // Access attributes getter
+      expect(objWithSymbol[internals].attributes).toBeDefined()
+      // Access lazyGetterStats getter
+      expect(objWithSymbol[internals].lazyGetterStats).toBeDefined()
+    })
+  })
+
+  describe('merge - edge cases', () => {
+    it('should return target when source is null', () => {
+      const target = { a: 1 }
+      const result = merge(target, null as any)
+      expect(result).toBe(target)
+    })
+
+    it('should return target when source is undefined', () => {
+      const target = { a: 1 }
+      const result = merge(target, undefined as any)
+      expect(result).toBe(target)
+    })
+
+    it('should return target when target is null', () => {
+      const source = { b: 2 }
+      const result = merge(null as any, source)
+      expect(result).toBe(null)
+    })
+
+    it('should return target when target is undefined', () => {
+      const source = { b: 2 }
+      const result = merge(undefined as any, source)
+      expect(result).toBe(undefined)
+    })
+
+    it('should handle nested null/undefined in merge queue', () => {
+      const target = { a: null, b: undefined }
+      const source = { a: { c: 1 }, b: { d: 2 } }
+      const result = merge(target, source)
+      // Null/undefined values in the queue should continue without throwing
+      expect(result).toMatchObject({ a: { c: 1 }, b: { d: 2 } })
+    })
+
+    it('should skip array merging when target has array', () => {
+      const target = { a: [1, 2] }
+      const source = { a: [3, 4] }
+      const result = merge(target, source)
+      expect(result.a).toEqual([3, 4])
+    })
+
+    it('should skip array merging when source has array', () => {
+      const target = { a: { b: 1 } }
+      const source = { a: [1, 2] }
+      const result = merge(target, source)
+      expect(result.a).toEqual([1, 2])
+    })
   })
 })
