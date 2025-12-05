@@ -448,12 +448,10 @@ describe('strings', () => {
 
   describe('fromCharCode', () => {
     it('should be exported', () => {
-      const { fromCharCode } = require('@socketsecurity/lib/strings')
       expect(typeof fromCharCode).toBe('function')
     })
 
     it('should convert char codes to strings', () => {
-      const { fromCharCode } = require('@socketsecurity/lib/strings')
       expect(fromCharCode(65)).toBe('A')
       expect(fromCharCode(97)).toBe('a')
       expect(fromCharCode(48)).toBe('0')

@@ -11,7 +11,7 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -567,10 +567,7 @@ describe('dlx-package', () => {
         // Reading package.json should work but bin field is missing
         expect(existsSync(path.join(nodeModules, 'package.json'))).toBe(true)
         const pkg = JSON.parse(
-          require('node:fs').readFileSync(
-            path.join(nodeModules, 'package.json'),
-            'utf8',
-          ),
+          readFileSync(path.join(nodeModules, 'package.json'), 'utf8'),
         )
         expect(pkg.bin).toBeUndefined()
       }, 'dlx-pkg-missing-')
@@ -602,10 +599,7 @@ describe('dlx-package', () => {
         // Should auto-select the single binary
         expect(existsSync(path.join(nodeModules, 'cli.js'))).toBe(true)
         const pkg = JSON.parse(
-          require('node:fs').readFileSync(
-            path.join(nodeModules, 'package.json'),
-            'utf8',
-          ),
+          readFileSync(path.join(nodeModules, 'package.json'), 'utf8'),
         )
         expect(typeof pkg.bin).toBe('string')
         expect(pkg.bin).toBe('./cli.js')
@@ -658,10 +652,7 @@ describe('dlx-package', () => {
 
         // Should find the binary matching last segment of package name
         const pkg = JSON.parse(
-          require('node:fs').readFileSync(
-            path.join(nodeModules, 'package.json'),
-            'utf8',
-          ),
+          readFileSync(path.join(nodeModules, 'package.json'), 'utf8'),
         )
         expect(pkg.bin['multi-bin']).toBe('./bin/main.js')
 
@@ -706,10 +697,7 @@ describe('dlx-package', () => {
 
         // Should fall back to first binary (other-a)
         const pkg = JSON.parse(
-          require('node:fs').readFileSync(
-            path.join(nodeModules, 'package.json'),
-            'utf8',
-          ),
+          readFileSync(path.join(nodeModules, 'package.json'), 'utf8'),
         )
         const firstBinary = Object.keys(pkg.bin)[0]
         expect(firstBinary).toBe('other-a')

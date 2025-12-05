@@ -13,6 +13,12 @@
  * including empty strings, special characters, unicode, and very large JSON payloads.
  */
 
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
+import { safeDelete } from '@socketsecurity/lib/fs'
+import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
 import { isJsonPrimitive, jsonParse } from '@socketsecurity/lib/json/parse'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -752,14 +758,6 @@ describe('json', () => {
   })
 
   describe('EditableJson', () => {
-    const { tmpdir } = require('node:os')
-    const { join } = require('node:path')
-    const { mkdtemp, readFile, writeFile } = require('node:fs/promises')
-    const { safeDelete } =
-      require('@socketsecurity/lib/fs') as typeof import('@socketsecurity/lib/fs')
-    const { getEditableJsonClass } =
-      require('@socketsecurity/lib/json/edit') as typeof import('@socketsecurity/lib/json/edit')
-
     let testDir: string
 
     beforeEach(async () => {
