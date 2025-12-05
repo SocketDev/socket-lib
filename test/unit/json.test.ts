@@ -754,7 +754,9 @@ describe('json', () => {
   describe('EditableJson', () => {
     const { tmpdir } = require('node:os')
     const { join } = require('node:path')
-    const { mkdtemp, readFile, rm, writeFile } = require('node:fs/promises')
+    const { mkdtemp, readFile, writeFile } = require('node:fs/promises')
+    const { safeDelete } =
+      require('@socketsecurity/lib/fs') as typeof import('@socketsecurity/lib/fs')
     const { getEditableJsonClass } =
       require('@socketsecurity/lib/json/edit') as typeof import('@socketsecurity/lib/json/edit')
 
@@ -766,7 +768,7 @@ describe('json', () => {
 
     afterEach(async () => {
       if (testDir) {
-        await rm(testDir, { recursive: true, force: true })
+        await safeDelete(testDir)
       }
     })
 
