@@ -1,7 +1,7 @@
 {
   "name": "@socketsecurity/lib",
   "version": "5.0.0",
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.25.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -677,7 +677,7 @@
   ],
   "engines": {
     "node": ">=22",
-    "pnpm": ">=10.22.0"
+    "pnpm": ">=10.25.0"
   },
   "sideEffects": false,
   "scripts": {
@@ -751,7 +751,7 @@
     "spdx-correct": "3.2.0",
     "spdx-expression-parse": "4.0.0",
     "streaming-iterables": "8.0.1",
-    "taze": "19.6.0",
+    "taze": "19.9.2",
     "trash": "10.0.0",
     "type-coverage": "2.29.7",
     "typescript": "5.9.2",
