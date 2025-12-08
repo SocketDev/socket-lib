@@ -72,8 +72,8 @@ importers:
         specifier: 9.1.6
         version: 9.1.6
       '@npmcli/package-json':
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 7.0.4
+        version: 7.0.4
       '@npmcli/promise-spawn':
         specifier: 8.0.3
         version: 8.0.3
@@ -810,8 +810,8 @@ packages:
     resolution: {integrity: sha512-GUYESQlxZRAdhs3UhbB6pVRNUELQOHXwK9ruDkwmCv2aZ5y0SApQzUJCg02p3A7Ue2J5hxvlk1YI53c00NmRyQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  '@npmcli/git@7.0.0':
-    resolution: {integrity: sha512-vnz7BVGtOctJAIHouCJdvWBhsTVSICMeUgZo2c7XAi5d5Rrl80S1H7oPym7K03cRuinK5Q6s2dw36+PgXQTcMA==}
+  '@npmcli/git@7.0.1':
+    resolution: {integrity: sha512-+XTFxK2jJF/EJJ5SoAzXk3qwIDfvFc5/g+bD274LZ7uY7LE8sTfG6Z8rOanPl2ZEvZWqNvmEdtXC25cE54VcoA==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
   '@npmcli/installed-package-contents@3.0.0':
@@ -835,13 +835,17 @@ packages:
     resolution: {integrity: sha512-+t5DZ6mO/QFh78PByMq1fGSAub/agLJZDRfJRMeOSNCt8s9YVlTjmGpIPwPhvXTGUIJk+WszlT0rQa1W33yzNA==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  '@npmcli/package-json@7.0.0':
-    resolution: {integrity: sha512-wy5os0g17akBCVScLyDsDFFf4qC/MmUgIGAFw2pmBGJ/yAQfFbTR9gEaofy4HGm9Jf2MQBnKZICfNds2h3WpEg==}
+  '@npmcli/package-json@7.0.4':
+    resolution: {integrity: sha512-0wInJG3j/K40OJt/33ax47WfWMzZTm6OQxB9cDhTt5huCP2a9g2GnlsxmfN+PulItNPIpPrZ+kfwwUil7eHcZQ==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
   '@npmcli/promise-spawn@8.0.3':
     resolution: {integrity: sha512-Yb00SWaL4F8w+K8YGhQ55+xE4RUNdMHV43WZGsiTM92gS+lC0mGsn7I4hLug7pbao035S6bj3Y3w0cUNGLfmkg==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  '@npmcli/promise-spawn@9.0.1':
+    resolution: {integrity: sha512-OLUaoqBuyxeTqUvjA3FZFiXUfYC1alp3Sa99gW3EUDz3tZ3CbXDdcZ7qWKBzicrJleIgucoWamWH1saAmH/l2Q==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   '@npmcli/query@4.0.1':
     resolution: {integrity: sha512-4OIPFb4weUUwkDXJf4Hh1inAn8neBGq3xsH4ZsAaN6FK3ldrFkH7jSpCc7N9xesi0Sp+EBXJ9eGMDrEww2Ztqw==}
@@ -1960,14 +1964,23 @@ packages:
     resolution: {integrity: sha512-XxwI8EOhVQgWp6iDL+3b0r86f4d6AX6zSU55HfB4ydCEuXLXc5FcYeOu+nnGftS4TEju/11rt4KJPTMgbfmv4A==}
     engines: {node: '>=10.13.0'}
 
-  glob@10.4.5:
-    resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+  glob@10.5.0:
+    resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
     hasBin: true
 
   glob@11.0.3:
     resolution: {integrity: sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==}
     engines: {node: 20 || >=22}
     hasBin: true
+
+  glob@11.1.0:
+    resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
+    engines: {node: 20 || >=22}
+    hasBin: true
+
+  glob@13.0.0:
+    resolution: {integrity: sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA==}
+    engines: {node: 20 || >=22}
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
@@ -2079,6 +2092,10 @@ packages:
   ini@5.0.0:
     resolution: {integrity: sha512-+N0ngpO3e7cRUWOJAS7qw0IZIVc6XPrW4MlFBdD066F2L4k1L6ker3hLqSq7iXxU5tgS4WGkIUElWn5vogAEnw==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  ini@6.0.0:
+    resolution: {integrity: sha512-IBTdIkzZNOpqm7q3dRqJvMaldXjDHWkEDfrwGEQTs5eaQMWV+djAhR+wahyNNMAa+qpbDUhBMVt4ZKNwpPm7xQ==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   ip-address@10.0.1:
     resolution: {integrity: sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==}
@@ -2198,6 +2215,10 @@ packages:
   json-parse-even-better-errors@4.0.0:
     resolution: {integrity: sha512-lR4MXjGNgkJc7tkQ97kb2nuEMnNCyU//XYVH0MKTGcXEiSudQ5MKGKen3C5QubYy0vmq+JGitUg92uuywGEwIA==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  json-parse-even-better-errors@5.0.0:
+    resolution: {integrity: sha512-ZF1nxZ28VhQouRWhUcVlUIN3qwSgPuswK05s/HIaoetAoE/9tngVmCHjSxmSQPav1nd+lPtTL0YZ/2AFdR/iYQ==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
@@ -2331,6 +2352,10 @@ packages:
 
   minimatch@10.0.3:
     resolution: {integrity: sha512-IPZ167aShDZZUMdRk66cyQAW3qr0WzbHkPdMYa8bzZhlHhO3jALbKdxcaak7W9FfT2rZNpQuUu4Od7ILEpXSaw==}
+    engines: {node: 20 || >=22}
+
+  minimatch@10.1.1:
+    resolution: {integrity: sha512-enIvLvRAFZYXJzkCYG5RKmPfrFArdLv+R+lbQ53BmIMLIry74bjKzX6iHAm8WYamJkhSSEabrWN5D97XnKObjQ==}
     engines: {node: 20 || >=22}
 
   minimatch@3.1.2:
@@ -2471,9 +2496,17 @@ packages:
     resolution: {integrity: sha512-z9HJBCYw9Zr8BqXcllKIs5nI+QggAImbBdHphOzVYrz2CB4iQ6FzWyKmlqDZua+51nAu7FcemlbTc9VgQN5XDQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
+  npm-install-checks@8.0.0:
+    resolution: {integrity: sha512-ScAUdMpyzkbpxoNekQ3tNRdFI8SJ86wgKZSQZdUxT+bj0wVFpsEMWnkXP0twVe1gJyNF5apBWDJhhIbgrIViRA==}
+    engines: {node: ^20.17.0 || >=22.9.0}
+
   npm-normalize-package-bin@4.0.0:
     resolution: {integrity: sha512-TZKxPvItzai9kN9H/TkmCtx/ZN/hvr3vUycjlfmH0ootY9yFBzNOpiXAdIn1Iteqsvk4lQn6B5PTrt+n6h8k/w==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  npm-normalize-package-bin@5.0.0:
+    resolution: {integrity: sha512-CJi3OS4JLsNMmr2u07OJlhcrPxCeOeP/4xq67aWNai6TNWWbTrlNDgl8NcFKVlcBKp18GPj+EzbNIgrBfZhsag==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   npm-package-arg@12.0.2:
     resolution: {integrity: sha512-f1NpFjNI9O4VbKMOlA5QoBq/vSQPORHcTZ2feJpFkTHJ9eQkdlmZEKSjcAhxTGInC7RlEyScT9ui67NaOsjFWA==}
@@ -2493,6 +2526,10 @@ packages:
 
   npm-pick-manifest@11.0.1:
     resolution: {integrity: sha512-HnU7FYSWbo7dTVHtK0G+BXbZ0aIfxz/aUCVLN0979Ec6rGUX5cJ6RbgVx5fqb5G31ufz+BVFA7y1SkRTPVNoVQ==}
+    engines: {node: ^20.17.0 || >=22.9.0}
+
+  npm-pick-manifest@11.0.3:
+    resolution: {integrity: sha512-buzyCfeoGY/PxKqmBqn1IUJrZnUi1VVJTdSSRPGI60tJdUhUoSQFhs0zycJokDdOznQentgrpf8LayEHyyYlqQ==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
   npm-registry-fetch@19.0.0:
@@ -2620,6 +2657,10 @@ packages:
     resolution: {integrity: sha512-ypGJsmGtdXUOeM5u93TyeIEfEhM6s+ljAhrk5vAvSx8uyY/02OvrZnA0YNGUrPXfpJMgI1ODd3nwz8Npx4O4cg==}
     engines: {node: 20 || >=22}
 
+  path-scurry@2.0.1:
+    resolution: {integrity: sha512-oWyT4gICAu+kaA7QWk/jvCHWarMKNs6pXOGWKDTr7cw4IGcUbW+PeTfbaQiLGheFRpjo6O9J0PmyMfQPjH71oA==}
+    engines: {node: 20 || >=22}
+
   path-type@6.0.0:
     resolution: {integrity: sha512-Vj7sf++t5pBD637NSfkxpHSMfWaeig5+DKWLhcqIYx6mWQz5hdJTGDVMQiJcw1ZYkhs7AazKDGpRVji1LJCZUQ==}
     engines: {node: '>=18'}
@@ -2681,6 +2722,10 @@ packages:
   proc-log@5.0.0:
     resolution: {integrity: sha512-Azwzvl90HaF0aCz1JrDdXQykFakSSNPaPoiZ9fm5qJIMHioDZEi7OAdRwSm6rSoPtY3Qutnm3L7ogmg3dc+wbQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  proc-log@6.1.0:
+    resolution: {integrity: sha512-iG+GYldRf2BQ0UDUAd6JQ/RwzaQy6mXmsk/IzlYyal4A4SNFw54MeH4/tLkF4I5WoWG9SQwuqWzS99jaFQHBuQ==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   proggy@3.0.0:
     resolution: {integrity: sha512-QE8RApCM3IaRRxVzxrjbgNMpQEX6Wu0p0KBeoSiSEw5/bsGwZHsshF4LCxH2jp/r6BU+bqA3LrMDEYNfJnpD8Q==}
@@ -3181,6 +3226,11 @@ packages:
   which@5.0.0:
     resolution: {integrity: sha512-JEdGzHwwkrbWoGOlIHqQ5gtprKGOenpDHpxE9zVR1bWbOtYRyPPHMe9FaP6x61CmNaTThSkb0DAJte5jD+DmzQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
+    hasBin: true
+
+  which@6.0.0:
+    resolution: {integrity: sha512-f+gEpIKMR9faW/JgAgPK1D7mekkFoqbmiwvNzuhsHetni20QSgzg9Vhn0g2JSJkkfehQnqdUAx7/e15qS1lPxg==}
+    engines: {node: ^20.17.0 || >=22.9.0}
     hasBin: true
 
   why-is-node-running@2.3.0:
@@ -3772,7 +3822,7 @@ snapshots:
       '@npmcli/metavuln-calculator': 9.0.2
       '@npmcli/name-from-folder': 3.0.0
       '@npmcli/node-gyp': 4.0.0
-      '@npmcli/package-json': 7.0.0
+      '@npmcli/package-json': 7.0.4
       '@npmcli/query': 4.0.1
       '@npmcli/redact': 3.2.2
       '@npmcli/run-script': 10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
@@ -3816,16 +3866,16 @@ snapshots:
       semver: 7.7.2
       which: 5.0.0
 
-  '@npmcli/git@7.0.0':
+  '@npmcli/git@7.0.1':
     dependencies:
-      '@npmcli/promise-spawn': 8.0.3
-      ini: 5.0.0
+      '@npmcli/promise-spawn': 9.0.1
+      ini: 6.0.0
       lru-cache: 11.2.2
-      npm-pick-manifest: 11.0.1
-      proc-log: 5.0.0
+      npm-pick-manifest: 11.0.3
+      proc-log: 6.1.0
       promise-retry: 2.0.1
       semver: 7.7.2
-      which: 5.0.0
+      which: 6.0.0
 
   '@npmcli/installed-package-contents@3.0.0':
     dependencies:
@@ -3835,8 +3885,8 @@ snapshots:
   '@npmcli/map-workspaces@5.0.0':
     dependencies:
       '@npmcli/name-from-folder': 3.0.0
-      '@npmcli/package-json': 7.0.0
-      glob: 11.0.3
+      '@npmcli/package-json': 7.0.4
+      glob: 11.1.0
       minimatch: 10.0.3
 
   '@npmcli/metavuln-calculator@9.0.2':
@@ -3853,19 +3903,23 @@ snapshots:
 
   '@npmcli/node-gyp@4.0.0': {}
 
-  '@npmcli/package-json@7.0.0':
+  '@npmcli/package-json@7.0.4':
     dependencies:
-      '@npmcli/git': 6.0.3
-      glob: 11.0.3
+      '@npmcli/git': 7.0.1
+      glob: 13.0.0
       hosted-git-info: 9.0.2
-      json-parse-even-better-errors: 4.0.0
-      proc-log: 5.0.0
+      json-parse-even-better-errors: 5.0.0
+      proc-log: 6.1.0
       semver: 7.7.2
       validate-npm-package-license: 3.0.4
 
   '@npmcli/promise-spawn@8.0.3':
     dependencies:
       which: 5.0.0
+
+  '@npmcli/promise-spawn@9.0.1':
+    dependencies:
+      which: 6.0.0
 
   '@npmcli/query@4.0.1':
     dependencies:
@@ -3876,7 +3930,7 @@ snapshots:
   '@npmcli/run-script@10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)':
     dependencies:
       '@npmcli/node-gyp': 4.0.0
-      '@npmcli/package-json': 7.0.0
+      '@npmcli/package-json': 7.0.4
       '@npmcli/promise-spawn': 8.0.3
       node-gyp: 11.5.0(patch_hash=140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9)
       proc-log: 5.0.0
@@ -4487,7 +4541,7 @@ snapshots:
     dependencies:
       '@npmcli/fs': 4.0.0
       fs-minipass: 3.0.3
-      glob: 10.4.5
+      glob: 10.5.0
       lru-cache: 11.2.2
       minipass: 7.1.2
       minipass-collect: 2.0.1
@@ -5013,7 +5067,7 @@ snapshots:
     dependencies:
       is-glob: 4.0.3
 
-  glob@10.4.5:
+  glob@10.5.0:
     dependencies:
       foreground-child: 3.3.1
       jackspeak: 3.4.3
@@ -5030,6 +5084,21 @@ snapshots:
       minipass: 7.1.2
       package-json-from-dist: 1.0.1
       path-scurry: 2.0.0
+
+  glob@11.1.0:
+    dependencies:
+      foreground-child: 3.3.1
+      jackspeak: 4.1.1
+      minimatch: 10.1.1
+      minipass: 7.1.2
+      package-json-from-dist: 1.0.1
+      path-scurry: 2.0.1
+
+  glob@13.0.0:
+    dependencies:
+      minimatch: 10.1.1
+      minipass: 7.1.2
+      path-scurry: 2.0.1
 
   globals@14.0.0: {}
 
@@ -5116,7 +5185,7 @@ snapshots:
 
   ignore-walk@8.0.0:
     dependencies:
-      minimatch: 10.0.3
+      minimatch: 10.1.1
 
   ignore@5.3.2: {}
 
@@ -5132,6 +5201,8 @@ snapshots:
   indent-string@5.0.0: {}
 
   ini@5.0.0: {}
+
+  ini@6.0.0: {}
 
   ip-address@10.0.1: {}
 
@@ -5227,6 +5298,8 @@ snapshots:
 
   json-parse-even-better-errors@4.0.0: {}
 
+  json-parse-even-better-errors@5.0.0: {}
+
   json-schema-traverse@0.4.1: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
@@ -5255,7 +5328,7 @@ snapshots:
   libnpmexec@10.1.8:
     dependencies:
       '@npmcli/arborist': 9.1.6
-      '@npmcli/package-json': 7.0.0
+      '@npmcli/package-json': 7.0.4
       '@npmcli/run-script': 10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
       ci-info: 4.3.1
       npm-package-arg: 13.0.0
@@ -5397,6 +5470,10 @@ snapshots:
     dependencies:
       '@isaacs/brace-expansion': 5.0.0
 
+  minimatch@10.1.1:
+    dependencies:
+      '@isaacs/brace-expansion': 5.0.0
+
   minimatch@3.1.2:
     dependencies:
       brace-expansion: 1.1.12
@@ -5525,7 +5602,13 @@ snapshots:
     dependencies:
       semver: 7.7.2
 
+  npm-install-checks@8.0.0:
+    dependencies:
+      semver: 7.7.2
+
   npm-normalize-package-bin@4.0.0: {}
+
+  npm-normalize-package-bin@5.0.0: {}
 
   npm-package-arg@12.0.2:
     dependencies:
@@ -5557,6 +5640,13 @@ snapshots:
     dependencies:
       npm-install-checks: 7.1.2
       npm-normalize-package-bin: 4.0.0
+      npm-package-arg: 13.0.0
+      semver: 7.7.2
+
+  npm-pick-manifest@11.0.3:
+    dependencies:
+      npm-install-checks: 8.0.0
+      npm-normalize-package-bin: 5.0.0
       npm-package-arg: 13.0.0
       semver: 7.7.2
 
@@ -5650,7 +5740,7 @@ snapshots:
     dependencies:
       '@npmcli/git': 6.0.3
       '@npmcli/installed-package-contents': 3.0.0
-      '@npmcli/package-json': 7.0.0
+      '@npmcli/package-json': 7.0.4
       '@npmcli/promise-spawn': 8.0.3
       '@npmcli/run-script': 10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
       cacache: 20.0.1
@@ -5670,9 +5760,9 @@ snapshots:
 
   pacote@21.0.3:
     dependencies:
-      '@npmcli/git': 7.0.0
+      '@npmcli/git': 7.0.1
       '@npmcli/installed-package-contents': 3.0.0
-      '@npmcli/package-json': 7.0.0
+      '@npmcli/package-json': 7.0.4
       '@npmcli/promise-spawn': 8.0.3
       '@npmcli/run-script': 10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
       cacache: 20.0.1
@@ -5714,6 +5804,11 @@ snapshots:
       minipass: 7.1.2
 
   path-scurry@2.0.0:
+    dependencies:
+      lru-cache: 11.2.2
+      minipass: 7.1.2
+
+  path-scurry@2.0.1:
     dependencies:
       lru-cache: 11.2.2
       minipass: 7.1.2
@@ -5760,6 +5855,8 @@ snapshots:
   presentable-error@0.0.1: {}
 
   proc-log@5.0.0: {}
+
+  proc-log@6.1.0: {}
 
   proggy@3.0.0: {}
 
@@ -6263,6 +6360,10 @@ snapshots:
       isexe: 3.1.1
 
   which@5.0.0:
+    dependencies:
+      isexe: 3.1.1
+
+  which@6.0.0:
     dependencies:
       isexe: 3.1.1
 
