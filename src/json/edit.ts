@@ -2,6 +2,8 @@
  * @fileoverview Editable JSON file manipulation with formatting preservation.
  */
 
+import { setTimeout as sleep } from 'node:timers/promises'
+
 import {
   INDENT_SYMBOL,
   NEWLINE_SYMBOL,
@@ -58,23 +60,50 @@ async function retryWrite(
     try {
       // eslint-disable-next-line no-await-in-loop
       await fsPromises.writeFile(filepath, content)
+      // On Windows, add a delay and verify file exists to ensure it's fully flushed
+      // This prevents ENOENT errors when immediately reading after write
+      // Windows CI runners are significantly slower than local development
+      if (process.platform === 'win32') {
+        // Initial delay to allow OS to flush the write
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(50)
+        // Verify the file is actually readable with retries
+        let accessRetries = 0
+        const maxAccessRetries = 5
+        while (accessRetries < maxAccessRetries) {
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            await fsPromises.access(filepath)
+            // Small final delay to ensure stability
+            // eslint-disable-next-line no-await-in-loop
+            await sleep(10)
+            break
+          } catch {
+            // If file isn't accessible yet, wait with increasing delays
+            const delay = 20 * (accessRetries + 1)
+            // eslint-disable-next-line no-await-in-loop
+            await sleep(delay)
+            accessRetries++
+          }
+        }
+      }
       return
     } catch (err) {
       const isLastAttempt = attempt === retries
-      const isEperm =
+      const isRetriableError =
         err instanceof Error &&
         'code' in err &&
-        (err.code === 'EPERM' || err.code === 'EBUSY')
+        (err.code === 'EPERM' || err.code === 'EBUSY' || err.code === 'ENOENT')
 
-      // Only retry on Windows EPERM/EBUSY errors, and not on the last attempt
-      if (!isEperm || isLastAttempt) {
+      // Only retry on Windows file system errors (EPERM/EBUSY/ENOENT), and not on the last attempt
+      if (!isRetriableError || isLastAttempt) {
         throw err
       }
 
       // Exponential backoff: 10ms, 20ms, 40ms
       const delay = baseDelay * 2 ** attempt
       // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delay))
+      await sleep(delay)
     }
   }
 }
@@ -88,12 +117,40 @@ function parseJson(content: string): unknown {
 }
 
 /**
- * Read file content from disk.
+ * Read file content from disk with retry logic for ENOENT errors.
  * @private
  */
 async function readFile(filepath: string): Promise<string> {
   const { promises: fsPromises } = getFs()
-  return await fsPromises.readFile(filepath, 'utf8')
+
+  // Retry on ENOENT since files may not be immediately accessible after writes
+  // Windows needs more retries due to slower filesystem operations
+  const maxRetries = process.platform === 'win32' ? 5 : 1
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await fsPromises.readFile(filepath, 'utf8')
+    } catch (err) {
+      const isLastAttempt = attempt === maxRetries
+      const isEnoent =
+        err instanceof Error && 'code' in err && err.code === 'ENOENT'
+
+      // Only retry ENOENT and not on last attempt
+      if (!isEnoent || isLastAttempt) {
+        throw err
+      }
+
+      // Wait before retry with exponential backoff
+      // Windows: 50ms, 100ms, 150ms, 200ms, 250ms (total 750ms + attempts)
+      // Others: 20ms
+      const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(delay)
+    }
+  }
+
+  // This line should never be reached but TypeScript requires it
+  throw new Error('Unreachable code')
 }
 
 /**
