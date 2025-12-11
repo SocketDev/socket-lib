@@ -1202,26 +1202,32 @@ export function readJsonSync(
 
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
- * Uses `del` for safer deletion that prevents removing cwd and above by default.
- * Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories.
+ *
+ * Uses `del` for safer deletion with these safety features:
+ * - By default, prevents deleting the current working directory (cwd) and above
+ * - Allows deleting within cwd (descendant paths) without force option
+ * - Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories
+ * - Protects against accidental deletion of parent directories via `../` paths
  *
  * @param filepath - Path or array of paths to delete (supports glob patterns)
  * @param options - Deletion options including force, retries, and recursion
+ * @param options.force - Set to true to allow deleting cwd and above (use with caution)
  * @throws {Error} When attempting to delete protected paths without force option
  *
  * @example
  * ```ts
- * // Delete a single file
- * await safeDelete('./temp-file.txt')
+ * // Delete files within cwd (safe by default)
+ * await safeDelete('./build')
+ * await safeDelete('./dist')
  *
- * // Delete a directory recursively
- * await safeDelete('./build', { recursive: true })
- *
- * // Delete multiple paths
- * await safeDelete(['./dist', './coverage'])
+ * // Delete with glob patterns
+ * await safeDelete(['./temp/**', '!./temp/keep.txt'])
  *
  * // Delete with custom retry settings
  * await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
+ *
+ * // Force delete cwd or above (requires explicit force: true)
+ * await safeDelete('../parent-dir', { force: true })
  * ```
  */
 export async function safeDelete(
@@ -1277,26 +1283,32 @@ export async function safeDelete(
 
 /**
  * Safely delete a file or directory synchronously with built-in protections.
- * Uses `del` for safer deletion that prevents removing cwd and above by default.
- * Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories.
+ *
+ * Uses `del` for safer deletion with these safety features:
+ * - By default, prevents deleting the current working directory (cwd) and above
+ * - Allows deleting within cwd (descendant paths) without force option
+ * - Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories
+ * - Protects against accidental deletion of parent directories via `../` paths
  *
  * @param filepath - Path or array of paths to delete (supports glob patterns)
  * @param options - Deletion options including force, retries, and recursion
+ * @param options.force - Set to true to allow deleting cwd and above (use with caution)
  * @throws {Error} When attempting to delete protected paths without force option
  *
  * @example
  * ```ts
- * // Delete a single file
- * safeDeleteSync('./temp-file.txt')
+ * // Delete files within cwd (safe by default)
+ * safeDeleteSync('./build')
+ * safeDeleteSync('./dist')
  *
- * // Delete a directory recursively
- * safeDeleteSync('./build', { recursive: true })
+ * // Delete with glob patterns
+ * safeDeleteSync(['./temp/**', '!./temp/keep.txt'])
  *
- * // Delete multiple paths with globs
- * safeDeleteSync(['./dist/**', './coverage/**'])
+ * // Delete multiple paths
+ * safeDeleteSync(['./coverage', './reports'])
  *
- * // Force delete a protected path (use with caution)
- * safeDeleteSync('./important', { force: true })
+ * // Force delete cwd or above (requires explicit force: true)
+ * safeDeleteSync('../parent-dir', { force: true })
  * ```
  */
 export function safeDeleteSync(
