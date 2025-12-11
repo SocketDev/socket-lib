@@ -18,6 +18,8 @@ import { createWriteStream } from 'fs'
 
 import type { IncomingMessage } from 'http'
 
+import type { Logger } from './logger.js'
+
 let _http: typeof import('http') | undefined
 let _https: typeof import('https') | undefined
 /**
@@ -319,8 +321,30 @@ export interface HttpDownloadOptions {
    */
   headers?: Record<string, string> | undefined
   /**
+   * Logger instance for automatic progress logging.
+   * When provided with `progressInterval`, will automatically log download progress.
+   * Mutually exclusive with `onProgress` - if both are provided, `logger` takes precedence.
+   *
+   * @example
+   * ```ts
+   * import { getDefaultLogger } from '@socketsecurity/lib/logger'
+   *
+   * const logger = getDefaultLogger()
+   * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+   *   logger,
+   *   progressInterval: 10  // Log every 10%
+   * })
+   * // Output:
+   * //   Progress: 10% (5.2 MB / 52.0 MB)
+   * //   Progress: 20% (10.4 MB / 52.0 MB)
+   * //   ...
+   * ```
+   */
+  logger?: Logger | undefined
+  /**
    * Callback for tracking download progress.
    * Called periodically as data is received.
+   * If `logger` is provided, this callback is ignored.
    *
    * @param downloaded - Number of bytes downloaded so far
    * @param total - Total file size in bytes (from Content-Length header)
@@ -336,6 +360,29 @@ export interface HttpDownloadOptions {
    * ```
    */
   onProgress?: ((downloaded: number, total: number) => void) | undefined
+  /**
+   * Progress reporting interval as a percentage (0-100).
+   * Only used when `logger` is provided.
+   * Progress will be logged each time the download advances by this percentage.
+   *
+   * @default 10
+   *
+   * @example
+   * ```ts
+   * // Log every 10%
+   * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+   *   logger: getDefaultLogger(),
+   *   progressInterval: 10
+   * })
+   *
+   * // Log every 25%
+   * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+   *   logger: getDefaultLogger(),
+   *   progressInterval: 25
+   * })
+   * ```
+   */
+  progressInterval?: number | undefined
   /**
    * Number of retry attempts for failed downloads.
    * Uses exponential backoff: delay = `retryDelay` * 2^attempt.
@@ -694,11 +741,32 @@ export async function httpDownload(
 ): Promise<HttpDownloadResult> {
   const {
     headers = {},
+    logger,
     onProgress,
+    progressInterval = 10,
     retries = 0,
     retryDelay = 1000,
     timeout = 120_000,
   } = { __proto__: null, ...options } as HttpDownloadOptions
+
+  // Create progress callback from logger if provided
+  let progressCallback:
+    | ((downloaded: number, total: number) => void)
+    | undefined
+  if (logger) {
+    let lastPercent = 0
+    progressCallback = (downloaded: number, total: number) => {
+      const percent = Math.floor((downloaded / total) * 100)
+      if (percent >= lastPercent + progressInterval) {
+        logger.log(
+          `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,
+        )
+        lastPercent = percent
+      }
+    }
+  } else {
+    progressCallback = onProgress
+  }
 
   // Retry logic with exponential backoff
   let lastError: Error | undefined
@@ -707,7 +775,7 @@ export async function httpDownload(
       // eslint-disable-next-line no-await-in-loop
       return await httpDownloadAttempt(url, destPath, {
         headers,
-        onProgress,
+        onProgress: progressCallback,
         timeout,
       })
     } catch (e) {
