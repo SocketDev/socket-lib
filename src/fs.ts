@@ -1203,7 +1203,7 @@ export function readJsonSync(
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
  *
- * Uses `del` for safer deletion with these safety features:
+ * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer deletion with these safety features:
  * - By default, prevents deleting the current working directory (cwd) and above
  * - Allows deleting within cwd (descendant paths) without force option
  * - Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories
@@ -1284,7 +1284,7 @@ export async function safeDelete(
 /**
  * Safely delete a file or directory synchronously with built-in protections.
  *
- * Uses `del` for safer deletion with these safety features:
+ * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer deletion with these safety features:
  * - By default, prevents deleting the current working directory (cwd) and above
  * - Allows deleting within cwd (descendant paths) without force option
  * - Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories
