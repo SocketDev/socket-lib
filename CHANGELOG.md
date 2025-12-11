@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.0.1) - 2025-12-11
+
+### Added
+
+- **http-request**: Enhanced `httpDownload()` with automatic progress logging via Logger integration
+  - New `logger` option: Pass a Logger instance for automatic progress tracking
+  - New `progressInterval` option: Configure progress reporting frequency (default: 10%)
+  - Progress format: `Progress: XX% (Y.Y MB / Z.Z MB)`
+  - `onProgress` callback takes precedence over `logger` when both are provided
+  - Commit: [`91e5db5`](https://github.com/SocketDev/socket-lib/commit/91e5db5)
+
 ## [5.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.0.0) - 2025-12-04
 
 ### Added
