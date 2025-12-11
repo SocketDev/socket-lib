@@ -15,6 +15,7 @@ import { promises as fs } from 'node:fs'
 import http from 'node:http'
 import type https from 'node:https'
 import path from 'node:path'
+import { Writable } from 'node:stream'
 
 import {
   httpDownload,
@@ -22,6 +23,7 @@ import {
   httpGetText,
   httpRequest,
 } from '@socketsecurity/lib/http-request'
+import { Logger } from '@socketsecurity/lib/logger'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper.mjs'
 
@@ -690,6 +692,144 @@ describe('http-request', () => {
         const result = await httpDownload(`${httpBaseUrl}/download`, destPath)
         expect(result.size).toBeGreaterThan(0)
       }, 'httpDownload-default-timeout-')
+    })
+
+    it('should log progress with logger option', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'logger.txt')
+        const logMessages: string[] = []
+
+        const stdout = new Writable({
+          write(chunk, _encoding, callback) {
+            logMessages.push(chunk.toString())
+            callback()
+          },
+        })
+
+        const logger = new Logger({ stdout })
+
+        await httpDownload(`${httpBaseUrl}/large-download`, destPath, {
+          logger,
+          progressInterval: 25, // Log every 25%
+        })
+
+        // Should have logged progress at 25%, 50%, 75%, 100%
+        expect(logMessages.length).toBeGreaterThan(0)
+        expect(logMessages.some(msg => msg.includes('Progress:'))).toBe(true)
+        expect(logMessages.some(msg => msg.includes('MB'))).toBe(true)
+
+        const content = await fs.readFile(destPath, 'utf8')
+        expect(content).toBe('X'.repeat(1000))
+      }, 'httpDownload-logger-')
+    })
+
+    it('should use default progressInterval of 10%', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'logger-default.txt')
+        const logMessages: string[] = []
+
+        const stdout = new Writable({
+          write(chunk, _encoding, callback) {
+            logMessages.push(chunk.toString())
+            callback()
+          },
+        })
+
+        const logger = new Logger({ stdout })
+
+        await httpDownload(`${httpBaseUrl}/large-download`, destPath, {
+          logger,
+          // No progressInterval specified - should default to 10%
+        })
+
+        expect(logMessages.length).toBeGreaterThan(0)
+        expect(logMessages.some(msg => msg.includes('Progress:'))).toBe(true)
+      }, 'httpDownload-logger-default-')
+    })
+
+    it('should prefer onProgress callback over logger', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'logger-precedence.txt')
+        const logMessages: string[] = []
+        let onProgressCalled = false
+
+        const stdout = new Writable({
+          write(chunk, _encoding, callback) {
+            logMessages.push(chunk.toString())
+            callback()
+          },
+        })
+
+        const logger = new Logger({ stdout })
+
+        await httpDownload(`${httpBaseUrl}/large-download`, destPath, {
+          logger,
+          onProgress: () => {
+            onProgressCalled = true
+          },
+          progressInterval: 25,
+        })
+
+        // onProgress should have been called
+        expect(onProgressCalled).toBe(true)
+        // Logger should NOT have been used
+        expect(logMessages.length).toBe(0)
+      }, 'httpDownload-logger-precedence-')
+    })
+
+    it('should format progress with MB units correctly', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'logger-format.txt')
+        const logMessages: string[] = []
+
+        const stdout = new Writable({
+          write(chunk, _encoding, callback) {
+            logMessages.push(chunk.toString())
+            callback()
+          },
+        })
+
+        const logger = new Logger({ stdout })
+
+        await httpDownload(`${httpBaseUrl}/large-download`, destPath, {
+          logger,
+          progressInterval: 50,
+        })
+
+        // Check format: "  Progress: XX% (Y.Y MB / Z.Z MB)"
+        expect(logMessages.length).toBeGreaterThan(0)
+        const progressMsg = logMessages.find(msg => msg.includes('Progress:'))
+        expect(progressMsg).toBeDefined()
+        expect(progressMsg).toMatch(
+          /Progress: \d+% \(\d+\.\d+ MB \/ \d+\.\d+ MB\)/,
+        )
+      }, 'httpDownload-logger-format-')
+    })
+
+    it('should not log progress with logger when no content-length', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'logger-no-length.txt')
+        const logMessages: string[] = []
+
+        const stdout = new Writable({
+          write(chunk, _encoding, callback) {
+            logMessages.push(chunk.toString())
+            callback()
+          },
+        })
+
+        const logger = new Logger({ stdout })
+
+        await httpDownload(`${httpBaseUrl}/download-no-length`, destPath, {
+          logger,
+        })
+
+        // Should not have logged any progress (no content-length header)
+        expect(logMessages.length).toBe(0)
+
+        const content = await fs.readFile(destPath, 'utf8')
+        expect(content).toBe('No content length')
+      }, 'httpDownload-logger-no-length-')
     })
   })
 

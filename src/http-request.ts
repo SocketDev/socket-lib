@@ -323,7 +323,7 @@ export interface HttpDownloadOptions {
   /**
    * Logger instance for automatic progress logging.
    * When provided with `progressInterval`, will automatically log download progress.
-   * Mutually exclusive with `onProgress` - if both are provided, `logger` takes precedence.
+   * If both `onProgress` and `logger` are provided, `onProgress` takes precedence.
    *
    * @example
    * ```ts
@@ -344,7 +344,7 @@ export interface HttpDownloadOptions {
   /**
    * Callback for tracking download progress.
    * Called periodically as data is received.
-   * If `logger` is provided, this callback is ignored.
+   * Takes precedence over `logger` if both are provided.
    *
    * @param downloaded - Number of bytes downloaded so far
    * @param total - Total file size in bytes (from Content-Length header)
@@ -749,11 +749,13 @@ export async function httpDownload(
     timeout = 120_000,
   } = { __proto__: null, ...options } as HttpDownloadOptions
 
-  // Create progress callback from logger if provided
+  // Create progress callback - onProgress takes precedence over logger
   let progressCallback:
     | ((downloaded: number, total: number) => void)
     | undefined
-  if (logger) {
+  if (onProgress) {
+    progressCallback = onProgress
+  } else if (logger) {
     let lastPercent = 0
     progressCallback = (downloaded: number, total: number) => {
       const percent = Math.floor((downloaded / total) * 100)
@@ -764,8 +766,6 @@ export async function httpDownload(
         lastPercent = percent
       }
     }
-  } else {
-    progressCallback = onProgress
   }
 
   // Retry logic with exponential backoff
