@@ -105,7 +105,7 @@ function getSignalListeners() {
   if (_sigListeners === undefined) {
     _sigListeners = { __proto__: null } as unknown as SignalListenerMap
     const emitter = getEmitter()
-    const sigs = getSignals()
+    const sigs = signals()
     for (const sig of sigs) {
       _sigListeners[sig] = function listener() {
         // If there are no other listeners, an exit is coming!
@@ -126,33 +126,6 @@ function getSignalListeners() {
     }
   }
   return _sigListeners as SignalListenerMap
-}
-
-let _signals: string[] | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getSignals() {
-  if (_signals === undefined) {
-    _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
-    if (!WIN32) {
-      _signals.push(
-        'SIGVTALRM',
-        'SIGXCPU',
-        'SIGXFSZ',
-        'SIGUSR2',
-        'SIGTRAP',
-        'SIGSYS',
-        'SIGQUIT',
-        'SIGIOT',
-        // should detect profiler and enable/disable accordingly.
-        // see #21
-        // 'SIGPROF'
-      )
-    }
-    if (platform === 'linux') {
-      _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
-    }
-  }
-  return _signals as string[]
 }
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -188,7 +161,7 @@ export function load(): void {
     emitter.count += 1
   }
 
-  const sigs = getSignals()
+  const sigs = signals()
   const sigListeners = getSignalListeners()
   _signals = sigs.filter(sig => {
     try {
@@ -297,12 +270,34 @@ export function onExit(
   }
 }
 
+let _signals: string[] | undefined
 /**
  * Get the list of signals that are currently being monitored.
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function signals(): string[] | undefined {
-  return _signals
+export function signals() {
+  if (_signals === undefined) {
+    _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
+    if (!WIN32) {
+      _signals.push(
+        'SIGVTALRM',
+        'SIGXCPU',
+        'SIGXFSZ',
+        'SIGUSR2',
+        'SIGTRAP',
+        'SIGSYS',
+        'SIGQUIT',
+        'SIGIOT',
+        // should detect profiler and enable/disable accordingly.
+        // see #21
+        // 'SIGPROF'
+      )
+    }
+    if (platform === 'linux') {
+      _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
+    }
+  }
+  return _signals as string[]
 }
 
 /**
@@ -315,7 +310,7 @@ export function unload(): void {
   }
   loaded = false
 
-  const sigs = getSignals()
+  const sigs = signals()
   const sigListeners = getSignalListeners()
   for (const sig of sigs) {
     try {
