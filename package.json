@@ -724,7 +724,7 @@
     "cacache": "20.0.1",
     "debug": "4.4.3",
     "del": "8.0.1",
-    "del-cli": "6.0.0",
+    "del-cli": "7.0.0",
     "esbuild": "0.25.11",
     "eslint": "9.35.0",
     "eslint-import-resolver-typescript": "4.4.4",
