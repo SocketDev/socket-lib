@@ -22,6 +22,7 @@ export type InteropString = `${Interop}`
 
 // Based on SocketPURL_Type from socket-sdk-js
 export enum PURL_Type {
+  ALPM = 'alpm',
   APK = 'apk',
   BITBUCKET = 'bitbucket',
   COCOAPODS = 'cocoapods',
@@ -52,6 +53,7 @@ export enum PURL_Type {
   SWID = 'swid',
   SWIFT = 'swift',
   VCS = 'vcs',
+  VSCODE = 'vscode',
 }
 
 export type PURLString = `${PURL_Type}`
