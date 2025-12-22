@@ -744,7 +744,7 @@
     "make-fetch-happen": "15.0.2",
     "nock": "14.0.10",
     "normalize-package-data": "8.0.0",
-    "npm-package-arg": "13.0.0",
+    "npm-package-arg": "13.0.2",
     "pacote": "21.0.1",
     "picomatch": "2.3.1",
     "semver": "7.7.2",

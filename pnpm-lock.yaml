@@ -177,8 +177,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       npm-package-arg:
-        specifier: 13.0.0
-        version: 13.0.0
+        specifier: 13.0.2
+        version: 13.0.2
       pacote:
         specifier: 21.0.1
         version: 21.0.1
@@ -2517,8 +2517,8 @@ packages:
     resolution: {integrity: sha512-f1NpFjNI9O4VbKMOlA5QoBq/vSQPORHcTZ2feJpFkTHJ9eQkdlmZEKSjcAhxTGInC7RlEyScT9ui67NaOsjFWA==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  npm-package-arg@13.0.0:
-    resolution: {integrity: sha512-+t2etZAGcB7TbbLHfDwooV9ppB2LhhcT6A+L9cahsf9mEUAoQ6CktLEVvEnpD0N5CkX7zJqnPGaFtoQDy9EkHQ==}
+  npm-package-arg@13.0.2:
+    resolution: {integrity: sha512-IciCE3SY3uE84Ld8WZU23gAPPV9rIYod4F+rc+vJ7h7cwAJt9Vk6TVsK60ry7Uj3SRS3bqRRIGuTp9YVlk6WNA==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
   npm-packlist@10.0.2:
@@ -3152,6 +3152,10 @@ packages:
   validate-npm-package-name@6.0.2:
     resolution: {integrity: sha512-IUoow1YUtvoBBC06dXs8bR8B9vuA3aJfmQNKMoaPG/OFsPmoQvw8xh+6Ye25Gx9DQhoEom3Pcu9MKHerm/NpUQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  validate-npm-package-name@7.0.1:
+    resolution: {integrity: sha512-BM0Upcemlce8/9+HE+/VpWqn3u3mYh6Om/FEC8yPMnEHwf710fW5Q6fhjT1SQyRlZD1G9CJbgfH+rWgAcIvjlQ==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   vite-tsconfig-paths@5.1.4:
     resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
@@ -3862,7 +3866,7 @@ snapshots:
       minimatch: 10.0.3
       nopt: 8.1.0
       npm-install-checks: 7.1.2
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       npm-pick-manifest: 11.0.1
       npm-registry-fetch: 19.0.0
       pacote: 21.0.3
@@ -5359,7 +5363,7 @@ snapshots:
       '@npmcli/package-json': 7.0.0
       '@npmcli/run-script': 10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
       ci-info: 4.3.1
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       pacote: 21.0.4
       proc-log: 6.1.0
       promise-retry: 2.0.1
@@ -5374,7 +5378,7 @@ snapshots:
     dependencies:
       '@npmcli/arborist': 9.1.6
       '@npmcli/run-script': 10.0.0(patch_hash=65d59a7c4dd7b00f1c218cbcf97d78fe2f462f2e048de4a22b41bd70dbdefcdc)
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       pacote: 21.0.3
     transitivePeerDependencies:
       - supports-color
@@ -5653,12 +5657,12 @@ snapshots:
       semver: 7.7.2
       validate-npm-package-name: 6.0.2
 
-  npm-package-arg@13.0.0:
+  npm-package-arg@13.0.2:
     dependencies:
       hosted-git-info: 9.0.2
-      proc-log: 5.0.0
+      proc-log: 6.1.0
       semver: 7.7.2
-      validate-npm-package-name: 6.0.2
+      validate-npm-package-name: 7.0.1
 
   npm-packlist@10.0.2:
     dependencies:
@@ -5681,14 +5685,14 @@ snapshots:
     dependencies:
       npm-install-checks: 7.1.2
       npm-normalize-package-bin: 4.0.0
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       semver: 7.7.2
 
   npm-pick-manifest@11.0.3:
     dependencies:
       npm-install-checks: 8.0.0
       npm-normalize-package-bin: 5.0.0
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       semver: 7.7.2
 
   npm-registry-fetch@19.0.0:
@@ -5699,7 +5703,7 @@ snapshots:
       minipass: 7.1.2
       minipass-fetch: 4.0.1
       minizlib: 3.1.0
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       proc-log: 5.0.0
     transitivePeerDependencies:
       - supports-color
@@ -5712,7 +5716,7 @@ snapshots:
       minipass: 7.1.2
       minipass-fetch: 5.0.0
       minizlib: 3.1.0
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       proc-log: 6.1.0
     transitivePeerDependencies:
       - supports-color
@@ -5800,7 +5804,7 @@ snapshots:
       cacache: 20.0.1
       fs-minipass: 3.0.3
       minipass: 7.1.2
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       npm-packlist: 10.0.2
       npm-pick-manifest: 10.0.0
       npm-registry-fetch: 19.0.0
@@ -5822,7 +5826,7 @@ snapshots:
       cacache: 20.0.1
       fs-minipass: 3.0.3
       minipass: 7.1.2
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       npm-packlist: 10.0.2
       npm-pick-manifest: 11.0.1
       npm-registry-fetch: 19.0.0
@@ -5844,7 +5848,7 @@ snapshots:
       cacache: 20.0.1
       fs-minipass: 3.0.3
       minipass: 7.1.2
-      npm-package-arg: 13.0.0
+      npm-package-arg: 13.0.2
       npm-packlist: 10.0.3
       npm-pick-manifest: 11.0.3
       npm-registry-fetch: 19.1.1
@@ -6373,6 +6377,8 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@6.0.2: {}
+
+  validate-npm-package-name@7.0.1: {}
 
   vite-tsconfig-paths@5.1.4(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1)):
     dependencies:
