@@ -721,7 +721,7 @@
     "@vitest/ui": "4.0.3",
     "@yarnpkg/core": "4.5.0",
     "@yarnpkg/extensions": "2.0.6",
-    "cacache": "20.0.1",
+    "cacache": "20.0.3",
     "debug": "4.4.3",
     "del": "8.0.1",
     "del-cli": "6.0.0",
