@@ -114,21 +114,28 @@ export function getSocketCacacheDir(): string {
 
 /**
  * Get the Socket DLX directory (~/.socket/_dlx).
- * Can be overridden with environment variables.
+ * Can be overridden with SOCKET_DLX_DIR environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
  *
  * Priority order:
- *   1. SOCKET_DLX_DIR - Full override of DLX cache directory
- *   2. SOCKET_HOME/_dlx - Base directory override (inherits from getSocketUserDir)
- *   3. Default: $HOME/.socket/_dlx
- *   4. Fallback: /tmp/.socket/_dlx (Unix) or %TEMP%\.socket\_dlx (Windows)
+ *   1. Test override via setPath('socket-dlx-dir', ...)
+ *   2. SOCKET_DLX_DIR - Full override of DLX cache directory
+ *   3. SOCKET_HOME/_dlx - Base directory override (inherits from getSocketUserDir)
+ *   4. Default: $HOME/.socket/_dlx
+ *   5. Fallback: /tmp/.socket/_dlx (Unix) or %TEMP%\.socket\_dlx (Windows)
  */
 export function getSocketDlxDir(): string {
-  if (getSocketDlxDirEnv()) {
-    return normalizePath(getSocketDlxDirEnv() as string)
-  }
-  return normalizePath(
-    path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${SOCKET_DLX_APP_NAME}`),
-  )
+  return getPathValue('socket-dlx-dir', () => {
+    if (getSocketDlxDirEnv()) {
+      return normalizePath(getSocketDlxDirEnv() as string)
+    }
+    return normalizePath(
+      path.join(
+        getSocketUserDir(),
+        `${SOCKET_APP_PREFIX}${SOCKET_DLX_APP_NAME}`,
+      ),
+    )
+  })
 }
 
 /**

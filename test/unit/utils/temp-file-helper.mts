@@ -8,6 +8,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { resetPaths } from '@socketsecurity/lib/paths/rewire'
 
 /**
  * Mock the home directory for cross-platform testing.
@@ -40,6 +41,9 @@ export function mockHomeDir(homeDir: string): () => void {
     process.env['USERPROFILE'] = homeDir
   }
 
+  // Reset path cache after env changes.
+  resetPaths()
+
   // Return restore function.
   return () => {
     clearEnv('HOME')
@@ -61,6 +65,9 @@ export function mockHomeDir(homeDir: string): () => void {
     } else {
       process.env['USERPROFILE'] = originalEnv.USERPROFILE
     }
+
+    // Reset path cache after restoring env.
+    resetPaths()
   }
 }
 

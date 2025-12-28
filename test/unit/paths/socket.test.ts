@@ -206,6 +206,7 @@ describe('paths/socket', () => {
 
     it('should be overridable via env var', () => {
       setEnv('SOCKET_DLX_DIR', '/custom/dlx')
+      resetPaths()
       const result = getSocketDlxDir()
       expect(result).toBe('/custom/dlx')
     })
