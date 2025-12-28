@@ -27,12 +27,13 @@ import { getHome } from '../env/home'
 import {
   getSocketCacacheDir as getSocketCacacheDirEnv,
   getSocketDlxDirEnv,
+  getSocketHome,
 } from '../env/socket'
 import { getUserprofile } from '../env/windows'
 
 import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR } from './dirnames'
 import { normalizePath } from './normalize'
-import { getPathValue, registerCacheInvalidation } from './rewire'
+import { getPathValue } from './rewire'
 
 /**
  * Get the OS home directory.
@@ -60,19 +61,25 @@ export function getSocketHomePath(): string {
   return getSocketUserDir()
 }
 
-let _cachedSocketUserDir: string | undefined
-
 /**
  * Get the Socket user directory (~/.socket).
- * Result is memoized for performance.
+ * Can be overridden with SOCKET_HOME environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
+ *
+ * Priority order:
+ *   1. Test override via setPath('socket-user-dir', ...)
+ *   2. SOCKET_HOME - Base directory override
+ *   3. Default: $HOME/.socket
+ *   4. Fallback: /tmp/.socket (Unix) or %TEMP%\.socket (Windows)
  */
 export function getSocketUserDir(): string {
-  if (_cachedSocketUserDir === undefined) {
-    _cachedSocketUserDir = normalizePath(
-      path.join(getUserHomeDir(), DOT_SOCKET_DIR),
-    )
-  }
-  return _cachedSocketUserDir
+  return getPathValue('socket-user-dir', () => {
+    const socketHome = getSocketHome()
+    if (socketHome) {
+      return normalizePath(socketHome)
+    }
+    return normalizePath(path.join(getUserHomeDir(), DOT_SOCKET_DIR))
+  })
 }
 
 /**
@@ -84,31 +91,36 @@ export function getSocketAppDir(appName: string): string {
   )
 }
 
-let _cachedSocketCacacheDir: string | undefined
-
 /**
  * Get the Socket cacache directory (~/.socket/_cacache).
- * Can be overridden with SOCKET_CACACHE_DIR environment variable for testing.
- * Result is memoized for performance.
+ * Can be overridden with SOCKET_CACACHE_DIR environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
+ *
+ * Priority order:
+ *   1. Test override via setPath('socket-cacache-dir', ...)
+ *   2. SOCKET_CACACHE_DIR - Full override of cacache directory
+ *   3. Default: $SOCKET_HOME/_cacache or $HOME/.socket/_cacache
  */
 export function getSocketCacacheDir(): string {
-  if (_cachedSocketCacacheDir === undefined) {
+  return getPathValue('socket-cacache-dir', () => {
     if (getSocketCacacheDirEnv()) {
-      _cachedSocketCacacheDir = normalizePath(
-        getSocketCacacheDirEnv() as string,
-      )
-    } else {
-      _cachedSocketCacacheDir = normalizePath(
-        path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
-      )
+      return normalizePath(getSocketCacacheDirEnv() as string)
     }
-  }
-  return _cachedSocketCacacheDir
+    return normalizePath(
+      path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
+    )
+  })
 }
 
 /**
  * Get the Socket DLX directory (~/.socket/_dlx).
- * Can be overridden with SOCKET_DLX_DIR environment variable for testing.
+ * Can be overridden with environment variables.
+ *
+ * Priority order:
+ *   1. SOCKET_DLX_DIR - Full override of DLX cache directory
+ *   2. SOCKET_HOME/_dlx - Base directory override (inherits from getSocketUserDir)
+ *   3. Default: $HOME/.socket/_dlx
+ *   4. Fallback: /tmp/.socket/_dlx (Unix) or %TEMP%\.socket\_dlx (Windows)
  */
 export function getSocketDlxDir(): string {
   if (getSocketDlxDirEnv()) {
@@ -162,7 +174,13 @@ export function getSocketRegistryGithubCacheDir(): string {
 /**
  * Get the user's home directory.
  * Uses environment variables directly to support test mocking.
- * Falls back to os.homedir() if env vars not set.
+ * Falls back to temporary directory if home is not available.
+ *
+ * Priority order:
+ *   1. HOME environment variable (Unix)
+ *   2. USERPROFILE environment variable (Windows)
+ *   3. os.homedir()
+ *   4. Fallback: os.tmpdir() (rarely used, for restricted environments)
  */
 export function getUserHomeDir(): string {
   // Try HOME first (Unix)
@@ -175,20 +193,15 @@ export function getUserHomeDir(): string {
   if (userProfile) {
     return userProfile
   }
-  // Fallback to os.homedir()
-  return getOsHomeDir()
+  // Try os.homedir()
+  try {
+    const osHome = getOsHomeDir()
+    if (osHome) {
+      return osHome
+    }
+  } catch {
+    // os.homedir() can throw in restricted environments
+  }
+  // Final fallback to temp directory (rarely used)
+  return getOsTmpDir()
 }
-
-/**
- * Invalidate all cached path values.
- * Called automatically by the paths/rewire module when setPath/clearPath/resetPaths are used.
- *
- * @internal Used for test rewiring
- */
-export function invalidateCache(): void {
-  _cachedSocketUserDir = undefined
-  _cachedSocketCacacheDir = undefined
-}
-
-// Register cache invalidation with the rewire module
-registerCacheInvalidation(invalidateCache)

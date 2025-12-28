@@ -25,7 +25,6 @@ import {
   getSocketRegistryGithubCacheDir,
   getSocketUserDir,
   getUserHomeDir,
-  invalidateCache,
 } from '@socketsecurity/lib/paths/socket'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import {
@@ -33,13 +32,9 @@ import {
   resetPaths,
   setPath,
 } from '@socketsecurity/lib/paths/rewire'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 describe('paths/socket', () => {
-  beforeEach(() => {
-    invalidateCache()
-  })
-
   afterEach(() => {
     resetPaths()
     resetEnv()
@@ -131,7 +126,7 @@ describe('paths/socket', () => {
       const first = getSocketUserDir()
 
       setEnv('HOME', '/new/home')
-      invalidateCache()
+      resetPaths()
 
       const second = getSocketUserDir()
       // Should reflect new home dir
@@ -183,7 +178,7 @@ describe('paths/socket', () => {
 
     it('should be overridable via env var', () => {
       setEnv('SOCKET_CACACHE_DIR', '/custom/cacache')
-      invalidateCache()
+      resetPaths()
       const result = getSocketCacacheDir()
       expect(result).toBe('/custom/cacache')
     })
@@ -290,37 +285,6 @@ describe('paths/socket', () => {
     })
   })
 
-  describe('invalidateCache', () => {
-    it('should clear memoized values', () => {
-      clearEnv('SOCKET_CACACHE_DIR')
-      const first = getSocketUserDir()
-      const cacacheFirst = getSocketCacacheDir()
-
-      // Change home dir
-      setEnv('HOME', '/new/home')
-      invalidateCache()
-
-      const second = getSocketUserDir()
-      const cacacheSecond = getSocketCacacheDir()
-
-      expect(second).not.toBe(first)
-      expect(cacacheSecond).not.toBe(cacacheFirst)
-      expect(second).toContain('/new/home')
-    })
-
-    it('should clear cache when resetPaths is called', () => {
-      getSocketUserDir()
-
-      setEnv('HOME', '/another/home')
-      resetPaths()
-
-      const second = getSocketUserDir()
-      // Cache should be cleared, allowing new value to be computed
-      expect(typeof second).toBe('string')
-      expect(second.endsWith('.socket')).toBe(true)
-    })
-  })
-
   describe('integration', () => {
     it('should maintain consistent directory structure', () => {
       const userDir = getSocketUserDir()
@@ -352,7 +316,7 @@ describe('paths/socket', () => {
     it('should handle environment variable overrides', () => {
       setEnv('SOCKET_CACACHE_DIR', '/custom/cache')
       setEnv('SOCKET_DLX_DIR', '/custom/dlx')
-      invalidateCache()
+      resetPaths()
 
       expect(getSocketCacacheDir()).toBe('/custom/cache')
       expect(getSocketDlxDir()).toBe('/custom/dlx')
