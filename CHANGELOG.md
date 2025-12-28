@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.2) - 2025-12-28
+
+### Fixed
+
+- **paths**: Fixed missing `getPathValue()` caching in `getSocketDlxDir()`
+  - Now uses `getPathValue()` for performance, consistent with `getSocketUserDir()` and `getSocketCacacheDir()`
+  - Adds test override support via `setPath('socket-dlx-dir', ...)`
+  - Test helper `mockHomeDir()` now properly invalidates path cache with `resetPaths()` calls
+  - Resolves cache persistence issues in test environments
+
 ## [5.1.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.1) - 2025-12-28
 
 ### Added
