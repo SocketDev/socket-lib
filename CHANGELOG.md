@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.1) - 2025-12-28
+
+### Added
+
+- **paths**: Added `SOCKET_HOME` environment variable support to customize Socket base directory
+  - `getSocketUserDir()` now checks `SOCKET_HOME` before defaulting to `~/.socket`
+  - `getSocketDlxDir()` inherits `SOCKET_HOME` support (priority: `SOCKET_DLX_DIR` > `SOCKET_HOME/_dlx` > `~/.socket/_dlx`)
+  - Enables flexible directory configuration for restricted or custom environments
+
+### Changed
+
+- **paths**: Enhanced directory resolution with temporary directory fallback
+  - `getUserHomeDir()` now falls back to `os.tmpdir()` when home directory is unavailable
+  - Improves resilience in containerized and restricted environments
+  - Priority order: `HOME` > `USERPROFILE` > `os.homedir()` > `os.tmpdir()`
+
 ## [5.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.0) - 2025-12-17
 
 ### Added
