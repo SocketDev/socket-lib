@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.3) - 2025-12-29
+
+### Fixed
+
+- **http-request**: Fixed `httpDownload()` to properly handle HTTP redirects (3xx status codes)
+  - Added `followRedirects` option (default: `true`) to enable automatic redirect following
+  - Added `maxRedirects` option (default: `5`) to limit redirect chain length
+  - Now supports downloading from services that use CDN redirects, such as GitHub release assets
+  - Prevents GitHub API quota exhaustion by following `browser_download_url` redirects instead of using API endpoints
+  - Resolves "Request quota exhausted" errors when downloading GitHub release assets
+
 ## [5.1.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.2) - 2025-12-28
 
 ### Fixed
