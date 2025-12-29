@@ -307,6 +307,28 @@ export interface HttpResponse {
  */
 export interface HttpDownloadOptions {
   /**
+   * Whether to automatically follow HTTP redirects (3xx status codes).
+   * This is essential for downloading from services that use CDN redirects,
+   * such as GitHub release assets which return HTTP 302 to their CDN.
+   *
+   * @default true
+   *
+   * @example
+   * ```ts
+   * // Follow redirects (default) - works with GitHub releases
+   * await httpDownload(
+   *   'https://github.com/org/repo/releases/download/v1.0.0/file.zip',
+   *   '/tmp/file.zip'
+   * )
+   *
+   * // Don't follow redirects
+   * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+   *   followRedirects: false
+   * })
+   * ```
+   */
+  followRedirects?: boolean | undefined
+  /**
    * HTTP headers to send with the download request.
    * A `User-Agent` header is automatically added if not provided.
    *
@@ -341,6 +363,21 @@ export interface HttpDownloadOptions {
    * ```
    */
   logger?: Logger | undefined
+  /**
+   * Maximum number of redirects to follow before throwing an error.
+   * Only relevant when `followRedirects` is `true`.
+   *
+   * @default 5
+   *
+   * @example
+   * ```ts
+   * // Allow up to 10 redirects
+   * await httpDownload('https://example.com/many-redirects/file.zip', '/tmp/file.zip', {
+   *   maxRedirects: 10
+   * })
+   * ```
+   */
+  maxRedirects?: number | undefined
   /**
    * Callback for tracking download progress.
    * Called periodically as data is received.
@@ -688,11 +725,14 @@ async function httpRequestAttempt(
 }
 
 /**
- * Download a file from a URL to a local path with retry logic and progress callbacks.
+ * Download a file from a URL to a local path with redirect support, retry logic, and progress callbacks.
  * Uses streaming to avoid loading entire file in memory.
  *
  * The download is streamed directly to disk, making it memory-efficient even for
  * large files. Progress callbacks allow for real-time download status updates.
+ *
+ * Automatically follows HTTP redirects (3xx status codes) by default, making it suitable
+ * for downloading from services like GitHub releases that redirect to CDN URLs.
  *
  * @param url - The URL to download from (must start with http:// or https://)
  * @param destPath - Absolute path where the file should be saved
@@ -708,6 +748,12 @@ async function httpRequestAttempt(
  *   '/tmp/file.zip'
  * )
  * console.log(`Downloaded ${result.size} bytes to ${result.path}`)
+ *
+ * // Download from GitHub releases (handles 302 redirect automatically)
+ * await httpDownload(
+ *   'https://github.com/org/repo/releases/download/v1.0.0/binary.tar.gz',
+ *   '/tmp/binary.tar.gz'
+ * )
  *
  * // With progress tracking
  * await httpDownload(
@@ -740,8 +786,10 @@ export async function httpDownload(
   options?: HttpDownloadOptions | undefined,
 ): Promise<HttpDownloadResult> {
   const {
+    followRedirects = true,
     headers = {},
     logger,
+    maxRedirects = 5,
     onProgress,
     progressInterval = 10,
     retries = 0,
@@ -774,7 +822,9 @@ export async function httpDownload(
     try {
       // eslint-disable-next-line no-await-in-loop
       return await httpDownloadAttempt(url, destPath, {
+        followRedirects,
         headers,
+        maxRedirects,
         onProgress: progressCallback,
         timeout,
       })
@@ -806,7 +856,9 @@ async function httpDownloadAttempt(
   options: HttpDownloadOptions,
 ): Promise<HttpDownloadResult> {
   const {
+    followRedirects = true,
     headers = {},
+    maxRedirects = 5,
     onProgress,
     timeout = 120_000,
   } = { __proto__: null, ...options } as HttpDownloadOptions
@@ -842,6 +894,40 @@ async function httpDownloadAttempt(
     const request = httpModule.request(
       requestOptions,
       (res: IncomingMessage) => {
+        // Handle redirects
+        if (
+          followRedirects &&
+          res.statusCode &&
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          if (maxRedirects <= 0) {
+            reject(
+              new Error(
+                `Too many redirects (exceeded maximum: ${maxRedirects})`,
+              ),
+            )
+            return
+          }
+
+          // Follow redirect
+          const redirectUrl = res.headers.location.startsWith('http')
+            ? res.headers.location
+            : new URL(res.headers.location, url).toString()
+
+          resolve(
+            httpDownloadAttempt(redirectUrl, destPath, {
+              followRedirects,
+              headers,
+              maxRedirects: maxRedirects - 1,
+              onProgress,
+              timeout,
+            }),
+          )
+          return
+        }
+
         // Check status code
         if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
           closeStream()
