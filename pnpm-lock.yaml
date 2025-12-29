@@ -75,8 +75,8 @@ importers:
         specifier: 7.0.0
         version: 7.0.0
       '@npmcli/promise-spawn':
-        specifier: 8.0.3
-        version: 8.0.3
+        specifier: 9.0.1
+        version: 9.0.1
       '@socketregistry/is-unicode-supported':
         specifier: 1.0.5
         version: 1.0.5
