@@ -776,6 +776,7 @@
     "overrides": {
       "@npmcli/arborist": "9.1.6",
       "@npmcli/run-script": "10.0.0",
+      "@sigstore/sign": "4.1.0",
       "ansi-regex": "6.2.2",
       "lru-cache": "11.2.2",
       "semver": "7.7.2",
@@ -785,6 +786,7 @@
     },
     "patchedDependencies": {
       "@npmcli/run-script@10.0.0": "patches/@npmcli__run-script@10.0.0.patch",
+      "@sigstore/sign@4.1.0": "patches/@sigstore__sign@4.1.0.patch",
       "node-gyp@11.5.0": "patches/node-gyp@11.5.0.patch"
     }
   }
