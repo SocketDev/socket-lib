@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.4) - 2025-12-30
+
+### Fixed
+
+- **dependencies**: Removed unnecessary `http2` module dependency from `@sigstore/sign@4.1.0`
+  - Added pnpm override to force `@sigstore/sign@4.1.0` across all dependencies
+  - Created patch to inline HTTP header and status constants instead of importing `http2` module
+  - Eliminates loading of Node.js `http2` module for HTTP/1.1-only operations
+
 ## [5.1.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.3) - 2025-12-29
 
 ### Fixed
