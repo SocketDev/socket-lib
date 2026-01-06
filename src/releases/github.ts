@@ -1,0 +1,517 @@
+/**
+ * @fileoverview GitHub release download utilities for Socket projects.
+ *
+ * Provides unified utilities for downloading release assets from any GitHub repository.
+ * Supports version caching, retry logic, and follows the socket-cli/socket-btm pattern.
+ *
+ * Features:
+ * - Generic `downloadGitHubRelease` for any GitHub repo
+ * - Specialized `downloadSocketBtmRelease` for socket-btm releases
+ * - Download release assets with automatic retry and redirect handling
+ * - Cache downloaded binaries with version tracking (.version files)
+ * - Support for latest release tag lookup by tool prefix
+ * - Configurable working directory and download destination
+ * - macOS quarantine attribute removal for downloaded executables
+ *
+ * Directory Structure:
+ * ```
+ * {downloadDir}/{toolName}/{platformArch}/
+ * ├── {binaryName}
+ * └── .version
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Generic: Download from any GitHub repo
+ * const binaryPath = await downloadGitHubRelease({
+ *   owner: 'nodejs',
+ *   repo: 'node',
+ *   tag: 'v20.10.0',
+ *   assetName: 'node-v20.10.0-linux-x64.tar.gz',
+ *   binaryName: 'node',
+ *   toolName: 'node',
+ *   platformArch: 'linux-x64'
+ * })
+ *
+ * // Specialized: Download from socket-btm
+ * const nodePath = await downloadSocketBtmRelease({
+ *   toolPrefix: 'node-smol-',
+ *   assetName: 'node-linux-x64-musl',
+ *   binaryName: 'node',
+ *   toolName: 'node-smol',
+ *   platformArch: 'linux-x64-musl'
+ * })
+ * ```
+ */
+
+import { existsSync } from 'node:fs'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+
+import { safeMkdir } from '../fs.js'
+import { httpDownload, httpRequest } from '../http-request.js'
+import { getDefaultLogger } from '../logger.js'
+import { pRetry } from '../promises.js'
+import { spawn } from '../spawn.js'
+
+const logger = getDefaultLogger()
+
+/**
+ * Socket-btm GitHub repository configuration.
+ */
+export const SOCKET_BTM_REPO = {
+  owner: 'SocketDev',
+  repo: 'socket-btm',
+} as const
+
+/**
+ * Retry configuration for GitHub API requests.
+ * Uses exponential backoff to handle transient failures and rate limiting.
+ */
+const RETRY_CONFIG = Object.freeze({
+  __proto__: null,
+  // Exponential backoff: delay doubles with each retry (5s, 10s, 20s).
+  backoffFactor: 2,
+  // Initial delay before first retry.
+  baseDelayMs: 5000,
+  // Maximum number of retry attempts (excluding initial request).
+  retries: 2,
+})
+
+/**
+ * Configuration for repository access.
+ */
+export interface RepoConfig {
+  /**
+   * GitHub repository owner/organization.
+   */
+  owner: string
+  /**
+   * GitHub repository name.
+   */
+  repo: string
+}
+
+/**
+ * Get GitHub authentication headers if token is available.
+ *
+ * Environment Variables:
+ * - GH_TOKEN: GitHub Personal Access Token (preferred).
+ * - GITHUB_TOKEN: Alternative token environment variable.
+ *
+ * Rate Limits (per hour):
+ * - Unauthenticated: 60 requests.
+ * - Authenticated (personal token): 5,000 requests.
+ * - Authenticated (GitHub Actions): 1,000 requests.
+ *
+ * @returns Headers object with Authorization header if token exists.
+ */
+function getAuthHeaders(): Record<string, string> {
+  const token = process.env['GH_TOKEN'] || process.env['GITHUB_TOKEN']
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  return headers
+}
+
+/**
+ * Get latest release tag matching a tool prefix.
+ *
+ * Searches recent releases for the first tag matching the given prefix.
+ * Useful for finding latest versions of tools with date-based tags like
+ * `node-smol-20260105-c47753c` or `binject-20260106-1df5745`.
+ *
+ * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-', 'binject-')
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options
+ * @returns Latest release tag or null if not found
+ *
+ * @example
+ * ```ts
+ * const tag = await getLatestRelease('node-smol-', {
+ *   owner: 'SocketDev',
+ *   repo: 'socket-btm'
+ * })
+ * // Returns: 'node-smol-20260105-c47753c'
+ * ```
+ */
+export async function getLatestRelease(
+  toolPrefix: string,
+  repoConfig: RepoConfig,
+  options: { quiet?: boolean } = {},
+): Promise<string | null> {
+  const { owner, repo } = repoConfig
+  const { quiet = false } = options
+
+  return await pRetry(
+    async () => {
+      // Fetch recent releases (100 should cover all tool releases).
+      const response = await httpRequest(
+        `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch releases: ${response.status}`)
+      }
+
+      const releases = JSON.parse(response.body.toString('utf8'))
+
+      // Find the first release matching the tool prefix.
+      for (const release of releases) {
+        const { tag_name: tag } = release
+        if (tag.startsWith(toolPrefix)) {
+          if (!quiet) {
+            logger.info(`Found release: ${tag}`)
+          }
+          return tag
+        }
+      }
+
+      // No matching release found.
+      if (!quiet) {
+        logger.info(`No ${toolPrefix} release found in latest 100 releases`)
+      }
+      return null
+    },
+    {
+      ...RETRY_CONFIG,
+      onRetry: (attempt, error) => {
+        if (!quiet) {
+          logger.info(
+            `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for ${toolPrefix} release...`,
+          )
+          logger.warn(
+            `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
+        return undefined
+      },
+    },
+  )
+}
+
+/**
+ * Get download URL for a specific release asset.
+ *
+ * @param tag - Release tag name (e.g., 'node-smol-20260105-c47753c')
+ * @param assetName - Asset name to download (e.g., 'node-linux-x64-musl')
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options
+ * @returns Browser download URL for the asset
+ *
+ * @example
+ * ```ts
+ * const url = await getReleaseAssetUrl(
+ *   'node-smol-20260105-c47753c',
+ *   'node-linux-x64-musl',
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * ```
+ */
+export async function getReleaseAssetUrl(
+  tag: string,
+  assetName: string,
+  repoConfig: RepoConfig,
+  options: { quiet?: boolean } = {},
+): Promise<string | null> {
+  const { owner, repo } = repoConfig
+  const { quiet = false } = options
+
+  return await pRetry(
+    async () => {
+      const response = await httpRequest(
+        `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
+      }
+
+      const release = JSON.parse(response.body.toString('utf8'))
+
+      // Find the matching asset.
+      const asset = release.assets.find(
+        (a: { name: string }) => a.name === assetName,
+      )
+
+      if (!asset) {
+        throw new Error(`Asset ${assetName} not found in release ${tag}`)
+      }
+
+      if (!quiet) {
+        logger.info(`Found asset: ${assetName}`)
+      }
+
+      return asset.browser_download_url
+    },
+    {
+      ...RETRY_CONFIG,
+      onRetry: (attempt, error) => {
+        if (!quiet) {
+          logger.info(
+            `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for asset URL...`,
+          )
+          logger.warn(
+            `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
+        return undefined
+      },
+    },
+  )
+}
+
+/**
+ * Download a specific release asset.
+ *
+ * Uses browser_download_url to avoid consuming GitHub API quota.
+ * Automatically follows redirects and retries on failure.
+ *
+ * @param tag - Release tag name
+ * @param assetName - Asset name to download
+ * @param outputPath - Path to write the downloaded file
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options
+ *
+ * @example
+ * ```ts
+ * await downloadReleaseAsset(
+ *   'node-smol-20260105-c47753c',
+ *   'node-linux-x64-musl',
+ *   '/path/to/output/node',
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * ```
+ */
+export async function downloadReleaseAsset(
+  tag: string,
+  assetName: string,
+  outputPath: string,
+  repoConfig: RepoConfig,
+  options: { quiet?: boolean } = {},
+): Promise<void> {
+  const { owner, repo } = repoConfig
+  const { quiet = false } = options
+
+  // Get the browser_download_url for the asset.
+  const downloadUrl = await getReleaseAssetUrl(
+    tag,
+    assetName,
+    { owner, repo },
+    { quiet },
+  )
+
+  if (!downloadUrl) {
+    throw new Error(`Asset ${assetName} not found in release ${tag}`)
+  }
+
+  // Create output directory.
+  await safeMkdir(path.dirname(outputPath))
+
+  // Download using httpDownload which supports redirects and retries.
+  await httpDownload(downloadUrl, outputPath, {
+    logger: quiet ? undefined : logger,
+    progressInterval: 10,
+    retries: 2,
+    retryDelay: 5000,
+  })
+}
+
+/**
+ * Configuration for downloading a GitHub release.
+ */
+export interface DownloadGitHubReleaseConfig {
+  /**
+   * GitHub repository owner/organization.
+   */
+  owner: string
+  /**
+   * GitHub repository name.
+   */
+  repo: string
+  /**
+   * Working directory (defaults to process.cwd()).
+   * Used to resolve relative paths in downloadDir.
+   */
+  cwd?: string
+  /**
+   * Download destination directory.
+   * Can be absolute or relative to cwd.
+   * @default 'build/downloaded' (relative to cwd)
+   */
+  downloadDir?: string
+  /**
+   * Tool name for directory structure (e.g., 'node-smol', 'binject', 'lief').
+   * Creates subdirectory: {downloadDir}/{toolName}/{platformArch}/
+   */
+  toolName: string
+  /**
+   * Platform-arch identifier (e.g., 'linux-x64-musl', 'darwin-arm64').
+   * Used for the download directory path.
+   */
+  platformArch: string
+  /**
+   * Binary filename (e.g., 'node', 'binject', 'lief', 'node.exe').
+   */
+  binaryName: string
+  /**
+   * Asset name on GitHub (e.g., 'node-linux-x64-musl', 'binject-darwin-arm64').
+   */
+  assetName: string
+  /**
+   * Tool prefix for finding latest release (e.g., 'node-smol-', 'binject-').
+   * Either this or `tag` must be provided.
+   */
+  toolPrefix?: string
+  /**
+   * Specific release tag to download (e.g., 'node-smol-20260105-c47753c').
+   * If not provided, uses `toolPrefix` to find the latest release.
+   */
+  tag?: string
+  /**
+   * Suppress log messages.
+   * @default false
+   */
+  quiet?: boolean
+  /**
+   * Remove macOS quarantine attribute after download.
+   * Only applies when downloading on macOS for macOS binaries.
+   * @default true
+   */
+  removeMacOSQuarantine?: boolean
+}
+
+/**
+ * Download a binary from any GitHub repository with version caching.
+ *
+ * Downloads to: `{downloadDir}/{toolName}/{platformArch}/{binaryName}`
+ * Caches version in: `{downloadDir}/{toolName}/{platformArch}/.version`
+ *
+ * @param config - Download configuration
+ * @returns Path to the downloaded binary
+ *
+ * @example
+ * ```ts
+ * // Download from any GitHub repo
+ * const nodePath = await downloadGitHubRelease({
+ *   owner: 'nodejs',
+ *   repo: 'node',
+ *   cwd: process.cwd(),
+ *   downloadDir: 'build/downloaded',  // relative to cwd
+ *   toolName: 'node',
+ *   platformArch: 'linux-x64',
+ *   binaryName: 'node',
+ *   assetName: 'node-v20.10.0-linux-x64.tar.gz',
+ *   tag: 'v20.10.0'
+ * })
+ * ```
+ */
+export async function downloadGitHubRelease(
+  config: DownloadGitHubReleaseConfig,
+): Promise<string> {
+  const {
+    assetName,
+    binaryName,
+    cwd = process.cwd(),
+    downloadDir = 'build/downloaded',
+    owner,
+    platformArch,
+    quiet = false,
+    removeMacOSQuarantine = true,
+    repo,
+    tag: explicitTag,
+    toolName,
+    toolPrefix,
+  } = config
+
+  // Get release tag (either explicit or latest).
+  let tag: string
+  if (explicitTag) {
+    tag = explicitTag
+  } else if (toolPrefix) {
+    const latestTag = await getLatestRelease(
+      toolPrefix,
+      { owner, repo },
+      { quiet },
+    )
+    if (!latestTag) {
+      throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
+    }
+    tag = latestTag
+  } else {
+    throw new Error('Either toolPrefix or tag must be provided')
+  }
+
+  // Resolve download directory (can be absolute or relative to cwd).
+  const resolvedDownloadDir = path.isAbsolute(downloadDir)
+    ? downloadDir
+    : path.join(cwd, downloadDir)
+
+  // Build download paths following socket-cli pattern.
+  const binaryDir = path.join(resolvedDownloadDir, toolName, platformArch)
+  const binaryPath = path.join(binaryDir, binaryName)
+  const versionPath = path.join(binaryDir, '.version')
+
+  // Check if already downloaded.
+  if (existsSync(versionPath) && existsSync(binaryPath)) {
+    const cachedVersion = (await readFile(versionPath, 'utf8')).trim()
+    if (cachedVersion === tag) {
+      if (!quiet) {
+        logger.info(`Using cached ${toolName} (${platformArch}): ${binaryPath}`)
+      }
+      return binaryPath
+    }
+  }
+
+  // Download the asset.
+  if (!quiet) {
+    logger.info(`Downloading ${toolName} for ${platformArch}...`)
+  }
+  await downloadReleaseAsset(
+    tag,
+    assetName,
+    binaryPath,
+    { owner, repo },
+    { quiet },
+  )
+
+  // Make executable on Unix-like systems.
+  const isWindows = binaryName.endsWith('.exe')
+  if (!isWindows) {
+    await chmod(binaryPath, 0o755)
+
+    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
+    if (
+      removeMacOSQuarantine &&
+      process.platform === 'darwin' &&
+      platformArch.startsWith('darwin')
+    ) {
+      try {
+        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
+          stdio: 'ignore',
+        })
+      } catch {
+        // Ignore errors - attribute might not exist or xattr might not be available.
+      }
+    }
+  }
+
+  // Write version file.
+  await writeFile(versionPath, tag, 'utf8')
+
+  if (!quiet) {
+    logger.info(`Downloaded ${toolName} to ${binaryPath}`)
+  }
+
+  return binaryPath
+}
