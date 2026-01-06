@@ -27,7 +27,7 @@ import {
 } from '../../src/ipc'
 import { resetPaths, setPath } from '../../src/paths/rewire'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper.mjs'
+import { runWithTempDir } from './utils/temp-file-helper'
 
 describe('ipc', () => {
   describe('createIpcChannelId', () => {

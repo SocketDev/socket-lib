@@ -20,7 +20,7 @@ import {
   writeJson,
 } from '@socketsecurity/lib/fs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../unit/utils/temp-file-helper.mjs'
+import { runWithTempDir } from '../unit/utils/temp-file-helper'
 
 describe('fs integration', () => {
   describe('JSON file operations', () => {

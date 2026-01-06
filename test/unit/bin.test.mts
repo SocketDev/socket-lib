@@ -25,7 +25,7 @@ import {
   whichRealSync,
 } from '@socketsecurity/lib/bin'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper.mjs'
+import { runWithTempDir } from './utils/temp-file-helper'
 
 describe('bin', () => {
   describe('isShadowBinPath', () => {

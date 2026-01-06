@@ -25,7 +25,7 @@ import {
 } from '@socketsecurity/lib/http-request'
 import { Logger } from '@socketsecurity/lib/logger'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper.mjs'
+import { runWithTempDir } from './utils/temp-file-helper'
 
 // Test server setup
 let httpServer: http.Server

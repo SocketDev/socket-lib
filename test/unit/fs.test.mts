@@ -47,7 +47,7 @@ import {
   writeJsonSync,
 } from '@socketsecurity/lib/fs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper.mjs'
+import { runWithTempDir } from './utils/temp-file-helper'
 
 describe('fs', () => {
   describe('findUp', () => {

@@ -25,7 +25,7 @@ import {
 } from '@socketsecurity/lib/packages/operations'
 import type { PackageJson } from '@socketsecurity/lib/packages'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../utils/temp-file-helper.mjs'
+import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('packages/operations', () => {
   describe('getReleaseTag', () => {

@@ -19,7 +19,7 @@ import type {
   DlxPackageOptions,
   DlxPackageResult,
 } from '@socketsecurity/lib/dlx/package'
-import { runWithTempDir } from '../utils/temp-file-helper.mjs'
+import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('dlx-package', () => {
   describe('generatePackageCacheKey', () => {
