@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.1.4",
+  "version": "5.2.0",
   "packageManager": "pnpm@10.26.2",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -522,6 +522,14 @@
     "./regexps": {
       "types": "./dist/regexps.d.ts",
       "default": "./dist/regexps.js"
+    },
+    "./releases/github": {
+      "types": "./dist/releases/github.d.ts",
+      "default": "./dist/releases/github.js"
+    },
+    "./releases/socket-btm": {
+      "types": "./dist/releases/socket-btm.d.ts",
+      "default": "./dist/releases/socket-btm.js"
     },
     "./sea": {
       "types": "./dist/sea.d.ts",

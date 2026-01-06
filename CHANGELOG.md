@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.2.0) - 2026-01-06
+
+### Added
+
+- **releases**: Added GitHub release download utilities for cross-project use
+  - Added `downloadGitHubRelease()` for downloading releases from any GitHub repository
+  - Added `downloadSocketBtmRelease()` specialized wrapper for socket-btm releases
+  - Features version caching with `.version` files to avoid redundant downloads
+  - Supports cross-platform binary downloads (darwin, linux, win32) with automatic platform/arch detection
+  - Includes Linux musl/glibc support with musl as default for broader compatibility
+  - Automatically removes macOS quarantine attributes from downloaded binaries
+  - Supports generic asset downloads (WASM files, models, etc.)
+  - API inspired by industry tools: `brew`, `cargo`, `gh` for intuitive usage
+  - Package exports: `@socketsecurity/lib/releases/github` and `@socketsecurity/lib/releases/socket-btm`
+
 ## [5.1.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.4) - 2025-12-30
 
 ### Fixed
