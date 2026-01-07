@@ -1,47 +1,5 @@
 /**
- * @fileoverview GitHub release download utilities for Socket projects.
- *
- * Provides unified utilities for downloading release assets from any GitHub repository.
- * Supports version caching, retry logic, and follows the socket-cli/socket-btm pattern.
- *
- * Features:
- * - Generic `downloadGitHubRelease` for any GitHub repo
- * - Specialized `downloadSocketBtmRelease` for socket-btm releases
- * - Download release assets with automatic retry and redirect handling
- * - Cache downloaded binaries with version tracking (.version files)
- * - Support for latest release tag lookup by tool prefix
- * - Configurable working directory and download destination
- * - macOS quarantine attribute removal for downloaded executables
- *
- * Directory Structure:
- * ```
- * {downloadDir}/{toolName}/{platformArch}/
- * ├── {binaryName}
- * └── .version
- * ```
- *
- * @example
- * ```ts
- * // Generic: Download from any GitHub repo
- * const binaryPath = await downloadGitHubRelease({
- *   owner: 'nodejs',
- *   repo: 'node',
- *   tag: 'v20.10.0',
- *   assetName: 'node-v20.10.0-linux-x64.tar.gz',
- *   binaryName: 'node',
- *   toolName: 'node',
- *   platformArch: 'linux-x64'
- * })
- *
- * // Specialized: Download from socket-btm
- * const nodePath = await downloadSocketBtmRelease({
- *   toolPrefix: 'node-smol-',
- *   assetName: 'node-linux-x64-musl',
- *   binaryName: 'node',
- *   toolName: 'node-smol',
- *   platformArch: 'linux-x64-musl'
- * })
- * ```
+ * @fileoverview GitHub release download utilities.
  */
 
 import { chmodSync, existsSync } from 'fs'
@@ -94,19 +52,11 @@ export interface RepoConfig {
 
 /**
  * Get GitHub authentication headers if token is available.
- *
- * Environment Variables:
- * - GH_TOKEN: GitHub Personal Access Token (preferred).
- * - GITHUB_TOKEN: Alternative token environment variable.
- *
- * Rate Limits (per hour):
- * - Unauthenticated: 60 requests.
- * - Authenticated (personal token): 5,000 requests.
- * - Authenticated (GitHub Actions): 1,000 requests.
+ * Checks GH_TOKEN or GITHUB_TOKEN environment variables.
  *
  * @returns Headers object with Authorization header if token exists.
  */
-function getAuthHeaders(): Record<string, string> {
+export function getAuthHeaders(): Record<string, string> {
   const token = process.env['GH_TOKEN'] || process.env['GITHUB_TOKEN']
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
@@ -121,23 +71,10 @@ function getAuthHeaders(): Record<string, string> {
 /**
  * Get latest release tag matching a tool prefix.
  *
- * Searches recent releases for the first tag matching the given prefix.
- * Useful for finding latest versions of tools with date-based tags like
- * `node-smol-20260105-c47753c` or `binject-20260106-1df5745`.
- *
- * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-', 'binject-')
+ * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-')
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @returns Latest release tag or null if not found
- *
- * @example
- * ```ts
- * const tag = await getLatestRelease('node-smol-', {
- *   owner: 'SocketDev',
- *   repo: 'socket-btm'
- * })
- * // Returns: 'node-smol-20260105-c47753c'
- * ```
  */
 export async function getLatestRelease(
   toolPrefix: string,
@@ -200,20 +137,11 @@ export async function getLatestRelease(
 /**
  * Get download URL for a specific release asset.
  *
- * @param tag - Release tag name (e.g., 'node-smol-20260105-c47753c')
- * @param assetName - Asset name to download (e.g., 'node-linux-x64-musl')
+ * @param tag - Release tag name
+ * @param assetName - Asset name to download
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @returns Browser download URL for the asset
- *
- * @example
- * ```ts
- * const url = await getReleaseAssetUrl(
- *   'node-smol-20260105-c47753c',
- *   'node-linux-x64-musl',
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * ```
  */
 export async function getReleaseAssetUrl(
   tag: string,
@@ -274,24 +202,11 @@ export async function getReleaseAssetUrl(
 /**
  * Download a specific release asset.
  *
- * Uses browser_download_url to avoid consuming GitHub API quota.
- * Automatically follows redirects and retries on failure.
- *
  * @param tag - Release tag name
  * @param assetName - Asset name to download
  * @param outputPath - Path to write the downloaded file
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
- *
- * @example
- * ```ts
- * await downloadReleaseAsset(
- *   'node-smol-20260105-c47753c',
- *   'node-linux-x64-musl',
- *   '/path/to/output/node',
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * ```
  */
 export async function downloadReleaseAsset(
   tag: string,
@@ -331,90 +246,37 @@ export async function downloadReleaseAsset(
  * Configuration for downloading a GitHub release.
  */
 export interface DownloadGitHubReleaseConfig {
-  /**
-   * GitHub repository owner/organization.
-   */
+  /** GitHub repository owner/organization. */
   owner: string
-  /**
-   * GitHub repository name.
-   */
+  /** GitHub repository name. */
   repo: string
-  /**
-   * Working directory (defaults to process.cwd()).
-   * Used to resolve relative paths in downloadDir.
-   */
+  /** Working directory (defaults to process.cwd()). */
   cwd?: string
-  /**
-   * Download destination directory.
-   * Can be absolute or relative to cwd.
-   * @default 'build/downloaded' (relative to cwd)
-   */
+  /** Download destination directory. @default 'build/downloaded' */
   downloadDir?: string
-  /**
-   * Tool name for directory structure (e.g., 'node-smol', 'binject', 'lief').
-   * Creates subdirectory: {downloadDir}/{toolName}/{platformArch}/
-   */
+  /** Tool name for directory structure. */
   toolName: string
-  /**
-   * Platform-arch identifier (e.g., 'linux-x64-musl', 'darwin-arm64').
-   * Used for the download directory path.
-   */
+  /** Platform-arch identifier (e.g., 'linux-x64-musl'). */
   platformArch: string
-  /**
-   * Binary filename (e.g., 'node', 'binject', 'lief', 'node.exe').
-   */
+  /** Binary filename (e.g., 'node', 'binject'). */
   binaryName: string
-  /**
-   * Asset name on GitHub (e.g., 'node-linux-x64-musl', 'binject-darwin-arm64').
-   */
+  /** Asset name on GitHub. */
   assetName: string
-  /**
-   * Tool prefix for finding latest release (e.g., 'node-smol-', 'binject-').
-   * Either this or `tag` must be provided.
-   */
+  /** Tool prefix for finding latest release. */
   toolPrefix?: string
-  /**
-   * Specific release tag to download (e.g., 'node-smol-20260105-c47753c').
-   * If not provided, uses `toolPrefix` to find the latest release.
-   */
+  /** Specific release tag to download. */
   tag?: string
-  /**
-   * Suppress log messages.
-   * @default false
-   */
+  /** Suppress log messages. @default false */
   quiet?: boolean
-  /**
-   * Remove macOS quarantine attribute after download.
-   * Only applies when downloading on macOS for macOS binaries.
-   * @default true
-   */
+  /** Remove macOS quarantine attribute after download. @default true */
   removeMacOSQuarantine?: boolean
 }
 
 /**
  * Download a binary from any GitHub repository with version caching.
  *
- * Downloads to: `{downloadDir}/{toolName}/{platformArch}/{binaryName}`
- * Caches version in: `{downloadDir}/{toolName}/{platformArch}/.version`
- *
  * @param config - Download configuration
  * @returns Path to the downloaded binary
- *
- * @example
- * ```ts
- * // Download from any GitHub repo
- * const nodePath = await downloadGitHubRelease({
- *   owner: 'nodejs',
- *   repo: 'node',
- *   cwd: process.cwd(),
- *   downloadDir: 'build/downloaded',  // relative to cwd
- *   toolName: 'node',
- *   platformArch: 'linux-x64',
- *   binaryName: 'node',
- *   assetName: 'node-v20.10.0-linux-x64.tar.gz',
- *   tag: 'v20.10.0'
- * })
- * ```
  */
 export async function downloadGitHubRelease(
   config: DownloadGitHubReleaseConfig,

@@ -1,24 +1,5 @@
 /**
  * @fileoverview Socket-btm release download utilities.
- *
- * Provides utilities for downloading binaries and assets from the
- * SocketDev/socket-btm GitHub repository. This includes build tools,
- * Node.js binaries, and WASM assets.
- *
- * Features:
- * - Generic function for any socket-btm release asset or binary
- * - Cross-platform binary downloads (can download for target platform/arch)
- * - Automatic platform/arch detection with musl support for Linux
- * - Version caching with .version files
- * - macOS quarantine attribute removal
- * - Configurable working directory and download destination
- *
- * Directory Structure:
- * ```
- * {downloadDir}/{toolName}/{platformArch}/
- * ├── {binaryName}
- * └── .version
- * ```
  */
 
 import { existsSync } from 'fs'
@@ -49,80 +30,27 @@ export type Libc = 'musl' | 'glibc'
  * Configuration for downloading socket-btm binary releases.
  */
 export interface SocketBtmBinaryConfig {
-  /**
-   * Working directory (defaults to process.cwd()).
-   */
+  /** Working directory (defaults to process.cwd()). */
   cwd?: string
-  /**
-   * Download destination directory.
-   * Can be absolute or relative to cwd.
-   * @default 'build/downloaded' (relative to cwd)
-   *
-   * Inspired by: gh release download --dir
-   */
+  /** Download destination directory. @default 'build/downloaded' */
   downloadDir?: string
-  /**
-   * Tool/package name for directory structure and release matching.
-   * Similar to: brew install <formula>, cargo install <crate>
-   *
-   * Examples: 'node-smol', 'binject', 'binflate'
-   *
-   * Used for:
-   * - Directory path: {downloadDir}/{tool}/{platformArch}/
-   * - Finding release: Searches for tags starting with '{tool}-'
-   */
+  /** Tool/package name for directory structure and release matching. */
   tool: string
-  /**
-   * Binary/executable name (without extension).
-   * Similar to: brew formula→binary mapping (postgresql→psql, imagemagick→magick)
-   *
-   * Examples: 'node', 'binject', 'psql', 'magick'
-   *
-   * Used to construct:
-   * - Asset pattern: {bin}-{platform}-{arch}[-musl][.exe]
-   * - Output filename: {bin} or {bin}.exe
-   *
-   * Presence of this field indicates binary download (vs asset download).
-   *
-   * @default tool (e.g., 'binject'→'binject', but 'node-smol'→'node-smol')
-   */
+  /** Binary/executable name (without extension). @default tool */
   bin?: string
-  /**
-   * Target platform (defaults to current platform).
-   */
+  /** Target platform (defaults to current platform). */
   targetPlatform?: Platform
-  /**
-   * Target architecture (defaults to current arch).
-   */
+  /** Target architecture (defaults to current arch). */
   targetArch?: Arch
-  /**
-   * Linux libc variant (musl or glibc).
-   * Auto-detected from the Node.js binary if not specified.
-   * Ignored for non-Linux platforms.
-   */
+  /** Linux libc variant. Auto-detected if not specified. */
   libc?: Libc
-  /**
-   * Specific release tag to download.
-   * Inspired by: gh release download <tag>
-   *
-   * If not provided, downloads the latest release matching '{tool}-*' pattern.
-   *
-   * Examples: 'node-smol-20260105-c47753c', 'binject-20260106-1df5745'
-   */
+  /** Specific release tag to download. */
   tag?: string
-  /**
-   * Suppress log messages.
-   * @default false
-   */
+  /** Suppress log messages. @default false */
   quiet?: boolean
-  /**
-   * Remove macOS quarantine attribute after download.
-   * Only applies when downloading on macOS for macOS binaries.
-   * @default true
-   */
+  /** Remove macOS quarantine attribute after download. @default true */
   removeMacOSQuarantine?: boolean
-
-  // Discriminator: presence of 'asset' means this is NOT a binary config
+  /** @internal Discriminator field */
   asset?: never
 }
 
@@ -130,65 +58,23 @@ export interface SocketBtmBinaryConfig {
  * Configuration for downloading socket-btm generic assets.
  */
 export interface SocketBtmAssetConfig {
-  /**
-   * Working directory (defaults to process.cwd()).
-   */
+  /** Working directory (defaults to process.cwd()). */
   cwd?: string
-  /**
-   * Download destination directory.
-   * Can be absolute or relative to cwd.
-   * @default 'build/downloaded' (relative to cwd)
-   *
-   * Inspired by: gh release download --dir
-   */
+  /** Download destination directory. @default 'build/downloaded' */
   downloadDir?: string
-  /**
-   * Tool/package name for directory structure and release matching.
-   *
-   * Examples: 'yoga-layout', 'onnxruntime', 'models'
-   *
-   * Used for:
-   * - Directory path: {downloadDir}/{tool}/assets/
-   * - Finding release: Searches for tags starting with '{tool}-'
-   */
+  /** Tool/package name for directory structure and release matching. */
   tool: string
-  /**
-   * Asset name pattern on GitHub.
-   * Inspired by: gh release download --pattern
-   *
-   * Examples: 'yoga-sync.mjs', 'ort-wasm-simd.wasm', '*.onnx'
-   *
-   * Presence of this field indicates asset download (vs binary download).
-   */
+  /** Asset name pattern on GitHub. */
   asset: string
-  /**
-   * Output filename (e.g., 'yoga-sync.mjs').
-   * Inspired by: gh release download --output
-   *
-   * @default asset (uses the asset name as-is)
-   */
+  /** Output filename. @default asset */
   output?: string
-  /**
-   * Specific release tag to download.
-   * Inspired by: gh release download <tag>
-   *
-   * If not provided, downloads the latest release matching '{tool}-*' pattern.
-   *
-   * Examples: 'yoga-layout-v20260106-a39285c', 'onnxruntime-v20260106-a39285c'
-   */
+  /** Specific release tag to download. */
   tag?: string
-  /**
-   * Suppress log messages.
-   * @default false
-   */
+  /** Suppress log messages. @default false */
   quiet?: boolean
-  /**
-   * Remove macOS quarantine attribute after download.
-   * @default false (not needed for non-executable assets)
-   */
+  /** Remove macOS quarantine attribute after download. @default false */
   removeMacOSQuarantine?: boolean
-
-  // Discriminators: mutually exclusive with binary-specific fields
+  /** @internal Discriminator fields */
   bin?: never
   targetPlatform?: never
   targetArch?: never
@@ -214,13 +100,9 @@ const ARCH_MAP: Record<string, string> = {
  * Detect the libc variant (musl or glibc) on Linux systems.
  * Returns undefined for non-Linux platforms.
  *
- * Detection method: Check for musl-specific files in the filesystem.
- * This is more reliable than checking the Node.js binary, especially for
- * statically-linked binaries that may contain references to both libc variants.
- *
  * @returns 'musl', 'glibc', or undefined (for non-Linux)
  */
-function detectLibc(): Libc | undefined {
+export function detectLibc(): Libc | undefined {
   const platform = os.platform()
   if (platform !== 'linux') {
     return undefined
@@ -253,18 +135,13 @@ function detectLibc(): Libc | undefined {
 /**
  * Get asset name for a socket-btm binary.
  *
- * Examples:
- * - binject-darwin-arm64
- * - node-linux-x64-musl
- * - binject-win-x64.exe
- *
  * @param binaryBaseName - Binary basename (e.g., 'binject', 'node')
  * @param platform - Target platform
  * @param arch - Target architecture
  * @param libc - Linux libc variant (optional)
- * @returns Asset name
+ * @returns Asset name (e.g., 'binject-darwin-arm64', 'node-linux-x64-musl')
  */
-function getBinaryAssetName(
+export function getBinaryAssetName(
   binaryBaseName: string,
   platform: Platform,
   arch: Arch,
@@ -294,17 +171,16 @@ function getBinaryAssetName(
 /**
  * Get platform-arch identifier for directory structure.
  *
- * Examples:
- * - darwin-arm64
- * - linux-x64-musl
- * - win32-x64
- *
  * @param platform - Target platform
  * @param arch - Target architecture
  * @param libc - Linux libc variant (optional)
- * @returns Platform-arch identifier
+ * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl')
  */
-function getPlatformArch(platform: Platform, arch: Arch, libc?: Libc): string {
+export function getPlatformArch(
+  platform: Platform,
+  arch: Arch,
+  libc?: Libc,
+): string {
   const mappedArch = ARCH_MAP[arch]
   if (!mappedArch) {
     throw new Error(`Unsupported architecture: ${arch}`)
@@ -317,76 +193,22 @@ function getPlatformArch(platform: Platform, arch: Arch, libc?: Libc): string {
 /**
  * Get binary filename for output.
  *
- * Examples:
- * - node
- * - node.exe
- * - binject.exe
- *
  * @param binaryBaseName - Binary basename (e.g., 'node', 'binject')
  * @param platform - Target platform
- * @returns Binary filename
+ * @returns Binary filename (e.g., 'node', 'node.exe')
  */
-function getBinaryName(binaryBaseName: string, platform: Platform): string {
+export function getBinaryName(
+  binaryBaseName: string,
+  platform: Platform,
+): string {
   return platform === 'win32' ? `${binaryBaseName}.exe` : binaryBaseName
 }
 
 /**
  * Download a release from socket-btm.
  *
- * Generic function for downloading any socket-btm binary or asset.
- * Handles both platform-specific binaries and generic assets.
- *
  * @param config - Download configuration
  * @returns Path to the downloaded file
- *
- * @example
- * ```ts
- * // Binary: node-smol (like: brew install nodejs → node)
- * const nodePath = await downloadSocketBtmRelease({
- *   tool: 'node-smol',
- *   bin: 'node'
- * })
- *
- * // Binary: binject (like: cargo install binject → binject)
- * const binjectPath = await downloadSocketBtmRelease({
- *   tool: 'binject'
- * })
- *
- * // Binary: cross-platform
- * const binflatePath = await downloadSocketBtmRelease({
- *   tool: 'binflate',
- *   targetPlatform: 'linux',
- *   targetArch: 'x64',
- *   libc: 'musl'
- * })
- *
- * // Asset: WASM file
- * const yogaPath = await downloadSocketBtmRelease({
- *   tool: 'yoga-layout',
- *   asset: 'yoga-sync.mjs'
- * })
- *
- * // Asset: with custom output name
- * const ortPath = await downloadSocketBtmRelease({
- *   tool: 'onnxruntime',
- *   asset: 'ort-wasm-simd.wasm',
- *   output: 'ort.wasm'
- * })
- *
- * // Custom paths (like: gh release download --dir)
- * await downloadSocketBtmRelease({
- *   tool: 'node-smol',
- *   bin: 'node',
- *   cwd: '/path/to/project',
- *   downloadDir: 'build/cache'
- * })
- *
- * // Specific version (like: gh release download <tag>)
- * await downloadSocketBtmRelease({
- *   tool: 'binject',
- *   tag: 'binject-20260106-1df5745'
- * })
- * ```
  */
 export async function downloadSocketBtmRelease(
   config: SocketBtmReleaseConfig,
