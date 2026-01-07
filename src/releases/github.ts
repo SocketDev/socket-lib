@@ -5,7 +5,7 @@
 import { chmodSync, existsSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 
-import picomatch from 'picomatch'
+import picomatch from '../external/picomatch.js'
 
 import { safeMkdir } from '../fs.js'
 import { httpDownload, httpRequest } from '../http-request.js'
