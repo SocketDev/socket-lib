@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.3.0) - 2026-01-07
+
+### Added
+
+- **releases/socket-btm**: Exported helper functions for external use
+  - `detectLibc()`: Detect musl vs glibc on Linux systems
+  - `getBinaryAssetName()`: Get GitHub asset name for platform/arch
+  - `getBinaryName()`: Get binary filename with platform-appropriate extension
+  - `getPlatformArch()`: Get platform-arch identifier for directory structure
+
+- **releases/github**: Exported `getAuthHeaders()` for GitHub API authentication
+  - Returns headers with `Accept`, `X-GitHub-Api-Version`, and optional `Authorization`
+  - Checks `GH_TOKEN` and `GITHUB_TOKEN` environment variables
+
 ## [5.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.2.1) - 2026-01-06
 
 ### Fixed
