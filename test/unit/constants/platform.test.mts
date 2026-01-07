@@ -11,8 +11,12 @@
 
 import { describe, expect, it } from 'vitest'
 
+import os from 'node:os'
+
 import {
   DARWIN,
+  getArch,
+  getPlatform,
   S_IXGRP,
   S_IXOTH,
   S_IXUSR,
@@ -61,6 +65,81 @@ describe('constants/platform', () => {
       const win321 = WIN32
       const win322 = WIN32
       expect(win321).toBe(win322)
+    })
+  })
+
+  describe('getArch', () => {
+    it('should return a string', () => {
+      expect(typeof getArch()).toBe('string')
+    })
+
+    it('should match os.arch()', () => {
+      expect(getArch()).toBe(os.arch())
+    })
+
+    it('should return consistent value across calls', () => {
+      expect(getArch()).toBe(getArch())
+    })
+
+    it('should return a known architecture', () => {
+      expect([
+        'arm',
+        'arm64',
+        'ia32',
+        'mips',
+        'mipsel',
+        'ppc',
+        'ppc64',
+        's390',
+        's390x',
+        'x64',
+      ]).toContain(getArch())
+    })
+  })
+
+  describe('getPlatform', () => {
+    it('should return a string', () => {
+      expect(typeof getPlatform()).toBe('string')
+    })
+
+    it('should match os.platform()', () => {
+      expect(getPlatform()).toBe(os.platform())
+    })
+
+    it('should match process.platform', () => {
+      expect(getPlatform()).toBe(process.platform)
+    })
+
+    it('should return consistent value across calls', () => {
+      expect(getPlatform()).toBe(getPlatform())
+    })
+
+    it('should return a known platform', () => {
+      expect([
+        'aix',
+        'darwin',
+        'freebsd',
+        'linux',
+        'openbsd',
+        'sunos',
+        'win32',
+      ]).toContain(getPlatform())
+    })
+
+    it('should be consistent with DARWIN constant', () => {
+      if (DARWIN) {
+        expect(getPlatform()).toBe('darwin')
+      } else {
+        expect(getPlatform()).not.toBe('darwin')
+      }
+    })
+
+    it('should be consistent with WIN32 constant', () => {
+      if (WIN32) {
+        expect(getPlatform()).toBe('win32')
+      } else {
+        expect(getPlatform()).not.toBe('win32')
+      }
     })
   })
 
