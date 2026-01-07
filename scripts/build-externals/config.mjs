@@ -31,8 +31,10 @@ export const externalPackages = [
   // inquirer-pack: Bundle all @inquirer packages together.
   { name: 'inquirer-pack', bundle: true },
   { name: 'picomatch', bundle: false },
-  { name: 'spdx-correct', bundle: true },
-  { name: 'spdx-expression-parse', bundle: true },
+  // spdx-pack: Bundle spdx-correct, spdx-expression-parse, and dependencies together.
+  { name: 'spdx-pack', bundle: true },
+  { name: 'spdx-correct', bundle: false },
+  { name: 'spdx-expression-parse', bundle: false },
   { name: 'streaming-iterables', bundle: true },
   { name: 'validate-npm-package-name', bundle: true },
   { name: 'which', bundle: true },
