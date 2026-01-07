@@ -51,6 +51,185 @@ export interface RepoConfig {
 }
 
 /**
+ * Configuration for downloading a GitHub release.
+ */
+export interface DownloadGitHubReleaseConfig {
+  /** GitHub repository owner/organization. */
+  owner: string
+  /** GitHub repository name. */
+  repo: string
+  /** Working directory (defaults to process.cwd()). */
+  cwd?: string
+  /** Download destination directory. @default 'build/downloaded' */
+  downloadDir?: string
+  /** Tool name for directory structure. */
+  toolName: string
+  /** Platform-arch identifier (e.g., 'linux-x64-musl'). */
+  platformArch: string
+  /** Binary filename (e.g., 'node', 'binject'). */
+  binaryName: string
+  /** Asset name on GitHub. */
+  assetName: string
+  /** Tool prefix for finding latest release. */
+  toolPrefix?: string
+  /** Specific release tag to download. */
+  tag?: string
+  /** Suppress log messages. @default false */
+  quiet?: boolean
+  /** Remove macOS quarantine attribute after download. @default true */
+  removeMacOSQuarantine?: boolean
+}
+
+/**
+ * Download a binary from any GitHub repository with version caching.
+ *
+ * @param config - Download configuration
+ * @returns Path to the downloaded binary
+ */
+export async function downloadGitHubRelease(
+  config: DownloadGitHubReleaseConfig,
+): Promise<string> {
+  const {
+    assetName,
+    binaryName,
+    cwd = process.cwd(),
+    downloadDir = 'build/downloaded',
+    owner,
+    platformArch,
+    quiet = false,
+    removeMacOSQuarantine = true,
+    repo,
+    tag: explicitTag,
+    toolName,
+    toolPrefix,
+  } = config
+
+  // Get release tag (either explicit or latest).
+  let tag: string
+  if (explicitTag) {
+    tag = explicitTag
+  } else if (toolPrefix) {
+    const latestTag = await getLatestRelease(
+      toolPrefix,
+      { owner, repo },
+      { quiet },
+    )
+    if (!latestTag) {
+      throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
+    }
+    tag = latestTag
+  } else {
+    throw new Error('Either toolPrefix or tag must be provided')
+  }
+
+  // Resolve download directory (can be absolute or relative to cwd).
+  const resolvedDownloadDir = path.isAbsolute(downloadDir)
+    ? downloadDir
+    : path.join(cwd, downloadDir)
+
+  // Build download paths following socket-cli pattern.
+  const binaryDir = path.join(resolvedDownloadDir, toolName, platformArch)
+  const binaryPath = path.join(binaryDir, binaryName)
+  const versionPath = path.join(binaryDir, '.version')
+
+  // Check if already downloaded.
+  if (existsSync(versionPath) && existsSync(binaryPath)) {
+    const cachedVersion = (await readFile(versionPath, 'utf8')).trim()
+    if (cachedVersion === tag) {
+      if (!quiet) {
+        logger.info(`Using cached ${toolName} (${platformArch}): ${binaryPath}`)
+      }
+      return binaryPath
+    }
+  }
+
+  // Download the asset.
+  if (!quiet) {
+    logger.info(`Downloading ${toolName} for ${platformArch}...`)
+  }
+  await downloadReleaseAsset(
+    tag,
+    assetName,
+    binaryPath,
+    { owner, repo },
+    { quiet },
+  )
+
+  // Make executable on Unix-like systems.
+  const isWindows = binaryName.endsWith('.exe')
+  if (!isWindows) {
+    chmodSync(binaryPath, 0o755)
+
+    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
+    if (
+      removeMacOSQuarantine &&
+      process.platform === 'darwin' &&
+      platformArch.startsWith('darwin')
+    ) {
+      try {
+        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
+          stdio: 'ignore',
+        })
+      } catch {
+        // Ignore errors - attribute might not exist or xattr might not be available.
+      }
+    }
+  }
+
+  // Write version file.
+  await writeFile(versionPath, tag, 'utf8')
+
+  if (!quiet) {
+    logger.info(`Downloaded ${toolName} to ${binaryPath}`)
+  }
+
+  return binaryPath
+}
+
+/**
+ * Download a specific release asset.
+ *
+ * @param tag - Release tag name
+ * @param assetName - Asset name to download
+ * @param outputPath - Path to write the downloaded file
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options
+ */
+export async function downloadReleaseAsset(
+  tag: string,
+  assetName: string,
+  outputPath: string,
+  repoConfig: RepoConfig,
+  options: { quiet?: boolean } = {},
+): Promise<void> {
+  const { owner, repo } = repoConfig
+  const { quiet = false } = options
+
+  // Get the browser_download_url for the asset.
+  const downloadUrl = await getReleaseAssetUrl(
+    tag,
+    assetName,
+    { owner, repo },
+    { quiet },
+  )
+
+  if (!downloadUrl) {
+    throw new Error(`Asset ${assetName} not found in release ${tag}`)
+  }
+
+  // Create output directory.
+  await safeMkdir(path.dirname(outputPath))
+
+  // Download using httpDownload which supports redirects and retries.
+  await httpDownload(downloadUrl, outputPath, {
+    logger: quiet ? undefined : logger,
+    progressInterval: 10,
+    retries: 2,
+    retryDelay: 5000,
+  })
+}
+
+/**
  * Get GitHub authentication headers if token is available.
  * Checks GH_TOKEN or GITHUB_TOKEN environment variables.
  *
@@ -197,183 +376,4 @@ export async function getReleaseAssetUrl(
       },
     },
   )
-}
-
-/**
- * Download a specific release asset.
- *
- * @param tag - Release tag name
- * @param assetName - Asset name to download
- * @param outputPath - Path to write the downloaded file
- * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
- */
-export async function downloadReleaseAsset(
-  tag: string,
-  assetName: string,
-  outputPath: string,
-  repoConfig: RepoConfig,
-  options: { quiet?: boolean } = {},
-): Promise<void> {
-  const { owner, repo } = repoConfig
-  const { quiet = false } = options
-
-  // Get the browser_download_url for the asset.
-  const downloadUrl = await getReleaseAssetUrl(
-    tag,
-    assetName,
-    { owner, repo },
-    { quiet },
-  )
-
-  if (!downloadUrl) {
-    throw new Error(`Asset ${assetName} not found in release ${tag}`)
-  }
-
-  // Create output directory.
-  await safeMkdir(path.dirname(outputPath))
-
-  // Download using httpDownload which supports redirects and retries.
-  await httpDownload(downloadUrl, outputPath, {
-    logger: quiet ? undefined : logger,
-    progressInterval: 10,
-    retries: 2,
-    retryDelay: 5000,
-  })
-}
-
-/**
- * Configuration for downloading a GitHub release.
- */
-export interface DownloadGitHubReleaseConfig {
-  /** GitHub repository owner/organization. */
-  owner: string
-  /** GitHub repository name. */
-  repo: string
-  /** Working directory (defaults to process.cwd()). */
-  cwd?: string
-  /** Download destination directory. @default 'build/downloaded' */
-  downloadDir?: string
-  /** Tool name for directory structure. */
-  toolName: string
-  /** Platform-arch identifier (e.g., 'linux-x64-musl'). */
-  platformArch: string
-  /** Binary filename (e.g., 'node', 'binject'). */
-  binaryName: string
-  /** Asset name on GitHub. */
-  assetName: string
-  /** Tool prefix for finding latest release. */
-  toolPrefix?: string
-  /** Specific release tag to download. */
-  tag?: string
-  /** Suppress log messages. @default false */
-  quiet?: boolean
-  /** Remove macOS quarantine attribute after download. @default true */
-  removeMacOSQuarantine?: boolean
-}
-
-/**
- * Download a binary from any GitHub repository with version caching.
- *
- * @param config - Download configuration
- * @returns Path to the downloaded binary
- */
-export async function downloadGitHubRelease(
-  config: DownloadGitHubReleaseConfig,
-): Promise<string> {
-  const {
-    assetName,
-    binaryName,
-    cwd = process.cwd(),
-    downloadDir = 'build/downloaded',
-    owner,
-    platformArch,
-    quiet = false,
-    removeMacOSQuarantine = true,
-    repo,
-    tag: explicitTag,
-    toolName,
-    toolPrefix,
-  } = config
-
-  // Get release tag (either explicit or latest).
-  let tag: string
-  if (explicitTag) {
-    tag = explicitTag
-  } else if (toolPrefix) {
-    const latestTag = await getLatestRelease(
-      toolPrefix,
-      { owner, repo },
-      { quiet },
-    )
-    if (!latestTag) {
-      throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
-    }
-    tag = latestTag
-  } else {
-    throw new Error('Either toolPrefix or tag must be provided')
-  }
-
-  // Resolve download directory (can be absolute or relative to cwd).
-  const resolvedDownloadDir = path.isAbsolute(downloadDir)
-    ? downloadDir
-    : path.join(cwd, downloadDir)
-
-  // Build download paths following socket-cli pattern.
-  const binaryDir = path.join(resolvedDownloadDir, toolName, platformArch)
-  const binaryPath = path.join(binaryDir, binaryName)
-  const versionPath = path.join(binaryDir, '.version')
-
-  // Check if already downloaded.
-  if (existsSync(versionPath) && existsSync(binaryPath)) {
-    const cachedVersion = (await readFile(versionPath, 'utf8')).trim()
-    if (cachedVersion === tag) {
-      if (!quiet) {
-        logger.info(`Using cached ${toolName} (${platformArch}): ${binaryPath}`)
-      }
-      return binaryPath
-    }
-  }
-
-  // Download the asset.
-  if (!quiet) {
-    logger.info(`Downloading ${toolName} for ${platformArch}...`)
-  }
-  await downloadReleaseAsset(
-    tag,
-    assetName,
-    binaryPath,
-    { owner, repo },
-    { quiet },
-  )
-
-  // Make executable on Unix-like systems.
-  const isWindows = binaryName.endsWith('.exe')
-  if (!isWindows) {
-    chmodSync(binaryPath, 0o755)
-
-    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
-    if (
-      removeMacOSQuarantine &&
-      process.platform === 'darwin' &&
-      platformArch.startsWith('darwin')
-    ) {
-      try {
-        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
-          stdio: 'ignore',
-        })
-      } catch {
-        // Ignore errors - attribute might not exist or xattr might not be available.
-      }
-    }
-  }
-
-  // Write version file.
-  await writeFile(versionPath, tag, 'utf8')
-
-  if (!quiet) {
-    logger.info(`Downloaded ${toolName} to ${binaryPath}`)
-  }
-
-  return binaryPath
 }

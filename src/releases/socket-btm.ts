@@ -133,78 +133,6 @@ export function detectLibc(): Libc | undefined {
 }
 
 /**
- * Get asset name for a socket-btm binary.
- *
- * @param binaryBaseName - Binary basename (e.g., 'binject', 'node')
- * @param platform - Target platform
- * @param arch - Target architecture
- * @param libc - Linux libc variant (optional)
- * @returns Asset name (e.g., 'binject-darwin-arm64', 'node-linux-x64-musl')
- */
-export function getBinaryAssetName(
-  binaryBaseName: string,
-  platform: Platform,
-  arch: Arch,
-  libc?: Libc | undefined,
-): string {
-  const mappedArch = ARCH_MAP[arch]
-  if (!mappedArch) {
-    throw new Error(`Unsupported architecture: ${arch}`)
-  }
-
-  const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
-  const ext = platform === 'win32' ? '.exe' : ''
-
-  if (platform === 'darwin') {
-    return `${binaryBaseName}-darwin-${mappedArch}${ext}`
-  }
-  if (platform === 'linux') {
-    return `${binaryBaseName}-linux-${mappedArch}${muslSuffix}${ext}`
-  }
-  if (platform === 'win32') {
-    return `${binaryBaseName}-win-${mappedArch}${ext}`
-  }
-
-  throw new Error(`Unsupported platform: ${platform}`)
-}
-
-/**
- * Get platform-arch identifier for directory structure.
- *
- * @param platform - Target platform
- * @param arch - Target architecture
- * @param libc - Linux libc variant (optional)
- * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl')
- */
-export function getPlatformArch(
-  platform: Platform,
-  arch: Arch,
-  libc?: Libc,
-): string {
-  const mappedArch = ARCH_MAP[arch]
-  if (!mappedArch) {
-    throw new Error(`Unsupported architecture: ${arch}`)
-  }
-
-  const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
-  return `${platform}-${mappedArch}${muslSuffix}`
-}
-
-/**
- * Get binary filename for output.
- *
- * @param binaryBaseName - Binary basename (e.g., 'node', 'binject')
- * @param platform - Target platform
- * @returns Binary filename (e.g., 'node', 'node.exe')
- */
-export function getBinaryName(
-  binaryBaseName: string,
-  platform: Platform,
-): string {
-  return platform === 'win32' ? `${binaryBaseName}.exe` : binaryBaseName
-}
-
-/**
  * Download a release from socket-btm.
  *
  * @param config - Download configuration
@@ -291,4 +219,76 @@ export async function downloadSocketBtmRelease(
   }
 
   return await downloadGitHubRelease(downloadConfig)
+}
+
+/**
+ * Get asset name for a socket-btm binary.
+ *
+ * @param binaryBaseName - Binary basename (e.g., 'binject', 'node')
+ * @param platform - Target platform
+ * @param arch - Target architecture
+ * @param libc - Linux libc variant (optional)
+ * @returns Asset name (e.g., 'binject-darwin-arm64', 'node-linux-x64-musl')
+ */
+export function getBinaryAssetName(
+  binaryBaseName: string,
+  platform: Platform,
+  arch: Arch,
+  libc?: Libc | undefined,
+): string {
+  const mappedArch = ARCH_MAP[arch]
+  if (!mappedArch) {
+    throw new Error(`Unsupported architecture: ${arch}`)
+  }
+
+  const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
+  const ext = platform === 'win32' ? '.exe' : ''
+
+  if (platform === 'darwin') {
+    return `${binaryBaseName}-darwin-${mappedArch}${ext}`
+  }
+  if (platform === 'linux') {
+    return `${binaryBaseName}-linux-${mappedArch}${muslSuffix}${ext}`
+  }
+  if (platform === 'win32') {
+    return `${binaryBaseName}-win-${mappedArch}${ext}`
+  }
+
+  throw new Error(`Unsupported platform: ${platform}`)
+}
+
+/**
+ * Get binary filename for output.
+ *
+ * @param binaryBaseName - Binary basename (e.g., 'node', 'binject')
+ * @param platform - Target platform
+ * @returns Binary filename (e.g., 'node', 'node.exe')
+ */
+export function getBinaryName(
+  binaryBaseName: string,
+  platform: Platform,
+): string {
+  return platform === 'win32' ? `${binaryBaseName}.exe` : binaryBaseName
+}
+
+/**
+ * Get platform-arch identifier for directory structure.
+ *
+ * @param platform - Target platform
+ * @param arch - Target architecture
+ * @param libc - Linux libc variant (optional)
+ * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl')
+ */
+export function getPlatformArch(
+  platform: Platform,
+  arch: Arch,
+  libc?: Libc,
+): string {
+  const mappedArch = ARCH_MAP[arch]
+  if (!mappedArch) {
+    throw new Error(`Unsupported architecture: ${arch}`)
+  }
+
+  const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
+  return `${platform}-${mappedArch}${muslSuffix}`
 }
