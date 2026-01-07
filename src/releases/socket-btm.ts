@@ -12,8 +12,10 @@ import {
   type Platform,
 } from '../constants/platform.js'
 import {
+  type AssetPattern,
   downloadGitHubRelease,
   type DownloadGitHubReleaseConfig,
+  findReleaseAsset,
   SOCKET_BTM_REPO,
 } from './github.js'
 
@@ -57,9 +59,9 @@ export interface SocketBtmAssetConfig {
   downloadDir?: string
   /** Tool/package name for directory structure and release matching. */
   tool: string
-  /** Asset name pattern on GitHub. */
-  asset: string
-  /** Output filename. @default asset */
+  /** Asset name or pattern on GitHub. Can be an exact name (string) or a pattern (prefix/suffix or RegExp). */
+  asset: string | AssetPattern
+  /** Output filename. @default resolved asset name */
   output?: string
   /** Specific release tag to download. */
   tag?: string
@@ -149,8 +151,39 @@ export async function downloadSocketBtmRelease(
       removeMacOSQuarantine = false,
     } = config as SocketBtmAssetConfig
 
-    // Default output to asset name if not provided
-    const outputName = output || asset
+    // Resolve asset pattern to actual asset name if needed.
+    let resolvedAsset: string
+    let resolvedTag = tag
+
+    if (typeof asset === 'string') {
+      // Exact asset name provided.
+      resolvedAsset = asset
+    } else {
+      // Pattern provided - need to find matching asset.
+      if (tag) {
+        throw new Error(
+          'Cannot use asset pattern with explicit tag. Either provide exact asset name or omit tag.',
+        )
+      }
+
+      // Find matching asset in latest release.
+      const result = await findReleaseAsset(
+        toolPrefix,
+        asset,
+        { owner: SOCKET_BTM_REPO.owner, repo: SOCKET_BTM_REPO.repo },
+        { quiet },
+      )
+
+      if (!result) {
+        throw new Error(`No ${tool} release with matching asset pattern found`)
+      }
+
+      resolvedAsset = result.assetName
+      resolvedTag = result.tag
+    }
+
+    // Default output to resolved asset name if not provided
+    const outputName = output || resolvedAsset
 
     // For non-binary assets, use a simple 'assets' directory instead of platform-arch
     const platformArch = 'assets'
@@ -163,9 +196,9 @@ export async function downloadSocketBtmRelease(
       toolName: tool,
       platformArch,
       binaryName: outputName,
-      assetName: asset,
+      assetName: resolvedAsset,
       toolPrefix,
-      tag,
+      tag: resolvedTag,
       quiet,
       removeMacOSQuarantine,
     }
