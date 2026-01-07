@@ -267,6 +267,136 @@ export function getAuthHeaders(): Record<string, string> {
 }
 
 /**
+ * Pattern for matching release assets.
+ * Can be either a prefix/suffix pair or a RegExp.
+ */
+export type AssetPattern = { prefix: string; suffix: string } | RegExp
+
+/**
+ * Result of finding a release asset.
+ */
+export interface FindReleaseAssetResult {
+  /** The release tag name. */
+  tag: string
+  /** The matching asset name. */
+  assetName: string
+}
+
+/**
+ * Find a release asset matching a pattern in the latest release.
+ * Searches for the first release matching the tool prefix,
+ * then finds the first asset matching the provided pattern.
+ *
+ * @param toolPrefix - Tool name prefix to search for (e.g., 'yoga-layout-')
+ * @param assetPattern - Pattern to match asset names (prefix/suffix or RegExp)
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options
+ * @returns Result with tag and asset name, or null if not found
+ *
+ * @example
+ * ```ts
+ * // Find yoga-sync asset with timestamped name
+ * const result = await findReleaseAsset(
+ *   'yoga-layout-',
+ *   { prefix: 'yoga-sync-', suffix: '.mjs' },
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * // result = { tag: 'yoga-layout-2024-01-15-abc123', assetName: 'yoga-sync-2024-01-15-abc123.mjs' }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Find models tar.gz with regex
+ * const result = await findReleaseAsset(
+ *   'models-',
+ *   /^models-\d{4}-\d{2}-\d{2}-.+\.tar\.gz$/,
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * ```
+ */
+export async function findReleaseAsset(
+  toolPrefix: string,
+  assetPattern: AssetPattern,
+  repoConfig: RepoConfig,
+  options: { quiet?: boolean } = {},
+): Promise<FindReleaseAssetResult | null> {
+  const { owner, repo } = repoConfig
+  const { quiet = false } = options
+
+  return await pRetry(
+    async () => {
+      // Fetch recent releases (100 should cover all tool releases).
+      const response = await httpRequest(
+        `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch releases: ${response.status}`)
+      }
+
+      const releases = JSON.parse(response.body.toString('utf8'))
+
+      // Find the first release matching the tool prefix.
+      for (const release of releases) {
+        const { assets, tag_name: tag } = release
+        if (!tag.startsWith(toolPrefix)) {
+          continue
+        }
+
+        // Find matching asset in this release.
+        let matchingAsset: { name: string } | undefined
+
+        if (assetPattern instanceof RegExp) {
+          matchingAsset = assets.find((a: { name: string }) =>
+            assetPattern.test(a.name),
+          )
+        } else {
+          const { prefix, suffix } = assetPattern
+          matchingAsset = assets.find(
+            (a: { name: string }) =>
+              a.name.startsWith(prefix) && a.name.endsWith(suffix),
+          )
+        }
+
+        if (matchingAsset) {
+          if (!quiet) {
+            logger.info(`Found release: ${tag}`)
+            logger.info(`Found asset: ${matchingAsset.name}`)
+          }
+          return {
+            assetName: matchingAsset.name,
+            tag,
+          }
+        }
+      }
+
+      // No matching release or asset found.
+      if (!quiet) {
+        logger.info(`No ${toolPrefix} release with matching asset found`)
+      }
+      return null
+    },
+    {
+      ...RETRY_CONFIG,
+      onRetry: (attempt, error) => {
+        if (!quiet) {
+          logger.info(
+            `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for release asset search...`,
+          )
+          logger.warn(
+            `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
+        return undefined
+      },
+    },
+  )
+}
+
+/**
  * Get latest release tag matching a tool prefix.
  *
  * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-')
