@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('@inquirer/password')
+// Re-export from inquirer-pack bundle for better deduplication.
+const { password } = require('../inquirer-pack')
+module.exports = password

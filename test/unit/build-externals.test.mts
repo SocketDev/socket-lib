@@ -181,13 +181,15 @@ describe('build-externals', () => {
 
   it('should have @inquirer modules properly bundled', async () => {
     const requiredInquirerModules = [
+      'checkbox',
+      'confirm',
       'input',
       'password',
       'search',
-      'confirm',
       'select',
     ]
     const inquirerDir = path.join(distExternalDir, '@inquirer')
+    const inquirerPackPath = path.join(distExternalDir, 'inquirer-pack.js')
 
     try {
       await fs.access(inquirerDir)
@@ -195,6 +197,29 @@ describe('build-externals', () => {
       expect.fail(`@inquirer directory not found at ${inquirerDir}`)
     }
 
+    // Check that inquirer-pack bundle exists and is properly sized.
+    try {
+      const [packStat, packContent] = await Promise.all([
+        fs.stat(inquirerPackPath),
+        fs.readFile(inquirerPackPath, 'utf8'),
+      ])
+
+      if (packStat.size <= 10_000) {
+        expect.fail(
+          `inquirer-pack should be properly bundled (> 10KB), got ${packStat.size} bytes`,
+        )
+      }
+
+      if (isStubReexport(packContent)) {
+        expect.fail('inquirer-pack should not be a stub re-export')
+      }
+    } catch (error) {
+      expect.fail(
+        `inquirer-pack not found or not properly bundled at ${inquirerPackPath}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
+    // Check that individual @inquirer modules are thin wrappers.
     const checkPromises = requiredInquirerModules.map(async module => {
       const modulePath = path.join(inquirerDir, `${module}.js`)
 
@@ -204,18 +229,20 @@ describe('build-externals', () => {
           fs.readFile(modulePath, 'utf8'),
         ])
 
-        if (stat.size <= 1000) {
+        if (stat.size > 1000) {
           expect.fail(
-            `@inquirer/${module} should be properly bundled (> 1KB), got ${stat.size} bytes`,
+            `@inquirer/${module} should be a thin wrapper (< 1KB), got ${stat.size} bytes`,
           )
         }
 
-        if (isStubReexport(content)) {
-          expect.fail(`@inquirer/${module} should not be a stub re-export`)
+        if (!content.includes('inquirer-pack')) {
+          expect.fail(
+            `@inquirer/${module} should re-export from inquirer-pack bundle`,
+          )
         }
       } catch (error) {
         expect.fail(
-          `@inquirer/${module} not found or not properly bundled at ${modulePath}: ${error instanceof Error ? error.message : String(error)}`,
+          `@inquirer/${module} not found or not properly wrapped at ${modulePath}: ${error instanceof Error ? error.message : String(error)}`,
         )
       }
     })

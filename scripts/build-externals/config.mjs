@@ -21,11 +21,16 @@ export const externalPackages = [
   { name: 'semver', bundle: false },
   // Utilities
   { name: 'debug', bundle: true },
-  { name: 'del', bundle: true },
-  { name: 'fast-glob', bundle: true },
+  // pico-pack: picomatch, del, fast-glob
+  { name: 'pico-pack', bundle: true },
+  // pico-pack internals - individual packages now just re-export from pico-pack bundle (no bundling needed)
+  { name: 'del', bundle: false },
+  { name: 'fast-glob', bundle: false },
   { name: 'fast-sort', bundle: true },
   { name: 'get-east-asian-width', bundle: true },
-  { name: 'picomatch', bundle: true },
+  // inquirer-pack: Bundle all @inquirer packages together.
+  { name: 'inquirer-pack', bundle: true },
+  { name: 'picomatch', bundle: false },
   { name: 'spdx-correct', bundle: true },
   { name: 'spdx-expression-parse', bundle: true },
   { name: 'streaming-iterables', bundle: true },
@@ -62,6 +67,7 @@ export const scopedPackages = [
       'search',
       'select',
     ],
+    bundle: false,
     optional: true,
   },
   {

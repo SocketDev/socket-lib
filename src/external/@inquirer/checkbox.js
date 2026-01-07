@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('@inquirer/checkbox')
+// Re-export from inquirer-pack bundle for better deduplication.
+const { checkbox } = require('../inquirer-pack')
+module.exports = checkbox

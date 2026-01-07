@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('@inquirer/select')
+// Re-export from inquirer-pack bundle for better deduplication.
+const { select } = require('../inquirer-pack')
+module.exports = select

@@ -1,9 +1,6 @@
 'use strict'
 
-// Export only what we use to reduce bundle size
-const { deleteAsync, deleteSync } = require('del')
+// Re-export from pico-pack bundle.
+const { del } = require('./pico-pack.js')
 
-module.exports = {
-  deleteAsync,
-  deleteSync,
-}
+module.exports = del

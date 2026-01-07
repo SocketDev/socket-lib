@@ -63,6 +63,14 @@ function getExternalModules(dir) {
   })
 }
 
+// Packages that legitimately only export { default } (ESM default exports).
+// These are optional @inquirer packages that use ESM default export pattern.
+const DEFAULT_ONLY_ALLOWED = new Set([
+  '@inquirer/confirm.js',
+  '@inquirer/input.js',
+  '@inquirer/password.js',
+])
+
 /**
  * Check if module exports work correctly for both CJS and ESM.
  */
@@ -70,6 +78,11 @@ async function checkModuleExports(filePath) {
   const relativePath = path.relative(externalDir, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues = []
+
+  // Skip validation for packages that legitimately only export default.
+  if (DEFAULT_ONLY_ALLOWED.has(normalizedPath)) {
+    return { path: normalizedPath, ok: true, issues: [] }
+  }
 
   // Test 1: CJS require() - should work without .default
   let cjsModule

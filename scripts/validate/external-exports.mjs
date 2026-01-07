@@ -61,6 +61,14 @@ function getExternalModules(dir) {
   return modules
 }
 
+// Packages that legitimately only export { default } (ESM default exports).
+// These are optional @inquirer packages that use ESM default export pattern.
+const DEFAULT_ONLY_ALLOWED = new Set([
+  '@inquirer/confirm.js',
+  '@inquirer/input.js',
+  '@inquirer/password.js',
+])
+
 /**
  * Check if an external module export is usable without .default.
  */
@@ -77,7 +85,11 @@ function checkExternalExport(filePath) {
       const keys = Object.keys(mod)
 
       // If only key is 'default', it's wrapped incorrectly
+      // UNLESS it's in the allowed list of packages that legitimately only export default
       if (keys.length === 1 && keys[0] === 'default') {
+        if (DEFAULT_ONLY_ALLOWED.has(normalizedPath)) {
+          return { path: normalizedPath, ok: true, keys: 1 }
+        }
         return {
           path: normalizedPath,
           ok: false,

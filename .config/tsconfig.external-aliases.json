@@ -12,6 +12,7 @@
       "make-fetch-happen": ["../src/external/make-fetch-happen"],
       "fast-sort": ["../src/external/fast-sort"],
       "pacote": ["../src/external/pacote"],
+      "picomatch": ["../src/external/picomatch"],
       "@socketsecurity/lib": ["../../socket-lib/dist/index.d.ts"],
       "@socketsecurity/lib/*": ["../../socket-lib/dist/*"],
       "@socketsecurity/registry": [

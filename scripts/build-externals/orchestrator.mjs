@@ -101,7 +101,17 @@ async function bundleAllPackages(options = {}) {
       // Multiple packages in scope.
       for (const pkg of packages) {
         const outputPath = path.join(scopeDir, `${pkg}.js`)
-        if (optional) {
+        if (bundle === false) {
+          // Copy non-bundled file as-is (thin re-export wrapper)
+          const srcPath = path.join(
+            rootDir,
+            'src',
+            'external',
+            scope,
+            `${pkg}.js`,
+          )
+          await fs.copyFile(srcPath, outputPath)
+        } else if (optional) {
           try {
             const size = await bundlePackage(`${scope}/${pkg}`, outputPath, {
               quiet,

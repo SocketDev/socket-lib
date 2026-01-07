@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('@inquirer/input')
+// Re-export from inquirer-pack bundle for better deduplication.
+const { input } = require('../inquirer-pack')
+module.exports = input
