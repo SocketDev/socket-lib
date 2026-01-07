@@ -787,6 +787,7 @@
       "@sigstore/sign": "4.1.0",
       "ansi-regex": "6.2.2",
       "lru-cache": "11.2.2",
+      "picomatch": "4.0.3",
       "semver": "7.7.2",
       "string-width": "8.1.0",
       "strip-ansi": "7.1.2",

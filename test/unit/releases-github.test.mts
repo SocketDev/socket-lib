@@ -4,6 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
+import picomatch from 'picomatch'
+
 import {
   getAuthHeaders,
   SOCKET_BTM_REPO,
@@ -112,6 +114,68 @@ describe('releases/github', () => {
           process.env['GITHUB_TOKEN'] = originalGithubToken
         }
       }
+    })
+  })
+
+  describe('picomatch integration', () => {
+    it('should match simple wildcard patterns', () => {
+      const isMatch = picomatch('yoga-sync-*.mjs')
+      expect(isMatch('yoga-sync-abc123.mjs')).toBe(true)
+      expect(isMatch('yoga-sync-2024-01-15.mjs')).toBe(true)
+      expect(isMatch('models-xyz.tar.gz')).toBe(false)
+      expect(isMatch('yoga-sync.js')).toBe(false)
+    })
+
+    it('should match patterns with multiple wildcards', () => {
+      const isMatch = picomatch('models-*-*.tar.gz')
+      expect(isMatch('models-2024-01-15.tar.gz')).toBe(true)
+      expect(isMatch('models-foo-bar.tar.gz')).toBe(true)
+      expect(isMatch('models-xyz.tar.gz')).toBe(false)
+    })
+
+    it('should match patterns with braces', () => {
+      const isMatch = picomatch('yoga-{sync,layout}-*.{mjs,js}')
+      expect(isMatch('yoga-sync-abc.mjs')).toBe(true)
+      expect(isMatch('yoga-layout-xyz.js')).toBe(true)
+      expect(isMatch('yoga-sync-abc.ts')).toBe(false)
+      expect(isMatch('yoga-other-xyz.mjs')).toBe(false)
+    })
+
+    it('should match exact patterns without wildcards', () => {
+      const isMatch = picomatch('exact-name.txt')
+      expect(isMatch('exact-name.txt')).toBe(true)
+      expect(isMatch('exact-name.md')).toBe(false)
+      expect(isMatch('other-name.txt')).toBe(false)
+    })
+
+    it('should match patterns starting with wildcard', () => {
+      const isMatch = picomatch('*-models.tar.gz')
+      expect(isMatch('foo-models.tar.gz')).toBe(true)
+      expect(isMatch('bar-models.tar.gz')).toBe(true)
+      expect(isMatch('models.tar.gz')).toBe(false)
+    })
+
+    it('should match patterns ending with wildcard', () => {
+      const isMatch = picomatch('yoga-*')
+      expect(isMatch('yoga-sync')).toBe(true)
+      expect(isMatch('yoga-layout')).toBe(true)
+      expect(isMatch('yoga-')).toBe(true)
+      expect(isMatch('models-sync')).toBe(false)
+    })
+
+    it('should support double-star globstar patterns', () => {
+      const isMatch = picomatch('**/*.mjs')
+      expect(isMatch('yoga-sync.mjs')).toBe(true)
+      expect(isMatch('dir/yoga-sync.mjs')).toBe(true)
+      expect(isMatch('deep/nested/dir/file.mjs')).toBe(true)
+      expect(isMatch('file.js')).toBe(false)
+    })
+
+    it('should be case-sensitive by default', () => {
+      const isMatch = picomatch('yoga-sync-*.mjs')
+      expect(isMatch('yoga-sync-ABC.mjs')).toBe(true)
+      expect(isMatch('Yoga-Sync-abc.mjs')).toBe(false)
+      expect(isMatch('YOGA-SYNC-abc.MJS')).toBe(false)
     })
   })
 })

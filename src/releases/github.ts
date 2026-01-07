@@ -5,6 +5,8 @@
 import { chmodSync, existsSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 
+import picomatch from 'picomatch'
+
 import { safeMkdir } from '../fs.js'
 import { httpDownload, httpRequest } from '../http-request.js'
 import { getDefaultLogger } from '../logger.js'
@@ -269,15 +271,19 @@ export function getAuthHeaders(): Record<string, string> {
 /**
  * Pattern for matching release assets.
  * Can be either:
- * - A string with wildcard (*) for simple glob patterns (e.g., 'yoga-sync-*.mjs')
- * - A prefix/suffix pair for explicit matching
+ * - A string with glob pattern syntax
+ * - A prefix/suffix pair for explicit matching (backward compatible)
  * - A RegExp for complex patterns
  *
- * String patterns support a single wildcard (*) which matches any characters:
- * - 'yoga-sync-*.mjs' → prefix: 'yoga-sync-', suffix: '.mjs'
- * - 'models-*.tar.gz' → prefix: 'models-', suffix: '.tar.gz'
- * - '*-models.tar.gz' → prefix: '', suffix: '-models.tar.gz'
- * - 'yoga-*' → prefix: 'yoga-', suffix: ''
+ * String patterns support full glob syntax via picomatch.
+ * Examples:
+ * - Simple wildcard: yoga-sync-*.mjs matches yoga-sync-abc123.mjs
+ * - Complex: models-*.tar.gz matches models-2024-01-15.tar.gz
+ * - Prefix wildcard: *-models.tar.gz matches foo-models.tar.gz
+ * - Suffix wildcard: yoga-* matches yoga-layout
+ * - Brace expansion: {yoga,models}-*.{mjs,js} matches yoga-abc.mjs or models-xyz.js
+ *
+ * For backward compatibility, prefix/suffix objects are still supported but glob patterns are recommended.
  */
 export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
 
@@ -292,55 +298,39 @@ export interface FindReleaseAssetResult {
 }
 
 /**
- * Parse a wildcard pattern string into prefix/suffix components.
- * Supports a single wildcard (*) character.
+ * Create a matcher function for a pattern using picomatch for glob patterns
+ * or simple prefix/suffix matching for object patterns.
  *
- * @param pattern - Pattern string with optional wildcard (e.g., 'yoga-sync-*.mjs')
- * @returns Prefix/suffix pair for matching
- * @throws Error if pattern contains multiple wildcards
+ * @param pattern - Pattern to match (string glob, prefix/suffix object, or RegExp)
+ * @returns Function that tests if a string matches the pattern
  *
  * @example
  * ```ts
- * parseWildcardPattern('yoga-sync-*.mjs')
- * // Returns: { prefix: 'yoga-sync-', suffix: '.mjs' }
+ * const matcher = createMatcher('yoga-sync-*.mjs')
+ * matcher('yoga-sync-abc123.mjs') // true
+ * matcher('models-xyz.tar.gz') // false
  *
- * parseWildcardPattern('models-*.tar.gz')
- * // Returns: { prefix: 'models-', suffix: '.tar.gz' }
- *
- * parseWildcardPattern('*-models.tar.gz')
- * // Returns: { prefix: '', suffix: '-models.tar.gz' }
- *
- * parseWildcardPattern('yoga-*')
- * // Returns: { prefix: 'yoga-', suffix: '' }
- *
- * parseWildcardPattern('exact-name.txt')
- * // Returns: { prefix: 'exact-name.txt', suffix: '' } (exact match)
+ * const matcher2 = createMatcher({ prefix: 'yoga-', suffix: '.mjs' })
+ * matcher2('yoga-sync.mjs') // true
+ * matcher2('yoga-layout.js') // false
  * ```
  */
-function parseWildcardPattern(pattern: string): {
-  prefix: string
-  suffix: string
-} {
-  const wildcardIndex = pattern.indexOf('*')
-
-  // No wildcard - treat as exact match (prefix only).
-  if (wildcardIndex === -1) {
-    return { prefix: pattern, suffix: '' }
+function createMatcher(
+  pattern: string | { prefix: string; suffix: string } | RegExp,
+): (input: string) => boolean {
+  if (typeof pattern === 'string') {
+    // Use picomatch for glob pattern matching.
+    const isMatch = picomatch(pattern)
+    return (input: string) => isMatch(input)
   }
 
-  // Check for multiple wildcards.
-  const lastWildcardIndex = pattern.lastIndexOf('*')
-  if (wildcardIndex !== lastWildcardIndex) {
-    throw new Error(
-      `Pattern contains multiple wildcards: ${pattern}. Only single wildcard (*) is supported.`,
-    )
+  if (pattern instanceof RegExp) {
+    return (input: string) => pattern.test(input)
   }
 
-  // Split at wildcard position.
-  const prefix = pattern.slice(0, wildcardIndex)
-  const suffix = pattern.slice(wildcardIndex + 1)
-
-  return { prefix, suffix }
+  // Prefix/suffix object pattern (backward compatible).
+  const { prefix, suffix } = pattern
+  return (input: string) => input.startsWith(prefix) && input.endsWith(suffix)
 }
 
 /**
@@ -349,14 +339,14 @@ function parseWildcardPattern(pattern: string): {
  * then finds the first asset matching the provided pattern.
  *
  * @param toolPrefix - Tool name prefix to search for (e.g., 'yoga-layout-')
- * @param assetPattern - Pattern to match asset names (string with wildcard, prefix/suffix object, or RegExp)
+ * @param assetPattern - Pattern to match asset names (glob string, prefix/suffix object, or RegExp)
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @returns Result with tag and asset name, or null if not found
  *
  * @example
  * ```ts
- * // Find yoga-sync asset with wildcard pattern
+ * // Find yoga-sync asset with glob pattern
  * const result = await findReleaseAsset(
  *   'yoga-layout-',
  *   'yoga-sync-*.mjs',
@@ -367,10 +357,20 @@ function parseWildcardPattern(pattern: string): {
  *
  * @example
  * ```ts
- * // Find models tar.gz with wildcard pattern
+ * // Find models tar.gz with glob pattern
  * const result = await findReleaseAsset(
  *   'models-',
  *   'models-*.tar.gz',
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Find asset with glob braces pattern
+ * const result = await findReleaseAsset(
+ *   'yoga-layout-',
+ *   'yoga-{sync,layout}-*.{mjs,js}',
  *   { owner: 'SocketDev', repo: 'socket-btm' }
  * )
  * ```
@@ -404,13 +404,8 @@ export async function findReleaseAsset(
   const { owner, repo } = repoConfig
   const { quiet = false } = options
 
-  // Normalize string patterns to prefix/suffix objects.
-  let normalizedPattern: { prefix: string; suffix: string } | RegExp
-  if (typeof assetPattern === 'string') {
-    normalizedPattern = parseWildcardPattern(assetPattern)
-  } else {
-    normalizedPattern = assetPattern
-  }
+  // Create matcher function for the pattern.
+  const isMatch = createMatcher(assetPattern)
 
   return await pRetry(
     async () => {
@@ -435,20 +430,10 @@ export async function findReleaseAsset(
           continue
         }
 
-        // Find matching asset in this release.
-        let matchingAsset: { name: string } | undefined
-
-        if (normalizedPattern instanceof RegExp) {
-          matchingAsset = assets.find((a: { name: string }) =>
-            normalizedPattern.test(a.name),
-          )
-        } else {
-          const { prefix, suffix } = normalizedPattern
-          matchingAsset = assets.find(
-            (a: { name: string }) =>
-              a.name.startsWith(prefix) && a.name.endsWith(suffix),
-          )
-        }
+        // Find matching asset in this release using the matcher function.
+        const matchingAsset = assets.find((a: { name: string }) =>
+          isMatch(a.name),
+        )
 
         if (matchingAsset) {
           if (!quiet) {

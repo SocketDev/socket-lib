@@ -15,7 +15,7 @@ import { externalPackages, scopedPackages } from '../build-externals/config.mjs'
 const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', 'dist')
+const distDir = path.resolve(__dirname, '..', '..', 'dist')
 const distExternalDir = path.join(distDir, 'external')
 
 // Build list of all external packages to rewrite
@@ -60,18 +60,21 @@ async function fixFileImports(filePath, verbose = false) {
   const externalPrefix = getExternalPathPrefix(filePath)
 
   for (const pkg of allExternalPackages) {
-    // Escape special regex characters in package name
+    // Escape special regex characters in package name.
     const escapedPkg = pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-    // Match require('pkg') or require("pkg")
-    // Don't match if it's already pointing to ./external/ or ../external/
+    // Match require('pkg') or require("pkg").
+    // Don't match if it's already pointing to ./external/ or ../external/.
     const requirePattern = new RegExp(
       `require\\((['"])(?!\\.\\.?\\/external\\/)${escapedPkg}\\1\\)`,
       'g',
     )
 
-    if (requirePattern.test(content)) {
-      // Replace with require('./external/pkg') or require('../external/pkg')
+    // Create a new regex for testing to avoid consuming matches.
+    const testPattern = new RegExp(requirePattern.source)
+
+    if (testPattern.test(content)) {
+      // Replace with require('./external/pkg') or require('../external/pkg').
       const replacement = `require('${externalPrefix}/${pkg}')`
       content = content.replace(requirePattern, replacement)
       modified = true
@@ -105,7 +108,7 @@ async function processDirectory(dir, verbose = false) {
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name)
 
-      // Skip the external directory itself
+      // Skip the external directory itself.
       if (entry.isDirectory() && fullPath === distExternalDir) {
         continue
       }
@@ -120,7 +123,7 @@ async function processDirectory(dir, verbose = false) {
       }
     }
   } catch (error) {
-    // Skip directories that don't exist
+    // Skip directories that don't exist.
     if (error.code !== 'ENOENT') {
       throw error
     }
