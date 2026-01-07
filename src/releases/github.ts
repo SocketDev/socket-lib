@@ -44,8 +44,8 @@
  * ```
  */
 
-import { existsSync } from 'node:fs'
-import { chmod, readFile, writeFile } from 'node:fs/promises'
+import { chmodSync, existsSync } from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { safeMkdir } from '../fs.js'
@@ -488,7 +488,7 @@ export async function downloadGitHubRelease(
   // Make executable on Unix-like systems.
   const isWindows = binaryName.endsWith('.exe')
   if (!isWindows) {
-    await chmod(binaryPath, 0o755)
+    chmodSync(binaryPath, 0o755)
 
     // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
     if (
