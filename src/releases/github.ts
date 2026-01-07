@@ -44,9 +44,9 @@
  * ```
  */
 
-import { chmodSync, existsSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
-import path from 'node:path'
+import { chmodSync, existsSync } from 'fs'
+import { readFile, writeFile } from 'fs/promises'
+import path from 'path'
 
 import { safeMkdir } from '../fs.js'
 import { httpDownload, httpRequest } from '../http-request.js'

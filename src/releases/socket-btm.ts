@@ -2,9 +2,8 @@
  * @fileoverview Socket-btm release download utilities.
  *
  * Provides utilities for downloading binaries and assets from the
- * SocketDev/socket-btm GitHub repository. This includes build tools (binject,
- * binflate, binpress), Node.js binaries (node-smol), and WASM assets
- * (yoga-layout).
+ * SocketDev/socket-btm GitHub repository. This includes build tools,
+ * Node.js binaries, and WASM assets.
  *
  * Features:
  * - Generic function for any socket-btm release asset or binary
@@ -20,40 +19,10 @@
  * ├── {binaryName}
  * └── .version
  * ```
- *
- * @example
- * ```ts
- * import { downloadSocketBtmRelease } from '@socketsecurity/lib/releases/socket-btm'
- *
- * // Download node-smol binary (like: brew install nodejs → /usr/local/bin/node)
- * const nodePath = await downloadSocketBtmRelease({
- *   tool: 'node-smol',
- *   bin: 'node'  // Presence of 'bin' = binary download
- * })
- *
- * // Download binject binary (like: cargo install binject → binject)
- * const binjectPath = await downloadSocketBtmRelease({
- *   tool: 'binject'  // No 'bin' or 'asset' = binary with bin=tool
- * })
- *
- * // Cross-platform binary (like: cargo install --target)
- * const nodePathLinux = await downloadSocketBtmRelease({
- *   tool: 'node-smol',
- *   bin: 'node',
- *   targetPlatform: 'linux',
- *   targetArch: 'x64',
- *   libc: 'musl'
- * })
- *
- * // Download WASM asset (like: gh release download --pattern)
- * const yogaPath = await downloadSocketBtmRelease({
- *   tool: 'yoga-layout',
- *   asset: 'yoga-sync.mjs'  // Presence of 'asset' = asset download
- * })
- * ```
  */
 
-import os from 'node:os'
+import { existsSync } from 'fs'
+import os from 'os'
 
 import {
   downloadGitHubRelease,
@@ -128,7 +97,7 @@ export interface SocketBtmBinaryConfig {
   targetArch?: Arch
   /**
    * Linux libc variant (musl or glibc).
-   * Defaults to musl for Linux for broader compatibility.
+   * Auto-detected from the Node.js binary if not specified.
    * Ignored for non-Linux platforms.
    */
   libc?: Libc
@@ -242,6 +211,46 @@ const ARCH_MAP: Record<string, string> = {
 }
 
 /**
+ * Detect the libc variant (musl or glibc) on Linux systems.
+ * Returns undefined for non-Linux platforms.
+ *
+ * Detection method: Check for musl-specific files in the filesystem.
+ * This is more reliable than checking the Node.js binary, especially for
+ * statically-linked binaries that may contain references to both libc variants.
+ *
+ * @returns 'musl', 'glibc', or undefined (for non-Linux)
+ */
+function detectLibc(): Libc | undefined {
+  const platform = os.platform()
+  if (platform !== 'linux') {
+    return undefined
+  }
+
+  try {
+    // Check for musl-specific dynamic linker
+    // These files only exist on musl systems
+    const muslPaths = [
+      '/lib/ld-musl-x86_64.so.1',
+      '/lib/ld-musl-aarch64.so.1',
+      '/usr/lib/ld-musl-x86_64.so.1',
+      '/usr/lib/ld-musl-aarch64.so.1',
+    ]
+
+    for (const path of muslPaths) {
+      if (existsSync(path)) {
+        return 'musl'
+      }
+    }
+
+    // If no musl files found, assume glibc
+    return 'glibc'
+  } catch {
+    // If detection fails, default to glibc (most common)
+    return 'glibc'
+  }
+}
+
+/**
  * Get asset name for a socket-btm binary.
  *
  * Examples:
@@ -259,7 +268,7 @@ function getBinaryAssetName(
   binaryBaseName: string,
   platform: Platform,
   arch: Arch,
-  libc?: Libc,
+  libc?: Libc | undefined,
 ): string {
   const mappedArch = ARCH_MAP[arch]
   if (!mappedArch) {
@@ -431,12 +440,12 @@ export async function downloadSocketBtmRelease(
     // Default bin to tool if not provided (like brew/cargo)
     const baseName = bin || tool
 
-    // Resolve platform and arch
+    // Resolve platform and arch based on host if not specified
     const platform = (targetPlatform || os.platform()) as Platform
     const arch = (targetArch || os.arch()) as Arch
 
-    // Default to musl for Linux for broader compatibility (works on both musl and glibc systems)
-    const libcType = libc || (platform === 'linux' ? 'musl' : undefined)
+    // Auto-detect libc variant on Linux if not specified
+    const libcType = libc || detectLibc()
 
     // Build asset name and platform-arch identifier
     const assetName = getBinaryAssetName(baseName, platform, arch, libcType)
