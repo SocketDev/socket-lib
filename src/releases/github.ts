@@ -268,9 +268,18 @@ export function getAuthHeaders(): Record<string, string> {
 
 /**
  * Pattern for matching release assets.
- * Can be either a prefix/suffix pair or a RegExp.
+ * Can be either:
+ * - A string with wildcard (*) for simple glob patterns (e.g., 'yoga-sync-*.mjs')
+ * - A prefix/suffix pair for explicit matching
+ * - A RegExp for complex patterns
+ *
+ * String patterns support a single wildcard (*) which matches any characters:
+ * - 'yoga-sync-*.mjs' → prefix: 'yoga-sync-', suffix: '.mjs'
+ * - 'models-*.tar.gz' → prefix: 'models-', suffix: '.tar.gz'
+ * - '*-models.tar.gz' → prefix: '', suffix: '-models.tar.gz'
+ * - 'yoga-*' → prefix: 'yoga-', suffix: ''
  */
-export type AssetPattern = { prefix: string; suffix: string } | RegExp
+export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
 
 /**
  * Result of finding a release asset.
@@ -283,25 +292,97 @@ export interface FindReleaseAssetResult {
 }
 
 /**
+ * Parse a wildcard pattern string into prefix/suffix components.
+ * Supports a single wildcard (*) character.
+ *
+ * @param pattern - Pattern string with optional wildcard (e.g., 'yoga-sync-*.mjs')
+ * @returns Prefix/suffix pair for matching
+ * @throws Error if pattern contains multiple wildcards
+ *
+ * @example
+ * ```ts
+ * parseWildcardPattern('yoga-sync-*.mjs')
+ * // Returns: { prefix: 'yoga-sync-', suffix: '.mjs' }
+ *
+ * parseWildcardPattern('models-*.tar.gz')
+ * // Returns: { prefix: 'models-', suffix: '.tar.gz' }
+ *
+ * parseWildcardPattern('*-models.tar.gz')
+ * // Returns: { prefix: '', suffix: '-models.tar.gz' }
+ *
+ * parseWildcardPattern('yoga-*')
+ * // Returns: { prefix: 'yoga-', suffix: '' }
+ *
+ * parseWildcardPattern('exact-name.txt')
+ * // Returns: { prefix: 'exact-name.txt', suffix: '' } (exact match)
+ * ```
+ */
+function parseWildcardPattern(pattern: string): {
+  prefix: string
+  suffix: string
+} {
+  const wildcardIndex = pattern.indexOf('*')
+
+  // No wildcard - treat as exact match (prefix only).
+  if (wildcardIndex === -1) {
+    return { prefix: pattern, suffix: '' }
+  }
+
+  // Check for multiple wildcards.
+  const lastWildcardIndex = pattern.lastIndexOf('*')
+  if (wildcardIndex !== lastWildcardIndex) {
+    throw new Error(
+      `Pattern contains multiple wildcards: ${pattern}. Only single wildcard (*) is supported.`,
+    )
+  }
+
+  // Split at wildcard position.
+  const prefix = pattern.slice(0, wildcardIndex)
+  const suffix = pattern.slice(wildcardIndex + 1)
+
+  return { prefix, suffix }
+}
+
+/**
  * Find a release asset matching a pattern in the latest release.
  * Searches for the first release matching the tool prefix,
  * then finds the first asset matching the provided pattern.
  *
  * @param toolPrefix - Tool name prefix to search for (e.g., 'yoga-layout-')
- * @param assetPattern - Pattern to match asset names (prefix/suffix or RegExp)
+ * @param assetPattern - Pattern to match asset names (string with wildcard, prefix/suffix object, or RegExp)
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @returns Result with tag and asset name, or null if not found
  *
  * @example
  * ```ts
- * // Find yoga-sync asset with timestamped name
+ * // Find yoga-sync asset with wildcard pattern
+ * const result = await findReleaseAsset(
+ *   'yoga-layout-',
+ *   'yoga-sync-*.mjs',
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * // result = { tag: 'yoga-layout-2024-01-15-abc123', assetName: 'yoga-sync-2024-01-15-abc123.mjs' }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Find models tar.gz with wildcard pattern
+ * const result = await findReleaseAsset(
+ *   'models-',
+ *   'models-*.tar.gz',
+ *   { owner: 'SocketDev', repo: 'socket-btm' }
+ * )
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Find asset with object pattern (backward compatible)
  * const result = await findReleaseAsset(
  *   'yoga-layout-',
  *   { prefix: 'yoga-sync-', suffix: '.mjs' },
  *   { owner: 'SocketDev', repo: 'socket-btm' }
  * )
- * // result = { tag: 'yoga-layout-2024-01-15-abc123', assetName: 'yoga-sync-2024-01-15-abc123.mjs' }
  * ```
  *
  * @example
@@ -322,6 +403,14 @@ export async function findReleaseAsset(
 ): Promise<FindReleaseAssetResult | null> {
   const { owner, repo } = repoConfig
   const { quiet = false } = options
+
+  // Normalize string patterns to prefix/suffix objects.
+  let normalizedPattern: { prefix: string; suffix: string } | RegExp
+  if (typeof assetPattern === 'string') {
+    normalizedPattern = parseWildcardPattern(assetPattern)
+  } else {
+    normalizedPattern = assetPattern
+  }
 
   return await pRetry(
     async () => {
@@ -349,12 +438,12 @@ export async function findReleaseAsset(
         // Find matching asset in this release.
         let matchingAsset: { name: string } | undefined
 
-        if (assetPattern instanceof RegExp) {
+        if (normalizedPattern instanceof RegExp) {
           matchingAsset = assets.find((a: { name: string }) =>
-            assetPattern.test(a.name),
+            normalizedPattern.test(a.name),
           )
         } else {
-          const { prefix, suffix } = assetPattern
+          const { prefix, suffix } = normalizedPattern
           matchingAsset = assets.find(
             (a: { name: string }) =>
               a.name.startsWith(prefix) && a.name.endsWith(suffix),

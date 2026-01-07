@@ -59,7 +59,14 @@ export interface SocketBtmAssetConfig {
   downloadDir?: string
   /** Tool/package name for directory structure and release matching. */
   tool: string
-  /** Asset name or pattern on GitHub. Can be an exact name (string) or a pattern (prefix/suffix or RegExp). */
+  /**
+   * Asset name or pattern on GitHub.
+   * Can be:
+   * - A string with wildcard (*) for simple glob patterns (e.g., 'yoga-sync-*.mjs')
+   * - An exact asset name (string without wildcard)
+   * - A pattern object with prefix/suffix
+   * - A RegExp for complex patterns
+   */
   asset: string | AssetPattern
   /** Output filename. @default resolved asset name */
   output?: string
@@ -155,11 +162,14 @@ export async function downloadSocketBtmRelease(
     let resolvedAsset: string
     let resolvedTag = tag
 
-    if (typeof asset === 'string') {
+    // Check if asset is a string without wildcard (exact match).
+    const isExactMatch = typeof asset === 'string' && !asset.includes('*')
+
+    if (isExactMatch) {
       // Exact asset name provided.
-      resolvedAsset = asset
+      resolvedAsset = asset as string
     } else {
-      // Pattern provided - need to find matching asset.
+      // Pattern provided (wildcard string, object, or RegExp) - need to find matching asset.
       if (tag) {
         throw new Error(
           'Cannot use asset pattern with explicit tag. Either provide exact asset name or omit tag.',
