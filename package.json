@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "packageManager": "pnpm@10.27.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",

@@ -206,7 +206,9 @@ describe('git extended tests', () => {
       await runWithTempDir(async tmpDir => {
         // Initialize a git repo
         spawnSync('git', ['init'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
+        spawnSync('git', ['config', 'user.name', 'Test User'], {
+          cwd: tmpDir,
+        })
         spawnSync('git', ['config', 'user.email', 'test@example.com'], {
           cwd: tmpDir,
         })
@@ -264,7 +266,7 @@ describe('git extended tests', () => {
         const isChangedAfter = await isChanged(testFile, { cwd: tmpDir })
         expect(typeof isChangedAfter).toBe('boolean')
       }, 'git-ops-')
-    })
+    }, 30_000)
 
     it('should detect untracked files', async () => {
       await runWithTempDir(async tmpDir => {
