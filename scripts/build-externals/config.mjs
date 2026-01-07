@@ -36,7 +36,7 @@ export const externalPackages = [
   { name: 'spdx-correct', bundle: false },
   { name: 'spdx-expression-parse', bundle: false },
   { name: 'streaming-iterables', bundle: true },
-  { name: 'validate-npm-package-name', bundle: true },
+  { name: 'validate-npm-package-name', bundle: false },
   { name: 'which', bundle: true },
   { name: 'yargs-parser', bundle: true },
   { name: 'yoctocolors-cjs', bundle: true },
