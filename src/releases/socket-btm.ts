@@ -3,28 +3,21 @@
  */
 
 import { existsSync } from 'fs'
-import os from 'os'
 
+import {
+  type Arch,
+  getArch,
+  type Libc,
+  getPlatform,
+  type Platform,
+} from '../constants/platform.js'
 import {
   downloadGitHubRelease,
   type DownloadGitHubReleaseConfig,
   SOCKET_BTM_REPO,
 } from './github.js'
 
-/**
- * Platform type for socket-btm binaries.
- */
-export type Platform = 'darwin' | 'linux' | 'win32'
-
-/**
- * Architecture type for socket-btm binaries.
- */
-export type Arch = 'arm64' | 'x64'
-
-/**
- * Linux libc variant.
- */
-export type Libc = 'musl' | 'glibc'
+export type { Arch, Libc, Platform }
 
 /**
  * Configuration for downloading socket-btm binary releases.
@@ -103,8 +96,7 @@ const ARCH_MAP: Record<string, string> = {
  * @returns 'musl', 'glibc', or undefined (for non-Linux)
  */
 export function detectLibc(): Libc | undefined {
-  const platform = os.platform()
-  if (platform !== 'linux') {
+  if (getPlatform() !== 'linux') {
     return undefined
   }
 
@@ -181,26 +173,24 @@ export async function downloadSocketBtmRelease(
     // Binary download
     const {
       bin,
-      libc,
+      libc = detectLibc(),
       removeMacOSQuarantine = true,
-      targetArch,
-      targetPlatform,
+      targetArch = getArch(),
+      targetPlatform = getPlatform(),
     } = config as SocketBtmBinaryConfig
 
     // Default bin to tool if not provided (like brew/cargo)
     const baseName = bin || tool
 
-    // Resolve platform and arch based on host if not specified
-    const platform = (targetPlatform || os.platform()) as Platform
-    const arch = (targetArch || os.arch()) as Arch
-
-    // Auto-detect libc variant on Linux if not specified
-    const libcType = libc || detectLibc()
-
     // Build asset name and platform-arch identifier
-    const assetName = getBinaryAssetName(baseName, platform, arch, libcType)
-    const platformArch = getPlatformArch(platform, arch, libcType)
-    const binaryName = getBinaryName(baseName, platform)
+    const assetName = getBinaryAssetName(
+      baseName,
+      targetPlatform,
+      targetArch,
+      libc,
+    )
+    const platformArch = getPlatformArch(targetPlatform, targetArch, libc)
+    const binaryName = getBinaryName(baseName, targetPlatform)
 
     downloadConfig = {
       owner: SOCKET_BTM_REPO.owner,
@@ -282,7 +272,7 @@ export function getBinaryName(
 export function getPlatformArch(
   platform: Platform,
   arch: Arch,
-  libc?: Libc,
+  libc?: Libc | undefined,
 ): string {
   const mappedArch = ARCH_MAP[arch]
   if (!mappedArch) {
