@@ -92,7 +92,7 @@ const globalConsole = console
 const ReflectApply = Reflect.apply
 const ReflectConstruct = Reflect.construct
 
-let _Console: typeof import('console').Console | undefined
+let _Console: typeof import('node:console').Console | undefined
 /**
  * Construct a new Console instance.
  * @private
@@ -102,7 +102,7 @@ function constructConsole(...args: unknown[]) {
   if (_Console === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    const nodeConsole = /*@__PURE__*/ require('node:console')
+    const nodeConsole = /*@__PURE__*/ require('console')
     _Console = nodeConsole.Console
   }
   return ReflectConstruct(

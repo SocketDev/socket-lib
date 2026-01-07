@@ -3,9 +3,6 @@
  * Provides cross-platform bin path lookup, command execution, and path normalization.
  */
 
-import fs from 'node:fs'
-import path from 'node:path'
-
 import { getHome } from './env/home'
 import { getAppdata, getLocalappdata } from './env/windows'
 import { getXdgDataHome } from './env/xdg'
@@ -16,13 +13,40 @@ import { readJsonSync } from './fs'
 import { isPath, normalizePath } from './paths/normalize'
 import { spawn } from './spawn'
 
-// ============================================================================
-// Private Helper Functions
-// ============================================================================
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
 
-// ============================================================================
-// Types and Interfaces
-// ============================================================================
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 /**
  * Options for the which function.
@@ -41,10 +65,6 @@ export interface WhichOptions {
   /** Current working directory for resolving relative paths. */
   cwd?: string | undefined
 }
-
-// ============================================================================
-// Public API (alphabetically sorted)
-// ============================================================================
 
 /**
  * Execute a binary with the given arguments.
@@ -96,7 +116,8 @@ export function findRealBin(
   binName: string,
   commonPaths: string[] = [],
 ): string | undefined {
-  // fs, path, and which are imported at the top
+  const fs = getFs()
+  const path = getPath()
 
   // Try common locations first.
   for (const binPath of commonPaths) {
@@ -140,7 +161,8 @@ export function findRealBin(
  * Find the real npm executable, bypassing any aliases and shadow bins.
  */
 export function findRealNpm(): string {
-  // fs and path are imported at the top
+  const fs = getFs()
+  const path = getPath()
 
   // Try to find npm in the same directory as the node executable.
   const nodeDir = path.dirname(process.execPath)
@@ -174,7 +196,7 @@ export function findRealNpm(): string {
  * Find the real pnpm executable, bypassing any aliases and shadow bins.
  */
 export function findRealPnpm(): string {
-  // path is imported at the top
+  const path = getPath()
 
   // Try common pnpm locations.
   const commonPaths = WIN32
@@ -205,7 +227,7 @@ export function findRealPnpm(): string {
  * Find the real yarn executable, bypassing any aliases and shadow bins.
  */
 export function findRealYarn(): string {
-  // path is imported at the top
+  const path = getPath()
 
   // Try common yarn locations.
   const commonPaths = [
@@ -239,7 +261,8 @@ export function isShadowBinPath(dirPath: string | undefined): boolean {
  * Handles Windows .cmd wrappers and Unix shell scripts, resolving them to the actual .js files they execute.
  */
 export function resolveRealBinSync(binPath: string): string {
-  // fs and path are imported at the top
+  const fs = getFs()
+  const path = getPath()
 
   // If it's not an absolute path, try to find it in PATH first
   if (!path.isAbsolute(binPath)) {

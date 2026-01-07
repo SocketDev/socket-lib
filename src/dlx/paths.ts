@@ -3,7 +3,7 @@
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 
-let _path: typeof import('path') | undefined
+let _path: typeof import('node:path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.
  * @private
@@ -13,7 +13,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('node:path')
+    _path = /*@__PURE__*/ require('path')
   }
   return _path!
 }

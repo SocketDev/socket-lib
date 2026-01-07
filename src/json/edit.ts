@@ -38,7 +38,7 @@ let _fs: typeof import('node:fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
-    _fs = /*@__PURE__*/ require('node:fs')
+    _fs = /*@__PURE__*/ require('fs')
   }
   return _fs as typeof import('node:fs')
 }

@@ -330,19 +330,18 @@ let _buffer: typeof import('node:buffer') | undefined
  * overhead and potential Webpack bundling errors.
  *
  * @private
- * @returns {typeof import('node:buffer')} The buffer module
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getBuffer() {
   if (_buffer === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _buffer = /*@__PURE__*/ require('node:buffer')
+    _buffer = /*@__PURE__*/ require('buffer')
   }
   return _buffer as typeof import('node:buffer')
 }
 
-let _fs: typeof import('fs') | undefined
+let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
@@ -354,12 +353,12 @@ let _fs: typeof import('fs') | undefined
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
-    _fs = /*@__PURE__*/ require('node:fs')
+    _fs = /*@__PURE__*/ require('fs')
   }
-  return _fs as typeof import('fs')
+  return _fs as typeof import('node:fs')
 }
 
-let _path: typeof import('path') | undefined
+let _path: typeof import('node:path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
@@ -372,9 +371,9 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('node:path')
+    _path = /*@__PURE__*/ require('path')
   }
-  return _path as typeof import('path')
+  return _path as typeof import('node:path')
 }
 
 /**

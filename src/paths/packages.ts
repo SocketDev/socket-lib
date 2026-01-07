@@ -4,7 +4,7 @@
 
 import { normalizePath } from './normalize'
 
-let _path: typeof import('path') | undefined
+let _path: typeof import('node:path') | undefined
 /**
  * Get the path module.
  */
@@ -13,9 +13,9 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('node:path')
+    _path = /*@__PURE__*/ require('path')
   }
-  return _path as typeof import('path')
+  return _path as typeof import('node:path')
 }
 
 /**

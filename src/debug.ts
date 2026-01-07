@@ -64,7 +64,7 @@ function getDebugJsInstance(namespace: string) {
   return inst
 }
 
-let _util: typeof import('util') | undefined
+let _util: typeof import('node:util') | undefined
 /**
  * Lazily load the util module.
  * @private
@@ -74,9 +74,9 @@ function getUtil() {
   if (_util === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _util = /*@__PURE__*/ require('node:util')
+    _util = /*@__PURE__*/ require('util')
   }
-  return _util as typeof import('util')
+  return _util as typeof import('node:util')
 }
 
 /**

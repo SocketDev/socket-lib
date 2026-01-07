@@ -4,7 +4,7 @@ import { readDirNamesSync, safeDelete } from '../fs'
 import { getSocketDlxDir } from '../paths/socket'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 
-let _fs: typeof import('fs') | undefined
+let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
@@ -17,9 +17,9 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('node:fs')
+    _fs = /*@__PURE__*/ require('fs')
   }
-  return _fs as typeof import('fs')
+  return _fs as typeof import('node:fs')
 }
 
 /**

@@ -128,18 +128,18 @@ export interface EditablePackageJsonInstance {
 
 let _EditablePackageJsonClass: EditablePackageJsonConstructor | undefined
 
-let _fs: typeof import('fs') | undefined
+let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('node:fs')
+    _fs = /*@__PURE__*/ require('fs')
   }
-  return _fs as typeof import('fs')
+  return _fs as typeof import('node:fs')
 }
 
-let _path: typeof import('path') | undefined
+let _path: typeof import('node:path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.
  * @private
@@ -149,20 +149,20 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('node:path')
+    _path = /*@__PURE__*/ require('path')
   }
-  return _path as typeof import('path')
+  return _path as typeof import('node:path')
 }
 
-let _util: typeof import('util') | undefined
+let _util: typeof import('node:util') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getUtil() {
   if (_util === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _util = /*@__PURE__*/ require('node:util')
+    _util = /*@__PURE__*/ require('util')
   }
-  return _util as typeof import('util')
+  return _util as typeof import('node:util')
 }
 
 /**

@@ -30,9 +30,6 @@
  * - dlxPackage() combines both for convenience
  */
 
-import fs from 'node:fs'
-import path from 'path'
-
 import { WIN32 } from '../constants/platform'
 import { getPacoteCachePath } from '../constants/packages'
 import { generateCacheKey } from './cache'
@@ -46,6 +43,41 @@ import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 import { spawn } from '../spawn'
+
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 /**
  * Regex to check if a version string contains range operators.
@@ -178,6 +210,8 @@ async function ensurePackageInstalled(
   packageSpec: string,
   force: boolean,
 ): Promise<{ installed: boolean; packageDir: string }> {
+  const fs = getFs()
+  const path = getPath()
   const cacheKey = generateCacheKey(packageSpec)
   const packageDir = normalizePath(path.join(getSocketDlxDir(), cacheKey))
   const installedDir = normalizePath(
@@ -309,13 +343,12 @@ async function ensurePackageInstalled(
  * Aligns with npm/npx binary resolution strategy.
  */
 function resolveBinaryPath(basePath: string): string {
-  // fs is imported at the top
-
   if (!WIN32) {
     // Unix: use path directly
     return basePath
   }
 
+  const fs = getFs()
   // Windows: check for wrappers in priority order
   // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
   const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
@@ -347,6 +380,7 @@ function findBinaryPath(
   packageName: string,
   binaryName?: string,
 ): string {
+  const path = getPath()
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
   )
@@ -483,7 +517,8 @@ function makePackageBinsExecutable(
     return
   }
 
-  // fs is imported at the top
+  const fs = getFs()
+  const path = getPath()
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
   )

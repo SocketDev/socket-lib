@@ -208,7 +208,7 @@ function getTimers() {
   if (_timers === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _timers = /*@__PURE__*/ require('node:timers/promises')
+    _timers = /*@__PURE__*/ require('timers/promises')
   }
   return _timers as typeof import('node:timers/promises')
 }

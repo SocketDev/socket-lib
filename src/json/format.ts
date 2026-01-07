@@ -238,7 +238,7 @@ export function shouldSave(
   // If ignoring whitespace, only compare content
   if (ignoreWhitespace) {
     // Use util.isDeepStrictEqual for comparison
-    const util = require('node:util')
+    const util = require('util')
     return !util.isDeepStrictEqual(sortedContent, origContent)
   }
 

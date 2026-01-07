@@ -1,10 +1,43 @@
-import path from 'path'
-
 import { debugNs } from './debug'
 import { getGlobMatcher } from './globs'
 import { normalizePath } from './paths/normalize'
 import { spawn, spawnSync } from './spawn'
 import { stripAnsi } from './strings'
+
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 /**
  * Options for git diff operations.
@@ -122,54 +155,6 @@ interface GitDiffSpawnArgs {
 }
 
 const gitDiffCache = new Map<string, string[]>()
-
-let _fs: typeof import('fs') | undefined
-/**
- * Lazily load the `fs` module to avoid Webpack errors.
- *
- * Uses non-`node:` prefixed require internally to prevent Webpack from
- * attempting to bundle Node.js built-in modules.
- *
- * @returns The Node.js `fs` module.
- *
- * @example
- * ```typescript
- * const fs = getFs()
- * const exists = fs.existsSync('/path/to/file')
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('fs')
-}
-
-let _path: typeof import('path') | undefined
-/**
- * Lazily load the `path` module to avoid Webpack errors.
- *
- * Uses non-`node:` prefixed require internally to prevent Webpack from
- * attempting to bundle Node.js built-in modules.
- *
- * @returns The Node.js `path` module.
- *
- * @example
- * ```typescript
- * const path = getPath()
- * const joined = path.join('/foo', 'bar')
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('path')
-}
 
 /**
  * Get the git executable path.
@@ -437,9 +422,11 @@ function parseGitDiffStdout(
     porcelain = false,
     ...matcherOptions
   } = { __proto__: null, ...options }
+  const fs = getFs()
+  const path = getPath()
   // Resolve cwd to handle symlinks.
   const cwd =
-    cwdOption === defaultRoot ? defaultRoot : getFs().realpathSync(cwdOption)
+    cwdOption === defaultRoot ? defaultRoot : fs.realpathSync(cwdOption)
   const rootPath = defaultRoot
   // Split into lines without trimming to preserve leading spaces in porcelain format.
   let rawFiles = stdout
@@ -777,9 +764,11 @@ export async function isChanged(
     ...options,
     absolute: false,
   })
+  const fs = getFs()
+  const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const resolvedPathname = fs.realpathSync(pathname)
+  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -828,9 +817,11 @@ export function isChangedSync(
     ...options,
     absolute: false,
   })
+  const fs = getFs()
+  const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const resolvedPathname = fs.realpathSync(pathname)
+  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -878,9 +869,11 @@ export async function isUnstaged(
     ...options,
     absolute: false,
   })
+  const fs = getFs()
+  const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const resolvedPathname = fs.realpathSync(pathname)
+  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -929,9 +922,11 @@ export function isUnstagedSync(
     ...options,
     absolute: false,
   })
+  const fs = getFs()
+  const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const resolvedPathname = fs.realpathSync(pathname)
+  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -978,9 +973,11 @@ export async function isStaged(
     ...options,
     absolute: false,
   })
+  const fs = getFs()
+  const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const resolvedPathname = fs.realpathSync(pathname)
+  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -1028,9 +1025,11 @@ export function isStagedSync(
     ...options,
     absolute: false,
   })
+  const fs = getFs()
+  const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = getFs().realpathSync(pathname)
-  const baseCwd = options?.cwd ? getFs().realpathSync(options['cwd']) : getCwd()
+  const resolvedPathname = fs.realpathSync(pathname)
+  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }

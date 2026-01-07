@@ -63,7 +63,7 @@ function getChildProcess() {
   if (_child_process === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _child_process = /*@__PURE__*/ require('node:child_process')
+    _child_process = /*@__PURE__*/ require('child_process')
   }
   return _child_process as typeof import('node:child_process')
 }

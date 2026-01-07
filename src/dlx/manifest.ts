@@ -58,7 +58,7 @@ export interface PackageDetails {
  */
 export interface BinaryDetails {
   checksum: string
-  checksum_algorithm: 'sha256' | 'sha512'
+  checksum_algorithm: ChecksumAlgorithm
   platform: string
   arch: string
   size: number
@@ -67,6 +67,8 @@ export interface BinaryDetails {
     url: string
   }
 }
+
+export type ChecksumAlgorithm = 'sha256' | 'sha512'
 
 /**
  * Unified manifest entry for all cached items (packages and binaries).

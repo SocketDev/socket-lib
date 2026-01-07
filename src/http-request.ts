@@ -20,8 +20,8 @@ import type { IncomingMessage } from 'http'
 
 import type { Logger } from './logger.js'
 
-let _http: typeof import('http') | undefined
-let _https: typeof import('https') | undefined
+let _http: typeof import('node:http') | undefined
+let _https: typeof import('node:https') | undefined
 /**
  * Lazily load http and https modules to avoid Webpack errors.
  * @private
@@ -31,9 +31,9 @@ function getHttp() {
   if (_http === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _http = /*@__PURE__*/ require('node:http')
+    _http = /*@__PURE__*/ require('http')
   }
-  return _http as typeof import('http')
+  return _http as typeof import('node:http')
 }
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -41,9 +41,9 @@ function getHttps() {
   if (_https === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _https = /*@__PURE__*/ require('node:https')
+    _https = /*@__PURE__*/ require('https')
   }
-  return _https as typeof import('https')
+  return _https as typeof import('node:https')
 }
 
 /**

@@ -1,12 +1,6 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
-import { createHash } from 'crypto'
-
-import os from 'os'
-
-import path from 'path'
-
-import { WIN32 } from '../constants/platform'
+import { getArch, getPlatform, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 
 import { generateCacheKey } from './cache'
@@ -17,15 +11,33 @@ import { isObjectObject } from '../objects'
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
-import type { SpawnExtra, SpawnOptions } from '../spawn'
 import { spawn } from '../spawn'
 
-let _fs: typeof import('fs') | undefined
+import type { ChecksumAlgorithm } from './manifest'
+import type { SpawnExtra, SpawnOptions } from '../spawn'
+
+let _crypto: typeof import('node:crypto') | undefined
+/**
+ * Lazily load the crypto module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getCrypto() {
+  if (_crypto === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _crypto = /*@__PURE__*/ require('crypto')
+  }
+  return _crypto as typeof import('node:crypto')
+}
+
+let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
  *
- * @returns The Node.js fs module
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -33,9 +45,27 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('node:fs')
+    _fs = /*@__PURE__*/ require('fs')
   }
-  return _fs as typeof import('fs')
+  return _fs as typeof import('node:fs')
+}
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
 }
 
 export interface DlxBinaryOptions {
@@ -180,7 +210,7 @@ export interface DlxMetadata {
  * Get metadata file path for a cached binary.
  */
 function getMetadataPath(cacheEntryPath: string): string {
-  return path.join(cacheEntryPath, '.dlx-metadata.json')
+  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
 }
 
 /**
@@ -227,20 +257,22 @@ async function downloadBinaryFile(
 ): Promise<string> {
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
+  const crypto = getCrypto()
+  const fs = getFs()
+  const path = getPath()
   const cacheEntryDir = path.dirname(destPath)
   const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
 
   return await processLock.withLock(
     lockPath,
     async () => {
-      const fs = getFs()
       // Check if file was downloaded while waiting for lock.
       if (fs.existsSync(destPath)) {
         const stats = await fs.promises.stat(destPath)
         if (stats.size > 0) {
           // File exists, compute and return checksum.
           const fileBuffer = await fs.promises.readFile(destPath)
-          const hasher = createHash('sha256')
+          const hasher = crypto.createHash('sha256')
           hasher.update(fileBuffer)
           return hasher.digest('hex')
         }
@@ -260,7 +292,7 @@ async function downloadBinaryFile(
 
       // Compute checksum of downloaded file.
       const fileBuffer = await fs.promises.readFile(destPath)
-      const hasher = createHash('sha256')
+      const hasher = crypto.createHash('sha256')
       hasher.update(fileBuffer)
       const actualChecksum = hasher.digest('hex')
 
@@ -312,9 +344,9 @@ async function writeMetadata(
     cache_key: cacheKey,
     timestamp: Date.now(),
     checksum,
-    checksum_algorithm: 'sha256',
-    platform: os.platform(),
-    arch: os.arch(),
+    checksum_algorithm: 'sha256' as ChecksumAlgorithm,
+    platform: getPlatform(),
+    arch: getArch(),
     size,
     source: {
       type: 'download',
@@ -329,9 +361,9 @@ async function writeMetadata(
     const spec = `${url}:${binaryName}`
     await dlxManifest.setBinaryEntry(spec, cacheKey, {
       checksum,
-      checksum_algorithm: 'sha256',
-      platform: os.platform(),
-      arch: os.arch(),
+      checksum_algorithm: metadata.checksum_algorithm,
+      platform: metadata.platform,
+      arch: metadata.arch,
       size,
       source: {
         type: 'download',
@@ -359,6 +391,7 @@ export async function cleanDlxCache(
 
   let cleaned = 0
   const now = Date.now()
+  const path = getPath()
   const entries = await fs.promises.readdir(cacheDir)
 
   for (const entry of entries) {
@@ -428,19 +461,18 @@ export async function dlxBinary(
     url,
     yes,
   } = { __proto__: null, ...options } as DlxBinaryOptions
-
+  const fs = getFs()
+  const path = getPath()
   // Map --yes flag to force behavior (auto-approve/skip prompts)
   const force = yes === true ? true : userForce
-
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
-  const binaryName = name || `binary-${process.platform}-${os.arch()}`
+  const binaryName = name || `binary-${process.platform}-${getArch()}`
   // Create spec from URL and binary name for unique cache identity.
   const spec = `${url}:${binaryName}`
   const cacheKey = generateCacheKey(spec)
   const cacheEntryDir = path.join(cacheDir, cacheKey)
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
-  const fs = getFs()
 
   let downloaded = false
   let computedChecksum = checksum
@@ -542,7 +574,7 @@ export async function dlxBinary(
         ...spawnOptions,
         env: {
           ...spawnOptions?.env,
-          PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
+          PATH: `${cacheEntryDir}${getPath().delimiter}${process.env['PATH'] || ''}`,
         },
         shell: true,
       }
@@ -572,16 +604,16 @@ export async function downloadBinary(
     name,
     url,
   } = { __proto__: null, ...options } as DlxBinaryOptions
-
+  const fs = getFs()
+  const path = getPath()
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
-  const binaryName = name || `binary-${process.platform}-${os.arch()}`
+  const binaryName = name || `binary-${process.platform}-${getArch()}`
   // Create spec from URL and binary name for unique cache identity.
   const spec = `${url}:${binaryName}`
   const cacheKey = generateCacheKey(spec)
   const cacheEntryDir = path.join(cacheDir, cacheKey)
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
-  const fs = getFs()
 
   let downloaded = false
 
@@ -670,6 +702,7 @@ export function executeBinary(
   //
   // Since our binaries are downloaded to a custom cache directory that's not in PATH,
   // we must prepend the cache directory to PATH so cmd.exe can locate the binary.
+  const path = getPath()
   const cacheEntryDir = path.dirname(binaryPath)
   const finalSpawnOptions = needsShell
     ? {
@@ -717,6 +750,7 @@ export async function listDlxCache(): Promise<
 
   const results = []
   const now = Date.now()
+  const path = getPath()
   const entries = await fs.promises.readdir(cacheDir)
 
   for (const entry of entries) {

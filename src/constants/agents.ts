@@ -28,8 +28,8 @@ export const NPM_BIN_PATH = /*@__PURE__*/ (() => {
 // because cli.js exports a function that must be invoked, not executed directly.
 export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
   try {
-    const { existsSync } = /*@__PURE__*/ require('node:fs')
-    const path = /*@__PURE__*/ require('node:path')
+    const { existsSync } = /*@__PURE__*/ require('fs')
+    const path = /*@__PURE__*/ require('path')
     // module is imported at the top
     // Find npm binary using which.
     const npmBin = which.sync('npm', { nothrow: true })

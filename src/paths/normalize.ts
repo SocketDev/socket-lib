@@ -82,14 +82,13 @@ let _buffer: typeof import('node:buffer') | undefined
  * overhead and potential Webpack bundling errors.
  *
  * @private
- * @returns {typeof import('node:buffer')} The buffer module
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getBuffer() {
   if (_buffer === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _buffer = /*@__PURE__*/ require('node:buffer')
+    _buffer = /*@__PURE__*/ require('buffer')
   }
   return _buffer as typeof import('node:buffer')
 }
@@ -102,14 +101,13 @@ let _url: typeof import('node:url') | undefined
  * overhead and potential Webpack bundling errors.
  *
  * @private
- * @returns {typeof import('node:url')} The url module
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getUrl() {
   if (_url === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _url = /*@__PURE__*/ require('node:url')
+    _url = /*@__PURE__*/ require('url')
   }
   return _url as typeof import('node:url')
 }
@@ -894,7 +892,7 @@ function resolve(...segments: string[]): string {
   // If no absolute path was found in segments, prepend current working directory.
   // This ensures the final path is always absolute.
   if (!resolvedAbsolute) {
-    const cwd = /*@__PURE__*/ require('node:process').cwd()
+    const cwd = /*@__PURE__*/ require('process').cwd()
     resolvedPath = cwd + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
   }
 

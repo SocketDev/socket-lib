@@ -4,7 +4,6 @@
 
 import { chmodSync, existsSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
-import path from 'path'
 
 import { safeMkdir } from '../fs.js'
 import { httpDownload, httpRequest } from '../http-request.js'
@@ -13,6 +12,24 @@ import { pRetry } from '../promises.js'
 import { spawn } from '../spawn.js'
 
 const logger = getDefaultLogger()
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 /**
  * Socket-btm GitHub repository configuration.
@@ -122,6 +139,7 @@ export async function downloadGitHubRelease(
     throw new Error('Either toolPrefix or tag must be provided')
   }
 
+  const path = getPath()
   // Resolve download directory (can be absolute or relative to cwd).
   const resolvedDownloadDir = path.isAbsolute(downloadDir)
     ? downloadDir
@@ -217,6 +235,7 @@ export async function downloadReleaseAsset(
     throw new Error(`Asset ${assetName} not found in release ${tag}`)
   }
 
+  const path = getPath()
   // Create output directory.
   await safeMkdir(path.dirname(outputPath))
 
