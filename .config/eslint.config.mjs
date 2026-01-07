@@ -365,6 +365,21 @@ const eslintConfig = [
       'no-await-in-loop': 'off',
     },
   },
+  {
+    // Disable node: prefix requirement in src/* files (library code for distribution)
+    files: ['src/**/*.ts', 'src/**/*.mts', 'src/**/*.js', 'src/**/*.mjs'],
+    rules: {
+      'n/prefer-node-protocol': 'off',
+    },
+  },
+  {
+    // Enforce node: prefix outside of src/* (scripts, tests, config files)
+    files: ['**/*.ts', '**/*.mts', '**/*.js', '**/*.mjs'],
+    ignores: ['src/**/*'],
+    rules: {
+      'n/prefer-node-protocol': 'error',
+    },
+  },
 ]
 
 export { eslintConfig }
