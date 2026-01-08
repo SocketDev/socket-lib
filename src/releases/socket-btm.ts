@@ -15,7 +15,8 @@ import {
   type AssetPattern,
   downloadGitHubRelease,
   type DownloadGitHubReleaseConfig,
-  findReleaseAsset,
+  getLatestRelease,
+  getReleaseAssetUrl,
   SOCKET_BTM_REPO,
 } from './github.js'
 
@@ -176,20 +177,32 @@ export async function downloadSocketBtmRelease(
         )
       }
 
-      // Find matching asset in latest release.
-      const result = await findReleaseAsset(
-        toolPrefix,
-        asset,
-        { owner: SOCKET_BTM_REPO.owner, repo: SOCKET_BTM_REPO.repo },
-        { quiet },
-      )
+      // Find latest release with matching asset.
+      resolvedTag = await getLatestRelease(toolPrefix, SOCKET_BTM_REPO, {
+        assetPattern: asset,
+        quiet,
+      })
 
-      if (!result) {
+      if (!resolvedTag) {
         throw new Error(`No ${tool} release with matching asset pattern found`)
       }
 
-      resolvedAsset = result.assetName
-      resolvedTag = result.tag
+      // Get the matching asset URL (which will give us the asset name).
+      const assetUrl = await getReleaseAssetUrl(
+        resolvedTag,
+        asset,
+        SOCKET_BTM_REPO,
+        {
+          quiet,
+        },
+      )
+
+      if (!assetUrl) {
+        throw new Error(`No matching asset found in release ${resolvedTag}`)
+      }
+
+      // Extract asset name from URL.
+      resolvedAsset = assetUrl.split('/').pop() || asset.toString()
     }
 
     // Default output to resolved asset name if not provided

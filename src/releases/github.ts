@@ -208,16 +208,17 @@ export async function downloadGitHubRelease(
 
 /**
  * Download a specific release asset.
+ * Supports pattern matching for dynamic asset discovery.
  *
  * @param tag - Release tag name
- * @param assetName - Asset name to download
+ * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
  * @param outputPath - Path to write the downloaded file
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  */
 export async function downloadReleaseAsset(
   tag: string,
-  assetName: string,
+  assetPattern: string | AssetPattern,
   outputPath: string,
   repoConfig: RepoConfig,
   options: { quiet?: boolean } = {},
@@ -228,13 +229,15 @@ export async function downloadReleaseAsset(
   // Get the browser_download_url for the asset.
   const downloadUrl = await getReleaseAssetUrl(
     tag,
-    assetName,
+    assetPattern,
     { owner, repo },
     { quiet },
   )
 
   if (!downloadUrl) {
-    throw new Error(`Asset ${assetName} not found in release ${tag}`)
+    const patternDesc =
+      typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
+    throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
   }
 
   const path = getPath()
@@ -288,16 +291,6 @@ export function getAuthHeaders(): Record<string, string> {
 export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
 
 /**
- * Result of finding a release asset.
- */
-export interface FindReleaseAssetResult {
-  /** The release tag name. */
-  tag: string
-  /** The matching asset name. */
-  assetName: string
-}
-
-/**
  * Create a matcher function for a pattern using picomatch for glob patterns
  * or simple prefix/suffix matching for object patterns.
  *
@@ -334,78 +327,25 @@ function createMatcher(
 }
 
 /**
- * Find a release asset matching a pattern in the latest release.
- * Searches for the first release matching the tool prefix,
- * then finds the first asset matching the provided pattern.
+ * Get latest release tag matching a tool prefix.
+ * Optionally filter by releases containing a matching asset.
  *
- * @param toolPrefix - Tool name prefix to search for (e.g., 'yoga-layout-')
- * @param assetPattern - Pattern to match asset names (glob string, prefix/suffix object, or RegExp)
+ * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-')
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
- * @returns Result with tag and asset name, or null if not found
- *
- * @example
- * ```ts
- * // Find yoga-sync asset with glob pattern
- * const result = await findReleaseAsset(
- *   'yoga-layout-',
- *   'yoga-sync-*.mjs',
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * // result = { tag: 'yoga-layout-2024-01-15-abc123', assetName: 'yoga-sync-2024-01-15-abc123.mjs' }
- * ```
- *
- * @example
- * ```ts
- * // Find models tar.gz with glob pattern
- * const result = await findReleaseAsset(
- *   'models-',
- *   'models-*.tar.gz',
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * ```
- *
- * @example
- * ```ts
- * // Find asset with glob braces pattern
- * const result = await findReleaseAsset(
- *   'yoga-layout-',
- *   'yoga-{sync,layout}-*.{mjs,js}',
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * ```
- *
- * @example
- * ```ts
- * // Find asset with object pattern (backward compatible)
- * const result = await findReleaseAsset(
- *   'yoga-layout-',
- *   { prefix: 'yoga-sync-', suffix: '.mjs' },
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * ```
- *
- * @example
- * ```ts
- * // Find models tar.gz with regex
- * const result = await findReleaseAsset(
- *   'models-',
- *   /^models-\d{4}-\d{2}-\d{2}-.+\.tar\.gz$/,
- *   { owner: 'SocketDev', repo: 'socket-btm' }
- * )
- * ```
+ * @param options.assetPattern - Optional pattern to filter releases by matching asset
+ * @returns Latest release tag or null if not found
  */
-export async function findReleaseAsset(
+export async function getLatestRelease(
   toolPrefix: string,
-  assetPattern: AssetPattern,
   repoConfig: RepoConfig,
-  options: { quiet?: boolean } = {},
-): Promise<FindReleaseAssetResult | null> {
+  options: { assetPattern?: AssetPattern; quiet?: boolean } = {},
+): Promise<string | null> {
+  const { assetPattern, quiet = false } = options
   const { owner, repo } = repoConfig
-  const { quiet = false } = options
 
-  // Create matcher function for the pattern.
-  const isMatch = createMatcher(assetPattern)
+  // Create matcher function if pattern provided.
+  const isMatch = assetPattern ? createMatcher(assetPattern) : undefined
 
   return await pRetry(
     async () => {
@@ -430,87 +370,20 @@ export async function findReleaseAsset(
           continue
         }
 
-        // Find matching asset in this release using the matcher function.
-        const matchingAsset = assets.find((a: { name: string }) =>
-          isMatch(a.name),
-        )
-
-        if (matchingAsset) {
-          if (!quiet) {
-            logger.info(`Found release: ${tag}`)
-            logger.info(`Found asset: ${matchingAsset.name}`)
-          }
-          return {
-            assetName: matchingAsset.name,
-            tag,
+        // If asset pattern provided, check if release has matching asset.
+        if (isMatch) {
+          const hasMatchingAsset = assets.some((a: { name: string }) =>
+            isMatch(a.name),
+          )
+          if (!hasMatchingAsset) {
+            continue
           }
         }
-      }
 
-      // No matching release or asset found.
-      if (!quiet) {
-        logger.info(`No ${toolPrefix} release with matching asset found`)
-      }
-      return null
-    },
-    {
-      ...RETRY_CONFIG,
-      onRetry: (attempt, error) => {
         if (!quiet) {
-          logger.info(
-            `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for release asset search...`,
-          )
-          logger.warn(
-            `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
-          )
+          logger.info(`Found release: ${tag}`)
         }
-        return undefined
-      },
-    },
-  )
-}
-
-/**
- * Get latest release tag matching a tool prefix.
- *
- * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-')
- * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
- * @returns Latest release tag or null if not found
- */
-export async function getLatestRelease(
-  toolPrefix: string,
-  repoConfig: RepoConfig,
-  options: { quiet?: boolean } = {},
-): Promise<string | null> {
-  const { owner, repo } = repoConfig
-  const { quiet = false } = options
-
-  return await pRetry(
-    async () => {
-      // Fetch recent releases (100 should cover all tool releases).
-      const response = await httpRequest(
-        `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch releases: ${response.status}`)
-      }
-
-      const releases = JSON.parse(response.body.toString('utf8'))
-
-      // Find the first release matching the tool prefix.
-      for (const release of releases) {
-        const { tag_name: tag } = release
-        if (tag.startsWith(toolPrefix)) {
-          if (!quiet) {
-            logger.info(`Found release: ${tag}`)
-          }
-          return tag
-        }
+        return tag
       }
 
       // No matching release found.
@@ -538,21 +411,30 @@ export async function getLatestRelease(
 
 /**
  * Get download URL for a specific release asset.
+ * Supports pattern matching for dynamic asset discovery.
  *
  * @param tag - Release tag name
- * @param assetName - Asset name to download
+ * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @returns Browser download URL for the asset
  */
 export async function getReleaseAssetUrl(
   tag: string,
-  assetName: string,
+  assetPattern: string | AssetPattern,
   repoConfig: RepoConfig,
   options: { quiet?: boolean } = {},
 ): Promise<string | null> {
   const { owner, repo } = repoConfig
   const { quiet = false } = options
+
+  // Create matcher function for the pattern.
+  const isMatch =
+    typeof assetPattern === 'string' &&
+    !assetPattern.includes('*') &&
+    !assetPattern.includes('{')
+      ? (input: string) => input === assetPattern
+      : createMatcher(assetPattern as AssetPattern)
 
   return await pRetry(
     async () => {
@@ -570,16 +452,18 @@ export async function getReleaseAssetUrl(
       const release = JSON.parse(response.body.toString('utf8'))
 
       // Find the matching asset.
-      const asset = release.assets.find(
-        (a: { name: string }) => a.name === assetName,
+      const asset = release.assets.find((a: { name: string }) =>
+        isMatch(a.name),
       )
 
       if (!asset) {
-        throw new Error(`Asset ${assetName} not found in release ${tag}`)
+        const patternDesc =
+          typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
+        throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
       }
 
       if (!quiet) {
-        logger.info(`Found asset: ${assetName}`)
+        logger.info(`Found asset: ${asset.name}`)
       }
 
       return asset.browser_download_url
