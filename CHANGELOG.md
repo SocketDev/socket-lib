@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.4.0) - 2026-01-07
+
+### Added
+
+- **releases/github**: Extended release functions to accept glob patterns for asset discovery
+  - `getReleaseAssetUrl()` now accepts glob patterns: `'yoga-sync-*.mjs'`, `'models-*.tar.gz'`
+  - `downloadReleaseAsset()` now accepts glob patterns for automatic asset discovery
+  - `getLatestRelease()` now accepts asset patterns to find releases with matching assets
+  - Supports wildcards, brace expansion, RegExp patterns, and prefix/suffix objects
+  - Uses picomatch for robust glob pattern matching
+
+- **releases/socket-btm**: Extended `downloadSocketBtmRelease()` to accept glob patterns
+  - `asset` parameter now accepts wildcards: `'yoga-sync-*.mjs'`, `'models-*.tar.gz'`
+  - Automatically discovers and downloads latest matching asset
+  - Eliminates need for hardcoded asset names in build scripts
+
 ## [5.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.3.0) - 2026-01-07
 
 ### Added
