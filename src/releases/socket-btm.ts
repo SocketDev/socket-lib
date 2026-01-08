@@ -2,8 +2,6 @@
  * @fileoverview Socket-btm release download utilities.
  */
 
-import { existsSync } from 'fs'
-
 import {
   type Arch,
   getArch,
@@ -23,65 +21,88 @@ import {
 export type { Arch, Libc, Platform }
 
 /**
- * Configuration for downloading socket-btm binary releases.
+ * Map Node.js arch to socket-btm asset arch naming.
  */
-export interface SocketBtmBinaryConfig {
-  /** Working directory (defaults to process.cwd()). */
-  cwd?: string
-  /** Download destination directory. @default 'build/downloaded' */
-  downloadDir?: string
-  /** Tool/package name for directory structure and release matching. */
-  tool: string
-  /** Binary/executable name (without extension). @default tool */
-  bin?: string
-  /** Target platform (defaults to current platform). */
-  targetPlatform?: Platform
-  /** Target architecture (defaults to current arch). */
-  targetArch?: Arch
-  /** Linux libc variant. Auto-detected if not specified. */
-  libc?: Libc
-  /** Specific release tag to download. */
-  tag?: string
-  /** Suppress log messages. @default false */
-  quiet?: boolean
-  /** Remove macOS quarantine attribute after download. @default true */
-  removeMacOSQuarantine?: boolean
-  /** @internal Discriminator field */
-  asset?: never
+const ARCH_MAP: Record<string, string> = {
+  __proto__: null,
+  arm64: 'arm64',
+  x64: 'x64',
+}
+
+let _fs: typeof import('node:fs') | undefined
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
 }
 
 /**
  * Configuration for downloading socket-btm generic assets.
  */
 export interface SocketBtmAssetConfig {
+  /** Asset name or pattern on GitHub. */
+  asset: string | AssetPattern
+  /** @internal Discriminator fields */
+  bin?: never
   /** Working directory (defaults to process.cwd()). */
   cwd?: string
   /** Download destination directory. @default 'build/downloaded' */
   downloadDir?: string
-  /** Tool/package name for directory structure and release matching. */
-  tool: string
-  /**
-   * Asset name or pattern on GitHub.
-   * Can be:
-   * - A string with wildcard (*) for simple glob patterns (e.g., 'yoga-sync-*.mjs')
-   * - An exact asset name (string without wildcard)
-   * - A pattern object with prefix/suffix
-   * - A RegExp for complex patterns
-   */
-  asset: string | AssetPattern
+  /** @internal Discriminator fields */
+  libc?: never
   /** Output filename. @default resolved asset name */
   output?: string
-  /** Specific release tag to download. */
-  tag?: string
   /** Suppress log messages. @default false */
   quiet?: boolean
   /** Remove macOS quarantine attribute after download. @default false */
   removeMacOSQuarantine?: boolean
+  /** Specific release tag to download. */
+  tag?: string
   /** @internal Discriminator fields */
-  bin?: never
-  targetPlatform?: never
   targetArch?: never
-  libc?: never
+  /** @internal Discriminator fields */
+  targetPlatform?: never
+  /** Tool/package name for directory structure and release matching. */
+  tool: string
+}
+
+/**
+ * Configuration for downloading socket-btm binary releases.
+ */
+export interface SocketBtmBinaryConfig {
+  /** @internal Discriminator field */
+  asset?: never
+  /** Binary/executable name (without extension). @default tool */
+  bin?: string
+  /** Working directory (defaults to process.cwd()). */
+  cwd?: string
+  /** Download destination directory. @default 'build/downloaded' */
+  downloadDir?: string
+  /** Linux libc variant. Auto-detected if not specified. */
+  libc?: Libc
+  /** Suppress log messages. @default false */
+  quiet?: boolean
+  /** Remove macOS quarantine attribute after download. @default true */
+  removeMacOSQuarantine?: boolean
+  /** Specific release tag to download. */
+  tag?: string
+  /** Target architecture (defaults to current arch). */
+  targetArch?: Arch
+  /** Target platform (defaults to current platform). */
+  targetPlatform?: Platform
+  /** Tool/package name for directory structure and release matching. */
+  tool: string
 }
 
 /**
@@ -90,14 +111,6 @@ export interface SocketBtmAssetConfig {
 export type SocketBtmReleaseConfig =
   | SocketBtmBinaryConfig
   | SocketBtmAssetConfig
-
-/**
- * Map Node.js arch to socket-btm asset arch naming.
- */
-const ARCH_MAP: Record<string, string> = {
-  arm64: 'arm64',
-  x64: 'x64',
-}
 
 /**
  * Detect the libc variant (musl or glibc) on Linux systems.
@@ -111,8 +124,9 @@ export function detectLibc(): Libc | undefined {
   }
 
   try {
-    // Check for musl-specific dynamic linker
-    // These files only exist on musl systems
+    const fs = getFs()
+    // Check for musl-specific dynamic linker.
+    // These files only exist on musl systems.
     const muslPaths = [
       '/lib/ld-musl-x86_64.so.1',
       '/lib/ld-musl-aarch64.so.1',
@@ -121,15 +135,15 @@ export function detectLibc(): Libc | undefined {
     ]
 
     for (const path of muslPaths) {
-      if (existsSync(path)) {
+      if (fs.existsSync(path)) {
         return 'musl'
       }
     }
 
-    // If no musl files found, assume glibc
+    // If no musl files found, assume glibc.
     return 'glibc'
   } catch {
-    // If detection fails, default to glibc (most common)
+    // If detection fails, default to glibc (most common).
     return 'glibc'
   }
 }

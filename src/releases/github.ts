@@ -2,9 +2,6 @@
  * @fileoverview GitHub release download utilities.
  */
 
-import { chmodSync, existsSync } from 'fs'
-import { readFile, writeFile } from 'fs/promises'
-
 import picomatch from '../external/picomatch.js'
 
 import { safeMkdir } from '../fs.js'
@@ -15,7 +12,65 @@ import { spawn } from '../spawn.js'
 
 const logger = getDefaultLogger()
 
+/**
+ * Retry configuration for GitHub API requests.
+ * Uses exponential backoff to handle transient failures and rate limiting.
+ */
+const RETRY_CONFIG = Object.freeze({
+  __proto__: null,
+  // Exponential backoff: delay doubles with each retry (5s, 10s, 20s).
+  backoffFactor: 2,
+  // Initial delay before first retry.
+  baseDelayMs: 5000,
+  // Maximum number of retry attempts (excluding initial request).
+  retries: 2,
+})
+
+let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
+
+/**
+ * Create a matcher function for a pattern using picomatch for glob patterns
+ * or simple prefix/suffix matching for object patterns.
+ *
+ * @param pattern - Pattern to match (string glob, prefix/suffix object, or RegExp)
+ * @returns Function that tests if a string matches the pattern
+ * @private
+ */
+function createMatcher(
+  pattern: string | { prefix: string; suffix: string } | RegExp,
+): (input: string) => boolean {
+  if (typeof pattern === 'string') {
+    // Use picomatch for glob pattern matching.
+    const isMatch = picomatch(pattern)
+    return (input: string) => isMatch(input)
+  }
+
+  if (pattern instanceof RegExp) {
+    return (input: string) => pattern.test(input)
+  }
+
+  // Prefix/suffix object pattern (backward compatible).
+  const { prefix, suffix } = pattern
+  return (input: string) => input.startsWith(prefix) && input.endsWith(suffix)
+}
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
 /**
  * Lazily load the path module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
@@ -34,26 +89,53 @@ function getPath() {
 }
 
 /**
- * Socket-btm GitHub repository configuration.
+ * Pattern for matching release assets.
+ * Can be either:
+ * - A string with glob pattern syntax
+ * - A prefix/suffix pair for explicit matching (backward compatible)
+ * - A RegExp for complex patterns
+ *
+ * String patterns support full glob syntax via picomatch.
+ * Examples:
+ * - Simple wildcard: yoga-sync-*.mjs matches yoga-sync-abc123.mjs
+ * - Complex: models-*.tar.gz matches models-2024-01-15.tar.gz
+ * - Prefix wildcard: *-models.tar.gz matches foo-models.tar.gz
+ * - Suffix wildcard: yoga-* matches yoga-layout
+ * - Brace expansion: {yoga,models}-*.{mjs,js} matches yoga-abc.mjs or models-xyz.js
+ *
+ * For backward compatibility, prefix/suffix objects are still supported but glob patterns are recommended.
  */
-export const SOCKET_BTM_REPO = {
-  owner: 'SocketDev',
-  repo: 'socket-btm',
-} as const
+export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
 
 /**
- * Retry configuration for GitHub API requests.
- * Uses exponential backoff to handle transient failures and rate limiting.
+ * Configuration for downloading a GitHub release.
  */
-const RETRY_CONFIG = Object.freeze({
-  __proto__: null,
-  // Exponential backoff: delay doubles with each retry (5s, 10s, 20s).
-  backoffFactor: 2,
-  // Initial delay before first retry.
-  baseDelayMs: 5000,
-  // Maximum number of retry attempts (excluding initial request).
-  retries: 2,
-})
+export interface DownloadGitHubReleaseConfig {
+  /** Asset name on GitHub. */
+  assetName: string
+  /** Binary filename (e.g., 'node', 'binject'). */
+  binaryName: string
+  /** Working directory (defaults to process.cwd()). */
+  cwd?: string
+  /** Download destination directory. @default 'build/downloaded' */
+  downloadDir?: string
+  /** GitHub repository owner/organization. */
+  owner: string
+  /** Platform-arch identifier (e.g., 'linux-x64-musl'). */
+  platformArch: string
+  /** Suppress log messages. @default false */
+  quiet?: boolean
+  /** Remove macOS quarantine attribute after download. @default true */
+  removeMacOSQuarantine?: boolean
+  /** GitHub repository name. */
+  repo: string
+  /** Specific release tag to download. */
+  tag?: string
+  /** Tool name for directory structure. */
+  toolName: string
+  /** Tool prefix for finding latest release. */
+  toolPrefix?: string
+}
 
 /**
  * Configuration for repository access.
@@ -70,141 +152,12 @@ export interface RepoConfig {
 }
 
 /**
- * Configuration for downloading a GitHub release.
+ * Socket-btm GitHub repository configuration.
  */
-export interface DownloadGitHubReleaseConfig {
-  /** GitHub repository owner/organization. */
-  owner: string
-  /** GitHub repository name. */
-  repo: string
-  /** Working directory (defaults to process.cwd()). */
-  cwd?: string
-  /** Download destination directory. @default 'build/downloaded' */
-  downloadDir?: string
-  /** Tool name for directory structure. */
-  toolName: string
-  /** Platform-arch identifier (e.g., 'linux-x64-musl'). */
-  platformArch: string
-  /** Binary filename (e.g., 'node', 'binject'). */
-  binaryName: string
-  /** Asset name on GitHub. */
-  assetName: string
-  /** Tool prefix for finding latest release. */
-  toolPrefix?: string
-  /** Specific release tag to download. */
-  tag?: string
-  /** Suppress log messages. @default false */
-  quiet?: boolean
-  /** Remove macOS quarantine attribute after download. @default true */
-  removeMacOSQuarantine?: boolean
-}
-
-/**
- * Download a binary from any GitHub repository with version caching.
- *
- * @param config - Download configuration
- * @returns Path to the downloaded binary
- */
-export async function downloadGitHubRelease(
-  config: DownloadGitHubReleaseConfig,
-): Promise<string> {
-  const {
-    assetName,
-    binaryName,
-    cwd = process.cwd(),
-    downloadDir = 'build/downloaded',
-    owner,
-    platformArch,
-    quiet = false,
-    removeMacOSQuarantine = true,
-    repo,
-    tag: explicitTag,
-    toolName,
-    toolPrefix,
-  } = config
-
-  // Get release tag (either explicit or latest).
-  let tag: string
-  if (explicitTag) {
-    tag = explicitTag
-  } else if (toolPrefix) {
-    const latestTag = await getLatestRelease(
-      toolPrefix,
-      { owner, repo },
-      { quiet },
-    )
-    if (!latestTag) {
-      throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
-    }
-    tag = latestTag
-  } else {
-    throw new Error('Either toolPrefix or tag must be provided')
-  }
-
-  const path = getPath()
-  // Resolve download directory (can be absolute or relative to cwd).
-  const resolvedDownloadDir = path.isAbsolute(downloadDir)
-    ? downloadDir
-    : path.join(cwd, downloadDir)
-
-  // Build download paths following socket-cli pattern.
-  const binaryDir = path.join(resolvedDownloadDir, toolName, platformArch)
-  const binaryPath = path.join(binaryDir, binaryName)
-  const versionPath = path.join(binaryDir, '.version')
-
-  // Check if already downloaded.
-  if (existsSync(versionPath) && existsSync(binaryPath)) {
-    const cachedVersion = (await readFile(versionPath, 'utf8')).trim()
-    if (cachedVersion === tag) {
-      if (!quiet) {
-        logger.info(`Using cached ${toolName} (${platformArch}): ${binaryPath}`)
-      }
-      return binaryPath
-    }
-  }
-
-  // Download the asset.
-  if (!quiet) {
-    logger.info(`Downloading ${toolName} for ${platformArch}...`)
-  }
-  await downloadReleaseAsset(
-    tag,
-    assetName,
-    binaryPath,
-    { owner, repo },
-    { quiet },
-  )
-
-  // Make executable on Unix-like systems.
-  const isWindows = binaryName.endsWith('.exe')
-  if (!isWindows) {
-    chmodSync(binaryPath, 0o755)
-
-    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
-    if (
-      removeMacOSQuarantine &&
-      process.platform === 'darwin' &&
-      platformArch.startsWith('darwin')
-    ) {
-      try {
-        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
-          stdio: 'ignore',
-        })
-      } catch {
-        // Ignore errors - attribute might not exist or xattr might not be available.
-      }
-    }
-  }
-
-  // Write version file.
-  await writeFile(versionPath, tag, 'utf8')
-
-  if (!quiet) {
-    logger.info(`Downloaded ${toolName} to ${binaryPath}`)
-  }
-
-  return binaryPath
-}
+export const SOCKET_BTM_REPO = {
+  owner: 'SocketDev',
+  repo: 'socket-btm',
+} as const
 
 /**
  * Download a specific release asset.
@@ -269,61 +222,6 @@ export function getAuthHeaders(): Record<string, string> {
     headers['Authorization'] = `Bearer ${token}`
   }
   return headers
-}
-
-/**
- * Pattern for matching release assets.
- * Can be either:
- * - A string with glob pattern syntax
- * - A prefix/suffix pair for explicit matching (backward compatible)
- * - A RegExp for complex patterns
- *
- * String patterns support full glob syntax via picomatch.
- * Examples:
- * - Simple wildcard: yoga-sync-*.mjs matches yoga-sync-abc123.mjs
- * - Complex: models-*.tar.gz matches models-2024-01-15.tar.gz
- * - Prefix wildcard: *-models.tar.gz matches foo-models.tar.gz
- * - Suffix wildcard: yoga-* matches yoga-layout
- * - Brace expansion: {yoga,models}-*.{mjs,js} matches yoga-abc.mjs or models-xyz.js
- *
- * For backward compatibility, prefix/suffix objects are still supported but glob patterns are recommended.
- */
-export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
-
-/**
- * Create a matcher function for a pattern using picomatch for glob patterns
- * or simple prefix/suffix matching for object patterns.
- *
- * @param pattern - Pattern to match (string glob, prefix/suffix object, or RegExp)
- * @returns Function that tests if a string matches the pattern
- *
- * @example
- * ```ts
- * const matcher = createMatcher('yoga-sync-*.mjs')
- * matcher('yoga-sync-abc123.mjs') // true
- * matcher('models-xyz.tar.gz') // false
- *
- * const matcher2 = createMatcher({ prefix: 'yoga-', suffix: '.mjs' })
- * matcher2('yoga-sync.mjs') // true
- * matcher2('yoga-layout.js') // false
- * ```
- */
-function createMatcher(
-  pattern: string | { prefix: string; suffix: string } | RegExp,
-): (input: string) => boolean {
-  if (typeof pattern === 'string') {
-    // Use picomatch for glob pattern matching.
-    const isMatch = picomatch(pattern)
-    return (input: string) => isMatch(input)
-  }
-
-  if (pattern instanceof RegExp) {
-    return (input: string) => pattern.test(input)
-  }
-
-  // Prefix/suffix object pattern (backward compatible).
-  const { prefix, suffix } = pattern
-  return (input: string) => input.startsWith(prefix) && input.endsWith(suffix)
 }
 
 /**
@@ -483,4 +381,114 @@ export async function getReleaseAssetUrl(
       },
     },
   )
+}
+
+/**
+ * Download a binary from any GitHub repository with version caching.
+ *
+ * @param config - Download configuration
+ * @returns Path to the downloaded binary
+ */
+export async function downloadGitHubRelease(
+  config: DownloadGitHubReleaseConfig,
+): Promise<string> {
+  const {
+    assetName,
+    binaryName,
+    cwd = process.cwd(),
+    downloadDir = 'build/downloaded',
+    owner,
+    platformArch,
+    quiet = false,
+    removeMacOSQuarantine = true,
+    repo,
+    tag: explicitTag,
+    toolName,
+    toolPrefix,
+  } = config
+
+  // Get release tag (either explicit or latest).
+  let tag: string
+  if (explicitTag) {
+    tag = explicitTag
+  } else if (toolPrefix) {
+    const latestTag = await getLatestRelease(
+      toolPrefix,
+      { owner, repo },
+      { quiet },
+    )
+    if (!latestTag) {
+      throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
+    }
+    tag = latestTag
+  } else {
+    throw new Error('Either toolPrefix or tag must be provided')
+  }
+
+  const path = getPath()
+  // Resolve download directory (can be absolute or relative to cwd).
+  const resolvedDownloadDir = path.isAbsolute(downloadDir)
+    ? downloadDir
+    : path.join(cwd, downloadDir)
+
+  // Build download paths following socket-cli pattern.
+  const binaryDir = path.join(resolvedDownloadDir, toolName, platformArch)
+  const binaryPath = path.join(binaryDir, binaryName)
+  const versionPath = path.join(binaryDir, '.version')
+
+  // Check if already downloaded.
+  const fs = getFs()
+  if (fs.existsSync(versionPath) && fs.existsSync(binaryPath)) {
+    const cachedVersion = (
+      await fs.promises.readFile(versionPath, 'utf8')
+    ).trim()
+    if (cachedVersion === tag) {
+      if (!quiet) {
+        logger.info(`Using cached ${toolName} (${platformArch}): ${binaryPath}`)
+      }
+      return binaryPath
+    }
+  }
+
+  // Download the asset.
+  if (!quiet) {
+    logger.info(`Downloading ${toolName} for ${platformArch}...`)
+  }
+  await downloadReleaseAsset(
+    tag,
+    assetName,
+    binaryPath,
+    { owner, repo },
+    { quiet },
+  )
+
+  // Make executable on Unix-like systems.
+  const isWindows = binaryName.endsWith('.exe')
+  if (!isWindows) {
+    fs.chmodSync(binaryPath, 0o755)
+
+    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
+    if (
+      removeMacOSQuarantine &&
+      process.platform === 'darwin' &&
+      platformArch.startsWith('darwin')
+    ) {
+      try {
+        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
+          stdio: 'ignore',
+        })
+      } catch {
+        // Ignore errors - attribute might not exist or xattr might not be available.
+      }
+    }
+  }
+
+  // Write version file.
+  await fs.promises.writeFile(versionPath, tag, 'utf8')
+
+  if (!quiet) {
+    logger.info(`Downloaded ${toolName} to ${binaryPath}`)
+  }
+
+  return binaryPath
 }
