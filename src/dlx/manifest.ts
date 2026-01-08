@@ -25,9 +25,30 @@
  * - Rate limiting registry requests
  */
 
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
-import path from 'path'
-
+let _fs: typeof import('node:fs') | undefined
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 import { readFileUtf8Sync, safeMkdirSync } from '../fs'
 import { getDefaultLogger } from '../logger'
 import { getSocketDlxDir } from '../paths/socket'
@@ -52,7 +73,6 @@ export interface PackageDetails {
     latest_known: string
   }
 }
-
 /**
  * Details for binary download entries.
  */
@@ -67,7 +87,6 @@ export interface BinaryDetails {
     url: string
   }
 }
-
 export type ChecksumAlgorithm = 'sha256' | 'sha512'
 
 /**
@@ -80,7 +99,6 @@ export interface ManifestEntry {
   timestamp: number
   details: PackageDetails | BinaryDetails
 }
-
 /**
  * Type guard for package entries.
  */
@@ -89,7 +107,6 @@ export function isPackageEntry(
 ): entry is ManifestEntry & { details: PackageDetails } {
   return entry.type === 'package'
 }
-
 /**
  * Type guard for binary entries.
  */
@@ -98,7 +115,6 @@ export function isBinaryEntry(
 ): entry is ManifestEntry & { details: BinaryDetails } {
   return entry.type === 'binary'
 }
-
 /**
  * Legacy store record format (deprecated, for migration).
  */
@@ -107,14 +123,12 @@ export interface StoreRecord {
   timestampNotification: number
   version: string
 }
-
 export interface DlxManifestOptions {
   /**
    * Custom manifest file path (defaults to ~/.socket/_dlx/.dlx-manifest.json).
    */
   manifestPath?: string
 }
-
 /**
  * DLX manifest storage manager with atomic operations.
  * Supports both legacy format (package name keys) and new unified manifest format (spec keys).
@@ -125,7 +139,8 @@ export class DlxManifest {
 
   constructor(options: DlxManifestOptions = {}) {
     this.manifestPath =
-      options.manifestPath ?? path.join(getSocketDlxDir(), MANIFEST_FILE_NAME)
+      options.manifestPath ??
+      getPath().join(getSocketDlxDir(), MANIFEST_FILE_NAME)
     this.lockPath = `${this.manifestPath}.lock`
   }
 
@@ -134,7 +149,7 @@ export class DlxManifest {
    */
   private readManifest(): Record<string, ManifestEntry | StoreRecord> {
     try {
-      if (!existsSync(this.manifestPath)) {
+      if (!getFs().existsSync(this.manifestPath)) {
         return Object.create(null)
       }
 
@@ -240,7 +255,7 @@ export class DlxManifest {
     data: Record<string, ManifestEntry | StoreRecord>,
   ): Promise<void> {
     // Ensure directory exists.
-    const manifestDir = path.dirname(this.manifestPath)
+    const manifestDir = getPath().dirname(this.manifestPath)
     try {
       safeMkdirSync(manifestDir, { recursive: true })
     } catch (error) {
@@ -254,13 +269,13 @@ export class DlxManifest {
     const tempPath = `${this.manifestPath}.tmp`
 
     try {
-      writeFileSync(tempPath, content, 'utf8')
-      writeFileSync(this.manifestPath, content, 'utf8')
+      getFs().writeFileSync(tempPath, content, 'utf8')
+      getFs().writeFileSync(this.manifestPath, content, 'utf8')
 
       // Clean up temp file.
       try {
-        if (existsSync(tempPath)) {
-          unlinkSync(tempPath)
+        if (getFs().existsSync(tempPath)) {
+          getFs().unlinkSync(tempPath)
         }
       } catch {
         // Cleanup failed, not critical.
@@ -268,8 +283,8 @@ export class DlxManifest {
     } catch (error) {
       // Clean up temp file on error.
       try {
-        if (existsSync(tempPath)) {
-          unlinkSync(tempPath)
+        if (getFs().existsSync(tempPath)) {
+          getFs().unlinkSync(tempPath)
         }
       } catch {
         // Best effort cleanup.
@@ -288,8 +303,8 @@ export class DlxManifest {
 
       // Read existing data.
       try {
-        if (existsSync(this.manifestPath)) {
-          const content = readFileSync(this.manifestPath, 'utf8')
+        if (getFs().existsSync(this.manifestPath)) {
+          const content = getFs().readFileSync(this.manifestPath, 'utf8')
           if (content.trim()) {
             data = JSON.parse(content) as Record<string, StoreRecord>
           }
@@ -304,7 +319,7 @@ export class DlxManifest {
       data[name] = record
 
       // Ensure directory exists.
-      const manifestDir = path.dirname(this.manifestPath)
+      const manifestDir = getPath().dirname(this.manifestPath)
       try {
         safeMkdirSync(manifestDir, { recursive: true })
       } catch (error) {
@@ -318,13 +333,13 @@ export class DlxManifest {
       const tempPath = `${this.manifestPath}.tmp`
 
       try {
-        writeFileSync(tempPath, content, 'utf8')
-        writeFileSync(this.manifestPath, content, 'utf8')
+        getFs().writeFileSync(tempPath, content, 'utf8')
+        getFs().writeFileSync(this.manifestPath, content, 'utf8')
 
         // Clean up temp file.
         try {
-          if (existsSync(tempPath)) {
-            unlinkSync(tempPath)
+          if (getFs().existsSync(tempPath)) {
+            getFs().unlinkSync(tempPath)
           }
         } catch {
           // Cleanup failed, not critical.
@@ -332,8 +347,8 @@ export class DlxManifest {
       } catch (error) {
         // Clean up temp file on error.
         try {
-          if (existsSync(tempPath)) {
-            unlinkSync(tempPath)
+          if (getFs().existsSync(tempPath)) {
+            getFs().unlinkSync(tempPath)
           }
         } catch {
           // Best effort cleanup.
@@ -349,11 +364,11 @@ export class DlxManifest {
   async clear(name: string): Promise<void> {
     await processLock.withLock(this.lockPath, async () => {
       try {
-        if (!existsSync(this.manifestPath)) {
+        if (!getFs().existsSync(this.manifestPath)) {
           return
         }
 
-        const content = readFileSync(this.manifestPath, 'utf8')
+        const content = getFs().readFileSync(this.manifestPath, 'utf8')
         if (!content.trim()) {
           return
         }
@@ -362,7 +377,7 @@ export class DlxManifest {
         delete data[name]
 
         const updatedContent = JSON.stringify(data, null, 2)
-        writeFileSync(this.manifestPath, updatedContent, 'utf8')
+        getFs().writeFileSync(this.manifestPath, updatedContent, 'utf8')
       } catch (error) {
         logger.warn(
           `Failed to clear cache for ${name}: ${error instanceof Error ? error.message : String(error)}`,
@@ -377,8 +392,8 @@ export class DlxManifest {
   async clearAll(): Promise<void> {
     await processLock.withLock(this.lockPath, async () => {
       try {
-        if (existsSync(this.manifestPath)) {
-          unlinkSync(this.manifestPath)
+        if (getFs().existsSync(this.manifestPath)) {
+          getFs().unlinkSync(this.manifestPath)
         }
       } catch (error) {
         logger.warn(
@@ -405,7 +420,7 @@ export class DlxManifest {
    */
   getAllPackages(): string[] {
     try {
-      if (!existsSync(this.manifestPath)) {
+      if (!getFs().existsSync(this.manifestPath)) {
         return []
       }
 
@@ -429,6 +444,5 @@ export class DlxManifest {
     }
   }
 }
-
 // Export singleton instance using default manifest location.
 export const dlxManifest = new DlxManifest()

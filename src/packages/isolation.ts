@@ -3,11 +3,33 @@
  * Provides tools to set up isolated test environments for packages.
  */
 
-import { existsSync, promises as fs } from 'fs'
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 import { WIN32 } from '../constants/platform'
-
-import path from 'node:path'
 import npmPackageArg from '../external/npm-package-arg'
 import { spawn } from '../spawn'
 
@@ -28,15 +50,14 @@ const FS_CP_OPTIONS = {
   recursive: true,
   ...(WIN32 ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
-
 /**
  * Resolve a path to its real location, handling symlinks.
  */
 async function resolveRealPath(pathStr: string): Promise<string> {
-  // path is imported at the top
-  return await fs.realpath(pathStr).catch(() => path.resolve(pathStr))
+  const fs = getFs()
+  const path = getPath()
+  return await fs.promises.realpath(pathStr).catch(() => path.resolve(pathStr))
 }
-
 /**
  * Merge and write package.json with original and new values.
  */
@@ -44,13 +65,13 @@ async function mergePackageJson(
   pkgJsonPath: string,
   originalPkgJson: PackageJson | undefined,
 ): Promise<PackageJson> {
-  const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath, 'utf8'))
+  const fs = getFs()
+  const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
   const mergedPkgJson = originalPkgJson
     ? { ...originalPkgJson, ...pkgJson }
     : pkgJson
   return mergedPkgJson
 }
-
 export type IsolatePackageOptions = {
   imports?: Record<string, string> | undefined
   install?: ((cwd: string) => Promise<void>) | undefined
@@ -59,12 +80,10 @@ export type IsolatePackageOptions = {
     | undefined
   sourcePath?: string | undefined
 }
-
 export type IsolatePackageResult = {
   exports?: Record<string, unknown> | undefined
   tmpdir: string
 }
-
 /**
  * Isolates a package in a temporary test environment.
  *
@@ -79,7 +98,8 @@ export async function isolatePackage(
   packageSpec: string,
   options?: IsolatePackageOptions | undefined,
 ): Promise<IsolatePackageResult> {
-  // path is imported at the top
+  const fs = getFs()
+  const path = getPath()
   const opts = { __proto__: null, ...options } as IsolatePackageOptions
   const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
 
@@ -97,7 +117,7 @@ export async function isolatePackage(
     const pathToResolve = isAbsolute(trimmedPath) ? trimmedPath : packageSpec
     sourcePath = path.resolve(pathToResolve)
 
-    if (!existsSync(sourcePath)) {
+    if (!fs.existsSync(sourcePath)) {
       throw new Error(`Source path does not exist: ${sourcePath}`)
     }
 
@@ -116,7 +136,7 @@ export async function isolatePackage(
 
     if (parsed.type === 'directory' || parsed.type === 'file') {
       sourcePath = parsed.fetchSpec
-      if (!sourcePath || !existsSync(sourcePath)) {
+      if (!sourcePath || !fs.existsSync(sourcePath)) {
         throw new Error(`Source path does not exist: ${sourcePath}`)
       }
       // If package name not provided by parser, read from package.json.
@@ -139,18 +159,18 @@ export async function isolatePackage(
 
   // Create temp directory for this package.
   const sanitizedName = packageName.replace(/[@/]/g, '-')
-  const tempDir = await fs.mkdtemp(
+  const tempDir = await fs.promises.mkdtemp(
     path.join(getOsTmpDir(), `socket-test-${sanitizedName}-`),
   )
   const packageTempDir = path.join(tempDir, sanitizedName)
-  await fs.mkdir(packageTempDir, { recursive: true })
+  await fs.promises.mkdir(packageTempDir, { recursive: true })
 
   let installedPath: string
   let originalPackageJson: PackageJson | undefined
 
   if (spec) {
     // Installing from registry first, then copying source on top if provided.
-    await fs.writeFile(
+    await fs.promises.writeFile(
       path.join(packageTempDir, 'package.json'),
       JSON.stringify(
         {
@@ -193,7 +213,7 @@ export async function isolatePackage(
       const realSourcePath = await resolveRealPath(sourcePath)
 
       if (realSourcePath !== realInstalledPath) {
-        await fs.cp(sourcePath, installedPath, FS_CP_OPTIONS)
+        await fs.promises.cp(sourcePath, installedPath, FS_CP_OPTIONS)
       }
     }
   } else {
@@ -210,10 +230,10 @@ export async function isolatePackage(
         )
       : path.join(packageTempDir, 'node_modules')
 
-    await fs.mkdir(scopedPath, { recursive: true })
+    await fs.promises.mkdir(scopedPath, { recursive: true })
     installedPath = path.join(packageTempDir, 'node_modules', packageName)
 
-    await fs.cp(sourcePath, installedPath, FS_CP_OPTIONS)
+    await fs.promises.cp(sourcePath, installedPath, FS_CP_OPTIONS)
   }
 
   // Prepare package.json if callback provided or if we need to merge with original.
@@ -228,7 +248,10 @@ export async function isolatePackage(
       ? await onPackageJson(mergedPkgJson)
       : mergedPkgJson
 
-    await fs.writeFile(pkgJsonPath, JSON.stringify(finalPkgJson, null, 2))
+    await fs.promises.writeFile(
+      pkgJsonPath,
+      JSON.stringify(finalPkgJson, null, 2),
+    )
   }
 
   // Install dependencies.

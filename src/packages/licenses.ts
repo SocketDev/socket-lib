@@ -5,11 +5,23 @@
 import { LOOP_SENTINEL } from '../constants/core'
 import { getCopyLeftLicenses } from '../constants/licenses'
 
-import path from 'node:path'
 import spdxCorrect from '../external/spdx-correct'
 import spdxExpParse from '../external/spdx-expression-parse'
 
 const copyLeftLicenses = getCopyLeftLicenses()
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 import { hasOwn } from '../objects'
 import type { LicenseNode } from '../packages'
@@ -191,7 +203,7 @@ export function resolvePackageLicenses(
   // https://github.com/kemitchell/validate-npm-package-license.js/blob/v3.0.4/index.js#L48-L53
   const match = fileReferenceRegExp.exec(licenseFieldValue)
   if (match) {
-    // path is imported at the top
+    const path = getPath()
     return [
       {
         license: licenseFieldValue,

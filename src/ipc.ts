@@ -28,11 +28,44 @@
  * @module ipc
  */
 
-import crypto from 'crypto'
+let _crypto: typeof import('node:crypto') | undefined
+/**
+ * Lazily load the crypto module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getCrypto() {
+  if (_crypto === undefined) {
+    _crypto = /*@__PURE__*/ require('crypto')
+  }
+  return _crypto as typeof import('node:crypto')
+}
 
-import { promises as fs } from 'fs'
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
 
-import path from 'path'
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 import { safeDeleteSync } from './fs'
 import { getOsTmpDir } from './paths/socket'
@@ -174,6 +207,7 @@ export interface IpcOptions {
  * ```
  */
 export function createIpcChannelId(prefix = 'socket'): string {
+  const crypto = getCrypto()
   return `${prefix}-${process.pid}-${crypto.randomBytes(8).toString('hex')}`
 }
 
@@ -209,6 +243,7 @@ export function createIpcChannelId(prefix = 'socket'): string {
 export function getIpcStubPath(appName: string): string {
   // Get the system's temporary directory - this is platform-specific.
   const tempDir = getOsTmpDir()
+  const path = getPath()
 
   // Create a hidden directory structure for Socket IPC files.
   // The dot prefix makes it hidden on Unix-like systems.
@@ -231,9 +266,11 @@ export function getIpcStubPath(appName: string): string {
  * @internal Helper function used by writeIpcStub
  */
 async function ensureIpcDirectory(filePath: string): Promise<void> {
+  const fs = getFs()
+  const path = getPath()
   const dir = path.dirname(filePath)
   // Create directory recursively if it doesn't exist.
-  await fs.mkdir(dir, { recursive: true })
+  await fs.promises.mkdir(dir, { recursive: true })
 }
 
 /**
@@ -288,7 +325,12 @@ export async function writeIpcStub(
   const validated = IpcStubSchema.parse(ipcData)
 
   // Write with pretty printing for debugging.
-  await fs.writeFile(stubPath, JSON.stringify(validated, null, 2), 'utf8')
+  const fs = getFs()
+  await fs.promises.writeFile(
+    stubPath,
+    JSON.stringify(validated, null, 2),
+    'utf8',
+  )
   return stubPath
 }
 
@@ -321,7 +363,8 @@ export async function writeIpcStub(
  */
 export async function readIpcStub(stubPath: string): Promise<unknown> {
   try {
-    const content = await fs.readFile(stubPath, 'utf8')
+    const fs = getFs()
+    const content = await fs.promises.readFile(stubPath, 'utf8')
     const parsed = JSON.parse(content)
     // Validate structure with Zod schema.
     const validated = IpcStubSchema.parse(parsed)
@@ -370,9 +413,11 @@ export async function readIpcStub(stubPath: string): Promise<unknown> {
  */
 export async function cleanupIpcStubs(appName: string): Promise<void> {
   const tempDir = getOsTmpDir()
+  const fs = getFs()
+  const path = getPath()
   const stubDir = path.join(tempDir, '.socket-ipc', appName)
   try {
-    const files = await fs.readdir(stubDir)
+    const files = await fs.promises.readdir(stubDir)
     const now = Date.now()
     // 5 minutes.
     const maxAgeMs = 5 * 60 * 1000
@@ -383,14 +428,14 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
           const filePath = path.join(stubDir, file)
           try {
             // Check both filesystem mtime and JSON timestamp for more reliable detection
-            const stats = await fs.stat(filePath)
+            const stats = await fs.promises.stat(filePath)
             const mtimeAge = now - stats.mtimeMs
             let isStale = mtimeAge > maxAgeMs
 
             // Always check the timestamp inside the JSON file for accuracy
             // This is more reliable than filesystem mtime in some environments
             try {
-              const content = await fs.readFile(filePath, 'utf8')
+              const content = await fs.promises.readFile(filePath, 'utf8')
               const parsed = JSON.parse(content)
               const validated = IpcStubSchema.parse(parsed)
               const contentAge = now - validated.timestamp
@@ -589,6 +634,7 @@ export function createIpcMessage<T = unknown>(
   type: string,
   data: T,
 ): IpcMessage<T> {
+  const crypto = getCrypto()
   return {
     id: crypto.randomBytes(16).toString('hex'),
     timestamp: Date.now(),

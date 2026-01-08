@@ -14,7 +14,19 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
-import { createWriteStream } from 'fs'
+let _fs: typeof import('node:fs') | undefined
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
 
 import type { IncomingMessage } from 'http'
 
@@ -879,6 +891,8 @@ async function httpDownloadAttempt(
       port: parsedUrl.port,
       timeout,
     }
+
+    const { createWriteStream } = getFs()
 
     let fileStream: ReturnType<typeof createWriteStream> | undefined
     let streamClosed = false

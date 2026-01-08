@@ -3,7 +3,20 @@
  * Async-aware theming with automatic context isolation via AsyncLocalStorage.
  */
 
-import { AsyncLocalStorage } from 'node:async_hooks'
+let _async_hooks: typeof import('node:async_hooks') | undefined
+/**
+ * Lazily load the async_hooks module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getAsyncHooks() {
+  if (_async_hooks === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _async_hooks = /*@__PURE__*/ require('async_hooks')
+  }
+  return _async_hooks as typeof import('node:async_hooks')
+}
 
 import type { Theme } from './types'
 import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
@@ -16,6 +29,7 @@ export type ThemeChangeListener = (theme: Theme) => void
 /**
  * AsyncLocalStorage for theme context isolation.
  */
+const { AsyncLocalStorage } = getAsyncHooks()
 const themeStorage = new AsyncLocalStorage<Theme>()
 
 /**

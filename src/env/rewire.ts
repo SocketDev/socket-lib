@@ -9,7 +9,20 @@
  * - Thread-safe for concurrent test execution
  */
 
-import { AsyncLocalStorage } from 'async_hooks'
+let _async_hooks: typeof import('node:async_hooks') | undefined
+/**
+ * Lazily load the async_hooks module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getAsyncHooks() {
+  if (_async_hooks === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _async_hooks = /*@__PURE__*/ require('async_hooks')
+  }
+  return _async_hooks as typeof import('node:async_hooks')
+}
 
 import { envAsBoolean } from './helpers'
 
@@ -17,6 +30,7 @@ type EnvOverrides = Map<string, string | undefined>
 
 // Isolated execution context storage for nested overrides (withEnv/withEnvSync)
 // AsyncLocalStorage creates isolated contexts that don't leak between concurrent code
+const { AsyncLocalStorage } = getAsyncHooks()
 const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
 
 // Shared test hook overrides (setEnv/clearEnv/resetEnv in beforeEach/afterEach)

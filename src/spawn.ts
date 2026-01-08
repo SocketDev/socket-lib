@@ -29,7 +29,19 @@
 import { getAbortSignal } from './constants/process'
 
 import npmCliPromiseSpawn from './external/@npmcli/promise-spawn'
-import path from 'node:path'
+
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('path')
+  }
+  return _path as typeof import('node:path')
+}
 
 import { isArray } from './arrays'
 import { whichSync } from './bin'
@@ -576,7 +588,7 @@ export function spawn(
   if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
     // path is imported at the top
     // Extract just the command name without path and extension.
-    actualCmd = path.basename(actualCmd, path.extname(actualCmd))
+    actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
   }
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
@@ -744,7 +756,7 @@ export function spawnSync(
   if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
     // path is imported at the top
     // Extract just the command name without path and extension.
-    actualCmd = path.basename(actualCmd, path.extname(actualCmd))
+    actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
   }
   const { stripAnsi: shouldStripAnsi = true, ...rawSpawnOptions } = {
     __proto__: null,

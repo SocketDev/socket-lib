@@ -18,9 +18,33 @@
  * - Visual feedback: Uses spinner to indicate process is running when output is masked.
  */
 
+let _child_process: typeof import('node:child_process') | undefined
+/**
+ * Lazily load the child_process module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getChildProcess() {
+  if (_child_process === undefined) {
+    _child_process = /*@__PURE__*/ require('child_process')
+  }
+  return _child_process as typeof import('node:child_process')
+}
+
+let _readline: typeof import('node:readline') | undefined
+/**
+ * Lazily load the readline module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getReadline() {
+  if (_readline === undefined) {
+    _readline = /*@__PURE__*/ require('readline')
+  }
+  return _readline as typeof import('node:readline')
+}
 import type { ChildProcess, SpawnOptions } from 'child_process'
-import { spawn } from 'child_process'
-import readline from 'readline'
+
 import { getDefaultSpinner } from '../spinner.js'
 import { clearLine } from './clear.js'
 import { write } from './stdout.js'
@@ -107,7 +131,6 @@ export interface OutputMaskOptions {
    */
   toggleText?: string | undefined
 }
-
 export interface OutputMask {
   /** Whether spinner is currently active */
   isSpinning: boolean
@@ -120,7 +143,6 @@ export interface OutputMask {
   /** Whether output is currently visible */
   verbose: boolean
 }
-
 /**
  * Create an output mask for controlling command output visibility.
  * The mask tracks whether output should be shown or hidden (buffered).
@@ -137,7 +159,6 @@ export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
     verbose: showOutput,
   }
 }
-
 /**
  * Create a keyboard handler for toggling output visibility.
  * Handles two key combinations:
@@ -145,11 +166,12 @@ export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
  * - ctrl+c: Cancel the running process.
  * The handler manipulates terminal state using ANSI escape sequences.
  */
+type ReadlineKey = { ctrl?: boolean; name?: string }
 export function createKeyboardHandler(
   mask: OutputMask,
   child: ChildProcess,
   options: OutputMaskOptions = {},
-): (_str: string, key: readline.Key) => void {
+): (_str: string, key: ReadlineKey) => void {
   const { message = 'Running…', toggleText = 'to see full output' } = options
 
   return (_str, key) => {
@@ -210,7 +232,6 @@ export function createKeyboardHandler(
     }
   }
 }
-
 /**
  * Attach output masking to a child process.
  * Returns a promise that resolves with the exit code.
@@ -238,7 +259,7 @@ export function attachOutputMask(
     // Setup keyboard input handling.
     // Raw mode is required to capture ctrl+o without waiting for Enter.
     if (process.stdin.isTTY) {
-      readline.emitKeypressEvents(process.stdin)
+      getReadline().emitKeypressEvents(process.stdin)
       process.stdin.setRawMode(true)
 
       const keypressHandler = createKeyboardHandler(mask, child, options)
@@ -357,7 +378,6 @@ export function attachOutputMask(
     })
   })
 }
-
 /**
  * Run a command with interactive output masking.
  * Convenience wrapper around spawn + attachOutputMask.
@@ -376,7 +396,7 @@ export async function runWithMask(
     ...spawnOptions
   } = options
 
-  const child = spawn(command, args, {
+  const child = getChildProcess().spawn(command, args, {
     stdio: ['inherit', 'pipe', 'pipe'],
     ...spawnOptions,
   })

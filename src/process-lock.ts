@@ -40,12 +40,26 @@
  * - Automatic cleanup on process exit
  */
 
-import { existsSync, mkdirSync, statSync, utimesSync } from 'fs'
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
 
 import { safeDeleteSync } from './fs'
 import { getDefaultLogger } from './logger'
 import { pRetry } from './promises'
 import { onExit } from './signal-exit'
+
+const fs = getFs()
+const { existsSync, mkdirSync, statSync, utimesSync } = fs
 
 const logger = getDefaultLogger()
 

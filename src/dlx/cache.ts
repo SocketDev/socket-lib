@@ -1,6 +1,19 @@
 /** @fileoverview Cache key generation utilities for DLX package installations. */
 
-import { createHash } from 'node:crypto'
+let _crypto: typeof import('node:crypto') | undefined
+/**
+ * Lazily load the crypto module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getCrypto() {
+  if (_crypto === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _crypto = /*@__PURE__*/ require('crypto')
+  }
+  return _crypto as typeof import('node:crypto')
+}
 
 /**
  * Generate a cache directory name using npm/npx approach.
@@ -27,5 +40,6 @@ import { createHash } from 'node:crypto'
  * npx hashes the package spec (name@version), not just name
  */
 export function generateCacheKey(spec: string): string {
-  return createHash('sha512').update(spec).digest('hex').substring(0, 16)
+  const crypto = getCrypto()
+  return crypto.createHash('sha512').update(spec).digest('hex').substring(0, 16)
 }

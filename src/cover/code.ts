@@ -2,8 +2,6 @@
  * @fileoverview Code coverage utilities for parsing v8 coverage data.
  */
 
-import { promises as fs } from 'fs'
-
 import { readJson } from '../fs'
 import { isObjectObject } from '../objects'
 import { spawn } from '../spawn'
@@ -16,7 +14,21 @@ import type {
   V8FileCoverage,
 } from './types'
 
+let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
 /**
  * Lazily load the path module to avoid Webpack errors.
  * @private
@@ -30,7 +42,6 @@ function getPath() {
   }
   return _path as typeof import('node:path')
 }
-
 /**
  * Get code coverage metrics from v8 coverage-final.json.
  *
@@ -55,7 +66,8 @@ export async function getCodeCoverage(
   }
 
   // Check if coverage file exists.
-  const coverageExists = await fs
+  const fs = getFs()
+  const coverageExists = await fs.promises
     .access(coveragePath)
     .then(() => true)
     .catch(() => false)
@@ -157,7 +169,6 @@ export async function getCodeCoverage(
     statements: calculateMetric(totals.statements),
   }
 }
-
 /**
  * Calculate coverage metric with percentage.
  */
