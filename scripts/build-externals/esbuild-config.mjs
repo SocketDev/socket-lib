@@ -14,11 +14,8 @@ const stubsDir = path.join(__dirname, 'stubs')
  * Only includes conservative stubs that are safe to use.
  */
 const STUB_MAP = {
-  // Character encoding - we only use UTF-8
+  // Character encoding - we only use UTF-8.
   '^(encoding|iconv-lite)$': 'encoding.cjs',
-
-  // Debug logging - already disabled via process.env.DEBUG = undefined
-  '^debug$': 'debug.cjs',
 }
 
 // Import createRequire at top level
@@ -155,6 +152,14 @@ function createStubPlugin(stubMap = STUB_MAP) {
   }
 }
 
+// Shared dependencies bundled in external-pack that should be marked external in other bundles.
+const EXTERNAL_PACK_DEPS = [
+  'has-flag',
+  'signal-exit',
+  'supports-color',
+  'yoctocolors-cjs',
+]
+
 /**
  * Get package-specific esbuild options.
  *
@@ -172,13 +177,26 @@ export function getPackageSpecificOptions(packageName) {
   } else if (packageName === 'zod') {
     // Zod has localization files we don't need.
     opts.external = [...(opts.external || []), './locales/*']
-  } else if (packageName.startsWith('@inquirer/')) {
-    // Inquirer packages have heavy dependencies we might not need.
+  } else if (packageName === 'debug') {
+    // Mark shared deps as external - they're bundled in external-pack.
+    opts.external = [...(opts.external || []), ...EXTERNAL_PACK_DEPS]
+  } else if (packageName === 'external-pack') {
+    // Inquirer packages have heavy dependencies we can exclude.
     opts.external = [...(opts.external || []), 'rxjs/operators']
-    // Inquirer packages export default only - unwrap for CJS compatibility
+  } else if (packageName.startsWith('@inquirer/')) {
+    // @inquirer packages export default only - unwrap for CJS compatibility.
     opts.footer = {
       js: 'if (module.exports && module.exports.default && Object.keys(module.exports).length === 1) { module.exports = module.exports.default; }',
     }
+  } else if (packageName === 'npm-pack') {
+    // Mark shared deps as external - they're bundled in external-pack.
+    // Also mark debug and which as external since they have their own bundles.
+    opts.external = [
+      ...(opts.external || []),
+      ...EXTERNAL_PACK_DEPS,
+      'debug',
+      'which',
+    ]
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.

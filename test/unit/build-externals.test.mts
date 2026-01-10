@@ -189,7 +189,7 @@ describe('build-externals', () => {
       'select',
     ]
     const inquirerDir = path.join(distExternalDir, '@inquirer')
-    const inquirerPackPath = path.join(distExternalDir, 'inquirer-pack.js')
+    const externalPackPath = path.join(distExternalDir, 'external-pack.js')
 
     try {
       await fs.access(inquirerDir)
@@ -197,25 +197,26 @@ describe('build-externals', () => {
       expect.fail(`@inquirer directory not found at ${inquirerDir}`)
     }
 
-    // Check that inquirer-pack bundle exists and is properly sized.
+    // Check that external-pack bundle exists and is properly sized.
+    // @inquirer packages are now bundled together with shared deps in external-pack.
     try {
       const [packStat, packContent] = await Promise.all([
-        fs.stat(inquirerPackPath),
-        fs.readFile(inquirerPackPath, 'utf8'),
+        fs.stat(externalPackPath),
+        fs.readFile(externalPackPath, 'utf8'),
       ])
 
-      if (packStat.size <= 10_000) {
+      if (packStat.size <= 50_000) {
         expect.fail(
-          `inquirer-pack should be properly bundled (> 10KB), got ${packStat.size} bytes`,
+          `external-pack should be properly bundled (> 50KB), got ${packStat.size} bytes`,
         )
       }
 
       if (isStubReexport(packContent)) {
-        expect.fail('inquirer-pack should not be a stub re-export')
+        expect.fail('external-pack should not be a stub re-export')
       }
     } catch (error) {
       expect.fail(
-        `inquirer-pack not found or not properly bundled at ${inquirerPackPath}: ${error instanceof Error ? error.message : String(error)}`,
+        `external-pack not found or not properly bundled at ${externalPackPath}: ${error instanceof Error ? error.message : String(error)}`,
       )
     }
 
@@ -235,9 +236,9 @@ describe('build-externals', () => {
           )
         }
 
-        if (!content.includes('inquirer-pack')) {
+        if (!content.includes('external-pack')) {
           expect.fail(
-            `@inquirer/${module} should re-export from inquirer-pack bundle`,
+            `@inquirer/${module} should re-export from external-pack bundle`,
           )
         }
       } catch (error) {

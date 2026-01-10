@@ -1,5 +1,6 @@
 'use strict'
 
-const colors = require('yoctocolors-cjs')
-module.exports = colors
-module.exports.default = colors
+// Re-export from external-pack bundle for better deduplication.
+const { yoctocolorsCjs } = require('./external-pack')
+module.exports = yoctocolorsCjs
+module.exports.default = yoctocolorsCjs

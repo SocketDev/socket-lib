@@ -5,10 +5,13 @@
 
 // Define which packages need bundling (ones that are actual npm packages).
 export const externalPackages = [
-  // NPM bundles - grouped for better deduplication
-  // npm-core: npm-package-arg, normalize-package-data, semver
-  { name: 'npm-core', bundle: true },
-  // npm-pack: arborist, cacache, libnpmpack, make-fetch-happen, pacote
+  // external-pack: Shared dependencies and @inquirer packages bundled together.
+  // Bundled first so npm-pack can mark shared deps as external.
+  // Contains: has-flag, signal-exit, supports-color, yoctocolors-cjs, @inquirer/*.
+  { name: 'external-pack', bundle: true },
+  // NPM bundles - grouped for better deduplication.
+  // npm-pack: arborist, cacache, libnpmpack, make-fetch-happen, npm-package-arg,
+  // normalize-package-data, pacote, semver, validate-npm-package-name.
   { name: 'npm-pack', bundle: true },
   // NPM internals - individual packages now just re-export from bundles (no bundling needed)
   { name: 'cacache', bundle: false },
@@ -28,18 +31,19 @@ export const externalPackages = [
   { name: 'fast-glob', bundle: false },
   { name: 'fast-sort', bundle: true },
   { name: 'get-east-asian-width', bundle: true },
-  // inquirer-pack: Bundle all @inquirer packages together.
-  { name: 'inquirer-pack', bundle: true },
+  { name: 'has-flag', bundle: false },
   { name: 'picomatch', bundle: false },
   // spdx-pack: Bundle spdx-correct, spdx-expression-parse, and dependencies together.
   { name: 'spdx-pack', bundle: true },
   { name: 'spdx-correct', bundle: false },
   { name: 'spdx-expression-parse', bundle: false },
+  { name: 'signal-exit', bundle: false },
   { name: 'streaming-iterables', bundle: true },
+  { name: 'supports-color', bundle: false },
   { name: 'validate-npm-package-name', bundle: false },
   { name: 'which', bundle: true },
   { name: 'yargs-parser', bundle: true },
-  { name: 'yoctocolors-cjs', bundle: true },
+  { name: 'yoctocolors-cjs', bundle: false },
   // Used by socket-cli (dist/cli.js has minified zod).
   { name: 'zod', bundle: true },
 ]
