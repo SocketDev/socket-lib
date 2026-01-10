@@ -17,6 +17,7 @@ import * as path from 'node:path'
 
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe.sequential('cache-with-ttl', () => {
@@ -24,7 +25,11 @@ describe.sequential('cache-with-ttl', () => {
   let testCacheDir: string
 
   beforeEach(() => {
-    // Create a unique cache directory for each test to ensure isolation
+    // Invalidate path caches to ensure SOCKET_CACACHE_DIR override takes effect.
+    // This is necessary because getSocketCacacheDir() caches its result.
+    invalidateCaches()
+
+    // Create a unique cache directory for each test to ensure isolation.
     testCacheDir = path.join(
       tmpdir(),
       `socket-test-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -180,16 +185,17 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should fetch again after cache expires', async () => {
+      // Use longer TTL (200ms) to avoid flaky failures on slow CI runners.
       const shortCache = createTtlCache({
-        ttl: 50,
+        ttl: 200,
         prefix: 'short-cache',
       })
       const fetcher = vi.fn(async () => 'value')
       await shortCache.getOrFetch('key', fetcher)
       expect(fetcher).toHaveBeenCalledTimes(1)
 
-      // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for TTL to expire (300ms > 200ms TTL).
+      await new Promise(resolve => setTimeout(resolve, 300))
 
       await shortCache.getOrFetch('key', fetcher)
       expect(fetcher).toHaveBeenCalledTimes(2)
@@ -321,16 +327,17 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should skip expired entries in getAll', async () => {
+      // Use longer TTL (200ms) to avoid flaky failures on slow CI runners.
       const shortCache = createTtlCache({
-        ttl: 50,
+        ttl: 200,
         prefix: 'expiry-getall-test',
       })
 
       await shortCache.set('key1', 'value1')
       await shortCache.set('key2', 'value2')
 
-      // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for TTL to expire (300ms > 200ms TTL).
+      await new Promise(resolve => setTimeout(resolve, 300))
 
       const all = await shortCache.getAll<string>('*')
       expect(all.size).toBe(0)
@@ -409,16 +416,18 @@ describe.sequential('cache-with-ttl', () => {
 
   describe('TTL expiration', () => {
     it('should expire entries after TTL', async () => {
+      // Use longer TTL (200ms) to avoid flaky failures on slow CI runners.
+      // Windows in particular can have significant I/O latency during cacache.put().
       const shortCache = createTtlCache({
-        ttl: 50,
+        ttl: 200,
         prefix: 'expiry-test',
       })
 
       await shortCache.set('key', 'value')
       expect(await shortCache.get<string>('key')).toBe('value')
 
-      // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for TTL to expire (300ms > 200ms TTL).
+      await new Promise(resolve => setTimeout(resolve, 300))
 
       expect(await shortCache.get('key')).toBeUndefined()
 
