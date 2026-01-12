@@ -182,8 +182,8 @@ importers:
         specifier: 15.2.11
         version: 15.2.11(supports-color@10.0.0)
       magic-string:
-        specifier: 0.30.17
-        version: 0.30.17
+        specifier: 0.30.21
+        version: 0.30.21
       make-fetch-happen:
         specifier: 15.0.2
         version: 15.0.2(supports-color@10.0.0)
@@ -2314,9 +2314,6 @@ packages:
   lru-cache@11.2.2:
     resolution: {integrity: sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==}
     engines: {node: 20 || >=22}
-
-  magic-string@0.30.17:
-    resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -5420,10 +5417,6 @@ snapshots:
   lowercase-keys@2.0.0: {}
 
   lru-cache@11.2.2: {}
-
-  magic-string@0.30.17:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.5
 
   magic-string@0.30.21:
     dependencies:

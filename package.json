@@ -749,7 +749,7 @@
     "libnpmexec": "^10.1.11",
     "libnpmpack": "9.0.9",
     "lint-staged": "15.2.11",
-    "magic-string": "0.30.17",
+    "magic-string": "0.30.21",
     "make-fetch-happen": "15.0.2",
     "nock": "14.0.10",
     "normalize-package-data": "8.0.0",
