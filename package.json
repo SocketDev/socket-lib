@@ -716,7 +716,7 @@
     "@inquirer/password": "4.0.18",
     "@inquirer/search": "3.1.1",
     "@inquirer/select": "4.3.2",
-    "@npmcli/arborist": "9.1.4",
+    "@npmcli/arborist": "9.1.9",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",
     "@socketregistry/is-unicode-supported": "1.0.5",
@@ -785,7 +785,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@npmcli/arborist": "9.1.6",
+      "@npmcli/arborist": "9.1.9",
       "@npmcli/run-script": "10.0.0",
       "@sigstore/core": "3.1.0",
       "@sigstore/sign": "4.1.0",
