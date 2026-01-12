@@ -261,34 +261,51 @@ export async function getLatestRelease(
 
       const releases = JSON.parse(response.body.toString('utf8'))
 
-      // Find the first release matching the tool prefix.
-      for (const release of releases) {
-        const { assets, tag_name: tag } = release
-        if (!tag.startsWith(toolPrefix)) {
-          continue
-        }
-
-        // If asset pattern provided, check if release has matching asset.
-        if (isMatch) {
-          const hasMatchingAsset = assets.some((a: { name: string }) =>
-            isMatch(a.name),
-          )
-          if (!hasMatchingAsset) {
-            continue
+      // Filter releases matching the tool prefix.
+      const matchingReleases = releases.filter(
+        (release: { tag_name: string; assets: Array<{ name: string }> }) => {
+          const { assets, tag_name: tag } = release
+          if (!tag.startsWith(toolPrefix)) {
+            return false
           }
-        }
 
+          // If asset pattern provided, check if release has matching asset.
+          if (isMatch) {
+            const hasMatchingAsset = assets.some((a: { name: string }) =>
+              isMatch(a.name),
+            )
+            if (!hasMatchingAsset) {
+              return false
+            }
+          }
+
+          return true
+        },
+      )
+
+      if (matchingReleases.length === 0) {
+        // No matching release found.
         if (!quiet) {
-          logger.info(`Found release: ${tag}`)
+          logger.info(`No ${toolPrefix} release found in latest 100 releases`)
         }
-        return tag
+        return null
       }
 
-      // No matching release found.
+      // Sort by published_at descending (newest first).
+      // GitHub API doesn't guarantee order, so we must sort explicitly.
+      matchingReleases.sort(
+        (a: { published_at: string }, b: { published_at: string }) =>
+          new Date(b.published_at).getTime() -
+          new Date(a.published_at).getTime(),
+      )
+
+      const latestRelease = matchingReleases[0]
+      const tag = latestRelease.tag_name
+
       if (!quiet) {
-        logger.info(`No ${toolPrefix} release found in latest 100 releases`)
+        logger.info(`Found release: ${tag}`)
       }
-      return null
+      return tag
     },
     {
       ...RETRY_CONFIG,

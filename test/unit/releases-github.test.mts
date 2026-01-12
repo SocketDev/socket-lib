@@ -302,6 +302,145 @@ describe('releases/github', () => {
       })
       expect(tag).toBeNull()
     })
+
+    it('should sort by published_at and return most recent release', async () => {
+      // Mock releases with same prefix but different published_at times.
+      const releasesOutOfOrder = [
+        {
+          assets: [{ name: 'node-darwin-arm64' }],
+          published_at: '2026-01-12T10:00:00Z',
+          tag_name: 'node-smol-20260112-d8601d1',
+        },
+        {
+          assets: [{ name: 'node-darwin-arm64' }],
+          published_at: '2026-01-12T15:30:00Z', // Most recent
+          tag_name: 'node-smol-20260112-9ec3865',
+        },
+        {
+          assets: [{ name: 'node-darwin-arm64' }],
+          published_at: '2026-01-12T08:00:00Z',
+          tag_name: 'node-smol-20260112-abc1234',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(releasesOutOfOrder)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      // Should return the release with the latest published_at time.
+      expect(tag).toBe('node-smol-20260112-9ec3865')
+    })
+
+    it('should handle multiple releases on same day with different times', async () => {
+      // Simulate scenario where GitHub API returns releases in arbitrary order.
+      const sameDay = [
+        {
+          assets: [{ name: 'yoga-sync-abc.mjs' }],
+          published_at: '2026-01-12T09:15:22Z',
+          tag_name: 'yoga-layout-20260112-first',
+        },
+        {
+          assets: [{ name: 'yoga-sync-xyz.mjs' }],
+          published_at: '2026-01-12T14:45:10Z', // Latest
+          tag_name: 'yoga-layout-20260112-latest',
+        },
+        {
+          assets: [{ name: 'yoga-sync-def.mjs' }],
+          published_at: '2026-01-12T11:30:00Z',
+          tag_name: 'yoga-layout-20260112-middle',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(Buffer.from(JSON.stringify(sameDay)), true, 200),
+      )
+
+      const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      expect(tag).toBe('yoga-layout-20260112-latest')
+    })
+
+    it('should sort by published_at even when API returns newest first', async () => {
+      // Test that we don't rely on API ordering.
+      const releasesNewestFirst = [
+        {
+          assets: [{ name: 'models-data.tar.gz' }],
+          published_at: '2026-01-15T12:00:00Z', // Newest
+          tag_name: 'models-20260115-newest',
+        },
+        {
+          assets: [{ name: 'models-data.tar.gz' }],
+          published_at: '2026-01-14T12:00:00Z',
+          tag_name: 'models-20260114-older',
+        },
+        {
+          assets: [{ name: 'models-data.tar.gz' }],
+          published_at: '2026-01-13T12:00:00Z',
+          tag_name: 'models-20260113-oldest',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(releasesNewestFirst)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      expect(tag).toBe('models-20260115-newest')
+    })
+
+    it('should sort by published_at with asset pattern filtering', async () => {
+      // Multiple releases matching prefix, but only some have matching assets.
+      const releasesWithAssets = [
+        {
+          assets: [{ name: 'node-linux-x64' }], // No matching asset
+          published_at: '2026-01-12T16:00:00Z',
+          tag_name: 'node-smol-20260112-no-match',
+        },
+        {
+          assets: [{ name: 'node-darwin-arm64' }], // Matching asset, oldest
+          published_at: '2026-01-12T10:00:00Z',
+          tag_name: 'node-smol-20260112-older',
+        },
+        {
+          assets: [{ name: 'node-darwin-arm64' }], // Matching asset, newest
+          published_at: '2026-01-12T14:00:00Z',
+          tag_name: 'node-smol-20260112-newer',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(releasesWithAssets)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
+        assetPattern: 'node-darwin-*',
+        quiet: true,
+      })
+
+      // Should return the newest release that has the matching asset.
+      expect(tag).toBe('node-smol-20260112-newer')
+    })
   })
 
   describe('getReleaseAssetUrl', () => {
