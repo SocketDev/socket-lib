@@ -236,8 +236,8 @@ importers:
         specifier: 8.44.1
         version: 8.44.1(eslint@9.35.0(jiti@2.6.1)(supports-color@10.0.0))(supports-color@10.0.0)(typescript@5.9.2)
       validate-npm-package-name:
-        specifier: 6.0.2
-        version: 6.0.2
+        specifier: 7.0.1
+        version: 7.0.1
       vite-tsconfig-paths:
         specifier: 5.1.4
         version: 5.1.4(supports-color@10.0.0)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1))
@@ -3165,6 +3165,10 @@ packages:
   validate-npm-package-name@6.0.2:
     resolution: {integrity: sha512-IUoow1YUtvoBBC06dXs8bR8B9vuA3aJfmQNKMoaPG/OFsPmoQvw8xh+6Ye25Gx9DQhoEom3Pcu9MKHerm/NpUQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  validate-npm-package-name@7.0.1:
+    resolution: {integrity: sha512-BM0Upcemlce8/9+HE+/VpWqn3u3mYh6Om/FEC8yPMnEHwf710fW5Q6fhjT1SQyRlZD1G9CJbgfH+rWgAcIvjlQ==}
+    engines: {node: ^20.17.0 || >=22.9.0}
 
   vite-tsconfig-paths@5.1.4:
     resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
@@ -6379,6 +6383,8 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@6.0.2: {}
+
+  validate-npm-package-name@7.0.1: {}
 
   vite-tsconfig-paths@5.1.4(supports-color@10.0.0)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1)):
     dependencies:
