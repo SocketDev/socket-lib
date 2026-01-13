@@ -227,6 +227,10 @@
       "types": "./dist/dlx/cache.d.ts",
       "default": "./dist/dlx/cache.js"
     },
+    "./dlx/detect": {
+      "types": "./dist/dlx/detect.d.ts",
+      "default": "./dist/dlx/detect.js"
+    },
     "./dlx/dir": {
       "types": "./dist/dlx/dir.d.ts",
       "default": "./dist/dlx/dir.js"
