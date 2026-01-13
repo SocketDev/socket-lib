@@ -5,7 +5,7 @@
  * - detectExecutableType() generic entry point routing
  * - detectDlxExecutableType() detects packages vs binaries in DLX cache
  * - detectLocalExecutableType() detects via package.json and file extensions
- * - isNodeJsExtension() validates .js, .mjs, .cjs extensions
+ * - isJsFilePath() validates .js, .mjs, .cjs file paths
  * - isNodePackage() simplified helper for package detection
  * - isNativeBinary() simplified helper for binary detection
  *
@@ -34,8 +34,8 @@ import {
   detectDlxExecutableType,
   detectExecutableType,
   detectLocalExecutableType,
+  isJsFilePath,
   isNativeBinary,
-  isNodeJsExtension,
   isNodePackage,
 } from '@socketsecurity/lib/dlx/detect'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
@@ -281,33 +281,33 @@ describe('DLX Executable Type Detection', () => {
     })
   })
 
-  describe('isNodeJsExtension', () => {
+  describe('isJsFilePath', () => {
     it('should return true for .js files', () => {
-      expect(isNodeJsExtension('/path/to/file.js')).toBe(true)
-      expect(isNodeJsExtension('file.js')).toBe(true)
+      expect(isJsFilePath('/path/to/file.js')).toBe(true)
+      expect(isJsFilePath('file.js')).toBe(true)
     })
 
     it('should return true for .mjs files', () => {
-      expect(isNodeJsExtension('/path/to/module.mjs')).toBe(true)
-      expect(isNodeJsExtension('module.mjs')).toBe(true)
+      expect(isJsFilePath('/path/to/module.mjs')).toBe(true)
+      expect(isJsFilePath('module.mjs')).toBe(true)
     })
 
     it('should return true for .cjs files', () => {
-      expect(isNodeJsExtension('/path/to/common.cjs')).toBe(true)
-      expect(isNodeJsExtension('common.cjs')).toBe(true)
+      expect(isJsFilePath('/path/to/common.cjs')).toBe(true)
+      expect(isJsFilePath('common.cjs')).toBe(true)
     })
 
     it('should be case-insensitive', () => {
-      expect(isNodeJsExtension('FILE.JS')).toBe(true)
-      expect(isNodeJsExtension('MODULE.MJS')).toBe(true)
-      expect(isNodeJsExtension('COMMON.CJS')).toBe(true)
+      expect(isJsFilePath('FILE.JS')).toBe(true)
+      expect(isJsFilePath('MODULE.MJS')).toBe(true)
+      expect(isJsFilePath('COMMON.CJS')).toBe(true)
     })
 
     it('should return false for non-Node.js extensions', () => {
-      expect(isNodeJsExtension('/path/to/binary')).toBe(false)
-      expect(isNodeJsExtension('/path/to/file.py')).toBe(false)
-      expect(isNodeJsExtension('/path/to/file.sh')).toBe(false)
-      expect(isNodeJsExtension('/path/to/file.exe')).toBe(false)
+      expect(isJsFilePath('/path/to/binary')).toBe(false)
+      expect(isJsFilePath('/path/to/file.py')).toBe(false)
+      expect(isJsFilePath('/path/to/file.sh')).toBe(false)
+      expect(isJsFilePath('/path/to/file.exe')).toBe(false)
     })
   })
 

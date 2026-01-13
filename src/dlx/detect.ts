@@ -135,7 +135,6 @@ export function detectLocalExecutableType(
   filePath: string,
 ): ExecutableDetectionResult {
   const fs = getFs()
-  const path = getPath()
 
   // Check 1: Look for package.json with bin field.
   const packageJsonPath = findPackageJson(filePath)
@@ -157,12 +156,11 @@ export function detectLocalExecutableType(
   }
 
   // Check 2: File extension fallback.
-  const ext = path.extname(filePath).toLowerCase()
-  if (NODE_JS_EXTENSIONS.has(ext as '.js' | '.mjs' | '.cjs')) {
+  if (isJsFilePath(filePath)) {
     return {
-      type: 'package',
-      method: 'file-extension',
       inDlxCache: false,
+      method: 'file-extension',
+      type: 'package',
     }
   }
 
@@ -199,25 +197,15 @@ function findPackageJson(filePath: string): string | undefined {
 }
 
 /**
- * Check if a file extension indicates a Node.js script.
+ * Check if a file path indicates a Node.js script.
  *
  * @param filePath - Path to check
  * @returns True if file has .js, .mjs, or .cjs extension
  */
-export function isNodeJsExtension(filePath: string): boolean {
+export function isJsFilePath(filePath: string): boolean {
   const path = getPath()
   const ext = path.extname(filePath).toLowerCase()
   return NODE_JS_EXTENSIONS.has(ext as '.js' | '.mjs' | '.cjs')
-}
-
-/**
- * Simplified helper: Is this a Node.js package?
- *
- * @param filePath - Path to check
- * @returns True if detected as Node.js package
- */
-export function isNodePackage(filePath: string): boolean {
-  return detectExecutableType(filePath).type === 'package'
 }
 
 /**
@@ -228,4 +216,14 @@ export function isNodePackage(filePath: string): boolean {
  */
 export function isNativeBinary(filePath: string): boolean {
   return detectExecutableType(filePath).type === 'binary'
+}
+
+/**
+ * Simplified helper: Is this a Node.js package?
+ *
+ * @param filePath - Path to check
+ * @returns True if detected as Node.js package
+ */
+export function isNodePackage(filePath: string): boolean {
+  return detectExecutableType(filePath).type === 'package'
 }
