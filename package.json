@@ -795,6 +795,7 @@
       "@sigstore/sign": "4.1.0",
       "ansi-regex": "6.2.2",
       "debug": "4.4.3",
+      "execa": "5.1.1",
       "has-flag": "5.0.1",
       "isexe": "3.1.1",
       "lru-cache": "11.2.2",
@@ -812,7 +813,8 @@
     "patchedDependencies": {
       "@npmcli/run-script@10.0.0": "patches/@npmcli__run-script@10.0.0.patch",
       "@sigstore/sign@4.1.0": "patches/@sigstore__sign@4.1.0.patch",
-      "node-gyp@11.5.0": "patches/node-gyp@11.5.0.patch"
+      "node-gyp@11.5.0": "patches/node-gyp@11.5.0.patch",
+      "execa@5.1.1": "patches/execa@5.1.1.patch"
     }
   }
 }
