@@ -269,6 +269,11 @@ export async function getLatestRelease(
             return false
           }
 
+          // Skip releases with no assets (empty releases).
+          if (!assets || assets.length === 0) {
+            return false
+          }
+
           // If asset pattern provided, check if release has matching asset.
           if (isMatch) {
             const hasMatchingAsset = assets.some((a: { name: string }) =>

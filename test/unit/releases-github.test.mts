@@ -441,6 +441,105 @@ describe('releases/github', () => {
       // Should return the newest release that has the matching asset.
       expect(tag).toBe('node-smol-20260112-newer')
     })
+
+    it('should skip releases with no assets', async () => {
+      // Mock releases where the newest has no assets (empty placeholder release).
+      const releasesWithEmpty = [
+        {
+          assets: [], // Empty release (no binaries built yet)
+          published_at: '2026-01-13T03:06:00Z', // Newest but empty
+          tag_name: 'node-smol-20260113-121d029',
+        },
+        {
+          assets: [{ name: 'node-darwin-arm64' }, { name: 'node-linux-x64' }],
+          published_at: '2025-12-26T00:17:00Z', // Older but has assets
+          tag_name: 'node-smol-20251226-2126245',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(releasesWithEmpty)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      // Should skip the empty release and return the older release with assets.
+      expect(tag).toBe('node-smol-20251226-2126245')
+    })
+
+    it('should return null when all matching releases have no assets', async () => {
+      // All releases matching prefix are empty.
+      const allEmpty = [
+        {
+          assets: [],
+          published_at: '2026-01-13T03:06:00Z',
+          tag_name: 'binject-20260113-121d029',
+        },
+        {
+          assets: [],
+          published_at: '2026-01-13T03:05:00Z',
+          tag_name: 'binject-20260113-abc1234',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(allEmpty)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      // Should return null since all matching releases are empty.
+      expect(tag).toBeNull()
+    })
+
+    it('should skip empty releases when asset pattern is provided', async () => {
+      // Mix of empty releases and releases with assets.
+      const mixedReleases = [
+        {
+          assets: [], // Empty
+          published_at: '2026-01-13T03:00:00Z',
+          tag_name: 'models-20260113-empty',
+        },
+        {
+          assets: [{ name: 'models-embeddings.bin' }], // Wrong asset
+          published_at: '2026-01-12T12:00:00Z',
+          tag_name: 'models-20260112-wrong',
+        },
+        {
+          assets: [{ name: 'models-data.tar.gz' }], // Correct asset
+          published_at: '2026-01-11T12:00:00Z',
+          tag_name: 'models-20260111-correct',
+        },
+      ]
+
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mixedReleases)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
+        assetPattern: '*.tar.gz',
+        quiet: true,
+      })
+
+      // Should skip empty release and release without matching asset.
+      expect(tag).toBe('models-20260111-correct')
+    })
   })
 
   describe('getReleaseAssetUrl', () => {
