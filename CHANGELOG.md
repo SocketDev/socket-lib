@@ -5,17 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.4.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.4.2) - 2026-01-12
+## [5.5.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.0) - 2026-01-12
 
 ### Added
 
 - **dlx/detect**: Executable type detection utilities for DLX cache and local file paths
-  - `detectExecutableType()`: Generic entry point that routes to appropriate detection strategy
   - `detectDlxExecutableType()`: Detects Node.js packages vs native binaries in DLX cache by checking for node_modules/ directory
+  - `detectExecutableType()`: Generic entry point that routes to appropriate detection strategy
   - `detectLocalExecutableType()`: Detects executables on local filesystem by checking package.json bin field or file extension
   - `isJsFilePath()`: Validates if a file path has .js, .mjs, or .cjs extension
-  - `isNodePackage()`: Simplified helper that returns true for Node.js packages
   - `isNativeBinary()`: Simplified helper that returns true for native binary executables
+  - `isNodePackage()`: Simplified helper that returns true for Node.js packages
 
 ### Fixed
 
