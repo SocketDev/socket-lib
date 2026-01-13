@@ -564,21 +564,19 @@ describe('releases/github', () => {
       tag_name: 'v1.0.0',
     }
 
-    beforeEach(() => {
-      vi.mocked(httpRequest).mockResolvedValue(
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should get asset URL with exact name', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
           Buffer.from(JSON.stringify(mockRelease)),
           true,
           200,
         ),
       )
-    })
 
-    afterEach(() => {
-      vi.clearAllMocks()
-    })
-
-    it('should get asset URL with exact name', async () => {
       const url = await getReleaseAssetUrl(
         'v1.0.0',
         'yoga-sync-20260107-abc123.mjs',
@@ -591,6 +589,14 @@ describe('releases/github', () => {
     })
 
     it('should get asset URL with wildcard pattern', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+
       const url = await getReleaseAssetUrl(
         'v1.0.0',
         'yoga-sync-*.mjs',
@@ -603,6 +609,14 @@ describe('releases/github', () => {
     })
 
     it('should get asset URL with brace expansion', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+
       const url = await getReleaseAssetUrl(
         'v1.0.0',
         'yoga-{sync,layout}-*.mjs',
@@ -615,6 +629,14 @@ describe('releases/github', () => {
     })
 
     it('should get asset URL with RegExp pattern', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+
       const url = await getReleaseAssetUrl(
         'v1.0.0',
         /^models-.+\.tar\.gz$/,
@@ -627,6 +649,14 @@ describe('releases/github', () => {
     })
 
     it('should get asset URL with prefix/suffix object pattern', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+
       const url = await getReleaseAssetUrl(
         'v1.0.0',
         { prefix: 'models-', suffix: '.tar.gz' },
@@ -639,6 +669,14 @@ describe('releases/github', () => {
     })
 
     it('should throw error when pattern does not match any asset', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+
       await expect(
         getReleaseAssetUrl('v1.0.0', 'nonexistent-*.xyz', SOCKET_BTM_REPO, {
           quiet: true,
@@ -664,22 +702,20 @@ describe('releases/github', () => {
       tag_name: 'v1.0.0',
     }
 
-    beforeEach(() => {
-      vi.mocked(httpRequest).mockResolvedValue(
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should download asset with exact name', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
           Buffer.from(JSON.stringify(mockRelease)),
           true,
           200,
         ),
       )
-      vi.mocked(httpDownload).mockResolvedValue(undefined)
-    })
+      vi.mocked(httpDownload).mockResolvedValueOnce(undefined)
 
-    afterEach(() => {
-      vi.clearAllMocks()
-    })
-
-    it('should download asset with exact name', async () => {
       await downloadReleaseAsset(
         'v1.0.0',
         'yoga-sync-abc.mjs',
@@ -700,6 +736,15 @@ describe('releases/github', () => {
     })
 
     it('should download asset with wildcard pattern', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+      vi.mocked(httpDownload).mockResolvedValueOnce(undefined)
+
       await downloadReleaseAsset(
         'v1.0.0',
         'yoga-*.mjs',
@@ -716,6 +761,15 @@ describe('releases/github', () => {
     })
 
     it('should download asset with brace expansion', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+      vi.mocked(httpDownload).mockResolvedValueOnce(undefined)
+
       await downloadReleaseAsset(
         'v1.0.0',
         '{yoga,models}-*.{mjs,tar.gz}',
@@ -732,6 +786,14 @@ describe('releases/github', () => {
     })
 
     it('should throw error when pattern does not match', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSON.stringify(mockRelease)),
+          true,
+          200,
+        ),
+      )
+
       await expect(
         downloadReleaseAsset(
           'v1.0.0',
