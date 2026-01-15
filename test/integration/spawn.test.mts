@@ -35,7 +35,9 @@ describe('spawn integration', () => {
         await spawn('node', ['--invalid-flag'])
         expect.fail('Should have thrown')
       } catch (error: any) {
-        expect(error.message).toContain('command failed')
+        expect(error.message).toContain('Command failed')
+        expect(error.message).toContain('exit code')
+        expect(error.code).toBe(9)
       }
     })
 

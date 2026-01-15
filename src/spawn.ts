@@ -27,6 +27,7 @@
  */
 
 import { getAbortSignal } from './constants/process'
+import { stackWithCauses } from './errors'
 
 import npmCliPromiseSpawn from './external/@npmcli/promise-spawn'
 
@@ -54,6 +55,9 @@ import type { EventEmitter } from 'node:events'
 
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
+
+// Cache for lazy stack trace computation.
+const stackCache = new WeakMap<Error, string>()
 
 // Define BufferEncoding type for TypeScript compatibility.
 type BufferEncoding = globalThis.BufferEncoding
@@ -244,6 +248,103 @@ export interface SpawnSyncReturns<T> {
   status: number | null
   signal: NodeJS.Signals | null
   error?: Error | undefined
+}
+
+/**
+ * Enhances spawn error with better context.
+ * Converts generic "command failed" to detailed error with command, exit code, and stderr.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function enhanceSpawnError(error: unknown): unknown {
+  if (error === null || typeof error !== 'object') {
+    return error
+  }
+
+  if (!isSpawnError(error)) {
+    return error
+  }
+
+  const err = error as SpawnError
+  const { args, cmd, code, signal, stderr } = err
+  const stderrText =
+    typeof stderr === 'string' ? stderr : (stderr?.toString() ?? '')
+
+  // Build enhanced message.
+  let enhancedMessage = `Command failed: ${cmd}`
+
+  if (args && args.length > 0) {
+    const argsStr = args.join(' ')
+    if (argsStr.length < 100) {
+      enhancedMessage += ` ${argsStr}`
+    } else {
+      enhancedMessage += ` ${argsStr.slice(0, 97)}...`
+    }
+  }
+
+  if (signal) {
+    enhancedMessage += ` (terminated by ${signal})`
+  } else if (code !== undefined) {
+    enhancedMessage += ` (exit code ${code})`
+  }
+
+  // Add first line of stderr for context.
+  const trimmedStderr = stderrText.trim()
+  if (trimmedStderr) {
+    const firstLine = trimmedStderr.split('\n')[0]
+    if (firstLine.length < 200) {
+      enhancedMessage += `\n${firstLine}`
+    } else {
+      enhancedMessage += `\n${firstLine.slice(0, 197)}...`
+    }
+  }
+
+  // Check if this is a synthetic error (generic "command failed" message).
+  const isSynthetic = err.message === 'command failed'
+
+  if (isSynthetic) {
+    // Modify the error directly.
+    Object.defineProperty(err, 'message', {
+      __proto__: null,
+      value: enhancedMessage,
+      writable: true,
+      enumerable: false,
+      configurable: true,
+    } as PropertyDescriptor)
+
+    return err
+  }
+
+  // Create enhanced error with original error as cause.
+  const enhancedError = new Error(enhancedMessage, {
+    cause: err,
+  }) as SpawnError
+
+  // Copy all spawn error properties except message and stack.
+  const descriptors = Object.getOwnPropertyDescriptors(err)
+  delete descriptors.message
+  delete descriptors.stack
+  Object.defineProperties(enhancedError, descriptors)
+
+  // Build stack lazily on first access using WeakMap cache.
+  Object.defineProperty(enhancedError, 'stack', {
+    __proto__: null,
+    configurable: true,
+    enumerable: false,
+    get() {
+      let stack = stackCache.get(enhancedError)
+      if (stack === undefined) {
+        try {
+          stack = stackWithCauses(err)
+        } catch {
+          stack = err.stack ?? new Error().stack ?? ''
+        }
+        stackCache.set(enhancedError, stack)
+      }
+      return stack
+    },
+  } as PropertyDescriptor)
+
+  return enhancedError
 }
 
 /**
@@ -652,18 +753,25 @@ export function spawn(
         return strippedResult
       })
       .catch(error => {
-        throw stripAnsiFromSpawnResult(error)
+        const strippedError = stripAnsiFromSpawnResult(error)
+        const enhancedError = enhanceSpawnError(strippedError)
+        throw enhancedError
       }) as PromiseSpawnResult
   } else {
-    newSpawnPromise = spawnPromise.then(result => {
-      // Add exitCode as an alias for code.
-      if ('code' in result) {
-        const res = result as typeof result & { exitCode: number }
-        res.exitCode = result.code
-        return res
-      }
-      return result
-    }) as PromiseSpawnResult
+    newSpawnPromise = spawnPromise
+      .then(result => {
+        // Add exitCode as an alias for code.
+        if ('code' in result) {
+          const res = result as typeof result & { exitCode: number }
+          res.exitCode = result.code
+          return res
+        }
+        return result
+      })
+      .catch(error => {
+        const enhancedError = enhanceSpawnError(error)
+        throw enhancedError
+      }) as PromiseSpawnResult
   }
   if (shouldRestartSpinner) {
     newSpawnPromise = newSpawnPromise.finally(() => {
