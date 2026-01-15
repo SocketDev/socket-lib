@@ -26,13 +26,14 @@ export const externalPackages = [
   { name: 'debug', bundle: true },
   // pico-pack: picomatch, del, fast-glob
   { name: 'pico-pack', bundle: true },
-  // pico-pack internals - individual packages now just re-export from pico-pack bundle (no bundling needed)
   { name: 'del', bundle: false },
   { name: 'fast-glob', bundle: false },
   { name: 'fast-sort', bundle: true },
   { name: 'get-east-asian-width', bundle: true },
   { name: 'has-flag', bundle: false },
   { name: 'picomatch', bundle: false },
+  // pony-cause
+  { name: 'pony-cause', bundle: true },
   // spdx-pack: Bundle spdx-correct, spdx-expression-parse, and dependencies together.
   { name: 'spdx-pack', bundle: true },
   { name: 'spdx-correct', bundle: false },
