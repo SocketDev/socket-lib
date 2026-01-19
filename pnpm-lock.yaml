@@ -243,8 +243,8 @@ importers:
         specifier: 6.0.2
         version: 6.0.2
       vite-tsconfig-paths:
-        specifier: 5.1.4
-        version: 5.1.4(supports-color@10.0.0)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1))
+        specifier: 6.0.4
+        version: 6.0.4(supports-color@10.0.0)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1))
       vitest:
         specifier: 4.0.3
         version: 4.0.3(@types/node@24.9.2)(@vitest/ui@4.0.3)(jiti@2.6.1)(supports-color@10.0.0)(yaml@2.8.1)
@@ -2949,14 +2949,17 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.1:
     resolution: {integrity: sha512-nlGpxf+hv0v7GkWBK2V9spgactGOp0qvfWRxUMjqHyzrt3SgwE48DIv/FhqPHJYLHpgW1opq3nERbz5Anq7n1g==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   taze@19.9.2:
     resolution: {integrity: sha512-If8bq7lSckIMPfXV+C9jjEfdsQnRryh/foKfpX/ah6zI0TrQfUGWSGCaaD32Bqy5/KGRmLZie3EwMSr3Au21XQ==}
@@ -3122,8 +3125,8 @@ packages:
     resolution: {integrity: sha512-IUoow1YUtvoBBC06dXs8bR8B9vuA3aJfmQNKMoaPG/OFsPmoQvw8xh+6Ye25Gx9DQhoEom3Pcu9MKHerm/NpUQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  vite-tsconfig-paths@5.1.4:
-    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
+  vite-tsconfig-paths@6.0.4:
+    resolution: {integrity: sha512-iIsEJ+ek5KqRTK17pmxtgIxXtqr3qDdE6OxrP9mVeGhVDNXRJTKN/l9oMbujTQNzMLe6XZ8qmpztfbkPu2TiFQ==}
     peerDependencies:
       vite: '*'
     peerDependenciesMeta:
@@ -6286,7 +6289,7 @@ snapshots:
 
   validate-npm-package-name@6.0.2: {}
 
-  vite-tsconfig-paths@5.1.4(supports-color@10.0.0)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1)):
+  vite-tsconfig-paths@6.0.4(supports-color@10.0.0)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.1)):
     dependencies:
       debug: 4.4.3(supports-color@10.0.0)
       globrex: 0.1.2
