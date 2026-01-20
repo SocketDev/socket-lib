@@ -93,7 +93,7 @@ export function getPacoteCachePath(): string {
       const cachePath = PacoteFetcherBase
         ? new PacoteFetcherBase(/*dummy package spec*/ 'x', {}).cache
         : ''
-      _pacoteCachePath = normalizePath(cachePath)
+      _pacoteCachePath = cachePath ? normalizePath(cachePath) : ''
     } catch {
       _pacoteCachePath = ''
     }

@@ -25,21 +25,19 @@
  * - dlx-package.ts: Installs npm packages from registries
  *
  * Implementation:
- * - Uses pacote for package installation (no npm CLI required)
+ * - Uses Arborist for package installation (like npx, no npm CLI required)
  * - Split into downloadPackage() and executePackage() for flexibility
  * - dlxPackage() combines both for convenience
  */
 
 import { WIN32 } from '../constants/platform'
-import { getPacoteCachePath } from '../constants/packages'
 import { generateCacheKey } from './cache'
 import Arborist from '../external/@npmcli/arborist'
 import libnpmexec from '../external/libnpmexec'
 import npmPackageArg from '../external/npm-package-arg'
-import pacote from '../external/pacote'
 import { readJsonSync, safeMkdir } from '../fs'
 import { normalizePath } from '../paths/normalize'
-import { getSocketDlxDir } from '../paths/socket'
+import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 import { spawn } from '../spawn'
@@ -261,24 +259,16 @@ async function ensurePackageInstalled(
         }
       }
 
-      // Use pacote to extract the package.
-      // Pacote leverages npm cache when available but doesn't require npm CLI.
-      const pacoteCachePath = getPacoteCachePath()
+      // Install package and dependencies using Arborist (like npx does).
+      // Arborist handles everything: fetching, extracting, dependency resolution, and bin links.
+      // This creates the proper flat node_modules structure with .bin symlinks.
       try {
-        /* c8 ignore next 4 - External pacote call */
-        await pacote.extract(packageSpec, installedDir, {
-          // Use consistent pacote cache path (respects npm cache locations when available).
-          cache: pacoteCachePath || path.join(packageDir, '.cache'),
-        })
-
-        // Install dependencies using Arborist.
-        // pacote.extract() only extracts the package tarball, it does NOT install dependencies.
-        // We must use Arborist to install dependencies after extraction.
         // Arborist is imported at the top
         /* c8 ignore next 3 - External Arborist constructor */
         const arb = new Arborist({
-          path: installedDir,
-          cache: pacoteCachePath || path.join(packageDir, '.cache'),
+          path: packageDir,
+          // Use Socket's shared cacache directory (~/.socket/_cacache).
+          cache: getSocketCacacheDir(),
           // Skip devDependencies (production-only like npx).
           omit: ['dev'],
           // Security: Skip install/preinstall/postinstall scripts to prevent arbitrary code execution.
@@ -293,9 +283,11 @@ async function ensurePackageInstalled(
           silent: true,
         })
 
-        /* c8 ignore next 2 - External Arborist calls */
-        await arb.buildIdealTree()
-        await arb.reify({ save: false })
+        // Use reify with 'add' to install the package and its dependencies in one step.
+        // This matches npx's approach: arb.reify({ add: [packageSpec] })
+        // save: true creates package.json and package-lock.json at the root (like npx).
+        /* c8 ignore next - External Arborist call */
+        await arb.reify({ save: true, add: [packageSpec] })
       } catch (e) {
         const code = (e as any).code
         if (code === 'E404' || code === 'ETARGET') {
