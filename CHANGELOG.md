@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.3) - 2026-01-20
+
+### Fixed
+
+- **deps**: Added patch for execa@2.1.0 to fix signal-exit v4 compatibility. The package was using default import syntax with signal-exit v4, which now exports onExit as a named export.
+
 ## [5.5.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.2) - 2026-01-20
 
 ### Changed
