@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.2) - 2026-01-20
+
+### Changed
+
+- **dlx/package**: Use `getSocketCacacheDir()` instead of `getPacoteCachePath()` for Arborist cache configuration
+  - Ensures consistent use of Socket's shared cacache directory (`~/.socket/_cacache`)
+  - Removes dependency on pacote cache path extraction which could fail
+  - Simplifies cache configuration by using reliable Socket path utility
+
 ## [5.5.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.1) - 2026-01-12
 
 ### Fixed
