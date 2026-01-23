@@ -44,8 +44,7 @@ describe('dlx-manifest', () => {
         cache_key: 'test-binary',
         timestamp: Date.now(),
         details: {
-          checksum: 'abc123',
-          checksum_algorithm: 'sha256',
+          integrity: 'sha512-abc123base64',
           platform: 'linux',
           arch: 'x64',
           size: 1024,
@@ -63,8 +62,7 @@ describe('dlx-manifest', () => {
         cache_key: 'test-binary',
         timestamp: Date.now(),
         details: {
-          checksum: 'abc123',
-          checksum_algorithm: 'sha256',
+          integrity: 'sha512-abc123base64',
           platform: 'linux',
           arch: 'x64',
           size: 1024,
@@ -116,8 +114,7 @@ describe('dlx-manifest', () => {
         cache_key: 'binary-key',
         timestamp: Date.now(),
         details: {
-          checksum: 'sha256hash',
-          checksum_algorithm: 'sha256',
+          integrity: 'sha512-abc123base64hash',
           platform: 'darwin',
           arch: 'arm64',
           size: 2048,
@@ -129,7 +126,7 @@ describe('dlx-manifest', () => {
       }
       expect(entry.type).toBe('binary')
       if (isBinaryEntry(entry)) {
-        expect(entry.details.checksum).toBe('sha256hash')
+        expect(entry.details.integrity).toBe('sha512-abc123base64hash')
         expect(entry.details.platform).toBe('darwin')
         expect(entry.details.arch).toBe('arm64')
       }
@@ -157,8 +154,7 @@ describe('dlx-manifest', () => {
         cache_key: 'test',
         timestamp: Date.now(),
         details: {
-          checksum: 'abc',
-          checksum_algorithm: 'sha512',
+          integrity: 'sha512-abc123base64',
           platform: 'win32',
           arch: 'x64',
           size: 100,
@@ -167,36 +163,23 @@ describe('dlx-manifest', () => {
       }
 
       if (isBinaryEntry(entry)) {
-        // TypeScript should know entry.details is BinaryDetails
-        expect(entry.details.checksum).toBeDefined()
-        expect(entry.details.checksum_algorithm).toBe('sha512')
+        // TypeScript should know entry.details is BinaryDetails.
+        expect(entry.details.integrity).toBeDefined()
+        expect(entry.details.integrity).toMatch(/^sha512-/)
       }
     })
   })
 
-  describe('checksum algorithms', () => {
-    it('should support sha256', () => {
+  describe('integrity format', () => {
+    it('should support SRI integrity hash format', () => {
       const details: BinaryDetails = {
-        checksum: 'abc123',
-        checksum_algorithm: 'sha256',
+        integrity: 'sha512-abc123base64hash==',
         platform: 'linux',
         arch: 'x64',
         size: 1024,
         source: { type: 'download', url: 'https://example.com' },
       }
-      expect(details.checksum_algorithm).toBe('sha256')
-    })
-
-    it('should support sha512', () => {
-      const details: BinaryDetails = {
-        checksum: 'def456',
-        checksum_algorithm: 'sha512',
-        platform: 'darwin',
-        arch: 'arm64',
-        size: 2048,
-        source: { type: 'download', url: 'https://example.com' },
-      }
-      expect(details.checksum_algorithm).toBe('sha512')
+      expect(details.integrity).toMatch(/^sha512-/)
     })
   })
 
@@ -267,8 +250,7 @@ describe('dlx-manifest', () => {
 
       it('should return binary entry', async () => {
         const details: BinaryDetails = {
-          checksum: 'abc123',
-          checksum_algorithm: 'sha256',
+          integrity: 'sha512-abc123base64',
           platform: 'linux',
           arch: 'x64',
           size: 2048,
@@ -358,8 +340,7 @@ describe('dlx-manifest', () => {
     describe('setBinaryEntry', () => {
       it('should store binary entry', async () => {
         const details: BinaryDetails = {
-          checksum: 'xyz789',
-          checksum_algorithm: 'sha512',
+          integrity: 'sha512-xyz789base64',
           platform: 'darwin',
           arch: 'arm64',
           size: 10_000,
@@ -371,7 +352,7 @@ describe('dlx-manifest', () => {
         expect(entry).toBeDefined()
         expect(isBinaryEntry(entry!)).toBe(true)
         if (isBinaryEntry(entry!)) {
-          expect(entry.details.checksum).toBe('xyz789')
+          expect(entry.details.integrity).toBe('sha512-xyz789base64')
           expect(entry.details.platform).toBe('darwin')
           expect(entry.details.arch).toBe('arm64')
         }
@@ -379,8 +360,7 @@ describe('dlx-manifest', () => {
 
       it('should update existing binary entry', async () => {
         const details1: BinaryDetails = {
-          checksum: 'old',
-          checksum_algorithm: 'sha256',
+          integrity: 'sha512-oldbase64',
           platform: 'linux',
           arch: 'x64',
           size: 1000,
@@ -389,8 +369,7 @@ describe('dlx-manifest', () => {
         await manifest.setBinaryEntry('bin', 'key1', details1)
 
         const details2: BinaryDetails = {
-          checksum: 'new',
-          checksum_algorithm: 'sha512',
+          integrity: 'sha512-newbase64',
           platform: 'win32',
           arch: 'x64',
           size: 2000,
@@ -400,7 +379,7 @@ describe('dlx-manifest', () => {
 
         const entry = manifest.getManifestEntry('bin')
         if (isBinaryEntry(entry!)) {
-          expect(entry.details.checksum).toBe('new')
+          expect(entry.details.integrity).toBe('sha512-newbase64')
           expect(entry.cache_key).toBe('key2')
         }
       })

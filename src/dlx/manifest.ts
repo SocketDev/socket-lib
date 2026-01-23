@@ -77,17 +77,23 @@ export interface PackageDetails {
  * Details for binary download entries.
  */
 export interface BinaryDetails {
-  checksum: string
-  checksum_algorithm: ChecksumAlgorithm
+  /** SRI integrity hash (sha512-<base64>, aligned with npm). */
+  integrity: string
   platform: string
   arch: string
   size: number
   source: {
-    type: 'download'
-    url: string
+    type: 'download' | 'extract'
+    url?: string
+    path?: string
+  }
+  /** Update check metadata (same structure as packages). */
+  update_check?: {
+    last_check: number
+    last_notification: number
+    latest_known: string
   }
 }
-export type ChecksumAlgorithm = 'sha256' | 'sha512'
 
 /**
  * Unified manifest entry for all cached items (packages and binaries).

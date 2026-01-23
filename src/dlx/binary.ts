@@ -1,10 +1,9 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
-import { getArch, getPlatform, WIN32 } from '../constants/platform'
+import { getArch, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 
 import { generateCacheKey } from './cache'
-import { dlxManifest } from './manifest'
 import { httpDownload } from '../http-request'
 import { isDir, readJson, safeDelete, safeMkdir } from '../fs'
 import { isObjectObject } from '../objects'
@@ -13,7 +12,6 @@ import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import { spawn } from '../spawn'
 
-import type { ChecksumAlgorithm } from './manifest'
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 
 let _crypto: typeof import('node:crypto') | undefined
@@ -80,9 +78,9 @@ export interface DlxBinaryOptions {
   name?: string | undefined
 
   /**
-   * Expected checksum (sha256) for verification.
+   * Expected SRI integrity hash (sha512-<base64>) for verification.
    */
-  checksum?: string | undefined
+  integrity?: string | undefined
 
   /**
    * Cache TTL in milliseconds (default: 7 days).
@@ -124,65 +122,40 @@ export interface DlxBinaryResult {
 
 /**
  * Metadata structure for cached binaries (.dlx-metadata.json).
- * Unified schema shared across TypeScript (dlxBinary) and C++ (socket_macho_decompress).
+ * Unified schema shared across TypeScript (dlxBinary) and C++ stub extractor.
  *
- * Core Fields (present in all implementations):
+ * Fields:
  * - version: Schema version (currently "1.0.0")
  * - cache_key: First 16 chars of SHA-512 hash (matches directory name)
  * - timestamp: Unix timestamp in milliseconds
- * - checksum: Full hash of cached binary (SHA-512 for C++, SHA-256 for TypeScript)
- * - checksum_algorithm: "sha512" or "sha256"
- * - platform: "darwin" | "linux" | "win32"
- * - arch: "x64" | "arm64"
+ * - integrity: SRI hash (sha512-<base64>, aligned with npm)
  * - size: Size of cached binary in bytes
  * - source: Origin information
- *   - type: "download" (from URL) or "decompression" (from embedded binary)
+ *   - type: "download" | "extract" | "package"
  *   - url: Download URL (if type is "download")
- *   - path: Source binary path (if type is "decompression")
+ *   - path: Source binary path (if type is "extract")
+ *   - spec: Package spec (if type is "package")
+ * - update_check: Update checking metadata (optional)
+ *   - last_check: Timestamp of last update check
+ *   - last_notification: Timestamp of last user notification
+ *   - latest_known: Latest known version string
  *
- * Extra Fields (implementation-specific):
- * - For C++ decompression:
- *   - compressed_size: Size of compressed data in bytes
- *   - compression_algorithm: Brotli level (numeric)
- *   - compression_ratio: original_size / compressed_size
- *
- * Example (TypeScript download):
+ * Example:
  * ```json
  * {
  *   "version": "1.0.0",
  *   "cache_key": "a1b2c3d4e5f67890",
  *   "timestamp": 1730332800000,
- *   "checksum": "sha256-abc123...",
- *   "checksum_algorithm": "sha256",
- *   "platform": "darwin",
- *   "arch": "arm64",
+ *   "integrity": "sha512-abc123base64...",
  *   "size": 15000000,
  *   "source": {
  *     "type": "download",
  *     "url": "https://example.com/binary"
- *   }
- * }
- * ```
- *
- * Example (C++ decompression):
- * ```json
- * {
- *   "version": "1.0.0",
- *   "cache_key": "0123456789abcdef",
- *   "timestamp": 1730332800000,
- *   "checksum": "sha512-def456...",
- *   "checksum_algorithm": "sha512",
- *   "platform": "darwin",
- *   "arch": "arm64",
- *   "size": 13000000,
- *   "source": {
- *     "type": "decompression",
- *     "path": "/usr/local/bin/socket"
  *   },
- *   "extra": {
- *     "compressed_size": 1700000,
- *     "compression_algorithm": 3,
- *     "compression_ratio": 7.647
+ *   "update_check": {
+ *     "last_check": 1730332800000,
+ *     "last_notification": 1730246400000,
+ *     "latest_known": "2.1.0"
  *   }
  * }
  * ```
@@ -193,17 +166,19 @@ export interface DlxMetadata {
   version: string
   cache_key: string
   timestamp: number
-  checksum: string
-  checksum_algorithm: string
-  platform: string
-  arch: string
+  integrity: string
   size: number
   source?: {
-    type: 'download' | 'decompression'
+    type: 'download' | 'extract' | 'package'
     url?: string
     path?: string
+    spec?: string
   }
-  extra?: Record<string, unknown>
+  update_check?: {
+    last_check: number
+    last_notification: number
+    latest_known: string
+  }
 }
 
 /**
@@ -253,7 +228,7 @@ async function isCacheValid(
 async function downloadBinaryFile(
   url: string,
   destPath: string,
-  checksum?: string | undefined,
+  integrity?: string | undefined,
 ): Promise<string> {
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
@@ -270,11 +245,13 @@ async function downloadBinaryFile(
       if (fs.existsSync(destPath)) {
         const stats = await fs.promises.stat(destPath)
         if (stats.size > 0) {
-          // File exists, compute and return checksum.
+          // File exists, compute and return SRI integrity hash.
           const fileBuffer = await fs.promises.readFile(destPath)
-          const hasher = crypto.createHash('sha256')
-          hasher.update(fileBuffer)
-          return hasher.digest('hex')
+          const hash = crypto
+            .createHash('sha512')
+            .update(fileBuffer)
+            .digest('base64')
+          return `sha512-${hash}`
         }
       }
 
@@ -290,18 +267,20 @@ async function downloadBinaryFile(
         )
       }
 
-      // Compute checksum of downloaded file.
+      // Compute SRI integrity hash of downloaded file.
       const fileBuffer = await fs.promises.readFile(destPath)
-      const hasher = crypto.createHash('sha256')
-      hasher.update(fileBuffer)
-      const actualChecksum = hasher.digest('hex')
+      const hash = crypto
+        .createHash('sha512')
+        .update(fileBuffer)
+        .digest('base64')
+      const actualIntegrity = `sha512-${hash}`
 
-      // Verify checksum if provided.
-      if (checksum && actualChecksum !== checksum) {
+      // Verify integrity if provided.
+      if (integrity && actualIntegrity !== integrity) {
         // Clean up invalid file.
         await safeDelete(destPath)
         throw new Error(
-          `Checksum mismatch: expected ${checksum}, got ${actualChecksum}`,
+          `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
         )
       }
 
@@ -310,7 +289,7 @@ async function downloadBinaryFile(
         await fs.promises.chmod(destPath, 0o755)
       }
 
-      return actualChecksum
+      return actualIntegrity
     },
     {
       // Align with npm npx locking strategy.
@@ -322,31 +301,22 @@ async function downloadBinaryFile(
 
 /**
  * Write metadata for a cached binary.
- * Writes to both per-directory metadata file (for backward compatibility)
- * and global manifest (~/.socket/_dlx/.dlx-manifest.json).
  * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
  * Schema documentation: See DlxMetadata interface in this file (exported).
- * Core fields: version, cache_key, timestamp, checksum, checksum_algorithm, platform, arch, size, source
- * Note: This implementation uses SHA-256 checksums instead of SHA-512.
  */
 async function writeMetadata(
   cacheEntryPath: string,
   cacheKey: string,
   url: string,
-  binaryName: string,
-  checksum: string,
+  integrity: string,
   size: number,
 ): Promise<void> {
-  // Write per-directory metadata file for backward compatibility.
   const metaPath = getMetadataPath(cacheEntryPath)
-  const metadata = {
+  const metadata: DlxMetadata = {
     version: '1.0.0',
     cache_key: cacheKey,
     timestamp: Date.now(),
-    checksum,
-    checksum_algorithm: 'sha256' as ChecksumAlgorithm,
-    platform: getPlatform(),
-    arch: getArch(),
+    integrity,
     size,
     source: {
       type: 'download',
@@ -355,25 +325,6 @@ async function writeMetadata(
   }
   const fs = getFs()
   await fs.promises.writeFile(metaPath, JSON.stringify(metadata, null, 2))
-
-  // Write to global manifest.
-  try {
-    const spec = `${url}:${binaryName}`
-    await dlxManifest.setBinaryEntry(spec, cacheKey, {
-      checksum,
-      checksum_algorithm: metadata.checksum_algorithm,
-      platform: metadata.platform,
-      arch: metadata.arch,
-      size,
-      source: {
-        type: 'download',
-        url,
-      },
-    })
-  } catch {
-    // Silently ignore manifest write errors - not critical.
-    // The per-directory metadata is the source of truth for now.
-  }
 }
 
 /**
@@ -454,8 +405,8 @@ export async function dlxBinary(
 ): Promise<DlxBinaryResult> {
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
-    checksum,
     force: userForce = false,
+    integrity,
     name,
     spawnOptions,
     url,
@@ -475,7 +426,7 @@ export async function dlxBinary(
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
 
   let downloaded = false
-  let computedChecksum = checksum
+  let computedIntegrity = integrity
 
   // Check if we need to download.
   if (
@@ -483,7 +434,7 @@ export async function dlxBinary(
     fs.existsSync(cacheEntryDir) &&
     (await isCacheValid(cacheEntryDir, cacheTtl))
   ) {
-    // Binary is cached and valid, read the checksum from metadata.
+    // Binary is cached and valid, read the integrity from metadata.
     try {
       const metaPath = getMetadataPath(cacheEntryDir)
       const metadata = await readJson(metaPath, { throws: false })
@@ -491,10 +442,10 @@ export async function dlxBinary(
         metadata &&
         typeof metadata === 'object' &&
         !Array.isArray(metadata) &&
-        typeof (metadata as Record<string, unknown>)['checksum'] === 'string'
+        typeof (metadata as Record<string, unknown>)['integrity'] === 'string'
       ) {
-        computedChecksum = (metadata as Record<string, unknown>)[
-          'checksum'
+        computedIntegrity = (metadata as Record<string, unknown>)[
+          'integrity'
         ] as string
       } else {
         // If metadata is invalid, re-download.
@@ -535,7 +486,7 @@ export async function dlxBinary(
     }
 
     // Download the binary.
-    computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
+    computedIntegrity = await downloadBinaryFile(url, binaryPath, integrity)
 
     // Get file size for metadata.
     const stats = await fs.promises.stat(binaryPath)
@@ -543,8 +494,7 @@ export async function dlxBinary(
       cacheEntryDir,
       cacheKey,
       url,
-      binaryName,
-      computedChecksum || '',
+      computedIntegrity || '',
       stats.size,
     )
   }
@@ -599,8 +549,8 @@ export async function downloadBinary(
 ): Promise<{ binaryPath: string; downloaded: boolean }> {
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
-    checksum,
     force = false,
+    integrity,
     name,
     url,
   } = { __proto__: null, ...options } as DlxBinaryOptions
@@ -652,7 +602,11 @@ export async function downloadBinary(
     }
 
     // Download the binary.
-    const computedChecksum = await downloadBinaryFile(url, binaryPath, checksum)
+    const computedIntegrity = await downloadBinaryFile(
+      url,
+      binaryPath,
+      integrity,
+    )
 
     // Get file size for metadata.
     const stats = await fs.promises.stat(binaryPath)
@@ -660,8 +614,7 @@ export async function downloadBinary(
       cacheEntryDir,
       cacheKey,
       url,
-      binaryName,
-      computedChecksum || '',
+      computedIntegrity || '',
       stats.size,
     )
     downloaded = true
@@ -733,10 +686,8 @@ export function getDlxCachePath(): string {
 export async function listDlxCache(): Promise<
   Array<{
     age: number
-    arch: string
-    checksum: string
+    integrity: string
     name: string
-    platform: string
     size: number
     url: string
   }>
@@ -792,10 +743,8 @@ export async function listDlxCache(): Promise<
 
         results.push({
           age: now - ((metaObj['timestamp'] as number) || 0),
-          arch: (metaObj['arch'] as string) || 'unknown',
-          checksum: (metaObj['checksum'] as string) || '',
+          integrity: (metaObj['integrity'] as string) || '',
           name: binaryFile,
-          platform: (metaObj['platform'] as string) || 'unknown',
           size: binaryStats.size,
           url,
         })
