@@ -40,12 +40,12 @@ beforeAll(async () => {
       if (url === '/binary') {
         res.writeHead(200, { 'Content-Type': 'application/octet-stream' })
         res.end('#!/bin/bash\necho "test binary"')
-      } else if (url === '/binary-with-checksum') {
+      } else if (url === '/binary-with-integrity') {
         const content = '#!/bin/bash\necho "verified binary"'
-        const hash = createHash('sha256').update(content).digest('hex')
+        const hash = createHash('sha512').update(content).digest('base64')
         res.writeHead(200, {
           'Content-Type': 'application/octet-stream',
-          'X-Checksum': hash,
+          'X-Integrity': `sha512-${hash}`,
         })
         res.end(content)
       } else if (url === '/binary-invalid-checksum') {
@@ -245,19 +245,18 @@ describe.sequential('dlx-binary', () => {
       }, 'dlxBinary-quiet-')
     })
 
-    it('should verify checksum when provided', async () => {
+    it('should verify integrity when provided', async () => {
       await runWithTempDir(async tmpDir => {
         const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const content = '#!/bin/bash\necho "verified binary"'
-          const expectedChecksum = createHash('sha256')
-            .update(content)
-            .digest('hex')
-          const url = `${httpBaseUrl}/binary-with-checksum`
+          const hash = createHash('sha512').update(content).digest('base64')
+          const expectedIntegrity = `sha512-${hash}`
+          const url = `${httpBaseUrl}/binary-with-integrity`
 
           const result = await dlxBinary(['--version'], {
-            checksum: expectedChecksum,
+            integrity: expectedIntegrity,
             name: 'verified-binary',
             url,
           })
@@ -267,28 +266,29 @@ describe.sequential('dlx-binary', () => {
         } finally {
           restoreHome()
         }
-      }, 'dlxBinary-checksum-')
+      }, 'dlxBinary-integrity-')
     })
 
-    it('should throw on checksum mismatch', async () => {
+    it('should throw on integrity mismatch', async () => {
       await runWithTempDir(async tmpDir => {
         const restoreHome = mockHomeDir(tmpDir)
 
         try {
           const url = `${httpBaseUrl}/binary-invalid-checksum`
-          const wrongChecksum = 'a'.repeat(64)
+          // SHA-512 base64 is 88 characters.
+          const wrongIntegrity = `sha512-${'a'.repeat(86)}==`
 
           await expect(
             dlxBinary(['--version'], {
-              checksum: wrongChecksum,
-              name: 'invalid-checksum-binary',
+              integrity: wrongIntegrity,
+              name: 'invalid-integrity-binary',
               url,
             }),
-          ).rejects.toThrow(/Checksum mismatch/)
+          ).rejects.toThrow(/Integrity mismatch/)
         } finally {
           restoreHome()
         }
-      }, 'dlxBinary-bad-checksum-')
+      }, 'dlxBinary-bad-integrity-')
     })
 
     it('should throw on download failure', async () => {
@@ -527,7 +527,7 @@ describe.sequential('dlx-binary', () => {
       }, 'dlxBinary-array-meta-')
     })
 
-    it('should handle metadata with missing checksum', async () => {
+    it('should handle metadata with missing integrity', async () => {
       await runWithTempDir(async tmpDir => {
         const restoreHome = mockHomeDir(tmpDir)
 
@@ -536,13 +536,13 @@ describe.sequential('dlx-binary', () => {
 
           // First download
           const result1 = await dlxBinary(['--version'], {
-            name: 'no-checksum-meta-binary',
+            name: 'no-integrity-meta-binary',
             url,
           })
           await result1.spawnPromise.catch(() => {})
 
-          // Write metadata without checksum
-          const name = 'no-checksum-meta-binary'
+          // Write metadata without integrity
+          const name = 'no-integrity-meta-binary'
           const spec = `${url}:${name}`
           const cacheKey = createHash('sha512')
             .update(spec)
@@ -558,7 +558,7 @@ describe.sequential('dlx-binary', () => {
 
           // Second call should re-download
           const result = await dlxBinary(['--version'], {
-            name: 'no-checksum-meta-binary',
+            name: 'no-integrity-meta-binary',
             url,
           })
 
@@ -567,7 +567,7 @@ describe.sequential('dlx-binary', () => {
         } finally {
           restoreHome()
         }
-      }, 'dlxBinary-no-checksum-meta-')
+      }, 'dlxBinary-no-integrity-meta-')
     })
 
     it('should pass args to spawn', async () => {
@@ -842,9 +842,8 @@ describe.sequential('dlx-binary', () => {
           const entry = list[0]
           expect(entry.name).toBe('list-binary')
           expect(entry.url).toBe(url)
-          expect(entry.platform).toBe(os.platform())
-          expect(entry.arch).toBe(os.arch())
-          expect(entry.checksum).toBeDefined()
+          expect(entry.integrity).toBeDefined()
+          expect(entry.integrity).toMatch(/^sha512-/)
           expect(entry.size).toBeGreaterThan(0)
           expect(entry.age).toBeGreaterThanOrEqual(0)
         } finally {
@@ -929,13 +928,11 @@ describe.sequential('dlx-binary', () => {
           const entryPath = path.join(cachePath, 'no-binary-entry')
           await fs.mkdir(entryPath, { recursive: true })
 
-          // Write metadata but no binary
+          // Write metadata but no binary.
           await fs.writeFile(
             path.join(entryPath, '.dlx-metadata.json'),
             JSON.stringify({
-              arch: os.arch(),
-              checksum: 'test',
-              platform: os.platform(),
+              integrity: 'sha512-test',
               timestamp: Date.now(),
               url: 'test',
             }),
@@ -974,9 +971,7 @@ describe.sequential('dlx-binary', () => {
 
           const entry = list[0]
           expect(entry.url).toBe('')
-          expect(entry.platform).toBe('unknown')
-          expect(entry.arch).toBe('unknown')
-          expect(entry.checksum).toBe('')
+          expect(entry.integrity).toBe('')
         } finally {
           restoreHome()
         }
@@ -1047,24 +1042,22 @@ describe.sequential('dlx-binary', () => {
           const entryPath = path.join(cachePath, 'stat-fail-entry')
           await fs.mkdir(entryPath, { recursive: true })
 
-          // Write metadata
+          // Write metadata.
           await fs.writeFile(
             path.join(entryPath, '.dlx-metadata.json'),
             JSON.stringify({
-              arch: os.arch(),
-              checksum: 'test',
-              platform: os.platform(),
+              integrity: 'sha512-test',
               timestamp: Date.now(),
               url: 'test',
             }),
             'utf8',
           )
 
-          // Create binary
+          // Create binary.
           const binaryPath = path.join(entryPath, 'binary')
           await fs.writeFile(binaryPath, '', 'utf8')
 
-          // Delete binary to cause stat failure
+          // Delete binary to cause stat failure.
           await fs.unlink(binaryPath)
 
           const list = await listDlxCache()
