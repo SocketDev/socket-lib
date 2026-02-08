@@ -988,6 +988,37 @@ describe('http-request', () => {
       }
     })
 
+    it('should not set Content-Type when body is empty string', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(
+          JSON.stringify({ contentType: req.headers['content-type'] || null }),
+        )
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const data = await httpJson<{ contentType: string | null }>(
+          `http://localhost:${testPort}/`,
+          {
+            method: 'POST',
+            body: '',
+          },
+        )
+        expect(data.contentType).toBeNull()
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
     it('should allow overriding default headers', async () => {
       const testServer = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -1161,6 +1192,32 @@ describe('http-request', () => {
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`)
+        expect(text).toBe('no-content-type')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should not set Content-Type when body is empty string', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(req.headers['content-type'] || 'no-content-type')
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const text = await httpText(`http://localhost:${testPort}/`, {
+          method: 'POST',
+          body: '',
+        })
         expect(text).toBe('no-content-type')
       } finally {
         await new Promise<void>(resolve => {

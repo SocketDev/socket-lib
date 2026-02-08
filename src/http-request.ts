@@ -1008,7 +1008,7 @@ export async function httpJson<T = unknown>(
   }
 
   // Add Content-Type when body is present
-  if (body !== undefined) {
+  if (body) {
     defaultHeaders['Content-Type'] = 'application/json'
   }
 
@@ -1182,7 +1182,7 @@ export async function httpText(
   }
 
   // Add Content-Type when body is present
-  if (body !== undefined) {
+  if (body) {
     defaultHeaders['Content-Type'] = 'text/plain'
   }
 
