@@ -1,7 +1,7 @@
 {
   "name": "@socketsecurity/lib",
   "version": "5.5.3",
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.29.1",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -730,7 +730,7 @@
     "@socketregistry/is-unicode-supported": "1.0.5",
     "@socketregistry/packageurl-js": "1.3.5",
     "@socketregistry/yocto-spinner": "1.0.25",
-    "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.5.0",
+    "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.5.3",
     "@types/node": "24.9.2",
     "@typescript/native-preview": "7.0.0-dev.20250920.1",
     "@vitest/coverage-v8": "4.0.3",
@@ -754,7 +754,7 @@
     "globals": "16.4.0",
     "has-flag": "5.0.1",
     "husky": "9.1.7",
-    "libnpmexec": "^10.1.11",
+    "libnpmexec": "^10.2.0",
     "libnpmpack": "9.0.9",
     "lint-staged": "15.2.11",
     "magic-string": "0.30.17",
