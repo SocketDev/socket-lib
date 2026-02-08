@@ -3,8 +3,8 @@
  *
  * Tests HTTP client utilities with local test server:
  * - httpRequest() low-level HTTP request function
- * - httpGetText() fetches and returns text content
- * - httpGetJson() fetches and parses JSON responses
+ * - httpText() fetches and returns text content
+ * - httpJson() fetches and parses JSON responses
  * - httpDownload() downloads files to disk
  * - Redirect following, timeout handling, error cases
  * - Custom headers, user agent, retry logic
@@ -19,8 +19,8 @@ import { Writable } from 'node:stream'
 
 import {
   httpDownload,
-  httpGetJson,
-  httpGetText,
+  httpJson,
+  httpText,
   httpRequest,
 } from '@socketsecurity/lib/http-request'
 import { Logger } from '@socketsecurity/lib/logger'
@@ -833,9 +833,9 @@ describe('http-request', () => {
     })
   })
 
-  describe('httpGetJson', () => {
+  describe('httpJson', () => {
     it('should get and parse JSON', async () => {
-      const data = await httpGetJson<{ message: string; status: string }>(
+      const data = await httpJson<{ message: string; status: string }>(
         `${httpBaseUrl}/json`,
       )
 
@@ -844,19 +844,19 @@ describe('http-request', () => {
     })
 
     it('should throw on non-ok response', async () => {
-      await expect(httpGetJson(`${httpBaseUrl}/not-found`)).rejects.toThrow(
+      await expect(httpJson(`${httpBaseUrl}/not-found`)).rejects.toThrow(
         /HTTP 404/,
       )
     })
 
     it('should throw on invalid JSON', async () => {
-      await expect(httpGetJson(`${httpBaseUrl}/invalid-json`)).rejects.toThrow(
+      await expect(httpJson(`${httpBaseUrl}/invalid-json`)).rejects.toThrow(
         /Failed to parse JSON/,
       )
     })
 
     it('should pass options to httpRequest', async () => {
-      const data = await httpGetJson(`${httpBaseUrl}/json`, {
+      const data = await httpJson(`${httpBaseUrl}/json`, {
         headers: { 'X-Test': 'value' },
         timeout: 5000,
       })
@@ -884,7 +884,7 @@ describe('http-request', () => {
       const testPort = address && typeof address === 'object' ? address.port : 0
 
       try {
-        const data = await httpGetJson<{ retries: string }>(
+        const data = await httpJson<{ retries: string }>(
           `http://localhost:${testPort}/`,
           {
             retries: 2,
@@ -902,27 +902,147 @@ describe('http-request', () => {
     })
 
     it('should handle server errors', async () => {
-      await expect(httpGetJson(`${httpBaseUrl}/server-error`)).rejects.toThrow(
+      await expect(httpJson(`${httpBaseUrl}/server-error`)).rejects.toThrow(
         /HTTP 500/,
       )
     })
+
+    it('should set Accept: application/json by default', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ accept: req.headers.accept }))
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const data = await httpJson<{ accept: string }>(
+          `http://localhost:${testPort}/`,
+        )
+        expect(data.accept).toBe('application/json')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should set Content-Type: application/json when body is present', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ contentType: req.headers['content-type'] }))
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const data = await httpJson<{ contentType: string }>(
+          `http://localhost:${testPort}/`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ test: 'data' }),
+          },
+        )
+        expect(data.contentType).toBe('application/json')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should not set Content-Type when body is absent', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(
+          JSON.stringify({ contentType: req.headers['content-type'] || null }),
+        )
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const data = await httpJson<{ contentType: string | null }>(
+          `http://localhost:${testPort}/`,
+        )
+        expect(data.contentType).toBeNull()
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should allow overriding default headers', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            accept: req.headers.accept,
+            contentType: req.headers['content-type'],
+          }),
+        )
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const data = await httpJson<{
+          accept: string
+          contentType: string
+        }>(`http://localhost:${testPort}/`, {
+          method: 'POST',
+          body: JSON.stringify({ test: 'data' }),
+          headers: {
+            Accept: 'application/vnd.api+json',
+            'Content-Type': 'application/vnd.api+json',
+          },
+        })
+        expect(data.accept).toBe('application/vnd.api+json')
+        expect(data.contentType).toBe('application/vnd.api+json')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
   })
 
-  describe('httpGetText', () => {
+  describe('httpText', () => {
     it('should get text response', async () => {
-      const text = await httpGetText(`${httpBaseUrl}/text`)
+      const text = await httpText(`${httpBaseUrl}/text`)
 
       expect(text).toBe('Plain text response')
     })
 
     it('should throw on non-ok response', async () => {
-      await expect(httpGetText(`${httpBaseUrl}/not-found`)).rejects.toThrow(
+      await expect(httpText(`${httpBaseUrl}/not-found`)).rejects.toThrow(
         /HTTP 404/,
       )
     })
 
     it('should pass options to httpRequest', async () => {
-      const text = await httpGetText(`${httpBaseUrl}/text`, {
+      const text = await httpText(`${httpBaseUrl}/text`, {
         headers: { 'X-Test': 'value' },
         timeout: 5000,
       })
@@ -950,7 +1070,7 @@ describe('http-request', () => {
       const testPort = address && typeof address === 'object' ? address.port : 0
 
       try {
-        const text = await httpGetText(`http://localhost:${testPort}/`, {
+        const text = await httpText(`http://localhost:${testPort}/`, {
           retries: 2,
           retryDelay: 10,
         })
@@ -965,16 +1085,120 @@ describe('http-request', () => {
     })
 
     it('should handle server errors', async () => {
-      await expect(httpGetText(`${httpBaseUrl}/server-error`)).rejects.toThrow(
+      await expect(httpText(`${httpBaseUrl}/server-error`)).rejects.toThrow(
         /HTTP 500/,
       )
     })
 
     it('should handle binary content as text', async () => {
-      const text = await httpGetText(`${httpBaseUrl}/binary`)
+      const text = await httpText(`${httpBaseUrl}/binary`)
 
       expect(text).toBeDefined()
       expect(text.length).toBeGreaterThan(0)
+    })
+
+    it('should set Accept: text/plain by default', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(req.headers.accept || '')
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const text = await httpText(`http://localhost:${testPort}/`)
+        expect(text).toBe('text/plain')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should set Content-Type: text/plain when body is present', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(req.headers['content-type'] || '')
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const text = await httpText(`http://localhost:${testPort}/`, {
+          method: 'POST',
+          body: 'test data',
+        })
+        expect(text).toBe('text/plain')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should not set Content-Type when body is absent', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(req.headers['content-type'] || 'no-content-type')
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const text = await httpText(`http://localhost:${testPort}/`)
+        expect(text).toBe('no-content-type')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should allow overriding default headers', async () => {
+      const testServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(
+          `Accept: ${req.headers.accept}, Content-Type: ${req.headers['content-type']}`,
+        )
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const text = await httpText(`http://localhost:${testPort}/`, {
+          method: 'POST',
+          body: 'test data',
+          headers: {
+            Accept: 'text/html',
+            'Content-Type': 'text/csv',
+          },
+        })
+        expect(text).toBe('Accept: text/html, Content-Type: text/csv')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
     })
   })
 
