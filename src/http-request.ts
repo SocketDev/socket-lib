@@ -499,88 +499,178 @@ export interface HttpDownloadResult {
 }
 
 /**
- * Make an HTTP/HTTPS request with retry logic and redirect support.
- * Provides a fetch-like API using Node.js native http/https modules.
- *
- * This is the main entry point for making HTTP requests. It handles retries,
- * redirects, timeouts, and provides a fetch-compatible response interface.
- *
- * @param url - The URL to request (must start with http:// or https://)
- * @param options - Request configuration options
- * @returns Promise resolving to response object with `.json()`, `.text()`, etc.
- * @throws {Error} When all retries are exhausted, timeout occurs, or non-retryable error happens
- *
- * @example
- * ```ts
- * // Simple GET request
- * const response = await httpRequest('https://api.example.com/data')
- * const data = response.json()
- *
- * // POST with JSON body
- * const response = await httpRequest('https://api.example.com/users', {
- *   method: 'POST',
- *   headers: { 'Content-Type': 'application/json' },
- *   body: JSON.stringify({ name: 'Alice', email: 'alice@example.com' })
- * })
- *
- * // With retries and timeout
- * const response = await httpRequest('https://api.example.com/data', {
- *   retries: 3,
- *   retryDelay: 1000,
- *   timeout: 60000
- * })
- *
- * // Don't follow redirects
- * const response = await httpRequest('https://example.com/redirect', {
- *   followRedirects: false
- * })
- * console.log(response.status) // 301, 302, etc.
- * ```
+ * Single download attempt (used internally by httpDownload with retry logic).
+ * @private
  */
-export async function httpRequest(
+async function httpDownloadAttempt(
   url: string,
-  options?: HttpRequestOptions | undefined,
-): Promise<HttpResponse> {
+  destPath: string,
+  options: HttpDownloadOptions,
+): Promise<HttpDownloadResult> {
   const {
-    body,
     followRedirects = true,
     headers = {},
     maxRedirects = 5,
-    method = 'GET',
-    retries = 0,
-    retryDelay = 1000,
-    timeout = 30_000,
-  } = { __proto__: null, ...options } as HttpRequestOptions
+    onProgress,
+    timeout = 120_000,
+  } = { __proto__: null, ...options } as HttpDownloadOptions
 
-  // Retry logic with exponential backoff
-  let lastError: Error | undefined
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      return await httpRequestAttempt(url, {
-        body,
-        followRedirects,
-        headers,
-        maxRedirects,
-        method,
-        timeout,
-      })
-    } catch (e) {
-      lastError = e as Error
+  return await new Promise((resolve, reject) => {
+    const parsedUrl = new URL(url)
+    const isHttps = parsedUrl.protocol === 'https:'
+    const httpModule = isHttps ? getHttps() : getHttp()
 
-      // Last attempt - throw error
-      if (attempt === retries) {
-        break
+    const requestOptions = {
+      headers: {
+        'User-Agent': 'socket-registry/1.0',
+        ...headers,
+      },
+      hostname: parsedUrl.hostname,
+      method: 'GET',
+      path: parsedUrl.pathname + parsedUrl.search,
+      port: parsedUrl.port,
+      timeout,
+    }
+
+    const { createWriteStream } = getFs()
+
+    let fileStream: ReturnType<typeof createWriteStream> | undefined
+    let streamClosed = false
+
+    const closeStream = () => {
+      if (!streamClosed && fileStream) {
+        streamClosed = true
+        fileStream.close()
+      }
+    }
+
+    /* c8 ignore start - External HTTP/HTTPS download request */
+    const request = httpModule.request(
+      requestOptions,
+      (res: IncomingMessage) => {
+        // Handle redirects
+        if (
+          followRedirects &&
+          res.statusCode &&
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          if (maxRedirects <= 0) {
+            reject(
+              new Error(
+                `Too many redirects (exceeded maximum: ${maxRedirects})`,
+              ),
+            )
+            return
+          }
+
+          // Follow redirect
+          const redirectUrl = res.headers.location.startsWith('http')
+            ? res.headers.location
+            : new URL(res.headers.location, url).toString()
+
+          resolve(
+            httpDownloadAttempt(redirectUrl, destPath, {
+              followRedirects,
+              headers,
+              maxRedirects: maxRedirects - 1,
+              onProgress,
+              timeout,
+            }),
+          )
+          return
+        }
+
+        // Check status code
+        if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+          closeStream()
+          reject(
+            new Error(
+              `Download failed: HTTP ${res.statusCode} ${res.statusMessage}`,
+            ),
+          )
+          return
+        }
+
+        const totalSize = Number.parseInt(
+          res.headers['content-length'] || '0',
+          10,
+        )
+        let downloadedSize = 0
+
+        // Create write stream
+        fileStream = createWriteStream(destPath)
+
+        fileStream.on('error', (error: Error) => {
+          closeStream()
+          const err = new Error(`Failed to write file: ${error.message}`, {
+            cause: error,
+          })
+          reject(err)
+        })
+
+        res.on('data', (chunk: Buffer) => {
+          downloadedSize += chunk.length
+          if (onProgress && totalSize > 0) {
+            onProgress(downloadedSize, totalSize)
+          }
+        })
+
+        res.on('end', () => {
+          fileStream?.close(() => {
+            streamClosed = true
+            resolve({
+              path: destPath,
+              size: downloadedSize,
+            })
+          })
+        })
+
+        res.on('error', (error: Error) => {
+          closeStream()
+          reject(error)
+        })
+
+        // Pipe response to file
+        res.pipe(fileStream)
+      },
+    )
+
+    request.on('error', (error: Error) => {
+      closeStream()
+      const code = (error as NodeJS.ErrnoException).code
+      let message = `HTTP download failed for ${url}: ${error.message}\n`
+
+      if (code === 'ENOTFOUND') {
+        message +=
+          'DNS lookup failed. Check the hostname and your network connection.'
+      } else if (code === 'ECONNREFUSED') {
+        message +=
+          'Connection refused. Verify the server is running and accessible.'
+      } else if (code === 'ETIMEDOUT') {
+        message +=
+          'Request timed out. Check your network or increase the timeout value.'
+      } else if (code === 'ECONNRESET') {
+        message +=
+          'Connection reset. The server may have closed the connection unexpectedly.'
+      } else {
+        message +=
+          'Check your network connection and verify the URL is correct.'
       }
 
-      // Retry with exponential backoff
-      const delayMs = retryDelay * 2 ** attempt
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delayMs))
-    }
-  }
+      reject(new Error(message, { cause: error }))
+    })
 
-  throw lastError || new Error('Request failed after retries')
+    request.on('timeout', () => {
+      request.destroy()
+      closeStream()
+      reject(new Error(`Download timed out after ${timeout}ms`))
+    })
+
+    request.end()
+    /* c8 ignore stop */
+  })
 }
 
 /**
@@ -859,181 +949,6 @@ export async function httpDownload(
 }
 
 /**
- * Single download attempt (used internally by httpDownload with retry logic).
- * @private
- */
-async function httpDownloadAttempt(
-  url: string,
-  destPath: string,
-  options: HttpDownloadOptions,
-): Promise<HttpDownloadResult> {
-  const {
-    followRedirects = true,
-    headers = {},
-    maxRedirects = 5,
-    onProgress,
-    timeout = 120_000,
-  } = { __proto__: null, ...options } as HttpDownloadOptions
-
-  return await new Promise((resolve, reject) => {
-    const parsedUrl = new URL(url)
-    const isHttps = parsedUrl.protocol === 'https:'
-    const httpModule = isHttps ? getHttps() : getHttp()
-
-    const requestOptions = {
-      headers: {
-        'User-Agent': 'socket-registry/1.0',
-        ...headers,
-      },
-      hostname: parsedUrl.hostname,
-      method: 'GET',
-      path: parsedUrl.pathname + parsedUrl.search,
-      port: parsedUrl.port,
-      timeout,
-    }
-
-    const { createWriteStream } = getFs()
-
-    let fileStream: ReturnType<typeof createWriteStream> | undefined
-    let streamClosed = false
-
-    const closeStream = () => {
-      if (!streamClosed && fileStream) {
-        streamClosed = true
-        fileStream.close()
-      }
-    }
-
-    /* c8 ignore start - External HTTP/HTTPS download request */
-    const request = httpModule.request(
-      requestOptions,
-      (res: IncomingMessage) => {
-        // Handle redirects
-        if (
-          followRedirects &&
-          res.statusCode &&
-          res.statusCode >= 300 &&
-          res.statusCode < 400 &&
-          res.headers.location
-        ) {
-          if (maxRedirects <= 0) {
-            reject(
-              new Error(
-                `Too many redirects (exceeded maximum: ${maxRedirects})`,
-              ),
-            )
-            return
-          }
-
-          // Follow redirect
-          const redirectUrl = res.headers.location.startsWith('http')
-            ? res.headers.location
-            : new URL(res.headers.location, url).toString()
-
-          resolve(
-            httpDownloadAttempt(redirectUrl, destPath, {
-              followRedirects,
-              headers,
-              maxRedirects: maxRedirects - 1,
-              onProgress,
-              timeout,
-            }),
-          )
-          return
-        }
-
-        // Check status code
-        if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
-          closeStream()
-          reject(
-            new Error(
-              `Download failed: HTTP ${res.statusCode} ${res.statusMessage}`,
-            ),
-          )
-          return
-        }
-
-        const totalSize = Number.parseInt(
-          res.headers['content-length'] || '0',
-          10,
-        )
-        let downloadedSize = 0
-
-        // Create write stream
-        fileStream = createWriteStream(destPath)
-
-        fileStream.on('error', (error: Error) => {
-          closeStream()
-          const err = new Error(`Failed to write file: ${error.message}`, {
-            cause: error,
-          })
-          reject(err)
-        })
-
-        res.on('data', (chunk: Buffer) => {
-          downloadedSize += chunk.length
-          if (onProgress && totalSize > 0) {
-            onProgress(downloadedSize, totalSize)
-          }
-        })
-
-        res.on('end', () => {
-          fileStream?.close(() => {
-            streamClosed = true
-            resolve({
-              path: destPath,
-              size: downloadedSize,
-            })
-          })
-        })
-
-        res.on('error', (error: Error) => {
-          closeStream()
-          reject(error)
-        })
-
-        // Pipe response to file
-        res.pipe(fileStream)
-      },
-    )
-
-    request.on('error', (error: Error) => {
-      closeStream()
-      const code = (error as NodeJS.ErrnoException).code
-      let message = `HTTP download failed for ${url}: ${error.message}\n`
-
-      if (code === 'ENOTFOUND') {
-        message +=
-          'DNS lookup failed. Check the hostname and your network connection.'
-      } else if (code === 'ECONNREFUSED') {
-        message +=
-          'Connection refused. Verify the server is running and accessible.'
-      } else if (code === 'ETIMEDOUT') {
-        message +=
-          'Request timed out. Check your network or increase the timeout value.'
-      } else if (code === 'ECONNRESET') {
-        message +=
-          'Connection reset. The server may have closed the connection unexpectedly.'
-      } else {
-        message +=
-          'Check your network connection and verify the URL is correct.'
-      }
-
-      reject(new Error(message, { cause: error }))
-    })
-
-    request.on('timeout', () => {
-      request.destroy()
-      closeStream()
-      reject(new Error(`Download timed out after ${timeout}ms`))
-    })
-
-    request.end()
-    /* c8 ignore stop */
-  })
-}
-
-/**
  * Perform an HTTP request and parse JSON response.
  * Convenience wrapper around `httpRequest` for JSON API calls.
  * Automatically sets appropriate headers for JSON requests:
@@ -1118,6 +1033,91 @@ export async function httpJson<T = unknown>(
   } catch (e) {
     throw new Error('Failed to parse JSON response', { cause: e })
   }
+}
+
+/**
+ * Make an HTTP/HTTPS request with retry logic and redirect support.
+ * Provides a fetch-like API using Node.js native http/https modules.
+ *
+ * This is the main entry point for making HTTP requests. It handles retries,
+ * redirects, timeouts, and provides a fetch-compatible response interface.
+ *
+ * @param url - The URL to request (must start with http:// or https://)
+ * @param options - Request configuration options
+ * @returns Promise resolving to response object with `.json()`, `.text()`, etc.
+ * @throws {Error} When all retries are exhausted, timeout occurs, or non-retryable error happens
+ *
+ * @example
+ * ```ts
+ * // Simple GET request
+ * const response = await httpRequest('https://api.example.com/data')
+ * const data = response.json()
+ *
+ * // POST with JSON body
+ * const response = await httpRequest('https://api.example.com/users', {
+ *   method: 'POST',
+ *   headers: { 'Content-Type': 'application/json' },
+ *   body: JSON.stringify({ name: 'Alice', email: 'alice@example.com' })
+ * })
+ *
+ * // With retries and timeout
+ * const response = await httpRequest('https://api.example.com/data', {
+ *   retries: 3,
+ *   retryDelay: 1000,
+ *   timeout: 60000
+ * })
+ *
+ * // Don't follow redirects
+ * const response = await httpRequest('https://example.com/redirect', {
+ *   followRedirects: false
+ * })
+ * console.log(response.status) // 301, 302, etc.
+ * ```
+ */
+export async function httpRequest(
+  url: string,
+  options?: HttpRequestOptions | undefined,
+): Promise<HttpResponse> {
+  const {
+    body,
+    followRedirects = true,
+    headers = {},
+    maxRedirects = 5,
+    method = 'GET',
+    retries = 0,
+    retryDelay = 1000,
+    timeout = 30_000,
+  } = { __proto__: null, ...options } as HttpRequestOptions
+
+  // Retry logic with exponential backoff
+  let lastError: Error | undefined
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await httpRequestAttempt(url, {
+        body,
+        followRedirects,
+        headers,
+        maxRedirects,
+        method,
+        timeout,
+      })
+    } catch (e) {
+      lastError = e as Error
+
+      // Last attempt - throw error
+      if (attempt === retries) {
+        break
+      }
+
+      // Retry with exponential backoff
+      const delayMs = retryDelay * 2 ** attempt
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+    }
+  }
+
+  throw lastError || new Error('Request failed after retries')
 }
 
 /**
