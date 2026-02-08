@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.6.0) - 2026-02-08
+
+### Added
+
+- **http-request**: Added automatic default headers for JSON and text requests
+  - `httpJson()` now automatically sets `Accept: application/json` header
+  - `httpJson()` automatically sets `Content-Type: application/json` when body is present
+  - `httpText()` now automatically sets `Accept: text/plain` header
+  - `httpText()` automatically sets `Content-Type: text/plain` when body is present
+  - User-provided headers always override defaults
+  - Simplifies API usage - no need to manually set common headers
+
+### Changed
+
+- **http-request**: Renamed HTTP helper functions to support all HTTP methods (BREAKING CHANGE)
+  - `httpGetJson()` → `httpJson()` - Now supports GET, POST, PUT, DELETE, PATCH, etc.
+  - `httpGetText()` → `httpText()` - Now supports all HTTP methods via `method` option
+  - Functions now accept `method` parameter in options (defaults to 'GET')
+  - More flexible API that matches modern fetch-style conventions
+  - **Migration**: Replace `httpGetJson()` calls with `httpJson()` and `httpGetText()` with `httpText()`
+
+### Fixed
+
+- **http-request**: Fixed Content-Type header incorrectly sent with empty string body
+  - Empty string body (`""`) no longer triggers Content-Type header
+  - Changed condition from `if (body !== undefined)` to `if (body)` for semantic correctness
+  - Empty string represents "no content" and should not declare a Content-Type
+  - Affects `httpJson()` and `httpText()` functions
+  - Fixes potential API compatibility issues with servers expecting no Content-Type for empty bodies
+  - Added comprehensive test coverage for empty string edge case
+
 ## [5.5.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.3) - 2026-01-20
 
 ### Fixed
