@@ -755,7 +755,7 @@
     "has-flag": "5.0.1",
     "husky": "9.1.7",
     "libnpmexec": "^10.2.0",
-    "libnpmpack": "9.0.9",
+    "libnpmpack": "9.0.13",
     "lint-staged": "15.2.11",
     "magic-string": "0.30.17",
     "make-fetch-happen": "15.0.2",
