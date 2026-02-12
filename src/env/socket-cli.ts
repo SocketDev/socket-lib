@@ -77,6 +77,28 @@ export function getSocketCliApiToken(): string | undefined {
 }
 
 /**
+ * Bootstrap cache directory path.
+ * Set by bootstrap wrappers to pass dlx cache location to CLI.
+ *
+ * @returns Bootstrap cache directory or undefined
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCliBootstrapCacheDir(): string | undefined {
+  return getEnvValue('SOCKET_CLI_BOOTSTRAP_CACHE_DIR')
+}
+
+/**
+ * Bootstrap package spec (e.g., @socketsecurity/cli@^2.0.11).
+ * Set by bootstrap wrappers (SEA/smol/npm) to pass package spec to CLI.
+ *
+ * @returns Bootstrap package spec or undefined
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCliBootstrapSpec(): string | undefined {
+  return getEnvValue('SOCKET_CLI_BOOTSTRAP_SPEC')
+}
+
+/**
  * Socket CLI configuration file path (alternative name).
  *
  * @returns Config file path or undefined
@@ -94,6 +116,21 @@ export function getSocketCliConfig(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliFix(): string | undefined {
   return getEnvValue('SOCKET_CLI_FIX')
+}
+
+/**
+ * Socket CLI GitHub authentication token.
+ * Checks SOCKET_CLI_GITHUB_TOKEN, SOCKET_SECURITY_GITHUB_PAT, then falls back to GITHUB_TOKEN.
+ *
+ * @returns GitHub token or undefined
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCliGithubToken(): string | undefined {
+  return (
+    getEnvValue('SOCKET_CLI_GITHUB_TOKEN') ||
+    getEnvValue('SOCKET_SECURITY_GITHUB_PAT') ||
+    getEnvValue('GITHUB_TOKEN')
+  )
 }
 
 /**
@@ -135,41 +172,4 @@ export function getSocketCliOrgSlug(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliViewAllRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_VIEW_ALL_RISKS'))
-}
-
-/**
- * Socket CLI GitHub authentication token.
- * Checks SOCKET_CLI_GITHUB_TOKEN, SOCKET_SECURITY_GITHUB_PAT, then falls back to GITHUB_TOKEN.
- *
- * @returns GitHub token or undefined
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketCliGithubToken(): string | undefined {
-  return (
-    getEnvValue('SOCKET_CLI_GITHUB_TOKEN') ||
-    getEnvValue('SOCKET_SECURITY_GITHUB_PAT') ||
-    getEnvValue('GITHUB_TOKEN')
-  )
-}
-
-/**
- * Bootstrap package spec (e.g., @socketsecurity/cli@^2.0.11).
- * Set by bootstrap wrappers (SEA/smol/npm) to pass package spec to CLI.
- *
- * @returns Bootstrap package spec or undefined
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketCliBootstrapSpec(): string | undefined {
-  return getEnvValue('SOCKET_CLI_BOOTSTRAP_SPEC')
-}
-
-/**
- * Bootstrap cache directory path.
- * Set by bootstrap wrappers to pass dlx cache location to CLI.
- *
- * @returns Bootstrap cache directory or undefined
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketCliBootstrapCacheDir(): string | undefined {
-  return getEnvValue('SOCKET_CLI_BOOTSTRAP_CACHE_DIR')
 }

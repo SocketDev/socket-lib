@@ -15,6 +15,15 @@ export function getAppdata(): string | undefined {
 }
 
 /**
+ * COMSPEC environment variable.
+ * Points to the Windows command processor (typically cmd.exe).
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getComspec(): string | undefined {
+  return getEnvValue('COMSPEC')
+}
+
+/**
  * LOCALAPPDATA environment variable.
  * Points to the Local Application Data directory on Windows.
  */
@@ -30,13 +39,4 @@ export function getLocalappdata(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getUserprofile(): string | undefined {
   return getEnvValue('USERPROFILE')
-}
-
-/**
- * COMSPEC environment variable.
- * Points to the Windows command processor (typically cmd.exe).
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getComspec(): string | undefined {
-  return getEnvValue('COMSPEC')
 }

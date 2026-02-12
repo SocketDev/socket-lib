@@ -52,6 +52,13 @@ const sharedOverrides: Map<string, string | undefined> | undefined =
   globalThis[sharedOverridesSymbol]
 
 /**
+ * Clear a specific environment variable override.
+ */
+export function clearEnv(key: string): void {
+  sharedOverrides?.delete(key)
+}
+
+/**
  * Get an environment variable value, checking overrides first.
  *
  * Resolution order:
@@ -75,6 +82,14 @@ export function getEnvValue(key: string): string | undefined {
 
   // Fall back to process.env (works with vi.stubEnv)
   return process.env[key]
+}
+
+/**
+ * Check if an environment variable has been overridden.
+ */
+export function hasOverride(key: string): boolean {
+  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  return !!(isolatedOverrides?.has(key) || sharedOverrides?.has(key))
 }
 
 /**
@@ -104,6 +119,23 @@ export function isInEnv(key: string): boolean {
 }
 
 /**
+ * Clear all environment variable overrides.
+ * Useful in afterEach hooks to ensure clean test state.
+ *
+ * @example
+ * ```typescript
+ * import { resetEnv } from './rewire'
+ *
+ * afterEach(() => {
+ *   resetEnv()
+ * })
+ * ```
+ */
+export function resetEnv(): void {
+  sharedOverrides?.clear()
+}
+
+/**
  * Set an environment variable override for testing.
  * This does not modify process.env, only affects env getters.
  *
@@ -130,38 +162,6 @@ export function isInEnv(key: string): boolean {
  */
 export function setEnv(key: string, value: string | undefined): void {
   sharedOverrides?.set(key, value)
-}
-
-/**
- * Clear a specific environment variable override.
- */
-export function clearEnv(key: string): void {
-  sharedOverrides?.delete(key)
-}
-
-/**
- * Clear all environment variable overrides.
- * Useful in afterEach hooks to ensure clean test state.
- *
- * @example
- * ```typescript
- * import { resetEnv } from './rewire'
- *
- * afterEach(() => {
- *   resetEnv()
- * })
- * ```
- */
-export function resetEnv(): void {
-  sharedOverrides?.clear()
-}
-
-/**
- * Check if an environment variable has been overridden.
- */
-export function hasOverride(key: string): boolean {
-  const isolatedOverrides = isolatedOverridesStorage.getStore()
-  return !!(isolatedOverrides?.has(key) || sharedOverrides?.has(key))
 }
 
 /**
