@@ -56,9 +56,12 @@ describe('env rewiring', () => {
       setEnv('CI', '')
       expect(getCI()).toBe(true)
 
-      // CI returns false only when cleared
+      // CI returns false only when cleared AND not in process.env
+      // On CI systems, process.env.CI exists, so stub it out first
+      vi.stubEnv('CI', undefined)
       clearEnv('CI')
       expect(getCI()).toBe(false)
+      vi.unstubAllEnvs()
     })
 
     it('should allow undefined overrides', () => {
@@ -100,8 +103,11 @@ describe('env rewiring', () => {
       setEnv('CI', 'false')
       expect(getCI()).toBe(true) // Key exists, so true
 
+      // Clear both override and process.env (for CI systems where CI is set)
+      vi.stubEnv('CI', undefined)
       clearEnv('CI')
       expect(getCI()).toBe(false) // Key doesn't exist
+      vi.unstubAllEnvs()
     })
 
     it('test 3: should not be affected by previous tests', () => {

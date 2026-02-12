@@ -10,7 +10,7 @@
 
 import { getCI } from '@socketsecurity/lib/env/ci'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('env/ci', () => {
   afterEach(() => {
@@ -90,8 +90,11 @@ describe('env/ci', () => {
       setEnv('CI', 'true')
       expect(getCI()).toBe(true)
 
+      // On CI systems, process.env.CI exists, so stub it out first
+      vi.stubEnv('CI', undefined)
       clearEnv('CI')
       expect(getCI()).toBe(false)
+      vi.unstubAllEnvs()
     })
 
     it('should handle consecutive reads', () => {
