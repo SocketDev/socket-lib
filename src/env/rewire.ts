@@ -9,6 +9,10 @@
  * - Thread-safe for concurrent test execution
  */
 
+import { hasOwn } from '../objects'
+
+import { envAsBoolean } from './helpers'
+
 let _async_hooks: typeof import('node:async_hooks') | undefined
 /**
  * Lazily load the async_hooks module to avoid Webpack errors.
@@ -23,8 +27,6 @@ function getAsyncHooks() {
   }
   return _async_hooks as typeof import('node:async_hooks')
 }
-
-import { envAsBoolean } from './helpers'
 
 type EnvOverrides = Map<string, string | undefined>
 
@@ -73,6 +75,32 @@ export function getEnvValue(key: string): string | undefined {
 
   // Fall back to process.env (works with vi.stubEnv)
   return process.env[key]
+}
+
+/**
+ * Check if an environment variable exists (has a key), checking overrides first.
+ *
+ * Resolution order:
+ * 1. Isolated overrides (temporary - set via withEnv/withEnvSync)
+ * 2. Shared overrides (persistent - set via setEnv in beforeEach)
+ * 3. process.env (including vi.stubEnv modifications)
+ *
+ * @internal Used by env getters to check for key presence (not value truthiness)
+ */
+export function isInEnv(key: string): boolean {
+  // Check isolated overrides first (highest priority - temporary via withEnv)
+  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  if (isolatedOverrides?.has(key)) {
+    return true
+  }
+
+  // Check shared overrides (persistent via setEnv in beforeEach)
+  if (sharedOverrides?.has(key)) {
+    return true
+  }
+
+  // Fall back to process.env (works with vi.stubEnv)
+  return hasOwn(process.env, key)
 }
 
 /**

@@ -15,10 +15,11 @@ import { getSocketDebug } from '@socketsecurity/lib/env/socket'
 import {
   clearEnv,
   hasOverride,
+  isInEnv,
   resetEnv,
   setEnv,
 } from '@socketsecurity/lib/env/rewire'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('env rewiring', () => {
   // Clean up after each test to avoid state leakage
@@ -51,8 +52,12 @@ describe('env rewiring', () => {
       setEnv('CI', '1')
       expect(getCI()).toBe(true)
 
-      // Override CI to false
+      // CI with empty string still returns true (key exists)
       setEnv('CI', '')
+      expect(getCI()).toBe(true)
+
+      // CI returns false only when cleared
+      clearEnv('CI')
       expect(getCI()).toBe(false)
     })
 
@@ -91,9 +96,12 @@ describe('env rewiring', () => {
       expect(getCI()).toBe(true)
     })
 
-    it('test 2: should run with CI=false', () => {
+    it('test 2: should run with CI cleared', () => {
       setEnv('CI', 'false')
-      expect(getCI()).toBe(false)
+      expect(getCI()).toBe(true) // Key exists, so true
+
+      clearEnv('CI')
+      expect(getCI()).toBe(false) // Key doesn't exist
     })
 
     it('test 3: should not be affected by previous tests', () => {
@@ -145,6 +153,83 @@ describe('env rewiring', () => {
       expect(getSocketDebug()).toBe('test')
       // CI returns to real value
       expect(hasOverride('CI')).toBe(false)
+    })
+  })
+
+  describe('isInEnv()', () => {
+    it('should return true when key exists with truthy value', () => {
+      setEnv('TEST_KEY', 'value')
+      expect(isInEnv('TEST_KEY')).toBe(true)
+    })
+
+    it('should return true when key exists with empty string', () => {
+      setEnv('TEST_KEY', '')
+      expect(isInEnv('TEST_KEY')).toBe(true)
+    })
+
+    it('should return true when key exists with "false" string', () => {
+      setEnv('TEST_KEY', 'false')
+      expect(isInEnv('TEST_KEY')).toBe(true)
+    })
+
+    it('should return true when key exists with "0" string', () => {
+      setEnv('TEST_KEY', '0')
+      expect(isInEnv('TEST_KEY')).toBe(true)
+    })
+
+    it('should return false when key does not exist', () => {
+      // Use a key that definitely doesn't exist
+      expect(isInEnv('NONEXISTENT_KEY_12345')).toBe(false)
+    })
+
+    it('should return false when key is cleared', () => {
+      setEnv('TEST_KEY', 'value')
+      expect(isInEnv('TEST_KEY')).toBe(true)
+
+      clearEnv('TEST_KEY')
+      expect(isInEnv('TEST_KEY')).toBe(false)
+    })
+
+    it('should handle undefined values correctly', () => {
+      setEnv('TEST_KEY', undefined)
+      // undefined means the key is set but has no value
+      expect(isInEnv('TEST_KEY')).toBe(true)
+    })
+
+    it('should check isolated overrides first', () => {
+      // Set shared override
+      setEnv('TEST_KEY', 'shared')
+      expect(isInEnv('TEST_KEY')).toBe(true)
+
+      // Shared override should still work
+      clearEnv('TEST_KEY')
+      expect(isInEnv('TEST_KEY')).toBe(false)
+    })
+
+    it('should work with real process.env values', () => {
+      // PATH should exist in process.env
+      expect(isInEnv('PATH')).toBe(true)
+    })
+
+    it('should detect keys added via vi.stubEnv', () => {
+      vi.stubEnv('VITEST_STUBBED_KEY', 'stubbed-value')
+      expect(isInEnv('VITEST_STUBBED_KEY')).toBe(true)
+      vi.unstubAllEnvs()
+    })
+
+    it('should prioritize overrides over process.env', () => {
+      // Set a value in process.env first
+      vi.stubEnv('TEST_PRIORITY_KEY', 'process-env-value')
+      expect(isInEnv('TEST_PRIORITY_KEY')).toBe(true)
+
+      // Override should still be checked
+      setEnv('TEST_PRIORITY_KEY', undefined)
+      expect(isInEnv('TEST_PRIORITY_KEY')).toBe(true)
+
+      clearEnv('TEST_PRIORITY_KEY')
+      expect(isInEnv('TEST_PRIORITY_KEY')).toBe(true) // Falls back to process.env
+
+      vi.unstubAllEnvs()
     })
   })
 })
