@@ -21,33 +21,6 @@ import {
 export type { Arch, Libc, Platform }
 
 /**
- * Map Node.js arch to socket-btm asset arch naming.
- */
-const ARCH_MAP: Record<string, string> = {
-  __proto__: null,
-  arm64: 'arm64',
-  x64: 'x64',
-}
-
-let _fs: typeof import('node:fs') | undefined
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
  * Configuration for downloading socket-btm generic assets.
  */
 export interface SocketBtmAssetConfig {
@@ -111,6 +84,33 @@ export interface SocketBtmBinaryConfig {
 export type SocketBtmReleaseConfig =
   | SocketBtmBinaryConfig
   | SocketBtmAssetConfig
+
+/**
+ * Map Node.js arch to socket-btm asset arch naming.
+ */
+const ARCH_MAP: Record<string, string> = {
+  __proto__: null,
+  arm64: 'arm64',
+  x64: 'x64',
+}
+
+let _fs: typeof import('node:fs') | undefined
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
 
 /**
  * Detect the libc variant (musl or glibc) on Linux systems.
