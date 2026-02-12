@@ -155,46 +155,109 @@ export interface DlxPackageResult {
 }
 
 /**
- * Parse package spec into name and version using npm-package-arg.
- * Examples:
- * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
- * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
- * - 'lodash' → { name: 'lodash', version: undefined }
+ * Execute a package via DLX - install if needed and run its binary.
+ *
+ * This is the Socket equivalent of npx/pnpm dlx/yarn dlx, but using
+ * our own cache directory (~/.socket/_dlx) and installation logic.
+ *
+ * Auto-forces reinstall for version ranges to get latest within range.
+ *
+ * @example
+ * ```typescript
+ * // Download and execute cdxgen
+ * const result = await dlxPackage(
+ *   ['--version'],
+ *   { package: '@cyclonedx/cdxgen@10.0.0' }
+ * )
+ * await result.spawnPromise
+ * ```
  */
-function parsePackageSpec(spec: string): {
-  name: string
-  version: string | undefined
-} {
-  try {
-    // npmPackageArg is imported at the top
-    /* c8 ignore next - External npm-package-arg call */
-    const parsed = npmPackageArg(spec)
+export async function dlxPackage(
+  args: readonly string[] | string[],
+  options?: DlxPackageOptions | undefined,
+  spawnExtra?: SpawnExtra | undefined,
+): Promise<DlxPackageResult> {
+  // Download the package.
+  const downloadResult = await downloadPackage(options!)
 
-    // Extract version from different types of specs.
-    // For registry specs, use fetchSpec (the version/range).
-    // For git/file/etc, version will be undefined.
-    const version =
-      parsed.type === 'tag'
-        ? parsed.fetchSpec
-        : parsed.type === 'version' || parsed.type === 'range'
-          ? parsed.fetchSpec
-          : undefined
+  // Execute the binary.
+  const spawnPromise = executePackage(
+    downloadResult.binaryPath,
+    args,
+    options?.spawnOptions,
+    spawnExtra,
+  )
 
-    return {
-      name: parsed.name || spec,
-      version,
-    }
-  } catch {
-    // Fallback to simple parsing if npm-package-arg fails.
-    const atIndex = spec.lastIndexOf('@')
-    if (atIndex === -1 || spec.startsWith('@')) {
-      // No version or scoped package without version.
-      return { name: spec, version: undefined }
-    }
-    return {
-      name: spec.slice(0, atIndex),
-      version: spec.slice(atIndex + 1),
-    }
+  return {
+    ...downloadResult,
+    spawnPromise,
+  }
+}
+
+/**
+ * Download and install a package without executing it.
+ * This is useful for self-update or when you need the package files
+ * but don't want to run the binary immediately.
+ *
+ * @example
+ * ```typescript
+ * // Install @socketsecurity/cli without running it
+ * const result = await downloadPackage({
+ *   package: '@socketsecurity/cli@1.2.0',
+ *   force: true
+ * })
+ * console.log('Installed to:', result.packageDir)
+ * console.log('Binary at:', result.binaryPath)
+ * ```
+ */
+export async function downloadPackage(
+  options: DlxPackageOptions,
+): Promise<DownloadPackageResult> {
+  const {
+    binaryName,
+    force: userForce,
+    package: packageSpec,
+    yes,
+  } = {
+    __proto__: null,
+    ...options,
+  } as DlxPackageOptions
+
+  // Parse package spec.
+  const { name: packageName, version: packageVersion } =
+    parsePackageSpec(packageSpec)
+
+  // Determine force behavior:
+  // 1. Explicit force takes precedence
+  // 2. --yes flag implies force (auto-approve/skip prompts)
+  // 3. Version ranges auto-force to get latest
+  const isVersionRange =
+    packageVersion !== undefined && rangeOperatorsRegExp.test(packageVersion)
+  const force =
+    userForce !== undefined ? userForce : yes === true ? true : isVersionRange
+
+  // Build full package spec for installation.
+  const fullPackageSpec = packageVersion
+    ? `${packageName}@${packageVersion}`
+    : packageName
+
+  // Ensure package is installed.
+  const { installed, packageDir } = await ensurePackageInstalled(
+    packageName,
+    fullPackageSpec,
+    force,
+  )
+
+  // Find binary path.
+  const binaryPath = findBinaryPath(packageDir, packageName, binaryName)
+
+  // Make all binaries in the package executable on Unix systems.
+  makePackageBinsExecutable(packageDir, packageName)
+
+  return {
+    binaryPath,
+    installed,
+    packageDir,
   }
 }
 
@@ -203,7 +266,7 @@ function parsePackageSpec(spec: string): {
  * Uses pacote for installation (no npm CLI required).
  * Protected by process lock to prevent concurrent installation corruption.
  */
-async function ensurePackageInstalled(
+export async function ensurePackageInstalled(
   packageName: string,
   packageSpec: string,
   force: boolean,
@@ -328,32 +391,42 @@ async function ensurePackageInstalled(
 }
 
 /**
- * Resolve binary path with cross-platform wrapper support.
- * On Windows, checks for .cmd, .bat, .ps1, .exe wrappers in order.
- * On Unix, uses path directly.
+ * Execute a package's binary with cross-platform shell handling.
+ * The package must already be installed (use downloadPackage first).
  *
- * Aligns with npm/npx binary resolution strategy.
+ * On Windows, script files (.bat, .cmd, .ps1) require shell: true.
+ * Matches npm/npx execution behavior.
+ *
+ * @example
+ * ```typescript
+ * // Execute an already-installed package
+ * const downloaded = await downloadPackage({ package: 'cowsay@1.5.0' })
+ * const result = await executePackage(
+ *   downloaded.binaryPath,
+ *   ['Hello World'],
+ *   { stdio: 'inherit' }
+ * )
+ * ```
  */
-function resolveBinaryPath(basePath: string): string {
-  if (!WIN32) {
-    // Unix: use path directly
-    return basePath
-  }
+export function executePackage(
+  binaryPath: string,
+  args: readonly string[] | string[],
+  spawnOptions?: SpawnOptions | undefined,
+  spawnExtra?: SpawnExtra | undefined,
+): ReturnType<typeof spawn> {
+  // On Windows, script files (.bat, .cmd, .ps1) require shell: true
+  // because they are not executable on their own and must be run through cmd.exe.
+  // .exe files are actual binaries and don't need shell mode.
+  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
 
-  const fs = getFs()
-  // Windows: check for wrappers in priority order
-  // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
-  const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
+  const finalOptions = needsShell
+    ? {
+        ...spawnOptions,
+        shell: true,
+      }
+    : spawnOptions
 
-  for (const ext of extensions) {
-    const testPath = basePath + ext
-    if (fs.existsSync(testPath)) {
-      return testPath
-    }
-  }
-
-  // Fallback to original path if no wrapper found
-  return basePath
+  return spawn(binaryPath, args, finalOptions, spawnExtra)
 }
 
 /**
@@ -367,7 +440,7 @@ function resolveBinaryPath(basePath: string): string {
  * 3. Try last segment of package name as final fallback
  * 4. Use first binary as last resort
  */
-function findBinaryPath(
+export function findBinaryPath(
   packageDir: string,
   packageName: string,
   binaryName?: string,
@@ -447,46 +520,6 @@ function findBinaryPath(
 }
 
 /**
- * Execute a package via DLX - install if needed and run its binary.
- *
- * This is the Socket equivalent of npx/pnpm dlx/yarn dlx, but using
- * our own cache directory (~/.socket/_dlx) and installation logic.
- *
- * Auto-forces reinstall for version ranges to get latest within range.
- *
- * @example
- * ```typescript
- * // Download and execute cdxgen
- * const result = await dlxPackage(
- *   ['--version'],
- *   { package: '@cyclonedx/cdxgen@10.0.0' }
- * )
- * await result.spawnPromise
- * ```
- */
-export async function dlxPackage(
-  args: readonly string[] | string[],
-  options?: DlxPackageOptions | undefined,
-  spawnExtra?: SpawnExtra | undefined,
-): Promise<DlxPackageResult> {
-  // Download the package.
-  const downloadResult = await downloadPackage(options!)
-
-  // Execute the binary.
-  const spawnPromise = executePackage(
-    downloadResult.binaryPath,
-    args,
-    options?.spawnOptions,
-    spawnExtra,
-  )
-
-  return {
-    ...downloadResult,
-    spawnPromise,
-  }
-}
-
-/**
  * Make all binaries in an installed package executable.
  * Reads the package.json bin field and makes all binaries executable (chmod 0o755).
  * Handles both single binary (string) and multiple binaries (object) formats.
@@ -500,7 +533,7 @@ export async function dlxPackage(
  * - npm cmd-shim: https://github.com/npm/cmd-shim/blob/main/lib/index.js
  * - npm getBinFromManifest: https://github.com/npm/libnpmexec/blob/main/lib/get-bin-from-manifest.js
  */
-function makePackageBinsExecutable(
+export function makePackageBinsExecutable(
   packageDir: string,
   packageName: string,
 ): void {
@@ -553,107 +586,74 @@ function makePackageBinsExecutable(
 }
 
 /**
- * Download and install a package without executing it.
- * This is useful for self-update or when you need the package files
- * but don't want to run the binary immediately.
- *
- * @example
- * ```typescript
- * // Install @socketsecurity/cli without running it
- * const result = await downloadPackage({
- *   package: '@socketsecurity/cli@1.2.0',
- *   force: true
- * })
- * console.log('Installed to:', result.packageDir)
- * console.log('Binary at:', result.binaryPath)
- * ```
+ * Parse package spec into name and version using npm-package-arg.
+ * Examples:
+ * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
+ * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
+ * - 'lodash' → { name: 'lodash', version: undefined }
  */
-export async function downloadPackage(
-  options: DlxPackageOptions,
-): Promise<DownloadPackageResult> {
-  const {
-    binaryName,
-    force: userForce,
-    package: packageSpec,
-    yes,
-  } = {
-    __proto__: null,
-    ...options,
-  } as DlxPackageOptions
+export function parsePackageSpec(spec: string): {
+  name: string
+  version: string | undefined
+} {
+  try {
+    // npmPackageArg is imported at the top
+    /* c8 ignore next - External npm-package-arg call */
+    const parsed = npmPackageArg(spec)
 
-  // Parse package spec.
-  const { name: packageName, version: packageVersion } =
-    parsePackageSpec(packageSpec)
+    // Extract version from different types of specs.
+    // For registry specs, use fetchSpec (the version/range).
+    // For git/file/etc, version will be undefined.
+    const version =
+      parsed.type === 'tag'
+        ? parsed.fetchSpec
+        : parsed.type === 'version' || parsed.type === 'range'
+          ? parsed.fetchSpec
+          : undefined
 
-  // Determine force behavior:
-  // 1. Explicit force takes precedence
-  // 2. --yes flag implies force (auto-approve/skip prompts)
-  // 3. Version ranges auto-force to get latest
-  const isVersionRange =
-    packageVersion !== undefined && rangeOperatorsRegExp.test(packageVersion)
-  const force =
-    userForce !== undefined ? userForce : yes === true ? true : isVersionRange
-
-  // Build full package spec for installation.
-  const fullPackageSpec = packageVersion
-    ? `${packageName}@${packageVersion}`
-    : packageName
-
-  // Ensure package is installed.
-  const { installed, packageDir } = await ensurePackageInstalled(
-    packageName,
-    fullPackageSpec,
-    force,
-  )
-
-  // Find binary path.
-  const binaryPath = findBinaryPath(packageDir, packageName, binaryName)
-
-  // Make all binaries in the package executable on Unix systems.
-  makePackageBinsExecutable(packageDir, packageName)
-
-  return {
-    binaryPath,
-    installed,
-    packageDir,
+    return {
+      name: parsed.name || spec,
+      version,
+    }
+  } catch {
+    // Fallback to simple parsing if npm-package-arg fails.
+    const atIndex = spec.lastIndexOf('@')
+    if (atIndex === -1 || spec.startsWith('@')) {
+      // No version or scoped package without version.
+      return { name: spec, version: undefined }
+    }
+    return {
+      name: spec.slice(0, atIndex),
+      version: spec.slice(atIndex + 1),
+    }
   }
 }
 
 /**
- * Execute a package's binary with cross-platform shell handling.
- * The package must already be installed (use downloadPackage first).
+ * Resolve binary path with cross-platform wrapper support.
+ * On Windows, checks for .cmd, .bat, .ps1, .exe wrappers in order.
+ * On Unix, uses path directly.
  *
- * On Windows, script files (.bat, .cmd, .ps1) require shell: true.
- * Matches npm/npx execution behavior.
- *
- * @example
- * ```typescript
- * // Execute an already-installed package
- * const downloaded = await downloadPackage({ package: 'cowsay@1.5.0' })
- * const result = await executePackage(
- *   downloaded.binaryPath,
- *   ['Hello World'],
- *   { stdio: 'inherit' }
- * )
- * ```
+ * Aligns with npm/npx binary resolution strategy.
  */
-export function executePackage(
-  binaryPath: string,
-  args: readonly string[] | string[],
-  spawnOptions?: SpawnOptions | undefined,
-  spawnExtra?: SpawnExtra | undefined,
-): ReturnType<typeof spawn> {
-  // On Windows, script files (.bat, .cmd, .ps1) require shell: true
-  // because they are not executable on their own and must be run through cmd.exe.
-  // .exe files are actual binaries and don't need shell mode.
-  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
+export function resolveBinaryPath(basePath: string): string {
+  if (!WIN32) {
+    // Unix: use path directly
+    return basePath
+  }
 
-  const finalOptions = needsShell
-    ? {
-        ...spawnOptions,
-        shell: true,
-      }
-    : spawnOptions
+  const fs = getFs()
+  // Windows: check for wrappers in priority order
+  // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
+  const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
 
-  return spawn(binaryPath, args, finalOptions, spawnExtra)
+  for (const ext of extensions) {
+    const testPath = basePath + ext
+    if (fs.existsSync(testPath)) {
+      return testPath
+    }
+  }
+
+  // Fallback to original path if no wrapper found
+  return basePath
 }

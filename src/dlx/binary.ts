@@ -182,152 +182,6 @@ export interface DlxMetadata {
 }
 
 /**
- * Get metadata file path for a cached binary.
- */
-function getMetadataPath(cacheEntryPath: string): string {
-  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
-}
-
-/**
- * Check if a cached binary is still valid.
- */
-async function isCacheValid(
-  cacheEntryPath: string,
-  cacheTtl: number,
-): Promise<boolean> {
-  const fs = getFs()
-  try {
-    const metaPath = getMetadataPath(cacheEntryPath)
-    if (!fs.existsSync(metaPath)) {
-      return false
-    }
-
-    const metadata = await readJson(metaPath, { throws: false })
-    if (!isObjectObject(metadata)) {
-      return false
-    }
-    const now = Date.now()
-    const timestamp = (metadata as Record<string, unknown>)['timestamp']
-    // If timestamp is missing or invalid, cache is invalid
-    if (typeof timestamp !== 'number' || timestamp <= 0) {
-      return false
-    }
-    const age = now - timestamp
-
-    return age < cacheTtl
-  } catch {
-    return false
-  }
-}
-
-/**
- * Download a file from a URL with integrity checking and concurrent download protection.
- * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
- * Internal helper function for downloading binary files.
- */
-async function downloadBinaryFile(
-  url: string,
-  destPath: string,
-  integrity?: string | undefined,
-): Promise<string> {
-  // Use process lock to prevent concurrent downloads.
-  // Lock is placed in the cache entry directory as 'concurrency.lock'.
-  const crypto = getCrypto()
-  const fs = getFs()
-  const path = getPath()
-  const cacheEntryDir = path.dirname(destPath)
-  const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
-
-  return await processLock.withLock(
-    lockPath,
-    async () => {
-      // Check if file was downloaded while waiting for lock.
-      if (fs.existsSync(destPath)) {
-        const stats = await fs.promises.stat(destPath)
-        if (stats.size > 0) {
-          // File exists, compute and return SRI integrity hash.
-          const fileBuffer = await fs.promises.readFile(destPath)
-          const hash = crypto
-            .createHash('sha512')
-            .update(fileBuffer)
-            .digest('base64')
-          return `sha512-${hash}`
-        }
-      }
-
-      // Download the file.
-      try {
-        await httpDownload(url, destPath)
-      } catch (e) {
-        throw new Error(
-          `Failed to download binary from ${url}\n` +
-            `Destination: ${destPath}\n` +
-            'Check your internet connection or verify the URL is accessible.',
-          { cause: e },
-        )
-      }
-
-      // Compute SRI integrity hash of downloaded file.
-      const fileBuffer = await fs.promises.readFile(destPath)
-      const hash = crypto
-        .createHash('sha512')
-        .update(fileBuffer)
-        .digest('base64')
-      const actualIntegrity = `sha512-${hash}`
-
-      // Verify integrity if provided.
-      if (integrity && actualIntegrity !== integrity) {
-        // Clean up invalid file.
-        await safeDelete(destPath)
-        throw new Error(
-          `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
-        )
-      }
-
-      // Make executable on POSIX systems.
-      if (!WIN32) {
-        await fs.promises.chmod(destPath, 0o755)
-      }
-
-      return actualIntegrity
-    },
-    {
-      // Align with npm npx locking strategy.
-      staleMs: 5000,
-      touchIntervalMs: 2000,
-    },
-  )
-}
-
-/**
- * Write metadata for a cached binary.
- * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
- * Schema documentation: See DlxMetadata interface in this file (exported).
- */
-async function writeMetadata(
-  cacheEntryPath: string,
-  cacheKey: string,
-  url: string,
-  integrity: string,
-  size: number,
-): Promise<void> {
-  const metaPath = getMetadataPath(cacheEntryPath)
-  const metadata: DlxMetadata = {
-    version: '1.0.0',
-    cache_key: cacheKey,
-    timestamp: Date.now(),
-    integrity,
-    size,
-    source: {
-      type: 'download',
-      url,
-    },
-  }
-  const fs = getFs()
-  await fs.promises.writeFile(metaPath, JSON.stringify(metadata, null, 2))
-}
-
-/**
  * Clean expired entries from the DLX cache.
  */
 export async function cleanDlxCache(
@@ -627,6 +481,85 @@ export async function downloadBinary(
 }
 
 /**
+ * Download a file from a URL with integrity checking and concurrent download protection.
+ * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
+ * Internal helper function for downloading binary files.
+ */
+export async function downloadBinaryFile(
+  url: string,
+  destPath: string,
+  integrity?: string | undefined,
+): Promise<string> {
+  // Use process lock to prevent concurrent downloads.
+  // Lock is placed in the cache entry directory as 'concurrency.lock'.
+  const crypto = getCrypto()
+  const fs = getFs()
+  const path = getPath()
+  const cacheEntryDir = path.dirname(destPath)
+  const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
+
+  return await processLock.withLock(
+    lockPath,
+    async () => {
+      // Check if file was downloaded while waiting for lock.
+      if (fs.existsSync(destPath)) {
+        const stats = await fs.promises.stat(destPath)
+        if (stats.size > 0) {
+          // File exists, compute and return SRI integrity hash.
+          const fileBuffer = await fs.promises.readFile(destPath)
+          const hash = crypto
+            .createHash('sha512')
+            .update(fileBuffer)
+            .digest('base64')
+          return `sha512-${hash}`
+        }
+      }
+
+      // Download the file.
+      try {
+        await httpDownload(url, destPath)
+      } catch (e) {
+        throw new Error(
+          `Failed to download binary from ${url}\n` +
+            `Destination: ${destPath}\n` +
+            'Check your internet connection or verify the URL is accessible.',
+          { cause: e },
+        )
+      }
+
+      // Compute SRI integrity hash of downloaded file.
+      const fileBuffer = await fs.promises.readFile(destPath)
+      const hash = crypto
+        .createHash('sha512')
+        .update(fileBuffer)
+        .digest('base64')
+      const actualIntegrity = `sha512-${hash}`
+
+      // Verify integrity if provided.
+      if (integrity && actualIntegrity !== integrity) {
+        // Clean up invalid file.
+        await safeDelete(destPath)
+        throw new Error(
+          `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
+        )
+      }
+
+      // Make executable on POSIX systems.
+      if (!WIN32) {
+        await fs.promises.chmod(destPath, 0o755)
+      }
+
+      return actualIntegrity
+    },
+    {
+      // Align with npm npx locking strategy.
+      staleMs: 5000,
+      touchIntervalMs: 2000,
+    },
+  )
+}
+
+/**
  * Execute a cached binary without re-downloading.
  * Similar to executePackage from dlx-package.
  * Binary must have been previously downloaded via downloadBinary or dlxBinary.
@@ -678,6 +611,45 @@ export function executeBinary(
  */
 export function getDlxCachePath(): string {
   return getSocketDlxDir()
+}
+
+/**
+ * Get metadata file path for a cached binary.
+ */
+export function getMetadataPath(cacheEntryPath: string): string {
+  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
+}
+
+/**
+ * Check if a cached binary is still valid.
+ */
+export async function isCacheValid(
+  cacheEntryPath: string,
+  cacheTtl: number,
+): Promise<boolean> {
+  const fs = getFs()
+  try {
+    const metaPath = getMetadataPath(cacheEntryPath)
+    if (!fs.existsSync(metaPath)) {
+      return false
+    }
+
+    const metadata = await readJson(metaPath, { throws: false })
+    if (!isObjectObject(metadata)) {
+      return false
+    }
+    const now = Date.now()
+    const timestamp = (metadata as Record<string, unknown>)['timestamp']
+    // If timestamp is missing or invalid, cache is invalid
+    if (typeof timestamp !== 'number' || timestamp <= 0) {
+      return false
+    }
+    const age = now - timestamp
+
+    return age < cacheTtl
+  } catch {
+    return false
+  }
 }
 
 /**
@@ -753,4 +725,32 @@ export async function listDlxCache(): Promise<
   }
 
   return results
+}
+
+/**
+ * Write metadata for a cached binary.
+ * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
+ * Schema documentation: See DlxMetadata interface in this file (exported).
+ */
+export async function writeMetadata(
+  cacheEntryPath: string,
+  cacheKey: string,
+  url: string,
+  integrity: string,
+  size: number,
+): Promise<void> {
+  const metaPath = getMetadataPath(cacheEntryPath)
+  const metadata: DlxMetadata = {
+    version: '1.0.0',
+    cache_key: cacheKey,
+    timestamp: Date.now(),
+    integrity,
+    size,
+    source: {
+      type: 'download',
+      url,
+    },
+  }
+  const fs = getFs()
+  await fs.promises.writeFile(metaPath, JSON.stringify(metadata, null, 2))
 }

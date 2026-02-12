@@ -59,34 +59,29 @@ export interface ExecutableDetectionResult {
 }
 
 /**
- * Detect if a path is a Node.js package or native binary executable.
- * Works for both DLX cache paths and local filesystem paths.
+ * Find package.json in the directory containing the file or parent directories.
  *
- * Detection strategy:
- * 1. If in DLX cache: Use detectDlxExecutableType()
- * 2. Otherwise: Use detectLocalExecutableType()
- *
- * @param filePath - Path to executable (DLX cache or local filesystem)
- * @returns Detection result with type, method, and metadata
- *
- * @example
- * ```typescript
- * const result = detectExecutableType('/path/to/tool')
- * if (result.type === 'package') {
- *   spawnNode([filePath, ...args])
- * } else {
- *   spawn(filePath, args)
- * }
- * ```
+ * @param filePath - Path to search from
+ * @returns Path to package.json if found, undefined otherwise
+ * @private
  */
-export function detectExecutableType(
-  filePath: string,
-): ExecutableDetectionResult {
-  if (isInSocketDlx(filePath)) {
-    return detectDlxExecutableType(filePath)
+function findPackageJson(filePath: string): string | undefined {
+  const fs = getFs()
+  const path = getPath()
+
+  let currentDir = path.dirname(path.resolve(filePath))
+  const root = path.parse(currentDir).root
+
+  while (currentDir !== root) {
+    const packageJsonPath = path.join(currentDir, 'package.json')
+    if (fs.existsSync(packageJsonPath)) {
+      return packageJsonPath
+    }
+
+    currentDir = path.dirname(currentDir)
   }
 
-  return detectLocalExecutableType(filePath)
+  return undefined
 }
 
 /**
@@ -122,6 +117,37 @@ export function detectDlxExecutableType(
     method: 'dlx-cache',
     inDlxCache: true,
   }
+}
+
+/**
+ * Detect if a path is a Node.js package or native binary executable.
+ * Works for both DLX cache paths and local filesystem paths.
+ *
+ * Detection strategy:
+ * 1. If in DLX cache: Use detectDlxExecutableType()
+ * 2. Otherwise: Use detectLocalExecutableType()
+ *
+ * @param filePath - Path to executable (DLX cache or local filesystem)
+ * @returns Detection result with type, method, and metadata
+ *
+ * @example
+ * ```typescript
+ * const result = detectExecutableType('/path/to/tool')
+ * if (result.type === 'package') {
+ *   spawnNode([filePath, ...args])
+ * } else {
+ *   spawn(filePath, args)
+ * }
+ * ```
+ */
+export function detectExecutableType(
+  filePath: string,
+): ExecutableDetectionResult {
+  if (isInSocketDlx(filePath)) {
+    return detectDlxExecutableType(filePath)
+  }
+
+  return detectLocalExecutableType(filePath)
 }
 
 /**
@@ -169,31 +195,6 @@ export function detectLocalExecutableType(
     method: 'file-extension',
     inDlxCache: false,
   }
-}
-
-/**
- * Find package.json in the directory containing the file or parent directories.
- *
- * @param filePath - Path to search from
- * @returns Path to package.json if found, undefined otherwise
- */
-function findPackageJson(filePath: string): string | undefined {
-  const fs = getFs()
-  const path = getPath()
-
-  let currentDir = path.dirname(path.resolve(filePath))
-  const root = path.parse(currentDir).root
-
-  while (currentDir !== root) {
-    const packageJsonPath = path.join(currentDir, 'package.json')
-    if (fs.existsSync(packageJsonPath)) {
-      return packageJsonPath
-    }
-
-    currentDir = path.dirname(currentDir)
-  }
-
-  return undefined
 }
 
 /**

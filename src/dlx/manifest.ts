@@ -106,22 +106,6 @@ export interface ManifestEntry {
   details: PackageDetails | BinaryDetails
 }
 /**
- * Type guard for package entries.
- */
-export function isPackageEntry(
-  entry: ManifestEntry,
-): entry is ManifestEntry & { details: PackageDetails } {
-  return entry.type === 'package'
-}
-/**
- * Type guard for binary entries.
- */
-export function isBinaryEntry(
-  entry: ManifestEntry,
-): entry is ManifestEntry & { details: BinaryDetails } {
-  return entry.type === 'binary'
-}
-/**
  * Legacy store record format (deprecated, for migration).
  */
 export interface StoreRecord {
@@ -135,6 +119,25 @@ export interface DlxManifestOptions {
    */
   manifestPath?: string
 }
+
+/**
+ * Type guard for binary entries.
+ */
+export function isBinaryEntry(
+  entry: ManifestEntry,
+): entry is ManifestEntry & { details: BinaryDetails } {
+  return entry.type === 'binary'
+}
+
+/**
+ * Type guard for package entries.
+ */
+export function isPackageEntry(
+  entry: ManifestEntry,
+): entry is ManifestEntry & { details: PackageDetails } {
+  return entry.type === 'package'
+}
+
 /**
  * DLX manifest storage manager with atomic operations.
  * Supports both legacy format (package name keys) and new unified manifest format (spec keys).
@@ -152,6 +155,7 @@ export class DlxManifest {
 
   /**
    * Read the entire manifest file.
+   * @private
    */
   private readManifest(): Record<string, ManifestEntry | StoreRecord> {
     try {
@@ -180,82 +184,8 @@ export class DlxManifest {
   }
 
   /**
-   * Get a manifest entry by spec (e.g., "@socketsecurity/cli@^2.0.11").
-   */
-  getManifestEntry(spec: string): ManifestEntry | undefined {
-    const data = this.readManifest()
-    const entry = data[spec]
-
-    // Check if it's a new-format entry (has 'type' field).
-    if (entry && 'type' in entry) {
-      return entry as ManifestEntry
-    }
-
-    return undefined
-  }
-
-  /**
-   * Get cached update information for a package (legacy format).
-   * @deprecated Use getManifestEntry() for new code.
-   */
-  get(name: string): StoreRecord | undefined {
-    const data = this.readManifest()
-    const entry = data[name]
-
-    // Return legacy format entries only.
-    if (entry && !('type' in entry)) {
-      return entry as StoreRecord
-    }
-
-    return undefined
-  }
-
-  /**
-   * Set a package manifest entry.
-   */
-  async setPackageEntry(
-    spec: string,
-    cacheKey: string,
-    details: PackageDetails,
-  ): Promise<void> {
-    await processLock.withLock(this.lockPath, async () => {
-      const data = this.readManifest()
-
-      data[spec] = {
-        type: 'package',
-        cache_key: cacheKey,
-        timestamp: Date.now(),
-        details,
-      }
-
-      await this.writeManifest(data)
-    })
-  }
-
-  /**
-   * Set a binary manifest entry.
-   */
-  async setBinaryEntry(
-    spec: string,
-    cacheKey: string,
-    details: BinaryDetails,
-  ): Promise<void> {
-    await processLock.withLock(this.lockPath, async () => {
-      const data = this.readManifest()
-
-      data[spec] = {
-        type: 'binary',
-        cache_key: cacheKey,
-        timestamp: Date.now(),
-        details,
-      }
-
-      await this.writeManifest(data)
-    })
-  }
-
-  /**
    * Write the manifest file atomically.
+   * @private
    */
   private async writeManifest(
     data: Record<string, ManifestEntry | StoreRecord>,
@@ -297,6 +227,123 @@ export class DlxManifest {
       }
       throw error
     }
+  }
+
+  /**
+   * Clear cached data for a specific entry.
+   */
+  async clear(name: string): Promise<void> {
+    await processLock.withLock(this.lockPath, async () => {
+      try {
+        if (!getFs().existsSync(this.manifestPath)) {
+          return
+        }
+
+        const content = getFs().readFileSync(this.manifestPath, 'utf8')
+        if (!content.trim()) {
+          return
+        }
+
+        const data = JSON.parse(content) as Record<string, StoreRecord>
+        delete data[name]
+
+        const updatedContent = JSON.stringify(data, null, 2)
+        getFs().writeFileSync(this.manifestPath, updatedContent, 'utf8')
+      } catch (error) {
+        logger.warn(
+          `Failed to clear cache for ${name}: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+    })
+  }
+
+  /**
+   * Clear all cached data.
+   */
+  async clearAll(): Promise<void> {
+    await processLock.withLock(this.lockPath, async () => {
+      try {
+        if (getFs().existsSync(this.manifestPath)) {
+          getFs().unlinkSync(this.manifestPath)
+        }
+      } catch (error) {
+        logger.warn(
+          `Failed to clear all cache: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+    })
+  }
+
+  /**
+   * Get cached update information for a package (legacy format).
+   * @deprecated Use getManifestEntry() for new code.
+   */
+  get(name: string): StoreRecord | undefined {
+    const data = this.readManifest()
+    const entry = data[name]
+
+    // Return legacy format entries only.
+    if (entry && !('type' in entry)) {
+      return entry as StoreRecord
+    }
+
+    return undefined
+  }
+
+  /**
+   * Get all cached package names.
+   */
+  getAllPackages(): string[] {
+    try {
+      if (!getFs().existsSync(this.manifestPath)) {
+        return []
+      }
+
+      const rawContent = readFileUtf8Sync(this.manifestPath)
+      const content = (
+        typeof rawContent === 'string'
+          ? rawContent
+          : rawContent.toString('utf8')
+      ).trim()
+      if (!content) {
+        return []
+      }
+
+      const data = JSON.parse(content) as Record<string, StoreRecord>
+      return Object.keys(data)
+    } catch (error) {
+      logger.warn(
+        `Failed to get package list: ${error instanceof Error ? error.message : String(error)}`,
+      )
+      return []
+    }
+  }
+
+  /**
+   * Get a manifest entry by spec (e.g., "@socketsecurity/cli@^2.0.11").
+   */
+  getManifestEntry(spec: string): ManifestEntry | undefined {
+    const data = this.readManifest()
+    const entry = data[spec]
+
+    // Check if it's a new-format entry (has 'type' field).
+    if (entry && 'type' in entry) {
+      return entry as ManifestEntry
+    }
+
+    return undefined
+  }
+
+  /**
+   * Check if cached data is fresh based on TTL.
+   */
+  isFresh(record: StoreRecord | undefined, ttlMs: number): boolean {
+    if (!record) {
+      return false
+    }
+
+    const age = Date.now() - record.timestampFetch
+    return age < ttlMs
   }
 
   /**
@@ -365,89 +412,47 @@ export class DlxManifest {
   }
 
   /**
-   * Clear cached data for a specific entry.
+   * Set a binary manifest entry.
    */
-  async clear(name: string): Promise<void> {
+  async setBinaryEntry(
+    spec: string,
+    cacheKey: string,
+    details: BinaryDetails,
+  ): Promise<void> {
     await processLock.withLock(this.lockPath, async () => {
-      try {
-        if (!getFs().existsSync(this.manifestPath)) {
-          return
-        }
+      const data = this.readManifest()
 
-        const content = getFs().readFileSync(this.manifestPath, 'utf8')
-        if (!content.trim()) {
-          return
-        }
-
-        const data = JSON.parse(content) as Record<string, StoreRecord>
-        delete data[name]
-
-        const updatedContent = JSON.stringify(data, null, 2)
-        getFs().writeFileSync(this.manifestPath, updatedContent, 'utf8')
-      } catch (error) {
-        logger.warn(
-          `Failed to clear cache for ${name}: ${error instanceof Error ? error.message : String(error)}`,
-        )
+      data[spec] = {
+        type: 'binary',
+        cache_key: cacheKey,
+        timestamp: Date.now(),
+        details,
       }
+
+      await this.writeManifest(data)
     })
   }
 
   /**
-   * Clear all cached data.
+   * Set a package manifest entry.
    */
-  async clearAll(): Promise<void> {
+  async setPackageEntry(
+    spec: string,
+    cacheKey: string,
+    details: PackageDetails,
+  ): Promise<void> {
     await processLock.withLock(this.lockPath, async () => {
-      try {
-        if (getFs().existsSync(this.manifestPath)) {
-          getFs().unlinkSync(this.manifestPath)
-        }
-      } catch (error) {
-        logger.warn(
-          `Failed to clear all cache: ${error instanceof Error ? error.message : String(error)}`,
-        )
+      const data = this.readManifest()
+
+      data[spec] = {
+        type: 'package',
+        cache_key: cacheKey,
+        timestamp: Date.now(),
+        details,
       }
+
+      await this.writeManifest(data)
     })
-  }
-
-  /**
-   * Check if cached data is fresh based on TTL.
-   */
-  isFresh(record: StoreRecord | undefined, ttlMs: number): boolean {
-    if (!record) {
-      return false
-    }
-
-    const age = Date.now() - record.timestampFetch
-    return age < ttlMs
-  }
-
-  /**
-   * Get all cached package names.
-   */
-  getAllPackages(): string[] {
-    try {
-      if (!getFs().existsSync(this.manifestPath)) {
-        return []
-      }
-
-      const rawContent = readFileUtf8Sync(this.manifestPath)
-      const content = (
-        typeof rawContent === 'string'
-          ? rawContent
-          : rawContent.toString('utf8')
-      ).trim()
-      if (!content) {
-        return []
-      }
-
-      const data = JSON.parse(content) as Record<string, StoreRecord>
-      return Object.keys(data)
-    } catch (error) {
-      logger.warn(
-        `Failed to get package list: ${error instanceof Error ? error.message : String(error)}`,
-      )
-      return []
-    }
   }
 }
 // Export singleton instance using default manifest location.
