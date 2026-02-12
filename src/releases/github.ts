@@ -217,7 +217,8 @@ export async function downloadGitHubRelease(
     const cachedVersion = (
       await fs.promises.readFile(versionPath, 'utf8')
     ).trim()
-    if (cachedVersion === tag) {
+    // Re-check binary exists after reading version (prevent TOCTOU race)
+    if (cachedVersion === tag && fs.existsSync(binaryPath)) {
       if (!quiet) {
         logger.info(`Using cached ${toolName} (${platformArch}): ${binaryPath}`)
       }

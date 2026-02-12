@@ -618,8 +618,8 @@ export function parsePackageSpec(spec: string): {
   } catch {
     // Fallback to simple parsing if npm-package-arg fails.
     const atIndex = spec.lastIndexOf('@')
-    if (atIndex === -1 || spec.startsWith('@')) {
-      // No version or scoped package without version.
+    if (atIndex === -1 || atIndex === 0) {
+      // No version or scoped package without version (@ only at position 0).
       return { name: spec, version: undefined }
     }
     return {

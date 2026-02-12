@@ -101,7 +101,8 @@ async function watchJS() {
         logger.log('\nStopping watch mode...')
       }
       await ctx.dispose()
-      process.exit(0)
+      process.exitCode = 0
+      throw new Error('Watch mode interrupted')
     })
 
     // Wait indefinitely
@@ -119,7 +120,7 @@ async function watchJS() {
 if (isWatch) {
   watchJS().catch(error => {
     logger.error(error)
-    process.exit(1)
+    process.exitCode = 1
   })
 } else {
   buildJS()

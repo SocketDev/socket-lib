@@ -214,7 +214,16 @@ export async function fetchGitHub<T = unknown>(
     )
   }
 
-  return JSON.parse(response.body.toString('utf8')) as T
+  try {
+    return JSON.parse(response.body.toString('utf8')) as T
+  } catch (error) {
+    throw new Error(
+      `Failed to parse GitHub API response: ${error instanceof Error ? error.message : String(error)}\n` +
+        `URL: ${url}\n` +
+        'Response may be malformed or incomplete.',
+      { cause: error },
+    )
+  }
 }
 
 /**

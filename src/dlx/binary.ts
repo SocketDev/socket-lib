@@ -225,7 +225,8 @@ export async function cleanDlxCache(
           ? now - timestamp
           : Number.POSITIVE_INFINITY
 
-      if (age > maxAge) {
+      // Treat future timestamps (clock skew) as expired
+      if (age < 0 || age > maxAge) {
         // Remove entire cache entry directory.
         // eslint-disable-next-line no-await-in-loop
         await safeDelete(entryPath, { force: true, recursive: true })
@@ -645,7 +646,10 @@ export async function isCacheValid(
       return false
     }
     const age = now - timestamp
-
+    // Reject future timestamps (clock skew or corruption)
+    if (age < 0) {
+      return false
+    }
     return age < cacheTtl
   } catch {
     return false
@@ -752,5 +756,8 @@ export async function writeMetadata(
     },
   }
   const fs = getFs()
-  await fs.promises.writeFile(metaPath, JSON.stringify(metadata, null, 2))
+  // Use atomic write-then-rename pattern to prevent corruption on crash
+  const tmpPath = `${metaPath}.tmp.${process.pid}`
+  await fs.promises.writeFile(tmpPath, JSON.stringify(metadata, null, 2))
+  await fs.promises.rename(tmpPath, metaPath)
 }

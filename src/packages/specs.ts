@@ -18,7 +18,11 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
   const userAndRepo = repoUrl.replace(/^.+github.com\//, '').split('/')
   const user = userAndRepo[0] || ''
   const project =
-    userAndRepo.length > 1 ? userAndRepo[1]?.slice(0, -'.git'.length) || '' : ''
+    userAndRepo.length > 1
+      ? (userAndRepo[1]?.endsWith('.git')
+          ? userAndRepo[1].slice(0, -4)
+          : userAndRepo[1]) || ''
+      : ''
   return { user, project }
 }
 

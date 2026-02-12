@@ -32,8 +32,8 @@ describe('packages/specs', () => {
     it('should handle URL without .git extension', () => {
       const result = getRepoUrlDetails('https://github.com/nodejs/node')
       expect(result.user).toBe('nodejs')
-      // Note: function slices off 4 chars (.git) even when not present
-      expect(result.project).toBe('')
+      // Fixed: now correctly returns project name without .git extension
+      expect(result.project).toBe('node')
     })
 
     it('should handle git@ protocol URLs', () => {
@@ -72,8 +72,8 @@ describe('packages/specs', () => {
         'https://github.com/facebook/react/tree/main',
       )
       expect(result.user).toBe('facebook')
-      // Note: function slices off 4 chars (.git) from "react/tree/main"
-      expect(result.project).toBe('r')
+      // Fixed: now correctly returns repo name without incorrect .git truncation
+      expect(result.project).toBe('react')
     })
   })
 

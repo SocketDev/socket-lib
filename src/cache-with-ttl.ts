@@ -190,9 +190,16 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
   /**
    * Check if entry is expired.
+   * Also detects clock skew by treating suspiciously far-future expiresAt as expired.
    */
   function isExpired(entry: TtlCacheEntry<any>): boolean {
-    return Date.now() > entry.expiresAt
+    const now = Date.now()
+    // Detect future expiresAt (clock skew or corruption).
+    // If expiresAt is more than 2x TTL in the future, treat as expired.
+    if (entry.expiresAt > now + ttl * 2) {
+      return true
+    }
+    return now > entry.expiresAt
   }
 
   /**
