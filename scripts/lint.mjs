@@ -416,7 +416,7 @@ async function main() {
       logger.log('  pnpm lint --fix             # Fix issues in changed files')
       logger.log('  pnpm lint --all             # Lint all files')
       logger.log('  pnpm lint --staged --fix    # Fix issues in staged files')
-      logger.log('  pnpm lint src/index.ts      # Lint specific file(s)')
+      logger.log('  pnpm lint src/logger.ts     # Lint specific file(s)')
       process.exitCode = 0
       return
     }

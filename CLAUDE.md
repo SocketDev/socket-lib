@@ -357,10 +357,9 @@ Use `pnpm run build:watch` or `pnpm run dev` for development with automatic rebu
 1. Create utility in appropriate `src/` subdirectory
 2. Use path aliases for internal imports
 3. Add type definitions
-4. Add to `src/index.ts` if public API
-5. Update `package.json` exports if direct export needed
-6. Add tests in `test/` matching structure
-7. Update types and build
+4. Update `package.json` exports if direct export needed
+5. Add tests in `test/` matching structure
+6. Update types and build
 
 ### Common Patterns
 

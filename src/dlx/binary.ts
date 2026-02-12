@@ -302,6 +302,11 @@ export async function dlxBinary(
         computedIntegrity = (metadata as Record<string, unknown>)[
           'integrity'
         ] as string
+        // Re-check binary exists after reading metadata (TOCTOU protection).
+        // Prevents race where binary is deleted between validity check and use.
+        if (!fs.existsSync(binaryPath)) {
+          downloaded = true
+        }
       } else {
         // If metadata is invalid, re-download.
         downloaded = true
