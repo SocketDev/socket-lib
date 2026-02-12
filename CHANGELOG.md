@@ -5,6 +5,69 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.7.0) - 2026-02-12
+
+### Added
+
+- **env**: Added `isInEnv()` helper function to check if an environment variable key exists, regardless of its value
+  - Returns `true` even for empty strings, `"false"`, `"0"`, etc.
+  - Follows same override resolution order as `getEnvValue()` (isolated overrides → shared overrides → process.env)
+  - Useful for detecting presence of environment variables independent of their value
+
+- **dlx**: Added new exported helper functions
+  - `downloadBinaryFile()` - Downloads a binary file from a URL to the dlx cache directory
+  - `ensurePackageInstalled()` - Ensures an npm package is installed and cached via Arborist
+  - `getBinaryCacheMetadataPath()` - Gets the file path to dlx binary cache metadata (`.dlx-metadata.json`)
+  - `isBinaryCacheValid()` - Checks if a cached dlx binary is still valid based on TTL and timestamp
+  - `makePackageBinsExecutable()` - Makes npm package binaries executable on Unix systems
+  - `parsePackageSpec()` - Parses npm package spec strings (e.g., `pkg@1.0.0`) into name and version
+  - `resolveBinaryPath()` - Resolves the absolute path to a binary within an installed package
+  - `writeBinaryCacheMetadata()` - Writes dlx binary cache metadata with integrity, size, and source info
+
+- **releases**: Added `createAssetMatcher()` utility function for GitHub release asset pattern matching
+  - Creates matcher functions that test strings against glob patterns, prefix/suffix, or RegExp
+  - Used for dynamic asset discovery in GitHub releases (e.g., matching platform-specific binaries)
+
+### Changed
+
+- **env**: Updated `getCI()` to use `isInEnv()` for more accurate CI detection
+  - Now returns `true` whenever the `CI` key exists in the environment, not just when truthy
+  - Matches standard CI detection behavior where the presence of the key (not its value) indicates a CI environment
+
+### Fixed
+
+- **github**: Fixed JSON parsing crash vulnerability by adding try-catch around `JSON.parse()` in GitHub API responses
+  - Prevents crashes on malformed, incomplete, or binary responses
+  - Error messages now include the response URL for better debugging
+
+- **dlx/binary**: Fixed clock skew vulnerabilities in cache validation
+  - Cache entries with future timestamps (clock skew) are now treated as expired
+  - Metadata writes now use atomic write-then-rename pattern to prevent corruption
+  - Added TOCTOU race protection by re-checking binary existence after metadata read
+
+- **dlx/cache cleanup**: Fixed handling of future timestamps during cache cleanup
+  - Entries with future timestamps (due to clock skew) are now properly treated as expired
+
+- **dlx/package**: Fixed scoped package parsing bug where `@scope/package` was incorrectly parsed
+  - Changed condition from `startsWith('@')` to `atIndex === 0` for more precise detection
+  - Fixes installation failures for scoped packages like `@socketregistry/lib`
+
+- **cache-with-ttl**: Added clock skew detection to TTL cache
+  - Far-future `expiresAt` values (>2x TTL) are now treated as expired
+  - Protects against cache poisoning from clock skew
+
+- **packages/specs**: Fixed unconditional `.git` truncation in Git URL parsing
+  - Now only removes `.git` suffix when URL actually ends with `.git`
+  - Prevents incorrect truncation of URLs containing `.git` in the middle
+
+- **releases/github**: Fixed TOCTOU race condition in binary download verification
+  - Re-checks binary existence after reading version file
+  - Ensures binary is re-downloaded if missing despite version file presence
+
+- **provenance**: Fixed incorrect package name in provenance workflow
+  - Changed from `@socketregistry/lib` to `@socketsecurity/lib`
+
+
 ## [5.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.6.0) - 2026-02-08
 
 ### Added
@@ -811,7 +874,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **DLX binary metadata structure**: Updated `writeMetadata()` to use unified schema with additional fields
+- **DLX binary metadata structure**: Updated `writeBinaryCacheMetadata()` to use unified schema with additional fields
   - Now includes `cache_key` (first 16 chars of SHA-512 hash)
   - Added `size` field for cached binary size
   - Added `checksum_algorithm` field (currently "sha256")
