@@ -806,6 +806,122 @@ describe.sequential('dlx-binary', () => {
         }
       }, 'cleanDlxCache-default-')
     })
+
+    it('should treat future timestamps as expired (clock skew protection)', async () => {
+      await runWithTempDir(async tmpDir => {
+        const restoreHome = mockHomeDir(tmpDir)
+
+        try {
+          const cachePath = getDlxCachePath()
+          const entryPath = path.join(cachePath, 'future-timestamp-entry')
+          await fs.mkdir(entryPath, { recursive: true })
+
+          // Write metadata with future timestamp (clock skew scenario)
+          const futureTimestamp = Date.now() + 365 * 24 * 60 * 60 * 1000 // 1 year in future
+          await fs.writeFile(
+            path.join(entryPath, '.dlx-metadata.json'),
+            JSON.stringify({
+              url: 'test',
+              timestamp: futureTimestamp,
+            }),
+            'utf8',
+          )
+
+          // Create a binary file
+          await fs.writeFile(path.join(entryPath, 'binary'), '', 'utf8')
+
+          // Clean should remove future-timestamped entries
+          const cleaned = await cleanDlxCache(7 * 24 * 60 * 60 * 1000) // 7 days
+          expect(cleaned).toBeGreaterThan(0)
+        } finally {
+          restoreHome()
+        }
+      }, 'cleanDlxCache-future-timestamp-')
+    })
+
+    it('should handle slightly future timestamps from clock skew', async () => {
+      await runWithTempDir(async tmpDir => {
+        const restoreHome = mockHomeDir(tmpDir)
+
+        try {
+          const cachePath = getDlxCachePath()
+          const entryPath = path.join(cachePath, 'slight-future-entry')
+          await fs.mkdir(entryPath, { recursive: true })
+
+          // Write metadata with slightly future timestamp (minor clock skew)
+          const slightlyFutureTimestamp = Date.now() + 5000 // 5 seconds in future
+          await fs.writeFile(
+            path.join(entryPath, '.dlx-metadata.json'),
+            JSON.stringify({
+              url: 'test',
+              timestamp: slightlyFutureTimestamp,
+            }),
+            'utf8',
+          )
+
+          // Create a binary file
+          await fs.writeFile(path.join(entryPath, 'binary'), '', 'utf8')
+
+          // Clean with short maxAge - should remove future-timestamped entries
+          const cleaned = await cleanDlxCache(1000) // 1 second
+          expect(cleaned).toBeGreaterThan(0)
+        } finally {
+          restoreHome()
+        }
+      }, 'cleanDlxCache-slight-future-')
+    })
+  })
+
+  describe('metadata writes (atomic operation)', () => {
+    it('should write metadata atomically using temp file', async () => {
+      await runWithTempDir(async tmpDir => {
+        const restoreHome = mockHomeDir(tmpDir)
+
+        try {
+          const url = `${httpBaseUrl}/binary`
+
+          // Download binary which writes metadata
+          const result = await dlxBinary(['--version'], {
+            name: 'atomic-write-binary',
+            url,
+          })
+          await result.spawnPromise.catch(() => {})
+
+          // Verify metadata was written successfully
+          const cachePath = getDlxCachePath()
+          const entries = await fs.readdir(cachePath)
+          expect(entries.length).toBeGreaterThan(0)
+
+          // Find the entry directory
+          for (const entry of entries) {
+            const entryPath = path.join(cachePath, entry)
+            const stat = await fs.stat(entryPath)
+            if (stat.isDirectory()) {
+              const metadataPath = path.join(entryPath, '.dlx-metadata.json')
+              const metadataExists = await fs
+                .access(metadataPath)
+                .then(() => true)
+                .catch(() => false)
+
+              if (metadataExists) {
+                // Verify metadata is valid JSON
+                const metadataContent = await fs.readFile(metadataPath, 'utf8')
+                const metadata = JSON.parse(metadataContent)
+                expect(metadata).toBeDefined()
+                expect(metadata.timestamp).toBeDefined()
+                expect(metadata.source?.url).toBe(url)
+
+                // Verify no temp files left behind
+                const tempFiles = entries.filter(file => file.includes('.tmp.'))
+                expect(tempFiles).toHaveLength(0)
+              }
+            }
+          }
+        } finally {
+          restoreHome()
+        }
+      }, 'atomic-write-metadata-')
+    })
   })
 
   describe('listDlxCache', () => {

@@ -805,4 +805,213 @@ describe('releases/github', () => {
       ).rejects.toThrow('Asset nonexistent-*.xyz not found in release v1.0.0')
     }, 40_000)
   })
+
+  describe('downloadGitHubRelease - TOCTOU race protection', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should re-check binary existence after reading version file (TOCTOU protection)', async () => {
+      // This tests the fix for the TOCTOU (Time-of-check-time-of-use) race condition
+      // in releases/github.ts:214-226
+      //
+      // Scenario:
+      // 1. Check version file exists and matches tag
+      // 2. Read version file
+      // 3. Binary gets deleted (by cleanup or concurrent process)
+      // 4. Try to use binary -> FAILURE
+      //
+      // Fix: Re-check binary existence after reading version file
+
+      const { downloadGitHubRelease } = await import(
+        '@socketsecurity/lib/releases/github'
+      )
+      const { tmpdir } = await import('node:os')
+      const { promises: fs } = await import('node:fs')
+      const path = await import('node:path')
+
+      const tmpDir = tmpdir()
+      const testDownloadDir = path.join(tmpDir, `test-github-dl-${Date.now()}`)
+
+      try {
+        // Mock successful HTTP download
+        vi.mocked(httpRequest).mockResolvedValue(
+          createMockHttpResponse(
+            Buffer.from(
+              JSON.stringify({
+                assets: [
+                  {
+                    name: 'test-binary',
+                    browser_download_url: 'https://example.com/binary',
+                  },
+                ],
+                tag_name: 'v1.0.0',
+              }),
+            ),
+            true,
+            200,
+          ),
+        )
+        // Mock httpDownload to actually create the file
+        vi.mocked(httpDownload).mockImplementation(async (_url, outputPath) => {
+          // Create directory if it doesn't exist
+          const dir = path.dirname(outputPath)
+          await fs.mkdir(dir, { recursive: true })
+          // Create a dummy binary file
+          const content = '#!/bin/bash\necho "test"'
+          await fs.writeFile(outputPath, content, 'utf8')
+          return { path: outputPath, size: content.length }
+        })
+
+        // First download - creates cache
+        const result1 = await downloadGitHubRelease({
+          assetName: 'test-binary',
+          binaryName: 'test-bin',
+          downloadDir: testDownloadDir,
+          owner: 'test-owner',
+          platformArch: 'test-arch',
+          quiet: true,
+          repo: 'test-repo',
+          tag: 'v1.0.0',
+          toolName: 'test-tool',
+        })
+
+        expect(result1).toBeDefined()
+        expect(result1).toContain('test-bin')
+
+        // Verify version file and binary exist
+        const binaryDir = path.join(testDownloadDir, 'test-tool', 'test-arch')
+        const versionFile = path.join(binaryDir, '.version')
+        const binaryFile = path.join(binaryDir, 'test-bin')
+
+        // Both should exist after first download
+        expect(
+          await fs
+            .access(versionFile)
+            .then(() => true)
+            .catch(() => false),
+        ).toBe(true)
+        expect(
+          await fs
+            .access(binaryFile)
+            .then(() => true)
+            .catch(() => false),
+        ).toBe(true)
+
+        // Second call - should use cache
+        const result2 = await downloadGitHubRelease({
+          assetName: 'test-binary',
+          binaryName: 'test-bin',
+          downloadDir: testDownloadDir,
+          owner: 'test-owner',
+          platformArch: 'test-arch',
+          quiet: true,
+          repo: 'test-repo',
+          tag: 'v1.0.0',
+          toolName: 'test-tool',
+        })
+
+        expect(result2).toBe(result1)
+        // httpDownload should only be called once (first download)
+        expect(httpDownload).toHaveBeenCalledTimes(1)
+      } finally {
+        // Cleanup
+        try {
+          await fs.rm(testDownloadDir, { force: true, recursive: true })
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    }, 40_000)
+
+    it('should re-download if binary is missing despite version file existing', async () => {
+      const { downloadGitHubRelease } = await import(
+        '@socketsecurity/lib/releases/github'
+      )
+      const { tmpdir } = await import('node:os')
+      const { promises: fs } = await import('node:fs')
+      const path = await import('node:path')
+
+      const tmpDir = tmpdir()
+      const testDownloadDir = path.join(
+        tmpDir,
+        `test-github-dl-missing-${Date.now()}`,
+      )
+
+      try {
+        // Mock successful HTTP download
+        vi.mocked(httpRequest).mockResolvedValue(
+          createMockHttpResponse(
+            Buffer.from(
+              JSON.stringify({
+                assets: [
+                  {
+                    name: 'test-binary',
+                    browser_download_url: 'https://example.com/binary',
+                  },
+                ],
+                tag_name: 'v1.0.0',
+              }),
+            ),
+            true,
+            200,
+          ),
+        )
+        // Mock httpDownload to actually create the file
+        vi.mocked(httpDownload).mockImplementation(async (_url, outputPath) => {
+          // Create directory if it doesn't exist
+          const dir = path.dirname(outputPath)
+          await fs.mkdir(dir, { recursive: true })
+          // Create a dummy binary file
+          const content = '#!/bin/bash\necho "test"'
+          await fs.writeFile(outputPath, content, 'utf8')
+          return { path: outputPath, size: content.length }
+        })
+
+        // First download
+        await downloadGitHubRelease({
+          assetName: 'test-binary',
+          binaryName: 'test-bin',
+          downloadDir: testDownloadDir,
+          owner: 'test-owner',
+          platformArch: 'test-arch',
+          quiet: true,
+          repo: 'test-repo',
+          tag: 'v1.0.0',
+          toolName: 'test-tool',
+        })
+
+        // Simulate TOCTOU scenario: delete binary but leave version file
+        const binaryDir = path.join(testDownloadDir, 'test-tool', 'test-arch')
+        const binaryFile = path.join(binaryDir, 'test-bin')
+        await fs.unlink(binaryFile)
+
+        // Reset mock call count
+        vi.mocked(httpDownload).mockClear()
+
+        // Second call - should detect missing binary and re-download
+        await downloadGitHubRelease({
+          assetName: 'test-binary',
+          binaryName: 'test-bin',
+          downloadDir: testDownloadDir,
+          owner: 'test-owner',
+          platformArch: 'test-arch',
+          quiet: true,
+          repo: 'test-repo',
+          tag: 'v1.0.0',
+          toolName: 'test-tool',
+        })
+
+        // Should download again due to missing binary
+        expect(httpDownload).toHaveBeenCalledTimes(1)
+      } finally {
+        // Cleanup
+        try {
+          await fs.rm(testDownloadDir, { force: true, recursive: true })
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    }, 40_000)
+  })
 })

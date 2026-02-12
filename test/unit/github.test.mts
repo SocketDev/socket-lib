@@ -762,4 +762,74 @@ describe.sequential('github', () => {
       expect(result.ghsaId).toBe('GHSA-cache-test-0001')
     })
   })
+
+  describe('JSON parsing error handling', () => {
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should throw descriptive error on malformed JSON response', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(200, 'not valid json{{{', {
+          'Content-Type': 'application/json',
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow(/Failed to parse GitHub API response/)
+    })
+
+    it('should throw descriptive error on incomplete JSON response', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(200, '{"name":"repo","owner":', {
+          'Content-Type': 'application/json',
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow(/Failed to parse GitHub API response/)
+    })
+
+    it('should throw descriptive error on truncated response', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(200, '{"name":', {
+          'Content-Type': 'application/json',
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow(/Failed to parse GitHub API response/)
+    })
+
+    it('should include URL in error message', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/special-repo')
+        .reply(200, 'invalid json')
+
+      try {
+        await fetchGitHub('https://api.github.com/repos/owner/special-repo')
+        expect.fail('Should have thrown an error')
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+        expect((error as Error).message).toContain(
+          'https://api.github.com/repos/owner/special-repo',
+        )
+      }
+    })
+
+    it('should handle binary responses gracefully', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo')
+        .reply(200, Buffer.from([0xff, 0xfe, 0x00, 0x01]), {
+          'Content-Type': 'application/json',
+        })
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow(/Failed to parse GitHub API response/)
+    })
+  })
 })
