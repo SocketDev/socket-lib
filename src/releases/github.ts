@@ -140,7 +140,7 @@ function getPath() {
  * @param pattern - Pattern to match (string glob, prefix/suffix object, or RegExp)
  * @returns Function that tests if a string matches the pattern
  */
-export function createMatcher(
+export function createAssetMatcher(
   pattern: string | { prefix: string; suffix: string } | RegExp,
 ): (input: string) => boolean {
   if (typeof pattern === 'string') {
@@ -353,7 +353,7 @@ export async function getLatestRelease(
   const { owner, repo } = repoConfig
 
   // Create matcher function if pattern provided.
-  const isMatch = assetPattern ? createMatcher(assetPattern) : undefined
+  const isMatch = assetPattern ? createAssetMatcher(assetPattern) : undefined
 
   return await pRetry(
     async () => {
@@ -464,7 +464,7 @@ export async function getReleaseAssetUrl(
     !assetPattern.includes('*') &&
     !assetPattern.includes('{')
       ? (input: string) => input === assetPattern
-      : createMatcher(assetPattern as AssetPattern)
+      : createAssetMatcher(assetPattern as AssetPattern)
 
   return await pRetry(
     async () => {

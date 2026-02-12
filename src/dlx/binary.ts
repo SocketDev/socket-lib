@@ -201,7 +201,7 @@ export async function cleanDlxCache(
 
   for (const entry of entries) {
     const entryPath = path.join(cacheDir, entry)
-    const metaPath = getMetadataPath(entryPath)
+    const metaPath = getBinaryCacheMetadataPath(entryPath)
 
     try {
       // eslint-disable-next-line no-await-in-loop
@@ -287,11 +287,11 @@ export async function dlxBinary(
   if (
     !force &&
     fs.existsSync(cacheEntryDir) &&
-    (await isCacheValid(cacheEntryDir, cacheTtl))
+    (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
   ) {
     // Binary is cached and valid, read the integrity from metadata.
     try {
-      const metaPath = getMetadataPath(cacheEntryDir)
+      const metaPath = getBinaryCacheMetadataPath(cacheEntryDir)
       const metadata = await readJson(metaPath, { throws: false })
       if (
         metadata &&
@@ -350,7 +350,7 @@ export async function dlxBinary(
 
     // Get file size for metadata.
     const stats = await fs.promises.stat(binaryPath)
-    await writeMetadata(
+    await writeBinaryCacheMetadata(
       cacheEntryDir,
       cacheKey,
       url,
@@ -431,7 +431,7 @@ export async function downloadBinary(
   if (
     !force &&
     fs.existsSync(cacheEntryDir) &&
-    (await isCacheValid(cacheEntryDir, cacheTtl))
+    (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
   ) {
     // Binary is cached and valid.
     downloaded = false
@@ -470,7 +470,7 @@ export async function downloadBinary(
 
     // Get file size for metadata.
     const stats = await fs.promises.stat(binaryPath)
-    await writeMetadata(
+    await writeBinaryCacheMetadata(
       cacheEntryDir,
       cacheKey,
       url,
@@ -622,20 +622,20 @@ export function getDlxCachePath(): string {
 /**
  * Get metadata file path for a cached binary.
  */
-export function getMetadataPath(cacheEntryPath: string): string {
+export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
   return getPath().join(cacheEntryPath, '.dlx-metadata.json')
 }
 
 /**
  * Check if a cached binary is still valid.
  */
-export async function isCacheValid(
+export async function isBinaryCacheValid(
   cacheEntryPath: string,
   cacheTtl: number,
 ): Promise<boolean> {
   const fs = getFs()
   try {
-    const metaPath = getMetadataPath(cacheEntryPath)
+    const metaPath = getBinaryCacheMetadataPath(cacheEntryPath)
     if (!fs.existsSync(metaPath)) {
       return false
     }
@@ -693,7 +693,7 @@ export async function listDlxCache(): Promise<
         continue
       }
 
-      const metaPath = getMetadataPath(entryPath)
+      const metaPath = getBinaryCacheMetadataPath(entryPath)
       // eslint-disable-next-line no-await-in-loop
       const metadata = await readJson(metaPath, { throws: false })
       if (
@@ -741,14 +741,14 @@ export async function listDlxCache(): Promise<
  * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
  * Schema documentation: See DlxMetadata interface in this file (exported).
  */
-export async function writeMetadata(
+export async function writeBinaryCacheMetadata(
   cacheEntryPath: string,
   cacheKey: string,
   url: string,
   integrity: string,
   size: number,
 ): Promise<void> {
-  const metaPath = getMetadataPath(cacheEntryPath)
+  const metaPath = getBinaryCacheMetadataPath(cacheEntryPath)
   const metadata: DlxMetadata = {
     version: '1.0.0',
     cache_key: cacheKey,
