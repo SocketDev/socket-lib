@@ -51,7 +51,7 @@ export async function getLocalPackagePath(packageName, rootDir) {
     }
   }
 
-  return null
+  return undefined
 }
 
 /**

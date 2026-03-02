@@ -108,10 +108,10 @@ function createForceNodeModulesPlugin() {
               }
             } catch {
               // Package not found, let esbuild handle the error
-              return null
+              return undefined
             }
           }
-          return null
+          return undefined
         })
       }
     },

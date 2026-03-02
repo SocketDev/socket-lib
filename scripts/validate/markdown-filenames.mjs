@@ -168,7 +168,7 @@ function validateFilename(filePath) {
   // README.md and LICENSE are special - allowed anywhere
   // Valid - allowed in any location
   if (nameWithoutExt === 'README' || nameWithoutExt === 'LICENSE') {
-    return null
+    return undefined
   }
 
   // Check if it's an allowed SCREAMING_CASE file
@@ -183,7 +183,7 @@ function validateFilename(filePath) {
       }
     }
     // Valid
-    return null
+    return undefined
   }
 
   // Check if it's in SCREAMING_CASE but not allowed
@@ -234,7 +234,7 @@ function validateFilename(filePath) {
   }
 
   // Valid
-  return null
+  return undefined
 }
 
 /**

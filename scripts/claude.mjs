@@ -352,7 +352,7 @@ class ProgressTracker {
       s.phases.some(p => p.name === phaseName),
     )
     if (similar.length === 0) {
-      return null
+      return undefined
     }
 
     // Get median duration for this phase.
@@ -362,7 +362,7 @@ class ProgressTracker {
       .sort((a, b) => a - b)
 
     if (durations.length === 0) {
-      return null
+      return undefined
     }
 
     const median = durations[Math.floor(durations.length / 2)]
@@ -758,14 +758,14 @@ ${similarErrors.length > 0 ? `**Similar Past Errors:**\n${similarErrors.map(e =>
 
     if (result.exitCode !== 0) {
       log.warn('Analysis failed, proceeding without root cause info')
-      return null
+      return undefined
     }
 
     // Parse JSON response.
     const jsonMatch = result.stdout.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
       log.warn('Could not parse analysis, proceeding without root cause info')
-      return null
+      return undefined
     }
 
     const analysis = JSON.parse(jsonMatch[0])
@@ -791,7 +791,7 @@ ${similarErrors.length > 0 ? `**Similar Past Errors:**\n${similarErrors.map(e =>
     return analysis
   } catch (e) {
     log.warn(`Analysis error: ${e.message}`)
-    return null
+    return undefined
   }
 }
 
@@ -2568,7 +2568,7 @@ Provide ONLY the JSON array, nothing else.`
 
   if (result.exitCode !== 0) {
     log.failed(`Failed to scan ${name}`)
-    return null
+    return undefined
   }
 
   log.done(`Scanned ${name}`)
@@ -2577,7 +2577,7 @@ Provide ONLY the JSON array, nothing else.`
     return JSON.parse(result.stdout.trim())
   } catch {
     log.warn(`Failed to parse scan results for ${name}`)
-    return null
+    return undefined
   }
 }
 
@@ -2846,7 +2846,7 @@ async function runSecurityScan(claudeCmd, options = {}) {
     const tasks = projects.map(project =>
       scanProjectForIssues(claudeCmd, project, options)
         .then(issues => ({ project: project.name, issues }))
-        .catch(error => ({ project: project.name, issues: null, error })),
+        .catch(error => ({ project: project.name, issues: undefined, error })),
     )
 
     const taskNames = projects.map(p => p.name)
