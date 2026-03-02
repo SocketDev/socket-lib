@@ -42,9 +42,7 @@ const buildResult = await spawn('node', ['scripts/build/main.mjs'], {
   },
 })
 if (buildResult.code !== 0) {
-  logger.error('Build with source maps failed')
-  process.exitCode = 1
-  process.exit(1)
+  throw new Error('Build with source maps failed')
 }
 
 // Run vitest with coverage enabled, capturing output

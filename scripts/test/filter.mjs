@@ -20,8 +20,7 @@ const projectRoot = path.resolve(__dirname, '..')
 // Find all coverage JSON files
 const coverageDir = path.join(projectRoot, 'coverage')
 if (!fs.existsSync(coverageDir)) {
-  logger.error('Coverage directory not found:', coverageDir)
-  process.exit(1)
+  throw new Error(`Coverage directory not found: ${coverageDir}`)
 }
 
 const coverageFinalPath = path.join(coverageDir, 'coverage-final.json')

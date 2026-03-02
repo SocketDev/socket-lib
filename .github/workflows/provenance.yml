@@ -16,8 +16,8 @@ on:
           - '1'
 
 permissions:
-  contents: write
-  id-token: write
+  contents: write   # Push git tags and create GitHub releases
+  id-token: write   # NPM trusted publishing via OIDC
 
 jobs:
   publish:

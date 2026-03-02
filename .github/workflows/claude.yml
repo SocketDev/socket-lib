@@ -15,10 +15,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  id-token: write
-  issues: write
-  pull-requests: write
+  contents: read        # Read repository code for Claude analysis
+  id-token: write       # Generate OIDC token for Anthropic API authentication
+  issues: write         # Post Claude responses to issues
+  pull-requests: write  # Post Claude responses to PR comments
 
 jobs:
   claude:

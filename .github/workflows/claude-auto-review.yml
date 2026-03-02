@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  id-token: write
-  pull-requests: read
+  contents: read        # Read repository code for analysis
+  id-token: write       # Generate OIDC token for Anthropic API authentication
+  pull-requests: read   # Read PR metadata and diff for review
 
 jobs:
   auto-review:

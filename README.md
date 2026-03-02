@@ -20,12 +20,12 @@ pnpm add @socketsecurity/lib
 ```typescript
 // Tree-shakeable exports
 import { Spinner } from '@socketsecurity/lib/spinner'
-import { readJsonFile } from '@socketsecurity/lib/fs'
-import { NODE_MODULES } from '@socketsecurity/lib/constants/packages'
+import { readJson } from '@socketsecurity/lib/fs'
+import { PACKAGE, LATEST } from '@socketsecurity/lib/constants/packages'
 
 const spinner = Spinner({ text: 'Loading...' })
 spinner.start()
-const pkg = await readJsonFile('./package.json')
+const pkg = await readJson('./package.json')
 spinner.stop()
 ```
 

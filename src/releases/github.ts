@@ -369,34 +369,44 @@ export async function getLatestRelease(
         throw new Error(`Failed to fetch releases: ${response.status}`)
       }
 
-      const releases = JSON.parse(response.body.toString('utf8'))
+      let releases: Array<{
+        tag_name: string
+        published_at: string
+        assets: Array<{ name: string }>
+      }>
+      try {
+        releases = JSON.parse(response.body.toString('utf8'))
+      } catch (cause) {
+        throw new Error(
+          `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
+          { cause },
+        )
+      }
 
       // Filter releases matching the tool prefix.
-      const matchingReleases = releases.filter(
-        (release: { tag_name: string; assets: Array<{ name: string }> }) => {
-          const { assets, tag_name: tag } = release
-          if (!tag.startsWith(toolPrefix)) {
+      const matchingReleases = releases.filter(release => {
+        const { assets, tag_name: tag } = release
+        if (!tag.startsWith(toolPrefix)) {
+          return false
+        }
+
+        // Skip releases with no assets (empty releases).
+        if (!assets || assets.length === 0) {
+          return false
+        }
+
+        // If asset pattern provided, check if release has matching asset.
+        if (isMatch) {
+          const hasMatchingAsset = assets.some((a: { name: string }) =>
+            isMatch(a.name),
+          )
+          if (!hasMatchingAsset) {
             return false
           }
+        }
 
-          // Skip releases with no assets (empty releases).
-          if (!assets || assets.length === 0) {
-            return false
-          }
-
-          // If asset pattern provided, check if release has matching asset.
-          if (isMatch) {
-            const hasMatchingAsset = assets.some((a: { name: string }) =>
-              isMatch(a.name),
-            )
-            if (!hasMatchingAsset) {
-              return false
-            }
-          }
-
-          return true
-        },
-      )
+        return true
+      })
 
       if (matchingReleases.length === 0) {
         // No matching release found.
@@ -479,12 +489,20 @@ export async function getReleaseAssetUrl(
         throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
       }
 
-      const release = JSON.parse(response.body.toString('utf8'))
+      let release: {
+        assets: Array<{ name: string; browser_download_url: string }>
+      }
+      try {
+        release = JSON.parse(response.body.toString('utf8'))
+      } catch (cause) {
+        throw new Error(
+          `Failed to parse GitHub release response for tag ${tag}`,
+          { cause },
+        )
+      }
 
       // Find the matching asset.
-      const asset = release.assets.find((a: { name: string }) =>
-        isMatch(a.name),
-      )
+      const asset = release.assets.find(a => isMatch(a.name))
 
       if (!asset) {
         const patternDesc =

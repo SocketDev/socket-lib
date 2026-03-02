@@ -112,8 +112,7 @@ src/
 ├── types.ts           # TypeScript type definitions
 ├── constants/         # Node.js, npm, package manager constants
 ├── env/              # Typed environment variable access
-├── lib/              # Core utility functions
-│   └── packages/     # Package management utilities
+├── packages/         # Package management utilities
 ├── external/         # Vendored external dependencies
 └── utils/            # Shared utilities
 
@@ -125,19 +124,19 @@ scripts/              # Build and development scripts
 test/                 # Test files
 ```
 
-**Path aliases**:
+**Path aliases** (defined in `.config/tsconfig.external-aliases.json`):
 ```
 #constants/* → src/constants/*
 #env/*       → src/env/*
-#lib/*       → src/lib/*
-#packages/*  → src/lib/packages/*
+#lib/*       → src/*
+#packages/*  → src/packages/*
 #types       → src/types
 #utils/*     → src/utils/*
 ```
 
 ### Commands
 - **Build**: `pnpm build` (production build)
-- **Watch**: `pnpm run build:watch` or `pnpm run dev` (development mode)
+- **Watch**: `pnpm run dev` (development mode)
 - **Test**: `pnpm test` (run tests)
 - **Type check**: `pnpm run check` (TypeScript type checking)
 - **Lint**: `pnpm run lint` (Biome linting)
@@ -149,26 +148,29 @@ test/                 # Test files
 
 #### Compilation
 - **Target**: TypeScript → CommonJS (ES2022)
-- **Builder**: esbuild via `scripts/build-js.mjs`
+- **Builder**: esbuild via `scripts/build/js.mjs`
 - **Type generation**: tsgo (TypeScript Native Preview)
 - **Output**: `dist/` directory
 
 #### Build Scripts
-All build scripts are Node.js modules (`.mjs`):
-- `build-js.mjs` - Main JavaScript compilation
-- `build-externals.mjs` - External dependency bundling
-- `fix-commonjs-exports.mjs` - Post-build CommonJS export fixes
-- `fix-default-imports.mjs` - Fix default import patterns
-- `generate-package-exports.mjs` - Auto-generate package.json exports
+All build scripts are Node.js modules (`.mjs`) in `scripts/`:
+- `build/js.mjs` - Main JavaScript compilation
+- `build/externals.mjs` - External dependency bundling
+- `fix/commonjs-exports.mjs` - Post-build CommonJS export fixes
+- `fix/external-imports.mjs` - Fix external import patterns
+- `fix/generate-package-exports.mjs` - Auto-generate package.json exports
 
 🚨 **FORBIDDEN**: Shell scripts (`.sh`) - Always use Node.js scripts
 
 #### Build Process
-1. Clean previous build: `pnpm run clean`
-2. Compile JavaScript: `pnpm run build:js`
-3. Generate types: `pnpm run build:types`
-4. Bundle externals: `pnpm run build:externals`
-5. Fix exports: `pnpm run fix:exports`
+The main build command (`pnpm build`) orchestrates via `scripts/build/main.mjs`:
+1. Clean previous build
+2. Build in parallel: source code, types, and externals
+3. Fix exports via `scripts/fix/main.mjs`
+
+Individual commands:
+- `pnpm run clean` - Clean build artifacts only
+- `pnpm build` - Full build (default)
 
 ### Code Style - Lib-Specific
 
@@ -250,8 +252,8 @@ Blank lines between groups, alphabetical within groups.
 All modules are exported via `package.json` exports field:
 - **Constants**: `./constants/<name>` → `dist/constants/<name>.js`
 - **Environment**: `./env/<name>` → `dist/env/<name>.js`
-- **Libraries**: `./<name>` → `dist/lib/<name>.js`
-- **Packages**: `./packages/<name>` → `dist/lib/packages/<name>.js`
+- **Libraries**: `./<name>` → `dist/<name>.js`
+- **Packages**: `./packages/<name>` → `dist/packages/<name>.js`
 - **Types**: `./types` → `dist/types.js`
 
 #### Adding New Exports
@@ -351,7 +353,7 @@ path: |
 3. `pnpm test` - Run tests (or `pnpm run cover` for coverage)
 
 #### Watch Mode
-Use `pnpm run build:watch` or `pnpm run dev` for development with automatic rebuilds.
+Use `pnpm run dev` for development with automatic rebuilds.
 
 #### Adding New Utilities
 1. Create utility in appropriate `src/` subdirectory

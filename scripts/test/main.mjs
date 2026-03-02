@@ -495,5 +495,5 @@ async function main() {
 
 main().catch(error => {
   logger.error(error)
-  process.exit(1)
+  process.exitCode = 1
 })

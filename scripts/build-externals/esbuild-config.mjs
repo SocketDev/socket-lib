@@ -153,7 +153,7 @@ function createStubPlugin(stubMap = STUB_MAP) {
 }
 
 // Shared dependencies bundled in external-pack that should be marked external in other bundles.
-const EXTERNAL_PACK_DEPS = [
+const _EXTERNAL_PACK_DEPS = [
   'has-flag',
   'signal-exit',
   'supports-color',
@@ -178,8 +178,8 @@ export function getPackageSpecificOptions(packageName) {
     // Zod has localization files we don't need.
     opts.external = [...(opts.external || []), './locales/*']
   } else if (packageName === 'debug') {
-    // Mark shared deps as external - they're bundled in external-pack.
-    opts.external = [...(opts.external || []), ...EXTERNAL_PACK_DEPS]
+    // Bundle supports-color inline to avoid external dependency.
+    // This makes debug.js fully self-contained.
   } else if (packageName === 'external-pack') {
     // Inquirer packages have heavy dependencies we can exclude.
     opts.external = [...(opts.external || []), 'rxjs/operators']
@@ -189,14 +189,8 @@ export function getPackageSpecificOptions(packageName) {
       js: 'if (module.exports && module.exports.default && Object.keys(module.exports).length === 1) { module.exports = module.exports.default; }',
     }
   } else if (packageName === 'npm-pack') {
-    // Mark shared deps as external - they're bundled in external-pack.
-    // Also mark debug and which as external since they have their own bundles.
-    opts.external = [
-      ...(opts.external || []),
-      ...EXTERNAL_PACK_DEPS,
-      'debug',
-      'which',
-    ]
+    // Bundle all deps inline to make npm-pack.js fully self-contained.
+    // This avoids hidden requires to debug, which, signal-exit, supports-color.
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.

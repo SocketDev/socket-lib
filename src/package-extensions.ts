@@ -43,8 +43,10 @@ const packageExtensions = ObjectFreeze(
       ],
     ] as PackageExtension[]
   ).sort((a_, b_) => {
-    const a = a_[0].slice(0, a_[0].lastIndexOf('@'))
-    const b = b_[0].slice(0, b_[0].lastIndexOf('@'))
+    const aIndex = a_[0].lastIndexOf('@')
+    const bIndex = b_[0].lastIndexOf('@')
+    const a = aIndex === -1 ? a_[0] : a_[0].slice(0, aIndex)
+    const b = bIndex === -1 ? b_[0] : b_[0].slice(0, bIndex)
     // Simulate the default compareFn of String.prototype.sort.
     if (a < b) {
       return -1

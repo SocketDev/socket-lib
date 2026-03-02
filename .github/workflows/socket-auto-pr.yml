@@ -19,8 +19,8 @@ on:
           - '1'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write       # Commit dependency updates to branches
+  pull-requests: write  # Create automated Socket.dev security PRs
 
 jobs:
   socket-auto-pr:
