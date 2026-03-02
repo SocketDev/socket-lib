@@ -6,34 +6,33 @@
 
 **Mission**: Identify critical bugs that could cause crashes, data corruption, or security vulnerabilities.
 
-**Scan Targets**: All `.mts` files in `src/`
+**Scan Targets**: All `.ts` files in `src/`
 
 **Prompt Template:**
 ```
-Your task is to perform a critical bug scan on socket-btm, a monorepo containing Node.js binary tooling written in TypeScript (.mts/.mjs), C/C++, and shell scripts. Identify bugs that could cause build failures, data corruption, or security vulnerabilities.
+Your task is to perform a critical bug scan on socket-lib, Socket Security's core infrastructure library. Identify bugs that could cause crashes, data corruption, or security vulnerabilities.
 
 <context>
-This is Socket Security's Binary Tooling Manager (BTM) monorepo with multiple packages:
-- **node-smol-builder**: Builds Node.js from source with Socket Security patches
-- **binject**: Binary injection library (C/C++ with LIEF integration)
-- **bin-infra**: Binary infrastructure utilities (compression, format handling)
-- **build-infra**: Build infrastructure utilities (tar, gzip, file I/O)
-- **binsuite**: Binary suite tools
+This is Socket Security's shared utilities library used by all Socket.dev tools:
+- **HTTP Client**: Implements retry logic and request handling (src/http-request.ts)
+- **File System**: File operations, JSON reading/writing, safe deletion (src/fs.ts)
+- **Spawn**: Process spawning with cross-platform support (src/spawn.ts)
+- **Logger**: Colored terminal output with symbols (src/logger.ts)
+- **Environment**: Typed environment variable access (src/env/*.ts)
+- **Paths**: Cross-platform path utilities (src/paths/*.ts)
 
 Key characteristics:
-- Uses TypeScript with .mts/.mjs extension for build scripts
-- C/C++ code for binary manipulation and injection
-- Manages Node.js version synchronization and patch application
-- Processes external source code and applies unified diff patches
-- Handles cross-platform compilation (macOS, Linux, Windows)
-- Manages build checkpoints and caching for performance
-- Must handle patch failures and build errors gracefully
+- Uses TypeScript compiled to CommonJS via esbuild
+- Must work cross-platform (Windows, macOS, Linux)
+- Exports named functions (no default exports)
+- Uses null-prototype objects pattern: `{ __proto__: null, ...props }`
+- Provides ESM interop annotations for Node.js compatibility
+- Core library - bugs here affect all downstream tools
 </context>
 
 <instructions>
-Scan all code files across the monorepo for these critical bug patterns:
-- TypeScript/JavaScript: packages/*/scripts/**/*.{mjs,mts}, packages/*/src/**/*.{mjs,mts}
-- C/C++: packages/*/src/**/*.{c,cc,cpp,h}
+Scan all code files for these critical bug patterns:
+- TypeScript: src/**/*.ts, scripts/**/*.mjs
 - Focus on:
 
 <pattern name="null_undefined_access">
@@ -52,7 +51,6 @@ Scan all code files across the monorepo for these critical bug patterns:
 
 <pattern name="race_conditions">
 - Concurrent file system operations without coordination
-- Parallel cache reads/writes without synchronization
 - Check-then-act patterns without atomic operations
 - Shared state modifications in Promise.all()
 </pattern>
@@ -68,13 +66,7 @@ Scan all code files across the monorepo for these critical bug patterns:
 - File handles opened but not closed (missing .close() or using())
 - Timers created but not cleared (setTimeout/setInterval)
 - Event listeners added but not removed
-- Memory accumulation in long-running processes
-</pattern>
-
-<pattern name="buffer_overflow">
-- String slicing without bounds validation
-- Array indexing beyond length
-- Buffer operations without size checks
+- Child processes spawned but not properly cleaned up
 </pattern>
 
 <quality_guidelines>
@@ -107,7 +99,7 @@ Only report issues that pass all three checks. Use `<thinking>` tags to show you
 <output_format>
 For each finding, report:
 
-File: src/path/to/file.mts:lineNumber
+File: src/path/to/file.ts:lineNumber
 Issue: [One-line description of the bug]
 Severity: Critical
 Pattern: [The problematic code snippet]
@@ -116,66 +108,67 @@ Fix: [Specific code change to fix it]
 Impact: [What happens if this bug is triggered]
 
 Example:
-File: packages/node-smol-builder/scripts/binary-released/shared/apply-patches.mjs:145
-Issue: Unhandled promise rejection in patch application
+File: src/http-request.ts:145
+Issue: Unhandled promise rejection in HTTP request
 Severity: Critical
-Pattern: `applyPatch(patchFile, targetPath)`
-Trigger: When patch file contains malformed unified diff format
-Fix: `await applyPatch(patchFile, targetPath).catch(err => { log.error(err); throw new Error(\`Patch failed: \${err.message}\`) })`
-Impact: Uncaught exception crashes build process, leaving Node.js source in inconsistent state
+Pattern: `httpRequest(url, options)`
+Trigger: When network request fails without error handler
+Fix: `await httpRequest(url, options).catch(err => { throw new Error(\`HTTP request failed: \${err.message}\`, { cause: err }) })`
+Impact: Uncaught exception crashes consuming application
 
-Example (C/C++):
-File: packages/binject/src/socketsecurity/binject/binject.c:234
-Issue: Potential null pointer dereference after malloc
+Example:
+File: src/fs.ts:234
+Issue: Potential null pointer access on file read
 Severity: Critical
-Pattern: `uint8_t* buffer = malloc(size); memcpy(buffer, data, size);`
-Trigger: When malloc fails due to insufficient memory
-Fix: `uint8_t* buffer = malloc(size); if (!buffer) return BINJECT_ERROR_MEMORY; memcpy(buffer, data, size);`
-Impact: Segmentation fault crashes binary injection process
+Pattern: `const data = JSON.parse(content)`
+Trigger: When file contains invalid JSON
+Fix: `try { return JSON.parse(content) } catch (e) { throw new Error(\`Invalid JSON in \${filePath}: \${e.message}\`, { cause: e }) }`
+Impact: TypeError crashes library when reading malformed JSON files
 </output_format>
 
 <quality_guidelines>
 - Only report actual bugs, not style issues or minor improvements
 - Verify bugs are not already handled by surrounding code
-- Prioritize bugs affecting build reliability and binary correctness
-- For C/C++: Focus on memory safety, null checks, buffer overflows
-- For TypeScript: Focus on promise handling, type guards, external input validation
+- Prioritize bugs affecting library reliability and consumer applications
+- Focus on promise handling, type guards, external input validation
 - Skip false positives (TypeScript type guards are sufficient in many cases)
-- Scan across all packages: node-smol-builder, binject, bin-infra, build-infra, binsuite
+- Focus on src/ (library source) and scripts/ (build scripts)
 </quality_guidelines>
 
-Scan systematically through all packages/ directories and report all critical bugs found. If no critical bugs are found, state that explicitly.
+Scan systematically through src/ and scripts/ directories and report all critical bugs found. If no critical bugs are found, state that explicitly.
 ```
 
 ---
 
 ### Logic Scan Agent
 
-**Mission**: Detect logical errors in build scripts, patch algorithms, and binary manipulation that could produce incorrect builds or corrupted binaries.
+**Mission**: Detect logical errors in utility functions, algorithms, and data processing that could produce incorrect results.
 
-**Scan Targets**: All packages in the monorepo
+**Scan Targets**: All `src/**/*.ts` files
 
 **Prompt Template:**
 ```
-Your task is to detect logic errors in socket-btm's build scripts, patch application logic, and binary manipulation code that could produce incorrect builds or corrupted binaries. Focus on algorithm correctness, edge case handling, and data validation.
+Your task is to detect logic errors in socket-lib that could cause incorrect behavior, wrong outputs, or subtle bugs. Focus on algorithm correctness, edge case handling, and data validation.
 
 <context>
-socket-btm is a monorepo for Node.js binary tooling:
-- **node-smol-builder**: Build orchestration, patch application, checkpoint management
-- **binject**: Binary injection logic, ELF/Mach-O/PE format handling
-- **bin-infra**: Binary compression, format detection, segment management
-- **build-infra**: File I/O, tar creation, gzip compression
+socket-lib is Socket Security's core infrastructure library:
+- **HTTP Client**: Request/response handling, retry logic (src/http-request.ts)
+- **File System**: File operations, path handling, JSON utilities (src/fs.ts)
+- **Spawn**: Process execution, output handling (src/spawn.ts)
+- **Strings**: Text manipulation, formatting (src/strings.ts)
+- **Arrays/Objects**: Collection utilities (src/arrays.ts, src/objects.ts)
+- **Paths**: Cross-platform path normalization (src/paths/*.ts)
 
 Critical operations:
-- Patch parsing and application (unified diff format)
-- Binary format detection and manipulation (ELF/Mach-O/PE)
-- Checkpoint creation and restoration (tar.gz archives)
-- Cross-platform path handling and file operations
-- Version comparison and Node.js synchronization
+- HTTP request building and retry logic
+- JSON parsing and file reading
+- Cross-platform path normalization
+- Environment variable parsing
+- Version comparison and semver handling
 </context>
 
 <instructions>
-Analyze all packages for these logic error patterns:
+Analyze all source files for these logic error patterns:
 
 <pattern name="off_by_one">
 Off-by-one errors in loops and slicing:
@@ -204,36 +197,25 @@ Unhandled edge cases in string/array operations:
 
 <pattern name="algorithm_correctness">
 Algorithm implementation issues:
-- Patch parsing: Hunk header line counts not validated, @@ parsing errors
 - Version comparison: Failing on semver edge cases (prerelease, build metadata)
 - Path resolution: Symlink handling, relative vs absolute path logic
-- File ordering: Incorrect dependency ordering in build sequences
-- Deduplication: Missing deduplication of duplicate files/patches
+- String operations: Unicode handling, encoding issues
+- Retry logic: Incorrect backoff calculations
 </pattern>
 
-<pattern name="patch_handling">
-Patch application logic errors:
-- Unified diff parsing: Line offset calculation errors, context matching failures
-- Hunk application: Off-by-one in line number calculations
-- Patch validation: Missing validation of patch format (malformed hunks)
-- Backup/restore: Not properly handling patch failures mid-application
-- Independent patches: Assumptions about patch ordering or dependencies
-</pattern>
-
-<pattern name="binary_format">
-Binary format handling errors:
-- Format detection: Misidentifying ELF/Mach-O/PE headers
-- Section/segment: Off-by-one in offset calculations, size validation missing
-- Endianness: Not handling big-endian vs little-endian correctly
-- Alignment: Missing alignment requirements for injected data
-- Cross-platform: Windows vs Unix path separators, line endings
+<pattern name="cross_platform">
+Cross-platform compatibility issues:
+- Path separators: Using / on Windows or \ on Unix
+- Line endings: \n vs \r\n handling
+- Case sensitivity: File path comparisons
+- Environment variables: Different naming conventions
 </pattern>
 
 <quality_guidelines>
 For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
 
 <thinking>
-1. Can this actually crash/fail in production?
+1. Can this actually produce wrong results in production?
    - Code path analysis: [describe the execution flow]
    - Production scenarios: [real-world conditions]
    - Result: [yes/no with justification]
@@ -259,7 +241,7 @@ Only report issues that pass all three checks. Use `<thinking>` tags to show you
 <output_format>
 For each finding, report:
 
-File: src/path/to/file.mts:lineNumber
+File: src/path/to/file.ts:lineNumber
 Issue: [One-line description]
 Severity: High | Medium
 Edge Case: [Specific input that triggers the error]
@@ -268,207 +250,61 @@ Fix: [Corrected code]
 Impact: [What incorrect output is produced]
 
 Example:
-File: packages/node-smol-builder/scripts/binary-released/shared/apply-patches.mjs:89
-Issue: Off-by-one in patch hunk line counting
+File: src/http-request.ts:89
+Issue: Off-by-one in retry attempt counting
 Severity: High
-Edge Case: When patch hunk has trailing context lines
-Pattern: `for (let i = 0; i < hunkLines.length - 1; i++)`
-Fix: `for (let i = 0; i < hunkLines.length; i++)`
-Impact: Last line of patch hunk is silently omitted, causing patch application to fail or produce incorrect output
-
-Example (C code):
-File: packages/binject/src/socketsecurity/binject/elf_inject.c:234
-Issue: Incorrect section size calculation with alignment
-Severity: High
-Edge Case: When injecting data into sections requiring alignment
-Pattern: `new_size = existing_size + data_size;`
-Fix: `new_size = ALIGN_UP(existing_size + data_size, section_alignment);`
-Impact: Injected data misaligned, causing segfault when binary loads section
-</output_format>
-
-<quality_guidelines>
-- Prioritize code handling external data (patches, binary files, build configs)
-- Focus on errors affecting build correctness and binary integrity
-- Verify logic errors aren't false alarms due to type narrowing
-- Consider real-world edge cases: malformed patches, unusual binary formats, cross-platform paths
-- Pay special attention to C/C++ pointer arithmetic and buffer calculations
-</quality_guidelines>
-
-Analyze systematically across all packages and report all logic errors found. If no errors are found, state that explicitly.
-```
-
----
-
-### Cache Scan Agent
-
-**Mission**: Identify caching bugs that cause stale builds, checkpoint corruption, or incorrect behavior.
-
-**Scan Targets**: Build checkpoint system and caching logic across all packages
-
-**Prompt Template:**
-```
-Your task is to analyze socket-btm's checkpoint and caching implementation for correctness, staleness bugs, and performance issues. Focus on checkpoint corruption, cache invalidation failures, and race conditions.
-
-<context>
-socket-btm uses a multi-stage checkpoint system to speed up builds:
-- **Checkpoint stages**: source-copied, source-patched, configured, compiled, stripped, compressed, final
-- **Storage**: tar.gz archives stored in build/checkpoints/{platform}-{arch}/
-- **Invalidation**: Based on cache keys (hashes of patches, config, source version)
-- **Progressive builds**: Can restore from any checkpoint and continue
-- **Cross-platform**: Must work on Windows, macOS, Linux (ARM64, x64)
-- **Critical**: Stale checkpoints cause incorrect builds that are hard to debug
-
-Caching locations:
-- packages/node-smol-builder/scripts/common/shared/checkpoints.mjs
-- packages/node-smol-builder/build/checkpoints/
-- Cache key generation and validation logic
-</context>
-
-<instructions>
-Analyze caching implementation for these issue categories:
-
-<pattern name="cache_invalidation">
-Stale checkpoints from incorrect invalidation:
-- Patch changes: Are patch file hashes included in cache key?
-- Source version: Is Node.js version properly included in cache key?
-- Config changes: Are build flags (debug/release, ICU settings) in cache key?
-- Cross-platform: Are platform/arch properly isolated (darwin-arm64 vs linux-x64)?
-- Restoration: Is checkpoint validated before restoration (corrupted archives)?
-- Race: Checkpoint modified/deleted between validation and restoration?
-</pattern>
-
-<pattern name="cache_keys">
-Checkpoint key generation correctness:
-- Hash collisions: Is hash function sufficient for patch content?
-- Patch ordering: Does key depend on patch application order?
-- Platform isolation: Are Windows/macOS/Linux checkpoints properly separated?
-- Arch isolation: Are ARM64/x64 checkpoints kept separate?
-- Additions: Are build-infra/binject changes invalidating checkpoints?
-- Environment: Are env vars (NODE_OPTIONS, etc.) affecting builds included?
-</pattern>
-
-<pattern name="checkpoint_corruption">
-Checkpoint archive corruption:
-- Partial writes: tar.gz creation interrupted, incomplete archive
-- Disk full: Archive truncated due to disk space issues
-- Extraction failures: Corrupted archive extracted partially
-- Overwrite races: Concurrent builds overwriting same checkpoint
-- Cleanup races: Checkpoint deleted while being restored
-</pattern>
-
-<pattern name="concurrency">
-Race conditions in checkpoint operations:
-- Creation races: Multiple builds creating same checkpoint simultaneously
-- Restoration races: Checkpoint deleted/modified during restoration
-- Validation races: Checkpoint validated then corrupted before use
-- Directory conflicts: Concurrent builds using same build directory
-- Lock files: Missing lock files allowing concurrent checkpoint access
-</pattern>
-
-<pattern name="stale_checkpoints">
-Scenarios producing stale/incorrect checkpoints:
-- Patch modified but checkpoint not invalidated (hash not updated)
-- Platform mismatch: Restoring darwin checkpoint on linux
-- Arch mismatch: Restoring arm64 checkpoint for x64 build
-- Version mismatch: Node.js version changed but checkpoint reused
-- Additions changed: build-infra/binject updated but checkpoint not invalidated
-- Environment drift: Build flags changed but cache key unchanged
-</pattern>
-
-<pattern name="edge_cases">
-Uncommon scenarios:
-- Empty files (zero bytes) - cached correctly?
-- File deletion while cached - stale entry persists?
-- Rapid successive reads/writes (stress testing)
-- Very large files exceeding maxEntrySize
-- Permission changes during caching
-</pattern>
-
-<quality_guidelines>
-For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
-
-<thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
-
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
-
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
-
-Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
-</thinking>
-
-Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
-</quality_guidelines>
-</instructions>
-
-<output_format>
-For each finding, report:
-
-File: packages/node-smol-builder/scripts/common/shared/checkpoints.mjs:lineNumber
-Issue: [One-line description]
-Severity: High | Medium
-Scenario: [Step-by-step sequence showing how bug manifests]
-Pattern: [The problematic code snippet]
-Fix: [Specific code change]
-Impact: [Observable effect - wrong output, performance, crash]
+Edge Case: When max retries is set to 0
+Pattern: `for (let i = 0; i < retries - 1; i++)`
+Fix: `for (let i = 0; i <= retries; i++)`
+Impact: Library retries one fewer time than configured
 
 Example:
-File: packages/node-smol-builder/scripts/common/shared/checkpoints.mjs:145
-Issue: Cache key missing patch content hashes
+File: src/paths/normalize.ts:45
+Issue: Path normalization fails on Windows UNC paths
 Severity: High
-Scenario: 1) Build with patch v1, creates checkpoint. 2) Patch file modified to v2 (same filename). 3) Build restores v1 checkpoint. 4) Produces binary with v1 patches but v2 expected
-Pattern: `const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}\``
-Fix: `const patchHashes = await hashAllPatches(); const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}-\${patchHashes}\``
-Impact: Stale checkpoints produce incorrect Node.js binaries with wrong patches applied
+Edge Case: When path starts with \\\\server\\share
+Pattern: `path.replace(/\\\\/g, '/')`
+Fix: `normalizePath(path)` using path.normalize() first
+Impact: UNC paths become invalid, file operations fail
 </output_format>
 
 <quality_guidelines>
-- Focus on correctness issues that produce wrong builds or corrupted checkpoints
-- Consider cross-platform differences (Windows, macOS, Linux)
-- Evaluate checkpoint invalidation scenarios (patches changed, additions changed)
-- Prioritize issues causing silent build incorrectness over performance
-- Verify issues aren't prevented by existing cache key generation
+- Prioritize code handling external data (file paths, environment variables, user input)
+- Focus on errors affecting correctness and cross-platform compatibility
+- Verify logic errors aren't false alarms due to type narrowing
+- Consider real-world edge cases: empty values, malformed input, platform differences
+- Pay special attention to string/array operations and path handling
 </quality_guidelines>
 
-Analyze the checkpoint implementation thoroughly across all checkpoint stages and report all issues found. If the implementation is sound, state that explicitly.
+Analyze systematically across src/ and report all logic errors found. If no errors are found, state that explicitly.
 ```
 
 ---
 
 ### Workflow Scan Agent
 
-**Mission**: Detect problems in build scripts, CI configuration, git hooks, and developer workflows across the socket-btm monorepo.
+**Mission**: Detect problems in build scripts, CI configuration, and developer workflows.
 
-**Scan Targets**: All `scripts/`, `package.json`, `.git-hooks/*`, `.github/workflows/*` across packages
+**Scan Targets**: `scripts/`, `package.json`, `.github/workflows/*`
 
 **Prompt Template:**
 ```
-Your task is to identify issues in socket-btm's development workflows, build scripts, and CI configuration that could cause build failures, test flakiness, or poor developer experience.
+Your task is to identify issues in socket-lib's development workflows, build scripts, and CI configuration that could cause build failures, test flakiness, or poor developer experience.
 
 <context>
-socket-btm is a pnpm monorepo with:
-- **Build scripts**: packages/*/scripts/**/*.{mjs,mts} (ESM, cross-platform Node.js)
-- **Package manager**: pnpm workspaces with scripts in each package.json
-- **Git hooks**: .git-hooks/* for pre-commit, pre-push validation
+socket-lib is a TypeScript library with:
+- **Build scripts**: scripts/**/*.mjs (ESM, cross-platform Node.js)
+- **Package manager**: pnpm with scripts in package.json
 - **CI**: GitHub Actions (.github/workflows/)
-- **Platforms**: Must work on Windows, macOS, Linux (ARM64, x64)
-- **CLAUDE.md**: Defines conventions (no process.exit(), no backward compat, etc.)
-- **Critical**: Build scripts compile C/C++ code and apply patches - must handle errors gracefully
+- **Platforms**: Must work on Windows, macOS, Linux
+- **CLAUDE.md**: Defines conventions (no process.exit(), named exports only, etc.)
+- **Build**: esbuild compiles TypeScript to CommonJS with ESM interop annotations
 
-Packages:
-- node-smol-builder: Main build orchestration
-- binject: C/C++ binary injection library
-- bin-infra, build-infra: Utilities used by node-smol-builder
+Components:
+- Library source: src/ (TypeScript files)
+- Build scripts: scripts/ (Node.js ESM)
+- Tests: test/ (Vitest test files)
+- Output: dist/ (CommonJS with .d.ts)
 </context>
 
 <instructions>
@@ -491,7 +327,7 @@ Error handling in scripts:
 - Error messages: Are they helpful for debugging?
 - Dependency checks: Do scripts check for required tools before use?
 
-**Note on file existence checks**: existsSync() is ACCEPTABLE and actually PREFERRED over async fs.access() for synchronous file checks. Node.js has quirks where the synchronous check is more reliable for immediate validation. Do NOT flag existsSync() as an issue.
+**Note on file existence checks**: existsSync() is ACCEPTABLE and actually PREFERRED over async fs.access() for synchronous file checks. Do NOT flag existsSync() as an issue.
 </pattern>
 
 <pattern name="package_json_scripts">
@@ -502,50 +338,41 @@ package.json script correctness:
 - Missing scripts: Standard scripts like build, test, lint documented?
 </pattern>
 
-<pattern name="git_hooks">
-Git hooks configuration:
-- Pre-commit: Does it run linting/formatting? Is it fast (<10s)?
-- Pre-push: Does it run tests to prevent broken pushes?
-- False positives: Do hooks block legitimate commits?
-- Error messages: Are hook failures clearly explained?
-- Hook installation: Is setup documented in README?
-</pattern>
-
 <pattern name="ci_configuration">
 CI pipeline issues:
-- Build order: Are steps in correct sequence (install → build → test)?
+- Build order: Are steps in correct sequence (install -> build -> test)?
 - Cross-platform: Are Windows/macOS/Linux builds all tested?
-- C/C++ compilation: Are compiler toolchains (clang, gcc, MSVC) properly configured?
-- Build artifacts: Are Node.js binaries uploaded for each platform?
-- Checkpoint caching: Are build checkpoints cached across CI runs?
+- Node versions: Are supported Node.js versions tested (20, 22, 24)?
+- Caching: Is pnpm cache properly configured?
 - Failure notifications: Are build failures clearly visible?
-- Node.js versions: Are upstream Node.js version updates tested?
-- Patch validation: Are patch files validated before application?
+- Build artifacts: Are dist files validated?
 </pattern>
 
-<pattern name="developer_experience">
-Documentation and setup:
-- Common errors: Are frequent issues documented with solutions?
-- Environment variables: Are required env vars documented?
+<pattern name="build_output">
+Build output validation:
+- ESM interop annotations: Are they present in all dist/*.js files?
+- Type definitions: Are .d.ts files generated for all exports?
+- Package exports: Does package.json exports match dist/ structure?
+- Named exports: No default exports (CLAUDE.md requirement)
 </pattern>
 
 <quality_guidelines>
 For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
 
 <thinking>
-1. Can this actually crash/fail in production?
+1. Can this actually cause build/CI failures?
    - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
+   - CI scenarios: [when would this fail]
    - Result: [yes/no with justification]
 
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
+2. What triggers this issue?
+   - Trigger conditions: [specific scenarios]
+   - Platform differences: [Windows/macOS/Linux]
    - Likelihood: [HIGH/MEDIUM/LOW]
 
 3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
+   - Defensive code: [error handling, fallbacks]
+   - CI protections: [matrix testing, caching]
    - Result: [SAFEGUARDED/VULNERABLE]
 
 Overall assessment: [REPORT/SKIP]
@@ -567,7 +394,7 @@ Pattern: [The problematic code or configuration]
 Fix: [Specific change to resolve]
 
 Example:
-File: scripts/build.mjs:23
+File: scripts/build/main.mjs:23
 Issue: Uses process.exit() violating CLAUDE.md convention
 Severity: Medium
 Impact: Cannot be tested properly, unconventional error handling
@@ -595,147 +422,7 @@ Analyze workflow files systematically and report all issues found. If workflows 
 
 ---
 
-## Scan Configuration
-
-### Severity Levels
-
-| Level | Description | Action Required |
-|-------|-------------|-----------------|
-| **Critical** | Crashes, security vulnerabilities, data corruption | Fix immediately |
-| **High** | Logic errors, incorrect output, resource leaks | Fix before release |
-| **Medium** | Performance issues, edge case bugs | Fix in next sprint |
-| **Low** | Code smells, minor inconsistencies | Fix when convenient |
-
-### Scan Priority Order
-
-1. **critical** - Most important, run first
-2. **logic** - Parser correctness critical for SBOM accuracy
-3. **cache** - Performance and correctness
-4. **workflow** - Developer experience
-
-### Coverage Targets
-
-- **critical**: All src/ files
-- **logic**: src/parsers/ (19 ecosystems) + src/utils/
-- **cache**: src/utils/file-cache.mts + related
-- **workflow**: scripts/, package.json, .git-hooks/, CI
-
----
-
-## Report Format
-
-### Structured Findings
-
-Each finding should include:
-```typescript
-{
-  file: "src/utils/file-cache.mts:89",
-  issue: "Potential race condition in cache update",
-  severity: "High",
-  scanType: "cache",
-  pattern: "if (cached) { /* check-then-act */ }",
-  suggestion: "Use atomic operations or locking",
-  impact: "Could return stale data under concurrent access"
-}
-```
-
-### Example Report Output
-
-```markdown
-# Quality Scan Report
-
-**Date:** 2026-02-05
-**Scans:** critical, logic, cache, workflow
-**Files Scanned:** 127
-**Findings:** 2 critical, 5 high, 8 medium, 3 low
-
-## Critical Issues (Priority 1) - 2 found
-
-### src/utils/file-cache.mts:89
-- **Issue**: Potential null pointer access on cache miss
-- **Pattern**: `const stats = await fs.stat(normalizedPath)`
-- **Fix**: Add try-catch or check file existence first
-- **Impact**: Crashes when file deleted between cache check and stat
-
-### src/parsers/npm/index.mts:234
-- **Issue**: Unhandled promise rejection
-- **Pattern**: `parsePackageJson(path)` without await or .catch()
-- **Fix**: Add await or .catch() handler
-- **Impact**: Uncaught exception crashes process
-
-## High Issues (Priority 2) - 5 found
-
-### src/parsers/pypi/index.mts:512
-- **Issue**: Off-by-one error in bracket depth calculation
-- **Pattern**: `bracketDepth - 1` can go negative
-- **Fix**: Use `Math.max(0, bracketDepth - 1)`
-- **Impact**: Incorrect dependency parsing for malformed files
-
-...
-
-## Scan Coverage
-- **Critical scan**: 127 files analyzed in src/
-- **Logic scan**: 19 parsers + 15 utils analyzed
-- **Cache scan**: 1 file + related code paths
-- **Workflow scan**: 12 scripts + package.json + 3 hooks
-
-## Recommendations
-1. Address 2 critical issues immediately before next release
-2. Review 5 high-severity logic errors in parsers
-3. Schedule medium issues for next sprint
-4. Low-priority items can be addressed during refactoring
-```
-
----
-
-## Edge Cases
-
-### No Findings
-
-If scan finds no issues:
-```markdown
-# Quality Scan Report
-
-**Result**: ✓ No issues found
-
-All scans completed successfully with no findings.
-
-- Critical scan: ✓ Clean
-- Logic scan: ✓ Clean
-- Cache scan: ✓ Clean
-- Workflow scan: ✓ Clean
-
-**Code quality**: Excellent
-```
-
-### Scan Failures
-
-If an agent fails or times out:
-```markdown
-## Scan Errors
-
-- **critical scan**: ✗ Failed (agent timeout)
-  - Retry recommended
-  - Check agent prompt size
-
-- **logic scan**: ✓ Completed
-- **cache scan**: ✓ Completed
-- **workflow scan**: ✓ Completed
-```
-
-### Partial Scans
-
-User can request specific scan types:
-```bash
-# Only run critical and logic scans
-quality-scan --types critical,logic
-```
-
-Report only includes requested scan types and notes which were skipped.
-
----
-
-## Security Scan Agent
+### Security Scan Agent
 
 **Mission**: Scan GitHub Actions workflows for security vulnerabilities using zizmor.
 
@@ -757,28 +444,26 @@ Zizmor is a GitHub Actions workflow security scanner that detects:
 This repository uses GitHub Actions for CI/CD with workflows in `.github/workflows/`.
 
 **Installation:**
-Zizmor is not available via npm. Install zizmor v1.22.0 using one of these methods:
+Zizmor is not available via npm. Install using one of these methods:
 
 **GitHub Releases (Recommended):**
 ```bash
-# Download from https://github.com/zizmorcore/zizmor/releases/tag/v1.22.0
 # macOS ARM64:
-curl -L https://github.com/zizmorcore/zizmor/releases/download/v1.22.0/zizmor-aarch64-apple-darwin -o /usr/local/bin/zizmor
+curl -L https://github.com/zizmorcore/zizmor/releases/latest/download/zizmor-aarch64-apple-darwin -o /usr/local/bin/zizmor
 chmod +x /usr/local/bin/zizmor
 
 # macOS x64:
-curl -L https://github.com/zizmorcore/zizmor/releases/download/v1.22.0/zizmor-x86_64-apple-darwin -o /usr/local/bin/zizmor
+curl -L https://github.com/zizmorcore/zizmor/releases/latest/download/zizmor-x86_64-apple-darwin -o /usr/local/bin/zizmor
 chmod +x /usr/local/bin/zizmor
 
 # Linux x64:
-curl -L https://github.com/zizmorcore/zizmor/releases/download/v1.22.0/zizmor-x86_64-unknown-linux-musl -o /usr/local/bin/zizmor
+curl -L https://github.com/zizmorcore/zizmor/releases/latest/download/zizmor-x86_64-unknown-linux-musl -o /usr/local/bin/zizmor
 chmod +x /usr/local/bin/zizmor
 ```
 
 **Alternative Methods:**
-- Homebrew: `brew install zizmor@1.22.0`
-- Cargo: `cargo install zizmor --version 1.22.0`
-- See https://docs.zizmor.sh/installation/ for all options
+- Homebrew: `brew install zizmor`
+- Cargo: `cargo install zizmor`
 </context>
 
 <instructions>
@@ -820,7 +505,6 @@ Look for findings like:
 - `error[cache-poisoning]` or `warning[cache-poisoning]`
 - Caching enabled when publishing artifacts
 - Vulnerable to cache poisoning attacks in release workflows
-- actions/setup-node or actions/setup-python with cache enabled during artifact publishing
 </pattern>
 
 <pattern name="credential_exposure">
@@ -833,19 +517,24 @@ Look for findings like:
 <output_format>
 For each finding, output in this structured format:
 
-{
-  file: ".github/workflows/workflow-name.yml:123",
-  issue: "Template injection vulnerability in run block",
-  severity: "High",
-  scanType: "security",
-  pattern: "run: echo ${{ github.event.comment.body }}",
-  trigger: "Untrusted user input from PR comment",
-  fix: "Use environment variables: env: COMMENT: ${{ github.event.comment.body }} then echo \"$COMMENT\"",
-  impact: "Attacker can execute arbitrary code in CI environment",
-  autofix: true
-}
+File: .github/workflows/workflow-name.yml:123
+Issue: [Vulnerability description]
+Severity: High | Medium | Low
+Pattern: [The problematic workflow code]
+Trigger: [What enables the vulnerability]
+Fix: [Specific workflow change]
+Impact: [Security consequence]
+Auto-fix: [Yes/No]
 
-Group findings by severity (Error → High → Medium → Low → Info)
+Example:
+File: .github/workflows/ci.yml:45
+Issue: Template injection in run block
+Severity: High
+Pattern: `echo "Comment: ${{ github.event.comment.body }}"`
+Trigger: Untrusted PR comment body injected into shell command
+Fix: Use environment variable: `env: COMMENT: ${{ github.event.comment.body }}` then `echo "Comment: $COMMENT"`
+Impact: Attacker can execute arbitrary commands in CI
+Auto-fix: Available (`zizmor --fix`)
 </output_format>
 
 <quality_guidelines>
@@ -858,39 +547,13 @@ Group findings by severity (Error → High → Medium → Low → Info)
 </quality_guidelines>
 ```
 
-### Example Security Scan Output
-
-```markdown
-## Security Issues - 2 found
-
-### .github/workflows/ci.yml:45
-- **Issue**: Template injection in run block
-- **Severity**: High
-- **Pattern**: `echo "User comment: ${{ github.event.comment.body }}"`
-- **Trigger**: Untrusted PR comment body injected into shell command
-- **Fix**: Use environment variable: `env: COMMENT: ${{ github.event.comment.body }}` then `echo "User comment: $COMMENT"`
-- **Impact**: Attacker can execute arbitrary commands in CI by crafting malicious PR comment
-- **Auto-fix**: Available (`zizmor --fix`)
-- **Confidence**: High
-
-### .github/workflows/release.yml:89
-- **Issue**: Cache poisoning vulnerability when publishing artifacts
-- **Severity**: Medium
-- **Pattern**: `actions/setup-node@v4` with `cache: 'npm'` in release workflow
-- **Trigger**: Dependency cache enabled in workflow that publishes release artifacts
-- **Fix**: Disable cache: `cache: ''` or remove cache parameter when publishing
-- **Impact**: Attacker could poison dependency cache and inject malicious code into releases
-- **Auto-fix**: Not available
-- **Confidence**: Low
-```
-
 ---
 
-## Documentation Scan Agent
+### Documentation Scan Agent
 
-**Mission**: Verify documentation accuracy by checking README files, code comments, and examples against actual codebase implementation.
+**Mission**: Verify documentation accuracy by checking README files and examples against actual codebase implementation.
 
-**Scan Targets**: All README.md files, documentation files, and inline code examples
+**Scan Targets**: All README.md files, CLAUDE.md, and documentation files
 
 **Prompt Template:**
 ```
@@ -908,7 +571,7 @@ Common documentation issues:
 - Command examples with incorrect flags or options
 - API documentation showing methods that don't exist
 - File paths that are incorrect or outdated
-- Build outputs documented in wrong locations
+- Export names that don't match actual exports
 - Configuration examples using deprecated formats
 - Missing documentation for new features
 - Examples that would fail if run as-is
@@ -918,43 +581,49 @@ Common documentation issues:
 Systematically verify all README files and documentation against the actual code:
 
 1. **Find all documentation files**:
-   ```bash
-   find . -name "README.md" -o -name "*.md" -path "*/docs/*"
-   ```
+   - README.md (root)
+   - CLAUDE.md (conventions)
+   - docs/*.md (if exists)
 
 2. **For each README, verify**:
-   - Package names match package.json "name" field
-   - Command examples use correct flags (check --help output or source)
+   - Package name matches package.json "name" field
+   - Command examples use correct flags (check scripts in package.json)
+   - Import examples use correct export names (check src/ exports)
    - File paths exist and match actual structure
    - Build output paths match actual build script outputs
    - API examples match actual exported functions/types
-   - Configuration examples match actual schema/validation
    - Version numbers are current (not outdated)
 
 3. **Check against actual code**:
    - Read package.json to verify names, scripts, dependencies
    - Read source files to verify APIs, exports, types
    - Check build scripts to verify output paths
-   - Verify CLI --help matches documented flags
    - Check tests to see what's actually supported
 
 4. **Pattern categories to check**:
 
 <pattern name="package_names">
 Look for:
-- README showing @scope/package when package.json has no scope
-- README showing package-name when package.json shows different name
+- README showing @scope/package when package.json has different scope
 - Installation instructions with wrong package names
 - Import examples using wrong package names
 </pattern>
 
 <pattern name="command_examples">
 Look for:
-- Commands with flags that don't exist (check --help)
+- Commands with flags that don't exist (check package.json scripts)
 - Missing required flags in examples
 - Deprecated flags still documented
 - Examples that would error if run as-is
-- Wrong command names (typos or renamed commands)
+</pattern>
+
+<pattern name="api_documentation">
+Look for:
+- Functions documented that don't exist in exports
+- Parameter types that don't match actual implementation
+- Return types incorrectly documented
+- Missing required parameters in examples
+- Examples using deprecated APIs
 </pattern>
 
 <pattern name="file_paths">
@@ -965,70 +634,34 @@ Look for:
 - Source file references that are outdated
 </pattern>
 
-<pattern name="api_documentation">
-Look for:
-- Functions/methods documented that don't exist in exports
-- Parameter types that don't match actual implementation
-- Return types incorrectly documented
-- Missing required parameters in examples
-- Examples using deprecated APIs
-</pattern>
-
-<pattern name="configuration">
-Look for:
-- Config examples using wrong keys or structure
-- Documented options that aren't validated in code
-- Missing required config fields
-- Wrong default values documented
-- Obsolete configuration formats
-</pattern>
-
-<pattern name="build_outputs">
-Look for:
-- Build output paths that don't match actual outputs
-- File sizes that are significantly outdated
-- Checkpoint names that don't match actual implementation
-- Binary names that are incorrect
-- Missing intermediate build stages
-</pattern>
-
-<pattern name="version_information">
-Look for:
-- Outdated version numbers in examples
-- Dependency versions that don't match package.json
-- Tool version requirements that are incorrect
-- Patch counts that don't match actual patches
-</pattern>
-
 <pattern name="missing_documentation">
 Look for:
 - Public APIs/exports not documented in README
 - Important environment variables not documented
 - New features added but not documented
-- Critical sections (75%+ of package) not mentioned
 </pattern>
 
 <quality_guidelines>
 For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
 
 <thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
+1. Does this documentation actually mislead users?
+   - Verification: [how I verified against actual code]
+   - User impact: [what happens if user follows this]
+   - Result: [MISLEADING/ACCURATE]
 
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
+2. How severe is this inaccuracy?
+   - Error type: [would fail/wrong behavior/confusing]
+   - Likelihood user encounters: [HIGH/MEDIUM/LOW]
+   - Severity: [High/Medium/Low]
 
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
+3. Is this a false positive?
+   - Alternative interpretations: [could this be intentional]
+   - Context: [is there related documentation]
+   - Result: [REPORT/SKIP]
 
 Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
+Decision: [If REPORT, include in findings. If SKIP, explain why]
 </thinking>
 
 Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
@@ -1052,123 +685,621 @@ Severity Guidelines:
 - Low: Minor inaccuracies or missing non-critical information
 
 Example:
-File: packages/binject/README.md:46
-Issue: Incorrect description of NODE_SEA section compression format
-Severity: High
-Pattern: "NODE_SEA - Compressed application code (Brotli, ~70-80% reduction)"
-Actual: NODE_SEA contains uncompressed blobs generated by Node.js itself, not Brotli-compressed data
-Fix: Change to: "NODE_SEA - Single Executable Application code (generated by Node.js)"
-Impact: Misleads developers about the actual format, causing confusion when inspecting binaries
-
-Example:
 File: README.md:25
-Issue: Incorrect package name in build command
+Issue: Incorrect import example
 Severity: High
-Pattern: "pnpm --filter @socketbin/node-smol-builder run build"
-Actual: package.json shows "name": "node-smol-builder" without @socketbin scope
-Fix: Change to: "pnpm --filter node-smol-builder run build"
-Impact: Command will fail with "No projects matched" error
-
-Example:
-File: packages/build-infra/README.md:14
-Issue: References non-existent module name
-Severity: Medium
-Pattern: "paths - Standard directory structure"
-Actual: Module is exported as "path-builder" in package.json exports
-Fix: Change to: "path-builder - Standard directory structure"
-Impact: Developers looking for "paths" module will not find it
-
-Example:
-File: packages/binject/README.md:227
-Issue: Incorrect config size documented
-Severity: Low
-Pattern: "Config stored in binary format (1112 bytes)"
-Actual: Config is 1176 bytes (verified in source code)
-Fix: Change to: "Config stored in binary format (1176 bytes)"
-Impact: Minor inaccuracy in technical specification
+Pattern: `import { httpGetJson } from '@socketsecurity/lib/http-request'`
+Actual: Function is named `httpJson`, not `httpGetJson`
+Fix: Change to: `import { httpJson } from '@socketsecurity/lib/http-request'`
+Impact: Import fails with "Named export 'httpGetJson' not found" error
 </output_format>
 
 <quality_guidelines>
 - Verify every claim against actual code - don't assume documentation is correct
-- Read package.json files to check names, scripts, versions
-- Run --help commands to verify CLI flags when possible
+- Read package.json to check names, scripts, versions
 - Check exports in source files to verify APIs
-- Look at build script outputs to verify paths
 - Focus on high-impact errors first (wrong commands, non-existent APIs)
-- Report missing documentation for major features (not every minor detail)
-- Group related issues (e.g., "5 packages using @scope incorrectly")
 - Provide exact fixes, not vague suggestions
-- If a README is mostly missing (75%+ of package undocumented), report as single high-severity issue
 </quality_guidelines>
 
-Scan all README.md files in the repository and report all documentation inaccuracies found. If documentation is accurate, state that explicitly.
+Scan all README.md files and documentation and report all inaccuracies found. If documentation is accurate, state that explicitly.
 ```
 
-### Example Documentation Scan Output
+---
+
+### ESM/CJS Interop Scan Agent
+
+**Mission**: Verify Node.js ESM/CJS interoperability for the library, ensuring named exports work correctly when imported from ESM code.
+
+**Scan Targets**: All `dist/*.js` files and `package.json` exports configuration
+
+**Prompt Template:**
+```
+Your task is to verify ESM/CJS interoperability for socket-lib, ensuring that ESM code can properly import named exports from the CommonJS modules.
+
+<context>
+Node.js 22+ has stricter ESM/CJS interoperability requirements. When ESM code imports a CommonJS module using:
+
+```javascript
+import { namedExport } from '@socketsecurity/lib/module'
+```
+
+Node.js uses static analysis to detect named exports from the CJS module. This works when:
+1. The CJS module has ESM interop annotations (esbuild's `0 && (module.exports = {...})`)
+2. The package.json exports field properly maps modules
+3. Named exports are used (not default exports)
+
+**The ESM interop annotation is critical:**
+```javascript
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  functionA,
+  functionB,
+  functionC
+})
+```
+
+This annotation at the end of each CJS file tells Node.js which named exports are available, enabling `import { functionA } from 'package'` syntax.
+
+Common interop failures:
+- Missing ESM interop annotation in dist/*.js files
+- Annotation lists different exports than actual module.exports
+- CJS module uses `module.exports = value` instead of object with named exports
+- package.json exports missing "types" condition before "default"
+- Default export confusion: module only exports `{ default: value }`
+
+socket-lib architecture:
+- TypeScript source compiled to CommonJS via esbuild
+- esbuild adds ESM interop annotations automatically
+- package.json exports field maps subpath imports
+- Type definitions (.d.ts) generated alongside .js files
+- Named exports pattern required (no default exports per CLAUDE.md)
+</context>
+
+<instructions>
+Verify ESM/CJS interoperability across the package:
+
+<pattern name="esm_interop_annotation">
+Check dist/*.js files for ESM interop annotations:
+- ✓ GOOD: File ends with `0 && (module.exports = { export1, export2, ... })`
+- ✗ BAD: Missing annotation entirely
+- ✗ BAD: Annotation lists exports that don't match actual exports
+- ✗ BAD: Annotation is malformed or incomplete
+
+Verify the annotation exists and matches actual exports:
+```javascript
+// Expected pattern at end of file:
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  httpDownload,
+  httpJson,
+  httpRequest,
+  httpText
+});
+```
+</pattern>
+
+<pattern name="cjs_export_format">
+Check that modules use proper named exports pattern:
+- ✓ GOOD: `module.exports = __toCommonJS(exports)` with ESM annotation
+- ✓ GOOD: `__export(exports, { foo: () => foo, bar: () => bar })`
+- ✗ BAD: `module.exports = singleValue` - Cannot destructure named imports
+- ✗ BAD: `module.exports.default = value` - Only default export available
+</pattern>
+
+<pattern name="package_json_exports">
+Check package.json exports field for proper configuration:
+- Each export should have "types" before "default" (TypeScript resolution)
+- Export paths should match actual dist file structure
+- No duplicate exports for same file
+- Verify exported files actually exist in dist/
+
+Example of correct exports:
+```json
+"./module": {
+  "types": "./dist/module.d.ts",
+  "default": "./dist/module.js"
+}
+```
+</pattern>
+
+<pattern name="type_definitions">
+Check .d.ts files match .js exports:
+- Every named export in .js should have corresponding type declaration
+- Type exports should use `export declare function/const/class`
+- No `export default` in type definitions (breaks CJS interop)
+</pattern>
+
+<pattern name="actual_esm_import_test">
+Test actual ESM imports work (run via node -e):
+```bash
+# Test named import
+node -e "import { exportName } from './dist/module.js'; console.log(typeof exportName)"
+
+# List available exports
+node -e "import('./dist/module.js').then(m => console.log(Object.keys(m).filter(k => k !== 'default')))"
+```
+
+Common errors to detect:
+- "Named export 'X' not found" - Export doesn't exist or annotation missing
+- Module has only `default` in exports (synthetic default from CJS)
+</pattern>
+
+<quality_guidelines>
+For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
+
+<thinking>
+1. Does this actually break ESM imports?
+   - Test the import: [actual node command or code analysis]
+   - Error message: [what error would users see]
+   - Result: [BREAKS/WORKS]
+
+2. What's the user-facing symptom?
+   - Import statement: [what user would write]
+   - Expected behavior: [what should happen]
+   - Actual behavior: [what happens]
+   - Likelihood: [HIGH/MEDIUM/LOW - how common is this import pattern]
+
+3. Is there a workaround or is this blocking?
+   - Workaround: [alternative import syntax if any]
+   - Severity: [BLOCKING - no workaround / DEGRADED - has workaround]
+
+Overall assessment: [REPORT/SKIP]
+Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
+</thinking>
+
+Only report issues that actually break ESM imports. Use `<thinking>` tags to show your reasoning explicitly.
+</quality_guidelines>
+</instructions>
+
+<output_format>
+For each finding, report:
+
+File: dist/module.js or package.json:exports
+Issue: [One-line description of the interop problem]
+Severity: Critical | High | Medium
+Import: [The import statement that fails]
+Error: [The error message users would see]
+Pattern: [The problematic code or config]
+Fix: [Specific change to resolve]
+Impact: [User-facing consequence]
+
+Severity Guidelines:
+- Critical: Named imports completely broken (SyntaxError, module not found)
+- High: Named imports require workaround (import default then destructure)
+- Medium: Type definitions don't match exports (TypeScript errors only)
+
+Example:
+File: dist/legacy-api.js
+Issue: Missing ESM interop annotation
+Severity: Critical
+Import: `import { legacyHelper } from '@socketsecurity/lib/legacy-api'`
+Error: "Named export 'legacyHelper' not found. The requested module is a CommonJS module, which may not support all module.exports as named exports."
+Pattern: File missing `0 && (module.exports = { legacyHelper })` annotation
+Fix: Rebuild with esbuild which adds annotations automatically, or add annotation manually
+Impact: Users must use workaround: `import pkg from '@socketsecurity/lib/legacy-api'; const { legacyHelper } = pkg`
+
+Example:
+File: dist/http-request.js
+Issue: ESM annotation missing export
+Severity: High
+Import: `import { httpDownload } from '@socketsecurity/lib/http-request'`
+Error: "Named export 'httpDownload' not found"
+Pattern: Annotation has `0 && (module.exports = { httpJson, httpRequest })` but missing httpDownload
+Fix: Update build to include all exports in annotation
+Impact: httpDownload not importable via named import despite being exported
+</output_format>
+
+<quality_guidelines>
+- Run actual ESM import tests using node -e when possible
+- Verify package.json exports against actual dist/ contents
+- Check both .js and .d.ts files for each exported module
+- Focus on named imports (the common pattern) over default imports
+- Prioritize issues that produce runtime errors over TypeScript-only issues
+- Test on Node.js 22+ which has stricter interop requirements
+- The ESM interop annotation is THE key thing to verify
+</quality_guidelines>
+
+Scan all exported modules and verify ESM/CJS interoperability. Report all issues found. If all exports work correctly with the ESM interop annotations present, state that explicitly.
+```
+
+---
+
+## Scan Configuration
+
+### Severity Levels
+
+| Level | Description | Action Required |
+|-------|-------------|-----------------|
+| **Critical** | Crashes, security vulnerabilities, data corruption | Fix immediately |
+| **High** | Logic errors, incorrect output, ESM interop broken | Fix before release |
+| **Medium** | Performance issues, edge case bugs | Fix in next sprint |
+| **Low** | Code smells, minor inconsistencies | Fix when convenient |
+
+### Scan Priority Order
+
+1. **critical** - Most important, run first
+2. **logic** - Utility correctness critical for all consumers
+3. **esm-interop** - Named imports must work for all consumers
+4. **external-bundles** - Vendored dependencies must be self-contained
+5. **workflow** - Build and CI stability
+6. **security** - GitHub Actions security
+7. **documentation** - Developer experience
+
+### Coverage Targets
+
+- **critical**: All src/*.ts files
+- **logic**: src/ utilities, path handling, HTTP client
+- **esm-interop**: All dist/*.js files, package.json exports
+- **external-bundles**: dist/external/*.js, package.json overrides/catalog
+- **workflow**: scripts/, package.json, .github/workflows/
+- **security**: .github/workflows/*.yml
+- **documentation**: README.md, CLAUDE.md, docs/
+
+---
+
+## Report Format
+
+### Structured Findings
+
+Each finding should include:
+```typescript
+{
+  file: "src/http-request.ts:89",
+  issue: "Missing ESM interop annotation",
+  severity: "Critical",
+  scanType: "esm-interop",
+  pattern: "File ends without 0 && (module.exports = {...})",
+  fix: "Rebuild with esbuild or add annotation manually",
+  impact: "Named imports fail for this module"
+}
+```
+
+### Example Report Output
 
 ```markdown
-## Documentation Issues - 8 found
+# Quality Scan Report
 
-### High Severity - 3 issues
+**Date:** 2026-03-02
+**Scans:** critical, logic, esm-interop, workflow
+**Files Scanned:** 144
+**Findings:** 0 critical, 1 high, 2 medium, 1 low
 
-#### README.md:25
-- **Issue**: Incorrect package name in build command
-- **Pattern**: `pnpm --filter @socketbin/node-smol-builder run build`
-- **Actual**: package.json shows `"name": "node-smol-builder"` without scope
-- **Fix**: Change to: `pnpm --filter node-smol-builder run build`
-- **Impact**: Command fails with "No projects matched" error
+## High Issues (Priority 2) - 1 found
 
-#### packages/binject/README.md:100
-- **Issue**: Documents obsolete --update-config flag
-- **Pattern**: `binject inject -e ./node-smol -o ./my-app --sea app.blob --update-config update-config.json`
-- **Actual**: Flag was removed, config now embedded via sea-config.json smol.update section
-- **Fix**: Remove --update-config example, document sea-config.json approach instead
-- **Impact**: Users will get "unknown flag" error, approach no longer works
+### dist/deprecated-module.js
+- **Issue**: Missing ESM interop annotation
+- **Pattern**: File ends without `0 && (module.exports = {...})` annotation
+- **Fix**: Remove deprecated module or rebuild with esbuild
+- **Impact**: Named imports fail: `import { helper } from '@socketsecurity/lib/deprecated-module'`
+- **Scan**: esm-interop
 
-#### packages/build-infra/README.md:12
-- **Issue**: Documents non-existent "c-package" builder
-- **Pattern**: "*-builder - Build strategies (cmake, rust, emscripten, c-package)"
-- **Actual**: No c-package-builder.mjs exists; actual builders are: cmake, rust, emscripten, docker, clean
-- **Fix**: List actual builders: "cmake, rust, emscripten, docker, clean"
-- **Impact**: Users looking for c-package builder will be confused
+## Medium Issues (Priority 3) - 2 found
 
-### Medium Severity - 3 issues
+### src/paths/normalize.ts:45
+- **Issue**: Path normalization inconsistent on Windows
+- **Edge Case**: UNC paths starting with \\\\
+- **Pattern**: `path.replace(/\\\\/g, '/')`
+- **Fix**: Use path.normalize() before replacing separators
+- **Impact**: UNC paths become invalid
 
-#### packages/binject/README.md:62
-- **Issue**: Output path missing build mode variants
-- **Pattern**: "Outputs to `build/prod/out/Final/binject`"
-- **Actual**: Build system supports both dev and prod modes: `build/{dev|prod}/out/Final/binject`
-- **Fix**: Change to: "Outputs to `build/{dev|prod}/out/Final/binject`"
-- **Impact**: Confusing for developers doing dev builds
+### scripts/build/main.mjs:23
+- **Issue**: Uses process.exit() violating CLAUDE.md convention
+- **Pattern**: `process.exit(1)`
+- **Fix**: `throw new Error('Build failed: ...')`
+- **Impact**: Cannot test error handling properly
 
-#### packages/node-smol-builder/README.md:182
-- **Issue**: Incorrect patch count
-- **Pattern**: "Applies 13 patches to Node.js source"
-- **Actual**: Only 12 patches in patches/source-patched/ directory
-- **Fix**: Change to: "Applies 12 patches to Node.js source"
-- **Impact**: Minor discrepancy in technical details
+## Scan Coverage
+- **Critical scan**: 89 files analyzed in src/
+- **Logic scan**: 89 files analyzed
+- **ESM interop scan**: 144 dist files analyzed
+- **Workflow scan**: 15 scripts + package.json + CI workflows
 
-#### packages/bin-infra/README.md:1-21
-- **Issue**: Missing 75% of package contents in documentation
-- **Pattern**: Only documents src/ and make/, omits lib/, test/, scripts/, upstream/, patches/
-- **Actual**: Package has extensive JavaScript API (lib/), test utilities, build scripts, and upstream dependencies
-- **Fix**: Add comprehensive documentation of all 17 C files, 3 JS modules with API examples, test helpers, scripts, and upstream submodules
-- **Impact**: Developers unaware of most package functionality
+## Verified Working
+- ESM interop annotations present in all 144 dist/*.js files
+- All 100+ package.json exports have matching dist files
+- Named imports verified working for key modules
 
-### Low Severity - 2 issues
-
-#### packages/binject/README.md:227
-- **Issue**: Incorrect config size
-- **Pattern**: "1112 bytes"
-- **Actual**: Config is 1176 bytes (verified in source)
-- **Fix**: Change all occurrences to: "1176 bytes"
-- **Impact**: Minor technical inaccuracy
-
-#### packages/binflate/README.md:18
-- **Issue**: Claims caching functionality
-- **Pattern**: "Uses cache at ~/.socket/_dlx/"
-- **Actual**: binflate only extracts; self-extracting stubs (not binflate) implement caching
-- **Fix**: Clarify that binflate extracts only, stubs handle caching
-- **Impact**: Confusion about which component caches
+## Recommendations
+1. Address high-severity ESM interop issue before release
+2. Fix path normalization edge case for Windows users
+3. Update build script to use throw instead of process.exit()
 ```
 
+---
+
+### External Bundles Scan Agent
+
+**Mission**: Verify vendored external dependencies in dist/external/ are properly bundled without hidden requires to node_modules, check for duplicate bundled code, and ensure pnpm overrides/catalog are used for deduplication.
+
+**Scan Targets**: `dist/external/*.js`, `package.json` (dependencies, overrides, catalog)
+
+**Prompt Template:**
+```
+Your task is to verify the integrity of vendored external dependencies in socket-lib, ensuring bundles are self-contained without hidden requires to node_modules packages, checking for duplicate bundled code, and verifying pnpm overrides/catalog are used for deduplication.
+
+<context>
+socket-lib vendors external npm packages into dist/external/ as zero-dependency bundles. This allows:
+- Consumers to use these packages without installing them directly
+- Consistent versions across all Socket.dev tools
+- Reduced dependency tree complexity
+
+**How external bundles work:**
+- Source type definitions: src/external/*.d.ts
+- Built bundles: dist/external/*.js (esbuild bundled, zero external deps)
+- Build script: scripts/build-externals/ (esbuild bundling)
+
+**What bundles should contain:**
+- All dependencies fully inlined (no require() to node_modules packages)
+- Only Node.js built-ins allowed as external requires (node:fs, node:path, etc.)
+- ESM interop annotations for named exports
+
+**What bundles should NOT contain:**
+- require("package-name") where package-name is in node_modules
+- require("which"), require("debug"), etc. - these should be bundled inline
+- Duplicate code that could be shared via pnpm overrides
+
+**pnpm deduplication:**
+- pnpm.overrides in package.json forces specific versions
+- pnpm.catalog (pnpm-workspace.yaml) provides workspace-wide version catalog
+- Deduplication reduces bundle sizes and ensures consistency
+</context>
+
+<instructions>
+Verify external bundle integrity across these categories:
+
+<pattern name="hidden_requires">
+Check dist/external/*.js for require() calls to non-bundled packages:
+
+**Allowed requires (Node.js built-ins):**
+- require("node:fs"), require("node:path"), require("node:url"), etc.
+- require("fs"), require("path"), require("os"), require("crypto"), etc.
+- require("stream"), require("events"), require("child_process"), etc.
+- require("module") for builtinModules
+
+**Forbidden requires (should be bundled):**
+- require("which") - external package, must be bundled
+- require("debug") - external package, must be bundled
+- require("semver") - external package, must be bundled
+- require("any-npm-package") - all external deps must be inlined
+
+**Detection method:**
+```bash
+# Find require() calls that are NOT node built-ins and NOT __commonJS wrappers
+grep -n 'require("' dist/external/*.js | \
+  grep -v 'node_modules/.pnpm' | \
+  grep -v 'node:' | \
+  grep -v '__require' | \
+  grep -v '__commonJS' | \
+  grep -v 'require("fs' | \
+  grep -v 'require("path' | \
+  grep -v 'require("os' | \
+  grep -v 'require("url' | \
+  grep -v 'require("crypto' | \
+  grep -v 'require("stream' | \
+  grep -v 'require("events' | \
+  grep -v 'require("child_process' | \
+  grep -v 'require("module'
+```
+
+Any remaining require() calls are potentially problematic.
+</pattern>
+
+<pattern name="duplicate_bundles">
+Check for code that's bundled multiple times across external bundles:
+
+**Detection:**
+- Same package bundled in multiple dist/external/*.js files
+- Large shared dependencies (semver, debug, etc.) appearing multiple times
+- Bundle size analysis showing unnecessary duplication
+
+**Check bundle sizes:**
+```bash
+ls -la dist/external/*.js | sort -k5 -n
+```
+
+Large bundles (>100KB) may indicate unnecessary duplication.
+
+**Check for common duplicated packages:**
+- semver (version comparison)
+- debug (logging)
+- which (executable finding)
+- signal-exit (exit handling)
+
+If same package appears in multiple bundles, consider:
+1. Creating shared bundle (e.g., npm-pack.js exports semver for others)
+2. Using re-export pattern: `const { semver } = require('./npm-pack')`
+</pattern>
+
+<pattern name="pnpm_overrides">
+Check package.json pnpm.overrides for deduplication:
+
+**What to verify:**
+- Common transitive dependencies have overrides to force single version
+- Overrides match versions in devDependencies
+- No conflicting versions that could cause issues
+
+**Example good overrides:**
+```json
+"pnpm": {
+  "overrides": {
+    "semver": "7.7.2",
+    "debug": "4.4.3",
+    "which": "5.0.0",
+    "signal-exit": "4.1.0"
+  }
+}
+```
+
+**Check for missing overrides:**
+Look at transitive dependencies that might have multiple versions:
+```bash
+pnpm ls --depth 3 | grep -E "semver|debug|which|signal-exit"
+```
+
+Multiple versions of same package = needs override.
+</pattern>
+
+<pattern name="pnpm_catalog">
+Check for pnpm catalog usage (workspace-wide version management):
+
+**Location:** pnpm-workspace.yaml (if exists)
+**Purpose:** Define versions once, use across workspace
+
+**Example catalog:**
+```yaml
+catalog:
+  semver: 7.7.2
+  debug: 4.4.3
+```
+
+**Benefits:**
+- Single source of truth for versions
+- Automatic deduplication
+- Easier updates
+</pattern>
+
+<pattern name="bundle_exports">
+Check that external bundles are properly exported in package.json:
+
+**For each dist/external/*.js file:**
+1. Should have corresponding export in package.json
+2. Should have type definitions (dist/external/*.d.ts or src/external/*.d.ts)
+3. ESM interop annotation should be present
+
+**Check package.json exports for externals:**
+Look for missing exports where dist/external/foo.js exists but no ./external/foo export.
+</pattern>
+
+<quality_guidelines>
+For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
+
+<thinking>
+1. Is this actually a problem?
+   - Require target: [what package is being required]
+   - Is it a Node.js built-in: [yes/no]
+   - Should it be bundled: [yes/no with reason]
+   - Result: [PROBLEM/OK]
+
+2. What's the impact?
+   - Runtime error: [would this cause require() to fail at runtime]
+   - Bundle size: [unnecessary duplication impact]
+   - Consistency: [version mismatch risks]
+   - Severity: [Critical/High/Medium/Low]
+
+3. Is there an existing solution?
+   - Already in overrides: [check package.json]
+   - Already shared via re-export: [check bundle structure]
+   - Result: [NEEDS_FIX/ALREADY_HANDLED]
+
+Overall assessment: [REPORT/SKIP]
+Decision: [If REPORT, include in findings. If SKIP, explain why]
+</thinking>
+
+Only report issues that would cause runtime errors or significant bundle bloat.
+</quality_guidelines>
+</instructions>
+
+<output_format>
+For each finding, report:
+
+File: dist/external/bundle-name.js:lineNumber (or package.json)
+Issue: [One-line description]
+Severity: Critical | High | Medium
+Category: hidden-require | duplicate-bundle | missing-override | missing-export
+Pattern: [The problematic code or configuration]
+Fix: [Specific change to resolve]
+Impact: [User-facing consequence]
+
+Severity Guidelines:
+- Critical: Hidden require that will fail at runtime (package not in node_modules)
+- High: Significant duplicate bundling (>50KB duplicated) or missing override causing version conflicts
+- Medium: Minor duplication or missing catalog entry
+
+Example - Hidden Require:
+File: dist/external/npm-pack.js:10115
+Issue: Hidden require to unbundled 'which' package
+Severity: Critical
+Category: hidden-require
+Pattern: `var which = require("which")`
+Fix: Add 'which' to esbuild bundle configuration or mark as external with peer dependency
+Impact: Runtime error "Cannot find module 'which'" when package is used without which installed
+
+Example - Duplicate Bundle:
+File: dist/external/pacote.js, dist/external/npm-pack.js
+Issue: 'semver' bundled in both files (~25KB each)
+Severity: Medium
+Category: duplicate-bundle
+Pattern: Both bundles contain full semver implementation
+Fix: Export semver from npm-pack.js, use re-export in pacote.js: `const { semver } = require('./npm-pack')`
+Impact: ~25KB unnecessary bundle size increase
+
+Example - Missing Override:
+File: package.json
+Issue: No pnpm override for 'debug' causing multiple versions
+Severity: High
+Category: missing-override
+Pattern: pnpm ls shows debug@4.3.4 and debug@4.4.3 in tree
+Fix: Add `"debug": "4.4.3"` to pnpm.overrides
+Impact: Inconsistent debug versions, potential bundle duplication
+</output_format>
+
+<quality_guidelines>
+- Run actual grep/find commands to detect hidden requires
+- Check bundle sizes to identify duplication
+- Verify pnpm ls output for version conflicts
+- Focus on issues causing runtime errors (Critical) over bundle size (Medium)
+- Consider re-export pattern as preferred fix for duplication
+- Node.js built-ins are always allowed (don't flag require("fs"))
+</quality_guidelines>
+
+Scan all external bundles and verify integrity. Report all issues found. If all bundles are properly self-contained, state that explicitly.
+```
+
+### Example External Bundles Scan Output
+
+```markdown
+## External Bundles Issues - 3 found
+
+### Critical Severity - 1 issue
+
+#### dist/external/npm-pack.js:10115
+- **Issue**: Hidden require to unbundled 'which' package
+- **Category**: hidden-require
+- **Pattern**: `var which = require("which")` (line 10115, 10939)
+- **Fix**: Add 'which' to esbuild bundle entry points or use existing dist/external/which.js
+- **Impact**: Runtime error if consumer doesn't have 'which' installed
+
+### High Severity - 1 issue
+
+#### package.json
+- **Issue**: Missing pnpm override for 'lru-cache'
+- **Category**: missing-override
+- **Pattern**: pnpm ls shows lru-cache@7.18.3 and lru-cache@11.2.2
+- **Fix**: Add `"lru-cache": "11.2.2"` to pnpm.overrides
+- **Impact**: Potential version conflicts and bundle duplication
+
+### Medium Severity - 1 issue
+
+#### dist/external/pacote.js + dist/external/cacache.js
+- **Issue**: 'ssri' implementation duplicated in both bundles
+- **Category**: duplicate-bundle
+- **Pattern**: Both contain ~15KB of ssri code
+- **Fix**: Create dist/external/ssri.js and use re-export pattern
+- **Impact**: ~15KB unnecessary bundle size
+
+### ✓ Verified Working
+
+The following aspects passed validation:
+- 45 external bundles have ESM interop annotations
+- All external bundles have corresponding package.json exports
+- Node.js built-in requires are properly used (node:fs, node:path, etc.)
+- pnpm.overrides covers 16 common dependencies
+
+### Deduplication Recommendations
+
+Consider adding these to pnpm.overrides for better deduplication:
+- minipass (used by cacache, pacote, make-fetch-happen)
+- @npmcli/fs (used by multiple npm packages)
+- proc-log (used by npm ecosystem packages)
+```

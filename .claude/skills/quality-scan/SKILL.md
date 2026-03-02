@@ -1,33 +1,35 @@
 ---
 name: quality-scan
-description: Cleans up junk files (SCREAMING_TEXT.md, temp files) and performs comprehensive quality scans across codebase to identify critical bugs, logic errors, caching issues, and workflow problems. Spawns specialized agents for targeted analysis and generates prioritized improvement tasks. Use when improving code quality, before releases, or investigating issues.
+description: Cleans up junk files (SCREAMING_TEXT.md, temp files) and performs comprehensive quality scans across codebase to identify critical bugs, logic errors, ESM/CJS interop issues, and workflow problems. Spawns specialized agents for targeted analysis and generates prioritized improvement tasks. Use when improving code quality, before releases, or investigating issues. (project)
 ---
 
 # quality-scan
 
 <task>
-Your task is to perform comprehensive quality scans across the socket-btm codebase using specialized agents to identify critical bugs, logic errors, caching issues, and workflow problems. Before scanning, clean up junk files (SCREAMING_TEXT.md files, temporary test files, etc.) to ensure a clean and organized repository. Generate a prioritized report with actionable improvement tasks.
+Your task is to perform comprehensive quality scans across the socket-lib codebase using specialized agents to identify critical bugs, logic errors, ESM/CJS interop issues, and workflow problems. Before scanning, clean up junk files to ensure a clean and organized repository. Generate a prioritized report with actionable improvement tasks.
 </task>
 
 <context>
 **What is Quality Scanning?**
 Quality scanning uses specialized AI agents to systematically analyze code for different categories of issues. Each agent type focuses on specific problem domains and reports findings with severity levels and actionable fixes.
 
-**socket-btm Architecture:**
-This is Socket Security's binary tooling manager (BTM) that:
-- Builds custom Node.js binaries with Socket Security patches
-- Manages Node.js versions and patch synchronization
-- Produces minimal Node.js builds (node-smol-builder)
-- Processes upstream Node.js source code and applies security patches
-- Supports production deployments with patched Node.js
+**socket-lib Architecture:**
+This is Socket Security's core infrastructure library that:
+- Provides shared utilities for all Socket.dev security tools
+- Implements HTTP client, file system utilities, logging, and spawning
+- Exports CommonJS modules with ESM interop annotations for Node.js compatibility
+- Uses TypeScript compiled via esbuild to CommonJS
+- Provides typed environment variable access and path utilities
+- Supports cross-platform operations (Windows, macOS, Linux)
 
 **Scan Types Available:**
 1. **critical** - Crashes, security vulnerabilities, resource leaks, data corruption
 2. **logic** - Algorithm errors, edge cases, type guards, off-by-one errors
-3. **cache** - Cache staleness, race conditions, invalidation bugs
-4. **workflow** - Build scripts, CI issues, cross-platform compatibility
-5. **security** - GitHub Actions workflow security (zizmor scanner)
-6. **documentation** - README accuracy, outdated docs, missing documentation
+3. **workflow** - Build scripts, CI issues, cross-platform compatibility
+4. **security** - GitHub Actions workflow security (zizmor scanner)
+5. **documentation** - README accuracy, outdated docs, missing documentation
+6. **esm-interop** - Node.js ESM/CJS interoperability, named exports, module format hints
+7. **external-bundles** - Vendored external dependencies: hidden requires, duplicate bundles, deduplication via pnpm overrides/catalog
 
 **Why Quality Scanning Matters:**
 - Catches bugs before they reach production
@@ -35,6 +37,7 @@ This is Socket Security's binary tooling manager (BTM) that:
 - Improves code quality systematically
 - Provides actionable fixes with file:line references
 - Prioritizes issues by severity for efficient remediation
+- Ensures ESM/CJS interop works for all consumers
 - Cleans up junk files for a well-organized repository
 
 **Agent Prompts:**
@@ -45,7 +48,7 @@ All agent prompts are embedded in `reference.md` with structured <context>, <ins
 **CRITICAL Requirements:**
 - Read-only analysis (no code changes during scan)
 - Must complete all enabled scans before reporting
-- Findings must be prioritized by severity (Critical → High → Medium → Low)
+- Findings must be prioritized by severity (Critical -> High -> Medium -> Low)
 - Must generate actionable tasks with file:line references
 - All findings must include suggested fixes
 
@@ -56,7 +59,7 @@ All agent prompts are embedded in `reference.md` with structured <context>, <ins
 - Proceed if codebase has uncommitted changes (warn but continue)
 
 **Do ONLY:**
-- Run enabled scan types in priority order (critical → logic → cache → workflow)
+- Run enabled scan types in priority order (critical -> logic -> esm-interop -> workflow)
 - Generate structured findings with severity levels
 - Provide actionable improvement tasks with specific code changes
 - Report statistics and coverage metrics
@@ -177,10 +180,11 @@ Ask user which scans to run:
 **Default Scan Types** (run all unless user specifies):
 1. **critical** - Critical bugs (crashes, security, resource leaks)
 2. **logic** - Logic errors (algorithms, edge cases, type guards)
-3. **cache** - Caching issues (staleness, races, invalidation)
-4. **workflow** - Workflow problems (scripts, CI, git hooks)
-5. **security** - GitHub Actions security (template injection, cache poisoning, etc.)
-6. **documentation** - Documentation accuracy (README errors, outdated docs)
+3. **workflow** - Workflow problems (scripts, CI, git hooks)
+4. **security** - GitHub Actions security (template injection, cache poisoning, etc.)
+5. **documentation** - Documentation accuracy (README errors, outdated docs)
+6. **esm-interop** - ESM/CJS compatibility (named exports, module format hints)
+7. **external-bundles** - External bundle integrity (hidden requires, duplicates, deduplication)
 
 **User Interaction:**
 Use AskUserQuestion tool:
@@ -188,21 +192,22 @@ Use AskUserQuestion tool:
 - Header: "Scan Types"
 - multiSelect: true
 - Options:
-  - "All scans (recommended)" → Run all 4 scan types
-  - "Critical only" → Run critical scan only
-  - "Critical + Logic" → Run critical and logic scans
-  - "Custom selection" → Ask user to specify which scans
+  - "All scans (recommended)" -> Run all scan types
+  - "Critical only" -> Run critical scan only
+  - "Critical + Logic" -> Run critical and logic scans
+  - "Custom selection" -> Ask user to specify which scans
 
 **Default:** If user doesn't specify, run all scans.
 
 <validation>
 Validate selected scan types exist in reference.md:
-- critical-scan → reference.md line ~5
-- logic-scan → reference.md line ~100
-- cache-scan → reference.md line ~200
-- workflow-scan → reference.md line ~300
-- security-scan → reference.md line ~400
-- documentation-scan → reference.md line ~810
+- critical-scan -> reference.md line ~5
+- logic-scan -> reference.md line ~150
+- workflow-scan -> reference.md line ~300
+- security-scan -> reference.md line ~450
+- documentation-scan -> reference.md line ~600
+- esm-interop-scan -> reference.md line ~800
+- external-bundles-scan -> reference.md line ~1000
 
 If user requests non-existent scan type, report error and suggest valid types.
 </validation>
@@ -222,10 +227,18 @@ Task({
   description: "Critical bugs scan",
   prompt: `${CRITICAL_SCAN_PROMPT_FROM_REFERENCE_MD}
 
-Focus on packages/node-smol-builder/ directory and root-level scripts/.
+Focus on src/ directory (utilities, HTTP client, file system operations).
+
+Library-specific patterns to check:
+- HTTP client error handling (src/http-request.ts)
+- File system operations (src/fs.ts)
+- Spawn utilities (src/spawn.ts)
+- Promise handling and retry logic
+- JSON parsing errors
+- Cross-platform path handling
 
 Report findings in this format:
-- File: path/to/file.mts:lineNumber
+- File: path/to/file.ts:lineNumber
 - Issue: Brief description
 - Severity: Critical/High/Medium/Low
 - Pattern: Code snippet
@@ -239,7 +252,7 @@ Scan systematically and report all findings. If no issues found, state that expl
 
 **For each scan:**
 1. Load agent prompt template from `reference.md`
-2. Customize for socket-btm context (focus on packages/node-smol-builder/, scripts/, patches/)
+2. Customize for socket-lib context (focus on src/, scripts/, test/)
 3. Spawn agent with Task tool using "general-purpose" subagent_type
 4. Capture findings from agent response
 5. Parse and categorize results
@@ -247,49 +260,25 @@ Scan systematically and report all findings. If no issues found, state that expl
 **Execution Order:** Run scans sequentially in priority order:
 - critical (highest priority)
 - logic
-- cache
-- workflow (lowest priority)
+- esm-interop
+- external-bundles
+- workflow
+- security
+- documentation (lowest priority)
 
 **Agent Prompt Sources:**
 - Critical scan: reference.md starting at line ~12
-- Logic scan: reference.md starting at line ~100
-- Cache scan: reference.md starting at line ~200
+- Logic scan: reference.md starting at line ~150
 - Workflow scan: reference.md starting at line ~300
-- Security scan: reference.md starting at line ~400
-- Documentation scan: reference.md starting at line ~810
+- Security scan: reference.md starting at line ~450
+- Documentation scan: reference.md starting at line ~600
+- ESM interop scan: reference.md starting at line ~800
+- External bundles scan: reference.md starting at line ~1000
 
 <validation>
 **Structured Output Validation:**
 
 After each agent returns, validate output structure before parsing:
-
-```bash
-# 1. Verify agent completed successfully
-if [ -z "$AGENT_OUTPUT" ]; then
-  echo "ERROR: Agent returned no output"
-  exit 1
-fi
-
-# 2. Check for findings or clean report
-if ! echo "$AGENT_OUTPUT" | grep -qE '(File:.*Issue:|No .* issues found|✓ Clean)'; then
-  echo "WARNING: Agent output missing expected format"
-  echo "Agent may have encountered an error or found no issues"
-fi
-
-# 3. Verify severity levels if findings exist
-if echo "$AGENT_OUTPUT" | grep -q "File:"; then
-  if ! echo "$AGENT_OUTPUT" | grep -qE 'Severity: (Critical|High|Medium|Low)'; then
-    echo "WARNING: Findings missing severity classification"
-  fi
-fi
-
-# 4. Verify fix suggestions if findings exist
-if echo "$AGENT_OUTPUT" | grep -q "File:"; then
-  if ! echo "$AGENT_OUTPUT" | grep -q "Fix:"; then
-    echo "WARNING: Findings missing suggested fixes"
-  fi
-fi
-```
 
 **Manual Verification Checklist:**
 - [ ] Agent output includes findings OR explicit "No issues found" statement
@@ -316,7 +305,7 @@ Collect all findings from agents and aggregate:
 
 ```typescript
 interface Finding {
-  file: string           // "packages/node-smol-builder/src/patcher.mts:89"
+  file: string           // "src/http-request.ts:89"
   issue: string          // "Potential null pointer access"
   severity: "Critical" | "High" | "Medium" | "Low"
   scanType: string       // "critical"
@@ -333,7 +322,7 @@ interface Finding {
 - Track which scans found the same issue
 
 **Prioritization:**
-- Sort by severity: Critical → High → Medium → Low
+- Sort by severity: Critical -> High -> Medium -> Low
 - Within same severity, sort by scanType priority
 - Within same severity+scanType, sort alphabetically by file path
 
@@ -357,19 +346,19 @@ Create structured quality report with all findings:
 # Quality Scan Report
 
 **Date:** YYYY-MM-DD
-**Repository:** socket-btm
+**Repository:** socket-lib
 **Scans:** [list of scan types run]
 **Files Scanned:** N
 **Findings:** N critical, N high, N medium, N low
 
 ## Critical Issues (Priority 1) - N found
 
-### packages/node-smol-builder/src/patcher.mts:89
-- **Issue**: Potential null pointer access when applying patches
-- **Pattern**: `const result = patches[index].apply()`
-- **Trigger**: When patch array has fewer elements than expected
-- **Fix**: `const patch = patches[index]; if (!patch) throw new Error('Patch not found'); const result = patch.apply()`
-- **Impact**: Crashes patch application process, build fails
+### src/http-request.ts:89
+- **Issue**: Potential null pointer access in retry logic
+- **Pattern**: `const result = response.data.items[0]`
+- **Trigger**: When API returns empty array
+- **Fix**: `const items = response.data?.items ?? []; if (items.length === 0) throw new Error('No items found'); const result = items[0]`
+- **Impact**: Crashes library, breaks consumer applications
 - **Scan**: critical
 
 ## High Issues (Priority 2) - N found
@@ -386,15 +375,15 @@ Create structured quality report with all findings:
 
 ## Scan Coverage
 
-- **Critical scan**: N files analyzed in packages/node-smol-builder/, scripts/
-- **Logic scan**: N files analyzed (patch logic, build scripts)
-- **Cache scan**: N files analyzed (if applicable)
+- **Critical scan**: N files analyzed in src/
+- **Logic scan**: N files analyzed (utilities, HTTP client)
+- **ESM interop scan**: N dist files analyzed
 - **Workflow scan**: N files analyzed (package.json, scripts/, .github/)
 
 ## Recommendations
 
 1. Address N critical issues immediately before next release
-2. Review N high-severity logic errors in patch application
+2. Review N high-severity logic errors in utilities
 3. Schedule N medium issues for next sprint
 4. Low-priority items can be addressed during refactoring
 
@@ -465,7 +454,7 @@ All findings include file:line references and suggested fixes.
 
 - ✅ `<promise>QUALITY_SCAN_COMPLETE</promise>` output
 - ✅ All enabled scans completed without errors
-- ✅ Findings prioritized by severity (Critical → Low)
+- ✅ Findings prioritized by severity (Critical -> Low)
 - ✅ All findings include file:line references
 - ✅ Actionable suggestions provided for all findings
 - ✅ Report generated with statistics and coverage metrics
@@ -477,10 +466,11 @@ See `reference.md` for detailed agent prompts with structured tags:
 
 - **critical-scan** - Null access, promise rejections, race conditions, resource leaks
 - **logic-scan** - Off-by-one errors, type guards, edge cases, algorithm correctness
-- **cache-scan** - Invalidation, key generation, memory management, concurrency
 - **workflow-scan** - Scripts, package.json, git hooks, CI configuration
 - **security-scan** - GitHub Actions workflow security (runs zizmor scanner)
 - **documentation-scan** - README accuracy, outdated examples, incorrect package names, missing documentation
+- **esm-interop-scan** - Node.js ESM/CJS interop, named exports, module format hints, dual-format compatibility
+- **external-bundles-scan** - Vendored dependencies integrity, hidden requires to node_modules, duplicate bundles, pnpm overrides/catalog deduplication
 
 All agent prompts follow Claude best practices with <context>, <instructions>, <pattern>, <output_format>, and <quality_guidelines> tags.
 
@@ -490,7 +480,7 @@ This skill is self-contained. No external commands needed.
 
 ## Context
 
-This skill provides systematic code quality analysis for socket-btm by:
+This skill provides systematic code quality analysis for socket-lib by:
 - Spawning specialized agents for targeted analysis
 - Using Task tool to run agents autonomously
 - Embedding agent prompts in reference.md following best practices
