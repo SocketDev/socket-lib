@@ -1,35 +1,26 @@
 ---
 name: quality-scan
-description: Cleans up junk files (SCREAMING_TEXT.md, temp files) and performs comprehensive quality scans across codebase to identify critical bugs, logic errors, ESM/CJS interop issues, and workflow problems. Spawns specialized agents for targeted analysis and generates prioritized improvement tasks. Use when improving code quality, before releases, or investigating issues. (project)
+description: Validates structural consistency, cleans up junk files (SCREAMING_TEXT.md, temp files), and performs comprehensive quality scans across codebase to identify critical bugs, logic errors, caching issues, and workflow problems. Spawns specialized agents for targeted analysis and generates prioritized improvement tasks. Use when improving code quality, before releases, or investigating issues.
 ---
 
 # quality-scan
 
 <task>
-Your task is to perform comprehensive quality scans across the socket-lib codebase using specialized agents to identify critical bugs, logic errors, ESM/CJS interop issues, and workflow problems. Before scanning, clean up junk files to ensure a clean and organized repository. Generate a prioritized report with actionable improvement tasks.
+Your task is to perform comprehensive quality scans across the codebase using specialized agents to identify critical bugs, logic errors, caching issues, and workflow problems. Before scanning, clean up junk files (SCREAMING_TEXT.md files, temporary test files, etc.) to ensure a clean and organized repository. Generate a prioritized report with actionable improvement tasks.
 </task>
 
 <context>
 **What is Quality Scanning?**
 Quality scanning uses specialized AI agents to systematically analyze code for different categories of issues. Each agent type focuses on specific problem domains and reports findings with severity levels and actionable fixes.
 
-**socket-lib Architecture:**
-This is Socket Security's core infrastructure library that:
-- Provides shared utilities for all Socket.dev security tools
-- Implements HTTP client, file system utilities, logging, and spawning
-- Exports CommonJS modules with ESM interop annotations for Node.js compatibility
-- Uses TypeScript compiled via esbuild to CommonJS
-- Provides typed environment variable access and path utilities
-- Supports cross-platform operations (Windows, macOS, Linux)
-
 **Scan Types Available:**
 1. **critical** - Crashes, security vulnerabilities, resource leaks, data corruption
 2. **logic** - Algorithm errors, edge cases, type guards, off-by-one errors
-3. **workflow** - Build scripts, CI issues, cross-platform compatibility
-4. **security** - GitHub Actions workflow security (zizmor scanner)
-5. **documentation** - README accuracy, outdated docs, missing documentation
-6. **esm-interop** - Node.js ESM/CJS interoperability, named exports, module format hints
-7. **external-bundles** - Vendored external dependencies: hidden requires, duplicate bundles, deduplication via pnpm overrides/catalog
+3. **cache** - Cache staleness, race conditions, invalidation bugs
+4. **workflow** - Build scripts, CI issues, cross-platform compatibility
+5. **workflow-optimization** - CI optimization checks (build-required conditions on cached builds)
+6. **security** - GitHub Actions workflow security (zizmor scanner)
+7. **documentation** - README accuracy, outdated docs, missing documentation, junior developer friendliness
 
 **Why Quality Scanning Matters:**
 - Catches bugs before they reach production
@@ -37,7 +28,6 @@ This is Socket Security's core infrastructure library that:
 - Improves code quality systematically
 - Provides actionable fixes with file:line references
 - Prioritizes issues by severity for efficient remediation
-- Ensures ESM/CJS interop works for all consumers
 - Cleans up junk files for a well-organized repository
 
 **Agent Prompts:**
@@ -48,7 +38,7 @@ All agent prompts are embedded in `reference.md` with structured <context>, <ins
 **CRITICAL Requirements:**
 - Read-only analysis (no code changes during scan)
 - Must complete all enabled scans before reporting
-- Findings must be prioritized by severity (Critical -> High -> Medium -> Low)
+- Findings must be prioritized by severity (Critical → High → Medium → Low)
 - Must generate actionable tasks with file:line references
 - All findings must include suggested fixes
 
@@ -59,7 +49,7 @@ All agent prompts are embedded in `reference.md` with structured <context>, <ins
 - Proceed if codebase has uncommitted changes (warn but continue)
 
 **Do ONLY:**
-- Run enabled scan types in priority order (critical -> logic -> esm-interop -> workflow)
+- Run enabled scan types in priority order (critical → logic → cache → workflow)
 - Generate structured findings with severity levels
 - Provide actionable improvement tasks with specific code changes
 - Report statistics and coverage metrics
@@ -96,7 +86,33 @@ git status
 
 ---
 
-### Phase 2: Repository Cleanup
+### Phase 2: Update Dependencies
+
+<action>
+Update dependencies in the current repository only:
+</action>
+
+**Update Process:**
+
+```bash
+pnpm run update
+```
+
+<validation>
+**Expected Results:**
+- Dependencies updated in current repository
+- Report number of packages updated
+- Continue with scan even if update fails
+
+**Track for reporting:**
+- Packages updated: N
+- Update status: Success/Failed (with warning)
+
+**Important:** Only update dependencies in the current repository. Do NOT attempt to update sibling repositories as this is out of scope and could have unintended side effects.</validation>
+
+---
+
+### Phase 3: Repository Cleanup
 
 <action>
 Clean up junk files and organize the repository before scanning:
@@ -171,7 +187,56 @@ find . -type f -name '*.log' \
 
 ---
 
-### Phase 3: Determine Scan Scope
+### Phase 4: Structural Validation
+
+<action>
+Run automated consistency checker to validate architectural patterns:
+</action>
+
+**Validation Tasks:**
+
+Run the consistency checker to validate monorepo structure:
+
+```bash
+node scripts/check-consistency.mjs
+```
+
+**The consistency checker validates:**
+1. **Required files** - README.md, package.json existence
+2. **Vitest configurations** - Proper mergeConfig usage
+3. **Test scripts** - Correct test patterns per package type
+4. **Coverage scripts** - Coverage setup where appropriate
+5. **External tools** - external-tools.json format validation
+6. **Build output structure** - Standard build/{mode}/out/Final/ layout
+7. **Package.json structure** - Standard fields and structure
+8. **Workspace dependencies** - Proper workspace:* and catalog: usage
+
+<validation>
+**Expected Results:**
+- Errors: 0 (any errors should be reported as Critical findings)
+- Warnings: 2 or fewer (expected deviations documented in checker)
+- Info: Multiple info messages are normal (observations only)
+
+**If errors found:**
+1. Report as Critical findings in the final report
+2. Include file:line references from checker output
+3. Suggest fixes based on checker recommendations
+4. Continue with remaining scans
+
+**If warnings found:**
+- Report as Low findings (these are expected deviations)
+- Document in final report under "Structural Validation"
+
+**Track for reporting:**
+- Number of packages validated
+- Number of errors/warnings/info messages
+- Any architectural pattern violations
+
+</validation>
+
+---
+
+### Phase 5: Determine Scan Scope
 
 <action>
 Ask user which scans to run:
@@ -180,11 +245,11 @@ Ask user which scans to run:
 **Default Scan Types** (run all unless user specifies):
 1. **critical** - Critical bugs (crashes, security, resource leaks)
 2. **logic** - Logic errors (algorithms, edge cases, type guards)
-3. **workflow** - Workflow problems (scripts, CI, git hooks)
-4. **security** - GitHub Actions security (template injection, cache poisoning, etc.)
-5. **documentation** - Documentation accuracy (README errors, outdated docs)
-6. **esm-interop** - ESM/CJS compatibility (named exports, module format hints)
-7. **external-bundles** - External bundle integrity (hidden requires, duplicates, deduplication)
+3. **cache** - Caching issues (staleness, races, invalidation)
+4. **workflow** - Workflow problems (scripts, CI, git hooks)
+5. **workflow-optimization** - CI optimization (build-required checks for cached builds)
+6. **security** - GitHub Actions security (template injection, cache poisoning, etc.)
+7. **documentation** - Documentation accuracy (README errors, outdated docs)
 
 **User Interaction:**
 Use AskUserQuestion tool:
@@ -192,29 +257,28 @@ Use AskUserQuestion tool:
 - Header: "Scan Types"
 - multiSelect: true
 - Options:
-  - "All scans (recommended)" -> Run all scan types
-  - "Critical only" -> Run critical scan only
-  - "Critical + Logic" -> Run critical and logic scans
-  - "Custom selection" -> Ask user to specify which scans
+  - "All scans (recommended)" → Run all 4 scan types
+  - "Critical only" → Run critical scan only
+  - "Critical + Logic" → Run critical and logic scans
+  - "Custom selection" → Ask user to specify which scans
 
 **Default:** If user doesn't specify, run all scans.
 
 <validation>
 Validate selected scan types exist in reference.md:
-- critical-scan -> reference.md line ~5
-- logic-scan -> reference.md line ~150
-- workflow-scan -> reference.md line ~300
-- security-scan -> reference.md line ~450
-- documentation-scan -> reference.md line ~600
-- esm-interop-scan -> reference.md line ~800
-- external-bundles-scan -> reference.md line ~1000
+- critical-scan → reference.md line ~5
+- logic-scan → reference.md line ~100
+- cache-scan → reference.md line ~200
+- workflow-scan → reference.md line ~300
+- security-scan → reference.md line ~400
+- documentation-scan → reference.md line ~810
 
 If user requests non-existent scan type, report error and suggest valid types.
 </validation>
 
 ---
 
-### Phase 4: Execute Scans
+### Phase 6: Execute Scans
 
 <action>
 For each enabled scan type, spawn a specialized agent using Task tool:
@@ -227,18 +291,11 @@ Task({
   description: "Critical bugs scan",
   prompt: `${CRITICAL_SCAN_PROMPT_FROM_REFERENCE_MD}
 
-Focus on src/ directory (utilities, HTTP client, file system operations).
-
-Library-specific patterns to check:
-- HTTP client error handling (src/http-request.ts)
-- File system operations (src/fs.ts)
-- Spawn utilities (src/spawn.ts)
-- Promise handling and retry logic
-- JSON parsing errors
-- Cross-platform path handling
+[IF monorepo] Focus on packages/ directories and root-level scripts/.
+[IF single package] Focus on src/, lib/, and scripts/ directories.
 
 Report findings in this format:
-- File: path/to/file.ts:lineNumber
+- File: path/to/file.mts:lineNumber
 - Issue: Brief description
 - Severity: Critical/High/Medium/Low
 - Pattern: Code snippet
@@ -252,7 +309,7 @@ Scan systematically and report all findings. If no issues found, state that expl
 
 **For each scan:**
 1. Load agent prompt template from `reference.md`
-2. Customize for socket-lib context (focus on src/, scripts/, test/)
+2. Customize for repository context (determine monorepo vs single package structure)
 3. Spawn agent with Task tool using "general-purpose" subagent_type
 4. Capture findings from agent response
 5. Parse and categorize results
@@ -260,44 +317,29 @@ Scan systematically and report all findings. If no issues found, state that expl
 **Execution Order:** Run scans sequentially in priority order:
 - critical (highest priority)
 - logic
-- esm-interop
-- external-bundles
-- workflow
-- security
-- documentation (lowest priority)
+- cache
+- workflow (lowest priority)
 
 **Agent Prompt Sources:**
 - Critical scan: reference.md starting at line ~12
-- Logic scan: reference.md starting at line ~150
+- Logic scan: reference.md starting at line ~100
+- Cache scan: reference.md starting at line ~200
 - Workflow scan: reference.md starting at line ~300
-- Security scan: reference.md starting at line ~450
-- Documentation scan: reference.md starting at line ~600
-- ESM interop scan: reference.md starting at line ~800
-- External bundles scan: reference.md starting at line ~1000
+- Security scan: reference.md starting at line ~400
+- Workflow-optimization scan: reference.md starting at line ~860
+- Documentation scan: reference.md starting at line ~1040
 
 <validation>
-**Structured Output Validation:**
-
-After each agent returns, validate output structure before parsing:
-
-**Manual Verification Checklist:**
-- [ ] Agent output includes findings OR explicit "No issues found" statement
-- [ ] All findings include file:line references
-- [ ] All findings include severity level (Critical/High/Medium/Low)
-- [ ] All findings include suggested fixes
-- [ ] Agent output is parseable and structured
-
-**For each scan completion:**
+For each scan completion:
 - Verify agent completed without errors
-- Extract findings from agent output (or confirm "No issues found")
+- Extract findings from agent output
 - Parse into structured format (file, issue, severity, fix)
 - Track scan coverage (files analyzed)
-- Log any validation warnings for debugging
 </validation>
 
 ---
 
-### Phase 5: Aggregate Findings
+### Phase 7: Aggregate Findings
 
 <action>
 Collect all findings from agents and aggregate:
@@ -305,7 +347,7 @@ Collect all findings from agents and aggregate:
 
 ```typescript
 interface Finding {
-  file: string           // "src/http-request.ts:89"
+  file: string           // "src/path/to/file.mts:89" or "packages/pkg/src/file.mts:89"
   issue: string          // "Potential null pointer access"
   severity: "Critical" | "High" | "Medium" | "Low"
   scanType: string       // "critical"
@@ -322,7 +364,7 @@ interface Finding {
 - Track which scans found the same issue
 
 **Prioritization:**
-- Sort by severity: Critical -> High -> Medium -> Low
+- Sort by severity: Critical → High → Medium → Low
 - Within same severity, sort by scanType priority
 - Within same severity+scanType, sort alphabetically by file path
 
@@ -336,7 +378,7 @@ interface Finding {
 
 ---
 
-### Phase 6: Generate Report
+### Phase 8: Generate Report
 
 <action>
 Create structured quality report with all findings:
@@ -346,19 +388,42 @@ Create structured quality report with all findings:
 # Quality Scan Report
 
 **Date:** YYYY-MM-DD
-**Repository:** socket-lib
+**Repository:** [repository name]
 **Scans:** [list of scan types run]
 **Files Scanned:** N
 **Findings:** N critical, N high, N medium, N low
 
+## Dependency Updates
+
+**Status:** N packages updated
+**Result:** Success/Failed
+
+## Structural Validation
+
+**Consistency Checker Results:**
+- Packages validated: 12
+- Errors: N (reported as Critical below)
+- Warnings: N (reported as Low below)
+- Info: N observations
+
+**Validation Categories:**
+✓ Required files
+✓ Vitest configurations
+✓ Test scripts
+✓ Coverage scripts
+✓ External tools
+✓ Build output structure
+✓ Package.json structure
+✓ Workspace dependencies
+
 ## Critical Issues (Priority 1) - N found
 
-### src/http-request.ts:89
-- **Issue**: Potential null pointer access in retry logic
-- **Pattern**: `const result = response.data.items[0]`
-- **Trigger**: When API returns empty array
-- **Fix**: `const items = response.data?.items ?? []; if (items.length === 0) throw new Error('No items found'); const result = items[0]`
-- **Impact**: Crashes library, breaks consumer applications
+### src/path/to/file.mts:89
+- **Issue**: [Description of critical issue]
+- **Pattern**: [Problematic code snippet]
+- **Trigger**: [What triggers this issue]
+- **Fix**: [Suggested fix]
+- **Impact**: [Impact description]
 - **Scan**: critical
 
 ## High Issues (Priority 2) - N found
@@ -375,15 +440,17 @@ Create structured quality report with all findings:
 
 ## Scan Coverage
 
-- **Critical scan**: N files analyzed in src/
-- **Logic scan**: N files analyzed (utilities, HTTP client)
-- **ESM interop scan**: N dist files analyzed
+- **Dependency updates**: N packages updated
+- **Structural validation**: [IF consistency checker exists] N packages validated, N architectural patterns checked
+- **Critical scan**: N files analyzed in [src/ or packages/]
+- **Logic scan**: N files analyzed
+- **Cache scan**: N files analyzed (if applicable)
 - **Workflow scan**: N files analyzed (package.json, scripts/, .github/)
 
 ## Recommendations
 
 1. Address N critical issues immediately before next release
-2. Review N high-severity logic errors in utilities
+2. Review N high-severity logic errors in patch application
 3. Schedule N medium issues for next sprint
 4. Low-priority items can be addressed during refactoring
 
@@ -409,7 +476,7 @@ Create structured quality report with all findings:
 
 ---
 
-### Phase 7: Complete
+### Phase 9: Complete
 
 <completion_signal>
 ```xml
@@ -422,12 +489,25 @@ Report these final metrics to the user:
 
 **Quality Scan Complete**
 ========================
+✓ Dependency updates: N packages updated
+✓ Structural validation: [IF applicable] N packages validated (N errors, N warnings)
 ✓ Repository cleanup: N junk files removed
 ✓ Scans completed: [list of scan types]
 ✓ Total findings: N (N critical, N high, N medium, N low)
 ✓ Files scanned: N
 ✓ Report generated: Yes
 ✓ Scan duration: [calculated from start to end]
+
+**Dependency Update Summary:**
+- Packages updated: N
+- Update status: Success/Failed
+
+**Structural Validation Summary:**
+[IF consistency checker exists]
+- Packages validated: N
+- Consistency errors: N (included in critical findings)
+- Consistency warnings: N (included in low findings)
+- Architectural patterns checked: N
 
 **Repository Cleanup Summary:**
 - SCREAMING_TEXT.md files removed: N
@@ -454,7 +534,7 @@ All findings include file:line references and suggested fixes.
 
 - ✅ `<promise>QUALITY_SCAN_COMPLETE</promise>` output
 - ✅ All enabled scans completed without errors
-- ✅ Findings prioritized by severity (Critical -> Low)
+- ✅ Findings prioritized by severity (Critical → Low)
 - ✅ All findings include file:line references
 - ✅ Actionable suggestions provided for all findings
 - ✅ Report generated with statistics and coverage metrics
@@ -466,11 +546,11 @@ See `reference.md` for detailed agent prompts with structured tags:
 
 - **critical-scan** - Null access, promise rejections, race conditions, resource leaks
 - **logic-scan** - Off-by-one errors, type guards, edge cases, algorithm correctness
+- **cache-scan** - Invalidation, key generation, memory management, concurrency
 - **workflow-scan** - Scripts, package.json, git hooks, CI configuration
+- **workflow-optimization-scan** - CI optimization checks (build-required on installation steps with checkpoint caching)
 - **security-scan** - GitHub Actions workflow security (runs zizmor scanner)
-- **documentation-scan** - README accuracy, outdated examples, incorrect package names, missing documentation
-- **esm-interop-scan** - Node.js ESM/CJS interop, named exports, module format hints, dual-format compatibility
-- **external-bundles-scan** - Vendored dependencies integrity, hidden requires to node_modules, duplicate bundles, pnpm overrides/catalog deduplication
+- **documentation-scan** - README accuracy, outdated examples, incorrect package names, missing documentation, junior developer friendliness (beginner-friendly explanations, troubleshooting, getting started guides)
 
 All agent prompts follow Claude best practices with <context>, <instructions>, <pattern>, <output_format>, and <quality_guidelines> tags.
 
@@ -480,7 +560,7 @@ This skill is self-contained. No external commands needed.
 
 ## Context
 
-This skill provides systematic code quality analysis for socket-lib by:
+This skill provides systematic code quality analysis by:
 - Spawning specialized agents for targeted analysis
 - Using Task tool to run agents autonomously
 - Embedding agent prompts in reference.md following best practices
