@@ -195,8 +195,9 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   function isExpired(entry: TtlCacheEntry<any>): boolean {
     const now = Date.now()
     // Detect future expiresAt (clock skew or corruption).
-    // If expiresAt is more than 2x TTL in the future, treat as expired.
-    if (entry.expiresAt > now + ttl * 2) {
+    // If expiresAt is more than 10 seconds past expected expiry, treat as expired.
+    const maxFutureMs = 10_000
+    if (entry.expiresAt > now + ttl + maxFutureMs) {
       return true
     }
     return now > entry.expiresAt
@@ -406,31 +407,33 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     const fullKey = buildKey(key)
 
-    // Check if fetch is already in progress (atomic check-and-set)
-    const inflight = inflightRequests.get(fullKey)
-    if (inflight) {
-      return await inflight
+    // Atomic check-and-set to prevent TOCTOU race
+    const existing = inflightRequests.get(fullKey)
+    if (existing) {
+      return await existing
     }
 
-    // Create promise before storing to minimize TOCTOU window
+    // Create and immediately store promise atomically
     const promise = (async () => {
       try {
         const data = await fetcher()
         await set(key, data)
         return data
+      } catch (error) {
+        // Clean up on error
+        inflightRequests.delete(fullKey)
+        throw error
       } finally {
         inflightRequests.delete(fullKey)
       }
     })()
 
-    // Double-check in case another call set it between our checks
-    const existing = inflightRequests.get(fullKey)
-    if (existing) {
-      // Another call won the race, use their promise
-      return await existing
+    // Final check - if another thread won, use theirs
+    const nowExisting = inflightRequests.get(fullKey)
+    if (nowExisting && nowExisting !== promise) {
+      return await nowExisting
     }
 
-    // We won the race, store our promise
     inflightRequests.set(fullKey, promise)
     return await promise
   }

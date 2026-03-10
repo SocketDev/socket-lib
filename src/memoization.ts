@@ -62,6 +62,10 @@ export function memoize<Args extends unknown[], Result>(
     ttl = Number.POSITIVE_INFINITY,
   } = options
 
+  if (ttl < 0) {
+    throw new TypeError('TTL must be non-negative')
+  }
+
   const cache = new Map<string, CacheEntry<Result>>()
   const accessOrder: string[] = []
 
@@ -194,9 +198,30 @@ export function memoizeAsync<Args extends unknown[], Result>(
 
     // Cache miss - compute value
     debugLog(`[memoizeAsync:${name}] miss`, { key })
-    const promise = fn(...args)
 
-    // Store promise in cache (handles concurrent calls)
+    // Create promise and cache it immediately (for deduplication)
+    const promise = fn(...args).then(
+      result => {
+        // Success - update cache entry with resolved promise
+        const entry = cache.get(key)
+        if (entry) {
+          entry.value = Promise.resolve(result)
+        }
+        return result
+      },
+      error => {
+        // Failure - remove from cache to allow retry
+        cache.delete(key)
+        const index = accessOrder.indexOf(key)
+        if (index !== -1) {
+          accessOrder.splice(index, 1)
+        }
+        debugLog(`[memoizeAsync:${name}] error`, { key, error })
+        throw error
+      },
+    )
+
+    // Store promise in cache
     evictLRU()
     cache.set(key, {
       value: promise,
@@ -206,20 +231,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
     accessOrder.push(key)
 
     debugLog(`[memoizeAsync:${name}] set`, { key, cacheSize: cache.size })
-
-    try {
-      const result = await promise
-      return result
-    } catch (e) {
-      // Remove failed promise from cache
-      cache.delete(key)
-      const orderIndex = accessOrder.indexOf(key)
-      if (orderIndex !== -1) {
-        accessOrder.splice(orderIndex, 1)
-      }
-      debugLog(`[memoizeAsync:${name}] clear`, { key, reason: 'error' })
-      throw e
-    }
+    return await promise
   }
 }
 

@@ -117,7 +117,7 @@ while read local_ref local_sha remote_ref remote_sha; do
     fi
 
     # Check file contents for secrets.
-    echo "$CHANGED_FILES" | while IFS= read -r file; do
+    while IFS= read -r file; do
       if [ -f "$file" ] && [ ! -d "$file" ]; then
         # Skip test files, example files, and hook scripts.
         if echo "$file" | grep -qE '\.(test|spec)\.(m?[jt]s|tsx?)$|\.example$|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then
@@ -158,7 +158,7 @@ while read local_ref local_sha remote_ref remote_sha; do
           ERRORS=$((ERRORS + 1))
         fi
       fi
-    done
+    done <<< "$CHANGED_FILES"
   fi
 
   TOTAL_ERRORS=$((TOTAL_ERRORS + ERRORS))

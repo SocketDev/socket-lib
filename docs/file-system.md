@@ -623,6 +623,7 @@ if (pkgPath) {
 ### Processing Files with Validation
 
 ```typescript
+// Note: fast-glob is an external dependency - install it separately
 import { glob } from 'fast-glob'
 import { validateFiles, readFileUtf8 } from '@socketsecurity/lib/fs'
 
@@ -637,6 +638,26 @@ for (const file of validPaths) {
   const content = await readFileUtf8(file)
   await processTypeScript(content)
 }
+```
+
+### Extracting Archives
+
+```typescript
+import { extractArchive, detectArchiveFormat } from '@socketsecurity/lib/archives'
+
+// Detect archive format
+const format = detectArchiveFormat('package.tar.gz')
+console.log(format) // 'tar.gz'
+
+// Extract archive with safety limits
+await extractArchive('package.tar.gz', './output', {
+  strip: 1, // Strip one leading path component
+  maxFileSize: 100 * 1024 * 1024, // 100MB per file
+  maxTotalSize: 1024 * 1024 * 1024, // 1GB total
+})
+
+// Supports: .zip, .tar, .tar.gz, .tgz
+// Built-in protection against zip bombs and path traversal
 ```
 
 ## Troubleshooting

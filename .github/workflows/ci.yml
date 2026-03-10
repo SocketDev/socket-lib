@@ -19,7 +19,7 @@ on:
         description: 'Node.js versions to test (JSON array)'
         required: false
         type: string
-        default: '["24.10.0"]'
+        default: '["20", "22", "24"]'
 
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
       lint-script: 'pnpm run lint --all'
       type-check-script: 'pnpm run check'
       test-script: 'pnpm exec vitest --config .config/vitest.config.mts run'
-      node-versions: ${{ inputs.node-versions || '["24.10.0"]' }}
+      node-versions: ${{ inputs.node-versions || '["20", "22", "24"]' }}
       os-versions: '["ubuntu-latest", "windows-latest"]'
       fail-fast: false
       max-parallel: 4
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@67a3db92603c23c58031586611c7cc852244c87c # main
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Build project
         run: pnpm run build

@@ -155,6 +155,20 @@ interface GitDiffSpawnArgs {
 }
 
 const gitDiffCache = new Map<string, string[]>()
+const gitDiffAccessOrder: string[] = []
+const GIT_CACHE_MAX_SIZE = 100
+
+function evictLRUGitCache() {
+  if (
+    gitDiffCache.size >= GIT_CACHE_MAX_SIZE &&
+    gitDiffAccessOrder.length > 0
+  ) {
+    const oldest = gitDiffAccessOrder.shift()
+    if (oldest) {
+      gitDiffCache.delete(oldest)
+    }
+  }
+}
 
 /**
  * Get the git executable path.
@@ -285,7 +299,9 @@ async function innerDiff(
     return []
   }
   if (cache && cacheKey) {
+    evictLRUGitCache()
     gitDiffCache.set(cacheKey, result)
+    gitDiffAccessOrder.push(cacheKey)
   }
   return result
 }
@@ -339,7 +355,9 @@ function innerDiffSync(
     return []
   }
   if (cache && cacheKey) {
+    evictLRUGitCache()
     gitDiffCache.set(cacheKey, result)
+    gitDiffAccessOrder.push(cacheKey)
   }
   return result
 }
@@ -820,10 +838,15 @@ export function isChangedSync(
   const fs = getFs()
   const path = getPath()
   // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = fs.realpathSync(pathname)
-  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
-  const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-  return files.includes(relativePath)
+  try {
+    const resolvedPathname = fs.realpathSync(pathname)
+    const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+    const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
+    return files.includes(relativePath)
+  } catch {
+    // Path doesn't exist or can't be resolved - it can't be changed
+    return false
+  }
 }
 
 /**

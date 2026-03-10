@@ -54,7 +54,7 @@ fi
 
 # Check for hardcoded user paths (generic detection).
 printf "Checking for hardcoded personal paths...\n"
-echo "$STAGED_FILES" | while IFS= read -r file; do
+while IFS= read -r file; do
   if [ -f "$file" ]; then
     # Skip test files and hook scripts.
     if echo "$file" | grep -qE '\.(test|spec)\.|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then
@@ -69,7 +69,7 @@ echo "$STAGED_FILES" | while IFS= read -r file; do
       ERRORS=$((ERRORS + 1))
     fi
   fi
-done
+done <<< "$STAGED_FILES"
 
 # Check for Socket API keys.
 printf "Checking for API keys...\n"

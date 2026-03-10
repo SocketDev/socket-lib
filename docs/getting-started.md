@@ -76,7 +76,7 @@ import { readJson } from '@socketsecurity/lib/fs'
 // import { Spinner, readJson } from '@socketsecurity/lib'
 ```
 
-This approach keeps your bundle size small by only including the code you actually use.
+**Why subpath imports?** This library is designed for selective imports to keep bundle sizes minimal. Each subpath (like `/spinner` or `/fs`) is a separate export point defined in `package.json` exports field. The root import (`@socketsecurity/lib`) doesn't re-export all modules - you must use specific subpaths.
 
 ## Common Use Cases
 

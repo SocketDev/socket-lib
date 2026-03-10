@@ -12,7 +12,8 @@ export function getNodeVersion(): string {
 }
 
 export function getNodeMajorVersion(): number {
-  return Number.parseInt(NODE_VERSION.slice(1).split('.')[0] ?? '0', 10)
+  const major = NODE_VERSION.slice(1).split('.')[0] ?? '0'
+  return Number.parseInt(major, 10) || 0
 }
 
 export function getNodeMinorVersion(): number {

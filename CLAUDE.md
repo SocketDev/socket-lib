@@ -376,9 +376,9 @@ import { isTest } from '#env/test'
 Each env module exports a pure getter function that accesses only its own environment variable. For fallback logic, compose multiple getters:
 ```typescript
 import { getHome } from '#env/home'
-import { getUserProfile } from '#env/userprofile'
+import { getUserprofile } from '#env/windows'
 
-const homeDir = getHome() || getUserProfile()  // Cross-platform fallback
+const homeDir = getHome() || getUserprofile()  // Cross-platform fallback
 ```
 
 **Testing with rewiring:**

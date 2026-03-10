@@ -168,7 +168,8 @@ export class ProgressBar {
     const colorFn = colors[this.options.color] || ((s: string) => s)
 
     // Calculate values
-    const percent = Math.floor((this.current / this.total) * 100)
+    const percent =
+      this.total === 0 ? 0 : Math.floor((this.current / this.total) * 100)
     const elapsed = Date.now() - this.startTime
     const eta =
       this.current === 0
@@ -177,7 +178,10 @@ export class ProgressBar {
 
     // Build bar
     const availableWidth = this.options.width
-    const filledWidth = Math.floor((this.current / this.total) * availableWidth)
+    const filledWidth =
+      this.total === 0
+        ? 0
+        : Math.floor((this.current / this.total) * availableWidth)
     const emptyWidth = availableWidth - filledWidth
 
     const filled = repeatString(this.options.complete, filledWidth)

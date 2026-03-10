@@ -446,6 +446,8 @@ const results = await checkHealth([
 Execute tasks with limited concurrency:
 
 ```typescript
+import fs from 'node:fs/promises'
+
 import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -460,7 +462,7 @@ async function processBatch<T>(
 
   logger.step(`Processing ${items.length} items with concurrency ${concurrency}`)
 
-  const queue = new PromiseQueue({ concurrency })
+  const queue = new PromiseQueue(concurrency)
   let completed = 0
 
   spinner.progress(0, items.length, 'items')
@@ -485,7 +487,7 @@ await processBatch(
   async (file) => {
     const content = await readFileUtf8(file)
     const processed = content.toUpperCase()
-    await writeFileUtf8(file, processed)
+    await fs.writeFile(file, processed, 'utf8')
   },
   10  // Process 10 files at a time
 )

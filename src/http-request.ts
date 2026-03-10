@@ -908,7 +908,7 @@ export async function httpDownload(
   } else if (logger) {
     let lastPercent = 0
     progressCallback = (downloaded: number, total: number) => {
-      const percent = Math.floor((downloaded / total) * 100)
+      const percent = total === 0 ? 0 : Math.floor((downloaded / total) * 100)
       if (percent >= lastPercent + progressInterval) {
         logger.log(
           `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,

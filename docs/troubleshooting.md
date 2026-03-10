@@ -449,7 +449,7 @@ Check your `tsconfig.json`:
    ```typescript
    import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
 
-   const queue = new PromiseQueue({ concurrency: 10 })
+   const queue = new PromiseQueue(10)
    await Promise.all(
      files.map(file => queue.add(() => readFileUtf8(file)))
    )

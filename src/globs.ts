@@ -151,7 +151,15 @@ export function getGlobMatcher(
   options?: { dot?: boolean; nocase?: boolean; ignore?: string[] },
 ): (path: string) => boolean {
   const patterns = Array.isArray(glob) ? glob : [glob]
-  const key = JSON.stringify({ patterns, options })
+  // Create stable cache key by sorting patterns and option keys
+  const sortedPatterns = [...patterns].sort()
+  const sortedOptions = options
+    ? Object.keys(options)
+        .sort()
+        .map(k => `${k}:${JSON.stringify(options[k as keyof typeof options])}`)
+        .join(',')
+    : ''
+  const key = `${sortedPatterns.join('|')}:${sortedOptions}`
   let matcher: ((path: string) => boolean) | undefined = matcherCache.get(key)
   if (matcher) {
     // Move to end of access order (LRU)

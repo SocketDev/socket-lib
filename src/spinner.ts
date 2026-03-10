@@ -281,7 +281,7 @@ function desc(value: unknown) {
  */
 function formatProgress(progress: ProgressInfo): string {
   const { current, total, unit } = progress
-  const percentage = Math.round((current / total) * 100)
+  const percentage = total === 0 ? 0 : Math.round((current / total) * 100)
   const bar = renderProgressBar(percentage)
   const count = unit ? `${current}/${total} ${unit}` : `${current}/${total}`
   return `${bar} ${percentage}% (${count})`
