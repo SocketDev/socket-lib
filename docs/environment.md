@@ -111,33 +111,7 @@ if (home) {
 
 **Environment Variable:** `HOME` (Unix/Linux/macOS)
 
-### getUserProfile()
-
-**What it does:** Gets the Windows user profile path.
-
-**Returns:** `string | undefined`
-
-**Example:**
-```typescript
-import { getUserProfile } from '@socketsecurity/lib/env/userprofile'
-
-const profile = getUserProfile()
-if (profile) {
-  const configPath = `${profile}\\.myapp\\config.json`
-}
-```
-
-**Environment Variable:** `USERPROFILE` (Windows)
-
-### Cross-Platform Home Directory
-
-```typescript
-import { getHome } from '@socketsecurity/lib/env/home'
-import { getUserProfile } from '@socketsecurity/lib/env/userprofile'
-
-// Compose getters for cross-platform fallback
-const homeDir = getHome() || getUserProfile()
-```
+**Cross-platform note:** For Windows, use `process.env.USERPROFILE` if needed
 
 ### getTerm()
 
@@ -157,23 +131,7 @@ if (term === 'dumb') {
 
 **Environment Variable:** `TERM`
 
-### getColorTerm()
-
-**What it does:** Checks if terminal supports color.
-
-**Returns:** `string | undefined`
-
-**Example:**
-```typescript
-import { getColorTerm } from '@socketsecurity/lib/env/colorterm'
-
-if (getColorTerm()) {
-  // Terminal supports color
-  enableColorOutput()
-}
-```
-
-**Environment Variable:** `COLORTERM`
+**Color support note:** For checking terminal color support, use `process.env.COLORTERM` directly or libraries like `supports-color`
 
 ## Testing with Rewiring
 
@@ -243,11 +201,11 @@ const config = {
 
 ```typescript
 import { getHome } from '@socketsecurity/lib/env/home'
-import { getUserProfile } from '@socketsecurity/lib/env/userprofile'
+import { WIN32 } from '@socketsecurity/lib/constants/platform'
 import path from 'node:path'
 
 function getConfigDir() {
-  const home = getHome() || getUserProfile()
+  const home = getHome() || (WIN32 ? process.env.USERPROFILE : undefined)
   if (!home) {
     throw new Error('Cannot determine home directory')
   }
@@ -259,11 +217,12 @@ function getConfigDir() {
 ### Terminal Capability Detection
 
 ```typescript
-import { getTerm, getColorTerm } from '@socketsecurity/lib/env/term'
+import { getTerm } from '@socketsecurity/lib/env/term'
 
 function supportsColor() {
   const term = getTerm()
-  return term !== 'dumb' && getColorTerm() !== undefined
+  const colorTerm = process.env.COLORTERM
+  return term !== 'dumb' && colorTerm !== undefined
 }
 
 function getLogger() {
@@ -288,11 +247,9 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 
 - **User Directories:**
   - `getHome()` - Returns `HOME` (Unix/Linux/macOS)
-  - `getUserProfile()` - Returns `USERPROFILE` (Windows)
 
 - **Terminal:**
   - `getTerm()` - Returns `TERM`
-  - `getColorTerm()` - Returns `COLORTERM`
 
 - **Path:**
   - `getPath()` - Returns `PATH`
@@ -322,9 +279,10 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 **Problem:** Path doesn't work on Windows/Unix.
 
 **Solution:**
-Use the fallback pattern:
+Use the fallback pattern with `process.env` for Windows:
 ```typescript
-const home = getHome() || getUserProfile()
+import { WIN32 } from '@socketsecurity/lib/constants/platform'
+const home = getHome() || (WIN32 ? process.env.USERPROFILE : undefined)
 ```
 
 And use `path.join()` for cross-platform path construction:

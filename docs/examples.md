@@ -10,7 +10,7 @@ A complete CLI tool that downloads a file, processes it, and provides visual fee
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { httpDownload } from '@socketsecurity/lib/http-request'
-import { readFileBinary, safeDelete, safeMkdir } from '@socketsecurity/lib/fs'
+import { readFileBinary, safeDelete, safeMkdir, safeStats } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
 const logger = getDefaultLogger()

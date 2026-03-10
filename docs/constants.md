@@ -12,64 +12,31 @@ Pre-defined constant values for Node.js versions, npm registry URLs, platform de
 ## Quick Start
 
 ```typescript
-import { MIN_SUPPORTED_NODE_VERSION } from '@socketsecurity/lib/constants/node'
-import { MAIN_REGISTRY_URL } from '@socketsecurity/lib/constants/npm'
+import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
 
-if (process.version < `v${MIN_SUPPORTED_NODE_VERSION}`) {
-  console.error(`Node.js ${MIN_SUPPORTED_NODE_VERSION}+ required`)
-  process.exit(1)
+if (WIN32) {
+  console.log('Running on Windows')
+} else if (DARWIN) {
+  console.log('Running on macOS')
+} else {
+  console.log('Running on Linux or other Unix-like OS')
 }
-
-console.log(`Registry: ${MAIN_REGISTRY_URL}`)
 ```
 
 ## Node.js Constants
 
-### MIN_SUPPORTED_NODE_VERSION
-
-Minimum supported Node.js version for Socket.dev tools.
-
-```typescript
-import { MIN_SUPPORTED_NODE_VERSION } from '@socketsecurity/lib/constants/node'
-
-console.log(MIN_SUPPORTED_NODE_VERSION) // "22.0.0"
-```
-
-### Version Checking
-
-```typescript
-import { MIN_SUPPORTED_NODE_VERSION } from '@socketsecurity/lib/constants/node'
-
-const currentVersion = process.version.slice(1) // Remove 'v' prefix
-
-if (currentVersion < MIN_SUPPORTED_NODE_VERSION) {
-  throw new Error(
-    `Node.js ${MIN_SUPPORTED_NODE_VERSION}+ required. Current: ${currentVersion}`
-  )
-}
-```
+See `@socketsecurity/lib/constants/node` for Node.js-related constants.
 
 ## npm Registry Constants
 
-### MAIN_REGISTRY_URL
-
-The main npm registry URL.
+For building npm registry URLs, use string literals directly:
 
 ```typescript
-import { MAIN_REGISTRY_URL } from '@socketsecurity/lib/constants/npm'
-
-console.log(MAIN_REGISTRY_URL) // "https://registry.npmjs.org"
-```
-
-### Building Registry URLs
-
-```typescript
-import { MAIN_REGISTRY_URL } from '@socketsecurity/lib/constants/npm'
 import { httpJson } from '@socketsecurity/lib/http-request'
 
-// Get package metadata
+// Get package metadata from npm registry
 const packageName = 'lodash'
-const url = `${MAIN_REGISTRY_URL}/${packageName}`
+const url = `https://registry.npmjs.org/${packageName}`
 const metadata = await httpJson(url)
 
 console.log(metadata.name, metadata['dist-tags'].latest)
@@ -78,10 +45,8 @@ console.log(metadata.name, metadata['dist-tags'].latest)
 ### Package Tarball URLs
 
 ```typescript
-import { MAIN_REGISTRY_URL } from '@socketsecurity/lib/constants/npm'
-
 function getTarballUrl(name: string, version: string): string {
-  return `${MAIN_REGISTRY_URL}/${name}/-/${name}-${version}.tgz`
+  return `https://registry.npmjs.org/${name}/-/${name}-${version}.tgz`
 }
 
 const url = getTarballUrl('lodash', '4.17.21')
@@ -116,15 +81,16 @@ if (DARWIN) {
 }
 ```
 
-### LINUX
+### Detecting Linux
 
-Checks if platform is Linux.
+There is no `LINUX` constant. To detect Linux or other Unix-like systems, check if the platform is neither Windows nor macOS:
 
 ```typescript
-import { LINUX } from '@socketsecurity/lib/constants/platform'
+import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
 
-if (LINUX) {
-  console.log('Running on Linux')
+const isLinux = !WIN32 && !DARWIN
+if (isLinux) {
+  console.log('Running on Linux or other Unix-like OS')
   // Use Linux-specific logic
 }
 ```
@@ -132,12 +98,12 @@ if (LINUX) {
 ### Platform-Specific Logic Example
 
 ```typescript
-import { WIN32, DARWIN, LINUX } from '@socketsecurity/lib/constants/platform'
-import { getHome, getUserProfile } from '@socketsecurity/lib/env'
+import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
+import { getHome } from '@socketsecurity/lib/env/home'
 import path from 'node:path'
 
 function getConfigDir(): string {
-  const home = getHome() || getUserProfile()
+  const home = getHome()
   if (!home) {
     throw new Error('Cannot determine home directory')
   }
@@ -146,7 +112,8 @@ function getConfigDir(): string {
     return path.join(home, 'AppData', 'Local', 'MyApp')
   } else if (DARWIN) {
     return path.join(home, 'Library', 'Application Support', 'MyApp')
-  } else if (LINUX) {
+  } else {
+    // Linux or other Unix-like OS
     return path.join(home, '.config', 'myapp')
   }
 
@@ -211,9 +178,10 @@ checkNodeVersion()
 ### npm Package Downloader
 
 ```typescript
-import { MAIN_REGISTRY_URL } from '@socketsecurity/lib/constants/npm'
 import { httpJson, httpDownload } from '@socketsecurity/lib/http-request'
 import { Spinner } from '@socketsecurity/lib/spinner'
+
+const NPM_REGISTRY = 'https://registry.npmjs.org'
 
 interface PackageMetadata {
   'dist-tags': { latest: string }
@@ -232,7 +200,7 @@ async function downloadPackage(
   // Get package metadata
   spinner.start('Fetching package metadata...')
   const metadata = await httpJson<PackageMetadata>(
-    `${MAIN_REGISTRY_URL}/${name}`
+    `${NPM_REGISTRY}/${name}`
   )
   spinner.success('Metadata fetched')
 
@@ -267,7 +235,7 @@ await downloadPackage('lodash', 'latest', '/tmp')
 ### Cross-Platform Path Builder
 
 ```typescript
-import { WIN32, DARWIN, LINUX } from '@socketsecurity/lib/constants/platform'
+import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
 import path from 'node:path'
 
 class PathBuilder {
@@ -321,10 +289,8 @@ console.log(configPath)
 ### Registry URL Builder
 
 ```typescript
-import { MAIN_REGISTRY_URL } from '@socketsecurity/lib/constants/npm'
-
 class RegistryClient {
-  constructor(private baseUrl: string = MAIN_REGISTRY_URL) {}
+  constructor(private baseUrl: string = 'https://registry.npmjs.org') {}
 
   packageUrl(name: string): string {
     return `${this.baseUrl}/${name}`
@@ -386,16 +352,10 @@ await Promise.all([
 
 ## Available Constants
 
-### Node.js
-- `MIN_SUPPORTED_NODE_VERSION` - Minimum Node.js version ("22.0.0")
-
-### npm Registry
-- `MAIN_REGISTRY_URL` - Main npm registry ("https://registry.npmjs.org")
-
 ### Platform
 - `WIN32` - Boolean, true on Windows
 - `DARWIN` - Boolean, true on macOS
-- `LINUX` - Boolean, true on Linux
+- For Linux detection, use `!WIN32 && !DARWIN`
 
 ### Process
 - `getAbortSignal()` - Function returning global AbortSignal
@@ -435,5 +395,5 @@ if (!semver.gte(process.version, MIN_SUPPORTED_NODE_VERSION)) {
 **Solution:**
 Use environment variable or config:
 ```typescript
-const registryUrl = process.env.NPM_REGISTRY || MAIN_REGISTRY_URL
+const registryUrl = process.env.NPM_REGISTRY || 'https://registry.npmjs.org'
 ```

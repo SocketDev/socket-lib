@@ -12,70 +12,96 @@ Utilities for working with npm, pnpm, and yarn, including package manager detect
 ## Quick Start
 
 ```typescript
-import { detectPackageManager } from '@socketsecurity/lib/packages'
+import { detectPackageManager } from '@socketsecurity/lib/env/package-manager'
 import { spawn } from '@socketsecurity/lib/spawn'
 
-// Detect package manager from lock files
-const pm = await detectPackageManager('./project')
-console.log(`Using ${pm}`) // "npm", "pnpm", or "yarn"
+// Detect which package manager is currently running (from environment)
+const pm = detectPackageManager()
+if (pm) {
+  console.log(`Running under ${pm}`) // "npm", "pnpm", "yarn", or "bun"
+}
 
-// Run install with detected package manager
-await spawn(pm, ['install'], { cwd: './project' })
+// For detecting project's package manager, check lock files
+import { findUpSync } from '@socketsecurity/lib/fs'
+const lockFile = findUpSync(['pnpm-lock.yaml', 'yarn.lock', 'bun.lockb', 'package-lock.json'])
 ```
 
 ## Package Manager Detection
 
 ### detectPackageManager()
 
-**What it does:** Detects which package manager a project uses by checking for lock files.
+**What it does:** Detects which package manager is currently running by checking environment variables.
 
-**When to use:** Building tools that need to run package manager commands, creating scaffolds, automating installs.
+**When to use:** Inside npm scripts, lifecycle hooks, or other code that runs during package manager operations. For detecting a project's package manager, check lock files instead (see below).
 
-**Parameters:**
-- `projectPath` (string): Path to project directory
+**Parameters:** None
 
-**Returns:** Promise<'npm' | 'pnpm' | 'yarn'>
+**Returns:** `'npm' | 'pnpm' | 'yarn' | 'bun' | null`
 
 **Detection Logic:**
-1. Checks for `pnpm-lock.yaml` → returns `'pnpm'`
-2. Checks for `yarn.lock` → returns `'yarn'`
-3. Defaults to `'npm'`
+1. Checks `npm_config_user_agent` environment variable (set by all package managers)
+2. Falls back to analyzing `process.argv[0]` path patterns
+3. Returns `null` if not running under a package manager
 
 **Example:**
 ```typescript
-import { detectPackageManager } from '@socketsecurity/lib/packages'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { detectPackageManager } from '@socketsecurity/lib/env/package-manager'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
 
-async function installDependencies(projectPath: string) {
-  const pm = await detectPackageManager(projectPath)
-  logger.info(`Detected package manager: ${pm}`)
-
-  logger.step(`Installing with ${pm}`)
-  await spawn(pm, ['install'], { cwd: projectPath })
-  logger.success('Dependencies installed')
+// Detect RUNNING package manager (works in npm scripts, lifecycle hooks)
+const pm = detectPackageManager()
+if (pm) {
+  logger.info(`Running under ${pm}`)
+} else {
+  logger.warn('Not running under a package manager')
 }
-
-await installDependencies('./my-project')
 ```
 
 **Common Pitfalls:**
-- Function looks for lock files, not package manager binaries
-- If no lock file exists, defaults to npm (even if pnpm/yarn is installed)
-- Doesn't check `packageManager` field in package.json
+- This detects the RUNNING package manager from environment, not the project's preferred package manager
+- Returns `null` when called outside package manager context (e.g., standalone Node.js script)
+- To detect a project's package manager, check lock files instead:
+
+```typescript
+import { findUpSync } from '@socketsecurity/lib/fs'
+
+function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' | null {
+  const lockFiles = {
+    'pnpm-lock.yaml': 'pnpm',
+    'yarn.lock': 'yarn',
+    'bun.lockb': 'bun',
+    'package-lock.json': 'npm',
+  }
+
+  for (const [file, pm] of Object.entries(lockFiles)) {
+    if (findUpSync(file, { cwd })) {
+      return pm as 'npm' | 'pnpm' | 'yarn' | 'bun'
+    }
+  }
+
+  return null
+}
+```
 
 ## Package Manager Operations
 
 ### Running Commands with Different Package Managers
 
 ```typescript
-import { detectPackageManager } from '@socketsecurity/lib/packages'
+import { findUpSync } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
+function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+  if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
+  if (findUpSync('yarn.lock', { cwd })) return 'yarn'
+  if (findUpSync('bun.lockb', { cwd })) return 'bun'
+  return 'npm' // Default to npm
+}
+
 async function runScript(projectPath: string, scriptName: string) {
-  const pm = await detectPackageManager(projectPath)
+  const pm = getProjectPackageManager(projectPath)
 
   // Package manager-specific command syntax
   const args = pm === 'npm' ? ['run', scriptName] : [scriptName]
@@ -92,12 +118,22 @@ await runScript('./project', 'test')
 ### Installing Specific Packages
 
 ```typescript
+import { findUpSync } from '@socketsecurity/lib/fs'
+import { spawn } from '@socketsecurity/lib/spawn'
+
+function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+  if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
+  if (findUpSync('yarn.lock', { cwd })) return 'yarn'
+  if (findUpSync('bun.lockb', { cwd })) return 'bun'
+  return 'npm'
+}
+
 async function addPackage(
   projectPath: string,
   packageName: string,
   options: { dev?: boolean; exact?: boolean } = {}
 ) {
-  const pm = await detectPackageManager(projectPath)
+  const pm = getProjectPackageManager(projectPath)
 
   const args = ['add', packageName]
 
@@ -213,17 +249,25 @@ if (lockFile) {
 ### Regenerating Lock Files
 
 ```typescript
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { findUpSync, safeDelete } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
+function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+  if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
+  if (findUpSync('yarn.lock', { cwd })) return 'yarn'
+  if (findUpSync('bun.lockb', { cwd })) return 'bun'
+  return 'npm'
+}
+
 async function regenerateLockFile(projectPath: string) {
-  const pm = await detectPackageManager(projectPath)
+  const pm = getProjectPackageManager(projectPath)
 
   // Delete old lock file
   const lockFiles = {
     npm: 'package-lock.json',
     pnpm: 'pnpm-lock.yaml',
-    yarn: 'yarn.lock'
+    yarn: 'yarn.lock',
+    bun: 'bun.lockb'
   }
 
   await safeDelete(`${projectPath}/${lockFiles[pm]}`)
@@ -238,10 +282,17 @@ async function regenerateLockFile(projectPath: string) {
 ### Smart Package Installer
 
 ```typescript
-import { detectPackageManager } from '@socketsecurity/lib/packages'
+import { findUpSync } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+  if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
+  if (findUpSync('yarn.lock', { cwd })) return 'yarn'
+  if (findUpSync('bun.lockb', { cwd })) return 'bun'
+  return 'npm'
+}
 
 async function smartInstall(
   projectPath: string,
@@ -251,7 +302,7 @@ async function smartInstall(
   const logger = getDefaultLogger()
   const spinner = Spinner()
 
-  const pm = await detectPackageManager(projectPath)
+  const pm = getProjectPackageManager(projectPath)
   logger.info(`Using ${pm}`)
 
   spinner.start(`Installing ${packages.length} package(s)...`)
@@ -378,14 +429,17 @@ workspaces.forEach(ws => {
 ### Package Manager Command Runner
 
 ```typescript
-import { detectPackageManager } from '@socketsecurity/lib/packages'
+import { findUpSync } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
 class PackageManager {
-  constructor(private pm: 'npm' | 'pnpm' | 'yarn', private cwd: string) {}
+  constructor(private pm: 'npm' | 'pnpm' | 'yarn' | 'bun', private cwd: string) {}
 
-  static async detect(cwd: string) {
-    const pm = await detectPackageManager(cwd)
+  static detect(cwd: string) {
+    let pm: 'npm' | 'pnpm' | 'yarn' | 'bun' = 'npm'
+    if (findUpSync('pnpm-lock.yaml', { cwd })) pm = 'pnpm'
+    else if (findUpSync('yarn.lock', { cwd })) pm = 'yarn'
+    else if (findUpSync('bun.lockb', { cwd })) pm = 'bun'
     return new PackageManager(pm, cwd)
   }
 
@@ -415,7 +469,7 @@ class PackageManager {
 }
 
 // Usage
-const pm = await PackageManager.detect('./project')
+const pm = PackageManager.detect('./project')
 await pm.install()
 await pm.add(['lodash'], false)
 await pm.add(['typescript'], true)
