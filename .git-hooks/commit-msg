@@ -41,7 +41,12 @@ fi
 COMMIT_MSG_FILE="$1"
 if [ -f "$COMMIT_MSG_FILE" ]; then
   # Create a temporary file to store the cleaned message.
-  TEMP_FILE=$(mktemp)
+  TEMP_FILE=$(mktemp) || {
+    printf "${RED}✗ Failed to create temporary file${NC}\n" >&2
+    exit 1
+  }
+  # Ensure cleanup on exit
+  trap 'rm -f "$TEMP_FILE"' EXIT
   REMOVED_LINES=0
 
   # Read the commit message line by line and filter out AI attribution.

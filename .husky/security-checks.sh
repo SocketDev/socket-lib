@@ -54,7 +54,7 @@ fi
 
 # Check for hardcoded user paths (generic detection).
 printf "Checking for hardcoded personal paths...\n"
-for file in $STAGED_FILES; do
+echo "$STAGED_FILES" | while IFS= read -r file; do
   if [ -f "$file" ]; then
     # Skip test files and hook scripts.
     if echo "$file" | grep -qE '\.(test|spec)\.|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then

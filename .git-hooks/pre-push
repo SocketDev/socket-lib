@@ -48,6 +48,12 @@ while read local_ref local_sha remote_ref remote_sha; do
     fi
   fi
 
+  # Validate the computed range before using it
+  if ! git rev-list "$range" >/dev/null 2>&1; then
+    printf "${RED}✗ Invalid commit range: $range${NC}\n" >&2
+    exit 1
+  fi
+
   ERRORS=0
 
   # ============================================================================
@@ -111,7 +117,7 @@ while read local_ref local_sha remote_ref remote_sha; do
     fi
 
     # Check file contents for secrets.
-    for file in $CHANGED_FILES; do
+    echo "$CHANGED_FILES" | while IFS= read -r file; do
       if [ -f "$file" ] && [ ! -d "$file" ]; then
         # Skip test files, example files, and hook scripts.
         if echo "$file" | grep -qE '\.(test|spec)\.(m?[jt]s|tsx?)$|\.example$|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then

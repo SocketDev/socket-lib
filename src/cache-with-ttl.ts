@@ -404,14 +404,15 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       return cached
     }
 
-    // Check if fetch is already in progress
     const fullKey = buildKey(key)
+
+    // Check if fetch is already in progress (atomic check-and-set)
     const inflight = inflightRequests.get(fullKey)
     if (inflight) {
       return await inflight
     }
 
-    // Start fetch and track it
+    // Create promise before storing to minimize TOCTOU window
     const promise = (async () => {
       try {
         const data = await fetcher()
@@ -422,6 +423,14 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       }
     })()
 
+    // Double-check in case another call set it between our checks
+    const existing = inflightRequests.get(fullKey)
+    if (existing) {
+      // Another call won the race, use their promise
+      return await existing
+    }
+
+    // We won the race, store our promise
     inflightRequests.set(fullKey, promise)
     return await promise
   }

@@ -249,12 +249,26 @@ async function runTests(
     vitestArgs.push(...positionals)
   }
 
+  // Build NODE_OPTIONS with deduplication to avoid conflicts
+  const existingOpts = (process.env.NODE_OPTIONS || '')
+    .split(/\s+/)
+    .filter(Boolean)
+  // Remove existing max-old-space-size to avoid conflicts
+  const filteredOpts = existingOpts.filter(
+    opt => !opt.startsWith('--max-old-space-size'),
+  )
+  const maxOldSpace = process.env.CI ? 8192 : 4096
+  const nodeOptions = [
+    ...filteredOpts,
+    `--max-old-space-size=${maxOldSpace}`,
+    '--unhandled-rejections=warn',
+  ].join(' ')
+
   const spawnOptions = {
     cwd: rootPath,
     env: {
       ...process.env,
-      NODE_OPTIONS:
-        `${process.env.NODE_OPTIONS || ''} --max-old-space-size=${process.env.CI ? 8192 : 4096} --unhandled-rejections=warn`.trim(),
+      NODE_OPTIONS: nodeOptions,
       VITEST: '1',
     },
     stdio: 'inherit',
@@ -488,8 +502,8 @@ async function main() {
       spinner.stop()
     } catch {}
     removeExitHandler()
-    // Explicitly exit to prevent hanging
-    process.exit(process.exitCode || 0)
+    // Exit code already set via process.exitCode (line 465/475)
+    // Let process exit naturally to allow parent process error handlers
   }
 }
 

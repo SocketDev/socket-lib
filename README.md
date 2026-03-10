@@ -96,7 +96,7 @@ Type-safe environment variable access and platform detection.
 - `getCI()` - Detect CI environment
 - `getNodeEnv()` - Get NODE_ENV value
 - `isTest()` - Check if running tests
-- `getHome()`, `getUserProfile()` - Cross-platform home directory
+- `getHome()` - Home directory (Unix/Linux/macOS)
 - Test rewiring with `setEnv()`, `resetEnv()`
 
 ### Package Management
@@ -107,9 +107,8 @@ Detect and work with npm, pnpm, and yarn.
 
 ### Constants
 Pre-defined values for Node.js, npm, and platform detection.
-- `MIN_SUPPORTED_NODE_VERSION` - Minimum Node.js version
-- `MAIN_REGISTRY_URL` - npm registry URL
-- `WIN32`, `DARWIN`, `LINUX` - Platform booleans
+- `getNodeMajorVersion()` - Get current Node.js major version
+- `WIN32`, `DARWIN` - Platform booleans (use `!WIN32 && !DARWIN` for Linux)
 - `getAbortSignal()` - Global abort signal
 
 ### Utilities

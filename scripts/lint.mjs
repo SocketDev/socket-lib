@@ -212,7 +212,11 @@ async function runLintOnFiles(files, options = {}) {
       }
 
       // When fixing, non-zero exit codes are normal if fixes were applied.
-      if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
+      // Check both stdout and stderr for error output (some linters use stdout)
+      const hasOutput =
+        (result.stderr && result.stderr.trim().length > 0) ||
+        (result.stdout && result.stdout.trim().length > 0)
+      if (!fix || hasOutput) {
         if (!quiet) {
           logger.error('Linting failed')
         }
@@ -286,7 +290,11 @@ async function runLintOnAll(options = {}) {
       }
 
       // When fixing, non-zero exit codes are normal if fixes were applied.
-      if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
+      // Check both stdout and stderr for error output (some linters use stdout)
+      const hasOutput =
+        (result.stderr && result.stderr.trim().length > 0) ||
+        (result.stdout && result.stdout.trim().length > 0)
+      if (!fix || hasOutput) {
         if (!quiet) {
           logger.error('Linting failed')
         }

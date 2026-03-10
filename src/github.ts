@@ -755,16 +755,15 @@ export async function cacheFetchGhsa(
   const cache = getGithubCache()
   const key = `ghsa:${ghsaId}`
 
-  // Check cache first.
-  if (!process.env['DISABLE_GITHUB_CACHE']) {
-    const cached = await cache.get(key)
-    if (cached) {
-      return JSON.parse(cached as string) as GhsaDetails
-    }
+  // Bypass cache if disabled.
+  if (process.env['DISABLE_GITHUB_CACHE']) {
+    return await fetchGhsaDetails(ghsaId, options)
   }
 
-  // Fetch and cache.
-  const data = await fetchGhsaDetails(ghsaId, options)
-  await cache.set(key, JSON.stringify(data))
-  return data
+  // Use getOrFetch to prevent race conditions (thundering herd).
+  const cached = await cache.getOrFetch(key, async () => {
+    const data = await fetchGhsaDetails(ghsaId, options)
+    return JSON.stringify(data)
+  })
+  return JSON.parse(cached as string) as GhsaDetails
 }
