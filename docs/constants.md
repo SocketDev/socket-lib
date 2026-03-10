@@ -278,9 +278,10 @@ const configPath = PathBuilder.home()
   .build()
 
 console.log(configPath)
-// Windows: C:\Users\name\AppData\Local\MyApp\config.json
-// macOS: /Users/name/Library/Application Support/MyApp/config.json
-// Linux: /home/name/.config/MyApp/config.json
+// Platform-specific output:
+// - Windows: Uses AppData\Local
+// - macOS: Uses Library/Application Support
+// - Linux: Uses .config
 ```
 
 ### Registry URL Builder
