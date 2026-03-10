@@ -485,7 +485,7 @@ export function findBinaryPath(
         // 1. User-provided binaryName
         // 2. Last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
         // 3. First binary as fallback
-        const lastSegment = packageName.split('/').pop()
+        const lastSegment = packageName.split('/').pop() ?? packageName
         const candidates = [
           binaryName,
           lastSegment,

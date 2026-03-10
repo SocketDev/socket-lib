@@ -126,7 +126,22 @@ export function globStreamLicenses(
   /* c8 ignore stop */
 }
 
+const MATCHER_CACHE_MAX_SIZE = 100
 const matcherCache = new Map<string, (path: string) => boolean>()
+const matcherAccessOrder: string[] = []
+
+function evictLRUMatcher() {
+  if (
+    matcherCache.size >= MATCHER_CACHE_MAX_SIZE &&
+    matcherAccessOrder.length > 0
+  ) {
+    const oldest = matcherAccessOrder.shift()
+    if (oldest) {
+      matcherCache.delete(oldest)
+    }
+  }
+}
+
 /**
  * Get a cached glob matcher function.
  */
@@ -139,8 +154,17 @@ export function getGlobMatcher(
   const key = JSON.stringify({ patterns, options })
   let matcher: ((path: string) => boolean) | undefined = matcherCache.get(key)
   if (matcher) {
+    // Move to end of access order (LRU)
+    const index = matcherAccessOrder.indexOf(key)
+    if (index !== -1) {
+      matcherAccessOrder.splice(index, 1)
+      matcherAccessOrder.push(key)
+    }
     return matcher
   }
+
+  // Evict oldest entry if cache is full
+  evictLRUMatcher()
 
   // Separate positive and negative patterns.
   const positivePatterns = patterns.filter(p => !p.startsWith('!'))
@@ -163,6 +187,7 @@ export function getGlobMatcher(
   ) as (path: string) => boolean
 
   matcherCache.set(key, matcher)
+  matcherAccessOrder.push(key)
   return matcher
 }
 

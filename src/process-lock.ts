@@ -318,7 +318,9 @@ class ProcessLockManager {
 
           // Handle parent path issues - not retryable.
           if (code === 'ENOTDIR') {
-            const parentDir = lockPath.slice(0, lockPath.lastIndexOf('/'))
+            const lastSlashIndex = lockPath.lastIndexOf('/')
+            const parentDir =
+              lastSlashIndex === -1 ? '.' : lockPath.slice(0, lastSlashIndex)
             throw new Error(
               `Cannot create lock directory: ${lockPath}\n` +
                 'A path component is a file when it should be a directory.\n' +
@@ -332,7 +334,9 @@ class ProcessLockManager {
           }
 
           if (code === 'ENOENT') {
-            const parentDir = lockPath.slice(0, lockPath.lastIndexOf('/'))
+            const lastSlashIndex = lockPath.lastIndexOf('/')
+            const parentDir =
+              lastSlashIndex === -1 ? '.' : lockPath.slice(0, lastSlashIndex)
             throw new Error(
               `Cannot create lock directory: ${lockPath}\n` +
                 `Parent directory does not exist: ${parentDir}\n` +

@@ -290,7 +290,9 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
         }
 
         // Add to results (strip cache prefix from key).
-        const originalKey = key.slice((opts.prefix?.length ?? 0) + 1)
+        const originalKey = opts.prefix
+          ? key.slice(opts.prefix.length + 1)
+          : key
         results.set(originalKey, entry.data as T)
       }
     }
@@ -312,7 +314,9 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       }
 
       // Skip if already in results (from memory).
-      const originalKey = cacheEntry.key.slice((opts.prefix?.length ?? 0) + 1)
+      const originalKey = opts.prefix
+        ? cacheEntry.key.slice(opts.prefix.length + 1)
+        : cacheEntry.key
       if (results.has(originalKey)) {
         continue
       }
@@ -384,8 +388,12 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     }
   }
 
+  // Track in-flight fetch requests to prevent duplicate fetches
+  const inflightRequests = new Map<string, Promise<any>>()
+
   /**
    * Get cached data or fetch and cache if missing/expired.
+   * Deduplicates concurrent requests with the same key.
    */
   async function getOrFetch<T>(
     key: string,
@@ -396,9 +404,26 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       return cached
     }
 
-    const data = await fetcher()
-    await set(key, data)
-    return data
+    // Check if fetch is already in progress
+    const fullKey = buildKey(key)
+    const inflight = inflightRequests.get(fullKey)
+    if (inflight) {
+      return await inflight
+    }
+
+    // Start fetch and track it
+    const promise = (async () => {
+      try {
+        const data = await fetcher()
+        await set(key, data)
+        return data
+      } finally {
+        inflightRequests.delete(fullKey)
+      }
+    })()
+
+    inflightRequests.set(fullKey, promise)
+    return await promise
   }
 
   /**

@@ -96,5 +96,8 @@ export function resolveOriginalPackageName(sockRegPkgName: string): string {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unescapeScope(escapedScope: string): string {
+  if (escapedScope.length < REGISTRY_SCOPE_DELIMITER.length) {
+    return `@${escapedScope}`
+  }
   return `@${escapedScope.slice(0, -REGISTRY_SCOPE_DELIMITER.length)}`
 }

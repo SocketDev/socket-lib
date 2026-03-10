@@ -77,7 +77,8 @@ export function formatCoverage(options: FormatCoverageOptions): string {
   }
 
   // Overall.
-  const emoji = getCoverageEmoji(Number.parseFloat(overall))
+  const overallValue = Number.parseFloat(overall)
+  const emoji = getCoverageEmoji(Number.isNaN(overallValue) ? 0 : overallValue)
   output += `\nOverall: ${overall}%${emoji}\n`
 
   return output
@@ -95,10 +96,11 @@ function calculateOverall(
     Number.parseFloat(code.branches.percent),
     Number.parseFloat(code.functions.percent),
     Number.parseFloat(code.lines.percent),
-  ]
+  ].map(val => (Number.isNaN(val) ? 0 : val))
 
   if (type) {
-    metrics.push(Number.parseFloat(type.percent))
+    const typePercent = Number.parseFloat(type.percent)
+    metrics.push(Number.isNaN(typePercent) ? 0 : typePercent)
   }
 
   const average = metrics.reduce((sum, val) => sum + val, 0) / metrics.length
