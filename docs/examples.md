@@ -10,7 +10,12 @@ A complete CLI tool that downloads a file, processes it, and provides visual fee
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { httpDownload } from '@socketsecurity/lib/http-request'
-import { readFileBinary, safeDelete, safeMkdir, safeStats } from '@socketsecurity/lib/fs'
+import {
+  readFileBinary,
+  safeDelete,
+  safeMkdir,
+  safeStats,
+} from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
 const logger = getDefaultLogger()
@@ -30,9 +35,11 @@ async function downloadAndProcess(url: string, destPath: string) {
     await httpDownload(url, downloadPath, {
       onProgress: (downloaded, total) => {
         spinner.progress(downloaded, total, 'bytes')
-      }
+      },
     })
-    spinner.success(`Downloaded ${(await safeStats(downloadPath))?.size || 0} bytes`)
+    spinner.success(
+      `Downloaded ${(await safeStats(downloadPath))?.size || 0} bytes`,
+    )
   } catch (error) {
     spinner.failAndStop('Download failed')
     throw error
@@ -52,10 +59,7 @@ async function downloadAndProcess(url: string, destPath: string) {
 }
 
 // Usage
-await downloadAndProcess(
-  'https://example.com/archive.tar.gz',
-  './output'
-)
+await downloadAndProcess('https://example.com/archive.tar.gz', './output')
 ```
 
 ## Package Manager Wrapper
@@ -68,7 +72,9 @@ import { findUpSync } from '@socketsecurity/lib/fs'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { Spinner } from '@socketsecurity/lib/spinner'
 
-async function detectPackageManager(cwd: string): Promise<'npm' | 'pnpm' | 'yarn'> {
+async function detectPackageManager(
+  cwd: string,
+): Promise<'npm' | 'pnpm' | 'yarn'> {
   if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
   if (findUpSync('yarn.lock', { cwd })) return 'yarn'
   return 'npm'
@@ -87,7 +93,7 @@ async function installDependencies(projectPath: string) {
     await spawn(pm, ['install'], {
       cwd: projectPath,
       stdio: 'pipe',
-      spinner
+      spinner,
     })
 
     spinner.successAndStop('Dependencies installed')
@@ -127,7 +133,7 @@ async function buildProject(projectPath: string) {
   spinner.start('Compiling TypeScript...')
   try {
     await spawn('tsc', ['--noEmit'], {
-      cwd: projectPath
+      cwd: projectPath,
     })
     spinner.success('TypeScript check passed')
   } catch (error) {
@@ -137,14 +143,18 @@ async function buildProject(projectPath: string) {
   // Build with esbuild
   spinner.text('Building with esbuild...')
   try {
-    await spawn('esbuild', [
-      'src/index.ts',
-      '--bundle',
-      '--platform=node',
-      '--outfile=dist/index.js'
-    ], {
-      cwd: projectPath
-    })
+    await spawn(
+      'esbuild',
+      [
+        'src/index.ts',
+        '--bundle',
+        '--platform=node',
+        '--outfile=dist/index.js',
+      ],
+      {
+        cwd: projectPath,
+      },
+    )
     spinner.success('Build successful')
   } catch (error) {
     spinner.failAndStop('Build failed')
@@ -160,7 +170,7 @@ async function buildProject(projectPath: string) {
   spinner.start('Running tests...')
   try {
     await spawn('vitest', ['run'], {
-      cwd: projectPath
+      cwd: projectPath,
     })
     spinner.successAndStop('All tests passed')
   } catch (error) {
@@ -199,7 +209,7 @@ async function loadConfig(projectDir: string): Promise<Config> {
   const defaults: Config = {
     apiUrl: 'https://api.example.com',
     timeout: 30000,
-    debug: false
+    debug: false,
   }
 
   // Try loading configs in order of precedence
@@ -209,7 +219,7 @@ async function loadConfig(projectDir: string): Promise<Config> {
   if (home) {
     const globalConfig = await readJson(
       path.join(home, '.myapp', 'config.json'),
-      { throws: false }
+      { throws: false },
     )
     if (globalConfig) {
       configs.push(globalConfig)
@@ -217,19 +227,17 @@ async function loadConfig(projectDir: string): Promise<Config> {
   }
 
   // 2. Project config
-  const projectConfig = await readJson(
-    path.join(projectDir, '.myapprc'),
-    { throws: false }
-  )
+  const projectConfig = await readJson(path.join(projectDir, '.myapprc'), {
+    throws: false,
+  })
   if (projectConfig) {
     configs.push(projectConfig)
   }
 
   // 3. Environment-specific config
-  const envConfig = await readJson(
-    path.join(projectDir, `.myapprc.${env}`),
-    { throws: false }
-  )
+  const envConfig = await readJson(path.join(projectDir, `.myapprc.${env}`), {
+    throws: false,
+  })
   if (envConfig) {
     configs.push(envConfig)
   }
@@ -277,7 +285,7 @@ async function processFiles(inputDir: string, outputDir: string) {
   let processed = 0
 
   const results = await Promise.all(
-    dirs.map(async (dir) => {
+    dirs.map(async dir => {
       const dirPath = path.join(inputDir, dir)
       const files = await readDirNames(dirPath)
 
@@ -296,12 +304,14 @@ async function processFiles(inputDir: string, outputDir: string) {
       spinner.progress(processed, dirs.length, 'directories')
 
       return { dir, fileCount: files.length }
-    })
+    }),
   )
 
   spinner.successAndStop('All files processed')
 
-  logger.success(`Processed ${results.reduce((sum, r) => sum + r.fileCount, 0)} files`)
+  logger.success(
+    `Processed ${results.reduce((sum, r) => sum + r.fileCount, 0)} files`,
+  )
   return results
 }
 
@@ -319,7 +329,7 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 async function gitStatus(repoPath: string) {
   const result = await spawn('git', ['status', '--porcelain'], {
-    cwd: repoPath
+    cwd: repoPath,
   })
   return result.stdout.trim()
 }
@@ -331,7 +341,7 @@ async function hasUncommittedChanges(repoPath: string): Promise<boolean> {
 
 async function getCurrentBranch(repoPath: string): Promise<string> {
   const result = await spawn('git', ['branch', '--show-current'], {
-    cwd: repoPath
+    cwd: repoPath,
   })
   return result.stdout.trim()
 }
@@ -346,7 +356,7 @@ async function safeCheckout(repoPath: string, branch: string) {
     // Offer to stash
     logger.step('Stashing changes')
     await spawn('git', ['stash', 'push', '-m', 'Auto-stash before checkout'], {
-      cwd: repoPath
+      cwd: repoPath,
     })
     logger.success('Changes stashed')
   }
@@ -355,7 +365,7 @@ async function safeCheckout(repoPath: string, branch: string) {
   logger.step(`Checking out ${branch}`)
   try {
     await spawn('git', ['checkout', branch], {
-      cwd: repoPath
+      cwd: repoPath,
     })
     logger.success(`Switched to ${branch}`)
   } catch (error) {
@@ -400,14 +410,14 @@ async function checkHealth(checks: HealthCheck[]) {
   logger.step('Running health checks')
 
   const results = await Promise.all(
-    checks.map(async (check) => {
+    checks.map(async check => {
       spinner.start(`Checking ${check.name}...`)
 
       try {
         const response = await httpJson(check.url, {
           retries: 3,
           retryDelay: 1000,
-          timeout: 5000
+          timeout: 5000,
         })
 
         spinner.success(`${check.name}: OK`)
@@ -416,7 +426,7 @@ async function checkHealth(checks: HealthCheck[]) {
         spinner.fail(`${check.name}: FAILED`)
         return { ...check, status: 'unhealthy', error }
       }
-    })
+    }),
   )
 
   spinner.stop()
@@ -437,7 +447,7 @@ async function checkHealth(checks: HealthCheck[]) {
 const results = await checkHealth([
   { name: 'API Server', url: 'https://api.example.com/health' },
   { name: 'Database', url: 'https://db.example.com/health' },
-  { name: 'Cache', url: 'https://cache.example.com/health' }
+  { name: 'Cache', url: 'https://cache.example.com/health' },
 ])
 ```
 
@@ -459,24 +469,26 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 async function processBatch<T>(
   items: T[],
   processor: (item: T) => Promise<void>,
-  concurrency: number = 5
+  concurrency: number = 5,
 ) {
   const logger = getDefaultLogger()
   const spinner = Spinner()
 
-  logger.step(`Processing ${items.length} items with concurrency ${concurrency}`)
+  logger.step(
+    `Processing ${items.length} items with concurrency ${concurrency}`,
+  )
 
   const queue = new PromiseQueue(concurrency)
   let completed = 0
 
   spinner.progress(0, items.length, 'items')
 
-  const tasks = items.map((item) =>
+  const tasks = items.map(item =>
     queue.add(async () => {
       await processor(item)
       completed++
       spinner.progress(completed, items.length, 'items')
-    })
+    }),
   )
 
   await Promise.all(tasks)
@@ -488,12 +500,12 @@ async function processBatch<T>(
 const files = await glob('**/*.txt')
 await processBatch(
   files,
-  async (file) => {
+  async file => {
     const content = await readFileUtf8(file)
     const processed = content.toUpperCase()
     await fs.writeFile(file, processed, 'utf8')
   },
-  10  // Process 10 files at a time
+  10, // Process 10 files at a time
 )
 ```
 

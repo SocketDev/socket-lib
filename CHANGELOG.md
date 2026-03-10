@@ -67,7 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **provenance**: Fixed incorrect package name in provenance workflow
   - Changed from `@socketregistry/lib` to `@socketsecurity/lib`
 
-
 ## [5.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.6.0) - 2026-02-08
 
 ### Added
@@ -1073,6 +1072,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This release completely refactors the environment variable system, consolidating 60+ individual env constant files into grouped getter modules with AsyncLocalStorage-based test rewiring.
 
 **Consolidated env files** - Individual files replaced with grouped modules:
+
 - `env/github.ts` - All GitHub-related env vars (GITHUB_TOKEN, GH_TOKEN, GITHUB_API_URL, etc.)
 - `env/socket.ts` - Socket-specific env vars (SOCKET_API_TOKEN, SOCKET_CACACHE_DIR, etc.)
 - `env/socket-cli.ts` - Socket CLI env vars (SOCKET_CLI_API_TOKEN, SOCKET_CLI_CONFIG, etc.)
@@ -1084,6 +1084,7 @@ This release completely refactors the environment variable system, consolidating
 - `env/test.ts` - Test framework env vars (VITEST, JEST_WORKER_ID)
 
 **Constants → Getter functions** - All env constants converted to functions:
+
 ```typescript
 // Before (v1.x):
 import { GITHUB_TOKEN } from '#env/github-token'
@@ -1093,6 +1094,7 @@ import { getGithubToken } from '#env/github'
 ```
 
 **Deleted files** - Removed 60+ individual env constant files:
+
 - `env/github-token.ts`, `env/socket-api-token.ts`, etc. → Consolidated into grouped files
 - `env/getters.ts` → Functions moved to their respective grouped files
 
@@ -1122,6 +1124,7 @@ afterEach(() => {
 ```
 
 **Features:**
+
 - Allows toggling between snapshot and live behavior
 - Compatible with `vi.stubEnv()` as fallback
 
@@ -1224,7 +1227,7 @@ afterEach(() => {
 ### Added
 
 - Added `dlx-package` module for installing and executing npm packages directly
-  - Content-addressed caching using SHA256 hash (like npm's _npx)
+  - Content-addressed caching using SHA256 hash (like npm's \_npx)
   - Auto-force for version ranges (^, ~, >, <) to get latest within range
   - Cross-platform support with comprehensive tests (30 tests)
   - Parses scoped and unscoped package specs correctly

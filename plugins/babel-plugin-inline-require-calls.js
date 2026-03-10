@@ -94,10 +94,10 @@ function inlineRequireCalls(babel) {
           const requireFunc = createRequire(currentFilePath)
 
           // Load the module.
-          const module = requireFunc(resolvedPath)
+          const loadedModule = requireFunc(resolvedPath)
 
           // Get the default export (supports both ESM default and CJS module.exports).
-          const value = module.default ?? module
+          const value = loadedModule.default ?? loadedModule
 
           // Verify the value is serializable (primitive or simple object).
           if (!isSerializable(value)) {

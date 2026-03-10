@@ -22,6 +22,7 @@ This is a reference to shared Socket standards. See `../socket-registry/CLAUDE.m
 ## VERIFICATION PROTOCOL
 
 **MANDATORY**: Before claiming any task is complete:
+
 1. Test the solution end-to-end
 2. Verify all changes work as expected
 3. Run the actual commands to confirm functionality
@@ -49,6 +50,7 @@ If user repeats instruction 2+ times, ask: "Should I add this to CLAUDE.md?"
 All shared standards (git, testing, code style, cross-platform, CI) defined in socket-registry/CLAUDE.md.
 
 **Quick references**:
+
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) `<type>(<scope>): <description>` - NO AI attribution
 - Scripts: Prefer `pnpm run foo --flag` over `foo:bar` scripts
 - Docs: Use `docs/` folder, lowercase-with-hyphens.md filenames, pithy writing with visuals
@@ -62,6 +64,7 @@ All shared standards (git, testing, code style, cross-platform, CI) defined in s
 ## 📝 EMOJI & OUTPUT STYLE
 
 **Terminal Symbols** (based on `@socketsecurity/lib/logger` LOG_SYMBOLS):
+
 - ✓ Success/checkmark - MUST be green (NOT ✅)
 - ✗ Error/failure - MUST be red (NOT ❌)
 - ⚠ Warning/caution - MUST be yellow (NOT ⚠️)
@@ -69,28 +72,31 @@ All shared standards (git, testing, code style, cross-platform, CI) defined in s
 - → Step/progress - MUST be cyan (NOT ➜ or ▶)
 
 **Color Requirements** (apply color to icon ONLY, not entire message):
+
 ```javascript
 import colors from 'yoctocolors-cjs'
-
-`${colors.green('✓')} ${msg}`   // Success
-`${colors.red('✗')} ${msg}`     // Error
-`${colors.yellow('⚠')} ${msg}`  // Warning
-`${colors.blue('ℹ')} ${msg}`    // Info
-`${colors.cyan('→')} ${msg}`    // Step/Progress
+;`${colors.green('✓')} ${msg}` // Success
+`${colors.red('✗')} ${msg}` // Error
+`${colors.yellow('⚠')} ${msg}` // Warning
+`${colors.blue('ℹ')} ${msg}` // Info
+`${colors.cyan('→')} ${msg}` // Step/Progress
 ```
 
 **Color Package**:
+
 - Use `yoctocolors-cjs` (NOT `yoctocolors` ESM package)
 - Pinned dev dependency in all Socket projects
 - CommonJS compatibility for scripts and tooling
 
 **Allowed Emojis** (use sparingly):
+
 - 📦 Packages
 - 💡 Ideas/tips
 - 🚀 Launch/deploy/excitement
 - 🎉 Major success/celebration
 
 **General Philosophy**:
+
 - Prefer colored text-based symbols (✓✗⚠ℹ→) for maximum terminal compatibility
 - Always color-code symbols: green=success, red=error, yellow=warning, blue=info, cyan=step
 - Use emojis sparingly for emphasis and delight
@@ -106,6 +112,7 @@ import colors from 'yoctocolors-cjs'
 Core infrastructure library for Socket.dev security tools.
 
 **Directory structure**:
+
 ```
 src/
 ├── index.ts           # Main export barrel
@@ -125,6 +132,7 @@ test/                 # Test files
 ```
 
 **Path aliases** (defined in `.config/tsconfig.external-aliases.json`):
+
 ```
 #constants/* → src/constants/*
 #env/*       → src/env/*
@@ -135,6 +143,7 @@ test/                 # Test files
 ```
 
 ### Commands
+
 - **Build**: `pnpm build` (production build)
 - **Watch**: `pnpm run dev` (development mode)
 - **Test**: `pnpm test` (run tests)
@@ -147,13 +156,16 @@ test/                 # Test files
 ### Build System
 
 #### Compilation
+
 - **Target**: TypeScript → CommonJS (ES2022)
 - **Builder**: esbuild via `scripts/build/js.mjs`
 - **Type generation**: tsgo (TypeScript Native Preview)
 - **Output**: `dist/` directory
 
 #### Build Scripts
+
 All build scripts are Node.js modules (`.mjs`) in `scripts/`:
+
 - `build/js.mjs` - Main JavaScript compilation
 - `build/externals.mjs` - External dependency bundling
 - `fix/commonjs-exports.mjs` - Post-build CommonJS export fixes
@@ -163,18 +175,22 @@ All build scripts are Node.js modules (`.mjs`) in `scripts/`:
 🚨 **FORBIDDEN**: Shell scripts (`.sh`) - Always use Node.js scripts
 
 #### Build Process
+
 The main build command (`pnpm build`) orchestrates via `scripts/build/main.mjs`:
+
 1. Clean previous build
 2. Build in parallel: source code, types, and externals
 3. Fix exports via `scripts/fix/main.mjs`
 
 Individual commands:
+
 - `pnpm run clean` - Clean build artifacts only
 - `pnpm build` - Full build (default)
 
 ### Code Style - Lib-Specific
 
 #### File Organization
+
 - **Extensions**: `.ts` for TypeScript, `.d.ts` for type definitions
 - **Naming**: kebab-case filenames (e.g., `cache-with-ttl.ts`)
 - **Module headers**: 🚨 MANDATORY `@fileoverview` headers
@@ -182,12 +198,14 @@ Individual commands:
 - **Semicolons**: ❌ OMIT (consistent with socket-registry)
 
 #### Type Patterns
+
 - **Type safety**: ❌ FORBIDDEN `any`; use `unknown` or specific types
 - **Type imports**: Always separate `import type` from runtime imports
 - **Null-prototype objects**: Use `{ __proto__: null, ...props }` pattern
 - **Options pattern**: `const opts = { __proto__: null, ...options } as SomeOptions`
 
 #### Import Organization
+
 1. Node.js built-ins (with `node:` prefix)
 2. External dependencies
 3. `@socketsecurity/*` packages
@@ -197,6 +215,7 @@ Individual commands:
 Blank lines between groups, alphabetical within groups.
 
 #### Path Aliases Usage
+
 - **Internal imports**: Always use path aliases for internal modules
   - ✅ `import { getCI } from '#env/ci'`
   - ❌ `import { getCI } from '../env/ci'`
@@ -204,6 +223,7 @@ Blank lines between groups, alphabetical within groups.
   - ✅ `import path from 'node:path'`
 
 #### Export Patterns
+
 - **Named exports ONLY**: 🚨 MANDATORY for all library modules
   - ✅ `export { value }` - Direct named export
   - ✅ `export { foo, bar, baz }` - Multiple named exports
@@ -219,6 +239,7 @@ Blank lines between groups, alphabetical within groups.
   - CI validation: `scripts/validate/dist-exports.mjs`
 
 #### Function Organization
+
 - **Alphabetical ordering**: 🚨 MANDATORY for all files with 3+ exported functions
   - **Private functions first**: Non-exported helpers, getters, utilities (alphabetically sorted)
   - **Exported functions second**: All public API functions (alphabetically sorted)
@@ -229,6 +250,7 @@ Blank lines between groups, alphabetical within groups.
   - Easier code review (spot missing/duplicate exports)
   - Consistent structure across entire codebase
 - **Example**:
+
   ```typescript
   // 1. Imports
   import { foo } from 'bar'
@@ -249,7 +271,9 @@ Blank lines between groups, alphabetical within groups.
 ### Package Exports
 
 #### Export Structure
+
 All modules are exported via `package.json` exports field:
+
 - **Constants**: `./constants/<name>` → `dist/constants/<name>.js`
 - **Environment**: `./env/<name>` → `dist/env/<name>.js`
 - **Libraries**: `./<name>` → `dist/<name>.js`
@@ -257,7 +281,9 @@ All modules are exported via `package.json` exports field:
 - **Types**: `./types` → `dist/types.js`
 
 #### Adding New Exports
+
 When adding new modules, update `package.json` exports:
+
 ```json
 "./module-name": {
   "types": "./dist/path/to/module.d.ts",
@@ -272,18 +298,21 @@ Or use `scripts/generate-package-exports.mjs` to auto-generate exports.
 **Vitest Configuration**: This repo uses the shared vitest configuration pattern documented in `../socket-registry/CLAUDE.md` (see "Vitest Configuration Variants" section). Main config: `.config/vitest.config.mts`
 
 #### Test Structure
+
 - **Directories**: `test/` - All test files
 - **Naming**: Match source structure (e.g., `test/spinner.test.ts` for `src/spinner.ts`)
 - **Framework**: Vitest
 - **Coverage**: c8/v8 coverage via Vitest
 
 #### Test Patterns
+
 - Use descriptive test names
 - Test both success and error paths
 - Mock external dependencies appropriately
 - Use path helpers for cross-platform tests
 
 #### Running Tests
+
 - **All tests**: `pnpm test`
 - **Specific file**: `pnpm test path/to/file.test.ts`
 - **Coverage**: `pnpm run cover`
@@ -292,12 +321,16 @@ Or use `scripts/generate-package-exports.mjs` to auto-generate exports.
 ### External Dependencies
 
 #### Vendored Dependencies
+
 Some dependencies are vendored in `src/external/`:
+
 - Type definitions for external packages
 - Optimized versions of dependencies
 
 #### Path Mappings
+
 `tsconfig.json` includes path mappings for vendored deps:
+
 ```json
 "paths": {
   "cacache": ["./src/external/cacache"],
@@ -310,9 +343,11 @@ Some dependencies are vendored in `src/external/`:
 ### CI Integration
 
 #### Optimized CI Pipeline
+
 **Workflow**: `.github/workflows/ci.yml` - Custom optimized pipeline
 
 **Key Optimizations**:
+
 - **Separate lint job**: Runs once (not 6x in matrix) - saves ~10s
 - **Build caching**: Build runs once, artifacts cached for all jobs - eliminates 5 rebuilds (~8s saved)
 - **Parallel execution**: Lint, build, test, type-check run in parallel where possible
@@ -320,12 +355,14 @@ Some dependencies are vendored in `src/external/`:
 - **Matrix strategy**: Tests run on Node 20/22/24 × Ubuntu/Windows (6 combinations)
 
 **Performance**:
+
 - Build time: ~1.6s (esbuild, parallelized)
 - Test execution: ~5s (4582 tests, multi-threaded)
 - Total CI time: ~40-60% faster than previous setup
 - Status check job: Single required check for branch protection
 
 **Job Structure**:
+
 1. **lint** - Runs Biome linting (once, Node 22/Ubuntu)
 2. **build** - Compiles source, caches dist + node_modules
 3. **test** - Runs test suite on all matrix combinations (uses cached build)
@@ -333,6 +370,7 @@ Some dependencies are vendored in `src/external/`:
 5. **ci-success** - Aggregates all job results for branch protection
 
 **Cache Strategy**:
+
 ```yaml
 key: build-${{ github.sha }}-${{ runner.os }}
 path: |
@@ -341,6 +379,7 @@ path: |
 ```
 
 **Previous Setup** (for reference):
+
 - Used reusable workflow: `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>`
 - 🚨 MANDATORY: Use full commit SHA, not tags
 - Format: `@662bbcab1b7533e24ba8e3446cffd8a7e5f7617e # main`
@@ -348,14 +387,17 @@ path: |
 ### Development Workflow
 
 #### Before Committing
+
 1. `pnpm run fix` - Auto-fix formatting/lint issues
 2. `pnpm run check` - Type check
 3. `pnpm test` - Run tests (or `pnpm run cover` for coverage)
 
 #### Watch Mode
+
 Use `pnpm run dev` for development with automatic rebuilds.
 
 #### Adding New Utilities
+
 1. Create utility in appropriate `src/` subdirectory
 2. Use path aliases for internal imports
 3. Add type definitions
@@ -366,7 +408,9 @@ Use `pnpm run dev` for development with automatic rebuilds.
 ### Common Patterns
 
 #### Environment Variables
+
 Access via typed getter functions in `src/env/`:
+
 ```typescript
 import { getCI } from '#env/ci'
 import { getNodeEnv } from '#env/node-env'
@@ -374,15 +418,17 @@ import { isTest } from '#env/test'
 ```
 
 Each env module exports a pure getter function that accesses only its own environment variable. For fallback logic, compose multiple getters:
+
 ```typescript
 import { getHome } from '#env/home'
 import { getUserprofile } from '#env/windows'
 
-const homeDir = getHome() || getUserprofile()  // Cross-platform fallback
+const homeDir = getHome() || getUserprofile() // Cross-platform fallback
 ```
 
 **Testing with rewiring:**
 Environment getters support test rewiring without modifying `process.env`:
+
 ```typescript
 import { setEnv, clearEnv, resetEnv } from '#env/rewire'
 import { getCI } from '#env/ci'
@@ -391,31 +437,38 @@ import { getCI } from '#env/ci'
 setEnv('CI', '1')
 expect(getCI()).toBe(true)
 
-clearEnv('CI')  // Clear single override
-resetEnv()      // Clear all overrides (use in afterEach)
+clearEnv('CI') // Clear single override
+resetEnv() // Clear all overrides (use in afterEach)
 ```
 
 This allows isolated tests without polluting the global process.env state.
 
 #### File System Operations
+
 Use utilities from `#lib/fs`:
+
 ```typescript
 import { readJsonFile, writeJsonFile } from '#lib/fs'
 ```
 
 #### Spawning Processes
+
 Use spawn utility from `#lib/spawn`:
+
 ```typescript
 import { spawn } from '#lib/spawn'
 ```
 
 #### Path Operations
+
 Use path utilities from `#lib/paths`:
+
 ```typescript
 import { normalizePath } from '#lib/paths'
 ```
 
 #### Working Directory
+
 - **🚨 NEVER use `process.chdir()`** - use `{ cwd }` options and absolute paths instead
   - Breaks tests, worker threads, and causes race conditions
   - Always pass `{ cwd: absolutePath }` to spawn/exec/fs operations
@@ -423,17 +476,20 @@ import { normalizePath } from '#lib/paths'
 ### Debugging
 
 #### Common Issues
+
 - **Path alias resolution**: Ensure `tsconfig.json` paths match actual file structure
 - **Module resolution**: Use `node:` prefix for Node.js built-ins
 - **Build errors**: Check for missing exports in `package.json`
 - **Test failures**: Verify path alias resolution in test environment
 
 #### Build Debugging
+
 - Check `dist/` output structure
 - Verify CommonJS exports are correctly transformed
 - Ensure type definitions are generated
 
 ### Notes
+
 - This is a core utilities library - maintain high quality and test coverage
 - Breaking changes impact all Socket.dev tools - coordinate carefully
 - Cross-platform compatibility is critical

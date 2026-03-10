@@ -1,0 +1,26 @@
+diff --git a/index.js b/index.js
+index a0c8acde487fce4d52127e850f94199eefd5845e..5f56a3d6f0053633df5a8e45429b38b98176a739 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,4 @@
+-const Minipass = require('minipass')
++const { Minipass } = require('minipass')
+ 
+ class SizeError extends Error {
+   constructor (found, expect) {
+diff --git a/package-lock.json b/package-lock.json
+deleted file mode 100644
+index 944b285252b1c12a4c2d1fe4887c22c4ed8447da..0000000000000000000000000000000000000000
+diff --git a/package.json b/package.json
+index a3257fd8f673aee71ac258585eebf757c305ee0e..18d20ac558547b26d209fd044ce529e9d4e30a95 100644
+--- a/package.json
++++ b/package.json
+@@ -18,7 +18,7 @@
+     "tap": "^14.6.4"
+   },
+   "dependencies": {
+-    "minipass": "^3.0.0"
++    "minipass": "^7.0.0"
+   },
+   "main": "index.js",
+   "keywords": [

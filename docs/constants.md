@@ -182,29 +182,25 @@ const NPM_REGISTRY = 'https://registry.npmjs.org'
 
 interface PackageMetadata {
   'dist-tags': { latest: string }
-  versions: Record<string, {
-    dist: { tarball: string }
-  }>
+  versions: Record<
+    string,
+    {
+      dist: { tarball: string }
+    }
+  >
 }
 
-async function downloadPackage(
-  name: string,
-  version: string,
-  destDir: string
-) {
+async function downloadPackage(name: string, version: string, destDir: string) {
   const spinner = Spinner()
 
   // Get package metadata
   spinner.start('Fetching package metadata...')
-  const metadata = await httpJson<PackageMetadata>(
-    `${NPM_REGISTRY}/${name}`
-  )
+  const metadata = await httpJson<PackageMetadata>(`${NPM_REGISTRY}/${name}`)
   spinner.success('Metadata fetched')
 
   // Use 'latest' if version not specified
-  const targetVersion = version === 'latest'
-    ? metadata['dist-tags'].latest
-    : version
+  const targetVersion =
+    version === 'latest' ? metadata['dist-tags'].latest : version
 
   const versionData = metadata.versions[targetVersion]
   if (!versionData) {
@@ -220,7 +216,7 @@ async function downloadPackage(
   await httpDownload(tarballUrl, destPath, {
     onProgress: (downloaded, total) => {
       spinner.progress(downloaded, total, 'bytes')
-    }
+    },
   })
 
   spinner.successAndStop(`Downloaded to ${destPath}`)
@@ -339,23 +335,25 @@ process.on('SIGINT', () => {
 // All these operations respect the abort signal
 await Promise.all([
   httpDownload('https://example.com/file1.zip', '/tmp/file1.zip', {
-    signal
+    signal,
   }),
   httpDownload('https://example.com/file2.zip', '/tmp/file2.zip', {
-    signal
+    signal,
   }),
-  spawn('long-running-command', [], { signal })
+  spawn('long-running-command', [], { signal }),
 ])
 ```
 
 ## Available Constants
 
 ### Platform
+
 - `WIN32` - Boolean, true on Windows
 - `DARWIN` - Boolean, true on macOS
 - For Linux detection, use `!WIN32 && !DARWIN`
 
 ### Process
+
 - `getAbortSignal()` - Function returning global AbortSignal
 
 ## Troubleshooting
@@ -366,6 +364,7 @@ await Promise.all([
 
 **Solution:**
 Check `process.platform` directly:
+
 ```typescript
 console.log(process.platform)
 // 'win32', 'darwin', 'linux', etc.
@@ -377,12 +376,15 @@ console.log(process.platform)
 
 **Solution:**
 Use proper version comparison:
+
 ```typescript
 import { getNodeMajorVersion } from '@socketsecurity/lib/constants/node'
 
 const requiredMajor = 22 // Node.js 22+ required
 if (getNodeMajorVersion() < requiredMajor) {
-  console.error(`Node.js ${requiredMajor}+ required, current: ${process.version}`)
+  console.error(
+    `Node.js ${requiredMajor}+ required, current: ${process.version}`,
+  )
   process.exit(1)
 }
 ```
@@ -393,6 +395,7 @@ if (getNodeMajorVersion() < requiredMajor) {
 
 **Solution:**
 Use environment variable or config:
+
 ```typescript
 const registryUrl = process.env.NPM_REGISTRY || 'https://registry.npmjs.org'
 ```

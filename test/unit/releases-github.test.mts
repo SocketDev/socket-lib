@@ -823,9 +823,8 @@ describe('releases/github', () => {
       //
       // Fix: Re-check binary existence after reading version file
 
-      const { downloadGitHubRelease } = await import(
-        '@socketsecurity/lib/releases/github'
-      )
+      const { downloadGitHubRelease } =
+        await import('@socketsecurity/lib/releases/github')
       const { tmpdir } = await import('node:os')
       const { promises: fs } = await import('node:fs')
       const path = await import('node:path')
@@ -925,9 +924,8 @@ describe('releases/github', () => {
     }, 40_000)
 
     it('should re-download if binary is missing despite version file existing', async () => {
-      const { downloadGitHubRelease } = await import(
-        '@socketsecurity/lib/releases/github'
-      )
+      const { downloadGitHubRelease } =
+        await import('@socketsecurity/lib/releases/github')
       const { tmpdir } = await import('node:os')
       const { promises: fs } = await import('node:fs')
       const path = await import('node:path')

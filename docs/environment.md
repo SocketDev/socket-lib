@@ -41,6 +41,7 @@ All environment getters are pure functions that access only their specific envir
 **Returns:** `boolean`
 
 **Example:**
+
 ```typescript
 import { getCI } from '@socketsecurity/lib/env/ci'
 
@@ -60,6 +61,7 @@ if (getCI()) {
 **Returns:** `'development' | 'production' | 'test' | string`
 
 **Example:**
+
 ```typescript
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 
@@ -81,6 +83,7 @@ if (env === 'production') {
 **Returns:** `boolean`
 
 **Example:**
+
 ```typescript
 import { isTest } from '@socketsecurity/lib/env/test'
 
@@ -100,6 +103,7 @@ if (isTest()) {
 **Returns:** `string | undefined`
 
 **Example:**
+
 ```typescript
 import { getHome } from '@socketsecurity/lib/env/home'
 
@@ -120,6 +124,7 @@ if (home) {
 **Returns:** `string | undefined`
 
 **Example:**
+
 ```typescript
 import { getTerm } from '@socketsecurity/lib/env/term'
 
@@ -148,7 +153,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  resetEnv()  // Clear all overrides
+  resetEnv() // Clear all overrides
 })
 
 // Or clear individual overrides
@@ -160,6 +165,7 @@ test('specific test', () => {
 ```
 
 **Benefits:**
+
 - Isolated tests without polluting global `process.env`
 - No side effects between tests
 - Cleaner test code
@@ -173,7 +179,7 @@ import { getCI } from '@socketsecurity/lib/env/ci'
 import { Spinner } from '@socketsecurity/lib/spinner'
 
 const spinner = getCI()
-  ? { start: () => {}, successAndStop: () => {} }  // Noop in CI
+  ? { start: () => {}, successAndStop: () => {} } // Noop in CI
   : Spinner({ text: 'Working...' })
 
 spinner.start()
@@ -187,13 +193,14 @@ spinner.successAndStop('Complete')
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 
 const config = {
-  apiUrl: getNodeEnv() === 'production'
-    ? 'https://api.example.com'
-    : 'http://localhost:3000',
+  apiUrl:
+    getNodeEnv() === 'production'
+      ? 'https://api.example.com'
+      : 'http://localhost:3000',
 
   logLevel: getNodeEnv() === 'development' ? 'debug' : 'info',
 
-  enableAnalytics: getNodeEnv() === 'production'
+  enableAnalytics: getNodeEnv() === 'production',
 }
 ```
 
@@ -228,8 +235,9 @@ function supportsColor() {
 function getLogger() {
   const colors = supportsColor()
   return {
-    success: (msg) => console.log(colors ? `\x1b[32m✓\x1b[0m ${msg}` : `✓ ${msg}`),
-    error: (msg) => console.log(colors ? `\x1b[31m✗\x1b[0m ${msg}` : `✗ ${msg}`)
+    success: msg =>
+      console.log(colors ? `\x1b[32m✓\x1b[0m ${msg}` : `✓ ${msg}`),
+    error: msg => console.log(colors ? `\x1b[31m✗\x1b[0m ${msg}` : `✗ ${msg}`),
   }
 }
 ```
@@ -261,6 +269,7 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 **Problem:** Getter returns `undefined` when variable should be set.
 
 **Solution:**
+
 - Verify the environment variable is set (`echo $VAR` on Unix, `echo %VAR%` on Windows)
 - Check spelling and case sensitivity
 - Ensure variable is exported in shell (`export VAR=value`)
@@ -270,6 +279,7 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 **Problem:** `getCI()` returns `false` in CI environment.
 
 **Solution:**
+
 - Most CI systems set the `CI` variable automatically
 - Manually set it in CI config if needed: `CI=1` or `CI=true`
 - Check your CI provider's documentation for environment variables
@@ -280,12 +290,14 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 
 **Solution:**
 Use the fallback pattern with `process.env` for Windows:
+
 ```typescript
 import { WIN32 } from '@socketsecurity/lib/constants/platform'
 const home = getHome() || (WIN32 ? process.env.USERPROFILE : undefined)
 ```
 
 And use `path.join()` for cross-platform path construction:
+
 ```typescript
 import path from 'node:path'
 const configPath = path.join(home, '.myapp', 'config.json')

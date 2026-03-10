@@ -203,17 +203,15 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           path: string,
           opts: EditablePackageJsonOptions = {},
         ) {
-          const p = new (
-            _EditablePackageJsonClass as EditablePackageJsonConstructor
-          )()
+          const p =
+            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.create(path)
           return opts.data ? p.update(opts.data) : p
         }
 
         static override async fix(path: string, opts: unknown) {
-          const p = new (
-            _EditablePackageJsonClass as EditablePackageJsonConstructor
-          )()
+          const p =
+            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path, true)
           return await p.fix(opts)
         }
@@ -222,9 +220,8 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           path: string,
           opts: EditablePackageJsonOptions = {},
         ) {
-          const p = new (
-            _EditablePackageJsonClass as EditablePackageJsonConstructor
-          )()
+          const p =
+            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
           // Avoid try/catch if we aren't going to create
           if (!opts.create) {
             return await p.load(path)
@@ -242,17 +239,15 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         }
 
         static override async normalize(path: string, opts: NormalizeOptions) {
-          const p = new (
-            _EditablePackageJsonClass as EditablePackageJsonConstructor
-          )()
+          const p =
+            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path)
           return await p.normalize(opts)
         }
 
         static override async prepare(path: string, opts: unknown) {
-          const p = new (
-            _EditablePackageJsonClass as EditablePackageJsonConstructor
-          )()
+          const p =
+            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path, true)
           return await p.prepare(opts)
         }

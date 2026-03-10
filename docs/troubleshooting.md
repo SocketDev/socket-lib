@@ -9,12 +9,15 @@ Common issues and solutions when using @socketsecurity/lib.
 **Problem:** Cannot find module '@socketsecurity/lib/...' after installation.
 
 **Solution:**
+
 1. Verify the package is installed:
+
    ```bash
    npm list @socketsecurity/lib
    ```
 
 2. Check your import path uses the correct export:
+
    ```typescript
    // Correct
    import { Spinner } from '@socketsecurity/lib/spinner'
@@ -24,6 +27,7 @@ Common issues and solutions when using @socketsecurity/lib.
    ```
 
 3. Clear your package manager cache and reinstall:
+
    ```bash
    # npm
    rm -rf node_modules package-lock.json
@@ -43,9 +47,11 @@ Common issues and solutions when using @socketsecurity/lib.
 **Problem:** TypeScript reports "Could not find a declaration file for module '@socketsecurity/lib/...'"
 
 **Solution:**
+
 1. Ensure you're using Node.js 22+ (required by the library)
 
 2. Check your `tsconfig.json` has proper module resolution:
+
    ```json
    {
      "compilerOptions": {
@@ -65,9 +71,10 @@ Common issues and solutions when using @socketsecurity/lib.
 
 **Solution:**
 Make sure you called `.start()`:
+
 ```typescript
 const spinner = Spinner({ text: 'Loading...' })
-spinner.start()  // Required!
+spinner.start() // Required!
 ```
 
 ### Spinner leaves visual artifacts
@@ -76,6 +83,7 @@ spinner.start()  // Required!
 
 **Solution:**
 Use the `*AndStop` methods:
+
 ```typescript
 // Good
 spinner.successAndStop('Done')
@@ -91,13 +99,14 @@ spinner.stop()
 
 **Solution:**
 Pass the spinner to spawn options:
+
 ```typescript
 const spinner = Spinner({ text: 'Running command...' })
 spinner.start()
 
 await spawn('command', [], {
-  stdio: 'inherit',  // Spinner auto-pauses
-  spinner
+  stdio: 'inherit', // Spinner auto-pauses
+  spinner,
 })
 
 spinner.successAndStop('Complete')
@@ -112,6 +121,7 @@ spinner.successAndStop('Complete')
 **Solutions:**
 
 For missing files:
+
 ```typescript
 // Use safe version that returns undefined
 const content = await safeReadFile('./optional-file.txt')
@@ -121,6 +131,7 @@ if (content === undefined) {
 ```
 
 For missing directories:
+
 ```typescript
 // Create directory before writing
 await safeMkdir('./path/to/dir')
@@ -134,6 +145,7 @@ await writeJson('./path/to/dir/file.json', data)
 **Solutions:**
 
 Check file permissions:
+
 ```bash
 # Unix/Linux/macOS
 ls -la filename
@@ -144,6 +156,7 @@ chmod 755 dirname   # For directories
 ```
 
 For `safeDelete()`, ensure parent directory is writable:
+
 ```bash
 chmod 755 parent-directory
 ```
@@ -154,6 +167,7 @@ chmod 755 parent-directory
 
 **Solution:**
 Always use `path.join()` for cross-platform paths:
+
 ```typescript
 import path from 'node:path'
 
@@ -171,6 +185,7 @@ const filePath = `${dir}/subdir/file.txt`
 **Solutions:**
 
 1. Use `throws: false` to handle gracefully:
+
    ```typescript
    const data = await readJson('./config.json', { throws: false })
    if (data === undefined) {
@@ -179,6 +194,7 @@ const filePath = `${dir}/subdir/file.txt`
    ```
 
 2. Validate JSON syntax:
+
    ```bash
    # Check JSON is valid
    cat file.json | jq .
@@ -196,6 +212,7 @@ const filePath = `${dir}/subdir/file.txt`
 **Problem:** Cannot resolve hostname.
 
 **Solutions:**
+
 1. Check the URL is correct
 2. Verify network connection:
    ```bash
@@ -212,6 +229,7 @@ const filePath = `${dir}/subdir/file.txt`
 **Problem:** Server not accepting connections.
 
 **Solutions:**
+
 1. Verify the server is running
 2. Check the port is correct
 3. Ensure firewall isn't blocking
@@ -222,16 +240,17 @@ const filePath = `${dir}/subdir/file.txt`
 **Problem:** Request exceeded timeout.
 
 **Solutions:**
+
 ```typescript
 // Increase timeout
 await httpJson('https://api.example.com/slow', {
-  timeout: 60000  // 1 minute instead of 30s default
+  timeout: 60000, // 1 minute instead of 30s default
 })
 
 // Add retries for unreliable networks
 await httpJson('https://api.example.com/data', {
   retries: 3,
-  retryDelay: 2000
+  retryDelay: 2000,
 })
 ```
 
@@ -240,15 +259,16 @@ await httpJson('https://api.example.com/data', {
 **Problem:** Exceeded `maxRedirects` limit.
 
 **Solutions:**
+
 ```typescript
 // Increase limit if redirects are legitimate
 await httpDownload(url, dest, {
-  maxRedirects: 10
+  maxRedirects: 10,
 })
 
 // Or disable redirects to debug
 const response = await httpRequest(url, {
-  followRedirects: false
+  followRedirects: false,
 })
 console.log('Redirect location:', response.headers['location'])
 ```
@@ -259,6 +279,7 @@ console.log('Redirect location:', response.headers['location'])
 
 **Solution:**
 For development only (NOT production):
+
 ```typescript
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 ```
@@ -274,6 +295,7 @@ Better solution: Install proper SSL certificates or use a certificate authority.
 **Solutions:**
 
 1. Check command exists in PATH:
+
    ```bash
    # Unix
    which command-name
@@ -283,6 +305,7 @@ Better solution: Install proper SSL certificates or use a certificate authority.
    ```
 
 2. Use full path:
+
    ```typescript
    await spawn('/usr/local/bin/command', [])
    ```
@@ -290,7 +313,7 @@ Better solution: Install proper SSL certificates or use a certificate authority.
 3. For Windows `.cmd`/`.bat` files:
    ```typescript
    await spawn('command.cmd', [], {
-     shell: true  // Required on Windows
+     shell: true, // Required on Windows
    })
    ```
 
@@ -301,9 +324,10 @@ Better solution: Install proper SSL certificates or use a certificate authority.
 **Solutions:**
 
 1. Add timeout:
+
    ```typescript
    await spawn('command', [], {
-     timeout: 30000  // Kill after 30s
+     timeout: 30000, // Kill after 30s
    })
    ```
 
@@ -311,7 +335,7 @@ Better solution: Install proper SSL certificates or use a certificate authority.
    ```typescript
    // If command waits for input, ignore stdin
    await spawn('command', [], {
-     stdio: ['ignore', 'pipe', 'pipe']
+     stdio: ['ignore', 'pipe', 'pipe'],
    })
    ```
 
@@ -321,9 +345,10 @@ Better solution: Install proper SSL certificates or use a certificate authority.
 
 **Solution:**
 Always use `cwd` option:
+
 ```typescript
 await spawn('npm', ['test'], {
-  cwd: '/absolute/path/to/project'
+  cwd: '/absolute/path/to/project',
 })
 ```
 
@@ -335,12 +360,13 @@ Never use `process.chdir()` - it's dangerous in Node.js.
 
 **Solution:**
 Merge with process.env:
+
 ```typescript
 await spawn('command', [], {
   env: {
     ...process.env,
-    CUSTOM_VAR: 'value'
-  }
+    CUSTOM_VAR: 'value',
+  },
 })
 ```
 
@@ -351,12 +377,15 @@ await spawn('command', [], {
 **Problem:** `getCI()` returns false in CI.
 
 **Solutions:**
+
 1. Check CI sets the `CI` variable:
+
    ```bash
    echo $CI
    ```
 
 2. Manually set in CI config:
+
    ```yaml
    # GitHub Actions
    env:
@@ -364,7 +393,7 @@ await spawn('command', [], {
 
    # GitLab CI
    variables:
-     CI: "true"
+     CI: 'true'
    ```
 
 3. Most major CI systems (GitHub Actions, GitLab CI, CircleCI, Travis CI) automatically set `CI=true`
@@ -374,12 +403,15 @@ await spawn('command', [], {
 **Problem:** Getter returns `undefined` when var should be set.
 
 **Solutions:**
+
 1. Verify variable is set:
+
    ```bash
    echo $VAR_NAME
    ```
 
 2. Ensure it's exported:
+
    ```bash
    export VAR_NAME=value
    ```
@@ -394,12 +426,13 @@ await spawn('command', [], {
 
 **Solution:**
 Use type assertions or generics:
+
 ```typescript
 // With generic
 const data = await httpJson<MyType>('https://api.example.com/data')
 
 // With type assertion
-const data = await httpJson('https://api.example.com/data') as MyType
+const data = (await httpJson('https://api.example.com/data')) as MyType
 
 // With validation
 const data = await httpJson('https://api.example.com/data')
@@ -414,6 +447,7 @@ if (isMyType(data)) {
 
 **Solution:**
 Check your `tsconfig.json`:
+
 ```json
 {
   "compilerOptions": {
@@ -433,6 +467,7 @@ Check your `tsconfig.json`:
 **Solutions:**
 
 1. Use parallel operations:
+
    ```typescript
    // Slow (sequential)
    for (const file of files) {
@@ -440,19 +475,16 @@ Check your `tsconfig.json`:
    }
 
    // Fast (parallel)
-   await Promise.all(
-     files.map(file => readFileUtf8(file))
-   )
+   await Promise.all(files.map(file => readFileUtf8(file)))
    ```
 
 2. Limit concurrency for very large sets:
+
    ```typescript
    import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
 
    const queue = new PromiseQueue(10)
-   await Promise.all(
-     files.map(file => queue.add(() => readFileUtf8(file)))
-   )
+   await Promise.all(files.map(file => queue.add(() => readFileUtf8(file))))
    ```
 
 ### Slow HTTP requests
@@ -462,17 +494,19 @@ Check your `tsconfig.json`:
 **Solutions:**
 
 1. Enable retries with exponential backoff:
+
    ```typescript
    await httpJson(url, {
      retries: 3,
-     retryDelay: 1000
+     retryDelay: 1000,
    })
    ```
 
 2. Reduce timeout for faster failures:
+
    ```typescript
    await httpJson(url, {
-     timeout: 5000  // Fail fast after 5s
+     timeout: 5000, // Fail fast after 5s
    })
    ```
 
@@ -495,36 +529,43 @@ If your issue isn't covered here:
 ## Common Error Messages
 
 ### "Cannot find module"
+
 - Check import path is correct
 - Verify package is installed
 - Clear cache and reinstall
 
 ### "Permission denied"
+
 - Check file/directory permissions
 - Ensure you have write access
 - Run with appropriate user permissions
 
 ### "ENOENT: no such file or directory"
+
 - Verify path exists
 - Check for typos in path
 - Use absolute paths or `path.join()`
 
 ### "command failed"
+
 - Check command exists in PATH
 - Verify arguments are correct
 - Review stderr for error details
 
 ### "JSON parse error"
+
 - Validate JSON syntax
 - Check for trailing commas
 - Ensure file contains valid JSON
 
 ### "Too many redirects"
+
 - Check for redirect loops
 - Increase `maxRedirects` if legitimate
 - Verify URL is correct
 
 ### "Request timeout"
+
 - Increase timeout value
 - Add retry logic
 - Check network connection

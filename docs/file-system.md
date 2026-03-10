@@ -17,7 +17,7 @@ import {
   readFileUtf8,
   writeJson,
   safeDelete,
-  findUpSync
+  findUpSync,
 } from '@socketsecurity/lib/fs'
 
 // Read a text file
@@ -42,12 +42,14 @@ const pkgPath = findUpSync('package.json')
 **When to use:** Reading text files like README.md, config files, or any UTF-8 encoded content.
 
 **Parameters:**
+
 - `filepath` (PathLike): Path to the file
 - `options` (ReadFileOptions): Optional encoding and abort signal
 
 **Returns:** Promise<string> with file contents
 
 **Example:**
+
 ```typescript
 import { readFileUtf8 } from '@socketsecurity/lib/fs'
 
@@ -58,11 +60,12 @@ console.log(content)
 // With abort signal
 const controller = new AbortController()
 const content = await readFileUtf8('./large-file.txt', {
-  signal: controller.signal
+  signal: controller.signal,
 })
 ```
 
 **Common Pitfalls:**
+
 - File path must exist or the promise will reject
 - Use `safeReadFile()` if you want to handle missing files gracefully
 
@@ -85,6 +88,7 @@ const content = readFileUtf8Sync('./config.txt')
 **Returns:** Promise<Buffer>
 
 **Example:**
+
 ```typescript
 import { readFileBinary } from '@socketsecurity/lib/fs'
 
@@ -103,12 +107,14 @@ const archive = await readFileBinary('./backup.tar.gz')
 **When to use:** Reading package.json, tsconfig.json, or any JSON configuration file.
 
 **Parameters:**
+
 - `filepath` (PathLike): Path to JSON file
 - `options` (ReadJsonOptions): Optional reviver function, encoding, and error handling
 
 **Returns:** Promise<any> with parsed JSON data
 
 **Example:**
+
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs'
 
@@ -121,7 +127,7 @@ const data = await readJson('./data.json', {
   reviver: (key, value) => {
     if (key === 'createdAt') return new Date(value)
     return value
-  }
+  },
 })
 
 // Don't throw on parse errors
@@ -132,6 +138,7 @@ if (config === undefined) {
 ```
 
 **Common Pitfalls:**
+
 - JSON parse errors will throw unless `throws: false` is set
 - Missing files throw an error with helpful context
 - Permission errors include suggestions for fixing access
@@ -155,6 +162,7 @@ const tsconfig = readJsonSync('./tsconfig.json')
 **Returns:** Promise<string | Buffer | undefined>
 
 **Example:**
+
 ```typescript
 import { safeReadFile } from '@socketsecurity/lib/fs'
 
@@ -179,6 +187,7 @@ const buffer = await safeReadFile('./image.png', { encoding: null })
 **When to use:** Saving configuration, package.json updates, or any JSON data.
 
 **Parameters:**
+
 - `filepath` (PathLike): Path to write to
 - `jsonContent` (unknown): Value to stringify
 - `options` (WriteJsonOptions): Formatting options
@@ -186,13 +195,14 @@ const buffer = await safeReadFile('./image.png', { encoding: null })
 **Returns:** Promise<void>
 
 **Example:**
+
 ```typescript
 import { writeJson } from '@socketsecurity/lib/fs'
 
 // Write with default 2-space indentation
 await writeJson('./config.json', {
   name: 'my-app',
-  version: '1.0.0'
+  version: '1.0.0',
 })
 
 // Custom indentation
@@ -209,6 +219,7 @@ await writeJson('./compact.json', data, { finalEOL: false })
 ```
 
 **Common Pitfalls:**
+
 - Parent directory must exist (use `safeMkdir()` to create it first)
 - Circular references in the object will throw an error
 
@@ -231,12 +242,14 @@ writeJsonSync('./config.json', { version: '2.0.0' })
 **When to use:** Finding subdirectories, listing folders.
 
 **Parameters:**
+
 - `dirname` (PathLike): Directory to read
 - `options` (ReadDirOptions): Filtering and sorting options
 
 **Returns:** Promise<string[]> with directory names
 
 **Example:**
+
 ```typescript
 import { readDirNames } from '@socketsecurity/lib/fs'
 
@@ -246,12 +259,12 @@ console.log('Subdirectories:', dirs)
 
 // Exclude empty directories
 const nonEmpty = await readDirNames('./cache', {
-  includeEmpty: false
+  includeEmpty: false,
 })
 
 // Ignore specific patterns
 const dirs = await readDirNames('./src', {
-  ignore: ['node_modules', '.git']
+  ignore: ['node_modules', '.git'],
 })
 
 // Disable sorting
@@ -279,12 +292,14 @@ Not yet implemented (only `isDirEmptySync` is available).
 **When to use:** Before deletion, checking if a cache directory needs cleanup.
 
 **Parameters:**
+
 - `dirname` (PathLike): Directory to check
 - `options` (IsDirEmptyOptions): Optional ignore patterns
 
 **Returns:** boolean
 
 **Example:**
+
 ```typescript
 import { isDirEmptySync } from '@socketsecurity/lib/fs'
 
@@ -294,7 +309,7 @@ if (isDirEmptySync('./cache')) {
 
 // Ignore .DS_Store files on macOS
 const isEmpty = isDirEmptySync('./temp', {
-  ignore: ['.DS_Store']
+  ignore: ['.DS_Store'],
 })
 ```
 
@@ -305,6 +320,7 @@ const isEmpty = isDirEmptySync('./temp', {
 **Returns:** Promise<boolean>
 
 **Example:**
+
 ```typescript
 import { isDir } from '@socketsecurity/lib/fs'
 
@@ -332,12 +348,14 @@ if (isDirSync('./dist')) {
 **When to use:** Ensuring a directory exists before writing files to it.
 
 **Parameters:**
+
 - `path` (PathLike): Directory to create
 - `options` (MakeDirectoryOptions): Optional mode and recursive settings
 
 **Returns:** Promise<void>
 
 **Example:**
+
 ```typescript
 import { safeMkdir } from '@socketsecurity/lib/fs'
 
@@ -352,6 +370,7 @@ await safeMkdir('./single-level', { recursive: false })
 ```
 
 **Common Pitfalls:**
+
 - Permission errors will still throw (only EEXIST is ignored)
 - Parent directories must exist if `recursive: false`
 
@@ -374,18 +393,21 @@ safeMkdirSync('./output')
 **When to use:** Cleaning up build artifacts, temporary files, or cache directories.
 
 **Safety Features:**
+
 - Prevents deleting current working directory (cwd) and above
 - Allows deleting within cwd without `force` option
 - Auto-enables `force` for temp directory, cacache, and ~/.socket
 - Protects against `../` path injection
 
 **Parameters:**
+
 - `filepath` (PathLike | PathLike[]): Path or paths to delete (supports globs)
 - `options` (RemoveOptions): Deletion options
 
 **Returns:** Promise<void>
 
 **Example:**
+
 ```typescript
 import { safeDelete } from '@socketsecurity/lib/fs'
 
@@ -404,11 +426,12 @@ await safeDelete('../parent-dir', { force: true })
 // Custom retry settings
 await safeDelete('./flaky-dir', {
   maxRetries: 5,
-  retryDelay: 500
+  retryDelay: 500,
 })
 ```
 
 **Common Pitfalls:**
+
 - Attempting to delete cwd or parent directories without `force: true` will throw
 - Glob patterns must be valid or deletion will fail
 - On Windows, files in use cannot be deleted even with retries
@@ -432,12 +455,14 @@ safeDeleteSync('./temp')
 **When to use:** Finding package.json, .git directory, configuration files in parent folders.
 
 **Parameters:**
+
 - `name` (string | string[]): Filename(s) to search for
 - `options` (FindUpOptions): Search options
 
 **Returns:** Promise<string | undefined> with normalized absolute path
 
 **Example:**
+
 ```typescript
 import { findUp } from '@socketsecurity/lib/fs'
 
@@ -446,20 +471,16 @@ const pkgPath = await findUp('package.json')
 console.log('Found at:', pkgPath)
 
 // Find any of multiple config files
-const configPath = await findUp([
-  '.config.js',
-  '.config.json',
-  '.config.yaml'
-])
+const configPath = await findUp(['.config.js', '.config.json', '.config.yaml'])
 
 // Find a directory
 const nodeModules = await findUp('node_modules', {
-  onlyDirectories: true
+  onlyDirectories: true,
 })
 
 // Start from specific directory
 const path = await findUp('tsconfig.json', {
-  cwd: '/path/to/project'
+  cwd: '/path/to/project',
 })
 ```
 
@@ -468,12 +489,14 @@ const path = await findUp('tsconfig.json', {
 **What it does:** Synchronous version of `findUp()` with optional `stopAt` parameter.
 
 **Parameters:**
+
 - `name` (string | string[]): Filename(s) to search for
 - `options` (FindUpSyncOptions): Search options including `stopAt`
 
 **Returns:** string | undefined
 
 **Example:**
+
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs'
 
@@ -482,7 +505,7 @@ const gitPath = findUpSync('.git', { onlyDirectories: true })
 
 // Stop searching at home directory
 const eslintPath = findUpSync('.eslintrc', {
-  stopAt: process.env.HOME
+  stopAt: process.env.HOME,
 })
 ```
 
@@ -495,6 +518,7 @@ const eslintPath = findUpSync('.eslintrc', {
 **Returns:** boolean
 
 **Example:**
+
 ```typescript
 import { isSymLinkSync } from '@socketsecurity/lib/fs'
 
@@ -512,6 +536,7 @@ if (isSymLinkSync('./my-link')) {
 **Returns:** string (normalized unique path)
 
 **Example:**
+
 ```typescript
 import { uniqueSync } from '@socketsecurity/lib/fs'
 
@@ -533,6 +558,7 @@ const uniquePath = uniqueSync('./data.json')
 **Returns:** ValidateFilesResult with `validPaths` and `invalidPaths` arrays
 
 **Example:**
+
 ```typescript
 import { validateFiles } from '@socketsecurity/lib/fs'
 
@@ -557,6 +583,7 @@ for (const path of validPaths) {
 **Returns:** Promise<Stats | undefined>
 
 **Example:**
+
 ```typescript
 import { safeStats } from '@socketsecurity/lib/fs'
 
@@ -643,7 +670,10 @@ for (const file of validPaths) {
 ### Extracting Archives
 
 ```typescript
-import { extractArchive, detectArchiveFormat } from '@socketsecurity/lib/archives'
+import {
+  extractArchive,
+  detectArchiveFormat,
+} from '@socketsecurity/lib/archives'
 
 // Detect archive format
 const format = detectArchiveFormat('package.tar.gz')
@@ -667,6 +697,7 @@ await extractArchive('package.tar.gz', './output', {
 **Problem:** File or directory doesn't exist.
 
 **Solution:**
+
 - Use `safeReadFile()` for optional files
 - Check paths are absolute or relative to correct location
 - Ensure parent directories exist before writing files
@@ -676,6 +707,7 @@ await extractArchive('package.tar.gz', './output', {
 **Problem:** Insufficient permissions to read/write file.
 
 **Solution:**
+
 - Check file permissions with `ls -la` (Unix) or file properties (Windows)
 - Run with appropriate user permissions
 - For `safeDelete()`, ensure you have write access to parent directory
@@ -685,6 +717,7 @@ await extractArchive('package.tar.gz', './output', {
 **Problem:** `safeDelete()` throws error when trying to delete protected path.
 
 **Solution:**
+
 - Only use `force: true` when absolutely necessary
 - Verify the path is correct and you intend to delete it
 - Protected paths include cwd and parent directories for safety
@@ -694,6 +727,7 @@ await extractArchive('package.tar.gz', './output', {
 **Problem:** `readJson()` throws SyntaxError.
 
 **Solution:**
+
 - Verify file contains valid JSON
 - Use `throws: false` option to handle gracefully
 - Check for trailing commas (not allowed in JSON)
@@ -703,5 +737,6 @@ await extractArchive('package.tar.gz', './output', {
 **Problem:** Writing fails because file exists.
 
 **Solution:**
+
 - Use `safeDelete()` to remove it first
 - Or use `uniqueSync()` to generate a unique filename

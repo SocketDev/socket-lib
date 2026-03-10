@@ -35,7 +35,7 @@ import { Spinner } from '@socketsecurity/lib/spinner'
 const spinner = Spinner({
   text: 'Loading data...',
   color: [140, 82, 255], // Socket purple RGB
-  spinner: 'dots'  // Animation style
+  spinner: 'dots', // Animation style
 })
 ```
 
@@ -44,6 +44,7 @@ const spinner = Spinner({
 **When to use:** Use spinners for operations that take more than a few seconds (network requests, file processing, builds).
 
 **Parameters:**
+
 - `text` (string): Initial message to display
 - `color` (ColorValue): RGB tuple `[r, g, b]` or color name like `'cyan'`
 - `spinner` (SpinnerStyle): Animation frames (defaults to `'socket'` style)
@@ -52,6 +53,7 @@ const spinner = Spinner({
 **Returns:** Spinner instance with methods for updating state
 
 **Example:**
+
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner'
 
@@ -70,6 +72,7 @@ spinner.successAndStop('All operations complete')
 ```
 
 **Common Pitfalls:**
+
 - Don't forget to call `.start()` - the spinner won't animate until started
 - Remember that methods WITHOUT "AndStop" keep the spinner running
 - Call `.stop()` or `.successAndStop()` when done to clean up properly
@@ -195,14 +198,15 @@ Add animated shimmer effects to spinner text:
 const spinner = Spinner({
   text: 'Building...',
   shimmer: {
-    dir: 'ltr',      // left-to-right
-    color: [255, 0, 255],  // magenta
-    speed: 0.5       // animation speed
-  }
+    dir: 'ltr', // left-to-right
+    color: [255, 0, 255], // magenta
+    speed: 0.5, // animation speed
+  },
 })
 ```
 
 **Directions:**
+
 - `'ltr'` - Left to right
 - `'rtl'` - Right to left
 - `'ttb'` - Top to bottom
@@ -356,6 +360,7 @@ console.log(`${LOG_SYMBOLS.step} Processing step`)
 ```
 
 **Available Symbols:**
+
 - `success` - Green checkmark (✔ or √)
 - `fail` - Red X (✖ or ×)
 - `warn` - Yellow warning (⚠ or ‼)
@@ -383,12 +388,13 @@ setTheme({
     error: [255, 0, 0],
     warning: [255, 200, 0],
     info: [0, 150, 255],
-    step: [150, 150, 255]
-  }
+    step: [150, 150, 255],
+  },
 })
 ```
 
 **Built-in Themes:**
+
 - `socket` - Default Socket.dev theme (purple/magenta)
 - `sunset` - Warm oranges and yellows
 - `ocean` - Cool blues and teals
@@ -468,9 +474,10 @@ logger.dedent()
 **Problem:** Spinner text appears but doesn't animate.
 
 **Solution:** Make sure you called `.start()`:
+
 ```typescript
 const spinner = Spinner({ text: 'Loading...' })
-spinner.start()  // Don't forget this!
+spinner.start() // Don't forget this!
 ```
 
 ### Spinner Leaves Artifacts
@@ -478,6 +485,7 @@ spinner.start()  // Don't forget this!
 **Problem:** Spinner leaves visual artifacts when stopped.
 
 **Solution:** Use the `*AndStop` methods which auto-clear:
+
 ```typescript
 // Good
 spinner.successAndStop('Done')
@@ -498,10 +506,11 @@ spinner.stop()
 **Problem:** Progress bar stuck at 0%.
 
 **Solution:** Make sure you're calling `progressStep()` or `progress()` with updated values:
+
 ```typescript
 spinner.progress(0, total, 'items')
 for (const item of items) {
   processItem(item)
-  spinner.progressStep()  // Don't forget to increment
+  spinner.progressStep() // Don't forget to increment
 }
 ```

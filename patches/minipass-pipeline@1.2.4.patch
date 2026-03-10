@@ -1,0 +1,32 @@
+diff --git a/index.js b/index.js
+index b94ea14b602befb622e376d5e1cd46819baa5d6c..9197dbe51e924ad6685a59e454bd5212b7d2e999 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,4 @@
+-const Minipass = require('minipass')
++const { Minipass } = require('minipass')
+ const EE = require('events')
+ const isStream = s => s && s instanceof EE && (
+   typeof s.pipe === 'function' || // readable
+@@ -117,7 +117,7 @@ class Pipeline extends Minipass {
+   }
+   write (chunk, enc, cb) {
+     return this[_head].write(chunk, enc, cb) &&
+-      (this.flowing || this.buffer.length === 0)
++      (this.flowing || this.bufferLength === 0)
+   }
+   end (chunk, enc, cb) {
+     this[_head].end(chunk, enc, cb)
+diff --git a/package.json b/package.json
+index d608dc66ce515d3e6dd437b7fc029c519a99bd5a..9a684d5df8ea2b4bd39710d17c5832dc3250ad64 100644
+--- a/package.json
++++ b/package.json
+@@ -18,7 +18,7 @@
+     "tap": "^14.6.9"
+   },
+   "dependencies": {
+-    "minipass": "^3.0.0"
++    "minipass": "^7.0.0"
+   },
+   "files": [
+     "index.js"

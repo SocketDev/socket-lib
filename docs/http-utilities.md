@@ -13,7 +13,11 @@ Make HTTP/HTTPS requests, download files, and interact with APIs using Node.js n
 ## Quick Start
 
 ```typescript
-import { httpJson, httpText, httpDownload } from '@socketsecurity/lib/http-request'
+import {
+  httpJson,
+  httpText,
+  httpDownload,
+} from '@socketsecurity/lib/http-request'
 
 // Fetch JSON from an API
 const data = await httpJson('https://api.example.com/users')
@@ -22,10 +26,7 @@ const data = await httpJson('https://api.example.com/users')
 const html = await httpText('https://example.com')
 
 // Download a file
-await httpDownload(
-  'https://example.com/file.zip',
-  '/tmp/file.zip'
-)
+await httpDownload('https://example.com/file.zip', '/tmp/file.zip')
 ```
 
 ## API Reference
@@ -37,12 +38,14 @@ await httpDownload(
 **When to use:** Calling REST APIs, fetching JSON data, working with web services.
 
 **Parameters:**
+
 - `url` (string): The URL to request (http:// or https://)
 - `options` (HttpRequestOptions): Request configuration
 
 **Returns:** Promise<T> with parsed JSON (T defaults to `unknown`)
 
 **Example:**
+
 ```typescript
 import { httpJson } from '@socketsecurity/lib/http-request'
 
@@ -65,22 +68,23 @@ const result = await httpJson('https://api.example.com/users', {
   method: 'POST',
   body: JSON.stringify({
     name: 'Alice',
-    email: 'alice@example.com'
-  })
+    email: 'alice@example.com',
+  }),
 })
 
 // With authentication and retries
 const data = await httpJson('https://api.example.com/data', {
   headers: {
-    'Authorization': 'Bearer token123'
+    Authorization: 'Bearer token123',
   },
   retries: 3,
   retryDelay: 1000,
-  timeout: 10000
+  timeout: 10000,
 })
 ```
 
 **Common Pitfalls:**
+
 - Non-2xx responses throw an error (check `response.ok` if using `httpRequest` directly)
 - JSON parsing errors will throw - make sure the response is valid JSON
 - Remember to `JSON.stringify()` the body when sending JSON data
@@ -93,12 +97,14 @@ const data = await httpJson('https://api.example.com/data', {
 **When to use:** Fetching HTML pages, plain text files, or non-JSON API responses.
 
 **Parameters:**
+
 - `url` (string): The URL to request
 - `options` (HttpRequestOptions): Request configuration
 
 **Returns:** Promise<string>
 
 **Example:**
+
 ```typescript
 import { httpText } from '@socketsecurity/lib/http-request'
 
@@ -107,24 +113,27 @@ const html = await httpText('https://example.com')
 console.log(html.includes('<!DOCTYPE html>'))
 
 // Fetch plain text
-const readme = await httpText('https://raw.githubusercontent.com/user/repo/main/README.md')
+const readme = await httpText(
+  'https://raw.githubusercontent.com/user/repo/main/README.md',
+)
 
 // POST text data
 const result = await httpText('https://api.example.com/webhook', {
   method: 'POST',
-  body: 'Plain text payload'
+  body: 'Plain text payload',
 })
 
 // With custom headers
 const content = await httpText('https://example.com/data.txt', {
   headers: {
-    'Accept': 'text/html',
-    'User-Agent': 'MyApp/1.0'
-  }
+    Accept: 'text/html',
+    'User-Agent': 'MyApp/1.0',
+  },
 })
 ```
 
 **Common Pitfalls:**
+
 - Non-2xx responses throw an error
 - Binary content will be decoded as UTF-8 (use `httpRequest` + `.arrayBuffer()` for binary)
 
@@ -135,12 +144,14 @@ const content = await httpText('https://example.com/data.txt', {
 **When to use:** When you need access to headers, status codes, or want to handle responses manually.
 
 **Parameters:**
+
 - `url` (string): The URL to request
 - `options` (HttpRequestOptions): Request configuration
 
 **Returns:** Promise<HttpResponse> with methods for accessing the response
 
 **Example:**
+
 ```typescript
 import { httpRequest } from '@socketsecurity/lib/http-request'
 
@@ -172,26 +183,28 @@ const response = await httpRequest('https://api.example.com/users', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer token123'
+    Authorization: 'Bearer token123',
   },
-  body: JSON.stringify({ name: 'Alice' })
+  body: JSON.stringify({ name: 'Alice' }),
 })
 
 // Don't follow redirects
 const response = await httpRequest('https://example.com/redirect', {
-  followRedirects: false
+  followRedirects: false,
 })
 console.log(response.status) // 301, 302, etc.
 console.log(response.headers['location']) // Redirect target
 ```
 
 **Response Methods:**
+
 - `.json<T>()` - Parse as JSON (generic type T)
 - `.text()` - Get as UTF-8 string
 - `.arrayBuffer()` - Get as ArrayBuffer
 - `.body` - Access raw Buffer directly
 
 **Common Pitfalls:**
+
 - Unlike `httpJson()` and `httpText()`, this doesn't throw on non-2xx responses
 - Must call `.json()`, `.text()`, or `.arrayBuffer()` to access the body
 - Each response method can only be called once (body is consumed)
@@ -203,6 +216,7 @@ console.log(response.headers['location']) // Redirect target
 **When to use:** Downloading large files, archives, installers, or any remote resource to disk.
 
 **Parameters:**
+
 - `url` (string): The URL to download from
 - `destPath` (string): Absolute path where file should be saved
 - `options` (HttpDownloadOptions): Download configuration
@@ -210,6 +224,7 @@ console.log(response.headers['location']) // Redirect target
 **Returns:** Promise<HttpDownloadResult> with `path` and `size`
 
 **Example:**
+
 ```typescript
 import { httpDownload } from '@socketsecurity/lib/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -217,59 +232,48 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 // Simple download
 const result = await httpDownload(
   'https://example.com/file.zip',
-  '/tmp/file.zip'
+  '/tmp/file.zip',
 )
 console.log(`Downloaded ${result.size} bytes to ${result.path}`)
 
 // Download from GitHub releases (handles redirects automatically)
 await httpDownload(
   'https://github.com/org/repo/releases/download/v1.0.0/binary.tar.gz',
-  '/tmp/binary.tar.gz'
+  '/tmp/binary.tar.gz',
 )
 
 // With progress callback
-await httpDownload(
-  'https://example.com/large-file.zip',
-  '/tmp/file.zip',
-  {
-    onProgress: (downloaded, total) => {
-      const percent = ((downloaded / total) * 100).toFixed(1)
-      console.log(`Progress: ${percent}% (${downloaded}/${total} bytes)`)
-    }
-  }
-)
+await httpDownload('https://example.com/large-file.zip', '/tmp/file.zip', {
+  onProgress: (downloaded, total) => {
+    const percent = ((downloaded / total) * 100).toFixed(1)
+    console.log(`Progress: ${percent}% (${downloaded}/${total} bytes)`)
+  },
+})
 
 // With logger progress (automatic progress logging)
 const logger = getDefaultLogger()
-await httpDownload(
-  'https://example.com/file.zip',
-  '/tmp/file.zip',
-  {
-    logger,
-    progressInterval: 10  // Log every 10%
-  }
-)
+await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+  logger,
+  progressInterval: 10, // Log every 10%
+})
 // Output:
 //   Progress: 10% (5.2 MB / 52.0 MB)
 //   Progress: 20% (10.4 MB / 52.0 MB)
 //   ...
 
 // With retries and timeout
-await httpDownload(
-  'https://example.com/file.zip',
-  '/tmp/file.zip',
-  {
-    retries: 3,
-    retryDelay: 2000,
-    timeout: 300000, // 5 minutes
-    headers: {
-      'Authorization': 'Bearer token123'
-    }
-  }
-)
+await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+  retries: 3,
+  retryDelay: 2000,
+  timeout: 300000, // 5 minutes
+  headers: {
+    Authorization: 'Bearer token123',
+  },
+})
 ```
 
 **Common Pitfalls:**
+
 - `destPath` must be an absolute path
 - Parent directory must exist (create it first with `safeMkdir()`)
 - Existing files at `destPath` will be overwritten
@@ -285,7 +289,7 @@ HTTP method to use.
 
 ```typescript
 await httpJson('https://api.example.com/users', {
-  method: 'POST'  // 'GET', 'POST', 'PUT', 'DELETE', etc.
+  method: 'POST', // 'GET', 'POST', 'PUT', 'DELETE', etc.
 })
 ```
 
@@ -298,10 +302,10 @@ Custom HTTP headers.
 ```typescript
 await httpJson('https://api.example.com/data', {
   headers: {
-    'Authorization': 'Bearer token123',
+    Authorization: 'Bearer token123',
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    Accept: 'application/json',
+  },
 })
 ```
 
@@ -315,20 +319,20 @@ Request body (string or Buffer).
 // JSON body
 await httpJson('https://api.example.com/users', {
   method: 'POST',
-  body: JSON.stringify({ name: 'Alice', email: 'alice@example.com' })
+  body: JSON.stringify({ name: 'Alice', email: 'alice@example.com' }),
 })
 
 // Text body
 await httpText('https://api.example.com/webhook', {
   method: 'POST',
-  body: 'Plain text data'
+  body: 'Plain text data',
 })
 
 // Binary body
 const buffer = Buffer.from([0x00, 0x01, 0x02])
 await httpRequest('https://api.example.com/upload', {
   method: 'POST',
-  body: buffer
+  body: buffer,
 })
 ```
 
@@ -338,11 +342,12 @@ Request timeout in milliseconds.
 
 ```typescript
 await httpJson('https://api.example.com/data', {
-  timeout: 60000  // 1 minute
+  timeout: 60000, // 1 minute
 })
 ```
 
 **Default:**
+
 - `30000` (30 seconds) for requests
 - `120000` (2 minutes) for downloads
 
@@ -352,8 +357,8 @@ Number of retry attempts for failed requests.
 
 ```typescript
 await httpJson('https://api.example.com/data', {
-  retries: 3,         // Try up to 3 times
-  retryDelay: 1000    // Wait 1s, then 2s, then 4s (exponential backoff)
+  retries: 3, // Try up to 3 times
+  retryDelay: 1000, // Wait 1s, then 2s, then 4s (exponential backoff)
 })
 ```
 
@@ -366,7 +371,7 @@ Initial delay in milliseconds before first retry. Subsequent retries use exponen
 ```typescript
 await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
   retries: 3,
-  retryDelay: 2000  // 2s, then 4s, then 8s
+  retryDelay: 2000, // 2s, then 4s, then 8s
 })
 ```
 
@@ -380,12 +385,12 @@ Whether to automatically follow HTTP redirects (3xx status codes).
 // Follow redirects (default)
 await httpDownload(
   'https://github.com/org/repo/releases/download/v1.0.0/file.zip',
-  '/tmp/file.zip'
+  '/tmp/file.zip',
 )
 
 // Don't follow redirects
 const response = await httpRequest('https://example.com/redirect', {
-  followRedirects: false
+  followRedirects: false,
 })
 console.log(response.status) // 301, 302, etc.
 ```
@@ -399,7 +404,7 @@ Maximum number of redirects to follow.
 ```typescript
 await httpJson('https://api.example.com/many-redirects', {
   followRedirects: true,
-  maxRedirects: 10
+  maxRedirects: 10,
 })
 ```
 
@@ -412,18 +417,14 @@ await httpJson('https://api.example.com/many-redirects', {
 Callback function for tracking download progress.
 
 ```typescript
-await httpDownload(
-  'https://example.com/large-file.zip',
-  '/tmp/file.zip',
-  {
-    onProgress: (downloaded, total) => {
-      const percent = ((downloaded / total) * 100).toFixed(1)
-      const downloadedMB = (downloaded / 1024 / 1024).toFixed(1)
-      const totalMB = (total / 1024 / 1024).toFixed(1)
-      console.log(`${percent}% (${downloadedMB} MB / ${totalMB} MB)`)
-    }
-  }
-)
+await httpDownload('https://example.com/large-file.zip', '/tmp/file.zip', {
+  onProgress: (downloaded, total) => {
+    const percent = ((downloaded / total) * 100).toFixed(1)
+    const downloadedMB = (downloaded / 1024 / 1024).toFixed(1)
+    const totalMB = (total / 1024 / 1024).toFixed(1)
+    console.log(`${percent}% (${downloadedMB} MB / ${totalMB} MB)`)
+  },
+})
 ```
 
 ### logger
@@ -433,14 +434,10 @@ Logger instance for automatic progress logging.
 ```typescript
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
-await httpDownload(
-  'https://example.com/file.zip',
-  '/tmp/file.zip',
-  {
-    logger: getDefaultLogger(),
-    progressInterval: 10  // Log every 10%
-  }
-)
+await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+  logger: getDefaultLogger(),
+  progressInterval: 10, // Log every 10%
+})
 ```
 
 **Note:** If both `onProgress` and `logger` are provided, `onProgress` takes precedence.
@@ -450,14 +447,10 @@ await httpDownload(
 Progress reporting interval as a percentage (0-100).
 
 ```typescript
-await httpDownload(
-  'https://example.com/file.zip',
-  '/tmp/file.zip',
-  {
-    logger: getDefaultLogger(),
-    progressInterval: 25  // Log at 25%, 50%, 75%, 100%
-  }
-)
+await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+  logger: getDefaultLogger(),
+  progressInterval: 25, // Log at 25%, 50%, 75%, 100%
+})
 ```
 
 **Default:** `10` (log every 10%)
@@ -480,10 +473,10 @@ const release = await httpJson<GitHubRelease>(
   'https://api.github.com/repos/owner/repo/releases/latest',
   {
     headers: {
-      'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `token ${process.env.GITHUB_TOKEN}`
-    }
-  }
+      Accept: 'application/vnd.github.v3+json',
+      Authorization: `token ${process.env.GITHUB_TOKEN}`,
+    },
+  },
 )
 
 console.log(`Latest release: ${release.tag_name}`)
@@ -508,8 +501,8 @@ try {
       retryDelay: 2000,
       timeout: 300000,
       logger,
-      progressInterval: 10
-    }
+      progressInterval: 10,
+    },
   )
 
   logger.success(`Downloaded ${(result.size / 1024 / 1024).toFixed(1)} MB`)
@@ -525,7 +518,7 @@ try {
 import { httpRequest } from '@socketsecurity/lib/http-request'
 
 const response = await httpRequest('https://api.example.com/data', {
-  headers: { 'Authorization': `Bearer ${token}` }
+  headers: { Authorization: `Bearer ${token}` },
 })
 
 if (!response.ok) {
@@ -564,8 +557,8 @@ await httpDownload(
         spinner.progress(downloaded, total, 'bytes')
         lastPercent = percent
       }
-    }
-  }
+    },
+  },
 )
 
 spinner.successAndStop('Download complete')
@@ -578,6 +571,7 @@ spinner.successAndStop('Download complete')
 **Problem:** Cannot resolve the hostname.
 
 **Solution:**
+
 - Check the URL is correct
 - Verify your network connection
 - Ensure DNS is working (try `ping example.com`)
@@ -588,6 +582,7 @@ spinner.successAndStop('Download complete')
 **Problem:** Server is not accepting connections.
 
 **Solution:**
+
 - Verify the server is running and accessible
 - Check the port number is correct
 - Ensure firewall isn't blocking the connection
@@ -598,6 +593,7 @@ spinner.successAndStop('Download complete')
 **Problem:** Request took longer than the timeout.
 
 **Solution:**
+
 - Increase the `timeout` value
 - Check your network connection speed
 - Verify the server isn't overloaded
@@ -608,6 +604,7 @@ spinner.successAndStop('Download complete')
 **Problem:** Exceeded `maxRedirects` limit.
 
 **Solution:**
+
 - Increase `maxRedirects` if the redirects are legitimate
 - Check for redirect loops (A→B→A)
 - Verify the URL is correct
@@ -617,6 +614,7 @@ spinner.successAndStop('Download complete')
 **Problem:** `httpJson()` fails to parse response.
 
 **Solution:**
+
 - Use `httpText()` to see the actual response
 - Verify the API is returning valid JSON
 - Check if the API requires specific headers (`Accept`, `Content-Type`)
@@ -627,6 +625,7 @@ spinner.successAndStop('Download complete')
 **Problem:** `httpDownload()` fails to write file.
 
 **Solution:**
+
 - Ensure the destination directory exists (use `safeMkdir()` first)
 - Check you have write permissions
 - Verify disk space is available
@@ -637,6 +636,7 @@ spinner.successAndStop('Download complete')
 **Problem:** Getting 401 Unauthorized responses.
 
 **Solution:**
+
 - Verify your API token/key is correct
 - Check the `Authorization` header format (`Bearer token` vs `token token`)
 - Ensure the token hasn't expired

@@ -106,9 +106,7 @@ function constructConsole(...args: unknown[]) {
     _Console = nodeConsole.Console
   }
   return ReflectConstruct(
-    _Console! as new (
-      ...args: unknown[]
-    ) => Console, // eslint-disable-line no-undef
+    _Console! as new (...args: unknown[]) => Console, // eslint-disable-line no-undef
     args,
   )
 }

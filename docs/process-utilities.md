@@ -42,6 +42,7 @@ if (await lock.acquire()) {
 **Security:** Uses array-based arguments which prevent command injection. Arguments are passed directly to the OS without shell interpretation, making it safe even with user input.
 
 **Parameters:**
+
 - `cmd` (string): Command to execute
 - `args` (string[]): Array of arguments
 - `options` (SpawnOptions): Process configuration
@@ -50,6 +51,7 @@ if (await lock.acquire()) {
 **Returns:** Promise<SpawnResult> with exit code, stdout, stderr, and process info
 
 **Example:**
+
 ```typescript
 import { spawn } from '@socketsecurity/lib/spawn'
 
@@ -61,7 +63,7 @@ console.log(result.stdout)
 const result = await spawn('npm', ['install'], {
   cwd: '/path/to/project',
   env: { NODE_ENV: 'production' },
-  stdio: 'pipe'
+  stdio: 'pipe',
 })
 
 // Access stdin for interactive processes
@@ -84,7 +86,7 @@ try {
 // Run with timeout
 try {
   await spawn('sleep', ['10'], {
-    timeout: 5000  // Kill after 5 seconds
+    timeout: 5000, // Kill after 5 seconds
   })
 } catch (error) {
   console.error('Command timed out')
@@ -92,6 +94,7 @@ try {
 ```
 
 **Common Pitfalls:**
+
 - Don't use string concatenation for arguments - use array form for security
 - Non-zero exit codes throw an error by default
 - Remember to pass `cwd` instead of using `process.chdir()` (never use `chdir`)
@@ -106,6 +109,7 @@ try {
 **Returns:** SpawnSyncReturns with exit code and captured output
 
 **Example:**
+
 ```typescript
 import { spawnSync } from '@socketsecurity/lib/spawn'
 
@@ -117,7 +121,7 @@ console.log(result.status) // exit code
 // With options
 const result = spawnSync('npm', ['install'], {
   cwd: '/path/to/project',
-  stdioString: true
+  stdioString: true,
 })
 
 if (result.status !== 0) {
@@ -126,12 +130,13 @@ if (result.status !== 0) {
 
 // Get raw buffer output
 const result = spawnSync('cat', ['binary-file'], {
-  stdioString: false
+  stdioString: false,
 })
 console.log(result.stdout) // Buffer
 ```
 
 **Common Pitfalls:**
+
 - Blocks the event loop - don't use for long-running commands
 - No spinner animation during execution
 - Timeout not supported (use `spawn()` with timeout instead)
@@ -144,7 +149,7 @@ Current working directory for the process.
 
 ```typescript
 await spawn('npm', ['test'], {
-  cwd: '/path/to/project'
+  cwd: '/path/to/project',
 })
 ```
 
@@ -158,8 +163,8 @@ Environment variables for the process.
 await spawn('node', ['app.js'], {
   env: {
     NODE_ENV: 'production',
-    API_KEY: 'secret123'
-  }
+    API_KEY: 'secret123',
+  },
 })
 ```
 
@@ -172,26 +177,27 @@ Stdio configuration for stdin, stdout, stderr.
 ```typescript
 // Pipe all stdio
 await spawn('command', [], {
-  stdio: 'pipe'
+  stdio: 'pipe',
 })
 
 // Inherit stdout/stderr (show in terminal)
 await spawn('npm', ['test'], {
-  stdio: 'inherit'
+  stdio: 'inherit',
 })
 
 // Ignore all stdio
 await spawn('background-task', [], {
-  stdio: 'ignore'
+  stdio: 'ignore',
 })
 
 // Custom per-stream: [stdin, stdout, stderr]
 await spawn('command', [], {
-  stdio: ['ignore', 'pipe', 'pipe']
+  stdio: ['ignore', 'pipe', 'pipe'],
 })
 ```
 
 **Values:**
+
 - `'pipe'` - Create pipe (default, captures output)
 - `'inherit'` - Use parent's stream (shows in terminal)
 - `'ignore'` - Ignore the stream
@@ -202,7 +208,7 @@ Run command in shell.
 
 ```typescript
 await spawn('npm', ['install'], {
-  shell: true  // Required for .cmd/.bat on Windows
+  shell: true, // Required for .cmd/.bat on Windows
 })
 ```
 
@@ -214,7 +220,7 @@ Maximum time before killing the process.
 
 ```typescript
 await spawn('long-running-command', [], {
-  timeout: 60000  // 60 seconds
+  timeout: 60000, // 60 seconds
 })
 ```
 
@@ -225,13 +231,13 @@ Convert stdio output to strings (default: true).
 ```typescript
 // Get strings (default)
 const result = await spawn('cat', ['file.txt'], {
-  stdioString: true
+  stdioString: true,
 })
 console.log(result.stdout) // string
 
 // Get buffers
 const result = await spawn('cat', ['binary-file'], {
-  stdioString: false
+  stdioString: false,
 })
 console.log(result.stdout) // Buffer
 ```
@@ -242,7 +248,7 @@ Remove ANSI escape codes from output (default: true).
 
 ```typescript
 await spawn('colored-command', [], {
-  stripAnsi: true  // Remove color codes
+  stripAnsi: true, // Remove color codes
 })
 ```
 
@@ -258,7 +264,7 @@ spinner.start()
 
 await spawn('command', [], {
   spinner,
-  stdio: 'inherit'  // Spinner auto-pauses when output is shown
+  stdio: 'inherit', // Spinner auto-pauses when output is shown
 })
 
 spinner.success('Complete')
@@ -279,6 +285,7 @@ await spawn(`git commit -m "${userMessage}"`, { shell: true })
 ```
 
 **Why array-based is safe:**
+
 - Node.js passes each argument directly to the OS
 - Shell metacharacters (`;`, `|`, `&`, `$`, etc.) are treated as literal strings
 - No shell interpretation even with `shell: true`
@@ -291,6 +298,7 @@ await spawn(`git commit -m "${userMessage}"`, { shell: true })
 **What it does:** Checks if a value is a spawn error.
 
 **Example:**
+
 ```typescript
 import { spawn, isSpawnError } from '@socketsecurity/lib/spawn'
 
@@ -310,6 +318,7 @@ try {
 **What it does:** Enhances spawn errors with better context and messages.
 
 **Example:**
+
 ```typescript
 import { enhanceSpawnError } from '@socketsecurity/lib/spawn'
 
@@ -332,6 +341,7 @@ try {
 **When to use:** Preventing duplicate builds, ensuring atomic operations, coordinating between processes.
 
 **Example:**
+
 ```typescript
 import { ProcessLock } from '@socketsecurity/lib/process-lock'
 
@@ -358,8 +368,8 @@ Creates a new process lock.
 
 ```typescript
 const lock = new ProcessLock('build-process', {
-  lockDir: '/tmp/locks',  // Custom lock directory
-  timeout: 30000          // Timeout in ms
+  lockDir: '/tmp/locks', // Custom lock directory
+  timeout: 30000, // Timeout in ms
 })
 ```
 
@@ -405,18 +415,19 @@ if (await lock.isLocked()) {
 **When to use:** Sending messages between processes, coordinating work, passing data.
 
 **Example:**
+
 ```typescript
 import { setupIPC } from '@socketsecurity/lib/ipc'
 
 // In parent process
 const child = spawn('node', ['worker.js'], {
-  stdio: ['ignore', 'pipe', 'pipe', 'ipc']
+  stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
 })
 
 setupIPC(child.process, {
-  onMessage: (message) => {
+  onMessage: message => {
     console.log('Received from child:', message)
-  }
+  },
 })
 
 // Send to child
@@ -424,12 +435,12 @@ child.process.send({ type: 'work', data: 'foo' })
 
 // In child (worker.js)
 setupIPC(process, {
-  onMessage: (message) => {
+  onMessage: message => {
     if (message.type === 'work') {
       const result = doWork(message.data)
       process.send({ type: 'result', value: result })
     }
-  }
+  },
 })
 ```
 
@@ -448,7 +459,7 @@ try {
   await spawn('pnpm', ['install'], {
     cwd: projectPath,
     stdio: 'pipe',
-    spinner
+    spinner,
   })
   spinner.successAndStop('Dependencies installed')
 } catch (error) {
@@ -487,7 +498,7 @@ import { spawn } from '@socketsecurity/lib/spawn'
 async function atomicBuild() {
   const lock = new ProcessLock('project-build')
 
-  if (!await lock.acquire()) {
+  if (!(await lock.acquire())) {
     console.log('Build already running in another process')
     return
   }
@@ -509,7 +520,7 @@ import { spawn } from '@socketsecurity/lib/spawn'
 
 // Get current branch
 const result = await spawn('git', ['branch', '--show-current'], {
-  cwd: repoPath
+  cwd: repoPath,
 })
 const branch = result.stdout.trim()
 console.log(`Current branch: ${branch}`)
@@ -517,7 +528,7 @@ console.log(`Current branch: ${branch}`)
 // Check for uncommitted changes
 try {
   await spawn('git', ['diff-index', '--quiet', 'HEAD'], {
-    cwd: repoPath
+    cwd: repoPath,
   })
   console.log('No uncommitted changes')
 } catch (error) {
@@ -526,7 +537,7 @@ try {
 
 // Get last commit
 const result = await spawn('git', ['log', '-1', '--format=%H %s'], {
-  cwd: repoPath
+  cwd: repoPath,
 })
 console.log(`Last commit: ${result.stdout}`)
 ```
@@ -539,7 +550,7 @@ import { spawn } from '@socketsecurity/lib/spawn'
 const tasks = [
   spawn('npm', ['run', 'test:unit']),
   spawn('npm', ['run', 'test:integration']),
-  spawn('npm', ['run', 'lint'])
+  spawn('npm', ['run', 'lint']),
 ]
 
 try {
@@ -558,6 +569,7 @@ try {
 **Problem:** Spawn throws ENOENT error.
 
 **Solution:**
+
 - Verify the command exists in PATH (`which command` on Unix, `where command` on Windows)
 - Use absolute paths if command isn't in PATH
 - Check if command requires shell (`.cmd`, `.bat` files need `shell: true` on Windows)
@@ -567,6 +579,7 @@ try {
 **Problem:** EACCES or EPERM error.
 
 **Solution:**
+
 - Check file permissions (`chmod +x script.sh` on Unix)
 - Verify you have execute permissions
 - On Unix, ensure script has proper shebang (`#!/usr/bin/env node`)
@@ -576,6 +589,7 @@ try {
 **Problem:** Spawn never resolves.
 
 **Solution:**
+
 - Add a `timeout` option
 - Check if command is waiting for input (set `stdio: 'ignore'` for stdin)
 - Ensure child process isn't keeping parent alive (`child.unref()`)
@@ -585,6 +599,7 @@ try {
 **Problem:** Strange characters in stdout/stderr.
 
 **Solution:**
+
 - Ensure `stdioString: true` for text output
 - Use `stripAnsi: true` to remove color codes
 - For binary output, use `stdioString: false` to get Buffer
@@ -595,13 +610,14 @@ try {
 
 **Solution:**
 Always use try/finally:
+
 ```typescript
 const lock = new ProcessLock('operation')
 if (await lock.acquire()) {
   try {
     await doWork()
   } finally {
-    await lock.release()  // Always runs, even on error
+    await lock.release() // Always runs, even on error
   }
 }
 ```
@@ -612,9 +628,10 @@ if (await lock.acquire()) {
 
 **Solution:**
 The library automatically enables `shell: true` on Windows for script files. If issues persist:
+
 ```typescript
 await spawn('command.cmd', [], {
-  shell: true  // Explicitly enable shell
+  shell: true, // Explicitly enable shell
 })
 ```
 
@@ -624,12 +641,13 @@ await spawn('command.cmd', [], {
 
 **Solution:**
 Merge with process.env:
+
 ```typescript
 await spawn('command', [], {
   env: {
-    ...process.env,  // Include parent env
-    CUSTOM_VAR: 'value'
-  }
+    ...process.env, // Include parent env
+    CUSTOM_VAR: 'value',
+  },
 })
 ```
 
@@ -639,9 +657,10 @@ await spawn('command', [], {
 
 **Solution:**
 Always use `cwd` option:
+
 ```typescript
 await spawn('npm', ['test'], {
-  cwd: '/absolute/path/to/project'
+  cwd: '/absolute/path/to/project',
 })
 ```
 

@@ -13,7 +13,6 @@
 
 import { promises as fs } from 'node:fs'
 import http from 'node:http'
-import type https from 'node:https'
 import path from 'node:path'
 import { Writable } from 'node:stream'
 
@@ -29,7 +28,6 @@ import { runWithTempDir } from './utils/temp-file-helper'
 
 // Test server setup
 let httpServer: http.Server
-let httpsServer: https.Server
 let httpPort: number
 let httpBaseUrl: string
 
@@ -169,11 +167,6 @@ afterAll(async () => {
   await new Promise<void>(resolve => {
     httpServer.close(() => resolve())
   })
-  if (httpsServer) {
-    await new Promise<void>(resolve => {
-      httpsServer.close(() => resolve())
-    })
-  }
 })
 
 describe('http-request', () => {

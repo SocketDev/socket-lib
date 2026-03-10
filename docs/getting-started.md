@@ -7,6 +7,7 @@ Welcome to @socketsecurity/lib, the core infrastructure library for Socket.dev s
 **Node.js Version:** Node.js 22 or higher is required.
 
 You can check your Node.js version with:
+
 ```bash
 node --version
 ```
@@ -57,6 +58,7 @@ logger.success(`Package name: ${pkg.name}`)
 ```
 
 Save this as `example.ts` and run it:
+
 ```bash
 npx tsx example.ts
 ```
@@ -107,7 +109,7 @@ console.log(result.stdout)
 // Run with options
 const result = await spawn('npm', ['install'], {
   cwd: '/path/to/project',
-  stdio: 'pipe'
+  stdio: 'pipe',
 })
 ```
 
@@ -135,15 +137,11 @@ import { httpJson, httpDownload } from '@socketsecurity/lib/http-request'
 const data = await httpJson('https://api.example.com/data')
 
 // Download a file
-await httpDownload(
-  'https://example.com/file.zip',
-  '/tmp/file.zip',
-  {
-    onProgress: (downloaded, total) => {
-      console.log(`${(downloaded / total * 100).toFixed(1)}% complete`)
-    }
-  }
-)
+await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+  onProgress: (downloaded, total) => {
+    console.log(`${((downloaded / total) * 100).toFixed(1)}% complete`)
+  },
+})
 ```
 
 ### Logging with Symbols

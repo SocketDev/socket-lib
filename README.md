@@ -59,14 +59,18 @@ logger.success(`Package: ${pkg.name}@${pkg.version}`)
 ## What's Inside
 
 ### Visual Effects
+
 Spinners, colored loggers, themes, progress bars, and terminal output formatting.
+
 - `Spinner` - Animated CLI spinners with progress tracking
 - `getDefaultLogger()` - Colored console logger with symbols
 - `LOG_SYMBOLS` - Colored terminal symbols (✓, ✗, ⚠, ℹ, →)
 - `setTheme()` - Customize colors across the library
 
 ### File System
+
 Cross-platform file operations with safe deletion and convenient wrappers.
+
 - `readFileUtf8()`, `readFileBinary()` - Read files as text or binary
 - `readJson()`, `writeJson()` - Parse and format JSON files
 - `safeDelete()` - Protected deletion with safety checks
@@ -75,7 +79,9 @@ Cross-platform file operations with safe deletion and convenient wrappers.
 - `validateFiles()` - Check file readability (useful for Yarn PnP, pnpm)
 
 ### HTTP Utilities
+
 Native Node.js HTTP/HTTPS requests with retry logic and redirects.
+
 - `httpJson()` - Fetch and parse JSON from APIs
 - `httpText()` - Fetch text/HTML content
 - `httpDownload()` - Download files with progress callbacks
@@ -83,7 +89,9 @@ Native Node.js HTTP/HTTPS requests with retry logic and redirects.
 - Automatic redirects, exponential backoff retries, timeout support
 
 ### Process Management
+
 Spawn child processes safely with cross-platform support.
+
 - `spawn()` - Promise-based process spawning with output capture
 - `spawnSync()` - Synchronous version for blocking operations
 - Array-based arguments prevent command injection
@@ -92,7 +100,9 @@ Spawn child processes safely with cross-platform support.
 - `setupIPC()` - Inter-process communication
 
 ### Environment Detection
+
 Type-safe environment variable access and platform detection.
+
 - `getCI()` - Detect CI environment
 - `getNodeEnv()` - Get NODE_ENV value
 - `isTest()` - Check if running tests
@@ -100,19 +110,25 @@ Type-safe environment variable access and platform detection.
 - Test rewiring with `setEnv()`, `resetEnv()`
 
 ### Package Management
+
 Detect and work with npm, pnpm, and yarn.
+
 - `detectPackageManager()` - Identify package manager from lock files
 - Package manifest operations
 - Lock file management
 
 ### Constants
+
 Pre-defined values for Node.js, npm, and platform detection.
+
 - `getNodeMajorVersion()` - Get current Node.js major version
 - `WIN32`, `DARWIN` - Platform booleans (use `!WIN32 && !DARWIN` for Linux)
 - `getAbortSignal()` - Global abort signal
 
 ### Utilities
+
 Helpers for arrays, objects, strings, promises, sorting, and more.
+
 - Arrays, objects, strings manipulation
 - Promise utilities and queues
 - Natural sorting
@@ -132,6 +148,7 @@ Helpers for arrays, objects, strings, promises, sorting, and more.
 ## Common Use Cases
 
 ### Running Shell Commands
+
 ```typescript
 import { spawn } from '@socketsecurity/lib/spawn'
 
@@ -140,6 +157,7 @@ console.log(result.stdout)
 ```
 
 ### Making API Requests
+
 ```typescript
 import { httpJson } from '@socketsecurity/lib/http-request'
 
@@ -147,6 +165,7 @@ const data = await httpJson('https://api.example.com/data')
 ```
 
 ### Visual Feedback
+
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner'
 
@@ -157,6 +176,7 @@ spinner.successAndStop('Complete!')
 ```
 
 ### Safe File Deletion
+
 ```typescript
 import { safeDelete } from '@socketsecurity/lib/fs'
 
@@ -167,6 +187,7 @@ await safeDelete('./build')
 ## Troubleshooting
 
 **Module not found**: Verify you're importing from the correct path:
+
 ```typescript
 // Correct
 import { Spinner } from '@socketsecurity/lib/spinner'
@@ -176,6 +197,7 @@ import { Spinner } from '@socketsecurity/lib'
 ```
 
 **Node version error**: This library requires Node.js 22+. Check your version:
+
 ```bash
 node --version
 ```

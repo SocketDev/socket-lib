@@ -152,17 +152,16 @@ export interface IpcMessage<T = unknown> {
  * IPC handshake message interface.
  * Used for initial connection establishment.
  */
-export interface IpcHandshake
-  extends IpcMessage<{
-    /** Protocol version for compatibility checking. */
-    version: string
-    /** Process ID for identification. */
-    pid: number
-    /** Optional API token for authentication. */
-    apiToken?: string
-    /** Application name for multi-app support. */
-    appName: string
-  }> {
+export interface IpcHandshake extends IpcMessage<{
+  /** Protocol version for compatibility checking. */
+  version: string
+  /** Process ID for identification. */
+  pid: number
+  /** Optional API token for authentication. */
+  apiToken?: string
+  /** Application name for multi-app support. */
+  appName: string
+}> {
   type: 'handshake'
 }
 
@@ -667,11 +666,11 @@ export function createIpcMessage<T = unknown>(
 export function hasIpcChannel(process: unknown): boolean {
   return Boolean(
     process &&
-      typeof process === 'object' &&
-      'send' in process &&
-      typeof process.send === 'function' &&
-      'channel' in process &&
-      process.channel !== undefined,
+    typeof process === 'object' &&
+    'send' in process &&
+    typeof process.send === 'function' &&
+    'channel' in process &&
+    process.channel !== undefined,
   )
 }
 

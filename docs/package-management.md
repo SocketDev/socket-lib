@@ -23,7 +23,12 @@ if (pm) {
 
 // For detecting project's package manager, check lock files
 import { findUpSync } from '@socketsecurity/lib/fs'
-const lockFile = findUpSync(['pnpm-lock.yaml', 'yarn.lock', 'bun.lockb', 'package-lock.json'])
+const lockFile = findUpSync([
+  'pnpm-lock.yaml',
+  'yarn.lock',
+  'bun.lockb',
+  'package-lock.json',
+])
 ```
 
 ## Package Manager Detection
@@ -39,11 +44,13 @@ const lockFile = findUpSync(['pnpm-lock.yaml', 'yarn.lock', 'bun.lockb', 'packag
 **Returns:** `'npm' | 'pnpm' | 'yarn' | 'bun' | null`
 
 **Detection Logic:**
+
 1. Checks `npm_config_user_agent` environment variable (set by all package managers)
 2. Falls back to analyzing `process.argv[0]` path patterns
 3. Returns `null` if not running under a package manager
 
 **Example:**
+
 ```typescript
 import { detectPackageManager } from '@socketsecurity/lib/env/package-manager'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -60,6 +67,7 @@ if (pm) {
 ```
 
 **Common Pitfalls:**
+
 - This detects the RUNNING package manager from environment, not the project's preferred package manager
 - Returns `null` when called outside package manager context (e.g., standalone Node.js script)
 - To detect a project's package manager, check lock files instead:
@@ -67,7 +75,9 @@ if (pm) {
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs'
 
-function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' | null {
+function getProjectPackageManager(
+  cwd: string,
+): 'npm' | 'pnpm' | 'yarn' | 'bun' | null {
   const lockFiles = {
     'pnpm-lock.yaml': 'pnpm',
     'yarn.lock': 'yarn',
@@ -93,7 +103,9 @@ function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' 
 import { findUpSync } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
-function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+function getProjectPackageManager(
+  cwd: string,
+): 'npm' | 'pnpm' | 'yarn' | 'bun' {
   if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
   if (findUpSync('yarn.lock', { cwd })) return 'yarn'
   if (findUpSync('bun.lockb', { cwd })) return 'bun'
@@ -121,7 +133,9 @@ await runScript('./project', 'test')
 import { findUpSync } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
-function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+function getProjectPackageManager(
+  cwd: string,
+): 'npm' | 'pnpm' | 'yarn' | 'bun' {
   if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
   if (findUpSync('yarn.lock', { cwd })) return 'yarn'
   if (findUpSync('bun.lockb', { cwd })) return 'bun'
@@ -131,7 +145,7 @@ function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' 
 async function addPackage(
   projectPath: string,
   packageName: string,
-  options: { dev?: boolean; exact?: boolean } = {}
+  options: { dev?: boolean; exact?: boolean } = {},
 ) {
   const pm = getProjectPackageManager(projectPath)
 
@@ -194,7 +208,7 @@ async function updateVersion(newVersion: string) {
   pkg.version = newVersion
 
   await writeJson('./package.json', pkg, {
-    spaces: 2  // Maintain formatting
+    spaces: 2, // Maintain formatting
   })
 
   console.log(`Updated version to ${newVersion}`)
@@ -234,7 +248,7 @@ import { findUpSync } from '@socketsecurity/lib/fs'
 
 function getLockFile(projectPath: string): string | undefined {
   return findUpSync(['pnpm-lock.yaml', 'yarn.lock', 'package-lock.json'], {
-    cwd: projectPath
+    cwd: projectPath,
   })
 }
 
@@ -252,7 +266,9 @@ if (lockFile) {
 import { findUpSync, safeDelete } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
-function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+function getProjectPackageManager(
+  cwd: string,
+): 'npm' | 'pnpm' | 'yarn' | 'bun' {
   if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
   if (findUpSync('yarn.lock', { cwd })) return 'yarn'
   if (findUpSync('bun.lockb', { cwd })) return 'bun'
@@ -267,7 +283,7 @@ async function regenerateLockFile(projectPath: string) {
     npm: 'package-lock.json',
     pnpm: 'pnpm-lock.yaml',
     yarn: 'yarn.lock',
-    bun: 'bun.lockb'
+    bun: 'bun.lockb',
   }
 
   await safeDelete(`${projectPath}/${lockFiles[pm]}`)
@@ -287,7 +303,9 @@ import { spawn } from '@socketsecurity/lib/spawn'
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
-function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' {
+function getProjectPackageManager(
+  cwd: string,
+): 'npm' | 'pnpm' | 'yarn' | 'bun' {
   if (findUpSync('pnpm-lock.yaml', { cwd })) return 'pnpm'
   if (findUpSync('yarn.lock', { cwd })) return 'yarn'
   if (findUpSync('bun.lockb', { cwd })) return 'bun'
@@ -297,7 +315,7 @@ function getProjectPackageManager(cwd: string): 'npm' | 'pnpm' | 'yarn' | 'bun' 
 async function smartInstall(
   projectPath: string,
   packages: string[],
-  options: { dev?: boolean } = {}
+  options: { dev?: boolean } = {},
 ) {
   const logger = getDefaultLogger()
   const spinner = Spinner()
@@ -319,7 +337,7 @@ async function smartInstall(
     await spawn(pm, args, {
       cwd: projectPath,
       stdio: 'pipe',
-      spinner
+      spinner,
     })
 
     spinner.successAndStop(`Installed ${packages.join(', ')}`)
@@ -353,7 +371,7 @@ async function checkOutdated(projectPath: string) {
 
   const deps = {
     ...pkg.dependencies,
-    ...pkg.devDependencies
+    ...pkg.devDependencies,
   }
 
   logger.step('Checking for updates')
@@ -361,7 +379,7 @@ async function checkOutdated(projectPath: string) {
   for (const [name, currentVersion] of Object.entries(deps)) {
     try {
       const data = await httpJson<NpmPackage>(
-        `https://registry.npmjs.org/${name}`
+        `https://registry.npmjs.org/${name}`,
       )
 
       const latest = data['dist-tags'].latest
@@ -411,7 +429,7 @@ async function listWorkspaces(rootPath: string): Promise<Workspace[]> {
       name: pkg.name,
       path: path.join(rootPath, 'packages', dir),
       version: pkg.version,
-      dependencies: Object.keys(pkg.dependencies || {})
+      dependencies: Object.keys(pkg.dependencies || {}),
     })
   }
 
@@ -433,7 +451,10 @@ import { findUpSync } from '@socketsecurity/lib/fs'
 import { spawn } from '@socketsecurity/lib/spawn'
 
 class PackageManager {
-  constructor(private pm: 'npm' | 'pnpm' | 'yarn' | 'bun', private cwd: string) {}
+  constructor(
+    private pm: 'npm' | 'pnpm' | 'yarn' | 'bun',
+    private cwd: string,
+  ) {}
 
   static detect(cwd: string) {
     let pm: 'npm' | 'pnpm' | 'yarn' | 'bun' = 'npm'
@@ -483,11 +504,12 @@ await pm.runScript('test')
 **Problem:** Detection picks wrong package manager.
 
 **Solution:**
+
 1. Ensure lock file exists for your package manager
 2. Delete conflicting lock files
 3. Or explicitly specify the package manager:
    ```typescript
-   const pm = 'pnpm'  // Force specific PM
+   const pm = 'pnpm' // Force specific PM
    await spawn(pm, ['install'], { cwd: projectPath })
    ```
 
@@ -496,7 +518,9 @@ await pm.runScript('test')
 **Problem:** Spawn fails when running PM command.
 
 **Solution:**
+
 1. Verify package manager is installed:
+
    ```bash
    which npm pnpm yarn
    ```
@@ -512,6 +536,7 @@ await pm.runScript('test')
 **Problem:** Multiple lock files in project.
 
 **Solution:**
+
 1. Choose one package manager
 2. Delete other lock files:
    ```typescript
@@ -525,6 +550,7 @@ await pm.runScript('test')
 **Problem:** EACCES errors when installing packages.
 
 **Solution:**
+
 1. Don't use sudo with package managers
 2. Fix npm permissions:
    ```bash

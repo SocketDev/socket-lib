@@ -22,7 +22,9 @@ Supports: string, number, boolean, null, undefined
 
 ```javascript
 // Before
-if (DEBUG) { console.log('debug') }
+if (DEBUG) {
+  console.log('debug')
+}
 DEBUG && expression
 const x = DEBUG ? dev : prod
 
@@ -40,10 +42,18 @@ Patterns: `if (DEBUG)`, `DEBUG &&`, `DEBUG ? a : b`
 
 ```javascript
 // Before
-if (process.env.NODE_ENV === 'production') { prodCode() } else { devCode() }
+if (process.env.NODE_ENV === 'production') {
+  prodCode()
+} else {
+  devCode()
+}
 
 // After (with env: { NODE_ENV: 'production' })
-if ('production' === 'production') { prodCode() } else { devCode() }
+if ('production' === 'production') {
+  prodCode()
+} else {
+  devCode()
+}
 
 // After Rollup tree-shaking
 prodCode()
@@ -57,10 +67,14 @@ Coerces types: 'true' → boolean, '42' → number
 
 ```javascript
 // Before
-if (response.status === HttpStatus.OK) { return StatusCode.Success }
+if (response.status === HttpStatus.OK) {
+  return StatusCode.Success
+}
 
 // After
-if (response.status === 200) { return 0 }
+if (response.status === 200) {
+  return 0
+}
 ```
 
 Note: Use TypeScript's `const enum` instead when possible.
@@ -73,8 +87,6 @@ const path = require('node:path')
 const pluginsPath = path.join(__dirname, '..', 'plugins')
 
 module.exports = {
-  plugins: [
-    path.join(pluginsPath, 'babel-plugin-inline-require-calls.js'),
-  ]
+  plugins: [path.join(pluginsPath, 'babel-plugin-inline-require-calls.js')],
 }
 ```

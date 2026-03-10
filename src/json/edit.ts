@@ -171,9 +171,9 @@ export function getEditableJsonClass<
   T = Record<string, unknown>,
 >(): EditableJsonConstructor<T> {
   if (_EditableJsonClass === undefined) {
-    _EditableJsonClass = class EditableJson<T = Record<string, unknown>>
-      implements EditableJsonInstance<T>
-    {
+    _EditableJsonClass = class EditableJson<
+      T = Record<string, unknown>,
+    > implements EditableJsonInstance<T> {
       _canSave = true
       _content: T = {} as T
       _path: string | undefined = undefined
