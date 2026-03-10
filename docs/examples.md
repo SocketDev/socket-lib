@@ -448,6 +448,10 @@ Execute tasks with limited concurrency:
 ```typescript
 import fs from 'node:fs/promises'
 
+// Note: fast-glob is an external dependency - install it separately (pnpm add -D fast-glob)
+import { glob } from 'fast-glob'
+
+import { readFileUtf8 } from '@socketsecurity/lib/fs'
 import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'

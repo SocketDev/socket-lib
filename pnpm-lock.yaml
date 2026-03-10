@@ -180,7 +180,7 @@ importers:
         specifier: 9.1.7
         version: 9.1.7
       libnpmexec:
-        specifier: ^10.2.3
+        specifier: 10.2.3
         version: 10.2.3(supports-color@10.0.0)
       libnpmpack:
         specifier: 9.0.9
@@ -234,7 +234,7 @@ importers:
         specifier: 3.1.2
         version: 3.1.2
       tar-stream:
-        specifier: ^3.1.8
+        specifier: 3.1.8
         version: 3.1.8
       taze:
         specifier: 19.9.2

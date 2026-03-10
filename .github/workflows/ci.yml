@@ -19,7 +19,7 @@ on:
         description: 'Node.js versions to test (JSON array)'
         required: false
         type: string
-        default: '["20", "22", "24"]'
+        default: '["22", "24"]'
 
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
       lint-script: 'pnpm run lint --all'
       type-check-script: 'pnpm run check'
       test-script: 'pnpm exec vitest --config .config/vitest.config.mts run'
-      node-versions: ${{ inputs.node-versions || '["20", "22", "24"]' }}
+      node-versions: ${{ inputs.node-versions || '["22", "24"]' }}
       os-versions: '["ubuntu-latest", "windows-latest"]'
       fail-fast: false
       max-parallel: 4

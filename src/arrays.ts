@@ -104,10 +104,9 @@ export function arrayChunk<T>(
     throw new Error('Chunk size must be greater than 0')
   }
   const { length } = arr
-  const actualChunkSize = Math.min(length, chunkSize)
   const chunks = []
-  for (let i = 0; i < length; i += actualChunkSize) {
-    chunks.push(arr.slice(i, i + actualChunkSize) as T[])
+  for (let i = 0; i < length; i += chunkSize) {
+    chunks.push(arr.slice(i, i + chunkSize) as T[])
   }
   return chunks
 }

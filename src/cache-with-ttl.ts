@@ -407,34 +407,28 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     const fullKey = buildKey(key)
 
-    // Atomic check-and-set to prevent TOCTOU race
+    // Check if another request is already in flight
     const existing = inflightRequests.get(fullKey)
     if (existing) {
       return await existing
     }
 
-    // Create and immediately store promise atomically
+    // Create promise with cleanup handlers
     const promise = (async () => {
       try {
         const data = await fetcher()
         await set(key, data)
         return data
-      } catch (error) {
-        // Clean up on error
-        inflightRequests.delete(fullKey)
-        throw error
       } finally {
+        // Clean up on both success and error
         inflightRequests.delete(fullKey)
       }
     })()
 
-    // Final check - if another thread won, use theirs
-    const nowExisting = inflightRequests.get(fullKey)
-    if (nowExisting && nowExisting !== promise) {
-      return await nowExisting
-    }
-
+    // Set the promise IMMEDIATELY before any await to prevent race
     inflightRequests.set(fullKey, promise)
+
+    // Await and return (cleanup happens in finally block)
     return await promise
   }
 

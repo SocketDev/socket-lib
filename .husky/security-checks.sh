@@ -73,7 +73,7 @@ done <<< "$STAGED_FILES"
 
 # Check for Socket API keys.
 printf "Checking for API keys...\n"
-for file in $STAGED_FILES; do
+while IFS= read -r file; do
   if [ -f "$file" ]; then
     if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | grep -v "$ALLOWED_PUBLIC_KEY" | grep -v 'your_api_key_here' | grep -v 'SOCKET_SECURITY_API_KEY=' | grep -v 'fake-token' | grep -v 'test-token' | grep -q .; then
       printf "${YELLOW}⚠ WARNING: Potential API key found in: $file${NC}\n"
@@ -81,11 +81,11 @@ for file in $STAGED_FILES; do
       printf "If this is a real API key, DO NOT COMMIT IT.\n"
     fi
   fi
-done
+done <<< "$STAGED_FILES"
 
 # Check for common secret patterns.
 printf "Checking for potential secrets...\n"
-for file in $STAGED_FILES; do
+while IFS= read -r file; do
   if [ -f "$file" ]; then
     # Skip test files, example files, and hook scripts.
     if echo "$file" | grep -qE '\.(test|spec)\.(m?[jt]s|tsx?)$|\.example$|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then
@@ -112,7 +112,7 @@ for file in $STAGED_FILES; do
       ERRORS=$((ERRORS + 1))
     fi
   fi
-done
+done <<< "$STAGED_FILES"
 
 if [ $ERRORS -gt 0 ]; then
   printf "\n"
