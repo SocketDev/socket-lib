@@ -151,25 +151,22 @@ await spawn('command', [], { signal })
 ### Version Requirement Checker
 
 ```typescript
-import { MIN_SUPPORTED_NODE_VERSION } from '@socketsecurity/lib/constants/node'
+import { getNodeMajorVersion } from '@socketsecurity/lib/constants/node'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 function checkNodeVersion() {
   const logger = getDefaultLogger()
-  const current = process.version.slice(1) // Remove 'v'
-  const required = MIN_SUPPORTED_NODE_VERSION
-
-  const [currentMajor] = current.split('.').map(Number)
-  const [requiredMajor] = required.split('.').map(Number)
+  const requiredMajor = 22 // Node.js 22+ required (from README.md)
+  const currentMajor = getNodeMajorVersion()
 
   if (currentMajor < requiredMajor) {
-    logger.fail(`Node.js ${required}+ is required`)
-    logger.error(`Current version: ${current}`)
+    logger.fail(`Node.js ${requiredMajor}+ is required`)
+    logger.error(`Current version: ${process.version}`)
     logger.info(`Download from: https://nodejs.org`)
     process.exit(1)
   }
 
-  logger.success(`Node.js ${current} (supported)`)
+  logger.success(`Node.js ${process.version} (supported)`)
 }
 
 checkNodeVersion()
@@ -380,11 +377,12 @@ console.log(process.platform)
 **Solution:**
 Use proper version comparison:
 ```typescript
-import semver from 'semver'
-import { MIN_SUPPORTED_NODE_VERSION } from '@socketsecurity/lib/constants/node'
+import { getNodeMajorVersion } from '@socketsecurity/lib/constants/node'
 
-if (!semver.gte(process.version, MIN_SUPPORTED_NODE_VERSION)) {
-  console.error('Node.js version too old')
+const requiredMajor = 22 // Node.js 22+ required
+if (getNodeMajorVersion() < requiredMajor) {
+  console.error(`Node.js ${requiredMajor}+ required, current: ${process.version}`)
+  process.exit(1)
 }
 ```
 

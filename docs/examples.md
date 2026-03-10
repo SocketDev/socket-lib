@@ -257,7 +257,8 @@ Process multiple files in parallel with progress tracking:
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { readDirNames, readFileUtf8, writeFileUtf8 } from '@socketsecurity/lib/fs'
+import { readDirNames, readFileUtf8, safeMkdir } from '@socketsecurity/lib/fs'
+import fs from 'node:fs/promises'
 import path from 'node:path'
 
 async function processFiles(inputDir: string, outputDir: string) {
@@ -285,10 +286,10 @@ async function processFiles(inputDir: string, outputDir: string) {
         const outputPath = path.join(outputDir, dir, file)
 
         const content = await readFileUtf8(inputPath)
-        const processed = content.toUpperCase() // Example processing
+        const processedContent = content.toUpperCase() // Example processing
 
         await safeMkdir(path.dirname(outputPath))
-        await writeFileUtf8(outputPath, processed)
+        await fs.writeFile(outputPath, processedContent, 'utf8')
       }
 
       processed++
