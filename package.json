@@ -103,6 +103,10 @@
       "types": "./dist/ansi.d.ts",
       "default": "./dist/ansi.js"
     },
+    "./archives": {
+      "types": "./dist/archives.d.ts",
+      "default": "./dist/archives.js"
+    },
     "./argv/flags": {
       "types": "./dist/argv/flags.d.ts",
       "default": "./dist/argv/flags.js"
@@ -737,6 +741,7 @@
     "@vitest/ui": "4.0.3",
     "@yarnpkg/core": "4.5.0",
     "@yarnpkg/extensions": "2.0.6",
+    "adm-zip": "0.5.16",
     "cacache": "20.0.1",
     "debug": "4.4.3",
     "del": "8.0.1",
@@ -771,6 +776,8 @@
     "spdx-expression-parse": "4.0.0",
     "streaming-iterables": "8.0.1",
     "supports-color": "10.0.0",
+    "tar-fs": "3.1.2",
+    "tar-stream": "^3.1.8",
     "taze": "19.9.2",
     "trash": "10.0.0",
     "type-coverage": "2.29.7",

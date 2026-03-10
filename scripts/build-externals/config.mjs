@@ -23,7 +23,9 @@ export const externalPackages = [
   { name: 'normalize-package-data', bundle: false },
   { name: 'semver', bundle: false },
   // Utilities
+  { name: 'adm-zip', bundle: true },
   { name: 'debug', bundle: true },
+  { name: 'tar-fs', bundle: true },
   // pico-pack: picomatch, del, fast-glob
   { name: 'pico-pack', bundle: true },
   { name: 'del', bundle: false },

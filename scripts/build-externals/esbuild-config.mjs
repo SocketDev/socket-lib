@@ -66,10 +66,12 @@ function createForceNodeModulesPlugin() {
    *
    * PACKAGES WITH ACTUAL TSCONFIG MAPPINGS (as of now):
    * ────────────────────────────────────────────────────
-   * ✓ cacache              - line 37 in tsconfig.json
-   * ✓ make-fetch-happen    - line 38 in tsconfig.json
-   * ✓ fast-sort            - line 39 in tsconfig.json
-   * ✓ pacote               - line 40 in tsconfig.json
+   * ✓ adm-zip              - line 31 in tsconfig.json
+   * ✓ cacache              - line 32 in tsconfig.json
+   * ✓ make-fetch-happen    - line 33 in tsconfig.json
+   * ✓ fast-sort            - line 34 in tsconfig.json
+   * ✓ pacote               - line 35 in tsconfig.json
+   * ✓ tar-fs               - line 36 in tsconfig.json
    *
    * ADDITIONAL PACKAGES (defensive):
    * ────────────────────────────────
@@ -83,10 +85,12 @@ function createForceNodeModulesPlugin() {
    * needing to be listed here.
    */
   const packagesWithPathMappings = [
+    'adm-zip',
     'cacache',
     'make-fetch-happen',
     'fast-sort',
     'pacote',
+    'tar-fs',
     'libnpmexec',
     'libnpmpack',
     'npm-package-arg',
