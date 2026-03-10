@@ -148,10 +148,41 @@ test/                 # Test files
 - **Watch**: `pnpm run dev` (development mode)
 - **Test**: `pnpm test` (run tests)
 - **Type check**: `pnpm run check` (TypeScript type checking)
-- **Lint**: `pnpm run lint` (Biome linting)
-- **Fix**: `pnpm run fix` (auto-fix formatting/lint issues)
+- **Lint**: `pnpm run lint` (oxlint - 50-100x faster than ESLint)
+- **Fix**: `pnpm run fix` (auto-fix formatting/lint issues with oxfmt)
 - **Coverage**: `pnpm run cover` (test coverage)
 - **Clean**: `pnpm run clean` (remove build artifacts)
+
+### Code Quality Tools
+
+#### Linting (oxlint)
+
+- **Tool**: [oxlint](https://oxc.rs) v1.52+ - Rust-based linter (50-100x faster than ESLint)
+- **Config**: `.oxlintrc.json` - 167+ rules with file-specific overrides
+- **Features**:
+  - TypeScript type-aware rules with `--type-aware` flag
+  - ESLint plugin compatibility via `jsPlugins` (e.g., `eslint-plugin-sort-destructure-keys`)
+  - Inline comments: `// oxlint-disable-next-line rule-name`
+  - Categories: correctness, suspicious, pedantic, style, restriction
+- **Performance**: ~100ms for full codebase lint
+
+#### Formatting (oxfmt)
+
+- **Tool**: [oxfmt](https://oxc.rs) v0.37+ - Rust-based formatter (3x faster than Biome, 30x faster than Prettier)
+- **Config**: `.oxfmtrc.json` - Prettier v3.8 compatible
+- **Settings**:
+  - Semi: true
+  - Single quotes: true
+  - Tab width: 2
+  - Print width: 80
+  - Trailing commas: all
+- **Performance**: ~20ms for full codebase format
+
+#### Usage
+
+- `pnpm run lint` - Run oxlint with type-aware rules
+- `pnpm run fix` - Run oxfmt to auto-fix formatting
+- `scripts/lint.mjs` - Orchestrates both tools with proper error handling
 
 ### Build System
 
@@ -234,7 +265,7 @@ Blank lines between groups, alphabetical within groups.
   - Default exports require `.default` access, breaking consistency
   - Build validation enforces this pattern (enabled in CI)
 - **Enforcement**:
-  - Biome linting rule: `"noDefaultExport": "error"`
+  - Oxlint linting rule: `"no-default-export": "error"`
   - Build-time validation: `scripts/validate/esm-named-exports.mjs`
   - CI validation: `scripts/validate/dist-exports.mjs`
 
