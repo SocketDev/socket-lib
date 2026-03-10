@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.8.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.0) - 2026-03-10
+
+### Added
+
+- **archives**: Added secure archive extraction utilities with support for ZIP, TAR, TAR.GZ, and TGZ formats
+  - Configurable limits: `maxFileSize` (default 100MB), `maxTotalSize` (default 1GB)
+  - Cross-platform path normalization
+  - External dependencies: adm-zip@0.5.16, tar-fs@3.1.2 (bundled, +212KB)
+  - Security features: path traversal protection, file size limits, total size limits, symlink blocking
+  - Strip option to remove leading path components (like tar `--strip-components`)
+  - `detectArchiveFormat()` - Detect archive type from file extension
+  - `extractArchive()` - Generic extraction with auto-format detection
+  - `extractTar()`, `extractTarGz()`, `extractZip()` - Format-specific extractors
+
+- **releases/github**: Added archive extraction support for GitHub releases
+  - Auto-detects format from asset filename
+  - Enhanced `downloadAndExtractZip()` to use generic archive helpers
+  - Supports ZIP, TAR, TAR.GZ, and TGZ assets
+  - `downloadAndExtractArchive()` - Generic archive download and extraction
+
+### Changed
+
+- **dependencies**: Deduplicated 14 external bundle packages to single versions using pnpm overrides and patches
+
 ## [5.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.7.0) - 2026-02-12
 
 ### Added
