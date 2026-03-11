@@ -35,6 +35,42 @@ This is a reference to shared Socket standards. See `../socket-registry/CLAUDE.m
 - Forbidden to create docs unless requested
 - Required to do exactly what was asked
 
+## 📄 DOCUMENTATION POLICY
+
+**Philosophy**: Minimize documentation clutter. Code should be self-documenting; docs should be intentional.
+
+**Allowed documentation files**:
+
+- `README.md` - Project overview, installation, basic usage only
+- `CLAUDE.md` - AI assistant instructions
+- `SECURITY.md` - Security policy (GitHub standard)
+- `CHANGELOG.md` - Version history (auto-generated preferred)
+- `docs/` - Concentrated API/usage documentation (10 files max, keep concise)
+- `.claude/` - Claude Code commands/skills (functional, not documentation)
+- `*/README.md` - Only for plugins/, scripts/, or complex subsystems requiring context
+
+**Forbidden documentation**:
+
+- ❌ Migration plans after migration completes
+- ❌ Planning documents after implementation
+- ❌ Redundant "getting started" guides
+- ❌ Docs duplicating what's in code comments
+- ❌ Tutorial content better suited for external blog posts
+- ❌ Architecture decision records (ADRs) unless explicitly requested
+
+**Maintenance protocol**:
+
+1. **After completing migrations**: DELETE planning documents (e.g., `MIGRATION_PLAN_*.md`)
+2. **After major refactors**: REMOVE implementation plans
+3. **Quarterly review**: Audit and remove stale documentation
+4. **Before adding docs**: Ask "Can this be a code comment instead?"
+
+**Enforcement**:
+
+- AI assistants MUST NOT create documentation files unless explicitly requested
+- Code reviewers should challenge new documentation files
+- Prefer inline code documentation (`@fileoverview`, JSDoc) over separate markdown files
+
 ## ROLE
 
 Principal Software Engineer: production code, architecture, reliability, ownership.
