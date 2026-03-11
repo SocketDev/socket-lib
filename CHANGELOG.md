@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.8.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.1) - 2026-03-11
+
+### Performance
+
+- **windows**: Add comprehensive caching for expensive PATH resolution operations
+  - `getBinPath()`, `getBinPathSync()`: Cache binary path lookups
+  - `findRealBin()`: Cache `all:true` lookups and use single `whichSync({ all: true })` call
+  - `getVoltaBinPath()`: Cache Volta binary resolution
+  - `spawn()`: Cache binary path resolution before spawning
+  - `getGitPath()`: Cache git binary path
+  - `getCachedRealpath()`: New helper caching `realpathSync()` calls for git operations
+  - `findGitRoot()`: Cache git root directory lookups
+  - `findPackageJson()`: Cache package.json path lookups
+  - `readPackageJson()`: Cache parsed package.json content
+  - `resolveBinaryPath()`: Cache binary path resolution with Windows extension handling
+  - `NPM_BIN_PATH`, `NPM_REAL_EXEC_PATH`: Share npm path resolution to avoid duplicate `which.sync()` calls
+  - `ProcessLockManager.isStale()`: Use single `statSync({ throwIfNoEntry: false })` instead of `existsSync()` + `statSync()`
+  - All caches validate entries with `existsSync()` and remove stale entries automatically
+
 ## [5.8.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.0) - 2026-03-10
 
 ### Added
