@@ -96,6 +96,8 @@ const vitestConfig = defineConfig({
         useAtomics: true,
       },
     },
+    // Increase timeouts to prevent worker timeout on slow CI environments
+    teardownTimeout: 30_000,
     // Reduce timeouts for faster failures
     testTimeout: 10_000,
     hookTimeout: 10_000,
