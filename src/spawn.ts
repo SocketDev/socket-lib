@@ -719,9 +719,18 @@ export function spawn(
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
   if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
-    // path is imported at the top
-    // Extract just the command name without path and extension.
-    actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
+    // Only strip the extension if the command doesn't contain a path.
+    // If it's an absolute or relative path, keep it intact so cmd.exe
+    // executes the exact file. Stripping would fail for files in directories
+    // not in PATH (e.g., temp directories, project-local bins).
+    const hasPath =
+      actualCmd.includes('/') ||
+      actualCmd.includes('\\') ||
+      /^[a-zA-Z]:/.test(actualCmd)
+    if (!hasPath) {
+      // Extract just the command name without extension for PATH lookup.
+      actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
+    }
   }
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
@@ -894,9 +903,18 @@ export function spawnSync(
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
   if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
-    // path is imported at the top
-    // Extract just the command name without path and extension.
-    actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
+    // Only strip the extension if the command doesn't contain a path.
+    // If it's an absolute or relative path, keep it intact so cmd.exe
+    // executes the exact file. Stripping would fail for files in directories
+    // not in PATH (e.g., temp directories, project-local bins).
+    const hasPath =
+      actualCmd.includes('/') ||
+      actualCmd.includes('\\') ||
+      /^[a-zA-Z]:/.test(actualCmd)
+    if (!hasPath) {
+      // Extract just the command name without extension for PATH lookup.
+      actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
+    }
   }
   const { stripAnsi: shouldStripAnsi = true, ...rawSpawnOptions } = {
     __proto__: null,
