@@ -13,6 +13,14 @@ import { readJsonSync } from './fs'
 import { isPath, normalizePath } from './paths/normalize'
 import { spawn } from './spawn'
 
+// Cache for binary path resolutions to avoid repeated PATH searches.
+// Cache is validated with existsSync() which is much cheaper than PATH search.
+const binPathCache = new Map<string, string>()
+// Separate cache for 'all: true' results (array of paths).
+const binPathAllCache = new Map<string, string[]>()
+// Cache for Volta binary path resolutions (keyed by volta path + binary name).
+const voltaBinCache = new Map<string, string>()
+
 let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
@@ -75,10 +83,30 @@ export async function execBin(
   args?: string[],
   options?: import('./spawn').SpawnOptions,
 ) {
-  // Resolve the binary path.
-  const resolvedPath = isPath(binPath)
-    ? resolveRealBinSync(binPath)
-    : await whichReal(binPath)
+  // Resolve the binary path, using cache for binary names (not paths).
+  let resolvedPath: string | string[] | undefined
+  if (isPath(binPath)) {
+    resolvedPath = resolveRealBinSync(binPath)
+  } else {
+    // Check cache first for binary names.
+    // Validate with existsSync() - cheaper than full PATH search.
+    const cached = binPathCache.get(binPath)
+    if (cached) {
+      if (getFs().existsSync(cached)) {
+        resolvedPath = cached
+      } else {
+        // Cached path no longer exists, remove stale entry.
+        binPathCache.delete(binPath)
+      }
+    }
+    if (!resolvedPath) {
+      resolvedPath = await whichReal(binPath)
+      // Cache the result if found.
+      if (typeof resolvedPath === 'string') {
+        binPathCache.set(binPath, resolvedPath)
+      }
+    }
+  }
 
   if (!resolvedPath) {
     const error = new Error(
@@ -127,34 +155,30 @@ export function findRealBin(
   }
 
   // Fall back to whichModule.sync if no direct path found.
+  // Use all: true to get all paths in a single call (avoids double PATH search on Windows).
   /* c8 ignore next - External which call */
-  const binPath = whichModule.sync(binName, { nothrow: true })
-  if (binPath) {
-    const binDir = path.dirname(binPath)
+  const allPaths = whichModule.sync(binName, { all: true, nothrow: true }) || []
+  // Ensure allPaths is an array.
+  const pathsArray = Array.isArray(allPaths)
+    ? allPaths
+    : typeof allPaths === 'string'
+      ? [allPaths]
+      : []
 
-    if (isShadowBinPath(binDir)) {
-      // This is likely a shadowed binary, try to find the real one.
-      /* c8 ignore next 2 - External which call */
-      const allPaths =
-        whichModule.sync(binName, { all: true, nothrow: true }) || []
-      // Ensure allPaths is an array.
-      const pathsArray = Array.isArray(allPaths)
-        ? allPaths
-        : typeof allPaths === 'string'
-          ? [allPaths]
-          : []
-
-      for (const altPath of pathsArray) {
-        const altDir = path.dirname(altPath)
-        if (!isShadowBinPath(altDir)) {
-          return altPath
-        }
-      }
-    }
-    return binPath
+  if (pathsArray.length === 0) {
+    return undefined
   }
-  // If all else fails, return undefined to indicate binary not found.
-  return undefined
+
+  // First, try to find a non-shadow bin path.
+  for (const binPath of pathsArray) {
+    const binDir = path.dirname(binPath)
+    if (!isShadowBinPath(binDir)) {
+      return binPath
+    }
+  }
+
+  // If all paths are shadow bins, return the first one.
+  return pathsArray[0]
 }
 
 /**
@@ -289,6 +313,17 @@ export function resolveRealBinSync(binPath: string): string {
     basename === 'node' ? -1 : (/(?<=\/)\.volta\//i.exec(binPath)?.index ?? -1)
   if (voltaIndex !== -1) {
     const voltaPath = binPath.slice(0, voltaIndex)
+    // Check Volta cache first - keyed by volta path + binary name.
+    const voltaCacheKey = `${voltaPath}:${basename}`
+    const cachedVolta = voltaBinCache.get(voltaCacheKey)
+    if (cachedVolta) {
+      if (fs.existsSync(cachedVolta)) {
+        return cachedVolta
+      }
+      // Cached Volta path no longer exists, remove stale entry.
+      voltaBinCache.delete(voltaCacheKey)
+    }
+
     const voltaToolsPath = path.join(voltaPath, 'tools')
     const voltaImagePath = path.join(voltaToolsPath, 'image')
     const voltaUserPath = path.join(voltaToolsPath, 'user')
@@ -337,10 +372,13 @@ export function resolveRealBinSync(binPath: string): string {
       }
     }
     if (voltaBinPath) {
+      let resolvedVoltaPath = voltaBinPath
       try {
-        return normalizePath(fs.realpathSync.native(voltaBinPath))
+        resolvedVoltaPath = normalizePath(fs.realpathSync.native(voltaBinPath))
       } catch {}
-      return voltaBinPath
+      // Cache the resolved Volta path.
+      voltaBinCache.set(voltaCacheKey, resolvedVoltaPath)
+      return resolvedVoltaPath
     }
   }
   if (WIN32) {
@@ -689,9 +727,33 @@ export async function whichReal(
   binName: string,
   options?: WhichOptions,
 ): Promise<string | string[] | undefined> {
-  // whichModule is imported at the top
+  const fs = getFs()
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { nothrow: true, ...options }
+
+  // Use cache - validate with existsSync() which is cheaper than full PATH search.
+  if (opts.all) {
+    // Check array cache for 'all: true' lookups.
+    // Only validate first path for performance - if primary binary exists, assume others do too.
+    const cachedAll = binPathAllCache.get(binName)
+    if (cachedAll && cachedAll.length > 0) {
+      if (fs.existsSync(cachedAll[0]!)) {
+        return cachedAll
+      }
+      // Primary cached path no longer exists, remove stale entry.
+      binPathAllCache.delete(binName)
+    }
+  } else {
+    const cached = binPathCache.get(binName)
+    if (cached) {
+      if (fs.existsSync(cached)) {
+        return cached
+      }
+      // Cached path no longer exists, remove stale entry.
+      binPathCache.delete(binName)
+    }
+  }
+
   // Depending on options `whichModule` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
   /* c8 ignore next - External which call */
@@ -705,7 +767,13 @@ export async function whichReal(
         ? [result]
         : undefined
     // If all is true and we have paths, resolve each one.
-    return paths?.length ? paths.map(p => resolveRealBinSync(p)) : paths
+    if (paths?.length) {
+      const resolved = paths.map(p => resolveRealBinSync(p))
+      // Cache the resolved paths.
+      binPathAllCache.set(binName, resolved)
+      return resolved
+    }
+    return paths
   }
 
   // If result is undefined (binary not found), return undefined
@@ -713,7 +781,10 @@ export async function whichReal(
     return undefined
   }
 
-  return resolveRealBinSync(result)
+  const resolved = resolveRealBinSync(result)
+  // Cache the resolved path.
+  binPathCache.set(binName, resolved)
+  return resolved
 }
 
 /**
@@ -725,8 +796,33 @@ export function whichRealSync(
   binName: string,
   options?: WhichOptions,
 ): string | string[] | undefined {
+  const fs = getFs()
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { nothrow: true, ...options }
+
+  // Use cache - validate with existsSync() which is cheaper than full PATH search.
+  if (opts.all) {
+    // Check array cache for 'all: true' lookups.
+    // Only validate first path for performance - if primary binary exists, assume others do too.
+    const cachedAll = binPathAllCache.get(binName)
+    if (cachedAll && cachedAll.length > 0) {
+      if (fs.existsSync(cachedAll[0]!)) {
+        return cachedAll
+      }
+      // Primary cached path no longer exists, remove stale entry.
+      binPathAllCache.delete(binName)
+    }
+  } else {
+    const cached = binPathCache.get(binName)
+    if (cached) {
+      if (fs.existsSync(cached)) {
+        return cached
+      }
+      // Cached path no longer exists, remove stale entry.
+      binPathCache.delete(binName)
+    }
+  }
+
   // Depending on options `which` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
   const result = whichSync(binName, opts)
@@ -739,7 +835,13 @@ export function whichRealSync(
         ? [result]
         : undefined
     // If all is true and we have paths, resolve each one.
-    return paths?.length ? paths.map(p => resolveRealBinSync(p)) : paths
+    if (paths?.length) {
+      const resolved = paths.map(p => resolveRealBinSync(p))
+      // Cache the resolved paths.
+      binPathAllCache.set(binName, resolved)
+      return resolved
+    }
+    return paths
   }
 
   // If result is undefined (binary not found), return undefined
@@ -747,7 +849,10 @@ export function whichRealSync(
     return undefined
   }
 
-  return resolveRealBinSync(result as string)
+  const resolved = resolveRealBinSync(result as string)
+  // Cache the resolved path.
+  binPathCache.set(binName, resolved)
+  return resolved
 }
 
 /**

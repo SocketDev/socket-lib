@@ -207,11 +207,12 @@ class ProcessLockManager {
    */
   private isStale(lockPath: string, staleMs: number): boolean {
     try {
-      if (!existsSync(lockPath)) {
+      // Use single statSync call instead of existsSync + statSync.
+      // throwIfNoEntry: false returns undefined if path doesn't exist.
+      const stats = statSync(lockPath, { throwIfNoEntry: false })
+      if (!stats) {
         return false
       }
-
-      const stats = statSync(lockPath)
       // Use second-level granularity to avoid APFS issues.
       const ageSeconds = Math.floor((Date.now() - stats.mtime.getTime()) / 1000)
       const staleSeconds = Math.floor(staleMs / 1000)
@@ -263,7 +264,8 @@ class ProcessLockManager {
       async () => {
         try {
           // Check for stale lock and remove if necessary.
-          if (existsSync(lockPath) && this.isStale(lockPath, staleMs)) {
+          // isStale() handles non-existent paths efficiently with single statSync call.
+          if (this.isStale(lockPath, staleMs)) {
             logger.log(`Removing stale lock: ${lockPath}`)
             try {
               safeDeleteSync(lockPath, { recursive: true })

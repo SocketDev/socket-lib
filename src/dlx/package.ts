@@ -629,6 +629,9 @@ export function parsePackageSpec(spec: string): {
   }
 }
 
+// Cache for binary path resolution to avoid repeated extension checks on Windows.
+const binaryPathCache = new Map<string, string>()
+
 /**
  * Resolve binary path with cross-platform wrapper support.
  * On Windows, checks for .cmd, .bat, .ps1, .exe wrappers in order.
@@ -643,6 +646,17 @@ export function resolveBinaryPath(basePath: string): string {
   }
 
   const fs = getFs()
+
+  // Check cache first - validate with existsSync.
+  const cached = binaryPathCache.get(basePath)
+  if (cached) {
+    if (fs.existsSync(cached)) {
+      return cached
+    }
+    // Cached path no longer exists, remove stale entry.
+    binaryPathCache.delete(basePath)
+  }
+
   // Windows: check for wrappers in priority order
   // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
   const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
@@ -650,6 +664,8 @@ export function resolveBinaryPath(basePath: string): string {
   for (const ext of extensions) {
     const testPath = basePath + ext
     if (fs.existsSync(testPath)) {
+      // Cache the result.
+      binaryPathCache.set(basePath, testPath)
       return testPath
     }
   }

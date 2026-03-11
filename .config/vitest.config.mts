@@ -97,9 +97,10 @@ const vitestConfig = defineConfig({
       },
       forks: {
         // CI: Use forks for stability (no worker timeout issues)
+        // Limit forks in CI to prevent file system contention on Windows
         singleFork: isCoverageEnabled,
-        maxForks: isCoverageEnabled ? 1 : 16,
-        minForks: isCoverageEnabled ? 1 : 4,
+        maxForks: isCoverageEnabled ? 1 : process.env.CI ? 4 : 16,
+        minForks: isCoverageEnabled ? 1 : process.env.CI ? 2 : 4,
         isolate: true,
       },
     },
@@ -110,8 +111,9 @@ const vitestConfig = defineConfig({
     hookTimeout: 10_000,
     // Speed optimizations
     sequence: {
-      // Run tests concurrently within suites
-      concurrent: true,
+      // Run tests concurrently within suites locally, but sequentially in CI
+      // to prevent worker timeouts from parallel binary path resolutions
+      concurrent: !process.env.CI,
     },
     // Bail early on first failure in CI
     bail: process.env.CI ? 1 : 0,

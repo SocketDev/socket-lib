@@ -53,11 +53,28 @@ import { stripAnsi } from './strings'
 
 import type { EventEmitter } from 'node:events'
 
+let _fs: typeof import('node:fs') | undefined
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
 
 // Cache for lazy stack trace computation.
 const stackCache = new WeakMap<Error, string>()
+
+// Cache for binary path resolutions to avoid repeated PATH searches.
+// Validated with existsSync() which is much cheaper than PATH search.
+const spawnBinPathCache = new Map<string, string>()
 
 // Define BufferEncoding type for TypeScript compatibility.
 type BufferEncoding = globalThis.BufferEncoding
@@ -652,10 +669,25 @@ export function spawn(
   // If cmd is already a path, use it as-is.
   let actualCmd = cmd
   if (!isPath(cmd)) {
-    // Binary name - resolve via PATH using which
-    const resolved = whichSync(cmd, { cwd, nothrow: true })
-    if (resolved && typeof resolved === 'string') {
-      actualCmd = resolved
+    // Binary name - check cache first, validate with existsSync().
+    const fs = getFs()
+    const cached = spawnBinPathCache.get(cmd)
+    if (cached) {
+      if (fs.existsSync(cached)) {
+        actualCmd = cached
+      } else {
+        // Cached path no longer exists, remove stale entry.
+        spawnBinPathCache.delete(cmd)
+      }
+    }
+    // If not cached or cache was stale, resolve via PATH.
+    if (actualCmd === cmd) {
+      const resolved = whichSync(cmd, { cwd, nothrow: true })
+      if (resolved && typeof resolved === 'string') {
+        actualCmd = resolved
+        // Cache the result.
+        spawnBinPathCache.set(cmd, resolved)
+      }
     }
     // If which returns null, keep original cmd and let spawn fail naturally
   }

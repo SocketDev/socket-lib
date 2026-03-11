@@ -13,33 +13,33 @@ export const BUN = 'bun'
 export const VLT = 'vlt'
 export const NPX = 'npx'
 
-// NPM binary path - resolved at runtime using which.
-export const NPM_BIN_PATH = /*@__PURE__*/ (() => {
+// NPM binary path - resolved once at runtime using which.
+// Shared between NPM_BIN_PATH and NPM_REAL_EXEC_PATH to avoid duplicate which.sync calls.
+const _npmBinPath = /*@__PURE__*/ (() => {
   try {
-    // module is imported at the top
-    return which.sync('npm', { nothrow: true }) || 'npm'
+    return which.sync('npm', { nothrow: true }) || null
   } catch {
-    return 'npm'
+    return null
   }
 })()
+
+export const NPM_BIN_PATH = _npmBinPath || 'npm'
 
 // NPM CLI entry point - resolved at runtime from npm bin location.
 // NOTE: This is kept for backward compatibility but NPM_BIN_PATH should be used instead
 // because cli.js exports a function that must be invoked, not executed directly.
 export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
   try {
-    const { existsSync } = /*@__PURE__*/ require('fs')
-    const path = /*@__PURE__*/ require('path')
-    // module is imported at the top
-    // Find npm binary using which.
-    const npmBin = which.sync('npm', { nothrow: true })
-    if (!npmBin) {
+    // Reuse cached npm bin path to avoid duplicate which.sync call.
+    if (!_npmBinPath) {
       return undefined
     }
+    const { existsSync } = /*@__PURE__*/ require('fs')
+    const path = /*@__PURE__*/ require('path')
     // npm bin is typically at: /path/to/node/bin/npm
     // cli.js is at: /path/to/node/lib/node_modules/npm/lib/cli.js
     // /path/to/node/bin
-    const npmDir = path.dirname(npmBin)
+    const npmDir = path.dirname(_npmBinPath)
     const nodeModulesPath = path.join(
       npmDir,
       '..',

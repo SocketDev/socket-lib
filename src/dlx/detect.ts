@@ -49,6 +49,12 @@ function getPath() {
  */
 const NODE_JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs'] as const)
 
+// Cache for package.json path lookups to avoid repeated directory traversal.
+const packageJsonPathCache = new Map<string, string | null>()
+
+// Cache for parsed package.json content to avoid repeated file reads.
+const packageJsonContentCache = new Map<string, object | null>()
+
 export type ExecutableType = 'package' | 'binary' | 'unknown'
 
 export interface ExecutableDetectionResult {
@@ -60,6 +66,7 @@ export interface ExecutableDetectionResult {
 
 /**
  * Find package.json in the directory containing the file or parent directories.
+ * Results are cached to avoid repeated directory traversal.
  *
  * @param filePath - Path to search from
  * @returns Path to package.json if found, undefined otherwise
@@ -69,19 +76,66 @@ function findPackageJson(filePath: string): string | undefined {
   const fs = getFs()
   const path = getPath()
 
-  let currentDir = path.dirname(path.resolve(filePath))
+  const startDir = path.dirname(path.resolve(filePath))
+
+  // Check cache first.
+  const cached = packageJsonPathCache.get(startDir)
+  if (cached !== undefined) {
+    // Validate cache - check if cached path still exists.
+    if (cached === null) {
+      return undefined
+    }
+    if (fs.existsSync(cached)) {
+      return cached
+    }
+    // Cached path no longer exists, remove stale entry.
+    packageJsonPathCache.delete(startDir)
+  }
+
+  let currentDir = startDir
   const root = path.parse(currentDir).root
 
   while (currentDir !== root) {
     const packageJsonPath = path.join(currentDir, 'package.json')
     if (fs.existsSync(packageJsonPath)) {
+      // Cache the result for the starting directory.
+      packageJsonPathCache.set(startDir, packageJsonPath)
       return packageJsonPath
     }
 
     currentDir = path.dirname(currentDir)
   }
 
+  // Cache the negative result.
+  packageJsonPathCache.set(startDir, null)
   return undefined
+}
+
+/**
+ * Read and parse package.json with caching.
+ * Results are cached to avoid repeated file reads.
+ *
+ * @param packageJsonPath - Path to package.json
+ * @returns Parsed package.json or null if invalid
+ * @private
+ */
+function readPackageJson(packageJsonPath: string): object | null {
+  const fs = getFs()
+
+  // Check cache first.
+  const cached = packageJsonContentCache.get(packageJsonPath)
+  if (cached !== undefined) {
+    return cached
+  }
+
+  try {
+    const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+    packageJsonContentCache.set(packageJsonPath, content)
+    return content
+  } catch {
+    packageJsonContentCache.set(packageJsonPath, null)
+    return null
+  }
 }
 
 /**
@@ -160,24 +214,21 @@ export function detectExecutableType(
 export function detectLocalExecutableType(
   filePath: string,
 ): ExecutableDetectionResult {
-  const fs = getFs()
-
   // Check 1: Look for package.json with bin field.
   const packageJsonPath = findPackageJson(filePath)
   if (packageJsonPath !== undefined) {
-    try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-      // If it has a bin field, it's a Node.js package.
-      if (packageJson.bin) {
-        return {
-          type: 'package',
-          method: 'package-json',
-          packageJsonPath,
-          inDlxCache: false,
-        }
+    const packageJson = readPackageJson(packageJsonPath) as Record<
+      string,
+      unknown
+    > | null
+    // If it has a bin field, it's a Node.js package.
+    if (packageJson?.bin) {
+      return {
+        type: 'package',
+        method: 'package-json',
+        packageJsonPath,
+        inDlxCache: false,
       }
-    } catch {
-      // Invalid package.json, fall through.
     }
   }
 

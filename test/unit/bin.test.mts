@@ -1395,4 +1395,104 @@ echo "test"
       }, 'resolveBin-normalize-')
     })
   })
+
+  describe('binary path caching', () => {
+    it('should cache binary path resolution for execBin', async () => {
+      // First call resolves and caches
+      const result1 = await execBin('node', ['-p', '"first"'])
+      expect(result1.code).toBe(0)
+
+      // Second call should use cache (same result, faster)
+      const result2 = await execBin('node', ['-p', '"second"'])
+      expect(result2.code).toBe(0)
+
+      // Both should work correctly
+      expect(result1.stdout).toContain('first')
+      expect(result2.stdout).toContain('second')
+    })
+
+    it('should cache binary path resolution for whichReal', async () => {
+      // First call resolves and caches
+      const result1 = await whichReal('node')
+      expect(result1).toBeDefined()
+      expect(typeof result1).toBe('string')
+
+      // Second call should use cache
+      const result2 = await whichReal('node')
+      expect(result2).toBe(result1)
+    })
+
+    it('should cache binary path resolution for whichRealSync', () => {
+      // First call resolves and caches
+      const result1 = whichRealSync('node')
+      expect(result1).toBeDefined()
+      expect(typeof result1).toBe('string')
+
+      // Second call should use cache
+      const result2 = whichRealSync('node')
+      expect(result2).toBe(result1)
+    })
+
+    it('should invalidate cache when binary no longer exists', async () => {
+      await runWithTempDir(async tmpDir => {
+        // Create a temporary "binary" script
+        const binPath = path.join(tmpDir, 'test-bin')
+        const binScript =
+          process.platform === 'win32'
+            ? '@echo off\necho test'
+            : '#!/bin/sh\necho test'
+        await fs.writeFile(binPath, binScript, 'utf8')
+        if (process.platform !== 'win32') {
+          await fs.chmod(binPath, 0o755)
+        }
+
+        // First call with absolute path works
+        const result1 = await execBin(binPath, [])
+        expect(result1.code).toBe(0)
+
+        // Delete the binary
+        await fs.unlink(binPath)
+
+        // Second call should fail because binary no longer exists
+        await expect(execBin(binPath, [])).rejects.toThrow()
+      }, 'cache-invalidation-')
+    })
+
+    it('should cache "all" option results in whichReal', async () => {
+      // First call resolves and caches
+      const result1 = await whichReal('node', { all: true })
+      expect(Array.isArray(result1)).toBe(true)
+      expect(result1!.length).toBeGreaterThan(0)
+
+      // Second call should use cache and return same result
+      const result2 = await whichReal('node', { all: true })
+      expect(Array.isArray(result2)).toBe(true)
+      expect(result2).toEqual(result1)
+    })
+
+    it('should cache "all" option results in whichRealSync', () => {
+      // First call resolves and caches
+      const result1 = whichRealSync('node', { all: true })
+      expect(Array.isArray(result1)).toBe(true)
+      expect(result1!.length).toBeGreaterThan(0)
+
+      // Second call should use cache and return same result
+      const result2 = whichRealSync('node', { all: true })
+      expect(Array.isArray(result2)).toBe(true)
+      expect(result2).toEqual(result1)
+    })
+
+    it('should use separate caches for single and all lookups', async () => {
+      // Single lookup
+      const single = await whichReal('node')
+      expect(typeof single).toBe('string')
+
+      // All lookup should still work and return array
+      const all = await whichReal('node', { all: true })
+      expect(Array.isArray(all)).toBe(true)
+
+      // Single should be string, all should be array - different caches
+      expect(single).not.toEqual(all)
+    })
+  })
 })

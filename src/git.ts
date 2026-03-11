@@ -1,3 +1,4 @@
+import { whichSync } from './bin'
 import { debugNs } from './debug'
 import { getGlobMatcher } from './globs'
 import { normalizePath } from './paths/normalize'
@@ -170,23 +171,56 @@ function evictLRUGitCache() {
   }
 }
 
+// Cached git binary path to avoid repeated PATH searches.
+let _gitPath: string | undefined
+
+// Cache for realpathSync results to avoid repeated filesystem calls.
+// Validated with existsSync() which is cheaper than realpathSync().
+const realpathCache = new Map<string, string>()
+
+// Cache for git root lookups to avoid repeated directory traversal.
+const gitRootCache = new Map<string, string>()
+
+/**
+ * Get the real path with caching to avoid repeated filesystem calls.
+ * Validates cache with existsSync() which is cheaper than realpathSync().
+ * @private
+ */
+function getCachedRealpath(pathname: string): string {
+  const fs = getFs()
+  const cached = realpathCache.get(pathname)
+  if (cached) {
+    if (fs.existsSync(cached)) {
+      return cached
+    }
+    // Cached path no longer exists, remove stale entry.
+    realpathCache.delete(pathname)
+  }
+  const resolved = fs.realpathSync(pathname)
+  realpathCache.set(pathname, resolved)
+  return resolved
+}
+
 /**
  * Get the git executable path.
  *
- * Currently always returns `'git'`, relying on the system PATH to resolve
- * the git binary location. This may be extended in the future to support
- * custom git paths.
+ * Resolves the git binary path via PATH on first call and caches it.
+ * Falls back to 'git' if not found in PATH.
  *
- * @returns The git executable name or path.
+ * @returns The git executable path (resolved from PATH on first call).
  *
  * @example
  * ```typescript
  * const git = getGitPath()
- * // => 'git'
+ * // => '/usr/bin/git' or 'git' if not found
  * ```
  */
 function getGitPath(): string {
-  return 'git'
+  if (_gitPath === undefined) {
+    const resolved = whichSync('git', { nothrow: true })
+    _gitPath = typeof resolved === 'string' ? resolved : 'git'
+  }
+  return _gitPath
 }
 
 /**
@@ -386,12 +420,26 @@ function innerDiffSync(
 export function findGitRoot(startPath: string): string {
   const fs = getFs()
   const path = getPath()
+
+  // Check cache first - git roots don't change during process lifetime.
+  const cached = gitRootCache.get(startPath)
+  if (cached) {
+    // Validate cache - check if .git still exists.
+    if (fs.existsSync(path.join(cached, '.git'))) {
+      return cached
+    }
+    // Cached root no longer valid, remove stale entry.
+    gitRootCache.delete(startPath)
+  }
+
   let currentPath = startPath
   // Walk up the directory tree looking for .git
   while (true) {
     try {
       const gitPath = path.join(currentPath, '.git')
       if (fs.existsSync(gitPath)) {
+        // Cache the result.
+        gitRootCache.set(startPath, currentPath)
         return currentPath
       }
     } catch {
@@ -440,11 +488,10 @@ function parseGitDiffStdout(
     porcelain = false,
     ...matcherOptions
   } = { __proto__: null, ...options }
-  const fs = getFs()
   const path = getPath()
-  // Resolve cwd to handle symlinks.
+  // Resolve cwd to handle symlinks (using cache for performance).
   const cwd =
-    cwdOption === defaultRoot ? defaultRoot : fs.realpathSync(cwdOption)
+    cwdOption === defaultRoot ? defaultRoot : getCachedRealpath(cwdOption)
   const rootPath = defaultRoot
   // Split into lines without trimming to preserve leading spaces in porcelain format.
   let rawFiles = stdout
@@ -782,11 +829,10 @@ export async function isChanged(
     ...options,
     absolute: false,
   })
-  const fs = getFs()
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = fs.realpathSync(pathname)
-  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  const resolvedPathname = getCachedRealpath(pathname)
+  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -835,12 +881,11 @@ export function isChangedSync(
     ...options,
     absolute: false,
   })
-  const fs = getFs()
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path.
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
   try {
-    const resolvedPathname = fs.realpathSync(pathname)
-    const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+    const resolvedPathname = getCachedRealpath(pathname)
+    const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
     const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
     return files.includes(relativePath)
   } catch {
@@ -892,11 +937,10 @@ export async function isUnstaged(
     ...options,
     absolute: false,
   })
-  const fs = getFs()
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = fs.realpathSync(pathname)
-  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  const resolvedPathname = getCachedRealpath(pathname)
+  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -945,11 +989,10 @@ export function isUnstagedSync(
     ...options,
     absolute: false,
   })
-  const fs = getFs()
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = fs.realpathSync(pathname)
-  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  const resolvedPathname = getCachedRealpath(pathname)
+  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -996,11 +1039,10 @@ export async function isStaged(
     ...options,
     absolute: false,
   })
-  const fs = getFs()
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = fs.realpathSync(pathname)
-  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  const resolvedPathname = getCachedRealpath(pathname)
+  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
@@ -1048,11 +1090,10 @@ export function isStagedSync(
     ...options,
     absolute: false,
   })
-  const fs = getFs()
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path.
-  const resolvedPathname = fs.realpathSync(pathname)
-  const baseCwd = options?.cwd ? fs.realpathSync(options['cwd']) : getCwd()
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  const resolvedPathname = getCachedRealpath(pathname)
+  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return files.includes(relativePath)
 }
