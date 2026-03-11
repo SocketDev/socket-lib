@@ -133,56 +133,68 @@ export async function extractTar(
 
   let totalExtractedSize = 0
 
+  let destroyScheduled = false
+
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
-      try {
-        // Check for symlinks
-        if (header.type === 'symlink' || header.type === 'link') {
-          const error = new Error(
-            `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
-          )
-          // Destroy stream on next tick to avoid unhandled error warnings
-          setImmediate(() => extractStream.destroy(error))
-          return header
-        }
-
-        // Check individual file size
-        if (header.size && header.size > maxFileSize) {
-          const error = new Error(
-            `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
-          )
-          setImmediate(() => extractStream.destroy(error))
-          return header
-        }
-
-        // Check total extracted size
-        if (header.size) {
-          totalExtractedSize += header.size
-          if (totalExtractedSize > maxTotalSize) {
-            const error = new Error(
-              `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
-            )
-            setImmediate(() => extractStream.destroy(error))
-            return header
-          }
-        }
-
-        return header
-      } catch (error) {
-        // Catch any unexpected errors and destroy stream
-        setImmediate(() => extractStream.destroy(error as Error))
+      // Skip if destroy already scheduled
+      if (destroyScheduled) {
         return header
       }
+
+      // Check for symlinks
+      if (header.type === 'symlink' || header.type === 'link') {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
+            ),
+          )
+        })
+        return header
+      }
+
+      // Check individual file size
+      if (header.size && header.size > maxFileSize) {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
+            ),
+          )
+        })
+        return header
+      }
+
+      // Check total extracted size
+      if (header.size) {
+        totalExtractedSize += header.size
+        if (totalExtractedSize > maxTotalSize) {
+          destroyScheduled = true
+          process.nextTick(() => {
+            extractStream.destroy(
+              new Error(
+                `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
+              ),
+            )
+          })
+          return header
+        }
+      }
+
+      return header
     },
     strip,
   })
 
-  const readStream = createReadStream(archivePath)
-
-  // Handle stream errors to prevent unhandled rejections
+  // Attach error handler before starting pipeline to catch errors
   extractStream.on('error', () => {
     // Error will be caught by pipeline
   })
+
+  const readStream = createReadStream(archivePath)
 
   try {
     await pipeline(readStream, extractStream)
@@ -217,56 +229,68 @@ export async function extractTarGz(
 
   let totalExtractedSize = 0
 
+  let destroyScheduled = false
+
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
-      try {
-        // Check for symlinks
-        if (header.type === 'symlink' || header.type === 'link') {
-          const error = new Error(
-            `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
-          )
-          // Destroy stream on next tick to avoid unhandled error warnings
-          setImmediate(() => extractStream.destroy(error))
-          return header
-        }
-
-        // Check individual file size
-        if (header.size && header.size > maxFileSize) {
-          const error = new Error(
-            `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
-          )
-          setImmediate(() => extractStream.destroy(error))
-          return header
-        }
-
-        // Check total extracted size
-        if (header.size) {
-          totalExtractedSize += header.size
-          if (totalExtractedSize > maxTotalSize) {
-            const error = new Error(
-              `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
-            )
-            setImmediate(() => extractStream.destroy(error))
-            return header
-          }
-        }
-
-        return header
-      } catch (error) {
-        // Catch any unexpected errors and destroy stream
-        setImmediate(() => extractStream.destroy(error as Error))
+      // Skip if destroy already scheduled
+      if (destroyScheduled) {
         return header
       }
+
+      // Check for symlinks
+      if (header.type === 'symlink' || header.type === 'link') {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
+            ),
+          )
+        })
+        return header
+      }
+
+      // Check individual file size
+      if (header.size && header.size > maxFileSize) {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
+            ),
+          )
+        })
+        return header
+      }
+
+      // Check total extracted size
+      if (header.size) {
+        totalExtractedSize += header.size
+        if (totalExtractedSize > maxTotalSize) {
+          destroyScheduled = true
+          process.nextTick(() => {
+            extractStream.destroy(
+              new Error(
+                `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
+              ),
+            )
+          })
+          return header
+        }
+      }
+
+      return header
     },
     strip,
   })
 
-  const readStream = createReadStream(archivePath)
-
-  // Handle stream errors to prevent unhandled rejections
+  // Attach error handler before starting pipeline to catch errors
   extractStream.on('error', () => {
     // Error will be caught by pipeline
   })
+
+  const readStream = createReadStream(archivePath)
 
   try {
     await pipeline(readStream, createGunzip(), extractStream)
