@@ -763,7 +763,7 @@
     "normalize-package-data": "8.0.0",
     "npm-package-arg": "13.0.0",
     "oxfmt": "^0.37.0",
-    "oxlint": "^1.53.0",
+    "oxlint": "1.53.0",
     "pacote": "21.0.1",
     "picomatch": "2.3.1",
     "pony-cause": "2.1.11",
