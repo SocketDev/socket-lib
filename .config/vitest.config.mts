@@ -70,8 +70,8 @@ const vitestConfig = defineConfig({
     ],
     reporters: ['default'],
     // Optimize test execution for speed
-    // Threads are faster than forks
-    pool: 'threads',
+    // Use forks in CI for stability, threads locally for speed
+    pool: process.env.CI ? 'forks' : 'threads',
     poolOptions: {
       threads: {
         // Maximize parallelism for speed
@@ -94,6 +94,13 @@ const vitestConfig = defineConfig({
         // 6. The rewire module uses globalThis singleton to handle coverage module duplication
         isolate: false,
         useAtomics: true,
+      },
+      forks: {
+        // CI: Use forks for stability (no worker timeout issues)
+        singleFork: isCoverageEnabled,
+        maxForks: isCoverageEnabled ? 1 : 16,
+        minForks: isCoverageEnabled ? 1 : 4,
+        isolate: true,
       },
     },
     // Increase timeouts to prevent worker timeout on slow CI environments
