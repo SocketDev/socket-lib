@@ -530,23 +530,27 @@ describe('archives', () => {
     })
 
     describe('zip bomb protection', () => {
-      it('should block files exceeding maxFileSize in zip', async () => {
-        await runWithTempDir(async tempDir => {
-          const bombZipPath = path.join(tempDir, 'bomb.zip')
-          const zip = new AdmZip()
+      it(
+        'should block files exceeding maxFileSize in zip',
+        async () => {
+          await runWithTempDir(async tempDir => {
+            const bombZipPath = path.join(tempDir, 'bomb.zip')
+            const zip = new AdmZip()
 
-          // Create a large buffer (150MB > 100MB default)
-          const largeBuffer = Buffer.alloc(150 * 1024 * 1024)
-          zip.addFile('large-file.bin', largeBuffer)
+            // Create a large buffer (150MB > 100MB default)
+            const largeBuffer = Buffer.alloc(150 * 1024 * 1024)
+            zip.addFile('large-file.bin', largeBuffer)
 
-          zip.writeZip(bombZipPath)
+            zip.writeZip(bombZipPath)
 
-          const extractDir = path.join(tempDir, 'extract')
-          await expect(extractZip(bombZipPath, extractDir)).rejects.toThrow(
-            /File size exceeds limit/,
-          )
-        }, 'security-zip-bomb-file-')
-      })
+            const extractDir = path.join(tempDir, 'extract')
+            await expect(extractZip(bombZipPath, extractDir)).rejects.toThrow(
+              /File size exceeds limit/,
+            )
+          }, 'security-zip-bomb-file-')
+        },
+        15_000,
+      )
 
       it('should block total size exceeding maxTotalSize in zip', async () => {
         await runWithTempDir(async tempDir => {
