@@ -723,11 +723,7 @@ export function spawn(
     // If it's an absolute or relative path, keep it intact so cmd.exe
     // executes the exact file. Stripping would fail for files in directories
     // not in PATH (e.g., temp directories, project-local bins).
-    const hasPath =
-      actualCmd.includes('/') ||
-      actualCmd.includes('\\') ||
-      /^[a-zA-Z]:/.test(actualCmd)
-    if (!hasPath) {
+    if (!isPath(actualCmd)) {
       // Extract just the command name without extension for PATH lookup.
       actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
     }
@@ -907,11 +903,7 @@ export function spawnSync(
     // If it's an absolute or relative path, keep it intact so cmd.exe
     // executes the exact file. Stripping would fail for files in directories
     // not in PATH (e.g., temp directories, project-local bins).
-    const hasPath =
-      actualCmd.includes('/') ||
-      actualCmd.includes('\\') ||
-      /^[a-zA-Z]:/.test(actualCmd)
-    if (!hasPath) {
+    if (!isPath(actualCmd)) {
       // Extract just the command name without extension for PATH lookup.
       actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
     }
