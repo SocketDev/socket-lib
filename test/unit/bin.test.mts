@@ -1436,7 +1436,10 @@ echo "test"
     it('should invalidate cache when binary no longer exists', async () => {
       await runWithTempDir(async tmpDir => {
         // Create a temporary "binary" script
-        const binPath = path.join(tmpDir, 'test-bin')
+        // Windows requires .cmd extension to execute batch scripts
+        const binName =
+          process.platform === 'win32' ? 'test-bin.cmd' : 'test-bin'
+        const binPath = path.join(tmpDir, binName)
         const binScript =
           process.platform === 'win32'
             ? '@echo off\necho test'
