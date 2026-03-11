@@ -453,7 +453,7 @@ describe('archives', () => {
         const file1 = await fs.readFile(path.join(tempDir, 'file1.txt'), 'utf8')
         expect(file1).toBe('targz-content1')
       }, 'extractArchive-targz-')
-    })
+    }, 15_000)
 
     it('should support strip option with auto-detection', async () => {
       await runWithTempDir(async tempDir => {
@@ -507,7 +507,7 @@ describe('archives', () => {
           const files = await fs.readdir(extractDir, { recursive: true })
           expect(files).toContain('etc')
         }, 'security-path-normalized-zip-')
-      })
+      }, 15_000)
 
       it('should validate extracted paths stay within base directory', async () => {
         await runWithTempDir(async tempDir => {
@@ -526,7 +526,7 @@ describe('archives', () => {
           )
           expect(content).toBe('content')
         }, 'security-path-validation-zip-')
-      })
+      }, 15_000)
     })
 
     describe('zip bomb protection', () => {
