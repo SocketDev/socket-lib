@@ -110,6 +110,7 @@ function shouldRunAllLinters(changedFiles) {
  * Filter files to only those that should be linted.
  */
 function filterLintableFiles(files) {
+  // Only include extensions actually supported by oxfmt/oxlint
   const lintableExtensions = new Set([
     '.js',
     '.mjs',
@@ -117,11 +118,6 @@ function filterLintableFiles(files) {
     '.ts',
     '.cts',
     '.mts',
-    '.json',
-    '.jsonc',
-    '.md',
-    '.yml',
-    '.yaml',
   ])
 
   const formatterExcludePatterns = getOxfmtExcludePatterns()
