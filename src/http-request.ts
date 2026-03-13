@@ -946,6 +946,7 @@ export async function httpDownload(
 
       // Download succeeded - atomically rename temp file to destination.
       // This overwrites any existing file at destPath.
+      // eslint-disable-next-line no-await-in-loop
       await fs.promises.rename(tempPath, destPath)
 
       return {
