@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.8.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.2) - 2026-03-13
+
+### Fixed
+
+- **http-request**: Download to temp file then atomically rename to prevent corruption
+  - Downloads now write to `{destPath}.download` temp file first
+  - On success, atomically renames to the destination path
+  - On failure, cleans up temp file and preserves any existing file at destination
+  - Prevents partial/corrupted files from CI caching causing extraction failures
+
 ## [5.8.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.1) - 2026-03-11
 
 ### Performance
