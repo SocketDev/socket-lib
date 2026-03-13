@@ -313,6 +313,7 @@ export async function downloadReleaseAsset(
   await safeMkdir(path.dirname(outputPath))
 
   // Download using httpDownload which supports redirects and retries.
+  // httpDownload deletes existing files before downloading to prevent partial/corrupted issues.
   await httpDownload(downloadUrl, outputPath, {
     logger: quiet ? undefined : logger,
     progressInterval: 10,

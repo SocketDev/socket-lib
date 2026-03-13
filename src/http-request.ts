@@ -14,6 +14,8 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
+import { safeDelete } from './fs.js'
+
 let _fs: typeof import('node:fs') | undefined
 
 /**
@@ -918,20 +920,46 @@ export async function httpDownload(
     }
   }
 
+  // Download to a temp file first, then atomically rename to destination.
+  // This prevents partial/corrupted files at the destination path if download fails,
+  // and preserves the original file (if any) until download succeeds.
+  const fs = getFs()
+  const tempPath = `${destPath}.download`
+
+  // Clean up any stale temp file from a previous failed download.
+  if (fs.existsSync(tempPath)) {
+    await safeDelete(tempPath)
+  }
+
   // Retry logic with exponential backoff
   let lastError: Error | undefined
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       // eslint-disable-next-line no-await-in-loop
-      return await httpDownloadAttempt(url, destPath, {
+      const result = await httpDownloadAttempt(url, tempPath, {
         followRedirects,
         headers,
         maxRedirects,
         onProgress: progressCallback,
         timeout,
       })
+
+      // Download succeeded - atomically rename temp file to destination.
+      // This overwrites any existing file at destPath.
+      await fs.promises.rename(tempPath, destPath)
+
+      return {
+        path: destPath,
+        size: result.size,
+      }
     } catch (e) {
       lastError = e as Error
+
+      // Clean up failed temp file before retry.
+      if (fs.existsSync(tempPath)) {
+        // eslint-disable-next-line no-await-in-loop
+        await safeDelete(tempPath)
+      }
 
       // Last attempt - throw error
       if (attempt === retries) {
