@@ -86,6 +86,17 @@ export type SocketBtmReleaseConfig =
   | SocketBtmAssetConfig
 
 /**
+ * Map Node.js platform to socket-btm asset platform naming.
+ * Uses 'win' instead of 'win32' for file/folder names.
+ */
+const PLATFORM_MAP: Record<string, string> = {
+  __proto__: null,
+  darwin: 'darwin',
+  linux: 'linux',
+  win32: 'win',
+}
+
+/**
  * Map Node.js arch to socket-btm asset arch naming.
  */
 const ARCH_MAP: Record<string, string> = {
@@ -333,22 +344,28 @@ export function getBinaryName(
 
 /**
  * Get platform-arch identifier for directory structure.
+ * Uses 'win' instead of 'win32' for file/folder names.
  *
  * @param platform - Target platform
  * @param arch - Target architecture
  * @param libc - Linux libc variant (optional)
- * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl')
+ * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl', 'win-x64')
  */
 export function getPlatformArch(
   platform: Platform,
   arch: Arch,
   libc?: Libc | undefined,
 ): string {
+  const mappedPlatform = PLATFORM_MAP[platform]
+  if (!mappedPlatform) {
+    throw new Error(`Unsupported platform: ${platform}`)
+  }
+
   const mappedArch = ARCH_MAP[arch]
   if (!mappedArch) {
     throw new Error(`Unsupported architecture: ${arch}`)
   }
 
   const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
-  return `${platform}-${mappedArch}${muslSuffix}`
+  return `${mappedPlatform}-${mappedArch}${muslSuffix}`
 }

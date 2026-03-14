@@ -105,13 +105,13 @@ describe('releases/socket-btm', () => {
       expect(getPlatformArch('linux', 'arm64', 'musl')).toBe('linux-arm64-musl')
     })
 
-    it('should return correct identifier for win32-x64', () => {
-      expect(getPlatformArch('win32', 'x64')).toBe('win32-x64')
+    it('should return correct identifier for win-x64', () => {
+      expect(getPlatformArch('win32', 'x64')).toBe('win-x64')
     })
 
     it('should ignore libc for non-linux platforms', () => {
       expect(getPlatformArch('darwin', 'arm64', 'musl')).toBe('darwin-arm64')
-      expect(getPlatformArch('win32', 'x64', 'musl')).toBe('win32-x64')
+      expect(getPlatformArch('win32', 'x64', 'musl')).toBe('win-x64')
     })
 
     it('should throw for unsupported architecture', () => {
