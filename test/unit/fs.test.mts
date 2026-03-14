@@ -816,6 +816,22 @@ describe('fs', () => {
         expect(exists).toBe(false)
       }, 'safeDelete-force-')
     })
+
+    it('should respect maxRetries and retryDelay options', async () => {
+      await runWithTempDir(async tmpDir => {
+        const testFile = path.join(tmpDir, 'file.txt')
+        await fs.writeFile(testFile, '', 'utf8')
+
+        // Delete with explicit retry options (should succeed on first attempt)
+        await safeDelete(testFile, { maxRetries: 2, retryDelay: 50 })
+
+        const exists = await fs
+          .access(testFile)
+          .then(() => true)
+          .catch(() => false)
+        expect(exists).toBe(false)
+      }, 'safeDelete-retry-')
+    })
   })
 
   describe('safeDeleteSync', () => {
@@ -874,6 +890,22 @@ describe('fs', () => {
 
     it('should not throw for non-existent files', () => {
       expect(() => safeDeleteSync('/nonexistent/file.txt')).not.toThrow()
+    })
+
+    it('should respect maxRetries and retryDelay options', async () => {
+      await runWithTempDir(async tmpDir => {
+        const testFile = path.join(tmpDir, 'file.txt')
+        await fs.writeFile(testFile, '', 'utf8')
+
+        // Delete with explicit retry options (should succeed on first attempt)
+        safeDeleteSync(testFile, { maxRetries: 2, retryDelay: 50 })
+
+        const exists = await fs
+          .access(testFile)
+          .then(() => true)
+          .catch(() => false)
+        expect(exists).toBe(false)
+      }, 'safeDeleteSync-retry-')
     })
   })
 

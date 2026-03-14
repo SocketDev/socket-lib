@@ -19,6 +19,7 @@ import { getAbortSignal } from './constants/process'
 
 import { isArray } from './arrays'
 import { deleteAsync, deleteSync } from './external/del'
+import { pRetry } from './promises'
 import { defaultIgnore, getGlobMatcher } from './globs'
 import type { JsonReviver } from './json/types'
 import { jsonParse } from './json/parse'
@@ -1270,13 +1271,25 @@ export async function safeDelete(
     }
   }
 
+  const maxRetries = opts.maxRetries ?? defaultRemoveOptions.maxRetries
+  const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
+
   /* c8 ignore start - External del call */
-  await deleteAsync(patterns, {
-    concurrency: opts.maxRetries || defaultRemoveOptions.maxRetries,
-    dryRun: false,
-    force: shouldForce,
-    onlyFiles: false,
-  })
+  await pRetry(
+    async () => {
+      await deleteAsync(patterns, {
+        dryRun: false,
+        force: shouldForce,
+        onlyFiles: false,
+      })
+    },
+    {
+      retries: maxRetries,
+      baseDelayMs: retryDelay,
+      backoffFactor: 2,
+      signal: opts.signal,
+    },
+  )
   /* c8 ignore stop */
 }
 
@@ -1351,13 +1364,34 @@ export function safeDeleteSync(
     }
   }
 
+  const maxRetries = opts.maxRetries ?? defaultRemoveOptions.maxRetries
+  const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
+
   /* c8 ignore start - External del call */
-  deleteSync(patterns, {
-    concurrency: opts.maxRetries || defaultRemoveOptions.maxRetries,
-    dryRun: false,
-    force: shouldForce,
-    onlyFiles: false,
-  })
+  let lastError: Error | undefined
+  let delay = retryDelay
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      deleteSync(patterns, {
+        dryRun: false,
+        force: shouldForce,
+        onlyFiles: false,
+      })
+      return
+    } catch (error) {
+      lastError = error as Error
+      if (attempt < maxRetries) {
+        // Sync sleep using Atomics.wait on a SharedArrayBuffer.
+        // This is a blocking wait that doesn't spin the CPU.
+        const waitMs = delay
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, waitMs)
+        delay *= 2 // Exponential backoff
+      }
+    }
+  }
+  if (lastError) {
+    throw lastError
+  }
   /* c8 ignore stop */
 }
 
