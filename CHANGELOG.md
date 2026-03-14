@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.9.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.9.0) - 2026-03-14
+
+### Changed
+
+- **releases/socket-btm**: `getPlatformArch()` now normalizes Windows platform to `win` instead of `win32`
+  - Returns `win-x64`, `win-arm64` instead of `win32-x64`, `win32-arm64`
+  - Consistent with `getBinaryAssetName()` which already uses `win` for Windows assets
+  - Aligns with socket-btm and Node.js convention: use `win` for file/folder names, `win32` for platform checks (`process.platform`)
+  - Added `PLATFORM_MAP` for explicit platform name mapping (darwin, linux, win32 → win)
+  - Now throws `Error: Unsupported platform` for unknown platform values
+
 ## [5.8.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.2) - 2026-03-13
 
 ### Fixed
