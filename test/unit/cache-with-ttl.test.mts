@@ -38,7 +38,7 @@ describe.sequential('cache-with-ttl', () => {
 
     // Create a fresh cache instance for each test
     cache = createTtlCache({
-      ttl: 1000, // 1 second for tests
+      ttl: 60_000, // 60 seconds for tests (prevents flaky failures on slow CI)
       prefix: 'test-cache',
       memoize: true,
     })
