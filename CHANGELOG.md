@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.10.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.10.0) - 2026-03-14
+
+### Changed
+
+- **releases/socket-btm**: Refactored `downloadSocketBtmRelease()` API for caller-controlled download paths
+  - Tool name moved from config object to required first parameter
+  - Config object is now optional second parameter (was required)
+  - Removed automatic `/${toolName}/${platformArch}` directory nesting - callers now have full control over download directory structure
+  - All optional parameters in config types now explicitly typed as `| undefined`
+  - Migration example:
+    - Before: `downloadSocketBtmRelease({ tool: 'lief', downloadDir: 'build' })`
+    - After: `downloadSocketBtmRelease('lief', { downloadDir: 'build' })`
+  - Rationale: Previous automatic path nesting created unexpected directory structures (e.g., `build/downloaded/lief/darwin-arm64/lief/assets/`) making it impossible for callers to predict exact file locations
+
 ## [5.9.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.9.1) - 2026-03-14
 
 ### Fixed
