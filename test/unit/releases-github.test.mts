@@ -879,7 +879,7 @@ describe('releases/github', () => {
         expect(result1).toContain('test-bin')
 
         // Verify version file and binary exist
-        const binaryDir = path.join(testDownloadDir, 'test-tool', 'test-arch')
+        const binaryDir = testDownloadDir
         const versionFile = path.join(binaryDir, '.version')
         const binaryFile = path.join(binaryDir, 'test-bin')
 
@@ -980,7 +980,7 @@ describe('releases/github', () => {
         })
 
         // Simulate TOCTOU scenario: delete binary but leave version file
-        const binaryDir = path.join(testDownloadDir, 'test-tool', 'test-arch')
+        const binaryDir = testDownloadDir
         const binaryFile = path.join(binaryDir, 'test-bin')
         await fs.unlink(binaryFile)
 

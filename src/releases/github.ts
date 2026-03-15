@@ -211,8 +211,8 @@ export async function downloadGitHubRelease(
     ? downloadDir
     : path.join(cwd, downloadDir)
 
-  // Build download paths following socket-cli pattern.
-  const binaryDir = path.join(resolvedDownloadDir, toolName, platformArch)
+  // Caller controls full directory structure (no automatic nesting).
+  const binaryDir = resolvedDownloadDir
   const binaryPath = path.join(binaryDir, binaryName)
   const versionPath = path.join(binaryDir, '.version')
 

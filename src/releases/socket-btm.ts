@@ -29,25 +29,23 @@ export interface SocketBtmAssetConfig {
   /** @internal Discriminator fields */
   bin?: never
   /** Working directory (defaults to process.cwd()). */
-  cwd?: string
+  cwd?: string | undefined
   /** Download destination directory. @default 'build/downloaded' */
-  downloadDir?: string
+  downloadDir?: string | undefined
   /** @internal Discriminator fields */
   libc?: never
   /** Output filename. @default resolved asset name */
-  output?: string
+  output?: string | undefined
   /** Suppress log messages. @default false */
-  quiet?: boolean
+  quiet?: boolean | undefined
   /** Remove macOS quarantine attribute after download. @default false */
-  removeMacOSQuarantine?: boolean
+  removeMacOSQuarantine?: boolean | undefined
   /** Specific release tag to download. */
-  tag?: string
+  tag?: string | undefined
   /** @internal Discriminator fields */
   targetArch?: never
   /** @internal Discriminator fields */
   targetPlatform?: never
-  /** Tool/package name for directory structure and release matching. */
-  tool: string
 }
 
 /**
@@ -57,25 +55,23 @@ export interface SocketBtmBinaryConfig {
   /** @internal Discriminator field */
   asset?: never
   /** Binary/executable name (without extension). @default tool */
-  bin?: string
+  bin?: string | undefined
   /** Working directory (defaults to process.cwd()). */
-  cwd?: string
+  cwd?: string | undefined
   /** Download destination directory. @default 'build/downloaded' */
-  downloadDir?: string
+  downloadDir?: string | undefined
   /** Linux libc variant. Auto-detected if not specified. */
-  libc?: Libc
+  libc?: Libc | undefined
   /** Suppress log messages. @default false */
-  quiet?: boolean
+  quiet?: boolean | undefined
   /** Remove macOS quarantine attribute after download. @default true */
-  removeMacOSQuarantine?: boolean
+  removeMacOSQuarantine?: boolean | undefined
   /** Specific release tag to download. */
-  tag?: string
+  tag?: string | undefined
   /** Target architecture (defaults to current arch). */
-  targetArch?: Arch
+  targetArch?: Arch | undefined
   /** Target platform (defaults to current platform). */
-  targetPlatform?: Platform
-  /** Tool/package name for directory structure and release matching. */
-  tool: string
+  targetPlatform?: Platform | undefined
 }
 
 /**
@@ -162,13 +158,16 @@ export function detectLibc(): Libc | undefined {
 /**
  * Download a release from socket-btm.
  *
- * @param config - Download configuration
+ * @param tool - Tool/package name for release matching (e.g., 'lief', 'curl')
+ * @param options - Download configuration
  * @returns Path to the downloaded file
  */
 export async function downloadSocketBtmRelease(
-  config: SocketBtmReleaseConfig,
+  tool: string,
+  options: SocketBtmReleaseConfig | undefined,
 ): Promise<string> {
-  const { cwd, downloadDir, quiet = false, tag, tool } = config
+  const config = Object.assign(Object.create(null), options)
+  const { cwd, downloadDir, quiet = false, tag } = config
 
   // Auto-generate toolPrefix from tool name (follows socket-btm tag pattern: {tool}-{date}-{commit})
   const toolPrefix = `${tool}-`
@@ -176,13 +175,13 @@ export async function downloadSocketBtmRelease(
   let downloadConfig: DownloadGitHubReleaseConfig
 
   // Infer type from presence of 'asset' field
-  if ('asset' in config) {
+  if (options && 'asset' in options) {
     // Asset download
-    const {
-      asset,
-      output,
-      removeMacOSQuarantine = false,
-    } = config as SocketBtmAssetConfig
+    const assetConfig = Object.assign(
+      Object.create(null),
+      options as SocketBtmAssetConfig,
+    )
+    const { asset, output, removeMacOSQuarantine = false } = assetConfig
 
     // Resolve asset pattern to actual asset name if needed.
     let resolvedAsset: string
@@ -252,13 +251,17 @@ export async function downloadSocketBtmRelease(
     }
   } else {
     // Binary download
+    const binaryConfig = Object.assign(
+      Object.create(null),
+      options as SocketBtmBinaryConfig | undefined,
+    )
     const {
       bin,
       libc = detectLibc(),
       removeMacOSQuarantine = true,
       targetArch = getArch(),
       targetPlatform = getPlatform(),
-    } = config as SocketBtmBinaryConfig
+    } = binaryConfig
 
     // Default bin to tool if not provided (like brew/cargo)
     const baseName = bin || tool
