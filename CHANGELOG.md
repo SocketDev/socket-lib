@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.0) - 2026-03-23
+
+### Added
+
+- **http-request**: Checksum verification for secure downloads
+  - `parseChecksums(text)`: Parse checksums file text into filename→hash map
+    - Supports GNU style (`hash  filename`), BSD style (`SHA256 (file) = hash`), and single-space format
+    - Handles Windows CRLF and Unix LF line endings
+    - Returns null-prototype object to prevent prototype pollution
+  - `fetchChecksums(url, options?)`: Fetch and parse checksums from URL
+    - Supports `headers` and `timeout` options
+  - `httpDownload` now accepts `sha256` option to verify downloaded files
+    - Verification happens before atomic rename (file not saved if hash mismatches)
+    - Accepts uppercase hashes (normalized to lowercase internally)
+
 ## [5.10.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.10.0) - 2026-03-14
 
 ### Changed
