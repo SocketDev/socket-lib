@@ -263,7 +263,12 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
         return entry.data
       }
       // Remove expired entry.
-      await cacache.remove(fullKey)
+      try {
+        await cacache.remove(fullKey)
+      } catch {
+        // Ignore removal errors - entry may not exist in persistent cache
+        // or cache directory may not be accessible (e.g., during test setup).
+      }
     }
 
     return undefined
@@ -446,7 +451,11 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     const fullKey = buildKey(key)
     memoCache.delete(fullKey)
-    await cacache.remove(fullKey)
+    try {
+      await cacache.remove(fullKey)
+    } catch {
+      // Ignore removal errors - entry may not exist or cache may be inaccessible.
+    }
   }
 
   /**
