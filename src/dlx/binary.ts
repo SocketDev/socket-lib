@@ -83,6 +83,13 @@ export interface DlxBinaryOptions {
   integrity?: string | undefined
 
   /**
+   * Expected SHA-256 hex checksum for verification.
+   * Passed to httpDownload for inline verification during download.
+   * This is more secure than post-download verification as it fails early.
+   */
+  sha256?: string | undefined
+
+  /**
    * Cache TTL in milliseconds (default: 7 days).
    */
   cacheTtl?: number | undefined
@@ -263,6 +270,7 @@ export async function dlxBinary(
     force: userForce = false,
     integrity,
     name,
+    sha256,
     spawnOptions,
     url,
     yes,
@@ -346,7 +354,12 @@ export async function dlxBinary(
     }
 
     // Download the binary.
-    computedIntegrity = await downloadBinaryFile(url, binaryPath, integrity)
+    computedIntegrity = await downloadBinaryFile(
+      url,
+      binaryPath,
+      integrity,
+      sha256,
+    )
 
     // Get file size for metadata.
     const stats = await fs.promises.stat(binaryPath)
@@ -412,6 +425,7 @@ export async function downloadBinary(
     force = false,
     integrity,
     name,
+    sha256,
     url,
   } = { __proto__: null, ...options } as DlxBinaryOptions
   const fs = getFs()
@@ -466,6 +480,7 @@ export async function downloadBinary(
       url,
       binaryPath,
       integrity,
+      sha256,
     )
 
     // Get file size for metadata.
@@ -490,11 +505,18 @@ export async function downloadBinary(
  * Download a file from a URL with integrity checking and concurrent download protection.
  * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
  * Internal helper function for downloading binary files.
+ *
+ * Supports two integrity verification methods:
+ * - sha256: Hex SHA-256 checksum (verified inline during download via httpDownload)
+ * - integrity: SRI format sha512-<base64> (verified post-download)
+ *
+ * The sha256 option is preferred as it fails early during download if the checksum doesn't match.
  */
 export async function downloadBinaryFile(
   url: string,
   destPath: string,
   integrity?: string | undefined,
+  sha256?: string | undefined,
 ): Promise<string> {
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
@@ -521,9 +543,11 @@ export async function downloadBinaryFile(
         }
       }
 
-      // Download the file.
+      // Download the file with optional SHA-256 verification.
+      // The sha256 option enables inline verification during download,
+      // which is more secure as it fails early if the checksum doesn't match.
       try {
-        await httpDownload(url, destPath)
+        await httpDownload(url, destPath, sha256 ? { sha256 } : undefined)
       } catch (e) {
         throw new Error(
           `Failed to download binary from ${url}\n` +
