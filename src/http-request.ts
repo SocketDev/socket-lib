@@ -34,8 +34,22 @@ import type { IncomingMessage } from 'http'
 
 import type { Logger } from './logger.js'
 
+let _crypto: typeof import('node:crypto') | undefined
 let _http: typeof import('node:http') | undefined
 let _https: typeof import('node:https') | undefined
+
+/**
+ * Lazily load the crypto module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getCrypto() {
+  if (_crypto === undefined) {
+    _crypto = /*@__PURE__*/ require('crypto')
+  }
+  return _crypto as typeof import('node:crypto')
+}
+
 /**
  * Lazily load http and https modules to avoid Webpack errors.
  * @private
@@ -472,6 +486,29 @@ export interface HttpDownloadOptions {
    * ```
    */
   timeout?: number | undefined
+  /**
+   * Expected SHA256 hash of the downloaded file.
+   * If provided, the download will fail if the computed hash doesn't match.
+   * The hash should be a lowercase hex string (64 characters).
+   *
+   * Use `fetchChecksums()` to fetch hashes from a checksums URL, then pass
+   * the specific hash here.
+   *
+   * @example
+   * ```ts
+   * // Verify download integrity with direct hash
+   * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+   *   sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+   * })
+   *
+   * // Verify using checksums from a URL
+   * const checksums = await fetchChecksums('https://example.com/checksums.txt')
+   * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+   *   sha256: checksums['file.zip']
+   * })
+   * ```
+   */
+  sha256?: string | undefined
 }
 
 /**
@@ -498,6 +535,134 @@ export interface HttpDownloadResult {
    * ```
    */
   size: number
+}
+
+/**
+ * Map of filenames to their SHA256 hashes.
+ * Keys are filenames (not paths), values are lowercase hex-encoded SHA256 hashes.
+ *
+ * @example
+ * ```ts
+ * const checksums: Checksums = {
+ *   'file.zip': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+ *   'other.tar.gz': 'abc123...'
+ * }
+ * ```
+ */
+export type Checksums = Record<string, string>
+
+/**
+ * Parse a checksums file text into a filename-to-hash map.
+ *
+ * Supports standard checksums file formats:
+ * - BSD style: "SHA256 (filename) = hash"
+ * - GNU style: "hash  filename" (two spaces)
+ * - Simple style: "hash filename" (single space)
+ *
+ * Lines starting with '#' are treated as comments and ignored.
+ * Empty lines are ignored.
+ *
+ * @param text - Raw text content of a checksums file
+ * @returns Map of filenames to lowercase SHA256 hashes
+ *
+ * @example
+ * ```ts
+ * const text = `
+ * # SHA256 checksums
+ * e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  file.zip
+ * abc123def456...  other.tar.gz
+ * `
+ * const checksums = parseChecksums(text)
+ * console.log(checksums['file.zip']) // 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+ * ```
+ */
+export function parseChecksums(text: string): Checksums {
+  const checksums: Checksums = { __proto__: null } as Checksums
+
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue
+    }
+
+    // Try BSD style: "SHA256 (filename) = hash"
+    const bsdMatch = trimmed.match(
+      /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/,
+    )
+    if (bsdMatch) {
+      checksums[bsdMatch[1]] = bsdMatch[2].toLowerCase()
+      continue
+    }
+
+    // Try GNU/simple style: "hash  filename" or "hash filename"
+    const gnuMatch = trimmed.match(/^([a-fA-F0-9]{64})\s+(.+)$/)
+    if (gnuMatch) {
+      checksums[gnuMatch[2]] = gnuMatch[1].toLowerCase()
+    }
+  }
+
+  return checksums
+}
+
+/**
+ * Options for fetching checksums from a URL.
+ */
+export interface FetchChecksumsOptions {
+  /**
+   * HTTP headers to send with the request.
+   */
+  headers?: Record<string, string> | undefined
+  /**
+   * Request timeout in milliseconds.
+   * @default 30000
+   */
+  timeout?: number | undefined
+}
+
+/**
+ * Fetch and parse a checksums file from a URL.
+ *
+ * This is useful for verifying downloads from GitHub releases which typically
+ * publish a checksums.txt file alongside release assets.
+ *
+ * @param url - URL to the checksums file
+ * @param options - Request options
+ * @returns Map of filenames to lowercase SHA256 hashes
+ * @throws {Error} When the checksums file cannot be fetched
+ *
+ * @example
+ * ```ts
+ * // Fetch checksums from GitHub release
+ * const checksums = await fetchChecksums(
+ *   'https://github.com/org/repo/releases/download/v1.0.0/checksums.txt'
+ * )
+ *
+ * // Use with httpDownload
+ * await httpDownload(
+ *   'https://github.com/org/repo/releases/download/v1.0.0/tool_linux.tar.gz',
+ *   '/tmp/tool.tar.gz',
+ *   { sha256: checksums['tool_linux.tar.gz'] }
+ * )
+ * ```
+ */
+export async function fetchChecksums(
+  url: string,
+  options?: FetchChecksumsOptions | undefined,
+): Promise<Checksums> {
+  const { headers = {}, timeout = 30_000 } = {
+    __proto__: null,
+    ...options,
+  } as FetchChecksumsOptions
+
+  const response = await httpRequest(url, { headers, timeout })
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch checksums from ${url}: ${response.status} ${response.statusText}`,
+    )
+  }
+
+  return parseChecksums(response.body.toString('utf8'))
 }
 
 /**
@@ -898,6 +1063,7 @@ export async function httpDownload(
     progressInterval = 10,
     retries = 0,
     retryDelay = 1000,
+    sha256,
     timeout = 120_000,
   } = { __proto__: null, ...options } as HttpDownloadOptions
 
@@ -943,6 +1109,27 @@ export async function httpDownload(
         onProgress: progressCallback,
         timeout,
       })
+
+      // Verify checksum if sha256 hash is provided.
+      if (sha256) {
+        const crypto = getCrypto()
+        // eslint-disable-next-line no-await-in-loop
+        const fileContent = await fs.promises.readFile(tempPath)
+        const computedHash = crypto
+          .createHash('sha256')
+          .update(fileContent)
+          .digest('hex')
+
+        if (computedHash !== sha256.toLowerCase()) {
+          // eslint-disable-next-line no-await-in-loop
+          await safeDelete(tempPath)
+          throw new Error(
+            `Checksum verification failed for ${url}\n` +
+              `Expected: ${sha256.toLowerCase()}\n` +
+              `Computed: ${computedHash}`,
+          )
+        }
+      }
 
       // Download succeeded - atomically rename temp file to destination.
       // This overwrites any existing file at destPath.

@@ -11,16 +11,19 @@
  * Used by Socket tools for API communication (registry, GitHub, GHSA).
  */
 
+import { createHash } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { Writable } from 'node:stream'
 
 import {
+  fetchChecksums,
   httpDownload,
   httpJson,
-  httpText,
   httpRequest,
+  httpText,
+  parseChecksums,
 } from '@socketsecurity/lib/http-request'
 import { Logger } from '@socketsecurity/lib/logger'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -128,6 +131,38 @@ beforeAll(async () => {
       } else if (url === '/invalid-json') {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end('not valid json{')
+      } else if (url === '/checksum-file') {
+        // File with known content for checksum testing.
+        const content = 'Test content for checksum verification'
+        res.writeHead(200, {
+          'Content-Length': String(content.length),
+          'Content-Type': 'text/plain',
+        })
+        res.end(content)
+      } else if (url === '/checksums.txt') {
+        // Checksums file in standard format: "hash  filename".
+        const content = 'Test content for checksum verification'
+        const hash = createHash('sha256').update(content).digest('hex')
+        const checksums = `${hash}  checksum-file\nabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n`
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(checksums)
+      } else if (url === '/checksums-single-space.txt') {
+        // Checksums file with single space separator.
+        const content = 'Test content for checksum verification'
+        const hash = createHash('sha256').update(content).digest('hex')
+        const checksums = `${hash} checksum-file\n`
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(checksums)
+      } else if (url === '/checksums-missing.txt') {
+        // Checksums file without our target file.
+        const checksums =
+          'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n'
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(checksums)
+      } else if (url === '/checksums-empty.txt') {
+        // Empty checksums file (only comments).
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('# This file has no checksums\n\n')
       } else if (url === '/post-success') {
         if (req.method === 'POST') {
           res.writeHead(201, { 'Content-Type': 'application/json' })
@@ -823,6 +858,349 @@ describe('http-request', () => {
         const content = await fs.readFile(destPath, 'utf8')
         expect(content).toBe('No content length')
       }, 'httpDownload-logger-no-length-')
+    })
+
+    it('should verify sha256 checksum when provided', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'checksum.txt')
+        const content = 'Test content for checksum verification'
+        const expectedHash = createHash('sha256').update(content).digest('hex')
+
+        const result = await httpDownload(
+          `${httpBaseUrl}/checksum-file`,
+          destPath,
+          { sha256: expectedHash },
+        )
+
+        expect(result.path).toBe(destPath)
+        const downloadedContent = await fs.readFile(destPath, 'utf8')
+        expect(downloadedContent).toBe(content)
+      }, 'httpDownload-sha256-')
+    })
+
+    it('should fail when sha256 checksum does not match', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'checksum-fail.txt')
+        const wrongHash =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
+        await expect(
+          httpDownload(`${httpBaseUrl}/checksum-file`, destPath, {
+            sha256: wrongHash,
+          }),
+        ).rejects.toThrow(/Checksum verification failed/)
+
+        // File should not exist after failed verification.
+        const exists = await fs
+          .access(destPath)
+          .then(() => true)
+          .catch(() => false)
+        expect(exists).toBe(false)
+      }, 'httpDownload-sha256-fail-')
+    })
+
+    it('should verify checksum using fetchChecksums', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'checksum-url.txt')
+
+        // Fetch checksums first, then use the hash.
+        const checksums = await fetchChecksums(`${httpBaseUrl}/checksums.txt`)
+        expect(checksums['checksum-file']).toBeDefined()
+
+        const result = await httpDownload(
+          `${httpBaseUrl}/checksum-file`,
+          destPath,
+          { sha256: checksums['checksum-file'] },
+        )
+
+        expect(result.path).toBe(destPath)
+        const content = await fs.readFile(destPath, 'utf8')
+        expect(content).toBe('Test content for checksum verification')
+      }, 'httpDownload-checksums-url-')
+    })
+
+    it('should accept uppercase sha256 hash', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'checksum-upper.txt')
+        const content = 'Test content for checksum verification'
+        const expectedHash = createHash('sha256')
+          .update(content)
+          .digest('hex')
+          .toUpperCase()
+
+        const result = await httpDownload(
+          `${httpBaseUrl}/checksum-file`,
+          destPath,
+          { sha256: expectedHash },
+        )
+
+        expect(result.path).toBe(destPath)
+      }, 'httpDownload-sha256-uppercase-')
+    })
+
+    it('should verify checksum after successful retry', async () => {
+      let attemptCount = 0
+      const content = 'Retry checksum content'
+      const expectedHash = createHash('sha256').update(content).digest('hex')
+
+      const testServer = http.createServer((req, res) => {
+        attemptCount++
+        if (attemptCount < 2) {
+          req.socket.destroy()
+        } else {
+          res.writeHead(200, { 'Content-Length': String(content.length) })
+          res.end(content)
+        }
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await runWithTempDir(async tmpDir => {
+          const destPath = path.join(tmpDir, 'retry-checksum.txt')
+          const result = await httpDownload(
+            `http://localhost:${testPort}/`,
+            destPath,
+            {
+              retries: 2,
+              retryDelay: 10,
+              sha256: expectedHash,
+            },
+          )
+
+          expect(result.size).toBe(content.length)
+          expect(attemptCount).toBe(2)
+
+          const downloaded = await fs.readFile(destPath, 'utf8')
+          expect(downloaded).toBe(content)
+        }, 'httpDownload-retry-checksum-')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should skip verification when sha256 is undefined', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'no-checksum.txt')
+
+        const result = await httpDownload(
+          `${httpBaseUrl}/checksum-file`,
+          destPath,
+          { sha256: undefined },
+        )
+
+        expect(result.path).toBe(destPath)
+        const content = await fs.readFile(destPath, 'utf8')
+        expect(content).toBe('Test content for checksum verification')
+      }, 'httpDownload-sha256-undefined-')
+    })
+  })
+
+  describe('parseChecksums', () => {
+    it('should parse GNU-style checksums (two spaces)', () => {
+      const text = `
+abc123def456789012345678901234567890123456789012345678901234abcd  file1.txt
+fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab  file2.zip
+`
+      const checksums = parseChecksums(text)
+
+      expect(checksums['file1.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+      expect(checksums['file2.zip']).toBe(
+        'fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab',
+      )
+    })
+
+    it('should parse simple-style checksums (single space)', () => {
+      const text =
+        'abc123def456789012345678901234567890123456789012345678901234abcd file.txt\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['file.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+    })
+
+    it('should parse BSD-style checksums', () => {
+      const text =
+        'SHA256 (myfile.tar.gz) = abc123def456789012345678901234567890123456789012345678901234abcd\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['myfile.tar.gz']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+    })
+
+    it('should ignore comments and empty lines', () => {
+      const text = `
+# This is a comment
+abc123def456789012345678901234567890123456789012345678901234abcd  file.txt
+
+# Another comment
+`
+      const checksums = parseChecksums(text)
+
+      expect(Object.keys(checksums)).toHaveLength(1)
+      expect(checksums['file.txt']).toBeDefined()
+    })
+
+    it('should normalize hashes to lowercase', () => {
+      const text =
+        'ABC123DEF456789012345678901234567890123456789012345678901234ABCD  FILE.txt\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['FILE.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+    })
+
+    it('should return empty object for empty input', () => {
+      const checksums = parseChecksums('')
+      expect(Object.keys(checksums)).toHaveLength(0)
+    })
+
+    it('should handle filenames with spaces', () => {
+      const text =
+        'abc123def456789012345678901234567890123456789012345678901234abcd  file with spaces.txt\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['file with spaces.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+    })
+
+    it('should handle mixed formats in same file', () => {
+      const text = `
+# Mixed format checksums file
+abc123def456789012345678901234567890123456789012345678901234abcd  gnu-style.txt
+1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef bsd-single.txt
+SHA256 (bsd-paren.tar.gz) = fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab
+`
+      const checksums = parseChecksums(text)
+
+      expect(checksums['gnu-style.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+      expect(checksums['bsd-single.txt']).toBe(
+        '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+      )
+      expect(checksums['bsd-paren.tar.gz']).toBe(
+        'fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab',
+      )
+    })
+
+    it('should skip invalid lines', () => {
+      const text = `
+abc123def456789012345678901234567890123456789012345678901234abcd  valid.txt
+this is not a valid checksum line
+tooshort  invalid.txt
+abc123def456789012345678901234567890123456789012345678901234abcd
+`
+      const checksums = parseChecksums(text)
+
+      expect(Object.keys(checksums)).toHaveLength(1)
+      expect(checksums['valid.txt']).toBeDefined()
+    })
+
+    it('should handle filenames with paths', () => {
+      const text =
+        'abc123def456789012345678901234567890123456789012345678901234abcd  path/to/file.txt\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['path/to/file.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+    })
+
+    it('should handle tab separator', () => {
+      const text =
+        'abc123def456789012345678901234567890123456789012345678901234abcd\tfile.txt\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['file.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+    })
+
+    it('should handle Windows line endings (CRLF)', () => {
+      const text =
+        'abc123def456789012345678901234567890123456789012345678901234abcd  file1.txt\r\n' +
+        'fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab  file2.txt\r\n'
+      const checksums = parseChecksums(text)
+
+      expect(checksums['file1.txt']).toBe(
+        'abc123def456789012345678901234567890123456789012345678901234abcd',
+      )
+      expect(checksums['file2.txt']).toBe(
+        'fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab',
+      )
+    })
+  })
+
+  describe('fetchChecksums', () => {
+    it('should fetch and parse checksums from URL', async () => {
+      const checksums = await fetchChecksums(`${httpBaseUrl}/checksums.txt`)
+
+      expect(checksums['checksum-file']).toBeDefined()
+      expect(checksums['checksum-file']).toHaveLength(64)
+      expect(checksums['other-file']).toBe(
+        'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      )
+    })
+
+    it('should handle single-space separator format', async () => {
+      const checksums = await fetchChecksums(
+        `${httpBaseUrl}/checksums-single-space.txt`,
+      )
+
+      expect(checksums['checksum-file']).toBeDefined()
+      expect(checksums['checksum-file']).toHaveLength(64)
+    })
+
+    it('should throw when URL returns 404', async () => {
+      await expect(fetchChecksums(`${httpBaseUrl}/not-found`)).rejects.toThrow(
+        /Failed to fetch checksums/,
+      )
+    })
+
+    it('should pass custom headers', async () => {
+      // Just verify it doesn't throw with custom headers.
+      const checksums = await fetchChecksums(`${httpBaseUrl}/checksums.txt`, {
+        headers: { 'X-Custom': 'value' },
+      })
+
+      expect(checksums['checksum-file']).toBeDefined()
+    })
+
+    it('should respect timeout option', async () => {
+      await expect(
+        fetchChecksums(`${httpBaseUrl}/timeout`, { timeout: 100 }),
+      ).rejects.toThrow(/timed out/)
+    })
+
+    it('should return empty object for empty checksums file', async () => {
+      const checksums = await fetchChecksums(
+        `${httpBaseUrl}/checksums-empty.txt`,
+      )
+
+      expect(Object.keys(checksums)).toHaveLength(0)
+    })
+
+    it('should return object with null prototype', async () => {
+      const checksums = await fetchChecksums(`${httpBaseUrl}/checksums.txt`)
+
+      // Verify no prototype pollution possible.
+      expect(Object.getPrototypeOf(checksums)).toBeNull()
+      expect(checksums['constructor']).toBeUndefined()
+      expect('toString' in checksums).toBe(false)
     })
   })
 
