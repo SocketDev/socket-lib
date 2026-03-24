@@ -6,7 +6,6 @@
  * Uses rewire for test isolation. Critical for ANSI color and formatting support.
  */
 
-import process from 'node:process'
 import { getTerm } from '@socketsecurity/lib/env/term'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

@@ -1,6 +1,5 @@
 /** @fileoverview Path utilities for DLX package installations. */
 
-import process from 'node:process'
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 

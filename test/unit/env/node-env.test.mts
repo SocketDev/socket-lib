@@ -6,7 +6,6 @@
  * Uses rewire for test isolation. Critical for environment-specific behavior.
  */
 
-import process from 'node:process'
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

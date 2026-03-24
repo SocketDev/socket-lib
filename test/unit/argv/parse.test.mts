@@ -12,7 +12,6 @@
  * - Returns { values, positionals, raw } matching Node.js util.parseArgs structure
  */
 
-import process from 'node:process'
 import { parseArgs, type ParseArgsConfig } from '@socketsecurity/lib/argv/parse'
 import { describe, expect, it } from 'vitest'
 

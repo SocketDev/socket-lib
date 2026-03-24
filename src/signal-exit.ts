@@ -146,7 +146,6 @@ let loaded = false
  * Load signal handlers and hook into process exit events.
  */
 /*@__NO_SIDE_EFFECTS__*/
-import process from 'node:process'
 export function load(): void {
   if (loaded || !globalProcess) {
     return

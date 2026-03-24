@@ -1,4 +1,3 @@
-import process from 'node:process'
 const { createRequire } = require('node:module')
 const fs = require('node:fs')
 const path = require('node:path')

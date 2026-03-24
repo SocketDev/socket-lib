@@ -6,7 +6,6 @@
  * Uses rewire for test isolation. Critical for authenticated package operations.
  */
 
-import process from 'node:process'
 import { getNodeAuthToken } from '@socketsecurity/lib/env/node-auth-token'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

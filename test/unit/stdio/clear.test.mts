@@ -9,7 +9,6 @@
  * Used by Socket CLI for interactive output, spinners, and progress indicators.
  */
 
-import process from 'node:process'
 import { describe, expect, it, vi } from 'vitest'
 
 import {

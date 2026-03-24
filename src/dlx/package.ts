@@ -30,7 +30,6 @@
  * - dlxPackage() combines both for convenience
  */
 
-import process from 'node:process'
 import { WIN32 } from '../constants/platform'
 import { generateCacheKey } from './cache'
 import Arborist from '../external/@npmcli/arborist'
