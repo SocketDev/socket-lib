@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.1) - 2026-03-24
+
+### Added
+
+- **dlx/binary**: Added `sha256` option to `dlxBinary()`, `downloadBinary()`, and `downloadBinaryFile()`
+  - Enables SHA-256 checksum verification for binary downloads via httpDownload
+  - Verification happens during download (fails early if checksum mismatches)
+  - Complements existing `integrity` option (SRI sha512 format, verified post-download)
+
 ## [5.11.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.0) - 2026-03-23
 
 ### Added
