@@ -5,6 +5,7 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 import fg from 'fast-glob'
 
 import { envAsBoolean } from '@socketsecurity/lib-stable/env/helpers'

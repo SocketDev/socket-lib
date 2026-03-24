@@ -2,6 +2,7 @@
  * @fileoverview Code coverage utilities for parsing v8 coverage data.
  */
 
+import process from 'node:process'
 import { readJson } from '../fs'
 import { isObjectObject } from '../objects'
 import { spawn } from '../spawn'

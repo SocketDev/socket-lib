@@ -3,6 +3,7 @@
  * Provides path normalization, validation, and file extension handling.
  */
 
+import process from 'node:process'
 import { WIN32 } from '../constants/platform'
 
 import { search } from '../strings'

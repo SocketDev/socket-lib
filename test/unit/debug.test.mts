@@ -12,6 +12,7 @@
  * Used throughout Socket tools for conditional development/debug logging.
  */
 
+import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   debug,

@@ -6,6 +6,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
+import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { spawn } from '@socketsecurity/lib-stable/spawn'

@@ -12,6 +12,7 @@
 import { describe, expect, it } from 'vitest'
 
 import os from 'node:os'
+import process from 'node:process'
 
 import {
   DARWIN,

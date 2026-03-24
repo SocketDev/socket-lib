@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner'

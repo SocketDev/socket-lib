@@ -10,6 +10,7 @@
  * Used in tests and scripts to control noisy or expected warnings.
  */
 
+import process from 'node:process'
 import {
   restoreWarnings,
   setMaxEventTargetListeners,

@@ -9,6 +9,7 @@
  * Used by Socket CLI to adapt behavior when running via npx/dlx.
  */
 
+import process from 'node:process'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { isRunningInTemporaryExecutor } from '@socketsecurity/lib/temporary-executor'

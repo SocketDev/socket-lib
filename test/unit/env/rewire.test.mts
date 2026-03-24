@@ -9,6 +9,7 @@
  * Critical for reliable, parallel test execution without env var conflicts.
  */
 
+import process from 'node:process'
 import { getCI } from '@socketsecurity/lib/env/ci'
 import { getHome } from '@socketsecurity/lib/env/home'
 import { getSocketDebug } from '@socketsecurity/lib/env/socket'

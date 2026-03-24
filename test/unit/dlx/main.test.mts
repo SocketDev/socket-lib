@@ -14,6 +14,7 @@ import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { generateCacheKey } from '@socketsecurity/lib/dlx/cache'

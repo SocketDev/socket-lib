@@ -9,6 +9,7 @@
  * Used by Socket tools for error reporting and diagnostic output.
  */
 
+import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {

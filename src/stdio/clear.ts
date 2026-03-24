@@ -20,6 +20,7 @@
  * clearLine(process.stderr) // Clear on stderr
  * ```
  */
+import process from 'node:process'
 export function clearLine(stream: NodeJS.WriteStream = process.stdout): void {
   if (stream.isTTY) {
     // TTY: Use cursor control

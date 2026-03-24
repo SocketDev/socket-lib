@@ -21,6 +21,7 @@
  * - Cache to minimize API calls
  */
 
+import process from 'node:process'
 import type { TtlCache } from './cache-with-ttl'
 import { createTtlCache } from './cache-with-ttl'
 import { getGhToken, getGithubToken } from './env/github'

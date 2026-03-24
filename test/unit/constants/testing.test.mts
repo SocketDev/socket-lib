@@ -9,6 +9,7 @@
  * Frozen constants for test configuration.
  */
 
+import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {

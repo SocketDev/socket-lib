@@ -3,6 +3,7 @@
  * Provides animated progress indicators with CI environment detection.
  */
 
+import process from 'node:process'
 import type { Writable } from 'stream'
 
 import colors from './external/yoctocolors-cjs'

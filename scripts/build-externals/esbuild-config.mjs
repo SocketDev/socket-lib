@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')

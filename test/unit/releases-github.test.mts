@@ -2,6 +2,7 @@
  * @fileoverview Unit tests for GitHub release download utilities.
  */
 
+import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import picomatch from 'picomatch'

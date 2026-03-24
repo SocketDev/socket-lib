@@ -10,6 +10,7 @@
  * - Validates both long-form flags (--verbose) and flag objects ({ verbose: true })
  */
 
+import process from 'node:process'
 import {
   getLogLevel,
   isAll,

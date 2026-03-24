@@ -9,6 +9,7 @@
  * Critical for Node.js version-specific behavior and compatibility.
  */
 
+import process from 'node:process'
 import {
   ESNEXT,
   NODE_SEA_FUSE,

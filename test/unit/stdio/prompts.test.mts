@@ -10,6 +10,7 @@
  * Used by Socket CLI tools for user interactions like selecting options, confirming actions.
  */
 
+import process from 'node:process'
 import {
   checkbox,
   confirm,

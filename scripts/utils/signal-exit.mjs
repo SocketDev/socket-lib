@@ -11,6 +11,7 @@
  * @param {(code: number, signal: string | null) => void} callback
  * @returns {() => void} Cleanup function
  */
+import process from 'node:process'
 export function onExit(callback) {
   const signals = ['SIGINT', 'SIGTERM', 'SIGHUP']
 

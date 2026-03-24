@@ -26,6 +26,7 @@
  * - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
  */
 
+import process from 'node:process'
 import { getAbortSignal } from './constants/process'
 import { stackWithCauses } from './errors'
 

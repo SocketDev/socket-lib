@@ -9,6 +9,7 @@
  * Used by Socket CLI for user-facing progress indicators.
  */
 
+import process from 'node:process'
 import { Spinner, withSpinner } from '@socketsecurity/lib/spinner'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

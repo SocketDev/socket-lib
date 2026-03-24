@@ -6,6 +6,7 @@
  * Uses rewire for test isolation. Used for shell-specific behavior and command execution.
  */
 
+import process from 'node:process'
 import { getShell } from '@socketsecurity/lib/env/shell'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

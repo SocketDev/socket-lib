@@ -3,6 +3,7 @@
  * Provides enhanced fs operations, glob matching, and directory traversal functions.
  */
 
+import process from 'node:process'
 import type { Abortable } from 'events'
 
 import type {

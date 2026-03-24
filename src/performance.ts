@@ -3,6 +3,7 @@
  * Provides timing, profiling, and performance metric collection for identifying bottlenecks.
  */
 
+import process from 'node:process'
 import { debugLog } from './debug'
 
 /**

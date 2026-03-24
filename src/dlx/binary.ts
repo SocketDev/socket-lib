@@ -1,5 +1,6 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
+import process from 'node:process'
 import { getArch, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 

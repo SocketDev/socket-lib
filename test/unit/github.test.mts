@@ -11,6 +11,7 @@
  * Used by Socket tools for GitHub API authentication and GHSA lookups.
  */
 
+import process from 'node:process'
 import {
   cacheFetchGhsa,
   clearRefCache,

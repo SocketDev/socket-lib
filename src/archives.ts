@@ -6,6 +6,7 @@
 import { createReadStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
+import process from 'node:process'
 
 import AdmZip from './external/adm-zip.js'
 import tarFs from './external/tar-fs.js'

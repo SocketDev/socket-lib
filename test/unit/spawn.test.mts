@@ -10,6 +10,7 @@
  * Used by Socket tools for git operations, npm commands, and external process execution.
  */
 
+import process from 'node:process'
 import {
   isSpawnError,
   isStdioType,

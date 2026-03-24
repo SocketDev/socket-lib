@@ -15,6 +15,7 @@
  * These paths are critical for Socket tool state management and caching strategies.
  */
 
+import process from 'node:process'
 import {
   getSocketAppCacheDir,
   getSocketAppCacheTtlDir,

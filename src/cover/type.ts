@@ -2,6 +2,7 @@
  * @fileoverview TypeScript type coverage utilities.
  */
 
+import process from 'node:process'
 import { spawn } from '../spawn'
 
 import type { GetTypeCoverageOptions, TypeCoverageResult } from './types'

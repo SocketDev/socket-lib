@@ -3,6 +3,7 @@
  * Provides enhanced console methods with formatted output capabilities.
  */
 
+import process from 'node:process'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
 import { applyLinePrefix, isBlankString } from './strings'

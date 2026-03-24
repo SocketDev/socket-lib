@@ -15,6 +15,7 @@
  * Used throughout Socket tools for cross-platform path handling.
  */
 
+import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 import {
   isAbsolute,

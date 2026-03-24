@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import process from 'node:process'
 
 import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'

@@ -9,6 +9,7 @@
  * Used by Socket tools for standard output and interactive CLI features.
  */
 
+import process from 'node:process'
 import { describe, expect, it, vi } from 'vitest'
 
 import {

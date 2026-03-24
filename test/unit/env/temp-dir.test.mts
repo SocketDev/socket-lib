@@ -6,6 +6,7 @@
  * Uses rewire for test isolation. Critical for temporary file operations.
  */
 
+import process from 'node:process'
 import { getTemp, getTmp, getTmpdir } from '@socketsecurity/lib/env/temp-dir'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

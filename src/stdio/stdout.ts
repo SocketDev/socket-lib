@@ -3,6 +3,7 @@
  * Provides utilities for writing to stdout with formatting and control.
  */
 
+import process from 'node:process'
 import { WriteStream } from 'tty'
 
 // Get the actual stdout stream

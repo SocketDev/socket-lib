@@ -2,6 +2,7 @@
  * @fileoverview Unit tests for socket-btm release utilities.
  */
 
+import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {

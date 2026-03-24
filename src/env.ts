@@ -63,6 +63,7 @@ const caseInsensitiveKeys = new Set([
  *   env: createEnvProxy(process.env, { NODE_ENV: 'test' })
  * })
  */
+import process from 'node:process'
 export function createEnvProxy(
   base: NodeJS.ProcessEnv,
   overrides?: Record<string, string | undefined>,

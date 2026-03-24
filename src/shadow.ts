@@ -3,6 +3,7 @@
  * Provides logic to determine when shadow binary installation should be skipped.
  */
 
+import process from 'node:process'
 import { normalizePath } from './paths/normalize'
 
 export interface ShadowInstallationOptions {

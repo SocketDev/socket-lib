@@ -6,6 +6,7 @@
  * Uses rewire for test isolation. Critical for internationalization and character encoding.
  */
 
+import process from 'node:process'
 import {
   getLang,
   getLcAll,

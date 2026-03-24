@@ -19,6 +19,7 @@ const stderr: NodeJS.WriteStream = process.stderr
  * writeErrorLine() // Write empty line
  * ```
  */
+import process from 'node:process'
 export function writeErrorLine(text: string = ''): void {
   stderr.write(`${text}\n`)
 }

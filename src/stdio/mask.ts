@@ -43,6 +43,7 @@ function getReadline() {
   }
   return _readline as typeof import('node:readline')
 }
+import process from 'node:process'
 import type { ChildProcess, SpawnOptions } from 'child_process'
 
 import { getDefaultSpinner } from '../spinner.js'

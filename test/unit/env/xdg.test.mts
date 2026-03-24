@@ -8,6 +8,7 @@
  * Uses rewire for test isolation. Linux/Unix standard for user directory organization.
  */
 
+import process from 'node:process'
 import {
   getXdgCacheHome,
   getXdgConfigHome,

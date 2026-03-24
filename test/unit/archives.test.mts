@@ -12,6 +12,7 @@
 import { createWriteStream, promises as fs } from 'node:fs'
 import path from 'node:path'
 import { createGzip } from 'node:zlib'
+import process from 'node:process'
 
 import AdmZip from 'adm-zip'
 import tarStream from 'tar-stream'

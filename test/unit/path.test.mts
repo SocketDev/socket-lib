@@ -15,6 +15,7 @@
  * and proper separation of path segments. Critical for cross-platform file operations.
  */
 
+import process from 'node:process'
 import {
   isAbsolute,
   isNodeModules,

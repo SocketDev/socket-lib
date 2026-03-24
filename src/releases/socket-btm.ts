@@ -2,6 +2,7 @@
  * @fileoverview Socket-btm release download utilities.
  */
 
+import process from 'node:process'
 import {
   type Arch,
   getArch,

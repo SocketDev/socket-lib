@@ -10,6 +10,7 @@
  * Used by Socket CLI for graceful shutdown and cleanup on process exit.
  */
 
+import process from 'node:process'
 import { load, onExit, signals, unload } from '@socketsecurity/lib/signal-exit'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 

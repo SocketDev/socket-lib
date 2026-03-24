@@ -3,6 +3,7 @@
  * Uses yargs-parser internally for robust argument parsing with Node.js parseArgs-compatible API.
  */
 
+import process from 'node:process'
 import yargsParser from '../external/yargs-parser'
 
 /**

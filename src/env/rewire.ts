@@ -9,6 +9,7 @@
  * - Thread-safe for concurrent test execution
  */
 
+import process from 'node:process'
 import { hasOwn } from '../objects'
 
 import { envAsBoolean } from './helpers'

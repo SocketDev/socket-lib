@@ -10,6 +10,7 @@
  *   --verbose  Show detailed output
  */
 
+import process from 'node:process'
 import { isQuiet, isVerbose } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'

@@ -3,6 +3,7 @@
  * Provides utilities to detect which package manager (npm/pnpm/yarn/bun) is running.
  */
 
+import process from 'node:process'
 import { getEnvValue } from './rewire'
 
 /**

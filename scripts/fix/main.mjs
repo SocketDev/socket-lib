@@ -3,6 +3,7 @@
  * Runs generate-package-exports and fix-external-imports in sequence.
  */
 
+import process from 'node:process'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import {

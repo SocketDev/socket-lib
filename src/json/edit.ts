@@ -3,6 +3,7 @@
  */
 
 import { setTimeout as sleep } from 'node:timers/promises'
+import process from 'node:process'
 
 import {
   INDENT_SYMBOL,

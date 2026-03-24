@@ -12,6 +12,7 @@
  *   --staged   Run on staged files only
  */
 
+import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import {
   printFooter,

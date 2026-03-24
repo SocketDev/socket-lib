@@ -52,6 +52,7 @@ function setupSuppression(): void {
  *
  * suppressMaxListenersWarning()
  */
+import process from 'node:process'
 export function suppressMaxListenersWarning(): void {
   suppressedWarnings.add('MaxListenersExceededWarning')
   setupSuppression()

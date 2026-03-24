@@ -3,6 +3,7 @@
  * Identifies and handles temporary execution contexts such as npx, pnpm dlx, and yarn dlx.
  */
 
+import process from 'node:process'
 import { WIN32 } from './constants/platform'
 import { normalizePath } from './paths/normalize'
 

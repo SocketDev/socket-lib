@@ -8,6 +8,7 @@
  * Used for adapting behavior based on the running package manager.
  */
 
+import process from 'node:process'
 import {
   detectPackageManager,
   getPackageManagerInfo,

@@ -17,6 +17,7 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
+import process from 'node:process'
 
 import { safeDelete } from '@socketsecurity/lib/fs'
 import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'

@@ -10,6 +10,7 @@
  * Used by Socket CLI to decide whether to install package manager wrappers.
  */
 
+import process from 'node:process'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { shouldSkipShadow } from '@socketsecurity/lib/shadow'

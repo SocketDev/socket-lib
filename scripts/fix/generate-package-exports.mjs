@@ -3,6 +3,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 
 import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.json' with { type: 'json' }
 import fastGlob from 'fast-glob'

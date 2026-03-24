@@ -3,6 +3,7 @@
  * Provides cross-platform bin path lookup, command execution, and path normalization.
  */
 
+import process from 'node:process'
 import { getHome } from './env/home'
 import { getAppdata, getLocalappdata } from './env/windows'
 import { getXdgDataHome } from './env/xdg'

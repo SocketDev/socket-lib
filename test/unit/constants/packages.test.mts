@@ -8,6 +8,7 @@
  * Frozen constants for consistent package operations.
  */
 
+import process from 'node:process'
 import {
   AT_LATEST,
   LATEST,

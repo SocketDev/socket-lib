@@ -10,6 +10,7 @@
  * Used by Socket CLI for long-running operations (package scanning, API calls).
  */
 
+import process from 'node:process'
 import {
   getCliSpinners,
   Spinner,

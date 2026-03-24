@@ -10,6 +10,7 @@
  * Used by Socket CLI for command-line argument processing.
  */
 
+import process from 'node:process'
 import {
   commonParseArgsConfig,
   getPositionalArgs,

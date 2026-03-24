@@ -10,6 +10,7 @@
  * Used by Socket CLI for package manager operations with flag filtering.
  */
 
+import process from 'node:process'
 import {
   execNpm,
   execPnpm,

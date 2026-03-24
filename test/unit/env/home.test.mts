@@ -7,6 +7,7 @@
  * Uses rewire for isolated testing. Critical for resolving user-specific paths.
  */
 
+import process from 'node:process'
 import { getHome } from '@socketsecurity/lib/env/home'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

@@ -8,6 +8,7 @@
  * - Cross-platform binary resolution
  */
 
+import process from 'node:process'
 import { which, whichSync } from '@socketsecurity/lib/bin'
 import { describe, expect, it } from 'vitest'
 

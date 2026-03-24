@@ -3,6 +3,7 @@
  * Provides inquirer.js integration with spinner support, context handling, and theming.
  */
 
+import process from 'node:process'
 import { getAbortSignal } from '../constants/process'
 
 import checkboxRaw from '../external/@inquirer/checkbox'

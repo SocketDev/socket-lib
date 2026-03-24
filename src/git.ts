@@ -1,3 +1,4 @@
+import process from 'node:process'
 import { whichSync } from './bin'
 import { debugNs } from './debug'
 import { getGlobMatcher } from './globs'

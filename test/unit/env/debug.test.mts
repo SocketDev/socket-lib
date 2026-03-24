@@ -7,6 +7,7 @@
  * DEBUG patterns follow the debug module convention for selective debug output.
  */
 
+import process from 'node:process'
 import { getDebug } from '@socketsecurity/lib/env/debug'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'

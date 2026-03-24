@@ -10,6 +10,7 @@
  * Used by Socket CLI for running npm, git, and other external commands.
  */
 
+import process from 'node:process'
 import { spawn, spawnSync } from '@socketsecurity/lib/spawn'
 import { describe, expect, it } from 'vitest'
 

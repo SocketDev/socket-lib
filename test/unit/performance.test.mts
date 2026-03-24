@@ -12,6 +12,7 @@
  * Used for benchmarking, profiling, and timing operations in Socket tools.
  */
 
+import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   clearPerformanceMetrics,

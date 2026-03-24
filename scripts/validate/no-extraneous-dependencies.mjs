@@ -18,6 +18,7 @@ import { existsSync, promises as fs } from 'node:fs'
 import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 
 import { parse } from '@babel/parser'
 import traverseModule from '@babel/traverse'

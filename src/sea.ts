@@ -4,6 +4,7 @@
  * as a Node.js Single Executable Application.
  */
 
+import process from 'node:process'
 import { normalizePath } from './paths/normalize'
 
 /**

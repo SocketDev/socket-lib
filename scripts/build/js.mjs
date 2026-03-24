@@ -3,6 +3,7 @@
  * This replaces tsgo for JS compilation while keeping tsgo for declarations
  */
 
+import process from 'node:process'
 import { build, context } from 'esbuild'
 
 import {
