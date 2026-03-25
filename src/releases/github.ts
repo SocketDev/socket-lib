@@ -103,6 +103,27 @@ export const SOCKET_BTM_REPO = {
 
 const logger = getDefaultLogger()
 
+// In-memory TTL cache for GitHub API responses.
+// Prevents redundant API calls during parallel asset downloads and
+// repeated builds (e.g., pre-commit hooks) within the same process.
+const API_CACHE_TTL_MS = 5 * 60_000
+const _apiCache = new Map<string, { data: unknown; expiresAt: number }>()
+
+function getCachedApiResponse<T>(key: string): T | undefined {
+  const entry = _apiCache.get(key)
+  if (entry && entry.expiresAt > Date.now()) {
+    return entry.data as T
+  }
+  if (entry) {
+    _apiCache.delete(key)
+  }
+  return undefined
+}
+
+function setCachedApiResponse(key: string, data: unknown): void {
+  _apiCache.set(key, { data, expiresAt: Date.now() + API_CACHE_TTL_MS })
+}
+
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
@@ -362,32 +383,42 @@ export async function getLatestRelease(
   // Create matcher function if pattern provided.
   const isMatch = assetPattern ? createAssetMatcher(assetPattern) : undefined
 
+  const cacheKey = `releases:${owner}/${repo}`
+
   return await pRetry(
     async () => {
-      // Fetch recent releases (100 should cover all tool releases).
-      const response = await httpRequest(
-        `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
+      // Check in-memory cache first to avoid redundant API calls.
+      let releases = getCachedApiResponse<
+        Array<{
+          tag_name: string
+          published_at: string
+          assets: Array<{ name: string }>
+        }>
+      >(cacheKey)
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch releases: ${response.status}`)
-      }
-
-      let releases: Array<{
-        tag_name: string
-        published_at: string
-        assets: Array<{ name: string }>
-      }>
-      try {
-        releases = JSON.parse(response.body.toString('utf8'))
-      } catch (cause) {
-        throw new Error(
-          `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
-          { cause },
+      if (!releases) {
+        // Fetch recent releases (100 should cover all tool releases).
+        const response = await httpRequest(
+          `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+          {
+            headers: getAuthHeaders(),
+          },
         )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch releases: ${response.status}`)
+        }
+
+        try {
+          releases = JSON.parse(response.body.toString('utf8'))
+        } catch (cause) {
+          throw new Error(
+            `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
+            { cause },
+          )
+        }
+
+        setCachedApiResponse(cacheKey, releases)
       }
 
       // Filter releases matching the tool prefix.
@@ -483,29 +514,37 @@ export async function getReleaseAssetUrl(
       ? (input: string) => input === assetPattern
       : createAssetMatcher(assetPattern as AssetPattern)
 
+  const cacheKey = `release:${owner}/${repo}:${tag}`
+
   return await pRetry(
     async () => {
-      const response = await httpRequest(
-        `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
-      }
-
-      let release: {
+      // Check in-memory cache first to avoid redundant API calls.
+      let release = getCachedApiResponse<{
         assets: Array<{ name: string; browser_download_url: string }>
-      }
-      try {
-        release = JSON.parse(response.body.toString('utf8'))
-      } catch (cause) {
-        throw new Error(
-          `Failed to parse GitHub release response for tag ${tag}`,
-          { cause },
+      }>(cacheKey)
+
+      if (!release) {
+        const response = await httpRequest(
+          `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
+          {
+            headers: getAuthHeaders(),
+          },
         )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
+        }
+
+        try {
+          release = JSON.parse(response.body.toString('utf8'))
+        } catch (cause) {
+          throw new Error(
+            `Failed to parse GitHub release response for tag ${tag}`,
+            { cause },
+          )
+        }
+
+        setCachedApiResponse(cacheKey, release)
       }
 
       // Find the matching asset.
