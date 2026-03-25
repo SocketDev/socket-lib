@@ -1746,4 +1746,62 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       }
     })
   })
+
+  describe('ca option', () => {
+    it('should accept ca option on httpRequest without error', async () => {
+      // ca is a no-op for HTTP (only applies to HTTPS), but should not throw.
+      const response = await httpRequest(`${httpBaseUrl}/text`, {
+        ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.text()).toBe('Plain text response')
+    })
+
+    it('should accept ca option on httpJson without error', async () => {
+      const data = await httpJson<{ message: string }>(`${httpBaseUrl}/json`, {
+        ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
+      })
+
+      expect(data.message).toBe('Hello, World!')
+    })
+
+    it('should accept ca option on httpText without error', async () => {
+      const text = await httpText(`${httpBaseUrl}/text`, {
+        ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
+      })
+
+      expect(text).toBe('Plain text response')
+    })
+
+    it('should accept ca option on httpDownload without error', async () => {
+      await runWithTempDir(async tempDir => {
+        const destPath = path.join(tempDir, 'ca-test.txt')
+        const result = await httpDownload(`${httpBaseUrl}/download`, destPath, {
+          ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
+        })
+
+        expect(result.path).toBe(destPath)
+        expect(result.size).toBeGreaterThan(0)
+      })
+    })
+
+    it('should accept ca option on fetchChecksums without error', async () => {
+      const checksums = await fetchChecksums(`${httpBaseUrl}/checksums.txt`, {
+        ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
+      })
+
+      expect(checksums['checksum-file']).toBeDefined()
+    })
+
+    it('should pass ca through redirects on httpRequest', async () => {
+      // ca should be preserved through redirect chains.
+      const response = await httpRequest(`${httpBaseUrl}/redirect`, {
+        ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.text()).toBe('Plain text response')
+    })
+  })
 })

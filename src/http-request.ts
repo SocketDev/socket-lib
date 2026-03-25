@@ -101,6 +101,24 @@ export interface HttpRequestOptions {
    */
   body?: Buffer | string | undefined
   /**
+   * Custom CA certificates for TLS connections.
+   * When provided, these certificates are combined with the default trust
+   * store via an HTTPS agent. Useful when SSL_CERT_FILE is set but
+   * NODE_EXTRA_CA_CERTS was not available at process startup.
+   *
+   * @example
+   * ```ts
+   * import { rootCertificates } from 'node:tls'
+   * import { readFileSync } from 'node:fs'
+   *
+   * const extraCerts = readFileSync('/path/to/cert.pem', 'utf-8')
+   * await httpRequest('https://api.example.com', {
+   *   ca: [...rootCertificates, extraCerts]
+   * })
+   * ```
+   */
+  ca?: string[] | undefined
+  /**
    * Whether to automatically follow HTTP redirects (3xx status codes).
    *
    * @default true
@@ -334,6 +352,12 @@ export interface HttpResponse {
  * Configuration options for file downloads.
  */
 export interface HttpDownloadOptions {
+  /**
+   * Custom CA certificates for TLS connections.
+   * When provided, these certificates are used for the download request.
+   * See `HttpRequestOptions.ca` for details.
+   */
+  ca?: string[] | undefined
   /**
    * Whether to automatically follow HTTP redirects (3xx status codes).
    * This is essential for downloading from services that use CDN redirects,
@@ -609,6 +633,11 @@ export function parseChecksums(text: string): Checksums {
  */
 export interface FetchChecksumsOptions {
   /**
+   * Custom CA certificates for TLS connections.
+   * See `HttpRequestOptions.ca` for details.
+   */
+  ca?: string[] | undefined
+  /**
    * HTTP headers to send with the request.
    */
   headers?: Record<string, string> | undefined
@@ -649,12 +678,16 @@ export async function fetchChecksums(
   url: string,
   options?: FetchChecksumsOptions | undefined,
 ): Promise<Checksums> {
-  const { headers = {}, timeout = 30_000 } = {
+  const {
+    ca,
+    headers = {},
+    timeout = 30_000,
+  } = {
     __proto__: null,
     ...options,
   } as FetchChecksumsOptions
 
-  const response = await httpRequest(url, { headers, timeout })
+  const response = await httpRequest(url, { ca, headers, timeout })
 
   if (!response.ok) {
     throw new Error(
@@ -675,6 +708,7 @@ async function httpDownloadAttempt(
   options: HttpDownloadOptions,
 ): Promise<HttpDownloadResult> {
   const {
+    ca,
     followRedirects = true,
     headers = {},
     maxRedirects = 5,
@@ -687,7 +721,7 @@ async function httpDownloadAttempt(
     const isHttps = parsedUrl.protocol === 'https:'
     const httpModule = isHttps ? getHttps() : getHttp()
 
-    const requestOptions = {
+    const requestOptions: Record<string, unknown> = {
       headers: {
         'User-Agent': 'socket-registry/1.0',
         ...headers,
@@ -697,6 +731,11 @@ async function httpDownloadAttempt(
       path: parsedUrl.pathname + parsedUrl.search,
       port: parsedUrl.port,
       timeout,
+    }
+
+    // Pass custom CA certificates for TLS connections.
+    if (ca && isHttps) {
+      requestOptions['ca'] = ca
     }
 
     const { createWriteStream } = getFs()
@@ -739,6 +778,7 @@ async function httpDownloadAttempt(
 
           resolve(
             httpDownloadAttempt(redirectUrl, destPath, {
+              ca,
               followRedirects,
               headers,
               maxRedirects: maxRedirects - 1,
@@ -850,6 +890,7 @@ async function httpRequestAttempt(
 ): Promise<HttpResponse> {
   const {
     body,
+    ca,
     followRedirects = true,
     headers = {},
     maxRedirects = 5,
@@ -862,7 +903,7 @@ async function httpRequestAttempt(
     const isHttps = parsedUrl.protocol === 'https:'
     const httpModule = isHttps ? getHttps() : getHttp()
 
-    const requestOptions = {
+    const requestOptions: Record<string, unknown> = {
       headers: {
         'User-Agent': 'socket-registry/1.0',
         ...headers,
@@ -872,6 +913,11 @@ async function httpRequestAttempt(
       path: parsedUrl.pathname + parsedUrl.search,
       port: parsedUrl.port,
       timeout,
+    }
+
+    // Pass custom CA certificates for TLS connections.
+    if (ca && isHttps) {
+      requestOptions['ca'] = ca
     }
 
     /* c8 ignore start - External HTTP/HTTPS request */
@@ -903,6 +949,7 @@ async function httpRequestAttempt(
           resolve(
             httpRequestAttempt(redirectUrl, {
               body,
+              ca,
               followRedirects,
               headers,
               maxRedirects: maxRedirects - 1,
@@ -1055,6 +1102,7 @@ export async function httpDownload(
   options?: HttpDownloadOptions | undefined,
 ): Promise<HttpDownloadResult> {
   const {
+    ca,
     followRedirects = true,
     headers = {},
     logger,
@@ -1103,6 +1151,7 @@ export async function httpDownload(
     try {
       // eslint-disable-next-line no-await-in-loop
       const result = await httpDownloadAttempt(url, tempPath, {
+        ca,
         followRedirects,
         headers,
         maxRedirects,
@@ -1296,6 +1345,7 @@ export async function httpRequest(
 ): Promise<HttpResponse> {
   const {
     body,
+    ca,
     followRedirects = true,
     headers = {},
     maxRedirects = 5,
@@ -1312,6 +1362,7 @@ export async function httpRequest(
       // eslint-disable-next-line no-await-in-loop
       return await httpRequestAttempt(url, {
         body,
+        ca,
         followRedirects,
         headers,
         maxRedirects,
