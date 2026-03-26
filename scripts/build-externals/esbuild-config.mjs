@@ -89,6 +89,7 @@ function createForceNodeModulesPlugin() {
     'cacache',
     'make-fetch-happen',
     'fast-sort',
+    'p-map',
     'pacote',
     'tar-fs',
     'libnpmexec',
@@ -111,7 +112,27 @@ function createForceNodeModulesPlugin() {
                 external: false,
               }
             } catch {
-              // Package not found, let esbuild handle the error
+              // require.resolve fails for ESM-only packages.
+              // Fall back to resolving the package.json and deriving the entry point.
+              try {
+                const pkgJsonPath = requireResolve.resolve(
+                  `${pkg}/package.json`,
+                )
+                const pkgDir = path.dirname(pkgJsonPath)
+                const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'))
+                const entry =
+                  typeof pkgJson.exports === 'string'
+                    ? pkgJson.exports
+                    : pkgJson.exports?.default || pkgJson.module || pkgJson.main
+                if (entry) {
+                  return {
+                    path: path.resolve(pkgDir, entry),
+                    external: false,
+                  }
+                }
+              } catch {
+                // Package not found, let esbuild handle the error
+              }
               return undefined
             }
           }
@@ -156,11 +177,18 @@ function createStubPlugin(stubMap = STUB_MAP) {
   }
 }
 
-// Shared dependencies bundled in external-pack that should be marked external in other bundles.
-const _EXTERNAL_PACK_DEPS = [
+// Shared dependencies that exist as standalone bundle files in dist/external/.
+// These must be marked external in bundles that would otherwise inline them,
+// so that at runtime they resolve to the existing bundle wrappers.
+const SHARED_EXTERNAL_DEPS = [
+  'debug',
   'has-flag',
+  'p-map',
   'signal-exit',
+  'spdx-correct',
+  'spdx-expression-parse',
   'supports-color',
+  'which',
   'yoctocolors-cjs',
 ]
 
@@ -182,8 +210,11 @@ export function getPackageSpecificOptions(packageName) {
     // Zod has localization files we don't need.
     opts.external = [...(opts.external || []), './locales/*']
   } else if (packageName === 'debug') {
-    // Bundle supports-color inline to avoid external dependency.
-    // This makes debug.js fully self-contained.
+    // Mark supports-color as external - it exists as a standalone bundle wrapper.
+    opts.external = [...(opts.external || []), 'supports-color']
+  } else if (packageName === 'pico-pack') {
+    // Mark p-map as external - it has its own standalone bundle.
+    opts.external = [...(opts.external || []), 'p-map']
   } else if (packageName === 'external-pack') {
     // Inquirer packages have heavy dependencies we can exclude.
     opts.external = [...(opts.external || []), 'rxjs/operators']
@@ -193,8 +224,9 @@ export function getPackageSpecificOptions(packageName) {
       js: 'if (module.exports && module.exports.default && Object.keys(module.exports).length === 1) { module.exports = module.exports.default; }',
     }
   } else if (packageName === 'npm-pack') {
-    // Bundle all deps inline to make npm-pack.js fully self-contained.
-    // This avoids hidden requires to debug, which, signal-exit, supports-color.
+    // Mark shared deps as external - they exist as standalone bundle wrappers.
+    // This eliminates ~100KB of duplication in the npm-pack bundle.
+    opts.external = [...(opts.external || []), ...SHARED_EXTERNAL_DEPS]
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.

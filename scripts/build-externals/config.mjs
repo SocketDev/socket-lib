@@ -26,7 +26,9 @@ export const externalPackages = [
   { name: 'adm-zip', bundle: true },
   { name: 'debug', bundle: true },
   { name: 'tar-fs', bundle: true },
-  // pico-pack: picomatch, del, fast-glob
+  // p-map: Standalone bundle (ESM-only package, bundled before pico-pack).
+  { name: 'p-map', bundle: true },
+  // pico-pack: picomatch, del, fast-glob (p-map marked external).
   { name: 'pico-pack', bundle: true },
   { name: 'del', bundle: false },
   { name: 'fast-glob', bundle: false },
