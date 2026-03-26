@@ -113,7 +113,7 @@ export async function withTempDir(prefix: string): Promise<{
  */
 export async function runWithTempDir(
   callback: (tempDir: string) => Promise<void>,
-  prefix: string,
+  prefix = 'tmp',
 ): Promise<void> {
   const { cleanup, path: tempDir } = await withTempDir(prefix)
   try {
