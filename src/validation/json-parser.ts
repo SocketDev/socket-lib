@@ -12,7 +12,19 @@
 
 import type { JsonParseOptions, JsonParseResult, Schema } from './types'
 
-const { hasOwn: ObjectHasOwn } = Object
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
+/**
+ * JSON.parse reviver that rejects prototype pollution keys at any depth.
+ */
+function prototypePollutionReviver(key: string, value: unknown): unknown {
+  if (DANGEROUS_KEYS.has(key)) {
+    throw new Error(
+      'JSON contains potentially malicious prototype pollution keys',
+    )
+  }
+  return value
+}
 
 /**
  * Safely parse JSON with optional schema validation and security controls.
@@ -71,29 +83,14 @@ export function safeJsonParse<T = unknown>(
     )
   }
 
-  // Parse JSON
+  // Parse JSON (reviver checks prototype pollution keys at all depths).
   let parsed: unknown
   try {
-    parsed = JSON.parse(jsonString)
+    parsed = allowPrototype
+      ? JSON.parse(jsonString)
+      : JSON.parse(jsonString, prototypePollutionReviver)
   } catch (error) {
     throw new Error(`Failed to parse JSON: ${error}`)
-  }
-
-  // Check for prototype pollution
-  if (
-    !allowPrototype &&
-    typeof parsed === 'object' &&
-    parsed !== null &&
-    !Array.isArray(parsed)
-  ) {
-    const dangerous = ['__proto__', 'constructor', 'prototype']
-    for (const key of dangerous) {
-      if (ObjectHasOwn(parsed, key)) {
-        throw new Error(
-          'JSON contains potentially malicious prototype pollution keys',
-        )
-      }
-    }
   }
 
   // Validate against schema if provided

@@ -762,9 +762,7 @@ export async function cacheFetchGhsa(
   }
 
   // Use getOrFetch to prevent race conditions (thundering herd).
-  const cached = await cache.getOrFetch(key, async () => {
-    const data = await fetchGhsaDetails(ghsaId, options)
-    return JSON.stringify(data)
-  })
-  return JSON.parse(cached as string) as GhsaDetails
+  return (await cache.getOrFetch(key, async () => {
+    return await fetchGhsaDetails(ghsaId, options)
+  })) as GhsaDetails
 }

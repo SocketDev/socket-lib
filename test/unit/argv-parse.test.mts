@@ -388,9 +388,9 @@ describe('argv/parse', () => {
       expect(hasFlag('verbose', argv)).toBe(true)
     })
 
-    it('should detect short flag', () => {
+    it('should not match short flags (only long flags)', () => {
       const argv = ['node', 'script.js', '-v']
-      expect(hasFlag('verbose', argv)).toBe(true)
+      expect(hasFlag('verbose', argv)).toBe(false)
     })
 
     it('should return false for missing flag', () => {
@@ -425,8 +425,8 @@ describe('argv/parse', () => {
       expect(hasFlag('verbose', argv)).toBe(false)
     })
 
-    it('should handle single letter flags', () => {
-      const argv = ['node', 'script.js', '-h']
+    it('should handle single letter long flags', () => {
+      const argv = ['node', 'script.js', '--h']
       expect(hasFlag('h', argv)).toBe(true)
     })
   })

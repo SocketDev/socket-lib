@@ -66,7 +66,15 @@ async function mergePackageJson(
   originalPkgJson: PackageJson | undefined,
 ): Promise<PackageJson> {
   const fs = getFs()
-  const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
+  let pkgJson: PackageJson
+  try {
+    pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
+  } catch (error) {
+    throw new Error(
+      `Failed to parse ${pkgJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    )
+  }
   const mergedPkgJson = originalPkgJson
     ? { ...originalPkgJson, ...pkgJson }
     : pkgJson

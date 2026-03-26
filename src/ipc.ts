@@ -602,6 +602,7 @@ export function waitForIpc<T = unknown>(
     cleanup = onIpc(handleMessage)
     if (timeout > 0) {
       timeoutId = setTimeout(handleTimeout, timeout)
+      timeoutId.unref()
     }
   })
 }

@@ -14,8 +14,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', 'dist')
-const _srcDir = path.resolve(__dirname, '..', 'src')
+const distDir = path.resolve(__dirname, '..', '..', 'dist')
+const _srcDir = path.resolve(__dirname, '..', '..', 'src')
 
 // Map of path aliases to their actual directories
 const pathAliases = {

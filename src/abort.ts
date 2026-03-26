@@ -44,7 +44,5 @@ export function createTimeoutSignal(ms: number): AbortSignal {
   if (ms <= 0) {
     throw new TypeError('timeout must be a positive number')
   }
-  const controller = new AbortController()
-  setTimeout(() => controller.abort(), ms)
-  return controller.signal
+  return AbortSignal.timeout(Math.ceil(ms))
 }

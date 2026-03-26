@@ -262,10 +262,5 @@ export function getPositionalArgs(startIndex = 2): string[] {
  * Check if a specific flag is present in argv.
  */
 export function hasFlag(flag: string, argv = process.argv): boolean {
-  const flagVariants = [
-    `--${flag}`,
-    // Short flag.
-    `-${flag.charAt(0)}`,
-  ]
-  return flagVariants.some(variant => argv.includes(variant))
+  return argv.includes(`--${flag}`)
 }

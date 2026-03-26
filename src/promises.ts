@@ -678,9 +678,7 @@ export async function pRetry<T>(
       // eslint-disable-next-line no-await-in-loop
       return await callbackFn(...(args || []), { signal })
     } catch (e) {
-      if (error === UNDEFINED_TOKEN) {
-        error = e
-      }
+      error = e
       if (attempts < 0) {
         break
       }

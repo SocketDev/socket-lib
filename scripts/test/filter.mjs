@@ -15,7 +15,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const projectRoot = path.resolve(__dirname, '..')
+const projectRoot = path.resolve(__dirname, '..', '..')
 
 // Find all coverage JSON files
 const coverageDir = path.join(projectRoot, 'coverage')

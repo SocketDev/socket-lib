@@ -998,6 +998,10 @@ async function httpRequestAttempt(
 
           resolve(response)
         })
+
+        res.on('error', (error: Error) => {
+          reject(error)
+        })
       },
     )
 
