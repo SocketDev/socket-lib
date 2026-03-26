@@ -17,7 +17,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', 'dist')
+const distDir = path.resolve(__dirname, '..', '..', 'dist')
 
 /**
  * Process files in a directory and fix CommonJS exports.

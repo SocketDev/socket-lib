@@ -6,6 +6,11 @@
 import { debugLog } from './debug'
 
 /**
+ * Global registry of memoization cache clear functions.
+ */
+const cacheRegistry: Array<() => void> = []
+
+/**
  * Options for memoization behavior.
  */
 type MemoizeOptions<Args extends unknown[], _Result = unknown> = {
@@ -69,6 +74,12 @@ export function memoize<Args extends unknown[], Result>(
   const cache = new Map<string, CacheEntry<Result>>()
   const accessOrder: string[] = []
 
+  // Register for global clearing.
+  cacheRegistry.push(() => {
+    cache.clear()
+    accessOrder.length = 0
+  })
+
   function evictLRU(): void {
     if (cache.size >= maxSize && accessOrder.length > 0) {
       const oldest = accessOrder.shift()
@@ -94,17 +105,25 @@ export function memoize<Args extends unknown[], Result>(
 
     // Check cache
     const cached = cache.get(key)
-    if (cached && !isExpired(cached)) {
-      cached.hits++
-      // Move to end of access order (LRU)
+    if (cached) {
+      if (!isExpired(cached)) {
+        cached.hits++
+        // Move to end of access order (LRU)
+        const index = accessOrder.indexOf(key)
+        if (index !== -1) {
+          accessOrder.splice(index, 1)
+        }
+        accessOrder.push(key)
+
+        debugLog(`[memoize:${name}] hit`, { key, hits: cached.hits })
+        return cached.value
+      }
+      // Clean up expired entry before re-caching.
+      cache.delete(key)
       const index = accessOrder.indexOf(key)
       if (index !== -1) {
         accessOrder.splice(index, 1)
       }
-      accessOrder.push(key)
-
-      debugLog(`[memoize:${name}] hit`, { key, hits: cached.hits })
-      return cached.value
     }
 
     // Cache miss - compute value
@@ -158,6 +177,12 @@ export function memoizeAsync<Args extends unknown[], Result>(
   const cache = new Map<string, CacheEntry<Promise<Result>>>()
   const accessOrder: string[] = []
 
+  // Register for global clearing.
+  cacheRegistry.push(() => {
+    cache.clear()
+    accessOrder.length = 0
+  })
+
   function evictLRU(): void {
     if (cache.size >= maxSize && accessOrder.length > 0) {
       const oldest = accessOrder.shift()
@@ -178,30 +203,48 @@ export function memoizeAsync<Args extends unknown[], Result>(
     return Date.now() - entry.timestamp > ttl
   }
 
+  // Track in-flight refreshes to prevent thundering herd on TTL expiry.
+  const refreshing = new Set<string>()
+
   return async function memoized(...args: Args): Promise<Result> {
     const key = keyGen(...args)
 
     // Check cache
     const cached = cache.get(key)
-    if (cached && !isExpired(cached)) {
-      cached.hits++
-      // Move to end of access order (LRU)
+    if (cached) {
+      if (!isExpired(cached)) {
+        cached.hits++
+        // Move to end of access order (LRU)
+        const index = accessOrder.indexOf(key)
+        if (index !== -1) {
+          accessOrder.splice(index, 1)
+        }
+        accessOrder.push(key)
+
+        debugLog(`[memoizeAsync:${name}] hit`, { key, hits: cached.hits })
+        return await cached.value
+      }
+      // Expired but another caller is already refreshing — return stale.
+      if (refreshing.has(key)) {
+        debugLog(`[memoizeAsync:${name}] stale-dedup`, { key })
+        return await cached.value
+      }
+      // Clean up expired entry before re-caching.
+      cache.delete(key)
       const index = accessOrder.indexOf(key)
       if (index !== -1) {
         accessOrder.splice(index, 1)
       }
-      accessOrder.push(key)
-
-      debugLog(`[memoizeAsync:${name}] hit`, { key, hits: cached.hits })
-      return await cached.value
     }
 
     // Cache miss - compute value
     debugLog(`[memoizeAsync:${name}] miss`, { key })
+    refreshing.add(key)
 
     // Create promise and cache it immediately (for deduplication)
     const promise = fn(...args).then(
       result => {
+        refreshing.delete(key)
         // Success - update cache entry with resolved promise
         const entry = cache.get(key)
         if (entry) {
@@ -210,6 +253,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
         return result
       },
       error => {
+        refreshing.delete(key)
         // Failure - remove from cache to allow retry
         cache.delete(key)
         const index = accessOrder.indexOf(key)
@@ -277,9 +321,10 @@ export function Memoize(options: MemoizeOptions<unknown[], unknown> = {}) {
  * Useful for testing or when you need to force recomputation.
  */
 export function clearAllMemoizationCaches(): void {
-  // Note: This requires the memoized functions to be tracked globally.
-  // For now, this is a placeholder that logs the intent.
   debugLog('[memoize:all] clear', { action: 'clear-all-caches' })
+  for (const clear of cacheRegistry) {
+    clear()
+  }
 }
 
 /**
@@ -307,10 +352,9 @@ export function memoizeWeak<K extends object, Result>(
   const cache = new WeakMap<K, Result>()
 
   return function memoized(key: K): Result {
-    const cached = cache.get(key)
-    if (cached !== undefined) {
+    if (cache.has(key)) {
       debugLog(`[memoizeWeak:${fn.name}] hit`)
-      return cached
+      return cache.get(key) as Result
     }
 
     debugLog(`[memoizeWeak:${fn.name}] miss`)

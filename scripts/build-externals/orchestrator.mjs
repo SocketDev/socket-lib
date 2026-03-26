@@ -7,9 +7,13 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+
 import { bundlePackage } from './bundler.mjs'
 import { externalPackages, scopedPackages } from './config.mjs'
 import { ensureDir } from './copy-files.mjs'
+
+const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..', '..')
@@ -84,7 +88,7 @@ async function bundleAllPackages(options = {}) {
           }
         } catch {
           if (!quiet) {
-            console.log(`  Skipping optional package ${scope}/${name}`)
+            logger.log(`  Skipping optional package ${scope}/${name}`)
           }
         }
       } else {
@@ -123,7 +127,7 @@ async function bundleAllPackages(options = {}) {
             }
           } catch {
             if (!quiet) {
-              console.log(`  Skipping optional package ${scope}/${pkg}`)
+              logger.log(`  Skipping optional package ${scope}/${pkg}`)
             }
           }
         } else {
@@ -226,7 +230,7 @@ async function fixNodeGypStrings(dir, options = {}) {
         await fs.writeFile(filePath, fixed, 'utf8')
 
         if (!quiet) {
-          console.log(
+          logger.log(
             `  Fixed node-gyp string in ${path.relative(path.join(dir, '..', '..'), filePath)}`,
           )
         }

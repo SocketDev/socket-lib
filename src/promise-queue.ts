@@ -12,6 +12,7 @@ type QueuedTask<T> = {
 export class PromiseQueue {
   private queue: Array<QueuedTask<unknown>> = []
   private running = 0
+  private idleResolvers: Array<() => void> = []
 
   private readonly maxConcurrency: number
   private readonly maxQueueLength: number | undefined
@@ -38,7 +39,10 @@ export class PromiseQueue {
     return await new Promise<T>((resolve, reject) => {
       const task: QueuedTask<T> = { fn, resolve, reject }
 
-      if (this.maxQueueLength && this.queue.length >= this.maxQueueLength) {
+      if (
+        this.maxQueueLength !== undefined &&
+        this.queue.length >= this.maxQueueLength
+      ) {
         // Drop oldest task to prevent memory buildup
         const droppedTask = this.queue.shift()
         if (droppedTask) {
@@ -53,6 +57,7 @@ export class PromiseQueue {
 
   private runNext(): void {
     if (this.running >= this.maxConcurrency || this.queue.length === 0) {
+      this.notifyIdleIfNeeded()
       return
     }
 
@@ -73,19 +78,24 @@ export class PromiseQueue {
       })
   }
 
+  private notifyIdleIfNeeded(): void {
+    if (this.running === 0 && this.queue.length === 0) {
+      for (const resolve of this.idleResolvers) {
+        resolve()
+      }
+      this.idleResolvers = []
+    }
+  }
+
   /**
    * Wait for all queued and running tasks to complete
    */
   async onIdle(): Promise<void> {
+    if (this.running === 0 && this.queue.length === 0) {
+      return
+    }
     return await new Promise<void>(resolve => {
-      const check = () => {
-        if (this.running === 0 && this.queue.length === 0) {
-          resolve()
-        } else {
-          setImmediate(check)
-        }
-      }
-      check()
+      this.idleResolvers.push(resolve)
     })
   }
 
@@ -107,6 +117,11 @@ export class PromiseQueue {
    * Clear all pending tasks from the queue (does not affect running tasks)
    */
   clear(): void {
+    const pending = this.queue
     this.queue = []
+    for (const task of pending) {
+      task.reject(new Error('Task cancelled: queue cleared'))
+    }
+    this.notifyIdleIfNeeded()
   }
 }

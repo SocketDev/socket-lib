@@ -177,21 +177,6 @@ function createStubPlugin(stubMap = STUB_MAP) {
   }
 }
 
-// Shared dependencies that exist as standalone bundle files in dist/external/.
-// These must be marked external in bundles that would otherwise inline them,
-// so that at runtime they resolve to the existing bundle wrappers.
-const SHARED_EXTERNAL_DEPS = [
-  'debug',
-  'has-flag',
-  'p-map',
-  'signal-exit',
-  'spdx-correct',
-  'spdx-expression-parse',
-  'supports-color',
-  'which',
-  'yoctocolors-cjs',
-]
-
 /**
  * Get package-specific esbuild options.
  *
@@ -209,12 +194,6 @@ export function getPackageSpecificOptions(packageName) {
   } else if (packageName === 'zod') {
     // Zod has localization files we don't need.
     opts.external = [...(opts.external || []), './locales/*']
-  } else if (packageName === 'debug') {
-    // Mark supports-color as external - it exists as a standalone bundle wrapper.
-    opts.external = [...(opts.external || []), 'supports-color']
-  } else if (packageName === 'pico-pack') {
-    // Mark p-map as external - it has its own standalone bundle.
-    opts.external = [...(opts.external || []), 'p-map']
   } else if (packageName === 'external-pack') {
     // Inquirer packages have heavy dependencies we can exclude.
     opts.external = [...(opts.external || []), 'rxjs/operators']
@@ -223,10 +202,6 @@ export function getPackageSpecificOptions(packageName) {
     opts.footer = {
       js: 'if (module.exports && module.exports.default && Object.keys(module.exports).length === 1) { module.exports = module.exports.default; }',
     }
-  } else if (packageName === 'npm-pack') {
-    // Mark shared deps as external - they exist as standalone bundle wrappers.
-    // This eliminates ~100KB of duplication in the npm-pack bundle.
-    opts.external = [...(opts.external || []), ...SHARED_EXTERNAL_DEPS]
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.
@@ -256,6 +231,8 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
     entryPoints: [entryPoint],
     bundle: true,
     platform: 'node',
+    // Intentionally conservative: node18 ensures maximum compatibility
+    // for bundled externals consumed by downstream packages.
     target: 'node18',
     format: 'cjs',
     outfile,
@@ -296,7 +273,7 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
     keepNames: true,
     // Additional optimizations:
     pure: ['console.log', 'console.debug', 'console.warn'],
-    drop: ['debugger', 'console'],
+    drop: ['debugger'],
     ignoreAnnotations: false,
     // Define compile-time constants for dead code elimination.
     define: {

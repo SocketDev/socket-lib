@@ -27,7 +27,7 @@ const ANSI_REGEX = /\x1b\[[0-9;]*m/g
 export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
   const { onlyFirst } = options ?? {}
   // Valid string terminator sequences are BEL, ESC\, and 0x9c.
-  const ST = '(?:\\u0007\\u001B\\u005C|\\u009C)'
+  const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)'
   // OSC sequences only: ESC ] ... ST (non-greedy until the first ST).
   const osc = `(?:\\u001B\\][\\s\\S]*?${ST})`
   // CSI and related: ESC/C1, optional intermediates, optional params (supports ; and :) then final byte.

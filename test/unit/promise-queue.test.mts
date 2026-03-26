@@ -258,12 +258,14 @@ describe('PromiseQueue', () => {
   })
 
   describe('clear', () => {
-    it('should clear pending tasks', async () => {
+    it('should clear pending tasks and reject their promises', async () => {
       const queue = new PromiseQueue(1)
 
+      // First task starts running (concurrency=1).
       queue.add(async () => await delay(100))
-      queue.add(async () => await delay(10))
-      queue.add(async () => await delay(10))
+      // These are queued (pending).
+      const pending1 = queue.add(async () => await delay(10))
+      const pending2 = queue.add(async () => await delay(10))
 
       await delay(10)
       const beforeClear = queue.pendingCount
@@ -271,6 +273,9 @@ describe('PromiseQueue', () => {
       queue.clear()
       expect(queue.pendingCount).toBe(0)
       expect(beforeClear).toBeGreaterThan(0)
+
+      await expect(pending1).rejects.toThrow('Task cancelled: queue cleared')
+      await expect(pending2).rejects.toThrow('Task cancelled: queue cleared')
     })
 
     it('should not affect running tasks', async () => {
@@ -294,6 +299,7 @@ describe('PromiseQueue', () => {
     it('should allow new tasks after clear', async () => {
       const queue = new PromiseQueue(2)
 
+      // With concurrency=2, task starts immediately (not pending).
       queue.add(async () => await delay(50))
       queue.clear()
 

@@ -279,7 +279,7 @@ export function createProgressIndicator(
   total: number,
   label?: string | undefined,
 ): string {
-  const percent = Math.floor((current / total) * 100)
+  const percent = total === 0 ? 0 : Math.floor((current / total) * 100)
   const progress = `${current}/${total}`
 
   let output = ''

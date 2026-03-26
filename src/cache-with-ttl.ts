@@ -252,9 +252,18 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     // Check persistent cache.
     const cacheEntry = await cacache.safeGet(fullKey)
     if (cacheEntry) {
-      const entry = JSON.parse(
-        cacheEntry.data.toString('utf8'),
-      ) as TtlCacheEntry<T>
+      let entry: TtlCacheEntry<T>
+      try {
+        entry = JSON.parse(cacheEntry.data.toString('utf8')) as TtlCacheEntry<T>
+      } catch {
+        // Corrupted cache entry, treat as miss and remove.
+        try {
+          await cacache.remove(fullKey)
+        } catch {
+          // Ignore removal errors.
+        }
+        return undefined
+      }
       if (!isExpired(entry)) {
         // Update in-memory cache.
         if (opts.memoize) {

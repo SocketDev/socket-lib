@@ -324,8 +324,13 @@ async function runIsolatedTests(options) {
     cwd: rootPath,
     env: {
       ...process.env,
-      NODE_OPTIONS:
-        `${process.env.NODE_OPTIONS || ''} --max-old-space-size=${process.env.CI ? 8192 : 4096} --unhandled-rejections=warn`.trim(),
+      NODE_OPTIONS: [
+        ...(process.env.NODE_OPTIONS || '')
+          .split(/\s+/)
+          .filter(opt => opt && !opt.startsWith('--max-old-space-size')),
+        `--max-old-space-size=${process.env.CI ? 8192 : 4096}`,
+        '--unhandled-rejections=warn',
+      ].join(' '),
       VITEST: '1',
     },
     stdio: 'inherit',
