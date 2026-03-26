@@ -280,7 +280,10 @@ class ProcessLockManager {
           }
 
           // Ensure parent directory exists.
-          const lastSlash = lockPath.lastIndexOf('/')
+          const lastSlash = Math.max(
+            lockPath.lastIndexOf('/'),
+            lockPath.lastIndexOf('\\'),
+          )
           if (lastSlash > 0) {
             mkdirSync(lockPath.slice(0, lastSlash), { recursive: true })
           }
@@ -328,7 +331,10 @@ class ProcessLockManager {
 
           // Handle parent path issues - not retryable.
           if (code === 'ENOTDIR') {
-            const lastSlashIndex = lockPath.lastIndexOf('/')
+            const lastSlashIndex = Math.max(
+              lockPath.lastIndexOf('/'),
+              lockPath.lastIndexOf('\\'),
+            )
             const parentDir =
               lastSlashIndex === -1 ? '.' : lockPath.slice(0, lastSlashIndex)
             throw new Error(
@@ -344,7 +350,10 @@ class ProcessLockManager {
           }
 
           if (code === 'ENOENT') {
-            const lastSlashIndex = lockPath.lastIndexOf('/')
+            const lastSlashIndex = Math.max(
+              lockPath.lastIndexOf('/'),
+              lockPath.lastIndexOf('\\'),
+            )
             const parentDir =
               lastSlashIndex === -1 ? '.' : lockPath.slice(0, lastSlashIndex)
             throw new Error(

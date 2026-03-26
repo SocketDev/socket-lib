@@ -670,7 +670,7 @@ describe('releases/github', () => {
     })
 
     it('should throw error when pattern does not match any asset', async () => {
-      vi.mocked(httpRequest).mockResolvedValueOnce(
+      vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
           Buffer.from(JSON.stringify(mockRelease)),
           true,
