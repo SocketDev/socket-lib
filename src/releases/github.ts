@@ -509,7 +509,11 @@ export async function getReleaseAssetUrl(
       }
 
       // Find the matching asset.
-      const asset = release.assets.find(a => isMatch(a.name))
+      const assets = release.assets
+      if (!Array.isArray(assets)) {
+        throw new Error(`Release ${tag} has no assets`)
+      }
+      const asset = assets.find(a => isMatch(a.name))
 
       if (!asset) {
         const patternDesc =
