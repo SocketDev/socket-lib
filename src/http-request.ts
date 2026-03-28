@@ -776,6 +776,17 @@ async function httpDownloadAttempt(
             ? res.headers.location
             : new URL(res.headers.location, url).toString()
 
+          // Reject HTTPS-to-HTTP downgrade redirects.
+          const redirectParsed = new URL(redirectUrl)
+          if (isHttps && redirectParsed.protocol !== 'https:') {
+            reject(
+              new Error(
+                `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
+              ),
+            )
+            return
+          }
+
           resolve(
             httpDownloadAttempt(redirectUrl, destPath, {
               ca,
@@ -945,6 +956,17 @@ async function httpRequestAttempt(
           const redirectUrl = res.headers.location.startsWith('http')
             ? res.headers.location
             : new URL(res.headers.location, url).toString()
+
+          // Reject HTTPS-to-HTTP downgrade redirects.
+          const redirectParsed = new URL(redirectUrl)
+          if (isHttps && redirectParsed.protocol !== 'https:') {
+            reject(
+              new Error(
+                `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
+              ),
+            )
+            return
+          }
 
           resolve(
             httpRequestAttempt(redirectUrl, {
@@ -1141,8 +1163,10 @@ export async function httpDownload(
   // Download to a temp file first, then atomically rename to destination.
   // This prevents partial/corrupted files at the destination path if download fails,
   // and preserves the original file (if any) until download succeeds.
+  const crypto = getCrypto()
   const fs = getFs()
-  const tempPath = `${destPath}.download`
+  const tempSuffix = crypto.randomBytes(6).toString('hex')
+  const tempPath = `${destPath}.${tempSuffix}.download`
 
   // Clean up any stale temp file from a previous failed download.
   if (fs.existsSync(tempPath)) {
@@ -1165,7 +1189,6 @@ export async function httpDownload(
 
       // Verify checksum if sha256 hash is provided.
       if (sha256) {
-        const crypto = getCrypto()
         // eslint-disable-next-line no-await-in-loop
         const fileContent = await fs.promises.readFile(tempPath)
         const computedHash = crypto
@@ -1173,12 +1196,21 @@ export async function httpDownload(
           .update(fileContent)
           .digest('hex')
 
-        if (computedHash !== sha256.toLowerCase()) {
+        const expectedHash = sha256.toLowerCase()
+
+        // Use constant-time comparison to prevent timing attacks.
+        if (
+          computedHash.length !== expectedHash.length ||
+          !crypto.timingSafeEqual(
+            Buffer.from(computedHash),
+            Buffer.from(expectedHash),
+          )
+        ) {
           // eslint-disable-next-line no-await-in-loop
           await safeDelete(tempPath)
           throw new Error(
             `Checksum verification failed for ${url}\n` +
-              `Expected: ${sha256.toLowerCase()}\n` +
+              `Expected: ${expectedHash}\n` +
               `Computed: ${computedHash}`,
           )
         }

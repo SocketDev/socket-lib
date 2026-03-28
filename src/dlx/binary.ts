@@ -566,13 +566,21 @@ export async function downloadBinaryFile(
         .digest('base64')
       const actualIntegrity = `sha512-${hash}`
 
-      // Verify integrity if provided.
-      if (integrity && actualIntegrity !== integrity) {
-        // Clean up invalid file.
-        await safeDelete(destPath)
-        throw new Error(
-          `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
-        )
+      // Verify integrity if provided (constant-time comparison).
+      if (integrity) {
+        const integrityMatch =
+          actualIntegrity.length === integrity.length &&
+          crypto.timingSafeEqual(
+            Buffer.from(actualIntegrity),
+            Buffer.from(integrity),
+          )
+        if (!integrityMatch) {
+          // Clean up invalid file.
+          await safeDelete(destPath)
+          throw new Error(
+            `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
+          )
+        }
       }
 
       // Make executable on POSIX systems.
