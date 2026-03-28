@@ -42,6 +42,8 @@ export interface ExtractOptions {
   quiet?: boolean
   /** Strip leading path components (like tar --strip-components) */
   strip?: number
+  /** Maximum number of entries to extract (default: 100,000) */
+  maxEntries?: number
   /** Maximum size of a single extracted file in bytes (default: 100MB) */
   maxFileSize?: number
   /** Maximum total extracted size in bytes (default: 1GB) */
@@ -55,6 +57,8 @@ export interface ExtractOptions {
 const DEFAULT_MAX_FILE_SIZE = 100 * 1024 * 1024
 // 1GB
 const DEFAULT_MAX_TOTAL_SIZE = 1024 * 1024 * 1024
+// Maximum number of entries to prevent inode exhaustion DoS.
+const DEFAULT_MAX_ENTRIES = 100_000
 
 /**
  * Validate that a resolved path is within the target directory.
@@ -123,6 +127,7 @@ export async function extractTar(
   options: ExtractOptions = {},
 ): Promise<void> {
   const {
+    maxEntries = DEFAULT_MAX_ENTRIES,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
@@ -133,6 +138,7 @@ export async function extractTar(
   await safeMkdir(normalizedOutputDir)
 
   let totalExtractedSize = 0
+  let entryCount = 0
 
   let destroyScheduled = false
 
@@ -140,6 +146,33 @@ export async function extractTar(
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
       if (destroyScheduled) {
+        return header
+      }
+
+      // Check entry count to prevent inode exhaustion DoS.
+      entryCount += 1
+      if (entryCount > maxEntries) {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `Archive has too many entries: exceeded limit of ${maxEntries}`,
+            ),
+          )
+        })
+        return header
+      }
+
+      // Reject entries with null bytes in names (defense in depth).
+      if (header.name.includes('\0')) {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `Invalid null byte in archive entry name: ${header.name}`,
+            ),
+          )
+        })
         return header
       }
 
@@ -219,6 +252,7 @@ export async function extractTarGz(
   options: ExtractOptions = {},
 ): Promise<void> {
   const {
+    maxEntries = DEFAULT_MAX_ENTRIES,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
@@ -229,6 +263,7 @@ export async function extractTarGz(
   await safeMkdir(normalizedOutputDir)
 
   let totalExtractedSize = 0
+  let entryCount = 0
 
   let destroyScheduled = false
 
@@ -236,6 +271,33 @@ export async function extractTarGz(
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
       if (destroyScheduled) {
+        return header
+      }
+
+      // Check entry count to prevent inode exhaustion DoS.
+      entryCount += 1
+      if (entryCount > maxEntries) {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `Archive has too many entries: exceeded limit of ${maxEntries}`,
+            ),
+          )
+        })
+        return header
+      }
+
+      // Reject entries with null bytes in names (defense in depth).
+      if (header.name.includes('\0')) {
+        destroyScheduled = true
+        process.nextTick(() => {
+          extractStream.destroy(
+            new Error(
+              `Invalid null byte in archive entry name: ${header.name}`,
+            ),
+          )
+        })
         return header
       }
 
@@ -315,6 +377,7 @@ export async function extractZip(
   options: ExtractOptions = {},
 ): Promise<void> {
   const {
+    maxEntries = DEFAULT_MAX_ENTRIES,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
@@ -329,11 +392,26 @@ export async function extractZip(
 
   // Pre-validate all entries for security
   const entries = zip.getEntries()
+
+  // Check entry count to prevent inode exhaustion DoS.
+  if (entries.length > maxEntries) {
+    throw new Error(
+      `Archive has too many entries: ${entries.length} (limit: ${maxEntries})`,
+    )
+  }
+
   let totalExtractedSize = 0
 
   for (const entry of entries) {
     if (entry.isDirectory) {
       continue
+    }
+
+    // Reject entries with null bytes in names (defense in depth).
+    if (entry.entryName.includes('\0')) {
+      throw new Error(
+        `Invalid null byte in archive entry name: ${entry.entryName}`,
+      )
     }
 
     // Check individual file size
