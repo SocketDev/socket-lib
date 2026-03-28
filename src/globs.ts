@@ -3,9 +3,26 @@
  * Provides file filtering and glob matcher functions for npm-like behavior.
  */
 
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-import * as fastGlob from './external/fast-glob.js'
-import picomatch from './external/picomatch.js'
+import type * as fastGlobType from './external/fast-glob.js'
+import type picomatchType from './external/picomatch.js'
+
+let _fastGlob: typeof fastGlobType | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getFastGlob() {
+  if (_fastGlob === undefined) {
+    _fastGlob = /*@__PURE__*/ require('./external/fast-glob.js')
+  }
+  return _fastGlob!
+}
+
+let _picomatch: typeof picomatchType | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getPicomatch() {
+  if (_picomatch === undefined) {
+    _picomatch = /*@__PURE__*/ require('./external/picomatch.js')
+  }
+  return _picomatch!
+}
 
 import { objectFreeze as ObjectFreeze } from './objects'
 import {
@@ -112,6 +129,7 @@ export function globStreamLicenses(
     ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
   }
   /* c8 ignore start - External fast-glob call */
+  const fastGlob = getFastGlob()
   return fastGlob.globStream(
     [recursive ? LICENSE_GLOB_RECURSIVE : LICENSE_GLOB],
     {
@@ -188,7 +206,8 @@ export function getGlobMatcher(
     ...(negativePatterns.length > 0 ? { ignore: negativePatterns } : {}),
   }
 
-  /* c8 ignore next 4 - External picomatch call */
+  /* c8 ignore next 5 - External picomatch call */
+  const picomatch = getPicomatch()
   matcher = picomatch(
     positivePatterns.length > 0 ? positivePatterns : patterns,
     matchOptions,
@@ -209,6 +228,7 @@ export function glob(
   options?: FastGlobOptions,
 ): Promise<string[]> {
   /* c8 ignore next - External fast-glob call */
+  const fastGlob = getFastGlob()
   return fastGlob.glob(patterns, options as import('fast-glob').Options)
 }
 
@@ -222,5 +242,6 @@ export function globSync(
   options?: FastGlobOptions,
 ): string[] {
   /* c8 ignore next - External fast-glob call */
+  const fastGlob = getFastGlob()
   return fastGlob.globSync(patterns, options as import('fast-glob').Options)
 }

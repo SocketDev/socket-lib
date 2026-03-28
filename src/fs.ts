@@ -19,7 +19,21 @@ import type {
 import { getAbortSignal } from './constants/process'
 
 import { isArray } from './arrays'
-import { deleteAsync, deleteSync } from './external/del'
+import type {
+  deleteAsync as deleteAsyncType,
+  deleteSync as deleteSyncType,
+} from './external/del'
+
+let _del:
+  | { deleteAsync: typeof deleteAsyncType; deleteSync: typeof deleteSyncType }
+  | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getDel() {
+  if (_del === undefined) {
+    _del = /*@__PURE__*/ require('./external/del')
+  }
+  return _del!
+}
 import { pRetry } from './promises'
 import { defaultIgnore, getGlobMatcher } from './globs'
 import type { JsonReviver } from './json/types'
@@ -1235,7 +1249,7 @@ export async function safeDelete(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
 ) {
-  // deleteAsync is imported at the top
+  // deleteAsync is lazily loaded via getDel()
   const opts = { __proto__: null, ...options } as RemoveOptions
   const patterns = isArray(filepath)
     ? filepath.map(pathLikeToString)
@@ -1276,9 +1290,10 @@ export async function safeDelete(
   const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
 
   /* c8 ignore start - External del call */
+  const del = getDel()
   await pRetry(
     async () => {
-      await deleteAsync(patterns, {
+      await del.deleteAsync(patterns, {
         dryRun: false,
         force: shouldForce,
         onlyFiles: false,
@@ -1328,7 +1343,7 @@ export function safeDeleteSync(
   filepath: PathLike | PathLike[],
   options?: RemoveOptions | undefined,
 ) {
-  // deleteSync is imported at the top
+  // deleteSync is lazily loaded via getDel()
   const opts = { __proto__: null, ...options } as RemoveOptions
   const patterns = isArray(filepath)
     ? filepath.map(pathLikeToString)
@@ -1369,11 +1384,12 @@ export function safeDeleteSync(
   const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
 
   /* c8 ignore start - External del call */
+  const del = getDel()
   let lastError: Error | undefined
   let delay = retryDelay
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      deleteSync(patterns, {
+      del.deleteSync(patterns, {
         dryRun: false,
         force: shouldForce,
         onlyFiles: false,

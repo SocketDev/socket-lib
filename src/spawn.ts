@@ -30,7 +30,16 @@ import process from 'node:process'
 import { getAbortSignal } from './constants/process'
 import { stackWithCauses } from './errors'
 
-import npmCliPromiseSpawn from './external/@npmcli/promise-spawn'
+import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
+
+let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getNpmCliPromiseSpawn() {
+  if (_npmCliPromiseSpawn === undefined) {
+    _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn')
+  }
+  return _npmCliPromiseSpawn!
+}
 
 let _path: typeof import('node:path') | undefined
 /**
@@ -738,7 +747,7 @@ export function spawn(
   if (shouldStopSpinner) {
     spinnerInstance.stop()
   }
-  // npmCliPromiseSpawn is imported at the top
+  // npmCliPromiseSpawn is lazily loaded via getNpmCliPromiseSpawn()
   // Use __proto__: null to prevent prototype pollution when passing to
   // third-party code, Node.js built-ins, or JavaScript built-in methods.
   // https://github.com/npm/promise-spawn
@@ -769,10 +778,11 @@ export function spawn(
     gid: spawnOptions.gid,
   } as unknown as PromiseSpawnOptions
   /* c8 ignore start - External npmCliPromiseSpawn call */
+  const npmCliPromiseSpawn = getNpmCliPromiseSpawn()
   const spawnPromise = npmCliPromiseSpawn(
     actualCmd,
     args ? [...args] : [],
-    promiseSpawnOpts as Parameters<typeof npmCliPromiseSpawn>[2],
+    promiseSpawnOpts as Parameters<typeof npmCliPromiseSpawnType>[2],
     extra,
   )
   /* c8 ignore stop */
