@@ -269,8 +269,9 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
   const fs = getFs()
   const path = getPath()
   const dir = path.dirname(filePath)
-  // Create directory recursively if it doesn't exist.
-  await fs.promises.mkdir(dir, { recursive: true })
+  // Use restrictive permissions (owner-only) to prevent other users
+  // from reading or writing IPC stub files.
+  await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
 }
 
 /**
@@ -326,11 +327,12 @@ export async function writeIpcStub(
 
   // Write with pretty printing for debugging.
   const fs = getFs()
-  await fs.promises.writeFile(
-    stubPath,
-    JSON.stringify(validated, null, 2),
-    'utf8',
-  )
+  // Use restrictive permissions (owner-only read/write) to prevent
+  // other users on the system from reading sensitive IPC data.
+  await fs.promises.writeFile(stubPath, JSON.stringify(validated, null, 2), {
+    encoding: 'utf8',
+    mode: 0o600,
+  })
   return stubPath
 }
 
@@ -442,7 +444,9 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
               // File is stale if EITHER check indicates staleness
               isStale = isStale || contentAge > maxAgeMs
             } catch {
-              // If we can't read/parse the file, rely on mtime check
+              // If we can't read/parse the file, treat it as stale
+              // to prevent accumulation of corrupted stub files.
+              isStale = true
             }
 
             if (isStale) {
