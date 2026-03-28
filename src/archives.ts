@@ -8,8 +8,26 @@ import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 import process from 'node:process'
 
-import AdmZip from './external/adm-zip.js'
-import tarFs from './external/tar-fs.js'
+import type AdmZipType from './external/adm-zip.js'
+import type tarFsType from './external/tar-fs.js'
+
+let _AdmZip: typeof AdmZipType | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getAdmZip() {
+  if (_AdmZip === undefined) {
+    _AdmZip = /*@__PURE__*/ require('./external/adm-zip.js')
+  }
+  return _AdmZip!
+}
+
+let _tarFs: typeof tarFsType | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getTarFs() {
+  if (_tarFs === undefined) {
+    _tarFs = /*@__PURE__*/ require('./external/tar-fs.js')
+  }
+  return _tarFs!
+}
 
 import { safeMkdir } from './fs.js'
 import { normalizePath } from './paths/normalize.js'
@@ -142,6 +160,7 @@ export async function extractTar(
 
   let destroyScheduled = false
 
+  const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
@@ -267,6 +286,7 @@ export async function extractTarGz(
 
   let destroyScheduled = false
 
+  const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
@@ -387,6 +407,7 @@ export async function extractZip(
   const normalizedOutputDir = normalizePath(outputDir)
   await safeMkdir(normalizedOutputDir)
 
+  const AdmZip = getAdmZip()
   const zip = new AdmZip(archivePath)
   const path = getPath()
 

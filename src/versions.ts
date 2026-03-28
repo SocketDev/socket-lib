@@ -1,12 +1,21 @@
 /** @fileoverview Version comparison and validation utilities for Socket ecosystem. */
 
-import * as semver from './external/semver.js'
+import type * as semverType from './external/semver.js'
+
+let _semver: typeof semverType | undefined
+function getSemver() {
+  if (_semver === undefined) {
+    _semver = require('./external/semver.js')
+  }
+  return _semver!
+}
 
 /**
  * Coerce a version string to valid semver format.
  */
 export function coerceVersion(version: string): string | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   const coerced = semver.coerce(version)
   return coerced?.version
 }
@@ -21,6 +30,7 @@ export function compareVersions(
 ): -1 | 0 | 1 | undefined {
   try {
     /* c8 ignore next - External semver call */
+    const semver = getSemver()
     return semver.compare(v1, v2)
   } catch {
     return undefined
@@ -32,6 +42,7 @@ export function compareVersions(
  */
 export function filterVersions(versions: string[], range: string): string[] {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return versions.filter(v => semver.satisfies(v, range))
 }
 
@@ -40,6 +51,7 @@ export function filterVersions(versions: string[], range: string): string[] {
  */
 export function getMajorVersion(version: string): number | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   const parsed = semver.parse(version)
   return parsed?.major
 }
@@ -49,6 +61,7 @@ export function getMajorVersion(version: string): number | undefined {
  */
 export function getMinorVersion(version: string): number | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   const parsed = semver.parse(version)
   return parsed?.minor
 }
@@ -58,6 +71,7 @@ export function getMinorVersion(version: string): number | undefined {
  */
 export function getPatchVersion(version: string): number | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   const parsed = semver.parse(version)
   return parsed?.patch
 }
@@ -78,6 +92,7 @@ export function incrementVersion(
   identifier?: string | undefined,
 ): string | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.inc(version, release, identifier) || undefined
 }
 
@@ -86,6 +101,7 @@ export function incrementVersion(
  */
 export function isEqual(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.eq(version1, version2)
 }
 
@@ -94,6 +110,7 @@ export function isEqual(version1: string, version2: string): boolean {
  */
 export function isGreaterThan(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.gt(version1, version2)
 }
 
@@ -105,6 +122,7 @@ export function isGreaterThanOrEqual(
   version2: string,
 ): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.gte(version1, version2)
 }
 
@@ -113,6 +131,7 @@ export function isGreaterThanOrEqual(
  */
 export function isLessThan(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.lt(version1, version2)
 }
 
@@ -121,6 +140,7 @@ export function isLessThan(version1: string, version2: string): boolean {
  */
 export function isLessThanOrEqual(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.lte(version1, version2)
 }
 
@@ -129,6 +149,7 @@ export function isLessThanOrEqual(version1: string, version2: string): boolean {
  */
 export function isValidVersion(version: string): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.valid(version) !== null
 }
 
@@ -137,6 +158,7 @@ export function isValidVersion(version: string): boolean {
  */
 export function maxVersion(versions: string[]): string | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.maxSatisfying(versions, '*') || undefined
 }
 
@@ -145,6 +167,7 @@ export function maxVersion(versions: string[]): string | undefined {
  */
 export function minVersion(versions: string[]): string | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.minSatisfying(versions, '*') || undefined
 }
 
@@ -161,6 +184,7 @@ export function parseVersion(version: string):
     }
   | undefined {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   const parsed = semver.parse(version)
   if (!parsed) {
     return undefined
@@ -179,6 +203,7 @@ export function parseVersion(version: string):
  */
 export function satisfiesVersion(version: string, range: string): boolean {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.satisfies(version, range)
 }
 
@@ -187,6 +212,7 @@ export function satisfiesVersion(version: string, range: string): boolean {
  */
 export function sortVersions(versions: string[]): string[] {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.sort([...versions])
 }
 
@@ -195,6 +221,7 @@ export function sortVersions(versions: string[]): string[] {
  */
 export function sortVersionsDesc(versions: string[]): string[] {
   /* c8 ignore next - External semver call */
+  const semver = getSemver()
   return semver.rsort([...versions])
 }
 
@@ -216,6 +243,7 @@ export function versionDiff(
   | undefined {
   try {
     /* c8 ignore next - External semver call */
+    const semver = getSemver()
     return semver.diff(version1, version2) || undefined
   } catch {
     return undefined

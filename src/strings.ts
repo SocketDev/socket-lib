@@ -4,7 +4,20 @@
  */
 
 import { ansiRegex, stripAnsi } from './ansi'
-import { eastAsianWidth } from './external/get-east-asian-width'
+import type { eastAsianWidth as eastAsianWidthType } from './external/get-east-asian-width'
+
+let _eastAsianWidth: typeof eastAsianWidthType | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getEastAsianWidth() {
+  if (_eastAsianWidth === undefined) {
+    _eastAsianWidth = /*@__PURE__*/ (
+      require('./external/get-east-asian-width') as {
+        eastAsianWidth: typeof eastAsianWidthType
+      }
+    ).eastAsianWidth
+  }
+  return _eastAsianWidth!
+}
 // Import get-east-asian-width from external wrapper.
 // This library implements Unicode Standard Annex #11 (East Asian Width).
 // https://www.unicode.org/reports/tr11/
@@ -668,6 +681,7 @@ export function stringWidth(text: string): number {
   // - Most terminal emulators default to narrow for ambiguous characters
   // - Consistent with string-width's default behavior
   const eastAsianWidthOptions = { ambiguousAsWide: false }
+  const eastAsianWidth = getEastAsianWidth()
 
   // KEY IMPROVEMENT #3: Comprehensive Width Calculation
   //

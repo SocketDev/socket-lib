@@ -3,8 +3,24 @@
  * Provides various comparison utilities for arrays and collections.
  */
 
-import * as fastSort from './external/fast-sort.js'
-import * as semver from './external/semver.js'
+import type * as fastSortType from './external/fast-sort.js'
+import type * as semverType from './external/semver.js'
+
+let _semver: typeof semverType | undefined
+function getSemver() {
+  if (_semver === undefined) {
+    _semver = require('./external/semver.js')
+  }
+  return _semver!
+}
+
+let _fastSort: typeof fastSortType | undefined
+function getFastSort() {
+  if (_fastSort === undefined) {
+    _fastSort = require('./external/fast-sort.js')
+  }
+  return _fastSort!
+}
 
 /**
  * Compare semantic versions.
@@ -12,6 +28,7 @@ import * as semver from './external/semver.js'
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
   /* c8 ignore next 2 - External semver calls */
+  const semver = getSemver()
   const validA: string | null = semver.valid(a)
   const validB: string | null = semver.valid(b)
 
@@ -89,7 +106,8 @@ export function naturalSorter<T>(
   arrayToSort: T[],
 ): ReturnType<FastSortFunction> {
   if (_naturalSorter === undefined) {
-    /* c8 ignore next 3 - External fast-sort call */
+    /* c8 ignore next 4 - External fast-sort call */
+    const fastSort = getFastSort()
     _naturalSorter = fastSort.createNewSortInstance({
       comparer: naturalCompare,
     }) as FastSortFunction
