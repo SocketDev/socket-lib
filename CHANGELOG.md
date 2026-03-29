@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.4) - 2026-03-28
+
+### Changed
+
+- **perf**: Lazy-load heavy external sub-bundles across 7 modules (#119)
+  - `sorts.ts`: Defer semver (2.5 MB via npm-pack) and fastSort until first use
+  - `versions.ts`: Defer semver until first use
+  - `archives.ts`: Defer adm-zip (102 KB) and tar-fs (105 KB) until extraction
+  - `globs.ts`: Defer fast-glob and picomatch (260 KB via pico-pack) until glob execution
+  - `fs.ts`: Defer del (260 KB via pico-pack) until safeDelete call
+  - `spawn.ts`: Defer @npmcli/promise-spawn (17 KB) until async spawn
+  - `strings.ts`: Defer get-east-asian-width (10 KB) until stringWidth call
+- Importing lightweight exports (isObject, httpJson, localeCompare, readJsonSync, stripAnsi) no longer loads heavy externals at module init time
+
 ## [5.11.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.3) - 2026-03-26
 
 ### Fixed

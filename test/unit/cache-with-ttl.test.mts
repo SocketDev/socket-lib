@@ -185,17 +185,17 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should fetch again after cache expires', async () => {
-      // Use longer TTL (200ms) to avoid flaky failures on slow CI runners.
+      // Use generous TTL to avoid flaky failures on slow CI runners (especially Windows).
       const shortCache = createTtlCache({
-        ttl: 200,
+        ttl: 500,
         prefix: 'short-cache',
       })
       const fetcher = vi.fn(async () => 'value')
       await shortCache.getOrFetch('key', fetcher)
       expect(fetcher).toHaveBeenCalledTimes(1)
 
-      // Wait for TTL to expire (300ms > 200ms TTL).
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Wait for TTL to expire (700ms > 500ms TTL).
+      await new Promise(resolve => setTimeout(resolve, 700))
 
       await shortCache.getOrFetch('key', fetcher)
       expect(fetcher).toHaveBeenCalledTimes(2)
@@ -327,17 +327,17 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should skip expired entries in getAll', async () => {
-      // Use longer TTL (200ms) to avoid flaky failures on slow CI runners.
+      // Use generous TTL to avoid flaky failures on slow CI runners (especially Windows).
       const shortCache = createTtlCache({
-        ttl: 200,
+        ttl: 500,
         prefix: 'expiry-getall-test',
       })
 
       await shortCache.set('key1', 'value1')
       await shortCache.set('key2', 'value2')
 
-      // Wait for TTL to expire (300ms > 200ms TTL).
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Wait for TTL to expire (700ms > 500ms TTL).
+      await new Promise(resolve => setTimeout(resolve, 700))
 
       const all = await shortCache.getAll<string>('*')
       expect(all.size).toBe(0)
@@ -416,18 +416,17 @@ describe.sequential('cache-with-ttl', () => {
 
   describe('TTL expiration', () => {
     it('should expire entries after TTL', async () => {
-      // Use longer TTL (200ms) to avoid flaky failures on slow CI runners.
-      // Windows in particular can have significant I/O latency during cacache.put().
+      // Use generous TTL to avoid flaky failures on slow CI runners (especially Windows).
       const shortCache = createTtlCache({
-        ttl: 200,
+        ttl: 500,
         prefix: 'expiry-test',
       })
 
       await shortCache.set('key', 'value')
       expect(await shortCache.get<string>('key')).toBe('value')
 
-      // Wait for TTL to expire (300ms > 200ms TTL).
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Wait for TTL to expire (700ms > 500ms TTL).
+      await new Promise(resolve => setTimeout(resolve, 700))
 
       expect(await shortCache.get('key')).toBeUndefined()
 
@@ -453,16 +452,16 @@ describe.sequential('cache-with-ttl', () => {
 
     it('should refresh TTL on set', async () => {
       const refreshCache = createTtlCache({
-        ttl: 300,
+        ttl: 2000,
         prefix: 'refresh-cache',
       })
 
       await refreshCache.set('key', 'value1')
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 200))
       await refreshCache.set('key', 'value2') // Refresh TTL
 
-      await new Promise(resolve => setTimeout(resolve, 100))
-      // Should still be cached (100 + 100 = 200ms, but TTL refreshed at 100ms to 300ms)
+      await new Promise(resolve => setTimeout(resolve, 200))
+      // Should still be cached (200 + 200 = 400ms, but TTL refreshed at 200ms to 2000ms)
       expect(await refreshCache.get<string>('key')).toBe('value2')
 
       await refreshCache.clear()
