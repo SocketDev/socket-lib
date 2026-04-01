@@ -51,11 +51,7 @@ jobs:
     steps:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6096b06b1790f411714c89c40f72aade2eeaab7c # main
 
-      - name: Install Claude Code
-        shell: bash
-        run: |
-          alias pnpm="$SFW_BIN pnpm"
-          pnpm add -g @anthropic-ai/claude-code@2.1.89
+      # claude-code is now a devDependency, installed via setup-and-install
 
       - name: Create update branch
         id: branch
