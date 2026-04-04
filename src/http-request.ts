@@ -30,7 +30,7 @@ function getFs() {
   return _fs as typeof import('node:fs')
 }
 
-import type { IncomingMessage } from 'http'
+import type { IncomingHttpHeaders, IncomingMessage } from 'http'
 
 import type { Logger } from './logger.js'
 
@@ -90,7 +90,7 @@ export interface HttpHookRequestInfo {
 export interface HttpHookResponseInfo {
   duration: number
   error?: Error | undefined
-  headers?: Record<string, Array<string> | string | undefined> | undefined
+  headers?: IncomingHttpHeaders | undefined
   method: string
   status?: number | undefined
   statusText?: string | undefined
@@ -326,7 +326,7 @@ export interface HttpResponse {
    * console.log(response.headers['set-cookie']) // May be string[]
    * ```
    */
-  headers: Record<string, Array<string> | string | undefined>
+  headers: IncomingHttpHeaders
   /**
    * Parse response body as JSON.
    * Type parameter `T` allows specifying the expected JSON structure.
@@ -1048,10 +1048,7 @@ async function httpRequestAttempt(
           res.headers.location
         ) {
           emitResponse({
-            headers: res.headers as Record<
-              string,
-              Array<string> | string | undefined
-            >,
+            headers: res.headers,
             status: res.statusCode,
             statusText: res.statusMessage,
           })
@@ -1129,10 +1126,7 @@ async function httpRequestAttempt(
               )
             },
             body: responseBody,
-            headers: res.headers as Record<
-              string,
-              Array<string> | string | undefined
-            >,
+            headers: res.headers,
             json<T = unknown>(): T {
               return JSON.parse(responseBody.toString('utf8')) as T
             },
@@ -1146,10 +1140,7 @@ async function httpRequestAttempt(
           }
 
           emitResponse({
-            headers: res.headers as Record<
-              string,
-              Array<string> | string | undefined
-            >,
+            headers: res.headers,
             status: res.statusCode,
             statusText: res.statusMessage,
           })
