@@ -91,7 +91,10 @@ jobs:
           claude --print \
             --model haiku \
             --max-turns 15 \
-            --allowedTools "Bash(pnpm:*)" "Bash(git:*)" "Read" "Write" "Edit" "Glob" "Grep" \
+            --allowedTools \
+              "Bash(pnpm:*)" \
+              "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git rev-parse:*)" \
+              "Read" "Write" "Edit" "Glob" "Grep" \
             "$(cat <<'PROMPT'
           /updating
 
@@ -185,7 +188,10 @@ jobs:
           claude --print \
             --model sonnet \
             --max-turns 25 \
-            --allowedTools "Bash(pnpm:*)" "Bash(git:*)" "Read" "Write" "Edit" "Glob" "Grep" \
+            --allowedTools \
+              "Bash(pnpm:*)" \
+              "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git rev-parse:*)" \
+              "Read" "Write" "Edit" "Glob" "Grep" \
             "$(cat <<PROMPT
           Build or tests failed after dependency updates. Fix them.
 
