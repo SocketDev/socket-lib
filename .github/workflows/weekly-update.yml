@@ -51,8 +51,6 @@ jobs:
     steps:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6096b06b1790f411714c89c40f72aade2eeaab7c # main
 
-      # claude-code is now a devDependency, installed via setup-and-install
-
       - name: Create update branch
         id: branch
         env:
@@ -70,12 +68,10 @@ jobs:
       - name: Run updating skill with Claude Code
         id: claude
         timeout-minutes: 30
-        shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_ACTIONS: 'true'
         run: |
-          alias pnpm="$SFW_BIN pnpm"
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "ANTHROPIC_API_KEY not set - skipping automated update"
             echo "success=false" >> $GITHUB_OUTPUT
@@ -83,7 +79,7 @@ jobs:
           fi
 
           set +e
-          claude --print --dangerously-skip-permissions \
+          pnpm exec claude --print --dangerously-skip-permissions \
             --model sonnet \
             "$(cat <<'PROMPT'
           /updating
