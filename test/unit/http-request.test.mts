@@ -1817,7 +1817,6 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
   })
 
-
   describe('hooks', () => {
     it('should call onRequest with method, url, headers, and timeout', async () => {
       const requestInfos: HttpHookRequestInfo[] = []
@@ -1849,7 +1848,9 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(responseInfos[0]!.statusText).toBe('OK')
       expect(responseInfos[0]!.duration).toBeGreaterThanOrEqual(0)
       expect(responseInfos[0]!.error).toBeUndefined()
-      expect(responseInfos[0]!.headers?.['content-type']).toContain('application/json')
+      expect(responseInfos[0]!.headers?.['content-type']).toContain(
+        'application/json',
+      )
     })
 
     it('should call onResponse with error on timeout', async () => {
@@ -2033,7 +2034,9 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const response = await httpRequest(`${httpBaseUrl}/json`)
       expect(response.rawResponse).toBeDefined()
       expect(response.rawResponse!.statusCode).toBe(200)
-      expect(response.rawResponse!.headers['content-type']).toContain('application/json')
+      expect(response.rawResponse!.headers['content-type']).toContain(
+        'application/json',
+      )
     })
 
     it('should be from final response after redirect', async () => {
@@ -2063,14 +2066,18 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         ['UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'SSL/TLS certificate error'],
       ]
       for (const [code, expected] of cases) {
-        const err = Object.assign(new Error('test'), { code }) as NodeJS.ErrnoException
+        const err = Object.assign(new Error('test'), {
+          code,
+        }) as NodeJS.ErrnoException
         const msg = enrichErrorMessage('http://example.com', 'GET', err)
         expect(msg).toContain(expected)
       }
     })
 
     it('should include method, url, and error code in message', () => {
-      const err = Object.assign(new Error('fail'), { code: 'ESOMETHING' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('fail'), {
+        code: 'ESOMETHING',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://my-server:8080/api', 'DELETE', err)
       expect(msg).toContain('DELETE request failed')
       expect(msg).toContain('http://my-server:8080/api')
