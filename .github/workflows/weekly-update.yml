@@ -65,9 +65,9 @@ jobs:
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
-      - name: Run updating skill with Claude Code
-        id: claude
-        timeout-minutes: 15
+      - name: Update dependencies (haiku — fast, cheap)
+        id: update
+        timeout-minutes: 10
         shell: bash
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -89,8 +89,8 @@ jobs:
 
           set +e
           claude --print \
-            --model sonnet \
-            --max-turns 25 \
+            --model haiku \
+            --max-turns 15 \
             --allowedTools "Bash(pnpm:*)" "Bash(git:*)" "Read" "Write" "Edit" "Glob" "Grep" \
             "$(cat <<'PROMPT'
           /updating
@@ -104,7 +104,7 @@ jobs:
           Update all dependencies to their latest versions.
           Create one atomic commit per dependency update with a conventional commit message.
           Leave all changes local — the workflow handles pushing and PR creation.
-          Skip running builds, tests, and type checks — CI runs those separately.
+          Do not run builds or tests — the next step handles that.
           </instructions>
 
           <success_criteria>
@@ -124,20 +124,122 @@ jobs:
             echo "success=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Run tests
+        id: tests
+        if: steps.update.outputs.success == 'true'
+        shell: bash
+        run: |
+          if [ -n "$SFW_BIN" ]; then
+            mkdir -p /tmp/sfw-bin
+            printf '#!/bin/bash\nexec "%s" pnpm "$@"\n' "$SFW_BIN" > /tmp/sfw-bin/pnpm
+            chmod +x /tmp/sfw-bin/pnpm
+            export PATH="/tmp/sfw-bin:$PATH"
+          fi
+
+          set +e
+          pnpm run build 2>&1 | tee build-output.log
+          BUILD_EXIT=$?
+          if [ "$BUILD_EXIT" -ne 0 ]; then
+            echo "tests-passed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          pnpm test 2>&1 | tee test-output.log
+          TEST_EXIT=$?
+          set -e
+
+          if [ "$TEST_EXIT" -eq 0 ]; then
+            echo "tests-passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests-passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fix test failures (sonnet — smarter, escalated)
+        id: claude
+        if: steps.update.outputs.success == 'true' && steps.tests.outputs.tests-passed == 'false'
+        timeout-minutes: 15
+        shell: bash
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_ACTIONS: 'true'
+        run: |
+          if [ -n "$SFW_BIN" ]; then
+            mkdir -p /tmp/sfw-bin
+            printf '#!/bin/bash\nexec "%s" pnpm "$@"\n' "$SFW_BIN" > /tmp/sfw-bin/pnpm
+            chmod +x /tmp/sfw-bin/pnpm
+            export PATH="/tmp/sfw-bin:$PATH"
+          fi
+
+          # Collect failure context for the agent.
+          FAILURE_LOG=""
+          if [ -f build-output.log ]; then
+            FAILURE_LOG+="Build output (last 50 lines):"$'\n'
+            FAILURE_LOG+="$(tail -50 build-output.log)"$'\n\n'
+          fi
+          if [ -f test-output.log ]; then
+            FAILURE_LOG+="Test output (last 100 lines):"$'\n'
+            FAILURE_LOG+="$(tail -100 test-output.log)"$'\n'
+          fi
+
+          set +e
+          claude --print \
+            --model sonnet \
+            --max-turns 25 \
+            --allowedTools "Bash(pnpm:*)" "Bash(git:*)" "Read" "Write" "Edit" "Glob" "Grep" \
+            "$(cat <<PROMPT
+          Build or tests failed after dependency updates. Fix them.
+
+          <failure_output>
+          $FAILURE_LOG
+          </failure_output>
+
+          <instructions>
+          Diagnose the failures from the output above.
+          Fix the code — do not revert the dependency updates.
+          Run the tests again to verify your fix works.
+          Create a commit for each fix with a conventional commit message.
+          </instructions>
+          PROMPT
+          )" \
+            2>&1 | tee -a claude-output.log
+          CLAUDE_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$CLAUDE_EXIT" -eq 0 ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set final status
+        id: final
+        if: always()
+        run: |
+          # Success if: update succeeded AND (tests passed OR fix succeeded)
+          if [ "${{ steps.update.outputs.success }}" = "true" ]; then
+            if [ "${{ steps.tests.outputs.tests-passed }}" = "true" ] || [ "${{ steps.claude.outputs.success }}" = "true" ]; then
+              echo "success=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          echo "success=false" >> $GITHUB_OUTPUT
+
       - name: Validate changes
         id: validate
-        if: steps.claude.outputs.success == 'true'
+        if: steps.final.outputs.success == 'true'
         run: |
-          # Only allow changes to dependency-related files.
+          # Allow dependency files + source/test fixes from the fix step.
           UNEXPECTED=""
           for file in $(git diff --name-only origin/main..HEAD); do
             case "$file" in
-              package.json|*/package.json|pnpm-lock.yaml|*/pnpm-lock.yaml|.npmrc|pnpm-workspace.yaml) ;;
+              package.json|*/package.json|pnpm-lock.yaml|*/pnpm-lock.yaml) ;;
+              .npmrc|pnpm-workspace.yaml) ;;
+              src/*|test/*|*.ts|*.mts|*.js|*.mjs) ;;
               *) UNEXPECTED="$UNEXPECTED $file" ;;
             esac
           done
           if [ -n "$UNEXPECTED" ]; then
-            echo "::error::Unexpected files modified by Claude:$UNEXPECTED"
+            echo "::error::Unexpected files modified:$UNEXPECTED"
             echo "valid=false" >> $GITHUB_OUTPUT
           else
             echo "valid=true" >> $GITHUB_OUTPUT
@@ -153,13 +255,13 @@ jobs:
           fi
 
       - name: Push branch
-        if: steps.claude.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
         run: git push origin "$BRANCH_NAME"
 
       - name: Create Pull Request
-        if: steps.claude.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
@@ -188,7 +290,7 @@ jobs:
             --base main
 
       - name: Add job summary
-        if: steps.claude.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
         run: |
@@ -198,12 +300,15 @@ jobs:
           echo "**Branch:** \`${BRANCH_NAME}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Commits:** ${COMMIT_COUNT}" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Claude output
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: claude-output-${{ github.run_id }}
-          path: claude-output.log
+          name: weekly-update-logs-${{ github.run_id }}
+          path: |
+            claude-output.log
+            build-output.log
+            test-output.log
           retention-days: 7
 
       - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6096b06b1790f411714c89c40f72aade2eeaab7c # main
