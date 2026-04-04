@@ -18,12 +18,17 @@ import path from 'node:path'
 import { Writable } from 'node:stream'
 
 import {
+  enrichErrorMessage,
   fetchChecksums,
   httpDownload,
   httpJson,
   httpRequest,
   httpText,
   parseChecksums,
+} from '@socketsecurity/lib/http-request'
+import type {
+  HttpHookRequestInfo,
+  HttpHookResponseInfo,
 } from '@socketsecurity/lib/http-request'
 import { Logger } from '@socketsecurity/lib/logger'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -163,6 +168,13 @@ beforeAll(async () => {
         // Empty checksums file (only comments).
         res.writeHead(200, { 'Content-Type': 'text/plain' })
         res.end('# This file has no checksums\n\n')
+      } else if (url === '/large-body') {
+        const content = 'X'.repeat(10_000)
+        res.writeHead(200, {
+          'Content-Length': String(content.length),
+          'Content-Type': 'text/plain',
+        })
+        res.end(content)
       } else if (url === '/post-success') {
         if (req.method === 'POST') {
           res.writeHead(201, { 'Content-Type': 'application/json' })
@@ -1802,6 +1814,270 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
       expect(response.status).toBe(200)
       expect(response.text()).toBe('Plain text response')
+    })
+  })
+
+  describe('hooks', () => {
+    it('should call onRequest before the request', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      await httpRequest(`${httpBaseUrl}/json`, {
+        hooks: {
+          onRequest: info => requestInfos.push(info),
+        },
+      })
+      expect(requestInfos).toHaveLength(1)
+      expect(requestInfos[0]!.method).toBe('GET')
+      expect(requestInfos[0]!.url).toBe(`${httpBaseUrl}/json`)
+      expect(requestInfos[0]!.timeout).toBe(30_000)
+      expect(requestInfos[0]!.headers).toBeDefined()
+      expect(requestInfos[0]!.headers['User-Agent']).toBe('socket-registry/1.0')
+    })
+
+    it('should call onResponse after a successful request', async () => {
+      const responseInfos: HttpHookResponseInfo[] = []
+      await httpRequest(`${httpBaseUrl}/json`, {
+        hooks: {
+          onResponse: info => responseInfos.push(info),
+        },
+      })
+      expect(responseInfos).toHaveLength(1)
+      expect(responseInfos[0]!.method).toBe('GET')
+      expect(responseInfos[0]!.url).toBe(`${httpBaseUrl}/json`)
+      expect(responseInfos[0]!.status).toBe(200)
+      expect(responseInfos[0]!.statusText).toBe('OK')
+      expect(responseInfos[0]!.duration).toBeGreaterThanOrEqual(0)
+      expect(responseInfos[0]!.error).toBeUndefined()
+    })
+
+    it('should call onResponse with error on failure', async () => {
+      const responseInfos: HttpHookResponseInfo[] = []
+      await httpRequest(`${httpBaseUrl}/timeout`, {
+        timeout: 50,
+        hooks: {
+          onResponse: info => responseInfos.push(info),
+        },
+      }).catch(() => {})
+      expect(responseInfos).toHaveLength(1)
+      expect(responseInfos[0]!.error).toBeDefined()
+    })
+
+    it('should fire hooks per-attempt on retries', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      const responseInfos: HttpHookResponseInfo[] = []
+
+      let attemptCount = 0
+      const testServer = http.createServer((_req, _res) => {
+        attemptCount++
+        _res.socket?.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await httpRequest(`http://localhost:${testPort}/`, {
+          retries: 1,
+          retryDelay: 10,
+          hooks: {
+            onRequest: info => requestInfos.push(info),
+            onResponse: info => responseInfos.push(info),
+          },
+        }).catch(() => {})
+
+        expect(attemptCount).toBe(2)
+        expect(requestInfos).toHaveLength(2)
+        expect(responseInfos).toHaveLength(2)
+        for (const info of responseInfos) {
+          expect(info.error).toBeDefined()
+        }
+      } finally {
+        await new Promise<void>(resolve => { testServer.close(() => resolve()) })
+      }
+    })
+
+    it('should fire hooks on redirect hops', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      const responseInfos: HttpHookResponseInfo[] = []
+
+      await httpRequest(`${httpBaseUrl}/redirect`, {
+        hooks: {
+          onRequest: info => requestInfos.push(info),
+          onResponse: info => responseInfos.push(info),
+        },
+      })
+
+      // redirect hop + final request = 2 onRequest, 2 onResponse
+      expect(requestInfos).toHaveLength(2)
+      expect(responseInfos).toHaveLength(2)
+      expect(responseInfos[0]!.status).toBe(302)
+      expect(responseInfos[1]!.status).toBe(200)
+    })
+
+    it('should pass custom headers through hooks', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      await httpRequest(`${httpBaseUrl}/json`, {
+        headers: { 'X-Custom': 'test-value' },
+        hooks: {
+          onRequest: info => requestInfos.push(info),
+        },
+      })
+      expect(requestInfos[0]!.headers['X-Custom']).toBe('test-value')
+    })
+
+    it('should include method in hook info for POST', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      await httpRequest(`${httpBaseUrl}/echo-body`, {
+        method: 'POST',
+        body: 'test',
+        hooks: {
+          onRequest: info => requestInfos.push(info),
+        },
+      })
+      expect(requestInfos[0]!.method).toBe('POST')
+    })
+  })
+
+  describe('maxResponseSize', () => {
+    it('should reject responses exceeding maxResponseSize', async () => {
+      await expect(
+        httpRequest(`${httpBaseUrl}/large-body`, {
+          maxResponseSize: 100,
+        }),
+      ).rejects.toThrow(/exceeds maximum size limit/)
+    })
+
+    it('should allow responses within maxResponseSize', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`, {
+        maxResponseSize: 1_000_000,
+      })
+      expect(response.ok).toBe(true)
+    })
+
+    it('should include size info in the error message', async () => {
+      try {
+        await httpRequest(`${httpBaseUrl}/large-body`, {
+          maxResponseSize: 50,
+        })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect((e as Error).message).toMatch(/MB.*>.*MB/)
+      }
+    })
+
+    it('should work with httpJson', async () => {
+      await expect(
+        httpJson(`${httpBaseUrl}/json`, {
+          maxResponseSize: 5,
+        }),
+      ).rejects.toThrow(/exceeds maximum size limit/)
+    })
+
+    it('should work with httpText', async () => {
+      await expect(
+        httpText(`${httpBaseUrl}/text`, {
+          maxResponseSize: 5,
+        }),
+      ).rejects.toThrow(/exceeds maximum size limit/)
+    })
+
+    it('should fire onResponse hook with error on size limit', async () => {
+      const responseInfos: HttpHookResponseInfo[] = []
+      await httpRequest(`${httpBaseUrl}/large-body`, {
+        maxResponseSize: 50,
+        hooks: {
+          onResponse: info => responseInfos.push(info),
+        },
+      }).catch(() => {})
+
+      // At least one hook call should contain the size limit error
+      expect(responseInfos.length).toBeGreaterThanOrEqual(1)
+      const sizeError = responseInfos.find(
+        info => info.error?.message?.includes('exceeds maximum size limit'),
+      )
+      expect(sizeError).toBeDefined()
+    })
+  })
+
+  describe('rawResponse', () => {
+    it('should expose rawResponse on HttpResponse', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`)
+      expect(response.rawResponse).toBeDefined()
+      expect(response.rawResponse!.statusCode).toBe(200)
+    })
+
+    it('should have headers on rawResponse', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`)
+      expect(response.rawResponse!.headers['content-type']).toContain('application/json')
+    })
+
+    it('should be available on non-2xx responses', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/not-found`)
+      expect(response.rawResponse).toBeDefined()
+      expect(response.rawResponse!.statusCode).toBe(404)
+    })
+  })
+
+  describe('enrichErrorMessage', () => {
+    it('should enrich ECONNREFUSED', () => {
+      const err = Object.assign(new Error('connect failed'), { code: 'ECONNREFUSED' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://localhost:1', 'GET', err)
+      expect(msg).toContain('Connection refused')
+      expect(msg).toContain('GET request failed')
+    })
+
+    it('should enrich ENOTFOUND', () => {
+      const err = Object.assign(new Error('not found'), { code: 'ENOTFOUND' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://no-such-host.invalid', 'POST', err)
+      expect(msg).toContain('DNS lookup failed')
+      expect(msg).toContain('POST request failed')
+    })
+
+    it('should enrich ETIMEDOUT', () => {
+      const err = Object.assign(new Error('timed out'), { code: 'ETIMEDOUT' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://example.com', 'GET', err)
+      expect(msg).toContain('Connection timed out')
+    })
+
+    it('should enrich ECONNRESET', () => {
+      const err = Object.assign(new Error('reset'), { code: 'ECONNRESET' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://example.com', 'GET', err)
+      expect(msg).toContain('Connection reset')
+    })
+
+    it('should enrich EPIPE', () => {
+      const err = Object.assign(new Error('broken pipe'), { code: 'EPIPE' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://example.com', 'PUT', err)
+      expect(msg).toContain('Broken pipe')
+      expect(msg).toContain('PUT request failed')
+    })
+
+    it('should enrich CERT_HAS_EXPIRED', () => {
+      const err = Object.assign(new Error('cert expired'), { code: 'CERT_HAS_EXPIRED' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('https://expired.example.com', 'GET', err)
+      expect(msg).toContain('SSL/TLS certificate error')
+    })
+
+    it('should enrich UNABLE_TO_VERIFY_LEAF_SIGNATURE', () => {
+      const err = Object.assign(new Error('leaf sig'), { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('https://badcert.example.com', 'GET', err)
+      expect(msg).toContain('SSL/TLS certificate error')
+    })
+
+    it('should include error code for unknown codes', () => {
+      const err = Object.assign(new Error('something'), { code: 'ESOMETHING' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://example.com', 'DELETE', err)
+      expect(msg).toContain('Error code: ESOMETHING')
+      expect(msg).toContain('DELETE request failed')
+    })
+
+    it('should handle errors without a code', () => {
+      const err = new Error('generic error') as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://example.com', 'GET', err)
+      expect(msg).toContain('GET request failed')
+      expect(msg).not.toContain('Error code:')
     })
   })
 })

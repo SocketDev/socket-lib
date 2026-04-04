@@ -945,9 +945,8 @@ async function httpDownloadAttempt(
 /**
  * Build an enriched error message based on the error code.
  * Generic guidance (no product-specific branding).
- * @private
  */
-function enrichErrorMessage(
+export function enrichErrorMessage(
   url: string,
   method: string,
   error: NodeJS.ErrnoException,
