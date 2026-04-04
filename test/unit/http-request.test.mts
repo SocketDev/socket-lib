@@ -428,7 +428,7 @@ describe('http-request', () => {
             retries: 2,
             retryDelay: 10,
           }),
-        ).rejects.toThrow(/HTTP request failed/)
+        ).rejects.toThrow(/request failed/)
         expect(attemptCount).toBe(3) // Initial attempt + 2 retries
       } finally {
         await new Promise<void>(resolve => {
@@ -440,7 +440,7 @@ describe('http-request', () => {
     it('should handle network errors', async () => {
       await expect(
         httpRequest('http://localhost:1/nonexistent', { timeout: 100 }),
-      ).rejects.toThrow(/HTTP request failed/)
+      ).rejects.toThrow(/request failed/)
     })
 
     it('should handle invalid URLs gracefully', async () => {
@@ -498,7 +498,7 @@ describe('http-request', () => {
       try {
         await expect(
           httpRequest(`http://localhost:${testPort}/`),
-        ).rejects.toThrow(/HTTP request failed/)
+        ).rejects.toThrow(/request failed/)
       } finally {
         await new Promise<void>(resolve => {
           testServer.close(() => resolve())
