@@ -30,7 +30,7 @@ function getFs() {
   return _fs as typeof import('node:fs')
 }
 
-import type { IncomingMessage } from 'http'
+import type { IncomingHttpHeaders, IncomingMessage } from 'http'
 
 import type { Logger } from './logger.js'
 
@@ -72,6 +72,38 @@ function getHttps() {
     _https = /*@__PURE__*/ require('https')
   }
   return _https as typeof import('node:https')
+}
+
+/**
+ * Information passed to the onRequest hook before each request attempt.
+ */
+export interface HttpHookRequestInfo {
+  headers: Record<string, string>
+  method: string
+  timeout: number
+  url: string
+}
+
+/**
+ * Information passed to the onResponse hook after each request attempt.
+ */
+export interface HttpHookResponseInfo {
+  duration: number
+  error?: Error | undefined
+  headers?: IncomingHttpHeaders | undefined
+  method: string
+  status?: number | undefined
+  statusText?: string | undefined
+  url: string
+}
+
+/**
+ * Lifecycle hooks for observing HTTP request/response events.
+ * Hooks fire per-attempt (retries produce multiple hook calls).
+ */
+export interface HttpHooks {
+  onRequest?: ((info: HttpHookRequestInfo) => void) | undefined
+  onResponse?: ((info: HttpHookResponseInfo) => void) | undefined
 }
 
 /**
@@ -137,6 +169,11 @@ export interface HttpRequestOptions {
    */
   followRedirects?: boolean | undefined
   /**
+   * Lifecycle hooks for observing request/response events.
+   * Hooks fire per-attempt — retries and redirects each trigger separate hook calls.
+   */
+  hooks?: HttpHooks | undefined
+  /**
    * HTTP headers to send with the request.
    * A `User-Agent` header is automatically added if not provided.
    *
@@ -167,6 +204,14 @@ export interface HttpRequestOptions {
    * ```
    */
   maxRedirects?: number | undefined
+  /**
+   * Maximum response body size in bytes. Responses exceeding this limit
+   * will be rejected with an error. Prevents memory exhaustion from
+   * unexpectedly large responses.
+   *
+   * @default undefined (no limit)
+   */
+  maxResponseSize?: number | undefined
   /**
    * HTTP method to use for the request.
    *
@@ -281,7 +326,7 @@ export interface HttpResponse {
    * console.log(response.headers['set-cookie']) // May be string[]
    * ```
    */
-  headers: Record<string, string | string[] | undefined>
+  headers: IncomingHttpHeaders
   /**
    * Parse response body as JSON.
    * Type parameter `T` allows specifying the expected JSON structure.
@@ -346,6 +391,12 @@ export interface HttpResponse {
    * ```
    */
   text(): string
+  /**
+   * The underlying Node.js IncomingMessage for advanced use cases
+   * (e.g., streaming, custom header inspection). Only available when
+   * the response was not consumed by the convenience methods.
+   */
+  rawResponse?: IncomingMessage | undefined
 }
 
 /**
@@ -892,7 +943,46 @@ async function httpDownloadAttempt(
 }
 
 /**
+ * Build an enriched error message based on the error code.
+ * Generic guidance (no product-specific branding).
+ */
+export function enrichErrorMessage(
+  url: string,
+  method: string,
+  error: NodeJS.ErrnoException,
+): string {
+  const code = error.code
+  let message = `${method} request failed: ${url}`
+  if (code === 'ECONNREFUSED') {
+    message +=
+      '\n→ Connection refused. Server is unreachable.\n→ Check: Network connectivity and firewall settings.'
+  } else if (code === 'ENOTFOUND') {
+    message +=
+      '\n→ DNS lookup failed. Cannot resolve hostname.\n→ Check: Internet connection and DNS settings.'
+  } else if (code === 'ETIMEDOUT') {
+    message +=
+      '\n→ Connection timed out. Network or server issue.\n→ Try: Check network connectivity and retry.'
+  } else if (code === 'ECONNRESET') {
+    message +=
+      '\n→ Connection reset by server. Possible network interruption.\n→ Try: Retry the request.'
+  } else if (code === 'EPIPE') {
+    message +=
+      '\n→ Broken pipe. Server closed connection unexpectedly.\n→ Check: Authentication credentials and permissions.'
+  } else if (
+    code === 'CERT_HAS_EXPIRED' ||
+    code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+  ) {
+    message +=
+      '\n→ SSL/TLS certificate error.\n→ Check: System time and date are correct.\n→ Try: Update CA certificates on your system.'
+  } else if (code) {
+    message += `\n→ Error code: ${code}`
+  }
+  return message
+}
+
+/**
  * Single HTTP request attempt (used internally by httpRequest with retry logic).
+ * Supports hooks (fire per-attempt), maxResponseSize, and rawResponse.
  * @private
  */
 async function httpRequestAttempt(
@@ -904,10 +994,20 @@ async function httpRequestAttempt(
     ca,
     followRedirects = true,
     headers = {},
+    hooks,
     maxRedirects = 5,
+    maxResponseSize,
     method = 'GET',
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
+
+  const startTime = Date.now()
+  const mergedHeaders = {
+    'User-Agent': 'socket-registry/1.0',
+    ...headers,
+  }
+
+  hooks?.onRequest?.({ method, url, headers: mergedHeaders, timeout })
 
   return await new Promise((resolve, reject) => {
     const parsedUrl = new URL(url)
@@ -915,10 +1015,7 @@ async function httpRequestAttempt(
     const httpModule = isHttps ? getHttps() : getHttp()
 
     const requestOptions: Record<string, unknown> = {
-      headers: {
-        'User-Agent': 'socket-registry/1.0',
-        ...headers,
-      },
+      headers: mergedHeaders,
       hostname: parsedUrl.hostname,
       method,
       path: parsedUrl.pathname + parsedUrl.search,
@@ -926,16 +1023,23 @@ async function httpRequestAttempt(
       timeout,
     }
 
-    // Pass custom CA certificates for TLS connections.
     if (ca && isHttps) {
       requestOptions['ca'] = ca
+    }
+
+    const emitResponse = (info: Partial<HttpHookResponseInfo>) => {
+      hooks?.onResponse?.({
+        duration: Date.now() - startTime,
+        method,
+        url,
+        ...info,
+      })
     }
 
     /* c8 ignore start - External HTTP/HTTPS request */
     const request = httpModule.request(
       requestOptions,
       (res: IncomingMessage) => {
-        // Handle redirects
         if (
           followRedirects &&
           res.statusCode &&
@@ -943,6 +1047,12 @@ async function httpRequestAttempt(
           res.statusCode < 400 &&
           res.headers.location
         ) {
+          emitResponse({
+            headers: res.headers,
+            status: res.statusCode,
+            statusText: res.statusMessage,
+          })
+
           if (maxRedirects <= 0) {
             reject(
               new Error(
@@ -952,12 +1062,10 @@ async function httpRequestAttempt(
             return
           }
 
-          // Follow redirect
           const redirectUrl = res.headers.location.startsWith('http')
             ? res.headers.location
             : new URL(res.headers.location, url).toString()
 
-          // Reject HTTPS-to-HTTP downgrade redirects.
           const redirectParsed = new URL(redirectUrl)
           if (isHttps && redirectParsed.protocol !== 'https:') {
             reject(
@@ -974,7 +1082,9 @@ async function httpRequestAttempt(
               ca,
               followRedirects,
               headers,
+              hooks,
               maxRedirects: maxRedirects - 1,
+              maxResponseSize,
               method,
               timeout,
             }),
@@ -982,9 +1092,22 @@ async function httpRequestAttempt(
           return
         }
 
-        // Collect response data
         const chunks: Buffer[] = []
+        let totalBytes = 0
+
         res.on('data', (chunk: Buffer) => {
+          totalBytes += chunk.length
+          if (maxResponseSize && totalBytes > maxResponseSize) {
+            res.destroy()
+            const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
+            const maxMB = (maxResponseSize / (1024 * 1024)).toFixed(2)
+            const err = new Error(
+              `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
+            )
+            emitResponse({ error: err })
+            reject(err)
+            return
+          }
           chunks.push(chunk)
         })
 
@@ -1003,14 +1126,12 @@ async function httpRequestAttempt(
               )
             },
             body: responseBody,
-            headers: res.headers as Record<
-              string,
-              string | string[] | undefined
-            >,
+            headers: res.headers,
             json<T = unknown>(): T {
               return JSON.parse(responseBody.toString('utf8')) as T
             },
             ok,
+            rawResponse: res,
             status: res.statusCode || 0,
             statusText: res.statusMessage || '',
             text(): string {
@@ -1018,45 +1139,42 @@ async function httpRequestAttempt(
             },
           }
 
+          emitResponse({
+            headers: res.headers,
+            status: res.statusCode,
+            statusText: res.statusMessage,
+          })
+
           resolve(response)
         })
 
         res.on('error', (error: Error) => {
+          emitResponse({ error })
           reject(error)
         })
       },
     )
 
     request.on('error', (error: Error) => {
-      const code = (error as NodeJS.ErrnoException).code
-      let message = `HTTP request failed for ${url}: ${error.message}\n`
-
-      if (code === 'ENOTFOUND') {
-        message +=
-          'DNS lookup failed. Check the hostname and your network connection.'
-      } else if (code === 'ECONNREFUSED') {
-        message +=
-          'Connection refused. Verify the server is running and accessible.'
-      } else if (code === 'ETIMEDOUT') {
-        message +=
-          'Request timed out. Check your network or increase the timeout value.'
-      } else if (code === 'ECONNRESET') {
-        message +=
-          'Connection reset. The server may have closed the connection unexpectedly.'
-      } else {
-        message +=
-          'Check your network connection and verify the URL is correct.'
-      }
-
-      reject(new Error(message, { cause: error }))
+      const message = enrichErrorMessage(
+        url,
+        method,
+        error as NodeJS.ErrnoException,
+      )
+      const enhanced = new Error(message, { cause: error })
+      emitResponse({ error: enhanced })
+      reject(enhanced)
     })
 
     request.on('timeout', () => {
       request.destroy()
-      reject(new Error(`Request timed out after ${timeout}ms`))
+      const err = new Error(
+        `${method} request timed out after ${timeout}ms: ${url}\n→ Server did not respond in time.\n→ Try: Increase timeout or check network connectivity.`,
+      )
+      emitResponse({ error: err })
+      reject(err)
     })
 
-    // Send body if present
     if (body) {
       request.write(body)
     }
@@ -1384,7 +1502,9 @@ export async function httpRequest(
     ca,
     followRedirects = true,
     headers = {},
+    hooks,
     maxRedirects = 5,
+    maxResponseSize,
     method = 'GET',
     retries = 0,
     retryDelay = 1000,
@@ -1401,7 +1521,9 @@ export async function httpRequest(
         ca,
         followRedirects,
         headers,
+        hooks,
         maxRedirects,
+        maxResponseSize,
         method,
         timeout,
       })
