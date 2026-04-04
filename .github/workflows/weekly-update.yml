@@ -89,7 +89,7 @@ jobs:
 
           set +e
           claude --print \
-            --model haiku \
+            --model sonnet \
             --max-turns 25 \
             --allowedTools "Bash(pnpm:*)" "Bash(git:*)" "Read" "Write" "Edit" "Glob" "Grep" \
             "$(cat <<'PROMPT'
