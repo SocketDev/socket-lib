@@ -44,7 +44,8 @@ async function main() {
       process.stdout.write('\r\x1b[K')
     }
 
-    // Always update Socket packages (bypass taze maturity period).
+    // Update Socket packages — bypass minimum-release-age since these are
+    // our own packages and we trust them immediately.
     if (!quiet) {
       logger.progress('Updating Socket packages...')
     }
@@ -60,12 +61,12 @@ async function main() {
         '-r',
       ],
       {
+        env: { ...process.env, npm_config_minimum_release_age: '0' },
         shell: WIN32,
         stdio: quiet ? 'pipe' : 'inherit',
       },
     )
 
-    // Clear progress line.
     if (!quiet) {
       process.stdout.write('\r\x1b[K')
     }
