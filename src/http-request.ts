@@ -90,7 +90,7 @@ export interface HttpHookRequestInfo {
 export interface HttpHookResponseInfo {
   duration: number
   error?: Error | undefined
-  headers?: Record<string, string | string[] | undefined> | undefined
+  headers?: Record<string, Array<string> | string | undefined> | undefined
   method: string
   status?: number | undefined
   statusText?: string | undefined
@@ -326,7 +326,7 @@ export interface HttpResponse {
    * console.log(response.headers['set-cookie']) // May be string[]
    * ```
    */
-  headers: Record<string, string | string[] | undefined>
+  headers: Record<string, Array<string> | string | undefined>
   /**
    * Parse response body as JSON.
    * Type parameter `T` allows specifying the expected JSON structure.
@@ -1050,7 +1050,7 @@ async function httpRequestAttempt(
           emitResponse({
             headers: res.headers as Record<
               string,
-              string | string[] | undefined
+              Array<string> | string | undefined
             >,
             status: res.statusCode,
             statusText: res.statusMessage,
@@ -1131,7 +1131,7 @@ async function httpRequestAttempt(
             body: responseBody,
             headers: res.headers as Record<
               string,
-              string | string[] | undefined
+              Array<string> | string | undefined
             >,
             json<T = unknown>(): T {
               return JSON.parse(responseBody.toString('utf8')) as T
@@ -1148,7 +1148,7 @@ async function httpRequestAttempt(
           emitResponse({
             headers: res.headers as Record<
               string,
-              string | string[] | undefined
+              Array<string> | string | undefined
             >,
             status: res.statusCode,
             statusText: res.statusMessage,
