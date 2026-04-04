@@ -1819,7 +1819,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
   describe('hooks', () => {
     it('should call onRequest with method, url, headers, and timeout', async () => {
-      const requestInfos: HttpHookRequestInfo[] = []
+      const requestInfos: Array<HttpHookRequestInfo> = []
       await httpRequest(`${httpBaseUrl}/json`, {
         headers: { 'X-Custom': 'test-value' },
         hooks: {
@@ -1835,7 +1835,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should call onResponse with status, headers, and duration', async () => {
-      const responseInfos: HttpHookResponseInfo[] = []
+      const responseInfos: Array<HttpHookResponseInfo> = []
       await httpRequest(`${httpBaseUrl}/json`, {
         hooks: {
           onResponse: info => responseInfos.push(info),
@@ -1854,7 +1854,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should call onResponse with error on timeout', async () => {
-      const responseInfos: HttpHookResponseInfo[] = []
+      const responseInfos: Array<HttpHookResponseInfo> = []
       await httpRequest(`${httpBaseUrl}/timeout`, {
         timeout: 50,
         hooks: {
@@ -1866,8 +1866,8 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should fire hooks per-attempt on retries', async () => {
-      const requestInfos: HttpHookRequestInfo[] = []
-      const responseInfos: HttpHookResponseInfo[] = []
+      const requestInfos: Array<HttpHookRequestInfo> = []
+      const responseInfos: Array<HttpHookResponseInfo> = []
 
       let attemptCount = 0
       const testServer = http.createServer((_req, _res) => {
@@ -1905,8 +1905,8 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should fire hooks on redirect hops with correct status codes', async () => {
-      const requestInfos: HttpHookRequestInfo[] = []
-      const responseInfos: HttpHookResponseInfo[] = []
+      const requestInfos: Array<HttpHookRequestInfo> = []
+      const responseInfos: Array<HttpHookResponseInfo> = []
 
       await httpRequest(`${httpBaseUrl}/redirect`, {
         hooks: {
@@ -1922,7 +1922,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should report POST method in hook info', async () => {
-      const requestInfos: HttpHookRequestInfo[] = []
+      const requestInfos: Array<HttpHookRequestInfo> = []
       await httpRequest(`${httpBaseUrl}/echo-body`, {
         method: 'POST',
         body: 'test',
@@ -1939,14 +1939,14 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should pass hooks through httpJson and httpText', async () => {
-      const jsonInfos: HttpHookResponseInfo[] = []
+      const jsonInfos: Array<HttpHookResponseInfo> = []
       await httpJson(`${httpBaseUrl}/json`, {
         hooks: { onResponse: info => jsonInfos.push(info) },
       })
       expect(jsonInfos).toHaveLength(1)
       expect(jsonInfos[0]!.status).toBe(200)
 
-      const textInfos: HttpHookResponseInfo[] = []
+      const textInfos: Array<HttpHookResponseInfo> = []
       await httpText(`${httpBaseUrl}/text`, {
         hooks: { onResponse: info => textInfos.push(info) },
       })
@@ -2013,7 +2013,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should fire onResponse hook with error on size limit', async () => {
-      const responseInfos: HttpHookResponseInfo[] = []
+      const responseInfos: Array<HttpHookResponseInfo> = []
       await httpRequest(`${httpBaseUrl}/large-body`, {
         maxResponseSize: 50,
         hooks: {
@@ -2056,7 +2056,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
   describe('enrichErrorMessage', () => {
     it('should enrich each known error code', () => {
-      const cases: [string, string][] = [
+      const cases: Array<[string, string]> = [
         ['ECONNREFUSED', 'Connection refused'],
         ['ENOTFOUND', 'DNS lookup failed'],
         ['ETIMEDOUT', 'Connection timed out'],
