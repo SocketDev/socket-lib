@@ -1894,7 +1894,9 @@ abc123def456789012345678901234567890123456789012345678901234abcd
           expect(info.error).toBeDefined()
         }
       } finally {
-        await new Promise<void>(resolve => { testServer.close(() => resolve()) })
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
       }
     })
 
@@ -1994,8 +1996,8 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
       // At least one hook call should contain the size limit error
       expect(responseInfos.length).toBeGreaterThanOrEqual(1)
-      const sizeError = responseInfos.find(
-        info => info.error?.message?.includes('exceeds maximum size limit'),
+      const sizeError = responseInfos.find(info =>
+        info.error?.message?.includes('exceeds maximum size limit'),
       )
       expect(sizeError).toBeDefined()
     })
@@ -2010,7 +2012,9 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
     it('should have headers on rawResponse', async () => {
       const response = await httpRequest(`${httpBaseUrl}/json`)
-      expect(response.rawResponse!.headers['content-type']).toContain('application/json')
+      expect(response.rawResponse!.headers['content-type']).toContain(
+        'application/json',
+      )
     })
 
     it('should be available on non-2xx responses', async () => {
@@ -2022,52 +2026,68 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
   describe('enrichErrorMessage', () => {
     it('should enrich ECONNREFUSED', () => {
-      const err = Object.assign(new Error('connect failed'), { code: 'ECONNREFUSED' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('connect failed'), {
+        code: 'ECONNREFUSED',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://localhost:1', 'GET', err)
       expect(msg).toContain('Connection refused')
       expect(msg).toContain('GET request failed')
     })
 
     it('should enrich ENOTFOUND', () => {
-      const err = Object.assign(new Error('not found'), { code: 'ENOTFOUND' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('not found'), {
+        code: 'ENOTFOUND',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://no-such-host.invalid', 'POST', err)
       expect(msg).toContain('DNS lookup failed')
       expect(msg).toContain('POST request failed')
     })
 
     it('should enrich ETIMEDOUT', () => {
-      const err = Object.assign(new Error('timed out'), { code: 'ETIMEDOUT' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('timed out'), {
+        code: 'ETIMEDOUT',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://example.com', 'GET', err)
       expect(msg).toContain('Connection timed out')
     })
 
     it('should enrich ECONNRESET', () => {
-      const err = Object.assign(new Error('reset'), { code: 'ECONNRESET' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('reset'), {
+        code: 'ECONNRESET',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://example.com', 'GET', err)
       expect(msg).toContain('Connection reset')
     })
 
     it('should enrich EPIPE', () => {
-      const err = Object.assign(new Error('broken pipe'), { code: 'EPIPE' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('broken pipe'), {
+        code: 'EPIPE',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://example.com', 'PUT', err)
       expect(msg).toContain('Broken pipe')
       expect(msg).toContain('PUT request failed')
     })
 
     it('should enrich CERT_HAS_EXPIRED', () => {
-      const err = Object.assign(new Error('cert expired'), { code: 'CERT_HAS_EXPIRED' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('cert expired'), {
+        code: 'CERT_HAS_EXPIRED',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('https://expired.example.com', 'GET', err)
       expect(msg).toContain('SSL/TLS certificate error')
     })
 
     it('should enrich UNABLE_TO_VERIFY_LEAF_SIGNATURE', () => {
-      const err = Object.assign(new Error('leaf sig'), { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('leaf sig'), {
+        code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('https://badcert.example.com', 'GET', err)
       expect(msg).toContain('SSL/TLS certificate error')
     })
 
     it('should include error code for unknown codes', () => {
-      const err = Object.assign(new Error('something'), { code: 'ESOMETHING' }) as NodeJS.ErrnoException
+      const err = Object.assign(new Error('something'), {
+        code: 'ESOMETHING',
+      }) as NodeJS.ErrnoException
       const msg = enrichErrorMessage('http://example.com', 'DELETE', err)
       expect(msg).toContain('Error code: ESOMETHING')
       expect(msg).toContain('DELETE request failed')
@@ -2078,6 +2098,152 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const msg = enrichErrorMessage('http://example.com', 'GET', err)
       expect(msg).toContain('GET request failed')
       expect(msg).not.toContain('Error code:')
+    })
+
+    it('should include url in the message', () => {
+      const err = Object.assign(new Error('fail'), { code: 'ECONNREFUSED' }) as NodeJS.ErrnoException
+      const msg = enrichErrorMessage('http://my-server:8080/api', 'GET', err)
+      expect(msg).toContain('http://my-server:8080/api')
+    })
+  })
+
+  describe('hooks — edge cases', () => {
+    it('should work with only onRequest (no onResponse)', async () => {
+      const infos: HttpHookRequestInfo[] = []
+      await httpRequest(`${httpBaseUrl}/json`, {
+        hooks: { onRequest: info => infos.push(info) },
+      })
+      expect(infos).toHaveLength(1)
+    })
+
+    it('should work with only onResponse (no onRequest)', async () => {
+      const infos: HttpHookResponseInfo[] = []
+      await httpRequest(`${httpBaseUrl}/json`, {
+        hooks: { onResponse: info => infos.push(info) },
+      })
+      expect(infos).toHaveLength(1)
+      expect(infos[0]!.status).toBe(200)
+    })
+
+    it('should work with empty hooks object', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`, { hooks: {} })
+      expect(response.ok).toBe(true)
+    })
+
+    it('should pass hooks through httpJson', async () => {
+      const infos: HttpHookResponseInfo[] = []
+      await httpJson(`${httpBaseUrl}/json`, {
+        hooks: { onResponse: info => infos.push(info) },
+      })
+      expect(infos).toHaveLength(1)
+      expect(infos[0]!.status).toBe(200)
+    })
+
+    it('should pass hooks through httpText', async () => {
+      const infos: HttpHookResponseInfo[] = []
+      await httpText(`${httpBaseUrl}/text`, {
+        hooks: { onResponse: info => infos.push(info) },
+      })
+      expect(infos).toHaveLength(1)
+      expect(infos[0]!.status).toBe(200)
+    })
+
+    it('should include response headers in onResponse', async () => {
+      const infos: HttpHookResponseInfo[] = []
+      await httpRequest(`${httpBaseUrl}/json`, {
+        hooks: { onResponse: info => infos.push(info) },
+      })
+      expect(infos[0]!.headers).toBeDefined()
+      const ct = infos[0]!.headers?.['content-type']
+      expect(ct).toContain('application/json')
+    })
+
+    it('should report non-zero duration in onResponse', async () => {
+      const infos: HttpHookResponseInfo[] = []
+      await httpRequest(`${httpBaseUrl}/slow`, {
+        hooks: { onResponse: info => infos.push(info) },
+      })
+      expect(infos[0]!.duration).toBeGreaterThanOrEqual(0)
+    })
+  })
+
+  describe('maxResponseSize — edge cases', () => {
+    it('should allow response exactly at maxResponseSize', async () => {
+      // /json body is small (<1000 bytes); set limit to its exact size
+      const probe = await httpRequest(`${httpBaseUrl}/json`)
+      const exactSize = probe.body.length
+
+      const response = await httpRequest(`${httpBaseUrl}/json`, {
+        maxResponseSize: exactSize,
+      })
+      expect(response.ok).toBe(true)
+      expect(response.body.length).toBe(exactSize)
+    })
+
+    it('should reject when maxResponseSize is 0', async () => {
+      // 0 is falsy so should be treated as "no limit"
+      const response = await httpRequest(`${httpBaseUrl}/json`, {
+        maxResponseSize: 0,
+      })
+      expect(response.ok).toBe(true)
+    })
+
+    it('should enforce maxResponseSize on redirected response', async () => {
+      // /redirect -> /text (19 bytes "Plain text response")
+      await expect(
+        httpRequest(`${httpBaseUrl}/redirect`, {
+          maxResponseSize: 5,
+        }),
+      ).rejects.toThrow(/exceeds maximum size limit/)
+    })
+  })
+
+  describe('rawResponse — edge cases', () => {
+    it('should have rawResponse after redirect', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/redirect`)
+      expect(response.rawResponse).toBeDefined()
+      // rawResponse should be from the final response, not the redirect
+      expect(response.rawResponse!.statusCode).toBe(200)
+    })
+
+    it('should have rawResponse on server error', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/server-error`)
+      expect(response.rawResponse).toBeDefined()
+      expect(response.rawResponse!.statusCode).toBe(500)
+    })
+  })
+
+  describe('enriched error messages — integration', () => {
+    it('should include method and url in timeout errors', async () => {
+      try {
+        await httpRequest(`${httpBaseUrl}/timeout`, { timeout: 50 })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        const msg = (e as Error).message
+        expect(msg).toContain('GET')
+        expect(msg).toContain('timed out')
+        expect(msg).toContain(`${httpBaseUrl}/timeout`)
+      }
+    })
+
+    it('should include method and url in connection errors', async () => {
+      try {
+        await httpRequest('http://localhost:1/no-server', { timeout: 100 })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        const msg = (e as Error).message
+        expect(msg).toContain('request failed')
+        expect(msg).toContain('localhost:1')
+      }
+    })
+
+    it('should preserve cause chain on network errors', async () => {
+      try {
+        await httpRequest('http://localhost:1/no-server', { timeout: 100 })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect((e as Error).cause).toBeDefined()
+      }
     })
   })
 })
