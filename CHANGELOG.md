@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.12.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.12.0) - 2026-04-04
+
+### Added — http-request
+
+- Lifecycle hooks (`onRequest`/`onResponse`) on `HttpRequestOptions` (#133)
+  - Fire per-attempt — retries and redirects each trigger separate hook calls
+  - `HttpHooks`, `HttpHookRequestInfo`, `HttpHookResponseInfo` types exported
+- `maxResponseSize` option to reject responses exceeding a byte limit
+  - Works through redirects, `httpJson`, and `httpText`
+- `rawResponse` property on `HttpResponse` exposing the underlying `IncomingMessage`
+- `enrichErrorMessage()` exported for reusable error enrichment
+
+### Changed — http-request
+
+- Error messages now include HTTP method and URL for easier debugging
+- `HttpResponse.headers` type changed from `Record<string, string | string[] | undefined>` to `IncomingHttpHeaders`
+
 ## [5.11.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.4) - 2026-03-28
 
 ### Changed
