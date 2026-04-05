@@ -2149,7 +2149,10 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(response.ok).toBe(true)
       expect(response.status).toBe(200)
       expect(response.statusText).toBe('OK')
-      expect(response.json()).toEqual({ message: 'Hello, World!', status: 'success' })
+      expect(response.json()).toEqual({
+        message: 'Hello, World!',
+        status: 'success',
+      })
       expect(response.headers['content-type']).toBe('application/json')
       expect(response.rawResponse).toBe(msg)
     })
