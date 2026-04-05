@@ -32,6 +32,12 @@ function getFs() {
 
 import type { IncomingHttpHeaders, IncomingMessage } from 'http'
 
+/** IncomingMessage received as a response to a client request (http.request callback). */
+export type IncomingResponse = IncomingMessage
+
+/** IncomingMessage received as a request in a server handler (http.createServer callback). */
+export type IncomingRequest = IncomingMessage
+
 import type { Logger } from './logger.js'
 
 let _crypto: typeof import('node:crypto') | undefined
@@ -392,11 +398,46 @@ export interface HttpResponse {
    */
   text(): string
   /**
-   * The underlying Node.js IncomingMessage for advanced use cases
+   * The underlying Node.js IncomingResponse for advanced use cases
    * (e.g., streaming, custom header inspection). Only available when
    * the response was not consumed by the convenience methods.
    */
-  rawResponse?: IncomingMessage | undefined
+  rawResponse?: IncomingResponse | undefined
+}
+
+/**
+ * Read and buffer a client-side IncomingResponse into an HttpResponse.
+ *
+ * Useful when you have a raw response from code that bypasses
+ * `httpRequest()` (e.g., multipart form-data uploads via `http.request()`,
+ * or responses from third-party HTTP libraries) and need to convert it
+ * into the standard HttpResponse interface.
+ */
+export async function readIncomingResponse(
+  msg: IncomingResponse,
+): Promise<HttpResponse> {
+  const chunks: Buffer[] = []
+  for await (const chunk of msg) {
+    chunks.push(chunk as Buffer)
+  }
+  const body = Buffer.concat(chunks)
+  const status = msg.statusCode ?? 0
+  const statusText = msg.statusMessage ?? ''
+  return {
+    arrayBuffer: () =>
+      body.buffer.slice(
+        body.byteOffset,
+        body.byteOffset + body.byteLength,
+      ) as ArrayBuffer,
+    body,
+    headers: msg.headers,
+    json: <T = unknown>() => JSON.parse(body.toString('utf8')) as T,
+    ok: status >= 200 && status < 300,
+    rawResponse: msg,
+    status,
+    statusText,
+    text: () => body.toString('utf8'),
+  }
 }
 
 /**
@@ -804,7 +845,7 @@ async function httpDownloadAttempt(
     /* c8 ignore start - External HTTP/HTTPS download request */
     const request = httpModule.request(
       requestOptions,
-      (res: IncomingMessage) => {
+      (res: IncomingResponse) => {
         // Handle redirects
         if (
           followRedirects &&
@@ -1039,7 +1080,7 @@ async function httpRequestAttempt(
     /* c8 ignore start - External HTTP/HTTPS request */
     const request = httpModule.request(
       requestOptions,
-      (res: IncomingMessage) => {
+      (res: IncomingResponse) => {
         if (
           followRedirects &&
           res.statusCode &&
