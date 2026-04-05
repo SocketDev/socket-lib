@@ -25,10 +25,13 @@ import {
   httpRequest,
   httpText,
   parseChecksums,
+  readIncomingResponse,
 } from '@socketsecurity/lib/http-request'
 import type {
   HttpHookRequestInfo,
   HttpHookResponseInfo,
+  IncomingRequest,
+  IncomingResponse,
 } from '@socketsecurity/lib/http-request'
 import { Logger } from '@socketsecurity/lib/logger'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -215,6 +218,12 @@ afterAll(async () => {
     httpServer.close(() => resolve())
   })
 })
+
+function makeRawRequest(url: string): Promise<http.IncomingMessage> {
+  return new Promise((resolve, reject) => {
+    http.get(url, resolve).on('error', reject)
+  })
+}
 
 describe('http-request', () => {
   describe('httpRequest', () => {
@@ -2115,6 +2124,140 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         expect(msg).toContain('localhost:1')
         expect((e as Error).cause).toBeDefined()
       }
+    })
+  })
+
+  describe('type aliases', () => {
+    it('IncomingResponse should be assignable from http.IncomingMessage', () => {
+      const msg: http.IncomingMessage = {} as http.IncomingMessage
+      const response: IncomingResponse = msg
+      expect(response).toBe(msg)
+    })
+
+    it('IncomingRequest should be assignable from http.IncomingMessage', () => {
+      const msg: http.IncomingMessage = {} as http.IncomingMessage
+      const request: IncomingRequest = msg
+      expect(request).toBe(msg)
+    })
+  })
+
+  describe('readIncomingResponse', () => {
+    it('should read a 200 JSON response', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/json`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+      expect(response.statusText).toBe('OK')
+      expect(response.json()).toEqual({ message: 'Hello, World!', status: 'success' })
+      expect(response.headers['content-type']).toBe('application/json')
+      expect(response.rawResponse).toBe(msg)
+    })
+
+    it('should read a plain text response', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/text`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+      expect(response.text()).toBe('Plain text response')
+    })
+
+    it('should handle 404 responses', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/not-found`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.ok).toBe(false)
+      expect(response.status).toBe(404)
+      expect(response.statusText).toBe('Not Found')
+      expect(response.text()).toBe('Not Found')
+    })
+
+    it('should handle 500 server errors', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/server-error`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.ok).toBe(false)
+      expect(response.status).toBe(500)
+      expect(response.text()).toBe('Internal Server Error')
+    })
+
+    it('should provide arrayBuffer from body', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/text`)
+      const response = await readIncomingResponse(msg)
+      const ab = response.arrayBuffer()
+
+      expect(ab).toBeInstanceOf(ArrayBuffer)
+      expect(ab.byteLength).toBeGreaterThan(0)
+      expect(Buffer.from(ab).toString('utf8')).toBe('Plain text response')
+    })
+
+    it('should handle binary response data', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/binary`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.ok).toBe(true)
+      expect(response.body.length).toBe(7)
+      expect(response.body[0]).toBe(0x00)
+      expect(response.body[1]).toBe(0x01)
+      expect(response.body[6]).toBe(0xfd)
+    })
+
+    it('should produce same result as httpRequest for same endpoint', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/json`)
+      const fromRaw = await readIncomingResponse(msg)
+      const fromLib = await httpRequest(`${httpBaseUrl}/json`)
+
+      expect(fromRaw.ok).toBe(fromLib.ok)
+      expect(fromRaw.status).toBe(fromLib.status)
+      expect(fromRaw.json()).toEqual(fromLib.json())
+      expect(fromRaw.text()).toBe(fromLib.text())
+    })
+
+    it('should handle large response bodies', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/large-body`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.ok).toBe(true)
+      expect(response.text()).toBe('X'.repeat(10_000))
+      expect(response.body.length).toBe(10_000)
+    })
+
+    it('should default status to 0 when statusCode is undefined', async () => {
+      const { Readable } = await import('node:stream')
+      const fakeMsg = new Readable({
+        read() {
+          this.push('body')
+          this.push(null)
+        },
+      }) as unknown as IncomingResponse
+      Object.assign(fakeMsg, {
+        headers: {},
+        statusCode: undefined,
+        statusMessage: undefined,
+      })
+
+      const response = await readIncomingResponse(fakeMsg)
+
+      expect(response.status).toBe(0)
+      expect(response.statusText).toBe('')
+      expect(response.ok).toBe(false)
+      expect(response.text()).toBe('body')
+    })
+
+    it('should preserve response headers', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/json`)
+      const response = await readIncomingResponse(msg)
+
+      expect(response.headers['content-type']).toBe('application/json')
+      expect(response.headers).toBeDefined()
+    })
+
+    it('should throw on invalid JSON from json()', async () => {
+      const msg = await makeRawRequest(`${httpBaseUrl}/text`)
+      const response = await readIncomingResponse(msg)
+
+      expect(() => response.json()).toThrow()
     })
   })
 })
