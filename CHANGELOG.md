@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.13.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.13.0) - 2026-04-05
+
+### Added — http-request
+
+- `readIncomingResponse()` — reads and buffers a Node.js `IncomingResponse` into an `HttpResponse` (#143)
+  - Useful for converting raw responses from code that bypasses `httpRequest()` (e.g. multipart form-data uploads) into the standard `HttpResponse` interface
+- `IncomingResponse` type alias — disambiguates `IncomingMessage` as a client-side response
+- `IncomingRequest` type alias — disambiguates `IncomingMessage` as a server-side request
+
+### Changed — http-request
+
+- Internal `httpRequestAttempt` callbacks now use `IncomingResponse` type
+- `HttpResponse.rawResponse` type narrowed from `IncomingMessage` to `IncomingResponse`
+
 ## [5.12.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.12.0) - 2026-04-04
 
 ### Added — http-request
