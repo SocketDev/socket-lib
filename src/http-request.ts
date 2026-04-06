@@ -282,7 +282,7 @@ export interface HttpRequestOptions {
    *     // Don't retry client errors (except 429)
    *     if (error instanceof HttpResponseError) {
    *       if (error.response.status === 429) {
-   *         const retryAfter = parseRetryAfter(error.response.headers['retry-after'])
+   *         const retryAfter = parseRetryAfterHeader(error.response.headers['retry-after'])
    *         return retryAfter ?? undefined
    *       }
    *       if (error.response.status >= 400 && error.response.status < 500) {
@@ -548,13 +548,13 @@ export class HttpResponseError extends Error {
  *
  * @example
  * ```ts
- * const delay = parseRetryAfter(response.headers['retry-after'])
+ * const delay = parseRetryAfterHeader(response.headers['retry-after'])
  * if (delay !== undefined) {
  *   await new Promise(resolve => setTimeout(resolve, delay))
  * }
  * ```
  */
-export function parseRetryAfter(
+export function parseRetryAfterHeader(
   value: string | string[] | undefined,
 ): number | undefined {
   if (!value) {
