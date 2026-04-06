@@ -717,7 +717,7 @@
     "update": "node scripts/update.mjs"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.89",
+    "@anthropic-ai/claude-code": "2.1.92",
     "@babel/core": "7.28.4",
     "@babel/parser": "7.28.4",
     "@babel/traverse": "7.28.4",
