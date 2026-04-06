@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.15.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.15.0) - 2026-04-06
+
+### Added — http-request
+
+- `stream` option on `HttpRequestOptions` — resolves with `HttpResponse` immediately after headers arrive, leaving `rawResponse` unconsumed for piping to files
+- `headers`, `ok`, `status`, `statusText` fields on `HttpDownloadResult`
+
+### Changed — http-request
+
+- `httpDownload` now uses `httpRequest` with `stream: true` internally, eliminating ~120 lines of duplicated HTTP plumbing
+
 ## [5.14.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.14.0) - 2026-04-06
 
 ### Added — http-request
