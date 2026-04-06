@@ -26,7 +26,7 @@ import {
   httpRequest,
   httpText,
   parseChecksums,
-  parseRetryAfter,
+  parseRetryAfterHeader,
   readIncomingResponse,
   sanitizeHeaders,
 } from '@socketsecurity/lib/http-request'
@@ -2578,34 +2578,34 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
   })
 
-  describe('parseRetryAfter', () => {
+  describe('parseRetryAfterHeader', () => {
     it('should parse integer seconds', () => {
-      expect(parseRetryAfter('120')).toBe(120_000)
+      expect(parseRetryAfterHeader('120')).toBe(120_000)
     })
 
     it('should parse zero seconds', () => {
-      expect(parseRetryAfter('0')).toBe(0)
+      expect(parseRetryAfterHeader('0')).toBe(0)
     })
 
     it('should return undefined for undefined input', () => {
-      expect(parseRetryAfter(undefined)).toBeUndefined()
+      expect(parseRetryAfterHeader(undefined)).toBeUndefined()
     })
 
     it('should return undefined for empty string', () => {
-      expect(parseRetryAfter('')).toBeUndefined()
+      expect(parseRetryAfterHeader('')).toBeUndefined()
     })
 
     it('should return undefined for empty array', () => {
-      expect(parseRetryAfter([])).toBeUndefined()
+      expect(parseRetryAfterHeader([])).toBeUndefined()
     })
 
     it('should take first value from array', () => {
-      expect(parseRetryAfter(['60', '120'])).toBe(60_000)
+      expect(parseRetryAfterHeader(['60', '120'])).toBe(60_000)
     })
 
     it('should parse future HTTP-date', () => {
       const future = new Date(Date.now() + 5000).toUTCString()
-      const result = parseRetryAfter(future)!
+      const result = parseRetryAfterHeader(future)!
 
       expect(result).toBeGreaterThan(0)
       expect(result).toBeLessThanOrEqual(6000)
@@ -2613,15 +2613,15 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
     it('should return undefined for past HTTP-date', () => {
       const past = new Date(Date.now() - 60_000).toUTCString()
-      expect(parseRetryAfter(past)).toBeUndefined()
+      expect(parseRetryAfterHeader(past)).toBeUndefined()
     })
 
     it('should return undefined for negative seconds', () => {
-      expect(parseRetryAfter('-5')).toBeUndefined()
+      expect(parseRetryAfterHeader('-5')).toBeUndefined()
     })
 
     it('should return undefined for non-parseable string', () => {
-      expect(parseRetryAfter('not-a-number-or-date')).toBeUndefined()
+      expect(parseRetryAfterHeader('not-a-number-or-date')).toBeUndefined()
     })
   })
 
@@ -3001,7 +3001,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
           retryDelay: 10,
           onRetry: (_attempt, error) => {
             if (error instanceof HttpResponseError) {
-              const retryAfter = parseRetryAfter(
+              const retryAfter = parseRetryAfterHeader(
                 error.response.headers['retry-after'],
               )
               return retryAfter ?? undefined
@@ -3059,10 +3059,10 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
   })
 
-  describe('parseRetryAfter - additional edge cases', () => {
+  describe('parseRetryAfterHeader - additional edge cases', () => {
     it('should reject partial numeric strings like "10abc"', () => {
       // Strict parsing — "10abc" is not a valid delay-seconds value
-      expect(parseRetryAfter('10abc')).toBeUndefined()
+      expect(parseRetryAfterHeader('10abc')).toBeUndefined()
     })
   })
 
@@ -3115,10 +3115,10 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
   })
 
-  describe('parseRetryAfter - whitespace', () => {
+  describe('parseRetryAfterHeader - whitespace', () => {
     it('should handle whitespace-padded integer', () => {
       // parseInt trims leading whitespace
-      expect(parseRetryAfter('  60  ')).toBe(60_000)
+      expect(parseRetryAfterHeader('  60  ')).toBe(60_000)
     })
   })
 
