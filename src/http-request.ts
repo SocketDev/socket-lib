@@ -14,6 +14,8 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
+import type { Readable } from 'node:stream'
+
 import { safeDelete } from './fs.js'
 
 let _fs: typeof import('node:fs') | undefined
@@ -118,7 +120,17 @@ export interface HttpHooks {
 export interface HttpRequestOptions {
   /**
    * Request body to send.
-   * Can be a string (e.g., JSON) or Buffer (e.g., binary data).
+   * Can be a string, Buffer, or Readable stream.
+   *
+   * When a Readable stream is provided, it is piped directly to the request.
+   * If the stream has a `getHeaders()` method (duck-typed, e.g., the `form-data`
+   * npm package), its headers (Content-Type with boundary) are automatically
+   * merged into the request headers.
+   *
+   * **Note:** Streaming bodies are one-shot — they cannot be replayed. Using a
+   * Readable body with `retries > 0` throws an error. Buffer the body as a
+   * string/Buffer if retries are needed. Redirects are also disabled for
+   * streaming bodies since the stream is consumed on the first request.
    *
    * @example
    * ```ts
@@ -135,9 +147,18 @@ export interface HttpRequestOptions {
    *   method: 'POST',
    *   body: buffer
    * })
+   *
+   * // Stream form-data (npm package, not native FormData)
+   * import FormData from 'form-data'
+   * const form = new FormData()
+   * form.append('file', createReadStream('data.json'))
+   * await httpRequest('https://api.example.com/upload', {
+   *   method: 'POST',
+   *   body: form  // auto-merges form.getHeaders()
+   * })
    * ```
    */
-  body?: Buffer | string | undefined
+  body?: Buffer | Readable | string | undefined
   /**
    * Custom CA certificates for TLS connections.
    * When provided, these certificates are combined with the default trust
@@ -242,6 +263,44 @@ export interface HttpRequestOptions {
    */
   method?: string | undefined
   /**
+   * Callback invoked before each retry attempt.
+   * Allows customizing retry behavior per-attempt (e.g., skip 4xx, honor Retry-After).
+   *
+   * @param attempt - Current retry attempt number (1-based)
+   * @param error - The error that triggered the retry (HttpResponseError for HTTP errors)
+   * @param delay - The calculated delay in ms before next retry
+   * @returns `false` to stop retrying and rethrow,
+   *          a `number` to override the delay (ms),
+   *          or `undefined` to use the calculated delay
+   *
+   * @example
+   * ```ts
+   * await httpRequest('https://api.example.com/data', {
+   *   retries: 3,
+   *   throwOnError: true,
+   *   onRetry: (attempt, error, delay) => {
+   *     // Don't retry client errors (except 429)
+   *     if (error instanceof HttpResponseError) {
+   *       if (error.response.status === 429) {
+   *         const retryAfter = parseRetryAfter(error.response.headers['retry-after'])
+   *         return retryAfter ?? undefined
+   *       }
+   *       if (error.response.status >= 400 && error.response.status < 500) {
+   *         return false
+   *       }
+   *     }
+   *   }
+   * })
+   * ```
+   */
+  onRetry?:
+    | ((
+        attempt: number,
+        error: unknown,
+        delay: number,
+      ) => boolean | number | undefined)
+    | undefined
+  /**
    * Number of retry attempts for failed requests.
    * Uses exponential backoff: delay = `retryDelay` * 2^attempt.
    *
@@ -273,6 +332,23 @@ export interface HttpRequestOptions {
    * ```
    */
   retryDelay?: number | undefined
+  /**
+   * When true, non-2xx HTTP responses throw an `HttpResponseError` instead
+   * of resolving with `response.ok === false`. This makes HTTP error
+   * responses eligible for retry via the `retries` option.
+   *
+   * @default false
+   *
+   * @example
+   * ```ts
+   * // Throw on 4xx/5xx responses (enabling retry for 5xx)
+   * await httpRequest('https://api.example.com/data', {
+   *   throwOnError: true,
+   *   retries: 3
+   * })
+   * ```
+   */
+  throwOnError?: boolean | undefined
   /**
    * Request timeout in milliseconds.
    * If the request takes longer than this, it will be aborted.
@@ -438,6 +514,122 @@ export async function readIncomingResponse(
     statusText,
     text: () => body.toString('utf8'),
   }
+}
+
+/**
+ * Error thrown when an HTTP response has a non-2xx status code
+ * and `throwOnError` is enabled. Carries the full `HttpResponse`
+ * so callers can inspect status, headers, and body.
+ */
+export class HttpResponseError extends Error {
+  response: HttpResponse
+
+  constructor(response: HttpResponse, message?: string | undefined) {
+    const statusCode = response.status ?? 'unknown'
+    const statusMessage = response.statusText || 'No status message'
+    super(message ?? `HTTP ${statusCode}: ${statusMessage}`)
+    this.name = 'HttpResponseError'
+    this.response = response
+    Error.captureStackTrace(this, HttpResponseError)
+  }
+}
+
+/**
+ * Parse a `Retry-After` HTTP header value into milliseconds.
+ *
+ * Supports both formats defined in RFC 7231 §7.1.3:
+ * - **delay-seconds**: integer number of seconds (e.g., `"120"`)
+ * - **HTTP-date**: an absolute date/time (e.g., `"Fri, 31 Dec 2027 23:59:59 GMT"`)
+ *
+ * When the header is an array (multiple values), the first element is used.
+ *
+ * @param value - The raw Retry-After header value(s)
+ * @returns Delay in milliseconds, or `undefined` if the value cannot be parsed
+ *
+ * @example
+ * ```ts
+ * const delay = parseRetryAfter(response.headers['retry-after'])
+ * if (delay !== undefined) {
+ *   await new Promise(resolve => setTimeout(resolve, delay))
+ * }
+ * ```
+ */
+export function parseRetryAfter(
+  value: string | string[] | undefined,
+): number | undefined {
+  if (!value) {
+    return undefined
+  }
+  // Handle array of values (take first).
+  const raw = Array.isArray(value) ? value[0] : value
+  if (!raw) {
+    return undefined
+  }
+  // Try parsing as seconds (strict integer — reject partial like "10abc").
+  const trimmed = raw.trim()
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = Number(trimmed)
+    return seconds * 1000
+  }
+  // Try parsing as HTTP date.
+  const date = new Date(raw)
+  if (!Number.isNaN(date.getTime())) {
+    const delayMs = date.getTime() - Date.now()
+    if (delayMs > 0) {
+      return delayMs
+    }
+  }
+  return undefined
+}
+
+/**
+ * Redact sensitive HTTP headers for safe logging and telemetry.
+ *
+ * Replaces values of sensitive headers (Authorization, Cookie, etc.)
+ * with `[REDACTED]`. Non-sensitive headers are passed through unchanged.
+ * Array values are joined with `', '`.
+ *
+ * @param headers - HTTP headers to sanitize
+ * @returns A new object with sensitive values redacted
+ *
+ * @example
+ * ```ts
+ * const safe = sanitizeHeaders({
+ *   'authorization': 'Bearer secret',
+ *   'content-type': 'application/json'
+ * })
+ * // { authorization: '[REDACTED]', 'content-type': 'application/json' }
+ * ```
+ */
+export function sanitizeHeaders(
+  headers: Record<string, unknown> | undefined,
+): Record<string, string> {
+  if (!headers) {
+    return {}
+  }
+  const sensitiveHeaders = new Set([
+    'authorization',
+    'cookie',
+    'proxy-authorization',
+    'proxy-authenticate',
+    'set-cookie',
+    'www-authenticate',
+  ])
+  const result: Record<string, string> = { __proto__: null } as Record<
+    string,
+    string
+  >
+  for (const key of Object.keys(headers)) {
+    const value = headers[key]
+    if (sensitiveHeaders.has(key.toLowerCase())) {
+      result[key] = '[REDACTED]'
+    } else if (Array.isArray(value)) {
+      result[key] = value.join(', ')
+    } else if (value !== undefined && value !== null) {
+      result[key] = String(value)
+    }
+  }
+  return result
 }
 
 /**
@@ -1043,14 +1235,52 @@ async function httpRequestAttempt(
   } = { __proto__: null, ...options } as HttpRequestOptions
 
   const startTime = Date.now()
+
+  // Auto-merge FormData headers (Content-Type with boundary).
+  const streamHeaders =
+    body &&
+    typeof body === 'object' &&
+    'getHeaders' in body &&
+    typeof (body as { getHeaders?: unknown }).getHeaders === 'function'
+      ? (body as { getHeaders: () => Record<string, string> }).getHeaders()
+      : undefined
+
   const mergedHeaders = {
     'User-Agent': 'socket-registry/1.0',
+    ...streamHeaders,
     ...headers,
   }
 
   hooks?.onRequest?.({ method, url, headers: mergedHeaders, timeout })
 
   return await new Promise((resolve, reject) => {
+    // Settled flag guards all resolve/reject paths so that at most one
+    // fires, even when destroy() cascades multiple events.
+    let settled = false
+    const resolveOnce = (response: HttpResponse) => {
+      if (settled) {
+        return
+      }
+      settled = true
+      resolve(response)
+    }
+    const rejectOnce = (err: Error) => {
+      if (settled) {
+        return
+      }
+      settled = true
+      // Clean up streaming body if still active to avoid leaked descriptors.
+      if (
+        body &&
+        typeof body === 'object' &&
+        typeof (body as { destroy?: unknown }).destroy === 'function'
+      ) {
+        ;(body as { destroy: () => void }).destroy()
+      }
+      emitResponse({ error: err })
+      reject(err)
+    }
+
     const parsedUrl = new URL(url)
     const isHttps = parsedUrl.protocol === 'https:'
     const httpModule = isHttps ? getHttps() : getHttp()
@@ -1069,12 +1299,16 @@ async function httpRequestAttempt(
     }
 
     const emitResponse = (info: Partial<HttpHookResponseInfo>) => {
-      hooks?.onResponse?.({
-        duration: Date.now() - startTime,
-        method,
-        url,
-        ...info,
-      })
+      try {
+        hooks?.onResponse?.({
+          duration: Date.now() - startTime,
+          method,
+          url,
+          ...info,
+        })
+      } catch {
+        // User-provided hook threw — swallow to avoid leaving the promise pending.
+      }
     }
 
     /* c8 ignore start - External HTTP/HTTPS request */
@@ -1088,6 +1322,9 @@ async function httpRequestAttempt(
           res.statusCode < 400 &&
           res.headers.location
         ) {
+          // Drain the redirect response body to free the socket.
+          res.resume()
+
           emitResponse({
             headers: res.headers,
             status: res.statusCode,
@@ -1095,6 +1332,8 @@ async function httpRequestAttempt(
           })
 
           if (maxRedirects <= 0) {
+            // Hook already emitted above — reject directly to avoid double-fire.
+            settled = true
             reject(
               new Error(
                 `Too many redirects (exceeded maximum: ${maxRedirects})`,
@@ -1109,6 +1348,8 @@ async function httpRequestAttempt(
 
           const redirectParsed = new URL(redirectUrl)
           if (isHttps && redirectParsed.protocol !== 'https:') {
+            // Hook already emitted above — reject directly to avoid double-fire.
+            settled = true
             reject(
               new Error(
                 `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
@@ -1117,6 +1358,8 @@ async function httpRequestAttempt(
             return
           }
 
+          // Redirect chaining — Promise adoption handles the inner result.
+          settled = true
           resolve(
             httpRequestAttempt(redirectUrl, {
               body,
@@ -1140,19 +1383,24 @@ async function httpRequestAttempt(
           totalBytes += chunk.length
           if (maxResponseSize && totalBytes > maxResponseSize) {
             res.destroy()
+            request.destroy()
             const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
             const maxMB = (maxResponseSize / (1024 * 1024)).toFixed(2)
-            const err = new Error(
-              `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
+            rejectOnce(
+              new Error(
+                `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
+              ),
             )
-            emitResponse({ error: err })
-            reject(err)
             return
           }
           chunks.push(chunk)
         })
 
         res.on('end', () => {
+          if (settled) {
+            return
+          }
+
           const responseBody = Buffer.concat(chunks)
           const ok =
             res.statusCode !== undefined &&
@@ -1186,12 +1434,11 @@ async function httpRequestAttempt(
             statusText: res.statusMessage,
           })
 
-          resolve(response)
+          resolveOnce(response)
         })
 
         res.on('error', (error: Error) => {
-          emitResponse({ error })
-          reject(error)
+          rejectOnce(error)
         })
       },
     )
@@ -1202,25 +1449,42 @@ async function httpRequestAttempt(
         method,
         error as NodeJS.ErrnoException,
       )
-      const enhanced = new Error(message, { cause: error })
-      emitResponse({ error: enhanced })
-      reject(enhanced)
+      rejectOnce(new Error(message, { cause: error }))
     })
 
     request.on('timeout', () => {
       request.destroy()
-      const err = new Error(
-        `${method} request timed out after ${timeout}ms: ${url}\n→ Server did not respond in time.\n→ Try: Increase timeout or check network connectivity.`,
+      rejectOnce(
+        new Error(
+          `${method} request timed out after ${timeout}ms: ${url}\n→ Server did not respond in time.\n→ Try: Increase timeout or check network connectivity.`,
+        ),
       )
-      emitResponse({ error: err })
-      reject(err)
     })
 
     if (body) {
+      // Duck-type: streams have a `pipe` method.
+      if (
+        typeof body === 'object' &&
+        typeof (body as { pipe?: unknown }).pipe === 'function'
+      ) {
+        // Readable stream (including FormData) — pipe it.
+        // The error listener is cleaned up implicitly: on failure rejectOnce
+        // destroys the stream, and on success the stream is fully consumed.
+        // Both cases prevent further error events.
+        const stream = body as import('node:stream').Readable
+        stream.on('error', (err: Error) => {
+          request.destroy()
+          rejectOnce(err)
+        })
+        stream.pipe(request)
+        return
+      }
+      // String or Buffer.
       request.write(body)
+      request.end()
+    } else {
+      request.end()
     }
-
-    request.end()
     /* c8 ignore stop */
   })
 }
@@ -1478,6 +1742,8 @@ export async function httpJson<T = unknown>(
     ...headers,
   }
 
+  // httpRequest may throw HttpResponseError when throwOnError is enabled.
+  // Let it propagate — don't mask it with a generic Error.
   const response = await httpRequest(url, {
     body,
     headers: mergedHeaders,
@@ -1547,27 +1813,56 @@ export async function httpRequest(
     maxRedirects = 5,
     maxResponseSize,
     method = 'GET',
+    onRetry,
     retries = 0,
     retryDelay = 1000,
+    throwOnError = false,
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
+
+  // Readable streams are one-shot — they cannot be replayed on retry or redirect.
+  // Duck-type check: streams have a `pipe` method.
+  const isStreamBody =
+    body !== undefined &&
+    typeof body === 'object' &&
+    typeof (body as { pipe?: unknown }).pipe === 'function'
+
+  if (isStreamBody && retries > 0) {
+    throw new Error(
+      'Streaming body (Readable/FormData) cannot be used with retries. ' +
+        'Streams are consumed on first attempt and cannot be replayed. ' +
+        'Set retries: 0 or buffer the body as a string/Buffer.',
+    )
+  }
+
+  const attemptOpts: HttpRequestOptions = {
+    body,
+    ca,
+    // Disable redirect following for stream bodies — the stream is consumed
+    // on the first request and cannot be re-piped to the redirect target.
+    followRedirects: isStreamBody ? false : followRedirects,
+    headers,
+    hooks,
+    maxRedirects,
+    maxResponseSize,
+    method,
+    timeout,
+  }
 
   // Retry logic with exponential backoff
   let lastError: Error | undefined
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       // eslint-disable-next-line no-await-in-loop
-      return await httpRequestAttempt(url, {
-        body,
-        ca,
-        followRedirects,
-        headers,
-        hooks,
-        maxRedirects,
-        maxResponseSize,
-        method,
-        timeout,
-      })
+      const response = await httpRequestAttempt(url, attemptOpts)
+
+      // When throwOnError is enabled, non-2xx responses become errors
+      // so they can be retried or caught by callers.
+      if (throwOnError && !response.ok) {
+        throw new HttpResponseError(response)
+      }
+
+      return response
     } catch (e) {
       lastError = e as Error
 
@@ -1576,10 +1871,26 @@ export async function httpRequest(
         break
       }
 
-      // Retry with exponential backoff
+      // Consult onRetry callback if provided.
       const delayMs = retryDelay * 2 ** attempt
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delayMs))
+      if (onRetry) {
+        const retryResult = onRetry(attempt + 1, e, delayMs)
+        // false = stop retrying, rethrow immediately.
+        if (retryResult === false) {
+          break
+        }
+        // A number overrides the delay (clamped to >= 0; NaN falls back to default).
+        const actualDelay =
+          typeof retryResult === 'number' && !Number.isNaN(retryResult)
+            ? Math.max(0, retryResult)
+            : delayMs
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(resolve => setTimeout(resolve, actualDelay))
+      } else {
+        // Default: retry with exponential backoff
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(resolve => setTimeout(resolve, delayMs))
+      }
     }
   }
 
@@ -1658,6 +1969,8 @@ export async function httpText(
     ...headers,
   }
 
+  // httpRequest may throw HttpResponseError when throwOnError is enabled.
+  // Let it propagate — don't mask it with a generic Error.
   const response = await httpRequest(url, {
     body,
     headers: mergedHeaders,
