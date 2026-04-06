@@ -860,7 +860,14 @@ describe('releases/github', () => {
           // Create a dummy binary file
           const content = '#!/bin/bash\necho "test"'
           await fs.writeFile(outputPath, content, 'utf8')
-          return { path: outputPath, size: content.length }
+          return {
+            headers: {},
+            ok: true as const,
+            path: outputPath,
+            size: content.length,
+            status: 200,
+            statusText: 'OK',
+          }
         })
 
         // First download - creates cache
@@ -964,7 +971,14 @@ describe('releases/github', () => {
           // Create a dummy binary file
           const content = '#!/bin/bash\necho "test"'
           await fs.writeFile(outputPath, content, 'utf8')
-          return { path: outputPath, size: content.length }
+          return {
+            headers: {},
+            ok: true as const,
+            path: outputPath,
+            size: content.length,
+            status: 200,
+            statusText: 'OK',
+          }
         })
 
         // First download
