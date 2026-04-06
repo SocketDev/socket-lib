@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.14.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.14.0) - 2026-04-06
+
+### Added — http-request
+
+- `HttpResponseError` class — thrown on non-2xx when `throwOnError` is enabled, carries the full `HttpResponse`
+- `throwOnError` option on `HttpRequestOptions` — non-2xx responses throw instead of resolving with `ok: false`, enabling retry of HTTP errors
+- `onRetry` callback on `HttpRequestOptions` — customize retry behavior per-attempt (return `false` to stop, a `number` to override delay, `undefined` for default backoff)
+- Streaming body support — `body` accepts `Readable` streams (incl. `form-data` npm package), auto-merges `getHeaders()` when present
+- `parseRetryAfterHeader()` — standalone RFC 7231 §7.1.3 `Retry-After` header parser (strict integer seconds + HTTP-date formats)
+- `sanitizeHeaders()` — redact sensitive headers (`authorization`, `cookie`, `set-cookie`, `proxy-authorization`, `proxy-authenticate`, `www-authenticate`) for safe logging
+
+### Changed — http-request
+
+- `HttpRequestOptions.body` type widened from `Buffer | string` to `Buffer | Readable | string`
+- Redirect responses now drained via `res.resume()` to free sockets
+- `maxResponseSize` exceeded now cleans up both response and request
+- `onResponse` hooks wrapped in try/catch — user hook errors can no longer leave promises pending
+
 ## [5.13.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.13.0) - 2026-04-05
 
 ### Added — http-request
