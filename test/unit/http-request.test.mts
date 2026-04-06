@@ -20,12 +20,15 @@ import { Writable } from 'node:stream'
 import {
   enrichErrorMessage,
   fetchChecksums,
+  HttpResponseError,
   httpDownload,
   httpJson,
   httpRequest,
   httpText,
   parseChecksums,
+  parseRetryAfter,
   readIncomingResponse,
+  sanitizeHeaders,
 } from '@socketsecurity/lib/http-request'
 import type {
   HttpHookRequestInfo,
@@ -189,6 +192,22 @@ beforeAll(async () => {
       } else if (url === '/no-redirect') {
         res.writeHead(301, { Location: '/text' })
         res.end()
+      } else if (url === '/upload-form') {
+        let body = ''
+        req.on('data', chunk => {
+          body += chunk.toString()
+        })
+        req.on('end', () => {
+          const contentType = req.headers['content-type'] || ''
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(
+            JSON.stringify({
+              contentType,
+              bodyLength: body.length,
+              hasMultipart: contentType.includes('multipart'),
+            }),
+          )
+        })
       } else {
         res.writeHead(200, { 'Content-Type': 'text/plain' })
         res.end('OK')
@@ -2030,11 +2049,11 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         },
       }).catch(() => {})
 
-      expect(responseInfos.length).toBeGreaterThanOrEqual(1)
-      const sizeError = responseInfos.find(info =>
-        info.error?.message?.includes('exceeds maximum size limit'),
+      expect(responseInfos).toHaveLength(1)
+      expect(responseInfos[0]!.error).toBeDefined()
+      expect(responseInfos[0]!.error!.message).toMatch(
+        /exceeds maximum size limit/,
       )
-      expect(sizeError).toBeDefined()
     })
   })
 
@@ -2261,6 +2280,1008 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const response = await readIncomingResponse(msg)
 
       expect(() => response.json()).toThrow()
+    })
+  })
+
+  describe('HttpResponseError', () => {
+    it('should include status and statusText in message', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/not-found`)
+      const error = new HttpResponseError(response)
+
+      expect(error.name).toBe('HttpResponseError')
+      expect(error.message).toContain('404')
+      expect(error.message).toContain('Not Found')
+      expect(error.response).toBe(response)
+    })
+
+    it('should accept a custom message', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/server-error`)
+      const error = new HttpResponseError(response, 'Custom error message')
+
+      expect(error.message).toBe('Custom error message')
+      expect(error.response.status).toBe(500)
+    })
+
+    it('should be an instance of Error', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/not-found`)
+      const error = new HttpResponseError(response)
+
+      expect(error).toBeInstanceOf(Error)
+      expect(error).toBeInstanceOf(HttpResponseError)
+    })
+
+    it('should have a stack trace', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/not-found`)
+      const error = new HttpResponseError(response)
+
+      expect(error.stack).toBeDefined()
+      expect(error.stack).toContain('HttpResponseError')
+    })
+  })
+
+  describe('throwOnError', () => {
+    it('should throw HttpResponseError on 404 when enabled', async () => {
+      try {
+        await httpRequest(`${httpBaseUrl}/not-found`, { throwOnError: true })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpResponseError)
+        const err = e as HttpResponseError
+        expect(err.response.status).toBe(404)
+        expect(err.response.text()).toBe('Not Found')
+      }
+    })
+
+    it('should throw HttpResponseError on 500 when enabled', async () => {
+      try {
+        await httpRequest(`${httpBaseUrl}/server-error`, { throwOnError: true })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpResponseError)
+        const err = e as HttpResponseError
+        expect(err.response.status).toBe(500)
+      }
+    })
+
+    it('should not throw on 2xx when enabled', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`, {
+        throwOnError: true,
+      })
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+    })
+
+    it('should resolve non-2xx without throwOnError (default)', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/not-found`)
+      expect(response.ok).toBe(false)
+      expect(response.status).toBe(404)
+    })
+
+    it('should enable retrying non-2xx responses', async () => {
+      let attemptCount = 0
+      const testServer = http.createServer((_req, res) => {
+        attemptCount++
+        if (attemptCount < 3) {
+          res.writeHead(500)
+          res.end('Server Error')
+        } else {
+          res.writeHead(200)
+          res.end('Recovered')
+        }
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const response = await httpRequest(`http://localhost:${testPort}/`, {
+          throwOnError: true,
+          retries: 3,
+          retryDelay: 10,
+        })
+        expect(response.text()).toBe('Recovered')
+        expect(attemptCount).toBe(3)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+  })
+
+  describe('onRetry', () => {
+    it('should call onRetry on each retry attempt', async () => {
+      const retryCalls: Array<{ attempt: number; delay: number }> = []
+      const testServer = http.createServer((req, _res) => {
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await httpRequest(`http://localhost:${testPort}/`, {
+          retries: 2,
+          retryDelay: 10,
+          onRetry: (attempt, _error, delay) => {
+            retryCalls.push({ attempt, delay })
+            return undefined
+          },
+        }).catch(() => {})
+
+        expect(retryCalls).toHaveLength(2)
+        expect(retryCalls[0]!.attempt).toBe(1)
+        expect(retryCalls[1]!.attempt).toBe(2)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should stop retrying when onRetry returns false', async () => {
+      let attemptCount = 0
+      const testServer = http.createServer((req, _res) => {
+        attemptCount++
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await expect(
+          httpRequest(`http://localhost:${testPort}/`, {
+            retries: 5,
+            retryDelay: 10,
+            onRetry: () => false,
+          }),
+        ).rejects.toThrow()
+
+        // Only 1 attempt — onRetry returned false, stopping before any retry
+        expect(attemptCount).toBe(1)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should override delay when onRetry returns a number', async () => {
+      const startTime = Date.now()
+      let attemptCount = 0
+      const testServer = http.createServer((req, _res) => {
+        attemptCount++
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await httpRequest(`http://localhost:${testPort}/`, {
+          retries: 1,
+          retryDelay: 5000, // default would be very long
+          onRetry: () => 10, // override to 10ms
+        }).catch(() => {})
+
+        const elapsed = Date.now() - startTime
+        expect(attemptCount).toBe(2)
+        // Should be fast since we overrode to 10ms, not 5000ms
+        expect(elapsed).toBeLessThan(2000)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should receive HttpResponseError when throwOnError + non-2xx', async () => {
+      let receivedError: unknown
+      let attemptCount = 0
+      const testServer = http.createServer((_req, res) => {
+        attemptCount++
+        if (attemptCount < 3) {
+          res.writeHead(500)
+          res.end('Error')
+        } else {
+          res.writeHead(200)
+          res.end('OK')
+        }
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const response = await httpRequest(`http://localhost:${testPort}/`, {
+          throwOnError: true,
+          retries: 3,
+          retryDelay: 10,
+          onRetry: (_attempt, error) => {
+            receivedError = error
+            return undefined
+          },
+        })
+
+        expect(response.text()).toBe('OK')
+        expect(receivedError).toBeInstanceOf(HttpResponseError)
+        expect((receivedError as HttpResponseError).response.status).toBe(500)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should skip 4xx retries via onRetry returning false', async () => {
+      let attemptCount = 0
+      const testServer = http.createServer((_req, res) => {
+        attemptCount++
+        res.writeHead(403)
+        res.end('Forbidden')
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await expect(
+          httpRequest(`http://localhost:${testPort}/`, {
+            throwOnError: true,
+            retries: 3,
+            retryDelay: 10,
+            onRetry: (_attempt, error) => {
+              if (
+                error instanceof HttpResponseError &&
+                error.response.status >= 400 &&
+                error.response.status < 500
+              ) {
+                return false
+              }
+              return undefined
+            },
+          }),
+        ).rejects.toThrow(HttpResponseError)
+
+        // Should not retry 4xx — only 1 attempt
+        expect(attemptCount).toBe(1)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+  })
+
+  describe('parseRetryAfter', () => {
+    it('should parse integer seconds', () => {
+      expect(parseRetryAfter('120')).toBe(120_000)
+    })
+
+    it('should parse zero seconds', () => {
+      expect(parseRetryAfter('0')).toBe(0)
+    })
+
+    it('should return undefined for undefined input', () => {
+      expect(parseRetryAfter(undefined)).toBeUndefined()
+    })
+
+    it('should return undefined for empty string', () => {
+      expect(parseRetryAfter('')).toBeUndefined()
+    })
+
+    it('should return undefined for empty array', () => {
+      expect(parseRetryAfter([])).toBeUndefined()
+    })
+
+    it('should take first value from array', () => {
+      expect(parseRetryAfter(['60', '120'])).toBe(60_000)
+    })
+
+    it('should parse future HTTP-date', () => {
+      const future = new Date(Date.now() + 5000).toUTCString()
+      const result = parseRetryAfter(future)!
+
+      expect(result).toBeGreaterThan(0)
+      expect(result).toBeLessThanOrEqual(6000)
+    })
+
+    it('should return undefined for past HTTP-date', () => {
+      const past = new Date(Date.now() - 60_000).toUTCString()
+      expect(parseRetryAfter(past)).toBeUndefined()
+    })
+
+    it('should return undefined for negative seconds', () => {
+      expect(parseRetryAfter('-5')).toBeUndefined()
+    })
+
+    it('should return undefined for non-parseable string', () => {
+      expect(parseRetryAfter('not-a-number-or-date')).toBeUndefined()
+    })
+  })
+
+  describe('sanitizeHeaders', () => {
+    it('should redact authorization header', () => {
+      const result = sanitizeHeaders({
+        authorization: 'Bearer secret-token',
+        'content-type': 'application/json',
+      })
+
+      expect(result['authorization']).toBe('[REDACTED]')
+      expect(result['content-type']).toBe('application/json')
+    })
+
+    it('should redact all sensitive headers', () => {
+      const result = sanitizeHeaders({
+        authorization: 'Bearer token',
+        cookie: 'session=abc',
+        'set-cookie': 'session=abc; Path=/',
+        'proxy-authorization': 'Basic xyz',
+        'proxy-authenticate': 'Basic',
+        'www-authenticate': 'Bearer',
+      })
+
+      for (const value of Object.values(result)) {
+        expect(value).toBe('[REDACTED]')
+      }
+    })
+
+    it('should be case-insensitive for header names', () => {
+      const result = sanitizeHeaders({
+        Authorization: 'Bearer secret',
+        COOKIE: 'session=abc',
+      })
+
+      expect(result['Authorization']).toBe('[REDACTED]')
+      expect(result['COOKIE']).toBe('[REDACTED]')
+    })
+
+    it('should join array values', () => {
+      const result = sanitizeHeaders({
+        accept: ['text/html', 'application/json'],
+      })
+
+      expect(result['accept']).toBe('text/html, application/json')
+    })
+
+    it('should return empty object for undefined input', () => {
+      const result = sanitizeHeaders(undefined)
+      expect(result).toEqual({})
+    })
+
+    it('should skip null and undefined values', () => {
+      const result = sanitizeHeaders({
+        present: 'value',
+        absent: undefined,
+        empty: null,
+      })
+
+      expect(result['present']).toBe('value')
+      expect('absent' in result).toBe(false)
+      expect('empty' in result).toBe(false)
+    })
+
+    it('should stringify non-string values', () => {
+      const result = sanitizeHeaders({
+        'content-length': 42 as unknown,
+        'x-flag': true as unknown,
+      })
+
+      expect(result['content-length']).toBe('42')
+      expect(result['x-flag']).toBe('true')
+    })
+
+    it('should pass through non-sensitive headers unchanged', () => {
+      const result = sanitizeHeaders({
+        'content-type': 'application/json',
+        'user-agent': 'my-sdk/1.0',
+        'x-request-id': 'abc-123',
+      })
+
+      expect(result['content-type']).toBe('application/json')
+      expect(result['user-agent']).toBe('my-sdk/1.0')
+      expect(result['x-request-id']).toBe('abc-123')
+    })
+  })
+
+  describe('streaming body', () => {
+    it('should pipe a Readable stream as request body', async () => {
+      const { Readable } = await import('node:stream')
+      const body = Readable.from(Buffer.from('streamed data'))
+
+      const response = await httpRequest(`${httpBaseUrl}/echo-body`, {
+        method: 'POST',
+        body: body as import('node:stream').Readable,
+      })
+
+      expect(response.text()).toBe('streamed data')
+    })
+
+    it('should auto-merge FormData-like getHeaders()', async () => {
+      const { Readable } = await import('node:stream')
+
+      // Create a minimal FormData-like object.
+      const boundary = 'test-boundary-123'
+      const formBody = [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="field"',
+        '',
+        'value',
+        `--${boundary}--`,
+      ].join('\r\n')
+
+      const stream = Readable.from(
+        Buffer.from(formBody),
+      ) as import('node:stream').Readable & {
+        getHeaders: () => Record<string, string>
+      }
+      stream.getHeaders = () => ({
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+      })
+
+      const response = await httpRequest(`${httpBaseUrl}/upload-form`, {
+        method: 'POST',
+        body: stream,
+      })
+
+      const data = response.json<{
+        contentType: string
+        hasMultipart: boolean
+      }>()
+      expect(data.hasMultipart).toBe(true)
+      expect(data.contentType).toContain('multipart/form-data')
+    })
+
+    it('should allow user headers to override stream headers', async () => {
+      const { Readable } = await import('node:stream')
+
+      const stream = Readable.from(
+        Buffer.from('override test'),
+      ) as import('node:stream').Readable & {
+        getHeaders: () => Record<string, string>
+      }
+      stream.getHeaders = () => ({
+        'content-type': 'multipart/form-data; boundary=auto',
+      })
+
+      const response = await httpRequest(`${httpBaseUrl}/upload-form`, {
+        method: 'POST',
+        body: stream,
+        headers: {
+          'content-type': 'application/octet-stream',
+        },
+      })
+
+      const data = response.json<{
+        contentType: string
+        hasMultipart: boolean
+      }>()
+      // User header should override getHeaders()
+      expect(data.contentType).toBe('application/octet-stream')
+      expect(data.hasMultipart).toBe(false)
+    })
+
+    it('should throw when streaming body is used with retries > 0', async () => {
+      const { Readable } = await import('node:stream')
+      const body = Readable.from(Buffer.from('data'))
+
+      await expect(
+        httpRequest(`${httpBaseUrl}/echo-body`, {
+          method: 'POST',
+          body: body as import('node:stream').Readable,
+          retries: 1,
+        }),
+      ).rejects.toThrow(/Streaming body.*cannot be used with retries/)
+    })
+
+    it('should disable redirects for streaming bodies', async () => {
+      const { Readable } = await import('node:stream')
+      const body = Readable.from(Buffer.from('redirect-body'))
+
+      // /redirect returns 302 -> /text, but with a stream body
+      // redirects are disabled, so we get the raw 302.
+      const response = await httpRequest(`${httpBaseUrl}/redirect`, {
+        method: 'POST',
+        body: body as import('node:stream').Readable,
+      })
+
+      // Should get the 302 directly, not follow to /text
+      expect(response.status).toBe(302)
+      expect(response.ok).toBe(false)
+    })
+
+    it('should handle stream errors without double-firing hooks', async () => {
+      const { Readable } = await import('node:stream')
+      const responseInfos: Array<
+        import('@socketsecurity/lib/http-request').HttpHookResponseInfo
+      > = []
+
+      const errorStream = new Readable({
+        read() {
+          // Emit error after a tick to allow piping to start.
+          process.nextTick(() => {
+            this.destroy(new Error('stream exploded'))
+          })
+        },
+      })
+
+      await expect(
+        httpRequest(`${httpBaseUrl}/echo-body`, {
+          method: 'POST',
+          body: errorStream as import('node:stream').Readable,
+          hooks: {
+            onResponse: info => responseInfos.push(info),
+          },
+        }),
+      ).rejects.toThrow(/stream exploded/)
+
+      // The settled guard should prevent duplicate onResponse hook calls.
+      expect(responseInfos).toHaveLength(1)
+    })
+  })
+
+  describe('onRetry - additional edge cases', () => {
+    it('should propagate errors thrown by onRetry', async () => {
+      const testServer = http.createServer((req, _res) => {
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await expect(
+          httpRequest(`http://localhost:${testPort}/`, {
+            retries: 2,
+            retryDelay: 10,
+            onRetry: () => {
+              throw new Error('onRetry kaboom')
+            },
+          }),
+        ).rejects.toThrow('onRetry kaboom')
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should treat onRetry returning 0 as 0ms delay', async () => {
+      const startTime = Date.now()
+      let attemptCount = 0
+      const testServer = http.createServer((req, _res) => {
+        attemptCount++
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await httpRequest(`http://localhost:${testPort}/`, {
+          retries: 2,
+          retryDelay: 5000,
+          onRetry: () => 0,
+        }).catch(() => {})
+
+        const elapsed = Date.now() - startTime
+        expect(attemptCount).toBe(3)
+        // 0ms override — should be much faster than 5s default
+        expect(elapsed).toBeLessThan(2000)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should clamp negative onRetry delay to 0', async () => {
+      const startTime = Date.now()
+      let attemptCount = 0
+      const testServer = http.createServer((req, _res) => {
+        attemptCount++
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await httpRequest(`http://localhost:${testPort}/`, {
+          retries: 1,
+          retryDelay: 5000,
+          onRetry: () => -100,
+        }).catch(() => {})
+
+        const elapsed = Date.now() - startTime
+        expect(attemptCount).toBe(2)
+        // Negative clamped to 0 — should be fast
+        expect(elapsed).toBeLessThan(2000)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should fall back to default delay when onRetry returns NaN', async () => {
+      const startTime = Date.now()
+      let attemptCount = 0
+      const testServer = http.createServer((req, _res) => {
+        attemptCount++
+        req.socket.destroy()
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        await httpRequest(`http://localhost:${testPort}/`, {
+          retries: 1,
+          retryDelay: 10, // small default so test is fast
+          onRetry: () => NaN,
+        }).catch(() => {})
+
+        const elapsed = Date.now() - startTime
+        expect(attemptCount).toBe(2)
+        // NaN falls back to default retryDelay (10ms) — should be fast
+        expect(elapsed).toBeLessThan(2000)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+
+    it('should use onRetry with rate-limited endpoint and Retry-After', async () => {
+      let attemptCount = 0
+      const testServer = http.createServer((_req, res) => {
+        attemptCount++
+        if (attemptCount < 2) {
+          res.writeHead(429, { 'Retry-After': '0' })
+          res.end('Rate limited')
+        } else {
+          res.writeHead(200)
+          res.end('OK')
+        }
+      })
+
+      await new Promise<void>(resolve => {
+        testServer.listen(0, () => resolve())
+      })
+
+      const address = testServer.address()
+      const testPort = address && typeof address === 'object' ? address.port : 0
+
+      try {
+        const response = await httpRequest(`http://localhost:${testPort}/`, {
+          throwOnError: true,
+          retries: 2,
+          retryDelay: 10,
+          onRetry: (_attempt, error) => {
+            if (error instanceof HttpResponseError) {
+              const retryAfter = parseRetryAfter(
+                error.response.headers['retry-after'],
+              )
+              return retryAfter ?? undefined
+            }
+            return undefined
+          },
+        })
+
+        expect(response.text()).toBe('OK')
+        expect(attemptCount).toBe(2)
+      } finally {
+        await new Promise<void>(resolve => {
+          testServer.close(() => resolve())
+        })
+      }
+    })
+  })
+
+  describe('throwOnError - additional edge cases', () => {
+    it('should throw HttpResponseError for 3xx when followRedirects is false', async () => {
+      try {
+        await httpRequest(`${httpBaseUrl}/redirect`, {
+          throwOnError: true,
+          followRedirects: false,
+        })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpResponseError)
+        expect((e as HttpResponseError).response.status).toBe(302)
+      }
+    })
+
+    it('should propagate HttpResponseError through httpJson', async () => {
+      try {
+        await httpJson(`${httpBaseUrl}/not-found`, {
+          throwOnError: true,
+        })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpResponseError)
+        expect((e as HttpResponseError).response.status).toBe(404)
+      }
+    })
+
+    it('should propagate HttpResponseError through httpText', async () => {
+      try {
+        await httpText(`${httpBaseUrl}/server-error`, {
+          throwOnError: true,
+        })
+        expect.unreachable('should have thrown')
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpResponseError)
+        expect((e as HttpResponseError).response.status).toBe(500)
+      }
+    })
+  })
+
+  describe('parseRetryAfter - additional edge cases', () => {
+    it('should reject partial numeric strings like "10abc"', () => {
+      // Strict parsing — "10abc" is not a valid delay-seconds value
+      expect(parseRetryAfter('10abc')).toBeUndefined()
+    })
+  })
+
+  describe('sanitizeHeaders - additional edge cases', () => {
+    it('should handle __proto__ and constructor keys safely', () => {
+      const result = sanitizeHeaders({
+        __proto__: 'poison',
+        constructor: 'attack',
+        'x-normal': 'fine',
+      } as unknown as Record<string, unknown>)
+
+      // __proto__ is not enumerable via Object.keys on a normal object,
+      // but constructor is.
+      expect(result['x-normal']).toBe('fine')
+      expect(result['constructor']).toBe('attack')
+      // The output object should have null prototype.
+      expect(Object.getPrototypeOf(result)).toBeNull()
+    })
+
+    it('should skip inherited prototype properties', () => {
+      const proto = { inherited: 'should-not-appear' }
+      const obj = Object.create(proto) as Record<string, unknown>
+      obj['own'] = 'visible'
+
+      const result = sanitizeHeaders(obj)
+      expect(result['own']).toBe('visible')
+      expect('inherited' in result).toBe(false)
+    })
+  })
+
+  describe('maxResponseSize - settle guard', () => {
+    it('should fire onResponse exactly once when maxResponseSize exceeded', async () => {
+      const responseInfos: Array<
+        import('@socketsecurity/lib/http-request').HttpHookResponseInfo
+      > = []
+
+      await httpRequest(`${httpBaseUrl}/large-body`, {
+        maxResponseSize: 50,
+        hooks: {
+          onResponse: info => responseInfos.push(info),
+        },
+      }).catch(() => {})
+
+      // The settled guard prevents duplicate hook fires.
+      expect(responseInfos).toHaveLength(1)
+      expect(responseInfos[0]!.error).toBeDefined()
+      expect(responseInfos[0]!.error!.message).toMatch(
+        /exceeds maximum size limit/,
+      )
+    })
+  })
+
+  describe('parseRetryAfter - whitespace', () => {
+    it('should handle whitespace-padded integer', () => {
+      // parseInt trims leading whitespace
+      expect(parseRetryAfter('  60  ')).toBe(60_000)
+    })
+  })
+
+  describe('Uint8Array body', () => {
+    it('should send Uint8Array as request body (not treated as stream)', async () => {
+      const data = new Uint8Array([104, 101, 108, 108, 111]) // "hello"
+      const response = await httpRequest(`${httpBaseUrl}/echo-body`, {
+        method: 'POST',
+        body: Buffer.from(data) as Buffer,
+      })
+
+      expect(response.text()).toBe('hello')
+    })
+  })
+
+  describe('onRetry - not called with retries: 0', () => {
+    it('should not call onRetry when retries is 0', async () => {
+      let onRetryCalled = false
+
+      try {
+        await httpRequest(`${httpBaseUrl}/not-found`, {
+          throwOnError: true,
+          retries: 0,
+          onRetry: () => {
+            onRetryCalled = true
+            return undefined
+          },
+        })
+      } catch {
+        // Expected to throw
+      }
+
+      expect(onRetryCalled).toBe(false)
+    })
+  })
+
+  describe('redirect hook and cleanup', () => {
+    it('should fire onResponse exactly once per redirect hop on maxRedirects exceeded', async () => {
+      const responseInfos: Array<
+        import('@socketsecurity/lib/http-request').HttpHookResponseInfo
+      > = []
+
+      await httpRequest(`${httpBaseUrl}/redirect-loop-1`, {
+        maxRedirects: 2,
+        hooks: {
+          onResponse: info => responseInfos.push(info),
+        },
+      }).catch(() => {})
+
+      // 3 redirect hops observed (each emits one 3xx hook before checking limits).
+      // The "too many redirects" rejection uses raw reject, not rejectOnce,
+      // so no additional error hook fires. Exactly 3 hook calls total.
+      expect(responseInfos).toHaveLength(3)
+      for (const info of responseInfos) {
+        expect(info.status).toBeGreaterThanOrEqual(300)
+        expect(info.status).toBeLessThan(400)
+        expect(info.error).toBeUndefined()
+      }
+    })
+
+    it('should work correctly with throwOnError across a 302 → 200 redirect', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/redirect`, {
+        throwOnError: true,
+      })
+
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+      expect(response.text()).toBe('Plain text response')
+    })
+  })
+
+  describe('stream body cleanup on failure', () => {
+    it('should destroy source stream body on request timeout', async () => {
+      const { Readable } = await import('node:stream')
+      let streamDestroyed = false
+
+      // Create a slow stream that will outlive the request.
+      const slowStream = new Readable({
+        read() {
+          // Never push data — simulate a stalled upload.
+        },
+        destroy(_err, callback) {
+          streamDestroyed = true
+          callback(null)
+        },
+      })
+
+      await expect(
+        httpRequest(`${httpBaseUrl}/timeout`, {
+          method: 'POST',
+          body: slowStream as import('node:stream').Readable,
+          timeout: 100,
+        }),
+      ).rejects.toThrow(/timed out/)
+
+      expect(streamDestroyed).toBe(true)
+    })
+
+    it('should destroy source stream body on connection error', async () => {
+      const { Readable } = await import('node:stream')
+      let streamDestroyed = false
+
+      const stream = new Readable({
+        read() {
+          // Never push — connection will fail first.
+        },
+        destroy(_err, callback) {
+          streamDestroyed = true
+          callback(null)
+        },
+      })
+
+      await expect(
+        httpRequest('http://localhost:1/no-server', {
+          method: 'POST',
+          body: stream as import('node:stream').Readable,
+          timeout: 100,
+        }),
+      ).rejects.toThrow()
+
+      expect(streamDestroyed).toBe(true)
+    })
+  })
+
+  describe('hook error resilience', () => {
+    it('should still resolve when onResponse hook throws on success', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`, {
+        hooks: {
+          onResponse: () => {
+            throw new Error('hook exploded')
+          },
+        },
+      })
+
+      // Promise must still settle despite the hook throwing.
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+    })
+
+    it('should still reject when onResponse hook throws on error', async () => {
+      await expect(
+        httpRequest(`${httpBaseUrl}/timeout`, {
+          timeout: 50,
+          hooks: {
+            onResponse: () => {
+              throw new Error('hook exploded on error')
+            },
+          },
+        }),
+      ).rejects.toThrow(/timed out/)
+    })
+
+    it('should still reject when onResponse hook throws on redirect failure', async () => {
+      await expect(
+        httpRequest(`${httpBaseUrl}/redirect-loop-1`, {
+          maxRedirects: 0,
+          hooks: {
+            onResponse: () => {
+              throw new Error('hook exploded on redirect')
+            },
+          },
+        }),
+      ).rejects.toThrow(/Too many redirects/)
     })
   })
 })
