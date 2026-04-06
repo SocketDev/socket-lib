@@ -561,6 +561,20 @@ describe('http-request', () => {
       }, 'httpDownload-basic-')
     })
 
+    it('should include response metadata in result', async () => {
+      await runWithTempDir(async tmpDir => {
+        const destPath = path.join(tmpDir, 'metadata.txt')
+        const result = await httpDownload(`${httpBaseUrl}/download`, destPath)
+
+        expect(result.ok).toBe(true)
+        expect(result.status).toBe(200)
+        expect(result.statusText).toBe('OK')
+        expect(result.headers).toBeDefined()
+        expect(result.headers['content-type']).toBe('text/plain')
+        expect(result.headers['content-length']).toBeDefined()
+      }, 'httpDownload-metadata-')
+    })
+
     it('should track download progress', async () => {
       await runWithTempDir(async tmpDir => {
         const destPath = path.join(tmpDir, 'progress.txt')
@@ -684,7 +698,7 @@ describe('http-request', () => {
               retries: 2,
               retryDelay: 10,
             }),
-          ).rejects.toThrow(/HTTP download failed/)
+          ).rejects.toThrow(/request failed/)
 
           expect(attemptCount).toBe(3)
         }, 'httpDownload-fail-')
@@ -2079,6 +2093,86 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
       const r500 = await httpRequest(`${httpBaseUrl}/server-error`)
       expect(r500.rawResponse!.statusCode).toBe(500)
+    })
+  })
+
+  describe('stream option', () => {
+    it('should resolve immediately with unconsumed rawResponse', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/text`, {
+        stream: true,
+      })
+
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+      expect(response.statusText).toBe('OK')
+      expect(response.headers['content-type']).toBe('text/plain')
+      expect(response.rawResponse).toBeDefined()
+      // Body not buffered in stream mode.
+      expect(response.body.length).toBe(0)
+      expect(response.text()).toBe('')
+
+      // Read the stream manually.
+      const chunks: Buffer[] = []
+      for await (const chunk of response.rawResponse!) {
+        chunks.push(chunk as Buffer)
+      }
+      expect(Buffer.concat(chunks).toString('utf8')).toBe('Plain text response')
+    })
+
+    it('should follow redirects in stream mode', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/redirect`, {
+        stream: true,
+      })
+
+      expect(response.ok).toBe(true)
+      expect(response.status).toBe(200)
+      expect(response.rawResponse).toBeDefined()
+
+      const chunks: Buffer[] = []
+      for await (const chunk of response.rawResponse!) {
+        chunks.push(chunk as Buffer)
+      }
+      expect(Buffer.concat(chunks).toString('utf8')).toBe('Plain text response')
+    })
+
+    it('should handle non-2xx in stream mode', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/not-found`, {
+        stream: true,
+      })
+
+      expect(response.ok).toBe(false)
+      expect(response.status).toBe(404)
+      expect(response.rawResponse).toBeDefined()
+    })
+
+    it('should throw on json() in stream mode', async () => {
+      const response = await httpRequest(`${httpBaseUrl}/json`, {
+        stream: true,
+      })
+      expect(() => response.json()).toThrow(
+        'Cannot parse JSON from a streaming response',
+      )
+    })
+
+    it('should pipe to a file via stream mode', async () => {
+      await runWithTempDir(async tmpDir => {
+        const response = await httpRequest(`${httpBaseUrl}/download`, {
+          stream: true,
+        })
+        expect(response.ok).toBe(true)
+
+        const destPath = path.join(tmpDir, 'streamed.txt')
+        const { createWriteStream } = await import('node:fs')
+        await new Promise<void>((resolve, reject) => {
+          const ws = createWriteStream(destPath)
+          ws.on('error', reject)
+          ws.on('close', resolve)
+          response.rawResponse!.pipe(ws)
+        })
+
+        const content = await fs.readFile(destPath, 'utf8')
+        expect(content).toBe('Download test content')
+      }, 'stream-pipe-')
     })
   })
 

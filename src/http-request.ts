@@ -348,6 +348,20 @@ export interface HttpRequestOptions {
    * })
    * ```
    */
+  /**
+   * When true, resolve with an HttpResponse whose body is NOT buffered.
+   * The `rawResponse` property contains the unconsumed IncomingResponse
+   * stream for piping to files or other destinations.
+   *
+   * `body`, `text()`, `json()`, and `arrayBuffer()` return empty/zero
+   * values since the stream has not been read.
+   *
+   * Incompatible with `maxResponseSize` (size enforcement requires
+   * reading the body).
+   *
+   * @default false
+   */
+  stream?: boolean | undefined
   throwOnError?: boolean | undefined
   /**
    * Request timeout in milliseconds.
@@ -823,26 +837,18 @@ export interface HttpDownloadOptions {
  * Result of a successful file download.
  */
 export interface HttpDownloadResult {
-  /**
-   * Absolute path where the file was saved.
-   *
-   * @example
-   * ```ts
-   * const result = await httpDownload('https://example.com/file.zip', '/tmp/file.zip')
-   * console.log(`Downloaded to: ${result.path}`)
-   * ```
-   */
+  /** HTTP response headers from the final response (after redirects). */
+  headers: IncomingHttpHeaders
+  /** Whether the download succeeded (status 200-299). Always true on success (non-2xx throws). */
+  ok: true
+  /** Absolute path where the file was saved. */
   path: string
-  /**
-   * Total size of downloaded file in bytes.
-   *
-   * @example
-   * ```ts
-   * const result = await httpDownload('https://example.com/file.zip', '/tmp/file.zip')
-   * console.log(`Downloaded ${result.size} bytes`)
-   * ```
-   */
+  /** Total size of downloaded file in bytes. */
   size: number
+  /** HTTP status code from the final response (after redirects). */
+  status: number
+  /** HTTP status message from the final response (after redirects). */
+  statusText: string
 }
 
 /**
@@ -983,7 +989,7 @@ export async function fetchChecksums(
 }
 
 /**
- * Single download attempt (used internally by httpDownload with retry logic).
+ * Single download attempt using httpRequestAttempt with stream: true.
  * @private
  */
 async function httpDownloadAttempt(
@@ -1000,178 +1006,70 @@ async function httpDownloadAttempt(
     timeout = 120_000,
   } = { __proto__: null, ...options } as HttpDownloadOptions
 
-  return await new Promise((resolve, reject) => {
-    const parsedUrl = new URL(url)
-    const isHttps = parsedUrl.protocol === 'https:'
-    const httpModule = isHttps ? getHttps() : getHttp()
+  const response = await httpRequestAttempt(url, {
+    ca,
+    followRedirects,
+    headers,
+    maxRedirects,
+    method: 'GET',
+    stream: true,
+    timeout,
+  })
 
-    const requestOptions: Record<string, unknown> = {
-      headers: {
-        'User-Agent': 'socket-registry/1.0',
-        ...headers,
-      },
-      hostname: parsedUrl.hostname,
-      method: 'GET',
-      path: parsedUrl.pathname + parsedUrl.search,
-      port: parsedUrl.port,
-      timeout,
-    }
-
-    // Pass custom CA certificates for TLS connections.
-    if (ca && isHttps) {
-      requestOptions['ca'] = ca
-    }
-
-    const { createWriteStream } = getFs()
-
-    let fileStream: ReturnType<typeof createWriteStream> | undefined
-    let streamClosed = false
-
-    const closeStream = () => {
-      if (!streamClosed && fileStream) {
-        streamClosed = true
-        fileStream.close()
-      }
-    }
-
-    /* c8 ignore start - External HTTP/HTTPS download request */
-    const request = httpModule.request(
-      requestOptions,
-      (res: IncomingResponse) => {
-        // Handle redirects
-        if (
-          followRedirects &&
-          res.statusCode &&
-          res.statusCode >= 300 &&
-          res.statusCode < 400 &&
-          res.headers.location
-        ) {
-          if (maxRedirects <= 0) {
-            reject(
-              new Error(
-                `Too many redirects (exceeded maximum: ${maxRedirects})`,
-              ),
-            )
-            return
-          }
-
-          // Follow redirect
-          const redirectUrl = res.headers.location.startsWith('http')
-            ? res.headers.location
-            : new URL(res.headers.location, url).toString()
-
-          // Reject HTTPS-to-HTTP downgrade redirects.
-          const redirectParsed = new URL(redirectUrl)
-          if (isHttps && redirectParsed.protocol !== 'https:') {
-            reject(
-              new Error(
-                `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
-              ),
-            )
-            return
-          }
-
-          resolve(
-            httpDownloadAttempt(redirectUrl, destPath, {
-              ca,
-              followRedirects,
-              headers,
-              maxRedirects: maxRedirects - 1,
-              onProgress,
-              timeout,
-            }),
-          )
-          return
-        }
-
-        // Check status code
-        if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
-          closeStream()
-          reject(
-            new Error(
-              `Download failed: HTTP ${res.statusCode} ${res.statusMessage}`,
-            ),
-          )
-          return
-        }
-
-        const totalSize = Number.parseInt(
-          res.headers['content-length'] || '0',
-          10,
-        )
-        let downloadedSize = 0
-
-        // Create write stream
-        fileStream = createWriteStream(destPath)
-
-        fileStream.on('error', (error: Error) => {
-          closeStream()
-          const err = new Error(`Failed to write file: ${error.message}`, {
-            cause: error,
-          })
-          reject(err)
-        })
-
-        res.on('data', (chunk: Buffer) => {
-          downloadedSize += chunk.length
-          if (onProgress && totalSize > 0) {
-            onProgress(downloadedSize, totalSize)
-          }
-        })
-
-        res.on('end', () => {
-          fileStream?.close(() => {
-            streamClosed = true
-            resolve({
-              path: destPath,
-              size: downloadedSize,
-            })
-          })
-        })
-
-        res.on('error', (error: Error) => {
-          closeStream()
-          reject(error)
-        })
-
-        // Pipe response to file
-        res.pipe(fileStream)
-      },
+  if (!response.ok) {
+    throw new Error(
+      `Download failed: HTTP ${response.status} ${response.statusText}`,
     )
+  }
 
-    request.on('error', (error: Error) => {
-      closeStream()
-      const code = (error as NodeJS.ErrnoException).code
-      let message = `HTTP download failed for ${url}: ${error.message}\n`
+  const res = response.rawResponse
+  if (!res) {
+    throw new Error('Stream response missing rawResponse')
+  }
 
-      if (code === 'ENOTFOUND') {
-        message +=
-          'DNS lookup failed. Check the hostname and your network connection.'
-      } else if (code === 'ECONNREFUSED') {
-        message +=
-          'Connection refused. Verify the server is running and accessible.'
-      } else if (code === 'ETIMEDOUT') {
-        message +=
-          'Request timed out. Check your network or increase the timeout value.'
-      } else if (code === 'ECONNRESET') {
-        message +=
-          'Connection reset. The server may have closed the connection unexpectedly.'
-      } else {
-        message +=
-          'Check your network connection and verify the URL is correct.'
+  const { createWriteStream } = getFs()
+  const totalSize = Number.parseInt(
+    (response.headers['content-length'] as string) || '0',
+    10,
+  )
+
+  return await new Promise((resolve, reject) => {
+    let downloadedSize = 0
+    const fileStream = createWriteStream(destPath)
+
+    fileStream.on('error', (error: Error) => {
+      fileStream.close()
+      reject(
+        new Error(`Failed to write file: ${error.message}`, { cause: error }),
+      )
+    })
+
+    res.on('data', (chunk: Buffer) => {
+      downloadedSize += chunk.length
+      if (onProgress && totalSize > 0) {
+        onProgress(downloadedSize, totalSize)
       }
-
-      reject(new Error(message, { cause: error }))
     })
 
-    request.on('timeout', () => {
-      request.destroy()
-      closeStream()
-      reject(new Error(`Download timed out after ${timeout}ms`))
+    res.on('end', () => {
+      fileStream.close(() => {
+        resolve({
+          headers: response.headers,
+          ok: true,
+          path: destPath,
+          size: downloadedSize,
+          status: response.status,
+          statusText: response.statusText,
+        })
+      })
     })
 
-    request.end()
-    /* c8 ignore stop */
+    res.on('error', (error: Error) => {
+      fileStream.close()
+      reject(error)
+    })
+
+    res.pipe(fileStream)
   })
 }
 
@@ -1231,6 +1129,7 @@ async function httpRequestAttempt(
     maxRedirects = 5,
     maxResponseSize,
     method = 'GET',
+    stream = false,
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
 
@@ -1370,9 +1269,39 @@ async function httpRequestAttempt(
               maxRedirects: maxRedirects - 1,
               maxResponseSize,
               method,
+              stream,
               timeout,
             }),
           )
+          return
+        }
+
+        // Stream mode: resolve immediately with unconsumed response.
+        if (stream) {
+          const status = res.statusCode || 0
+          const statusText = res.statusMessage || ''
+          const ok = status >= 200 && status < 300
+
+          emitResponse({
+            headers: res.headers,
+            status,
+            statusText,
+          })
+
+          const emptyBody = Buffer.alloc(0)
+          resolveOnce({
+            arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
+            body: emptyBody,
+            headers: res.headers,
+            json: () => {
+              throw new Error('Cannot parse JSON from a streaming response')
+            },
+            ok,
+            rawResponse: res,
+            status,
+            statusText,
+            text: () => '',
+          })
           return
         }
 
@@ -1645,8 +1574,8 @@ export async function httpDownload(
       await fs.promises.rename(tempPath, destPath)
 
       return {
+        ...result,
         path: destPath,
-        size: result.size,
       }
     } catch (e) {
       lastError = e as Error
@@ -1816,6 +1745,7 @@ export async function httpRequest(
     onRetry,
     retries = 0,
     retryDelay = 1000,
+    stream = false,
     throwOnError = false,
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
@@ -1846,6 +1776,7 @@ export async function httpRequest(
     maxRedirects,
     maxResponseSize,
     method,
+    stream,
     timeout,
   }
 
