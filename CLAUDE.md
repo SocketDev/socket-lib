@@ -93,6 +93,7 @@ The file system is working memory. Use it actively:
 - Always prefer editing existing files
 - Forbidden to create docs unless requested
 - Required to do exactly what was asked
+- 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec <package>` for devDep binaries, or `pnpm run <script>` for package.json scripts. If a tool is needed, add it as a pinned devDependency first.
 
 ## 📄 DOCUMENTATION POLICY
 
@@ -247,6 +248,15 @@ test/                 # Test files
 - **Fix**: `pnpm run fix` (auto-fix formatting/lint issues with oxfmt)
 - **Coverage**: `pnpm run cover` (test coverage)
 - **Clean**: `pnpm run clean` (remove build artifacts)
+
+## Agents & Skills
+
+- `/security-scan` — runs AgentShield + zizmor security audit
+- `/quality-scan` — comprehensive code quality analysis
+- `/quality-loop` — scan and fix iteratively
+- Agents: `code-reviewer`, `security-reviewer`, `refactor-cleaner` (in `.claude/agents/`)
+- Shared subskills in `.claude/skills/_shared/`
+- Pipeline state tracked in `.claude/ops/queue.yaml`
 
 ### Code Quality Tools
 

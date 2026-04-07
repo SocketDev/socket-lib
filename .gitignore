@@ -66,6 +66,8 @@ dist/
 # ============================================================================
 # Claude Code configuration
 # ============================================================================
-.claude/*
-!.claude/commands/
-!.claude/skills/
+/.claude/*
+!/.claude/agents/
+!/.claude/commands/
+!/.claude/ops/
+!/.claude/skills/
