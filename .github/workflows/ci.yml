@@ -47,8 +47,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4edf2e3c3beff7d536e79ce43dfb61abba7cb537 # main
-        with:
-          node-version: '24'
 
       - name: Build project
         run: pnpm run build
