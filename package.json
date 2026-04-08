@@ -695,8 +695,8 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=22",
-    "pnpm": ">=10.25.0"
+    "node": ">=24",
+    "pnpm": ">=10.33.0"
   },
   "sideEffects": false,
   "scripts": {
