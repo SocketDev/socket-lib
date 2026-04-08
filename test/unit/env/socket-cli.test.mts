@@ -65,7 +65,14 @@ describe('socket-cli env', () => {
     })
 
     it('should return undefined when not set', () => {
+      // Clear all proxy env vars that getSocketCliApiProxy falls back to,
+      // including standard proxy vars that CI runners may have set.
       setEnv('SOCKET_CLI_API_PROXY', undefined)
+      setEnv('SOCKET_SECURITY_API_PROXY', undefined)
+      setEnv('HTTPS_PROXY', undefined)
+      setEnv('https_proxy', undefined)
+      setEnv('HTTP_PROXY', undefined)
+      setEnv('http_proxy', undefined)
       expect(getSocketCliApiProxy()).toBeUndefined()
     })
   })
