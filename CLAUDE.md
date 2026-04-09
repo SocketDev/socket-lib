@@ -128,13 +128,13 @@ All shared standards (git, testing, code style, cross-platform, CI) defined in s
 
 **Terminal Symbols** (from `@socketsecurity/lib/logger` LOG_SYMBOLS):
 
-| Symbol | Color | Meaning |
-|--------|-------|---------|
-| ✓ | green | Success |
-| ✗ | red | Error |
-| ⚠ | yellow | Warning |
-| ℹ | blue | Info |
-| → | cyan | Step/progress |
+| Symbol | Color  | Meaning       |
+| ------ | ------ | ------------- |
+| ✓      | green  | Success       |
+| ✗      | red    | Error         |
+| ⚠      | yellow | Warning       |
+| ℹ      | blue   | Info          |
+| →      | cyan   | Step/progress |
 
 Color the icon only, not the message. Use `yoctocolors-cjs` (not the ESM `yoctocolors`). Use emojis sparingly; prefer colored text symbols for terminal compatibility.
 
