@@ -27,7 +27,7 @@ permissions:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@1dc0e87db45927365e0622ed56a583f97c6cbbab # main
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@96c2a403934488b2b1d6127e44f65fd2c36c1150 # main
     with:
       test-setup-script: 'pnpm run build'
       lint-script: 'pnpm run lint --all'
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1dc0e87db45927365e0622ed56a583f97c6cbbab # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@96c2a403934488b2b1d6127e44f65fd2c36c1150 # main
 
       - name: Build project
         run: pnpm run build
