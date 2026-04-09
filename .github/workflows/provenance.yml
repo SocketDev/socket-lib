@@ -14,6 +14,11 @@ on:
         options:
           - '0'
           - '1'
+      publish-without-sfw:
+        description: 'Publish directly to npm, bypassing Socket firewall shims'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write   # Push git tags and create GitHub releases
@@ -25,5 +30,8 @@ jobs:
     with:
       debug: ${{ inputs.debug }}
       package-name: '@socketsecurity/lib'
+      publish-without-sfw: ${{ inputs.publish-without-sfw }}
       setup-script: 'pnpm run build'
       use-trusted-publishing: true
+    secrets:
+      SOCKET_API_KEY: ${{ secrets.SOCKET_API_KEY }}
