@@ -1,5 +1,4 @@
 diff --git a/index.js b/index.js
-index cb2537fa6b2b57b790cf6e8704a90ea52351e638..f435f5d7fde518722c010d7612a6ff11b4cf52c2 100644
 --- a/index.js
 +++ b/index.js
 @@ -1,4 +1,4 @@
@@ -9,11 +8,10 @@ index cb2537fa6b2b57b790cf6e8704a90ea52351e638..f435f5d7fde518722c010d7612a6ff11
  const _flushed = Symbol('_flushed')
  const _flushing = Symbol('_flushing')
 diff --git a/package.json b/package.json
-index 09127d0ec2015cd969307c23ea7c8a1d7414a21c..e13856c53443ba75a31933c25ea38ac06f574b73 100644
 --- a/package.json
 +++ b/package.json
-@@ -18,7 +18,7 @@
-     "tap": "^14.6.9"
+@@ -21,7 +21,7 @@
+     "tap": "^15.1.6"
    },
    "dependencies": {
 -    "minipass": "^3.0.0"

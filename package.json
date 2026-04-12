@@ -1,7 +1,7 @@
 {
   "name": "@socketsecurity/lib",
   "version": "5.15.0",
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.0.0-rc.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
@@ -695,8 +695,8 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=24",
-    "pnpm": ">=10.33.0"
+    "node": ">=22",
+    "pnpm": ">=11.0.0-rc.0"
   },
   "sideEffects": false,
   "scripts": {
@@ -797,58 +797,6 @@
   "peerDependenciesMeta": {
     "typescript": {
       "optional": true
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "@inquirer/ansi": "1.0.2",
-      "@inquirer/core": "10.3.1",
-      "@inquirer/figures": "1.0.15",
-      "@npmcli/arborist": "9.1.6",
-      "@npmcli/git": "6.0.3",
-      "@npmcli/run-script": "10.0.0",
-      "@sigstore/core": "3.1.0",
-      "@sigstore/sign": "4.1.0",
-      "ansi-regex": "6.2.2",
-      "brace-expansion": "5.0.5",
-      "chownr": "3.0.0",
-      "debug": "4.4.3",
-      "execa": "5.1.1",
-      "has-flag": "5.0.1",
-      "hosted-git-info": "8.1.0",
-      "isexe": "3.1.1",
-      "lru-cache": "11.2.2",
-      "minimatch": "9.0.6",
-      "minipass": "7.1.3",
-      "minipass-fetch": "4.0.1",
-      "minipass-sized": "1.0.3",
-      "minipass@7": "7.1.3",
-      "minizlib": "3.1.0",
-      "npm-package-arg": "12.0.2",
-      "npm-pick-manifest": "10.0.0",
-      "p-map": "7.0.4",
-      "picomatch": "4.0.4",
-      "proc-log": "6.1.0",
-      "semver": "7.7.2",
-      "signal-exit": "4.1.0",
-      "spdx-expression-parse": "4.0.0",
-      "ssri": "12.0.0",
-      "string-width": "8.1.0",
-      "strip-ansi": "7.1.2",
-      "supports-color": "10.2.2",
-      "tar": "7.5.11",
-      "which": "5.0.0",
-      "wrap-ansi": "9.0.2",
-      "yoctocolors-cjs": "2.1.3"
-    },
-    "patchedDependencies": {
-      "@npmcli/run-script@10.0.0": "patches/@npmcli__run-script@10.0.0.patch",
-      "@sigstore/sign@4.1.0": "patches/@sigstore__sign@4.1.0.patch",
-      "execa@5.1.1": "patches/execa@5.1.1.patch",
-      "minipass-flush@1.0.5": "patches/minipass-flush@1.0.5.patch",
-      "minipass-pipeline@1.2.4": "patches/minipass-pipeline@1.2.4.patch",
-      "node-gyp@11.5.0": "patches/node-gyp@11.5.0.patch",
-      "minipass-sized@1.0.3": "patches/minipass-sized@1.0.3.patch"
     }
   }
 }
