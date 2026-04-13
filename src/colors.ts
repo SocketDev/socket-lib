@@ -68,6 +68,12 @@ const colorToRgb: Record<ColorName, ColorRgb> = {
  * Type guard to check if a color value is an RGB tuple.
  * @param value - Color value to check
  * @returns `true` if value is an RGB tuple, `false` if it's a color name
+ *
+ * @example
+ * ```typescript
+ * isRgbTuple([255, 0, 0]) // true
+ * isRgbTuple('red')       // false
+ * ```
  */
 export function isRgbTuple(value: ColorValue): value is ColorRgb {
   return Array.isArray(value)
@@ -78,6 +84,12 @@ export function isRgbTuple(value: ColorValue): value is ColorRgb {
  * Named colors are looked up in the `colorToRgb` map, RGB tuples are returned as-is.
  * @param color - Color name or RGB tuple
  * @returns RGB tuple with values 0-255
+ *
+ * @example
+ * ```typescript
+ * toRgb('red')       // [255, 0, 0]
+ * toRgb([0, 128, 0]) // [0, 128, 0]
+ * ```
  */
 export function toRgb(color: ColorValue): ColorRgb {
   if (isRgbTuple(color)) {

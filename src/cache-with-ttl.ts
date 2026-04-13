@@ -158,6 +158,13 @@ const DEFAULT_PREFIX = 'ttl-cache'
 
 /**
  * Create a TTL-based cache instance.
+ *
+ * @example
+ * ```typescript
+ * const cache = createTtlCache({ ttl: 60_000, prefix: 'my-app' })
+ * await cache.set('key', { value: 42 })
+ * const data = await cache.get('key') // { value: 42 }
+ * ```
  */
 export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   const opts = {

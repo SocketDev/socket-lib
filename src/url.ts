@@ -8,6 +8,13 @@ const UrlCtor = URL
 
 /**
  * Check if a value is a valid URL.
+ *
+ * @example
+ * ```typescript
+ * isUrl('https://example.com') // true
+ * isUrl('not a url')           // false
+ * isUrl(null)                  // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isUrl(value: string | URL | null | undefined): boolean {
@@ -20,6 +27,12 @@ export function isUrl(value: string | URL | null | undefined): boolean {
 
 /**
  * Parse a value as a URL.
+ *
+ * @example
+ * ```typescript
+ * parseUrl('https://example.com')  // URL { href: 'https://example.com/' }
+ * parseUrl('invalid')              // undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseUrl(value: string | URL): URL | undefined {
@@ -31,6 +44,12 @@ export function parseUrl(value: string | URL): URL | undefined {
 
 /**
  * Convert a URL search parameter to an array.
+ *
+ * @example
+ * ```typescript
+ * urlSearchParamAsArray('a, b, c') // ['a', 'b', 'c']
+ * urlSearchParamAsArray(null)      // []
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamAsArray(
@@ -51,6 +70,13 @@ export interface UrlSearchParamAsBooleanOptions {
 
 /**
  * Convert a URL search parameter to a boolean.
+ *
+ * @example
+ * ```typescript
+ * urlSearchParamAsBoolean('true') // true
+ * urlSearchParamAsBoolean('0')    // false
+ * urlSearchParamAsBoolean(null)   // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamAsBoolean(
@@ -73,6 +99,12 @@ export function urlSearchParamAsBoolean(
 
 /**
  * Helper to get array from URLSearchParams.
+ *
+ * @example
+ * ```typescript
+ * const params = new URLSearchParams('tags=a,b,c')
+ * urlSearchParamsGetArray(params, 'tags') // ['a', 'b', 'c']
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsGetArray(
@@ -97,6 +129,13 @@ export interface UrlSearchParamsGetBooleanOptions {
 
 /**
  * Helper to get boolean from URLSearchParams.
+ *
+ * @example
+ * ```typescript
+ * const params = new URLSearchParams('debug=true')
+ * urlSearchParamsGetBoolean(params, 'debug') // true
+ * urlSearchParamsGetBoolean(params, 'other') // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsGetBoolean(
@@ -123,6 +162,12 @@ export interface CreateRelativeUrlOptions {
 
 /**
  * Create a relative URL for testing.
+ *
+ * @example
+ * ```typescript
+ * createRelativeUrl('/api/test')                                    // 'api/test'
+ * createRelativeUrl('/api/test', { base: 'https://example.com' })  // 'https://example.com/api/test'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function createRelativeUrl(
@@ -153,6 +198,13 @@ export interface UrlSearchParamAsStringOptions {
 
 /**
  * Get string value from URLSearchParams with a default.
+ *
+ * @example
+ * ```typescript
+ * const params = new URLSearchParams('name=socket')
+ * urlSearchParamAsString(params, 'name')  // 'socket'
+ * urlSearchParamAsString(params, 'other') // ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamAsString(
@@ -177,6 +229,13 @@ export interface UrlSearchParamAsNumberOptions {
 
 /**
  * Get number value from URLSearchParams with a default.
+ *
+ * @example
+ * ```typescript
+ * const params = new URLSearchParams('limit=10')
+ * urlSearchParamAsNumber(params, 'limit') // 10
+ * urlSearchParamAsNumber(params, 'other') // 0
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamAsNumber(
