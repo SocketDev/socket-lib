@@ -10,6 +10,16 @@ import { getEnvValue } from './rewire'
 /**
  * JEST_WORKER_ID environment variable.
  * Set when running tests with Jest.
+ *
+ * @returns The Jest worker ID string, or empty string if not set
+ *
+ * @example
+ * ```typescript
+ * import { getJestWorkerId } from '@socketsecurity/lib/env/test'
+ *
+ * const workerId = getJestWorkerId()
+ * // e.g. '1' when running in Jest, or ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getJestWorkerId(): string {
@@ -19,6 +29,17 @@ export function getJestWorkerId(): string {
 /**
  * VITEST environment variable.
  * Set when running tests with Vitest.
+ *
+ * @returns `true` if running in Vitest, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { getVitest } from '@socketsecurity/lib/env/test'
+ *
+ * if (getVitest()) {
+ *   console.log('Running in Vitest')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getVitest(): boolean {
@@ -28,6 +49,17 @@ export function getVitest(): boolean {
 /**
  * Check if code is running in a test environment.
  * Checks NODE_ENV, VITEST, and JEST_WORKER_ID.
+ *
+ * @returns `true` if running in a test environment, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { isTest } from '@socketsecurity/lib/env/test'
+ *
+ * if (isTest()) {
+ *   console.log('Running in test environment')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isTest(): boolean {

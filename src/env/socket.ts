@@ -8,6 +8,17 @@ import { getEnvValue } from './rewire'
 /**
  * SOCKET_ACCEPT_RISKS environment variable getter.
  * Whether to accept all Socket Security risks.
+ *
+ * @returns `true` if risks are accepted, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { getSocketAcceptRisks } from '@socketsecurity/lib/env/socket'
+ *
+ * if (getSocketAcceptRisks()) {
+ *   console.log('All risks accepted')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketAcceptRisks(): boolean {
@@ -17,6 +28,16 @@ export function getSocketAcceptRisks(): boolean {
 /**
  * SOCKET_API_BASE_URL environment variable getter.
  * Socket Security API base URL.
+ *
+ * @returns The API base URL, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketApiBaseUrl } from '@socketsecurity/lib/env/socket'
+ *
+ * const baseUrl = getSocketApiBaseUrl()
+ * // e.g. 'https://api.socket.dev' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiBaseUrl(): string | undefined {
@@ -26,6 +47,16 @@ export function getSocketApiBaseUrl(): string | undefined {
 /**
  * SOCKET_API_PROXY environment variable getter.
  * Proxy URL for Socket Security API requests.
+ *
+ * @returns The API proxy URL, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketApiProxy } from '@socketsecurity/lib/env/socket'
+ *
+ * const proxy = getSocketApiProxy()
+ * // e.g. 'http://proxy.example.com:8080' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiProxy(): string | undefined {
@@ -35,6 +66,16 @@ export function getSocketApiProxy(): string | undefined {
 /**
  * SOCKET_API_TIMEOUT environment variable getter.
  * Timeout in milliseconds for Socket Security API requests.
+ *
+ * @returns The timeout in milliseconds, or `0` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketApiTimeout } from '@socketsecurity/lib/env/socket'
+ *
+ * const timeout = getSocketApiTimeout()
+ * // e.g. 30000 or 0 if not set
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiTimeout(): number {
@@ -44,6 +85,16 @@ export function getSocketApiTimeout(): number {
 /**
  * SOCKET_API_TOKEN environment variable getter.
  * Socket Security API authentication token.
+ *
+ * @returns The API token, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketApiToken } from '@socketsecurity/lib/env/socket'
+ *
+ * const token = getSocketApiToken()
+ * // e.g. a Socket API token string or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiToken(): string | undefined {
@@ -53,6 +104,16 @@ export function getSocketApiToken(): string | undefined {
 /**
  * SOCKET_CACACHE_DIR environment variable getter.
  * Overrides the default Socket cacache directory location.
+ *
+ * @returns The cacache directory path, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketCacacheDir } from '@socketsecurity/lib/env/socket'
+ *
+ * const dir = getSocketCacacheDir()
+ * // e.g. '/tmp/.socket-cache' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCacacheDir(): string | undefined {
@@ -62,6 +123,16 @@ export function getSocketCacacheDir(): string | undefined {
 /**
  * SOCKET_CONFIG environment variable getter.
  * Socket Security configuration file path.
+ *
+ * @returns The config file path, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketConfig } from '@socketsecurity/lib/env/socket'
+ *
+ * const config = getSocketConfig()
+ * // e.g. '/tmp/project/socket.yml' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketConfig(): string | undefined {
@@ -71,6 +142,16 @@ export function getSocketConfig(): string | undefined {
 /**
  * SOCKET_DEBUG environment variable getter.
  * Controls Socket-specific debug output.
+ *
+ * @returns The Socket debug filter, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketDebug } from '@socketsecurity/lib/env/socket'
+ *
+ * const debug = getSocketDebug()
+ * // e.g. '*' or 'api' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketDebug(): string | undefined {
@@ -80,6 +161,16 @@ export function getSocketDebug(): string | undefined {
 /**
  * SOCKET_DLX_DIR environment variable getter.
  * Overrides the default Socket DLX directory location.
+ *
+ * @returns The DLX directory path, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketDlxDirEnv } from '@socketsecurity/lib/env/socket'
+ *
+ * const dlxDir = getSocketDlxDirEnv()
+ * // e.g. '/tmp/.socket-dlx' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketDlxDirEnv(): string | undefined {
@@ -89,6 +180,16 @@ export function getSocketDlxDirEnv(): string | undefined {
 /**
  * SOCKET_HOME environment variable getter.
  * Socket Security home directory path.
+ *
+ * @returns The Socket home directory, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketHome } from '@socketsecurity/lib/env/socket'
+ *
+ * const home = getSocketHome()
+ * // e.g. '/tmp/.socket' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketHome(): string | undefined {
@@ -98,6 +199,17 @@ export function getSocketHome(): string | undefined {
 /**
  * SOCKET_NO_API_TOKEN environment variable getter.
  * Whether to skip Socket Security API token requirement.
+ *
+ * @returns `true` if the API token requirement is skipped, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { getSocketNoApiToken } from '@socketsecurity/lib/env/socket'
+ *
+ * if (getSocketNoApiToken()) {
+ *   console.log('API token requirement skipped')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketNoApiToken(): boolean {
@@ -107,6 +219,16 @@ export function getSocketNoApiToken(): boolean {
 /**
  * SOCKET_NPM_REGISTRY environment variable getter.
  * Socket NPM registry URL (alternative name).
+ *
+ * @returns The Socket NPM registry URL, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketNpmRegistry } from '@socketsecurity/lib/env/socket'
+ *
+ * const registry = getSocketNpmRegistry()
+ * // e.g. 'https://npm.socket.dev/' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketNpmRegistry(): string | undefined {
@@ -116,6 +238,16 @@ export function getSocketNpmRegistry(): string | undefined {
 /**
  * SOCKET_ORG_SLUG environment variable getter.
  * Socket Security organization slug identifier.
+ *
+ * @returns The organization slug, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketOrgSlug } from '@socketsecurity/lib/env/socket'
+ *
+ * const slug = getSocketOrgSlug()
+ * // e.g. 'my-org' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketOrgSlug(): string | undefined {
@@ -125,6 +257,16 @@ export function getSocketOrgSlug(): string | undefined {
 /**
  * SOCKET_REGISTRY_URL environment variable getter.
  * Socket Registry URL for package installation.
+ *
+ * @returns The Socket registry URL, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketRegistryUrl } from '@socketsecurity/lib/env/socket'
+ *
+ * const registryUrl = getSocketRegistryUrl()
+ * // e.g. 'https://registry.socket.dev/' or undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketRegistryUrl(): string | undefined {
@@ -134,6 +276,17 @@ export function getSocketRegistryUrl(): string | undefined {
 /**
  * SOCKET_VIEW_ALL_RISKS environment variable getter.
  * Whether to view all Socket Security risks.
+ *
+ * @returns `true` if viewing all risks, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { getSocketViewAllRisks } from '@socketsecurity/lib/env/socket'
+ *
+ * if (getSocketViewAllRisks()) {
+ *   console.log('Viewing all risks')
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketViewAllRisks(): boolean {
