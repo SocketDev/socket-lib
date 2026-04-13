@@ -175,6 +175,20 @@ export function createEnvProxy(
 
 /**
  * Convert an environment variable value to a boolean.
+ *
+ * @param value - The value to convert
+ * @param defaultValue - Default when value is null/undefined (default: `false`)
+ * @returns `true` if value is '1' or 'true' (case-insensitive), `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { envAsBoolean } from '@socketsecurity/lib/env'
+ *
+ * envAsBoolean('true')      // true
+ * envAsBoolean('1')         // true
+ * envAsBoolean('false')     // false
+ * envAsBoolean(undefined)   // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function envAsBoolean(value: unknown, defaultValue = false): boolean {
@@ -190,6 +204,19 @@ export function envAsBoolean(value: unknown, defaultValue = false): boolean {
 
 /**
  * Convert an environment variable value to a number.
+ *
+ * @param value - The value to convert
+ * @param defaultValue - Default when value is not a finite number (default: `0`)
+ * @returns The parsed integer, or the default value if parsing fails
+ *
+ * @example
+ * ```typescript
+ * import { envAsNumber } from '@socketsecurity/lib/env'
+ *
+ * envAsNumber('3000')     // 3000
+ * envAsNumber('abc')      // 0
+ * envAsNumber(undefined)  // 0
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function envAsNumber(value: unknown, defaultValue = 0): number {
@@ -203,6 +230,19 @@ export function envAsNumber(value: unknown, defaultValue = 0): number {
 
 /**
  * Convert an environment variable value to a trimmed string.
+ *
+ * @param value - The value to convert
+ * @param defaultValue - Default when value is null/undefined (default: `''`)
+ * @returns The trimmed string value, or the default value
+ *
+ * @example
+ * ```typescript
+ * import { envAsString } from '@socketsecurity/lib/env'
+ *
+ * envAsString('  hello  ')  // 'hello'
+ * envAsString(undefined)    // ''
+ * envAsString(null, 'n/a')  // 'n/a'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function envAsString(value: unknown, defaultValue = ''): string {

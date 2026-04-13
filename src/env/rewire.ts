@@ -54,6 +54,16 @@ const sharedOverrides: Map<string, string | undefined> | undefined =
 
 /**
  * Clear a specific environment variable override.
+ *
+ * @param key - The environment variable name to clear
+ *
+ * @example
+ * ```typescript
+ * import { setEnv, clearEnv } from '@socketsecurity/lib/env/rewire'
+ *
+ * setEnv('CI', '1')
+ * clearEnv('CI')
+ * ```
  */
 export function clearEnv(key: string): void {
   sharedOverrides?.delete(key)
@@ -68,6 +78,14 @@ export function clearEnv(key: string): void {
  * 3. process.env (including vi.stubEnv modifications)
  *
  * @internal Used by env getters to support test rewiring
+ *
+ * @example
+ * ```typescript
+ * import { getEnvValue } from '@socketsecurity/lib/env/rewire'
+ *
+ * const value = getEnvValue('NODE_ENV')
+ * // e.g. 'production' or undefined
+ * ```
  */
 export function getEnvValue(key: string): string | undefined {
   // Check isolated overrides first (highest priority - temporary via withEnv)
@@ -87,6 +105,18 @@ export function getEnvValue(key: string): string | undefined {
 
 /**
  * Check if an environment variable has been overridden.
+ *
+ * @param key - The environment variable name to check
+ * @returns `true` if the variable has been overridden, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { setEnv, hasOverride } from '@socketsecurity/lib/env/rewire'
+ *
+ * hasOverride('CI')  // false
+ * setEnv('CI', '1')
+ * hasOverride('CI')  // true
+ * ```
  */
 export function hasOverride(key: string): boolean {
   const isolatedOverrides = isolatedOverridesStorage.getStore()
@@ -102,6 +132,14 @@ export function hasOverride(key: string): boolean {
  * 3. process.env (including vi.stubEnv modifications)
  *
  * @internal Used by env getters to check for key presence (not value truthiness)
+ *
+ * @example
+ * ```typescript
+ * import { isInEnv } from '@socketsecurity/lib/env/rewire'
+ *
+ * isInEnv('PATH')     // true (usually set)
+ * isInEnv('MISSING')  // false
+ * ```
  */
 export function isInEnv(key: string): boolean {
   // Check isolated overrides first (highest priority - temporary via withEnv)
