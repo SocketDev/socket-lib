@@ -2,7 +2,7 @@
 
 [![Socket Badge](https://socket.dev/api/badge/npm/package/@socketsecurity/lib)](https://socket.dev/npm/package/@socketsecurity/lib)
 [![CI](https://github.com/SocketDev/socket-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/SocketDev/socket-lib/actions/workflows/ci.yml)
-![Coverage](https://img.shields.io/badge/coverage-84.10%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-50.05%25-yellow)
 
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
@@ -141,7 +141,7 @@ Helpers for arrays, objects, strings, promises, sorting, and more.
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **TypeScript-first** - Full type safety with .d.ts files
 - **Zero dependencies** (for core HTTP - uses Node.js native modules)
-- **Well-tested** - 84% coverage with comprehensive test suite
+- **Well-tested** - 50% line coverage with 6600+ tests across 145 test files
 - **Security-focused** - Safe defaults, command injection protection
 - **CommonJS output** - Compatible with Node.js tooling
 

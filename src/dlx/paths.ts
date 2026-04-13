@@ -94,7 +94,7 @@ export function isInSocketDlx(filePath: string): boolean {
   }
 
   const path = getPath()
-  const dlxDir = getSocketDlxDir()
+  const dlxDir = normalizePath(getSocketDlxDir())
   const absolutePath = normalizePath(path.resolve(filePath))
 
   // Check if the absolute path starts with the DLX directory.
