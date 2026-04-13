@@ -22,6 +22,13 @@ const ANSI_REGEX = /\x1b\[[0-9;]*m/g
  * https://socket.dev/npm/package/ansi-regexp/overview/6.2.2
  * MIT License
  * Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+ *
+ * @example
+ * ```typescript
+ * const regex = ansiRegex()
+ * '\u001b[31mHello\u001b[0m'.match(regex)  // ['\u001b[31m', '\u001b[0m']
+ * ansiRegex({ onlyFirst: true })           // matches only the first code
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
@@ -40,6 +47,12 @@ export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
 /**
  * Strip ANSI escape codes from text.
  * Uses the inlined ansi-regex for matching.
+ *
+ * @example
+ * ```typescript
+ * stripAnsi('\u001b[31mError\u001b[0m')  // 'Error'
+ * stripAnsi('\u001b[1mBold\u001b[0m')    // 'Bold'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stripAnsi(text: string): string {

@@ -5,6 +5,13 @@
 
 /**
  * Capitalize the first letter of a word.
+ *
+ * @example
+ * ```typescript
+ * capitalize('hello')  // 'Hello'
+ * capitalize('WORLD')  // 'World'
+ * capitalize('')       // ''
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function capitalize(word: string): string {
@@ -20,6 +27,12 @@ export function capitalize(word: string): string {
 
 /**
  * Determine the appropriate article (a/an) for a word.
+ *
+ * @example
+ * ```typescript
+ * determineArticle('apple')   // 'an'
+ * determineArticle('banana')  // 'a'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function determineArticle(word: string): string {
@@ -32,6 +45,13 @@ export interface PluralizeOptions {
 
 /**
  * Pluralize a word based on count.
+ *
+ * @example
+ * ```typescript
+ * pluralize('file')               // 'file'
+ * pluralize('file', { count: 3 }) // 'files'
+ * pluralize('file', { count: 0 }) // 'files'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function pluralize(
