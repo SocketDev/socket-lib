@@ -41,6 +41,12 @@ export interface RemoveOptions {
 
 /**
  * Get the cacache module for cache operations.
+ *
+ * @example
+ * ```typescript
+ * const cacache = getCacache()
+ * const entries = await cacache.ls(cacheDir)
+ * ```
  */
 export function getCacache() {
   // cacache is imported at the top
@@ -167,6 +173,12 @@ export async function clear(
  * Get data from the Socket shared cache by key.
  * @throws {Error} When cache entry is not found.
  * @throws {TypeError} If key contains wildcards (*)
+ *
+ * @example
+ * ```typescript
+ * const entry = await get('socket-sdk:scans:abc123')
+ * console.log(entry.data.toString('utf8'))
+ * ```
  */
 export async function get(
   key: string,
@@ -186,6 +198,11 @@ export async function get(
  * Put data into the Socket shared cache with a key.
  *
  * @throws {TypeError} If key contains wildcards (*)
+ *
+ * @example
+ * ```typescript
+ * await put('socket-sdk:scans:abc123', Buffer.from('result data'))
+ * ```
  */
 export async function put(
   key: string,
@@ -206,6 +223,11 @@ export async function put(
  * Remove an entry from the Socket shared cache by key.
  *
  * @throws {TypeError} If key contains wildcards (*)
+ *
+ * @example
+ * ```typescript
+ * await remove('socket-sdk:scans:abc123')
+ * ```
  */
 export async function remove(key: string): Promise<unknown> {
   if (key.includes('*')) {
@@ -220,6 +242,14 @@ export async function remove(key: string): Promise<unknown> {
 
 /**
  * Get data from the Socket shared cache by key without throwing.
+ *
+ * @example
+ * ```typescript
+ * const entry = await safeGet('socket-sdk:scans:abc123')
+ * if (entry) {
+ *   console.log(entry.data.toString('utf8'))
+ * }
+ * ```
  */
 export async function safeGet(
   key: string,
@@ -234,6 +264,14 @@ export async function safeGet(
 
 /**
  * Execute a callback with a temporary directory for cache operations.
+ *
+ * @example
+ * ```typescript
+ * const result = await withTmp(async (tmpDir) => {
+ *   // Use tmpDir for temporary cache work
+ *   return 'done'
+ * })
+ * ```
  */
 export async function withTmp<T>(
   callback: (tmpDirPath: string) => Promise<T>,

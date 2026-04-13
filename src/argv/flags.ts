@@ -39,6 +39,13 @@ export type FlagInput = FlagValues | string[] | readonly string[] | undefined
  * Get the appropriate log level based on flags.
  * Returns 'silent', 'error', 'warn', 'info', 'verbose', or 'debug'.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * getLogLevel()  // 'info' (default)
+ * getLogLevel({ quiet: true })  // 'silent'
+ * getLogLevel(['--debug'])  // 'debug'
+ * ```
  */
 export function getLogLevel(input?: FlagInput): string {
   if (isQuiet(input)) {
@@ -56,6 +63,12 @@ export function getLogLevel(input?: FlagInput): string {
 /**
  * Check if all flag is set.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isAll({ all: true })  // true
+ * isAll(['--all'])  // true
+ * ```
  */
 export function isAll(input?: FlagInput): boolean {
   if (!input) {
@@ -70,6 +83,12 @@ export function isAll(input?: FlagInput): boolean {
 /**
  * Check if changed files mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isChanged({ changed: true })  // true
+ * isChanged(['--changed'])  // true
+ * ```
  */
 export function isChanged(input?: FlagInput): boolean {
   if (!input) {
@@ -85,6 +104,12 @@ export function isChanged(input?: FlagInput): boolean {
  * Check if coverage mode is enabled.
  * Checks both 'coverage' and 'cover' flags.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isCoverage({ coverage: true })  // true
+ * isCoverage(['--cover'])  // true
+ * ```
  */
 export function isCoverage(input?: FlagInput): boolean {
   if (!input) {
@@ -99,6 +124,12 @@ export function isCoverage(input?: FlagInput): boolean {
 /**
  * Check if debug mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isDebug({ debug: true })  // true
+ * isDebug(['--debug'])  // true
+ * ```
  */
 export function isDebug(input?: FlagInput): boolean {
   if (!input) {
@@ -113,6 +144,12 @@ export function isDebug(input?: FlagInput): boolean {
 /**
  * Check if dry-run mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isDryRun({ 'dry-run': true })  // true
+ * isDryRun(['--dry-run'])  // true
+ * ```
  */
 export function isDryRun(input?: FlagInput): boolean {
   if (!input) {
@@ -127,6 +164,12 @@ export function isDryRun(input?: FlagInput): boolean {
 /**
  * Check if fix/autofix mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isFix({ fix: true })  // true
+ * isFix(['--fix'])  // true
+ * ```
  */
 export function isFix(input?: FlagInput): boolean {
   if (!input) {
@@ -141,6 +184,12 @@ export function isFix(input?: FlagInput): boolean {
 /**
  * Check if force mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isForce({ force: true })  // true
+ * isForce(['--force'])  // true
+ * ```
  */
 export function isForce(input?: FlagInput): boolean {
   if (!input) {
@@ -155,6 +204,12 @@ export function isForce(input?: FlagInput): boolean {
 /**
  * Check if help flag is set.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isHelp({ help: true })  // true
+ * isHelp(['-h'])  // true
+ * ```
  */
 export function isHelp(input?: FlagInput): boolean {
   if (!input) {
@@ -169,6 +224,12 @@ export function isHelp(input?: FlagInput): boolean {
 /**
  * Check if JSON output is requested.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isJson({ json: true })  // true
+ * isJson(['--json'])  // true
+ * ```
  */
 export function isJson(input?: FlagInput): boolean {
   if (!input) {
@@ -183,6 +244,12 @@ export function isJson(input?: FlagInput): boolean {
 /**
  * Check if quiet/silent mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isQuiet({ quiet: true })  // true
+ * isQuiet(['--silent'])  // true
+ * ```
  */
 export function isQuiet(input?: FlagInput): boolean {
   if (!input) {
@@ -197,6 +264,12 @@ export function isQuiet(input?: FlagInput): boolean {
 /**
  * Check if staged files mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isStaged({ staged: true })  // true
+ * isStaged(['--staged'])  // true
+ * ```
  */
 export function isStaged(input?: FlagInput): boolean {
   if (!input) {
@@ -211,6 +284,12 @@ export function isStaged(input?: FlagInput): boolean {
 /**
  * Check if update mode is enabled (for snapshots, dependencies, etc).
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isUpdate({ update: true })  // true
+ * isUpdate(['-u'])  // true
+ * ```
  */
 export function isUpdate(input?: FlagInput): boolean {
   if (!input) {
@@ -225,6 +304,12 @@ export function isUpdate(input?: FlagInput): boolean {
 /**
  * Check if verbose mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isVerbose({ verbose: true })  // true
+ * isVerbose(['--verbose'])  // true
+ * ```
  */
 export function isVerbose(input?: FlagInput): boolean {
   if (!input) {
@@ -239,6 +324,12 @@ export function isVerbose(input?: FlagInput): boolean {
 /**
  * Check if watch mode is enabled.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
+ *
+ * @example
+ * ```typescript
+ * isWatch({ watch: true })  // true
+ * isWatch(['-w'])  // true
+ * ```
  */
 export function isWatch(input?: FlagInput): boolean {
   if (!input) {

@@ -360,6 +360,12 @@ function debugCacheNs(
 
 /**
  * Cache debug function with caller info.
+ *
+ * @example
+ * ```typescript
+ * debugCache('hit', 'socket-sdk:scans:abc123')
+ * debugCache('miss', 'socket-sdk:scans:xyz', { ttl: 60000 })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function debugCache(

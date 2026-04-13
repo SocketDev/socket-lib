@@ -22,6 +22,13 @@ export interface ShadowInstallationOptions {
  * @param options.cwd - Current working directory path to check
  * @param options.win32 - Whether running on Windows
  * @returns true if shadow installation should be skipped
+ *
+ * @example
+ * ```typescript
+ * if (shouldSkipShadow(binPath, { cwd: process.cwd() })) {
+ *   console.log('Skipping shadow binary installation')
+ * }
+ * ```
  */
 export function shouldSkipShadow(
   binPath: string,
