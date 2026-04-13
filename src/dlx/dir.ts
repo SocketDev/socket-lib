@@ -30,6 +30,11 @@ function getFs() {
 
 /**
  * Clear all DLX package installations.
+ *
+ * @example
+ * ```typescript
+ * await clearDlx()
+ * ```
  */
 export async function clearDlx(): Promise<void> {
   const packages = await listDlxPackagesAsync()
@@ -38,6 +43,11 @@ export async function clearDlx(): Promise<void> {
 
 /**
  * Clear all DLX package installations synchronously.
+ *
+ * @example
+ * ```typescript
+ * clearDlxSync()
+ * ```
  */
 export function clearDlxSync(): void {
   const packages = listDlxPackages()
@@ -48,6 +58,13 @@ export function clearDlxSync(): void {
 
 /**
  * Check if the DLX directory exists.
+ *
+ * @example
+ * ```typescript
+ * if (dlxDirExists()) {
+ *   console.log('DLX directory is present')
+ * }
+ * ```
  */
 export function dlxDirExists(): boolean {
   const fs = getFs()
@@ -56,6 +73,13 @@ export function dlxDirExists(): boolean {
 
 /**
  * Check if the DLX directory exists asynchronously.
+ *
+ * @example
+ * ```typescript
+ * if (await dlxDirExistsAsync()) {
+ *   console.log('DLX directory is present')
+ * }
+ * ```
  */
 export async function dlxDirExistsAsync(): Promise<boolean> {
   const fs = getFs()
@@ -69,6 +93,11 @@ export async function dlxDirExistsAsync(): Promise<boolean> {
 
 /**
  * Ensure the DLX directory exists, creating it if necessary.
+ *
+ * @example
+ * ```typescript
+ * await ensureDlxDir()
+ * ```
  */
 export async function ensureDlxDir(): Promise<void> {
   await safeMkdir(getSocketDlxDir())
@@ -76,6 +105,11 @@ export async function ensureDlxDir(): Promise<void> {
 
 /**
  * Ensure the DLX directory exists synchronously, creating it if necessary.
+ *
+ * @example
+ * ```typescript
+ * ensureDlxDirSync()
+ * ```
  */
 export function ensureDlxDirSync(): void {
   safeMkdirSync(getSocketDlxDir())

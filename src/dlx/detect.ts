@@ -144,6 +144,12 @@ function readPackageJson(packageJsonPath: string): object | null {
  *
  * @param filePath - Path within DLX cache (~/.socket/_dlx/)
  * @returns Detection result
+ *
+ * @example
+ * ```typescript
+ * const result = detectDlxExecutableType('/tmp/.socket/_dlx/a1b2c3d4/tool')
+ * console.log(result.type) // 'package' or 'binary'
+ * ```
  */
 export function detectDlxExecutableType(
   filePath: string,
@@ -210,6 +216,14 @@ export function detectExecutableType(
  *
  * @param filePath - Local filesystem path (not in DLX cache)
  * @returns Detection result
+ *
+ * @example
+ * ```typescript
+ * const result = detectLocalExecutableType('/usr/local/bin/tool')
+ * if (result.type === 'package') {
+ *   console.log('Node.js package at:', result.packageJsonPath)
+ * }
+ * ```
  */
 export function detectLocalExecutableType(
   filePath: string,
@@ -253,6 +267,13 @@ export function detectLocalExecutableType(
  *
  * @param filePath - Path to check
  * @returns True if file has .js, .mjs, or .cjs extension
+ *
+ * @example
+ * ```typescript
+ * isJsFilePath('index.js')   // true
+ * isJsFilePath('lib.mjs')    // true
+ * isJsFilePath('tool.exe')   // false
+ * ```
  */
 export function isJsFilePath(filePath: string): boolean {
   const path = getPath()
@@ -265,6 +286,12 @@ export function isJsFilePath(filePath: string): boolean {
  *
  * @param filePath - Path to check
  * @returns True if detected as native binary (not Node.js package)
+ *
+ * @example
+ * ```typescript
+ * isNativeBinary('/usr/local/bin/tool')    // true
+ * isNativeBinary('/tmp/project/index.js')  // false
+ * ```
  */
 export function isNativeBinary(filePath: string): boolean {
   return detectExecutableType(filePath).type === 'binary'
@@ -275,6 +302,12 @@ export function isNativeBinary(filePath: string): boolean {
  *
  * @param filePath - Path to check
  * @returns True if detected as Node.js package
+ *
+ * @example
+ * ```typescript
+ * isNodePackage('/tmp/project/index.js')   // true
+ * isNodePackage('/usr/local/bin/tool')     // false
+ * ```
  */
 export function isNodePackage(filePath: string): boolean {
   return detectExecutableType(filePath).type === 'package'

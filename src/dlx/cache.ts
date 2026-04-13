@@ -38,6 +38,12 @@ function getCrypto() {
  * https://github.com/npm/cli/blob/v11.6.2/workspaces/libnpmexec/lib/index.js#L233-L244
  * Implementation: packages.map().sort().join('\n') → SHA-512 → slice(0,16)
  * npx hashes the package spec (name@version), not just name
+ *
+ * @example
+ * ```typescript
+ * const key = generateCacheKey('prettier@3.0.0')
+ * // e.g. 'a1b2c3d4e5f67890'
+ * ```
  */
 export function generateCacheKey(spec: string): string {
   const crypto = getCrypto()

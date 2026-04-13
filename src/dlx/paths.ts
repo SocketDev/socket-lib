@@ -20,6 +20,11 @@ function getPath() {
 
 /**
  * Get the installed package directory within DLX node_modules.
+ *
+ * @example
+ * ```typescript
+ * const dir = getDlxInstalledPackageDir('prettier')
+ * ```
  */
 export function getDlxInstalledPackageDir(packageName: string): string {
   const path = getPath()
@@ -30,6 +35,11 @@ export function getDlxInstalledPackageDir(packageName: string): string {
 
 /**
  * Get the DLX installation directory for a specific package.
+ *
+ * @example
+ * ```typescript
+ * const dir = getDlxPackageDir('a1b2c3d4')
+ * ```
  */
 export function getDlxPackageDir(packageName: string): string {
   const path = getPath()
@@ -38,6 +48,11 @@ export function getDlxPackageDir(packageName: string): string {
 
 /**
  * Get the package.json path for a DLX installed package.
+ *
+ * @example
+ * ```typescript
+ * const jsonPath = getDlxPackageJsonPath('prettier')
+ * ```
  */
 export function getDlxPackageJsonPath(packageName: string): string {
   const path = getPath()
@@ -48,6 +63,11 @@ export function getDlxPackageJsonPath(packageName: string): string {
 
 /**
  * Get the node_modules directory for a DLX package installation.
+ *
+ * @example
+ * ```typescript
+ * const nmDir = getDlxPackageNodeModulesDir('a1b2c3d4')
+ * ```
  */
 export function getDlxPackageNodeModulesDir(packageName: string): string {
   const path = getPath()
