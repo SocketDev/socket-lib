@@ -167,6 +167,13 @@ function getUtil() {
 
 /**
  * Get the EditablePackageJson class for package.json manipulation.
+ *
+ * @example
+ * ```typescript
+ * const EditablePackageJson = getEditablePackageJsonClass()
+ * const pkg = await EditablePackageJson.load('/tmp/my-project')
+ * console.log(pkg.content.name)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
@@ -467,6 +474,11 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
 /**
  * Convert a package.json object to an editable instance.
+ *
+ * @example
+ * ```typescript
+ * const editable = pkgJsonToEditable({ name: 'my-pkg', version: '1.0.0' })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function pkgJsonToEditable(
@@ -485,6 +497,14 @@ export function pkgJsonToEditable(
 
 /**
  * Convert package.json to editable instance with file persistence.
+ *
+ * @example
+ * ```typescript
+ * const editable = await toEditablePackageJson(
+ *   { name: 'my-pkg', version: '1.0.0' },
+ *   { path: '/tmp/my-project' }
+ * )
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function toEditablePackageJson(
@@ -519,6 +539,14 @@ export async function toEditablePackageJson(
 
 /**
  * Convert package.json to editable instance with file persistence synchronously.
+ *
+ * @example
+ * ```typescript
+ * const editable = toEditablePackageJsonSync(
+ *   { name: 'my-pkg', version: '1.0.0' },
+ *   { path: '/tmp/my-project' }
+ * )
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function toEditablePackageJsonSync(

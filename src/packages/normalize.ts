@@ -25,6 +25,12 @@ function getEscapedScopeRegExp(): RegExp {
 
 /**
  * Normalize a package.json object with standard npm package normalization.
+ *
+ * @example
+ * ```typescript
+ * const pkgJson = { name: 'my-pkg', version: '1.0.0' }
+ * const normalized = normalizePackageJson(pkgJson)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizePackageJson(
@@ -67,6 +73,12 @@ export function normalizePackageJson(
 
 /**
  * Extract escaped scope from a Socket registry package name.
+ *
+ * @example
+ * ```typescript
+ * resolveEscapedScope('babel__core') // 'babel__'
+ * resolveEscapedScope('lodash')      // undefined
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveEscapedScope(
@@ -79,6 +91,11 @@ export function resolveEscapedScope(
 
 /**
  * Resolve original package name from Socket registry package name.
+ *
+ * @example
+ * ```typescript
+ * resolveOriginalPackageName('@socketregistry/is-number') // 'is-number'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveOriginalPackageName(sockRegPkgName: string): string {
@@ -93,6 +110,11 @@ export function resolveOriginalPackageName(sockRegPkgName: string): string {
 
 /**
  * Convert escaped scope to standard npm scope format.
+ *
+ * @example
+ * ```typescript
+ * unescapeScope('babel__') // '@babel'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unescapeScope(escapedScope: string): string {
