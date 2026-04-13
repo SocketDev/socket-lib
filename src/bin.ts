@@ -77,6 +77,12 @@ export interface WhichOptions {
 
 /**
  * Execute a binary with the given arguments.
+ *
+ * @example
+ * ```typescript
+ * await execBin('pnpm', ['install'])
+ * await execBin('/usr/local/bin/node', ['script.js'], { cwd: '/tmp' })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function execBin(
@@ -140,6 +146,12 @@ export async function execBin(
 
 /**
  * Find the real executable for a binary, bypassing shadow bins.
+ *
+ * @example
+ * ```typescript
+ * const npmPath = findRealBin('npm', ['/usr/local/bin/npm'])
+ * const gitPath = findRealBin('git')
+ * ```
  */
 export function findRealBin(
   binName: string,
@@ -184,6 +196,12 @@ export function findRealBin(
 
 /**
  * Find the real npm executable, bypassing any aliases and shadow bins.
+ *
+ * @example
+ * ```typescript
+ * const npmPath = findRealNpm()
+ * // e.g. '/usr/local/bin/npm'
+ * ```
  */
 export function findRealNpm(): string {
   const fs = getFs()
@@ -219,6 +237,12 @@ export function findRealNpm(): string {
 
 /**
  * Find the real pnpm executable, bypassing any aliases and shadow bins.
+ *
+ * @example
+ * ```typescript
+ * const pnpmPath = findRealPnpm()
+ * // e.g. '/usr/local/bin/pnpm'
+ * ```
  */
 export function findRealPnpm(): string {
   const path = getPath()
@@ -250,6 +274,12 @@ export function findRealPnpm(): string {
 
 /**
  * Find the real yarn executable, bypassing any aliases and shadow bins.
+ *
+ * @example
+ * ```typescript
+ * const yarnPath = findRealYarn()
+ * // e.g. '/usr/local/bin/yarn'
+ * ```
  */
 export function findRealYarn(): string {
   const path = getPath()
@@ -270,6 +300,12 @@ export function findRealYarn(): string {
 
 /**
  * Check if a directory path contains any shadow bin patterns.
+ *
+ * @example
+ * ```typescript
+ * isShadowBinPath('/tmp/project/node_modules/.bin')  // true
+ * isShadowBinPath('/usr/local/bin')                   // false
+ * ```
  */
 export function isShadowBinPath(dirPath: string | undefined): boolean {
   if (!dirPath) {
@@ -284,6 +320,12 @@ export function isShadowBinPath(dirPath: string | undefined): boolean {
 /**
  * Resolve a binary path to the real underlying script file.
  * Handles Windows .cmd wrappers and Unix shell scripts, resolving them to the actual .js files they execute.
+ *
+ * @example
+ * ```typescript
+ * const realPath = resolveRealBinSync('/usr/local/bin/npm')
+ * // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
+ * ```
  */
 export function resolveRealBinSync(binPath: string): string {
   const fs = getFs()
@@ -723,6 +765,12 @@ export async function which(
  * Find a binary in the system PATH and resolve to the real underlying script asynchronously.
  * Resolves wrapper scripts (.cmd, .ps1, shell scripts) to the actual .js files they execute.
  * @throws {Error} If the binary is not found and nothrow is false.
+ *
+ * @example
+ * ```typescript
+ * const npmPath = await whichReal('npm')
+ * // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
+ * ```
  */
 export async function whichReal(
   binName: string,
@@ -792,6 +840,12 @@ export async function whichReal(
  * Find a binary in the system PATH and resolve to the real underlying script synchronously.
  * Resolves wrapper scripts (.cmd, .ps1, shell scripts) to the actual .js files they execute.
  * @throws {Error} If the binary is not found and nothrow is false.
+ *
+ * @example
+ * ```typescript
+ * const npmPath = whichRealSync('npm')
+ * // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
+ * ```
  */
 export function whichRealSync(
   binName: string,

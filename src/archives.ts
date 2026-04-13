@@ -114,6 +114,13 @@ function validatePathWithinBase(
  *
  * @param filePath - Path to archive file
  * @returns Archive format or null if unknown
+ *
+ * @example
+ * ```typescript
+ * detectArchiveFormat('package.tar.gz')  // 'tar.gz'
+ * detectArchiveFormat('archive.zip')     // 'zip'
+ * detectArchiveFormat('data.csv')        // null
+ * ```
  */
 export function detectArchiveFormat(filePath: string): ArchiveFormat | null {
   const lower = filePath.toLowerCase()
@@ -138,6 +145,12 @@ export function detectArchiveFormat(filePath: string): ArchiveFormat | null {
  * @param archivePath - Path to tar file
  * @param outputDir - Directory to extract to
  * @param options - Extraction options
+ *
+ * @example
+ * ```typescript
+ * await extractTar('/tmp/archive.tar', '/tmp/output')
+ * await extractTar('/tmp/archive.tar', '/tmp/output', { strip: 1 })
+ * ```
  */
 export async function extractTar(
   archivePath: string,
@@ -264,6 +277,12 @@ export async function extractTar(
  * @param archivePath - Path to tar.gz or tgz file
  * @param outputDir - Directory to extract to
  * @param options - Extraction options
+ *
+ * @example
+ * ```typescript
+ * await extractTarGz('/tmp/archive.tar.gz', '/tmp/output')
+ * await extractTarGz('/tmp/archive.tgz', '/tmp/output', { strip: 1 })
+ * ```
  */
 export async function extractTarGz(
   archivePath: string,
@@ -390,6 +409,12 @@ export async function extractTarGz(
  * @param archivePath - Path to zip file
  * @param outputDir - Directory to extract to
  * @param options - Extraction options
+ *
+ * @example
+ * ```typescript
+ * await extractZip('/tmp/archive.zip', '/tmp/output')
+ * await extractZip('/tmp/archive.zip', '/tmp/output', { strip: 1 })
+ * ```
  */
 export async function extractZip(
   archivePath: string,
@@ -530,6 +555,12 @@ export async function extractZip(
  * @param outputDir - Directory to extract to
  * @param options - Extraction options
  * @throws Error if archive format is not supported
+ *
+ * @example
+ * ```typescript
+ * await extractArchive('/tmp/package.tar.gz', '/tmp/output')
+ * await extractArchive('/tmp/release.zip', '/tmp/output', { strip: 1 })
+ * ```
  */
 export async function extractArchive(
   archivePath: string,

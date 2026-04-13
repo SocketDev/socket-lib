@@ -280,6 +280,15 @@ export interface SpawnSyncReturns<T> {
 /**
  * Enhances spawn error with better context.
  * Converts generic "command failed" to detailed error with command, exit code, and stderr.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await spawn('git', ['status'])
+ * } catch (err) {
+ *   throw enhanceSpawnError(err)
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function enhanceSpawnError(error: unknown): unknown {
