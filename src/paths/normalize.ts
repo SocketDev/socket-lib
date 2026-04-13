@@ -359,6 +359,62 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
 }
 
 /**
+ * Convert Unix-style POSIX paths (MSYS/Git Bash format) back to native Windows paths.
+ *
+ * This is the inverse of {@link toUnixPath}. MSYS-style paths use `/c/` notation
+ * for drive letters, which PowerShell and cmd.exe cannot resolve. This function
+ * converts them back to native Windows format.
+ *
+ * Conversion rules:
+ * - On Windows: Converts Unix drive notation to Windows drive letters
+ *   - `/c/path/to/file` becomes `C:/path/to/file`
+ *   - `/d/projects/app` becomes `D:/projects/app`
+ *   - Drive letters are always uppercase in the output
+ * - On Unix: Returns the path unchanged (passes through normalization)
+ *
+ * This is particularly important for:
+ * - GitHub Actions runners where `command -v` returns MSYS paths
+ * - Tools like sfw that need to resolve real binary paths on Windows
+ * - Scripts that receive paths from Git Bash but need to pass them to native Windows tools
+ *
+ * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to convert
+ * @returns {string} Native Windows path (e.g., `C:/path/to/file`) or normalized Unix path
+ *
+ * @example
+ * ```typescript
+ * // MSYS drive letter paths
+ * fromUnixPath('/c/projects/app/file.txt')    // 'C:/projects/app/file.txt'
+ * fromUnixPath('/d/projects/foo/bar')         // 'D:/projects/foo/bar'
+ *
+ * // Non-drive Unix paths (unchanged)
+ * fromUnixPath('/tmp/build/output')           // '/tmp/build/output'
+ * fromUnixPath('/usr/local/bin')              // '/usr/local/bin'
+ *
+ * // Already Windows paths (unchanged)
+ * fromUnixPath('C:/Windows/System32')         // 'C:/Windows/System32'
+ *
+ * // Edge cases
+ * fromUnixPath('/c')                          // 'C:/'
+ * fromUnixPath('')                            // '.'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function fromUnixPath(pathLike: string | Buffer | URL): string {
+  const normalized = normalizePath(pathLike)
+
+  // On Windows, convert MSYS drive notation back to native: /c/path → C:/path
+  if (WIN32) {
+    return normalized.replace(
+      /^\/([a-zA-Z])(\/|$)/,
+      (_, letter, sep) => `${letter.toUpperCase()}:${sep || '/'}`,
+    )
+  }
+
+  // On Unix, just return the normalized path
+  return normalized
+}
+
+/**
  * Normalize a path by converting backslashes to forward slashes and collapsing segments.
  *
  * This function performs several normalization operations:
@@ -1114,21 +1170,23 @@ export function relativeResolve(from: string, to: string): string {
 }
 
 /**
- * Convert Windows paths to Unix-style POSIX paths for Git Bash tools.
+ * Convert Windows paths to MSYS/Unix-style POSIX paths for Git Bash tools.
  *
- * Git for Windows tools (like tar, git, etc.) expect POSIX-style paths with
- * forward slashes and Unix drive letter notation (/c/ instead of C:\).
+ * Git for Windows and MSYS2 tools (like tar, git, etc.) expect POSIX-style
+ * paths with forward slashes and Unix drive letter notation (/c/ instead of C:\).
  * This function handles the conversion for cross-platform compatibility.
+ *
+ * This is the inverse of {@link fromUnixPath}.
  *
  * Conversion rules:
  * - On Windows: Normalizes separators and converts drive letters
  *   - `C:\path\to\file` becomes `/c/path/to/file`
- *   - `D:/Users/name` becomes `/d/Users/name`
+ *   - `D:/projects/app` becomes `/d/projects/app`
  *   - Drive letters are always lowercase in the output
  * - On Unix: Returns the path unchanged (passes through normalization)
  *
  * This is particularly important for:
- * - Git Bash tools that interpret `D:\` as a remote hostname
+ * - MSYS2/Git Bash tools that interpret `D:\` as a remote hostname
  * - Cross-platform build scripts using tar, git archive, etc.
  * - CI/CD environments where Git for Windows is used
  *
