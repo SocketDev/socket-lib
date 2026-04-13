@@ -74,6 +74,13 @@ export interface LicenseVisitor {
 
 /**
  * Collect licenses that are incompatible (copyleft).
+ *
+ * @example
+ * ```typescript
+ * const nodes = [{ license: 'MIT' }, { license: 'GPL-3.0' }]
+ * const incompatible = collectIncompatibleLicenses(nodes)
+ * // incompatible contains only the GPL-3.0 node
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function collectIncompatibleLicenses(
@@ -91,6 +98,12 @@ export function collectIncompatibleLicenses(
 
 /**
  * Collect warnings from license nodes.
+ *
+ * @example
+ * ```typescript
+ * const nodes = [{ license: 'UNLICENSED' }]
+ * collectLicenseWarnings(nodes) // ['Package is unlicensed']
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function collectLicenseWarnings(licenseNodes: LicenseNode[]): string[] {
@@ -112,6 +125,13 @@ export function collectLicenseWarnings(licenseNodes: LicenseNode[]): string[] {
 
 /**
  * Create an AST node from a raw node.
+ *
+ * @example
+ * ```typescript
+ * const raw = { license: 'MIT' }
+ * const node = createAstNode(raw)
+ * // node.type === 'License'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function createAstNode(rawNode: SpdxAstNode): InternalAstNode {
@@ -122,6 +142,17 @@ export function createAstNode(rawNode: SpdxAstNode): InternalAstNode {
 
 /**
  * Create a binary operation AST node.
+ *
+ * @example
+ * ```typescript
+ * const raw = {
+ *   left: { license: 'MIT' },
+ *   conjunction: 'OR' as const,
+ *   right: { license: 'Apache-2.0' }
+ * }
+ * const node = createBinaryOperationNode(raw)
+ * // node.type === 'BinaryOperation'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function createBinaryOperationNode(
@@ -156,6 +187,12 @@ export function createBinaryOperationNode(
 
 /**
  * Create a license AST node.
+ *
+ * @example
+ * ```typescript
+ * const node = createLicenseNode({ license: 'MIT' })
+ * // node.type === 'License' && node.license === 'MIT'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function createLicenseNode(
@@ -170,6 +207,12 @@ export function createLicenseNode(
 
 /**
  * Parse an SPDX license expression into an AST.
+ *
+ * @example
+ * ```typescript
+ * const ast = parseSpdxExp('MIT OR Apache-2.0')
+ * // ast is a BinaryOperation node with MIT and Apache-2.0 leaves
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseSpdxExp(spdxExp: string): SpdxAstNode | undefined {
@@ -184,6 +227,12 @@ export function parseSpdxExp(spdxExp: string): SpdxAstNode | undefined {
 
 /**
  * Parse package license field into structured license nodes.
+ *
+ * @example
+ * ```typescript
+ * const nodes = resolvePackageLicenses('MIT', '/tmp/my-project')
+ * // [{ license: 'MIT' }]
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageLicenses(
@@ -238,6 +287,16 @@ export function resolvePackageLicenses(
 
 /**
  * Traverse SPDX license AST and invoke visitor callbacks for each node.
+ *
+ * @example
+ * ```typescript
+ * const ast = parseSpdxExp('MIT OR Apache-2.0')
+ * const licenses: string[] = []
+ * if (ast) {
+ *   visitLicenses(ast, { License(node) { licenses.push(node.license) } })
+ * }
+ * // licenses === ['MIT', 'Apache-2.0']
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function visitLicenses(ast: SpdxAstNode, visitor: LicenseVisitor): void {

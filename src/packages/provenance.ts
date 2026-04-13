@@ -145,6 +145,12 @@ function isTrustedPublisher(value: unknown): boolean {
 
 /**
  * Convert raw attestation data to user-friendly provenance details.
+ *
+ * @example
+ * ```typescript
+ * const details = getProvenanceDetails(attestationData)
+ * // { level: 'trusted', repository: '...', commitSha: '...' }
+ * ```
  */
 export function getProvenanceDetails(attestationData: unknown): unknown {
   const attestations = getAttestations(attestationData)
@@ -208,6 +214,11 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
 
 /**
  * Fetch package provenance information from npm registry.
+ *
+ * @example
+ * ```typescript
+ * const provenance = await fetchPackageProvenance('lodash', '4.17.21')
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackageProvenance(
