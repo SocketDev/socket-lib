@@ -12,12 +12,14 @@
  * - pathLikeToString() converts Buffer/URL to string
  * - relativeResolve() resolves relative paths
  * - toUnixPath() converts Windows paths to Unix-style POSIX paths for Git Bash tools
+ * - fromUnixPath() converts MSYS/Unix-style paths back to native Windows paths
  * Used throughout Socket tools for cross-platform path handling.
  */
 
 import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 import {
+  fromUnixPath,
   isAbsolute,
   isNodeModules,
   isPath,
@@ -80,6 +82,103 @@ describe('paths/normalize', () => {
     it('should handle Windows UNC paths', () => {
       const result = normalizePath('\\\\server\\share\\file')
       expect(result).toContain('server')
+    })
+  })
+
+  describe('fromUnixPath', () => {
+    const isWindows = process.platform === 'win32'
+
+    it.skipIf(!isWindows)(
+      'should convert MSYS drive letter paths to Windows format',
+      () => {
+        expect(fromUnixPath('/c/projects/app/file.txt')).toBe(
+          'C:/projects/app/file.txt',
+        )
+        expect(fromUnixPath('/d/projects/foo/bar')).toBe('D:/projects/foo/bar')
+      },
+    )
+
+    it.skipIf(!isWindows)(
+      'should convert lowercase drive letters to uppercase',
+      () => {
+        expect(fromUnixPath('/c/path')).toBe('C:/path')
+        expect(fromUnixPath('/d/path')).toBe('D:/path')
+        expect(fromUnixPath('/z/path')).toBe('Z:/path')
+      },
+    )
+
+    it.skipIf(!isWindows)('should handle all drive letters a-z', () => {
+      expect(fromUnixPath('/a/path')).toBe('A:/path')
+      expect(fromUnixPath('/e/path')).toBe('E:/path')
+      expect(fromUnixPath('/z/path')).toBe('Z:/path')
+    })
+
+    it.skipIf(!isWindows)('should handle bare drive letter path', () => {
+      expect(fromUnixPath('/c')).toBe('C:/')
+    })
+
+    it.skipIf(!isWindows)('should not convert non-drive Unix paths', () => {
+      expect(fromUnixPath('/tmp/build/output')).toBe('/tmp/build/output')
+      expect(fromUnixPath('/usr/local/bin')).toBe('/usr/local/bin')
+    })
+
+    it.skipIf(isWindows)('should leave Unix paths unchanged on Unix', () => {
+      expect(fromUnixPath('/tmp/build/output')).toBe('/tmp/build/output')
+      expect(fromUnixPath('/usr/local/bin')).toBe('/usr/local/bin')
+      expect(fromUnixPath('/c/projects/app')).toBe('/c/projects/app')
+    })
+
+    it.skipIf(isWindows)('should normalize paths on Unix', () => {
+      expect(fromUnixPath('/usr/local/../bin')).toBe('/usr/bin')
+      expect(fromUnixPath('/usr//local///bin')).toBe('/usr/local/bin')
+    })
+
+    it('should handle relative paths', () => {
+      const result1 = fromUnixPath('./src/index.ts')
+      const result2 = fromUnixPath('../lib/utils')
+      expect(result1).toContain('src')
+      expect(result2).toContain('lib')
+    })
+
+    it('should handle empty string', () => {
+      expect(fromUnixPath('')).toBe('.')
+    })
+
+    it.skipIf(!isWindows)('should handle paths with spaces', () => {
+      expect(fromUnixPath('/c/Program Files/App')).toBe('C:/Program Files/App')
+    })
+
+    it.skipIf(!isWindows)('should handle paths with special characters', () => {
+      expect(fromUnixPath('/c/projects/file (1).txt')).toBe(
+        'C:/projects/file (1).txt',
+      )
+      expect(fromUnixPath('/d/projects/@scope/package')).toBe(
+        'D:/projects/@scope/package',
+      )
+    })
+
+    it('should handle Buffer input', () => {
+      if (isWindows) {
+        const buffer = Buffer.from('/c/projects/app')
+        expect(fromUnixPath(buffer)).toBe('C:/projects/app')
+      } else {
+        const buffer = Buffer.from('/usr/local')
+        expect(fromUnixPath(buffer)).toBe('/usr/local')
+      }
+    })
+
+    it.skipIf(!isWindows)(
+      'should be the inverse of toUnixPath on Windows',
+      () => {
+        const original = 'C:/projects/app/file.txt'
+        const unix = toUnixPath(original)
+        const backToWindows = fromUnixPath(unix)
+        expect(backToWindows).toBe(original)
+      },
+    )
+
+    it.skipIf(isWindows)('should handle root path', () => {
+      expect(fromUnixPath('/')).toBe('/')
     })
   })
 
@@ -364,88 +463,79 @@ describe('paths/normalize', () => {
   describe('toUnixPath', () => {
     const isWindows = process.platform === 'win32'
 
-    it('should convert Windows drive letter paths with backslashes', () => {
-      if (isWindows) {
-        expect(toUnixPath('C:\\Users\\name\\file.txt')).toBe(
-          '/c/Users/name/file.txt',
+    it.skipIf(!isWindows)(
+      'should convert Windows drive letter paths with backslashes',
+      () => {
+        expect(toUnixPath('C:\\projects\\app\\file.txt')).toBe(
+          '/c/projects/app/file.txt',
         )
         expect(toUnixPath('D:\\projects\\foo\\bar')).toBe('/d/projects/foo/bar')
-      }
-    })
+      },
+    )
 
-    it('should convert Windows drive letter paths with forward slashes', () => {
-      if (isWindows) {
+    it.skipIf(!isWindows)(
+      'should convert Windows drive letter paths with forward slashes',
+      () => {
         expect(toUnixPath('C:/Windows/System32')).toBe('/c/Windows/System32')
         expect(toUnixPath('D:/data/logs')).toBe('/d/data/logs')
-      }
-    })
+      },
+    )
 
-    it('should convert uppercase drive letters to lowercase', () => {
-      if (isWindows) {
+    it.skipIf(!isWindows)(
+      'should convert uppercase drive letters to lowercase',
+      () => {
         expect(toUnixPath('C:\\path')).toBe('/c/path')
         expect(toUnixPath('D:\\path')).toBe('/d/path')
         expect(toUnixPath('Z:\\path')).toBe('/z/path')
-      }
+      },
+    )
+
+    it.skipIf(!isWindows)('should handle lowercase drive letters', () => {
+      expect(toUnixPath('c:\\path')).toBe('/c/path')
+      expect(toUnixPath('d:\\path')).toBe('/d/path')
     })
 
-    it('should handle lowercase drive letters', () => {
-      if (isWindows) {
-        expect(toUnixPath('c:\\path')).toBe('/c/path')
-        expect(toUnixPath('d:\\path')).toBe('/d/path')
-      }
+    it.skipIf(!isWindows)('should handle mixed case drive letters', () => {
+      expect(toUnixPath('c:\\Windows\\System32')).toBe('/c/Windows/System32')
+      expect(toUnixPath('D:\\projects\\app')).toBe('/d/projects/app')
     })
 
-    it('should handle mixed case drive letters', () => {
-      if (isWindows) {
-        expect(toUnixPath('c:\\Windows\\System32')).toBe('/c/Windows/System32')
-        expect(toUnixPath('D:\\Users\\John')).toBe('/d/Users/John')
-      }
+    it.skipIf(!isWindows)('should handle UNC paths', () => {
+      expect(toUnixPath('\\\\server\\share\\file')).toBe('//server/share/file')
+      expect(toUnixPath('\\\\server\\share\\path\\to\\file')).toBe(
+        '//server/share/path/to/file',
+      )
     })
 
-    it('should handle UNC paths', () => {
-      if (isWindows) {
-        expect(toUnixPath('\\\\server\\share\\file')).toBe(
-          '//server/share/file',
-        )
-        expect(toUnixPath('\\\\server\\share\\path\\to\\file')).toBe(
-          '//server/share/path/to/file',
-        )
-      }
+    it.skipIf(isWindows)('should handle Unix absolute paths on Unix', () => {
+      expect(toUnixPath('/tmp/build/output')).toBe('/tmp/build/output')
+      expect(toUnixPath('/usr/local/bin')).toBe('/usr/local/bin')
+      expect(toUnixPath('/var/log/app.log')).toBe('/var/log/app.log')
     })
 
-    it('should handle Unix absolute paths on Unix', () => {
-      if (!isWindows) {
-        expect(toUnixPath('/home/user/file')).toBe('/home/user/file')
-        expect(toUnixPath('/usr/local/bin')).toBe('/usr/local/bin')
-        expect(toUnixPath('/var/log/app.log')).toBe('/var/log/app.log')
-      }
-    })
-
-    it('should normalize paths on Unix (collapse .., remove ./, etc)', () => {
-      if (!isWindows) {
-        // Verify that normalization still happens on Unix
+    it.skipIf(isWindows)(
+      'should normalize paths on Unix (collapse .., remove ./, etc)',
+      () => {
         expect(toUnixPath('/usr/local/../bin')).toBe('/usr/bin')
         expect(toUnixPath('/usr//local///bin')).toBe('/usr/local/bin')
         expect(toUnixPath('./src/index.ts')).toBe('src/index.ts')
         expect(toUnixPath('/usr/./local/bin')).toBe('/usr/local/bin')
-      }
-    })
+      },
+    )
 
     it('should handle relative paths', () => {
-      // Relative paths get normalized but don't get drive letter conversion
       const result1 = toUnixPath('./src/index.ts')
       const result2 = toUnixPath('../lib/utils')
       expect(result1).toContain('src')
       expect(result2).toContain('lib')
-      // On Unix, should be unchanged. On Windows, backslashes become forward slashes
       expect(result1.includes('\\\\')).toBe(false)
       expect(result2.includes('\\\\')).toBe(false)
     })
 
     it('should handle Buffer input', () => {
       if (isWindows) {
-        const buffer = Buffer.from('C:\\Users\\name')
-        expect(toUnixPath(buffer)).toBe('/c/Users/name')
+        const buffer = Buffer.from('C:\\projects\\app')
+        expect(toUnixPath(buffer)).toBe('/c/projects/app')
       } else {
         const buffer = Buffer.from('/usr/local')
         expect(toUnixPath(buffer)).toBe('/usr/local')
@@ -466,76 +556,62 @@ describe('paths/normalize', () => {
     })
 
     it('should handle empty string', () => {
-      // Empty string normalizes to '.' on all platforms (consistent with Node.js path.normalize)
       expect(toUnixPath('')).toBe('.')
     })
 
-    it('should handle root paths', () => {
-      if (!isWindows) {
-        expect(toUnixPath('/')).toBe('/')
-      }
+    it.skipIf(isWindows)('should handle root paths', () => {
+      expect(toUnixPath('/')).toBe('/')
     })
 
-    it('should handle paths with spaces', () => {
-      if (isWindows) {
-        expect(toUnixPath('C:\\Program Files\\App')).toBe(
-          '/c/Program Files/App',
-        )
-        expect(toUnixPath('D:\\My Documents\\file.txt')).toBe(
-          '/d/My Documents/file.txt',
-        )
-      }
+    it.skipIf(!isWindows)('should handle paths with spaces', () => {
+      expect(toUnixPath('C:\\Program Files\\App')).toBe('/c/Program Files/App')
+      expect(toUnixPath('D:\\My Documents\\file.txt')).toBe(
+        '/d/My Documents/file.txt',
+      )
     })
 
-    it('should handle paths with special characters', () => {
-      if (isWindows) {
-        expect(toUnixPath('C:\\Users\\name\\file (1).txt')).toBe(
-          '/c/Users/name/file (1).txt',
-        )
-        expect(toUnixPath('D:\\projects\\@scope\\package')).toBe(
-          '/d/projects/@scope/package',
-        )
-      }
+    it.skipIf(!isWindows)('should handle paths with special characters', () => {
+      expect(toUnixPath('C:\\projects\\file (1).txt')).toBe(
+        '/c/projects/file (1).txt',
+      )
+      expect(toUnixPath('D:\\projects\\@scope\\package')).toBe(
+        '/d/projects/@scope/package',
+      )
     })
 
-    it('should handle mixed separators in path', () => {
-      if (isWindows) {
-        expect(toUnixPath('C:\\Users/name\\file.txt')).toBe(
-          '/c/Users/name/file.txt',
-        )
-      }
+    it.skipIf(!isWindows)('should handle mixed separators in path', () => {
+      expect(toUnixPath('C:\\projects/app\\file.txt')).toBe(
+        '/c/projects/app/file.txt',
+      )
     })
 
-    it('should handle all drive letters A-Z', () => {
-      if (isWindows) {
-        expect(toUnixPath('A:\\path')).toBe('/a/path')
-        expect(toUnixPath('E:\\path')).toBe('/e/path')
-        expect(toUnixPath('Z:\\path')).toBe('/z/path')
-      }
+    it.skipIf(!isWindows)('should handle all drive letters A-Z', () => {
+      expect(toUnixPath('A:\\path')).toBe('/a/path')
+      expect(toUnixPath('E:\\path')).toBe('/e/path')
+      expect(toUnixPath('Z:\\path')).toBe('/z/path')
     })
 
-    it('should preserve path after drive letter conversion', () => {
-      if (isWindows) {
+    it.skipIf(!isWindows)(
+      'should preserve path after drive letter conversion',
+      () => {
         expect(toUnixPath('C:\\a\\b\\c\\d\\e\\f')).toBe('/c/a/b/c/d/e/f')
         expect(toUnixPath('D:\\projects\\socket-btm\\build\\dev')).toBe(
           '/d/projects/socket-btm/build/dev',
         )
-      }
-    })
+      },
+    )
 
-    it('should handle Git Bash tar paths correctly', () => {
-      // This is the primary use case: Git for Windows tar.EXE needs POSIX paths
-      if (isWindows) {
-        // Example from Windows CI: D:\a\socket-btm\build\dev
+    it.skipIf(!isWindows)(
+      'should handle MSYS/Git Bash tar paths correctly',
+      () => {
         expect(toUnixPath('D:\\a\\socket-btm\\build\\dev')).toBe(
           '/d/a/socket-btm/build/dev',
         )
-        // tar expects /d/path not D:\path
         const result = toUnixPath('C:\\Windows\\Temp\\archive.tar.gz')
         expect(result.startsWith('/c/')).toBe(true)
         expect(result.includes('\\')).toBe(false)
-      }
-    })
+      },
+    )
   })
 
   describe('Edge cases', () => {
