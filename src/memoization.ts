@@ -319,6 +319,11 @@ export function Memoize(options: MemoizeOptions<unknown[], unknown> = {}) {
 /**
  * Clear all memoization caches.
  * Useful for testing or when you need to force recomputation.
+ *
+ * @example
+ * ```typescript
+ * clearAllMemoizationCaches()
+ * ```
  */
 export function clearAllMemoizationCaches(): void {
   debugLog('[memoize:all] clear', { action: 'clear-all-caches' })

@@ -502,6 +502,13 @@ export interface HttpResponse {
  * `httpRequest()` (e.g., multipart form-data uploads via `http.request()`,
  * or responses from third-party HTTP libraries) and need to convert it
  * into the standard HttpResponse interface.
+ *
+ * @example
+ * ```typescript
+ * const raw = await makeRawRequest('https://example.com/api')
+ * const response = await readIncomingResponse(raw)
+ * console.log(response.status, response.body.toString('utf8'))
+ * ```
  */
 export async function readIncomingResponse(
   msg: IncomingResponse,
@@ -1076,6 +1083,15 @@ async function httpDownloadAttempt(
 /**
  * Build an enriched error message based on the error code.
  * Generic guidance (no product-specific branding).
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await fetch('https://api.example.com')
+ * } catch (err) {
+ *   console.error(enrichErrorMessage('https://api.example.com', 'GET', err))
+ * }
+ * ```
  */
 export function enrichErrorMessage(
   url: string,

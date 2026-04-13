@@ -36,6 +36,12 @@ export const RAINBOW_GRADIENT: ShimmerColorGradient = [
 /**
  * Generate rainbow gradient colors for any text length.
  * Colors are distributed evenly across the text by cycling through the gradient.
+ *
+ * @example
+ * ```typescript
+ * const colors = generateRainbowGradient('Hello'.length)
+ * console.log(colors.length) // 5
+ * ```
  */
 export function generateRainbowGradient(
   textLength: number,

@@ -96,6 +96,12 @@ export function extractFormatting(json: string): JsonFormatting {
  * Get default formatting for JSON files.
  *
  * @returns Default formatting (2 spaces, LF line endings)
+ *
+ * @example
+ * ```typescript
+ * const fmt = getDefaultFormatting()
+ * // { indent: 2, newline: '\n' }
+ * ```
  */
 export function getDefaultFormatting(): JsonFormatting {
   return {
@@ -162,6 +168,12 @@ export function stringifyWithFormatting(
  *
  * @param content - Content object with potential symbol properties
  * @returns Object with symbols removed
+ *
+ * @example
+ * ```typescript
+ * const obj = { key: "value", [Symbol.for("indent")]: 2 }
+ * stripFormattingSymbols(obj)  // { key: "value" }
+ * ```
  */
 export function stripFormattingSymbols(
   content: Record<string | symbol, unknown>,
@@ -179,6 +191,12 @@ export function stripFormattingSymbols(
  *
  * @param content - Content object with Symbol.for('indent') and Symbol.for('newline')
  * @returns Formatting metadata, or defaults if symbols not present
+ *
+ * @example
+ * ```typescript
+ * const content = { [Symbol.for("indent")]: 4, [Symbol.for("newline")]: "\r\n" }
+ * getFormattingFromContent(content)  // { indent: 4, newline: "\r\n" }
+ * ```
  */
 export function getFormattingFromContent(
   content: Record<string | symbol, unknown>,

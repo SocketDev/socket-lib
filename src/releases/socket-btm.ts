@@ -124,6 +124,12 @@ function getFs() {
  * Returns undefined for non-Linux platforms.
  *
  * @returns 'musl', 'glibc', or undefined (for non-Linux)
+ *
+ * @example
+ * ```typescript
+ * const libc = detectLibc()
+ * console.log(libc) // 'glibc', 'musl', or undefined
+ * ```
  */
 export function detectLibc(): Libc | undefined {
   if (getPlatform() !== 'linux') {
@@ -161,6 +167,13 @@ export function detectLibc(): Libc | undefined {
  * @param tool - Tool/package name for release matching (e.g., 'lief', 'curl')
  * @param options - Download configuration
  * @returns Path to the downloaded file
+ *
+ * @example
+ * ```typescript
+ * const binPath = await downloadSocketBtmRelease('lief', {
+ *   downloadDir: '/tmp/build/downloaded',
+ * })
+ * ```
  */
 export async function downloadSocketBtmRelease(
   tool: string,
@@ -303,6 +316,12 @@ export async function downloadSocketBtmRelease(
  * @param arch - Target architecture
  * @param libc - Linux libc variant (optional)
  * @returns Asset name (e.g., 'binject-darwin-arm64', 'node-linux-x64-musl')
+ *
+ * @example
+ * ```typescript
+ * getBinaryAssetName('lief', 'linux', 'x64', 'musl')
+ * // 'lief-linux-x64-musl'
+ * ```
  */
 export function getBinaryAssetName(
   binaryBaseName: string,
@@ -337,6 +356,12 @@ export function getBinaryAssetName(
  * @param binaryBaseName - Binary basename (e.g., 'node', 'binject')
  * @param platform - Target platform
  * @returns Binary filename (e.g., 'node', 'node.exe')
+ *
+ * @example
+ * ```typescript
+ * getBinaryName('node', 'win32')  // 'node.exe'
+ * getBinaryName('node', 'linux')  // 'node'
+ * ```
  */
 export function getBinaryName(
   binaryBaseName: string,
@@ -353,6 +378,12 @@ export function getBinaryName(
  * @param arch - Target architecture
  * @param libc - Linux libc variant (optional)
  * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl', 'win-x64')
+ *
+ * @example
+ * ```typescript
+ * getPlatformArch('linux', 'x64', 'musl')  // 'linux-x64-musl'
+ * getPlatformArch('darwin', 'arm64')  // 'darwin-arm64'
+ * ```
  */
 export function getPlatformArch(
   platform: Platform,

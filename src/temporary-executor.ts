@@ -14,6 +14,13 @@ import { normalizePath } from './paths/normalize'
  * When package managers run commands via exec/npx/dlx, they execute in temporary directories
  * that are cleaned up after execution. Creating persistent shadows or modifying PATH
  * in these contexts can break subsequent package manager commands.
+ *
+ * @example
+ * ```typescript
+ * if (isRunningInTemporaryExecutor()) {
+ *   console.log('Running in a temporary executor context')
+ * }
+ * ```
  */
 export function isRunningInTemporaryExecutor(cwd = process.cwd()): boolean {
   // Check environment variable for exec/npx/dlx indicators.

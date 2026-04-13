@@ -144,6 +144,12 @@ let loaded = false
 
 /**
  * Load signal handlers and hook into process exit events.
+ *
+ * @example
+ * ```typescript
+ * load()
+ * // Signal handlers are now active
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function load(): void {
@@ -234,6 +240,15 @@ export interface OnExitOptions {
 
 /**
  * Register a callback to run on process exit or signal.
+ *
+ * @example
+ * ```typescript
+ * const remove = onExit((code, signal) => {
+ *   console.log(`Exiting with code ${code}, signal ${signal}`)
+ * })
+ * // Later, to unregister:
+ * remove()
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function onExit(
@@ -273,6 +288,12 @@ export function onExit(
 let _signals: string[] | undefined
 /**
  * Get the list of signals that are currently being monitored.
+ *
+ * @example
+ * ```typescript
+ * const sigs = signals()
+ * console.log(sigs) // ['SIGABRT', 'SIGALRM', 'SIGHUP', ...]
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function signals() {
@@ -302,6 +323,12 @@ export function signals() {
 
 /**
  * Unload signal handlers and restore original process behavior.
+ *
+ * @example
+ * ```typescript
+ * unload()
+ * // Signal handlers are now removed
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unload(): void {

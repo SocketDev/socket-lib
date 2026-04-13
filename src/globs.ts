@@ -109,6 +109,14 @@ export const defaultIgnore = ObjectFreeze([
 
 /**
  * Create a stream of license file paths matching glob patterns.
+ *
+ * @example
+ * ```typescript
+ * const stream = globStreamLicenses('/tmp/my-package')
+ * for await (const licensePath of stream) {
+ *   console.log(licensePath)
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function globStreamLicenses(
@@ -162,6 +170,13 @@ function evictLRUMatcher() {
 
 /**
  * Get a cached glob matcher function.
+ *
+ * @example
+ * ```typescript
+ * const isMatch = getGlobMatcher('*.ts')
+ * isMatch('index.ts')  // true
+ * isMatch('index.js')  // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGlobMatcher(
@@ -221,6 +236,12 @@ export function getGlobMatcher(
 /**
  * Asynchronously find files matching glob patterns.
  * Wrapper around fast-glob.
+ *
+ * @example
+ * ```typescript
+ * const files = await glob('src/*.ts', { cwd: '/tmp/project' })
+ * console.log(files) // ['src/index.ts', 'src/utils.ts']
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function glob(
@@ -235,6 +256,12 @@ export function glob(
 /**
  * Synchronously find files matching glob patterns.
  * Wrapper around fast-glob.sync.
+ *
+ * @example
+ * ```typescript
+ * const files = globSync('*.json', { cwd: '/tmp/project' })
+ * console.log(files) // ['package.json', 'tsconfig.json']
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function globSync(
