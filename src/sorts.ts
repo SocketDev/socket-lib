@@ -24,6 +24,13 @@ function getFastSort() {
 
 /**
  * Compare semantic versions.
+ *
+ * @example
+ * ```typescript
+ * compareSemver('1.0.0', '2.0.0')  // -1
+ * compareSemver('2.0.0', '1.0.0')  // 1
+ * compareSemver('1.0.0', '1.0.0')  // 0
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
@@ -47,6 +54,13 @@ export function compareSemver(a: string, b: string): number {
 
 /**
  * Simple string comparison.
+ *
+ * @example
+ * ```typescript
+ * compareStr('a', 'b')  // -1
+ * compareStr('b', 'a')  // 1
+ * compareStr('a', 'a')  // 0
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareStr(a: string, b: string): number {
@@ -56,6 +70,13 @@ export function compareStr(a: string, b: string): number {
 let _localeCompare: ((x: string, y: string) => number) | undefined
 /**
  * Compare two strings using locale-aware comparison.
+ *
+ * @example
+ * ```typescript
+ * localeCompare('a', 'b')  // -1
+ * localeCompare('b', 'a')  // 1
+ * localeCompare('a', 'a')  // 0
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function localeCompare(x: string, y: string): number {
@@ -69,6 +90,12 @@ export function localeCompare(x: string, y: string): number {
 let _naturalCompare: ((x: string, y: string) => number) | undefined
 /**
  * Compare two strings using natural sorting (numeric-aware, case-insensitive).
+ *
+ * @example
+ * ```typescript
+ * naturalCompare('file2', 'file10')  // negative (file2 before file10)
+ * naturalCompare('img10', 'img2')    // positive (img10 after img2)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function naturalCompare(x: string, y: string): number {
@@ -100,6 +127,12 @@ type FastSortFunction = ReturnType<
 let _naturalSorter: FastSortFunction | undefined
 /**
  * Sort an array using natural comparison.
+ *
+ * @example
+ * ```typescript
+ * naturalSorter(['file10', 'file2', 'file1']).asc()
+ * // ['file1', 'file2', 'file10']
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function naturalSorter<T>(

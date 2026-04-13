@@ -4,6 +4,13 @@
 
 /**
  * Create a composite AbortSignal from multiple signals.
+ *
+ * @example
+ * ```typescript
+ * const ac1 = new AbortController()
+ * const ac2 = new AbortController()
+ * const signal = createCompositeAbortSignal(ac1.signal, ac2.signal)
+ * ```
  */
 export function createCompositeAbortSignal(
   ...signals: Array<AbortSignal | null | undefined>
@@ -33,6 +40,12 @@ export function createCompositeAbortSignal(
 
 /**
  * Create an AbortSignal that triggers after a timeout.
+ *
+ * @example
+ * ```typescript
+ * const signal = createTimeoutSignal(5000) // aborts after 5 seconds
+ * fetch('https://example.com', { signal })
+ * ```
  */
 export function createTimeoutSignal(ms: number): AbortSignal {
   if (typeof ms !== 'number' || Number.isNaN(ms)) {

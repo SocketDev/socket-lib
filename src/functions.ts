@@ -11,12 +11,25 @@ export type AnyFunction = (...args: unknown[]) => unknown
 
 /**
  * A no-op function that does nothing.
+ *
+ * @example
+ * ```typescript
+ * const callback = noop
+ * callback()  // does nothing
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function noop(): void {}
 
 /**
  * Create a function that only executes once.
+ *
+ * @example
+ * ```typescript
+ * const init = once(() => Math.random())
+ * init()  // 0.456 (random value)
+ * init()  // 0.456 (same value, not recalculated)
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function once<T extends AnyFunction>(fn: T): T {
@@ -36,6 +49,15 @@ export function once<T extends AnyFunction>(fn: T): T {
 
 /**
  * Wrap an async function to silently catch and ignore errors.
+ *
+ * @example
+ * ```typescript
+ * const safeFetch = silentWrapAsync(async (url: string) => {
+ *   const res = await fetch(url)
+ *   return res.json()
+ * })
+ * await safeFetch('https://example.com')  // result or undefined on error
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function silentWrapAsync<TArgs extends unknown[], TResult>(
@@ -52,6 +74,14 @@ export function silentWrapAsync<TArgs extends unknown[], TResult>(
 
 /**
  * Execute a function with tail call optimization via trampoline.
+ *
+ * @example
+ * ```typescript
+ * const factorial = trampoline((n: number, acc = 1): any =>
+ *   n <= 1 ? acc : () => factorial(n - 1, n * acc)
+ * )
+ * factorial(5)  // 120
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function trampoline<T extends AnyFunction>(fn: T): T {

@@ -10,6 +10,13 @@
 
 /**
  * Escape special characters in a string for use in a regular expression.
+ *
+ * @example
+ * ```typescript
+ * escapeRegExp('foo.bar')     // 'foo\\.bar'
+ * escapeRegExp('a+b*c?')     // 'a\\+b\\*c\\?'
+ * new RegExp(escapeRegExp('[test]'))  // /\[test\]/
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function escapeRegExp(str: string): string {
