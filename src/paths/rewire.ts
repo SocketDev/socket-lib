@@ -8,15 +8,38 @@
  * - Thread-safe for concurrent test execution
  */
 
+// Shared test hook state (setPath/clearPath/resetPaths in beforeEach/afterEach)
+// IMPORTANT: Use globalThis to ensure singleton across duplicate module instances.
+// Vitest alias resolution can create separate module instances for the same file
+// (e.g. '@socketsecurity/lib/paths/rewire' vs relative '../paths/rewire').
+// Both must share the same Maps for rewiring to work correctly.
+// Only initialize in test environment to avoid polluting production runtime.
+// Vitest automatically sets VITEST=true when running tests.
+interface PathRewireState {
+  testOverrides: Map<string, string | undefined>
+  valueCache: Map<string, string>
+  cacheInvalidationCallbacks: Array<() => void>
+}
+
+const stateSymbol = Symbol.for('@socketsecurity/lib/paths/rewire/state')
+if (!globalThis[stateSymbol]) {
+  globalThis[stateSymbol] = {
+    testOverrides: new Map<string, string | undefined>(),
+    valueCache: new Map<string, string>(),
+    cacheInvalidationCallbacks: [] as Array<() => void>,
+  }
+}
+
+const sharedState: PathRewireState = globalThis[stateSymbol]
+
 // Per-test overrides
-// Each test file gets its own instance due to Vitest's module isolation
-const testOverrides = new Map<string, string | undefined>()
+const testOverrides = sharedState.testOverrides
 
 // Cache for computed values (cleared when overrides change)
-const valueCache = new Map<string, string>()
+const valueCache = sharedState.valueCache
 
 // Cache invalidation callbacks - registered by modules that need to clear their caches
-const cacheInvalidationCallbacks: Array<() => void> = []
+const cacheInvalidationCallbacks = sharedState.cacheInvalidationCallbacks
 
 /**
  * Clear a specific path override.

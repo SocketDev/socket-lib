@@ -120,9 +120,13 @@ const vitestConfig = defineConfig({
     bail: process.env.CI ? 1 : 0,
     server: {
       deps: {
-        // Note: inlining @socketsecurity/lib in coverage mode would cause duplicate module instances
-        // The rewire module uses globalThis singleton to handle this, so inlining is not needed
-        inline: isCoverageEnabled ? [/@socketsecurity\/lib/, 'zod'] : ['zod'],
+        // Always inline @socketsecurity/lib so that CJS require() calls within
+        // dist/ bundles go through vitest's module system, enabling vi.mock()
+        // to intercept cross-module dependencies. Without inlining, Node.js
+        // native CJS loader handles require() calls, bypassing vi.mock().
+        // The rewire modules use globalThis singletons to share state across
+        // any duplicate module instances that inlining may create.
+        inline: [/@socketsecurity\/lib/, 'zod'],
       },
     },
     coverage: {

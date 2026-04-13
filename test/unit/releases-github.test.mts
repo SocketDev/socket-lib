@@ -13,13 +13,16 @@ import {
   getLatestRelease,
   getReleaseAssetUrl,
   SOCKET_BTM_REPO,
-} from '@socketsecurity/lib/releases/github'
+} from '../../src/releases/github'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
-import { httpDownload, httpRequest } from '@socketsecurity/lib/http-request'
+import type { HttpResponse } from '../../src/http-request'
+import { httpDownload, httpRequest } from '../../src/http-request'
 
 // Mock httpRequest and httpDownload modules.
-vi.mock('@socketsecurity/lib/http-request')
+// Uses src path so vi.mock() intercepts cross-module imports within src/ files.
+// Package specifier mocking (@socketsecurity/lib/http-request) does not work
+// because dist/ CJS bundles bypass vitest's module mock system.
+vi.mock('../../src/http-request')
 
 /**
  * Create a mock HttpResponse object for testing.
@@ -825,7 +828,7 @@ describe('releases/github', () => {
       // Fix: Re-check binary existence after reading version file
 
       const { downloadGitHubRelease } =
-        await import('@socketsecurity/lib/releases/github')
+        await import('../../src/releases/github')
       const { tmpdir } = await import('node:os')
       const { promises: fs } = await import('node:fs')
       const path = await import('node:path')
@@ -933,7 +936,7 @@ describe('releases/github', () => {
 
     it('should re-download if binary is missing despite version file existing', async () => {
       const { downloadGitHubRelease } =
-        await import('@socketsecurity/lib/releases/github')
+        await import('../../src/releases/github')
       const { tmpdir } = await import('node:os')
       const { promises: fs } = await import('node:fs')
       const path = await import('node:path')

@@ -15,20 +15,7 @@
  * Critical for proper execution of downloaded packages and binaries.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-const { mockGetSocketDlxDir, mockIsInSocketDlx } = vi.hoisted(() => ({
-  mockGetSocketDlxDir: vi.fn(),
-  mockIsInSocketDlx: vi.fn(),
-}))
-
-vi.mock('@socketsecurity/lib/dlx/paths', () => ({
-  isInSocketDlx: mockIsInSocketDlx,
-}))
-
-vi.mock('@socketsecurity/lib/paths/socket', () => ({
-  getSocketDlxDir: mockGetSocketDlxDir,
-}))
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   detectDlxExecutableType,
@@ -38,6 +25,7 @@ import {
   isNativeBinary,
   isNodePackage,
 } from '@socketsecurity/lib/dlx/detect'
+import { resetPaths, setPath } from '@socketsecurity/lib/paths/rewire'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -50,11 +38,12 @@ describe('DLX Executable Type Detection', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'dlx-detect-test-'))
     mockDlxDir = join(tempDir, '.socket', '_dlx')
     mkdirSync(mockDlxDir, { recursive: true })
-    mockGetSocketDlxDir.mockReturnValue(mockDlxDir)
-    vi.clearAllMocks()
+    // Use path rewire to override DLX directory for all modules
+    setPath('socket-dlx-dir', mockDlxDir)
   })
 
   afterEach(() => {
+    resetPaths()
     try {
       rmSync(tempDir, { force: true, recursive: true })
     } catch {
@@ -68,11 +57,8 @@ describe('DLX Executable Type Detection', () => {
       const nodeModulesDir = join(mockDlxDir, 'abc123', 'node_modules')
       mkdirSync(nodeModulesDir, { recursive: true })
 
-      mockIsInSocketDlx.mockReturnValue(true)
-
       const result = detectExecutableType(dlxPath)
 
-      expect(mockIsInSocketDlx).toHaveBeenCalledWith(dlxPath)
       expect(result.type).toBe('package')
       expect(result.method).toBe('dlx-cache')
       expect(result.inDlxCache).toBe(true)
@@ -84,11 +70,8 @@ describe('DLX Executable Type Detection', () => {
       mkdirSync(localDir, { recursive: true })
       writeFileSync(localPath, '#!/usr/bin/env node\nconsole.log("test")')
 
-      mockIsInSocketDlx.mockReturnValue(false)
-
       const result = detectExecutableType(localPath)
 
-      expect(mockIsInSocketDlx).toHaveBeenCalledWith(localPath)
       expect(result.type).toBe('package')
       expect(result.method).toBe('file-extension')
       expect(result.inDlxCache).toBe(false)
@@ -318,8 +301,6 @@ describe('DLX Executable Type Detection', () => {
       const nodeModulesDir = join(mockDlxDir, cacheKey, 'node_modules')
       mkdirSync(nodeModulesDir, { recursive: true })
 
-      mockIsInSocketDlx.mockReturnValue(true)
-
       expect(isNodePackage(filePath)).toBe(true)
     })
 
@@ -327,16 +308,12 @@ describe('DLX Executable Type Detection', () => {
       const jsPath = join(tempDir, 'script.js')
       writeFileSync(jsPath, 'console.log("test")')
 
-      mockIsInSocketDlx.mockReturnValue(false)
-
       expect(isNodePackage(jsPath)).toBe(true)
     })
 
     it('should return false for binaries', () => {
       const binaryPath = join(tempDir, 'native-binary')
       writeFileSync(binaryPath, Buffer.from([0x7f, 0x45, 0x4c, 0x46]))
-
-      mockIsInSocketDlx.mockReturnValue(false)
 
       expect(isNodePackage(binaryPath)).toBe(false)
     })
@@ -349,8 +326,6 @@ describe('DLX Executable Type Detection', () => {
       const cacheDir = join(mockDlxDir, cacheKey)
       mkdirSync(cacheDir, { recursive: true })
 
-      mockIsInSocketDlx.mockReturnValue(true)
-
       expect(isNativeBinary(filePath)).toBe(true)
     })
 
@@ -358,16 +333,12 @@ describe('DLX Executable Type Detection', () => {
       const binaryPath = join(tempDir, 'tool')
       writeFileSync(binaryPath, Buffer.from([0x7f, 0x45, 0x4c, 0x46]))
 
-      mockIsInSocketDlx.mockReturnValue(false)
-
       expect(isNativeBinary(binaryPath)).toBe(true)
     })
 
     it('should return false for Node.js packages', () => {
       const jsPath = join(tempDir, 'script.mjs')
       writeFileSync(jsPath, 'console.log("test")')
-
-      mockIsInSocketDlx.mockReturnValue(false)
 
       expect(isNativeBinary(jsPath)).toBe(false)
     })
