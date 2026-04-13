@@ -95,6 +95,12 @@ const yarnInstallLikeCommands = new Set([
  *
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
  * in the args array are properly escaped by Node.js when passed to spawn().
+ *
+ * @example
+ * ```typescript
+ * await execNpm(['install', '--save', 'lodash'])
+ * await execNpm(['run', 'build'], { cwd: '/tmp/project' })
+ * ```
  */
 export function execNpm(args: string[], options?: SpawnOptions | undefined) {
   const useDebug = isDebug()
@@ -157,6 +163,12 @@ export interface PnpmOptions extends SpawnOptions {
  *
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
  * in the args array are properly escaped by Node.js when passed to execBin().
+ *
+ * @example
+ * ```typescript
+ * await execPnpm(['install'])
+ * await execPnpm(['add', 'lodash'], { allowLockfileUpdate: true })
+ * ```
  */
 export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
   const { allowLockfileUpdate, ...extBinOpts } = {
@@ -224,6 +236,12 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
  *
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
  * in the args array are properly escaped by Node.js when passed to execBin().
+ *
+ * @example
+ * ```typescript
+ * await execYarn(['install'])
+ * await execYarn(['add', 'lodash'], { cwd: '/tmp/project' })
+ * ```
  */
 export function execYarn(
   args: string[],
@@ -271,6 +289,13 @@ export function execYarn(
 
 /**
  * Check if a command argument is an npm audit flag.
+ *
+ * @example
+ * ```typescript
+ * isNpmAuditFlag('--no-audit')  // true
+ * isNpmAuditFlag('--audit')     // true
+ * isNpmAuditFlag('--save')      // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmAuditFlag(cmdArg: string): boolean {
@@ -279,6 +304,13 @@ export function isNpmAuditFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is an npm fund flag.
+ *
+ * @example
+ * ```typescript
+ * isNpmFundFlag('--no-fund')  // true
+ * isNpmFundFlag('--fund')     // true
+ * isNpmFundFlag('--save')     // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmFundFlag(cmdArg: string): boolean {
@@ -287,6 +319,14 @@ export function isNpmFundFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is an npm loglevel flag.
+ *
+ * @example
+ * ```typescript
+ * isNpmLoglevelFlag('--loglevel')  // true
+ * isNpmLoglevelFlag('--silent')    // true
+ * isNpmLoglevelFlag('-s')          // true
+ * isNpmLoglevelFlag('--save')      // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmLoglevelFlag(cmdArg: string): boolean {
@@ -304,6 +344,13 @@ export function isNpmLoglevelFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is an npm node-options flag.
+ *
+ * @example
+ * ```typescript
+ * isNpmNodeOptionsFlag('--node-options')                            // true
+ * isNpmNodeOptionsFlag('--node-options=--max-old-space-size=4096')  // true
+ * isNpmNodeOptionsFlag('--save')                                   // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
@@ -313,6 +360,13 @@ export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is an npm progress flag.
+ *
+ * @example
+ * ```typescript
+ * isNpmProgressFlag('--no-progress')  // true
+ * isNpmProgressFlag('--progress')     // true
+ * isNpmProgressFlag('--save')         // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmProgressFlag(cmdArg: string): boolean {
@@ -321,6 +375,13 @@ export function isNpmProgressFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is a pnpm ignore-scripts flag.
+ *
+ * @example
+ * ```typescript
+ * isPnpmIgnoreScriptsFlag('--ignore-scripts')     // true
+ * isPnpmIgnoreScriptsFlag('--no-ignore-scripts')  // true
+ * isPnpmIgnoreScriptsFlag('--save')               // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
@@ -329,6 +390,13 @@ export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is a pnpm frozen-lockfile flag.
+ *
+ * @example
+ * ```typescript
+ * isPnpmFrozenLockfileFlag('--frozen-lockfile')     // true
+ * isPnpmFrozenLockfileFlag('--no-frozen-lockfile')  // true
+ * isPnpmFrozenLockfileFlag('--save')                // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
@@ -337,6 +405,13 @@ export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
 
 /**
  * Check if a command argument is a pnpm install command.
+ *
+ * @example
+ * ```typescript
+ * isPnpmInstallCommand('install')  // true
+ * isPnpmInstallCommand('i')        // true
+ * isPnpmInstallCommand('run')      // false
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmInstallCommand(cmdArg: string): boolean {
@@ -351,6 +426,12 @@ export const isPnpmLoglevelFlag = isNpmLoglevelFlag
 /**
  * Execute a package.json script using the appropriate package manager.
  * Automatically detects pnpm, yarn, or npm based on lockfiles.
+ *
+ * @example
+ * ```typescript
+ * await execScript('build')
+ * await execScript('test', ['--coverage'], { cwd: '/tmp/project' })
+ * ```
  */
 export interface ExecScriptOptions extends SpawnOptions {
   prepost?: boolean | undefined

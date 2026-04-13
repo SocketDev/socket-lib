@@ -609,6 +609,12 @@ export function findUpSync(
  * Called automatically by the paths/rewire module when paths are overridden in tests.
  *
  * @internal Used for test rewiring
+ *
+ * @example
+ * ```typescript
+ * invalidatePathCache()
+ * // Cached allowed directories are now cleared
+ * ```
  */
 export function invalidatePathCache(): void {
   _cachedAllowedDirs = undefined
@@ -768,6 +774,13 @@ export function normalizeEncoding(
  *
  * @param enc - Encoding to normalize
  * @returns Normalized encoding string, defaults to 'utf8' for unknown encodings
+ *
+ * @example
+ * ```typescript
+ * normalizeEncodingSlow('ucs2')    // 'utf16le'
+ * normalizeEncodingSlow('LATIN1')  // 'latin1'
+ * normalizeEncodingSlow('binary')  // 'latin1'
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizeEncodingSlow(enc: string): BufferEncoding {

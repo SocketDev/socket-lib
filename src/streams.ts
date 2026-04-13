@@ -12,6 +12,14 @@ import { normalizeIterationOptions, pRetry } from './promises'
 
 /**
  * Execute a function for each item in an iterable in parallel.
+ *
+ * @example
+ * ```typescript
+ * const urls = ['https://a.io', 'https://b.io']
+ * await parallelEach(urls, async (url) => {
+ *   await fetch(url)
+ * }, { concurrency: 4 })
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function parallelEach<T>(
@@ -26,6 +34,16 @@ export async function parallelEach<T>(
 
 /**
  * Map over an iterable in parallel with concurrency control.
+ *
+ * @example
+ * ```typescript
+ * const ids = [1, 2, 3]
+ * for await (const result of parallelMap(ids, async (id) => {
+ *   return await fetchData(id)
+ * }, 4)) {
+ *   console.log(result)
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parallelMap<T, U>(
@@ -51,6 +69,16 @@ export function parallelMap<T, U>(
 
 /**
  * Transform an iterable with a function.
+ *
+ * @example
+ * ```typescript
+ * const lines = ['hello', 'world']
+ * for await (const upper of transform(lines, async (line) => {
+ *   return line.toUpperCase()
+ * })) {
+ *   console.log(upper)  // 'HELLO', 'WORLD'
+ * }
+ * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function transform<T, U>(
