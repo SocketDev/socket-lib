@@ -24,6 +24,13 @@ function getFs() {
 
 /**
  * Check if a package is installed in DLX.
+ *
+ * @example
+ * ```typescript
+ * if (isDlxPackageInstalled('prettier')) {
+ *   console.log('prettier is installed')
+ * }
+ * ```
  */
 export function isDlxPackageInstalled(packageName: string): boolean {
   const fs = getFs()
@@ -32,6 +39,13 @@ export function isDlxPackageInstalled(packageName: string): boolean {
 
 /**
  * Check if a package is installed in DLX asynchronously.
+ *
+ * @example
+ * ```typescript
+ * if (await isDlxPackageInstalledAsync('prettier')) {
+ *   console.log('prettier is installed')
+ * }
+ * ```
  */
 export async function isDlxPackageInstalledAsync(
   packageName: string,
@@ -47,6 +61,12 @@ export async function isDlxPackageInstalledAsync(
 
 /**
  * List all packages installed in DLX.
+ *
+ * @example
+ * ```typescript
+ * const packages = listDlxPackages()
+ * console.log('Installed:', packages.join(', '))
+ * ```
  */
 export function listDlxPackages(): string[] {
   try {
@@ -58,6 +78,12 @@ export function listDlxPackages(): string[] {
 
 /**
  * List all packages installed in DLX asynchronously.
+ *
+ * @example
+ * ```typescript
+ * const packages = await listDlxPackagesAsync()
+ * console.log('Installed:', packages.join(', '))
+ * ```
  */
 export async function listDlxPackagesAsync(): Promise<string[]> {
   const fs = getFs()
@@ -76,6 +102,11 @@ export async function listDlxPackagesAsync(): Promise<string[]> {
 
 /**
  * Remove a DLX package installation.
+ *
+ * @example
+ * ```typescript
+ * await removeDlxPackage('prettier')
+ * ```
  */
 export async function removeDlxPackage(packageName: string): Promise<void> {
   const packageDir = getDlxPackageDir(packageName)
@@ -90,6 +121,11 @@ export async function removeDlxPackage(packageName: string): Promise<void> {
 
 /**
  * Remove a DLX package installation synchronously.
+ *
+ * @example
+ * ```typescript
+ * removeDlxPackageSync('prettier')
+ * ```
  */
 export function removeDlxPackageSync(packageName: string): void {
   const fs = getFs()

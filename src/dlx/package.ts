@@ -265,6 +265,16 @@ export async function downloadPackage(
  * Install package to ~/.socket/_dlx/<hash>/ if not already installed.
  * Uses pacote for installation (no npm CLI required).
  * Protected by process lock to prevent concurrent installation corruption.
+ *
+ * @example
+ * ```typescript
+ * const { installed, packageDir } = await ensurePackageInstalled(
+ *   'prettier',
+ *   'prettier@3.0.0',
+ *   false
+ * )
+ * console.log(`Installed: ${installed}, dir: ${packageDir}`)
+ * ```
  */
 export async function ensurePackageInstalled(
   packageName: string,
@@ -439,6 +449,15 @@ export function executePackage(
  * 2. Fall back to user-provided binaryName if npm's strategy fails
  * 3. Try last segment of package name as final fallback
  * 4. Use first binary as last resort
+ *
+ * @example
+ * ```typescript
+ * const binPath = findBinaryPath(
+ *   '/tmp/.socket/_dlx/a1b2c3d4',
+ *   'prettier'
+ * )
+ * console.log(`Binary: ${binPath}`)
+ * ```
  */
 export function findBinaryPath(
   packageDir: string,
@@ -532,6 +551,14 @@ export function findBinaryPath(
  * References:
  * - npm cmd-shim: https://github.com/npm/cmd-shim/blob/main/lib/index.js
  * - npm getBinFromManifest: https://github.com/npm/libnpmexec/blob/main/lib/get-bin-from-manifest.js
+ *
+ * @example
+ * ```typescript
+ * makePackageBinsExecutable(
+ *   '/tmp/.socket/_dlx/a1b2c3d4',
+ *   'prettier'
+ * )
+ * ```
  */
 export function makePackageBinsExecutable(
   packageDir: string,
@@ -591,6 +618,15 @@ export function makePackageBinsExecutable(
  * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
  * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
  * - 'lodash' → { name: 'lodash', version: undefined }
+ *
+ * @example
+ * ```typescript
+ * parsePackageSpec('lodash@4.17.21')
+ * // { name: 'lodash', version: '4.17.21' }
+ *
+ * parsePackageSpec('@scope/pkg')
+ * // { name: '@scope/pkg', version: undefined }
+ * ```
  */
 export function parsePackageSpec(spec: string): {
   name: string
@@ -638,6 +674,13 @@ const binaryPathCache = new Map<string, string>()
  * On Unix, uses path directly.
  *
  * Aligns with npm/npx binary resolution strategy.
+ *
+ * @example
+ * ```typescript
+ * const resolved = resolveBinaryPath('/tmp/.socket/_dlx/a1b2c3d4/prettier')
+ * // On Windows: may resolve to '.cmd' or '.ps1' wrapper
+ * // On Unix: returns the path unchanged
+ * ```
  */
 export function resolveBinaryPath(basePath: string): string {
   if (!WIN32) {

@@ -124,6 +124,14 @@ export interface DlxManifestOptions {
 
 /**
  * Type guard for binary entries.
+ *
+ * @example
+ * ```typescript
+ * const entry = manifest.getManifestEntry('https://example.com/tool')
+ * if (entry && isBinaryEntry(entry)) {
+ *   console.log(entry.details.integrity)
+ * }
+ * ```
  */
 export function isBinaryEntry(
   entry: ManifestEntry,
@@ -133,6 +141,14 @@ export function isBinaryEntry(
 
 /**
  * Type guard for package entries.
+ *
+ * @example
+ * ```typescript
+ * const entry = manifest.getManifestEntry('@socketsecurity/cli@^2.0.0')
+ * if (entry && isPackageEntry(entry)) {
+ *   console.log(entry.details.installed_version)
+ * }
+ * ```
  */
 export function isPackageEntry(
   entry: ManifestEntry,

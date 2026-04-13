@@ -191,6 +191,15 @@ export interface DlxMetadata {
 
 /**
  * Clean expired entries from the DLX cache.
+ *
+ * @example
+ * ```typescript
+ * // Remove cache entries older than the default TTL
+ * const removed = await cleanDlxCache()
+ *
+ * // Remove entries older than 1 hour
+ * const removed2 = await cleanDlxCache(60 * 60 * 1000)
+ * ```
  */
 export async function cleanDlxCache(
   maxAge: number = DLX_BINARY_CACHE_TTL,
@@ -260,6 +269,15 @@ export async function cleanDlxCache(
 
 /**
  * Download and execute a binary from a URL with caching.
+ *
+ * @example
+ * ```typescript
+ * const result = await dlxBinary(['--version'], {
+ *   url: 'https://example.com/tool-linux-x64',
+ *   name: 'tool',
+ * })
+ * await result.spawnPromise
+ * ```
  */
 export async function dlxBinary(
   args: readonly string[] | string[],
@@ -417,6 +435,15 @@ export async function dlxBinary(
  * Similar to downloadPackage from dlx-package.
  *
  * @returns Object containing the path to the cached binary and whether it was downloaded
+ *
+ * @example
+ * ```typescript
+ * const { binaryPath, downloaded } = await downloadBinary({
+ *   url: 'https://example.com/tool-linux-x64',
+ *   name: 'tool',
+ * })
+ * console.log(`Binary at: ${binaryPath}, fresh: ${downloaded}`)
+ * ```
  */
 export async function downloadBinary(
   options: Omit<DlxBinaryOptions, 'spawnOptions'>,
@@ -512,6 +539,15 @@ export async function downloadBinary(
  * - integrity: SRI format sha512-<base64> (verified post-download)
  *
  * The sha256 option is preferred as it fails early during download if the checksum doesn't match.
+ *
+ * @example
+ * ```typescript
+ * const integrity = await downloadBinaryFile(
+ *   'https://example.com/tool-linux-x64',
+ *   '/tmp/dlx-cache/tool'
+ * )
+ * console.log(`Integrity: ${integrity}`)
+ * ```
  */
 export async function downloadBinaryFile(
   url: string,
@@ -608,6 +644,15 @@ export async function downloadBinaryFile(
  * @param spawnOptions Spawn options for execution
  * @param spawnExtra Extra spawn configuration
  * @returns The spawn promise for the running process
+ *
+ * @example
+ * ```typescript
+ * const { binaryPath } = await downloadBinary({
+ *   url: 'https://example.com/tool-linux-x64',
+ *   name: 'tool',
+ * })
+ * const result = executeBinary(binaryPath, ['--help'])
+ * ```
  */
 export function executeBinary(
   binaryPath: string,
@@ -647,6 +692,11 @@ export function executeBinary(
  * Get the DLX binary cache directory path.
  * Returns normalized path for cross-platform compatibility.
  * Uses same directory as dlx-package for unified DLX storage.
+ *
+ * @example
+ * ```typescript
+ * const cachePath = getDlxCachePath()
+ * ```
  */
 export function getDlxCachePath(): string {
   return getSocketDlxDir()
@@ -654,6 +704,12 @@ export function getDlxCachePath(): string {
 
 /**
  * Get metadata file path for a cached binary.
+ *
+ * @example
+ * ```typescript
+ * const metaPath = getBinaryCacheMetadataPath('/tmp/dlx-cache/a1b2c3d4')
+ * // '/tmp/dlx-cache/a1b2c3d4/.dlx-metadata.json'
+ * ```
  */
 export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
   return getPath().join(cacheEntryPath, '.dlx-metadata.json')
@@ -661,6 +717,15 @@ export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
 
 /**
  * Check if a cached binary is still valid.
+ *
+ * @example
+ * ```typescript
+ * const ttl = 7 * 24 * 60 * 60 * 1000
+ * const valid = await isBinaryCacheValid('/tmp/dlx-cache/a1b2c3d4', ttl)
+ * if (!valid) {
+ *   // Re-download the binary
+ * }
+ * ```
  */
 export async function isBinaryCacheValid(
   cacheEntryPath: string,
@@ -696,6 +761,14 @@ export async function isBinaryCacheValid(
 
 /**
  * Get information about cached binaries.
+ *
+ * @example
+ * ```typescript
+ * const entries = await listDlxCache()
+ * for (const entry of entries) {
+ *   console.log(`${entry.name}: ${entry.size} bytes`)
+ * }
+ * ```
  */
 export async function listDlxCache(): Promise<
   Array<{
@@ -773,6 +846,17 @@ export async function listDlxCache(): Promise<
  * Write metadata for a cached binary.
  * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
  * Schema documentation: See DlxMetadata interface in this file (exported).
+ *
+ * @example
+ * ```typescript
+ * await writeBinaryCacheMetadata(
+ *   '/tmp/dlx-cache/a1b2c3d4',
+ *   'a1b2c3d4',
+ *   'https://example.com/tool',
+ *   'sha512-abc123...',
+ *   15000000
+ * )
+ * ```
  */
 export async function writeBinaryCacheMetadata(
   cacheEntryPath: string,
