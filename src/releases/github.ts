@@ -145,6 +145,13 @@ function getPath() {
  *
  * @param pattern - Pattern to match (string glob, prefix/suffix object, or RegExp)
  * @returns Function that tests if a string matches the pattern
+ *
+ * @example
+ * ```typescript
+ * const isMatch = createAssetMatcher('tool-*-linux-x64')
+ * isMatch('tool-v1.0-linux-x64')  // true
+ * isMatch('tool-v1.0-darwin-arm64')  // false
+ * ```
  */
 export function createAssetMatcher(
   pattern: string | { prefix: string; suffix: string } | RegExp,
@@ -169,6 +176,16 @@ export function createAssetMatcher(
  *
  * @param config - Download configuration
  * @returns Path to the downloaded binary
+ *
+ * @example
+ * ```typescript
+ * const binaryPath = await downloadGitHubRelease({
+ *   owner: 'SocketDev', repo: 'socket-btm',
+ *   toolName: 'lief', toolPrefix: 'lief-',
+ *   assetName: 'lief-linux-x64', binaryName: 'lief',
+ *   platformArch: 'linux-x64',
+ * })
+ * ```
  */
 export async function downloadGitHubRelease(
   config: DownloadGitHubReleaseConfig,
@@ -284,6 +301,14 @@ export async function downloadGitHubRelease(
  * @param outputPath - Path to write the downloaded file
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
+ *
+ * @example
+ * ```typescript
+ * await downloadReleaseAsset(
+ *   'v1.0.0', 'tool-linux-x64', '/tmp/tool',
+ *   { owner: 'SocketDev', repo: 'socket-btm' },
+ * )
+ * ```
  */
 export async function downloadReleaseAsset(
   tag: string,
@@ -328,6 +353,12 @@ export async function downloadReleaseAsset(
  * Checks GH_TOKEN or GITHUB_TOKEN environment variables.
  *
  * @returns Headers object with Authorization header if token exists.
+ *
+ * @example
+ * ```typescript
+ * const headers = getAuthHeaders()
+ * // { Accept: 'application/vnd.github+json', Authorization: 'Bearer ...' }
+ * ```
  */
 export function getAuthHeaders(): Record<string, string> {
   const token = process.env['GH_TOKEN'] || process.env['GITHUB_TOKEN']
@@ -350,6 +381,14 @@ export function getAuthHeaders(): Record<string, string> {
  * @param options - Additional options
  * @param options.assetPattern - Optional pattern to filter releases by matching asset
  * @returns Latest release tag or null if not found
+ *
+ * @example
+ * ```typescript
+ * const tag = await getLatestRelease('lief-', {
+ *   owner: 'SocketDev', repo: 'socket-btm',
+ * })
+ * console.log(tag) // 'lief-2025-01-15-abc1234'
+ * ```
  */
 export async function getLatestRelease(
   toolPrefix: string,
@@ -465,6 +504,14 @@ export async function getLatestRelease(
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @returns Browser download URL for the asset
+ *
+ * @example
+ * ```typescript
+ * const url = await getReleaseAssetUrl(
+ *   'v1.0.0', 'tool-linux-x64',
+ *   { owner: 'SocketDev', repo: 'socket-btm' },
+ * )
+ * ```
  */
 export async function getReleaseAssetUrl(
   tag: string,
@@ -556,6 +603,14 @@ export async function getReleaseAssetUrl(
  * @param options.quiet - Suppress log messages
  * @param options.cleanup - Remove downloaded zip file after extraction (default: true)
  * @returns Path to the extraction directory
+ *
+ * @example
+ * ```typescript
+ * const outputDir = await downloadAndExtractZip(
+ *   'v1.0.0', 'models-*.zip', '/tmp/models',
+ *   { owner: 'SocketDev', repo: 'socket-btm' },
+ * )
+ * ```
  */
 export async function downloadAndExtractZip(
   tag: string,
@@ -629,6 +684,14 @@ export async function downloadAndExtractZip(
  * @param options.strip - Strip leading path components (like tar --strip-components)
  * @param options.format - Archive format (auto-detected if not specified)
  * @returns Path to the extraction directory
+ *
+ * @example
+ * ```typescript
+ * const outputDir = await downloadAndExtractArchive(
+ *   'v1.0.0', 'data-*.tar.gz', '/tmp/data',
+ *   { owner: 'SocketDev', repo: 'socket-btm' },
+ * )
+ * ```
  */
 export async function downloadAndExtractArchive(
   tag: string,

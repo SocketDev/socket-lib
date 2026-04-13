@@ -15,6 +15,14 @@ let _isSea: boolean | undefined
 /**
  * Get the current SEA binary path.
  * Only valid when running as a SEA binary.
+ *
+ * @example
+ * ```typescript
+ * const binPath = getSeaBinaryPath()
+ * if (binPath) {
+ *   console.log(`Running as SEA binary: ${binPath}`)
+ * }
+ * ```
  */
 export function getSeaBinaryPath(): string | undefined {
   return isSeaBinary() && process.argv[0]
@@ -25,6 +33,13 @@ export function getSeaBinaryPath(): string | undefined {
 /**
  * Detect if the current process is running as a SEA binary.
  * Uses Node.js 24+ native API with caching for performance.
+ *
+ * @example
+ * ```typescript
+ * if (isSeaBinary()) {
+ *   console.log('Running as a Single Executable Application')
+ * }
+ * ```
  */
 export function isSeaBinary(): boolean {
   if (_isSea === undefined) {

@@ -117,6 +117,13 @@ export function setMaxEventTargetListeners(
 /**
  * Restore the original process.emitWarning function.
  * Call this to re-enable all warnings after suppressing them.
+ *
+ * @example
+ * ```typescript
+ * suppressMaxListenersWarning()
+ * // ... do work ...
+ * restoreWarnings() // Re-enable all warnings
+ * ```
  */
 export function restoreWarnings(): void {
   if (originalEmitWarning) {

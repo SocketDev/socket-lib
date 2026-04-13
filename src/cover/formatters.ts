@@ -23,6 +23,12 @@ const COVERAGE_EMOJI_THRESHOLDS = [
 
 /**
  * Get emoji for coverage percentage.
+ *
+ * @example
+ * ```typescript
+ * getCoverageEmoji(95)  // ' \u{1F3AF}'
+ * getCoverageEmoji(50)  // ' \u{1F528}'
+ * ```
  */
 export function getCoverageEmoji(percent: number): string {
   const entry = COVERAGE_EMOJI_THRESHOLDS.find(
@@ -33,6 +39,18 @@ export function getCoverageEmoji(percent: number): string {
 
 /**
  * Format coverage data for console output.
+ *
+ * @example
+ * ```typescript
+ * const output = formatCoverage({
+ *   code: {
+ *     statements: { percent: '85.00' },
+ *     branches: { percent: '80.00' },
+ *     functions: { percent: '90.00' },
+ *     lines: { percent: '88.00' },
+ *   },
+ * })
+ * ```
  */
 export function formatCoverage(options: FormatCoverageOptions): string {
   const opts = {

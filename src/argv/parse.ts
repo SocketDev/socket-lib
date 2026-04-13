@@ -97,6 +97,17 @@ export interface ParsedArgs<T = Record<string, unknown>> {
 /**
  * Parse command-line arguments with a Node.js parseArgs-compatible API.
  * Uses yargs-parser internally for robust argument parsing.
+ *
+ * @example
+ * ```typescript
+ * const { values, positionals } = parseArgs({
+ *   args: ['--force', '--quiet', 'file.ts'],
+ *   options: {
+ *     force: { type: 'boolean' },
+ *     quiet: { type: 'boolean', short: 'q' },
+ *   },
+ * })
+ * ```
  */
 export function parseArgs<T = Record<string, unknown>>(
   config: ParseArgsConfig = {},
@@ -206,6 +217,14 @@ export function parseArgs<T = Record<string, unknown>>(
 /**
  * Parse command-line arguments with Socket defaults.
  * Provides sensible defaults for Socket CLI applications.
+ *
+ * @example
+ * ```typescript
+ * const { values, positionals } = parseArgsWithDefaults({
+ *   args: ['--force', 'file.ts'],
+ *   options: { force: { type: 'boolean' } },
+ * })
+ * ```
  */
 export function parseArgsWithDefaults<T = Record<string, unknown>>(
   config: ParseArgsConfig = {},
@@ -239,6 +258,12 @@ export const commonParseArgsConfig: ParseArgsConfig = {
 /**
  * Extract positional arguments from process.argv.
  * Useful for commands that accept file paths or other positional parameters.
+ *
+ * @example
+ * ```typescript
+ * // process.argv = ["node", "script.js", "src", "lib", "--verbose"]
+ * getPositionalArgs()  // ["src", "lib"]
+ * ```
  */
 export function getPositionalArgs(startIndex = 2): string[] {
   const args = process.argv.slice(startIndex)
@@ -260,6 +285,12 @@ export function getPositionalArgs(startIndex = 2): string[] {
 
 /**
  * Check if a specific flag is present in argv.
+ *
+ * @example
+ * ```typescript
+ * hasFlag('verbose')  // true if --verbose is in process.argv
+ * hasFlag('force', ['--force', '--quiet'])  // true
+ * ```
  */
 export function hasFlag(flag: string, argv = process.argv): boolean {
   return argv.includes(`--${flag}`)

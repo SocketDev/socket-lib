@@ -148,6 +148,12 @@ export interface OutputMask {
  * Create an output mask for controlling command output visibility.
  * The mask tracks whether output should be shown or hidden (buffered).
  * When hidden, output is buffered and a spinner is shown instead.
+ *
+ * @example
+ * ```typescript
+ * const mask = createOutputMask({ showOutput: false })
+ * console.log(mask.verbose)  // false
+ * ```
  */
 export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
   const { showOutput = false } = options
@@ -166,6 +172,13 @@ export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
  * - ctrl+o: Toggle between showing and hiding output.
  * - ctrl+c: Cancel the running process.
  * The handler manipulates terminal state using ANSI escape sequences.
+ *
+ * @example
+ * ```typescript
+ * const handler = createKeyboardHandler(mask, childProcess, {
+ *   message: 'Testing...',
+ * })
+ * ```
  */
 type ReadlineKey = { ctrl?: boolean; name?: string }
 export function createKeyboardHandler(
@@ -241,6 +254,12 @@ export function createKeyboardHandler(
  * - Buffers stdout/stderr when not in verbose mode.
  * - Shows a spinner when output is masked.
  * - Allows toggling between masked and unmasked output with ctrl+o.
+ *
+ * @example
+ * ```typescript
+ * const child = spawn("pnpm", ["test"], { stdio: ["inherit", "pipe", "pipe"] })
+ * const exitCode = await attachOutputMask(child, { message: 'Running tests' })
+ * ```
  */
 export function attachOutputMask(
   child: ChildProcess,
@@ -384,6 +403,13 @@ export function attachOutputMask(
  * Convenience wrapper around spawn + attachOutputMask.
  * Spawns a child process and attaches the output masking system to it.
  * stdin is inherited, stdout and stderr are piped for masking control.
+ *
+ * @example
+ * ```typescript
+ * const exitCode = await runWithMask('pnpm', ['test'], {
+ *   message: 'Running tests',
+ * })
+ * ```
  */
 export async function runWithMask(
   command: string,

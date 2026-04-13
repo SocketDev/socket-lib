@@ -240,6 +240,15 @@ function pickDirection(direction: ShimmerDirection): 'ltr' | 'rtl' {
  * 4. Renders each character with appropriate brightness based on distance from wave
  * 5. Updates the animation state for the next frame
  * 6. Handles direction changes for bidirectional and random modes
+ *
+ * @example
+ * ```typescript
+ * const state = { step: 0, speed: 0.33, currentDir: 'ltr', mode: 'ltr' }
+ * const result = applyShimmer('Loading...', state, {
+ *   color: [140, 82, 255],
+ *   direction: 'ltr',
+ * })
+ * ```
  */
 export function applyShimmer(
   text: string,

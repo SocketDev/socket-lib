@@ -28,6 +28,12 @@ export type SocketFramesOptions = {
  * Returns a spinner definition compatible with cli-spinners format.
  *
  * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
+ *
+ * @example
+ * ```typescript
+ * const { frames, interval } = generateSocketSpinnerFrames()
+ * console.log(frames.length, interval) // 18 50
+ * ```
  */
 export function generateSocketSpinnerFrames(
   options?: SocketFramesOptions | undefined,
