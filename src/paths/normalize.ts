@@ -24,6 +24,7 @@ const CHAR_UPPERCASE_A = 65
 const CHAR_UPPERCASE_Z = 90
 
 // Regular expressions.
+const msysDriveRegExp = /^\/([a-zA-Z])(\/|$)/
 const slashRegExp = /[/\\]/
 const nodeModulesPathRegExp = /(?:^|[/\\])node_modules(?:[/\\]|$)/
 
@@ -110,6 +111,17 @@ function getUrl() {
     _url = /*@__PURE__*/ require('url')
   }
   return _url as typeof import('node:url')
+}
+
+// On Windows, convert MSYS drive notation to native: /c/path → C:/path
+function msysDriveToNative(normalized: string): string {
+  if (WIN32) {
+    return normalized.replace(
+      msysDriveRegExp,
+      (_, letter, sep) => `${letter.toUpperCase()}:${sep || '/'}`,
+    )
+  }
+  return normalized
 }
 
 /**
@@ -359,58 +371,82 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
 }
 
 /**
- * Convert Unix-style POSIX paths (MSYS/Git Bash format) back to native Windows paths.
+ * Check if a path uses MSYS/Git Bash Unix-style drive letter notation.
  *
- * This is the inverse of {@link toUnixPath}. MSYS-style paths use `/c/` notation
- * for drive letters, which PowerShell and cmd.exe cannot resolve. This function
- * converts them back to native Windows format.
+ * Detects paths in the format `/c/...` where a single letter after the leading
+ * slash represents a Windows drive letter. These paths are produced by MSYS2,
+ * Git Bash, and `command -v` on Windows.
  *
- * Conversion rules:
- * - On Windows: Converts Unix drive notation to Windows drive letters
- *   - `/c/path/to/file` becomes `C:/path/to/file`
- *   - `/d/projects/app` becomes `D:/projects/app`
- *   - Drive letters are always uppercase in the output
- * - On Unix: Returns the path unchanged (passes through normalization)
+ * Detection rules:
+ * - Must start with `/` followed by a single ASCII letter (a-z, A-Z)
+ * - The letter must be followed by `/` or be at the end of the string
+ * - Examples: `/c/Users/name`, `/d/projects`, `/c`
+ * - Non-matches: `/tmp`, `/usr/local`, `C:/Windows`
  *
- * This is particularly important for:
- * - GitHub Actions runners where `command -v` returns MSYS paths
- * - Tools like sfw that need to resolve real binary paths on Windows
- * - Scripts that receive paths from Git Bash but need to pass them to native Windows tools
- *
- * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to convert
- * @returns {string} Native Windows path (e.g., `C:/path/to/file`) or normalized Unix path
+ * @param {string | Buffer | URL} pathLike - The path to check
+ * @returns {boolean} `true` if the path uses MSYS drive letter notation
  *
  * @example
  * ```typescript
  * // MSYS drive letter paths
- * fromUnixPath('/c/projects/app/file.txt')    // 'C:/projects/app/file.txt'
- * fromUnixPath('/d/projects/foo/bar')         // 'D:/projects/foo/bar'
+ * isUnixPath('/c/Users/name')         // true
+ * isUnixPath('/d/projects/app')       // true
+ * isUnixPath('/c')                    // true
+ * isUnixPath('/C/Windows')            // true
  *
- * // Non-drive Unix paths (unchanged)
+ * // Not MSYS drive paths
+ * isUnixPath('/tmp/build')            // false
+ * isUnixPath('/usr/local/bin')        // false
+ * isUnixPath('C:/Windows')            // false
+ * isUnixPath('./relative')            // false
+ * isUnixPath('')                      // false
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isUnixPath(pathLike: string | Buffer | URL): boolean {
+  const filepath = pathLikeToString(pathLike)
+  return typeof filepath === 'string' && msysDriveRegExp.test(filepath)
+}
+
+/**
+ * Convert Unix-style POSIX paths to native Windows paths.
+ *
+ * This is the inverse of {@link toUnixPath}. On Windows, MSYS-style paths use
+ * `/c/` notation for drive letters and forward slashes, which PowerShell and
+ * cmd.exe cannot resolve. This function converts them to native Windows format
+ * with backslashes and proper drive letters.
+ *
+ * Conversion rules:
+ * - On Windows: Converts drive notation and separators to native format
+ *   - `/c/path/to/file` becomes `C:\path\to\file`
+ *   - `/d/projects/app` becomes `D:\projects\app`
+ *   - Forward slashes become backslashes
+ *   - Drive letters are always uppercase in the output
+ * - On Unix: Returns the normalized path unchanged (forward slashes preserved)
+ *
+ * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to convert
+ * @returns {string} Native Windows path (e.g., `C:\path\to\file`) or normalized Unix path
+ *
+ * @example
+ * ```typescript
+ * // MSYS drive letter paths (Windows)
+ * fromUnixPath('/c/projects/app/file.txt')    // 'C:\\projects\\app\\file.txt'
+ * fromUnixPath('/d/projects/foo/bar')         // 'D:\\projects\\foo\\bar'
+ * fromUnixPath('/c')                          // 'C:\\'
+ *
+ * // Forward-slash paths (Windows)
+ * fromUnixPath('C:/Windows/System32')         // 'C:\\Windows\\System32'
+ *
+ * // Unix (unchanged, forward slashes preserved)
  * fromUnixPath('/tmp/build/output')           // '/tmp/build/output'
- * fromUnixPath('/usr/local/bin')              // '/usr/local/bin'
- *
- * // Already Windows paths (unchanged)
- * fromUnixPath('C:/Windows/System32')         // 'C:/Windows/System32'
- *
- * // Edge cases
- * fromUnixPath('/c')                          // 'C:/'
- * fromUnixPath('')                            // '.'
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function fromUnixPath(pathLike: string | Buffer | URL): string {
   const normalized = normalizePath(pathLike)
-
-  // On Windows, convert MSYS drive notation back to native: /c/path → C:/path
   if (WIN32) {
-    return normalized.replace(
-      /^\/([a-zA-Z])(\/|$)/,
-      (_, letter, sep) => `${letter.toUpperCase()}:${sep || '/'}`,
-    )
+    return normalized.replace(/\//g, '\\')
   }
-
-  // On Unix, just return the normalized path
   return normalized
 }
 
@@ -427,6 +463,7 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  * - Returns `.` for empty or collapsed paths
  *
  * Special handling:
+ * - MSYS drive letters (Windows only): `/c/path` becomes `C:/path`
  * - UNC paths: Maintains double leading slashes for `//server/share` format
  * - Windows namespaces: Preserves `//./` and `//?/` prefixes
  * - Leading `..` segments: Preserved in relative paths without prefix
@@ -452,6 +489,10 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  * // Windows paths
  * normalizePath('C:\\Users\\username\\file.txt') // 'C:/Users/username/file.txt'
  * normalizePath('foo\\bar\\baz')                 // 'foo/bar/baz'
+ *
+ * // MSYS drive letters (Windows only)
+ * normalizePath('/c/projects/app')              // 'C:/projects/app' (on Windows)
+ * normalizePath('/d/Users/name')                // 'D:/Users/name' (on Windows)
  *
  * // UNC paths
  * normalizePath('\\\\server\\share\\file')   // '//server/share/file'
@@ -592,7 +633,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     if (segment === '..') {
       return prefix ? prefix.slice(0, -1) || '/' : '..'
     }
-    return prefix + segment
+    return msysDriveToNative(prefix + segment)
   }
   // Process segments and handle '.', '..', and empty segments.
   let collapsed = ''
@@ -688,7 +729,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
   if (collapsed.length === 0) {
     return prefix || '.'
   }
-  return prefix + collapsed
+  return msysDriveToNative(prefix + collapsed)
 }
 
 /**
