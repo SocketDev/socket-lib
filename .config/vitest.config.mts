@@ -65,18 +65,13 @@ const vitestConfig = defineConfig({
         : [toGlobPath(path.resolve(projectRoot, 'test/npm/**'))]),
     ],
     reporters: ['default'],
-    pool: process.env.CI ? 'forks' : 'threads',
+    pool: 'threads',
     poolOptions: {
       threads: {
-        maxThreads: 16,
-        minThreads: 4,
+        maxThreads: process.env.CI ? 4 : 16,
+        minThreads: process.env.CI ? 2 : 4,
         isolate: false,
         useAtomics: true,
-      },
-      forks: {
-        maxForks: process.env.CI ? 4 : 16,
-        minForks: process.env.CI ? 2 : 4,
-        isolate: true,
       },
     },
     teardownTimeout: 30_000,
