@@ -1,7 +1,2 @@
 # Run pre-push security validation.
-if [ -x ".git-hooks/pre-push" ]; then
-  .git-hooks/pre-push "$@"
-else
-  printf "\033[0;31m✗ Error: .git-hooks/pre-push not found or not executable\033[0m\n" >&2
-  exit 1
-fi
+.git-hooks/pre-push "$@"
