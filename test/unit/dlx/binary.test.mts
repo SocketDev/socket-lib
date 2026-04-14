@@ -1190,102 +1190,54 @@ describe.sequential('dlx-binary', () => {
   describe('Windows-specific behavior', () => {
     const originalPlatform = process.platform
 
-    it.skipIf(process.platform !== 'win32')(
-      'should handle .cmd files with shell on Windows',
-      async () => {
-        await runWithTempDir(async tmpDir => {
-          const restoreHome = mockHomeDir(tmpDir)
+    // Windows script extensions that require shell: true in spawn.
+    // Each test verifies dlxBinary downloads the script and resolves
+    // the correct binaryPath. The spawnPromise is raced with a timeout
+    // to avoid hanging on CI when shell execution stalls (e.g. ps1
+    // execution policy prompts).
+    const windowsScriptExts = ['.cmd', '.bat', '.ps1'] as const
 
-          try {
-            // Mock Windows platform
-            Object.defineProperty(process, 'platform', {
-              configurable: true,
-              value: 'win32',
-            })
+    for (const ext of windowsScriptExts) {
+      it.skipIf(process.platform !== 'win32')(
+        `should handle ${ext} files with shell on Windows`,
+        async () => {
+          await runWithTempDir(
+            async tmpDir => {
+              const restoreHome = mockHomeDir(tmpDir)
 
-            const url = `${httpBaseUrl}/binary-windows.cmd`
+              try {
+                Object.defineProperty(process, 'platform', {
+                  configurable: true,
+                  value: 'win32',
+                })
 
-            const result = await dlxBinary(['--version'], {
-              name: 'test.cmd',
-              url,
-            })
+                const url = `${httpBaseUrl}/binary-windows${ext}`
 
-            expect(result.binaryPath).toContain('.cmd')
-            await result.spawnPromise.catch(() => {})
-          } finally {
-            restoreHome()
-            Object.defineProperty(process, 'platform', {
-              configurable: true,
-              value: originalPlatform,
-            })
-          }
-        }, 'dlxBinary-windows-cmd-')
-      },
-    )
+                const result = await dlxBinary(['--version'], {
+                  name: `test${ext}`,
+                  url,
+                })
 
-    it.skipIf(process.platform !== 'win32')(
-      'should handle .bat files with shell on Windows',
-      async () => {
-        await runWithTempDir(async tmpDir => {
-          const restoreHome = mockHomeDir(tmpDir)
-
-          try {
-            Object.defineProperty(process, 'platform', {
-              configurable: true,
-              value: 'win32',
-            })
-
-            const url = `${httpBaseUrl}/binary-windows.bat`
-
-            const result = await dlxBinary(['--version'], {
-              name: 'test.bat',
-              url,
-            })
-
-            expect(result.binaryPath).toContain('.bat')
-            await result.spawnPromise.catch(() => {})
-          } finally {
-            restoreHome()
-            Object.defineProperty(process, 'platform', {
-              configurable: true,
-              value: originalPlatform,
-            })
-          }
-        }, 'dlxBinary-windows-bat-')
-      },
-    )
-
-    it.skipIf(process.platform !== 'win32')(
-      'should handle .ps1 files with shell on Windows',
-      async () => {
-        await runWithTempDir(async tmpDir => {
-          const restoreHome = mockHomeDir(tmpDir)
-
-          try {
-            Object.defineProperty(process, 'platform', {
-              configurable: true,
-              value: 'win32',
-            })
-
-            const url = `${httpBaseUrl}/binary-windows.ps1`
-
-            const result = await dlxBinary(['--version'], {
-              name: 'test.ps1',
-              url,
-            })
-
-            expect(result.binaryPath).toContain('.ps1')
-            await result.spawnPromise.catch(() => {})
-          } finally {
-            restoreHome()
-            Object.defineProperty(process, 'platform', {
-              configurable: true,
-              value: originalPlatform,
-            })
-          }
-        }, 'dlxBinary-windows-ps1-')
-      },
-    )
+                expect(result.binaryPath).toContain(ext)
+                // Race the spawn with a 5s timeout to prevent hangs on CI
+                // (e.g. PowerShell execution policy prompts).
+                await Promise.race([
+                  result.spawnPromise.catch(() => {}),
+                  new Promise(resolve => setTimeout(resolve, 5_000)),
+                ])
+              } finally {
+                restoreHome()
+                Object.defineProperty(process, 'platform', {
+                  configurable: true,
+                  value: originalPlatform,
+                })
+              }
+            },
+            `dlxBinary-windows-${ext.slice(1)}-`,
+          )
+        },
+      )
+    }
   })
 
   describe('edge cases', () => {
