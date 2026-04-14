@@ -1,6 +1,8 @@
-ignoreDependencyScripts: true
-linkWorkspacePackages: false
 resolutionMode: highest
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - '@yarnpkg/core@4.5.0'
+  - '@yarnpkg/libzip@3.2.2'
 
 allowBuilds:
   esbuild: true
@@ -56,12 +58,11 @@ patchedDependencies:
   node-gyp@11.5.0: patches/node-gyp@11.5.0.patch
   minipass-sized@1.0.3: patches/minipass-sized@1.0.3.patch
 
-settings:
-  # Wait 7 days (10080 minutes) before installing newly published packages.
-  minimumReleaseAge: 10080
-  minimumReleaseAgeExclude:
-    - '@anthropic-ai/claude-code@2.1.92'
-    - '@socketaddon/*'
-    - '@socketbin/*'
-    - '@socketregistry/*'
-    - '@socketsecurity/*'
+# Wait 7 days (10080 minutes) before installing newly published packages.
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@anthropic-ai/claude-code@2.1.92'
+  - '@socketaddon/*'
+  - '@socketbin/*'
+  - '@socketregistry/*'
+  - '@socketsecurity/*'
