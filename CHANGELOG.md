@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.18.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.0) - 2026-04-14
+
+### Added — dlx
+
+- Socket Firewall API check before package downloads — resolves dependency tree via `buildIdealTree`, checks all packages against `firewall-api.socket.dev/purl` in parallel, blocks on critical/high severity alerts
+
+### Changed — http-request
+
+- Default `User-Agent` header updated from `socket-registry/1.0` to `socketsecurity-lib/{version}`
+
 ## [5.17.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.17.0) - 2026-04-14
 
 ### Added — paths
