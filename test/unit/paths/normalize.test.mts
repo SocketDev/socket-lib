@@ -92,7 +92,7 @@ describe('paths/normalize', () => {
       'should convert MSYS drive letter paths on Windows',
       () => {
         expect(normalizePath('/c/projects/app')).toBe('C:/projects/app')
-        expect(normalizePath('/d/Users/name')).toBe('D:/Users/name')
+        expect(normalizePath('/d/tools/bin')).toBe('D:/tools/bin')
         expect(normalizePath('/z/path')).toBe('Z:/path')
       },
     )
@@ -106,7 +106,7 @@ describe('paths/normalize', () => {
 
     it.skipIf(isWindows)('should not convert MSYS-like paths on Unix', () => {
       expect(normalizePath('/c/projects/app')).toBe('/c/projects/app')
-      expect(normalizePath('/d/Users/name')).toBe('/d/Users/name')
+      expect(normalizePath('/d/tools/bin')).toBe('/d/tools/bin')
     })
 
     it.skipIf(!isWindows)(
@@ -294,7 +294,7 @@ describe('paths/normalize', () => {
 
   describe('isUnixPath', () => {
     it('should detect MSYS drive letter paths', () => {
-      expect(isUnixPath('/c/Users/name')).toBe(true)
+      expect(isUnixPath('/c/tools/bin')).toBe(true)
       expect(isUnixPath('/d/projects/app')).toBe(true)
       expect(isUnixPath('/z/path')).toBe(true)
       expect(isUnixPath('/C/Windows')).toBe(true)

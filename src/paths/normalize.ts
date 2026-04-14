@@ -380,7 +380,7 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
  * Detection rules:
  * - Must start with `/` followed by a single ASCII letter (a-z, A-Z)
  * - The letter must be followed by `/` or be at the end of the string
- * - Examples: `/c/Users/name`, `/d/projects`, `/c`
+ * - Examples: `/c/tools/bin`, `/d/projects`, `/c`
  * - Non-matches: `/tmp`, `/usr/local`, `C:/Windows`
  *
  * @param {string | Buffer | URL} pathLike - The path to check
@@ -389,7 +389,7 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
  * @example
  * ```typescript
  * // MSYS drive letter paths
- * isUnixPath('/c/Users/name')         // true
+ * isUnixPath('/c/tools/bin')         // true
  * isUnixPath('/d/projects/app')       // true
  * isUnixPath('/c')                    // true
  * isUnixPath('/C/Windows')            // true
@@ -492,7 +492,7 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  *
  * // MSYS drive letters (Windows only)
  * normalizePath('/c/projects/app')              // 'C:/projects/app' (on Windows)
- * normalizePath('/d/Users/name')                // 'D:/Users/name' (on Windows)
+ * normalizePath('/d/tools/bin')                 // 'D:/tools/bin' (on Windows)
  *
  * // UNC paths
  * normalizePath('\\\\server\\share\\file')   // '//server/share/file'
