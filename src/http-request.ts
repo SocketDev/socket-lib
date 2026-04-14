@@ -16,6 +16,7 @@
 
 import type { Readable } from 'node:stream'
 
+import { SOCKET_LIB_USER_AGENT } from './constants/socket'
 import { safeDelete } from './fs.js'
 
 let _fs: typeof import('node:fs') | undefined
@@ -1161,7 +1162,7 @@ async function httpRequestAttempt(
       : undefined
 
   const mergedHeaders = {
-    'User-Agent': 'socket-registry/1.0',
+    'User-Agent': SOCKET_LIB_USER_AGENT,
     ...streamHeaders,
     ...headers,
   }

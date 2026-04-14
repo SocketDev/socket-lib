@@ -3,6 +3,7 @@
  * Fast JS compilation with esbuild, declarations with tsgo
  */
 
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
@@ -12,6 +13,9 @@ import { envAsBoolean } from '@socketsecurity/lib-stable/env/helpers'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
+const rootPkgJson = JSON.parse(
+  fs.readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
+)
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
@@ -275,6 +279,8 @@ export const buildConfig = {
     'process.env.NODE_ENV': JSON.stringify(
       process.env.NODE_ENV || 'production',
     ),
+    'process.env.INLINED_LIB_VERSION': JSON.stringify(rootPkgJson.version),
+    'process.env["INLINED_LIB_VERSION"]': JSON.stringify(rootPkgJson.version),
   },
 
   // Banner for generated code

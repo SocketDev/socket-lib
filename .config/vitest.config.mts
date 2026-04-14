@@ -2,6 +2,7 @@
  * @fileoverview Vitest configuration for socket-lib
  */
 
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
@@ -9,6 +10,9 @@ import { defineConfig } from 'vitest/config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
+const rootPkgJson = JSON.parse(
+  readFileSync(path.join(projectRoot, 'package.json'), 'utf8'),
+)
 
 // Normalize paths for cross-platform glob patterns (forward slashes on Windows)
 const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
@@ -38,6 +42,9 @@ const vitestConfig = defineConfig({
     },
   },
   test: {
+    env: {
+      INLINED_LIB_VERSION: rootPkgJson.version,
+    },
     globalSetup: [path.resolve(__dirname, 'vitest-global-setup.mts')],
     globals: false,
     environment: 'node',

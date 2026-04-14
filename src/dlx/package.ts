@@ -31,11 +31,13 @@
  */
 
 import { WIN32 } from '../constants/platform'
+import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
 import { generateCacheKey } from './cache'
 import Arborist from '../external/@npmcli/arborist'
 import libnpmexec from '../external/libnpmexec'
 import npmPackageArg from '../external/npm-package-arg'
 import { readJsonSync, safeMkdir } from '../fs'
+import { httpJson } from '../http-request'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
@@ -333,8 +335,8 @@ export async function ensurePackageInstalled(
       }
 
       // Install package and dependencies using Arborist (like npx does).
-      // Arborist handles everything: fetching, extracting, dependency resolution, and bin links.
-      // This creates the proper flat node_modules structure with .bin symlinks.
+      // Split into buildIdealTree → firewall check → reify so we can
+      // scan all resolved packages before downloading any tarballs.
       try {
         // Arborist is imported at the top
         /* c8 ignore next 3 - External Arborist constructor */
@@ -356,12 +358,26 @@ export async function ensurePackageInstalled(
           silent: true,
         })
 
-        // Use reify with 'add' to install the package and its dependencies in one step.
-        // This matches npx's approach: arb.reify({ add: [packageSpec] })
+        // Step 1: Resolve dependency tree (registry metadata only, no tarballs).
+        /* c8 ignore next - External Arborist call */
+        await arb.buildIdealTree({ add: [packageSpec] })
+
+        // Step 2: Check resolved packages against Socket Firewall API (public).
+        /* c8 ignore next - External API call */
+        await checkFirewallPurls(arb, packageName)
+
+        // Step 3: Download tarballs and install. Reuses the cached idealTree.
         // save: true creates package.json and package-lock.json at the root (like npx).
         /* c8 ignore next - External Arborist call */
-        await arb.reify({ save: true, add: [packageSpec] })
+        await arb.reify({ save: true })
       } catch (e) {
+        // Rethrow firewall block errors without wrapping.
+        if (
+          e instanceof Error &&
+          e.message.startsWith('Socket Firewall blocked')
+        ) {
+          throw e
+        }
         const code = (e as any).code
         if (code === 'E404' || code === 'ETARGET') {
           throw new Error(
@@ -609,6 +625,122 @@ export function makePackageBinsExecutable(
   } catch {
     // Ignore errors reading package.json or making binaries executable
     // This is non-critical functionality
+  }
+}
+
+// ── Socket Firewall API check ──
+
+const FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
+const FIREWALL_TIMEOUT = 10_000
+const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new Set([
+  'critical',
+  'high',
+])
+
+interface FirewallAlert {
+  severity?: string
+  type?: string
+  key?: string
+}
+
+interface FirewallResponse {
+  alerts?: FirewallAlert[]
+}
+
+/**
+ * Build a PURL string for an npm package.
+ * Follows the PURL spec for the npm type:
+ *   - Scoped: `@scope/pkg` → `pkg:npm/%40scope/pkg@version`
+ *   - Unscoped: `pkg` → `pkg:npm/pkg@version`
+ *
+ */
+export function npmPurl(name: string, version: string): string {
+  const encoded = name.startsWith('@') ? `%40${name.slice(1)}` : name
+  // PURL spec: '+' in version must be encoded as %2B
+  const encodedVersion = version.replace(/\+/g, '%2B')
+  return `pkg:npm/${encoded}@${encodedVersion}`
+}
+
+/**
+ * Check all resolved packages in an Arborist ideal tree against the
+ * Socket Firewall API (public, no auth required).
+ * Throws if any dependency has critical or high severity alerts.
+ *
+ * @param arb - Arborist instance with populated idealTree
+ * @param requestedPackage - Top-level package name (for error messages)
+ * @private
+ */
+async function checkFirewallPurls(
+  arb: InstanceType<typeof Arborist>,
+  requestedPackage: string,
+): Promise<void> {
+  const idealTree = arb.idealTree
+  if (!idealTree) {
+    return
+  }
+
+  // Collect PURLs for all non-root resolved nodes.
+  const purls: Array<{ purl: string; name: string; version: string }> = []
+  for (const node of idealTree.inventory.values()) {
+    if (node.isProjectRoot) {
+      continue
+    }
+    const { name, version } = node.package
+    if (!name || !version) {
+      continue
+    }
+    purls.push({ purl: npmPurl(name, version), name, version })
+  }
+  if (purls.length === 0) {
+    return
+  }
+
+  const blocked: Array<{
+    name: string
+    version: string
+    alerts: string[]
+  }> = []
+
+  // Check all PURLs against the public firewall API in parallel.
+  await Promise.allSettled(
+    purls.map(async ({ name, purl, version }) => {
+      try {
+        const data = await httpJson<FirewallResponse>(
+          `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`,
+          {
+            headers: { 'User-Agent': SOCKET_LIB_USER_AGENT },
+            timeout: FIREWALL_TIMEOUT,
+            retries: 1,
+            retryDelay: 500,
+          },
+        )
+        const blocking = (data.alerts ?? []).filter(
+          a => a.severity && FIREWALL_BLOCK_SEVERITIES.has(a.severity),
+        )
+        if (blocking.length > 0) {
+          blocked.push({
+            name,
+            version,
+            alerts: blocking.map(
+              a => `${a.severity}: ${a.type ?? a.key ?? 'unknown'}`,
+            ),
+          })
+        }
+      } catch {
+        // Firewall API errors are non-fatal — allow install to proceed.
+      }
+    }),
+  )
+
+  if (blocked.length > 0) {
+    const details = blocked
+      .map(b => `  ${b.name}@${b.version}: ${b.alerts.join(', ')}`)
+      .join('\n')
+    throw new Error(
+      `Socket Firewall blocked installation of "${requestedPackage}".\n` +
+        `The following dependencies have security alerts:\n${details}\n\n` +
+        'Visit https://socket.dev for more information.',
+    )
   }
 }
 

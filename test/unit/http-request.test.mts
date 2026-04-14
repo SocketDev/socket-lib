@@ -36,6 +36,7 @@ import type {
   IncomingRequest,
   IncomingResponse,
 } from '@socketsecurity/lib/http-request'
+import { SOCKET_LIB_USER_AGENT } from '@socketsecurity/lib/constants/socket'
 import { Logger } from '@socketsecurity/lib/logger'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
@@ -350,7 +351,7 @@ describe('http-request', () => {
 
       const headers = response.json<Record<string, string>>()
       expect(headers['x-custom-header']).toBe('custom-value')
-      expect(headers['user-agent']).toBe('socket-registry/1.0')
+      expect(headers['user-agent']).toBe(SOCKET_LIB_USER_AGENT)
     })
 
     it('should handle custom User-Agent', async () => {
@@ -1872,7 +1873,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(requestInfos[0]!.method).toBe('GET')
       expect(requestInfos[0]!.url).toBe(`${httpBaseUrl}/json`)
       expect(requestInfos[0]!.timeout).toBe(30_000)
-      expect(requestInfos[0]!.headers['User-Agent']).toBe('socket-registry/1.0')
+      expect(requestInfos[0]!.headers['User-Agent']).toBe(SOCKET_LIB_USER_AGENT)
       expect(requestInfos[0]!.headers['X-Custom']).toBe('test-value')
     })
 

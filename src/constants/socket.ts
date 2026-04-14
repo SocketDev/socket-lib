@@ -39,6 +39,13 @@ export const SOCKET_FIREWALL_APP_NAME = 'sfw'
 export const SOCKET_REGISTRY_APP_NAME = 'registry'
 export const SOCKET_APP_PREFIX = '_'
 
+// Socket.dev lib.
+export const SOCKET_LIB_NAME = '@socketsecurity/lib'
+export const SOCKET_LIB_VERSION: string =
+  process.env['INLINED_LIB_VERSION'] ?? '0.0.0'
+export const SOCKET_LIB_URL = 'https://github.com/SocketDev/socket-lib'
+export const SOCKET_LIB_USER_AGENT = `socketsecurity-lib/${SOCKET_LIB_VERSION} (${SOCKET_LIB_URL})`
+
 // Socket.dev IPC.
 export const SOCKET_IPC_HANDSHAKE = 'SOCKET_IPC_HANDSHAKE'
 
