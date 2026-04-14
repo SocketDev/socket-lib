@@ -263,7 +263,11 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
       'zlib',
       ...(packageOpts.external || []),
     ],
-    plugins: [createForceNodeModulesPlugin(), createStubPlugin()],
+    plugins: [
+      createForceNodeModulesPlugin(),
+      createStubPlugin(),
+      ...(packageOpts.plugins || []),
+    ],
     minify: false,
     sourcemap: false,
     metafile: true,
