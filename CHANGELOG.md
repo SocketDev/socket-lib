@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.18.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.1) - 2026-04-14
+
+### Changed — build
+
+- Dedup npm-pack.js bundle via pnpm overrides: pacote 21.5.0, make-fetch-happen 15.0.5, and 7 transitive npm packages (npm-bundled, npm-normalize-package-bin, json-parse-even-better-errors, @npmcli/installed-package-contents, @npmcli/name-from-folder, @npmcli/promise-spawn, @npmcli/redact)
+- npm-pack.js: 69,738 → 66,443 lines (2.59MB → 2.46MB), 22 duplicate packages removed
+
 ## [5.18.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.0) - 2026-04-14
 
 ### Added — dlx
