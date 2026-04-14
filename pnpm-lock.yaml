@@ -298,8 +298,8 @@ importers:
         specifier: 1.0.5
         version: 1.0.5
       '@socketregistry/packageurl-js':
-        specifier: 1.4.1
-        version: 1.4.1
+        specifier: 1.4.2
+        version: 1.4.2
       '@socketregistry/yocto-spinner':
         specifier: 1.0.25
         version: 1.0.25
@@ -1686,9 +1686,9 @@ packages:
     resolution: {integrity: sha512-l3wz0cknjyGlI2iCyZxp50FJhtUFXkdZR6CfUU7OfNxE7I4CRBdsvORLgV+JPwqQQErRO/CZgKsbDHefd3puYA==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.4.1':
-    resolution: {integrity: sha512-t/UrOd1DMYXcGuKo2v07WMbuHCMlKBKOriTHu4cn9OIxfj1qWKoF/kpOswGHOWkG5zwj2Ke/2+qLiDugmx5z+A==}
-    engines: {node: '>=18.20.4', pnpm: '>=10.25.0'}
+  '@socketregistry/packageurl-js@1.4.2':
+    resolution: {integrity: sha512-yt9UfUzD02wZ7kwb67oe4jxG2D9JtgPqjrK/ans2BovFyeie0w8hvRR0MuOWM4mUt2371oFPp7NB6O5ZjYJmlw==}
+    engines: {node: '>=18.20.8', pnpm: '>=11.0.0-rc.0'}
 
   '@socketregistry/yocto-spinner@1.0.25':
     resolution: {integrity: sha512-f8AqJMH1+BL15G6bHDzb1jyY+wW4gOYQs5JumSxmnE/H/+KgqbIZgaPwDdRwoeciDGojoSVrRHiTZjbe7n7dJA==}
@@ -4599,9 +4599,7 @@ snapshots:
 
   '@socketregistry/is-unicode-supported@1.0.5': {}
 
-  '@socketregistry/packageurl-js@1.4.1':
-    dependencies:
-      picomatch: 4.0.4
+  '@socketregistry/packageurl-js@1.4.2': {}
 
   '@socketregistry/yocto-spinner@1.0.25':
     dependencies:
