@@ -2,10 +2,13 @@
  * @fileoverview Vitest configuration for socket-lib
  */
 
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 import { defineConfig } from 'vitest/config'
+
+import type { Plugin } from 'vitest/config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
@@ -19,28 +22,73 @@ const isCoverageEnabled =
   process.env.npm_lifecycle_event?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
+// Vite plugin that resolves @socketsecurity/lib/* imports to src/*.ts source
+// files and applies module aliases. Vitest's internal config hooks override
+// resolve.alias and resolve.conditions, so we use a plugin to ensure our
+// resolution takes effect.
+function sourceResolverPlugin(): Plugin {
+  const LIB_PREFIX = '@socketsecurity/lib/'
+  const LIB_EXACT = '@socketsecurity/lib'
+  const aliasMap: Record<string, string> = {
+    cacache: path.resolve(projectRoot, 'src/external/cacache'),
+    'make-fetch-happen': path.resolve(
+      projectRoot,
+      'src/external/make-fetch-happen',
+    ),
+    'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
+    pacote: path.resolve(projectRoot, 'src/external/pacote'),
+    '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
+  }
+
+  return {
+    name: 'vitest:source-resolver',
+    enforce: 'pre',
+    resolveId(source) {
+      // Resolve @socketsecurity/lib/* to src/*.ts
+      if (source.startsWith(LIB_PREFIX)) {
+        const subpath = source.slice(LIB_PREFIX.length)
+        // Try direct .ts file first, then index.ts in subdirectory
+        const directPath = path.resolve(projectRoot, 'src', `${subpath}.ts`)
+        if (fs.existsSync(directPath)) return directPath
+        const indexPath = path.resolve(projectRoot, 'src', subpath, 'index.ts')
+        if (fs.existsSync(indexPath)) return indexPath
+        return undefined
+      }
+      if (source === LIB_EXACT) {
+        return path.resolve(projectRoot, 'src/index.ts')
+      }
+      // Resolve aliased external dependencies
+      for (const [alias, target] of Object.entries(aliasMap)) {
+        if (source === alias || source.startsWith(`${alias}/`)) {
+          const rest = source === alias ? '' : source.slice(alias.length)
+          return `${target}${rest}`
+        }
+      }
+      return undefined
+    },
+    // Inject 'source' export condition into ssr resolve for worker processes
+    config() {
+      if (!isCoverageEnabled) return undefined
+      return {
+        ssr: {
+          resolve: {
+            conditions: ['source'],
+            externalConditions: ['source'],
+          },
+        },
+      }
+    },
+  }
+}
+
 const vitestConfig = defineConfig({
   cacheDir: path.resolve(projectRoot, '.cache/vitest'),
+  plugins: [sourceResolverPlugin()],
   resolve: {
     preserveSymlinks: false,
     extensions: isCoverageEnabled
       ? ['.ts', '.mts', '.cts', '.js', '.mjs', '.cjs', '.json']
       : ['.mts', '.ts', '.mjs', '.js', '.json'],
-    alias: {
-      cacache: path.resolve(projectRoot, 'src/external/cacache'),
-      'make-fetch-happen': path.resolve(
-        projectRoot,
-        'src/external/make-fetch-happen',
-      ),
-      'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
-      pacote: path.resolve(projectRoot, 'src/external/pacote'),
-      '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
-      '@socketsecurity/lib/stdio/prompts': path.resolve(
-        projectRoot,
-        'src/stdio/prompts/index.ts',
-      ),
-      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
-    },
   },
   test: {
     globalSetup: [path.resolve(__dirname, 'vitest-global-setup.mts')],
@@ -75,11 +123,8 @@ const vitestConfig = defineConfig({
     pool: process.env.CI ? 'forks' : 'threads',
     poolOptions: {
       threads: {
-        // Maximize parallelism for speed
-        // During coverage, use single thread for deterministic execution
-        singleThread: isCoverageEnabled,
-        maxThreads: isCoverageEnabled ? 1 : 16,
-        minThreads: isCoverageEnabled ? 1 : 4,
+        maxThreads: 16,
+        minThreads: 4,
         // IMPORTANT: isolate: false for performance and test compatibility
         //
         // Tradeoff Analysis:
@@ -99,9 +144,8 @@ const vitestConfig = defineConfig({
       forks: {
         // CI: Use forks for stability (no worker timeout issues)
         // Limit forks in CI to prevent file system contention on Windows
-        singleFork: isCoverageEnabled,
-        maxForks: isCoverageEnabled ? 1 : process.env.CI ? 4 : 16,
-        minForks: isCoverageEnabled ? 1 : process.env.CI ? 2 : 4,
+        maxForks: process.env.CI ? 4 : 16,
+        minForks: process.env.CI ? 2 : 4,
         isolate: true,
       },
     },
@@ -165,10 +209,10 @@ const vitestConfig = defineConfig({
       skipFull: false,
       ignoreClassMethods: ['constructor'],
       thresholds: {
-        lines: 68,
-        functions: 70,
-        branches: 70,
-        statements: 68,
+        lines: 80,
+        functions: 88,
+        branches: 68,
+        statements: 80,
       },
     },
   },

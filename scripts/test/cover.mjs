@@ -55,6 +55,8 @@ const customFlags = ['--code-only', '--type-only', '--summary']
 const vitestArgs = [
   'exec',
   'vitest',
+  '--config',
+  '.config/vitest.config.mts',
   'run',
   '--coverage',
   ...process.argv.slice(2).filter(arg => !customFlags.includes(arg)),
