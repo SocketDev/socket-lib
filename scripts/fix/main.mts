@@ -33,35 +33,35 @@ async function main(): Promise<void> {
 
   const exitCode = await runSequence([
     {
-      args: ['scripts/fix/generate-package-exports.mjs', ...fixArgs],
+      args: ['scripts/fix/generate-package-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/fix/path-aliases.mjs', ...fixArgs],
+      args: ['scripts/fix/path-aliases.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/fix/external-imports.mjs', ...fixArgs],
+      args: ['scripts/fix/external-imports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/fix/commonjs-exports.mjs', ...fixArgs],
+      args: ['scripts/fix/commonjs-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/validate/esm-named-exports.mjs', ...fixArgs],
+      args: ['scripts/validate/esm-named-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/validate/dist-exports.mjs', ...fixArgs],
+      args: ['scripts/validate/dist-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/validate/external-exports.mjs', ...fixArgs],
+      args: ['scripts/validate/external-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/validate/external-esm-cjs.mjs', ...fixArgs],
+      args: ['scripts/validate/external-esm-cjs.mts', ...fixArgs],
       command: 'node',
     },
   ])

@@ -66,7 +66,10 @@ function getOxfmtExcludePatterns(): string[] {
 /**
  * Check if a file matches any of the exclude patterns.
  */
-function isExcludedByFormatter(file: string, excludePatterns: string[]): boolean {
+function isExcludedByFormatter(
+  file: string,
+  excludePatterns: string[],
+): boolean {
   for (const pattern of excludePatterns) {
     // Convert glob pattern to regex-like matching
     // Support **/ for directory wildcards and * for filename wildcards
@@ -89,7 +92,10 @@ function isExcludedByFormatter(file: string, excludePatterns: string[]): boolean
 /**
  * Check if we should run all linters based on changed files.
  */
-function shouldRunAllLinters(changedFiles: string[]): { runAll: boolean; reason?: string } {
+function shouldRunAllLinters(changedFiles: string[]): {
+  runAll: boolean
+  reason?: string
+} {
   for (const file of changedFiles) {
     // Core library files
     if (CORE_FILES.has(file)) {
@@ -142,7 +148,10 @@ function filterLintableFiles(files: string[]): string[] {
 /**
  * Run linters on specific files.
  */
-async function runLintOnFiles(files: string[], options: { fix?: boolean; quiet?: boolean } = {}): Promise<number> {
+async function runLintOnFiles(
+  files: string[],
+  options: { fix?: boolean; quiet?: boolean } = {},
+): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!files.length) {
@@ -214,7 +223,9 @@ async function runLintOnFiles(files: string[], options: { fix?: boolean; quiet?:
 /**
  * Run linters on all files.
  */
-async function runLintOnAll(options: { fix?: boolean; quiet?: boolean } = {}): Promise<number> {
+async function runLintOnAll(
+  options: { fix?: boolean; quiet?: boolean } = {},
+): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!quiet) {
@@ -274,7 +285,11 @@ interface FilesToLintResult {
   mode: string
 }
 
-async function getFilesToLint(options: { all?: boolean; changed?: boolean; staged?: boolean }): Promise<FilesToLintResult> {
+async function getFilesToLint(options: {
+  all?: boolean
+  changed?: boolean
+  staged?: boolean
+}): Promise<FilesToLintResult> {
   const { all, changed, staged } = options
 
   // If --all, return early

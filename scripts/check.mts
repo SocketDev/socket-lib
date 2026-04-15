@@ -5,7 +5,7 @@
  * - TypeScript type checking
  *
  * Usage:
- *   node scripts/check.mjs [options]
+ *   node scripts/check.mts [options]
  *
  * Options:
  *   --all      Run on all files (default behavior)
@@ -31,17 +31,17 @@ async function main(): Promise<void> {
 
     if (help) {
       logger.log('Check Runner')
-      logger.log('\nUsage: node scripts/check.mjs [options]')
+      logger.log('\nUsage: node scripts/check.mts [options]')
       logger.log('\nOptions:')
       logger.log('  --help, -h     Show this help message')
       logger.log('  --all          Run on all files (default behavior)')
       logger.log('  --staged       Run on staged files only')
       logger.log('\nExamples:')
-      logger.log('  node scripts/check.mjs          # Run on all files')
+      logger.log('  node scripts/check.mts          # Run on all files')
       logger.log(
-        '  node scripts/check.mjs --all    # Run on all files (explicit)',
+        '  node scripts/check.mts --all    # Run on all files (explicit)',
       )
-      logger.log('  node scripts/check.mjs --staged # Run on staged files')
+      logger.log('  node scripts/check.mts --staged # Run on staged files')
       process.exitCode = 0
       return
     }
@@ -76,49 +76,49 @@ async function main(): Promise<void> {
         },
       },
       {
-        args: ['scripts/validate/no-link-deps.mjs'],
+        args: ['scripts/validate/no-link-deps.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
         },
       },
       {
-        args: ['scripts/validate/no-extraneous-dependencies.mjs'],
+        args: ['scripts/validate/no-extraneous-dependencies.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
         },
       },
       {
-        args: ['scripts/validate/esbuild-minify.mjs'],
+        args: ['scripts/validate/esbuild-minify.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
         },
       },
       {
-        args: ['scripts/validate/no-cdn-refs.mjs'],
+        args: ['scripts/validate/no-cdn-refs.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
         },
       },
       {
-        args: ['scripts/validate/markdown-filenames.mjs'],
+        args: ['scripts/validate/markdown-filenames.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
         },
       },
       {
-        args: ['scripts/validate/file-size.mjs'],
+        args: ['scripts/validate/file-size.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
         },
       },
       {
-        args: ['scripts/validate/file-count.mjs'],
+        args: ['scripts/validate/file-count.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),

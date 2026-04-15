@@ -110,8 +110,6 @@ If user repeats instruction 2+ times, ask: "Should I add this to CLAUDE.md?"
 
 ## SHARED STANDARDS
 
-
-
 **Quick references**:
 
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) `<type>(<scope>): <description>` — NO AI attribution

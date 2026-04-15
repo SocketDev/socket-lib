@@ -91,7 +91,9 @@ interface TestResult {
   mode?: string
 }
 
-export function getTestsToRun(options: { staged?: boolean; all?: boolean } = {}): TestResult {
+export function getTestsToRun(
+  options: { staged?: boolean; all?: boolean } = {},
+): TestResult {
   const { all = false, staged = false } = options
 
   // All mode runs all tests

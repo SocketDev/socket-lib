@@ -69,7 +69,11 @@ const removeExitHandler = onExit((_code, signal) => {
   }
 })
 
-async function runCommand(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<number> {
+async function runCommand(
+  command: string,
+  args: string[] = [],
+  options: SpawnOptions = {},
+): Promise<number> {
   return new Promise<number>((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
@@ -97,7 +101,11 @@ interface CommandOutput {
   stderr: string
 }
 
-async function runCommandWithOutput(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<CommandOutput> {
+async function runCommandWithOutput(
+  command: string,
+  args: string[] = [],
+  options: SpawnOptions = {},
+): Promise<CommandOutput> {
   return new Promise<CommandOutput>((resolve, reject) => {
     let stdout = ''
     let stderr = ''
@@ -320,7 +328,9 @@ async function runTests(
   return result.code
 }
 
-async function runIsolatedTests(options: { coverage?: boolean }): Promise<number> {
+async function runIsolatedTests(options: {
+  coverage?: boolean
+}): Promise<number> {
   const { coverage } = options
 
   logger.step('Running isolated tests')

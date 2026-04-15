@@ -33,7 +33,10 @@ interface CleanTask {
   patterns?: string[]
 }
 
-async function cleanDirectories(tasks: CleanTask[], options: { quiet?: boolean } = {}): Promise<number> {
+async function cleanDirectories(
+  tasks: CleanTask[],
+  options: { quiet?: boolean } = {},
+): Promise<number> {
   const { quiet = false } = options
 
   for (const task of tasks) {

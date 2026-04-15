@@ -51,14 +51,16 @@ interface BuildSourceResult {
   result: BuildResult | null
 }
 
-async function buildSource(options: BuildSourceOptions = {}): Promise<BuildSourceResult> {
+async function buildSource(
+  options: BuildSourceOptions = {},
+): Promise<BuildSourceResult> {
   const { quiet = false, skipClean = false, verbose = false } = options
 
   // Clean dist directory if needed
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/build/clean.mjs', '--dist', '--quiet'],
+        args: ['scripts/build/clean.mts', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -111,7 +113,7 @@ async function buildTypes(options: BuildTypesOptions = {}): Promise<number> {
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/build/clean.mjs', '--types', '--quiet'],
+      args: ['scripts/build/clean.mts', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -139,10 +141,12 @@ async function buildTypes(options: BuildTypesOptions = {}): Promise<number> {
  * Build external dependencies.
  * Returns exitCode for external logging.
  */
-async function buildExternals(options: { quiet?: boolean; verbose?: boolean } = {}): Promise<number> {
+async function buildExternals(
+  options: { quiet?: boolean; verbose?: boolean } = {},
+): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const args = ['scripts/build/externals.mjs']
+  const args = ['scripts/build/externals.mts']
   if (quiet) {
     args.push('--quiet')
   }
@@ -170,10 +174,12 @@ async function buildExternals(options: { quiet?: boolean; verbose?: boolean } = 
  * Fix exports after build.
  * Returns exitCode for external logging.
  */
-async function fixExports(options: { quiet?: boolean; verbose?: boolean } = {}): Promise<number> {
+async function fixExports(
+  options: { quiet?: boolean; verbose?: boolean } = {},
+): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const fixArgs = ['scripts/fix/main.mjs']
+  const fixArgs = ['scripts/fix/main.mts']
   if (quiet) {
     fixArgs.push('--quiet')
   }
@@ -200,7 +206,9 @@ async function fixExports(options: { quiet?: boolean; verbose?: boolean } = {}):
 /**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
-async function watchBuild(options: { quiet?: boolean; verbose?: boolean } = {}): Promise<number> {
+async function watchBuild(
+  options: { quiet?: boolean; verbose?: boolean } = {},
+): Promise<number> {
   const { quiet = false, verbose = false } = options
 
   if (!quiet) {
@@ -411,7 +419,7 @@ async function main(): Promise<void> {
       }
 
       // Validate external type definitions before building
-      const validateArgs = ['scripts/validate/external-types.mjs']
+      const validateArgs = ['scripts/validate/external-types.mts']
       if (quiet) {
         validateArgs.push('--quiet')
       }
@@ -437,7 +445,7 @@ async function main(): Promise<void> {
 
       exitCode = await runSequence([
         {
-          args: ['scripts/build/clean.mjs', '--dist', '--types', '--quiet'],
+          args: ['scripts/build/clean.mts', '--dist', '--types', '--quiet'],
           command: 'node',
         },
       ])
