@@ -46,7 +46,7 @@ const CONFIG_PATTERNS = [
 /**
  * Get oxfmt exclude patterns from .oxfmtrc.json.
  */
-function getOxfmtExcludePatterns() {
+function getOxfmtExcludePatterns(): string[] {
   try {
     const oxfmtConfigPath = path.join(process.cwd(), '.oxfmtrc.json')
     if (!existsSync(oxfmtConfigPath)) {
@@ -66,7 +66,7 @@ function getOxfmtExcludePatterns() {
 /**
  * Check if a file matches any of the exclude patterns.
  */
-function isExcludedByFormatter(file, excludePatterns) {
+function isExcludedByFormatter(file: string, excludePatterns: string[]): boolean {
   for (const pattern of excludePatterns) {
     // Convert glob pattern to regex-like matching
     // Support **/ for directory wildcards and * for filename wildcards
@@ -89,7 +89,7 @@ function isExcludedByFormatter(file, excludePatterns) {
 /**
  * Check if we should run all linters based on changed files.
  */
-function shouldRunAllLinters(changedFiles) {
+function shouldRunAllLinters(changedFiles: string[]): { runAll: boolean; reason?: string } {
   for (const file of changedFiles) {
     // Core library files
     if (CORE_FILES.has(file)) {
@@ -110,7 +110,7 @@ function shouldRunAllLinters(changedFiles) {
 /**
  * Filter files to only those that should be linted.
  */
-function filterLintableFiles(files) {
+function filterLintableFiles(files: string[]): string[] {
   // Only include extensions actually supported by oxfmt/oxlint
   const lintableExtensions = new Set([
     '.js',
@@ -142,7 +142,7 @@ function filterLintableFiles(files) {
 /**
  * Run linters on specific files.
  */
-async function runLintOnFiles(files, options = {}) {
+async function runLintOnFiles(files: string[], options: { fix?: boolean; quiet?: boolean } = {}): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!files.length) {
@@ -214,7 +214,7 @@ async function runLintOnFiles(files, options = {}) {
 /**
  * Run linters on all files.
  */
-async function runLintOnAll(options = {}) {
+async function runLintOnAll(options: { fix?: boolean; quiet?: boolean } = {}): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!quiet) {
@@ -268,7 +268,13 @@ async function runLintOnAll(options = {}) {
 /**
  * Get files to lint based on options.
  */
-async function getFilesToLint(options) {
+interface FilesToLintResult {
+  files: string[] | 'all' | undefined
+  reason?: string
+  mode: string
+}
+
+async function getFilesToLint(options: { all?: boolean; changed?: boolean; staged?: boolean }): Promise<FilesToLintResult> {
   const { all, changed, staged } = options
 
   // If --all, return early

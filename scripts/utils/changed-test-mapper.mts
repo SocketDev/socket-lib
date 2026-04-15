@@ -36,7 +36,7 @@ const CORE_FILES = [
  * @param {string} filepath - Path to source file
  * @returns {string[]} Array of test file paths
  */
-function mapSourceToTests(filepath) {
+function mapSourceToTests(filepath: string): string[] {
   const normalized = normalizePath(filepath)
 
   // Skip non-code files
@@ -85,7 +85,13 @@ function mapSourceToTests(filepath) {
  * @param {boolean} options.all - Run all tests
  * @returns {{tests: string[] | 'all' | null, reason?: string, mode?: string}} Object with test patterns, reason, and mode
  */
-export function getTestsToRun(options = {}) {
+interface TestResult {
+  tests: string[] | 'all' | undefined
+  reason?: string
+  mode?: string
+}
+
+export function getTestsToRun(options: { staged?: boolean; all?: boolean } = {}): TestResult {
   const { all = false, staged = false } = options
 
   // All mode runs all tests
@@ -107,7 +113,7 @@ export function getTestsToRun(options = {}) {
     return { tests: undefined, mode }
   }
 
-  const testFiles = new Set()
+  const testFiles = new Set<string>()
   let runAllTests = false
   let runAllReason = ''
 

@@ -1,8 +1,16 @@
 /** @fileoverview Utility for running shell commands with proper error handling. */
 
+import type { SpawnOptions, SpawnSyncOptions } from '@socketsecurity/lib-stable/spawn'
+
 import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn'
+
+interface CommandEntry {
+  command: string
+  args?: string[]
+  options?: SpawnOptions
+}
 
 const logger = getDefaultLogger()
 
@@ -13,7 +21,7 @@ const logger = getDefaultLogger()
  * @param {object} options - Spawn options
  * @returns {Promise<number>} Exit code
  */
-export async function runCommand(command, args = [], options = {}) {
+export async function runCommand(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<number> {
   try {
     const result = await spawn(command, args, {
       stdio: 'inherit',
@@ -25,7 +33,7 @@ export async function runCommand(command, args = [], options = {}) {
     // spawn() from @socketsecurity/lib throws on non-zero exit
     // Return the exit code from the error
     if (error && typeof error === 'object' && 'code' in error) {
-      return error.code
+      return (error as { code: number }).code
     }
     throw error
   }
@@ -38,7 +46,7 @@ export async function runCommand(command, args = [], options = {}) {
  * @param {object} options - Spawn options
  * @returns {number} Exit code
  */
-export function runCommandSync(command, args = [], options = {}) {
+export function runCommandSync(command: string, args: string[] = [], options: SpawnSyncOptions = {}): number {
   const result = spawnSync(command, args, {
     stdio: 'inherit',
     ...(process.platform === 'win32' && { shell: true }),
@@ -55,7 +63,7 @@ export function runCommandSync(command, args = [], options = {}) {
  * @param {object} options - Spawn options
  * @returns {Promise<number>} Exit code
  */
-export async function runPnpmScript(scriptName, extraArgs = [], options = {}) {
+export async function runPnpmScript(scriptName: string, extraArgs: string[] = [], options: SpawnOptions = {}): Promise<number> {
   return runCommand('pnpm', ['run', scriptName, ...extraArgs], options)
 }
 
@@ -64,7 +72,7 @@ export async function runPnpmScript(scriptName, extraArgs = [], options = {}) {
  * @param {Array<{command: string, args?: string[], options?: object}>} commands
  * @returns {Promise<number>} Exit code of first failing command, or 0 if all succeed
  */
-export async function runSequence(commands) {
+export async function runSequence(commands: CommandEntry[]): Promise<number> {
   for (const { args = [], command, options = {} } of commands) {
     const exitCode = await runCommand(command, args, options)
     if (exitCode !== 0) {
@@ -79,7 +87,7 @@ export async function runSequence(commands) {
  * @param {Array<{command: string, args?: string[], options?: object}>} commands
  * @returns {Promise<number[]>} Array of exit codes
  */
-export async function runParallel(commands) {
+export async function runParallel(commands: CommandEntry[]): Promise<number[]> {
   const promises = commands.map(({ args = [], command, options = {} }) =>
     runCommand(command, args, options),
   )
@@ -94,7 +102,7 @@ export async function runParallel(commands) {
  * @param {object} options - Spawn options
  * @returns {Promise<{exitCode: number, stdout: string, stderr: string}>}
  */
-export async function runCommandQuiet(command, args = [], options = {}) {
+export async function runCommandQuiet(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<{ exitCode: number; stdout: string | Buffer; stderr: string | Buffer }> {
   try {
     const result = await spawn(command, args, {
       ...options,
@@ -118,10 +126,11 @@ export async function runCommandQuiet(command, args = [], options = {}) {
       'stdout' in error &&
       'stderr' in error
     ) {
+      const spawnErr = error as { code: number; stdout: string | Buffer; stderr: string | Buffer }
       return {
-        exitCode: error.code,
-        stderr: error.stderr,
-        stdout: error.stdout,
+        exitCode: spawnErr.code,
+        stderr: spawnErr.stderr,
+        stdout: spawnErr.stdout,
       }
     }
     throw error
@@ -136,7 +145,7 @@ export async function runCommandQuiet(command, args = [], options = {}) {
  * @param {object} options - Spawn options
  * @returns {Promise<number>} Exit code
  */
-export async function logAndRun(description, command, args = [], options = {}) {
+export async function logAndRun(description: string, command: string, args: string[] = [], options: SpawnOptions = {}): Promise<number> {
   logger.log(description)
   return runCommand(command, args, options)
 }

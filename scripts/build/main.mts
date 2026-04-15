@@ -7,6 +7,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 
+import type { BuildResult } from 'esbuild'
+
 import { build, context } from 'esbuild'
 
 import {
@@ -36,7 +38,20 @@ const rootPath = path.resolve(
  * Build source code with esbuild.
  * Returns { exitCode, buildTime, result } for external logging.
  */
-async function buildSource(options = {}) {
+interface BuildSourceOptions {
+  quiet?: boolean
+  skipClean?: boolean
+  verbose?: boolean
+  analyze?: boolean
+}
+
+interface BuildSourceResult {
+  exitCode: number
+  buildTime: number
+  result: BuildResult | null
+}
+
+async function buildSource(options: BuildSourceOptions = {}): Promise<BuildSourceResult> {
   const { quiet = false, skipClean = false, verbose = false } = options
 
   // Clean dist directory if needed
@@ -79,7 +94,13 @@ async function buildSource(options = {}) {
  * Build TypeScript declarations.
  * Returns exitCode for external logging.
  */
-async function buildTypes(options = {}) {
+interface BuildTypesOptions {
+  quiet?: boolean
+  skipClean?: boolean
+  verbose?: boolean
+}
+
+async function buildTypes(options: BuildTypesOptions = {}): Promise<number> {
   const {
     quiet = false,
     skipClean = false,
@@ -118,7 +139,7 @@ async function buildTypes(options = {}) {
  * Build external dependencies.
  * Returns exitCode for external logging.
  */
-async function buildExternals(options = {}) {
+async function buildExternals(options: { quiet?: boolean; verbose?: boolean } = {}): Promise<number> {
   const { quiet = false, verbose = false } = options
 
   const args = ['scripts/build/externals.mjs']
@@ -149,7 +170,7 @@ async function buildExternals(options = {}) {
  * Fix exports after build.
  * Returns exitCode for external logging.
  */
-async function fixExports(options = {}) {
+async function fixExports(options: { quiet?: boolean; verbose?: boolean } = {}): Promise<number> {
   const { quiet = false, verbose = false } = options
 
   const fixArgs = ['scripts/fix/main.mjs']
@@ -179,7 +200,7 @@ async function fixExports(options = {}) {
 /**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
-async function watchBuild(options = {}) {
+async function watchBuild(options: { quiet?: boolean; verbose?: boolean } = {}): Promise<number> {
   const { quiet = false, verbose = false } = options
 
   if (!quiet) {
@@ -245,7 +266,7 @@ async function watchBuild(options = {}) {
 /**
  * Check if build is needed.
  */
-function isBuildNeeded() {
+function isBuildNeeded(): boolean {
   const distPath = path.join(rootPath, 'dist', 'index.js')
   const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
 

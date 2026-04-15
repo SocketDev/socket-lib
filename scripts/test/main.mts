@@ -3,6 +3,8 @@
  * Combines check, build, and test steps with clean, consistent output.
  */
 
+import type { SpawnOptions } from 'node:child_process'
+
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
@@ -67,8 +69,8 @@ const removeExitHandler = onExit((_code, signal) => {
   }
 })
 
-async function runCommand(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
+async function runCommand(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
       ...(process.platform === 'win32' && { shell: true }),
@@ -89,8 +91,14 @@ async function runCommand(command, args = [], options = {}) {
   })
 }
 
-async function runCommandWithOutput(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
+interface CommandOutput {
+  code: number
+  stdout: string
+  stderr: string
+}
+
+async function runCommandWithOutput(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<CommandOutput> {
+  return new Promise<CommandOutput>((resolve, reject) => {
     let stdout = ''
     let stderr = ''
 
@@ -125,7 +133,7 @@ async function runCommandWithOutput(command, args = [], options = {}) {
   })
 }
 
-async function runCheck() {
+async function runCheck(): Promise<number> {
   logger.step('Running checks')
 
   // Run fix (auto-format) quietly since it has its own output
@@ -176,7 +184,7 @@ async function runCheck() {
   return exitCode
 }
 
-async function runBuild() {
+async function runBuild(): Promise<number> {
   const distIndexPath = path.join(rootPath, 'dist', 'index.js')
   if (!existsSync(distIndexPath)) {
     logger.step('Building project')
@@ -185,11 +193,19 @@ async function runBuild() {
   return 0
 }
 
+interface RunTestsOptions {
+  all?: boolean
+  coverage?: boolean
+  force?: boolean
+  staged?: boolean
+  update?: boolean
+}
+
 async function runTests(
-  options,
-  positionals = [],
-  configPath = '.config/vitest.config.mts',
-) {
+  options: RunTestsOptions,
+  positionals: string[] = [],
+  configPath: string = '.config/vitest.config.mts',
+): Promise<number> {
   const { all, coverage, force, staged, update } = options
   const runAll = all || force
 
@@ -304,7 +320,7 @@ async function runTests(
   return result.code
 }
 
-async function runIsolatedTests(options) {
+async function runIsolatedTests(options: { coverage?: boolean }): Promise<number> {
   const { coverage } = options
 
   logger.step('Running isolated tests')
