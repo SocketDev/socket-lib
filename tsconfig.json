@@ -2,7 +2,7 @@
   "extends": "./.config/tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "node16",
+    "moduleResolution": "bundler",
     "outDir": "dist",
     "rootDir": "src",
     "noEmit": false,
