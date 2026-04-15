@@ -131,7 +131,7 @@ function checkEsmNamedExports(filePath) {
     }
 
     return { path: filePath, ok: true }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       path: filePath,
       ok: false,
@@ -140,7 +140,7 @@ function checkEsmNamedExports(filePath) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const quiet = isQuiet()
   const verbose = process.argv.includes('--verbose')
 

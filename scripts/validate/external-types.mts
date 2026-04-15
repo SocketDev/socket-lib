@@ -62,7 +62,7 @@ function checkTypeDefinition(filePath) {
   let content
   try {
     content = readFileSync(filePath, 'utf8')
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       path: normalizedPath,
       ok: false,
@@ -150,7 +150,7 @@ function checkTypeDefinition(filePath) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const quiet = isQuiet()
   const verbose = process.argv.includes('--verbose')
 

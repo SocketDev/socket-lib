@@ -89,7 +89,7 @@ async function checkModuleExports(filePath) {
   let cjsModule
   try {
     cjsModule = require(filePath)
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       path: normalizedPath,
       ok: false,
@@ -140,7 +140,7 @@ async function checkModuleExports(filePath) {
     // Dynamic import to test ESM interop
     const moduleUrl = pathToFileURL(filePath).href
     esmModule = await import(moduleUrl)
-  } catch (error) {
+  } catch (error: unknown) {
     issues.push(`ESM import failed: ${error.message}`)
     return {
       path: normalizedPath,
@@ -246,7 +246,7 @@ async function checkModuleExports(filePath) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const quiet = isQuiet()
   const verbose = process.argv.includes('--verbose')
 

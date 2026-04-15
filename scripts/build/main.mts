@@ -66,7 +66,7 @@ async function buildSource(options = {}) {
     const buildTime = Date.now() - startTime
 
     return { exitCode: 0, buildTime, result }
-  } catch (error) {
+  } catch (error: unknown) {
     if (!quiet) {
       logger.error('Source build failed')
       logger.error(error)
@@ -234,7 +234,7 @@ async function watchBuild(options = {}) {
 
     // Wait indefinitely
     await new Promise(() => {})
-  } catch (error) {
+  } catch (error: unknown) {
     if (!quiet) {
       logger.error('Watch mode failed:', error)
     }
@@ -252,7 +252,7 @@ function isBuildNeeded() {
   return !existsSync(distPath) || !existsSync(distTypesPath)
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
     const { values } = parseArgs({
@@ -482,7 +482,7 @@ async function main() {
     if (exitCode !== 0) {
       process.exitCode = exitCode
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(`Build runner failed: ${error.message}`)
     process.exitCode = 1
   }

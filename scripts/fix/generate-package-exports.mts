@@ -44,7 +44,7 @@ const { EXT_DTS, EXT_JSON } = constants
 /**
  * Generate exports and browser fields for registry package.
  */
-async function main() {
+async function main(): Promise<void> {
   const { registryPkgPath } = constants
   const registryPkgJsonPath = path.join(registryPkgPath, 'package.json')
 

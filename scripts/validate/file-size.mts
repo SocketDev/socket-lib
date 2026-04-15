@@ -108,7 +108,7 @@ async function validateFileSizes() {
   return violations
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const violations = await validateFileSizes()
 
@@ -140,7 +140,7 @@ async function main() {
     logger.log('')
 
     process.exitCode = 1
-  } catch (error) {
+  } catch (error: unknown) {
     logger.fail(`Validation failed: ${error.message}`)
     process.exitCode = 1
   }

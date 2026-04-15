@@ -112,7 +112,7 @@ async function checkPackageJson(filePath) {
   return violations
 }
 
-async function main() {
+async function main(): Promise<void> {
   const packageJsonFiles = await findPackageJsonFiles(rootPath)
   const allViolations = []
 

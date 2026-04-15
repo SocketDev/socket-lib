@@ -597,7 +597,7 @@ ${diff.stdout}
 
     const scan = JSON.parse(jsonMatch[0])
     return scan
-  } catch (e) {
+  } catch (e: unknown) {
     log.warn(`Scan error: ${e.message}`)
     return { issues: [], safe: true }
   }
@@ -790,7 +790,7 @@ ${similarErrors.length > 0 ? `**Similar Past Errors:**\n${similarErrors.map(e =>
     }
 
     return analysis
-  } catch (e) {
+  } catch (e: unknown) {
     log.warn(`Analysis error: ${e.message}`)
     return undefined
   }
@@ -1140,7 +1140,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
     modelStrategy.recordAttempt(task, true)
 
     return result
-  } catch (error) {
+  } catch (error: unknown) {
     // Record failure for potential escalation
     modelStrategy.recordAttempt(task, false)
 
@@ -1378,7 +1378,7 @@ async function checkIfCommitIsPartOfPR(sha, owner, repo) {
         }
       }
     }
-  } catch (e) {
+  } catch (e: unknown) {
     log.warn(`Failed to check if commit is part of PR: ${e.message}`)
   }
 
@@ -2047,7 +2047,7 @@ async function ensureClaudeInGitignore() {
       await fs.writeFile(gitignorePath, updatedContent)
       log.done('Added /.claude to .gitignore')
     }
-  } catch (e) {
+  } catch (e: unknown) {
     if (e.code === 'ENOENT') {
       // Create .gitignore with .claude entry.
       log.warn('No .gitignore found, creating one')
@@ -2451,7 +2451,7 @@ async function scanProjectForIssues(claudeCmd, project, options = {}) {
           }
         }
       }
-    } catch (e) {
+    } catch (e: unknown) {
       // Log permission errors but continue scanning.
       if (e.code === 'EACCES' || e.code === 'EPERM') {
         // Silently skip permission errors.
@@ -3866,7 +3866,7 @@ async function validateBeforePush(cwd) {
       const pkgPath = path.join(cwd, 'package.json')
       const pkgContent = await fs.readFile(pkgPath, 'utf8')
       JSON.parse(pkgContent)
-    } catch (e) {
+    } catch (e: unknown) {
       warnings.push(`${colors.yellow('⚠')} Invalid package.json: ${e.message}`)
     }
   }
@@ -4767,7 +4767,7 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
           if (exitCode !== 0) {
             log.warn(`Claude fix exited with code ${exitCode}`)
           }
-        } catch (error) {
+        } catch (error: unknown) {
           log.warn(`Claude fix error: ${error.message}`)
         } finally {
           clearInterval(progressInterval)
@@ -5087,7 +5087,7 @@ Fix the issue by making necessary file changes. Be direct, don't ask questions.`
                 if (exitCode !== 0) {
                   log.warn(`Claude fix exited with code ${exitCode}`)
                 }
-              } catch (error) {
+              } catch (error: unknown) {
                 log.warn(`Claude fix error: ${error.message}`)
               } finally {
                 clearInterval(progressInterval)
@@ -5186,7 +5186,7 @@ Fix the issue by making necessary file changes. Be direct, don't ask questions.`
               `Fixed ${fixedJobs.size} job(s) so far (commits pending push)`,
             )
           }
-        } catch (e) {
+        } catch (e: unknown) {
           log.warn(`Failed to parse job data: ${e.message}`)
         }
       }
@@ -5289,7 +5289,7 @@ async function runWatchMode(claudeCmd, options = {}) {
           } else {
             log.done('No issues found')
           }
-        } catch (error) {
+        } catch (error: unknown) {
           log.failed(`Error scanning ${project.name}: ${error.message}`)
         }
       },
@@ -5322,7 +5322,7 @@ async function runWatchMode(claudeCmd, options = {}) {
               },
             )
           }
-        } catch (error) {
+        } catch (error: unknown) {
           log.failed(`Full scan error in ${project.name}: ${error.message}`)
         }
       }
@@ -5387,7 +5387,7 @@ function showOperations() {
   logger.log('  --help         Show this help message')
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments.
     const { positionals, values } = parseArgs({
@@ -5726,7 +5726,7 @@ async function main() {
     }
 
     process.exitCode = success ? 0 : 1
-  } catch (error) {
+  } catch (error: unknown) {
     log.error(`Operation failed: ${error.message}`)
     process.exitCode = 1
   }

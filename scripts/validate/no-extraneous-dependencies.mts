@@ -50,7 +50,7 @@ function parseCode(code, filePath) {
       allowReturnOutsideFunction: true,
       sourceType: 'unambiguous',
     })
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(`Failed to parse ${filePath}: ${error.message}`)
   }
 }
@@ -269,7 +269,7 @@ async function validateNoExtraneousDependencies() {
           }
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       errors.push({
         file: path.relative(rootPath, file),
         type: 'parse-error',
@@ -281,7 +281,7 @@ async function validateNoExtraneousDependencies() {
   return { errors }
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const { errors } = await validateNoExtraneousDependencies()
 
@@ -322,7 +322,7 @@ async function main() {
     }
 
     process.exitCode = 1
-  } catch (error) {
+  } catch (error: unknown) {
     logger.fail('Validation failed:', error.message)
     process.exitCode = 1
   }

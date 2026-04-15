@@ -14,7 +14,7 @@ import { buildExternals } from '../build-externals/orchestrator.mts'
 
 const logger = getDefaultLogger()
 
-async function main() {
+async function main(): Promise<void> {
   // Check for verbose mode via isVerbose or manual check
   const verbose = process.argv.includes('--verbose')
   const quiet = isQuiet()
@@ -29,7 +29,7 @@ async function main() {
           : 'External Bundles (no packages)'
       logger.success(title)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(`Build failed: ${error.message || error}`)
     process.exitCode = 1
   }

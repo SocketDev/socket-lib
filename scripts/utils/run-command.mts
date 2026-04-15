@@ -21,7 +21,7 @@ export async function runCommand(command, args = [], options = {}) {
       ...options,
     })
     return result.code
-  } catch (error) {
+  } catch (error: unknown) {
     // spawn() from @socketsecurity/lib throws on non-zero exit
     // Return the exit code from the error
     if (error && typeof error === 'object' && 'code' in error) {
@@ -108,7 +108,7 @@ export async function runCommandQuiet(command, args = [], options = {}) {
       stderr: result.stderr,
       stdout: result.stdout,
     }
-  } catch (error) {
+  } catch (error: unknown) {
     // spawn() from @socketsecurity/lib throws on non-zero exit
     // Return the exit code and output from the error
     if (

@@ -15,7 +15,7 @@ import { runSequence } from '../utils/run-command.mts'
 
 const logger = getDefaultLogger()
 
-async function main() {
+async function main(): Promise<void> {
   const verbose = process.argv.includes('--verbose')
   const quiet = isQuiet()
 

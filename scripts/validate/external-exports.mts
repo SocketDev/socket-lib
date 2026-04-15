@@ -141,7 +141,7 @@ function checkExternalExport(filePath) {
 
     // Primitive exports are okay for some modules
     return { path: normalizedPath, ok: true, keys: 'primitive' }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       path: normalizedPath,
       ok: false,
@@ -150,7 +150,7 @@ function checkExternalExport(filePath) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const quiet = isQuiet()
   const verbose = process.argv.includes('--verbose')
 

@@ -317,7 +317,7 @@ async function getFilesToLint(options) {
   return { files: lintableFiles, reason: undefined, mode }
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
     const { positionals, values } = parseArgs({
@@ -437,7 +437,7 @@ async function main() {
         logger.success('All lint checks passed!')
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(`Lint runner failed: ${error.message}`)
     process.exitCode = 1
   }
