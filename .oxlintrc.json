@@ -302,7 +302,12 @@
       }
     },
     {
-      "files": ["scripts/**/*.mjs", "registry/scripts/**/*.mjs"],
+      "files": [
+        "scripts/**/*.mjs",
+        "scripts/**/*.mts",
+        "registry/scripts/**/*.mjs",
+        "registry/scripts/**/*.mts"
+      ],
       "rules": {
         "no-await-in-loop": "off"
       }

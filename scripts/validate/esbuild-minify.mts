@@ -17,7 +17,7 @@ const rootPath = path.join(__dirname, '..', '..')
  * Validate esbuild configuration has minify: false.
  */
 async function validateEsbuildMinify() {
-  const configPath = path.join(rootPath, '.config/esbuild.config.mjs')
+  const configPath = path.join(rootPath, '.config/esbuild.config.mts')
 
   try {
     // Dynamic import of the esbuild config
