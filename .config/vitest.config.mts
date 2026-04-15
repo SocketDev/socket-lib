@@ -42,6 +42,7 @@ const vitestConfig = defineConfig({
     },
   },
   test: {
+    deps: { interopDefault: false },
     env: {
       INLINED_LIB_VERSION: rootPkgJson.version,
     },

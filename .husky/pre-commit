@@ -8,17 +8,7 @@ else
 fi
 
 if [ -z "${DISABLE_PRECOMMIT_TEST}" ]; then
-  if command -v dotenvx >/dev/null 2>&1 || [ -x "./node_modules/.bin/dotenvx" ]; then
-    if [ -f ".env.precommit" ]; then
-      dotenvx -q run -f .env.precommit -- pnpm test --staged || pnpm test --staged
-    else
-      printf "⚠  .env.precommit not found, running tests without it\n"
-      pnpm test --staged
-    fi
-  else
-    printf "⚠  dotenvx not found, running tests without .env.precommit\n"
-    pnpm test --staged
-  fi
+  pnpm test --staged
 else
   printf "Skipping testing due to DISABLE_PRECOMMIT_TEST env var\n"
 fi
