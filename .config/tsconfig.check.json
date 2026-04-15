@@ -4,9 +4,7 @@
     "noEmit": true,
     "rootDir": "..",
     "types": ["node", "vitest"],
-    "skipLibCheck": true,
-    "strict": false,
-    "noImplicitAny": false
+    "skipLibCheck": true
   },
   "include": ["../src/**/*.ts", "../test/**/*.ts", "../test/**/*.mts"],
   "exclude": ["../node_modules", "../dist/**/*"]

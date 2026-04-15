@@ -10,7 +10,7 @@ function getCrypto() {
   if (_crypto === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _crypto = /*@__PURE__*/ require('crypto')
+    _crypto = /*@__PURE__*/ require('node:crypto')
   }
   return _crypto as typeof import('node:crypto')
 }

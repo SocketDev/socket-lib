@@ -230,23 +230,23 @@ describe('stdio/prompts', () => {
       expect(theme).toHaveProperty('icon')
 
       // Test that the theme style functions work
-      const style = theme.style as Record<string, (text: string) => string>
-      expect(typeof style.message).toBe('function')
-      expect(typeof style.answer).toBe('function')
-      expect(typeof style.help).toBe('function')
-      expect(typeof style.description).toBe('function')
-      expect(typeof style.disabled).toBe('function')
-      expect(typeof style.error).toBe('function')
-      expect(typeof style.highlight).toBe('function')
+      const style = theme['style'] as Record<string, (text: string) => string>
+      expect(typeof style['message']).toBe('function')
+      expect(typeof style['answer']).toBe('function')
+      expect(typeof style['help']).toBe('function')
+      expect(typeof style['description']).toBe('function')
+      expect(typeof style['disabled']).toBe('function')
+      expect(typeof style['error']).toBe('function')
+      expect(typeof style['highlight']).toBe('function')
 
       // Call the functions to increase coverage
-      expect(style.message('test')).toBeDefined()
-      expect(style.answer('test')).toBeDefined()
-      expect(style.help('test')).toBeDefined()
-      expect(style.description('test')).toBeDefined()
-      expect(style.disabled('test')).toBeDefined()
-      expect(style.error('test')).toBeDefined()
-      expect(style.highlight('test')).toBeDefined()
+      expect(style['message']!('test')).toBeDefined()
+      expect(style['answer']!('test')).toBeDefined()
+      expect(style['help']!('test')).toBeDefined()
+      expect(style['description']!('test')).toBeDefined()
+      expect(style['disabled']!('test')).toBeDefined()
+      expect(style['error']!('test')).toBeDefined()
+      expect(style['highlight']!('test')).toBeDefined()
     })
 
     it('should handle THEMES object reference', () => {
@@ -289,7 +289,7 @@ describe('stdio/prompts', () => {
       await wrapped({ message: 'Test?' })
       const callArgs = mockPrompt.mock.calls[0]
       const config = callArgs?.[0] as Record<string, unknown>
-      expect(config.theme).toBeDefined()
+      expect(config['theme']).toBeDefined()
     })
 
     it('should convert existing theme', async () => {
@@ -299,8 +299,8 @@ describe('stdio/prompts', () => {
       await wrapped({ message: 'Test?', theme: 'sunset' })
       const callArgs = mockPrompt.mock.calls[0]
       const config = callArgs?.[0] as Record<string, unknown>
-      expect(config.theme).toBeDefined()
-      expect(typeof config.theme).toBe('object')
+      expect(config['theme']).toBeDefined()
+      expect(typeof config['theme']).toBe('object')
     })
 
     it('should inject abort signal', async () => {
@@ -538,8 +538,8 @@ describe('stdio/prompts', () => {
         },
       })
       expect(theme).toBeDefined()
-      const style = theme.style as Record<string, (text: string) => string>
-      expect(style.message('test')).toBeDefined()
+      const style = theme['style'] as Record<string, (text: string) => string>
+      expect(style['message']!('test')).toBeDefined()
     })
 
     it('should handle theme with mixed named and RGB colors', () => {
@@ -557,9 +557,9 @@ describe('stdio/prompts', () => {
           textDim: 'gray',
         },
       })
-      const style = theme.style as Record<string, (text: string) => string>
-      expect(style.message('test')).toContain('test')
-      expect(style.error('test')).toContain('test')
+      const style = theme['style'] as Record<string, (text: string) => string>
+      expect(style['message']!('test')).toContain('test')
+      expect(style['error']!('test')).toContain('test')
     })
 
     it('should handle all available theme names', () => {
@@ -573,17 +573,17 @@ describe('stdio/prompts', () => {
       for (const name of themeNames) {
         const theme = createInquirerTheme(name)
         expect(theme).toBeDefined()
-        expect(theme.style).toBeDefined()
-        expect(theme.icon).toBeDefined()
+        expect(theme['style']).toBeDefined()
+        expect(theme['icon']).toBeDefined()
       }
     })
 
     it('should verify icon colors are applied', () => {
       const theme = createInquirerTheme('sunset')
-      const icon = theme.icon as Record<string, string>
-      expect(icon.checked).toBeDefined()
-      expect(icon.unchecked).toBe(' ')
-      expect(icon.cursor).toBeDefined()
+      const icon = theme['icon'] as Record<string, string>
+      expect(icon['checked']).toBeDefined()
+      expect(icon['unchecked']).toBe(' ')
+      expect(icon['cursor']).toBeDefined()
     })
   })
 

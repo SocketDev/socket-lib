@@ -36,7 +36,7 @@ let _crypto: typeof import('node:crypto') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getCrypto() {
   if (_crypto === undefined) {
-    _crypto = /*@__PURE__*/ require('crypto')
+    _crypto = /*@__PURE__*/ require('node:crypto')
   }
   return _crypto as typeof import('node:crypto')
 }
@@ -49,7 +49,7 @@ let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -62,7 +62,7 @@ let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
   if (_path === undefined) {
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }

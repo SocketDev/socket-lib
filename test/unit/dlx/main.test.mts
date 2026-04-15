@@ -50,9 +50,9 @@ describe.sequential('dlx', () => {
 
   beforeEach(async () => {
     // Save original env and create isolated test directory
-    originalEnv = process.env.SOCKET_DLX_DIR
+    originalEnv = process.env['SOCKET_DLX_DIR']
     testDlxDir = path.join(os.tmpdir(), `socket-dlx-test-${randomUUID()}`)
-    process.env.SOCKET_DLX_DIR = testDlxDir
+    process.env['SOCKET_DLX_DIR'] = testDlxDir
 
     // Clean up any existing test artifacts
     await clearDlx().catch(() => {})
@@ -69,9 +69,9 @@ describe.sequential('dlx', () => {
 
     // Restore original env
     if (originalEnv === undefined) {
-      delete process.env.SOCKET_DLX_DIR
+      delete process.env['SOCKET_DLX_DIR']
     } else {
-      process.env.SOCKET_DLX_DIR = originalEnv
+      process.env['SOCKET_DLX_DIR'] = originalEnv
     }
   })
 

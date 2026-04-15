@@ -74,7 +74,7 @@ function getUtil() {
   if (_util === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _util = /*@__PURE__*/ require('util')
+    _util = /*@__PURE__*/ require('node:util')
   }
   return _util as typeof import('node:util')
 }

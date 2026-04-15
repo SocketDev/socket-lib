@@ -14,6 +14,7 @@ import cacache from '../external/cacache'
 import libnpmpack from '../external/libnpmpack'
 import makeFetchHappen from '../external/make-fetch-happen'
 import npmPackageArg from '../external/npm-package-arg'
+// @ts-expect-error - external vendored module
 import { PackageURL } from '../external/@socketregistry/packageurl-js'
 import pacote from '../external/pacote'
 import * as semver from '../external/semver'

@@ -116,7 +116,7 @@ describe('constants/testing', () => {
     })
 
     it('should support test mode detection', () => {
-      const testMode = process.env.NODE_ENV === TEST
+      const testMode = process.env['NODE_ENV'] === TEST
       expect(typeof testMode).toBe('boolean')
     })
   })
@@ -139,6 +139,7 @@ describe('constants/testing', () => {
     it('should not allow reassignment of TEST', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         TEST = 'production'
       }).toThrow()
     })
@@ -146,6 +147,7 @@ describe('constants/testing', () => {
     it('should not allow reassignment of VITEST', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         VITEST = 'JEST'
       }).toThrow()
     })
@@ -153,6 +155,7 @@ describe('constants/testing', () => {
     it('should not allow reassignment of CI', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         CI = 'LOCAL'
       }).toThrow()
     })
@@ -160,6 +163,7 @@ describe('constants/testing', () => {
     it('should not allow reassignment of PRE_COMMIT', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         PRE_COMMIT = 'POST_COMMIT'
       }).toThrow()
     })

@@ -361,7 +361,7 @@ describe('globs', () => {
       })
       expect(Array.isArray(files)).toBe(true)
       if (files.length > 0) {
-        expect(path.isAbsolute(files[0])).toBe(true)
+        expect(path.isAbsolute(files[0]!)).toBe(true)
       }
     })
 
@@ -444,7 +444,7 @@ describe('globs', () => {
       })
       expect(Array.isArray(files)).toBe(true)
       if (files.length > 0) {
-        expect(path.isAbsolute(files[0])).toBe(true)
+        expect(path.isAbsolute(files[0]!)).toBe(true)
       }
     })
 

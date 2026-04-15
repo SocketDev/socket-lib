@@ -23,12 +23,12 @@ import { setTheme, THEMES } from '@socketsecurity/lib/themes'
 describe('LOG_SYMBOLS', () => {
   it('should lazily initialize symbols', () => {
     expect(LOG_SYMBOLS).toBeDefined()
-    expect(LOG_SYMBOLS.success).toContain('')
-    expect(LOG_SYMBOLS.fail).toContain('')
-    expect(LOG_SYMBOLS.warn).toContain('')
-    expect(LOG_SYMBOLS.info).toContain('')
-    expect(LOG_SYMBOLS.skip).toContain('')
-    expect(LOG_SYMBOLS.step).toContain('')
+    expect(LOG_SYMBOLS['success']).toContain('')
+    expect(LOG_SYMBOLS['fail']).toContain('')
+    expect(LOG_SYMBOLS['warn']).toContain('')
+    expect(LOG_SYMBOLS['info']).toContain('')
+    expect(LOG_SYMBOLS['skip']).toContain('')
+    expect(LOG_SYMBOLS['step']).toContain('')
   })
 
   it('should provide colored symbols', () => {
@@ -44,14 +44,14 @@ describe('LOG_SYMBOLS', () => {
 
   it('should update symbols when theme changes', () => {
     // Initialize symbols with default theme
-    const initialSuccess = LOG_SYMBOLS.success
+    const initialSuccess = LOG_SYMBOLS['success']
     expect(initialSuccess).toBeTruthy()
 
     // Change theme
     setTheme(THEMES.sunset)
 
     // Symbols should update
-    const updatedSuccess = LOG_SYMBOLS.success
+    const updatedSuccess = LOG_SYMBOLS['success']
     expect(updatedSuccess).toBeTruthy()
 
     // Reset to default theme for other tests
@@ -415,7 +415,7 @@ describe('Logger', () => {
       const stepLine = stdoutChunks[stdoutChunks.length - 1]
       // Strip ANSI color codes for easier testing
       // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence needed for stripping color codes
-      const stripped = stepLine.replace(/\x1b\[\d+m/g, '')
+      const stripped = stepLine!.replace(/\x1b\[\d+m/g, '')
       // Should have exactly one arrow symbol and the message text
       expect(stripped).toMatch(/^[→>] Step 1\n$/)
       // Verify the arrow appears exactly once at the start

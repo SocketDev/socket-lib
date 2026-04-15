@@ -807,8 +807,8 @@ describe('spinner', () => {
     it('should return socket custom spinner', () => {
       const socket = getCliSpinners('socket')
       expect(socket).toBeDefined()
-      expect(socket.frames).toBeDefined()
-      expect(socket.interval).toBeDefined()
+      expect(socket!.frames).toBeDefined()
+      expect(socket!.interval).toBeDefined()
     })
 
     it('should return undefined for non-existent spinner', () => {

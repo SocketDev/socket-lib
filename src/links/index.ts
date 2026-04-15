@@ -63,7 +63,7 @@ export function link(text: string, url: string, options?: LinkOptions): string {
       : (opts.theme ?? getTheme())
 
   // Resolve link color
-  const linkColor = resolveColor(theme.colors.link, theme.colors)
+  const linkColor = resolveColor(theme!.colors.link, theme!.colors)
 
   // Apply color - for now just use cyan as a simple fallback
   // Note: RGB color support to be added in yoctocolors wrapper

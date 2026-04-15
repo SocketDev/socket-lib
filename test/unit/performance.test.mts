@@ -70,7 +70,7 @@ describe('performance', () => {
       }
       expect(measurements.length).toBe(5)
       for (let i = 1; i < measurements.length; i++) {
-        expect(measurements[i]).toBeGreaterThanOrEqual(measurements[i - 1])
+        expect(measurements[i]).toBeGreaterThanOrEqual(measurements[i - 1]!)
       }
     })
   })
@@ -82,7 +82,7 @@ describe('performance', () => {
         times.push(performance.now())
       }
       expect(times.length).toBe(100)
-      expect(times[times.length - 1]).toBeGreaterThanOrEqual(times[0])
+      expect(times[times.length - 1]).toBeGreaterThanOrEqual(times[0]!)
     })
 
     it('should return high-resolution timestamps', () => {
@@ -98,12 +98,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -129,8 +129,8 @@ describe('performance', () => {
       expect(metrics.length).toBe(1)
       const metadata = metrics[0]?.metadata
       if (metadata && Object.keys(metadata).length > 0) {
-        expect(metadata.key).toBe('value')
-        expect(metadata.extra).toBe('data')
+        expect(metadata['key']).toBe('value')
+        expect(metadata['extra']).toBe('data')
       } else {
         // If metadata is empty, that's also acceptable
         expect(metrics[0]?.operation).toBe('test-op')
@@ -146,7 +146,7 @@ describe('performance', () => {
     })
 
     it('should return no-op when DEBUG=perf is not set', () => {
-      process.env.DEBUG = undefined
+      process.env['DEBUG'] = undefined
       const stop = perfTimer('no-debug')
       stop()
       const metrics = getPerformanceMetrics()
@@ -168,12 +168,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -189,7 +189,7 @@ describe('performance', () => {
     it('should record success metadata', async () => {
       await measure('success-op', async () => 'done')
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.success).toBe(true)
+      expect(metrics[0]?.metadata?.['success']).toBe(true)
     })
 
     it('should handle errors and record them', async () => {
@@ -200,18 +200,18 @@ describe('performance', () => {
       ).rejects.toThrow('Test error')
 
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.success).toBe(false)
-      expect(metrics[0]?.metadata?.error).toBe('Test error')
+      expect(metrics[0]?.metadata?.['success']).toBe(false)
+      expect(metrics[0]?.metadata?.['error']).toBe('Test error')
     })
 
     it('should include custom metadata', async () => {
       await measure('meta-op', async () => 'result', { custom: 'data' })
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.custom).toBe('data')
+      expect(metrics[0]?.metadata?.['custom']).toBe('data')
     })
 
     it('should return zero duration when perf disabled', async () => {
-      process.env.DEBUG = undefined
+      process.env['DEBUG'] = undefined
       const result = await measure('no-perf', async () => 'value')
       expect(result.result).toBe('value')
       expect(result.duration).toBe(0)
@@ -223,12 +223,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -243,7 +243,7 @@ describe('performance', () => {
     it('should record success metadata', () => {
       measureSync('success-sync', () => 'done')
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.success).toBe(true)
+      expect(metrics[0]?.metadata?.['success']).toBe(true)
     })
 
     it('should handle errors and record them', () => {
@@ -254,14 +254,14 @@ describe('performance', () => {
       }).toThrow('Sync error')
 
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.success).toBe(false)
-      expect(metrics[0]?.metadata?.error).toBe('Sync error')
+      expect(metrics[0]?.metadata?.['success']).toBe(false)
+      expect(metrics[0]?.metadata?.['error']).toBe('Sync error')
     })
 
     it('should include custom metadata', () => {
       measureSync('meta-sync', () => 'result', { tag: 'test' })
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.tag).toBe('test')
+      expect(metrics[0]?.metadata?.['tag']).toBe('test')
     })
 
     it('should measure computation time', () => {
@@ -282,12 +282,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -319,12 +319,12 @@ describe('performance', () => {
     let originalDebug: string | undefined
 
     beforeEach(() => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -355,12 +355,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -377,8 +377,8 @@ describe('performance', () => {
       const summary = getPerformanceSummary()
       expect(Object.keys(summary)).toContain('op1')
       expect(Object.keys(summary)).toContain('op2')
-      expect(summary.op1?.count).toBe(2)
-      expect(summary.op2?.count).toBe(1)
+      expect(summary['op1']?.count).toBe(2)
+      expect(summary['op2']?.count).toBe(1)
     })
 
     it('should calculate statistics correctly', () => {
@@ -390,17 +390,17 @@ describe('performance', () => {
       })
 
       const summary = getPerformanceSummary()
-      expect(summary.test?.count).toBe(2)
-      expect(summary.test?.total).toBeGreaterThanOrEqual(0)
-      expect(summary.test?.avg).toBeGreaterThanOrEqual(0)
-      expect(summary.test?.min).toBeGreaterThanOrEqual(0)
-      expect(summary.test?.max).toBeGreaterThanOrEqual(0)
+      expect(summary['test']?.count).toBe(2)
+      expect(summary['test']?.total).toBeGreaterThanOrEqual(0)
+      expect(summary['test']?.avg).toBeGreaterThanOrEqual(0)
+      expect(summary['test']?.min).toBeGreaterThanOrEqual(0)
+      expect(summary['test']?.max).toBeGreaterThanOrEqual(0)
     })
 
     it('should round values to 2 decimal places', () => {
       measureSync('round', () => 1)
       const summary = getPerformanceSummary()
-      const stats = summary.round
+      const stats = summary['round']
       if (stats) {
         expect(stats.total).toBe(Math.round(stats.total * 100) / 100)
         expect(stats.avg).toBe(Math.round(stats.avg * 100) / 100)
@@ -418,7 +418,7 @@ describe('performance', () => {
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -429,16 +429,16 @@ describe('performance', () => {
     })
 
     it('should not print when no metrics', () => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
       expect(() => {
         printPerformanceSummary()
       }).not.toThrow()
     })
 
     it('should print when perf enabled and metrics exist', () => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
       measureSync('test', () => 1)
       expect(() => {
         printPerformanceSummary()
@@ -451,12 +451,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -480,7 +480,7 @@ describe('performance', () => {
     })
 
     it('should not create metric when perf disabled', () => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       perfCheckpoint('disabled')
       const metrics = getPerformanceMetrics()
       expect(metrics.length).toBe(0)
@@ -492,12 +492,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -516,13 +516,13 @@ describe('performance', () => {
     it('should include heap metrics in metadata', () => {
       trackMemory('heap-check')
       const metrics = getPerformanceMetrics()
-      expect(metrics[0]?.metadata?.heapUsed).toBeDefined()
-      expect(metrics[0]?.metadata?.heapTotal).toBeDefined()
-      expect(metrics[0]?.metadata?.external).toBeDefined()
+      expect(metrics[0]?.metadata?.['heapUsed']).toBeDefined()
+      expect(metrics[0]?.metadata?.['heapTotal']).toBeDefined()
+      expect(metrics[0]?.metadata?.['external']).toBeDefined()
     })
 
     it('should return zero when perf disabled', () => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       const mem = trackMemory('no-perf')
       expect(mem).toBe(0)
     })
@@ -541,7 +541,7 @@ describe('performance', () => {
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -551,15 +551,15 @@ describe('performance', () => {
     })
 
     it('should return message when no metrics', () => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
       const report = generatePerformanceReport()
       expect(report).toContain('no performance data collected')
     })
 
     it('should generate report with metrics', () => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
       measureSync('test-op', () => 42)
       const report = generatePerformanceReport()
       expect(report).toContain('Performance Report')
@@ -572,8 +572,8 @@ describe('performance', () => {
     })
 
     it('should include total measured time', () => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
       measureSync('op1', () => 1)
       measureSync('op2', () => 2)
       const report = generatePerformanceReport()
@@ -581,8 +581,8 @@ describe('performance', () => {
     })
 
     it('should format report with box drawing characters', () => {
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
       measureSync('test', () => 1)
       const report = generatePerformanceReport()
       expect(report).toContain('╔')
@@ -599,12 +599,12 @@ describe('performance', () => {
 
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env.DEBUG
-      process.env.DEBUG = 'perf'
+      originalDebug = process.env['DEBUG']
+      process.env['DEBUG'] = 'perf'
     })
 
     afterEach(() => {
-      process.env.DEBUG = originalDebug
+      process.env['DEBUG'] = originalDebug
       clearPerformanceMetrics()
     })
 
@@ -645,7 +645,7 @@ describe('performance', () => {
 
       const metrics = getPerformanceMetrics()
       expect(metrics.length).toBe(3)
-      expect(metrics[1]?.metadata?.success).toBe(false)
+      expect(metrics[1]?.metadata?.['success']).toBe(false)
     })
   })
 })

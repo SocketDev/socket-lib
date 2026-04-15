@@ -956,7 +956,7 @@ describe.sequential('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list.length).toBeGreaterThan(0)
 
-          const entry = list[0]
+          const entry = list[0]!
           expect(entry.name).toBe('list-binary')
           expect(entry.url).toBe(url)
           expect(entry.integrity).toBeDefined()
@@ -1086,7 +1086,7 @@ describe.sequential('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list.length).toBe(1)
 
-          const entry = list[0]
+          const entry = list[0]!
           expect(entry.url).toBe('')
           expect(entry.integrity).toBe('')
         } finally {
@@ -1114,7 +1114,7 @@ describe.sequential('dlx-binary', () => {
 
           const list = await listDlxCache()
           expect(list.length).toBe(1)
-          expect(list[0].age).toBeGreaterThan(0)
+          expect(list[0]!.age).toBeGreaterThan(0)
         } finally {
           restoreHome()
         }

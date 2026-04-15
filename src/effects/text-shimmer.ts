@@ -265,6 +265,9 @@ export function applyShimmer(
     // Resolve theme to Theme object
     const theme =
       typeof opts.theme === 'string' ? THEMES[opts.theme] : opts.theme
+    if (!theme) {
+      throw new Error(`Unknown theme: ${opts.theme as string}`)
+    }
     // Use theme's primary color
     const themeColor = resolveColor(
       theme.colors.primary,

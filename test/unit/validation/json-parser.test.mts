@@ -466,7 +466,7 @@ describe('validation/json-parser', () => {
       const results = []
       for (const item of streamNdjson(ndjson)) {
         results.push(item)
-        if (Object.keys(item)[0] === 'c') {
+        if (Object.keys(item as object)[0] === 'c') {
           break
         }
       }

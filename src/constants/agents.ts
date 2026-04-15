@@ -34,8 +34,8 @@ export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
     if (!_npmBinPath) {
       return undefined
     }
-    const { existsSync } = /*@__PURE__*/ require('fs')
-    const path = /*@__PURE__*/ require('path')
+    const { existsSync } = /*@__PURE__*/ require('node:fs')
+    const path = /*@__PURE__*/ require('node:path')
     // npm bin is typically at: /path/to/node/bin/npm
     // cli.js is at: /path/to/node/lib/node_modules/npm/lib/cli.js
     // /path/to/node/bin

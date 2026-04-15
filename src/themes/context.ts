@@ -13,7 +13,7 @@ function getAsyncHooks() {
   if (_async_hooks === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _async_hooks = /*@__PURE__*/ require('async_hooks')
+    _async_hooks = /*@__PURE__*/ require('node:async_hooks')
   }
   return _async_hooks as typeof import('node:async_hooks')
 }
@@ -53,7 +53,8 @@ const listeners: Set<ThemeChangeListener> = new Set()
  * ```
  */
 export function setTheme(theme: Theme | ThemeName): void {
-  fallbackTheme = typeof theme === 'string' ? THEMES[theme] : theme
+  fallbackTheme =
+    typeof theme === 'string' ? (THEMES[theme] ?? fallbackTheme) : theme
   emitThemeChange(fallbackTheme)
 }
 
@@ -92,7 +93,8 @@ export async function withTheme<T>(
   theme: Theme | ThemeName,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const resolvedTheme: Theme = typeof theme === 'string' ? THEMES[theme] : theme
+  const resolvedTheme: Theme =
+    typeof theme === 'string' ? (THEMES[theme] ?? fallbackTheme) : theme
   return await themeStorage.run(resolvedTheme, async () => {
     emitThemeChange(resolvedTheme)
     return await fn()
@@ -116,7 +118,8 @@ export async function withTheme<T>(
  * ```
  */
 export function withThemeSync<T>(theme: Theme | ThemeName, fn: () => T): T {
-  const resolvedTheme: Theme = typeof theme === 'string' ? THEMES[theme] : theme
+  const resolvedTheme: Theme =
+    typeof theme === 'string' ? (THEMES[theme] ?? fallbackTheme) : theme
   return themeStorage.run(resolvedTheme, () => {
     emitThemeChange(resolvedTheme)
     return fn()

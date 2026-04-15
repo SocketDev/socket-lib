@@ -50,31 +50,31 @@ describe('Logger', () => {
     })
 
     it('should return strings for symbols', () => {
-      expect(typeof LOG_SYMBOLS.success).toBe('string')
-      expect(typeof LOG_SYMBOLS.fail).toBe('string')
-      expect(typeof LOG_SYMBOLS.warn).toBe('string')
-      expect(typeof LOG_SYMBOLS.info).toBe('string')
-      expect(typeof LOG_SYMBOLS.progress).toBe('string')
-      expect(typeof LOG_SYMBOLS.step).toBe('string')
+      expect(typeof LOG_SYMBOLS['success']).toBe('string')
+      expect(typeof LOG_SYMBOLS['fail']).toBe('string')
+      expect(typeof LOG_SYMBOLS['warn']).toBe('string')
+      expect(typeof LOG_SYMBOLS['info']).toBe('string')
+      expect(typeof LOG_SYMBOLS['progress']).toBe('string')
+      expect(typeof LOG_SYMBOLS['step']).toBe('string')
     })
 
     it('should have non-empty symbol strings', () => {
-      expect(LOG_SYMBOLS.success.length).toBeGreaterThan(0)
-      expect(LOG_SYMBOLS.fail.length).toBeGreaterThan(0)
-      expect(LOG_SYMBOLS.warn.length).toBeGreaterThan(0)
-      expect(LOG_SYMBOLS.info.length).toBeGreaterThan(0)
-      expect(LOG_SYMBOLS.progress.length).toBeGreaterThan(0)
-      expect(LOG_SYMBOLS.step.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS['success']!.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS['fail']!.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS['warn']!.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS['info']!.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS['progress']!.length).toBeGreaterThan(0)
+      expect(LOG_SYMBOLS['step']!.length).toBeGreaterThan(0)
     })
 
     it('should be accessible from Logger.LOG_SYMBOLS', () => {
       expect(Logger.LOG_SYMBOLS).toBe(LOG_SYMBOLS)
-      expect(Logger.LOG_SYMBOLS.success).toBe(LOG_SYMBOLS.success)
+      expect(Logger.LOG_SYMBOLS['success']).toBe(LOG_SYMBOLS['success'])
     })
 
     it('should have progress symbol containing therefore character', () => {
       // Progress symbol should contain ∴ (Unicode) or :. (ASCII fallback)
-      expect(LOG_SYMBOLS.progress).toMatch(/[∴:]/)
+      expect(LOG_SYMBOLS['progress']).toMatch(/[∴:]/)
     })
   })
 

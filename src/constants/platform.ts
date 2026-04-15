@@ -12,7 +12,7 @@ function getOs() {
   if (_os === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _os = /*@__PURE__*/ require('os')
+    _os = /*@__PURE__*/ require('node:os')
   }
   return _os as typeof import('node:os')
 }

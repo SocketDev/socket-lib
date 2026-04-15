@@ -473,12 +473,12 @@ describe('cacache', () => {
         expect(removed).toBeGreaterThanOrEqual(0)
 
         // Verify abc entries cleared
-        expect(await safeGet(keys[0])).toBeUndefined()
-        expect(await safeGet(keys[1])).toBeUndefined()
+        expect(await safeGet(keys[0]!)).toBeUndefined()
+        expect(await safeGet(keys[1]!)).toBeUndefined()
 
         // Verify xyz entry remains (if cache works)
         // This may be undefined if cache doesn't work in test env
-        await safeGet(keys[2])
+        await safeGet(keys[2]!)
 
         // Clean up remaining
         await clear({ prefix })

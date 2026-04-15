@@ -133,7 +133,7 @@ describe('constants/packages', () => {
 
     it('should match npm_lifecycle_event env var', () => {
       const event = getNpmLifecycleEvent()
-      const envValue = process.env.npm_lifecycle_event
+      const envValue = process.env['npm_lifecycle_event']
       expect(event).toBe(envValue)
     })
   })

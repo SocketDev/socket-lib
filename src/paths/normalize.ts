@@ -89,7 +89,7 @@ function getBuffer() {
   if (_buffer === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _buffer = /*@__PURE__*/ require('buffer')
+    _buffer = /*@__PURE__*/ require('node:buffer')
   }
   return _buffer as typeof import('node:buffer')
 }
@@ -108,7 +108,7 @@ function getUrl() {
   if (_url === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _url = /*@__PURE__*/ require('url')
+    _url = /*@__PURE__*/ require('node:url')
   }
   return _url as typeof import('node:url')
 }
@@ -989,7 +989,7 @@ function resolve(...segments: string[]): string {
   // If no absolute path was found in segments, prepend current working directory.
   // This ensures the final path is always absolute.
   if (!resolvedAbsolute) {
-    const cwd = /*@__PURE__*/ require('process').cwd()
+    const cwd = /*@__PURE__*/ require('node:process').cwd()
     resolvedPath = cwd + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
   }
 

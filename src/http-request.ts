@@ -28,12 +28,12 @@ let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
 
-import type { IncomingHttpHeaders, IncomingMessage } from 'http'
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
 /** IncomingMessage received as a response to a client request (http.request callback). */
 export type IncomingResponse = IncomingMessage
@@ -54,7 +54,7 @@ let _https: typeof import('node:https') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getCrypto() {
   if (_crypto === undefined) {
-    _crypto = /*@__PURE__*/ require('crypto')
+    _crypto = /*@__PURE__*/ require('node:crypto')
   }
   return _crypto as typeof import('node:crypto')
 }
@@ -68,7 +68,7 @@ function getHttp() {
   if (_http === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _http = /*@__PURE__*/ require('http')
+    _http = /*@__PURE__*/ require('node:http')
   }
   return _http as typeof import('node:http')
 }
@@ -78,7 +78,7 @@ function getHttps() {
   if (_https === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _https = /*@__PURE__*/ require('https')
+    _https = /*@__PURE__*/ require('node:https')
   }
   return _https as typeof import('node:https')
 }
@@ -637,10 +637,9 @@ export function sanitizeHeaders(
     'set-cookie',
     'www-authenticate',
   ])
-  const result: Record<string, string> = { __proto__: null } as Record<
-    string,
-    string
-  >
+  const result: Record<string, string> = {
+    __proto__: null,
+  } as unknown as Record<string, string>
   for (const key of Object.keys(headers)) {
     const value = headers[key]
     if (sensitiveHeaders.has(key.toLowerCase())) {
@@ -899,7 +898,7 @@ export type Checksums = Record<string, string>
  * ```
  */
 export function parseChecksums(text: string): Checksums {
-  const checksums: Checksums = { __proto__: null } as Checksums
+  const checksums: Checksums = { __proto__: null } as unknown as Checksums
 
   for (const line of text.split('\n')) {
     const trimmed = line.trim()
@@ -912,14 +911,14 @@ export function parseChecksums(text: string): Checksums {
       /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/,
     )
     if (bsdMatch) {
-      checksums[bsdMatch[1]] = bsdMatch[2].toLowerCase()
+      checksums[bsdMatch[1]!] = bsdMatch[2]!.toLowerCase()
       continue
     }
 
     // Try GNU/simple style: "hash  filename" or "hash filename"
     const gnuMatch = trimmed.match(/^([a-fA-F0-9]{64})\s+(.+)$/)
     if (gnuMatch) {
-      checksums[gnuMatch[2]] = gnuMatch[1].toLowerCase()
+      checksums[gnuMatch[2]!] = gnuMatch[1]!.toLowerCase()
     }
   }
 

@@ -117,7 +117,7 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -134,7 +134,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }
@@ -401,97 +401,99 @@ export async function getLatestRelease(
   // Create matcher function if pattern provided.
   const isMatch = assetPattern ? createAssetMatcher(assetPattern) : undefined
 
-  return await pRetry(
-    async () => {
-      // Fetch recent releases (100 should cover all tool releases).
-      const response = await httpRequest(
-        `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch releases: ${response.status}`)
-      }
-
-      let releases: Array<{
-        tag_name: string
-        published_at: string
-        assets: Array<{ name: string }>
-      }>
-      try {
-        releases = JSON.parse(response.body.toString('utf8'))
-      } catch (cause) {
-        throw new Error(
-          `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
-          { cause },
+  return (
+    (await pRetry(
+      async () => {
+        // Fetch recent releases (100 should cover all tool releases).
+        const response = await httpRequest(
+          `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+          {
+            headers: getAuthHeaders(),
+          },
         )
-      }
 
-      // Filter releases matching the tool prefix.
-      const matchingReleases = releases.filter(release => {
-        const { assets, tag_name: tag } = release
-        if (!tag.startsWith(toolPrefix)) {
-          return false
+        if (!response.ok) {
+          throw new Error(`Failed to fetch releases: ${response.status}`)
         }
 
-        // Skip releases with no assets (empty releases).
-        if (!assets || assets.length === 0) {
-          return false
-        }
-
-        // If asset pattern provided, check if release has matching asset.
-        if (isMatch) {
-          const hasMatchingAsset = assets.some((a: { name: string }) =>
-            isMatch(a.name),
+        let releases: Array<{
+          tag_name: string
+          published_at: string
+          assets: Array<{ name: string }>
+        }>
+        try {
+          releases = JSON.parse(response.body.toString('utf8'))
+        } catch (cause) {
+          throw new Error(
+            `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
+            { cause },
           )
-          if (!hasMatchingAsset) {
+        }
+
+        // Filter releases matching the tool prefix.
+        const matchingReleases = releases.filter(release => {
+          const { assets, tag_name: tag } = release
+          if (!tag.startsWith(toolPrefix)) {
             return false
           }
+
+          // Skip releases with no assets (empty releases).
+          if (!assets || assets.length === 0) {
+            return false
+          }
+
+          // If asset pattern provided, check if release has matching asset.
+          if (isMatch) {
+            const hasMatchingAsset = assets.some((a: { name: string }) =>
+              isMatch(a.name),
+            )
+            if (!hasMatchingAsset) {
+              return false
+            }
+          }
+
+          return true
+        })
+
+        if (matchingReleases.length === 0) {
+          // No matching release found.
+          if (!quiet) {
+            logger.info(`No ${toolPrefix} release found in latest 100 releases`)
+          }
+          return null
         }
 
-        return true
-      })
+        // Sort by published_at descending (newest first).
+        // GitHub API doesn't guarantee order, so we must sort explicitly.
+        matchingReleases.sort(
+          (a: { published_at: string }, b: { published_at: string }) =>
+            new Date(b.published_at).getTime() -
+            new Date(a.published_at).getTime(),
+        )
 
-      if (matchingReleases.length === 0) {
-        // No matching release found.
+        const latestRelease = matchingReleases[0]!
+        const tag = latestRelease.tag_name
+
         if (!quiet) {
-          logger.info(`No ${toolPrefix} release found in latest 100 releases`)
+          logger.info(`Found release: ${tag}`)
         }
-        return null
-      }
-
-      // Sort by published_at descending (newest first).
-      // GitHub API doesn't guarantee order, so we must sort explicitly.
-      matchingReleases.sort(
-        (a: { published_at: string }, b: { published_at: string }) =>
-          new Date(b.published_at).getTime() -
-          new Date(a.published_at).getTime(),
-      )
-
-      const latestRelease = matchingReleases[0]
-      const tag = latestRelease.tag_name
-
-      if (!quiet) {
-        logger.info(`Found release: ${tag}`)
-      }
-      return tag
-    },
-    {
-      ...RETRY_CONFIG,
-      onRetry: (attempt, error) => {
-        if (!quiet) {
-          logger.info(
-            `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for ${toolPrefix} release...`,
-          )
-          logger.warn(
-            `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
-          )
-        }
-        return undefined
+        return tag
       },
-    },
+      {
+        ...RETRY_CONFIG,
+        onRetry: (attempt, error) => {
+          if (!quiet) {
+            logger.info(
+              `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for ${toolPrefix} release...`,
+            )
+            logger.warn(
+              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+            )
+          }
+          return undefined
+        },
+      },
+    )) ?? null
   )
 }
 
@@ -530,64 +532,66 @@ export async function getReleaseAssetUrl(
       ? (input: string) => input === assetPattern
       : createAssetMatcher(assetPattern as AssetPattern)
 
-  return await pRetry(
-    async () => {
-      const response = await httpRequest(
-        `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
-      }
-
-      let release: {
-        assets: Array<{ name: string; browser_download_url: string }>
-      }
-      try {
-        release = JSON.parse(response.body.toString('utf8'))
-      } catch (cause) {
-        throw new Error(
-          `Failed to parse GitHub release response for tag ${tag}`,
-          { cause },
+  return (
+    (await pRetry(
+      async () => {
+        const response = await httpRequest(
+          `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
+          {
+            headers: getAuthHeaders(),
+          },
         )
-      }
 
-      // Find the matching asset.
-      const assets = release.assets
-      if (!Array.isArray(assets)) {
-        throw new Error(`Release ${tag} has no assets`)
-      }
-      const asset = assets.find(a => isMatch(a.name))
+        if (!response.ok) {
+          throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
+        }
 
-      if (!asset) {
-        const patternDesc =
-          typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-        throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
-      }
-
-      if (!quiet) {
-        logger.info(`Found asset: ${asset.name}`)
-      }
-
-      return asset.browser_download_url
-    },
-    {
-      ...RETRY_CONFIG,
-      onRetry: (attempt, error) => {
-        if (!quiet) {
-          logger.info(
-            `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for asset URL...`,
-          )
-          logger.warn(
-            `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+        let release: {
+          assets: Array<{ name: string; browser_download_url: string }>
+        }
+        try {
+          release = JSON.parse(response.body.toString('utf8'))
+        } catch (cause) {
+          throw new Error(
+            `Failed to parse GitHub release response for tag ${tag}`,
+            { cause },
           )
         }
-        return undefined
+
+        // Find the matching asset.
+        const assets = release.assets
+        if (!Array.isArray(assets)) {
+          throw new Error(`Release ${tag} has no assets`)
+        }
+        const asset = assets.find(a => isMatch(a.name))
+
+        if (!asset) {
+          const patternDesc =
+            typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
+          throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
+        }
+
+        if (!quiet) {
+          logger.info(`Found asset: ${asset.name}`)
+        }
+
+        return asset.browser_download_url
       },
-    },
+      {
+        ...RETRY_CONFIG,
+        onRetry: (attempt, error) => {
+          if (!quiet) {
+            logger.info(
+              `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for asset URL...`,
+            )
+            logger.warn(
+              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+            )
+          }
+          return undefined
+        },
+      },
+    )) ?? null
   )
 }
 

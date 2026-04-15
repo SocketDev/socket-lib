@@ -67,110 +67,110 @@ export function createEnvProxy(
   base: NodeJS.ProcessEnv,
   overrides?: Record<string, string | undefined>,
 ): NodeJS.ProcessEnv {
-  return new Proxy(
-    {},
-    {
-      get(_target, prop) {
-        if (typeof prop !== 'string') {
-          return undefined
-        }
+  function lookupEnvValue(prop: string): string | undefined {
+    // Priority 1: Check overrides for exact match.
+    if (overrides && prop in overrides) {
+      return overrides[prop]
+    }
 
-        // Priority 1: Check overrides for exact match.
-        if (overrides && prop in overrides) {
-          return overrides[prop]
-        }
+    // Priority 2: Check base for exact match.
+    if (prop in base) {
+      return base[prop]
+    }
 
-        // Priority 2: Check base for exact match.
-        if (prop in base) {
-          return base[prop]
+    // Priority 3: Case-insensitive lookup for known keys.
+    const upperProp = prop.toUpperCase()
+    if (caseInsensitiveKeys.has(upperProp)) {
+      // Check overrides with case variations.
+      if (overrides) {
+        const key = findCaseInsensitiveEnvKey(overrides, upperProp)
+        if (key !== undefined) {
+          return overrides[key]
         }
+      }
+      // Check base with case variations.
+      const key = findCaseInsensitiveEnvKey(base, upperProp)
+      if (key !== undefined) {
+        return base[key]
+      }
+    }
 
-        // Priority 3: Case-insensitive lookup for known keys.
-        const upperProp = prop.toUpperCase()
-        if (caseInsensitiveKeys.has(upperProp)) {
-          // Check overrides with case variations.
-          if (overrides) {
-            const key = findCaseInsensitiveEnvKey(overrides, upperProp)
-            if (key !== undefined) {
-              return overrides[key]
-            }
-          }
-          // Check base with case variations.
-          const key = findCaseInsensitiveEnvKey(base, upperProp)
-          if (key !== undefined) {
-            return base[key]
-          }
-        }
+    return undefined
+  }
 
+  return new Proxy({} as NodeJS.ProcessEnv, {
+    get(_target, prop) {
+      if (typeof prop !== 'string') {
         return undefined
-      },
-
-      ownKeys(_target) {
-        const keys = new Set<string>([
-          ...Object.keys(base),
-          ...(overrides ? Object.keys(overrides) : []),
-        ])
-        return [...keys]
-      },
-
-      getOwnPropertyDescriptor(_target, prop) {
-        if (typeof prop !== 'string') {
-          return undefined
-        }
-
-        // Use the same lookup logic as get().
-        const value = this.get?.(_target, prop, _target)
-        return value !== undefined
-          ? {
-              enumerable: true,
-              configurable: true,
-              writable: true,
-              value,
-            }
-          : undefined
-      },
-
-      has(_target, prop) {
-        if (typeof prop !== 'string') {
-          return false
-        }
-
-        // Check overrides.
-        if (overrides && prop in overrides) {
-          return true
-        }
-
-        // Check base.
-        if (prop in base) {
-          return true
-        }
-
-        // Case-insensitive check.
-        const upperProp = prop.toUpperCase()
-        if (caseInsensitiveKeys.has(upperProp)) {
-          if (
-            overrides &&
-            findCaseInsensitiveEnvKey(overrides, upperProp) !== undefined
-          ) {
-            return true
-          }
-          if (findCaseInsensitiveEnvKey(base, upperProp) !== undefined) {
-            return true
-          }
-        }
-
-        return false
-      },
-
-      set(_target, prop, value) {
-        if (typeof prop === 'string' && overrides) {
-          overrides[prop] = value
-          return true
-        }
-        return false
-      },
+      }
+      return lookupEnvValue(prop)
     },
-  ) as NodeJS.ProcessEnv
+
+    ownKeys(_target) {
+      const keys = new Set<string>([
+        ...Object.keys(base),
+        ...(overrides ? Object.keys(overrides) : []),
+      ])
+      return [...keys]
+    },
+
+    getOwnPropertyDescriptor(_target, prop) {
+      if (typeof prop !== 'string') {
+        return undefined
+      }
+
+      // Use the same lookup logic as get().
+      const value = lookupEnvValue(prop)
+      return value !== undefined
+        ? {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value,
+          }
+        : undefined
+    },
+
+    has(_target, prop) {
+      if (typeof prop !== 'string') {
+        return false
+      }
+
+      // Check overrides.
+      if (overrides && prop in overrides) {
+        return true
+      }
+
+      // Check base.
+      if (prop in base) {
+        return true
+      }
+
+      // Case-insensitive check.
+      const upperProp = prop.toUpperCase()
+      if (caseInsensitiveKeys.has(upperProp)) {
+        if (
+          overrides &&
+          findCaseInsensitiveEnvKey(overrides, upperProp) !== undefined
+        ) {
+          return true
+        }
+        if (findCaseInsensitiveEnvKey(base, upperProp) !== undefined) {
+          return true
+        }
+      }
+
+      return false
+    },
+
+    set(_target, prop, value) {
+      if (typeof prop === 'string' && overrides) {
+        overrides[prop] = value
+        return true
+      }
+      return false
+    },
+  }) as NodeJS.ProcessEnv
 }
 
 /**

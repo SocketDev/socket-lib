@@ -134,7 +134,9 @@ describe('sorts', () => {
 
     it('should handle objects with selector', () => {
       const arr = [{ name: 'file10' }, { name: 'file2' }, { name: 'file1' }]
-      const result = naturalSorter(arr).asc(item => item.name)
+      const result = naturalSorter(arr).asc(
+        (item: { name: string }) => item.name,
+      )
       expect(result).toEqual([
         { name: 'file1' },
         { name: 'file2' },

@@ -590,8 +590,8 @@ describe('http-request', () => {
         expect(progressUpdates.length).toBeGreaterThan(0)
         // Last update should have full size
         const lastUpdate = progressUpdates[progressUpdates.length - 1]
-        expect(lastUpdate.downloaded).toBe(lastUpdate.total)
-        expect(lastUpdate.total).toBe(1000)
+        expect(lastUpdate!.downloaded).toBe(lastUpdate!.total)
+        expect(lastUpdate!.total).toBe(1000)
       }, 'httpDownload-progress-')
     })
 

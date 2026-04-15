@@ -38,7 +38,7 @@ describe('env rewiring', () => {
     })
 
     it('should clear override and return to real value', () => {
-      const originalHome = process.env.HOME
+      const originalHome = process.env['HOME']
 
       setEnv('HOME', '/custom/home')
       expect(getHome()).toBe('/custom/home')

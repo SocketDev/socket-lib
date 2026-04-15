@@ -210,9 +210,9 @@ describe('json-format', () => {
         m: 'string',
       }
       const sorted = sortKeys(obj)
-      expect(sorted.z).toEqual({ nested: true })
-      expect(sorted.a).toEqual([1, 2, 3])
-      expect(sorted.m).toBe('string')
+      expect(sorted['z']).toEqual({ nested: true })
+      expect(sorted['a']).toEqual([1, 2, 3])
+      expect(sorted['m']).toBe('string')
     })
 
     it('should not mutate original object', () => {

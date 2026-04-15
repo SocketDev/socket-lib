@@ -121,7 +121,7 @@ describe('packages/operations', () => {
     })
 
     it('should handle undefined namespace', () => {
-      const purlObj = { name: 'package', namespace: undefined }
+      const purlObj = { name: 'package' }
       expect(resolvePackageName(purlObj)).toBe('package')
     })
 
@@ -195,7 +195,7 @@ describe('packages/operations', () => {
 
         const result = await readPackageJson(tmpDir, { editable: true })
         expect(result).toBeDefined()
-        expect(typeof result?.save).toBe('function')
+        expect(typeof result?.['save']).toBe('function')
       }, 'read-pkg-json-editable-')
     })
 
@@ -263,7 +263,7 @@ describe('packages/operations', () => {
         )
 
         const result = await readPackageJson(tmpDir)
-        expect(result?.custom).toBe('field')
+        expect(result?.['custom']).toBe('field')
       }, 'read-pkg-json-no-normalize-')
     })
   })
@@ -313,7 +313,7 @@ describe('packages/operations', () => {
 
         const result = readPackageJsonSync(tmpDir, { editable: true })
         expect(result).toBeDefined()
-        expect(typeof result?.save).toBe('function')
+        expect(typeof result?.['save']).toBe('function')
       }, 'read-pkg-json-sync-editable-')
     })
 
@@ -396,7 +396,7 @@ describe('packages/operations', () => {
 
     it('should use temporary directory when dest not provided', async () => {
       let tmpPath = ''
-      await extractPackage('is-number@7.0.0', (async (destPath) => {
+      await extractPackage('is-number@7.0.0', (async (destPath: string) => {
         tmpPath = destPath
         // Verify package.json exists in temp directory
         const pkgJsonPath = path.join(destPath, 'package.json')
@@ -412,7 +412,7 @@ describe('packages/operations', () => {
 
     it('should handle function as second argument', async () => {
       let called = false
-      await extractPackage('is-number@7.0.0', (async (destPath) => {
+      await extractPackage('is-number@7.0.0', (async (destPath: string) => {
         called = true
         expect(destPath).toBeTruthy()
       }) as any)

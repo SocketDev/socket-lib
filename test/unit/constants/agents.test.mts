@@ -358,6 +358,7 @@ describe('constants/agents', () => {
     it('should not allow reassignment of agent constants', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         NPM = 'something else'
       }).toThrow()
     })
@@ -365,6 +366,7 @@ describe('constants/agents', () => {
     it('should not allow reassignment of lockfile constants', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         PACKAGE_LOCK_JSON = 'something.json'
       }).toThrow()
     })
@@ -372,6 +374,7 @@ describe('constants/agents', () => {
     it('should not allow reassignment of URL constants', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         NPM_REGISTRY_URL = 'https://other-registry.com'
       }).toThrow()
     })

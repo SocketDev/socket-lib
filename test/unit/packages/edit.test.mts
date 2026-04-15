@@ -848,7 +848,7 @@ describe('packages/editable', () => {
 
       const editable = pkgJsonToEditable(pkgJson) as EditablePackageJson
 
-      expect(editable.content.custom).toBe('field')
+      expect(editable.content['custom']).toBe('field')
     })
 
     it('should normalize when normalize option is true', () => {
@@ -1203,7 +1203,7 @@ describe('packages/editable', () => {
 
         await pkg.save()
 
-        expect(pkg.content.dependencies?.dep2).toBe('2.0.0')
+        expect(pkg.content.dependencies?.['dep2']).toBe('2.0.0')
       }, 'edge-deep-update-')
     })
 

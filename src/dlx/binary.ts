@@ -27,7 +27,7 @@ function getCrypto() {
   if (_crypto === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _crypto = /*@__PURE__*/ require('crypto')
+    _crypto = /*@__PURE__*/ require('node:crypto')
   }
   return _crypto as typeof import('node:crypto')
 }
@@ -44,7 +44,7 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -62,7 +62,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }

@@ -78,8 +78,8 @@ describe('maintained-node-versions', () => {
         .map(v => v.split('.').map(Number))
         .sort((a, b) => {
           for (let i = 0; i < 3; i++) {
-            if (a[i] !== b[i]) {
-              return a[i] - b[i]
+            if (a[i]! !== b[i]!) {
+              return a[i]! - b[i]!
             }
           }
           return 0
@@ -147,8 +147,8 @@ describe('maintained-node-versions', () => {
       const current = maintainedNodeVersions.current.split('.').map(Number)
       const previous = maintainedNodeVersions.previous.split('.').map(Number)
 
-      const currentMajor = current[0]
-      const previousMajor = previous[0]
+      const currentMajor = current[0]!
+      const previousMajor = previous[0]!
 
       expect(currentMajor).toBeGreaterThanOrEqual(previousMajor)
     })
@@ -157,8 +157,8 @@ describe('maintained-node-versions', () => {
       const previous = maintainedNodeVersions.previous.split('.').map(Number)
       const last = maintainedNodeVersions.last.split('.').map(Number)
 
-      const previousMajor = previous[0]
-      const lastMajor = last[0]
+      const previousMajor = previous[0]!
+      const lastMajor = last[0]!
 
       expect(previousMajor).toBeGreaterThanOrEqual(lastMajor)
     })
@@ -167,8 +167,8 @@ describe('maintained-node-versions', () => {
       const next = maintainedNodeVersions.next.split('.').map(Number)
       const current = maintainedNodeVersions.current.split('.').map(Number)
 
-      const nextMajor = next[0]
-      const currentMajor = current[0]
+      const nextMajor = next[0]!
+      const currentMajor = current[0]!
 
       expect(nextMajor).toBeGreaterThanOrEqual(currentMajor)
     })
@@ -177,7 +177,7 @@ describe('maintained-node-versions', () => {
   describe('realistic version numbers', () => {
     it('should have major versions in reasonable range', () => {
       maintainedNodeVersions.forEach(version => {
-        const major = Number.parseInt(version.split('.')[0], 10)
+        const major = Number.parseInt(version.split('.')[0]!, 10)
         expect(major).toBeGreaterThanOrEqual(10)
         expect(major).toBeLessThanOrEqual(100)
       })
@@ -185,7 +185,7 @@ describe('maintained-node-versions', () => {
 
     it('should have minor versions in valid range', () => {
       maintainedNodeVersions.forEach(version => {
-        const minor = Number.parseInt(version.split('.')[1], 10)
+        const minor = Number.parseInt(version.split('.')[1]!, 10)
         expect(minor).toBeGreaterThanOrEqual(0)
         expect(minor).toBeLessThanOrEqual(99)
       })
@@ -193,7 +193,7 @@ describe('maintained-node-versions', () => {
 
     it('should have patch versions in valid range', () => {
       maintainedNodeVersions.forEach(version => {
-        const patch = Number.parseInt(version.split('.')[2], 10)
+        const patch = Number.parseInt(version.split('.')[2]!, 10)
         expect(patch).toBeGreaterThanOrEqual(0)
         expect(patch).toBeLessThanOrEqual(99)
       })
@@ -209,7 +209,7 @@ describe('maintained-node-versions', () => {
 
     it('should support map operation', () => {
       const majors = maintainedNodeVersions.map(v =>
-        Number.parseInt(v.split('.')[0], 10),
+        Number.parseInt(v.split('.')[0]!, 10),
       )
       expect(majors).toHaveLength(4)
       majors.forEach(m => expect(typeof m).toBe('number'))

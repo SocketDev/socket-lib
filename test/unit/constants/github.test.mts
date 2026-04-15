@@ -152,6 +152,7 @@ describe('constants/github', () => {
     it('should not allow reassignment of GITHUB_API_BASE_URL', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         GITHUB_API_BASE_URL = 'https://other-api.com'
       }).toThrow()
     })
@@ -159,6 +160,7 @@ describe('constants/github', () => {
     it('should not allow reassignment of CACHE_GITHUB_DIR', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         CACHE_GITHUB_DIR = 'other-dir'
       }).toThrow()
     })

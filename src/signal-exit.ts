@@ -53,7 +53,7 @@ function getEvents() {
   if (_events === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _events = /*@__PURE__*/ require('events')
+    _events = /*@__PURE__*/ require('node:events')
   }
   return _events as typeof import('node:events')
 }

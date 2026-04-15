@@ -48,9 +48,9 @@ describe('themes', () => {
         expect(theme).toHaveProperty('name')
         expect(theme).toHaveProperty('displayName')
         expect(theme).toHaveProperty('colors')
-        expect(theme.colors).toHaveProperty('primary')
-        expect(theme.colors).toHaveProperty('success')
-        expect(theme.colors).toHaveProperty('error')
+        expect(theme!.colors).toHaveProperty('primary')
+        expect(theme!.colors).toHaveProperty('success')
+        expect(theme!.colors).toHaveProperty('error')
       }
     })
   })

@@ -24,7 +24,7 @@ function getAsyncHooks() {
   if (_async_hooks === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _async_hooks = /*@__PURE__*/ require('async_hooks')
+    _async_hooks = /*@__PURE__*/ require('node:async_hooks')
   }
   return _async_hooks as typeof import('node:async_hooks')
 }
@@ -45,12 +45,15 @@ const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
 const sharedOverridesSymbol = Symbol.for(
   '@socketsecurity/lib/env/rewire/test-overrides',
 )
-const isVitestEnv = envAsBoolean(process.env.VITEST)
-if (isVitestEnv && !globalThis[sharedOverridesSymbol]) {
-  globalThis[sharedOverridesSymbol] = new Map<string, string | undefined>()
+const _globalThis = globalThis as Record<symbol, unknown>
+const isVitestEnv = envAsBoolean(process.env['VITEST'])
+if (isVitestEnv && !_globalThis[sharedOverridesSymbol]) {
+  _globalThis[sharedOverridesSymbol] = new Map<string, string | undefined>()
 }
 const sharedOverrides: Map<string, string | undefined> | undefined =
-  globalThis[sharedOverridesSymbol]
+  _globalThis[sharedOverridesSymbol] as
+    | Map<string, string | undefined>
+    | undefined
 
 /**
  * Clear a specific environment variable override.

@@ -4,7 +4,7 @@
  */
 
 import process from 'node:process'
-import { WriteStream } from 'tty'
+import { WriteStream } from 'node:tty'
 
 // Get the actual stdout stream
 const stdout: NodeJS.WriteStream = process.stdout

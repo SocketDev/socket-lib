@@ -2,8 +2,11 @@
  * @fileoverview Editable package.json manipulation utilities.
  */
 
+// @ts-expect-error - external vendored module
 import EditablePackageJsonBase from '../external/@npmcli/package-json'
+// @ts-expect-error - external vendored module
 import { parse, read } from '../external/@npmcli/package-json/lib/read-package'
+// @ts-expect-error - external vendored module
 import { packageSort } from '../external/@npmcli/package-json/lib/sort'
 import {
   getFormattingFromContent,
@@ -134,7 +137,7 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -149,7 +152,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }
@@ -160,7 +163,7 @@ function getUtil() {
   if (_util === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _util = /*@__PURE__*/ require('util')
+    _util = /*@__PURE__*/ require('node:util')
   }
   return _util as typeof import('node:util')
 }

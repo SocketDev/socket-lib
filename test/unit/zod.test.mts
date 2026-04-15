@@ -102,15 +102,19 @@ describe('zod', () => {
     })
 
     it('should support refinements', () => {
-      const schema = z.string().refine(val => val.length > 3, {
-        message: 'String must be longer than 3 characters',
-      })
+      const schema = z
+        .string()
+        .refine((val: unknown) => (val as string).length > 3, {
+          message: 'String must be longer than 3 characters',
+        })
       expect(schema.parse('test')).toBe('test')
       expect(() => schema.parse('ab')).toThrow()
     })
 
     it('should support transformations', () => {
-      const schema = z.string().transform(val => val.toUpperCase())
+      const schema = z
+        .string()
+        .transform((val: unknown) => (val as string).toUpperCase())
       expect(schema.parse('test')).toBe('TEST')
     })
 

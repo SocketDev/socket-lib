@@ -440,7 +440,7 @@ describe('stdio/stderr', () => {
 
     it('should write formatted error when no stack', () => {
       const error = new Error('Test error')
-      error.stack = undefined
+      delete error.stack
       writeStackTrace(error)
       expect(getContext().writeSpy).toHaveBeenCalledWith('Error: Test error\n')
     })
@@ -453,7 +453,7 @@ describe('stdio/stderr', () => {
 
     it('should handle error with multiline message', () => {
       const error = new Error('Line 1\nLine 2')
-      error.stack = undefined
+      delete error.stack
       writeStackTrace(error)
       expect(getContext().writeSpy).toHaveBeenCalledWith(
         'Error: Line 1\nLine 2\n',
@@ -462,7 +462,7 @@ describe('stdio/stderr', () => {
 
     it('should handle error with Unicode message', () => {
       const error = new Error('エラー: 失敗')
-      error.stack = undefined
+      delete error.stack
       writeStackTrace(error)
       expect(getContext().writeSpy).toHaveBeenCalledWith(
         'Error: エラー: 失敗\n',
@@ -495,7 +495,7 @@ describe('stdio/stderr', () => {
       clearLine()
       expect(getContext().clearLineSpy).toHaveBeenCalled()
 
-      getContext().clearLineSpy.mockClear()
+      getContext().clearLineSpy!.mockClear()
 
       // Switch to non-TTY
       Object.defineProperty(stderr, 'isTTY', {

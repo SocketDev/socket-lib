@@ -37,7 +37,7 @@ describe('normalizePackageJson', () => {
       preserve: ['custom'],
     })
     // Access custom field through Record type
-    expect((normalized as Record<string, unknown>).custom).toBe('value')
+    expect((normalized as Record<string, unknown>)['custom']).toBe('value')
   })
 
   it('should handle dependencies normalization', () => {
@@ -47,7 +47,7 @@ describe('normalizePackageJson', () => {
     }
     const normalized = normalizePackageJson(pkg as PackageJson)
     expect(normalized.dependencies).toBeDefined()
-    expect(normalized.dependencies?.lodash).toBe('^4.0.0')
+    expect(normalized.dependencies?.['lodash']).toBe('^4.0.0')
   })
 
   it('should handle empty package.json', () => {

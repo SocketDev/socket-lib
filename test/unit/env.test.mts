@@ -254,36 +254,36 @@ describe('env', () => {
       it('should return proxy that reads from base env', () => {
         const base = { PATH: '/usr/bin', HOME: '/home/user' }
         const proxy = createEnvProxy(base)
-        expect(proxy.PATH).toBe('/usr/bin')
-        expect(proxy.HOME).toBe('/home/user')
+        expect(proxy['PATH']).toBe('/usr/bin')
+        expect(proxy['HOME']).toBe('/home/user')
       })
 
       it('should return proxy that reads from overrides', () => {
         const base = { PATH: '/usr/bin' }
         const overrides = { NODE_ENV: 'test' }
         const proxy = createEnvProxy(base, overrides)
-        expect(proxy.NODE_ENV).toBe('test')
-        expect(proxy.PATH).toBe('/usr/bin')
+        expect(proxy['NODE_ENV']).toBe('test')
+        expect(proxy['PATH']).toBe('/usr/bin')
       })
 
       it('should prioritize overrides over base', () => {
         const base = { PATH: '/usr/bin', HOME: '/home/user' }
         const overrides = { PATH: '/custom/bin' }
         const proxy = createEnvProxy(base, overrides)
-        expect(proxy.PATH).toBe('/custom/bin')
-        expect(proxy.HOME).toBe('/home/user')
+        expect(proxy['PATH']).toBe('/custom/bin')
+        expect(proxy['HOME']).toBe('/home/user')
       })
 
       it('should return undefined for non-existent keys', () => {
         const base = { PATH: '/usr/bin' }
         const proxy = createEnvProxy(base)
-        expect(proxy.NONEXISTENT).toBeUndefined()
+        expect(proxy['NONEXISTENT']).toBeUndefined()
       })
 
       it('should work without overrides', () => {
         const base = { PATH: '/usr/bin' }
         const proxy = createEnvProxy(base)
-        expect(proxy.PATH).toBe('/usr/bin')
+        expect(proxy['PATH']).toBe('/usr/bin')
       })
     })
 
@@ -291,30 +291,30 @@ describe('env', () => {
       it('should find PATH with different cases', () => {
         const base = { Path: 'C:\\Windows' }
         const proxy = createEnvProxy(base)
-        expect(proxy.PATH).toBe('C:\\Windows')
-        expect(proxy.Path).toBe('C:\\Windows')
-        expect(proxy.path).toBe('C:\\Windows')
+        expect(proxy['PATH']).toBe('C:\\Windows')
+        expect(proxy['Path']).toBe('C:\\Windows')
+        expect(proxy['path']).toBe('C:\\Windows')
       })
 
       it('should find TEMP with different cases', () => {
         const base = { Temp: 'C:\\Temp' }
         const proxy = createEnvProxy(base)
-        expect(proxy.TEMP).toBe('C:\\Temp')
-        expect(proxy.temp).toBe('C:\\Temp')
+        expect(proxy['TEMP']).toBe('C:\\Temp')
+        expect(proxy['temp']).toBe('C:\\Temp')
       })
 
       it('should find HOME with different cases', () => {
         const base = { home: '/home/user' }
         const proxy = createEnvProxy(base)
-        expect(proxy.HOME).toBe('/home/user')
-        expect(proxy.Home).toBe('/home/user')
+        expect(proxy['HOME']).toBe('/home/user')
+        expect(proxy['Home']).toBe('/home/user')
       })
 
       it('should prioritize exact match over case-insensitive', () => {
         const base = { PATH: '/exact', Path: '/alt' }
         const proxy = createEnvProxy(base)
-        expect(proxy.PATH).toBe('/exact')
-        expect(proxy.Path).toBe('/alt')
+        expect(proxy['PATH']).toBe('/exact')
+        expect(proxy['Path']).toBe('/alt')
       })
 
       it('should check overrides for case-insensitive matches', () => {
@@ -322,14 +322,14 @@ describe('env', () => {
         const overrides = { Path: '/override/path' }
         const proxy = createEnvProxy(base, overrides)
         // Access with 'PATH' should find 'Path' in overrides via case-insensitive lookup.
-        expect(proxy.PATH).toBe('/override/path')
+        expect(proxy['PATH']).toBe('/override/path')
       })
 
       it('should not do case-insensitive lookup for non-Windows vars', () => {
         const base = { myVar: 'value' }
         const proxy = createEnvProxy(base)
-        expect(proxy.MYVAR).toBeUndefined()
-        expect(proxy.myVar).toBe('value')
+        expect(proxy['MYVAR']).toBeUndefined()
+        expect(proxy['myVar']).toBe('value')
       })
     })
 
@@ -393,7 +393,7 @@ describe('env', () => {
         const proxy = createEnvProxy(base, overrides)
         ;(proxy as any).NEW_VAR = 'new-value'
         expect((proxy as any).NEW_VAR).toBe('new-value')
-        expect(overrides.NEW_VAR).toBe('new-value')
+        expect(overrides['NEW_VAR']).toBe('new-value')
       })
 
       it('should not support set operation without overrides', () => {
@@ -407,7 +407,7 @@ describe('env', () => {
     describe('edge cases', () => {
       it('should handle empty base and overrides', () => {
         const proxy = createEnvProxy({})
-        expect(proxy.PATH).toBeUndefined()
+        expect(proxy['PATH']).toBeUndefined()
         expect(Object.keys(proxy)).toHaveLength(0)
       })
 
@@ -420,16 +420,16 @@ describe('env', () => {
       it('should handle undefined values in base', () => {
         const base = { PATH: undefined as any, HOME: '/home/user' }
         const proxy = createEnvProxy(base)
-        expect(proxy.PATH).toBeUndefined()
-        expect(proxy.HOME).toBe('/home/user')
+        expect(proxy['PATH']).toBeUndefined()
+        expect(proxy['HOME']).toBe('/home/user')
       })
 
       it('should handle undefined values in overrides', () => {
         const base = { PATH: '/usr/bin' }
         const overrides = { NODE_ENV: undefined }
         const proxy = createEnvProxy(base, overrides)
-        expect(proxy.NODE_ENV).toBeUndefined()
-        expect(proxy.PATH).toBe('/usr/bin')
+        expect(proxy['NODE_ENV']).toBeUndefined()
+        expect(proxy['PATH']).toBe('/usr/bin')
       })
 
       it('should enumerate all unique keys', () => {
@@ -466,18 +466,18 @@ describe('env', () => {
         const proxy = createEnvProxy(base)
 
         // Test case-insensitive access for all Windows vars.
-        expect(proxy.appdata).toBe(base.APPDATA)
-        expect(proxy.comspec).toBe(base.COMSPEC)
-        expect(proxy.home).toBe(base.HOME)
-        expect(proxy.localappdata).toBe(base.LOCALAPPDATA)
-        expect(proxy.path).toBe(base.PATH)
-        expect(proxy.pathext).toBe(base.PATHEXT)
-        expect(proxy.programfiles).toBe(base.PROGRAMFILES)
-        expect(proxy.systemroot).toBe(base.SYSTEMROOT)
-        expect(proxy.temp).toBe(base.TEMP)
-        expect(proxy.tmp).toBe(base.TMP)
-        expect(proxy.userprofile).toBe(base.USERPROFILE)
-        expect(proxy.windir).toBe(base.WINDIR)
+        expect(proxy['appdata']).toBe(base.APPDATA)
+        expect(proxy['comspec']).toBe(base.COMSPEC)
+        expect(proxy['home']).toBe(base.HOME)
+        expect(proxy['localappdata']).toBe(base.LOCALAPPDATA)
+        expect(proxy['path']).toBe(base.PATH)
+        expect(proxy['pathext']).toBe(base.PATHEXT)
+        expect(proxy['programfiles']).toBe(base.PROGRAMFILES)
+        expect(proxy['systemroot']).toBe(base.SYSTEMROOT)
+        expect(proxy['temp']).toBe(base.TEMP)
+        expect(proxy['tmp']).toBe(base.TMP)
+        expect(proxy['userprofile']).toBe(base.USERPROFILE)
+        expect(proxy['windir']).toBe(base.WINDIR)
       })
     })
 
@@ -485,9 +485,9 @@ describe('env', () => {
       it('should handle mixed case PATH variations', () => {
         const base = { Path: 'C:\\Windows;C:\\Program Files' }
         const proxy = createEnvProxy(base)
-        expect(proxy.PATH).toBe(base.Path)
-        expect(proxy.path).toBe(base.Path)
-        expect(proxy.PaTh).toBe(base.Path)
+        expect(proxy['PATH']).toBe(base.Path)
+        expect(proxy['path']).toBe(base.Path)
+        expect(proxy['PaTh']).toBe(base.Path)
       })
 
       it('should preserve case when setting via proxy', () => {

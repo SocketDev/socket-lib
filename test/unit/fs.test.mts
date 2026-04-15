@@ -17,6 +17,9 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+
+import type { SafeReadOptions } from '@socketsecurity/lib/fs'
+
 import {
   findUp,
   findUpSync,
@@ -945,7 +948,9 @@ describe('fs', () => {
         const testData = Buffer.from([0x01, 0x02, 0x03])
         await fs.writeFile(testFile, testData)
 
-        const result = await safeReadFile(testFile, { encoding: null })
+        const result = await safeReadFile(testFile, {
+          encoding: null,
+        } as unknown as SafeReadOptions & { encoding: null })
         expect(Buffer.isBuffer(result)).toBe(true)
         expect(result).toEqual(testData)
       }, 'safeReadFile-buffer-')
@@ -987,7 +992,9 @@ describe('fs', () => {
         const testData = Buffer.from([0x01, 0x02, 0x03])
         await fs.writeFile(testFile, testData)
 
-        const result = safeReadFileSync(testFile, { encoding: null })
+        const result = safeReadFileSync(testFile, {
+          encoding: null,
+        } as unknown as SafeReadOptions & { encoding: null })
         expect(Buffer.isBuffer(result)).toBe(true)
         expect(result).toEqual(testData)
       }, 'safeReadFileSync-buffer-')
@@ -1741,7 +1748,7 @@ describe('fs', () => {
       const result = safeReadFileSync('/nonexistent/file.bin', {
         encoding: null,
         defaultValue: defaultBuffer,
-      })
+      } as unknown as SafeReadOptions & { encoding: null })
       expect(Buffer.isBuffer(result)).toBe(true)
       expect(result).toBe(defaultBuffer)
     })
@@ -1750,7 +1757,7 @@ describe('fs', () => {
       const result = safeReadFileSync('/nonexistent/file.bin', {
         encoding: null,
         defaultValue: 'not a buffer',
-      })
+      } as unknown as SafeReadOptions & { encoding: null })
       expect(result).toBeUndefined()
     })
 
@@ -1776,7 +1783,7 @@ describe('fs', () => {
       const result = await safeReadFile('/nonexistent/file.bin', {
         encoding: null,
         defaultValue: defaultBuffer,
-      })
+      } as unknown as SafeReadOptions & { encoding: null })
       expect(Buffer.isBuffer(result)).toBe(true)
       expect(result).toBe(defaultBuffer)
     })
@@ -1785,7 +1792,7 @@ describe('fs', () => {
       const result = await safeReadFile('/nonexistent/file.bin', {
         encoding: null,
         defaultValue: 'not a buffer',
-      })
+      } as unknown as SafeReadOptions & { encoding: null })
       expect(result).toBeUndefined()
     })
 

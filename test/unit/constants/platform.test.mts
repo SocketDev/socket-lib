@@ -301,6 +301,7 @@ describe('constants/platform', () => {
     it('should not allow reassignment of DARWIN', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         DARWIN = !DARWIN
       }).toThrow()
     })
@@ -308,6 +309,7 @@ describe('constants/platform', () => {
     it('should not allow reassignment of WIN32', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         WIN32 = !WIN32
       }).toThrow()
     })
@@ -315,6 +317,7 @@ describe('constants/platform', () => {
     it('should not allow reassignment of permission constants', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         S_IXUSR = 0
       }).toThrow()
     })

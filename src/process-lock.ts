@@ -48,7 +48,7 @@ let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -260,7 +260,7 @@ class ProcessLockManager {
     // Ensure exit handler is registered before any lock acquisition.
     this.ensureExitHandler()
 
-    return await pRetry(
+    return (await pRetry(
       async () => {
         try {
           // Check for stale lock and remove if necessary.
@@ -379,7 +379,7 @@ class ProcessLockManager {
         maxDelayMs,
         jitter: true,
       },
-    )
+    ))!
   }
 
   /**

@@ -86,7 +86,7 @@ export type SocketBtmReleaseConfig =
  * Uses 'win' instead of 'win32' for file/folder names.
  */
 const PLATFORM_MAP: Record<string, string> = {
-  __proto__: null,
+  __proto__: null as unknown as string,
   darwin: 'darwin',
   linux: 'linux',
   win32: 'win',
@@ -96,7 +96,7 @@ const PLATFORM_MAP: Record<string, string> = {
  * Map Node.js arch to socket-btm asset arch naming.
  */
 const ARCH_MAP: Record<string, string> = {
-  __proto__: null,
+  __proto__: null as unknown as string,
   arm64: 'arm64',
   x64: 'x64',
 }
@@ -114,7 +114,7 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }

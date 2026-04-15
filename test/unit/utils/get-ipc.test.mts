@@ -188,11 +188,11 @@ describe('utils/get-ipc', () => {
 
     it('should not allow deleting properties', async () => {
       const ipc = await getIpc()
-      const keys = Object.keys(ipc)
+      const keys = Object.keys(ipc) as Array<keyof IpcObject>
 
       if (keys.length > 0) {
         expect(() => {
-          delete ipc[keys[0]]
+          delete ipc[keys[0]!]
         }).toThrow()
       }
     })
@@ -222,7 +222,7 @@ describe('utils/get-ipc', () => {
         const results = await Promise.all(keys.map(key => getIpc(key)))
 
         results.forEach((result, i) => {
-          expect(result).toBe(ipc[keys[i]])
+          expect(result).toBe(ipc[keys[i]!])
         })
       }
     })

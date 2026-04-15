@@ -368,6 +368,7 @@ describe('constants/socket', () => {
     it('should not allow reassignment', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         SOCKET_API_BASE_URL = 'https://other-api.com'
       }).toThrow()
     })

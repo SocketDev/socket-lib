@@ -77,48 +77,48 @@ describe('Logger - Theme Handling', () => {
 
   describe('LOG_SYMBOLS', () => {
     it('should access LOG_SYMBOLS.success', () => {
-      expect(LOG_SYMBOLS.success).toBeDefined()
-      expect(typeof LOG_SYMBOLS.success).toBe('string')
+      expect(LOG_SYMBOLS['success']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['success']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.fail', () => {
-      expect(LOG_SYMBOLS.fail).toBeDefined()
-      expect(typeof LOG_SYMBOLS.fail).toBe('string')
+      expect(LOG_SYMBOLS['fail']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['fail']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.warn', () => {
-      expect(LOG_SYMBOLS.warn).toBeDefined()
-      expect(typeof LOG_SYMBOLS.warn).toBe('string')
+      expect(LOG_SYMBOLS['warn']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['warn']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.info', () => {
-      expect(LOG_SYMBOLS.info).toBeDefined()
-      expect(typeof LOG_SYMBOLS.info).toBe('string')
+      expect(LOG_SYMBOLS['info']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['info']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.step', () => {
-      expect(LOG_SYMBOLS.step).toBeDefined()
-      expect(typeof LOG_SYMBOLS.step).toBe('string')
+      expect(LOG_SYMBOLS['step']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['step']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.skip', () => {
-      expect(LOG_SYMBOLS.skip).toBeDefined()
-      expect(typeof LOG_SYMBOLS.skip).toBe('string')
+      expect(LOG_SYMBOLS['skip']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['skip']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.progress', () => {
-      expect(LOG_SYMBOLS.progress).toBeDefined()
-      expect(typeof LOG_SYMBOLS.progress).toBe('string')
+      expect(LOG_SYMBOLS['progress']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['progress']).toBe('string')
     })
 
     it('should access LOG_SYMBOLS.reason', () => {
-      expect(LOG_SYMBOLS.reason).toBeDefined()
-      expect(typeof LOG_SYMBOLS.reason).toBe('string')
+      expect(LOG_SYMBOLS['reason']).toBeDefined()
+      expect(typeof LOG_SYMBOLS['reason']).toBe('string')
     })
 
     it('should initialize LOG_SYMBOLS on first access', () => {
       // Accessing any property should trigger initialization
-      const successSymbol = LOG_SYMBOLS.success
+      const successSymbol = LOG_SYMBOLS['success']
       expect(successSymbol).toBeTruthy()
     })
 

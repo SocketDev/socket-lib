@@ -129,7 +129,7 @@ describe('abort', () => {
 
       expect(signal.aborted).toBe(false)
 
-      controllers[3].abort()
+      controllers[3]!.abort()
 
       await new Promise(resolve => setTimeout(resolve, 0))
 
@@ -140,16 +140,16 @@ describe('abort', () => {
       const controllers = Array.from({ length: 3 }, () => new AbortController())
       const signal = createCompositeAbortSignal(
         null,
-        controllers[0].signal,
+        controllers[0]!.signal,
         undefined,
-        controllers[1].signal,
+        controllers[1]!.signal,
         null,
-        controllers[2].signal,
+        controllers[2]!.signal,
       )
 
       expect(signal.aborted).toBe(false)
 
-      controllers[1].abort()
+      controllers[1]!.abort()
 
       await new Promise(resolve => setTimeout(resolve, 0))
 

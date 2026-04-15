@@ -65,7 +65,7 @@ describe('prompts', () => {
         { name: 'Option 2', value: '2' },
       ]
       expect(choices).toHaveLength(2)
-      expect(choices[0].name).toBe('Option 1')
+      expect(choices[0]!.name).toBe('Option 1')
     })
 
     it('should accept Choice with description and disabled', () => {
@@ -85,8 +85,8 @@ describe('prompts', () => {
         },
       ]
       expect(choices).toHaveLength(2)
-      expect(choices[0].description).toBe('First option')
-      expect(choices[1].disabled).toBe('Not available')
+      expect(choices[0]!.description).toBe('First option')
+      expect(choices[1]!.disabled).toBe('Not available')
     })
 
     it('should accept Choice with all optional properties', () => {
@@ -100,9 +100,9 @@ describe('prompts', () => {
           value: 'full',
         },
       ]
-      expect(choices[0].name).toBe('Full Option')
-      expect(choices[0].short).toBe('Full')
-      expect(choices[0].description).toBe('Detailed option')
+      expect(choices[0]!.name).toBe('Full Option')
+      expect(choices[0]!.short).toBe('Full')
+      expect(choices[0]!.description).toBe('Detailed option')
     })
   })
 })

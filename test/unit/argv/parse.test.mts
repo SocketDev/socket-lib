@@ -30,7 +30,7 @@ describe('argv/parse', () => {
           verbose: { type: 'boolean' },
         },
       })
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['verbose']).toBe(true)
     })
 
     it('should parse string options', () => {
@@ -40,7 +40,7 @@ describe('argv/parse', () => {
           name: { type: 'string' },
         },
       })
-      expect(result.values.name).toBe('test')
+      expect(result.values['name']).toBe('test')
     })
 
     it('should parse multiple options', () => {
@@ -52,9 +52,9 @@ describe('argv/parse', () => {
           count: { type: 'string' },
         },
       })
-      expect(result.values.verbose).toBe(true)
-      expect(result.values.name).toBe('test')
-      expect(result.values.count).toBe('42')
+      expect(result.values['verbose']).toBe(true)
+      expect(result.values['name']).toBe('test')
+      expect(result.values['count']).toBe('42')
     })
 
     it('should handle short aliases', () => {
@@ -64,7 +64,7 @@ describe('argv/parse', () => {
           verbose: { type: 'boolean', short: 'v' },
         },
       })
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['verbose']).toBe(true)
     })
 
     it('should handle multiple short aliases', () => {
@@ -75,8 +75,8 @@ describe('argv/parse', () => {
           name: { type: 'string', short: 'n' },
         },
       })
-      expect(result.values.verbose).toBe(true)
-      expect(result.values.name).toBe('test')
+      expect(result.values['verbose']).toBe(true)
+      expect(result.values['name']).toBe('test')
     })
 
     it('should parse positional arguments', () => {
@@ -95,8 +95,8 @@ describe('argv/parse', () => {
           name: { type: 'string' },
         },
       })
-      expect(result.values.verbose).toBe(true)
-      expect(result.values.name).toBe('test')
+      expect(result.values['verbose']).toBe(true)
+      expect(result.values['name']).toBe('test')
       expect(result.positionals).toEqual(['file.txt'])
     })
 
@@ -108,8 +108,8 @@ describe('argv/parse', () => {
           verbose: { type: 'boolean', default: false },
         },
       })
-      expect(result.values.port).toBe('3000')
-      expect(result.values.verbose).toBe(false)
+      expect(result.values['port']).toBe('3000')
+      expect(result.values['verbose']).toBe(false)
     })
 
     it('should override defaults with provided values', () => {
@@ -120,8 +120,8 @@ describe('argv/parse', () => {
           verbose: { type: 'boolean', default: false },
         },
       })
-      expect(result.values.port).toBe('8080')
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['port']).toBe('8080')
+      expect(result.values['verbose']).toBe(true)
     })
 
     it('should handle kebab-case to camelCase conversion', () => {
@@ -131,7 +131,7 @@ describe('argv/parse', () => {
           tempDir: { type: 'string' },
         },
       })
-      expect(result.values.tempDir).toBe('/tmp')
+      expect(result.values['tempDir']).toBe('/tmp')
     })
 
     it('should handle multiple values (arrays)', () => {
@@ -141,7 +141,7 @@ describe('argv/parse', () => {
           tag: { type: 'string', multiple: true },
         },
       })
-      expect(result.values.tag).toEqual(['v1', 'v2', 'v3'])
+      expect(result.values['tag']).toEqual(['v1', 'v2', 'v3'])
     })
 
     it('should handle -- separator', () => {
@@ -151,7 +151,7 @@ describe('argv/parse', () => {
           verbose: { type: 'boolean' },
         },
       })
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['verbose']).toBe(true)
       // Arguments after -- may be in positionals or in the raw['--'] array
       const hasFlag =
         result.positionals.includes('--not-a-flag') ||
@@ -171,8 +171,8 @@ describe('argv/parse', () => {
           },
         },
       })
-      expect(result.values.port).toBe(8080)
-      expect(typeof result.values.port).toBe('number')
+      expect(result.values['port']).toBe(8080)
+      expect(typeof result.values['port']).toBe('number')
     })
 
     it('should handle boolean negation', () => {
@@ -182,7 +182,7 @@ describe('argv/parse', () => {
           color: { type: 'boolean', default: true },
         },
       })
-      expect(result.values.color).toBe(false)
+      expect(result.values['color']).toBe(false)
     })
 
     it('should handle empty string values', () => {
@@ -192,7 +192,7 @@ describe('argv/parse', () => {
           name: { type: 'string' },
         },
       })
-      expect(result.values.name).toBe('')
+      expect(result.values['name']).toBe('')
     })
 
     it('should handle allowPositionals option', () => {
@@ -214,7 +214,7 @@ describe('argv/parse', () => {
         },
         strict: false,
       })
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['verbose']).toBe(true)
     })
 
     it('should provide raw parsed arguments', () => {
@@ -225,7 +225,7 @@ describe('argv/parse', () => {
         },
       })
       expect(result.raw).toBeDefined()
-      expect(result.raw._).toBeDefined()
+      expect(result.raw['_']).toBeDefined()
     })
 
     it('should handle complex scenarios', () => {
@@ -248,9 +248,9 @@ describe('argv/parse', () => {
         },
         allowPositionals: true,
       })
-      expect(result.values.verbose).toBe(true)
-      expect(result.values.name).toBe('myapp')
-      expect(Array.isArray(result.values.tag)).toBe(true)
+      expect(result.values['verbose']).toBe(true)
+      expect(result.values['name']).toBe('myapp')
+      expect(Array.isArray(result.values['tag'])).toBe(true)
       // Positionals handling varies by implementation, just verify options work
       expect(result.positionals).toBeDefined()
     })
@@ -265,7 +265,7 @@ describe('argv/parse', () => {
           'camel-case-expansion': false,
         },
       })
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['verbose']).toBe(true)
     })
   })
 
@@ -287,7 +287,7 @@ describe('argv/parse', () => {
         allowNegative: false,
       }
       const result = parseArgs(config)
-      expect(result.values.test).toBe(true)
+      expect(result.values['test']).toBe(true)
     })
   })
 
@@ -307,7 +307,7 @@ describe('argv/parse', () => {
           flag: { type: 'boolean' },
         },
       })
-      expect(result.values.flag).toBe(true)
+      expect(result.values['flag']).toBe(true)
     })
 
     it('should handle numeric strings without conversion', () => {
@@ -317,8 +317,8 @@ describe('argv/parse', () => {
           value: { type: 'string' },
         },
       })
-      expect(result.values.value).toBe('42')
-      expect(typeof result.values.value).toBe('string')
+      expect(result.values['value']).toBe('42')
+      expect(typeof result.values['value']).toBe('string')
     })
 
     it('should handle equals syntax', () => {
@@ -329,8 +329,8 @@ describe('argv/parse', () => {
           count: { type: 'string' },
         },
       })
-      expect(result.values.name).toBe('test')
-      expect(result.values.count).toBe('42')
+      expect(result.values['name']).toBe('test')
+      expect(result.values['count']).toBe('42')
     })
 
     it('should handle short option groups', () => {
@@ -342,9 +342,9 @@ describe('argv/parse', () => {
           c: { type: 'boolean', short: 'c' },
         },
       })
-      expect(result.values.a).toBe(true)
-      expect(result.values.b).toBe(true)
-      expect(result.values.c).toBe(true)
+      expect(result.values['a']).toBe(true)
+      expect(result.values['b']).toBe(true)
+      expect(result.values['c']).toBe(true)
     })
 
     it('should handle repeated boolean flags', () => {
@@ -354,7 +354,7 @@ describe('argv/parse', () => {
           verbose: { type: 'boolean' },
         },
       })
-      expect(result.values.verbose).toBe(true)
+      expect(result.values['verbose']).toBe(true)
     })
   })
 
@@ -369,7 +369,7 @@ describe('argv/parse', () => {
           },
         },
       })
-      expect(result.values.port).toBe(3000)
+      expect(result.values['port']).toBe(3000)
     })
 
     it('should coerce to uppercase', () => {
@@ -382,7 +382,7 @@ describe('argv/parse', () => {
           },
         },
       })
-      expect(result.values.env).toBe('PRODUCTION')
+      expect(result.values['env']).toBe('PRODUCTION')
     })
 
     it('should coerce arrays', () => {
@@ -395,7 +395,7 @@ describe('argv/parse', () => {
           },
         },
       })
-      expect(result.values.tags).toEqual(['a', 'b', 'c'])
+      expect(result.values['tags']).toEqual(['a', 'b', 'c'])
     })
   })
 })

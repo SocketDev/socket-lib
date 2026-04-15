@@ -21,7 +21,7 @@ let _os: typeof import('node:os') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getOs() {
   if (_os === undefined) {
-    _os = /*@__PURE__*/ require('os')
+    _os = /*@__PURE__*/ require('node:os')
   }
   return _os as typeof import('node:os')
 }
@@ -34,7 +34,7 @@ let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
   if (_path === undefined) {
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }

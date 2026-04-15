@@ -96,7 +96,7 @@ describe('constants/process', () => {
 
   describe('singleton behavior', () => {
     it('should maintain singleton pattern for AbortController', () => {
-      const instances = []
+      const instances: unknown[] = []
       for (let i = 0; i < 5; i++) {
         instances.push(getAbortController())
       }
@@ -105,7 +105,7 @@ describe('constants/process', () => {
     })
 
     it('should maintain singleton pattern for AbortSignal', () => {
-      const signals = []
+      const signals: unknown[] = []
       for (let i = 0; i < 5; i++) {
         signals.push(getAbortSignal())
       }

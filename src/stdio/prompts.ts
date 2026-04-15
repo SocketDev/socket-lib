@@ -5,11 +5,17 @@
 
 import { getAbortSignal } from '../constants/process'
 
+// @ts-expect-error - external vendored module
 import checkboxRaw from '../external/@inquirer/checkbox'
+// @ts-expect-error - external vendored module
 import confirmRaw from '../external/@inquirer/confirm'
+// @ts-expect-error - external vendored module
 import inputRaw from '../external/@inquirer/input'
+// @ts-expect-error - external vendored module
 import passwordRaw from '../external/@inquirer/password'
+// @ts-expect-error - external vendored module
 import * as searchModule from '../external/@inquirer/search'
+// @ts-expect-error - external vendored module
 import * as selectModuleImport from '../external/@inquirer/select'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
@@ -121,7 +127,7 @@ export type Separator = SeparatorType
  * @returns Resolved Theme
  */
 function resolveTheme(theme: Theme | ThemeName): Theme {
-  return typeof theme === 'string' ? THEMES[theme] : theme
+  return typeof theme === 'string' ? (THEMES[theme] ?? THEMES.socket) : theme
 }
 
 /**
@@ -236,12 +242,12 @@ export function wrapPrompt<T = unknown>(
     // Inject theme into config (args[0])
     const config = args[0] as Record<string, unknown>
     if (config && typeof config === 'object') {
-      if (!config.theme) {
+      if (!config['theme']) {
         // No theme provided, use current theme
-        config.theme = createInquirerTheme(getTheme())
+        config['theme'] = createInquirerTheme(getTheme())
       } else {
         // Theme provided - let createInquirerTheme handle detection
-        config.theme = createInquirerTheme(config.theme)
+        config['theme'] = createInquirerTheme(config['theme'])
       }
     }
 

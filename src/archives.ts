@@ -42,7 +42,7 @@ let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
   if (_path === undefined) {
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }
@@ -57,15 +57,15 @@ export type ArchiveFormat = 'tar' | 'tar.gz' | 'tgz' | 'zip'
  */
 export interface ExtractOptions {
   /** Suppress log messages */
-  quiet?: boolean
+  quiet?: boolean | undefined
   /** Strip leading path components (like tar --strip-components) */
-  strip?: number
+  strip?: number | undefined
   /** Maximum number of entries to extract (default: 100,000) */
-  maxEntries?: number
+  maxEntries?: number | undefined
   /** Maximum size of a single extracted file in bytes (default: 100MB) */
-  maxFileSize?: number
+  maxFileSize?: number | undefined
   /** Maximum total extracted size in bytes (default: 1GB) */
-  maxTotalSize?: number
+  maxTotalSize?: number | undefined
 }
 
 /**

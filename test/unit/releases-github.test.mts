@@ -5,6 +5,7 @@
 import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+// @ts-expect-error - no type declarations
 import picomatch from 'picomatch'
 
 import {
@@ -15,7 +16,7 @@ import {
   SOCKET_BTM_REPO,
 } from '../../src/releases/github'
 
-import type { HttpResponse } from '../../src/http-request'
+import type { HttpDownloadResult, HttpResponse } from '../../src/http-request'
 import { httpDownload, httpRequest } from '../../src/http-request'
 
 // Mock httpRequest and httpDownload modules.
@@ -718,7 +719,9 @@ describe('releases/github', () => {
           200,
         ),
       )
-      vi.mocked(httpDownload).mockResolvedValueOnce(undefined)
+      vi.mocked(httpDownload).mockResolvedValueOnce(
+        undefined as unknown as HttpDownloadResult,
+      )
 
       await downloadReleaseAsset(
         'v1.0.0',
@@ -747,7 +750,9 @@ describe('releases/github', () => {
           200,
         ),
       )
-      vi.mocked(httpDownload).mockResolvedValueOnce(undefined)
+      vi.mocked(httpDownload).mockResolvedValueOnce(
+        undefined as unknown as HttpDownloadResult,
+      )
 
       await downloadReleaseAsset(
         'v1.0.0',
@@ -772,7 +777,9 @@ describe('releases/github', () => {
           200,
         ),
       )
-      vi.mocked(httpDownload).mockResolvedValueOnce(undefined)
+      vi.mocked(httpDownload).mockResolvedValueOnce(
+        undefined as unknown as HttpDownloadResult,
+      )
 
       await downloadReleaseAsset(
         'v1.0.0',

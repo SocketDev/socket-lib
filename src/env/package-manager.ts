@@ -100,7 +100,7 @@ export function getPackageManagerInfo(): {
 
   // Parse "pnpm/8.15.1 npm/? node/v20.11.0 darwin arm64".
   const match = userAgent.match(/^([^/]+)\/([^\s]+)/)
-  if (match) {
+  if (match?.[1] && match[2]) {
     return {
       name: match[1],
       version: match[2],

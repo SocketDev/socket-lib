@@ -22,9 +22,11 @@ export interface JsonFormatting {
  * Options for determining if a save should occur.
  */
 export interface ShouldSaveOptions {
-  ignoreWhitespace?: boolean
-  sort?: boolean
-  sortFn?: (obj: Record<string, unknown>) => Record<string, unknown>
+  ignoreWhitespace?: boolean | undefined
+  sort?: boolean | undefined
+  sortFn?:
+    | ((obj: Record<string, unknown>) => Record<string, unknown>)
+    | undefined
 }
 
 /**
@@ -47,7 +49,7 @@ export function detectIndent(json: string): string | number {
     // Default to 2 spaces
     return 2
   }
-  const indent = match[1]
+  const indent = match[1]!
   // Check if all spaces (return count) or mixed (return string)
   if (/^ +$/.test(indent)) {
     return indent.length
@@ -256,7 +258,7 @@ export function shouldSave(
   // If ignoring whitespace, only compare content
   if (ignoreWhitespace) {
     // Use util.isDeepStrictEqual for comparison
-    const util = require('util')
+    const util = require('node:util')
     return !util.isDeepStrictEqual(sortedContent, origContent)
   }
 

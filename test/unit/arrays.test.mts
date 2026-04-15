@@ -127,6 +127,7 @@ describe('arrays', () => {
     it('should return true for arrays', () => {
       expect(isArray([])).toBe(true)
       expect(isArray([1, 2, 3])).toBe(true)
+      // oxlint-disable-next-line unicorn/no-new-array
       expect(isArray(new Array(5))).toBe(true)
     })
 

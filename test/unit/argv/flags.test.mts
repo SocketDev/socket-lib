@@ -331,8 +331,8 @@ describe('argv/flags', () => {
         customFlag: 'custom-value',
         anotherFlag: 123,
       }
-      expect(flags.customFlag).toBe('custom-value')
-      expect(flags.anotherFlag).toBe(123)
+      expect(flags['customFlag']).toBe('custom-value')
+      expect(flags['anotherFlag']).toBe(123)
     })
   })
 

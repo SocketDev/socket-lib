@@ -742,7 +742,7 @@ describe('dlx-package', () => {
         const pkg = JSON.parse(
           readFileSync(path.join(nodeModules, 'package.json'), 'utf8'),
         )
-        const firstBinary = Object.keys(pkg.bin)[0]
+        const firstBinary = Object.keys(pkg.bin)[0]!
         expect(firstBinary).toBe('other-a')
         expect(pkg.bin[firstBinary]).toBe('./bin/a.js')
       }, 'dlx-pkg-fallback-')

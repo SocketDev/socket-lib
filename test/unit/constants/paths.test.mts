@@ -370,6 +370,7 @@ describe('constants/paths', () => {
     it('should not allow reassignment', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         PACKAGE_JSON = 'other.json'
       }).toThrow()
     })

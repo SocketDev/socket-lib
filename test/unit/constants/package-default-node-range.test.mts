@@ -23,7 +23,7 @@ describe('package-default-node-range', () => {
     const versionMatch = packageDefaultNodeRange.match(/^>=(\d+)$/)
     expect(versionMatch).not.toBeNull()
     if (versionMatch) {
-      const majorVersion = Number.parseInt(versionMatch[1], 10)
+      const majorVersion = Number.parseInt(versionMatch[1]!, 10)
       expect(majorVersion).toBeGreaterThan(0)
       expect(majorVersion).toBeLessThan(100) // Sanity check
     }
@@ -34,7 +34,7 @@ describe('package-default-node-range', () => {
     // As of 2025, maintained versions are typically >= 18
     const versionMatch = packageDefaultNodeRange.match(/^>=(\d+)$/)
     if (versionMatch) {
-      const majorVersion = Number.parseInt(versionMatch[1], 10)
+      const majorVersion = Number.parseInt(versionMatch[1]!, 10)
       expect(majorVersion).toBeGreaterThanOrEqual(18)
     }
   })

@@ -21,6 +21,8 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+import type { SafeReadOptions } from '@socketsecurity/lib/fs'
+
 import {
   isSymLinkSync,
   readFileBinary,
@@ -240,7 +242,9 @@ describe.sequential('fs - Sync Functions', () => {
       const content = 'buffer content'
       writeFileSync(file, content)
 
-      const result = safeReadFileSync(file, { encoding: null })
+      const result = safeReadFileSync(file, {
+        encoding: null,
+      } as unknown as SafeReadOptions & { encoding: null })
       expect(Buffer.isBuffer(result)).toBe(true)
       expect(result?.toString()).toBe(content)
     })

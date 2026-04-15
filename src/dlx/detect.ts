@@ -27,7 +27,7 @@ let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -39,7 +39,7 @@ function getFs() {
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
   if (_path === undefined) {
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }
@@ -160,7 +160,7 @@ export function detectDlxExecutableType(
   const dlxDir = getSocketDlxDir()
   const absolutePath = path.resolve(filePath)
   const relativePath = path.relative(dlxDir, absolutePath)
-  const cacheKey = relativePath.split(path.sep)[0]
+  const cacheKey = relativePath.split(path.sep)[0] ?? ''
   const cacheDir = path.join(dlxDir, cacheKey)
 
   // Packages have node_modules/, binaries don't.
@@ -236,7 +236,7 @@ export function detectLocalExecutableType(
       unknown
     > | null
     // If it has a bin field, it's a Node.js package.
-    if (packageJson?.bin) {
+    if (packageJson?.['bin']) {
       return {
         type: 'package',
         method: 'package-json',

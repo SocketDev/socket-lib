@@ -103,7 +103,7 @@ function constructConsole(...args: unknown[]) {
   if (_Console === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    const nodeConsole = /*@__PURE__*/ require('console')
+    const nodeConsole = /*@__PURE__*/ require('node:console')
     _Console = nodeConsole.Console
   }
   return ReflectConstruct(
@@ -190,16 +190,16 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     const stepColor = theme.colors.step
 
     // Update symbol values
-    target.fail = applyColor(supported ? '✖' : '×', errorColor, colors)
-    target.info = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
-    target.progress = applyColor(supported ? '∴' : ':.', stepColor, colors)
-    target.reason = colors.dim(
+    target['fail'] = applyColor(supported ? '✖' : '×', errorColor, colors)
+    target['info'] = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
+    target['progress'] = applyColor(supported ? '∴' : ':.', stepColor, colors)
+    target['reason'] = colors.dim(
       applyColor(supported ? '∴' : ':.', warningColor, colors),
     )
-    target.skip = applyColor(supported ? '↻' : '@', stepColor, colors)
-    target.step = applyColor(supported ? '→' : '>', stepColor, colors)
-    target.success = applyColor(supported ? '✔' : '√', successColor, colors)
-    target.warn = applyColor(supported ? '⚠' : '‼', warningColor, colors)
+    target['skip'] = applyColor(supported ? '↻' : '@', stepColor, colors)
+    target['step'] = applyColor(supported ? '→' : '>', stepColor, colors)
+    target['success'] = applyColor(supported ? '✔' : '√', successColor, colors)
+    target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor, colors)
   }
 
   const init = () => {
@@ -475,7 +475,10 @@ export class Logger {
       if (themeOption) {
         if (typeof themeOption === 'string') {
           // Theme name - resolve to Theme object
-          this.#theme = THEMES[themeOption]
+          const resolved = THEMES[themeOption as keyof typeof THEMES]
+          if (resolved) {
+            this.#theme = resolved
+          }
         } else {
           // Theme object
           this.#theme = themeOption
@@ -680,7 +683,7 @@ export class Logger {
     const indent = this.#getIndent('stderr')
     const symbols = this.#getSymbols()
     con.error(
-      applyLinePrefix(`${symbols[symbolType]} ${text}`, {
+      applyLinePrefix(`${symbols[symbolType as keyof LogSymbols]} ${text}`, {
         prefix: indent,
       }),
       ...extras,
@@ -719,7 +722,9 @@ export class Logger {
       instance.#parent = this
       instance.#boundStream = 'stderr'
       instance.#options = { __proto__: null, ...this.#options }
-      instance.#theme = this.#theme
+      if (this.#theme) {
+        instance.#theme = this.#theme
+      }
       this.#stderrLogger = instance
     }
     return this.#stderrLogger
@@ -754,7 +759,9 @@ export class Logger {
       instance.#parent = this
       instance.#boundStream = 'stdout'
       instance.#options = { __proto__: null, ...this.#options }
-      instance.#theme = this.#theme
+      if (this.#theme) {
+        instance.#theme = this.#theme
+      }
       this.#stdoutLogger = instance
     }
     return this.#stdoutLogger
@@ -876,7 +883,7 @@ export class Logger {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
     const streamObj = (
-      stream === 'stderr' ? con._stderr : con._stdout
+      stream === 'stderr' ? con['_stderr'] : con['_stdout']
     ) as NodeJS.WriteStream & {
       isTTY: boolean
       cursorTo: (x: number) => void
@@ -1047,7 +1054,7 @@ export class Logger {
    */
   dir(obj: unknown, options?: unknown | undefined): this {
     const con = this.#getConsole()
-    con.dir(obj, options)
+    con.dir(obj, options as import('node:util').InspectOptions | undefined)
     this[lastWasBlankSymbol](false)
     return this[incLogCallCountSymbol]()
   }
@@ -1380,7 +1387,7 @@ export class Logger {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
     const streamObj = (
-      stream === 'stderr' ? con._stderr : con._stdout
+      stream === 'stderr' ? con['_stderr'] : con['_stdout']
     ) as NodeJS.WriteStream & { write: (text: string) => boolean }
     const symbols = this.#getSymbols()
     streamObj.write(`${symbols.progress} ${text}`)
@@ -1751,7 +1758,7 @@ export class Logger {
     // 3. Fall back to con._stdout (which applies formatting)
     const ctorArgs = privateConstructorArgs.get(this) ?? []
     const stdout =
-      this.#originalStdout || (ctorArgs[0] as any)?.stdout || con._stdout
+      this.#originalStdout || (ctorArgs[0] as any)?.stdout || con['_stdout']
     stdout.write(text)
     this[lastWasBlankSymbol](false)
     return this

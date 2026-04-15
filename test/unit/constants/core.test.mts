@@ -156,6 +156,7 @@ describe('constants/core', () => {
     it('should not allow reassignment of LOOP_SENTINEL', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         LOOP_SENTINEL = 999
       }).toThrow()
     })
@@ -163,6 +164,7 @@ describe('constants/core', () => {
     it('should not allow reassignment of string constants', () => {
       expect(() => {
         // @ts-expect-error - testing immutability
+        // oxlint-disable-next-line no-import-assign
         UNKNOWN_ERROR = 'Different error'
       }).toThrow()
     })

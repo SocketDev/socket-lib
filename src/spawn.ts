@@ -30,6 +30,7 @@ import process from 'node:process'
 import { getAbortSignal } from './constants/process'
 import { stackWithCauses } from './errors'
 
+// @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
 
 let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
@@ -49,7 +50,7 @@ let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
   if (_path === undefined) {
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }
@@ -71,7 +72,7 @@ let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -106,7 +107,7 @@ function getChildProcess() {
   if (_child_process === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _child_process = /*@__PURE__*/ require('child_process')
+    _child_process = /*@__PURE__*/ require('node:child_process')
   }
   return _child_process as typeof import('node:child_process')
 }
@@ -357,8 +358,8 @@ export function enhanceSpawnError(error: unknown): unknown {
 
   // Copy all spawn error properties except message and stack.
   const descriptors = Object.getOwnPropertyDescriptors(err)
-  delete descriptors.message
-  delete descriptors.stack
+  Reflect.deleteProperty(descriptors, 'message')
+  Reflect.deleteProperty(descriptors, 'stack')
   Object.defineProperties(enhancedError, descriptors)
 
   // Build stack lazily on first access using WeakMap cache.
@@ -799,7 +800,7 @@ export function spawn(
   let newSpawnPromise: PromiseSpawnResult
   if (shouldStripAnsi && stdioString) {
     newSpawnPromise = spawnPromise
-      .then(result => {
+      .then((result: unknown) => {
         const strippedResult = stripAnsiFromSpawnResult(result)
         // Add exitCode as an alias for code.
         if ('code' in (strippedResult as { code?: number })) {
@@ -809,23 +810,26 @@ export function spawn(
         }
         return strippedResult
       })
-      .catch(error => {
+      .catch((error: unknown) => {
         const strippedError = stripAnsiFromSpawnResult(error)
         const enhancedError = enhanceSpawnError(strippedError)
         throw enhancedError
       }) as PromiseSpawnResult
   } else {
     newSpawnPromise = spawnPromise
-      .then(result => {
+      .then((result: unknown) => {
         // Add exitCode as an alias for code.
-        if ('code' in result) {
-          const res = result as typeof result & { exitCode: number }
-          res.exitCode = result.code
+        if (result !== null && typeof result === 'object' && 'code' in result) {
+          const res = result as typeof result & {
+            exitCode: number
+            code: number
+          }
+          res.exitCode = res.code
           return res
         }
         return result
       })
-      .catch(error => {
+      .catch((error: unknown) => {
         const enhancedError = enhanceSpawnError(error)
         throw enhancedError
       }) as PromiseSpawnResult

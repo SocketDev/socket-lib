@@ -26,7 +26,7 @@ let _child_process: typeof import('node:child_process') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getChildProcess() {
   if (_child_process === undefined) {
-    _child_process = /*@__PURE__*/ require('child_process')
+    _child_process = /*@__PURE__*/ require('node:child_process')
   }
   return _child_process as typeof import('node:child_process')
 }
@@ -39,12 +39,12 @@ let _readline: typeof import('node:readline') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getReadline() {
   if (_readline === undefined) {
-    _readline = /*@__PURE__*/ require('readline')
+    _readline = /*@__PURE__*/ require('node:readline')
   }
   return _readline as typeof import('node:readline')
 }
 import process from 'node:process'
-import type { ChildProcess, SpawnOptions } from 'child_process'
+import type { ChildProcess, SpawnOptions } from 'node:child_process'
 
 import { getDefaultSpinner } from '../spinner.js'
 import { clearLine } from './clear.js'

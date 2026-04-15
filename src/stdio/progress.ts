@@ -129,7 +129,7 @@ export class ProgressBar {
     // Throttle rendering
     const now = Date.now()
     if (
-      now - this.lastRender < this.options.renderThrottle &&
+      now - this.lastRender < (this.options.renderThrottle ?? 16) &&
       this.current < this.total
     ) {
       return
@@ -166,7 +166,8 @@ export class ProgressBar {
    * Render the progress bar.
    */
   private render(tokens?: Record<string, unknown>): void {
-    const colorFn = colors[this.options.color] || ((s: string) => s)
+    const colorName = this.options.color ?? 'cyan'
+    const colorFn = colors[colorName] || ((s: string) => s)
 
     // Calculate values
     const percent =
@@ -178,19 +179,19 @@ export class ProgressBar {
         : (elapsed / this.current) * (this.total - this.current)
 
     // Build bar
-    const availableWidth = this.options.width
+    const availableWidth = this.options.width ?? 40
     const filledWidth =
       this.total === 0
         ? 0
         : Math.floor((this.current / this.total) * availableWidth)
     const emptyWidth = availableWidth - filledWidth
 
-    const filled = repeatString(this.options.complete, filledWidth)
-    const empty = repeatString(this.options.incomplete, emptyWidth)
+    const filled = repeatString(this.options.complete ?? '█', filledWidth)
+    const empty = repeatString(this.options.incomplete ?? '░', emptyWidth)
     const bar = colorFn(filled) + empty
 
     // Format output
-    let output = this.options.format
+    let output = this.options.format ?? ':bar :percent :current/:total'
     output = output.replace(':bar', bar)
     output = output.replace(':percent', `${percent}%`)
     output = output.replace(':current', String(this.current))

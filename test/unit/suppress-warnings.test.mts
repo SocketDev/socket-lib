@@ -47,7 +47,7 @@ describe('suppress-warnings', () => {
       const wrapped = process.emitWarning
       process.emitWarning = (warning, ...args) => {
         emitWarningSpy(warning, ...args)
-        return wrapped(warning, ...args)
+        return (wrapped as (...a: unknown[]) => void)(warning, ...args)
       }
 
       process.emitWarning('DeprecationWarning: test')

@@ -4,7 +4,7 @@
  */
 
 import process from 'node:process'
-import type { Writable } from 'stream'
+import type { Writable } from 'node:stream'
 
 import colors from './external/yoctocolors-cjs'
 
@@ -447,7 +447,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         if (opts.theme) {
           // Resolve theme name or use Theme object directly
           if (typeof opts.theme === 'string') {
-            theme = THEMES[opts.theme]
+            theme = THEMES[opts.theme] ?? theme
           } else {
             theme = opts.theme
           }
@@ -1024,7 +1024,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         const normalized = normalizeText(text)
         // Only log if we have actual content (consistent with #apply's stop method handling)
         if (normalized) {
-          logger.error(`${LOG_SYMBOLS.skip} ${normalized}`, ...extras)
+          logger.error(`${LOG_SYMBOLS['skip']} ${normalized}`, ...extras)
         }
         return this
       }

@@ -34,7 +34,7 @@ function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('fs')
+    _fs = /*@__PURE__*/ require('node:fs')
   }
   return _fs as typeof import('node:fs')
 }
@@ -52,7 +52,7 @@ function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('path')
+    _path = /*@__PURE__*/ require('node:path')
   }
   return _path as typeof import('node:path')
 }
@@ -806,7 +806,10 @@ export async function whichReal(
   // Depending on options `whichModule` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
   /* c8 ignore next - External which call */
-  const result = await whichModule(binName, opts)
+  const result = await whichModule(
+    binName,
+    opts as import('./external/which').WhichOptions,
+  )
 
   // When 'all: true' is specified, ensure we always return an array.
   if (opts?.all) {

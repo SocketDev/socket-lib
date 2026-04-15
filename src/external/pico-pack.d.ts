@@ -5,7 +5,7 @@ import type picomatchType from 'picomatch'
 export interface PicoPack {
   del: Pick<typeof delTypes, 'deleteAsync' | 'deleteSync'>
   glob: {
-    glob: typeof fastGlobTypes
+    glob: typeof fastGlobTypes.glob
     globStream: typeof fastGlobTypes.globStream
     globSync: typeof fastGlobTypes.sync
   }

@@ -15,6 +15,7 @@ import { createGzip } from 'node:zlib'
 import process from 'node:process'
 
 import AdmZip from 'adm-zip'
+// @ts-expect-error - no type declarations
 import tarStream from 'tar-stream'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 

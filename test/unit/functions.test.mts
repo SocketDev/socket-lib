@@ -9,6 +9,8 @@
  * Used throughout Socket tools for callback handling and recursion optimization.
  */
 
+import type { AnyFunction } from '@socketsecurity/lib/functions'
+
 import {
   noop,
   once,
@@ -41,7 +43,7 @@ describe('functions', () => {
   describe('once', () => {
     it('should execute function only once', () => {
       const fn = vi.fn((x: number) => x * 2)
-      const onceFn = once(fn)
+      const onceFn = once(fn as unknown as AnyFunction)
 
       expect(onceFn(5)).toBe(10)
       expect(onceFn(10)).toBe(10) // Still returns first result
@@ -106,7 +108,7 @@ describe('functions', () => {
 
     it('should pass arguments on first call', () => {
       const fn = vi.fn((a: number, b: number, c: number) => a + b + c)
-      const onceFn = once(fn)
+      const onceFn = once(fn as unknown as AnyFunction)
 
       onceFn(1, 2, 3)
       expect(fn).toHaveBeenCalledWith(1, 2, 3)
@@ -136,7 +138,7 @@ describe('functions', () => {
 
     it('should work with multiple argument functions', () => {
       const fn = vi.fn((a: string, b: number, c: boolean) => ({ a, b, c }))
-      const onceFn = once(fn)
+      const onceFn = once(fn as unknown as AnyFunction)
 
       const result1 = onceFn('test', 42, true)
       const result2 = onceFn('different', 99, false)
@@ -259,7 +261,7 @@ describe('functions', () => {
   describe('trampoline', () => {
     it('should execute non-recursive function normally', () => {
       const fn = (x: number) => x * 2
-      const trampolineFn = trampoline(fn)
+      const trampolineFn = trampoline(fn as unknown as AnyFunction)
 
       expect(trampolineFn(5)).toBe(10)
     })
@@ -274,7 +276,7 @@ describe('functions', () => {
           return acc as number
         }
         return (() => fact(n - 1, n * acc)) as any
-      })
+      } as unknown as AnyFunction)
 
       expect(factorial(5)).toBe(120)
       expect(factorial(10)).toBe(3_628_800)
@@ -289,7 +291,7 @@ describe('functions', () => {
           return acc as number
         }
         return (() => sumN(n - 1, acc + n)) as any
-      })
+      } as unknown as AnyFunction)
 
       expect(sum(5)).toBe(15) // 5 + 4 + 3 + 2 + 1
       expect(sum(10)).toBe(55) // 10 + 9 + ... + 1
@@ -297,12 +299,12 @@ describe('functions', () => {
     })
 
     it('should handle functions that return functions multiple levels deep', () => {
-      const fn = trampoline((depth: number): number | (() => number) => {
+      const fn = trampoline(((depth: number): number | (() => number) => {
         if (depth === 0) {
           return 0
         }
         return (() => () => () => fn(depth - 1)) as any
-      })
+      }) as unknown as AnyFunction)
 
       expect(fn(5)).toBe(0)
     })
@@ -319,19 +321,21 @@ describe('functions', () => {
             return (acc + this.value) as number
           }
           return (() => this.countdown(n - 1, acc + n)) as any
-        }),
+        } as unknown as AnyFunction),
       }
 
       expect(context.countdown(5)).toBe(25) // 5 + 4 + 3 + 2 + 1 + 10
     })
 
     it('should handle functions returning immediate results', () => {
-      const fn = trampoline((x: number) => x + 1)
+      const fn = trampoline(((x: number) => x + 1) as unknown as AnyFunction)
       expect(fn(5)).toBe(6)
     })
 
     it('should handle functions with multiple arguments', () => {
-      const add = trampoline((a: number, b: number) => a + b)
+      const add = trampoline(
+        ((a: number, b: number) => a + b) as unknown as AnyFunction,
+      )
       expect(add(3, 4)).toBe(7)
     })
 
@@ -348,7 +352,7 @@ describe('functions', () => {
           return b as number
         }
         return (() => fibonacci(n - 1, b, a + b)) as any
-      })
+      } as unknown as AnyFunction)
 
       expect(fib(0)).toBe(0)
       expect(fib(1)).toBe(1)
@@ -357,12 +361,12 @@ describe('functions', () => {
     })
 
     it('should handle functions returning functions that return values', () => {
-      const fn = trampoline((x: number): number | (() => number) => {
+      const fn = trampoline(((x: number): number | (() => number) => {
         if (x === 0) {
           return 42
         }
         return (() => fn(x - 1)) as any
-      })
+      }) as unknown as AnyFunction)
 
       expect(fn(3)).toBe(42)
     })
@@ -376,7 +380,7 @@ describe('functions', () => {
           return 0
         }
         return (() => deep(n - 1)) as any
-      })
+      } as unknown as AnyFunction)
 
       // Test with a large number that would normally overflow
       expect(deepRecursion(1000)).toBe(0)

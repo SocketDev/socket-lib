@@ -457,7 +457,7 @@ describe('stdio/stdout', () => {
       clearLine()
       expect(getContext().clearLineSpy).toHaveBeenCalled()
 
-      getContext().clearLineSpy.mockClear()
+      getContext().clearLineSpy!.mockClear()
 
       // Switch to non-TTY
       Object.defineProperty(stdout, 'isTTY', {
@@ -495,12 +495,12 @@ describe('stdio/stdout', () => {
         configurable: true,
       })
       // Clear spy calls from any previous tests to ensure accurate count
-      getContext().cursorToSpy.mockClear()
-      const callsBefore = getContext().cursorToSpy.mock.calls.length
+      getContext().cursorToSpy!.mockClear()
+      const callsBefore = getContext().cursorToSpy!.mock.calls.length
       for (let i = 0; i < 100; i++) {
         cursorTo(i, i)
       }
-      const callsAfter = getContext().cursorToSpy.mock.calls.length
+      const callsAfter = getContext().cursorToSpy!.mock.calls.length
       expect(callsAfter - callsBefore).toBe(100)
     })
 

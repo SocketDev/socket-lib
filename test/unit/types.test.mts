@@ -111,7 +111,7 @@ describe('types', () => {
         version: '1.0.0',
         customField: 'custom value',
       }
-      expect(data.customField).toBe('custom value')
+      expect(data['customField']).toBe('custom value')
     })
 
     it('should accept valid ManifestEntry tuple', () => {
