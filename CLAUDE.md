@@ -110,9 +110,7 @@ If user repeats instruction 2+ times, ask: "Should I add this to CLAUDE.md?"
 
 ## SHARED STANDARDS
 
-**Canonical reference**: `../socket-registry/CLAUDE.md`
 
-All shared standards (git, testing, code style, cross-platform, CI) defined in socket-registry/CLAUDE.md.
 
 **Quick references**:
 
