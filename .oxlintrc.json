@@ -155,7 +155,7 @@
     "import-x/no-named-as-default-member": "warn",
     "import-x/no-duplicates": "warn",
     "unicorn/consistent-function-scoping": "error",
-    "curly": "error",
+    "curly": ["error", "all"],
     "no-await-in-loop": "error",
     "no-new": "error",
     "no-proto": "error",
