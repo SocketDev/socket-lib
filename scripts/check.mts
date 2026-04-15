@@ -19,13 +19,34 @@ import {
   printHeader,
 } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runParallel } from './utils/run-command.mts'
+import { runCommandQuiet, runParallel } from './utils/run-command.mts'
 
 const logger = getDefaultLogger()
+
+async function runTypeCheck(quiet = false): Promise<number> {
+  if (!quiet) {
+    logger.progress('Checking TypeScript')
+  }
+  const result = await runCommandQuiet('tsgo', ['--noEmit'])
+  if (result.exitCode !== 0) {
+    if (!quiet) {
+      logger.error('Type checks failed')
+    }
+    if (result.stdout) {
+      console.log(result.stdout)
+    }
+    return result.exitCode
+  }
+  if (!quiet) {
+    logger.clearLine().done('Type checks passed')
+  }
+  return 0
+}
 
 async function main(): Promise<void> {
   try {
     const all = process.argv.includes('--all')
+    const quiet = process.argv.includes('--quiet')
     const staged = process.argv.includes('--staged')
     const help = process.argv.includes('--help') || process.argv.includes('-h')
 
@@ -66,15 +87,7 @@ async function main(): Promise<void> {
       },
     })
 
-    // TypeScript type checking always runs on whole project
     checks.push(
-      {
-        args: ['exec', 'tsgo', '--noEmit'],
-        command: 'pnpm',
-        options: {
-          ...(process.platform === 'win32' && { shell: true }),
-        },
-      },
       {
         args: ['scripts/validate/no-link-deps.mts'],
         command: 'node',
@@ -132,10 +145,17 @@ async function main(): Promise<void> {
     if (failed) {
       logger.error('Some checks failed')
       process.exitCode = 1
-    } else {
-      logger.success('All checks passed')
-      printFooter()
+      return
     }
+
+    const typeCheckExitCode = await runTypeCheck(quiet)
+    if (typeCheckExitCode !== 0) {
+      process.exitCode = typeCheckExitCode
+      return
+    }
+
+    logger.success('All checks passed')
+    printFooter()
   } catch (error) {
     logger.error(`Check failed: ${error.message}`)
     process.exitCode = 1
