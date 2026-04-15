@@ -71,3 +71,5 @@ dist/
 !/.claude/commands/
 !/.claude/ops/
 !/.claude/skills/
+!/.claude/hooks/
+!/.claude/settings.json
