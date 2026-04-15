@@ -50,7 +50,7 @@ function parseCode(code, filePath) {
       allowReturnOutsideFunction: true,
       sourceType: 'unambiguous',
     })
-  } catch (error: unknown) {
+  } catch (error) {
     throw new Error(`Failed to parse ${filePath}: ${error.message}`)
   }
 }
@@ -269,7 +269,7 @@ async function validateNoExtraneousDependencies() {
           }
         }
       }
-    } catch (error: unknown) {
+    } catch (error) {
       errors.push({
         file: path.relative(rootPath, file),
         type: 'parse-error',
@@ -322,7 +322,7 @@ async function main(): Promise<void> {
     }
 
     process.exitCode = 1
-  } catch (error: unknown) {
+  } catch (error) {
     logger.fail('Validation failed:', error.message)
     process.exitCode = 1
   }

@@ -62,7 +62,7 @@ function checkTypeDefinition(filePath) {
   let content
   try {
     content = readFileSync(filePath, 'utf8')
-  } catch (error: unknown) {
+  } catch (error) {
     return {
       path: normalizedPath,
       ok: false,

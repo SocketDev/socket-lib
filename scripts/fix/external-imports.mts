@@ -123,7 +123,7 @@ async function processDirectory(dir, verbose = false) {
         }
       }
     }
-  } catch (error: unknown) {
+  } catch (error) {
     // Skip directories that don't exist.
     if (error.code !== 'ENOENT') {
       throw error
@@ -147,7 +147,7 @@ async function fixExternalImports() {
           : 'External Imports (no changes)'
       logger.success(title)
     }
-  } catch (error: unknown) {
+  } catch (error) {
     logger.error(`Failed to fix external imports: ${error.message}`)
     process.exitCode = 1
   }

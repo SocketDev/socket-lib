@@ -29,7 +29,7 @@ async function main(): Promise<void> {
           : 'External Bundles (no packages)'
       logger.success(title)
     }
-  } catch (error: unknown) {
+  } catch (error) {
     logger.error(`Build failed: ${error.message || error}`)
     process.exitCode = 1
   }

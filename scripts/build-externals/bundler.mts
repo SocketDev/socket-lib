@@ -109,7 +109,7 @@ ${contentWithoutStrict}`
       logger.log(`    ✓ Bundled ${packageName} (${sizeKB}KB)`)
     }
     return sizeKB
-  } catch (error: unknown) {
+  } catch (error) {
     if (!quiet) {
       logger.log(`    ✗ Failed to bundle ${packageName}: ${error.message}`)
     }

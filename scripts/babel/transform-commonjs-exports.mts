@@ -179,7 +179,7 @@ export async function transformFile(filePath, options = {}) {
       const moduleName = filename.replace('.js', '')
       return { dirname, filename, modified: true, moduleName }
     }
-  } catch (e: unknown) {
+  } catch (e) {
     if (logger) {
       logger.warn(`Could not parse ${filePath}: ${e.message}`)
     }
@@ -280,7 +280,7 @@ export async function fixImports(filePath, fixedModules, options = {}) {
       await fs.writeFile(filePath, magicString.toString(), 'utf8')
       return { filename: path.basename(filePath), modified: true }
     }
-  } catch (e: unknown) {
+  } catch (e) {
     if (logger) {
       logger.warn(`Could not parse ${filePath}: ${e.message}`)
     }

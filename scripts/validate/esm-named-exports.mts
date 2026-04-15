@@ -131,7 +131,7 @@ function checkEsmNamedExports(filePath) {
     }
 
     return { path: filePath, ok: true }
-  } catch (error: unknown) {
+  } catch (error) {
     return {
       path: filePath,
       ok: false,

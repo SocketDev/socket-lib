@@ -141,7 +141,7 @@ function checkExternalExport(filePath) {
 
     // Primitive exports are okay for some modules
     return { path: normalizedPath, ok: true, keys: 'primitive' }
-  } catch (error: unknown) {
+  } catch (error) {
     return {
       path: normalizedPath,
       ok: false,

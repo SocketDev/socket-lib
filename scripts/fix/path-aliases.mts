@@ -132,7 +132,7 @@ async function processDirectory(dir, verbose = false) {
         }
       }
     }
-  } catch (error: unknown) {
+  } catch (error) {
     // Skip directories that don't exist
     if (error.code !== 'ENOENT') {
       throw error
@@ -156,7 +156,7 @@ async function fixPathAliases() {
           : 'Path Aliases (no changes)'
       logger.success(title)
     }
-  } catch (error: unknown) {
+  } catch (error) {
     logger.error(`Failed to fix path aliases: ${error.message}`)
     process.exitCode = 1
   }

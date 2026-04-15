@@ -46,7 +46,7 @@ async function buildJS(): Promise<number> {
     }
 
     return 0
-  } catch (error: unknown) {
+  } catch (error) {
     if (!isQuiet) {
       logger.error('JavaScript build failed')
       logger.error(error)
@@ -108,7 +108,7 @@ async function watchJS(): Promise<number> {
 
     // Wait indefinitely
     await new Promise(() => {})
-  } catch (error: unknown) {
+  } catch (error) {
     if (!isQuiet) {
       logger.error('Watch mode failed')
       logger.error(error)
