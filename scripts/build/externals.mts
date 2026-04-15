@@ -10,7 +10,7 @@ import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { pluralize } from '@socketsecurity/lib-stable/words'
 
-import { buildExternals } from '../build-externals/orchestrator.mjs'
+import { buildExternals } from '../build-externals/orchestrator.mts'
 
 const logger = getDefaultLogger()
 

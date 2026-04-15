@@ -22,7 +22,7 @@ import colors from 'yoctocolors-cjs'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
-import { parseArgs } from './utils/parse-args.mjs'
+import { parseArgs } from './utils/parse-args.mts'
 
 const logger = getDefaultLogger()
 

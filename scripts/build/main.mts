@@ -13,7 +13,7 @@ import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
-} from '../../.config/esbuild.config.mjs'
+} from '../../.config/esbuild.config.mts'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import {
@@ -21,8 +21,8 @@ import {
   printHeader,
 } from '@socketsecurity/lib-stable/stdio/header'
 
-import { parseArgs } from '../utils/parse-args.mjs'
-import { runSequence } from '../utils/run-command.mjs'
+import { parseArgs } from '../utils/parse-args.mts'
+import { runSequence } from '../utils/run-command.mts'
 
 const logger = getDefaultLogger()
 

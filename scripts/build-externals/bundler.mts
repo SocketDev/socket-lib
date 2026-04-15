@@ -12,11 +12,11 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import {
   getEsbuildConfig,
   getPackageSpecificOptions,
-} from './esbuild-config.mjs'
+} from './esbuild-config.mts'
 import {
   getLocalPackagePath,
   resolveLocalEntryPoint,
-} from './local-packages.mjs'
+} from './local-packages.mts'
 
 const require = createRequire(import.meta.url)
 const logger = getDefaultLogger()

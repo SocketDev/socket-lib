@@ -16,8 +16,8 @@ import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { parseArgs } from './utils/parse-args.mjs'
-import { runCommandQuiet } from './utils/run-command.mjs'
+import { parseArgs } from './utils/parse-args.mts'
+import { runCommandQuiet } from './utils/run-command.mts'
 
 const logger = getDefaultLogger()
 

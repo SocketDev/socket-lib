@@ -19,7 +19,7 @@ import {
   printHeader,
 } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runParallel } from './utils/run-command.mjs'
+import { runParallel } from './utils/run-command.mts'
 
 const logger = getDefaultLogger()
 

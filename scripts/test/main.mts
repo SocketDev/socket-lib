@@ -13,9 +13,9 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { getTestsToRun } from '../utils/changed-test-mapper.mjs'
-import { parseArgs } from '../utils/parse-args.mjs'
-import { onExit } from '../utils/signal-exit.mjs'
+import { getTestsToRun } from '../utils/changed-test-mapper.mts'
+import { parseArgs } from '../utils/parse-args.mts'
+import { onExit } from '../utils/signal-exit.mts'
 
 const logger = getDefaultLogger()
 const spinner = getDefaultSpinner()

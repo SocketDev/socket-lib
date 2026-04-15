@@ -11,7 +11,7 @@ import process from 'node:process'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
-import { externalPackages, scopedPackages } from '../build-externals/config.mjs'
+import { externalPackages, scopedPackages } from '../build-externals/config.mts'
 
 const logger = getDefaultLogger()
 

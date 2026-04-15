@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
-import { bundlePackage } from './bundler.mjs'
-import { externalPackages, scopedPackages } from './config.mjs'
-import { ensureDir } from './copy-files.mjs'
+import { bundlePackage } from './bundler.mts'
+import { externalPackages, scopedPackages } from './config.mts'
+import { ensureDir } from './copy-files.mts'
 
 const logger = getDefaultLogger()
 
