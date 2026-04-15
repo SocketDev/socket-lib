@@ -735,7 +735,7 @@
     "@socketregistry/yocto-spinner": "1.0.25",
     "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.18.2",
     "@types/node": "24.9.2",
-    "@typescript/native-preview": "7.0.0-dev.20250920.1",
+    "@typescript/native-preview": "7.0.0-dev.20260415.1",
     "@vitest/coverage-v8": "4.0.3",
     "@vitest/ui": "4.0.3",
     "@yarnpkg/core": "4.5.0",
