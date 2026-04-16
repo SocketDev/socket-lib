@@ -3,10 +3,6 @@ name: ⚡ CI
 # Dependencies:
 #   - SocketDev/socket-registry/.github/workflows/ci.yml
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 on:
   push:
     branches: [main]
@@ -14,39 +10,28 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      node-versions:
-        description: 'Node.js versions to test (JSON array)'
-        required: false
-        type: string
-        default: '["22", "24"]'
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@b86b2cb3fefa4ffa6c1a702476f9785f6c3bb887 # main
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@eb53b17da1dbb6170e3df74d28ec2e1e45678c70 # main
     with:
-      test-setup-script: 'pnpm run build'
-      lint-script: 'pnpm run lint --all'
-      type-check-script: 'pnpm run check'
       test-script: 'pnpm exec vitest --config .config/vitest.config.mts run'
-      node-versions: ${{ inputs.node-versions || '["22", "24"]' }}
-      os-versions: '["ubuntu-latest", "windows-latest"]'
-      fail-fast: false
-      max-parallel: 4
-      test-timeout-minutes: 15
 
-  # Isolated test suite - runs separately with full isolation
   test-isolated:
     name: Test (Isolated)
     needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@b86b2cb3fefa4ffa6c1a702476f9785f6c3bb887 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@eb53b17da1dbb6170e3df74d28ec2e1e45678c70 # main
 
       - name: Build project
         run: pnpm run build
