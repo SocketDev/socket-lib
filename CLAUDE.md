@@ -118,6 +118,7 @@ If user repeats instruction 2+ times, ask: "Should I add this to CLAUDE.md?"
 - Backward Compatibility: FORBIDDEN to maintain — actively remove when encountered (see canonical CLAUDE.md)
 - Work Safeguards: MANDATORY commit + backup branch before bulk changes
 - Safe Deletion: Use `safeDelete()` from `@socketsecurity/lib/fs` (NEVER `fs.rm/rmSync` or `rm -rf`)
+- File existence: ALWAYS `existsSync` from `node:fs`. NEVER `fs.access`, `fs.stat`-for-existence, or an async `fileExists` wrapper. Import form: `import { existsSync, promises as fs } from 'node:fs'`.
 
 ---
 
