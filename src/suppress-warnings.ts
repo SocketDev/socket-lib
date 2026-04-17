@@ -53,6 +53,11 @@ function setupSuppression(): void {
  * suppressMaxListenersWarning()
  */
 import process from 'node:process'
+/**
+ * Silence `MaxListenersExceededWarning` messages from `process.emitWarning`.
+ * Installs a single shared wrapper around `process.emitWarning` on first call
+ * so repeat invocations are cheap.
+ */
 export function suppressMaxListenersWarning(): void {
   suppressedWarnings.add('MaxListenersExceededWarning')
   setupSuppression()

@@ -153,29 +153,34 @@ export function globStreamLicenses(
 }
 
 const MATCHER_CACHE_MAX_SIZE = 100
+// LRU cache. We exploit Map's insertion-order iteration so eviction is O(1):
+// delete the first key. On read, delete + set moves the entry to the back,
+// keeping the cache in recency order.
 const matcherCache = new Map<string, (path: string) => boolean>()
-const matcherAccessOrder: string[] = []
-
-function evictLRUMatcher() {
-  if (
-    matcherCache.size >= MATCHER_CACHE_MAX_SIZE &&
-    matcherAccessOrder.length > 0
-  ) {
-    const oldest = matcherAccessOrder.shift()
-    if (oldest) {
-      matcherCache.delete(oldest)
-    }
-  }
-}
 
 /**
- * Get a cached glob matcher function.
+ * Return a glob-matcher function, memoized by pattern + options.
+ *
+ * The returned function is a fast synchronous predicate built on picomatch.
+ * Results are memoized — calling `getGlobMatcher(['*.ts'])` a thousand times
+ * in a loop returns the same compiled matcher each time, so callers do not
+ * need to hoist it themselves.
+ *
+ * The cache is LRU with a cap of 100 entries. Cache keys fold together the
+ * (sorted) pattern list and (sorted) option set, so arguments that differ
+ * only in ordering share a matcher.
+ *
+ * Default options: `dot: true`, `nocase: true`. Patterns starting with `!`
+ * become ignore patterns.
  *
  * @example
  * ```typescript
  * const isMatch = getGlobMatcher('*.ts')
  * isMatch('index.ts')  // true
  * isMatch('index.js')  // false
+ *
+ * // With negation
+ * const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -193,19 +198,21 @@ export function getGlobMatcher(
         .join(',')
     : ''
   const key = `${sortedPatterns.join('|')}:${sortedOptions}`
-  let matcher: ((path: string) => boolean) | undefined = matcherCache.get(key)
-  if (matcher) {
-    // Move to end of access order (LRU)
-    const index = matcherAccessOrder.indexOf(key)
-    if (index !== -1) {
-      matcherAccessOrder.splice(index, 1)
-      matcherAccessOrder.push(key)
-    }
-    return matcher
+  const existing = matcherCache.get(key)
+  if (existing) {
+    // Re-insert to mark as most-recently-used.
+    matcherCache.delete(key)
+    matcherCache.set(key, existing)
+    return existing
   }
 
-  // Evict oldest entry if cache is full
-  evictLRUMatcher()
+  // Evict oldest entry if cache is full (Map iteration order = insertion order).
+  if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
+    const oldest = matcherCache.keys().next().value
+    if (oldest !== undefined) {
+      matcherCache.delete(oldest)
+    }
+  }
 
   // Separate positive and negative patterns.
   const positivePatterns = patterns.filter(p => !p.startsWith('!'))
@@ -223,13 +230,12 @@ export function getGlobMatcher(
 
   /* c8 ignore next 5 - External picomatch call */
   const picomatch = getPicomatch()
-  matcher = picomatch(
+  const matcher = picomatch(
     positivePatterns.length > 0 ? positivePatterns : patterns,
     matchOptions,
   ) as (path: string) => boolean
 
   matcherCache.set(key, matcher)
-  matcherAccessOrder.push(key)
   return matcher
 }
 

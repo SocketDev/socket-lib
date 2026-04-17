@@ -437,6 +437,17 @@ export interface ExecScriptOptions extends SpawnOptions {
   prepost?: boolean | undefined
 }
 
+/**
+ * Execute a package.json script using the detected package manager.
+ * Picks pnpm, npm, or yarn by walking up to the nearest lockfile; falls back
+ * to running `node --run` or `npm run` directly when no lockfile is found.
+ * Honors `shell: true` by passing through to `spawn()` unchanged.
+ *
+ * @param scriptName - The package.json script to run
+ * @param args - Either the script arguments or an options object
+ * @param options - Spawn options plus `prepost` to force npm-style pre/post scripts
+ * @returns The spawned `ChildProcess`-like promise from the underlying runner.
+ */
 export function execScript(
   scriptName: string,
   args?: string[] | readonly string[] | ExecScriptOptions | undefined,

@@ -181,6 +181,17 @@ export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
  * ```
  */
 type ReadlineKey = { ctrl?: boolean; name?: string }
+/**
+ * Create a readline key handler that toggles buffered output on `ctrl+o` and
+ * cancels the child on `ctrl+c`. When toggled verbose, buffered output is
+ * flushed to the terminal; when toggled back, prior output is cleared and the
+ * spinner resumes.
+ *
+ * @param mask - Shared output-mask state used to track buffering and spinner status
+ * @param child - Child process that should be killed on cancellation
+ * @param options - Optional spinner message and toggle hint text
+ * @returns A readline keypress listener with the signature `(str, key) => void`.
+ */
 export function createKeyboardHandler(
   mask: OutputMask,
   child: ChildProcess,

@@ -21,6 +21,13 @@
  * ```
  */
 import process from 'node:process'
+/**
+ * Clear the current line on the given stream.
+ * Uses native TTY methods when available and falls back to `\r\x1b[K` ANSI
+ * escapes on non-TTY streams.
+ *
+ * @param stream - Output stream to clear (defaults to `process.stdout`)
+ */
 export function clearLine(stream: NodeJS.WriteStream = process.stdout): void {
   if (stream.isTTY) {
     // TTY: Use cursor control

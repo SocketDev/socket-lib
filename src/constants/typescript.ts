@@ -14,6 +14,12 @@ export function getTsTypesAvailable(): boolean {
   }
 }
 
+/**
+ * Check whether TypeScript's `lib/` directory is resolvable from the current
+ * project by probing `typescript/lib`.
+ *
+ * @returns `true` when the `typescript` package's libs can be resolved.
+ */
 export function getTsLibsAvailable(): boolean {
   try {
     require.resolve('typescript/lib')

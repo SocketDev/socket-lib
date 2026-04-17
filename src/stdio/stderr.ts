@@ -20,6 +20,12 @@ const stderr: NodeJS.WriteStream = process.stderr
  * ```
  */
 import process from 'node:process'
+/**
+ * Write a line to `stderr`, appending a trailing newline.
+ * Passing no argument writes an empty line.
+ *
+ * @param text - Text to write (defaults to the empty string)
+ */
 export function writeErrorLine(text: string = ''): void {
   stderr.write(`${text}\n`)
 }
