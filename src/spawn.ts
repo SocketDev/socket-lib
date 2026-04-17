@@ -33,28 +33,6 @@ import { stackWithCauses } from './errors'
 // @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
 
-let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getNpmCliPromiseSpawn() {
-  if (_npmCliPromiseSpawn === undefined) {
-    _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn')
-  }
-  return _npmCliPromiseSpawn!
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
 import { isArray } from './arrays'
 import { whichSync } from './bin'
 import { isPath } from './paths/normalize'
@@ -63,19 +41,6 @@ import { getDefaultSpinner } from './spinner'
 import { stripAnsi } from './strings'
 
 import type { EventEmitter } from 'node:events'
-
-let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
 
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
@@ -92,25 +57,10 @@ type BufferEncoding = globalThis.BufferEncoding
 
 const windowsScriptExtRegExp = /\.(?:cmd|bat|ps1)$/i
 
+let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
+let _path: typeof import('node:path') | undefined
+let _fs: typeof import('node:fs') | undefined
 let _child_process: typeof import('node:child_process') | undefined
-/**
- * Lazily load the `child_process` module to avoid Webpack bundling issues.
- *
- * @returns The Node.js `child_process` module
- *
- * @example
- * const childProcess = getChildProcess()
- * childProcess.spawnSync('ls', ['-la'])
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getChildProcess() {
-  if (_child_process === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _child_process = /*@__PURE__*/ require('node:child_process')
-  }
-  return _child_process as typeof import('node:child_process')
-}
 
 /**
  * Options for spawning a child process with promise-based completion.
@@ -276,6 +226,213 @@ export interface SpawnSyncReturns<T> {
   status: number | null
   signal: NodeJS.Signals | null
   error?: Error | undefined
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+// Duplicated from Node.js child_process.SpawnOptions
+// These are the options passed to child_process.spawn()
+interface NodeSpawnOptions {
+  cwd?: string | URL | undefined
+  env?: NodeJS.ProcessEnv | undefined
+  argv0?: string | undefined
+  stdio?: any
+  detached?: boolean | undefined
+  uid?: number | undefined
+  gid?: number | undefined
+  serialization?: 'json' | 'advanced' | undefined
+  shell?: boolean | string | undefined
+  windowsVerbatimArguments?: boolean | undefined
+  windowsHide?: boolean | undefined
+  signal?: AbortSignal | undefined
+  timeout?: number | undefined
+  killSignal?: NodeJS.Signals | number | undefined
+}
+
+// Duplicated from Node.js child_process.ChildProcess
+// This represents a spawned child process
+interface ChildProcess extends EventEmitter {
+  stdin: NodeJS.WritableStream | null
+  stdout: NodeJS.ReadableStream | null
+  stderr: NodeJS.ReadableStream | null
+  readonly channel?: any
+  readonly stdio: [
+    NodeJS.WritableStream | null,
+    NodeJS.ReadableStream | null,
+    NodeJS.ReadableStream | null,
+    NodeJS.ReadableStream | NodeJS.WritableStream | null | undefined,
+    NodeJS.ReadableStream | NodeJS.WritableStream | null | undefined,
+  ]
+  readonly killed: boolean
+  readonly pid?: number | undefined
+  readonly connected: boolean
+  readonly exitCode: number | null
+  readonly signalCode: NodeJS.Signals | null
+  readonly spawnargs: string[]
+  readonly spawnfile: string
+  kill(signal?: NodeJS.Signals | number): boolean
+  send(message: any, callback?: (error: Error | null) => void): boolean
+  send(
+    message: any,
+    sendHandle?: any | undefined,
+    callback?: (error: Error | null) => void,
+  ): boolean
+  send(
+    message: any,
+    sendHandle?: any | undefined,
+    options?: any | undefined,
+    callback?: (error: Error | null) => void,
+  ): boolean
+  disconnect(): void
+  unref(): void
+  ref(): void
+}
+
+// Duplicated from Node.js stream.Writable
+interface WritableStreamType {
+  writable: boolean
+  writableEnded: boolean
+  writableFinished: boolean
+  writableHighWaterMark: number
+  writableLength: number
+  writableObjectMode: boolean
+  writableCorked: number
+  destroyed: boolean
+  write(
+    chunk: any,
+    encoding?: BufferEncoding | undefined,
+    callback?: (error?: Error | null) => void,
+  ): boolean
+  write(chunk: any, callback?: (error?: Error | null) => void): boolean
+  end(cb?: () => void): this
+  end(chunk: any, cb?: () => void): this
+  end(chunk: any, encoding?: BufferEncoding | undefined, cb?: () => void): this
+  cork(): void
+  uncork(): void
+  destroy(error?: Error | undefined): this
+}
+
+/**
+ * Options for spawning a child process with {@link spawn}.
+ * Extends Node.js spawn options with additional Socket-specific functionality.
+ *
+ * @property {string | URL | undefined} cwd - Current working directory
+ * @property {NodeJS.ProcessEnv | undefined} env - Environment variables
+ * @property {number | undefined} gid - Group identity (POSIX)
+ * @property {boolean | string | undefined} shell - Run command in shell
+ * @property {AbortSignal | undefined} signal - Abort signal
+ * @property {import('./spinner').Spinner | undefined} spinner - Spinner instance to pause during execution
+ * @property {StdioType | undefined} stdio - Stdio configuration
+ * @property {boolean | undefined} stdioString - Convert output to strings (default: `true`)
+ * @property {boolean | undefined} stripAnsi - Remove ANSI codes from output (default: `true`)
+ * @property {number | undefined} timeout - Timeout in milliseconds
+ * @property {number | undefined} uid - User identity (POSIX)
+ * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or escape arguments on Windows (requires shell: true). Use when you need exact argument control. Default: false
+ */
+export type SpawnOptions = import('./objects').Remap<
+  NodeSpawnOptions & {
+    spinner?: import('./spinner').Spinner | undefined
+    stdioString?: boolean
+    stripAnsi?: boolean
+  }
+>
+export type SpawnResult = PromiseSpawnResult
+/**
+ * Result object returned when a spawned process completes.
+ *
+ * @property {string} cmd - Command that was executed
+ * @property {string[] | readonly string[]} args - Arguments passed to the command
+ * @property {number} code - Process exit code
+ * @property {NodeJS.Signals | null} signal - Signal that terminated the process, if any
+ * @property {string | Buffer} stdout - Standard output (string if `stdioString: true`, Buffer otherwise)
+ * @property {string | Buffer} stderr - Standard error (string if `stdioString: true`, Buffer otherwise)
+ */
+export type SpawnStdioResult = {
+  cmd: string
+  args: string[] | readonly string[]
+  code: number
+  signal: NodeJS.Signals | null
+  stdout: string | Buffer
+  stderr: string | Buffer
+}
+
+/**
+ * Options for synchronously spawning a child process with {@link spawnSync}.
+ * Same as {@link SpawnOptions} but excludes the `spinner` property (not applicable for synchronous execution).
+ */
+export type SpawnSyncOptions = Omit<SpawnOptions, 'spinner'>
+
+/**
+ * Lazily load the `child_process` module to avoid Webpack bundling issues.
+ *
+ * @returns The Node.js `child_process` module
+ *
+ * @example
+ * const childProcess = getChildProcess()
+ * childProcess.spawnSync('ls', ['-la'])
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getChildProcess() {
+  if (_child_process === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _child_process = /*@__PURE__*/ require('node:child_process')
+  }
+  return _child_process as typeof import('node:child_process')
+}
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+function getNpmCliPromiseSpawn() {
+  if (_npmCliPromiseSpawn === undefined) {
+    _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn')
+  }
+  return _npmCliPromiseSpawn!
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
+}
+
+/**
+ * Strip ANSI escape codes from spawn result stdout and stderr.
+ * Modifies the result object in place to remove color codes and formatting.
+ *
+ * @param {unknown} result - Spawn result object with stdout/stderr properties
+ * @returns {unknown} The modified result object
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function stripAnsiFromSpawnResult(result: unknown): unknown {
+  const res = result as {
+    stdout?: string | Buffer
+    stderr?: string | Buffer
+  }
+  const { stderr, stdout } = res
+  if (typeof stdout === 'string') {
+    res.stdout = stripAnsi(stdout)
+  }
+  if (typeof stderr === 'string') {
+    res.stderr = stripAnsi(stderr)
+  }
+  return res
 }
 
 /**
@@ -455,156 +612,6 @@ export function isStdioType(
       stdio[1] === type &&
       stdio[2] === type)
   )
-}
-
-/**
- * Strip ANSI escape codes from spawn result stdout and stderr.
- * Modifies the result object in place to remove color codes and formatting.
- *
- * @param {unknown} result - Spawn result object with stdout/stderr properties
- * @returns {unknown} The modified result object
- */
-/*@__NO_SIDE_EFFECTS__*/
-function stripAnsiFromSpawnResult(result: unknown): unknown {
-  const res = result as {
-    stdout?: string | Buffer
-    stderr?: string | Buffer
-  }
-  const { stderr, stdout } = res
-  if (typeof stdout === 'string') {
-    res.stdout = stripAnsi(stdout)
-  }
-  if (typeof stderr === 'string') {
-    res.stderr = stripAnsi(stderr)
-  }
-  return res
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-// Duplicated from Node.js child_process.SpawnOptions
-// These are the options passed to child_process.spawn()
-interface NodeSpawnOptions {
-  cwd?: string | URL | undefined
-  env?: NodeJS.ProcessEnv | undefined
-  argv0?: string | undefined
-  stdio?: any
-  detached?: boolean | undefined
-  uid?: number | undefined
-  gid?: number | undefined
-  serialization?: 'json' | 'advanced' | undefined
-  shell?: boolean | string | undefined
-  windowsVerbatimArguments?: boolean | undefined
-  windowsHide?: boolean | undefined
-  signal?: AbortSignal | undefined
-  timeout?: number | undefined
-  killSignal?: NodeJS.Signals | number | undefined
-}
-
-// Duplicated from Node.js child_process.ChildProcess
-// This represents a spawned child process
-interface ChildProcess extends EventEmitter {
-  stdin: NodeJS.WritableStream | null
-  stdout: NodeJS.ReadableStream | null
-  stderr: NodeJS.ReadableStream | null
-  readonly channel?: any
-  readonly stdio: [
-    NodeJS.WritableStream | null,
-    NodeJS.ReadableStream | null,
-    NodeJS.ReadableStream | null,
-    NodeJS.ReadableStream | NodeJS.WritableStream | null | undefined,
-    NodeJS.ReadableStream | NodeJS.WritableStream | null | undefined,
-  ]
-  readonly killed: boolean
-  readonly pid?: number | undefined
-  readonly connected: boolean
-  readonly exitCode: number | null
-  readonly signalCode: NodeJS.Signals | null
-  readonly spawnargs: string[]
-  readonly spawnfile: string
-  kill(signal?: NodeJS.Signals | number): boolean
-  send(message: any, callback?: (error: Error | null) => void): boolean
-  send(
-    message: any,
-    sendHandle?: any | undefined,
-    callback?: (error: Error | null) => void,
-  ): boolean
-  send(
-    message: any,
-    sendHandle?: any | undefined,
-    options?: any | undefined,
-    callback?: (error: Error | null) => void,
-  ): boolean
-  disconnect(): void
-  unref(): void
-  ref(): void
-}
-
-// Duplicated from Node.js stream.Writable
-interface WritableStreamType {
-  writable: boolean
-  writableEnded: boolean
-  writableFinished: boolean
-  writableHighWaterMark: number
-  writableLength: number
-  writableObjectMode: boolean
-  writableCorked: number
-  destroyed: boolean
-  write(
-    chunk: any,
-    encoding?: BufferEncoding | undefined,
-    callback?: (error?: Error | null) => void,
-  ): boolean
-  write(chunk: any, callback?: (error?: Error | null) => void): boolean
-  end(cb?: () => void): this
-  end(chunk: any, cb?: () => void): this
-  end(chunk: any, encoding?: BufferEncoding | undefined, cb?: () => void): this
-  cork(): void
-  uncork(): void
-  destroy(error?: Error | undefined): this
-}
-
-/**
- * Options for spawning a child process with {@link spawn}.
- * Extends Node.js spawn options with additional Socket-specific functionality.
- *
- * @property {string | URL | undefined} cwd - Current working directory
- * @property {NodeJS.ProcessEnv | undefined} env - Environment variables
- * @property {number | undefined} gid - Group identity (POSIX)
- * @property {boolean | string | undefined} shell - Run command in shell
- * @property {AbortSignal | undefined} signal - Abort signal
- * @property {import('./spinner').Spinner | undefined} spinner - Spinner instance to pause during execution
- * @property {StdioType | undefined} stdio - Stdio configuration
- * @property {boolean | undefined} stdioString - Convert output to strings (default: `true`)
- * @property {boolean | undefined} stripAnsi - Remove ANSI codes from output (default: `true`)
- * @property {number | undefined} timeout - Timeout in milliseconds
- * @property {number | undefined} uid - User identity (POSIX)
- * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or escape arguments on Windows (requires shell: true). Use when you need exact argument control. Default: false
- */
-export type SpawnOptions = import('./objects').Remap<
-  NodeSpawnOptions & {
-    spinner?: import('./spinner').Spinner | undefined
-    stdioString?: boolean
-    stripAnsi?: boolean
-  }
->
-export type SpawnResult = PromiseSpawnResult
-/**
- * Result object returned when a spawned process completes.
- *
- * @property {string} cmd - Command that was executed
- * @property {string[] | readonly string[]} args - Arguments passed to the command
- * @property {number} code - Process exit code
- * @property {NodeJS.Signals | null} signal - Signal that terminated the process, if any
- * @property {string | Buffer} stdout - Standard output (string if `stdioString: true`, Buffer otherwise)
- * @property {string | Buffer} stderr - Standard error (string if `stdioString: true`, Buffer otherwise)
- */
-export type SpawnStdioResult = {
-  cmd: string
-  args: string[] | readonly string[]
-  code: number
-  signal: NodeJS.Signals | null
-  stdout: string | Buffer
-  stderr: string | Buffer
 }
 
 /**
@@ -847,13 +854,6 @@ export function spawn(
   ).stdin
   return newSpawnPromise as SpawnResult
 }
-
-/*@__NO_SIDE_EFFECTS__*/
-/**
- * Options for synchronously spawning a child process with {@link spawnSync}.
- * Same as {@link SpawnOptions} but excludes the `spinner` property (not applicable for synchronous execution).
- */
-export type SpawnSyncOptions = Omit<SpawnOptions, 'spinner'>
 
 /**
  * Synchronously spawn a child process and wait for it to complete.

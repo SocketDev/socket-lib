@@ -24,16 +24,6 @@ import type {
   deleteSync as deleteSyncType,
 } from './external/del'
 
-let _del:
-  | { deleteAsync: typeof deleteAsyncType; deleteSync: typeof deleteSyncType }
-  | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getDel() {
-  if (_del === undefined) {
-    _del = /*@__PURE__*/ require('./external/del')
-  }
-  return _del!
-}
 import { pRetry } from './promises'
 import { defaultIgnore, getGlobMatcher } from './globs'
 import type { JsonReviver } from './json/types'
@@ -312,6 +302,22 @@ export interface WriteJsonOptions extends WriteOptions {
   spaces?: number | string | undefined
 }
 
+/**
+ * Result of file readability validation.
+ * Contains lists of valid and invalid file paths.
+ */
+export interface ValidateFilesResult {
+  /**
+   * File paths that passed validation and are readable.
+   */
+  validPaths: string[]
+  /**
+   * File paths that failed validation (unreadable, permission denied, or non-existent).
+   * Common with Yarn Berry PnP virtual filesystem, pnpm symlinks, or filesystem race conditions.
+   */
+  invalidPaths: string[]
+}
+
 const defaultRemoveOptions = objectFreeze({
   __proto__: null,
   force: true,
@@ -320,8 +326,14 @@ const defaultRemoveOptions = objectFreeze({
   retryDelay: 200,
 })
 
+let _del:
+  | { deleteAsync: typeof deleteAsyncType; deleteSync: typeof deleteSyncType }
+  | undefined
 // Cache for resolved allowed directories
 let _cachedAllowedDirs: string[] | undefined
+let _buffer: typeof import('node:buffer') | undefined
+let _fs: typeof import('node:fs') | undefined
+let _path: typeof import('node:path') | undefined
 
 /**
  * Get resolved allowed directories for safe deletion with lazy caching.
@@ -341,7 +353,6 @@ function getAllowedDirectories(): string[] {
   return _cachedAllowedDirs
 }
 
-let _buffer: typeof import('node:buffer') | undefined
 /**
  * Lazily load the buffer module.
  *
@@ -360,7 +371,14 @@ function getBuffer() {
   return _buffer as typeof import('node:buffer')
 }
 
-let _fs: typeof import('node:fs') | undefined
+/*@__NO_SIDE_EFFECTS__*/
+function getDel() {
+  if (_del === undefined) {
+    _del = /*@__PURE__*/ require('./external/del')
+  }
+  return _del!
+}
+
 /**
  * Lazily load the fs module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
@@ -377,7 +395,6 @@ function getFs() {
   return _fs as typeof import('node:fs')
 }
 
-let _path: typeof import('node:path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.
  * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
@@ -623,9 +640,6 @@ export function invalidatePathCache(): void {
   _cachedAllowedDirs = undefined
 }
 
-// Register cache invalidation with the rewire module
-registerCacheInvalidation(invalidatePathCache)
-
 /**
  * Check if a path is a directory asynchronously.
  * Returns `true` for directories, `false` for files or non-existent paths.
@@ -643,25 +657,6 @@ registerCacheInvalidation(invalidatePathCache)
 /*@__NO_SIDE_EFFECTS__*/
 export async function isDir(filepath: PathLike) {
   return !!(await safeStats(filepath))?.isDirectory()
-}
-
-/**
- * Check if a path is a directory synchronously.
- * Returns `true` for directories, `false` for files or non-existent paths.
- *
- * @param filepath - Path to check
- * @returns `true` if path is a directory, `false` otherwise
- *
- * @example
- * ```ts
- * if (isDirSync('./src')) {
- *   console.log('src is a directory')
- * }
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function isDirSync(filepath: PathLike) {
-  return !!safeStatsSync(filepath)?.isDirectory()
 }
 
 /**
@@ -716,6 +711,25 @@ export function isDirEmptySync(
     // Return false for non-existent paths or other errors.
     return false
   }
+}
+
+/**
+ * Check if a path is a directory synchronously.
+ * Returns `true` for directories, `false` for files or non-existent paths.
+ *
+ * @param filepath - Path to check
+ * @returns `true` if path is a directory, `false` otherwise
+ *
+ * @example
+ * ```ts
+ * if (isDirSync('./src')) {
+ *   console.log('src is a directory')
+ * }
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isDirSync(filepath: PathLike) {
+  return !!safeStatsSync(filepath)?.isDirectory()
 }
 
 /**
@@ -982,38 +996,6 @@ export async function readFileBinary(
 }
 
 /**
- * Read a file as UTF-8 text asynchronously.
- * Returns a string with the file contents decoded as UTF-8.
- * This is the most common way to read text files.
- *
- * @param filepath - Path to file
- * @param options - Read options including encoding and abort signal
- * @returns Promise resolving to string containing file contents
- *
- * @example
- * ```ts
- * // Read a text file
- * const content = await readFileUtf8('./README.md')
- *
- * // Read with custom encoding
- * const content = await readFileUtf8('./data.txt', { encoding: 'utf-8' })
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export async function readFileUtf8(
-  filepath: PathLike,
-  options?: ReadFileOptions | undefined,
-) {
-  const opts = typeof options === 'string' ? { encoding: options } : options
-  const fs = getFs()
-  return await fs.promises.readFile(filepath, {
-    signal: abortSignal,
-    ...opts,
-    encoding: 'utf8',
-  })
-}
-
-/**
  * Read a file as binary data synchronously.
  * Returns a Buffer without encoding the contents.
  * Useful for reading images, archives, or other binary formats.
@@ -1043,6 +1025,38 @@ export function readFileBinarySync(
     ...opts,
     encoding: null,
   } as ObjectEncodingOptions)
+}
+
+/**
+ * Read a file as UTF-8 text asynchronously.
+ * Returns a string with the file contents decoded as UTF-8.
+ * This is the most common way to read text files.
+ *
+ * @param filepath - Path to file
+ * @param options - Read options including encoding and abort signal
+ * @returns Promise resolving to string containing file contents
+ *
+ * @example
+ * ```ts
+ * // Read a text file
+ * const content = await readFileUtf8('./README.md')
+ *
+ * // Read with custom encoding
+ * const content = await readFileUtf8('./data.txt', { encoding: 'utf-8' })
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export async function readFileUtf8(
+  filepath: PathLike,
+  options?: ReadFileOptions | undefined,
+) {
+  const opts = typeof options === 'string' ? { encoding: options } : options
+  const fs = getFs()
+  return await fs.promises.readFile(filepath, {
+    signal: abortSignal,
+    ...opts,
+    encoding: 'utf8',
+  })
 }
 
 /**
@@ -1779,22 +1793,6 @@ export function uniqueSync(filepath: PathLike): string {
 }
 
 /**
- * Result of file readability validation.
- * Contains lists of valid and invalid file paths.
- */
-export interface ValidateFilesResult {
-  /**
-   * File paths that passed validation and are readable.
-   */
-  validPaths: string[]
-  /**
-   * File paths that failed validation (unreadable, permission denied, or non-existent).
-   * Common with Yarn Berry PnP virtual filesystem, pnpm symlinks, or filesystem race conditions.
-   */
-  invalidPaths: string[]
-}
-
-/**
  * Validate that file paths are readable before processing.
  * Filters out files from glob results that cannot be accessed (common with
  * Yarn Berry PnP virtual filesystem, pnpm content-addressable store symlinks,
@@ -1947,3 +1945,6 @@ export function writeJsonSync(
     __proto__: null,
   } as WriteFileOptions)
 }
+
+// Register cache invalidation with the rewire module
+registerCacheInvalidation(invalidatePathCache)

@@ -94,53 +94,11 @@ const ReflectApply = Reflect.apply
 const ReflectConstruct = Reflect.construct
 
 let _Console: typeof import('node:console').Console | undefined
-/**
- * Construct a new Console instance.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function constructConsole(...args: unknown[]) {
-  if (_Console === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    const nodeConsole = /*@__PURE__*/ require('node:console')
-    _Console = nodeConsole.Console
-  }
-  return ReflectConstruct(
-    _Console! as new (...args: unknown[]) => Console, // eslint-disable-line no-undef
-    args,
-  )
-}
-
-/**
- * Get the yoctocolors module for terminal colors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getYoctocolors() {
-  return yoctocolorsCjs
-}
-
-/**
- * Apply a color to text using yoctocolors.
- * Handles both named colors and RGB tuples.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function applyColor(
-  text: string,
-  color: ColorValue,
-  colors: typeof yoctocolorsCjs,
-): string {
-  if (typeof color === 'string') {
-    // Named color like 'green', 'red', etc.
-    return (colors as any)[color](text)
-  }
-  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
-  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
-  const { 0: r, 1: g, 2: b } = color
-  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
-}
+let _consoleSymbols: symbol[] | undefined
+let _kGroupIndentationWidthSymbol: symbol | undefined
+let _prototypeInitialized = false
+// Private singleton instance
+let _logger: Logger | undefined
 
 /**
  * Log symbols for terminal output with colored indicators.
@@ -310,41 +268,12 @@ const privateConsole = new WeakMap()
 const privateConstructorArgs = new WeakMap()
 
 /**
- * Lazily get console symbols on first access.
- *
- * Deferred to avoid accessing global console during early Node.js bootstrap
- * before stdout is ready.
- * @private
- */
-let _consoleSymbols: symbol[] | undefined
-function getConsoleSymbols(): symbol[] {
-  if (_consoleSymbols === undefined) {
-    _consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
-  }
-  return _consoleSymbols
-}
-
-/**
  * Symbol for incrementing the internal log call counter.
  *
  * This is an internal symbol used to track the number of times logging
  * methods have been called on a logger instance.
  */
 export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
-
-/**
- * Lazily get kGroupIndentationWidth symbol on first access.
- * @private
- */
-let _kGroupIndentationWidthSymbol: symbol | undefined
-function getKGroupIndentationWidthSymbol(): symbol {
-  if (_kGroupIndentationWidthSymbol === undefined) {
-    _kGroupIndentationWidthSymbol =
-      getConsoleSymbols().find(s => (s as any).label === 'kGroupIndentWidth') ??
-      Symbol('kGroupIndentWidth')
-  }
-  return _kGroupIndentationWidthSymbol
-}
 
 /**
  * Symbol for tracking whether the last logged line was blank.
@@ -1766,13 +1695,51 @@ export class Logger {
 }
 
 /**
+ * Apply a color to text using yoctocolors.
+ * Handles both named colors and RGB tuples.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function applyColor(
+  text: string,
+  color: ColorValue,
+  colors: typeof yoctocolorsCjs,
+): string {
+  if (typeof color === 'string') {
+    // Named color like 'green', 'red', etc.
+    return (colors as any)[color](text)
+  }
+  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
+  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
+  const { 0: r, 1: g, 2: b } = color
+  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
+}
+
+/**
+ * Construct a new Console instance.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function constructConsole(...args: unknown[]) {
+  if (_Console === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    const nodeConsole = /*@__PURE__*/ require('node:console')
+    _Console = nodeConsole.Console
+  }
+  return ReflectConstruct(
+    _Console! as new (...args: unknown[]) => Console, // eslint-disable-line no-undef
+    args,
+  )
+}
+
+/**
  * Lazily add dynamic console methods to Logger prototype.
  *
  * This is deferred until first access to avoid calling Object.entries(globalConsole)
  * during early Node.js bootstrap before stdout is ready.
  * @private
  */
-let _prototypeInitialized = false
 function ensurePrototypeInitialized() {
   if (_prototypeInitialized) {
     return
@@ -1841,8 +1808,41 @@ function ensurePrototypeInitialized() {
   Object.defineProperties(Logger.prototype, Object.fromEntries(entries))
 }
 
-// Private singleton instance
-let _logger: Logger | undefined
+/**
+ * Lazily get console symbols on first access.
+ *
+ * Deferred to avoid accessing global console during early Node.js bootstrap
+ * before stdout is ready.
+ * @private
+ */
+function getConsoleSymbols(): symbol[] {
+  if (_consoleSymbols === undefined) {
+    _consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
+  }
+  return _consoleSymbols
+}
+
+/**
+ * Lazily get kGroupIndentationWidth symbol on first access.
+ * @private
+ */
+function getKGroupIndentationWidthSymbol(): symbol {
+  if (_kGroupIndentationWidthSymbol === undefined) {
+    _kGroupIndentationWidthSymbol =
+      getConsoleSymbols().find(s => (s as any).label === 'kGroupIndentWidth') ??
+      Symbol('kGroupIndentWidth')
+  }
+  return _kGroupIndentationWidthSymbol
+}
+
+/**
+ * Get the yoctocolors module for terminal colors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getYoctocolors() {
+  return yoctocolorsCjs
+}
 
 /**
  * Get the default logger instance.
@@ -1866,7 +1866,3 @@ export function getDefaultLogger(): Logger {
   }
   return _logger
 }
-
-// REMOVED: Deprecated `logger` export
-// Migration: Use getDefaultLogger() instead
-// See: getDefaultLogger() function above

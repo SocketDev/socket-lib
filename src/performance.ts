@@ -29,45 +29,163 @@ function isPerfEnabled(): boolean {
 }
 
 /**
- * Start a performance timer for an operation.
- * Returns a stop function that records the duration.
- *
- * @param operation - Name of the operation being timed
- * @param metadata - Optional metadata to attach to the metric
- * @returns Stop function that completes the timing
+ * Clear all collected performance metrics.
  *
  * @example
- * import { perfTimer } from '@socketsecurity/lib/performance'
+ * import { clearPerformanceMetrics } from '@socketsecurity/lib/performance'
  *
- * const stop = perfTimer('api-call')
- * await fetchData()
- * stop({ endpoint: '/npm/lodash/score' })
+ * clearPerformanceMetrics()
  */
-export function perfTimer(
-  operation: string,
-  metadata?: Record<string, unknown>,
-): (additionalMetadata?: Record<string, unknown>) => void {
-  if (!isPerfEnabled()) {
-    // No-op if perf tracking disabled
-    return () => {}
+export function clearPerformanceMetrics(): void {
+  performanceMetrics.length = 0
+  debugLog('[perf] Cleared performance metrics')
+}
+
+/**
+ * Create a performance report for the current execution.
+ * Only available when DEBUG=perf is enabled.
+ *
+ * @returns Formatted performance report
+ *
+ * @example
+ * import { generatePerformanceReport } from '@socketsecurity/lib/performance'
+ *
+ * console.log(generatePerformanceReport())
+ * // ╔═══════════════════════════════════════════════╗
+ * // ║         Performance Report                    ║
+ * // ╚═══════════════════════════════════════════════╝
+ * //
+ * // api-call:
+ * //   Calls: 5
+ * //   Avg:   246.8ms
+ * //   Min:   100ms
+ * //   Max:   500ms
+ * //   Total: 1234ms
+ */
+export function generatePerformanceReport(): string {
+  if (!isPerfEnabled() || performanceMetrics.length === 0) {
+    return '(no performance data collected - enable with DEBUG=perf)'
   }
 
-  const start = performance.now()
-  debugLog(`[perf] [START] ${operation}`)
+  const summary = getPerformanceSummary()
+  const operations = Object.keys(summary).sort()
 
-  return (additionalMetadata?: Record<string, unknown>) => {
-    const duration = performance.now() - start
-    const metric: PerformanceMetrics = {
-      operation,
-      // Round to 2 decimals
-      duration: Math.round(duration * 100) / 100,
-      timestamp: Date.now(),
-      metadata: { ...metadata, ...additionalMetadata },
+  let report = '\n╔═══════════════════════════════════════════════╗\n'
+  report += '║         Performance Report                    ║\n'
+  report += '╚═══════════════════════════════════════════════╝\n\n'
+
+  for (const operation of operations) {
+    const stats = summary[operation] as {
+      count: number
+      total: number
+      avg: number
+      min: number
+      max: number
+    }
+    report += `${operation}:\n`
+    report += `  Calls: ${stats.count}\n`
+    report += `  Avg:   ${stats.avg}ms\n`
+    report += `  Min:   ${stats.min}ms\n`
+    report += `  Max:   ${stats.max}ms\n`
+    report += `  Total: ${stats.total}ms\n\n`
+  }
+
+  const totalDuration = Object.values(summary).reduce(
+    (sum, s) => sum + s.total,
+    0,
+  )
+  report += `Total measured time: ${Math.round(totalDuration * 100) / 100}ms\n`
+
+  return report
+}
+
+/**
+ * Get all collected performance metrics.
+ * Only available when DEBUG=perf is enabled.
+ *
+ * @returns Array of performance metrics
+ *
+ * @example
+ * import { getPerformanceMetrics } from '@socketsecurity/lib/performance'
+ *
+ * const metrics = getPerformanceMetrics()
+ * console.log(metrics)
+ */
+export function getPerformanceMetrics(): PerformanceMetrics[] {
+  return [...performanceMetrics]
+}
+
+/**
+ * Get performance summary statistics.
+ *
+ * @returns Summary of metrics grouped by operation
+ *
+ * @example
+ * import { getPerformanceSummary } from '@socketsecurity/lib/performance'
+ *
+ * const summary = getPerformanceSummary()
+ * console.log(summary)
+ * // {
+ * //   'api-call': { count: 5, total: 1234, avg: 246.8, min: 100, max: 500 },
+ * //   'file-read': { count: 10, total: 50, avg: 5, min: 2, max: 15 }
+ * // }
+ */
+export function getPerformanceSummary(): Record<
+  string,
+  {
+    count: number
+    total: number
+    avg: number
+    min: number
+    max: number
+  }
+> {
+  const summary: Record<
+    string,
+    { count: number; total: number; min: number; max: number }
+  > = Object.create(null)
+
+  for (const metric of performanceMetrics) {
+    const { duration, operation } = metric
+
+    if (!summary[operation]) {
+      summary[operation] = {
+        count: 0,
+        total: 0,
+        min: Number.POSITIVE_INFINITY,
+        max: Number.NEGATIVE_INFINITY,
+      }
     }
 
-    performanceMetrics.push(metric)
-    debugLog(`[perf] [END] ${operation} - ${metric.duration}ms`)
+    const stats = summary[operation] as {
+      count: number
+      total: number
+      min: number
+      max: number
+    }
+    stats.count++
+    stats.total += duration
+    stats.min = Math.min(stats.min, duration)
+    stats.max = Math.max(stats.max, duration)
   }
+
+  // Calculate averages and return with proper typing
+  const result: Record<
+    string,
+    { count: number; total: number; avg: number; min: number; max: number }
+  > = Object.create(null)
+
+  for (const { 0: operation, 1: stats } of Object.entries(summary)) {
+    result[operation] = {
+      count: stats.count,
+      total: Math.round(stats.total * 100) / 100,
+      avg: Math.round((stats.total / stats.count) * 100) / 100,
+      min: Math.round(stats.min * 100) / 100,
+      max: Math.round(stats.max * 100) / 100,
+    }
+  }
+
+  return result
 }
 
 /**
@@ -146,105 +264,81 @@ export function measureSync<T>(
 }
 
 /**
- * Get all collected performance metrics.
- * Only available when DEBUG=perf is enabled.
+ * Mark a checkpoint in performance tracking.
+ * Useful for tracking progress through complex operations.
  *
- * @returns Array of performance metrics
+ * @param checkpoint - Name of the checkpoint
+ * @param metadata - Optional metadata
  *
  * @example
- * import { getPerformanceMetrics } from '@socketsecurity/lib/performance'
+ * import { perfCheckpoint } from '@socketsecurity/lib/performance'
  *
- * const metrics = getPerformanceMetrics()
- * console.log(metrics)
+ * perfCheckpoint('start-scan')
+ * // ... do work ...
+ * perfCheckpoint('fetch-packages', { count: 50 })
+ * // ... do work ...
+ * perfCheckpoint('analyze-issues', { issueCount: 10 })
+ * perfCheckpoint('end-scan')
  */
-export function getPerformanceMetrics(): PerformanceMetrics[] {
-  return [...performanceMetrics]
+export function perfCheckpoint(
+  checkpoint: string,
+  metadata?: Record<string, unknown>,
+): void {
+  if (!isPerfEnabled()) {
+    return
+  }
+
+  const metric: PerformanceMetrics = {
+    operation: `checkpoint:${checkpoint}`,
+    duration: 0,
+    timestamp: Date.now(),
+    ...(metadata ? { metadata } : {}),
+  }
+
+  performanceMetrics.push(metric)
+  debugLog(`[perf] [CHECKPOINT] ${checkpoint}`)
 }
 
 /**
- * Clear all collected performance metrics.
+ * Start a performance timer for an operation.
+ * Returns a stop function that records the duration.
+ *
+ * @param operation - Name of the operation being timed
+ * @param metadata - Optional metadata to attach to the metric
+ * @returns Stop function that completes the timing
  *
  * @example
- * import { clearPerformanceMetrics } from '@socketsecurity/lib/performance'
+ * import { perfTimer } from '@socketsecurity/lib/performance'
  *
- * clearPerformanceMetrics()
+ * const stop = perfTimer('api-call')
+ * await fetchData()
+ * stop({ endpoint: '/npm/lodash/score' })
  */
-export function clearPerformanceMetrics(): void {
-  performanceMetrics.length = 0
-  debugLog('[perf] Cleared performance metrics')
-}
-
-/**
- * Get performance summary statistics.
- *
- * @returns Summary of metrics grouped by operation
- *
- * @example
- * import { getPerformanceSummary } from '@socketsecurity/lib/performance'
- *
- * const summary = getPerformanceSummary()
- * console.log(summary)
- * // {
- * //   'api-call': { count: 5, total: 1234, avg: 246.8, min: 100, max: 500 },
- * //   'file-read': { count: 10, total: 50, avg: 5, min: 2, max: 15 }
- * // }
- */
-export function getPerformanceSummary(): Record<
-  string,
-  {
-    count: number
-    total: number
-    avg: number
-    min: number
-    max: number
-  }
-> {
-  const summary: Record<
-    string,
-    { count: number; total: number; min: number; max: number }
-  > = Object.create(null)
-
-  for (const metric of performanceMetrics) {
-    const { duration, operation } = metric
-
-    if (!summary[operation]) {
-      summary[operation] = {
-        count: 0,
-        total: 0,
-        min: Number.POSITIVE_INFINITY,
-        max: Number.NEGATIVE_INFINITY,
-      }
-    }
-
-    const stats = summary[operation] as {
-      count: number
-      total: number
-      min: number
-      max: number
-    }
-    stats.count++
-    stats.total += duration
-    stats.min = Math.min(stats.min, duration)
-    stats.max = Math.max(stats.max, duration)
+export function perfTimer(
+  operation: string,
+  metadata?: Record<string, unknown>,
+): (additionalMetadata?: Record<string, unknown>) => void {
+  if (!isPerfEnabled()) {
+    // No-op if perf tracking disabled
+    return () => {}
   }
 
-  // Calculate averages and return with proper typing
-  const result: Record<
-    string,
-    { count: number; total: number; avg: number; min: number; max: number }
-  > = Object.create(null)
+  const start = performance.now()
+  debugLog(`[perf] [START] ${operation}`)
 
-  for (const { 0: operation, 1: stats } of Object.entries(summary)) {
-    result[operation] = {
-      count: stats.count,
-      total: Math.round(stats.total * 100) / 100,
-      avg: Math.round((stats.total / stats.count) * 100) / 100,
-      min: Math.round(stats.min * 100) / 100,
-      max: Math.round(stats.max * 100) / 100,
+  return (additionalMetadata?: Record<string, unknown>) => {
+    const duration = performance.now() - start
+    const metric: PerformanceMetrics = {
+      operation,
+      // Round to 2 decimals
+      duration: Math.round(duration * 100) / 100,
+      timestamp: Date.now(),
+      metadata: { ...metadata, ...additionalMetadata },
     }
-  }
 
-  return result
+    performanceMetrics.push(metric)
+    debugLog(`[perf] [END] ${operation} - ${metric.duration}ms`)
+  }
 }
 
 /**
@@ -286,42 +380,6 @@ export function printPerformanceSummary(): void {
 }
 
 /**
- * Mark a checkpoint in performance tracking.
- * Useful for tracking progress through complex operations.
- *
- * @param checkpoint - Name of the checkpoint
- * @param metadata - Optional metadata
- *
- * @example
- * import { perfCheckpoint } from '@socketsecurity/lib/performance'
- *
- * perfCheckpoint('start-scan')
- * // ... do work ...
- * perfCheckpoint('fetch-packages', { count: 50 })
- * // ... do work ...
- * perfCheckpoint('analyze-issues', { issueCount: 10 })
- * perfCheckpoint('end-scan')
- */
-export function perfCheckpoint(
-  checkpoint: string,
-  metadata?: Record<string, unknown>,
-): void {
-  if (!isPerfEnabled()) {
-    return
-  }
-
-  const metric: PerformanceMetrics = {
-    operation: `checkpoint:${checkpoint}`,
-    duration: 0,
-    timestamp: Date.now(),
-    ...(metadata ? { metadata } : {}),
-  }
-
-  performanceMetrics.push(metric)
-  debugLog(`[perf] [CHECKPOINT] ${checkpoint}`)
-}
-
-/**
  * Track memory usage at a specific point.
  * Only available when DEBUG=perf is enabled.
  *
@@ -360,62 +418,4 @@ export function trackMemory(label: string): number {
   performanceMetrics.push(metric)
 
   return heapUsedMB
-}
-
-/**
- * Create a performance report for the current execution.
- * Only available when DEBUG=perf is enabled.
- *
- * @returns Formatted performance report
- *
- * @example
- * import { generatePerformanceReport } from '@socketsecurity/lib/performance'
- *
- * console.log(generatePerformanceReport())
- * // ╔═══════════════════════════════════════════════╗
- * // ║         Performance Report                    ║
- * // ╚═══════════════════════════════════════════════╝
- * //
- * // api-call:
- * //   Calls: 5
- * //   Avg:   246.8ms
- * //   Min:   100ms
- * //   Max:   500ms
- * //   Total: 1234ms
- */
-export function generatePerformanceReport(): string {
-  if (!isPerfEnabled() || performanceMetrics.length === 0) {
-    return '(no performance data collected - enable with DEBUG=perf)'
-  }
-
-  const summary = getPerformanceSummary()
-  const operations = Object.keys(summary).sort()
-
-  let report = '\n╔═══════════════════════════════════════════════╗\n'
-  report += '║         Performance Report                    ║\n'
-  report += '╚═══════════════════════════════════════════════╝\n\n'
-
-  for (const operation of operations) {
-    const stats = summary[operation] as {
-      count: number
-      total: number
-      avg: number
-      min: number
-      max: number
-    }
-    report += `${operation}:\n`
-    report += `  Calls: ${stats.count}\n`
-    report += `  Avg:   ${stats.avg}ms\n`
-    report += `  Min:   ${stats.min}ms\n`
-    report += `  Max:   ${stats.max}ms\n`
-    report += `  Total: ${stats.total}ms\n\n`
-  }
-
-  const totalDuration = Object.values(summary).reduce(
-    (sum, s) => sum + s.total,
-    0,
-  )
-  report += `Total measured time: ${Math.round(totalDuration * 100) / 100}ms\n`
-
-  return report
 }

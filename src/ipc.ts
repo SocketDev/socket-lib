@@ -6,45 +6,6 @@
  * size and exposure limits of passing data through environment variables.
  */
 
-let _crypto: typeof import('node:crypto') | undefined
-/**
- * Lazily load the crypto module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getCrypto() {
-  if (_crypto === undefined) {
-    _crypto = /*@__PURE__*/ require('node:crypto')
-  }
-  return _crypto as typeof import('node:crypto')
-}
-
-let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
 import process from 'node:process'
 import { safeDeleteSync } from './fs'
 import { getOsTmpDir } from './paths/socket'
@@ -167,70 +128,9 @@ export interface IpcOptions {
   timeout?: number
 }
 
-/**
- * Create a unique IPC channel identifier for message correlation.
- *
- * Generates a unique identifier that combines:
- * - A prefix for namespacing (defaults to 'socket')
- * - The current process ID for process identification
- * - A random hex string for uniqueness
- *
- * @param prefix - Optional prefix to namespace the channel ID
- * @returns A unique channel identifier string
- *
- * @example
- * ```typescript
- * const channelId = createIpcChannelId('socket-cli')
- * // Returns: 'socket-cli-12345-a1b2c3d4e5f6g7h8'
- * ```
- */
-export function createIpcChannelId(prefix = 'socket'): string {
-  const crypto = getCrypto()
-  return `${prefix}-${process.pid}-${crypto.randomBytes(8).toString('hex')}`
-}
-
-/**
- * Get the IPC stub path for a given application.
- *
- * This function generates a unique file path for IPC stub files that are used
- * to pass data between processes. The stub files are stored in a hidden directory
- * within the system's temporary folder.
- *
- * ## Path Structure:
- * - Base: System temp directory (e.g., /tmp on Unix, %TEMP% on Windows)
- * - Directory: `.socket-ipc/{appName}/`
- * - Filename: `stub-{pid}.json`
- *
- * ## Security Features:
- * - Files are isolated per application via appName parameter
- * - Process ID in filename prevents collisions between concurrent processes
- * - Temporary directory location ensures automatic cleanup on system restart
- *
- * @param appName - The application identifier (e.g., 'socket-cli', 'socket-dlx')
- * @returns Full path to the IPC stub file
- *
- * @example
- * ```typescript
- * const stubPath = getIpcStubPath('socket-cli')
- * // Returns: '/tmp/.socket-ipc/socket-cli/stub-12345.json' (Unix)
- * // Returns: 'C:\\Users\\Name\\AppData\\Local\\Temp\\.socket-ipc\\socket-cli\\stub-12345.json' (Windows)
- * ```
- *
- * @used Currently used by socket-cli for self-update and inter-process communication
- */
-export function getIpcStubPath(appName: string): string {
-  // Get the system's temporary directory - this is platform-specific.
-  const tempDir = getOsTmpDir()
-  const path = getPath()
-
-  // Create a hidden directory structure for Socket IPC files.
-  // The dot prefix makes it hidden on Unix-like systems.
-  const stubDir = path.join(tempDir, '.socket-ipc', appName)
-
-  // Generate filename with process ID to ensure uniqueness.
-  // The PID prevents conflicts when multiple processes run simultaneously.
-  return path.join(stubDir, `stub-${process.pid}.json`)
-}
+let _crypto: typeof import('node:crypto') | undefined
+let _fs: typeof import('node:fs') | undefined
+let _path: typeof import('node:path') | undefined
 
 /**
  * Ensure IPC directory exists for stub file creation.
@@ -253,119 +153,39 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
 }
 
 /**
- * Write IPC data to a stub file for inter-process data transfer.
- *
- * This function creates a stub file containing data that needs to be passed
- * between processes. The stub file includes metadata like process ID and
- * timestamp for validation.
- *
- * ## File Structure:
- * ```json
- * {
- *   "pid": 12345,
- *   "timestamp": 1699564234567,
- *   "data": { ... }
- * }
- * ```
- *
- * ## Use Cases:
- * - Passing API tokens to child processes
- * - Transferring configuration between Socket CLI components
- * - Sharing large data that exceeds environment variable limits
- *
- * @param appName - The application identifier
- * @param data - The data to write to the stub file
- * @returns Promise resolving to the stub file path
- *
- * @example
- * ```typescript
- * const stubPath = await writeIpcStub('socket-cli', {
- *   apiToken: 'secret-token',
- *   config: { ... }
- * })
- * // Pass stubPath to child process for reading
- * ```
+ * Lazily load the crypto module to avoid Webpack errors.
+ * @private
  */
-export async function writeIpcStub(
-  appName: string,
-  data: unknown,
-): Promise<string> {
-  const stubPath = getIpcStubPath(appName)
-  await ensureIpcDirectory(stubPath)
-
-  // Create stub data with validation metadata.
-  const ipcData: IpcStub = {
-    data,
-    pid: process.pid,
-    timestamp: Date.now(),
+/*@__NO_SIDE_EFFECTS__*/
+function getCrypto() {
+  if (_crypto === undefined) {
+    _crypto = /*@__PURE__*/ require('node:crypto')
   }
-
-  // Validate data structure with Zod schema.
-  const validated = IpcStubSchema.parse(ipcData)
-
-  // Write with pretty printing for debugging.
-  const fs = getFs()
-  // Use restrictive permissions (owner-only read/write) to prevent
-  // other users on the system from reading sensitive IPC data.
-  await fs.promises.writeFile(stubPath, JSON.stringify(validated, null, 2), {
-    encoding: 'utf8',
-    mode: 0o600,
-  })
-  return stubPath
+  return _crypto as typeof import('node:crypto')
 }
 
 /**
- * Read IPC data from a stub file with automatic cleanup.
- *
- * This function reads data from an IPC stub file and validates its freshness.
- * Stale files (older than 5 minutes) are automatically cleaned up to prevent
- * accumulation of temporary files.
- *
- * ## Validation Steps:
- * 1. Read and parse JSON file
- * 2. Validate structure with Zod schema
- * 3. Check timestamp freshness
- * 4. Clean up if stale
- * 5. Return data if valid
- *
- * @param stubPath - Path to the stub file to read
- * @returns Promise resolving to the data or null if invalid/stale
- *
- * @example
- * ```typescript
- * const data = await readIpcStub('/tmp/.socket-ipc/socket-cli/stub-12345.json')
- * if (data) {
- *   console.log('Received:', data)
- * }
- * ```
- *
- * @unused Reserved for future implementation
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
  */
-export async function readIpcStub(stubPath: string): Promise<unknown> {
-  try {
-    const fs = getFs()
-    const content = await fs.promises.readFile(stubPath, 'utf8')
-    const parsed = JSON.parse(content)
-    // Validate structure with Zod schema.
-    const validated = IpcStubSchema.parse(parsed)
-    // Check age for freshness validation.
-    const ageMs = Date.now() - validated.timestamp
-    // 5 minutes.
-    const maxAgeMs = 5 * 60 * 1000
-    if (ageMs > maxAgeMs) {
-      // Clean up stale file. IPC stubs are always in tmpdir, so use force: true.
-      try {
-        safeDeleteSync(stubPath, { force: true })
-      } catch {
-        // Ignore deletion errors
-      }
-      return null
-    }
-    return validated.data
-  } catch {
-    // Return null for any errors (file not found, invalid JSON, validation failure).
-    return null
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
   }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }
 
 /**
@@ -443,6 +263,271 @@ export async function cleanupIpcStubs(appName: string): Promise<void> {
 }
 
 /**
+ * Create a unique IPC channel identifier for message correlation.
+ *
+ * Generates a unique identifier that combines:
+ * - A prefix for namespacing (defaults to 'socket')
+ * - The current process ID for process identification
+ * - A random hex string for uniqueness
+ *
+ * @param prefix - Optional prefix to namespace the channel ID
+ * @returns A unique channel identifier string
+ *
+ * @example
+ * ```typescript
+ * const channelId = createIpcChannelId('socket-cli')
+ * // Returns: 'socket-cli-12345-a1b2c3d4e5f6g7h8'
+ * ```
+ */
+export function createIpcChannelId(prefix = 'socket'): string {
+  const crypto = getCrypto()
+  return `${prefix}-${process.pid}-${crypto.randomBytes(8).toString('hex')}`
+}
+
+/**
+ * Create an IPC message with proper structure and metadata.
+ *
+ * This factory function creates properly structured IPC messages with:
+ * - Unique ID for tracking
+ * - Timestamp for freshness
+ * - Type for routing
+ * - Data payload
+ *
+ * @param type - The message type identifier
+ * @param data - The message payload
+ * @returns A properly structured IPC message
+ *
+ * @example
+ * ```typescript
+ * const handshake = createIpcMessage('handshake', {
+ *   version: '1.0.0',
+ *   pid: process.pid,
+ *   appName: 'socket-cli'
+ * })
+ * ```
+ *
+ * @unused Reserved for future message creation needs
+ */
+export function createIpcMessage<T = unknown>(
+  type: string,
+  data: T,
+): IpcMessage<T> {
+  const crypto = getCrypto()
+  return {
+    id: crypto.randomBytes(16).toString('hex'),
+    timestamp: Date.now(),
+    type,
+    data,
+  }
+}
+
+/**
+ * Get the IPC stub path for a given application.
+ *
+ * This function generates a unique file path for IPC stub files that are used
+ * to pass data between processes. The stub files are stored in a hidden directory
+ * within the system's temporary folder.
+ *
+ * ## Path Structure:
+ * - Base: System temp directory (e.g., /tmp on Unix, %TEMP% on Windows)
+ * - Directory: `.socket-ipc/{appName}/`
+ * - Filename: `stub-{pid}.json`
+ *
+ * ## Security Features:
+ * - Files are isolated per application via appName parameter
+ * - Process ID in filename prevents collisions between concurrent processes
+ * - Temporary directory location ensures automatic cleanup on system restart
+ *
+ * @param appName - The application identifier (e.g., 'socket-cli', 'socket-dlx')
+ * @returns Full path to the IPC stub file
+ *
+ * @example
+ * ```typescript
+ * const stubPath = getIpcStubPath('socket-cli')
+ * // Returns: '/tmp/.socket-ipc/socket-cli/stub-12345.json' (Unix)
+ * // Returns: 'C:\\Users\\Name\\AppData\\Local\\Temp\\.socket-ipc\\socket-cli\\stub-12345.json' (Windows)
+ * ```
+ *
+ * @used Currently used by socket-cli for self-update and inter-process communication
+ */
+export function getIpcStubPath(appName: string): string {
+  // Get the system's temporary directory - this is platform-specific.
+  const tempDir = getOsTmpDir()
+  const path = getPath()
+
+  // Create a hidden directory structure for Socket IPC files.
+  // The dot prefix makes it hidden on Unix-like systems.
+  const stubDir = path.join(tempDir, '.socket-ipc', appName)
+
+  // Generate filename with process ID to ensure uniqueness.
+  // The PID prevents conflicts when multiple processes run simultaneously.
+  return path.join(stubDir, `stub-${process.pid}.json`)
+}
+
+/**
+ * Check if process has IPC channel available.
+ *
+ * This utility checks whether a process object has the necessary
+ * properties for IPC communication. Used to determine if IPC
+ * messaging is possible before attempting to send.
+ *
+ * @param process - The process object to check
+ * @returns true if IPC is available, false otherwise
+ *
+ * @example
+ * ```typescript
+ * if (hasIpcChannel(childProcess)) {
+ *   sendIpc(childProcess, message)
+ * } else {
+ *   // Fall back to alternative communication method
+ * }
+ * ```
+ *
+ * @unused Reserved for IPC availability detection
+ */
+export function hasIpcChannel(process: unknown): boolean {
+  return Boolean(
+    process &&
+    typeof process === 'object' &&
+    'send' in process &&
+    typeof process.send === 'function' &&
+    'channel' in process &&
+    process.channel !== undefined,
+  )
+}
+
+/**
+ * Receive data through Node.js IPC channel.
+ *
+ * Sets up a listener for IPC messages with automatic validation and parsing.
+ * Returns a cleanup function to remove the listener when no longer needed.
+ *
+ * ## Message Flow:
+ * 1. Receive raw message from IPC channel
+ * 2. Validate with parseIpcMessage
+ * 3. Call handler if valid
+ * 4. Ignore invalid messages
+ *
+ * @param handler - Function to call with valid IPC messages
+ * @returns Cleanup function to remove the listener
+ *
+ * @example
+ * ```typescript
+ * const cleanup = onIpc((message) => {
+ *   console.log('Received:', message.type, message.data)
+ * })
+ * // Later...
+ * cleanup() // Remove listener
+ * ```
+ *
+ * @unused Reserved for bidirectional communication
+ */
+export function onIpc(handler: (message: IpcMessage) => void): () => void {
+  const listener = (message: unknown) => {
+    const parsed = parseIpcMessage(message)
+    if (parsed) {
+      handler(parsed)
+    }
+  }
+  process.on('message', listener)
+  // Return cleanup function for proper resource management.
+  return () => {
+    process.off('message', listener)
+  }
+}
+
+/**
+ * Safely parse and validate IPC messages.
+ *
+ * This function performs runtime validation of incoming messages
+ * to ensure they conform to the IPC message structure. It uses
+ * Zod schemas for robust validation.
+ *
+ * ## Validation Steps:
+ * 1. Check if message is an object
+ * 2. Validate required fields exist
+ * 3. Validate field types
+ * 4. Return typed message or null
+ *
+ * @param message - The raw message to parse
+ * @returns Parsed IPC message or null if invalid
+ *
+ * @example
+ * ```typescript
+ * const parsed = parseIpcMessage(rawMessage)
+ * if (parsed) {
+ *   handleMessage(parsed)
+ * }
+ * ```
+ *
+ * @unused Reserved for message validation needs
+ */
+export function parseIpcMessage(message: unknown): IpcMessage | null {
+  try {
+    // Use Zod schema for comprehensive validation.
+    const validated = IpcMessageSchema.parse(message)
+    return validated as IpcMessage
+  } catch {
+    // Return null for any validation failure.
+    return null
+  }
+}
+
+/**
+ * Read IPC data from a stub file with automatic cleanup.
+ *
+ * This function reads data from an IPC stub file and validates its freshness.
+ * Stale files (older than 5 minutes) are automatically cleaned up to prevent
+ * accumulation of temporary files.
+ *
+ * ## Validation Steps:
+ * 1. Read and parse JSON file
+ * 2. Validate structure with Zod schema
+ * 3. Check timestamp freshness
+ * 4. Clean up if stale
+ * 5. Return data if valid
+ *
+ * @param stubPath - Path to the stub file to read
+ * @returns Promise resolving to the data or null if invalid/stale
+ *
+ * @example
+ * ```typescript
+ * const data = await readIpcStub('/tmp/.socket-ipc/socket-cli/stub-12345.json')
+ * if (data) {
+ *   console.log('Received:', data)
+ * }
+ * ```
+ *
+ * @unused Reserved for future implementation
+ */
+export async function readIpcStub(stubPath: string): Promise<unknown> {
+  try {
+    const fs = getFs()
+    const content = await fs.promises.readFile(stubPath, 'utf8')
+    const parsed = JSON.parse(content)
+    // Validate structure with Zod schema.
+    const validated = IpcStubSchema.parse(parsed)
+    // Check age for freshness validation.
+    const ageMs = Date.now() - validated.timestamp
+    // 5 minutes.
+    const maxAgeMs = 5 * 60 * 1000
+    if (ageMs > maxAgeMs) {
+      // Clean up stale file. IPC stubs are always in tmpdir, so use force: true.
+      try {
+        safeDeleteSync(stubPath, { force: true })
+      } catch {
+        // Ignore deletion errors
+      }
+      return null
+    }
+    return validated.data
+  } catch {
+    // Return null for any errors (file not found, invalid JSON, validation failure).
+    return null
+  }
+}
+
+/**
  * Send data through Node.js IPC channel.
  *
  * This function sends structured messages through the Node.js IPC channel
@@ -484,46 +569,6 @@ export function sendIpc(
     }
   }
   return false
-}
-
-/**
- * Receive data through Node.js IPC channel.
- *
- * Sets up a listener for IPC messages with automatic validation and parsing.
- * Returns a cleanup function to remove the listener when no longer needed.
- *
- * ## Message Flow:
- * 1. Receive raw message from IPC channel
- * 2. Validate with parseIpcMessage
- * 3. Call handler if valid
- * 4. Ignore invalid messages
- *
- * @param handler - Function to call with valid IPC messages
- * @returns Cleanup function to remove the listener
- *
- * @example
- * ```typescript
- * const cleanup = onIpc((message) => {
- *   console.log('Received:', message.type, message.data)
- * })
- * // Later...
- * cleanup() // Remove listener
- * ```
- *
- * @unused Reserved for bidirectional communication
- */
-export function onIpc(handler: (message: IpcMessage) => void): () => void {
-  const listener = (message: unknown) => {
-    const parsed = parseIpcMessage(message)
-    if (parsed) {
-      handler(parsed)
-    }
-  }
-  process.on('message', listener)
-  // Return cleanup function for proper resource management.
-  return () => {
-    process.off('message', listener)
-  }
 }
 
 /**
@@ -590,107 +635,63 @@ export function waitForIpc<T = unknown>(
 }
 
 /**
- * Create an IPC message with proper structure and metadata.
+ * Write IPC data to a stub file for inter-process data transfer.
  *
- * This factory function creates properly structured IPC messages with:
- * - Unique ID for tracking
- * - Timestamp for freshness
- * - Type for routing
- * - Data payload
+ * This function creates a stub file containing data that needs to be passed
+ * between processes. The stub file includes metadata like process ID and
+ * timestamp for validation.
  *
- * @param type - The message type identifier
- * @param data - The message payload
- * @returns A properly structured IPC message
+ * ## File Structure:
+ * ```json
+ * {
+ *   "pid": 12345,
+ *   "timestamp": 1699564234567,
+ *   "data": { ... }
+ * }
+ * ```
+ *
+ * ## Use Cases:
+ * - Passing API tokens to child processes
+ * - Transferring configuration between Socket CLI components
+ * - Sharing large data that exceeds environment variable limits
+ *
+ * @param appName - The application identifier
+ * @param data - The data to write to the stub file
+ * @returns Promise resolving to the stub file path
  *
  * @example
  * ```typescript
- * const handshake = createIpcMessage('handshake', {
- *   version: '1.0.0',
- *   pid: process.pid,
- *   appName: 'socket-cli'
+ * const stubPath = await writeIpcStub('socket-cli', {
+ *   apiToken: 'secret-token',
+ *   config: { ... }
  * })
+ * // Pass stubPath to child process for reading
  * ```
- *
- * @unused Reserved for future message creation needs
  */
-export function createIpcMessage<T = unknown>(
-  type: string,
-  data: T,
-): IpcMessage<T> {
-  const crypto = getCrypto()
-  return {
-    id: crypto.randomBytes(16).toString('hex'),
-    timestamp: Date.now(),
-    type,
+export async function writeIpcStub(
+  appName: string,
+  data: unknown,
+): Promise<string> {
+  const stubPath = getIpcStubPath(appName)
+  await ensureIpcDirectory(stubPath)
+
+  // Create stub data with validation metadata.
+  const ipcData: IpcStub = {
     data,
+    pid: process.pid,
+    timestamp: Date.now(),
   }
-}
 
-/**
- * Check if process has IPC channel available.
- *
- * This utility checks whether a process object has the necessary
- * properties for IPC communication. Used to determine if IPC
- * messaging is possible before attempting to send.
- *
- * @param process - The process object to check
- * @returns true if IPC is available, false otherwise
- *
- * @example
- * ```typescript
- * if (hasIpcChannel(childProcess)) {
- *   sendIpc(childProcess, message)
- * } else {
- *   // Fall back to alternative communication method
- * }
- * ```
- *
- * @unused Reserved for IPC availability detection
- */
-export function hasIpcChannel(process: unknown): boolean {
-  return Boolean(
-    process &&
-    typeof process === 'object' &&
-    'send' in process &&
-    typeof process.send === 'function' &&
-    'channel' in process &&
-    process.channel !== undefined,
-  )
-}
+  // Validate data structure with Zod schema.
+  const validated = IpcStubSchema.parse(ipcData)
 
-/**
- * Safely parse and validate IPC messages.
- *
- * This function performs runtime validation of incoming messages
- * to ensure they conform to the IPC message structure. It uses
- * Zod schemas for robust validation.
- *
- * ## Validation Steps:
- * 1. Check if message is an object
- * 2. Validate required fields exist
- * 3. Validate field types
- * 4. Return typed message or null
- *
- * @param message - The raw message to parse
- * @returns Parsed IPC message or null if invalid
- *
- * @example
- * ```typescript
- * const parsed = parseIpcMessage(rawMessage)
- * if (parsed) {
- *   handleMessage(parsed)
- * }
- * ```
- *
- * @unused Reserved for message validation needs
- */
-export function parseIpcMessage(message: unknown): IpcMessage | null {
-  try {
-    // Use Zod schema for comprehensive validation.
-    const validated = IpcMessageSchema.parse(message)
-    return validated as IpcMessage
-  } catch {
-    // Return null for any validation failure.
-    return null
-  }
+  // Write with pretty printing for debugging.
+  const fs = getFs()
+  // Use restrictive permissions (owner-only read/write) to prevent
+  // other users on the system from reading sensitive IPC data.
+  await fs.promises.writeFile(stubPath, JSON.stringify(validated, null, 2), {
+    encoding: 'utf8',
+    mode: 0o600,
+  })
+  return stubPath
 }

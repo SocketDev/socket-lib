@@ -19,69 +19,15 @@ import type { Readable } from 'node:stream'
 import { SOCKET_LIB_USER_AGENT } from './constants/socket'
 import { safeDelete } from './fs.js'
 
-let _fs: typeof import('node:fs') | undefined
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
+
+import type { Logger } from './logger.js'
 
 /** IncomingMessage received as a response to a client request (http.request callback). */
 export type IncomingResponse = IncomingMessage
 
 /** IncomingMessage received as a request in a server handler (http.createServer callback). */
 export type IncomingRequest = IncomingMessage
-
-import type { Logger } from './logger.js'
-
-let _crypto: typeof import('node:crypto') | undefined
-let _http: typeof import('node:http') | undefined
-let _https: typeof import('node:https') | undefined
-
-/**
- * Lazily load the crypto module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getCrypto() {
-  if (_crypto === undefined) {
-    _crypto = /*@__PURE__*/ require('node:crypto')
-  }
-  return _crypto as typeof import('node:crypto')
-}
-
-/**
- * Lazily load http and https modules to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getHttp() {
-  if (_http === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _http = /*@__PURE__*/ require('node:http')
-  }
-  return _http as typeof import('node:http')
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-function getHttps() {
-  if (_https === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _https = /*@__PURE__*/ require('node:https')
-  }
-  return _https as typeof import('node:https')
-}
 
 /**
  * Information passed to the onRequest hook before each request attempt.
@@ -497,48 +443,6 @@ export interface HttpResponse {
 }
 
 /**
- * Read and buffer a client-side IncomingResponse into an HttpResponse.
- *
- * Useful when you have a raw response from code that bypasses
- * `httpRequest()` (e.g., multipart form-data uploads via `http.request()`,
- * or responses from third-party HTTP libraries) and need to convert it
- * into the standard HttpResponse interface.
- *
- * @example
- * ```typescript
- * const raw = await makeRawRequest('https://example.com/api')
- * const response = await readIncomingResponse(raw)
- * console.log(response.status, response.body.toString('utf8'))
- * ```
- */
-export async function readIncomingResponse(
-  msg: IncomingResponse,
-): Promise<HttpResponse> {
-  const chunks: Buffer[] = []
-  for await (const chunk of msg) {
-    chunks.push(chunk as Buffer)
-  }
-  const body = Buffer.concat(chunks)
-  const status = msg.statusCode ?? 0
-  const statusText = msg.statusMessage ?? ''
-  return {
-    arrayBuffer: () =>
-      body.buffer.slice(
-        body.byteOffset,
-        body.byteOffset + body.byteLength,
-      ) as ArrayBuffer,
-    body,
-    headers: msg.headers,
-    json: <T = unknown>() => JSON.parse(body.toString('utf8')) as T,
-    ok: status >= 200 && status < 300,
-    rawResponse: msg,
-    status,
-    statusText,
-    text: () => body.toString('utf8'),
-  }
-}
-
-/**
  * Error thrown when an HTTP response has a non-2xx status code
  * and `throwOnError` is enabled. Carries the full `HttpResponse`
  * so callers can inspect status, headers, and body.
@@ -554,103 +458,6 @@ export class HttpResponseError extends Error {
     this.response = response
     Error.captureStackTrace(this, HttpResponseError)
   }
-}
-
-/**
- * Parse a `Retry-After` HTTP header value into milliseconds.
- *
- * Supports both formats defined in RFC 7231 §7.1.3:
- * - **delay-seconds**: integer number of seconds (e.g., `"120"`)
- * - **HTTP-date**: an absolute date/time (e.g., `"Fri, 31 Dec 2027 23:59:59 GMT"`)
- *
- * When the header is an array (multiple values), the first element is used.
- *
- * @param value - The raw Retry-After header value(s)
- * @returns Delay in milliseconds, or `undefined` if the value cannot be parsed
- *
- * @example
- * ```ts
- * const delay = parseRetryAfterHeader(response.headers['retry-after'])
- * if (delay !== undefined) {
- *   await new Promise(resolve => setTimeout(resolve, delay))
- * }
- * ```
- */
-export function parseRetryAfterHeader(
-  value: string | string[] | undefined,
-): number | undefined {
-  if (!value) {
-    return undefined
-  }
-  // Handle array of values (take first).
-  const raw = Array.isArray(value) ? value[0] : value
-  if (!raw) {
-    return undefined
-  }
-  // Try parsing as seconds (strict integer — reject partial like "10abc").
-  const trimmed = raw.trim()
-  if (/^\d+$/.test(trimmed)) {
-    const seconds = Number(trimmed)
-    return seconds * 1000
-  }
-  // Try parsing as HTTP date.
-  const date = new Date(raw)
-  if (!Number.isNaN(date.getTime())) {
-    const delayMs = date.getTime() - Date.now()
-    if (delayMs > 0) {
-      return delayMs
-    }
-  }
-  return undefined
-}
-
-/**
- * Redact sensitive HTTP headers for safe logging and telemetry.
- *
- * Replaces values of sensitive headers (Authorization, Cookie, etc.)
- * with `[REDACTED]`. Non-sensitive headers are passed through unchanged.
- * Array values are joined with `', '`.
- *
- * @param headers - HTTP headers to sanitize
- * @returns A new object with sensitive values redacted
- *
- * @example
- * ```ts
- * const safe = sanitizeHeaders({
- *   'authorization': 'Bearer secret',
- *   'content-type': 'application/json'
- * })
- * // { authorization: '[REDACTED]', 'content-type': 'application/json' }
- * ```
- */
-export function sanitizeHeaders(
-  headers: Record<string, unknown> | undefined,
-): Record<string, string> {
-  if (!headers) {
-    return {}
-  }
-  const sensitiveHeaders = new Set([
-    'authorization',
-    'cookie',
-    'proxy-authorization',
-    'proxy-authenticate',
-    'set-cookie',
-    'www-authenticate',
-  ])
-  const result: Record<string, string> = {
-    __proto__: null,
-  } as unknown as Record<string, string>
-  for (const key of Object.keys(headers)) {
-    const value = headers[key]
-    if (sensitiveHeaders.has(key.toLowerCase())) {
-      result[key] = '[REDACTED]'
-    } else if (Array.isArray(value)) {
-      result[key] = value.join(', ')
-    } else if (value !== undefined && value !== null) {
-      result[key] = String(value)
-    }
-  }
-  return result
 }
 
 /**
@@ -873,59 +680,6 @@ export interface HttpDownloadResult {
 export type Checksums = Record<string, string>
 
 /**
- * Parse a checksums file text into a filename-to-hash map.
- *
- * Supports standard checksums file formats:
- * - BSD style: "SHA256 (filename) = hash"
- * - GNU style: "hash  filename" (two spaces)
- * - Simple style: "hash filename" (single space)
- *
- * Lines starting with '#' are treated as comments and ignored.
- * Empty lines are ignored.
- *
- * @param text - Raw text content of a checksums file
- * @returns Map of filenames to lowercase SHA256 hashes
- *
- * @example
- * ```ts
- * const text = `
- * # SHA256 checksums
- * e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  file.zip
- * abc123def456...  other.tar.gz
- * `
- * const checksums = parseChecksums(text)
- * console.log(checksums['file.zip']) // 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
- * ```
- */
-export function parseChecksums(text: string): Checksums {
-  const checksums: Checksums = { __proto__: null } as unknown as Checksums
-
-  for (const line of text.split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue
-    }
-
-    // Try BSD style: "SHA256 (filename) = hash"
-    const bsdMatch = trimmed.match(
-      /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/,
-    )
-    if (bsdMatch) {
-      checksums[bsdMatch[1]!] = bsdMatch[2]!.toLowerCase()
-      continue
-    }
-
-    // Try GNU/simple style: "hash  filename" or "hash filename"
-    const gnuMatch = trimmed.match(/^([a-fA-F0-9]{64})\s+(.+)$/)
-    if (gnuMatch) {
-      checksums[gnuMatch[2]!] = gnuMatch[1]!.toLowerCase()
-    }
-  }
-
-  return checksums
-}
-
-/**
  * Options for fetching checksums from a URL.
  */
 export interface FetchChecksumsOptions {
@@ -945,54 +699,57 @@ export interface FetchChecksumsOptions {
   timeout?: number | undefined
 }
 
+let _fs: typeof import('node:fs') | undefined
+let _crypto: typeof import('node:crypto') | undefined
+let _http: typeof import('node:http') | undefined
+let _https: typeof import('node:https') | undefined
+
 /**
- * Fetch and parse a checksums file from a URL.
- *
- * This is useful for verifying downloads from GitHub releases which typically
- * publish a checksums.txt file alongside release assets.
- *
- * @param url - URL to the checksums file
- * @param options - Request options
- * @returns Map of filenames to lowercase SHA256 hashes
- * @throws {Error} When the checksums file cannot be fetched
- *
- * @example
- * ```ts
- * // Fetch checksums from GitHub release
- * const checksums = await fetchChecksums(
- *   'https://github.com/org/repo/releases/download/v1.0.0/checksums.txt'
- * )
- *
- * // Use with httpDownload
- * await httpDownload(
- *   'https://github.com/org/repo/releases/download/v1.0.0/tool_linux.tar.gz',
- *   '/tmp/tool.tar.gz',
- *   { sha256: checksums['tool_linux.tar.gz'] }
- * )
- * ```
+ * Lazily load the crypto module to avoid Webpack errors.
+ * @private
  */
-export async function fetchChecksums(
-  url: string,
-  options?: FetchChecksumsOptions | undefined,
-): Promise<Checksums> {
-  const {
-    ca,
-    headers = {},
-    timeout = 30_000,
-  } = {
-    __proto__: null,
-    ...options,
-  } as FetchChecksumsOptions
-
-  const response = await httpRequest(url, { ca, headers, timeout })
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch checksums from ${url}: ${response.status} ${response.statusText}`,
-    )
+/*@__NO_SIDE_EFFECTS__*/
+function getCrypto() {
+  if (_crypto === undefined) {
+    _crypto = /*@__PURE__*/ require('node:crypto')
   }
+  return _crypto as typeof import('node:crypto')
+}
 
-  return parseChecksums(response.body.toString('utf8'))
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Lazily load http and https modules to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getHttp() {
+  if (_http === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _http = /*@__PURE__*/ require('node:http')
+  }
+  return _http as typeof import('node:http')
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+function getHttps() {
+  if (_https === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _https = /*@__PURE__*/ require('node:https')
+  }
+  return _https as typeof import('node:https')
 }
 
 /**
@@ -1078,53 +835,6 @@ async function httpDownloadAttempt(
 
     res.pipe(fileStream)
   })
-}
-
-/**
- * Build an enriched error message based on the error code.
- * Generic guidance (no product-specific branding).
- *
- * @example
- * ```typescript
- * try {
- *   await fetch('https://api.example.com')
- * } catch (err) {
- *   console.error(enrichErrorMessage('https://api.example.com', 'GET', err))
- * }
- * ```
- */
-export function enrichErrorMessage(
-  url: string,
-  method: string,
-  error: NodeJS.ErrnoException,
-): string {
-  const code = error.code
-  let message = `${method} request failed: ${url}`
-  if (code === 'ECONNREFUSED') {
-    message +=
-      '\n→ Connection refused. Server is unreachable.\n→ Check: Network connectivity and firewall settings.'
-  } else if (code === 'ENOTFOUND') {
-    message +=
-      '\n→ DNS lookup failed. Cannot resolve hostname.\n→ Check: Internet connection and DNS settings.'
-  } else if (code === 'ETIMEDOUT') {
-    message +=
-      '\n→ Connection timed out. Network or server issue.\n→ Try: Check network connectivity and retry.'
-  } else if (code === 'ECONNRESET') {
-    message +=
-      '\n→ Connection reset by server. Possible network interruption.\n→ Try: Retry the request.'
-  } else if (code === 'EPIPE') {
-    message +=
-      '\n→ Broken pipe. Server closed connection unexpectedly.\n→ Check: Authentication credentials and permissions.'
-  } else if (
-    code === 'CERT_HAS_EXPIRED' ||
-    code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
-  ) {
-    message +=
-      '\n→ SSL/TLS certificate error.\n→ Check: System time and date are correct.\n→ Try: Update CA certificates on your system.'
-  } else if (code) {
-    message += `\n→ Error code: ${code}`
-  }
-  return message
 }
 
 /**
@@ -1432,6 +1142,103 @@ async function httpRequestAttempt(
     }
     /* c8 ignore stop */
   })
+}
+
+/**
+ * Build an enriched error message based on the error code.
+ * Generic guidance (no product-specific branding).
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await fetch('https://api.example.com')
+ * } catch (err) {
+ *   console.error(enrichErrorMessage('https://api.example.com', 'GET', err))
+ * }
+ * ```
+ */
+export function enrichErrorMessage(
+  url: string,
+  method: string,
+  error: NodeJS.ErrnoException,
+): string {
+  const code = error.code
+  let message = `${method} request failed: ${url}`
+  if (code === 'ECONNREFUSED') {
+    message +=
+      '\n→ Connection refused. Server is unreachable.\n→ Check: Network connectivity and firewall settings.'
+  } else if (code === 'ENOTFOUND') {
+    message +=
+      '\n→ DNS lookup failed. Cannot resolve hostname.\n→ Check: Internet connection and DNS settings.'
+  } else if (code === 'ETIMEDOUT') {
+    message +=
+      '\n→ Connection timed out. Network or server issue.\n→ Try: Check network connectivity and retry.'
+  } else if (code === 'ECONNRESET') {
+    message +=
+      '\n→ Connection reset by server. Possible network interruption.\n→ Try: Retry the request.'
+  } else if (code === 'EPIPE') {
+    message +=
+      '\n→ Broken pipe. Server closed connection unexpectedly.\n→ Check: Authentication credentials and permissions.'
+  } else if (
+    code === 'CERT_HAS_EXPIRED' ||
+    code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+  ) {
+    message +=
+      '\n→ SSL/TLS certificate error.\n→ Check: System time and date are correct.\n→ Try: Update CA certificates on your system.'
+  } else if (code) {
+    message += `\n→ Error code: ${code}`
+  }
+  return message
+}
+
+/**
+ * Fetch and parse a checksums file from a URL.
+ *
+ * This is useful for verifying downloads from GitHub releases which typically
+ * publish a checksums.txt file alongside release assets.
+ *
+ * @param url - URL to the checksums file
+ * @param options - Request options
+ * @returns Map of filenames to lowercase SHA256 hashes
+ * @throws {Error} When the checksums file cannot be fetched
+ *
+ * @example
+ * ```ts
+ * // Fetch checksums from GitHub release
+ * const checksums = await fetchChecksums(
+ *   'https://github.com/org/repo/releases/download/v1.0.0/checksums.txt'
+ * )
+ *
+ * // Use with httpDownload
+ * await httpDownload(
+ *   'https://github.com/org/repo/releases/download/v1.0.0/tool_linux.tar.gz',
+ *   '/tmp/tool.tar.gz',
+ *   { sha256: checksums['tool_linux.tar.gz'] }
+ * )
+ * ```
+ */
+export async function fetchChecksums(
+  url: string,
+  options?: FetchChecksumsOptions | undefined,
+): Promise<Checksums> {
+  const {
+    ca,
+    headers = {},
+    timeout = 30_000,
+  } = {
+    __proto__: null,
+    ...options,
+  } as FetchChecksumsOptions
+
+  const response = await httpRequest(url, { ca, headers, timeout })
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch checksums from ${url}: ${response.status} ${response.statusText}`,
+    )
+  }
+
+  return parseChecksums(response.body.toString('utf8'))
 }
 
 /**
@@ -1929,4 +1736,196 @@ export async function httpText(
   }
 
   return response.text()
+}
+
+/**
+ * Parse a checksums file text into a filename-to-hash map.
+ *
+ * Supports standard checksums file formats:
+ * - BSD style: "SHA256 (filename) = hash"
+ * - GNU style: "hash  filename" (two spaces)
+ * - Simple style: "hash filename" (single space)
+ *
+ * Lines starting with '#' are treated as comments and ignored.
+ * Empty lines are ignored.
+ *
+ * @param text - Raw text content of a checksums file
+ * @returns Map of filenames to lowercase SHA256 hashes
+ *
+ * @example
+ * ```ts
+ * const text = `
+ * # SHA256 checksums
+ * e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  file.zip
+ * abc123def456...  other.tar.gz
+ * `
+ * const checksums = parseChecksums(text)
+ * console.log(checksums['file.zip']) // 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+ * ```
+ */
+export function parseChecksums(text: string): Checksums {
+  const checksums: Checksums = { __proto__: null } as unknown as Checksums
+
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue
+    }
+
+    // Try BSD style: "SHA256 (filename) = hash"
+    const bsdMatch = trimmed.match(
+      /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/,
+    )
+    if (bsdMatch) {
+      checksums[bsdMatch[1]!] = bsdMatch[2]!.toLowerCase()
+      continue
+    }
+
+    // Try GNU/simple style: "hash  filename" or "hash filename"
+    const gnuMatch = trimmed.match(/^([a-fA-F0-9]{64})\s+(.+)$/)
+    if (gnuMatch) {
+      checksums[gnuMatch[2]!] = gnuMatch[1]!.toLowerCase()
+    }
+  }
+
+  return checksums
+}
+
+/**
+ * Parse a `Retry-After` HTTP header value into milliseconds.
+ *
+ * Supports both formats defined in RFC 7231 §7.1.3:
+ * - **delay-seconds**: integer number of seconds (e.g., `"120"`)
+ * - **HTTP-date**: an absolute date/time (e.g., `"Fri, 31 Dec 2027 23:59:59 GMT"`)
+ *
+ * When the header is an array (multiple values), the first element is used.
+ *
+ * @param value - The raw Retry-After header value(s)
+ * @returns Delay in milliseconds, or `undefined` if the value cannot be parsed
+ *
+ * @example
+ * ```ts
+ * const delay = parseRetryAfterHeader(response.headers['retry-after'])
+ * if (delay !== undefined) {
+ *   await new Promise(resolve => setTimeout(resolve, delay))
+ * }
+ * ```
+ */
+export function parseRetryAfterHeader(
+  value: string | string[] | undefined,
+): number | undefined {
+  if (!value) {
+    return undefined
+  }
+  // Handle array of values (take first).
+  const raw = Array.isArray(value) ? value[0] : value
+  if (!raw) {
+    return undefined
+  }
+  // Try parsing as seconds (strict integer — reject partial like "10abc").
+  const trimmed = raw.trim()
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = Number(trimmed)
+    return seconds * 1000
+  }
+  // Try parsing as HTTP date.
+  const date = new Date(raw)
+  if (!Number.isNaN(date.getTime())) {
+    const delayMs = date.getTime() - Date.now()
+    if (delayMs > 0) {
+      return delayMs
+    }
+  }
+  return undefined
+}
+
+/**
+ * Read and buffer a client-side IncomingResponse into an HttpResponse.
+ *
+ * Useful when you have a raw response from code that bypasses
+ * `httpRequest()` (e.g., multipart form-data uploads via `http.request()`,
+ * or responses from third-party HTTP libraries) and need to convert it
+ * into the standard HttpResponse interface.
+ *
+ * @example
+ * ```typescript
+ * const raw = await makeRawRequest('https://example.com/api')
+ * const response = await readIncomingResponse(raw)
+ * console.log(response.status, response.body.toString('utf8'))
+ * ```
+ */
+export async function readIncomingResponse(
+  msg: IncomingResponse,
+): Promise<HttpResponse> {
+  const chunks: Buffer[] = []
+  for await (const chunk of msg) {
+    chunks.push(chunk as Buffer)
+  }
+  const body = Buffer.concat(chunks)
+  const status = msg.statusCode ?? 0
+  const statusText = msg.statusMessage ?? ''
+  return {
+    arrayBuffer: () =>
+      body.buffer.slice(
+        body.byteOffset,
+        body.byteOffset + body.byteLength,
+      ) as ArrayBuffer,
+    body,
+    headers: msg.headers,
+    json: <T = unknown>() => JSON.parse(body.toString('utf8')) as T,
+    ok: status >= 200 && status < 300,
+    rawResponse: msg,
+    status,
+    statusText,
+    text: () => body.toString('utf8'),
+  }
+}
+
+/**
+ * Redact sensitive HTTP headers for safe logging and telemetry.
+ *
+ * Replaces values of sensitive headers (Authorization, Cookie, etc.)
+ * with `[REDACTED]`. Non-sensitive headers are passed through unchanged.
+ * Array values are joined with `', '`.
+ *
+ * @param headers - HTTP headers to sanitize
+ * @returns A new object with sensitive values redacted
+ *
+ * @example
+ * ```ts
+ * const safe = sanitizeHeaders({
+ *   'authorization': 'Bearer secret',
+ *   'content-type': 'application/json'
+ * })
+ * // { authorization: '[REDACTED]', 'content-type': 'application/json' }
+ * ```
+ */
+export function sanitizeHeaders(
+  headers: Record<string, unknown> | undefined,
+): Record<string, string> {
+  if (!headers) {
+    return {}
+  }
+  const sensitiveHeaders = new Set([
+    'authorization',
+    'cookie',
+    'proxy-authorization',
+    'proxy-authenticate',
+    'set-cookie',
+    'www-authenticate',
+  ])
+  const result: Record<string, string> = {
+    __proto__: null,
+  } as unknown as Record<string, string>
+  for (const key of Object.keys(headers)) {
+    const value = headers[key]
+    if (sensitiveHeaders.has(key.toLowerCase())) {
+      result[key] = '[REDACTED]'
+    } else if (Array.isArray(value)) {
+      result[key] = value.join(', ')
+    } else if (value !== undefined && value !== null) {
+      result[key] = String(value)
+    }
+  }
+  return result
 }

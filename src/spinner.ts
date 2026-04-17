@@ -367,6 +367,33 @@ let _Spinner: {
   new (options?: SpinnerOptions | undefined): Spinner
 }
 let _defaultSpinner: SpinnerStyle | undefined
+let _spinner: ReturnType<typeof Spinner> | undefined
+
+/**
+ * Get the default spinner instance.
+ * Lazily creates the spinner to avoid circular dependencies during module initialization.
+ * Reuses the same instance across calls.
+ *
+ * @returns Shared default spinner instance
+ *
+ * @example
+ * ```ts
+ * import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
+ *
+ * const spinner = getDefaultSpinner()
+ * spinner.start('Loading…')
+ * ```
+ */
+export function getDefaultSpinner(): ReturnType<typeof Spinner> {
+  if (_spinner === undefined) {
+    _spinner = Spinner()
+  }
+  return _spinner
+}
+
+// REMOVED: Deprecated `spinner` export
+// Migration: Use getDefaultSpinner() instead
+// See: getDefaultSpinner() function above
 
 /**
  * Create a spinner instance for displaying loading indicators.
@@ -1342,34 +1369,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
     ...options,
   })
 }
-
-let _spinner: ReturnType<typeof Spinner> | undefined
-
-/**
- * Get the default spinner instance.
- * Lazily creates the spinner to avoid circular dependencies during module initialization.
- * Reuses the same instance across calls.
- *
- * @returns Shared default spinner instance
- *
- * @example
- * ```ts
- * import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
- *
- * const spinner = getDefaultSpinner()
- * spinner.start('Loading…')
- * ```
- */
-export function getDefaultSpinner(): ReturnType<typeof Spinner> {
-  if (_spinner === undefined) {
-    _spinner = Spinner()
-  }
-  return _spinner
-}
-
-// REMOVED: Deprecated `spinner` export
-// Migration: Use getDefaultSpinner() instead
-// See: getDefaultSpinner() function above
 
 /**
  * Configuration options for `withSpinner()` helper.

@@ -47,17 +47,6 @@ const originalProcessReallyExit = globalProcess?.reallyExit as
   | undefined
 const WIN32 = platform === 'win32'
 
-let _events: typeof import('node:events') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getEvents() {
-  if (_events === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _events = /*@__PURE__*/ require('node:events')
-  }
-  return _events as typeof import('node:events')
-}
-
 // Type for tracking emitted signals.
 type EmittedSignals = {
   // Using string as signals can include custom events like 'exit' and 'afterexit'.
@@ -69,7 +58,35 @@ type SignalExitEmitter = import('node:events').EventEmitter & {
   emitted?: EmittedSignals
   infinite?: boolean
 }
+
+type SignalListener = () => void
+// Type for signal listeners indexed by signal name.
+type SignalListenerMap = {
+  [signal: string]: SignalListener
+}
+
+export interface OnExitOptions {
+  alwaysLast?: boolean
+}
+
+let _events: typeof import('node:events') | undefined
 let _emitter: SignalExitEmitter | undefined
+let _sigListeners: SignalListenerMap | undefined
+let loaded = false
+let _signals: string[] | undefined
+
+/*@__NO_SIDE_EFFECTS__*/
+function emit(event: string, code: number | null, signal: string | null): void {
+  const emitter = getEmitter()
+  if (emitter.emitted?.[event]) {
+    return
+  }
+  if (emitter.emitted) {
+    emitter.emitted[event] = true
+  }
+  emitter.emit(event, code, signal)
+}
+
 /*@__NO_SIDE_EFFECTS__*/
 function getEmitter() {
   if (_emitter === undefined) {
@@ -94,12 +111,16 @@ function getEmitter() {
   return _emitter as SignalExitEmitter
 }
 
-type SignalListener = () => void
-// Type for signal listeners indexed by signal name.
-type SignalListenerMap = {
-  [signal: string]: SignalListener
+/*@__NO_SIDE_EFFECTS__*/
+function getEvents() {
+  if (_events === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _events = /*@__PURE__*/ require('node:events')
+  }
+  return _events as typeof import('node:events')
 }
-let _sigListeners: SignalListenerMap | undefined
+
 /*@__NO_SIDE_EFFECTS__*/
 function getSignalListeners() {
   if (_sigListeners === undefined) {
@@ -126,62 +147,6 @@ function getSignalListeners() {
     }
   }
   return _sigListeners as SignalListenerMap
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-function emit(event: string, code: number | null, signal: string | null): void {
-  const emitter = getEmitter()
-  if (emitter.emitted?.[event]) {
-    return
-  }
-  if (emitter.emitted) {
-    emitter.emitted[event] = true
-  }
-  emitter.emit(event, code, signal)
-}
-
-let loaded = false
-
-/**
- * Load signal handlers and hook into process exit events.
- *
- * @example
- * ```typescript
- * load()
- * // Signal handlers are now active
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function load(): void {
-  if (loaded || !globalProcess) {
-    return
-  }
-  loaded = true
-
-  // This is the number of onSignalExit's that are in play.
-  // It's important so that we can count the correct number of
-  // listeners on signals, and don't wait for the other one to
-  // handle it instead of us.
-  const emitter = getEmitter()
-  if (emitter.count !== undefined) {
-    emitter.count += 1
-  }
-
-  const sigs = signals()
-  const sigListeners = getSignalListeners()
-  _signals = sigs.filter(sig => {
-    try {
-      globalProcess.on(
-        sig as NodeJS.Signals,
-        sigListeners[sig] as SignalListener,
-      )
-      return true
-    } catch {}
-    return false
-  })
-
-  globalProcess.emit = processEmit as typeof globalProcess.emit
-  globalProcess.reallyExit = processReallyExit
 }
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -234,8 +199,46 @@ function processReallyExit(code?: number | undefined): never {
   throw new Error('processReallyExit should never return')
 }
 
-export interface OnExitOptions {
-  alwaysLast?: boolean
+/**
+ * Load signal handlers and hook into process exit events.
+ *
+ * @example
+ * ```typescript
+ * load()
+ * // Signal handlers are now active
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function load(): void {
+  if (loaded || !globalProcess) {
+    return
+  }
+  loaded = true
+
+  // This is the number of onSignalExit's that are in play.
+  // It's important so that we can count the correct number of
+  // listeners on signals, and don't wait for the other one to
+  // handle it instead of us.
+  const emitter = getEmitter()
+  if (emitter.count !== undefined) {
+    emitter.count += 1
+  }
+
+  const sigs = signals()
+  const sigListeners = getSignalListeners()
+  _signals = sigs.filter(sig => {
+    try {
+      globalProcess.on(
+        sig as NodeJS.Signals,
+        sigListeners[sig] as SignalListener,
+      )
+      return true
+    } catch {}
+    return false
+  })
+
+  globalProcess.emit = processEmit as typeof globalProcess.emit
+  globalProcess.reallyExit = processReallyExit
 }
 
 /**
@@ -285,7 +288,6 @@ export function onExit(
   }
 }
 
-let _signals: string[] | undefined
 /**
  * Get the list of signals that are currently being monitored.
  *

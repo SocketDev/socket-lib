@@ -41,24 +41,6 @@ const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000
 let _githubCache: TtlCache | undefined
 
 /**
- * Get or create the GitHub cache instance.
- * Lazy initializes the cache with default TTL and memoization enabled.
- * Used internally for caching GitHub API responses.
- *
- * @returns The singleton cache instance
- */
-function getGithubCache(): TtlCache {
-  if (_githubCache === undefined) {
-    _githubCache = createTtlCache({
-      memoize: true,
-      prefix: 'github-refs',
-      ttl: DEFAULT_CACHE_TTL_MS,
-    })
-  }
-  return _githubCache
-}
-
-/**
  * Options for GitHub API fetch requests.
  */
 export interface GitHubFetchOptions {
@@ -89,28 +71,393 @@ export interface GitHubRateLimitError extends Error {
 }
 
 /**
- * Get GitHub authentication token from environment variables.
- * Checks multiple environment variable names in priority order.
+ * GitHub ref object returned by the API.
+ * Represents a git reference (tag or branch).
+ */
+export interface GitHubRef {
+  /** The object this ref points to */
+  object: {
+    /** SHA of the commit or tag object */
+    sha: string
+    /** Type of object ('commit' or 'tag') */
+    type: string
+    /** API URL to fetch the full object details */
+    url: string
+  }
+  /** Full ref path (e.g., 'refs/tags/v1.0.0' or 'refs/heads/main') */
+  ref: string
+  /** API URL for this ref */
+  url: string
+}
+
+/**
+ * GitHub annotated tag object returned by the API.
+ * Represents a git tag with metadata.
+ */
+export interface GitHubTag {
+  /** Tag annotation message */
+  message: string
+  /** The commit this tag points to */
+  object: {
+    /** SHA of the commit */
+    sha: string
+    /** Type of object (usually 'commit') */
+    type: string
+    /** API URL to fetch the commit details */
+    url: string
+  }
+  /** SHA of this tag object itself */
+  sha: string
+  /** Tag name (e.g., 'v1.0.0') */
+  tag: string
+  /**
+   * Information about who created the tag.
+   * Undefined for lightweight tags.
+   */
+  tagger?: {
+    /** Tag creation date in ISO 8601 format */
+    date: string
+    /** Tagger's email address */
+    email: string
+    /** Tagger's name */
+    name: string
+  }
+  /** API URL for this tag object */
+  url: string
+}
+
+/**
+ * GitHub commit object returned by the API.
+ * Represents a git commit with metadata.
+ */
+export interface GitHubCommit {
+  /** Full commit SHA */
+  sha: string
+  /** API URL for this commit */
+  url: string
+  /** Commit details */
+  commit: {
+    /** Commit message */
+    message: string
+    /** Author information */
+    author: {
+      /** Commit author date in ISO 8601 format */
+      date: string
+      /** Author's email address */
+      email: string
+      /** Author's name */
+      name: string
+    }
+  }
+}
+
+/**
+ * Options for resolving git refs to commit SHAs.
+ */
+export interface ResolveRefOptions {
+  /**
+   * GitHub authentication token.
+   * If not provided, will attempt to use token from environment variables.
+   */
+  token?: string | undefined
+}
+
+/**
+ * GitHub Security Advisory (GHSA) details.
+ * Represents a complete security advisory from GitHub's database.
+ */
+export interface GhsaDetails {
+  /** GHSA identifier (e.g., 'GHSA-xxxx-yyyy-zzzz') */
+  ghsaId: string
+  /** Short summary of the vulnerability */
+  summary: string
+  /** Detailed description of the vulnerability */
+  details: string
+  /** Severity level ('low', 'moderate', 'high', 'critical') */
+  severity: string
+  /** Alternative identifiers (CVE IDs, etc.) */
+  aliases: string[]
+  /** ISO 8601 timestamp when advisory was published */
+  publishedAt: string
+  /** ISO 8601 timestamp when advisory was last updated */
+  updatedAt: string
+  /**
+   * ISO 8601 timestamp when advisory was withdrawn.
+   * `null` if advisory is still active.
+   */
+  withdrawnAt: string | null
+  /** External reference URLs for more information */
+  references: Array<{ url: string }>
+  /** Affected packages and version ranges */
+  vulnerabilities: Array<{
+    /** Package information */
+    package: {
+      /** Ecosystem (e.g., 'npm', 'pip', 'maven') */
+      ecosystem: string
+      /** Package name */
+      name: string
+    }
+    /** Version range expression for vulnerable versions */
+    vulnerableVersionRange: string
+    /**
+     * First patched version that fixes the vulnerability.
+     * `null` if no patched version exists yet.
+     */
+    firstPatchedVersion: { identifier: string } | null
+  }>
+  /**
+   * CVSS (Common Vulnerability Scoring System) information.
+   * `null` if CVSS score is not available.
+   */
+  cvss: {
+    /** CVSS score (0.0-10.0) */
+    score: number
+    /** CVSS vector string describing the vulnerability characteristics */
+    vectorString: string
+  } | null
+  /** CWE (Common Weakness Enumeration) categories */
+  cwes: Array<{
+    /** CWE identifier (e.g., 'CWE-79') */
+    cweId: string
+    /** Human-readable CWE name */
+    name: string
+    /** Description of the weakness category */
+    description: string
+  }>
+}
+
+/**
+ * Fetch the SHA for a git ref from GitHub API.
+ * Internal helper that implements the multi-strategy ref resolution logic.
+ * Tries tags, branches, and direct commit lookups in sequence.
  *
- * Environment variables checked (in order):
- * 1. `GITHUB_TOKEN` - Standard GitHub token variable
- * 2. `GH_TOKEN` - Alternative GitHub CLI token variable
- * 3. `SOCKET_CLI_GITHUB_TOKEN` - Socket-specific token variable
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param ref - Git reference to resolve
+ * @param options - Resolution options with authentication token
+ * @returns The full commit SHA
  *
- * @returns The first available GitHub token, or `undefined` if none found
+ * @throws {Error} When ref cannot be resolved after all strategies fail
+ */
+async function fetchRefSha(
+  owner: string,
+  repo: string,
+  ref: string,
+  options: ResolveRefOptions,
+): Promise<string> {
+  const fetchOptions: GitHubFetchOptions = {
+    token: options.token,
+  }
+
+  try {
+    // Try as a tag first.
+    const tagUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/git/refs/tags/${ref}`
+    const tagData = await fetchGitHub<GitHubRef>(tagUrl, fetchOptions)
+
+    // Tag might point to a tag object or directly to a commit.
+    if (tagData.object.type === 'tag') {
+      // Dereference the tag object to get the commit.
+      const tagObject = await fetchGitHub<GitHubTag>(
+        tagData.object.url,
+        fetchOptions,
+      )
+      return tagObject.object.sha
+    }
+    return tagData.object.sha
+  } catch {
+    // Not a tag, try as a branch.
+    try {
+      const branchUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/git/refs/heads/${ref}`
+      const branchData = await fetchGitHub<GitHubRef>(branchUrl, fetchOptions)
+      return branchData.object.sha
+    } catch {
+      // Try without refs/ prefix (for commit SHAs or other refs).
+      try {
+        const commitUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/commits/${ref}`
+        const commitData = await fetchGitHub<GitHubCommit>(
+          commitUrl,
+          fetchOptions,
+        )
+        return commitData.sha
+      } catch (e) {
+        throw new Error(
+          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${e instanceof Error ? e.message : String(e)}`,
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Get or create the GitHub cache instance.
+ * Lazy initializes the cache with default TTL and memoization enabled.
+ * Used internally for caching GitHub API responses.
+ *
+ * @returns The singleton cache instance
+ */
+function getGithubCache(): TtlCache {
+  if (_githubCache === undefined) {
+    _githubCache = createTtlCache({
+      memoize: true,
+      prefix: 'github-refs',
+      ttl: DEFAULT_CACHE_TTL_MS,
+    })
+  }
+  return _githubCache
+}
+
+/**
+ * Fetch GitHub Security Advisory details with caching.
+ * Retrieves advisory information with two-tier caching (in-memory + persistent).
+ * Cached results are stored with the default TTL (5 minutes).
+ *
+ * Caching behavior:
+ * - Checks in-memory cache first for immediate response
+ * - Falls back to persistent disk cache if not in memory
+ * - Fetches from API only if not cached
+ * - Stores result in both cache tiers
+ * - Respects `DISABLE_GITHUB_CACHE` env var
+ *
+ * @param ghsaId - GHSA identifier to fetch
+ * @param options - Fetch options including authentication token
+ * @returns Complete advisory details
+ *
+ * @throws {Error} If advisory cannot be found or API request fails
+ * @throws {GitHubRateLimitError} When API rate limit is exceeded
  *
  * @example
  * ```ts
- * const token = getGitHubToken()
- * if (!token) {
- *   console.warn('No GitHub token found')
+ * // First call hits API
+ * const advisory = await cacheFetchGhsa('GHSA-1234-5678-90ab')
+ *
+ * // Second call within 5 minutes returns cached data
+ * const cached = await cacheFetchGhsa('GHSA-1234-5678-90ab')
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Disable caching for fresh data
+ * process.env.DISABLE_GITHUB_CACHE = '1'
+ * const advisory = await cacheFetchGhsa('GHSA-xxxx-yyyy-zzzz')
+ * ```
+ */
+export async function cacheFetchGhsa(
+  ghsaId: string,
+  options?: GitHubFetchOptions | undefined,
+): Promise<GhsaDetails> {
+  const cache = getGithubCache()
+  const key = `ghsa:${ghsaId}`
+
+  // Bypass cache if disabled.
+  if (process.env['DISABLE_GITHUB_CACHE']) {
+    return await fetchGhsaDetails(ghsaId, options)
+  }
+
+  // Use getOrFetch to prevent race conditions (thundering herd).
+  return (await cache.getOrFetch(key, async () => {
+    return await fetchGhsaDetails(ghsaId, options)
+  })) as GhsaDetails
+}
+
+/**
+ * Clear the ref resolution cache (in-memory only).
+ * Clears the in-memory memoization cache without affecting the persistent disk cache.
+ * Useful for testing or when you need fresh data from the API.
+ *
+ * Note: This only clears the in-memory cache. The persistent cacache storage
+ * remains intact and will be used to rebuild the in-memory cache on next access.
+ *
+ * @returns Promise that resolves when cache is cleared
+ *
+ * @example
+ * ```ts
+ * // Clear cache to force fresh API calls
+ * await clearRefCache()
+ * const sha = await resolveRefToSha('owner', 'repo', 'main')
+ * // This will hit the persistent cache or API, not in-memory cache
+ * ```
+ */
+export async function clearRefCache(): Promise<void> {
+  if (_githubCache) {
+    await _githubCache.clear({ memoOnly: true })
+  }
+}
+
+/**
+ * Fetch GitHub Security Advisory details from the API.
+ * Retrieves complete advisory information including severity, affected packages,
+ * CVSS scores, and CWE classifications.
+ *
+ * @param ghsaId - GHSA identifier to fetch (e.g., 'GHSA-xxxx-yyyy-zzzz')
+ * @param options - Fetch options including authentication token
+ * @returns Complete advisory details with normalized field names
+ *
+ * @throws {Error} If advisory cannot be found or API request fails
+ * @throws {GitHubRateLimitError} When API rate limit is exceeded
+ *
+ * @example
+ * ```ts
+ * const advisory = await fetchGhsaDetails('GHSA-1234-5678-90ab')
+ * console.log(`Severity: ${advisory.severity}`)
+ * console.log(`Affects: ${advisory.vulnerabilities.length} packages`)
+ * if (advisory.cvss) {
+ *   console.log(`CVSS Score: ${advisory.cvss.score}`)
+ * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Check if vulnerability is patched
+ * const advisory = await fetchGhsaDetails('GHSA-xxxx-yyyy-zzzz')
+ * for (const vuln of advisory.vulnerabilities) {
+ *   if (vuln.firstPatchedVersion) {
+ *     console.log(
+ *       `Patched in ${vuln.package.name}@${vuln.firstPatchedVersion.identifier}`
+ *     )
+ *   }
  * }
  * ```
  */
-export function getGitHubToken(): string | undefined {
-  return (
-    getGithubToken() || getGhToken() || getSocketCliGithubToken() || undefined
-  )
+export async function fetchGhsaDetails(
+  ghsaId: string,
+  options?: GitHubFetchOptions | undefined,
+): Promise<GhsaDetails> {
+  /* c8 ignore start - External GitHub API call */
+  const url = `https://api.github.com/advisories/${ghsaId}`
+  const data = await fetchGitHub<{
+    aliases?: string[]
+    cvss: unknown
+    cwes?: Array<{ cweId: string; name: string; description: string }>
+    details: string
+    ghsa_id: string
+    published_at: string
+    references?: Array<{ url: string }>
+    severity: string
+    summary: string
+    updated_at: string
+    vulnerabilities?: Array<{
+      package: { ecosystem: string; name: string }
+      vulnerableVersionRange: string
+      firstPatchedVersion: { identifier: string } | null
+    }>
+    withdrawn_at: string
+  }>(url, options)
+  /* c8 ignore stop */
+
+  return {
+    ghsaId: data.ghsa_id,
+    summary: data.summary,
+    details: data.details,
+    severity: data.severity,
+    aliases: data.aliases || [],
+    publishedAt: data.published_at,
+    updatedAt: data.updated_at,
+    withdrawnAt: data.withdrawn_at,
+    references: data.references || [],
+    vulnerabilities: data.vulnerabilities || [],
+    cvss: data.cvss as { score: number; vectorString: string } | null,
+    cwes: data.cwes || [],
+  }
 }
 
 /**
@@ -228,95 +575,113 @@ export async function fetchGitHub<T = unknown>(
 }
 
 /**
- * GitHub ref object returned by the API.
- * Represents a git reference (tag or branch).
+ * Generate GitHub Security Advisory URL from GHSA ID.
+ * Constructs the public advisory URL for a given GHSA identifier.
+ *
+ * @param ghsaId - GHSA identifier (e.g., 'GHSA-xxxx-yyyy-zzzz')
+ * @returns Full URL to the advisory page
+ *
+ * @example
+ * ```ts
+ * const url = getGhsaUrl('GHSA-1234-5678-90ab')
+ * console.log(url) // 'https://github.com/advisories/GHSA-1234-5678-90ab'
+ * ```
  */
-export interface GitHubRef {
-  /** The object this ref points to */
-  object: {
-    /** SHA of the commit or tag object */
-    sha: string
-    /** Type of object ('commit' or 'tag') */
-    type: string
-    /** API URL to fetch the full object details */
-    url: string
-  }
-  /** Full ref path (e.g., 'refs/tags/v1.0.0' or 'refs/heads/main') */
-  ref: string
-  /** API URL for this ref */
-  url: string
+export function getGhsaUrl(ghsaId: string): string {
+  return `https://github.com/advisories/${ghsaId}`
 }
 
 /**
- * GitHub annotated tag object returned by the API.
- * Represents a git tag with metadata.
+ * Get GitHub authentication token from environment variables.
+ * Checks multiple environment variable names in priority order.
+ *
+ * Environment variables checked (in order):
+ * 1. `GITHUB_TOKEN` - Standard GitHub token variable
+ * 2. `GH_TOKEN` - Alternative GitHub CLI token variable
+ * 3. `SOCKET_CLI_GITHUB_TOKEN` - Socket-specific token variable
+ *
+ * @returns The first available GitHub token, or `undefined` if none found
+ *
+ * @example
+ * ```ts
+ * const token = getGitHubToken()
+ * if (!token) {
+ *   console.warn('No GitHub token found')
+ * }
+ * ```
  */
-export interface GitHubTag {
-  /** Tag annotation message */
-  message: string
-  /** The commit this tag points to */
-  object: {
-    /** SHA of the commit */
-    sha: string
-    /** Type of object (usually 'commit') */
-    type: string
-    /** API URL to fetch the commit details */
-    url: string
-  }
-  /** SHA of this tag object itself */
-  sha: string
-  /** Tag name (e.g., 'v1.0.0') */
-  tag: string
-  /**
-   * Information about who created the tag.
-   * Undefined for lightweight tags.
-   */
-  tagger?: {
-    /** Tag creation date in ISO 8601 format */
-    date: string
-    /** Tagger's email address */
-    email: string
-    /** Tagger's name */
-    name: string
-  }
-  /** API URL for this tag object */
-  url: string
+export function getGitHubToken(): string | undefined {
+  return (
+    getGithubToken() || getGhToken() || getSocketCliGithubToken() || undefined
+  )
 }
 
 /**
- * GitHub commit object returned by the API.
- * Represents a git commit with metadata.
+ * Get GitHub authentication token from git config.
+ * Reads the `github.token` configuration value from git config.
+ * This is a fallback method when environment variables don't contain a token.
+ *
+ * @param options - Spawn options for git command execution
+ * @returns GitHub token from git config, or `undefined` if not configured
+ *
+ * @example
+ * ```ts
+ * const token = await getGitHubTokenFromGitConfig()
+ * if (token) {
+ *   console.log('Found token in git config')
+ * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // With custom working directory
+ * const token = await getGitHubTokenFromGitConfig({
+ *   cwd: '/path/to/repo'
+ * })
+ * ```
  */
-export interface GitHubCommit {
-  /** Full commit SHA */
-  sha: string
-  /** API URL for this commit */
-  url: string
-  /** Commit details */
-  commit: {
-    /** Commit message */
-    message: string
-    /** Author information */
-    author: {
-      /** Commit author date in ISO 8601 format */
-      date: string
-      /** Author's email address */
-      email: string
-      /** Author's name */
-      name: string
+export async function getGitHubTokenFromGitConfig(
+  options?: SpawnOptions | undefined,
+): Promise<string | undefined> {
+  /* c8 ignore start - External git process call */
+  try {
+    const result = await spawn('git', ['config', 'github.token'], {
+      ...options,
+      stdio: 'pipe',
+    })
+    if (result.code === 0 && result.stdout) {
+      return result.stdout.toString().trim()
     }
+  } catch {
+    // Ignore errors - git config may not have token.
   }
+  return undefined
+  /* c8 ignore stop */
 }
 
 /**
- * Options for resolving git refs to commit SHAs.
+ * Get GitHub authentication token from all available sources.
+ * Checks environment variables first, then falls back to git config.
+ * This is the recommended way to get a GitHub token with maximum compatibility.
+ *
+ * Priority order:
+ * 1. Environment variables (GITHUB_TOKEN, GH_TOKEN, SOCKET_CLI_GITHUB_TOKEN)
+ * 2. Git config (github.token)
+ *
+ * @returns GitHub token from first available source, or `undefined` if none found
+ *
+ * @example
+ * ```ts
+ * const token = await getGitHubTokenWithFallback()
+ * if (!token) {
+ *   throw new Error('GitHub token required')
+ * }
+ * ```
  */
-export interface ResolveRefOptions {
-  /**
-   * GitHub authentication token.
-   * If not provided, will attempt to use token from environment variables.
-   */
-  token?: string | undefined
+export async function getGitHubTokenWithFallback(): Promise<
+  string | undefined
+> {
+  return getGitHubToken() || (await getGitHubTokenFromGitConfig())
 }
 
 /**
@@ -400,369 +765,4 @@ export async function resolveRefToSha(
   return await cache.getOrFetch(cacheKey, async () => {
     return await fetchRefSha(owner, repo, ref, opts)
   })
-}
-
-/**
- * Fetch the SHA for a git ref from GitHub API.
- * Internal helper that implements the multi-strategy ref resolution logic.
- * Tries tags, branches, and direct commit lookups in sequence.
- *
- * @param owner - Repository owner
- * @param repo - Repository name
- * @param ref - Git reference to resolve
- * @param options - Resolution options with authentication token
- * @returns The full commit SHA
- *
- * @throws {Error} When ref cannot be resolved after all strategies fail
- */
-async function fetchRefSha(
-  owner: string,
-  repo: string,
-  ref: string,
-  options: ResolveRefOptions,
-): Promise<string> {
-  const fetchOptions: GitHubFetchOptions = {
-    token: options.token,
-  }
-
-  try {
-    // Try as a tag first.
-    const tagUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/git/refs/tags/${ref}`
-    const tagData = await fetchGitHub<GitHubRef>(tagUrl, fetchOptions)
-
-    // Tag might point to a tag object or directly to a commit.
-    if (tagData.object.type === 'tag') {
-      // Dereference the tag object to get the commit.
-      const tagObject = await fetchGitHub<GitHubTag>(
-        tagData.object.url,
-        fetchOptions,
-      )
-      return tagObject.object.sha
-    }
-    return tagData.object.sha
-  } catch {
-    // Not a tag, try as a branch.
-    try {
-      const branchUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/git/refs/heads/${ref}`
-      const branchData = await fetchGitHub<GitHubRef>(branchUrl, fetchOptions)
-      return branchData.object.sha
-    } catch {
-      // Try without refs/ prefix (for commit SHAs or other refs).
-      try {
-        const commitUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/commits/${ref}`
-        const commitData = await fetchGitHub<GitHubCommit>(
-          commitUrl,
-          fetchOptions,
-        )
-        return commitData.sha
-      } catch (e) {
-        throw new Error(
-          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${e instanceof Error ? e.message : String(e)}`,
-        )
-      }
-    }
-  }
-}
-
-/**
- * Clear the ref resolution cache (in-memory only).
- * Clears the in-memory memoization cache without affecting the persistent disk cache.
- * Useful for testing or when you need fresh data from the API.
- *
- * Note: This only clears the in-memory cache. The persistent cacache storage
- * remains intact and will be used to rebuild the in-memory cache on next access.
- *
- * @returns Promise that resolves when cache is cleared
- *
- * @example
- * ```ts
- * // Clear cache to force fresh API calls
- * await clearRefCache()
- * const sha = await resolveRefToSha('owner', 'repo', 'main')
- * // This will hit the persistent cache or API, not in-memory cache
- * ```
- */
-export async function clearRefCache(): Promise<void> {
-  if (_githubCache) {
-    await _githubCache.clear({ memoOnly: true })
-  }
-}
-
-/**
- * Get GitHub authentication token from git config.
- * Reads the `github.token` configuration value from git config.
- * This is a fallback method when environment variables don't contain a token.
- *
- * @param options - Spawn options for git command execution
- * @returns GitHub token from git config, or `undefined` if not configured
- *
- * @example
- * ```ts
- * const token = await getGitHubTokenFromGitConfig()
- * if (token) {
- *   console.log('Found token in git config')
- * }
- * ```
- *
- * @example
- * ```ts
- * // With custom working directory
- * const token = await getGitHubTokenFromGitConfig({
- *   cwd: '/path/to/repo'
- * })
- * ```
- */
-export async function getGitHubTokenFromGitConfig(
-  options?: SpawnOptions | undefined,
-): Promise<string | undefined> {
-  /* c8 ignore start - External git process call */
-  try {
-    const result = await spawn('git', ['config', 'github.token'], {
-      ...options,
-      stdio: 'pipe',
-    })
-    if (result.code === 0 && result.stdout) {
-      return result.stdout.toString().trim()
-    }
-  } catch {
-    // Ignore errors - git config may not have token.
-  }
-  return undefined
-  /* c8 ignore stop */
-}
-
-/**
- * Get GitHub authentication token from all available sources.
- * Checks environment variables first, then falls back to git config.
- * This is the recommended way to get a GitHub token with maximum compatibility.
- *
- * Priority order:
- * 1. Environment variables (GITHUB_TOKEN, GH_TOKEN, SOCKET_CLI_GITHUB_TOKEN)
- * 2. Git config (github.token)
- *
- * @returns GitHub token from first available source, or `undefined` if none found
- *
- * @example
- * ```ts
- * const token = await getGitHubTokenWithFallback()
- * if (!token) {
- *   throw new Error('GitHub token required')
- * }
- * ```
- */
-export async function getGitHubTokenWithFallback(): Promise<
-  string | undefined
-> {
-  return getGitHubToken() || (await getGitHubTokenFromGitConfig())
-}
-
-/**
- * GitHub Security Advisory (GHSA) details.
- * Represents a complete security advisory from GitHub's database.
- */
-export interface GhsaDetails {
-  /** GHSA identifier (e.g., 'GHSA-xxxx-yyyy-zzzz') */
-  ghsaId: string
-  /** Short summary of the vulnerability */
-  summary: string
-  /** Detailed description of the vulnerability */
-  details: string
-  /** Severity level ('low', 'moderate', 'high', 'critical') */
-  severity: string
-  /** Alternative identifiers (CVE IDs, etc.) */
-  aliases: string[]
-  /** ISO 8601 timestamp when advisory was published */
-  publishedAt: string
-  /** ISO 8601 timestamp when advisory was last updated */
-  updatedAt: string
-  /**
-   * ISO 8601 timestamp when advisory was withdrawn.
-   * `null` if advisory is still active.
-   */
-  withdrawnAt: string | null
-  /** External reference URLs for more information */
-  references: Array<{ url: string }>
-  /** Affected packages and version ranges */
-  vulnerabilities: Array<{
-    /** Package information */
-    package: {
-      /** Ecosystem (e.g., 'npm', 'pip', 'maven') */
-      ecosystem: string
-      /** Package name */
-      name: string
-    }
-    /** Version range expression for vulnerable versions */
-    vulnerableVersionRange: string
-    /**
-     * First patched version that fixes the vulnerability.
-     * `null` if no patched version exists yet.
-     */
-    firstPatchedVersion: { identifier: string } | null
-  }>
-  /**
-   * CVSS (Common Vulnerability Scoring System) information.
-   * `null` if CVSS score is not available.
-   */
-  cvss: {
-    /** CVSS score (0.0-10.0) */
-    score: number
-    /** CVSS vector string describing the vulnerability characteristics */
-    vectorString: string
-  } | null
-  /** CWE (Common Weakness Enumeration) categories */
-  cwes: Array<{
-    /** CWE identifier (e.g., 'CWE-79') */
-    cweId: string
-    /** Human-readable CWE name */
-    name: string
-    /** Description of the weakness category */
-    description: string
-  }>
-}
-
-/**
- * Generate GitHub Security Advisory URL from GHSA ID.
- * Constructs the public advisory URL for a given GHSA identifier.
- *
- * @param ghsaId - GHSA identifier (e.g., 'GHSA-xxxx-yyyy-zzzz')
- * @returns Full URL to the advisory page
- *
- * @example
- * ```ts
- * const url = getGhsaUrl('GHSA-1234-5678-90ab')
- * console.log(url) // 'https://github.com/advisories/GHSA-1234-5678-90ab'
- * ```
- */
-export function getGhsaUrl(ghsaId: string): string {
-  return `https://github.com/advisories/${ghsaId}`
-}
-
-/**
- * Fetch GitHub Security Advisory details from the API.
- * Retrieves complete advisory information including severity, affected packages,
- * CVSS scores, and CWE classifications.
- *
- * @param ghsaId - GHSA identifier to fetch (e.g., 'GHSA-xxxx-yyyy-zzzz')
- * @param options - Fetch options including authentication token
- * @returns Complete advisory details with normalized field names
- *
- * @throws {Error} If advisory cannot be found or API request fails
- * @throws {GitHubRateLimitError} When API rate limit is exceeded
- *
- * @example
- * ```ts
- * const advisory = await fetchGhsaDetails('GHSA-1234-5678-90ab')
- * console.log(`Severity: ${advisory.severity}`)
- * console.log(`Affects: ${advisory.vulnerabilities.length} packages`)
- * if (advisory.cvss) {
- *   console.log(`CVSS Score: ${advisory.cvss.score}`)
- * }
- * ```
- *
- * @example
- * ```ts
- * // Check if vulnerability is patched
- * const advisory = await fetchGhsaDetails('GHSA-xxxx-yyyy-zzzz')
- * for (const vuln of advisory.vulnerabilities) {
- *   if (vuln.firstPatchedVersion) {
- *     console.log(
- *       `Patched in ${vuln.package.name}@${vuln.firstPatchedVersion.identifier}`
- *     )
- *   }
- * }
- * ```
- */
-export async function fetchGhsaDetails(
-  ghsaId: string,
-  options?: GitHubFetchOptions | undefined,
-): Promise<GhsaDetails> {
-  /* c8 ignore start - External GitHub API call */
-  const url = `https://api.github.com/advisories/${ghsaId}`
-  const data = await fetchGitHub<{
-    aliases?: string[]
-    cvss: unknown
-    cwes?: Array<{ cweId: string; name: string; description: string }>
-    details: string
-    ghsa_id: string
-    published_at: string
-    references?: Array<{ url: string }>
-    severity: string
-    summary: string
-    updated_at: string
-    vulnerabilities?: Array<{
-      package: { ecosystem: string; name: string }
-      vulnerableVersionRange: string
-      firstPatchedVersion: { identifier: string } | null
-    }>
-    withdrawn_at: string
-  }>(url, options)
-  /* c8 ignore stop */
-
-  return {
-    ghsaId: data.ghsa_id,
-    summary: data.summary,
-    details: data.details,
-    severity: data.severity,
-    aliases: data.aliases || [],
-    publishedAt: data.published_at,
-    updatedAt: data.updated_at,
-    withdrawnAt: data.withdrawn_at,
-    references: data.references || [],
-    vulnerabilities: data.vulnerabilities || [],
-    cvss: data.cvss as { score: number; vectorString: string } | null,
-    cwes: data.cwes || [],
-  }
-}
-
-/**
- * Fetch GitHub Security Advisory details with caching.
- * Retrieves advisory information with two-tier caching (in-memory + persistent).
- * Cached results are stored with the default TTL (5 minutes).
- *
- * Caching behavior:
- * - Checks in-memory cache first for immediate response
- * - Falls back to persistent disk cache if not in memory
- * - Fetches from API only if not cached
- * - Stores result in both cache tiers
- * - Respects `DISABLE_GITHUB_CACHE` env var
- *
- * @param ghsaId - GHSA identifier to fetch
- * @param options - Fetch options including authentication token
- * @returns Complete advisory details
- *
- * @throws {Error} If advisory cannot be found or API request fails
- * @throws {GitHubRateLimitError} When API rate limit is exceeded
- *
- * @example
- * ```ts
- * // First call hits API
- * const advisory = await cacheFetchGhsa('GHSA-1234-5678-90ab')
- *
- * // Second call within 5 minutes returns cached data
- * const cached = await cacheFetchGhsa('GHSA-1234-5678-90ab')
- * ```
- *
- * @example
- * ```ts
- * // Disable caching for fresh data
- * process.env.DISABLE_GITHUB_CACHE = '1'
- * const advisory = await cacheFetchGhsa('GHSA-xxxx-yyyy-zzzz')
- * ```
- */
-export async function cacheFetchGhsa(
-  ghsaId: string,
-  options?: GitHubFetchOptions | undefined,
-): Promise<GhsaDetails> {
-  const cache = getGithubCache()
-  const key = `ghsa:${ghsaId}`
-
-  // Bypass cache if disabled.
-  if (process.env['DISABLE_GITHUB_CACHE']) {
-    return await fetchGhsaDetails(ghsaId, options)
-  }
-
-  // Use getOrFetch to prevent race conditions (thundering herd).
-  return (await cache.getOrFetch(key, async () => {
-    return await fetchGhsaDetails(ghsaId, options)
-  })) as GhsaDetails
 }
