@@ -50,6 +50,9 @@ import { naturalCompare } from './sorts'
 
 const abortSignal = getAbortSignal()
 
+// Module-level regex constants — avoid re-allocating on every call.
+const NEWLINE_REGEX = /\n/g
+
 /**
  * Supported text encodings for Node.js Buffers.
  * Includes ASCII, UTF-8/16, base64, binary, and hexadecimal encodings.
@@ -450,7 +453,7 @@ function stringify(
 ): string {
   const EOF = finalEOL ? EOL : ''
   const str = JSON.stringify(json, replacer, spaces)
-  return `${str.replace(/\n/g, EOL)}${EOF}`
+  return `${str.replace(NEWLINE_REGEX, EOL)}${EOF}`
 }
 
 /**

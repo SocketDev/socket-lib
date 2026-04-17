@@ -156,20 +156,30 @@ interface GitDiffSpawnArgs {
   staged: SpawnArgs
 }
 
+// LRU cache for git diff results. We exploit Map's insertion-order iteration
+// so eviction is O(1): delete the first key. Touching on read (delete + set)
+// keeps the most-recently-used entry at the back.
 const gitDiffCache = new Map<string, string[]>()
-const gitDiffAccessOrder: string[] = []
 const GIT_CACHE_MAX_SIZE = 100
 
-function evictLRUGitCache() {
-  if (
-    gitDiffCache.size >= GIT_CACHE_MAX_SIZE &&
-    gitDiffAccessOrder.length > 0
-  ) {
-    const oldest = gitDiffAccessOrder.shift()
-    if (oldest) {
+function getCachedGitDiff(key: string): string[] | undefined {
+  const result = gitDiffCache.get(key)
+  if (result) {
+    // Re-insert to mark as most-recently-used.
+    gitDiffCache.delete(key)
+    gitDiffCache.set(key, result)
+  }
+  return result
+}
+
+function setCachedGitDiff(key: string, result: string[]): void {
+  if (gitDiffCache.size >= GIT_CACHE_MAX_SIZE) {
+    const oldest = gitDiffCache.keys().next().value
+    if (oldest !== undefined) {
       gitDiffCache.delete(oldest)
     }
   }
+  gitDiffCache.set(key, result)
 }
 
 // Cached git binary path to avoid repeated PATH searches.
@@ -317,7 +327,7 @@ async function innerDiff(
   const { cache = true, ...parseOptions } = { __proto__: null, ...options }
   const cacheKey = cache ? JSON.stringify({ args, parseOptions }) : undefined
   if (cache && cacheKey) {
-    const result = gitDiffCache.get(cacheKey)
+    const result = getCachedGitDiff(cacheKey)
     if (result) {
       return result
     }
@@ -349,9 +359,7 @@ async function innerDiff(
     return []
   }
   if (cache && cacheKey) {
-    evictLRUGitCache()
-    gitDiffCache.set(cacheKey, result)
-    gitDiffAccessOrder.push(cacheKey)
+    setCachedGitDiff(cacheKey, result)
   }
   return result
 }
@@ -373,7 +381,7 @@ function innerDiffSync(
   const { cache = true, ...parseOptions } = { __proto__: null, ...options }
   const cacheKey = cache ? JSON.stringify({ args, parseOptions }) : undefined
   if (cache && cacheKey) {
-    const result = gitDiffCache.get(cacheKey)
+    const result = getCachedGitDiff(cacheKey)
     if (result) {
       return result
     }
@@ -405,9 +413,7 @@ function innerDiffSync(
     return []
   }
   if (cache && cacheKey) {
-    evictLRUGitCache()
-    gitDiffCache.set(cacheKey, result)
-    gitDiffAccessOrder.push(cacheKey)
+    setCachedGitDiff(cacheKey, result)
   }
   return result
 }
