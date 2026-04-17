@@ -143,7 +143,9 @@ Color the icon only, not the message. Use `yoctocolors-cjs` (not the ESM `yoctoc
 
 Core infrastructure library for Socket.dev security tools.
 
-**Path aliases** (from `.config/tsconfig.external-aliases.json`): `#constants/*`, `#env/*`, `#lib/*`, `#packages/*`, `#types`, `#utils/*` — all map to `src/` subdirectories. Always use aliases for internal imports (never relative paths).
+**Internal imports**: Use relative paths (e.g., `'../constants/packages'`). Path aliases are intentionally avoided — they add indirection without saving keystrokes and mask structural coupling.
+
+**Vendored externals**: `cacache`, `make-fetch-happen`, `fast-sort`, `pacote`, `adm-zip`, `tar-fs`, `picomatch` are vendored in `src/external/` and remapped via `tsconfig.json` `paths`. Always import these by their bare package name; the tsconfig resolves them to the vendored copy.
 
 ### Commands
 
@@ -199,7 +201,7 @@ Core infrastructure library for Socket.dev security tools.
 1. Node.js built-ins (with `node:` prefix)
 2. External dependencies
 3. `@socketsecurity/*` packages
-4. Internal path aliases (`#constants/*`, `#env/*`, `#lib/*`, etc.)
+4. Internal relative paths (`../constants/*`, `../env/*`, etc.)
 5. Type imports (separate)
 
 Blank lines between groups, alphabetical within groups.
@@ -237,7 +239,7 @@ Custom optimized pipeline in `.github/workflows/ci.yml`: separate lint job (runs
 
 ### Environment Variables
 
-Access via typed getter functions in `src/env/`. Each module exports a pure getter. Test rewiring via `#env/rewire` (`setEnv`, `clearEnv`, `resetEnv`) without modifying `process.env`.
+Access via typed getter functions in `src/env/`. Each module exports a pure getter. Test rewiring via `src/env/rewire.ts` (`setEnv`, `clearEnv`, `resetEnv`) without modifying `process.env`.
 
 ### Working Directory
 

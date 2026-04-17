@@ -102,29 +102,24 @@ async function main(): Promise<void> {
     if (ext === EXT_JSON) {
       jsonExports[`./${exportPath}`] = filePath
     } else {
-      const extLessExportPath = `./${exportPath.slice(0, -ext.length)}`
       const isDts = ext === EXT_DTS
-      if (o[extLessExportPath]) {
-        o[extLessExportPath][isDts ? 'types' : 'default'] = filePath
+      const basename = path.basename(exportPath, ext)
+      // For index files, expose only the directory path (e.g., './themes'),
+      // not the redundant './themes/index' form.
+      let publicPath: string
+      if (basename === 'index') {
+        const dirname = path.dirname(exportPath)
+        publicPath = dirname === '.' ? '.' : `./${dirname}`
       } else {
-        o[extLessExportPath] = {
+        publicPath = `./${exportPath.slice(0, -ext.length)}`
+      }
+      if (o[publicPath]) {
+        o[publicPath][isDts ? 'types' : 'default'] = filePath
+      } else {
+        o[publicPath] = {
           // Order is significant. Default should be specified last.
           types: isDts ? filePath : undefined,
           default: isDts ? undefined : filePath,
-        }
-      }
-      const basename = path.basename(exportPath, ext)
-      if (basename === 'index') {
-        const dirname = path.dirname(exportPath)
-        const dirPath = dirname === '.' ? dirname : `./${dirname}`
-        if (o[dirPath]) {
-          o[dirPath][isDts ? 'types' : 'default'] = filePath
-        } else {
-          o[dirPath] = {
-            // Order is significant. Default should be specified last.
-            types: isDts ? filePath : undefined,
-            default: isDts ? undefined : filePath,
-          }
         }
       }
     }

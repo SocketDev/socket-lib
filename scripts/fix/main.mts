@@ -37,10 +37,6 @@ async function main(): Promise<void> {
       command: 'node',
     },
     {
-      args: ['scripts/fix/path-aliases.mts', ...fixArgs],
-      command: 'node',
-    },
-    {
       args: ['scripts/fix/external-imports.mts', ...fixArgs],
       command: 'node',
     },

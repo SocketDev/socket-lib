@@ -3,12 +3,6 @@
   "compilerOptions": {
     "declarationMap": false,
     "paths": {
-      "#constants/*": ["../src/constants/*"],
-      "#env/*": ["../src/env/*"],
-      "#lib/*": ["../src/*"],
-      "#packages/*": ["../src/packages/*"],
-      "#types": ["../src/types"],
-      "#utils/*": ["../src/utils/*"],
       "cacache": ["../src/external/cacache"],
       "make-fetch-happen": ["../src/external/make-fetch-happen"],
       "fast-sort": ["../src/external/fast-sort"],

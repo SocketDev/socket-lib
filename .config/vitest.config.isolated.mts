@@ -19,13 +19,6 @@ const vitestConfigIsolated = defineConfig({
     preserveSymlinks: false,
     extensions: ['.mts', '.ts', '.mjs', '.js', '.json'],
     alias: {
-      '#env/ci': path.resolve(projectRoot, 'src/env/ci.ts'),
-      '#env': path.resolve(projectRoot, 'src/env'),
-      '#constants': path.resolve(projectRoot, 'src/constants'),
-      '#lib': path.resolve(projectRoot, 'src/lib'),
-      '#packages': path.resolve(projectRoot, 'src/lib/packages'),
-      '#types': path.resolve(projectRoot, 'src/types.ts'),
-      '#utils': path.resolve(projectRoot, 'src/utils'),
       cacache: path.resolve(projectRoot, 'src/external/cacache'),
       'make-fetch-happen': path.resolve(
         projectRoot,
