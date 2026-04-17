@@ -1,10 +1,12 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "declarationMap": false,
     "noEmit": true,
     "rootDir": "..",
-    "types": ["node", "vitest"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "types": ["node", "vitest"]
   },
   "include": ["../src/**/*.ts", "../test/**/*.ts", "../test/**/*.mts"],
   "exclude": ["../node_modules", "../dist/**/*"]

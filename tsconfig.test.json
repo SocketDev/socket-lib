@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "declarationMap": false,
     "rootDir": ".",
+    "sourceMap": false,
     "types": ["node", "vitest"]
   },
   "include": ["test/**/*.ts", "test/**/*.mts", "src/**/*.ts"],

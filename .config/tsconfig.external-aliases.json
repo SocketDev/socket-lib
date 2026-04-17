@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.check.json",
   "compilerOptions": {
+    "declarationMap": false,
     "paths": {
       "#constants/*": ["../src/constants/*"],
       "#env/*": ["../src/env/*"],
@@ -25,6 +26,7 @@
       "@socketregistry/packageurl-js/*": ["../../socket-packageurl-js/dist/*"],
       "@socketsecurity/sdk": ["../../socket-sdk-js/dist/index.d.ts"],
       "@socketsecurity/sdk/*": ["../../socket-sdk-js/dist/*"]
-    }
+    },
+    "sourceMap": false
   }
 }
