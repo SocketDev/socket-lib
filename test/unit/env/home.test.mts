@@ -1,10 +1,10 @@
 /**
  * @fileoverview Unit tests for HOME environment variable getter.
  *
- * Tests getHome() which retrieves the user's home directory path via HOME env var.
- * Returns home path string or undefined if not set. Unix/Linux standard.
- * On Windows, use getUserprofile() instead (USERPROFILE env var).
- * Uses rewire for isolated testing. Critical for resolving user-specific paths.
+ * Tests getHome(), which resolves the user's home directory. It reads $HOME
+ * first (POSIX + most shells), then falls back to $USERPROFILE for Windows
+ * environments where $HOME is typically unset. Uses rewire for isolated
+ * testing. Critical for resolving user-specific paths cross-platform.
  */
 
 import { getHome } from '@socketsecurity/lib/env/home'
@@ -149,6 +149,18 @@ describe('env/home', () => {
     it('should handle Snap paths', () => {
       setEnv('HOME', '/home/user/snap/app/common')
       expect(getHome()).toBe('/home/user/snap/app/common')
+    })
+
+    it('should fall back to USERPROFILE when HOME is unset (Windows)', () => {
+      setEnv('HOME', undefined)
+      setEnv('USERPROFILE', 'C:\\Users\\alice')
+      expect(getHome()).toBe('C:\\Users\\alice')
+    })
+
+    it('should prefer HOME over USERPROFILE when both are set', () => {
+      setEnv('HOME', '/Users/alice')
+      setEnv('USERPROFILE', 'C:\\Users\\alice')
+      expect(getHome()).toBe('/Users/alice')
     })
   })
 })

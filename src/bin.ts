@@ -207,16 +207,28 @@ export function findRealNpm(): string {
   const fs = getFs()
   const path = getPath()
 
-  // Try to find npm in the same directory as the node executable.
+  // Try to find npm alongside the node executable. On Windows this is
+  // npm.cmd; on POSIX it's the bare npm shim.
   const nodeDir = path.dirname(process.execPath)
-  const npmInNodeDir = path.join(nodeDir, 'npm')
-
-  if (fs.existsSync(npmInNodeDir)) {
-    return npmInNodeDir
+  const nodeDirCandidates = WIN32
+    ? [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
+    : [path.join(nodeDir, 'npm')]
+  for (const candidate of nodeDirCandidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate
+    }
   }
 
-  // Try common npm locations.
-  const commonPaths = ['/usr/local/bin/npm', '/usr/bin/npm']
+  // Try common npm locations per platform.
+  const appdata = getAppdata()
+  const commonPaths = WIN32
+    ? [
+        appdata ? path.join(appdata, 'npm', 'npm.cmd') : '',
+        appdata ? path.join(appdata, 'npm', 'npm') : '',
+        'C:\\Program Files\\nodejs\\npm.cmd',
+        'C:\\Program Files\\nodejs\\npm',
+      ].filter(Boolean)
+    : ['/usr/local/bin/npm', '/usr/bin/npm']
   const result = findRealBin('npm', commonPaths)
 
   // If we found a valid path, return it.
@@ -246,27 +258,31 @@ export function findRealNpm(): string {
  */
 export function findRealPnpm(): string {
   const path = getPath()
+  const home = getHome()
+  const appdata = getAppdata()
+  const localappdata = getLocalappdata()
+  const xdgDataHome = getXdgDataHome()
 
-  // Try common pnpm locations.
+  // Try common pnpm locations. Guard each env-derived path with its
+  // existence — getHome()/getAppdata()/etc. can all return undefined.
   const commonPaths = WIN32
     ? [
-        // Windows common paths.
-        path.join(getAppdata() as string, 'npm', 'pnpm.cmd'),
-        path.join(getAppdata() as string, 'npm', 'pnpm'),
-        path.join(getLocalappdata() as string, 'pnpm', 'pnpm.cmd'),
-        path.join(getLocalappdata() as string, 'pnpm', 'pnpm'),
+        appdata ? path.join(appdata, 'npm', 'pnpm.cmd') : '',
+        appdata ? path.join(appdata, 'npm', 'pnpm') : '',
+        localappdata ? path.join(localappdata, 'pnpm', 'pnpm.cmd') : '',
+        localappdata ? path.join(localappdata, 'pnpm', 'pnpm') : '',
         'C:\\Program Files\\nodejs\\pnpm.cmd',
         'C:\\Program Files\\nodejs\\pnpm',
       ].filter(Boolean)
     : [
-        // Unix common paths.
         '/usr/local/bin/pnpm',
         '/usr/bin/pnpm',
-        path.join(
-          (getXdgDataHome() as string) || `${getHome() as string}/.local/share`,
-          'pnpm/pnpm',
-        ),
-        path.join(getHome() as string, '.pnpm/pnpm'),
+        xdgDataHome
+          ? path.join(xdgDataHome, 'pnpm/pnpm')
+          : home
+            ? path.join(home, '.local/share/pnpm/pnpm')
+            : '',
+        home ? path.join(home, '.pnpm/pnpm') : '',
       ].filter(Boolean)
 
   return findRealBin('pnpm', commonPaths) ?? ''
@@ -283,17 +299,28 @@ export function findRealPnpm(): string {
  */
 export function findRealYarn(): string {
   const path = getPath()
+  const home = getHome()
+  const appdata = getAppdata()
 
-  // Try common yarn locations.
-  const commonPaths = [
-    '/usr/local/bin/yarn',
-    '/usr/bin/yarn',
-    path.join(getHome() as string, '.yarn/bin/yarn'),
-    path.join(
-      getHome() as string,
-      '.config/yarn/global/node_modules/.bin/yarn',
-    ),
-  ].filter(Boolean)
+  // Try common yarn locations per platform. Guard env-derived paths with
+  // existence checks — getHome()/getAppdata() can return undefined.
+  const commonPaths = WIN32
+    ? [
+        appdata ? path.join(appdata, 'npm', 'yarn.cmd') : '',
+        appdata ? path.join(appdata, 'npm', 'yarn') : '',
+        home ? path.join(home, '.yarn/bin/yarn.cmd') : '',
+        home ? path.join(home, '.yarn/bin/yarn') : '',
+        'C:\\Program Files\\nodejs\\yarn.cmd',
+        'C:\\Program Files\\nodejs\\yarn',
+      ].filter(Boolean)
+    : [
+        '/usr/local/bin/yarn',
+        '/usr/bin/yarn',
+        home ? path.join(home, '.yarn/bin/yarn') : '',
+        home
+          ? path.join(home, '.config/yarn/global/node_modules/.bin/yarn')
+          : '',
+      ].filter(Boolean)
 
   return findRealBin('yarn', commonPaths) ?? ''
 }

@@ -185,6 +185,12 @@ const gitRootCache = new Map<string, string>()
 /**
  * Get the real path with caching to avoid repeated filesystem calls.
  * Validates cache with existsSync() which is cheaper than realpathSync().
+ *
+ * ENOENT/ENOTDIR are re-thrown because the caller explicitly passed a path
+ * they expect to exist — swallowing these would turn "file not found" into
+ * a silent no-op. Other errors (EACCES, EPERM, EIO) fall back to the input
+ * path since they can happen on container/overlay filesystems where the
+ * path exists but realpath resolution is restricted.
  * @private
  */
 function getCachedRealpath(pathname: string): string {
@@ -197,7 +203,16 @@ function getCachedRealpath(pathname: string): string {
     // Cached path no longer exists, remove stale entry.
     realpathCache.delete(pathname)
   }
-  const resolved = fs.realpathSync(pathname)
+  let resolved: string
+  try {
+    resolved = fs.realpathSync(pathname)
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code
+    if (code === 'ENOENT' || code === 'ENOTDIR') {
+      throw error
+    }
+    resolved = pathname
+  }
   realpathCache.set(pathname, resolved)
   return resolved
 }
@@ -241,7 +256,7 @@ function getGitPath(): string {
  * ```
  */
 function getCwd(): string {
-  return getFs().realpathSync(process.cwd())
+  return getCachedRealpath(process.cwd())
 }
 
 /**
@@ -259,7 +274,7 @@ function getCwd(): string {
  * @returns Object containing spawn arguments for all, unstaged, and staged operations.
  */
 function getGitDiffSpawnArgs(cwd?: string | undefined): GitDiffSpawnArgs {
-  const resolvedCwd = cwd ? getFs().realpathSync(cwd) : getCwd()
+  const resolvedCwd = cwd ? getCachedRealpath(cwd) : getCwd()
   return {
     all: [
       getGitPath(),
@@ -495,9 +510,10 @@ function parseGitDiffStdout(
     cwdOption === defaultRoot ? defaultRoot : getCachedRealpath(cwdOption)
   const rootPath = defaultRoot
   // Split into lines without trimming to preserve leading spaces in porcelain format.
+  // Handle both LF (POSIX) and CRLF (Windows) — git on Windows emits CRLF by default.
   let rawFiles = stdout
     ? stripAnsi(stdout)
-        .split('\n')
+        .split(/\r?\n/)
         .map(line => line.trimEnd())
         .filter(line => line)
     : []

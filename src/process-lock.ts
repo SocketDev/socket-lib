@@ -40,6 +40,11 @@
  * - Automatic cleanup on process exit
  */
 
+import { safeDeleteSync } from './fs'
+import { getDefaultLogger } from './logger'
+import { pRetry } from './promises'
+import { onExit } from './signal-exit'
+
 let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
@@ -53,13 +58,18 @@ function getFs() {
   return _fs as typeof import('node:fs')
 }
 
-import { safeDeleteSync } from './fs'
-import { getDefaultLogger } from './logger'
-import { pRetry } from './promises'
-import { onExit } from './signal-exit'
-
-const fs = getFs()
-const { existsSync, mkdirSync, statSync, utimesSync } = fs
+let _path: typeof import('node:path') | undefined
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
+}
 
 const logger = getDefaultLogger()
 
@@ -128,9 +138,10 @@ class ProcessLockManager {
       this.touchTimers.clear()
 
       // Clean up all active locks.
+      const fs = getFs()
       for (const lockPath of this.activeLocks) {
         try {
-          if (existsSync(lockPath)) {
+          if (fs.existsSync(lockPath)) {
             safeDeleteSync(lockPath, { recursive: true })
           }
         } catch {
@@ -150,9 +161,12 @@ class ProcessLockManager {
    */
   private touchLock(lockPath: string): void {
     try {
-      if (existsSync(lockPath)) {
-        const now = new Date()
-        utimesSync(lockPath, now, now)
+      const fs = getFs()
+      if (fs.existsSync(lockPath)) {
+        // utimesSync accepts numeric timestamps (seconds). Pass Date.now() / 1000
+        // to avoid the Date allocation on every touch tick.
+        const now = Date.now() / 1000
+        fs.utimesSync(lockPath, now, now)
       }
     } catch (error) {
       logger.warn(
@@ -209,7 +223,7 @@ class ProcessLockManager {
     try {
       // Use single statSync call instead of existsSync + statSync.
       // throwIfNoEntry: false returns undefined if path doesn't exist.
-      const stats = statSync(lockPath, { throwIfNoEntry: false })
+      const stats = getFs().statSync(lockPath, { throwIfNoEntry: false })
       if (!stats) {
         return false
       }
@@ -275,23 +289,24 @@ class ProcessLockManager {
           }
 
           // Check if lock already exists before creating.
-          if (existsSync(lockPath)) {
+          const fs = getFs()
+          if (fs.existsSync(lockPath)) {
             throw new Error(`Lock already exists: ${lockPath}`)
           }
 
-          // Ensure parent directory exists.
-          const lastSlash = Math.max(
-            lockPath.lastIndexOf('/'),
-            lockPath.lastIndexOf('\\'),
-          )
-          if (lastSlash > 0) {
-            mkdirSync(lockPath.slice(0, lastSlash), { recursive: true })
+          // Ensure parent directory exists. Use path.dirname() so that both
+          // POSIX and Windows separators (and mixed-separator inputs) are
+          // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
+          // approach failed on relative paths and mixed-separator inputs.
+          const parent = getPath().dirname(lockPath)
+          if (parent && parent !== '.' && parent !== lockPath) {
+            fs.mkdirSync(parent, { recursive: true })
           }
 
           // Atomic lock acquisition via mkdir (without recursive).
           // Without recursive, mkdirSync throws EEXIST if another process
           // created the directory between the existsSync check and here.
-          mkdirSync(lockPath)
+          fs.mkdirSync(lockPath)
 
           // Track lock for cleanup.
           this.activeLocks.add(lockPath)
@@ -398,7 +413,7 @@ class ProcessLockManager {
     this.stopTouchTimer(lockPath)
 
     try {
-      if (existsSync(lockPath)) {
+      if (getFs().existsSync(lockPath)) {
         safeDeleteSync(lockPath, { recursive: true })
       }
       this.activeLocks.delete(lockPath)
