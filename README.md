@@ -45,6 +45,7 @@ logger.success(`Package: ${pkg.name}@${pkg.version}`)
 
 ## Documentation
 
+- [API Index](./docs/api-index.md) - Every subpath export with a one-line description (start here)
 - [Getting Started](./docs/getting-started.md) - Prerequisites, installation, and first examples
 - [Visual Effects](./docs/visual-effects.md) - Spinners, loggers, themes, and progress indicators
 - [File System](./docs/file-system.md) - File operations, globs, paths, and safe deletion

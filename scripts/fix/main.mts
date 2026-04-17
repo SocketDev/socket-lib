@@ -37,6 +37,10 @@ async function main(): Promise<void> {
       command: 'node',
     },
     {
+      args: ['scripts/fix/generate-api-index.mts', ...fixArgs],
+      command: 'node',
+    },
+    {
       args: ['scripts/fix/external-imports.mts', ...fixArgs],
       command: 'node',
     },
