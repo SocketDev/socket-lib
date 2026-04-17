@@ -1,6 +1,8 @@
 /**
- * IPC (Inter-Process Communication) object getter.
- * Handles communication between parent and child processes.
+ * @fileoverview Socket CLI IPC object getter.
+ * Lazily builds an `IpcObject` from `SOCKET_CLI_*` environment variables so
+ * child processes can read flags and tokens forwarded by the parent Socket
+ * CLI without re-parsing `process.env` each call.
  */
 
 export interface IpcObject {

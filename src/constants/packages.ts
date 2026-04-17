@@ -1,5 +1,8 @@
 /**
- * Package metadata, defaults, extensions, and lifecycle scripts.
+ * @fileoverview Package metadata, defaults, extensions, and lifecycle helpers.
+ * Exposes lazily-memoized accessors for package defaults (Node range, Socket
+ * categories), the pacote cache path, lifecycle script names, and known
+ * package extensions used during manifest processing.
  */
 
 import { getNpmLifecycleEvent as getNpmLifecycleEventEnv } from '../env/npm'

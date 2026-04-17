@@ -1,6 +1,8 @@
 /**
- * Common flag utilities for Socket CLI applications.
- * Provides consistent flag checking across all Socket projects.
+ * @fileoverview Common flag utilities for Socket CLI applications.
+ * Provides consistent flag checking (quiet, silent, verbose, debug, dry-run,
+ * etc.) across Socket projects, accepting either parsed flag objects or raw
+ * argv arrays.
  */
 
 /**

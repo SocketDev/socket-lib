@@ -1,5 +1,7 @@
 /**
- * Process control: abort signals and UI utilities.
+ * @fileoverview Process control helpers.
+ * Lazily creates and exposes a shared `AbortController` and its `AbortSignal`
+ * so cooperating modules can coordinate cancellation from a single source.
  */
 
 // Abort controller and signal.

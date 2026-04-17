@@ -1,6 +1,7 @@
 /**
- * Argument parsing utilities for CLI applications.
- * Uses yargs-parser internally for robust argument parsing with Node.js parseArgs-compatible API.
+ * @fileoverview Argument parsing utilities for CLI applications.
+ * Wraps the vendored yargs-parser with a Node.js parseArgs-compatible surface
+ * for booleans, strings, arrays, aliases, defaults, and coercion.
  */
 
 import process from 'node:process'

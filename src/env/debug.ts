@@ -1,6 +1,7 @@
 /**
- * DEBUG environment variable getter.
- * Controls debug output for the debug package.
+ * @fileoverview DEBUG environment variable getter.
+ * Exports `getDebug()`, which returns the raw `DEBUG` filter string used by
+ * the `debug` package (or `undefined` when unset).
  */
 
 import { getEnvValue } from './rewire'

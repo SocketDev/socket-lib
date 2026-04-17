@@ -1,6 +1,7 @@
 /**
- * TERM environment variable getter.
- * Terminal type identifier.
+ * @fileoverview TERM environment variable getter.
+ * Exports `getTerm()`, returning the `TERM` terminal type identifier (for
+ * example `xterm-256color`) or `undefined` when unset.
  */
 
 import { getEnvValue } from './rewire'

@@ -1,5 +1,8 @@
 /**
- * Node.js runtime: versions, features, flags, and capabilities.
+ * @fileoverview Node.js runtime version and capability helpers.
+ * Provides getters for the current Node version (major/minor/patch), the
+ * maintained-versions list, and feature-detection flags for APIs that vary
+ * across Node releases.
  */
 
 import process from 'node:process'

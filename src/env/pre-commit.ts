@@ -1,6 +1,7 @@
 /**
- * PRE_COMMIT environment variable getter.
- * Whether running in a pre-commit hook context.
+ * @fileoverview PRE_COMMIT environment variable getter.
+ * Exports `getPreCommit()`, a boolean coercion of `PRE_COMMIT` used to
+ * detect when code is running inside a pre-commit hook.
  */
 
 import { envAsBoolean } from './helpers'

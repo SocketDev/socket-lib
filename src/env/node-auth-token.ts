@@ -1,6 +1,7 @@
 /**
- * NODE_AUTH_TOKEN environment variable getter.
- * Authentication token for Node.js package registry access.
+ * @fileoverview NODE_AUTH_TOKEN environment variable getter.
+ * Exports `getNodeAuthToken()`, returning the value of `NODE_AUTH_TOKEN`
+ * used to authenticate against Node.js package registries.
  */
 
 import { getEnvValue } from './rewire'

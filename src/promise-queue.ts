@@ -1,6 +1,8 @@
 /**
- * A promise queue that limits concurrent execution of async tasks.
- * Based on patterns from coana-package-manager for resource-aware async operations.
+ * @fileoverview Bounded concurrency promise queue.
+ * Exports the `PromiseQueue` class, which limits how many async tasks run
+ * simultaneously, supports an optional max queue length (dropping the oldest
+ * pending task when exceeded), and exposes an idle-wait helper.
  */
 
 type QueuedTask<T> = {

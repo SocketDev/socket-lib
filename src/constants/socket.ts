@@ -1,5 +1,8 @@
 /**
- * Socket.dev APIs, scopes, organizations, and application names.
+ * @fileoverview Socket.dev branding and identifier constants.
+ * Centralizes API base URLs, the public API key, website/docs URLs, npm
+ * scopes, GitHub org/repo names, and app name strings used across the
+ * Socket toolchain.
  */
 
 // Socket.dev API.

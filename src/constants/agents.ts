@@ -1,6 +1,7 @@
 /**
- * Package manager agent constants.
- * Agent names, lockfile names, registry URLs, and configuration field names.
+ * @fileoverview Package manager agent constants.
+ * Exports agent names (npm/pnpm/yarn/bun/vlt/npx), lockfile names, registry
+ * URLs, and resolved npm binary paths used across Socket tooling.
  */
 
 import which from '../external/which'

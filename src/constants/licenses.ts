@@ -1,5 +1,7 @@
 /**
- * License identifiers and copy-left license sets.
+ * @fileoverview License identifier constants.
+ * Exports common SPDX license strings (MIT, UNLICENSED) and a lazily-built
+ * set of copy-left SPDX identifiers used when classifying package licenses.
  */
 
 // License identifiers.

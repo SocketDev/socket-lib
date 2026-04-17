@@ -1,6 +1,8 @@
 /**
- * CI environment variable getter.
- * Determines if code is running in a Continuous Integration environment.
+ * @fileoverview CI environment variable getter.
+ * Exports `getCI()`, which returns whether the `CI` environment variable is
+ * present (using the rewire helper so tests can override without touching
+ * `process.env`).
  */
 
 import { isInEnv } from './rewire'

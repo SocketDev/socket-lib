@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Git helpers built on top of `spawn`.
+ * Provides utilities for querying repository state - changed/staged files,
+ * diffs, and related metadata - with path normalization, glob filtering,
+ * lazy fs/path loading, and debug instrumentation.
+ */
+
 import process from 'node:process'
 import { whichSync } from './bin'
 import { debugNs } from './debug'

@@ -1,6 +1,7 @@
 /**
- * SHELL environment variable getter.
- * Unix/macOS default shell path.
+ * @fileoverview SHELL environment variable getter.
+ * Exports `getShell()`, returning the Unix/macOS `SHELL` path (for example
+ * `/bin/zsh`) or `undefined` when the variable is unset.
  */
 
 import { getEnvValue } from './rewire'

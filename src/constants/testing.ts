@@ -1,5 +1,7 @@
 /**
- * Testing framework constants and CI environment detection.
+ * @fileoverview Testing framework and CI-related string constants.
+ * Exports the canonical `TEST`, `VITEST`, `CI`, and `PRE_COMMIT` name
+ * strings referenced by env checks and configuration.
  */
 
 // Testing frameworks.

@@ -1,6 +1,7 @@
 /**
- * PATH environment variable getter.
- * System executable search paths.
+ * @fileoverview PATH environment variable getter.
+ * Exports `getPath()`, returning the raw value of the `PATH` environment
+ * variable that lists executable search directories.
  */
 
 import { getEnvValue } from './rewire'

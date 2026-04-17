@@ -1,31 +1,9 @@
 /**
- * IPC (Inter-Process Communication) Module
- * ==========================================
- *
- * This module provides secure inter-process communication utilities for Socket CLI
- * and related tools. It replaces environment variable passing with more secure and
- * scalable alternatives.
- *
- * ## Key Features:
- * - File-based stub communication for initial data handoff
- * - Node.js IPC channel support for real-time bidirectional messaging
- * - Automatic cleanup of temporary files
- * - Type-safe message validation with Zod schemas
- * - Timeout handling for reliability
- *
- * ## Use Cases:
- * 1. Passing API tokens between processes without exposing them in env vars
- * 2. Transferring large configuration objects that exceed env var size limits
- * 3. Bidirectional communication between parent and child processes
- * 4. Secure handshake protocols between Socket CLI components
- *
- * ## Security Considerations:
- * - Stub files are created with restricted permissions in OS temp directory
- * - Messages include timestamps for freshness validation
- * - Automatic cleanup prevents sensitive data persistence
- * - Unique IDs prevent message replay attacks
- *
- * @module ipc
+ * @fileoverview Secure inter-process communication utilities for Socket CLI.
+ * Combines file-based stub handoff (restricted-perm temp files with unique
+ * IDs and timestamps) with Node.js IPC channels for bidirectional messaging,
+ * Zod-validated payloads, timeouts, and automatic cleanup - avoiding the
+ * size and exposure limits of passing data through environment variables.
  */
 
 let _crypto: typeof import('node:crypto') | undefined

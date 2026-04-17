@@ -1,5 +1,7 @@
 /**
- * TypeScript availability and type system checks.
+ * @fileoverview TypeScript availability detection.
+ * Exports small getters that probe whether the `typescript` package's type
+ * definitions and lib files are resolvable from the current project.
  */
 
 // TypeScript types/libs availability.

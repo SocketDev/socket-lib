@@ -1,6 +1,8 @@
 /**
- * Core primitives and fundamental constants.
- * Goal: Minimize this module by finding proper semantic homes for all constants.
+ * @fileoverview Core primitives and fundamental constants.
+ * Holds sentinels, unknown/empty tokens, the internals symbol, and a few
+ * shared env-var name strings. Intentionally kept small - prefer moving
+ * constants to a more specific `src/constants/*` module when possible.
  */
 
 // Internal implementation symbol.

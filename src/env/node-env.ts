@@ -1,6 +1,7 @@
 /**
- * NODE_ENV environment variable getter.
- * Indicates the Node.js environment mode (production, development, test).
+ * @fileoverview NODE_ENV environment variable getter.
+ * Exports `getNodeEnv()`, returning the raw `NODE_ENV` value (typically
+ * 'production', 'development', or 'test') or `undefined` when unset.
  */
 
 import { getEnvValue } from './rewire'
