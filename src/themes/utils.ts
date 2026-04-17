@@ -8,76 +8,45 @@ import type { ShimmerColorGradient } from '../effects/text-shimmer'
 import type { Theme, ThemeColors, ColorReference } from './types'
 
 /**
- * Resolve color reference to concrete value.
- * Handles semantic keywords: 'primary', 'secondary', 'rainbow', 'inherit'
+ * Create new theme from complete specification.
  *
- * @param value - Color reference
- * @param colors - Theme palette
- * @returns Resolved color
+ * @param config - Theme configuration
+ * @returns Theme object
  *
  * @example
  * ```ts
- * resolveColor('primary', theme.colors)
- * resolveColor([255, 0, 0], theme.colors)
+ * const theme = createTheme({
+ *   name: 'custom',
+ *   displayName: 'Custom',
+ *   colors: {
+ *     primary: [255, 100, 200],
+ *     success: 'greenBright',
+ *     error: 'redBright',
+ *     warning: 'yellowBright',
+ *     info: 'blueBright',
+ *     step: 'cyanBright',
+ *     text: 'white',
+ *     textDim: 'gray',
+ *     link: 'cyanBright',
+ *     prompt: 'primary'
+ *   }
+ * })
  * ```
  */
-export function resolveColor(
-  value: ColorReference | ColorValue,
-  colors: ThemeColors,
-): ColorValue | 'inherit' | ShimmerColorGradient {
-  if (typeof value === 'string') {
-    if (value === 'primary') {
-      return colors.primary
-    }
-    if (value === 'secondary') {
-      return colors.secondary ?? colors.primary
-    }
-    if (value === 'inherit') {
-      return 'inherit'
-    }
-    if (value === 'rainbow') {
-      return RAINBOW_GRADIENT
-    }
-    return value as ColorValue
-  }
-  return value as ColorValue
-}
-
-/**
- * Resolve shimmer color with gradient support.
- *
- * @param value - Shimmer color
- * @param theme - Theme context
- * @returns Resolved color
- *
- * @example
- * ```ts
- * resolveShimmerColor('rainbow', theme)
- * resolveShimmerColor('primary', theme)
- * ```
- */
-export function resolveShimmerColor(
-  value: ColorReference | ColorValue[] | undefined,
-  theme: Theme,
-): ColorValue | ShimmerColorGradient | 'inherit' {
-  if (!value) {
-    return 'inherit'
-  }
-  if (value === 'rainbow') {
-    return RAINBOW_GRADIENT
-  }
-  if (value === 'inherit') {
-    return 'inherit'
-  }
-  if (Array.isArray(value)) {
-    if (value.length > 0 && Array.isArray(value[0])) {
-      // Gradient
-      return value as ShimmerColorGradient
-    }
-    // Single RGB
-    return value as unknown as ColorValue
-  }
-  return resolveColor(value as ColorReference, theme.colors)
+export function createTheme(
+  config: Pick<Theme, 'name' | 'displayName' | 'colors'> &
+    Partial<Omit<Theme, 'name' | 'displayName' | 'colors'>>,
+): Theme {
+  return {
+    __proto__: null,
+    name: config.name,
+    displayName: config.displayName,
+    colors: { __proto__: null, ...config.colors } as ThemeColors,
+    effects: config.effects
+      ? { __proto__: null, ...config.effects }
+      : undefined,
+    meta: config.meta ? { __proto__: null, ...config.meta } : undefined,
+  } as Theme
 }
 
 /**
@@ -153,43 +122,74 @@ export function extendTheme(
 }
 
 /**
- * Create new theme from complete specification.
+ * Resolve color reference to concrete value.
+ * Handles semantic keywords: 'primary', 'secondary', 'rainbow', 'inherit'
  *
- * @param config - Theme configuration
- * @returns Theme object
+ * @param value - Color reference
+ * @param colors - Theme palette
+ * @returns Resolved color
  *
  * @example
  * ```ts
- * const theme = createTheme({
- *   name: 'custom',
- *   displayName: 'Custom',
- *   colors: {
- *     primary: [255, 100, 200],
- *     success: 'greenBright',
- *     error: 'redBright',
- *     warning: 'yellowBright',
- *     info: 'blueBright',
- *     step: 'cyanBright',
- *     text: 'white',
- *     textDim: 'gray',
- *     link: 'cyanBright',
- *     prompt: 'primary'
- *   }
- * })
+ * resolveColor('primary', theme.colors)
+ * resolveColor([255, 0, 0], theme.colors)
  * ```
  */
-export function createTheme(
-  config: Pick<Theme, 'name' | 'displayName' | 'colors'> &
-    Partial<Omit<Theme, 'name' | 'displayName' | 'colors'>>,
-): Theme {
-  return {
-    __proto__: null,
-    name: config.name,
-    displayName: config.displayName,
-    colors: { __proto__: null, ...config.colors } as ThemeColors,
-    effects: config.effects
-      ? { __proto__: null, ...config.effects }
-      : undefined,
-    meta: config.meta ? { __proto__: null, ...config.meta } : undefined,
-  } as Theme
+export function resolveColor(
+  value: ColorReference | ColorValue,
+  colors: ThemeColors,
+): ColorValue | 'inherit' | ShimmerColorGradient {
+  if (typeof value === 'string') {
+    if (value === 'primary') {
+      return colors.primary
+    }
+    if (value === 'secondary') {
+      return colors.secondary ?? colors.primary
+    }
+    if (value === 'inherit') {
+      return 'inherit'
+    }
+    if (value === 'rainbow') {
+      return RAINBOW_GRADIENT
+    }
+    return value as ColorValue
+  }
+  return value as ColorValue
+}
+
+/**
+ * Resolve shimmer color with gradient support.
+ *
+ * @param value - Shimmer color
+ * @param theme - Theme context
+ * @returns Resolved color
+ *
+ * @example
+ * ```ts
+ * resolveShimmerColor('rainbow', theme)
+ * resolveShimmerColor('primary', theme)
+ * ```
+ */
+export function resolveShimmerColor(
+  value: ColorReference | ColorValue[] | undefined,
+  theme: Theme,
+): ColorValue | ShimmerColorGradient | 'inherit' {
+  if (!value) {
+    return 'inherit'
+  }
+  if (value === 'rainbow') {
+    return RAINBOW_GRADIENT
+  }
+  if (value === 'inherit') {
+    return 'inherit'
+  }
+  if (Array.isArray(value)) {
+    if (value.length > 0 && Array.isArray(value[0])) {
+      // Gradient
+      return value as ShimmerColorGradient
+    }
+    // Single RGB
+    return value as unknown as ColorValue
+  }
+  return resolveColor(value as ColorReference, theme.colors)
 }

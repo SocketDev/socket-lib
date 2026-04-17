@@ -40,17 +40,16 @@ export interface RemoveOptions {
 }
 
 /**
- * Get the cacache module for cache operations.
- *
- * @example
- * ```typescript
- * const cacache = getCacache()
- * const entries = await cacache.ls(cacheDir)
- * ```
+ * Check if a key matches a pattern (with wildcard support).
  */
-export function getCacache() {
-  // cacache is imported at the top
-  return cacache
+function matchesPattern(key: string, pattern: string): boolean {
+  // If no wildcards, use simple prefix matching (faster)
+  if (!pattern.includes('*')) {
+    return key.startsWith(pattern)
+  }
+  // Use regex for wildcard patterns
+  const regex = patternToRegex(pattern)
+  return regex.test(key)
 }
 
 /**
@@ -63,19 +62,6 @@ function patternToRegex(pattern: string): RegExp {
   // Convert * to .* (match any characters)
   const regexPattern = escaped.replaceAll('*', '.*')
   return new RegExp(`^${regexPattern}`)
-}
-
-/**
- * Check if a key matches a pattern (with wildcard support).
- */
-function matchesPattern(key: string, pattern: string): boolean {
-  // If no wildcards, use simple prefix matching (faster)
-  if (!pattern.includes('*')) {
-    return key.startsWith(pattern)
-  }
-  // Use regex for wildcard patterns
-  const regex = patternToRegex(pattern)
-  return regex.test(key)
 }
 
 /**
@@ -192,6 +178,20 @@ export async function get(
   const cacache = getCacache() as any
   /* c8 ignore next - External cacache call */
   return await cacache.get(getSocketCacacheDir(), key, options)
+}
+
+/**
+ * Get the cacache module for cache operations.
+ *
+ * @example
+ * ```typescript
+ * const cacache = getCacache()
+ * const entries = await cacache.ls(cacheDir)
+ * ```
+ */
+export function getCacache() {
+  // cacache is imported at the top
+  return cacache
 }
 
 /**

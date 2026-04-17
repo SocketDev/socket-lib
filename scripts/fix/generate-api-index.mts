@@ -7,10 +7,14 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+
+import { spawn } from '@socketsecurity/lib-stable/spawn'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..', '..')
+const WIN32 = process.platform === 'win32'
 
 type PackageExports = Record<
   string,
@@ -147,7 +151,7 @@ function renderMarkdown(groups: Map<string, Row[]>): string {
   return lines.join('\n')
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const pkg = JSON.parse(
     readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
   ) as { exports: PackageExports }
@@ -157,8 +161,23 @@ function main(): void {
   const markdown = renderMarkdown(groups)
   const outPath = path.join(rootPath, 'docs', 'api-index.md')
   writeFileSync(outPath, markdown)
+  // Run oxfmt so the checked-in file matches the formatter's expectations
+  // (table column alignment, etc.) — otherwise lint fails on every build.
+  try {
+    await spawn('pnpm', ['exec', 'oxfmt', outPath], {
+      cwd: rootPath,
+      shell: WIN32,
+      stdio: 'ignore',
+    })
+  } catch {
+    // Formatting is best-effort — don't fail the build if oxfmt is missing.
+  }
   // eslint-disable-next-line no-console
   console.log(`Wrote ${rows.length} exports to docs/api-index.md`)
 }
 
-main()
+main().catch(err => {
+  // eslint-disable-next-line no-console
+  console.error(err)
+  process.exitCode = 1
+})

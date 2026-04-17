@@ -413,40 +413,6 @@ export function search(
   return result === -1 ? -1 : result + offset
 }
 
-/**
- * Strip the Byte Order Mark (BOM) from the beginning of a string.
- *
- * The BOM (U+FEFF) is a Unicode character that can appear at the start of
- * a text file to indicate byte order and encoding. In UTF-16 (JavaScript's
- * internal string representation), it appears as 0xFEFF. This function
- * removes it if present, leaving the rest of the string unchanged.
- *
- * Most text processing doesn't need to handle the BOM explicitly, but it
- * can cause issues when parsing JSON, CSV, or other structured data formats
- * that don't expect a leading invisible character.
- *
- * @param str - The string to strip BOM from
- * @returns The string without BOM
- *
- * @example
- * ```ts
- * stripBom('\uFEFFhello world')
- * // Returns: 'hello world'
- *
- * stripBom('hello world')
- * // Returns: 'hello world' (no BOM to strip)
- *
- * stripBom('')
- * // Returns: ''
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function stripBom(str: string): string {
-  // In JavaScript, string data is stored as UTF-16, so BOM is 0xFEFF.
-  // https://tc39.es/ecma262/#sec-unicode-format-control-characters
-  return str.length > 0 && str.charCodeAt(0) === 0xfe_ff ? str.slice(1) : str
-}
-
 // Initialize Intl.Segmenter for proper grapheme cluster segmentation.
 // Hoisted outside stringWidth() for reuse across multiple calls.
 //
@@ -792,6 +758,40 @@ export function stringWidth(text: string): number {
   }
 
   return width
+}
+
+/**
+ * Strip the Byte Order Mark (BOM) from the beginning of a string.
+ *
+ * The BOM (U+FEFF) is a Unicode character that can appear at the start of
+ * a text file to indicate byte order and encoding. In UTF-16 (JavaScript's
+ * internal string representation), it appears as 0xFEFF. This function
+ * removes it if present, leaving the rest of the string unchanged.
+ *
+ * Most text processing doesn't need to handle the BOM explicitly, but it
+ * can cause issues when parsing JSON, CSV, or other structured data formats
+ * that don't expect a leading invisible character.
+ *
+ * @param str - The string to strip BOM from
+ * @returns The string without BOM
+ *
+ * @example
+ * ```ts
+ * stripBom('\uFEFFhello world')
+ * // Returns: 'hello world'
+ *
+ * stripBom('hello world')
+ * // Returns: 'hello world' (no BOM to strip)
+ *
+ * stripBom('')
+ * // Returns: ''
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function stripBom(str: string): string {
+  // In JavaScript, string data is stored as UTF-16, so BOM is 0xFEFF.
+  // https://tc39.es/ecma262/#sec-unicode-format-control-characters
+  return str.length > 0 && str.charCodeAt(0) === 0xfe_ff ? str.slice(1) : str
 }
 
 /**

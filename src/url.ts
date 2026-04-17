@@ -6,6 +6,58 @@
 const BooleanCtor = Boolean
 const UrlCtor = URL
 
+export interface CreateRelativeUrlOptions {
+  base?: string
+}
+
+export interface UrlSearchParamAsBooleanOptions {
+  defaultValue?: boolean
+}
+
+export interface UrlSearchParamAsNumberOptions {
+  defaultValue?: number
+}
+
+export interface UrlSearchParamAsStringOptions {
+  defaultValue?: string
+}
+
+export interface UrlSearchParamsGetBooleanOptions {
+  defaultValue?: boolean
+}
+
+/**
+ * Create a relative URL for testing.
+ *
+ * @example
+ * ```typescript
+ * createRelativeUrl('/api/test')                                    // 'api/test'
+ * createRelativeUrl('/api/test', { base: 'https://example.com' })  // 'https://example.com/api/test'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function createRelativeUrl(
+  path: string,
+  options?: CreateRelativeUrlOptions | undefined,
+): string {
+  const { base = '' } = {
+    __proto__: null,
+    ...options,
+  } as CreateRelativeUrlOptions
+  // Remove leading slash to make it relative.
+  const relativePath = path.replace(/^\//, '')
+
+  if (base) {
+    let baseUrl = base
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/'
+    }
+    return baseUrl + relativePath
+  }
+
+  return relativePath
+}
+
 /**
  * Check if a value is a valid URL.
  *
@@ -64,10 +116,6 @@ export function urlSearchParamAsArray(
     : []
 }
 
-export interface UrlSearchParamAsBooleanOptions {
-  defaultValue?: boolean
-}
-
 /**
  * Convert a URL search parameter to a boolean.
  *
@@ -98,102 +146,33 @@ export function urlSearchParamAsBoolean(
 }
 
 /**
- * Helper to get array from URLSearchParams.
+ * Get number value from URLSearchParams with a default.
  *
  * @example
  * ```typescript
- * const params = new URLSearchParams('tags=a,b,c')
- * urlSearchParamsGetArray(params, 'tags') // ['a', 'b', 'c']
+ * const params = new URLSearchParams('limit=10')
+ * urlSearchParamAsNumber(params, 'limit') // 10
+ * urlSearchParamAsNumber(params, 'other') // 0
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamsGetArray(
+export function urlSearchParamAsNumber(
   params: URLSearchParams | null | undefined,
   key: string,
-): string[] {
-  if (params && typeof params.getAll === 'function') {
-    const values = params.getAll(key)
-    // If single value contains commas, split it
-    const firstValue = values[0]
-    if (values.length === 1 && firstValue && firstValue.includes(',')) {
-      return urlSearchParamAsArray(firstValue)
-    }
-    return values
-  }
-  return []
-}
-
-export interface UrlSearchParamsGetBooleanOptions {
-  defaultValue?: boolean
-}
-
-/**
- * Helper to get boolean from URLSearchParams.
- *
- * @example
- * ```typescript
- * const params = new URLSearchParams('debug=true')
- * urlSearchParamsGetBoolean(params, 'debug') // true
- * urlSearchParamsGetBoolean(params, 'other') // false
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamsGetBoolean(
-  params: URLSearchParams | null | undefined,
-  key: string,
-  options?: UrlSearchParamsGetBooleanOptions | undefined,
-): boolean {
-  const { defaultValue = false } = {
+  options?: UrlSearchParamAsNumberOptions | undefined,
+): number {
+  const { defaultValue = 0 } = {
     __proto__: null,
     ...options,
-  } as UrlSearchParamsGetBooleanOptions
+  } as UrlSearchParamAsNumberOptions
   if (params && typeof params.get === 'function') {
     const value = params.get(key)
-    return value !== null
-      ? urlSearchParamAsBoolean(value, { defaultValue })
-      : defaultValue
+    if (value !== null) {
+      const num = Number(value)
+      return !Number.isNaN(num) ? num : defaultValue
+    }
   }
   return defaultValue
-}
-
-export interface CreateRelativeUrlOptions {
-  base?: string
-}
-
-/**
- * Create a relative URL for testing.
- *
- * @example
- * ```typescript
- * createRelativeUrl('/api/test')                                    // 'api/test'
- * createRelativeUrl('/api/test', { base: 'https://example.com' })  // 'https://example.com/api/test'
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function createRelativeUrl(
-  path: string,
-  options?: CreateRelativeUrlOptions | undefined,
-): string {
-  const { base = '' } = {
-    __proto__: null,
-    ...options,
-  } as CreateRelativeUrlOptions
-  // Remove leading slash to make it relative.
-  const relativePath = path.replace(/^\//, '')
-
-  if (base) {
-    let baseUrl = base
-    if (!baseUrl.endsWith('/')) {
-      baseUrl += '/'
-    }
-    return baseUrl + relativePath
-  }
-
-  return relativePath
-}
-
-export interface UrlSearchParamAsStringOptions {
-  defaultValue?: string
 }
 
 /**
@@ -223,36 +202,57 @@ export function urlSearchParamAsString(
   return defaultValue
 }
 
-export interface UrlSearchParamAsNumberOptions {
-  defaultValue?: number
-}
-
 /**
- * Get number value from URLSearchParams with a default.
+ * Helper to get array from URLSearchParams.
  *
  * @example
  * ```typescript
- * const params = new URLSearchParams('limit=10')
- * urlSearchParamAsNumber(params, 'limit') // 10
- * urlSearchParamAsNumber(params, 'other') // 0
+ * const params = new URLSearchParams('tags=a,b,c')
+ * urlSearchParamsGetArray(params, 'tags') // ['a', 'b', 'c']
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamAsNumber(
+export function urlSearchParamsGetArray(
   params: URLSearchParams | null | undefined,
   key: string,
-  options?: UrlSearchParamAsNumberOptions | undefined,
-): number {
-  const { defaultValue = 0 } = {
+): string[] {
+  if (params && typeof params.getAll === 'function') {
+    const values = params.getAll(key)
+    // If single value contains commas, split it
+    const firstValue = values[0]
+    if (values.length === 1 && firstValue && firstValue.includes(',')) {
+      return urlSearchParamAsArray(firstValue)
+    }
+    return values
+  }
+  return []
+}
+
+/**
+ * Helper to get boolean from URLSearchParams.
+ *
+ * @example
+ * ```typescript
+ * const params = new URLSearchParams('debug=true')
+ * urlSearchParamsGetBoolean(params, 'debug') // true
+ * urlSearchParamsGetBoolean(params, 'other') // false
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function urlSearchParamsGetBoolean(
+  params: URLSearchParams | null | undefined,
+  key: string,
+  options?: UrlSearchParamsGetBooleanOptions | undefined,
+): boolean {
+  const { defaultValue = false } = {
     __proto__: null,
     ...options,
-  } as UrlSearchParamAsNumberOptions
+  } as UrlSearchParamsGetBooleanOptions
   if (params && typeof params.get === 'function') {
     const value = params.get(key)
-    if (value !== null) {
-      const num = Number(value)
-      return !Number.isNaN(num) ? num : defaultValue
-    }
+    return value !== null
+      ? urlSearchParamAsBoolean(value, { defaultValue })
+      : defaultValue
   }
   return defaultValue
 }

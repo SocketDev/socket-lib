@@ -39,44 +39,48 @@ interface InspectOptions {
 export type { DebugOptions, NamespacesOrOptions, InspectOptions }
 
 const debugByNamespace = new Map()
-/**
- * Get or create a debug instance for a namespace.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getDebugJsInstance(namespace: string) {
-  let inst = debugByNamespace.get(namespace)
-  if (inst) {
-    return inst
-  }
-  if (
-    !getDebug() &&
-    getSocketDebug() &&
-    (namespace === 'error' || namespace === 'notice')
-  ) {
-    /* c8 ignore next - External debug library call */
-    debugJs.enable(namespace)
-  }
-  /* c8 ignore next - External debug library call */
-  inst = debugJs(namespace)
-  inst.log = customLog
-  debugByNamespace.set(namespace, inst)
-  return inst
-}
 
 let _util: typeof import('node:util') | undefined
+
+let pointingTriangle: string | undefined
+
 /**
- * Lazily load the util module.
+ * Custom log function for debug output.
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getUtil() {
-  if (_util === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
+function customLog(...args: unknown[]) {
+  const util = getUtil()
+  /* c8 ignore start - External debug library inspection options */
+  const inspectOpts = debugJs.inspectOpts
+    ? {
+        ...debugJs.inspectOpts,
+        showHidden:
+          debugJs.inspectOpts.showHidden === null
+            ? undefined
+            : debugJs.inspectOpts.showHidden,
+        depth:
+          debugJs.inspectOpts.depth === null ||
+          typeof debugJs.inspectOpts.depth === 'boolean'
+            ? undefined
+            : debugJs.inspectOpts.depth,
+      }
+    : {}
+  /* c8 ignore stop */
+  ReflectApply(logger.info, logger, [
+    util.formatWithOptions(inspectOpts, ...args),
+  ])
+}
 
-    _util = /*@__PURE__*/ require('node:util')
-  }
-  return _util as typeof import('node:util')
+/**
+ * Extract options from namespaces parameter.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
+  return namespaces !== null && typeof namespaces === 'object'
+    ? ({ __proto__: null, ...namespaces } as DebugOptions)
+    : ({ __proto__: null, namespaces } as DebugOptions)
 }
 
 /**
@@ -127,42 +131,42 @@ function getCallerInfo(stackOffset: number = 3): string {
 }
 
 /**
- * Custom log function for debug output.
+ * Get or create a debug instance for a namespace.
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function customLog(...args: unknown[]) {
-  const util = getUtil()
-  /* c8 ignore start - External debug library inspection options */
-  const inspectOpts = debugJs.inspectOpts
-    ? {
-        ...debugJs.inspectOpts,
-        showHidden:
-          debugJs.inspectOpts.showHidden === null
-            ? undefined
-            : debugJs.inspectOpts.showHidden,
-        depth:
-          debugJs.inspectOpts.depth === null ||
-          typeof debugJs.inspectOpts.depth === 'boolean'
-            ? undefined
-            : debugJs.inspectOpts.depth,
-      }
-    : {}
-  /* c8 ignore stop */
-  ReflectApply(logger.info, logger, [
-    util.formatWithOptions(inspectOpts, ...args),
-  ])
+function getDebugJsInstance(namespace: string) {
+  let inst = debugByNamespace.get(namespace)
+  if (inst) {
+    return inst
+  }
+  if (
+    !getDebug() &&
+    getSocketDebug() &&
+    (namespace === 'error' || namespace === 'notice')
+  ) {
+    /* c8 ignore next - External debug library call */
+    debugJs.enable(namespace)
+  }
+  /* c8 ignore next - External debug library call */
+  inst = debugJs(namespace)
+  inst.log = customLog
+  debugByNamespace.set(namespace, inst)
+  return inst
 }
 
 /**
- * Extract options from namespaces parameter.
+ * Lazily load the util module.
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
-  return namespaces !== null && typeof namespaces === 'object'
-    ? ({ __proto__: null, ...namespaces } as DebugOptions)
-    : ({ __proto__: null, namespaces } as DebugOptions)
+function getUtil() {
+  if (_util === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _util = /*@__PURE__*/ require('node:util')
+  }
+  return _util as typeof import('node:util')
 }
 
 /**
@@ -201,9 +205,94 @@ function isEnabled(namespaces: string | undefined) {
 }
 
 /**
+ * Debug output with caller info (wrapper for debugNs with default namespace).
+ */
+export function debug(...args: unknown[]): void {
+  debugNs('*', ...args)
+}
+
+/**
+ * Cache debug function with caller info.
+ *
+ * @example
+ * ```typescript
+ * debugCache('hit', 'socket-sdk:scans:abc123')
+ * debugCache('miss', 'socket-sdk:scans:xyz', { ttl: 60000 })
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function debugCache(
+  operation: string,
+  key: string,
+  meta?: unknown | undefined,
+): void {
+  if (!getSocketDebug()) {
+    return
+  }
+  // Get caller info with stack offset of 3 (caller -> debugCache -> getCallerInfo).
+  const callerName = getCallerInfo(3) || 'cache'
+
+  if (pointingTriangle === undefined) {
+    const supported = isUnicodeSupported()
+    pointingTriangle = supported ? '▸' : '>'
+  }
+
+  const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
+  const args = meta !== undefined ? [prefix, meta] : [prefix]
+  console.log(...args)
+}
+
+/**
+ * Debug output for cache operations with caller info.
+ * First argument is the operation type (hit/miss/set/clear).
+ * Second argument is the cache key or message.
+ * Optional third argument is metadata object.
+ */
+export function debugCacheNs(
+  namespacesOrOpts: NamespacesOrOptions,
+  operation: string,
+  key: string,
+  meta?: unknown | undefined,
+) {
+  const options = extractOptions(namespacesOrOpts)
+  const { namespaces } = options
+  if (!isEnabled(namespaces as string)) {
+    return
+  }
+  // Get caller info with stack offset of 4 (caller -> debugCacheNs -> getCallerInfo).
+  const callerName = getCallerInfo(4) || 'cache'
+
+  if (pointingTriangle === undefined) {
+    const supported = isUnicodeSupported()
+    pointingTriangle = supported ? '▸' : '>'
+  }
+
+  const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
+  const logArgs = meta !== undefined ? [prefix, meta] : [prefix]
+
+  const spinnerInstance = options.spinner || getDefaultSpinner()
+  const wasSpinning = spinnerInstance?.isSpinning
+  spinnerInstance?.stop()
+  ReflectApply(logger.info, logger, logArgs)
+  if (wasSpinning) {
+    spinnerInstance?.start()
+  }
+}
+
+/**
+ * Debug output for object inspection (wrapper for debugDirNs with default namespace).
+ */
+export function debugDir(
+  obj: unknown,
+  inspectOpts?: InspectOptions | undefined,
+): void {
+  debugDirNs('*', obj, inspectOpts)
+}
+
+/**
  * Debug output for object inspection with caller info.
  */
-function debugDirNs(
+export function debugDirNs(
   namespacesOrOpts: NamespacesOrOptions,
   obj: unknown,
   inspectOpts?: InspectOptions | undefined,
@@ -247,46 +336,30 @@ function debugDirNs(
   }
 }
 
-let pointingTriangle: string | undefined
 /**
- * Debug output with caller info.
+ * Debug logging function (wrapper for debugLogNs with default namespace).
  */
-function debugNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
-  const options = extractOptions(namespacesOrOpts)
-  const { namespaces } = options
-  if (!isEnabled(namespaces as string)) {
-    return
-  }
-  // Get caller info with stack offset of 4 (caller -> debugNs -> getCallerInfo).
-  const name = getCallerInfo(4) || 'anonymous'
-  if (pointingTriangle === undefined) {
-    const supported = isUnicodeSupported()
-    pointingTriangle = supported ? '▸' : '>'
-  }
-  const text = args.at(0)
-  const logArgs =
-    typeof text === 'string'
-      ? [
-          applyLinePrefix(
-            `${name ? `${name} ${pointingTriangle} ` : ''}${text}`,
-            { prefix: '[DEBUG] ' },
-          ),
-          ...args.slice(1),
-        ]
-      : args
-  const spinnerInstance = options.spinner || getDefaultSpinner()
-  const wasSpinning = spinnerInstance?.isSpinning
-  spinnerInstance?.stop()
-  ReflectApply(logger.info, logger, logArgs)
-  if (wasSpinning) {
-    spinnerInstance?.start()
-  }
+export function debugLog(...args: unknown[]): void {
+  debugLogNs('*', ...args)
+}
+
+/**
+ * Create a Node.js util.debuglog compatible function.
+ * Returns a function that conditionally writes debug messages to stderr.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function debuglog(section: string) {
+  const util = getUtil()
+  return util.debuglog(section)
 }
 
 /**
  * Debug logging function with caller info.
  */
-function debugLogNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
+export function debugLogNs(
+  namespacesOrOpts: NamespacesOrOptions,
+  ...args: unknown[]
+) {
   const options = extractOptions(namespacesOrOpts)
   const { namespaces } = options
   if (!isEnabled(namespaces as string)) {
@@ -322,33 +395,34 @@ function debugLogNs(namespacesOrOpts: NamespacesOrOptions, ...args: unknown[]) {
 }
 
 /**
- * Debug output for cache operations with caller info.
- * First argument is the operation type (hit/miss/set/clear).
- * Second argument is the cache key or message.
- * Optional third argument is metadata object.
+ * Debug output with caller info.
  */
-function debugCacheNs(
+export function debugNs(
   namespacesOrOpts: NamespacesOrOptions,
-  operation: string,
-  key: string,
-  meta?: unknown | undefined,
+  ...args: unknown[]
 ) {
   const options = extractOptions(namespacesOrOpts)
   const { namespaces } = options
   if (!isEnabled(namespaces as string)) {
     return
   }
-  // Get caller info with stack offset of 4 (caller -> debugCacheNs -> getCallerInfo).
-  const callerName = getCallerInfo(4) || 'cache'
-
+  // Get caller info with stack offset of 4 (caller -> debugNs -> getCallerInfo).
+  const name = getCallerInfo(4) || 'anonymous'
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
-
-  const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
-  const logArgs = meta !== undefined ? [prefix, meta] : [prefix]
-
+  const text = args.at(0)
+  const logArgs =
+    typeof text === 'string'
+      ? [
+          applyLinePrefix(
+            `${name ? `${name} ${pointingTriangle} ` : ''}${text}`,
+            { prefix: '[DEBUG] ' },
+          ),
+          ...args.slice(1),
+        ]
+      : args
   const spinnerInstance = options.spinner || getDefaultSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
@@ -359,92 +433,11 @@ function debugCacheNs(
 }
 
 /**
- * Cache debug function with caller info.
- *
- * @example
- * ```typescript
- * debugCache('hit', 'socket-sdk:scans:abc123')
- * debugCache('miss', 'socket-sdk:scans:xyz', { ttl: 60000 })
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function debugCache(
-  operation: string,
-  key: string,
-  meta?: unknown | undefined,
-): void {
-  if (!getSocketDebug()) {
-    return
-  }
-  // Get caller info with stack offset of 3 (caller -> debugCache -> getCallerInfo).
-  const callerName = getCallerInfo(3) || 'cache'
-
-  if (pointingTriangle === undefined) {
-    const supported = isUnicodeSupported()
-    pointingTriangle = supported ? '▸' : '>'
-  }
-
-  const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
-  const args = meta !== undefined ? [prefix, meta] : [prefix]
-  console.log(...args)
-}
-
-/**
- * Check if debug mode is enabled.
- */
-/*@__NO_SIDE_EFFECTS__*/
-function isDebugNs(namespaces: string | undefined): boolean {
-  return !!getSocketDebug() && isEnabled(namespaces)
-}
-
-/**
- * Debug output with caller info (wrapper for debugNs with default namespace).
- */
-function debug(...args: unknown[]): void {
-  debugNs('*', ...args)
-}
-
-/**
- * Debug output for object inspection (wrapper for debugDirNs with default namespace).
- */
-function debugDir(
-  obj: unknown,
-  inspectOpts?: InspectOptions | undefined,
-): void {
-  debugDirNs('*', obj, inspectOpts)
-}
-
-/**
- * Debug logging function (wrapper for debugLogNs with default namespace).
- */
-function debugLog(...args: unknown[]): void {
-  debugLogNs('*', ...args)
-}
-
-/**
- * Check if debug mode is enabled.
- */
-/*@__NO_SIDE_EFFECTS__*/
-function isDebug(): boolean {
-  return !!getSocketDebug()
-}
-
-/**
- * Create a Node.js util.debuglog compatible function.
- * Returns a function that conditionally writes debug messages to stderr.
- */
-/*@__NO_SIDE_EFFECTS__*/
-function debuglog(section: string) {
-  const util = getUtil()
-  return util.debuglog(section)
-}
-
-/**
  * Create timing functions for measuring code execution time.
  * Returns an object with start() and end() methods, plus a callable function.
  */
 /*@__NO_SIDE_EFFECTS__*/
-function debugtime(label: string) {
+export function debugtime(label: string) {
   const util = getUtil()
   // Node.js util doesn't have debugtime - create a custom implementation
   let startTime: number | undefined
@@ -470,16 +463,18 @@ function debugtime(label: string) {
   return impl
 }
 
-// Export main debug functions with caller info.
-export { debug }
-// debugCache is already exported directly above
-export { debugCacheNs }
-export { debugDir }
-export { debugDirNs }
-export { debugLog }
-export { debuglog }
-export { debugLogNs }
-export { debugNs }
-export { debugtime }
-export { isDebug }
-export { isDebugNs }
+/**
+ * Check if debug mode is enabled.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isDebug(): boolean {
+  return !!getSocketDebug()
+}
+
+/**
+ * Check if debug mode is enabled.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isDebugNs(namespaces: string | undefined): boolean {
+  return !!getSocketDebug() && isEnabled(namespaces)
+}

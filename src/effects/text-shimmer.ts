@@ -48,50 +48,6 @@ type TextStyles = {
   underline: boolean
 }
 
-/**
- * Detect all text formatting styles present in ANSI-coded text.
- * Checks for bold, dim, italic, underline, and strikethrough.
- */
-function detectStyles(text: string): TextStyles {
-  return {
-    __proto__: null,
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
-    bold: /\x1b\[1m/.test(text),
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
-    dim: /\x1b\[2m/.test(text),
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
-    italic: /\x1b\[3m/.test(text),
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
-    strikethrough: /\x1b\[9m/.test(text),
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
-    underline: /\x1b\[4m/.test(text),
-  } as TextStyles
-}
-
-/**
- * Build ANSI code string from text styles.
- * Returns the concatenated ANSI codes needed to apply the styles.
- */
-function stylesToAnsi(styles: TextStyles): string {
-  let codes = ''
-  if (styles.bold) {
-    codes += '\x1b[1m'
-  }
-  if (styles.dim) {
-    codes += '\x1b[2m'
-  }
-  if (styles.italic) {
-    codes += '\x1b[3m'
-  }
-  if (styles.underline) {
-    codes += '\x1b[4m'
-  }
-  if (styles.strikethrough) {
-    codes += '\x1b[9m'
-  }
-  return codes
-}
-
 // Internal options for applyShimmer function.
 type ShimmerOptions = {
   readonly color?: ShimmerColorRgb | ShimmerColorGradient | undefined
@@ -117,24 +73,6 @@ export const DIR_RTL = 'rtl'
 export const MODE_BI = 'bi'
 
 /**
- * Calculate shimmer intensity based on distance from shimmer wave position.
- * Uses a power curve for smooth falloff - characters close to the wave
- * get high intensity (bright white), while distant characters get 0.
- */
-function shimmerIntensity(
-  distance: number,
-  shimmerWidth: number = 2.5,
-): number {
-  // Characters beyond shimmer width get no effect.
-  if (distance > shimmerWidth) {
-    return 0
-  }
-  // Smooth falloff using power curve.
-  const normalized = distance / shimmerWidth
-  return (1 - normalized) ** 2.5
-}
-
-/**
  * Blend two RGB colors based on a blend factor (0-1).
  * factor 0 = color1, factor 1 = color2, factor 0.5 = 50/50 blend.
  */
@@ -147,6 +85,66 @@ function blendColors(
   const g = Math.round(color1[1] + (color2[1] - color1[1]) * factor)
   const b = Math.round(color1[2] + (color2[2] - color1[2]) * factor)
   return [r, g, b] as const
+}
+
+/**
+ * Detect all text formatting styles present in ANSI-coded text.
+ * Checks for bold, dim, italic, underline, and strikethrough.
+ */
+function detectStyles(text: string): TextStyles {
+  return {
+    __proto__: null,
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
+    bold: /\x1b\[1m/.test(text),
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
+    dim: /\x1b\[2m/.test(text),
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
+    italic: /\x1b\[3m/.test(text),
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
+    strikethrough: /\x1b\[9m/.test(text),
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence detection.
+    underline: /\x1b\[4m/.test(text),
+  } as TextStyles
+}
+
+/**
+ * Calculate shimmer wave position for current animation step.
+ * The shimmer wave moves across the text length, with extra space
+ * for the wave to fade in/out at the edges.
+ */
+function getShimmerPos(
+  textLength: number,
+  step: number,
+  currentDir: 'ltr' | 'rtl',
+  shimmerWidth: number = 2.5,
+): number {
+  // Total steps for one complete cycle (text length + fade in/out space).
+  const totalSteps = textLength + shimmerWidth + 2
+
+  // RTL: Shimmer moves from right to left.
+  if (currentDir === DIR_RTL) {
+    return textLength - (step % totalSteps)
+  }
+
+  // LTR: Shimmer moves from left to right.
+  return step % totalSteps
+}
+
+/**
+ * Resolve shimmer direction to a concrete 'ltr' or 'rtl' value.
+ * Used for initializing shimmer state and picking random directions.
+ */
+function pickDirection(direction: ShimmerDirection): 'ltr' | 'rtl' {
+  // Random mode: 50/50 chance of LTR or RTL.
+  if (direction === DIR_RANDOM) {
+    return Math.random() < 0.5 ? DIR_LTR : DIR_RTL
+  }
+  // RTL mode: Use RTL direction.
+  if (direction === DIR_RTL) {
+    return DIR_RTL
+  }
+  // LTR mode (or any other): Default to LTR.
+  return DIR_LTR
 }
 
 /**
@@ -192,43 +190,45 @@ function renderChar(
 }
 
 /**
- * Calculate shimmer wave position for current animation step.
- * The shimmer wave moves across the text length, with extra space
- * for the wave to fade in/out at the edges.
+ * Calculate shimmer intensity based on distance from shimmer wave position.
+ * Uses a power curve for smooth falloff - characters close to the wave
+ * get high intensity (bright white), while distant characters get 0.
  */
-function getShimmerPos(
-  textLength: number,
-  step: number,
-  currentDir: 'ltr' | 'rtl',
+function shimmerIntensity(
+  distance: number,
   shimmerWidth: number = 2.5,
 ): number {
-  // Total steps for one complete cycle (text length + fade in/out space).
-  const totalSteps = textLength + shimmerWidth + 2
-
-  // RTL: Shimmer moves from right to left.
-  if (currentDir === DIR_RTL) {
-    return textLength - (step % totalSteps)
+  // Characters beyond shimmer width get no effect.
+  if (distance > shimmerWidth) {
+    return 0
   }
-
-  // LTR: Shimmer moves from left to right.
-  return step % totalSteps
+  // Smooth falloff using power curve.
+  const normalized = distance / shimmerWidth
+  return (1 - normalized) ** 2.5
 }
 
 /**
- * Resolve shimmer direction to a concrete 'ltr' or 'rtl' value.
- * Used for initializing shimmer state and picking random directions.
+ * Build ANSI code string from text styles.
+ * Returns the concatenated ANSI codes needed to apply the styles.
  */
-function pickDirection(direction: ShimmerDirection): 'ltr' | 'rtl' {
-  // Random mode: 50/50 chance of LTR or RTL.
-  if (direction === DIR_RANDOM) {
-    return Math.random() < 0.5 ? DIR_LTR : DIR_RTL
+function stylesToAnsi(styles: TextStyles): string {
+  let codes = ''
+  if (styles.bold) {
+    codes += '\x1b[1m'
   }
-  // RTL mode: Use RTL direction.
-  if (direction === DIR_RTL) {
-    return DIR_RTL
+  if (styles.dim) {
+    codes += '\x1b[2m'
   }
-  // LTR mode (or any other): Default to LTR.
-  return DIR_LTR
+  if (styles.italic) {
+    codes += '\x1b[3m'
+  }
+  if (styles.underline) {
+    codes += '\x1b[4m'
+  }
+  if (styles.strikethrough) {
+    codes += '\x1b[9m'
+  }
+  return codes
 }
 
 /**

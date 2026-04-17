@@ -113,82 +113,6 @@ export function getDefaultFormatting(): JsonFormatting {
 }
 
 /**
- * Sort object keys alphabetically.
- * Creates a new object with sorted keys (does not mutate input).
- *
- * @param obj - Object to sort
- * @returns New object with alphabetically sorted keys
- *
- * @example
- * ```ts
- * sortKeys({ z: 3, a: 1, m: 2 })
- * // => { a: 1, m: 2, z: 3 }
- * ```
- */
-export function sortKeys(
-  obj: Record<string, unknown>,
-): Record<string, unknown> {
-  const sorted: Record<string, unknown> = { __proto__: null }
-  const keys = Object.keys(obj).sort()
-  for (const key of keys) {
-    sorted[key] = obj[key]
-  }
-  return sorted
-}
-
-/**
- * Stringify JSON with specific formatting.
- * Applies indentation and line ending preferences.
- *
- * @param content - Object to stringify
- * @param formatting - Formatting preferences (indent and newline)
- * @returns Formatted JSON string with trailing newline
- *
- * @example
- * ```ts
- * stringifyWithFormatting(
- *   { key: 'value' },
- *   { indent: 4, newline: '\r\n' }
- * )
- * // => '{\r\n    "key": "value"\r\n}\r\n'
- * ```
- */
-export function stringifyWithFormatting(
-  content: Record<string, unknown>,
-  formatting: JsonFormatting,
-): string {
-  const { indent, newline } = formatting
-  const format = indent === undefined || indent === null ? '  ' : indent
-  const eol = newline === undefined || newline === null ? '\n' : newline
-
-  return `${JSON.stringify(content, undefined, format)}\n`.replace(/\n/g, eol)
-}
-
-/**
- * Strip formatting symbols from content object.
- * Removes Symbol.for('indent') and Symbol.for('newline') from the object.
- *
- * @param content - Content object with potential symbol properties
- * @returns Object with symbols removed
- *
- * @example
- * ```typescript
- * const obj = { key: "value", [Symbol.for("indent")]: 2 }
- * stripFormattingSymbols(obj)  // { key: "value" }
- * ```
- */
-export function stripFormattingSymbols(
-  content: Record<string | symbol, unknown>,
-): Record<string, unknown> {
-  const {
-    [INDENT_SYMBOL]: _indent,
-    [NEWLINE_SYMBOL]: _newline,
-    ...rest
-  } = content
-  return rest
-}
-
-/**
  * Extract formatting from content object that has symbol-based metadata.
  *
  * @param content - Content object with Symbol.for('indent') and Symbol.for('newline')
@@ -270,4 +194,80 @@ export function shouldSave(
 
   // Compare trimmed content to detect actual changes
   return newFileContent.trim() !== originalFileContent.trim()
+}
+
+/**
+ * Sort object keys alphabetically.
+ * Creates a new object with sorted keys (does not mutate input).
+ *
+ * @param obj - Object to sort
+ * @returns New object with alphabetically sorted keys
+ *
+ * @example
+ * ```ts
+ * sortKeys({ z: 3, a: 1, m: 2 })
+ * // => { a: 1, m: 2, z: 3 }
+ * ```
+ */
+export function sortKeys(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
+  const sorted: Record<string, unknown> = { __proto__: null }
+  const keys = Object.keys(obj).sort()
+  for (const key of keys) {
+    sorted[key] = obj[key]
+  }
+  return sorted
+}
+
+/**
+ * Stringify JSON with specific formatting.
+ * Applies indentation and line ending preferences.
+ *
+ * @param content - Object to stringify
+ * @param formatting - Formatting preferences (indent and newline)
+ * @returns Formatted JSON string with trailing newline
+ *
+ * @example
+ * ```ts
+ * stringifyWithFormatting(
+ *   { key: 'value' },
+ *   { indent: 4, newline: '\r\n' }
+ * )
+ * // => '{\r\n    "key": "value"\r\n}\r\n'
+ * ```
+ */
+export function stringifyWithFormatting(
+  content: Record<string, unknown>,
+  formatting: JsonFormatting,
+): string {
+  const { indent, newline } = formatting
+  const format = indent === undefined || indent === null ? '  ' : indent
+  const eol = newline === undefined || newline === null ? '\n' : newline
+
+  return `${JSON.stringify(content, undefined, format)}\n`.replace(/\n/g, eol)
+}
+
+/**
+ * Strip formatting symbols from content object.
+ * Removes Symbol.for('indent') and Symbol.for('newline') from the object.
+ *
+ * @param content - Content object with potential symbol properties
+ * @returns Object with symbols removed
+ *
+ * @example
+ * ```typescript
+ * const obj = { key: "value", [Symbol.for("indent")]: 2 }
+ * stripFormattingSymbols(obj)  // { key: "value" }
+ * ```
+ */
+export function stripFormattingSymbols(
+  content: Record<string | symbol, unknown>,
+): Record<string, unknown> {
+  const {
+    [INDENT_SYMBOL]: _indent,
+    [NEWLINE_SYMBOL]: _newline,
+    ...rest
+  } = content
+  return rest
 }

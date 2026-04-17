@@ -689,6 +689,19 @@ export function executeBinary(
 }
 
 /**
+ * Get metadata file path for a cached binary.
+ *
+ * @example
+ * ```typescript
+ * const metaPath = getBinaryCacheMetadataPath('/tmp/dlx-cache/a1b2c3d4')
+ * // '/tmp/dlx-cache/a1b2c3d4/.dlx-metadata.json'
+ * ```
+ */
+export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
+  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
+}
+
+/**
  * Get the DLX binary cache directory path.
  * Returns normalized path for cross-platform compatibility.
  * Uses same directory as dlx-package for unified DLX storage.
@@ -700,19 +713,6 @@ export function executeBinary(
  */
 export function getDlxCachePath(): string {
   return getSocketDlxDir()
-}
-
-/**
- * Get metadata file path for a cached binary.
- *
- * @example
- * ```typescript
- * const metaPath = getBinaryCacheMetadataPath('/tmp/dlx-cache/a1b2c3d4')
- * // '/tmp/dlx-cache/a1b2c3d4/.dlx-metadata.json'
- * ```
- */
-export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
-  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
 }
 
 /**

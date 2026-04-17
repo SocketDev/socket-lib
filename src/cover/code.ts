@@ -17,6 +17,24 @@ import type {
 
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
+
+/**
+ * Calculate coverage metric with percentage.
+ */
+function calculateMetric(data: {
+  covered: number
+  total: number
+}): CoverageMetric {
+  const percent =
+    data.total === 0 ? '0.00' : ((data.covered / data.total) * 100).toFixed(2)
+
+  return {
+    covered: data.covered,
+    percent,
+    total: data.total,
+  }
+}
+
 /**
  * Lazily load the fs module to avoid Webpack errors.
  * @private
@@ -30,6 +48,7 @@ function getFs() {
   }
   return _fs as typeof import('node:fs')
 }
+
 /**
  * Lazily load the path module to avoid Webpack errors.
  * @private
@@ -43,6 +62,7 @@ function getPath() {
   }
   return _path as typeof import('node:path')
 }
+
 /**
  * Get code coverage metrics from v8 coverage-final.json.
  *
@@ -168,21 +188,5 @@ export async function getCodeCoverage(
     functions: calculateMetric(totals.functions),
     lines: calculateMetric(totals.lines),
     statements: calculateMetric(totals.statements),
-  }
-}
-/**
- * Calculate coverage metric with percentage.
- */
-function calculateMetric(data: {
-  covered: number
-  total: number
-}): CoverageMetric {
-  const percent =
-    data.total === 0 ? '0.00' : ((data.covered / data.total) * 100).toFixed(2)
-
-  return {
-    covered: data.covered,
-    percent,
-    total: data.total,
   }
 }

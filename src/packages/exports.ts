@@ -59,26 +59,6 @@ export function findTypesForSubpath(
 }
 
 /**
- * Get subpaths from package exports.
- *
- * @example
- * ```typescript
- * const exports = { '.': './index.js', './utils': './utils.js' }
- * getSubpaths(exports) // ['.', './utils']
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSubpaths(entryExports: unknown): string[] {
-  if (!isObject(entryExports)) {
-    return []
-  }
-  // Return the keys of the exports object (the subpaths).
-  return Object.getOwnPropertyNames(entryExports).filter(key =>
-    key.startsWith('.'),
-  )
-}
-
-/**
  * Get file paths from package exports.
  *
  * @example
@@ -134,6 +114,26 @@ export function getExportFilePaths(entryExports: unknown): string[] {
 
   // Remove duplicates and filter out non-file paths.
   return [...new Set(paths)].filter(p => p.startsWith('./'))
+}
+
+/**
+ * Get subpaths from package exports.
+ *
+ * @example
+ * ```typescript
+ * const exports = { '.': './index.js', './utils': './utils.js' }
+ * getSubpaths(exports) // ['.', './utils']
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSubpaths(entryExports: unknown): string[] {
+  if (!isObject(entryExports)) {
+    return []
+  }
+  // Return the keys of the exports object (the subpaths).
+  return Object.getOwnPropertyNames(entryExports).filter(key =>
+    key.startsWith('.'),
+  )
 }
 
 /**

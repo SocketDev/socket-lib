@@ -3,47 +3,10 @@
  * Provides utilities for writing to stderr with formatting and control.
  */
 
+import process from 'node:process'
+
 // Get the actual stderr stream
 const stderr: NodeJS.WriteStream = process.stderr
-
-/**
- * Write a line to stderr with trailing newline.
- * Used for error messages, warnings, and diagnostic output.
- *
- * @param text - Text to write
- * @default text ''
- *
- * @example
- * ```ts
- * writeErrorLine('Error: File not found')
- * writeErrorLine() // Write empty line
- * ```
- */
-import process from 'node:process'
-/**
- * Write a line to `stderr`, appending a trailing newline.
- * Passing no argument writes an empty line.
- *
- * @param text - Text to write (defaults to the empty string)
- */
-export function writeErrorLine(text: string = ''): void {
-  stderr.write(`${text}\n`)
-}
-
-/**
- * Write text to stderr without adding a newline.
- *
- * @param text - Text to write
- *
- * @example
- * ```ts
- * writeError('Downloading...')
- * // Later update progress
- * ```
- */
-export function writeError(text: string): void {
-  stderr.write(text)
-}
 
 /**
  * Clear the current line on stderr.
@@ -83,24 +46,6 @@ export function cursorTo(x: number, y?: number | undefined): void {
 }
 
 /**
- * Check if stderr is connected to a TTY (terminal).
- *
- * @returns `true` if stderr is a TTY, `false` if piped/redirected
- *
- * @example
- * ```ts
- * if (isTTY()) {
- *   // Show colored error messages
- * } else {
- *   // Use plain text
- * }
- * ```
- */
-export function isTTY(): boolean {
-  return stderr.isTTY || false
-}
-
-/**
  * Get the number of columns (width) in the terminal.
  *
  * @returns Terminal width in characters
@@ -133,27 +78,36 @@ export function getRows(): number {
 }
 
 /**
- * Write a formatted warning message to stderr.
+ * Check if stderr is connected to a TTY (terminal).
  *
- * @param message - Warning message text
- * @param prefix - Prefix label for the warning
- * @default prefix 'Warning'
+ * @returns `true` if stderr is a TTY, `false` if piped/redirected
  *
  * @example
  * ```ts
- * writeWarning('Deprecated API usage')
- * // Output: 'Warning: Deprecated API usage'
- *
- * writeWarning('Invalid config', 'Config')
- * // Output: 'Config: Invalid config'
+ * if (isTTY()) {
+ *   // Show colored error messages
+ * } else {
+ *   // Use plain text
+ * }
  * ```
  */
-export function writeWarning(
-  message: string,
-  prefix: string = 'Warning',
-): void {
-  const formatted = `${prefix}: ${message}`
-  writeErrorLine(formatted)
+export function isTTY(): boolean {
+  return stderr.isTTY || false
+}
+
+/**
+ * Write text to stderr without adding a newline.
+ *
+ * @param text - Text to write
+ *
+ * @example
+ * ```ts
+ * writeError('Downloading...')
+ * // Later update progress
+ * ```
+ */
+export function writeError(text: string): void {
+  stderr.write(text)
 }
 
 /**
@@ -181,6 +135,24 @@ export function writeErrorFormatted(
 }
 
 /**
+ * Write a line to stderr with trailing newline.
+ * Used for error messages, warnings, and diagnostic output.
+ * Passing no argument writes an empty line.
+ *
+ * @param text - Text to write (defaults to the empty string)
+ * @default text ''
+ *
+ * @example
+ * ```ts
+ * writeErrorLine('Error: File not found')
+ * writeErrorLine() // Write empty line
+ * ```
+ */
+export function writeErrorLine(text: string = ''): void {
+  stderr.write(`${text}\n`)
+}
+
+/**
  * Write an error's stack trace to stderr.
  * Falls back to formatted error message if no stack is available.
  *
@@ -201,6 +173,30 @@ export function writeStackTrace(error: Error): void {
   } else {
     writeErrorFormatted(error.message)
   }
+}
+
+/**
+ * Write a formatted warning message to stderr.
+ *
+ * @param message - Warning message text
+ * @param prefix - Prefix label for the warning
+ * @default prefix 'Warning'
+ *
+ * @example
+ * ```ts
+ * writeWarning('Deprecated API usage')
+ * // Output: 'Warning: Deprecated API usage'
+ *
+ * writeWarning('Invalid config', 'Config')
+ * // Output: 'Config: Invalid config'
+ * ```
+ */
+export function writeWarning(
+  message: string,
+  prefix: string = 'Warning',
+): void {
+  const formatted = `${prefix}: ${message}`
+  writeErrorLine(formatted)
 }
 
 // Export the raw stream for advanced usage

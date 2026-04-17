@@ -3,7 +3,26 @@
  * Async-aware theming with automatic context isolation via AsyncLocalStorage.
  */
 
+import type { Theme } from './types'
+import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
+
 let _async_hooks: typeof import('node:async_hooks') | undefined
+
+/**
+ * Theme change event listener signature.
+ */
+export type ThemeChangeListener = (theme: Theme) => void
+
+/**
+ * Emit theme change event to listeners.
+ * @private
+ */
+function emitThemeChange(theme: Theme): void {
+  for (const listener of listeners) {
+    listener(theme)
+  }
+}
+
 /**
  * Lazily load the async_hooks module to avoid Webpack errors.
  * @private
@@ -17,14 +36,6 @@ function getAsyncHooks() {
   }
   return _async_hooks as typeof import('node:async_hooks')
 }
-
-import type { Theme } from './types'
-import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
-
-/**
- * Theme change event listener signature.
- */
-export type ThemeChangeListener = (theme: Theme) => void
 
 /**
  * AsyncLocalStorage for theme context isolation.
@@ -43,6 +54,44 @@ let fallbackTheme: Theme = SOCKET_THEME
 const listeners: Set<ThemeChangeListener> = new Set()
 
 /**
+ * Get the active theme from context.
+ *
+ * @returns Current theme
+ *
+ * @example
+ * ```ts
+ * const theme = getTheme()
+ * console.log(theme.displayName)
+ * ```
+ */
+export function getTheme(): Theme {
+  return themeStorage.getStore() ?? fallbackTheme
+}
+
+/**
+ * Subscribe to theme change events.
+ *
+ * @param listener - Change handler
+ * @returns Unsubscribe function
+ *
+ * @example
+ * ```ts
+ * const unsubscribe = onThemeChange((theme) => {
+ *   console.log('Theme:', theme.displayName)
+ * })
+ *
+ * // Cleanup
+ * unsubscribe()
+ * ```
+ */
+export function onThemeChange(listener: ThemeChangeListener): () => void {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+/**
  * Set the global fallback theme.
  *
  * @param theme - Theme name or object
@@ -56,21 +105,6 @@ export function setTheme(theme: Theme | ThemeName): void {
   fallbackTheme =
     typeof theme === 'string' ? (THEMES[theme] ?? fallbackTheme) : theme
   emitThemeChange(fallbackTheme)
-}
-
-/**
- * Get the active theme from context.
- *
- * @returns Current theme
- *
- * @example
- * ```ts
- * const theme = getTheme()
- * console.log(theme.displayName)
- * ```
- */
-export function getTheme(): Theme {
-  return themeStorage.getStore() ?? fallbackTheme
 }
 
 /**
@@ -124,37 +158,4 @@ export function withThemeSync<T>(theme: Theme | ThemeName, fn: () => T): T {
     emitThemeChange(resolvedTheme)
     return fn()
   })
-}
-
-/**
- * Subscribe to theme change events.
- *
- * @param listener - Change handler
- * @returns Unsubscribe function
- *
- * @example
- * ```ts
- * const unsubscribe = onThemeChange((theme) => {
- *   console.log('Theme:', theme.displayName)
- * })
- *
- * // Cleanup
- * unsubscribe()
- * ```
- */
-export function onThemeChange(listener: ThemeChangeListener): () => void {
-  listeners.add(listener)
-  return () => {
-    listeners.delete(listener)
-  }
-}
-
-/**
- * Emit theme change event to listeners.
- * @private
- */
-function emitThemeChange(theme: Theme): void {
-  for (const listener of listeners) {
-    listener(theme)
-  }
 }

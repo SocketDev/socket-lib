@@ -2,6 +2,8 @@
  * @fileoverview Utilities to suppress specific process warnings.
  */
 
+import process from 'node:process'
+
 const { apply: ReflectApply } = Reflect
 
 // Store the original emitWarning function to avoid repeat wrapping.
@@ -44,38 +46,22 @@ function setupSuppression(): void {
 }
 
 /**
- * Suppress MaxListenersExceededWarning messages.
- * This is useful in tests or scripts where multiple listeners are expected.
+ * Restore the original process.emitWarning function.
+ * Call this to re-enable all warnings after suppressing them.
  *
  * @example
- * import { suppressMaxListenersWarning } from '@socketsecurity/lib/suppress-warnings'
- *
+ * ```typescript
  * suppressMaxListenersWarning()
+ * // ... do work ...
+ * restoreWarnings() // Re-enable all warnings
+ * ```
  */
-import process from 'node:process'
-/**
- * Silence `MaxListenersExceededWarning` messages from `process.emitWarning`.
- * Installs a single shared wrapper around `process.emitWarning` on first call
- * so repeat invocations are cheap.
- */
-export function suppressMaxListenersWarning(): void {
-  suppressedWarnings.add('MaxListenersExceededWarning')
-  setupSuppression()
-}
-
-/**
- * Suppress all process warnings of a specific type.
- *
- * @param warningType - The warning type to suppress (e.g., 'DeprecationWarning', 'ExperimentalWarning')
- *
- * @example
- * import { suppressWarningType } from '@socketsecurity/lib/suppress-warnings'
- *
- * suppressWarningType('ExperimentalWarning')
- */
-export function suppressWarningType(warningType: string): void {
-  suppressedWarnings.add(warningType)
-  setupSuppression()
+export function restoreWarnings(): void {
+  if (originalEmitWarning) {
+    process.emitWarning = originalEmitWarning
+    originalEmitWarning = undefined
+    suppressedWarnings.clear()
+  }
 }
 
 /**
@@ -120,22 +106,37 @@ export function setMaxEventTargetListeners(
 }
 
 /**
- * Restore the original process.emitWarning function.
- * Call this to re-enable all warnings after suppressing them.
+ * Suppress MaxListenersExceededWarning messages.
+ * This is useful in tests or scripts where multiple listeners are expected.
  *
  * @example
- * ```typescript
+ * import { suppressMaxListenersWarning } from '@socketsecurity/lib/suppress-warnings'
+ *
  * suppressMaxListenersWarning()
- * // ... do work ...
- * restoreWarnings() // Re-enable all warnings
- * ```
  */
-export function restoreWarnings(): void {
-  if (originalEmitWarning) {
-    process.emitWarning = originalEmitWarning
-    originalEmitWarning = undefined
-    suppressedWarnings.clear()
-  }
+/**
+ * Silence `MaxListenersExceededWarning` messages from `process.emitWarning`.
+ * Installs a single shared wrapper around `process.emitWarning` on first call
+ * so repeat invocations are cheap.
+ */
+export function suppressMaxListenersWarning(): void {
+  suppressedWarnings.add('MaxListenersExceededWarning')
+  setupSuppression()
+}
+
+/**
+ * Suppress all process warnings of a specific type.
+ *
+ * @param warningType - The warning type to suppress (e.g., 'DeprecationWarning', 'ExperimentalWarning')
+ *
+ * @example
+ * import { suppressWarningType } from '@socketsecurity/lib/suppress-warnings'
+ *
+ * suppressWarningType('ExperimentalWarning')
+ */
+export function suppressWarningType(warningType: string): void {
+  suppressedWarnings.add(warningType)
+  setupSuppression()
 }
 
 /**

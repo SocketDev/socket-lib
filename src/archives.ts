@@ -8,44 +8,11 @@ import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 import process from 'node:process'
 
-import type AdmZipType from './external/adm-zip.js'
-import type tarFsType from './external/tar-fs.js'
-
-let _AdmZip: typeof AdmZipType | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getAdmZip() {
-  if (_AdmZip === undefined) {
-    _AdmZip = /*@__PURE__*/ require('./external/adm-zip.js')
-  }
-  return _AdmZip!
-}
-
-let _tarFs: typeof tarFsType | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getTarFs() {
-  if (_tarFs === undefined) {
-    _tarFs = /*@__PURE__*/ require('./external/tar-fs.js')
-  }
-  return _tarFs!
-}
-
 import { safeMkdir } from './fs.js'
 import { normalizePath } from './paths/normalize.js'
 
-let _path: typeof import('node:path') | undefined
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import type AdmZipType from './external/adm-zip.js'
+import type tarFsType from './external/tar-fs.js'
 
 /**
  * Archive format type.
@@ -77,6 +44,39 @@ const DEFAULT_MAX_FILE_SIZE = 100 * 1024 * 1024
 const DEFAULT_MAX_TOTAL_SIZE = 1024 * 1024 * 1024
 // Maximum number of entries to prevent inode exhaustion DoS.
 const DEFAULT_MAX_ENTRIES = 100_000
+
+let _AdmZip: typeof AdmZipType | undefined
+let _tarFs: typeof tarFsType | undefined
+let _path: typeof import('node:path') | undefined
+
+/*@__NO_SIDE_EFFECTS__*/
+function getAdmZip() {
+  if (_AdmZip === undefined) {
+    _AdmZip = /*@__PURE__*/ require('./external/adm-zip.js')
+  }
+  return _AdmZip!
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+function getTarFs() {
+  if (_tarFs === undefined) {
+    _tarFs = /*@__PURE__*/ require('./external/tar-fs.js')
+  }
+  return _tarFs!
+}
 
 /**
  * Validate that a resolved path is within the target directory.
@@ -137,6 +137,48 @@ export function detectArchiveFormat(filePath: string): ArchiveFormat | null {
     return 'zip'
   }
   return null
+}
+
+/**
+ * Extract an archive to a directory.
+ * Automatically detects format from file extension.
+ *
+ * @param archivePath - Path to archive file
+ * @param outputDir - Directory to extract to
+ * @param options - Extraction options
+ * @throws Error if archive format is not supported
+ *
+ * @example
+ * ```typescript
+ * await extractArchive('/tmp/package.tar.gz', '/tmp/output')
+ * await extractArchive('/tmp/release.zip', '/tmp/output', { strip: 1 })
+ * ```
+ */
+export async function extractArchive(
+  archivePath: string,
+  outputDir: string,
+  options: ExtractOptions = {},
+): Promise<void> {
+  const format = detectArchiveFormat(archivePath)
+
+  if (!format) {
+    const path = getPath()
+    const ext = path.extname(archivePath).toLowerCase()
+    throw new Error(
+      `Unsupported archive format${ext ? ` (extension: ${ext})` : ''}: ${archivePath}. ` +
+        'Supported formats: .zip, .tar, .tar.gz, .tgz',
+    )
+  }
+
+  switch (format) {
+    case 'zip':
+      return await extractZip(archivePath, outputDir, options)
+    case 'tar':
+      return await extractTar(archivePath, outputDir, options)
+    case 'tar.gz':
+    case 'tgz':
+      return await extractTarGz(archivePath, outputDir, options)
+  }
 }
 
 /**
@@ -544,47 +586,5 @@ export async function extractZip(
       // Extract file
       zip.extractEntryTo(entry, path.dirname(targetPath), false, true)
     }
-  }
-}
-
-/**
- * Extract an archive to a directory.
- * Automatically detects format from file extension.
- *
- * @param archivePath - Path to archive file
- * @param outputDir - Directory to extract to
- * @param options - Extraction options
- * @throws Error if archive format is not supported
- *
- * @example
- * ```typescript
- * await extractArchive('/tmp/package.tar.gz', '/tmp/output')
- * await extractArchive('/tmp/release.zip', '/tmp/output', { strip: 1 })
- * ```
- */
-export async function extractArchive(
-  archivePath: string,
-  outputDir: string,
-  options: ExtractOptions = {},
-): Promise<void> {
-  const format = detectArchiveFormat(archivePath)
-
-  if (!format) {
-    const path = getPath()
-    const ext = path.extname(archivePath).toLowerCase()
-    throw new Error(
-      `Unsupported archive format${ext ? ` (extension: ${ext})` : ''}: ${archivePath}. ` +
-        'Supported formats: .zip, .tar, .tar.gz, .tgz',
-    )
-  }
-
-  switch (format) {
-    case 'zip':
-      return await extractZip(archivePath, outputDir, options)
-    case 'tar':
-      return await extractTar(archivePath, outputDir, options)
-    case 'tar.gz':
-    case 'tgz':
-      return await extractTarGz(archivePath, outputDir, options)
   }
 }

@@ -28,6 +28,45 @@ const msysDriveRegExp = /^\/([a-zA-Z])(\/|$)/
 const slashRegExp = /[/\\]/
 const nodeModulesPathRegExp = /(?:^|[/\\])node_modules(?:[/\\]|$)/
 
+let _buffer: typeof import('node:buffer') | undefined
+let _url: typeof import('node:url') | undefined
+
+/**
+ * Lazily load the buffer module.
+ *
+ * Performs on-demand loading of Node.js buffer module to avoid initialization
+ * overhead and potential Webpack bundling errors.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getBuffer() {
+  if (_buffer === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _buffer = /*@__PURE__*/ require('node:buffer')
+  }
+  return _buffer as typeof import('node:buffer')
+}
+
+/**
+ * Lazily load the url module.
+ *
+ * Performs on-demand loading of Node.js url module to avoid initialization
+ * overhead and potential Webpack bundling errors.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getUrl() {
+  if (_url === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _url = /*@__PURE__*/ require('node:url')
+  }
+  return _url as typeof import('node:url')
+}
+
 /**
  * Check if a character code represents a path separator.
  *
@@ -75,44 +114,6 @@ function isWindowsDeviceRoot(code: number): boolean {
   )
 }
 
-let _buffer: typeof import('node:buffer') | undefined
-/**
- * Lazily load the buffer module.
- *
- * Performs on-demand loading of Node.js buffer module to avoid initialization
- * overhead and potential Webpack bundling errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getBuffer() {
-  if (_buffer === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _buffer = /*@__PURE__*/ require('node:buffer')
-  }
-  return _buffer as typeof import('node:buffer')
-}
-
-let _url: typeof import('node:url') | undefined
-/**
- * Lazily load the url module.
- *
- * Performs on-demand loading of Node.js url module to avoid initialization
- * overhead and potential Webpack bundling errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getUrl() {
-  if (_url === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _url = /*@__PURE__*/ require('node:url')
-  }
-  return _url as typeof import('node:url')
-}
-
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 function msysDriveToNative(normalized: string): string {
   if (WIN32) {
@@ -125,30 +126,289 @@ function msysDriveToNative(normalized: string): string {
 }
 
 /**
- * Check if a path contains node_modules directory.
+ * Calculate the relative path from one path to another.
  *
- * Detects whether a given path includes a `node_modules` directory segment.
- * This is useful for identifying npm package dependencies and filtering
- * dependency-related paths.
+ * This function computes how to get from the `from` path to the `to` path
+ * using relative path notation. Both paths are first resolved to absolute
+ * paths, then compared to find the common base path, and finally a relative
+ * path is constructed using `../` for parent directory traversal.
  *
- * The check matches `node_modules` appearing as a complete path segment,
- * ensuring it is either at the start, end, or surrounded by path separators.
+ * Algorithm:
+ * 1. Resolve both paths to absolute
+ * 2. Find the longest common path prefix (up to a separator)
+ * 3. For each remaining directory in `from`, add `../` to go up
+ * 4. Append the remaining path from `to`
  *
- * @param {string | Buffer | URL} pathLike - The path to check
- * @returns {boolean} `true` if the path contains `node_modules`, `false` otherwise
+ * Windows-specific behavior:
+ * - File system paths are case-insensitive on Windows (NTFS, FAT32)
+ * - `C:\Foo` and `c:\foo` are considered the same path
+ * - Reference: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+ * - Case is preserved but not significant for comparison
+ *
+ * @param {string} from - The source path (starting point)
+ * @param {string} to - The destination path (target)
+ * @returns {string} The relative path from `from` to `to`, or empty string if paths are identical
  *
  * @example
  * ```typescript
- * isNodeModules('/project/node_modules/package')    // true
- * isNodeModules('node_modules/package/index.js')    // true
- * isNodeModules('/src/my_node_modules_backup')      // false
- * isNodeModules('/project/src/index.js')            // false
+ * // Basic relative paths
+ * relative('/foo/bar', '/foo/baz')           // '../baz'
+ * relative('/foo/bar/baz', '/foo')           // '../..'
+ * relative('/foo', '/foo/bar')               // 'bar'
+ *
+ * // Same paths
+ * relative('/foo/bar', '/foo/bar')           // ''
+ *
+ * // Windows case-insensitive
+ * relative('C:\\Foo\\bar', 'C:\\foo\\baz')   // '../baz' (Windows)
+ *
+ * // Root paths
+ * relative('/', '/foo/bar')                  // 'foo/bar'
+ * relative('/foo/bar', '/')                  // '../..'
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function isNodeModules(pathLike: string | Buffer | URL): boolean {
-  const filepath = pathLikeToString(pathLike)
-  return nodeModulesPathRegExp.test(filepath)
+function relative(from: string, to: string): string {
+  // Quick return if paths are already identical.
+  if (from === to) {
+    return ''
+  }
+
+  // Resolve both paths to absolute.
+  // This handles relative paths, '.', '..', and ensures consistent format.
+  const actualFrom = resolve(from)
+  const actualTo = resolve(to)
+
+  // Check again after resolution (paths might have been equivalent).
+  if (actualFrom === actualTo) {
+    return ''
+  }
+
+  // Windows: perform case-insensitive comparison.
+  // NTFS and FAT32 preserve case but are case-insensitive for lookups.
+  // This means 'C:\Foo\bar.txt' and 'c:\foo\BAR.TXT' refer to the same file.
+  // Reference: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#case-sensitivity
+  if (WIN32) {
+    const fromLower = actualFrom.toLowerCase()
+    const toLower = actualTo.toLowerCase()
+    if (fromLower === toLower) {
+      return ''
+    }
+  }
+
+  // Skip the leading separator for comparison.
+  // We compare paths starting after the root separator to find common directories.
+  // Example: '/foo/bar' becomes 'foo/bar' for comparison (index 1).
+  const fromStart = 1
+  const fromEnd = actualFrom.length
+  const fromLen = fromEnd - fromStart
+  const toStart = 1
+  const toEnd = actualTo.length
+  const toLen = toEnd - toStart
+
+  // Compare paths character by character to find the longest common prefix.
+  // We only consider a common prefix valid if it ends at a directory separator.
+  const length = fromLen < toLen ? fromLen : toLen
+  // Index of last common directory separator.
+  let lastCommonSep = -1
+  let i = 0
+
+  for (; i < length; i += 1) {
+    let fromCode = actualFrom.charCodeAt(fromStart + i)
+    let toCode = actualTo.charCodeAt(toStart + i)
+
+    // Paths diverge at this character.
+    // On Windows, perform case-insensitive comparison.
+    if (WIN32) {
+      // Normalize to lowercase for case-insensitive comparison.
+      // Convert A-Z (65-90) to a-z (97-122).
+      if (fromCode >= CHAR_UPPERCASE_A && fromCode <= CHAR_UPPERCASE_Z) {
+        fromCode += 32
+      }
+      if (toCode >= CHAR_UPPERCASE_A && toCode <= CHAR_UPPERCASE_Z) {
+        toCode += 32
+      }
+    }
+
+    if (fromCode !== toCode) {
+      break
+    }
+
+    // Track directory separators (both forward and backslash for Windows compatibility).
+    // We need this to ensure we only split at directory boundaries.
+    // Use original fromCode from actualFrom (before case normalization).
+    if (isPathSeparator(actualFrom.charCodeAt(fromStart + i))) {
+      lastCommonSep = i
+    }
+  }
+
+  // Handle edge cases where one path is a prefix of the other.
+  if (i === length) {
+    if (toLen > length) {
+      // Destination path is longer.
+      const toCode = actualTo.charCodeAt(toStart + i)
+      if (isPathSeparator(toCode)) {
+        // `from` is the exact base path for `to`.
+        // Example: from='/foo/bar'; to='/foo/bar/baz' → 'baz'
+        // Skip the separator character (+1) to get just the relative portion.
+        return actualTo.slice(toStart + i + 1)
+      }
+      if (i === 0) {
+        // `from` is the root directory.
+        // Example: from='/'; to='/foo' → 'foo'
+        return actualTo.slice(toStart + i)
+      }
+    } else if (fromLen > length) {
+      // Source path is longer.
+      const fromCode = actualFrom.charCodeAt(fromStart + i)
+      if (isPathSeparator(fromCode)) {
+        // `to` is the exact base path for `from`.
+        // Example: from='/foo/bar/baz'; to='/foo/bar' → '..'
+        // We need to go up from the extra directory.
+        lastCommonSep = i
+      } else if (i === 0) {
+        // `to` is the root directory.
+        // Example: from='/foo'; to='/' → '..'
+        lastCommonSep = 0
+      }
+    }
+  }
+
+  // Generate the relative path by constructing '../' segments.
+  let out = ''
+
+  // Count the number of directories in `from` after the common base.
+  // For each directory, we need to go up one level ('../').
+  // Example: from='/a/b/c', to='/a/x' → common='a', need '../..' (up from c, up from b)
+  for (i = fromStart + lastCommonSep + 1; i <= fromEnd; i += 1) {
+    const code = actualFrom.charCodeAt(i)
+
+    // At the end of the path or at a separator, add '../'.
+    if (i === fromEnd || isPathSeparator(code)) {
+      out += out.length === 0 ? '..' : '/..'
+    }
+  }
+
+  // Append the rest of the destination path after the common base.
+  // This gives us the path from the common ancestor to the destination.
+  return out + actualTo.slice(toStart + lastCommonSep)
+}
+
+/**
+ * Resolve an absolute path from path segments.
+ *
+ * This function mimics Node.js `path.resolve()` behavior by building an
+ * absolute path from the given segments. It processes segments from right
+ * to left, stopping when an absolute path is encountered. If no absolute
+ * path is found, it prepends the current working directory.
+ *
+ * Algorithm:
+ * 1. Process segments from right to left
+ * 2. Stop when an absolute path is found
+ * 3. Prepend current working directory if no absolute path found
+ * 4. Normalize the final path
+ *
+ * Key behaviors:
+ * - Later segments override earlier ones (e.g., `resolve('/foo', '/bar')` returns `/bar`)
+ * - Empty or non-string segments are skipped
+ * - Result is always an absolute path
+ * - Path separators are normalized to forward slashes
+ *
+ * @param {...string} segments - Path segments to resolve
+ * @returns {string} The resolved absolute path
+ *
+ * @example
+ * ```typescript
+ * // Basic resolution
+ * resolve('foo', 'bar', 'baz')           // '/cwd/foo/bar/baz' (assuming cwd is '/cwd')
+ * resolve('/foo', 'bar', 'baz')          // '/foo/bar/baz'
+ * resolve('foo', '/bar', 'baz')          // '/bar/baz'
+ *
+ * // Windows paths
+ * resolve('C:\\foo', 'bar')              // 'C:/foo/bar'
+ *
+ * // Empty segments
+ * resolve('foo', '', 'bar')              // '/cwd/foo/bar'
+ * resolve()                              // '/cwd' (current directory)
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function resolve(...segments: string[]): string {
+  let resolvedPath = ''
+  let resolvedAbsolute = false
+
+  // Process segments from right to left until we find an absolute path.
+  // This allows later segments to override earlier ones.
+  // Example: resolve('/foo', '/bar') returns '/bar', not '/foo/bar'.
+  for (let i = segments.length - 1; i >= 0 && !resolvedAbsolute; i -= 1) {
+    const segment = segments[i]
+
+    // Skip empty or non-string segments.
+    if (typeof segment !== 'string' || segment.length === 0) {
+      continue
+    }
+
+    // Prepend the segment to the resolved path.
+    // Use forward slashes as separators (normalized later).
+    resolvedPath =
+      segment + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
+
+    // Check if this segment is absolute.
+    // Absolute paths stop the resolution process.
+    resolvedAbsolute = isAbsolute(segment)
+  }
+
+  // If no absolute path was found in segments, prepend current working directory.
+  // This ensures the final path is always absolute.
+  if (!resolvedAbsolute) {
+    const cwd = /*@__PURE__*/ require('node:process').cwd()
+    resolvedPath = cwd + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
+  }
+
+  // Normalize the resolved path (collapse '..' and '.', convert separators).
+  return normalizePath(resolvedPath)
+}
+
+/**
+ * Convert Unix-style POSIX paths to native Windows paths.
+ *
+ * This is the inverse of {@link toUnixPath}. On Windows, MSYS-style paths use
+ * `/c/` notation for drive letters and forward slashes, which PowerShell and
+ * cmd.exe cannot resolve. This function converts them to native Windows format
+ * with backslashes and proper drive letters.
+ *
+ * Conversion rules:
+ * - On Windows: Converts drive notation and separators to native format
+ *   - `/c/path/to/file` becomes `C:\path\to\file`
+ *   - `/d/projects/app` becomes `D:\projects\app`
+ *   - Forward slashes become backslashes
+ *   - Drive letters are always uppercase in the output
+ * - On Unix: Returns the normalized path unchanged (forward slashes preserved)
+ *
+ * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to convert
+ * @returns {string} Native Windows path (e.g., `C:\path\to\file`) or normalized Unix path
+ *
+ * @example
+ * ```typescript
+ * // MSYS drive letter paths (Windows)
+ * fromUnixPath('/c/projects/app/file.txt')    // 'C:\\projects\\app\\file.txt'
+ * fromUnixPath('/d/projects/foo/bar')         // 'D:\\projects\\foo\\bar'
+ * fromUnixPath('/c')                          // 'C:\\'
+ *
+ * // Forward-slash paths (Windows)
+ * fromUnixPath('C:/Windows/System32')         // 'C:\\Windows\\System32'
+ *
+ * // Unix (unchanged, forward slashes preserved)
+ * fromUnixPath('/tmp/build/output')           // '/tmp/build/output'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function fromUnixPath(pathLike: string | Buffer | URL): string {
+  const normalized = normalizePath(pathLike)
+  if (WIN32) {
+    return normalized.replace(/\//g, '\\')
+  }
+  return normalized
 }
 
 /**
@@ -241,6 +501,33 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
 
   // Not an absolute path.
   return false
+}
+
+/**
+ * Check if a path contains node_modules directory.
+ *
+ * Detects whether a given path includes a `node_modules` directory segment.
+ * This is useful for identifying npm package dependencies and filtering
+ * dependency-related paths.
+ *
+ * The check matches `node_modules` appearing as a complete path segment,
+ * ensuring it is either at the start, end, or surrounded by path separators.
+ *
+ * @param {string | Buffer | URL} pathLike - The path to check
+ * @returns {boolean} `true` if the path contains `node_modules`, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * isNodeModules('/project/node_modules/package')    // true
+ * isNodeModules('node_modules/package/index.js')    // true
+ * isNodeModules('/src/my_node_modules_backup')      // false
+ * isNodeModules('/project/src/index.js')            // false
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isNodeModules(pathLike: string | Buffer | URL): boolean {
+  const filepath = pathLikeToString(pathLike)
+  return nodeModulesPathRegExp.test(filepath)
 }
 
 /**
@@ -406,48 +693,6 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
 export function isUnixPath(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
   return typeof filepath === 'string' && msysDriveRegExp.test(filepath)
-}
-
-/**
- * Convert Unix-style POSIX paths to native Windows paths.
- *
- * This is the inverse of {@link toUnixPath}. On Windows, MSYS-style paths use
- * `/c/` notation for drive letters and forward slashes, which PowerShell and
- * cmd.exe cannot resolve. This function converts them to native Windows format
- * with backslashes and proper drive letters.
- *
- * Conversion rules:
- * - On Windows: Converts drive notation and separators to native format
- *   - `/c/path/to/file` becomes `C:\path\to\file`
- *   - `/d/projects/app` becomes `D:\projects\app`
- *   - Forward slashes become backslashes
- *   - Drive letters are always uppercase in the output
- * - On Unix: Returns the normalized path unchanged (forward slashes preserved)
- *
- * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to convert
- * @returns {string} Native Windows path (e.g., `C:\path\to\file`) or normalized Unix path
- *
- * @example
- * ```typescript
- * // MSYS drive letter paths (Windows)
- * fromUnixPath('/c/projects/app/file.txt')    // 'C:\\projects\\app\\file.txt'
- * fromUnixPath('/d/projects/foo/bar')         // 'D:\\projects\\foo\\bar'
- * fromUnixPath('/c')                          // 'C:\\'
- *
- * // Forward-slash paths (Windows)
- * fromUnixPath('C:/Windows/System32')         // 'C:\\Windows\\System32'
- *
- * // Unix (unchanged, forward slashes preserved)
- * fromUnixPath('/tmp/build/output')           // '/tmp/build/output'
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function fromUnixPath(pathLike: string | Buffer | URL): string {
-  const normalized = normalizePath(pathLike)
-  if (WIN32) {
-    return normalized.replace(/\//g, '\\')
-  }
-  return normalized
 }
 
 /**
@@ -838,6 +1083,50 @@ export function pathLikeToString(
 }
 
 /**
+ * Get the relative path from one path to another.
+ *
+ * Computes the relative path from `from` to `to` and normalizes the result.
+ * This is a convenience wrapper around the `relative()` function that adds
+ * path normalization (converting separators and collapsing segments).
+ *
+ * The function:
+ * 1. Calculates the relative path using `relative()`
+ * 2. Normalizes the result using `normalizePath()`
+ * 3. Preserves empty strings (same path) without converting to `.`
+ *
+ * @param {string} from - The source path (starting point)
+ * @param {string} to - The destination path (target)
+ * @returns {string} The normalized relative path from `from` to `to`, or empty string if paths are identical
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * relativeResolve('/foo/bar', '/foo/baz')         // '../baz'
+ * relativeResolve('/foo/bar/baz', '/foo')         // '../..'
+ * relativeResolve('/foo', '/foo/bar')             // 'bar'
+ *
+ * // Same paths
+ * relativeResolve('/foo/bar', '/foo/bar')         // ''
+ *
+ * // Windows paths (normalized)
+ * relativeResolve('C:\\foo\\bar', 'C:\\foo\\baz') // '../baz'
+ *
+ * // With normalization
+ * relativeResolve('/foo/./bar', '/foo/baz')       // '../baz'
+ * relativeResolve('/foo/bar/../baz', '/foo/qux')  // '../qux'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function relativeResolve(from: string, to: string): string {
+  const rel = relative(from, to)
+  // Empty string means same path - don't normalize to '.'
+  if (rel === '') {
+    return ''
+  }
+  return normalizePath(rel)
+}
+
+/**
  * Split a path into an array of segments.
  *
  * Divides a path into individual components by splitting on path separators
@@ -882,332 +1171,6 @@ export function splitPath(pathLike: string | Buffer | URL): string[] {
     return []
   }
   return filepath.split(slashRegExp)
-}
-
-/**
- * Remove leading ./ or ../ from a path.
- *
- * Strips the `./` or `.\` prefix from relative paths. This is useful for
- * normalizing paths when the current directory reference is implicit or
- * unwanted.
- *
- * Note: This function only removes a single leading `./` or `.\`. It does
- * not remove `../` prefixes or process the rest of the path.
- *
- * @param {string | Buffer | URL} pathLike - The path to process
- * @returns {string} The path without leading `./` or `.\`, or unchanged if no such prefix
- *
- * @example
- * ```typescript
- * // Remove ./ prefix
- * trimLeadingDotSlash('./src/index.js')     // 'src/index.js'
- * trimLeadingDotSlash('.\\src\\file.txt')   // 'src\\file.txt'
- *
- * // Preserve ../ prefix
- * trimLeadingDotSlash('../lib/util.js')     // '../lib/util.js'
- *
- * // No change for other paths
- * trimLeadingDotSlash('/absolute/path')     // '/absolute/path'
- * trimLeadingDotSlash('relative/path')      // 'relative/path'
- * trimLeadingDotSlash('.')                  // '.'
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function trimLeadingDotSlash(pathLike: string | Buffer | URL): string {
-  const filepath = pathLikeToString(pathLike)
-  // Only trim ./ not ../
-  if (filepath.startsWith('./') || filepath.startsWith('.\\')) {
-    return filepath.slice(2)
-  }
-  return filepath
-}
-
-/**
- * Resolve an absolute path from path segments.
- *
- * This function mimics Node.js `path.resolve()` behavior by building an
- * absolute path from the given segments. It processes segments from right
- * to left, stopping when an absolute path is encountered. If no absolute
- * path is found, it prepends the current working directory.
- *
- * Algorithm:
- * 1. Process segments from right to left
- * 2. Stop when an absolute path is found
- * 3. Prepend current working directory if no absolute path found
- * 4. Normalize the final path
- *
- * Key behaviors:
- * - Later segments override earlier ones (e.g., `resolve('/foo', '/bar')` returns `/bar`)
- * - Empty or non-string segments are skipped
- * - Result is always an absolute path
- * - Path separators are normalized to forward slashes
- *
- * @param {...string} segments - Path segments to resolve
- * @returns {string} The resolved absolute path
- *
- * @example
- * ```typescript
- * // Basic resolution
- * resolve('foo', 'bar', 'baz')           // '/cwd/foo/bar/baz' (assuming cwd is '/cwd')
- * resolve('/foo', 'bar', 'baz')          // '/foo/bar/baz'
- * resolve('foo', '/bar', 'baz')          // '/bar/baz'
- *
- * // Windows paths
- * resolve('C:\\foo', 'bar')              // 'C:/foo/bar'
- *
- * // Empty segments
- * resolve('foo', '', 'bar')              // '/cwd/foo/bar'
- * resolve()                              // '/cwd' (current directory)
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-function resolve(...segments: string[]): string {
-  let resolvedPath = ''
-  let resolvedAbsolute = false
-
-  // Process segments from right to left until we find an absolute path.
-  // This allows later segments to override earlier ones.
-  // Example: resolve('/foo', '/bar') returns '/bar', not '/foo/bar'.
-  for (let i = segments.length - 1; i >= 0 && !resolvedAbsolute; i -= 1) {
-    const segment = segments[i]
-
-    // Skip empty or non-string segments.
-    if (typeof segment !== 'string' || segment.length === 0) {
-      continue
-    }
-
-    // Prepend the segment to the resolved path.
-    // Use forward slashes as separators (normalized later).
-    resolvedPath =
-      segment + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
-
-    // Check if this segment is absolute.
-    // Absolute paths stop the resolution process.
-    resolvedAbsolute = isAbsolute(segment)
-  }
-
-  // If no absolute path was found in segments, prepend current working directory.
-  // This ensures the final path is always absolute.
-  if (!resolvedAbsolute) {
-    const cwd = /*@__PURE__*/ require('node:process').cwd()
-    resolvedPath = cwd + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
-  }
-
-  // Normalize the resolved path (collapse '..' and '.', convert separators).
-  return normalizePath(resolvedPath)
-}
-
-/**
- * Calculate the relative path from one path to another.
- *
- * This function computes how to get from the `from` path to the `to` path
- * using relative path notation. Both paths are first resolved to absolute
- * paths, then compared to find the common base path, and finally a relative
- * path is constructed using `../` for parent directory traversal.
- *
- * Algorithm:
- * 1. Resolve both paths to absolute
- * 2. Find the longest common path prefix (up to a separator)
- * 3. For each remaining directory in `from`, add `../` to go up
- * 4. Append the remaining path from `to`
- *
- * Windows-specific behavior:
- * - File system paths are case-insensitive on Windows (NTFS, FAT32)
- * - `C:\Foo` and `c:\foo` are considered the same path
- * - Reference: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
- * - Case is preserved but not significant for comparison
- *
- * @param {string} from - The source path (starting point)
- * @param {string} to - The destination path (target)
- * @returns {string} The relative path from `from` to `to`, or empty string if paths are identical
- *
- * @example
- * ```typescript
- * // Basic relative paths
- * relative('/foo/bar', '/foo/baz')           // '../baz'
- * relative('/foo/bar/baz', '/foo')           // '../..'
- * relative('/foo', '/foo/bar')               // 'bar'
- *
- * // Same paths
- * relative('/foo/bar', '/foo/bar')           // ''
- *
- * // Windows case-insensitive
- * relative('C:\\Foo\\bar', 'C:\\foo\\baz')   // '../baz' (Windows)
- *
- * // Root paths
- * relative('/', '/foo/bar')                  // 'foo/bar'
- * relative('/foo/bar', '/')                  // '../..'
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-function relative(from: string, to: string): string {
-  // Quick return if paths are already identical.
-  if (from === to) {
-    return ''
-  }
-
-  // Resolve both paths to absolute.
-  // This handles relative paths, '.', '..', and ensures consistent format.
-  const actualFrom = resolve(from)
-  const actualTo = resolve(to)
-
-  // Check again after resolution (paths might have been equivalent).
-  if (actualFrom === actualTo) {
-    return ''
-  }
-
-  // Windows: perform case-insensitive comparison.
-  // NTFS and FAT32 preserve case but are case-insensitive for lookups.
-  // This means 'C:\Foo\bar.txt' and 'c:\foo\BAR.TXT' refer to the same file.
-  // Reference: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#case-sensitivity
-  if (WIN32) {
-    const fromLower = actualFrom.toLowerCase()
-    const toLower = actualTo.toLowerCase()
-    if (fromLower === toLower) {
-      return ''
-    }
-  }
-
-  // Skip the leading separator for comparison.
-  // We compare paths starting after the root separator to find common directories.
-  // Example: '/foo/bar' becomes 'foo/bar' for comparison (index 1).
-  const fromStart = 1
-  const fromEnd = actualFrom.length
-  const fromLen = fromEnd - fromStart
-  const toStart = 1
-  const toEnd = actualTo.length
-  const toLen = toEnd - toStart
-
-  // Compare paths character by character to find the longest common prefix.
-  // We only consider a common prefix valid if it ends at a directory separator.
-  const length = fromLen < toLen ? fromLen : toLen
-  // Index of last common directory separator.
-  let lastCommonSep = -1
-  let i = 0
-
-  for (; i < length; i += 1) {
-    let fromCode = actualFrom.charCodeAt(fromStart + i)
-    let toCode = actualTo.charCodeAt(toStart + i)
-
-    // Paths diverge at this character.
-    // On Windows, perform case-insensitive comparison.
-    if (WIN32) {
-      // Normalize to lowercase for case-insensitive comparison.
-      // Convert A-Z (65-90) to a-z (97-122).
-      if (fromCode >= CHAR_UPPERCASE_A && fromCode <= CHAR_UPPERCASE_Z) {
-        fromCode += 32
-      }
-      if (toCode >= CHAR_UPPERCASE_A && toCode <= CHAR_UPPERCASE_Z) {
-        toCode += 32
-      }
-    }
-
-    if (fromCode !== toCode) {
-      break
-    }
-
-    // Track directory separators (both forward and backslash for Windows compatibility).
-    // We need this to ensure we only split at directory boundaries.
-    // Use original fromCode from actualFrom (before case normalization).
-    if (isPathSeparator(actualFrom.charCodeAt(fromStart + i))) {
-      lastCommonSep = i
-    }
-  }
-
-  // Handle edge cases where one path is a prefix of the other.
-  if (i === length) {
-    if (toLen > length) {
-      // Destination path is longer.
-      const toCode = actualTo.charCodeAt(toStart + i)
-      if (isPathSeparator(toCode)) {
-        // `from` is the exact base path for `to`.
-        // Example: from='/foo/bar'; to='/foo/bar/baz' → 'baz'
-        // Skip the separator character (+1) to get just the relative portion.
-        return actualTo.slice(toStart + i + 1)
-      }
-      if (i === 0) {
-        // `from` is the root directory.
-        // Example: from='/'; to='/foo' → 'foo'
-        return actualTo.slice(toStart + i)
-      }
-    } else if (fromLen > length) {
-      // Source path is longer.
-      const fromCode = actualFrom.charCodeAt(fromStart + i)
-      if (isPathSeparator(fromCode)) {
-        // `to` is the exact base path for `from`.
-        // Example: from='/foo/bar/baz'; to='/foo/bar' → '..'
-        // We need to go up from the extra directory.
-        lastCommonSep = i
-      } else if (i === 0) {
-        // `to` is the root directory.
-        // Example: from='/foo'; to='/' → '..'
-        lastCommonSep = 0
-      }
-    }
-  }
-
-  // Generate the relative path by constructing '../' segments.
-  let out = ''
-
-  // Count the number of directories in `from` after the common base.
-  // For each directory, we need to go up one level ('../').
-  // Example: from='/a/b/c', to='/a/x' → common='a', need '../..' (up from c, up from b)
-  for (i = fromStart + lastCommonSep + 1; i <= fromEnd; i += 1) {
-    const code = actualFrom.charCodeAt(i)
-
-    // At the end of the path or at a separator, add '../'.
-    if (i === fromEnd || isPathSeparator(code)) {
-      out += out.length === 0 ? '..' : '/..'
-    }
-  }
-
-  // Append the rest of the destination path after the common base.
-  // This gives us the path from the common ancestor to the destination.
-  return out + actualTo.slice(toStart + lastCommonSep)
-}
-
-/**
- * Get the relative path from one path to another.
- *
- * Computes the relative path from `from` to `to` and normalizes the result.
- * This is a convenience wrapper around the `relative()` function that adds
- * path normalization (converting separators and collapsing segments).
- *
- * The function:
- * 1. Calculates the relative path using `relative()`
- * 2. Normalizes the result using `normalizePath()`
- * 3. Preserves empty strings (same path) without converting to `.`
- *
- * @param {string} from - The source path (starting point)
- * @param {string} to - The destination path (target)
- * @returns {string} The normalized relative path from `from` to `to`, or empty string if paths are identical
- *
- * @example
- * ```typescript
- * // Basic usage
- * relativeResolve('/foo/bar', '/foo/baz')         // '../baz'
- * relativeResolve('/foo/bar/baz', '/foo')         // '../..'
- * relativeResolve('/foo', '/foo/bar')             // 'bar'
- *
- * // Same paths
- * relativeResolve('/foo/bar', '/foo/bar')         // ''
- *
- * // Windows paths (normalized)
- * relativeResolve('C:\\foo\\bar', 'C:\\foo\\baz') // '../baz'
- *
- * // With normalization
- * relativeResolve('/foo/./bar', '/foo/baz')       // '../baz'
- * relativeResolve('/foo/bar/../baz', '/foo/qux')  // '../qux'
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function relativeResolve(from: string, to: string): string {
-  const rel = relative(from, to)
-  // Empty string means same path - don't normalize to '.'
-  if (rel === '') {
-    return ''
-  }
-  return normalizePath(rel)
 }
 
 /**
@@ -1267,4 +1230,42 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
 
   // On Unix, just return the normalized path
   return normalized
+}
+
+/**
+ * Remove leading ./ or ../ from a path.
+ *
+ * Strips the `./` or `.\` prefix from relative paths. This is useful for
+ * normalizing paths when the current directory reference is implicit or
+ * unwanted.
+ *
+ * Note: This function only removes a single leading `./` or `.\`. It does
+ * not remove `../` prefixes or process the rest of the path.
+ *
+ * @param {string | Buffer | URL} pathLike - The path to process
+ * @returns {string} The path without leading `./` or `.\`, or unchanged if no such prefix
+ *
+ * @example
+ * ```typescript
+ * // Remove ./ prefix
+ * trimLeadingDotSlash('./src/index.js')     // 'src/index.js'
+ * trimLeadingDotSlash('.\\src\\file.txt')   // 'src\\file.txt'
+ *
+ * // Preserve ../ prefix
+ * trimLeadingDotSlash('../lib/util.js')     // '../lib/util.js'
+ *
+ * // No change for other paths
+ * trimLeadingDotSlash('/absolute/path')     // '/absolute/path'
+ * trimLeadingDotSlash('relative/path')      // 'relative/path'
+ * trimLeadingDotSlash('.')                  // '.'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function trimLeadingDotSlash(pathLike: string | Buffer | URL): string {
+  const filepath = pathLikeToString(pathLike)
+  // Only trim ./ not ../
+  if (filepath.startsWith('./') || filepath.startsWith('.\\')) {
+    return filepath.slice(2)
+  }
+  return filepath
 }

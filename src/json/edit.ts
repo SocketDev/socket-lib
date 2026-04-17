@@ -45,6 +45,51 @@ function getFs() {
 }
 
 /**
+ * Parse JSON content and extract formatting metadata.
+ * @private
+ */
+function parseJson(content: string): unknown {
+  return JSONParse(content)
+}
+
+/**
+ * Read file content from disk with retry logic for ENOENT errors.
+ * @private
+ */
+async function readFile(filepath: string): Promise<string> {
+  const { promises: fsPromises } = getFs()
+
+  // Retry on ENOENT since files may not be immediately accessible after writes
+  // Windows needs more retries due to slower filesystem operations
+  const maxRetries = process.platform === 'win32' ? 5 : 1
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await fsPromises.readFile(filepath, 'utf8')
+    } catch (err) {
+      const isLastAttempt = attempt === maxRetries
+      const isEnoent =
+        err instanceof Error && 'code' in err && err.code === 'ENOENT'
+
+      // Only retry ENOENT and not on last attempt
+      if (!isEnoent || isLastAttempt) {
+        throw err
+      }
+
+      // Wait before retry with exponential backoff
+      // Windows: 50ms, 100ms, 150ms, 200ms, 250ms (total 750ms + attempts)
+      // Others: 20ms
+      const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(delay)
+    }
+  }
+
+  // This line should never be reached but TypeScript requires it
+  throw new Error('Unreachable code')
+}
+
+/**
  * Retry a file write operation with exponential backoff on Windows EPERM errors.
  * Windows can have transient file locking issues with temp directories.
  * @private
@@ -107,51 +152,6 @@ async function retryWrite(
       await sleep(delay)
     }
   }
-}
-
-/**
- * Parse JSON content and extract formatting metadata.
- * @private
- */
-function parseJson(content: string): unknown {
-  return JSONParse(content)
-}
-
-/**
- * Read file content from disk with retry logic for ENOENT errors.
- * @private
- */
-async function readFile(filepath: string): Promise<string> {
-  const { promises: fsPromises } = getFs()
-
-  // Retry on ENOENT since files may not be immediately accessible after writes
-  // Windows needs more retries due to slower filesystem operations
-  const maxRetries = process.platform === 'win32' ? 5 : 1
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      return await fsPromises.readFile(filepath, 'utf8')
-    } catch (err) {
-      const isLastAttempt = attempt === maxRetries
-      const isEnoent =
-        err instanceof Error && 'code' in err && err.code === 'ENOENT'
-
-      // Only retry ENOENT and not on last attempt
-      if (!isEnoent || isLastAttempt) {
-        throw err
-      }
-
-      // Wait before retry with exponential backoff
-      // Windows: 50ms, 100ms, 150ms, 200ms, 250ms (total 750ms + attempts)
-      // Others: 20ms
-      const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
-      // eslint-disable-next-line no-await-in-loop
-      await sleep(delay)
-    }
-  }
-
-  // This line should never be reached but TypeScript requires it
-  throw new Error('Unreachable code')
 }
 
 /**

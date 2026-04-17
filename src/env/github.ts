@@ -6,6 +6,25 @@
 import { getEnvValue } from './rewire'
 
 /**
+ * GH_TOKEN environment variable.
+ * Alternative GitHub authentication token for API access (used by GitHub CLI).
+ *
+ * @returns The GH CLI token, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getGhToken } from '@socketsecurity/lib/env/github'
+ *
+ * const token = getGhToken()
+ * // e.g. 'gho_abc123...' or undefined
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getGhToken(): string | undefined {
+  return getEnvValue('GH_TOKEN')
+}
+
+/**
  * GITHUB_API_URL environment variable.
  * GitHub API URL (e.g., https://api.github.com).
  *
@@ -136,23 +155,4 @@ export function getGithubServerUrl(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubToken(): string | undefined {
   return getEnvValue('GITHUB_TOKEN')
-}
-
-/**
- * GH_TOKEN environment variable.
- * Alternative GitHub authentication token for API access (used by GitHub CLI).
- *
- * @returns The GH CLI token, or `undefined` if not set
- *
- * @example
- * ```typescript
- * import { getGhToken } from '@socketsecurity/lib/env/github'
- *
- * const token = getGhToken()
- * // e.g. 'gho_abc123...' or undefined
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getGhToken(): string | undefined {
-  return getEnvValue('GH_TOKEN')
 }

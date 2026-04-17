@@ -3,40 +3,28 @@
  * Provides tools to set up isolated test environments for packages.
  */
 
-let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
 import { WIN32 } from '../constants/platform'
 import npmPackageArg from '../external/npm-package-arg'
 import { spawn } from '../spawn'
 
-import type { PackageJson } from '../packages'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
-import { readPackageJson } from './operations'
 import { getOsTmpDir } from '../paths/socket'
+import { readPackageJson } from './operations'
+
+import type { PackageJson } from '../packages'
+
+export type IsolatePackageOptions = {
+  imports?: Record<string, string> | undefined
+  install?: ((cwd: string) => Promise<void>) | undefined
+  onPackageJson?:
+    | ((pkgJson: PackageJson) => PackageJson | Promise<PackageJson>)
+    | undefined
+  sourcePath?: string | undefined
+}
+export type IsolatePackageResult = {
+  exports?: Record<string, unknown> | undefined
+  tmpdir: string
+}
 
 /**
  * Copy options for fs.cp with cross-platform retry support.
@@ -50,14 +38,34 @@ const FS_CP_OPTIONS = {
   recursive: true,
   ...(WIN32 ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
+
+let _fs: typeof import('node:fs') | undefined
+let _path: typeof import('node:path') | undefined
+
 /**
- * Resolve a path to its real location, handling symlinks.
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
  */
-async function resolveRealPath(pathStr: string): Promise<string> {
-  const fs = getFs()
-  const path = getPath()
-  return await fs.promises.realpath(pathStr).catch(() => path.resolve(pathStr))
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
 }
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
+}
+
 /**
  * Merge and write package.json with original and new values.
  */
@@ -80,18 +88,16 @@ async function mergePackageJson(
     : pkgJson
   return mergedPkgJson
 }
-export type IsolatePackageOptions = {
-  imports?: Record<string, string> | undefined
-  install?: ((cwd: string) => Promise<void>) | undefined
-  onPackageJson?:
-    | ((pkgJson: PackageJson) => PackageJson | Promise<PackageJson>)
-    | undefined
-  sourcePath?: string | undefined
+
+/**
+ * Resolve a path to its real location, handling symlinks.
+ */
+async function resolveRealPath(pathStr: string): Promise<string> {
+  const fs = getFs()
+  const path = getPath()
+  return await fs.promises.realpath(pathStr).catch(() => path.resolve(pathStr))
 }
-export type IsolatePackageResult = {
-  exports?: Record<string, unknown> | undefined
-  tmpdir: string
-}
+
 /**
  * Isolates a package in a temporary test environment.
  *

@@ -93,6 +93,36 @@ export const dividers = {
 } as const
 
 /**
+ * Print a dotted divider line.
+ * Convenience function using `·` character.
+ *
+ * @example
+ * ```ts
+ * printDottedDivider()
+ * // ·······················································
+ * ```
+ */
+export function printDottedDivider(): void {
+  printDivider({ char: '·' })
+}
+
+/**
+ * Print a section break with spacing directly to console.
+ *
+ * @param options - Divider formatting options
+ *
+ * @example
+ * ```ts
+ * console.log('Previous section')
+ * printSectionBreak()
+ * console.log('Next section')
+ * ```
+ */
+export function printSectionBreak(options?: DividerOptions): void {
+  console.log(sectionBreak(options))
+}
+
+/**
  * Print a thick divider line (default style).
  * Convenience function using `═` character.
  *
@@ -121,20 +151,6 @@ export function printThinDivider(): void {
 }
 
 /**
- * Print a dotted divider line.
- * Convenience function using `·` character.
- *
- * @example
- * ```ts
- * printDottedDivider()
- * // ·······················································
- * ```
- */
-export function printDottedDivider(): void {
-  printDivider({ char: '·' })
-}
-
-/**
  * Create a section break with blank lines before and after the divider.
  * Useful for creating visual separation between major sections.
  *
@@ -157,20 +173,4 @@ export function printDottedDivider(): void {
 export function sectionBreak(options?: DividerOptions): string {
   const div = divider(options)
   return `\n${div}\n`
-}
-
-/**
- * Print a section break with spacing directly to console.
- *
- * @param options - Divider formatting options
- *
- * @example
- * ```ts
- * console.log('Previous section')
- * printSectionBreak()
- * console.log('Next section')
- * ```
- */
-export function printSectionBreak(options?: DividerOptions): void {
-  console.log(sectionBreak(options))
 }

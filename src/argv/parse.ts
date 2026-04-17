@@ -96,6 +96,66 @@ export interface ParsedArgs<T = Record<string, unknown>> {
 }
 
 /**
+ * Common parseArgs configuration for Socket registry scripts.
+ */
+export const commonParseArgsConfig: ParseArgsConfig = {
+  options: {
+    force: {
+      type: 'boolean',
+      short: 'f',
+      default: false,
+    },
+    quiet: {
+      type: 'boolean',
+      short: 'q',
+      default: false,
+    },
+  },
+  strict: false,
+}
+
+/**
+ * Extract positional arguments from process.argv.
+ * Useful for commands that accept file paths or other positional parameters.
+ *
+ * @example
+ * ```typescript
+ * // process.argv = ["node", "script.js", "src", "lib", "--verbose"]
+ * getPositionalArgs()  // ["src", "lib"]
+ * ```
+ */
+export function getPositionalArgs(startIndex = 2): string[] {
+  const args = process.argv.slice(startIndex)
+  const positionals: string[] = []
+  let i = 0
+
+  while (i < args.length) {
+    const arg = args[i]!
+    // Stop at first flag
+    if (arg.startsWith('-')) {
+      break
+    }
+    positionals.push(arg)
+    i++
+  }
+
+  return positionals
+}
+
+/**
+ * Check if a specific flag is present in argv.
+ *
+ * @example
+ * ```typescript
+ * hasFlag('verbose')  // true if --verbose is in process.argv
+ * hasFlag('force', ['--force', '--quiet'])  // true
+ * ```
+ */
+export function hasFlag(flag: string, argv = process.argv): boolean {
+  return argv.includes(`--${flag}`)
+}
+
+/**
  * Parse command-line arguments with a Node.js parseArgs-compatible API.
  * Uses yargs-parser internally for robust argument parsing.
  *
@@ -235,64 +295,4 @@ export function parseArgsWithDefaults<T = Record<string, unknown>>(
     allowPositionals: true,
     ...config,
   })
-}
-
-/**
- * Common parseArgs configuration for Socket registry scripts.
- */
-export const commonParseArgsConfig: ParseArgsConfig = {
-  options: {
-    force: {
-      type: 'boolean',
-      short: 'f',
-      default: false,
-    },
-    quiet: {
-      type: 'boolean',
-      short: 'q',
-      default: false,
-    },
-  },
-  strict: false,
-}
-
-/**
- * Extract positional arguments from process.argv.
- * Useful for commands that accept file paths or other positional parameters.
- *
- * @example
- * ```typescript
- * // process.argv = ["node", "script.js", "src", "lib", "--verbose"]
- * getPositionalArgs()  // ["src", "lib"]
- * ```
- */
-export function getPositionalArgs(startIndex = 2): string[] {
-  const args = process.argv.slice(startIndex)
-  const positionals: string[] = []
-  let i = 0
-
-  while (i < args.length) {
-    const arg = args[i]!
-    // Stop at first flag
-    if (arg.startsWith('-')) {
-      break
-    }
-    positionals.push(arg)
-    i++
-  }
-
-  return positionals
-}
-
-/**
- * Check if a specific flag is present in argv.
- *
- * @example
- * ```typescript
- * hasFlag('verbose')  // true if --verbose is in process.argv
- * hasFlag('force', ['--force', '--quiet'])  // true
- * ```
- */
-export function hasFlag(flag: string, argv = process.argv): boolean {
-  return argv.includes(`--${flag}`)
 }

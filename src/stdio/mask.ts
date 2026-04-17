@@ -18,37 +18,15 @@
  * - Visual feedback: Uses spinner to indicate process is running when output is masked.
  */
 
-let _child_process: typeof import('node:child_process') | undefined
-/**
- * Lazily load the child_process module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getChildProcess() {
-  if (_child_process === undefined) {
-    _child_process = /*@__PURE__*/ require('node:child_process')
-  }
-  return _child_process as typeof import('node:child_process')
-}
-
-let _readline: typeof import('node:readline') | undefined
-/**
- * Lazily load the readline module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getReadline() {
-  if (_readline === undefined) {
-    _readline = /*@__PURE__*/ require('node:readline')
-  }
-  return _readline as typeof import('node:readline')
-}
 import process from 'node:process'
 import type { ChildProcess, SpawnOptions } from 'node:child_process'
 
 import { getDefaultSpinner } from '../spinner.js'
 import { clearLine } from './clear.js'
 import { write } from './stdout.js'
+
+let _child_process: typeof import('node:child_process') | undefined
+let _readline: typeof import('node:readline') | undefined
 
 const spinner = getDefaultSpinner()
 
@@ -144,119 +122,33 @@ export interface OutputMask {
   /** Whether output is currently visible */
   verbose: boolean
 }
-/**
- * Create an output mask for controlling command output visibility.
- * The mask tracks whether output should be shown or hidden (buffered).
- * When hidden, output is buffered and a spinner is shown instead.
- *
- * @example
- * ```typescript
- * const mask = createOutputMask({ showOutput: false })
- * console.log(mask.verbose)  // false
- * ```
- */
-export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
-  const { showOutput = false } = options
 
-  return {
-    isSpinning: !showOutput,
-    outputBuffer: [],
-    stderrCapture: '',
-    stdoutCapture: '',
-    verbose: showOutput,
-  }
-}
-/**
- * Create a keyboard handler for toggling output visibility.
- * Handles two key combinations:
- * - ctrl+o: Toggle between showing and hiding output.
- * - ctrl+c: Cancel the running process.
- * The handler manipulates terminal state using ANSI escape sequences.
- *
- * @example
- * ```typescript
- * const handler = createKeyboardHandler(mask, childProcess, {
- *   message: 'Testing...',
- * })
- * ```
- */
 type ReadlineKey = { ctrl?: boolean; name?: string }
+
 /**
- * Create a readline key handler that toggles buffered output on `ctrl+o` and
- * cancels the child on `ctrl+c`. When toggled verbose, buffered output is
- * flushed to the terminal; when toggled back, prior output is cleared and the
- * spinner resumes.
- *
- * @param mask - Shared output-mask state used to track buffering and spinner status
- * @param child - Child process that should be killed on cancellation
- * @param options - Optional spinner message and toggle hint text
- * @returns A readline keypress listener with the signature `(str, key) => void`.
+ * Lazily load the child_process module to avoid Webpack errors.
+ * @private
  */
-export function createKeyboardHandler(
-  mask: OutputMask,
-  child: ChildProcess,
-  options: OutputMaskOptions = {},
-): (_str: string, key: ReadlineKey) => void {
-  const { message = 'Running…', toggleText = 'to see full output' } = options
-
-  return (_str, key) => {
-    // ctrl+o toggles verbose mode.
-    if (key?.ctrl && key.name === 'o') {
-      mask.verbose = !mask.verbose
-
-      if (mask.verbose) {
-        // Stop spinner and show buffered output.
-        if (mask.isSpinning) {
-          spinner.stop()
-          mask.isSpinning = false
-        }
-
-        // Clear the current line (removes spinner remnants).
-        clearLine()
-
-        // Show buffered output.
-        if (mask.outputBuffer.length > 0) {
-          console.log('--- Output (ctrl+o to hide) ---')
-          mask.outputBuffer.forEach(line => {
-            write(line)
-          })
-        }
-      } else {
-        // Hide output and show spinner.
-        // Clear all the output lines that were shown.
-        if (mask.outputBuffer.length > 0) {
-          // Calculate number of lines to clear (output + header line).
-          const lineCount = mask.outputBuffer.join('').split('\n').length + 1
-          // Move up and clear each line using ANSI escape sequences:
-          // - '\x1b[1A' (CSI A): Move cursor up 1 line.
-          // - '\x1b[2K' (CSI K with param 2): Erase entire line.
-          // This combination effectively "rewinds" the terminal output.
-          for (let i = 0; i < lineCount; i += 1) {
-            process.stdout.write('\x1b[1A\x1b[2K')
-          }
-        }
-        clearLine()
-
-        // Clear the buffer and restart spinner.
-        mask.outputBuffer = []
-        if (!mask.isSpinning) {
-          spinner.start(`${message} (ctrl+o ${toggleText})`)
-          mask.isSpinning = true
-        }
-      }
-    }
-    // ctrl+c to cancel.
-    else if (key?.ctrl && key.name === 'c') {
-      // Gracefully terminate child process.
-      child.kill('SIGTERM')
-      // Restore terminal to normal mode before exiting.
-      if (process.stdin.isTTY) {
-        process.stdin.setRawMode(false)
-      }
-      throw new Error('Process cancelled by user')
-    }
+/*@__NO_SIDE_EFFECTS__*/
+function getChildProcess() {
+  if (_child_process === undefined) {
+    _child_process = /*@__PURE__*/ require('node:child_process')
   }
+  return _child_process as typeof import('node:child_process')
 }
+
+/**
+ * Lazily load the readline module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getReadline() {
+  if (_readline === undefined) {
+    _readline = /*@__PURE__*/ require('node:readline')
+  }
+  return _readline as typeof import('node:readline')
+}
+
 /**
  * Attach output masking to a child process.
  * Returns a promise that resolves with the exit code.
@@ -409,6 +301,119 @@ export function attachOutputMask(
     })
   })
 }
+
+/**
+ * Create a keyboard handler for toggling output visibility.
+ * Handles two key combinations:
+ * - ctrl+o: Toggle between showing and hiding output.
+ * - ctrl+c: Cancel the running process.
+ * The handler manipulates terminal state using ANSI escape sequences.
+ * Create a readline key handler that toggles buffered output on `ctrl+o` and
+ * cancels the child on `ctrl+c`. When toggled verbose, buffered output is
+ * flushed to the terminal; when toggled back, prior output is cleared and the
+ * spinner resumes.
+ *
+ * @param mask - Shared output-mask state used to track buffering and spinner status
+ * @param child - Child process that should be killed on cancellation
+ * @param options - Optional spinner message and toggle hint text
+ * @returns A readline keypress listener with the signature `(str, key) => void`.
+ *
+ * @example
+ * ```typescript
+ * const handler = createKeyboardHandler(mask, childProcess, {
+ *   message: 'Testing...',
+ * })
+ * ```
+ */
+export function createKeyboardHandler(
+  mask: OutputMask,
+  child: ChildProcess,
+  options: OutputMaskOptions = {},
+): (_str: string, key: ReadlineKey) => void {
+  const { message = 'Running…', toggleText = 'to see full output' } = options
+
+  return (_str, key) => {
+    // ctrl+o toggles verbose mode.
+    if (key?.ctrl && key.name === 'o') {
+      mask.verbose = !mask.verbose
+
+      if (mask.verbose) {
+        // Stop spinner and show buffered output.
+        if (mask.isSpinning) {
+          spinner.stop()
+          mask.isSpinning = false
+        }
+
+        // Clear the current line (removes spinner remnants).
+        clearLine()
+
+        // Show buffered output.
+        if (mask.outputBuffer.length > 0) {
+          console.log('--- Output (ctrl+o to hide) ---')
+          mask.outputBuffer.forEach(line => {
+            write(line)
+          })
+        }
+      } else {
+        // Hide output and show spinner.
+        // Clear all the output lines that were shown.
+        if (mask.outputBuffer.length > 0) {
+          // Calculate number of lines to clear (output + header line).
+          const lineCount = mask.outputBuffer.join('').split('\n').length + 1
+          // Move up and clear each line using ANSI escape sequences:
+          // - '\x1b[1A' (CSI A): Move cursor up 1 line.
+          // - '\x1b[2K' (CSI K with param 2): Erase entire line.
+          // This combination effectively "rewinds" the terminal output.
+          for (let i = 0; i < lineCount; i += 1) {
+            process.stdout.write('\x1b[1A\x1b[2K')
+          }
+        }
+        clearLine()
+
+        // Clear the buffer and restart spinner.
+        mask.outputBuffer = []
+        if (!mask.isSpinning) {
+          spinner.start(`${message} (ctrl+o ${toggleText})`)
+          mask.isSpinning = true
+        }
+      }
+    }
+    // ctrl+c to cancel.
+    else if (key?.ctrl && key.name === 'c') {
+      // Gracefully terminate child process.
+      child.kill('SIGTERM')
+      // Restore terminal to normal mode before exiting.
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false)
+      }
+      throw new Error('Process cancelled by user')
+    }
+  }
+}
+
+/**
+ * Create an output mask for controlling command output visibility.
+ * The mask tracks whether output should be shown or hidden (buffered).
+ * When hidden, output is buffered and a spinner is shown instead.
+ *
+ * @example
+ * ```typescript
+ * const mask = createOutputMask({ showOutput: false })
+ * console.log(mask.verbose)  // false
+ * ```
+ */
+export function createOutputMask(options: OutputMaskOptions = {}): OutputMask {
+  const { showOutput = false } = options
+
+  return {
+    isSpinning: !showOutput,
+    outputBuffer: [],
+    stderrCapture: '',
+    stdoutCapture: '',
+    verbose: showOutput,
+  }
+}
+
 /**
  * Run a command with interactive output masking.
  * Convenience wrapper around spawn + attachOutputMask.

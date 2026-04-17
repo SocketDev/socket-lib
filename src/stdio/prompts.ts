@@ -35,22 +35,6 @@ const selectModule = selectModuleImport as any
 const selectRaw = selectModule.default
 const ActualSeparator = selectModule.Separator
 
-/**
- * Apply a color to text using yoctocolors.
- * Handles both named colors and RGB tuples.
- * @private
- */
-function applyColor(text: string, color: ColorValue): string {
-  if (typeof color === 'string') {
-    // Named color like 'green', 'red', etc.
-    return (yoctocolorsCjs as any)[color](text)
-  }
-  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
-  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
-  const { 0: r, 1: g, 2: b } = color
-  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
-}
-
 // Type definitions
 
 /**
@@ -122,12 +106,19 @@ declare class SeparatorType {
 export type Separator = SeparatorType
 
 /**
- * Resolve theme name or object to Theme.
- * @param theme - Theme name or object
- * @returns Resolved Theme
+ * Apply a color to text using yoctocolors.
+ * Handles both named colors and RGB tuples.
+ * @private
  */
-function resolveTheme(theme: Theme | ThemeName): Theme {
-  return typeof theme === 'string' ? (THEMES[theme] ?? THEMES.socket) : theme
+function applyColor(text: string, color: ColorValue): string {
+  if (typeof color === 'string') {
+    // Named color like 'green', 'red', etc.
+    return (yoctocolorsCjs as any)[color](text)
+  }
+  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
+  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
+  const { 0: r, 1: g, 2: b } = color
+  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
 }
 
 /**
@@ -142,6 +133,15 @@ function isSocketTheme(value: unknown): value is Theme {
     'name' in value &&
     'colors' in value
   )
+}
+
+/**
+ * Resolve theme name or object to Theme.
+ * @param theme - Theme name or object
+ * @returns Resolved Theme
+ */
+function resolveTheme(theme: Theme | ThemeName): Theme {
+  return typeof theme === 'string' ? (THEMES[theme] ?? THEMES.socket) : theme
 }
 
 /**
@@ -210,6 +210,31 @@ export function createInquirerTheme(
 
   // Otherwise it's already an @inquirer theme, return as-is
   return theme as Record<string, unknown>
+}
+
+/**
+ * Create a separator for select prompts.
+ * Creates a visual separator line in choice lists.
+ *
+ * @param text - Optional separator text (defaults to '───────')
+ * @returns Separator instance
+ *
+ * @example
+ * import { select, createSeparator } from '@socketsecurity/lib/stdio/prompts'
+ *
+ * const choice = await select({
+ *   message: 'Choose an option:',
+ *   choices: [
+ *     { name: 'Option 1', value: 1 },
+ *     createSeparator(),
+ *     { name: 'Option 2', value: 2 }
+ *   ]
+ * })
+ */
+export function createSeparator(
+  text?: string,
+): InstanceType<typeof ActualSeparator> {
+  return new ActualSeparator(text)
 }
 
 /**
@@ -353,28 +378,3 @@ export const search: typeof searchRaw = wrapPrompt(searchRaw)
 export const select: typeof selectRaw = wrapPrompt(selectRaw)
 
 export { ActualSeparator as Separator }
-
-/**
- * Create a separator for select prompts.
- * Creates a visual separator line in choice lists.
- *
- * @param text - Optional separator text (defaults to '───────')
- * @returns Separator instance
- *
- * @example
- * import { select, createSeparator } from '@socketsecurity/lib/stdio/prompts'
- *
- * const choice = await select({
- *   message: 'Choose an option:',
- *   choices: [
- *     { name: 'Option 1', value: 1 },
- *     createSeparator(),
- *     { name: 'Option 2', value: 2 }
- *   ]
- * })
- */
-export function createSeparator(
-  text?: string,
-): InstanceType<typeof ActualSeparator> {
-  return new ActualSeparator(text)
-}

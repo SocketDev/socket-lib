@@ -10,37 +10,6 @@ import { WriteStream } from 'node:tty'
 const stdout: NodeJS.WriteStream = process.stdout
 
 /**
- * Write a line to stdout with trailing newline.
- *
- * @param text - Text to write
- * @default text ''
- *
- * @example
- * ```ts
- * writeLine('Hello, world!')
- * writeLine() // Write empty line
- * ```
- */
-export function writeLine(text: string = ''): void {
-  stdout.write(`${text}\n`)
-}
-
-/**
- * Write text to stdout without adding a newline.
- *
- * @param text - Text to write
- *
- * @example
- * ```ts
- * write('Loading...')
- * // Later: clear and update
- * ```
- */
-export function write(text: string): void {
-  stdout.write(text)
-}
-
-/**
  * Clear the current line on stdout.
  * Only works in TTY environments.
  *
@@ -55,6 +24,22 @@ export function clearLine(): void {
   if (stdout.isTTY) {
     stdout.cursorTo(0)
     stdout.clearLine(0)
+  }
+}
+
+/**
+ * Clear screen from cursor position down to bottom.
+ * Only works in TTY environments.
+ *
+ * @example
+ * ```ts
+ * cursorTo(0, 5)
+ * clearScreenDown() // Clear from row 5 to bottom
+ * ```
+ */
+export function clearScreenDown(): void {
+  if (stdout.isTTY) {
+    stdout.clearScreenDown()
   }
 }
 
@@ -78,37 +63,29 @@ export function cursorTo(x: number, y?: number | undefined): void {
 }
 
 /**
- * Clear screen from cursor position down to bottom.
- * Only works in TTY environments.
+ * Register handlers to ensure cursor is shown on process exit.
+ * Prevents hidden cursor after abnormal termination.
+ * Handles SIGINT (Ctrl+C) and SIGTERM signals.
  *
  * @example
  * ```ts
- * cursorTo(0, 5)
- * clearScreenDown() // Clear from row 5 to bottom
+ * ensureCursorOnExit()
+ * hideCursor()
+ * // Even if process crashes, cursor will be restored
  * ```
  */
-export function clearScreenDown(): void {
-  if (stdout.isTTY) {
-    stdout.clearScreenDown()
-  }
-}
-
-/**
- * Check if stdout is connected to a TTY (terminal).
- *
- * @returns `true` if stdout is a TTY, `false` if piped/redirected
- *
- * @example
- * ```ts
- * if (isTTY()) {
- *   // Show interactive UI
- * } else {
- *   // Use simple text output
- * }
- * ```
- */
-export function isTTY(): boolean {
-  return stdout.isTTY || false
+export function ensureCursorOnExit(): void {
+  process.on('exit', showCursor)
+  process.on('SIGINT', () => {
+    showCursor()
+    // eslint-disable-next-line n/no-process-exit
+    process.exit(130)
+  })
+  process.on('SIGTERM', () => {
+    showCursor()
+    // eslint-disable-next-line n/no-process-exit
+    process.exit(143)
+  })
 }
 
 /**
@@ -161,6 +138,24 @@ export function hideCursor(): void {
 }
 
 /**
+ * Check if stdout is connected to a TTY (terminal).
+ *
+ * @returns `true` if stdout is a TTY, `false` if piped/redirected
+ *
+ * @example
+ * ```ts
+ * if (isTTY()) {
+ *   // Show interactive UI
+ * } else {
+ *   // Use simple text output
+ * }
+ * ```
+ */
+export function isTTY(): boolean {
+  return stdout.isTTY || false
+}
+
+/**
  * Show the cursor on stdout.
  * Should be called after `hideCursor()`.
  *
@@ -178,29 +173,34 @@ export function showCursor(): void {
 }
 
 /**
- * Register handlers to ensure cursor is shown on process exit.
- * Prevents hidden cursor after abnormal termination.
- * Handles SIGINT (Ctrl+C) and SIGTERM signals.
+ * Write text to stdout without adding a newline.
+ *
+ * @param text - Text to write
  *
  * @example
  * ```ts
- * ensureCursorOnExit()
- * hideCursor()
- * // Even if process crashes, cursor will be restored
+ * write('Loading...')
+ * // Later: clear and update
  * ```
  */
-export function ensureCursorOnExit(): void {
-  process.on('exit', showCursor)
-  process.on('SIGINT', () => {
-    showCursor()
-    // eslint-disable-next-line n/no-process-exit
-    process.exit(130)
-  })
-  process.on('SIGTERM', () => {
-    showCursor()
-    // eslint-disable-next-line n/no-process-exit
-    process.exit(143)
-  })
+export function write(text: string): void {
+  stdout.write(text)
+}
+
+/**
+ * Write a line to stdout with trailing newline.
+ *
+ * @param text - Text to write
+ * @default text ''
+ *
+ * @example
+ * ```ts
+ * writeLine('Hello, world!')
+ * writeLine() // Write empty line
+ * ```
+ */
+export function writeLine(text: string = ''): void {
+  stdout.write(`${text}\n`)
 }
 
 // Export the raw stream for advanced usage

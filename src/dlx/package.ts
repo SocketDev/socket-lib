@@ -45,45 +45,33 @@ import type { SpawnExtra, SpawnOptions } from '../spawn'
 import { spawn } from '../spawn'
 
 let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
 let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
 
 /**
  * Regex to check if a version string contains range operators.
  * Matches any version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
  */
 const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
+
+const FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
+const FIREWALL_TIMEOUT = 10_000
+const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new Set([
+  'critical',
+  'high',
+])
+
+// Cache for binary path resolution to avoid repeated extension checks on Windows.
+const binaryPathCache = new Map<string, string>()
+
+interface FirewallAlert {
+  severity?: string
+  type?: string
+  key?: string
+}
+
+interface FirewallResponse {
+  alerts?: FirewallAlert[]
+}
 
 export interface DownloadPackageResult {
   /** Path to the installed package directory. */
@@ -154,6 +142,122 @@ export interface DlxPackageResult {
   installed: boolean
   /** The spawn promise for the running process. */
   spawnPromise: ReturnType<typeof spawn>
+}
+
+/**
+ * Check all resolved packages in an Arborist ideal tree against the
+ * Socket Firewall API (public, no auth required).
+ * Throws if any dependency has critical or high severity alerts.
+ *
+ * @param arb - Arborist instance with populated idealTree
+ * @param requestedPackage - Top-level package name (for error messages)
+ * @private
+ */
+async function checkFirewallPurls(
+  arb: InstanceType<typeof Arborist>,
+  requestedPackage: string,
+): Promise<void> {
+  const idealTree = arb.idealTree
+  if (!idealTree) {
+    return
+  }
+
+  // Collect PURLs for all non-root resolved nodes.
+  const purls: Array<{ purl: string; name: string; version: string }> = []
+  for (const node of idealTree.inventory.values()) {
+    if (node.isProjectRoot) {
+      continue
+    }
+    const { name, version } = node.package
+    if (!name || !version) {
+      continue
+    }
+    purls.push({ purl: npmPurl(name, version), name, version })
+  }
+  if (purls.length === 0) {
+    return
+  }
+
+  const blocked: Array<{
+    name: string
+    version: string
+    alerts: string[]
+  }> = []
+
+  // Check all PURLs against the public firewall API in parallel.
+  await Promise.allSettled(
+    purls.map(async ({ name, purl, version }) => {
+      try {
+        const data = await httpJson<FirewallResponse>(
+          `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`,
+          {
+            headers: { 'User-Agent': SOCKET_LIB_USER_AGENT },
+            timeout: FIREWALL_TIMEOUT,
+            retries: 1,
+            retryDelay: 500,
+          },
+        )
+        const blocking = (data.alerts ?? []).filter(
+          a => a.severity && FIREWALL_BLOCK_SEVERITIES.has(a.severity),
+        )
+        if (blocking.length > 0) {
+          blocked.push({
+            name,
+            version,
+            alerts: blocking.map(
+              a => `${a.severity}: ${a.type ?? a.key ?? 'unknown'}`,
+            ),
+          })
+        }
+      } catch {
+        // Firewall API errors are non-fatal — allow install to proceed.
+      }
+    }),
+  )
+
+  if (blocked.length > 0) {
+    const details = blocked
+      .map(b => `  ${b.name}@${b.version}: ${b.alerts.join(', ')}`)
+      .join('\n')
+    throw new Error(
+      `Socket Firewall blocked installation of "${requestedPackage}".\n` +
+        `The following dependencies have security alerts:\n${details}\n\n` +
+        'Visit https://socket.dev for more information.',
+    )
+  }
+}
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js path module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }
 
 /**
@@ -628,25 +732,6 @@ export function makePackageBinsExecutable(
   }
 }
 
-// ── Socket Firewall API check ──
-
-const FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
-const FIREWALL_TIMEOUT = 10_000
-const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new Set([
-  'critical',
-  'high',
-])
-
-interface FirewallAlert {
-  severity?: string
-  type?: string
-  key?: string
-}
-
-interface FirewallResponse {
-  alerts?: FirewallAlert[]
-}
-
 /**
  * Build a PURL string for an npm package.
  * Follows the PURL spec for the npm type:
@@ -659,89 +744,6 @@ export function npmPurl(name: string, version: string): string {
   // PURL spec: '+' in version must be encoded as %2B
   const encodedVersion = version.replace(/\+/g, '%2B')
   return `pkg:npm/${encoded}@${encodedVersion}`
-}
-
-/**
- * Check all resolved packages in an Arborist ideal tree against the
- * Socket Firewall API (public, no auth required).
- * Throws if any dependency has critical or high severity alerts.
- *
- * @param arb - Arborist instance with populated idealTree
- * @param requestedPackage - Top-level package name (for error messages)
- * @private
- */
-async function checkFirewallPurls(
-  arb: InstanceType<typeof Arborist>,
-  requestedPackage: string,
-): Promise<void> {
-  const idealTree = arb.idealTree
-  if (!idealTree) {
-    return
-  }
-
-  // Collect PURLs for all non-root resolved nodes.
-  const purls: Array<{ purl: string; name: string; version: string }> = []
-  for (const node of idealTree.inventory.values()) {
-    if (node.isProjectRoot) {
-      continue
-    }
-    const { name, version } = node.package
-    if (!name || !version) {
-      continue
-    }
-    purls.push({ purl: npmPurl(name, version), name, version })
-  }
-  if (purls.length === 0) {
-    return
-  }
-
-  const blocked: Array<{
-    name: string
-    version: string
-    alerts: string[]
-  }> = []
-
-  // Check all PURLs against the public firewall API in parallel.
-  await Promise.allSettled(
-    purls.map(async ({ name, purl, version }) => {
-      try {
-        const data = await httpJson<FirewallResponse>(
-          `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`,
-          {
-            headers: { 'User-Agent': SOCKET_LIB_USER_AGENT },
-            timeout: FIREWALL_TIMEOUT,
-            retries: 1,
-            retryDelay: 500,
-          },
-        )
-        const blocking = (data.alerts ?? []).filter(
-          a => a.severity && FIREWALL_BLOCK_SEVERITIES.has(a.severity),
-        )
-        if (blocking.length > 0) {
-          blocked.push({
-            name,
-            version,
-            alerts: blocking.map(
-              a => `${a.severity}: ${a.type ?? a.key ?? 'unknown'}`,
-            ),
-          })
-        }
-      } catch {
-        // Firewall API errors are non-fatal — allow install to proceed.
-      }
-    }),
-  )
-
-  if (blocked.length > 0) {
-    const details = blocked
-      .map(b => `  ${b.name}@${b.version}: ${b.alerts.join(', ')}`)
-      .join('\n')
-    throw new Error(
-      `Socket Firewall blocked installation of "${requestedPackage}".\n` +
-        `The following dependencies have security alerts:\n${details}\n\n` +
-        'Visit https://socket.dev for more information.',
-    )
-  }
 }
 
 /**
@@ -796,9 +798,6 @@ export function parsePackageSpec(spec: string): {
     }
   }
 }
-
-// Cache for binary path resolution to avoid repeated extension checks on Windows.
-const binaryPathCache = new Map<string, string>()
 
 /**
  * Resolve binary path with cross-platform wrapper support.

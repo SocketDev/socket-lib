@@ -90,6 +90,19 @@ const yarnInstallLikeCommands = new Set([
   'import',
 ])
 
+export interface PnpmOptions extends SpawnOptions {
+  allowLockfileUpdate?: boolean
+}
+
+export interface ExecScriptOptions extends SpawnOptions {
+  prepost?: boolean | undefined
+}
+
+/**
+ * Alias for isNpmLoglevelFlag for pnpm usage.
+ */
+export const isPnpmLoglevelFlag = isNpmLoglevelFlag
+
 /**
  * Execute npm commands with optimized flags and settings.
  *
@@ -152,10 +165,6 @@ export function execNpm(args: string[], options?: SpawnOptions | undefined) {
       ...options,
     } as SpawnOptions,
   )
-}
-
-export interface PnpmOptions extends SpawnOptions {
-  allowLockfileUpdate?: boolean
 }
 
 /**
@@ -228,6 +237,83 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
       ...otherArgs,
     ],
     extBinOpts,
+  )
+}
+
+/**
+ * Execute a package.json script using the detected package manager.
+ * Picks pnpm, npm, or yarn by walking up to the nearest lockfile; falls back
+ * to running `node --run` or `npm run` directly when no lockfile is found.
+ * Honors `shell: true` by passing through to `spawn()` unchanged.
+ *
+ * @param scriptName - The package.json script to run
+ * @param args - Either the script arguments or an options object
+ * @param options - Spawn options plus `prepost` to force npm-style pre/post scripts
+ * @returns The spawned `ChildProcess`-like promise from the underlying runner.
+ */
+export function execScript(
+  scriptName: string,
+  args?: string[] | readonly string[] | ExecScriptOptions | undefined,
+  options?: ExecScriptOptions | undefined,
+) {
+  // Handle overloaded signatures: execScript(name, options) or execScript(name, args, options).
+  let resolvedOptions: ExecScriptOptions | undefined
+  let resolvedArgs: string[]
+  if (!Array.isArray(args) && args !== null && typeof args === 'object') {
+    resolvedOptions = args as ExecScriptOptions
+    resolvedArgs = []
+  } else {
+    resolvedOptions = options
+    resolvedArgs = (args || []) as string[]
+  }
+  const { prepost, ...spawnOptions } = {
+    __proto__: null,
+    ...resolvedOptions,
+  } as ExecScriptOptions
+
+  // If shell: true is passed, run the command directly as a shell command.
+  if (spawnOptions.shell === true) {
+    return spawn(scriptName, resolvedArgs, spawnOptions)
+  }
+
+  const useNodeRun = !prepost && supportsNodeRun()
+
+  // Detect package manager based on lockfile by traversing up from current directory.
+  const cwd =
+    (getOwn(spawnOptions, 'cwd') as string | undefined) ?? process.cwd()
+
+  // Check for pnpm-lock.yaml.
+  const pnpmLockPath = findUpSync(PNPM_LOCK_YAML, { cwd }) as string | undefined
+  if (pnpmLockPath) {
+    return execPnpm(['run', scriptName, ...resolvedArgs], spawnOptions)
+  }
+
+  // Check for package-lock.json.
+  // When in an npm workspace, use npm run to ensure workspace binaries are available.
+  const packageLockPath = findUpSync(PACKAGE_LOCK_JSON, { cwd }) as
+    | string
+    | undefined
+  if (packageLockPath) {
+    return execNpm(['run', scriptName, ...resolvedArgs], spawnOptions)
+  }
+
+  // Check for yarn.lock.
+  const yarnLockPath = findUpSync(YARN_LOCK, { cwd }) as string | undefined
+  if (yarnLockPath) {
+    return execYarn(['run', scriptName, ...resolvedArgs], spawnOptions)
+  }
+
+  return spawn(
+    getExecPath(),
+    [
+      ...getNodeNoWarningsFlags(),
+      ...(useNodeRun ? ['--run'] : [NPM_REAL_EXEC_PATH, 'run']),
+      scriptName,
+      ...resolvedArgs,
+    ],
+    {
+      ...spawnOptions,
+    },
   )
 }
 
@@ -374,21 +460,6 @@ export function isNpmProgressFlag(cmdArg: string): boolean {
 }
 
 /**
- * Check if a command argument is a pnpm ignore-scripts flag.
- *
- * @example
- * ```typescript
- * isPnpmIgnoreScriptsFlag('--ignore-scripts')     // true
- * isPnpmIgnoreScriptsFlag('--no-ignore-scripts')  // true
- * isPnpmIgnoreScriptsFlag('--save')               // false
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
-  return pnpmIgnoreScriptsFlags.has(cmdArg)
-}
-
-/**
  * Check if a command argument is a pnpm frozen-lockfile flag.
  *
  * @example
@@ -404,6 +475,21 @@ export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
 }
 
 /**
+ * Check if a command argument is a pnpm ignore-scripts flag.
+ *
+ * @example
+ * ```typescript
+ * isPnpmIgnoreScriptsFlag('--ignore-scripts')     // true
+ * isPnpmIgnoreScriptsFlag('--no-ignore-scripts')  // true
+ * isPnpmIgnoreScriptsFlag('--save')               // false
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
+  return pnpmIgnoreScriptsFlags.has(cmdArg)
+}
+
+/**
  * Check if a command argument is a pnpm install command.
  *
  * @example
@@ -416,100 +502,4 @@ export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmInstallCommand(cmdArg: string): boolean {
   return pnpmInstallCommands.has(cmdArg)
-}
-
-/**
- * Alias for isNpmLoglevelFlag for pnpm usage.
- */
-export const isPnpmLoglevelFlag = isNpmLoglevelFlag
-
-/**
- * Execute a package.json script using the appropriate package manager.
- * Automatically detects pnpm, yarn, or npm based on lockfiles.
- *
- * @example
- * ```typescript
- * await execScript('build')
- * await execScript('test', ['--coverage'], { cwd: '/tmp/project' })
- * ```
- */
-export interface ExecScriptOptions extends SpawnOptions {
-  prepost?: boolean | undefined
-}
-
-/**
- * Execute a package.json script using the detected package manager.
- * Picks pnpm, npm, or yarn by walking up to the nearest lockfile; falls back
- * to running `node --run` or `npm run` directly when no lockfile is found.
- * Honors `shell: true` by passing through to `spawn()` unchanged.
- *
- * @param scriptName - The package.json script to run
- * @param args - Either the script arguments or an options object
- * @param options - Spawn options plus `prepost` to force npm-style pre/post scripts
- * @returns The spawned `ChildProcess`-like promise from the underlying runner.
- */
-export function execScript(
-  scriptName: string,
-  args?: string[] | readonly string[] | ExecScriptOptions | undefined,
-  options?: ExecScriptOptions | undefined,
-) {
-  // Handle overloaded signatures: execScript(name, options) or execScript(name, args, options).
-  let resolvedOptions: ExecScriptOptions | undefined
-  let resolvedArgs: string[]
-  if (!Array.isArray(args) && args !== null && typeof args === 'object') {
-    resolvedOptions = args as ExecScriptOptions
-    resolvedArgs = []
-  } else {
-    resolvedOptions = options
-    resolvedArgs = (args || []) as string[]
-  }
-  const { prepost, ...spawnOptions } = {
-    __proto__: null,
-    ...resolvedOptions,
-  } as ExecScriptOptions
-
-  // If shell: true is passed, run the command directly as a shell command.
-  if (spawnOptions.shell === true) {
-    return spawn(scriptName, resolvedArgs, spawnOptions)
-  }
-
-  const useNodeRun = !prepost && supportsNodeRun()
-
-  // Detect package manager based on lockfile by traversing up from current directory.
-  const cwd =
-    (getOwn(spawnOptions, 'cwd') as string | undefined) ?? process.cwd()
-
-  // Check for pnpm-lock.yaml.
-  const pnpmLockPath = findUpSync(PNPM_LOCK_YAML, { cwd }) as string | undefined
-  if (pnpmLockPath) {
-    return execPnpm(['run', scriptName, ...resolvedArgs], spawnOptions)
-  }
-
-  // Check for package-lock.json.
-  // When in an npm workspace, use npm run to ensure workspace binaries are available.
-  const packageLockPath = findUpSync(PACKAGE_LOCK_JSON, { cwd }) as
-    | string
-    | undefined
-  if (packageLockPath) {
-    return execNpm(['run', scriptName, ...resolvedArgs], spawnOptions)
-  }
-
-  // Check for yarn.lock.
-  const yarnLockPath = findUpSync(YARN_LOCK, { cwd }) as string | undefined
-  if (yarnLockPath) {
-    return execYarn(['run', scriptName, ...resolvedArgs], spawnOptions)
-  }
-
-  return spawn(
-    getExecPath(),
-    [
-      ...getNodeNoWarningsFlags(),
-      ...(useNodeRun ? ['--run'] : [NPM_REAL_EXEC_PATH, 'run']),
-      scriptName,
-      ...resolvedArgs,
-    ],
-    {
-      ...spawnOptions,
-    },
-  )
 }

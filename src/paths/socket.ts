@@ -13,31 +13,6 @@
  * └── _sfw/               # Socket Firewall app directory
  */
 
-let _os: typeof import('node:os') | undefined
-/**
- * Lazily load the os module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getOs() {
-  if (_os === undefined) {
-    _os = /*@__PURE__*/ require('node:os')
-  }
-  return _os as typeof import('node:os')
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
 import { CACHE_GITHUB_DIR } from '../constants/github'
 import {
   SOCKET_APP_PREFIX,
@@ -57,6 +32,33 @@ import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR } from './dirnames'
 import { normalizePath } from './normalize'
 import { getPathValue } from './rewire'
 
+let _os: typeof import('node:os') | undefined
+let _path: typeof import('node:path') | undefined
+
+/**
+ * Lazily load the os module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getOs() {
+  if (_os === undefined) {
+    _os = /*@__PURE__*/ require('node:os')
+  }
+  return _os as typeof import('node:os')
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
+}
+
 /**
  * Get the OS home directory.
  * Can be overridden in tests using setPath('homedir', ...) from paths/rewire.
@@ -74,31 +76,18 @@ export function getOsTmpDir(): string {
   return getPathValue('tmpdir', () => getOs().tmpdir())
 }
 /**
- * Get the Socket home directory (~/.socket).
- * Alias for getSocketUserDir() for consistency across Socket projects.
+ * Get a Socket app cache directory (~/.socket/_<appName>/cache).
  */
-export function getSocketHomePath(): string {
-  return getSocketUserDir()
+export function getSocketAppCacheDir(appName: string): string {
+  return normalizePath(getPath().join(getSocketAppDir(appName), CACHE_DIR))
 }
 /**
- * Get the Socket user directory (~/.socket).
- * Can be overridden with SOCKET_HOME environment variable or via setPath() for testing.
- * Result is cached via getPathValue for performance.
- *
- * Priority order:
- *   1. Test override via setPath('socket-user-dir', ...)
- *   2. SOCKET_HOME - Base directory override
- *   3. Default: $HOME/.socket
- *   4. Fallback: /tmp/.socket (Unix) or %TEMP%\.socket (Windows)
+ * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
  */
-export function getSocketUserDir(): string {
-  return getPathValue('socket-user-dir', () => {
-    const socketHome = getSocketHome()
-    if (socketHome) {
-      return normalizePath(socketHome)
-    }
-    return normalizePath(getPath().join(getUserHomeDir(), DOT_SOCKET_DIR))
-  })
+export function getSocketAppCacheTtlDir(appName: string): string {
+  return normalizePath(
+    getPath().join(getSocketAppCacheDir(appName), CACHE_TTL_DIR),
+  )
 }
 /**
  * Get a Socket app directory (~/.socket/_<appName>).
@@ -129,6 +118,12 @@ export function getSocketCacacheDir(): string {
   })
 }
 /**
+ * Get the Socket CLI directory (~/.socket/_socket).
+ */
+export function getSocketCliDir(): string {
+  return getSocketAppDir(SOCKET_CLI_APP_NAME)
+}
+/**
  * Get the Socket DLX directory (~/.socket/_dlx).
  * Can be overridden with SOCKET_DLX_DIR environment variable or via setPath() for testing.
  * Result is cached via getPathValue for performance.
@@ -154,24 +149,11 @@ export function getSocketDlxDir(): string {
   })
 }
 /**
- * Get a Socket app cache directory (~/.socket/_<appName>/cache).
+ * Get the Socket home directory (~/.socket).
+ * Alias for getSocketUserDir() for consistency across Socket projects.
  */
-export function getSocketAppCacheDir(appName: string): string {
-  return normalizePath(getPath().join(getSocketAppDir(appName), CACHE_DIR))
-}
-/**
- * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
- */
-export function getSocketAppCacheTtlDir(appName: string): string {
-  return normalizePath(
-    getPath().join(getSocketAppCacheDir(appName), CACHE_TTL_DIR),
-  )
-}
-/**
- * Get the Socket CLI directory (~/.socket/_socket).
- */
-export function getSocketCliDir(): string {
-  return getSocketAppDir(SOCKET_CLI_APP_NAME)
+export function getSocketHomePath(): string {
+  return getSocketUserDir()
 }
 /**
  * Get the Socket Registry directory (~/.socket/_registry).
@@ -189,6 +171,26 @@ export function getSocketRegistryGithubCacheDir(): string {
       CACHE_GITHUB_DIR,
     ),
   )
+}
+/**
+ * Get the Socket user directory (~/.socket).
+ * Can be overridden with SOCKET_HOME environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
+ *
+ * Priority order:
+ *   1. Test override via setPath('socket-user-dir', ...)
+ *   2. SOCKET_HOME - Base directory override
+ *   3. Default: $HOME/.socket
+ *   4. Fallback: /tmp/.socket (Unix) or %TEMP%\.socket (Windows)
+ */
+export function getSocketUserDir(): string {
+  return getPathValue('socket-user-dir', () => {
+    const socketHome = getSocketHome()
+    if (socketHome) {
+      return normalizePath(socketHome)
+    }
+    return normalizePath(getPath().join(getUserHomeDir(), DOT_SOCKET_DIR))
+  })
 }
 /**
  * Get the user's home directory.

@@ -196,6 +196,7 @@ export interface IterationOptions {
 }
 
 let _timers: typeof import('node:timers/promises') | undefined
+
 /**
  * Get the timers/promises module.
  * Uses lazy loading to avoid Webpack bundling issues.
@@ -387,62 +388,6 @@ export async function pEach<T>(
 }
 
 /**
- * Filter an array asynchronously with concurrency control.
- *
- * Tests each element with an async predicate function, processing items in parallel
- * batches. Returns a new array with only items that pass the test. Similar to
- * `array.filter()` but for async predicates with controlled concurrency.
- *
- * @template T - The type of array elements
- * @param array - The array to filter
- * @param callbackFn - Async predicate function returning true to keep item
- * @param options - Concurrency as number, or full iteration options, or undefined
- * @returns Promise resolving to filtered array
- *
- * @example
- * // Filter serially
- * const activeUsers = await pFilter(users, async (user) => {
- *   return await isUserActive(user.id)
- * })
- *
- * @example
- * // Filter with concurrency
- * const validFiles = await pFilter(filePaths, async (path) => {
- *   try {
- *     await fs.access(path)
- *     return true
- *   } catch {
- *     return false
- *   }
- * }, 10)
- *
- * @example
- * // With retries for flaky checks
- * const reachable = await pFilter(endpoints, async (url) => {
- *   const response = await fetch(url)
- *   return response.ok
- * }, {
- *   concurrency: 5,
- *   retries: 2
- * })
- */
-/*@__NO_SIDE_EFFECTS__*/
-export async function pFilter<T>(
-  array: T[],
-  callbackFn: (item: T) => Promise<boolean>,
-  options?: number | IterationOptions | undefined,
-): Promise<T[]> {
-  const iterOpts = normalizeIterationOptions(options)
-  return (
-    await pFilterChunk(
-      arrayChunk(array, iterOpts.concurrency),
-      callbackFn,
-      iterOpts.retries,
-    )
-  ).flat()
-}
-
-/**
  * Process array in chunks with an async callback.
  *
  * Divides the array into fixed-size chunks and processes each chunk sequentially
@@ -501,6 +446,62 @@ export async function pEachChunk<T>(
       args: [chunk],
     })
   }
+}
+
+/**
+ * Filter an array asynchronously with concurrency control.
+ *
+ * Tests each element with an async predicate function, processing items in parallel
+ * batches. Returns a new array with only items that pass the test. Similar to
+ * `array.filter()` but for async predicates with controlled concurrency.
+ *
+ * @template T - The type of array elements
+ * @param array - The array to filter
+ * @param callbackFn - Async predicate function returning true to keep item
+ * @param options - Concurrency as number, or full iteration options, or undefined
+ * @returns Promise resolving to filtered array
+ *
+ * @example
+ * // Filter serially
+ * const activeUsers = await pFilter(users, async (user) => {
+ *   return await isUserActive(user.id)
+ * })
+ *
+ * @example
+ * // Filter with concurrency
+ * const validFiles = await pFilter(filePaths, async (path) => {
+ *   try {
+ *     await fs.access(path)
+ *     return true
+ *   } catch {
+ *     return false
+ *   }
+ * }, 10)
+ *
+ * @example
+ * // With retries for flaky checks
+ * const reachable = await pFilter(endpoints, async (url) => {
+ *   const response = await fetch(url)
+ *   return response.ok
+ * }, {
+ *   concurrency: 5,
+ *   retries: 2
+ * })
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export async function pFilter<T>(
+  array: T[],
+  callbackFn: (item: T) => Promise<boolean>,
+  options?: number | IterationOptions | undefined,
+): Promise<T[]> {
+  const iterOpts = normalizeIterationOptions(options)
+  return (
+    await pFilterChunk(
+      arrayChunk(array, iterOpts.concurrency),
+      callbackFn,
+      iterOpts.retries,
+    )
+  ).flat()
 }
 
 /**

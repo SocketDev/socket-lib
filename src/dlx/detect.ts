@@ -21,30 +21,6 @@ let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
 /**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
-/**
  * Node.js script file extensions.
  */
 const NODE_JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs'] as const)
@@ -109,6 +85,30 @@ function findPackageJson(filePath: string): string | undefined {
   // Cache the negative result.
   packageJsonPathCache.set(startDir, null)
   return undefined
+}
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }
 
 /**

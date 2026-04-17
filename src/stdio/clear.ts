@@ -3,15 +3,19 @@
  * Provides functions for clearing lines, screens, and managing cursor position.
  */
 
+import process from 'node:process'
+
 /**
  * Clear the current line in the terminal.
  * Uses native TTY methods when available, falls back to ANSI escape codes.
+ * Uses native TTY methods when available and falls back to `\r\x1b[K` ANSI
+ * escapes on non-TTY streams.
  *
  * ANSI Sequences:
  * - `\r`: Carriage return (move to line start)
  * - `\x1b[K`: Clear from cursor to end of line
  *
- * @param stream - Output stream to clear
+ * @param stream - Output stream to clear (defaults to `process.stdout`)
  * @default stream process.stdout
  *
  * @example
@@ -19,14 +23,6 @@
  * clearLine() // Clear current line on stdout
  * clearLine(process.stderr) // Clear on stderr
  * ```
- */
-import process from 'node:process'
-/**
- * Clear the current line on the given stream.
- * Uses native TTY methods when available and falls back to `\r\x1b[K` ANSI
- * escapes on non-TTY streams.
- *
- * @param stream - Output stream to clear (defaults to `process.stdout`)
  */
 export function clearLine(stream: NodeJS.WriteStream = process.stdout): void {
   if (stream.isTTY) {
@@ -155,24 +151,27 @@ export function hideCursor(stream: NodeJS.WriteStream = process.stdout): void {
 }
 
 /**
- * Show the terminal cursor.
- * Should be called after `hideCursor()` to restore normal cursor visibility.
+ * Restore cursor to previously saved position.
+ * Must be called after `saveCursor()`.
  *
  * ANSI Sequence:
- * - `\x1b[?25h`: DECTCEM show cursor
+ * - `\x1b8`: DECRC restore cursor
  *
  * @param stream - Output stream to manipulate
  * @default stream process.stdout
  *
  * @example
  * ```ts
- * hideCursor()
- * // ... show animation
- * showCursor()
+ * saveCursor()
+ * console.log('Temporary text')
+ * restoreCursor()
+ * console.log('Back at saved position')
  * ```
  */
-export function showCursor(stream: NodeJS.WriteStream = process.stdout): void {
-  stream.write('\x1b[?25h')
+export function restoreCursor(
+  stream: NodeJS.WriteStream = process.stdout,
+): void {
+  stream.write('\x1b8')
 }
 
 /**
@@ -198,25 +197,22 @@ export function saveCursor(stream: NodeJS.WriteStream = process.stdout): void {
 }
 
 /**
- * Restore cursor to previously saved position.
- * Must be called after `saveCursor()`.
+ * Show the terminal cursor.
+ * Should be called after `hideCursor()` to restore normal cursor visibility.
  *
  * ANSI Sequence:
- * - `\x1b8`: DECRC restore cursor
+ * - `\x1b[?25h`: DECTCEM show cursor
  *
  * @param stream - Output stream to manipulate
  * @default stream process.stdout
  *
  * @example
  * ```ts
- * saveCursor()
- * console.log('Temporary text')
- * restoreCursor()
- * console.log('Back at saved position')
+ * hideCursor()
+ * // ... show animation
+ * showCursor()
  * ```
  */
-export function restoreCursor(
-  stream: NodeJS.WriteStream = process.stdout,
-): void {
-  stream.write('\x1b8')
+export function showCursor(stream: NodeJS.WriteStream = process.stdout): void {
+  stream.write('\x1b[?25h')
 }

@@ -22,19 +22,26 @@ const COVERAGE_EMOJI_THRESHOLDS = [
 ]
 
 /**
- * Get emoji for coverage percentage.
- *
- * @example
- * ```typescript
- * getCoverageEmoji(95)  // ' \u{1F3AF}'
- * getCoverageEmoji(50)  // ' \u{1F528}'
- * ```
+ * Calculate overall coverage percentage.
  */
-export function getCoverageEmoji(percent: number): string {
-  const entry = COVERAGE_EMOJI_THRESHOLDS.find(
-    ({ threshold }) => percent >= threshold,
-  )
-  return entry?.emoji || ''
+function calculateOverall(
+  code: FormatCoverageOptions['code'],
+  type: FormatCoverageOptions['type'],
+): string {
+  const metrics = [
+    Number.parseFloat(code.statements.percent),
+    Number.parseFloat(code.branches.percent),
+    Number.parseFloat(code.functions.percent),
+    Number.parseFloat(code.lines.percent),
+  ].map(val => (Number.isNaN(val) ? 0 : val))
+
+  if (type) {
+    const typePercent = Number.parseFloat(type.percent)
+    metrics.push(Number.isNaN(typePercent) ? 0 : typePercent)
+  }
+
+  const average = metrics.reduce((sum, val) => sum + val, 0) / metrics.length
+  return average.toFixed(2)
 }
 
 /**
@@ -103,24 +110,17 @@ export function formatCoverage(options: FormatCoverageOptions): string {
 }
 
 /**
- * Calculate overall coverage percentage.
+ * Get emoji for coverage percentage.
+ *
+ * @example
+ * ```typescript
+ * getCoverageEmoji(95)  // ' \u{1F3AF}'
+ * getCoverageEmoji(50)  // ' \u{1F528}'
+ * ```
  */
-function calculateOverall(
-  code: FormatCoverageOptions['code'],
-  type: FormatCoverageOptions['type'],
-): string {
-  const metrics = [
-    Number.parseFloat(code.statements.percent),
-    Number.parseFloat(code.branches.percent),
-    Number.parseFloat(code.functions.percent),
-    Number.parseFloat(code.lines.percent),
-  ].map(val => (Number.isNaN(val) ? 0 : val))
-
-  if (type) {
-    const typePercent = Number.parseFloat(type.percent)
-    metrics.push(Number.isNaN(typePercent) ? 0 : typePercent)
-  }
-
-  const average = metrics.reduce((sum, val) => sum + val, 0) / metrics.length
-  return average.toFixed(2)
+export function getCoverageEmoji(percent: number): string {
+  const entry = COVERAGE_EMOJI_THRESHOLDS.find(
+    ({ threshold }) => percent >= threshold,
+  )
+  return entry?.emoji || ''
 }

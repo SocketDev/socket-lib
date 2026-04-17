@@ -38,6 +38,59 @@ type CacheEntry<T> = {
 }
 
 /**
+ * Clear all memoization caches.
+ * Useful for testing or when you need to force recomputation.
+ *
+ * @example
+ * ```typescript
+ * clearAllMemoizationCaches()
+ * ```
+ */
+export function clearAllMemoizationCaches(): void {
+  debugLog('[memoize:all] clear', { action: 'clear-all-caches' })
+  for (const clear of cacheRegistry) {
+    clear()
+  }
+}
+
+/**
+ * Create a memoized version of a method.
+ * Preserves 'this' context for class methods.
+ *
+ * @param target - Object containing the method
+ * @param propertyKey - Method name
+ * @param descriptor - Property descriptor
+ * @returns Modified descriptor with memoized method
+ *
+ * @example
+ * import { Memoize } from '@socketsecurity/lib/memoization'
+ *
+ * class Calculator {
+ *   @Memoize()
+ *   fibonacci(n: number): number {
+ *     if (n <= 1) return n
+ *     return this.fibonacci(n - 1) + this.fibonacci(n - 2)
+ *   }
+ * }
+ */
+export function Memoize(options: MemoizeOptions<unknown[], unknown> = {}) {
+  return (
+    _target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ): PropertyDescriptor => {
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
+
+    descriptor.value = memoize(originalMethod, {
+      ...options,
+      name: options.name || propertyKey,
+    })
+
+    return descriptor
+  }
+}
+
+/**
  * Memoize a function with configurable caching behavior.
  * Caches function results to avoid repeated computation.
  *
@@ -280,55 +333,42 @@ export function memoizeAsync<Args extends unknown[], Result>(
 }
 
 /**
- * Create a memoized version of a method.
- * Preserves 'this' context for class methods.
+ * Create a debounced memoized function.
+ * Combines memoization with debouncing for expensive operations.
  *
- * @param target - Object containing the method
- * @param propertyKey - Method name
- * @param descriptor - Property descriptor
- * @returns Modified descriptor with memoized method
- *
- * @example
- * import { Memoize } from '@socketsecurity/lib/memoization'
- *
- * class Calculator {
- *   @Memoize()
- *   fibonacci(n: number): number {
- *     if (n <= 1) return n
- *     return this.fibonacci(n - 1) + this.fibonacci(n - 2)
- *   }
- * }
- */
-export function Memoize(options: MemoizeOptions<unknown[], unknown> = {}) {
-  return (
-    _target: unknown,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ): PropertyDescriptor => {
-    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
-
-    descriptor.value = memoize(originalMethod, {
-      ...options,
-      name: options.name || propertyKey,
-    })
-
-    return descriptor
-  }
-}
-
-/**
- * Clear all memoization caches.
- * Useful for testing or when you need to force recomputation.
+ * @param fn - Function to memoize and debounce
+ * @param wait - Debounce wait time in milliseconds
+ * @param options - Memoization options
+ * @returns Debounced memoized function
  *
  * @example
- * ```typescript
- * clearAllMemoizationCaches()
- * ```
+ * import { memoizeDebounced } from '@socketsecurity/lib/memoization'
+ *
+ * const search = memoizeDebounced(
+ *   (query: string) => performSearch(query),
+ *   300,
+ *   { name: 'search' }
+ * )
  */
-export function clearAllMemoizationCaches(): void {
-  debugLog('[memoize:all] clear', { action: 'clear-all-caches' })
-  for (const clear of cacheRegistry) {
-    clear()
+export function memoizeDebounced<Args extends unknown[], Result>(
+  fn: (...args: Args) => Result,
+  wait: number,
+  options: MemoizeOptions<Args, Result> = {},
+): (...args: Args) => Result {
+  const memoized = memoize(fn, options)
+  let timeoutId: NodeJS.Timeout | undefined
+
+  return function debounced(...args: Args): Result {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+
+    timeoutId = setTimeout(() => {
+      memoized(...args)
+    }, wait)
+
+    // For immediate return, try cached value or compute synchronously
+    return memoized(...args)
   }
 }
 
@@ -400,45 +440,5 @@ export function once<Result>(fn: () => Result): () => Result {
       debugLog(`[once:${fn.name}] hit`)
     }
     return result
-  }
-}
-
-/**
- * Create a debounced memoized function.
- * Combines memoization with debouncing for expensive operations.
- *
- * @param fn - Function to memoize and debounce
- * @param wait - Debounce wait time in milliseconds
- * @param options - Memoization options
- * @returns Debounced memoized function
- *
- * @example
- * import { memoizeDebounced } from '@socketsecurity/lib/memoization'
- *
- * const search = memoizeDebounced(
- *   (query: string) => performSearch(query),
- *   300,
- *   { name: 'search' }
- * )
- */
-export function memoizeDebounced<Args extends unknown[], Result>(
-  fn: (...args: Args) => Result,
-  wait: number,
-  options: MemoizeOptions<Args, Result> = {},
-): (...args: Args) => Result {
-  const memoized = memoize(fn, options)
-  let timeoutId: NodeJS.Timeout | undefined
-
-  return function debounced(...args: Args): Result {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-
-    timeoutId = setTimeout(() => {
-      memoized(...args)
-    }, wait)
-
-    // For immediate return, try cached value or compute synchronously
-    return memoized(...args)
   }
 }

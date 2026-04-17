@@ -6,20 +6,29 @@
 import type * as fastSortType from './external/fast-sort.js'
 import type * as semverType from './external/semver.js'
 
-let _semver: typeof semverType | undefined
-function getSemver() {
-  if (_semver === undefined) {
-    _semver = require('./external/semver.js')
-  }
-  return _semver!
-}
+// Type for fast-sort sorter function.
+type FastSortFunction = ReturnType<
+  typeof import('fast-sort').createNewSortInstance
+>
 
 let _fastSort: typeof fastSortType | undefined
+let _localeCompare: ((x: string, y: string) => number) | undefined
+let _naturalCompare: ((x: string, y: string) => number) | undefined
+let _naturalSorter: FastSortFunction | undefined
+let _semver: typeof semverType | undefined
+
 function getFastSort() {
   if (_fastSort === undefined) {
     _fastSort = require('./external/fast-sort.js')
   }
   return _fastSort!
+}
+
+function getSemver() {
+  if (_semver === undefined) {
+    _semver = require('./external/semver.js')
+  }
+  return _semver!
 }
 
 /**
@@ -67,7 +76,6 @@ export function compareStr(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
 }
 
-let _localeCompare: ((x: string, y: string) => number) | undefined
 /**
  * Compare two strings using locale-aware comparison.
  *
@@ -87,7 +95,6 @@ export function localeCompare(x: string, y: string): number {
   return _localeCompare(x, y)
 }
 
-let _naturalCompare: ((x: string, y: string) => number) | undefined
 /**
  * Compare two strings using natural sorting (numeric-aware, case-insensitive).
  *
@@ -119,12 +126,6 @@ export function naturalCompare(x: string, y: string): number {
   return _naturalCompare(x, y)
 }
 
-// Type for fast-sort sorter function.
-type FastSortFunction = ReturnType<
-  typeof import('fast-sort').createNewSortInstance
->
-
-let _naturalSorter: FastSortFunction | undefined
 /**
  * Sort an array using natural comparison.
  *

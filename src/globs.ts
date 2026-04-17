@@ -6,24 +6,6 @@
 import type * as fastGlobType from './external/fast-glob.js'
 import type picomatchType from './external/picomatch.js'
 
-let _fastGlob: typeof fastGlobType | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getFastGlob() {
-  if (_fastGlob === undefined) {
-    _fastGlob = /*@__PURE__*/ require('./external/fast-glob.js')
-  }
-  return _fastGlob!
-}
-
-let _picomatch: typeof picomatchType | undefined
-/*@__NO_SIDE_EFFECTS__*/
-function getPicomatch() {
-  if (_picomatch === undefined) {
-    _picomatch = /*@__PURE__*/ require('./external/picomatch.js')
-  }
-  return _picomatch!
-}
-
 import { objectFreeze as ObjectFreeze } from './objects'
 import {
   LICENSE_GLOB,
@@ -66,6 +48,15 @@ export interface GlobOptions extends FastGlobOptions {
 
 export type { Pattern, FastGlobOptions }
 
+let _fastGlob: typeof fastGlobType | undefined
+let _picomatch: typeof picomatchType | undefined
+
+const MATCHER_CACHE_MAX_SIZE = 100
+// LRU cache. We exploit Map's insertion-order iteration so eviction is O(1):
+// delete the first key. On read, delete + set moves the entry to the back,
+// keeping the cache in recency order.
+const matcherCache = new Map<string, (path: string) => boolean>()
+
 export const defaultIgnore = ObjectFreeze([
   // Most of these ignored files can be included specifically if included in the
   // files globs. Exceptions to this are:
@@ -107,56 +98,21 @@ export const defaultIgnore = ObjectFreeze([
   '**/bower_components',
 ])
 
-/**
- * Create a stream of license file paths matching glob patterns.
- *
- * @example
- * ```typescript
- * const stream = globStreamLicenses('/tmp/my-package')
- * for await (const licensePath of stream) {
- *   console.log(licensePath)
- * }
- * ```
- */
 /*@__NO_SIDE_EFFECTS__*/
-export function globStreamLicenses(
-  dirname: string,
-  options?: GlobOptions,
-): NodeJS.ReadableStream {
-  const {
-    ignore: ignoreOpt,
-    ignoreOriginals,
-    recursive,
-    ...globOptions
-  } = { __proto__: null, ...options } as GlobOptions
-  const ignore = [
-    ...(Array.isArray(ignoreOpt) ? ignoreOpt : defaultIgnore),
-    '**/*.{cjs,cts,js,json,mjs,mts,ts}',
-  ]
-  if (ignoreOriginals) {
-    ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
+function getFastGlob() {
+  if (_fastGlob === undefined) {
+    _fastGlob = /*@__PURE__*/ require('./external/fast-glob.js')
   }
-  /* c8 ignore start - External fast-glob call */
-  const fastGlob = getFastGlob()
-  return fastGlob.globStream(
-    [recursive ? LICENSE_GLOB_RECURSIVE : LICENSE_GLOB],
-    {
-      __proto__: null,
-      absolute: true,
-      caseSensitiveMatch: false,
-      cwd: dirname,
-      ...globOptions,
-      ...(ignore ? { ignore } : {}),
-    } as import('fast-glob').Options,
-  )
-  /* c8 ignore stop */
+  return _fastGlob!
 }
 
-const MATCHER_CACHE_MAX_SIZE = 100
-// LRU cache. We exploit Map's insertion-order iteration so eviction is O(1):
-// delete the first key. On read, delete + set moves the entry to the back,
-// keeping the cache in recency order.
-const matcherCache = new Map<string, (path: string) => boolean>()
+/*@__NO_SIDE_EFFECTS__*/
+function getPicomatch() {
+  if (_picomatch === undefined) {
+    _picomatch = /*@__PURE__*/ require('./external/picomatch.js')
+  }
+  return _picomatch!
+}
 
 /**
  * Return a glob-matcher function, memoized by pattern + options.
@@ -257,6 +213,51 @@ export function glob(
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
   return fastGlob.glob(patterns, options as import('fast-glob').Options)
+}
+
+/**
+ * Create a stream of license file paths matching glob patterns.
+ *
+ * @example
+ * ```typescript
+ * const stream = globStreamLicenses('/tmp/my-package')
+ * for await (const licensePath of stream) {
+ *   console.log(licensePath)
+ * }
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function globStreamLicenses(
+  dirname: string,
+  options?: GlobOptions,
+): NodeJS.ReadableStream {
+  const {
+    ignore: ignoreOpt,
+    ignoreOriginals,
+    recursive,
+    ...globOptions
+  } = { __proto__: null, ...options } as GlobOptions
+  const ignore = [
+    ...(Array.isArray(ignoreOpt) ? ignoreOpt : defaultIgnore),
+    '**/*.{cjs,cts,js,json,mjs,mts,ts}',
+  ]
+  if (ignoreOriginals) {
+    ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
+  }
+  /* c8 ignore start - External fast-glob call */
+  const fastGlob = getFastGlob()
+  return fastGlob.globStream(
+    [recursive ? LICENSE_GLOB_RECURSIVE : LICENSE_GLOB],
+    {
+      __proto__: null,
+      absolute: true,
+      caseSensitiveMatch: false,
+      cwd: dirname,
+      ...globOptions,
+      ...(ignore ? { ignore } : {}),
+    } as import('fast-glob').Options,
+  )
+  /* c8 ignore stop */
 }
 
 /**
