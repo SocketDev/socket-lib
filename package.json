@@ -559,10 +559,6 @@
       "types": "./dist/ssri.d.ts",
       "default": "./dist/ssri.js"
     },
-    "./stdio/clear": {
-      "types": "./dist/stdio/clear.d.ts",
-      "default": "./dist/stdio/clear.js"
-    },
     "./stdio/divider": {
       "types": "./dist/stdio/divider.d.ts",
       "default": "./dist/stdio/divider.js"
@@ -574,18 +570,6 @@
     "./stdio/header": {
       "types": "./dist/stdio/header.d.ts",
       "default": "./dist/stdio/header.js"
-    },
-    "./stdio/mask": {
-      "types": "./dist/stdio/mask.d.ts",
-      "default": "./dist/stdio/mask.js"
-    },
-    "./stdio/progress": {
-      "types": "./dist/stdio/progress.d.ts",
-      "default": "./dist/stdio/progress.js"
-    },
-    "./stdio/prompts": {
-      "types": "./dist/stdio/prompts.d.ts",
-      "default": "./dist/stdio/prompts.js"
     },
     "./stdio/stderr": {
       "types": "./dist/stdio/stderr.d.ts",
@@ -707,12 +691,6 @@
     "@babel/parser": "7.28.4",
     "@babel/traverse": "7.28.4",
     "@babel/types": "7.28.4",
-    "@inquirer/checkbox": "4.3.1",
-    "@inquirer/confirm": "5.1.16",
-    "@inquirer/input": "4.2.2",
-    "@inquirer/password": "4.0.18",
-    "@inquirer/search": "3.1.1",
-    "@inquirer/select": "4.3.2",
     "@npmcli/arborist": "9.1.4",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",

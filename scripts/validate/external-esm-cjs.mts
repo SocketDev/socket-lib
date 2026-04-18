@@ -65,12 +65,7 @@ function getExternalModules(dir) {
 }
 
 // Packages that legitimately only export { default } (ESM default exports).
-// These are optional @inquirer packages that use ESM default export pattern.
-const DEFAULT_ONLY_ALLOWED = new Set([
-  '@inquirer/confirm.js',
-  '@inquirer/input.js',
-  '@inquirer/password.js',
-])
+const DEFAULT_ONLY_ALLOWED = new Set<string>([])
 
 /**
  * Check if module exports work correctly for both CJS and ESM.
@@ -123,8 +118,6 @@ async function checkModuleExports(filePath) {
       // If .default is a circular reference (module.default === module), that's okay
       if (cjsModule.default !== cjsModule) {
         const nonDefaultKeys = cjsKeys.filter(k => k !== 'default')
-        // If there are other exports, this might be intentional (like @inquirer modules)
-        // We'll check ESM compatibility below
         if (nonDefaultKeys.length === 0) {
           issues.push(
             'CJS: Module has .default but no other exports - may be wrapped',
@@ -162,7 +155,7 @@ async function checkModuleExports(filePath) {
       )
     }
   } else if (cjsType === 'object' && cjsModule !== null) {
-    // For objects with both default and named exports (like @inquirer modules)
+    // For objects with both default and named exports.
     if ('default' in cjsModule && cjsModule.default !== cjsModule) {
       // ESM should have the default export
       if (esmDefault === undefined) {
@@ -193,44 +186,6 @@ async function checkModuleExports(filePath) {
             )
           }
         }
-      }
-    }
-  }
-
-  // Test 4: Specific checks for @inquirer modules
-  if (normalizedPath.startsWith('@inquirer/')) {
-    const moduleName = normalizedPath.split('/')[1]
-
-    // confirm, input, password should export functions directly
-    if (['confirm', 'input', 'password'].includes(moduleName)) {
-      if (cjsType !== 'function') {
-        issues.push(
-          `@inquirer/${moduleName}: Should export function directly for CJS (got ${cjsType})`,
-        )
-      }
-      if (typeof esmDefault !== 'function') {
-        issues.push(
-          `@inquirer/${moduleName}: Should export function as default for ESM (got ${typeof esmDefault})`,
-        )
-      }
-    }
-
-    // select, checkbox, search should have both default function and Separator
-    if (['select', 'checkbox', 'search'].includes(moduleName)) {
-      if (!cjsKeys.includes('Separator')) {
-        issues.push(`@inquirer/${moduleName}: Missing Separator export in CJS`)
-      }
-      if (!('default' in cjsModule)) {
-        issues.push(`@inquirer/${moduleName}: Missing default export in CJS`)
-      }
-      if (typeof cjsModule.default !== 'function') {
-        issues.push(
-          `@inquirer/${moduleName}: default should be a function (got ${typeof cjsModule.default})`,
-        )
-      }
-      // Check ESM access to Separator
-      if (!('Separator' in esmModule)) {
-        issues.push(`@inquirer/${moduleName}: Separator not accessible in ESM`)
       }
     }
   }
@@ -311,25 +266,6 @@ async function main(): Promise<void> {
         logger.substep(`${modulesWithDefault} modules with ESM default export`)
         logger.substep(`${functionExports} function exports`)
         logger.substep(`${objectExports} object exports`)
-
-        // Check @inquirer modules specifically
-        const inquirerResults = results.filter(r =>
-          r.path.startsWith('@inquirer/'),
-        )
-        if (inquirerResults.length > 0) {
-          logger.log('')
-          logger.success(
-            `Verified ${inquirerResults.length} @inquirer ${pluralize('module', { count: inquirerResults.length })}:`,
-          )
-          for (const result of inquirerResults) {
-            const hasDefault = result.hasEsmDefault ? '✓ default' : ''
-            const hasSeparator =
-              result.cjsKeys > 0 ? `✓ ${result.cjsKeys} exports` : ''
-            logger.substep(
-              `${result.path}: ${[hasDefault, hasSeparator].filter(Boolean).join(', ')}`,
-            )
-          }
-        }
       }
     }
   }

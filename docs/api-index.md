@@ -192,17 +192,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## stdio/
 
-| Subpath                                                          | Description                                         |
-| ---------------------------------------------------------------- | --------------------------------------------------- |
-| [`@socketsecurity/lib/stdio/clear`](../src/stdio/clear.ts)       | Terminal clearing and cursor utilities.             |
-| [`@socketsecurity/lib/stdio/divider`](../src/stdio/divider.ts)   | Console divider and separator utilities.            |
-| [`@socketsecurity/lib/stdio/footer`](../src/stdio/footer.ts)     | Console footer/summary formatting utilities.        |
-| [`@socketsecurity/lib/stdio/header`](../src/stdio/header.ts)     | Console header/banner formatting utilities.         |
-| [`@socketsecurity/lib/stdio/mask`](../src/stdio/mask.ts)         | Interactive output masking utilities for CLI tools. |
-| [`@socketsecurity/lib/stdio/progress`](../src/stdio/progress.ts) | Progress bar utilities for CLI applications.        |
-| [`@socketsecurity/lib/stdio/prompts`](../src/stdio/prompts.ts)   | User prompt utilities for interactive scripts.      |
-| [`@socketsecurity/lib/stdio/stderr`](../src/stdio/stderr.ts)     | Standard error stream utilities.                    |
-| [`@socketsecurity/lib/stdio/stdout`](../src/stdio/stdout.ts)     | Standard output stream utilities.                   |
+| Subpath                                                        | Description                                  |
+| -------------------------------------------------------------- | -------------------------------------------- |
+| [`@socketsecurity/lib/stdio/divider`](../src/stdio/divider.ts) | Console divider and separator utilities.     |
+| [`@socketsecurity/lib/stdio/footer`](../src/stdio/footer.ts)   | Console footer/summary formatting utilities. |
+| [`@socketsecurity/lib/stdio/header`](../src/stdio/header.ts)   | Console header/banner formatting utilities.  |
+| [`@socketsecurity/lib/stdio/stderr`](../src/stdio/stderr.ts)   | Standard error stream utilities.             |
+| [`@socketsecurity/lib/stdio/stdout`](../src/stdio/stdout.ts)   | Standard output stream utilities.            |
 
 ## themes/
 

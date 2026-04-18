@@ -98,9 +98,10 @@ describe('suppress-warnings', () => {
         s => s.description === 'events.maxEventTargetListeners',
       )
 
-      if (kMaxEventTargetListeners) {
-        expect((signal as any)[kMaxEventTargetListeners]).toBe(20)
-      }
+      // Assert the symbol is present before asserting its value — otherwise
+      // a Node upgrade that renames the symbol would silently pass this test.
+      expect(kMaxEventTargetListeners).toBeDefined()
+      expect((signal as any)[kMaxEventTargetListeners!]).toBe(20)
     })
 
     it('should use default value of 10', () => {
@@ -114,9 +115,8 @@ describe('suppress-warnings', () => {
         s => s.description === 'events.maxEventTargetListeners',
       )
 
-      if (kMaxEventTargetListeners) {
-        expect((signal as any)[kMaxEventTargetListeners]).toBe(10)
-      }
+      expect(kMaxEventTargetListeners).toBeDefined()
+      expect((signal as any)[kMaxEventTargetListeners!]).toBe(10)
     })
 
     it('should handle EventTarget without the symbol', () => {

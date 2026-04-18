@@ -5,9 +5,9 @@
 
 // Define which packages need bundling (ones that are actual npm packages).
 export const externalPackages = [
-  // external-pack: Shared dependencies and @inquirer packages bundled together.
+  // external-pack: Shared dependencies bundled together.
   // Bundled first so npm-pack can mark shared deps as external.
-  // Contains: has-flag, signal-exit, supports-color, yoctocolors-cjs, @inquirer/*.
+  // Contains: has-flag, signal-exit, supports-color, yoctocolors-cjs.
   { name: 'external-pack', bundle: true },
   // NPM bundles - grouped for better deduplication.
   // npm-pack: arborist, cacache, libnpmpack, make-fetch-happen, npm-package-arg,
@@ -66,20 +66,6 @@ export const scopedPackages = [
     packages: ['package-json', 'promise-spawn'],
     bundle: true,
     subpaths: ['package-json/lib/read-package.js', 'package-json/lib/sort.js'],
-  },
-  {
-    scope: '@inquirer',
-    packages: [
-      // Only bundle packages that are in devDependencies
-      'checkbox',
-      'confirm',
-      'input',
-      'password',
-      'search',
-      'select',
-    ],
-    bundle: false,
-    optional: true,
   },
   {
     scope: '@socketregistry',

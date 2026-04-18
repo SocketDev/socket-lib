@@ -36,7 +36,7 @@ function getExternalModules(dir) {
       if (entry.isFile() && entry.name.endsWith('.js')) {
         modules.push(fullPath)
       } else if (entry.isDirectory()) {
-        // For scoped packages like @inquirer, @npmcli, etc.
+        // For scoped packages like @npmcli, @socketregistry, etc.
         // Check if they have index.js or subdirectories
         try {
           const indexPath = path.join(fullPath, 'index.js')
@@ -63,12 +63,7 @@ function getExternalModules(dir) {
 }
 
 // Packages that legitimately only export { default } (ESM default exports).
-// These are optional @inquirer packages that use ESM default export pattern.
-const DEFAULT_ONLY_ALLOWED = new Set([
-  '@inquirer/confirm.js',
-  '@inquirer/input.js',
-  '@inquirer/password.js',
-])
+const DEFAULT_ONLY_ALLOWED = new Set<string>([])
 
 /**
  * Check if an external module export is usable without .default.
