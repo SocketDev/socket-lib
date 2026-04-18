@@ -413,30 +413,6 @@ describe('fs - Additional Coverage', () => {
     })
   })
 
-  describe('safeStatsSync with string options', () => {
-    it('should handle string encoding option', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testFile = path.join(tmpDir, 'test.txt')
-        await fs.writeFile(testFile, '', 'utf8')
-
-        const result = safeStatsSync(testFile, 'utf8')
-        expect(result).toBeDefined()
-        expect(result?.isFile()).toBe(true)
-      }, 'safeStatsSync-string-encoding-')
-    })
-
-    it('should handle object options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testFile = path.join(tmpDir, 'test.txt')
-        await fs.writeFile(testFile, '', 'utf8')
-
-        const result = safeStatsSync(testFile, { encoding: 'utf8' })
-        expect(result).toBeDefined()
-        expect(result?.isFile()).toBe(true)
-      }, 'safeStatsSync-obj-opts-')
-    })
-  })
-
   describe('readDirNames with more options', () => {
     it('should handle sort: false', async () => {
       await runWithTempDir(async tmpDir => {

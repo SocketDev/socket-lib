@@ -274,5 +274,5 @@ export function supportsProcessSend(): boolean {
 }
 
 // Node.js constants.
-export const NODE_SEA_FUSE = 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2'
 export const ESNEXT = 'esnext'
+export const NODE_SEA_FUSE = 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2'

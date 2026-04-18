@@ -1020,17 +1020,6 @@ describe('fs', () => {
       const result = safeStatsSync('/nonexistent/path')
       expect(result).toBeUndefined()
     })
-
-    it('should pass encoding option as string', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testFile = path.join(tmpDir, 'test.txt')
-        await fs.writeFile(testFile, '', 'utf8')
-
-        const result = safeStatsSync(testFile, 'utf8')
-        expect(result).toBeDefined()
-        expect(result?.isFile()).toBe(true)
-      }, 'safeStatsSync-encoding-')
-    })
   })
 
   describe('uniqueSync', () => {

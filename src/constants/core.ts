@@ -23,8 +23,8 @@ export const EMPTY_VALUE = '<value>'
 export const UNDEFINED_TOKEN: undefined = undefined
 
 // Miscellaneous.
-export const V = 'v'
 export const COLUMN_LIMIT = 80
+export const V = 'v'
 
 // Environment variable name constants.
 export const NODE_AUTH_TOKEN = 'NODE_AUTH_TOKEN'
