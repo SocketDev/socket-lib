@@ -60,11 +60,6 @@ export type BufferEncoding =
   | 'hex'
 
 /**
- * Represents any valid JSON content type.
- */
-export type JsonContent = unknown
-
-/**
  * Options for asynchronous `findUp` operations.
  */
 export interface FindUpOptions {
@@ -128,20 +123,9 @@ export interface IsDirEmptyOptions {
 }
 
 /**
- * Options for read operations with abort support.
+ * Represents any valid JSON content type.
  */
-export interface ReadOptions extends Abortable {
-  /**
-   * Character encoding to use for reading.
-   * @default 'utf8'
-   */
-  encoding?: BufferEncoding | string | undefined
-  /**
-   * File system flag for reading behavior.
-   * @default 'r'
-   */
-  flag?: string | undefined
-}
+export type JsonContent = unknown
 
 /**
  * Options for reading directories with filtering and sorting.
@@ -199,6 +183,22 @@ export type ReadJsonOptions = Remap<
 >
 
 /**
+ * Options for read operations with abort support.
+ */
+export interface ReadOptions extends Abortable {
+  /**
+   * Character encoding to use for reading.
+   * @default 'utf8'
+   */
+  encoding?: BufferEncoding | string | undefined
+  /**
+   * File system flag for reading behavior.
+   * @default 'r'
+   */
+  flag?: string | undefined
+}
+
+/**
  * Options for file/directory removal operations.
  */
 export interface RemoveOptions {
@@ -241,25 +241,19 @@ export interface SafeReadOptions extends ReadOptions {
 }
 
 /**
- * Options for write operations with encoding and mode control.
+ * Result of file readability validation.
+ * Contains lists of valid and invalid file paths.
  */
-export interface WriteOptions extends Abortable {
+export interface ValidateFilesResult {
   /**
-   * Character encoding for writing.
-   * @default 'utf8'
+   * File paths that passed validation and are readable.
    */
-  encoding?: BufferEncoding | string | undefined
+  validPaths: string[]
   /**
-   * File mode (permissions) to set.
-   * Uses standard Unix permission bits (e.g., 0o644).
-   * @default 0o666 (read/write for all, respecting umask)
+   * File paths that failed validation (unreadable, permission denied, or non-existent).
+   * Common with Yarn Berry PnP virtual filesystem, pnpm symlinks, or filesystem race conditions.
    */
-  mode?: number | undefined
-  /**
-   * File system flag for write behavior.
-   * @default 'w' (create or truncate)
-   */
-  flag?: string | undefined
+  invalidPaths: string[]
 }
 
 /**
@@ -302,19 +296,25 @@ export interface WriteJsonOptions extends WriteOptions {
 }
 
 /**
- * Result of file readability validation.
- * Contains lists of valid and invalid file paths.
+ * Options for write operations with encoding and mode control.
  */
-export interface ValidateFilesResult {
+export interface WriteOptions extends Abortable {
   /**
-   * File paths that passed validation and are readable.
+   * Character encoding for writing.
+   * @default 'utf8'
    */
-  validPaths: string[]
+  encoding?: BufferEncoding | string | undefined
   /**
-   * File paths that failed validation (unreadable, permission denied, or non-existent).
-   * Common with Yarn Berry PnP virtual filesystem, pnpm symlinks, or filesystem race conditions.
+   * File mode (permissions) to set.
+   * Uses standard Unix permission bits (e.g., 0o644).
+   * @default 0o666 (read/write for all, respecting umask)
    */
-  invalidPaths: string[]
+  mode?: number | undefined
+  /**
+   * File system flag for write behavior.
+   * @default 'w' (create or truncate)
+   */
+  flag?: string | undefined
 }
 
 const defaultRemoveOptions = objectFreeze({
