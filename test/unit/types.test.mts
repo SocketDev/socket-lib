@@ -8,10 +8,6 @@ import { PURL_Type } from '@socketsecurity/lib/types'
 
 describe('types', () => {
   describe('PURL_Type enum', () => {
-    it('should export PURL_Type enum', () => {
-      expect(PURL_Type).toBeDefined()
-    })
-
     it('should have NPM type', () => {
       expect(PURL_Type.NPM).toBe('npm')
     })

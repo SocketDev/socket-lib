@@ -16,31 +16,22 @@ import { z } from '@socketsecurity/lib/zod'
 
 describe('zod', () => {
   describe('z export', () => {
-    it('should export z object', () => {
-      expect(z).toBeDefined()
-      expect(typeof z).toBe('object')
-    })
-
     it('should export string schema builder', () => {
-      expect(typeof z.string).toBe('function')
       const schema = z.string()
       expect(schema.parse('test')).toBe('test')
     })
 
     it('should export number schema builder', () => {
-      expect(typeof z.number).toBe('function')
       const schema = z.number()
       expect(schema.parse(123)).toBe(123)
     })
 
     it('should export boolean schema builder', () => {
-      expect(typeof z.boolean).toBe('function')
       const schema = z.boolean()
       expect(schema.parse(true)).toBe(true)
     })
 
     it('should export object schema builder', () => {
-      expect(typeof z.object).toBe('function')
       const schema = z.object({
         name: z.string(),
         age: z.number(),
@@ -52,7 +43,6 @@ describe('zod', () => {
     })
 
     it('should export array schema builder', () => {
-      expect(typeof z.array).toBe('function')
       const schema = z.array(z.string())
       expect(schema.parse(['a', 'b', 'c'])).toEqual(['a', 'b', 'c'])
     })

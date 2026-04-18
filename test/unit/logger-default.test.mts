@@ -13,9 +13,9 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { describe, expect, it } from 'vitest'
 
 describe('getDefaultLogger', () => {
-  it('should return a Logger instance', () => {
+  it('should return a Logger with dynamic log methods', () => {
     const log = getDefaultLogger()
-    expect(log).toBeDefined()
+    // Logger methods are installed dynamically; verify core methods exist.
     expect(typeof log.log).toBe('function')
     expect(typeof log.success).toBe('function')
     expect(typeof log.error).toBe('function')

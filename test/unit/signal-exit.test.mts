@@ -91,18 +91,16 @@ describe('signal-exit', () => {
       load()
       const sigs = signals()
       expect(sigs).toBeTruthy()
-      if (sigs) {
-        // Common signals across platforms
-        expect(sigs).toContain('SIGINT')
-        expect(sigs).toContain('SIGTERM')
-      }
+      // Common signals across platforms
+      expect(sigs).toContain('SIGINT')
+      expect(sigs).toContain('SIGTERM')
     })
 
     it('should have platform-specific signals', () => {
       load()
       const sigs = signals()
       expect(sigs).toBeTruthy()
-      if (sigs && process.platform !== 'win32') {
+      if (process.platform !== 'win32') {
         // POSIX-only signals
         expect(sigs.length).toBeGreaterThan(5)
       }
@@ -246,7 +244,7 @@ describe('signal-exit', () => {
       load()
       const sigs = signals()
       expect(sigs).toBeTruthy()
-      if (process.platform === 'win32' && sigs) {
+      if (process.platform === 'win32') {
         // Windows should have fewer signals
         expect(sigs).toContain('SIGINT')
         expect(sigs).toContain('SIGTERM')
@@ -257,7 +255,7 @@ describe('signal-exit', () => {
       load()
       const sigs = signals()
       expect(sigs).toBeTruthy()
-      if (process.platform !== 'win32' && sigs) {
+      if (process.platform !== 'win32') {
         // POSIX should have more signals
         expect(sigs.length).toBeGreaterThan(5)
         expect(sigs).toContain('SIGINT')
@@ -270,7 +268,7 @@ describe('signal-exit', () => {
       load()
       const sigs = signals()
       expect(sigs).toBeTruthy()
-      if (process.platform === 'linux' && sigs) {
+      if (process.platform === 'linux') {
         // Linux-specific signals
         expect(sigs).toContain('SIGIO')
         expect(sigs).toContain('SIGPOLL')
