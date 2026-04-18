@@ -4,6 +4,7 @@
  */
 
 import process from 'node:process'
+
 import { WIN32 } from './constants/platform'
 import { normalizePath } from './paths/normalize'
 

@@ -6,6 +6,7 @@
  */
 
 import process from 'node:process'
+
 import { maintainedNodeVersions } from './maintained-node-versions'
 
 const NODE_VERSION = process.version

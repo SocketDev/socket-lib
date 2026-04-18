@@ -4,11 +4,11 @@
  */
 
 import process from 'node:process'
+
+import { WIN32 } from './constants/platform'
 import { getHome } from './env/home'
 import { getAppdata, getLocalappdata } from './env/windows'
 import { getXdgDataHome } from './env/xdg'
-
-import { WIN32 } from './constants/platform'
 import whichModule from './external/which'
 import { readJsonSync } from './fs'
 import { isPath, normalizePath } from './paths/normalize'

@@ -14,14 +14,12 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
-import type { Readable } from 'node:stream'
-
 import { SOCKET_LIB_USER_AGENT } from './constants/socket'
 import { safeDelete } from './fs.js'
 
-import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
-
 import type { Logger } from './logger.js'
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
+import type { Readable } from 'node:stream'
 
 /** IncomingMessage received as a response to a client request (http.request callback). */
 export type IncomingResponse = IncomingMessage

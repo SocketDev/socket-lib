@@ -4,29 +4,10 @@
  */
 
 import process from 'node:process'
-import type { Abortable } from 'node:events'
-
-import type {
-  Dirent,
-  MakeDirectoryOptions,
-  ObjectEncodingOptions,
-  OpenMode,
-  PathLike,
-  StatSyncOptions,
-  WriteFileOptions,
-} from 'node:fs'
-
-import { getAbortSignal } from './constants/process'
 
 import { isArray } from './arrays'
-import type {
-  deleteAsync as deleteAsyncType,
-  deleteSync as deleteSyncType,
-} from './external/del'
-
-import { pRetry } from './promises'
+import { getAbortSignal } from './constants/process'
 import { defaultIgnore, getGlobMatcher } from './globs'
-import type { JsonReviver } from './json/types'
 import { jsonParse } from './json/parse'
 import { objectFreeze, type Remap } from './objects'
 import { normalizePath, pathLikeToString } from './paths/normalize'
@@ -36,7 +17,24 @@ import {
   getSocketCacacheDir,
   getSocketUserDir,
 } from './paths/socket'
+import { pRetry } from './promises'
 import { naturalCompare } from './sorts'
+
+import type {
+  deleteAsync as deleteAsyncType,
+  deleteSync as deleteSyncType,
+} from './external/del'
+import type { JsonReviver } from './json/types'
+import type { Abortable } from 'node:events'
+import type {
+  Dirent,
+  MakeDirectoryOptions,
+  ObjectEncodingOptions,
+  OpenMode,
+  PathLike,
+  StatSyncOptions,
+  WriteFileOptions,
+} from 'node:fs'
 
 const abortSignal = getAbortSignal()
 

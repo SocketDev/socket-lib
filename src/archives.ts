@@ -4,9 +4,9 @@
  */
 
 import { createReadStream } from 'node:fs'
+import process from 'node:process'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
-import process from 'node:process'
 
 import { safeMkdir } from './fs.js'
 import { normalizePath } from './paths/normalize.js'

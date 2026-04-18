@@ -24,6 +24,7 @@
  */
 
 import process from 'node:process'
+
 import {
   NPM_BIN_PATH,
   NPM_REAL_EXEC_PATH,

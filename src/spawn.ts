@@ -27,19 +27,18 @@
  */
 
 import process from 'node:process'
-import { getAbortSignal } from './constants/process'
-import { stackWithCauses } from './errors'
-
-// @ts-expect-error - external vendored module
-import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
 
 import { isArray } from './arrays'
 import { whichSync } from './bin'
-import { isPath } from './paths/normalize'
+import { getAbortSignal } from './constants/process'
+import { stackWithCauses } from './errors'
 import { getOwn, hasOwn } from './objects'
+import { isPath } from './paths/normalize'
 import { getDefaultSpinner } from './spinner'
 import { stripAnsi } from './strings'
 
+// @ts-expect-error - external vendored module
+import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
 import type { StdioOptions, Serializable, SendHandle } from 'node:child_process'
 import type { EventEmitter } from 'node:events'
 

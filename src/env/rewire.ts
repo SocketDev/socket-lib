@@ -10,8 +10,8 @@
  */
 
 import process from 'node:process'
-import { hasOwn } from '../objects'
 
+import { hasOwn } from '../objects'
 import { envAsBoolean } from './helpers'
 
 let _async_hooks: typeof import('node:async_hooks') | undefined

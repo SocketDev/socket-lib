@@ -5,6 +5,7 @@
  */
 
 import process from 'node:process'
+
 import { normalizePath } from './paths/normalize'
 
 /**

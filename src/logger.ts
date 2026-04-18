@@ -4,12 +4,15 @@
  */
 
 import process from 'node:process'
+
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
+
 import { applyLinePrefix, isBlankString } from './strings'
-import type { ColorValue } from './colors'
 import { getTheme, onThemeChange } from './themes/context'
 import { THEMES } from './themes/themes'
+
+import type { ColorValue } from './colors'
 
 /**
  * Log symbols for terminal output with colored indicators.

@@ -19,11 +19,12 @@
  */
 
 import process from 'node:process'
-import type { ChildProcess, SpawnOptions } from 'node:child_process'
 
 import { getDefaultSpinner } from '../spinner.js'
 import { clearLine } from './clear.js'
 import { write } from './stdout.js'
+
+import type { ChildProcess, SpawnOptions } from 'node:child_process'
 
 let _child_process: typeof import('node:child_process') | undefined
 let _readline: typeof import('node:readline') | undefined

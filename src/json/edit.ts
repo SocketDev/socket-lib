@@ -2,8 +2,8 @@
  * @fileoverview Editable JSON file manipulation with formatting preservation.
  */
 
-import { setTimeout as sleep } from 'node:timers/promises'
 import process from 'node:process'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 import {
   INDENT_SYMBOL,
@@ -16,6 +16,7 @@ import {
   stringifyWithFormatting,
   stripFormattingSymbols,
 } from './format'
+
 import type {
   EditableJsonConstructor,
   EditableJsonInstance,

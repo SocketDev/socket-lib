@@ -1,17 +1,17 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
 import process from 'node:process'
+
 import { getArch, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
-
-import { generateCacheKey } from './cache'
-import { httpDownload } from '../http-request'
 import { isDir, readJson, safeDelete, safeMkdir } from '../fs'
+import { httpDownload } from '../http-request'
 import { isObjectObject } from '../objects'
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import { spawn } from '../spawn'
+import { generateCacheKey } from './cache'
 
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 

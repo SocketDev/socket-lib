@@ -4,6 +4,7 @@
  */
 
 import process from 'node:process'
+
 import colors from '../external/yoctocolors-cjs'
 import { repeatString, stripAnsi } from '../strings'
 
