@@ -9,18 +9,20 @@
 import process from 'node:process'
 import { parseArgs as nodeParseArgs } from 'node:util'
 
+import type { ParseArgsConfig } from 'node:util'
+
+interface ParseArgsResult {
+  values: Record<string, unknown>
+  positionals: string[]
+}
+
 /**
  * Parse command-line arguments using Node.js built-in parseArgs.
  * Simplified version for build scripts that don't need yargs-parser features.
- *
- * @param {object} config - Parse configuration
- * @param {string[]} [config.args] - Arguments to parse (defaults to process.argv.slice(2))
- * @param {object} [config.options] - Options configuration
- * @param {boolean} [config.strict] - Whether to throw on unknown options (default: false)
- * @param {boolean} [config.allowPositionals] - Whether to allow positionals (default: true)
- * @returns {{ values: object, positionals: string[] }}
  */
-export function parseArgs(config = {}) {
+export function parseArgs(
+  config: Partial<ParseArgsConfig> = {},
+): ParseArgsResult {
   const {
     allowPositionals = true,
     args = process.argv.slice(2),
@@ -54,13 +56,10 @@ export function parseArgs(config = {}) {
 
 /**
  * Extract positional arguments from process.argv.
- *
- * @param {number} [startIndex=2] - Index to start from
- * @returns {string[]}
  */
-export function getPositionalArgs(startIndex = 2) {
+export function getPositionalArgs(startIndex: number = 2): string[] {
   const args = process.argv.slice(startIndex)
-  const positionals = []
+  const positionals: string[] = []
 
   for (const arg of args) {
     // Stop at first flag
@@ -75,11 +74,7 @@ export function getPositionalArgs(startIndex = 2) {
 
 /**
  * Check if a specific flag is present in argv.
- *
- * @param {string} flag - Flag name (without dashes)
- * @param {string[]} [argv=process.argv] - Arguments array
- * @returns {boolean}
  */
-export function hasFlag(flag, argv = process.argv) {
+export function hasFlag(flag: string, argv: string[] = process.argv): boolean {
   return argv.includes(`--${flag}`) || argv.includes(`-${flag.charAt(0)}`)
 }

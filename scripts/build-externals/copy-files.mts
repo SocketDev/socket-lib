@@ -11,24 +11,20 @@ const logger = getDefaultLogger()
 
 /**
  * Ensure directory exists.
- *
- * @param {string} dir - Directory path
- * @returns {Promise<void>}
  */
-export async function ensureDir(dir) {
+export async function ensureDir(dir: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true })
 }
 
 /**
  * Copy local TypeScript declaration files only.
  * JavaScript files are either bundled by esbuild or manually vendored (handled separately).
- *
- * @param {string} srcDir - Source directory
- * @param {string} destDir - Destination directory
- * @param {boolean} quiet - Suppress output
- * @returns {Promise<number>} Number of files copied
  */
-export async function copyLocalFiles(srcDir, destDir, quiet = false) {
+export async function copyLocalFiles(
+  srcDir: string,
+  destDir: string,
+  quiet: boolean = false,
+): Promise<number> {
   const files = await fs.readdir(srcDir)
   let count = 0
 
@@ -52,19 +48,13 @@ export async function copyLocalFiles(srcDir, destDir, quiet = false) {
 
 /**
  * Recursively copy a directory.
- *
- * @param {string} srcPath - Source path
- * @param {string} destPath - Destination path
- * @param {string} relativePath - Relative path for logging
- * @param {boolean} quiet - Suppress output
- * @returns {Promise<number>} Number of files copied
  */
 export async function copyRecursive(
-  srcPath,
-  destPath,
-  relativePath = '',
-  quiet = false,
-) {
+  srcPath: string,
+  destPath: string,
+  relativePath: string = '',
+  quiet: boolean = false,
+): Promise<number> {
   await ensureDir(destPath)
   const entries = await fs.readdir(srcPath, { withFileTypes: true })
   let count = 0
@@ -92,19 +82,13 @@ export async function copyRecursive(
 
 /**
  * Copy scoped package directories.
- *
- * @param {string} srcDir - Source directory
- * @param {string} destDir - Destination directory
- * @param {Array} scopedPackages - List of scoped packages
- * @param {boolean} quiet - Suppress output
- * @returns {Promise<number>} Number of files copied
  */
 export async function copyScopedFiles(
-  srcDir,
-  destDir,
-  scopedPackages,
-  quiet = false,
-) {
+  srcDir: string,
+  destDir: string,
+  scopedPackages: Array<{ scope: string }>,
+  quiet: boolean = false,
+): Promise<number> {
   let count = 0
 
   for (const { scope } of scopedPackages) {
