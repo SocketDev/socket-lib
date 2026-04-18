@@ -1716,7 +1716,6 @@ export async function safeStats(filepath: PathLike) {
  * Returns undefined for any error (file not found, permission denied, etc.).
  *
  * @param filepath - Path to check
- * @param options - Read options (currently unused but kept for API consistency)
  * @returns Stats object, or undefined on error
  *
  * @example
@@ -1730,17 +1729,12 @@ export async function safeStats(filepath: PathLike) {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function safeStatsSync(
-  filepath: PathLike,
-  options?: ReadFileOptions | undefined,
-) {
-  const opts = typeof options === 'string' ? { encoding: options } : options
+export function safeStatsSync(filepath: PathLike) {
   const fs = getFs()
   try {
     return fs.statSync(filepath, {
       __proto__: null,
       throwIfNoEntry: false,
-      ...opts,
     } as StatSyncOptions)
   } catch {}
   return undefined

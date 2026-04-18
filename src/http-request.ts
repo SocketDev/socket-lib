@@ -779,7 +779,8 @@ async function httpDownloadAttempt(
   })
 
   if (!response.ok) {
-    throw new Error(
+    throw new HttpResponseError(
+      response,
       `Download failed: HTTP ${response.status} ${response.statusText}`,
     )
   }
@@ -1529,7 +1530,7 @@ export async function httpJson<T = unknown>(
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    throw new HttpResponseError(response)
   }
 
   try {
@@ -1758,7 +1759,7 @@ export async function httpText(
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    throw new HttpResponseError(response)
   }
 
   return response.text()
