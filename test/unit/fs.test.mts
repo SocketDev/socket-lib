@@ -18,7 +18,7 @@ import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import type { SafeReadOptions } from '@socketsecurity/lib/fs'
+import { describe, expect, it } from 'vitest'
 
 import {
   findUp,
@@ -50,8 +50,10 @@ import {
   writeJson,
   writeJsonSync,
 } from '@socketsecurity/lib/fs'
-import { describe, expect, it } from 'vitest'
+
 import { runWithTempDir } from './utils/temp-file-helper'
+
+import type { SafeReadOptions } from '@socketsecurity/lib/fs'
 
 describe('fs', () => {
   describe('findUp', () => {

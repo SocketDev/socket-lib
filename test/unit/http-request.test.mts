@@ -17,6 +17,9 @@ import http from 'node:http'
 import path from 'node:path'
 import { Writable } from 'node:stream'
 
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { SOCKET_LIB_USER_AGENT } from '@socketsecurity/lib/constants/socket'
 import {
   enrichErrorMessage,
   fetchChecksums,
@@ -30,16 +33,16 @@ import {
   readIncomingResponse,
   sanitizeHeaders,
 } from '@socketsecurity/lib/http-request'
+import { Logger } from '@socketsecurity/lib/logger'
+
+import { runWithTempDir } from './utils/temp-file-helper'
+
 import type {
   HttpHookRequestInfo,
   HttpHookResponseInfo,
   IncomingRequest,
   IncomingResponse,
 } from '@socketsecurity/lib/http-request'
-import { SOCKET_LIB_USER_AGENT } from '@socketsecurity/lib/constants/socket'
-import { Logger } from '@socketsecurity/lib/logger'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper'
 
 // Test server setup
 let httpServer: http.Server

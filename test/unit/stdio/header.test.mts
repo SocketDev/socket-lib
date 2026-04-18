@@ -10,14 +10,15 @@
  * Used by Socket CLI for visual structure and section markers in terminal output.
  */
 
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { stripAnsi } from '@socketsecurity/lib/ansi'
+import { printFooter } from '@socketsecurity/lib/stdio/footer'
 import {
   createHeader,
   createSectionHeader,
   printHeader,
 } from '@socketsecurity/lib/stdio/header'
-import { printFooter } from '@socketsecurity/lib/stdio/footer'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('stdio/header', () => {
   describe('createHeader', () => {

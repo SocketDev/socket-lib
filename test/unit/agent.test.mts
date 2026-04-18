@@ -11,6 +11,9 @@
  */
 
 import process from 'node:process'
+
+import { describe, expect, it } from 'vitest'
+
 import {
   execNpm,
   execPnpm,
@@ -26,7 +29,6 @@ import {
   isPnpmInstallCommand,
   isPnpmLoglevelFlag,
 } from '@socketsecurity/lib/agent'
-import { describe, expect, it } from 'vitest'
 
 describe('agent', () => {
   describe('Flag checking functions', () => {

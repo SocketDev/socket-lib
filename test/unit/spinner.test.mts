@@ -11,13 +11,15 @@
  */
 
 import process from 'node:process'
+
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import {
   getCliSpinners,
   Spinner,
   withSpinner,
   withSpinnerSync,
 } from '@socketsecurity/lib/spinner'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('spinner', () => {
   // Mock stdout/stderr to prevent actual spinner output during tests
