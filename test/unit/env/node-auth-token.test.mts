@@ -6,9 +6,12 @@
  * Uses rewire for test isolation. Critical for authenticated package operations.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
 import { getNodeAuthToken } from '@socketsecurity/lib/env/node-auth-token'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/node-auth-token', () => {
   afterEach(() => {
@@ -21,11 +24,9 @@ describe('env/node-auth-token', () => {
       expect(getNodeAuthToken()).toBe('test-token-123')
     })
 
-    it('should return undefined when NODE_AUTH_TOKEN is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('NODE_AUTH_TOKEN')
-      // After clearing override, falls back to actual process.env
-      const result = getNodeAuthToken()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getNodeAuthToken()).toBe(process.env['NODE_AUTH_TOKEN'])
     })
 
     it('should handle npm registry auth token', () => {

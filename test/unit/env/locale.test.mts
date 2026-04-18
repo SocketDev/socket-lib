@@ -6,13 +6,16 @@
  * Uses rewire for test isolation. Critical for internationalization and character encoding.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
 import {
   getLang,
   getLcAll,
   getLcMessages,
 } from '@socketsecurity/lib/env/locale'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/locale', () => {
   afterEach(() => {
@@ -25,11 +28,9 @@ describe('env/locale', () => {
       expect(getLang()).toBe('en_US.UTF-8')
     })
 
-    it('should return undefined when LANG is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('LANG')
-      // After clearing override, falls back to actual process.env
-      const result = getLang()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getLang()).toBe(process.env['LANG'])
     })
 
     it('should handle various locale formats', () => {
@@ -68,11 +69,9 @@ describe('env/locale', () => {
       expect(getLcAll()).toBe('en_US.UTF-8')
     })
 
-    it('should return undefined when LC_ALL is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('LC_ALL')
-      // After clearing override, falls back to actual process.env
-      const result = getLcAll()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getLcAll()).toBe(process.env['LC_ALL'])
     })
 
     it('should handle various locale formats', () => {
@@ -110,11 +109,9 @@ describe('env/locale', () => {
       expect(getLcMessages()).toBe('en_US.UTF-8')
     })
 
-    it('should return undefined when LC_MESSAGES is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('LC_MESSAGES')
-      // After clearing override, falls back to actual process.env
-      const result = getLcMessages()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getLcMessages()).toBe(process.env['LC_MESSAGES'])
     })
 
     it('should handle various locale formats', () => {
@@ -167,9 +164,7 @@ describe('env/locale', () => {
       clearEnv('LC_ALL')
 
       expect(getLang()).toBe('en_US.UTF-8')
-      // After clearing override, falls back to actual process.env
-      const result = getLcAll()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getLcAll()).toBe(process.env['LC_ALL'])
       expect(getLcMessages()).toBe('de_DE.UTF-8')
     })
 
@@ -180,11 +175,10 @@ describe('env/locale', () => {
 
       resetEnv()
 
-      // After reset, values depend on actual process.env
-      // Just verify functions still work
-      expect(typeof getLang()).toMatch(/string|undefined/)
-      expect(typeof getLcAll()).toMatch(/string|undefined/)
-      expect(typeof getLcMessages()).toMatch(/string|undefined/)
+      // After reset, values track actual process.env
+      expect(getLang()).toBe(process.env['LANG'])
+      expect(getLcAll()).toBe(process.env['LC_ALL'])
+      expect(getLcMessages()).toBe(process.env['LC_MESSAGES'])
     })
 
     it('should handle updating locale values', () => {
@@ -218,16 +212,13 @@ describe('env/locale', () => {
     it('should handle multiple clearing and setting', () => {
       setEnv('LANG', 'en_US.UTF-8')
       clearEnv('LANG')
-      // After clearing override, falls back to actual process.env
-      let result = getLang()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getLang()).toBe(process.env['LANG'])
 
       setEnv('LANG', 'fr_FR.UTF-8')
       expect(getLang()).toBe('fr_FR.UTF-8')
 
       clearEnv('LANG')
-      result = getLang()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getLang()).toBe(process.env['LANG'])
     })
 
     it('should handle all three variables being unset', () => {
@@ -235,10 +226,10 @@ describe('env/locale', () => {
       clearEnv('LC_ALL')
       clearEnv('LC_MESSAGES')
 
-      // After clearing overrides, fall back to actual process.env
-      expect(typeof getLang()).toMatch(/string|undefined/)
-      expect(typeof getLcAll()).toMatch(/string|undefined/)
-      expect(typeof getLcMessages()).toMatch(/string|undefined/)
+      // After clearing overrides, all three fall back to process.env.
+      expect(getLang()).toBe(process.env['LANG'])
+      expect(getLcAll()).toBe(process.env['LC_ALL'])
+      expect(getLcMessages()).toBe(process.env['LC_MESSAGES'])
     })
 
     it('should handle consecutive reads', () => {

@@ -6,9 +6,12 @@
  * Uses rewire for test isolation. Critical for environment-specific behavior.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/node-env', () => {
   afterEach(() => {
@@ -21,11 +24,9 @@ describe('env/node-env', () => {
       expect(getNodeEnv()).toBe('production')
     })
 
-    it('should return undefined when NODE_ENV is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('NODE_ENV')
-      // After clearing override, falls back to actual process.env
-      const result = getNodeEnv()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getNodeEnv()).toBe(process.env['NODE_ENV'])
     })
 
     it('should handle production environment', () => {
@@ -84,9 +85,7 @@ describe('env/node-env', () => {
       expect(getNodeEnv()).toBe('production')
 
       clearEnv('NODE_ENV')
-      // After clearing override, falls back to actual process.env
-      const result = getNodeEnv()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getNodeEnv()).toBe(process.env['NODE_ENV'])
 
       setEnv('NODE_ENV', 'development')
       expect(getNodeEnv()).toBe('development')

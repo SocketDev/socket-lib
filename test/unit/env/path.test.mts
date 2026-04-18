@@ -6,9 +6,12 @@
  * Uses rewire for test isolation. Critical for executable resolution.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
 import { getPath } from '@socketsecurity/lib/env/path'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/path', () => {
   afterEach(() => {
@@ -21,11 +24,9 @@ describe('env/path', () => {
       expect(getPath()).toBe('/usr/bin:/bin')
     })
 
-    it('should return undefined when PATH is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('PATH')
-      // After clearing override, falls back to actual process.env
-      const result = getPath()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getPath()).toBe(process.env['PATH'])
     })
 
     it('should handle Unix PATH with colon separator', () => {
@@ -109,9 +110,7 @@ describe('env/path', () => {
       expect(getPath()).toBe('/usr/bin:/bin')
 
       clearEnv('PATH')
-      // After clearing override, falls back to actual process.env
-      const result = getPath()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getPath()).toBe(process.env['PATH'])
 
       setEnv('PATH', '/usr/local/bin:/usr/bin')
       expect(getPath()).toBe('/usr/local/bin:/usr/bin')

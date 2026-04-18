@@ -6,9 +6,12 @@
  * Uses rewire for test isolation. Critical for temporary file operations.
  */
 
-import { getTemp, getTmp, getTmpdir } from '@socketsecurity/lib/env/temp-dir'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import process from 'node:process'
+
 import { afterEach, describe, expect, it } from 'vitest'
+
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getTemp, getTmp, getTmpdir } from '@socketsecurity/lib/env/temp-dir'
 
 describe('env/temp-dir', () => {
   afterEach(() => {
@@ -21,11 +24,9 @@ describe('env/temp-dir', () => {
       expect(getTmpdir()).toBe('/tmp')
     })
 
-    it('should return undefined when TMPDIR is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('TMPDIR')
-      // After clearing override, falls back to actual process.env
-      const result = getTmpdir()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getTmpdir()).toBe(process.env['TMPDIR'])
     })
 
     it('should handle macOS default tmpdir', () => {
@@ -91,11 +92,9 @@ describe('env/temp-dir', () => {
       expect(getTemp()).toBe('C:\\Windows\\Temp')
     })
 
-    it('should return undefined when TEMP is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('TEMP')
-      // After clearing override, falls back to actual process.env
-      const result = getTemp()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getTemp()).toBe(process.env['TEMP'])
     })
 
     it('should handle Windows default temp', () => {
@@ -160,11 +159,9 @@ describe('env/temp-dir', () => {
       expect(getTmp()).toBe('C:\\Temp')
     })
 
-    it('should return undefined when TMP is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('TMP')
-      // After clearing override, falls back to actual process.env
-      const result = getTmp()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getTmp()).toBe(process.env['TMP'])
     })
 
     it('should handle Windows TMP', () => {

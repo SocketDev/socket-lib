@@ -50,70 +50,29 @@ describe('Logger - Theme Handling', () => {
       expect(logger).toBeDefined()
     })
 
-    it('should create logger with lush theme', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'lush' })
-      logger.info('Test message')
-      expect(stderrData.join('')).toContain('Test message')
-    })
-
-    it('should create logger with sunset theme', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'sunset' })
-      logger.info('Test message')
-      expect(stderrData.join('')).toContain('Test message')
-    })
-
-    it('should create logger with ultra theme', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'ultra' })
-      logger.info('Test message')
-      expect(stderrData.join('')).toContain('Test message')
-    })
-
-    it('should create logger with terracotta theme', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'terracotta' })
-      logger.info('Test message')
-      expect(stderrData.join('')).toContain('Test message')
-    })
+    it.each(['lush', 'sunset', 'ultra', 'terracotta'] as const)(
+      'should create logger with %s theme and write messages',
+      theme => {
+        const logger = new Logger({ stdout, stderr, theme })
+        logger.info('Test message')
+        expect(stderrData.join('')).toContain('Test message')
+      },
+    )
   })
 
   describe('LOG_SYMBOLS', () => {
-    it('should access LOG_SYMBOLS.success', () => {
-      expect(LOG_SYMBOLS['success']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['success']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.fail', () => {
-      expect(LOG_SYMBOLS['fail']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['fail']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.warn', () => {
-      expect(LOG_SYMBOLS['warn']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['warn']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.info', () => {
-      expect(LOG_SYMBOLS['info']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['info']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.step', () => {
-      expect(LOG_SYMBOLS['step']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['step']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.skip', () => {
-      expect(LOG_SYMBOLS['skip']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['skip']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.progress', () => {
-      expect(LOG_SYMBOLS['progress']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['progress']).toBe('string')
-    })
-
-    it('should access LOG_SYMBOLS.reason', () => {
-      expect(LOG_SYMBOLS['reason']).toBeDefined()
-      expect(typeof LOG_SYMBOLS['reason']).toBe('string')
+    it.each([
+      'success',
+      'fail',
+      'warn',
+      'info',
+      'step',
+      'skip',
+      'progress',
+      'reason',
+    ] as const)('should expose string symbol for %s', key => {
+      expect(LOG_SYMBOLS[key]).toBeDefined()
+      expect(typeof LOG_SYMBOLS[key]).toBe('string')
     })
 
     it('should initialize LOG_SYMBOLS on first access', () => {
@@ -168,40 +127,24 @@ describe('Logger - Theme Handling', () => {
   })
 
   describe('Symbol usage in logging', () => {
-    it('should use themed symbols in success method', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'socket' })
-      logger.success('Success message')
-      const output = stderrData.join('')
-      expect(output).toContain('Success message')
-    })
-
-    it('should use themed symbols in fail method', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'socket' })
-      logger.fail('Fail message')
-      const output = stderrData.join('')
-      expect(output).toContain('Fail message')
-    })
-
-    it('should use themed symbols in warn method', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'socket' })
-      logger.warn('Warn message')
-      const output = stderrData.join('')
-      expect(output).toContain('Warn message')
-    })
-
-    it('should use themed symbols in info method', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'socket' })
-      logger.info('Info message')
-      const output = stderrData.join('')
-      expect(output).toContain('Info message')
-    })
-
-    it('should use themed symbols in step method', () => {
-      const logger = new Logger({ stdout, stderr, theme: 'socket' })
-      logger.step('Step message')
-      const output = stdoutData.join('')
-      expect(output).toContain('Step message')
-    })
+    it.each([
+      { method: 'success', stream: 'stderr' },
+      { method: 'fail', stream: 'stderr' },
+      { method: 'warn', stream: 'stderr' },
+      { method: 'info', stream: 'stderr' },
+      { method: 'step', stream: 'stdout' },
+    ] as const)(
+      'should write themed $method output to $stream',
+      ({ method, stream }) => {
+        const logger = new Logger({ stdout, stderr, theme: 'socket' })
+        const message = `${method} message`
+        ;(logger as unknown as Record<string, (msg: string) => void>)[method]!(
+          message,
+        )
+        const output = (stream === 'stderr' ? stderrData : stdoutData).join('')
+        expect(output).toContain(message)
+      },
+    )
   })
 
   describe('Stream-specific loggers', () => {

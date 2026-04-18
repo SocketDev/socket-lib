@@ -7,9 +7,12 @@
  * testing. Critical for resolving user-specific paths cross-platform.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
 import { getHome } from '@socketsecurity/lib/env/home'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/home', () => {
   afterEach(() => {
@@ -22,11 +25,10 @@ describe('env/home', () => {
       expect(getHome()).toBe('/Users/testuser')
     })
 
-    it('should return undefined when HOME is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('HOME')
-      // After clearing override, falls back to actual process.env
-      const result = getHome()
-      expect(typeof result).toMatch(/string|undefined/)
+      // getHome() falls back to HOME ?? USERPROFILE from process.env
+      expect(getHome()).toBe(process.env['HOME'] ?? process.env['USERPROFILE'])
     })
 
     it('should handle Unix home directory', () => {
@@ -100,9 +102,7 @@ describe('env/home', () => {
       expect(getHome()).toBe('/home/user')
 
       clearEnv('HOME')
-      // After clearing override, falls back to actual process.env
-      const result = getHome()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getHome()).toBe(process.env['HOME'] ?? process.env['USERPROFILE'])
 
       setEnv('HOME', '/Users/newuser')
       expect(getHome()).toBe('/Users/newuser')

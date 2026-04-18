@@ -8,13 +8,16 @@
  * Uses rewire for test isolation. Linux/Unix standard for user directory organization.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import {
   getXdgCacheHome,
   getXdgConfigHome,
   getXdgDataHome,
 } from '@socketsecurity/lib/env/xdg'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/xdg', () => {
   afterEach(() => {
@@ -27,11 +30,9 @@ describe('env/xdg', () => {
       expect(getXdgCacheHome()).toBe('/home/user/.cache')
     })
 
-    it('should return undefined when XDG_CACHE_HOME is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('XDG_CACHE_HOME')
-      // After clearing override, falls back to actual process.env
-      const result = getXdgCacheHome()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getXdgCacheHome()).toBe(process.env['XDG_CACHE_HOME'])
     })
 
     it('should handle default cache location', () => {
@@ -91,11 +92,9 @@ describe('env/xdg', () => {
       expect(getXdgConfigHome()).toBe('/home/user/.config')
     })
 
-    it('should return undefined when XDG_CONFIG_HOME is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('XDG_CONFIG_HOME')
-      // After clearing override, falls back to actual process.env
-      const result = getXdgConfigHome()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getXdgConfigHome()).toBe(process.env['XDG_CONFIG_HOME'])
     })
 
     it('should handle default config location', () => {
@@ -160,11 +159,9 @@ describe('env/xdg', () => {
       expect(getXdgDataHome()).toBe('/home/user/.local/share')
     })
 
-    it('should return undefined when XDG_DATA_HOME is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('XDG_DATA_HOME')
-      // After clearing override, falls back to actual process.env
-      const result = getXdgDataHome()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getXdgDataHome()).toBe(process.env['XDG_DATA_HOME'])
     })
 
     it('should handle default data location', () => {

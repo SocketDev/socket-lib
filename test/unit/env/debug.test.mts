@@ -7,9 +7,12 @@
  * DEBUG patterns follow the debug module convention for selective debug output.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
 import { getDebug } from '@socketsecurity/lib/env/debug'
 import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/debug', () => {
   afterEach(() => {
@@ -22,11 +25,9 @@ describe('env/debug', () => {
       expect(getDebug()).toBe('*')
     })
 
-    it('should return undefined when DEBUG is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('DEBUG')
-      // After clearing override, falls back to actual process.env
-      const result = getDebug()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getDebug()).toBe(process.env['DEBUG'])
     })
 
     it('should handle wildcard debug pattern', () => {
@@ -85,9 +86,7 @@ describe('env/debug', () => {
       expect(getDebug()).toBe('*')
 
       clearEnv('DEBUG')
-      // After clearing override, falls back to actual process.env
-      const result = getDebug()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getDebug()).toBe(process.env['DEBUG'])
 
       setEnv('DEBUG', 'app:*')
       expect(getDebug()).toBe('app:*')

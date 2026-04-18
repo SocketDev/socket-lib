@@ -6,9 +6,12 @@
  * Uses rewire for test isolation. Critical for ANSI color and formatting support.
  */
 
-import { getTerm } from '@socketsecurity/lib/env/term'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import process from 'node:process'
+
 import { afterEach, describe, expect, it } from 'vitest'
+
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getTerm } from '@socketsecurity/lib/env/term'
 
 describe('env/term', () => {
   afterEach(() => {
@@ -21,11 +24,9 @@ describe('env/term', () => {
       expect(getTerm()).toBe('xterm-256color')
     })
 
-    it('should return undefined when TERM is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('TERM')
-      // After clearing override, falls back to actual process.env
-      const result = getTerm()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getTerm()).toBe(process.env['TERM'])
     })
 
     it('should handle xterm terminal', () => {
@@ -134,9 +135,7 @@ describe('env/term', () => {
       expect(getTerm()).toBe('xterm')
 
       clearEnv('TERM')
-      // After clearing override, falls back to actual process.env
-      const result = getTerm()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getTerm()).toBe(process.env['TERM'])
 
       setEnv('TERM', 'screen')
       expect(getTerm()).toBe('screen')

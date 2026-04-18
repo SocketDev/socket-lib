@@ -179,9 +179,7 @@ describe('bin', () => {
 
     it('should return single path when all is false', async () => {
       const result = await whichReal('node', { all: false })
-      if (result) {
-        expect(typeof result).toBe('string')
-      }
+      expect(typeof result).toBe('string')
     })
 
     it('should handle empty binary name', async () => {
@@ -572,9 +570,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
     it('should find node binary', () => {
       const result = findRealBin('node')
       expect(result).toBeDefined()
-      if (result) {
-        expect(result).toContain('node')
-      }
+      expect(result).toContain('node')
     })
 
     it('should return undefined for non-existent binary', () => {
@@ -594,11 +590,9 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
 
     it('should skip shadow bins', async () => {
       await runWithTempDir(async _tmpDir => {
-        // This test verifies the behavior but may not find an actual shadow bin
         const result = findRealBin('node', [])
-        if (result) {
-          expect(isShadowBinPath(path.dirname(result))).toBe(false)
-        }
+        expect(result).toBeDefined()
+        expect(isShadowBinPath(path.dirname(result!))).toBe(false)
       }, 'findRealBin-shadow-')
     })
 
@@ -660,8 +654,10 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
       expect(typeof result).toBe('string')
     })
 
-    it('should return path containing pnpm if found', () => {
+    it('should return path containing pnpm when found', () => {
       const result = findRealPnpm()
+      expect(typeof result).toBe('string')
+      // When found (non-empty), must include 'pnpm' in the path.
       if (result) {
         expect(result).toContain('pnpm')
       }
@@ -680,8 +676,9 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
       expect(typeof result).toBe('string')
     })
 
-    it('should return path containing yarn if found', () => {
+    it('should return path containing yarn when found', () => {
       const result = findRealYarn()
+      expect(typeof result).toBe('string')
       if (result) {
         expect(result).toContain('yarn')
       }
@@ -1121,15 +1118,9 @@ node "%NPX_CLI_JS%" %*\r
 
   describe('findRealBin - shadow bin detection', () => {
     it('should prefer non-shadow bin paths', async () => {
-      // This test verifies that if we have multiple binaries,
-      // we prefer the one that's not in node_modules/.bin
       const result = findRealBin('node', [])
-      if (result) {
-        const dirName = path.dirname(result)
-        // If we found a bin, it should preferably not be a shadow bin
-        // However, we can't guarantee this on all systems
-        expect(typeof isShadowBinPath(dirName)).toBe('boolean')
-      }
+      expect(result).toBeDefined()
+      expect(isShadowBinPath(path.dirname(result!))).toBe(false)
     })
 
     it('should handle when all paths are shadow bins', () => {
@@ -1229,33 +1220,25 @@ echo "test"
     })
 
     it('should fall back to which when common paths not found', () => {
-      // Use node which should be available in PATH
       const result = findRealBin('node', [
         '/nonexistent/path1',
         '/nonexistent/path2',
       ])
       expect(result).toBeDefined()
-      if (result) {
-        expect(result).toContain('node')
-      }
+      expect(result).toContain('node')
     })
 
     it('should detect and skip shadow bin paths', async () => {
       await runWithTempDir(async tmpDir => {
-        // This tests the shadow bin detection logic
         const shadowPath = path.join(tmpDir, 'node_modules/.bin')
         await fs.mkdir(shadowPath, { recursive: true })
 
         const binPath = path.join(shadowPath, 'test-bin')
         await fs.writeFile(binPath, '#!/bin/sh\necho "test"', 'utf8')
 
-        // findRealBin should try to find alternates when it detects shadow paths
-        const result = findRealBin('node', []) // Use node which exists
-        if (result) {
-          // The result should ideally not be in a shadow bin path
-          // but we can't guarantee it, so just verify it returns something
-          expect(result).toBeDefined()
-        }
+        const result = findRealBin('node', [])
+        expect(result).toBeDefined()
+        expect(isShadowBinPath(path.dirname(result!))).toBe(false)
       }, 'findRealBin-shadow-detection-')
     })
   })

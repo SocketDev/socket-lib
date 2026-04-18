@@ -6,6 +6,11 @@
  * Uses rewire for test isolation. Enables shadow mode for Socket CLI operations.
  */
 
+import process from 'node:process'
+
+import { afterEach, describe, expect, it } from 'vitest'
+
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import {
   getSocketCliShadowAcceptRisks,
   getSocketCliShadowApiToken,
@@ -13,8 +18,6 @@ import {
   getSocketCliShadowProgress,
   getSocketCliShadowSilent,
 } from '@socketsecurity/lib/env/socket-cli-shadow'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/socket-cli-shadow', () => {
   afterEach(() => {
@@ -71,10 +74,11 @@ describe('env/socket-cli-shadow', () => {
       expect(getSocketCliShadowApiToken()).toBe('test-token-123')
     })
 
-    it('should return undefined when SOCKET_CLI_SHADOW_API_TOKEN is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('SOCKET_CLI_SHADOW_API_TOKEN')
-      const result = getSocketCliShadowApiToken()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getSocketCliShadowApiToken()).toBe(
+        process.env['SOCKET_CLI_SHADOW_API_TOKEN'],
+      )
     })
 
     it('should handle Socket API token', () => {
@@ -120,10 +124,9 @@ describe('env/socket-cli-shadow', () => {
       expect(getSocketCliShadowBin()).toBe('/usr/local/bin/socket')
     })
 
-    it('should return undefined when SOCKET_CLI_SHADOW_BIN is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('SOCKET_CLI_SHADOW_BIN')
-      const result = getSocketCliShadowBin()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getSocketCliShadowBin()).toBe(process.env['SOCKET_CLI_SHADOW_BIN'])
     })
 
     it('should handle Unix binary path', () => {

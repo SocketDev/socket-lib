@@ -381,9 +381,9 @@ describe.sequential('dlx-binary', () => {
         try {
           const url = `${httpBaseUrl}/binary`
 
-          // Set very short TTL
+          // Set short TTL with generous headroom to avoid CI timing flakes.
           const result = await dlxBinary(['--version'], {
-            cacheTtl: 100, // 100ms
+            cacheTtl: 500,
             name: 'ttl-binary',
             url,
           })
@@ -392,12 +392,12 @@ describe.sequential('dlx-binary', () => {
 
           expect(result.downloaded).toBe(true)
 
-          // Wait for cache to expire
-          await new Promise(resolve => setTimeout(resolve, 150))
+          // Wait for cache to expire.
+          await new Promise(resolve => setTimeout(resolve, 700))
 
-          // Should re-download due to expired cache
+          // Should re-download due to expired cache.
           const result2 = await dlxBinary(['--version'], {
-            cacheTtl: 100,
+            cacheTtl: 500,
             name: 'ttl-binary',
             url,
           })
@@ -614,19 +614,19 @@ describe.sequential('dlx-binary', () => {
         try {
           const url = `${httpBaseUrl}/binary`
 
-          // Download binary with short TTL
+          // Download binary with short TTL; give timing generous headroom.
           const result = await dlxBinary(['--version'], {
-            cacheTtl: 100,
+            cacheTtl: 500,
             name: 'clean-binary',
             url,
           })
           await result.spawnPromise.catch(() => {})
 
-          // Wait for cache to expire
-          await new Promise(resolve => setTimeout(resolve, 150))
+          // Wait for cache to expire.
+          await new Promise(resolve => setTimeout(resolve, 700))
 
-          // Clean expired entries
-          const cleaned = await cleanDlxCache(100)
+          // Clean expired entries.
+          const cleaned = await cleanDlxCache(500)
           expect(cleaned).toBeGreaterThan(0)
         } finally {
           restoreHome()

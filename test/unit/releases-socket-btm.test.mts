@@ -142,29 +142,8 @@ describe('releases/socket-btm', () => {
   })
 
   describe('downloadSocketBtmRelease', () => {
-    it('should accept tool as first parameter and options as second parameter', () => {
-      // Type checking test - verifies new signature compiles correctly
+    it('is an exported function', () => {
       expect(typeof downloadSocketBtmRelease).toBe('function')
-
-      // Verify the function accepts the correct signature
-      // (actual download tests would require mocking GitHub API)
-      const tool = 'lief'
-      const options = {
-        downloadDir: 'build/downloaded',
-        quiet: true,
-      }
-
-      // This verifies TypeScript accepts the new signature
-      expect(() => downloadSocketBtmRelease(tool, options)).toBeDefined()
-      expect(() => downloadSocketBtmRelease(tool, undefined)).toBeDefined()
-    })
-
-    it('should accept undefined options parameter', () => {
-      // Verify options is truly optional
-      const tool = 'curl'
-
-      // TypeScript should allow calling with just tool parameter
-      expect(() => downloadSocketBtmRelease(tool, undefined)).toBeDefined()
     })
   })
 })

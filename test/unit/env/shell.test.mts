@@ -6,9 +6,12 @@
  * Uses rewire for test isolation. Used for shell-specific behavior and command execution.
  */
 
-import { getShell } from '@socketsecurity/lib/env/shell'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import process from 'node:process'
+
 import { afterEach, describe, expect, it } from 'vitest'
+
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getShell } from '@socketsecurity/lib/env/shell'
 
 describe('env/shell', () => {
   afterEach(() => {
@@ -21,11 +24,9 @@ describe('env/shell', () => {
       expect(getShell()).toBe('/bin/bash')
     })
 
-    it('should return undefined when SHELL is not set', () => {
+    it('should fall back to process.env when override is cleared', () => {
       clearEnv('SHELL')
-      // After clearing override, falls back to actual process.env
-      const result = getShell()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getShell()).toBe(process.env['SHELL'])
     })
 
     it('should handle bash shell path', () => {
@@ -111,9 +112,7 @@ describe('env/shell', () => {
       expect(getShell()).toBe('/bin/bash')
 
       clearEnv('SHELL')
-      // After clearing override, falls back to actual process.env
-      const result = getShell()
-      expect(typeof result).toMatch(/string|undefined/)
+      expect(getShell()).toBe(process.env['SHELL'])
 
       setEnv('SHELL', '/bin/zsh')
       expect(getShell()).toBe('/bin/zsh')
