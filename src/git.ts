@@ -158,6 +158,25 @@ function getCachedGitDiff(key: string): string[] | undefined {
 }
 
 /**
+ * Build a stable cache key that is insensitive to object-property insertion
+ * order, so callers passing the same options with different shapes hit the
+ * same cache slot.
+ * @private
+ */
+function stableKey(value: unknown): string {
+  return JSON.stringify(value, (_key, val) => {
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      const sorted: Record<string, unknown> = {}
+      for (const k of Object.keys(val as object).sort()) {
+        sorted[k] = (val as Record<string, unknown>)[k]
+      }
+      return sorted
+    }
+    return val
+  })
+}
+
+/**
  * Get the real path with caching to avoid repeated filesystem calls.
  * Validates cache with existsSync() which is cheaper than realpathSync().
  *
@@ -323,7 +342,7 @@ async function innerDiff(
   options?: GitDiffOptions | undefined,
 ): Promise<string[]> {
   const { cache = true, ...parseOptions } = { __proto__: null, ...options }
-  const cacheKey = cache ? JSON.stringify({ args, parseOptions }) : undefined
+  const cacheKey = cache ? stableKey({ args, parseOptions }) : undefined
   if (cache && cacheKey) {
     const result = getCachedGitDiff(cacheKey)
     if (result) {
@@ -377,7 +396,7 @@ function innerDiffSync(
   options?: GitDiffOptions | undefined,
 ): string[] {
   const { cache = true, ...parseOptions } = { __proto__: null, ...options }
-  const cacheKey = cache ? JSON.stringify({ args, parseOptions }) : undefined
+  const cacheKey = cache ? stableKey({ args, parseOptions }) : undefined
   if (cache && cacheKey) {
     const result = getCachedGitDiff(cacheKey)
     if (result) {

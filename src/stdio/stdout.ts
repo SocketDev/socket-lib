@@ -74,7 +74,12 @@ export function cursorTo(x: number, y?: number | undefined): void {
  * // Even if process crashes, cursor will be restored
  * ```
  */
+let _cursorExitRegistered = false
 export function ensureCursorOnExit(): void {
+  if (_cursorExitRegistered) {
+    return
+  }
+  _cursorExitRegistered = true
   process.on('exit', showCursor)
   process.on('SIGINT', () => {
     showCursor()

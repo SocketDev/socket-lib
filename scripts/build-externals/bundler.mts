@@ -2,7 +2,7 @@
  * @fileoverview Package bundling logic using esbuild.
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -50,15 +50,14 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
       'external',
       `${packageName}.js`,
     )
-    try {
-      await fs.access(srcExternalPath)
+    if (existsSync(srcExternalPath)) {
       packagePath = srcExternalPath
       if (!quiet) {
         logger.log(
           `  Using entry point ${path.relative(rootDir, srcExternalPath)}`,
         )
       }
-    } catch {
+    } else {
       // No src/external file, check for local workspace/sibling versions (dev mode).
       const localPath = await getLocalPackagePath(packageName, rootDir)
       if (localPath) {

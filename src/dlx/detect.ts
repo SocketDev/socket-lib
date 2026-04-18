@@ -28,8 +28,13 @@ const NODE_JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs'] as const)
 // Cache for package.json path lookups to avoid repeated directory traversal.
 const packageJsonPathCache = new Map<string, string | null>()
 
-// Cache for parsed package.json content to avoid repeated file reads.
-const packageJsonContentCache = new Map<string, object | null>()
+// Cache for parsed package.json content keyed by path + mtime so stale
+// content is not served if the file is modified or replaced.
+type PackageJsonCacheEntry = {
+  mtimeMs: number
+  content: object | null
+}
+const packageJsonContentCache = new Map<string, PackageJsonCacheEntry>()
 
 export type ExecutableType = 'package' | 'binary' | 'unknown'
 
@@ -122,18 +127,25 @@ function getPath() {
 function readPackageJson(packageJsonPath: string): object | null {
   const fs = getFs()
 
-  // Check cache first.
+  let mtimeMs = 0
+  try {
+    mtimeMs = fs.statSync(packageJsonPath).mtimeMs
+  } catch {
+    packageJsonContentCache.delete(packageJsonPath)
+    return null
+  }
+
   const cached = packageJsonContentCache.get(packageJsonPath)
-  if (cached !== undefined) {
-    return cached
+  if (cached !== undefined && cached.mtimeMs === mtimeMs) {
+    return cached.content
   }
 
   try {
     const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-    packageJsonContentCache.set(packageJsonPath, content)
+    packageJsonContentCache.set(packageJsonPath, { mtimeMs, content })
     return content
   } catch {
-    packageJsonContentCache.set(packageJsonPath, null)
+    packageJsonContentCache.set(packageJsonPath, { mtimeMs, content: null })
     return null
   }
 }

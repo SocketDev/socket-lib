@@ -1,6 +1,6 @@
 /** @fileoverview Package management utilities for DLX installations. */
 
-import { readDirNamesSync, safeDelete } from '../fs'
+import { readDirNamesSync, safeDelete, safeDeleteSync } from '../fs'
 import { getSocketDlxDir } from '../paths/socket'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 
@@ -128,10 +128,9 @@ export async function removeDlxPackage(packageName: string): Promise<void> {
  * ```
  */
 export function removeDlxPackageSync(packageName: string): void {
-  const fs = getFs()
   const packageDir = getDlxPackageDir(packageName)
   try {
-    fs.rmSync(packageDir, { recursive: true, force: true })
+    safeDeleteSync(packageDir, { recursive: true, force: true })
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {

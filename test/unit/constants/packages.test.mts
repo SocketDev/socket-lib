@@ -384,9 +384,9 @@ describe('constants/packages', () => {
       expect(PACKAGE_DEFAULT_VERSION).toMatch(/^\d+\.\d+\.\d+$/)
     })
 
-    it('getPackumentCache should return Map type', () => {
+    it('getPackumentCache should return a Map instance', () => {
       const cache = getPackumentCache()
-      expect(cache.constructor.name).toBe('Map')
+      expect(cache).toBeInstanceOf(Map)
     })
   })
 })

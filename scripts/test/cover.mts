@@ -9,6 +9,8 @@ import process from 'node:process'
 
 import { spawn } from '@socketsecurity/lib-stable/spawn'
 
+const WIN32 = process.platform === 'win32'
+
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../..',
@@ -33,6 +35,7 @@ const result = await spawn(
   ],
   {
     cwd: rootPath,
+    shell: WIN32,
     stdio: 'inherit',
     env: { ...process.env, COVERAGE: 'true' },
   },

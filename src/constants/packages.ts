@@ -68,12 +68,38 @@ export function getPackageExtensions(): Iterable<[string, unknown]> {
   return _packageExtensions
 }
 
+const PACKUMENT_CACHE_MAX = 500
+
+class BoundedPackumentCache extends Map<string, unknown> {
+  override set(key: string, value: unknown): this {
+    if (this.has(key)) {
+      this.delete(key)
+    } else if (this.size >= PACKUMENT_CACHE_MAX) {
+      const oldest = this.keys().next().value
+      if (oldest !== undefined) {
+        this.delete(oldest)
+      }
+    }
+    return super.set(key, value)
+  }
+}
+
 /*@__NO_SIDE_EFFECTS__*/
 export function getPackumentCache(): Map<string, unknown> {
   if (_packumentCache === undefined) {
-    _packumentCache = new Map()
+    _packumentCache = new BoundedPackumentCache()
   }
   return _packumentCache
+}
+
+/**
+ * Clear the packument cache. Useful for long-running processes that want to
+ * force a re-fetch of registry metadata.
+ */
+export function clearPackumentCache(): void {
+  if (_packumentCache !== undefined) {
+    _packumentCache.clear()
+  }
 }
 
 /*@__NO_SIDE_EFFECTS__*/

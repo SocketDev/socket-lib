@@ -38,6 +38,32 @@ type CacheEntry<T> = {
 }
 
 /**
+ * Default cache key generator that disambiguates `undefined`, `BigInt`, and
+ * `Map`/`Set` arguments (which `JSON.stringify` drops or collapses).
+ * @private
+ */
+function defaultKeyGen(args: readonly unknown[]): string {
+  return JSON.stringify(args, (_key, value) => {
+    if (value === undefined) {
+      return '\0undefined'
+    }
+    if (typeof value === 'bigint') {
+      return `\0bigint:${value.toString()}`
+    }
+    if (typeof value === 'function') {
+      return `\0fn:${value.name || 'anonymous'}`
+    }
+    if (value instanceof Map) {
+      return { __tag: 'Map', entries: Array.from(value.entries()) }
+    }
+    if (value instanceof Set) {
+      return { __tag: 'Set', values: Array.from(value.values()) }
+    }
+    return value
+  })
+}
+
+/**
  * Clear all memoization caches.
  * Useful for testing or when you need to force recomputation.
  *
@@ -114,7 +140,7 @@ export function memoize<Args extends unknown[], Result>(
   options: MemoizeOptions<Args, Result> = {},
 ): (...args: Args) => Result {
   const {
-    keyGen = (...args) => JSON.stringify(args),
+    keyGen = (...args) => defaultKeyGen(args),
     maxSize = Number.POSITIVE_INFINITY,
     name = fn.name || 'anonymous',
     ttl = Number.POSITIVE_INFINITY,
@@ -221,7 +247,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
   options: MemoizeOptions<Args, Result> = {},
 ): (...args: Args) => Promise<Result> {
   const {
-    keyGen = (...args) => JSON.stringify(args),
+    keyGen = (...args) => defaultKeyGen(args),
     maxSize = Number.POSITIVE_INFINITY,
     name = fn.name || 'anonymous',
     ttl = Number.POSITIVE_INFINITY,
@@ -257,7 +283,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
   }
 
   // Track in-flight refreshes to prevent thundering herd on TTL expiry.
-  const refreshing = new Set<string>()
+  const refreshing = new Map<string, Promise<Result>>()
 
   return async function memoized(...args: Args): Promise<Result> {
     const key = keyGen(...args)
@@ -277,10 +303,12 @@ export function memoizeAsync<Args extends unknown[], Result>(
         debugLog(`[memoizeAsync:${name}] hit`, { key, hits: cached.hits })
         return await cached.value
       }
-      // Expired but another caller is already refreshing — return stale.
-      if (refreshing.has(key)) {
+      // Expired but another caller is already refreshing — await the
+      // in-flight refresh so stale callers see the fresh value.
+      const inflight = refreshing.get(key)
+      if (inflight) {
         debugLog(`[memoizeAsync:${name}] stale-dedup`, { key })
-        return await cached.value
+        return await inflight
       }
       // Clean up expired entry before re-caching.
       cache.delete(key)
@@ -292,7 +320,6 @@ export function memoizeAsync<Args extends unknown[], Result>(
 
     // Cache miss - compute value
     debugLog(`[memoizeAsync:${name}] miss`, { key })
-    refreshing.add(key)
 
     // Create promise and cache it immediately (for deduplication)
     const promise = fn(...args).then(
@@ -317,6 +344,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
         throw error
       },
     )
+    refreshing.set(key, promise)
 
     // Store promise in cache
     evictLRU()

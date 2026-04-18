@@ -801,8 +801,15 @@ async function httpDownloadAttempt(
     let downloadedSize = 0
     const fileStream = createWriteStream(destPath)
 
+    const cleanupPartial = () => {
+      getFs()
+        .promises.unlink(destPath)
+        .catch(() => {})
+    }
+
     fileStream.on('error', (error: Error) => {
-      fileStream.close()
+      fileStream.destroy()
+      cleanupPartial()
       reject(
         new Error(`Failed to write file: ${error.message}`, { cause: error }),
       )
@@ -829,7 +836,8 @@ async function httpDownloadAttempt(
     })
 
     res.on('error', (error: Error) => {
-      fileStream.close()
+      fileStream.destroy()
+      cleanupPartial()
       reject(error)
     })
 
@@ -983,6 +991,26 @@ async function httpRequestAttempt(
             return
           }
 
+          // Strip auth/session headers on cross-origin redirects to prevent
+          // leaking credentials to third-party hosts (e.g., GitHub -> S3).
+          let redirectHeaders = headers
+          if (new URL(url).origin !== redirectParsed.origin) {
+            redirectHeaders = { __proto__: null } as unknown as typeof headers
+            const stripped = new Set([
+              'authorization',
+              'cookie',
+              'proxy-authorization',
+              'proxy-authenticate',
+            ])
+            for (const key of Object.keys(headers)) {
+              if (!stripped.has(key.toLowerCase())) {
+                ;(redirectHeaders as Record<string, unknown>)[key] = (
+                  headers as Record<string, unknown>
+                )[key]
+              }
+            }
+          }
+
           // Redirect chaining — Promise adoption handles the inner result.
           settled = true
           resolve(
@@ -990,7 +1018,7 @@ async function httpRequestAttempt(
               body,
               ca,
               followRedirects,
-              headers,
+              headers: redirectHeaders,
               hooks,
               maxRedirects: maxRedirects - 1,
               maxResponseSize,

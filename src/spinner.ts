@@ -308,8 +308,11 @@ function normalizeText(value: unknown) {
  * @private
  */
 function renderProgressBar(percentage: number, width: number = 20): string {
-  const filled = Math.round((percentage / 100) * width)
-  const empty = width - filled
+  const filled = Math.max(
+    0,
+    Math.min(width, Math.round((percentage / 100) * width)),
+  )
+  const empty = Math.max(0, width - filled)
   const bar = '█'.repeat(filled) + '░'.repeat(empty)
   // Use cyan color for the progress bar
   // colors is imported at the top

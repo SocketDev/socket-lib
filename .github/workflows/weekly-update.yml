@@ -125,14 +125,14 @@ jobs:
         run: |
           set +e
           pnpm run build 2>&1 | tee build-output.log
-          BUILD_EXIT=$?
+          BUILD_EXIT=${PIPESTATUS[0]}
           if [ "$BUILD_EXIT" -ne 0 ]; then
             echo "tests-passed=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           pnpm test 2>&1 | tee test-output.log
-          TEST_EXIT=$?
+          TEST_EXIT=${PIPESTATUS[0]}
           set -e
 
           if [ "$TEST_EXIT" -eq 0 ]; then
@@ -161,6 +161,21 @@ jobs:
             FAILURE_LOG+="$(tail -100 test-output.log)"$'\n'
           fi
 
+          # Write prompt to file to avoid shell expansion of FAILURE_LOG.
+          PROMPT_FILE=$(mktemp)
+          {
+            printf '%s\n' 'Build or tests failed after dependency updates. Fix them.'
+            printf '\n<failure_output>\n'
+            printf '%s' "$FAILURE_LOG"
+            printf '\n</failure_output>\n\n'
+            printf '%s\n' '<instructions>'
+            printf '%s\n' 'Diagnose the failures from the output above.'
+            printf '%s\n' 'Fix the code — do not revert the dependency updates.'
+            printf '%s\n' 'Run the tests again to verify your fix works.'
+            printf '%s\n' 'Create a commit for each fix with a conventional commit message.'
+            printf '%s\n' '</instructions>'
+          } > "$PROMPT_FILE"
+
           set +e
           claude --print \
             --model sonnet \
@@ -169,24 +184,11 @@ jobs:
               "Bash(pnpm:*)" \
               "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git rev-parse:*)" \
               "Read" "Write" "Edit" "Glob" "Grep" \
-            "$(cat <<PROMPT
-          Build or tests failed after dependency updates. Fix them.
-
-          <failure_output>
-          $FAILURE_LOG
-          </failure_output>
-
-          <instructions>
-          Diagnose the failures from the output above.
-          Fix the code — do not revert the dependency updates.
-          Run the tests again to verify your fix works.
-          Create a commit for each fix with a conventional commit message.
-          </instructions>
-          PROMPT
-          )" \
+            "$(cat "$PROMPT_FILE")" \
             2>&1 | tee -a claude-output.log
           CLAUDE_EXIT=${PIPESTATUS[0]}
           set -e
+          rm -f "$PROMPT_FILE"
 
           if [ "$CLAUDE_EXIT" -eq 0 ]; then
             echo "success=true" >> $GITHUB_OUTPUT

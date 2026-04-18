@@ -183,8 +183,11 @@ export class ProgressBar {
     const filledWidth =
       this.total === 0
         ? 0
-        : Math.floor((this.current / this.total) * availableWidth)
-    const emptyWidth = availableWidth - filledWidth
+        : Math.min(
+            availableWidth,
+            Math.floor((this.current / this.total) * availableWidth),
+          )
+    const emptyWidth = Math.max(0, availableWidth - filledWidth)
 
     const filled = repeatString(this.options.complete ?? '█', filledWidth)
     const empty = repeatString(this.options.incomplete ?? '░', emptyWidth)

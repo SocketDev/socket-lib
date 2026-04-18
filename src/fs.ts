@@ -1481,12 +1481,12 @@ export async function safeMkdir(
   try {
     await fs.promises.mkdir(path, opts)
   } catch (e: unknown) {
-    // Ignore EEXIST error - directory already exists.
+    // Ignore EEXIST (directory already exists); re-throw everything else.
     if (
-      typeof e === 'object' &&
-      e !== null &&
-      'code' in e &&
-      e.code !== 'EEXIST'
+      typeof e !== 'object' ||
+      e === null ||
+      !('code' in e) ||
+      (e as NodeJS.ErrnoException).code !== 'EEXIST'
     ) {
       throw e
     }
@@ -1531,12 +1531,12 @@ export function safeMkdirSync(
   try {
     fs.mkdirSync(path, opts)
   } catch (e: unknown) {
-    // Ignore EEXIST error - directory already exists.
+    // Ignore EEXIST (directory already exists); re-throw everything else.
     if (
-      typeof e === 'object' &&
-      e !== null &&
-      'code' in e &&
-      e.code !== 'EEXIST'
+      typeof e !== 'object' ||
+      e === null ||
+      !('code' in e) ||
+      (e as NodeJS.ErrnoException).code !== 'EEXIST'
     ) {
       throw e
     }

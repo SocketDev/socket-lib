@@ -32,7 +32,7 @@ async function validateEsbuildMinify() {
           config: 'buildConfig',
           value: config.buildConfig.minify,
           message: 'buildConfig.minify must be false',
-          location: `${configPath}:242`,
+          location: configPath,
         })
       }
     }
@@ -44,7 +44,7 @@ async function validateEsbuildMinify() {
           config: 'watchConfig',
           value: config.watchConfig.minify,
           message: 'watchConfig.minify must be false',
-          location: `${configPath}:270`,
+          location: configPath,
         })
       }
     }

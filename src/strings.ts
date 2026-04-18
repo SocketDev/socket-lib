@@ -102,10 +102,10 @@ export function applyLinePrefix(
  * // Returns: 'hello-world'
  *
  * camelToKebab('XMLHttpRequest')
- * // Returns: 'xmlhttprequest'
+ * // Returns: 'xmlhttp-request'
  *
  * camelToKebab('iOS')
- * // Returns: 'ios'
+ * // Returns: 'i-os'
  *
  * camelToKebab('')
  * // Returns: ''

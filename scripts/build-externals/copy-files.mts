@@ -2,7 +2,7 @@
  * @fileoverview File copying utilities for external dependencies.
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
@@ -77,19 +77,13 @@ export async function copyRecursive(
     if (entry.isDirectory()) {
       // Recursively copy directory
       count += await copyRecursive(srcEntry, destEntry, relPath, quiet)
-    } else {
-      // Only copy if the file doesn't already exist (i.e., wasn't bundled).
-      try {
-        await fs.access(destEntry)
-        // File exists (was bundled), skip copying.
-      } catch {
-        // File doesn't exist, copy it.
-        await fs.copyFile(srcEntry, destEntry)
-        if (!quiet) {
-          logger.log(`  Copied ${relPath}`)
-        }
-        count++
+    } else if (!existsSync(destEntry)) {
+      // File doesn't exist (wasn't bundled), copy it.
+      await fs.copyFile(srcEntry, destEntry)
+      if (!quiet) {
+        logger.log(`  Copied ${relPath}`)
       }
+      count++
     }
   }
 

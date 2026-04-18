@@ -3,7 +3,7 @@
  * Checks for local workspace or sibling project versions.
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
 /**
@@ -43,11 +43,8 @@ export async function getLocalPackagePath(packageName, rootDir) {
 
   // Return first existing path.
   for (const checkPath of checks) {
-    try {
-      await fs.access(path.join(checkPath, 'package.json'))
+    if (existsSync(path.join(checkPath, 'package.json'))) {
       return checkPath
-    } catch {
-      // Path doesn't exist, continue.
     }
   }
 

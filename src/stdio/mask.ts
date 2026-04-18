@@ -181,20 +181,23 @@ export function attachOutputMask(
 
     // Setup keyboard input handling.
     // Raw mode is required to capture ctrl+o without waiting for Enter.
+    let keypressHandler: ((str: string, key: ReadlineKey) => void) | undefined
     if (process.stdin.isTTY) {
       getReadline().emitKeypressEvents(process.stdin)
       process.stdin.setRawMode(true)
 
-      const keypressHandler = createKeyboardHandler(mask, child, options)
+      keypressHandler = createKeyboardHandler(mask, child, options)
       process.stdin.on('keypress', keypressHandler)
+    }
 
-      // Cleanup on exit: restore terminal to normal mode.
-      child.on('exit', () => {
-        if (process.stdin.isTTY) {
-          process.stdin.setRawMode(false)
+    const cleanupStdin = () => {
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false)
+        if (keypressHandler) {
           process.stdin.removeListener('keypress', keypressHandler)
+          keypressHandler = undefined
         }
-      })
+      }
     }
 
     // Handle stdout: either show immediately or buffer for later.
@@ -252,10 +255,7 @@ export function attachOutputMask(
     }
 
     child.on('exit', code => {
-      // Cleanup keyboard if needed.
-      if (process.stdin.isTTY) {
-        process.stdin.setRawMode(false)
-      }
+      cleanupStdin()
 
       // Allow caller to override exit code based on output.
       let finalCode = code || 0
@@ -289,10 +289,7 @@ export function attachOutputMask(
     })
 
     child.on('error', error => {
-      // Ensure terminal is restored to normal mode on error.
-      if (process.stdin.isTTY) {
-        process.stdin.setRawMode(false)
-      }
+      cleanupStdin()
 
       if (mask.isSpinning) {
         spinner.failAndStop(`${message} error`)

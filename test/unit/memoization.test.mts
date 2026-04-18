@@ -146,11 +146,12 @@ describe('memoization', () => {
       const fn = vi.fn((val: unknown) => String(val))
       const memoized = memoize(fn)
 
+      // null and undefined produce distinct cache keys so each argument
+      // gets its own cached value (prevents stale/cross-contaminated results).
       expect(memoized(null)).toBe('null')
-      // Note: JSON.stringify treats null and undefined the same, so they share cache
-      expect(memoized(undefined)).toBe('null')
+      expect(memoized(undefined)).toBe('undefined')
       expect(memoized(null)).toBe('null')
-      expect(fn).toHaveBeenCalledTimes(1)
+      expect(fn).toHaveBeenCalledTimes(2)
     })
 
     it('should update LRU order on cache hit', () => {
