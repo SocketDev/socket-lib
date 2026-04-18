@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Babel plugin that rewrites `url.parse(x)` calls to `new URL(x)`
+ * in bundled output, eliminating the deprecated legacy API from the build.
+ */
+
 export function transformUrlParse({ types: t }) {
   return {
     name: 'transform-url-parse',

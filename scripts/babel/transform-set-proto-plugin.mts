@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Babel plugin that rewrites `Reflect.setPrototypeOf(A, B)` calls
+ * in bundled output, unwrapping trailing `.prototype` / `.__proto__` access so
+ * the resulting code works with the `--frozen-intrinsics` Node flag.
+ */
+
 // Helper to check if something is a .__proto__ access.
 function isProtoAccess(node, t) {
   return (
