@@ -31,7 +31,7 @@ const logger = getDefaultLogger()
 /**
  * Get all .d.ts files recursively in a directory.
  */
-function getDtsFilesRecursive(dir, files = []) {
+function getDtsFilesRecursive(dir: string, files: string[] = []): string[] {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
 

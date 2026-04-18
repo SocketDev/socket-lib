@@ -22,12 +22,11 @@ const distDir = path.resolve(__dirname, '..', '..', 'dist')
 /**
  * Process files in a directory and fix CommonJS exports.
  * Handles files with `export default` by transforming __toCommonJS patterns.
- *
- * @param {string} dir - Directory to process
- * @param {boolean} verbose - Show individual file fixes
- * @returns {Promise<number>} Number of files fixed
  */
-async function processDirectory(dir, verbose = false) {
+async function processDirectory(
+  dir: string,
+  verbose: boolean = false,
+): Promise<number> {
   let fixedCount = 0
 
   try {

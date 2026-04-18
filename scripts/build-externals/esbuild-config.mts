@@ -143,11 +143,9 @@ function createForceNodeModulesPlugin() {
 
 /**
  * Create esbuild plugin to stub modules using files from stubs/ directory.
- *
- * @param {Record<string, string>} stubMap - Map of regex patterns to stub filenames
- * @returns {import('esbuild').Plugin}
+ * stubMap keys are regex patterns; values are stub filenames.
  */
-function createStubPlugin(stubMap = STUB_MAP) {
+function createStubPlugin(stubMap: Record<string, string> = STUB_MAP) {
   // Pre-compile regex patterns and load stub contents
   const stubs = Object.entries(stubMap).map(([pattern, filename]) => ({
     filter: new RegExp(pattern),
