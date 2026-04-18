@@ -35,8 +35,9 @@ import { Spinner } from '@socketsecurity/lib/spinner'
 const spinner = Spinner({
   text: 'Loading data...',
   color: [140, 82, 255], // Socket purple RGB
-  spinner: 'dots', // Animation style
 })
+// Use a preset animation by name via getSpinner('dots'):
+// const spinner = Spinner({ spinner: getSpinner('dots') })
 ```
 
 **What it does:** Creates an animated CLI spinner with custom text, colors, and animation style.

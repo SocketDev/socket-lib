@@ -4,7 +4,7 @@
  * Tests comprehensive string processing functions:
  * - ANSI handling: ansiRegex(), stripAnsi() for terminal color code processing
  * - Line manipulation: applyLinePrefix(), indentString(), trimNewlines()
- * - Case conversion: camelToKebab(), toKebabCase() with snake_case support
+ * - Case conversion: toKebabCase() with camelCase + snake_case support
  * - Text formatting: centerText(), repeatString()
  * - Width calculation: stringWidth() accounts for CJK characters, emoji, combining marks
  * - Type guards: isBlankString(), isNonEmptyString()
@@ -17,7 +17,6 @@
 import {
   ansiRegex,
   applyLinePrefix,
-  camelToKebab,
   centerText,
   fromCharCode,
   indentString,
@@ -84,36 +83,6 @@ describe('strings', () => {
     it('should apply prefix even to empty string', () => {
       const result = applyLinePrefix('', { prefix: '> ' })
       expect(result).toBe('> ')
-    })
-  })
-
-  describe('camelToKebab', () => {
-    it('should convert simple camelCase', () => {
-      expect(camelToKebab('camelCase')).toBe('camel-case')
-      expect(camelToKebab('myVariableName')).toBe('my-variable-name')
-    })
-
-    it('should handle consecutive uppercase letters', () => {
-      expect(camelToKebab('HTTPServer')).toBe('httpserver')
-      expect(camelToKebab('XMLParser')).toBe('xmlparser')
-    })
-
-    it('should handle already lowercase', () => {
-      expect(camelToKebab('lowercase')).toBe('lowercase')
-    })
-
-    it('should handle empty string', () => {
-      expect(camelToKebab('')).toBe('')
-    })
-
-    it('should handle single letter', () => {
-      expect(camelToKebab('A')).toBe('a')
-      expect(camelToKebab('a')).toBe('a')
-    })
-
-    it('should handle numbers', () => {
-      expect(camelToKebab('version2')).toBe('version2')
-      expect(camelToKebab('http2Server')).toBe('http2-server')
     })
   })
 
@@ -476,26 +445,6 @@ describe('strings', () => {
       })
     })
 
-    describe('camelToKebab edge cases', () => {
-      it('should handle strings with numbers in middle', () => {
-        expect(camelToKebab('http2Server')).toBe('http2-server')
-        expect(camelToKebab('base64Encode')).toBe('base64-encode')
-      })
-
-      it('should handle single uppercase letter', () => {
-        expect(camelToKebab('A')).toBe('a')
-        expect(camelToKebab('I')).toBe('i')
-      })
-
-      it('should handle all uppercase', () => {
-        expect(camelToKebab('ALLCAPS')).toBe('allcaps')
-      })
-
-      it('should handle mixed case with numbers', () => {
-        expect(camelToKebab('HTML5Parser')).toBe('html5-parser')
-      })
-    })
-
     describe('indentString edge cases', () => {
       it('should handle count of 0', () => {
         expect(indentString('hello', { count: 0 })).toBe('hello')
@@ -585,30 +534,6 @@ describe('strings', () => {
         // Tests line 731: if (!str.length)
         const result = toKebabCase('')
         expect(result).toBe('')
-      })
-    })
-
-    describe('camelToKebab additional edge cases', () => {
-      it('should handle break condition in inner loop', () => {
-        // Tests lines 111-112: if (!char) break
-        expect(camelToKebab('Test')).toBe('test')
-      })
-
-      it('should handle uppercase sequence collection', () => {
-        // Tests lines 124-140: consecutive uppercase handling
-        expect(camelToKebab('XMLHTTPRequest')).toBe('xmlhttprequest')
-        expect(camelToKebab('IOError')).toBe('ioerror')
-      })
-
-      it('should handle non-uppercase continuation', () => {
-        // Tests lines 136-139: stop when hitting non-uppercase
-        expect(camelToKebab('HTTPSConnection')).toBe('httpsconnection')
-      })
-
-      it('should handle mixed case with numbers', () => {
-        // Tests lines 141-145: lowercase letters, digits, other chars
-        expect(camelToKebab('base64Encode')).toBe('base64-encode')
-        expect(camelToKebab('sha256Hash')).toBe('sha256-hash')
       })
     })
 
@@ -846,27 +771,6 @@ describe('strings', () => {
       })
     })
 
-    describe('camelToKebab edge cases', () => {
-      it('should handle empty strings', () => {
-        expect(camelToKebab('')).toBe('')
-      })
-
-      it('should handle single character', () => {
-        expect(camelToKebab('a')).toBe('a')
-        expect(camelToKebab('A')).toBe('a')
-      })
-
-      it('should handle strings with only uppercase', () => {
-        expect(camelToKebab('ABC')).toBe('abc')
-        expect(camelToKebab('UPPERCASE')).toBe('uppercase')
-      })
-
-      it('should handle strings starting with lowercase', () => {
-        expect(camelToKebab('lowercase')).toBe('lowercase')
-        expect(camelToKebab('test')).toBe('test')
-      })
-    })
-
     describe('toKebabCase with snake_case', () => {
       it('should convert snake_case to kebab-case', () => {
         expect(toKebabCase('snake_case_string')).toBe('snake-case-string')
@@ -1080,27 +984,6 @@ describe('strings', () => {
 
       it('should return string unchanged when prefix is undefined', () => {
         expect(applyLinePrefix('test', undefined)).toBe('test')
-      })
-    })
-
-    describe('camelToKebab comprehensive', () => {
-      it('should handle strings with null bytes', () => {
-        // Null bytes are preserved in JavaScript strings
-        const strWithNull = 'test\x00after'
-        expect(camelToKebab(strWithNull)).toBe('test\x00after')
-      })
-
-      it('should handle uppercase after null byte', () => {
-        const strWithNull = 'test\x00After'
-        const result = camelToKebab(strWithNull)
-        expect(result).toContain('test\x00')
-        expect(result).toContain('after')
-      })
-
-      it('should handle edge case of very short strings', () => {
-        expect(camelToKebab('a')).toBe('a')
-        expect(camelToKebab('A')).toBe('a')
-        expect(camelToKebab('AB')).toBe('ab')
       })
     })
 

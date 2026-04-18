@@ -83,84 +83,6 @@ export function applyLinePrefix(
 }
 
 /**
- * Convert a camelCase string to kebab-case.
- *
- * Transforms camelCase strings by converting uppercase letters to lowercase
- * and inserting hyphens before uppercase sequences. Handles consecutive
- * uppercase letters (like "XMLHttpRequest") by treating them as a single word.
- * Returns empty string for empty input.
- *
- * Note: This function only handles camelCase. For mixed formats including
- * snake_case, use `toKebabCase()` instead.
- *
- * @param str - The camelCase string to convert
- * @returns The kebab-case string
- *
- * @example
- * ```ts
- * camelToKebab('helloWorld')
- * // Returns: 'hello-world'
- *
- * camelToKebab('XMLHttpRequest')
- * // Returns: 'xmlhttp-request'
- *
- * camelToKebab('iOS')
- * // Returns: 'i-os'
- *
- * camelToKebab('')
- * // Returns: ''
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function camelToKebab(str: string): string {
-  const { length } = str
-  if (!length) {
-    return ''
-  }
-  let result = ''
-  let i = 0
-  while (i < length) {
-    const char = str[i]
-    if (!char) {
-      break
-    }
-    const charCode = char.charCodeAt(0)
-    // Check if current character is uppercase letter.
-    // A = 65, Z = 90
-    const isUpperCase = charCode >= 65 /*'A'*/ && charCode <= 90 /*'Z'*/
-    if (isUpperCase) {
-      // Add dash before uppercase sequence (except at start).
-      if (result.length > 0) {
-        result += '-'
-      }
-      // Collect all consecutive uppercase letters.
-      while (i < length) {
-        const currChar = str[i]
-        if (!currChar) {
-          break
-        }
-        const currCharCode = currChar.charCodeAt(0)
-        const isCurrUpper =
-          currCharCode >= 65 /*'A'*/ && currCharCode <= 90 /*'Z'*/
-        if (isCurrUpper) {
-          // Convert uppercase to lowercase: subtract 32 (A=65 -> a=97, diff=32)
-          result += fromCharCode(currCharCode + 32 /*'a'-'A'*/)
-          i += 1
-        } else {
-          // Stop when we hit non-uppercase.
-          break
-        }
-      }
-    } else {
-      // Handle lowercase letters, digits, and other characters.
-      result += char
-      i += 1
-    }
-  }
-  return result
-}
-
-/**
  * Center text within a given width.
  *
  * Adds spaces before and after the text to center it within the specified width.
@@ -800,8 +722,8 @@ export function stripBom(str: string): string {
  * - Inserting hyphens before uppercase letters (for camelCase)
  * - Replacing underscores with hyphens (for snake_case)
  *
- * This is more comprehensive than `camelToKebab()` as it handles mixed
- * formats including snake_case. Returns empty string for empty input.
+ * Handles mixed formats (camelCase, snake_case, acronyms) in one pass.
+ * Returns empty string for empty input.
  *
  * @param str - The string to convert
  * @returns The kebab-case string

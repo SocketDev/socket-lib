@@ -21,7 +21,7 @@ const ArrayIsArray = Array.isArray
 const SLSA_PROVENANCE_V0_2 = 'https://slsa.dev/provenance/v0.2'
 const SLSA_PROVENANCE_V1_0 = 'https://slsa.dev/provenance/v1'
 
-let _fetcher: typeof import('make-fetch-happen') | undefined
+let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
 
 /**
  * Find the first attestation with valid provenance data.
@@ -98,7 +98,7 @@ function getFetcher() {
       cache: 'force-cache',
     })
   }
-  return _fetcher as typeof import('make-fetch-happen')
+  return _fetcher
 }
 
 /**

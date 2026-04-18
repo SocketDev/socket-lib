@@ -14,21 +14,16 @@ Spawn child processes, manage inter-process communication (IPC), handle process 
 
 ```typescript
 import { spawn } from '@socketsecurity/lib/spawn'
-import { ProcessLock } from '@socketsecurity/lib/process-lock'
+import { processLock } from '@socketsecurity/lib/process-lock'
 
 // Run a command
 const result = await spawn('git', ['status'])
 console.log(result.stdout)
 
 // Ensure only one instance runs
-const lock = new ProcessLock('my-operation')
-if (await lock.acquire()) {
-  try {
-    await doWork()
-  } finally {
-    await lock.release()
-  }
-}
+await processLock.withLock('/tmp/my-operation.lock', async () => {
+  await doWork()
+})
 ```
 
 ## Spawning Processes
@@ -334,114 +329,109 @@ try {
 
 ## Process Locks
 
-### ProcessLock
+### processLock
 
-**What it does:** Ensures only one instance of an operation runs at a time.
+**What it does:** Filesystem-based advisory lock for ensuring only one process runs a critical section at a time.
 
 **When to use:** Preventing duplicate builds, ensuring atomic operations, coordinating between processes.
+
+The module exports a singleton `processLock` (type `ProcessLockManager`). There is NO `ProcessLock` constructor — use the singleton.
 
 **Example:**
 
 ```typescript
-import { ProcessLock } from '@socketsecurity/lib/process-lock'
+import { processLock } from '@socketsecurity/lib/process-lock'
 
-const lock = new ProcessLock('my-critical-operation')
+const lockPath = '/tmp/my-critical-operation.lock'
 
-if (await lock.acquire()) {
+const acquired = await processLock.acquire(lockPath)
+if (acquired) {
   try {
     // Do critical work that shouldn't run concurrently
     await buildProject()
   } finally {
-    // Always release in finally block
-    await lock.release()
+    processLock.release(lockPath)
   }
-} else {
-  console.log('Another process is running this operation')
 }
 ```
 
-### ProcessLock Methods
+### withLock (scoped helper)
 
-#### constructor(name, options?)
-
-Creates a new process lock.
+Prefer `withLock` for automatic release:
 
 ```typescript
-const lock = new ProcessLock('build-process', {
-  lockDir: '/tmp/locks', // Custom lock directory
-  timeout: 30000, // Timeout in ms
+import { processLock } from '@socketsecurity/lib/process-lock'
+
+await processLock.withLock('/tmp/build.lock', async () => {
+  await buildProject()
 })
 ```
 
-#### acquire()
+### processLock Methods
 
-Attempts to acquire the lock.
+#### acquire(lockPath, options?)
+
+Attempts to acquire the lock at `lockPath`. Returns `true` if acquired, `false` if another process holds it.
 
 ```typescript
-const acquired = await lock.acquire()
-if (acquired) {
-  // Lock acquired, do work
-}
+const acquired = await processLock.acquire('/tmp/my.lock', {
+  retries: 10, // retry up to 10 times
+  baseDelayMs: 100, // start retrying with 100ms backoff
+  staleMs: 60_000, // consider lock stale after 60s
+})
 ```
 
-Returns `true` if lock was acquired, `false` if another process holds it.
+#### release(lockPath)
 
-#### release()
-
-Releases the lock.
+Releases a lock previously acquired by this process. Always pair with `acquire` in a `finally` block, or use `withLock`.
 
 ```typescript
-await lock.release()
+processLock.release('/tmp/my.lock')
 ```
 
-Always call this in a `finally` block to ensure cleanup.
+#### withLock(lockPath, fn, options?)
 
-#### isLocked()
-
-Checks if the lock is currently held.
+Scoped helper — acquires the lock, runs `fn`, releases the lock even on error. Returns the value of `fn`.
 
 ```typescript
-if (await lock.isLocked()) {
-  console.log('Lock is held by another process')
-}
+const result = await processLock.withLock('/tmp/my.lock', async () => {
+  return await doWork()
+})
 ```
 
 ## Inter-Process Communication (IPC)
 
-### setupIPC()
+Two complementary IPC modules are provided:
 
-**What it does:** Sets up IPC channel for communication between parent and child processes.
+### Filesystem stub IPC (`@socketsecurity/lib/ipc`)
 
-**When to use:** Sending messages between processes, coordinating work, passing data.
-
-**Example:**
+For passing data between parent and child processes when the payload may exceed environment-variable size limits or needs restricted-perm (0o600) storage.
 
 ```typescript
-import { setupIPC } from '@socketsecurity/lib/ipc'
+import { writeIpcStub, getIpcStubPath } from '@socketsecurity/lib/ipc'
 
-// In parent process
-const child = spawn('node', ['worker.js'], {
-  stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-})
-
-setupIPC(child.process, {
-  onMessage: message => {
-    console.log('Received from child:', message)
+// Parent: write payload to stub file and pass path to child
+const stubPath = await writeIpcStub('socket-cli', {
+  apiToken: 'secret',
+  config: {
+    /* ... */
   },
 })
+spawn('node', ['child.js', stubPath])
 
-// Send to child
-child.process.send({ type: 'work', data: 'foo' })
+// Child: read the stub path from argv and load the JSON
+import { readFile } from 'node:fs/promises'
+const data = JSON.parse(await readFile(process.argv[2], 'utf8'))
+```
 
-// In child (worker.js)
-setupIPC(process, {
-  onMessage: message => {
-    if (message.type === 'work') {
-      const result = doWork(message.data)
-      process.send({ type: 'result', value: result })
-    }
-  },
-})
+### CLI env-var IPC (`@socketsecurity/lib/ipc-cli`)
+
+For reading `SOCKET_CLI_*` environment variables forwarded by a parent Socket CLI.
+
+```typescript
+import { getIpc } from '@socketsecurity/lib/ipc-cli'
+
+const { SOCKET_CLI_FIX, SOCKET_CLI_OPTIMIZE } = await getIpc()
 ```
 
 ## Real-World Examples

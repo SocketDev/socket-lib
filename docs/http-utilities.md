@@ -219,7 +219,7 @@ console.log(response.headers['location']) // Redirect target
 
 - `url` (string): The URL to download from
 - `destPath` (string): Path where file should be saved (absolute path recommended)
-- `options` (HttpDownloadResult): Download configuration
+- `options` (HttpDownloadOptions): Download configuration
 
 **Returns:** `Promise<HttpDownloadResult>` with `headers`, `ok`, `path`, `size`, `status`, and `statusText`
 
@@ -309,7 +309,7 @@ await httpJson('https://api.example.com/data', {
 })
 ```
 
-**Default:** Includes `User-Agent: socket-registry/1.0`
+**Default:** Includes `User-Agent: socketsecurity-lib/<version> (<url>)` (see `SOCKET_LIB_USER_AGENT` in `constants/socket`).
 
 ### body
 
