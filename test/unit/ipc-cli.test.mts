@@ -9,9 +9,10 @@
  * Used by Socket CLI for parent-worker communication in multi-threaded operations.
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getIpc } from '@socketsecurity/lib/ipc-cli'
+
 import type { IpcObject } from '@socketsecurity/lib/ipc-cli'
 
 describe('ipc-cli', () => {
@@ -306,6 +307,114 @@ describe('ipc-cli', () => {
 
       expect('toString' in ipc).toBe(true) // inherited
       expect(Object.hasOwn(ipc, 'toString')).toBe(false) // not own property
+    })
+  })
+
+  /**
+   * These tests exercise the env-var parsing logic by importing the module
+   * fresh after setting process.env. The module caches `_ipcObject` on first
+   * call, so we must reset modules between tests.
+   */
+  describe.sequential('env variable parsing', () => {
+    const ENV_VARS = [
+      'SOCKET_CLI_FIX',
+      'SOCKET_CLI_OPTIMIZE',
+      'SOCKET_CLI_SHADOW_ACCEPT_RISKS',
+      'SOCKET_CLI_SHADOW_API_TOKEN',
+      'SOCKET_CLI_SHADOW_BIN',
+      'SOCKET_CLI_SHADOW_PROGRESS',
+      'SOCKET_CLI_SHADOW_SILENT',
+    ] as const
+
+    let originalEnv: Partial<
+      Record<(typeof ENV_VARS)[number], string | undefined>
+    >
+
+    beforeEach(() => {
+      originalEnv = {}
+      for (const key of ENV_VARS) {
+        originalEnv[key] = process.env[key]
+        delete process.env[key]
+      }
+      vi.resetModules()
+    })
+
+    afterEach(() => {
+      for (const key of ENV_VARS) {
+        if (originalEnv[key] === undefined) {
+          delete process.env[key]
+        } else {
+          process.env[key] = originalEnv[key]
+        }
+      }
+    })
+
+    async function freshGetIpc(): Promise<IpcObject> {
+      // Dynamic import to pick up a fresh module instance after resetModules.
+      const mod = (await import('@socketsecurity/lib/ipc-cli')) as {
+        getIpc: () => Promise<IpcObject>
+      }
+      return await mod.getIpc()
+    }
+
+    it('parses "true" as boolean true for SOCKET_CLI_OPTIMIZE', async () => {
+      process.env['SOCKET_CLI_OPTIMIZE'] = 'true'
+      const ipc = await freshGetIpc()
+      expect(ipc.SOCKET_CLI_OPTIMIZE).toBe(true)
+    })
+
+    it('parses "1" as boolean true for SOCKET_CLI_OPTIMIZE', async () => {
+      process.env['SOCKET_CLI_OPTIMIZE'] = '1'
+      const ipc = await freshGetIpc()
+      expect(ipc.SOCKET_CLI_OPTIMIZE).toBe(true)
+    })
+
+    it('parses other truthy strings as false (only "true"/"1" → true)', async () => {
+      process.env['SOCKET_CLI_OPTIMIZE'] = 'yes'
+      const ipc = await freshGetIpc()
+      expect(ipc.SOCKET_CLI_OPTIMIZE).toBe(false)
+    })
+
+    it('parses "false" as boolean false for SOCKET_CLI_OPTIMIZE', async () => {
+      process.env['SOCKET_CLI_OPTIMIZE'] = 'false'
+      const ipc = await freshGetIpc()
+      expect(ipc.SOCKET_CLI_OPTIMIZE).toBe(false)
+    })
+
+    it('omits SOCKET_CLI_OPTIMIZE when env var is empty string', async () => {
+      process.env['SOCKET_CLI_OPTIMIZE'] = ''
+      const ipc = await freshGetIpc()
+      expect('SOCKET_CLI_OPTIMIZE' in ipc).toBe(false)
+    })
+
+    it('applies boolean parsing to all SHADOW boolean flags', async () => {
+      process.env['SOCKET_CLI_SHADOW_ACCEPT_RISKS'] = '1'
+      process.env['SOCKET_CLI_SHADOW_PROGRESS'] = 'true'
+      process.env['SOCKET_CLI_SHADOW_SILENT'] = 'false'
+      const ipc = await freshGetIpc()
+      expect(ipc.SOCKET_CLI_SHADOW_ACCEPT_RISKS).toBe(true)
+      expect(ipc.SOCKET_CLI_SHADOW_PROGRESS).toBe(true)
+      expect(ipc.SOCKET_CLI_SHADOW_SILENT).toBe(false)
+    })
+
+    it('passes string values through verbatim for string fields', async () => {
+      // Use the real sktsec_ prefix so this exercises any future length/prefix
+      // validation added downstream. The "test-token" substring matches the
+      // commit-msg hook's test-fixture allowlist — do not shorten.
+      const testToken = 'sktsec_test-token_abc123'
+      process.env['SOCKET_CLI_FIX'] = 'react'
+      process.env['SOCKET_CLI_SHADOW_API_TOKEN'] = testToken
+      process.env['SOCKET_CLI_SHADOW_BIN'] = '/usr/local/bin/socket'
+      const ipc = await freshGetIpc()
+      expect(ipc.SOCKET_CLI_FIX).toBe('react')
+      expect(ipc.SOCKET_CLI_SHADOW_API_TOKEN).toBe(testToken)
+      expect(ipc.SOCKET_CLI_SHADOW_BIN).toBe('/usr/local/bin/socket')
+    })
+
+    it('returns an empty frozen object when no SOCKET_CLI_* vars are set', async () => {
+      const ipc = await freshGetIpc()
+      expect(Object.keys(ipc)).toEqual([])
+      expect(Object.isFrozen(ipc)).toBe(true)
     })
   })
 })
