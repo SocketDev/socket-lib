@@ -39,6 +39,98 @@ const processArg = [...process.argv]
 export type FlagInput = FlagValues | string[] | readonly string[] | undefined
 
 /**
+ * Common flag definitions for parseArgs configuration.
+ * Can be spread into parseArgs options for consistency.
+ */
+export const COMMON_FLAGS = {
+  all: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Target all files',
+  },
+  changed: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Target changed files',
+  },
+  coverage: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Run with coverage',
+  },
+  cover: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Run with coverage (alias)',
+  },
+  debug: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Enable debug output',
+  },
+  'dry-run': {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Perform a dry run',
+  },
+  fix: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Automatically fix issues',
+  },
+  force: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Force the operation',
+  },
+  help: {
+    type: 'boolean' as const,
+    default: false,
+    short: 'h',
+    description: 'Show help',
+  },
+  json: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Output as JSON',
+  },
+  quiet: {
+    type: 'boolean' as const,
+    default: false,
+    short: 'q',
+    description: 'Suppress output',
+  },
+  silent: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Suppress all output',
+  },
+  staged: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Target staged files',
+  },
+  update: {
+    type: 'boolean' as const,
+    default: false,
+    short: 'u',
+    description: 'Update snapshots/deps',
+  },
+  verbose: {
+    type: 'boolean' as const,
+    default: false,
+    short: 'v',
+    description: 'Verbose output',
+  },
+  watch: {
+    type: 'boolean' as const,
+    default: false,
+    short: 'w',
+    description: 'Watch mode',
+  },
+}
+
+/**
  * Get the appropriate log level based on flags.
  * Returns 'silent', 'error', 'warn', 'info', 'verbose', or 'debug'.
  * Accepts FlagValues object, process.argv array, or undefined (uses process.argv).
@@ -342,96 +434,4 @@ export function isWatch(input?: FlagInput): boolean {
     return input.includes('--watch') || input.includes('-w')
   }
   return !!(input as FlagValues).watch
-}
-
-/**
- * Common flag definitions for parseArgs configuration.
- * Can be spread into parseArgs options for consistency.
- */
-export const COMMON_FLAGS = {
-  all: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Target all files',
-  },
-  changed: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Target changed files',
-  },
-  coverage: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Run with coverage',
-  },
-  cover: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Run with coverage (alias)',
-  },
-  debug: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Enable debug output',
-  },
-  'dry-run': {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Perform a dry run',
-  },
-  fix: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Automatically fix issues',
-  },
-  force: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Force the operation',
-  },
-  help: {
-    type: 'boolean' as const,
-    default: false,
-    short: 'h',
-    description: 'Show help',
-  },
-  json: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Output as JSON',
-  },
-  quiet: {
-    type: 'boolean' as const,
-    default: false,
-    short: 'q',
-    description: 'Suppress output',
-  },
-  silent: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Suppress all output',
-  },
-  staged: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Target staged files',
-  },
-  update: {
-    type: 'boolean' as const,
-    default: false,
-    short: 'u',
-    description: 'Update snapshots/deps',
-  },
-  verbose: {
-    type: 'boolean' as const,
-    default: false,
-    short: 'v',
-    description: 'Verbose output',
-  },
-  watch: {
-    type: 'boolean' as const,
-    default: false,
-    short: 'w',
-    description: 'Watch mode',
-  },
 }

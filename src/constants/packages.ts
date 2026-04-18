@@ -27,6 +27,16 @@ export const AT_LATEST = '@latest'
 export const LATEST = 'latest'
 export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 
+/**
+ * Clear the packument cache. Useful for long-running processes that want to
+ * force a re-fetch of registry metadata.
+ */
+export function clearPackumentCache(): void {
+  if (_packumentCache !== undefined) {
+    _packumentCache.clear()
+  }
+}
+
 /*@__NO_SIDE_EFFECTS__*/
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
@@ -90,16 +100,6 @@ export function getPackumentCache(): Map<string, unknown> {
     _packumentCache = new BoundedPackumentCache()
   }
   return _packumentCache
-}
-
-/**
- * Clear the packument cache. Useful for long-running processes that want to
- * force a re-fetch of registry metadata.
- */
-export function clearPackumentCache(): void {
-  if (_packumentCache !== undefined) {
-    _packumentCache.clear()
-  }
 }
 
 /*@__NO_SIDE_EFFECTS__*/
