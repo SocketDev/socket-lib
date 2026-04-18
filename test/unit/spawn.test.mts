@@ -11,13 +11,15 @@
  */
 
 import process from 'node:process'
+
+import { describe, expect, it } from 'vitest'
+
 import {
   isSpawnError,
   isStdioType,
   spawn,
   spawnSync,
 } from '@socketsecurity/lib/spawn'
-import { describe, expect, it } from 'vitest'
 
 describe('spawn', () => {
   describe('isSpawnError', () => {

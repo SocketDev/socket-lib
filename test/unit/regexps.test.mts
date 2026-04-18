@@ -9,8 +9,9 @@
  * Used throughout Socket tools for safe regex pattern construction.
  */
 
-import { escapeRegExp } from '@socketsecurity/lib/regexps'
 import { describe, expect, it } from 'vitest'
+
+import { escapeRegExp } from '@socketsecurity/lib/regexps'
 
 describe('regexps', () => {
   describe('escapeRegExp', () => {

@@ -11,6 +11,8 @@
  * Used by Socket tools for package integrity verification.
  */
 
+import { describe, expect, it } from 'vitest'
+
 import {
   hexToSsri,
   isValidHex,
@@ -18,7 +20,6 @@ import {
   parseSsri,
   ssriToHex,
 } from '@socketsecurity/lib/ssri'
-import { describe, expect, it } from 'vitest'
 
 describe('ssri', () => {
   describe('ssriToHex', () => {

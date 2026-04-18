@@ -9,8 +9,9 @@
  * Used by Socket CLI to detect standalone executable deployment.
  */
 
-import { getSeaBinaryPath, isSeaBinary } from '@socketsecurity/lib/sea'
 import { describe, expect, it } from 'vitest'
+
+import { getSeaBinaryPath, isSeaBinary } from '@socketsecurity/lib/sea'
 
 describe('sea', () => {
   describe('isSeaBinary', () => {

@@ -10,10 +10,11 @@
  * Used by Socket CLI for displaying package lists, scan results, and reports.
  */
 
-import colors from 'yoctocolors-cjs'
-import { formatSimpleTable, formatTable } from '@socketsecurity/lib/tables'
-import { stripAnsi } from '@socketsecurity/lib/strings'
 import { describe, expect, it } from 'vitest'
+import colors from 'yoctocolors-cjs'
+
+import { stripAnsi } from '@socketsecurity/lib/strings'
+import { formatSimpleTable, formatTable } from '@socketsecurity/lib/tables'
 
 describe('tables', () => {
   describe('formatTable', () => {
