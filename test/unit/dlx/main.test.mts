@@ -22,13 +22,11 @@ import {
   clearDlx,
   clearDlxSync,
   dlxDirExists,
-  dlxDirExistsAsync,
   ensureDlxDir,
   ensureDlxDirSync,
 } from '@socketsecurity/lib/dlx/dir'
 import {
   isDlxPackageInstalled,
-  isDlxPackageInstalledAsync,
   listDlxPackages,
   listDlxPackagesAsync,
   removeDlxPackage,
@@ -138,7 +136,7 @@ describe.sequential('dlx', () => {
     })
   })
 
-  describe('dlxDirExists / dlxDirExistsAsync', () => {
+  describe('dlxDirExists', () => {
     it('should return false when DLX directory does not exist', () => {
       // Ensure it doesn't exist
       if (fs.existsSync(getSocketDlxDir())) {
@@ -150,24 +148,6 @@ describe.sequential('dlx', () => {
     it('should return true when DLX directory exists', async () => {
       await ensureDlxDir()
       expect(dlxDirExists()).toBe(true)
-    })
-
-    it('async version should return false when directory does not exist', async () => {
-      // Ensure it doesn't exist (use async version for consistency)
-      try {
-        await fs.promises.rm(getSocketDlxDir(), {
-          recursive: true,
-          force: true,
-        })
-      } catch {
-        // Directory might not exist, which is fine
-      }
-      expect(await dlxDirExistsAsync()).toBe(false)
-    })
-
-    it('async version should return true when directory exists', async () => {
-      await ensureDlxDir()
-      expect(await dlxDirExistsAsync()).toBe(true)
     })
   })
 
@@ -358,7 +338,7 @@ describe.sequential('dlx', () => {
     })
   })
 
-  describe('isDlxPackageInstalled / isDlxPackageInstalledAsync', () => {
+  describe('isDlxPackageInstalled', () => {
     it('should return false when package is not installed', () => {
       expect(isDlxPackageInstalled(testPackageName)).toBe(false)
     })
@@ -368,17 +348,6 @@ describe.sequential('dlx', () => {
       const installedDir = getDlxInstalledPackageDir(testPackageName)
       await fs.promises.mkdir(installedDir, { recursive: true })
       expect(isDlxPackageInstalled(testPackageName)).toBe(true)
-    })
-
-    it('async version should return false when package is not installed', async () => {
-      expect(await isDlxPackageInstalledAsync(testPackageName)).toBe(false)
-    })
-
-    it('async version should return true when package is installed', async () => {
-      // Create a mock installation
-      const installedDir = getDlxInstalledPackageDir(testPackageName)
-      await fs.promises.mkdir(installedDir, { recursive: true })
-      expect(await isDlxPackageInstalledAsync(testPackageName)).toBe(true)
     })
 
     it('should handle scoped packages', async () => {

@@ -38,23 +38,6 @@ export function isDlxPackageInstalled(packageName: string): boolean {
 }
 
 /**
- * Check if a package is installed in DLX asynchronously.
- *
- * @example
- * ```typescript
- * if (await isDlxPackageInstalledAsync('prettier')) {
- *   console.log('prettier is installed')
- * }
- * ```
- */
-export async function isDlxPackageInstalledAsync(
-  packageName: string,
-): Promise<boolean> {
-  const fs = getFs()
-  return fs.existsSync(getDlxInstalledPackageDir(packageName))
-}
-
-/**
  * List all packages installed in DLX.
  *
  * @example

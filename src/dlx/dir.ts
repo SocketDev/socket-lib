@@ -72,21 +72,6 @@ export function dlxDirExists(): boolean {
 }
 
 /**
- * Check if the DLX directory exists asynchronously.
- *
- * @example
- * ```typescript
- * if (await dlxDirExistsAsync()) {
- *   console.log('DLX directory is present')
- * }
- * ```
- */
-export async function dlxDirExistsAsync(): Promise<boolean> {
-  const fs = getFs()
-  return fs.existsSync(getSocketDlxDir())
-}
-
-/**
  * Ensure the DLX directory exists, creating it if necessary.
  *
  * @example
