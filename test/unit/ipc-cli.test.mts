@@ -13,6 +13,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getIpc } from '@socketsecurity/lib/ipc-cli'
 
+import { FAKE_SOCKET_TOKEN } from './utils/fake-tokens'
+
 import type { IpcObject } from '@socketsecurity/lib/ipc-cli'
 
 describe('ipc-cli', () => {
@@ -398,16 +400,12 @@ describe('ipc-cli', () => {
     })
 
     it('passes string values through verbatim for string fields', async () => {
-      // Use the real sktsec_ prefix so this exercises any future length/prefix
-      // validation added downstream. The "test-token" substring matches the
-      // commit-msg hook's test-fixture allowlist — do not shorten.
-      const testToken = 'sktsec_test-token_abc123'
       process.env['SOCKET_CLI_FIX'] = 'react'
-      process.env['SOCKET_CLI_SHADOW_API_TOKEN'] = testToken
+      process.env['SOCKET_CLI_SHADOW_API_TOKEN'] = FAKE_SOCKET_TOKEN
       process.env['SOCKET_CLI_SHADOW_BIN'] = '/usr/local/bin/socket'
       const ipc = await freshGetIpc()
       expect(ipc.SOCKET_CLI_FIX).toBe('react')
-      expect(ipc.SOCKET_CLI_SHADOW_API_TOKEN).toBe(testToken)
+      expect(ipc.SOCKET_CLI_SHADOW_API_TOKEN).toBe(FAKE_SOCKET_TOKEN)
       expect(ipc.SOCKET_CLI_SHADOW_BIN).toBe('/usr/local/bin/socket')
     })
 
