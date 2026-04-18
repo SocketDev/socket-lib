@@ -8,11 +8,11 @@ import process from 'node:process'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 
-import { safeMkdir } from './fs.js'
-import { normalizePath } from './paths/normalize.js'
+import { safeMkdir } from './fs'
+import { normalizePath } from './paths/normalize'
 
-import type AdmZipType from './external/adm-zip.js'
-import type tarFsType from './external/tar-fs.js'
+import type AdmZipType from './external/adm-zip'
+import type tarFsType from './external/tar-fs'
 
 /**
  * Archive format type.

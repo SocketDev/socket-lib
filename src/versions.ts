@@ -1,11 +1,11 @@
 /** @fileoverview Version comparison and validation utilities for Socket ecosystem. */
 
-import type * as semverType from './external/semver.js'
+import type * as semverType from './external/semver'
 
 let _semver: typeof semverType | undefined
 function getSemver() {
   if (_semver === undefined) {
-    _semver = require('./external/semver.js')
+    _semver = require('./external/semver')
   }
   return _semver!
 }

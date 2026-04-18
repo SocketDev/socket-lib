@@ -8,14 +8,14 @@ import {
   type Libc,
   getPlatform,
   type Platform,
-} from '../constants/platform.js'
+} from '../constants/platform'
 import {
   type AssetPattern,
   downloadGitHubRelease,
   type DownloadGitHubReleaseConfig,
   getLatestRelease,
   getReleaseAssetUrl,
-} from './github.js'
+} from './github'
 
 export type { Arch, Libc, Platform }
 

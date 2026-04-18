@@ -3,8 +3,8 @@
  * Provides various comparison utilities for arrays and collections.
  */
 
-import type * as fastSortType from './external/fast-sort.js'
-import type * as semverType from './external/semver.js'
+import type * as fastSortType from './external/fast-sort'
+import type * as semverType from './external/semver'
 
 // Type for fast-sort sorter function.
 type FastSortFunction = ReturnType<

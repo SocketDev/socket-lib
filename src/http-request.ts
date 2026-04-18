@@ -15,9 +15,9 @@
  */
 
 import { SOCKET_LIB_USER_AGENT } from './constants/socket'
-import { safeDelete } from './fs.js'
+import { safeDelete } from './fs'
 
-import type { Logger } from './logger.js'
+import type { Logger } from './logger'
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type { Readable } from 'node:stream'
 

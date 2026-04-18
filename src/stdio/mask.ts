@@ -20,9 +20,9 @@
 
 import process from 'node:process'
 
-import { getDefaultSpinner } from '../spinner.js'
-import { clearLine } from './clear.js'
-import { write } from './stdout.js'
+import { getDefaultSpinner } from '../spinner'
+import { clearLine } from './clear'
+import { write } from './stdout'
 
 import type { ChildProcess, SpawnOptions } from 'node:child_process'
 

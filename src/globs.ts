@@ -3,8 +3,8 @@
  * Provides file filtering and glob matcher functions for npm-like behavior.
  */
 
-import type * as fastGlobType from './external/fast-glob.js'
-import type picomatchType from './external/picomatch.js'
+import type * as fastGlobType from './external/fast-glob'
+import type picomatchType from './external/picomatch'
 
 import { objectFreeze as ObjectFreeze } from './objects'
 import {

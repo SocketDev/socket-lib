@@ -5,7 +5,7 @@
  * to fix compatibility issues, missing peer dependencies, etc.
  */
 
-import * as yarnPkgExtensions from './external/@yarnpkg/extensions.js'
+import * as yarnPkgExtensions from './external/@yarnpkg/extensions'
 
 const { freeze: ObjectFreeze } = Object
 

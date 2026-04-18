@@ -4,18 +4,18 @@
 
 import process from 'node:process'
 
-import picomatch from '../external/picomatch.js'
+import picomatch from '../external/picomatch'
 
 import {
   type ArchiveFormat,
   detectArchiveFormat,
   extractArchive,
-} from '../archives.js'
-import { safeMkdir } from '../fs.js'
-import { httpDownload, httpRequest } from '../http-request.js'
-import { getDefaultLogger } from '../logger.js'
-import { pRetry } from '../promises.js'
-import { spawn } from '../spawn.js'
+} from '../archives'
+import { safeMkdir } from '../fs'
+import { httpDownload, httpRequest } from '../http-request'
+import { getDefaultLogger } from '../logger'
+import { pRetry } from '../promises'
+import { spawn } from '../spawn'
 
 /**
  * Pattern for matching release assets.
