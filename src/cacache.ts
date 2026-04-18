@@ -12,7 +12,7 @@ export interface GetOptions {
 export interface PutOptions {
   integrity?: string | undefined
   size?: number | undefined
-  metadata?: any | undefined
+  metadata?: unknown | undefined
   memoize?: boolean | undefined
 }
 
@@ -20,7 +20,7 @@ export interface CacheEntry {
   data: Buffer
   integrity: string
   key: string
-  metadata?: any | undefined
+  metadata?: unknown | undefined
   path: string
   size: number
   time: number

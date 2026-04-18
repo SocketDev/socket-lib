@@ -183,7 +183,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   // In-memory cache for hot data
-  const memoCache = new Map<string, TtlCacheEntry<any>>()
+  const memoCache = new Map<string, TtlCacheEntry<unknown>>()
 
   // Ensure ttl is defined
   const ttl = opts.ttl ?? DEFAULT_TTL_MS
@@ -199,7 +199,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    * Check if entry is expired.
    * Also detects clock skew by treating suspiciously far-future expiresAt as expired.
    */
-  function isExpired(entry: TtlCacheEntry<any>): boolean {
+  function isExpired(entry: TtlCacheEntry<unknown>): boolean {
     const now = Date.now()
     // Detect future expiresAt (clock skew or corruption).
     // If expiresAt is more than 10 seconds past expected expiry, treat as expired.
@@ -411,7 +411,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   // Track in-flight fetch requests to prevent duplicate fetches
-  const inflightRequests = new Map<string, Promise<any>>()
+  const inflightRequests = new Map<string, Promise<unknown>>()
 
   /**
    * Get cached data or fetch and cache if missing/expired.
@@ -431,7 +431,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     // Check if another request is already in flight
     const existing = inflightRequests.get(fullKey)
     if (existing) {
-      return await existing
+      return (await existing) as T
     }
 
     // Create promise with cleanup handlers

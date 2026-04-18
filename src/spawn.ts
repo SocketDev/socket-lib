@@ -40,6 +40,7 @@ import { getOwn, hasOwn } from './objects'
 import { getDefaultSpinner } from './spinner'
 import { stripAnsi } from './strings'
 
+import type { StdioOptions, Serializable, SendHandle } from 'node:child_process'
 import type { EventEmitter } from 'node:events'
 
 const abortSignal = getAbortSignal()
@@ -235,7 +236,7 @@ interface NodeSpawnOptions {
   cwd?: string | URL | undefined
   env?: NodeJS.ProcessEnv | undefined
   argv0?: string | undefined
-  stdio?: any
+  stdio?: StdioOptions | undefined
   detached?: boolean | undefined
   uid?: number | undefined
   gid?: number | undefined
@@ -254,7 +255,7 @@ interface ChildProcess extends EventEmitter {
   stdin: NodeJS.WritableStream | null
   stdout: NodeJS.ReadableStream | null
   stderr: NodeJS.ReadableStream | null
-  readonly channel?: any
+  readonly channel?: unknown
   readonly stdio: [
     NodeJS.WritableStream | null,
     NodeJS.ReadableStream | null,
@@ -270,16 +271,16 @@ interface ChildProcess extends EventEmitter {
   readonly spawnargs: string[]
   readonly spawnfile: string
   kill(signal?: NodeJS.Signals | number): boolean
-  send(message: any, callback?: (error: Error | null) => void): boolean
+  send(message: Serializable, callback?: (error: Error | null) => void): boolean
   send(
-    message: any,
-    sendHandle?: any | undefined,
+    message: Serializable,
+    sendHandle?: SendHandle | undefined,
     callback?: (error: Error | null) => void,
   ): boolean
   send(
-    message: any,
-    sendHandle?: any | undefined,
-    options?: any | undefined,
+    message: Serializable,
+    sendHandle?: SendHandle | undefined,
+    options?: { keepOpen?: boolean | undefined } | undefined,
     callback?: (error: Error | null) => void,
   ): boolean
   disconnect(): void
@@ -298,14 +299,18 @@ interface WritableStreamType {
   writableCorked: number
   destroyed: boolean
   write(
-    chunk: any,
+    chunk: unknown,
     encoding?: BufferEncoding | undefined,
     callback?: (error?: Error | null) => void,
   ): boolean
-  write(chunk: any, callback?: (error?: Error | null) => void): boolean
+  write(chunk: unknown, callback?: (error?: Error | null) => void): boolean
   end(cb?: () => void): this
-  end(chunk: any, cb?: () => void): this
-  end(chunk: any, encoding?: BufferEncoding | undefined, cb?: () => void): this
+  end(chunk: unknown, cb?: () => void): this
+  end(
+    chunk: unknown,
+    encoding?: BufferEncoding | undefined,
+    cb?: () => void,
+  ): this
   cork(): void
   uncork(): void
   destroy(error?: Error | undefined): this
@@ -759,7 +764,9 @@ export function spawn(
   // https://nodejs.org/api/child_process.html#optionsstdio
   const wasSpinning = !!spinnerInstance?.isSpinning
   const shouldStopSpinner =
-    wasSpinning && !isStdioType(stdio, 'ignore') && !isStdioType(stdio, 'pipe')
+    wasSpinning &&
+    !isStdioType(stdio as string | string[], 'ignore') &&
+    !isStdioType(stdio as string | string[], 'pipe')
   const shouldRestartSpinner = shouldStopSpinner
   if (shouldStopSpinner) {
     spinnerInstance.stop()

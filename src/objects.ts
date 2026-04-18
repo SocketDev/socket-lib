@@ -595,7 +595,7 @@ export function isObjectObject(
   if (value === null || typeof value !== 'object' || isArray(value)) {
     return false
   }
-  const proto: any = ObjectGetPrototypeOf(value)
+  const proto: object | null = ObjectGetPrototypeOf(value)
   return proto === null || proto === ObjectPrototype
 }
 

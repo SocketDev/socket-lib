@@ -364,7 +364,7 @@ export class Logger {
   #stdoutLastWasBlank = false
   #logCallCount = 0
   #options: Record<string, unknown>
-  #originalStdout?: any
+  #originalStdout?: NodeJS.WritableStream | undefined
   #theme?: import('./themes/types').Theme
 
   /**
@@ -397,10 +397,12 @@ export class Logger {
     if (typeof options === 'object' && options !== null) {
       this.#options = { __proto__: null, ...options }
       // Store reference to original stdout stream to bypass Console formatting
-      this.#originalStdout = (options as any).stdout
+      this.#originalStdout = (
+        options as { stdout?: NodeJS.WritableStream }
+      ).stdout
 
       // Handle theme option
-      const themeOption = (options as any).theme
+      const themeOption = (options as { theme?: unknown }).theme
       if (themeOption) {
         if (typeof themeOption === 'string') {
           // Theme name - resolve to Theme object
@@ -410,7 +412,7 @@ export class Logger {
           }
         } else {
           // Theme object
-          this.#theme = themeOption
+          this.#theme = themeOption as import('./themes/types').Theme
         }
       }
     } else {
@@ -1687,7 +1689,9 @@ export class Logger {
     // 3. Fall back to con._stdout (which applies formatting)
     const ctorArgs = privateConstructorArgs.get(this) ?? []
     const stdout =
-      this.#originalStdout || (ctorArgs[0] as any)?.stdout || con['_stdout']
+      this.#originalStdout ||
+      (ctorArgs[0] as { stdout?: NodeJS.WritableStream } | undefined)?.stdout ||
+      (con as unknown as { _stdout: NodeJS.WritableStream })._stdout
     stdout.write(text)
     this[lastWasBlankSymbol](false)
     return this

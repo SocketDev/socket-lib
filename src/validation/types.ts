@@ -25,7 +25,7 @@ export interface ParseResult<T> {
   /** Parsed and validated data (only present when `success` is `true`) */
   data?: T | undefined
   /** Error information (only present when `success` is `false`) */
-  error?: any
+  error?: unknown
 }
 
 /**
@@ -48,7 +48,7 @@ export interface ParseResult<T> {
  * const result = schema.safeParse({ name: 'Alice', age: 30 })
  * ```
  */
-export interface Schema<T = any> {
+export interface Schema<T = unknown> {
   /**
    * Safely parse data without throwing errors.
    * Returns a result object indicating success or failure.
@@ -56,7 +56,7 @@ export interface Schema<T = any> {
    * @param data - The data to validate
    * @returns Parse result with success flag and data or error
    */
-  safeParse(data: any): ParseResult<T>
+  safeParse(data: unknown): ParseResult<T>
 
   /**
    * Parse data and throw an error if validation fails.
@@ -66,7 +66,7 @@ export interface Schema<T = any> {
    * @returns The validated and parsed data
    * @throws {Error} When validation fails
    */
-  parse(data: any): T
+  parse(data: unknown): T
 
   /**
    * Optional schema name for debugging and error messages.

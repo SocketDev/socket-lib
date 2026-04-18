@@ -247,11 +247,11 @@ export function safeJsonParse<T = unknown>(
   if (schema) {
     const result = schema.safeParse(parsed)
     if (!result.success) {
-      const errors = result.error.issues
-        .map(
-          (issue: { path: Array<string | number>; message: string }) =>
-            `${issue.path.join('.')}: ${issue.message}`,
-        )
+      const error = result.error as {
+        issues: Array<{ path: Array<string | number>; message: string }>
+      }
+      const errors = error.issues
+        .map(issue => `${issue.path.join('.')}: ${issue.message}`)
         .join(', ')
       throw new Error(`Validation failed: ${errors}`)
     }
