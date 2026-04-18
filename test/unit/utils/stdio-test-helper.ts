@@ -3,8 +3,10 @@
  */
 
 import { WriteStream } from 'node:tty'
-import type { Writable } from 'node:stream'
+
 import { afterEach, beforeEach, vi } from 'vitest'
+
+import type { Writable } from 'node:stream'
 
 interface StdioTestContext {
   originalIsTTY: boolean | undefined
@@ -23,11 +25,17 @@ interface StdioTestContext {
 export function setupStdioTest(
   stream: NodeJS.WriteStream & Writable,
 ): StdioTestContext {
+  // vi.spyOn returns a typed spy; coerce via unknown for our context shape.
+  type Spy = ReturnType<typeof vi.spyOn>
+  const mutableStream = stream as unknown as Record<string, unknown>
+
   const context: StdioTestContext = {
     originalIsTTY: stream.isTTY,
     originalColumns: stream.columns,
     originalRows: stream.rows,
-    writeSpy: vi.spyOn(stream, 'write').mockImplementation(() => true) as any,
+    writeSpy: vi
+      .spyOn(stream, 'write')
+      .mockImplementation(() => true) as unknown as Spy,
   }
 
   // Make stream appear as a WriteStream instance for hide/showCursor tests
@@ -35,25 +43,25 @@ export function setupStdioTest(
 
   // Create stubs for TTY methods only if they don't exist, then spy on them
   if (!stream.cursorTo) {
-    ;(stream as any).cursorTo = vi.fn()
+    mutableStream['cursorTo'] = vi.fn()
   }
   context.cursorToSpy = vi
-    .spyOn(stream, 'cursorTo' as any)
-    .mockImplementation(() => {}) as any
+    .spyOn(stream as never, 'cursorTo' as never)
+    .mockImplementation(() => {}) as unknown as Spy
 
   if (!stream.clearLine) {
-    ;(stream as any).clearLine = vi.fn()
+    mutableStream['clearLine'] = vi.fn()
   }
   context.clearLineSpy = vi
-    .spyOn(stream, 'clearLine' as any)
-    .mockImplementation(() => {}) as any
+    .spyOn(stream as never, 'clearLine' as never)
+    .mockImplementation(() => {}) as unknown as Spy
 
   if (!stream.clearScreenDown) {
-    ;(stream as any).clearScreenDown = vi.fn()
+    mutableStream['clearScreenDown'] = vi.fn()
   }
   context.clearScreenDownSpy = vi
-    .spyOn(stream, 'clearScreenDown' as any)
-    .mockImplementation(() => {}) as any
+    .spyOn(stream as never, 'clearScreenDown' as never)
+    .mockImplementation(() => {}) as unknown as Spy
 
   return context
 }

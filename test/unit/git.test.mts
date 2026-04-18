@@ -13,6 +13,9 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+
+import { describe, expect, it } from 'vitest'
+
 import {
   findGitRoot,
   getChangedFiles,
@@ -28,7 +31,6 @@ import {
   isUnstaged,
   isUnstagedSync,
 } from '@socketsecurity/lib/git'
-import { describe, expect, it } from 'vitest'
 
 describe('git', () => {
   const projectRoot = process.cwd()
@@ -202,20 +204,26 @@ describe('git', () => {
       expect(typeof result).toBe('boolean')
     })
 
-    it('should return false for committed file in clean repo', async () => {
-      // README.md should exist and be committed
+    it('should report unchanged for committed file in clean repo', async () => {
       const testFile = path.join(projectRoot, 'README.md')
-      const fileExists = existsSync(testFile)
-      if (fileExists) {
-        const result = await isChanged(testFile, { cwd: projectRoot })
-        // In a clean repo, committed files should not be changed
-        expect(typeof result).toBe('boolean')
+      // Skip if README is missing; should always exist in this repo.
+      if (!existsSync(testFile)) {
+        return
       }
+      const changedFiles = await getChangedFiles({ cwd: projectRoot })
+      const isExpectedChanged = changedFiles.some(
+        f => f === testFile || f === 'README.md',
+      )
+      const result = await isChanged(testFile, { cwd: projectRoot })
+      expect(result).toBe(isExpectedChanged)
     })
 
-    it('should work with relative paths', async () => {
-      const result = await isChanged('package.json', { cwd: projectRoot })
-      expect(typeof result).toBe('boolean')
+    it('should accept relative and absolute paths equivalently', async () => {
+      const abs = await isChanged(path.join(projectRoot, 'package.json'), {
+        cwd: projectRoot,
+      })
+      const rel = await isChanged('package.json', { cwd: projectRoot })
+      expect(abs).toBe(rel)
     })
 
     it('should throw for non-existent files', async () => {
