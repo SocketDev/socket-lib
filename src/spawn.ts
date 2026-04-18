@@ -607,6 +607,8 @@ export function isStdioType(
     return typeof stdio === 'string' && validTypes.includes(stdio)
   }
   // Original two-argument behavior.
+  // Accept null/undefined as equivalent to 'pipe' because Node.js defaults
+  // unspecified stdio entries to 'pipe'. Tests explicitly cover this contract.
   return (
     stdio === type ||
     ((stdio === null || stdio === undefined) && type === 'pipe') ||

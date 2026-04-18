@@ -400,7 +400,7 @@ export function resolveRealBinSync(binPath: string): string {
     const voltaPlatform = readJsonSync(
       path.join(voltaUserPath, 'platform.json'),
       { throws: false },
-    ) as any
+    ) as { node?: { runtime?: string; npm?: string } } | null
     const voltaNodeVersion = voltaPlatform?.node?.runtime
     const voltaNpmVersion = voltaPlatform?.node?.npm
     let voltaBinPath = ''
@@ -426,7 +426,7 @@ export function resolveRealBinSync(binPath: string): string {
       const binInfo = readJsonSync(
         path.join(voltaUserBinPath, `${basename}.json`),
         { throws: false },
-      ) as any
+      ) as { package?: string } | null
       const binPackage = binInfo?.package
       if (binPackage) {
         voltaBinPath = path.join(
@@ -780,7 +780,10 @@ export async function which(
     // whichModule returns string when found, rejects when not found
     // whichModule is imported at the top
     /* c8 ignore next - External which call */
-    const result = await whichModule(binName, options as any)
+    const result = await whichModule(
+      binName,
+      options as import('./external/which').WhichOptions,
+    )
     return result as string | string[]
   } catch {
     // Binary not found in PATH
@@ -980,7 +983,10 @@ export function whichSync(
   try {
     // whichModule.sync returns string when found, throws when not found
     // whichModule is imported at the top
-    const result = whichModule.sync(binName, options as any)
+    const result = whichModule.sync(
+      binName,
+      options as import('./external/which').WhichOptions,
+    )
     return result as string | string[]
   } catch {
     // Binary not found in PATH
