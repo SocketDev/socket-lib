@@ -482,7 +482,7 @@ export async function ensurePackageInstalled(
         ) {
           throw e
         }
-        const code = (e as any).code
+        const code = (e as { code?: string } | null)?.code
         if (code === 'E404' || code === 'ETARGET') {
           throw new Error(
             `Package not found: ${packageSpec}\n` +
@@ -616,7 +616,7 @@ export function findBinaryPath(
         binName = getBinFromManifest({
           name: packageName,
           bin: binObj,
-          _id: `${packageName}@${(pkgJson as any).version || 'unknown'}`,
+          _id: `${packageName}@${(pkgJson as { version?: string }).version || 'unknown'}`,
         })
         binPath = binObj[binName]
       } catch {

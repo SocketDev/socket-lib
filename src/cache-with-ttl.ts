@@ -19,42 +19,6 @@
 
 import * as cacache from './cacache'
 
-export interface TtlCacheOptions {
-  /**
-   * Time-to-live in milliseconds.
-   * @default 5 * 60 * 1000 (5 minutes)
-   */
-  ttl?: number | undefined
-  /**
-   * Enable in-memory memoization for hot data.
-   * @default true
-   */
-  memoize?: boolean | undefined
-  /**
-   * Custom cache key prefix.
-   * Must not contain wildcards (*).
-   * Use clear({ prefix: "pattern*" }) for wildcard matching instead.
-   *
-   * @default 'ttl-cache'
-   * @throws {TypeError} If prefix contains wildcards
-   *
-   * @example
-   * // Valid
-   * createTtlCache({ prefix: 'socket-sdk' })
-   * createTtlCache({ prefix: 'my-app:cache' })
-   *
-   * @example
-   * // Invalid - throws TypeError
-   * createTtlCache({ prefix: 'socket-*' })
-   */
-  prefix?: string | undefined
-}
-
-export interface TtlCacheEntry<T> {
-  data: T
-  expiresAt: number
-}
-
 export interface ClearOptions {
   /**
    * Only clear in-memory memoization cache, not persistent cache.
@@ -90,7 +54,7 @@ export interface TtlCache {
    *
    * @example
    * // Get all entries with this cache's prefix
-   * const all = await cache.getAll<any>('*')
+   * const all = await cache.getAll<unknown>('*')
    */
   getAll<T>(pattern: string): Promise<Map<string, T>>
   /**
@@ -150,6 +114,42 @@ export interface TtlCache {
    * await cache.clear({ memoOnly: true })
    */
   clear(options?: ClearOptions | undefined): Promise<void>
+}
+
+export interface TtlCacheEntry<T> {
+  data: T
+  expiresAt: number
+}
+
+export interface TtlCacheOptions {
+  /**
+   * Time-to-live in milliseconds.
+   * @default 5 * 60 * 1000 (5 minutes)
+   */
+  ttl?: number | undefined
+  /**
+   * Enable in-memory memoization for hot data.
+   * @default true
+   */
+  memoize?: boolean | undefined
+  /**
+   * Custom cache key prefix.
+   * Must not contain wildcards (*).
+   * Use clear({ prefix: "pattern*" }) for wildcard matching instead.
+   *
+   * @default 'ttl-cache'
+   * @throws {TypeError} If prefix contains wildcards
+   *
+   * @example
+   * // Valid
+   * createTtlCache({ prefix: 'socket-sdk' })
+   * createTtlCache({ prefix: 'my-app:cache' })
+   *
+   * @example
+   * // Invalid - throws TypeError
+   * createTtlCache({ prefix: 'socket-*' })
+   */
+  prefix?: string | undefined
 }
 
 // 5 minutes
@@ -321,7 +321,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Check persistent cache for entries not in memory.
     const cacheDir = (await import('./paths/socket')).getSocketCacacheDir()
-    const cacacheModule = (await import('./cacache')) as any
+    const cacacheModule = await import('./cacache')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 
     for await (const cacheEntry of stream) {

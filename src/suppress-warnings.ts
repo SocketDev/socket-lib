@@ -20,7 +20,7 @@ function setupSuppression(): void {
   // Only wrap once - store the original on first call.
   if (!originalEmitWarning) {
     originalEmitWarning = process.emitWarning
-    process.emitWarning = (warning: string | Error, ...args: any[]) => {
+    process.emitWarning = (warning: string | Error, ...args: unknown[]) => {
       // Check both string warnings and warning objects.
       if (typeof warning === 'string') {
         // Check if any suppressed warning type matches.
@@ -101,7 +101,8 @@ export function setMaxEventTargetListeners(
   if (kMaxEventTargetListeners) {
     // The default events.defaultMaxListeners value is 10.
     // https://nodejs.org/api/events.html#eventsdefaultmaxlisteners
-    ;(target as any)[kMaxEventTargetListeners] = maxListeners
+    ;(target as unknown as Record<symbol, number>)[kMaxEventTargetListeners] =
+      maxListeners
   }
 }
 

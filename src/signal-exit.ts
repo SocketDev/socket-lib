@@ -154,7 +154,7 @@ function processEmit(
   this: NodeJS.Process,
   eventName: string,
   exitCode?: number | undefined,
-  ...args: any[]
+  ...args: unknown[]
 ): boolean {
   if (eventName === 'exit') {
     let actualExitCode = exitCode

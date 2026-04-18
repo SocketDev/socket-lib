@@ -25,6 +25,7 @@
 
 import process from 'node:process'
 
+import { execBin } from './bin'
 import {
   NPM_BIN_PATH,
   NPM_REAL_EXEC_PATH,
@@ -38,14 +39,13 @@ import {
   supportsNodeRun,
 } from './constants/node'
 import { WIN32 } from './constants/platform'
-import { getCI } from './env/ci'
-
-import { execBin } from './bin'
 import { isDebug } from './debug'
+import { getCI } from './env/ci'
 import { findUpSync } from './fs'
 import { getOwn } from './objects'
-import type { SpawnOptions } from './spawn'
 import { spawn } from './spawn'
+
+import type { SpawnOptions } from './spawn'
 
 // Note: npm flag checking is done with regex patterns in the is*Flag functions below.
 
