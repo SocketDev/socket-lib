@@ -143,7 +143,10 @@ export function getPerformanceSummary(): Record<
   const summary: Record<
     string,
     { count: number; total: number; min: number; max: number }
-  > = Object.create(null)
+  > = { __proto__: null } as unknown as Record<
+    string,
+    { count: number; total: number; min: number; max: number }
+  >
 
   for (const metric of performanceMetrics) {
     const { duration, operation } = metric
@@ -173,7 +176,10 @@ export function getPerformanceSummary(): Record<
   const result: Record<
     string,
     { count: number; total: number; avg: number; min: number; max: number }
-  > = Object.create(null)
+  > = { __proto__: null } as unknown as Record<
+    string,
+    { count: number; total: number; avg: number; min: number; max: number }
+  >
 
   for (const { 0: operation, 1: stats } of Object.entries(summary)) {
     result[operation] = {

@@ -177,7 +177,10 @@ export class DlxManifest {
   private readManifest(): Record<string, ManifestEntry | StoreRecord> {
     try {
       if (!fs.existsSync(this.manifestPath)) {
-        return Object.create(null)
+        return { __proto__: null } as unknown as Record<
+          string,
+          ManifestEntry | StoreRecord
+        >
       }
 
       const rawContent = readFileUtf8Sync(this.manifestPath)
@@ -188,7 +191,10 @@ export class DlxManifest {
       ).trim()
 
       if (!content) {
-        return Object.create(null)
+        return { __proto__: null } as unknown as Record<
+          string,
+          ManifestEntry | StoreRecord
+        >
       }
 
       return JSON.parse(content) as Record<string, ManifestEntry | StoreRecord>
@@ -362,7 +368,9 @@ export class DlxManifest {
    */
   async set(name: string, record: StoreRecord): Promise<void> {
     await processLock.withLock(this.lockPath, async () => {
-      let data: Record<string, StoreRecord> = Object.create(null)
+      let data: Record<string, StoreRecord> = {
+        __proto__: null,
+      } as unknown as Record<string, StoreRecord>
 
       // Read existing data.
       try {

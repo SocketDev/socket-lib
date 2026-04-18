@@ -186,7 +186,12 @@ export async function downloadSocketBtmRelease(
   tool: string,
   options: SocketBtmReleaseConfig | undefined,
 ): Promise<string> {
-  const config = Object.assign(Object.create(null), options)
+  const config = { __proto__: null, ...(options ?? {}) } as unknown as {
+    cwd?: string | undefined
+    downloadDir?: string | undefined
+    quiet?: boolean | undefined
+    tag?: string | undefined
+  }
   const { cwd, downloadDir, quiet = false, tag } = config
 
   // Auto-generate toolPrefix from tool name (follows socket-btm tag pattern: {tool}-{date}-{commit})
@@ -197,10 +202,10 @@ export async function downloadSocketBtmRelease(
   // Infer type from presence of 'asset' field
   if (options && 'asset' in options) {
     // Asset download
-    const assetConfig = Object.assign(
-      Object.create(null),
-      options as SocketBtmAssetConfig,
-    )
+    const assetConfig = {
+      __proto__: null,
+      ...(options as SocketBtmAssetConfig),
+    } as SocketBtmAssetConfig
     const { asset, output, removeMacOSQuarantine = false } = assetConfig
 
     // Resolve asset pattern to actual asset name if needed.
@@ -222,10 +227,11 @@ export async function downloadSocketBtmRelease(
       }
 
       // Find latest release with matching asset.
-      resolvedTag = await getLatestRelease(toolPrefix, SOCKET_BTM_REPO, {
-        assetPattern: asset,
-        quiet,
-      })
+      resolvedTag =
+        (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO, {
+          assetPattern: asset,
+          quiet,
+        })) ?? undefined
 
       if (!resolvedTag) {
         throw new Error(`No ${tool} release with matching asset pattern found`)
@@ -258,23 +264,23 @@ export async function downloadSocketBtmRelease(
     downloadConfig = {
       owner: SOCKET_BTM_REPO.owner,
       repo: SOCKET_BTM_REPO.repo,
-      cwd,
-      downloadDir,
+      ...(cwd !== undefined && { cwd }),
+      ...(downloadDir !== undefined && { downloadDir }),
       toolName: tool,
       platformArch,
       binaryName: outputName,
       assetName: resolvedAsset,
       toolPrefix,
-      tag: resolvedTag,
+      ...(resolvedTag !== undefined && { tag: resolvedTag }),
       quiet,
       removeMacOSQuarantine,
     }
   } else {
     // Binary download
-    const binaryConfig = Object.assign(
-      Object.create(null),
-      options as SocketBtmBinaryConfig | undefined,
-    )
+    const binaryConfig = {
+      __proto__: null,
+      ...(options as SocketBtmBinaryConfig | undefined),
+    } as SocketBtmBinaryConfig
     const {
       bin,
       libc = detectLibc(),
@@ -299,14 +305,14 @@ export async function downloadSocketBtmRelease(
     downloadConfig = {
       owner: SOCKET_BTM_REPO.owner,
       repo: SOCKET_BTM_REPO.repo,
-      cwd,
-      downloadDir,
+      ...(cwd !== undefined && { cwd }),
+      ...(downloadDir !== undefined && { downloadDir }),
       toolName: tool,
       platformArch,
       binaryName,
       assetName,
       toolPrefix,
-      tag,
+      ...(tag !== undefined && { tag }),
       quiet,
       removeMacOSQuarantine,
     }
