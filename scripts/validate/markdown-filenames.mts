@@ -65,7 +65,7 @@ const SKIP_DIRS = new Set([
 /**
  * Check if a filename is in SCREAMING_CASE (all uppercase with optional underscores).
  */
-function isScreamingCase(filename) {
+function isScreamingCase(filename: string): boolean {
   // Remove extension for checking
   const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
 
@@ -76,7 +76,7 @@ function isScreamingCase(filename) {
 /**
  * Check if a filename is lowercase-with-hyphens.
  */
-function isLowercaseHyphenated(filename) {
+function isLowercaseHyphenated(filename: string): boolean {
   // Remove extension for checking
   const nameWithoutExt = filename.replace(/\.md$/, '')
 
@@ -87,7 +87,10 @@ function isLowercaseHyphenated(filename) {
 /**
  * Recursively find all markdown files.
  */
-async function findMarkdownFiles(dir, files = []) {
+async function findMarkdownFiles(
+  dir: string,
+  files: string[] = [],
+): Promise<string[]> {
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
