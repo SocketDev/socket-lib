@@ -24,7 +24,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/env`](../src/env.ts)                               | Environment variable parsing and conversion utilities.                                                         |
 | [`@socketsecurity/lib/errors`](../src/errors.ts)                         | Error utilities with cause chain support.                                                                      |
 | [`@socketsecurity/lib/fs`](../src/fs.ts)                                 | File system utilities with cross-platform path handling.                                                       |
-| [`@socketsecurity/lib/functions`](../src/functions.ts)                   | Common function utilities for control flow and caching.                                                        |
 | [`@socketsecurity/lib/git`](../src/git.ts)                               | Git helpers built on top of `spawn`.                                                                           |
 | [`@socketsecurity/lib/github`](../src/github.ts)                         | GitHub utilities for Socket projects.                                                                          |
 | [`@socketsecurity/lib/globs`](../src/globs.ts)                           | Glob pattern matching utilities with default ignore patterns.                                                  |

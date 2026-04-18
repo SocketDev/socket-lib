@@ -76,17 +76,19 @@ export interface Schema<T = unknown> {
 }
 
 /**
- * Options for configuring JSON parsing behavior with security controls.
+ * Options for configuring safe JSON parsing with security controls.
+ * Distinct from `JsonParseOptions` in `@socketsecurity/lib/json/types`
+ * which is scoped to reviver/error-handling for fs-oriented JSON reads.
  *
  * @example
  * ```ts
- * const options: JsonParseOptions = {
+ * const options: SafeJsonParseOptions = {
  *   maxSize: 1024 * 1024, // 1MB limit
  *   allowPrototype: false // Block prototype pollution
  * }
  * ```
  */
-export interface JsonParseOptions {
+export interface SafeJsonParseOptions {
   /**
    * Allow dangerous prototype pollution keys (`__proto__`, `constructor`, `prototype`).
    * Set to `true` only if you trust the JSON source completely.

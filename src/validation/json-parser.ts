@@ -10,7 +10,7 @@
  * - Memory safety: Prevents memory exhaustion attacks
  */
 
-import type { JsonParseOptions, JsonParseResult, Schema } from './types'
+import type { SafeJsonParseOptions, JsonParseResult, Schema } from './types'
 
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 
@@ -61,9 +61,12 @@ function prototypePollutionReviver(key: string, value: unknown): unknown {
  */
 export function createJsonParser<T = unknown>(
   schema?: Schema<T> | undefined,
-  defaultOptions?: JsonParseOptions | undefined,
+  defaultOptions?: SafeJsonParseOptions | undefined,
 ) {
-  return (jsonString: string, options?: JsonParseOptions | undefined): T => {
+  return (
+    jsonString: string,
+    options?: SafeJsonParseOptions | undefined,
+  ): T => {
     return safeJsonParse(jsonString, schema, { ...defaultOptions, ...options })
   }
 }
@@ -106,7 +109,7 @@ export function createJsonParser<T = unknown>(
 export function parseJsonWithResult<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
-  options?: JsonParseOptions | undefined,
+  options?: SafeJsonParseOptions | undefined,
 ): JsonParseResult<T> {
   try {
     const data = safeJsonParse(jsonString, schema, options)
@@ -153,7 +156,7 @@ export function parseJsonWithResult<T = unknown>(
 export function parseNdjson<T = unknown>(
   ndjson: string,
   schema?: Schema<T> | undefined,
-  options?: JsonParseOptions | undefined,
+  options?: SafeJsonParseOptions | undefined,
 ): T[] {
   const results: T[] = []
   const lines = ndjson.split(/\r?\n/)
@@ -221,7 +224,7 @@ export function parseNdjson<T = unknown>(
 export function safeJsonParse<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
-  options: JsonParseOptions = {},
+  options: SafeJsonParseOptions = {},
 ): T {
   const { allowPrototype = false, maxSize = 10 * 1024 * 1024 } = options
 
@@ -303,7 +306,7 @@ export function safeJsonParse<T = unknown>(
 export function* streamNdjson<T = unknown>(
   ndjson: string,
   schema?: Schema<T> | undefined,
-  options?: JsonParseOptions | undefined,
+  options?: SafeJsonParseOptions | undefined,
 ): Generator<T, void, unknown> {
   const lines = ndjson.split(/\r?\n/)
 
@@ -354,7 +357,7 @@ export function* streamNdjson<T = unknown>(
 export function tryJsonParse<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
-  options?: JsonParseOptions | undefined,
+  options?: SafeJsonParseOptions | undefined,
 ): T | undefined {
   try {
     return safeJsonParse(jsonString, schema, options)
