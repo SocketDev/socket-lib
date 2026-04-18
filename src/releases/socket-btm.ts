@@ -92,21 +92,21 @@ export type SocketBtmReleaseConfig =
  * Map Node.js platform to socket-btm asset platform naming.
  * Uses 'win' instead of 'win32' for file/folder names.
  */
-const PLATFORM_MAP: Record<string, string> = {
-  __proto__: null as unknown as string,
+const PLATFORM_MAP = {
+  __proto__: null,
   darwin: 'darwin',
   linux: 'linux',
   win32: 'win',
-}
+} as unknown as Record<string, string>
 
 /**
  * Map Node.js arch to socket-btm asset arch naming.
  */
-const ARCH_MAP: Record<string, string> = {
-  __proto__: null as unknown as string,
+const ARCH_MAP = {
+  __proto__: null,
   arm64: 'arm64',
   x64: 'x64',
-}
+} as unknown as Record<string, string>
 
 let _fs: typeof import('node:fs') | undefined
 
