@@ -371,10 +371,6 @@
       "types": "./dist/fs.d.ts",
       "default": "./dist/fs.js"
     },
-    "./functions": {
-      "types": "./dist/functions.d.ts",
-      "default": "./dist/functions.js"
-    },
     "./git": {
       "types": "./dist/git.d.ts",
       "default": "./dist/git.js"
