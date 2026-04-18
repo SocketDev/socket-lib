@@ -722,7 +722,7 @@
     "nock": "14.0.10",
     "normalize-package-data": "8.0.0",
     "npm-package-arg": "13.0.0",
-    "oxfmt": "^0.37.0",
+    "oxfmt": "0.37.0",
     "oxlint": "1.53.0",
     "p-map": "7.0.4",
     "pacote": "21.5.0",
