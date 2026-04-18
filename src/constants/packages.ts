@@ -5,14 +5,12 @@
  * package extensions used during manifest processing.
  */
 
-import { getNpmLifecycleEvent as getNpmLifecycleEventEnv } from '../env/npm'
+import pacote from '../external/pacote'
+import { packageExtensions as packageExtensionsImport } from '../package-extensions'
+import { normalizePath } from '../paths/normalize'
 import { lifecycleScriptNames as lifecycleScriptNamesImport } from './lifecycle-script-names'
 import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from './package-default-node-range'
 import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from './package-default-socket-categories'
-import { packageExtensions as packageExtensionsImport } from '../package-extensions'
-
-import pacote from '../external/pacote'
-import { normalizePath } from '../paths/normalize'
 
 let _lifecycleScriptNames: string[]
 let _packageDefaultNodeRange: string | undefined
@@ -44,11 +42,6 @@ export function getLifecycleScriptNames(): string[] {
     _lifecycleScriptNames = Array.from(lifecycleScriptNamesImport)
   }
   return _lifecycleScriptNames
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function getNpmLifecycleEvent(): string | undefined {
-  return getNpmLifecycleEventEnv()
 }
 
 /*@__NO_SIDE_EFFECTS__*/

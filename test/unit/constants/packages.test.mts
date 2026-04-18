@@ -8,21 +8,20 @@
  * Frozen constants for consistent package operations.
  */
 
-import process from 'node:process'
+import { describe, expect, it } from 'vitest'
+
 import {
   AT_LATEST,
   LATEST,
   PACKAGE,
   PACKAGE_DEFAULT_VERSION,
   getLifecycleScriptNames,
-  getNpmLifecycleEvent,
   getPackageDefaultNodeRange,
   getPackageDefaultSocketCategories,
   getPackageExtensions,
   getPackumentCache,
   getPacoteCachePath,
 } from '@socketsecurity/lib/constants/packages'
-import { describe, expect, it } from 'vitest'
 
 describe('constants/packages', () => {
   describe('package constants', () => {
@@ -121,20 +120,6 @@ describe('constants/packages', () => {
         expect(entry.length).toBe(2)
         expect(typeof entry[0]).toBe('string')
       }
-    })
-  })
-
-  describe('getNpmLifecycleEvent', () => {
-    it('should return string or undefined', () => {
-      const event = getNpmLifecycleEvent()
-      const type = typeof event
-      expect(type === 'string' || type === 'undefined').toBe(true)
-    })
-
-    it('should match npm_lifecycle_event env var', () => {
-      const event = getNpmLifecycleEvent()
-      const envValue = process.env['npm_lifecycle_event']
-      expect(event).toBe(envValue)
     })
   })
 
@@ -264,15 +249,6 @@ describe('constants/packages', () => {
       const extensions = getPackageExtensions()
       const arr = Array.from(extensions)
       expect(arr.length).toBeGreaterThanOrEqual(0)
-    })
-
-    it('should handle undefined npm lifecycle event', () => {
-      const event = getNpmLifecycleEvent()
-      if (event === undefined) {
-        expect(typeof event).toBe('undefined')
-      } else {
-        expect(typeof event).toBe('string')
-      }
     })
 
     it('should handle empty lifecycle script names', () => {
