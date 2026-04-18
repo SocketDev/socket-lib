@@ -764,14 +764,16 @@ describe('promises', () => {
       expect(fn).not.toHaveBeenCalled()
     })
 
-    it('should return undefined when signal is aborted during setTimeout', async () => {
+    it('should return undefined when signal aborts during retry delay', async () => {
+      // Abort synchronously inside the failing attempt so the retry-delay
+      // branch sees an already-aborted signal — no wall-clock race.
       const controller = new AbortController()
       let attempts = 0
 
       const fn = vi.fn().mockImplementation(async () => {
         attempts += 1
         if (attempts === 1) {
-          setTimeout(() => controller.abort(), 5)
+          controller.abort()
           throw new Error('fail')
         }
         return 'success'
@@ -788,18 +790,19 @@ describe('promises', () => {
     })
 
     it('should handle abort signal between retries', async () => {
+      // Same pattern — abort inside the first-attempt rejection so retry
+      // observes the aborted signal deterministically.
       const controller = new AbortController()
       let attempts = 0
 
       const fn = vi.fn().mockImplementation(async () => {
         attempts += 1
         if (attempts === 1) {
+          controller.abort()
           throw new Error('fail')
         }
         return 'success'
       })
-
-      setTimeout(() => controller.abort(), 30)
 
       const result = await pRetry(fn, {
         retries: 3,

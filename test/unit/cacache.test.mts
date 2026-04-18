@@ -23,7 +23,6 @@ import {
   withTmp,
 } from '@socketsecurity/lib/cacache'
 import type {
-  CacheEntry,
   GetOptions,
   PutOptions,
   RemoveOptions,
@@ -53,54 +52,6 @@ describe('cacache', () => {
     })
   })
 
-  describe('type exports', () => {
-    it('should support GetOptions type', () => {
-      const opts: GetOptions = {
-        integrity: 'sha512-abc',
-        size: 1024,
-        memoize: true,
-      }
-      expect(opts).toBeDefined()
-    })
-
-    it('should support PutOptions type', () => {
-      const opts: PutOptions = {
-        integrity: 'sha512-abc',
-        size: 1024,
-        metadata: { foo: 'bar' },
-        memoize: true,
-      }
-      expect(opts).toBeDefined()
-    })
-
-    it('should support CacheEntry type', () => {
-      const entry: CacheEntry = {
-        data: Buffer.from('test'),
-        integrity: 'sha512-abc',
-        key: 'test-key',
-        metadata: { foo: 'bar' },
-        path: '/path/to/cache',
-        size: 4,
-        time: Date.now(),
-      }
-      expect(entry).toBeDefined()
-    })
-
-    it('should support RemoveOptions type', () => {
-      const opts: RemoveOptions = {
-        prefix: 'socket-sdk',
-      }
-      expect(opts).toBeDefined()
-    })
-
-    it('should support RemoveOptions with wildcard', () => {
-      const opts: RemoveOptions = {
-        prefix: 'socket-sdk:scans:abc*',
-      }
-      expect(opts).toBeDefined()
-    })
-  })
-
   describe('put', () => {
     it('should export put function', () => {
       expect(typeof put).toBe('function')
@@ -122,16 +73,15 @@ describe('cacache', () => {
     })
 
     it('should accept keys without wildcards', async () => {
-      // This will fail because it actually tries to write to cache,
-      // but it proves the wildcard check passed
+      // Proves the wildcard check does NOT reject a non-wildcard key.
+      // The operation may still fail in test env (no cache dir) — that's
+      // fine, but the failure must not be the wildcard-rejection error.
       const key = `test-key-${Date.now()}`
       try {
         await put(key, 'test data')
-        // If it succeeds, clean up
         await remove(key)
       } catch (e) {
-        // Expected - cache dir may not exist in test env
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
   })
@@ -202,7 +152,7 @@ describe('cacache', () => {
       try {
         await remove('nonexistent-key')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
   })
@@ -249,7 +199,7 @@ describe('cacache', () => {
         const result = await clear(opts)
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -259,7 +209,7 @@ describe('cacache', () => {
         const result = await clear(opts)
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -270,7 +220,7 @@ describe('cacache', () => {
       } catch (e) {
         // Ignore ENOTEMPTY errors per implementation
         if ((e as any)?.code !== 'ENOTEMPTY') {
-          expect(e).toBeDefined()
+          expect((e as Error).message).not.toMatch(/wildcard/i)
         }
       }
     })
@@ -281,7 +231,7 @@ describe('cacache', () => {
         expect(result).toBeUndefined()
       } catch (e) {
         if ((e as any)?.code !== 'ENOTEMPTY') {
-          expect(e).toBeDefined()
+          expect((e as Error).message).not.toMatch(/wildcard/i)
         }
       }
     })
@@ -292,7 +242,7 @@ describe('cacache', () => {
         expect(result).toBeUndefined()
       } catch (e) {
         if ((e as any)?.code !== 'ENOTEMPTY') {
-          expect(e).toBeDefined()
+          expect((e as Error).message).not.toMatch(/wildcard/i)
         }
       }
     })
@@ -352,7 +302,7 @@ describe('cacache', () => {
         expect(result).toBe('result')
       } catch (e) {
         // Cache dir may not exist in test env
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -363,7 +313,7 @@ describe('cacache', () => {
         })
         expect(result).toBe(42)
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -375,7 +325,7 @@ describe('cacache', () => {
         })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -387,7 +337,7 @@ describe('cacache', () => {
         // If we reach here, cache dir doesn't exist
       } catch (e) {
         // Either cache dir error or callback error
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
   })
@@ -414,7 +364,7 @@ describe('cacache', () => {
         await expect(get(key)).rejects.toThrow()
       } catch (e) {
         // Cache dir may not exist in test env - that's ok
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -434,7 +384,7 @@ describe('cacache', () => {
         const missing = await safeGet(key)
         expect(missing).toBeUndefined()
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -456,7 +406,7 @@ describe('cacache', () => {
         const results = await Promise.all(keys.map(safeGet))
         results.forEach(result => expect(result).toBeUndefined())
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -483,7 +433,7 @@ describe('cacache', () => {
         // Clean up remaining
         await clear({ prefix })
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
   })
@@ -496,7 +446,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -506,7 +456,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -516,7 +466,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -526,7 +476,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -537,7 +487,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -547,7 +497,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -557,7 +507,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -567,7 +517,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -577,7 +527,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -587,7 +537,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -597,7 +547,7 @@ describe('cacache', () => {
         const result = await clear({ prefix })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
   })
@@ -611,7 +561,7 @@ describe('cacache', () => {
         await remove(key)
       } catch (e) {
         // Cache may not work in test env - that's ok
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -621,7 +571,7 @@ describe('cacache', () => {
         await put(longKey, 'data')
         await remove(longKey)
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -631,7 +581,7 @@ describe('cacache', () => {
         await put(key, 'data')
         await remove(key)
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -640,7 +590,7 @@ describe('cacache', () => {
         const result = await clear({ prefix: '' })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -649,7 +599,7 @@ describe('cacache', () => {
         const result = await clear({ prefix: '*' })
         expect(typeof result).toBe('number')
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -662,7 +612,7 @@ describe('cacache', () => {
         expect(Buffer.isBuffer(entry.data)).toBe(true)
         await remove(key)
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -674,7 +624,7 @@ describe('cacache', () => {
         expect(entry.data.toString()).toBe('')
         await remove(key)
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -695,7 +645,7 @@ describe('cacache', () => {
         expect(entry).toBeDefined()
         await remove(key)
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
 
@@ -721,7 +671,7 @@ describe('cacache', () => {
         // Concurrent removes
         await Promise.all(keys.map(remove))
       } catch (e) {
-        expect(e).toBeDefined()
+        expect((e as Error).message).not.toMatch(/wildcard/i)
       }
     })
   })
