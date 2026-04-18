@@ -107,14 +107,14 @@ Type-safe environment variable access and platform detection.
 - `getCI()` - Detect CI environment
 - `getNodeEnv()` - Get NODE_ENV value
 - `isTest()` - Check if running tests
-- `getHome()` - Home directory (Unix/Linux/macOS)
+- `getHome()` - Home directory (cross-platform, with Windows `USERPROFILE` fallback)
 - Test rewiring with `setEnv()`, `resetEnv()`
 
 ### Package Management
 
 Detect and work with npm, pnpm, and yarn.
 
-- `detectPackageManager()` - Identify package manager from lock files
+- `detectPackageManager()` - Identify running package manager from `npm_config_user_agent` / binary path
 - Package manifest operations
 - Lock file management
 

@@ -111,7 +111,7 @@ const archive = await readFileBinary('./backup.tar.gz')
 - `filepath` (PathLike): Path to JSON file
 - `options` (ReadJsonOptions): Optional reviver function, encoding, and error handling
 
-**Returns:** Promise<any> with parsed JSON data
+**Returns:** `Promise<T>` with parsed JSON data (default `T = unknown`)
 
 **Example:**
 

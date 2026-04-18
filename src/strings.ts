@@ -600,8 +600,6 @@ try {
  * stringWidth('')
  * // Returns: 0
  * ```
- *
- * @throws {TypeError} When input is not a string
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stringWidth(text: string): number {
@@ -820,7 +818,7 @@ export function stripBom(str: string): string {
  * // Returns: 'xmlhttp-request'
  *
  * toKebabCase('iOS_Version')
- * // Returns: 'io-s-version'
+ * // Returns: 'i-os-version'
  *
  * toKebabCase('')
  * // Returns: ''

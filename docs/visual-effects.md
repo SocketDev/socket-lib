@@ -395,11 +395,11 @@ setTheme({
 
 **Built-in Themes:**
 
-- `socket` - Default Socket.dev theme (purple/magenta)
-- `sunset` - Warm oranges and yellows
-- `ocean` - Cool blues and teals
-- `forest` - Natural greens
-- `monochrome` - Black and white
+- `socket` - Default Socket.dev theme (refined violet with shimmer)
+- `sunset` - Warm sunset gradient (purple-to-orange)
+- `terracotta` - Rich terracotta and ember warmth
+- `lush` - Steel blue with golden accents
+- `ultra` - Prismatic shimmer for deep analysis
 
 ## Real-World Examples
 

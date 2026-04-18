@@ -41,6 +41,9 @@ export function createCompositeAbortSignal(
 /**
  * Create an AbortSignal that triggers after a timeout.
  *
+ * @throws {TypeError} If `ms` is not a number, is NaN, is not finite, or is not
+ *   positive.
+ *
  * @example
  * ```typescript
  * const signal = createTimeoutSignal(5000) // aborts after 5 seconds
