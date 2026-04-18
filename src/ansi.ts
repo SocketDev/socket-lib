@@ -4,12 +4,12 @@
  */
 
 // ANSI escape codes - commonly used sequences.
-export const ANSI_RESET = '\x1b[0m'
 export const ANSI_BOLD = '\x1b[1m'
 export const ANSI_DIM = '\x1b[2m'
 export const ANSI_ITALIC = '\x1b[3m'
-export const ANSI_UNDERLINE = '\x1b[4m'
+export const ANSI_RESET = '\x1b[0m'
 export const ANSI_STRIKETHROUGH = '\x1b[9m'
+export const ANSI_UNDERLINE = '\x1b[4m'
 
 // ANSI escape code regex to strip colors/formatting.
 // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequences use control characters.

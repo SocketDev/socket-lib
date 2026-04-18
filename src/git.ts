@@ -33,6 +33,45 @@ import { stripAnsi } from './strings'
  * const files = await getChangedFiles({ cwd: '/path/to/repo/src' })
  * ```
  */
+/**
+ * Options for filtering packages by git changes.
+ *
+ * Used to determine which packages in a monorepo have changed files.
+ *
+ * @example
+ * ```typescript
+ * // Filter packages with changes
+ * const changed = filterPackagesByChanges(packages)
+ *
+ * // Force include all packages
+ * const all = filterPackagesByChanges(packages, { force: true })
+ *
+ * // Use custom package key
+ * const changed = filterPackagesByChanges(
+ *   packages,
+ *   { packageKey: 'directory' }
+ * )
+ * ```
+ */
+export interface FilterPackagesByChangesOptions {
+  /**
+   * Force include all packages regardless of changes.
+   *
+   * @default false
+   */
+  force?: boolean | undefined
+  /**
+   * Key to access package path in package objects.
+   *
+   * @default 'path'
+   */
+  packageKey?: string | undefined
+  /**
+   * Additional options for filtering.
+   */
+  [key: string]: unknown
+}
+
 export interface GitDiffOptions {
   /**
    * Return absolute file paths instead of relative paths.
@@ -78,45 +117,6 @@ export interface GitDiffOptions {
    * Additional options passed to glob matcher.
    *
    * Supports options like `dot`, `ignore`, `nocase` for filtering results.
-   */
-  [key: string]: unknown
-}
-
-/**
- * Options for filtering packages by git changes.
- *
- * Used to determine which packages in a monorepo have changed files.
- *
- * @example
- * ```typescript
- * // Filter packages with changes
- * const changed = filterPackagesByChanges(packages)
- *
- * // Force include all packages
- * const all = filterPackagesByChanges(packages, { force: true })
- *
- * // Use custom package key
- * const changed = filterPackagesByChanges(
- *   packages,
- *   { packageKey: 'directory' }
- * )
- * ```
- */
-export interface FilterPackagesByChangesOptions {
-  /**
-   * Force include all packages regardless of changes.
-   *
-   * @default false
-   */
-  force?: boolean | undefined
-  /**
-   * Key to access package path in package objects.
-   *
-   * @default 'path'
-   */
-  packageKey?: string | undefined
-  /**
-   * Additional options for filtering.
    */
   [key: string]: unknown
 }

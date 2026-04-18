@@ -3,6 +3,10 @@
  * Provides text transformation functions for consistent word processing.
  */
 
+export interface PluralizeOptions {
+  count?: number
+}
+
 /**
  * Capitalize the first letter of a word.
  *
@@ -37,10 +41,6 @@ export function capitalize(word: string): string {
 /*@__NO_SIDE_EFFECTS__*/
 export function determineArticle(word: string): string {
   return /^[aeiou]/.test(word) ? 'an' : 'a'
-}
-
-export interface PluralizeOptions {
-  count?: number
 }
 
 /**

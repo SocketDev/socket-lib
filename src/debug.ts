@@ -344,16 +344,6 @@ export function debugLog(...args: unknown[]): void {
 }
 
 /**
- * Create a Node.js util.debuglog compatible function.
- * Returns a function that conditionally writes debug messages to stderr.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function debuglog(section: string) {
-  const util = getUtil()
-  return util.debuglog(section)
-}
-
-/**
  * Debug logging function with caller info.
  */
 export function debugLogNs(
@@ -392,6 +382,16 @@ export function debugLogNs(
   if (wasSpinning) {
     spinnerInstance?.start()
   }
+}
+
+/**
+ * Create a Node.js util.debuglog compatible function.
+ * Returns a function that conditionally writes debug messages to stderr.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function debuglog(section: string) {
+  const util = getUtil()
+  return util.debuglog(section)
 }
 
 /**

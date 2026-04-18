@@ -4,6 +4,12 @@
  */
 
 /**
+ * Special 'inherit' color value that uses the current color context.
+ * Used with effects like shimmer to dynamically inherit color.
+ */
+export type ColorInherit = 'inherit'
+
+/**
  * Named color values supported by the library.
  * Maps to standard terminal colors with bright variants.
  */
@@ -24,12 +30,6 @@ export type ColorName =
   | 'whiteBright'
   | 'yellow'
   | 'yellowBright'
-
-/**
- * Special 'inherit' color value that uses the current color context.
- * Used with effects like shimmer to dynamically inherit color.
- */
-export type ColorInherit = 'inherit'
 
 /**
  * RGB color tuple with values 0-255 for red, green, and blue channels.

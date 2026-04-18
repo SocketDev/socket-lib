@@ -599,26 +599,6 @@ export function isObjectObject(
   return proto === null || proto === ObjectPrototype
 }
 
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-
-/**
- * Alias for native `Object.assign`.
- *
- * Copies all enumerable own properties from one or more source objects
- * to a target object and returns the modified target object.
- *
- * @example
- * ```ts
- * const target = { a: 1 }
- * const source = { b: 2, c: 3 }
- * objectAssign(target, source) // { a: 1, b: 2, c: 3 }
- * ```
- */
-export const objectAssign = Object.assign
-
 /**
  * Deep merge source object into target object.
  *
@@ -704,6 +684,26 @@ export function merge<T extends object, U extends object>(
   }
   return target as T & U
 }
+
+// IMPORTANT: Do not use destructuring here - use direct assignment instead.
+// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
+// `exports.SomeName = void 0;` which causes runtime errors.
+// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
+
+/**
+ * Alias for native `Object.assign`.
+ *
+ * Copies all enumerable own properties from one or more source objects
+ * to a target object and returns the modified target object.
+ *
+ * @example
+ * ```ts
+ * const target = { a: 1 }
+ * const source = { b: 2, c: 3 }
+ * objectAssign(target, source) // { a: 1, b: 2, c: 3 }
+ * ```
+ */
+export const objectAssign = Object.assign
 
 /**
  * Get all own property entries (key-value pairs) from an object.
