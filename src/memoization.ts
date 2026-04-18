@@ -13,7 +13,7 @@ const cacheRegistry: Array<() => void> = []
 /**
  * Options for memoization behavior.
  */
-type MemoizeOptions<Args extends unknown[], _Result = unknown> = {
+export type MemoizeOptions<Args extends unknown[], _Result = unknown> = {
   /** Custom cache key generator (defaults to JSON.stringify) */
   keyGen?: (...args: Args) => string
   /** Maximum cache size (LRU eviction when exceeded) */

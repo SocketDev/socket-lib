@@ -10,7 +10,7 @@ import { debugLog } from './debug'
 /**
  * Performance metrics collected during execution.
  */
-type PerformanceMetrics = {
+export type PerformanceMetrics = {
   operation: string
   duration: number
   timestamp: number
