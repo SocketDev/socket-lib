@@ -808,7 +808,7 @@ export async function whichReal(
 ): Promise<string | string[] | undefined> {
   const fs = getFs()
   // Default to nothrow: true if not specified to return undefined instead of throwing
-  const opts = { nothrow: true, ...options }
+  const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
   // Use cache - validate with existsSync() which is cheaper than full PATH search.
   if (opts.all) {
@@ -886,7 +886,7 @@ export function whichRealSync(
 ): string | string[] | undefined {
   const fs = getFs()
   // Default to nothrow: true if not specified to return undefined instead of throwing
-  const opts = { nothrow: true, ...options }
+  const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
   // Use cache - validate with existsSync() which is cheaper than full PATH search.
   if (opts.all) {
