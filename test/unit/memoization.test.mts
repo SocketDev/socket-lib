@@ -97,6 +97,8 @@ describe('memoization', () => {
 
     it('should respect TTL expiration', async () => {
       const fn = vi.fn((n: number) => n * 2)
+      // Use a large margin so slow CI (especially Windows) doesn't race the
+      // wall clock: expire 100ms, sleep 500ms.
       const memoized = memoize(fn, { ttl: 100 })
 
       expect(memoized(5)).toBe(10)
@@ -106,8 +108,8 @@ describe('memoization', () => {
       expect(memoized(5)).toBe(10)
       expect(fn).toHaveBeenCalledTimes(1)
 
-      // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 150))
+      // Wait well past TTL to expire
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       expect(memoized(5)).toBe(10)
       expect(fn).toHaveBeenCalledTimes(2)
@@ -267,7 +269,7 @@ describe('memoization', () => {
       expect(fn).toHaveBeenCalledTimes(1)
 
       // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 150))
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       expect(await memoized(5)).toBe(10)
       expect(fn).toHaveBeenCalledTimes(2)
@@ -521,7 +523,7 @@ describe('memoization', () => {
       expect(fn).toHaveBeenCalledTimes(1)
 
       // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 150))
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // After debounce, still cached
       expect(debounced(5)).toBe(10)
@@ -538,7 +540,7 @@ describe('memoization', () => {
 
       expect(fn).toHaveBeenCalledTimes(1)
 
-      await new Promise(resolve => setTimeout(resolve, 150))
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Should still only be called once
       expect(fn).toHaveBeenCalledTimes(1)

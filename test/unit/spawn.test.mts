@@ -284,17 +284,15 @@ describe('spawn', () => {
       }
     })
 
-    it('should handle Windows script extensions on Windows', async () => {
-      if (process.platform === 'win32') {
-        // On Windows, commands with .cmd/.bat extensions should be handled
+    it.skipIf(process.platform !== 'win32')(
+      'should handle Windows script extensions on Windows',
+      async () => {
         const result = await spawn('npm.cmd', ['--version'], {
           shell: true,
         })
         expect(result.code).toBe(0)
-      } else {
-        expect(true).toBe(true) // Skip on non-Windows
-      }
-    })
+      },
+    )
 
     it.skipIf(process.platform === 'win32')(
       'should handle shell as string path',
@@ -444,16 +442,15 @@ describe('spawn', () => {
       expect(Array.isArray(result.output)).toBe(true)
     })
 
-    it('should handle Windows script extensions on Windows', () => {
-      if (process.platform === 'win32') {
+    it.skipIf(process.platform !== 'win32')(
+      'should handle Windows script extensions on Windows',
+      () => {
         const result = spawnSync('npm.cmd', ['--version'], {
           shell: true,
         })
         expect(result.status).toBe(0)
-      } else {
-        expect(true).toBe(true) // Skip on non-Windows
-      }
-    })
+      },
+    )
 
     it.skipIf(process.platform === 'win32')(
       'should handle shell as string path',

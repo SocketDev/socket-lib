@@ -255,17 +255,30 @@ describe('abort', () => {
       expect(signal).toBeInstanceOf(AbortSignal)
       expect(signal.aborted).toBe(false)
 
-      // Wait for timeout
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for the 'abort' event rather than racing the clock.
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error('timeout did not fire within 1000ms')),
+          1000,
+        )
+        signal.addEventListener(
+          'abort',
+          () => {
+            clearTimeout(timer)
+            resolve()
+          },
+          { once: true },
+        )
+      })
 
       expect(signal.aborted).toBe(true)
     })
 
     it('should not abort before timeout', async () => {
-      const signal = createTimeoutSignal(100)
+      const signal = createTimeoutSignal(500)
       expect(signal.aborted).toBe(false)
 
-      // Wait less than timeout
+      // Wait well under timeout — generous margin for slow CI.
       await new Promise(resolve => setTimeout(resolve, 30))
 
       expect(signal.aborted).toBe(false)

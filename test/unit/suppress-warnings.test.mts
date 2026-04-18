@@ -173,15 +173,12 @@ describe('suppress-warnings', () => {
     })
 
     it('should handle callback errors', async () => {
-      try {
-        await withSuppressedWarnings('TestWarning', () => {
+      // Callback errors must propagate out of withSuppressedWarnings.
+      await expect(
+        withSuppressedWarnings('TestWarning', () => {
           throw new Error('test error')
-        })
-      } catch (error: any) {
-        expect(error.message).toBe('test error')
-      }
-      // Error was properly propagated
-      expect(true).toBe(true)
+        }),
+      ).rejects.toThrow('test error')
     })
 
     it('should return callback result', async () => {
