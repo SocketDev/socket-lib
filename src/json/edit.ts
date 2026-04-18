@@ -100,7 +100,8 @@ async function retryWrite(
   retries = 3,
   baseDelay = 10,
 ): Promise<void> {
-  const { promises: fsPromises } = getFs()
+  const fs = getFs()
+  const { promises: fsPromises } = fs
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -113,24 +114,21 @@ async function retryWrite(
         // Initial delay to allow OS to flush the write
         // eslint-disable-next-line no-await-in-loop
         await sleep(50)
-        // Verify the file is actually readable with retries
+        // Verify the file is actually present with retries
         let accessRetries = 0
         const maxAccessRetries = 5
         while (accessRetries < maxAccessRetries) {
-          try {
-            // eslint-disable-next-line no-await-in-loop
-            await fsPromises.access(filepath)
+          if (fs.existsSync(filepath)) {
             // Small final delay to ensure stability
             // eslint-disable-next-line no-await-in-loop
             await sleep(10)
             break
-          } catch {
-            // If file isn't accessible yet, wait with increasing delays
-            const delay = 20 * (accessRetries + 1)
-            // eslint-disable-next-line no-await-in-loop
-            await sleep(delay)
-            accessRetries++
           }
+          // If file isn't present yet, wait with increasing delays
+          const delay = 20 * (accessRetries + 1)
+          // eslint-disable-next-line no-await-in-loop
+          await sleep(delay)
+          accessRetries++
         }
       }
       return

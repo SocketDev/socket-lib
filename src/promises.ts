@@ -470,12 +470,7 @@ export async function pEachChunk<T>(
  * @example
  * // Filter with concurrency
  * const validFiles = await pFilter(filePaths, async (path) => {
- *   try {
- *     await fs.access(path)
- *     return true
- *   } catch {
- *     return false
- *   }
+ *   return existsSync(path)
  * }, 10)
  *
  * @example

@@ -83,12 +83,7 @@ export function dlxDirExists(): boolean {
  */
 export async function dlxDirExistsAsync(): Promise<boolean> {
   const fs = getFs()
-  try {
-    await fs.promises.access(getSocketDlxDir())
-    return true
-  } catch {
-    return false
-  }
+  return fs.existsSync(getSocketDlxDir())
 }
 
 /**

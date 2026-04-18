@@ -51,12 +51,7 @@ export async function isDlxPackageInstalledAsync(
   packageName: string,
 ): Promise<boolean> {
   const fs = getFs()
-  try {
-    await fs.promises.access(getDlxInstalledPackageDir(packageName))
-    return true
-  } catch {
-    return false
-  }
+  return fs.existsSync(getDlxInstalledPackageDir(packageName))
 }
 
 /**
