@@ -44,8 +44,6 @@ describe('cacache', () => {
       expect(typeof cacache.get).toBe('function')
       expect(typeof cacache.put).toBe('function')
       // rm and ls are namespaces with methods like rm.entry, rm.all, ls.stream
-      expect(cacache.rm).toBeDefined()
-      expect(cacache.ls).toBeDefined()
       expect(typeof cacache.rm.entry).toBe('function')
       expect(typeof cacache.ls.stream).toBe('function')
     })

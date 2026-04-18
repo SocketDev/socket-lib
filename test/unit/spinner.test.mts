@@ -756,33 +756,22 @@ describe('spinner', () => {
   })
 
   describe('Theme handling', () => {
-    it('should accept theme as string name', () => {
-      const spinner = Spinner({ theme: 'socket' })
-      expect(spinner).toBeDefined()
-    })
-
-    it('should accept theme lush', () => {
-      const spinner = Spinner({ theme: 'lush' })
-      expect(spinner).toBeDefined()
-    })
-
-    it('should accept theme sunset', () => {
-      const spinner = Spinner({ theme: 'sunset' })
-      expect(spinner).toBeDefined()
-    })
-
-    it('should accept theme ultra', () => {
-      const spinner = Spinner({ theme: 'ultra' })
-      expect(spinner).toBeDefined()
-    })
+    it.each(['socket', 'lush', 'sunset', 'ultra'] as const)(
+      'should accept %s theme name without throwing and return a spinner with methods',
+      themeName => {
+        const spinner = Spinner({ theme: themeName })
+        expect(typeof spinner.start).toBe('function')
+        expect(typeof spinner.stop).toBe('function')
+      },
+    )
   })
 
   describe('getCliSpinners', () => {
     it('should return socket custom spinner', () => {
       const socket = getCliSpinners('socket')
       expect(socket).toBeDefined()
-      expect(socket!.frames).toBeDefined()
-      expect(socket!.interval).toBeDefined()
+      expect(Array.isArray(socket!.frames)).toBe(true)
+      expect(typeof socket!.interval).toBe('number')
     })
 
     it('should return undefined for non-existent spinner', () => {
