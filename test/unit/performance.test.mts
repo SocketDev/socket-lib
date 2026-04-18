@@ -146,7 +146,10 @@ describe('performance', () => {
     })
 
     it('should return no-op when DEBUG=perf is not set', () => {
-      process.env['DEBUG'] = undefined
+      // Actually unset the env var — `env['DEBUG'] = undefined` coerces
+      // to the string 'undefined' which matches `.includes('perf')`
+      // would falsely true if 'perf' ever appeared in any prefix.
+      delete process.env['DEBUG']
       const stop = perfTimer('no-debug')
       stop()
       const metrics = getPerformanceMetrics()

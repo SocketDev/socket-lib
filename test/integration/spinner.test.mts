@@ -10,14 +10,21 @@
  */
 
 import process from 'node:process'
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { Spinner, withSpinner } from '@socketsecurity/lib/spinner'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('spinner integration', () => {
   // Mock stdout/stderr to prevent actual spinner output during tests
   beforeEach(() => {
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
     vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+  })
+
+  afterEach(() => {
+    // Restore all vi.spyOn mocks to prevent leaking across test files.
+    vi.restoreAllMocks()
   })
 
   describe('real-world spinner workflows', () => {
@@ -29,13 +36,10 @@ describe('spinner integration', () => {
 
       // Simulate multi-step operation
       spinner.text('Step 1: Initializing')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.text('Step 2: Processing')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.text('Step 3: Finalizing')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.successAndStop('Operation completed!')
       expect(spinner.isSpinning).toBe(false)
@@ -48,7 +52,6 @@ describe('spinner integration', () => {
       const totalFiles = 10
       for (let i = 0; i <= totalFiles; i++) {
         spinner.progress(i, totalFiles, 'files')
-        await new Promise(resolve => setTimeout(resolve, 5))
       }
 
       spinner.doneAndStop('All files processed')
@@ -61,14 +64,11 @@ describe('spinner integration', () => {
 
       spinner.step('Step 1')
       spinner.substep('Substep 1.1')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.substep('Substep 1.2')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.step('Step 2')
       spinner.substep('Substep 2.1')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.successAndStop('Operation complete')
       expect(spinner.isSpinning).toBe(false)
@@ -82,7 +82,6 @@ describe('spinner integration', () => {
       const result = await withSpinner({
         message: 'Reading file...',
         operation: async () => {
-          await new Promise(resolve => setTimeout(resolve, 20))
           operationCompleted = true
           return 'file-content'
         },
@@ -96,7 +95,6 @@ describe('spinner integration', () => {
       const result = await withSpinner({
         message: 'Fetching data...',
         operation: async () => {
-          await new Promise(resolve => setTimeout(resolve, 20))
           return { status: 'success', data: [1, 2, 3] }
         },
       })
@@ -109,7 +107,6 @@ describe('spinner integration', () => {
         withSpinner({
           message: 'Running operation...',
           operation: async () => {
-            await new Promise(resolve => setTimeout(resolve, 10))
             throw new Error('Operation failed')
           },
         }),
@@ -120,7 +117,6 @@ describe('spinner integration', () => {
       const result = await withSpinner({
         message: 'Processing with shimmer...',
         operation: async () => {
-          await new Promise(resolve => setTimeout(resolve, 20))
           return 'done'
         },
         withOptions: {
@@ -135,7 +131,6 @@ describe('spinner integration', () => {
       const result = await withSpinner({
         message: 'Processing with color...',
         operation: async () => {
-          await new Promise(resolve => setTimeout(resolve, 20))
           return 'complete'
         },
         withOptions: {
@@ -161,7 +156,6 @@ describe('spinner integration', () => {
       }
 
       spinner.text('Continuing with other checks...')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.successAndStop('Checks completed with warnings')
       expect(spinner.isSpinning).toBe(false)
@@ -170,8 +164,6 @@ describe('spinner integration', () => {
     it('should stop spinner on fatal error', async () => {
       const spinner = Spinner()
       spinner.start('Critical operation...')
-
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.failAndStop('Critical failure - operation aborted')
       expect(spinner.isSpinning).toBe(false)
@@ -190,7 +182,6 @@ describe('spinner integration', () => {
       spinner.indent()
 
       spinner.step('Level 3 task')
-      await new Promise(resolve => setTimeout(resolve, 10))
 
       spinner.dedent()
       spinner.step('Back to level 2')

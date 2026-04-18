@@ -91,9 +91,12 @@ describe('streams', () => {
     })
 
     it('should work with async operations', async () => {
+      // Use Promise.resolve() for an async boundary — setTimeout(1) is
+      // below OS timer granularity on macOS/Windows (~10–15ms real wait)
+      // and misleads readers without providing a real delay.
       const input = [10, 20, 30]
       const result = parallelMap(input, async x => {
-        await new Promise(resolve => setTimeout(resolve, 1))
+        await Promise.resolve()
         return x / 10
       })
       const output = await collect(result)

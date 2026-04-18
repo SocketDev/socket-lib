@@ -109,14 +109,14 @@ export function getSocketApiToken(): string | undefined {
  *
  * @example
  * ```typescript
- * import { getSocketCacacheDir } from '@socketsecurity/lib/env/socket'
+ * import { getSocketCacacheDirEnv } from '@socketsecurity/lib/env/socket'
  *
- * const dir = getSocketCacacheDir()
+ * const dir = getSocketCacacheDirEnv()
  * // e.g. '/tmp/.socket-cache' or undefined
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function getSocketCacacheDir(): string | undefined {
+export function getSocketCacacheDirEnv(): string | undefined {
   return getEnvValue('SOCKET_CACACHE_DIR')
 }
 

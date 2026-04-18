@@ -44,21 +44,6 @@ export function divider(options?: DividerOptions): string {
 }
 
 /**
- * Print a divider line directly to console.
- *
- * @param options - Divider formatting options
- *
- * @example
- * ```ts
- * printDivider() // Prints default divider
- * printDivider({ char: '─', width: 60 })
- * ```
- */
-export function printDivider(options?: DividerOptions): void {
-  console.log(divider(options))
-}
-
-/**
  * Common divider style presets.
  * Provides quick access to popular divider styles.
  *
@@ -91,6 +76,21 @@ export const dividers = {
   /** Arrow divider using `→` */
   arrow: () => divider({ char: '→' }),
 } as const
+
+/**
+ * Print a divider line directly to console.
+ *
+ * @param options - Divider formatting options
+ *
+ * @example
+ * ```ts
+ * printDivider() // Prints default divider
+ * printDivider({ char: '─', width: 60 })
+ * ```
+ */
+export function printDivider(options?: DividerOptions): void {
+  console.log(divider(options))
+}
 
 /**
  * Print a dotted divider line.

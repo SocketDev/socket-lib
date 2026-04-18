@@ -703,17 +703,15 @@ export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
 
 /**
  * Get the DLX binary cache directory path.
- * Returns normalized path for cross-platform compatibility.
- * Uses same directory as dlx-package for unified DLX storage.
+ * Alias of `getSocketDlxDir` — DLX binary cache uses the same directory
+ * as dlx-package for unified DLX storage.
  *
  * @example
  * ```typescript
  * const cachePath = getDlxCachePath()
  * ```
  */
-export function getDlxCachePath(): string {
-  return getSocketDlxDir()
-}
+export const getDlxCachePath = getSocketDlxDir
 
 /**
  * Check if a cached binary is still valid.

@@ -202,7 +202,10 @@ export class DlxManifest {
       logger.warn(
         `Failed to read manifest: ${error instanceof Error ? error.message : String(error)}`,
       )
-      return Object.create(null)
+      return { __proto__: null } as unknown as Record<
+        string,
+        ManifestEntry | StoreRecord
+      >
     }
   }
 

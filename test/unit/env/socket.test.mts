@@ -3,7 +3,7 @@
  *
  * Tests Socket-specific environment variable accessors (SOCKET_* prefix):
  * - API config: getSocketApiBaseUrl(), getSocketApiToken(), getSocketApiProxy(), getSocketApiTimeout()
- * - Paths: getSocketHome(), getSocketCacacheDir(), getSocketDlxDirEnv(), getSocketConfig()
+ * - Paths: getSocketHome(), getSocketCacacheDirEnv(), getSocketDlxDirEnv(), getSocketConfig()
  * - Registry: getSocketNpmRegistry(), getSocketRegistryUrl()
  * - Behavior: getSocketDebug(), getSocketAcceptRisks(), getSocketViewAllRisks(), getSocketNoApiToken()
  * - Organization: getSocketOrgSlug()
@@ -16,7 +16,7 @@ import {
   getSocketApiProxy,
   getSocketApiTimeout,
   getSocketApiToken,
-  getSocketCacacheDir,
+  getSocketCacacheDirEnv,
   getSocketConfig,
   getSocketDebug,
   getSocketDlxDirEnv,
@@ -106,15 +106,15 @@ describe('socket env', () => {
     })
   })
 
-  describe('getSocketCacacheDir', () => {
+  describe('getSocketCacacheDirEnv', () => {
     it('should return cacache directory when set', () => {
       setEnv('SOCKET_CACACHE_DIR', '/custom/cacache')
-      expect(getSocketCacacheDir()).toBe('/custom/cacache')
+      expect(getSocketCacacheDirEnv()).toBe('/custom/cacache')
     })
 
     it('should return undefined when not set', () => {
       setEnv('SOCKET_CACACHE_DIR', undefined)
-      expect(getSocketCacacheDir()).toBeUndefined()
+      expect(getSocketCacacheDirEnv()).toBeUndefined()
     })
   })
 

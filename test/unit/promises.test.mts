@@ -223,17 +223,22 @@ describe('promises', () => {
     })
 
     it('should respect abort signal', async () => {
+      // Abort synchronously after the first item is processed so the
+      // outcome doesn't depend on wall-clock ordering of setTimeout vs
+      // the async iterator.
       const controller = new AbortController()
       const items = [1, 2, 3, 4]
       const processed: number[] = []
 
-      setTimeout(() => controller.abort(), 20)
-
       await pEach(
         items,
         async item => {
-          await new Promise(resolve => setTimeout(resolve, 15))
           processed.push(item)
+          // Trigger abort after first item; subsequent iterations see
+          // an already-aborted signal.
+          if (item === 1) {
+            controller.abort()
+          }
         },
         { signal: controller.signal, concurrency: 1 },
       )
@@ -306,15 +311,17 @@ describe('promises', () => {
     })
 
     it('should respect abort signal', async () => {
+      // Abort synchronously after the first item so the outcome doesn't
+      // depend on wall-clock timer races.
       const controller = new AbortController()
       const items = [1, 2, 3, 4, 5, 6]
-
-      setTimeout(() => controller.abort(), 15)
 
       const result = await pFilter(
         items,
         async item => {
-          await new Promise(resolve => setTimeout(resolve, 10))
+          if (item === 1) {
+            controller.abort()
+          }
           return item % 2 === 0
         },
         { signal: controller.signal, concurrency: 1 },
@@ -385,6 +392,7 @@ describe('promises', () => {
     })
 
     it('should handle abort signal mid-processing', async () => {
+      // Abort synchronously after first item instead of racing a timer.
       const controller = new AbortController()
       const chunks = [
         [1, 2, 3],
@@ -392,12 +400,12 @@ describe('promises', () => {
         [7, 8, 9],
       ]
 
-      setTimeout(() => controller.abort(), 25)
-
       const result = await pFilterChunk(
         chunks,
         async item => {
-          await new Promise(resolve => setTimeout(resolve, 15))
+          if (item === 1) {
+            controller.abort()
+          }
           return item % 2 === 0
         },
         { signal: controller.signal },
@@ -485,17 +493,19 @@ describe('promises', () => {
     })
 
     it('should respect abort signal', async () => {
+      // Abort synchronously from inside the first chunk rather than
+      // racing a setTimeout with an inner sleep.
       const controller = new AbortController()
       const items = Array.from({ length: 500 }, (_, i) => i + 1)
       let chunksProcessed = 0
-
-      setTimeout(() => controller.abort(), 25)
 
       await pEachChunk(
         items,
         async chunk => {
           chunksProcessed += 1
-          await new Promise(resolve => setTimeout(resolve, 15))
+          if (chunksProcessed === 1) {
+            controller.abort()
+          }
           return chunk
         },
         { chunkSize: 100, signal: controller.signal },

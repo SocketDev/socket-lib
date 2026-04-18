@@ -22,7 +22,7 @@ import {
 } from '../constants/socket'
 import { getHome } from '../env/home'
 import {
-  getSocketCacacheDir as getSocketCacacheDirEnv,
+  getSocketCacacheDirEnv,
   getSocketDlxDirEnv,
   getSocketHome,
 } from '../env/socket'

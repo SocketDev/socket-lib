@@ -4,9 +4,12 @@
 
 import { LOOP_SENTINEL } from '../constants/core'
 import { getCopyLeftLicenses } from '../constants/licenses'
-
 import spdxCorrect from '../external/spdx-correct'
 import spdxExpParse from '../external/spdx-expression-parse'
+import { hasOwn } from '../objects'
+import { normalizePath } from '../paths/normalize'
+
+import type { LicenseNode } from '../packages'
 
 const copyLeftLicenses = getCopyLeftLicenses()
 
@@ -22,10 +25,6 @@ function getPath() {
   }
   return _path as typeof import('node:path')
 }
-
-import { hasOwn } from '../objects'
-import type { LicenseNode } from '../packages'
-import { normalizePath } from '../paths/normalize'
 
 const BINARY_OPERATION_NODE_TYPE = 'BinaryOperation'
 const LICENSE_NODE_TYPE = 'License'

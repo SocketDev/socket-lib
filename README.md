@@ -142,7 +142,7 @@ Helpers for arrays, objects, strings, promises, sorting, and more.
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **TypeScript-first** - Full type safety with .d.ts files
 - **Zero dependencies** (for core HTTP - uses Node.js native modules)
-- **Well-tested** - 6600+ tests across 145 test files
+- **Well-tested** - 6000+ tests across 139+ test files
 - **Security-focused** - Safe defaults, command injection protection
 - **CommonJS output** - Compatible with Node.js tooling
 
