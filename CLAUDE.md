@@ -79,7 +79,7 @@
 
 ## DOCUMENTATION POLICY
 
-**Allowed**: `README.md`, `CLAUDE.md`, `SECURITY.md`, `CHANGELOG.md`, `docs/` (max 10 files), `.claude/` (functional only), `*/README.md` for complex subsystems only.
+**Allowed**: `README.md`, `CLAUDE.md`, `SECURITY.md`, `CHANGELOG.md`, `docs/` (max 11 files), `.claude/` (functional only), `*/README.md` for complex subsystems only.
 
 **Forbidden**: Migration/planning docs after completion, redundant guides, docs duplicating code comments, tutorial content, ADRs unless requested. After migrations or major refactors, DELETE planning documents.
 

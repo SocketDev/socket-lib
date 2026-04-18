@@ -331,85 +331,31 @@ describe('argv/flags', () => {
       expect(typeof COMMON_FLAGS).toBe('object')
     })
 
-    it('should have all flag defined', () => {
-      expect(COMMON_FLAGS.all).toBeDefined()
-      expect(COMMON_FLAGS.all.type).toBe('boolean')
-      expect(COMMON_FLAGS.all.default).toBe(false)
-    })
-
-    it('should have changed flag defined', () => {
-      expect(COMMON_FLAGS.changed).toBeDefined()
-      expect(COMMON_FLAGS.changed.type).toBe('boolean')
-    })
-
-    it('should have coverage flag defined', () => {
-      expect(COMMON_FLAGS.coverage).toBeDefined()
-      expect(COMMON_FLAGS.coverage.type).toBe('boolean')
-    })
-
-    it('should have debug flag defined', () => {
-      expect(COMMON_FLAGS.debug).toBeDefined()
-      expect(COMMON_FLAGS.debug.type).toBe('boolean')
-    })
-
-    it('should have dry-run flag defined', () => {
-      expect(COMMON_FLAGS['dry-run']).toBeDefined()
-      expect(COMMON_FLAGS['dry-run'].type).toBe('boolean')
-    })
-
-    it('should have fix flag defined', () => {
-      expect(COMMON_FLAGS.fix).toBeDefined()
-      expect(COMMON_FLAGS.fix.type).toBe('boolean')
-    })
-
-    it('should have force flag defined', () => {
-      expect(COMMON_FLAGS.force).toBeDefined()
-      expect(COMMON_FLAGS.force.type).toBe('boolean')
-    })
-
-    it('should have help flag with short alias', () => {
-      expect(COMMON_FLAGS.help).toBeDefined()
-      expect(COMMON_FLAGS.help.type).toBe('boolean')
-      expect(COMMON_FLAGS.help.short).toBe('h')
-    })
-
-    it('should have json flag defined', () => {
-      expect(COMMON_FLAGS.json).toBeDefined()
-      expect(COMMON_FLAGS.json.type).toBe('boolean')
-    })
-
-    it('should have quiet flag with short alias', () => {
-      expect(COMMON_FLAGS.quiet).toBeDefined()
-      expect(COMMON_FLAGS.quiet.type).toBe('boolean')
-      expect(COMMON_FLAGS.quiet.short).toBe('q')
-    })
-
-    it('should have silent flag defined', () => {
-      expect(COMMON_FLAGS.silent).toBeDefined()
-      expect(COMMON_FLAGS.silent.type).toBe('boolean')
-    })
-
-    it('should have staged flag defined', () => {
-      expect(COMMON_FLAGS.staged).toBeDefined()
-      expect(COMMON_FLAGS.staged.type).toBe('boolean')
-    })
-
-    it('should have update flag with short alias', () => {
-      expect(COMMON_FLAGS.update).toBeDefined()
-      expect(COMMON_FLAGS.update.type).toBe('boolean')
-      expect(COMMON_FLAGS.update.short).toBe('u')
-    })
-
-    it('should have verbose flag with short alias', () => {
-      expect(COMMON_FLAGS.verbose).toBeDefined()
-      expect(COMMON_FLAGS.verbose.type).toBe('boolean')
-      expect(COMMON_FLAGS.verbose.short).toBe('v')
-    })
-
-    it('should have watch flag with short alias', () => {
-      expect(COMMON_FLAGS.watch).toBeDefined()
-      expect(COMMON_FLAGS.watch.type).toBe('boolean')
-      expect(COMMON_FLAGS.watch.short).toBe('w')
+    it.each([
+      { name: 'all', extra: { default: false } },
+      { name: 'changed' },
+      { name: 'coverage' },
+      { name: 'debug' },
+      { name: 'dry-run' },
+      { name: 'fix' },
+      { name: 'force' },
+      { name: 'help', extra: { short: 'h' } },
+      { name: 'json' },
+      { name: 'quiet', extra: { short: 'q' } },
+      { name: 'silent' },
+      { name: 'staged' },
+      { name: 'update', extra: { short: 'u' } },
+      { name: 'verbose', extra: { short: 'v' } },
+      { name: 'watch', extra: { short: 'w' } },
+    ])('should define $name as boolean flag', ({ name, extra }) => {
+      const flag = COMMON_FLAGS[name as keyof typeof COMMON_FLAGS]
+      expect(flag).toBeDefined()
+      expect(flag.type).toBe('boolean')
+      if (extra) {
+        for (const [key, value] of Object.entries(extra)) {
+          expect(flag[key as keyof typeof flag]).toBe(value)
+        }
+      }
     })
 
     it('should have descriptions for all flags', () => {
