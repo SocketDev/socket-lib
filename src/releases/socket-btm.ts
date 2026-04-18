@@ -15,10 +15,17 @@ import {
   type DownloadGitHubReleaseConfig,
   getLatestRelease,
   getReleaseAssetUrl,
-  SOCKET_BTM_REPO,
 } from './github.js'
 
 export type { Arch, Libc, Platform }
+
+/**
+ * Socket-btm GitHub repository configuration.
+ */
+export const SOCKET_BTM_REPO = {
+  owner: 'SocketDev',
+  repo: 'socket-btm',
+} as const
 
 /**
  * Configuration for downloading socket-btm generic assets.

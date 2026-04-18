@@ -5,10 +5,11 @@
  * argv arrays.
  */
 
+import process from 'node:process'
+
 /**
  * Flag values object from parsed arguments.
  */
-import process from 'node:process'
 export interface FlagValues {
   [key: string]: unknown
   quiet?: boolean

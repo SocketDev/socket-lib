@@ -179,3 +179,26 @@ export function createSummaryFooter(
     ...(stats.duration !== undefined && { startTime: stats.duration }),
   })
 }
+
+/**
+ * Print a footer with optional success message.
+ * Uses `─` border character for a lighter appearance.
+ * Fixed width of 55 characters to match `printHeader()`.
+ *
+ * @param message - Optional message to display (shown in green)
+ *
+ * @example
+ * ```ts
+ * printFooter('Analysis complete')
+ * // Output:
+ * // ───────────────────────────────────────────────────
+ * // Analysis complete (in green)
+ * ```
+ */
+export function printFooter(message?: string | undefined): void {
+  const border = repeatString('─', 55)
+  console.log(border)
+  if (message) {
+    console.log(colors.green(message))
+  }
+}

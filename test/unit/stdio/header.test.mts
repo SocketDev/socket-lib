@@ -14,9 +14,9 @@ import { stripAnsi } from '@socketsecurity/lib/ansi'
 import {
   createHeader,
   createSectionHeader,
-  printFooter,
   printHeader,
 } from '@socketsecurity/lib/stdio/header'
+import { printFooter } from '@socketsecurity/lib/stdio/footer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('stdio/header', () => {

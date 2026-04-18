@@ -13,8 +13,8 @@ import {
   getAuthHeaders,
   getLatestRelease,
   getReleaseAssetUrl,
-  SOCKET_BTM_REPO,
 } from '../../src/releases/github'
+import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
 
 import type { HttpDownloadResult, HttpResponse } from '../../src/http-request'
 import { httpDownload, httpRequest } from '../../src/http-request'

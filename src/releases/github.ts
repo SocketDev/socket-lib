@@ -93,14 +93,6 @@ const RETRY_CONFIG = Object.freeze({
   retries: 2,
 })
 
-/**
- * Socket-btm GitHub repository configuration.
- */
-export const SOCKET_BTM_REPO = {
-  owner: 'SocketDev',
-  repo: 'socket-btm',
-} as const
-
 const logger = getDefaultLogger()
 
 let _fs: typeof import('node:fs') | undefined

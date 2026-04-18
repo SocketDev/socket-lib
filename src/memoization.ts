@@ -438,10 +438,13 @@ export function memoizeWeak<K extends object, Result>(
 }
 
 /**
- * Simple once() implementation - caches single result forever.
- * Useful for initialization functions that should only run once.
+ * Simple once() for zero-argument initialization functions.
+ * Caches a single result forever and emits debug-log events on hit/miss.
  *
- * @param fn - Function to run once
+ * For arg-aware memoization with `this` preservation, see `once` in
+ * `@socketsecurity/lib/functions` which accepts any signature.
+ *
+ * @param fn - Zero-argument function to run once
  * @returns Memoized version that only executes once
  *
  * @example
