@@ -3,13 +3,14 @@
  * Provides colored hyperlinks using theme configuration.
  */
 
-import type { ColorName } from '../colors'
-import yoctocolorsCjs from '../external/yoctocolors-cjs'
-import { getTheme } from '../themes/context'
-import { THEMES } from '../themes/themes'
-import { resolveColor } from '../themes/utils'
-import type { Theme } from '../themes/types'
-import type { ThemeName } from '../themes/themes'
+import yoctocolorsCjs from './external/yoctocolors-cjs'
+import { getTheme } from './themes/context'
+import { THEMES } from './themes/themes'
+import { resolveColor } from './themes/utils'
+
+import type { ColorName } from './colors'
+import type { ThemeName } from './themes/themes'
+import type { Theme } from './themes/types'
 
 /**
  * Options for creating themed links.

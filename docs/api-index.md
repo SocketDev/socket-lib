@@ -30,7 +30,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/http-request`](../src/http-request.ts)             | HTTP/HTTPS request utilities using Node.js built-in modules with retry logic, redirects, and download support. |
 | [`@socketsecurity/lib/ipc`](../src/ipc.ts)                               | Secure inter-process communication utilities for Socket CLI.                                                   |
 | [`@socketsecurity/lib/ipc-cli`](../src/ipc-cli.ts)                       | Socket CLI child-process IPC object getter.                                                                    |
-| [`@socketsecurity/lib/links`](../src/links/index.ts)                     | Themed hyperlink utilities for terminal output.                                                                |
+| [`@socketsecurity/lib/links`](../src/links.ts)                           | Themed hyperlink utilities for terminal output.                                                                |
 | [`@socketsecurity/lib/logger`](../src/logger.ts)                         | Console logging utilities with line prefix support.                                                            |
 | [`@socketsecurity/lib/memoization`](../src/memoization.ts)               | Memoization utilities for caching function results.                                                            |
 | [`@socketsecurity/lib/objects`](../src/objects.ts)                       | Object manipulation and reflection utilities.                                                                  |

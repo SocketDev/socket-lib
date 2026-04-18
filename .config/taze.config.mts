@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Taze dependency-update configuration for socket-lib.
+ */
+
 import { defineConfig } from 'taze'
 
 const tazeConfig = defineConfig({

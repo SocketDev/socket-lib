@@ -412,8 +412,8 @@
       "default": "./dist/json/types.js"
     },
     "./links": {
-      "types": "./dist/links/index.d.ts",
-      "default": "./dist/links/index.js"
+      "types": "./dist/links.d.ts",
+      "default": "./dist/links.js"
     },
     "./logger": {
       "types": "./dist/logger.d.ts",

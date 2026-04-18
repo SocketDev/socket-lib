@@ -1,6 +1,9 @@
+/**
+ * @fileoverview Vite plugin to inline CommonJS require() calls of simple constants for coverage runs.
+ */
+
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import process from 'node:process'
 
 import { parse } from '@babel/parser'
 import type { NodePath } from '@babel/traverse'

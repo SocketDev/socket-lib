@@ -53,10 +53,6 @@ import {
   resolveRegistryPackageName,
 } from './packages/operations'
 import {
-  resolvePackageJsonDirname,
-  resolvePackageJsonPath,
-} from './paths/packages'
-import {
   fetchPackageProvenance,
   getProvenanceDetails,
 } from './packages/provenance'
@@ -72,6 +68,10 @@ import {
   isRegistryFetcherType,
   isValidPackageName,
 } from './packages/validation'
+import {
+  resolvePackageJsonDirname,
+  resolvePackageJsonPath,
+} from './paths/packages'
 
 // Type for package.json exports field.
 type PackageExports = {
@@ -270,11 +270,11 @@ export {
   resolveEscapedScope,
   resolveGitHubTgzUrl,
   resolveOriginalPackageName,
-  resolvePackageName,
   resolvePackageJsonDirname,
-  resolvePackageJsonPath,
   resolvePackageJsonEntryExports,
+  resolvePackageJsonPath,
   resolvePackageLicenses,
+  resolvePackageName,
   resolveRegistryPackageName,
   toEditablePackageJson,
   toEditablePackageJsonSync,

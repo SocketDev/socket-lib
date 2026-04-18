@@ -1,11 +1,11 @@
+/**
+ * @fileoverview Vite plugin to transform ES6 import paths from dist/ to src/ during coverage so tests load TypeScript sources for instrumentation.
+ */
+
 import { resolve } from 'node:path'
 
 import type { Plugin } from 'vite'
 
-/**
- * Vite plugin to transform ES6 import paths from dist/ to src/ during coverage.
- * This allows tests with ES6 imports to load TypeScript source files for instrumentation.
- */
 export function createImportTransformPlugin(
   isCoverageEnabled: boolean,
   projectRoot: string,
