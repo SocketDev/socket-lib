@@ -43,7 +43,6 @@ export type ColorRgb = readonly [number, number, number]
  */
 export type ColorValue = ColorName | ColorRgb
 
-// Map color names to RGB values.
 const colorToRgb: Record<ColorName, ColorRgb> = {
   __proto__: null,
   black: [0, 0, 0],

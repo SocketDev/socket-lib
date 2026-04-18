@@ -237,7 +237,6 @@ export async function downloadSocketBtmRelease(
         throw new Error(`No ${tool} release with matching asset pattern found`)
       }
 
-      // Get the matching asset URL (which will give us the asset name).
       const assetUrl = await getReleaseAssetUrl(
         resolvedTag,
         asset,
@@ -292,7 +291,6 @@ export async function downloadSocketBtmRelease(
     // Default bin to tool if not provided (like brew/cargo)
     const baseName = bin || tool
 
-    // Build asset name and platform-arch identifier
     const assetName = getBinaryAssetName(
       baseName,
       targetPlatform,

@@ -205,7 +205,6 @@ export async function downloadAndExtractArchive(
   const path = getPath()
   const fs = getFs()
 
-  // Create output directory
   await safeMkdir(outputDir)
 
   // Determine file extension from pattern or format
@@ -296,7 +295,6 @@ export async function downloadAndExtractZip(
   const path = getPath()
   const fs = getFs()
 
-  // Create output directory
   await safeMkdir(outputDir)
 
   // Download zip to temporary location
@@ -505,7 +503,6 @@ export async function downloadReleaseAsset(
   }
 
   const path = getPath()
-  // Create output directory.
   await safeMkdir(path.dirname(outputPath))
 
   // Download using httpDownload which supports redirects and retries.
