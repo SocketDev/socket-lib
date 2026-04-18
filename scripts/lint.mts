@@ -7,12 +7,11 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import {
   getChangedFilesSync,
   getStagedFilesSync,
 } from '@socketsecurity/lib-stable/git'
-
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 

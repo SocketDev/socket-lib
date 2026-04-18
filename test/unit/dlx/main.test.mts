@@ -5,7 +5,7 @@
  * - getDlxPackageDir(), getDlxPackageJsonPath() path resolution
  * - ensureDlxDir(), ensureDlxDirSync() cache directory creation
  * - clearDlx(), clearDlxSync() cache cleanup
- * - dlxDirExists(), dlxDirExistsAsync() cache existence checks
+ * - dlxDirExists() cache existence checks
  * - generateCacheKey() creates unique cache keys for packages
  * Used by Socket CLI for pnpm dlx / npx-style package execution.
  */

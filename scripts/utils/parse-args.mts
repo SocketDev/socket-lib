@@ -6,8 +6,8 @@
  * dependencies where build scripts depend on the built dist output.
  */
 
-import { parseArgs as nodeParseArgs } from 'node:util'
 import process from 'node:process'
+import { parseArgs as nodeParseArgs } from 'node:util'
 
 /**
  * Parse command-line arguments using Node.js built-in parseArgs.

@@ -5,6 +5,14 @@
 
 import process from 'node:process'
 
+import {
+  clearLineOn,
+  cursorToOn,
+  getColumnsOf,
+  getRowsOf,
+  isTTYOf,
+} from './_stream'
+
 // Get the actual stderr stream
 const stderr: NodeJS.WriteStream = process.stderr
 
@@ -20,10 +28,7 @@ const stderr: NodeJS.WriteStream = process.stderr
  * ```
  */
 export function clearLine(): void {
-  if (stderr.isTTY) {
-    stderr.cursorTo(0)
-    stderr.clearLine(0)
-  }
+  clearLineOn(stderr)
 }
 
 /**
@@ -40,9 +45,7 @@ export function clearLine(): void {
  * ```
  */
 export function cursorTo(x: number, y?: number | undefined): void {
-  if (stderr.isTTY) {
-    stderr.cursorTo(x, y)
-  }
+  cursorToOn(stderr, x, y)
 }
 
 /**
@@ -58,7 +61,7 @@ export function cursorTo(x: number, y?: number | undefined): void {
  * ```
  */
 export function getColumns(): number {
-  return stderr.columns || 80
+  return getColumnsOf(stderr)
 }
 
 /**
@@ -74,7 +77,7 @@ export function getColumns(): number {
  * ```
  */
 export function getRows(): number {
-  return stderr.rows || 24
+  return getRowsOf(stderr)
 }
 
 /**
@@ -92,7 +95,7 @@ export function getRows(): number {
  * ```
  */
 export function isTTY(): boolean {
-  return stderr.isTTY || false
+  return isTTYOf(stderr)
 }
 
 /**

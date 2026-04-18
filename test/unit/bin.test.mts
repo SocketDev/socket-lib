@@ -98,15 +98,13 @@ describe('bin', () => {
       expect(result).toBeUndefined()
     })
 
-    it('should respect nothrow option set to false', () => {
-      try {
-        const result = whichRealSync('nonexistent-bin-xyz', { nothrow: false })
-        // If it doesn't throw, expect undefined
-        expect(result).toBeUndefined()
-      } catch (error) {
-        // If it throws, that's also acceptable behavior
-        expect(error).toBeDefined()
-      }
+    it('should return undefined when nothrow is false and binary not found', () => {
+      // Observed behavior: our wrapper returns undefined for missing
+      // binaries regardless of nothrow. The option is passed through
+      // to which-module; its behavior has evolved in recent versions.
+      expect(
+        whichRealSync('nonexistent-bin-xyz', { nothrow: false }),
+      ).toBeUndefined()
     })
 
     it('should return array when all option is true', () => {
@@ -122,12 +120,12 @@ describe('bin', () => {
       expect(result).toBeUndefined()
     })
 
-    it('should resolve path when all is false', () => {
+    it('should resolve node path when all is false', () => {
+      // node is guaranteed to be on PATH (we are running under node).
       const result = whichRealSync('node', { all: false })
-      if (result) {
-        expect(typeof result).toBe('string')
-        expect(result).not.toContain('\\')
-      }
+      expect(typeof result).toBe('string')
+      expect(result).toContain('node')
+      expect(result).not.toContain('\\')
     })
 
     it('should handle empty binary name', () => {

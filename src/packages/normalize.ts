@@ -9,9 +9,9 @@ import {
 import { escapeRegExp } from '../regexps'
 import normalizePackageData from '../external/normalize-package-data'
 import { merge } from '../objects'
+import { findPackageExtensions } from './operations'
 
 import type { NormalizeOptions, PackageJson } from '../packages'
-import { findPackageExtensions } from './operations'
 
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn

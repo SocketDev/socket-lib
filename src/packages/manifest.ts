@@ -19,9 +19,10 @@ import semver from '../external/semver'
 
 import { isArray } from '../arrays'
 import { isObjectObject, objectEntries } from '../objects'
-import type { PackageJson, PacoteOptions } from '../packages'
 import { resolvePackageJsonEntryExports } from './exports'
 import { isRegistryFetcherType } from './validation'
+
+import type { PackageJson, PacoteOptions } from '../packages'
 
 const abortSignal = getAbortSignal()
 const packageDefaultNodeRange = getPackageDefaultNodeRange()

@@ -4,14 +4,16 @@
  */
 
 import process from 'node:process'
+
 import { build, context } from 'esbuild'
+
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
 } from '../../.config/esbuild.config.mts'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 

@@ -222,10 +222,12 @@ describe('streams', () => {
     })
 
     it('should handle side effects', async () => {
+      // Use Promise.resolve() for an async boundary — setTimeout(1) is
+      // below OS timer granularity on macOS/Windows.
       const input = ['a', 'b', 'c']
       const results: string[] = []
       await parallelEach(input, async x => {
-        await new Promise(resolve => setTimeout(resolve, 1))
+        await Promise.resolve()
         results.push(x.toUpperCase())
       })
       expect(results.sort()).toEqual(['A', 'B', 'C'])

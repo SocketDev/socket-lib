@@ -5,13 +5,14 @@
  * dependencies where build scripts depend on the built dist output.
  */
 
+import process from 'node:process'
+
 /**
  * Register a callback to run when process exits
  *
  * @param {(code: number, signal: string | null) => void} callback
  * @returns {() => void} Cleanup function
  */
-import process from 'node:process'
 export function onExit(callback) {
   const signals = ['SIGINT', 'SIGTERM', 'SIGHUP']
 

@@ -1201,36 +1201,40 @@ describe('spinner', () => {
       expect(result).toBe('completed')
     })
 
-    it('should handle spinner text updates during operation', async () => {
+    it('should invoke the operation when text is updated during run', async () => {
+      // withSpinner resets spinner text after completion — observable is
+      // that the operation actually ran (text calls would throw on a
+      // broken spinner/operation callback wiring).
       const spinner = Spinner()
+      let opRan = false
       await withSpinner({
         message: 'Starting...',
         operation: async () => {
           spinner.text('Middle...')
-          await new Promise(resolve => setTimeout(resolve, 1))
           spinner.text('Finishing...')
+          opRan = true
         },
         spinner,
       })
-      expect(spinner).toBeDefined()
+      expect(opRan).toBe(true)
     })
 
-    it('should handle progress updates during withSpinner', async () => {
+    it('should chain progress calls during withSpinner without throwing', async () => {
       const spinner = Spinner()
-      await withSpinner({
+      // #progress is private — best observable is that the operation
+      // completes and each progressStep() returns the spinner (chainable).
+      const result = await withSpinner({
         message: 'Processing files...',
         operation: async () => {
           spinner.progress(0, 3, 'files')
-          await new Promise(resolve => setTimeout(resolve, 1))
-          spinner.progressStep()
-          await new Promise(resolve => setTimeout(resolve, 1))
-          spinner.progressStep()
-          await new Promise(resolve => setTimeout(resolve, 1))
-          spinner.progressStep()
+          const a = spinner.progressStep()
+          const b = spinner.progressStep()
+          const c = spinner.progressStep()
+          return a === spinner && b === spinner && c === spinner
         },
         spinner,
       })
-      expect(spinner).toBeDefined()
+      expect(result).toBe(true)
     })
 
     it('should handle multiple spinner instances', () => {

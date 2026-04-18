@@ -3,17 +3,17 @@
  * Combines check, build, and test steps with clean, consistent output.
  */
 
-import type { SpawnOptions } from 'node:child_process'
-
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
+
+import type { SpawnOptions } from 'node:child_process'
 
 import { getTestsToRun } from '../utils/changed-test-mapper.mts'
 import { parseArgs } from '../utils/parse-args.mts'

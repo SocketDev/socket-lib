@@ -4,18 +4,11 @@
 
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
-
-import type { BuildResult } from 'esbuild'
+import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
 
-import {
-  analyzeMetafile,
-  buildConfig,
-  watchConfig,
-} from '../../.config/esbuild.config.mts'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import {
@@ -23,8 +16,15 @@ import {
   printHeader,
 } from '@socketsecurity/lib-stable/stdio/header'
 
+import {
+  analyzeMetafile,
+  buildConfig,
+  watchConfig,
+} from '../../.config/esbuild.config.mts'
 import { parseArgs } from '../utils/parse-args.mts'
 import { runSequence } from '../utils/run-command.mts'
+
+import type { BuildResult } from 'esbuild'
 
 const logger = getDefaultLogger()
 

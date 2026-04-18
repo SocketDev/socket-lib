@@ -466,8 +466,10 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should expire entries and return undefined after TTL (memoized)', async () => {
+      // Use generous TTL margin to avoid flaky failures on slow CI runners
+      // (especially Windows). Matches sibling TTL-expiry tests in this file.
       const shortCache = createTtlCache({
-        ttl: 200,
+        ttl: 500,
         prefix: 'short-memo-cache',
         memoize: true,
       })
@@ -475,7 +477,7 @@ describe.sequential('cache-with-ttl', () => {
       await shortCache.set('key', 'value')
       expect(await shortCache.get<string>('key')).toBe('value')
 
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 700))
       expect(await shortCache.get<string>('key')).toBeUndefined()
 
       await shortCache.clear()

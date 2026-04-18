@@ -320,7 +320,7 @@ describe('cacache', () => {
     it('should support async callbacks', async () => {
       try {
         const result = await withTmp(async tmpDir => {
-          await new Promise(resolve => setTimeout(resolve, 1))
+          await Promise.resolve()
           return tmpDir.length
         })
         expect(typeof result).toBe('number')

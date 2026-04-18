@@ -3,11 +3,11 @@
  * Ensures require('./dist/foo') returns the actual value, not wrapped in { default: value }
  */
 
-import { createRequire } from 'node:module'
 import { readdirSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', '..', 'dist')

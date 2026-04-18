@@ -6,6 +6,14 @@
 import process from 'node:process'
 import { WriteStream } from 'node:tty'
 
+import {
+  clearLineOn,
+  cursorToOn,
+  getColumnsOf,
+  getRowsOf,
+  isTTYOf,
+} from './_stream'
+
 // Get the actual stdout stream
 const stdout: NodeJS.WriteStream = process.stdout
 
@@ -24,10 +32,7 @@ let _cursorExitRegistered = false
  * ```
  */
 export function clearLine(): void {
-  if (stdout.isTTY) {
-    stdout.cursorTo(0)
-    stdout.clearLine(0)
-  }
+  clearLineOn(stdout)
 }
 
 /**
@@ -60,9 +65,7 @@ export function clearScreenDown(): void {
  * ```
  */
 export function cursorTo(x: number, y?: number | undefined): void {
-  if (stdout.isTTY) {
-    stdout.cursorTo(x, y)
-  }
+  cursorToOn(stdout, x, y)
 }
 
 /**
@@ -108,7 +111,7 @@ export function ensureCursorOnExit(): void {
  * ```
  */
 export function getColumns(): number {
-  return stdout.columns || 80
+  return getColumnsOf(stdout)
 }
 
 /**
@@ -124,7 +127,7 @@ export function getColumns(): number {
  * ```
  */
 export function getRows(): number {
-  return stdout.rows || 24
+  return getRowsOf(stdout)
 }
 
 /**
@@ -159,7 +162,7 @@ export function hideCursor(): void {
  * ```
  */
 export function isTTY(): boolean {
-  return stdout.isTTY || false
+  return isTTYOf(stdout)
 }
 
 /**

@@ -6,6 +6,7 @@
  */
 
 import process from 'node:process'
+
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { pluralize } from '@socketsecurity/lib-stable/words'

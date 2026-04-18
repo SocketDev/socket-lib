@@ -11,9 +11,10 @@
  */
 
 import process from 'node:process'
+
 import { isQuiet, isVerbose } from '@socketsecurity/lib-stable/argv/flags'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { spawn } from '@socketsecurity/lib-stable/spawn'
 
 async function main(): Promise<void> {

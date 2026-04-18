@@ -6,7 +6,6 @@
 
 import { spawn } from 'node:child_process'
 import crypto from 'node:crypto'
-import process from 'node:process'
 import {
   existsSync,
   readFileSync,
@@ -15,6 +14,7 @@ import {
 } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { deleteAsync as del } from 'del'
