@@ -3,15 +3,15 @@
  * Provides file filtering and glob matcher functions for npm-like behavior.
  */
 
-import type * as fastGlobType from './external/fast-glob'
-import type picomatchType from './external/picomatch'
-
 import { objectFreeze as ObjectFreeze } from './objects'
 import {
   LICENSE_GLOB,
   LICENSE_GLOB_RECURSIVE,
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
 } from './paths/globs'
+
+import type * as fastGlobType from './external/fast-glob'
+import type picomatchType from './external/picomatch'
 
 // Type definitions
 type Pattern = string

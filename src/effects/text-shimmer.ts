@@ -15,10 +15,10 @@
 import { ANSI_RESET, stripAnsi } from '../ansi'
 import { isArray } from '../arrays'
 import { getCI } from '../env/ci'
-import { resolveColor } from '../themes/utils'
 import { THEMES } from '../themes/themes'
-import type { ColorValue } from '../colors'
+import { resolveColor } from '../themes/utils'
 
+import type { ColorValue } from '../colors'
 import type {
   ShimmerColorGradient,
   ShimmerColorRgb,

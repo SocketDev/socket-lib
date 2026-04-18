@@ -37,10 +37,10 @@ import { isPath } from './paths/normalize'
 import { getDefaultSpinner } from './spinner'
 import { stripAnsi } from './strings'
 
+import type { SendHandle, Serializable, StdioOptions } from 'node:child_process'
+import type { EventEmitter } from 'node:events'
 // @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
-import type { StdioOptions, Serializable, SendHandle } from 'node:child_process'
-import type { EventEmitter } from 'node:events'
 
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
