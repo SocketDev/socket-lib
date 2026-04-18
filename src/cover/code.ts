@@ -89,12 +89,7 @@ export async function getCodeCoverage(
 
   // Check if coverage file exists.
   const fs = getFs()
-  const coverageExists = await fs.promises
-    .access(coveragePath)
-    .then(() => true)
-    .catch(() => false)
-
-  if (!coverageExists) {
+  if (!fs.existsSync(coveragePath)) {
     if (generateIfMissing) {
       // Run vitest to generate coverage.
       await spawn('vitest', ['run', '--coverage'], {

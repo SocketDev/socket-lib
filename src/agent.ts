@@ -100,11 +100,6 @@ export interface ExecScriptOptions extends SpawnOptions {
 }
 
 /**
- * Alias for isNpmLoglevelFlag for pnpm usage.
- */
-export const isPnpmLoglevelFlag = isNpmLoglevelFlag
-
-/**
  * Execute npm commands with optimized flags and settings.
  *
  * SECURITY: Uses array-based arguments to prevent command injection. All elements
@@ -504,3 +499,8 @@ export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
 export function isPnpmInstallCommand(cmdArg: string): boolean {
   return pnpmInstallCommands.has(cmdArg)
 }
+
+/**
+ * Alias for isNpmLoglevelFlag — pnpm uses the same `--loglevel` surface.
+ */
+export const isPnpmLoglevelFlag = isNpmLoglevelFlag
