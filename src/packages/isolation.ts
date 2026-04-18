@@ -3,12 +3,12 @@
  * Provides tools to set up isolated test environments for packages.
  */
 
-import { WIN32 } from '../constants/platform'
 import npmPackageArg from '../external/npm-package-arg'
-import { spawn } from '../spawn'
 
+import { WIN32 } from '../constants/platform'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
+import { spawn } from '../spawn'
 import { readPackageJson } from './operations'
 
 import type { PackageJson } from '../packages'
