@@ -117,7 +117,6 @@ export function applyLinePrefix(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function centerText(text: string, width: number): string {
-  /* c8 ignore next */
   const textLength = stripAnsi(text).length
   if (textLength >= width) {
     return text
