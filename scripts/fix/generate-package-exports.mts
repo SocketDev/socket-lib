@@ -81,6 +81,8 @@ async function main(): Promise<void> {
         'dist/external/**',
         'scripts/**',
         'src/**',
+        // Files prefixed with _ are private helpers, not public API.
+        'dist/**/_*',
       ],
       gitignore: false,
     })),
