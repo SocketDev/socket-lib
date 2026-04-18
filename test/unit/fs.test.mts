@@ -14,7 +14,7 @@
  * Validates cross-platform behavior, error handling, and edge cases (missing files, permissions).
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -756,10 +756,7 @@ describe('fs', () => {
 
         await safeDelete(testFile)
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       }, 'safeDelete-file-')
     })
@@ -772,10 +769,7 @@ describe('fs', () => {
 
         await safeDelete(testDir)
 
-        const exists = await fs
-          .access(testDir)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testDir)
         expect(exists).toBe(false)
       }, 'safeDelete-dir-')
     })
@@ -789,14 +783,8 @@ describe('fs', () => {
 
         await safeDelete([file1, file2])
 
-        const exists1 = await fs
-          .access(file1)
-          .then(() => true)
-          .catch(() => false)
-        const exists2 = await fs
-          .access(file2)
-          .then(() => true)
-          .catch(() => false)
+        const exists1 = existsSync(file1)
+        const exists2 = existsSync(file2)
         expect(exists1).toBe(false)
         expect(exists2).toBe(false)
       }, 'safeDelete-multiple-')
@@ -813,10 +801,7 @@ describe('fs', () => {
 
         await safeDelete(testFile, { force: true })
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       }, 'safeDelete-force-')
     })
@@ -829,10 +814,7 @@ describe('fs', () => {
         // Delete with explicit retry options (should succeed on first attempt)
         await safeDelete(testFile, { maxRetries: 2, retryDelay: 50 })
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       }, 'safeDelete-retry-')
     })
@@ -846,10 +828,7 @@ describe('fs', () => {
 
         safeDeleteSync(testFile)
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       }, 'safeDeleteSync-file-')
     })
@@ -862,10 +841,7 @@ describe('fs', () => {
 
         safeDeleteSync(testDir)
 
-        const exists = await fs
-          .access(testDir)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testDir)
         expect(exists).toBe(false)
       }, 'safeDeleteSync-dir-')
     })
@@ -879,14 +855,8 @@ describe('fs', () => {
 
         safeDeleteSync([file1, file2])
 
-        const exists1 = await fs
-          .access(file1)
-          .then(() => true)
-          .catch(() => false)
-        const exists2 = await fs
-          .access(file2)
-          .then(() => true)
-          .catch(() => false)
+        const exists1 = existsSync(file1)
+        const exists2 = existsSync(file2)
         expect(exists1).toBe(false)
         expect(exists2).toBe(false)
       }, 'safeDeleteSync-multiple-')
@@ -904,10 +874,7 @@ describe('fs', () => {
         // Delete with explicit retry options (should succeed on first attempt)
         safeDeleteSync(testFile, { maxRetries: 2, retryDelay: 50 })
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       }, 'safeDeleteSync-retry-')
     })

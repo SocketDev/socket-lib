@@ -12,7 +12,7 @@
  */
 
 import { createHash } from 'node:crypto'
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { Writable } from 'node:stream'
@@ -945,10 +945,7 @@ describe('http-request', () => {
         ).rejects.toThrow(/Checksum verification failed/)
 
         // File should not exist after failed verification.
-        const exists = await fs
-          .access(destPath)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(destPath)
         expect(exists).toBe(false)
       }, 'httpDownload-sha256-fail-')
     })

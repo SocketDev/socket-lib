@@ -2,7 +2,9 @@
  * @fileoverview Unit tests for GitHub release download utilities.
  */
 
+import { existsSync } from 'node:fs'
 import process from 'node:process'
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // @ts-expect-error - no type declarations
@@ -902,18 +904,8 @@ describe('releases/github', () => {
         const binaryFile = path.join(binaryDir, 'test-bin')
 
         // Both should exist after first download
-        expect(
-          await fs
-            .access(versionFile)
-            .then(() => true)
-            .catch(() => false),
-        ).toBe(true)
-        expect(
-          await fs
-            .access(binaryFile)
-            .then(() => true)
-            .catch(() => false),
-        ).toBe(true)
+        expect(existsSync(versionFile)).toBe(true)
+        expect(existsSync(binaryFile)).toBe(true)
 
         // Second call - should use cache
         const result2 = await downloadGitHubRelease({

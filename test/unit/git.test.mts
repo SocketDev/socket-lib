@@ -10,7 +10,7 @@
  * Used by Socket CLI for git-aware operations (pre-commit hooks, file filtering).
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import {
@@ -205,10 +205,7 @@ describe('git', () => {
     it('should return false for committed file in clean repo', async () => {
       // README.md should exist and be committed
       const testFile = path.join(projectRoot, 'README.md')
-      const fileExists = await fs
-        .access(testFile)
-        .then(() => true)
-        .catch(() => false)
+      const fileExists = existsSync(testFile)
       if (fileExists) {
         const result = await isChanged(testFile, { cwd: projectRoot })
         // In a clean repo, committed files should not be changed

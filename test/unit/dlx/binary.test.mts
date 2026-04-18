@@ -12,7 +12,7 @@
  */
 
 import { createHash } from 'node:crypto'
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
@@ -899,10 +899,7 @@ describe.sequential('dlx-binary', () => {
             const stat = await fs.stat(entryPath)
             if (stat.isDirectory()) {
               const metadataPath = path.join(entryPath, '.dlx-metadata.json')
-              const metadataExists = await fs
-                .access(metadataPath)
-                .then(() => true)
-                .catch(() => false)
+              const metadataExists = existsSync(metadataPath)
 
               if (metadataExists) {
                 // Verify metadata is valid JSON
@@ -1280,10 +1277,7 @@ describe.sequential('dlx-binary', () => {
 
           // Cache directory should not exist initially
           const cachePath = getDlxCachePath()
-          const exists = await fs
-            .access(cachePath)
-            .then(() => true)
-            .catch(() => false)
+          const exists = existsSync(cachePath)
           expect(exists).toBe(false)
 
           // Download should create directory
@@ -1293,10 +1287,7 @@ describe.sequential('dlx-binary', () => {
           })
           await result.spawnPromise.catch(() => {})
 
-          const existsAfter = await fs
-            .access(cachePath)
-            .then(() => true)
-            .catch(() => false)
+          const existsAfter = existsSync(cachePath)
           expect(existsAfter).toBe(true)
         } finally {
           restoreHome()

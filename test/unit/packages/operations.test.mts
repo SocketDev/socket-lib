@@ -10,7 +10,7 @@
  * Used by Socket tools for package management and dependency operations.
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import {
@@ -372,10 +372,7 @@ describe('packages/operations', () => {
 
         // Verify extraction
         const pkgJsonPath = path.join(dest, 'package.json')
-        const exists = await fs
-          .access(pkgJsonPath)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(pkgJsonPath)
         expect(exists).toBe(true)
       }, 'extract-pkg-')
     }, 30_000)
@@ -400,10 +397,7 @@ describe('packages/operations', () => {
         tmpPath = destPath
         // Verify package.json exists in temp directory
         const pkgJsonPath = path.join(destPath, 'package.json')
-        const exists = await fs
-          .access(pkgJsonPath)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(pkgJsonPath)
         expect(exists).toBe(true)
       }) as any)
 
@@ -431,10 +425,7 @@ describe('packages/operations', () => {
         })
 
         const pkgJsonPath = path.join(dest, 'package.json')
-        const exists = await fs
-          .access(pkgJsonPath)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(pkgJsonPath)
         expect(exists).toBe(true)
       }, 'extract-pkg-options-')
     }, 30_000)
@@ -702,11 +693,7 @@ describe('packages/operations', () => {
           tmpPrefix: 'test-',
         })
 
-        const exists = await fs
-          .access(path.join(dest, 'package.json'))
-          .then(() => true)
-          .catch(() => false)
-        expect(exists).toBe(true)
+        expect(existsSync(path.join(dest, 'package.json'))).toBe(true)
       }, 'extract-all-opts-')
     }, 30_000)
 

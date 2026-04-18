@@ -13,7 +13,7 @@
  * Complements primary fs.test.ts by focusing on uncommon code paths and error conditions.
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -543,10 +543,7 @@ describe('fs - Additional Coverage', () => {
         await fs.writeFile(testFile, 'test', 'utf8')
         await safeDelete(testFile, { force: false })
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       } catch (e) {
         // Clean up if test fails
@@ -568,14 +565,8 @@ describe('fs - Additional Coverage', () => {
 
         await safeDelete([file1, file2], { force: false })
 
-        const exists1 = await fs
-          .access(file1)
-          .then(() => true)
-          .catch(() => false)
-        const exists2 = await fs
-          .access(file2)
-          .then(() => true)
-          .catch(() => false)
+        const exists1 = existsSync(file1)
+        const exists2 = existsSync(file2)
 
         expect(exists1).toBe(false)
         expect(exists2).toBe(false)
@@ -599,10 +590,7 @@ describe('fs - Additional Coverage', () => {
         await fs.writeFile(testFile, 'test', 'utf8')
         await safeDelete(testFile)
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       } catch (e) {
         try {
@@ -622,10 +610,7 @@ describe('fs - Additional Coverage', () => {
         await fs.writeFile(testFile, 'test', 'utf8')
         safeDeleteSync(testFile, { force: false })
 
-        const exists = await fs
-          .access(testFile)
-          .then(() => true)
-          .catch(() => false)
+        const exists = existsSync(testFile)
         expect(exists).toBe(false)
       } catch (e) {
         try {
@@ -646,14 +631,8 @@ describe('fs - Additional Coverage', () => {
 
         safeDeleteSync([file1, file2])
 
-        const exists1 = await fs
-          .access(file1)
-          .then(() => true)
-          .catch(() => false)
-        const exists2 = await fs
-          .access(file2)
-          .then(() => true)
-          .catch(() => false)
+        const exists1 = existsSync(file1)
+        const exists2 = existsSync(file2)
 
         expect(exists1).toBe(false)
         expect(exists2).toBe(false)
