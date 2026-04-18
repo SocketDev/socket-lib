@@ -130,7 +130,7 @@ describe('stdio/divider', () => {
   })
 
   describe('printDivider', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -163,7 +163,7 @@ describe('stdio/divider', () => {
   })
 
   describe('printThickDivider', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -181,7 +181,7 @@ describe('stdio/divider', () => {
   })
 
   describe('printThinDivider', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -199,7 +199,7 @@ describe('stdio/divider', () => {
   })
 
   describe('printDottedDivider', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -254,7 +254,7 @@ describe('stdio/divider', () => {
   })
 
   describe('printSectionBreak', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})

@@ -258,7 +258,7 @@ describe('stdio/header', () => {
   })
 
   describe('printHeader', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -300,7 +300,7 @@ describe('stdio/header', () => {
   })
 
   describe('printFooter', () => {
-    let consoleLogSpy: any
+    let consoleLogSpy: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})

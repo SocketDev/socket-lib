@@ -93,7 +93,7 @@ describe('Logger - Theme Handling', () => {
 
     it('should support get operation on LOG_SYMBOLS', () => {
       const symbol = Reflect.get(LOG_SYMBOLS, 'success')
-      expect(symbol).toBeDefined()
+      expect(symbol).toBe(LOG_SYMBOLS['success'])
     })
 
     it('should support getOwnPropertyDescriptor on LOG_SYMBOLS', () => {

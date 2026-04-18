@@ -1054,7 +1054,7 @@ describe('Logger', () => {
     })
 
     it('should handle objects with circular references', () => {
-      const obj: any = { name: 'test' }
+      const obj: { name: string; self?: unknown } = { name: 'test' }
       obj.self = obj
       expect(() => {
         testLogger.dir(obj)

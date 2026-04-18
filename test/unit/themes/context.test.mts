@@ -11,14 +11,17 @@
  * Enables theme isolation across concurrent operations in Socket CLI tools.
  */
 
+import { beforeEach, describe, expect, it } from 'vitest'
+
 import {
   getTheme,
+  onThemeChange,
   setTheme,
   withTheme,
   withThemeSync,
-  onThemeChange,
 } from '@socketsecurity/lib/themes/context'
-import { describe, expect, it, beforeEach } from 'vitest'
+
+import type { Theme } from '@socketsecurity/lib/themes/types'
 
 describe('themes/context', () => {
   describe('getTheme', () => {
@@ -262,7 +265,7 @@ describe('themes/context', () => {
     })
 
     it('should call listener with new theme', () => {
-      let capturedTheme: any
+      let capturedTheme: Theme | undefined
       const unsubscribe = onThemeChange(theme => {
         capturedTheme = theme
       })

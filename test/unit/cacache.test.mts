@@ -36,7 +36,6 @@ describe('cacache', () => {
 
     it('should return cacache module', () => {
       const cacache = getCacache()
-      expect(cacache).toBeDefined()
       expect(typeof cacache).toBe('object')
     })
 

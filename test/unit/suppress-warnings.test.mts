@@ -22,7 +22,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('suppress-warnings', () => {
   let originalEmitWarning: typeof process.emitWarning
-  let emitWarningSpy: any
+  let emitWarningSpy: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     originalEmitWarning = process.emitWarning
