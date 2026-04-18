@@ -4,11 +4,11 @@
  * These are bundled dependencies used internally by socket-lib modules.
  */
 
-import { createRequire } from 'node:module'
 import { readdirSync, statSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')

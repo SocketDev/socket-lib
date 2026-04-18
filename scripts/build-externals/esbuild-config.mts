@@ -3,11 +3,14 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')
+
+const requireResolve = createRequire(import.meta.url)
 
 /**
  * Stub configuration - maps module patterns to stub files.
@@ -17,11 +20,6 @@ const STUB_MAP = {
   // Character encoding - we only use UTF-8.
   '^(encoding|iconv-lite)$': 'encoding.cjs',
 }
-
-// Import createRequire at top level
-import { createRequire } from 'node:module'
-
-const requireResolve = createRequire(import.meta.url)
 
 /**
  * Create esbuild plugin to force npm packages to resolve from node_modules.

@@ -4,11 +4,11 @@
  * so that ESM code can do: import { foo, bar } from '@socketsecurity/lib-stable/module'
  */
 
-import { createRequire } from 'node:module'
 import { readFileSync, readdirSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', '..', 'dist')

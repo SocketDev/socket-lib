@@ -4,8 +4,8 @@
  */
 
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'

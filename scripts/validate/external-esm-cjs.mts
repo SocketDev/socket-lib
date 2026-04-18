@@ -11,11 +11,11 @@
  * - Object exports preserve all named properties
  */
 
-import { createRequire } from 'node:module'
 import { readdirSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')

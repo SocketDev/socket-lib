@@ -5,8 +5,8 @@
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'

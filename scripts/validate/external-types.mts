@@ -11,10 +11,10 @@
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
+import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'src', 'external')
