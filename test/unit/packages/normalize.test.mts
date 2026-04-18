@@ -1,4 +1,12 @@
-/** @fileoverview Tests for package.json normalization utilities. */
+/**
+ * @fileoverview Tests for package.json normalization utilities.
+ *
+ * IMPORTANT: This test imports from dist/ to exercise the bundled artifact,
+ * which re-exports `normalize-package-data`. Importing the source would miss
+ * bundler interop issues: `normalize-package-data` is a CJS module that
+ * esbuild wraps, and pre-wrap imports work in `src/` tsconfig but fail after
+ * bundling if we aren't careful with the export shape.
+ */
 
 import { describe, expect, it } from 'vitest'
 

@@ -171,10 +171,11 @@ describe.sequential('Logger - Advanced Features', () => {
       expect(result).toBe(logger)
     })
 
-    it('should work with stream-bound loggers', () => {
-      logger.stdout.indent(6)
-      logger.stdout.dedent(6)
-      expect(true).toBe(true)
+    it('stream-bound indent/dedent do not throw', () => {
+      expect(() => {
+        logger.stdout.indent(6)
+        logger.stdout.dedent(6)
+      }).not.toThrow()
     })
   })
 
@@ -298,14 +299,15 @@ describe.sequential('Logger - Advanced Features', () => {
       expect(stderrData.length).toBeGreaterThan(0)
     })
 
-    it('should maintain separate indentation for stderr and stdout', () => {
-      logger.stdout.indent(4)
-      logger.stderr.indent(2)
-      logger.stdout.log('stdout')
-      logger.stderr.error('stderr')
-      logger.stdout.dedent(4)
-      logger.stderr.dedent(2)
-      expect(true).toBe(true)
+    it('stdout and stderr can be indented/dedented independently without throwing', () => {
+      expect(() => {
+        logger.stdout.indent(4)
+        logger.stderr.indent(2)
+        logger.stdout.log('stdout')
+        logger.stderr.error('stderr')
+        logger.stdout.dedent(4)
+        logger.stderr.dedent(2)
+      }).not.toThrow()
     })
   })
 

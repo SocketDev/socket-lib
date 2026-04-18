@@ -184,11 +184,11 @@ describe('Logger', () => {
       expect(stdoutData.length).toBeGreaterThan(0)
     })
 
-    it('should support indentation tracking', () => {
-      // Indentation is tracked internally
-      logger.indent()
-      logger.dedent()
-      expect(true).toBe(true)
+    it('indent and dedent run without throwing', () => {
+      expect(() => {
+        logger.indent()
+        logger.dedent()
+      }).not.toThrow()
     })
   })
 

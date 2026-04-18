@@ -218,10 +218,10 @@ console.log(response.headers['location']) // Redirect target
 **Parameters:**
 
 - `url` (string): The URL to download from
-- `destPath` (string): Absolute path where file should be saved
-- `options` (HttpDownloadOptions): Download configuration
+- `destPath` (string): Path where file should be saved (absolute path recommended)
+- `options` (HttpDownloadResult): Download configuration
 
-**Returns:** Promise<HttpDownloadResult> with `path` and `size`
+**Returns:** `Promise<HttpDownloadResult>` with `headers`, `ok`, `path`, `size`, `status`, and `statusText`
 
 **Example:**
 
@@ -274,7 +274,7 @@ await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
 
 **Common Pitfalls:**
 
-- `destPath` must be an absolute path
+- Prefer absolute paths for `destPath`; relative paths resolve against the process cwd.
 - Parent directory must exist (create it first with `safeMkdir()`)
 - Existing files at `destPath` will be overwritten
 - Network errors will retry if `retries > 0`, but filesystem errors won't

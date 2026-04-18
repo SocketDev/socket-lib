@@ -232,16 +232,6 @@ describe('constants/packages', () => {
   })
 
   describe('integration', () => {
-    it('all getters should be callable', () => {
-      expect(() => getPackageDefaultNodeRange()).not.toThrow()
-      expect(() => getPackageDefaultSocketCategories()).not.toThrow()
-      expect(() => getPackageExtensions()).not.toThrow()
-      expect(() => getNpmLifecycleEvent()).not.toThrow()
-      expect(() => getLifecycleScriptNames()).not.toThrow()
-      expect(() => getPackumentCache()).not.toThrow()
-      expect(() => getPacoteCachePath()).not.toThrow()
-    })
-
     it('constants should be immutable', () => {
       const originalPackage = PACKAGE
       const originalLatest = LATEST

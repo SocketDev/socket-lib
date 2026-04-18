@@ -34,9 +34,23 @@ describe('shadow', () => {
       })
 
       it('should not skip when win32 is true but binPath is empty', () => {
-        const result = shouldSkipShadow('', { win32: true, cwd: '/home/user' })
-        // Empty binPath on Windows should not trigger skip
-        expect(typeof result).toBe('boolean')
+        // Control npm_config_user_agent so downstream env-dependent branches
+        // (exec/npx/dlx) don't flip the result non-deterministically.
+        const originalUserAgent = process.env['npm_config_user_agent']
+        delete process.env['npm_config_user_agent']
+        try {
+          // Empty binPath fails the `win32 && binPath` guard, so shadow
+          // installation is NOT skipped on that branch.
+          const result = shouldSkipShadow('', {
+            win32: true,
+            cwd: '/home/user',
+          })
+          expect(result).toBe(false)
+        } finally {
+          if (originalUserAgent !== undefined) {
+            process.env['npm_config_user_agent'] = originalUserAgent
+          }
+        }
       })
 
       it('should not skip when win32 is false even with binPath', () => {

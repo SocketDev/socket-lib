@@ -94,7 +94,7 @@ if (isTest()) {
 }
 ```
 
-**Detected by:** Checks `NODE_ENV === 'test'`
+**Detected by:** `NODE_ENV === 'test'`, `VITEST`, or `JEST_WORKER_ID` being set.
 
 ### getHome()
 
@@ -113,9 +113,7 @@ if (home) {
 }
 ```
 
-**Environment Variable:** `HOME` (Unix/Linux/macOS)
-
-**Cross-platform note:** For Windows, use `process.env.USERPROFILE` if needed
+**Environment Variables:** `HOME` (Unix/Linux/macOS), falling back to `USERPROFILE` (Windows). Callers do NOT need to handle the Windows fallback themselves — `getHome()` returns the correct value on all platforms.
 
 ### getTerm()
 
@@ -208,11 +206,10 @@ const config = {
 
 ```typescript
 import { getHome } from '@socketsecurity/lib/env/home'
-import { WIN32 } from '@socketsecurity/lib/constants/platform'
 import path from 'node:path'
 
 function getConfigDir() {
-  const home = getHome() || (WIN32 ? process.env.USERPROFILE : undefined)
+  const home = getHome()
   if (!home) {
     throw new Error('Cannot determine home directory')
   }
@@ -251,10 +248,10 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 
 - **Node.js:**
   - `getNodeEnv()` - Checks `NODE_ENV`
-  - `isTest()` - Checks if `NODE_ENV === 'test'`
+  - `isTest()` - Checks `NODE_ENV === 'test'`, `VITEST`, or `JEST_WORKER_ID`
 
 - **User Directories:**
-  - `getHome()` - Returns `HOME` (Unix/Linux/macOS)
+  - `getHome()` - Returns `HOME` (Unix/Linux/macOS) with `USERPROFILE` fallback on Windows
 
 - **Terminal:**
   - `getTerm()` - Returns `TERM`
@@ -289,11 +286,11 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 **Problem:** Path doesn't work on Windows/Unix.
 
 **Solution:**
-Use the fallback pattern with `process.env` for Windows:
+`getHome()` already handles the Windows `USERPROFILE` fallback internally — just use it directly:
 
 ```typescript
-import { WIN32 } from '@socketsecurity/lib/constants/platform'
-const home = getHome() || (WIN32 ? process.env.USERPROFILE : undefined)
+import { getHome } from '@socketsecurity/lib/env/home'
+const home = getHome()
 ```
 
 And use `path.join()` for cross-platform path construction:

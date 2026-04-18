@@ -53,10 +53,8 @@ describe('spinner', () => {
 
       await withSpinner({
         message: 'Testing...',
-        operation: async () => {
-          // Just verify operation runs
-          expect(true).toBe(true)
-        },
+        // Empty body — the real assertion is restoration after the operation.
+        operation: async () => {},
         spinner,
         withOptions: {
           color: 'red',
@@ -113,9 +111,8 @@ describe('spinner', () => {
 
       await withSpinner({
         message: 'Testing...',
-        operation: async () => {
-          expect(true).toBe(true)
-        },
+        // Empty body — the assertion is color unchanged after.
+        operation: async () => {},
         spinner,
       })
 
@@ -202,9 +199,8 @@ describe('spinner', () => {
 
       withSpinnerSync({
         message: 'Testing...',
-        operation: () => {
-          expect(true).toBe(true)
-        },
+        // Empty body — the assertion is color unchanged after.
+        operation: () => {},
         spinner,
       })
 

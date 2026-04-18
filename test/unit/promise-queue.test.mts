@@ -309,10 +309,9 @@ describe('PromiseQueue', () => {
   })
 
   describe('onIdle', () => {
-    it('should resolve immediately for empty queue', async () => {
+    it('onIdle resolves without throwing for empty queue', async () => {
       const queue = new PromiseQueue(1)
-      await queue.onIdle()
-      expect(true).toBe(true)
+      await expect(queue.onIdle()).resolves.not.toThrow()
     })
 
     it('should wait for all tasks to complete', async () => {

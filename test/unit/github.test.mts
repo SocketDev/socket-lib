@@ -384,11 +384,14 @@ describe.sequential('github', () => {
   })
 
   describe('caching behavior', () => {
-    it('should allow multiple cache clears in sequence', async () => {
-      for (let i = 0; i < 5; i++) {
-        await clearRefCache()
-      }
-      expect(true).toBe(true)
+    it('multiple cache clears in sequence run without throwing', async () => {
+      await expect(
+        (async () => {
+          for (let i = 0; i < 5; i++) {
+            await clearRefCache()
+          }
+        })(),
+      ).resolves.not.toThrow()
     })
 
     it('should handle cache operations after clear', async () => {
