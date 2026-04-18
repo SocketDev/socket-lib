@@ -97,7 +97,7 @@ Spawn child processes safely with cross-platform support.
 - `spawnSync()` - Synchronous version for blocking operations
 - Array-based arguments prevent command injection
 - Automatic Windows `.cmd`/`.bat` handling
-- `processLock.lock()` / `processLock.unlock()` - Ensure only one instance runs at a time
+- `processLock.withLock()` / `processLock.acquire()` / `processLock.release()` - Ensure only one instance runs at a time
 - `writeIpcStub()` / `getIpcStubPath()` - Filesystem-based inter-process data handoff
 
 ### Environment Detection

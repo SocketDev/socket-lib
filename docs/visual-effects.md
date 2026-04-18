@@ -36,8 +36,8 @@ const spinner = Spinner({
   text: 'Loading data...',
   color: [140, 82, 255], // Socket purple RGB
 })
-// Use a preset animation by name via getSpinner('dots'):
-// const spinner = Spinner({ spinner: getSpinner('dots') })
+// Use a preset animation by name via getCliSpinners('dots'):
+// const spinner = Spinner({ spinner: getCliSpinners('dots') })
 ```
 
 **What it does:** Creates an animated CLI spinner with custom text, colors, and animation style.

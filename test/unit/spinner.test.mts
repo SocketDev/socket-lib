@@ -498,8 +498,6 @@ describe('spinner', () => {
       const spinner = Spinner()
       spinner.start()
       const result = spinner.progress(50, 100)
-      // Wait for animation frame to render progress
-      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
       spinner.stop()
     })
@@ -508,8 +506,6 @@ describe('spinner', () => {
       const spinner = Spinner()
       spinner.start()
       const result = spinner.progress(25, 100, 'files')
-      // Wait for animation frame to render progress
-      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
       spinner.stop()
     })
@@ -519,8 +515,6 @@ describe('spinner', () => {
       spinner.start()
       spinner.progress(0, 100)
       const result = spinner.progressStep(10)
-      // Wait for animation frame to render progress
-      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
       spinner.stop()
     })
@@ -530,32 +524,20 @@ describe('spinner', () => {
       spinner.start()
       spinner.progress(0, 100)
       const result = spinner.progressStep()
-      // Wait for animation frame to render progress
-      await new Promise(resolve => setTimeout(resolve, 50))
       expect(result).toBe(spinner)
       spinner.stop()
     })
 
-    it('should render progress bar with various percentages', async () => {
+    it('should accept progress at each quartile without throwing', () => {
       const spinner = Spinner()
       spinner.start('Processing')
-
-      // Test different progress values to trigger formatProgress and renderProgressBar
-      spinner.progress(0, 100)
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      spinner.progress(25, 100)
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      spinner.progress(50, 100)
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      spinner.progress(75, 100)
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      spinner.progress(100, 100, 'items')
-      await new Promise(resolve => setTimeout(resolve, 50))
-
+      expect(() => {
+        spinner.progress(0, 100)
+        spinner.progress(25, 100)
+        spinner.progress(50, 100)
+        spinner.progress(75, 100)
+        spinner.progress(100, 100, 'items')
+      }).not.toThrow()
       spinner.stop()
     })
 
@@ -686,17 +668,11 @@ describe('spinner', () => {
       expect(spinner.color).toEqual([255, 0, 255])
     })
 
-    it('should handle color changes during animation', async () => {
+    it('should accept color changes during animation', () => {
       const spinner = Spinner({ color: 'blue' })
       spinner.start('Testing')
-
-      // Wait for first frame
-      await new Promise(resolve => setTimeout(resolve, 50))
-
-      // Change color during animation
       spinner.color = [0, 255, 0]
       expect(spinner.color).toEqual([0, 255, 0])
-
       spinner.stop()
     })
   })

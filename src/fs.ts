@@ -20,11 +20,6 @@ import {
 import { pRetry } from './promises'
 import { naturalCompare } from './sorts'
 
-import type {
-  deleteAsync as deleteAsyncType,
-  deleteSync as deleteSyncType,
-} from './external/del'
-import type { JsonReviver } from './json/types'
 import type { Abortable } from 'node:events'
 import type {
   Dirent,
@@ -35,6 +30,12 @@ import type {
   StatSyncOptions,
   WriteFileOptions,
 } from 'node:fs'
+
+import type {
+  deleteAsync as deleteAsyncType,
+  deleteSync as deleteSyncType,
+} from './external/del'
+import type { JsonReviver } from './json/types'
 
 const abortSignal = getAbortSignal()
 

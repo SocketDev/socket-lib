@@ -27,10 +27,6 @@ const vitestConfigIsolated = defineConfig({
       'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
       pacote: path.resolve(projectRoot, 'src/external/pacote'),
       '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
-      '@socketsecurity/lib/stdio/prompts': path.resolve(
-        projectRoot,
-        'src/stdio/prompts/index.ts',
-      ),
       '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
     },
   },

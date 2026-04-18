@@ -344,14 +344,14 @@ import { processLock } from '@socketsecurity/lib/process-lock'
 
 const lockPath = '/tmp/my-critical-operation.lock'
 
-const acquired = await processLock.acquire(lockPath)
-if (acquired) {
-  try {
-    // Do critical work that shouldn't run concurrently
-    await buildProject()
-  } finally {
-    processLock.release(lockPath)
-  }
+// acquire() returns a release function, or throws if the lock cannot be
+// acquired after the configured retries.
+const release = await processLock.acquire(lockPath)
+try {
+  // Do critical work that shouldn't run concurrently
+  await buildProject()
+} finally {
+  release()
 }
 ```
 
@@ -371,19 +371,21 @@ await processLock.withLock('/tmp/build.lock', async () => {
 
 #### acquire(lockPath, options?)
 
-Attempts to acquire the lock at `lockPath`. Returns `true` if acquired, `false` if another process holds it.
+Acquires the lock at `lockPath`. Returns a release function. Throws if the lock cannot be acquired after all retries.
 
 ```typescript
-const acquired = await processLock.acquire('/tmp/my.lock', {
+const release = await processLock.acquire('/tmp/my.lock', {
   retries: 10, // retry up to 10 times
   baseDelayMs: 100, // start retrying with 100ms backoff
   staleMs: 60_000, // consider lock stale after 60s
 })
+// ... later
+release()
 ```
 
 #### release(lockPath)
 
-Releases a lock previously acquired by this process. Always pair with `acquire` in a `finally` block, or use `withLock`.
+Releases a lock previously acquired by this process. Always pair with `acquire` in a `finally` block, or use `withLock`. Prefer calling the release function returned by `acquire()`.
 
 ```typescript
 processLock.release('/tmp/my.lock')
@@ -482,23 +484,21 @@ spinner.successAndStop('All steps complete')
 ### Atomic Operations with Locks
 
 ```typescript
-import { ProcessLock } from '@socketsecurity/lib/process-lock'
+import { processLock } from '@socketsecurity/lib/process-lock'
 import { spawn } from '@socketsecurity/lib/spawn'
 
 async function atomicBuild() {
-  const lock = new ProcessLock('project-build')
-
-  if (!(await lock.acquire())) {
-    console.log('Build already running in another process')
-    return
-  }
-
+  // withLock auto-releases on success or error. acquire() throws if the
+  // lock cannot be obtained after retries, so catching the error is the
+  // way to signal "someone else is running".
   try {
-    console.log('Starting build...')
-    await spawn('npm', ['run', 'build'], { cwd: projectPath })
-    console.log('Build complete')
-  } finally {
-    await lock.release()
+    await processLock.withLock('/tmp/project-build.lock', async () => {
+      console.log('Starting build...')
+      await spawn('npm', ['run', 'build'], { cwd: projectPath })
+      console.log('Build complete')
+    })
+  } catch (error) {
+    console.log('Build already running in another process')
   }
 }
 ```
@@ -596,19 +596,26 @@ try {
 
 ### Lock not releasing
 
-**Problem:** ProcessLock stays locked after error.
+**Problem:** Lock stays held after error.
 
 **Solution:**
-Always use try/finally:
+Prefer `processLock.withLock()` which auto-releases; or use the release
+function returned by `acquire()` inside a `try/finally`:
 
 ```typescript
-const lock = new ProcessLock('operation')
-if (await lock.acquire()) {
-  try {
-    await doWork()
-  } finally {
-    await lock.release() // Always runs, even on error
-  }
+import { processLock } from '@socketsecurity/lib/process-lock'
+
+// Preferred: scoped helper
+await processLock.withLock('/tmp/operation.lock', async () => {
+  await doWork()
+})
+
+// Manual: release function from acquire()
+const release = await processLock.acquire('/tmp/operation.lock')
+try {
+  await doWork()
+} finally {
+  release() // Always runs, even on error
 }
 ```
 
