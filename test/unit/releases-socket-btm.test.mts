@@ -3,7 +3,8 @@
  */
 
 import process from 'node:process'
-import { describe, expect, it } from 'vitest'
+
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   detectLibc,
@@ -11,7 +12,22 @@ import {
   getBinaryAssetName,
   getBinaryName,
   getPlatformArch,
-} from '@socketsecurity/lib/releases/socket-btm'
+} from '../../src/releases/socket-btm'
+
+import {
+  downloadGitHubRelease,
+  getLatestRelease,
+  getReleaseAssetUrl,
+} from '../../src/releases/github'
+
+// Mock the downstream github release helpers so we can verify socket-btm's
+// config construction without issuing real network or filesystem operations.
+// Uses src path so vi.mock() intercepts cross-module imports within src/ files.
+vi.mock('../../src/releases/github', () => ({
+  downloadGitHubRelease: vi.fn(),
+  getLatestRelease: vi.fn(),
+  getReleaseAssetUrl: vi.fn(),
+}))
 
 describe('releases/socket-btm', () => {
   describe('detectLibc', () => {
@@ -141,9 +157,195 @@ describe('releases/socket-btm', () => {
     })
   })
 
-  describe('downloadSocketBtmRelease', () => {
-    it('is an exported function', () => {
-      expect(typeof downloadSocketBtmRelease).toBe('function')
+  describe.sequential('downloadSocketBtmRelease', () => {
+    beforeEach(() => {
+      vi.mocked(downloadGitHubRelease).mockReset()
+      vi.mocked(getLatestRelease).mockReset()
+      vi.mocked(getReleaseAssetUrl).mockReset()
+    })
+
+    it('should pass binary config to downloadGitHubRelease for current platform', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/dl/binject-darwin-arm64/binject',
+      )
+
+      const result = await downloadSocketBtmRelease('binject', {
+        downloadDir: '/tmp/dl',
+        quiet: true,
+        targetPlatform: 'darwin',
+        targetArch: 'arm64',
+      })
+
+      expect(result).toBe('/tmp/dl/binject-darwin-arm64/binject')
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg).toMatchObject({
+        owner: 'SocketDev',
+        repo: 'socket-btm',
+        toolName: 'binject',
+        toolPrefix: 'binject-',
+        assetName: 'binject-darwin-arm64',
+        binaryName: 'binject',
+        platformArch: 'darwin-arm64',
+        downloadDir: '/tmp/dl',
+        quiet: true,
+      })
+    })
+
+    it('should encode libc in asset + platform for linux with musl', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/dl/node-linux-x64-musl/node',
+      )
+
+      await downloadSocketBtmRelease('node', {
+        downloadDir: '/tmp/dl',
+        quiet: true,
+        targetPlatform: 'linux',
+        targetArch: 'x64',
+        libc: 'musl',
+      })
+
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg).toMatchObject({
+        assetName: 'node-linux-x64-musl',
+        platformArch: 'linux-x64-musl',
+        binaryName: 'node',
+      })
+    })
+
+    it('should pass explicit tag through to downloadGitHubRelease', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/dl/bin-darwin-arm64/bin',
+      )
+
+      await downloadSocketBtmRelease('bin', {
+        quiet: true,
+        tag: 'bin-20250101-abc',
+        targetPlatform: 'darwin',
+        targetArch: 'arm64',
+      })
+
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg.tag).toBe('bin-20250101-abc')
+    })
+
+    it('should use .exe binary name on windows', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        'C:\\dl\\node-win-x64\\node.exe',
+      )
+
+      await downloadSocketBtmRelease('node', {
+        quiet: true,
+        targetPlatform: 'win32',
+        targetArch: 'x64',
+      })
+
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg).toMatchObject({
+        assetName: 'node-win-x64.exe',
+        binaryName: 'node.exe',
+        platformArch: 'win-x64',
+      })
+    })
+
+    it('should default bin to tool name when bin is unset', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x/lief')
+
+      await downloadSocketBtmRelease('lief', {
+        quiet: true,
+        targetPlatform: 'darwin',
+        targetArch: 'arm64',
+      })
+
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg.binaryName).toBe('lief')
+      expect(cfg.assetName).toBe('lief-darwin-arm64')
+    })
+
+    it('should use explicit bin name when different from tool', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x/other')
+
+      await downloadSocketBtmRelease('tool', {
+        bin: 'other',
+        quiet: true,
+        targetPlatform: 'darwin',
+        targetArch: 'arm64',
+      })
+
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg).toMatchObject({
+        toolName: 'tool',
+        toolPrefix: 'tool-',
+        binaryName: 'other',
+        assetName: 'other-darwin-arm64',
+      })
+    })
+
+    it('should download an asset by exact name', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/assets/models-data.tar.gz',
+      )
+
+      const result = await downloadSocketBtmRelease('models', {
+        asset: 'models-data.tar.gz',
+        downloadDir: '/tmp/assets',
+        quiet: true,
+      })
+
+      expect(result).toBe('/tmp/assets/models-data.tar.gz')
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg).toMatchObject({
+        toolName: 'models',
+        toolPrefix: 'models-',
+        assetName: 'models-data.tar.gz',
+        binaryName: 'models-data.tar.gz',
+        platformArch: 'assets',
+      })
+    })
+
+    it('should resolve asset pattern via latest release and asset URL', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('models-20250101-abc')
+      vi.mocked(getReleaseAssetUrl).mockResolvedValueOnce(
+        'https://github.com/SocketDev/socket-btm/releases/download/models-20250101-abc/models-v2.tar.gz',
+      )
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/assets/models-v2.tar.gz',
+      )
+
+      await downloadSocketBtmRelease('models', {
+        asset: 'models-*.tar.gz',
+        downloadDir: '/tmp/assets',
+        quiet: true,
+      })
+
+      // Pattern resolution calls both helpers before delegating the download.
+      expect(getLatestRelease).toHaveBeenCalled()
+      expect(getReleaseAssetUrl).toHaveBeenCalled()
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg).toMatchObject({
+        assetName: 'models-v2.tar.gz',
+        tag: 'models-20250101-abc',
+      })
+    })
+
+    it('should reject asset pattern paired with explicit tag', async () => {
+      await expect(
+        downloadSocketBtmRelease('models', {
+          asset: 'models-*.tar.gz',
+          tag: 'models-20250101-abc',
+          quiet: true,
+        }),
+      ).rejects.toThrow('Cannot use asset pattern with explicit tag')
+    })
+
+    it('should throw when no matching release found for pattern', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce(null)
+
+      await expect(
+        downloadSocketBtmRelease('models', {
+          asset: 'models-*.tar.gz',
+          quiet: true,
+        }),
+      ).rejects.toThrow(/No models release with matching asset pattern/)
     })
   })
 })

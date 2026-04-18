@@ -485,10 +485,6 @@ describe('agent', () => {
         result.catch(() => {})
         expect(result).toBeInstanceOf(Promise)
       })
-
-      it('should be a function', () => {
-        expect(typeof execNpm).toBe('function')
-      })
     })
 
     describe('execPnpm argument transformation', () => {
@@ -497,10 +493,6 @@ describe('agent', () => {
         // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
         expect(result).toBeInstanceOf(Promise)
-      })
-
-      it('should be a function', () => {
-        expect(typeof execPnpm).toBe('function')
       })
     })
 
@@ -511,10 +503,6 @@ describe('agent', () => {
         result.catch(() => {})
         expect(result).toBeInstanceOf(Promise)
       })
-
-      it('should be a function', () => {
-        expect(typeof execYarn).toBe('function')
-      })
     })
 
     describe('execScript argument transformation', () => {
@@ -523,10 +511,6 @@ describe('agent', () => {
         // Catch promise immediately to prevent unhandled rejection on Windows.
         result.catch(() => {})
         expect(result).toBeInstanceOf(Promise)
-      })
-
-      it('should be a function', () => {
-        expect(typeof execScript).toBe('function')
       })
 
       it('should handle script name with array args', () => {

@@ -33,10 +33,6 @@ describe('ansi', () => {
   })
 
   describe('ansiRegex', () => {
-    it('should be a function', () => {
-      expect(typeof ansiRegex).toBe('function')
-    })
-
     it('should create a global regex by default', () => {
       const regex = ansiRegex()
       expect(regex.global).toBe(true)
@@ -127,10 +123,6 @@ describe('ansi', () => {
   })
 
   describe('stripAnsi', () => {
-    it('should be a function', () => {
-      expect(typeof stripAnsi).toBe('function')
-    })
-
     it('should strip ANSI codes from text', () => {
       const input = '\x1b[31mred\x1b[0m text'
       const expected = 'red text'

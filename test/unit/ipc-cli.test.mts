@@ -16,10 +16,6 @@ import type { IpcObject } from '@socketsecurity/lib/ipc-cli'
 
 describe('ipc-cli', () => {
   describe('getIpc()', () => {
-    it('should export getIpc function', () => {
-      expect(typeof getIpc).toBe('function')
-    })
-
     it('should return an object', async () => {
       const ipc = await getIpc()
       expect(typeof ipc).toBe('object')
