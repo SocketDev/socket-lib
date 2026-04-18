@@ -194,7 +194,11 @@ export function createEnvProxy(
 export function envAsBoolean(value: unknown, defaultValue = false): boolean {
   if (typeof value === 'string') {
     const trimmed = value.trim()
-    return trimmed === '1' || trimmed.toLowerCase() === 'true'
+    if (!trimmed) {
+      return !!defaultValue
+    }
+    const lower = trimmed.toLowerCase()
+    return lower === '1' || lower === 'true' || lower === 'yes'
   }
   if (value === null || value === undefined) {
     return !!defaultValue

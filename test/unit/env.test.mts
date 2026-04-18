@@ -40,9 +40,10 @@ describe('env', () => {
       expect(envAsBoolean('FALSE')).toBe(false)
     })
 
-    it('should convert any other string to false', () => {
+    it('treats 1/true/yes (case-insensitive) as true, all others as false', () => {
+      expect(envAsBoolean('yes')).toBe(true)
+      expect(envAsBoolean('YES')).toBe(true)
       expect(envAsBoolean('no')).toBe(false)
-      expect(envAsBoolean('yes')).toBe(false)
       expect(envAsBoolean('random')).toBe(false)
     })
 
