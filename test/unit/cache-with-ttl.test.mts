@@ -395,12 +395,10 @@ describe.sequential('cache-with-ttl', () => {
 
     it('should clear only in-memory cache with memoOnly option', async () => {
       await cache.set('key', 'value')
-
-      await cache.clear({ memoOnly: true })
-
-      // After clearing memo only, value should still be in persistent cache
-      // but might not be immediately accessible depending on implementation
-      expect(true).toBe(true) // Test passes if no error
+      // memoOnly clear should complete without throwing; the persistent cache
+      // layer is expected to retain the value but asserting on it is racy in
+      // test sandboxes where the persistent dir may be isolated per run.
+      await expect(cache.clear({ memoOnly: true })).resolves.not.toThrow()
     })
 
     it('should handle clearing empty cache', async () => {

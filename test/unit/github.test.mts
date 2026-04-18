@@ -82,11 +82,12 @@ describe.sequential('github', () => {
       expect(() => clearRefCache()).not.toThrow()
     })
 
-    it('should be callable multiple times', () => {
-      clearRefCache()
-      clearRefCache()
-      clearRefCache()
-      expect(true).toBe(true)
+    it('should be callable multiple times without throwing', () => {
+      expect(() => {
+        clearRefCache()
+        clearRefCache()
+        clearRefCache()
+      }).not.toThrow()
     })
   })
 
@@ -167,21 +168,24 @@ describe.sequential('github', () => {
   })
 
   describe('clearRefCache', () => {
-    it('should clear cache asynchronously', async () => {
-      await clearRefCache()
-      expect(true).toBe(true)
+    it('should clear cache asynchronously without throwing', async () => {
+      await expect(clearRefCache()).resolves.not.toThrow()
     })
 
     it('should handle multiple sequential clears', async () => {
-      await clearRefCache()
-      await clearRefCache()
-      await clearRefCache()
-      expect(true).toBe(true)
+      await expect(
+        (async () => {
+          await clearRefCache()
+          await clearRefCache()
+          await clearRefCache()
+        })(),
+      ).resolves.not.toThrow()
     })
 
     it('should handle concurrent clears', async () => {
-      await Promise.all([clearRefCache(), clearRefCache(), clearRefCache()])
-      expect(true).toBe(true)
+      await expect(
+        Promise.all([clearRefCache(), clearRefCache(), clearRefCache()]),
+      ).resolves.toBeDefined()
     })
   })
 

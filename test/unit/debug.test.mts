@@ -348,11 +348,12 @@ describe('debug', () => {
 
     it('should handle multiple start() and end() calls', () => {
       const timer = debugtime('timer-multiple')
-      timer.start()
-      timer.end()
-      timer.start()
-      timer.end()
-      expect(true).toBe(true)
+      expect(() => {
+        timer.start()
+        timer.end()
+        timer.start()
+        timer.end()
+      }).not.toThrow()
     })
 
     it('should handle end() without start()', () => {
@@ -374,11 +375,12 @@ describe('debug', () => {
     it('should handle multiple timers with start() and end()', () => {
       const timer1 = debugtime('timer-a')
       const timer2 = debugtime('timer-b')
-      timer1.start()
-      timer2.start()
-      timer1.end()
-      timer2.end()
-      expect(true).toBe(true)
+      expect(() => {
+        timer1.start()
+        timer2.start()
+        timer1.end()
+        timer2.end()
+      }).not.toThrow()
     })
   })
 

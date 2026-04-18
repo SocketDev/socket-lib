@@ -57,17 +57,19 @@ describe('signal-exit', () => {
     })
 
     it('should be safe to call when not loaded', () => {
-      unload()
-      unload()
-      expect(true).toBe(true) // Should not throw
+      expect(() => {
+        unload()
+        unload()
+      }).not.toThrow()
     })
 
     it('should be safe to call multiple times', () => {
       load()
-      unload()
-      unload()
-      unload()
-      expect(true).toBe(true) // Should not throw
+      expect(() => {
+        unload()
+        unload()
+        unload()
+      }).not.toThrow()
     })
   })
 
@@ -125,8 +127,7 @@ describe('signal-exit', () => {
       const callback = vi.fn()
       const remove = onExit(callback)
       expect(typeof remove).toBe('function')
-      remove()
-      expect(true).toBe(true) // Should not throw
+      expect(() => remove()).not.toThrow()
     })
 
     it('should handle alwaysLast option', () => {
@@ -190,22 +191,23 @@ describe('signal-exit', () => {
       const remove1 = onExit(callback1)
       const remove2 = onExit(callback2)
 
-      // Remove both
-      remove1()
-      remove2()
-
-      // Signal handlers should be cleaned up
-      expect(true).toBe(true)
+      // Remove both — removal functions must complete without throwing
+      // even when they are the last remaining handlers.
+      expect(() => {
+        remove1()
+        remove2()
+      }).not.toThrow()
     })
   })
 
   describe('edge cases', () => {
     it('should handle rapid load/unload cycles', () => {
-      for (let i = 0; i < 10; i++) {
-        load()
-        unload()
-      }
-      expect(true).toBe(true)
+      expect(() => {
+        for (let i = 0; i < 10; i++) {
+          load()
+          unload()
+        }
+      }).not.toThrow()
     })
 
     it('should handle multiple handlers with same callback', () => {
@@ -213,9 +215,10 @@ describe('signal-exit', () => {
       const remove1 = onExit(callback)
       const remove2 = onExit(callback)
 
-      remove1()
-      remove2()
-      expect(true).toBe(true)
+      expect(() => {
+        remove1()
+        remove2()
+      }).not.toThrow()
     })
 
     it('should handle mix of regular and alwaysLast handlers', () => {
@@ -229,11 +232,12 @@ describe('signal-exit', () => {
       const remove3 = onExit(regular2)
       const remove4 = onExit(last2, { alwaysLast: true })
 
-      remove1()
-      remove2()
-      remove3()
-      remove4()
-      expect(true).toBe(true)
+      expect(() => {
+        remove1()
+        remove2()
+        remove3()
+        remove4()
+      }).not.toThrow()
     })
   })
 
@@ -304,41 +308,42 @@ describe('signal-exit', () => {
     it('should handle removal of non-existent handler', () => {
       const callback = vi.fn()
       const remove = onExit(callback)
-      remove()
-      // Remove again should not throw
-      remove()
-      remove()
-      expect(true).toBe(true)
+      // Remove the first time (legitimate), then extra times must be no-ops.
+      expect(() => {
+        remove()
+        remove()
+        remove()
+      }).not.toThrow()
     })
   })
 
   describe('memory management', () => {
     it('should not leak handlers', () => {
-      const handlers = []
+      const handlers: Array<() => void> = []
       for (let i = 0; i < 100; i++) {
         const callback = vi.fn()
         const remove = onExit(callback)
         handlers.push(remove)
       }
 
-      // Remove all handlers
-      for (const remove of handlers) {
-        remove()
-      }
-
-      expect(true).toBe(true)
+      // Removing 100 handlers in sequence must not throw.
+      expect(() => {
+        for (const remove of handlers) {
+          remove()
+        }
+      }).not.toThrow()
     })
 
     it('should handle handler removal in any order', () => {
       const callbacks = Array.from({ length: 10 }, () => vi.fn())
       const removers = callbacks.map(cb => onExit(cb))
 
-      // Remove in reverse order
-      for (let i = removers.length - 1; i >= 0; i--) {
-        removers[i]?.()
-      }
-
-      expect(true).toBe(true)
+      // Remove in reverse order — LIFO removal must be safe.
+      expect(() => {
+        for (let i = removers.length - 1; i >= 0; i--) {
+          removers[i]?.()
+        }
+      }).not.toThrow()
     })
   })
 })

@@ -660,41 +660,33 @@ describe('packages/operations', () => {
       expect(called).toBe(true)
     }, 30_000)
 
-    it('should lazy load fetcher on first use', async () => {
-      // This test verifies that make-fetch-happen is only loaded when needed
+    it('resolveGitHubTgzUrl returns without throwing for valid input', async () => {
       const pkgJson: PackageJson = {
         name: 'test',
         version: '1.0.0',
         repository: { url: 'git+https://github.com/user/repo.git' },
       }
 
-      await resolveGitHubTgzUrl('test', pkgJson)
-      // If we get here without error, lazy loading worked
-      expect(true).toBe(true)
+      await expect(resolveGitHubTgzUrl('test', pkgJson)).resolves.toBeDefined()
     }, 30_000)
 
-    it('should lazy load npm-package-arg on first use', () => {
-      // Using getReleaseTag should not load npm-package-arg
-      getReleaseTag('package@1.0.0')
-      expect(true).toBe(true)
+    it('getReleaseTag returns a string for package spec', () => {
+      const tag = getReleaseTag('package@1.0.0')
+      expect(typeof tag).toBe('string')
     })
 
-    it('should lazy load pack on first use', async () => {
-      // packPackage should lazy load the pack module
+    it('packPackage rejects for non-existent directory', async () => {
       await expect(packPackage('/non/existent')).rejects.toThrow()
     }, 30_000)
 
-    it('should lazy load pacote on first use', async () => {
-      // extractPackage should lazy load pacote
+    it('extractPackage rejects for invalid spec', async () => {
       await expect(
         extractPackage('invalid-spec-xyz', { dest: '/tmp/test' })
       ).rejects.toThrow()
     }, 30_000)
 
-    it('should lazy load semver on first use', () => {
-      // findPackageExtensions should lazy load semver
-      findPackageExtensions('package', '1.0.0')
-      expect(true).toBe(true)
+    it('findPackageExtensions returns without throwing', () => {
+      expect(() => findPackageExtensions('package', '1.0.0')).not.toThrow()
     })
   })
 
