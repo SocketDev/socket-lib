@@ -9,6 +9,7 @@ const NumberCtor = Number
 // `exports.SomeName = void 0;` which causes runtime errors.
 // See: https://github.com/SocketDev/socket-packageurl-js/issues/3
 const NumberIsFinite = Number.isFinite
+const NumberIsNaN = Number.isNaN
 const NumberParseInt = Number.parseInt
 const StringCtor = String
 
@@ -174,30 +175,58 @@ export function createEnvProxy(
 }
 
 /**
+ * Options for `envAsBoolean`.
+ */
+export interface EnvAsBooleanOptions {
+  /** Default when value is null/undefined. @default false */
+  defaultValue?: boolean | undefined
+  /**
+   * Whether to trim whitespace from string values before matching. When
+   * `false`, `'  true  '` is NOT recognised as truthy — only exact matches.
+   * @default true
+   */
+  trim?: boolean | undefined
+}
+
+/**
  * Convert an environment variable value to a boolean.
  *
+ * Back-compat overload: passing a bare boolean as the second argument is
+ * equivalent to `{ defaultValue: B }`.
+ *
  * @param value - The value to convert
- * @param defaultValue - Default when value is null/undefined (default: `false`)
- * @returns `true` if value is '1' or 'true' (case-insensitive), `false` otherwise
+ * @param defaultValueOrOptions - Default (boolean) or options object
+ * @returns `true` if value is '1', 'true', or 'yes' (case-insensitive), `false` otherwise
  *
  * @example
  * ```typescript
  * import { envAsBoolean } from '@socketsecurity/lib/env'
  *
- * envAsBoolean('true')      // true
- * envAsBoolean('1')         // true
- * envAsBoolean('false')     // false
- * envAsBoolean(undefined)   // false
+ * envAsBoolean('true')                     // true
+ * envAsBoolean('1')                        // true
+ * envAsBoolean('yes')                      // true
+ * envAsBoolean('  true  ')                 // true (trimmed)
+ * envAsBoolean('  true  ', { trim: false }) // false (strict)
+ * envAsBoolean(undefined)                  // false
+ * envAsBoolean(undefined, true)            // true (legacy positional default)
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function envAsBoolean(value: unknown, defaultValue = false): boolean {
+export function envAsBoolean(
+  value: unknown,
+  defaultValueOrOptions: boolean | EnvAsBooleanOptions | undefined = false,
+): boolean {
+  const opts: EnvAsBooleanOptions =
+    typeof defaultValueOrOptions === 'boolean'
+      ? { defaultValue: defaultValueOrOptions }
+      : (defaultValueOrOptions ?? {})
+  const { defaultValue = false, trim = true } = opts
   if (typeof value === 'string') {
-    const trimmed = value.trim()
-    if (!trimmed) {
+    const candidate = trim ? value.trim() : value
+    if (!candidate) {
       return !!defaultValue
     }
-    const lower = trimmed.toLowerCase()
+    const lower = candidate.toLowerCase()
     return lower === '1' || lower === 'true' || lower === 'yes'
   }
   if (value === null || value === undefined) {
@@ -207,24 +236,79 @@ export function envAsBoolean(value: unknown, defaultValue = false): boolean {
 }
 
 /**
+ * Options for `envAsNumber`.
+ */
+export interface EnvAsNumberOptions {
+  /**
+   * Whether to return `±Infinity` when input parses to infinity. When
+   * `false` (default), infinities and NaN are coerced to `defaultValue`.
+   * @default false
+   */
+  allowInfinity?: boolean | undefined
+  /** Default when value is not a finite number. @default 0 */
+  defaultValue?: number | undefined
+  /**
+   * Parse mode. `'int'` (default) uses `parseInt(_, 10)` — integer only.
+   * `'float'` uses `Number()` — decimals preserved.
+   * @default 'int'
+   */
+  mode?: 'int' | 'float' | undefined
+}
+
+/**
  * Convert an environment variable value to a number.
  *
+ * Back-compat overload: passing a bare number as the second argument is
+ * equivalent to `{ defaultValue: N }`.
+ *
  * @param value - The value to convert
- * @param defaultValue - Default when value is not a finite number (default: `0`)
- * @returns The parsed integer, or the default value if parsing fails
+ * @param defaultValueOrOptions - Default (number) or options object
+ * @returns The parsed number, or the default value if parsing fails
  *
  * @example
  * ```typescript
  * import { envAsNumber } from '@socketsecurity/lib/env'
  *
- * envAsNumber('3000')     // 3000
- * envAsNumber('abc')      // 0
- * envAsNumber(undefined)  // 0
+ * envAsNumber('3000')              // 3000 (int mode)
+ * envAsNumber('3.14', { mode: 'float' }) // 3.14
+ * envAsNumber('abc')               // 0
+ * envAsNumber(undefined, 42)       // 42 (legacy positional default)
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function envAsNumber(value: unknown, defaultValue = 0): number {
-  const numOrNaN = NumberParseInt(String(value), 10)
+export function envAsNumber(
+  value: unknown,
+  defaultValueOrOptions: number | EnvAsNumberOptions | undefined = 0,
+): number {
+  const opts: EnvAsNumberOptions =
+    typeof defaultValueOrOptions === 'number'
+      ? { defaultValue: defaultValueOrOptions }
+      : (defaultValueOrOptions ?? {})
+  const { allowInfinity = false, defaultValue = 0, mode = 'int' } = opts
+
+  // Fast-paths for the strict `string | undefined` shape (helpers semantics).
+  if (value === undefined || value === null) {
+    return defaultValue
+  }
+  if (typeof value === 'string') {
+    if (!value) {
+      return defaultValue
+    }
+    const num = mode === 'float' ? NumberCtor(value) : NumberParseInt(value, 10)
+    if (NumberIsNaN(num)) {
+      return defaultValue
+    }
+    if (!NumberIsFinite(num)) {
+      return allowInfinity ? num : defaultValue
+    }
+    return num || 0
+  }
+
+  // Broad (unknown) path — coerce via String() then parse.
+  const numOrNaN =
+    mode === 'float'
+      ? NumberCtor(String(value))
+      : NumberParseInt(String(value), 10)
   const numMayBeNegZero = NumberIsFinite(numOrNaN)
     ? numOrNaN
     : NumberCtor(defaultValue)
@@ -233,30 +317,74 @@ export function envAsNumber(value: unknown, defaultValue = 0): number {
 }
 
 /**
- * Convert an environment variable value to a trimmed string.
+ * Options for `envAsString`.
+ */
+export interface EnvAsStringOptions {
+  /** Default when value is null/undefined. @default '' */
+  defaultValue?: string | undefined
+  /**
+   * Whether to trim whitespace from string values. `true` (default) trims.
+   * Set `false` to preserve whitespace (helpers.envAsString semantics).
+   * @default true
+   */
+  trim?: boolean | undefined
+}
+
+/**
+ * Convert an environment variable value to a string.
+ *
+ * Back-compat overload: passing a bare string as the second argument is
+ * equivalent to `{ defaultValue: S }`.
  *
  * @param value - The value to convert
- * @param defaultValue - Default when value is null/undefined (default: `''`)
- * @returns The trimmed string value, or the default value
+ * @param defaultValueOrOptions - Default (string) or options object
+ * @returns The string value, or the default value
  *
  * @example
  * ```typescript
  * import { envAsString } from '@socketsecurity/lib/env'
  *
- * envAsString('  hello  ')  // 'hello'
- * envAsString(undefined)    // ''
- * envAsString(null, 'n/a')  // 'n/a'
+ * envAsString('  hello  ')                    // 'hello' (trimmed)
+ * envAsString('  hello  ', { trim: false })   // '  hello  '
+ * envAsString(undefined)                      // ''
+ * envAsString(null, 'n/a')                    // 'n/a' (legacy positional)
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function envAsString(value: unknown, defaultValue = ''): string {
+export function envAsString(
+  value: unknown,
+  defaultValueOrOptions: string | EnvAsStringOptions | undefined = '',
+): string {
+  // Accept bare string OR any non-options value as positional default for
+  // legacy compat (`envAsString(null, 123)` coerces to '123'). Options form
+  // is detected by plain-object shape with known keys.
+  const isOptionsObject =
+    typeof defaultValueOrOptions === 'object' &&
+    defaultValueOrOptions !== null &&
+    !Array.isArray(defaultValueOrOptions) &&
+    ('defaultValue' in defaultValueOrOptions || 'trim' in defaultValueOrOptions)
+  const opts: EnvAsStringOptions = isOptionsObject
+    ? (defaultValueOrOptions as EnvAsStringOptions)
+    : {
+        defaultValue:
+          defaultValueOrOptions === undefined
+            ? ''
+            : typeof defaultValueOrOptions === 'string'
+              ? defaultValueOrOptions
+              : StringCtor(defaultValueOrOptions),
+      }
+  const { defaultValue = '', trim = true } = opts
+
+  if (value === undefined || value === null) {
+    return defaultValue === '' || !trim
+      ? defaultValue
+      : StringCtor(defaultValue).trim()
+  }
   if (typeof value === 'string') {
-    return value.trim()
+    return trim ? value.trim() : value
   }
-  if (value === null || value === undefined) {
-    return defaultValue === '' ? defaultValue : StringCtor(defaultValue).trim()
-  }
-  return StringCtor(value).trim()
+  const str = StringCtor(value)
+  return trim ? str.trim() : str
 }
 
 /**
