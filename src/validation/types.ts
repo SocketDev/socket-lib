@@ -122,26 +122,3 @@ export interface SafeJsonParseOptions {
    */
   maxSize?: number | undefined
 }
-
-/**
- * Discriminated union type for JSON parsing results.
- * Enables type-safe handling of success and failure cases.
- *
- * @template T - The expected type of the parsed data
- *
- * @example
- * ```ts
- * const result: JsonParseResult<User> = parseJsonWithResult(jsonString)
- *
- * if (result.success) {
- *   // TypeScript knows result.data is available
- *   console.log(result.data.name)
- * } else {
- *   // TypeScript knows result.error is available
- *   console.error(result.error)
- * }
- * ```
- */
-export type JsonParseResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }

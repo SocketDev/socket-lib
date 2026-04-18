@@ -1,8 +1,10 @@
 /**
- * @fileoverview Socket CLI IPC object getter.
+ * @fileoverview Socket CLI child-process IPC object getter.
  * Lazily builds an `IpcObject` from `SOCKET_CLI_*` environment variables so
  * child processes can read flags and tokens forwarded by the parent Socket
- * CLI without re-parsing `process.env` each call.
+ * CLI without re-parsing `process.env` each call. Complements the filesystem
+ * stub IPC in `@socketsecurity/lib/ipc` (`getIpcStubPath`, `writeIpcStub`)
+ * for cases where data exceeds env-var size limits.
  */
 
 export interface IpcObject {

@@ -11,10 +11,10 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getIpc } from '@socketsecurity/lib/utils/get-ipc'
-import type { IpcObject } from '@socketsecurity/lib/utils/get-ipc'
+import { getIpc } from '@socketsecurity/lib/ipc-cli'
+import type { IpcObject } from '@socketsecurity/lib/ipc-cli'
 
-describe('utils/get-ipc', () => {
+describe('ipc-cli', () => {
   describe('getIpc()', () => {
     it('should export getIpc function', () => {
       expect(typeof getIpc).toBe('function')

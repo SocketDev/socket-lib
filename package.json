@@ -391,6 +391,10 @@
       "types": "./dist/ipc.d.ts",
       "default": "./dist/ipc.js"
     },
+    "./ipc-cli": {
+      "types": "./dist/ipc-cli.d.ts",
+      "default": "./dist/ipc-cli.js"
+    },
     "./json/edit": {
       "types": "./dist/json/edit.d.ts",
       "default": "./dist/json/edit.js"
@@ -626,10 +630,6 @@
     "./url": {
       "types": "./dist/url.d.ts",
       "default": "./dist/url.js"
-    },
-    "./utils/get-ipc": {
-      "types": "./dist/utils/get-ipc.d.ts",
-      "default": "./dist/utils/get-ipc.js"
     },
     "./validation/json-parser": {
       "types": "./dist/validation/json-parser.d.ts",
