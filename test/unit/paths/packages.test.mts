@@ -53,6 +53,17 @@ describe('paths/packages', () => {
       const result = resolvePackageJsonDirname('/foo/bar/baz/qux/package.json')
       expect(result).toBe('/foo/bar/baz/qux')
     })
+
+    it('should not strip to parent for files merely ending in package.json', () => {
+      // Regression: `endsWith('package.json')` used to misclassify
+      // `my-package.json` as a manifest and return the parent dir.
+      expect(resolvePackageJsonDirname('/foo/my-package.json')).toBe(
+        '/foo/my-package.json',
+      )
+      expect(resolvePackageJsonDirname('/foo/bar-package.json')).toBe(
+        '/foo/bar-package.json',
+      )
+    })
   })
 
   describe('resolvePackageJsonPath', () => {
@@ -92,6 +103,14 @@ describe('paths/packages', () => {
       const result = resolvePackageJsonPath('/foo/bar/package.json')
       expect(result).toBe('/foo/bar/package.json')
       expect(result).not.toBe('/foo/bar/package.json/package.json')
+    })
+
+    it('should append package.json to files that merely end in package.json', () => {
+      // Regression: `endsWith('package.json')` used to skip the append
+      // for paths like `/foo/my-package.json`, treating them as manifests.
+      expect(resolvePackageJsonPath('/foo/my-package.json')).toBe(
+        '/foo/my-package.json/package.json',
+      )
     })
   })
 
