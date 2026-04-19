@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.20.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.0) - 2026-04-19
+
+### Added — validation (universal schema validator)
+
+- `@socketsecurity/lib/validation/validate-schema` — one entry point that accepts TypeBox schemas, Zod v3/v4 schemas, or any `safeParse`-shaped duck type. Returns a tagged `{ ok: true, value } | { ok: false, errors }` result with normalized `{ path, message }` issues across every backend. Type inference flows through: Zod users get `z.infer<…>`, TypeBox users get `Static<…>`, no casts required
+- `parseSchema(schema, data)` — throwing twin of `validateSchema` for fail-fast trust-boundary validation
+- `Infer<S>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema` — supporting types exported alongside the helpers
+- `@sinclair/typebox` bundled at `dist/external/@sinclair/typebox/` (core + `/value` subpath) — consumers get the TypeBox path of `validateSchema` out of the box, no separate install
+
+### Changed
+
+- `src/ipc.ts` migrates its internal stub schema from Zod to TypeBox + `parseSchema` as the first dog-food of the universal validator (no public API impact)
+- `scripts/build-externals/esbuild-config.mts` — subpath output filenames now append `.js` when the subpath omits it, so `@sinclair/typebox/value` lands at `dist/external/@sinclair/typebox/value.js` while the exports map references it by the canonical subpath
+- `scripts/build-externals/config.mts` — replaces the `zod` external entry with a scoped `@sinclair/typebox` entry
+
+### Fixed
+
+- `src/promise-queue.ts`: wrap `task.fn()` invocation via `Promise.resolve().then()` so a **synchronous** throw inside a queued task converts to a proper rejection on `task.reject` instead of escaping as an uncaught exception
+- `src/stdio/progress.ts` `formatTime()`: clamp negative milliseconds so an over-ticking or clock-skewed progress bar no longer renders a negative ETA like `-1m59s`
+- `src/dlx/lockfile.ts`: wrap the scratch-directory cleanup in `finally` with its own `try/catch` so a cleanup failure cannot clobber the real exception from the main try-block
+- `src/dlx/package.ts` `parsePackageSpec`: normalize a bare trailing `@` (e.g. `"pkg@"`) to `version: undefined` so downstream "no version provided" checks behave consistently
+- `src/stdio/prompts.ts`: tighten the `selectModule` destructure type to the two properties actually used (`default`, `Separator`) instead of an `as any` cast
+- `src/http-request.ts`: hoist `CHECKSUM_BSD_RE` and `CHECKSUM_GNU_RE` regex literals to module scope so `parseChecksums()` no longer re-declares them once per line inside its loop
+- `src/dlx/manifest.ts`: correct the `@fileoverview` "Primary API" list to match the actual `DlxManifest` methods (`get/set/clear/clearAll/isFresh/getManifestEntry`) and flag `setPackageEntry` / `setBinaryEntry` as deprecated
+
+### Removed
+
+- `./zod` subpath export + `src/zod.ts` + `src/external/zod.*` + `test/unit/zod.test.mts`. The wrapper had no remaining consumers now that validation flows through `validateSchema`. Zod stays as a pinned `devDependency` so tests still exercise the Zod path of the universal helper
+
+### Internal
+
+- `.github/workflows/provenance.yml` — registry SHA pin bumped to `d54c36d0` (fleet-wide cascade catch-up; every other fleet repo moved months ago)
+- `.claude/hooks/*` registered as workspace packages in `pnpm-workspace.yaml` so `taze` (via `pnpm run update`) keeps hook manifests in lockstep with the root catalog
+- `test/temp/` added to `.gitignore` — archive-test fixtures land there and used to linger as untracked files when a watch run was interrupted
+- `scripts/build-externals/esbuild-config.mts` — restored full `STUB_MAP` + `createStubPlugin` + scoped-stub tuple form that was inadvertently wiped by the 5.19.1 release commit (was down to a single encoding stub); reinstates the 11+ entries that reduce `dist/external/npm-pack.js` to its 5.19.0 size, and drops the now-dead `zod/v4/locales` stub
+
 ## [5.19.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.1) - 2026-04-19
 
 ### Fixed — stdio (restore accidentally-dropped modules)
