@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.19.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.0) - 2026-04-19
+
+### Added — dlx/integrity (new module)
+
+- `HashSpec`, `NormalizedHash`, `ComputedHashes` types. `HashSpec` accepts a bare string (sha512 SRI or sha256 hex, sniffed) or an explicit `{ type, value }` object
+- `normalizeHash()`, `computeHashes()`, `verifyHash()` — `verifyHash` uses `crypto.timingSafeEqual` for constant-time comparison
+- `DlxHashMismatchError` — carries `expected` + `actual` for diagnostics
+
+### Added — dlx/arborist (new module)
+
+- `safeIdealTree()`, `safeReify()` — hardened `@npmcli/arborist` wrappers mirroring socket-cli v1.1.79 `SafeArborist` overrides (`audit: false`, `fund: false`, `ignoreScripts: true`, `progress: false`, `saveBundle: false`, `silent: true`)
+- `writeSafeNpmrc()` — defense-in-depth `.npmrc` writer matching the Arborist overrides
+- Optional `before?: Date` on `safeIdealTree` for release-age enforcement during resolution
+
+### Added — dlx/lockfile (new module)
+
+- `generatePackagePin({ package, minReleaseDays?, minReleaseMins? })` — returns `PinDetails { name, version, hash: ComputedHashes, packageJson, lockfile }`. Runs Arborist in `packageLockOnly: true` mode against a tmp directory and auto-cleans
+- **Default `minReleaseDays: 7`** — resolution refuses to select versions published in the last week. Pass `0` to disable. `minReleaseMins` is a pnpm-style alias (mutually exclusive with `minReleaseDays`)
+- `LockfileSpec` type — export for use as the new `lockfile` option on `downloadPackage`
+
+### Added — dlx existing modules
+
+- `DlxPackageOptions.hash?: HashSpec` and `DlxPackageOptions.lockfile?: LockfileSpec` — passing a lockfile materializes it into the install dir (path → `fs.copyFileSync`, content → `fs.writeFileSync`) and drops a hardened `.npmrc` alongside before Arborist runs
+- `DlxBinaryOptions.hash?: HashSpec` — ergonomic alternative to the lower-level `integrity` and `sha256` fields (both still accepted)
+
+### Fixed — external
+
+- `pacote` shim now exposes `tarball`, `manifest`, `packument` alongside `extract`. **Fixes a latent runtime crash** in `src/packages/manifest.ts` callers (`fetchPackageManifest` / `fetchPackagePackument` called `.manifest(...)` / `.packument(...)` on a shim that previously only had `extract`, raising `TypeError: not a function`)
+
+### Changed — build (bundle size)
+
+- `dist/external/npm-pack.js`: 2,526,598 → 1,755,460 bytes (−771 KB, −30.5%). New `STUB_MAP` entries for code paths our callers never reach:
+  - `@sigstore/{bundle,core,protobuf-specs,sign,tuf,verify}`, `sigstore`, `tuf-js`, `@tufjs/{canonical-json,models}` — Sigstore attestation, only reached via `arb.audit()`
+  - `@npmcli/metavuln-calculator` — audit-only
+  - `@npmcli/query`, `postcss-selector-parser` — `arb.query()` unused
+  - `@npmcli/run-script`, `@npmcli/node-gyp` — guarded out by `ignoreScripts: true`
+  - `@npmcli/git`, `pacote/lib/{git,file,dir,remote}.js` — registry specs only
+  - arborist `audit-report.js`, `yarn-lock.js`, `isolated-reifier.js`, `query-selector-all.js`, `printable.js` — each gated or unused
+  - `cacache/lib/verify.js` — `cacache.verify` (npm cache verify) unused
+  - `proggy` — progress tracker, gated by `progress: false`
+  - `debug/src/browser.js` — Node-only bundle
+- `dist/external/zod.js`: 597,238 → 291,430 bytes (−306 KB, −51.2%). Stubbed `zod/v4/{core,classic,mini}`'s eager `locales/index.cjs` barrel (40+ translation modules). Opt-in via `z.config(z.locales.xx())` is never called by us
+
 ## [5.18.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.2) - 2026-04-14
 
 ### Removed
