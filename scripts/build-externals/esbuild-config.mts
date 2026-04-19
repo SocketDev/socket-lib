@@ -38,6 +38,13 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   '^@npmcli/metavuln-calculator$': 'empty.cjs',
   // Arborist CSS-selector query API — unused.
   '^@npmcli/query$': 'empty.cjs',
+  // node-gyp detection — Arborist calls isNodeGypPackage(path) during
+  // rebuild to decide whether to synthesize an install script for native
+  // rebuilds. That synthesized script only runs when !ignoreScripts,
+  // and we always pass ignoreScripts: true, so the detection return
+  // value is consumed but never acted on. Stub returns falsy =>
+  // isGyp=false => branch skipped.
+  '^@npmcli/node-gyp$': 'npmcli-node-gyp.cjs',
   // Lifecycle scripts — we always pass ignoreScripts: true, so every
   // runScript(...) call site in arborist/reify.js and arborist/rebuild.js
   // is guarded out.
