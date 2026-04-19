@@ -1906,23 +1906,47 @@ async function executeParallel(tasks, workers = 3) {
     return results
   }
 
-  // Parallel execution with worker limit
+  // Parallel execution with worker limit.
+  // A single-waiter "slot available" signal wakes this loop whenever any
+  // in-flight task settles, instead of re-racing the whole executing[] array
+  // on every iteration (that stacks .then handlers on still-pending promises
+  // — see https://github.com/nodejs/node/issues/17469).
   log.substep(`🚀 Executing ${tasks.length} tasks with ${workers} workers`)
   const results = []
-  const executing = []
+  let inFlight = 0
+  let slotWaiter = null
+
+  const releaseSlot = () => {
+    inFlight--
+    if (slotWaiter) {
+      const resolve = slotWaiter
+      slotWaiter = null
+      resolve()
+    }
+  }
+  const waitForSlot = () => {
+    if (inFlight < workers) {
+      return Promise.resolve()
+    }
+    return new Promise(resolve => {
+      slotWaiter = resolve
+    })
+  }
 
   for (const task of tasks) {
-    const promise = task().then(result => {
-      executing.splice(executing.indexOf(promise), 1)
-      return result
-    })
-
+    await waitForSlot()
+    inFlight++
+    const promise = task().then(
+      result => {
+        releaseSlot()
+        return result
+      },
+      err => {
+        releaseSlot()
+        throw err
+      },
+    )
     results.push(promise)
-    executing.push(promise)
-
-    if (executing.length >= workers) {
-      await Promise.race(executing)
-    }
   }
 
   return Promise.all(results)
