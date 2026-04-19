@@ -75,6 +75,7 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   // etc. imports elsewhere aren't caught.
   '^\\./dir\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
   '^\\./file\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  '^\\./git\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
   '^\\./remote\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
   // Arborist AuditReport — load() is gated on options.audit !== false
   // and we always pass audit: false. The require is eager but the
@@ -112,6 +113,9 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
     /@npmcli[\\/]arborist[\\/]lib[\\/]/,
     'arborist-printable.cjs',
   ],
+  // cacache.verify — the `npm cache verify` helper. Exported from
+  // cacache/lib/index.js but no code in our bundle chain calls it.
+  '^\\./verify\\.js$': [/cacache[\\/]lib[\\/]/, 'empty.cjs'],
 }
 
 /**
