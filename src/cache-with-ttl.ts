@@ -421,17 +421,28 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     key: string,
     fetcher: () => Promise<T>,
   ): Promise<T> {
+    const fullKey = buildKey(key)
+
+    // Join an in-flight fetch before touching the persistent cache. If we
+    // did the `await get(key)` first, two concurrent callers on a cold
+    // key would both suspend on the same disk read, both see no cached
+    // value, both skip this check, and both fire `fetcher()` — the exact
+    // thundering-herd the inflight map is supposed to prevent.
+    const preexisting = inflightRequests.get(fullKey)
+    if (preexisting) {
+      return (await preexisting) as T
+    }
+
     const cached = await get<T>(key)
     if (cached !== undefined) {
       return cached
     }
 
-    const fullKey = buildKey(key)
-
-    // Check if another request is already in flight
-    const existing = inflightRequests.get(fullKey)
-    if (existing) {
-      return (await existing) as T
+    // Re-check after the await: another caller may have registered an
+    // in-flight fetch while we were reading the persistent cache.
+    const rechecked = inflightRequests.get(fullKey)
+    if (rechecked) {
+      return (await rechecked) as T
     }
 
     // Create promise with cleanup handlers
@@ -446,7 +457,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       }
     })()
 
-    // Set the promise IMMEDIATELY before any await to prevent race
+    // Register before awaiting so subsequent callers join this fetch.
     inflightRequests.set(fullKey, promise)
 
     // Await and return (cleanup happens in finally block)

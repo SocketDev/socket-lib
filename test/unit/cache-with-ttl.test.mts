@@ -554,8 +554,37 @@ describe.sequential('cache-with-ttl', () => {
 
       // All should return the value
       expect(results).toEqual(['value', 'value', 'value'])
-      // But fetcher might be called multiple times due to race conditions
-      expect(fetchCount).toBeGreaterThan(0)
+      // And the inflight map dedupes to a single upstream call.
+      // (Previously gated on `> 0` because getOrFetch let two concurrent
+      // cold-cache callers both fire fetcher — the check-then-inflight
+      // ordering was wrong. Tightened once the TOCTOU was closed.)
+      expect(fetchCount).toBe(1)
+    })
+
+    it('dedupes concurrent cold-cache fetches', async () => {
+      // Regression: previously `await get(key)` ran BEFORE the inflight
+      // map was consulted. Two callers could both suspend on the disk
+      // lookup, both see no cached value, and both start a fresh fetch.
+      let fetchCount = 0
+      let resolveFetcher: (value: string) => void = () => {}
+      const pendingValue = new Promise<string>(resolve => {
+        resolveFetcher = resolve
+      })
+      const fetcher = async () => {
+        fetchCount++
+        return pendingValue
+      }
+
+      const p1 = cache.getOrFetch('race-key', fetcher)
+      const p2 = cache.getOrFetch('race-key', fetcher)
+      const p3 = cache.getOrFetch('race-key', fetcher)
+      // Microtask gap so the first caller can register the inflight
+      // entry, even though its internal `await get()` is still pending.
+      await Promise.resolve()
+      resolveFetcher('joined')
+      const [v1, v2, v3] = await Promise.all([p1, p2, p3])
+      expect([v1, v2, v3]).toEqual(['joined', 'joined', 'joined'])
+      expect(fetchCount).toBe(1)
     })
   })
 
