@@ -91,6 +91,13 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
     /@npmcli[\\/]arborist[\\/]lib[\\/]/,
     'arborist-yarn-lock.cjs',
   ],
+  // Arborist IsolatedReifier mixin — only adds methods used when
+  // options.installStrategy === 'linked'. We never pass that flag.
+  // Identity mixin preserves the class composition chain.
+  '^\\./isolated-reifier\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
+    'arborist-isolated-reifier.cjs',
+  ],
 }
 
 /**
