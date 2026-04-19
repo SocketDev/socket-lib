@@ -3,10 +3,16 @@
  * Manages persistent caching of DLX package and binary metadata with TTL support
  * and atomic file operations.
  *
- * Key Functions:
- * - getManifestEntry: Retrieve manifest entry by spec
- * - setPackageEntry: Store npm package metadata
- * - setBinaryEntry: Store binary download metadata
+ * Primary API (on {@link DlxManifest}):
+ * - `getManifestEntry(spec)` — retrieve a manifest entry by spec
+ * - `set(name, record)` — store a raw `StoreRecord`
+ * - `get(name)` — read a raw `StoreRecord`
+ * - `clear(name)` / `clearAll()` — eviction
+ * - `isFresh(record, ttlMs)` — TTL check
+ *
+ * Legacy typed setters `setPackageEntry` and `setBinaryEntry` exist but
+ * are deprecated; new callers should construct a `StoreRecord` and use
+ * `set(name, record)` directly.
  *
  * Features:
  * - TTL-based cache expiration

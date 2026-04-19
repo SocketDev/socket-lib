@@ -232,7 +232,9 @@ export class ProgressBar {
    * Format time in seconds to human readable.
    */
   private formatTime(ms: number): string {
-    const seconds = Math.round(ms / 1000)
+    // Clamp negatives (can happen when current > total due to over-ticking
+    // or clock skew) to 0 so we don't render "-1m59s".
+    const seconds = Math.max(0, Math.round(ms / 1000))
     if (seconds < 60) {
       return `${seconds}s`
     }

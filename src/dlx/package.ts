@@ -851,9 +851,12 @@ export function parsePackageSpec(spec: string): {
       // No version or scoped package without version (@ only at position 0).
       return { name: spec, version: undefined }
     }
+    const sliced = spec.slice(atIndex + 1)
     return {
       name: spec.slice(0, atIndex),
-      version: spec.slice(atIndex + 1),
+      // A trailing `@` (e.g. `'pkg@'`) yields an empty slice — normalize
+      // to undefined so downstream "no version" checks behave.
+      version: sliced || undefined,
     }
   }
 }

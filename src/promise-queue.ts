@@ -70,8 +70,11 @@ export class PromiseQueue {
 
     this.running++
 
-    task
-      .fn()
+    // Wrap in Promise.resolve().then() so a synchronous throw inside
+    // task.fn() converts into a rejection routed to task.reject rather
+    // than escaping as an uncaught exception.
+    Promise.resolve()
+      .then(() => task.fn())
       .then(task.resolve)
       .catch(task.reject)
       .finally(() => {
