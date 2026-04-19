@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.19.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.1) - 2026-04-19
+
+### Fixed — stdio (restore accidentally-dropped modules)
+
+5.19.0 shipped a breaking change that was not called out in its changelog or version bump: a refactor commit removed `stdio/prompts`, `stdio/progress`, `stdio/clear`, and the vendored `external/@inquirer/*` shims. socket-cli and other consumers import `stdio/prompts` directly and broke on upgrade.
+
+Restored:
+
+- `@socketsecurity/lib/stdio/prompts` — inquirer wrappers (`password`, `confirm`, `input`, `select`, `checkbox`, `search`)
+- `@socketsecurity/lib/stdio/progress` — progress-bar utility (`ProgressBar` class)
+- `@socketsecurity/lib/stdio/clear` — terminal line/screen/cursor helpers
+- `src/external/@inquirer/{checkbox,confirm,input,password,search,select}.js` vendor shims
+- Corresponding test suites
+
 ## [5.19.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.0) - 2026-04-19
 
 ### Added — dlx/integrity (new module)

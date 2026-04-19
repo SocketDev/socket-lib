@@ -4,11 +4,11 @@
  * These are bundled dependencies used internally by socket-lib modules.
  */
 
-import { readdirSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')
@@ -36,7 +36,7 @@ function getExternalModules(dir) {
       if (entry.isFile() && entry.name.endsWith('.js')) {
         modules.push(fullPath)
       } else if (entry.isDirectory()) {
-        // For scoped packages like @npmcli, @socketregistry, etc.
+        // For scoped packages like @inquirer, @npmcli, etc.
         // Check if they have index.js or subdirectories
         try {
           const indexPath = path.join(fullPath, 'index.js')
@@ -63,7 +63,12 @@ function getExternalModules(dir) {
 }
 
 // Packages that legitimately only export { default } (ESM default exports).
-const DEFAULT_ONLY_ALLOWED = new Set<string>([])
+// These are optional @inquirer packages that use ESM default export pattern.
+const DEFAULT_ONLY_ALLOWED = new Set([
+  '@inquirer/confirm.js',
+  '@inquirer/input.js',
+  '@inquirer/password.js',
+])
 
 /**
  * Check if an external module export is usable without .default.

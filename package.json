@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.19.0",
+  "version": "5.19.1",
   "packageManager": "pnpm@11.0.0-rc.2",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -575,6 +575,10 @@
       "types": "./dist/ssri.d.ts",
       "default": "./dist/ssri.js"
     },
+    "./stdio/clear": {
+      "types": "./dist/stdio/clear.d.ts",
+      "default": "./dist/stdio/clear.js"
+    },
     "./stdio/divider": {
       "types": "./dist/stdio/divider.d.ts",
       "default": "./dist/stdio/divider.js"
@@ -586,6 +590,14 @@
     "./stdio/header": {
       "types": "./dist/stdio/header.d.ts",
       "default": "./dist/stdio/header.js"
+    },
+    "./stdio/progress": {
+      "types": "./dist/stdio/progress.d.ts",
+      "default": "./dist/stdio/progress.js"
+    },
+    "./stdio/prompts": {
+      "types": "./dist/stdio/prompts.d.ts",
+      "default": "./dist/stdio/prompts.js"
     },
     "./stdio/stderr": {
       "types": "./dist/stdio/stderr.d.ts",
@@ -699,6 +711,12 @@
     "@babel/parser": "7.28.4",
     "@babel/traverse": "7.28.4",
     "@babel/types": "7.28.4",
+    "@inquirer/checkbox": "5.1.3",
+    "@inquirer/confirm": "6.0.11",
+    "@inquirer/input": "5.0.11",
+    "@inquirer/password": "5.0.11",
+    "@inquirer/search": "4.1.7",
+    "@inquirer/select": "5.1.3",
     "@npmcli/arborist": "9.1.4",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",

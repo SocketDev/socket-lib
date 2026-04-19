@@ -8,6 +8,9 @@ allowBuilds:
   esbuild: true
 
 overrides:
+  '@inquirer/ansi': 2.0.5
+  '@inquirer/core': 11.1.8
+  '@inquirer/figures': 2.0.5
   '@npmcli/arborist': 9.1.6
   '@npmcli/git': 6.0.3
   '@npmcli/installed-package-contents': 4.0.0
