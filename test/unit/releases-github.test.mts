@@ -842,8 +842,15 @@ describe('releases/github', () => {
       const { promises: fs } = await import('node:fs')
       const path = await import('node:path')
 
-      const tmpDir = tmpdir()
-      const testDownloadDir = path.join(tmpDir, `test-github-dl-${Date.now()}`)
+      // mkdtemp gives an OS-guaranteed unique dir. Previous `Date.now()`
+      // naming collided across test runs on the same millisecond and
+      // across parallel vitest workers, occasionally letting a prior
+      // run's cached .version + binary satisfy the cache-hit branch
+      // inside downloadGitHubRelease — so `httpDownload` was called 0
+      // times and the assertion below saw the wrong count.
+      const testDownloadDir = await fs.mkdtemp(
+        path.join(tmpdir(), 'test-github-dl-'),
+      )
 
       try {
         // Mock successful HTTP download
@@ -940,10 +947,10 @@ describe('releases/github', () => {
       const { promises: fs } = await import('node:fs')
       const path = await import('node:path')
 
-      const tmpDir = tmpdir()
-      const testDownloadDir = path.join(
-        tmpDir,
-        `test-github-dl-missing-${Date.now()}`,
+      // mkdtemp avoids collisions with prior test runs' leftover cache
+      // dirs. See note on the sibling test above.
+      const testDownloadDir = await fs.mkdtemp(
+        path.join(tmpdir(), 'test-github-dl-missing-'),
       )
 
       try {
