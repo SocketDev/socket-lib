@@ -3,25 +3,120 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')
 
+const requireResolve = createRequire(import.meta.url)
+
 /**
  * Stub configuration - maps module patterns to stub files.
  * Only includes conservative stubs that are safe to use.
+ *
+ * SAFETY NOTE for the Arborist-reachable stubs below:
+ * We use Arborist via `safeIdealTree` (buildIdealTree + reify in
+ * packageLockOnly mode) and `safeReify` only. We never call
+ * `arb.audit()` (→ metavuln-calculator → sigstore/tuf) nor
+ * `arb.query(...)` (→ @npmcli/query → postcss-selector-parser).
+ * If a future caller needs those code paths, drop the corresponding
+ * entry from STUB_MAP.
  */
-const STUB_MAP = {
+/**
+ * Each entry may be a bare stub filename (matches against args.path only)
+ * or a tuple `[importerPattern, stubFilename]` to require args.importer
+ * to also match (used to scope relative-path stubs to a specific package).
+ */
+const STUB_MAP: Record<string, string | [RegExp, string]> = {
+  // Git-based package specs (`git://`, `github:`, `gitlab:`). We only
+  // pass registry specs (`name@version`); pacote/lib/git.js and
+  // @npmcli/git are unreachable.
+  '^@npmcli/git$': 'empty.cjs',
+  // Vulnerability calculator — arb.audit() path only.
+  '^@npmcli/metavuln-calculator$': 'empty.cjs',
+  // Arborist CSS-selector query API — unused.
+  '^@npmcli/query$': 'empty.cjs',
+  // node-gyp detection — Arborist calls isNodeGypPackage(path) during
+  // rebuild to decide whether to synthesize an install script for native
+  // rebuilds. That synthesized script only runs when !ignoreScripts,
+  // and we always pass ignoreScripts: true, so the detection return
+  // value is consumed but never acted on. Stub returns falsy =>
+  // isGyp=false => branch skipped.
+  '^@npmcli/node-gyp$': 'npmcli-node-gyp.cjs',
+  // Lifecycle scripts — we always pass ignoreScripts: true, so every
+  // runScript(...) call site in arborist/reify.js and arborist/rebuild.js
+  // is guarded out.
+  '^@npmcli/run-script$': 'empty.cjs',
+  // Sigstore attestation — reachable only via arb.audit(), unused.
+  '^@sigstore/(bundle|core|protobuf-specs|sign|tuf|verify)$': 'empty.cjs',
+  // TUF root-of-trust — Sigstore-only dependency.
+  '^@tufjs/(canonical-json|models)$': 'empty.cjs',
   // Character encoding - we only use UTF-8.
   '^(encoding|iconv-lite)$': 'encoding.cjs',
+  '^postcss-selector-parser$': 'empty.cjs',
+  // Progress tracker — we pass progress: false. Replace with an
+  // EventEmitter-based no-op that preserves the `new Tracker(...)`
+  // + `on('done')` contract Arborist uses.
+  '^proggy$': 'proggy.cjs',
+  '^sigstore$': 'empty.cjs',
+  '^tuf-js$': 'empty.cjs',
+  // Pacote non-registry fetchers — eagerly required at the top of
+  // pacote/lib/fetcher.js but only instantiated when the parsed spec
+  // type matches. We only pass registry specs (name@version/range/tag)
+  // → RegistryFetcher is the only one that ever fires. Scope each
+  // stub to imports coming from inside pacote/lib so unrelated ./dir
+  // etc. imports elsewhere aren't caught.
+  '^\\./dir\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  '^\\./file\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  '^\\./git\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  '^\\./remote\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  // Arborist AuditReport — load() is gated on options.audit !== false
+  // and we always pass audit: false. The require is eager but the
+  // class is never instantiated.
+  '^\\.\\./audit-report\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
+    'arborist-audit-report.cjs',
+  ],
+  // Arborist YarnLock — instantiated only when a yarn.lock file is
+  // present in the install dir. We operate in scratch tmp dirs (pin
+  // flow) or Socket cache dirs (install flow), neither of which has
+  // a yarn.lock.
+  '^\\./yarn-lock\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-yarn-lock.cjs',
+  ],
+  // Arborist IsolatedReifier mixin — only adds methods used when
+  // options.installStrategy === 'linked'. We never pass that flag.
+  // Identity mixin preserves the class composition chain.
+  '^\\./isolated-reifier\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
+    'arborist-isolated-reifier.cjs',
+  ],
+  // Arborist querySelectorAll — arb.query(selector) API, unused.
+  // Fixes the @npmcli/query + postcss-selector-parser stub by
+  // preventing the call site from being reachable.
+  '^\\./query-selector-all\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-query-selector-all.cjs',
+  ],
+  // Arborist printable-tree — Node.prototype.toJSON() helper. Arborist
+  // never JSON.stringify's a tree itself; the helper only matters for
+  // debug dumps callers might do. We don't.
+  '^\\./printable\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-printable.cjs',
+  ],
+  // cacache.verify — the `npm cache verify` helper. Exported from
+  // cacache/lib/index.js but no code in our bundle chain calls it.
+  '^\\./verify\\.js$': [/cacache[\\/]lib[\\/]/, 'empty.cjs'],
+  // debug's browser entry — debug/src/index.js conditionally requires
+  // it via `typeof process === 'undefined' || process.browser === true`.
+  // We run in Node and set process.browser=false, so the branch is
+  // dead. Esbuild still bundles the eager require path.
+  '^\\./browser\\.js$': [/debug[\\/]src[\\/]/, 'empty.cjs'],
 }
-
-// Import createRequire at top level
-import { createRequire } from 'node:module'
-
-const requireResolve = createRequire(import.meta.url)
 
 /**
  * Create esbuild plugin to force npm packages to resolve from node_modules.
@@ -145,27 +240,38 @@ function createForceNodeModulesPlugin() {
 
 /**
  * Create esbuild plugin to stub modules using files from stubs/ directory.
- *
- * @param {Record<string, string>} stubMap - Map of regex patterns to stub filenames
- * @returns {import('esbuild').Plugin}
+ * stubMap keys are regex patterns; values are stub filenames.
  */
-function createStubPlugin(stubMap = STUB_MAP) {
+function createStubPlugin(
+  stubMap: Record<string, string | [RegExp, string]> = STUB_MAP,
+) {
   // Pre-compile regex patterns and load stub contents
-  const stubs = Object.entries(stubMap).map(([pattern, filename]) => ({
-    filter: new RegExp(pattern),
-    contents: readFileSync(path.join(stubsDir, filename), 'utf8'),
-    stubFile: filename,
-  }))
+  const stubs = Object.entries(stubMap).map(([pattern, value]) => {
+    const [importerFilter, filename] = Array.isArray(value)
+      ? value
+      : [undefined, value]
+    return {
+      filter: new RegExp(pattern),
+      importerFilter,
+      contents: readFileSync(path.join(stubsDir, filename), 'utf8'),
+      stubFile: filename,
+    }
+  })
 
   return {
     name: 'stub-modules',
     setup(build) {
-      for (const { contents, filter, stubFile } of stubs) {
+      for (const { contents, filter, importerFilter, stubFile } of stubs) {
         // Resolve: mark modules as stubbed
-        build.onResolve({ filter }, args => ({
-          path: args.path,
-          namespace: `stub:${stubFile}`,
-        }))
+        build.onResolve({ filter }, args => {
+          if (importerFilter && !importerFilter.test(args.importer)) {
+            return undefined
+          }
+          return {
+            path: args.path,
+            namespace: `stub:${stubFile}`,
+          }
+        })
 
         // Load: return stub file contents
         build.onLoad({ filter: /.*/, namespace: `stub:${stubFile}` }, () => ({
@@ -190,17 +296,6 @@ export function getPackageSpecificOptions(packageName) {
     // Browserslist's data updates frequently - we can exclude some update checking.
     opts.define = {
       'process.versions.node': '"18.0.0"',
-    }
-  } else if (packageName === 'zod') {
-    // Zod has localization files we don't need.
-    opts.external = [...(opts.external || []), './locales/*']
-  } else if (packageName === 'external-pack') {
-    // Inquirer packages have heavy dependencies we can exclude.
-    opts.external = [...(opts.external || []), 'rxjs/operators']
-  } else if (packageName.startsWith('@inquirer/')) {
-    // @inquirer packages export default only - unwrap for CJS compatibility.
-    opts.footer = {
-      js: 'if (module.exports && module.exports.default && Object.keys(module.exports).length === 1) { module.exports = module.exports.default; }',
     }
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.

@@ -146,7 +146,13 @@ async function bundleAllPackages(options = {}) {
     // Bundle subpath exports (e.g., @npmcli/package-json/lib/read-package)
     if (subpaths) {
       for (const subpath of subpaths) {
-        const outputPath = path.join(distExternalDir, scope, subpath)
+        // Output file always ends in .js. Subpath may already include it
+        // (e.g. '@npmcli/package-json/lib/read-package.js' — the package's
+        // own exports map uses that literal path) or omit it (e.g.
+        // '@sinclair/typebox/value' — exports map uses './value', so the
+        // subpath can't include .js or resolve will fail).
+        const outFilename = subpath.endsWith('.js') ? subpath : `${subpath}.js`
+        const outputPath = path.join(distExternalDir, scope, outFilename)
         const packageName = `${scope}/${subpath}`
         // Ensure parent directory exists
         await ensureDir(path.dirname(outputPath))
