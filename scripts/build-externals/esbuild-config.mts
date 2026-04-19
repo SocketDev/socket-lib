@@ -241,9 +241,6 @@ export function getPackageSpecificOptions(packageName) {
     opts.define = {
       'process.versions.node': '"18.0.0"',
     }
-  } else if (packageName === 'zod') {
-    // Zod has localization files we don't need.
-    opts.external = [...(opts.external || []), './locales/*']
   } else if (packageName === '@socketregistry/packageurl-js') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.
