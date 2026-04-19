@@ -98,6 +98,20 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
     /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
     'arborist-isolated-reifier.cjs',
   ],
+  // Arborist querySelectorAll — arb.query(selector) API, unused.
+  // Fixes the @npmcli/query + postcss-selector-parser stub by
+  // preventing the call site from being reachable.
+  '^\\./query-selector-all\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-query-selector-all.cjs',
+  ],
+  // Arborist printable-tree — Node.prototype.toJSON() helper. Arborist
+  // never JSON.stringify's a tree itself; the helper only matters for
+  // debug dumps callers might do. We don't.
+  '^\\./printable\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-printable.cjs',
+  ],
 }
 
 /**
