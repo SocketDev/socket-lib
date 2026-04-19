@@ -724,7 +724,7 @@
     "@socketregistry/is-unicode-supported": "1.0.5",
     "@socketregistry/packageurl-js": "1.4.2",
     "@socketregistry/yocto-spinner": "1.0.25",
-    "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.19.1",
+    "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.20.1",
     "@types/node": "24.9.2",
     "@typescript/native-preview": "7.0.0-dev.20260415.1",
     "@vitest/coverage-v8": "4.0.3",
