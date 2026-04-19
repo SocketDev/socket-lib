@@ -307,17 +307,17 @@ function getPath() {
  */
 export async function dlxPackage(
   args: readonly string[] | string[],
-  options?: DlxPackageOptions | undefined,
+  options: DlxPackageOptions,
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxPackageResult> {
   // Download the package.
-  const downloadResult = await downloadPackage(options!)
+  const downloadResult = await downloadPackage(options)
 
   // Execute the binary.
   const spawnPromise = executePackage(
     downloadResult.binaryPath,
     args,
-    options?.spawnOptions,
+    options.spawnOptions,
     spawnExtra,
   )
 

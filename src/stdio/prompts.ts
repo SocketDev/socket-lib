@@ -29,9 +29,14 @@ import { resolveColor } from '../themes/utils'
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
 
-// Modules imported at the top - extract default and Separator
+// Modules imported at the top - extract default and Separator.
+// The @inquirer/select shim exposes the namespaced CJS module, so we
+// narrow instead of `as any` to stay within CLAUDE.md's no-any rule.
 const searchRaw = searchModule.default
-const selectModule = selectModuleImport as any
+const selectModule = selectModuleImport as unknown as {
+  default: typeof selectModuleImport.default
+  Separator: typeof selectModuleImport.Separator
+}
 const selectRaw = selectModule.default
 const ActualSeparator = selectModule.Separator
 
