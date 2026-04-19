@@ -448,6 +448,22 @@ importers:
         specifier: 4.1.12
         version: 4.1.12
 
+  .claude/hooks/check-new-deps:
+    dependencies:
+      '@socketregistry/packageurl-js':
+        specifier: 1.4.2
+        version: 1.4.2
+      '@socketsecurity/lib':
+        specifier: 5.19.1
+        version: 5.19.1(typescript@5.9.2)
+      '@socketsecurity/sdk':
+        specifier: 4.0.1
+        version: 4.0.1
+    devDependencies:
+      '@types/node':
+        specifier: 24.9.2
+        version: 24.9.2
+
 packages:
 
   '@antfu/ni@27.0.1':
@@ -1595,6 +1611,10 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@socketsecurity/sdk@4.0.1':
+    resolution: {integrity: sha512-fe3DQp2dFwhc0G6Za36GIMSV+QaPAP5L96K3ZOtywt9nhbwxc9IQwqzdOVztdn5Rbez3t9EHU9Esj24/hWdP0g==}
+    engines: {node: '>=18.20.8', pnpm: '>=11.0.0-rc.0'}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -4122,6 +4142,8 @@ snapshots:
   '@socketsecurity/lib@5.19.1(typescript@5.9.2)':
     optionalDependencies:
       typescript: 5.9.2
+
+  '@socketsecurity/sdk@4.0.1': {}
 
   '@standard-schema/spec@1.1.0': {}
 
