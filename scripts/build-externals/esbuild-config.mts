@@ -76,6 +76,21 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   '^\\./dir\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
   '^\\./file\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
   '^\\./remote\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  // Arborist AuditReport — load() is gated on options.audit !== false
+  // and we always pass audit: false. The require is eager but the
+  // class is never instantiated.
+  '^\\.\\./audit-report\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
+    'arborist-audit-report.cjs',
+  ],
+  // Arborist YarnLock — instantiated only when a yarn.lock file is
+  // present in the install dir. We operate in scratch tmp dirs (pin
+  // flow) or Socket cache dirs (install flow), neither of which has
+  // a yarn.lock.
+  '^\\./yarn-lock\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-yarn-lock.cjs',
+  ],
 }
 
 /**
