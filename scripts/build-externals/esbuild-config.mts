@@ -15,10 +15,29 @@ const requireResolve = createRequire(import.meta.url)
 /**
  * Stub configuration - maps module patterns to stub files.
  * Only includes conservative stubs that are safe to use.
+ *
+ * SAFETY NOTE for the Arborist-reachable stubs below:
+ * We use Arborist via `safeIdealTree` (buildIdealTree + reify in
+ * packageLockOnly mode) and `safeReify` only. We never call
+ * `arb.audit()` (→ metavuln-calculator → sigstore/tuf) nor
+ * `arb.query(...)` (→ @npmcli/query → postcss-selector-parser).
+ * If a future caller needs those code paths, drop the corresponding
+ * entry from STUB_MAP.
  */
 const STUB_MAP = {
+  // Vulnerability calculator — arb.audit() path only.
+  '^@npmcli/metavuln-calculator$': 'empty.cjs',
+  // Arborist CSS-selector query API — unused.
+  '^@npmcli/query$': 'empty.cjs',
+  // Sigstore attestation — reachable only via arb.audit(), unused.
+  '^@sigstore/(bundle|core|protobuf-specs|sign|tuf|verify)$': 'empty.cjs',
+  // TUF root-of-trust — Sigstore-only dependency.
+  '^@tufjs/(canonical-json|models)$': 'empty.cjs',
   // Character encoding - we only use UTF-8.
   '^(encoding|iconv-lite)$': 'encoding.cjs',
+  '^postcss-selector-parser$': 'empty.cjs',
+  '^sigstore$': 'empty.cjs',
+  '^tuf-js$': 'empty.cjs',
 }
 
 /**
