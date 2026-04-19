@@ -116,6 +116,11 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   // cacache.verify — the `npm cache verify` helper. Exported from
   // cacache/lib/index.js but no code in our bundle chain calls it.
   '^\\./verify\\.js$': [/cacache[\\/]lib[\\/]/, 'empty.cjs'],
+  // debug's browser entry — debug/src/index.js conditionally requires
+  // it via `typeof process === 'undefined' || process.browser === true`.
+  // We run in Node and set process.browser=false, so the branch is
+  // dead. Esbuild still bundles the eager require path.
+  '^\\./browser\\.js$': [/debug[\\/]src[\\/]/, 'empty.cjs'],
 }
 
 /**
