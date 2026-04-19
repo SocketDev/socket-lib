@@ -25,10 +25,18 @@ const requireResolve = createRequire(import.meta.url)
  * entry from STUB_MAP.
  */
 const STUB_MAP = {
+  // Git-based package specs (`git://`, `github:`, `gitlab:`). We only
+  // pass registry specs (`name@version`); pacote/lib/git.js and
+  // @npmcli/git are unreachable.
+  '^@npmcli/git$': 'empty.cjs',
   // Vulnerability calculator — arb.audit() path only.
   '^@npmcli/metavuln-calculator$': 'empty.cjs',
   // Arborist CSS-selector query API — unused.
   '^@npmcli/query$': 'empty.cjs',
+  // Lifecycle scripts — we always pass ignoreScripts: true, so every
+  // runScript(...) call site in arborist/reify.js and arborist/rebuild.js
+  // is guarded out.
+  '^@npmcli/run-script$': 'empty.cjs',
   // Sigstore attestation — reachable only via arb.audit(), unused.
   '^@sigstore/(bundle|core|protobuf-specs|sign|tuf|verify)$': 'empty.cjs',
   // TUF root-of-trust — Sigstore-only dependency.
