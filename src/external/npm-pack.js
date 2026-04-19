@@ -4,6 +4,7 @@
 // Includes: arborist, cacache, libnpmpack, make-fetch-happen, pacote,
 // npm-package-arg, normalize-package-data, semver, validate-npm-package-name.
 
+const pacoteIndex = require('pacote/lib/index.js')
 const { get: pacoteFetcherGet } = require('pacote/lib/fetcher.js')
 const libnpmpack = require('libnpmpack/lib/index.js')
 const cacacheGet = require('cacache/lib/get.js')
@@ -20,9 +21,12 @@ const normalizePackageData = require('normalize-package-data/lib/normalize.js')
 const semver = require('semver')
 const validateNpmPackageName = require('validate-npm-package-name')
 
-// Re-create pacote.extract wrapper
+// Re-create pacote surface with the methods we consume.
 const pacote = {
   extract: (spec, dest, opts) => pacoteFetcherGet(spec, opts).extract(dest),
+  tarball: pacoteIndex.tarball,
+  manifest: pacoteIndex.manifest,
+  packument: pacoteIndex.packument,
 }
 
 // Re-create cacache structure

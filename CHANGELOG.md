@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.19.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.0) - 2026-04-18
+
+### Added — dlx
+
+- `dlx/integrity` module — `HashSpec`, `NormalizedHash`, `ComputedHashes`, `normalizeHash()`, `computeHashes()`, `verifyHash()`, `DlxHashMismatchError`. Sniffs bare sha512 SRI vs sha256 hex strings; `verifyHash` uses `crypto.timingSafeEqual` for constant-time comparison
+- `dlx/arborist` module — `safeIdealTree()`, `safeReify()`, `writeSafeNpmrc()` wrapping `@npmcli/arborist` with fixed safety options mirroring socket-cli v1.1.79 `SafeArborist` (`audit: false`, `fund: false`, `ignoreScripts: true`, `progress: false`, `saveBundle: false`, `silent: true`). Accepts `before?: Date` to enforce release-age cutoffs during resolution
+- `dlx/lockfile` module — `generatePackagePin({ package, minReleaseDays?, minReleaseMins? })` returns `PinDetails { name, version, hash: ComputedHashes, packageJson, lockfile }`. Uses Arborist's lockfile-only mode in a tmp directory, fetches the top-level tarball once for sha256, then auto-cleans. Default `minReleaseDays = 7`; pass `0` to disable. `minReleaseDays` and `minReleaseMins` are mutually exclusive aliases for npm-style and pnpm-style semantics. `LockfileSpec` type exported for use as the `lockfile` option on `downloadPackage`
+- `dlx/external-tools` module — `loadExternalTools(filepath)` reads JSON docs with an optional `extends` chain, resolves relative `lockfile` paths to absolute, and returns a frozen record keyed by tool name
+- `DlxPackageOptions.hash?: HashSpec` and `DlxPackageOptions.lockfile?: LockfileSpec` — passing a lockfile materializes it into the install dir (path → `fs.copyFileSync`, content → `fs.writeFileSync`) and drops a hardened `.npmrc` alongside before Arborist runs
+- `DlxBinaryOptions.hash?: HashSpec` — unified alternative to the lower-level `integrity` and `sha256` fields
+
+### Changed — external
+
+- `pacote` shim now exposes `tarball`, `manifest`, `packument` in addition to `extract` (previously only `extract` was bundled)
+
 ## [5.18.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.2) - 2026-04-14
 
 ### Removed

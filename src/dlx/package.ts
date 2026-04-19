@@ -32,7 +32,6 @@
 
 import { WIN32 } from '../constants/platform'
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
-import { generateCacheKey } from './cache'
 import Arborist from '../external/@npmcli/arborist'
 import libnpmexec from '../external/libnpmexec'
 import npmPackageArg from '../external/npm-package-arg'
@@ -41,8 +40,12 @@ import { httpJson } from '../http-request'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
-import type { SpawnExtra, SpawnOptions } from '../spawn'
 import { spawn } from '../spawn'
+import { generateCacheKey } from './cache'
+
+import type { HashSpec } from './integrity'
+import type { LockfileSpec } from './lockfile'
+import type { SpawnExtra, SpawnOptions } from '../spawn'
 
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
@@ -82,7 +85,31 @@ export interface DownloadPackageResult {
   installed: boolean
 }
 
-export interface DlxPackageOptions {
+/**
+ * Shared install-pinning options used by both {@link DlxPackageOptions}
+ * and the lower-level {@link ensurePackageInstalled}.
+ */
+export interface EnsurePackageInstallOptions {
+  /**
+   * Expected hash of the top-level package tarball. Accepts either:
+   * - A bare sha512 SRI string (sniffed as integrity).
+   * - A bare sha256 hex string (sniffed as checksum).
+   * - An explicit `{ type: 'integrity' | 'checksum', value }` object.
+   */
+  hash?: HashSpec | undefined
+
+  /**
+   * Vendored `package-lock.json` to drive a reproducible install. Accepts
+   * a filesystem path (sniffed) or raw JSON content (sniffed via leading
+   * `{`), or an explicit `{ type: 'path' | 'content', value }` object.
+   *
+   * When provided, the lockfile is written into the install dir before
+   * Arborist runs and a hardened `.npmrc` is placed alongside it.
+   */
+  lockfile?: LockfileSpec | undefined
+}
+
+export interface DlxPackageOptions extends EnsurePackageInstallOptions {
   /**
    * Package to install (e.g., '@cyclonedx/cdxgen@10.0.0').
    * Aligns with npx --package flag.
@@ -322,6 +349,8 @@ export async function downloadPackage(
   const {
     binaryName,
     force: userForce,
+    hash,
+    lockfile,
     package: packageSpec,
     yes,
   } = {
@@ -352,6 +381,7 @@ export async function downloadPackage(
     packageName,
     fullPackageSpec,
     force,
+    { hash, lockfile },
   )
 
   // Find binary path.
@@ -386,6 +416,7 @@ export async function ensurePackageInstalled(
   packageName: string,
   packageSpec: string,
   force: boolean,
+  install?: EnsurePackageInstallOptions | undefined,
 ): Promise<{ installed: boolean; packageDir: string }> {
   const fs = getFs()
   const path = getPath()
@@ -436,6 +467,34 @@ export async function ensurePackageInstalled(
         if (fs.existsSync(pkgJsonPath)) {
           return { installed: false, packageDir }
         }
+      }
+
+      // If a lockfile was provided, materialize it into packageDir and
+      // drop a hardened .npmrc alongside. Arborist picks up both.
+      // Sniff: explicit { type, value } wins; bare string with leading `{`
+      // (after whitespace) is JSON content, else a filesystem path.
+      if (install?.lockfile !== undefined) {
+        const spec = install.lockfile
+        const lockDest = path.join(packageDir, 'package-lock.json')
+        let isContent: boolean
+        let value: string
+        if (typeof spec === 'string') {
+          isContent = spec.trimStart().startsWith('{')
+          value = spec
+        } else {
+          isContent = spec.type === 'content'
+          value = spec.value
+        }
+        if (isContent) {
+          fs.writeFileSync(lockDest, value, 'utf8')
+        } else {
+          fs.copyFileSync(value, lockDest)
+        }
+        fs.writeFileSync(
+          path.join(packageDir, '.npmrc'),
+          'ignore-scripts=true\naudit=false\nfund=false\nsave=false\n',
+          'utf8',
+        )
       }
 
       // Install package and dependencies using Arborist (like npx does).
