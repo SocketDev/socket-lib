@@ -24,7 +24,12 @@ const requireResolve = createRequire(import.meta.url)
  * If a future caller needs those code paths, drop the corresponding
  * entry from STUB_MAP.
  */
-const STUB_MAP = {
+/**
+ * Each entry may be a bare stub filename (matches against args.path only)
+ * or a tuple `[importerPattern, stubFilename]` to require args.importer
+ * to also match (used to scope relative-path stubs to a specific package).
+ */
+const STUB_MAP: Record<string, string | [RegExp, string]> = {
   // Git-based package specs (`git://`, `github:`, `gitlab:`). We only
   // pass registry specs (`name@version`); pacote/lib/git.js and
   // @npmcli/git are unreachable.
@@ -50,6 +55,11 @@ const STUB_MAP = {
   '^proggy$': 'proggy.cjs',
   '^sigstore$': 'empty.cjs',
   '^tuf-js$': 'empty.cjs',
+  // Zod localization — eagerly required from zod/v4/{core,classic,mini}
+  // but only used when callers opt in via z.config(z.locales.xx()).
+  // Scope the match to imports coming from inside zod so other
+  // `./locales/*` patterns elsewhere don't collide.
+  '^\\.\\./locales/index\\.cjs$': [/zod[\\/]v4[\\/]/, 'zod-locales.cjs'],
 }
 
 /**
@@ -176,23 +186,36 @@ function createForceNodeModulesPlugin() {
  * Create esbuild plugin to stub modules using files from stubs/ directory.
  * stubMap keys are regex patterns; values are stub filenames.
  */
-function createStubPlugin(stubMap: Record<string, string> = STUB_MAP) {
+function createStubPlugin(
+  stubMap: Record<string, string | [RegExp, string]> = STUB_MAP,
+) {
   // Pre-compile regex patterns and load stub contents
-  const stubs = Object.entries(stubMap).map(([pattern, filename]) => ({
-    filter: new RegExp(pattern),
-    contents: readFileSync(path.join(stubsDir, filename), 'utf8'),
-    stubFile: filename,
-  }))
+  const stubs = Object.entries(stubMap).map(([pattern, value]) => {
+    const [importerFilter, filename] = Array.isArray(value)
+      ? value
+      : [undefined, value]
+    return {
+      filter: new RegExp(pattern),
+      importerFilter,
+      contents: readFileSync(path.join(stubsDir, filename), 'utf8'),
+      stubFile: filename,
+    }
+  })
 
   return {
     name: 'stub-modules',
     setup(build) {
-      for (const { contents, filter, stubFile } of stubs) {
+      for (const { contents, filter, importerFilter, stubFile } of stubs) {
         // Resolve: mark modules as stubbed
-        build.onResolve({ filter }, args => ({
-          path: args.path,
-          namespace: `stub:${stubFile}`,
-        }))
+        build.onResolve({ filter }, args => {
+          if (importerFilter && !importerFilter.test(args.importer)) {
+            return undefined
+          }
+          return {
+            path: args.path,
+            namespace: `stub:${stubFile}`,
+          }
+        })
 
         // Load: return stub file contents
         build.onLoad({ filter: /.*/, namespace: `stub:${stubFile}` }, () => ({
