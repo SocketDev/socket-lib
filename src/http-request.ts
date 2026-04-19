@@ -1790,6 +1790,10 @@ export async function httpText(
  * console.log(checksums['file.zip']) // 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
  * ```
  */
+const CHECKSUM_BSD_RE = /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/
+const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
+const RETRY_AFTER_INT_RE = /^\d+$/
+
 export function parseChecksums(text: string): Checksums {
   const checksums: Checksums = { __proto__: null } as unknown as Checksums
 
@@ -1800,16 +1804,14 @@ export function parseChecksums(text: string): Checksums {
     }
 
     // Try BSD style: "SHA256 (filename) = hash"
-    const bsdMatch = trimmed.match(
-      /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/,
-    )
+    const bsdMatch = CHECKSUM_BSD_RE.exec(trimmed)
     if (bsdMatch) {
       checksums[bsdMatch[1]!] = bsdMatch[2]!.toLowerCase()
       continue
     }
 
     // Try GNU/simple style: "hash  filename" or "hash filename"
-    const gnuMatch = trimmed.match(/^([a-fA-F0-9]{64})\s+(.+)$/)
+    const gnuMatch = CHECKSUM_GNU_RE.exec(trimmed)
     if (gnuMatch) {
       checksums[gnuMatch[2]!] = gnuMatch[1]!.toLowerCase()
     }
@@ -1851,7 +1853,7 @@ export function parseRetryAfterHeader(
   }
   // Try parsing as seconds (strict integer — reject partial like "10abc").
   const trimmed = raw.trim()
-  if (/^\d+$/.test(trimmed)) {
+  if (RETRY_AFTER_INT_RE.test(trimmed)) {
     const seconds = Number(trimmed)
     return seconds * 1000
   }
