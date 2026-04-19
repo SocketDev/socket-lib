@@ -308,6 +308,13 @@ export function memoizeAsync<Args extends unknown[], Result>(
       const inflight = refreshing.get(key)
       if (inflight) {
         debugLog(`[memoizeAsync:${name}] stale-dedup`, { key })
+        // Bump recency so the entry we're refreshing isn't evicted
+        // under LRU pressure while a peer is computing on our behalf.
+        const inflightIndex = accessOrder.indexOf(key)
+        if (inflightIndex !== -1) {
+          accessOrder.splice(inflightIndex, 1)
+        }
+        accessOrder.push(key)
         return await inflight
       }
       // Clean up expired entry before re-caching.
@@ -325,10 +332,17 @@ export function memoizeAsync<Args extends unknown[], Result>(
     const promise = fn(...args).then(
       result => {
         refreshing.delete(key)
-        // Success - update cache entry with resolved promise
+        // Success — update cache entry with resolved promise AND refresh
+        // the timestamp so the freshly-computed value isn't immediately
+        // classified as expired. The timestamp was previously set when
+        // the fetch *started*; under a slow fn this meant `isExpired`
+        // could fire right as the value landed, and every subsequent
+        // call past TTL recomputed because the stale-dedup branch had
+        // nothing to join (`refreshing` was emptied here first).
         const entry = cache.get(key)
         if (entry) {
           entry.value = Promise.resolve(result)
+          entry.timestamp = Date.now()
         }
         return result
       },

@@ -275,6 +275,39 @@ describe('memoization', () => {
       expect(fn).toHaveBeenCalledTimes(2)
     })
 
+    it('refreshes the entry timestamp on resolve, not just on initial set', async () => {
+      // Regression: the timestamp used to be set when fn() STARTED, so a
+      // slow fn (longer than TTL) would produce a resolved value already
+      // classified as expired, and every subsequent call past the first
+      // TTL window would re-fetch despite the cache having just landed a
+      // fresh value. The fix sets `entry.timestamp = Date.now()` in the
+      // resolve handler so the cached hit window starts when the result
+      // is available. Uses fake timers so the assertion isn't sensitive
+      // to real-world microtask jitter under parallel test load.
+      vi.useFakeTimers()
+      try {
+        let callCount = 0
+        const slowFn = async (n: number) => {
+          callCount++
+          await new Promise(r => setTimeout(r, 500))
+          return n * 2
+        }
+        const memoized = memoizeAsync(slowFn, { ttl: 200 })
+        const p1 = memoized(5)
+        await vi.advanceTimersByTimeAsync(500)
+        expect(await p1).toBe(10)
+        expect(callCount).toBe(1)
+        // Without advancing time further, the second call should hit
+        // because the resolve handler set timestamp = now(500).
+        // (Pre-fix: timestamp was still 0 — 500ms old → expired → new
+        // call would fire. Post-fix: 0ms old → hit.)
+        expect(await memoized(5)).toBe(10)
+        expect(callCount).toBe(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
     it('should use custom keyGen when provided', async () => {
       const fn = vi.fn(async (a: number, b: number) => a + b)
       const memoized = memoizeAsync(fn, {
