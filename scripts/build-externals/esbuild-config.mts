@@ -67,6 +67,15 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   // Scope the match to imports coming from inside zod so other
   // `./locales/*` patterns elsewhere don't collide.
   '^\\.\\./locales/index\\.cjs$': [/zod[\\/]v4[\\/]/, 'zod-locales.cjs'],
+  // Pacote non-registry fetchers — eagerly required at the top of
+  // pacote/lib/fetcher.js but only instantiated when the parsed spec
+  // type matches. We only pass registry specs (name@version/range/tag)
+  // → RegistryFetcher is the only one that ever fires. Scope each
+  // stub to imports coming from inside pacote/lib so unrelated ./dir
+  // etc. imports elsewhere aren't caught.
+  '^\\./dir\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  '^\\./file\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  '^\\./remote\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
 }
 
 /**
