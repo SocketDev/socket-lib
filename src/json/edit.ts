@@ -158,7 +158,7 @@ async function retryWrite(
  *
  * @example
  * ```ts
- * import { getEditableJsonClass } from '@socketsecurity/lib/json'
+ * import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
  *
  * const EditableJson = getEditableJsonClass<MyConfigType>()
  * const config = await EditableJson.load('./config.json')
