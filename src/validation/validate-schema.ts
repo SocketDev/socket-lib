@@ -1,19 +1,20 @@
 /**
- * @fileoverview Universal schema validation — works with TypeBox, Zod (v3 and
- * v4), and any Zod-shaped `Schema<T>` duck type.
+ * @fileoverview Universal schema validation for Zod-style schemas (Zod v3,
+ * v4, and any `safeParse`-shaped duck type).
  *
- * Accepts any supported schema kind and returns a tagged result.
+ * Accepts a schema and returns a tagged result.
  *   - `{ ok: true, value }`  — validation passed, `value` is typed as the
- *     schema's inferred output.
+ *     schema's inferred output (`z.infer<typeof S>`).
  *   - `{ ok: false, errors }` — validation failed, `errors` is a normalized
- *     list of `{ path, message }` regardless of which validator produced them.
+ *     list of `{ path, message }`.
  *
- * Types flow through: `validateSchema(ZodSchema, data)` returns
- * `{ ok: true, value: z.infer<typeof ZodSchema> } | { ok: false, errors: ... }`.
- * `validateSchema(TypeBoxSchema, data)` returns the equivalent using
- * `Static<typeof TypeBoxSchema>`. Zod is detected purely structurally via
- * `.safeParse` — no runtime import. TypeBox validation lazy-loads the
- * bundled `@sinclair/typebox/value` runtime from `src/external/`.
+ * Zod is detected purely structurally via `.safeParse` — no runtime import of
+ * the `zod` package is required by socket-lib.
+ *
+ * @internal
+ * Socket-lib additionally recognizes TypeBox schemas for its own internal
+ * use (e.g. `src/ipc.ts`'s stub-file validation). That path is not a
+ * supported consumer API — callers should use Zod.
  */
 
 import type { ParseResult, Schema } from './types'
@@ -158,45 +159,35 @@ function normalizeZodError(err: unknown): ValidationIssue[] {
 }
 
 /**
- * Validate `data` against any supported `schema` kind. Non-throwing.
+ * Validate `data` against a Zod-style `schema`. Non-throwing.
  *
- * Supported schema kinds:
- * - `@sinclair/typebox` schemas (detected via the `Kind` symbol)
+ * Accepted schemas:
  * - `zod` schemas, v3 and v4 (detected via `.safeParse` on the schema)
  * - Any object conforming to {@link Schema} (the socket-lib duck type)
  *
- * The return type narrows `value` to {@link Infer | `Infer<S>`}, so Zod users
- * get `z.infer<typeof S>` and TypeBox users get `Static<typeof S>` with no
- * casts.
+ * The return type narrows `value` to {@link Infer | `Infer<S>`}, so callers
+ * get `z.infer<typeof S>` with no casts.
  *
  * @example
  * ```ts
- * // Zod
  * import { z } from 'zod'
  * const U = z.object({ name: z.string() })
- * const r = validateSchema(U, data)
- * if (r.ok) r.value.name // string
- *
- * // TypeBox
- * import { Type } from '@sinclair/typebox'
- * const U = Type.Object({ name: Type.String() })
  * const r = validateSchema(U, data)
  * if (r.ok) r.value.name // string
  * ```
  *
  * Errors are normalized to {@link ValidationIssue}: `{ path, message }`.
- * TypeBox JSON-Pointer paths are converted to arrays. Numeric segments are
- * parsed as numbers.
  */
 export function validateSchema<S>(
   schema: S,
   data: unknown,
 ): ValidateResult<Infer<S>> {
-  // TypeBox path: check the structural `[Kind]: string` marker.
+  // Internal TypeBox path: socket-lib uses TypeBox schemas in a few
+  // places (e.g. src/ipc.ts), detected here via the structural
+  // `[Kind]: string` marker. Not a supported consumer API — external
+  // callers should use Zod. The runtime is loaded lazily from the
+  // bundled external under `src/external/` so consumers never see it.
   if (isTypeBoxSchema(schema)) {
-    // TypeBox's Value runtime is bundled into socket-lib's dist/external,
-    // so consumers don't need to install @sinclair/typebox separately —
-    // they get Value.Check + Value.Errors from our vendored copy.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Value } = require('../external/@sinclair/typebox/value') as {
       Value: {

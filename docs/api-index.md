@@ -217,8 +217,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## validation/
 
-| Subpath                                                                                  | Description                                                                                                  |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`@socketsecurity/lib/validation/json-parser`](../src/validation/json-parser.ts)         | Safe JSON parsing with validation and security controls.                                                     |
-| [`@socketsecurity/lib/validation/types`](../src/validation/types.ts)                     | Validation type definitions.                                                                                 |
-| [`@socketsecurity/lib/validation/validate-schema`](../src/validation/validate-schema.ts) | Universal schema validation — works with TypeBox, Zod (v3 and v4), and any Zod-shaped `Schema<T>` duck type. |
+| Subpath                                                                                  | Description                                                                                           |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/validation/json-parser`](../src/validation/json-parser.ts)         | Safe JSON parsing with validation and security controls.                                              |
+| [`@socketsecurity/lib/validation/types`](../src/validation/types.ts)                     | Validation type definitions.                                                                          |
+| [`@socketsecurity/lib/validation/validate-schema`](../src/validation/validate-schema.ts) | Universal schema validation for Zod-style schemas (Zod v3, v4, and any `safeParse`-shaped duck type). |

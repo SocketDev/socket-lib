@@ -5,20 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.20.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.1) - 2026-04-19
+
+### Fixed
+
+- `src/ipc.ts`: harden stub-file writes against local symlink/TOCTOU. Previously `writeIpcStub` used `mkdir {recursive, mode: 0o700}` + `writeFile`, which on multi-user Linux (`/tmp` sticky-bit but world-writable) let a pre-positioned attacker-owned `.socket-ipc/<app>/` survive the mode argument and redirect the subsequent `writeFile` through symlinks to victim files. Now validates directory ownership + mode on POSIX after `mkdir`, then opens the stub with `O_CREAT | O_WRONLY | O_EXCL | O_NOFOLLOW` so pre-existing inodes trigger EEXIST and final-component symlinks trigger ELOOP rather than silent file overwrite
+- `src/cache-with-ttl.ts` `getOrFetch()` — the inflight-map check ran _after_ `await get(key)`, so two concurrent cold-cache callers both suspended on the same disk read, both saw no cached value, both skipped the inflight check, and both fired `fetcher()`. Moves the inflight check before the persistent-cache lookup (with a re-check afterward) so the advertised dedupe guarantee actually holds
+- `src/cache-with-ttl.ts` — cap the in-memory `memoCache` with LRU eviction (`memoMaxSize`, default 1000). Previously a long-running process (devserver, editor extension) querying many distinct keys grew memory without bound — expired entries were only reclaimed when the same key was read again
+- `src/memoization.ts` `memoizeAsync()` — `entry.timestamp` was set when a cache miss STARTED its `fn(...)` call, so a fn taking longer than `ttl` produced a value classified as expired the moment it resolved; every subsequent caller past the first ttl window re-fetched instead of hitting the cache. Now refreshes the timestamp in the resolve handler. Also bumps `accessOrder` on the stale-dedup branch so an entry mid-refresh isn't evicted while a peer is computing on its behalf
+- `src/tables.ts` — `displayWidth` measured columns by `.length` of the ANSI-stripped string, i.e. UTF-16 code units rather than rendered terminal cells. CJK, emoji, and combined code points misaligned tables. Routes measurement through `stringWidth` (Intl.Segmenter + East Asian Width)
+- `src/paths/packages.ts` — `resolvePackageJsonDirname` / `resolvePackageJsonPath` gated on `filepath.endsWith('package.json')`, which misidentified any file whose name ended in that suffix (e.g. `/foo/my-package.json`) as a manifest. Now checks for the literal final segment
+- `src/json/edit.ts` — `@example` for `getEditableJsonClass` imported from `@socketsecurity/lib/json`, which is not a package export; fixed to `@socketsecurity/lib/json/edit`
+
 ## [5.20.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.0) - 2026-04-19
 
-### Added — validation (universal schema validator)
+### Added — validation
 
-- `@socketsecurity/lib/validation/validate-schema` — one entry point that accepts TypeBox schemas, Zod v3/v4 schemas, or any `safeParse`-shaped duck type. Returns a tagged `{ ok: true, value } | { ok: false, errors }` result with normalized `{ path, message }` issues across every backend. Type inference flows through: Zod users get `z.infer<…>`, TypeBox users get `Static<…>`, no casts required
+- `@socketsecurity/lib/validation/validate-schema` — universal validator that accepts any Zod-style schema (Zod v3/v4, or any `safeParse`-shaped duck type) and returns a tagged `{ ok: true, value } | { ok: false, errors }` result with normalized `{ path, message }` issues. Type inference flows through: callers get `z.infer<…>`, no casts. Zod is detected purely structurally via `.safeParse` — no runtime import of the `zod` package required
 - `parseSchema(schema, data)` — throwing twin of `validateSchema` for fail-fast trust-boundary validation
 - `Infer<S>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema` — supporting types exported alongside the helpers
-- `@sinclair/typebox` bundled at `dist/external/@sinclair/typebox/` (core + `/value` subpath) — consumers get the TypeBox path of `validateSchema` out of the box, no separate install
-
-### Changed
-
-- `src/ipc.ts` migrates its internal stub schema from Zod to TypeBox + `parseSchema` as the first dog-food of the universal validator (no public API impact)
-- `scripts/build-externals/esbuild-config.mts` — subpath output filenames now append `.js` when the subpath omits it, so `@sinclair/typebox/value` lands at `dist/external/@sinclair/typebox/value.js` while the exports map references it by the canonical subpath
-- `scripts/build-externals/config.mts` — replaces the `zod` external entry with a scoped `@sinclair/typebox` entry
 
 ### Fixed
 
@@ -29,17 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `src/stdio/prompts.ts`: tighten the `selectModule` destructure type to the two properties actually used (`default`, `Separator`) instead of an `as any` cast
 - `src/http-request.ts`: hoist `CHECKSUM_BSD_RE` and `CHECKSUM_GNU_RE` regex literals to module scope so `parseChecksums()` no longer re-declares them once per line inside its loop
 - `src/dlx/manifest.ts`: correct the `@fileoverview` "Primary API" list to match the actual `DlxManifest` methods (`get/set/clear/clearAll/isFresh/getManifestEntry`) and flag `setPackageEntry` / `setBinaryEntry` as deprecated
-
-### Removed
-
-- `./zod` subpath export + `src/zod.ts` + `src/external/zod.*` + `test/unit/zod.test.mts`. The wrapper had no remaining consumers now that validation flows through `validateSchema`. Zod stays as a pinned `devDependency` so tests still exercise the Zod path of the universal helper
-
-### Internal
-
-- `.github/workflows/provenance.yml` — registry SHA pin bumped to `d54c36d0` (fleet-wide cascade catch-up; every other fleet repo moved months ago)
-- `.claude/hooks/*` registered as workspace packages in `pnpm-workspace.yaml` so `taze` (via `pnpm run update`) keeps hook manifests in lockstep with the root catalog
-- `test/temp/` added to `.gitignore` — archive-test fixtures land there and used to linger as untracked files when a watch run was interrupted
-- `scripts/build-externals/esbuild-config.mts` — restored full `STUB_MAP` + `createStubPlugin` + scoped-stub tuple form that was inadvertently wiped by the 5.19.1 release commit (was down to a single encoding stub); reinstates the 11+ entries that reduce `dist/external/npm-pack.js` to its 5.19.0 size, and drops the now-dead `zod/v4/locales` stub
 
 ## [5.19.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.1) - 2026-04-19
 
