@@ -93,6 +93,7 @@
 - Safe Deletion: Use `safeDelete()` from `@socketsecurity/lib/fs` (NEVER `fs.rm/rmSync` or `rm -rf`)
 - HTTP Requests: NEVER use `fetch()` — use `httpJson`/`httpText`/`httpRequest` from `@socketsecurity/lib/http-request`
 - File existence: ALWAYS `existsSync` from `node:fs`. NEVER `fs.access`, `fs.stat`-for-existence, or an async `fileExists` wrapper. Import form: `import { existsSync, promises as fs } from 'node:fs'`.
+- `Promise.race` / `Promise.any`: NEVER pass a long-lived promise (interrupt signal, pool member) into a race inside a loop. Each call re-attaches `.then` handlers to every arm; handlers accumulate on surviving promises until they settle. For concurrency limiters, use a single-waiter "slot available" signal (resolved by each task's `.then`) instead of re-racing `executing[]`. See nodejs/node#17469 and `@watchable/unpromise`. Race with two fresh arms (e.g. one-shot `withTimeout`) is safe.
 
 ---
 
@@ -149,6 +150,7 @@ Core infrastructure library for Socket.dev security tools.
 - **Null-prototype objects**: `{ __proto__: null, ...props }`
 - **Exports**: Named only. `export default` FORBIDDEN (breaks dual CJS/ESM). Enforced by oxlint `no-default-export` + build + CI validation.
 - **Function order**: Files with 3+ exports require alphabetical ordering — private first (alphabetical), then exported (alphabetical). Constants/types before functions.
+- **Promise.race in loops**: NEVER re-race the same pool across iterations. Each race attaches fresh `.then` handlers to every arm — a promise that survives N iterations accumulates N handler sets ([nodejs/node#17469](https://github.com/nodejs/node/issues/17469)). Fresh-both-arms races (e.g. `Promise.race([work(), timeoutPromise()])` where both are per-call) are fine. For concurrency limiters, use a single-waiter signal (`promiseWithResolvers` swapped per iteration), never `Promise.race(pool)` over a persistent pool.
 
 ### Package Exports
 
