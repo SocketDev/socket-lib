@@ -150,7 +150,6 @@ Core infrastructure library for Socket.dev security tools.
 - **Null-prototype objects**: `{ __proto__: null, ...props }`
 - **Exports**: Named only. `export default` FORBIDDEN (breaks dual CJS/ESM). Enforced by oxlint `no-default-export` + build + CI validation.
 - **Function order**: Files with 3+ exports require alphabetical ordering — private first (alphabetical), then exported (alphabetical). Constants/types before functions.
-- **Promise.race in loops**: NEVER re-race the same pool across iterations. Each race attaches fresh `.then` handlers to every arm — a promise that survives N iterations accumulates N handler sets ([nodejs/node#17469](https://github.com/nodejs/node/issues/17469)). Fresh-both-arms races (e.g. `Promise.race([work(), timeoutPromise()])` where both are per-call) are fine. For concurrency limiters, use a single-waiter signal (`promiseWithResolvers` swapped per iteration), never `Promise.race(pool)` over a persistent pool.
 
 ### Package Exports
 
