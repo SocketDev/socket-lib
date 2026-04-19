@@ -133,6 +133,13 @@ export interface TtlCacheOptions {
    */
   memoize?: boolean | undefined
   /**
+   * Maximum number of entries to keep in the in-memory memo cache. When
+   * exceeded, the least-recently-used entry is evicted. The persistent
+   * (cacache) layer is unaffected.
+   * @default 1000
+   */
+  memoMaxSize?: number | undefined
+  /**
    * Custom cache key prefix.
    * Must not contain wildcards (*).
    * Use clear({ prefix: "pattern*" }) for wildcard matching instead.
@@ -155,6 +162,11 @@ export interface TtlCacheOptions {
 // 5 minutes
 const DEFAULT_TTL_MS = 5 * 60 * 1000
 const DEFAULT_PREFIX = 'ttl-cache'
+// Cap the in-memory memoization layer. Without this, a long-running
+// daemon (devserver, editor extension) that queries many distinct keys
+// accumulates entries forever — expired entries are only reclaimed when
+// that exact key is read again. Cacache on disk is unaffected.
+const DEFAULT_MEMO_MAX_SIZE = 1000
 
 /**
  * Create a TTL-based cache instance.
@@ -170,6 +182,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   const opts = {
     __proto__: null,
     memoize: true,
+    memoMaxSize: DEFAULT_MEMO_MAX_SIZE,
     prefix: DEFAULT_PREFIX,
     ttl: DEFAULT_TTL_MS,
     ...options,
@@ -182,8 +195,25 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     )
   }
 
-  // In-memory cache for hot data
+  // In-memory cache for hot data. Capped via opts.memoMaxSize using a
+  // Map's insertion-order semantics as the LRU list: `memoSet` deletes
+  // the key first so a re-insert moves it to the tail, and when size
+  // exceeds the cap we evict the oldest entry (first key in iteration).
   const memoCache = new Map<string, TtlCacheEntry<unknown>>()
+  const memoMaxSize = Math.max(1, opts.memoMaxSize ?? DEFAULT_MEMO_MAX_SIZE)
+
+  function memoSet(fullKey: string, entry: TtlCacheEntry<unknown>): void {
+    if (memoCache.has(fullKey)) {
+      memoCache.delete(fullKey)
+    } else if (memoCache.size >= memoMaxSize) {
+      // Evict the least-recently-used entry (oldest insertion).
+      const oldest = memoCache.keys().next().value
+      if (oldest !== undefined) {
+        memoCache.delete(oldest)
+      }
+    }
+    memoCache.set(fullKey, entry)
+  }
 
   // Ensure ttl is defined
   const ttl = opts.ttl ?? DEFAULT_TTL_MS
@@ -248,6 +278,8 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     if (opts.memoize) {
       const memoEntry = memoCache.get(fullKey)
       if (memoEntry && !isExpired(memoEntry)) {
+        // Bump recency so the LRU eviction prefers colder entries.
+        memoSet(fullKey, memoEntry)
         return memoEntry.data as T
       }
       // Remove expired memo entry.
@@ -274,7 +306,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       if (!isExpired(entry)) {
         // Update in-memory cache.
         if (opts.memoize) {
-          memoCache.set(fullKey, entry)
+          memoSet(fullKey, entry)
         }
         return entry.data
       }
@@ -365,7 +397,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
         // Update in-memory cache.
         if (opts.memoize) {
-          memoCache.set(cacheEntry.key, parsed)
+          memoSet(cacheEntry.key, parsed)
         }
       } catch {
         // Ignore parse errors or other issues.
@@ -395,7 +427,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Update in-memory cache first (synchronous and fast).
     if (opts.memoize) {
-      memoCache.set(fullKey, entry)
+      memoSet(fullKey, entry)
     }
 
     // Update persistent cache (don't fail if this errors).
