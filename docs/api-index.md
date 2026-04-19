@@ -100,16 +100,19 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## dlx/
 
-| Subpath                                                      | Description                                                   |
-| ------------------------------------------------------------ | ------------------------------------------------------------- |
-| [`@socketsecurity/lib/dlx/binary`](../src/dlx/binary.ts)     | DLX binary execution utilities for Socket ecosystem.          |
-| [`@socketsecurity/lib/dlx/cache`](../src/dlx/cache.ts)       | Cache key generation utilities for DLX package installations. |
-| [`@socketsecurity/lib/dlx/detect`](../src/dlx/detect.ts)     | Executable type detection for DLX and local filesystem paths. |
-| [`@socketsecurity/lib/dlx/dir`](../src/dlx/dir.ts)           | Directory management utilities for DLX installations.         |
-| [`@socketsecurity/lib/dlx/manifest`](../src/dlx/manifest.ts) | DLX manifest storage utilities.                               |
-| [`@socketsecurity/lib/dlx/package`](../src/dlx/package.ts)   | DLX package execution - Install and execute npm packages.     |
-| [`@socketsecurity/lib/dlx/packages`](../src/dlx/packages.ts) | Package management utilities for DLX installations.           |
-| [`@socketsecurity/lib/dlx/paths`](../src/dlx/paths.ts)       | Path utilities for DLX package installations.                 |
+| Subpath                                                        | Description                                                          |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [`@socketsecurity/lib/dlx/arborist`](../src/dlx/arborist.ts)   | Safe Arborist wrapper for dlx installs and lockfile-only resolution. |
+| [`@socketsecurity/lib/dlx/binary`](../src/dlx/binary.ts)       | DLX binary execution utilities for Socket ecosystem.                 |
+| [`@socketsecurity/lib/dlx/cache`](../src/dlx/cache.ts)         | Cache key generation utilities for DLX package installations.        |
+| [`@socketsecurity/lib/dlx/detect`](../src/dlx/detect.ts)       | Executable type detection for DLX and local filesystem paths.        |
+| [`@socketsecurity/lib/dlx/dir`](../src/dlx/dir.ts)             | Directory management utilities for DLX installations.                |
+| [`@socketsecurity/lib/dlx/integrity`](../src/dlx/integrity.ts) | Integrity specification helpers for dlx downloads.                   |
+| [`@socketsecurity/lib/dlx/lockfile`](../src/dlx/lockfile.ts)   | Package pin generation for dlx installs.                             |
+| [`@socketsecurity/lib/dlx/manifest`](../src/dlx/manifest.ts)   | DLX manifest storage utilities.                                      |
+| [`@socketsecurity/lib/dlx/package`](../src/dlx/package.ts)     | DLX package execution - Install and execute npm packages.            |
+| [`@socketsecurity/lib/dlx/packages`](../src/dlx/packages.ts)   | Package management utilities for DLX installations.                  |
+| [`@socketsecurity/lib/dlx/paths`](../src/dlx/paths.ts)         | Path utilities for DLX package installations.                        |
 
 ## effects/
 

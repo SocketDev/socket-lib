@@ -223,6 +223,10 @@
       "types": "./dist/debug.d.ts",
       "default": "./dist/debug.js"
     },
+    "./dlx/arborist": {
+      "types": "./dist/dlx/arborist.d.ts",
+      "default": "./dist/dlx/arborist.js"
+    },
     "./dlx/binary": {
       "types": "./dist/dlx/binary.d.ts",
       "default": "./dist/dlx/binary.js"
@@ -238,6 +242,14 @@
     "./dlx/dir": {
       "types": "./dist/dlx/dir.d.ts",
       "default": "./dist/dlx/dir.js"
+    },
+    "./dlx/integrity": {
+      "types": "./dist/dlx/integrity.d.ts",
+      "default": "./dist/dlx/integrity.js"
+    },
+    "./dlx/lockfile": {
+      "types": "./dist/dlx/lockfile.d.ts",
+      "default": "./dist/dlx/lockfile.js"
     },
     "./dlx/manifest": {
       "types": "./dist/dlx/manifest.d.ts",
@@ -698,16 +710,13 @@
     "@typescript/native-preview": "7.0.0-dev.20260415.1",
     "@vitest/coverage-v8": "4.0.3",
     "@vitest/ui": "4.0.3",
-    "@yarnpkg/core": "4.5.0",
     "@yarnpkg/extensions": "2.0.6",
     "adm-zip": "0.5.16",
     "cacache": "20.0.1",
     "debug": "4.4.3",
     "del": "8.0.1",
-    "del-cli": "6.0.0",
     "ecc-agentshield": "1.4.0",
     "esbuild": "0.25.11",
-    "eslint-plugin-sort-destructure-keys": "2.0.0",
     "fast-glob": "3.3.3",
     "fast-sort": "3.4.1",
     "get-east-asian-width": "1.3.0",
@@ -737,11 +746,9 @@
     "tar-fs": "3.1.2",
     "tar-stream": "3.1.8",
     "taze": "19.9.2",
-    "trash": "10.0.0",
     "type-coverage": "2.29.7",
     "typescript": "5.9.2",
     "validate-npm-package-name": "6.0.2",
-    "vite-tsconfig-paths": "5.1.4",
     "vitest": "4.0.3",
     "which": "5.0.0",
     "yargs-parser": "22.0.0",

@@ -12,7 +12,9 @@ import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import { spawn } from '../spawn'
 import { generateCacheKey } from './cache'
+import { normalizeHash } from './integrity'
 
+import type { HashSpec } from './integrity'
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 
 let _crypto: typeof import('node:crypto') | undefined
@@ -79,7 +81,20 @@ export interface DlxBinaryOptions {
   name?: string | undefined
 
   /**
+   * Expected hash for verification. Accepts either:
+   * - A bare sha512 SRI string (`sha512-<base64>`), sniffed as integrity.
+   * - A bare sha256 hex string (64 hex chars), sniffed as checksum.
+   * - An explicit `{ type: 'integrity' | 'checksum', value }` object.
+   *
+   * This is the preferred field. `integrity` and `sha256` remain as
+   * lower-level escapes; if both `hash` and one of those is set, `hash`
+   * wins for the matching flavor.
+   */
+  hash?: HashSpec | undefined
+
+  /**
    * Expected SRI integrity hash (sha512-<base64>) for verification.
+   * Lower-level alternative to `hash`.
    */
   integrity?: string | undefined
 
@@ -87,6 +102,7 @@ export interface DlxBinaryOptions {
    * Expected SHA-256 hex checksum for verification.
    * Passed to httpDownload for inline verification during download.
    * This is more secure than post-download verification as it fails early.
+   * Lower-level alternative to `hash`.
    */
   sha256?: string | undefined
 
@@ -287,13 +303,24 @@ export async function dlxBinary(
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
     force: userForce = false,
-    integrity,
+    hash,
+    integrity: rawIntegrity,
     name,
-    sha256,
+    sha256: rawSha256,
     spawnOptions,
     url,
     yes,
   } = { __proto__: null, ...options } as DlxBinaryOptions
+  let integrity = rawIntegrity
+  let sha256 = rawSha256
+  if (hash !== undefined) {
+    const normalized = normalizeHash(hash)
+    if (normalized.type === 'integrity') {
+      integrity = normalized.value
+    } else {
+      sha256 = normalized.value
+    }
+  }
   const fs = getFs()
   const path = getPath()
   // Map --yes flag to force behavior (auto-approve/skip prompts)
@@ -451,11 +478,22 @@ export async function downloadBinary(
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
     force = false,
-    integrity,
+    hash,
+    integrity: rawIntegrity,
     name,
-    sha256,
+    sha256: rawSha256,
     url,
   } = { __proto__: null, ...options } as DlxBinaryOptions
+  let integrity = rawIntegrity
+  let sha256 = rawSha256
+  if (hash !== undefined) {
+    const normalized = normalizeHash(hash)
+    if (normalized.type === 'integrity') {
+      integrity = normalized.value
+    } else {
+      sha256 = normalized.value
+    }
+  }
   const fs = getFs()
   const path = getPath()
   // Generate cache paths similar to pnpm/npx structure.
