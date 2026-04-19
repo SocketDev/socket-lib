@@ -5,14 +5,14 @@
  *
  * Primary API (on {@link DlxManifest}):
  * - `getManifestEntry(spec)` — retrieve a manifest entry by spec
- * - `set(name, record)` — store a raw `StoreRecord`
- * - `get(name)` — read a raw `StoreRecord`
+ * - `setPackageEntry(spec, key, details)` — store npm package metadata
+ * - `setBinaryEntry(spec, key, details)` — store binary download metadata
+ * - `getAllPackages()` — enumerate cached package names
  * - `clear(name)` / `clearAll()` — eviction
  * - `isFresh(record, ttlMs)` — TTL check
  *
- * Legacy typed setters `setPackageEntry` and `setBinaryEntry` exist but
- * are deprecated; new callers should construct a `StoreRecord` and use
- * `set(name, record)` directly.
+ * The bare `get(name)` / `set(name, record)` methods are deprecated
+ * legacy shims kept for backward compatibility with pre-5.x callers.
  *
  * Features:
  * - TTL-based cache expiration
