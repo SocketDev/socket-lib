@@ -44,6 +44,10 @@ const STUB_MAP = {
   // Character encoding - we only use UTF-8.
   '^(encoding|iconv-lite)$': 'encoding.cjs',
   '^postcss-selector-parser$': 'empty.cjs',
+  // Progress tracker — we pass progress: false. Replace with an
+  // EventEmitter-based no-op that preserves the `new Tracker(...)`
+  // + `on('done')` contract Arborist uses.
+  '^proggy$': 'proggy.cjs',
   '^sigstore$': 'empty.cjs',
   '^tuf-js$': 'empty.cjs',
 }
