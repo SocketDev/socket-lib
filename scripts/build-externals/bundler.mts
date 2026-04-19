@@ -43,13 +43,15 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
     let packagePath
 
     // First, check if src/external/{packageName}.js exists - use as entry point.
-    // Preserve scope for scoped packages like @socketregistry/yocto-spinner
-    const srcExternalPath = path.join(
-      rootDir,
-      'src',
-      'external',
-      `${packageName}.js`,
-    )
+    // Preserve scope for scoped packages like @socketregistry/yocto-spinner.
+    // Subpath entries may already end in `.js` (e.g. `@npmcli/package-json/
+    // lib/read-package.js` — the package's own exports map uses that literal
+    // path). Strip an existing `.js` before appending so we don't look for
+    // `read-package.js.js` and silently skip the thin wrapper.
+    const wrapperName = packageName.endsWith('.js')
+      ? packageName
+      : `${packageName}.js`
+    const srcExternalPath = path.join(rootDir, 'src', 'external', wrapperName)
     if (existsSync(srcExternalPath)) {
       packagePath = srcExternalPath
       if (!quiet) {
