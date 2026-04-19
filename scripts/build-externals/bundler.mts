@@ -114,12 +114,10 @@ ${contentWithoutStrict}`
     if (!quiet) {
       logger.log(`    ✗ Failed to bundle ${packageName}: ${error.message}`)
     }
-    // Create error stub.
-    const stubContent = `'use strict'
-
-// Failed to bundle ${packageName}: ${error.message}
-throw new Error('Failed to bundle ${packageName}')
-`
-    await fs.writeFile(outputPath, stubContent)
+    // Propagate the failure. The orchestrator wraps optional packages in
+    // try/catch and logs a "Skipping optional package" message; required
+    // packages bubble up so the build exits non-zero instead of silently
+    // shipping throw-stubs that only fail later, at consumer runtime.
+    throw error
   }
 }
