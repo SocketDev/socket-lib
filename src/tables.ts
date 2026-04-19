@@ -4,7 +4,7 @@
  */
 
 import colors from './external/yoctocolors-cjs'
-import { stripAnsi } from './strings'
+import { stringWidth } from './strings'
 
 export type ColumnAlignment = 'left' | 'right' | 'center'
 
@@ -20,10 +20,12 @@ export type TableColumn = {
 }
 
 /**
- * Calculate display width accounting for ANSI codes.
+ * Calculate display width accounting for ANSI codes, CJK, and emoji.
+ * Uses `stringWidth` so multi-cell glyphs (full-width CJK, emoji, combined
+ * code points) contribute their actual terminal column count to padding.
  */
 function displayWidth(text: string): number {
-  return stripAnsi(text).length
+  return stringWidth(text)
 }
 
 /**
@@ -34,8 +36,7 @@ function padText(
   width: number,
   align: ColumnAlignment = 'left',
 ): string {
-  const stripped = stripAnsi(text)
-  const textWidth = stripped.length
+  const textWidth = displayWidth(text)
   const padding = Math.max(0, width - textWidth)
 
   switch (align) {
