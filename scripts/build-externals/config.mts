@@ -49,8 +49,6 @@ export const externalPackages = [
   { name: 'which', bundle: true },
   { name: 'yargs-parser', bundle: true },
   { name: 'yoctocolors-cjs', bundle: false },
-  // Used by socket-cli (dist/cli.js has minified zod).
-  { name: 'zod', bundle: true },
 ]
 
 // Scoped packages need special handling.
@@ -85,6 +83,19 @@ export const scopedPackages = [
     scope: '@socketregistry',
     packages: ['packageurl-js', 'is-unicode-supported', 'yocto-spinner'],
     optional: true,
+  },
+  // @sinclair/typebox powers validateSchema()'s TypeBox path. Bundle
+  // so consumers don't need to install typebox separately — they just
+  // import from @socketsecurity/lib/validation/validate-schema and
+  // pass in TypeBox schemas built with our vendored copy of Type.*.
+  //
+  // Bundles both the core entry (for Type.* builders) and the /value
+  // runtime (for Value.Check + Value.Errors used internally).
+  {
+    scope: '@sinclair',
+    name: 'typebox',
+    bundle: true,
+    subpaths: ['typebox/value'],
   },
   { scope: '@yarnpkg', name: 'extensions', bundle: true },
 ]

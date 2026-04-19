@@ -663,6 +663,10 @@
       "types": "./dist/validation/types.d.ts",
       "default": "./dist/validation/types.js"
     },
+    "./validation/validate-schema": {
+      "types": "./dist/validation/validate-schema.d.ts",
+      "default": "./dist/validation/validate-schema.js"
+    },
     "./versions": {
       "types": "./dist/versions.d.ts",
       "default": "./dist/versions.js"
@@ -670,10 +674,6 @@
     "./words": {
       "types": "./dist/words.d.ts",
       "default": "./dist/words.js"
-    },
-    "./zod": {
-      "types": "./dist/zod.d.ts",
-      "default": "./dist/zod.js"
     },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
@@ -720,6 +720,7 @@
     "@npmcli/arborist": "9.1.4",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",
+    "@sinclair/typebox": "0.34.49",
     "@socketregistry/is-unicode-supported": "1.0.5",
     "@socketregistry/packageurl-js": "1.4.2",
     "@socketregistry/yocto-spinner": "1.0.25",

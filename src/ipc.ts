@@ -7,20 +7,21 @@
 
 import process from 'node:process'
 
+import { Type } from './external/@sinclair/typebox'
 import { getOsTmpDir } from './paths/socket'
-import { z } from './zod'
+import { parseSchema } from './validation/validate-schema'
 
 /**
  * IPC stub file schema - validates the structure of stub files.
  * Stub files are used for passing data between processes via filesystem.
  */
-const IpcStubSchema = z.object({
+const IpcStubSchema = Type.Object({
   /** Process ID that created the stub. */
-  pid: z.number().int().positive(),
+  pid: Type.Integer({ minimum: 1 }),
   /** Creation timestamp for age validation. */
-  timestamp: z.number().positive(),
+  timestamp: Type.Number({ exclusiveMinimum: 0 }),
   /** The actual data payload. */
-  data: z.unknown(),
+  data: Type.Unknown(),
 })
 
 /**
@@ -152,7 +153,7 @@ export async function writeIpcStub(
     timestamp: Date.now(),
   }
 
-  const validated = IpcStubSchema.parse(ipcData)
+  const validated = parseSchema(IpcStubSchema, ipcData)
 
   const fs = getFs()
   await fs.promises.writeFile(stubPath, JSON.stringify(validated, null, 2), {

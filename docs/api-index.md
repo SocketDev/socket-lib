@@ -58,7 +58,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/url`](../src/url.ts)                               | URL parsing and validation utilities.                                                                          |
 | [`@socketsecurity/lib/versions`](../src/versions.ts)                     | Version comparison and validation utilities for Socket ecosystem.                                              |
 | [`@socketsecurity/lib/words`](../src/words.ts)                           | Word manipulation utilities for capitalization and formatting.                                                 |
-| [`@socketsecurity/lib/zod`](../src/zod.ts)                               | Zod schema validation library wrapper for type-safe runtime validation.                                        |
 
 ## argv/
 
@@ -218,7 +217,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## validation/
 
-| Subpath                                                                          | Description                                              |
-| -------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [`@socketsecurity/lib/validation/json-parser`](../src/validation/json-parser.ts) | Safe JSON parsing with validation and security controls. |
-| [`@socketsecurity/lib/validation/types`](../src/validation/types.ts)             | Validation type definitions.                             |
+| Subpath                                                                                  | Description                                                                                                  |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/validation/json-parser`](../src/validation/json-parser.ts)         | Safe JSON parsing with validation and security controls.                                                     |
+| [`@socketsecurity/lib/validation/types`](../src/validation/types.ts)                     | Validation type definitions.                                                                                 |
+| [`@socketsecurity/lib/validation/validate-schema`](../src/validation/validate-schema.ts) | Universal schema validation — works with TypeBox, Zod (v3 and v4), and any Zod-shaped `Schema<T>` duck type. |
