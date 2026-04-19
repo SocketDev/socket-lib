@@ -252,15 +252,18 @@ async function watchBuild(
     // Enable watch mode
     await ctx.watch()
 
-    // Keep the process alive
-    process.on('SIGINT', async () => {
-      await ctx.dispose()
-      process.exitCode = 0
-      throw new Error('Watch mode interrupted')
+    // On Ctrl-C, tear down the esbuild context and exit cleanly. Earlier
+    // this handler threw inside an async callback, which surfaced as an
+    // unhandled rejection and the surrounding try/catch rewrote the clean
+    // exit into "Watch mode failed: Watch mode interrupted".
+    process.on('SIGINT', () => {
+      ctx.dispose().finally(() => process.exit(0))
     })
 
-    // Wait indefinitely
-    await new Promise(() => {})
+    // Wait indefinitely — SIGINT is the only exit path.
+    await new Promise<never>(() => {})
+    // Unreachable; satisfies Promise<number> return type.
+    return 0
   } catch (error) {
     if (!quiet) {
       logger.error('Watch mode failed:', error)

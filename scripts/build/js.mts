@@ -98,18 +98,19 @@ async function watchJS(): Promise<number> {
 
     await ctx.watch()
 
-    // Keep process alive
-    process.on('SIGINT', async () => {
+    // On Ctrl-C, tear down the esbuild context and exit cleanly. Earlier
+    // this handler threw inside an async callback, which surfaced as an
+    // unhandled rejection and the outer try/catch rewrote the clean exit
+    // into "Watch mode failed: Watch mode interrupted".
+    process.on('SIGINT', () => {
       if (!isQuiet) {
         logger.log('\nStopping watch mode...')
       }
-      await ctx.dispose()
-      process.exitCode = 0
-      throw new Error('Watch mode interrupted')
+      ctx.dispose().finally(() => process.exit(0))
     })
 
-    // Wait indefinitely
-    await new Promise(() => {})
+    // Wait indefinitely — SIGINT is the only exit path.
+    await new Promise<never>(() => {})
   } catch (error) {
     if (!isQuiet) {
       logger.error('Watch mode failed')
