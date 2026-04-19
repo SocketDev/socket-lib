@@ -6,10 +6,8 @@
 import process from 'node:process'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import {
-  printFooter,
-  printHeader,
-} from '@socketsecurity/lib-stable/stdio/header'
+import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
+import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { runSequence } from '../utils/run-command.mts'
 
