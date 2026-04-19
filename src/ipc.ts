@@ -43,7 +43,11 @@ let _path: typeof import('node:path') | undefined
 /**
  * Ensure IPC directory exists for stub file creation.
  * Uses restrictive (0o700) permissions so other users cannot read or write
- * stub files.
+ * stub files. On POSIX, after `mkdir` we verify the directory is owned by
+ * the current user and not world/group-writable — protects against a
+ * prior local attacker pre-creating `.socket-ipc/<app>/` with permissive
+ * modes and planting symlinks for stub filenames. Throws if the directory
+ * fails the check.
  * @internal
  */
 async function ensureIpcDirectory(filePath: string): Promise<void> {
@@ -51,6 +55,31 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
   const path = getPath()
   const dir = path.dirname(filePath)
   await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
+  if (process.platform === 'win32') {
+    return
+  }
+  const stats = await fs.promises.lstat(dir)
+  if (!stats.isDirectory()) {
+    throw new Error(`IPC path is not a directory: ${dir}`)
+  }
+  const getuid = process.getuid
+  const ownUid = typeof getuid === 'function' ? getuid.call(process) : -1
+  if (ownUid !== -1 && stats.uid !== ownUid) {
+    throw new Error(
+      `IPC directory ${dir} is owned by another user (uid ${stats.uid}); refusing to use it.`,
+    )
+  }
+  // Permission bits only (mask out file-type bits). Reject any group or
+  // other access — only owner bits may be set.
+  // eslint-disable-next-line no-bitwise
+  const mode = stats.mode & 0o777
+  // eslint-disable-next-line no-bitwise
+  if ((mode & 0o077) !== 0) {
+    // Tighten an over-permissive directory we just inherited. Use chmod
+    // rather than fail outright so a first-run that inherits e.g. 0o755
+    // from umask still succeeds.
+    await fs.promises.chmod(dir, 0o700)
+  }
 }
 
 /**
@@ -156,9 +185,37 @@ export async function writeIpcStub(
   const validated = parseSchema(IpcStubSchema, ipcData)
 
   const fs = getFs()
-  await fs.promises.writeFile(stubPath, JSON.stringify(validated, null, 2), {
-    encoding: 'utf8',
-    mode: 0o600,
-  })
+  // Open O_CREAT|O_WRONLY|O_EXCL|O_NOFOLLOW so we (a) refuse to overwrite
+  // a pre-existing stub — protects against collision with an attacker-
+  // planted file or an old stub from a reused PID — and (b) refuse to
+  // follow a symlink at the final path component, which on shared temp
+  // dirs (e.g. /tmp on Linux) could otherwise redirect this write into
+  // the victim's own files. O_NOFOLLOW is a no-op on Windows, where the
+  // per-user $TEMP makes the attack moot anyway.
+  // eslint-disable-next-line no-bitwise
+  const flags =
+    fs.constants.O_CREAT |
+    fs.constants.O_WRONLY |
+    fs.constants.O_EXCL |
+    fs.constants.O_NOFOLLOW
+  // Retry once if a stale stub (from the same PID, reused after an ungraceful
+  // exit) already exists — remove and recreate. Only one retry.
+  let handle: import('node:fs').promises.FileHandle | undefined
+  try {
+    handle = await fs.promises.open(stubPath, flags, 0o600)
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException
+    if (err.code === 'EEXIST') {
+      await fs.promises.unlink(stubPath)
+      handle = await fs.promises.open(stubPath, flags, 0o600)
+    } else {
+      throw err
+    }
+  }
+  try {
+    await handle.writeFile(JSON.stringify(validated, null, 2), 'utf8')
+  } finally {
+    await handle.close()
+  }
   return stubPath
 }
