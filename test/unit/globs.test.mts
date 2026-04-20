@@ -107,6 +107,19 @@ describe('globs', () => {
       expect(matcher1).toBe(matcher2)
     })
 
+    it('caches array-valued options order-insensitively', () => {
+      // Regression: previously JSON.stringify preserved array order, so
+      // `{ ignore: ['a', 'b'] }` and `{ ignore: ['b', 'a'] }` produced
+      // different cache keys and double-compiled equivalent matchers.
+      const matcher1 = getGlobMatcher('*.js', {
+        ignore: ['**/node_modules', '**/.git'],
+      })
+      const matcher2 = getGlobMatcher('*.js', {
+        ignore: ['**/.git', '**/node_modules'],
+      })
+      expect(matcher1).toBe(matcher2)
+    })
+
     it('should create different matchers for different patterns', () => {
       const matcher1 = getGlobMatcher('*.js')
       const matcher2 = getGlobMatcher('*.ts')

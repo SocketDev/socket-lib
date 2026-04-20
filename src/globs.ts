@@ -145,12 +145,20 @@ export function getGlobMatcher(
   options?: { dot?: boolean; nocase?: boolean; ignore?: string[] },
 ): (path: string) => boolean {
   const patterns = Array.isArray(glob) ? glob : [glob]
-  // Create stable cache key by sorting patterns and option keys
+  // Create stable cache key by sorting patterns and option keys.
+  // Option values that are arrays (e.g. `ignore: ['a', 'b']`) get sorted
+  // element-wise so `['a', 'b']` and `['b', 'a']` hit the same entry —
+  // otherwise equivalent matchers re-compile and evict each other under
+  // the 100-entry cap.
   const sortedPatterns = [...patterns].sort()
   const sortedOptions = options
     ? Object.keys(options)
         .sort()
-        .map(k => `${k}:${JSON.stringify(options[k as keyof typeof options])}`)
+        .map(k => {
+          const value = options[k as keyof typeof options]
+          const normalized = Array.isArray(value) ? [...value].sort() : value
+          return `${k}:${JSON.stringify(normalized)}`
+        })
         .join(',')
     : ''
   const key = `${sortedPatterns.join('|')}:${sortedOptions}`
