@@ -20,8 +20,11 @@
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function escapeRegExp(str: string): string {
-  // Escape characters with special meaning either inside or outside character sets.
-  // Use a simple backslash escape when it's always valid, and a `\xnn` escape when
-  // the simpler form would be disallowed by Unicode patterns' stricter grammar.
-  return str.replace(/[\\|{}()[\]^$+*?.]/g, '\\$&')
+  // Escape characters with special meaning either inside or outside
+  // character sets. Includes `-` so callers that splice an escaped
+  // string into a character class — e.g. `new RegExp('[' +
+  // escapeRegExp(userInput) + ']')` — don't accidentally create a range
+  // when input contains '-'. Matches the MDN / `escape-string-regexp`
+  // reference set.
+  return str.replace(/[\\|{}()[\]^$+*?.-]/g, '\\$&')
 }

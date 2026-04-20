@@ -54,14 +54,15 @@ function matchesPattern(key: string, pattern: string): boolean {
 
 /**
  * Convert wildcard pattern to regex for matching.
- * Supports * as wildcard (matches any characters).
+ * Supports * as wildcard (matches any characters). Anchors both ends —
+ * `foo*bar` matches exactly `foo<anything>bar`, not `foo<anything>bar<more>`.
  */
 function patternToRegex(pattern: string): RegExp {
   // Escape regex special characters except *
   const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&')
   // Convert * to .* (match any characters)
   const regexPattern = escaped.replaceAll('*', '.*')
-  return new RegExp(`^${regexPattern}`)
+  return new RegExp(`^${regexPattern}$`)
 }
 
 /**

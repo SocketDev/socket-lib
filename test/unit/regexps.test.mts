@@ -109,9 +109,12 @@ describe('regexps', () => {
       expect(escapeRegExp('a?')).toBe('a\\?')
     })
 
-    it('should escape character classes', () => {
-      expect(escapeRegExp('[a-z]')).toBe('\\[a-z\\]')
-      expect(escapeRegExp('[^0-9]')).toBe('\\[\\^0-9\\]')
+    it('should escape character classes (including the range hyphen)', () => {
+      // `-` is now escaped so splicing the result into a character class
+      // (e.g. `[${escapeRegExp('a-z')}]`) produces three literal chars
+      // rather than a range.
+      expect(escapeRegExp('[a-z]')).toBe('\\[a\\-z\\]')
+      expect(escapeRegExp('[^0-9]')).toBe('\\[\\^0\\-9\\]')
     })
 
     it('should handle unicode characters', () => {

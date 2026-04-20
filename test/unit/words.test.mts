@@ -99,15 +99,18 @@ describe('words', () => {
       expect(determineArticle('zebra')).toBe('a')
     })
 
-    it('should be case-sensitive (lowercase vowels)', () => {
-      expect(determineArticle('Apple')).toBe('a')
-      expect(determineArticle('Elephant')).toBe('a')
-      expect(determineArticle('Orange')).toBe('a')
+    it('matches vowels case-insensitively', () => {
+      // Previously gated on a case-sensitive `/^[aeiou]/` regex, which
+      // produced "a Apple" for capitalized inputs. Now uses /i so any
+      // leading vowel (upper or lower) picks "an".
+      expect(determineArticle('Apple')).toBe('an')
+      expect(determineArticle('Elephant')).toBe('an')
+      expect(determineArticle('Orange')).toBe('an')
     })
 
-    it('should handle uppercase vowels at start', () => {
+    it('handles uppercase and lowercase vowels uniformly', () => {
       expect(determineArticle('apple')).toBe('an')
-      expect(determineArticle('APPLE')).toBe('a')
+      expect(determineArticle('APPLE')).toBe('an')
     })
 
     it('should handle empty string', () => {

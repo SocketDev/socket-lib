@@ -19,14 +19,15 @@ export interface PluralizeOptions {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function capitalize(word: string): string {
-  const { length } = word
-  if (length === 0) {
+  if (word.length === 0) {
     return word
   }
-  if (length === 1) {
-    return word.toUpperCase()
-  }
-  return `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`
+  // Iterate by code point, not UTF-16 unit, so non-BMP characters
+  // (emoji, astral-plane scripts) aren't split between their surrogate
+  // pair halves. `charAt(0).toUpperCase() + slice(1).toLowerCase()` used
+  // to produce broken surrogate pairs for inputs like '𐐀foo'.
+  const [first, ...rest] = [...word]
+  return (first ?? '').toUpperCase() + rest.join('').toLowerCase()
 }
 
 /**
@@ -40,7 +41,11 @@ export function capitalize(word: string): string {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function determineArticle(word: string): string {
-  return /^[aeiou]/.test(word) ? 'an' : 'a'
+  // Case-insensitive so `Apple` and `apple` both pick `an`. Strict
+  // spelling rules can't handle silent-h / y-sound exceptions (hour,
+  // user); documenting that as a known limitation rather than shipping
+  // a multi-entry exception list.
+  return /^[aeiou]/i.test(word) ? 'an' : 'a'
 }
 
 /**

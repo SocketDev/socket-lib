@@ -253,10 +253,13 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       return (key: string) => key.startsWith(fullPattern)
     }
 
-    // Wildcard matching with regex.
+    // Wildcard matching with regex. Anchor both ends so `foo*bar` matches
+    // exactly `foo<anything>bar` and not `foo<anything>bar<anything else>`.
+    // Missing the `$` anchor let `deleteAll('foo*bar')` also sweep
+    // `foo123bar-extra`, which silently over-deletes.
     const escaped = fullPattern.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&')
     const regexPattern = escaped.replaceAll('*', '.*')
-    const regex = new RegExp(`^${regexPattern}`)
+    const regex = new RegExp(`^${regexPattern}$`)
     return (key: string) => regex.test(key)
   }
 
