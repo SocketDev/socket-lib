@@ -40,29 +40,23 @@ export interface RemoveOptions {
 }
 
 /**
- * Check if a key matches a pattern (with wildcard support).
+ * Build a key→boolean matcher for `pattern`. For non-wildcard patterns
+ * this returns a prefix-startsWith predicate (no regex allocation); for
+ * wildcard patterns it compiles the regex *once* and closes over it so
+ * the caller can apply the same matcher across N keys in O(1)-per-key.
+ *
+ * Anchors both ends — `foo*bar` matches exactly `foo<anything>bar`,
+ * not `foo<anything>bar<more>`.
  */
-function matchesPattern(key: string, pattern: string): boolean {
-  // If no wildcards, use simple prefix matching (faster)
+function createPatternMatcher(pattern: string): (key: string) => boolean {
   if (!pattern.includes('*')) {
-    return key.startsWith(pattern)
+    return (key: string) => key.startsWith(pattern)
   }
-  // Use regex for wildcard patterns
-  const regex = patternToRegex(pattern)
-  return regex.test(key)
-}
-
-/**
- * Convert wildcard pattern to regex for matching.
- * Supports * as wildcard (matches any characters). Anchors both ends —
- * `foo*bar` matches exactly `foo<anything>bar`, not `foo<anything>bar<more>`.
- */
-function patternToRegex(pattern: string): RegExp {
-  // Escape regex special characters except *
+  // Escape regex special characters except `*`, then convert `*` to `.*`.
   const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&')
-  // Convert * to .* (match any characters)
   const regexPattern = escaped.replaceAll('*', '.*')
-  return new RegExp(`^${regexPattern}$`)
+  const regex = new RegExp(`^${regexPattern}$`)
+  return (key: string) => regex.test(key)
 }
 
 /**
@@ -136,13 +130,16 @@ export async function clear(
     return removed
   }
 
-  // For wildcard patterns, need to match each entry.
+  // For wildcard patterns, need to match each entry. Compile the
+  // matcher once outside the stream loop so wildcard scans are
+  // O(1)-per-key instead of re-compiling the regex on every entry.
   let removed = 0
+  const matches = createPatternMatcher(opts.prefix)
   /* c8 ignore next - External cacache call */
   const stream = cacache.ls.stream(cacheDir)
 
   for await (const entry of stream) {
-    if (matchesPattern(entry.key, opts.prefix)) {
+    if (matches(entry.key)) {
       try {
         /* c8 ignore next - External cacache call */
         await cacache.rm.entry(cacheDir, entry.key)

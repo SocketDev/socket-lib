@@ -150,19 +150,21 @@ export function memoize<Args extends unknown[], Result>(
     throw new TypeError('TTL must be non-negative')
   }
 
+  // LRU via Map insertion-order: delete+re-insert moves a key to the
+  // end in O(1). The oldest key is `cache.keys().next().value`. This
+  // replaces the prior parallel `accessOrder: string[]` which cost
+  // O(n) per hit (indexOf + splice) and scaled poorly for large caches.
   const cache = new Map<string, CacheEntry<Result>>()
-  const accessOrder: string[] = []
 
   // Register for global clearing.
   cacheRegistry.push(() => {
     cache.clear()
-    accessOrder.length = 0
   })
 
   function evictLRU(): void {
-    if (cache.size >= maxSize && accessOrder.length > 0) {
-      const oldest = accessOrder.shift()
-      if (oldest) {
+    if (cache.size >= maxSize) {
+      const oldest = cache.keys().next().value
+      if (oldest !== undefined) {
         cache.delete(oldest)
         debugLog(`[memoize:${name}] clear`, {
           key: oldest,
@@ -182,41 +184,31 @@ export function memoize<Args extends unknown[], Result>(
   return function memoized(...args: Args): Result {
     const key = keyGen(...args)
 
-    // Check cache
     const cached = cache.get(key)
     if (cached) {
       if (!isExpired(cached)) {
         cached.hits++
-        // Move to end of access order (LRU)
-        const index = accessOrder.indexOf(key)
-        if (index !== -1) {
-          accessOrder.splice(index, 1)
-        }
-        accessOrder.push(key)
+        // Bump recency: delete + re-insert moves the entry to Map's
+        // insertion-order tail in O(1).
+        cache.delete(key)
+        cache.set(key, cached)
 
         debugLog(`[memoize:${name}] hit`, { key, hits: cached.hits })
         return cached.value
       }
-      // Clean up expired entry before re-caching.
+      // Expired — drop it before recomputing.
       cache.delete(key)
-      const index = accessOrder.indexOf(key)
-      if (index !== -1) {
-        accessOrder.splice(index, 1)
-      }
     }
 
-    // Cache miss - compute value
     debugLog(`[memoize:${name}] miss`, { key })
     const value = fn(...args)
 
-    // Store in cache
     evictLRU()
     cache.set(key, {
       value,
       timestamp: Date.now(),
       hits: 0,
     })
-    accessOrder.push(key)
 
     debugLog(`[memoize:${name}] set`, { key, cacheSize: cache.size })
     return value
@@ -253,19 +245,20 @@ export function memoizeAsync<Args extends unknown[], Result>(
     ttl = Number.POSITIVE_INFINITY,
   } = options
 
+  // LRU via Map insertion-order: see `memoize()` above for the full
+  // rationale. Key lifecycle on bump: `cache.delete(key)` +
+  // `cache.set(key, entry)` moves the entry to the tail in O(1).
   const cache = new Map<string, CacheEntry<Promise<Result>>>()
-  const accessOrder: string[] = []
 
   // Register for global clearing.
   cacheRegistry.push(() => {
     cache.clear()
-    accessOrder.length = 0
   })
 
   function evictLRU(): void {
-    if (cache.size >= maxSize && accessOrder.length > 0) {
-      const oldest = accessOrder.shift()
-      if (oldest) {
+    if (cache.size >= maxSize) {
+      const oldest = cache.keys().next().value
+      if (oldest !== undefined) {
         cache.delete(oldest)
         debugLog(`[memoizeAsync:${name}] clear`, {
           key: oldest,
@@ -282,24 +275,24 @@ export function memoizeAsync<Args extends unknown[], Result>(
     return Date.now() - entry.timestamp > ttl
   }
 
+  // Bump an existing cache entry to the tail (most-recently-used) in
+  // O(1). Caller must have already verified `cache.has(key)`.
+  function bumpRecency(key: string, entry: CacheEntry<Promise<Result>>): void {
+    cache.delete(key)
+    cache.set(key, entry)
+  }
+
   // Track in-flight refreshes to prevent thundering herd on TTL expiry.
   const refreshing = new Map<string, Promise<Result>>()
 
   return async function memoized(...args: Args): Promise<Result> {
     const key = keyGen(...args)
 
-    // Check cache
     const cached = cache.get(key)
     if (cached) {
       if (!isExpired(cached)) {
         cached.hits++
-        // Move to end of access order (LRU)
-        const index = accessOrder.indexOf(key)
-        if (index !== -1) {
-          accessOrder.splice(index, 1)
-        }
-        accessOrder.push(key)
-
+        bumpRecency(key, cached)
         debugLog(`[memoizeAsync:${name}] hit`, { key, hits: cached.hits })
         return await cached.value
       }
@@ -310,35 +303,26 @@ export function memoizeAsync<Args extends unknown[], Result>(
         debugLog(`[memoizeAsync:${name}] stale-dedup`, { key })
         // Bump recency so the entry we're refreshing isn't evicted
         // under LRU pressure while a peer is computing on our behalf.
-        const inflightIndex = accessOrder.indexOf(key)
-        if (inflightIndex !== -1) {
-          accessOrder.splice(inflightIndex, 1)
-        }
-        accessOrder.push(key)
+        bumpRecency(key, cached)
         return await inflight
       }
-      // Clean up expired entry before re-caching.
+      // Expired and no in-flight refresh — drop it before recomputing.
       cache.delete(key)
-      const index = accessOrder.indexOf(key)
-      if (index !== -1) {
-        accessOrder.splice(index, 1)
-      }
     }
 
-    // Cache miss - compute value
     debugLog(`[memoizeAsync:${name}] miss`, { key })
 
-    // Create promise and cache it immediately (for deduplication)
+    // Create promise and cache it immediately (for deduplication).
     const promise = fn(...args).then(
       result => {
         refreshing.delete(key)
-        // Success — update cache entry with resolved promise AND refresh
-        // the timestamp so the freshly-computed value isn't immediately
-        // classified as expired. The timestamp was previously set when
-        // the fetch *started*; under a slow fn this meant `isExpired`
-        // could fire right as the value landed, and every subsequent
-        // call past TTL recomputed because the stale-dedup branch had
-        // nothing to join (`refreshing` was emptied here first).
+        // Success — refresh the timestamp so the freshly-computed value
+        // isn't immediately classified as expired. The timestamp was
+        // previously set when the fetch *started*; under a slow fn this
+        // meant `isExpired` could fire right as the value landed, and
+        // every subsequent call past TTL recomputed because the
+        // stale-dedup branch had nothing to join (`refreshing` was
+        // emptied here first).
         const entry = cache.get(key)
         if (entry) {
           entry.value = Promise.resolve(result)
@@ -348,26 +332,20 @@ export function memoizeAsync<Args extends unknown[], Result>(
       },
       error => {
         refreshing.delete(key)
-        // Failure - remove from cache to allow retry
+        // Failure — remove from cache to allow retry.
         cache.delete(key)
-        const index = accessOrder.indexOf(key)
-        if (index !== -1) {
-          accessOrder.splice(index, 1)
-        }
         debugLog(`[memoizeAsync:${name}] error`, { key, error })
         throw error
       },
     )
     refreshing.set(key, promise)
 
-    // Store promise in cache
     evictLRU()
     cache.set(key, {
       value: promise,
       timestamp: Date.now(),
       hits: 0,
     })
-    accessOrder.push(key)
 
     debugLog(`[memoizeAsync:${name}] set`, { key, cacheSize: cache.size })
     return await promise
