@@ -675,10 +675,6 @@
       "types": "./dist/validation/types.d.ts",
       "default": "./dist/validation/types.js"
     },
-    "./validation/validate-schema": {
-      "types": "./dist/validation/validate-schema.d.ts",
-      "default": "./dist/validation/validate-schema.js"
-    },
     "./versions": {
       "types": "./dist/versions.d.ts",
       "default": "./dist/versions.js"

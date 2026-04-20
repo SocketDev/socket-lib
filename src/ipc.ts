@@ -9,7 +9,7 @@ import process from 'node:process'
 
 import { Type } from './external/@sinclair/typebox'
 import { getOsTmpDir } from './paths/socket'
-import { parseSchema } from './validation/validate-schema'
+import { parseSchema } from './schema/parse'
 
 /**
  * IPC stub file schema - validates the structure of stub files.
