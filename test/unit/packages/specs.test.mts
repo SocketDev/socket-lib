@@ -52,6 +52,18 @@ describe('packages/specs', () => {
       expect(result.project).toBe('berry')
     })
 
+    it('handles git+https:// and git+ssh:// URLs (npm repository.url forms)', () => {
+      // npm's `npm pkg get repository.url` canonicalizes to `git+https://`
+      // or `git+ssh://` prefixes. The scheme pattern accepts `+` so these
+      // match the same as plain `https://github.com/…`.
+      expect(
+        getRepoUrlDetails('git+https://github.com/npm/cli.git'),
+      ).toEqual({ user: 'npm', project: 'cli' })
+      expect(
+        getRepoUrlDetails('git+ssh://git@github.com/npm/cli.git'),
+      ).toEqual({ user: 'npm', project: 'cli' })
+    })
+
     it('returns empty strings for invalid URL', () => {
       // Previously the loose `/^.+github.com\//` replace left garbage in
       // user/project for non-GitHub or malformed inputs. Now returns a

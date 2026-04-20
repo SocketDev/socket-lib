@@ -24,11 +24,15 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
   // Anchor the host to exactly `github.com` (optionally preceded by
   // userinfo like `user@`). Escaping the `.` blocks lookalikes like
   // `githubXcom`; pinning the host to the full final label blocks
-  // `fake-github.com` or `github.com.attacker.tld` shenanigans. Callers
-  // passing scp-style git@github.com:… need to normalize upstream; we
-  // require `://` here so the host component is unambiguous.
+  // `fake-github.com` or `github.com.attacker.tld` shenanigans. The
+  // scheme class allows `+` so npm's canonical `git+https://…` and
+  // `git+ssh://…` forms from package.json `repository.url` match.
+  // Callers passing scp-style git@github.com:… need to normalize
+  // upstream; we require `://` here so the host is unambiguous.
   const match =
-    /^(?:[a-z]+:\/\/)(?:[^/@]+@)?github\.com\/([^?#]+)(?:[?#]|$)/i.exec(repoUrl)
+    /^(?:[a-z][a-z+]*:\/\/)(?:[^/@]+@)?github\.com\/([^?#]+)(?:[?#]|$)/i.exec(
+      repoUrl,
+    )
   if (!match || !match[1]) {
     return { user: '', project: '' }
   }
