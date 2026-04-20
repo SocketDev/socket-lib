@@ -280,29 +280,41 @@ describe('memoization', () => {
       // TTL window would re-fetch despite the cache having just landed a
       // fresh value. The fix sets `entry.timestamp = Date.now()` in the
       // resolve handler so the cached hit window starts when the result
-      // is available. Uses fake timers so the assertion isn't sensitive
-      // to real-world microtask jitter under parallel test load.
-      vi.useFakeTimers()
+      // is available. Uses a stubbed `Date.now` (not fake timers) so we
+      // don't depend on Vitest's timer/microtask interleaving under
+      // parallel worker load.
+      const realNow = Date.now
+      let fakeTime = 1_000_000
+      const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => fakeTime)
       try {
         let callCount = 0
+        let resolveFn: ((v: number) => void) | undefined
         const slowFn = async (n: number) => {
           callCount++
-          await new Promise(r => setTimeout(r, 500))
-          return n * 2
+          const result = await new Promise<number>(r => {
+            resolveFn = r
+          })
+          return n * result
         }
         const memoized = memoizeAsync(slowFn, { ttl: 200 })
+        // Start call at t=1_000_000.
         const p1 = memoized(5)
-        await vi.advanceTimersByTimeAsync(500)
+        // Advance past TTL (500 > 200) BEFORE resolving the fn.
+        fakeTime += 500
+        resolveFn!(2)
         expect(await p1).toBe(10)
         expect(callCount).toBe(1)
-        // Without advancing time further, the second call should hit
-        // because the resolve handler set timestamp = now(500).
-        // (Pre-fix: timestamp was still 0 — 500ms old → expired → new
-        // call would fire. Post-fix: 0ms old → hit.)
+        // Without advancing further, the second call should hit because
+        // the resolve handler reset the entry timestamp to t=1_000_500.
+        // (Pre-fix: timestamp was 1_000_000 — age 500 > ttl 200 →
+        //  expired → second call would fire.)
         expect(await memoized(5)).toBe(10)
         expect(callCount).toBe(1)
       } finally {
-        vi.useRealTimers()
+        nowSpy.mockRestore()
+        // Belt-and-suspenders: restore original even if spy cleanup
+        // leaves a bound impl in place.
+        Date.now = realNow
       }
     })
 
