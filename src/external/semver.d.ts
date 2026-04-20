@@ -22,8 +22,20 @@ export function gte(version1: string, version2: string): boolean
 export function lt(version1: string, version2: string): boolean
 export function lte(version1: string, version2: string): boolean
 export function valid(version: string): string | null
-export function maxSatisfying(versions: string[], range: string): string | null
-export function minSatisfying(versions: string[], range: string): string | null
+export interface RangeOptions {
+  includePrerelease?: boolean
+  loose?: boolean
+}
+export function maxSatisfying(
+  versions: string[],
+  range: string,
+  options?: RangeOptions | boolean,
+): string | null
+export function minSatisfying(
+  versions: string[],
+  range: string,
+  options?: RangeOptions | boolean,
+): string | null
 export function sort(versions: string[]): string[]
 export function rsort(versions: string[]): string[]
 export function diff(

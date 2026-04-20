@@ -227,10 +227,14 @@ class ProcessLockManager {
       if (!stats) {
         return false
       }
-      // Use second-level granularity to avoid APFS issues.
-      const ageSeconds = Math.floor((Date.now() - stats.mtime.getTime()) / 1000)
-      const staleSeconds = Math.floor(staleMs / 1000)
-      return ageSeconds > staleSeconds
+      // Compare in milliseconds. APFS's mtime precision is second-level
+      // but truncating the age to seconds was silently rounding sub-
+      // second `staleMs` values up to ~1s (staleMs=500 → staleSeconds=0,
+      // so the lock had to be 1s+ past mtime before it was considered
+      // stale). Floor only the mtime side to absorb APFS quirks, keep
+      // the threshold at full precision.
+      const ageMs = Date.now() - Math.floor(stats.mtime.getTime())
+      return ageMs > staleMs
     } catch {
       return false
     }
@@ -288,16 +292,11 @@ class ProcessLockManager {
             }
           }
 
-          // Check if lock already exists before creating.
-          const fs = getFs()
-          if (fs.existsSync(lockPath)) {
-            throw new Error(`Lock already exists: ${lockPath}`)
-          }
-
           // Ensure parent directory exists. Use path.dirname() so that both
           // POSIX and Windows separators (and mixed-separator inputs) are
           // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
           // approach failed on relative paths and mixed-separator inputs.
+          const fs = getFs()
           const parent = getPath().dirname(lockPath)
           if (parent && parent !== '.' && parent !== lockPath) {
             fs.mkdirSync(parent, { recursive: true })
@@ -305,7 +304,9 @@ class ProcessLockManager {
 
           // Atomic lock acquisition via mkdir (without recursive).
           // Without recursive, mkdirSync throws EEXIST if another process
-          // created the directory between the existsSync check and here.
+          // already owns the directory. No pre-check: an existsSync +
+          // mkdirSync pair opens a TOCTOU window without adding safety,
+          // because mkdirSync is atomic on its own.
           fs.mkdirSync(lockPath)
 
           // Track lock for cleanup.

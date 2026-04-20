@@ -221,9 +221,13 @@ describe('url', () => {
       expect(urlSearchParamAsBoolean('0')).toBe(false)
     })
 
-    it('should return false for other strings', () => {
+    it('accepts the same truthy vocabulary as envAsBoolean', () => {
+      // Expanded set so callers get consistent behavior across env vars
+      // and query strings: '1' | 'true' | 'yes' | 'on' (case-insensitive).
+      expect(urlSearchParamAsBoolean('yes')).toBe(true)
+      expect(urlSearchParamAsBoolean('Yes')).toBe(true)
+      expect(urlSearchParamAsBoolean('on')).toBe(true)
       expect(urlSearchParamAsBoolean('hello')).toBe(false)
-      expect(urlSearchParamAsBoolean('yes')).toBe(false)
       expect(urlSearchParamAsBoolean('no')).toBe(false)
     })
 

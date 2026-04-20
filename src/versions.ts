@@ -242,7 +242,14 @@ export function isValidVersion(version: string): boolean {
 export function maxVersion(versions: string[]): string | undefined {
   /* c8 ignore next - External semver call */
   const semver = getSemver()
-  return semver.maxSatisfying(versions, '*') || undefined
+  // includePrerelease: true so an all-prerelease input like
+  // ['1.0.0-alpha', '1.0.0-beta'] resolves to the latest prerelease
+  // instead of returning undefined under semver's default (which filters
+  // prereleases out against '*').
+  return (
+    semver.maxSatisfying(versions, '*', { includePrerelease: true }) ||
+    undefined
+  )
 }
 
 /**
@@ -256,7 +263,10 @@ export function maxVersion(versions: string[]): string | undefined {
 export function minVersion(versions: string[]): string | undefined {
   /* c8 ignore next - External semver call */
   const semver = getSemver()
-  return semver.minSatisfying(versions, '*') || undefined
+  return (
+    semver.minSatisfying(versions, '*', { includePrerelease: true }) ||
+    undefined
+  )
 }
 
 /**

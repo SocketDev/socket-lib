@@ -517,7 +517,10 @@ export async function findUp(
   let dir = path.resolve(cwd)
   const { root } = path.parse(dir)
   const names = isArray(name) ? name : [name as string]
-  while (dir && dir !== root) {
+  // Traverse up to and INCLUDING the filesystem root. Previously the
+  // loop exited when `dir === root`, so a match at e.g. `/.foo` was
+  // never visited.
+  while (dir) {
     for (const n of names) {
       if (signal?.aborted) {
         return undefined
@@ -533,6 +536,9 @@ export async function findUp(
           return normalizePath(thePath)
         }
       } catch {}
+    }
+    if (dir === root) {
+      break
     }
     dir = path.dirname(dir)
   }
@@ -588,7 +594,10 @@ export function findUpSync(
   const { root } = path.parse(dir)
   const stopDir = stopAt ? path.resolve(stopAt) : undefined
   const names = isArray(name) ? name : [name as string]
-  while (dir && dir !== root) {
+  // Traverse up to and INCLUDING the filesystem root (or stopAt). The
+  // old `while (dir && dir !== root)` exited before visiting `root`
+  // itself, so a match at `/.foo` was never found.
+  while (dir) {
     // Check if we should stop at this directory.
     if (stopDir && dir === stopDir) {
       // Check current directory but don't go up.
@@ -617,6 +626,9 @@ export function findUpSync(
           return normalizePath(thePath)
         }
       } catch {}
+    }
+    if (dir === root) {
+      break
     }
     dir = path.dirname(dir)
   }

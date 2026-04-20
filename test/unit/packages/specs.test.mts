@@ -36,11 +36,14 @@ describe('packages/specs', () => {
       expect(result.project).toBe('node')
     })
 
-    it('should handle git@ protocol URLs', () => {
+    it('rejects git@ protocol URLs (scp-style is not supported)', () => {
+      // scp-style `git@github.com:npm/cli.git` has no `://` separator;
+      // the matcher requires one so the host is unambiguously `github.com`
+      // rather than the whole string before `:`. Callers that need scp
+      // parsing should normalize to https upstream.
       const result = getRepoUrlDetails('git@github.com:npm/cli.git')
-      // Note: the function doesn't handle git@ URLs with : separator correctly
-      expect(result.user).toBe('git@github.com:npm')
-      expect(result.project).toBe('cli')
+      expect(result.user).toBe('')
+      expect(result.project).toBe('')
     })
 
     it('should handle git:// protocol URLs', () => {
@@ -49,10 +52,26 @@ describe('packages/specs', () => {
       expect(result.project).toBe('berry')
     })
 
-    it('should return empty strings for invalid URL', () => {
+    it('returns empty strings for invalid URL', () => {
+      // Previously the loose `/^.+github.com\//` replace left garbage in
+      // user/project for non-GitHub or malformed inputs. Now returns a
+      // clean empty result so callers can branch on it.
       const result = getRepoUrlDetails('not-a-valid-url')
-      expect(result.user).toBe('not-a-valid-url')
+      expect(result.user).toBe('')
       expect(result.project).toBe('')
+    })
+
+    it('rejects github.com lookalike hosts', () => {
+      // Previously `/^.+github.com\//` matched any host that happened to
+      // end with `github.com` literally because `.` was unescaped.
+      expect(getRepoUrlDetails('https://githubXcom/a/b')).toEqual({
+        user: '',
+        project: '',
+      })
+      expect(getRepoUrlDetails('https://fake-github.com.attacker.tld/a/b')).toEqual({
+        user: '',
+        project: '',
+      })
     })
 
     it('should handle empty string', () => {

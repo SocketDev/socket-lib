@@ -21,14 +21,23 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
   user: string
   project: string
 } {
-  const userAndRepo = repoUrl.replace(/^.+github.com\//, '').split('/')
+  // Anchor the host to exactly `github.com` (optionally preceded by
+  // userinfo like `user@`). Escaping the `.` blocks lookalikes like
+  // `githubXcom`; pinning the host to the full final label blocks
+  // `fake-github.com` or `github.com.attacker.tld` shenanigans. Callers
+  // passing scp-style git@github.com:… need to normalize upstream; we
+  // require `://` here so the host component is unambiguous.
+  const match =
+    /^(?:[a-z]+:\/\/)(?:[^/@]+@)?github\.com\/([^?#]+)(?:[?#]|$)/i.exec(repoUrl)
+  if (!match || !match[1]) {
+    return { user: '', project: '' }
+  }
+  const userAndRepo = match[1].split('/')
   const user = userAndRepo[0] || ''
-  const project =
-    userAndRepo.length > 1
-      ? (userAndRepo[1]?.endsWith('.git')
-          ? userAndRepo[1].slice(0, -4)
-          : userAndRepo[1]) || ''
-      : ''
+  const rawProject = userAndRepo[1] ?? ''
+  const project = rawProject.endsWith('.git')
+    ? rawProject.slice(0, -4)
+    : rawProject
   return { user, project }
 }
 

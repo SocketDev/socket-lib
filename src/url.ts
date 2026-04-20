@@ -137,7 +137,21 @@ export function urlSearchParamAsBoolean(
   } as UrlSearchParamAsBooleanOptions
   if (typeof value === 'string') {
     const trimmed = value.trim()
-    return trimmed === '1' || trimmed.toLowerCase() === 'true'
+    // Empty string → use defaultValue, same as null/undefined. Previously
+    // fell through to the final truthy check and returned false, silently
+    // bypassing `defaultValue: true`.
+    if (trimmed === '') {
+      return !!defaultValue
+    }
+    const lowered = trimmed.toLowerCase()
+    // Accept the same truthy vocabulary as `envAsBoolean` so query-string
+    // flags behave predictably cross-context: '1', 'true', 'yes', 'on'.
+    return (
+      lowered === '1' ||
+      lowered === 'true' ||
+      lowered === 'yes' ||
+      lowered === 'on'
+    )
   }
   if (value === null || value === undefined) {
     return !!defaultValue
