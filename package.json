@@ -667,14 +667,6 @@
       "types": "./dist/url.d.ts",
       "default": "./dist/url.js"
     },
-    "./validation/json-parser": {
-      "types": "./dist/validation/json-parser.d.ts",
-      "default": "./dist/validation/json-parser.js"
-    },
-    "./validation/types": {
-      "types": "./dist/validation/types.d.ts",
-      "default": "./dist/validation/types.js"
-    },
     "./versions": {
       "types": "./dist/versions.d.ts",
       "default": "./dist/versions.js"

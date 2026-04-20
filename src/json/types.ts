@@ -78,6 +78,57 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 export type JsonReviver = (key: string, value: unknown) => unknown
 
 /**
+ * Options for `safeJsonParse`: security controls for untrusted JSON.
+ *
+ * Distinct from `JsonParseOptions` (which is scoped to reviver /
+ * error-handling for trusted-source fs reads). Use this type when
+ * parsing user input, network payloads, or anything beyond a trust
+ * boundary.
+ *
+ * @example
+ * ```ts
+ * const options: SafeJsonParseOptions = {
+ *   maxSize: 1024 * 1024, // 1MB limit
+ *   allowPrototype: false // Block prototype pollution
+ * }
+ * ```
+ */
+export interface SafeJsonParseOptions {
+  /**
+   * Allow dangerous prototype pollution keys (`__proto__`, `constructor`, `prototype`).
+   * Set to `true` only if you trust the JSON source completely.
+   *
+   * @default false
+   *
+   * @example
+   * ```ts
+   * // Will throw error by default
+   * safeJsonParse('{"__proto__": {"polluted": true}}')
+   *
+   * // Allows the parse (dangerous!)
+   * safeJsonParse('{"__proto__": {"polluted": true}}', undefined, {
+   *   allowPrototype: true
+   * })
+   * ```
+   */
+  allowPrototype?: boolean | undefined
+
+  /**
+   * Maximum allowed size of JSON string in bytes.
+   * Prevents memory exhaustion from extremely large payloads.
+   *
+   * @default 10_485_760 (10 MB)
+   *
+   * @example
+   * ```ts
+   * // Limit to 1KB
+   * safeJsonParse(jsonString, undefined, { maxSize: 1024 })
+   * ```
+   */
+  maxSize?: number | undefined
+}
+
+/**
  * Options for JSON parsing operations.
  */
 export interface JsonParseOptions {

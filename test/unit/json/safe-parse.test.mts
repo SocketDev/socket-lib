@@ -10,9 +10,9 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
-import { safeJsonParse } from '@socketsecurity/lib/validation/json-parser'
+import { safeJsonParse } from '@socketsecurity/lib/json/parse'
 
-describe('validation/json-parser', () => {
+describe('json/safe-parse', () => {
   describe('safeJsonParse', () => {
     it('should parse valid JSON', () => {
       const result = safeJsonParse('{"name":"test","value":123}')

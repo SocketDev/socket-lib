@@ -1,10 +1,19 @@
 /**
  * @fileoverview JSON parsing utilities with Buffer detection and BOM stripping.
- * Provides safe JSON parsing with automatic encoding handling.
+ * Provides safe JSON parsing with automatic encoding handling, plus
+ * `safeJsonParse` for untrusted input (prototype-pollution protection +
+ * size limits + optional schema validation).
  */
 
+import { validateSchema } from '../schema/validate'
 import { stripBom } from '../strings'
-import type { JsonParseOptions, JsonPrimitive, JsonValue } from './types'
+import type { Schema } from '../schema/types'
+import type {
+  JsonParseOptions,
+  JsonPrimitive,
+  JsonValue,
+  SafeJsonParseOptions,
+} from './types'
 
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
@@ -156,4 +165,107 @@ export function jsonParse(
     }
   }
   return undefined
+}
+
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
+/**
+ * JSON.parse reviver that rejects prototype pollution keys at any depth.
+ *
+ * @internal
+ */
+function prototypePollutionReviver(key: string, value: unknown): unknown {
+  if (DANGEROUS_KEYS.has(key)) {
+    throw new Error(
+      'JSON contains potentially malicious prototype pollution keys',
+    )
+  }
+  return value
+}
+
+const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
+
+/**
+ * Safely parse JSON with optional schema validation and security controls.
+ * Throws on parse failure, validation failure, or security violation.
+ *
+ * Recommended for parsing untrusted JSON (user input, network payloads,
+ * anything beyond a trust boundary). Layers:
+ * 1. Size cap (default 10 MB) prevents memory exhaustion.
+ * 2. Prototype-pollution reviver rejects `__proto__` / `constructor` /
+ *    `prototype` keys at any depth (unless `allowPrototype: true`).
+ * 3. Optional Zod-shaped schema validation via
+ *    `@socketsecurity/lib/schema/validate`.
+ *
+ * For trusted-source reads (package.json, local config files), prefer
+ * `jsonParse()` — it offers Buffer/BOM handling and filepath-aware error
+ * messages, without the untrusted-input overhead.
+ *
+ * @throws {Error} When `jsonString` exceeds `maxSize`.
+ * @throws {Error} When JSON parsing fails.
+ * @throws {Error} When prototype-pollution keys are detected (and
+ *   `allowPrototype` is not `true`).
+ * @throws {Error} When schema validation fails.
+ *
+ * @example
+ * ```ts
+ * // Basic parsing with type inference.
+ * const data = safeJsonParse<User>('{"name":"Alice","age":30}')
+ *
+ * // With schema validation.
+ * import { z } from 'zod'
+ * const userSchema = z.object({ name: z.string(), age: z.number() })
+ * const user = safeJsonParse('{"name":"Alice","age":30}', userSchema)
+ *
+ * // With size limit.
+ * const data = safeJsonParse(jsonString, undefined, { maxSize: 1024 })
+ *
+ * // Allow prototype keys (DANGEROUS — only for trusted sources).
+ * const data = safeJsonParse('{"__proto__":{}}', undefined, {
+ *   allowPrototype: true,
+ * })
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function safeJsonParse<T = unknown>(
+  jsonString: string,
+  schema?: Schema<T> | undefined,
+  options: SafeJsonParseOptions = {},
+): T {
+  const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = options
+
+  // Size check up front.
+  const byteLength = Buffer.byteLength(jsonString, 'utf8')
+  if (byteLength > maxSize) {
+    throw new Error(
+      `JSON string exceeds maximum size limit${
+        maxSize !== DEFAULT_MAX_SIZE ? ` of ${maxSize} bytes` : ''
+      }`,
+    )
+  }
+
+  // Parse with the prototype-pollution reviver unless the caller opted out.
+  let parsed: unknown
+  try {
+    parsed = allowPrototype
+      ? JSONParse(jsonString)
+      : JSONParse(jsonString, prototypePollutionReviver)
+  } catch (error) {
+    throw new Error(`Failed to parse JSON: ${error}`)
+  }
+
+  // Optional schema validation — route through validateSchema so the
+  // normalization logic lives in exactly one place.
+  if (schema) {
+    const result = validateSchema(schema, parsed)
+    if (!result.ok) {
+      const summary = result.errors
+        .map(e => `${e.path.join('.') || '(root)'}: ${e.message}`)
+        .join(', ')
+      throw new Error(`Validation failed: ${summary}`)
+    }
+    return result.value
+  }
+
+  return parsed as T
 }
