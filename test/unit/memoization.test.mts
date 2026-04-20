@@ -5,7 +5,6 @@
  * - memoize() caches synchronous function results
  * - memoizeAsync() caches async function results with promise deduplication
  * - memoizeWeak() uses WeakMap for object key caching
- * - memoizeDebounced() combines memoization with debouncing
  * - once() ensures function executes exactly once
  * - Memoize() decorator for class methods
  * - clearAllMemoizationCaches() global cache clearing
@@ -17,7 +16,6 @@ import {
   Memoize,
   memoize,
   memoizeAsync,
-  memoizeDebounced,
   memoizeWeak,
   once,
 } from '@socketsecurity/lib/memoization'
@@ -539,66 +537,6 @@ describe('memoization', () => {
       // Second call should not throw (returns cached undefined from throw)
       // Note: In the actual implementation, the result is cached before throw
       // so this behavior depends on implementation details
-    })
-  })
-
-  describe('memoizeDebounced', () => {
-    it('should debounce and memoize function calls', async () => {
-      const fn = vi.fn((n: number) => n * 2)
-      const debounced = memoizeDebounced(fn, 100)
-
-      // First call - computes immediately
-      expect(debounced(5)).toBe(10)
-      expect(fn).toHaveBeenCalledTimes(1)
-
-      // Immediate second call - returns cached
-      expect(debounced(5)).toBe(10)
-      expect(fn).toHaveBeenCalledTimes(1)
-
-      // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // After debounce, still cached
-      expect(debounced(5)).toBe(10)
-      expect(fn).toHaveBeenCalledTimes(1)
-    })
-
-    it('should clear debounce timeout on subsequent calls', async () => {
-      const fn = vi.fn((n: number) => n * 2)
-      const debounced = memoizeDebounced(fn, 100)
-
-      debounced(5)
-      debounced(5)
-      debounced(5)
-
-      expect(fn).toHaveBeenCalledTimes(1)
-
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Should still only be called once
-      expect(fn).toHaveBeenCalledTimes(1)
-    })
-
-    it('should handle different arguments', async () => {
-      const fn = vi.fn((n: number) => n * 2)
-      const debounced = memoizeDebounced(fn, 50)
-
-      expect(debounced(1)).toBe(2)
-      expect(debounced(2)).toBe(4)
-      expect(debounced(1)).toBe(2) // Cached
-
-      expect(fn).toHaveBeenCalledTimes(2)
-    })
-
-    it('should respect memoization options', () => {
-      const fn = vi.fn((n: number) => n * 2)
-      const debounced = memoizeDebounced(fn, 50, { maxSize: 1 })
-
-      debounced(1)
-      debounced(2) // Evicts 1
-      debounced(1) // Cache miss
-
-      expect(fn).toHaveBeenCalledTimes(3)
     })
   })
 

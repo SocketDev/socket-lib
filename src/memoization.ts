@@ -375,46 +375,6 @@ export function memoizeAsync<Args extends unknown[], Result>(
 }
 
 /**
- * Create a debounced memoized function.
- * Combines memoization with debouncing for expensive operations.
- *
- * @param fn - Function to memoize and debounce
- * @param wait - Debounce wait time in milliseconds
- * @param options - Memoization options
- * @returns Debounced memoized function
- *
- * @example
- * import { memoizeDebounced } from '@socketsecurity/lib/memoization'
- *
- * const search = memoizeDebounced(
- *   (query: string) => performSearch(query),
- *   300,
- *   { name: 'search' }
- * )
- */
-export function memoizeDebounced<Args extends unknown[], Result>(
-  fn: (...args: Args) => Result,
-  wait: number,
-  options: MemoizeOptions<Args, Result> = {},
-): (...args: Args) => Result {
-  const memoized = memoize(fn, options)
-  let timeoutId: NodeJS.Timeout | undefined
-
-  return function debounced(...args: Args): Result {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-
-    timeoutId = setTimeout(() => {
-      memoized(...args)
-    }, wait)
-
-    // For immediate return, try cached value or compute synchronously
-    return memoized(...args)
-  }
-}
-
-/**
  * Memoize with WeakMap for object keys.
  * Allows garbage collection when objects are no longer referenced.
  * Only works when first argument is an object.
