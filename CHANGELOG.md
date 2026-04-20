@@ -5,57 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.21.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.21.0) - 2026-04-20
 
-### Added — schema (new module, replaces `validation/validate-schema`)
+### Added
 
-- `@socketsecurity/lib/schema/validate` — non-throwing validator accepting any Zod-shaped schema (duck-typed on `.safeParse`). Returns a tagged `{ ok: true, value } | { ok: false, errors }` with normalized `{ path, message }` issues. socket-lib additionally recognizes TypeBox for its own internal use (e.g. `src/ipc.ts` stub validation); external callers should pass Zod schemas. No runtime dependency on `zod` — consumers bring their own
-- `@socketsecurity/lib/schema/parse` — throwing twin for fail-fast trust boundaries (app startup, config files). Summarizes all issues into a single `Error` message
-- `@socketsecurity/lib/schema/types` — shared types: `Schema<T>`, `ParseResult<T>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema`, and `Infer<S>` (which unwraps Zod v3/v4 and TypeBox output shapes)
-
-### Added — native feature-detect helpers
-
-- `@socketsecurity/lib/promises` `withResolvers()` — exposes the TC39 [`Promise.withResolvers`](https://tc39.es/ecma262/#sec-promise.withResolvers) API as a first-class export. Bound to the native method when available (Node 20.12+ / 21+ / 22+; V8 ≥ 12.0); otherwise falls back to a spec-equivalent `new Promise(executor)` implementation. Returns `{ promise, resolve, reject }` with `Object.prototype`-prototyped own enumerable properties per §27.2.4.9. Retires the `let resolve; const p = new Promise(r => { resolve = r })` dance for deferred-resolution patterns. Public `PromiseWithResolvers<T>` interface exported alongside
+- `@socketsecurity/lib/schema/validate` — non-throwing Zod/TypeBox validator returning `{ ok, value } | { ok, errors }` with normalized paths
+- `@socketsecurity/lib/schema/parse` — throwing variant for fail-fast trust boundaries
+- `@socketsecurity/lib/schema/types` — `Schema<T>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema`, `Infer<S>`
+- `@socketsecurity/lib/promises` `withResolvers()` — spec-compliant [`Promise.withResolvers`](https://tc39.es/ecma262/#sec-promise.withResolvers) helper with `PromiseWithResolvers<T>` type. Uses the native implementation when available
 
 ### Changed
 
-- `@socketsecurity/lib/regexps` `escapeRegExp()` — bound to native [`RegExp.escape`](https://tc39.es/ecma262/#sec-regexp.escape) when available (Node 24+ / V8 13.7); otherwise uses a spec-compliant fallback. Previous implementation escaped only the SyntaxCharacter set, leaving output unsafe against leading-identifier merging (e.g. a trailing `\0..\9` in a surrounding pattern could absorb a leading digit) and unsafe inside `/.../` literals (no `/` escape). New implementation encodes leading `[0-9A-Za-z]` as `\xHH`, backslash-prefixes `SyntaxCharacter + /`, emits `ControlEscape` letter forms, and `\xHH`-escapes the `otherPunctuators` / whitespace / line-terminator / lone-surrogate set per §22.2.5.1. Fallback output byte-equivalent to native across ASCII 0-127 plus non-ASCII NBSP / ZWNBSP / LS / PS / surrogates (zero diffs). **Caller-visible shape change**: escaped output now uses `\xHH` for many characters that previously passed through literally (e.g. `escapeRegExp('a')` is now `'\\x61'`, not `'a'`); callers that string-match on the escape output rather than compiling it into a `RegExp` may need updates. Functional equivalence (round-trip match against the original input) is preserved
+- `@socketsecurity/lib/regexps` `escapeRegExp()` — now spec-compliant with TC39 [`RegExp.escape`](https://tc39.es/ecma262/#sec-regexp.escape); uses the native implementation when available. **Caller-visible shape change**: escaped output now uses `\xHH` for many characters that previously passed through literally (e.g. `escapeRegExp('a')` is now `'\x61'`). Functional equivalence (the compiled regex matches the original input) is preserved; only callers that string-match on escape output need updates
+- `@socketsecurity/lib/memoization` `MemoizeOptions<Args>` — dropped the unused second type parameter. Consumers who wrote `MemoizeOptions<Args, Result>` must drop the second argument
+- `@socketsecurity/lib/packages/specs` `getRepoUrlDetails()` — now accepts `git+https://` / `git+ssh://` GitHub URLs and rejects lookalike hosts (`githubXcom`, `fake-github.com.attacker.tld`). scp-style `git@github.com:…` URLs (no `://`) now return `{ user: '', project: '' }` — callers must normalize to https/ssh upstream
+- `@socketsecurity/lib/url` `urlSearchParamAsBoolean()` — accepts the same truthy vocabulary as `envAsBoolean` (`1` / `true` / `yes` / `on`, case-insensitive). Empty-string input now falls through to `defaultValue` instead of returning `false`
 
 ### Removed
 
-- `@socketsecurity/lib/validation/*` subpath retired entirely — its two exports are re-homed under modules that match their purpose. Migrate:
-  - `import { validateSchema } from '@socketsecurity/lib/validation/validate-schema'` → `import { validateSchema } from '@socketsecurity/lib/schema/validate'`
-  - `import { parseSchema } from '@socketsecurity/lib/validation/validate-schema'` → `import { parseSchema } from '@socketsecurity/lib/schema/parse'`
-  - `import { safeJsonParse } from '@socketsecurity/lib/validation/json-parser'` → `import { safeJsonParse } from '@socketsecurity/lib/json/parse'`
-  - Types (`Infer`, `ValidateResult`, `ValidationIssue`, `AnySchema`, `Schema`, `ParseResult`) → `@socketsecurity/lib/schema/types`
-  - Types (`SafeJsonParseOptions`) → `@socketsecurity/lib/json/types`
-- `memoizeDebounced` export from `@socketsecurity/lib/memoization` — the helper was misnamed (the "debounce" callback only invoked the already-memoized fn for cache-population side effects, never deferred the caller's return value) and had no internal consumers. Use `memoize` or `memoizeAsync` with a `ttl` instead
+- `@socketsecurity/lib/validation/*` subpath retired — exports re-homed:
+  - `validateSchema` / `parseSchema` → `@socketsecurity/lib/schema/validate` / `@socketsecurity/lib/schema/parse`
+  - `safeJsonParse` → `@socketsecurity/lib/json/parse`
+  - Types → `@socketsecurity/lib/schema/types` and `@socketsecurity/lib/json/types`
+- `memoizeDebounced` from `@socketsecurity/lib/memoization` — was misnamed and had no consumers. Use `memoize` / `memoizeAsync` with a `ttl` instead
 
-### Fixed — caching
+### Fixed
 
-- `src/dlx/detect.ts` — bound `packageJsonPathCache` with an LRU cap (200) and give negative entries a 10s TTL so a directory that later gains a `package.json` (e.g. `npm install` in a sibling workspace) is re-probed instead of permanently stuck on the cached "not found"
-- `src/dlx/package.ts` — bound `binaryPathCache` with an LRU cap (200) so a long-running process that resolves many distinct binary paths no longer accumulates entries forever after `cleanDlxCache` reclaims the files on disk
-- `src/cacache.ts` / `src/cache-with-ttl.ts` — wildcard deletion (`deleteAll('foo*bar')`) now anchors both ends of the pattern. The missing `$` anchor silently over-deleted keys like `foo123bar-extra`
-- `src/globs.ts` — cache key for array-valued options (e.g. `ignore`) is now order-insensitive, so the same logical set doesn't produce multiple cache entries depending on call-site ordering
+- `@socketsecurity/lib/versions` `maxVersion()` / `minVersion()` — return the latest/earliest prerelease for all-prerelease inputs (previously returned `undefined`)
+- `@socketsecurity/lib/fs` `findUp()` / `findUpSync()` — traverse up to and **including** the filesystem root (previously missed matches at `/.foo`)
+- `@socketsecurity/lib/words` `capitalize()` — safe for non-BMP characters (emoji, astral-plane scripts); previously produced broken surrogate pairs
+- `@socketsecurity/lib/words` `determineArticle()` — case-insensitive vowel match (`Apple` → `an Apple`)
+- `@socketsecurity/lib/archives` `extractZip()` / `extractTar()` / `extractTarGz()` — missing-archive errors now uniformly surface as `ENOENT` with `code` / `path` / message (previously `extractZip` surfaced adm-zip's generic `"Invalid filename"`)
+- `@socketsecurity/lib/promise-queue` — bounded queue now rejects the newest submission when full, preserving in-flight work
+- `@socketsecurity/lib/cacache` / `@socketsecurity/lib/cache-with-ttl` — wildcard key deletion anchors both ends of the pattern (`deleteAll('foo*bar')` no longer sweeps `foo123bar-extra`)
+- `@socketsecurity/lib/process-lock` — sub-second `staleMs` values now honored at full precision; TOCTOU window on lock acquisition closed
+- `@socketsecurity/lib/suppress-warnings` `withSuppressedWarnings()` — no longer wipes concurrent suppressions on exit
+- Unbounded LRU caches in `@socketsecurity/lib/dlx` capped (binary path, package.json path); negative package.json lookups now expire after 10s
+- Glob cache keys for array-valued options (e.g. `ignore`) are order-insensitive
 
-### Fixed — promises & concurrency
+### Performance
 
-- `src/promise-queue.ts` — when a bounded queue hits its limit, reject the **newest** submission (current call) rather than the oldest already-enqueued task. Prior behavior let a flood of new submissions cancel in-flight work the caller had already committed to awaiting
-- `src/suppress-warnings.ts` `withSuppressedWarnings()` — do not reassign `process.emitWarning` in `finally`. The snapshot-and-restore pattern at the top of the function either captured the native function after a wrapper was already installed (then restoring native on exit wiped every other active suppression) or captured the wrapper itself (making the restore a no-op). Suppression is driven by the `suppressedWarnings` set; membership changes are enough
-- `src/process-lock.ts` — drop the `existsSync(lockPath)` pre-check before `mkdirSync(lockPath)`. `mkdirSync` without `recursive` is already atomic and throws `EEXIST` when another process owns the directory; the pre-check only opened a TOCTOU window without adding safety. Stale-lock detection now compares full-precision milliseconds (`Date.now() - mtime.getTime() > staleMs`) instead of second-level truncation — sub-second `staleMs` values (e.g. 500) were previously being rounded up to a 1s minimum
-
-### Fixed — URL / version / spec parsing
-
-- `src/packages/specs.ts` `getRepoUrlDetails()` — tighten the GitHub URL matcher to anchor on `github.com` specifically (escaped `.`, full-label match) and accept npm's canonical `git+https://` / `git+ssh://` repository URL forms. Previously `/^.+github.com\//` matched lookalike hosts like `githubXcom` or `fake-github.com.attacker.tld`, and returned garbage (e.g. `user: 'git@github.com:npm'`) for scp-style URLs. scp-style `git@github.com:…` (no `://`) is now rejected and returns `{ user: '', project: '' }` — callers must normalize to https/ssh upstream
-- `src/url.ts` `urlSearchParamAsBoolean()` — accept the same truthy vocabulary as `envAsBoolean` (`1` / `true` / `yes` / `on`, case-insensitive). Empty-string input now falls through to `defaultValue` instead of silently returning `false`
-- `src/versions.ts` `maxVersion()` / `minVersion()` — pass `includePrerelease: true` to semver so an all-prerelease input like `['1.0.0-alpha', '1.0.0-beta']` resolves to the latest prerelease instead of returning `undefined` under semver's default behavior against `'*'`
-- `src/external/semver.d.ts` — add `RangeOptions` and type the `options` parameter on `maxSatisfying` / `minSatisfying`
-
-### Fixed — misc
-
-- `src/fs.ts` `findUp()` / `findUpSync()` — traverse up to and **including** the filesystem root (and `stopAt`). The old `while (dir && dir !== root)` loop exited before visiting `root` itself, so a match at `/.foo` was never found
-- `src/words.ts` `capitalize()` — iterate by code point so non-BMP characters (emoji, astral-plane scripts) aren't split between their UTF-16 surrogate pair halves. Previously `'𐐀foo'` produced a broken leading surrogate
-- `src/words.ts` `determineArticle()` — match leading vowels case-insensitively (`Apple` → `an Apple`, not `a Apple`). Silent-h / y-sound exceptions (hour, user) remain a documented limitation rather than a built-in exception list
+- `@socketsecurity/lib/memoization` — `memoize()` / `memoizeAsync()` cache-hit bookkeeping dropped from O(n) to O(1). Noticeable on caches with many entries
+- `@socketsecurity/lib/cacache` — wildcard `clear()` no longer recompiles the match regex per streamed entry
 
 ## [5.20.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.1) - 2026-04-19
 
