@@ -160,15 +160,19 @@ export async function withSuppressedWarnings<T>(
   callback: () => T | Promise<T>,
 ): Promise<T> {
   const wasAlreadySuppressed = suppressedWarnings.has(warningType)
-  const original = process.emitWarning
   suppressWarningType(warningType)
   try {
     return await callback()
   } finally {
-    // Only remove from suppressed set if we added it.
+    // The wrapper is driven by `suppressedWarnings` membership, so
+    // removing this type from the set is enough to stop suppressing it.
+    // Do NOT reassign `process.emitWarning` here: snapshotting the
+    // previous value at the top would either (a) capture the native
+    // function when the wrapper was already installed and then restore
+    // native — wiping every other active suppression — or (b) be the
+    // wrapper itself, in which case the restore is a no-op anyway.
     if (!wasAlreadySuppressed) {
       suppressedWarnings.delete(warningType)
     }
-    process.emitWarning = original
   }
 }

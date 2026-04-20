@@ -161,15 +161,24 @@ describe('suppress-warnings', () => {
   })
 
   describe('withSuppressedWarnings', () => {
-    it('should restore warnings after callback completes', async () => {
+    it('does not wipe concurrent suppressions on exit', async () => {
+      // Regression: the old implementation snapshotted
+      // `process.emitWarning` at the top and restored it in `finally`.
+      // If another caller had already installed a suppression wrapper,
+      // `withSuppressedWarnings` would uninstall it on exit, silently
+      // breaking the other caller's suppression. The fix is to not
+      // reassign `process.emitWarning` in `finally` at all — the
+      // wrapper is driven by the `suppressedWarnings` set.
       restoreWarnings()
-      const original = process.emitWarning
-
+      // Outer caller: install a long-lived suppression wrapper.
+      suppressWarningType('OtherWarning')
+      const wrapperAfterOuter = process.emitWarning
+      // Inner: withSuppressedWarnings runs and exits.
       await withSuppressedWarnings('TestWarning', () => {
-        // Nothing
+        // no-op
       })
-
-      expect(process.emitWarning).toBe(original)
+      // Wrapper must still be installed so OtherWarning stays suppressed.
+      expect(process.emitWarning).toBe(wrapperAfterOuter)
     })
 
     it('should handle callback errors', async () => {
