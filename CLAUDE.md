@@ -24,6 +24,7 @@
 3. **FORBIDDEN**: Claiming "Done" when tests show failures
 4. Run type-check/lint if configured; fix ALL errors before reporting done
 5. Re-read every modified file; confirm nothing references removed items
+6. Fix warnings when you find them (lint, type-check, build, runtime) — don't leave them for later
 
 ## CONTEXT & EDIT SAFETY
 
