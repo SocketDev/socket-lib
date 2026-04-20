@@ -243,10 +243,21 @@ describe('archives', () => {
       }, 'extractZip-windows-path-')
     })
 
-    it('should throw on nonexistent zip file', async () => {
+    it('should throw ENOENT on nonexistent zip file', async () => {
       await runWithTempDir(async tempDir => {
         const nonexistentPath = path.join(tempDir, 'nonexistent.zip')
-        await expect(extractZip(nonexistentPath, tempDir)).rejects.toThrow()
+        // All three extractors normalize "missing archive" to ENOENT
+        // via the shared `assertArchiveExists` preflight — previously
+        // extractZip surfaced adm-zip's generic "Invalid filename"
+        // while tar/tar.gz surfaced the raw Node ENOENT. Assert on
+        // `.code === 'ENOENT'` so the test catches a semantic
+        // regression rather than merely any rejection.
+        await expect(
+          extractZip(nonexistentPath, tempDir),
+        ).rejects.toMatchObject({
+          code: 'ENOENT',
+          message: expect.stringContaining(nonexistentPath),
+        })
       }, 'extractZip-error-')
     })
   })
@@ -321,10 +332,15 @@ describe('archives', () => {
       }, 'extractTar-windows-path-')
     })
 
-    it('should throw on nonexistent tar file', async () => {
+    it('should throw ENOENT on nonexistent tar file', async () => {
       await runWithTempDir(async tempDir => {
         const nonexistentPath = path.join(tempDir, 'nonexistent.tar')
-        await expect(extractTar(nonexistentPath, tempDir)).rejects.toThrow()
+        await expect(
+          extractTar(nonexistentPath, tempDir),
+        ).rejects.toMatchObject({
+          code: 'ENOENT',
+          message: expect.stringContaining(nonexistentPath),
+        })
       }, 'extractTar-error-')
     })
   })
@@ -421,10 +437,15 @@ describe('archives', () => {
       }, 'extractTarGz-windows-path-')
     })
 
-    it('should throw on nonexistent tar.gz file', async () => {
+    it('should throw ENOENT on nonexistent tar.gz file', async () => {
       await runWithTempDir(async tempDir => {
         const nonexistentPath = path.join(tempDir, 'nonexistent.tar.gz')
-        await expect(extractTarGz(nonexistentPath, tempDir)).rejects.toThrow()
+        await expect(
+          extractTarGz(nonexistentPath, tempDir),
+        ).rejects.toMatchObject({
+          code: 'ENOENT',
+          message: expect.stringContaining(nonexistentPath),
+        })
       }, 'extractTarGz-error-')
     })
   })

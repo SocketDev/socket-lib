@@ -3,7 +3,7 @@
  * Supports zip, tar, tar.gz, and tgz formats.
  */
 
-import { createReadStream } from 'node:fs'
+import { createReadStream, existsSync } from 'node:fs'
 import process from 'node:process'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
@@ -110,6 +110,29 @@ function validatePathWithinBase(
 }
 
 /**
+ * Assert that an archive file exists on disk before handing it to the
+ * underlying extractor. Normalizes the "missing archive" surface across
+ * all three extractors (zip/tar/tar.gz): each now throws a Node-style
+ * `ENOENT` error with the archive path. Without this preflight, `zip`
+ * goes through adm-zip and surfaces as `"Invalid filename"`, while
+ * `tar`/`tar.gz` surface the raw Node `ENOENT` — inconsistent, and
+ * adm-zip's message didn't include the path.
+ *
+ * @throws Error with `code: 'ENOENT'` if archivePath doesn't exist.
+ * @private
+ */
+function assertArchiveExists(archivePath: string): void {
+  if (!existsSync(archivePath)) {
+    const err = new Error(
+      `ENOENT: no such file or directory, open '${archivePath}'`,
+    ) as Error & { code: string; path: string }
+    err.code = 'ENOENT'
+    err.path = archivePath
+    throw err
+  }
+}
+
+/**
  * Detect archive format from file path.
  *
  * @param filePath - Path to archive file
@@ -199,6 +222,11 @@ export async function extractTar(
   outputDir: string,
   options: ExtractOptions = {},
 ): Promise<void> {
+  // Normalize the "missing archive" surface (see extractZip) — throw
+  // ENOENT up front with a clear message rather than letting the
+  // Node-level createReadStream eventually surface as a stream error.
+  assertArchiveExists(archivePath)
+
   const {
     maxEntries = DEFAULT_MAX_ENTRIES,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
@@ -331,6 +359,9 @@ export async function extractTarGz(
   outputDir: string,
   options: ExtractOptions = {},
 ): Promise<void> {
+  // Normalize the "missing archive" surface (see extractZip).
+  assertArchiveExists(archivePath)
+
   const {
     maxEntries = DEFAULT_MAX_ENTRIES,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
@@ -463,6 +494,10 @@ export async function extractZip(
   outputDir: string,
   options: ExtractOptions = {},
 ): Promise<void> {
+  // Normalize the "missing archive" surface — throws ENOENT before
+  // AdmZip can surface its generic "Invalid filename" message.
+  assertArchiveExists(archivePath)
+
   const {
     maxEntries = DEFAULT_MAX_ENTRIES,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
