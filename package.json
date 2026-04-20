@@ -547,6 +547,18 @@
       "types": "./dist/releases/socket-btm.d.ts",
       "default": "./dist/releases/socket-btm.js"
     },
+    "./schema/parse": {
+      "types": "./dist/schema/parse.d.ts",
+      "default": "./dist/schema/parse.js"
+    },
+    "./schema/types": {
+      "types": "./dist/schema/types.d.ts",
+      "default": "./dist/schema/types.js"
+    },
+    "./schema/validate": {
+      "types": "./dist/schema/validate.d.ts",
+      "default": "./dist/schema/validate.js"
+    },
     "./sea": {
       "types": "./dist/sea.d.ts",
       "default": "./dist/sea.js"
