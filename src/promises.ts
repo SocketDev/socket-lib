@@ -759,3 +759,69 @@ export function resolveRetryOptions(
 
   return options ? { ...defaults, ...options } : defaults
 }
+
+/**
+ * Shape returned by {@link withResolvers}: a fresh pending promise plus
+ * the `resolve` / `reject` handles that settle it.
+ *
+ * Matches the spec return-shape exactly
+ * ([ECMA-262 §27.2.4.9](https://tc39.es/ecma262/#sec-promise.withResolvers)).
+ */
+export interface PromiseWithResolvers<T> {
+  /** The pending promise. */
+  promise: Promise<T>
+  /** Resolves {@link promise} with the given value (or thenable). */
+  resolve: (value: T | PromiseLike<T>) => void
+  /** Rejects {@link promise} with the given reason. */
+  reject: (reason?: unknown) => void
+}
+
+const maybeNativeWithResolvers = (
+  Promise as unknown as {
+    withResolvers?: unknown
+  }
+).withResolvers
+
+/**
+ * Create a pending promise together with its `resolve` and `reject`
+ * handles as first-class values, per
+ * [ECMA-262 §27.2.4.9](https://tc39.es/ecma262/#sec-promise.withResolvers).
+ *
+ * Bound to native `Promise.withResolvers` when available (Node 20.12+ /
+ * 21+ / 22+; V8 ≥ 12.0); otherwise falls back to a spec-equivalent
+ * `new Promise(executor)` implementation that captures the handles via
+ * closure. The returned object always has own data properties `promise`,
+ * `resolve`, `reject` on `Object.prototype` — writable, enumerable, and
+ * configurable — matching the spec's `CreateDataPropertyOrThrow` steps.
+ *
+ * Use this instead of the manual
+ * `let resolve; const p = new Promise(r => { resolve = r })` dance for
+ * deferred-resolution patterns (event-driven bridges, adapter layers,
+ * handshake signaling) where the settle path lives outside the executor.
+ *
+ * @example
+ * ```typescript
+ * const { promise, resolve, reject } = withResolvers<string>()
+ * emitter.once('ready', () => resolve('ok'))
+ * emitter.once('error', err => reject(err))
+ * const result = await promise
+ * ```
+ */
+export const withResolvers: <T>() => PromiseWithResolvers<T> =
+  typeof maybeNativeWithResolvers === 'function'
+    ? // Bind so callers who destructure the export don't lose `this`.
+      ((maybeNativeWithResolvers as () => PromiseWithResolvers<unknown>).bind(
+        Promise,
+      ) as <T>() => PromiseWithResolvers<T>)
+    : <T>(): PromiseWithResolvers<T> => {
+        // Fallback: capture resolvers via closure. The `!` asserts hold
+        // because Promise's executor runs synchronously, so both handles
+        // are assigned before the constructor returns.
+        let resolve!: (value: T | PromiseLike<T>) => void
+        let reject!: (reason?: unknown) => void
+        const promise = new Promise<T>((res, rej) => {
+          resolve = res
+          reject = rej
+        })
+        return { promise, resolve, reject }
+      }

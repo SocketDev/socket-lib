@@ -19,6 +19,7 @@ import {
   pFilterChunk,
   pRetry,
   resolveRetryOptions,
+  withResolvers,
 } from '@socketsecurity/lib/promises'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -1046,6 +1047,100 @@ describe('promises', () => {
     it('should handle zero retries', () => {
       const options = resolveRetryOptions(0)
       expect(options.retries).toBe(0)
+    })
+  })
+
+  describe('withResolvers', () => {
+    // Spec: https://tc39.es/ecma262/#sec-promise.withResolvers
+    // These tests exercise the feature-detect binding. On Node 20.12+ /
+    // 22+ the export is bound to native Promise.withResolvers; on older
+    // engines it's our fallback. Both paths must satisfy the spec.
+
+    it('is a function', () => {
+      expect(typeof withResolvers).toBe('function')
+    })
+
+    it('returns an object with promise, resolve, reject', () => {
+      const d = withResolvers<number>()
+      expect(d.promise).toBeInstanceOf(Promise)
+      expect(typeof d.resolve).toBe('function')
+      expect(typeof d.reject).toBe('function')
+    })
+
+    it('resolves the promise with the provided value', async () => {
+      const { promise, resolve } = withResolvers<string>()
+      resolve('hello')
+      await expect(promise).resolves.toBe('hello')
+    })
+
+    it('rejects the promise with the provided reason', async () => {
+      const { promise, reject } = withResolvers<number>()
+      const err = new Error('boom')
+      reject(err)
+      await expect(promise).rejects.toBe(err)
+    })
+
+    it('adopts a thenable passed to resolve', async () => {
+      const { promise, resolve } = withResolvers<number>()
+      resolve(Promise.resolve(42))
+      await expect(promise).resolves.toBe(42)
+    })
+
+    it('rejects when a rejected thenable is passed to resolve', async () => {
+      const { promise, resolve } = withResolvers<number>()
+      const err = new Error('inner')
+      resolve(Promise.reject(err))
+      await expect(promise).rejects.toBe(err)
+    })
+
+    it('settles exactly once — later resolve() calls are ignored', async () => {
+      const { promise, resolve } = withResolvers<string>()
+      resolve('first')
+      resolve('second')
+      await expect(promise).resolves.toBe('first')
+    })
+
+    it('settles exactly once — reject after resolve is ignored', async () => {
+      const { promise, resolve, reject } = withResolvers<string>()
+      resolve('ok')
+      reject(new Error('late'))
+      await expect(promise).resolves.toBe('ok')
+    })
+
+    it('supports deferred resolution from outside the executor', async () => {
+      // The point of withResolvers: settle from code that doesn't own the
+      // executor. Here an event-style callback closes over `resolve`.
+      const { promise, resolve } = withResolvers<string>()
+      setTimeout(() => resolve('fired'), 0)
+      await expect(promise).resolves.toBe('fired')
+    })
+
+    it('each call returns a fresh, independent capability', async () => {
+      const a = withResolvers<number>()
+      const b = withResolvers<number>()
+      expect(a.promise).not.toBe(b.promise)
+      expect(a.resolve).not.toBe(b.resolve)
+      a.resolve(1)
+      b.resolve(2)
+      await expect(a.promise).resolves.toBe(1)
+      await expect(b.promise).resolves.toBe(2)
+    })
+
+    // Spec §27.2.4.9 step 3: `OrdinaryObjectCreate(%Object.prototype%)`.
+    // The returned object is a plain object, not a Promise / subclass.
+    it('returned object has Object.prototype as its prototype', () => {
+      const d = withResolvers<number>()
+      expect(Object.getPrototypeOf(d)).toBe(Object.prototype)
+    })
+
+    // Spec §27.2.4.9 steps 4-6: properties created via
+    // `CreateDataPropertyOrThrow` — writable, enumerable, configurable.
+    it('promise/resolve/reject are own enumerable properties', () => {
+      const d = withResolvers<number>()
+      const keys = Object.keys(d)
+      expect(keys).toContain('promise')
+      expect(keys).toContain('resolve')
+      expect(keys).toContain('reject')
     })
   })
 })
