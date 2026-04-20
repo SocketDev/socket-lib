@@ -227,14 +227,14 @@ class ProcessLockManager {
       if (!stats) {
         return false
       }
-      // Compare in milliseconds. APFS's mtime precision is second-level
-      // but truncating the age to seconds was silently rounding sub-
-      // second `staleMs` values up to ~1s (staleMs=500 → staleSeconds=0,
-      // so the lock had to be 1s+ past mtime before it was considered
-      // stale). Floor only the mtime side to absorb APFS quirks, keep
-      // the threshold at full precision.
-      const ageMs = Date.now() - Math.floor(stats.mtime.getTime())
-      return ageMs > staleMs
+      // Compare in milliseconds. The previous implementation floored
+      // both sides to seconds, which silently rounded sub-second
+      // `staleMs` values up to ~1s (staleMs=500 → staleSeconds=0, so
+      // the lock had to be 1s+ past mtime before being considered
+      // stale). Node returns mtime with ms precision on all platforms
+      // we support; APFS's second-level filesystem precision just
+      // means the low bits are zero, which the subtraction handles.
+      return Date.now() - stats.mtime.getTime() > staleMs
     } catch {
       return false
     }
