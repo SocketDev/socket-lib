@@ -40,7 +40,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/process-lock`](../src/process-lock.ts)             | Process locking utilities with stale detection and exit cleanup.                                               |
 | [`@socketsecurity/lib/promise-queue`](../src/promise-queue.ts)           | Bounded concurrency promise queue.                                                                             |
 | [`@socketsecurity/lib/promises`](../src/promises.ts)                     | Promise utilities including chunked iteration and timers.                                                      |
-| [`@socketsecurity/lib/regexps`](../src/regexps.ts)                       | Regular expression utilities including escape-string-regexp implementation.                                    |
+| [`@socketsecurity/lib/regexps`](../src/regexps.ts)                       | Regular expression utilities including a spec-compliant `RegExp.escape` fallback.                              |
 | [`@socketsecurity/lib/sea`](../src/sea.ts)                               | SEA (Single Executable Application) detection utilities for Socket ecosystem.                                  |
 | [`@socketsecurity/lib/shadow`](../src/shadow.ts)                         | Shadow binary installation utilities for Socket ecosystem.                                                     |
 | [`@socketsecurity/lib/signal-exit`](../src/signal-exit.ts)               | Process signal handling utilities.                                                                             |
