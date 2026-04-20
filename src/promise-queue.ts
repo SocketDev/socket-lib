@@ -1,8 +1,9 @@
 /**
  * @fileoverview Bounded concurrency promise queue.
  * Exports the `PromiseQueue` class, which limits how many async tasks run
- * simultaneously, supports an optional max queue length (dropping the oldest
- * pending task when exceeded), and exposes an idle-wait helper.
+ * simultaneously, supports an optional max queue length (new tasks beyond
+ * the cap are rejected with "Task dropped: queue length exceeded"), and
+ * exposes an idle-wait helper.
  */
 
 type QueuedTask<T> = {
@@ -22,7 +23,10 @@ export class PromiseQueue {
   /**
    * Creates a new PromiseQueue
    * @param maxConcurrency - Maximum number of promises that can run concurrently
-   * @param maxQueueLength - Maximum queue size (older tasks are dropped if exceeded)
+   * @param maxQueueLength - Maximum queue size; submissions past the cap
+   * reject with "Task dropped: queue length exceeded" instead of evicting
+   * a caller that has been waiting patiently. Callers must handle this
+   * rejection or they'll see an unhandled rejection.
    */
   constructor(maxConcurrency: number, maxQueueLength?: number | undefined) {
     this.maxConcurrency = maxConcurrency
@@ -35,23 +39,25 @@ export class PromiseQueue {
   /**
    * Add a task to the queue
    * @param fn - Async function to execute
-   * @returns Promise that resolves with the function's result
+   * @returns Promise that resolves with the function's result, or rejects
+   * with "Task dropped: queue length exceeded" if the queue is full.
    */
   async add<T>(fn: () => Promise<T>): Promise<T> {
     return await new Promise<T>((resolve, reject) => {
-      const task: QueuedTask<T> = { fn, resolve, reject }
-
+      // Reject the newcomer rather than evicting an earlier-submitted task.
+      // FIFO fairness: the caller who waited longest gets served, not the
+      // caller who arrived last. Previously this dropped the queue head,
+      // which punished patient callers and violated typical
+      // bounded-queue semantics.
       if (
         this.maxQueueLength !== undefined &&
         this.queue.length >= this.maxQueueLength
       ) {
-        // Drop oldest task to prevent memory buildup
-        const droppedTask = this.queue.shift()
-        if (droppedTask) {
-          droppedTask.reject(new Error('Task dropped: queue length exceeded'))
-        }
+        reject(new Error('Task dropped: queue length exceeded'))
+        return
       }
 
+      const task: QueuedTask<T> = { fn, resolve, reject }
       this.queue.push(task as QueuedTask<unknown>)
       this.runNext()
     })

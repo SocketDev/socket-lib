@@ -141,32 +141,34 @@ describe('PromiseQueue', () => {
   })
 
   describe('maxQueueLength', () => {
-    it('should drop oldest task when queue exceeds max length', async () => {
+    it('should reject the newest submission when queue is full (drop-newest, FIFO-fair)', async () => {
       const queue = new PromiseQueue(1, 2)
       const results: string[] = []
       const errors: Error[] = []
 
-      // Add 4 tasks - first one runs immediately, next 2 queue, 4th drops oldest queued
+      // Concurrency 1, queue cap 2. task1 runs immediately, task2+task3
+      // fill the queue, task4 arrives over the cap and should be rejected —
+      // earlier submitters (task2, task3) keep their slots.
       const tasks = [
         queue.add(async () => {
           await delay(50)
           results.push('task1')
           return 'task1'
         }),
-        queue
-          .add(async () => {
-            results.push('task2')
-            return 'task2'
-          })
-          .catch((e: Error) => errors.push(e)),
+        queue.add(async () => {
+          results.push('task2')
+          return 'task2'
+        }),
         queue.add(async () => {
           results.push('task3')
           return 'task3'
         }),
-        queue.add(async () => {
-          results.push('task4')
-          return 'task4'
-        }),
+        queue
+          .add(async () => {
+            results.push('task4')
+            return 'task4'
+          })
+          .catch((e: Error) => errors.push(e)),
       ]
 
       await Promise.all(tasks.map(t => t.catch(() => {})))
@@ -174,7 +176,9 @@ describe('PromiseQueue', () => {
       expect(errors.length).toBe(1)
       expect(errors[0]?.message).toBe('Task dropped: queue length exceeded')
       expect(results).toContain('task1')
-      expect(results).not.toContain('task2') // Dropped
+      expect(results).toContain('task2')
+      expect(results).toContain('task3')
+      expect(results).not.toContain('task4')
     })
 
     it('should work without dropping tasks when under limit', async () => {
