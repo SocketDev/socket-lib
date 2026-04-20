@@ -13,7 +13,7 @@ const cacheRegistry: Array<() => void> = []
 /**
  * Options for memoization behavior.
  */
-export type MemoizeOptions<Args extends unknown[], _Result = unknown> = {
+export type MemoizeOptions<Args extends unknown[]> = {
   /** Custom cache key generator (defaults to JSON.stringify) */
   keyGen?: (...args: Args) => string
   /** Maximum cache size (LRU eviction when exceeded) */
@@ -99,7 +99,7 @@ export function clearAllMemoizationCaches(): void {
  *   }
  * }
  */
-export function Memoize(options: MemoizeOptions<unknown[], unknown> = {}) {
+export function Memoize(options: MemoizeOptions<unknown[]> = {}) {
   return (
     _target: unknown,
     propertyKey: string,
@@ -137,7 +137,7 @@ export function Memoize(options: MemoizeOptions<unknown[], unknown> = {}) {
  */
 export function memoize<Args extends unknown[], Result>(
   fn: (...args: Args) => Result,
-  options: MemoizeOptions<Args, Result> = {},
+  options: MemoizeOptions<Args> = {},
 ): (...args: Args) => Result {
   const {
     keyGen = (...args) => defaultKeyGen(args),
@@ -244,7 +244,7 @@ export function memoize<Args extends unknown[], Result>(
  */
 export function memoizeAsync<Args extends unknown[], Result>(
   fn: (...args: Args) => Promise<Result>,
-  options: MemoizeOptions<Args, Result> = {},
+  options: MemoizeOptions<Args> = {},
 ): (...args: Args) => Promise<Result> {
   const {
     keyGen = (...args) => defaultKeyGen(args),
