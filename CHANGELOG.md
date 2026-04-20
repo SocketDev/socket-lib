@@ -52,88 +52,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `src/ipc.ts`: harden stub-file writes against local symlink/TOCTOU. Previously `writeIpcStub` used `mkdir {recursive, mode: 0o700}` + `writeFile`, which on multi-user Linux (`/tmp` sticky-bit but world-writable) let a pre-positioned attacker-owned `.socket-ipc/<app>/` survive the mode argument and redirect the subsequent `writeFile` through symlinks to victim files. Now validates directory ownership + mode on POSIX after `mkdir`, then opens the stub with `O_CREAT | O_WRONLY | O_EXCL | O_NOFOLLOW` so pre-existing inodes trigger EEXIST and final-component symlinks trigger ELOOP rather than silent file overwrite
-- `src/cache-with-ttl.ts` `getOrFetch()` — the inflight-map check ran _after_ `await get(key)`, so two concurrent cold-cache callers both suspended on the same disk read, both saw no cached value, both skipped the inflight check, and both fired `fetcher()`. Moves the inflight check before the persistent-cache lookup (with a re-check afterward) so the advertised dedupe guarantee actually holds
-- `src/cache-with-ttl.ts` — cap the in-memory `memoCache` with LRU eviction (`memoMaxSize`, default 1000). Previously a long-running process (devserver, editor extension) querying many distinct keys grew memory without bound — expired entries were only reclaimed when the same key was read again
-- `src/memoization.ts` `memoizeAsync()` — `entry.timestamp` was set when a cache miss STARTED its `fn(...)` call, so a fn taking longer than `ttl` produced a value classified as expired the moment it resolved; every subsequent caller past the first ttl window re-fetched instead of hitting the cache. Now refreshes the timestamp in the resolve handler. Also bumps `accessOrder` on the stale-dedup branch so an entry mid-refresh isn't evicted while a peer is computing on its behalf
-- `src/tables.ts` — `displayWidth` measured columns by `.length` of the ANSI-stripped string, i.e. UTF-16 code units rather than rendered terminal cells. CJK, emoji, and combined code points misaligned tables. Routes measurement through `stringWidth` (Intl.Segmenter + East Asian Width)
-- `src/paths/packages.ts` — `resolvePackageJsonDirname` / `resolvePackageJsonPath` gated on `filepath.endsWith('package.json')`, which misidentified any file whose name ended in that suffix (e.g. `/foo/my-package.json`) as a manifest. Now checks for the literal final segment
-- `src/json/edit.ts` — `@example` for `getEditableJsonClass` imported from `@socketsecurity/lib/json`, which is not a package export; fixed to `@socketsecurity/lib/json/edit`
+- `@socketsecurity/lib/ipc` — harden stub-file writes against symlink/TOCTOU attacks on shared-tmp filesystems (POSIX ownership + mode validation, `O_EXCL | O_NOFOLLOW` open)
+- `@socketsecurity/lib/cache-with-ttl` `getOrFetch()` — close concurrent-caller race that let two cold-cache awaits both skip the inflight-dedupe check and fire the fetcher twice
+- `@socketsecurity/lib/cache-with-ttl` — cap the in-memory memo layer with LRU eviction (`memoMaxSize`, default 1000); long-running processes no longer grow unbounded
+- `@socketsecurity/lib/memoization` `memoizeAsync()` — refresh cache entry timestamp on resolve so slow fetches (longer than `ttl`) aren't classified as expired the moment they land
+- `@socketsecurity/lib/tables` — `displayWidth` now measures rendered terminal cells (via `stringWidth`) instead of UTF-16 code units; CJK / emoji / combining marks align correctly
+- `@socketsecurity/lib/paths/packages` — `resolvePackageJsonDirname` / `resolvePackageJsonPath` no longer mis-identify files like `/foo/my-package.json` as package manifests
+- `@socketsecurity/lib/json/edit` — `@example` import path corrected
 
 ## [5.20.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.0) - 2026-04-19
 
-### Added — validation
+### Added
 
-- `@socketsecurity/lib/validation/validate-schema` — universal validator that accepts any Zod-style schema (Zod v3/v4, or any `safeParse`-shaped duck type) and returns a tagged `{ ok: true, value } | { ok: false, errors }` result with normalized `{ path, message }` issues. Type inference flows through: callers get `z.infer<…>`, no casts. Zod is detected purely structurally via `.safeParse` — no runtime import of the `zod` package required
-- `parseSchema(schema, data)` — throwing twin of `validateSchema` for fail-fast trust-boundary validation
-- `Infer<S>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema` — supporting types exported alongside the helpers
+- `@socketsecurity/lib/validation/validate-schema` — universal Zod-style schema validator with `validateSchema` (tagged result) and `parseSchema` (throwing); `Infer<S>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema` types. No runtime `zod` dependency
+
+> **Deprecated in 5.21.0**: moved to `@socketsecurity/lib/schema/*`.
 
 ### Fixed
 
-- `src/promise-queue.ts`: wrap `task.fn()` invocation via `Promise.resolve().then()` so a **synchronous** throw inside a queued task converts to a proper rejection on `task.reject` instead of escaping as an uncaught exception
-- `src/stdio/progress.ts` `formatTime()`: clamp negative milliseconds so an over-ticking or clock-skewed progress bar no longer renders a negative ETA like `-1m59s`
-- `src/dlx/lockfile.ts`: wrap the scratch-directory cleanup in `finally` with its own `try/catch` so a cleanup failure cannot clobber the real exception from the main try-block
-- `src/dlx/package.ts` `parsePackageSpec`: normalize a bare trailing `@` (e.g. `"pkg@"`) to `version: undefined` so downstream "no version provided" checks behave consistently
-- `src/stdio/prompts.ts`: tighten the `selectModule` destructure type to the two properties actually used (`default`, `Separator`) instead of an `as any` cast
-- `src/http-request.ts`: hoist `CHECKSUM_BSD_RE` and `CHECKSUM_GNU_RE` regex literals to module scope so `parseChecksums()` no longer re-declares them once per line inside its loop
-- `src/dlx/manifest.ts`: correct the `@fileoverview` "Primary API" list to match the actual `DlxManifest` methods (`get/set/clear/clearAll/isFresh/getManifestEntry`) and flag `setPackageEntry` / `setBinaryEntry` as deprecated
+- `@socketsecurity/lib/promise-queue` — synchronous throws inside a queued task now convert to proper rejections instead of escaping as uncaught exceptions
+- `@socketsecurity/lib/stdio/progress` `formatTime()` — clamp negative milliseconds so over-ticking / clock-skewed bars don't render negative ETAs
+- `@socketsecurity/lib/dlx/lockfile` — scratch-directory cleanup can no longer clobber the real exception from the main block
+- `@socketsecurity/lib/dlx/package` `parsePackageSpec` — normalize a bare trailing `@` (e.g. `"pkg@"`) to `version: undefined`
+- `@socketsecurity/lib/stdio/prompts` — tighten an internal destructure type away from `as any`
+- `@socketsecurity/lib/http-request` — hoist checksum regex literals out of a per-line loop
 
 ## [5.19.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.1) - 2026-04-19
 
-### Fixed — stdio (restore accidentally-dropped modules)
+### Fixed
 
-5.19.0 shipped a breaking change that was not called out in its changelog or version bump: a refactor commit removed `stdio/prompts`, `stdio/progress`, `stdio/clear`, and the vendored `external/@inquirer/*` shims. socket-cli and other consumers import `stdio/prompts` directly and broke on upgrade.
-
-Restored:
-
-- `@socketsecurity/lib/stdio/prompts` — inquirer wrappers (`password`, `confirm`, `input`, `select`, `checkbox`, `search`)
-- `@socketsecurity/lib/stdio/progress` — progress-bar utility (`ProgressBar` class)
-- `@socketsecurity/lib/stdio/clear` — terminal line/screen/cursor helpers
-- `src/external/@inquirer/{checkbox,confirm,input,password,search,select}.js` vendor shims
-- Corresponding test suites
+Restore `@socketsecurity/lib/stdio/prompts`, `@socketsecurity/lib/stdio/progress`, and `@socketsecurity/lib/stdio/clear` — accidentally removed in 5.19.0 without a major-bump callout. Downstream consumers that import `stdio/prompts` directly are unbroken.
 
 ## [5.19.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.0) - 2026-04-19
 
-### Added — dlx/integrity (new module)
+### Added
 
-- `HashSpec`, `NormalizedHash`, `ComputedHashes` types. `HashSpec` accepts a bare string (sha512 SRI or sha256 hex, sniffed) or an explicit `{ type, value }` object
-- `normalizeHash()`, `computeHashes()`, `verifyHash()` — `verifyHash` uses `crypto.timingSafeEqual` for constant-time comparison
-- `DlxHashMismatchError` — carries `expected` + `actual` for diagnostics
+- `@socketsecurity/lib/dlx/integrity` — hash verification utilities: `HashSpec`, `NormalizedHash`, `ComputedHashes`, `normalizeHash()`, `computeHashes()`, `verifyHash()` (constant-time via `crypto.timingSafeEqual`), `DlxHashMismatchError`
+- `@socketsecurity/lib/dlx/arborist` — hardened `@npmcli/arborist` wrappers: `safeIdealTree()`, `safeReify()`, `writeSafeNpmrc()`. Locks down `audit`, `fund`, `ignoreScripts`, `saveBundle`, etc. Supports `before?: Date` for release-age enforcement
+- `@socketsecurity/lib/dlx/lockfile` — `generatePackagePin()` returns `{ name, version, hash, packageJson, lockfile }` for a resolved package. Default `minReleaseDays: 7` refuses versions published in the last week (`0` to disable); `minReleaseMins` accepted as pnpm-style alias
+- `DlxPackageOptions.hash`, `DlxPackageOptions.lockfile`, `DlxBinaryOptions.hash` — first-class integrity + lockfile options on the dlx entry points
 
-### Added — dlx/arborist (new module)
+### Fixed
 
-- `safeIdealTree()`, `safeReify()` — hardened `@npmcli/arborist` wrappers mirroring socket-cli v1.1.79 `SafeArborist` overrides (`audit: false`, `fund: false`, `ignoreScripts: true`, `progress: false`, `saveBundle: false`, `silent: true`)
-- `writeSafeNpmrc()` — defense-in-depth `.npmrc` writer matching the Arborist overrides
-- Optional `before?: Date` on `safeIdealTree` for release-age enforcement during resolution
+- `pacote` shim — exposes `tarball`, `manifest`, `packument` alongside `extract`. Fixes a latent runtime crash in `fetchPackageManifest` / `fetchPackagePackument` callers
 
-### Added — dlx/lockfile (new module)
+### Changed
 
-- `generatePackagePin({ package, minReleaseDays?, minReleaseMins? })` — returns `PinDetails { name, version, hash: ComputedHashes, packageJson, lockfile }`. Runs Arborist in `packageLockOnly: true` mode against a tmp directory and auto-cleans
-- **Default `minReleaseDays: 7`** — resolution refuses to select versions published in the last week. Pass `0` to disable. `minReleaseMins` is a pnpm-style alias (mutually exclusive with `minReleaseDays`)
-- `LockfileSpec` type — export for use as the new `lockfile` option on `downloadPackage`
-
-### Added — dlx existing modules
-
-- `DlxPackageOptions.hash?: HashSpec` and `DlxPackageOptions.lockfile?: LockfileSpec` — passing a lockfile materializes it into the install dir (path → `fs.copyFileSync`, content → `fs.writeFileSync`) and drops a hardened `.npmrc` alongside before Arborist runs
-- `DlxBinaryOptions.hash?: HashSpec` — ergonomic alternative to the lower-level `integrity` and `sha256` fields (both still accepted)
-
-### Fixed — external
-
-- `pacote` shim now exposes `tarball`, `manifest`, `packument` alongside `extract`. **Fixes a latent runtime crash** in `src/packages/manifest.ts` callers (`fetchPackageManifest` / `fetchPackagePackument` called `.manifest(...)` / `.packument(...)` on a shim that previously only had `extract`, raising `TypeError: not a function`)
-
-### Changed — build (bundle size)
-
-- `dist/external/npm-pack.js`: 2,526,598 → 1,755,460 bytes (−771 KB, −30.5%). New `STUB_MAP` entries for code paths our callers never reach:
-  - `@sigstore/{bundle,core,protobuf-specs,sign,tuf,verify}`, `sigstore`, `tuf-js`, `@tufjs/{canonical-json,models}` — Sigstore attestation, only reached via `arb.audit()`
-  - `@npmcli/metavuln-calculator` — audit-only
-  - `@npmcli/query`, `postcss-selector-parser` — `arb.query()` unused
-  - `@npmcli/run-script`, `@npmcli/node-gyp` — guarded out by `ignoreScripts: true`
-  - `@npmcli/git`, `pacote/lib/{git,file,dir,remote}.js` — registry specs only
-  - arborist `audit-report.js`, `yarn-lock.js`, `isolated-reifier.js`, `query-selector-all.js`, `printable.js` — each gated or unused
-  - `cacache/lib/verify.js` — `cacache.verify` (npm cache verify) unused
-  - `proggy` — progress tracker, gated by `progress: false`
-  - `debug/src/browser.js` — Node-only bundle
-- `dist/external/zod.js`: 597,238 → 291,430 bytes (−306 KB, −51.2%). Stubbed `zod/v4/{core,classic,mini}`'s eager `locales/index.cjs` barrel (40+ translation modules). Opt-in via `z.config(z.locales.xx())` is never called by us
+Reduced bundle size of `dist/external/npm-pack.js` (−771 KB, −30.5%) and `dist/external/zod.js` (−306 KB, −51.2%) by stubbing code paths our callers never reach (Sigstore attestation, arborist audit/query, zod locale translations, etc.)
 
 ## [5.18.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.2) - 2026-04-14
 
@@ -143,70 +108,63 @@ Restored:
 
 ## [5.18.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.1) - 2026-04-14
 
-### Changed — build
+### Changed
 
-- Dedup npm-pack.js bundle via pnpm overrides: pacote 21.5.0, make-fetch-happen 15.0.5, and 7 transitive npm packages (npm-bundled, npm-normalize-package-bin, json-parse-even-better-errors, @npmcli/installed-package-contents, @npmcli/name-from-folder, @npmcli/promise-spawn, @npmcli/redact)
-- npm-pack.js: 69,738 → 66,443 lines (2.59MB → 2.46MB), 22 duplicate packages removed
+- Deduplicated the `dist/external/npm-pack` bundle via `pnpm overrides` (pacote 21.5.0, make-fetch-happen 15.0.5, and 7 transitive `@npmcli/*` packages) — 22 duplicate packages removed, ~130 KB smaller
 
 ## [5.18.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.0) - 2026-04-14
 
-### Added — dlx
+### Added
 
-- Socket Firewall API check before package downloads — resolves dependency tree via `buildIdealTree`, checks all packages against `firewall-api.socket.dev/purl` in parallel, blocks on critical/high severity alerts
+- `@socketsecurity/lib/dlx` — Socket Firewall API check before package downloads. Resolves the dependency tree and blocks on critical/high severity alerts
 
-### Changed — http-request
+### Changed
 
-- Default `User-Agent` header updated from `socket-registry/1.0` to `socketsecurity-lib/{version}`
+- `@socketsecurity/lib/http-request` — default `User-Agent` updated from `socket-registry/1.0` to `socketsecurity-lib/{version}`
 
 ## [5.17.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.17.0) - 2026-04-14
 
-### Added — paths
+### Added
 
-- `isUnixPath()` — detect MSYS/Git Bash drive letter notation (`/c/...`)
+- `@socketsecurity/lib/paths` `isUnixPath()` — detect MSYS/Git Bash drive-letter notation (`/c/...`)
 
-### Changed — paths
+### Changed
 
-- `normalizePath()` now converts MSYS drive letters on Windows (`/c/path` → `C:/path`)
-- `fromUnixPath()` now produces native Windows paths with backslashes (`/c/path` → `C:\path`), making it the true inverse of `toUnixPath()`
+- `@socketsecurity/lib/paths` `normalizePath()` — converts MSYS drive letters on Windows (`/c/path` → `C:/path`)
+- `@socketsecurity/lib/paths` `fromUnixPath()` — produces native Windows paths with backslashes (`/c/path` → `C:\path`), making it the true inverse of `toUnixPath()`
 
 ## [5.16.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.16.0) - 2026-04-14
 
-### Added — paths
+### Added
 
-- `fromUnixPath()` — convert MSYS/Git Bash Unix-style paths (`/c/path`) back to native Windows format (`C:/path`), inverse of `toUnixPath` (#168)
+- `@socketsecurity/lib/paths` `fromUnixPath()` — convert MSYS/Git Bash Unix-style paths (`/c/path`) back to native Windows format (`C:/path`), inverse of `toUnixPath` (#168)
 
-### Fixed — dlx
+### Fixed
 
-- Normalize dlx directory path in `isInSocketDlx` for Windows compatibility
+- `@socketsecurity/lib/dlx` `isInSocketDlx` — normalize the dlx directory path for Windows compatibility
 
 ## [5.15.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.15.0) - 2026-04-06
 
-### Added — http-request
+### Added
 
-- `stream` option on `HttpRequestOptions` — resolves with `HttpResponse` immediately after headers arrive, leaving `rawResponse` unconsumed for piping to files
-- `headers`, `ok`, `status`, `statusText` fields on `HttpDownloadResult`
-
-### Changed — http-request
-
-- `httpDownload` now uses `httpRequest` with `stream: true` internally, eliminating ~120 lines of duplicated HTTP plumbing
+- `@socketsecurity/lib/http-request` — `stream` option on `HttpRequestOptions` resolves with `HttpResponse` immediately after headers arrive, leaving `rawResponse` unconsumed for piping to files
+- `@socketsecurity/lib/http-request` — `headers`, `ok`, `status`, `statusText` fields on `HttpDownloadResult`
 
 ## [5.14.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.14.0) - 2026-04-06
 
-### Added — http-request
+### Added
 
-- `HttpResponseError` class — thrown on non-2xx when `throwOnError` is enabled, carries the full `HttpResponse`
-- `throwOnError` option on `HttpRequestOptions` — non-2xx responses throw instead of resolving with `ok: false`, enabling retry of HTTP errors
-- `onRetry` callback on `HttpRequestOptions` — customize retry behavior per-attempt (return `false` to stop, a `number` to override delay, `undefined` for default backoff)
-- Streaming body support — `body` accepts `Readable` streams (incl. `form-data` npm package), auto-merges `getHeaders()` when present
-- `parseRetryAfterHeader()` — standalone RFC 7231 §7.1.3 `Retry-After` header parser (strict integer seconds + HTTP-date formats)
-- `sanitizeHeaders()` — redact sensitive headers (`authorization`, `cookie`, `set-cookie`, `proxy-authorization`, `proxy-authenticate`, `www-authenticate`) for safe logging
+- `@socketsecurity/lib/http-request`:
+  - `HttpResponseError` class — thrown on non-2xx when `throwOnError` is enabled; carries the full `HttpResponse`
+  - `throwOnError` option — non-2xx responses throw instead of resolving with `ok: false`
+  - `onRetry` callback — customize retry behavior per-attempt (`false` to stop, a `number` to override delay, `undefined` for default backoff)
+  - Streaming body support — `body` accepts `Readable` streams (incl. `form-data`), auto-merges `getHeaders()` when present
+  - `parseRetryAfterHeader()` — standalone RFC 7231 §7.1.3 parser
+  - `sanitizeHeaders()` — redact sensitive headers for safe logging
 
-### Changed — http-request
+### Changed
 
-- `HttpRequestOptions.body` type widened from `Buffer | string` to `Buffer | Readable | string`
-- Redirect responses now drained via `res.resume()` to free sockets
-- `maxResponseSize` exceeded now cleans up both response and request
-- `onResponse` hooks wrapped in try/catch — user hook errors can no longer leave promises pending
+- `@socketsecurity/lib/http-request` — `HttpRequestOptions.body` widened to `Buffer | Readable | string`; `onResponse` hook errors no longer leave promises pending
 
 ## [5.13.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.13.0) - 2026-04-05
 
