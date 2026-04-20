@@ -15,8 +15,8 @@
 
 set -e
 
-# shellcheck source=./_lib.sh
-. "$(dirname "$0")/_lib.sh"
+# shellcheck source=./_helpers.sh
+. "$(dirname "$0")/_helpers.sh"
 
 printf "${GREEN}Running mandatory pre-push validation...${NC}\n"
 
@@ -157,9 +157,9 @@ while read local_ref local_sha remote_ref remote_sha; do
         fi
 
         # Socket API keys (except allowed public key and test placeholders).
-        if echo "$file_text" | grep -E 'sktsec_[a-zA-Z0-9_-]+' | filter_allowed_sktsec | grep -q .; then
+        if echo "$file_text" | grep -E 'sktsec_[a-zA-Z0-9_-]+' | filter_allowed_api_keys | grep -q .; then
           printf "${RED}✗ BLOCKED: Real API key detected in: %s${NC}\n" "$file"
-          echo "$file_text" | grep -n 'sktsec_' | filter_allowed_sktsec | head -3
+          echo "$file_text" | grep -n 'sktsec_' | filter_allowed_api_keys | head -3
           ERRORS=$((ERRORS + 1))
         fi
 

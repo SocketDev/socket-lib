@@ -4,11 +4,8 @@
 
 set -e
 
-# shellcheck source=./_lib.sh
-. "$(dirname "$0")/_lib.sh"
-
-# pre-commit prints a warning color in addition to the shared RED/GREEN.
-YELLOW='\033[1;33m'
+# shellcheck source=./_helpers.sh
+. "$(dirname "$0")/_helpers.sh"
 
 printf "${GREEN}Running Socket Security checks...${NC}\n"
 
@@ -70,9 +67,9 @@ done
 printf "Checking for API keys...\n"
 echo "$STAGED_FILES" | while IFS= read -r file; do
   if [ -f "$file" ]; then
-    if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | filter_allowed_sktsec | grep -q .; then
+    if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | filter_allowed_api_keys | grep -q .; then
       printf "${YELLOW}⚠ WARNING: Potential API key found in: $file${NC}\n"
-      grep -n 'sktsec_' "$file" | filter_allowed_sktsec | head -3
+      grep -n 'sktsec_' "$file" | filter_allowed_api_keys | head -3
       printf "If this is a real API key, DO NOT COMMIT IT.\n"
     fi
   fi
