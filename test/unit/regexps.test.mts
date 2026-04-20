@@ -16,7 +16,7 @@
  * native `RegExp.escape` (Node 24+) or our hand-rolled fallback.
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { escapeRegExp } from '@socketsecurity/lib/regexps'
 
@@ -150,6 +150,154 @@ describe('regexps', () => {
       const re = new RegExp(`^v${middle}-release$`)
       expect(re.test('v1.2.3-release')).toBe(true)
       expect(re.test('vX2X3-release')).toBe(false)
+    })
+  })
+
+  // Explicit coverage of the fallback branch. On Node 24+ the module binds
+  // to native `RegExp.escape` at import time, so normal test runs exercise
+  // only the native path. Here we unbind the native method and re-import
+  // the module fresh, forcing the feature-detect to select the fallback.
+  // Each assertion also runs against the current (possibly-native) export
+  // so the two paths are proven equivalent on identical inputs.
+  describe('escapeRegExp — fallback implementation', () => {
+    const hadNative =
+      typeof (RegExp as unknown as { escape?: unknown }).escape === 'function'
+    const nativeEscape = hadNative
+      ? (RegExp as unknown as { escape: (s: string) => string }).escape
+      : undefined
+
+    afterEach(() => {
+      // Restore native between tests so we don't leak state to later
+      // suites that may import regexps via a cached module.
+      if (hadNative && nativeEscape) {
+        ;(RegExp as unknown as { escape: (s: string) => string }).escape =
+          nativeEscape
+      }
+      vi.resetModules()
+    })
+
+    async function loadFallback(): Promise<(s: string) => string> {
+      // Delete the native method so the module's typeof check picks
+      // the fallback on re-import.
+      delete (RegExp as unknown as { escape?: unknown }).escape
+      vi.resetModules()
+      const mod = await import('@socketsecurity/lib/regexps')
+      return mod.escapeRegExp
+    }
+
+    it('is still a function after the fallback branch is selected', async () => {
+      const fallback = await loadFallback()
+      expect(typeof fallback).toBe('function')
+    })
+
+    it('fallback encodes leading letter/digit as \\xHH', async () => {
+      const fallback = await loadFallback()
+      expect(fallback('a')).toBe('\\x61')
+      expect(fallback('Z')).toBe('\\x5a')
+      expect(fallback('0')).toBe('\\x30')
+      // Trailing letters/digits are verbatim.
+      expect(fallback('abc').startsWith('\\x61')).toBe(true)
+      expect(fallback('abc').endsWith('bc')).toBe(true)
+    })
+
+    it('fallback backslash-prefixes SyntaxCharacter + /', async () => {
+      const fallback = await loadFallback()
+      for (const ch of '^$\\.*+?()[]{}|/') {
+        expect(fallback(ch)).toBe('\\' + ch)
+      }
+    })
+
+    it('fallback emits ControlEscape letter forms', async () => {
+      const fallback = await loadFallback()
+      expect(fallback('\t')).toBe('\\t')
+      expect(fallback('\n')).toBe('\\n')
+      expect(fallback('\v')).toBe('\\v')
+      expect(fallback('\f')).toBe('\\f')
+      expect(fallback('\r')).toBe('\\r')
+    })
+
+    it('fallback hex-escapes the otherPunctuators set', async () => {
+      const fallback = await loadFallback()
+      for (const ch of ',-=<>#&!%:;@~\'`"') {
+        const cp = ch.codePointAt(0)!
+        expect(fallback(ch)).toBe('\\x' + cp.toString(16).padStart(2, '0'))
+      }
+    })
+
+    it('fallback hex-escapes whitespace and line terminators', async () => {
+      const fallback = await loadFallback()
+      // Space, NBSP → \xHH (cp ≤ 0xFF).
+      expect(fallback(' ')).toBe('\\x20')
+      expect(fallback('\u00a0')).toBe('\\xa0')
+      // LS (U+2028), PS (U+2029), ZWNBSP (U+FEFF) → \uXXXX (cp > 0xFF).
+      expect(fallback('\u2028')).toBe('\\u2028')
+      expect(fallback('\u2029')).toBe('\\u2029')
+      expect(fallback('\ufeff')).toBe('\\ufeff')
+    })
+
+    it('fallback round-trips arbitrary inputs as literal matches', async () => {
+      const fallback = await loadFallback()
+      for (const s of [
+        'test.file',
+        'a-z',
+        '[test]',
+        'hello世界',
+        'v1.2.3-release',
+        '',
+        '*.{js,ts}',
+        'price: $50+',
+      ]) {
+        const re = new RegExp(`^${fallback(s)}$`)
+        expect(re.test(s)).toBe(true)
+      }
+    })
+
+    // Proves the two paths produce byte-identical output for every ASCII
+    // code point, so callers that cache the escaped form don't see
+    // different strings depending on Node version.
+    it('fallback output is byte-identical to native across ASCII 0-127', async () => {
+      if (!hadNative || !nativeEscape) {
+        return // Only meaningful when native exists to diff against.
+      }
+      const fallback = await loadFallback()
+      for (let cp = 0; cp < 128; cp++) {
+        const s = String.fromCodePoint(cp)
+        expect(fallback(s), `diverged at cp 0x${cp.toString(16)}`).toBe(
+          nativeEscape(s),
+        )
+      }
+    })
+
+    it('fallback output is byte-identical to native for representative non-ASCII', async () => {
+      if (!hadNative || !nativeEscape) {
+        return
+      }
+      const fallback = await loadFallback()
+      for (const cp of [0xa0, 0xfeff, 0x2028, 0x2029, 0xd800, 0xdc00]) {
+        const s = String.fromCodePoint(cp)
+        expect(fallback(s)).toBe(nativeEscape(s))
+      }
+    })
+
+    it('fallback output is byte-identical to native for multi-char strings', async () => {
+      if (!hadNative || !nativeEscape) {
+        return
+      }
+      const fallback = await loadFallback()
+      for (const s of [
+        'abc',
+        'foo.bar',
+        '[test]',
+        'a-z',
+        'hello world',
+        'v1.2.3-release',
+        'test.file',
+        '*.{js,ts}',
+        'hello世界',
+        'test\t\n',
+      ]) {
+        expect(fallback(s)).toBe(nativeEscape(s))
+      }
     })
   })
 })

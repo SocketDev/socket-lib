@@ -21,7 +21,7 @@ import {
   resolveRetryOptions,
   withResolvers,
 } from '@socketsecurity/lib/promises'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {
   describe('resolveRetryOptions', () => {
@@ -1137,6 +1137,106 @@ describe('promises', () => {
     // `CreateDataPropertyOrThrow` — writable, enumerable, configurable.
     it('promise/resolve/reject are own enumerable properties', () => {
       const d = withResolvers<number>()
+      const keys = Object.keys(d)
+      expect(keys).toContain('promise')
+      expect(keys).toContain('resolve')
+      expect(keys).toContain('reject')
+    })
+  })
+
+  // Explicit coverage of the fallback branch. On Node 20.12+ / 22+ the
+  // module binds to native `Promise.withResolvers` at import time, so
+  // normal runs exercise only the native path. Here we delete the native
+  // method and re-import the module fresh, forcing the feature-detect
+  // to pick the closure fallback.
+  describe('withResolvers — fallback implementation', () => {
+    const hadNative =
+      typeof (Promise as unknown as { withResolvers?: unknown })
+        .withResolvers === 'function'
+    const nativeWithResolvers = hadNative
+      ? (
+          Promise as unknown as {
+            withResolvers: () => unknown
+          }
+        ).withResolvers
+      : undefined
+
+    afterEach(() => {
+      if (hadNative && nativeWithResolvers) {
+        ;(
+          Promise as unknown as { withResolvers: () => unknown }
+        ).withResolvers = nativeWithResolvers
+      }
+      vi.resetModules()
+    })
+
+    async function loadFallback(): Promise<
+      () => { promise: Promise<unknown>; resolve: Function; reject: Function }
+    > {
+      delete (Promise as unknown as { withResolvers?: unknown }).withResolvers
+      vi.resetModules()
+      const mod = await import('@socketsecurity/lib/promises')
+      return mod.withResolvers as () => {
+        promise: Promise<unknown>
+        resolve: Function
+        reject: Function
+      }
+    }
+
+    it('fallback is a function', async () => {
+      const fallback = await loadFallback()
+      expect(typeof fallback).toBe('function')
+    })
+
+    it('fallback returns { promise, resolve, reject } with correct types', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
+      expect(d.promise).toBeInstanceOf(Promise)
+      expect(typeof d.resolve).toBe('function')
+      expect(typeof d.reject).toBe('function')
+    })
+
+    it('fallback resolves the promise with the provided value', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
+      d.resolve('ok')
+      await expect(d.promise).resolves.toBe('ok')
+    })
+
+    it('fallback rejects the promise with the provided reason', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
+      const err = new Error('nope')
+      d.reject(err)
+      await expect(d.promise).rejects.toBe(err)
+    })
+
+    it('fallback adopts a thenable passed to resolve', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
+      d.resolve(Promise.resolve(99))
+      await expect(d.promise).resolves.toBe(99)
+    })
+
+    it('fallback settle-once semantics (later calls ignored)', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
+      d.resolve('first')
+      d.resolve('second')
+      d.reject(new Error('late'))
+      await expect(d.promise).resolves.toBe('first')
+    })
+
+    // Spec §27.2.4.9 step 3: return object has Object.prototype.
+    it('fallback returns an ordinary object, not a Promise subclass', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
+      expect(Object.getPrototypeOf(d)).toBe(Object.prototype)
+    })
+
+    it('fallback properties are own + enumerable', async () => {
+      const fallback = await loadFallback()
+      const d = fallback()
       const keys = Object.keys(d)
       expect(keys).toContain('promise')
       expect(keys).toContain('resolve')
