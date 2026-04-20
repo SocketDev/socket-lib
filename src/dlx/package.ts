@@ -63,8 +63,26 @@ const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new Set([
   'high',
 ])
 
-// Cache for binary path resolution to avoid repeated extension checks on Windows.
+// Cache for binary path resolution to avoid repeated extension checks
+// on Windows. Bounded LRU: a long-running process that resolves many
+// distinct binary paths used to accumulate entries forever, and entries
+// for paths that have since been garbage-collected by `cleanDlxCache`
+// were never reclaimed. Map iteration order = insertion order; accessing
+// an entry re-inserts it to bump recency.
+const BINARY_PATH_CACHE_MAX_SIZE = 200
 const binaryPathCache = new Map<string, string>()
+
+function binaryPathCacheSet(key: string, value: string): void {
+  if (binaryPathCache.has(key)) {
+    binaryPathCache.delete(key)
+  } else if (binaryPathCache.size >= BINARY_PATH_CACHE_MAX_SIZE) {
+    const oldest = binaryPathCache.keys().next().value
+    if (oldest !== undefined) {
+      binaryPathCache.delete(oldest)
+    }
+  }
+  binaryPathCache.set(key, value)
+}
 
 interface FirewallAlert {
   severity?: string
@@ -887,6 +905,8 @@ export function resolveBinaryPath(basePath: string): string {
   const cached = binaryPathCache.get(basePath)
   if (cached) {
     if (fs.existsSync(cached)) {
+      // Bump recency on hit.
+      binaryPathCacheSet(basePath, cached)
       return cached
     }
     // Cached path no longer exists, remove stale entry.
@@ -901,7 +921,7 @@ export function resolveBinaryPath(basePath: string): string {
     const testPath = basePath + ext
     if (fs.existsSync(testPath)) {
       // Cache the result.
-      binaryPathCache.set(basePath, testPath)
+      binaryPathCacheSet(basePath, testPath)
       return testPath
     }
   }

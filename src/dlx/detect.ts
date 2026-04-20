@@ -26,7 +26,29 @@ let _path: typeof import('node:path') | undefined
 const NODE_JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs'] as const)
 
 // Cache for package.json path lookups to avoid repeated directory traversal.
-const packageJsonPathCache = new Map<string, string | null>()
+// Bounded LRU so long-lived processes don't accumulate entries for every
+// distinct startDir they've ever seen. Negative entries (null) are
+// short-lived — we re-probe after TTL expiry so a dir that later gains
+// a package.json isn't permanently stuck at "none found".
+const PACKAGE_JSON_PATH_CACHE_MAX_SIZE = 200
+const PACKAGE_JSON_NEGATIVE_TTL_MS = 10_000
+type PackageJsonPathEntry = {
+  path: string | null
+  at: number
+}
+const packageJsonPathCache = new Map<string, PackageJsonPathEntry>()
+
+function packageJsonPathCacheSet(key: string, value: string | null): void {
+  if (packageJsonPathCache.has(key)) {
+    packageJsonPathCache.delete(key)
+  } else if (packageJsonPathCache.size >= PACKAGE_JSON_PATH_CACHE_MAX_SIZE) {
+    const oldest = packageJsonPathCache.keys().next().value
+    if (oldest !== undefined) {
+      packageJsonPathCache.delete(oldest)
+    }
+  }
+  packageJsonPathCache.set(key, { path: value, at: Date.now() })
+}
 
 // Cache for parsed package.json content keyed by path + mtime so stale
 // content is not served if the file is modified or replaced.
@@ -62,15 +84,22 @@ function findPackageJson(filePath: string): string | undefined {
   // Check cache first.
   const cached = packageJsonPathCache.get(startDir)
   if (cached !== undefined) {
-    // Validate cache - check if cached path still exists.
-    if (cached === null) {
-      return undefined
+    // Negative entries expire after a short TTL so a directory that later
+    // gains a package.json (npm install in a sibling workspace, etc.) is
+    // re-probed instead of permanently stuck on the cached "not found".
+    if (cached.path === null) {
+      if (Date.now() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {
+        return undefined
+      }
+      packageJsonPathCache.delete(startDir)
+    } else if (fs.existsSync(cached.path)) {
+      // Bump recency on hit.
+      packageJsonPathCacheSet(startDir, cached.path)
+      return cached.path
+    } else {
+      // Cached path no longer exists, remove stale entry.
+      packageJsonPathCache.delete(startDir)
     }
-    if (fs.existsSync(cached)) {
-      return cached
-    }
-    // Cached path no longer exists, remove stale entry.
-    packageJsonPathCache.delete(startDir)
   }
 
   let currentDir = startDir
@@ -80,7 +109,7 @@ function findPackageJson(filePath: string): string | undefined {
     const packageJsonPath = path.join(currentDir, 'package.json')
     if (fs.existsSync(packageJsonPath)) {
       // Cache the result for the starting directory.
-      packageJsonPathCache.set(startDir, packageJsonPath)
+      packageJsonPathCacheSet(startDir, packageJsonPath)
       return packageJsonPath
     }
 
@@ -88,7 +117,7 @@ function findPackageJson(filePath: string): string | undefined {
   }
 
   // Cache the negative result.
-  packageJsonPathCache.set(startDir, null)
+  packageJsonPathCacheSet(startDir, null)
   return undefined
 }
 
