@@ -819,81 +819,55 @@ describe('releases/github', () => {
     }, 40_000)
   })
 
-  describe('downloadGitHubRelease - TOCTOU race protection', () => {
+  // .sequential is required because vitest's config sets
+  // `concurrent: !process.env.CI` (.config/vitest.config.mts). These
+  // tests share the module-level httpDownload / httpRequest mocks so
+  // running them in parallel lets one test's call pollute another's
+  // `toHaveBeenCalledTimes` assertion. Pattern borrowed from
+  // test/unit/logger-advanced.test.mts which disables concurrency for
+  // the same reason.
+  describe.sequential('downloadGitHubRelease - TOCTOU race protection', () => {
+    // Pre-populate the on-disk cache state synchronously before calling
+    // downloadGitHubRelease, so the function under test can only
+    // observe the state the test prepared. httpDownload is either
+    // asserted-never-called (cache-hit path) or mocked as a trivial
+    // no-op that writes the missing file for the re-download path.
+    // No mock side effects interleave with the call under test.
+
+    // All state (temp dir, imports) lives inside each `it` block so
+    // nothing leaks across tests under `isolate: false`. The previous
+    // rewrite used `let testDir` at the describe scope and flaked
+    // because that single binding got overwritten by the next
+    // test's beforeEach while vitest was still reporting the first
+    // test's assertion. Using fully local state makes that impossible.
     beforeEach(() => {
       vi.clearAllMocks()
     })
 
-    it('should re-check binary existence after reading version file (TOCTOU protection)', async () => {
-      // This tests the fix for the TOCTOU (Time-of-check-time-of-use) race condition
-      // in releases/github.ts:214-226
-      //
-      // Scenario:
-      // 1. Check version file exists and matches tag
-      // 2. Read version file
-      // 3. Binary gets deleted (by cleanup or concurrent process)
-      // 4. Try to use binary -> FAILURE
-      //
-      // Fix: Re-check binary existence after reading version file
-
+    it('uses cache and does not call httpDownload when binary + version file exist and tag matches', async () => {
       const { downloadGitHubRelease } =
         await import('../../src/releases/github')
-      const { tmpdir } = await import('node:os')
       const { promises: fs } = await import('node:fs')
-      const path = await import('node:path')
+      const { tmpdir } = await import('node:os')
+      const nodePath = await import('node:path')
 
-      // mkdtemp gives an OS-guaranteed unique dir. Previous `Date.now()`
-      // naming collided across test runs on the same millisecond and
-      // across parallel vitest workers, occasionally letting a prior
-      // run's cached .version + binary satisfy the cache-hit branch
-      // inside downloadGitHubRelease — so `httpDownload` was called 0
-      // times and the assertion below saw the wrong count.
-      const testDownloadDir = await fs.mkdtemp(
-        path.join(tmpdir(), 'test-github-dl-'),
+      const testDir = await fs.mkdtemp(
+        nodePath.join(tmpdir(), 'test-github-dl-'),
       )
-
       try {
-        // Mock successful HTTP download
-        vi.mocked(httpRequest).mockResolvedValue(
-          createMockHttpResponse(
-            Buffer.from(
-              JSON.stringify({
-                assets: [
-                  {
-                    name: 'test-binary',
-                    browser_download_url: 'https://example.com/binary',
-                  },
-                ],
-                tag_name: 'v1.0.0',
-              }),
-            ),
-            true,
-            200,
-          ),
-        )
-        // Mock httpDownload to actually create the file
-        vi.mocked(httpDownload).mockImplementation(async (_url, outputPath) => {
-          // Create directory if it doesn't exist
-          const dir = path.dirname(outputPath)
-          await fs.mkdir(dir, { recursive: true })
-          // Create a dummy binary file
-          const content = '#!/bin/bash\necho "test"'
-          await fs.writeFile(outputPath, content, 'utf8')
-          return {
-            headers: {},
-            ok: true as const,
-            path: outputPath,
-            size: content.length,
-            status: 200,
-            statusText: 'OK',
-          }
-        })
+        // Pre-populate the cache exactly as a prior successful download
+        // would have left it: binary + .version file with matching tag.
+        // downloadGitHubRelease must short-circuit to the cached binary
+        // path without touching httpDownload.
+        const binaryFile = nodePath.join(testDir, 'test-bin')
+        const versionFile = nodePath.join(testDir, '.version')
+        await fs.writeFile(binaryFile, '#!/bin/bash\necho "test"', 'utf8')
+        await fs.writeFile(versionFile, 'v1.0.0', 'utf8')
 
-        // First download - creates cache
-        const result1 = await downloadGitHubRelease({
+        const result = await downloadGitHubRelease({
           assetName: 'test-binary',
           binaryName: 'test-bin',
-          downloadDir: testDownloadDir,
+          downloadDir: testDir,
           owner: 'test-owner',
           platformArch: 'test-arch',
           quiet: true,
@@ -902,67 +876,45 @@ describe('releases/github', () => {
           toolName: 'test-tool',
         })
 
-        expect(result1).toBeDefined()
-        expect(result1).toContain('test-bin')
-
-        // Verify version file and binary exist
-        const binaryDir = testDownloadDir
-        const versionFile = path.join(binaryDir, '.version')
-        const binaryFile = path.join(binaryDir, 'test-bin')
-
-        // Both should exist after first download
-        expect(existsSync(versionFile)).toBe(true)
+        expect(result).toBe(binaryFile)
+        expect(httpDownload).not.toHaveBeenCalled()
+        expect(httpRequest).not.toHaveBeenCalled()
         expect(existsSync(binaryFile)).toBe(true)
-
-        // Second call - should use cache
-        const result2 = await downloadGitHubRelease({
-          assetName: 'test-binary',
-          binaryName: 'test-bin',
-          downloadDir: testDownloadDir,
-          owner: 'test-owner',
-          platformArch: 'test-arch',
-          quiet: true,
-          repo: 'test-repo',
-          tag: 'v1.0.0',
-          toolName: 'test-tool',
-        })
-
-        expect(result2).toBe(result1)
-        // httpDownload should only be called once (first download)
-        expect(httpDownload).toHaveBeenCalledTimes(1)
+        expect(existsSync(versionFile)).toBe(true)
       } finally {
-        // Cleanup
-        try {
-          await fs.rm(testDownloadDir, { force: true, recursive: true })
-        } catch {
-          // Ignore cleanup errors
-        }
+        await fs.rm(testDir, { force: true, recursive: true }).catch(() => {})
       }
-    }, 40_000)
+    })
 
-    it('should re-download if binary is missing despite version file existing', async () => {
+    it('re-downloads when version file exists but binary is missing (TOCTOU recovery)', async () => {
       const { downloadGitHubRelease } =
         await import('../../src/releases/github')
-      const { tmpdir } = await import('node:os')
       const { promises: fs } = await import('node:fs')
-      const path = await import('node:path')
+      const { tmpdir } = await import('node:os')
+      const nodePath = await import('node:path')
 
-      // mkdtemp avoids collisions with prior test runs' leftover cache
-      // dirs. See note on the sibling test above.
-      const testDownloadDir = await fs.mkdtemp(
-        path.join(tmpdir(), 'test-github-dl-missing-'),
+      const testDir = await fs.mkdtemp(
+        nodePath.join(tmpdir(), 'test-github-dl-missing-'),
       )
-
       try {
-        // Mock successful HTTP download
-        vi.mocked(httpRequest).mockResolvedValue(
+        // The TOCTOU recovery path: version file claims the right tag
+        // is cached, but the binary was removed (by OS cleanup, another
+        // process, manual rm, etc.). The second existsSync check inside
+        // downloadGitHubRelease must detect the missing binary after
+        // reading the version file and fall through to re-download.
+        const binaryFile = nodePath.join(testDir, 'test-bin')
+        const versionFile = nodePath.join(testDir, '.version')
+        await fs.writeFile(versionFile, 'v1.0.0', 'utf8')
+        // Intentionally do NOT create binaryFile.
+
+        vi.mocked(httpRequest).mockResolvedValueOnce(
           createMockHttpResponse(
             Buffer.from(
               JSON.stringify({
                 assets: [
                   {
-                    name: 'test-binary',
                     browser_download_url: 'https://example.com/binary',
+                    name: 'test-binary',
                   },
                 ],
                 tag_name: 'v1.0.0',
@@ -972,29 +924,24 @@ describe('releases/github', () => {
             200,
           ),
         )
-        // Mock httpDownload to actually create the file
-        vi.mocked(httpDownload).mockImplementation(async (_url, outputPath) => {
-          // Create directory if it doesn't exist
-          const dir = path.dirname(outputPath)
-          await fs.mkdir(dir, { recursive: true })
-          // Create a dummy binary file
-          const content = '#!/bin/bash\necho "test"'
-          await fs.writeFile(outputPath, content, 'utf8')
-          return {
-            headers: {},
-            ok: true as const,
-            path: outputPath,
-            size: content.length,
-            status: 200,
-            statusText: 'OK',
-          }
-        })
+        vi.mocked(httpDownload).mockImplementationOnce(
+          async (_url, outputPath) => {
+            await fs.writeFile(outputPath, '#!/bin/bash\necho "test"', 'utf8')
+            return {
+              headers: {},
+              ok: true as const,
+              path: outputPath,
+              size: 22,
+              status: 200,
+              statusText: 'OK',
+            }
+          },
+        )
 
-        // First download
-        await downloadGitHubRelease({
+        const result = await downloadGitHubRelease({
           assetName: 'test-binary',
           binaryName: 'test-bin',
-          downloadDir: testDownloadDir,
+          downloadDir: testDir,
           owner: 'test-owner',
           platformArch: 'test-arch',
           quiet: true,
@@ -1003,37 +950,82 @@ describe('releases/github', () => {
           toolName: 'test-tool',
         })
 
-        // Simulate TOCTOU scenario: delete binary but leave version file
-        const binaryDir = testDownloadDir
-        const binaryFile = path.join(binaryDir, 'test-bin')
-        await fs.unlink(binaryFile)
-
-        // Reset mock call count
-        vi.mocked(httpDownload).mockClear()
-
-        // Second call - should detect missing binary and re-download
-        await downloadGitHubRelease({
-          assetName: 'test-binary',
-          binaryName: 'test-bin',
-          downloadDir: testDownloadDir,
-          owner: 'test-owner',
-          platformArch: 'test-arch',
-          quiet: true,
-          repo: 'test-repo',
-          tag: 'v1.0.0',
-          toolName: 'test-tool',
-        })
-
-        // Should download again due to missing binary
+        expect(result).toBe(binaryFile)
         expect(httpDownload).toHaveBeenCalledTimes(1)
+        expect(existsSync(binaryFile)).toBe(true)
       } finally {
-        // Cleanup
-        try {
-          await fs.rm(testDownloadDir, { force: true, recursive: true })
-        } catch {
-          // Ignore cleanup errors
-        }
+        await fs.rm(testDir, { force: true, recursive: true }).catch(() => {})
       }
-    }, 40_000)
+    })
+
+    it('re-downloads when version file tag does not match requested tag', async () => {
+      const { downloadGitHubRelease } =
+        await import('../../src/releases/github')
+      const { promises: fs } = await import('node:fs')
+      const { tmpdir } = await import('node:os')
+      const nodePath = await import('node:path')
+
+      const testDir = await fs.mkdtemp(
+        nodePath.join(tmpdir(), 'test-github-dl-stale-'),
+      )
+      try {
+        // Cache-invalidation path: both files present but .version
+        // says a different tag than the caller asked for. Must fall
+        // through to re-download.
+        const binaryFile = nodePath.join(testDir, 'test-bin')
+        const versionFile = nodePath.join(testDir, '.version')
+        await fs.writeFile(binaryFile, 'stale-binary', 'utf8')
+        await fs.writeFile(versionFile, 'v0.9.0', 'utf8')
+
+        vi.mocked(httpRequest).mockResolvedValueOnce(
+          createMockHttpResponse(
+            Buffer.from(
+              JSON.stringify({
+                assets: [
+                  {
+                    browser_download_url: 'https://example.com/binary',
+                    name: 'test-binary',
+                  },
+                ],
+                tag_name: 'v1.0.0',
+              }),
+            ),
+            true,
+            200,
+          ),
+        )
+        vi.mocked(httpDownload).mockImplementationOnce(
+          async (_url, outputPath) => {
+            await fs.writeFile(outputPath, 'fresh-binary', 'utf8')
+            return {
+              headers: {},
+              ok: true as const,
+              path: outputPath,
+              size: 12,
+              status: 200,
+              statusText: 'OK',
+            }
+          },
+        )
+
+        await downloadGitHubRelease({
+          assetName: 'test-binary',
+          binaryName: 'test-bin',
+          downloadDir: testDir,
+          owner: 'test-owner',
+          platformArch: 'test-arch',
+          quiet: true,
+          repo: 'test-repo',
+          tag: 'v1.0.0',
+          toolName: 'test-tool',
+        })
+
+        expect(httpDownload).toHaveBeenCalledTimes(1)
+        // Cache updated to the new tag.
+        expect(await fs.readFile(versionFile, 'utf8')).toBe('v1.0.0')
+      } finally {
+        await fs.rm(testDir, { force: true, recursive: true }).catch(() => {})
+      }
+    })
   })
 })
