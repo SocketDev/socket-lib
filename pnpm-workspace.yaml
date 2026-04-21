@@ -11,6 +11,7 @@ packages:
   - .claude/hooks/*
 
 allowBuilds:
+  '@pnpm/exe': true
   esbuild: true
 
 overrides:
