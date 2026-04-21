@@ -75,13 +75,13 @@ describe('releases/socket-btm', () => {
 
     it('should return correct asset name for win32-x64', () => {
       expect(getBinaryAssetName('binject', 'win32', 'x64')).toBe(
-        'binject-win-x64.exe',
+        'binject-win32-x64.exe',
       )
     })
 
     it('should return correct asset name for win32-arm64', () => {
       expect(getBinaryAssetName('node', 'win32', 'arm64')).toBe(
-        'node-win-arm64.exe',
+        'node-win32-arm64.exe',
       )
     })
 
@@ -123,13 +123,13 @@ describe('releases/socket-btm', () => {
       expect(getPlatformArch('linux', 'arm64', 'musl')).toBe('linux-arm64-musl')
     })
 
-    it('should return correct identifier for win-x64', () => {
-      expect(getPlatformArch('win32', 'x64')).toBe('win-x64')
+    it('should return correct identifier for win32-x64', () => {
+      expect(getPlatformArch('win32', 'x64')).toBe('win32-x64')
     })
 
     it('should ignore libc for non-linux platforms', () => {
       expect(getPlatformArch('darwin', 'arm64', 'musl')).toBe('darwin-arm64')
-      expect(getPlatformArch('win32', 'x64', 'musl')).toBe('win-x64')
+      expect(getPlatformArch('win32', 'x64', 'musl')).toBe('win32-x64')
     })
 
     it('should throw for unsupported architecture', () => {
@@ -230,7 +230,7 @@ describe('releases/socket-btm', () => {
 
     it('should use .exe binary name on windows', async () => {
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
-        'C:\\dl\\node-win-x64\\node.exe',
+        'C:\\dl\\node-win32-x64\\node.exe',
       )
 
       await downloadSocketBtmRelease('node', {
@@ -241,9 +241,9 @@ describe('releases/socket-btm', () => {
 
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
       expect(cfg).toMatchObject({
-        assetName: 'node-win-x64.exe',
+        assetName: 'node-win32-x64.exe',
         binaryName: 'node.exe',
-        platformArch: 'win-x64',
+        platformArch: 'win32-x64',
       })
     })
 

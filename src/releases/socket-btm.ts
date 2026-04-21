@@ -90,13 +90,16 @@ export type SocketBtmReleaseConfig =
 
 /**
  * Map Node.js platform to socket-btm asset platform naming.
- * Uses 'win' instead of 'win32' for file/folder names.
+ * Identity mapping: asset names use `process.platform` verbatim
+ * (`darwin`, `linux`, `win32`) to align with pnpm's pack-app, the
+ * `--os` / `supportedArchitectures.os` config keys, and the
+ * `@pnpm/exe.<os>-<arch>` package convention.
  */
 const PLATFORM_MAP = {
   __proto__: null,
   darwin: 'darwin',
   linux: 'linux',
-  win32: 'win',
+  win32: 'win32',
 } as unknown as Record<string, string>
 
 /**
@@ -355,7 +358,7 @@ export function getBinaryAssetName(
     return `${binaryBaseName}-linux-${mappedArch}${muslSuffix}${ext}`
   }
   if (platform === 'win32') {
-    return `${binaryBaseName}-win-${mappedArch}${ext}`
+    return `${binaryBaseName}-win32-${mappedArch}${ext}`
   }
 
   throw new Error(`Unsupported platform: ${platform}`)
@@ -382,18 +385,74 @@ export function getBinaryName(
 }
 
 /**
- * Get platform-arch identifier for directory structure.
- * Uses 'win' instead of 'win32' for file/folder names.
+ * Get platform-arch identifier for directory structure and asset names.
+ *
+ * # Format: `<os>-<arch>[-<libc>]`
+ *
+ * The OS segment is `process.platform` verbatim: `darwin` / `linux` /
+ * `win32`. The arch segment is `process.arch` verbatim: `x64` / `arm64`.
+ * The optional libc suffix is `-musl` (Linux only; the glibc default is
+ * unsuffixed to match Node.js's own linuxstatic convention).
+ *
+ * # Why these specific conventions
+ *
+ * ## Why `win32`, not `win`
+ *
+ * `win32` is what `process.platform` returns on every Windows host. Every
+ * npm package whose install-time platform filter uses the standard
+ * `os` / `cpu` / `libc` manifest fields must match `process.platform`
+ * strings exactly (npm compares them verbatim — there's no shorthand
+ * layer). Using `win` internally here would have forced a translation
+ * every time we constructed an install filter or a target triple, and
+ * reviewers would have to remember "we abbreviate on disk but not in
+ * package filters." Since the two now match, there's no translation
+ * step to get wrong.
+ *
+ * pnpm's pack-app (v11+) accepts `<os>-<arch>[-<libc>]` target strings
+ * and its shards are `@pnpm/exe.<os>-<arch>` (with `win32`, not `win` —
+ * see pnpm#11314). Our naming matches so asset names we emit can flow
+ * directly into pack-app's `--target` arg, `pnpm.app.targets` config,
+ * and sibling-package-name construction without a translation map.
+ *
+ * ## Why `-musl` is the suffix (and glibc is unsuffixed)
+ *
+ * Node.js's own linuxstatic tarballs historically used the unqualified
+ * `linux` for glibc and a separate download channel for musl. The pnpm
+ * ecosystem codified that as `linux-<arch>` (glibc, default) and
+ * `linux-<arch>-musl` (the libc outlier), matching the asymmetric
+ * reality of Linux distros — glibc is the majority case, musl is
+ * Alpine-and-similar. Adding `-glibc` for the default would be
+ * redundant noise in the name.
+ *
+ * ## Why libc is only appended for Linux
+ *
+ * macOS and Windows have exactly one system libc each (Apple libSystem,
+ * Microsoft UCRT). A hypothetical `darwin-arm64-libsystem` conveys no
+ * information. Node.js, npm, and pnpm all treat libc as a Linux-only
+ * axis; we follow the same convention so callers don't have to special-
+ * case `'darwin-arm64'.startsWith('darwin-arm64')` style matches.
+ *
+ * ## Why this function exists at all (vs. inlining)
+ *
+ * Two upstream APIs that socket-btm consumers end up calling — the
+ * npm manifest filter (`os`/`cpu`/`libc`) and pnpm's pack-app
+ * `--target` — both need the exact same triple format. Centralizing
+ * the construction here means a future schema change (e.g. Node
+ * introducing `riscv64`) gets one edit, and the error message for an
+ * unsupported platform is uniform across downloaders, pack-app
+ * invocations, and the `@socketbin/*` resolver logic.
  *
  * @param platform - Target platform
  * @param arch - Target architecture
- * @param libc - Linux libc variant (optional)
- * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl', 'win-x64')
+ * @param libc - Linux libc variant (optional; non-linux platforms ignore)
+ * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl', 'win32-x64')
  *
  * @example
  * ```typescript
  * getPlatformArch('linux', 'x64', 'musl')  // 'linux-x64-musl'
- * getPlatformArch('darwin', 'arm64')  // 'darwin-arm64'
+ * getPlatformArch('darwin', 'arm64')       // 'darwin-arm64'
+ * getPlatformArch('win32', 'x64')          // 'win32-x64'
+ * getPlatformArch('darwin', 'x64', 'musl') // 'darwin-x64' — libc ignored
  * ```
  */
 export function getPlatformArch(
