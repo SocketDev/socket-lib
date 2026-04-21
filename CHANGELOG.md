@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.22.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.22.0) - 2026-04-21
+
+### Changed
+
+- `@socketsecurity/lib/releases/socket-btm` `getPlatformArch()` / `getBinaryAssetName()` — aligned with pnpm pack-app's `<os>-<arch>[-<libc>]` target format. The Windows OS segment is now `win32` (was `win`); `getPlatformArch('win32', 'x64')` returns `'win32-x64'` and `getBinaryAssetName('node', 'win32', 'x64')` returns `'node-win32-x64.exe'`. Callers that string-match on the output need updates
+
 ## [5.21.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.21.0) - 2026-04-20
 
 ### Added
