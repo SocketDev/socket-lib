@@ -93,9 +93,10 @@ export function getSocketCliApiTimeout(): number {
 }
 
 /**
- * Socket CLI API authentication token (alternative name).
- * Checks SOCKET_CLI_API_TOKEN, SOCKET_CLI_API_KEY, SOCKET_SECURITY_API_TOKEN, SOCKET_SECURITY_API_KEY.
- * Maintains full v1.x backward compatibility.
+ * Socket CLI API authentication token.
+ * Checks SOCKET_API_TOKEN (canonical), then the legacy names
+ * SOCKET_CLI_API_TOKEN, SOCKET_CLI_API_KEY, SOCKET_SECURITY_API_TOKEN,
+ * SOCKET_SECURITY_API_KEY. Maintains full v1.x backward compatibility.
  *
  * @returns API token or undefined
  *
@@ -110,6 +111,7 @@ export function getSocketCliApiTimeout(): number {
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiToken(): string | undefined {
   return (
+    getEnvValue('SOCKET_API_TOKEN') ||
     getEnvValue('SOCKET_CLI_API_TOKEN') ||
     getEnvValue('SOCKET_CLI_API_KEY') ||
     getEnvValue('SOCKET_SECURITY_API_TOKEN') ||

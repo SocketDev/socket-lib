@@ -95,9 +95,20 @@ describe('socket-cli env', () => {
   })
 
   describe('getSocketCliApiToken', () => {
-    it('should return token when set', () => {
+    it('should return token when SOCKET_CLI_API_TOKEN is set', () => {
       setEnv('SOCKET_CLI_API_TOKEN', 'test-token-123')
       expect(getSocketCliApiToken()).toBe('test-token-123')
+    })
+
+    it('should return token when SOCKET_API_TOKEN is set', () => {
+      setEnv('SOCKET_API_TOKEN', 'canonical-token')
+      expect(getSocketCliApiToken()).toBe('canonical-token')
+    })
+
+    it('should prefer SOCKET_API_TOKEN over legacy names', () => {
+      setEnv('SOCKET_API_TOKEN', 'canonical-token')
+      setEnv('SOCKET_CLI_API_TOKEN', 'legacy-token')
+      expect(getSocketCliApiToken()).toBe('canonical-token')
     })
 
     it('should return undefined when not set', () => {
