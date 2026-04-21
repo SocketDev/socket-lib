@@ -1,4 +1,3 @@
-resolutionMode: highest
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - '@yarnpkg/core@4.5.0'
