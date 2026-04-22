@@ -5,6 +5,7 @@
 import process from 'node:process'
 import { setTimeout as sleep } from 'node:timers/promises'
 
+import { isErrnoException } from '../errors'
 import {
   INDENT_SYMBOL,
   NEWLINE_SYMBOL,
@@ -69,8 +70,7 @@ async function readFile(filepath: string): Promise<string> {
       return await fsPromises.readFile(filepath, 'utf8')
     } catch (err) {
       const isLastAttempt = attempt === maxRetries
-      const isEnoent =
-        err instanceof Error && 'code' in err && err.code === 'ENOENT'
+      const isEnoent = isErrnoException(err) && err.code === 'ENOENT'
 
       // Only retry ENOENT and not on last attempt
       if (!isEnoent || isLastAttempt) {
@@ -136,8 +136,7 @@ async function retryWrite(
     } catch (err) {
       const isLastAttempt = attempt === retries
       const isRetriableError =
-        err instanceof Error &&
-        'code' in err &&
+        isErrnoException(err) &&
         (err.code === 'EPERM' || err.code === 'EBUSY' || err.code === 'ENOENT')
 
       // Only retry on Windows file system errors (EPERM/EBUSY/ENOENT), and not on the last attempt

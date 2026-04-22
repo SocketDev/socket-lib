@@ -40,6 +40,7 @@
  * - Automatic cleanup on process exit
  */
 
+import { errorMessage } from './errors'
 import { safeDeleteSync } from './fs'
 import { getDefaultLogger } from './logger'
 import { pRetry } from './promises'
@@ -169,9 +170,7 @@ class ProcessLockManager {
         fs.utimesSync(lockPath, now, now)
       }
     } catch (error) {
-      logger.warn(
-        `Failed to touch lock ${lockPath}: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      logger.warn(`Failed to touch lock ${lockPath}: ${errorMessage(error)}`)
     }
   }
 
@@ -419,9 +418,7 @@ class ProcessLockManager {
       }
       this.activeLocks.delete(lockPath)
     } catch (error) {
-      logger.warn(
-        `Failed to release lock ${lockPath}: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      logger.warn(`Failed to release lock ${lockPath}: ${errorMessage(error)}`)
     }
   }
 

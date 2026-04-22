@@ -244,6 +244,7 @@ patchedDependencies:
   minipass-pipeline@1.2.4: ace05cec4a6d3ccfb43c804a925683b0809e4c50067530985ee7795826d942a4
   minipass-sized@1.0.3: 2048620f836b8d07ca6b41a3500944fe7a43fb7542aa6d45bceb405afa513738
   node-gyp@11.5.0: 140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9
+  pony-cause@2.1.11: 39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8
 
 importers:
 
@@ -398,7 +399,7 @@ importers:
         version: 4.0.4
       pony-cause:
         specifier: 2.1.11
-        version: 2.1.11
+        version: 2.1.11(patch_hash=39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8)
       semver:
         specifier: 7.7.2
         version: 7.7.2
@@ -5445,7 +5446,7 @@ snapshots:
     dependencies:
       yaml: 2.8.3
 
-  pony-cause@2.1.11: {}
+  pony-cause@2.1.11(patch_hash=39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8): {}
 
   postcss-selector-parser@7.1.1:
     dependencies:

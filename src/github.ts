@@ -26,6 +26,7 @@ import process from 'node:process'
 import { createTtlCache } from './cache-with-ttl'
 import { getGhToken, getGithubToken } from './env/github'
 import { getSocketCliGithubToken } from './env/socket-cli'
+import { errorMessage } from './errors'
 import { httpRequest } from './http-request'
 import { spawn } from './spawn'
 
@@ -283,7 +284,7 @@ async function fetchRefSha(
         return commitData.sha
       } catch (e) {
         throw new Error(
-          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${e instanceof Error ? e.message : String(e)}`,
+          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e)}`,
         )
       }
     }
@@ -568,7 +569,7 @@ export async function fetchGitHub<T = unknown>(
     return JSON.parse(response.body.toString('utf8')) as T
   } catch (error) {
     throw new Error(
-      `Failed to parse GitHub API response: ${error instanceof Error ? error.message : String(error)}\n` +
+      `Failed to parse GitHub API response: ${errorMessage(error)}\n` +
         `URL: ${url}\n` +
         'Response may be malformed or incomplete.',
       { cause: error },

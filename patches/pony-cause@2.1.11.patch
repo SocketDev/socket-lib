@@ -1,0 +1,110 @@
+diff --git a/lib/helpers.js b/lib/helpers.js
+index 3733564ae016c6c7a37dda78c56b5997cae567cc..249815036733d66425a7c7dc4481bfe193b04eac 100644
+--- a/lib/helpers.js
++++ b/lib/helpers.js
+@@ -1,5 +1,9 @@
+ 'use strict';
+ 
++const isError = typeof Error.isError === 'function'
++  ? Error.isError
++  : (v) => v !== null && typeof v === 'object' && Object.prototype.toString.call(v) === '[object Error]';
++
+ /**
+  * @template {Error} T
+  * @param {unknown} err
+@@ -8,7 +12,7 @@
+  */
+ const findCauseByReference = (err, reference) => { // linemod-prefix-with: export
+   if (!err || !reference) return;
+-  if (!(err instanceof Error)) return;
++  if (!isError(err)) return;
+   if (
+     !(reference.prototype instanceof Error) &&
+     // @ts-ignore
+@@ -49,11 +53,11 @@ const getErrorCause = (err) => { // linemod-prefix-with: export
+   if (typeof err.cause === 'function') {
+     const causeResult = err.cause();
+ 
+-    return causeResult instanceof Error
++    return isError(causeResult)
+       ? causeResult
+       : undefined;
+   } else {
+-    return err.cause instanceof Error
++    return isError(err.cause)
+       ? err.cause
+       : undefined;
+   }
+@@ -68,7 +72,7 @@ const getErrorCause = (err) => { // linemod-prefix-with: export
+  * @returns {string}
+  */
+ const _stackWithCauses = (err, seen) => {
+-  if (!(err instanceof Error)) return '';
++  if (!isError(err)) return '';
+ 
+   const stack = err.stack || '';
+ 
+@@ -105,7 +109,7 @@ const stackWithCauses = (err) => _stackWithCauses(err, new Set()); // linemod-pr
+  * @returns {string}
+  */
+ const _messageWithCauses = (err, seen, skip) => {
+-  if (!(err instanceof Error)) return '';
++  if (!isError(err)) return '';
+ 
+   const message = skip ? '' : (err.message || '');
+ 
+diff --git a/lib/helpers.mjs b/lib/helpers.mjs
+index 71cf29eb3054be9885a75ffa625c59209f211504..92be97b04cbf8541c4426bd33ee26cfd9af52c82 100644
+--- a/lib/helpers.mjs
++++ b/lib/helpers.mjs
+@@ -1,5 +1,9 @@
+ 'use strict';
+ 
++const isError = typeof Error.isError === 'function'
++  ? Error.isError
++  : (v) => v !== null && typeof v === 'object' && Object.prototype.toString.call(v) === '[object Error]';
++
+ /**
+  * @template {Error} T
+  * @param {unknown} err
+@@ -8,7 +12,7 @@
+  */
+ export const findCauseByReference = (err, reference) => {
+   if (!err || !reference) return;
+-  if (!(err instanceof Error)) return;
++  if (!isError(err)) return;
+   if (
+     !(reference.prototype instanceof Error) &&
+     // @ts-ignore
+@@ -49,11 +53,11 @@ export const getErrorCause = (err) => {
+   if (typeof err.cause === 'function') {
+     const causeResult = err.cause();
+ 
+-    return causeResult instanceof Error
++    return isError(causeResult)
+       ? causeResult
+       : undefined;
+   } else {
+-    return err.cause instanceof Error
++    return isError(err.cause)
+       ? err.cause
+       : undefined;
+   }
+@@ -68,7 +72,7 @@ export const getErrorCause = (err) => {
+  * @returns {string}
+  */
+ const _stackWithCauses = (err, seen) => {
+-  if (!(err instanceof Error)) return '';
++  if (!isError(err)) return '';
+ 
+   const stack = err.stack || '';
+ 
+@@ -105,7 +109,7 @@ export const stackWithCauses = (err) => _stackWithCauses(err, new Set());
+  * @returns {string}
+  */
+ const _messageWithCauses = (err, seen, skip) => {
+-  if (!(err instanceof Error)) return '';
++  if (!isError(err)) return '';
+ 
+   const message = skip ? '' : (err.message || '');
+ 

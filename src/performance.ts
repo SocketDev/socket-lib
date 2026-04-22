@@ -6,6 +6,7 @@
 import process from 'node:process'
 
 import { debugLog } from './debug'
+import { errorMessage } from './errors'
 
 /**
  * Performance metrics collected during execution.
@@ -227,7 +228,7 @@ export async function measure<T>(
   } catch (e) {
     stop({
       success: false,
-      error: e instanceof Error ? e.message : 'Unknown',
+      error: errorMessage(e),
     })
     throw e
   }
@@ -264,7 +265,7 @@ export function measureSync<T>(
   } catch (e) {
     stop({
       success: false,
-      error: e instanceof Error ? e.message : 'Unknown',
+      error: errorMessage(e),
     })
     throw e
   }

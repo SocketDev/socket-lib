@@ -55,6 +55,7 @@ function getPath() {
   }
   return _path as typeof import('node:path')
 }
+import { errorMessage } from '../errors'
 import { readFileUtf8Sync, safeMkdirSync } from '../fs'
 import { getDefaultLogger } from '../logger'
 import { getSocketDlxDir } from '../paths/socket'
@@ -205,9 +206,7 @@ export class DlxManifest {
 
       return JSON.parse(content) as Record<string, ManifestEntry | StoreRecord>
     } catch (error) {
-      logger.warn(
-        `Failed to read manifest: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      logger.warn(`Failed to read manifest: ${errorMessage(error)}`)
       return { __proto__: null } as unknown as Record<
         string,
         ManifestEntry | StoreRecord
@@ -227,9 +226,7 @@ export class DlxManifest {
     try {
       safeMkdirSync(manifestDir, { recursive: true })
     } catch (error) {
-      logger.warn(
-        `Failed to create manifest directory: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      logger.warn(`Failed to create manifest directory: ${errorMessage(error)}`)
     }
 
     // Write atomically.
@@ -275,9 +272,7 @@ export class DlxManifest {
 
         await this.writeManifest(data)
       } catch (error) {
-        logger.warn(
-          `Failed to clear cache for ${name}: ${error instanceof Error ? error.message : String(error)}`,
-        )
+        logger.warn(`Failed to clear cache for ${name}: ${errorMessage(error)}`)
       }
     })
   }
@@ -292,9 +287,7 @@ export class DlxManifest {
           fs.unlinkSync(this.manifestPath)
         }
       } catch (error) {
-        logger.warn(
-          `Failed to clear all cache: ${error instanceof Error ? error.message : String(error)}`,
-        )
+        logger.warn(`Failed to clear all cache: ${errorMessage(error)}`)
       }
     })
   }
@@ -337,9 +330,7 @@ export class DlxManifest {
       const data = JSON.parse(content) as Record<string, StoreRecord>
       return Object.keys(data)
     } catch (error) {
-      logger.warn(
-        `Failed to get package list: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      logger.warn(`Failed to get package list: ${errorMessage(error)}`)
       return []
     }
   }
@@ -390,9 +381,7 @@ export class DlxManifest {
           }
         }
       } catch (error) {
-        logger.warn(
-          `Failed to read existing manifest: ${error instanceof Error ? error.message : String(error)}`,
-        )
+        logger.warn(`Failed to read existing manifest: ${errorMessage(error)}`)
       }
 
       // Update record.
@@ -404,7 +393,7 @@ export class DlxManifest {
         safeMkdirSync(manifestDir, { recursive: true })
       } catch (error) {
         logger.warn(
-          `Failed to create manifest directory: ${error instanceof Error ? error.message : String(error)}`,
+          `Failed to create manifest directory: ${errorMessage(error)}`,
         )
       }
 

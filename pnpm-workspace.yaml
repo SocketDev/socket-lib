@@ -1,8 +1,3 @@
-trustPolicy: no-downgrade
-trustPolicyExclude:
-  - '@yarnpkg/core@4.5.0'
-  - '@yarnpkg/libzip@3.2.2'
-
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
 # alongside the root. Keeps hook deps in lockstep with the main tree.
@@ -12,11 +7,13 @@ packages:
 allowBuilds:
   esbuild: true
 
-# Refuse to run if the pnpm version on PATH differs from the packageManager
-# field in package.json. Our setup action pins pnpm via external-tools.json;
-# any drift should fail fast, not silently auto-download via @pnpm/exe
-# (which in rc.5 leaves a placeholder launcher that errors at runtime).
-pmOnFail: error
+# Wait 7 days (10080 minutes) before installing newly published packages.
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@socketaddon/*'
+  - '@socketbin/*'
+  - '@socketregistry/*'
+  - '@socketsecurity/*'
 
 overrides:
   '@inquirer/ansi': 2.0.5
@@ -38,8 +35,8 @@ overrides:
   execa: 5.1.1
   has-flag: 5.0.1
   hosted-git-info: 8.1.0
-  json-parse-even-better-errors: 5.0.0
   isexe: 3.1.1
+  json-parse-even-better-errors: 5.0.0
   lru-cache: 11.2.2
   make-fetch-happen: 15.0.5
   minimatch: 9.0.6
@@ -53,8 +50,8 @@ overrides:
   npm-normalize-package-bin: 5.0.0
   npm-package-arg: 12.0.2
   npm-pick-manifest: 10.0.0
-  pacote: 21.5.0
   p-map: 7.0.4
+  pacote: 21.5.0
   picomatch: 4.0.4
   proc-log: 6.1.0
   semver: 7.7.2
@@ -75,13 +72,16 @@ patchedDependencies:
   execa@5.1.1: patches/execa@5.1.1.patch
   minipass-flush@1.0.7: patches/minipass-flush@1.0.7.patch
   minipass-pipeline@1.2.4: patches/minipass-pipeline@1.2.4.patch
-  node-gyp@11.5.0: patches/node-gyp@11.5.0.patch
   minipass-sized@1.0.3: patches/minipass-sized@1.0.3.patch
+  node-gyp@11.5.0: patches/node-gyp@11.5.0.patch
+  pony-cause@2.1.11: patches/pony-cause@2.1.11.patch
 
-# Wait 7 days (10080 minutes) before installing newly published packages.
-minimumReleaseAge: 10080
-minimumReleaseAgeExclude:
-  - '@socketaddon/*'
-  - '@socketbin/*'
-  - '@socketregistry/*'
-  - '@socketsecurity/*'
+# Refuse to run if the pnpm version on PATH differs from the packageManager
+# field in package.json. Our setup action pins pnpm via external-tools.json;
+# any drift should fail fast, not silently auto-download via @pnpm/exe
+# (which in rc.5 leaves a placeholder launcher that errors at runtime).
+pmOnFail: error
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - '@yarnpkg/core@4.5.0'
+  - '@yarnpkg/libzip@3.2.2'

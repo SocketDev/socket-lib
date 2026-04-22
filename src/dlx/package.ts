@@ -32,6 +32,7 @@
 
 import { WIN32 } from '../constants/platform'
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
+import { isError } from '../errors'
 import Arborist from '../external/@npmcli/arborist'
 import libnpmexec from '../external/libnpmexec'
 import npmPackageArg from '../external/npm-package-arg'
@@ -553,10 +554,7 @@ export async function ensurePackageInstalled(
         await arb.reify({ save: true })
       } catch (e) {
         // Rethrow firewall block errors without wrapping.
-        if (
-          e instanceof Error &&
-          e.message.startsWith('Socket Firewall blocked')
-        ) {
+        if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
           throw e
         }
         const code = (e as { code?: string } | null)?.code

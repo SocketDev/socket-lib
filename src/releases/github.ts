@@ -11,6 +11,7 @@ import {
   detectArchiveFormat,
   extractArchive,
 } from '../archives'
+import { errorMessage } from '../errors'
 import { safeMkdir } from '../fs'
 import { httpDownload, httpRequest } from '../http-request'
 import { getDefaultLogger } from '../logger'
@@ -654,7 +655,7 @@ export async function getLatestRelease(
               `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for ${toolPrefix} release...`,
             )
             logger.warn(
-              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${errorMessage(error)}`,
             )
           }
           return undefined
@@ -752,7 +753,7 @@ export async function getReleaseAssetUrl(
               `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for asset URL...`,
             )
             logger.warn(
-              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${errorMessage(error)}`,
             )
           }
           return undefined

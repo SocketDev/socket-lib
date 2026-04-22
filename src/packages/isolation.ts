@@ -6,6 +6,7 @@
 import npmPackageArg from '../external/npm-package-arg'
 
 import { WIN32 } from '../constants/platform'
+import { errorMessage } from '../errors'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
 import { spawn } from '../spawn'
@@ -78,10 +79,9 @@ async function mergePackageJson(
   try {
     pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
   } catch (error) {
-    throw new Error(
-      `Failed to parse ${pkgJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
-      { cause: error },
-    )
+    throw new Error(`Failed to parse ${pkgJsonPath}: ${errorMessage(error)}`, {
+      cause: error,
+    })
   }
   const mergedPkgJson = originalPkgJson
     ? { ...originalPkgJson, ...pkgJson }
