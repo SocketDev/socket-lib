@@ -4,7 +4,7 @@
 
 import process from 'node:process'
 
-const { apply: ReflectApply } = Reflect
+import { ReflectApply } from './primordials'
 
 // Store the original emitWarning function to avoid repeat wrapping.
 let originalEmitWarning: typeof process.emitWarning | undefined

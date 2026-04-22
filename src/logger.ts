@@ -8,6 +8,7 @@ import process from 'node:process'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
 
+import { ReflectApply, ReflectConstruct } from './primordials'
 import { applyLinePrefix, isBlankString } from './strings'
 import { getTheme, onThemeChange } from './themes/context'
 import { THEMES } from './themes/themes'
@@ -89,12 +90,6 @@ interface Task {
 export type { LogSymbols, LoggerMethods, Task }
 
 const globalConsole = console
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const ReflectApply = Reflect.apply
-const ReflectConstruct = Reflect.construct
 
 let _Console: typeof import('node:console').Console | undefined
 let _consoleSymbols: symbol[] | undefined

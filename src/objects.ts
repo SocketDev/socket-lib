@@ -10,6 +10,20 @@ import {
 } from './constants/core'
 
 import { isArray } from './arrays'
+import {
+  ObjectDefineProperties,
+  ObjectDefineProperty,
+  ObjectFreeze,
+  ObjectFromEntries,
+  ObjectGetOwnPropertyDescriptors,
+  ObjectGetOwnPropertyNames,
+  ObjectGetPrototypeOf,
+  ObjectHasOwn,
+  ObjectKeys,
+  ObjectPrototype,
+  ObjectSetPrototypeOf,
+  ReflectOwnKeys,
+} from './primordials'
 import { localeCompare } from './sorts'
 
 // Type definitions
@@ -78,32 +92,14 @@ type SortedObject<T> = {
 
 export type { GetterDefObj, LazyGetterStats, ConstantsObjectOptions, Remap }
 
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const ObjectDefineProperties = Object.defineProperties
-const ObjectDefineProperty = Object.defineProperty
-const ObjectFreeze = Object.freeze
-const ObjectFromEntries = Object.fromEntries
-const ObjectGetOwnPropertyDescriptors = Object.getOwnPropertyDescriptors
-const ObjectGetOwnPropertyNames = Object.getOwnPropertyNames
-const ObjectGetPrototypeOf = Object.getPrototypeOf
-const ObjectHasOwn = Object.hasOwn
-const ObjectKeys = Object.keys
-const ObjectPrototype = Object.prototype
-const ObjectSetPrototypeOf = Object.setPrototypeOf
+// __defineGetter__ is not in the public primordials surface — it's
+// deprecated-but-present on Object.prototype. Capture locally.
 // @ts-expect-error - __defineGetter__ exists but not in type definitions.
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
 // `exports.SomeName = void 0;` which causes runtime errors.
 // See: https://github.com/SocketDev/socket-packageurl-js/issues/3
 const __defineGetter__ = Object.prototype.__defineGetter__
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const ReflectOwnKeys = Reflect.ownKeys
 
 /**
  * Create a frozen constants object with lazy getters and internal properties.

@@ -15,12 +15,9 @@
 
 import { UNKNOWN_ERROR } from './constants/core'
 import { messageWithCauses, stackWithCauses } from './external/pony-cause'
+import { ObjectPrototypeToString } from './primordials'
 
 export { UNKNOWN_ERROR, messageWithCauses, stackWithCauses }
-
-// Capture built-ins so a later monkey-patch can't poison our checks.
-const ObjectPrototypeToString = Object.prototype.toString
-const ReflectApply = Reflect.apply
 
 /**
  * Spec-compliant [`Error.isError`](https://tc39.es/ecma262/#sec-error.iserror)
@@ -53,7 +50,7 @@ export function isErrorShim(value: unknown): value is Error {
   if (value === null || typeof value !== 'object') {
     return false
   }
-  return ReflectApply(ObjectPrototypeToString, value, []) === '[object Error]'
+  return ObjectPrototypeToString(value) === '[object Error]'
 }
 
 /**
