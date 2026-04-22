@@ -64,7 +64,7 @@ The umbrella rule: never run a git command that mutates state belonging to a pat
 
 - Flag misconceptions before executing
 - Flag adjacent bugs: "I also noticed X — want me to fix it?"
-- **Default to perfectionist mindset**: when you have latitude to choose, pick the maximally correct option — no shortcuts, no cosmetic deferrals. Fix state that *looks* stale even if not load-bearing. If pragmatism is the right call, the user will ask for it explicitly. "Works now" ≠ "right."
+- **Default to perfectionist mindset**: when you have latitude to choose, pick the maximally correct option — no shortcuts, no cosmetic deferrals. Fix state that _looks_ stale even if not load-bearing. If pragmatism is the right call, the user will ask for it explicitly. "Works now" ≠ "right."
 
 ## SCOPE PROTOCOL
 
