@@ -305,8 +305,8 @@ importers:
         specifier: 1.0.25
         version: 1.0.25
       '@socketsecurity/lib-stable':
-        specifier: npm:@socketsecurity/lib@5.23.0
-        version: '@socketsecurity/lib@5.23.0(typescript@5.9.2)'
+        specifier: npm:@socketsecurity/lib@5.24.0
+        version: '@socketsecurity/lib@5.24.0(typescript@5.9.2)'
       '@types/node':
         specifier: 24.9.2
         version: 24.9.2
@@ -458,8 +458,8 @@ importers:
         specifier: 1.4.2
         version: 1.4.2
       '@socketsecurity/lib':
-        specifier: 5.23.0
-        version: 5.23.0(typescript@5.9.2)
+        specifier: 5.24.0
+        version: 5.24.0(typescript@5.9.2)
       '@socketsecurity/sdk':
         specifier: 4.0.1
         version: 4.0.1
@@ -1610,8 +1610,8 @@ packages:
     resolution: {integrity: sha512-f8AqJMH1+BL15G6bHDzb1jyY+wW4gOYQs5JumSxmnE/H/+KgqbIZgaPwDdRwoeciDGojoSVrRHiTZjbe7n7dJA==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/lib@5.23.0':
-    resolution: {integrity: sha512-7/t0YEzYjl9Z3zFr8nTDLumQKUQuSs4NJ6TpHptVstJhKEXqL4fmRYv6MbMitVfq8P9sdifkoETqUwb7zrwtkg==}
+  '@socketsecurity/lib@5.24.0':
+    resolution: {integrity: sha512-4Yar8oo4N12ESoNt/i2PNf08HRABUC0OcfUfwzIF3xjq89E5VMDN+aeOtnn6Oo4Y6u3TiuZRG7NgEBZ83LQ1Lw==}
     engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -4148,7 +4148,7 @@ snapshots:
     dependencies:
       yoctocolors-cjs: 2.1.3
 
-  '@socketsecurity/lib@5.23.0(typescript@5.9.2)':
+  '@socketsecurity/lib@5.24.0(typescript@5.9.2)':
     optionalDependencies:
       typescript: 5.9.2
 
