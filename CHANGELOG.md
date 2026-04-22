@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.23.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.23.0) - 2026-04-22
+
+### Added
+
+- `@socketsecurity/lib/errors` `isError(value)` — spec-compliant ES2025 [`Error.isError`](https://tc39.es/ecma262/#sec-error.iserror) with an `@@toStringTag`-based shim for older engines. Recognizes cross-realm Errors (worker threads, vm contexts, iframes) that same-realm `instanceof Error` misses
+- `@socketsecurity/lib/errors` `errorMessage(value)` — extracts a readable message from any caught value (Error with cause chain via `messageWithCauses`, primitive, plain object, or nullish) with the shared `UNKNOWN_ERROR` (`'Unknown error'`) fallback. Replaces the `e instanceof Error ? e.message : String(e)` pattern
+- `@socketsecurity/lib/errors` `errorStack(value)` — companion helper returning the cause-aware stack for Error instances (via `stackWithCauses`) and `undefined` otherwise
+- `@socketsecurity/lib/errors` `isErrnoException(value)` — narrows to `NodeJS.ErrnoException` (an Error with a non-empty uppercase-prefixed `.code`, matching the libuv `UV_E*` / Node `ERR_*` conventions), cross-realm safe
+- `@socketsecurity/lib/errors` re-exports `UNKNOWN_ERROR` from `constants/core` so callers don't need a separate import
+
+### Changed
+
+- `@socketsecurity/lib/errors` pony-cause `messageWithCauses` / `stackWithCauses` / `findCauseByReference` / `getErrorCause` — patched to use `isError` internally so cross-realm Errors are recognized (previously returned `''` for any Error thrown in a different realm)
+
 ## [5.22.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.22.0) - 2026-04-21
 
 ### Changed
