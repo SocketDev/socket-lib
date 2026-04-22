@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "declarationMap": false,
+    "module": "esnext",
     "rootDir": ".",
     "sourceMap": false,
     "types": ["node", "vitest"]
