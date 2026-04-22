@@ -25,6 +25,7 @@ import {
   whichReal,
   whichRealSync,
 } from '@socketsecurity/lib/bin'
+import { isError } from '@socketsecurity/lib/errors'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
 
@@ -227,7 +228,7 @@ describe('bin', () => {
         } catch (error) {
           // Skip if symlinks are not supported on this platform
           if (
-            error instanceof Error &&
+            isError(error) &&
             (error.message.includes('EPERM') ||
               error.message.includes('operation not permitted'))
           ) {
@@ -709,7 +710,7 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
         await execBin('nonexistent-bin-12345')
       } catch (error) {
         expect(error).toBeInstanceOf(Error)
-        if (error instanceof Error) {
+        if (isError(error)) {
           expect((error as any).code).toBe('ENOENT')
         }
       }

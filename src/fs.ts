@@ -7,6 +7,7 @@ import process from 'node:process'
 
 import { isArray } from './arrays'
 import { getAbortSignal } from './constants/process'
+import { isErrnoException } from './errors'
 import { defaultIgnore, getGlobMatcher } from './globs'
 import { jsonParse } from './json/parse'
 import { objectFreeze, type Remap } from './objects'
@@ -1493,12 +1494,7 @@ export async function safeMkdir(
     await fs.promises.mkdir(path, opts)
   } catch (e: unknown) {
     // Ignore EEXIST (directory already exists); re-throw everything else.
-    if (
-      typeof e !== 'object' ||
-      e === null ||
-      !('code' in e) ||
-      (e as NodeJS.ErrnoException).code !== 'EEXIST'
-    ) {
+    if (!isErrnoException(e) || e.code !== 'EEXIST') {
       throw e
     }
   }
@@ -1543,12 +1539,7 @@ export function safeMkdirSync(
     fs.mkdirSync(path, opts)
   } catch (e: unknown) {
     // Ignore EEXIST (directory already exists); re-throw everything else.
-    if (
-      typeof e !== 'object' ||
-      e === null ||
-      !('code' in e) ||
-      (e as NodeJS.ErrnoException).code !== 'EEXIST'
-    ) {
+    if (!isErrnoException(e) || e.code !== 'EEXIST') {
       throw e
     }
   }
