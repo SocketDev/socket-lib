@@ -48,6 +48,12 @@ export const applyBind = bind.bind(apply) as <
 // ─── Constructors ──────────────────────────────────────────────────────
 export const ArrayCtor: ArrayConstructor = Array
 export const BooleanCtor: BooleanConstructor = Boolean
+// BufferCtor is a Node-only global; `undefined` in the browser. Callers
+// that import it in browser code get a type-safe `undefined` rather than
+// a runtime ReferenceError.
+export const BufferCtor: typeof globalThis.Buffer | undefined = (
+  globalThis as { Buffer?: typeof globalThis.Buffer }
+).Buffer
 export const DateCtor: DateConstructor = Date
 export const ErrorCtor: ErrorConstructor = Error
 export const MapCtor: MapConstructor = Map
@@ -135,6 +141,28 @@ export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
 ) => number
 export const ArrayPrototypeValues = uncurryThis(Array.prototype.values)
 
+// ─── Buffer (prototype) ────────────────────────────────────────────────
+// Buffer is a Node-only global; these helpers are `undefined` in browsers.
+// Typed as `Function | undefined` so TS forces a null-check in cross-env code.
+export const BufferPrototypeSlice:
+  | ((buf: Buffer, start?: number, end?: number) => Buffer)
+  | undefined = BufferCtor ? uncurryThis(BufferCtor.prototype.slice) : undefined
+export const BufferPrototypeToString:
+  | ((
+      buf: Buffer,
+      encoding?: BufferEncoding,
+      start?: number,
+      end?: number,
+    ) => string)
+  | undefined = BufferCtor
+  ? uncurryThis(BufferCtor.prototype.toString)
+  : undefined
+
+// ─── Date (prototype) ──────────────────────────────────────────────────
+export const DatePrototypeGetTime = uncurryThis(Date.prototype.getTime)
+export const DatePrototypeToISOString = uncurryThis(Date.prototype.toISOString)
+export const DatePrototypeValueOf = uncurryThis(Date.prototype.valueOf)
+
 // ─── Function ──────────────────────────────────────────────────────────
 export const FunctionPrototypeApply = uncurryThis(Function.prototype.apply) as (
   self: (...args: unknown[]) => unknown,
@@ -151,6 +179,40 @@ export const FunctionPrototypeCall = uncurryThis(Function.prototype.call) as (
   thisArg: unknown,
   ...args: unknown[]
 ) => unknown
+
+// ─── Iterator (prototype) ──────────────────────────────────────────────
+// Map#keys() / Set#values() / etc. share an iterator prototype chain.
+// In some engines `.next` lives on the immediate prototype; in others it
+// lives on a shared ancestor. Walk up until we find the level that owns
+// the method so `uncurryThis` grabs the same one regardless of engine.
+const _anyIterator = new Map().keys() as Iterator<unknown>
+let _iteratorLookup: object | null = Object.getPrototypeOf(_anyIterator)
+while (
+  _iteratorLookup &&
+  typeof (_iteratorLookup as { next?: unknown }).next !== 'function'
+) {
+  _iteratorLookup = Object.getPrototypeOf(_iteratorLookup)
+}
+const _iteratorProto = _iteratorLookup as {
+  next: (this: Iterator<unknown>) => IteratorResult<unknown>
+  return?: (this: Iterator<unknown>, value?: unknown) => IteratorResult<unknown>
+}
+export const IteratorPrototypeNext = uncurryThis(_iteratorProto.next)
+export const IteratorPrototypeReturn =
+  typeof _iteratorProto.return === 'function'
+    ? uncurryThis(_iteratorProto.return)
+    : undefined
+
+// ─── Map (prototype) ───────────────────────────────────────────────────
+export const MapPrototypeClear = uncurryThis(Map.prototype.clear)
+export const MapPrototypeDelete = uncurryThis(Map.prototype.delete)
+export const MapPrototypeEntries = uncurryThis(Map.prototype.entries)
+export const MapPrototypeForEach = uncurryThis(Map.prototype.forEach)
+export const MapPrototypeGet = uncurryThis(Map.prototype.get)
+export const MapPrototypeHas = uncurryThis(Map.prototype.has)
+export const MapPrototypeKeys = uncurryThis(Map.prototype.keys)
+export const MapPrototypeSet = uncurryThis(Map.prototype.set)
+export const MapPrototypeValues = uncurryThis(Map.prototype.values)
 
 // ─── Math ──────────────────────────────────────────────────────────────
 export const MathAbs = Math.abs
@@ -213,6 +275,11 @@ export const ObjectPrototypePropertyIsEnumerable = uncurryThis(
 export const ObjectPrototypeToString = uncurryThis(Object.prototype.toString)
 export const ObjectPrototypeValueOf = uncurryThis(Object.prototype.valueOf)
 
+// ─── Promise (prototype) ───────────────────────────────────────────────
+export const PromisePrototypeCatch = uncurryThis(Promise.prototype.catch)
+export const PromisePrototypeFinally = uncurryThis(Promise.prototype.finally)
+export const PromisePrototypeThen = uncurryThis(Promise.prototype.then)
+
 // ─── Reflect ───────────────────────────────────────────────────────────
 export const ReflectApply = Reflect.apply
 export const ReflectConstruct = Reflect.construct
@@ -241,6 +308,16 @@ export const RegExpPrototypeSymbolReplace = uncurryThis(
     replaceValue: string,
   ) => string,
 )
+
+// ─── Set (prototype) ───────────────────────────────────────────────────
+export const SetPrototypeAdd = uncurryThis(Set.prototype.add)
+export const SetPrototypeClear = uncurryThis(Set.prototype.clear)
+export const SetPrototypeDelete = uncurryThis(Set.prototype.delete)
+export const SetPrototypeEntries = uncurryThis(Set.prototype.entries)
+export const SetPrototypeForEach = uncurryThis(Set.prototype.forEach)
+export const SetPrototypeHas = uncurryThis(Set.prototype.has)
+export const SetPrototypeKeys = uncurryThis(Set.prototype.keys)
+export const SetPrototypeValues = uncurryThis(Set.prototype.values)
 
 // ─── String (static) ───────────────────────────────────────────────────
 export const StringFromCharCode = String.fromCharCode
@@ -326,3 +403,37 @@ export const SymbolFor = Symbol.for
 export const SymbolIterator = Symbol.iterator
 export const SymbolToPrimitive = Symbol.toPrimitive
 export const SymbolToStringTag = Symbol.toStringTag
+
+// ─── URLSearchParams (prototype) ───────────────────────────────────────
+export const URLSearchParamsPrototypeAppend = uncurryThis(
+  URLSearchParams.prototype.append,
+)
+export const URLSearchParamsPrototypeDelete = uncurryThis(
+  URLSearchParams.prototype.delete,
+)
+export const URLSearchParamsPrototypeForEach = uncurryThis(
+  URLSearchParams.prototype.forEach,
+)
+export const URLSearchParamsPrototypeGet = uncurryThis(
+  URLSearchParams.prototype.get,
+)
+export const URLSearchParamsPrototypeGetAll = uncurryThis(
+  URLSearchParams.prototype.getAll,
+)
+export const URLSearchParamsPrototypeHas = uncurryThis(
+  URLSearchParams.prototype.has,
+)
+export const URLSearchParamsPrototypeSet = uncurryThis(
+  URLSearchParams.prototype.set,
+)
+
+// ─── WeakMap (prototype) ───────────────────────────────────────────────
+export const WeakMapPrototypeDelete = uncurryThis(WeakMap.prototype.delete)
+export const WeakMapPrototypeGet = uncurryThis(WeakMap.prototype.get)
+export const WeakMapPrototypeHas = uncurryThis(WeakMap.prototype.has)
+export const WeakMapPrototypeSet = uncurryThis(WeakMap.prototype.set)
+
+// ─── WeakSet (prototype) ───────────────────────────────────────────────
+export const WeakSetPrototypeAdd = uncurryThis(WeakSet.prototype.add)
+export const WeakSetPrototypeDelete = uncurryThis(WeakSet.prototype.delete)
+export const WeakSetPrototypeHas = uncurryThis(WeakSet.prototype.has)
