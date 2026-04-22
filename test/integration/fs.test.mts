@@ -15,6 +15,7 @@ import path from 'node:path'
 
 import {
   readJson,
+  safeDelete,
   safeMkdir,
   safeStats,
   writeJson,
@@ -146,7 +147,7 @@ describe('fs integration', () => {
       expect(stats?.isDirectory()).toBe(true)
 
       // Cleanup
-      await fs.rm(testDir, { recursive: true, force: true })
+      await safeDelete(testDir)
     })
   })
 })

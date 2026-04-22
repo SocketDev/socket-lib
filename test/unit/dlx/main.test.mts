@@ -39,6 +39,7 @@ import {
   getDlxPackageNodeModulesDir,
   isInSocketDlx,
 } from '@socketsecurity/lib/dlx/paths'
+import { safeDeleteSync } from '@socketsecurity/lib/fs'
 import { getSocketDlxDir } from '@socketsecurity/lib/paths/socket'
 
 describe.sequential('dlx', () => {
@@ -140,7 +141,7 @@ describe.sequential('dlx', () => {
     it('should return false when DLX directory does not exist', () => {
       // Ensure it doesn't exist
       if (fs.existsSync(getSocketDlxDir())) {
-        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
+        safeDeleteSync(getSocketDlxDir(), { force: true })
       }
       expect(dlxDirExists()).toBe(false)
     })
@@ -155,7 +156,7 @@ describe.sequential('dlx', () => {
     it('should create DLX directory if it does not exist', async () => {
       // Ensure it doesn't exist
       if (fs.existsSync(getSocketDlxDir())) {
-        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
+        safeDeleteSync(getSocketDlxDir(), { force: true })
       }
       await ensureDlxDir()
       expect(fs.existsSync(getSocketDlxDir())).toBe(true)
@@ -169,7 +170,7 @@ describe.sequential('dlx', () => {
     it('sync version should create DLX directory if it does not exist', () => {
       // Ensure it doesn't exist
       if (fs.existsSync(getSocketDlxDir())) {
-        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
+        safeDeleteSync(getSocketDlxDir(), { force: true })
       }
       ensureDlxDirSync()
       expect(fs.existsSync(getSocketDlxDir())).toBe(true)
@@ -522,7 +523,7 @@ describe.sequential('dlx', () => {
     it('should not throw when DLX directory does not exist', async () => {
       // Ensure directory doesn't exist
       if (fs.existsSync(getSocketDlxDir())) {
-        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
+        safeDeleteSync(getSocketDlxDir(), { force: true })
       }
       await expect(clearDlx()).resolves.not.toThrow()
     })
@@ -548,7 +549,7 @@ describe.sequential('dlx', () => {
     it('sync version should not throw when DLX directory does not exist', () => {
       // Ensure directory doesn't exist
       if (fs.existsSync(getSocketDlxDir())) {
-        fs.rmSync(getSocketDlxDir(), { recursive: true, force: true })
+        safeDeleteSync(getSocketDlxDir(), { force: true })
       }
       expect(() => clearDlxSync()).not.toThrow()
     })

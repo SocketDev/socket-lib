@@ -5,6 +5,7 @@
 import { existsSync } from 'node:fs'
 import process from 'node:process'
 
+import { safeDelete } from '@socketsecurity/lib/fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // @ts-expect-error - no type declarations
@@ -882,7 +883,7 @@ describe('releases/github', () => {
         expect(existsSync(binaryFile)).toBe(true)
         expect(existsSync(versionFile)).toBe(true)
       } finally {
-        await fs.rm(testDir, { force: true, recursive: true }).catch(() => {})
+        await safeDelete(testDir, { force: true }).catch(() => {})
       }
     })
 
@@ -954,7 +955,7 @@ describe('releases/github', () => {
         expect(httpDownload).toHaveBeenCalledTimes(1)
         expect(existsSync(binaryFile)).toBe(true)
       } finally {
-        await fs.rm(testDir, { force: true, recursive: true }).catch(() => {})
+        await safeDelete(testDir, { force: true }).catch(() => {})
       }
     })
 
@@ -1024,7 +1025,7 @@ describe('releases/github', () => {
         // Cache updated to the new tag.
         expect(await fs.readFile(versionFile, 'utf8')).toBe('v1.0.0')
       } finally {
-        await fs.rm(testDir, { force: true, recursive: true }).catch(() => {})
+        await safeDelete(testDir, { force: true }).catch(() => {})
       }
     })
   })

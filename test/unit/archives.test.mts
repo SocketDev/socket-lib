@@ -36,6 +36,7 @@ import {
   extractTarGz,
   extractZip,
 } from '@socketsecurity/lib/archives'
+import { safeDelete } from '@socketsecurity/lib/fs'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 
@@ -115,7 +116,7 @@ beforeAll(async () => {
 
   cleanupTestFiles = async () => {
     try {
-      await fs.rm(tempDir, { force: true, recursive: true })
+      await safeDelete(tempDir, { force: true })
     } catch {
       // Ignore cleanup errors
     }

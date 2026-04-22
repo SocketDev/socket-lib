@@ -9,6 +9,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { safeDelete } from '@socketsecurity/lib/fs'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'
 
 /**
@@ -98,7 +99,7 @@ export async function withTempDir(prefix: string): Promise<{
   const cleanup = async () => {
     try {
       // Force delete temp directory outside CWD.
-      await fs.rm(tempDir, { force: true, recursive: true })
+      await safeDelete(tempDir, { force: true })
     } catch {
       // Ignore cleanup errors.
     }
