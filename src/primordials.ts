@@ -56,6 +56,14 @@ export const BufferCtor: typeof globalThis.Buffer | undefined = (
 ).Buffer
 export const DateCtor: DateConstructor = Date
 export const ErrorCtor: ErrorConstructor = Error
+// Error subclasses commonly thrown in validation paths.
+export const AggregateErrorCtor: AggregateErrorConstructor = AggregateError
+export const EvalErrorCtor: EvalErrorConstructor = EvalError
+export const RangeErrorCtor: RangeErrorConstructor = RangeError
+export const ReferenceErrorCtor: ReferenceErrorConstructor = ReferenceError
+export const SyntaxErrorCtor: SyntaxErrorConstructor = SyntaxError
+export const TypeErrorCtor: TypeErrorConstructor = TypeError
+export const URIErrorCtor: URIErrorConstructor = URIError
 export const MapCtor: MapConstructor = Map
 export const NumberCtor: NumberConstructor = Number
 export const ObjectCtor: ObjectConstructor = Object
