@@ -11,6 +11,7 @@
  */
 
 import { existsSync, promises as fs } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import {
@@ -487,6 +488,105 @@ describe('packages/operations', () => {
       expect(tarball).toBeDefined()
       expect(Buffer.isBuffer(tarball)).toBe(true)
     }, 30_000)
+
+    it('should run prepack scripts for a directory spec', async () => {
+      // Regression: @npmcli/run-script was previously stubbed as empty,
+      // which caused `runScript is not a function` when libnpmpack tried
+      // to fire `prepack` on directory specs. Write the sentinel file
+      // from a plain JS file rather than an inline -e string so shell
+      // quoting differences across platforms don't mask the test.
+      await runWithTempDir(async tmpDir => {
+        const sentinel = path.join(tmpDir, '.prepack-ran')
+        const scriptPath = path.join(tmpDir, 'prepack.cjs')
+        await fs.writeFile(
+          scriptPath,
+          `require('node:fs').writeFileSync(${JSON.stringify(sentinel)}, '1')\n`,
+        )
+        await fs.writeFile(
+          path.join(tmpDir, 'package.json'),
+          JSON.stringify({
+            name: 'prepack-probe',
+            version: '1.0.0',
+            scripts: {
+              prepack: `node ${JSON.stringify(scriptPath)}`,
+            },
+          }),
+        )
+
+        const tarball = await packPackage(tmpDir)
+        expect(Buffer.isBuffer(tarball)).toBe(true)
+        expect(existsSync(sentinel)).toBe(true)
+      }, 'pack-prepack-')
+    }, 30_000)
+  })
+
+  describe('pacote fetcher coverage', () => {
+    // These tests guard against re-stubbing the non-registry pacote
+    // fetchers. Each spec type reaches a different fetcher inside
+    // pacote/lib — if any of dir/file/remote/git is stubbed with
+    // `pacote-fetcher-throw.cjs`, the corresponding assertion below
+    // fails loudly rather than silently shipping a broken bundle.
+    it('directory specs use pacote/lib/dir.js', async () => {
+      await runWithTempDir(async tmpDir => {
+        await fs.writeFile(
+          path.join(tmpDir, 'package.json'),
+          JSON.stringify({ name: 'dir-probe', version: '1.0.0' }),
+        )
+        const tarball = await packPackage(tmpDir)
+        expect(Buffer.isBuffer(tarball)).toBe(true)
+      }, 'dir-fetcher-')
+    }, 30_000)
+
+    it('local tarball specs use pacote/lib/file.js', async () => {
+      // First pack a tiny directory into a tarball, then re-pack the
+      // tarball file itself. The second call hits the File fetcher.
+      await runWithTempDir(async tmpDir => {
+        await fs.writeFile(
+          path.join(tmpDir, 'package.json'),
+          JSON.stringify({ name: 'file-probe', version: '1.0.0' }),
+        )
+        const tarball = (await packPackage(tmpDir)) as Buffer
+        const tarballPath = path.join(tmpDir, 'file-probe-1.0.0.tgz')
+        await fs.writeFile(tarballPath, tarball)
+
+        const extractDest = path.join(tmpDir, 'extracted')
+        await fs.mkdir(extractDest, { recursive: true })
+        await extractPackage(tarballPath, { dest: extractDest })
+        expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
+      }, 'file-fetcher-')
+    }, 30_000)
+
+    it('remote tarball specs use pacote/lib/remote.js', async () => {
+      // Registry tarball fetched via a direct http(s) URL — bypasses
+      // the registry resolver and goes straight through RemoteFetcher.
+      await runWithTempDir(async tmpDir => {
+        const extractDest = path.join(tmpDir, 'extracted')
+        await fs.mkdir(extractDest, { recursive: true })
+        await extractPackage(
+          'https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz',
+          { dest: extractDest },
+        )
+        expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
+      }, 'remote-fetcher-')
+    }, 60_000)
+
+    it('git specs use pacote/lib/git.js + @npmcli/git', async () => {
+      // Git archives are fetched via pacote/lib/git.js which wraps
+      // @npmcli/git. Stubbing either breaks every git-backed spec.
+      // pacote's GitFetcher requires an Arborist constructor at pack
+      // time — pass it explicitly so the fetcher can run.
+      const testRequire = createRequire(import.meta.url)
+      const Arborist = testRequire('@npmcli/arborist')
+      await runWithTempDir(async tmpDir => {
+        const extractDest = path.join(tmpDir, 'extracted')
+        await fs.mkdir(extractDest, { recursive: true })
+        await extractPackage(
+          'github:jonschlinkert/is-number#7.0.0',
+          { dest: extractDest, Arborist } as any,
+        )
+        expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
+      }, 'git-fetcher-')
+    }, 120_000)
   })
 
   describe('resolveGitHubTgzUrl', () => {

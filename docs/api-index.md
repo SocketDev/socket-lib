@@ -124,30 +124,29 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## env/
 
-| Subpath                                                                        | Description                                                    |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| [`@socketsecurity/lib/env/ci`](../src/env/ci.ts)                               | CI environment variable getter.                                |
-| [`@socketsecurity/lib/env/debug`](../src/env/debug.ts)                         | DEBUG environment variable getter.                             |
-| [`@socketsecurity/lib/env/github`](../src/env/github.ts)                       | GitHub Actions environment variable getters.                   |
-| [`@socketsecurity/lib/env/helpers`](../src/env/helpers.ts)                     | Environment variable type conversion helpers.                  |
-| [`@socketsecurity/lib/env/home`](../src/env/home.ts)                           | HOME environment variable getter with Windows fallback.        |
-| [`@socketsecurity/lib/env/locale`](../src/env/locale.ts)                       | Locale and language environment variable getters.              |
-| [`@socketsecurity/lib/env/node-auth-token`](../src/env/node-auth-token.ts)     | NODE_AUTH_TOKEN environment variable getter.                   |
-| [`@socketsecurity/lib/env/node-env`](../src/env/node-env.ts)                   | NODE_ENV environment variable getter.                          |
-| [`@socketsecurity/lib/env/npm`](../src/env/npm.ts)                             | NPM environment variable getters.                              |
-| [`@socketsecurity/lib/env/package-manager`](../src/env/package-manager.ts)     | Package manager environment detection.                         |
-| [`@socketsecurity/lib/env/path`](../src/env/path.ts)                           | PATH environment variable getter.                              |
-| [`@socketsecurity/lib/env/pre-commit`](../src/env/pre-commit.ts)               | PRE_COMMIT environment variable getter.                        |
-| [`@socketsecurity/lib/env/rewire`](../src/env/rewire.ts)                       | Environment variable rewiring utilities for testing.           |
-| [`@socketsecurity/lib/env/shell`](../src/env/shell.ts)                         | SHELL environment variable getter.                             |
-| [`@socketsecurity/lib/env/socket`](../src/env/socket.ts)                       | Socket Security environment variable getters.                  |
-| [`@socketsecurity/lib/env/socket-cli`](../src/env/socket-cli.ts)               | Socket CLI environment variables.                              |
-| [`@socketsecurity/lib/env/socket-cli-shadow`](../src/env/socket-cli-shadow.ts) | Socket CLI shadow mode environment variables.                  |
-| [`@socketsecurity/lib/env/temp-dir`](../src/env/temp-dir.ts)                   | Temporary directory environment variable getters.              |
-| [`@socketsecurity/lib/env/term`](../src/env/term.ts)                           | TERM environment variable getter.                              |
-| [`@socketsecurity/lib/env/test`](../src/env/test.ts)                           | Test environment variable getters and detection.               |
-| [`@socketsecurity/lib/env/windows`](../src/env/windows.ts)                     | Windows environment variable getters.                          |
-| [`@socketsecurity/lib/env/xdg`](../src/env/xdg.ts)                             | XDG Base Directory Specification environment variable getters. |
+| Subpath                                                                    | Description                                                    |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [`@socketsecurity/lib/env/ci`](../src/env/ci.ts)                           | CI environment variable getter.                                |
+| [`@socketsecurity/lib/env/debug`](../src/env/debug.ts)                     | DEBUG environment variable getter.                             |
+| [`@socketsecurity/lib/env/github`](../src/env/github.ts)                   | GitHub Actions environment variable getters.                   |
+| [`@socketsecurity/lib/env/helpers`](../src/env/helpers.ts)                 | Environment variable type conversion helpers.                  |
+| [`@socketsecurity/lib/env/home`](../src/env/home.ts)                       | HOME environment variable getter with Windows fallback.        |
+| [`@socketsecurity/lib/env/locale`](../src/env/locale.ts)                   | Locale and language environment variable getters.              |
+| [`@socketsecurity/lib/env/node-auth-token`](../src/env/node-auth-token.ts) | NODE_AUTH_TOKEN environment variable getter.                   |
+| [`@socketsecurity/lib/env/node-env`](../src/env/node-env.ts)               | NODE_ENV environment variable getter.                          |
+| [`@socketsecurity/lib/env/npm`](../src/env/npm.ts)                         | NPM environment variable getters.                              |
+| [`@socketsecurity/lib/env/package-manager`](../src/env/package-manager.ts) | Package manager environment detection.                         |
+| [`@socketsecurity/lib/env/path`](../src/env/path.ts)                       | PATH environment variable getter.                              |
+| [`@socketsecurity/lib/env/pre-commit`](../src/env/pre-commit.ts)           | PRE_COMMIT environment variable getter.                        |
+| [`@socketsecurity/lib/env/rewire`](../src/env/rewire.ts)                   | Environment variable rewiring utilities for testing.           |
+| [`@socketsecurity/lib/env/shell`](../src/env/shell.ts)                     | SHELL environment variable getter.                             |
+| [`@socketsecurity/lib/env/socket`](../src/env/socket.ts)                   | Socket Security environment variable getters.                  |
+| [`@socketsecurity/lib/env/socket-cli`](../src/env/socket-cli.ts)           | Socket CLI environment variables.                              |
+| [`@socketsecurity/lib/env/temp-dir`](../src/env/temp-dir.ts)               | Temporary directory environment variable getters.              |
+| [`@socketsecurity/lib/env/term`](../src/env/term.ts)                       | TERM environment variable getter.                              |
+| [`@socketsecurity/lib/env/test`](../src/env/test.ts)                       | Test environment variable getters and detection.               |
+| [`@socketsecurity/lib/env/windows`](../src/env/windows.ts)                 | Windows environment variable getters.                          |
+| [`@socketsecurity/lib/env/xdg`](../src/env/xdg.ts)                         | XDG Base Directory Specification environment variable getters. |
 
 ## json/
 

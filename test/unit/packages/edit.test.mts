@@ -262,6 +262,28 @@ describe('packages/editable', () => {
         expect(pkg).toBeDefined()
       }, 'editable-prepare-')
     })
+
+    it('should populate gitHead when inside a git repo', async () => {
+      // Regression: @npmcli/git was previously stubbed as empty,
+      // which broke normalize's `gitHead` step (`git.find is not a
+      // function`) and made every `prepare()` call throw. This test
+      // sets up a minimal .git layout and asserts the step actually
+      // reads HEAD rather than silently skipping it.
+      await runWithTempDir(async tmpDir => {
+        const headSha = 'a'.repeat(40)
+        await fs.mkdir(path.join(tmpDir, '.git'), { recursive: true })
+        await fs.writeFile(path.join(tmpDir, '.git', 'HEAD'), headSha + '\n')
+        await fs.writeFile(
+          path.join(tmpDir, 'package.json'),
+          JSON.stringify({ name: 'githead-probe', version: '1.0.0' }),
+        )
+
+        const EditablePackageJson = getEditablePackageJsonClass()
+        const pkg = await EditablePackageJson.prepare(tmpDir, {})
+
+        expect((pkg as any).content.gitHead).toBe(headSha)
+      }, 'editable-prepare-githead-')
+    })
   })
 
   describe('EditablePackageJson instance methods', () => {

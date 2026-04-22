@@ -458,8 +458,8 @@ importers:
         specifier: 1.4.2
         version: 1.4.2
       '@socketsecurity/lib':
-        specifier: 5.21.0
-        version: 5.21.0(typescript@5.9.2)
+        specifier: 5.23.0
+        version: 5.23.0(typescript@5.9.2)
       '@socketsecurity/sdk':
         specifier: 4.0.1
         version: 4.0.1
@@ -1609,15 +1609,6 @@ packages:
   '@socketregistry/yocto-spinner@1.0.25':
     resolution: {integrity: sha512-f8AqJMH1+BL15G6bHDzb1jyY+wW4gOYQs5JumSxmnE/H/+KgqbIZgaPwDdRwoeciDGojoSVrRHiTZjbe7n7dJA==}
     engines: {node: '>=18'}
-
-  '@socketsecurity/lib@5.21.0':
-    resolution: {integrity: sha512-cSqdq2kOBSuH3u8rfDhViCrN7IJPqzAvzklUYrEFhohUgJkky0+YYQ/gbSwRehZDGY8mqv+6lKGrt4OKWnNsdQ==}
-    engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
-    peerDependencies:
-      typescript: '>=5.0.0'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   '@socketsecurity/lib@5.23.0':
     resolution: {integrity: sha512-7/t0YEzYjl9Z3zFr8nTDLumQKUQuSs4NJ6TpHptVstJhKEXqL4fmRYv6MbMitVfq8P9sdifkoETqUwb7zrwtkg==}
@@ -4156,10 +4147,6 @@ snapshots:
   '@socketregistry/yocto-spinner@1.0.25':
     dependencies:
       yoctocolors-cjs: 2.1.3
-
-  '@socketsecurity/lib@5.21.0(typescript@5.9.2)':
-    optionalDependencies:
-      typescript: 5.9.2
 
   '@socketsecurity/lib@5.23.0(typescript@5.9.2)':
     optionalDependencies:

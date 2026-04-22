@@ -30,10 +30,6 @@ const requireResolve = createRequire(import.meta.url)
  * to also match (used to scope relative-path stubs to a specific package).
  */
 const STUB_MAP: Record<string, string | [RegExp, string]> = {
-  // Git-based package specs (`git://`, `github:`, `gitlab:`). We only
-  // pass registry specs (`name@version`); pacote/lib/git.js and
-  // @npmcli/git are unreachable.
-  '^@npmcli/git$': 'empty.cjs',
   // Vulnerability calculator — arb.audit() path only.
   '^@npmcli/metavuln-calculator$': 'empty.cjs',
   // Arborist CSS-selector query API — unused.
@@ -45,10 +41,6 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   // value is consumed but never acted on. Stub returns falsy =>
   // isGyp=false => branch skipped.
   '^@npmcli/node-gyp$': 'npmcli-node-gyp.cjs',
-  // Lifecycle scripts — we always pass ignoreScripts: true, so every
-  // runScript(...) call site in arborist/reify.js and arborist/rebuild.js
-  // is guarded out.
-  '^@npmcli/run-script$': 'empty.cjs',
   // Sigstore attestation — reachable only via arb.audit(), unused.
   '^@sigstore/(bundle|core|protobuf-specs|sign|tuf|verify)$': 'empty.cjs',
   // TUF root-of-trust — Sigstore-only dependency.
@@ -62,16 +54,25 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
   '^proggy$': 'proggy.cjs',
   '^sigstore$': 'empty.cjs',
   '^tuf-js$': 'empty.cjs',
-  // Pacote non-registry fetchers — eagerly required at the top of
-  // pacote/lib/fetcher.js but only instantiated when the parsed spec
-  // type matches. We only pass registry specs (name@version/range/tag)
-  // → RegistryFetcher is the only one that ever fires. Scope each
-  // stub to imports coming from inside pacote/lib so unrelated ./dir
-  // etc. imports elsewhere aren't caught.
-  '^\\./dir\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
-  '^\\./file\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
-  '^\\./git\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
-  '^\\./remote\\.js$': [/pacote[\\/]lib[\\/]/, 'pacote-fetcher-throw.cjs'],
+  // Pacote fetchers were previously stubbed on the assumption that
+  // our API surface only passes registry specs. That assumption is
+  // false:
+  //   - `./dir.js`    is reached for directory specs that
+  //                   `packPackage(path)` / `extractPackage(path)`
+  //                   routinely pass.
+  //   - `./file.js`   is reached for local tarball specs.
+  //   - `./remote.js` is reached for http(s) tarball specs AND
+  //                   internally from registry.js's
+  //                   `_tarballFromResolved()` which streams every
+  //                   registry tarball as a remote fetch.
+  //   - `./git.js`    is reached for `git+https://`, `github:`,
+  //                   `gitlab:`, etc. specs. We don't test that
+  //                   path, but our API surface doesn't forbid it,
+  //                   and stubbing silently turns a valid spec into
+  //                   "this pacote fetcher is stubbed out" at
+  //                   runtime.
+  // None of them can be safely stubbed at the API boundary we
+  // expose, so leave all four fetchers real.
   // Arborist AuditReport — load() is gated on options.audit !== false
   // and we always pass audit: false. The require is eager but the
   // class is never instantiated.
