@@ -30,163 +30,211 @@
 //   const { apply, bind, call } = Function.prototype
 //   const uncurryThis = bind.bind(call)
 const { apply, bind, call } = Function.prototype
-const uncurryThis = bind.bind(call) as <T, A extends readonly unknown[], R>(
+export const uncurryThis = bind.bind(call) as <
+  T,
+  A extends readonly unknown[],
+  R,
+>(
   fn: (this: T, ...args: A) => R,
 ) => (self: T, ...args: A) => R
-const applyBind = bind.bind(apply) as <T, A extends readonly unknown[], R>(
+export const applyBind = bind.bind(apply) as <
+  T,
+  A extends readonly unknown[],
+  R,
+>(
   fn: (this: T, ...args: A) => R,
 ) => (self: T, args: A) => R
 
 // ─── Constructors ──────────────────────────────────────────────────────
-const ArrayCtor: ArrayConstructor = Array
-const BooleanCtor: BooleanConstructor = Boolean
-const DateCtor: DateConstructor = Date
-const ErrorCtor: ErrorConstructor = Error
-const MapCtor: MapConstructor = Map
-const NumberCtor: NumberConstructor = Number
-const ObjectCtor: ObjectConstructor = Object
-const PromiseCtor: PromiseConstructor = Promise
-const RegExpCtor: RegExpConstructor = RegExp
-const SetCtor: SetConstructor = Set
-const StringCtor: StringConstructor = String
-const SymbolCtor: SymbolConstructor = Symbol
-const URLCtor: typeof URL = URL
-const URLSearchParamsCtor: typeof URLSearchParams = URLSearchParams
-const WeakMapCtor: WeakMapConstructor = WeakMap
-const WeakRefCtor: WeakRefConstructor = WeakRef
-const WeakSetCtor: WeakSetConstructor = WeakSet
+export const ArrayCtor: ArrayConstructor = Array
+export const BooleanCtor: BooleanConstructor = Boolean
+export const DateCtor: DateConstructor = Date
+export const ErrorCtor: ErrorConstructor = Error
+export const MapCtor: MapConstructor = Map
+export const NumberCtor: NumberConstructor = Number
+export const ObjectCtor: ObjectConstructor = Object
+export const PromiseCtor: PromiseConstructor = Promise
+export const RegExpCtor: RegExpConstructor = RegExp
+export const SetCtor: SetConstructor = Set
+export const StringCtor: StringConstructor = String
+export const SymbolCtor: SymbolConstructor = Symbol
+export const URLCtor: typeof URL = URL
+export const URLSearchParamsCtor: typeof URLSearchParams = URLSearchParams
+export const WeakMapCtor: WeakMapConstructor = WeakMap
+export const WeakRefCtor: WeakRefConstructor = WeakRef
+export const WeakSetCtor: WeakSetConstructor = WeakSet
 
 // ─── Global functions ──────────────────────────────────────────────────
-const decodeComponent = globalThis.decodeURIComponent
-const encodeComponent = globalThis.encodeURIComponent
+export const decodeComponent = globalThis.decodeURIComponent
+export const encodeComponent = globalThis.encodeURIComponent
 
 // ─── JSON ──────────────────────────────────────────────────────────────
-const JSONParse = JSON.parse
-const JSONStringify = JSON.stringify
+export const JSONParse = JSON.parse
+export const JSONStringify = JSON.stringify
 
 // ─── Array (static) ────────────────────────────────────────────────────
-const ArrayFrom = Array.from
-const ArrayIsArray = Array.isArray
-const ArrayOf = Array.of
+export const ArrayFrom = Array.from
+export const ArrayIsArray = Array.isArray
+export const ArrayOf = Array.of
 
 // ─── Array (prototype) ─────────────────────────────────────────────────
-const ArrayPrototypeAt = uncurryThis(Array.prototype.at)
-const ArrayPrototypeConcat = uncurryThis(Array.prototype.concat) as <T>(
+export const ArrayPrototypeAt = uncurryThis(Array.prototype.at)
+export const ArrayPrototypeConcat = uncurryThis(Array.prototype.concat) as <T>(
   self: T[],
   ...items: Array<T | readonly T[]>
 ) => T[]
-const ArrayPrototypeCopyWithin = uncurryThis(Array.prototype.copyWithin)
-const ArrayPrototypeEntries = uncurryThis(Array.prototype.entries)
-const ArrayPrototypeEvery = uncurryThis(Array.prototype.every)
-const ArrayPrototypeFill = uncurryThis(Array.prototype.fill)
-const ArrayPrototypeFilter = uncurryThis(Array.prototype.filter)
-const ArrayPrototypeFind = uncurryThis(Array.prototype.find)
-const ArrayPrototypeFindIndex = uncurryThis(Array.prototype.findIndex)
-const ArrayPrototypeFindLast = uncurryThis(Array.prototype.findLast)
-const ArrayPrototypeFindLastIndex = uncurryThis(Array.prototype.findLastIndex)
-const ArrayPrototypeFlat = uncurryThis(Array.prototype.flat)
-const ArrayPrototypeFlatMap = uncurryThis(Array.prototype.flatMap)
-const ArrayPrototypeForEach = uncurryThis(Array.prototype.forEach)
-const ArrayPrototypeIncludes = uncurryThis(Array.prototype.includes)
-const ArrayPrototypeIndexOf = uncurryThis(Array.prototype.indexOf)
-const ArrayPrototypeJoin = uncurryThis(Array.prototype.join)
-const ArrayPrototypeKeys = uncurryThis(Array.prototype.keys)
-const ArrayPrototypeLastIndexOf = uncurryThis(Array.prototype.lastIndexOf)
-const ArrayPrototypeMap = uncurryThis(Array.prototype.map)
-const ArrayPrototypePop = uncurryThis(Array.prototype.pop)
-const ArrayPrototypePush = uncurryThis(Array.prototype.push) as <T>(
+export const ArrayPrototypeCopyWithin = uncurryThis(Array.prototype.copyWithin)
+export const ArrayPrototypeEntries = uncurryThis(Array.prototype.entries)
+export const ArrayPrototypeEvery = uncurryThis(Array.prototype.every)
+export const ArrayPrototypeFill = uncurryThis(Array.prototype.fill)
+export const ArrayPrototypeFilter = uncurryThis(Array.prototype.filter)
+export const ArrayPrototypeFind = uncurryThis(Array.prototype.find)
+export const ArrayPrototypeFindIndex = uncurryThis(Array.prototype.findIndex)
+export const ArrayPrototypeFindLast = uncurryThis(Array.prototype.findLast)
+export const ArrayPrototypeFindLastIndex = uncurryThis(
+  Array.prototype.findLastIndex,
+)
+export const ArrayPrototypeFlat = uncurryThis(Array.prototype.flat)
+export const ArrayPrototypeFlatMap = uncurryThis(Array.prototype.flatMap)
+export const ArrayPrototypeForEach = uncurryThis(Array.prototype.forEach)
+export const ArrayPrototypeIncludes = uncurryThis(Array.prototype.includes)
+export const ArrayPrototypeIndexOf = uncurryThis(Array.prototype.indexOf)
+export const ArrayPrototypeJoin = uncurryThis(Array.prototype.join)
+export const ArrayPrototypeKeys = uncurryThis(Array.prototype.keys)
+export const ArrayPrototypeLastIndexOf = uncurryThis(
+  Array.prototype.lastIndexOf,
+)
+export const ArrayPrototypeMap = uncurryThis(Array.prototype.map)
+export const ArrayPrototypePop = uncurryThis(Array.prototype.pop)
+export const ArrayPrototypePush = uncurryThis(Array.prototype.push) as <T>(
   self: T[],
   ...items: T[]
 ) => number
-const ArrayPrototypeReduce = uncurryThis(Array.prototype.reduce)
-const ArrayPrototypeReduceRight = uncurryThis(Array.prototype.reduceRight)
-const ArrayPrototypeReverse = uncurryThis(Array.prototype.reverse)
-const ArrayPrototypeShift = uncurryThis(Array.prototype.shift)
-const ArrayPrototypeSlice = uncurryThis(Array.prototype.slice)
-const ArrayPrototypeSome = uncurryThis(Array.prototype.some)
-const ArrayPrototypeSort = uncurryThis(Array.prototype.sort)
-const ArrayPrototypeSplice = uncurryThis(Array.prototype.splice) as <T>(
+export const ArrayPrototypeReduce = uncurryThis(Array.prototype.reduce)
+export const ArrayPrototypeReduceRight = uncurryThis(
+  Array.prototype.reduceRight,
+)
+export const ArrayPrototypeReverse = uncurryThis(Array.prototype.reverse)
+export const ArrayPrototypeShift = uncurryThis(Array.prototype.shift)
+export const ArrayPrototypeSlice = uncurryThis(Array.prototype.slice)
+export const ArrayPrototypeSome = uncurryThis(Array.prototype.some)
+export const ArrayPrototypeSort = uncurryThis(Array.prototype.sort)
+export const ArrayPrototypeSplice = uncurryThis(Array.prototype.splice) as <T>(
   self: T[],
   start: number,
   deleteCount?: number,
   ...items: T[]
 ) => T[]
-const ArrayPrototypeToReversed = uncurryThis(Array.prototype.toReversed)
-const ArrayPrototypeToSorted = uncurryThis(Array.prototype.toSorted)
-const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <T>(
+export const ArrayPrototypeToReversed = uncurryThis(Array.prototype.toReversed)
+export const ArrayPrototypeToSorted = uncurryThis(Array.prototype.toSorted)
+export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
+  T,
+>(
   self: T[],
   ...items: T[]
 ) => number
-const ArrayPrototypeValues = uncurryThis(Array.prototype.values)
+export const ArrayPrototypeValues = uncurryThis(Array.prototype.values)
+
+// ─── Function ──────────────────────────────────────────────────────────
+export const FunctionPrototypeApply = uncurryThis(Function.prototype.apply) as (
+  self: (...args: unknown[]) => unknown,
+  thisArg: unknown,
+  args: unknown[],
+) => unknown
+export const FunctionPrototypeBind = uncurryThis(Function.prototype.bind) as (
+  self: (...args: unknown[]) => unknown,
+  thisArg: unknown,
+  ...args: unknown[]
+) => (...args: unknown[]) => unknown
+export const FunctionPrototypeCall = uncurryThis(Function.prototype.call) as (
+  self: (...args: unknown[]) => unknown,
+  thisArg: unknown,
+  ...args: unknown[]
+) => unknown
+
+// ─── Math ──────────────────────────────────────────────────────────────
+export const MathAbs = Math.abs
+export const MathCeil = Math.ceil
+export const MathFloor = Math.floor
+export const MathMax = Math.max
+export const MathMin = Math.min
+export const MathPow = Math.pow
+export const MathRandom = Math.random
+export const MathRound = Math.round
+export const MathSign = Math.sign
+export const MathSqrt = Math.sqrt
+export const MathTrunc = Math.trunc
 
 // ─── Number ───────────────────────────────────────────────────────────
-const NumberIsFinite = Number.isFinite
-const NumberIsInteger = Number.isInteger
-const NumberIsNaN = Number.isNaN
-const NumberIsSafeInteger = Number.isSafeInteger
-const NumberParseFloat = Number.parseFloat
-const NumberParseInt = Number.parseInt
-const NumberPrototypeToFixed = uncurryThis(Number.prototype.toFixed)
-const NumberPrototypeToString = uncurryThis(Number.prototype.toString)
+export const NumberIsFinite = Number.isFinite
+export const NumberIsInteger = Number.isInteger
+export const NumberIsNaN = Number.isNaN
+export const NumberIsSafeInteger = Number.isSafeInteger
+export const NumberParseFloat = Number.parseFloat
+export const NumberParseInt = Number.parseInt
+export const NumberPrototypeToFixed = uncurryThis(Number.prototype.toFixed)
+export const NumberPrototypeToString = uncurryThis(Number.prototype.toString)
 
 // ─── Object (static) ───────────────────────────────────────────────────
-const ObjectAssign = Object.assign
-const ObjectCreate = Object.create
-const ObjectDefineProperties = Object.defineProperties
-const ObjectDefineProperty = Object.defineProperty
-const ObjectEntries = Object.entries
-const ObjectFreeze = Object.freeze
-const ObjectFromEntries = Object.fromEntries
-const ObjectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor
-const ObjectGetOwnPropertyDescriptors = Object.getOwnPropertyDescriptors
-const ObjectGetOwnPropertyNames = Object.getOwnPropertyNames
-const ObjectGetOwnPropertySymbols = Object.getOwnPropertySymbols
-const ObjectGetPrototypeOf = Object.getPrototypeOf
-const ObjectHasOwn = Object.hasOwn
-const ObjectIs = Object.is
-const ObjectIsExtensible = Object.isExtensible
-const ObjectIsFrozen = Object.isFrozen
-const ObjectIsSealed = Object.isSealed
-const ObjectKeys = Object.keys
-const ObjectPreventExtensions = Object.preventExtensions
-const ObjectSeal = Object.seal
-const ObjectSetPrototypeOf = Object.setPrototypeOf
-const ObjectValues = Object.values
+export const ObjectAssign = Object.assign
+export const ObjectCreate = Object.create
+export const ObjectDefineProperties = Object.defineProperties
+export const ObjectDefineProperty = Object.defineProperty
+export const ObjectEntries = Object.entries
+export const ObjectFreeze = Object.freeze
+export const ObjectFromEntries = Object.fromEntries
+export const ObjectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor
+export const ObjectGetOwnPropertyDescriptors = Object.getOwnPropertyDescriptors
+export const ObjectGetOwnPropertyNames = Object.getOwnPropertyNames
+export const ObjectGetOwnPropertySymbols = Object.getOwnPropertySymbols
+export const ObjectGetPrototypeOf = Object.getPrototypeOf
+export const ObjectHasOwn = Object.hasOwn
+export const ObjectIs = Object.is
+export const ObjectIsExtensible = Object.isExtensible
+export const ObjectIsFrozen = Object.isFrozen
+export const ObjectIsSealed = Object.isSealed
+export const ObjectKeys = Object.keys
+export const ObjectPreventExtensions = Object.preventExtensions
+export const ObjectSeal = Object.seal
+export const ObjectSetPrototypeOf = Object.setPrototypeOf
+export const ObjectValues = Object.values
 
 // ─── Object (prototype) ────────────────────────────────────────────────
-const ObjectPrototype = Object.prototype
-const ObjectPrototypeHasOwnProperty = uncurryThis(
+export const ObjectPrototype = Object.prototype
+export const ObjectPrototypeHasOwnProperty = uncurryThis(
   Object.prototype.hasOwnProperty,
 )
-const ObjectPrototypeIsPrototypeOf = uncurryThis(Object.prototype.isPrototypeOf)
-const ObjectPrototypePropertyIsEnumerable = uncurryThis(
+export const ObjectPrototypeIsPrototypeOf = uncurryThis(
+  Object.prototype.isPrototypeOf,
+)
+export const ObjectPrototypePropertyIsEnumerable = uncurryThis(
   Object.prototype.propertyIsEnumerable,
 )
-const ObjectPrototypeToString = uncurryThis(Object.prototype.toString)
-const ObjectPrototypeValueOf = uncurryThis(Object.prototype.valueOf)
+export const ObjectPrototypeToString = uncurryThis(Object.prototype.toString)
+export const ObjectPrototypeValueOf = uncurryThis(Object.prototype.valueOf)
 
 // ─── Reflect ───────────────────────────────────────────────────────────
-const ReflectApply = Reflect.apply
-const ReflectConstruct = Reflect.construct
-const ReflectDefineProperty = Reflect.defineProperty
-const ReflectDeleteProperty = Reflect.deleteProperty
-const ReflectGet = Reflect.get
-const ReflectGetOwnPropertyDescriptor = Reflect.getOwnPropertyDescriptor
-const ReflectGetPrototypeOf = Reflect.getPrototypeOf
-const ReflectHas = Reflect.has
-const ReflectIsExtensible = Reflect.isExtensible
-const ReflectOwnKeys = Reflect.ownKeys
-const ReflectPreventExtensions = Reflect.preventExtensions
-const ReflectSet = Reflect.set
-const ReflectSetPrototypeOf = Reflect.setPrototypeOf
+export const ReflectApply = Reflect.apply
+export const ReflectConstruct = Reflect.construct
+export const ReflectDefineProperty = Reflect.defineProperty
+export const ReflectDeleteProperty = Reflect.deleteProperty
+export const ReflectGet = Reflect.get
+export const ReflectGetOwnPropertyDescriptor = Reflect.getOwnPropertyDescriptor
+export const ReflectGetPrototypeOf = Reflect.getPrototypeOf
+export const ReflectHas = Reflect.has
+export const ReflectIsExtensible = Reflect.isExtensible
+export const ReflectOwnKeys = Reflect.ownKeys
+export const ReflectPreventExtensions = Reflect.preventExtensions
+export const ReflectSet = Reflect.set
+export const ReflectSetPrototypeOf = Reflect.setPrototypeOf
 
 // ─── RegExp ────────────────────────────────────────────────────────────
-const RegExpPrototypeExec = uncurryThis(RegExp.prototype.exec)
-const RegExpPrototypeTest = uncurryThis(RegExp.prototype.test)
-const RegExpPrototypeSymbolMatch = uncurryThis(
+export const RegExpPrototypeExec = uncurryThis(RegExp.prototype.exec)
+export const RegExpPrototypeTest = uncurryThis(RegExp.prototype.test)
+export const RegExpPrototypeSymbolMatch = uncurryThis(
   RegExp.prototype[Symbol.match] as (this: RegExp, str: string) => unknown,
 )
-const RegExpPrototypeSymbolReplace = uncurryThis(
+export const RegExpPrototypeSymbolReplace = uncurryThis(
   RegExp.prototype[Symbol.replace] as (
     this: RegExp,
     str: string,
@@ -195,226 +243,86 @@ const RegExpPrototypeSymbolReplace = uncurryThis(
 )
 
 // ─── String (static) ───────────────────────────────────────────────────
-const StringFromCharCode = String.fromCharCode
-const StringFromCodePoint = String.fromCodePoint
-const StringRaw = String.raw
+export const StringFromCharCode = String.fromCharCode
+export const StringFromCodePoint = String.fromCodePoint
+export const StringRaw = String.raw
 
 // ─── String (prototype) ────────────────────────────────────────────────
-const StringPrototypeAt = uncurryThis(String.prototype.at)
-const StringPrototypeCharAt = uncurryThis(String.prototype.charAt)
-const StringPrototypeCharCodeAt = uncurryThis(String.prototype.charCodeAt)
-const StringPrototypeCodePointAt = uncurryThis(String.prototype.codePointAt)
-const StringPrototypeConcat = uncurryThis(String.prototype.concat) as (
+export const StringPrototypeAt = uncurryThis(String.prototype.at)
+export const StringPrototypeCharAt = uncurryThis(String.prototype.charAt)
+export const StringPrototypeCharCodeAt = uncurryThis(
+  String.prototype.charCodeAt,
+)
+export const StringPrototypeCodePointAt = uncurryThis(
+  String.prototype.codePointAt,
+)
+export const StringPrototypeConcat = uncurryThis(String.prototype.concat) as (
   self: string,
   ...strs: string[]
 ) => string
-const StringPrototypeEndsWith = uncurryThis(String.prototype.endsWith)
-const StringPrototypeIncludes = uncurryThis(String.prototype.includes)
-const StringPrototypeIndexOf = uncurryThis(String.prototype.indexOf)
-const StringPrototypeLastIndexOf = uncurryThis(String.prototype.lastIndexOf)
-const StringPrototypeLocaleCompare = uncurryThis(String.prototype.localeCompare)
-const StringPrototypeMatch = uncurryThis(
+export const StringPrototypeEndsWith = uncurryThis(String.prototype.endsWith)
+export const StringPrototypeIncludes = uncurryThis(String.prototype.includes)
+export const StringPrototypeIndexOf = uncurryThis(String.prototype.indexOf)
+export const StringPrototypeLastIndexOf = uncurryThis(
+  String.prototype.lastIndexOf,
+)
+export const StringPrototypeLocaleCompare = uncurryThis(
+  String.prototype.localeCompare,
+)
+export const StringPrototypeMatch = uncurryThis(
   String.prototype.match as (
     this: string,
     matcher: string | RegExp,
   ) => RegExpMatchArray | null,
 )
-const StringPrototypeMatchAll = uncurryThis(
+export const StringPrototypeMatchAll = uncurryThis(
   String.prototype.matchAll as (
     this: string,
     matcher: RegExp | string,
   ) => IterableIterator<RegExpMatchArray>,
 )
-const StringPrototypeNormalize = uncurryThis(String.prototype.normalize)
-const StringPrototypePadEnd = uncurryThis(String.prototype.padEnd)
-const StringPrototypePadStart = uncurryThis(String.prototype.padStart)
-const StringPrototypeRepeat = uncurryThis(String.prototype.repeat)
-const StringPrototypeReplace = uncurryThis(String.prototype.replace)
-const StringPrototypeReplaceAll = uncurryThis(
+export const StringPrototypeNormalize = uncurryThis(String.prototype.normalize)
+export const StringPrototypePadEnd = uncurryThis(String.prototype.padEnd)
+export const StringPrototypePadStart = uncurryThis(String.prototype.padStart)
+export const StringPrototypeRepeat = uncurryThis(String.prototype.repeat)
+export const StringPrototypeReplace = uncurryThis(String.prototype.replace)
+export const StringPrototypeReplaceAll = uncurryThis(
   String.prototype.replaceAll as (
     this: string,
     searchValue: string,
     replaceValue: string,
   ) => string,
 )
-const StringPrototypeSearch = uncurryThis(String.prototype.search)
-const StringPrototypeSlice = uncurryThis(String.prototype.slice)
-const StringPrototypeSplit = uncurryThis(String.prototype.split) as (
+export const StringPrototypeSearch = uncurryThis(String.prototype.search)
+export const StringPrototypeSlice = uncurryThis(String.prototype.slice)
+export const StringPrototypeSplit = uncurryThis(String.prototype.split) as (
   self: string,
   separator: string | RegExp,
   limit?: number,
 ) => string[]
-const StringPrototypeStartsWith = uncurryThis(String.prototype.startsWith)
-const StringPrototypeSubstring = uncurryThis(String.prototype.substring)
-const StringPrototypeToLocaleLowerCase = uncurryThis(
+export const StringPrototypeStartsWith = uncurryThis(
+  String.prototype.startsWith,
+)
+export const StringPrototypeSubstring = uncurryThis(String.prototype.substring)
+export const StringPrototypeToLocaleLowerCase = uncurryThis(
   String.prototype.toLocaleLowerCase,
 )
-const StringPrototypeToLocaleUpperCase = uncurryThis(
+export const StringPrototypeToLocaleUpperCase = uncurryThis(
   String.prototype.toLocaleUpperCase,
 )
-const StringPrototypeToLowerCase = uncurryThis(String.prototype.toLowerCase)
-const StringPrototypeToUpperCase = uncurryThis(String.prototype.toUpperCase)
-const StringPrototypeTrim = uncurryThis(String.prototype.trim)
-const StringPrototypeTrimEnd = uncurryThis(String.prototype.trimEnd)
-const StringPrototypeTrimStart = uncurryThis(String.prototype.trimStart)
+export const StringPrototypeToLowerCase = uncurryThis(
+  String.prototype.toLowerCase,
+)
+export const StringPrototypeToUpperCase = uncurryThis(
+  String.prototype.toUpperCase,
+)
+export const StringPrototypeTrim = uncurryThis(String.prototype.trim)
+export const StringPrototypeTrimEnd = uncurryThis(String.prototype.trimEnd)
+export const StringPrototypeTrimStart = uncurryThis(String.prototype.trimStart)
 
 // ─── Symbol ────────────────────────────────────────────────────────────
-const SymbolAsyncIterator = Symbol.asyncIterator
-const SymbolFor = Symbol.for
-const SymbolIterator = Symbol.iterator
-const SymbolToPrimitive = Symbol.toPrimitive
-const SymbolToStringTag = Symbol.toStringTag
-
-export {
-  applyBind,
-  ArrayCtor,
-  ArrayFrom,
-  ArrayIsArray,
-  ArrayOf,
-  ArrayPrototypeAt,
-  ArrayPrototypeConcat,
-  ArrayPrototypeCopyWithin,
-  ArrayPrototypeEntries,
-  ArrayPrototypeEvery,
-  ArrayPrototypeFill,
-  ArrayPrototypeFilter,
-  ArrayPrototypeFind,
-  ArrayPrototypeFindIndex,
-  ArrayPrototypeFindLast,
-  ArrayPrototypeFindLastIndex,
-  ArrayPrototypeFlat,
-  ArrayPrototypeFlatMap,
-  ArrayPrototypeForEach,
-  ArrayPrototypeIncludes,
-  ArrayPrototypeIndexOf,
-  ArrayPrototypeJoin,
-  ArrayPrototypeKeys,
-  ArrayPrototypeLastIndexOf,
-  ArrayPrototypeMap,
-  ArrayPrototypePop,
-  ArrayPrototypePush,
-  ArrayPrototypeReduce,
-  ArrayPrototypeReduceRight,
-  ArrayPrototypeReverse,
-  ArrayPrototypeShift,
-  ArrayPrototypeSlice,
-  ArrayPrototypeSome,
-  ArrayPrototypeSort,
-  ArrayPrototypeSplice,
-  ArrayPrototypeToReversed,
-  ArrayPrototypeToSorted,
-  ArrayPrototypeUnshift,
-  ArrayPrototypeValues,
-  BooleanCtor,
-  DateCtor,
-  decodeComponent,
-  encodeComponent,
-  ErrorCtor,
-  JSONParse,
-  JSONStringify,
-  MapCtor,
-  NumberCtor,
-  NumberIsFinite,
-  NumberIsInteger,
-  NumberIsNaN,
-  NumberIsSafeInteger,
-  NumberParseFloat,
-  NumberParseInt,
-  NumberPrototypeToFixed,
-  NumberPrototypeToString,
-  ObjectAssign,
-  ObjectCreate,
-  ObjectCtor,
-  ObjectDefineProperties,
-  ObjectDefineProperty,
-  ObjectEntries,
-  ObjectFreeze,
-  ObjectFromEntries,
-  ObjectGetOwnPropertyDescriptor,
-  ObjectGetOwnPropertyDescriptors,
-  ObjectGetOwnPropertyNames,
-  ObjectGetOwnPropertySymbols,
-  ObjectGetPrototypeOf,
-  ObjectHasOwn,
-  ObjectIs,
-  ObjectIsExtensible,
-  ObjectIsFrozen,
-  ObjectIsSealed,
-  ObjectKeys,
-  ObjectPreventExtensions,
-  ObjectPrototype,
-  ObjectPrototypeHasOwnProperty,
-  ObjectPrototypeIsPrototypeOf,
-  ObjectPrototypePropertyIsEnumerable,
-  ObjectPrototypeToString,
-  ObjectPrototypeValueOf,
-  ObjectSeal,
-  ObjectSetPrototypeOf,
-  ObjectValues,
-  PromiseCtor,
-  ReflectApply,
-  ReflectConstruct,
-  ReflectDefineProperty,
-  ReflectDeleteProperty,
-  ReflectGet,
-  ReflectGetOwnPropertyDescriptor,
-  ReflectGetPrototypeOf,
-  ReflectHas,
-  ReflectIsExtensible,
-  ReflectOwnKeys,
-  ReflectPreventExtensions,
-  ReflectSet,
-  ReflectSetPrototypeOf,
-  RegExpCtor,
-  RegExpPrototypeExec,
-  RegExpPrototypeSymbolMatch,
-  RegExpPrototypeSymbolReplace,
-  RegExpPrototypeTest,
-  SetCtor,
-  StringCtor,
-  StringFromCharCode,
-  StringFromCodePoint,
-  StringPrototypeAt,
-  StringPrototypeCharAt,
-  StringPrototypeCharCodeAt,
-  StringPrototypeCodePointAt,
-  StringPrototypeConcat,
-  StringPrototypeEndsWith,
-  StringPrototypeIncludes,
-  StringPrototypeIndexOf,
-  StringPrototypeLastIndexOf,
-  StringPrototypeLocaleCompare,
-  StringPrototypeMatch,
-  StringPrototypeMatchAll,
-  StringPrototypeNormalize,
-  StringPrototypePadEnd,
-  StringPrototypePadStart,
-  StringPrototypeRepeat,
-  StringPrototypeReplace,
-  StringPrototypeReplaceAll,
-  StringPrototypeSearch,
-  StringPrototypeSlice,
-  StringPrototypeSplit,
-  StringPrototypeStartsWith,
-  StringPrototypeSubstring,
-  StringPrototypeToLocaleLowerCase,
-  StringPrototypeToLocaleUpperCase,
-  StringPrototypeToLowerCase,
-  StringPrototypeToUpperCase,
-  StringPrototypeTrim,
-  StringPrototypeTrimEnd,
-  StringPrototypeTrimStart,
-  StringRaw,
-  SymbolAsyncIterator,
-  SymbolCtor,
-  SymbolFor,
-  SymbolIterator,
-  SymbolToPrimitive,
-  SymbolToStringTag,
-  uncurryThis,
-  URLCtor,
-  URLSearchParamsCtor,
-  WeakMapCtor,
-  WeakRefCtor,
-  WeakSetCtor,
-}
+export const SymbolAsyncIterator = Symbol.asyncIterator
+export const SymbolFor = Symbol.for
+export const SymbolIterator = Symbol.iterator
+export const SymbolToPrimitive = Symbol.toPrimitive
+export const SymbolToStringTag = Symbol.toStringTag
