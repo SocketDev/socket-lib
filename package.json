@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.23.0",
+  "version": "5.24.0",
   "packageManager": "pnpm@11.0.0-rc.5",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -350,10 +350,6 @@
     "./env/socket-cli": {
       "types": "./dist/env/socket-cli.d.ts",
       "default": "./dist/env/socket-cli.js"
-    },
-    "./env/socket-cli-shadow": {
-      "types": "./dist/env/socket-cli-shadow.d.ts",
-      "default": "./dist/env/socket-cli-shadow.js"
     },
     "./env/temp-dir": {
       "types": "./dist/env/temp-dir.d.ts",

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.24.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.24.0) - 2026-04-22
+
+### Removed
+
+- `@socketsecurity/lib/env/socket-cli-shadow` — deleted. Unused after Socket CLI's shadow infrastructure was removed
+
+### Fixed
+
+- `packPackage()` / `extractPackage()` now work for non-registry specs (local dir/tarball, remote tarball URL, git). The bundled pacote fetchers (`dir.js`, `file.js`, `remote.js`, `git.js`) were over-stubbed and broke every non-registry path
+- `EditablePackageJson.prepare()` no longer throws `git.find is not a function`. `@npmcli/git` is reached from `normalize.gitHead`, not just `arb.audit()`, so it can't be stubbed
+- `packPackage(<dir>)` now runs `prepack` / `postpack` scripts instead of throwing `runScript is not a function`. `@npmcli/run-script` is reachable whenever `ignoreScripts` isn't set
+
 ## [5.23.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.23.0) - 2026-04-22
 
 ### Added
