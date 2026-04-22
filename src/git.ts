@@ -201,10 +201,10 @@ function getCachedRealpath(pathname: string): string {
   let resolved: string
   try {
     resolved = fs.realpathSync(pathname)
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException).code
     if (code === 'ENOENT' || code === 'ENOTDIR') {
-      throw error
+      throw e
     }
     resolved = pathname
   }

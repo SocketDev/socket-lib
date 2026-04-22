@@ -91,12 +91,12 @@ async function main(): Promise<void> {
         logger.log('')
       }
     }
-  } catch (error) {
+  } catch (e) {
     if (!quiet) {
-      logger.fail(`Update failed: ${error.message}`)
+      logger.fail(`Update failed: ${e.message}`)
     }
     if (verbose) {
-      logger.error(error)
+      logger.error(e)
     }
     process.exitCode = 1
   }

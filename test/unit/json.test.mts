@@ -903,10 +903,10 @@ describe('json', () => {
               await sleep(50)
               await safeDelete(testDir)
               break
-            } catch (err) {
+            } catch (e) {
               retries--
               if (retries === 0) {
-                throw err
+                throw e
               }
               await sleep(100)
             }

@@ -78,11 +78,11 @@ function checkExport(filePath) {
     }
 
     return { path: filePath, ok: true }
-  } catch (error) {
+  } catch (e) {
     return {
       path: filePath,
       ok: false,
-      reason: `Failed to require: ${error.message}`,
+      reason: `Failed to require: ${e.message}`,
     }
   }
 }

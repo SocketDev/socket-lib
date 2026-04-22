@@ -67,8 +67,8 @@ describe('spawn integration', () => {
     it('should handle command not found error', async () => {
       try {
         await spawn('nonexistent-command-xyz', [])
-      } catch (error) {
-        expect(error).toBeDefined()
+      } catch (e) {
+        expect(e).toBeDefined()
       }
     })
   })

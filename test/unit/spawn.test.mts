@@ -254,8 +254,8 @@ describe('spawn', () => {
       try {
         await spawn('sh', ['-c', 'exit 1'])
         expect.fail('Should have thrown')
-      } catch (error) {
-        expect(isSpawnError(error)).toBe(true)
+      } catch (e) {
+        expect(isSpawnError(e)).toBe(true)
       }
     })
 
@@ -496,8 +496,8 @@ describe('spawn', () => {
       try {
         await spawn('nonexistent-command-12345')
         expect.fail('Should have thrown')
-      } catch (error) {
-        expect(isSpawnError(error)).toBe(true)
+      } catch (e) {
+        expect(isSpawnError(e)).toBe(true)
       }
     })
 
@@ -510,8 +510,8 @@ describe('spawn', () => {
       try {
         await spawn('ls', ['--invalid-flag-that-does-not-exist-xyz'])
         expect.fail('Should have thrown')
-      } catch (error) {
-        expect(isSpawnError(error)).toBe(true)
+      } catch (e) {
+        expect(isSpawnError(e)).toBe(true)
       }
     })
   })

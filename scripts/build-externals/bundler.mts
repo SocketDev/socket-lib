@@ -110,14 +110,14 @@ ${contentWithoutStrict}`
       logger.log(`    ✓ Bundled ${packageName} (${sizeKB}KB)`)
     }
     return sizeKB
-  } catch (error) {
+  } catch (e) {
     if (!quiet) {
-      logger.log(`    ✗ Failed to bundle ${packageName}: ${error.message}`)
+      logger.log(`    ✗ Failed to bundle ${packageName}: ${e.message}`)
     }
     // Propagate the failure. The orchestrator wraps optional packages in
     // try/catch and logs a "Skipping optional package" message; required
     // packages bubble up so the build exits non-zero instead of silently
     // shipping throw-stubs that only fail later, at consumer runtime.
-    throw error
+    throw e
   }
 }

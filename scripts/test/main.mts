@@ -506,12 +506,12 @@ async function main(): Promise<void> {
     } else {
       logger.success('All tests passed!')
     }
-  } catch (error) {
+  } catch (e) {
     // Ensure spinner is stopped
     try {
       spinner.stop()
     } catch {}
-    logger.error(`Test runner failed: ${error.message}`)
+    logger.error(`Test runner failed: ${e.message}`)
     process.exitCode = 1
   } finally {
     // Ensure spinner is stopped

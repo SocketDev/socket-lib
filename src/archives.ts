@@ -334,10 +334,10 @@ export async function extractTar(
 
   try {
     await pipeline(readStream, extractStream)
-  } catch (error) {
+  } catch (e) {
     // Ensure stream is cleaned up on error
     readStream.destroy()
-    throw error
+    throw e
   }
 }
 
@@ -469,10 +469,10 @@ export async function extractTarGz(
 
   try {
     await pipeline(readStream, createGunzip(), extractStream)
-  } catch (error) {
+  } catch (e) {
     // Ensure stream is cleaned up on error
     readStream.destroy()
-    throw error
+    throw e
   }
 }
 

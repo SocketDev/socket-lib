@@ -155,8 +155,8 @@ async function main(): Promise<void> {
 
     logger.success('All checks passed')
     printFooter()
-  } catch (error) {
-    logger.error(`Check failed: ${error.message}`)
+  } catch (e) {
+    logger.error(`Check failed: ${e.message}`)
     process.exitCode = 1
   }
 }

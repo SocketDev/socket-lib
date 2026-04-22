@@ -512,9 +512,9 @@ export async function fetchGhsaDetails(
  * // Handle rate limit errors
  * try {
  *   await fetchGitHub('https://api.github.com/repos/owner/repo')
- * } catch (error) {
- *   if (error.status === 403 && error.resetTime) {
- *     console.error(`Rate limited until ${error.resetTime}`)
+ * } catch (e) {
+ *   if (e.status === 403 && e.resetTime) {
+ *     console.error(`Rate limited until ${e.resetTime}`)
  *   }
  * }
  * ```
@@ -567,12 +567,12 @@ export async function fetchGitHub<T = unknown>(
 
   try {
     return JSON.parse(response.body.toString('utf8')) as T
-  } catch (error) {
+  } catch (e) {
     throw new Error(
-      `Failed to parse GitHub API response: ${errorMessage(error)}\n` +
+      `Failed to parse GitHub API response: ${errorMessage(e)}\n` +
         `URL: ${url}\n` +
         'Response may be malformed or incomplete.',
-      { cause: error },
+      { cause: e },
     )
   }
 }

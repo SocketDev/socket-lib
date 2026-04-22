@@ -1179,8 +1179,8 @@ async function httpRequestAttempt(
  * ```typescript
  * try {
  *   await fetch('https://api.example.com')
- * } catch (err) {
- *   console.error(enrichErrorMessage('https://api.example.com', 'GET', err))
+ * } catch (e) {
+ *   console.error(enrichErrorMessage('https://api.example.com', 'GET', e))
  * }
  * ```
  */

@@ -209,10 +209,10 @@ async function processDirectory(
         }
       }
     }
-  } catch (error) {
+  } catch (e) {
     // Skip directories that don't exist
-    if (error.code !== 'ENOENT') {
-      throw error
+    if (e.code !== 'ENOENT') {
+      throw e
     }
   }
 
@@ -233,8 +233,8 @@ async function fixConstantExports() {
           : 'CommonJS Exports (no changes)'
       logger.success(title)
     }
-  } catch (error) {
-    logger.error(`Failed to fix CommonJS exports: ${error.message}`)
+  } catch (e) {
+    logger.error(`Failed to fix CommonJS exports: ${e.message}`)
     process.exitCode = 1
   }
 }

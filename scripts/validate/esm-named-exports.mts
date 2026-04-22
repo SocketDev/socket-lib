@@ -131,11 +131,11 @@ function checkEsmNamedExports(filePath) {
     }
 
     return { path: filePath, ok: true }
-  } catch (error) {
+  } catch (e) {
     return {
       path: filePath,
       ok: false,
-      reason: `Failed to analyze: ${error.message}`,
+      reason: `Failed to analyze: ${e.message}`,
     }
   }
 }

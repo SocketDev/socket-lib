@@ -26,9 +26,9 @@ describe('schema/parse', () => {
     expect(() => parseSchema(Config, { host: 42, port: 'oops' })).toThrow(Error)
     try {
       parseSchema(Config, { host: 42, port: 'oops' })
-    } catch (err) {
-      expect(err).toBeInstanceOf(Error)
-      const msg = (err as Error).message
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error)
+      const msg = (e as Error).message
       expect(msg).toMatch(/^Validation failed:/)
       // Both field names should appear in the summary.
       expect(msg).toContain('host')
@@ -66,8 +66,8 @@ describe('schema/parse', () => {
       parseSchema(fakeSchema, {})
       // Force failure if no throw.
       expect.fail('parseSchema should have thrown')
-    } catch (err) {
-      const msg = (err as Error).message
+    } catch (e) {
+      const msg = (e as Error).message
       expect(msg).toContain('user.name: required')
       expect(msg).toContain('user.age: must be positive')
     }

@@ -1140,7 +1140,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
     modelStrategy.recordAttempt(task, true)
 
     return result
-  } catch (error) {
+  } catch (e) {
     // Record failure for potential escalation
     modelStrategy.recordAttempt(task, false)
 
@@ -1152,7 +1152,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
       return runClaude(claudeCmd, prompt, opts)
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -4791,8 +4791,8 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
           if (exitCode !== 0) {
             log.warn(`Claude fix exited with code ${exitCode}`)
           }
-        } catch (error) {
-          log.warn(`Claude fix error: ${error.message}`)
+        } catch (e) {
+          log.warn(`Claude fix error: ${e.message}`)
         } finally {
           clearInterval(progressInterval)
           log.done('Claude fix attempt completed')
@@ -5111,8 +5111,8 @@ Fix the issue by making necessary file changes. Be direct, don't ask questions.`
                 if (exitCode !== 0) {
                   log.warn(`Claude fix exited with code ${exitCode}`)
                 }
-              } catch (error) {
-                log.warn(`Claude fix error: ${error.message}`)
+              } catch (e) {
+                log.warn(`Claude fix error: ${e.message}`)
               } finally {
                 clearInterval(progressInterval)
                 log.done(`Fix attempt for ${job.name} completed`)
@@ -5313,8 +5313,8 @@ async function runWatchMode(claudeCmd, options = {}) {
           } else {
             log.done('No issues found')
           }
-        } catch (error) {
-          log.failed(`Error scanning ${project.name}: ${error.message}`)
+        } catch (e) {
+          log.failed(`Error scanning ${project.name}: ${e.message}`)
         }
       },
     )
@@ -5346,8 +5346,8 @@ async function runWatchMode(claudeCmd, options = {}) {
               },
             )
           }
-        } catch (error) {
-          log.failed(`Full scan error in ${project.name}: ${error.message}`)
+        } catch (e) {
+          log.failed(`Full scan error in ${project.name}: ${e.message}`)
         }
       }
       // 30 minutes
@@ -5750,8 +5750,8 @@ async function main(): Promise<void> {
     }
 
     process.exitCode = success ? 0 : 1
-  } catch (error) {
-    log.error(`Operation failed: ${error.message}`)
+  } catch (e) {
+    log.error(`Operation failed: ${e.message}`)
     process.exitCode = 1
   }
 }

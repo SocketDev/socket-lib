@@ -37,13 +37,13 @@ export async function runCommand(
       ...options,
     })
     return result.code
-  } catch (error) {
+  } catch (e) {
     // spawn() from @socketsecurity/lib throws on non-zero exit
     // Return the exit code from the error
-    if (error && typeof error === 'object' && 'code' in error) {
-      return (error as { code: number }).code
+    if (e && typeof e === 'object' && 'code' in e) {
+      return (e as { code: number }).code
     }
-    throw error
+    throw e
   }
 }
 
@@ -140,17 +140,17 @@ export async function runCommandQuiet(
       stderr: result.stderr,
       stdout: result.stdout,
     }
-  } catch (error) {
+  } catch (e) {
     // spawn() from @socketsecurity/lib throws on non-zero exit
     // Return the exit code and output from the error
     if (
-      error &&
-      typeof error === 'object' &&
-      'code' in error &&
-      'stdout' in error &&
-      'stderr' in error
+      e &&
+      typeof e === 'object' &&
+      'code' in e &&
+      'stdout' in e &&
+      'stderr' in e
     ) {
-      const spawnErr = error as {
+      const spawnErr = e as {
         code: number
         stdout: string | Buffer
         stderr: string | Buffer
@@ -161,7 +161,7 @@ export async function runCommandQuiet(
         stdout: spawnErr.stdout,
       }
     }
-    throw error
+    throw e
   }
 }
 

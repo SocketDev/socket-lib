@@ -1437,8 +1437,8 @@ export function safeDeleteSync(
         onlyFiles: false,
       })
       return
-    } catch (error) {
-      lastError = error as Error
+    } catch (e) {
+      lastError = e as Error
       if (attempt < maxRetries) {
         // Sync sleep using Atomics.wait on a SharedArrayBuffer.
         // This is a blocking wait that doesn't spin the CPU.

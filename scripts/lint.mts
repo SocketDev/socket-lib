@@ -457,8 +457,8 @@ async function main(): Promise<void> {
         logger.success('All lint checks passed!')
       }
     }
-  } catch (error) {
-    logger.error(`Lint runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(`Lint runner failed: ${e.message}`)
     process.exitCode = 1
   }
 }

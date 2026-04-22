@@ -251,10 +251,10 @@ export async function downloadAndExtractArchive(
         if (!quiet) {
           logger.info('Cleaned up temporary archive file')
         }
-      } catch (error) {
+      } catch (e) {
         // Ignore cleanup errors
         if (!quiet) {
-          logger.warn(`Failed to cleanup archive file: ${error}`)
+          logger.warn(`Failed to cleanup archive file: ${e}`)
         }
       }
     }
@@ -328,10 +328,10 @@ export async function downloadAndExtractZip(
         if (!quiet) {
           logger.info('Cleaned up temporary zip file')
         }
-      } catch (error) {
+      } catch (e) {
         // Ignore cleanup errors
         if (!quiet) {
-          logger.warn(`Failed to cleanup zip file: ${error}`)
+          logger.warn(`Failed to cleanup zip file: ${e}`)
         }
       }
     }

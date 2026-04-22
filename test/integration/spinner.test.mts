@@ -150,8 +150,8 @@ describe('spinner integration', () => {
       try {
         // Simulate operation that can fail
         throw new Error('Check failed')
-      } catch (error) {
-        spinner.error(`Error: ${(error as Error).message}`)
+      } catch (e) {
+        spinner.error(`Error: ${(e as Error).message}`)
         // Continue with other operations
       }
 

@@ -68,13 +68,13 @@ async function readFile(filepath: string): Promise<string> {
     try {
       // eslint-disable-next-line no-await-in-loop
       return await fsPromises.readFile(filepath, 'utf8')
-    } catch (err) {
+    } catch (e) {
       const isLastAttempt = attempt === maxRetries
-      const isEnoent = isErrnoException(err) && err.code === 'ENOENT'
+      const isEnoent = isErrnoException(e) && e.code === 'ENOENT'
 
       // Only retry ENOENT and not on last attempt
       if (!isEnoent || isLastAttempt) {
-        throw err
+        throw e
       }
 
       // Wait before retry with exponential backoff
@@ -133,15 +133,15 @@ async function retryWrite(
         }
       }
       return
-    } catch (err) {
+    } catch (e) {
       const isLastAttempt = attempt === retries
       const isRetriableError =
-        isErrnoException(err) &&
-        (err.code === 'EPERM' || err.code === 'EBUSY' || err.code === 'ENOENT')
+        isErrnoException(e) &&
+        (e.code === 'EPERM' || e.code === 'EBUSY' || e.code === 'ENOENT')
 
       // Only retry on Windows file system errors (EPERM/EBUSY/ENOENT), and not on the last attempt
       if (!isRetriableError || isLastAttempt) {
-        throw err
+        throw e
       }
 
       // Exponential backoff: 10ms, 20ms, 40ms
@@ -258,11 +258,11 @@ export function getEditableJsonClass<
         let parseErr: unknown
         try {
           this._readFileContent = await readFile(this.filename)
-        } catch (err) {
+        } catch (e) {
           if (!create) {
-            throw err
+            throw e
           }
-          parseErr = err
+          parseErr = e
         }
         if (parseErr) {
           throw parseErr

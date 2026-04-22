@@ -62,11 +62,11 @@ function checkTypeDefinition(filePath) {
   let content
   try {
     content = readFileSync(filePath, 'utf8')
-  } catch (error) {
+  } catch (e) {
     return {
       path: normalizedPath,
       ok: false,
-      issues: [`Failed to read file: ${error.message}`],
+      issues: [`Failed to read file: ${e.message}`],
     }
   }
 

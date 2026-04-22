@@ -205,8 +205,8 @@ export class DlxManifest {
       }
 
       return JSON.parse(content) as Record<string, ManifestEntry | StoreRecord>
-    } catch (error) {
-      logger.warn(`Failed to read manifest: ${errorMessage(error)}`)
+    } catch (e) {
+      logger.warn(`Failed to read manifest: ${errorMessage(e)}`)
       return { __proto__: null } as unknown as Record<
         string,
         ManifestEntry | StoreRecord
@@ -225,8 +225,8 @@ export class DlxManifest {
     const manifestDir = path.dirname(this.manifestPath)
     try {
       safeMkdirSync(manifestDir, { recursive: true })
-    } catch (error) {
-      logger.warn(`Failed to create manifest directory: ${errorMessage(error)}`)
+    } catch (e) {
+      logger.warn(`Failed to create manifest directory: ${errorMessage(e)}`)
     }
 
     // Write atomically.
@@ -236,7 +236,7 @@ export class DlxManifest {
     try {
       fs.writeFileSync(tempPath, content, 'utf8')
       fs.renameSync(tempPath, this.manifestPath)
-    } catch (error) {
+    } catch (e) {
       // Clean up temp file on error.
       try {
         if (fs.existsSync(tempPath)) {
@@ -245,7 +245,7 @@ export class DlxManifest {
       } catch {
         // Best effort cleanup.
       }
-      throw error
+      throw e
     }
   }
 
@@ -271,8 +271,8 @@ export class DlxManifest {
         delete data[name]
 
         await this.writeManifest(data)
-      } catch (error) {
-        logger.warn(`Failed to clear cache for ${name}: ${errorMessage(error)}`)
+      } catch (e) {
+        logger.warn(`Failed to clear cache for ${name}: ${errorMessage(e)}`)
       }
     })
   }
@@ -286,8 +286,8 @@ export class DlxManifest {
         if (fs.existsSync(this.manifestPath)) {
           fs.unlinkSync(this.manifestPath)
         }
-      } catch (error) {
-        logger.warn(`Failed to clear all cache: ${errorMessage(error)}`)
+      } catch (e) {
+        logger.warn(`Failed to clear all cache: ${errorMessage(e)}`)
       }
     })
   }
@@ -329,8 +329,8 @@ export class DlxManifest {
 
       const data = JSON.parse(content) as Record<string, StoreRecord>
       return Object.keys(data)
-    } catch (error) {
-      logger.warn(`Failed to get package list: ${errorMessage(error)}`)
+    } catch (e) {
+      logger.warn(`Failed to get package list: ${errorMessage(e)}`)
       return []
     }
   }
@@ -380,8 +380,8 @@ export class DlxManifest {
             data = JSON.parse(content) as Record<string, StoreRecord>
           }
         }
-      } catch (error) {
-        logger.warn(`Failed to read existing manifest: ${errorMessage(error)}`)
+      } catch (e) {
+        logger.warn(`Failed to read existing manifest: ${errorMessage(e)}`)
       }
 
       // Update record.
@@ -391,9 +391,9 @@ export class DlxManifest {
       const manifestDir = path.dirname(this.manifestPath)
       try {
         safeMkdirSync(manifestDir, { recursive: true })
-      } catch (error) {
+      } catch (e) {
         logger.warn(
-          `Failed to create manifest directory: ${errorMessage(error)}`,
+          `Failed to create manifest directory: ${errorMessage(e)}`,
         )
       }
 
@@ -404,7 +404,7 @@ export class DlxManifest {
       try {
         fs.writeFileSync(tempPath, content, 'utf8')
         fs.renameSync(tempPath, this.manifestPath)
-      } catch (error) {
+      } catch (e) {
         // Clean up temp file on error.
         try {
           if (fs.existsSync(tempPath)) {
@@ -413,7 +413,7 @@ export class DlxManifest {
         } catch {
           // Best effort cleanup.
         }
-        throw error
+        throw e
       }
     })
   }

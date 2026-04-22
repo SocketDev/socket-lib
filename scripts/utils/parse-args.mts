@@ -42,7 +42,7 @@ export function parseArgs(
       values: result.values,
       positionals: result.positionals || [],
     }
-  } catch (error) {
+  } catch (e) {
     // If parsing fails in non-strict mode, return empty values
     if (!strict) {
       return {
@@ -50,7 +50,7 @@ export function parseArgs(
         positionals: args.filter(arg => !arg.startsWith('-')),
       }
     }
-    throw error
+    throw e
   }
 }
 

@@ -89,11 +89,11 @@ async function checkModuleExports(filePath) {
   let cjsModule
   try {
     cjsModule = require(filePath)
-  } catch (error) {
+  } catch (e) {
     return {
       path: normalizedPath,
       ok: false,
-      issues: [`CJS require() failed: ${error.message}`],
+      issues: [`CJS require() failed: ${e.message}`],
     }
   }
 
@@ -140,8 +140,8 @@ async function checkModuleExports(filePath) {
     // Dynamic import to test ESM interop
     const moduleUrl = pathToFileURL(filePath).href
     esmModule = await import(moduleUrl)
-  } catch (error) {
-    issues.push(`ESM import failed: ${error.message}`)
+  } catch (e) {
+    issues.push(`ESM import failed: ${e.message}`)
     return {
       path: normalizedPath,
       ok: false,

@@ -480,8 +480,8 @@ describe('stdio/stderr', () => {
     it('should support exception handling pattern', () => {
       try {
         throw new Error('Something went wrong')
-      } catch (err) {
-        writeStackTrace(err as Error)
+      } catch (e) {
+        writeStackTrace(e as Error)
       }
       expect(getContext().writeSpy).toHaveBeenCalled()
     })

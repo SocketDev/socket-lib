@@ -225,16 +225,16 @@ describe('bin', () => {
           expect(result).toBeTruthy()
           // Should resolve to real path
           expect(result).toContain('target')
-        } catch (error) {
+        } catch (e) {
           // Skip if symlinks are not supported on this platform
           if (
-            isError(error) &&
-            (error.message.includes('EPERM') ||
-              error.message.includes('operation not permitted'))
+            isError(e) &&
+            (e.message.includes('EPERM') ||
+              e.message.includes('operation not permitted'))
           ) {
             console.log('Skipping symlink test - not supported')
           } else {
-            throw error
+            throw e
           }
         }
       }, 'resolveBin-symlink-')
@@ -708,10 +708,10 @@ exec node "$basedir/pnpm/bin/pnpm.cjs" "$@"
     it('should throw error with ENOENT code', async () => {
       try {
         await execBin('nonexistent-bin-12345')
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        if (isError(error)) {
-          expect((error as any).code).toBe('ENOENT')
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error)
+        if (isError(e)) {
+          expect((e as any).code).toBe('ENOENT')
         }
       }
     })

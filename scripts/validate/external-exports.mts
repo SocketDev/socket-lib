@@ -141,11 +141,11 @@ function checkExternalExport(filePath) {
 
     // Primitive exports are okay for some modules
     return { path: normalizedPath, ok: true, keys: 'primitive' }
-  } catch (error) {
+  } catch (e) {
     return {
       path: normalizedPath,
       ok: false,
-      reason: `Failed to require: ${error.message}`,
+      reason: `Failed to require: ${e.message}`,
     }
   }
 }

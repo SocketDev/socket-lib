@@ -78,9 +78,9 @@ async function mergePackageJson(
   let pkgJson: PackageJson
   try {
     pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
-  } catch (error) {
-    throw new Error(`Failed to parse ${pkgJsonPath}: ${errorMessage(error)}`, {
-      cause: error,
+  } catch (e) {
+    throw new Error(`Failed to parse ${pkgJsonPath}: ${errorMessage(e)}`, {
+      cause: e,
     })
   }
   const mergedPkgJson = originalPkgJson

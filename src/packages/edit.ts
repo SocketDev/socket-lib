@@ -290,11 +290,11 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           let parseErr: unknown
           try {
             this._readFileContent = await read(this.filename)
-          } catch (err) {
+          } catch (e) {
             if (!create) {
-              throw err
+              throw e
             }
-            parseErr = err
+            parseErr = e
           }
           if (parseErr) {
             const nodePath = getPath()

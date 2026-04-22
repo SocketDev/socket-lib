@@ -169,8 +169,8 @@ class ProcessLockManager {
         const now = Date.now() / 1000
         fs.utimesSync(lockPath, now, now)
       }
-    } catch (error) {
-      logger.warn(`Failed to touch lock ${lockPath}: ${errorMessage(error)}`)
+    } catch (e) {
+      logger.warn(`Failed to touch lock ${lockPath}: ${errorMessage(e)}`)
     }
   }
 
@@ -316,8 +316,8 @@ class ProcessLockManager {
 
           // Return release function.
           return () => this.release(lockPath)
-        } catch (error) {
-          const code = (error as NodeJS.ErrnoException).code
+        } catch (e) {
+          const code = (e as NodeJS.ErrnoException).code
 
           // Handle lock contention - lock already exists.
           if (code === 'EEXIST') {
@@ -332,7 +332,7 @@ class ProcessLockManager {
             throw new Error(
               `Permission denied creating lock: ${lockPath}. ` +
                 'Check directory permissions or run with appropriate access.',
-              { cause: error },
+              { cause: e },
             )
           }
 
@@ -340,7 +340,7 @@ class ProcessLockManager {
           if (code === 'EROFS') {
             throw new Error(
               `Cannot create lock on read-only filesystem: ${lockPath}`,
-              { cause: error },
+              { cause: e },
             )
           }
 
@@ -360,7 +360,7 @@ class ProcessLockManager {
                 `  1. Check if "${parentDir}" contains a file instead of a directory\n` +
                 '  2. Remove any conflicting files in the path\n' +
                 '  3. Ensure the full parent directory structure exists',
-              { cause: error },
+              { cause: e },
             )
           }
 
@@ -378,13 +378,13 @@ class ProcessLockManager {
                 `  1. Ensure the parent directory "${parentDir}" exists\n` +
                 `  2. Create the directory structure: mkdir -p "${parentDir}"\n` +
                 '  3. Check filesystem permissions allow directory creation',
-              { cause: error },
+              { cause: e },
             )
           }
 
           // Re-throw other errors with context.
           throw new Error(`Failed to acquire lock: ${lockPath}`, {
-            cause: error,
+            cause: e,
           })
         }
       },
@@ -417,8 +417,8 @@ class ProcessLockManager {
         safeDeleteSync(lockPath, { recursive: true })
       }
       this.activeLocks.delete(lockPath)
-    } catch (error) {
-      logger.warn(`Failed to release lock ${lockPath}: ${errorMessage(error)}`)
+    } catch (e) {
+      logger.warn(`Failed to release lock ${lockPath}: ${errorMessage(e)}`)
     }
   }
 

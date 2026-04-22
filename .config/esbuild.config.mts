@@ -185,10 +185,10 @@ function createPathShorteningPlugin() {
               // Write the modified content
               // eslint-disable-next-line no-await-in-loop
               await fs.writeFile(outputPath, magicString.toString(), 'utf8')
-            } catch (error) {
+            } catch (e) {
               console.error(
                 `Failed to shorten paths in ${outputPath}:`,
-                error.message,
+                e.message,
               )
               // Continue without failing the build
             }

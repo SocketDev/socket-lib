@@ -133,10 +133,10 @@ export type PromiseSpawnResult = Promise<{
  * @example
  * try {
  *   await spawn('exit', ['1'])
- * } catch (error) {
- *   if (isSpawnError(error)) {
- *     console.error(`Command failed with code ${error.code}`)
- *     console.error(`stderr: ${error.stderr}`)
+ * } catch (e) {
+ *   if (isSpawnError(e)) {
+ *     console.error(`Command failed with code ${e.code}`)
+ *     console.error(`stderr: ${e.stderr}`)
  *   }
  * }
  */
@@ -447,8 +447,8 @@ function stripAnsiFromSpawnResult(result: unknown): unknown {
  * ```typescript
  * try {
  *   await spawn('git', ['status'])
- * } catch (err) {
- *   throw enhanceSpawnError(err)
+ * } catch (e) {
+ *   throw enhanceSpawnError(e)
  * }
  * ```
  */
@@ -555,9 +555,9 @@ export function enhanceSpawnError(error: unknown): unknown {
  * @example
  * try {
  *   await spawn('nonexistent-command')
- * } catch (error) {
- *   if (isSpawnError(error)) {
- *     console.error(`Spawn failed: ${error.code}`)
+ * } catch (e) {
+ *   if (isSpawnError(e)) {
+ *     console.error(`Spawn failed: ${e.code}`)
  *   }
  * }
  */
@@ -675,10 +675,10 @@ export function isStdioType(
  * // Handle errors with exit codes
  * try {
  *   await spawn('exit', ['1'])
- * } catch (error) {
- *   if (isSpawnError(error)) {
- *     console.error(`Failed with code ${error.code}`)
- *     console.error(error.stderr)
+ * } catch (e) {
+ *   if (isSpawnError(e)) {
+ *     console.error(`Failed with code ${e.code}`)
+ *     console.error(e.stderr)
  *   }
  * }
  */

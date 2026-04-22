@@ -819,9 +819,9 @@ describe.sequential('github', () => {
       try {
         await fetchGitHub('https://api.github.com/repos/owner/special-repo')
         expect.fail('Should have thrown an error')
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect((error as Error).message).toContain(
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error)
+        expect((e as Error).message).toContain(
           'https://api.github.com/repos/owner/special-repo',
         )
       }

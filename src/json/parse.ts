@@ -120,8 +120,8 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
  * // Enhanced error messages with filepath
  * try {
  *   jsonParse('invalid', { filepath: 'config.json' })
- * } catch (err) {
- *   console.error(err.message)
+ * } catch (e) {
+ *   console.error(e.message)
  *   // => "config.json: Unexpected token i in JSON at position 0"
  * }
  *
@@ -250,8 +250,8 @@ export function safeJsonParse<T = unknown>(
     parsed = allowPrototype
       ? JSONParse(jsonString)
       : JSONParse(jsonString, prototypePollutionReviver)
-  } catch (error) {
-    throw new Error(`Failed to parse JSON: ${error}`)
+  } catch (e) {
+    throw new Error(`Failed to parse JSON: ${e}`)
   }
 
   // Optional schema validation — route through validateSchema so the
