@@ -14,7 +14,7 @@ const projectRoot = path.resolve(__dirname, '..')
 const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
 
 const vitestConfigIsolated = defineConfig({
-  cacheDir: path.resolve(projectRoot, '.cache/vitest-isolated'),
+  cacheDir: path.resolve(projectRoot, 'node_modules/.cache/vitest-isolated'),
   resolve: {
     preserveSymlinks: false,
     extensions: ['.mts', '.ts', '.mjs', '.js', '.json'],
