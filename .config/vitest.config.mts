@@ -19,7 +19,7 @@ const rootPkgJson = JSON.parse(
 const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
 
 const vitestConfig = defineConfig({
-  cacheDir: path.resolve(projectRoot, '.cache/vitest'),
+  cacheDir: path.resolve(projectRoot, 'node_modules/.cache/vitest'),
   resolve: {
     // Use 'source' export condition so @socketsecurity/lib/* imports resolve
     // to src/*.ts instead of dist/*.js. This enables proper v8 coverage
