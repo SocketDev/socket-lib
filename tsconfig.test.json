@@ -8,5 +8,5 @@
     "types": ["node", "vitest"]
   },
   "include": ["test/**/*.ts", "test/**/*.mts", "src/**/*.ts"],
-  "exclude": ["node_modules", "dist/**/*"]
+  "exclude": [".cache", "dist/**/*", "node_modules"]
 }

@@ -10,5 +10,5 @@
     "types": ["node", "vitest"]
   },
   "include": ["../src/**/*.ts", "../test/**/*.ts", "../test/**/*.mts"],
-  "exclude": ["../node_modules", "../dist/**/*"]
+  "exclude": ["../.cache", "../dist/**/*", "../node_modules"]
 }
