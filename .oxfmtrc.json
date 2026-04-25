@@ -33,6 +33,8 @@
     "perf/**/fixtures",
     "scripts/templates",
     "test/**/fixtures",
-    "test/**/packages"
+    "test/**/packages",
+    "tools/**/node_modules",
+    "**/vendor"
   ]
 }

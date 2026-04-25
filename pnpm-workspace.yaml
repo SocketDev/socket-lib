@@ -1,8 +1,17 @@
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
 # alongside the root. Keeps hook deps in lockstep with the main tree.
+#
+# tools/* — developer-only utilities (audit/codemod scripts). Not
+# published, not part of the dist tree.
+#
+# vendor/* — vendored upstream code shipped as workspace packages so
+# tools can reference it via `workspace:*` instead of brittle
+# `../../../vendor/...` relative paths.
 packages:
   - .claude/hooks/*
+  - tools/*
+  - vendor/*
 
 allowBuilds:
   esbuild: true

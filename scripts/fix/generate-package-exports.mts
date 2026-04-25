@@ -81,6 +81,10 @@ async function main(): Promise<void> {
         'dist/external/**',
         'scripts/**',
         'src/**',
+        // tools/ and vendor/ are workspace packages for internal use,
+        // not public exports of @socketsecurity/lib.
+        'tools/**',
+        'vendor/**',
         // Files prefixed with _ are private helpers, not public API.
         'dist/**/_*',
       ],
