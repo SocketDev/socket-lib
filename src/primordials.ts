@@ -370,7 +370,13 @@ export const StringPrototypeNormalize = uncurryThis(String.prototype.normalize)
 export const StringPrototypePadEnd = uncurryThis(String.prototype.padEnd)
 export const StringPrototypePadStart = uncurryThis(String.prototype.padStart)
 export const StringPrototypeRepeat = uncurryThis(String.prototype.repeat)
-export const StringPrototypeReplace = uncurryThis(String.prototype.replace)
+export const StringPrototypeReplace = uncurryThis(
+  String.prototype.replace as (
+    this: string,
+    searchValue: string | RegExp,
+    replaceValue: string,
+  ) => string,
+)
 export const StringPrototypeReplaceAll = uncurryThis(
   String.prototype.replaceAll as (
     this: string,

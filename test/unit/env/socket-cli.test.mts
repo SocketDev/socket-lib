@@ -112,7 +112,13 @@ describe('socket-cli env', () => {
     })
 
     it('should return undefined when not set', () => {
+      // Clear all token env vars that getSocketCliApiToken falls back to,
+      // including the canonical SOCKET_API_TOKEN that CI runners may have set.
+      setEnv('SOCKET_API_TOKEN', undefined)
       setEnv('SOCKET_CLI_API_TOKEN', undefined)
+      setEnv('SOCKET_CLI_API_KEY', undefined)
+      setEnv('SOCKET_SECURITY_API_TOKEN', undefined)
+      setEnv('SOCKET_SECURITY_API_KEY', undefined)
       expect(getSocketCliApiToken()).toBeUndefined()
     })
   })

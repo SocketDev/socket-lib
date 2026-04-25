@@ -380,12 +380,16 @@ describe('primordials', () => {
 
     it('ArrayPrototypeReduce / ReduceRight', () => {
       expect(
-        ArrayPrototypeReduce([1, 2, 3], (a: number, b: number) => a + b, 0),
+        ArrayPrototypeReduce(
+          [1, 2, 3],
+          ((a: number, b: number) => a + b) as never,
+          0,
+        ),
       ).toBe(6)
       expect(
         ArrayPrototypeReduceRight(
           ['a', 'b', 'c'],
-          (acc: string, x: string) => acc + x,
+          ((acc: string, x: string) => acc + x) as never,
           '',
         ),
       ).toBe('cba')
@@ -421,9 +425,9 @@ describe('primordials', () => {
       ): string {
         return `${this.greeting}, ${name}`
       }
-      expect(FunctionPrototypeApply(greet, { greeting: 'Hi' }, ['Jane'])).toBe(
-        'Hi, Jane',
-      )
+      expect(
+        FunctionPrototypeApply(greet as never, { greeting: 'Hi' }, ['Jane']),
+      ).toBe('Hi, Jane')
     })
 
     it('FunctionPrototypeBind returns a bound function', () => {
@@ -441,9 +445,9 @@ describe('primordials', () => {
       ): string {
         return `${this.greeting}, ${name}`
       }
-      expect(FunctionPrototypeCall(greet, { greeting: 'Hi' }, 'Jane')).toBe(
-        'Hi, Jane',
-      )
+      expect(
+        FunctionPrototypeCall(greet as never, { greeting: 'Hi' }, 'Jane'),
+      ).toBe('Hi, Jane')
     })
   })
 
