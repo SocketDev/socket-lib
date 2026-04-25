@@ -19,6 +19,10 @@ Thumbs.db
 .nvm
 .pnpmfile.cjs
 node_modules/
+# Defensive cache ignore — Node compile-cache, corepack, and other
+# tools occasionally drop scratch dirs into a project-local .cache/.
+# node_modules/.cache/ is the canonical home for tools we control.
+**/.cache/
 npm-debug.log*
 pnpm-debug.log*
 yarn-error.log*
