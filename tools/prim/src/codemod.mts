@@ -94,10 +94,17 @@ export async function applyCodemod({
   return result
 }
 
+// Codemod only handles plain JavaScript. Rewriting TypeScript would
+// require source-mapping between stripped-types and original byte
+// offsets — out of scope. The audit (`prim audit`) does walk TS files,
+// so users can see migration candidates in source even if the codemod
+// can't auto-rewrite them yet.
+const REWRITABLE_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx'])
+
 function* walkDir(
   dir,
-  skipDirs = ['external'],
-  skipFiles = ['primordials.js', 'primordials.mjs'],
+  skipDirs = ['external', 'node_modules', '.cache'],
+  skipFiles = ['primordials.js', 'primordials.mjs', 'primordials.cjs'],
 ) {
   for (const entry of readdirSync(dir)) {
     if (skipDirs.includes(entry) || skipFiles.includes(entry)) {
@@ -107,12 +114,7 @@ function* walkDir(
     const stat = statSync(abs)
     if (stat.isDirectory()) {
       yield* walkDir(abs, skipDirs, skipFiles)
-    } else if (
-      entry.endsWith('.js') ||
-      entry.endsWith('.mjs') ||
-      entry.endsWith('.ts') ||
-      entry.endsWith('.mts')
-    ) {
+    } else if (REWRITABLE_EXTENSIONS.has(path.extname(entry))) {
       yield abs
     }
   }

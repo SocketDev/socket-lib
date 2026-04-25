@@ -77,7 +77,7 @@ pnpm prim mod --target . --dir src --include-guessed --apply
 | `prim gaps`     | Report call sites that need a primordial that doesn't exist yet — the input list for expanding `socket-lib/src/primordials.ts`. |
 | `prim audit`    | Run `coverage` + `gaps` and (optionally) persist the snapshot to the state file.                                                |
 | `prim state`    | Inspect the persisted state file.                                                                                               |
-| `prim mod`      | Codemod source files to use primordials. Dry-run by default; pass `--apply` to write.                                           |
+| `prim mod`      | Codemod **JavaScript** source files to use primordials. Dry-run by default; pass `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible.                                           |
 
 ## How it knows what's covered
 
