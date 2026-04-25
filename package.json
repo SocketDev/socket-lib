@@ -699,6 +699,7 @@
     "dev": "node scripts/build/main.mts --watch",
     "fix": "node scripts/fix.mts",
     "lint": "node scripts/lint.mts",
+    "prim": "node tools/prim/bin/prim.mts",
     "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
     "prepare": "husky && node scripts/build/main.mts --quiet",
     "prepublishOnly": "pnpm run build",

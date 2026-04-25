@@ -23,12 +23,20 @@ use primordials, and a state file for tracking progress across runs.
 
 ## Install
 
+`prim` is a workspace-only tool — it isn't published to npm and never will be (`"private": true`). Two ways to run it:
+
 ```sh
-# Local checkout, run directly:
+# From inside socket-lib, use the root pnpm script:
+pnpm prim --help
+pnpm prim coverage --target ../socket-cli
+
+# From outside socket-lib (e.g. when auditing a sibling repo), invoke
+# the bin directly:
 node /path/to/socket-lib/tools/prim/bin/prim.mts --help
 ```
 
-Once published to npm, `pnpm dlx prim` will work too.
+The `pnpm prim` form is the canonical way to run it during fleet
+development — it always picks up the live source under `tools/prim/`.
 
 ## Usage
 
@@ -36,29 +44,29 @@ Once published to npm, `pnpm dlx prim` will work too.
 
 ```sh
 # Show help
-prim --help
+pnpm prim --help
 
 # Find call sites you could migrate today (existing primordials)
-prim coverage --target ./socket-cli --dir dist
+pnpm prim coverage --target ../socket-cli --dir dist
 
 # Find gaps in the primordials surface (need socket-lib expansion)
-prim gaps --target ./socket-cli
+pnpm prim gaps --target ../socket-cli
 
 # Both at once, as a snapshot
-prim audit --target ./socket-cli --update-state
+pnpm prim audit --target ../socket-cli --update-state
 
 # Inspect persisted state
-prim state
+pnpm prim state
 
 # Dry-run a codemod over your source tree
-prim mod --target . --dir src
+pnpm prim mod --target . --dir src
 
 # Apply for real (only after reviewing the dry-run!)
-prim mod --target . --dir src --apply
+pnpm prim mod --target . --dir src --apply
 
 # Also rewrite prototype-method calls where the receiver type is
 # guessed from the variable name (more aggressive — needs review)
-prim mod --target . --dir src --include-guessed --apply
+pnpm prim mod --target . --dir src --include-guessed --apply
 ```
 
 ### Subcommands
