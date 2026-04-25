@@ -700,7 +700,7 @@
     "fix": "node scripts/fix.mts",
     "lint": "node scripts/lint.mts",
     "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
-    "prepare": "husky",
+    "prepare": "husky && node scripts/build/main.mts --quiet",
     "prepublishOnly": "pnpm run build",
     "test": "node scripts/test/main.mts",
     "update": "node scripts/update.mts"
