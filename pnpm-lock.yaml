@@ -468,6 +468,14 @@ importers:
         specifier: 24.9.2
         version: 24.9.2
 
+  tools/prim:
+    dependencies:
+      acorn-wasm:
+        specifier: workspace:*
+        version: link:../../vendor/acorn-wasm
+
+  vendor/acorn-wasm: {}
+
 packages:
 
   '@antfu/ni@27.0.1':

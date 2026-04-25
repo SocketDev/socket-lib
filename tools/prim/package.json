@@ -1,0 +1,26 @@
+{
+  "name": "prim",
+  "version": "0.1.0",
+  "description": "Audit a project's bundled output for primordials coverage and gaps against @socketsecurity/lib/primordials, and codemod source to use them",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "prim": "./bin/prim.mts"
+  },
+  "main": "./src/index.mts",
+  "exports": {
+    ".": "./src/index.mts"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md"
+  ],
+  "dependencies": {
+    "acorn-wasm": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "license": "MIT"
+}
