@@ -392,9 +392,7 @@ export class DlxManifest {
       try {
         safeMkdirSync(manifestDir, { recursive: true })
       } catch (e) {
-        logger.warn(
-          `Failed to create manifest directory: ${errorMessage(e)}`,
-        )
+        logger.warn(`Failed to create manifest directory: ${errorMessage(e)}`)
       }
 
       // Write atomically.

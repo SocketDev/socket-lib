@@ -37,6 +37,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/package-extensions`](../src/package-extensions.ts) | Package extensions for compatibility adjustments.                                                              |
 | [`@socketsecurity/lib/packages`](../src/packages.ts)                     | Package registry management with Socket.dev specific utilities.                                                |
 | [`@socketsecurity/lib/performance`](../src/performance.ts)               | Performance monitoring utilities for profiling and optimization.                                               |
+| [`@socketsecurity/lib/primordials`](../src/primordials.ts)               | Safe references to built-in functions and constructors.                                                        |
 | [`@socketsecurity/lib/process-lock`](../src/process-lock.ts)             | Process locking utilities with stale detection and exit cleanup.                                               |
 | [`@socketsecurity/lib/promise-queue`](../src/promise-queue.ts)           | Bounded concurrency promise queue.                                                                             |
 | [`@socketsecurity/lib/promises`](../src/promises.ts)                     | Promise utilities including chunked iteration and timers.                                                      |
