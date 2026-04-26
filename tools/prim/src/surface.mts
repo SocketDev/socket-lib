@@ -115,7 +115,11 @@ function deriveNodeBootstrapSurface() {
     // method.
     exports.add(name)
     for (const propName of Object.getOwnPropertyNames(original)) {
-      if (propName === 'prototype' || propName === 'name' || propName === 'length') {
+      if (
+        propName === 'prototype' ||
+        propName === 'name' ||
+        propName === 'length'
+      ) {
         continue
       }
       exports.add(`${name}${capitalize(propName)}`)
@@ -225,9 +229,7 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
   if (surfacePath) {
     const resolved = path.resolve(surfacePath)
     if (!existsSync(resolved)) {
-      throw new Error(
-        `--surface path not found: ${resolved}`,
-      )
+      throw new Error(`--surface path not found: ${resolved}`)
     }
     return { source: resolved, exports: parseExports(resolved) }
   }
