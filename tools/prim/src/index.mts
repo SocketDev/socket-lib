@@ -8,8 +8,8 @@
  */
 
 export { auditDirectory } from './audit.mts'
+export { lintSource } from './lint.mts'
 export { loadPrimordialsSurface } from './surface.mts'
-export { loadState, saveState } from './state.mts'
 export {
   TRACKED_GLOBALS,
   ctorPrimordialName,

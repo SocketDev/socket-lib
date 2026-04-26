@@ -10,7 +10,7 @@ Primordials capture references to JavaScript built-ins (`Object.keys`,
 code can tamper with prototypes or globals. They're a hardening tool for
 code that processes adversarial input.
 
-`prim` answers two questions across a project's bundled output:
+`prim` answers two questions across a project's source / bundled output:
 
 - **Coverage**: which call sites already have a primordial available
   (i.e. you can replace `arr.map(fn)` with `ArrayPrototypeMap(arr, fn)`
@@ -19,16 +19,18 @@ code that processes adversarial input.
   the surface needs expansion in `socket-lib/src/primordials.ts`)?
 
 It also includes a codemod (`prim mod`) that rewrites source files to
-use primordials, and a state file for tracking progress across runs.
+use primordials, and a structural linter (`prim lint`) that enforces
+naming-convention rules for primordials destructure blocks.
 
 ## Install
 
-`prim` is a workspace-only tool — it isn't published to npm and never will be (`"private": true`). Two ways to run it:
+`prim` is a workspace-only tool — it isn't published to npm and never
+will be (`"private": true`). Two ways to run it:
 
 ```sh
 # From inside socket-lib, use the root pnpm script:
 pnpm prim --help
-pnpm prim coverage --target ../socket-cli
+pnpm prim audit --target ../socket-cli
 
 # From outside socket-lib (e.g. when auditing a sibling repo), invoke
 # the bin directly:
@@ -40,56 +42,62 @@ development — it always picks up the live source under `tools/prim/`.
 
 ## Usage
 
-`prim` is a multi-command CLI. Each subcommand does one thing.
+`prim` has three subcommands, each focused on one operation:
+
+| Subcommand   | Purpose |
+|---|---|
+| `prim audit` | Find call sites where a primordial applies. Default shows both migration candidates (covered) and surface gaps (gap). Filter with `--coverage` or `--gaps`. |
+| `prim mod`   | Codemod **JavaScript** source files to use primordials. Dry-run by default; `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible. |
+| `prim lint`  | Structural lint rules for primordials destructure blocks. Currently: `ctor-rename` — constructor primordials (`Array`, `Set`, `TypeError`, …) must be aliased `<Name>: <Name>Ctor` when destructured from `primordials` (or any configured primordials-shaped source). Exits 1 on violations. |
 
 ```sh
 # Show help
 pnpm prim --help
 
-# Find call sites you could migrate today (existing primordials)
-pnpm prim coverage --target ../socket-cli --dir dist
+# Find both migration candidates AND surface gaps:
+pnpm prim audit --target ../socket-cli
 
-# Find gaps in the primordials surface (need socket-lib expansion)
-pnpm prim gaps --target ../socket-cli
+# Only the gaps (what's missing from socket-lib's primordials):
+pnpm prim audit --target ../socket-cli --gaps
 
-# Both at once, as a snapshot
-pnpm prim audit --target ../socket-cli --update-state
+# Only the migration candidates (what we could rewrite today):
+pnpm prim audit --target . --dir src --coverage
 
-# Inspect persisted state
-pnpm prim state
-
-# Dry-run a codemod over your source tree
+# Dry-run a codemod over your source tree:
 pnpm prim mod --target . --dir src
 
-# Apply for real (only after reviewing the dry-run!)
+# Apply for real (only after reviewing the dry-run!):
 pnpm prim mod --target . --dir src --apply
 
 # Also rewrite prototype-method calls where the receiver type is
-# guessed from the variable name (more aggressive — needs review)
+# guessed from the variable name (more aggressive — needs review):
 pnpm prim mod --target . --dir src --include-guessed --apply
+
+# Lint additions code for ctor-rename violations:
+pnpm prim lint --target additions/source-patched --dir lib
 ```
-
-### Subcommands
-
-| Subcommand      | Purpose                                                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `prim coverage` | Report call sites in the target that could be migrated to existing primordials.                                                 |
-| `prim gaps`     | Report call sites that need a primordial that doesn't exist yet — the input list for expanding `socket-lib/src/primordials.ts`. |
-| `prim audit`    | Run `coverage` + `gaps` and (optionally) persist the snapshot to the state file.                                                |
-| `prim state`    | Inspect the persisted state file.                                                                                               |
-| `prim lint`     | Structural lint rules for primordials destructure blocks. Currently: `ctor-rename` — constructor primordials (`Array`, `Set`, `TypeError`, …) must be aliased `<Name>: <Name>Ctor` when destructured from `primordials` (or any configured primordials-shaped source like `safe-references`). Exits 1 on violations.        |
-| `prim mod`      | Codemod **JavaScript** source files to use primordials. Dry-run by default; pass `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible.                                           |
 
 ## How it knows what's covered
 
-`prim` resolves the primordials surface from one of two locations:
+`prim` resolves the primordials surface from one of three locations:
 
-1. A sibling socket-lib checkout: `../socket-lib/src/primordials.ts`
-   (used during fleet development).
-2. The installed `@socketsecurity/lib/dist/primordials.js` in the
+1. Explicit `--surface <path>` flag (audit/mod) — overrides everything.
+   Use this to audit against Node's
+   `lib/internal/per_context/primordials.js` or any other
+   primordials-shaped source.
+2. A sibling socket-lib checkout: `../socket-lib/src/primordials.ts`
+   (used during fleet development — picks up unreleased exports).
+3. The installed `@socketsecurity/lib/dist/primordials.js` in the
    target's `node_modules`.
 
 Whichever it finds first wins.
+
+When `--surface` points at a Node `per_context/primordials.js`, the
+loader recognizes the path and dynamically computes the full surface
+(~541 names) by enumerating the static + prototype methods of the
+upstream globals (Array, Object, String, Number, Map, Set, Error,
+RegExp, JSON, Math, Reflect, etc.) — the same names Node installs at
+bootstrap via `copyPropsRenamed` + `copyPrototype` reflection.
 
 ## Design
 
@@ -97,6 +105,9 @@ Whichever it finds first wins.
   (originally from
   [sdxgen](https://github.com/SocketDev/sdxgen/tree/main/vendor/acorn-wasm))
   — no npm install needed, no network access.
+- **TypeScript support**: `.ts`/`.mts`/`.cts`/`.tsx` files are stripped
+  via Node's `module.stripTypeScriptTypes()` before parsing, so the
+  audit walks source trees regardless of compilation state.
 - **Heuristics**: receiver-type guessing for prototype-method calls
   (e.g. `arr.map(...)` → `Array`). False positives show up flagged
   with `[guessed: …]` so they can be dismissed manually.
@@ -104,22 +115,7 @@ Whichever it finds first wins.
   built-in type (`.toUpperCase` → String, `.getTime` → Date) are
   classified by the method name regardless of receiver, which is a
   stronger signal than the name heuristic.
-
-## State file format
-
-```json
-{
-  "updated": "2026-04-22T20:10:19.200Z",
-  "targets": {
-    "socket-cli": {
-      "coverage": [
-        { "primordial": "ObjectKeys", "count": 142 },
-        { "primordial": "ArrayPrototypeMap", "count": 86 }
-      ],
-      "gaps": [{ "primordial": "WeakRefPrototypeDeref", "count": 3 }]
-    }
-  }
-}
-```
-
-Default location is `<cwd>/.prim-state.json`; override with `--state`.
+- **Bundler-glue filter**: skips esbuild's CJS interop boilerplate
+  (`Object.defineProperty(exports, "__esModule", ...)` and
+  `var __defProp = Object.defineProperty;`) so audits of `dist/`
+  trees don't drown in machine-generated noise.
