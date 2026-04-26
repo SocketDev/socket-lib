@@ -4,11 +4,8 @@
 
 set -e
 
-# shellcheck source=./_lib.sh
-. "$(dirname "$0")/_lib.sh"
-
-# pre-commit prints a warning color in addition to the shared RED/GREEN.
-YELLOW='\033[1;33m'
+# shellcheck source=./_api-key-check.sh
+. "$(dirname "$0")/_api-key-check.sh"
 
 printf "${GREEN}Running Socket Security checks...${NC}\n"
 
@@ -39,27 +36,34 @@ if echo "$STAGED_FILES" | grep -E '\.log$' | grep -v 'test.*\.log'; then
 fi
 
 # Check for .env files.
+# Allowlist: .env.example (template) and .env.test (tracked placeholder).
+# Everything else matching .env* is blocked.
 printf "Checking for .env files...\n"
-if echo "$STAGED_FILES" | grep -E '^\.env(\.local)?$'; then
-  printf "${RED}✗ ERROR: .env or .env.local file detected!${NC}\n"
-  echo "$STAGED_FILES" | grep -E '^\.env(\.local)?$'
-  printf "These files should never be committed. Use .env.example instead.\n"
+if echo "$STAGED_FILES" | grep -E '^\.env(\.[^/]+)?$' | grep -vE '^\.env\.(example|test)$' | grep -q .; then
+  printf "${RED}✗ ERROR: .env file detected!${NC}\n"
+  echo "$STAGED_FILES" | grep -E '^\.env(\.[^/]+)?$' | grep -vE '^\.env\.(example|test)$'
+  printf "These files should never be committed. Use .env.example for templates.\n"
   ERRORS=$((ERRORS + 1))
 fi
 
 # Check for hardcoded user paths (generic detection).
 printf "Checking for hardcoded personal paths...\n"
-echo "$STAGED_FILES" | while IFS= read -r file; do
+for file in $STAGED_FILES; do
   if [ -f "$file" ]; then
     # Skip test files and hook scripts.
     if echo "$file" | grep -qE '\.(test|spec)\.|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then
       continue
     fi
 
-    # Check for common user path patterns.
-    if grep -E '(/Users/[^/\s]+/|/home/[^/\s]+/|C:\\Users\\[^\\]+\\)' "$file" 2>/dev/null | grep -q .; then
+    # Check for common user path patterns. Placeholders like /Users/<name>/,
+    # /home/<user>/, /Users/$USER/, /home/${USER}/ are allowed — those are
+    # documentation and shell-script idioms, not real leaks.
+    path_hits=$(grep -nE '(/Users/[^[:space:]/]+/|/home/[^[:space:]/]+/|C:\\Users\\[^[:space:]\\]+\\)' "$file" 2>/dev/null \
+      | grep -vE '(/Users/<[^>]*>/|/home/<[^>]*>/|C:\\Users\\<[^>]*>\\|/Users/\$\{?[A-Z_]+\}?/|/home/\$\{?[A-Z_]+\}?/)' \
+      || true)
+    if [ -n "$path_hits" ]; then
       printf "${RED}✗ ERROR: Hardcoded personal path found in: $file${NC}\n"
-      grep -n -E '(/Users/[^/\s]+/|/home/[^/\s]+/|C:\\Users\\[^\\]+\\)' "$file" | head -3
+      echo "$path_hits" | head -3
       printf "Replace with relative paths or environment variables.\n"
       ERRORS=$((ERRORS + 1))
     fi
@@ -68,11 +72,15 @@ done
 
 # Check for Socket API keys.
 printf "Checking for API keys...\n"
-echo "$STAGED_FILES" | while IFS= read -r file; do
+for file in $STAGED_FILES; do
   if [ -f "$file" ]; then
-    if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | filter_allowed_sktsec | grep -q .; then
+    # Skip hook scripts: they contain the sktsec_ regex pattern literal.
+    if echo "$file" | grep -qE '\.git-hooks/|\.husky/'; then
+      continue
+    fi
+    if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | filter_allowed_api_keys | grep -q .; then
       printf "${YELLOW}⚠ WARNING: Potential API key found in: $file${NC}\n"
-      grep -n 'sktsec_' "$file" | filter_allowed_sktsec | head -3
+      grep -n 'sktsec_' "$file" | filter_allowed_api_keys | head -3
       printf "If this is a real API key, DO NOT COMMIT IT.\n"
     fi
   fi
@@ -80,7 +88,7 @@ done
 
 # Check for common secret patterns.
 printf "Checking for potential secrets...\n"
-echo "$STAGED_FILES" | while IFS= read -r file; do
+for file in $STAGED_FILES; do
   if [ -f "$file" ]; then
     # Skip test files, example files, and hook scripts.
     if echo "$file" | grep -qE '\.(test|spec)\.(m?[jt]s|tsx?)$|\.example$|/test/|/tests/|fixtures/|\.git-hooks/|\.husky/'; then
@@ -113,9 +121,11 @@ done
 printf "Checking for npx/dlx usage...\n"
 for file in $STAGED_FILES; do
   if [ -f "$file" ]; then
+    # Skip node_modules, lockfiles, and this hook itself.
     if echo "$file" | grep -qE 'node_modules/|pnpm-lock\.yaml|\.git-hooks/'; then
       continue
     fi
+
     if grep -nE '\bnpx\b|\bpnpm dlx\b|\byarn dlx\b' "$file" 2>/dev/null | grep -v '# zizmor:' | grep -q .; then
       printf "${RED}✗ ERROR: npx/dlx usage found in: $file${NC}\n"
       grep -nE '\bnpx\b|\bpnpm dlx\b|\byarn dlx\b' "$file" | grep -v '# zizmor:' | head -3
