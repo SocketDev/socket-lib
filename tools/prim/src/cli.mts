@@ -253,11 +253,12 @@ export async function runCli(argv) {
     if (!wantGaps) {
       filtered = filtered.filter(f => f.kind !== 'gap')
     }
-    const mode = values.coverage && !values.gaps
-      ? 'coverage'
-      : values.gaps && !values.coverage
-        ? 'gaps'
-        : 'audit'
+    const mode =
+      values.coverage && !values.gaps
+        ? 'coverage'
+        : values.gaps && !values.coverage
+          ? 'gaps'
+          : 'audit'
     report(filtered, json, path.basename(targetRoot), mode)
     // Surface parse failures so silent skips don't mask audit gaps.
     const parseFailures = findings.parseFailures ?? 0
