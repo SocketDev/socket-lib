@@ -259,6 +259,14 @@ export async function runCli(argv) {
         ? 'gaps'
         : 'audit'
     report(filtered, json, path.basename(targetRoot), mode)
+    // Surface parse failures so silent skips don't mask audit gaps.
+    const parseFailures = findings.parseFailures ?? 0
+    if (parseFailures > 0 && !json) {
+      process.stderr.write(
+        `prim: warning — ${parseFailures} file(s) failed to parse and were skipped. ` +
+          `Findings are incomplete; check files with unusual syntax.\n`,
+      )
+    }
     return
   }
 

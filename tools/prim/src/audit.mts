@@ -374,16 +374,15 @@ export function auditDirectory({
     },
   }
 
+  let parseFailures = 0
+
   function auditFile(absPath, relPath) {
     const ext = path.extname(absPath)
     const rawSrc = readFileSync(absPath, 'utf8')
-    // For TypeScript files, strip types before parsing. We use mode
-    // 'transform' (not 'strip') because the latter pads stripped
-    // regions with whitespace to preserve byte offsets — but
-    // `stripTypeScriptTypes` only supports 'strip' for sourceType
-    // 'module'+ files when the strip leaves a parseable result. For
-    // our purposes (offset → line/column) we re-derive line offsets
-    // from the parseable source, so 'transform' is fine.
+    // For TypeScript files, strip types before parsing. acorn-wasm's
+    // `typescript: true` doesn't cover modern TS syntax (`export type`,
+    // class fields with annotations, generic type parameters), so we
+    // strip via Node's `module.stripTypeScriptTypes` and parse plain JS.
     let src = rawSrc
     if (TS_EXTENSIONS.has(ext)) {
       try {
@@ -399,9 +398,22 @@ export function auditDirectory({
     try {
       walk(src, visitors, PARSE_OPTIONS)
     } catch {
-      // File didn't parse — skip silently. Lint/type pipelines catch
-      // syntax errors elsewhere.
+      // Parse failure — track it so we can surface a summary.
+      parseFailures += 1
     }
+  }
+
+  // After auditing, tag the findings with the parse-failure count so
+  // callers can surface a warning. We attach it as a non-enumerable
+  // property to keep findings.length the right number for filtering.
+  function attachParseFailureCount(arr) {
+    Object.defineProperty(arr, 'parseFailures', {
+      value: parseFailures,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    })
+    return arr
   }
 
   function* walkDir(dir) {
@@ -424,5 +436,5 @@ export function auditDirectory({
     auditFile(abs, rel)
   }
 
-  return findings
+  return attachParseFailureCount(findings)
 }

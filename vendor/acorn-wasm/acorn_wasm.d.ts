@@ -1,6 +1,13 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+ * Parse `source`, compile `selector`, run the matcher, return a
+ * JSON-encoded result string. Meant to be called from JavaScript as:
+ *
+ *     const result = JSON.parse(aqs_match(source, selector))
+ */
+export function aqs_match(source: string, selector: string): string;
+/**
  * Standalone parse function (matches Acorn API)
  */
 export function parse(code: string, options: any): any;
