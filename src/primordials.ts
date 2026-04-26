@@ -47,6 +47,7 @@ export const applyBind = bind.bind(apply) as <
 
 // ─── Constructors ──────────────────────────────────────────────────────
 export const ArrayCtor: ArrayConstructor = Array
+export const ArrayBufferCtor: ArrayBufferConstructor = ArrayBuffer
 export const BooleanCtor: BooleanConstructor = Boolean
 // BufferCtor is a Node-only global; `undefined` in the browser. Callers
 // that import it in browser code get a type-safe `undefined` rather than
@@ -54,6 +55,7 @@ export const BooleanCtor: BooleanConstructor = Boolean
 export const BufferCtor: typeof globalThis.Buffer | undefined = (
   globalThis as { Buffer?: typeof globalThis.Buffer }
 ).Buffer
+export const DataViewCtor: DataViewConstructor = DataView
 export const DateCtor: DateConstructor = Date
 export const ErrorCtor: ErrorConstructor = Error
 // Error subclasses commonly thrown in validation paths.
@@ -72,6 +74,18 @@ export const RegExpCtor: RegExpConstructor = RegExp
 export const SetCtor: SetConstructor = Set
 export const StringCtor: StringConstructor = String
 export const SymbolCtor: SymbolConstructor = Symbol
+// Typed-array constructors. Same shape as Array — bundled externals
+// (npm-pack, adm-zip, tar-fs, etc.) reach for these directly.
+export const Float32ArrayCtor: Float32ArrayConstructor = Float32Array
+export const Float64ArrayCtor: Float64ArrayConstructor = Float64Array
+export const Int8ArrayCtor: Int8ArrayConstructor = Int8Array
+export const Int16ArrayCtor: Int16ArrayConstructor = Int16Array
+export const Int32ArrayCtor: Int32ArrayConstructor = Int32Array
+export const Uint8ArrayCtor: Uint8ArrayConstructor = Uint8Array
+export const Uint8ClampedArrayCtor: Uint8ClampedArrayConstructor =
+  Uint8ClampedArray
+export const Uint16ArrayCtor: Uint16ArrayConstructor = Uint16Array
+export const Uint32ArrayCtor: Uint32ArrayConstructor = Uint32Array
 export const URLCtor: typeof URL = URL
 export const URLSearchParamsCtor: typeof URLSearchParams = URLSearchParams
 export const WeakMapCtor: WeakMapConstructor = WeakMap
@@ -90,6 +104,9 @@ export const JSONStringify = JSON.stringify
 export const ArrayFrom = Array.from
 export const ArrayIsArray = Array.isArray
 export const ArrayOf = Array.of
+
+// ─── ArrayBuffer (static) ──────────────────────────────────────────────
+export const ArrayBufferIsView = ArrayBuffer.isView
 
 // ─── Array (prototype) ─────────────────────────────────────────────────
 export const ArrayPrototypeAt = uncurryThis(Array.prototype.at)
@@ -149,9 +166,25 @@ export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
 ) => number
 export const ArrayPrototypeValues = uncurryThis(Array.prototype.values)
 
-// ─── Buffer (prototype) ────────────────────────────────────────────────
+// ─── Buffer (static) ───────────────────────────────────────────────────
 // Buffer is a Node-only global; these helpers are `undefined` in browsers.
-// Typed as `Function | undefined` so TS forces a null-check in cross-env code.
+// Typed as the corresponding member type | undefined so TS forces a
+// null-check in cross-env code.
+export const BufferAlloc: typeof Buffer.alloc | undefined = BufferCtor?.alloc
+export const BufferAllocUnsafe: typeof Buffer.allocUnsafe | undefined =
+  BufferCtor?.allocUnsafe
+export const BufferAllocUnsafeSlow: typeof Buffer.allocUnsafeSlow | undefined =
+  BufferCtor?.allocUnsafeSlow
+export const BufferByteLength: typeof Buffer.byteLength | undefined =
+  BufferCtor?.byteLength
+export const BufferConcat: typeof Buffer.concat | undefined = BufferCtor?.concat
+export const BufferFrom: typeof Buffer.from | undefined = BufferCtor?.from
+export const BufferIsBuffer: typeof Buffer.isBuffer | undefined =
+  BufferCtor?.isBuffer
+export const BufferIsEncoding: typeof Buffer.isEncoding | undefined =
+  BufferCtor?.isEncoding
+
+// ─── Buffer (prototype) ────────────────────────────────────────────────
 export const BufferPrototypeSlice:
   | ((buf: Buffer, start?: number, end?: number) => Buffer)
   | undefined = BufferCtor ? uncurryThis(BufferCtor.prototype.slice) : undefined
@@ -166,10 +199,24 @@ export const BufferPrototypeToString:
   ? uncurryThis(BufferCtor.prototype.toString)
   : undefined
 
+// ─── Date (static) ─────────────────────────────────────────────────────
+export const DateNow = Date.now
+export const DateParse = Date.parse
+export const DateUTC = Date.UTC
+
 // ─── Date (prototype) ──────────────────────────────────────────────────
 export const DatePrototypeGetTime = uncurryThis(Date.prototype.getTime)
 export const DatePrototypeToISOString = uncurryThis(Date.prototype.toISOString)
 export const DatePrototypeValueOf = uncurryThis(Date.prototype.valueOf)
+
+// ─── Error (static) ────────────────────────────────────────────────────
+// `Error.isError` is ES2025 (Node 22.18+). Older Node falls back to
+// `instanceof Error` via the polyfill in src/errors.ts. The primordial
+// reference is typed `Function | undefined` so callers in older
+// environments don't crash at import time.
+export const ErrorIsError: ((value: unknown) => value is Error) | undefined = (
+  Error as { isError?: (v: unknown) => v is Error }
+).isError
 
 // ─── Function ──────────────────────────────────────────────────────────
 export const FunctionPrototypeApply = uncurryThis(Function.prototype.apply) as (
@@ -283,6 +330,19 @@ export const ObjectPrototypePropertyIsEnumerable = uncurryThis(
 export const ObjectPrototypeToString = uncurryThis(Object.prototype.toString)
 export const ObjectPrototypeValueOf = uncurryThis(Object.prototype.valueOf)
 
+// ─── Promise (static) ──────────────────────────────────────────────────
+export const PromiseAll = Promise.all.bind(Promise)
+export const PromiseAllSettled = Promise.allSettled.bind(Promise)
+export const PromiseAny = Promise.any.bind(Promise)
+export const PromiseRace = Promise.race.bind(Promise)
+export const PromiseReject = Promise.reject.bind(Promise)
+export const PromiseResolve = Promise.resolve.bind(Promise)
+// `Promise.withResolvers` is ES2024 (Node 22.0+). Typed as
+// `Function | undefined` for safety even though Node 22+ always has it.
+export const PromiseWithResolvers: typeof Promise.withResolvers | undefined = (
+  Promise as { withResolvers?: typeof Promise.withResolvers }
+).withResolvers?.bind(Promise) as typeof Promise.withResolvers | undefined
+
 // ─── Promise (prototype) ───────────────────────────────────────────────
 export const PromisePrototypeCatch = uncurryThis(Promise.prototype.catch)
 export const PromisePrototypeFinally = uncurryThis(Promise.prototype.finally)
@@ -303,7 +363,15 @@ export const ReflectPreventExtensions = Reflect.preventExtensions
 export const ReflectSet = Reflect.set
 export const ReflectSetPrototypeOf = Reflect.setPrototypeOf
 
-// ─── RegExp ────────────────────────────────────────────────────────────
+// ─── RegExp (static) ───────────────────────────────────────────────────
+// `RegExp.escape` is ES2025 (Node 22.18+). Typed `Function | undefined`
+// for safety even though Node 22.18+ always has it. Callers needing a
+// portable shape should null-check.
+export const RegExpEscape: ((s: string) => string) | undefined = (
+  RegExp as { escape?: (s: string) => string }
+).escape
+
+// ─── RegExp (prototype) ────────────────────────────────────────────────
 export const RegExpPrototypeExec = uncurryThis(RegExp.prototype.exec)
 export const RegExpPrototypeTest = uncurryThis(RegExp.prototype.test)
 export const RegExpPrototypeSymbolMatch = uncurryThis(
