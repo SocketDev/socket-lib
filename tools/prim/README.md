@@ -44,10 +44,10 @@ development — it always picks up the live source under `tools/prim/`.
 
 `prim` has three subcommands, each focused on one operation:
 
-| Subcommand   | Purpose |
-|---|---|
-| `prim audit` | Find call sites where a primordial applies. Default shows both migration candidates (covered) and surface gaps (gap). Filter with `--coverage` or `--gaps`. |
-| `prim mod`   | Codemod **JavaScript** source files to use primordials. Dry-run by default; `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible. |
+| Subcommand   | Purpose                                                                                                                                                                                                                                                                                       |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prim audit` | Find call sites where a primordial applies. Default shows both migration candidates (covered) and surface gaps (gap). Filter with `--coverage` or `--gaps`.                                                                                                                                   |
+| `prim mod`   | Codemod **JavaScript** source files to use primordials. Dry-run by default; `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible.               |
 | `prim lint`  | Structural lint rules for primordials destructure blocks. Currently: `ctor-rename` — constructor primordials (`Array`, `Set`, `TypeError`, …) must be aliased `<Name>: <Name>Ctor` when destructured from `primordials` (or any configured primordials-shaped source). Exits 1 on violations. |
 
 ```sh

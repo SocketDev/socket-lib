@@ -324,9 +324,7 @@ export function formatLintFindings(findings, ctx) {
   if (findings.length === 0) {
     return `${ctx.targetName}: no lint violations.\n`
   }
-  const lines = [
-    `${ctx.targetName} (lint): ${findings.length} violation(s)\n`,
-  ]
+  const lines = [`${ctx.targetName} (lint): ${findings.length} violation(s)\n`]
   for (const f of findings) {
     lines.push(
       `  [${f.rule}] ${f.file}:${f.line}:${f.column}  destructured \`${f.name}\` from ${f.source}; expected \`${f.name}: ${f.expected}\``,
