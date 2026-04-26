@@ -16,6 +16,10 @@ export function parse(code: string, options: any): any;
  */
 export function is_valid(code: string): boolean;
 /**
+ * Get version information
+ */
+export function version(): string;
+/**
  * Find innermost node containing position
  */
 export function findNodeAround(code: string, pos: number, node_type: string | null | undefined, options_js: any): any;
@@ -27,10 +31,6 @@ export function findNodeAfter(code: string, pos: number, node_type: string | nul
  * Find outermost node ending before position
  */
 export function findNodeBefore(code: string, pos: number, node_type: string | null | undefined, options_js: any): any;
-/**
- * Get version information
- */
-export function version(): string;
 /**
  * Simple walk - parse code and call visitor for each node type
  */
@@ -68,7 +68,14 @@ export class WasmParser {
   [Symbol.dispose](): void;
   constructor();
   /**
-   * Parse JavaScript code and return AST as JsValue (WASM) or JSON string (native)
+   * Parse JavaScript code and return AST as JsValue (WASM) or JSON string (native).
+   *
+   * The WASM path goes:
+   *   options_js (JS object)
+   *     → options_from_jsvalue (Reflect-based reads, no serde_json)
+   *     → parser → JSON string
+   *     → JSON::parse (one cheap JS-side parse)
+   *     → JsValue handed back to JS as the AST root
    */
   parse(code: string, options_js: any): any;
 }

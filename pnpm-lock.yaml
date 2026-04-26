@@ -400,6 +400,9 @@ importers:
       pony-cause:
         specifier: 2.1.11
         version: 2.1.11(patch_hash=39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8)
+      prim:
+        specifier: workspace:*
+        version: link:tools/prim
       semver:
         specifier: 7.7.2
         version: 7.7.2
@@ -467,6 +470,10 @@ importers:
       '@types/node':
         specifier: 24.9.2
         version: 24.9.2
+
+  .claude/hooks/path-guard: {}
+
+  .claude/hooks/token-guard: {}
 
   tools/prim:
     dependencies:
