@@ -238,9 +238,14 @@ export async function runCli(argv) {
       scanDir,
       exported: surface.exports,
     })
-    // Filter mode based on flags. Neither flag = both.
-    const wantCoverage = values.coverage || (!values.coverage && !values.gaps)
-    const wantGaps = values.gaps || (!values.coverage && !values.gaps)
+    // Filter mode based on flags. The two flags are partitioning
+    // filters on the same dataset:
+    //   neither       → both (default)
+    //   --coverage    → only covered
+    //   --gaps        → only gap
+    //   --coverage --gaps → both (explicit, redundant but allowed)
+    const wantCoverage = values.coverage || !values.gaps
+    const wantGaps = values.gaps || !values.coverage
     let filtered = findings
     if (!wantCoverage) {
       filtered = filtered.filter(f => f.kind !== 'covered')
