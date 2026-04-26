@@ -12,6 +12,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { bundlePackage } from './bundler.mts'
 import { externalPackages, scopedPackages } from './config.mts'
 import { ensureDir } from './copy-files.mts'
+import { transformPrimordials } from './transform-primordials.mts'
 
 const logger = getDefaultLogger()
 
@@ -197,6 +198,18 @@ export async function buildExternals(options = {}) {
 
   // Post-process: Fix node-gyp strings to prevent bundler issues for consumers
   await fixNodeGypStrings(distExternalDir, { quiet })
+
+  // Post-process: rewrite well-known global calls (Buffer.from, Date.now,
+  // Object.keys, …) to socket-lib's primordials surface so the bundled
+  // externals don't depend on a clean caller realm. Gated off until the
+  // upstream acorn-wasm parser's range-serialization bug is fixed — see
+  // the long header in ./transform-primordials.mts for the repro. Set
+  // SOCKET_LIB_PRIMORDIALS_TRANSFORM=1 to run anyway (for testing once
+  // the parser ships a fix).
+  if (process.env.SOCKET_LIB_PRIMORDIALS_TRANSFORM === '1') {
+    const distRoot = path.dirname(distExternalDir)
+    await transformPrimordials(distRoot, distExternalDir, { quiet })
+  }
 
   return { bundledCount, totalSize }
 }

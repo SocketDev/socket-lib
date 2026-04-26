@@ -38,7 +38,23 @@ import {
   staticPrimordialName,
 } from './globals.mts'
 
-const PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
+const DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
+
+/**
+ * Output format for the inserted primordials import:
+ *   { kind: 'esm' }: emits `import { X, Y } from '<specifier>'`. Default;
+ *     used when the target is ESM source code.
+ *   { kind: 'cjs' }: emits `const { X, Y } = require('<specifier>')`.
+ *     Used when the target is CJS bundled output (dist/external/*.js).
+ *
+ * `specifier` is either a static string or a `(absFilePath) => string`
+ * function. The function form lets callers compute a per-file relative
+ * path to the primordials module — e.g.
+ *   absFile === '.../dist/external/tar-fs.js' → '../primordials.js'
+ *   absFile === '.../dist/external/@npmcli/x/y.js' → '../../../primordials.js'
+ *
+ * @typedef {{ kind: 'esm' | 'cjs', specifier: string | ((absFile: string) => string) }} ImportStyle
+ */
 
 /**
  * @typedef {Object} CodemodResult
@@ -55,6 +71,8 @@ const PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
  * @param {Set<string>} opts.exported
  * @param {boolean} opts.apply
  * @param {boolean} opts.includeGuessed
+ * @param {ImportStyle} [opts.importStyle] Defaults to ESM with the
+ *   '@socketsecurity/lib/primordials' specifier.
  * @returns {Promise<CodemodResult>}
  */
 export async function applyCodemod({
@@ -63,6 +81,10 @@ export async function applyCodemod({
   exported,
   apply,
   includeGuessed,
+  importStyle = {
+    kind: 'esm',
+    specifier: DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER,
+  },
 }) {
   const result = {
     filesChanged: 0,
@@ -79,6 +101,7 @@ export async function applyCodemod({
       exported,
       includeGuessed,
       apply,
+      importStyle,
     })
     if (fileResult.rewrites > 0) {
       result.filesChanged += 1
@@ -127,7 +150,14 @@ function* walkDir(
  * Each rewrite is recorded as a `{ start, end, replacement, primordial }`
  * tuple, then applied right-to-left so positions stay valid.
  */
-function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
+function rewriteFile({
+  absPath,
+  relPath,
+  exported,
+  includeGuessed,
+  apply,
+  importStyle,
+}) {
   const src = readFileSync(absPath, 'utf8')
   let ast
   try {
@@ -143,6 +173,16 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
   } catch {
     return { rewrites: 0, importAdded: false, skipped: 0 }
   }
+
+  // acorn-wasm reports byte offsets, not char offsets. JS string slice
+  // is char-indexed, so on sources with multi-byte UTF-8 chars (CJK,
+  // emoji, accented Latin), positions silently mis-align and rewrites
+  // corrupt the file. Build a byte→char map once, then translate every
+  // AST start/end before slicing. ASCII-only sources skip the
+  // conversion entirely (the map is identity).
+  const byteToChar = buildByteToCharMap(src)
+  const toChar = (off: number): number =>
+    byteToChar === null ? off : (byteToChar[off] ?? off)
 
   const rewrites = []
   const usedPrimordials = new Set()
@@ -161,8 +201,8 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
       }
       // Replace `Foo` (the identifier) with `Ctor`.
       rewrites.push({
-        start: callee.start,
-        end: callee.end,
+        start: toChar(callee.start),
+        end: toChar(callee.end),
         replacement: ctor,
       })
       usedPrimordials.add(ctor)
@@ -195,8 +235,8 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
       // Replace `Foo.bar` (the whole MemberExpression callee) with the
       // primordial name. Args list stays intact.
       rewrites.push({
-        start: node.callee.start,
-        end: node.callee.end,
+        start: toChar(node.callee.start),
+        end: toChar(node.callee.end),
         replacement: expected,
       })
       usedPrimordials.add(expected)
@@ -229,17 +269,20 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
     // Rewrite `obj.method(args)` → `Primordial(obj, args)`.
     // We need: replace from start of `node.callee` to end of `node` with
     // `Primordial(<obj source>, <args source>)`.
-    const objSrc = src.slice(object.start, object.end)
+    const objSrc = src.slice(toChar(object.start), toChar(object.end))
     const argsSrc =
       node.arguments.length > 0
-        ? src.slice(node.arguments[0].start, node.arguments.at(-1).end)
+        ? src.slice(
+            toChar(node.arguments[0].start),
+            toChar(node.arguments.at(-1).end),
+          )
         : ''
     const replacement = argsSrc
       ? `${expected}(${objSrc}, ${argsSrc})`
       : `${expected}(${objSrc})`
     rewrites.push({
-      start: node.start,
-      end: node.end,
+      start: toChar(node.start),
+      end: toChar(node.end),
       replacement,
     })
     usedPrimordials.add(expected)
@@ -256,11 +299,16 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
     out = out.slice(0, r.start) + r.replacement + out.slice(r.end)
   }
 
-  // Add the import block. Find the last existing import statement and
-  // insert after it; if none, prepend.
+  // Add the import/require block. Find the last existing import (or
+  // require, in CJS mode) and insert after it; if none, prepend.
+  const resolvedSpecifier =
+    typeof importStyle.specifier === 'function'
+      ? importStyle.specifier(absPath)
+      : importStyle.specifier
   const { newSource, importAdded } = ensureImports(
     out,
     [...usedPrimordials].sort(),
+    { kind: importStyle.kind, specifier: resolvedSpecifier },
   )
 
   if (apply) {
@@ -268,6 +316,61 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
   }
 
   return { rewrites: rewrites.length, importAdded, skipped }
+}
+
+/**
+ * Build a sparse byte-offset → char-offset map for `src`. Returns
+ * `null` when the source is pure ASCII (every byte == every char) so
+ * the caller can fast-path identity translation.
+ *
+ * The returned array has one entry per UTF-8 byte position: arr[B]
+ * gives the char index that byte starts. Bytes inside a multi-byte
+ * codepoint share the char index of the codepoint's lead byte.
+ */
+function buildByteToCharMap(src: string): number[] | null {
+  // Scan: any code unit ≥ 0x80 implies a multi-byte UTF-8 representation.
+  let hasNonAscii = false
+  for (let i = 0; i < src.length; i++) {
+    if (src.charCodeAt(i) >= 0x80) {
+      hasNonAscii = true
+      break
+    }
+  }
+  if (!hasNonAscii) {
+    return null
+  }
+  const buf = Buffer.from(src, 'utf8')
+  const map = Array.from({ length: buf.length + 1 })
+  let charIdx = 0
+  let byteIdx = 0
+  // Walk char-by-char; for each char compute its UTF-8 byte length
+  // and stamp the char index into every byte slot it spans.
+  for (let i = 0; i < src.length; i++) {
+    const code = src.codePointAt(i)
+    let byteLen
+    if (code < 0x80) {
+      byteLen = 1
+    } else if (code < 0x800) {
+      byteLen = 2
+    } else if (code < 0x10000) {
+      byteLen = 3
+    } else {
+      byteLen = 4
+      // Surrogate pair: codePointAt returned the full codepoint at the
+      // first surrogate, so skip the trailing surrogate in the next
+      // iteration.
+      i++
+    }
+    for (let j = 0; j < byteLen; j++) {
+      map[byteIdx + j] = charIdx
+    }
+    byteIdx += byteLen
+    charIdx += byteLen === 4 ? 2 : 1
+  }
+  // Sentinel for end-of-source positions (acorn-wasm sometimes reports
+  // an end == buf.length).
+  map[byteIdx] = charIdx
+  return map
 }
 
 /**
@@ -297,16 +400,36 @@ function walkAst(node, visit) {
 }
 
 /**
- * Insert `import { … } from '@socketsecurity/lib/primordials'` after
- * the last existing import. If an import from the same specifier
- * already exists, merge into it. Returns the new source and whether
- * the import was added (vs already-present-and-complete).
+ * Escape a string for use inside a regex character class / pattern.
  */
-function ensureImports(src, identifiers) {
-  // Detect existing import from the primordials specifier.
-  const existingRe = new RegExp(
-    `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${PRIMORDIALS_IMPORT_SPECIFIER}['"]`,
-  )
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Insert (or merge into) the primordials import statement.
+ *
+ * In ESM mode emits `import { X, Y } from '<specifier>'`. In CJS mode
+ * emits `const { X, Y } = require('<specifier>')`. If a matching import
+ * (same shape, same specifier) already exists in `src`, the new
+ * identifiers are merged into its destructure list and we re-sort the
+ * keys; otherwise the new statement is inserted after the last existing
+ * import/require, or prepended if neither exists.
+ *
+ * Returns the rewritten source and a boolean indicating whether anything
+ * was added/changed (vs already-present-and-complete).
+ */
+function ensureImports(src, identifiers, importStyle) {
+  const { kind, specifier } = importStyle
+  const escSpec = escapeRegex(specifier)
+  const existingRe =
+    kind === 'esm'
+      ? new RegExp(
+          `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escSpec}['"]\\s*;?`,
+        )
+      : new RegExp(
+          `(?:const|let|var)\\s*\\{([^}]*)\\}\\s*=\\s*require\\(\\s*['"]${escSpec}['"]\\s*\\)\\s*;?`,
+        )
   const existing = src.match(existingRe)
   if (existing) {
     const have = new Set(
@@ -326,26 +449,58 @@ function ensureImports(src, identifiers) {
       return { newSource: src, importAdded: false }
     }
     const merged = [...have].sort().join(', ')
-    const newImport = `import { ${merged} } from '${PRIMORDIALS_IMPORT_SPECIFIER}'`
+    const replacement =
+      kind === 'esm'
+        ? `import { ${merged} } from '${specifier}'`
+        : `const { ${merged} } = require('${specifier}')`
     return {
-      newSource: src.replace(existingRe, newImport),
+      newSource: src.replace(existingRe, replacement),
       importAdded: true,
     }
   }
 
-  // No existing import — insert after last import statement.
-  const importLineRe = /^import\s.+?from\s+['"][^'"]+['"]\s*;?\s*$/gm
-  let lastEnd = 0
-  for (const m of src.matchAll(importLineRe)) {
-    lastEnd = m.index + m[0].length
-  }
-  const newImport = `import { ${identifiers.join(', ')} } from '${PRIMORDIALS_IMPORT_SPECIFIER}'\n`
+  // No matching import — insert after the last existing import-or-require.
+  // We match either ESM imports or CJS require-shaped declarations so the
+  // inserted block lands alongside the existing module-loading prologue.
+  const lastEnd = findInsertionPoint(src)
+  const list = identifiers.join(', ')
+  const newStmt =
+    kind === 'esm'
+      ? `import { ${list} } from '${specifier}'\n`
+      : `const { ${list} } = require('${specifier}')\n`
   if (lastEnd === 0) {
-    // No imports at all — prepend.
-    return { newSource: newImport + src, importAdded: true }
+    return { newSource: newStmt + src, importAdded: true }
   }
   return {
-    newSource: src.slice(0, lastEnd) + '\n' + newImport + src.slice(lastEnd),
+    newSource: src.slice(0, lastEnd) + '\n' + newStmt + src.slice(lastEnd),
     importAdded: true,
   }
+}
+
+/**
+ * Find the byte offset right after the last import / require statement
+ * at module scope. Returns 0 if neither is found, so callers can prepend.
+ */
+function findInsertionPoint(src) {
+  // ESM: `import ... from '...'`.
+  const importRe = /^import\s.+?from\s+['"][^'"]+['"]\s*;?\s*$/gm
+  // CJS: `const|let|var ... = require('...')`. We don't try to handle
+  // every degenerate form — the goal is to land near the existing
+  // top-of-file require block, not perfectly classify every statement.
+  const requireRe =
+    /^(?:const|let|var)\s+[^=]+?=\s*require\(\s*['"][^'"]+['"]\s*\)\s*;?\s*$/gm
+  let lastEnd = 0
+  for (const m of src.matchAll(importRe)) {
+    const end = m.index + m[0].length
+    if (end > lastEnd) {
+      lastEnd = end
+    }
+  }
+  for (const m of src.matchAll(requireRe)) {
+    const end = m.index + m[0].length
+    if (end > lastEnd) {
+      lastEnd = end
+    }
+  }
+  return lastEnd
 }

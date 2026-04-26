@@ -8,9 +8,11 @@
  */
 
 export { auditDirectory } from './audit.mts'
+export { applyCodemod } from './codemod.mts'
 export { lintSource } from './lint.mts'
 export { loadPrimordialsSurface } from './surface.mts'
 export {
+  NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
   ctorPrimordialName,
   guessReceiverType,
