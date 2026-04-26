@@ -52,9 +52,20 @@ import {
 // available 22.6+).
 const TS_EXTENSIONS = new Set(['.ts', '.mts', '.cts', '.tsx'])
 const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx'])
+// `.d.ts`, `.d.mts`, `.d.cts` are type-only declaration files — no
+// runtime code, so they can never contain a primordial call site.
+// `path.extname` returns just `.ts` for `foo.d.ts`, so we have to
+// match against the basename's secondary suffix.
+function isDeclarationFile(absPath) {
+  const base = path.basename(absPath)
+  return /\.d\.[mc]?ts$/.test(base)
+}
 
 /** Returns true if the file's extension is one we walk. */
 function isSourceFile(absPath) {
+  if (isDeclarationFile(absPath)) {
+    return false
+  }
   const ext = path.extname(absPath)
   return TS_EXTENSIONS.has(ext) || JS_EXTENSIONS.has(ext)
 }
@@ -374,7 +385,13 @@ export function auditDirectory({
     },
   }
 
-  let parseFailures = 0
+  // Track files that couldn't be audited. Two failure modes:
+  //   - parse: acorn-wasm threw on the (possibly type-stripped) source.
+  //   - strip: Node's module.stripTypeScriptTypes threw before we got
+  //     to the parser. Different mode but same user impact (the file
+  //     was silently skipped, audit results incomplete).
+  const parseFailureFiles: string[] = []
+  const stripFailureFiles: string[] = []
 
   function auditFile(absPath, relPath) {
     const ext = path.extname(absPath)
@@ -388,8 +405,10 @@ export function auditDirectory({
       try {
         src = stripTypeScriptTypes(rawSrc, { mode: 'strip' })
       } catch {
-        // Strip failed (e.g. syntax error). Skip this file —
-        // lint/type pipelines catch syntax errors elsewhere.
+        // Strip failed (e.g. syntax error). Track and skip — lint/type
+        // pipelines catch syntax errors elsewhere, but record the path
+        // so users running --json can see what was skipped.
+        stripFailureFiles.push(relPath)
         return
       }
     }
@@ -398,17 +417,36 @@ export function auditDirectory({
     try {
       walk(src, visitors, PARSE_OPTIONS)
     } catch {
-      // Parse failure — track it so we can surface a summary.
-      parseFailures += 1
+      parseFailureFiles.push(relPath)
     }
   }
 
-  // After auditing, tag the findings with the parse-failure count so
-  // callers can surface a warning. We attach it as a non-enumerable
-  // property to keep findings.length the right number for filtering.
+  // After auditing, tag the findings with the failure metadata so
+  // callers can surface a warning + investigate. Attached as
+  // non-enumerable properties so they don't interfere with code that
+  // does findings.length / map / filter etc., but enumerable copies
+  // also live on a wrapper the JSON formatter pulls from.
   function attachParseFailureCount(arr) {
     Object.defineProperty(arr, 'parseFailures', {
-      value: parseFailures,
+      value: parseFailureFiles.length,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    })
+    Object.defineProperty(arr, 'parseFailureFiles', {
+      value: parseFailureFiles.slice(),
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    })
+    Object.defineProperty(arr, 'stripFailures', {
+      value: stripFailureFiles.length,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    })
+    Object.defineProperty(arr, 'stripFailureFiles', {
+      value: stripFailureFiles.slice(),
       enumerable: false,
       configurable: false,
       writable: false,

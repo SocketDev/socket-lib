@@ -259,14 +259,46 @@ export async function runCli(argv) {
         : values.gaps && !values.coverage
           ? 'gaps'
           : 'audit'
-    report(filtered, json, path.basename(targetRoot), mode)
-    // Surface parse failures so silent skips don't mask audit gaps.
-    const parseFailures = findings.parseFailures ?? 0
-    if (parseFailures > 0 && !json) {
-      process.stderr.write(
-        `prim: warning — ${parseFailures} file(s) failed to parse and were skipped. ` +
-          `Findings are incomplete; check files with unusual syntax.\n`,
-      )
+    // Audits silently skip files that fail to parse or fail TS-strip.
+    // Pull the per-file lists off the findings array (they're attached
+    // there by audit.mts) and pass them through so neither human nor
+    // JSON consumers lose visibility into incomplete coverage.
+    const parseFailureFiles: string[] = findings.parseFailureFiles ?? []
+    const stripFailureFiles: string[] = findings.stripFailureFiles ?? []
+    report(
+      filtered,
+      json,
+      path.basename(targetRoot),
+      mode,
+      parseFailureFiles,
+      stripFailureFiles,
+    )
+    if (!json) {
+      // Human-readable warning + per-file list. Goes to stderr so the
+      // findings on stdout stay machine-pipeable.
+      const totalSkipped = parseFailureFiles.length + stripFailureFiles.length
+      if (totalSkipped > 0) {
+        process.stderr.write(
+          `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. ` +
+            `Audit is incomplete.\n`,
+        )
+        if (parseFailureFiles.length > 0) {
+          process.stderr.write(
+            `  parse-failed (${parseFailureFiles.length}):\n`,
+          )
+          for (const f of parseFailureFiles) {
+            process.stderr.write(`    ${f}\n`)
+          }
+        }
+        if (stripFailureFiles.length > 0) {
+          process.stderr.write(
+            `  ts-strip-failed (${stripFailureFiles.length}):\n`,
+          )
+          for (const f of stripFailureFiles) {
+            process.stderr.write(`    ${f}\n`)
+          }
+        }
+      }
     }
     return
   }
@@ -274,10 +306,29 @@ export async function runCli(argv) {
   fail(`unknown command: ${command}\n\n${HELP}`)
 }
 
-function report(findings, json, targetName, mode) {
+function report(
+  findings,
+  json,
+  targetName,
+  mode,
+  parseFailureFiles: string[] = [],
+  stripFailureFiles: string[] = [],
+) {
   if (json) {
+    // Embed the failure lists in the JSON output so machine consumers
+    // can see what got skipped — non-enumerable handles on the array
+    // don't survive JSON.stringify, so we lift them onto the wrapper.
     process.stdout.write(
-      formatJson({ targetName, mode, count: findings.length, findings }) + '\n',
+      formatJson({
+        targetName,
+        mode,
+        count: findings.length,
+        findings,
+        parseFailures: parseFailureFiles.length,
+        parseFailureFiles,
+        stripFailures: stripFailureFiles.length,
+        stripFailureFiles,
+      }) + '\n',
     )
   } else {
     process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n')
