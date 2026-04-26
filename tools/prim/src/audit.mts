@@ -263,6 +263,23 @@ export function auditDirectory({
     return false
   }
 
+  // Constructor naming differs between surfaces:
+  //   socket-lib uses `<Name>Ctor` (e.g. `ArrayCtor`, `SetCtor`)
+  //   Node bootstrap uses bare `<Name>` (e.g. `Array`, `Set`)
+  // Pick whichever variant the surface actually exports; if neither
+  // is present we report the socket-lib convention as the gap so the
+  // expansion target is clear.
+  function resolveCtorName(globalName) {
+    const sktName = ctorPrimordialName(globalName)
+    if (exported.has(sktName)) {
+      return sktName
+    }
+    if (exported.has(globalName)) {
+      return globalName
+    }
+    return sktName
+  }
+
   const visitors = {
     NewExpression(node, _ancestors) {
       if (
@@ -275,7 +292,7 @@ export function auditDirectory({
         currentFile.relPath,
         node.start,
         `new ${node.callee.name}(...)`,
-        ctorPrimordialName(node.callee.name),
+        resolveCtorName(node.callee.name),
       )
     },
     CallExpression(node, _ancestors) {

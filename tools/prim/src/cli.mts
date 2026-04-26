@@ -2,14 +2,19 @@
  * @fileoverview `prim` CLI entry point.
  *
  * Subcommands:
- *   audit     — full report: coverage + gaps in one pass.
- *   coverage  — only call sites where a primordial already exists
- *               (migration candidates).
- *   gaps      — only call sites where no primordial exists yet
- *               (surface-expansion candidates).
- *   mod       — rewrite call sites to use primordials. Dry-run by default;
- *               pass `--apply` to write changes. Adds the import block.
- *   state     — show or diff the persisted state file.
+ *   audit       — full report: coverage + gaps in one pass.
+ *   coverage    — only call sites where a primordial already exists
+ *                 (migration candidates).
+ *   gaps        — only call sites where no primordial exists yet
+ *                 (surface-expansion candidates).
+ *   mod         — rewrite call sites to use primordials. Dry-run by default;
+ *                 pass `--apply` to write changes. Adds the import block.
+ *   lint        — structural lint rules for primordials usage. Currently:
+ *                 ctor-rename (constructor primordials must be aliased
+ *                 `<Name>: <Name>Ctor` when destructured from
+ *                 `primordials` or any configured primordials-shaped
+ *                 source). Exits 1 if violations are found.
+ *   state       — show or diff the persisted state file.
  *
  * Common flags:
  *   --target <path>     The repo to audit. Defaults to cwd.
@@ -36,6 +41,7 @@ import { parseArgs } from 'node:util'
 import { auditDirectory } from './audit.mts'
 import { applyCodemod } from './codemod.mts'
 import { formatHuman, formatJson } from './format.mts'
+import { formatLintFindings, lintSource } from './lint.mts'
 import { defaultStatePath, loadState, rollup, saveState } from './state.mts'
 import { loadPrimordialsSurface } from './surface.mts'
 
@@ -50,6 +56,9 @@ COMMANDS
   coverage             Only show migration candidates — existing primordials.
   gaps                 Only show surface gaps — uncovered patterns.
   mod                  Rewrite call sites to use primordials. Dry-run by default.
+  lint                 Structural lint rules for primordials usage. Currently:
+                       ctor-rename (constructor primordials must be aliased
+                       \`<Name>: <Name>Ctor\`). Exits 1 if violations are found.
   state                Show the persisted state file.
 
 COMMON OPTIONS
@@ -58,6 +67,15 @@ COMMON OPTIONS
                        commands (audit/coverage/gaps); default \`src\` for \`mod\`.
   --json               JSON output instead of human-readable text.
   --state <path>       State file path (default: <cwd>/.prim-state.json).
+  --surface <path>     Explicit primordials source file (overrides the default
+                       sibling/installed lookup). Use this to audit against
+                       Node's lib/internal/per_context/primordials.js or any
+                       other primordials-shaped source.
+  --primordials-source <name>  (lint only, repeatable) Identifier or require()
+                       specifier to treat as a primordials-shaped source.
+                       Defaults: \`primordials\`,
+                       \`internal/socketsecurity/safe-references\`,
+                       \`safe-references\`.
   --update-state       Persist findings into the state file.
   --help, -h           Show this help.
 
@@ -92,6 +110,8 @@ const ARG_OPTIONS = {
   dir: { type: 'string' },
   json: { type: 'boolean', default: false },
   state: { type: 'string' },
+  surface: { type: 'string' },
+  'primordials-source': { type: 'string', multiple: true },
   'update-state': { type: 'boolean', default: false },
   apply: { type: 'boolean', default: false },
   'include-guessed': { type: 'boolean', default: false },
@@ -152,9 +172,31 @@ export async function runCli(argv) {
     )
   }
 
+  // `lint` is purely structural — it doesn't need a primordials surface.
+  // Handle it before the surface load so users don't need to pass
+  // --surface for a lint-only check. The list of "primordials-shaped"
+  // sources can be extended via --primordials-source (repeatable).
+  if (command === 'lint') {
+    const primordialSources = values['primordials-source']
+    const findings = lintSource({
+      targetRoot,
+      scanDir,
+      primordialSources: Array.isArray(primordialSources)
+        ? primordialSources
+        : primordialSources
+          ? [primordialSources]
+          : undefined,
+    })
+    reportLint(findings, json, path.basename(targetRoot))
+    if (findings.length > 0) {
+      process.exitCode = 1
+    }
+    return
+  }
+
   let surface
   try {
-    surface = loadPrimordialsSurface(targetRoot)
+    surface = loadPrimordialsSurface(targetRoot, values.surface)
   } catch (e) {
     fail(e.message)
   }
@@ -218,6 +260,21 @@ function report(findings, json, targetName, mode) {
   } else {
     process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n')
   }
+}
+
+function reportLint(findings, json, targetName) {
+  if (json) {
+    process.stdout.write(
+      formatJson({
+        targetName,
+        mode: 'lint',
+        count: findings.length,
+        findings,
+      }) + '\n',
+    )
+    return
+  }
+  process.stdout.write(formatLintFindings(findings, { targetName }))
 }
 
 function reportMod(result, json, applied) {
