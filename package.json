@@ -694,6 +694,7 @@
   "scripts": {
     "build": "node scripts/build/main.mts",
     "check": "node scripts/check.mts",
+    "check:paths": "node scripts/check-paths.mts",
     "clean": "node scripts/build/clean.mts",
     "cover": "node scripts/test/cover.mts",
     "dev": "node scripts/build/main.mts --watch",

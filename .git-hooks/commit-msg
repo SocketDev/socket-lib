@@ -4,8 +4,8 @@
 
 set -e
 
-# shellcheck source=./_lib.sh
-. "$(dirname "$0")/_lib.sh"
+# shellcheck source=./_api-key-check.sh
+. "$(dirname "$0")/_api-key-check.sh"
 
 ERRORS=0
 
@@ -16,8 +16,13 @@ COMMITTED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null ||
 if [ -n "$COMMITTED_FILES" ]; then
   for file in $COMMITTED_FILES; do
     if [ -f "$file" ]; then
+      # Skip hook scripts: they contain the sktsec_ regex pattern literal.
+      if echo "$file" | grep -qE '\.git-hooks/|\.husky/'; then
+        continue
+      fi
+
       # Check for Socket API keys (except allowed).
-      if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | filter_allowed_sktsec | grep -q .; then
+      if grep -E 'sktsec_[a-zA-Z0-9_-]+' "$file" 2>/dev/null | filter_allowed_api_keys | grep -q .; then
         printf "${RED}✗ SECURITY: Potential API key detected in commit!${NC}\n"
         printf "File: %s\n" "$file"
         ERRORS=$((ERRORS + 1))
