@@ -29,6 +29,7 @@ import path from 'node:path'
 import { parse } from 'acorn-wasm'
 
 import {
+  NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
   ctorPrimordialName,
@@ -205,6 +206,12 @@ function rewriteFile({ absPath, relPath, exported, includeGuessed, apply }) {
     // Prototype: receiver disambiguation.
     let receiverType = UNAMBIGUOUS_PROTOTYPE_METHODS.get(property.name)
     if (!receiverType) {
+      // Skip when the property name is a known Node built-in module
+      // static method (path.isAbsolute, fs.readFile, etc.). Same
+      // suppression as audit.mts to keep audit/codemod in lock-step.
+      if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
+        return
+      }
       const guess = guessReceiverType(object.name)
       if (!guess) {
         return

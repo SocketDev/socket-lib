@@ -36,6 +36,7 @@ process.emitWarning = function emitWarning(...args) {
 }
 
 import {
+  NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
   ctorPrimordialName,
@@ -339,6 +340,13 @@ export function auditDirectory({
             `${object.name}.${property.name}(...)  [method: ${methodType}]`,
             prototypePrimordialName(methodType, property.name),
           )
+          return
+        }
+        // Skip when the property name is a known Node built-in module
+        // static method (path.isAbsolute, fs.readFile, os.tmpdir, etc.).
+        // The receiver is a module object regardless of identifier
+        // shape — guessing the receiver as String/Array would be wrong.
+        if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
           return
         }
         // Weaker signal: guess the receiver's type from its name.

@@ -189,6 +189,68 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
 ])
 
 /**
+ * Property names we know are static methods on Node built-in modules,
+ * NOT prototype methods on a builtin type. When the called member name
+ * is one of these, the type-guess heuristic should skip — the receiver
+ * is a module object regardless of what its identifier name suggests.
+ *
+ * Without this set, `path.isAbsolute(...)` gets classified as
+ * "String.prototype.isAbsolute" because `path` matches the String hint
+ * regex. Same for `path.join`, `path.dirname`, etc.
+ */
+export const NODE_MODULE_STATIC_METHODS = new Set([
+  // path
+  'isAbsolute',
+  'join',
+  'dirname',
+  'basename',
+  'extname',
+  'relative',
+  'resolve',
+  'normalize',
+  'format',
+  // url
+  'fileURLToPath',
+  'pathToFileURL',
+  'urlToHttpOptions',
+  'domainToASCII',
+  'domainToUnicode',
+  // os
+  'homedir',
+  'tmpdir',
+  'platform',
+  'arch',
+  'cpus',
+  'hostname',
+  'userInfo',
+  'networkInterfaces',
+  'release',
+  // process / cwd-style
+  'cwd',
+  'chdir',
+  'memoryUsage',
+  // fs (sync + async — both are statics on the fs module)
+  'readFile',
+  'writeFile',
+  'appendFile',
+  'readdir',
+  'readlink',
+  'realpath',
+  'mkdir',
+  'rmdir',
+  'unlink',
+  'rename',
+  'stat',
+  'lstat',
+  'fstat',
+  'access',
+  'chmod',
+  'chown',
+  'open',
+  'close',
+])
+
+/**
  * Heuristic: when a method call's receiver isn't a known global AND the
  * method name isn't unambiguous, guess what built-in type it is from
  * the identifier name. Returns the global name (e.g. `'Array'`) or
@@ -200,11 +262,22 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
  */
 export function guessReceiverType(name) {
   // ─── Array hints ────────────────────────────────────────────────────
+  // Explicit known-array names only. We previously matched any camelCase
+  // identifier ending in 's' as Array, but that misclassifies object
+  // collections like `smolHandlers`, `http2Refs`, `eventListeners`,
+  // `subscribers` — names that happen to end in 's' but hold objects
+  // keyed by name, not array elements. False positives drowned out
+  // real array gaps in TypeScript projects.
+  //
+  // To stay useful on plurals, require either:
+  //   1. Exact match against a known-array list, OR
+  //   2. A clearly array-ish suffix that's unlikely to be a hash/object
+  //      collection (Array, List, Vec, Tuple).
   if (
-    /^(arr|array|list|items|results|entries|values|keys|nodes|elements|matches|parts|chunks|paths|files|args|argv|tokens|lines|cols|rows|deps|tags|specs|errors|warnings)$/.test(
+    /^(arr|array|list|items|results|entries|values|keys|nodes|elements|matches|parts|chunks|paths|files|args|argv|tokens|lines|cols|rows|deps|tags|specs|errors|warnings|ancestors|children|siblings|tasks|jobs|requests|responses|messages|events|records|rows)$/.test(
       name,
     ) ||
-    /^[a-z][a-zA-Z0-9]*s$/.test(name) // camelCase ending in 's'
+    /(Array|List|Vec|Tuple)$/.test(name)
   ) {
     return 'Array'
   }
@@ -234,7 +307,11 @@ export function guessReceiverType(name) {
     return 'Date'
   }
   // ─── RegExp hints ───────────────────────────────────────────────────
-  if (/^(re|regex|regexp|pattern)$/.test(name) || /Re(gex|gExp)?$/.test(name)) {
+  // `pattern` deliberately excluded — it's just as commonly a string
+  // (a regex *source*, not a compiled RegExp) and the false-positives
+  // from classifying string `.includes` / `.replace` / `.match` calls
+  // as RegExp prototype methods drown out the rare real RegExp guess.
+  if (/^(re|regex|regexp)$/.test(name) || /Re(gex|gExp)$/.test(name)) {
     return 'RegExp'
   }
   // ─── Promise hints ──────────────────────────────────────────────────
