@@ -29,6 +29,7 @@ import path from 'node:path'
 import { parse } from 'acorn-wasm'
 
 import {
+  INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
@@ -228,6 +229,16 @@ function rewriteFile({
 
     // Static: Foo.bar(args) → FooBar(args)
     if (TRACKED_GLOBALS.has(object.name)) {
+      // Skip data-property / accessor statics that aren't callable
+      // primordials (e.g. Error.prepareStackTrace — V8 setter). Same
+      // suppression as audit.mts so audit/codemod stay in lock-step.
+      if (
+        INTENTIONAL_NON_PRIMORDIAL_STATICS.has(
+          `${object.name}.${property.name}`,
+        )
+      ) {
+        return
+      }
       const expected = staticPrimordialName(object.name, property.name)
       if (!exported.has(expected)) {
         return

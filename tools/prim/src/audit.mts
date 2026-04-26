@@ -36,6 +36,7 @@ process.emitWarning = function emitWarning(...args) {
 }
 
 import {
+  INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
@@ -320,6 +321,15 @@ export function auditDirectory({
         return
       }
       if (object.type === 'Identifier' && TRACKED_GLOBALS.has(object.name)) {
+        // Skip data-property / accessor statics that aren't callable
+        // primordials (e.g. Error.prepareStackTrace — V8 setter).
+        if (
+          INTENTIONAL_NON_PRIMORDIAL_STATICS.has(
+            `${object.name}.${property.name}`,
+          )
+        ) {
+          return
+        }
         record(
           currentFile.relPath,
           node.start,
@@ -382,6 +392,15 @@ export function auditDirectory({
       }
       const propName = node.property.name
       if (propName[0] !== propName[0].toLowerCase()) {
+        return
+      }
+      // Skip data-property / accessor statics that aren't callable
+      // primordials (e.g. Error.prepareStackTrace — V8 setter).
+      if (
+        INTENTIONAL_NON_PRIMORDIAL_STATICS.has(
+          `${node.object.name}.${propName}`,
+        )
+      ) {
         return
       }
       record(

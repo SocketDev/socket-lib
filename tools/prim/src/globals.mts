@@ -326,6 +326,42 @@ export function guessReceiverType(name) {
 }
 
 /**
+ * Statics on tracked globals that are known to be data properties or
+ * accessors — NOT callable functions — and therefore cannot be wrapped
+ * as a primordial. The audit and codemod skip them so they don't show
+ * up as actionable gaps.
+ *
+ * Each entry is `<Global>.<member>` joined by a dot. The notes point
+ * at the spec or platform doc that defines the property (so it's clear
+ * this is intentional, not an oversight). Entries are sorted
+ * alphanumerically.
+ *
+ *   Error.captureStackTrace
+ *     V8 method but it MUTATES the target (`err`) in place rather than
+ *     being safely curryable. Wrapping as a primordial would still be
+ *     correct in principle; callers wanting deterministic stack capture
+ *     usually want the realm-anchored Error constructor instead.
+ *     https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions
+ *
+ *   Error.prepareStackTrace
+ *     V8 setter property; user code assigns a `(err, frames) => string`
+ *     to override the default stack-formatting on `err.stack` access.
+ *     Not standardized — V8 (Node, Chromium) only.
+ *     https://v8.dev/docs/stack-trace-api#customizing-stack-traces
+ *
+ *   Error.stackTraceLimit
+ *     V8 number property — the global cap on stack frames retained.
+ *     Setting it from a primordial would have no effect; reading it
+ *     returns the live value.
+ *     https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions
+ */
+export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
+  'Error.captureStackTrace',
+  'Error.prepareStackTrace',
+  'Error.stackTraceLimit',
+])
+
+/**
  * Map a tracked global + property name to the corresponding primordial
  * export name in `@socketsecurity/lib/primordials`.
  */
