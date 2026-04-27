@@ -21,10 +21,11 @@ import { spawn } from '../spawn'
 // Pin global primordials at module load. The fetch + parse path here
 // runs in long-lived processes (CI build scripts, downstream tools)
 // where consumers may install Object.defineProperty hooks or similar
-// over JSON / Array; capturing the original references protects the
-// listing logic from those mutations and matches the convention used
-// elsewhere in this package (see src/packages/provenance.ts).
+// over JSON / Array / Error; capturing the original references protects
+// the listing logic from those mutations and matches the convention
+// used elsewhere in this package (see src/packages/provenance.ts).
 const ArrayIsArray = Array.isArray
+const ErrorCtor = Error
 const JSONParse = JSON.parse
 const JSONStringify = JSON.stringify
 
@@ -581,7 +582,7 @@ async function fetchReleasesViaRest(
     { headers: getAuthHeaders() },
   )
   if (!response.ok) {
-    throw new Error(`Failed to fetch releases: ${response.status}`)
+    throw new ErrorCtor(`Failed to fetch releases: ${response.status}`)
   }
   const text = response.body.toString('utf8')
   if (text.length === 0) {
@@ -595,7 +596,7 @@ async function fetchReleasesViaRest(
   try {
     parsed = JSONParse(text)
   } catch (cause) {
-    throw new Error(
+    throw new ErrorCtor(
       `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
       { cause },
     )
@@ -633,7 +634,9 @@ async function fetchReleasesViaGraphQL(
     method: 'POST',
   })
   if (!response.ok) {
-    throw new Error(`Failed to fetch releases via GraphQL: ${response.status}`)
+    throw new ErrorCtor(
+      `Failed to fetch releases via GraphQL: ${response.status}`,
+    )
   }
   let parsed: {
     data?: {
@@ -652,13 +655,13 @@ async function fetchReleasesViaGraphQL(
   try {
     parsed = JSONParse(response.body.toString('utf8'))
   } catch (cause) {
-    throw new Error(
+    throw new ErrorCtor(
       `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
       { cause },
     )
   }
   if (parsed.errors?.length) {
-    throw new Error(
+    throw new ErrorCtor(
       `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
     )
   }
@@ -666,6 +669,84 @@ async function fetchReleasesViaGraphQL(
     tag_name: n.tagName,
     published_at: n.publishedAt,
     assets: n.releaseAssets?.nodes ?? [],
+  }))
+}
+
+/**
+ * Fetch the assets of a single release identified by tag via GraphQL.
+ * Used as the fallback for `getReleaseAssetUrl` when the REST per-tag
+ * endpoint returns 200 + empty body (the GitHub-incident shape).
+ *
+ * Returns `null` when the release tag genuinely doesn't exist (so
+ * the caller can throw an actionable "tag not found" error rather
+ * than silently masking the failure). Throws on transport errors.
+ */
+async function fetchReleaseAssetsViaGraphQL(
+  owner: string,
+  repo: string,
+  tag: string,
+): Promise<Array<{ name: string; browser_download_url: string }> | null> {
+  const response = await httpRequest('https://api.github.com/graphql', {
+    body: JSONStringify({
+      query: `query($owner: String!, $repo: String!, $tag: String!) {
+        repository(owner: $owner, name: $repo) {
+          release(tagName: $tag) {
+            tagName
+            releaseAssets(first: 100) { nodes { name downloadUrl } }
+          }
+        }
+      }`,
+      variables: { owner, repo, tag },
+    }),
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    method: 'POST',
+  })
+  if (!response.ok) {
+    throw new ErrorCtor(
+      `GraphQL fallback for ${tag} failed: ${response.status} ${response.statusText}`,
+    )
+  }
+  if (response.body.byteLength === 0) {
+    throw new ErrorCtor(
+      `GraphQL fallback for ${tag} also returned empty body — both REST and GraphQL backends are degraded`,
+    )
+  }
+  let parsed: {
+    data?: {
+      repository?: {
+        release?: {
+          tagName: string
+          releaseAssets?: {
+            nodes?: Array<{ name: string; downloadUrl: string }>
+          }
+        } | null
+      }
+    }
+    errors?: Array<{ message: string }>
+  }
+  try {
+    parsed = JSONParse(response.body.toString('utf8'))
+  } catch (cause) {
+    throw new ErrorCtor(
+      `Failed to parse GitHub GraphQL release response for ${tag}`,
+      { cause },
+    )
+  }
+  if (parsed.errors?.length) {
+    throw new ErrorCtor(
+      `GraphQL error fetching release ${tag}: ${parsed.errors.map(e => e.message).join('; ')}`,
+    )
+  }
+  const release = parsed.data?.repository?.release
+  if (!release) {
+    return null
+  }
+  // Normalize to REST shape: GraphQL exposes the asset URL as
+  // `downloadUrl`, REST as `browser_download_url`. Map so the caller
+  // (and the asset-matcher) keep working unchanged.
+  return (release.releaseAssets?.nodes ?? []).map(n => ({
+    browser_download_url: n.downloadUrl,
+    name: n.name,
   }))
 }
 
@@ -848,23 +929,49 @@ export async function getReleaseAssetUrl(
           throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
         }
 
-        let release: {
-          assets: Array<{ name: string; browser_download_url: string }>
-        }
-        try {
-          release = JSON.parse(response.body.toString('utf8'))
-        } catch (cause) {
-          throw new Error(
-            `Failed to parse GitHub release response for tag ${tag}`,
-            { cause },
+        // 200 OK + zero-byte body is the GitHub Elasticsearch incident
+        // shape — REST GETs return successful but empty responses.
+        // Cross-check via GraphQL `repository.release(tagName)` which
+        // hits a different backend; both endpoints expose the same
+        // {name, browserDownloadUrl} fields, so we normalize and run
+        // the same matcher unchanged.
+        let assets: Array<{ name: string; browser_download_url: string }>
+        if (response.body.byteLength === 0) {
+          if (!quiet) {
+            logger.warn(
+              `REST releases/tags/${tag} returned empty body for ${owner}/${repo}; falling back to GraphQL. See https://www.githubstatus.com.`,
+            )
+          }
+          const fallbackAssets = await fetchReleaseAssetsViaGraphQL(
+            owner,
+            repo,
+            tag,
           )
+          if (fallbackAssets === null) {
+            throw new ErrorCtor(
+              `Failed to fetch release ${tag}: REST returned empty body and GraphQL fallback found no release with that tag`,
+            )
+          }
+          assets = fallbackAssets
+        } else {
+          let release: {
+            assets: Array<{ name: string; browser_download_url: string }>
+          }
+          try {
+            release = JSONParse(response.body.toString('utf8'))
+          } catch (cause) {
+            throw new ErrorCtor(
+              `Failed to parse GitHub release response for tag ${tag}`,
+              { cause },
+            )
+          }
+
+          if (!ArrayIsArray(release.assets)) {
+            throw new ErrorCtor(`Release ${tag} has no assets`)
+          }
+          assets = release.assets
         }
 
-        // Find the matching asset.
-        const assets = release.assets
-        if (!Array.isArray(assets)) {
-          throw new Error(`Release ${tag} has no assets`)
-        }
         const asset = assets.find(a => isMatch(a.name))
 
         if (!asset) {

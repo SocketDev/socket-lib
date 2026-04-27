@@ -801,6 +801,56 @@ describe('releases/github', () => {
         }),
       ).rejects.toThrow('Asset nonexistent-*.xyz not found in release v1.0.0')
     }, 40_000)
+
+    it('should fall back to GraphQL when REST returns 200 + empty body', async () => {
+      // Per-tag REST endpoint returns successfully but with no body —
+      // the GitHub-incident shape. The fallback hits GraphQL
+      // `repository.release(tagName).releaseAssets` and normalizes
+      // GraphQL's `downloadUrl` field back to REST's
+      // `browser_download_url` so the asset matcher works unchanged.
+      const graphqlPayload = {
+        data: {
+          repository: {
+            release: {
+              releaseAssets: {
+                nodes: [
+                  {
+                    downloadUrl:
+                      'https://github.com/test/repo/releases/download/v1.0.0/curl-linux-x64',
+                    name: 'curl-linux-x64',
+                  },
+                ],
+                tagName: 'v1.0.0',
+              },
+            },
+          },
+        },
+      }
+      vi.mocked(httpRequest)
+        // 1st: REST per-tag → 200 + empty body
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from(''), true, 200),
+        )
+        // 2nd: GraphQL release(tagName) → real result
+        .mockResolvedValueOnce(
+          createMockHttpResponse(
+            Buffer.from(JSONStringify(graphqlPayload)),
+            true,
+            200,
+          ),
+        )
+
+      const url = await getReleaseAssetUrl(
+        'v1.0.0',
+        'curl-linux-x64',
+        SOCKET_BTM_REPO,
+        { quiet: true },
+      )
+
+      expect(url).toBe(
+        'https://github.com/test/repo/releases/download/v1.0.0/curl-linux-x64',
+      )
+    })
   })
 
   describe('downloadReleaseAsset', () => {

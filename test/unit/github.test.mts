@@ -593,6 +593,20 @@ describe.sequential('github', () => {
         headers: { 'X-Custom-Header': 'custom-value' },
       })
     })
+
+    it('should throw GitHubEmptyBodyError on 200 + zero-byte body', async () => {
+      // The documented GitHub-search-degraded incident shape: REST
+      // returns HTTP 200 OK with a body of 0 bytes (no error code,
+      // no Retry-After, no rate-limit signal). Without a typed
+      // error, callers parse '' and throw a confusing SyntaxError;
+      // the typed error gives downstream callers a single
+      // `instanceof` check to switch on for fallback transports.
+      nock('https://api.github.com').get('/repos/owner/repo').reply(200, '')
+
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo'),
+      ).rejects.toThrow(/empty body/)
+    })
   })
 
   describe('resolveRefToSha', () => {
@@ -691,6 +705,108 @@ describe.sequential('github', () => {
         resolveRefToSha('owner', 'repo', 'nonexistent'),
       ).rejects.toThrow('failed to resolve ref')
     })
+
+    it('should fall back to GraphQL when REST returns 200 + empty body', async () => {
+      // GitHub Elasticsearch incident shape — REST endpoints across
+      // the API surface return HTTP 200 with zero-byte bodies. The
+      // tier cascade (tag → branch → commit) detects this via the
+      // typed `GitHubEmptyBodyError` and routes the lookup through
+      // GraphQL `repository.ref(qualifiedName)` which uses a
+      // different backend. Uses a unique ref name to avoid colliding
+      // with the resolveRefToSha cache populated by prior tests
+      // (clearRefCache is not awaited in the outer beforeEach).
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/incident-tag-via-graphql')
+        .reply(200, '')
+        .get('/repos/owner/repo/git/refs/heads/incident-tag-via-graphql')
+        .reply(200, '')
+        .get('/repos/owner/repo/commits/incident-tag-via-graphql')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              tagRef: {
+                target: {
+                  __typename: 'Commit',
+                  oid: 'graphql-commit-sha-aaa',
+                },
+              },
+              branchRef: null,
+              commit: null,
+            },
+          },
+        })
+
+      const sha = await resolveRefToSha(
+        'owner',
+        'repo',
+        'incident-tag-via-graphql',
+      )
+      expect(sha).toBe('graphql-commit-sha-aaa')
+    })
+
+    it('should resolve annotated tags via GraphQL fallback', async () => {
+      // Annotated tags wrap a Commit inside a Tag; in REST this needs
+      // a second lookup against `tagData.object.url`. GraphQL returns
+      // both in a single query — `Tag.target.oid` is the commit SHA.
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/incident-annotated-tag')
+        .reply(200, '')
+        .get('/repos/owner/repo/git/refs/heads/incident-annotated-tag')
+        .reply(200, '')
+        .get('/repos/owner/repo/commits/incident-annotated-tag')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              tagRef: {
+                target: {
+                  __typename: 'Tag',
+                  target: { oid: 'annotated-commit-sha-bbb' },
+                },
+              },
+              branchRef: null,
+              commit: null,
+            },
+          },
+        })
+
+      const sha = await resolveRefToSha(
+        'owner',
+        'repo',
+        'incident-annotated-tag',
+      )
+      expect(sha).toBe('annotated-commit-sha-bbb')
+    })
+
+    it('should resolve branches via GraphQL fallback when REST is empty', async () => {
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/incident-branch-via-graphql')
+        .reply(200, '')
+        .get('/repos/owner/repo/git/refs/heads/incident-branch-via-graphql')
+        .reply(200, '')
+        .get('/repos/owner/repo/commits/incident-branch-via-graphql')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              tagRef: null,
+              branchRef: { target: { oid: 'branch-head-sha-ccc' } },
+              commit: null,
+            },
+          },
+        })
+
+      const sha = await resolveRefToSha(
+        'owner',
+        'repo',
+        'incident-branch-via-graphql',
+      )
+      expect(sha).toBe('branch-head-sha-ccc')
+    })
   })
 
   describe('fetchGhsaDetails', () => {
@@ -733,6 +849,66 @@ describe.sequential('github', () => {
       expect(result.ghsaId).toBe('GHSA-xxxx-yyyy-zzzz')
       expect(result.severity).toBe('high')
       expect(result.aliases).toContain('CVE-2024-1234')
+    })
+
+    it('should fall back to GraphQL on REST empty body and normalize fields', async () => {
+      // REST returns 200 + empty body (incident shape). The fallback
+      // hits GraphQL `securityAdvisory(ghsaId)` and normalizes the
+      // two field-shape diffs:
+      //   - severity: GraphQL uppercases ('MODERATE'), REST lowercases
+      //   - aliases: GraphQL exposes a single `identifiers` list that
+      //     includes the GHSA self-reference; REST excludes it
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-aaaa-bbbb-cccc')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            securityAdvisory: {
+              ghsaId: 'GHSA-aaaa-bbbb-cccc',
+              summary: 'Curl uses incorrect cert path',
+              description: 'Detailed description from GraphQL',
+              severity: 'MODERATE',
+              publishedAt: '2024-03-15T00:00:00Z',
+              updatedAt: '2024-03-16T00:00:00Z',
+              withdrawnAt: null,
+              cvss: { score: 5.3, vectorString: 'CVSS:3.1/AV:N' },
+              cwes: {
+                nodes: [
+                  {
+                    cweId: 'CWE-295',
+                    name: 'Cert Validation',
+                    description: '',
+                  },
+                ],
+              },
+              references: [{ url: 'https://example.com/curl-advisory' }],
+              vulnerabilities: {
+                nodes: [
+                  {
+                    package: { ecosystem: 'NPM', name: 'curl-bridge' },
+                    vulnerableVersionRange: '< 1.5.0',
+                    firstPatchedVersion: { identifier: '1.5.0' },
+                  },
+                ],
+              },
+              identifiers: [
+                { type: 'GHSA', value: 'GHSA-aaaa-bbbb-cccc' },
+                { type: 'CVE', value: 'CVE-2024-9999' },
+              ],
+            },
+          },
+        })
+
+      const result = await fetchGhsaDetails('GHSA-aaaa-bbbb-cccc')
+      expect(result.ghsaId).toBe('GHSA-aaaa-bbbb-cccc')
+      // severity normalized to lowercase
+      expect(result.severity).toBe('moderate')
+      // aliases contains only non-GHSA identifiers
+      expect(result.aliases).toEqual(['CVE-2024-9999'])
+      expect(result.details).toBe('Detailed description from GraphQL')
+      expect(result.cvss?.score).toBe(5.3)
+      expect(result.vulnerabilities[0]?.package.name).toBe('curl-bridge')
     })
   })
 

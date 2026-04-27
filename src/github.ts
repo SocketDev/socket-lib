@@ -33,8 +33,15 @@ import { spawn } from './spawn'
 import type { TtlCache } from './cache-with-ttl'
 import type { SpawnOptions } from './spawn'
 
+// Pin global primordials at module load. Matches src/packages/provenance.ts.
+const ErrorCtor = Error
+const JSONParse = JSON.parse
+const JSONStringify = JSON.stringify
+
 // GitHub API base URL constant (inlined for coverage mode compatibility).
 const GITHUB_API_BASE_URL = 'https://api.github.com'
+
+const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
 
 // 5 minutes.
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000
@@ -42,6 +49,30 @@ const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000
 // Create TTL cache instance for GitHub ref resolution.
 // Uses cacache for persistent storage with in-memory memoization.
 let _githubCache: TtlCache | undefined
+
+/**
+ * Thrown by `fetchGitHub` when GitHub returns HTTP 200 OK with a
+ * zero-byte body. This is the documented signature of the GitHub
+ * Elasticsearch / search-degraded incident
+ * (https://www.githubstatus.com): the response is "successful" by
+ * status code but the payload is missing entirely. Surfacing it as
+ * a typed error lets callers decide whether to retry, fall back to
+ * a different transport (e.g. GraphQL), or surface to the user.
+ */
+export class GitHubEmptyBodyError extends Error {
+  /** HTTP status (always 200 — that's what makes this case insidious). */
+  status: number
+  constructor(url: string) {
+    super(
+      `GitHub API returned HTTP 200 with an empty body for ${url}. ` +
+        'This is the documented signature of an upstream incident — ' +
+        'see https://www.githubstatus.com. Retrying or falling back ' +
+        'to a different transport is recommended.',
+    )
+    this.name = 'GitHubEmptyBodyError'
+    this.status = 200
+  }
+}
 
 /**
  * Options for GitHub API fetch requests.
@@ -252,6 +283,20 @@ async function fetchRefSha(
     token: options.token,
   }
 
+  // GitHub's REST listing endpoints share an Elasticsearch-backed
+  // index with search; during the documented incidents these GET
+  // calls return HTTP 200 + zero-byte body for every URL. The
+  // `fetchGitHub` helper now throws `GitHubEmptyBodyError` for that
+  // shape so we can distinguish "real 404" (keep walking the tier
+  // cascade) from "incident" (give up on REST, use GraphQL).
+  let sawEmptyBody = false
+  const note404 = (e: unknown): unknown => {
+    if (e instanceof GitHubEmptyBodyError) {
+      sawEmptyBody = true
+    }
+    return e
+  }
+
   try {
     // Try as a tag first.
     const tagUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/git/refs/tags/${ref}`
@@ -267,13 +312,15 @@ async function fetchRefSha(
       return tagObject.object.sha
     }
     return tagData.object.sha
-  } catch {
+  } catch (e) {
+    note404(e)
     // Not a tag, try as a branch.
     try {
       const branchUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/git/refs/heads/${ref}`
       const branchData = await fetchGitHub<GitHubRef>(branchUrl, fetchOptions)
       return branchData.object.sha
-    } catch {
+    } catch (e2) {
+      note404(e2)
       // Try without refs/ prefix (for commit SHAs or other refs).
       try {
         const commitUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/commits/${ref}`
@@ -282,13 +329,151 @@ async function fetchRefSha(
           fetchOptions,
         )
         return commitData.sha
-      } catch (e) {
+      } catch (e3) {
+        note404(e3)
+        // If ANY tier hit `GitHubEmptyBodyError`, REST is degraded —
+        // fall back to GraphQL, which uses a different backend and
+        // resolves all three lookups (tag / branch / commit) in one
+        // round trip. If GraphQL also fails, surface the original
+        // REST failure so the user sees the actionable error.
+        if (sawEmptyBody) {
+          try {
+            const sha = await fetchRefShaViaGraphQL(
+              owner,
+              repo,
+              ref,
+              fetchOptions,
+            )
+            if (sha) {
+              return sha
+            }
+          } catch {
+            // fall through to the original error
+          }
+        }
         throw new Error(
-          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e)}`,
+          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e3)}`,
         )
       }
     }
   }
+}
+
+/**
+ * Resolve a ref to its commit SHA via GraphQL. Used as the REST
+ * fallback in `fetchRefSha` when the REST endpoints return empty
+ * bodies (the documented GitHub incident shape).
+ *
+ * GraphQL `Repository.ref(qualifiedName)` returns the resolved tag
+ * or branch in one call, including the dereferenced commit SHA for
+ * annotated tags via `Tag.target.oid`. `Repository.object(oid)`
+ * handles raw commit SHAs. Returns `null` if none of the three
+ * forms match (genuine "ref not found" — not an incident).
+ */
+async function fetchRefShaViaGraphQL(
+  owner: string,
+  repo: string,
+  ref: string,
+  options: GitHubFetchOptions,
+): Promise<string | null> {
+  const token = options.token || getGitHubToken()
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+    'User-Agent': 'socket-registry-github-client',
+    ...options.headers,
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  // Resolve all three forms in one query. Aliases keep the response
+  // shape predictable regardless of which form matches.
+  const query = `query($owner: String!, $repo: String!, $tag: String!, $branch: String!, $oid: GitObjectID!) {
+    repository(owner: $owner, name: $repo) {
+      tagRef: ref(qualifiedName: $tag) {
+        target {
+          __typename
+          ... on Tag { target { oid } }
+          ... on Commit { oid }
+        }
+      }
+      branchRef: ref(qualifiedName: $branch) {
+        target { oid }
+      }
+      commit: object(oid: $oid) {
+        __typename
+        ... on Commit { oid }
+      }
+    }
+  }`
+  // GraphQL's `oid` argument is a GitObjectID scalar — it must look
+  // like a 40-char hex SHA. If `ref` doesn't match that shape, pass
+  // a known-zero SHA so the query parses; the alias just returns
+  // null and we fall through to the tag/branch resolutions.
+  const looksLikeSha = /^[a-f0-9]{40}$/i.test(ref)
+  const oidArg = looksLikeSha ? ref : '0000000000000000000000000000000000000000'
+  const response = await httpRequest(GITHUB_GRAPHQL_URL, {
+    body: JSONStringify({
+      query,
+      variables: {
+        branch: `refs/heads/${ref}`,
+        oid: oidArg,
+        owner,
+        repo,
+        tag: `refs/tags/${ref}`,
+      },
+    }),
+    headers,
+    method: 'POST',
+  })
+  if (!response.ok || response.body.byteLength === 0) {
+    return null
+  }
+  let parsed: {
+    data?: {
+      repository?: {
+        tagRef?: {
+          target?:
+            | { __typename: 'Tag'; target?: { oid: string } }
+            | { __typename: 'Commit'; oid: string }
+            | null
+        } | null
+        branchRef?: { target?: { oid: string } | null } | null
+        commit?: { __typename?: string; oid?: string } | null
+      } | null
+    }
+    errors?: Array<{ message: string }>
+  }
+  try {
+    parsed = JSONParse(response.body.toString('utf8'))
+  } catch {
+    return null
+  }
+  // GraphQL surfaces "not found" as null nodes (NOT an `errors` entry
+  // unless the whole repo is missing) — so a null tagRef/branchRef
+  // simply means that form didn't match. Walk the same priority
+  // order as the REST cascade: tag → branch → commit.
+  const repoData = parsed.data?.repository
+  if (!repoData) {
+    return null
+  }
+  const tagTarget = repoData.tagRef?.target
+  if (tagTarget) {
+    if (tagTarget.__typename === 'Tag') {
+      return tagTarget.target?.oid ?? null
+    }
+    if (tagTarget.__typename === 'Commit') {
+      return tagTarget.oid ?? null
+    }
+  }
+  const branchOid = repoData.branchRef?.target?.oid
+  if (branchOid) {
+    return branchOid
+  }
+  if (repoData.commit?.__typename === 'Commit' && repoData.commit.oid) {
+    return repoData.commit.oid
+  }
+  return null
 }
 
 /**
@@ -427,39 +612,175 @@ export async function fetchGhsaDetails(
 ): Promise<GhsaDetails> {
   /* c8 ignore start - External GitHub API call */
   const url = `https://api.github.com/advisories/${ghsaId}`
-  const data = await fetchGitHub<{
-    aliases?: string[]
-    cvss: unknown
-    cwes?: Array<{ cweId: string; name: string; description: string }>
-    details: string
-    ghsa_id: string
-    published_at: string
-    references?: Array<{ url: string }>
-    severity: string
-    summary: string
-    updated_at: string
-    vulnerabilities?: Array<{
-      package: { ecosystem: string; name: string }
-      vulnerableVersionRange: string
-      firstPatchedVersion: { identifier: string } | null
-    }>
-    withdrawn_at: string
-  }>(url, options)
-  /* c8 ignore stop */
+  try {
+    const data = await fetchGitHub<{
+      aliases?: string[]
+      cvss: unknown
+      cwes?: Array<{ cweId: string; name: string; description: string }>
+      details: string
+      ghsa_id: string
+      published_at: string
+      references?: Array<{ url: string }>
+      severity: string
+      summary: string
+      updated_at: string
+      vulnerabilities?: Array<{
+        package: { ecosystem: string; name: string }
+        vulnerableVersionRange: string
+        firstPatchedVersion: { identifier: string } | null
+      }>
+      withdrawn_at: string
+    }>(url, options)
 
+    return {
+      ghsaId: data.ghsa_id,
+      summary: data.summary,
+      details: data.details,
+      severity: data.severity,
+      aliases: data.aliases || [],
+      publishedAt: data.published_at,
+      updatedAt: data.updated_at,
+      withdrawnAt: data.withdrawn_at,
+      references: data.references || [],
+      vulnerabilities: data.vulnerabilities || [],
+      cvss: data.cvss as { score: number; vectorString: string } | null,
+      cwes: data.cwes || [],
+    }
+  } catch (e) {
+    // REST returned 200 + empty body — the GitHub-incident shape.
+    // Fall back to GraphQL `securityAdvisory(ghsaId)`, which uses a
+    // different backend and exposes the same data with minor field
+    // renames (severity case + identifiers vs. aliases) that we
+    // normalize here so the public return shape matches REST.
+    if (e instanceof GitHubEmptyBodyError) {
+      return await fetchGhsaDetailsViaGraphQL(ghsaId, options)
+    }
+    throw e
+  }
+  /* c8 ignore stop */
+}
+
+/**
+ * GraphQL counterpart for `fetchGhsaDetails`. Queries
+ * `securityAdvisory(ghsaId)` and normalizes the response to match
+ * the REST shape: lowercase severity (`MODERATE` → `moderate`),
+ * derive `aliases` from `identifiers` by filtering out the
+ * advisory's own GHSA id, and unwrap `connection { nodes }` blocks.
+ */
+async function fetchGhsaDetailsViaGraphQL(
+  ghsaId: string,
+  options?: GitHubFetchOptions | undefined,
+): Promise<GhsaDetails> {
+  const opts = { __proto__: null, ...options } as GitHubFetchOptions
+  const token = opts.token || getGitHubToken()
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+    'User-Agent': 'socket-registry-github-client',
+    ...opts.headers,
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  const query = `query($ghsaId: String!) {
+    securityAdvisory(ghsaId: $ghsaId) {
+      ghsaId
+      summary
+      description
+      severity
+      publishedAt
+      updatedAt
+      withdrawnAt
+      cvss { score vectorString }
+      cwes(first: 50) { nodes { cweId name description } }
+      references { url }
+      vulnerabilities(first: 100) {
+        nodes {
+          package { ecosystem name }
+          vulnerableVersionRange
+          firstPatchedVersion { identifier }
+        }
+      }
+      identifiers { type value }
+    }
+  }`
+  const response = await httpRequest(GITHUB_GRAPHQL_URL, {
+    body: JSONStringify({ query, variables: { ghsaId } }),
+    headers,
+    method: 'POST',
+  })
+  if (!response.ok) {
+    throw new ErrorCtor(
+      `GitHub GraphQL API error ${response.status}: ${response.statusText}`,
+    )
+  }
+  if (response.body.byteLength === 0) {
+    throw new GitHubEmptyBodyError(GITHUB_GRAPHQL_URL)
+  }
+  let parsed: {
+    data?: {
+      securityAdvisory?: {
+        ghsaId: string
+        summary: string
+        description: string
+        severity: string
+        publishedAt: string
+        updatedAt: string
+        withdrawnAt: string | null
+        cvss?: { score: number; vectorString: string } | null
+        cwes?: {
+          nodes?: Array<{ cweId: string; name: string; description: string }>
+        }
+        references?: Array<{ url: string }>
+        vulnerabilities?: {
+          nodes?: Array<{
+            package: { ecosystem: string; name: string }
+            vulnerableVersionRange: string
+            firstPatchedVersion: { identifier: string } | null
+          }>
+        }
+        identifiers?: Array<{ type: string; value: string }>
+      } | null
+    }
+    errors?: Array<{ message: string }>
+  }
+  try {
+    parsed = JSONParse(response.body.toString('utf8'))
+  } catch (cause) {
+    throw new ErrorCtor(
+      `Failed to parse GitHub GraphQL response for advisory ${ghsaId}`,
+      { cause },
+    )
+  }
+  if (parsed.errors?.length) {
+    throw new ErrorCtor(
+      `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
+    )
+  }
+  const adv = parsed.data?.securityAdvisory
+  if (!adv) {
+    throw new ErrorCtor(`GHSA ${ghsaId} not found via GraphQL`)
+  }
   return {
-    ghsaId: data.ghsa_id,
-    summary: data.summary,
-    details: data.details,
-    severity: data.severity,
-    aliases: data.aliases || [],
-    publishedAt: data.published_at,
-    updatedAt: data.updated_at,
-    withdrawnAt: data.withdrawn_at,
-    references: data.references || [],
-    vulnerabilities: data.vulnerabilities || [],
-    cvss: data.cvss as { score: number; vectorString: string } | null,
-    cwes: data.cwes || [],
+    ghsaId: adv.ghsaId,
+    summary: adv.summary,
+    details: adv.description,
+    // REST returns severity lowercase ("moderate"); GraphQL uppercases
+    // ("MODERATE"). Normalize so callers can compare against a single
+    // canonical form regardless of which transport ran.
+    severity: adv.severity.toLowerCase(),
+    // REST `aliases` is the list of non-GHSA identifiers (CVE ids,
+    // typically). GraphQL `identifiers` includes the advisory's own
+    // GHSA id alongside CVE ids; filter it out to match REST shape.
+    aliases:
+      adv.identifiers?.filter(i => i.type !== 'GHSA').map(i => i.value) ?? [],
+    publishedAt: adv.publishedAt,
+    updatedAt: adv.updatedAt,
+    withdrawnAt: adv.withdrawnAt ?? '',
+    references: adv.references ?? [],
+    vulnerabilities: adv.vulnerabilities?.nodes ?? [],
+    cvss: adv.cvss ?? null,
+    cwes: adv.cwes?.nodes ?? [],
   }
 }
 
@@ -565,8 +886,19 @@ export async function fetchGitHub<T = unknown>(
     )
   }
 
+  // 200 OK + zero-byte body is the documented GitHub incident shape
+  // (Elasticsearch degraded → REST GETs return successful empty
+  // responses). Surface as a typed error so callers can fall back to
+  // GraphQL rather than parsing '' and throwing a confusing
+  // SyntaxError. Without this guard `JSON.parse('')` blows up with
+  // an unrelated "Unexpected end of JSON input" message that hides
+  // the upstream cause.
+  if (response.body.byteLength === 0) {
+    throw new GitHubEmptyBodyError(url)
+  }
+
   try {
-    return JSON.parse(response.body.toString('utf8')) as T
+    return JSONParse(response.body.toString('utf8')) as T
   } catch (e) {
     throw new Error(
       `Failed to parse GitHub API response: ${errorMessage(e)}\n` +
