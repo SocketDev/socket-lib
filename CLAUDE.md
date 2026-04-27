@@ -144,6 +144,7 @@ See `docs/references/error-messages.md` for worked examples and anti-patterns.
 - Forbidden to create docs unless requested
 - 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec` or `pnpm run` # zizmor: documentation-prohibition
 - **minimumReleaseAge**: NEVER add packages to `minimumReleaseAgeExclude` in CI. Locally, ASK before adding — the age threshold is a security control.
+- 🚨 **NEVER mention private repos or internal project names** in commits, PR titles/descriptions/comments, issues, release notes, or any public-surface text. Internal codenames, unreleased product names, internal tooling repo names not on the public org page, customer names, partner names — none belong in public surfaces. **Omit the reference entirely.** Don't substitute a placeholder ("an internal tool", "a downstream consumer", etc.) — the placeholder itself is a tell that something is being elided. Rewrite the sentence to not need the reference at all. The `.claude/hooks/private-name-guard` hook re-prints this rule on every public-surface `git`/`gh` command as a priming nudge; the rule applies even when the hook isn't installed.
 
 ## DOCUMENTATION POLICY
 
