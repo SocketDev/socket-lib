@@ -13,6 +13,15 @@ packages:
   - tools/*
   - vendor/*
 
+# Catalog entries shared across hook workspaces. The hooks live in
+# `.claude/hooks/*` and depend on the same Socket fleet packages the
+# repo itself ships. Pinning them here keeps the entire hook tree in
+# lockstep with the parent without each hook duplicating literal pins.
+catalog:
+  '@socketregistry/packageurl-js': 1.4.2
+  '@socketsecurity/lib': 5.25.1
+  '@socketsecurity/sdk': 4.0.1
+
 allowBuilds:
   esbuild: true
 
