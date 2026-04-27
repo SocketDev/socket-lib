@@ -442,14 +442,14 @@ export const StringPrototypeReplace = uncurryThis(
   String.prototype.replace as (
     this: string,
     searchValue: string | RegExp,
-    replaceValue: string,
+    replaceValue: string | ((substring: string, ...args: any[]) => string),
   ) => string,
 )
 export const StringPrototypeReplaceAll = uncurryThis(
   String.prototype.replaceAll as (
     this: string,
-    searchValue: string,
-    replaceValue: string,
+    searchValue: string | RegExp,
+    replaceValue: string | ((substring: string, ...args: any[]) => string),
   ) => string,
 )
 export const StringPrototypeSearch = uncurryThis(String.prototype.search)
