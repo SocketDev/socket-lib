@@ -36,6 +36,37 @@ vi.mock('../../src/http-request')
  * @param status - HTTP status code
  * @returns Complete mock HttpResponse object
  */
+/**
+ * Wrap a REST-shape releases array as a GraphQL response. Mirrors the
+ * exact shape `getLatestRelease` parses (data.repository.releases.nodes
+ * with tagName/publishedAt/releaseAssets.nodes), so existing test
+ * fixtures that read like REST `[{tag_name, published_at, assets}]`
+ * stay readable while the implementation queries GraphQL.
+ */
+function wrapReleasesAsGraphQL(
+  releases: Array<{
+    tag_name: string
+    published_at?: string
+    assets?: Array<{ name: string }>
+  }>,
+): Buffer {
+  return Buffer.from(
+    JSON.stringify({
+      data: {
+        repository: {
+          releases: {
+            nodes: releases.map(r => ({
+              tagName: r.tag_name,
+              publishedAt: r.published_at ?? '2026-01-01T00:00:00Z',
+              releaseAssets: { nodes: r.assets ?? [] },
+            })),
+          },
+        },
+      },
+    }),
+  )
+}
+
 function createMockHttpResponse(
   body: Buffer,
   ok: boolean,
@@ -253,11 +284,7 @@ describe('releases/github', () => {
 
     beforeEach(() => {
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockReleases)),
-          true,
-          200,
-        ),
+        createMockHttpResponse(wrapReleasesAsGraphQL(mockReleases), true, 200),
       )
     })
 
@@ -333,7 +360,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(releasesOutOfOrder)),
+          wrapReleasesAsGraphQL(releasesOutOfOrder),
           true,
           200,
         ),
@@ -368,7 +395,7 @@ describe('releases/github', () => {
       ]
 
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(Buffer.from(JSON.stringify(sameDay)), true, 200),
+        createMockHttpResponse(wrapReleasesAsGraphQL(sameDay), true, 200),
       )
 
       const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO, {
@@ -400,7 +427,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(releasesNewestFirst)),
+          wrapReleasesAsGraphQL(releasesNewestFirst),
           true,
           200,
         ),
@@ -435,7 +462,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(releasesWithAssets)),
+          wrapReleasesAsGraphQL(releasesWithAssets),
           true,
           200,
         ),
@@ -467,7 +494,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(releasesWithEmpty)),
+          wrapReleasesAsGraphQL(releasesWithEmpty),
           true,
           200,
         ),
@@ -497,11 +524,7 @@ describe('releases/github', () => {
       ]
 
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(
-          Buffer.from(JSON.stringify(allEmpty)),
-          true,
-          200,
-        ),
+        createMockHttpResponse(wrapReleasesAsGraphQL(allEmpty), true, 200),
       )
 
       const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO, {
@@ -534,7 +557,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mixedReleases)),
+          wrapReleasesAsGraphQL(mixedReleases),
           true,
           200,
         ),

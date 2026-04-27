@@ -572,11 +572,34 @@ export async function getLatestRelease(
   return (
     (await pRetry(
       async () => {
-        // Fetch recent releases (100 should cover all tool releases).
+        // List releases via GraphQL. GitHub's REST endpoint
+        // `/repos/:owner/:repo/releases` excludes immutable releases
+        // (the default for releases created since GitHub introduced
+        // release immutability), returning an empty array even when
+        // the repo has dozens of published releases. GraphQL's
+        // `repository.releases` connection includes immutable releases
+        // and is the canonical replacement. Per-tag fetches via
+        // `/repos/:owner/:repo/releases/tags/:tag` still work for
+        // immutable releases, so `getReleaseAssetUrl` stays on REST.
         const response = await httpRequest(
-          `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+          'https://api.github.com/graphql',
           {
-            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              query: `query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+                    nodes {
+                      tagName
+                      publishedAt
+                      releaseAssets(first: 100) { nodes { name } }
+                    }
+                  }
+                }
+              }`,
+              variables: { owner, repo },
+            }),
+            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+            method: 'POST',
           },
         )
 
@@ -590,10 +613,35 @@ export async function getLatestRelease(
           assets: Array<{ name: string }>
         }>
         try {
-          releases = JSON.parse(response.body.toString('utf8'))
+          const parsed = JSON.parse(response.body.toString('utf8')) as {
+            data?: {
+              repository?: {
+                releases?: {
+                  nodes?: Array<{
+                    tagName: string
+                    publishedAt: string
+                    releaseAssets?: { nodes?: Array<{ name: string }> }
+                  }>
+                }
+              }
+            }
+            errors?: Array<{ message: string }>
+          }
+          if (parsed.errors?.length) {
+            throw new Error(
+              `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
+            )
+          }
+          releases = (parsed.data?.repository?.releases?.nodes ?? []).map(
+            n => ({
+              tag_name: n.tagName,
+              published_at: n.publishedAt,
+              assets: n.releaseAssets?.nodes ?? [],
+            }),
+          )
         } catch (cause) {
           throw new Error(
-            `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
+            `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
             { cause },
           )
         }
