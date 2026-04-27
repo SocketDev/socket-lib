@@ -18,6 +18,16 @@ import { getDefaultLogger } from '../logger'
 import { pRetry } from '../promises'
 import { spawn } from '../spawn'
 
+// Pin global primordials at module load. The fetch + parse path here
+// runs in long-lived processes (CI build scripts, downstream tools)
+// where consumers may install Object.defineProperty hooks or similar
+// over JSON / Array; capturing the original references protects the
+// listing logic from those mutations and matches the convention used
+// elsewhere in this package (see src/packages/provenance.ts).
+const ArrayIsArray = Array.isArray
+const JSONParse = JSON.parse
+const JSONStringify = JSON.stringify
+
 /**
  * Pattern for matching release assets.
  * Can be either:
@@ -541,6 +551,125 @@ export function getAuthHeaders(): Record<string, string> {
 }
 
 /**
+ * Internal release row shape used by the listing helpers and the
+ * filter pipeline in `getLatestRelease`. Both REST and GraphQL paths
+ * normalize their output to this shape so downstream code is unaware
+ * of which transport produced the data.
+ */
+interface ReleaseRow {
+  tag_name: string
+  published_at: string
+  assets: Array<{ name: string }>
+}
+
+/**
+ * Fetch the latest 100 releases for a repo via REST. Returns an empty
+ * array on:
+ *   - HTTP 200 + zero-byte body (the GitHub Elasticsearch outage
+ *     symptom — `/releases` returns 200 with no body when its
+ *     listing index is degraded; there is no error code, no
+ *     Retry-After, no rate-limit header, just an empty payload)
+ *   - HTTP 200 + literal `[]` (a brand-new repo with no releases)
+ * Throws on non-OK status so `pRetry` retries transient failures.
+ */
+async function fetchReleasesViaRest(
+  owner: string,
+  repo: string,
+): Promise<ReleaseRow[]> {
+  const response = await httpRequest(
+    `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+    { headers: getAuthHeaders() },
+  )
+  if (!response.ok) {
+    throw new Error(`Failed to fetch releases: ${response.status}`)
+  }
+  const text = response.body.toString('utf8')
+  if (text.length === 0) {
+    // 200 OK + empty body — the documented GitHub-search-degraded
+    // signature. Return [] so the caller can decide whether to fall
+    // back rather than throwing (we don't want pRetry to burn
+    // attempts on a known incident shape).
+    return []
+  }
+  let parsed: unknown
+  try {
+    parsed = JSONParse(text)
+  } catch (cause) {
+    throw new Error(
+      `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
+      { cause },
+    )
+  }
+  return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
+}
+
+/**
+ * Fetch the latest 100 releases for a repo via GraphQL. Used as a
+ * fallback when REST returns an empty listing — GraphQL hits a
+ * different backend and stays consistent through Elasticsearch
+ * outages. Maps GraphQL fields back to the REST-shaped row so the
+ * caller doesn't need to know which transport ran.
+ */
+async function fetchReleasesViaGraphQL(
+  owner: string,
+  repo: string,
+): Promise<ReleaseRow[]> {
+  const response = await httpRequest('https://api.github.com/graphql', {
+    body: JSONStringify({
+      query: `query($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+            nodes {
+              tagName
+              publishedAt
+              releaseAssets(first: 100) { nodes { name } }
+            }
+          }
+        }
+      }`,
+      variables: { owner, repo },
+    }),
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    method: 'POST',
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to fetch releases via GraphQL: ${response.status}`)
+  }
+  let parsed: {
+    data?: {
+      repository?: {
+        releases?: {
+          nodes?: Array<{
+            tagName: string
+            publishedAt: string
+            releaseAssets?: { nodes?: Array<{ name: string }> }
+          }>
+        }
+      }
+    }
+    errors?: Array<{ message: string }>
+  }
+  try {
+    parsed = JSONParse(response.body.toString('utf8'))
+  } catch (cause) {
+    throw new Error(
+      `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
+      { cause },
+    )
+  }
+  if (parsed.errors?.length) {
+    throw new Error(
+      `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
+    )
+  }
+  return (parsed.data?.repository?.releases?.nodes ?? []).map(n => ({
+    tag_name: n.tagName,
+    published_at: n.publishedAt,
+    assets: n.releaseAssets?.nodes ?? [],
+  }))
+}
+
+/**
  * Get latest release tag matching a tool prefix.
  * Optionally filter by releases containing a matching asset.
  *
@@ -572,75 +701,35 @@ export async function getLatestRelease(
   return (
     (await pRetry(
       async () => {
-        // List releases via GraphQL. GitHub's REST endpoint
-        // `/repos/:owner/:repo/releases` excludes immutable releases
-        // (the default for releases created since GitHub introduced
-        // release immutability), returning an empty array even when
-        // the repo has dozens of published releases. GraphQL's
-        // `repository.releases` connection includes immutable releases
-        // and is the canonical replacement. Per-tag fetches via
-        // `/repos/:owner/:repo/releases/tags/:tag` still work for
-        // immutable releases, so `getReleaseAssetUrl` stays on REST.
-        const response = await httpRequest('https://api.github.com/graphql', {
-          body: JSON.stringify({
-            query: `query($owner: String!, $repo: String!) {
-                repository(owner: $owner, name: $repo) {
-                  releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
-                    nodes {
-                      tagName
-                      publishedAt
-                      releaseAssets(first: 100) { nodes { name } }
-                    }
-                  }
-                }
-              }`,
-            variables: { owner, repo },
-          }),
-          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-          method: 'POST',
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch releases: ${response.status}`)
-        }
-
-        let releases: Array<{
-          tag_name: string
-          published_at: string
-          assets: Array<{ name: string }>
-        }>
-        try {
-          const parsed = JSON.parse(response.body.toString('utf8')) as {
-            data?: {
-              repository?: {
-                releases?: {
-                  nodes?: Array<{
-                    tagName: string
-                    publishedAt: string
-                    releaseAssets?: { nodes?: Array<{ name: string }> }
-                  }>
-                }
-              }
+        // Fetch via REST first. The REST endpoint is the canonical
+        // listing path and is what we want to use when GitHub is
+        // healthy. During GitHub Elasticsearch outages (which back the
+        // releases listing index) REST can return HTTP 200 with an
+        // empty array even when the repo has dozens of releases — see
+        // https://www.githubstatus.com incidents tagged "search is
+        // degraded". When that happens we fall back to GraphQL, which
+        // hits a different backend and stays consistent through ES
+        // outages. Per-tag fetches in `getReleaseAssetUrl` go through
+        // `/repos/:owner/:repo/releases/tags/:tag` which is unaffected
+        // by the listing-index outage, so that helper stays on REST.
+        let releases = await fetchReleasesViaRest(owner, repo)
+        if (releases.length === 0) {
+          // Empty REST response is ambiguous: it could mean the repo
+          // genuinely has no releases, or GitHub's listing index is
+          // degraded. Cross-check against GraphQL once. If GraphQL
+          // also returns 0, the repo really is empty and we report
+          // "no match"; if GraphQL returns >0, REST was lying and we
+          // surface the GraphQL result with a warning so the operator
+          // can correlate with GitHub status.
+          const graphqlReleases = await fetchReleasesViaGraphQL(owner, repo)
+          if (graphqlReleases.length > 0) {
+            if (!quiet) {
+              logger.warn(
+                `REST releases endpoint returned 0 results for ${owner}/${repo}; falling back to GraphQL (got ${graphqlReleases.length}). This usually indicates a GitHub search/listing-index incident — see https://www.githubstatus.com.`,
+              )
             }
-            errors?: Array<{ message: string }>
+            releases = graphqlReleases
           }
-          if (parsed.errors?.length) {
-            throw new Error(
-              `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
-            )
-          }
-          releases = (parsed.data?.repository?.releases?.nodes ?? []).map(
-            n => ({
-              tag_name: n.tagName,
-              published_at: n.publishedAt,
-              assets: n.releaseAssets?.nodes ?? [],
-            }),
-          )
-        } catch (cause) {
-          throw new Error(
-            `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
-            { cause },
-          )
         }
 
         // Filter releases matching the tool prefix.

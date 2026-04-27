@@ -28,6 +28,10 @@ import { httpDownload, httpRequest } from '../../src/http-request'
 // because dist/ CJS bundles bypass vitest's module mock system.
 vi.mock('../../src/http-request')
 
+// Match the production source's primordials convention so a consumer
+// who patched `JSON.stringify` after import wouldn't perturb fixtures.
+const JSONStringify = JSON.stringify
+
 /**
  * Create a mock HttpResponse object for testing.
  *
@@ -36,37 +40,6 @@ vi.mock('../../src/http-request')
  * @param status - HTTP status code
  * @returns Complete mock HttpResponse object
  */
-/**
- * Wrap a REST-shape releases array as a GraphQL response. Mirrors the
- * exact shape `getLatestRelease` parses (data.repository.releases.nodes
- * with tagName/publishedAt/releaseAssets.nodes), so existing test
- * fixtures that read like REST `[{tag_name, published_at, assets}]`
- * stay readable while the implementation queries GraphQL.
- */
-function wrapReleasesAsGraphQL(
-  releases: Array<{
-    tag_name: string
-    published_at?: string
-    assets?: Array<{ name: string }>
-  }>,
-): Buffer {
-  return Buffer.from(
-    JSON.stringify({
-      data: {
-        repository: {
-          releases: {
-            nodes: releases.map(r => ({
-              tagName: r.tag_name,
-              publishedAt: r.published_at ?? '2026-01-01T00:00:00Z',
-              releaseAssets: { nodes: r.assets ?? [] },
-            })),
-          },
-        },
-      },
-    }),
-  )
-}
-
 function createMockHttpResponse(
   body: Buffer,
   ok: boolean,
@@ -284,7 +257,11 @@ describe('releases/github', () => {
 
     beforeEach(() => {
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(wrapReleasesAsGraphQL(mockReleases), true, 200),
+        createMockHttpResponse(
+          Buffer.from(JSONStringify(mockReleases)),
+          true,
+          200,
+        ),
       )
     })
 
@@ -360,7 +337,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          wrapReleasesAsGraphQL(releasesOutOfOrder),
+          Buffer.from(JSONStringify(releasesOutOfOrder)),
           true,
           200,
         ),
@@ -395,7 +372,7 @@ describe('releases/github', () => {
       ]
 
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(wrapReleasesAsGraphQL(sameDay), true, 200),
+        createMockHttpResponse(Buffer.from(JSONStringify(sameDay)), true, 200),
       )
 
       const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO, {
@@ -427,7 +404,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          wrapReleasesAsGraphQL(releasesNewestFirst),
+          Buffer.from(JSONStringify(releasesNewestFirst)),
           true,
           200,
         ),
@@ -462,7 +439,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          wrapReleasesAsGraphQL(releasesWithAssets),
+          Buffer.from(JSONStringify(releasesWithAssets)),
           true,
           200,
         ),
@@ -494,7 +471,7 @@ describe('releases/github', () => {
 
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          wrapReleasesAsGraphQL(releasesWithEmpty),
+          Buffer.from(JSONStringify(releasesWithEmpty)),
           true,
           200,
         ),
@@ -524,7 +501,7 @@ describe('releases/github', () => {
       ]
 
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(wrapReleasesAsGraphQL(allEmpty), true, 200),
+        createMockHttpResponse(Buffer.from(JSONStringify(allEmpty)), true, 200),
       )
 
       const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO, {
@@ -556,7 +533,11 @@ describe('releases/github', () => {
       ]
 
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(wrapReleasesAsGraphQL(mixedReleases), true, 200),
+        createMockHttpResponse(
+          Buffer.from(JSONStringify(mixedReleases)),
+          true,
+          200,
+        ),
       )
 
       const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
@@ -566,6 +547,116 @@ describe('releases/github', () => {
 
       // Should skip empty release and release without matching asset.
       expect(tag).toBe('models-20260111-correct')
+    })
+
+    it('should fall back to GraphQL when REST returns 200 + empty body', async () => {
+      // GitHub Elasticsearch outage signature: REST returns HTTP 200
+      // OK with a zero-byte body. There's no error code, no Retry-After,
+      // and no rate-limit signal — just an empty payload. The helper
+      // detects this as an empty REST result and re-queries via
+      // GraphQL, which hits a different backend and stays consistent
+      // through the outage.
+      const graphqlPayload = {
+        data: {
+          repository: {
+            releases: {
+              nodes: [
+                {
+                  publishedAt: '2026-01-15T12:00:00Z',
+                  releaseAssets: { nodes: [{ name: 'binject-darwin-arm64' }] },
+                  tagName: 'binject-20260115-abc1234',
+                },
+              ],
+            },
+          },
+        },
+      }
+      vi.mocked(httpRequest)
+        // 1st call: REST → 200 + empty body (incident shape)
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from(''), true, 200),
+        )
+        // 2nd call: GraphQL → real result
+        .mockResolvedValueOnce(
+          createMockHttpResponse(
+            Buffer.from(JSONStringify(graphqlPayload)),
+            true,
+            200,
+          ),
+        )
+
+      const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      expect(tag).toBe('binject-20260115-abc1234')
+    })
+
+    it('should fall back to GraphQL when REST returns 200 + literal []', async () => {
+      // The other observed incident shape: REST returns 200 with the
+      // literal empty array `[]` (parsed cleanly as `Array.isArray`).
+      // Same fallback path — the helper can't distinguish a degraded
+      // listing from a brand-new empty repo without cross-checking.
+      const graphqlPayload = {
+        data: {
+          repository: {
+            releases: {
+              nodes: [
+                {
+                  publishedAt: '2026-01-15T12:00:00Z',
+                  releaseAssets: {
+                    nodes: [{ name: 'curl-linux-x64' }],
+                  },
+                  tagName: 'curl-20260115-abc1234',
+                },
+              ],
+            },
+          },
+        },
+      }
+      vi.mocked(httpRequest)
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from('[]'), true, 200),
+        )
+        .mockResolvedValueOnce(
+          createMockHttpResponse(
+            Buffer.from(JSONStringify(graphqlPayload)),
+            true,
+            200,
+          ),
+        )
+
+      const tag = await getLatestRelease('curl-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      expect(tag).toBe('curl-20260115-abc1234')
+    })
+
+    it('should return null when both REST and GraphQL return empty', async () => {
+      // Repo that genuinely has no releases — both backends agree.
+      // This is the only path where a `null` return is correct; we
+      // must not let an outage signal masquerade as "no releases".
+      const emptyGraphqlPayload = {
+        data: { repository: { releases: { nodes: [] } } },
+      }
+      vi.mocked(httpRequest)
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from('[]'), true, 200),
+        )
+        .mockResolvedValueOnce(
+          createMockHttpResponse(
+            Buffer.from(JSONStringify(emptyGraphqlPayload)),
+            true,
+            200,
+          ),
+        )
+
+      const tag = await getLatestRelease('nonexistent-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+
+      expect(tag).toBeNull()
     })
   })
 
@@ -598,7 +689,7 @@ describe('releases/github', () => {
     it('should get asset URL with exact name', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -618,7 +709,7 @@ describe('releases/github', () => {
     it('should get asset URL with wildcard pattern', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -638,7 +729,7 @@ describe('releases/github', () => {
     it('should get asset URL with brace expansion', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -658,7 +749,7 @@ describe('releases/github', () => {
     it('should get asset URL with RegExp pattern', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -678,7 +769,7 @@ describe('releases/github', () => {
     it('should get asset URL with prefix/suffix object pattern', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -698,7 +789,7 @@ describe('releases/github', () => {
     it('should throw error when pattern does not match any asset', async () => {
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -736,7 +827,7 @@ describe('releases/github', () => {
     it('should download asset with exact name', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -767,7 +858,7 @@ describe('releases/github', () => {
     it('should download asset with wildcard pattern', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -794,7 +885,7 @@ describe('releases/github', () => {
     it('should download asset with brace expansion', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -821,7 +912,7 @@ describe('releases/github', () => {
     it('should throw error when pattern does not match', async () => {
       vi.mocked(httpRequest).mockResolvedValueOnce(
         createMockHttpResponse(
-          Buffer.from(JSON.stringify(mockRelease)),
+          Buffer.from(JSONStringify(mockRelease)),
           true,
           200,
         ),
@@ -930,7 +1021,7 @@ describe('releases/github', () => {
         vi.mocked(httpRequest).mockResolvedValueOnce(
           createMockHttpResponse(
             Buffer.from(
-              JSON.stringify({
+              JSONStringify({
                 assets: [
                   {
                     browser_download_url: 'https://example.com/binary',
@@ -1000,7 +1091,7 @@ describe('releases/github', () => {
         vi.mocked(httpRequest).mockResolvedValueOnce(
           createMockHttpResponse(
             Buffer.from(
-              JSON.stringify({
+              JSONStringify({
                 assets: [
                   {
                     browser_download_url: 'https://example.com/binary',
