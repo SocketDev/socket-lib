@@ -581,11 +581,9 @@ export async function getLatestRelease(
         // and is the canonical replacement. Per-tag fetches via
         // `/repos/:owner/:repo/releases/tags/:tag` still work for
         // immutable releases, so `getReleaseAssetUrl` stays on REST.
-        const response = await httpRequest(
-          'https://api.github.com/graphql',
-          {
-            body: JSON.stringify({
-              query: `query($owner: String!, $repo: String!) {
+        const response = await httpRequest('https://api.github.com/graphql', {
+          body: JSON.stringify({
+            query: `query($owner: String!, $repo: String!) {
                 repository(owner: $owner, name: $repo) {
                   releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
                     nodes {
@@ -596,12 +594,11 @@ export async function getLatestRelease(
                   }
                 }
               }`,
-              variables: { owner, repo },
-            }),
-            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-            method: 'POST',
-          },
-        )
+            variables: { owner, repo },
+          }),
+          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+          method: 'POST',
+        })
 
         if (!response.ok) {
           throw new Error(`Failed to fetch releases: ${response.status}`)

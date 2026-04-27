@@ -556,11 +556,7 @@ describe('releases/github', () => {
       ]
 
       vi.mocked(httpRequest).mockResolvedValue(
-        createMockHttpResponse(
-          wrapReleasesAsGraphQL(mixedReleases),
-          true,
-          200,
-        ),
+        createMockHttpResponse(wrapReleasesAsGraphQL(mixedReleases), true, 200),
       )
 
       const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
