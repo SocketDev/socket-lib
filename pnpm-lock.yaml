@@ -473,6 +473,12 @@ importers:
 
   .claude/hooks/path-guard: {}
 
+  .claude/hooks/private-name-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 24.9.2
+        version: 24.9.2
+
   .claude/hooks/token-guard: {}
 
   tools/prim:
