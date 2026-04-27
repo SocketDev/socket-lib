@@ -54,7 +54,17 @@ const DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
  *   absFile === '.../dist/external/tar-fs.js' → '../primordials.js'
  *   absFile === '.../dist/external/@npmcli/x/y.js' → '../../../primordials.js'
  *
- * @typedef {{ kind: 'esm' | 'cjs', specifier: string | ((absFile: string) => string) }} ImportStyle
+ * `aliasPrefix` (optional) renames the imported identifiers in the
+ * destructure list. Useful for the bundle-transform path: bundled
+ * externals frequently declare local `var ObjectDefineProperty = …`
+ * shadows from esbuild's CJS interop runtime, which would collide
+ * with a top-level `const { ObjectDefineProperty } = require(…)`.
+ * Setting `aliasPrefix: '_p_'` rewrites all primordial references in
+ * the file to `_p_ObjectDefineProperty(…)` and emits the require as
+ * `const { ObjectDefineProperty: _p_ObjectDefineProperty } = …`,
+ * avoiding any clash with the bundle's own identifiers.
+ *
+ * @typedef {{ kind: 'esm' | 'cjs', specifier: string | ((absFile: string) => string), aliasPrefix?: string }} ImportStyle
  */
 
 /**
@@ -159,6 +169,12 @@ function rewriteFile({
   apply,
   importStyle,
 }) {
+  // Local-name prefix for the inserted destructure. When set, an
+  // imported `Foo` is referenced in source as `<prefix>Foo` and the
+  // require becomes `const { Foo: <prefix>Foo, … } = require(…)`.
+  // Empty string = no aliasing (matches the ESM-default behavior).
+  const aliasPrefix = importStyle?.aliasPrefix ?? ''
+  const localName = (name: string): string => aliasPrefix + name
   const src = readFileSync(absPath, 'utf8')
   let ast
   try {
@@ -174,6 +190,23 @@ function rewriteFile({
   } catch {
     return { rewrites: 0, importAdded: false, skipped: 0 }
   }
+
+  // Repair AST end positions. acorn-wasm's compact_serialize fast-paths
+  // a small set of node kinds (Identifier, Literal, ImportDeclaration…)
+  // and falls back to `(data >> 32) as u32` for everything else — but
+  // for nodes whose `data` field stores a heap pointer or packed child
+  // ids (CallExpression, VariableDeclaration, BlockStatement, …) the
+  // high 32 bits aren't an end offset, so the emitted `end` is garbage
+  // (often 0, sometimes a callee's NodeId, sometimes a stale value
+  // bleeding from a sibling node).
+  //
+  // Until the wasm parser fix lands, repair here: walk depth-first,
+  // and for any node with a broken end (end < start, or end < the
+  // computed end of its rightmost descendant), substitute the
+  // descendant-derived value. The recursion is bounded by AST depth
+  // so the cost is linear in node count — same as the rewrite walk
+  // we're about to do anyway.
+  repairEndPositions(ast)
 
   // acorn-wasm reports byte offsets, not char offsets. JS string slice
   // is char-indexed, so on sources with multi-byte UTF-8 chars (CJK,
@@ -200,11 +233,11 @@ function rewriteFile({
       if (!exported.has(ctor)) {
         return
       }
-      // Replace `Foo` (the identifier) with `Ctor`.
+      // Replace `Foo` (the identifier) with `Ctor` (or its aliased form).
       rewrites.push({
         start: toChar(callee.start),
         end: toChar(callee.end),
-        replacement: ctor,
+        replacement: localName(ctor),
       })
       usedPrimordials.add(ctor)
       return
@@ -244,11 +277,11 @@ function rewriteFile({
         return
       }
       // Replace `Foo.bar` (the whole MemberExpression callee) with the
-      // primordial name. Args list stays intact.
+      // primordial name (or its aliased form). Args list stays intact.
       rewrites.push({
         start: toChar(node.callee.start),
         end: toChar(node.callee.end),
-        replacement: expected,
+        replacement: localName(expected),
       })
       usedPrimordials.add(expected)
       return
@@ -278,8 +311,13 @@ function rewriteFile({
       return
     }
     // Rewrite `obj.method(args)` → `Primordial(obj, args)`.
-    // We need: replace from start of `node.callee` to end of `node` with
-    // `Primordial(<obj source>, <args source>)`.
+    // Need to span from start of `node.callee` through the closing `)`.
+    // node.end is unreliable on bundles (acorn-wasm parser bug — see
+    // repairEndPositions above), so we don't trust it for the outermost
+    // span. Instead: take the start of the call (= node.callee.start)
+    // and scan forward from after the last argument's end to find the
+    // matching `)`. Whitespace, line comments, and trailing commas
+    // between the last arg and `)` are tolerated.
     const objSrc = src.slice(toChar(object.start), toChar(object.end))
     const argsSrc =
       node.arguments.length > 0
@@ -288,12 +326,23 @@ function rewriteFile({
             toChar(node.arguments.at(-1).end),
           )
         : ''
+    const callStart = toChar(node.callee.start)
+    const lastArgEnd =
+      node.arguments.length > 0
+        ? toChar(node.arguments.at(-1).end)
+        : toChar(node.callee.end)
+    const callEnd = findClosingParen(src, lastArgEnd)
+    if (callEnd < 0) {
+      // Couldn't find `)` — bail on this rewrite rather than corrupt.
+      return
+    }
+    const fnName = localName(expected)
     const replacement = argsSrc
-      ? `${expected}(${objSrc}, ${argsSrc})`
-      : `${expected}(${objSrc})`
+      ? `${fnName}(${objSrc}, ${argsSrc})`
+      : `${fnName}(${objSrc})`
     rewrites.push({
-      start: toChar(node.start),
-      end: toChar(node.end),
+      start: callStart,
+      end: callEnd,
       replacement,
     })
     usedPrimordials.add(expected)
@@ -303,10 +352,28 @@ function rewriteFile({
     return { rewrites: 0, importAdded: false, skipped }
   }
 
-  // Apply rewrites back-to-front to preserve earlier positions.
-  rewrites.sort((a, b) => b.start - a.start)
-  let out = src
+  // Dedupe rewrites by [start, end] span. acorn-wasm's compact_serialize
+  // can emit the same node object multiple times in the JSON tree
+  // (children pointed at by sequential indices and by heap structs are
+  // the same logical node), so a single physical Buffer.from(…) call
+  // can show up 4× in the walk. Applying the same rewrite span 4×
+  // works the first time (span [a, b] replaced once) but the 2nd, 3rd,
+  // 4th iterations re-apply [a, b] in the already-rewritten string,
+  // eating bytes past the new identifier and corrupting the file.
+  // Dedupe before applying, then sort back-to-front.
+  const seen = new Set<string>()
+  const deduped: typeof rewrites = []
   for (const r of rewrites) {
+    const key = `${r.start}:${r.end}`
+    if (seen.has(key)) {
+      continue
+    }
+    seen.add(key)
+    deduped.push(r)
+  }
+  deduped.sort((a, b) => b.start - a.start)
+  let out = src
+  for (const r of deduped) {
     out = out.slice(0, r.start) + r.replacement + out.slice(r.end)
   }
 
@@ -319,7 +386,11 @@ function rewriteFile({
   const { newSource, importAdded } = ensureImports(
     out,
     [...usedPrimordials].sort(),
-    { kind: importStyle.kind, specifier: resolvedSpecifier },
+    {
+      kind: importStyle.kind,
+      specifier: resolvedSpecifier,
+      aliasPrefix,
+    },
   )
 
   if (apply) {
@@ -327,6 +398,133 @@ function rewriteFile({
   }
 
   return { rewrites: rewrites.length, importAdded, skipped }
+}
+
+/**
+ * Scan `src` forward from `from` (exclusive) until we hit the matching
+ * `)` for an open call. Returns the char index AFTER the `)`, or -1
+ * if no `)` is found before EOF. Tolerates whitespace, line comments,
+ * block comments, and trailing commas. Doesn't try to handle
+ * arbitrarily-nested expressions — callers pass `from` set to the
+ * known end of the last argument, so we're scanning within the
+ * remaining `<ws>* (,)? <ws>* )` slice.
+ */
+function findClosingParen(src: string, from: number): number {
+  let i = from
+  while (i < src.length) {
+    const c = src.charCodeAt(i)
+    // Whitespace.
+    if (c === 0x20 || c === 0x09 || c === 0x0a || c === 0x0d) {
+      i++
+      continue
+    }
+    // Line comment.
+    if (c === 0x2f && src.charCodeAt(i + 1) === 0x2f) {
+      while (i < src.length && src.charCodeAt(i) !== 0x0a) {
+        i++
+      }
+      continue
+    }
+    // Block comment.
+    if (c === 0x2f && src.charCodeAt(i + 1) === 0x2a) {
+      i += 2
+      while (i < src.length - 1) {
+        if (src.charCodeAt(i) === 0x2a && src.charCodeAt(i + 1) === 0x2f) {
+          i += 2
+          break
+        }
+        i++
+      }
+      continue
+    }
+    // Trailing comma.
+    if (c === 0x2c) {
+      i++
+      continue
+    }
+    if (c === 0x29) {
+      // `)` — return the position right after it.
+      return i + 1
+    }
+    // Anything else means we're not at the call's end (probably the
+    // last-arg end was wrong). Bail.
+    return -1
+  }
+  return -1
+}
+
+/**
+ * Repair AST end positions in place. Walks depth-first; for each node
+ * whose `end` is missing or smaller than the computed end of its
+ * children, replaces it with the maximum end seen across descendants.
+ *
+ * Workaround for acorn-wasm's compact_serialize emitting `0` (or other
+ * stale data-field bits) as `end` for node kinds whose data field
+ * doesn't pack the end position in its high 32 bits. Inner expression
+ * nodes (Identifier, Literal, MemberExpression after the fix in this
+ * file's earlier session, etc.) have correct ends; this function
+ * propagates those upward.
+ *
+ * Returns the (possibly repaired) end of `node` so parents can fold it
+ * into their own computation.
+ */
+function repairEndPositions(node) {
+  if (!node || typeof node !== 'object') {
+    return 0
+  }
+  if (Array.isArray(node)) {
+    let m = 0
+    for (const child of node) {
+      const e = repairEndPositions(child)
+      if (e > m) {
+        m = e
+      }
+    }
+    return m
+  }
+  if (typeof node.type !== 'string') {
+    // Not an AST node (e.g. a literal value, a token list). Recurse
+    // through nested objects/arrays so we still reach AST descendants.
+    let m = 0
+    for (const key of Object.keys(node)) {
+      if (key === 'loc' || key === 'range' || key.startsWith('_')) {
+        continue
+      }
+      const e = repairEndPositions(node[key])
+      if (e > m) {
+        m = e
+      }
+    }
+    return m
+  }
+
+  let maxChildEnd = 0
+  for (const key of Object.keys(node)) {
+    if (
+      key === 'loc' ||
+      key === 'range' ||
+      key === 'start' ||
+      key === 'end' ||
+      key.startsWith('_')
+    ) {
+      continue
+    }
+    const e = repairEndPositions(node[key])
+    if (e > maxChildEnd) {
+      maxChildEnd = e
+    }
+  }
+
+  // If the reported end is sane (>= start AND >= max-child-end), keep it.
+  // Otherwise replace with the larger of (start, maxChildEnd).
+  const reportedEnd = typeof node.end === 'number' ? node.end : 0
+  const start = typeof node.start === 'number' ? node.start : 0
+  const correctedEnd = Math.max(start, maxChildEnd)
+  if (reportedEnd < correctedEnd) {
+    node.end = correctedEnd
+    return correctedEnd
+  }
+  return reportedEnd
 }
 
 /**
@@ -432,6 +630,18 @@ function escapeRegex(s) {
  */
 function ensureImports(src, identifiers, importStyle) {
   const { kind, specifier } = importStyle
+  const aliasPrefix: string = importStyle.aliasPrefix ?? ''
+  // Render one identifier as a destructure entry: `Foo` if no alias,
+  // `Foo: <prefix>Foo` if aliased.
+  const renderEntry = (name: string): string =>
+    aliasPrefix ? `${name}: ${aliasPrefix}${name}` : name
+  // Parse a destructure entry back into the original imported name.
+  // Handles both `Foo` and `Foo: Local` forms.
+  const parseEntry = (entry: string): string => {
+    const trimmed = entry.trim()
+    const colonIdx = trimmed.indexOf(':')
+    return colonIdx === -1 ? trimmed : trimmed.slice(0, colonIdx).trim()
+  }
   const escSpec = escapeRegex(specifier)
   const existingRe =
     kind === 'esm'
@@ -443,12 +653,7 @@ function ensureImports(src, identifiers, importStyle) {
         )
   const existing = src.match(existingRe)
   if (existing) {
-    const have = new Set(
-      existing[1]
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean),
-    )
+    const have = new Set(existing[1].split(',').map(parseEntry).filter(Boolean))
     let addedAny = false
     for (const id of identifiers) {
       if (!have.has(id)) {
@@ -459,7 +664,7 @@ function ensureImports(src, identifiers, importStyle) {
     if (!addedAny) {
       return { newSource: src, importAdded: false }
     }
-    const merged = [...have].sort().join(', ')
+    const merged = [...have].sort().map(renderEntry).join(', ')
     const replacement =
       kind === 'esm'
         ? `import { ${merged} } from '${specifier}'`
@@ -474,7 +679,7 @@ function ensureImports(src, identifiers, importStyle) {
   // We match either ESM imports or CJS require-shaped declarations so the
   // inserted block lands alongside the existing module-loading prologue.
   const lastEnd = findInsertionPoint(src)
-  const list = identifiers.join(', ')
+  const list = identifiers.map(renderEntry).join(', ')
   const newStmt =
     kind === 'esm'
       ? `import { ${list} } from '${specifier}'\n`

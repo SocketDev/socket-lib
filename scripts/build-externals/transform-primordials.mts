@@ -24,30 +24,28 @@
  * codemod's specifier-as-function form covers that — see
  * tools/prim/src/codemod.mts ImportStyle.
  *
- * STATUS — gated behind SOCKET_LIB_PRIMORDIALS_TRANSFORM=1
+ * The acorn-wasm parser has a known range-serialization bug: many node
+ * kinds (CallExpression, VariableDeclaration, BlockStatement, Program,
+ * MemberExpression, etc.) come back with `end` set to 0 or a stale
+ * unrelated offset because compact_serialize.rs's `node.end()` falls
+ * through to `(self.data >> 32) as u32` for any kind whose data field
+ * stores a heap pointer or packed child IDs rather than an end
+ * position. Inner expression positions (Identifier, Literal, etc.)
+ * are correct.
  *
- * Off by default in the orchestrator until the underlying acorn-wasm
- * parser bug is fixed: on bundles ≥ ~3.6KB, the parser reports `end: 0`
- * (or other tiny stale values) for outer node types — Program,
- * ExpressionStatement, top-level VariableDeclaration, and crucially the
- * outer CallExpression nodes the codemod's prototype-rewrite path uses
- * to span the original `obj.method(args)` slice. Inner expression
- * positions (Identifier, MemberExpression, the args themselves) are
- * fine. The codemod's static-method path (Buffer.isBuffer → BufferIsBuffer)
- * relies on the outer CallExpression's end, so rewrites end up
- * truncating thousands of characters of source between the new call
- * site and a stale offset, producing files that fail to parse.
+ * Workaround lives in tools/prim/src/codemod.mts:
+ *   - `repairEndPositions(ast)` walks depth-first and for any node
+ *     whose `end < max child end`, substitutes the descendant-derived
+ *     value. Fixes MemberExpression, Identifier, etc. ends — enough
+ *     for the static `Foo.bar(args) → FooBar(args)` rewrite path.
+ *   - For the prototype `obj.method(args) → Primordial(obj, args)`
+ *     path the codemod scans source forward from the last argument's
+ *     end to find the matching `)` — see `findClosingParen()`.
  *
- * Reproduces with vendor/acorn-wasm/acorn_wasm.cjs against any
- * dist/external bundle: parse → walk → outer node has `end: <small>`
- * while children have correct positions. Confirmed on tar-fs.js where
- * the first `Buffer.isBuffer(value)` call at byte 3624 has
- * `node.end: 589` (some unrelated offset earlier in the file).
- *
- * Re-enable once the acorn-wasm range-serialization is corrected. The
- * codemod-side correctness work is already in place: byte→char offset
- * translation (UTF-8 sources) and CJS-style require emission both
- * landed alongside this module.
+ * The transform now runs unconditionally as part of the externals
+ * build. If the wasm parser is fixed upstream, both workarounds
+ * become no-ops (correct ends pass through unchanged) and can be
+ * removed.
  */
 
 import path from 'node:path'
@@ -92,13 +90,19 @@ export async function transformPrimordials(
     return normalized.startsWith('.') ? normalized : `./${normalized}`
   }
 
+  // Alias the imported names so we never clash with identifiers the
+  // bundle declares for itself. esbuild's CJS interop runtime
+  // declares locals like `var ObjectDefineProperty = global.…` inside
+  // some IIFEs; without aliasing, our top-level
+  // `const { ObjectDefineProperty } = require(…)` would collide and
+  // the file fails to load with "Identifier already been declared".
   const result = await applyCodemod({
     targetRoot: distRoot,
     scanDir: distExternalDir,
     exported: surface.exports,
     apply: true,
     includeGuessed: false,
-    importStyle: { kind: 'cjs', specifier },
+    importStyle: { kind: 'cjs', specifier, aliasPrefix: '_p_' },
   })
 
   if (!quiet && result.filesChanged > 0) {

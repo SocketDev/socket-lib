@@ -201,15 +201,13 @@ export async function buildExternals(options = {}) {
 
   // Post-process: rewrite well-known global calls (Buffer.from, Date.now,
   // Object.keys, …) to socket-lib's primordials surface so the bundled
-  // externals don't depend on a clean caller realm. Gated off until the
-  // upstream acorn-wasm parser's range-serialization bug is fixed — see
-  // the long header in ./transform-primordials.mts for the repro. Set
-  // SOCKET_LIB_PRIMORDIALS_TRANSFORM=1 to run anyway (for testing once
-  // the parser ships a fix).
-  if (process.env.SOCKET_LIB_PRIMORDIALS_TRANSFORM === '1') {
-    const distRoot = path.dirname(distExternalDir)
-    await transformPrimordials(distRoot, distExternalDir, { quiet })
-  }
+  // externals don't depend on a clean caller realm. The codemod has a
+  // built-in workaround for the acorn-wasm parser's range-serialization
+  // bug (it repairs broken `end` positions by walking children, and
+  // scans source for the closing `)` when the call's outer end is
+  // unreliable — see tools/prim/src/codemod.mts).
+  const distRoot = path.dirname(distExternalDir)
+  await transformPrimordials(distRoot, distExternalDir, { quiet })
 
   return { bundledCount, totalSize }
 }
