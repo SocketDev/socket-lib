@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.28.0",
+  "version": "5.25.0",
   "packageManager": "pnpm@11.0.0-rc.5",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -679,7 +679,8 @@
     "./package.json": "./package.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json",
-    "./tsconfig.test.json": "./tsconfig.test.json"
+    "./tsconfig.test.json": "./tsconfig.test.json",
+    "./xport.schema.json": "./xport.schema.json"
   },
   "files": [
     "dist",

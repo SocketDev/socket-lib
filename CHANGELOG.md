@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.25.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.25.0) - 2026-04-26
+
+### Added
+
+- `@socketsecurity/lib/primordials` — new public module exposing safe references to ~100 built-in constructors, static methods, and prototype methods captured at module-load time. Mirrors the Node.js-internal primordials convention: static methods retain their name (`ObjectKeys`, `ArrayIsArray`, `JSONParse`, `ReflectApply`); prototype methods are uncurried via `uncurryThis` (`StringPrototypeSlice(str, 0, 3)` instead of `str.slice(0, 3)`); constructors get a `Ctor` suffix (`MapCtor`, `SetCtor`, `ErrorCtor`, …) to avoid shadowing the capital-case global. Library internals migrated to use these helpers so prototype-pollution attacks on the caller realm can't redirect them. Surface includes `Function`, `Math`, and the full Error subclass set (`TypeErrorCtor`, `RangeErrorCtor`, `SyntaxErrorCtor`, `ReferenceErrorCtor`, `URIErrorCtor`, `EvalErrorCtor`, `AggregateErrorCtor`) after audit-driven coverage passes
+
 ## [5.24.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.24.0) - 2026-04-22
 
 ### Removed
