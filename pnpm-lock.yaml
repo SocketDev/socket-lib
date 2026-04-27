@@ -305,8 +305,8 @@ importers:
         specifier: 1.0.25
         version: 1.0.25
       '@socketsecurity/lib-stable':
-        specifier: npm:@socketsecurity/lib@5.25.0
-        version: '@socketsecurity/lib@5.25.0(typescript@5.9.2)'
+        specifier: npm:@socketsecurity/lib@5.25.1
+        version: '@socketsecurity/lib@5.25.1(typescript@5.9.2)'
       '@types/node':
         specifier: 24.9.2
         version: 24.9.2
@@ -1640,8 +1640,8 @@ packages:
       typescript:
         optional: true
 
-  '@socketsecurity/lib@5.25.0':
-    resolution: {integrity: sha512-uh79YGbVTPa32yOwYogKvBB4W1svKzMkdI+Q4vGKQWKeMoG/Q1HR95lw/2jiVouesjhZKUzhzxd7EP0b1Jc3rQ==}
+  '@socketsecurity/lib@5.25.1':
+    resolution: {integrity: sha512-I/sXk5FDOF7FVstzYn8tKtCvRe97KU/hl4p0e3OI1O9gma2uYypDiJT/n3axvtkqOyNFxWICWuXfy8Hnzeaw6Q==}
     engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -4182,7 +4182,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.2
 
-  '@socketsecurity/lib@5.25.0(typescript@5.9.2)':
+  '@socketsecurity/lib@5.25.1(typescript@5.9.2)':
     optionalDependencies:
       typescript: 5.9.2
 
