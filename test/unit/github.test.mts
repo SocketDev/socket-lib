@@ -807,6 +807,111 @@ describe.sequential('github', () => {
       )
       expect(sha).toBe('branch-head-sha-ccc')
     })
+
+    it('should NOT fall back to GraphQL when REST cascade hits genuine 404s', async () => {
+      // Real 404s (the ref genuinely doesn't exist as a tag, branch,
+      // or commit) must NOT trigger the GraphQL fallback. The
+      // fallback is reserved for the documented incident shape
+      // (200 + empty body); a 404-throughout cascade should produce
+      // the standard "ref not found" error without any GraphQL
+      // round trip. We use nock with no `.post('/graphql')` mock —
+      // if the code DID call GraphQL, nock would fail loudly with
+      // "no match for request".
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/genuinely-missing-ref')
+        .reply(404)
+        .get('/repos/owner/repo/git/refs/heads/genuinely-missing-ref')
+        .reply(404)
+        .get('/repos/owner/repo/commits/genuinely-missing-ref')
+        .reply(404)
+
+      await expect(
+        resolveRefToSha('owner', 'repo', 'genuinely-missing-ref'),
+      ).rejects.toThrow('failed to resolve ref')
+    })
+
+    it('should re-throw original REST error when GraphQL fallback also fails', async () => {
+      // Both transports degraded: REST hits empty bodies all the way
+      // through the cascade, GraphQL returns a non-OK status. The
+      // helper should swallow the GraphQL transport error and
+      // surface the REST cascade's 'failed to resolve ref' message
+      // — that's more actionable for the user than a confusing
+      // GraphQL-side error caused by the same incident.
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/double-failure-ref')
+        .reply(200, '')
+        .get('/repos/owner/repo/git/refs/heads/double-failure-ref')
+        .reply(200, '')
+        .get('/repos/owner/repo/commits/double-failure-ref')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(503, 'graphql unavailable')
+
+      await expect(
+        resolveRefToSha('owner', 'repo', 'double-failure-ref'),
+      ).rejects.toThrow('failed to resolve ref')
+    })
+
+    it('should return null from GraphQL when ref not found anywhere', async () => {
+      // GraphQL ran successfully but all three aliases (tagRef,
+      // branchRef, commit) came back null — the ref legitimately
+      // doesn't exist. Caller falls back to the REST error message.
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/incident-but-real-404')
+        .reply(200, '')
+        .get('/repos/owner/repo/git/refs/heads/incident-but-real-404')
+        .reply(200, '')
+        .get('/repos/owner/repo/commits/incident-but-real-404')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              tagRef: null,
+              branchRef: null,
+              commit: null,
+            },
+          },
+        })
+
+      await expect(
+        resolveRefToSha('owner', 'repo', 'incident-but-real-404'),
+      ).rejects.toThrow('failed to resolve ref')
+    })
+
+    it('should forward auth token to GraphQL fallback', async () => {
+      // The user-provided token must be threaded through to the
+      // GraphQL POST as a Bearer auth header — GraphQL queries to
+      // private repos require auth even when REST anonymous works.
+      nock('https://api.github.com')
+        .get('/repos/owner/repo/git/refs/tags/auth-forwarding-ref')
+        .reply(200, '')
+        .get('/repos/owner/repo/git/refs/heads/auth-forwarding-ref')
+        .reply(200, '')
+        .get('/repos/owner/repo/commits/auth-forwarding-ref')
+        .reply(200, '')
+        .post('/graphql')
+        .matchHeader('Authorization', 'Bearer custom-token-xyz')
+        .reply(200, {
+          data: {
+            repository: {
+              tagRef: {
+                target: { __typename: 'Commit', oid: 'auth-sha-ddd' },
+              },
+              branchRef: null,
+              commit: null,
+            },
+          },
+        })
+
+      const sha = await resolveRefToSha(
+        'owner',
+        'repo',
+        'auth-forwarding-ref',
+        { token: 'custom-token-xyz' },
+      )
+      expect(sha).toBe('auth-sha-ddd')
+    })
   })
 
   describe('fetchGhsaDetails', () => {
@@ -909,6 +1014,125 @@ describe.sequential('github', () => {
       expect(result.details).toBe('Detailed description from GraphQL')
       expect(result.cvss?.score).toBe(5.3)
       expect(result.vulnerabilities[0]?.package.name).toBe('curl-bridge')
+    })
+
+    it('should NOT trigger GraphQL fallback on real 404', async () => {
+      // 404 means the GHSA genuinely doesn't exist. Falling back to
+      // GraphQL would just confirm what we already know and add a
+      // pointless round trip. The fallback is reserved for the
+      // empty-body incident shape only.
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-not-real-id-xx')
+        .reply(404, '')
+
+      await expect(fetchGhsaDetails('GHSA-not-real-id-xx')).rejects.toThrow(
+        'GitHub API error 404',
+      )
+    })
+
+    it('should NOT trigger GraphQL fallback on rate-limit error', async () => {
+      // Rate-limit errors throw `GitHubRateLimitError`, which is
+      // distinct from `GitHubEmptyBodyError`. Falling back to
+      // GraphQL would consume the same rate-limit budget and just
+      // surface a confusing GraphQL rate-limit message instead of
+      // the actionable "set GITHUB_TOKEN" REST message.
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-rate-limited-xx')
+        .reply(403, 'rate limit exceeded', {
+          'x-ratelimit-remaining': '0',
+          'x-ratelimit-reset': String(Math.floor(Date.now() / 1000) + 3600),
+        })
+
+      await expect(fetchGhsaDetails('GHSA-rate-limited-xx')).rejects.toThrow(
+        'GitHub API rate limit exceeded',
+      )
+    })
+
+    it('should propagate GraphQL transport error when REST is empty and GraphQL fails', async () => {
+      // REST returned 200 + empty (incident shape), so we tried
+      // GraphQL. GraphQL itself failed (non-OK status). Surface
+      // the GraphQL error so the user sees both transports failed
+      // — there's no useful REST error to fall back on here
+      // because REST "succeeded" with an empty body.
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-double-fail-xx')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(503, 'graphql unavailable')
+
+      await expect(fetchGhsaDetails('GHSA-double-fail-xx')).rejects.toThrow(
+        /GraphQL/,
+      )
+    })
+
+    it('should reject when GraphQL returns null securityAdvisory', async () => {
+      // GraphQL returned successfully but the advisory query came
+      // back as `securityAdvisory: null` (no advisory with that id
+      // exists). Throw a clear "not found" error so the caller
+      // doesn't silently consume a synthetic empty advisory.
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-graphql-null-xx')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, { data: { securityAdvisory: null } })
+
+      await expect(fetchGhsaDetails('GHSA-graphql-null-xx')).rejects.toThrow(
+        'GHSA-graphql-null-xx not found via GraphQL',
+      )
+    })
+
+    it('should propagate errors[] from GraphQL fallback', async () => {
+      // GraphQL returned an `errors[]` payload (malformed query,
+      // permissions issue, etc.). The helper should throw with
+      // the GraphQL error messages joined so the user can see
+      // what the upstream complaint was.
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-graphql-errors-xx')
+        .reply(200, '')
+        .post('/graphql')
+        .reply(200, {
+          errors: [
+            { message: 'Field "securityAdvisory" requires authorization' },
+          ],
+        })
+
+      await expect(fetchGhsaDetails('GHSA-graphql-errors-xx')).rejects.toThrow(
+        'Field "securityAdvisory" requires authorization',
+      )
+    })
+
+    it('should forward auth token to GraphQL fallback', async () => {
+      // Auth token threaded through to the GraphQL POST so private
+      // / org-only advisory data resolves correctly during fallback.
+      nock('https://api.github.com')
+        .get('/advisories/GHSA-auth-fwd-xx')
+        .reply(200, '')
+        .post('/graphql')
+        .matchHeader('Authorization', 'Bearer ghsa-token-zzz')
+        .reply(200, {
+          data: {
+            securityAdvisory: {
+              ghsaId: 'GHSA-auth-fwd-xx',
+              summary: 'Auth-forwarded advisory',
+              description: 'desc',
+              severity: 'LOW',
+              publishedAt: '2024-04-01T00:00:00Z',
+              updatedAt: '2024-04-01T00:00:00Z',
+              withdrawnAt: null,
+              cvss: null,
+              cwes: { nodes: [] },
+              references: [],
+              vulnerabilities: { nodes: [] },
+              identifiers: [{ type: 'GHSA', value: 'GHSA-auth-fwd-xx' }],
+            },
+          },
+        })
+
+      const result = await fetchGhsaDetails('GHSA-auth-fwd-xx', {
+        token: 'ghsa-token-zzz',
+      })
+      expect(result.severity).toBe('low')
+      expect(result.aliases).toEqual([])
     })
   })
 

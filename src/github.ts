@@ -52,12 +52,32 @@ let _githubCache: TtlCache | undefined
 
 /**
  * Thrown by `fetchGitHub` when GitHub returns HTTP 200 OK with a
- * zero-byte body. This is the documented signature of the GitHub
- * Elasticsearch / search-degraded incident
- * (https://www.githubstatus.com): the response is "successful" by
- * status code but the payload is missing entirely. Surfacing it as
- * a typed error lets callers decide whether to retry, fall back to
- * a different transport (e.g. GraphQL), or surface to the user.
+ * zero-byte body — the "successful empty response" pattern.
+ *
+ * Why this exists (background for new contributors):
+ *   GitHub's REST API has a documented failure mode that is *very*
+ *   easy to miss in code review. During incidents where the search
+ *   / Elasticsearch backing index is degraded (see GitHub status
+ *   pages with titles like "search is degraded" or "Pull Requests
+ *   degraded"), the REST `/repos/...` GET endpoints return:
+ *     - HTTP status: 200 OK   ← looks like success
+ *     - Body:        ""       ← but the payload is empty
+ *     - Headers:     no Retry-After, no rate-limit signal, nothing
+ *
+ *   Without a typed error, calling code does
+ *     `JSON.parse(response.body.toString('utf8'))`
+ *   on an empty string, which throws a confusing
+ *   `SyntaxError: Unexpected end of JSON input`. That error has
+ *   nothing to do with our code — but it's the only signal upstream
+ *   sees. This class wraps that case in a *named* error so callers
+ *   can `instanceof GitHubEmptyBodyError` and choose what to do:
+ *   retry the same endpoint later, fall back to GraphQL (which uses
+ *   a different backend and is unaffected by ES outages), or surface
+ *   a clean message to the user.
+ *
+ *   The HTTP status is hard-coded to 200 because that's *exactly*
+ *   what makes this insidious — a real 4xx/5xx would already be
+ *   handled by the rate-limit / status-code branch above.
  */
 export class GitHubEmptyBodyError extends Error {
   /** HTTP status (always 200 — that's what makes this case insidious). */
@@ -283,12 +303,36 @@ async function fetchRefSha(
     token: options.token,
   }
 
-  // GitHub's REST listing endpoints share an Elasticsearch-backed
-  // index with search; during the documented incidents these GET
-  // calls return HTTP 200 + zero-byte body for every URL. The
-  // `fetchGitHub` helper now throws `GitHubEmptyBodyError` for that
-  // shape so we can distinguish "real 404" (keep walking the tier
-  // cascade) from "incident" (give up on REST, use GraphQL).
+  // ---------------------------------------------------------------
+  // Why this function has a "tier cascade" instead of a single call:
+  //
+  //   The user gives us a string `ref` and we don't know whether it
+  //   names a tag (e.g. "v1.2.3"), a branch (e.g. "main"), or a raw
+  //   commit SHA (e.g. "abc1234..."). REST has three different
+  //   endpoints for these — there's no single "resolve any ref"
+  //   endpoint — so we just try each in order: tag first (most
+  //   common), then branch, then raw commit SHA. The first 200
+  //   wins, the rest are skipped.
+  //
+  // Why we track `sawEmptyBody` separately from "this tier 404'd":
+  //
+  //   A real 404 means "this tier didn't match — keep walking" (e.g.
+  //   "v1.2.3" isn't a branch, so the heads/v1.2.3 lookup 404s and
+  //   we move on). But a `GitHubEmptyBodyError` means "GitHub itself
+  //   is degraded right now and even a real match would return as
+  //   if it didn't exist." Walking the tier cascade further when
+  //   GitHub is down just multiplies the wasted calls — we'd 'fail'
+  //   all three tiers, then either give up or fall back. By noting
+  //   the empty-body signal in `sawEmptyBody`, we can fall through
+  //   to a single GraphQL call after the cascade finishes that
+  //   resolves all three forms in one shot via a different backend.
+  //
+  //   The `note404` name is a little unfortunate — it really tracks
+  //   "the kind of error we just caught". But the semantic intent
+  //   from the caller's perspective IS "this tier didn't match",
+  //   which is what 404 means in the original cascade. Renaming
+  //   would touch every catch site for limited gain.
+  // ---------------------------------------------------------------
   let sawEmptyBody = false
   const note404 = (e: unknown): unknown => {
     if (e instanceof GitHubEmptyBodyError) {
@@ -331,11 +375,29 @@ async function fetchRefSha(
         return commitData.sha
       } catch (e3) {
         note404(e3)
-        // If ANY tier hit `GitHubEmptyBodyError`, REST is degraded —
-        // fall back to GraphQL, which uses a different backend and
-        // resolves all three lookups (tag / branch / commit) in one
-        // round trip. If GraphQL also fails, surface the original
-        // REST failure so the user sees the actionable error.
+        // -----------------------------------------------------------
+        // If ANY of the three REST tiers hit the empty-body signal,
+        // REST is degraded — fall back to GraphQL. GraphQL hits a
+        // *different* backend at GitHub (not the same Elasticsearch
+        // index as REST listings), so it stays consistent through
+        // the kinds of incidents that produce empty REST bodies.
+        //
+        // We only fall back when `sawEmptyBody` is true. If all
+        // three tiers genuinely 404'd (the ref really doesn't exist
+        // anywhere — tag, branch, or commit), we DON'T trigger the
+        // GraphQL call. That keeps the fallback narrow: it fires
+        // only on the documented incident shape, not on every
+        // "ref not found" outcome.
+        //
+        // If GraphQL ALSO fails (network error, GraphQL errors[],
+        // etc.) we silently swallow it and re-throw the *original*
+        // REST error. The reasoning is: the REST cascade error
+        // gives the user an actionable message ("ref not found"),
+        // while a GraphQL transport error is incident plumbing
+        // they can't act on. Better to show the lower-level "we
+        // couldn't find it" error than a confusing GraphQL
+        // exception caused by the same incident.
+        // -----------------------------------------------------------
         if (sawEmptyBody) {
           try {
             const sha = await fetchRefShaViaGraphQL(
@@ -351,7 +413,7 @@ async function fetchRefSha(
             // fall through to the original error
           }
         }
-        throw new Error(
+        throw new ErrorCtor(
           `failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e3)}`,
         )
       }
@@ -360,15 +422,42 @@ async function fetchRefSha(
 }
 
 /**
- * Resolve a ref to its commit SHA via GraphQL. Used as the REST
- * fallback in `fetchRefSha` when the REST endpoints return empty
- * bodies (the documented GitHub incident shape).
+ * Resolve a ref to its commit SHA via GraphQL.
  *
- * GraphQL `Repository.ref(qualifiedName)` returns the resolved tag
- * or branch in one call, including the dereferenced commit SHA for
- * annotated tags via `Tag.target.oid`. `Repository.object(oid)`
- * handles raw commit SHAs. Returns `null` if none of the three
- * forms match (genuine "ref not found" — not an incident).
+ * Why this function exists:
+ *   This is the fallback that `fetchRefSha` calls when the REST
+ *   tier-cascade detects the "GitHub returned 200 + empty body"
+ *   incident shape. GraphQL hits a different backend than REST
+ *   listings, so it stays consistent through the kinds of incidents
+ *   that produce empty REST responses.
+ *
+ * What it does:
+ *   The REST cascade needs three separate calls (tag, branch,
+ *   commit) because REST has no single "resolve any ref" endpoint.
+ *   GraphQL DOES — `Repository.ref(qualifiedName)` resolves
+ *   tags AND branches by their fully-qualified name, and
+ *   `Repository.object(oid)` resolves a raw commit SHA. We bundle
+ *   all three into ONE query using GraphQL aliases (`tagRef`,
+ *   `branchRef`, `commit`) and pick whichever resolved.
+ *
+ * Annotated vs lightweight tags:
+ *   In Git, a "lightweight tag" is just a name that points directly
+ *   at a commit. An "annotated tag" is a separate object (with
+ *   tagger info, message, etc.) that itself points at the commit.
+ *   GraphQL's `Tag.target` field gives us the commit SHA for
+ *   annotated tags in one shot — REST needs a *second* HTTP call
+ *   to dereference. The `... on Tag { target { oid } }` /
+ *   `... on Commit { oid }` inline-fragments handle both shapes.
+ *
+ * Return contract:
+ *   - Returns the SHA string when any form matches.
+ *   - Returns `null` when the ref genuinely doesn't exist as a
+ *     tag, branch, OR commit. The caller treats `null` the same
+ *     as "REST cascade also failed" — a real "ref not found".
+ *   - Returns `null` (not throws) on transport-level failures too:
+ *     non-OK HTTP, empty GraphQL body, or JSON parse error. The
+ *     REST cascade's "ref not found" message is more useful to the
+ *     end user than a GraphQL transport error.
  */
 async function fetchRefShaViaGraphQL(
   owner: string,
@@ -386,8 +475,10 @@ async function fetchRefShaViaGraphQL(
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  // Resolve all three forms in one query. Aliases keep the response
-  // shape predictable regardless of which form matches.
+  // Resolve all three forms in one query. The `aliasName: ref(...)`
+  // syntax assigns each lookup a stable key in the response so we
+  // don't have to guess which one matched — we just check each
+  // alias in priority order (tag → branch → commit) below.
   const query = `query($owner: String!, $repo: String!, $tag: String!, $branch: String!, $oid: GitObjectID!) {
     repository(owner: $owner, name: $repo) {
       tagRef: ref(qualifiedName: $tag) {
@@ -406,10 +497,16 @@ async function fetchRefShaViaGraphQL(
       }
     }
   }`
-  // GraphQL's `oid` argument is a GitObjectID scalar — it must look
-  // like a 40-char hex SHA. If `ref` doesn't match that shape, pass
-  // a known-zero SHA so the query parses; the alias just returns
-  // null and we fall through to the tag/branch resolutions.
+  // GraphQL's `oid` argument is a GitObjectID scalar — it must
+  // syntactically look like a 40-character hex SHA, or the entire
+  // GraphQL query is rejected as malformed BEFORE any resolution
+  // happens. If the user passed a tag or branch name (which won't
+  // match the SHA shape), we substitute the all-zeros SHA so the
+  // query parses. The `commit:` alias then resolves to null (no
+  // such commit), and we fall through to the tag/branch results.
+  // Without this guard, calling `fetchRefShaViaGraphQL(..., 'main')`
+  // would throw a confusing "Argument 'oid' on Field 'object' has
+  // an invalid value" error and the tag/branch lookups never run.
   const looksLikeSha = /^[a-f0-9]{40}$/i.test(ref)
   const oidArg = looksLikeSha ? ref : '0000000000000000000000000000000000000000'
   const response = await httpRequest(GITHUB_GRAPHQL_URL, {
@@ -427,6 +524,11 @@ async function fetchRefShaViaGraphQL(
     method: 'POST',
   })
   if (!response.ok || response.body.byteLength === 0) {
+    // Either GraphQL itself failed (non-OK status) or it ALSO
+    // returned an empty body — both backends are degraded. Return
+    // null so the caller surfaces the original REST error rather
+    // than re-throwing here. We deliberately don't recurse to
+    // another transport because there isn't a third option.
     return null
   }
   let parsed: {
@@ -449,10 +551,23 @@ async function fetchRefShaViaGraphQL(
   } catch {
     return null
   }
-  // GraphQL surfaces "not found" as null nodes (NOT an `errors` entry
-  // unless the whole repo is missing) — so a null tagRef/branchRef
-  // simply means that form didn't match. Walk the same priority
-  // order as the REST cascade: tag → branch → commit.
+  // GraphQL has two ways of saying "no":
+  //
+  //   1. The aliased field comes back as `null` (e.g.
+  //      `tagRef: null`). This is GraphQL's normal way of saying
+  //      "the lookup ran but found nothing." It is NOT in the
+  //      response's `errors[]` array — it's just a null in `data`.
+  //   2. A genuine error (malformed query, repo doesn't exist,
+  //      auth missing) shows up in the top-level `errors[]` array.
+  //
+  // For form-level "not found" we want behavior #1 — keep walking
+  // the alias list. We only treat `errors[]` as a hard failure if
+  // the entire `data.repository` came back null (e.g. wrong owner
+  // / repo / private and we're unauthenticated).
+  //
+  // Walk the aliases in the SAME priority order as the REST
+  // cascade (tag → branch → commit) so the function's behavior is
+  // identical to REST when both backends return data.
   const repoData = parsed.data?.repository
   if (!repoData) {
     return null
@@ -647,11 +762,24 @@ export async function fetchGhsaDetails(
       cwes: data.cwes || [],
     }
   } catch (e) {
-    // REST returned 200 + empty body — the GitHub-incident shape.
-    // Fall back to GraphQL `securityAdvisory(ghsaId)`, which uses a
-    // different backend and exposes the same data with minor field
-    // renames (severity case + identifiers vs. aliases) that we
-    // normalize here so the public return shape matches REST.
+    // -------------------------------------------------------------
+    // Why we narrow the catch with `instanceof GitHubEmptyBodyError`:
+    //
+    //   We ONLY want to fall back to GraphQL on the documented
+    //   incident shape (200 OK + empty body). Other errors should
+    //   propagate as-is so the caller sees the real cause:
+    //     - Rate limit (`GitHubRateLimitError`) → user needs to set
+    //       GITHUB_TOKEN; running a parallel GraphQL call would just
+    //       hit the same rate-limit budget and confuse the message.
+    //     - 404 → advisory genuinely doesn't exist; we want the
+    //       clean "not found" surface, not a GraphQL retry.
+    //     - 5xx → transient; pRetry on the caller side handles it.
+    //   Only the empty-body case is worth a parallel-transport try.
+    //
+    // GraphQL exposes the same data with minor shape diffs that
+    // `fetchGhsaDetailsViaGraphQL` normalizes back to the REST
+    // shape so callers don't see the difference.
+    // -------------------------------------------------------------
     if (e instanceof GitHubEmptyBodyError) {
       return await fetchGhsaDetailsViaGraphQL(ghsaId, options)
     }
@@ -661,11 +789,42 @@ export async function fetchGhsaDetails(
 }
 
 /**
- * GraphQL counterpart for `fetchGhsaDetails`. Queries
- * `securityAdvisory(ghsaId)` and normalizes the response to match
- * the REST shape: lowercase severity (`MODERATE` → `moderate`),
- * derive `aliases` from `identifiers` by filtering out the
- * advisory's own GHSA id, and unwrap `connection { nodes }` blocks.
+ * GraphQL counterpart for `fetchGhsaDetails`.
+ *
+ * What it does:
+ *   Queries the GraphQL `securityAdvisory(ghsaId)` connection and
+ *   reshapes the response to match the REST `/advisories/:id` JSON
+ *   so callers don't have to know which transport ran.
+ *
+ * Three normalizations the REST shape differs from GraphQL on:
+ *
+ *   1. Severity case
+ *      REST returns lowercase strings like "moderate", "high".
+ *      GraphQL returns SCREAMING_CASE enum values: "MODERATE",
+ *      "HIGH", "CRITICAL". We `.toLowerCase()` so callers can
+ *      compare against a single canonical form.
+ *
+ *   2. Identifiers vs. aliases
+ *      REST has an `aliases: ["CVE-2024-..."]` array — a flat list
+ *      of non-GHSA IDs (CVEs, etc.) for the same vulnerability.
+ *      GraphQL has `identifiers: [{type, value}]` which INCLUDES
+ *      the advisory's own GHSA id alongside CVE ids. We filter
+ *      out the GHSA self-reference so the list matches REST.
+ *
+ *   3. Connection wrapping
+ *      GraphQL wraps array fields in `{ nodes: [...] }` connection
+ *      objects (it's how pagination works in GraphQL). REST
+ *      returns plain arrays. We unwrap with `?.nodes ?? []`.
+ *
+ *   `description` (GraphQL) maps to `details` (REST) — same data,
+ *   different field name. The mapping below renames it.
+ *
+ * Token handling:
+ *   We re-derive the token from `options.token || getGitHubToken()`
+ *   because this function may be called from places that didn't
+ *   thread an explicit token through. GraphQL queries to private
+ *   data require auth even when the equivalent REST GET works
+ *   anonymously, so the auth header is mandatory in practice.
  */
 async function fetchGhsaDetailsViaGraphQL(
   ghsaId: string,

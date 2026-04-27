@@ -564,14 +564,31 @@ interface ReleaseRow {
 }
 
 /**
- * Fetch the latest 100 releases for a repo via REST. Returns an empty
- * array on:
- *   - HTTP 200 + zero-byte body (the GitHub Elasticsearch outage
- *     symptom — `/releases` returns 200 with no body when its
- *     listing index is degraded; there is no error code, no
- *     Retry-After, no rate-limit header, just an empty payload)
- *   - HTTP 200 + literal `[]` (a brand-new repo with no releases)
- * Throws on non-OK status so `pRetry` retries transient failures.
+ * Fetch the latest 100 releases for a repo via REST.
+ *
+ * Why this returns `[]` on TWO different cases:
+ *   - HTTP 200 + zero-byte body. This is the documented GitHub
+ *     "search degraded" incident shape (see status.github.com).
+ *     The releases listing endpoint shares an Elasticsearch index
+ *     with search; when that ES is degraded, `/releases` returns
+ *     a successful 200 OK but with NO BODY. There's no error code,
+ *     no Retry-After, no rate-limit header — just an empty payload.
+ *   - HTTP 200 + literal `[]`. This is the *normal* "the repo has
+ *     no releases" response — say a brand-new repo with no
+ *     published versions.
+ *
+ *   Both produce the same `[]` here because the helper can't tell
+ *   them apart without context. The CALLER (getLatestRelease) does
+ *   the cross-check: if REST returns `[]`, query GraphQL once. If
+ *   GraphQL also returns `[]`, the repo really is empty. If it
+ *   returns >0, REST was lying and we use GraphQL's answer.
+ *
+ * Why we throw on non-OK status:
+ *   `pRetry` wraps this call and retries on thrown errors with
+ *   exponential backoff. A 5xx is transient and worth retrying;
+ *   we want it to throw so pRetry can do its job. Empty body is
+ *   NOT thrown because pRetry can't help — a 200 OK is "done" as
+ *   far as retry policy is concerned.
  */
 async function fetchReleasesViaRest(
   owner: string,
@@ -605,11 +622,32 @@ async function fetchReleasesViaRest(
 }
 
 /**
- * Fetch the latest 100 releases for a repo via GraphQL. Used as a
- * fallback when REST returns an empty listing — GraphQL hits a
- * different backend and stays consistent through Elasticsearch
- * outages. Maps GraphQL fields back to the REST-shaped row so the
- * caller doesn't need to know which transport ran.
+ * Fetch the latest 100 releases for a repo via GraphQL.
+ *
+ * Why this exists:
+ *   `fetchReleasesViaRest` can return `[]` for two reasons (real
+ *   empty repo vs. GitHub-incident-degraded backend). When REST
+ *   returns nothing, the caller in `getLatestRelease` calls THIS
+ *   to disambiguate — if we return >0 here, REST was lying.
+ *
+ * Field shape diffs we normalize:
+ *   GraphQL returns       REST equivalent      Why they differ
+ *   `tagName`             `tag_name`           camelCase vs. snake_case
+ *   `publishedAt`         `published_at`       camelCase vs. snake_case
+ *   `releaseAssets.nodes` `assets`             GraphQL connection
+ *                                              wrapper unwrapped
+ *
+ *   We re-shape inside the `.map(...)` at the bottom so callers
+ *   downstream can use the SAME code path regardless of which
+ *   transport ran.
+ *
+ * Why we hit a different backend:
+ *   GraphQL queries don't go through the same Elasticsearch index
+ *   that REST listings rely on. During incidents that drop the ES
+ *   index (or its connectivity), GraphQL's `repository.releases`
+ *   connection keeps working because it reads from a different
+ *   data path inside GitHub. That's the entire reason this
+ *   fallback exists.
  */
 async function fetchReleasesViaGraphQL(
   owner: string,
@@ -674,12 +712,33 @@ async function fetchReleasesViaGraphQL(
 
 /**
  * Fetch the assets of a single release identified by tag via GraphQL.
- * Used as the fallback for `getReleaseAssetUrl` when the REST per-tag
- * endpoint returns 200 + empty body (the GitHub-incident shape).
  *
- * Returns `null` when the release tag genuinely doesn't exist (so
- * the caller can throw an actionable "tag not found" error rather
- * than silently masking the failure). Throws on transport errors.
+ * Why this exists:
+ *   `getReleaseAssetUrl` uses REST `/releases/tags/:tag` to look
+ *   up a single release and find a downloadable asset. During
+ *   GitHub incidents that endpoint can return 200 + empty body
+ *   the same way the listing endpoint does (the per-tag lookup
+ *   joins against the same listing index for asset discovery).
+ *   This helper hits GraphQL `repository.release(tagName)` which
+ *   uses a different backend.
+ *
+ * Field shape diff we normalize:
+ *   GraphQL returns                       REST equivalent
+ *   `releaseAssets.nodes[].downloadUrl`   `assets[].browser_download_url`
+ *
+ *   Same URL, different field name and one extra connection-wrapper
+ *   level. The mapping at the bottom converts so the asset-matcher
+ *   in `getReleaseAssetUrl` can run unchanged.
+ *
+ * Return contract:
+ *   - Array of assets (REST shape) when the release exists.
+ *   - `null` when the release with that tag genuinely doesn't
+ *     exist (GraphQL returned `release: null`). The caller throws
+ *     a clean "tag not found" error in that case.
+ *   - Throws on transport errors (non-OK HTTP, GraphQL errors[],
+ *     or even the GraphQL backend ALSO returning empty body — at
+ *     that point both transports are degraded and we want the
+ *     pRetry wrapper to back off and retry).
  */
 async function fetchReleaseAssetsViaGraphQL(
   owner: string,
@@ -929,12 +988,31 @@ export async function getReleaseAssetUrl(
           throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
         }
 
-        // 200 OK + zero-byte body is the GitHub Elasticsearch incident
-        // shape — REST GETs return successful but empty responses.
-        // Cross-check via GraphQL `repository.release(tagName)` which
-        // hits a different backend; both endpoints expose the same
-        // {name, browserDownloadUrl} fields, so we normalize and run
-        // the same matcher unchanged.
+        // -------------------------------------------------------
+        // 200 OK + zero-byte body = GitHub Elasticsearch incident.
+        // The status says "success" but the payload is empty.
+        // Cross-check via GraphQL `repository.release(tagName)`,
+        // which uses a different backend — when REST is degraded
+        // GraphQL is usually still serving the same data.
+        //
+        // The two transports expose the SAME asset data with one
+        // field-name diff (`downloadUrl` vs. `browser_download_url`)
+        // that `fetchReleaseAssetsViaGraphQL` normalizes. After
+        // normalization we go back to the SAME asset matcher path
+        // below — the rest of the function doesn't know which
+        // transport produced the asset list.
+        //
+        // Three outcomes from the GraphQL fallback:
+        //   - assets returned: continue with matching as normal
+        //   - `null` returned: GraphQL says no release with this
+        //     tag exists. Throw a clear error so the user knows
+        //     the tag is genuinely missing rather than masking a
+        //     transient with a silent skip.
+        //   - GraphQL itself throws: `pRetry` retries the whole
+        //     `getReleaseAssetUrl` call (REST included). This is
+        //     intentional — if both transports fail we want
+        //     backoff, not a blind error.
+        // -------------------------------------------------------
         let assets: Array<{ name: string; browser_download_url: string }>
         if (response.body.byteLength === 0) {
           if (!quiet) {

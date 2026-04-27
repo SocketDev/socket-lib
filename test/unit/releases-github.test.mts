@@ -266,7 +266,11 @@ describe('releases/github', () => {
     })
 
     afterEach(() => {
-      vi.clearAllMocks()
+      // resetAllMocks clears mockImplementation as well as call
+      // history; some new fallback tests below set
+      // `mockImplementation` for pRetry-aware mocking and that
+      // must not leak into later tests.
+      vi.resetAllMocks()
     })
 
     it('should find latest release by prefix without asset pattern', async () => {
@@ -658,6 +662,66 @@ describe('releases/github', () => {
 
       expect(tag).toBeNull()
     })
+
+    it('should propagate errors[] from GraphQL fallback', async () => {
+      // REST is degraded → GraphQL fallback fires, but GraphQL
+      // returns an `errors[]` payload (e.g. missing auth scope).
+      // The helper should surface the GraphQL error so the user
+      // can see exactly what upstream complained about, instead
+      // of silently treating the empty response as "no releases".
+      //
+      // Uses `mockImplementation` (not `mockResolvedValueOnce`) so
+      // pRetry's repeated attempts all receive the same answers
+      // and we don't have to mock each retry round individually.
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        // Odd calls = REST (empty body), even = GraphQL errors[].
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(
+          Buffer.from(
+            JSONStringify({ errors: [{ message: 'Bad credentials' }] }),
+          ),
+          true,
+          200,
+        )
+      })
+
+      await expect(
+        getLatestRelease('whatever-', SOCKET_BTM_REPO, { quiet: true }),
+      ).rejects.toThrow(/Bad credentials/)
+    }, 60_000)
+
+    it('should NOT call GraphQL when REST returns a populated array', async () => {
+      // Healthy GitHub: REST returns a populated list. The fallback
+      // should NOT fire (no second http call). Verified by setting
+      // a single `mockResolvedValueOnce` — if the helper made a
+      // second call, the second mock would be undefined and the
+      // test would throw a TypeError instead of resolving cleanly.
+      const healthyRelease = [
+        {
+          assets: [{ name: 'curl-darwin-arm64' }],
+          published_at: '2026-04-01T00:00:00Z',
+          tag_name: 'curl-20260401-stable',
+        },
+      ]
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSONStringify(healthyRelease)),
+          true,
+          200,
+        ),
+      )
+
+      const tag = await getLatestRelease('curl-', SOCKET_BTM_REPO, {
+        quiet: true,
+      })
+      expect(tag).toBe('curl-20260401-stable')
+      // httpRequest invoked exactly once — REST only, no GraphQL.
+      expect(vi.mocked(httpRequest)).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('getReleaseAssetUrl', () => {
@@ -683,7 +747,12 @@ describe('releases/github', () => {
     }
 
     afterEach(() => {
-      vi.clearAllMocks()
+      // resetAllMocks clears both call history AND any
+      // mockImplementation set by tests above. Some of the new
+      // fallback tests use `mockImplementation` to handle pRetry's
+      // repeated attempts cheaply, and that implementation must
+      // not leak into later tests in this describe block.
+      vi.resetAllMocks()
     })
 
     it('should get asset URL with exact name', async () => {
@@ -851,6 +920,120 @@ describe('releases/github', () => {
         'https://github.com/test/repo/releases/download/v1.0.0/curl-linux-x64',
       )
     })
+
+    it('should throw when GraphQL fallback returns null release', async () => {
+      // REST hit the empty-body incident shape, so we tried GraphQL.
+      // GraphQL ran fine but returned `repository.release: null` —
+      // there is no release with that tag. Surface a clear error
+      // (not a silent skip) so the caller knows the tag is the
+      // problem, not the transport.
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(
+          Buffer.from(
+            JSONStringify({ data: { repository: { release: null } } }),
+          ),
+          true,
+          200,
+        )
+      })
+
+      await expect(
+        getReleaseAssetUrl(
+          'tag-that-does-not-exist',
+          'whatever-*.bin',
+          SOCKET_BTM_REPO,
+          { quiet: true },
+        ),
+      ).rejects.toThrow(
+        /REST returned empty body and GraphQL fallback found no release/,
+      )
+    }, 60_000)
+
+    it('should throw when GraphQL fallback returns errors[]', async () => {
+      // GraphQL returned an `errors[]` payload (auth missing,
+      // malformed query, etc.). The helper should throw with the
+      // GraphQL error message included so the caller can see what
+      // upstream actually said.
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(
+          Buffer.from(
+            JSONStringify({
+              errors: [{ message: 'Field "release" requires authentication' }],
+            }),
+          ),
+          true,
+          200,
+        )
+      })
+
+      await expect(
+        getReleaseAssetUrl('v9.9.9', 'x-*.bin', SOCKET_BTM_REPO, {
+          quiet: true,
+        }),
+      ).rejects.toThrow(/requires authentication/)
+    }, 60_000)
+
+    it('should retry via pRetry when both REST and GraphQL return empty', async () => {
+      // Worst case: REST returns empty body, GraphQL ALSO returns
+      // empty body. The helper inside the per-tag fallback throws
+      // (since "both backends are degraded" is genuinely transient
+      // and worth retrying with backoff). pRetry catches it. We
+      // verify by mocking the FULL retry sequence: 3 rounds of
+      // (REST empty + GraphQL empty) → final round succeeds.
+      const successRelease = {
+        assets: [
+          {
+            browser_download_url:
+              'https://github.com/test/repo/releases/download/v1.0.0/recovered.bin',
+            name: 'recovered.bin',
+          },
+        ],
+      }
+      vi.mocked(httpRequest)
+        // attempt 1: REST empty + GraphQL empty
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from(''), true, 200),
+        )
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from(''), true, 200),
+        )
+        // attempt 2: REST empty + GraphQL empty
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from(''), true, 200),
+        )
+        .mockResolvedValueOnce(
+          createMockHttpResponse(Buffer.from(''), true, 200),
+        )
+        // attempt 3: REST recovers
+        .mockResolvedValueOnce(
+          createMockHttpResponse(
+            Buffer.from(JSONStringify(successRelease)),
+            true,
+            200,
+          ),
+        )
+
+      const url = await getReleaseAssetUrl(
+        'v1.0.0',
+        'recovered.bin',
+        SOCKET_BTM_REPO,
+        { quiet: true },
+      )
+
+      expect(url).toBe(
+        'https://github.com/test/repo/releases/download/v1.0.0/recovered.bin',
+      )
+    }, 120_000)
   })
 
   describe('downloadReleaseAsset', () => {
@@ -960,7 +1143,12 @@ describe('releases/github', () => {
     })
 
     it('should throw error when pattern does not match', async () => {
-      vi.mocked(httpRequest).mockResolvedValueOnce(
+      // pRetry attempts the call up to 3 times — use
+      // `mockResolvedValue` (always) instead of `mockResolvedValueOnce`
+      // so each retry gets the same payload. Otherwise the second
+      // pRetry attempt would receive `undefined` and throw an
+      // unrelated "Cannot read properties of undefined" error.
+      vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(
           Buffer.from(JSONStringify(mockRelease)),
           true,
