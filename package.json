@@ -679,8 +679,7 @@
     "./package.json": "./package.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json",
-    "./tsconfig.test.json": "./tsconfig.test.json",
-    "./xport.schema.json": "./xport.schema.json"
+    "./tsconfig.test.json": "./tsconfig.test.json"
   },
   "files": [
     "dist",
