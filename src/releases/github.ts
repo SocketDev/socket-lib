@@ -16,6 +16,7 @@ import { httpDownload, httpRequest } from '../http-request'
 import { getDefaultLogger } from '../logger'
 import {
   ArrayIsArray,
+  DateParse,
   ErrorCtor,
   JSONParse,
   JSONStringify,
@@ -247,7 +248,7 @@ export async function downloadAndExtractArchive(
       logger.info(`Extracted archive contents to ${outputDir}`)
     }
   } catch (cause) {
-    throw new Error(`Failed to extract archive: ${archivePath}`, { cause })
+    throw new ErrorCtor(`Failed to extract archive: ${archivePath}`, { cause })
   } finally {
     // Cleanup temporary archive file if requested
     if (cleanup) {
@@ -324,7 +325,7 @@ export async function downloadAndExtractZip(
       logger.info(`Extracted zip contents to ${outputDir}`)
     }
   } catch (cause) {
-    throw new Error(`Failed to extract zip file: ${zipPath}`, { cause })
+    throw new ErrorCtor(`Failed to extract zip file: ${zipPath}`, { cause })
   } finally {
     // Cleanup temporary zip file if requested
     if (cleanup) {
@@ -386,11 +387,11 @@ export async function downloadGitHubRelease(
   } else if (toolPrefix) {
     const latestTag = await getLatestRelease(toolPrefix, { owner, repo })
     if (!latestTag) {
-      throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
+      throw new ErrorCtor(`No ${toolPrefix} release found in ${owner}/${repo}`)
     }
     tag = latestTag
   } else {
-    throw new Error('Either toolPrefix or tag must be provided')
+    throw new ErrorCtor('Either toolPrefix or tag must be provided')
   }
 
   const path = getPath()
@@ -499,7 +500,7 @@ export async function downloadReleaseAsset(
   if (!downloadUrl) {
     const patternDesc =
       typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-    throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
+    throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
   }
 
   const path = getPath()
@@ -917,10 +918,12 @@ export async function getLatestRelease(
 
       // Sort by published_at descending (newest first).
       // GitHub API doesn't guarantee order, so we must sort explicitly.
+      // DateParse returns the epoch ms for an ISO 8601 string, which
+      // is what we'd get from `new Date(s).getTime()` but with one
+      // less object allocation per comparison.
       matchingReleases.sort(
         (a: { published_at: string }, b: { published_at: string }) =>
-          new Date(b.published_at).getTime() -
-          new Date(a.published_at).getTime(),
+          DateParse(b.published_at) - DateParse(a.published_at),
       )
 
       const latestRelease = matchingReleases[0]!
@@ -1062,7 +1065,7 @@ export async function getReleaseAssetUrl(
       if (!asset) {
         const patternDesc =
           typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-        throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
+        throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
       }
 
       return asset.browser_download_url

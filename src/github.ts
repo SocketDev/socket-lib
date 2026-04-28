@@ -1042,7 +1042,7 @@ export async function fetchGitHub<T = unknown>(
         const resetDate = resetTimeStr
           ? new Date(Number(resetTimeStr) * 1000)
           : undefined
-        const error = new Error(
+        const error = new ErrorCtor(
           `GitHub API rate limit exceeded${resetDate ? `. Resets at ${resetDate.toLocaleString()}` : ''}. Use GITHUB_TOKEN environment variable to increase rate limit.`,
         ) as GitHubRateLimitError
         error.status = 403
@@ -1050,7 +1050,7 @@ export async function fetchGitHub<T = unknown>(
         throw error
       }
     }
-    throw new Error(
+    throw new ErrorCtor(
       `GitHub API error ${response.status}: ${response.statusText}`,
     )
   }
@@ -1069,7 +1069,7 @@ export async function fetchGitHub<T = unknown>(
   try {
     return JSONParse(response.body.toString('utf8')) as T
   } catch (e) {
-    throw new Error(
+    throw new ErrorCtor(
       `Failed to parse GitHub API response: ${errorMessage(e)}\n` +
         `URL: ${url}\n` +
         'Response may be malformed or incomplete.',
