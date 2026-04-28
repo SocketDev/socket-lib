@@ -28,7 +28,7 @@ import { getGhToken, getGithubToken } from './env/github'
 import { getSocketCliGithubToken } from './env/socket-cli'
 import { errorMessage } from './errors'
 import { httpRequest } from './http-request'
-import { ErrorCtor, JSONParse, JSONStringify } from './primordials'
+import { DateCtor, ErrorCtor, JSONParse, JSONStringify } from './primordials'
 import { spawn } from './spawn'
 
 import type { TtlCache } from './cache-with-ttl'
@@ -1040,7 +1040,7 @@ export async function fetchGitHub<T = unknown>(
         const resetTimeStr =
           typeof resetTime === 'string' ? resetTime : resetTime?.[0]
         const resetDate = resetTimeStr
-          ? new Date(Number(resetTimeStr) * 1000)
+          ? new DateCtor(Number(resetTimeStr) * 1000)
           : undefined
         const error = new ErrorCtor(
           `GitHub API rate limit exceeded${resetDate ? `. Resets at ${resetDate.toLocaleString()}` : ''}. Use GITHUB_TOKEN environment variable to increase rate limit.`,
