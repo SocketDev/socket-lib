@@ -852,7 +852,7 @@ describe.sequential('github', () => {
       ).rejects.toThrow('failed to resolve ref')
     })
 
-    it('should return null from GraphQL when ref not found anywhere', async () => {
+    it('should return undefined from GraphQL when ref not found anywhere', async () => {
       // GraphQL ran successfully but all three aliases (tagRef,
       // branchRef, commit) came back null — the ref legitimately
       // doesn't exist. Caller falls back to the REST error message.
@@ -1077,7 +1077,11 @@ describe.sequential('github', () => {
         .reply(200, { data: { securityAdvisory: null } })
 
       await expect(fetchGhsaDetails('GHSA-graphql-null-xx')).rejects.toThrow(
-        'GHSA-graphql-null-xx not found via GraphQL',
+        // The GraphQL "null securityAdvisory" path now wraps in the
+        // generic "both transports failed" surface error so the
+        // caller gets one consistent message regardless of which way
+        // GraphQL failed (null vs errors[] vs transport).
+        /Failed to fetch advisory GHSA-graphql-null-xx/,
       )
     })
 
@@ -1097,7 +1101,10 @@ describe.sequential('github', () => {
         })
 
       await expect(fetchGhsaDetails('GHSA-graphql-errors-xx')).rejects.toThrow(
-        'Field "securityAdvisory" requires authorization',
+        // GraphQL errors[] path wraps in the "both transports failed"
+        // surface error. The original GraphQL message lives in
+        // .cause for callers who want to drill down.
+        /Failed to fetch advisory GHSA-graphql-errors-xx/,
       )
     })
 

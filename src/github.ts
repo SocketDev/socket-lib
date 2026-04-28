@@ -28,15 +28,11 @@ import { getGhToken, getGithubToken } from './env/github'
 import { getSocketCliGithubToken } from './env/socket-cli'
 import { errorMessage } from './errors'
 import { httpRequest } from './http-request'
+import { ErrorCtor, JSONParse, JSONStringify } from './primordials'
 import { spawn } from './spawn'
 
 import type { TtlCache } from './cache-with-ttl'
 import type { SpawnOptions } from './spawn'
-
-// Pin global primordials at module load. Matches src/packages/provenance.ts.
-const ErrorCtor = Error
-const JSONParse = JSON.parse
-const JSONStringify = JSON.stringify
 
 // GitHub API base URL constant (inlined for coverage mode compatibility).
 const GITHUB_API_BASE_URL = 'https://api.github.com'
@@ -83,12 +79,11 @@ export class GitHubEmptyBodyError extends Error {
   /** HTTP status (always 200 — that's what makes this case insidious). */
   status: number
   constructor(url: string) {
-    super(
-      `GitHub API returned HTTP 200 with an empty body for ${url}. ` +
-        'This is the documented signature of an upstream incident — ' +
-        'see https://www.githubstatus.com. Retrying or falling back ' +
-        'to a different transport is recommended.',
-    )
+    // Library-API error: terse and stable so callers can switch on
+    // .name / instanceof without parsing the message. The verbose
+    // background ("documented incident shape", status URL) lives in
+    // the JSDoc above the class declaration.
+    super(`GitHub API returned HTTP 200 with empty body: ${url}`)
     this.name = 'GitHubEmptyBodyError'
     this.status = 200
   }
@@ -390,28 +385,36 @@ async function fetchRefSha(
         // "ref not found" outcome.
         //
         // If GraphQL ALSO fails (network error, GraphQL errors[],
-        // etc.) we silently swallow it and re-throw the *original*
-        // REST error. The reasoning is: the REST cascade error
-        // gives the user an actionable message ("ref not found"),
-        // while a GraphQL transport error is incident plumbing
-        // they can't act on. Better to show the lower-level "we
-        // couldn't find it" error than a confusing GraphQL
-        // exception caused by the same incident.
+        // etc.) we throw an informative "both transports failed"
+        // error so the operator sees the cross-backend signal
+        // rather than a bare last-tier REST error.
         // -----------------------------------------------------------
         if (sawEmptyBody) {
+          let graphqlSha: string | undefined
+          let graphqlErr: unknown
           try {
-            const sha = await fetchRefShaViaGraphQL(
+            graphqlSha = await fetchRefShaViaGraphQL(
               owner,
               repo,
               ref,
               fetchOptions,
             )
-            if (sha) {
-              return sha
-            }
-          } catch {
-            // fall through to the original error
+          } catch (cause) {
+            graphqlErr = cause
           }
+          if (graphqlSha) {
+            return graphqlSha
+          }
+          if (graphqlErr !== undefined) {
+            throw new ErrorCtor(
+              `Failed to resolve ref "${ref}" for ${owner}/${repo}: both REST and GraphQL backends degraded`,
+              { cause: graphqlErr },
+            )
+          }
+          // GraphQL completed successfully but found no match — the ref
+          // genuinely doesn't exist (or the empty-body signal happened
+          // but GitHub has since recovered enough for GraphQL to confirm
+          // the absence). Surface the cleaner "ref not found" message.
         }
         throw new ErrorCtor(
           `failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e3)}`,
@@ -451,10 +454,10 @@ async function fetchRefSha(
  *
  * Return contract:
  *   - Returns the SHA string when any form matches.
- *   - Returns `null` when the ref genuinely doesn't exist as a
- *     tag, branch, OR commit. The caller treats `null` the same
+ *   - Returns `undefined` when the ref genuinely doesn't exist as a
+ *     tag, branch, OR commit. The caller treats `undefined` the same
  *     as "REST cascade also failed" — a real "ref not found".
- *   - Returns `null` (not throws) on transport-level failures too:
+ *   - Returns `undefined` (not throws) on transport-level failures too:
  *     non-OK HTTP, empty GraphQL body, or JSON parse error. The
  *     REST cascade's "ref not found" message is more useful to the
  *     end user than a GraphQL transport error.
@@ -464,7 +467,7 @@ async function fetchRefShaViaGraphQL(
   repo: string,
   ref: string,
   options: GitHubFetchOptions,
-): Promise<string | null> {
+): Promise<string | undefined> {
   const token = options.token || getGitHubToken()
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',
@@ -526,10 +529,10 @@ async function fetchRefShaViaGraphQL(
   if (!response.ok || response.body.byteLength === 0) {
     // Either GraphQL itself failed (non-OK status) or it ALSO
     // returned an empty body — both backends are degraded. Return
-    // null so the caller surfaces the original REST error rather
+    // undefined so the caller surfaces the original REST error rather
     // than re-throwing here. We deliberately don't recurse to
     // another transport because there isn't a third option.
-    return null
+    return undefined
   }
   let parsed: {
     data?: {
@@ -549,7 +552,7 @@ async function fetchRefShaViaGraphQL(
   try {
     parsed = JSONParse(response.body.toString('utf8'))
   } catch {
-    return null
+    return undefined
   }
   // GraphQL has two ways of saying "no":
   //
@@ -570,15 +573,15 @@ async function fetchRefShaViaGraphQL(
   // identical to REST when both backends return data.
   const repoData = parsed.data?.repository
   if (!repoData) {
-    return null
+    return undefined
   }
   const tagTarget = repoData.tagRef?.target
   if (tagTarget) {
     if (tagTarget.__typename === 'Tag') {
-      return tagTarget.target?.oid ?? null
+      return tagTarget.target?.oid ?? undefined
     }
     if (tagTarget.__typename === 'Commit') {
-      return tagTarget.oid ?? null
+      return tagTarget.oid ?? undefined
     }
   }
   const branchOid = repoData.branchRef?.target?.oid
@@ -588,7 +591,7 @@ async function fetchRefShaViaGraphQL(
   if (repoData.commit?.__typename === 'Commit' && repoData.commit.oid) {
     return repoData.commit.oid
   }
-  return null
+  return undefined
 }
 
 /**
@@ -781,7 +784,14 @@ export async function fetchGhsaDetails(
     // shape so callers don't see the difference.
     // -------------------------------------------------------------
     if (e instanceof GitHubEmptyBodyError) {
-      return await fetchGhsaDetailsViaGraphQL(ghsaId, options)
+      try {
+        return await fetchGhsaDetailsViaGraphQL(ghsaId, options)
+      } catch (cause) {
+        throw new ErrorCtor(
+          `Failed to fetch advisory ${ghsaId}: both REST and GraphQL backends degraded`,
+          { cause },
+        )
+      }
     }
     throw e
   }

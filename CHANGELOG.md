@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.26.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.0) - 2026-04-27
+
+### Added
+
+- `@socketsecurity/lib/github` `GitHubEmptyBodyError` — new exported error class. Thrown by `fetchGitHub` when GitHub returns HTTP 200 OK with a zero-byte body (the documented signature of GitHub Elasticsearch / search-degraded incidents — see https://www.githubstatus.com). Lets callers `instanceof` this error to detect the upstream-degraded shape and route around it instead of catching a confusing downstream `JSON.parse('')` SyntaxError
+- `@socketsecurity/lib/github` `getLatestRelease({ nothrow })` and `@socketsecurity/lib/releases/github` `getReleaseAssetUrl({ nothrow })` — when `true`, return `undefined` instead of throwing if both REST and GraphQL backends are degraded. Matches the existing `nothrow` convention from `@socketsecurity/lib/bin` (`whichSync({ nothrow })`)
+
+### Changed
+
+- `getLatestRelease`, `getReleaseAssetUrl`, `fetchRefShaViaGraphQL` (internal), `fetchReleaseAssetsViaGraphQL` (internal) — return `undefined` (was: `null`) when no result is found. Matches the `__proto__: null` only / `undefined` convention used elsewhere in the package. Callers using `=== null` will need to switch to `=== undefined` or a falsy check; callers using `if (!result)` are unaffected
+- `fetchGhsaDetails` GraphQL fallback path normalizes severity to lowercase (`"MODERATE"` → `"moderate"`) to match the REST endpoint's wire shape. Callers comparing against a single canonical case no longer have to handle both
+- `getLatestRelease` and `getReleaseAssetUrl` no longer log to `logger.info` / `logger.warn` on success, retry, or fallback. The helpers are silent by design now: errors throw, success returns. The `quiet` option is still accepted for backward compat but ignored
+
+### Fixed
+
+- `@socketsecurity/lib/releases/github` `getLatestRelease` now transparently falls back to GraphQL `repository.releases` when the REST `/repos/:owner/:repo/releases` listing endpoint returns HTTP 200 with an empty body. The REST listing shares an Elasticsearch-backed index with search; during incidents the endpoint returns success-with-no-body for arbitrary repos. GraphQL hits a different backend and stays consistent through these outages
+- `@socketsecurity/lib/releases/github` `getReleaseAssetUrl` now transparently falls back to GraphQL `repository.release(tagName).releaseAssets` on the same incident shape. GraphQL's `downloadUrl` field is normalized back to REST's `browser_download_url` so the asset matcher runs unchanged
+- `@socketsecurity/lib/github` `resolveRefToSha` now transparently falls back to GraphQL `repository.ref(qualifiedName)` + `repository.object(oid)` after the REST tag → branch → commit cascade hits the empty-body shape. GraphQL resolves all three forms in one round trip, including dereferencing annotated tags via `Tag.target.oid`
+- `@socketsecurity/lib/github` `fetchGhsaDetails` now falls back to GraphQL `securityAdvisory(ghsaId)` on the empty-body shape. Two field-shape diffs are normalized: severity case (uppercase → lowercase) and `aliases` (derived from GraphQL `identifiers` by filtering out the advisory's own GHSA id)
+- All four fallback paths only fire on `GitHubEmptyBodyError` (the documented incident signature). Real 404s, rate-limit errors, and 5xx responses still propagate as-is — the fallback is reserved for the case REST gives no usable signal
+
+### Tooling
+
+- `tools/prim` audit now detects local-alias redeclarations of primordials (`const ErrorCtor = Error`, `const JSONParse = JSON.parse`, `const ArrayIsArray = Array.isArray`, etc.) at top-level scope and reports them as a new `redeclaration` finding kind. The recommendation is to import the alias from `./primordials` instead of redeclaring it locally. `--coverage` includes redeclarations alongside covered call sites since both are migration candidates against the existing surface; `--gaps` excludes them
+
 ## [5.25.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.25.1) - 2026-04-27
 
 ### Fixed

@@ -233,7 +233,13 @@ describe('releases/github', () => {
     })
   })
 
-  describe('getLatestRelease', () => {
+  // describe.sequential: vitest's vitest.config.mts runs tests
+  // concurrently in non-CI mode (`isolate: false`), and our new
+  // fallback tests use `vi.mockImplementation` which persists
+  // mock state. Without sequential ordering, one test's `mockImplementation`
+  // can race with another test's `mockResolvedValueOnce`. Sequential
+  // ordering inside this describe keeps the mocks per-test predictable.
+  describe.sequential('getLatestRelease', () => {
     const mockReleases = [
       {
         assets: [
@@ -293,7 +299,7 @@ describe('releases/github', () => {
         assetPattern: '*.tar.gz',
         quiet: true,
       })
-      expect(tag).toBeNull()
+      expect(tag).toBeUndefined()
     })
 
     it('should match asset with brace expansion pattern', async () => {
@@ -312,11 +318,11 @@ describe('releases/github', () => {
       expect(tag).toBe('models-20260106-def456')
     })
 
-    it('should return null when no releases match prefix', async () => {
+    it('should return undefined when no releases match prefix', async () => {
       const tag = await getLatestRelease('nonexistent-', SOCKET_BTM_REPO, {
         quiet: true,
       })
-      expect(tag).toBeNull()
+      expect(tag).toBeUndefined()
     })
 
     it('should sort by published_at and return most recent release', async () => {
@@ -489,7 +495,7 @@ describe('releases/github', () => {
       expect(tag).toBe('node-smol-20251226-2126245')
     })
 
-    it('should return null when all matching releases have no assets', async () => {
+    it('should return undefined when all matching releases have no assets', async () => {
       // All releases matching prefix are empty.
       const allEmpty = [
         {
@@ -513,7 +519,7 @@ describe('releases/github', () => {
       })
 
       // Should return null since all matching releases are empty.
-      expect(tag).toBeNull()
+      expect(tag).toBeUndefined()
     })
 
     it('should skip empty releases when asset pattern is provided', async () => {
@@ -637,7 +643,7 @@ describe('releases/github', () => {
       expect(tag).toBe('curl-20260115-abc1234')
     })
 
-    it('should return null when both REST and GraphQL return empty', async () => {
+    it('should return undefined when both REST and GraphQL return empty', async () => {
       // Repo that genuinely has no releases — both backends agree.
       // This is the only path where a `null` return is correct; we
       // must not let an outage signal masquerade as "no releases".
@@ -660,7 +666,7 @@ describe('releases/github', () => {
         quiet: true,
       })
 
-      expect(tag).toBeNull()
+      expect(tag).toBeUndefined()
     })
 
     it('should propagate errors[] from GraphQL fallback', async () => {
@@ -691,7 +697,11 @@ describe('releases/github', () => {
 
       await expect(
         getLatestRelease('whatever-', SOCKET_BTM_REPO, { quiet: true }),
-      ).rejects.toThrow(/Bad credentials/)
+        // GraphQL errors[] now wraps in the "both transports failed"
+        // surface error. The original GraphQL message lives in .cause.
+      ).rejects.toThrow(
+        /Failed to list SocketDev\/socket-btm releases: both REST and GraphQL backends degraded/,
+      )
     }, 60_000)
 
     it('should NOT call GraphQL when REST returns a populated array', async () => {
@@ -722,9 +732,90 @@ describe('releases/github', () => {
       // httpRequest invoked exactly once — REST only, no GraphQL.
       expect(vi.mocked(httpRequest)).toHaveBeenCalledTimes(1)
     })
+
+    it('should throw on REST non-OK status (5xx)', async () => {
+      // pRetry retries non-OK responses; eventually it gives up and
+      // throws. We test that the helper correctly surfaces the
+      // failure rather than silently returning null.
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from('Internal Server Error'),
+          false,
+          503,
+        ),
+      )
+
+      await expect(
+        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
+      ).rejects.toThrow(/Failed to fetch releases: 503/)
+    }, 60_000)
+
+    it('should throw on REST malformed JSON body', async () => {
+      // 200 OK but the body isn't valid JSON. The helper wraps the
+      // SyntaxError in a clear "Failed to parse" surface error.
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(Buffer.from('<html>not json</html>'), true, 200),
+      )
+
+      await expect(
+        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
+      ).rejects.toThrow(/Failed to parse GitHub releases response/)
+    }, 60_000)
+
+    it('should throw informative error when both REST and GraphQL transport fail', async () => {
+      // REST returns 200 + empty (incident shape) → fall back to GraphQL.
+      // GraphQL itself returns non-OK. The wrapper surfaces a terse
+      // "both REST and GraphQL backends degraded" library-API error
+      // so the operator immediately knows to check GitHub status,
+      // not their config.
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        // Odd calls = REST empty body; even = GraphQL 503.
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(
+          Buffer.from('graphql unavailable'),
+          false,
+          503,
+        )
+      })
+
+      await expect(
+        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
+      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
+    }, 60_000)
+
+    it('should throw on GraphQL fallback malformed JSON', async () => {
+      // REST empty (incident) → GraphQL returns 200 with unparseable
+      // body. Inside fetchReleasesViaGraphQL this throws a parse
+      // error, which getLatestRelease wraps in "both backends
+      // degraded". This exercises the GraphQL JSON.parse catch in
+      // fetchReleasesViaGraphQL (line ~696).
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(
+          Buffer.from('not valid json {'),
+          true,
+          200,
+        )
+      })
+
+      await expect(
+        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
+      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
+    }, 60_000)
   })
 
-  describe('getReleaseAssetUrl', () => {
+  // describe.sequential: same reasoning as getLatestRelease above
+  // — pRetry-aware mocks (mockImplementation) need sequential ordering
+  // so they don't leak across concurrent tests.
+  describe.sequential('getReleaseAssetUrl', () => {
     const mockRelease = {
       assets: [
         {
@@ -950,7 +1041,10 @@ describe('releases/github', () => {
           { quiet: true },
         ),
       ).rejects.toThrow(
-        /REST returned empty body and GraphQL fallback found no release/,
+        // The "GraphQL says null release" branch surfaces a clear
+        // "found no release with that tag" message so the user knows
+        // it's a missing-tag problem, not a transport problem.
+        /found no release with that tag/,
       )
     }, 60_000)
 
@@ -980,7 +1074,9 @@ describe('releases/github', () => {
         getReleaseAssetUrl('v9.9.9', 'x-*.bin', SOCKET_BTM_REPO, {
           quiet: true,
         }),
-      ).rejects.toThrow(/requires authentication/)
+        // GraphQL errors[] wraps in the "both transports failed"
+        // surface error per the new spec.
+      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
     }, 60_000)
 
     it('should retry via pRetry when both REST and GraphQL return empty', async () => {
@@ -1034,9 +1130,95 @@ describe('releases/github', () => {
         'https://github.com/test/repo/releases/download/v1.0.0/recovered.bin',
       )
     }, 120_000)
+
+    it('should throw informative error when both REST and GraphQL transport fail', async () => {
+      // REST returns 200 + empty body (incident), GraphQL transport
+      // also fails (5xx). The wrapper surfaces "Both upstream
+      // backends appear degraded" so the operator can correlate
+      // with GitHub status.
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(
+          Buffer.from('graphql unavailable'),
+          false,
+          503,
+        )
+      })
+
+      await expect(
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
+          quiet: true,
+        }),
+      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
+    }, 60_000)
+
+    it('should throw on GraphQL fallback malformed JSON body', async () => {
+      // REST empty (incident) → GraphQL responds 200 OK but with
+      // unparseable body. Surfaces the parse-failure error.
+      let call = 0
+      vi.mocked(httpRequest).mockImplementation(async () => {
+        call += 1
+        if (call % 2 === 1) {
+          return createMockHttpResponse(Buffer.from(''), true, 200)
+        }
+        return createMockHttpResponse(Buffer.from('not json at all'), true, 200)
+      })
+
+      await expect(
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
+          quiet: true,
+        }),
+        // Parse error inside fetchReleaseAssetsViaGraphQL is treated
+        // as a transport failure → wrapped in the "both transports
+        // failed" surface error. The original SyntaxError is in
+        // .cause for callers who want to drill down.
+      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
+    }, 60_000)
+
+    it('should throw on REST per-tag malformed JSON body', async () => {
+      // REST returns 200 OK with non-empty but unparseable body.
+      // The else-branch's JSON.parse throws → wrapped in
+      // "Failed to parse GitHub release response for tag".
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(Buffer.from('<html>not json</html>'), true, 200),
+      )
+
+      await expect(
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
+          quiet: true,
+        }),
+      ).rejects.toThrow(
+        /Failed to parse GitHub release response for tag v1\.0\.0/,
+      )
+    }, 60_000)
+
+    it('should throw on REST per-tag release missing assets', async () => {
+      // REST returns 200 OK with valid JSON but no `assets` array.
+      // ArrayIsArray check fails → "Release X has no assets".
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(
+          Buffer.from(JSONStringify({ tag_name: 'v1.0.0' })),
+          true,
+          200,
+        ),
+      )
+
+      await expect(
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
+          quiet: true,
+        }),
+      ).rejects.toThrow(/Release v1\.0\.0 has no assets/)
+    }, 60_000)
   })
 
-  describe('downloadReleaseAsset', () => {
+  // describe.sequential: prevents downloadReleaseAsset's
+  // mockResolvedValue from racing with the prior describe block's
+  // mockImplementation cleanup.
+  describe.sequential('downloadReleaseAsset', () => {
     const mockRelease = {
       assets: [
         {

@@ -159,7 +159,12 @@ const main = (): number => {
     if (
       file.includes('node_modules/') ||
       file.endsWith('pnpm-lock.yaml') ||
-      file.includes('.git-hooks/')
+      file.includes('.git-hooks/') ||
+      // CHANGELOG entries discuss npx ecosystem *behavior* (cache
+      // semantics, naming conventions) as historical documentation —
+      // they're not commands. Skip the npx/dlx scan for changelogs.
+      file === 'CHANGELOG.md' ||
+      file.endsWith('/CHANGELOG.md')
     ) {
       continue
     }

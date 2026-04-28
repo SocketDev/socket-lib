@@ -11,23 +11,17 @@ import {
   detectArchiveFormat,
   extractArchive,
 } from '../archives'
-import { errorMessage } from '../errors'
 import { safeMkdir } from '../fs'
 import { httpDownload, httpRequest } from '../http-request'
 import { getDefaultLogger } from '../logger'
+import {
+  ArrayIsArray,
+  ErrorCtor,
+  JSONParse,
+  JSONStringify,
+} from '../primordials'
 import { pRetry } from '../promises'
 import { spawn } from '../spawn'
-
-// Pin global primordials at module load. The fetch + parse path here
-// runs in long-lived processes (CI build scripts, downstream tools)
-// where consumers may install Object.defineProperty hooks or similar
-// over JSON / Array / Error; capturing the original references protects
-// the listing logic from those mutations and matches the convention
-// used elsewhere in this package (see src/packages/provenance.ts).
-const ArrayIsArray = Array.isArray
-const ErrorCtor = Error
-const JSONParse = JSON.parse
-const JSONStringify = JSON.stringify
 
 /**
  * Pattern for matching release assets.
@@ -732,9 +726,10 @@ async function fetchReleasesViaGraphQL(
  *
  * Return contract:
  *   - Array of assets (REST shape) when the release exists.
- *   - `null` when the release with that tag genuinely doesn't
- *     exist (GraphQL returned `release: null`). The caller throws
- *     a clean "tag not found" error in that case.
+ *   - `undefined` when the release with that tag genuinely doesn't
+ *     exist (GraphQL returned `release: null` over the wire — we
+ *     translate that to undefined per the codebase convention). The
+ *     caller throws a clean "tag not found" error in that case.
  *   - Throws on transport errors (non-OK HTTP, GraphQL errors[],
  *     or even the GraphQL backend ALSO returning empty body — at
  *     that point both transports are degraded and we want the
@@ -744,7 +739,7 @@ async function fetchReleaseAssetsViaGraphQL(
   owner: string,
   repo: string,
   tag: string,
-): Promise<Array<{ name: string; browser_download_url: string }> | null> {
+): Promise<Array<{ name: string; browser_download_url: string }> | undefined> {
   const response = await httpRequest('https://api.github.com/graphql', {
     body: JSONStringify({
       query: `query($owner: String!, $repo: String!, $tag: String!) {
@@ -798,7 +793,7 @@ async function fetchReleaseAssetsViaGraphQL(
   }
   const release = parsed.data?.repository?.release
   if (!release) {
-    return null
+    return undefined
   }
   // Normalize to REST shape: GraphQL exposes the asset URL as
   // `downloadUrl`, REST as `browser_download_url`. Map so the caller
@@ -817,7 +812,10 @@ async function fetchReleaseAssetsViaGraphQL(
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @param options.assetPattern - Optional pattern to filter releases by matching asset
- * @returns Latest release tag or null if not found
+ * @param options.nothrow - If true, return undefined instead of throwing when both REST and GraphQL backends are degraded. Default: false.
+ * @param options.quiet - Accepted for backward compat; no longer consumed.
+ * @returns Latest release tag or undefined if not found
+ * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is false.
  *
  * @example
  * ```typescript
@@ -830,112 +828,109 @@ async function fetchReleaseAssetsViaGraphQL(
 export async function getLatestRelease(
   toolPrefix: string,
   repoConfig: RepoConfig,
-  options: { assetPattern?: AssetPattern; quiet?: boolean } = {},
-): Promise<string | null> {
-  const { assetPattern, quiet = false } = options
+  options: {
+    assetPattern?: AssetPattern
+    nothrow?: boolean
+    quiet?: boolean
+  } = {},
+): Promise<string | undefined> {
+  // `quiet` is accepted for backward compat but no longer consumed —
+  // the helper is silent by design now (errors throw, success returns).
+  const { assetPattern, nothrow = false } = options
   const { owner, repo } = repoConfig
 
   // Create matcher function if pattern provided.
   const isMatch = assetPattern ? createAssetMatcher(assetPattern) : undefined
 
   return (
-    (await pRetry(
-      async () => {
-        // Fetch via REST first. The REST endpoint is the canonical
-        // listing path and is what we want to use when GitHub is
-        // healthy. During GitHub Elasticsearch outages (which back the
-        // releases listing index) REST can return HTTP 200 with an
-        // empty array even when the repo has dozens of releases — see
-        // https://www.githubstatus.com incidents tagged "search is
-        // degraded". When that happens we fall back to GraphQL, which
-        // hits a different backend and stays consistent through ES
-        // outages. Per-tag fetches in `getReleaseAssetUrl` go through
-        // `/repos/:owner/:repo/releases/tags/:tag` which is unaffected
-        // by the listing-index outage, so that helper stays on REST.
-        let releases = await fetchReleasesViaRest(owner, repo)
-        if (releases.length === 0) {
-          // Empty REST response is ambiguous: it could mean the repo
-          // genuinely has no releases, or GitHub's listing index is
-          // degraded. Cross-check against GraphQL once. If GraphQL
-          // also returns 0, the repo really is empty and we report
-          // "no match"; if GraphQL returns >0, REST was lying and we
-          // surface the GraphQL result with a warning so the operator
-          // can correlate with GitHub status.
-          const graphqlReleases = await fetchReleasesViaGraphQL(owner, repo)
-          if (graphqlReleases.length > 0) {
-            if (!quiet) {
-              logger.warn(
-                `REST releases endpoint returned 0 results for ${owner}/${repo}; falling back to GraphQL (got ${graphqlReleases.length}). This usually indicates a GitHub search/listing-index incident — see https://www.githubstatus.com.`,
-              )
-            }
-            releases = graphqlReleases
+    (await pRetry(async () => {
+      // Fetch via REST first. The REST endpoint is the canonical
+      // listing path and is what we want to use when GitHub is
+      // healthy. During GitHub Elasticsearch outages (which back the
+      // releases listing index) REST can return HTTP 200 with an
+      // empty array even when the repo has dozens of releases — see
+      // https://www.githubstatus.com incidents tagged "search is
+      // degraded". When that happens we fall back to GraphQL, which
+      // hits a different backend and stays consistent through ES
+      // outages. Per-tag fetches in `getReleaseAssetUrl` go through
+      // `/repos/:owner/:repo/releases/tags/:tag` which is unaffected
+      // by the listing-index outage, so that helper stays on REST.
+      let releases = await fetchReleasesViaRest(owner, repo)
+      if (releases.length === 0) {
+        // Empty REST response is ambiguous: it could mean the repo
+        // genuinely has no releases, or GitHub's listing index is
+        // degraded. Cross-check against GraphQL once. If GraphQL
+        // also returns 0, the repo really is empty and we report
+        // "no match"; if GraphQL returns >0, REST was lying and
+        // we silently use the GraphQL result — the caller asked
+        // for releases, the helper got them, the transport diff
+        // isn't actionable for the user. If GraphQL throws, wrap
+        // with a "both transports failed" message so the operator
+        // sees the cross-backend signal rather than a bare GraphQL
+        // error that looks like an unrelated failure.
+        let graphqlReleases: ReleaseRow[]
+        try {
+          graphqlReleases = await fetchReleasesViaGraphQL(owner, repo)
+        } catch (cause) {
+          // Library-API error: terse, stable. The verbose
+          // explanation lives in the JSDoc / README; callers
+          // asserting on .message need a short canonical form.
+          // `nothrow: true` callers get undefined (treated as "no
+          // releases found") instead of the throw — matches the
+          // bin.ts whichReal convention.
+          if (nothrow) {
+            return undefined
           }
+          throw new ErrorCtor(
+            `Failed to list ${owner}/${repo} releases: both REST and GraphQL backends degraded`,
+            { cause },
+          )
+        }
+        if (graphqlReleases.length > 0) {
+          releases = graphqlReleases
+        }
+      }
+
+      // Filter releases matching the tool prefix.
+      const matchingReleases = releases.filter(release => {
+        const { assets, tag_name: tag } = release
+        if (!tag.startsWith(toolPrefix)) {
+          return false
         }
 
-        // Filter releases matching the tool prefix.
-        const matchingReleases = releases.filter(release => {
-          const { assets, tag_name: tag } = release
-          if (!tag.startsWith(toolPrefix)) {
+        // Skip releases with no assets (empty releases).
+        if (!assets || assets.length === 0) {
+          return false
+        }
+
+        // If asset pattern provided, check if release has matching asset.
+        if (isMatch) {
+          const hasMatchingAsset = assets.some((a: { name: string }) =>
+            isMatch(a.name),
+          )
+          if (!hasMatchingAsset) {
             return false
           }
-
-          // Skip releases with no assets (empty releases).
-          if (!assets || assets.length === 0) {
-            return false
-          }
-
-          // If asset pattern provided, check if release has matching asset.
-          if (isMatch) {
-            const hasMatchingAsset = assets.some((a: { name: string }) =>
-              isMatch(a.name),
-            )
-            if (!hasMatchingAsset) {
-              return false
-            }
-          }
-
-          return true
-        })
-
-        if (matchingReleases.length === 0) {
-          // No matching release found.
-          if (!quiet) {
-            logger.info(`No ${toolPrefix} release found in latest 100 releases`)
-          }
-          return null
         }
 
-        // Sort by published_at descending (newest first).
-        // GitHub API doesn't guarantee order, so we must sort explicitly.
-        matchingReleases.sort(
-          (a: { published_at: string }, b: { published_at: string }) =>
-            new Date(b.published_at).getTime() -
-            new Date(a.published_at).getTime(),
-        )
+        return true
+      })
 
-        const latestRelease = matchingReleases[0]!
-        const tag = latestRelease.tag_name
+      if (matchingReleases.length === 0) {
+        return undefined
+      }
 
-        if (!quiet) {
-          logger.info(`Found release: ${tag}`)
-        }
-        return tag
-      },
-      {
-        ...RETRY_CONFIG,
-        onRetry: (attempt, error) => {
-          if (!quiet) {
-            logger.info(
-              `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for ${toolPrefix} release...`,
-            )
-            logger.warn(
-              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${errorMessage(error)}`,
-            )
-          }
-          return undefined
-        },
-      },
-    )) ?? null
+      // Sort by published_at descending (newest first).
+      // GitHub API doesn't guarantee order, so we must sort explicitly.
+      matchingReleases.sort(
+        (a: { published_at: string }, b: { published_at: string }) =>
+          new Date(b.published_at).getTime() -
+          new Date(a.published_at).getTime(),
+      )
+
+      const latestRelease = matchingReleases[0]!
+      return latestRelease.tag_name
+    }, RETRY_CONFIG)) ?? undefined
   )
 }
 
@@ -947,7 +942,10 @@ export async function getLatestRelease(
  * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
- * @returns Browser download URL for the asset
+ * @param options.nothrow - If true, return undefined instead of throwing when both REST and GraphQL backends are degraded. Default: false.
+ * @param options.quiet - Accepted for backward compat; no longer consumed.
+ * @returns Browser download URL for the asset, or undefined when not found.
+ * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is false.
  *
  * @example
  * ```typescript
@@ -961,10 +959,10 @@ export async function getReleaseAssetUrl(
   tag: string,
   assetPattern: string | AssetPattern,
   repoConfig: RepoConfig,
-  options: { quiet?: boolean } = {},
-): Promise<string | null> {
+  options: { nothrow?: boolean; quiet?: boolean } = {},
+): Promise<string | undefined> {
+  const { nothrow = false } = options
   const { owner, repo } = repoConfig
-  const { quiet = false } = options
 
   // Create matcher function for the pattern.
   const isMatch =
@@ -975,109 +973,100 @@ export async function getReleaseAssetUrl(
       : createAssetMatcher(assetPattern as AssetPattern)
 
   return (
-    (await pRetry(
-      async () => {
-        const response = await httpRequest(
-          `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
-          {
-            headers: getAuthHeaders(),
-          },
-        )
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
-        }
-
-        // -------------------------------------------------------
-        // 200 OK + zero-byte body = GitHub Elasticsearch incident.
-        // The status says "success" but the payload is empty.
-        // Cross-check via GraphQL `repository.release(tagName)`,
-        // which uses a different backend — when REST is degraded
-        // GraphQL is usually still serving the same data.
-        //
-        // The two transports expose the SAME asset data with one
-        // field-name diff (`downloadUrl` vs. `browser_download_url`)
-        // that `fetchReleaseAssetsViaGraphQL` normalizes. After
-        // normalization we go back to the SAME asset matcher path
-        // below — the rest of the function doesn't know which
-        // transport produced the asset list.
-        //
-        // Three outcomes from the GraphQL fallback:
-        //   - assets returned: continue with matching as normal
-        //   - `null` returned: GraphQL says no release with this
-        //     tag exists. Throw a clear error so the user knows
-        //     the tag is genuinely missing rather than masking a
-        //     transient with a silent skip.
-        //   - GraphQL itself throws: `pRetry` retries the whole
-        //     `getReleaseAssetUrl` call (REST included). This is
-        //     intentional — if both transports fail we want
-        //     backoff, not a blind error.
-        // -------------------------------------------------------
-        let assets: Array<{ name: string; browser_download_url: string }>
-        if (response.body.byteLength === 0) {
-          if (!quiet) {
-            logger.warn(
-              `REST releases/tags/${tag} returned empty body for ${owner}/${repo}; falling back to GraphQL. See https://www.githubstatus.com.`,
-            )
-          }
-          const fallbackAssets = await fetchReleaseAssetsViaGraphQL(
-            owner,
-            repo,
-            tag,
-          )
-          if (fallbackAssets === null) {
-            throw new ErrorCtor(
-              `Failed to fetch release ${tag}: REST returned empty body and GraphQL fallback found no release with that tag`,
-            )
-          }
-          assets = fallbackAssets
-        } else {
-          let release: {
-            assets: Array<{ name: string; browser_download_url: string }>
-          }
-          try {
-            release = JSONParse(response.body.toString('utf8'))
-          } catch (cause) {
-            throw new ErrorCtor(
-              `Failed to parse GitHub release response for tag ${tag}`,
-              { cause },
-            )
-          }
-
-          if (!ArrayIsArray(release.assets)) {
-            throw new ErrorCtor(`Release ${tag} has no assets`)
-          }
-          assets = release.assets
-        }
-
-        const asset = assets.find(a => isMatch(a.name))
-
-        if (!asset) {
-          const patternDesc =
-            typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-          throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
-        }
-
-        if (!quiet) {
-          logger.info(`Found asset: ${asset.name}`)
-        }
-
-        return asset.browser_download_url
-      },
-      {
-        ...RETRY_CONFIG,
-        onRetry: (attempt, error) => {
-          if (!quiet) {
-            logger.info(
-              `Retry attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} for asset URL...`,
-            )
-            logger.warn(
-              `Attempt ${attempt + 1}/${RETRY_CONFIG.retries + 1} failed: ${errorMessage(error)}`,
-            )
-          }
-          return undefined
+    (await pRetry(async () => {
+      const response = await httpRequest(
+        `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
+        {
+          headers: getAuthHeaders(),
         },
-      },
-    )) ?? null
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
+      }
+
+      // -------------------------------------------------------
+      // 200 OK + zero-byte body = GitHub Elasticsearch incident.
+      // The status says "success" but the payload is empty.
+      // Cross-check via GraphQL `repository.release(tagName)`,
+      // which uses a different backend — when REST is degraded
+      // GraphQL is usually still serving the same data.
+      //
+      // The two transports expose the SAME asset data with one
+      // field-name diff (`downloadUrl` vs. `browser_download_url`)
+      // that `fetchReleaseAssetsViaGraphQL` normalizes. After
+      // normalization we go back to the SAME asset matcher path
+      // below — the rest of the function doesn't know which
+      // transport produced the asset list.
+      //
+      // Three outcomes from the GraphQL fallback:
+      //   - assets returned: continue with matching as normal
+      //   - `undefined` returned: GraphQL says no release with this
+      //     tag exists. Throw a clear error so the user knows
+      //     the tag is genuinely missing rather than masking a
+      //     transient with a silent skip.
+      //   - GraphQL itself throws: `pRetry` retries the whole
+      //     `getReleaseAssetUrl` call (REST included). This is
+      //     intentional — if both transports fail we want
+      //     backoff, not a blind error.
+      // -------------------------------------------------------
+      let assets: Array<{ name: string; browser_download_url: string }>
+      if (response.body.byteLength === 0) {
+        // REST is degraded — silently route to GraphQL. Only error
+        // out (with a clear, informative message) if BOTH transports
+        // fail to return assets for this tag.
+        let fallbackAssets:
+          | Array<{ name: string; browser_download_url: string }>
+          | undefined
+        try {
+          fallbackAssets = await fetchReleaseAssetsViaGraphQL(owner, repo, tag)
+        } catch (cause) {
+          // `nothrow: true` callers get undefined instead of the throw.
+          if (nothrow) {
+            return undefined
+          }
+          throw new ErrorCtor(
+            `Failed to fetch ${owner}/${repo} release ${tag}: both REST and GraphQL backends degraded`,
+            { cause },
+          )
+        }
+        if (fallbackAssets === undefined) {
+          if (nothrow) {
+            return undefined
+          }
+          throw new ErrorCtor(
+            `Release ${tag} not found in ${owner}/${repo}: GraphQL fallback found no release with that tag`,
+          )
+        }
+        assets = fallbackAssets
+      } else {
+        let release: {
+          assets: Array<{ name: string; browser_download_url: string }>
+        }
+        try {
+          release = JSONParse(response.body.toString('utf8'))
+        } catch (cause) {
+          throw new ErrorCtor(
+            `Failed to parse GitHub release response for tag ${tag}`,
+            { cause },
+          )
+        }
+
+        if (!ArrayIsArray(release.assets)) {
+          throw new ErrorCtor(`Release ${tag} has no assets`)
+        }
+        assets = release.assets
+      }
+
+      const asset = assets.find(a => isMatch(a.name))
+
+      if (!asset) {
+        const patternDesc =
+          typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
+        throw new Error(`Asset ${patternDesc} not found in release ${tag}`)
+      }
+
+      return asset.browser_download_url
+    }, RETRY_CONFIG)) ?? undefined
   )
 }

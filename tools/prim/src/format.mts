@@ -3,7 +3,7 @@
  */
 
 /**
- * @param {Array<{ primordial: string; pattern: string; file: string; line: number; kind: 'covered'|'gap' }>} findings
+ * @param {Array<{ primordial: string; pattern: string; file: string; line: number; kind: 'covered'|'gap'|'redeclaration' }>} findings
  * @param {{ mode: 'coverage'|'gaps'|'audit'; targetName: string }} ctx
  * @returns {string}
  */
@@ -35,10 +35,14 @@ export function formatHuman(findings, ctx) {
 
   for (const [primordial, items] of sorted) {
     const sample = items[0]
-    const verb =
-      sample.kind === 'covered'
-        ? `replace ${items.length}× with \`${primordial}\``
-        : `add \`${primordial}\` to socket-lib/src/primordials.ts (${items.length} call site${items.length === 1 ? '' : 's'})`
+    let verb
+    if (sample.kind === 'redeclaration') {
+      verb = `import \`${primordial}\` from \`./primordials\` (${items.length} local redeclaration${items.length === 1 ? '' : 's'} — drop the local alias)`
+    } else if (sample.kind === 'covered') {
+      verb = `replace ${items.length}× with \`${primordial}\``
+    } else {
+      verb = `add \`${primordial}\` to socket-lib/src/primordials.ts (${items.length} call site${items.length === 1 ? '' : 's'})`
+    }
     lines.push(verb)
     for (const item of items.slice(0, 3)) {
       lines.push(`    ${item.file}:${item.line}  ${item.pattern}`)

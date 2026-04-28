@@ -240,15 +240,21 @@ export async function runCli(argv) {
     })
     // Filter mode based on flags. The two flags are partitioning
     // filters on the same dataset:
-    //   neither       → both (default)
-    //   --coverage    → only covered
-    //   --gaps        → only gap
-    //   --coverage --gaps → both (explicit, redundant but allowed)
+    //   neither       → all (covered + gap + redeclaration)
+    //   --coverage    → only covered + redeclaration (both are
+    //                   migration candidates against the existing
+    //                   primordials surface — gap = need to add to
+    //                   primordials, redeclaration = need to use
+    //                   the existing primordial)
+    //   --gaps        → only gap (what's missing from primordials.ts)
+    //   --coverage --gaps → all (explicit, redundant but allowed)
     const wantCoverage = values.coverage || !values.gaps
     const wantGaps = values.gaps || !values.coverage
     let filtered = findings
     if (!wantCoverage) {
-      filtered = filtered.filter(f => f.kind !== 'covered')
+      filtered = filtered.filter(
+        f => f.kind !== 'covered' && f.kind !== 'redeclaration',
+      )
     }
     if (!wantGaps) {
       filtered = filtered.filter(f => f.kind !== 'gap')

@@ -170,6 +170,32 @@ export function auditDirectory({
     })
   }
 
+  /**
+   * Record a `redeclaration` finding — a top-level `const NAME = expr`
+   * where `NAME` matches a primordials export and `expr` reaches a
+   * built-in (Error, JSON.parse, Array.isArray, etc.). This is the
+   * shape consumers fall back to when they don't know they can
+   * import from `./primordials`. The codemod (eventually) rewrites
+   * these to a single `import { NAME } from './primordials'` line.
+   */
+  function recordRedeclaration(file, offset, name, pattern) {
+    const lineStarts = currentFile.lineStarts
+    const { line, column } = lineColumnAt(lineStarts, offset)
+    const dedupKey = `${file}:${line}:${column}:redecl:${name}`
+    if (seen.has(dedupKey)) {
+      return
+    }
+    seen.add(dedupKey)
+    findings.push({
+      primordial: name,
+      pattern,
+      file,
+      line,
+      column,
+      kind: 'redeclaration',
+    })
+  }
+
   // Per-file context the visitors read. acorn-wasm's walker doesn't
   // pass extra args beyond ancestors, so we share state via this
   // closure-scoped handle. Reset on every `auditFile` call.
@@ -294,6 +320,84 @@ export function auditDirectory({
   }
 
   const visitors = {
+    VariableDeclarator(node, ancestors) {
+      // Detect local-alias redeclaration of primordials:
+      //   const ErrorCtor = Error
+      //   const JSONParse = JSON.parse
+      //   const ArrayIsArray = Array.isArray
+      //
+      // The audit normally visits the right-hand side via NewExpression /
+      // CallExpression / MemberExpression and reports a "covered" finding —
+      // technically correct, but misses the larger improvement: this file
+      // should `import { NAME } from './primordials'` and skip the
+      // declaration entirely. Surface as kind='redeclaration' so reports
+      // and codemod can act on it specifically.
+      if (
+        node.id?.type !== 'Identifier' ||
+        typeof node.id.name !== 'string' ||
+        !exported.has(node.id.name)
+      ) {
+        return
+      }
+      // Skip the primordials.ts file itself — it IS the canonical
+      // declaration. The skipFiles allowlist in scanDir already filters
+      // by filename, but files under different names (a vendored copy,
+      // a re-export module) shouldn't trip the redeclaration check
+      // either if their declarations are intentionally re-exports.
+      const init = node.init
+      if (!init) {
+        return
+      }
+      // Recognized RHS shapes that produce a primordial alias:
+      //   Identifier            (e.g. Error)
+      //   MemberExpression      (e.g. JSON.parse, Array.isArray, Object.keys)
+      // Anything else (a function call, a literal) isn't a primordial
+      // alias even if the LHS name happens to match.
+      const isAliasRhs =
+        init.type === 'Identifier' ||
+        (init.type === 'MemberExpression' && !init.computed)
+      if (!isAliasRhs) {
+        return
+      }
+      // Only care about top-level declarations (Program → VariableDeclaration → VariableDeclarator).
+      // Local-scope shadowing is a different kind of bug and out of scope.
+      let topLevel = false
+      for (let i = ancestors.length - 1; i >= 0; i -= 1) {
+        const a = ancestors[i]
+        if (a.type === 'Program') {
+          topLevel = true
+          break
+        }
+        if (
+          a.type === 'FunctionDeclaration' ||
+          a.type === 'FunctionExpression' ||
+          a.type === 'ArrowFunctionExpression'
+        ) {
+          return
+        }
+      }
+      if (!topLevel) {
+        return
+      }
+      // Compose a human-readable RHS string for the report.
+      let rhs
+      if (init.type === 'Identifier') {
+        rhs = init.name
+      } else {
+        // MemberExpression — `Object.name` or `Object.prototype.name`.
+        const objName =
+          init.object?.type === 'Identifier' ? init.object.name : '?'
+        const propName =
+          init.property?.type === 'Identifier' ? init.property.name : '?'
+        rhs = `${objName}.${propName}`
+      }
+      recordRedeclaration(
+        currentFile.relPath,
+        node.start,
+        node.id.name,
+        `const ${node.id.name} = ${rhs}`,
+      )
+    },
     NewExpression(node, _ancestors) {
       if (
         node.callee?.type !== 'Identifier' ||
