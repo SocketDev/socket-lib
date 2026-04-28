@@ -233,7 +233,6 @@ export async function downloadSocketBtmRelease(
       resolvedTag =
         (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO, {
           assetPattern: asset,
-          quiet,
         })) ?? undefined
 
       if (!resolvedTag) {
@@ -244,9 +243,6 @@ export async function downloadSocketBtmRelease(
         resolvedTag,
         asset,
         SOCKET_BTM_REPO,
-        {
-          quiet,
-        },
       )
 
       if (!assetUrl) {

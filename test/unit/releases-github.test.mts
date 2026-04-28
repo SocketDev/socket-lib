@@ -280,16 +280,13 @@ describe('releases/github', () => {
     })
 
     it('should find latest release by prefix without asset pattern', async () => {
-      const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO)
       expect(tag).toBe('yoga-layout-20260107-abc123')
     })
 
     it('should find latest release by prefix with matching asset pattern', async () => {
       const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO, {
         assetPattern: 'yoga-sync-*.mjs',
-        quiet: true,
       })
       expect(tag).toBe('yoga-layout-20260107-abc123')
     })
@@ -297,7 +294,6 @@ describe('releases/github', () => {
     it('should skip release without matching asset when pattern provided', async () => {
       const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
         assetPattern: '*.tar.gz',
-        quiet: true,
       })
       expect(tag).toBeUndefined()
     })
@@ -305,7 +301,6 @@ describe('releases/github', () => {
     it('should match asset with brace expansion pattern', async () => {
       const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
         assetPattern: 'models-{embeddings,data}-*.{bin,dat}',
-        quiet: true,
       })
       expect(tag).toBe('models-20260106-def456')
     })
@@ -313,15 +308,12 @@ describe('releases/github', () => {
     it('should match asset with RegExp pattern', async () => {
       const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
         assetPattern: /^models-\d{8}-.+\.tar\.gz$/,
-        quiet: true,
       })
       expect(tag).toBe('models-20260106-def456')
     })
 
     it('should return undefined when no releases match prefix', async () => {
-      const tag = await getLatestRelease('nonexistent-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('nonexistent-', SOCKET_BTM_REPO)
       expect(tag).toBeUndefined()
     })
 
@@ -353,9 +345,7 @@ describe('releases/github', () => {
         ),
       )
 
-      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO)
 
       // Should return the release with the latest published_at time.
       expect(tag).toBe('node-smol-20260112-9ec3865')
@@ -385,9 +375,7 @@ describe('releases/github', () => {
         createMockHttpResponse(Buffer.from(JSONStringify(sameDay)), true, 200),
       )
 
-      const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('yoga-layout-', SOCKET_BTM_REPO)
 
       expect(tag).toBe('yoga-layout-20260112-latest')
     })
@@ -420,9 +408,7 @@ describe('releases/github', () => {
         ),
       )
 
-      const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('models-', SOCKET_BTM_REPO)
 
       expect(tag).toBe('models-20260115-newest')
     })
@@ -457,7 +443,6 @@ describe('releases/github', () => {
 
       const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
         assetPattern: 'node-darwin-*',
-        quiet: true,
       })
 
       // Should return the newest release that has the matching asset.
@@ -487,9 +472,7 @@ describe('releases/github', () => {
         ),
       )
 
-      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('node-smol-', SOCKET_BTM_REPO)
 
       // Should skip the empty release and return the older release with assets.
       expect(tag).toBe('node-smol-20251226-2126245')
@@ -514,9 +497,7 @@ describe('releases/github', () => {
         createMockHttpResponse(Buffer.from(JSONStringify(allEmpty)), true, 200),
       )
 
-      const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO)
 
       // Should return null since all matching releases are empty.
       expect(tag).toBeUndefined()
@@ -552,7 +533,6 @@ describe('releases/github', () => {
 
       const tag = await getLatestRelease('models-', SOCKET_BTM_REPO, {
         assetPattern: '*.tar.gz',
-        quiet: true,
       })
 
       // Should skip empty release and release without matching asset.
@@ -595,9 +575,7 @@ describe('releases/github', () => {
           ),
         )
 
-      const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('binject-', SOCKET_BTM_REPO)
 
       expect(tag).toBe('binject-20260115-abc1234')
     })
@@ -636,9 +614,7 @@ describe('releases/github', () => {
           ),
         )
 
-      const tag = await getLatestRelease('curl-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('curl-', SOCKET_BTM_REPO)
 
       expect(tag).toBe('curl-20260115-abc1234')
     })
@@ -662,9 +638,7 @@ describe('releases/github', () => {
           ),
         )
 
-      const tag = await getLatestRelease('nonexistent-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('nonexistent-', SOCKET_BTM_REPO)
 
       expect(tag).toBeUndefined()
     })
@@ -696,7 +670,7 @@ describe('releases/github', () => {
       })
 
       await expect(
-        getLatestRelease('whatever-', SOCKET_BTM_REPO, { quiet: true }),
+        getLatestRelease('whatever-', SOCKET_BTM_REPO),
         // GraphQL errors[] now wraps in the "both transports failed"
         // surface error. The original GraphQL message lives in .cause.
       ).rejects.toThrow(
@@ -725,9 +699,7 @@ describe('releases/github', () => {
         ),
       )
 
-      const tag = await getLatestRelease('curl-', SOCKET_BTM_REPO, {
-        quiet: true,
-      })
+      const tag = await getLatestRelease('curl-', SOCKET_BTM_REPO)
       expect(tag).toBe('curl-20260401-stable')
       // httpRequest invoked exactly once — REST only, no GraphQL.
       expect(vi.mocked(httpRequest)).toHaveBeenCalledTimes(1)
@@ -745,9 +717,9 @@ describe('releases/github', () => {
         ),
       )
 
-      await expect(
-        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
-      ).rejects.toThrow(/Failed to fetch releases: 503/)
+      await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
+        /Failed to fetch SocketDev\/socket-btm releases: 503/,
+      )
     }, 60_000)
 
     it('should throw on REST malformed JSON body', async () => {
@@ -757,9 +729,9 @@ describe('releases/github', () => {
         createMockHttpResponse(Buffer.from('<html>not json</html>'), true, 200),
       )
 
-      await expect(
-        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
-      ).rejects.toThrow(/Failed to parse GitHub releases response/)
+      await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
+        /Failed to parse SocketDev\/socket-btm releases response/,
+      )
     }, 60_000)
 
     it('should throw informative error when both REST and GraphQL transport fail', async () => {
@@ -782,9 +754,9 @@ describe('releases/github', () => {
         )
       })
 
-      await expect(
-        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
-      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
+      await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
     }, 60_000)
 
     it('should throw on GraphQL fallback malformed JSON', async () => {
@@ -806,9 +778,9 @@ describe('releases/github', () => {
         )
       })
 
-      await expect(
-        getLatestRelease('curl-', SOCKET_BTM_REPO, { quiet: true }),
-      ).rejects.toThrow(/both REST and GraphQL backends degraded/)
+      await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
     }, 60_000)
   })
 
@@ -859,7 +831,6 @@ describe('releases/github', () => {
         'v1.0.0',
         'yoga-sync-20260107-abc123.mjs',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
       expect(url).toBe(
         'https://github.com/test/repo/releases/download/v1.0.0/yoga-sync-20260107-abc123.mjs',
@@ -879,7 +850,6 @@ describe('releases/github', () => {
         'v1.0.0',
         'yoga-sync-*.mjs',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
       expect(url).toBe(
         'https://github.com/test/repo/releases/download/v1.0.0/yoga-sync-20260107-abc123.mjs',
@@ -899,7 +869,6 @@ describe('releases/github', () => {
         'v1.0.0',
         'yoga-{sync,layout}-*.mjs',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
       expect(url).toBe(
         'https://github.com/test/repo/releases/download/v1.0.0/yoga-sync-20260107-abc123.mjs',
@@ -919,7 +888,6 @@ describe('releases/github', () => {
         'v1.0.0',
         /^models-.+\.tar\.gz$/,
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
       expect(url).toBe(
         'https://github.com/test/repo/releases/download/v1.0.0/models-data.tar.gz',
@@ -939,7 +907,6 @@ describe('releases/github', () => {
         'v1.0.0',
         { prefix: 'models-', suffix: '.tar.gz' },
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
       expect(url).toBe(
         'https://github.com/test/repo/releases/download/v1.0.0/models-data.tar.gz',
@@ -956,9 +923,7 @@ describe('releases/github', () => {
       )
 
       await expect(
-        getReleaseAssetUrl('v1.0.0', 'nonexistent-*.xyz', SOCKET_BTM_REPO, {
-          quiet: true,
-        }),
+        getReleaseAssetUrl('v1.0.0', 'nonexistent-*.xyz', SOCKET_BTM_REPO),
       ).rejects.toThrow('Asset nonexistent-*.xyz not found in release v1.0.0')
     }, 40_000)
 
@@ -1004,7 +969,6 @@ describe('releases/github', () => {
         'v1.0.0',
         'curl-linux-x64',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
 
       expect(url).toBe(
@@ -1038,13 +1002,12 @@ describe('releases/github', () => {
           'tag-that-does-not-exist',
           'whatever-*.bin',
           SOCKET_BTM_REPO,
-          { quiet: true },
         ),
       ).rejects.toThrow(
         // The "GraphQL says null release" branch surfaces a clear
-        // "found no release with that tag" message so the user knows
-        // it's a missing-tag problem, not a transport problem.
-        /found no release with that tag/,
+        // "Release X not found in owner/repo" message so the user
+        // knows it's a missing-tag problem, not a transport problem.
+        /Release tag-that-does-not-exist not found in SocketDev\/socket-btm/,
       )
     }, 60_000)
 
@@ -1071,9 +1034,7 @@ describe('releases/github', () => {
       })
 
       await expect(
-        getReleaseAssetUrl('v9.9.9', 'x-*.bin', SOCKET_BTM_REPO, {
-          quiet: true,
-        }),
+        getReleaseAssetUrl('v9.9.9', 'x-*.bin', SOCKET_BTM_REPO),
         // GraphQL errors[] wraps in the "both transports failed"
         // surface error per the new spec.
       ).rejects.toThrow(/both REST and GraphQL backends degraded/)
@@ -1123,7 +1084,6 @@ describe('releases/github', () => {
         'v1.0.0',
         'recovered.bin',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
 
       expect(url).toBe(
@@ -1150,9 +1110,7 @@ describe('releases/github', () => {
       })
 
       await expect(
-        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
-          quiet: true,
-        }),
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
       ).rejects.toThrow(/both REST and GraphQL backends degraded/)
     }, 60_000)
 
@@ -1169,9 +1127,7 @@ describe('releases/github', () => {
       })
 
       await expect(
-        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
-          quiet: true,
-        }),
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
         // Parse error inside fetchReleaseAssetsViaGraphQL is treated
         // as a transport failure → wrapped in the "both transports
         // failed" surface error. The original SyntaxError is in
@@ -1188,11 +1144,9 @@ describe('releases/github', () => {
       )
 
       await expect(
-        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
-          quiet: true,
-        }),
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
       ).rejects.toThrow(
-        /Failed to parse GitHub release response for tag v1\.0\.0/,
+        /Failed to parse SocketDev\/socket-btm release v1\.0\.0 response/,
       )
     }, 60_000)
 
@@ -1208,10 +1162,10 @@ describe('releases/github', () => {
       )
 
       await expect(
-        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO, {
-          quiet: true,
-        }),
-      ).rejects.toThrow(/Release v1\.0\.0 has no assets/)
+        getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
+      ).rejects.toThrow(
+        /Release v1\.0\.0 has no assets in SocketDev\/socket-btm/,
+      )
     }, 60_000)
   })
 
@@ -1256,7 +1210,6 @@ describe('releases/github', () => {
         'yoga-sync-abc.mjs',
         '/tmp/output.mjs',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
 
       expect(httpDownload).toHaveBeenCalledWith(
@@ -1287,7 +1240,6 @@ describe('releases/github', () => {
         'yoga-*.mjs',
         '/tmp/output.mjs',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
 
       expect(httpDownload).toHaveBeenCalledWith(
@@ -1314,7 +1266,6 @@ describe('releases/github', () => {
         '{yoga,models}-*.{mjs,tar.gz}',
         '/tmp/output',
         SOCKET_BTM_REPO,
-        { quiet: true },
       )
 
       expect(httpDownload).toHaveBeenCalledWith(
@@ -1344,7 +1295,6 @@ describe('releases/github', () => {
           'nonexistent-*.xyz',
           '/tmp/output.xyz',
           SOCKET_BTM_REPO,
-          { quiet: true },
         ),
       ).rejects.toThrow('Asset nonexistent-*.xyz not found in release v1.0.0')
     }, 40_000)
@@ -1401,7 +1351,6 @@ describe('releases/github', () => {
           downloadDir: testDir,
           owner: 'test-owner',
           platformArch: 'test-arch',
-          quiet: true,
           repo: 'test-repo',
           tag: 'v1.0.0',
           toolName: 'test-tool',
@@ -1475,7 +1424,6 @@ describe('releases/github', () => {
           downloadDir: testDir,
           owner: 'test-owner',
           platformArch: 'test-arch',
-          quiet: true,
           repo: 'test-repo',
           tag: 'v1.0.0',
           toolName: 'test-tool',
@@ -1545,7 +1493,6 @@ describe('releases/github', () => {
           downloadDir: testDir,
           owner: 'test-owner',
           platformArch: 'test-arch',
-          quiet: true,
           repo: 'test-repo',
           tag: 'v1.0.0',
           toolName: 'test-tool',

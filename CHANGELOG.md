@@ -16,7 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `getLatestRelease`, `getReleaseAssetUrl`, `fetchRefShaViaGraphQL` (internal), `fetchReleaseAssetsViaGraphQL` (internal) — return `undefined` (was: `null`) when no result is found. Matches the `__proto__: null` only / `undefined` convention used elsewhere in the package. Callers using `=== null` will need to switch to `=== undefined` or a falsy check; callers using `if (!result)` are unaffected
 - `fetchGhsaDetails` GraphQL fallback path normalizes severity to lowercase (`"MODERATE"` → `"moderate"`) to match the REST endpoint's wire shape. Callers comparing against a single canonical case no longer have to handle both
-- `getLatestRelease` and `getReleaseAssetUrl` no longer log to `logger.info` / `logger.warn` on success, retry, or fallback. The helpers are silent by design now: errors throw, success returns. The `quiet` option is still accepted for backward compat but ignored
+- `getLatestRelease` and `getReleaseAssetUrl` are silent by design now: errors throw, success returns. No more `logger.info` / `logger.warn` calls on success, retry, or fallback
+
+### Removed
+
+- `getLatestRelease({ quiet })` and `getReleaseAssetUrl({ quiet })` — the `quiet` option is gone from the type signatures. Passing it is now a TypeScript error. There's nothing left to suppress (the helpers don't log anymore — see "Changed"). Callers that were passing `{ quiet: true }` as their only option should drop the options arg entirely
 
 ### Fixed
 

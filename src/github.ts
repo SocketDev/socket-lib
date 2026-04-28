@@ -417,7 +417,7 @@ async function fetchRefSha(
           // the absence). Surface the cleaner "ref not found" message.
         }
         throw new ErrorCtor(
-          `failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e3)}`,
+          `Failed to resolve ref "${ref}" for ${owner}/${repo}: ${errorMessage(e3)}`,
         )
       }
     }
@@ -923,12 +923,12 @@ async function fetchGhsaDetailsViaGraphQL(
   }
   if (parsed.errors?.length) {
     throw new ErrorCtor(
-      `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
+      `GraphQL securityAdvisory(${ghsaId}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
     )
   }
   const adv = parsed.data?.securityAdvisory
   if (!adv) {
-    throw new ErrorCtor(`GHSA ${ghsaId} not found via GraphQL`)
+    throw new ErrorCtor(`GHSA ${ghsaId} not found`)
   }
   return {
     ghsaId: adv.ghsaId,

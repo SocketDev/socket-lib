@@ -703,7 +703,7 @@ describe.sequential('github', () => {
 
       await expect(
         resolveRefToSha('owner', 'repo', 'nonexistent'),
-      ).rejects.toThrow('failed to resolve ref')
+      ).rejects.toThrow('Failed to resolve ref')
     })
 
     it('should fall back to GraphQL when REST returns 200 + empty body', async () => {
@@ -827,14 +827,14 @@ describe.sequential('github', () => {
 
       await expect(
         resolveRefToSha('owner', 'repo', 'genuinely-missing-ref'),
-      ).rejects.toThrow('failed to resolve ref')
+      ).rejects.toThrow('Failed to resolve ref')
     })
 
     it('should re-throw original REST error when GraphQL fallback also fails', async () => {
       // Both transports degraded: REST hits empty bodies all the way
       // through the cascade, GraphQL returns a non-OK status. The
       // helper should swallow the GraphQL transport error and
-      // surface the REST cascade's 'failed to resolve ref' message
+      // surface the REST cascade's 'Failed to resolve ref' message
       // — that's more actionable for the user than a confusing
       // GraphQL-side error caused by the same incident.
       nock('https://api.github.com')
@@ -849,7 +849,7 @@ describe.sequential('github', () => {
 
       await expect(
         resolveRefToSha('owner', 'repo', 'double-failure-ref'),
-      ).rejects.toThrow('failed to resolve ref')
+      ).rejects.toThrow('Failed to resolve ref')
     })
 
     it('should return undefined from GraphQL when ref not found anywhere', async () => {
@@ -876,7 +876,7 @@ describe.sequential('github', () => {
 
       await expect(
         resolveRefToSha('owner', 'repo', 'incident-but-real-404'),
-      ).rejects.toThrow('failed to resolve ref')
+      ).rejects.toThrow('Failed to resolve ref')
     })
 
     it('should forward auth token to GraphQL fallback', async () => {

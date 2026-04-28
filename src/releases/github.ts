@@ -384,11 +384,7 @@ export async function downloadGitHubRelease(
   if (explicitTag) {
     tag = explicitTag
   } else if (toolPrefix) {
-    const latestTag = await getLatestRelease(
-      toolPrefix,
-      { owner, repo },
-      { quiet },
-    )
+    const latestTag = await getLatestRelease(toolPrefix, { owner, repo })
     if (!latestTag) {
       throw new Error(`No ${toolPrefix} release found in ${owner}/${repo}`)
     }
@@ -495,12 +491,10 @@ export async function downloadReleaseAsset(
   const { quiet = false } = options
 
   // Get the browser_download_url for the asset.
-  const downloadUrl = await getReleaseAssetUrl(
-    tag,
-    assetPattern,
-    { owner, repo },
-    { quiet },
-  )
+  const downloadUrl = await getReleaseAssetUrl(tag, assetPattern, {
+    owner,
+    repo,
+  })
 
   if (!downloadUrl) {
     const patternDesc =
@@ -593,7 +587,9 @@ async function fetchReleasesViaRest(
     { headers: getAuthHeaders() },
   )
   if (!response.ok) {
-    throw new ErrorCtor(`Failed to fetch releases: ${response.status}`)
+    throw new ErrorCtor(
+      `Failed to fetch ${owner}/${repo} releases: ${response.status}`,
+    )
   }
   const text = response.body.toString('utf8')
   if (text.length === 0) {
@@ -607,10 +603,9 @@ async function fetchReleasesViaRest(
   try {
     parsed = JSONParse(text)
   } catch (cause) {
-    throw new ErrorCtor(
-      `Failed to parse GitHub releases response from https://api.github.com/repos/${owner}/${repo}/releases`,
-      { cause },
-    )
+    throw new ErrorCtor(`Failed to parse ${owner}/${repo} releases response`, {
+      cause,
+    })
   }
   return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
 }
@@ -667,7 +662,7 @@ async function fetchReleasesViaGraphQL(
   })
   if (!response.ok) {
     throw new ErrorCtor(
-      `Failed to fetch releases via GraphQL: ${response.status}`,
+      `Failed to fetch ${owner}/${repo} releases (GraphQL): ${response.status}`,
     )
   }
   let parsed: {
@@ -694,7 +689,7 @@ async function fetchReleasesViaGraphQL(
   }
   if (parsed.errors?.length) {
     throw new ErrorCtor(
-      `GraphQL error: ${parsed.errors.map(e => e.message).join('; ')}`,
+      `GraphQL repository.releases(${owner}/${repo}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
     )
   }
   return (parsed.data?.repository?.releases?.nodes ?? []).map(n => ({
@@ -757,12 +752,12 @@ async function fetchReleaseAssetsViaGraphQL(
   })
   if (!response.ok) {
     throw new ErrorCtor(
-      `GraphQL fallback for ${tag} failed: ${response.status} ${response.statusText}`,
+      `Failed to fetch ${owner}/${repo} release ${tag} (GraphQL): ${response.status} ${response.statusText}`,
     )
   }
   if (response.body.byteLength === 0) {
     throw new ErrorCtor(
-      `GraphQL fallback for ${tag} also returned empty body — both REST and GraphQL backends are degraded`,
+      `Failed to fetch ${owner}/${repo} release ${tag}: GraphQL returned empty body`,
     )
   }
   let parsed: {
@@ -782,13 +777,13 @@ async function fetchReleaseAssetsViaGraphQL(
     parsed = JSONParse(response.body.toString('utf8'))
   } catch (cause) {
     throw new ErrorCtor(
-      `Failed to parse GitHub GraphQL release response for ${tag}`,
+      `Failed to parse ${owner}/${repo} release ${tag} response (GraphQL)`,
       { cause },
     )
   }
   if (parsed.errors?.length) {
     throw new ErrorCtor(
-      `GraphQL error fetching release ${tag}: ${parsed.errors.map(e => e.message).join('; ')}`,
+      `GraphQL repository.release(${owner}/${repo}, ${tag}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
     )
   }
   const release = parsed.data?.repository?.release
@@ -813,7 +808,6 @@ async function fetchReleaseAssetsViaGraphQL(
  * @param options - Additional options
  * @param options.assetPattern - Optional pattern to filter releases by matching asset
  * @param options.nothrow - If true, return undefined instead of throwing when both REST and GraphQL backends are degraded. Default: false.
- * @param options.quiet - Accepted for backward compat; no longer consumed.
  * @returns Latest release tag or undefined if not found
  * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is false.
  *
@@ -831,11 +825,12 @@ export async function getLatestRelease(
   options: {
     assetPattern?: AssetPattern
     nothrow?: boolean
-    quiet?: boolean
   } = {},
 ): Promise<string | undefined> {
-  // `quiet` is accepted for backward compat but no longer consumed —
-  // the helper is silent by design now (errors throw, success returns).
+  // The `quiet` option from previous releases is no longer accepted.
+  // The helper is silent by design now (errors throw, success
+  // returns) so there's nothing for the caller to suppress. Type
+  // enforces this — passing `{ quiet: true }` is a TS error.
   const { assetPattern, nothrow = false } = options
   const { owner, repo } = repoConfig
 
@@ -943,7 +938,6 @@ export async function getLatestRelease(
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options
  * @param options.nothrow - If true, return undefined instead of throwing when both REST and GraphQL backends are degraded. Default: false.
- * @param options.quiet - Accepted for backward compat; no longer consumed.
  * @returns Browser download URL for the asset, or undefined when not found.
  * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is false.
  *
@@ -959,8 +953,11 @@ export async function getReleaseAssetUrl(
   tag: string,
   assetPattern: string | AssetPattern,
   repoConfig: RepoConfig,
-  options: { nothrow?: boolean; quiet?: boolean } = {},
+  options: { nothrow?: boolean } = {},
 ): Promise<string | undefined> {
+  // The `quiet` option from previous releases is no longer accepted.
+  // The helper is silent by design now (errors throw, success
+  // returns). Type enforces this — passing `{ quiet: true }` is a TS error.
   const { nothrow = false } = options
   const { owner, repo } = repoConfig
 
@@ -982,7 +979,9 @@ export async function getReleaseAssetUrl(
       )
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch release ${tag}: ${response.status}`)
+        throw new ErrorCtor(
+          `Failed to fetch ${owner}/${repo} release ${tag}: ${response.status}`,
+        )
       }
 
       // -------------------------------------------------------
@@ -1034,9 +1033,7 @@ export async function getReleaseAssetUrl(
           if (nothrow) {
             return undefined
           }
-          throw new ErrorCtor(
-            `Release ${tag} not found in ${owner}/${repo}: GraphQL fallback found no release with that tag`,
-          )
+          throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
         }
         assets = fallbackAssets
       } else {
@@ -1047,13 +1044,15 @@ export async function getReleaseAssetUrl(
           release = JSONParse(response.body.toString('utf8'))
         } catch (cause) {
           throw new ErrorCtor(
-            `Failed to parse GitHub release response for tag ${tag}`,
+            `Failed to parse ${owner}/${repo} release ${tag} response`,
             { cause },
           )
         }
 
         if (!ArrayIsArray(release.assets)) {
-          throw new ErrorCtor(`Release ${tag} has no assets`)
+          throw new ErrorCtor(
+            `Release ${tag} has no assets in ${owner}/${repo}`,
+          )
         }
         assets = release.assets
       }
