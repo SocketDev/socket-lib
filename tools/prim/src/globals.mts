@@ -158,14 +158,14 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
   ['toTimeString', 'Date'],
   ['toUTCString', 'Date'],
 
-  // ─── RegExp only ────────────────────────────────────────────────────
-  ['exec', 'RegExp'],
-  ['test', 'RegExp'],
-
-  // ─── Promise only ───────────────────────────────────────────────────
-  ['then', 'Promise'],
-  ['catch', 'Promise'],
-  ['finally', 'Promise'],
+  // ─── Hard cases live in ambiguous-methods.mts ───────────────────────
+  // `exec`, `test`, `then`, `catch`, `finally` are duck-typed by user
+  // libraries (semver Range.test, validators, PromiseLike, jest, …),
+  // so they aren't unambiguous in practice even though they're spec-
+  // defined on a single type. See `ambiguous-methods.mts` for the
+  // table the analyzer uses to defer those names — either to the
+  // identifier-name guess (`re.test()` → RegExp) or to AI-deferred
+  // classification when `--ai-disambiguate` is on.
 
   // ─── Map only ───────────────────────────────────────────────────────
   // (Set has `entries` too but Map's is more common in our usage; on

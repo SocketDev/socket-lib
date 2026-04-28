@@ -100,6 +100,16 @@ COMMON OPTIONS
                        name. Off by default — these need manual review.
   --surface <path>     Explicit primordials source file (same as audit).
 
+\`audit\` AND \`mod\` SHARED OPTION
+  --ai-disambiguate    Defer ambiguous prototype methods (.test, .then,
+                       .exec, .catch, .finally) to Claude Sonnet for
+                       receiver-type classification when the static
+                       guess can't decide. Reads the surrounding source
+                       only — no Bash, no Edit, no Write. Verdicts are
+                       cached in <target>/.prim-cache/ so re-runs are
+                       free. Off by default — opt-in. Requires
+                       ANTHROPIC_API_KEY in env.
+
 \`lint\` OPTIONS
   --primordials-source <name>  (repeatable) Identifier or require()
                        specifier to treat as a primordials-shaped source.
@@ -131,16 +141,17 @@ EXAMPLES
 // Argument schema. parseArgs in node:util gives us strict validation and
 // `--key=value` parsing for free.
 const ARG_OPTIONS = {
-  target: { type: 'string' },
-  dir: { type: 'string' },
-  json: { type: 'boolean', default: false },
-  surface: { type: 'string' },
-  'primordials-source': { type: 'string', multiple: true },
-  coverage: { type: 'boolean', default: false },
-  gaps: { type: 'boolean', default: false },
+  'ai-disambiguate': { type: 'boolean', default: false },
   apply: { type: 'boolean', default: false },
-  'include-guessed': { type: 'boolean', default: false },
+  coverage: { type: 'boolean', default: false },
+  dir: { type: 'string' },
+  gaps: { type: 'boolean', default: false },
   help: { type: 'boolean', short: 'h', default: false },
+  'include-guessed': { type: 'boolean', default: false },
+  json: { type: 'boolean', default: false },
+  'primordials-source': { type: 'string', multiple: true },
+  surface: { type: 'string' },
+  target: { type: 'string' },
 }
 
 export async function runCli(argv) {
@@ -222,21 +233,23 @@ export async function runCli(argv) {
   // shared-AST surprises and is faster).
   if (command === 'mod') {
     const result = await applyCodemod({
-      targetRoot,
-      scanDir,
-      exported: surface.exports,
+      aiDisambiguate: values['ai-disambiguate'],
       apply: values.apply,
+      exported: surface.exports,
       includeGuessed: values['include-guessed'],
+      scanDir,
+      targetRoot,
     })
     reportMod(result, json, values.apply)
     return
   }
 
   if (command === 'audit') {
-    const findings = auditDirectory({
-      targetRoot,
-      scanDir,
+    const findings = await auditDirectory({
+      aiDisambiguate: values['ai-disambiguate'],
       exported: surface.exports,
+      scanDir,
+      targetRoot,
     })
     // Filter mode based on flags. The two flags are partitioning
     // filters on the same dataset:

@@ -35,6 +35,8 @@ process.emitWarning = function emitWarning(...args) {
   return defaultEmitWarning(...args)
 }
 
+import { isAmbiguousMethod } from './ambiguous-methods.mts'
+import { buildSnippet, disambiguateReceiver } from './disambiguate.mts'
 import {
   INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
@@ -133,12 +135,16 @@ function buildLineStarts(src) {
  * @param {Set<string>} opts.exported        Currently-exported primordials.
  * @param {string[]} [opts.skipDirs]         Directories to skip during walk.
  * @param {string[]} [opts.skipFiles]        Files to skip (basename match).
- * @returns {Finding[]}
+ * @param {boolean} [opts.aiDisambiguate]    When true, defer ambiguous
+ *   prototype methods (.test, .then, etc.) to Claude with a locked-down
+ *   read-only tool surface. Off by default — opt-in via CLI flag.
+ *   Requires ANTHROPIC_API_KEY in env.
+ * @returns {Promise<Finding[]>}
  */
-export function auditDirectory({
-  targetRoot,
-  scanDir,
+export async function auditDirectory({
+  aiDisambiguate = false,
   exported,
+  scanDir,
   skipDirs = ['external', 'node_modules', '.cache'],
   skipFiles = [
     'primordials.js',
@@ -148,6 +154,7 @@ export function auditDirectory({
     'primordials.mts',
     'primordials.cts',
   ],
+  targetRoot,
 }) {
   const findings = []
   const seen = new Set()
@@ -199,7 +206,15 @@ export function auditDirectory({
   // Per-file context the visitors read. acorn-wasm's walker doesn't
   // pass extra args beyond ancestors, so we share state via this
   // closure-scoped handle. Reset on every `auditFile` call.
-  const currentFile = { relPath: '', lineStarts: [0] }
+  const currentFile = { relPath: '', lineStarts: [0], src: '' }
+
+  // Sites where the property name is in AMBIGUOUS_PROTOTYPE_METHODS
+  // and the receiver identifier didn't match a static guess. Drained
+  // after the walk by an async pass that defers to Claude (read-only
+  // tool surface) when `aiDisambiguate` is on. Snapshots the snippet
+  // up-front because the AST is freed after walk completes.
+  /** @type {Array<{file:string, offset:number, line:number, column:number, methodName:string, receiverName:string, snippet:string}>} */
+  const pendingAmbiguous = []
 
   /**
    * Recognize esbuild's CJS-output boilerplate — the helper-variable
@@ -463,6 +478,46 @@ export function auditDirectory({
         if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
           return
         }
+        // Hard cases (.test, .then, .exec, .catch, .finally): widely
+        // duck-typed by user libraries. Static guess via identifier
+        // name still applies ("re" → RegExp, "promise" → Promise);
+        // for the rest, queue for AI-deferred classification when
+        // --ai-disambiguate is on.
+        if (isAmbiguousMethod(property.name)) {
+          const guess = guessReceiverType(object.name)
+          if (guess) {
+            record(
+              currentFile.relPath,
+              node.start,
+              `${object.name}.${property.name}(...)  [guessed: ${guess}]`,
+              prototypePrimordialName(guess, property.name),
+            )
+            return
+          }
+          if (aiDisambiguate) {
+            // Defer to a post-walk async pass. Snapshot what the
+            // disambiguator needs; the AST gets thrown away when
+            // the walk ends, so we capture by value.
+            const { line, column } = lineColumnAt(
+              currentFile.lineStarts,
+              node.start,
+            )
+            pendingAmbiguous.push({
+              column,
+              file: currentFile.relPath,
+              line,
+              methodName: property.name,
+              offset: node.start,
+              receiverName: object.name,
+              snippet: buildSnippet(
+                currentFile.src,
+                currentFile.lineStarts,
+                line,
+              ),
+            })
+          }
+          return
+        }
         // Weaker signal: guess the receiver's type from its name.
         const guess = guessReceiverType(object.name)
         if (!guess) {
@@ -545,6 +600,7 @@ export function auditDirectory({
     }
     currentFile.relPath = relPath
     currentFile.lineStarts = buildLineStarts(src)
+    currentFile.src = src
     try {
       walk(src, visitors, PARSE_OPTIONS)
     } catch {
@@ -603,6 +659,33 @@ export function auditDirectory({
   for (const abs of walkDir(scanDir)) {
     const rel = path.relative(targetRoot, abs)
     auditFile(abs, rel)
+  }
+
+  // Post-walk: drain pending ambiguous sites. Each call goes to
+  // Claude (or hits the on-disk cache) and produces a verdict.
+  // Sequential to keep API throughput predictable; parallelism
+  // would need a token budget concept we don't have.
+  if (aiDisambiguate && pendingAmbiguous.length > 0) {
+    for (const item of pendingAmbiguous) {
+      const verdict = await disambiguateReceiver({
+        aiEnabled: true,
+        column: item.column,
+        filePath: item.file,
+        line: item.line,
+        methodName: item.methodName,
+        receiverName: item.receiverName,
+        snippet: item.snippet,
+        targetRoot,
+      })
+      if (verdict.type) {
+        record(
+          item.file,
+          item.offset,
+          `${item.receiverName}.${item.methodName}(...)  [ai: ${verdict.type} — ${verdict.reason}]`,
+          prototypePrimordialName(verdict.type, item.methodName),
+        )
+      }
+    }
   }
 
   return attachParseFailureCount(findings)

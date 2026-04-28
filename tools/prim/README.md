@@ -119,3 +119,35 @@ bootstrap via `copyPropsRenamed` + `copyPrototype` reflection.
   (`Object.defineProperty(exports, "__esModule", ...)` and
   `var __defProp = Object.defineProperty;`) so audits of `dist/`
   trees don't drown in machine-generated noise.
+
+## Hard cases — `--ai-disambiguate`
+
+A small number of method names (`.test`, `.then`, `.exec`, `.catch`,
+`.finally`) are spec-defined on a single built-in (RegExp / Promise) but
+widely _duck-typed_ by user libraries — semver `Range.prototype.test`,
+PromiseLike thenables, validator predicates, etc. The static analyzer
+can only classify these via the receiver-name heuristic
+(`re`/`regex`/`promise`/…), which misses anything else.
+
+Pass `--ai-disambiguate` (audit and mod both accept it) to defer the
+remaining ambiguous sites to Claude Sonnet:
+
+```sh
+ANTHROPIC_API_KEY=sk-... pnpm prim audit --target . --ai-disambiguate
+```
+
+The disambiguator runs Claude with a **read-only** tool surface —
+`Read`, `Grep`, `Glob` only; `Bash`, `Edit`, `Write`, `WebFetch` are
+explicitly denied (defense-in-depth). Verdicts are cached in
+`<target>/.prim-cache/disambiguate.json`, so re-runs after the first
+hit don't pay the API cost.
+
+The list of "hard cases" lives in
+[`src/ambiguous-methods.mts`](./src/ambiguous-methods.mts) — add an
+entry there if you encounter a new duck-typed method name in the wild.
+
+Without the flag, ambiguous sites are silently skipped (rather than
+risk the cacache→semver `RegExp.prototype.test called on incompatible
+receiver` shape). The static guess path still applies — `re.test()`
+gets classified as RegExp via the receiver-name heuristic with no API
+call.

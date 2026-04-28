@@ -23,6 +23,12 @@ node_modules/
 # tools occasionally drop scratch dirs into a project-local .cache/.
 # node_modules/.cache/ is the canonical home for tools we control.
 **/.cache/
+
+# `prim` audit/codemod's AI-disambiguation cache. Keyed on
+# (method, receiver, snippet-hash) so verdicts persist across runs
+# and re-runs are free; not portable across machines (verdicts
+# depend on an account's API key budget) so it's gitignored.
+.prim-cache/
 npm-debug.log*
 pnpm-debug.log*
 yarn-error.log*

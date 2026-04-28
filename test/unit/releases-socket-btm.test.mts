@@ -338,7 +338,7 @@ describe('releases/socket-btm', () => {
     })
 
     it('should throw when no matching release found for pattern', async () => {
-      vi.mocked(getLatestRelease).mockResolvedValueOnce(null)
+      vi.mocked(getLatestRelease).mockResolvedValueOnce(undefined)
 
       await expect(
         downloadSocketBtmRelease('models', {

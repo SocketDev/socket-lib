@@ -28,6 +28,8 @@ import path from 'node:path'
 
 import { parse } from 'acorn-wasm'
 
+import { isAmbiguousMethod } from './ambiguous-methods.mts'
+import { buildSnippet, disambiguateReceiver } from './disambiguate.mts'
 import {
   INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
@@ -82,20 +84,25 @@ const DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
  * @param {Set<string>} opts.exported
  * @param {boolean} opts.apply
  * @param {boolean} opts.includeGuessed
+ * @param {boolean} [opts.aiDisambiguate]    When true, defer ambiguous
+ *   prototype methods (.test, .then, etc.) to Claude with a locked-down
+ *   read-only tool surface. Off by default — opt-in via CLI flag.
+ *   Requires ANTHROPIC_API_KEY in env.
  * @param {ImportStyle} [opts.importStyle] Defaults to ESM with the
  *   '@socketsecurity/lib/primordials' specifier.
  * @returns {Promise<CodemodResult>}
  */
 export async function applyCodemod({
-  targetRoot,
-  scanDir,
-  exported,
+  aiDisambiguate = false,
   apply,
-  includeGuessed,
+  exported,
   importStyle = {
     kind: 'esm',
     specifier: DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER,
   },
+  includeGuessed,
+  scanDir,
+  targetRoot,
 }) {
   const result = {
     filesChanged: 0,
@@ -106,13 +113,15 @@ export async function applyCodemod({
 
   for (const abs of walkDir(scanDir)) {
     const rel = path.relative(targetRoot, abs)
-    const fileResult = rewriteFile({
+    const fileResult = await rewriteFile({
       absPath: abs,
-      relPath: rel,
-      exported,
-      includeGuessed,
+      aiDisambiguate,
       apply,
+      exported,
       importStyle,
+      includeGuessed,
+      relPath: rel,
+      targetRoot,
     })
     if (fileResult.rewrites > 0) {
       result.filesChanged += 1
@@ -160,14 +169,20 @@ function* walkDir(
  *
  * Each rewrite is recorded as a `{ start, end, replacement, primordial }`
  * tuple, then applied right-to-left so positions stay valid.
+ *
+ * Async because the AI-deferred disambiguation pass for ambiguous
+ * methods (.test, .then, etc.) calls into the locked-down Claude SDK.
+ * Sync codepath when `aiDisambiguate` is false — same behavior as before.
  */
-function rewriteFile({
+async function rewriteFile({
   absPath,
-  relPath,
-  exported,
-  includeGuessed,
+  aiDisambiguate,
   apply,
+  exported,
   importStyle,
+  includeGuessed,
+  relPath,
+  targetRoot,
 }) {
   // Local-name prefix for the inserted destructure. When set, an
   // imported `Foo` is referenced in source as `<prefix>Foo` and the
@@ -221,6 +236,14 @@ function rewriteFile({
   const rewrites = []
   const usedPrimordials = new Set()
   let skipped = 0
+
+  // Sites where the property name is in AMBIGUOUS_PROTOTYPE_METHODS
+  // and the receiver-name guess didn't fire. Drained post-walk by
+  // an async pass that calls the locked-down Claude disambiguator.
+  // Snapshots the byte ranges up-front because the AST is freed
+  // when the walk ends.
+  /** @type {Array<{methodName:string, receiverName:string, calleeStart:number, calleeEnd:number, firstArgStart:number, lastArgEnd:number, objectStart:number, objectEnd:number, offset:number}>} */
+  const pendingAmbiguous = []
 
   walkAst(ast, node => {
     // ── new Foo(...) ────────────────────────────────────────────────
@@ -296,15 +319,55 @@ function rewriteFile({
       if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
         return
       }
-      const guess = guessReceiverType(object.name)
-      if (!guess) {
-        return
+      // Hard cases (.test, .then, .exec, .catch, .finally): widely
+      // duck-typed by user libraries. Try the static guess first;
+      // fall back to AI-deferred classification when --ai-disambiguate
+      // is on. See ambiguous-methods.mts for the rationale.
+      if (isAmbiguousMethod(property.name)) {
+        const guess = guessReceiverType(object.name)
+        if (guess) {
+          // Static signal won — drop into the same path as a
+          // non-ambiguous guessed receiver below.
+          if (!includeGuessed) {
+            skipped += 1
+            return
+          }
+          receiverType = guess
+        } else if (aiDisambiguate) {
+          // Defer: capture the call site for a post-walk async pass.
+          // Ambiguous-method callers must consult Claude before deciding
+          // whether to rewrite.
+          pendingAmbiguous.push({
+            calleeStart: toChar(node.callee.start),
+            calleeEnd: toChar(node.callee.end),
+            firstArgStart:
+              node.arguments.length > 0 ? toChar(node.arguments[0].start) : -1,
+            lastArgEnd:
+              node.arguments.length > 0
+                ? toChar(node.arguments.at(-1).end)
+                : toChar(node.callee.end),
+            methodName: property.name,
+            objectEnd: toChar(object.end),
+            objectStart: toChar(object.start),
+            offset: node.callee.start,
+            receiverName: object.name,
+          })
+          return
+        } else {
+          skipped += 1
+          return
+        }
+      } else {
+        const guess = guessReceiverType(object.name)
+        if (!guess) {
+          return
+        }
+        if (!includeGuessed) {
+          skipped += 1
+          return
+        }
+        receiverType = guess
       }
-      if (!includeGuessed) {
-        skipped += 1
-        return
-      }
-      receiverType = guess
     }
     const expected = prototypePrimordialName(receiverType, property.name)
     if (!exported.has(expected)) {
@@ -347,6 +410,76 @@ function rewriteFile({
     })
     usedPrimordials.add(expected)
   })
+
+  // Drain pending ambiguous sites by deferring to Claude. Sequential
+  // to keep API throughput predictable. On a verdict that names a
+  // candidate type, append the rewrite using the same shape as the
+  // sync path (object, args, closing-paren scan).
+  if (aiDisambiguate && pendingAmbiguous.length > 0) {
+    const lineStarts = []
+    {
+      lineStarts.push(0)
+      for (let i = 0; i < src.length; i += 1) {
+        if (src.charCodeAt(i) === 10) {
+          lineStarts.push(i + 1)
+        }
+      }
+    }
+    const lineColAt = offset => {
+      let lo = 0
+      let hi = lineStarts.length - 1
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >>> 1
+        if (lineStarts[mid] <= offset) {
+          lo = mid
+        } else {
+          hi = mid - 1
+        }
+      }
+      return { line: lo + 1, column: offset - lineStarts[lo] + 1 }
+    }
+    for (const item of pendingAmbiguous) {
+      const { line, column } = lineColAt(item.offset)
+      const verdict = await disambiguateReceiver({
+        aiEnabled: true,
+        column,
+        filePath: relPath,
+        line,
+        methodName: item.methodName,
+        receiverName: item.receiverName,
+        snippet: buildSnippet(src, lineStarts, line),
+        targetRoot,
+      })
+      if (!verdict.type) {
+        skipped += 1
+        continue
+      }
+      const expectedAi = prototypePrimordialName(verdict.type, item.methodName)
+      if (!exported.has(expectedAi)) {
+        continue
+      }
+      // Apply the same rewrite shape as the sync path.
+      const objSrc = src.slice(item.objectStart, item.objectEnd)
+      const argsSrc =
+        item.firstArgStart >= 0
+          ? src.slice(item.firstArgStart, item.lastArgEnd)
+          : ''
+      const callEnd = findClosingParen(src, item.lastArgEnd)
+      if (callEnd < 0) {
+        continue
+      }
+      const fnNameAi = localName(expectedAi)
+      const replacementAi = argsSrc
+        ? `${fnNameAi}(${objSrc}, ${argsSrc})`
+        : `${fnNameAi}(${objSrc})`
+      rewrites.push({
+        start: item.calleeStart,
+        end: callEnd,
+        replacement: replacementAi,
+      })
+      usedPrimordials.add(expectedAi)
+    }
+  }
 
   if (rewrites.length === 0) {
     return { rewrites: 0, importAdded: false, skipped }

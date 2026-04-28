@@ -11,6 +11,9 @@
   "exports": {
     ".": "./src/index.mts"
   },
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.mts"
+  },
   "files": [
     "bin/",
     "src/",
@@ -18,6 +21,14 @@
   ],
   "dependencies": {
     "acorn-wasm": "workspace:*"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/claude-agent-sdk": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=22.18"
