@@ -255,106 +255,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.13.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.13.0) - 2026-04-05
 
-### Added — http-request
+### Added
 
-- `readIncomingResponse()` — reads and buffers a Node.js `IncomingResponse` into an `HttpResponse` (#143)
-  - Useful for converting raw responses from code that bypasses `httpRequest()` (e.g. multipart form-data uploads) into the standard `HttpResponse` interface
-- `IncomingResponse` type alias — disambiguates `IncomingMessage` as a client-side response
-- `IncomingRequest` type alias — disambiguates `IncomingMessage` as a server-side request
+- `http-request` `readIncomingResponse()` — reads and buffers a Node.js response into an `HttpResponse` (#143)
+- `http-request` `IncomingResponse` / `IncomingRequest` type aliases — disambiguate `IncomingMessage` direction
 
-### Changed — http-request
+### Changed
 
-- Internal `httpRequestAttempt` callbacks now use `IncomingResponse` type
 - `HttpResponse.rawResponse` type narrowed from `IncomingMessage` to `IncomingResponse`
 
 ## [5.12.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.12.0) - 2026-04-04
 
-### Added — http-request
+### Added
 
-- Lifecycle hooks (`onRequest`/`onResponse`) on `HttpRequestOptions` (#133)
-  - Fire per-attempt — retries and redirects each trigger separate hook calls
-  - `HttpHooks`, `HttpHookRequestInfo`, `HttpHookResponseInfo` types exported
-- `maxResponseSize` option to reject responses exceeding a byte limit
-  - Works through redirects, `httpJson`, and `httpText`
-- `rawResponse` property on `HttpResponse` exposing the underlying `IncomingMessage`
-- `enrichErrorMessage()` exported for reusable error enrichment
-
-### Changed — http-request
-
-- Error messages now include HTTP method and URL for easier debugging
-- `HttpResponse.headers` type changed from `Record<string, string | string[] | undefined>` to `IncomingHttpHeaders`
-
-## [5.11.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.4) - 2026-03-28
+- `http-request` lifecycle hooks (`onRequest` / `onResponse`) on `HttpRequestOptions` — fire per-attempt; retries and redirects each trigger separate calls (#133)
+- `http-request` `maxResponseSize` option — reject responses exceeding a byte limit (works through redirects, `httpJson`, `httpText`)
+- `http-request` `HttpResponse.rawResponse` — underlying `IncomingMessage`
+- `http-request` `enrichErrorMessage()` exported
 
 ### Changed
 
-- **perf**: Lazy-load heavy external sub-bundles across 7 modules (#119)
-  - `sorts.ts`: Defer semver (2.5 MB via npm-pack) and fastSort until first use
-  - `versions.ts`: Defer semver until first use
-  - `archives.ts`: Defer adm-zip (102 KB) and tar-fs (105 KB) until extraction
-  - `globs.ts`: Defer fast-glob and picomatch (260 KB via pico-pack) until glob execution
-  - `fs.ts`: Defer del (260 KB via pico-pack) until safeDelete call
-  - `spawn.ts`: Defer @npmcli/promise-spawn (17 KB) until async spawn
-  - `strings.ts`: Defer get-east-asian-width (10 KB) until stringWidth call
-- Importing lightweight exports (isObject, httpJson, localeCompare, readJsonSync, stripAnsi) no longer loads heavy externals at module init time
+- Error messages now include HTTP method and URL
+- `HttpResponse.headers` type changed to `IncomingHttpHeaders`
+
+## [5.11.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.4) - 2026-03-28
+
+### Performance
+
+- Lazy-load heavy external sub-bundles across 7 modules (#119) — `sorts`, `versions`, `archives`, `globs`, `fs`, `spawn`, `strings`. Lightweight imports no longer load heavy externals at init
 
 ## [5.11.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.3) - 2026-03-26
 
 ### Fixed
 
-- **build**: Deduplicate shared deps across external bundles (#110)
-- **quality**: Comprehensive quality scan fixes across codebase (#111)
-- **releases**: Add in-memory TTL cache for GitHub API responses
-- **releases**: Guard against missing assets in GitHub release response (#112)
-- **process-lock**: Fix Windows path separator handling for lock directory creation (#112)
+- `releases` — in-memory TTL cache for GitHub API responses; guard against missing assets in release response (#112)
+- `process-lock` — Windows path separator handling for lock directory creation (#112)
 
 ## [5.11.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.2) - 2026-03-24
 
 ### Added
 
-- **http-request**: Custom CA certificate support for TLS connections
-  - `httpRequest`, `httpJson`, `httpText` accept `ca` option for custom certificate authorities
-  - `httpDownload` accepts `ca` option, threaded through redirects and retries
-  - `fetchChecksums` accepts `ca` option, passed through to underlying request
-  - Enables SSL_CERT_FILE support when NODE_EXTRA_CA_CERTS is unavailable at process startup
+- `http-request` — custom CA certificate support (`ca` option on `httpRequest`, `httpJson`, `httpText`, `httpDownload`, `fetchChecksums`). Enables `SSL_CERT_FILE` support when `NODE_EXTRA_CA_CERTS` is unavailable at process startup
 
 ## [5.11.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.1) - 2026-03-24
 
 ### Added
 
-- **dlx/binary**: Added `sha256` option to `dlxBinary()`, `downloadBinary()`, and `downloadBinaryFile()`
-  - Enables SHA-256 checksum verification for binary downloads via httpDownload
-  - Verification happens during download (fails early if checksum mismatches)
-  - Complements existing `integrity` option (SRI sha512 format, verified post-download)
+- `dlx/binary` — `sha256` option on `dlxBinary()`, `downloadBinary()`, `downloadBinaryFile()`. Verification happens during download (fails early on mismatch). Complements the existing `integrity` (SRI sha512) option
 
 ## [5.11.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.11.0) - 2026-03-23
 
 ### Added
 
-- **http-request**: Checksum verification for secure downloads
-  - `parseChecksums(text)`: Parse checksums file text into filename→hash map
-    - Supports GNU style (`hash  filename`), BSD style (`SHA256 (file) = hash`), and single-space format
-    - Handles Windows CRLF and Unix LF line endings
-    - Returns null-prototype object to prevent prototype pollution
-  - `fetchChecksums(url, options?)`: Fetch and parse checksums from URL
-    - Supports `headers` and `timeout` options
-  - `httpDownload` now accepts `sha256` option to verify downloaded files
-    - Verification happens before atomic rename (file not saved if hash mismatches)
-    - Accepts uppercase hashes (normalized to lowercase internally)
+- `http-request` `parseChecksums(text)` — parse GNU / BSD / single-space checksum file formats; CRLF and LF line endings; null-prototype map
+- `http-request` `fetchChecksums(url, options?)` — fetch and parse checksums from URL; supports `headers` and `timeout`
+- `http-request` `httpDownload` `sha256` option — verifies before atomic rename (file not saved on mismatch); accepts uppercase hashes
 
 ## [5.10.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.10.0) - 2026-03-14
 
 ### Changed
 
-- **releases/socket-btm**: Refactored `downloadSocketBtmRelease()` API for caller-controlled download paths
-  - Tool name moved from config object to required first parameter
-  - Config object is now optional second parameter (was required)
-  - Removed automatic `/${toolName}/${platformArch}` directory nesting - callers now have full control over download directory structure
-  - All optional parameters in config types now explicitly typed as `| undefined`
-  - Migration example:
-    - Before: `downloadSocketBtmRelease({ tool: 'lief', downloadDir: 'build' })`
-    - After: `downloadSocketBtmRelease('lief', { downloadDir: 'build' })`
-  - Rationale: Previous automatic path nesting created unexpected directory structures (e.g., `build/downloaded/lief/darwin-arm64/lief/assets/`) making it impossible for callers to predict exact file locations
+- **BREAKING**: `releases/socket-btm` `downloadSocketBtmRelease()` — tool name moved to required first parameter; config object now optional second parameter. Automatic `/${toolName}/${platformArch}` directory nesting removed (callers now control the full path).
+  - Before: `downloadSocketBtmRelease({ tool: 'lief', downloadDir: 'build' })`
+  - After: `downloadSocketBtmRelease('lief', { downloadDir: 'build' })`
 
 ## [5.9.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.9.1) - 2026-03-14
 
