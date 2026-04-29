@@ -1035,96 +1035,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `validateFiles()` utility function to `fs` module for defensive file access validation
-  - Returns `ValidateFilesResult` with `validPaths` and `invalidPaths` arrays
-  - Filters out unreadable files before processing (common with Yarn Berry PnP virtual filesystem, pnpm symlinks)
-  - Prevents ENOENT errors when files exist in glob results but are not accessible
-  - Comprehensive test coverage for all validation scenarios
+- `fs` `validateFiles()` — returns `{ validPaths, invalidPaths }`. Filters unreadable files before processing (Yarn Berry PnP, pnpm symlinks)
 
 ## [1.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v1.2.0) - 2025-10-23
 
 ### Added
 
-- Added `dlx-package` module for installing and executing npm packages directly
-  - Content-addressed caching using SHA256 hash (like npm's \_npx)
-  - Auto-force for version ranges (^, ~, >, <) to get latest within range
-  - Cross-platform support with comprehensive tests (30 tests)
-  - Parses scoped and unscoped package specs correctly
-  - Resolves binaries from package.json bin field
+- `dlx-package` — install and execute npm packages directly. Content-addressed cache (SHA256). Auto-force for version ranges (`^`, `~`, `>`, `<`). Resolves binaries from `package.json` `bin`
 
 ### Changed
 
-- Unified DLX storage under `~/.socket/_dlx/` directory
-  - Binary downloads now use `~/.socket/_dlx/` instead of non-existent cache path
-  - Both npm packages and binaries share parent directory with content-addressed hashing
-- Updated paths.ts documentation to clarify unified directory structure
+- Unified DLX storage under `~/.socket/_dlx/` (binary downloads + npm packages share content-addressed parent)
 
 ## [1.1.2] - 2025-10-23
 
 ### Fixed
 
-- Fixed broken relative import paths in `packages/isolation.ts` and `packages/provenance.ts` that prevented bundling by external tools
+- Broken relative import paths in `packages/isolation.ts` / `packages/provenance.ts`
 
 ## [1.1.1] - 2025-10-23
 
 ### Fixed
 
-- Fixed shimmer text effects not respecting CI environment detection (now disabled in CI to prevent ANSI escape codes in logs)
+- Shimmer text effects respect CI detection (disabled in CI to avoid ANSI escapes in logs)
 
 ## [1.1.0] - 2025-10-23
 
 ### Added
 
-- Added `filterOutput` option to `stdio/mask` for filtering output chunks before display/buffering
-- Added `overrideExitCode` option to `stdio/mask` for customizing exit codes based on captured output
-- Added comprehensive JSDoc documentation across entire library for enhanced VSCode IntelliSense
-  - Detailed @param, @returns, @template, @throws tags
-  - Practical @example blocks with real-world usage patterns
-  - @default tags showing default values
-  - Enhanced interface property documentation
-
-### Changed
-
-- Improved TypeScript type hints and tooltips throughout library
-- Enhanced documentation for all core utilities (arrays, fs, git, github, http-request, json, logger, objects, path, promises, spawn, spinner, strings)
-- Enhanced documentation for stdio utilities (clear, divider, footer, header, mask, progress, prompts, stderr, stdout)
-- Enhanced documentation for validation utilities (json-parser, types)
+- `stdio/mask` — `filterOutput` (filter output chunks before display) and `overrideExitCode` (customize exit codes from captured output)
+- Comprehensive JSDoc across the library for IntelliSense (`@param`, `@returns`, `@example`, `@default`)
 
 ## [1.0.5] - 2025-10-22
 
 ### Added
 
-- Added support for custom retry delays from onRetry callback
+- Custom retry delays from `onRetry` callback
 
 ## [1.0.4] - 2025-10-21
 
 ### Fixed
 
-- Fixed external dependency paths in root-level source files (corrected require paths from `../external/` to `./external/` in bin, cacache, fs, globs, spawn, spinner, and streams modules)
+- External dep paths in root-level dist files (`../external/` → `./external/`)
 
 ## [1.0.3] - 2025-10-21
 
 ### Fixed
 
-- Fixed external dependency import paths in packages and stdio modules (corrected require paths from `../../external/` to `../external/`)
+- External dep import paths in `packages/` and `stdio/` modules (`../../external/` → `../external/`)
 
 ## [1.0.2] - 2025-10-21
 
 ### Fixed
 
-- Fixed module resolution error in packages/normalize module (corrected require path from `../../constants/socket` to `../constants/socket`)
+- `packages/normalize` module resolution (`../../constants/socket` → `../constants/socket`)
 
 ## [1.0.1] - 2025-10-21
 
 ### Fixed
 
-- Fixed relative import paths in compiled CommonJS output (changed `require("../external/...")` to `require("./external/...")` for root-level dist files)
+- Relative imports in compiled CommonJS — root-level dist files use `./external/...`
 
 ## [1.0.0] - 2025-10-20
 
 ### Changed
 
-- Consolidated parseArgs into argv/parse module
+- `parseArgs` consolidated into `argv/parse`
 
 ---
 
