@@ -368,36 +368,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **github**: Fixed JSON parsing crash vulnerability by adding try-catch around `JSON.parse()` in GitHub API responses
-  - Prevents crashes on malformed, incomplete, or binary responses
-  - Error messages now include the response URL for better debugging
-
-- **dlx/binary**: Fixed clock skew vulnerabilities in cache validation
-  - Cache entries with future timestamps (clock skew) are now treated as expired
-  - Metadata writes now use atomic write-then-rename pattern to prevent corruption
-  - Added TOCTOU race protection by re-checking binary existence after metadata read
-
-- **dlx/cache cleanup**: Fixed handling of future timestamps during cache cleanup
-  - Entries with future timestamps (due to clock skew) are now properly treated as expired
-
-- **dlx/package**: Fixed scoped package parsing bug where `@scope/package` was incorrectly parsed
-  - Changed condition from `startsWith('@')` to `atIndex === 0` for more precise detection
-  - Fixes installation failures for scoped packages like `@socketregistry/lib`
-
-- **cache-with-ttl**: Added clock skew detection to TTL cache
-  - Far-future `expiresAt` values (>2x TTL) are now treated as expired
-  - Protects against cache poisoning from clock skew
-
-- **packages/specs**: Fixed unconditional `.git` truncation in Git URL parsing
-  - Now only removes `.git` suffix when URL actually ends with `.git`
-  - Prevents incorrect truncation of URLs containing `.git` in the middle
-
-- **releases/github**: Fixed TOCTOU race condition in binary download verification
-  - Re-checks binary existence after reading version file
-  - Ensures binary is re-downloaded if missing despite version file presence
-
-- **provenance**: Fixed incorrect package name in provenance workflow
-  - Changed from `@socketregistry/lib` to `@socketsecurity/lib`
+- `github` — try/catch around `JSON.parse()` in API responses; error messages include the response URL
+- `dlx/binary` — clock-skew protection (future timestamps treated as expired); atomic metadata write-then-rename; TOCTOU re-check of binary existence after metadata read
+- `dlx/cache` — future-timestamped entries treated as expired during cleanup
+- `dlx/package` — scoped-package parsing uses `atIndex === 0` (was `startsWith('@')`); fixes `@scope/pkg` installation failures
+- `cache-with-ttl` — clock-skew detection (far-future `expiresAt` > 2x TTL treated as expired)
+- `packages/specs` — only strips `.git` when URL actually ends with it (no more mid-URL truncation)
+- `releases/github` — TOCTOU on binary download verification (re-checks after reading version file)
+- `provenance` workflow — corrected package name `@socketregistry/lib` → `@socketsecurity/lib`
 
 ## [5.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.6.0) - 2026-02-08
 
