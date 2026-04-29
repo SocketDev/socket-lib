@@ -479,188 +479,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **dependencies**: Removed unnecessary `http2` module dependency from `@sigstore/sign@4.1.0`
-  - Added pnpm override to force `@sigstore/sign@4.1.0` across all dependencies
-  - Created patch to inline HTTP header and status constants instead of importing `http2` module
-  - Eliminates loading of Node.js `http2` module for HTTP/1.1-only operations
+- Removed unnecessary `http2` module dependency from `@sigstore/sign@4.1.0` via pnpm override + patch — eliminates loading `node:http2` for HTTP/1.1-only operations
 
 ## [5.1.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.3) - 2025-12-29
 
 ### Fixed
 
-- **http-request**: Fixed `httpDownload()` to properly handle HTTP redirects (3xx status codes)
-  - Added `followRedirects` option (default: `true`) to enable automatic redirect following
-  - Added `maxRedirects` option (default: `5`) to limit redirect chain length
-  - Now supports downloading from services that use CDN redirects, such as GitHub release assets
-  - Prevents GitHub API quota exhaustion by following `browser_download_url` redirects instead of using API endpoints
-  - Resolves "Request quota exhausted" errors when downloading GitHub release assets
+- `http-request` `httpDownload()` follows 3xx redirects. New `followRedirects` (default `true`) and `maxRedirects` (default `5`) options. Resolves "Request quota exhausted" when downloading GitHub release assets
 
 ## [5.1.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.2) - 2025-12-28
 
 ### Fixed
 
-- **paths**: Fixed missing `getPathValue()` caching in `getSocketDlxDir()`
-  - Now uses `getPathValue()` for performance, consistent with `getSocketUserDir()` and `getSocketCacacheDir()`
-  - Adds test override support via `setPath('socket-dlx-dir', ...)`
-  - Test helper `mockHomeDir()` now properly invalidates path cache with `resetPaths()` calls
-  - Resolves cache persistence issues in test environments
+- `paths` — `getSocketDlxDir()` now uses `getPathValue()` caching consistent with the other Socket-dir helpers. Adds test override via `setPath('socket-dlx-dir', ...)`
 
 ## [5.1.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.1) - 2025-12-28
 
 ### Added
 
-- **paths**: Added `SOCKET_HOME` environment variable support to customize Socket base directory
-  - `getSocketUserDir()` now checks `SOCKET_HOME` before defaulting to `~/.socket`
-  - `getSocketDlxDir()` inherits `SOCKET_HOME` support (priority: `SOCKET_DLX_DIR` > `SOCKET_HOME/_dlx` > `~/.socket/_dlx`)
-  - Enables flexible directory configuration for restricted or custom environments
+- `paths` `SOCKET_HOME` env var support — customize Socket base directory. Priority: `SOCKET_DLX_DIR` > `SOCKET_HOME/_dlx` > `~/.socket/_dlx`
 
 ### Changed
 
-- **paths**: Enhanced directory resolution with temporary directory fallback
-  - `getUserHomeDir()` now falls back to `os.tmpdir()` when home directory is unavailable
-  - Improves resilience in containerized and restricted environments
-  - Priority order: `HOME` > `USERPROFILE` > `os.homedir()` > `os.tmpdir()`
+- `paths` `getUserHomeDir()` falls back to `os.tmpdir()` when home dir is unavailable. Priority: `HOME` > `USERPROFILE` > `os.homedir()` > `os.tmpdir()`
 
 ## [5.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.0) - 2025-12-17
 
 ### Added
 
-- **types**: Added `ALPM` and `VSCODE` to `PURL_Type` enum
-  - `ALPM`: Arch Linux Package Manager ecosystem
-  - `VSCODE`: Visual Studio Code extensions ecosystem
+- `types` `PURL_Type` — added `ALPM` (Arch Linux) and `VSCODE` (VS Code extensions)
 
 ## [5.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.0.2) - 2025-12-15
 
 ### Changed
 
-- **signal-exit**: `signals()` now auto-initializes its internal state
-  - Commit: [`8cb0576`](https://github.com/SocketDev/socket-lib/commit/8cb0576)
+- `signal-exit` `signals()` auto-initializes its internal state
 
 ## [5.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.0.1) - 2025-12-11
 
 ### Added
 
-- **http-request**: Enhanced `httpDownload()` with automatic progress logging via Logger integration
-  - New `logger` option: Pass a Logger instance for automatic progress tracking
-  - New `progressInterval` option: Configure progress reporting frequency (default: 10%)
-  - Progress format: `Progress: XX% (Y.Y MB / Z.Z MB)`
-  - `onProgress` callback takes precedence over `logger` when both are provided
-  - Commit: [`91e5db5`](https://github.com/SocketDev/socket-lib/commit/91e5db5)
+- `http-request` `httpDownload()` automatic progress logging — `logger` option for a Logger instance, `progressInterval` option (default `10%`). `onProgress` callback takes precedence over `logger`
 
 ## [5.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.0.0) - 2025-12-04
 
 ### Added
 
-- **json/edit**: New `EditableJson` base class for generic JSON file manipulation with formatting preservation
-  - Extracted from `EditablePackageJson` to enable code reuse via composition pattern
-  - Supports reading, modifying, and writing JSON files while preserving formatting
-  - Export: `@socketsecurity/lib/json/edit`
-
-- **json/format**: New JSON formatting utilities for consistent JSON manipulation
-  - Functions for analyzing and preserving JSON formatting patterns
-  - Export: `@socketsecurity/lib/json/format`
-
-- **json/parse**: New JSON parsing utilities
-  - `isJsonPrimitive()`: Check if value is a JSON primitive type
-  - `jsonParse()`: Parse JSON with error handling
-  - Export: `@socketsecurity/lib/json/parse`
-
-- **json/types**: New JSON type definitions and interfaces
-  - Export: `@socketsecurity/lib/json/types`
-
-- **dlx/cache**: New DLX cache utilities
-  - `generateCacheKey()`: Generate cache keys for DLX packages
-  - Export: `@socketsecurity/lib/dlx/cache`
-
-- **dlx/dir**: New DLX directory management utilities
-  - `clearDlx()`, `clearDlxSync()`: Clear DLX directory
-  - `dlxDirExists()`, `dlxDirExistsAsync()`: Check if DLX directory exists
-  - `ensureDlxDir()`, `ensureDlxDirSync()`: Ensure DLX directory exists
-  - Export: `@socketsecurity/lib/dlx/dir`
-
-- **dlx/packages**: New DLX package management utilities
-  - `isDlxPackageInstalled()`, `isDlxPackageInstalledAsync()`: Check if package is installed
-  - `listDlxPackages()`, `listDlxPackagesAsync()`: List installed packages
-  - `removeDlxPackage()`, `removeDlxPackageSync()`: Remove installed packages
-  - Export: `@socketsecurity/lib/dlx/packages`
-
-- **dlx/paths**: New DLX path utilities
-  - `getDlxPackageDir()`: Get package directory path
-  - `getDlxInstalledPackageDir()`: Get installed package directory path
-  - `getDlxPackageJsonPath()`: Get package.json path
-  - `getDlxPackageNodeModulesDir()`: Get node_modules directory path
-  - `isInSocketDlx()`: Check if path is in DLX directory
-  - Export: `@socketsecurity/lib/dlx/paths`
+- `json/edit` `EditableJson` — base class for generic JSON file manipulation with formatting preservation
+- `json/format` — JSON formatting utilities
+- `json/parse` — `isJsonPrimitive`, `jsonParse` (with error handling)
+- `json/types` — JSON type definitions
+- `dlx/cache` `generateCacheKey()` — DLX package cache keys
+- `dlx/dir` — `clearDlx`, `clearDlxSync`, `dlxDirExists`, `dlxDirExistsAsync`, `ensureDlxDir`, `ensureDlxDirSync`
+- `dlx/packages` — `isDlxPackageInstalled`, `listDlxPackages`, `removeDlxPackage` (+ async/sync variants)
+- `dlx/paths` — `getDlxPackageDir`, `getDlxInstalledPackageDir`, `getDlxPackageJsonPath`, `getDlxPackageNodeModulesDir`, `isInSocketDlx`
 
 ### Changed
 
-- **BREAKING**: Reorganized module paths for better structure and discoverability
-  - `@socketsecurity/lib/json/editable` → `@socketsecurity/lib/json/edit`
-  - `@socketsecurity/lib/packages/editable` → `@socketsecurity/lib/packages/edit`
-  - `@socketsecurity/lib/maintained-node-versions` → `@socketsecurity/lib/constants/maintained-node-versions`
-  - `@socketsecurity/lib/package-default-node-range` → `@socketsecurity/lib/constants/package-default-node-range`
-  - `@socketsecurity/lib/package-default-socket-categories` → `@socketsecurity/lib/constants/package-default-socket-categories`
-  - `@socketsecurity/lib/lifecycle-script-names` → `@socketsecurity/lib/constants/lifecycle-script-names`
-  - `@socketsecurity/lib/dlx` → Split into `@socketsecurity/lib/dlx/cache`, `@socketsecurity/lib/dlx/dir`, `@socketsecurity/lib/dlx/packages`, `@socketsecurity/lib/dlx/paths`
-  - `@socketsecurity/lib/dlx-binary` → `@socketsecurity/lib/dlx/binary`
-  - `@socketsecurity/lib/dlx-manifest` → `@socketsecurity/lib/dlx/manifest`
-  - `@socketsecurity/lib/dlx-package` → `@socketsecurity/lib/dlx/package`
-
-- **json**: Reorganized JSON utilities into modular submodules (json/edit, json/format, json/parse, json/types)
-  - Removed barrel index file in favor of direct submodule imports
-  - Better separation of concerns and tree-shaking
-
-- **dlx**: Split monolithic DLX module into focused submodules (cache, dir, packages, paths)
-  - Improved modularity and maintainability
-  - Better code organization and discoverability
+- **BREAKING**: Module path reorganization:
+  - `json/editable` → `json/edit`
+  - `packages/editable` → `packages/edit`
+  - `maintained-node-versions`, `package-default-node-range`, `package-default-socket-categories`, `lifecycle-script-names` → moved under `constants/`
+  - `dlx` → split into `dlx/cache`, `dlx/dir`, `dlx/packages`, `dlx/paths`
+  - `dlx-binary` → `dlx/binary`; `dlx-manifest` → `dlx/manifest`; `dlx-package` → `dlx/package`
 
 ## [4.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.4.0) - 2025-11-25
 
 ### Added
 
-- **fs**: Exported `normalizeEncoding()` function for robust encoding string normalization
-  - Handles case-insensitive encoding names (e.g., 'UTF-8', 'utf8', 'UTF8')
-  - Supports encoding aliases (e.g., 'binary' → 'latin1', 'ucs-2' → 'utf16le')
-  - Fast-path optimization for common encodings
-  - Defaults to 'utf8' for invalid or null encodings
-  - Export: `@socketsecurity/lib/fs`
+- `fs` `normalizeEncoding()` — case-insensitive encoding normalization with aliases (`binary` → `latin1`, `ucs-2` → `utf16le`); defaults to `utf8`
 
 ### Fixed
 
-- **fs**: `safeReadFile()` and `safeReadFileSync()` type signatures and encoding handling
-  - Corrected type overloads: `encoding: null` → `Buffer | undefined`, no encoding → `string | undefined` (UTF-8 default)
-  - Fixed implementation to properly handle `encoding: null` for Buffer returns
-
-- **suppress-warnings**: `withSuppressedWarnings()` now properly restores warning state
-  - Fixed state restoration to only remove warning types that were added by the function
-  - Prevents accidental removal of warnings that were already suppressed
-  - Ensures correct cleanup behavior when warning types are nested or reused
+- `fs` `safeReadFile` / `safeReadFileSync` — corrected type overloads (`encoding: null` → `Buffer`; no encoding → `string`)
+- `suppress-warnings` `withSuppressedWarnings()` — properly restores state, only removing warnings the function added
 
 ## [4.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.3.0) - 2025-11-20
 
 ### Added
 
-- **globs**: New `glob()` and `globSync()` wrapper functions for fast-glob
-  - Provides convenient wrappers around fast-glob with normalized options
-  - Maintains consistent API with existing glob functionality
-  - Export: `@socketsecurity/lib/globs`
+- `globs` `glob()` / `globSync()` — wrapper functions for fast-glob with normalized options
 
 ## [4.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.1.0) - 2025-11-17
 
 ### Added
 
-- **constants/node**: New version helper functions for cleaner version detection
-  - `getNodeMinorVersion()`: Extract minor version number
-  - `getNodePatchVersion()`: Extract patch version number
+- `constants/node` — `getNodeMinorVersion()`, `getNodePatchVersion()`
 
 ### Fixed
 
-- **constants/node**: Improve Node.js flag management in `getNodeHardenFlags()`
-  - Properly guard `--experimental-permission` for Node 20-23 only
-  - Properly guard `--permission` for Node 24+ only
-  - Properly guard `--force-node-api-uncaught-exceptions-policy` for Node 22+ (was incorrectly applied to all versions)
-  - Automatically include permission grants from `getNodePermissionFlags()` for Node 24+
-  - Remove `--experimental-policy` flag (no policy file provided)
+- `constants/node` `getNodeHardenFlags()` — `--experimental-permission` guarded for Node 20-23; `--permission` for Node 24+; `--force-node-api-uncaught-exceptions-policy` for Node 22+. Removed `--experimental-policy`
 
 ## [4.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v4.0.1) - 2025-11-17
 
