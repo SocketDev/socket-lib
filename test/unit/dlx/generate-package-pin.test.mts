@@ -6,8 +6,6 @@
  * flow against the real npm registry.
  */
 
-import process from 'node:process'
-
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -16,7 +14,7 @@ import {
   generatePackagePin,
 } from '@socketsecurity/lib/dlx/lockfile'
 
-const skipNetwork = !!process.env['SOCKET_LIB_SKIP_NETWORK_TESTS']
+import { describeNetworkOnly } from '../utils/skip-helpers'
 
 describe('dlx/lockfile/generatePackagePin', () => {
   describe('option validation', () => {
@@ -57,7 +55,7 @@ describe('dlx/lockfile/generatePackagePin', () => {
     })
   })
 
-  describe.skipIf(skipNetwork)('live registry (network)', () => {
+  describeNetworkOnly('live registry (network)', () => {
     it('returns pin details with both hash formats', async () => {
       const pin = await generatePackagePin({
         package: 'is-odd@3.0.1',

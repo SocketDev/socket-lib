@@ -21,6 +21,8 @@ import {
   spawnSync,
 } from '@socketsecurity/lib/spawn'
 
+import { itUnixOnly, itWindowsOnly } from './utils/skip-helpers'
+
 describe('spawn', () => {
   describe('isSpawnError', () => {
     it('should return true for error with code property', () => {
@@ -286,7 +288,7 @@ describe('spawn', () => {
       }
     })
 
-    it.skipIf(process.platform !== 'win32')(
+    itWindowsOnly(
       'should handle Windows script extensions on Windows',
       async () => {
         const result = await spawn('npm.cmd', ['--version'], {
@@ -296,7 +298,7 @@ describe('spawn', () => {
       },
     )
 
-    it.skipIf(process.platform === 'win32')(
+    itUnixOnly(
       'should handle shell as string path',
       async () => {
         const result = await spawn('echo', ['hello'], {
@@ -444,7 +446,7 @@ describe('spawn', () => {
       expect(Array.isArray(result.output)).toBe(true)
     })
 
-    it.skipIf(process.platform !== 'win32')(
+    itWindowsOnly(
       'should handle Windows script extensions on Windows',
       () => {
         const result = spawnSync('npm.cmd', ['--version'], {
@@ -454,7 +456,7 @@ describe('spawn', () => {
       },
     )
 
-    it.skipIf(process.platform === 'win32')(
+    itUnixOnly(
       'should handle shell as string path',
       () => {
         const result = spawnSync('echo', ['hello'], {

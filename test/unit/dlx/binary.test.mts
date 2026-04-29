@@ -25,6 +25,8 @@ import {
   listDlxCache,
 } from '@socketsecurity/lib/dlx/binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { itWindowsOnly } from '../utils/skip-helpers'
 import { mockHomeDir, runWithTempDir } from '../utils/temp-file-helper'
 
 // Test server setup
@@ -1195,7 +1197,7 @@ describe.sequential('dlx-binary', () => {
     const windowsScriptExts = ['.cmd', '.bat', '.ps1'] as const
 
     for (const ext of windowsScriptExts) {
-      it.skipIf(process.platform !== 'win32')(
+      itWindowsOnly(
         `should handle ${ext} files with shell on Windows`,
         async () => {
           await runWithTempDir(
