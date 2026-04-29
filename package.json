@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.26.0",
+  "version": "5.27.0",
   "packageManager": "pnpm@11.0.0",
   "license": "MIT",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
@@ -271,17 +271,17 @@
       "types": "./dist/effects/pulse-frames.d.ts",
       "default": "./dist/effects/pulse-frames.js"
     },
-    "./effects/text-shimmer": {
-      "types": "./dist/effects/text-shimmer.d.ts",
-      "default": "./dist/effects/text-shimmer.js"
+    "./effects/shimmer": {
+      "types": "./dist/effects/shimmer.d.ts",
+      "default": "./dist/effects/shimmer.js"
     },
-    "./effects/types": {
-      "types": "./dist/effects/types.d.ts",
-      "default": "./dist/effects/types.js"
+    "./effects/shimmer-keyframes": {
+      "types": "./dist/effects/shimmer-keyframes.d.ts",
+      "default": "./dist/effects/shimmer-keyframes.js"
     },
-    "./effects/ultra": {
-      "types": "./dist/effects/ultra.d.ts",
-      "default": "./dist/effects/ultra.js"
+    "./effects/shimmer-terminal": {
+      "types": "./dist/effects/shimmer-terminal.d.ts",
+      "default": "./dist/effects/shimmer-terminal.js"
     },
     "./env": {
       "types": "./dist/env.d.ts",
