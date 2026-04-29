@@ -5,31 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.27.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.27.0) - 2026-04-29
-
-### Added
-
-- `@socketsecurity/lib/effects/shimmer` — new pure-functional shimmer engine. `frameColors(spec, length, frame) → RGB[]` is the load-bearing primitive. Built-in kernels (`blockKernel`, `smoothKernel`), sweep generators (`ltrSweep`, `rtlSweep`, `biSweep`, `randomSweep`, `noSweep`), and palette helpers (`constant`, `gradient`, `blendRGB`) compose into a `ShimmerSpec`. `configToSpec()` translates the user-facing flat `ShimmerConfig` into a spec for callers that don't need full control. Zero deps, no mutable state — same `(spec, length, frame)` always produces the same output
-- `@socketsecurity/lib/effects/shimmer-terminal` — terminal renderer. `colorsToAnsi(text, colors)` wraps each char in 24-bit truecolor ANSI escapes; `renderFrame(spec, text, frame)` is a one-call convenience over `frameColors` + `colorsToAnsi`
-- `@socketsecurity/lib/effects/shimmer-keyframes` — SVG keyframe batcher. `toKeyframes(spec, length, frames)` pre-renders N frames into per-character SMIL-ready `keyTimes`/`values` arrays with consecutive-duplicate dedup and a clean `t=1` loop closure. Drop straight into `<animate keyTimes={...} values={...} calcMode="discrete">`. Replaces the bespoke generator code that lived in `ultrathink/assets/.gen-logo.mjs`
-- `feat(prim): AI-deferred disambiguator + programmatic-Claude lockdown` (commit fc64033) — see commit body
-- `chore(deps): bump pnpm 11.0.0-rc.5 → 11.0.0 (GA)` (commit 554d35a)
-
-### Changed
-
-- **BREAKING**: `@socketsecurity/lib/spinner` `ShimmerInfo` shape changed. The runtime state object exposed via `Spinner.shimmerState` now uses `direction: ShimmerDirection`, `speed: number`, `frame: number` (was: `currentDir`, `mode`, `speed`, `step`). The user-facing `ShimmerConfig` shape (`{ color, dir, speed }`) is unchanged — callers that only construct configs and read back state via getters do not need to migrate; callers that introspect `shimmerState.mode` or `shimmerState.step` do
-- `@socketsecurity/lib/spinner` shimmer rendering — internals now drive the new `frameColors` + `colorsToAnsi` pipeline. Behavior at the spinner level is preserved (LTR sweep at `speed: 1/3` is the same wave the previous library produced); the rewrite removes 350+ LOC of mutable state, regex-based ANSI style detection, and CI/theme-resolution branching from `effects/text-shimmer.ts`
-- `refactor(github): adopt DateParse + ErrorCtor primordials throughout` (commit 7bb2d03)
-- `fix(github): adopt DateCtor + vendor fixed acorn-wasm` (commit ec2d3d4)
-- `refactor(github): tighten error messages + remove quiet option` (commit b6d3713)
-
-### Removed
-
-- **BREAKING**: `@socketsecurity/lib/effects/text-shimmer` subpath export — file deleted. Public surface (`applyShimmer`, `ShimmerColor`, `ShimmerColorRgb`, `ShimmerColorGradient`, `ShimmerColorInherit`, `ShimmerConfig` legacy shape, `ShimmerState`, `DIR_LTR`/`DIR_RTL`/`DIR_RANDOM`/`DIR_NONE`/`MODE_BI`/`COLOR_INHERIT` constants) is gone. Migrate to `@socketsecurity/lib/effects/shimmer` — `applyShimmer(text, state, opts)` becomes `colorsToAnsi(text, frameColors(spec, length, frame))` where `spec` comes from `configToSpec({ color, dir, speed }, length)`
-- **BREAKING**: `@socketsecurity/lib/effects/ultra` subpath export — file deleted. `RAINBOW_GRADIENT` moved to `@socketsecurity/lib/themes/utils` (now typed `Palette` from the new shimmer engine). `generateRainbowGradient(n)` removed — use `Array.from({ length: n }, gradient(RAINBOW_GRADIENT))` instead, or pass `RAINBOW_GRADIENT` directly to `ShimmerConfig.color` and let the engine handle wrap-around
-- **BREAKING**: `@socketsecurity/lib/effects/types` subpath export — file deleted. The shared types (`ShimmerColor*`, `ShimmerDirection`, `ShimmerConfig`, `ShimmerState`) lived only there and have been replaced by types in `effects/shimmer.ts` (`RGB`, `Palette`, `ShimmerDirection`, `ShimmerConfig`, `ShimmerSpec`, `Kernel`, `KernelContext`)
-
-
+## [5.26.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.0) - 2026-04-27
 
 ### Added
 

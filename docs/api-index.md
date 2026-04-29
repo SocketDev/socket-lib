@@ -115,12 +115,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## effects/
 
-| Subpath                                                                                | Description                                           |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| [`@socketsecurity/lib/effects/pulse-frames`](../src/effects/pulse-frames.ts)           | Socket pulse animation frames generator.              |
-| [`@socketsecurity/lib/effects/shimmer`](../src/effects/shimmer.ts)                     | Shimmer animation engine — pure functions, zero deps. |
-| [`@socketsecurity/lib/effects/shimmer-keyframes`](../src/effects/shimmer-keyframes.ts) | SVG keyframe batcher for the shimmer engine.          |
-| [`@socketsecurity/lib/effects/shimmer-terminal`](../src/effects/shimmer-terminal.ts)   | Terminal renderer for the shimmer engine.             |
+| Subpath                                                                      | Description                                             |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [`@socketsecurity/lib/effects/pulse-frames`](../src/effects/pulse-frames.ts) | Socket pulse animation frames generator.                |
+| [`@socketsecurity/lib/effects/text-shimmer`](../src/effects/text-shimmer.ts) | Text shimmer animation utilities.                       |
+| [`@socketsecurity/lib/effects/types`](../src/effects/types.ts)               | Shared types for effects (shimmer, pulse, ultra, etc.). |
+| [`@socketsecurity/lib/effects/ultra`](../src/effects/ultra.ts)               | Ultrathink rainbow gradient effect.                     |
 
 ## env/
 
