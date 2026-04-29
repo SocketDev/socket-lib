@@ -574,239 +574,148 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Removed # path imports and replaced with relative paths
+- Replaced `#`-path imports with relative paths
 
 ## [4.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v4.0.0) - 2025-11-15
 
 ### Changed
 
-- **paths**: Reorganized path utilities into dedicated `paths/*` submodules for improved modularity
-- **imports**: Converted lazy require() calls to ES6 static imports for better tree-shaking and bundler compatibility
+- **BREAKING**: `paths` reorganized into dedicated `paths/*` submodules
+- Lazy `require()` calls converted to ES6 static imports for better tree-shaking
 
 ## [3.5.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.5.0) - 2025-11-14
 
 ### Added
 
-- **argv/quote**: New utilities for quoting command-line arguments when using `spawn()` with `shell: true`
-  - `posixQuote(arg)`: Quote arguments for POSIX shells (bash, sh, zsh) using single quotes
-  - `win32Quote(arg)`: Quote arguments for Windows cmd.exe using double quotes
+- `argv/quote` — `posixQuote(arg)` (single-quote for bash/sh/zsh) and `win32Quote(arg)` (double-quote for cmd.exe). Use when invoking `spawn()` with `shell: true`
 
 ## [3.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.4.0) - 2025-11-14
 
 ### Added
 
-- **Spinner**: New `skip()` and `skipAndStop()` methods for displaying skipped operations
-  - `skip(text)`: Display skip message alongside spinner (e.g., "Skipping optional step...")
-  - `skipAndStop(text)`: Display skip message and stop spinner in one call
-  - Uses cyan ↻ (refresh/reload) symbol with @ ASCII fallback
-  - Normalizes text formatting consistently with other spinner methods
-  - Useful for communicating skipped steps during long-running operations
-
-- **Logger**: New `skip()` method and symbol for skipped operations
-  - `LOG_SYMBOLS.skip`: New cyan ↻ symbol for skip output (@ ASCII fallback)
-  - `skip(message)`: Display skip messages with dedicated symbol
-  - Complements existing info/step/success/error/warning/reason methods
+- `Spinner` `skip(text)` / `skipAndStop(text)` — display skip messages with cyan ↻ symbol
+- `Logger` `skip(message)` and `LOG_SYMBOLS.skip`
 
 ## [3.3.11](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.11) - 2025-11-14
 
 ### Fixed
 
-- **prompts**: Fix "inquirerPrompt is not a function" error in interactive prompts
-  - Properly handle inquirer modules with multiple exports (select, search)
+- `prompts` — "inquirerPrompt is not a function" when inquirer modules expose multiple exports (select, search)
 
 ## [3.3.10](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.10) - 2025-11-14
 
 ### Fixed
 
-- **deps**: Add string-width and wrap-ansi overrides for bundling compatibility
-  - Forces string-width@8.1.0 and wrap-ansi@9.0.2 for compatibility with strip-ansi@7.1.2
+- `string-width@8.1.0` and `wrap-ansi@9.0.2` overrides for `strip-ansi@7.1.2` compatibility
 
 ## [3.3.9](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.9) - 2025-11-14
 
 ### Fixed
 
-- **deps**: Add strip-ansi override to fix bundling compatibility
-  - Forces strip-ansi@7.1.2 for compatibility with ansi-regex@6.2.2
+- `strip-ansi@7.1.2` override for `ansi-regex@6.2.2` compatibility
 
 ## [3.3.8](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.8) - 2025-11-14
 
 ### Fixed
 
-- **spinner**: Clear remaining artifacts after withSpinner stops
-  - Fixed rogue spinner characters persisting after spinner completes
+- `spinner` — clear remaining artifacts after `withSpinner` stops (rogue spinner characters)
 
 ## [3.3.7](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.7) - 2025-11-13
 
 ### Changed
 
-- **refactor**: Add explicit `.js` extensions to external require calls
-  - Improves module resolution clarity and compatibility with modern bundlers
-  - Updated 18 require calls across 10 source files
+- Explicit `.js` extensions on external `require()` calls for modern bundler compat
 
 ## [3.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.6) - 2025-11-13
 
 ### Changed
 
-- **deps**: Add pnpm overrides to consolidate package versions
-  - Force single versions: `@npmcli/arborist@9.1.6`, `@npmcli/run-script@10.0.0`, `semver@7.7.2`, `ansi-regex@6.2.2`, `lru-cache@11.2.2`
-  - Update patch from `@npmcli/run-script@9.1.0` to `@npmcli/run-script@10.0.0`
-  - Reduces duplicate dependencies and potential version conflicts
+- pnpm overrides consolidate `@npmcli/arborist@9.1.6`, `@npmcli/run-script@10.0.0`, `semver@7.7.2`, `ansi-regex@6.2.2`, `lru-cache@11.2.2` to single versions
 
 ## [3.3.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.5) - 2025-11-13
 
 ### Fixed
 
-- **build**: Add patches to prevent node-gyp bundling issues
+- Patches to prevent `node-gyp` bundling issues
 
 ## [3.3.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.4) - 2025-11-13
 
 ### Fixed
 
-- **build**: Mark node-gyp as external in npm-pack bundle
+- `node-gyp` marked external in `npm-pack` bundle
 
 ## [3.3.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.3) - 2025-11-13
 
 ### Fixed
 
-- **build**: Break node-gyp string to prevent bundler issues with ESM/CJS interop
+- `node-gyp` string broken to prevent bundler ESM/CJS interop issues
 
 ## [3.3.2](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.2) - 2025-11-13
 
 ### Changed
 
-- **dlx**: Install package dependencies after download
-- **external**: Optimize npm package bundle sizes (~3MB reduction)
+- `dlx` installs package dependencies after download
+- npm package bundle sizes reduced ~3 MB
 
 ## [3.3.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.1) - 2025-11-11
 
 ### Added
 
-- Added `SOCKET_DOCS_CONTACT_URL` constant for documentation contact support page
-- Added `checkbox` prompt support
+- `SOCKET_DOCS_CONTACT_URL` constant
+- `checkbox` prompt support
 
 ## [3.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.3.0) - 2025-11-07
 
 ### Added
 
-- **Spinner**: New `reason()` and `reasonAndStop()` methods for displaying working/thinking output
-  - `reason(text)`: Display reason text alongside spinner (e.g., "Analyzing dependencies...")
-  - `reasonAndStop(text)`: Display reason text and stop spinner in one call
-  - Normalizes text formatting consistently with other spinner methods
-  - Useful for communicating progress steps during long-running operations
-
-- **Logger**: New `reason()` method and symbol for working/thinking output
-  - `LOG_SYMBOLS.reason`: New symbol for reason output (distinct from info/step symbols)
-  - `reason(message)`: Display reason messages with dedicated symbol
-  - Complements existing info/step/success/error/warning methods
+- `Spinner` `reason(text)` / `reasonAndStop(text)` — display working/thinking output
+- `Logger` `reason(message)` and `LOG_SYMBOLS.reason`
 
 ## [3.2.8](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.8) - 2025-11-05
 
 ### Fixed
 
-- **build**: Fix CommonJS export script edge cases
-  - Fixed stray semicolons after comment placeholders in transformed modules
-  - Fixed incorrect transformation of `module.exports.default` to `module.module.exports`
-  - Ensures external dependencies and default exports work correctly
+- CommonJS export script edge cases (stray semicolons after comment placeholders; incorrect `module.exports.default` → `module.module.exports`)
 
 ## [3.2.7](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.7) - 2025-11-05
 
 ### Fixed
 
-- **build-externals**: Disable minification to preserve exports
-  - External dependencies are no longer minified during bundling
-  - Prevents export name mangling that breaks CommonJS interop
-  - Fixes `semver.parse()` and `semver.major()` being undefined
-
-- **build**: Fix CommonJS export interop for TypeScript default exports
-  - Modules with `export default` now work without requiring `.default` accessor
-
-### Changed
-
-- **docs**: Moved packages README to correct location (`src/packages/README.md`)
+- External dependency minification disabled to preserve exports (was breaking `semver.parse()`, `semver.major()`)
+- CommonJS export interop for TypeScript `export default` no longer needs `.default` accessor
 
 ## [3.2.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.6) - 2025-11-05
 
 ### Fixed
 
-- **logger**: Replace yoctocolors-cjs rgb() with manual ANSI codes
-  - The yoctocolors-cjs package doesn't have an rgb() method
-  - Manually construct ANSI escape sequences for RGB colors (ESC[38;2;r;g;bm...ESC[39m)
-  - Affects `src/logger.ts` and `src/stdio/prompts.ts` applyColor() functions
+- `logger` and `stdio/prompts` — manual ANSI escape sequences for RGB colors (yoctocolors-cjs has no `rgb()` method)
 
 ## [3.2.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.5) - 2025-11-05
 
 ### Added
 
-- **scripts**: Add path alias resolution script (`fix-path-aliases.mjs`)
-  - Resolves internal path aliases (`#lib/*`, `#constants/*`, etc.) to relative paths in built CommonJS files
-
-- **build**: Integrate path alias resolution into build pipeline
-  - Add path alias plugin to esbuild config
-  - Integrate `fix-path-aliases.mjs` into build process
-  - Ensures path aliases work correctly in compiled CommonJS output
+- Path alias resolution in build pipeline — `#lib/*` / `#constants/*` aliases resolve to relative paths in compiled CommonJS
 
 ## [3.2.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.4) - 2025-11-04
 
 ### Added
 
-- **Logger**: New `time()` method for timing operations with automatic duration reporting
-  - Starts a named timer and returns a `stop()` function
-  - Automatically logs completion with formatted duration (e.g., "Operation completed in 1.23s")
-  - Useful for performance monitoring and debugging
+- `Logger` `time()` — start a named timer; returns `stop()` that logs completion with formatted duration
 
 ### Fixed
 
-- **Spinner effects**: Fixed star spinner frames by adding trailing space for consistent spacing
-- **Build system**: Fixed external dependency bundling issues
-  - Bundle `@npmcli/package-json` with subpath exports support
-  - Use `src/external` files as bundle entry points for proper module resolution
-  - Bundle libnpmexec from npm instead of using vendored version
-  - Prevent circular dependencies with `createForceNodeModulesPlugin()` to force resolution from node_modules
-
-## [3.2.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.3) - 2025-11-03
-
-### Internal
-
-- **Build system**: Added stub infrastructure for external dependency bundling
-  - Created organized `scripts/build-externals/stubs/` directory with utility and active stubs
-  - Added conservative stubs for unused dependencies: `encoding`/`iconv-lite` and `debug`
-  - Reduces external bundle size by ~18KB (9KB from encoding stubs, 9KB from debug stubs)
+- Star spinner frames — added trailing space for consistent spacing
 
 ## [3.2.2](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.2) - 2025-11-03
 
 ### Added
 
-- **DLX**: Binary permission management with chmod 0o755 for all package binaries
-  - New `makePackageBinsExecutable()` function ensures all binaries in installed packages are executable
-  - Aligns with npm's cmd-shim approach for binary permissions
-  - Handles both single and multiple binary packages
-  - No-op on Windows (permissions not needed)
-
-- **DLX**: npm-compatible bin resolution via vendored `getBinFromManifest`
-  - Cherry-picked `getBinFromManifest` from libnpmexec@10.1.8 (~1.5 KB)
-  - Avoids 1.1 MB bundle by vendoring single function instead of full package
-  - Provides battle-tested npm bin resolution strategy
-  - Maintains user-friendly fallbacks for edge cases
-
-### Changed
-
-- **DLX**: Enhanced `findBinaryPath()` with npm's resolution strategy
-  - Primary: npm's `getBinFromManifest` (handles standard cases and aliases)
-  - Fallback: user-provided `binaryName` parameter
-  - Fallback: last segment of package name
-  - Last resort: first binary in list
+- `dlx` `makePackageBinsExecutable()` — chmod 0o755 on all package binaries (no-op on Windows)
+- `dlx` `findBinaryPath()` adopts npm's resolution strategy (vendored `getBinFromManifest` from libnpmexec)
 
 ### Performance
 
-- **Optimized package size**: Reduced bundle size through strategic export minimization and vendoring
-  - Vendored `getBinFromManifest` function instead of bundling full libnpmexec (~1.1 MB savings)
-  - Minimized external module exports for better tree-shaking:
-    - `fast-sort`: Now exports only `{ createNewSortInstance }` (2.1 KB, 96% reduction from ~56 KB)
-    - `fast-glob`: Now exports only `{ globStream }` (82 KB bundle)
-    - `del`: Now exports only `{ deleteAsync, deleteSync }` (100 KB bundle)
-    - `streaming-iterables`: Now exports only `{ parallelMap, transform }` (11 KB, 93% reduction from ~168 KB)
-  - Total savings: ~1.3 MB (1.1 MB from vendoring + 211 KB from minimized exports)
-  - Establishes pattern for future external module additions
+- Bundle size reduced ~1.3 MB total — vendored `getBinFromManifest` (1.1 MB savings) + minimized exports for `fast-sort`, `fast-glob`, `del`, `streaming-iterables`
 
 ## [3.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.1) - 2025-11-02
 
