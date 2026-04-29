@@ -493,6 +493,52 @@ describe('spinner', () => {
       expect(spinner.shimmerState).toBeUndefined()
       spinner.stop()
     })
+
+    it('should expose a frame counter starting at 0', () => {
+      const spinner = Spinner({ shimmer: { dir: 'ltr' } })
+      expect(spinner.shimmerState?.frame).toBe(0)
+    })
+
+    it('should default speed to 1/3 when omitted', () => {
+      const spinner = Spinner({ shimmer: { dir: 'ltr' } })
+      expect(spinner.shimmerState?.speed).toBeCloseTo(1 / 3, 5)
+    })
+
+    it('should default direction to ltr when shimmer is a string keyword', () => {
+      const spinner = Spinner({ shimmer: 'ltr' })
+      expect(spinner.shimmerState?.direction).toBe('ltr')
+    })
+
+    it('should accept rtl direction as a string shorthand', () => {
+      const spinner = Spinner({ shimmer: 'rtl' })
+      expect(spinner.shimmerState?.direction).toBe('rtl')
+    })
+
+    it('should accept a per-character palette as shimmer color', () => {
+      const palette: Array<[number, number, number]> = [
+        [255, 0, 0],
+        [0, 255, 0],
+        [0, 0, 255],
+      ]
+      const spinner = Spinner({ shimmer: { color: palette, dir: 'ltr' } })
+      expect(spinner.shimmerState?.color).toEqual(palette)
+    })
+
+    it('should reset frame counter to 0 when re-enabling shimmer', () => {
+      const spinner = Spinner({ shimmer: { dir: 'ltr' } })
+      // Frame begins at 0; manually nudge it via setShimmer.
+      spinner.setShimmer({ dir: 'ltr' })
+      const before = spinner.shimmerState?.frame
+      expect(before).toBe(0)
+      spinner.disableShimmer()
+      spinner.enableShimmer()
+      expect(spinner.shimmerState?.frame).toBe(0)
+    })
+
+    it('should accept dir: none and store it in state', () => {
+      const spinner = Spinner({ shimmer: { dir: 'none' } })
+      expect(spinner.shimmerState?.direction).toBe('none')
+    })
   })
 
   describe('Progress methods', () => {

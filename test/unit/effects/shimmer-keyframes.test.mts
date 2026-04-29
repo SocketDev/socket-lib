@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   configToSpec,
+  frameColors,
   type RGB,
   type ShimmerSpec,
 } from '@socketsecurity/lib/effects/shimmer'
@@ -78,6 +79,40 @@ describe('effects/shimmer-keyframes', () => {
         expect(track.times).toEqual([1])
         // No frames captured, so the closing value falls back to the default.
         expect(track.values).toHaveLength(1)
+      }
+    })
+
+    it('agrees with frameColors at every emitted keyframe time', () => {
+      // Frame-by-frame correctness: for every keyframe (time, value), there
+      // must exist a frame number whose engine output matches that value.
+      // This catches any drift between the keyframes adapter and the engine.
+      const FRAMES = 30
+      const spec = configToSpec({ color: [255, 0, 0], dir: 'bi', speed: 1 }, 6)
+      const tracks = toKeyframes(spec, 6, FRAMES)
+
+      // For each char, verify each emitted keyframe matches the engine's
+      // output at the corresponding frame index.
+      for (let charIdx = 0; charIdx < 6; charIdx++) {
+        const track = tracks[charIdx]!
+        // Skip the t=1 closure entry (it's a synthetic loop wrap).
+        for (let k = 0; k < track.times.length - 1; k++) {
+          const frameIdx = Math.round(track.times[k]! * FRAMES)
+          const engineRgb = frameColors(spec, 6, frameIdx)[charIdx]!
+          const engineStr = `rgb(${engineRgb[0]},${engineRgb[1]},${engineRgb[2]})`
+          expect(track.values[k]).toBe(engineStr)
+        }
+      }
+    })
+
+    it('omits redundant keyframes when consecutive frames are identical', () => {
+      // A wave that's parked off-screen produces an unchanging stream of base
+      // colors. The adapter should compress that to a single keyframe.
+      const spec = configToSpec({ color: [100, 200, 50], dir: 'none' }, 4)
+      const tracks = toKeyframes(spec, 4, 100)
+      // 'none' direction → wave never on text → all 100 frames identical.
+      // Tracks should compress to: opening keyframe + t=1 closure = 2 entries.
+      for (const track of tracks) {
+        expect(track.values).toHaveLength(2)
       }
     })
   })
