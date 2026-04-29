@@ -117,9 +117,12 @@ function checkEsmNamedExports(filePath) {
 
     // If we have an empty object, check if it's a type-only file
     if (keys.length === 0) {
-      // Type-only files (e.g., cover/types.js, effects/types.js) have no runtime exports
-      // These are expected and OK
-      const isTypeOnlyFile = normalizedPath.endsWith('/types.js')
+      // Type-only files have no runtime exports — accepted patterns:
+      //   <dir>/types.js              (e.g., cover/types.js, effects/types.js)
+      //   <dir>/<name>-types.js       (e.g., releases/github-types.js)
+      const isTypeOnlyFile =
+        normalizedPath.endsWith('/types.js') ||
+        /-types\.js$/.test(normalizedPath)
       if (isTypeOnlyFile) {
         return { path: filePath, ok: true }
       }

@@ -9,13 +9,13 @@ import {
   getPlatform,
   type Platform,
 } from '../constants/platform'
-import {
-  type AssetPattern,
-  downloadGitHubRelease,
-  type DownloadGitHubReleaseConfig,
-  getLatestRelease,
-  getReleaseAssetUrl,
-} from './github'
+import { getLatestRelease, getReleaseAssetUrl } from './github-api'
+import { downloadGitHubRelease } from './github-downloads'
+
+import type {
+  AssetPattern,
+  DownloadGitHubReleaseConfig,
+} from './github-types'
 
 export type { Arch, Libc, Platform }
 

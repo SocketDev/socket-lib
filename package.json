@@ -539,9 +539,29 @@
       "types": "./dist/regexps.d.ts",
       "default": "./dist/regexps.js"
     },
-    "./releases/github": {
-      "types": "./dist/releases/github.d.ts",
-      "default": "./dist/releases/github.js"
+    "./releases/github-api": {
+      "types": "./dist/releases/github-api.d.ts",
+      "default": "./dist/releases/github-api.js"
+    },
+    "./releases/github-archives": {
+      "types": "./dist/releases/github-archives.d.ts",
+      "default": "./dist/releases/github-archives.js"
+    },
+    "./releases/github-assets": {
+      "types": "./dist/releases/github-assets.d.ts",
+      "default": "./dist/releases/github-assets.js"
+    },
+    "./releases/github-auth": {
+      "types": "./dist/releases/github-auth.d.ts",
+      "default": "./dist/releases/github-auth.js"
+    },
+    "./releases/github-downloads": {
+      "types": "./dist/releases/github-downloads.d.ts",
+      "default": "./dist/releases/github-downloads.js"
+    },
+    "./releases/github-types": {
+      "types": "./dist/releases/github-types.d.ts",
+      "default": "./dist/releases/github-types.js"
     },
     "./releases/socket-btm": {
       "types": "./dist/releases/socket-btm.d.ts",

@@ -187,10 +187,15 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## releases/
 
-| Subpath                                                                    | Description                            |
-| -------------------------------------------------------------------------- | -------------------------------------- |
-| [`@socketsecurity/lib/releases/github`](../src/releases/github.ts)         | GitHub release download utilities.     |
-| [`@socketsecurity/lib/releases/socket-btm`](../src/releases/socket-btm.ts) | Socket-btm release download utilities. |
+| Subpath                                                                                | Description                                         |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [`@socketsecurity/lib/releases/github-api`](../src/releases/github-api.ts)             | GitHub release listing + asset-URL discovery.       |
+| [`@socketsecurity/lib/releases/github-archives`](../src/releases/github-archives.ts)   | GitHub release archive download + extraction.       |
+| [`@socketsecurity/lib/releases/github-assets`](../src/releases/github-assets.ts)       | Asset matching helpers for GitHub releases.         |
+| [`@socketsecurity/lib/releases/github-auth`](../src/releases/github-auth.ts)           | GitHub API authentication header helpers.           |
+| [`@socketsecurity/lib/releases/github-downloads`](../src/releases/github-downloads.ts) | GitHub release asset downloads.                     |
+| [`@socketsecurity/lib/releases/github-types`](../src/releases/github-types.ts)         | Public types for GitHub release download utilities. |
+| [`@socketsecurity/lib/releases/socket-btm`](../src/releases/socket-btm.ts)             | Socket-btm release download utilities.              |
 
 ## schema/
 

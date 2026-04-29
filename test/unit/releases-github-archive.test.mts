@@ -44,7 +44,7 @@ describe('releases-github-archive', () => {
   describe('downloadAndExtractZip integration', () => {
     it('should be exported for backward compatibility', async () => {
       const { downloadAndExtractZip } =
-        await import('@socketsecurity/lib/releases/github')
+        await import('@socketsecurity/lib/releases/github-archives')
       expect(typeof downloadAndExtractZip).toBe('function')
     })
   })
@@ -52,7 +52,7 @@ describe('releases-github-archive', () => {
   describe('downloadAndExtractArchive integration', () => {
     it('should be exported for all archive formats', async () => {
       const { downloadAndExtractArchive } =
-        await import('@socketsecurity/lib/releases/github')
+        await import('@socketsecurity/lib/releases/github-archives')
       expect(typeof downloadAndExtractArchive).toBe('function')
     })
   })

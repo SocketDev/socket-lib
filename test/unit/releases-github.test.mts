@@ -12,11 +12,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import picomatch from 'picomatch'
 
 import {
-  downloadReleaseAsset,
-  getAuthHeaders,
   getLatestRelease,
   getReleaseAssetUrl,
-} from '../../src/releases/github'
+} from '../../src/releases/github-api'
+import { getAuthHeaders } from '../../src/releases/github-auth'
+import { downloadReleaseAsset } from '../../src/releases/github-downloads'
 import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
 
 import type { HttpDownloadResult, HttpResponse } from '../../src/http-request'
@@ -1327,7 +1327,7 @@ describe('releases/github', () => {
 
     it('uses cache and does not call httpDownload when binary + version file exist and tag matches', async () => {
       const { downloadGitHubRelease } =
-        await import('../../src/releases/github')
+        await import('../../src/releases/github-downloads')
       const { promises: fs } = await import('node:fs')
       const { tmpdir } = await import('node:os')
       const nodePath = await import('node:path')
@@ -1368,7 +1368,7 @@ describe('releases/github', () => {
 
     it('re-downloads when version file exists but binary is missing (TOCTOU recovery)', async () => {
       const { downloadGitHubRelease } =
-        await import('../../src/releases/github')
+        await import('../../src/releases/github-downloads')
       const { promises: fs } = await import('node:fs')
       const { tmpdir } = await import('node:os')
       const nodePath = await import('node:path')
@@ -1439,7 +1439,7 @@ describe('releases/github', () => {
 
     it('re-downloads when version file tag does not match requested tag', async () => {
       const { downloadGitHubRelease } =
-        await import('../../src/releases/github')
+        await import('../../src/releases/github-downloads')
       const { promises: fs } = await import('node:fs')
       const { tmpdir } = await import('node:os')
       const nodePath = await import('node:path')

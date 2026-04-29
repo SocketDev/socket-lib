@@ -15,18 +15,20 @@ import {
 } from '../../src/releases/socket-btm'
 
 import {
-  downloadGitHubRelease,
   getLatestRelease,
   getReleaseAssetUrl,
-} from '../../src/releases/github'
+} from '../../src/releases/github-api'
+import { downloadGitHubRelease } from '../../src/releases/github-downloads'
 
 // Mock the downstream github release helpers so we can verify socket-btm's
 // config construction without issuing real network or filesystem operations.
 // Uses src path so vi.mock() intercepts cross-module imports within src/ files.
-vi.mock('../../src/releases/github', () => ({
-  downloadGitHubRelease: vi.fn(),
+vi.mock('../../src/releases/github-api', () => ({
   getLatestRelease: vi.fn(),
   getReleaseAssetUrl: vi.fn(),
+}))
+vi.mock('../../src/releases/github-downloads', () => ({
+  downloadGitHubRelease: vi.fn(),
 }))
 
 describe('releases/socket-btm', () => {
