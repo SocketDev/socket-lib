@@ -4,6 +4,8 @@
  * Follows the cli-spinners format: https://github.com/sindresorhus/cli-spinners
  */
 
+import { ANSI_BOLD, ANSI_DIM, ANSI_RESET } from '../ansi'
+
 export type SocketFramesOptions = {
   readonly baseColor?: readonly [number, number, number] | undefined
   readonly interval?: number | undefined
@@ -46,9 +48,9 @@ export function generateSocketSpinnerFrames(
 
   // ANSI codes for brightness modifiers only (no colors).
   // Yocto-spinner will apply the spinner's current color to each frame.
-  const bold = '\x1b[1m'
-  const dim = '\x1b[2m'
-  const reset = '\x1b[0m'
+  const bold = ANSI_BOLD
+  const dim = ANSI_DIM
+  const reset = ANSI_RESET
 
   // Using VS15 (\uFE0E) to force text-style rendering.
   // Lightning bolt (⚡) is wider than stars. To keep consistent spacing:
