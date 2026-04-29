@@ -2,11 +2,36 @@
  * @fileoverview Theme utilities — color resolution and composition.
  */
 
-import { RAINBOW_GRADIENT } from '../effects/ultra'
-
 import type { ColorValue } from '../colors'
-import type { ShimmerColorGradient } from '../effects/text-shimmer'
+import type { Palette } from '../effects/shimmer'
 import type { ColorReference, Theme, ThemeColors } from './types'
+
+/**
+ * Rainbow gradient colors used for the `'rainbow'` color keyword.
+ * 10 hues — cycles through the full color spectrum with smooth transitions.
+ */
+export const RAINBOW_GRADIENT: Palette = [
+  // Red/pink.
+  [255, 100, 120],
+  // Orange.
+  [255, 140, 80],
+  // Yellow/gold.
+  [255, 180, 60],
+  // Yellow/green.
+  [220, 200, 80],
+  // Green.
+  [120, 200, 100],
+  // Cyan/turquoise.
+  [80, 200, 180],
+  // Blue.
+  [80, 160, 220],
+  // Purple/violet.
+  [140, 120, 220],
+  // Pink/magenta.
+  [200, 100, 200],
+  // Red/pink.
+  [255, 100, 140],
+]
 
 /**
  * Create new theme from complete specification.
@@ -139,7 +164,7 @@ export function extendTheme(
 export function resolveColor(
   value: ColorReference | ColorValue,
   colors: ThemeColors,
-): ColorValue | 'inherit' | ShimmerColorGradient {
+): ColorValue | 'inherit' | Palette {
   if (typeof value === 'string') {
     if (value === 'primary') {
       return colors.primary
@@ -174,7 +199,7 @@ export function resolveColor(
 export function resolveShimmerColor(
   value: ColorReference | ColorValue[] | undefined,
   theme: Theme,
-): ColorValue | ShimmerColorGradient | 'inherit' {
+): ColorValue | Palette | 'inherit' {
   if (!value) {
     return 'inherit'
   }
@@ -187,7 +212,7 @@ export function resolveShimmerColor(
   if (Array.isArray(value)) {
     if (value.length > 0 && Array.isArray(value[0])) {
       // Gradient
-      return value as ShimmerColorGradient
+      return value as Palette
     }
     // Single RGB
     return value as unknown as ColorValue

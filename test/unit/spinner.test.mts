@@ -75,7 +75,7 @@ describe('spinner', () => {
         message: 'Testing...',
         operation: async () => {
           // During operation, shimmer should be different
-          expect(spinner.shimmerState?.mode).toBe('rtl')
+          expect(spinner.shimmerState?.direction).toBe('rtl')
         },
         spinner,
         withOptions: {
@@ -84,7 +84,7 @@ describe('spinner', () => {
       })
 
       // After operation, shimmer should be restored
-      expect(spinner.shimmerState?.mode).toBe(originalShimmer?.mode)
+      expect(spinner.shimmerState?.direction).toBe(originalShimmer?.direction)
       expect(spinner.shimmerState?.speed).toBe(originalShimmer?.speed)
     })
 
@@ -182,7 +182,7 @@ describe('spinner', () => {
         message: 'Testing...',
         operation: () => {
           // During operation, shimmer should be different
-          expect(spinner.shimmerState?.mode).toBe('rtl')
+          expect(spinner.shimmerState?.direction).toBe('rtl')
         },
         spinner,
         withOptions: {
@@ -191,7 +191,7 @@ describe('spinner', () => {
       })
 
       // After operation, shimmer should be restored
-      expect(spinner.shimmerState?.mode).toBe(originalShimmer?.mode)
+      expect(spinner.shimmerState?.direction).toBe(originalShimmer?.direction)
       expect(spinner.shimmerState?.speed).toBe(originalShimmer?.speed)
     })
 
@@ -445,7 +445,7 @@ describe('spinner', () => {
       const result = spinner.setShimmer({ dir: 'rtl', speed: 2 })
       expect(result).toBe(spinner)
       expect(spinner.shimmerState).toBeDefined()
-      expect(spinner.shimmerState?.mode).toBe('rtl')
+      expect(spinner.shimmerState?.direction).toBe('rtl')
       expect(spinner.shimmerState?.speed).toBe(2)
     })
 
@@ -453,7 +453,7 @@ describe('spinner', () => {
       const spinner = Spinner({ shimmer: { dir: 'ltr', speed: 1 } })
       const result = spinner.updateShimmer({ speed: 3 })
       expect(result).toBe(spinner)
-      expect(spinner.shimmerState?.mode).toBe('ltr')
+      expect(spinner.shimmerState?.direction).toBe('ltr')
       expect(spinner.shimmerState?.speed).toBe(3)
     })
 
@@ -488,7 +488,7 @@ describe('spinner', () => {
       // Let animation run
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      expect(spinner.shimmerState?.mode).toBe('rtl')
+      expect(spinner.shimmerState?.direction).toBe('rtl')
       spinner.disableShimmer()
       expect(spinner.shimmerState).toBeUndefined()
       spinner.stop()
@@ -1093,7 +1093,7 @@ describe('spinner', () => {
     it('should create spinner with shimmer config', () => {
       const spinner = Spinner({ shimmer: { dir: 'rtl', speed: 2.0 } })
       expect(spinner.shimmerState).toBeDefined()
-      expect(spinner.shimmerState?.mode).toBe('rtl')
+      expect(spinner.shimmerState?.direction).toBe('rtl')
       expect(spinner.shimmerState?.speed).toBe(2.0)
     })
 

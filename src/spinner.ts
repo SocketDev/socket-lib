@@ -15,12 +15,13 @@ import { getCI } from './env/ci'
 import { isDebug } from './debug'
 import { generateSocketSpinnerFrames } from './effects/pulse-frames'
 import type {
-  ShimmerColorGradient,
+  Palette,
   ShimmerConfig,
   ShimmerDirection,
-  ShimmerState,
-} from './effects/text-shimmer'
-import { applyShimmer, COLOR_INHERIT, DIR_LTR } from './effects/text-shimmer'
+  ShimmerSpec,
+} from './effects/shimmer'
+import { configToSpec, frameColors } from './effects/shimmer'
+import { colorsToAnsi } from './effects/shimmer-terminal'
 import yoctoSpinner from './external/@socketregistry/yocto-spinner'
 import {
   LOG_SYMBOLS,
@@ -33,6 +34,8 @@ import { isBlankString, stringWidth } from './strings'
 import { getTheme } from './themes/context'
 import { THEMES } from './themes/themes'
 import { resolveColor } from './themes/utils'
+
+const COLOR_INHERIT = 'inherit'
 
 /**
  * Symbol types for status messages.
@@ -54,12 +57,19 @@ export type ProgressInfo = {
 }
 
 /**
- * Internal shimmer state with color configuration.
- * Extends `ShimmerState` with additional color property that can be inherited from spinner.
+ * Internal shimmer runtime state. Holds the user-facing config plus a
+ * monotonic frame counter; the spinner advances `frame` on each animation
+ * tick and feeds the current frame to the shimmer engine.
  */
-export type ShimmerInfo = ShimmerState & {
-  /** Color for shimmer effect - can inherit from spinner, use explicit color, or gradient */
-  color: ColorInherit | ColorValue | ShimmerColorGradient
+export type ShimmerInfo = {
+  /** User-facing color reference (inherit, explicit value, or palette). */
+  color: ColorInherit | ColorValue | Palette
+  /** Current direction (driven by config, snapshotted here for getters). */
+  direction: ShimmerDirection
+  /** Steps per frame. */
+  speed: number
+  /** Monotonic frame counter — advanced on each animation tick. */
+  frame: number
 }
 
 /**
@@ -521,38 +531,34 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         let shimmerInfo: ShimmerInfo | undefined
         if (opts.shimmer) {
           let shimmerDir: ShimmerDirection
-          let shimmerColor:
-            | ColorInherit
-            | ColorValue
-            | ShimmerColorGradient
-            | undefined
+          let shimmerColor: ColorInherit | ColorValue | Palette
           // Default: 0.33 steps per frame (~150ms per step).
           let shimmerSpeed: number = 1 / 3
 
           if (typeof opts.shimmer === 'string') {
             shimmerDir = opts.shimmer
+            shimmerColor = COLOR_INHERIT
           } else {
             const shimmerConfig = {
               __proto__: null,
               ...opts.shimmer,
             } as ShimmerConfig
-            shimmerDir = shimmerConfig.dir ?? DIR_LTR
-            shimmerColor = shimmerConfig.color ?? COLOR_INHERIT
+            shimmerDir = shimmerConfig.dir ?? 'ltr'
+            shimmerColor =
+              (shimmerConfig.color as
+                | ColorInherit
+                | ColorValue
+                | Palette
+                | undefined) ?? COLOR_INHERIT
             shimmerSpeed = shimmerConfig.speed ?? 1 / 3
           }
 
-          // Create shimmer info with initial animation state:
-          // - COLOR_INHERIT means use spinner color dynamically
-          // - ColorValue (name or RGB tuple) is an explicit override color
-          // - undefined color defaults to COLOR_INHERIT
-          // - speed controls steps per frame (lower = slower, e.g., 0.33 = ~150ms per step)
           shimmerInfo = {
             __proto__: null,
-            color: shimmerColor === undefined ? COLOR_INHERIT : shimmerColor,
-            currentDir: DIR_LTR,
-            mode: shimmerDir,
+            color: shimmerColor,
+            direction: shimmerDir,
             speed: shimmerSpeed,
-            step: 0,
+            frame: 0,
           } as ShimmerInfo
         }
 
@@ -610,11 +616,11 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           return undefined
         }
         return {
+          __proto__: null,
           color: this.#shimmer.color,
-          currentDir: this.#shimmer.currentDir,
-          mode: this.#shimmer.mode,
+          direction: this.#shimmer.direction,
           speed: this.#shimmer.speed,
-          step: this.#shimmer.step,
+          frame: this.#shimmer.frame,
         } as ShimmerInfo
       }
 
@@ -674,21 +680,31 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         if (displayText && this.#shimmer) {
           // If shimmer color is 'inherit', use current spinner color (getter ensures RGB).
           // Otherwise, check if it's a gradient (array of arrays) or single color.
-          let shimmerColor: ColorRgb | ShimmerColorGradient
+          let shimmerColor: ColorRgb | Palette
           if (this.#shimmer.color === COLOR_INHERIT) {
             shimmerColor = this.color
           } else if (Array.isArray(this.#shimmer.color[0])) {
-            // It's a gradient - use as is.
-            shimmerColor = this.#shimmer.color as ShimmerColorGradient
+            shimmerColor = this.#shimmer.color as Palette
           } else {
-            // It's a single color - convert to RGB.
             shimmerColor = toRgb(this.#shimmer.color as ColorValue)
           }
 
-          displayText = applyShimmer(displayText, this.#shimmer, {
-            color: shimmerColor,
-            direction: this.#shimmer.mode,
-          })
+          // Disable shimmer in CI: keep the spinner deterministic, no
+          // animated escape sequences.
+          if (!getCI() && this.#shimmer.direction !== 'none') {
+            const chars = [...displayText]
+            const spec: ShimmerSpec = configToSpec(
+              {
+                color: shimmerColor,
+                dir: this.#shimmer.direction,
+                speed: this.#shimmer.speed,
+              },
+              chars.length,
+            )
+            const colors = frameColors(spec, chars.length, this.#shimmer.frame)
+            displayText = colorsToAnsi(displayText, colors)
+            this.#shimmer.frame++
+          }
         }
 
         // Apply indentation
@@ -843,16 +859,15 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       enableShimmer(): Spinner {
         if (this.#shimmerSavedConfig) {
-          // Restore saved config.
-          this.#shimmer = { ...this.#shimmerSavedConfig }
+          // Restore saved config (reset frame counter to 0).
+          this.#shimmer = { ...this.#shimmerSavedConfig, frame: 0 }
         } else {
-          // Create default config.
           this.#shimmer = {
+            __proto__: null,
             color: COLOR_INHERIT,
-            currentDir: DIR_LTR,
-            mode: DIR_LTR,
+            direction: 'ltr',
             speed: 1 / 3,
-            step: 0,
+            frame: 0,
           } as ShimmerInfo
           this.#shimmerSavedConfig = this.#shimmer
         }
@@ -1076,11 +1091,13 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       setShimmer(config: ShimmerConfig): Spinner {
         this.#shimmer = {
-          color: config.color ?? COLOR_INHERIT,
-          currentDir: DIR_LTR,
-          mode: config.dir ?? DIR_LTR,
+          __proto__: null,
+          color:
+            (config.color as ColorInherit | ColorValue | Palette | undefined) ??
+            COLOR_INHERIT,
+          direction: config.dir ?? 'ltr',
           speed: config.speed ?? 1 / 3,
-          step: 0,
+          frame: 0,
         } as ShimmerInfo
         this.#shimmerSavedConfig = this.#shimmer
         this.#updateSpinnerText()
@@ -1284,47 +1301,42 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           ...config,
         } as Partial<ShimmerConfig>
 
+        // Translate partial config field names: ShimmerConfig.dir → ShimmerInfo.direction.
+        const update: Partial<ShimmerInfo> = {
+          __proto__: null,
+        } as Partial<ShimmerInfo>
+        if (partialConfig.color !== undefined) {
+          update.color = partialConfig.color as
+            | ColorInherit
+            | ColorValue
+            | Palette
+        }
+        if (partialConfig.dir !== undefined) {
+          update.direction = partialConfig.dir
+        }
+        if (partialConfig.speed !== undefined) {
+          update.speed = partialConfig.speed
+        }
+
         if (this.#shimmer) {
-          // Update existing shimmer.
-          this.#shimmer = {
-            ...this.#shimmer,
-            ...(partialConfig.color !== undefined
-              ? { color: partialConfig.color }
-              : {}),
-            ...(partialConfig.dir !== undefined
-              ? { mode: partialConfig.dir }
-              : {}),
-            ...(partialConfig.speed !== undefined
-              ? { speed: partialConfig.speed }
-              : {}),
-          } as ShimmerInfo
-          this.#shimmerSavedConfig = this.#shimmer
+          this.#shimmer = { ...this.#shimmer, ...update } as ShimmerInfo
         } else if (this.#shimmerSavedConfig) {
-          // Restore and update.
           this.#shimmer = {
             ...this.#shimmerSavedConfig,
-            ...(partialConfig.color !== undefined
-              ? { color: partialConfig.color }
-              : {}),
-            ...(partialConfig.dir !== undefined
-              ? { mode: partialConfig.dir }
-              : {}),
-            ...(partialConfig.speed !== undefined
-              ? { speed: partialConfig.speed }
-              : {}),
+            ...update,
+            frame: 0,
           } as ShimmerInfo
-          this.#shimmerSavedConfig = this.#shimmer
         } else {
-          // Create new with partial config.
           this.#shimmer = {
-            color: partialConfig.color ?? COLOR_INHERIT,
-            currentDir: DIR_LTR,
-            mode: partialConfig.dir ?? DIR_LTR,
-            speed: partialConfig.speed ?? 1 / 3,
-            step: 0,
+            __proto__: null,
+            color: COLOR_INHERIT,
+            direction: 'ltr',
+            speed: 1 / 3,
+            frame: 0,
+            ...update,
           } as ShimmerInfo
-          this.#shimmerSavedConfig = this.#shimmer
         }
+        this.#shimmerSavedConfig = this.#shimmer
 
         this.#updateSpinnerText()
         return this as unknown as Spinner
@@ -1487,7 +1499,7 @@ export async function withSpinner<T>(
       if (savedShimmerState) {
         spinner.setShimmer({
           color: savedShimmerState.color as any,
-          dir: savedShimmerState.mode,
+          dir: savedShimmerState.direction,
           speed: savedShimmerState.speed,
         })
       } else {
@@ -1650,7 +1662,7 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
       if (savedShimmerState) {
         spinner.setShimmer({
           color: savedShimmerState.color as any,
-          dir: savedShimmerState.mode,
+          dir: savedShimmerState.direction,
           speed: savedShimmerState.speed,
         })
       } else {
