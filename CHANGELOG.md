@@ -721,209 +721,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Logger/Spinner**: Use module-level constants to prevent duplicate and rogue spinner indicators
-  - Call `getDefaultLogger()` and `getDefaultSpinner()` once at module scope instead of repeated calls
-  - Prevents multiple spinner instances that can cause duplicate or lingering indicators in terminal output
-  - Applied in `src/dlx-manifest.ts`, `src/stdio/mask.ts`, and `src/spinner.ts`
-  - Follows DRY principle and aligns with socket-registry/socket-sdk-js patterns
-
-### Fixed
-
-- **Scripts**: Fixed undefined logger variable in update script
-  - Replaced undefined `log` references with `_logger` throughout `scripts/update.mjs`
-  - Resolves ESLint errors that blocked test execution
-- **Tests**: Improved stdout test stability by checking call delta instead of absolute counts
-  - Fixed flaky CI failures where spy call count was 101 instead of expected 100
-  - More robust approach handles potential state leakage between tests
-- **Tests**: Removed unnecessary 10ms delay in cache-with-ttl test
-  - Cache with memoization enabled updates in-memory storage synchronously
-  - Delay was insufficient in CI and unnecessary given synchronous behavior
-  - Resolves flaky CI failures where cached values returned undefined
+- `Logger` / `Spinner` — call `getDefaultLogger()` / `getDefaultSpinner()` once at module scope to prevent duplicate spinner indicators
 
 ## [3.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.2.0) - 2025-11-02
 
 ### Added
 
-- **DLX**: Unified manifest for packages and binaries
-  - Centralized manifest system for tracking DLX-compatible packages
-  - Simplifies package and binary lookups for dependency-free execution
+- `dlx` — unified manifest for packages and binaries
 
 ## [3.1.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.1.3) - 2025-11-02
 
 ### Changed
 
-- **Dependencies**: Updated `@socketregistry/packageurl-js` to 1.3.5
+- `@socketregistry/packageurl-js` updated to 1.3.5
 
 ## [3.1.2](https://github.com/SocketDev/socket-lib/releases/tag/v3.1.2) - 2025-11-02
 
 ### Fixed
 
-- **External dependencies**: Fixed incorrectly marked external dependencies to use wrapper pattern
-  - Updated `src/constants/agents.ts` to use `require('../external/which')` instead of direct imports
-  - Updated `src/zod.ts` to export from `./external/zod'` instead of direct imports
-  - Maintains zero dependencies policy by ensuring all runtime dependencies go through the external wrapper pattern
-- **Spinner**: Fixed undefined properties in setShimmer by handling defaults correctly
+- `Spinner` `setShimmer` — handle undefined properties via defaults
+- External deps now go through the wrapper pattern (`require('../external/which')`, etc.) — maintains zero-deps policy
 
 ## [3.1.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.1.1) - 2025-11-02
 
 ### Fixed
 
-- **Cache TTL**: Fixed flaky test by handling persistent cache write failures gracefully
-  - Wrapped `cacache.put` in try/catch to prevent failures when persistent cache writes fail or are slow
-  - In-memory cache is updated synchronously before the persistent write, so immediate reads succeed regardless of persistent cache state
-  - Improves reliability in test environments and when cache directory has issues
+- `cache-with-ttl` — `cacache.put` wrapped in try/catch so persistent-cache write failures don't break in-memory reads
 
 ## [3.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.1.0) - 2025-11-01
 
 ### Changed
 
-- **File system utilities**: `safeMkdir` and `safeMkdirSync` now default to `recursive: true`
-  - Nested directories are created by default, simplifying common usage patterns
+- `fs` `safeMkdir` / `safeMkdirSync` default to `recursive: true`
 
 ## [3.0.6](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.6) - 2025-11-01
 
 ### Added
 
-- **Build validation**: Added guard against `link:` protocol dependencies in package.json
-  - New `validate-no-link-deps.mjs` script automatically runs during `pnpm run check`
-  - Prevents accidental publication with `link:` dependencies which can cause issues
-  - Recommends using `workspace:` for monorepos or `catalog:` for centralized version management
-  - Validates all dependency fields: dependencies, devDependencies, peerDependencies, optionalDependencies
+- Build validation — guard against `link:` protocol dependencies in `package.json` (`validate-no-link-deps.mjs` runs during `pnpm run check`)
 
 ### Changed
 
-- **Dependencies**: Updated `@socketregistry/packageurl-js` to 1.3.3
-- **Git hooks**: Committed pre-commit and pre-push hook configurations for version control
-- **Scripts**: Removed shebang from `validate-no-link-deps` script (Node.js script, not shell)
+- `@socketregistry/packageurl-js` updated to 1.3.3
 
 ## [3.0.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.5) - 2025-11-01
 
 ### Fixed
 
-- **Critical: Prompts API breaking changes**: Restored working prompts implementation that was accidentally replaced with non-functional stub in v3.0.0
-  - Consolidated all prompts functionality into `src/stdio/prompts.ts`
-  - Removed unimplemented stub from `src/prompts/` that was throwing "not yet implemented" errors
-  - Removed `./prompts` package export (use `@socketsecurity/lib/stdio/prompts` instead)
-  - Restored missing exports: `password`, `search`, `Separator`, and added `createSeparator()` helper
-  - Fixed `Choice` type to use correct `name` property (matching `@inquirer` API, not erroneous `label`)
+- **Critical**: prompts API restored — non-functional stub from v3.0.0 replaced with working implementation. `@socketsecurity/lib/stdio/prompts` exports `password`, `search`, `Separator`, `createSeparator()`. `Choice.name` (was erroneously `label`)
 
 ### Added
 
-- **Theme integration for prompts**: Prompts now automatically use the active theme colors
-  - Prompt messages styled with `colors.prompt`
-  - Descriptions and disabled items styled with `colors.textDim`
-  - Answers and highlights styled with `colors.primary`
-  - Error messages styled with `colors.error`
-  - Success indicators styled with `colors.success`
-  - Exported `createInquirerTheme()` function for converting Socket themes to @inquirer format
-  - Consistent visual experience with Logger and Spinner theme integration
-
-- **Theme parameter support**: Logger, Prompts, and text effects now accept optional `theme` parameter
-  - Pass theme names (`'socket'`, `'sunset'`, `'terracotta'`, `'lush'`, `'ultra'`) or Theme objects
-  - **Logger**: `new Logger({ theme: 'sunset' })` - uses theme-specific symbol colors
-  - **Prompts**: `await input({ message: 'Name:', theme: 'ultra' })` - uses theme for prompt styling
-  - **Text effects**: `applyShimmer(text, state, { theme: 'terracotta' })` - uses theme for shimmer colors
-  - Instance-specific themes override global theme context when provided
-  - Falls back to global theme context when no instance theme specified
-  - **Note**: Spinner already had theme parameter support in v3.0.0
+- Prompts adopt the active theme (`colors.prompt`, `textDim`, `primary`, `error`, `success`); `createInquirerTheme()` exported
+- Theme parameter support — `Logger`, prompts, and text effects accept `theme: 'socket' | 'sunset' | 'terracotta' | 'lush' | 'ultra'` (or a Theme object)
 
 ### Removed
 
-- **Unused index entrypoint**: Removed `src/index.ts` and package exports for `"."` and `"./index"`
-  - This was a leftover from socket-registry and not needed for this library
-  - Users should import specific modules directly (e.g., `@socketsecurity/lib/logger`)
-  - Breaking: `import { getDefaultLogger } from '@socketsecurity/lib'` no longer works
-  - Use: `import { getDefaultLogger } from '@socketsecurity/lib/logger'` instead
+- **BREAKING**: `src/index.ts` deleted; main index `"."` / `"./index"` exports gone. Import specific modules: `@socketsecurity/lib/logger` instead of `@socketsecurity/lib`
 
 ## [3.0.4](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.4) - 2025-11-01
 
 ### Changed
 
-- **Sunset theme**: Updated colors from azure blue to warm orange/purple gradient matching Coana branding
-- **Terracotta theme**: Renamed from `brick` to `terracotta` for better clarity
+- Sunset theme — azure blue → warm orange/purple gradient (Coana branding)
+- `brick` theme renamed to `terracotta`
 
 ## [3.0.3](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.3) - 2025-11-01
 
 ### Fixed
 
-- **Critical: Node.js ESM/CJS interop completely fixed**: Disabled minification to ensure proper ESM named import detection
-  - Root cause: esbuild minification was breaking Node.js ESM's CJS named export detection
-  - Solution: Disabled minification entirely (`minify: false` in esbuild config)
-  - Libraries should not be minified - consumers minify during their own build process
-  - Unminified esbuild output uses clear `__export` patterns that Node.js ESM natively understands
-  - Removed `fix-commonjs-exports.mjs` build script - no longer needed with unminified code
-  - ESM imports now work reliably: `import { getDefaultLogger } from '@socketsecurity/lib/logger'`
-  - Verified with real-world ESM module testing (`.mjs` files importing from CJS `.js` dist)
+- **Critical**: Node.js ESM/CJS interop — disabled esbuild minification (was breaking ESM named-import detection from CJS dist). ESM imports now work reliably
 
 ## [3.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.2) - 2025-11-01
 
 ### Fixed
 
-- **Critical: Node.js ESM named imports from CommonJS**: Fixed build output to ensure Node.js ESM can properly detect named exports from CommonJS modules
-  - Previously, esbuild's minified export pattern placed `module.exports` before variable definitions, causing "Cannot access before initialization" errors
-  - Build script now uses `@babel/parser` + `magic-string` for safe AST parsing and transformation
-  - Exports are now correctly placed at end of files after all variable definitions
-  - Enables proper ESM named imports: `import { getDefaultLogger, Logger } from '@socketsecurity/lib/logger'`
-  - Fixes socket-cli issue where named imports were failing with obscure initialization errors
+- **Critical**: Node.js ESM named imports from CommonJS — `module.exports` placed before variable defs caused "Cannot access before initialization". Build now uses `@babel/parser` + `magic-string` to position exports at end of file
 
 ## [3.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.1) - 2025-11-01
 
 ### Added
 
-- **Convenience exports from main index**: Added logger and spinner exports to ease v2→v3 migration
-  - Logger: `getDefaultLogger()`, `Logger`, `LOG_SYMBOLS` now available from `@socketsecurity/lib`
-  - Spinner: `getDefaultSpinner()`, `Spinner` now available from `@socketsecurity/lib`
-  - Both main index (`@socketsecurity/lib`) and subpath (`@socketsecurity/lib/logger`, `@socketsecurity/lib/spinner`) imports now work
-  - Both import paths return the same singleton instances
+- Convenience re-exports of `getDefaultLogger`, `Logger`, `LOG_SYMBOLS`, `getDefaultSpinner`, `Spinner` from main index for v2→v3 migration
 
 ### Fixed
 
-- **Critical: Spinner crashes when calling logger**: Fixed spinner internal calls to use `getDefaultLogger()` instead of removed `logger` export
-  - Spinner methods (`start()`, `stop()`, `success()`, `fail()`, etc.) no longer crash with "logger is not defined" errors
-  - All 5 internal logger access points updated to use the correct v3 API
-  - Resolves runtime errors when using spinners with hoisted variables
-
-### Changed
-
-- **Migration path improvement**: Users can now import logger/spinner from either main index or subpaths, reducing breaking change impact from v3.0.0
+- **Critical**: Spinner internal calls to removed `logger` export — use `getDefaultLogger()` (5 call sites)
 
 ## [3.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.0) - 2025-11-01
 
 ### Added
 
-- Theme system with 5 built-in themes: `socket`, `sunset`, `terracotta`, `lush`, `ultra`
-- `setTheme()`, `getTheme()`, `withTheme()`, `withThemeSync()` for theme management
-- `createTheme()`, `extendTheme()`, `resolveColor()` helper functions
-- `onThemeChange()` event listener for theme reactivity
-- `link()` function for themed terminal hyperlinks in `@socketsecurity/lib/links`
-- Logger and spinner now inherit theme colors automatically
-- Spinner methods: `enableShimmer()`, `disableShimmer()`, `setShimmer()`, `updateShimmer()`
-- DLX cross-platform binary resolution (`.cmd`, `.bat`, `.ps1` on Windows)
-- DLX programmatic options aligned with CLI conventions (`force`, `quiet`, `package`)
+- Theme system — 5 built-in themes (`socket`, `sunset`, `terracotta`, `lush`, `ultra`); `setTheme`, `getTheme`, `withTheme`, `withThemeSync`, `createTheme`, `extendTheme`, `resolveColor`, `onThemeChange`
+- `links` `link()` — themed terminal hyperlinks
+- Logger and spinner inherit theme colors
+- Spinner methods: `enableShimmer`, `disableShimmer`, `setShimmer`, `updateShimmer`
+- `dlx` cross-platform binary resolution (`.cmd`, `.bat`, `.ps1` on Windows)
 
 ### Changed
 
-- Theme context uses AsyncLocalStorage instead of manual stack management
-- Promise retry options renamed: `factor` → `backoffFactor`, `minTimeout` → `baseDelayMs`, `maxTimeout` → `maxDelayMs`
+- Theme context uses `AsyncLocalStorage` instead of manual stack
+- **BREAKING**: Promise retry options renamed — `factor` → `backoffFactor`, `minTimeout` → `baseDelayMs`, `maxTimeout` → `maxDelayMs`
 
 ### Removed
 
-**BREAKING CHANGES:**
-
-- `pushTheme()` and `popTheme()` - use `withTheme()` or `withThemeSync()` instead
-- `logger` export - use `getDefaultLogger()` instead
-- `spinner` export - use `getDefaultSpinner()` instead
-- `download-lock.ts` - use `process-lock.ts` instead
+- **BREAKING**: `pushTheme()` / `popTheme()` — use `withTheme()` / `withThemeSync()`
+- **BREAKING**: `logger` / `spinner` exports — use `getDefaultLogger()` / `getDefaultSpinner()`
+- **BREAKING**: `download-lock.ts` — use `process-lock.ts`
 - Promise option aliases: `factor`, `minTimeout`, `maxTimeout`
-
----
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.10.3](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.3) - 2025-10-31
 
