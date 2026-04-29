@@ -948,164 +948,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Binary utility wrapper functions**: Added `which()` and `whichSync()` wrapper functions to `bin` module
-  - Cross-platform binary lookup that respects PATH environment variable
-  - Synchronous and asynchronous variants for different use cases
-  - Integrates with existing binary resolution utilities
+- `bin` `which()` / `whichSync()` — cross-platform binary lookup respecting `PATH`
 
 ## [2.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.2.1) - 2025-10-28
 
 ### Fixed
 
-- **Logger write() method**: Fixed `write()` to bypass Console formatting when outputting raw text
-  - Previously, `write()` used Console's internal `_stdout` stream which applied unintended formatting like group indentation
-  - Now stores a reference to the original stdout stream in a dedicated private field (`#originalStdout`) during construction
-  - The `write()` method uses this stored reference to write directly to the raw stream, bypassing all Console formatting layers
-  - Ensures raw text output without any formatting applied, fixing test failures in CI environments where writes after `indent()` were unexpectedly formatted
+- `Logger` `write()` bypasses Console formatting (group indentation, etc.) — now writes directly to the raw stdout reference captured at construction
 
 ## [2.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.2.0) - 2025-10-28
 
 ### Added
 
-- **Logger step symbol**: `logger.step()` now displays a cyan arrow symbol (→ or > in ASCII) before step messages for improved visual separation
-  - New `LOG_SYMBOLS.step` symbol added to the symbol palette
-  - Automatic stripping of existing symbols from step messages
-  - Maintains existing blank line behavior for clear step separation
+- `Logger` `step()` — cyan arrow `→` prefix (or `>` in ASCII fallback). New `LOG_SYMBOLS.step`
 
 ## [2.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.1.0) - 2025-10-28
 
 ### Added
 
-- Package manager detection utilities (`detectPackageManager()`, `getPackageManagerInfo()`, `getPackageManagerUserAgent()`)
-- `isInSocketDlx()` utility to check if file path is within `~/.socket/_dlx/`
-- `downloadPackage()` and `executePackage()` functions for separate download and execution of packages
+- Package manager detection — `detectPackageManager()`, `getPackageManagerInfo()`, `getPackageManagerUserAgent()`
+- `isInSocketDlx()` — check if a path is under `~/.socket/_dlx/`
+- `downloadPackage()` / `executePackage()` — separate download and execution
 
 ## [2.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.0.0) - 2025-10-27
 
-### Breaking Changes
+### Changed
 
-**Environment Variable System Refactor**
-
-This release completely refactors the environment variable system, consolidating 60+ individual env constant files into grouped getter modules with AsyncLocalStorage-based test rewiring.
-
-**Consolidated env files** - Individual files replaced with grouped modules:
-
-- `env/github.ts` - All GitHub-related env vars (GITHUB_TOKEN, GH_TOKEN, GITHUB_API_URL, etc.)
-- `env/socket.ts` - Socket-specific env vars (SOCKET_API_TOKEN, SOCKET_CACACHE_DIR, etc.)
-- `env/socket-cli.ts` - Socket CLI env vars (SOCKET_CLI_API_TOKEN, SOCKET_CLI_CONFIG, etc.)
-- `env/npm.ts` - NPM-related env vars
-- `env/locale.ts` - Locale env vars (LANG, LC_ALL, LC_MESSAGES)
-- `env/windows.ts` - Windows-specific env vars (USERPROFILE, LOCALAPPDATA, APPDATA, COMSPEC)
-- `env/xdg.ts` - XDG base directory env vars
-- `env/temp-dir.ts` - Temp directory env vars (TEMP, TMP, TMPDIR)
-- `env/test.ts` - Test framework env vars (VITEST, JEST_WORKER_ID)
-
-**Constants → Getter functions** - All env constants converted to functions:
-
-```typescript
-// Before (v1.x):
-import { GITHUB_TOKEN } from '#env/github-token'
-
-// After (v2.x):
-import { getGithubToken } from '#env/github'
-```
-
-**Deleted files** - Removed 60+ individual env constant files:
-
-- `env/github-token.ts`, `env/socket-api-token.ts`, etc. → Consolidated into grouped files
-- `env/getters.ts` → Functions moved to their respective grouped files
+- **BREAKING**: Environment variable system refactor — 60+ individual `env/<NAME>.ts` files consolidated into grouped getter modules:
+  - `env/github`, `env/socket`, `env/socket-cli`, `env/npm`, `env/locale`, `env/windows`, `env/xdg`, `env/temp-dir`, `env/test`
+  - All env constants converted to functions: `import { GITHUB_TOKEN } from '#env/github-token'` → `import { getGithubToken } from '#env/github'`
 
 ### Added
 
-**AsyncLocalStorage-Based Test Rewiring**
-
-New `env/rewire.ts` and `path/rewire.ts` modules provides context-isolated environment variable overrides for testing:
-
-```typescript
-import { withEnv, setEnv, resetEnv, getEnvValue } from '#env/rewire'
-
-// Option 1: Isolated context with AsyncLocalStorage
-await withEnv({ CI: '1', NODE_ENV: 'test' }, async () => {
-  // CI env var is '1' only within this block
-  // Concurrent tests don't interfere
-})
-
-// Option 2: Traditional beforeEach/afterEach pattern
-beforeEach(() => {
-  setEnv('CI', '1')
-})
-
-afterEach(() => {
-  resetEnv()
-})
-```
-
-**Features:**
-
-- Allows toggling between snapshot and live behavior
-- Compatible with `vi.stubEnv()` as fallback
-
-### Changed
-
-- Updated all dynamic `require()` statements to use path aliases (`#constants/*`, `#packages/*`)
-- Improved logger blank line tracking per stream (separate stderr/stdout tracking)
-- Exported `getCacache()` function for external use
+- `env/rewire` and `paths/rewire` — AsyncLocalStorage-based env/path overrides for testing. `withEnv({...}, async () => {})` for isolated context, or `setEnv` / `resetEnv` for `beforeEach`/`afterEach`
+- `getCacache()` exported
 
 ## [1.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.6) - 2025-10-26
 
 ### Fixed
 
-- Fixed `debug` module functions being incorrectly tree-shaken as no-ops in bundled output
-  - Removed incorrect `/*@__NO_SIDE_EFFECTS__*/` annotations from `debug()`, `debugDir()`, `debugLog()`, and their `*Ns` variants
-  - These functions have side effects (logging output, spinner manipulation) and should not be removed by bundlers
-  - Fixes issue where `debugLog()` and `debugDir()` were compiled to empty no-op functions
+- `debug` functions no longer tree-shaken as no-ops — removed incorrect `/*@__NO_SIDE_EFFECTS__*/` annotations on `debug`, `debugDir`, `debugLog` (+ `*Ns` variants)
 
 ## [1.3.5](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.5) - 2025-10-26
 
 ### Added
 
-- Added `createEnvProxy()` utility function to `env` module for Windows-compatible environment variable access
-  - Provides case-insensitive environment variable access (e.g., PATH, Path, path all work)
-  - Smart priority system: overrides > exact match > case-insensitive fallback
-  - Full Proxy implementation with proper handlers for get, set, has, ownKeys, getOwnPropertyDescriptor
-  - Opt-in helper for users who need Windows env var compatibility
-  - Well-documented with usage examples and performance notes
-- Added `findCaseInsensitiveEnvKey()` utility function to `env` module
-  - Searches for environment variable keys using case-insensitive matching
-  - Optimized with length fast path to minimize expensive `toUpperCase()` calls
-  - Useful for cross-platform env var access where case may vary (e.g., PATH vs Path vs path)
-- Added comprehensive test suite for `env` module with 71 tests
-  - Covers `envAsBoolean()`, `envAsNumber()`, `envAsString()` conversion utilities
-  - Tests `createEnvProxy()` with Windows environment variables and edge cases
-  - Validates `findCaseInsensitiveEnvKey()` optimization and behavior
+- `env` `createEnvProxy()` — Windows-compatible case-insensitive env var access (`PATH`, `Path`, `path` all work). Priority: overrides > exact match > case-insensitive fallback
+- `env` `findCaseInsensitiveEnvKey()` — case-insensitive key search with length fast-path
 
 ### Fixed
 
-- Fixed `spawn` module to preserve Windows `process.env` Proxy behavior
-  - When no custom environment variables are provided, use `process.env` directly instead of spreading it
-  - Preserves Windows case-insensitive environment variable access (PATH vs Path)
-  - Fixes empty CLI output issue on Windows CI runners
-  - Only spreads `process.env` when merging custom environment variables
+- `spawn` preserves Windows `process.env` Proxy behavior (uses `process.env` directly when no custom env merges, keeping Windows case-insensitive access)
 
 ## [1.3.4](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.4) - 2025-10-26
 
 ### Added
 
-- Added Node.js SIGUSR1 signal handler prevention utilities in `constants/node` module
-  - `supportsNodeDisableSigusr1Flag()`: Detects if Node supports `--disable-sigusr1` flag (v22.14+, v23.7+, v24.8+)
-  - `getNodeDisableSigusr1Flags()`: Returns appropriate flags to prevent debugger attachment
-    - Returns `['--disable-sigusr1']` on supported versions (prevents Signal I/O Thread creation)
-    - Falls back to `['--no-inspect']` on Node 18+ (blocks debugger but still creates thread)
-  - Enables production CLI environments to prevent SIGUSR1 debugger signal handling for security
+- `constants/node` — `supportsNodeDisableSigusr1Flag()`, `getNodeDisableSigusr1Flags()`. Returns `['--disable-sigusr1']` on Node 22.14+/23.7+/24.8+, falls back to `['--no-inspect']` on Node 18+
 
 ## [1.3.3](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.3) - 2025-10-24
 
 ### Fixed
 
-- Fixed lazy getter bug in `objects` module where `defineGetter`, `defineLazyGetter`, and `defineLazyGetters` had incorrect `/*@__NO_SIDE_EFFECTS__*/` annotations
-  - These functions mutate objects by defining properties, so marking them as side-effect-free caused esbuild to incorrectly tree-shake the calls during bundling
-  - Lazy getters were returning `undefined` instead of their computed values
-  - Removed double wrapping in `defineLazyGetters` where `createLazyGetter` was being called unnecessarily
+- `objects` `defineGetter`, `defineLazyGetter`, `defineLazyGetters` — removed incorrect `/*@__NO_SIDE_EFFECTS__*/` annotations (these mutate objects). Lazy getters were returning `undefined` after esbuild tree-shaking
 
 ## [1.3.2](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.2) - 2025-10-24
 
@@ -1117,10 +1022,7 @@ afterEach(() => {
 
 ### Fixed
 
-- Fixed @inquirer modules (`input`, `password`, `search`) not being properly bundled into `dist/external/`
-  - Resolves build failures in downstream packages (socket-cli) that depend on socket-lib
-  - Added missing packages to bundling configuration in `scripts/build-externals.mjs`
-  - All @inquirer packages now ship as zero-dependency bundles
+- `@inquirer` modules (`input`, `password`, `search`) properly bundled into `dist/external/` — fixes build failures in downstream socket-cli
 
 ### Added
 
