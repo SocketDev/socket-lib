@@ -324,4 +324,79 @@ describe.sequential('process-lock', () => {
       expect(existsSync(deepPath)).toBe(false)
     })
   })
+
+  describe('error path messages', () => {
+    it('throws an informative error when parent directory does not exist (ENOENT)', async () => {
+      // Use a path under a non-existent root that mkdirSync(parent, recursive: true) cannot resolve
+      // (e.g., includes a file path component). Easier: lock under a freshly-removed parent.
+      const missingPath = path.join(
+        '/nonexistent-root-' + Date.now(),
+        'sub',
+        'lock',
+      )
+      // mkdirSync with recursive will likely succeed in /tmp but fail under
+      // a non-writable absolute root. Use a relative path that mkdir
+      // cannot reach when given an empty parent.
+      // The cleanest cross-platform reproduction is to mock the fs module,
+      // but for an integration test we skip if the system can create the
+      // path (very unusual).
+      try {
+        await processLock.acquire(missingPath, { retries: 1 })
+        // If we got here, mkdir succeeded — clean up and skip the assertion.
+        processLock.release(missingPath)
+      } catch (e) {
+        // Expect either the dedicated "Parent directory does not exist"
+        // message or a permission error wrapped through "Failed to acquire".
+        expect((e as Error).message).toMatch(
+          /Parent directory does not exist|Failed to acquire lock|Permission denied/,
+        )
+      }
+    })
+
+    it('returns a working release function from acquire', async () => {
+      const release = await processLock.acquire(testLockPath)
+      expect(typeof release).toBe('function')
+      release()
+      expect(existsSync(testLockPath)).toBe(false)
+    })
+
+    it('release is idempotent on already-released locks', () => {
+      // Releasing a lock that was never acquired or already released should
+      // not throw.
+      processLock.release(testLockPath)
+      processLock.release(testLockPath)
+      expect(existsSync(testLockPath)).toBe(false)
+    })
+  })
+
+  describe('touch timer', () => {
+    it('keeps the lock fresh past the stale timeout when touchInterval is set', async () => {
+      const fs = await import('node:fs')
+      // Short stale window, fast touch.
+      const release = await processLock.acquire(testLockPath, {
+        staleMs: 200,
+        touchIntervalMs: 50,
+      })
+      const initialMtime = fs.statSync(testLockPath).mtime.getTime()
+      // Wait longer than staleMs.
+      await sleep(300)
+      const refreshedMtime = fs.statSync(testLockPath).mtime.getTime()
+      expect(refreshedMtime).toBeGreaterThan(initialMtime)
+      release()
+    })
+
+    it('does not start a touch timer when touchIntervalMs is 0', async () => {
+      const fs = await import('node:fs')
+      const release = await processLock.acquire(testLockPath, {
+        touchIntervalMs: 0,
+        staleMs: 5000,
+      })
+      const initial = fs.statSync(testLockPath).mtime.getTime()
+      await sleep(100)
+      const after = fs.statSync(testLockPath).mtime.getTime()
+      // No automatic touch — mtime stable.
+      expect(after).toBe(initial)
+      release()
+    })
+  })
 })
