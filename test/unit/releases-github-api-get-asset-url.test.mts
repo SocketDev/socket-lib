@@ -4,7 +4,7 @@
  * Covers REST + GraphQL fallback for per-tag asset URL discovery.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { getReleaseAssetUrl } from '../../src/releases/github-api'
 import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
@@ -183,9 +183,7 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
     }
     vi.mocked(httpRequest)
       // 1st: REST per-tag → 200 + empty body
-      .mockResolvedValueOnce(
-        createMockHttpResponse(Buffer.from(''), true, 200),
-      )
+      .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
       // 2nd: GraphQL release(tagName) → real result
       .mockResolvedValueOnce(
         createMockHttpResponse(
@@ -219,9 +217,7 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
         return createMockHttpResponse(Buffer.from(''), true, 200)
       }
       return createMockHttpResponse(
-        Buffer.from(
-          JSONStringify({ data: { repository: { release: null } } }),
-        ),
+        Buffer.from(JSONStringify({ data: { repository: { release: null } } })),
         true,
         200,
       )
@@ -288,19 +284,11 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
     }
     vi.mocked(httpRequest)
       // attempt 1: REST empty + GraphQL empty
-      .mockResolvedValueOnce(
-        createMockHttpResponse(Buffer.from(''), true, 200),
-      )
-      .mockResolvedValueOnce(
-        createMockHttpResponse(Buffer.from(''), true, 200),
-      )
+      .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
+      .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
       // attempt 2: REST empty + GraphQL empty
-      .mockResolvedValueOnce(
-        createMockHttpResponse(Buffer.from(''), true, 200),
-      )
-      .mockResolvedValueOnce(
-        createMockHttpResponse(Buffer.from(''), true, 200),
-      )
+      .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
+      .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
       // attempt 3: REST recovers
       .mockResolvedValueOnce(
         createMockHttpResponse(
@@ -393,8 +381,6 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
 
     await expect(
       getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
-    ).rejects.toThrow(
-      /Release v1\.0\.0 has no assets in SocketDev\/socket-btm/,
-    )
+    ).rejects.toThrow(/Release v1\.0\.0 has no assets in SocketDev\/socket-btm/)
   }, 60_000)
 })

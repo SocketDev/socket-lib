@@ -122,7 +122,7 @@ function checkEsmNamedExports(filePath) {
       //   <dir>/<name>-types.js       (e.g., releases/github-types.js)
       const isTypeOnlyFile =
         normalizedPath.endsWith('/types.js') ||
-        /-types\.js$/.test(normalizedPath)
+        normalizedPath.endsWith('-types.js')
       if (isTypeOnlyFile) {
         return { path: filePath, ok: true }
       }

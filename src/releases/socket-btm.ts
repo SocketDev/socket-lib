@@ -12,10 +12,7 @@ import {
 import { getLatestRelease, getReleaseAssetUrl } from './github-api'
 import { downloadGitHubRelease } from './github-downloads'
 
-import type {
-  AssetPattern,
-  DownloadGitHubReleaseConfig,
-} from './github-types'
+import type { AssetPattern, DownloadGitHubReleaseConfig } from './github-types'
 
 export type { Arch, Libc, Platform }
 

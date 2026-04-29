@@ -32,12 +32,8 @@ const TAG_WINDOWS = '[windows]'
 const TAG_UNIX = '[unix]'
 const TAG_NETWORK = '[network]'
 
-type ItArgs = Parameters<typeof it>
-type ItFn = ItArgs[1]
-type ItOpts = ItArgs[2]
-
-type DescribeArgs = Parameters<typeof describe>
-type DescribeFn = DescribeArgs[1]
+type TestFn = () => void | Promise<void>
+type SuiteFn = () => void
 
 function tagged(name: string, tag: string): string {
   return `${tag} ${name}`
@@ -46,36 +42,36 @@ function tagged(name: string, tag: string): string {
 /**
  * Test that only runs on Windows. Skipped on Unix-likes.
  */
-export function itWindowsOnly(name: string, fn?: ItFn, opts?: ItOpts): void {
-  it.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn as ItFn, opts)
+export function itWindowsOnly(name: string, fn: TestFn): void {
+  it.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
 }
 
 /**
  * Test that only runs on Unix-likes (Linux, macOS). Skipped on Windows.
  */
-export function itUnixOnly(name: string, fn?: ItFn, opts?: ItOpts): void {
-  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn as ItFn, opts)
+export function itUnixOnly(name: string, fn: TestFn): void {
+  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
 }
 
 /**
  * Test that hits the live network. Skipped when
  * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
  */
-export function itNetworkOnly(name: string, fn?: ItFn, opts?: ItOpts): void {
-  it.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn as ItFn, opts)
+export function itNetworkOnly(name: string, fn: TestFn): void {
+  it.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
 }
 
 /**
  * Describe block that only runs on Windows. Skipped on Unix-likes.
  */
-export function describeWindowsOnly(name: string, fn: DescribeFn): void {
+export function describeWindowsOnly(name: string, fn: SuiteFn): void {
   describe.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
 }
 
 /**
  * Describe block that only runs on Unix-likes. Skipped on Windows.
  */
-export function describeUnixOnly(name: string, fn: DescribeFn): void {
+export function describeUnixOnly(name: string, fn: SuiteFn): void {
   describe.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
 }
 
@@ -83,6 +79,6 @@ export function describeUnixOnly(name: string, fn: DescribeFn): void {
  * Describe block that hits the live network. Skipped when
  * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
  */
-export function describeNetworkOnly(name: string, fn: DescribeFn): void {
+export function describeNetworkOnly(name: string, fn: SuiteFn): void {
   describe.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
 }

@@ -298,15 +298,12 @@ describe('spawn', () => {
       },
     )
 
-    itUnixOnly(
-      'should handle shell as string path',
-      async () => {
-        const result = await spawn('echo', ['hello'], {
-          shell: '/bin/sh',
-        })
-        expect(result.code).toBe(0)
-      },
-    )
+    itUnixOnly('should handle shell as string path', async () => {
+      const result = await spawn('echo', ['hello'], {
+        shell: '/bin/sh',
+      })
+      expect(result.code).toBe(0)
+    })
 
     it('should handle undefined args', async () => {
       const result = await spawn('pwd', undefined)
@@ -446,25 +443,19 @@ describe('spawn', () => {
       expect(Array.isArray(result.output)).toBe(true)
     })
 
-    itWindowsOnly(
-      'should handle Windows script extensions on Windows',
-      () => {
-        const result = spawnSync('npm.cmd', ['--version'], {
-          shell: true,
-        })
-        expect(result.status).toBe(0)
-      },
-    )
+    itWindowsOnly('should handle Windows script extensions on Windows', () => {
+      const result = spawnSync('npm.cmd', ['--version'], {
+        shell: true,
+      })
+      expect(result.status).toBe(0)
+    })
 
-    itUnixOnly(
-      'should handle shell as string path',
-      () => {
-        const result = spawnSync('echo', ['hello'], {
-          shell: '/bin/sh',
-        })
-        expect(result.status).toBe(0)
-      },
-    )
+    itUnixOnly('should handle shell as string path', () => {
+      const result = spawnSync('echo', ['hello'], {
+        shell: '/bin/sh',
+      })
+      expect(result.status).toBe(0)
+    })
 
     it('should handle undefined args', () => {
       const result = spawnSync('pwd', undefined)

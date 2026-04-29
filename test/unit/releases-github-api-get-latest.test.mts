@@ -343,9 +343,7 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
     }
     vi.mocked(httpRequest)
       // 1st call: REST → 200 + empty body (incident shape)
-      .mockResolvedValueOnce(
-        createMockHttpResponse(Buffer.from(''), true, 200),
-      )
+      .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
       // 2nd call: GraphQL → real result
       .mockResolvedValueOnce(
         createMockHttpResponse(
@@ -490,11 +488,7 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
     // throws. We test that the helper correctly surfaces the
     // failure rather than silently returning null.
     vi.mocked(httpRequest).mockResolvedValue(
-      createMockHttpResponse(
-        Buffer.from('Internal Server Error'),
-        false,
-        503,
-      ),
+      createMockHttpResponse(Buffer.from('Internal Server Error'), false, 503),
     )
 
     await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
@@ -551,11 +545,7 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
       if (call % 2 === 1) {
         return createMockHttpResponse(Buffer.from(''), true, 200)
       }
-      return createMockHttpResponse(
-        Buffer.from('not valid json {'),
-        true,
-        200,
-      )
+      return createMockHttpResponse(Buffer.from('not valid json {'), true, 200)
     })
 
     await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
