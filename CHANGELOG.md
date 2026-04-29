@@ -5,239 +5,253 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.26.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.1) - 2026-04-29
+
+### Added
+
+- `effects/shimmer` — pure-functional shimmer engine
+- `effects/shimmer-terminal` — terminal (ANSI) renderer for the engine
+- `effects/shimmer-keyframes` — SVG keyframe batcher for the engine
+- `releases/github-types`, `github-assets`, `github-auth`, `github-api`, `github-downloads`, `github-archives` — six focused submodules replacing the single `releases/github` export
+
+### Changed
+
+- **BREAKING**: `spinner` `ShimmerInfo` shape — `{ direction, speed, frame }` (was: `currentDir`, `mode`, `speed`, `step`). User-facing `ShimmerConfig` is unchanged
+- `getLatestRelease` / `getReleaseAssetUrl` return `undefined` (was: `null`) when no result is found, and no longer log on success/retry — errors throw, success returns
+
+### Removed
+
+- **BREAKING**: `effects/text-shimmer`, `effects/ultra`, `effects/types` subpath exports. Migrate to `effects/shimmer` (+ `effects/shimmer-terminal`); `RAINBOW_GRADIENT` now lives in `themes/utils`
+- **BREAKING**: `themes` barrel export. Import from `themes/themes`, `themes/context`, `themes/utils`, or `themes/types`
+- **BREAKING**: `releases/github` subpath export. Migrate to the focused submodules (see Added)
+- `getLatestRelease({ quiet })` / `getReleaseAssetUrl({ quiet })` — the helpers no longer log
+
+### Fixed
+
+- `releases/github-api` `getLatestRelease` and `getReleaseAssetUrl` transparently fall back to GraphQL when GitHub REST returns 200 + empty body (search-degraded incident shape)
+- `github` `resolveRefToSha` and `fetchGhsaDetails` get the same GraphQL fallback for the same incident shape
+- All fallbacks only fire on the empty-body signature; real 404s, rate-limits, and 5xx still propagate
+
 ## [5.26.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.0) - 2026-04-27
 
 ### Added
 
-- `@socketsecurity/lib/github` `GitHubEmptyBodyError` — new exported error class. Thrown by `fetchGitHub` when GitHub returns HTTP 200 OK with a zero-byte body (the documented signature of GitHub Elasticsearch / search-degraded incidents — see https://www.githubstatus.com). Lets callers `instanceof` this error to detect the upstream-degraded shape and route around it instead of catching a confusing downstream `JSON.parse('')` SyntaxError
-- `@socketsecurity/lib/github` `getLatestRelease({ nothrow })` and `@socketsecurity/lib/releases/github` `getReleaseAssetUrl({ nothrow })` — when `true`, return `undefined` instead of throwing if both REST and GraphQL backends are degraded. Matches the existing `nothrow` convention from `@socketsecurity/lib/bin` (`whichSync({ nothrow })`)
+- `github` `GitHubEmptyBodyError` — exported error class for GitHub's "search degraded" 200 OK + empty body incident shape
+- `nothrow` option on `getLatestRelease` and `getReleaseAssetUrl` — return `undefined` instead of throwing when both REST and GraphQL backends are degraded
 
 ### Changed
 
-- `getLatestRelease`, `getReleaseAssetUrl`, `fetchRefShaViaGraphQL` (internal), `fetchReleaseAssetsViaGraphQL` (internal) — return `undefined` (was: `null`) when no result is found. Matches the `__proto__: null` only / `undefined` convention used elsewhere in the package. Callers using `=== null` will need to switch to `=== undefined` or a falsy check; callers using `if (!result)` are unaffected
-- `fetchGhsaDetails` GraphQL fallback path normalizes severity to lowercase (`"MODERATE"` → `"moderate"`) to match the REST endpoint's wire shape. Callers comparing against a single canonical case no longer have to handle both
-- `getLatestRelease` and `getReleaseAssetUrl` are silent by design now: errors throw, success returns. No more `logger.info` / `logger.warn` calls on success, retry, or fallback
+- `getLatestRelease` / `getReleaseAssetUrl` return `undefined` (was: `null`) when no result is found, and no longer log on success/retry — errors throw, success returns
+- `fetchGhsaDetails` GraphQL fallback normalizes severity to lowercase to match REST shape
 
 ### Removed
 
-- `getLatestRelease({ quiet })` and `getReleaseAssetUrl({ quiet })` — the `quiet` option is gone from the type signatures. Passing it is now a TypeScript error. There's nothing left to suppress (the helpers don't log anymore — see "Changed"). Callers that were passing `{ quiet: true }` as their only option should drop the options arg entirely
+- `getLatestRelease({ quiet })` / `getReleaseAssetUrl({ quiet })` — no longer accepted (the helpers don't log anymore)
 
 ### Fixed
 
-- `@socketsecurity/lib/releases/github` `getLatestRelease` now transparently falls back to GraphQL `repository.releases` when the REST `/repos/:owner/:repo/releases` listing endpoint returns HTTP 200 with an empty body. The REST listing shares an Elasticsearch-backed index with search; during incidents the endpoint returns success-with-no-body for arbitrary repos. GraphQL hits a different backend and stays consistent through these outages
-- `@socketsecurity/lib/releases/github` `getReleaseAssetUrl` now transparently falls back to GraphQL `repository.release(tagName).releaseAssets` on the same incident shape. GraphQL's `downloadUrl` field is normalized back to REST's `browser_download_url` so the asset matcher runs unchanged
-- `@socketsecurity/lib/github` `resolveRefToSha` now transparently falls back to GraphQL `repository.ref(qualifiedName)` + `repository.object(oid)` after the REST tag → branch → commit cascade hits the empty-body shape. GraphQL resolves all three forms in one round trip, including dereferencing annotated tags via `Tag.target.oid`
-- `@socketsecurity/lib/github` `fetchGhsaDetails` now falls back to GraphQL `securityAdvisory(ghsaId)` on the empty-body shape. Two field-shape diffs are normalized: severity case (uppercase → lowercase) and `aliases` (derived from GraphQL `identifiers` by filtering out the advisory's own GHSA id)
-- All four fallback paths only fire on `GitHubEmptyBodyError` (the documented incident signature). Real 404s, rate-limit errors, and 5xx responses still propagate as-is — the fallback is reserved for the case REST gives no usable signal
-
-### Tooling
-
-- `tools/prim` audit now detects local-alias redeclarations of primordials (`const ErrorCtor = Error`, `const JSONParse = JSON.parse`, `const ArrayIsArray = Array.isArray`, etc.) at top-level scope and reports them as a new `redeclaration` finding kind. The recommendation is to import the alias from `./primordials` instead of redeclaring it locally. `--coverage` includes redeclarations alongside covered call sites since both are migration candidates against the existing surface; `--gaps` excludes them
+- `releases/github` `getLatestRelease` and `getReleaseAssetUrl` fall back to GraphQL on the empty-body incident shape
+- `github` `resolveRefToSha` and `fetchGhsaDetails` get the same GraphQL fallback
+- All fallbacks fire only on `GitHubEmptyBodyError`; real 404s / rate-limits / 5xx still propagate
 
 ## [5.25.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.25.1) - 2026-04-27
 
 ### Fixed
 
-- `@socketsecurity/lib/primordials` `StringPrototypeReplace` / `StringPrototypeReplaceAll` — `replaceValue` parameter now accepts the callback form (`(substring, ...args) => string`) in addition to a literal string, matching `String.prototype.replace`'s actual signature
+- `primordials` `StringPrototypeReplace` / `StringPrototypeReplaceAll` — `replaceValue` accepts the callback form, matching `String.prototype.replace`
 
 ## [5.25.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.25.0) - 2026-04-26
 
 ### Added
 
-- `@socketsecurity/lib/primordials` — new public module exposing safe references to ~100 built-in constructors, static methods, and prototype methods captured at module-load time. Mirrors the Node.js-internal primordials convention: static methods retain their name (`ObjectKeys`, `ArrayIsArray`, `JSONParse`, `ReflectApply`); prototype methods are uncurried via `uncurryThis` (`StringPrototypeSlice(str, 0, 3)` instead of `str.slice(0, 3)`); constructors get a `Ctor` suffix (`MapCtor`, `SetCtor`, `ErrorCtor`, …) to avoid shadowing the capital-case global. Library internals migrated to use these helpers so prototype-pollution attacks on the caller realm can't redirect them. Surface includes `Function`, `Math`, and the full Error subclass set (`TypeErrorCtor`, `RangeErrorCtor`, `SyntaxErrorCtor`, `ReferenceErrorCtor`, `URIErrorCtor`, `EvalErrorCtor`, `AggregateErrorCtor`) after audit-driven coverage passes
+- `primordials` — public module exposing ~100 safe references to built-in constructors, static methods, and prototype methods captured at load time. Static methods keep their name (`ObjectKeys`, `JSONParse`); prototype methods are uncurried (`StringPrototypeSlice(str, 0, 3)`); constructors use a `Ctor` suffix (`MapCtor`, `ErrorCtor`)
 
 ## [5.24.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.24.0) - 2026-04-22
 
 ### Removed
 
-- `@socketsecurity/lib/env/socket-cli-shadow` — deleted. Unused after Socket CLI's shadow infrastructure was removed
+- `env/socket-cli-shadow` — deleted (unused)
 
 ### Fixed
 
-- `packPackage()` / `extractPackage()` now work for non-registry specs (local dir/tarball, remote tarball URL, git). The bundled pacote fetchers (`dir.js`, `file.js`, `remote.js`, `git.js`) were over-stubbed and broke every non-registry path
-- `EditablePackageJson.prepare()` no longer throws `git.find is not a function`. `@npmcli/git` is reached from `normalize.gitHead`, not just `arb.audit()`, so it can't be stubbed
-- `packPackage(<dir>)` now runs `prepack` / `postpack` scripts instead of throwing `runScript is not a function`. `@npmcli/run-script` is reachable whenever `ignoreScripts` isn't set
+- `packPackage()` / `extractPackage()` work for non-registry specs (local dir/tarball, remote tarball, git)
+- `EditablePackageJson.prepare()` no longer throws `git.find is not a function`
+- `packPackage(<dir>)` runs `prepack` / `postpack` scripts instead of throwing
 
 ## [5.23.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.23.0) - 2026-04-22
 
 ### Added
 
-- `@socketsecurity/lib/errors` `isError(value)` — spec-compliant ES2025 [`Error.isError`](https://tc39.es/ecma262/#sec-error.iserror) with an `@@toStringTag`-based shim for older engines. Recognizes cross-realm Errors (worker threads, vm contexts, iframes) that same-realm `instanceof Error` misses
-- `@socketsecurity/lib/errors` `errorMessage(value)` — extracts a readable message from any caught value (Error with cause chain via `messageWithCauses`, primitive, plain object, or nullish) with the shared `UNKNOWN_ERROR` (`'Unknown error'`) fallback. Replaces the `e instanceof Error ? e.message : String(e)` pattern
-- `@socketsecurity/lib/errors` `errorStack(value)` — companion helper returning the cause-aware stack for Error instances (via `stackWithCauses`) and `undefined` otherwise
-- `@socketsecurity/lib/errors` `isErrnoException(value)` — narrows to `NodeJS.ErrnoException` (an Error with a non-empty uppercase-prefixed `.code`, matching the libuv `UV_E*` / Node `ERR_*` conventions), cross-realm safe
-- `@socketsecurity/lib/errors` re-exports `UNKNOWN_ERROR` from `constants/core` so callers don't need a separate import
+- `errors` `isError(value)` — spec-compliant ES2025 [`Error.isError`](https://tc39.es/ecma262/#sec-error.iserror), cross-realm safe
+- `errors` `errorMessage(value)` — readable message from any caught value (Error, primitive, object, nullish) with cause-chain support
+- `errors` `errorStack(value)` — cause-aware stack or `undefined`
+- `errors` `isErrnoException(value)` — narrows to `NodeJS.ErrnoException`, cross-realm safe
+- `errors` re-exports `UNKNOWN_ERROR`
 
 ### Changed
 
-- `@socketsecurity/lib/errors` pony-cause `messageWithCauses` / `stackWithCauses` / `findCauseByReference` / `getErrorCause` — patched to use `isError` internally so cross-realm Errors are recognized (previously returned `''` for any Error thrown in a different realm)
+- pony-cause `messageWithCauses` / `stackWithCauses` / `findCauseByReference` / `getErrorCause` use `isError` internally — cross-realm Errors are recognized (previously returned `''`)
 
 ## [5.22.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.22.0) - 2026-04-21
 
 ### Changed
 
-- `@socketsecurity/lib/releases/socket-btm` `getPlatformArch()` / `getBinaryAssetName()` — aligned with pnpm pack-app's `<os>-<arch>[-<libc>]` target format. The Windows OS segment is now `win32` (was `win`); `getPlatformArch('win32', 'x64')` returns `'win32-x64'` and `getBinaryAssetName('node', 'win32', 'x64')` returns `'node-win32-x64.exe'`. Callers that string-match on the output need updates
+- `releases/socket-btm` `getPlatformArch()` / `getBinaryAssetName()` — aligned with pnpm pack-app's `<os>-<arch>[-<libc>]` format. Windows OS segment is now `win32` (was `win`)
 
 ## [5.21.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.21.0) - 2026-04-20
 
 ### Added
 
-- `@socketsecurity/lib/schema/validate` — non-throwing Zod/TypeBox validator returning `{ ok, value } | { ok, errors }` with normalized paths
-- `@socketsecurity/lib/schema/parse` — throwing variant for fail-fast trust boundaries
-- `@socketsecurity/lib/schema/types` — `Schema<T>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema`, `Infer<S>`
-- `@socketsecurity/lib/promises` `withResolvers()` — spec-compliant [`Promise.withResolvers`](https://tc39.es/ecma262/#sec-promise.withResolvers) helper with `PromiseWithResolvers<T>` type. Uses the native implementation when available
+- `schema/validate` — non-throwing Zod/TypeBox validator returning `{ ok, value } | { ok, errors }`
+- `schema/parse` — throwing variant for fail-fast trust boundaries
+- `schema/types` — `Schema<T>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema`, `Infer<S>`
+- `promises` `withResolvers()` — spec-compliant [`Promise.withResolvers`](https://tc39.es/ecma262/#sec-promise.withResolvers); uses native when available
 
 ### Changed
 
-- `@socketsecurity/lib/regexps` `escapeRegExp()` — now spec-compliant with TC39 [`RegExp.escape`](https://tc39.es/ecma262/#sec-regexp.escape); uses the native implementation when available. **Caller-visible shape change**: escaped output now uses `\xHH` for many characters that previously passed through literally (e.g. `escapeRegExp('a')` is now `'\x61'`). Functional equivalence (the compiled regex matches the original input) is preserved; only callers that string-match on escape output need updates
-- `@socketsecurity/lib/memoization` `MemoizeOptions<Args>` — dropped the unused second type parameter. Consumers who wrote `MemoizeOptions<Args, Result>` must drop the second argument
-- `@socketsecurity/lib/packages/specs` `getRepoUrlDetails()` — now accepts `git+https://` / `git+ssh://` GitHub URLs and rejects lookalike hosts (`githubXcom`, `fake-github.com.attacker.tld`). scp-style `git@github.com:…` URLs (no `://`) now return `{ user: '', project: '' }` — callers must normalize to https/ssh upstream
-- `@socketsecurity/lib/url` `urlSearchParamAsBoolean()` — accepts the same truthy vocabulary as `envAsBoolean` (`1` / `true` / `yes` / `on`, case-insensitive). Empty-string input now falls through to `defaultValue` instead of returning `false`
+- `regexps` `escapeRegExp()` — now spec-compliant with TC39 [`RegExp.escape`](https://tc39.es/ecma262/#sec-regexp.escape). **Output shape changed**: many characters now escape to `\xHH` (e.g. `'a'` → `'\x61'`); compiled regex behavior is preserved
+- `memoization` `MemoizeOptions<Args>` — dropped unused second type parameter
+- `packages/specs` `getRepoUrlDetails()` — accepts `git+https://` / `git+ssh://` GitHub URLs; rejects lookalike hosts. scp-style `git@github.com:…` returns `{ user: '', project: '' }`
+- `url` `urlSearchParamAsBoolean()` — accepts the same truthy vocabulary as `envAsBoolean` (`1` / `true` / `yes` / `on`); empty string falls through to `defaultValue`
 
 ### Removed
 
-- `@socketsecurity/lib/validation/*` subpath retired — exports re-homed:
-  - `validateSchema` / `parseSchema` → `@socketsecurity/lib/schema/validate` / `@socketsecurity/lib/schema/parse`
-  - `safeJsonParse` → `@socketsecurity/lib/json/parse`
-  - Types → `@socketsecurity/lib/schema/types` and `@socketsecurity/lib/json/types`
-- `memoizeDebounced` from `@socketsecurity/lib/memoization` — was misnamed and had no consumers. Use `memoize` / `memoizeAsync` with a `ttl` instead
+- `validation/*` subpath retired — exports re-homed: `validateSchema` / `parseSchema` → `schema/validate` / `schema/parse`; `safeJsonParse` → `json/parse`; types → `schema/types` and `json/types`
+- `memoization` `memoizeDebounced` — use `memoize` / `memoizeAsync` with a `ttl` instead
 
 ### Fixed
 
-- `@socketsecurity/lib/versions` `maxVersion()` / `minVersion()` — return the latest/earliest prerelease for all-prerelease inputs (previously returned `undefined`)
-- `@socketsecurity/lib/fs` `findUp()` / `findUpSync()` — traverse up to and **including** the filesystem root (previously missed matches at `/.foo`)
-- `@socketsecurity/lib/words` `capitalize()` — safe for non-BMP characters (emoji, astral-plane scripts); previously produced broken surrogate pairs
-- `@socketsecurity/lib/words` `determineArticle()` — case-insensitive vowel match (`Apple` → `an Apple`)
-- `@socketsecurity/lib/archives` `extractZip()` / `extractTar()` / `extractTarGz()` — missing-archive errors now uniformly surface as `ENOENT` with `code` / `path` / message (previously `extractZip` surfaced adm-zip's generic `"Invalid filename"`)
-- `@socketsecurity/lib/promise-queue` — bounded queue now rejects the newest submission when full, preserving in-flight work
-- `@socketsecurity/lib/cacache` / `@socketsecurity/lib/cache-with-ttl` — wildcard key deletion anchors both ends of the pattern (`deleteAll('foo*bar')` no longer sweeps `foo123bar-extra`)
-- `@socketsecurity/lib/process-lock` — sub-second `staleMs` values now honored at full precision; TOCTOU window on lock acquisition closed
-- `@socketsecurity/lib/suppress-warnings` `withSuppressedWarnings()` — no longer wipes concurrent suppressions on exit
-- Unbounded LRU caches in `@socketsecurity/lib/dlx` capped (binary path, package.json path); negative package.json lookups now expire after 10s
-- Glob cache keys for array-valued options (e.g. `ignore`) are order-insensitive
+- `versions` `maxVersion()` / `minVersion()` — return latest/earliest prerelease for all-prerelease inputs
+- `fs` `findUp()` / `findUpSync()` — traverse up to and including the filesystem root
+- `words` `capitalize()` — safe for non-BMP characters (emoji, astral-plane scripts)
+- `words` `determineArticle()` — case-insensitive vowel match
+- `archives` `extractZip` / `extractTar` / `extractTarGz` — missing-archive errors uniformly surface as `ENOENT`
+- `promise-queue` — bounded queue rejects newest submission when full, preserving in-flight work
+- `cacache` / `cache-with-ttl` — wildcard key deletion anchors both ends of the pattern
+- `process-lock` — sub-second `staleMs` values honored at full precision; TOCTOU window on acquisition closed
+- `suppress-warnings` `withSuppressedWarnings()` — no longer wipes concurrent suppressions on exit
+- `dlx` LRU caches capped (binary path, package.json path); negative package.json lookups expire after 10s
+- Glob cache keys for array-valued options are order-insensitive
 
 ### Performance
 
-- `@socketsecurity/lib/memoization` — `memoize()` / `memoizeAsync()` cache-hit bookkeeping dropped from O(n) to O(1). Noticeable on caches with many entries
-- `@socketsecurity/lib/cacache` — wildcard `clear()` no longer recompiles the match regex per streamed entry
+- `memoization` cache-hit bookkeeping is now O(1) (was O(n))
+- `cacache` wildcard `clear()` no longer recompiles the match regex per entry
 
 ## [5.20.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.1) - 2026-04-19
 
 ### Fixed
 
-- `@socketsecurity/lib/ipc` — harden stub-file writes against symlink/TOCTOU attacks on shared-tmp filesystems (POSIX ownership + mode validation, `O_EXCL | O_NOFOLLOW` open)
-- `@socketsecurity/lib/cache-with-ttl` `getOrFetch()` — close concurrent-caller race that let two cold-cache awaits both skip the inflight-dedupe check and fire the fetcher twice
-- `@socketsecurity/lib/cache-with-ttl` — cap the in-memory memo layer with LRU eviction (`memoMaxSize`, default 1000); long-running processes no longer grow unbounded
-- `@socketsecurity/lib/memoization` `memoizeAsync()` — refresh cache entry timestamp on resolve so slow fetches (longer than `ttl`) aren't classified as expired the moment they land
-- `@socketsecurity/lib/tables` — `displayWidth` now measures rendered terminal cells (via `stringWidth`) instead of UTF-16 code units; CJK / emoji / combining marks align correctly
-- `@socketsecurity/lib/paths/packages` — `resolvePackageJsonDirname` / `resolvePackageJsonPath` no longer mis-identify files like `/foo/my-package.json` as package manifests
-- `@socketsecurity/lib/json/edit` — `@example` import path corrected
+- `ipc` — stub-file writes hardened against symlink/TOCTOU attacks (`O_EXCL | O_NOFOLLOW`, ownership + mode validation)
+- `cache-with-ttl` `getOrFetch()` — closes concurrent-caller race that fired the fetcher twice
+- `cache-with-ttl` — in-memory memo layer capped via LRU (`memoMaxSize`, default 1000)
+- `memoization` `memoizeAsync()` — refreshes entry timestamp on resolve so slow fetches aren't immediately classified as expired
+- `tables` — `displayWidth` measures rendered terminal cells via `stringWidth` (CJK / emoji / combining marks align correctly)
+- `paths/packages` — `resolvePackageJsonDirname` / `resolvePackageJsonPath` no longer mis-identify files like `/foo/my-package.json`
 
 ## [5.20.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.20.0) - 2026-04-19
 
 ### Added
 
-- `@socketsecurity/lib/validation/validate-schema` — universal Zod-style schema validator with `validateSchema` (tagged result) and `parseSchema` (throwing); `Infer<S>`, `ValidateResult<T>`, `ValidationIssue`, `AnySchema` types. No runtime `zod` dependency
+- `validation/validate-schema` — universal Zod-style schema validator with `validateSchema` (tagged result) and `parseSchema` (throwing). No runtime `zod` dep
 
-> **Deprecated in 5.21.0**: moved to `@socketsecurity/lib/schema/*`.
+> **Deprecated in 5.21.0**: moved to `schema/*`.
 
 ### Fixed
 
-- `@socketsecurity/lib/promise-queue` — synchronous throws inside a queued task now convert to proper rejections instead of escaping as uncaught exceptions
-- `@socketsecurity/lib/stdio/progress` `formatTime()` — clamp negative milliseconds so over-ticking / clock-skewed bars don't render negative ETAs
-- `@socketsecurity/lib/dlx/lockfile` — scratch-directory cleanup can no longer clobber the real exception from the main block
-- `@socketsecurity/lib/dlx/package` `parsePackageSpec` — normalize a bare trailing `@` (e.g. `"pkg@"`) to `version: undefined`
-- `@socketsecurity/lib/stdio/prompts` — tighten an internal destructure type away from `as any`
-- `@socketsecurity/lib/http-request` — hoist checksum regex literals out of a per-line loop
+- `promise-queue` — sync throws inside a queued task convert to proper rejections (no longer escape as uncaught)
+- `stdio/progress` `formatTime()` — clamps negative milliseconds (no negative ETAs)
+- `dlx/lockfile` — scratch-directory cleanup no longer clobbers the real exception
+- `dlx/package` `parsePackageSpec` — bare trailing `@` (e.g. `"pkg@"`) normalizes to `version: undefined`
 
 ## [5.19.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.1) - 2026-04-19
 
 ### Fixed
 
-Restore `@socketsecurity/lib/stdio/prompts`, `@socketsecurity/lib/stdio/progress`, and `@socketsecurity/lib/stdio/clear` — accidentally removed in 5.19.0 without a major-bump callout. Downstream consumers that import `stdio/prompts` directly are unbroken.
+- Restored `stdio/prompts`, `stdio/progress`, and `stdio/clear` — accidentally removed in 5.19.0
 
 ## [5.19.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.19.0) - 2026-04-19
 
 ### Added
 
-- `@socketsecurity/lib/dlx/integrity` — hash verification utilities: `HashSpec`, `NormalizedHash`, `ComputedHashes`, `normalizeHash()`, `computeHashes()`, `verifyHash()` (constant-time via `crypto.timingSafeEqual`), `DlxHashMismatchError`
-- `@socketsecurity/lib/dlx/arborist` — hardened `@npmcli/arborist` wrappers: `safeIdealTree()`, `safeReify()`, `writeSafeNpmrc()`. Locks down `audit`, `fund`, `ignoreScripts`, `saveBundle`, etc. Supports `before?: Date` for release-age enforcement
-- `@socketsecurity/lib/dlx/lockfile` — `generatePackagePin()` returns `{ name, version, hash, packageJson, lockfile }` for a resolved package. Default `minReleaseDays: 7` refuses versions published in the last week (`0` to disable); `minReleaseMins` accepted as pnpm-style alias
-- `DlxPackageOptions.hash`, `DlxPackageOptions.lockfile`, `DlxBinaryOptions.hash` — first-class integrity + lockfile options on the dlx entry points
+- `dlx/integrity` — hash verification utilities (`normalizeHash`, `computeHashes`, `verifyHash` with constant-time compare, `DlxHashMismatchError`)
+- `dlx/arborist` — hardened `@npmcli/arborist` wrappers (`safeIdealTree`, `safeReify`, `writeSafeNpmrc`). Locks down audit/fund/scripts/etc. Supports `before?: Date` for release-age enforcement
+- `dlx/lockfile` `generatePackagePin()` — returns `{ name, version, hash, packageJson, lockfile }`. Default `minReleaseDays: 7` refuses versions published in the last week
+- `DlxPackageOptions.hash`, `.lockfile`, `DlxBinaryOptions.hash` — integrity + lockfile options on dlx entry points
 
 ### Fixed
 
-- `pacote` shim — exposes `tarball`, `manifest`, `packument` alongside `extract`. Fixes a latent runtime crash in `fetchPackageManifest` / `fetchPackagePackument` callers
+- `pacote` shim exposes `tarball`, `manifest`, `packument` alongside `extract`
 
 ### Changed
 
-Reduced bundle size of `dist/external/npm-pack.js` (−771 KB, −30.5%) and `dist/external/zod.js` (−306 KB, −51.2%) by stubbing code paths our callers never reach (Sigstore attestation, arborist audit/query, zod locale translations, etc.)
+- `dist/external/npm-pack.js` 30% smaller; `dist/external/zod.js` 51% smaller (unused code paths stubbed)
 
 ## [5.18.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.2) - 2026-04-14
 
 ### Removed
 
-- Remove unused `plugins/` directory and `./plugins/babel-plugin-inline-require-calls` export — no downstream consumers; socket-cli maintains its own local copies
+- `plugins/` directory + `./plugins/babel-plugin-inline-require-calls` — unused
 
 ## [5.18.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.1) - 2026-04-14
 
 ### Changed
 
-- Deduplicated the `dist/external/npm-pack` bundle via `pnpm overrides` (pacote 21.5.0, make-fetch-happen 15.0.5, and 7 transitive `@npmcli/*` packages) — 22 duplicate packages removed, ~130 KB smaller
+- `dist/external/npm-pack` deduplicated via `pnpm overrides` — 22 duplicate packages removed, ~130 KB smaller
 
 ## [5.18.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.0) - 2026-04-14
 
 ### Added
 
-- `@socketsecurity/lib/dlx` — Socket Firewall API check before package downloads. Resolves the dependency tree and blocks on critical/high severity alerts
+- `dlx` — Socket Firewall API check before package downloads. Resolves the dependency tree and blocks on critical/high alerts
 
 ### Changed
 
-- `@socketsecurity/lib/http-request` — default `User-Agent` updated from `socket-registry/1.0` to `socketsecurity-lib/{version}`
+- `http-request` default `User-Agent` is now `socketsecurity-lib/{version}` (was `socket-registry/1.0`)
 
 ## [5.17.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.17.0) - 2026-04-14
 
 ### Added
 
-- `@socketsecurity/lib/paths` `isUnixPath()` — detect MSYS/Git Bash drive-letter notation (`/c/...`)
+- `paths` `isUnixPath()` — detects MSYS/Git Bash drive-letter notation (`/c/...`)
 
 ### Changed
 
-- `@socketsecurity/lib/paths` `normalizePath()` — converts MSYS drive letters on Windows (`/c/path` → `C:/path`)
-- `@socketsecurity/lib/paths` `fromUnixPath()` — produces native Windows paths with backslashes (`/c/path` → `C:\path`), making it the true inverse of `toUnixPath()`
+- `paths` `normalizePath()` converts MSYS drive letters on Windows (`/c/path` → `C:/path`)
+- `paths` `fromUnixPath()` produces native Windows paths with backslashes (`/c/path` → `C:\path`)
 
 ## [5.16.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.16.0) - 2026-04-14
 
 ### Added
 
-- `@socketsecurity/lib/paths` `fromUnixPath()` — convert MSYS/Git Bash Unix-style paths (`/c/path`) back to native Windows format (`C:/path`), inverse of `toUnixPath` (#168)
+- `paths` `fromUnixPath()` — convert MSYS/Git Bash paths back to native Windows format (#168)
 
 ### Fixed
 
-- `@socketsecurity/lib/dlx` `isInSocketDlx` — normalize the dlx directory path for Windows compatibility
+- `dlx` `isInSocketDlx` normalizes the dlx directory path on Windows
 
 ## [5.15.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.15.0) - 2026-04-06
 
 ### Added
 
-- `@socketsecurity/lib/http-request` — `stream` option on `HttpRequestOptions` resolves with `HttpResponse` immediately after headers arrive, leaving `rawResponse` unconsumed for piping to files
-- `@socketsecurity/lib/http-request` — `headers`, `ok`, `status`, `statusText` fields on `HttpDownloadResult`
+- `http-request` `stream` option — resolves immediately after headers arrive, leaving the body unconsumed for piping
+- `http-request` — `headers`, `ok`, `status`, `statusText` fields on `HttpDownloadResult`
 
 ## [5.14.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.14.0) - 2026-04-06
 
 ### Added
 
-- `@socketsecurity/lib/http-request`:
-  - `HttpResponseError` class — thrown on non-2xx when `throwOnError` is enabled; carries the full `HttpResponse`
+- `http-request`:
+  - `HttpResponseError` — thrown on non-2xx when `throwOnError` is set
   - `throwOnError` option — non-2xx responses throw instead of resolving with `ok: false`
-  - `onRetry` callback — customize retry behavior per-attempt (`false` to stop, a `number` to override delay, `undefined` for default backoff)
-  - Streaming body support — `body` accepts `Readable` streams (incl. `form-data`), auto-merges `getHeaders()` when present
-  - `parseRetryAfterHeader()` — standalone RFC 7231 §7.1.3 parser
-  - `sanitizeHeaders()` — redact sensitive headers for safe logging
+  - `onRetry` callback — customize retry per attempt
+  - Streaming body support — `body` accepts `Readable` streams (incl. `form-data`)
+  - `parseRetryAfterHeader()` — RFC 7231 §7.1.3 parser
+  - `sanitizeHeaders()` — redact sensitive headers for logging
 
 ### Changed
 
-- `@socketsecurity/lib/http-request` — `HttpRequestOptions.body` widened to `Buffer | Readable | string`; `onResponse` hook errors no longer leave promises pending
+- `http-request` `HttpRequestOptions.body` widened to `Buffer | Readable | string`; `onResponse` errors no longer leave promises pending
 
 ## [5.13.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.13.0) - 2026-04-05
 
