@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   isDlxPackageInstalled,
@@ -126,6 +126,88 @@ describe.sequential('dlx/packages', () => {
 
     it('does not throw when removing a non-existent package', () => {
       expect(() => removeDlxPackageSync('does-not-exist')).not.toThrow()
+    })
+
+    it('throws a permission-denied error when safeDeleteSync fails with EACCES', async () => {
+      // Spy on safeDeleteSync to throw a synthetic EACCES.
+      const fsModule = await import('@socketsecurity/lib/fs')
+      const originalSafeDelete = fsModule.safeDeleteSync
+      const err = new Error(
+        'EACCES: permission denied',
+      ) as NodeJS.ErrnoException
+      err.code = 'EACCES'
+      const spy = vi
+        .spyOn(fsModule, 'safeDeleteSync')
+        .mockImplementation(() => {
+          throw err
+        })
+      try {
+        expect(() => removeDlxPackageSync('locked-pkg')).toThrow(
+          /Permission denied removing DLX package/,
+        )
+      } finally {
+        spy.mockRestore()
+        // Sanity: restore is in place.
+        expect(fsModule.safeDeleteSync).toBe(originalSafeDelete)
+      }
+    })
+
+    it('throws a permission-denied error when safeDeleteSync fails with EPERM', async () => {
+      const fsModule = await import('@socketsecurity/lib/fs')
+      const err = new Error(
+        'EPERM: operation not permitted',
+      ) as NodeJS.ErrnoException
+      err.code = 'EPERM'
+      const spy = vi
+        .spyOn(fsModule, 'safeDeleteSync')
+        .mockImplementation(() => {
+          throw err
+        })
+      try {
+        expect(() => removeDlxPackageSync('eperm-pkg')).toThrow(
+          /Permission denied removing DLX package/,
+        )
+      } finally {
+        spy.mockRestore()
+      }
+    })
+
+    it('throws a read-only-filesystem error when safeDeleteSync fails with EROFS', async () => {
+      const fsModule = await import('@socketsecurity/lib/fs')
+      const err = new Error(
+        'EROFS: read-only file system',
+      ) as NodeJS.ErrnoException
+      err.code = 'EROFS'
+      const spy = vi
+        .spyOn(fsModule, 'safeDeleteSync')
+        .mockImplementation(() => {
+          throw err
+        })
+      try {
+        expect(() => removeDlxPackageSync('rofs-pkg')).toThrow(
+          /read-only filesystem/,
+        )
+      } finally {
+        spy.mockRestore()
+      }
+    })
+
+    it('throws a generic failure error for unrecognized errno codes', async () => {
+      const fsModule = await import('@socketsecurity/lib/fs')
+      const err = new Error('EBUSY: resource busy') as NodeJS.ErrnoException
+      err.code = 'EBUSY'
+      const spy = vi
+        .spyOn(fsModule, 'safeDeleteSync')
+        .mockImplementation(() => {
+          throw err
+        })
+      try {
+        expect(() => removeDlxPackageSync('busy-pkg')).toThrow(
+          /Failed to remove DLX package/,
+        )
+      } finally {
+        spy.mockRestore()
+      }
     })
   })
 })
