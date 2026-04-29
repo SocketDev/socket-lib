@@ -403,130 +403,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **http-request**: Added automatic default headers for JSON and text requests
-  - `httpJson()` now automatically sets `Accept: application/json` header
-  - `httpJson()` automatically sets `Content-Type: application/json` when body is present
-  - `httpText()` now automatically sets `Accept: text/plain` header
-  - `httpText()` automatically sets `Content-Type: text/plain` when body is present
-  - User-provided headers always override defaults
-  - Simplifies API usage - no need to manually set common headers
+- `http-request` `httpJson()` / `httpText()` automatically set `Accept` and `Content-Type` headers (when body present); user headers override
 
 ### Changed
 
-- **http-request**: Renamed HTTP helper functions to support all HTTP methods (BREAKING CHANGE)
-  - `httpGetJson()` → `httpJson()` - Now supports GET, POST, PUT, DELETE, PATCH, etc.
-  - `httpGetText()` → `httpText()` - Now supports all HTTP methods via `method` option
-  - Functions now accept `method` parameter in options (defaults to 'GET')
-  - More flexible API that matches modern fetch-style conventions
-  - **Migration**: Replace `httpGetJson()` calls with `httpJson()` and `httpGetText()` with `httpText()`
+- **BREAKING**: `http-request` `httpGetJson()` → `httpJson()` and `httpGetText()` → `httpText()`. Functions now accept `method` (defaults to `'GET'`), supporting all HTTP verbs
 
 ### Fixed
 
-- **http-request**: Fixed Content-Type header incorrectly sent with empty string body
-  - Empty string body (`""`) no longer triggers Content-Type header
-  - Changed condition from `if (body !== undefined)` to `if (body)` for semantic correctness
-  - Empty string represents "no content" and should not declare a Content-Type
-  - Affects `httpJson()` and `httpText()` functions
-  - Fixes potential API compatibility issues with servers expecting no Content-Type for empty bodies
-  - Added comprehensive test coverage for empty string edge case
+- `http-request` — empty-string body no longer triggers `Content-Type`
 
 ## [5.5.3](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.3) - 2026-01-20
 
 ### Fixed
 
-- **deps**: Added patch for execa@2.1.0 to fix signal-exit v4 compatibility. The package was using default import syntax with signal-exit v4, which now exports onExit as a named export.
+- Patched `execa@2.1.0` for `signal-exit` v4 compatibility (named export)
 
 ## [5.5.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.2) - 2026-01-20
 
 ### Changed
 
-- **dlx/package**: Use `getSocketCacacheDir()` instead of `getPacoteCachePath()` for Arborist cache configuration
-  - Ensures consistent use of Socket's shared cacache directory (`~/.socket/_cacache`)
-  - Removes dependency on pacote cache path extraction which could fail
-  - Simplifies cache configuration by using reliable Socket path utility
+- `dlx/package` uses `getSocketCacacheDir()` (was `getPacoteCachePath()`) for Arborist cache config — removes dependency on pacote cache-path extraction
 
 ## [5.5.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.1) - 2026-01-12
 
 ### Fixed
 
-- Fixed dotenvx compatibility with pre-commit hooks
-- Fixed empty releases being returned when finding latest release
+- dotenvx compatibility with pre-commit hooks
+- Empty releases being returned by latest-release lookup
 
 ## [5.5.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.5.0) - 2026-01-12
 
 ### Added
 
-- **dlx/detect**: Executable type detection utilities for DLX cache and local file paths
-  - `detectDlxExecutableType()`: Detects Node.js packages vs native binaries in DLX cache by checking for node_modules/ directory
-  - `detectExecutableType()`: Generic entry point that routes to appropriate detection strategy
-  - `detectLocalExecutableType()`: Detects executables on local filesystem by checking package.json bin field or file extension
-  - `isJsFilePath()`: Validates if a file path has .js, .mjs, or .cjs extension
-  - `isNativeBinary()`: Simplified helper that returns true for native binary executables
-  - `isNodePackage()`: Simplified helper that returns true for Node.js packages
+- `dlx/detect` — `detectDlxExecutableType`, `detectExecutableType`, `detectLocalExecutableType`, `isJsFilePath`, `isNativeBinary`, `isNodePackage`. Distinguishes Node packages from native binaries in DLX cache and on local filesystem
 
 ### Fixed
 
-- **releases/github**: Sort releases by published_at to reliably find latest release instead of relying on creation order
+- `releases/github` — sort releases by `published_at` to reliably find latest (was relying on creation order)
 
 ## [5.4.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.4.1) - 2026-01-10
 
 ### Fixed
 
-- **build**: Removed debug module stub to bundle real debug package. The stub was missing `enable()` and `disable()` methods, causing errors when downstream projects re-bundled the lib.
+- Removed `debug` module stub to bundle the real package — stub was missing `enable()` / `disable()`
 
 ## [5.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.4.0) - 2026-01-07
 
 ### Added
 
-- **releases/github**: Extended release functions to accept glob patterns for asset discovery
-  - `getReleaseAssetUrl()` now accepts glob patterns: `'yoga-sync-*.mjs'`, `'models-*.tar.gz'`
-  - `downloadReleaseAsset()` now accepts glob patterns for automatic asset discovery
-  - `getLatestRelease()` now accepts asset patterns to find releases with matching assets
-  - Supports wildcards, brace expansion, RegExp patterns, and prefix/suffix objects
-  - Uses picomatch for robust glob pattern matching
-
-- **releases/socket-btm**: Extended `downloadSocketBtmRelease()` to accept glob patterns
-  - `asset` parameter now accepts wildcards: `'yoga-sync-*.mjs'`, `'models-*.tar.gz'`
-  - Automatically discovers and downloads latest matching asset
-  - Eliminates need for hardcoded asset names in build scripts
+- `releases/github` — `getReleaseAssetUrl()`, `downloadReleaseAsset()`, `getLatestRelease()` accept glob patterns (wildcards, brace expansion, RegExp) via picomatch
+- `releases/socket-btm` `downloadSocketBtmRelease()` — `asset` parameter accepts glob patterns
 
 ## [5.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.3.0) - 2026-01-07
 
 ### Added
 
-- **releases/socket-btm**: Exported helper functions for external use
-  - `detectLibc()`: Detect musl vs glibc on Linux systems
-  - `getBinaryAssetName()`: Get GitHub asset name for platform/arch
-  - `getBinaryName()`: Get binary filename with platform-appropriate extension
-  - `getPlatformArch()`: Get platform-arch identifier for directory structure
-
-- **releases/github**: Exported `getAuthHeaders()` for GitHub API authentication
-  - Returns headers with `Accept`, `X-GitHub-Api-Version`, and optional `Authorization`
-  - Checks `GH_TOKEN` and `GITHUB_TOKEN` environment variables
+- `releases/socket-btm` exports: `detectLibc`, `getBinaryAssetName`, `getBinaryName`, `getPlatformArch`
+- `releases/github` exports `getAuthHeaders()` — checks `GH_TOKEN` / `GITHUB_TOKEN`
 
 ## [5.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.2.1) - 2026-01-06
 
 ### Fixed
 
-- **releases**: Fixed "Text file busy" errors when executing downloaded binaries
-  - Changed `downloadGitHubRelease()` to use synchronous `chmodSync()` instead of async `chmod()`
-  - Ensures file system operations complete before binary execution
-  - Prevents race conditions in CI/CD environments where async operations may not fully flush to disk
+- `releases` — `downloadGitHubRelease()` uses sync `chmodSync()` to prevent "Text file busy" race in CI
 
 ## [5.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.2.0) - 2026-01-06
 
 ### Added
 
-- **releases**: Added GitHub release download utilities for cross-project use
-  - Added `downloadGitHubRelease()` for downloading releases from any GitHub repository
-  - Added `downloadSocketBtmRelease()` specialized wrapper for socket-btm releases
-  - Features version caching with `.version` files to avoid redundant downloads
-  - Supports cross-platform binary downloads (darwin, linux, win32) with automatic platform/arch detection
-  - Includes Linux musl/glibc support with musl as default for broader compatibility
-  - Automatically removes macOS quarantine attributes from downloaded binaries
-  - Supports generic asset downloads (WASM files, models, etc.)
-  - API inspired by industry tools: `brew`, `cargo`, `gh` for intuitive usage
-  - Package exports: `@socketsecurity/lib/releases/github` and `@socketsecurity/lib/releases/socket-btm`
+- `releases/github` — `downloadGitHubRelease()` for any GitHub repo
+- `releases/socket-btm` — `downloadSocketBtmRelease()` wrapper. Version caching via `.version` files; cross-platform with auto platform/arch detection; Linux musl/glibc support; macOS quarantine attribute auto-removal; generic asset downloads (WASM, models)
 
 ## [5.1.4](https://github.com/SocketDev/socket-lib/releases/tag/v5.1.4) - 2025-12-30
 
