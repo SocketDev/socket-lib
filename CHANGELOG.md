@@ -323,105 +323,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **fs**: `safeDelete()` and `safeDeleteSync()` now properly implement retry logic
-  - Previously `maxRetries` was incorrectly passed as `concurrency` to del (parallelism, not retries)
-  - `safeDelete()` now wraps `deleteAsync()` with `pRetry()` for exponential backoff
-  - `safeDeleteSync()` implements sync retry loop with `Atomics.wait()` for non-blocking sleep
-  - Both use `backoffFactor: 2` (delay doubles each retry: 200ms → 400ms → 800ms by default)
-  - `maxRetries` and `retryDelay` options in `RemoveOptions` now work as documented
+- `fs` `safeDelete()` and `safeDeleteSync()` now properly implement retry logic. Previously `maxRetries` was incorrectly passed as `concurrency` to `del`. Both now use exponential backoff (`backoffFactor: 2`); `maxRetries` and `retryDelay` in `RemoveOptions` work as documented
 
 ## [5.9.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.9.0) - 2026-03-14
 
 ### Changed
 
-- **releases/socket-btm**: `getPlatformArch()` now normalizes Windows platform to `win` instead of `win32`
-  - Returns `win-x64`, `win-arm64` instead of `win32-x64`, `win32-arm64`
-  - Consistent with `getBinaryAssetName()` which already uses `win` for Windows assets
-  - Aligns with socket-btm and Node.js convention: use `win` for file/folder names, `win32` for platform checks (`process.platform`)
-  - Added `PLATFORM_MAP` for explicit platform name mapping (darwin, linux, win32 → win)
-  - Now throws `Error: Unsupported platform` for unknown platform values
+- **BREAKING**: `releases/socket-btm` `getPlatformArch()` normalizes Windows to `win` (was `win32`) — returns `win-x64`, `win-arm64`. Throws on unknown platforms. (Reverted in 5.22.0 back to `win32`)
 
 ## [5.8.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.2) - 2026-03-13
 
 ### Fixed
 
-- **http-request**: Download to temp file then atomically rename to prevent corruption
-  - Downloads now write to `{destPath}.download` temp file first
-  - On success, atomically renames to the destination path
-  - On failure, cleans up temp file and preserves any existing file at destination
-  - Prevents partial/corrupted files from CI caching causing extraction failures
+- `http-request` — downloads write to `{destPath}.download` temp file then atomically rename. Prevents partial/corrupted files from CI caching causing extraction failures
 
 ## [5.8.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.1) - 2026-03-11
 
 ### Performance
 
-- **windows**: Add comprehensive caching for expensive PATH resolution operations
-  - `getBinPath()`, `getBinPathSync()`: Cache binary path lookups
-  - `findRealBin()`: Cache `all:true` lookups and use single `whichSync({ all: true })` call
-  - `getVoltaBinPath()`: Cache Volta binary resolution
-  - `spawn()`: Cache binary path resolution before spawning
-  - `getGitPath()`: Cache git binary path
-  - `getCachedRealpath()`: New helper caching `realpathSync()` calls for git operations
-  - `findGitRoot()`: Cache git root directory lookups
-  - `findPackageJson()`: Cache package.json path lookups
-  - `readPackageJson()`: Cache parsed package.json content
-  - `resolveBinaryPath()`: Cache binary path resolution with Windows extension handling
-  - `NPM_BIN_PATH`, `NPM_REAL_EXEC_PATH`: Share npm path resolution to avoid duplicate `which.sync()` calls
-  - `ProcessLockManager.isStale()`: Use single `statSync({ throwIfNoEntry: false })` instead of `existsSync()` + `statSync()`
-  - All caches validate entries with `existsSync()` and remove stale entries automatically
+- Comprehensive caching for expensive PATH/realpath/git/package.json lookups across `bin`, `spawn`, `git`, `paths`, and `process-lock`. All caches validate entries via `existsSync()` and evict stale ones
 
 ## [5.8.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.8.0) - 2026-03-10
 
 ### Added
 
-- **archives**: Added secure archive extraction utilities with support for ZIP, TAR, TAR.GZ, and TGZ formats
-  - Configurable limits: `maxFileSize` (default 100MB), `maxTotalSize` (default 1GB)
-  - Cross-platform path normalization
-  - External dependencies: adm-zip@0.5.16, tar-fs@3.1.2 (bundled, +212KB)
-  - Security features: path traversal protection, file size limits, total size limits, symlink blocking
-  - Strip option to remove leading path components (like tar `--strip-components`)
-  - `detectArchiveFormat()` - Detect archive type from file extension
-  - `extractArchive()` - Generic extraction with auto-format detection
-  - `extractTar()`, `extractTarGz()`, `extractZip()` - Format-specific extractors
-
-- **releases/github**: Added archive extraction support for GitHub releases
-  - Auto-detects format from asset filename
-  - Enhanced `downloadAndExtractZip()` to use generic archive helpers
-  - Supports ZIP, TAR, TAR.GZ, and TGZ assets
-  - `downloadAndExtractArchive()` - Generic archive download and extraction
+- `archives` — secure archive extraction for ZIP / TAR / TAR.GZ / TGZ. Configurable `maxFileSize` (100MB) and `maxTotalSize` (1GB). Path-traversal protection, symlink blocking, strip option. Exports: `detectArchiveFormat`, `extractArchive`, `extractTar`, `extractTarGz`, `extractZip`
+- `releases/github` `downloadAndExtractArchive()` — generic archive download and extract; auto-detects format
 
 ### Changed
 
-- **dependencies**: Deduplicated 14 external bundle packages to single versions using pnpm overrides and patches
+- 14 external bundle packages deduplicated via pnpm overrides + patches
 
 ## [5.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.7.0) - 2026-02-12
 
 ### Added
 
-- **env**: Added `isInEnv()` helper function to check if an environment variable key exists, regardless of its value
-  - Returns `true` even for empty strings, `"false"`, `"0"`, etc.
-  - Follows same override resolution order as `getEnvValue()` (isolated overrides → shared overrides → process.env)
-  - Useful for detecting presence of environment variables independent of their value
-
-- **dlx**: Added new exported helper functions
-  - `downloadBinaryFile()` - Downloads a binary file from a URL to the dlx cache directory
-  - `ensurePackageInstalled()` - Ensures an npm package is installed and cached via Arborist
-  - `getBinaryCacheMetadataPath()` - Gets the file path to dlx binary cache metadata (`.dlx-metadata.json`)
-  - `isBinaryCacheValid()` - Checks if a cached dlx binary is still valid based on TTL and timestamp
-  - `makePackageBinsExecutable()` - Makes npm package binaries executable on Unix systems
-  - `parsePackageSpec()` - Parses npm package spec strings (e.g., `pkg@1.0.0`) into name and version
-  - `resolveBinaryPath()` - Resolves the absolute path to a binary within an installed package
-  - `writeBinaryCacheMetadata()` - Writes dlx binary cache metadata with integrity, size, and source info
-
-- **releases**: Added `createAssetMatcher()` utility function for GitHub release asset pattern matching
-  - Creates matcher functions that test strings against glob patterns, prefix/suffix, or RegExp
-  - Used for dynamic asset discovery in GitHub releases (e.g., matching platform-specific binaries)
+- `env` `isInEnv(key)` — `true` whenever the key exists, regardless of value (empty string, `"false"`, `"0"` all count)
+- `dlx` helpers exposed: `downloadBinaryFile`, `ensurePackageInstalled`, `getBinaryCacheMetadataPath`, `isBinaryCacheValid`, `makePackageBinsExecutable`, `parsePackageSpec`, `resolveBinaryPath`, `writeBinaryCacheMetadata`
+- `releases` `createAssetMatcher()` — matcher fn for glob / prefix-suffix / RegExp asset patterns
 
 ### Changed
 
-- **env**: Updated `getCI()` to use `isInEnv()` for more accurate CI detection
-  - Now returns `true` whenever the `CI` key exists in the environment, not just when truthy
-  - Matches standard CI detection behavior where the presence of the key (not its value) indicates a CI environment
+- `env` `getCI()` now uses `isInEnv('CI')` — `true` whenever the key exists, matching standard CI-detection convention
 
 ### Fixed
 
