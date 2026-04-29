@@ -834,199 +834,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Updated `@socketregistry/packageurl-js` to 1.3.1 to resolve an unintended external dependency
-- **Documentation**: Corrected JSDoc `@example` import paths from `@socketsecurity/registry` to `@socketsecurity/lib` across utility modules
-  - Updated examples in `memoization.ts`, `performance.ts`, `spinner.ts`, `suppress-warnings.ts`, and `tables.ts`
-  - Ensures documentation reflects correct package name after v1.0.0 rename
+- `@socketregistry/packageurl-js` updated to 1.3.1 (resolves unintended external dep)
+- JSDoc `@example` import paths corrected after v1.0.0 rename (`@socketsecurity/registry` → `@socketsecurity/lib`)
 
 ## [2.10.2](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.2) - 2025-10-31
 
 ### Changed
 
-- **Package spec parsing**: Refactored to use official `npm-package-arg` library for robust handling of all npm package specification formats (versions, ranges, tags, git URLs)
-  - Improves reliability when parsing complex package specs
-  - Better handles edge cases in version ranges and scoped packages
-  - Falls back to simple parsing if npm-package-arg fails
+- Package spec parsing uses official `npm-package-arg` library for full npm spec support (versions, ranges, tags, git URLs); falls back to simple parsing if it fails
 
 ### Fixed
 
-- **Scoped package version parsing**: Fixed critical bug where parsePackageSpec was stripping the `@` prefix from scoped packages with versions
-  - Example: `@coana-tech/cli@~14.12.51` was incorrectly parsed as `coana-tech/cli@~14.12.51`
-  - Caused package installation failures for scoped packages in DLX system
+- **Critical**: `parsePackageSpec` no longer strips the `@` prefix from scoped+versioned specs (e.g., `@coana-tech/cli@~14.12.51`)
 
 ## [2.10.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.1) - 2025-10-31
 
 ### Fixed
 
-- **Process lock directory creation**: Use recursive mkdir to ensure parent directories exist when creating lock directory
-- **Node.js debug flags**: Remove buggy `getNodeDebugFlags()` function that returned debug flags without required argument values
+- Process lock — recursive mkdir for parent dirs
+- Removed buggy `getNodeDebugFlags()` (returned flags without required argument values)
 
 ## [2.10.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.10.0) - 2025-10-30
 
 ### Added
 
-- **Unified DLX metadata schema**: Standardized `.dlx-metadata.json` format across TypeScript and C++ implementations
-  - Exported `DlxMetadata` interface as canonical schema reference
-  - Core fields: `version`, `cache_key`, `timestamp`, `checksum`, `checksum_algorithm`, `platform`, `arch`, `size`, `source`
-  - Support for `source` tracking (download vs decompression origin)
-  - Reserved `extra` field for implementation-specific data
-  - Comprehensive documentation with examples for both download and decompression use cases
+- Unified `.dlx-metadata.json` schema — `DlxMetadata` interface exported. Fields: `version`, `cache_key`, `timestamp`, `checksum`, `checksum_algorithm`, `platform`, `arch`, `size`, `source` (`{ type, url }`); reserved `extra` for impl-specific data
 
 ### Changed
 
-- **DLX binary metadata structure**: Updated `writeBinaryCacheMetadata()` to use unified schema with additional fields
-  - Now includes `cache_key` (first 16 chars of SHA-512 hash)
-  - Added `size` field for cached binary size
-  - Added `checksum_algorithm` field (currently "sha256")
-  - Restructured to use `source.type` and `source.url` for origin tracking
-  - Maintains backward compatibility in `listDlxCache()` reader
+- `dlx` `writeBinaryCacheMetadata()` adopts the unified schema (`cache_key` = SHA-512 prefix, `size`, `checksum_algorithm`, `source.type`/`source.url`)
 
 ## [2.9.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.9.1) - 2025-10-30
 
 ### Added
 
-- **Smart binary detection in dlxPackage**: Automatically finds the correct binary even when package name doesn't match binary name
-  - If package has single binary, uses it automatically regardless of name
-  - Resolves packages like `@socketsecurity/cli` (binary: `socket`) without manual configuration
-  - Falls back to intelligent name matching for multi-binary packages
-- **Optional binaryName parameter**: Added `binaryName` option to `DlxPackageOptions` for explicit binary selection when auto-detection isn't sufficient
+- `dlxPackage` smart binary detection — uses single-binary packages directly regardless of name. Optional `binaryName` for explicit selection on multi-binary packages
 
 ### Fixed
 
-- **Binary resolution for scoped packages**: Fixed issue where `dlxPackage` couldn't find binaries when package name didn't match binary name (e.g., `@socketsecurity/cli` with `bin: { socket: '...' }`)
+- Binary resolution for scoped packages where package name ≠ binary name (e.g., `@socketsecurity/cli` exposes `bin: { socket: '...' }`)
 
 ## [2.9.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.9.0) - 2025-10-30
 
 ### Added
 
-- **Socket.dev URL constants**: Added centralized URL constants for Socket.dev services
-  - `SOCKET_WEBSITE_URL`: Main Socket.dev website
-  - `SOCKET_CONTACT_URL`: Contact page
-  - `SOCKET_DASHBOARD_URL`: Dashboard homepage
-  - `SOCKET_API_TOKENS_URL`: API tokens settings page
-  - `SOCKET_PRICING_URL`: Pricing information
-  - `SOCKET_STATUS_URL`: Service status page
-  - `SOCKET_DOCS_URL`: Documentation site
-  - Available via `@socketsecurity/lib/constants/socket`
+- `constants/socket` URL constants — `SOCKET_WEBSITE_URL`, `SOCKET_CONTACT_URL`, `SOCKET_DASHBOARD_URL`, `SOCKET_API_TOKENS_URL`, `SOCKET_PRICING_URL`, `SOCKET_STATUS_URL`, `SOCKET_DOCS_URL`
 
 ### Changed
 
-- **Enhanced error messages across library**: Comprehensive audit and improvement of error handling
-  - Added actionable error messages with resolution steps throughout modules
-  - Improved file system operation errors (permissions, read-only filesystems, path issues)
-  - Enhanced DLX error messages with clear troubleshooting guidance
-  - Better error context in process locking, binary downloads, and package operations
-  - Consistent error formatting with helpful user guidance
-- **Consolidated process locking**: Standardized on directory-based lock format across all modules
-  - All locking operations now use `process-lock` module exclusively
-  - Lock directories provide atomic guarantees across all filesystems including NFS
-  - Consistent mtime-based stale detection with 5-second timeout (aligned with npm npx)
-  - Automatic cleanup on process exit with proper signal handling
+- Error messages across the library — actionable resolution steps for fs, dlx, process-lock, downloads
+- All locking consolidated on `process-lock` (atomic mkdir-based; 5s stale timeout aligned with npm npx)
 
 ## [2.8.4](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.4) - 2025-10-30
 
 ### Added
 
-- **DLX binary helper functions mirror dlx-package pattern**
-  - `downloadBinary`: Download binary with caching (without execution)
-  - `executeBinary`: Execute cached binary without re-downloading
-  - Renamed internal `downloadBinary` to `downloadBinaryFile` to avoid naming conflicts
-  - Maintains feature parity with `downloadPackage`/`executePackage` from dlx-package
+- `dlx` `downloadBinary` (cache without execution) and `executeBinary` (run cached binary). Internal `downloadBinary` renamed to `downloadBinaryFile` to avoid the naming conflict
 
 ## [2.8.3](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.3) - 2025-10-30
 
 ### Fixed
 
-- **Logger now fully defers all console access for Node.js internal bootstrap compatibility**: Completed lazy initialization to prevent ERR_CONSOLE_WRITABLE_STREAM errors
-  - Deferred `Object.getOwnPropertySymbols(console)` call until first logger use
-  - Deferred `kGroupIndentationWidth` symbol lookup
-  - Deferred `Object.entries(console)` and prototype method initialization
-  - Ensures logger can be safely imported in Node.js internal bootstrap contexts (e.g., `lib/internal/bootstrap/*.js`) before stdout is initialized
-  - Builds on v2.8.2 console deferring to complete early bootstrap compatibility
+- `Logger` defers `Object.getOwnPropertySymbols(console)`, `kGroupIndentationWidth`, and `Object.entries(console)` until first use — safe to import in Node.js internal bootstrap contexts
 
 ## [2.8.2](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.2) - 2025-10-29
 
 ### Changed
 
-- Enhanced Logger class to defer Console creation until first use
-  - Eliminates early bootstrap errors when importing logger before stdout is ready
-  - Enables safe logger imports during Node.js early initialization phase
-  - Simplified internal storage with WeakMap-only pattern for constructor args
+- `Logger` defers `Console` creation until first use — eliminates early-bootstrap errors when imported before stdout is ready
 
 ## [2.8.1](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.1) - 2025-10-29
 
 ### Changed
 
-- **Consolidated DLX cache key generation**: Extracted `generateCacheKey` function to shared `dlx.ts` module
-  - Eliminates code duplication between `dlx-binary.ts` and `dlx-package.ts`
-  - Enables consistent cache key generation across the Socket ecosystem
-  - Exports function for use in dependent packages (e.g., socket-cli)
-  - Maintains SHA-512 truncated to 16 chars strategy from v2.8.0
+- `dlx` — `generateCacheKey` extracted to shared module. Exported for downstream consumers (e.g. socket-cli)
 
 ## [2.8.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.8.0) - 2025-10-29
 
 ### Changed
 
-- **Enhanced DLX cache key generation with npm/npx compatibility**: Updated cache key strategy to align with npm/npx ecosystem patterns
-  - Changed from SHA-256 (64 chars) to SHA-512 truncated to 16 chars (matching npm/npx)
-  - Optimized for Windows MAX_PATH compatibility (260 character limit)
-  - Accepts collision risk for shorter paths (~1 in 18 quintillion with 1000 entries)
-  - Added support for PURL-style package specifications (e.g., `npm:prettier@3.0.0`, `pypi:requests@2.31.0`)
-  - Documented Socket's shorthand format (without `pkg:` prefix) handled by `@socketregistry/packageurl-js`
-  - References npm/cli v11.6.2 implementation for consistency
+- `dlx` cache keys — SHA-512 truncated to 16 chars (was SHA-256 / 64 chars), matching npm/npx. Better Windows `MAX_PATH` compatibility. Supports PURL specs (`npm:prettier@3.0.0`, `pypi:requests@2.31.0`)
 
 ## [2.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.7.0) - 2025-10-28
 
 ### Added
 
-- **DLX cache locking for concurrent installation protection**: Added process-lock protection to dlx-package installation operations
-  - Lock file created at `~/.socket/_dlx/<hash>/.lock` (similar to npm npx's `concurrency.lock`)
-  - Prevents concurrent installations from corrupting the same package cache
-  - Uses 5-second stale timeout and 2-second periodic touching (aligned with npm npx)
-  - Double-check pattern verifies installation after acquiring lock to avoid redundant work
-  - Completes 100% alignment with npm's npx locking strategy
+- `dlx` cache locking — `~/.socket/_dlx/<hash>/.lock` (npm-npx-style `concurrency.lock`). Prevents concurrent installations from corrupting the same package cache. 5s stale timeout, 2s periodic touch
 
 ## [2.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.6.0) - 2025-10-28
 
 ### Changed
 
-- **Process locking aligned with npm npx**: Enhanced process-lock module to match npm's npx locking strategy
-  - Reduced stale timeout from 10 seconds to 5 seconds (matches npm npx)
-  - Added periodic lock touching (2-second interval) to prevent false stale detection during long operations
-  - Implemented second-level granularity for mtime comparison to avoid APFS floating-point precision issues
-  - Added automatic touch timer cleanup on process exit
-  - Timers use `unref()` to prevent keeping process alive
-  - Aligns with npm's npx implementation per https://github.com/npm/cli/pull/8512
+- `process-lock` aligned with npm npx — 5s stale timeout (was 10s), 2s periodic touch, second-level mtime comparison (avoids APFS float precision), `unref()` timers, automatic cleanup on exit
 
 ## [2.5.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.5.0) - 2025-10-28
 
 ### Added
 
-- **Process locking utilities**: Added `ProcessLockManager` class providing cross-platform inter-process synchronization using file-system based locks
-  - Atomic lock acquisition via `mkdir()` for thread-safe operations
-  - Stale lock detection with automatic cleanup (default 10 seconds, aligned with npm's npx strategy)
-  - Exponential backoff with jitter for retry attempts
-  - Process exit handlers for guaranteed cleanup even on abnormal termination
-  - Three main APIs: `acquire()`, `release()`, and `withLock()` (recommended)
-  - Comprehensive test suite with `describe.sequential` for proper isolation
-  - Export: `@socketsecurity/lib/process-lock`
+- `process-lock` `ProcessLockManager` — cross-platform inter-process sync via filesystem locks. Atomic `mkdir()` acquisition; stale-lock detection (10s default); exponential backoff with jitter; exit-handler cleanup. APIs: `acquire`, `release`, `withLock` (recommended)
 
 ### Changed
 
-- **Script refactoring**: Renamed `spinner.succeed()` to `spinner.success()` for consistency
-- **Script cleanup**: Removed redundant spinner cleanup in interactive-runner
+- `spinner.succeed()` renamed to `spinner.success()`
 
 ## [2.4.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.4.0) - 2025-10-28
 
 ### Changed
 
-- **Download locking aligned with npm**: Reduced default `staleTimeout` in `downloadWithLock()` from 300 seconds to 10 seconds to align with npm's npx locking strategy
-  - Prevents stale locks from blocking downloads for extended periods
-  - Matches npm's battle-tested timeout range (5-10 seconds)
-  - Binary downloads now protected against concurrent corruption
-- **Binary download protection**: `dlxBinary.downloadBinary()` now uses `downloadWithLock()` to prevent corruption when multiple processes download the same binary concurrently
-  - Eliminates race conditions during parallel binary downloads
-  - Maintains checksum verification and executable permissions
+- `downloadWithLock()` default `staleTimeout` 300s → 10s (aligns with npm npx)
+- `dlxBinary.downloadBinary()` uses `downloadWithLock()` to prevent corruption from concurrent binary downloads
 
 ## [2.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.3.0) - 2025-10-28
 
