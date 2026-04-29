@@ -9,55 +9,99 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  biSweep,
+  DEFAULT_BASE_COLOR,
+  WHITE,
+  bidirectionalSweep,
+  blendRgb,
   blockKernel,
-  blendRGB,
   configToSpec,
-  constant,
+  directionToSweep,
   frameColors,
   gradient,
   ltrSweep,
   noSweep,
   randomSweep,
+  resolvePalette,
   rtlSweep,
   smoothKernel,
+  solidColor,
   type Palette,
   type RGB,
+  type ShimmerDirection,
   type ShimmerSpec,
 } from '@socketsecurity/lib/effects/shimmer'
 
 const RED: RGB = [255, 0, 0]
 const GREEN: RGB = [0, 255, 0]
 const BLUE: RGB = [0, 0, 255]
-const WHITE: RGB = [255, 255, 255]
 
 describe('effects/shimmer', () => {
-  describe('blendRGB', () => {
+  describe('blendRgb', () => {
     it('returns a at t=0 and b at t=1', () => {
-      expect(blendRGB(RED, BLUE, 0)).toEqual(RED)
-      expect(blendRGB(RED, BLUE, 1)).toEqual(BLUE)
+      expect(blendRgb(RED, BLUE, 0)).toEqual(RED)
+      expect(blendRgb(RED, BLUE, 1)).toEqual(BLUE)
     })
 
     it('interpolates linearly per channel at t=0.5', () => {
-      expect(blendRGB(RED, BLUE, 0.5)).toEqual([128, 0, 128])
+      expect(blendRgb(RED, BLUE, 0.5)).toEqual([128, 0, 128])
     })
 
     it('clamps t to [0, 1]', () => {
-      expect(blendRGB(RED, BLUE, -1)).toEqual(RED)
-      expect(blendRGB(RED, BLUE, 2)).toEqual(BLUE)
+      expect(blendRgb(RED, BLUE, -1)).toEqual(RED)
+      expect(blendRgb(RED, BLUE, 2)).toEqual(BLUE)
     })
 
     it('rounds RGB channels to integer', () => {
-      const result = blendRGB([0, 0, 0], [255, 255, 255], 0.333)
+      const result = blendRgb([0, 0, 0], [255, 255, 255], 0.333)
       expect(result.every(c => Number.isInteger(c))).toBe(true)
     })
   })
 
-  describe('constant', () => {
+  describe('solidColor', () => {
     it('returns the same color regardless of index', () => {
-      const f = constant(RED)
+      const f = solidColor(RED)
       expect(f(0)).toEqual(RED)
       expect(f(99)).toEqual(RED)
+    })
+
+    it('returns the same reference for repeat calls', () => {
+      const f = solidColor(RED)
+      expect(f(0)).toBe(f(1))
+    })
+  })
+
+  describe('exported constants', () => {
+    it('WHITE is rgb(255, 255, 255)', () => {
+      expect(WHITE).toEqual([255, 255, 255])
+    })
+
+    it('DEFAULT_BASE_COLOR is Socket purple', () => {
+      expect(DEFAULT_BASE_COLOR).toEqual([140, 82, 255])
+    })
+
+    it('configToSpec uses DEFAULT_BASE_COLOR when color omitted', () => {
+      const spec = configToSpec({ dir: 'none' }, 3)
+      const colors = frameColors(spec, 3, 0)
+      // dir='none' → wave never on text → every char shows base color.
+      expect(colors[0]).toEqual(DEFAULT_BASE_COLOR)
+      expect(colors[1]).toEqual(DEFAULT_BASE_COLOR)
+      expect(colors[2]).toEqual(DEFAULT_BASE_COLOR)
+    })
+
+    it('configToSpec uses WHITE highlight by default', () => {
+      const spec = configToSpec(
+        {
+          color: [0, 0, 0] as RGB,
+          dir: 'ltr',
+          speed: 1,
+          kernel: 'block',
+          padding: 0,
+        },
+        3,
+      )
+      // padding=0: wave starts at char 0. block kernel: char 0 is highlight.
+      const colors = frameColors(spec, 3, 0)
+      expect(colors[0]).toEqual(WHITE)
     })
   })
 
@@ -180,9 +224,9 @@ describe('effects/shimmer', () => {
     })
   })
 
-  describe('biSweep', () => {
+  describe('bidirectionalSweep', () => {
     it('does LTR then RTL each cycle', () => {
-      const f = biSweep(10, 2)
+      const f = bidirectionalSweep(10, 2)
       // LTR phase: frame 0..13 (cycle = 14)
       expect(f(0)).toBe(-2)
       expect(f(13)).toBe(11)
@@ -194,14 +238,14 @@ describe('effects/shimmer', () => {
     })
 
     it('wraps after one full bidirectional cycle', () => {
-      const f = biSweep(10, 2)
+      const f = bidirectionalSweep(10, 2)
       // fullCycle = 28
       expect(f(0)).toBe(f(28))
       expect(f(15)).toBe(f(43))
     })
 
     it('handles negative frame numbers', () => {
-      const f = biSweep(10, 2)
+      const f = bidirectionalSweep(10, 2)
       expect(f(-1)).toBe(f(27))
     })
   })
@@ -406,13 +450,98 @@ describe('effects/shimmer', () => {
     })
   })
 
+  describe('resolvePalette', () => {
+    it('returns solidColor of defaultColor when source is undefined', () => {
+      const f = resolvePalette(undefined, BLUE)
+      expect(f(0)).toEqual(BLUE)
+      expect(f(99)).toEqual(BLUE)
+    })
+
+    it('returns solidColor of source when source is a single RGB', () => {
+      const f = resolvePalette(RED, BLUE)
+      expect(f(0)).toEqual(RED)
+      expect(f(5)).toEqual(RED)
+    })
+
+    it('returns gradient of source when source is a Palette', () => {
+      const palette: Palette = [RED, GREEN, BLUE]
+      const f = resolvePalette(palette, [0, 0, 0] as RGB)
+      expect(f(0)).toEqual(RED)
+      expect(f(1)).toEqual(GREEN)
+      expect(f(2)).toEqual(BLUE)
+      expect(f(3)).toEqual(RED) // wraps
+    })
+
+    it('handles single-RGB source with first channel that is itself an array-like primitive', () => {
+      // Single RGB: [255, 0, 0] — element [0] is the number 255.
+      // Palette: [[255,0,0]] — element [0] is an array.
+      // resolvePalette uses ArrayIsArray(source[0]) to disambiguate.
+      const single = resolvePalette([255, 0, 0] as RGB, BLUE)
+      const palette = resolvePalette([[255, 0, 0]] as Palette, BLUE)
+      expect(single(0)).toEqual([255, 0, 0])
+      expect(palette(0)).toEqual([255, 0, 0])
+    })
+  })
+
+  describe('directionToSweep', () => {
+    const cases: Array<{ dir: ShimmerDirection; expectedKind: string }> = [
+      { dir: 'ltr', expectedKind: 'ltr' },
+      { dir: 'rtl', expectedKind: 'rtl' },
+      { dir: 'bi', expectedKind: 'bi' },
+      { dir: 'random', expectedKind: 'random' },
+      { dir: 'none', expectedKind: 'none' },
+    ]
+
+    it('returns ltrSweep behavior for ltr', () => {
+      const f = directionToSweep('ltr', 10, 2)
+      expect(f(0)).toBe(-2) // ltrSweep starts at -padding
+    })
+
+    it('returns rtlSweep behavior for rtl', () => {
+      const f = directionToSweep('rtl', 10, 2)
+      expect(f(0)).toBe(11) // rtlSweep starts at textLength + padding - 1
+    })
+
+    it('returns bidirectionalSweep behavior for bi', () => {
+      const f = directionToSweep('bi', 10, 2)
+      expect(f(0)).toBe(-2) // first half is LTR
+      expect(f(14)).toBe(11) // second half is RTL
+    })
+
+    it('returns randomSweep behavior for random', () => {
+      const f = directionToSweep('random', 10, 2)
+      // Random can produce either start; just verify it returns a position
+      // in the valid range.
+      const v = f(0)
+      expect(v === -2 || v === 11).toBe(true)
+    })
+
+    it('returns noSweep behavior for none', () => {
+      const f = directionToSweep('none', 10, 2)
+      expect(f(0)).toBe(-Infinity)
+      expect(f(100)).toBe(-Infinity)
+    })
+
+    it('falls back to ltr for unknown direction strings', () => {
+      const f = directionToSweep('unknown' as ShimmerDirection, 10, 2)
+      // Falls through to ltr default arm.
+      expect(f(0)).toBe(-2)
+    })
+
+    it.each(cases)('handles direction $dir', ({ dir }) => {
+      const f = directionToSweep(dir, 10, 2)
+      expect(typeof f).toBe('function')
+      expect(typeof f(0)).toBe('number')
+    })
+  })
+
   describe('frameColors', () => {
     it('returns one RGB per character', () => {
       const spec: ShimmerSpec = {
         positionAt: () => 0,
         kernel: blockKernel(1),
-        baseColor: constant(RED),
-        highlightColor: constant(WHITE),
+        baseColor: solidColor(RED),
+        highlightColor: solidColor(WHITE),
       }
       expect(frameColors(spec, 5, 0)).toHaveLength(5)
       expect(frameColors(spec, 0, 0)).toEqual([])
