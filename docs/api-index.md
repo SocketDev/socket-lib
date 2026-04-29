@@ -54,7 +54,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/suppress-warnings`](../src/suppress-warnings.ts)   | Utilities to suppress specific process warnings.                                                               |
 | [`@socketsecurity/lib/tables`](../src/tables.ts)                         | Table formatting utilities for CLI applications.                                                               |
 | [`@socketsecurity/lib/temporary-executor`](../src/temporary-executor.ts) | Temporary package executor detection utilities for Socket ecosystem.                                           |
-| [`@socketsecurity/lib/themes`](../src/themes/index.ts)                   | Elegant theming system for Socket libraries.                                                                   |
 | [`@socketsecurity/lib/types`](../src/types.ts)                           | Type definitions for Socket Registry.                                                                          |
 | [`@socketsecurity/lib/url`](../src/url.ts)                               | URL parsing and validation utilities.                                                                          |
 | [`@socketsecurity/lib/versions`](../src/versions.ts)                     | Version comparison and validation utilities for Socket ecosystem.                                              |

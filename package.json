@@ -639,10 +639,6 @@
       "types": "./dist/temporary-executor.d.ts",
       "default": "./dist/temporary-executor.js"
     },
-    "./themes": {
-      "types": "./dist/themes/index.d.ts",
-      "default": "./dist/themes/index.js"
-    },
     "./themes/context": {
       "types": "./dist/themes/context.d.ts",
       "default": "./dist/themes/context.js"

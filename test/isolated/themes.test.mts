@@ -12,16 +12,17 @@
  */
 
 import {
-  SOCKET_THEME,
-  THEMES,
-  createTheme,
-  extendTheme,
   getTheme,
-  resolveColor,
   setTheme,
   withTheme,
   withThemeSync,
-} from '@socketsecurity/lib/themes'
+} from '@socketsecurity/lib/themes/context'
+import { SOCKET_THEME, THEMES } from '@socketsecurity/lib/themes/themes'
+import {
+  createTheme,
+  extendTheme,
+  resolveColor,
+} from '@socketsecurity/lib/themes/utils'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('themes', () => {
