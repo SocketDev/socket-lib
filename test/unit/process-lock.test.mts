@@ -12,6 +12,7 @@
  */
 
 import { existsSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -20,6 +21,13 @@ import type { ProcessLockOptions } from '@socketsecurity/lib/process-lock'
 import { processLock } from '@socketsecurity/lib/process-lock'
 import { safeDeleteSync } from '@socketsecurity/lib/fs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+// process-lock lazily does `require('node:fs')` inside getFs(). The require'd
+// CommonJS module's properties are writable/configurable, unlike the ESM
+// namespace import. We grab the same module via createRequire and patch
+// mkdirSync directly to drive errno error paths in acquire().
+const cjsRequire = createRequire(import.meta.url)
+const fsCjs = cjsRequire('node:fs') as typeof import('node:fs')
 
 describe.sequential('process-lock', () => {
   let testLockPath: string
@@ -397,6 +405,85 @@ describe.sequential('process-lock', () => {
       // No automatic touch — mtime stable.
       expect(after).toBe(initial)
       release()
+    })
+  })
+
+  describe('errno error paths', () => {
+    // Each test patches mkdirSync on the CJS-loaded node:fs module, runs
+    // acquire() with a synthetic errno, and restores the original.
+    function withMkdirError<T>(
+      code: NodeJS.ErrnoException['code'],
+      message: string,
+      fn: () => T | Promise<T>,
+    ): Promise<T> {
+      const original = fsCjs.mkdirSync
+      const err = new Error(message) as NodeJS.ErrnoException
+      err.code = code
+      let mkdirCallCount = 0
+      // process-lock calls mkdirSync twice in acquire(): once for the parent
+      // (recursive: true) and once for the lock dir itself. We let the parent
+      // call succeed so the error fires on the lock-dir creation only.
+      ;(fsCjs as { mkdirSync: typeof fsCjs.mkdirSync }).mkdirSync = ((
+        pathArg: string,
+        opts?: object,
+      ) => {
+        mkdirCallCount += 1
+        if (mkdirCallCount === 1 && opts) {
+          return original(pathArg, opts as Parameters<typeof original>[1])
+        }
+        throw err
+      }) as typeof fsCjs.mkdirSync
+      return Promise.resolve(fn()).finally(() => {
+        ;(fsCjs as { mkdirSync: typeof fsCjs.mkdirSync }).mkdirSync = original
+      })
+    }
+
+    it('throws permission-denied error on EACCES', async () => {
+      await withMkdirError('EACCES', 'EACCES: permission denied', async () => {
+        await expect(
+          processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
+        ).rejects.toThrow(/Permission denied creating lock/)
+      })
+    })
+
+    it('throws permission-denied error on EPERM', async () => {
+      await withMkdirError(
+        'EPERM',
+        'EPERM: operation not permitted',
+        async () => {
+          await expect(
+            processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
+          ).rejects.toThrow(/Permission denied creating lock/)
+        },
+      )
+    })
+
+    it('throws read-only-filesystem error on EROFS', async () => {
+      await withMkdirError(
+        'EROFS',
+        'EROFS: read-only file system',
+        async () => {
+          await expect(
+            processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
+          ).rejects.toThrow(/read-only filesystem/)
+        },
+      )
+    })
+
+    it('throws path-component-is-a-file error on ENOTDIR', async () => {
+      await withMkdirError('ENOTDIR', 'ENOTDIR: not a directory', async () => {
+        await expect(
+          processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
+        ).rejects.toThrow(/A path component is a file/)
+      })
+    })
+
+    it('wraps unknown errno codes in a generic acquire failure', async () => {
+      await withMkdirError('EBUSY', 'EBUSY: resource busy', async () => {
+        await expect(
+          processLock.acquire(testLockPath, { retries: 1, baseDelayMs: 10 }),
+        ).rejects.toThrow(/Failed to acquire lock/)
+      })
     })
   })
 })
