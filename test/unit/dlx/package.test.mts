@@ -11,22 +11,32 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import type {
   DlxPackageOptions,
   DlxPackageResult,
 } from '@socketsecurity/lib/dlx/package'
 import {
+  ensurePackageInstalled,
   executePackage,
   findBinaryPath,
   makePackageBinsExecutable,
   npmPurl,
   resolveBinaryPath,
 } from '@socketsecurity/lib/dlx/package'
+import { setPath } from '@socketsecurity/lib/paths/rewire'
 import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('dlx-package', () => {
@@ -1175,6 +1185,112 @@ describe('dlx-package', () => {
       )
       const result = await promise
       expect(String(result.stderr)).toContain('err')
+    })
+  })
+
+  describe('ensurePackageInstalled (cached path)', () => {
+    let tmpDir: string
+    let savedDlxDir: string | undefined
+
+    // Pre-stage a node_modules/<pkg>/package.json under <dlxDir>/<sha512-prefix>/
+    // matching what generateCacheKey produces. The early-return path inside
+    // ensurePackageInstalled then short-circuits Arborist entirely.
+    beforeEach(() => {
+      tmpDir = mkdtempSync(path.join(tmpdir(), 'dlx-pkg-cached-'))
+      savedDlxDir = process.env['SOCKET_DLX_DIR']
+      process.env['SOCKET_DLX_DIR'] = tmpDir
+      setPath('socket-dlx-dir', tmpDir)
+    })
+
+    afterEach(() => {
+      if (savedDlxDir === undefined) {
+        delete process.env['SOCKET_DLX_DIR']
+      } else {
+        process.env['SOCKET_DLX_DIR'] = savedDlxDir
+      }
+      setPath('socket-dlx-dir', undefined)
+      try {
+        rmSync(tmpDir, { recursive: true, force: true })
+      } catch {}
+    })
+
+    function stageCachedPackage(packageSpec: string, packageName: string) {
+      // generateCacheKey is sha512-hex-prefix(16) of the package spec.
+      const cacheKey = createHash('sha512')
+        .update(packageSpec)
+        .digest('hex')
+        .slice(0, 16)
+      const packageDir = path.join(tmpDir, cacheKey)
+      const installedDir = path.join(packageDir, 'node_modules', packageName)
+      mkdirSync(installedDir, { recursive: true })
+      writeFileSync(
+        path.join(installedDir, 'package.json'),
+        JSON.stringify({ name: packageName, version: '1.2.3' }),
+      )
+      return { cacheKey, installedDir, packageDir }
+    }
+
+    it('short-circuits when an installed package.json already exists', async () => {
+      const { installedDir, packageDir } = stageCachedPackage(
+        'lodash@4.17.21',
+        'lodash',
+      )
+      const result = await ensurePackageInstalled(
+        'lodash',
+        'lodash@4.17.21',
+        false,
+      )
+      expect(result.installed).toBe(false)
+      // packageDir matches exactly (modulo path normalization).
+      expect(result.packageDir.replace(/\\/g, '/')).toBe(
+        packageDir.replace(/\\/g, '/'),
+      )
+      // The cached package.json is untouched.
+      expect(existsSync(path.join(installedDir, 'package.json'))).toBe(true)
+    })
+
+    it('short-circuits for scoped packages too', async () => {
+      stageCachedPackage('@scope/pkg@2.0.0', '@scope/pkg')
+      const result = await ensurePackageInstalled(
+        '@scope/pkg',
+        '@scope/pkg@2.0.0',
+        false,
+      )
+      expect(result.installed).toBe(false)
+    })
+
+    it('writes lockfile content + hardened .npmrc when lockfile is JSON-string content', async () => {
+      // Skip the early-return so the lockfile branch runs.
+      const lockfileContent = JSON.stringify({
+        name: 'lf-test',
+        lockfileVersion: 3,
+        requires: true,
+        packages: { '': { name: 'lf-test' } },
+      })
+      const cacheKey = createHash('sha512')
+        .update('lf-test@1.0.0')
+        .digest('hex')
+        .slice(0, 16)
+      const packageDir = path.join(tmpDir, cacheKey)
+      // Don't pre-stage installedDir — we want to enter the Arborist branch.
+      mkdirSync(packageDir, { recursive: true })
+
+      // Arborist will throw, but the lockfile + .npmrc should already be
+      // written by the time it does.
+      await expect(
+        ensurePackageInstalled('lf-test', 'lf-test@1.0.0', false, {
+          lockfile: lockfileContent,
+        }),
+      ).rejects.toBeDefined()
+
+      const writtenLock = readFileSync(
+        path.join(packageDir, 'package-lock.json'),
+        'utf8',
+      )
+      expect(writtenLock).toBe(lockfileContent)
+      const writtenNpmrc = readFileSync(path.join(packageDir, '.npmrc'), 'utf8')
+      expect(writtenNpmrc).toContain('ignore-scripts=true')
+      expect(writtenNpmrc).toContain('audit=false')
     })
   })
 })
