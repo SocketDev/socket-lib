@@ -115,7 +115,7 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 🚨 Never emit the raw value of any secret to tool output, commits, comments, or replies. The `.claude/hooks/token-guard/` `PreToolUse` hook blocks the deterministic patterns (literal token shapes, env dumps, `.env*` reads, unfiltered `curl -H "Authorization:"`, sensitive-name commands without redaction). When the hook blocks a command, rewrite — don't bypass.
 
-Behavior the hook can't catch: redact `token` / `jwt` / `access_token` / `refresh_token` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses. Show key *names* only when displaying `.env.local`. If a user pastes a secret, treat it as compromised and ask them to rotate.
+Behavior the hook can't catch: redact `token` / `jwt` / `access_token` / `refresh_token` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses. Show key _names_ only when displaying `.env.local`. If a user pastes a secret, treat it as compromised and ask them to rotate.
 
 Full hook spec in [`.claude/hooks/token-guard/README.md`](.claude/hooks/token-guard/README.md).
 
