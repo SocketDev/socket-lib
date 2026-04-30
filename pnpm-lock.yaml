@@ -187,9 +187,15 @@ settings:
 
 catalogs:
   default:
+    '@socketregistry/packageurl-js':
+      specifier: 1.4.2
+      version: 1.4.2
     '@socketsecurity/lib':
       specifier: 5.25.1
       version: 5.25.1
+    '@socketsecurity/sdk':
+      specifier: 4.0.1
+      version: 4.0.1
     '@types/node':
       specifier: 24.9.2
       version: 24.9.2
@@ -308,7 +314,7 @@ importers:
         specifier: 1.0.5
         version: 1.0.5
       '@socketregistry/packageurl-js':
-        specifier: 1.4.2
+        specifier: 'catalog:'
         version: 1.4.2
       '@socketregistry/yocto-spinner':
         specifier: 1.0.25
@@ -477,13 +483,13 @@ importers:
   .claude/hooks/check-new-deps:
     dependencies:
       '@socketregistry/packageurl-js':
-        specifier: 1.4.2
+        specifier: 'catalog:'
         version: 1.4.2
       '@socketsecurity/lib':
         specifier: 'catalog:'
         version: 5.25.1(typescript@5.9.2)
       '@socketsecurity/sdk':
-        specifier: 4.0.1
+        specifier: 'catalog:'
         version: 4.0.1
     devDependencies:
       '@types/node':
@@ -2315,8 +2321,8 @@ packages:
     resolution: {integrity: sha512-j6vWzfrGVfyXxge+O0x5sh6cvxAog0a/4Rdd2K36zCMV5eJ+/+tOAngRO8cODMNWbVRdVlmGZQL2YS3yR8bIUA==}
     engines: {node: '>= 0.4'}
 
-  es-toolkit@1.45.1:
-    resolution: {integrity: sha512-/jhoOj/Fx+A+IIyDNOvO3TItGmlMKhtX8ISAHKE90c4b/k1tqaqEZ+uUqfpU8DMnW5cgNJv606zS55jGvza0Xw==}
+  es-toolkit@1.46.0:
+    resolution: {integrity: sha512-IToJ6ct9OLl5zz6WsC/1vZEwfSZ7Myil+ygl5Tf30Xjn9AEkzNB4kqp2G7VUJKF1DtTx/ra5M5KLlXvzOg51BA==}
 
   esbuild@0.25.11:
     resolution: {integrity: sha512-KohQwyzrKTQmhXDW1PjCv3Tyspn9n5GcY2RTDqeORIdIJY8yKIF7sTSopFmn/wpMPW4rdPXI0UE5LJLuq3bx0Q==}
@@ -4798,7 +4804,7 @@ snapshots:
       cross-spawn: 7.0.6
       diff: 5.2.2
       dotenv: 16.6.1
-      es-toolkit: 1.45.1
+      es-toolkit: 1.46.0
       fast-glob: 3.3.3
       got: 11.8.6
       hpagent: 1.2.0
@@ -5189,7 +5195,7 @@ snapshots:
       has-tostringtag: 1.0.2
       hasown: 2.0.2
 
-  es-toolkit@1.45.1: {}
+  es-toolkit@1.46.0: {}
 
   esbuild@0.25.11:
     optionalDependencies:
