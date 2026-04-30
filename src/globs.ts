@@ -114,13 +114,71 @@ function getFastGlob() {
   return _fastGlob!
 }
 
-// fast-glob silently discards `ignore` entries that end in `/` — its
-// micromatch matcher treats the trailing slash as a literal that requires
-// a matching trailing slash on the input path, but readdir entries never
-// carry one. The gitignore convention of writing directory entries as
-// `dist/` therefore defeats the entire ignore at the walk level.
-// fast-glob upstream is undermaintained (3.3.3 from Jan 2025, no 3.4.0)
-// and issue #437 was closed without a fix, so normalize here.
+// ─────────────────────────────────────────────────────────────────────
+// Trailing-slash workaround for fast-glob ignore patterns
+// ─────────────────────────────────────────────────────────────────────
+//
+// TL;DR: when you pass `ignore: ['**/dist/']` to fast-glob, the `dist`
+// directory still gets walked. Strip the trailing slash before passing
+// it to fast-glob and the ignore actually takes effect.
+//
+// Why this exists
+// ───────────────
+// The gitignore convention is to write directory entries with a
+// trailing slash: `dist/`, `node_modules/`, `coverage/`. Tools that
+// translate gitignore lines into glob patterns (including socket-cli's
+// `globWithGitIgnore` helper, npm-packlist, etc.) preserve that slash —
+// you'd expect the pattern to mean "this is a directory to ignore."
+//
+// fast-glob has TWO independent filters that decide whether a file
+// shows up in results, and they handle the trailing slash differently:
+//
+//   1. The DEEP filter decides whether to walk INTO a candidate
+//      directory at all. This is the one that matters for performance:
+//      if the deep filter says "skip dist", fast-glob never reads
+//      300k entries inside it. The deep filter compiles
+//      `**/dist/` into a regex that requires a trailing slash on the
+//      input, but it tests `entryPath = 'dist'` (no slash, because
+//      readdir entries don't include one). So the regex doesn't match,
+//      the deep filter doesn't see it as a hit, and fast-glob walks in
+//      anyway — wasting an entire `readdir` of the subtree.
+//      → see fast-glob's `src/providers/filters/deep.ts`.
+//
+//   2. The ENTRY filter decides whether each individual entry returned
+//      from the walk should appear in results. As of v4 the entry
+//      filter retries with a trailing slash appended for directory
+//      entries, so it correctly ignores `dist/b.json` once it's been
+//      enumerated.
+//      → see fast-glob's `src/providers/filters/entry.ts` lines
+//        ~110–125 (the "// A pattern with a trailling slash can be
+//        used for directory matching." block).
+//
+// Net effect: a `dist/` ignore pattern correctly removes `dist`
+// contents from the RESULT array, but only AFTER fast-glob has walked
+// the entire subtree. On a 300k-file `dist/` under tight memory
+// (`--max-old-space-size=128`) this is the difference between
+// "instant" and "OOM kill". socket-cli's `globWithGitIgnore` ran into
+// exactly this; see PR socket-cli#1288 for the bug-hunt narrative.
+//
+// fast-glob upstream is undermaintained: v3.3.3 was cut Jan 2025, no
+// v3.4.0 cut yet, and issue mrmlnc/fast-glob#437 ("Directory globs
+// with and without trailing slash in ignore patterns have different
+// results") closed without a fix. v4 is unreleased and only fixes the
+// entry filter, not the deep filter — so stripping the trailing slash
+// at our call sites stays the correct workaround for the foreseeable
+// future.
+//
+// Why a workaround instead of a fork
+// ──────────────────────────────────
+// Stripping the trailing slash makes the pattern shape `**/dist`,
+// which both the deep and entry filters interpret correctly: the deep
+// filter's regex matches `entryPath = 'dist'` and skips the walk
+// entirely. Same end result as the gitignore-style pattern was
+// supposed to express, just with the form fast-glob actually honors.
+
+// charCode 47 is `/`. Reading it that way avoids a per-call string
+// allocation for the literal — primordials-friendly, no behavior
+// change vs. `pattern.endsWith('/')`.
 function stripTrailingSlash(pattern: string): string {
   if (
     pattern.length > 1 &&
@@ -131,6 +189,15 @@ function stripTrailingSlash(pattern: string): string {
   return pattern
 }
 
+// Normalize a user-provided ignore array by running every entry
+// through stripTrailingSlash. Returns undefined when `ignore` is not
+// an array so callers can skip merging the option entirely.
+//
+// Uses a pre-sized for-loop instead of `.map`: socket-lib uses
+// primordials (the prototype `Array.prototype.map` can be intercepted
+// or replaced by user code at module load), and a hand-rolled loop is
+// also marginally faster — no callback indirection, no growth of the
+// result array.
 function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
   if (!ArrayIsArray(ignore)) {
     return undefined
@@ -260,6 +327,9 @@ export function glob(
 ): Promise<string[]> {
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
+  // Strip trailing slashes from ignore patterns before fast-glob sees
+  // them; otherwise `dist/` from a .gitignore-derived list silently
+  // walks the whole subtree. See the stripTrailingSlash header above.
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
   return fastGlob.glob(patterns, {
     ...(options as import('fast-glob').Options),
@@ -289,6 +359,10 @@ export function globStreamLicenses(
     recursive,
     ...globOptions
   } = { __proto__: null, ...options } as GlobOptions
+  // Caller-supplied ignore arrays may contain gitignore-style
+  // directory patterns (`dist/`); normalize them. Our defaultIgnore
+  // entries are already trailing-slash-free, so we can use them
+  // as-is. See stripTrailingSlash header above for why this matters.
   const baseIgnore = ArrayIsArray(ignoreOpt)
     ? normalizeIgnorePatterns(ignoreOpt)!
     : (defaultIgnore as readonly string[] as string[])
@@ -329,6 +403,8 @@ export function globSync(
 ): string[] {
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
+  // Strip trailing slashes from ignore patterns; same workaround as
+  // the async `glob` above, see stripTrailingSlash header.
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
   return fastGlob.globSync(patterns, {
     ...(options as import('fast-glob').Options),
