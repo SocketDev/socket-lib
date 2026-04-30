@@ -135,7 +135,13 @@ function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
   if (!ArrayIsArray(ignore)) {
     return undefined
   }
-  return (ignore as string[]).map(stripTrailingSlash)
+  const source = ignore as string[]
+  const { length } = source
+  const normalized = new Array(length) as string[]
+  for (let i = 0; i < length; i++) {
+    normalized[i] = stripTrailingSlash(source[i]!)
+  }
+  return normalized
 }
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -283,10 +289,10 @@ export function globStreamLicenses(
     recursive,
     ...globOptions
   } = { __proto__: null, ...options } as GlobOptions
-  const ignore = [
-    ...(ArrayIsArray(ignoreOpt) ? ignoreOpt : defaultIgnore),
-    '**/*.{cjs,cts,js,json,mjs,mts,ts}',
-  ].map(stripTrailingSlash)
+  const baseIgnore = ArrayIsArray(ignoreOpt)
+    ? normalizeIgnorePatterns(ignoreOpt)!
+    : (defaultIgnore as readonly string[] as string[])
+  const ignore: string[] = [...baseIgnore, '**/*.{cjs,cts,js,json,mjs,mts,ts}']
   if (ignoreOriginals) {
     ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
   }
