@@ -54,6 +54,7 @@ import {
   ArrayPrototypeToSorted,
   ArrayPrototypeUnshift,
   ArrayPrototypeValues,
+  AtomicsWait,
   BooleanCtor,
   BufferCtor,
   BufferPrototypeSlice,
@@ -61,6 +62,7 @@ import {
   DateCtor,
   DatePrototypeGetTime,
   DatePrototypeToISOString,
+  DatePrototypeToLocaleString,
   DatePrototypeValueOf,
   decodeComponent,
   encodeComponent,
@@ -135,6 +137,7 @@ import {
   PromisePrototypeCatch,
   PromisePrototypeFinally,
   PromisePrototypeThen,
+  ProxyCtor,
   ReflectApply,
   ReflectConstruct,
   ReflectDefineProperty,
@@ -154,6 +157,7 @@ import {
   RegExpPrototypeSymbolReplace,
   RegExpPrototypeTest,
   SetCtor,
+  SharedArrayBufferCtor,
   SetPrototypeAdd,
   SetPrototypeClear,
   SetPrototypeDelete,
@@ -236,8 +240,10 @@ describe('primordials', () => {
       expect(NumberCtor).toBe(Number)
       expect(ObjectCtor).toBe(Object)
       expect(PromiseCtor).toBe(Promise)
+      expect(ProxyCtor).toBe(Proxy)
       expect(RegExpCtor).toBe(RegExp)
       expect(SetCtor).toBe(Set)
+      expect(SharedArrayBufferCtor).toBe(SharedArrayBuffer)
       expect(StringCtor).toBe(String)
       expect(SymbolCtor).toBe(Symbol)
       expect(URLCtor).toBe(URL)
@@ -254,6 +260,20 @@ describe('primordials', () => {
       expect(new DateCtor(0).getTime()).toBe(0)
       expect(new URLCtor('https://example.com').hostname).toBe('example.com')
       expect(new ErrorCtor('boom').message).toBe('boom')
+    })
+
+    it('ProxyCtor wraps a target with handlers', () => {
+      const target = { a: 1 }
+      const proxy = new ProxyCtor(target, {
+        get: (_, prop) => (prop === 'a' ? 42 : undefined),
+      })
+      expect(proxy.a).toBe(42)
+    })
+
+    it('SharedArrayBufferCtor allocates a fixed-size buffer', () => {
+      const sab = new SharedArrayBufferCtor(8)
+      expect(sab.byteLength).toBe(8)
+      expect(sab).toBeInstanceOf(SharedArrayBuffer)
     })
   })
 
@@ -836,6 +856,33 @@ describe('primordials (extended surface)', () => {
       expect(DatePrototypeGetTime(d)).toBe(0)
       expect(DatePrototypeToISOString(d)).toBe('1970-01-01T00:00:00.000Z')
       expect(DatePrototypeValueOf(d)).toBe(0)
+    })
+
+    it('ToLocaleString returns a non-empty string', () => {
+      const d = new Date(0)
+      // Locale output varies by environment; just confirm we get a
+      // non-empty string back from the uncurried call.
+      expect(typeof DatePrototypeToLocaleString(d)).toBe('string')
+      expect(DatePrototypeToLocaleString(d).length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Atomics', () => {
+    it('AtomicsWait returns "timed-out" when no notify arrives', () => {
+      // 0ms timeout — wait completes immediately with 'timed-out'
+      // because no other agent is going to notify on this buffer.
+      const sab = new SharedArrayBuffer(4)
+      const view = new Int32Array(sab)
+      expect(AtomicsWait(view, 0, 0, 0)).toBe('timed-out')
+    })
+
+    it('AtomicsWait returns "not-equal" when value mismatches', () => {
+      // When the slot value differs from the expected value, wait
+      // returns 'not-equal' immediately without blocking.
+      const sab = new SharedArrayBuffer(4)
+      const view = new Int32Array(sab)
+      view[0] = 7
+      expect(AtomicsWait(view, 0, 0, 0)).toBe('not-equal')
     })
   })
 

@@ -70,8 +70,11 @@ export const MapCtor: MapConstructor = Map
 export const NumberCtor: NumberConstructor = Number
 export const ObjectCtor: ObjectConstructor = Object
 export const PromiseCtor: PromiseConstructor = Promise
+export const ProxyCtor: ProxyConstructor = Proxy
 export const RegExpCtor: RegExpConstructor = RegExp
 export const SetCtor: SetConstructor = Set
+export const SharedArrayBufferCtor: SharedArrayBufferConstructor =
+  SharedArrayBuffer
 export const StringCtor: StringConstructor = String
 export const SymbolCtor: SymbolConstructor = Symbol
 // Typed-array constructors. Same shape as Array — bundled externals
@@ -107,6 +110,12 @@ export const ArrayOf = Array.of
 
 // ─── ArrayBuffer (static) ──────────────────────────────────────────────
 export const ArrayBufferIsView = ArrayBuffer.isView
+
+// ─── Atomics (static) ──────────────────────────────────────────────────
+// Atomics.wait blocks the calling thread until either notified or the
+// timeout elapses. Used by the sync retry loop in fs.safeDeleteSync to
+// sleep without spinning the CPU.
+export const AtomicsWait = Atomics.wait
 
 // ─── Array (prototype) ─────────────────────────────────────────────────
 export const ArrayPrototypeAt = uncurryThis(Array.prototype.at)
@@ -207,6 +216,9 @@ export const DateUTC = Date.UTC
 // ─── Date (prototype) ──────────────────────────────────────────────────
 export const DatePrototypeGetTime = uncurryThis(Date.prototype.getTime)
 export const DatePrototypeToISOString = uncurryThis(Date.prototype.toISOString)
+export const DatePrototypeToLocaleString = uncurryThis(
+  Date.prototype.toLocaleString,
+)
 export const DatePrototypeValueOf = uncurryThis(Date.prototype.valueOf)
 
 // ─── Error (static) ────────────────────────────────────────────────────
