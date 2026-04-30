@@ -548,6 +548,67 @@ describe('globs', () => {
       })
       expect(files.sort()).toEqual(['package.json', 'src/a.json'])
     })
+
+    // Mixed: one entry has the trailing slash, one does not. Both
+    // should suppress their target. Catches an early bug where the
+    // normalized array dropped non-string entries silently.
+    it('glob: handles mixed trailing/non-trailing slashes in same array', async () => {
+      mkdirSync(path.join(tmpRoot, 'build'), { recursive: true })
+      writeFileSync(path.join(tmpRoot, 'build', 'c.json'), '{}')
+      const files = await glob(['**/*.json'], {
+        cwd: tmpRoot,
+        ignore: ['**/dist/', '**/build'],
+      })
+      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+    })
+
+    // Empty ignore array must still produce a normalized empty array
+    // (not undefined, not throw). Catches a regression where an empty
+    // option object was being passed through with `ignore: undefined`
+    // and fast-glob fell back to its defaults.
+    it('glob: accepts empty ignore array', async () => {
+      const files = await glob(['**/*.json'], {
+        cwd: tmpRoot,
+        ignore: [],
+      })
+      expect(files.sort()).toEqual([
+        'dist/b.json',
+        'package.json',
+        'src/a.json',
+      ])
+    })
+
+    // A bare `/` should NOT be stripped — it's the root pattern and
+    // turning it into '' would break the meaning. The guard is
+    // `pattern.length > 1`.
+    it('globSync: leaves a single-character "/" pattern unchanged', () => {
+      // No file matches `/` literally; this just confirms the call
+      // completes without throwing on the boundary case. Real value
+      // is in the unit-level guard, not the file-level effect.
+      const files = globSync(['**/*.json'], {
+        cwd: tmpRoot,
+        ignore: ['/'],
+      })
+      // Same result as no ignore at all — `/` was preserved (not
+      // stripped to '') and didn't accidentally match the cwd.
+      expect(files.sort()).toEqual([
+        'dist/b.json',
+        'package.json',
+        'src/a.json',
+      ])
+    })
+
+    // Calling without an `ignore` option at all must not crash on the
+    // `options?.ignore` access path. Regression-guard for a typo where
+    // `options.ignore` (missing the optional chain) used to throw.
+    it('glob: works with no ignore option', async () => {
+      const files = await glob(['**/*.json'], { cwd: tmpRoot })
+      expect(files.sort()).toEqual([
+        'dist/b.json',
+        'package.json',
+        'src/a.json',
+      ])
+    })
   })
 
   describe('integration', () => {

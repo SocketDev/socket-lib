@@ -14,10 +14,12 @@ import type * as fastGlobType from './external/fast-glob'
 import type picomatchType from './external/picomatch'
 
 import {
+  ArrayCtor,
   ArrayIsArray,
   JSONStringify,
   MapCtor,
   ObjectKeys,
+  StringPrototypeCharCodeAt,
   StringPrototypeStartsWith,
 } from './primordials'
 
@@ -158,10 +160,12 @@ function getFastGlob() {
 // the entire subtree. On a 300k-file `dist/` under tight memory
 // (`--max-old-space-size=128`) this is the difference between
 // "instant" and "OOM kill". socket-cli's `globWithGitIgnore` ran into
-// exactly this; see PR socket-cli#1288 for the bug-hunt narrative.
+// exactly this; see the bug-hunt narrative at
+// https://github.com/SocketDev/socket-cli/pull/1288.
 //
 // fast-glob upstream is undermaintained: v3.3.3 was cut Jan 2025, no
-// v3.4.0 cut yet, and issue mrmlnc/fast-glob#437 ("Directory globs
+// v3.4.0 cut yet, and issue
+// https://github.com/mrmlnc/fast-glob/issues/437 ("Directory globs
 // with and without trailing slash in ignore patterns have different
 // results") closed without a fix. v4 is unreleased and only fixes the
 // entry filter, not the deep filter — so stripping the trailing slash
@@ -178,11 +182,13 @@ function getFastGlob() {
 
 // charCode 47 is `/`. Reading it that way avoids a per-call string
 // allocation for the literal — primordials-friendly, no behavior
-// change vs. `pattern.endsWith('/')`.
+// change vs. `pattern.endsWith('/')`. StringPrototypeCharCodeAt is
+// the uncurried form so the prototype method can't be hijacked by
+// a user-mutated `String.prototype.charCodeAt`.
 function stripTrailingSlash(pattern: string): string {
   if (
     pattern.length > 1 &&
-    pattern.charCodeAt(pattern.length - 1) === 47 /*'/'*/
+    StringPrototypeCharCodeAt(pattern, pattern.length - 1) === 47 /*'/'*/
   ) {
     return pattern.slice(0, -1)
   }
@@ -204,7 +210,7 @@ function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
   }
   const source = ignore as string[]
   const { length } = source
-  const normalized = new Array(length) as string[]
+  const normalized = new ArrayCtor(length) as string[]
   for (let i = 0; i < length; i++) {
     normalized[i] = stripTrailingSlash(source[i]!)
   }
