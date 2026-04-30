@@ -100,7 +100,11 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
   ['endsWith', 'String'],
   ['localeCompare', 'String'],
   ['matchAll', 'String'],
-  ['normalize', 'String'],
+  // `normalize` deliberately omitted — too commonly overloaded by user
+  // classes (e.g. EditablePackageJson.normalize, validators, schema
+  // libs). Rewriting `obj.normalize(opts)` to
+  // `StringPrototypeNormalize(obj, opts)` blew up at runtime when `obj`
+  // wasn't a string.
   ['padEnd', 'String'],
   ['padStart', 'String'],
   ['repeat', 'String'],
@@ -400,7 +404,9 @@ function getPrototypeMethods(globalName) {
       globalName === 'Buffer' &&
       typeof globalThis.Uint8Array === 'function'
     ) {
-      const u8names = Object.getOwnPropertyNames(globalThis.Uint8Array.prototype)
+      const u8names = Object.getOwnPropertyNames(
+        globalThis.Uint8Array.prototype,
+      )
       for (let i = 0, { length } = u8names; i < length; i++) {
         cached.add(u8names[i])
       }

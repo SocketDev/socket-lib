@@ -355,14 +355,7 @@ export async function runCli(argv) {
 
 // Extensions checked when looking for a sibling `primordials.*` file
 // to switch the codemod into relative-import mode. Sorted alphanumeric.
-const PRIMORDIALS_FILE_EXTS = [
-  '.cjs',
-  '.cts',
-  '.js',
-  '.mjs',
-  '.mts',
-  '.ts',
-]
+const PRIMORDIALS_FILE_EXTS = ['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts']
 
 /**
  * Walk up from `scanDir` looking for a sibling `primordials.{ts,mts,cts,js,mjs,cjs}`
@@ -377,9 +370,10 @@ const PRIMORDIALS_FILE_EXTS = [
  */
 function findLocalPrimordials(scanDir): string | undefined {
   const candidates = [scanDir, path.dirname(scanDir)]
-  for (const dir of candidates) {
-    for (const ext of PRIMORDIALS_FILE_EXTS) {
-      const candidate = path.join(dir, `primordials${ext}`)
+  for (let i = 0, { length: dl } = candidates; i < dl; i++) {
+    const dir = candidates[i]!
+    for (let j = 0, { length: el } = PRIMORDIALS_FILE_EXTS; j < el; j++) {
+      const candidate = path.join(dir, `primordials${PRIMORDIALS_FILE_EXTS[j]}`)
       if (existsSync(candidate)) {
         return candidate
       }
