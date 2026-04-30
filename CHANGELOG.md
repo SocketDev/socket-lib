@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.26.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.2) - 2026-04-30
+
+### Fixed
+
+- `globs` `glob` / `globSync` / `globStreamLicenses` — strip a trailing `/` from `ignore` patterns before passing them to fast-glob. The gitignore convention of writing directory entries as `dist/` was silently dropped at the deep-filter level (fast-glob walked the entire subtree before discarding results), which on a large `dist/` could push memory past the limit. fast-glob v3.3.3 and the unreleased v4 both have the bug; tracked at [mrmlnc/fast-glob#437](https://github.com/mrmlnc/fast-glob/issues/437). Same workaround as [SocketDev/socket-cli#1288](https://github.com/SocketDev/socket-cli/pull/1288).
+
 ## [5.26.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.1) - 2026-04-29
 
 ### Added
