@@ -47,23 +47,25 @@ import { spawn } from './spawn'
 
 import type { SpawnOptions } from './spawn'
 
+import { ArrayIsArray, SetCtor } from './primordials'
+
 // Note: npm flag checking is done with regex patterns in the is*Flag functions below.
 
-const pnpmIgnoreScriptsFlags = new Set([
+const pnpmIgnoreScriptsFlags = new SetCtor([
   '--ignore-scripts',
   '--no-ignore-scripts',
 ])
 
-const pnpmFrozenLockfileFlags = new Set([
+const pnpmFrozenLockfileFlags = new SetCtor([
   '--frozen-lockfile',
   '--no-frozen-lockfile',
 ])
 
-const pnpmInstallCommands = new Set(['install', 'i'])
+const pnpmInstallCommands = new SetCtor(['install', 'i'])
 
 // Commands that support --ignore-scripts flag in pnpm:
 // Installation-related: install, add, update, remove, link, unlink, import, rebuild.
-const pnpmInstallLikeCommands = new Set([
+const pnpmInstallLikeCommands = new SetCtor([
   'install',
   'i',
   'add',
@@ -81,7 +83,7 @@ const pnpmInstallLikeCommands = new Set([
 
 // Commands that support --ignore-scripts flag in yarn:
 // Similar to npm/pnpm: installation-related commands.
-const yarnInstallLikeCommands = new Set([
+const yarnInstallLikeCommands = new SetCtor([
   'install',
   'add',
   'upgrade',
@@ -255,7 +257,7 @@ export function execScript(
   // Handle overloaded signatures: execScript(name, options) or execScript(name, args, options).
   let resolvedOptions: ExecScriptOptions | undefined
   let resolvedArgs: string[]
-  if (!Array.isArray(args) && args !== null && typeof args === 'object') {
+  if (!ArrayIsArray(args) && args !== null && typeof args === 'object') {
     resolvedOptions = args as ExecScriptOptions
     resolvedArgs = []
   } else {

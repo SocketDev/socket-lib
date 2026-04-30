@@ -6,6 +6,8 @@ import process from 'node:process'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { isErrnoException } from '../errors'
+import { ErrorCtor } from '../primordials'
+
 import {
   INDENT_SYMBOL,
   NEWLINE_SYMBOL,
@@ -87,7 +89,7 @@ async function readFile(filepath: string): Promise<string> {
   }
 
   // This line should never be reached but TypeScript requires it
-  throw new Error('Unreachable code')
+  throw new ErrorCtor('Unreachable code')
 }
 
 /**
@@ -283,7 +285,7 @@ export function getEditableJsonClass<
 
       async save(options?: EditableJsonSaveOptions): Promise<boolean> {
         if (!this._canSave || this.content === undefined) {
-          throw new Error('No file path to save to')
+          throw new ErrorCtor('No file path to save to')
         }
 
         // Check if save is needed
@@ -319,7 +321,7 @@ export function getEditableJsonClass<
 
       saveSync(options?: EditableJsonSaveOptions): boolean {
         if (!this._canSave || this.content === undefined) {
-          throw new Error('No file path to save to')
+          throw new ErrorCtor('No file path to save to')
         }
 
         // Check if save is needed

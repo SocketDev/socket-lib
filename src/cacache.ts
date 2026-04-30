@@ -3,6 +3,13 @@
 import cacache from './external/cacache'
 import { getSocketCacacheDir } from './paths/socket'
 
+import {
+  RegExpCtor,
+  StringPrototypeReplaceAll,
+  StringPrototypeStartsWith,
+  TypeErrorCtor,
+} from './primordials'
+
 export interface GetOptions {
   integrity?: string | undefined
   size?: number | undefined
@@ -50,12 +57,16 @@ export interface RemoveOptions {
  */
 function createPatternMatcher(pattern: string): (key: string) => boolean {
   if (!pattern.includes('*')) {
-    return (key: string) => key.startsWith(pattern)
+    return (key: string) => StringPrototypeStartsWith(key, pattern)
   }
   // Escape regex special characters except `*`, then convert `*` to `.*`.
-  const escaped = pattern.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&')
-  const regexPattern = escaped.replaceAll('*', '.*')
-  const regex = new RegExp(`^${regexPattern}$`)
+  const escaped = StringPrototypeReplaceAll(
+    pattern,
+    /[.+?^${}()|[\]\\]/g,
+    '\\$&',
+  )
+  const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
+  const regex = new RegExpCtor(`^${regexPattern}$`)
   return (key: string) => regex.test(key)
 }
 
@@ -169,7 +180,7 @@ export async function get(
   options?: GetOptions | undefined,
 ): Promise<CacheEntry> {
   if (key.includes('*')) {
-    throw new TypeError(
+    throw new TypeErrorCtor(
       'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
     )
   }
@@ -208,7 +219,7 @@ export async function put(
   options?: PutOptions | undefined,
 ) {
   if (key.includes('*')) {
-    throw new TypeError(
+    throw new TypeErrorCtor(
       'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
     )
   }
@@ -229,7 +240,7 @@ export async function put(
  */
 export async function remove(key: string): Promise<unknown> {
   if (key.includes('*')) {
-    throw new TypeError(
+    throw new TypeErrorCtor(
       'Cache key cannot contain wildcards (*). Use clear({ prefix: "pattern*" }) to remove multiple entries.',
     )
   }

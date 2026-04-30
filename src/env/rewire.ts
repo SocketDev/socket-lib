@@ -14,6 +14,8 @@ import process from 'node:process'
 import { hasOwn } from '../objects'
 import { envAsBoolean } from './helpers'
 
+import { MapCtor, ObjectEntries } from '../primordials'
+
 let _async_hooks: typeof import('node:async_hooks') | undefined
 /**
  * Lazily load the async_hooks module to avoid Webpack errors.
@@ -48,7 +50,7 @@ const sharedOverridesSymbol = Symbol.for(
 const _globalThis = globalThis as Record<symbol, unknown>
 const isVitestEnv = envAsBoolean(process.env['VITEST'])
 if (isVitestEnv && !_globalThis[sharedOverridesSymbol]) {
-  _globalThis[sharedOverridesSymbol] = new Map<string, string | undefined>()
+  _globalThis[sharedOverridesSymbol] = new MapCtor<string, string | undefined>()
 }
 const sharedOverrides: Map<string, string | undefined> | undefined =
   _globalThis[sharedOverridesSymbol] as
@@ -241,7 +243,7 @@ export async function withEnv<T>(
   overrides: Record<string, string | undefined>,
   fn: () => T | Promise<T>,
 ): Promise<T> {
-  const map = new Map(Object.entries(overrides))
+  const map = new MapCtor(ObjectEntries(overrides))
   return await isolatedOverridesStorage.run(map, fn)
 }
 
@@ -263,6 +265,6 @@ export function withEnvSync<T>(
   overrides: Record<string, string | undefined>,
   fn: () => T,
 ): T {
-  const map = new Map(Object.entries(overrides))
+  const map = new MapCtor(ObjectEntries(overrides))
   return isolatedOverridesStorage.run(map, fn)
 }

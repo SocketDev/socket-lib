@@ -7,6 +7,8 @@
 
 import process from 'node:process'
 
+import { ArrayIsArray } from '../primordials'
+
 /**
  * Flag values object from parsed arguments.
  */
@@ -169,7 +171,7 @@ export function isAll(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--all')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--all')
   }
   return !!(input as FlagValues).all
@@ -189,7 +191,7 @@ export function isChanged(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--changed')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--changed')
   }
   return !!(input as FlagValues).changed
@@ -210,7 +212,7 @@ export function isCoverage(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--coverage') || processArg.includes('--cover')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--coverage') || input.includes('--cover')
   }
   return !!((input as FlagValues).coverage || (input as FlagValues).cover)
@@ -230,7 +232,7 @@ export function isDebug(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--debug')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--debug')
   }
   return !!(input as FlagValues).debug
@@ -250,7 +252,7 @@ export function isDryRun(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--dry-run')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--dry-run')
   }
   return !!(input as FlagValues)['dry-run']
@@ -270,7 +272,7 @@ export function isFix(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--fix')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--fix')
   }
   return !!(input as FlagValues).fix
@@ -290,7 +292,7 @@ export function isForce(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--force')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--force')
   }
   return !!(input as FlagValues).force
@@ -310,7 +312,7 @@ export function isHelp(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--help') || processArg.includes('-h')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--help') || input.includes('-h')
   }
   return !!(input as FlagValues).help
@@ -330,7 +332,7 @@ export function isJson(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--json')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--json')
   }
   return !!(input as FlagValues).json
@@ -350,7 +352,7 @@ export function isQuiet(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--quiet') || processArg.includes('--silent')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--quiet') || input.includes('--silent')
   }
   return !!((input as FlagValues).quiet || (input as FlagValues).silent)
@@ -370,7 +372,7 @@ export function isStaged(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--staged')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--staged')
   }
   return !!(input as FlagValues).staged
@@ -390,7 +392,7 @@ export function isUpdate(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--update') || processArg.includes('-u')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--update') || input.includes('-u')
   }
   return !!(input as FlagValues).update
@@ -410,7 +412,7 @@ export function isVerbose(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--verbose')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--verbose')
   }
   return !!(input as FlagValues).verbose
@@ -430,7 +432,7 @@ export function isWatch(input?: FlagInput): boolean {
   if (!input) {
     return processArg.includes('--watch') || processArg.includes('-w')
   }
-  if (Array.isArray(input)) {
+  if (ArrayIsArray(input)) {
     return input.includes('--watch') || input.includes('-w')
   }
   return !!(input as FlagValues).watch

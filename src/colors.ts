@@ -3,6 +3,8 @@
  * Provides type-safe color handling with named colors and RGB tuples.
  */
 
+import { ArrayIsArray } from './primordials'
+
 /**
  * Special 'inherit' color value that uses the current color context.
  * Used with effects like shimmer to dynamically inherit color.
@@ -75,7 +77,7 @@ const colorToRgb: Record<ColorName, ColorRgb> = {
  * ```
  */
 export function isRgbTuple(value: ColorValue): value is ColorRgb {
-  return Array.isArray(value)
+  return ArrayIsArray(value)
 }
 
 /**

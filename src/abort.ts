@@ -2,6 +2,13 @@
  * @fileoverview Abort signal utilities.
  */
 
+import {
+  MathCeil,
+  NumberIsFinite,
+  NumberIsNaN,
+  TypeErrorCtor,
+} from './primordials'
+
 /**
  * Create a composite AbortSignal from multiple signals.
  *
@@ -51,14 +58,14 @@ export function createCompositeAbortSignal(
  * ```
  */
 export function createTimeoutSignal(ms: number): AbortSignal {
-  if (typeof ms !== 'number' || Number.isNaN(ms)) {
-    throw new TypeError('timeout must be a number')
+  if (typeof ms !== 'number' || NumberIsNaN(ms)) {
+    throw new TypeErrorCtor('timeout must be a number')
   }
-  if (!Number.isFinite(ms)) {
-    throw new TypeError('timeout must be a finite number')
+  if (!NumberIsFinite(ms)) {
+    throw new TypeErrorCtor('timeout must be a finite number')
   }
   if (ms <= 0) {
-    throw new TypeError('timeout must be a positive number')
+    throw new TypeErrorCtor('timeout must be a positive number')
   }
-  return AbortSignal.timeout(Math.ceil(ms))
+  return AbortSignal.timeout(MathCeil(ms))
 }

@@ -3,6 +3,8 @@
  * Provides constants and helpers for terminal formatting.
  */
 
+import { RegExpCtor } from './primordials'
+
 // ANSI escape codes - commonly used sequences.
 export const ANSI_BOLD = '\x1b[1m'
 export const ANSI_DIM = '\x1b[2m'
@@ -41,7 +43,7 @@ export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
   const csi =
     '[\\u001B\\u009B][[\\]()#;?]*(?:\\d{1,4}(?:[;:]\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]'
   const pattern = `${osc}|${csi}`
-  return new RegExp(pattern, onlyFirst ? undefined : 'g')
+  return new RegExpCtor(pattern, onlyFirst ? undefined : 'g')
 }
 
 /**

@@ -13,6 +13,12 @@
 
 import { createHash, timingSafeEqual } from 'node:crypto'
 
+import {
+  BufferFrom,
+  StringPrototypeStartsWith,
+  TypeErrorCtor,
+} from '../primordials'
+
 /**
  * Tagged union representing an expected hash.
  *
@@ -58,7 +64,7 @@ const INTEGRITY_BODY_RE = /^[A-Za-z0-9+/=]+$/
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
 function isIntegrityString(s: string): boolean {
-  if (!s.startsWith(INTEGRITY_PREFIX)) {
+  if (!StringPrototypeStartsWith(s, INTEGRITY_PREFIX)) {
     return false
   }
   const body = s.slice(INTEGRITY_PREFIX.length)
@@ -84,7 +90,7 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
   if (typeof spec === 'object' && spec !== null) {
     if (spec.type === 'integrity') {
       if (!isIntegrityString(spec.value)) {
-        throw new TypeError(
+        throw new TypeErrorCtor(
           `Expected SRI integrity string "sha512-<base64>", got: ${spec.value}`,
         )
       }
@@ -92,18 +98,18 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
     }
     if (spec.type === 'checksum') {
       if (!isChecksumString(spec.value)) {
-        throw new TypeError(
+        throw new TypeErrorCtor(
           `Expected sha256 hex string (64 hex chars), got: ${spec.value}`,
         )
       }
       return { type: 'checksum', value: spec.value }
     }
-    throw new TypeError(
+    throw new TypeErrorCtor(
       `Unknown hash type: ${(spec as { type: unknown }).type}`,
     )
   }
   if (typeof spec !== 'string') {
-    throw new TypeError(
+    throw new TypeErrorCtor(
       `HashSpec must be a string or { type, value } object, got: ${typeof spec}`,
     )
   }
@@ -113,7 +119,7 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
   if (isChecksumString(spec)) {
     return { type: 'checksum', value: spec }
   }
-  throw new TypeError(
+  throw new TypeErrorCtor(
     `Unrecognized hash format. Expected SRI integrity ("sha512-<base64>") or sha256 hex (64 hex chars), got: ${spec}`,
   )
 }
@@ -141,8 +147,8 @@ export function verifyHash(
 ): void {
   const actual =
     expected.type === 'integrity' ? computed.integrity : computed.checksum
-  const expectedBuf = Buffer.from(expected.value)
-  const actualBuf = Buffer.from(actual)
+  const expectedBuf = BufferFrom!(expected.value)
+  const actualBuf = BufferFrom!(actual)
   if (
     expectedBuf.length !== actualBuf.length ||
     !timingSafeEqual(expectedBuf, actualBuf)

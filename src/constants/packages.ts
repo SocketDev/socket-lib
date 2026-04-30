@@ -12,6 +12,8 @@ import { lifecycleScriptNames as lifecycleScriptNamesImport } from './lifecycle-
 import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from './package-default-node-range'
 import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from './package-default-socket-categories'
 
+import { ArrayFrom, ObjectEntries, ReflectGetPrototypeOf } from '../primordials'
+
 let _lifecycleScriptNames: string[]
 let _packageDefaultNodeRange: string | undefined
 let _packageDefaultSocketCategories: readonly string[]
@@ -39,7 +41,7 @@ export function clearPackumentCache(): void {
 export function getLifecycleScriptNames(): string[] {
   if (_lifecycleScriptNames === undefined) {
     // lifecycleScriptNames is imported at the top
-    _lifecycleScriptNames = Array.from(lifecycleScriptNamesImport)
+    _lifecycleScriptNames = ArrayFrom(lifecycleScriptNamesImport)
   }
   return _lifecycleScriptNames
 }
@@ -66,7 +68,7 @@ export function getPackageDefaultSocketCategories() {
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (_packageExtensions === undefined) {
     // packageExtensions is imported at the top
-    _packageExtensions = Object.entries(packageExtensionsImport)
+    _packageExtensions = ObjectEntries(packageExtensionsImport)
   }
   return _packageExtensions
 }
@@ -100,7 +102,7 @@ export function getPacoteCachePath(): string {
   if (_pacoteCachePath === undefined) {
     try {
       // module is imported at the top
-      const proto = Reflect.getPrototypeOf(
+      const proto = ReflectGetPrototypeOf(
         (pacote as { RegistryFetcher: { prototype: object } }).RegistryFetcher
           .prototype,
       ) as { constructor?: new (...args: unknown[]) => { cache: string } }

@@ -3,6 +3,8 @@
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 
+import { StringPrototypeStartsWith } from '../primordials'
+
 let _path: typeof import('node:path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.
@@ -83,7 +85,7 @@ export function getDlxPackageNodeModulesDir(packageName: string): string {
  *
  * @example
  * ```typescript
- * isInSocketDlx('/home/user/.socket/_dlx/abc123/bin/socket') // true
+ * isInSocketDlx('/home/<user>/.socket/_dlx/abc123/bin/socket') // true
  * isInSocketDlx('/usr/local/bin/socket') // false
  * isInSocketDlx(process.argv[0]) // Check if current binary is in DLX
  * ```
@@ -99,5 +101,5 @@ export function isInSocketDlx(filePath: string): boolean {
 
   // Check if the absolute path starts with the DLX directory.
   // Both paths are normalized to use forward slashes for consistent comparison.
-  return absolutePath.startsWith(`${dlxDir}/`)
+  return StringPrototypeStartsWith(absolutePath, `${dlxDir}/`)
 }

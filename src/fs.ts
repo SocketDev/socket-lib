@@ -38,6 +38,16 @@ import type {
 } from './external/del'
 import type { JsonReviver } from './json/types'
 
+import {
+  AtomicsWait,
+  BufferIsBuffer,
+  ErrorCtor,
+  Int32ArrayCtor,
+  JSONStringify,
+  SharedArrayBufferCtor,
+  StringPrototypeStartsWith,
+} from './primordials'
+
 const abortSignal = getAbortSignal()
 
 // Module-level regex constants — avoid re-allocating on every call.
@@ -331,7 +341,6 @@ let _del:
   | undefined
 // Cache for resolved allowed directories
 let _cachedAllowedDirs: string[] | undefined
-let _buffer: typeof import('node:buffer') | undefined
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
@@ -351,24 +360,6 @@ function getAllowedDirectories(): string[] {
     ]
   }
   return _cachedAllowedDirs
-}
-
-/**
- * Lazily load the buffer module.
- *
- * Performs on-demand loading of Node.js buffer module to avoid initialization
- * overhead and potential Webpack bundling errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getBuffer() {
-  if (_buffer === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _buffer = /*@__PURE__*/ require('node:buffer')
-  }
-  return _buffer as typeof import('node:buffer')
 }
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -469,7 +460,7 @@ function stringify(
   spaces: number | string = 2,
 ): string {
   const EOF = finalEOL ? EOL : ''
-  const str = JSON.stringify(json, replacer, spaces)
+  const str = JSONStringify(json, replacer, spaces)
   return `${str.replace(NEWLINE_REGEX, EOL)}${EOF}`
 }
 
@@ -1156,14 +1147,14 @@ export async function readJson(
     if (shouldThrow) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'ENOENT') {
-        throw new Error(
+        throw new ErrorCtor(
           `JSON file not found: ${filepath}\n` +
             'Ensure the file exists or create it with the expected structure.',
           { cause: e },
         )
       }
       if (code === 'EACCES' || code === 'EPERM') {
-        throw new Error(
+        throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
             'Check file permissions or run with appropriate access.',
           { cause: e },
@@ -1233,14 +1224,14 @@ export function readJsonSync(
     if (shouldThrow) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'ENOENT') {
-        throw new Error(
+        throw new ErrorCtor(
           `JSON file not found: ${filepath}\n` +
             'Ensure the file exists or create it with the expected structure.',
           { cause: e },
         )
       }
       if (code === 'EACCES' || code === 'EPERM') {
-        throw new Error(
+        throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
             'Check file permissions or run with appropriate access.',
           { cause: e },
@@ -1310,10 +1301,10 @@ export async function safeDelete(
       // Check each allowed directory
       for (const allowedDir of allowedDirs) {
         const isInAllowedDir =
-          resolvedPath.startsWith(allowedDir + path.sep) ||
+          StringPrototypeStartsWith(resolvedPath, allowedDir + path.sep) ||
           resolvedPath === allowedDir
         const relativePath = path.relative(allowedDir, resolvedPath)
-        const isGoingBackward = relativePath.startsWith('..')
+        const isGoingBackward = StringPrototypeStartsWith(relativePath, '..')
 
         if (isInAllowedDir && !isGoingBackward) {
           return true
@@ -1404,10 +1395,10 @@ export function safeDeleteSync(
       // Check each allowed directory
       for (const allowedDir of allowedDirs) {
         const isInAllowedDir =
-          resolvedPath.startsWith(allowedDir + path.sep) ||
+          StringPrototypeStartsWith(resolvedPath, allowedDir + path.sep) ||
           resolvedPath === allowedDir
         const relativePath = path.relative(allowedDir, resolvedPath)
-        const isGoingBackward = relativePath.startsWith('..')
+        const isGoingBackward = StringPrototypeStartsWith(relativePath, '..')
 
         if (isInAllowedDir && !isGoingBackward) {
           return true
@@ -1443,7 +1434,12 @@ export function safeDeleteSync(
         // Sync sleep using Atomics.wait on a SharedArrayBuffer.
         // This is a blocking wait that doesn't spin the CPU.
         const waitMs = delay
-        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, waitMs)
+        AtomicsWait(
+          new Int32ArrayCtor(new SharedArrayBufferCtor(4)),
+          0,
+          0,
+          waitMs,
+        )
         delay *= 2 // Exponential backoff
       }
     }
@@ -1610,8 +1606,7 @@ export async function safeReadFile(
     return undefined
   }
   if (shouldReturnBuffer) {
-    const { Buffer } = getBuffer()
-    return Buffer.isBuffer(defaultValue) ? defaultValue : undefined
+    return BufferIsBuffer!(defaultValue) ? defaultValue : undefined
   }
   return typeof defaultValue === 'string' ? defaultValue : String(defaultValue)
 }
@@ -1680,8 +1675,7 @@ export function safeReadFileSync(
     return undefined
   }
   if (shouldReturnBuffer) {
-    const { Buffer } = getBuffer()
-    return Buffer.isBuffer(defaultValue) ? defaultValue : undefined
+    return BufferIsBuffer!(defaultValue) ? defaultValue : undefined
   }
   return typeof defaultValue === 'string' ? defaultValue : String(defaultValue)
 }

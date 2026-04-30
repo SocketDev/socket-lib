@@ -3,6 +3,8 @@
  * Provides type-safe conversion functions for boolean, number, and string values.
  */
 
+import { ArrayIsArray, ObjectKeys, ProxyCtor, SetCtor } from './primordials'
+
 const NumberCtor = Number
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
@@ -15,7 +17,7 @@ const StringCtor = String
 
 // Common environment variables that have case sensitivity issues on Windows.
 // These are checked with case-insensitive matching when exact matches fail.
-const caseInsensitiveKeys = new Set([
+const caseInsensitiveKeys = new SetCtor([
   'APPDATA',
   'COMSPEC',
   'HOME',
@@ -99,7 +101,7 @@ export function createEnvProxy(
     return undefined
   }
 
-  return new Proxy({} as NodeJS.ProcessEnv, {
+  return new ProxyCtor({} as NodeJS.ProcessEnv, {
     get(_target, prop) {
       if (typeof prop !== 'string') {
         return undefined
@@ -361,7 +363,7 @@ export function envAsString(
   const isOptionsObject =
     typeof defaultValueOrOptions === 'object' &&
     defaultValueOrOptions !== null &&
-    !Array.isArray(defaultValueOrOptions) &&
+    !ArrayIsArray(defaultValueOrOptions) &&
     ('defaultValue' in defaultValueOrOptions || 'trim' in defaultValueOrOptions)
   const opts: EnvAsStringOptions = isOptionsObject
     ? (defaultValueOrOptions as EnvAsStringOptions)
@@ -423,7 +425,7 @@ export function findCaseInsensitiveEnvKey(
   upperEnvVarName: string,
 ): string | undefined {
   const targetLength = upperEnvVarName.length
-  for (const key of Object.keys(env)) {
+  for (const key of ObjectKeys(env)) {
     // Fast path: bail early if lengths don't match.
     if (key.length !== targetLength) {
       continue

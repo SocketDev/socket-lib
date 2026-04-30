@@ -19,6 +19,17 @@
 
 import * as cacache from './cacache'
 
+import {
+  DateNow,
+  JSONParse,
+  MapCtor,
+  MathMax,
+  RegExpCtor,
+  StringPrototypeReplaceAll,
+  StringPrototypeStartsWith,
+  TypeErrorCtor,
+} from './primordials'
+
 export interface ClearOptions {
   /**
    * Only clear in-memory memoization cache, not persistent cache.
@@ -190,7 +201,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
   // Validate prefix does not contain wildcards.
   if (opts.prefix?.includes('*')) {
-    throw new TypeError(
+    throw new TypeErrorCtor(
       'Cache prefix cannot contain wildcards (*). Use clear({ prefix: "pattern*" }) for wildcard matching.',
     )
   }
@@ -199,8 +210,8 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   // Map's insertion-order semantics as the LRU list: `memoSet` deletes
   // the key first so a re-insert moves it to the tail, and when size
   // exceeds the cap we evict the oldest entry (first key in iteration).
-  const memoCache = new Map<string, TtlCacheEntry<unknown>>()
-  const memoMaxSize = Math.max(1, opts.memoMaxSize ?? DEFAULT_MEMO_MAX_SIZE)
+  const memoCache = new MapCtor<string, TtlCacheEntry<unknown>>()
+  const memoMaxSize = MathMax(1, opts.memoMaxSize ?? DEFAULT_MEMO_MAX_SIZE)
 
   function memoSet(fullKey: string, entry: TtlCacheEntry<unknown>): void {
     if (memoCache.has(fullKey)) {
@@ -230,7 +241,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    * Also detects clock skew by treating suspiciously far-future expiresAt as expired.
    */
   function isExpired(entry: TtlCacheEntry<unknown>): boolean {
-    const now = Date.now()
+    const now = DateNow()
     // Detect future expiresAt (clock skew or corruption).
     // If expiresAt is more than 10 seconds past expected expiry, treat as expired.
     const maxFutureMs = 10_000
@@ -250,16 +261,20 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     if (!hasWildcard) {
       // Simple prefix matching (fast path).
-      return (key: string) => key.startsWith(fullPattern)
+      return (key: string) => StringPrototypeStartsWith(key, fullPattern)
     }
 
     // Wildcard matching with regex. Anchor both ends so `foo*bar` matches
     // exactly `foo<anything>bar` and not `foo<anything>bar<anything else>`.
     // Missing the `$` anchor let `deleteAll('foo*bar')` also sweep
     // `foo123bar-extra`, which silently over-deletes.
-    const escaped = fullPattern.replaceAll(/[.+?^${}()|[\]\\]/g, '\\$&')
-    const regexPattern = escaped.replaceAll('*', '.*')
-    const regex = new RegExp(`^${regexPattern}$`)
+    const escaped = StringPrototypeReplaceAll(
+      fullPattern,
+      /[.+?^${}()|[\]\\]/g,
+      '\\$&',
+    )
+    const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
+    const regex = new RegExpCtor(`^${regexPattern}$`)
     return (key: string) => regex.test(key)
   }
 
@@ -270,7 +285,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    */
   async function get<T>(key: string): Promise<T | undefined> {
     if (key.includes('*')) {
-      throw new TypeError(
+      throw new TypeErrorCtor(
         'Cache key cannot contain wildcards (*). Use getAll(pattern) to retrieve multiple entries.',
       )
     }
@@ -296,7 +311,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     if (cacheEntry) {
       let entry: TtlCacheEntry<T>
       try {
-        entry = JSON.parse(cacheEntry.data.toString('utf8')) as TtlCacheEntry<T>
+        entry = JSONParse(cacheEntry.data.toString('utf8')) as TtlCacheEntry<T>
       } catch {
         // Corrupted cache entry, treat as miss and remove.
         try {
@@ -330,7 +345,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    * Supports wildcards (*) for flexible matching.
    */
   async function getAll<T>(pattern: string): Promise<Map<string, T>> {
-    const results = new Map<string, T>()
+    const results = new MapCtor<string, T>()
     const matches = createMatcher(pattern)
 
     // Check in-memory cache first.
@@ -385,7 +400,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
           continue
         }
 
-        const parsed = JSON.parse(
+        const parsed = JSONParse(
           entry.data.toString('utf8'),
         ) as TtlCacheEntry<T>
 
@@ -417,7 +432,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    */
   async function set<T>(key: string, data: T): Promise<void> {
     if (key.includes('*')) {
-      throw new TypeError(
+      throw new TypeErrorCtor(
         'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
       )
     }
@@ -425,7 +440,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     const fullKey = buildKey(key)
     const entry: TtlCacheEntry<T> = {
       data,
-      expiresAt: Date.now() + ttl,
+      expiresAt: DateNow() + ttl,
     }
 
     // Update in-memory cache first (synchronous and fast).
@@ -446,7 +461,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   // Track in-flight fetch requests to prevent duplicate fetches
-  const inflightRequests = new Map<string, Promise<unknown>>()
+  const inflightRequests = new MapCtor<string, Promise<unknown>>()
 
   /**
    * Get cached data or fetch and cache if missing/expired.
@@ -506,7 +521,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    */
   async function deleteEntry(key: string): Promise<void> {
     if (key.includes('*')) {
-      throw new TypeError(
+      throw new TypeErrorCtor(
         'Cache key cannot contain wildcards (*). Use deleteAll(pattern) to remove multiple entries.',
       )
     }

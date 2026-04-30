@@ -24,6 +24,8 @@
 import Arborist from '../external/@npmcli/arborist'
 import { getSocketCacacheDir } from '../paths/socket'
 
+import { ErrorCtor, JSONParse, ObjectKeys } from '../primordials'
+
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
@@ -133,13 +135,13 @@ function getBaseArboristOptions(installPath: string, quiet: boolean) {
 function readSingleDependency(packageJsonPath: string): string {
   const fs = getFs()
   const raw = fs.readFileSync(packageJsonPath, 'utf8')
-  const pkg = JSON.parse(raw) as {
+  const pkg = JSONParse(raw) as {
     dependencies?: Record<string, string>
   }
   const deps = pkg.dependencies ?? {}
-  const names = Object.keys(deps)
+  const names = ObjectKeys(deps)
   if (names.length !== 1) {
-    throw new Error(
+    throw new ErrorCtor(
       `safeIdealTree expects exactly one top-level dependency in ${packageJsonPath}, found ${names.length}`,
     )
   }
@@ -171,7 +173,7 @@ function readTopLevelFromIdealTree(
   } | null
   const inventory = root?.inventory
   if (!inventory || typeof inventory.values !== 'function') {
-    throw new Error('Arborist idealTree missing inventory')
+    throw new ErrorCtor('Arborist idealTree missing inventory')
   }
   for (const node of inventory.values()) {
     if (node.isProjectRoot) {
@@ -179,7 +181,7 @@ function readTopLevelFromIdealTree(
     }
     if (node.name === targetName && node.depth === 1) {
       if (!node.version || !node.integrity) {
-        throw new Error(
+        throw new ErrorCtor(
           `Arborist idealTree node for ${targetName} missing version/integrity`,
         )
       }
@@ -190,7 +192,7 @@ function readTopLevelFromIdealTree(
       }
     }
   }
-  throw new Error(
+  throw new ErrorCtor(
     `Arborist idealTree inventory has no top-level node for ${targetName}`,
   )
 }
@@ -296,7 +298,7 @@ export async function writeSafeNpmrc(
     ...options,
   } as WriteSafeNpmrcOptions
   if (minReleaseDays !== undefined && minReleaseMins !== undefined) {
-    throw new Error(
+    throw new ErrorCtor(
       'writeSafeNpmrc: minReleaseDays and minReleaseMins are mutually exclusive',
     )
   }

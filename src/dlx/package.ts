@@ -48,6 +48,16 @@ import type { HashSpec } from './integrity'
 import type { LockfileSpec } from './lockfile'
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 
+import {
+  ErrorCtor,
+  MapCtor,
+  ObjectKeys,
+  ObjectValues,
+  PromiseAllSettled,
+  SetCtor,
+  StringPrototypeStartsWith,
+} from '../primordials'
+
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
@@ -59,7 +69,7 @@ const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
 
 const FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
 const FIREWALL_TIMEOUT = 10_000
-const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new Set([
+const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new SetCtor([
   'critical',
   'high',
 ])
@@ -71,7 +81,7 @@ const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new Set([
 // were never reclaimed. Map iteration order = insertion order; accessing
 // an entry re-inserts it to bump recency.
 const BINARY_PATH_CACHE_MAX_SIZE = 200
-const binaryPathCache = new Map<string, string>()
+const binaryPathCache = new MapCtor<string, string>()
 
 function binaryPathCacheSet(key: string, value: string): void {
   if (binaryPathCache.has(key)) {
@@ -231,7 +241,7 @@ async function checkFirewallPurls(
   }> = []
 
   // Check all PURLs against the public firewall API in parallel.
-  await Promise.allSettled(
+  await PromiseAllSettled(
     purls.map(async ({ name, purl, version }) => {
       try {
         const data = await httpJson<FirewallResponse>(
@@ -265,7 +275,7 @@ async function checkFirewallPurls(
     const details = blocked
       .map(b => `  ${b.name}@${b.version}: ${b.alerts.join(', ')}`)
       .join('\n')
-    throw new Error(
+    throw new ErrorCtor(
       `Socket Firewall blocked installation of "${requestedPackage}".\n` +
         `The following dependencies have security alerts:\n${details}\n\n` +
         'Visit https://socket.dev for more information.',
@@ -452,20 +462,20 @@ export async function ensurePackageInstalled(
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {
-      throw new Error(
+      throw new ErrorCtor(
         `Permission denied creating package directory: ${packageDir}\n` +
           'Please check directory permissions or run with appropriate access.',
         { cause: e },
       )
     }
     if (code === 'EROFS') {
-      throw new Error(
+      throw new ErrorCtor(
         `Cannot create package directory on read-only filesystem: ${packageDir}\n` +
           'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
         { cause: e },
       )
     }
-    throw new Error(`Failed to create package directory: ${packageDir}`, {
+    throw new ErrorCtor(`Failed to create package directory: ${packageDir}`, {
       cause: e,
     })
   }
@@ -677,7 +687,7 @@ export function findBinaryPath(
     binPath = bin
   } else if (typeof bin === 'object' && bin !== null) {
     const binObj = bin as Record<string, string>
-    const binKeys = Object.keys(binObj)
+    const binKeys = ObjectKeys(binObj)
 
     // If only one binary, use it regardless of name.
     if (binKeys.length === 1) {
@@ -724,7 +734,7 @@ export function findBinaryPath(
   }
 
   if (!binPath) {
-    throw new Error(`No binary found for package "${packageName}"`)
+    throw new ErrorCtor(`No binary found for package "${packageName}"`)
   }
 
   const rawPath = normalizePath(path.join(installedDir, binPath))
@@ -787,7 +797,7 @@ export function makePackageBinsExecutable(
     } else if (typeof bin === 'object' && bin !== null) {
       // Multiple binaries
       const binObj = bin as Record<string, string>
-      binPaths.push(...Object.values(binObj))
+      binPaths.push(...ObjectValues(binObj))
     }
 
     // Make all binaries executable
@@ -815,7 +825,9 @@ export function makePackageBinsExecutable(
  *
  */
 export function npmPurl(name: string, version: string): string {
-  const encoded = name.startsWith('@') ? `%40${name.slice(1)}` : name
+  const encoded = StringPrototypeStartsWith(name, '@')
+    ? `%40${name.slice(1)}`
+    : name
   // PURL spec: '+' in version must be encoded as %2B
   const encodedVersion = version.replace(/\+/g, '%2B')
   return `pkg:npm/${encoded}@${encodedVersion}`

@@ -14,6 +14,15 @@ import { normalizePath } from './paths/normalize'
 import type AdmZipType from './external/adm-zip'
 import type tarFsType from './external/tar-fs'
 
+import {
+  ArrayFrom,
+  ErrorCtor,
+  PromiseAll,
+  SetCtor,
+  StringPrototypeEndsWith,
+  StringPrototypeStartsWith,
+} from './primordials'
+
 /**
  * Archive format type.
  */
@@ -100,10 +109,10 @@ function validatePathWithinBase(
   // Ensure target path starts with base directory + separator
   // This prevents attacks like /base/dir vs /base/dir-evil
   if (
-    !resolvedTarget.startsWith(resolvedBase + path.sep) &&
+    !StringPrototypeStartsWith(resolvedTarget, resolvedBase + path.sep) &&
     resolvedTarget !== resolvedBase
   ) {
-    throw new Error(
+    throw new ErrorCtor(
       `Path traversal attempt detected: entry "${entryName}" would extract to "${resolvedTarget}" outside target directory "${resolvedBase}"`,
     )
   }
@@ -123,7 +132,7 @@ function validatePathWithinBase(
  */
 function assertArchiveExists(archivePath: string): void {
   if (!existsSync(archivePath)) {
-    const err = new Error(
+    const err = new ErrorCtor(
       `ENOENT: no such file or directory, open '${archivePath}'`,
     ) as Error & { code: string; path: string }
     err.code = 'ENOENT'
@@ -147,16 +156,16 @@ function assertArchiveExists(archivePath: string): void {
  */
 export function detectArchiveFormat(filePath: string): ArchiveFormat | null {
   const lower = filePath.toLowerCase()
-  if (lower.endsWith('.tar.gz')) {
+  if (StringPrototypeEndsWith(lower, '.tar.gz')) {
     return 'tar.gz'
   }
-  if (lower.endsWith('.tgz')) {
+  if (StringPrototypeEndsWith(lower, '.tgz')) {
     return 'tgz'
   }
-  if (lower.endsWith('.tar')) {
+  if (StringPrototypeEndsWith(lower, '.tar')) {
     return 'tar'
   }
-  if (lower.endsWith('.zip')) {
+  if (StringPrototypeEndsWith(lower, '.zip')) {
     return 'zip'
   }
   return null
@@ -187,7 +196,7 @@ export async function extractArchive(
   if (!format) {
     const path = getPath()
     const ext = path.extname(archivePath).toLowerCase()
-    throw new Error(
+    throw new ErrorCtor(
       `Unsupported archive format${ext ? ` (extension: ${ext})` : ''}: ${archivePath}. ` +
         'Supported formats: .zip, .tar, .tar.gz, .tgz',
     )
@@ -518,7 +527,7 @@ export async function extractZip(
 
   // Check entry count to prevent inode exhaustion DoS.
   if (entries.length > maxEntries) {
-    throw new Error(
+    throw new ErrorCtor(
       `Archive has too many entries: ${entries.length} (limit: ${maxEntries})`,
     )
   }
@@ -532,7 +541,7 @@ export async function extractZip(
 
     // Reject entries with null bytes in names (defense in depth).
     if (entry.entryName.includes('\0')) {
-      throw new Error(
+      throw new ErrorCtor(
         `Invalid null byte in archive entry name: ${entry.entryName}`,
       )
     }
@@ -540,7 +549,7 @@ export async function extractZip(
     // Check individual file size
     const uncompressedSize = entry.header.size
     if (uncompressedSize > maxFileSize) {
-      throw new Error(
+      throw new ErrorCtor(
         `File size exceeds limit: ${entry.entryName} (${uncompressedSize} bytes > ${maxFileSize} bytes)`,
       )
     }
@@ -548,7 +557,7 @@ export async function extractZip(
     // Check total extracted size
     totalExtractedSize += uncompressedSize
     if (totalExtractedSize > maxTotalSize) {
-      throw new Error(
+      throw new ErrorCtor(
         `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
       )
     }
@@ -583,7 +592,7 @@ export async function extractZip(
     const entries = zip.getEntries()
 
     // Collect all directories we need to create
-    const dirsToCreate = new Set<string>()
+    const dirsToCreate = new SetCtor<string>()
     for (const entry of entries) {
       if (entry.isDirectory) {
         continue
@@ -601,7 +610,7 @@ export async function extractZip(
     }
 
     // Create all directories
-    await Promise.all(Array.from(dirsToCreate).map(dir => safeMkdir(dir)))
+    await PromiseAll(ArrayFrom(dirsToCreate).map(dir => safeMkdir(dir)))
 
     // Extract all files (synchronous operation)
     for (const entry of entries) {

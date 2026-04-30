@@ -3,6 +3,8 @@
  * Provides conjunction and disjunction formatters using Intl.ListFormat.
  */
 
+import { ErrorCtor, SetCtor } from './primordials'
+
 let _conjunctionFormatter: Intl.ListFormat | undefined
 /**
  * Get a cached Intl.ListFormat instance for conjunction (and) formatting.
@@ -101,7 +103,7 @@ export function arrayChunk<T>(
 ): T[][] {
   const chunkSize = size ?? 2
   if (chunkSize <= 0) {
-    throw new Error('Chunk size must be greater than 0')
+    throw new ErrorCtor('Chunk size must be greater than 0')
   }
   const { length } = arr
   const chunks = []
@@ -143,7 +145,7 @@ export function arrayChunk<T>(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function arrayUnique<T>(arr: T[] | readonly T[]): T[] {
-  return [...new Set(arr)]
+  return [...new SetCtor(arr)]
 }
 
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.

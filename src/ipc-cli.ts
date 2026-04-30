@@ -7,6 +7,8 @@
  * for cases where data exceeds env-var size limits.
  */
 
+import { ObjectFreeze } from './primordials'
+
 export interface IpcObject {
   SOCKET_CLI_FIX?: string | undefined
   SOCKET_CLI_OPTIMIZE?: boolean | undefined
@@ -78,7 +80,7 @@ export async function getIpc(
         env['SOCKET_CLI_SHADOW_SILENT'] === '1'
     }
 
-    Object.freeze(_ipcObject)
+    ObjectFreeze(_ipcObject)
   }
 
   return key ? _ipcObject[key] : _ipcObject

@@ -6,6 +6,13 @@ import { indentString } from '../strings'
 
 import type { FormatCoverageOptions } from './types'
 
+import {
+  JSONStringify,
+  NumberIsNaN,
+  NumberParseFloat,
+  NumberPrototypeToFixed,
+} from '../primordials'
+
 /**
  * Coverage emoji thresholds for visual feedback.
  */
@@ -29,19 +36,19 @@ function calculateOverall(
   type: FormatCoverageOptions['type'],
 ): string {
   const metrics = [
-    Number.parseFloat(code.statements.percent),
-    Number.parseFloat(code.branches.percent),
-    Number.parseFloat(code.functions.percent),
-    Number.parseFloat(code.lines.percent),
-  ].map(val => (Number.isNaN(val) ? 0 : val))
+    NumberParseFloat(code.statements.percent),
+    NumberParseFloat(code.branches.percent),
+    NumberParseFloat(code.functions.percent),
+    NumberParseFloat(code.lines.percent),
+  ].map(val => (NumberIsNaN(val) ? 0 : val))
 
   if (type) {
-    const typePercent = Number.parseFloat(type.percent)
-    metrics.push(Number.isNaN(typePercent) ? 0 : typePercent)
+    const typePercent = NumberParseFloat(type.percent)
+    metrics.push(NumberIsNaN(typePercent) ? 0 : typePercent)
   }
 
   const average = metrics.reduce((sum, val) => sum + val, 0) / metrics.length
-  return average.toFixed(2)
+  return NumberPrototypeToFixed(average, 2)
 }
 
 /**
@@ -69,7 +76,7 @@ export function formatCoverage(options: FormatCoverageOptions): string {
   const { code, format, type } = opts
 
   if (format === 'json') {
-    return JSON.stringify({ code, type }, null, 2)
+    return JSONStringify({ code, type }, null, 2)
   }
 
   const overall = calculateOverall(code, type)
@@ -102,8 +109,8 @@ export function formatCoverage(options: FormatCoverageOptions): string {
   }
 
   // Overall.
-  const overallValue = Number.parseFloat(overall)
-  const emoji = getCoverageEmoji(Number.isNaN(overallValue) ? 0 : overallValue)
+  const overallValue = NumberParseFloat(overall)
+  const emoji = getCoverageEmoji(NumberIsNaN(overallValue) ? 0 : overallValue)
   output += `\nOverall: ${overall}%${emoji}\n`
 
   return output

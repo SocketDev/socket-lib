@@ -17,6 +17,13 @@ import { normalizeHash } from './integrity'
 import type { HashSpec } from './integrity'
 import type { SpawnExtra, SpawnOptions } from '../spawn'
 
+import {
+  ArrayIsArray,
+  DateNow,
+  ErrorCtor,
+  StringPrototypeStartsWith,
+} from '../primordials'
+
 let _crypto: typeof import('node:crypto') | undefined
 /**
  * Lazily load the crypto module to avoid Webpack errors.
@@ -228,7 +235,7 @@ export async function cleanDlxCache(
   }
 
   let cleaned = 0
-  const now = Date.now()
+  const now = DateNow()
   const path = getPath()
   const entries = await fs.promises.readdir(cacheDir)
 
@@ -244,11 +251,7 @@ export async function cleanDlxCache(
 
       // eslint-disable-next-line no-await-in-loop
       const metadata = await readJson(metaPath, { throws: false })
-      if (
-        !metadata ||
-        typeof metadata !== 'object' ||
-        Array.isArray(metadata)
-      ) {
+      if (!metadata || typeof metadata !== 'object' || ArrayIsArray(metadata)) {
         continue
       }
       const timestamp = (metadata as Record<string, unknown>)['timestamp']
@@ -350,7 +353,7 @@ export async function dlxBinary(
       if (
         metadata &&
         typeof metadata === 'object' &&
-        !Array.isArray(metadata) &&
+        !ArrayIsArray(metadata) &&
         typeof (metadata as Record<string, unknown>)['integrity'] === 'string'
       ) {
         computedIntegrity = (metadata as Record<string, unknown>)[
@@ -380,20 +383,20 @@ export async function dlxBinary(
     } catch (e) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'EACCES' || code === 'EPERM') {
-        throw new Error(
+        throw new ErrorCtor(
           `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
             'Please check directory permissions or run with appropriate access.',
           { cause: e },
         )
       }
       if (code === 'EROFS') {
-        throw new Error(
+        throw new ErrorCtor(
           `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
             'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
           { cause: e },
         )
       }
-      throw new Error(
+      throw new ErrorCtor(
         `Failed to create binary cache directory: ${cacheEntryDir}`,
         { cause: e },
       )
@@ -522,20 +525,20 @@ export async function downloadBinary(
     } catch (e) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'EACCES' || code === 'EPERM') {
-        throw new Error(
+        throw new ErrorCtor(
           `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
             'Please check directory permissions or run with appropriate access.',
           { cause: e },
         )
       }
       if (code === 'EROFS') {
-        throw new Error(
+        throw new ErrorCtor(
           `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
             'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
           { cause: e },
         )
       }
-      throw new Error(
+      throw new ErrorCtor(
         `Failed to create binary cache directory: ${cacheEntryDir}`,
         { cause: e },
       )
@@ -778,7 +781,7 @@ export async function isBinaryCacheValid(
     if (!isObjectObject(metadata)) {
       return false
     }
-    const now = Date.now()
+    const now = DateNow()
     const timestamp = (metadata as Record<string, unknown>)['timestamp']
     // If timestamp is missing or invalid, cache is invalid
     if (typeof timestamp !== 'number' || timestamp <= 0) {
@@ -823,7 +826,7 @@ export async function listDlxCache(): Promise<
   }
 
   const results = []
-  const now = Date.now()
+  const now = DateNow()
   const path = getPath()
   const entries = await fs.promises.readdir(cacheDir)
 
@@ -838,11 +841,7 @@ export async function listDlxCache(): Promise<
       const metaPath = getBinaryCacheMetadataPath(entryPath)
       // eslint-disable-next-line no-await-in-loop
       const metadata = await readJson(metaPath, { throws: false })
-      if (
-        !metadata ||
-        typeof metadata !== 'object' ||
-        Array.isArray(metadata)
-      ) {
+      if (!metadata || typeof metadata !== 'object' || ArrayIsArray(metadata)) {
         continue
       }
 
@@ -857,7 +856,7 @@ export async function listDlxCache(): Promise<
       // Find the binary file in the directory.
       // eslint-disable-next-line no-await-in-loop
       const files = await fs.promises.readdir(entryPath)
-      const binaryFile = files.find(f => !f.startsWith('.'))
+      const binaryFile = files.find(f => !StringPrototypeStartsWith(f, '.'))
 
       if (binaryFile) {
         const binaryPath = path.join(entryPath, binaryFile)
@@ -905,7 +904,7 @@ export async function writeBinaryCacheMetadata(
   const metadata: DlxMetadata = {
     version: '1.0.0',
     cache_key: cacheKey,
-    timestamp: Date.now(),
+    timestamp: DateNow(),
     integrity,
     size,
     source: {

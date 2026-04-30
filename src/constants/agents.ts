@@ -12,7 +12,7 @@ export const PNPM = 'pnpm'
 export const YARN = 'yarn'
 export const BUN = 'bun'
 export const VLT = 'vlt'
-export const NPX = 'npx'
+export const NPX = 'npx' // # socket-hook: allow npx
 
 // NPM binary path - resolved once at runtime using which.
 // Shared between NPM_BIN_PATH and NPM_REAL_EXEC_PATH to avoid duplicate which.sync calls.

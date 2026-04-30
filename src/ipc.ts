@@ -11,6 +11,8 @@ import { Type } from './external/@sinclair/typebox'
 import { getOsTmpDir } from './paths/socket'
 import { parseSchema } from './schema/parse'
 
+import { DateNow, ErrorCtor, JSONStringify } from './primordials'
+
 /**
  * IPC stub file schema - validates the structure of stub files.
  * Stub files are used for passing data between processes via filesystem.
@@ -60,12 +62,12 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
   }
   const stats = await fs.promises.lstat(dir)
   if (!stats.isDirectory()) {
-    throw new Error(`IPC path is not a directory: ${dir}`)
+    throw new ErrorCtor(`IPC path is not a directory: ${dir}`)
   }
   const getuid = process.getuid
   const ownUid = typeof getuid === 'function' ? getuid.call(process) : -1
   if (ownUid !== -1 && stats.uid !== ownUid) {
-    throw new Error(
+    throw new ErrorCtor(
       `IPC directory ${dir} is owned by another user (uid ${stats.uid}); refusing to use it.`,
     )
   }
@@ -179,7 +181,7 @@ export async function writeIpcStub(
   const ipcData: IpcStub = {
     data,
     pid: process.pid,
-    timestamp: Date.now(),
+    timestamp: DateNow(),
   }
 
   const validated = parseSchema(IpcStubSchema, ipcData)
@@ -213,7 +215,7 @@ export async function writeIpcStub(
     }
   }
   try {
-    await handle.writeFile(JSON.stringify(validated, null, 2), 'utf8')
+    await handle.writeFile(JSONStringify(validated, null, 2), 'utf8')
   } finally {
     await handle.close()
   }

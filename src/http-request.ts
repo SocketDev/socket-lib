@@ -21,6 +21,25 @@ import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type { Readable } from 'node:stream'
 import type { Logger } from './logger'
 
+import {
+  ArrayIsArray,
+  BufferConcat,
+  BufferFrom,
+  DateCtor,
+  DateNow,
+  ErrorCtor,
+  JSONParse,
+  MathFloor,
+  MathMax,
+  NumberIsNaN,
+  NumberParseInt,
+  ObjectKeys,
+  PromiseCtor,
+  SetCtor,
+  StringPrototypeStartsWith,
+  URLCtor,
+} from './primordials'
+
 /** IncomingMessage received as a response to a client request (http.request callback). */
 export type IncomingResponse = IncomingMessage
 
@@ -787,16 +806,16 @@ async function httpDownloadAttempt(
 
   const res = response.rawResponse
   if (!res) {
-    throw new Error('Stream response missing rawResponse')
+    throw new ErrorCtor('Stream response missing rawResponse')
   }
 
   const { createWriteStream } = getFs()
-  const totalSize = Number.parseInt(
+  const totalSize = NumberParseInt(
     (response.headers['content-length'] as string) || '0',
     10,
   )
 
-  return await new Promise((resolve, reject) => {
+  return await new PromiseCtor((resolve, reject) => {
     let downloadedSize = 0
     const fileStream = createWriteStream(destPath)
 
@@ -866,7 +885,7 @@ async function httpRequestAttempt(
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
 
-  const startTime = Date.now()
+  const startTime = DateNow()
 
   // Auto-merge FormData headers (Content-Type with boundary).
   const streamHeaders =
@@ -885,7 +904,7 @@ async function httpRequestAttempt(
 
   hooks?.onRequest?.({ method, url, headers: mergedHeaders, timeout })
 
-  return await new Promise((resolve, reject) => {
+  return await new PromiseCtor((resolve, reject) => {
     // Settled flag guards all resolve/reject paths so that at most one
     // fires, even when destroy() cascades multiple events.
     let settled = false
@@ -913,7 +932,7 @@ async function httpRequestAttempt(
       reject(err)
     }
 
-    const parsedUrl = new URL(url)
+    const parsedUrl = new URLCtor(url)
     const isHttps = parsedUrl.protocol === 'https:'
     const httpModule = isHttps ? getHttps() : getHttp()
 
@@ -933,7 +952,7 @@ async function httpRequestAttempt(
     const emitResponse = (info: Partial<HttpHookResponseInfo>) => {
       try {
         hooks?.onResponse?.({
-          duration: Date.now() - startTime,
+          duration: DateNow() - startTime,
           method,
           url,
           ...info,
@@ -1260,7 +1279,7 @@ export async function fetchChecksums(
   const response = await httpRequest(url, { ca, headers, timeout })
 
   if (!response.ok) {
-    throw new Error(
+    throw new ErrorCtor(
       `Failed to fetch checksums from ${url}: ${response.status} ${response.statusText}`,
     )
   }
@@ -1352,7 +1371,7 @@ export async function httpDownload(
   } else if (logger) {
     let lastPercent = 0
     progressCallback = (downloaded: number, total: number) => {
-      const percent = total === 0 ? 0 : Math.floor((downloaded / total) * 100)
+      const percent = total === 0 ? 0 : MathFloor((downloaded / total) * 100)
       if (percent >= lastPercent + progressInterval) {
         logger.log(
           `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,
@@ -1404,13 +1423,13 @@ export async function httpDownload(
         if (
           computedHash.length !== expectedHash.length ||
           !crypto.timingSafeEqual(
-            Buffer.from(computedHash),
+            BufferFrom!(computedHash),
             Buffer.from(expectedHash),
           )
         ) {
           // eslint-disable-next-line no-await-in-loop
           await safeDelete(tempPath)
-          throw new Error(
+          throw new ErrorCtor(
             `Checksum verification failed for ${url}\n` +
               `Expected: ${expectedHash}\n` +
               `Computed: ${computedHash}`,
@@ -1444,11 +1463,11 @@ export async function httpDownload(
       // Retry with exponential backoff
       const delayMs = retryDelay * 2 ** attempt
       // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delayMs))
+      await new PromiseCtor(resolve => setTimeout(resolve, delayMs))
     }
   }
 
-  throw lastError || new Error('Download failed after retries')
+  throw lastError || new ErrorCtor('Download failed after retries')
 }
 
 /**
@@ -1536,7 +1555,7 @@ export async function httpJson<T = unknown>(
   try {
     return response.json<T>()
   } catch (e) {
-    throw new Error('Failed to parse JSON response', { cause: e })
+    throw new ErrorCtor('Failed to parse JSON response', { cause: e })
   }
 }
 
@@ -1608,7 +1627,7 @@ export async function httpRequest(
     typeof (body as { pipe?: unknown }).pipe === 'function'
 
   if (isStreamBody && retries > 0) {
-    throw new Error(
+    throw new ErrorCtor(
       'Streaming body (Readable/FormData) cannot be used with retries. ' +
         'Streams are consumed on first attempt and cannot be replayed. ' +
         'Set retries: 0 or buffer the body as a string/Buffer.',
@@ -1662,20 +1681,20 @@ export async function httpRequest(
         }
         // A number overrides the delay (clamped to >= 0; NaN falls back to default).
         const actualDelay =
-          typeof retryResult === 'number' && !Number.isNaN(retryResult)
-            ? Math.max(0, retryResult)
+          typeof retryResult === 'number' && !NumberIsNaN(retryResult)
+            ? MathMax(0, retryResult)
             : delayMs
         // eslint-disable-next-line no-await-in-loop
-        await new Promise(resolve => setTimeout(resolve, actualDelay))
+        await new PromiseCtor(resolve => setTimeout(resolve, actualDelay))
       } else {
         // Default: retry with exponential backoff
         // eslint-disable-next-line no-await-in-loop
-        await new Promise(resolve => setTimeout(resolve, delayMs))
+        await new PromiseCtor(resolve => setTimeout(resolve, delayMs))
       }
     }
   }
 
-  throw lastError || new Error('Request failed after retries')
+  throw lastError || new ErrorCtor('Request failed after retries')
 }
 
 /**
@@ -1799,7 +1818,7 @@ export function parseChecksums(text: string): Checksums {
 
   for (const line of text.split('\n')) {
     const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) {
+    if (!trimmed || StringPrototypeStartsWith(trimmed, '#')) {
       continue
     }
 
@@ -1847,7 +1866,7 @@ export function parseRetryAfterHeader(
     return undefined
   }
   // Handle array of values (take first).
-  const raw = Array.isArray(value) ? value[0] : value
+  const raw = ArrayIsArray(value) ? value[0] : value
   if (!raw) {
     return undefined
   }
@@ -1858,9 +1877,9 @@ export function parseRetryAfterHeader(
     return seconds * 1000
   }
   // Try parsing as HTTP date.
-  const date = new Date(raw)
-  if (!Number.isNaN(date.getTime())) {
-    const delayMs = date.getTime() - Date.now()
+  const date = new DateCtor(raw)
+  if (!NumberIsNaN(date.getTime())) {
+    const delayMs = date.getTime() - DateNow()
     if (delayMs > 0) {
       return delayMs
     }
@@ -1890,7 +1909,7 @@ export async function readIncomingResponse(
   for await (const chunk of msg) {
     chunks.push(chunk as Buffer)
   }
-  const body = Buffer.concat(chunks)
+  const body = BufferConcat!(chunks)
   const status = msg.statusCode ?? 0
   const statusText = msg.statusMessage ?? ''
   return {
@@ -1901,7 +1920,7 @@ export async function readIncomingResponse(
       ) as ArrayBuffer,
     body,
     headers: msg.headers,
-    json: <T = unknown>() => JSON.parse(body.toString('utf8')) as T,
+    json: <T = unknown>() => JSONParse(body.toString('utf8')) as T,
     ok: status >= 200 && status < 300,
     rawResponse: msg,
     status,
@@ -1935,7 +1954,7 @@ export function sanitizeHeaders(
   if (!headers) {
     return {}
   }
-  const sensitiveHeaders = new Set([
+  const sensitiveHeaders = new SetCtor([
     'authorization',
     'cookie',
     'proxy-authorization',
@@ -1946,11 +1965,11 @@ export function sanitizeHeaders(
   const result: Record<string, string> = {
     __proto__: null,
   } as unknown as Record<string, string>
-  for (const key of Object.keys(headers)) {
+  for (const key of ObjectKeys(headers)) {
     const value = headers[key]
     if (sensitiveHeaders.has(key.toLowerCase())) {
       result[key] = '[REDACTED]'
-    } else if (Array.isArray(value)) {
+    } else if (ArrayIsArray(value)) {
       result[key] = value.join(', ')
     } else if (value !== undefined && value !== null) {
       result[key] = String(value)

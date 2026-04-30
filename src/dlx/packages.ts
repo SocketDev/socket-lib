@@ -4,6 +4,8 @@ import { readDirNamesSync, safeDelete, safeDeleteSync } from '../fs'
 import { getSocketDlxDir } from '../paths/socket'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 
+import { ErrorCtor } from '../primordials'
+
 let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
@@ -91,7 +93,7 @@ export async function removeDlxPackage(packageName: string): Promise<void> {
   try {
     await safeDelete(packageDir, { recursive: true, force: true })
   } catch (e) {
-    throw new Error(`Failed to remove DLX package "${packageName}"`, {
+    throw new ErrorCtor(`Failed to remove DLX package "${packageName}"`, {
       cause: e,
     })
   }
@@ -112,7 +114,7 @@ export function removeDlxPackageSync(packageName: string): void {
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {
-      throw new Error(
+      throw new ErrorCtor(
         `Permission denied removing DLX package "${packageName}"\n` +
           `Directory: ${packageDir}\n` +
           'To resolve:\n' +
@@ -124,14 +126,14 @@ export function removeDlxPackageSync(packageName: string): void {
       )
     }
     if (code === 'EROFS') {
-      throw new Error(
+      throw new ErrorCtor(
         `Cannot remove DLX package "${packageName}" from read-only filesystem\n` +
           `Directory: ${packageDir}\n` +
           'The filesystem is mounted read-only.',
         { cause: e },
       )
     }
-    throw new Error(
+    throw new ErrorCtor(
       `Failed to remove DLX package "${packageName}"\n` +
         `Directory: ${packageDir}\n` +
         'Check permissions and ensure no programs are using this directory.',

@@ -2,6 +2,8 @@
  * @fileoverview Maintained Node.js versions without external dependencies.
  */
 
+import { ObjectAssign } from '../primordials'
+
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
 // `exports.SomeName = void 0;` which causes runtime errors.
@@ -23,7 +25,7 @@ const previous = '20.19.5'
 const last = '18.20.8'
 
 const maintainedNodeVersions = ObjectFreeze(
-  Object.assign([last, previous, current, next], {
+  ObjectAssign([last, previous, current, next], {
     current,
     last,
     next,

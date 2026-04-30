@@ -61,6 +61,8 @@ import { getDefaultLogger } from '../logger'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 
+import { DateNow, JSONParse, JSONStringify, ObjectKeys } from '../primordials'
+
 const fs = getFs()
 const path = getPath()
 const logger = getDefaultLogger()
@@ -204,7 +206,7 @@ export class DlxManifest {
         >
       }
 
-      return JSON.parse(content) as Record<string, ManifestEntry | StoreRecord>
+      return JSONParse(content) as Record<string, ManifestEntry | StoreRecord>
     } catch (e) {
       logger.warn(`Failed to read manifest: ${errorMessage(e)}`)
       return { __proto__: null } as unknown as Record<
@@ -230,7 +232,7 @@ export class DlxManifest {
     }
 
     // Write atomically.
-    const content = JSON.stringify(data, null, 2)
+    const content = JSONStringify(data, null, 2)
     const tempPath = `${this.manifestPath}.tmp`
 
     try {
@@ -327,8 +329,8 @@ export class DlxManifest {
         return []
       }
 
-      const data = JSON.parse(content) as Record<string, StoreRecord>
-      return Object.keys(data)
+      const data = JSONParse(content) as Record<string, StoreRecord>
+      return ObjectKeys(data)
     } catch (e) {
       logger.warn(`Failed to get package list: ${errorMessage(e)}`)
       return []
@@ -358,7 +360,7 @@ export class DlxManifest {
       return false
     }
 
-    const age = Date.now() - record.timestampFetch
+    const age = DateNow() - record.timestampFetch
     return age < ttlMs
   }
 

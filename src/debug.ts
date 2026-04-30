@@ -10,7 +10,12 @@ import debugJs from './external/debug'
 
 import { getDefaultLogger } from './logger'
 import { hasOwn } from './objects'
-import { ReflectApply } from './primordials'
+import {
+  DateNow,
+  MapCtor,
+  ReflectApply,
+  StringPrototypeStartsWith,
+} from './primordials'
 import { getDefaultSpinner } from './spinner'
 import { applyLinePrefix } from './strings'
 
@@ -33,7 +38,7 @@ interface InspectOptions {
 
 export type { DebugOptions, NamespacesOrOptions, InspectOptions }
 
-const debugByNamespace = new Map()
+const debugByNamespace = new MapCtor()
 
 let _util: typeof import('node:util') | undefined
 
@@ -108,7 +113,7 @@ function getCallerInfo(stackOffset: number = 3): string {
               name = match
                 // Strip known V8 invocation prefixes to get the name.
                 .replace(/^(?:async|bound|get|new|set)\s+/, '')
-              if (name.startsWith('Object.')) {
+              if (StringPrototypeStartsWith(name, 'Object.')) {
                 // Strip leading 'Object.' if not an own property of Object.
                 const afterDot = name.slice(7 /*'Object.'.length*/)
                 if (!hasOwn(Object, afterDot)) {
@@ -187,7 +192,7 @@ function isEnabled(namespaces: string | undefined) {
   const names = []
   const skips = []
   for (const ns of split) {
-    if (ns.startsWith('-')) {
+    if (StringPrototypeStartsWith(ns, '-')) {
       skips.push(ns.slice(1))
     } else {
       names.push(ns)
@@ -438,19 +443,19 @@ export function debugtime(label: string) {
   let startTime: number | undefined
   const impl = () => {
     if (startTime === undefined) {
-      startTime = Date.now()
+      startTime = DateNow()
     } else {
-      const duration = Date.now() - startTime
+      const duration = DateNow() - startTime
       util.debuglog('time')(`${label}: ${duration}ms`)
       startTime = undefined
     }
   }
   impl.start = () => {
-    startTime = Date.now()
+    startTime = DateNow()
   }
   impl.end = () => {
     if (startTime !== undefined) {
-      const duration = Date.now() - startTime
+      const duration = DateNow() - startTime
       util.debuglog('time')(`${label}: ${duration}ms`)
       startTime = undefined
     }

@@ -8,6 +8,8 @@ import process from 'node:process'
 
 import yargsParser from '../external/yargs-parser'
 
+import { ObjectEntries, StringPrototypeStartsWith } from '../primordials'
+
 /**
  * Yargs parser options interface.
  */
@@ -133,7 +135,7 @@ export function getPositionalArgs(startIndex = 2): string[] {
   while (i < args.length) {
     const arg = args[i]!
     // Stop at first flag
-    if (arg.startsWith('-')) {
+    if (StringPrototypeStartsWith(arg, '-')) {
       break
     }
     positionals.push(arg)
@@ -220,7 +222,7 @@ export function parseArgs<T = Record<string, unknown>>(
   }
 
   // Process each option configuration.
-  for (const { 0: key, 1: optionConfig } of Object.entries(options)) {
+  for (const { 0: key, 1: optionConfig } of ObjectEntries(options)) {
     const {
       coerce,
       default: defaultValue,

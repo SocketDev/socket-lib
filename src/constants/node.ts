@@ -9,6 +9,8 @@ import process from 'node:process'
 
 import { maintainedNodeVersions } from './maintained-node-versions'
 
+import { NumberParseInt } from '../primordials'
+
 const NODE_VERSION = process.version
 
 let _nodeDisableSigusr1Flags: string[]
@@ -100,7 +102,7 @@ export function getNodeHardenFlags(): string[] {
  */
 export function getNodeMajorVersion(): number {
   const major = NODE_VERSION.slice(1).split('.')[0] ?? '0'
-  return Number.parseInt(major, 10) || 0
+  return NumberParseInt(major, 10) || 0
 }
 
 /**
@@ -109,7 +111,7 @@ export function getNodeMajorVersion(): number {
  * @returns The minor version number, or `0` if it cannot be parsed.
  */
 export function getNodeMinorVersion(): number {
-  return Number.parseInt(NODE_VERSION.split('.')[1] ?? '0', 10)
+  return NumberParseInt(NODE_VERSION.split('.')[1] ?? '0', 10)
 }
 
 /**
@@ -131,7 +133,7 @@ export function getNodeNoWarningsFlags(): string[] {
  * @returns The patch version number, or `0` if it cannot be parsed.
  */
 export function getNodePatchVersion(): number {
-  return Number.parseInt(NODE_VERSION.split('.')[2] ?? '0', 10)
+  return NumberParseInt(NODE_VERSION.split('.')[2] ?? '0', 10)
 }
 
 /**

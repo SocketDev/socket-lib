@@ -14,13 +14,20 @@ import { readJsonSync } from './fs'
 import { isPath, normalizePath } from './paths/normalize'
 import { spawn } from './spawn'
 
+import {
+  ArrayIsArray,
+  ErrorCtor,
+  MapCtor,
+  StringPrototypeStartsWith,
+} from './primordials'
+
 // Cache for binary path resolutions to avoid repeated PATH searches.
 // Cache is validated with existsSync() which is much cheaper than PATH search.
-const binPathCache = new Map<string, string>()
+const binPathCache = new MapCtor<string, string>()
 // Separate cache for 'all: true' results (array of paths).
-const binPathAllCache = new Map<string, string[]>()
+const binPathAllCache = new MapCtor<string, string[]>()
 // Cache for Volta binary path resolutions (keyed by volta path + binary name).
-const voltaBinCache = new Map<string, string>()
+const voltaBinCache = new MapCtor<string, string>()
 
 let _fs: typeof import('node:fs') | undefined
 /**
@@ -116,7 +123,7 @@ export async function execBin(
   }
 
   if (!resolvedPath) {
-    const error = new Error(
+    const error = new ErrorCtor(
       `Binary not found: ${binPath}\n` +
         'Possible causes:\n' +
         `  - Binary "${binPath}" is not installed or not in PATH\n` +
@@ -134,7 +141,7 @@ export async function execBin(
   }
 
   // Execute the binary directly.
-  const binCommand = Array.isArray(resolvedPath)
+  const binCommand = ArrayIsArray(resolvedPath)
     ? resolvedPath[0]!
     : resolvedPath
   // On Windows, binaries are often .cmd files that require shell to execute.
@@ -172,7 +179,7 @@ export function findRealBin(
   /* c8 ignore next - External which call */
   const allPaths = whichModule.sync(binName, { all: true, nothrow: true }) || []
   // Ensure allPaths is an array.
-  const pathsArray = Array.isArray(allPaths)
+  const pathsArray = ArrayIsArray(allPaths)
     ? allPaths
     : typeof allPaths === 'string'
       ? [allPaths]
@@ -404,7 +411,7 @@ export function resolveRealBinSync(binPath: string): string {
     const voltaNodeVersion = voltaPlatform?.node?.runtime
     const voltaNpmVersion = voltaPlatform?.node?.npm
     let voltaBinPath = ''
-    if (basename === 'npm' || basename === 'npx') {
+    if (basename === 'npm' || basename === 'npx') /* # socket-hook: allow npx */ {
       if (voltaNpmVersion) {
         const relCliPath = `bin/${basename}-cli.js`
         voltaBinPath = path.join(
@@ -457,7 +464,7 @@ export function resolveRealBinSync(binPath: string): string {
       extLowered === '.cmd' ||
       extLowered === '.exe' ||
       extLowered === '.ps1'
-    const isNpmOrNpx = basename === 'npm' || basename === 'npx'
+    const isNpmOrNpx = basename === 'npm' || basename === 'npx' // # socket-hook: allow npx
     const isPnpmOrYarn = basename === 'pnpm' || basename === 'yarn'
     if (hasKnownExt && isNpmOrNpx) {
       // The quick route assumes a bin path like: C:\Program Files\nodejs\npm.cmd
@@ -647,7 +654,7 @@ export function resolveRealBinSync(binPath: string): string {
     // Handle Unix shell scripts (non-Windows platforms)
     let hasNoExt = extLowered === ''
     const isPnpmOrYarn = basename === 'pnpm' || basename === 'yarn'
-    const isNpmOrNpx = basename === 'npm' || basename === 'npx'
+    const isNpmOrNpx = basename === 'npm' || basename === 'npx' // # socket-hook: allow npx
 
     // Handle special case where pnpm path in CI has extra segments.
     // In setup-pnpm GitHub Action, the path might be malformed like:
@@ -712,7 +719,11 @@ export function resolveRealBinSync(binPath: string): string {
         }
         // Check if the extracted path looks wrong (e.g., pnpm/bin/pnpm.cjs without ../).
         // This happens with setup-pnpm action when it creates a malformed shell script.
-        if (relPath && basename === 'pnpm' && relPath.startsWith('pnpm/')) {
+        if (
+          relPath &&
+          basename === 'pnpm' &&
+          StringPrototypeStartsWith(relPath, 'pnpm/')
+        ) {
           // The path should be ../pnpm/... not pnpm/...
           // Prepend ../ to fix the relative path.
           relPath = `../${relPath}`
@@ -843,7 +854,7 @@ export async function whichReal(
 
   // When 'all: true' is specified, ensure we always return an array.
   if (opts?.all) {
-    const paths = Array.isArray(result)
+    const paths = ArrayIsArray(result)
       ? result
       : typeof result === 'string'
         ? [result]
@@ -917,7 +928,7 @@ export function whichRealSync(
 
   // When 'all: true' is specified, ensure we always return an array.
   if (opts.all) {
-    const paths = Array.isArray(result)
+    const paths = ArrayIsArray(result)
       ? result
       : typeof result === 'string'
         ? [result]

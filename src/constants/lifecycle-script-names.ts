@@ -5,7 +5,9 @@
  * https://docs.npmjs.com/cli/v10/using-npm/scripts#life-cycle-scripts
  */
 
-const lifecycleScriptNames = new Set(
+import { SetCtor } from '../primordials'
+
+const lifecycleScriptNames = new SetCtor(
   [
     'dependencies',
     'prepublishOnly',

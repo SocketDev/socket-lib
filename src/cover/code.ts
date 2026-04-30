@@ -8,6 +8,8 @@ import { readJson } from '../fs'
 import { isObjectObject } from '../objects'
 import { spawn } from '../spawn'
 
+import { ArrayIsArray, ErrorCtor, ObjectValues } from '../primordials'
+
 import type {
   CodeCoverageResult,
   CoverageMetric,
@@ -84,7 +86,7 @@ export async function getCodeCoverage(
   const { coveragePath, generateIfMissing } = opts
 
   if (!coveragePath) {
-    throw new Error('Coverage path is required')
+    throw new ErrorCtor('Coverage path is required')
   }
 
   // Check if coverage file exists.
@@ -97,7 +99,7 @@ export async function getCodeCoverage(
         stdio: 'inherit',
       })
     } else {
-      throw new Error(
+      throw new ErrorCtor(
         `Coverage file not found at "${coveragePath}". Run tests with coverage first.`,
       )
     }
@@ -107,7 +109,7 @@ export async function getCodeCoverage(
   const coverageData = (await readJson(coveragePath)) as unknown
 
   if (!isObjectObject(coverageData)) {
-    throw new Error(`Invalid coverage data format in "${coveragePath}"`)
+    throw new ErrorCtor(`Invalid coverage data format in "${coveragePath}"`)
   }
 
   // Aggregate metrics across all files.
@@ -121,7 +123,7 @@ export async function getCodeCoverage(
 
   const v8Data = coverageData as V8CoverageData
 
-  for (const fileCoverage of Object.values(v8Data)) {
+  for (const fileCoverage of ObjectValues(v8Data)) {
     if (!isObjectObject(fileCoverage)) {
       continue
     }
@@ -130,7 +132,7 @@ export async function getCodeCoverage(
 
     // Aggregate statements.
     if (fc.s && isObjectObject(fc.s)) {
-      const statementCounts = Object.values(fc.s)
+      const statementCounts = ObjectValues(fc.s)
       for (const count of statementCounts) {
         if (typeof count === 'number') {
           totals.statements.total += 1
@@ -143,9 +145,9 @@ export async function getCodeCoverage(
 
     // Aggregate branches.
     if (fc.b && isObjectObject(fc.b)) {
-      const branchCounts = Object.values(fc.b)
+      const branchCounts = ObjectValues(fc.b)
       for (const branches of branchCounts) {
-        if (Array.isArray(branches)) {
+        if (ArrayIsArray(branches)) {
           for (const count of branches) {
             if (typeof count === 'number') {
               totals.branches.total += 1
@@ -160,7 +162,7 @@ export async function getCodeCoverage(
 
     // Aggregate functions.
     if (fc.f && isObjectObject(fc.f)) {
-      const functionCounts = Object.values(fc.f)
+      const functionCounts = ObjectValues(fc.f)
       for (const count of functionCounts) {
         if (typeof count === 'number') {
           totals.functions.total += 1

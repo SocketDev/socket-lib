@@ -20,6 +20,8 @@ import { computeHashes } from './integrity'
 
 import type { ComputedHashes } from './integrity'
 
+import { DateCtor, DateNow, JSONStringify } from '../primordials'
+
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
@@ -191,14 +193,14 @@ export async function generatePackagePin(
       : minReleaseMins !== undefined
         ? minReleaseMins * 60_000
         : 0
-  const before = ageMs > 0 ? new Date(Date.now() - ageMs) : undefined
+  const before = ageMs > 0 ? new DateCtor(DateNow() - ageMs) : undefined
   const scratch = path.join(
     tmpdir(),
     `socket-lib-pin-${process.pid}-${Date.now()}`,
   )
   await safeMkdir(scratch, { recursive: true })
   try {
-    const packageJson = JSON.stringify(
+    const packageJson = JSONStringify(
       {
         name: 'socket-lib-pin',
         version: '0.0.0',

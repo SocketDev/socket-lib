@@ -8,6 +8,8 @@ import { spawn } from '../spawn'
 
 import type { GetTypeCoverageOptions, TypeCoverageResult } from './types'
 
+import { ErrorCtor, NumberParseInt } from '../primordials'
+
 /**
  * Get TypeScript type coverage metrics.
  *
@@ -26,7 +28,7 @@ export async function getTypeCoverage(
   const { cwd, generateIfMissing } = opts
 
   if (!cwd) {
-    throw new Error('Working directory is required.')
+    throw new ErrorCtor('Working directory is required.')
   }
 
   try {
@@ -45,13 +47,13 @@ export async function getTypeCoverage(
     }
 
     return {
-      covered: Number.parseInt(match[1], 10),
+      covered: NumberParseInt(match[1], 10),
       percent: match[3],
-      total: Number.parseInt(match[2], 10),
+      total: NumberParseInt(match[2], 10),
     }
   } catch (e) {
     if (generateIfMissing) {
-      throw new Error(
+      throw new ErrorCtor(
         'Unable to generate type coverage. Ensure type-coverage is installed.',
         { cause: e },
       )

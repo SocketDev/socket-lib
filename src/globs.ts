@@ -13,6 +13,14 @@ import {
 import type * as fastGlobType from './external/fast-glob'
 import type picomatchType from './external/picomatch'
 
+import {
+  ArrayIsArray,
+  JSONStringify,
+  MapCtor,
+  ObjectKeys,
+  StringPrototypeStartsWith,
+} from './primordials'
+
 // Type definitions
 type Pattern = string
 
@@ -55,7 +63,7 @@ const MATCHER_CACHE_MAX_SIZE = 100
 // LRU cache. We exploit Map's insertion-order iteration so eviction is O(1):
 // delete the first key. On read, delete + set moves the entry to the back,
 // keeping the cache in recency order.
-const matcherCache = new Map<string, (path: string) => boolean>()
+const matcherCache = new MapCtor<string, (path: string) => boolean>()
 
 export const defaultIgnore = ObjectFreeze([
   // Most of these ignored files can be included specifically if included in the
@@ -144,7 +152,7 @@ export function getGlobMatcher(
   glob: Pattern | Pattern[],
   options?: { dot?: boolean; nocase?: boolean; ignore?: string[] },
 ): (path: string) => boolean {
-  const patterns = Array.isArray(glob) ? glob : [glob]
+  const patterns = ArrayIsArray(glob) ? glob : [glob]
   // Create stable cache key by sorting patterns and option keys.
   // Option values that are arrays (e.g. `ignore: ['a', 'b']`) get sorted
   // element-wise so `['a', 'b']` and `['b', 'a']` hit the same entry —
@@ -152,12 +160,12 @@ export function getGlobMatcher(
   // the 100-entry cap.
   const sortedPatterns = [...patterns].sort()
   const sortedOptions = options
-    ? Object.keys(options)
+    ? ObjectKeys(options)
         .sort()
         .map(k => {
           const value = options[k as keyof typeof options]
-          const normalized = Array.isArray(value) ? [...value].sort() : value
-          return `${k}:${JSON.stringify(normalized)}`
+          const normalized = ArrayIsArray(value) ? [...value].sort() : value
+          return `${k}:${JSONStringify(normalized)}`
         })
         .join(',')
     : ''
@@ -179,9 +187,11 @@ export function getGlobMatcher(
   }
 
   // Separate positive and negative patterns.
-  const positivePatterns = patterns.filter(p => !p.startsWith('!'))
+  const positivePatterns = patterns.filter(
+    p => !StringPrototypeStartsWith(p, '!'),
+  )
   const negativePatterns = patterns
-    .filter(p => p.startsWith('!'))
+    .filter(p => StringPrototypeStartsWith(p, '!'))
     .map(p => p.slice(1))
 
   // Use ignore option for negation patterns.
@@ -246,7 +256,7 @@ export function globStreamLicenses(
     ...globOptions
   } = { __proto__: null, ...options } as GlobOptions
   const ignore = [
-    ...(Array.isArray(ignoreOpt) ? ignoreOpt : defaultIgnore),
+    ...(ArrayIsArray(ignoreOpt) ? ignoreOpt : defaultIgnore),
     '**/*.{cjs,cts,js,json,mjs,mts,ts}',
   ]
   if (ignoreOriginals) {

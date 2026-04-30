@@ -15,7 +15,10 @@
 
 import { UNKNOWN_ERROR } from './constants/core'
 import { messageWithCauses, stackWithCauses } from './external/pony-cause'
-import { ObjectPrototypeToString } from './primordials'
+import {
+  ObjectPrototypeToString,
+  StringPrototypeCharCodeAt,
+} from './primordials'
 
 export { UNKNOWN_ERROR, messageWithCauses, stackWithCauses }
 
@@ -104,7 +107,7 @@ export function isErrnoException(
   // Errors whose `.code` is lowercase (usually a package-specific tag)
   // rather than maintaining an exact allow-list that would drift on
   // every Node release.
-  const first = code.charCodeAt(0)
+  const first = StringPrototypeCharCodeAt(code, 0)
   return first >= 65 /* 'A' */ && first <= 90 /* 'Z' */
 }
 

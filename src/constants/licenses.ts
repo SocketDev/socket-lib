@@ -4,6 +4,8 @@
  * set of copy-left SPDX identifiers used when classifying package licenses.
  */
 
+import { SetCtor } from '../primordials'
+
 // License identifiers.
 export const MIT = 'MIT'
 export const UNLICENCED = 'UNLICENCED'
@@ -19,7 +21,7 @@ let _copyLeftLicenses: Set<string>
  */
 export function getCopyLeftLicenses(): Set<string> {
   if (_copyLeftLicenses === undefined) {
-    _copyLeftLicenses = new Set([
+    _copyLeftLicenses = new SetCtor([
       'AGPL-1.0',
       'AGPL-1.0-only',
       'AGPL-1.0-or-later',

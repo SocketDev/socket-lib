@@ -17,13 +17,15 @@
 import { isInSocketDlx } from './paths'
 import { getSocketDlxDir } from '../paths/socket'
 
+import { DateNow, JSONParse, MapCtor, SetCtor } from '../primordials'
+
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
 /**
  * Node.js script file extensions.
  */
-const NODE_JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs'] as const)
+const NODE_JS_EXTENSIONS = new SetCtor(['.js', '.mjs', '.cjs'] as const)
 
 // Cache for package.json path lookups to avoid repeated directory traversal.
 // Bounded LRU so long-lived processes don't accumulate entries for every
@@ -36,7 +38,7 @@ type PackageJsonPathEntry = {
   path: string | null
   at: number
 }
-const packageJsonPathCache = new Map<string, PackageJsonPathEntry>()
+const packageJsonPathCache = new MapCtor<string, PackageJsonPathEntry>()
 
 function packageJsonPathCacheSet(key: string, value: string | null): void {
   if (packageJsonPathCache.has(key)) {
@@ -56,7 +58,7 @@ type PackageJsonCacheEntry = {
   mtimeMs: number
   content: object | null
 }
-const packageJsonContentCache = new Map<string, PackageJsonCacheEntry>()
+const packageJsonContentCache = new MapCtor<string, PackageJsonCacheEntry>()
 
 export type ExecutableType = 'package' | 'binary' | 'unknown'
 
@@ -88,7 +90,7 @@ function findPackageJson(filePath: string): string | undefined {
     // gains a package.json (npm install in a sibling workspace, etc.) is
     // re-probed instead of permanently stuck on the cached "not found".
     if (cached.path === null) {
-      if (Date.now() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {
+      if (DateNow() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {
         return undefined
       }
       packageJsonPathCache.delete(startDir)
@@ -170,7 +172,7 @@ function readPackageJson(packageJsonPath: string): object | null {
   }
 
   try {
-    const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+    const content = JSONParse(fs.readFileSync(packageJsonPath, 'utf8'))
     packageJsonContentCache.set(packageJsonPath, { mtimeMs, content })
     return content
   } catch {

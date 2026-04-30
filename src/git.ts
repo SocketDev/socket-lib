@@ -14,6 +14,13 @@ import { normalizePath } from './paths/normalize'
 import { spawn, spawnSync } from './spawn'
 import { stripAnsi } from './strings'
 
+import {
+  BufferIsBuffer,
+  JSONStringify,
+  MapCtor,
+  StringPrototypeSubstring,
+} from './primordials'
+
 /**
  * Options for git diff operations.
  *
@@ -135,7 +142,7 @@ let _path: typeof import('node:path') | undefined
 // LRU cache for git diff results. We exploit Map's insertion-order iteration
 // so eviction is O(1): delete the first key. Touching on read (delete + set)
 // keeps the most-recently-used entry at the back.
-const gitDiffCache = new Map<string, string[]>()
+const gitDiffCache = new MapCtor<string, string[]>()
 const GIT_CACHE_MAX_SIZE = 100
 
 // Cached git binary path to avoid repeated PATH searches.
@@ -143,10 +150,10 @@ let _gitPath: string | undefined
 
 // Cache for realpathSync results to avoid repeated filesystem calls.
 // Validated with existsSync() which is cheaper than realpathSync().
-const realpathCache = new Map<string, string>()
+const realpathCache = new MapCtor<string, string>()
 
 // Cache for git root lookups to avoid repeated directory traversal.
-const gitRootCache = new Map<string, string>()
+const gitRootCache = new MapCtor<string, string>()
 
 function getCachedGitDiff(key: string): string[] | undefined {
   const result = gitDiffCache.get(key)
@@ -165,7 +172,7 @@ function getCachedGitDiff(key: string): string[] | undefined {
  * @private
  */
 function stableKey(value: unknown): string {
-  return JSON.stringify(value, (_key, val) => {
+  return JSONStringify(value, (_key, val) => {
     if (val && typeof val === 'object' && !Array.isArray(val)) {
       const sorted: Record<string, unknown> = {}
       for (const k of Object.keys(val as object).sort()) {
@@ -357,7 +364,7 @@ async function innerDiff(
       ...args[2],
       stdioString: false,
     })
-    const stdout = Buffer.isBuffer(spawnResult.stdout)
+    const stdout = BufferIsBuffer!(spawnResult.stdout)
       ? spawnResult.stdout.toString('utf8')
       : String(spawnResult.stdout)
     // Extract spawn cwd from args to pass to parser
@@ -411,7 +418,7 @@ function innerDiffSync(
       ...args[2],
       stdioString: false,
     })
-    const stdout = Buffer.isBuffer(spawnResult.stdout)
+    const stdout = BufferIsBuffer!(spawnResult.stdout)
       ? spawnResult.stdout.toString('utf8')
       : String(spawnResult.stdout)
     // Extract spawn cwd from args to pass to parser
@@ -488,7 +495,7 @@ function parseGitDiffStdout(
   if (porcelain) {
     rawFiles = rawFiles.map(line => {
       // Status is first 2 chars, then space, then filename.
-      return line.length > 3 ? line.substring(3) : line
+      return line.length > 3 ? StringPrototypeSubstring(line, 3) : line
     })
   }
   const files = absolute
