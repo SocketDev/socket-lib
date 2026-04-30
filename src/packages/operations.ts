@@ -39,7 +39,11 @@ import {
 } from './specs'
 import { toEditablePackageJson, toEditablePackageJsonSync } from './edit'
 
-import { StringPrototypeStartsWith } from '../primordials'
+import {
+  StringPrototypeIndexOf,
+  StringPrototypeSlice,
+  StringPrototypeStartsWith,
+} from '../primordials'
 
 const abortSignal = getAbortSignal()
 const packageExtensions = getPackageExtensions()
@@ -164,13 +168,13 @@ export function getReleaseTag(spec: string): string {
   let atIndex = -1
   if (StringPrototypeStartsWith(spec, '@')) {
     // Find the second @ for scoped packages.
-    atIndex = spec.indexOf('@', 1)
+    atIndex = StringPrototypeIndexOf(spec, '@', 1)
   } else {
     // Find the first @ for unscoped packages.
-    atIndex = spec.indexOf('@')
+    atIndex = StringPrototypeIndexOf(spec, '@')
   }
   if (atIndex !== -1) {
-    return spec.slice(atIndex + 1)
+    return StringPrototypeSlice(spec, atIndex + 1)
   }
   return ''
 }

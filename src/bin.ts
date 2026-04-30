@@ -16,6 +16,7 @@ import { spawn } from './spawn'
 
 import {
   ArrayIsArray,
+  ArrayPrototypeMap,
   ErrorCtor,
   MapCtor,
   StringPrototypeStartsWith,
@@ -864,7 +865,7 @@ export async function whichReal(
         : undefined
     // If all is true and we have paths, resolve each one.
     if (paths?.length) {
-      const resolved = paths.map(p => resolveRealBinSync(p))
+      const resolved = ArrayPrototypeMap(paths, p => resolveRealBinSync(p))
       // Cache the resolved paths.
       binPathAllCache.set(binName, resolved)
       return resolved
@@ -938,7 +939,7 @@ export function whichRealSync(
         : undefined
     // If all is true and we have paths, resolve each one.
     if (paths?.length) {
-      const resolved = paths.map(p => resolveRealBinSync(p))
+      const resolved = ArrayPrototypeMap(paths, p => resolveRealBinSync(p))
       // Cache the resolved paths.
       binPathAllCache.set(binName, resolved)
       return resolved

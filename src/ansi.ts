@@ -3,7 +3,7 @@
  * Provides constants and helpers for terminal formatting.
  */
 
-import { RegExpCtor } from './primordials'
+import { RegExpCtor, StringPrototypeReplace } from './primordials'
 
 // ANSI escape codes - commonly used sequences.
 export const ANSI_BOLD = '\x1b[1m'
@@ -58,5 +58,5 @@ export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stripAnsi(text: string): string {
-  return text.replace(ANSI_REGEX, '')
+  return StringPrototypeReplace(text, ANSI_REGEX, '')
 }

@@ -25,7 +25,10 @@ import {
   MapCtor,
   MathMax,
   RegExpCtor,
+  RegExpPrototypeTest,
+  StringPrototypeIncludes,
   StringPrototypeReplaceAll,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
   TypeErrorCtor,
 } from './primordials'
@@ -275,7 +278,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     )
     const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
     const regex = new RegExpCtor(`^${regexPattern}$`)
-    return (key: string) => regex.test(key)
+    return (key: string) => RegExpPrototypeTest(regex, key)
   }
 
   /**
@@ -284,7 +287,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    * @throws {TypeError} If key contains wildcards (*)
    */
   async function get<T>(key: string): Promise<T | undefined> {
-    if (key.includes('*')) {
+    if (StringPrototypeIncludes(key, '*')) {
       throw new TypeErrorCtor(
         'Cache key cannot contain wildcards (*). Use getAll(pattern) to retrieve multiple entries.',
       )
@@ -363,7 +366,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
         // Add to results (strip cache prefix from key).
         const originalKey = opts.prefix
-          ? key.slice(opts.prefix.length + 1)
+          ? StringPrototypeSlice(key, opts.prefix.length + 1)
           : key
         results.set(originalKey, entry.data as T)
       }
@@ -431,7 +434,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    * @throws {TypeError} If key contains wildcards (*)
    */
   async function set<T>(key: string, data: T): Promise<void> {
-    if (key.includes('*')) {
+    if (StringPrototypeIncludes(key, '*')) {
       throw new TypeErrorCtor(
         'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
       )
@@ -520,7 +523,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    * @throws {TypeError} If key contains wildcards (*)
    */
   async function deleteEntry(key: string): Promise<void> {
-    if (key.includes('*')) {
+    if (StringPrototypeIncludes(key, '*')) {
       throw new TypeErrorCtor(
         'Cache key cannot contain wildcards (*). Use deleteAll(pattern) to remove multiple entries.',
       )

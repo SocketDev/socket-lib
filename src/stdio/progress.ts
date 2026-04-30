@@ -14,6 +14,7 @@ import {
   MathMax,
   MathMin,
   ObjectEntries,
+  StringPrototypeReplace,
 } from '../primordials'
 
 export interface ProgressBarOptions {
@@ -204,7 +205,7 @@ export class ProgressBar {
 
     // Format output
     let output = this.options.format ?? ':bar :percent :current/:total'
-    output = output.replace(':bar', bar)
+    output = StringPrototypeReplace(output, ':bar', bar)
     output = output.replace(':percent', `${percent}%`)
     output = output.replace(':current', String(this.current))
     output = output.replace(':total', String(this.total))

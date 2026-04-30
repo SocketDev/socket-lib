@@ -4,7 +4,7 @@ import { readDirNamesSync, safeDelete, safeDeleteSync } from '../fs'
 import { getSocketDlxDir } from '../paths/socket'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 
-import { ErrorCtor } from '../primordials'
+import { ArrayPrototypeFilter, ErrorCtor } from '../primordials'
 
 let _fs: typeof import('node:fs') | undefined
 /**
@@ -71,8 +71,7 @@ export async function listDlxPackagesAsync(): Promise<string[]> {
     const entries = await fs.promises.readdir(getSocketDlxDir(), {
       withFileTypes: true,
     })
-    return entries
-      .filter(e => e.isDirectory())
+    return ArrayPrototypeFilter(entries, e => e.isDirectory())
       .map(e => e.name)
       .sort()
   } catch {

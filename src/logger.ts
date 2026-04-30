@@ -9,6 +9,8 @@ import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
 
 import {
+  ArrayPrototypeAt,
+  ArrayPrototypeSlice,
   ErrorCtor,
   MathMin,
   ObjectDefineProperties,
@@ -18,6 +20,7 @@ import {
   ReflectApply,
   ReflectConstruct,
   ReflectOwnKeys,
+  StringPrototypeReplace,
   WeakMapCtor,
 } from './primordials'
 import { applyLinePrefix, isBlankString } from './strings'
@@ -443,13 +446,16 @@ export class Logger {
     stream?: 'stderr' | 'stdout',
   ): this {
     const con = this.#getConsole()
-    const text = args.at(0)
+    const text = ArrayPrototypeAt(args, 0)
     const hasText = typeof text === 'string'
     // Determine which stream this method writes to
     const targetStream = stream || (methodName === 'log' ? 'stdout' : 'stderr')
     const indent = this.#getIndent(targetStream)
     const logArgs = hasText
-      ? [applyLinePrefix(text, { prefix: indent }), ...args.slice(1)]
+      ? [
+          applyLinePrefix(text, { prefix: indent }),
+          ...ArrayPrototypeSlice(args, 1),
+        ]
       : args
     ReflectApply(
       con[methodName] as (...args: unknown[]) => unknown,
@@ -600,7 +606,11 @@ export class Logger {
     // Matches ASCII fallbacks: ×, ‼, √, i, >, :., @
     // Also handles variation selectors (U+FE0F) and whitespace after symbol.
     // Note: We don't strip standalone 'i', '>', or '@' to avoid breaking words, but we do strip ':.' as it's unambiguous.
-    return text.replace(/^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[\uFE0F\s]*/u, '')
+    return StringPrototypeReplace(
+      text,
+      /^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[\uFE0F\s]*/u,
+      '',
+    )
   }
 
   /**
@@ -609,12 +619,12 @@ export class Logger {
    */
   #symbolApply(symbolType: string, args: unknown[]): this {
     const con = this.#getConsole()
-    let text = args.at(0)
+    let text = ArrayPrototypeAt(args, 0)
     // biome-ignore lint/suspicious/noImplicitAnyLet: Flexible argument handling.
     let extras
     if (typeof text === 'string') {
       text = this.#stripSymbols(text)
-      extras = args.slice(1)
+      extras = ArrayPrototypeSlice(args, 1)
     } else {
       extras = args
       text = ''

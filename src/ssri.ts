@@ -3,7 +3,7 @@
  * Provides conversion and validation for SSRI and hex hash formats.
  */
 
-import { BufferFrom, ErrorCtor } from './primordials'
+import { BufferFrom, BufferPrototypeToString, ErrorCtor } from './primordials'
 
 /**
  * Convert hex format hash to SSRI format.
@@ -29,7 +29,7 @@ export function hexToSsri(hex: string, algorithm = 'sha256'): string {
   }
   // Convert hex to base64.
   const buffer = BufferFrom!(hex, 'hex')
-  const base64Hash = buffer.toString('base64')
+  const base64Hash = BufferPrototypeToString!(buffer, 'base64')
   return `${algorithm}-${base64Hash}`
 }
 
@@ -127,5 +127,5 @@ export function ssriToHex(ssri: string): string {
   const base64Hash = match[2]
   // Convert base64 to hex.
   const buffer = BufferFrom!(base64Hash, 'base64')
-  return buffer.toString('hex')
+  return BufferPrototypeToString!(buffer, 'hex')
 }

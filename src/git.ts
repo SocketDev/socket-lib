@@ -15,6 +15,7 @@ import { spawn, spawnSync } from './spawn'
 import { stripAnsi } from './strings'
 
 import {
+  ArrayPrototypeIncludes,
   BufferIsBuffer,
   JSONStringify,
   MapCtor,
@@ -892,7 +893,7 @@ export async function isChanged(
   const resolvedPathname = getCachedRealpath(pathname)
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-  return files.includes(relativePath)
+  return ArrayPrototypeIncludes(files, relativePath)
 }
 
 /**
@@ -945,7 +946,7 @@ export function isChangedSync(
     const resolvedPathname = getCachedRealpath(pathname)
     const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
     const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-    return files.includes(relativePath)
+    return ArrayPrototypeIncludes(files, relativePath)
   } catch {
     // Path doesn't exist or can't be resolved - it can't be changed
     return false
@@ -999,7 +1000,7 @@ export async function isStaged(
   const resolvedPathname = getCachedRealpath(pathname)
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-  return files.includes(relativePath)
+  return ArrayPrototypeIncludes(files, relativePath)
 }
 
 /**
@@ -1050,7 +1051,7 @@ export function isStagedSync(
   const resolvedPathname = getCachedRealpath(pathname)
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-  return files.includes(relativePath)
+  return ArrayPrototypeIncludes(files, relativePath)
 }
 
 /**
@@ -1101,7 +1102,7 @@ export async function isUnstaged(
   const resolvedPathname = getCachedRealpath(pathname)
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-  return files.includes(relativePath)
+  return ArrayPrototypeIncludes(files, relativePath)
 }
 
 /**
@@ -1153,5 +1154,5 @@ export function isUnstagedSync(
   const resolvedPathname = getCachedRealpath(pathname)
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
-  return files.includes(relativePath)
+  return ArrayPrototypeIncludes(files, relativePath)
 }

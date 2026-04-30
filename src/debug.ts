@@ -11,9 +11,12 @@ import debugJs from './external/debug'
 import { getDefaultLogger } from './logger'
 import { hasOwn } from './objects'
 import {
+  ArrayPrototypeAt,
+  ArrayPrototypeSlice,
   DateNow,
   MapCtor,
   ReflectApply,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from './primordials'
 import { getDefaultSpinner } from './spinner'
@@ -115,7 +118,7 @@ function getCallerInfo(stackOffset: number = 3): string {
                 .replace(/^(?:async|bound|get|new|set)\s+/, '')
               if (StringPrototypeStartsWith(name, 'Object.')) {
                 // Strip leading 'Object.' if not an own property of Object.
-                const afterDot = name.slice(7 /*'Object.'.length*/)
+                const afterDot = StringPrototypeSlice(name, 7)
                 if (!hasOwn(Object, afterDot)) {
                   name = afterDot
                 }
@@ -363,7 +366,7 @@ export function debugLogNs(
     pointingTriangle = supported ? '▸' : '>'
   }
 
-  const text = args.at(0)
+  const text = ArrayPrototypeAt(args, 0)
   const logArgs =
     typeof text === 'string'
       ? [
@@ -371,7 +374,7 @@ export function debugLogNs(
             `${callerName ? `${callerName} ${pointingTriangle} ` : ''}${text}`,
             { prefix: '[DEBUG] ' },
           ),
-          ...args.slice(1),
+          ...ArrayPrototypeSlice(args, 1),
         ]
       : [`[DEBUG] ${callerName} ${pointingTriangle}`, ...args]
 
@@ -412,7 +415,7 @@ export function debugNs(
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
-  const text = args.at(0)
+  const text = ArrayPrototypeAt(args, 0)
   const logArgs =
     typeof text === 'string'
       ? [
@@ -420,7 +423,7 @@ export function debugNs(
             `${name ? `${name} ${pointingTriangle} ` : ''}${text}`,
             { prefix: '[DEBUG] ' },
           ),
-          ...args.slice(1),
+          ...ArrayPrototypeSlice(args, 1),
         ]
       : args
   const spinnerInstance = options.spinner || getDefaultSpinner()

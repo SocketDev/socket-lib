@@ -20,7 +20,13 @@ import { computeHashes } from './integrity'
 
 import type { ComputedHashes } from './integrity'
 
-import { DateCtor, DateNow, JSONStringify } from '../primordials'
+import {
+  DateCtor,
+  DateNow,
+  JSONStringify,
+  StringPrototypeLastIndexOf,
+  StringPrototypeSlice,
+} from '../primordials'
 
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
@@ -127,22 +133,22 @@ export class DlxLockfileError extends Error {
  * `'@scope/name@range'` or a bare `'name'`.
  */
 function specName(spec: string): string {
-  const atIdx = spec.lastIndexOf('@')
+  const atIdx = StringPrototypeLastIndexOf(spec, '@')
   if (atIdx <= 0) {
     return spec
   }
-  return spec.slice(0, atIdx)
+  return StringPrototypeSlice(spec, 0, atIdx)
 }
 
 /**
  * Extract the version range (or `'latest'`) from a spec.
  */
 function specRange(spec: string): string {
-  const atIdx = spec.lastIndexOf('@')
+  const atIdx = StringPrototypeLastIndexOf(spec, '@')
   if (atIdx <= 0) {
     return 'latest'
   }
-  return spec.slice(atIdx + 1) || 'latest'
+  return StringPrototypeSlice(spec, atIdx + 1) || 'latest'
 }
 
 /**

@@ -15,6 +15,7 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 
 import {
   BufferFrom,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
   TypeErrorCtor,
 } from '../primordials'
@@ -67,7 +68,7 @@ function isIntegrityString(s: string): boolean {
   if (!StringPrototypeStartsWith(s, INTEGRITY_PREFIX)) {
     return false
   }
-  const body = s.slice(INTEGRITY_PREFIX.length)
+  const body = StringPrototypeSlice(s, INTEGRITY_PREFIX.length)
   return body.length > 0 && INTEGRITY_BODY_RE.test(body)
 }
 

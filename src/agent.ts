@@ -47,7 +47,12 @@ import { spawn } from './spawn'
 
 import type { SpawnOptions } from './spawn'
 
-import { ArrayIsArray, SetCtor } from './primordials'
+import {
+  ArrayIsArray,
+  ArrayPrototypeIndexOf,
+  ArrayPrototypeSlice,
+  SetCtor,
+} from './primordials'
 
 // Note: npm flag checking is done with regex patterns in the is*Flag functions below.
 
@@ -115,14 +120,15 @@ export interface ExecScriptOptions extends SpawnOptions {
  */
 export function execNpm(args: string[], options?: SpawnOptions | undefined) {
   const useDebug = isDebug()
-  const terminatorPos = args.indexOf('--')
+  const terminatorPos = ArrayPrototypeIndexOf(args, '--')
   const npmArgs = (
-    terminatorPos === -1 ? args : args.slice(0, terminatorPos)
+    terminatorPos === -1 ? args : ArrayPrototypeSlice(args, 0, terminatorPos)
   ).filter(
     (a: string) =>
       !isNpmAuditFlag(a) && !isNpmFundFlag(a) && !isNpmProgressFlag(a),
   )
-  const otherArgs = terminatorPos === -1 ? [] : args.slice(terminatorPos)
+  const otherArgs =
+    terminatorPos === -1 ? [] : ArrayPrototypeSlice(args, terminatorPos)
   const logLevelArgs =
     // The default value of loglevel is "notice". We default to "warn" which is
     // one level quieter.
@@ -183,11 +189,12 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
     ...options,
   } as PnpmOptions
   const useDebug = isDebug()
-  const terminatorPos = args.indexOf('--')
+  const terminatorPos = ArrayPrototypeIndexOf(args, '--')
   const pnpmArgs = (
-    terminatorPos === -1 ? args : args.slice(0, terminatorPos)
+    terminatorPos === -1 ? args : ArrayPrototypeSlice(args, 0, terminatorPos)
   ).filter((a: string) => !isNpmProgressFlag(a))
-  const otherArgs = terminatorPos === -1 ? [] : args.slice(terminatorPos)
+  const otherArgs =
+    terminatorPos === -1 ? [] : ArrayPrototypeSlice(args, terminatorPos)
 
   const firstArg = pnpmArgs[0]
   const supportsIgnoreScripts = firstArg
@@ -332,11 +339,12 @@ export function execYarn(
   options?: import('./spawn').SpawnOptions,
 ) {
   const useDebug = isDebug()
-  const terminatorPos = args.indexOf('--')
+  const terminatorPos = ArrayPrototypeIndexOf(args, '--')
   const yarnArgs = (
-    terminatorPos === -1 ? args : args.slice(0, terminatorPos)
+    terminatorPos === -1 ? args : ArrayPrototypeSlice(args, 0, terminatorPos)
   ).filter((a: string) => !isNpmProgressFlag(a))
-  const otherArgs = terminatorPos === -1 ? [] : args.slice(terminatorPos)
+  const otherArgs =
+    terminatorPos === -1 ? [] : ArrayPrototypeSlice(args, terminatorPos)
 
   const firstArg = yarnArgs[0]
   const supportsIgnoreScripts = firstArg

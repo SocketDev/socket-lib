@@ -12,7 +12,13 @@ import { parseUrl } from '../url'
 
 import type { ProvenanceOptions } from '../packages'
 
-import { BufferFrom, JSONParse, StringPrototypeEndsWith } from '../primordials'
+import {
+  BufferFrom,
+  JSONParse,
+  StringPrototypeEndsWith,
+  StringPrototypeIncludes,
+  StringPrototypeSplit,
+} from '../primordials'
 
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
@@ -116,8 +122,8 @@ function isTrustedPublisher(value: unknown): boolean {
 
   // Handle GitHub workflow refs with @ syntax by trying the first part.
   // Example: "https://github.com/owner/repo/.github/workflows/ci.yml@refs/heads/main"
-  if (!url && value.includes('@')) {
-    const firstPart = value.split('@')[0]
+  if (!url && StringPrototypeIncludes(value, '@')) {
+    const firstPart = StringPrototypeSplit(value, '@')[0]
     if (firstPart) {
       url = parseUrl(firstPart)
     }
@@ -144,7 +150,10 @@ function isTrustedPublisher(value: unknown): boolean {
   }
 
   // Fallback: check for provider keywords in non-URL strings.
-  return value.includes('github') || value.includes('gitlab')
+  return (
+    StringPrototypeIncludes(value, 'github') ||
+    StringPrototypeIncludes(value, 'gitlab')
+  )
 }
 
 /**

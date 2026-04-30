@@ -8,7 +8,11 @@ import process from 'node:process'
 
 import yargsParser from '../external/yargs-parser'
 
-import { ObjectEntries, StringPrototypeStartsWith } from '../primordials'
+import {
+  ArrayPrototypeIncludes,
+  ObjectEntries,
+  StringPrototypeStartsWith,
+} from '../primordials'
 
 /**
  * Yargs parser options interface.
@@ -155,7 +159,7 @@ export function getPositionalArgs(startIndex = 2): string[] {
  * ```
  */
 export function hasFlag(flag: string, argv = process.argv): boolean {
-  return argv.includes(`--${flag}`)
+  return ArrayPrototypeIncludes(argv, `--${flag}`)
 }
 
 /**

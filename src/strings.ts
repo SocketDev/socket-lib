@@ -9,9 +9,14 @@ import type { eastAsianWidth as eastAsianWidthType } from './external/get-east-a
 import {
   MathFloor,
   MathMax,
+  RegExpPrototypeTest,
   StringPrototypeCharCodeAt,
   StringPrototypeCodePointAt,
+  StringPrototypeIncludes,
   StringPrototypeRepeat,
+  StringPrototypeReplace,
+  StringPrototypeSearch,
+  StringPrototypeSlice,
 } from './primordials'
 
 let _eastAsianWidth: typeof eastAsianWidthType | undefined
@@ -86,7 +91,7 @@ export function applyLinePrefix(
     ...options,
   } as ApplyLinePrefixOptions
   return prefix.length
-    ? `${prefix}${str.includes('\n') ? str.replace(/\n/g, `\n${prefix}`) : str}`
+    ? `${prefix}${StringPrototypeIncludes(str, '\n') ? str.replace(/\n/g, `\n${prefix}`) : str}`
     : str
 }
 
@@ -335,10 +340,10 @@ export function search(
     return -1
   }
   if (fromIndex === 0) {
-    return str.search(regexp)
+    return StringPrototypeSearch(str, regexp)
   }
   const offset = fromIndex < 0 ? MathMax(length + fromIndex, 0) : fromIndex
-  const result = str.slice(offset).search(regexp)
+  const result = StringPrototypeSlice(str, offset).search(regexp)
   return result === -1 ? -1 : result + offset
 }
 
@@ -592,7 +597,7 @@ export function stringWidth(text: string): number {
     //
     // Why skip? Terminals don't allocate columns for these characters.
     // They're either control codes or modify adjacent characters without adding width.
-    if (zeroWidthClusterRegex.test(segment)) {
+    if (RegExpPrototypeTest(zeroWidthClusterRegex, segment)) {
       continue
     }
 
@@ -611,7 +616,7 @@ export function stringWidth(text: string): number {
     //
     // The key insight: The ENTIRE grapheme cluster is 2 columns, regardless
     // of how many code points it contains. That's why we need Intl.Segmenter!
-    if (emojiRegex.test(segment)) {
+    if (RegExpPrototypeTest(emojiRegex, segment)) {
       width += 2
       continue
     }
@@ -719,7 +724,7 @@ export function stripBom(str: string): string {
   // In JavaScript, string data is stored as UTF-16, so BOM is 0xFEFF.
   // https://tc39.es/ecma262/#sec-unicode-format-control-characters
   return str.length > 0 && StringPrototypeCharCodeAt(str, 0) === 0xfe_ff
-    ? str.slice(1)
+    ? StringPrototypeSlice(str, 1)
     : str
 }
 
@@ -761,9 +766,7 @@ export function toKebabCase(str: string): string {
     return str
   }
   return (
-    str
-      // Convert camelCase to kebab-case
-      .replace(/([a-z]+[0-9]*)([A-Z])/g, '$1-$2')
+    StringPrototypeReplace(str, /([a-z]+[0-9]*)([A-Z])/g, '$1-$2')
       // Convert underscores to hyphens
       .replace(/_/g, '-')
       .toLowerCase()
@@ -835,5 +838,7 @@ export function trimNewlines(str: string): string {
     }
     end -= 1
   }
-  return start === 0 && end === length ? str : str.slice(start, end)
+  return start === 0 && end === length
+    ? str
+    : StringPrototypeSlice(str, start, end)
 }

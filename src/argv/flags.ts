@@ -7,7 +7,7 @@
 
 import process from 'node:process'
 
-import { ArrayIsArray } from '../primordials'
+import { ArrayIsArray, StringPrototypeIncludes } from '../primordials'
 
 /**
  * Flag values object from parsed arguments.
@@ -172,7 +172,7 @@ export function isAll(input?: FlagInput): boolean {
     return processArg.includes('--all')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--all')
+    return StringPrototypeIncludes(input, '--all')
   }
   return !!(input as FlagValues).all
 }
@@ -192,7 +192,7 @@ export function isChanged(input?: FlagInput): boolean {
     return processArg.includes('--changed')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--changed')
+    return StringPrototypeIncludes(input, '--changed')
   }
   return !!(input as FlagValues).changed
 }
@@ -213,7 +213,10 @@ export function isCoverage(input?: FlagInput): boolean {
     return processArg.includes('--coverage') || processArg.includes('--cover')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--coverage') || input.includes('--cover')
+    return (
+      StringPrototypeIncludes(input, '--coverage') ||
+      StringPrototypeIncludes(input, '--cover')
+    )
   }
   return !!((input as FlagValues).coverage || (input as FlagValues).cover)
 }
@@ -233,7 +236,7 @@ export function isDebug(input?: FlagInput): boolean {
     return processArg.includes('--debug')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--debug')
+    return StringPrototypeIncludes(input, '--debug')
   }
   return !!(input as FlagValues).debug
 }
@@ -253,7 +256,7 @@ export function isDryRun(input?: FlagInput): boolean {
     return processArg.includes('--dry-run')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--dry-run')
+    return StringPrototypeIncludes(input, '--dry-run')
   }
   return !!(input as FlagValues)['dry-run']
 }
@@ -273,7 +276,7 @@ export function isFix(input?: FlagInput): boolean {
     return processArg.includes('--fix')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--fix')
+    return StringPrototypeIncludes(input, '--fix')
   }
   return !!(input as FlagValues).fix
 }
@@ -293,7 +296,7 @@ export function isForce(input?: FlagInput): boolean {
     return processArg.includes('--force')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--force')
+    return StringPrototypeIncludes(input, '--force')
   }
   return !!(input as FlagValues).force
 }
@@ -313,7 +316,10 @@ export function isHelp(input?: FlagInput): boolean {
     return processArg.includes('--help') || processArg.includes('-h')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--help') || input.includes('-h')
+    return (
+      StringPrototypeIncludes(input, '--help') ||
+      StringPrototypeIncludes(input, '-h')
+    )
   }
   return !!(input as FlagValues).help
 }
@@ -333,7 +339,7 @@ export function isJson(input?: FlagInput): boolean {
     return processArg.includes('--json')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--json')
+    return StringPrototypeIncludes(input, '--json')
   }
   return !!(input as FlagValues).json
 }
@@ -353,7 +359,10 @@ export function isQuiet(input?: FlagInput): boolean {
     return processArg.includes('--quiet') || processArg.includes('--silent')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--quiet') || input.includes('--silent')
+    return (
+      StringPrototypeIncludes(input, '--quiet') ||
+      StringPrototypeIncludes(input, '--silent')
+    )
   }
   return !!((input as FlagValues).quiet || (input as FlagValues).silent)
 }
@@ -373,7 +382,7 @@ export function isStaged(input?: FlagInput): boolean {
     return processArg.includes('--staged')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--staged')
+    return StringPrototypeIncludes(input, '--staged')
   }
   return !!(input as FlagValues).staged
 }
@@ -393,7 +402,10 @@ export function isUpdate(input?: FlagInput): boolean {
     return processArg.includes('--update') || processArg.includes('-u')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--update') || input.includes('-u')
+    return (
+      StringPrototypeIncludes(input, '--update') ||
+      StringPrototypeIncludes(input, '-u')
+    )
   }
   return !!(input as FlagValues).update
 }
@@ -413,7 +425,7 @@ export function isVerbose(input?: FlagInput): boolean {
     return processArg.includes('--verbose')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--verbose')
+    return StringPrototypeIncludes(input, '--verbose')
   }
   return !!(input as FlagValues).verbose
 }
@@ -433,7 +445,10 @@ export function isWatch(input?: FlagInput): boolean {
     return processArg.includes('--watch') || processArg.includes('-w')
   }
   if (ArrayIsArray(input)) {
-    return input.includes('--watch') || input.includes('-w')
+    return (
+      StringPrototypeIncludes(input, '--watch') ||
+      StringPrototypeIncludes(input, '-w')
+    )
   }
   return !!(input as FlagValues).watch
 }

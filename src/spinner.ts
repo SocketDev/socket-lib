@@ -37,6 +37,8 @@ import { resolveColor } from './themes/utils'
 
 import {
   ArrayIsArray,
+  ArrayPrototypeAt,
+  ArrayPrototypeSlice,
   MathMax,
   MathRound,
   ObjectDefineProperties,
@@ -639,9 +641,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       #apply(methodName: string, args: unknown[]) {
         let extras: unknown[]
-        let text = args.at(0)
+        let text = ArrayPrototypeAt(args, 0)
         if (typeof text === 'string') {
-          extras = args.slice(1)
+          extras = ArrayPrototypeSlice(args, 1)
         } else {
           extras = args
           text = ''
@@ -729,10 +731,10 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @private
        */
       #showStatusAndKeepSpinning(symbolType: SymbolType, args: unknown[]) {
-        let text = args.at(0)
+        let text = ArrayPrototypeAt(args, 0)
         let extras: unknown[]
         if (typeof text === 'string') {
-          extras = args.slice(1)
+          extras = ArrayPrototypeSlice(args, 1)
         } else {
           extras = args
           text = ''
@@ -1128,7 +1130,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        */
       start(...args: unknown[]) {
         if (args.length) {
-          const text = args.at(0)
+          const text = ArrayPrototypeAt(args, 0)
           const normalized = normalizeText(text)
           // We clear this.text on start when `text` is falsy because yocto-spinner
           // will not clear it otherwise.

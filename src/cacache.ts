@@ -5,6 +5,8 @@ import { getSocketCacacheDir } from './paths/socket'
 
 import {
   RegExpCtor,
+  RegExpPrototypeTest,
+  StringPrototypeIncludes,
   StringPrototypeReplaceAll,
   StringPrototypeStartsWith,
   TypeErrorCtor,
@@ -67,7 +69,7 @@ function createPatternMatcher(pattern: string): (key: string) => boolean {
   )
   const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
   const regex = new RegExpCtor(`^${regexPattern}$`)
-  return (key: string) => regex.test(key)
+  return (key: string) => RegExpPrototypeTest(regex, key)
 }
 
 /**
@@ -179,7 +181,7 @@ export async function get(
   key: string,
   options?: GetOptions | undefined,
 ): Promise<CacheEntry> {
-  if (key.includes('*')) {
+  if (StringPrototypeIncludes(key, '*')) {
     throw new TypeErrorCtor(
       'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
     )
@@ -218,7 +220,7 @@ export async function put(
   data: string | Buffer,
   options?: PutOptions | undefined,
 ) {
-  if (key.includes('*')) {
+  if (StringPrototypeIncludes(key, '*')) {
     throw new TypeErrorCtor(
       'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
     )
@@ -239,7 +241,7 @@ export async function put(
  * ```
  */
 export async function remove(key: string): Promise<unknown> {
-  if (key.includes('*')) {
+  if (StringPrototypeIncludes(key, '*')) {
     throw new TypeErrorCtor(
       'Cache key cannot contain wildcards (*). Use clear({ prefix: "pattern*" }) to remove multiple entries.',
     )

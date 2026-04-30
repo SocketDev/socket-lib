@@ -9,8 +9,10 @@ import { search } from '../strings'
 
 import {
   BufferIsBuffer,
+  RegExpPrototypeTest,
   StringPrototypeCharAt,
   StringPrototypeCharCodeAt,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from '../primordials'
 
@@ -515,7 +517,7 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isNodeModules(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
-  return nodeModulesPathRegExp.test(filepath)
+  return RegExpPrototypeTest(nodeModulesPathRegExp, filepath)
 }
 
 /**
@@ -683,7 +685,10 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isUnixPath(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
-  return typeof filepath === 'string' && msysDriveRegExp.test(filepath)
+  return (
+    typeof filepath === 'string' &&
+    RegExpPrototypeTest(msysDriveRegExp, filepath)
+  )
 }
 
 /**
@@ -868,7 +873,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       return prefix || '.'
     }
     if (segment === '..') {
-      return prefix ? prefix.slice(0, -1) || '/' : '..'
+      return prefix ? StringPrototypeSlice(prefix, 0, -1) || '/' : '..'
     }
     return msysDriveToNative(prefix + segment)
   }

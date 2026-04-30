@@ -6,6 +6,7 @@
 
 import {
   MapCtor,
+  NumberPrototypeToString,
   SetCtor,
   StringFromCodePoint,
   StringPrototypeCharCodeAt,
@@ -66,11 +67,11 @@ function isSpecHexEscapeCp(cp: number): boolean {
 }
 
 function hex2(n: number): string {
-  return n.toString(16).padStart(2, '0')
+  return NumberPrototypeToString(n, 16).padStart(2, '0')
 }
 
 function hex4(n: number): string {
-  return n.toString(16).padStart(4, '0')
+  return NumberPrototypeToString(n, 16).padStart(4, '0')
 }
 
 function escapeRegExpFallback(str: string): string {

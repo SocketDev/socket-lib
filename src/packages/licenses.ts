@@ -11,7 +11,7 @@ import { normalizePath } from '../paths/normalize'
 
 import type { LicenseNode } from '../packages'
 
-import { ErrorCtor, MapCtor } from '../primordials'
+import { ErrorCtor, MapCtor, RegExpPrototypeExec } from '../primordials'
 
 const copyLeftLicenses = getCopyLeftLicenses()
 
@@ -251,7 +251,7 @@ export function resolvePackageLicenses(
   }
   // Match "SEE LICENSE IN <relativeFilepathToLicense>"
   // https://github.com/kemitchell/validate-npm-package-license.js/blob/v3.0.4/index.js#L48-L53
-  const match = fileReferenceRegExp.exec(licenseFieldValue)
+  const match = RegExpPrototypeExec(fileReferenceRegExp, licenseFieldValue)
   if (match) {
     const path = getPath()
     return [

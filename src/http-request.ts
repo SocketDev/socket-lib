@@ -36,6 +36,7 @@ import {
   ObjectKeys,
   PromiseCtor,
   SetCtor,
+  StringPrototypeSplit,
   StringPrototypeStartsWith,
   URLCtor,
 } from './primordials'
@@ -1816,7 +1817,7 @@ const RETRY_AFTER_INT_RE = /^\d+$/
 export function parseChecksums(text: string): Checksums {
   const checksums: Checksums = { __proto__: null } as unknown as Checksums
 
-  for (const line of text.split('\n')) {
+  for (const line of StringPrototypeSplit(text, '\n')) {
     const trimmed = line.trim()
     if (!trimmed || StringPrototypeStartsWith(trimmed, '#')) {
       continue

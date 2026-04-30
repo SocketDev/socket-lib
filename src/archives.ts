@@ -16,6 +16,7 @@ import type tarFsType from './external/tar-fs'
 
 import {
   ArrayFrom,
+  ArrayPrototypeSlice,
   ErrorCtor,
   PromiseAll,
   SetCtor,
@@ -568,7 +569,7 @@ export async function extractZip(
       continue
     }
 
-    const strippedPath = parts.slice(strip).join('/')
+    const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
     const targetPath = path.join(normalizedOutputDir, strippedPath)
 
     // Validate path is within target directory (prevents path traversal)
@@ -604,7 +605,7 @@ export async function extractZip(
         continue
       }
 
-      const strippedPath = parts.slice(strip).join('/')
+      const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
       const targetPath = path.join(normalizedOutputDir, strippedPath)
       dirsToCreate.add(path.dirname(targetPath))
     }
@@ -624,7 +625,7 @@ export async function extractZip(
         continue
       }
 
-      const strippedPath = parts.slice(strip).join('/')
+      const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
       const targetPath = path.join(normalizedOutputDir, strippedPath)
 
       // Extract file

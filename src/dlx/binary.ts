@@ -19,6 +19,7 @@ import type { SpawnExtra, SpawnOptions } from '../spawn'
 
 import {
   ArrayIsArray,
+  ArrayPrototypeFind,
   DateNow,
   ErrorCtor,
   StringPrototypeStartsWith,
@@ -856,7 +857,10 @@ export async function listDlxCache(): Promise<
       // Find the binary file in the directory.
       // eslint-disable-next-line no-await-in-loop
       const files = await fs.promises.readdir(entryPath)
-      const binaryFile = files.find(f => !StringPrototypeStartsWith(f, '.'))
+      const binaryFile = ArrayPrototypeFind(
+        files,
+        f => !StringPrototypeStartsWith(f, '.'),
+      )
 
       if (binaryFile) {
         const binaryPath = path.join(entryPath, binaryFile)

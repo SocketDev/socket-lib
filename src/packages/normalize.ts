@@ -13,7 +13,12 @@ import { findPackageExtensions } from './operations'
 
 import type { NormalizeOptions, PackageJson } from '../packages'
 
-import { RegExpCtor, StringPrototypeStartsWith } from '../primordials'
+import {
+  RegExpCtor,
+  RegExpPrototypeExec,
+  StringPrototypeSlice,
+  StringPrototypeStartsWith,
+} from '../primordials'
 
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn
@@ -87,7 +92,7 @@ export function resolveEscapedScope(
   sockRegPkgName: string,
 ): string | undefined {
   const escapedScopeRegExp = getEscapedScopeRegExp()
-  const match = escapedScopeRegExp.exec(sockRegPkgName)?.[0]
+  const match = RegExpPrototypeExec(escapedScopeRegExp, sockRegPkgName)?.[0]
   return match || undefined
 }
 
@@ -109,7 +114,7 @@ export function resolveOriginalPackageName(sockRegPkgName: string): string {
     : sockRegPkgName
   const escapedScope = resolveEscapedScope(name)
   return escapedScope
-    ? `${unescapeScope(escapedScope)}/${name.slice(escapedScope.length)}`
+    ? `${unescapeScope(escapedScope)}/${StringPrototypeSlice(name, escapedScope.length)}`
     : name
 }
 

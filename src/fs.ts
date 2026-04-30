@@ -45,6 +45,7 @@ import {
   Int32ArrayCtor,
   JSONStringify,
   SharedArrayBufferCtor,
+  StringPrototypeReplace,
   StringPrototypeStartsWith,
 } from './primordials'
 
@@ -461,7 +462,7 @@ function stringify(
 ): string {
   const EOF = finalEOL ? EOL : ''
   const str = JSONStringify(json, replacer, spaces)
-  return `${str.replace(NEWLINE_REGEX, EOL)}${EOF}`
+  return `${StringPrototypeReplace(str, NEWLINE_REGEX, EOL)}${EOF}`
 }
 
 /**

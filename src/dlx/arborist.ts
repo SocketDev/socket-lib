@@ -24,7 +24,12 @@
 import Arborist from '../external/@npmcli/arborist'
 import { getSocketCacacheDir } from '../paths/socket'
 
-import { ErrorCtor, JSONParse, ObjectKeys } from '../primordials'
+import {
+  ArrayPrototypePush,
+  ErrorCtor,
+  JSONParse,
+  ObjectKeys,
+} from '../primordials'
 
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
@@ -311,10 +316,10 @@ export async function writeSafeNpmrc(
     'progress=false',
   ]
   if (minReleaseDays !== undefined) {
-    lines.push(`min-release-age=${minReleaseDays}`)
+    ArrayPrototypePush(lines, `min-release-age=${minReleaseDays}`)
   }
   if (minReleaseMins !== undefined) {
-    lines.push(`minimum-release-age=${minReleaseMins}`)
+    ArrayPrototypePush(lines, `minimum-release-age=${minReleaseMins}`)
   }
   await fs.promises.writeFile(
     path.join(installPath, '.npmrc'),

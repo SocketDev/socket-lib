@@ -49,6 +49,7 @@ import {
   ObjectDefineProperty,
   ObjectGetOwnPropertyDescriptors,
   ReflectDeleteProperty,
+  RegExpPrototypeTest,
   WeakMapCtor,
 } from './primordials'
 
@@ -761,7 +762,11 @@ export function spawn(
   // See: https://github.com/nodejs/node/issues/3675
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
-  if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
+  if (
+    WIN32 &&
+    shell &&
+    RegExpPrototypeTest(windowsScriptExtRegExp, actualCmd)
+  ) {
     // Only strip the extension if the command doesn't contain a path.
     // If it's an absolute or relative path, keep it intact so cmd.exe
     // executes the exact file. Stripping would fail for files in directories
@@ -940,7 +945,11 @@ export function spawnSync(
   const shell = getOwn(options, 'shell')
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
-  if (WIN32 && shell && windowsScriptExtRegExp.test(actualCmd)) {
+  if (
+    WIN32 &&
+    shell &&
+    RegExpPrototypeTest(windowsScriptExtRegExp, actualCmd)
+  ) {
     // Only strip the extension if the command doesn't contain a path.
     // If it's an absolute or relative path, keep it intact so cmd.exe
     // executes the exact file. Stripping would fail for files in directories

@@ -6,6 +6,8 @@
 import colors from '../external/yoctocolors-cjs'
 import { centerText, repeatString } from '../strings'
 
+import { ArrayPrototypePush } from '../primordials'
+
 export interface HeaderOptions {
   /**
    * Width of the header in characters.
@@ -92,16 +94,16 @@ export function createHeader(title: string, options?: HeaderOptions): string {
   const lines: string[] = [border]
 
   for (let i = 0; i < padding; i++) {
-    lines.push(paddingLine)
+    ArrayPrototypePush(lines, paddingLine)
   }
 
-  lines.push(centeredTitle)
+  ArrayPrototypePush(lines, centeredTitle)
 
   for (let i = 0; i < padding; i++) {
-    lines.push(paddingLine)
+    ArrayPrototypePush(lines, paddingLine)
   }
 
-  lines.push(border)
+  ArrayPrototypePush(lines, border)
 
   return lines.join('\n')
 }

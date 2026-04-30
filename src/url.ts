@@ -3,7 +3,11 @@
  * Provides URL validation, normalization, and parsing helpers.
  */
 
-import { NumberIsNaN, StringPrototypeEndsWith } from './primordials'
+import {
+  NumberIsNaN,
+  StringPrototypeEndsWith,
+  StringPrototypeReplace,
+} from './primordials'
 
 const BooleanCtor = Boolean
 const UrlCtor = URL
@@ -47,7 +51,7 @@ export function createRelativeUrl(
     ...options,
   } as CreateRelativeUrlOptions
   // Remove leading slash to make it relative.
-  const relativePath = path.replace(/^\//, '')
+  const relativePath = StringPrototypeReplace(path, /^\//, '')
 
   if (base) {
     let baseUrl = base

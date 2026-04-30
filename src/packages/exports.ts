@@ -7,6 +7,7 @@ import { LOOP_SENTINEL } from '../constants/core'
 import { isObject, isObjectObject } from '../objects'
 
 import {
+  ArrayPrototypePush,
   ErrorCtor,
   ObjectGetOwnPropertyNames,
   SetCtor,
@@ -80,7 +81,7 @@ export function getExportFilePaths(entryExports: unknown): string[] {
     return []
   }
 
-  const paths = []
+  const paths: string[] = []
 
   // Traverse the exports object to find actual file paths.
   for (const key of ObjectGetOwnPropertyNames(entryExports)) {
@@ -92,24 +93,24 @@ export function getExportFilePaths(entryExports: unknown): string[] {
 
     if (typeof value === 'string') {
       // Direct path export.
-      paths.push(value)
+      ArrayPrototypePush(paths, value)
     } else if (isObject(value)) {
       // Conditional or nested export.
       for (const subKey of ObjectGetOwnPropertyNames(value)) {
         const subValue = value[subKey]
         if (typeof subValue === 'string') {
-          paths.push(subValue)
+          ArrayPrototypePush(paths, subValue)
         } else if (isArray(subValue)) {
           // Array of conditions.
           for (const item of subValue) {
             if (typeof item === 'string') {
-              paths.push(item)
+              ArrayPrototypePush(paths, item)
             } else if (isObject(item)) {
               // Nested conditional.
               for (const nestedKey of ObjectGetOwnPropertyNames(item)) {
                 const nestedValue = item[nestedKey]
                 if (typeof nestedValue === 'string') {
-                  paths.push(nestedValue)
+                  ArrayPrototypePush(paths, nestedValue)
                 }
               }
             }

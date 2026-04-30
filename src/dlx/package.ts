@@ -54,7 +54,11 @@ import {
   ObjectKeys,
   ObjectValues,
   PromiseAllSettled,
+  RegExpPrototypeTest,
   SetCtor,
+  StringPrototypeLastIndexOf,
+  StringPrototypeReplace,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from '../primordials'
 
@@ -396,7 +400,8 @@ export async function downloadPackage(
   // 2. --yes flag implies force (auto-approve/skip prompts)
   // 3. Version ranges auto-force to get latest
   const isVersionRange =
-    packageVersion !== undefined && rangeOperatorsRegExp.test(packageVersion)
+    packageVersion !== undefined &&
+    RegExpPrototypeTest(rangeOperatorsRegExp, packageVersion)
   const force =
     userForce !== undefined ? userForce : yes === true ? true : isVersionRange
 
@@ -826,10 +831,10 @@ export function makePackageBinsExecutable(
  */
 export function npmPurl(name: string, version: string): string {
   const encoded = StringPrototypeStartsWith(name, '@')
-    ? `%40${name.slice(1)}`
+    ? `%40${StringPrototypeSlice(name, 1)}`
     : name
   // PURL spec: '+' in version must be encoded as %2B
-  const encodedVersion = version.replace(/\+/g, '%2B')
+  const encodedVersion = StringPrototypeReplace(version, /\+/g, '%2B')
   return `pkg:npm/${encoded}@${encodedVersion}`
 }
 
@@ -874,14 +879,14 @@ export function parsePackageSpec(spec: string): {
     }
   } catch {
     // Fallback to simple parsing if npm-package-arg fails.
-    const atIndex = spec.lastIndexOf('@')
+    const atIndex = StringPrototypeLastIndexOf(spec, '@')
     if (atIndex === -1 || atIndex === 0) {
       // No version or scoped package without version (@ only at position 0).
       return { name: spec, version: undefined }
     }
-    const sliced = spec.slice(atIndex + 1)
+    const sliced = StringPrototypeSlice(spec, atIndex + 1)
     return {
-      name: spec.slice(0, atIndex),
+      name: StringPrototypeSlice(spec, 0, atIndex),
       // A trailing `@` (e.g. `'pkg@'`) yields an empty slice — normalize
       // to undefined so downstream "no version" checks behave.
       version: sliced || undefined,

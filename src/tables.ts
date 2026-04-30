@@ -6,7 +6,7 @@
 import colors from './external/yoctocolors-cjs'
 import { stringWidth } from './strings'
 
-import { MathMax } from './primordials'
+import { ArrayPrototypePush, MathMax } from './primordials'
 
 export type ColumnAlignment = 'left' | 'right' | 'center'
 
@@ -104,11 +104,11 @@ export function formatSimpleTable(
   const headerCells = columns.map((col, i) =>
     padText(colors.bold(col.header), widths[i] as number, col.align),
   )
-  lines.push(headerCells.join('  '))
+  ArrayPrototypePush(lines, headerCells.join('  '))
 
   // Header separator
   const separators = widths.map(w => colors.dim('─'.repeat(w)))
-  lines.push(separators.join('  '))
+  ArrayPrototypePush(lines, separators.join('  '))
 
   // Data rows
   for (const row of data) {
@@ -119,7 +119,7 @@ export function formatSimpleTable(
       }
       return padText(value, widths[i] as number, col.align)
     })
-    lines.push(cells.join('  '))
+    ArrayPrototypePush(lines, cells.join('  '))
   }
 
   return lines.join('\n')
@@ -175,20 +175,21 @@ export function formatTable(
 
   // Top border
   const topBorder = `┌─${widths.map(w => '─'.repeat(w)).join('─┬─')}─┐`
-  lines.push(colors.dim(topBorder))
+  ArrayPrototypePush(lines, colors.dim(topBorder))
 
   // Header row
   const headerCells = columns.map((col, i) => {
     const text = colors.bold(col.header)
     return padText(text, widths[i] as number, col.align)
   })
-  lines.push(
+  ArrayPrototypePush(
+    lines,
     colors.dim('│ ') + headerCells.join(colors.dim(' │ ')) + colors.dim(' │'),
   )
 
   // Header separator
   const headerSep = `├─${widths.map(w => '─'.repeat(w)).join('─┼─')}─┤`
-  lines.push(colors.dim(headerSep))
+  ArrayPrototypePush(lines, colors.dim(headerSep))
 
   // Data rows
   for (const row of data) {
@@ -199,14 +200,15 @@ export function formatTable(
       }
       return padText(value, widths[i] as number, col.align)
     })
-    lines.push(
+    ArrayPrototypePush(
+      lines,
       colors.dim('│ ') + cells.join(colors.dim(' │ ')) + colors.dim(' │'),
     )
   }
 
   // Bottom border
   const bottomBorder = `└─${widths.map(w => '─'.repeat(w)).join('─┴─')}─┘`
-  lines.push(colors.dim(bottomBorder))
+  ArrayPrototypePush(lines, colors.dim(bottomBorder))
 
   return lines.join('\n')
 }
