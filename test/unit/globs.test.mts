@@ -13,6 +13,8 @@
  * Used by Socket tools for file discovery and npm package analysis.
  */
 
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import {
@@ -22,7 +24,7 @@ import {
   globStreamLicenses,
   globSync,
 } from '@socketsecurity/lib/globs'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('globs', () => {
   describe('defaultIgnore', () => {
@@ -500,6 +502,51 @@ describe('globs', () => {
     it('should work without options parameter', () => {
       const files = globSync('*.json')
       expect(Array.isArray(files)).toBe(true)
+    })
+  })
+
+  describe('trailing-slash ignore patterns', () => {
+    let tmpRoot: string
+
+    beforeEach(() => {
+      tmpRoot = mkdtempSync(path.join(tmpdir(), 'socket-lib-globs-'))
+      mkdirSync(path.join(tmpRoot, 'dist'), { recursive: true })
+      mkdirSync(path.join(tmpRoot, 'src'), { recursive: true })
+      writeFileSync(path.join(tmpRoot, 'package.json'), '{}')
+      writeFileSync(path.join(tmpRoot, 'src', 'a.json'), '{}')
+      writeFileSync(path.join(tmpRoot, 'dist', 'b.json'), '{}')
+    })
+
+    afterEach(() => {
+      rmSync(tmpRoot, { recursive: true, force: true })
+    })
+
+    // fast-glob silently drops `ignore` entries that end in `/` — the
+    // gitignore convention `dist/` therefore did nothing at the walk
+    // level. socket-lib normalizes the patterns with stripTrailingSlash
+    // so the ignore is honored.
+    it('glob: directory ignored via trailing-slash pattern is excluded', async () => {
+      const files = await glob(['**/*.json'], {
+        cwd: tmpRoot,
+        ignore: ['**/dist/'],
+      })
+      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+    })
+
+    it('globSync: directory ignored via trailing-slash pattern is excluded', () => {
+      const files = globSync(['**/*.json'], {
+        cwd: tmpRoot,
+        ignore: ['**/dist/'],
+      })
+      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+    })
+
+    it('glob: still honors patterns without trailing slash', async () => {
+      const files = await glob(['**/*.json'], {
+        cwd: tmpRoot,
+        ignore: ['**/dist/**'],
+      })
+      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
     })
   })
 

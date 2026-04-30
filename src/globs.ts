@@ -114,6 +114,30 @@ function getFastGlob() {
   return _fastGlob!
 }
 
+// fast-glob silently discards `ignore` entries that end in `/` — its
+// micromatch matcher treats the trailing slash as a literal that requires
+// a matching trailing slash on the input path, but readdir entries never
+// carry one. The gitignore convention of writing directory entries as
+// `dist/` therefore defeats the entire ignore at the walk level.
+// fast-glob upstream is undermaintained (3.3.3 from Jan 2025, no 3.4.0)
+// and issue #437 was closed without a fix, so normalize here.
+function stripTrailingSlash(pattern: string): string {
+  if (
+    pattern.length > 1 &&
+    pattern.charCodeAt(pattern.length - 1) === 47 /*'/'*/
+  ) {
+    return pattern.slice(0, -1)
+  }
+  return pattern
+}
+
+function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
+  if (!ArrayIsArray(ignore)) {
+    return undefined
+  }
+  return (ignore as string[]).map(stripTrailingSlash)
+}
+
 /*@__NO_SIDE_EFFECTS__*/
 function getPicomatch() {
   if (_picomatch === undefined) {
@@ -230,7 +254,11 @@ export function glob(
 ): Promise<string[]> {
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
-  return fastGlob.glob(patterns, options as import('fast-glob').Options)
+  const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
+  return fastGlob.glob(patterns, {
+    ...(options as import('fast-glob').Options),
+    ...(normalizedIgnore ? { ignore: normalizedIgnore } : {}),
+  })
 }
 
 /**
@@ -258,7 +286,7 @@ export function globStreamLicenses(
   const ignore = [
     ...(ArrayIsArray(ignoreOpt) ? ignoreOpt : defaultIgnore),
     '**/*.{cjs,cts,js,json,mjs,mts,ts}',
-  ]
+  ].map(stripTrailingSlash)
   if (ignoreOriginals) {
     ignore.push(LICENSE_ORIGINAL_GLOB_RECURSIVE)
   }
@@ -295,5 +323,9 @@ export function globSync(
 ): string[] {
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
-  return fastGlob.globSync(patterns, options as import('fast-glob').Options)
+  const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
+  return fastGlob.globSync(patterns, {
+    ...(options as import('fast-glob').Options),
+    ...(normalizedIgnore ? { ignore: normalizedIgnore } : {}),
+  })
 }
