@@ -192,6 +192,10 @@ Core infrastructure library for Socket.dev security tools.
 - **Lint**: `pnpm run lint` (oxlint) | **Fix**: `pnpm run fix` (oxfmt)
 - **Clean**: `pnpm run clean`
 
+### Background Bash
+
+Never use `Bash(run_in_background: true)` for test/build commands (`vitest`, `pnpm test`, `pnpm build`, `tsgo`). Backgrounded runs you don't poll get abandoned and leak Node workers. Background mode is for dev servers and long migrations whose results you'll consume. If a run hangs, kill it: `pkill -f "vitest/dist/workers"`.
+
 ## Agents & Skills
 
 - `/security-scan` — AgentShield + zizmor security audit
