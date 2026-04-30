@@ -385,18 +385,18 @@ function getPrototypeMethods(globalName) {
   const ctor = globalThis[globalName]
   cached = new Set()
   if (ctor && typeof ctor === 'function' && ctor.prototype) {
-    for (const name of Object.getOwnPropertyNames(ctor.prototype)) {
-      cached.add(name)
+    const names = Object.getOwnPropertyNames(ctor.prototype)
+    for (let i = 0, { length } = names; i < length; i++) {
+      cached.add(names[i])
     }
     // Buffer extends Uint8Array; include its prototype too.
     if (
       globalName === 'Buffer' &&
       typeof globalThis.Uint8Array === 'function'
     ) {
-      for (const name of Object.getOwnPropertyNames(
-        globalThis.Uint8Array.prototype,
-      )) {
-        cached.add(name)
+      const u8names = Object.getOwnPropertyNames(globalThis.Uint8Array.prototype)
+      for (let i = 0, { length } = u8names; i < length; i++) {
+        cached.add(u8names[i])
       }
     }
   }
