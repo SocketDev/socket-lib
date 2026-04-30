@@ -4,6 +4,11 @@
 
 import picomatch from '../external/picomatch'
 
+import {
+  StringPrototypeEndsWith,
+  StringPrototypeStartsWith,
+} from '../primordials'
+
 /**
  * Create a matcher function for a pattern using picomatch for glob patterns
  * or simple prefix/suffix matching for object patterns.
@@ -33,5 +38,7 @@ export function createAssetMatcher(
 
   // Prefix/suffix object pattern (backward compatible).
   const { prefix, suffix } = pattern
-  return (input: string) => input.startsWith(prefix) && input.endsWith(suffix)
+  return (input: string) =>
+    StringPrototypeStartsWith(input, prefix) &&
+    StringPrototypeEndsWith(input, suffix)
 }

@@ -8,6 +8,8 @@
 import { validateSchema } from '../schema/validate'
 import { stripBom } from '../strings'
 import type { Schema } from '../schema/types'
+import { BufferByteLength, ErrorCtor, SetCtor } from '../primordials'
+
 import type {
   JsonParseOptions,
   JsonPrimitive,
@@ -167,7 +169,7 @@ export function jsonParse(
   return undefined
 }
 
-const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+const DANGEROUS_KEYS = new SetCtor(['__proto__', 'constructor', 'prototype'])
 
 /**
  * JSON.parse reviver that rejects prototype pollution keys at any depth.
@@ -176,7 +178,7 @@ const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
  */
 function prototypePollutionReviver(key: string, value: unknown): unknown {
   if (DANGEROUS_KEYS.has(key)) {
-    throw new Error(
+    throw new ErrorCtor(
       'JSON contains potentially malicious prototype pollution keys',
     )
   }
@@ -235,9 +237,9 @@ export function safeJsonParse<T = unknown>(
   const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = options
 
   // Size check up front.
-  const byteLength = Buffer.byteLength(jsonString, 'utf8')
+  const byteLength = BufferByteLength!(jsonString, 'utf8')
   if (byteLength > maxSize) {
-    throw new Error(
+    throw new ErrorCtor(
       `JSON string exceeds maximum size limit${
         maxSize !== DEFAULT_MAX_SIZE ? ` of ${maxSize} bytes` : ''
       }`,
@@ -251,7 +253,7 @@ export function safeJsonParse<T = unknown>(
       ? JSONParse(jsonString)
       : JSONParse(jsonString, prototypePollutionReviver)
   } catch (e) {
-    throw new Error(`Failed to parse JSON: ${e}`)
+    throw new ErrorCtor(`Failed to parse JSON: ${e}`)
   }
 
   // Optional schema validation — route through validateSchema so the
@@ -262,7 +264,7 @@ export function safeJsonParse<T = unknown>(
       const summary = result.errors
         .map(e => `${e.path.join('.') || '(root)'}: ${e.message}`)
         .join(', ')
-      throw new Error(`Validation failed: ${summary}`)
+      throw new ErrorCtor(`Validation failed: ${summary}`)
     }
     return result.value
   }

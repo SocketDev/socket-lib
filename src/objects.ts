@@ -11,6 +11,7 @@ import {
 
 import { isArray } from './arrays'
 import {
+  ErrorCtor,
   ObjectDefineProperties,
   ObjectDefineProperty,
   ObjectFreeze,
@@ -23,6 +24,7 @@ import {
   ObjectPrototype,
   ObjectSetPrototypeOf,
   ReflectOwnKeys,
+  SetCtor,
 } from './primordials'
 import { localeCompare } from './sorts'
 
@@ -169,7 +171,7 @@ export function createConstantsObject(
   })
   const lazyGetterStats = ObjectFreeze({
     __proto__: null,
-    initialized: new Set<PropertyKey>(),
+    initialized: new SetCtor<PropertyKey>(),
   })
   const object = defineLazyGetters(
     {
@@ -640,7 +642,7 @@ export function merge<T extends object, U extends object>(
   let { length: queueLength } = queue
   while (pos < queueLength) {
     if (pos === LOOP_SENTINEL) {
-      throw new Error('Detected infinite loop in object crawl of merge')
+      throw new ErrorCtor('Detected infinite loop in object crawl of merge')
     }
     const { 0: currentTarget, 1: currentSource } = queue[pos++] as [
       Record<PropertyKey, unknown>,

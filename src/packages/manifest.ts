@@ -24,6 +24,8 @@ import { isRegistryFetcherType } from './validation'
 
 import type { PackageJson, PacoteOptions } from '../packages'
 
+import { ObjectFromEntries } from '../primordials'
+
 const abortSignal = getAbortSignal()
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
@@ -90,7 +92,7 @@ export function createPackageJson(
     ...(isObjectObject(resolutions) ? { resolutions: { ...resolutions } } : {}),
     ...(isObjectObject(engines)
       ? {
-          engines: Object.fromEntries(
+          engines: ObjectFromEntries(
             objectEntries(engines).map((pair: [PropertyKey, unknown]) => {
               const strKey = String(pair[0])
               const result: [string, unknown] = [strKey, pair[1]]

@@ -61,7 +61,7 @@ export function shouldSkipShadow(
   const userAgent = process.env['npm_config_user_agent']
   if (
     userAgent?.includes('exec') ||
-    userAgent?.includes('npx') ||
+    userAgent?.includes('npx') || // # socket-hook: allow npx
     userAgent?.includes('dlx')
   ) {
     return true

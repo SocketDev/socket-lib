@@ -6,6 +6,8 @@
 import type { Theme } from './types'
 import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
 
+import { SetCtor } from '../primordials'
+
 let _async_hooks: typeof import('node:async_hooks') | undefined
 
 /**
@@ -51,7 +53,7 @@ let fallbackTheme: Theme = SOCKET_THEME
 /**
  * Registered theme change listeners.
  */
-const listeners: Set<ThemeChangeListener> = new Set()
+const listeners: Set<ThemeChangeListener> = new SetCtor()
 
 /**
  * Get the active theme from context.

@@ -14,6 +14,8 @@ import {
   ErrorCtor,
   JSONParse,
   JSONStringify,
+  ObjectFreeze,
+  StringPrototypeStartsWith,
 } from '../primordials'
 import { pRetry } from '../promises'
 
@@ -26,7 +28,7 @@ import type { AssetPattern, RepoConfig } from './github-types'
  * Retry configuration for GitHub API requests.
  * Uses exponential backoff to handle transient failures and rate limiting.
  */
-const RETRY_CONFIG = Object.freeze({
+const RETRY_CONFIG = ObjectFreeze({
   __proto__: null,
   // Exponential backoff: delay doubles with each retry (5s, 10s, 20s).
   backoffFactor: 2,
@@ -386,7 +388,7 @@ export async function getLatestRelease(
       // Filter releases matching the tool prefix.
       const matchingReleases = releases.filter(release => {
         const { assets, tag_name: tag } = release
-        if (!tag.startsWith(toolPrefix)) {
+        if (!StringPrototypeStartsWith(tag, toolPrefix)) {
           return false
         }
 

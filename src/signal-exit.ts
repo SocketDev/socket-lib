@@ -3,7 +3,7 @@
  * Provides cross-platform signal exit detection and cleanup handlers.
  */
 
-import { ReflectApply } from './primordials'
+import { ErrorCtor, ReflectApply, TypeErrorCtor } from './primordials'
 
 // Inlined signal-exit:
 // https://socket.dev/npm/package/signal-exit/overview/4.1.0
@@ -193,7 +193,7 @@ function processReallyExit(code?: number | undefined): never {
     globalProcess,
     [exitCode],
   )
-  throw new Error('processReallyExit should never return')
+  throw new ErrorCtor('processReallyExit should never return')
 }
 
 /**
@@ -259,7 +259,7 @@ export function onExit(
     return function remove() {}
   }
   if (typeof cb !== 'function') {
-    throw new TypeError('a callback must be provided for exit handler')
+    throw new TypeErrorCtor('a callback must be provided for exit handler')
   }
   if (loaded === false) {
     load()

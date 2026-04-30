@@ -14,6 +14,14 @@ import { readPackageJson } from './operations'
 
 import type { PackageJson } from '../packages'
 
+import {
+  ErrorCtor,
+  JSONParse,
+  ObjectEntries,
+  StringPrototypeEndsWith,
+  StringPrototypeStartsWith,
+} from '../primordials'
+
 export type IsolatePackageOptions = {
   imports?: Record<string, string> | undefined
   install?: ((cwd: string) => Promise<void>) | undefined
@@ -34,7 +42,7 @@ const FS_CP_OPTIONS = {
   dereference: true,
   errorOnExist: false,
   filter: (src: string) =>
-    !src.includes('node_modules') && !src.endsWith('.DS_Store'),
+    !src.includes('node_modules') && !StringPrototypeEndsWith(src, '.DS_Store'),
   force: true,
   recursive: true,
   ...(WIN32 ? { maxRetries: 3, retryDelay: 100 } : {}),
@@ -77,9 +85,9 @@ async function mergePackageJson(
   const fs = getFs()
   let pkgJson: PackageJson
   try {
-    pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
+    pkgJson = JSONParse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
   } catch (e) {
-    throw new Error(`Failed to parse ${pkgJsonPath}: ${errorMessage(e)}`, {
+    throw new ErrorCtor(`Failed to parse ${pkgJsonPath}: ${errorMessage(e)}`, {
       cause: e,
     })
   }
@@ -132,13 +140,13 @@ export async function isolatePackage(
     sourcePath = path.resolve(pathToResolve)
 
     if (!fs.existsSync(sourcePath)) {
-      throw new Error(`Source path does not exist: ${sourcePath}`)
+      throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
     }
 
     // Read package.json to get the name.
     const pkgJson = await readPackageJson(sourcePath, { normalize: true })
     if (!pkgJson) {
-      throw new Error(`Could not read package.json from: ${sourcePath}`)
+      throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
     }
     packageName = pkgJson.name as string
   } else {
@@ -151,13 +159,13 @@ export async function isolatePackage(
     if (parsed.type === 'directory' || parsed.type === 'file') {
       sourcePath = parsed.fetchSpec
       if (!sourcePath || !fs.existsSync(sourcePath)) {
-        throw new Error(`Source path does not exist: ${sourcePath}`)
+        throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
       }
       // If package name not provided by parser, read from package.json.
       if (!packageName) {
         const pkgJson = await readPackageJson(sourcePath, { normalize: true })
         if (!pkgJson) {
-          throw new Error(`Could not read package.json from: ${sourcePath}`)
+          throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
         }
         packageName = pkgJson.name as string
       }
@@ -168,7 +176,7 @@ export async function isolatePackage(
   }
 
   if (!packageName) {
-    throw new Error(`Could not determine package name from: ${packageSpec}`)
+    throw new ErrorCtor(`Could not determine package name from: ${packageSpec}`)
   }
 
   // Create temp directory for this package.
@@ -202,7 +210,7 @@ export async function isolatePackage(
       await install(packageTempDir)
     } else {
       // spawn is imported at the top
-      const packageInstallSpec = spec.startsWith('https://')
+      const packageInstallSpec = StringPrototypeStartsWith(spec, 'https://')
         ? spec
         : `${packageName}@${spec}`
 
@@ -233,10 +241,12 @@ export async function isolatePackage(
   } else {
     // Just copying local package, no registry install.
     if (!sourcePath) {
-      throw new Error('sourcePath is required when no version spec provided')
+      throw new ErrorCtor(
+        'sourcePath is required when no version spec provided',
+      )
     }
 
-    const scopedPath = packageName.startsWith('@')
+    const scopedPath = StringPrototypeStartsWith(packageName, '@')
       ? path.join(
           packageTempDir,
           'node_modules',
@@ -286,7 +296,7 @@ export async function isolatePackage(
     : (undefined as unknown as Record<string, unknown>)
 
   if (imports) {
-    for (const { 0: key, 1: specifier } of Object.entries(imports)) {
+    for (const { 0: key, 1: specifier } of ObjectEntries(imports)) {
       const fullPath = path.join(installedPath, specifier)
       exports[key] = require(fullPath)
     }

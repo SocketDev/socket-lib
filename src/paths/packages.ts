@@ -4,6 +4,8 @@
 
 import { normalizePath } from './normalize'
 
+import { StringPrototypeEndsWith } from '../primordials'
+
 let _path: typeof import('node:path') | undefined
 /**
  * Get the path module.
@@ -27,8 +29,8 @@ function getPath() {
 function isPackageJsonFile(filepath: string): boolean {
   return (
     filepath === 'package.json' ||
-    filepath.endsWith('/package.json') ||
-    filepath.endsWith('\\package.json')
+    StringPrototypeEndsWith(filepath, '/package.json') ||
+    StringPrototypeEndsWith(filepath, '\\package.json')
   )
 }
 

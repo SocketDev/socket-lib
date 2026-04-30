@@ -6,6 +6,8 @@ import type { ColorValue } from '../colors'
 import type { Palette } from '../effects/shimmer'
 import type { ColorReference, Theme, ThemeColors } from './types'
 
+import { ArrayIsArray } from '../primordials'
+
 /**
  * Rainbow gradient colors used for the `'rainbow'` color keyword.
  * 10 hues — cycles through the full color spectrum with smooth transitions.
@@ -209,8 +211,8 @@ export function resolveShimmerColor(
   if (value === 'inherit') {
     return 'inherit'
   }
-  if (Array.isArray(value)) {
-    if (value.length > 0 && Array.isArray(value[0])) {
+  if (ArrayIsArray(value)) {
+    if (value.length > 0 && ArrayIsArray(value[0])) {
       // Gradient
       return value as Palette
     }

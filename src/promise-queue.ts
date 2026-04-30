@@ -6,6 +6,8 @@
  * exposes an idle-wait helper.
  */
 
+import { ErrorCtor, PromiseCtor, PromiseResolve } from './primordials'
+
 type QueuedTask<T> = {
   fn: () => Promise<T>
   resolve: (value: T) => void
@@ -32,7 +34,7 @@ export class PromiseQueue {
     this.maxConcurrency = maxConcurrency
     this.maxQueueLength = maxQueueLength
     if (maxConcurrency < 1) {
-      throw new Error('maxConcurrency must be at least 1')
+      throw new ErrorCtor('maxConcurrency must be at least 1')
     }
   }
 
@@ -43,7 +45,7 @@ export class PromiseQueue {
    * with "Task dropped: queue length exceeded" if the queue is full.
    */
   async add<T>(fn: () => Promise<T>): Promise<T> {
-    return await new Promise<T>((resolve, reject) => {
+    return await new PromiseCtor<T>((resolve, reject) => {
       // Reject the newcomer rather than evicting an earlier-submitted task.
       // FIFO fairness: the caller who waited longest gets served, not the
       // caller who arrived last. Previously this dropped the queue head,
@@ -53,7 +55,7 @@ export class PromiseQueue {
         this.maxQueueLength !== undefined &&
         this.queue.length >= this.maxQueueLength
       ) {
-        reject(new Error('Task dropped: queue length exceeded'))
+        reject(new ErrorCtor('Task dropped: queue length exceeded'))
         return
       }
 
@@ -79,7 +81,7 @@ export class PromiseQueue {
     // Wrap in Promise.resolve().then() so a synchronous throw inside
     // task.fn() converts into a rejection routed to task.reject rather
     // than escaping as an uncaught exception.
-    Promise.resolve()
+    PromiseResolve()
       .then(() => task.fn())
       .then(task.resolve)
       .catch(task.reject)
@@ -105,7 +107,7 @@ export class PromiseQueue {
     if (this.running === 0 && this.queue.length === 0) {
       return
     }
-    return await new Promise<void>(resolve => {
+    return await new PromiseCtor<void>(resolve => {
       this.idleResolvers.push(resolve)
     })
   }
@@ -131,7 +133,7 @@ export class PromiseQueue {
     const pending = this.queue
     this.queue = []
     for (const task of pending) {
-      task.reject(new Error('Task cancelled: queue cleared'))
+      task.reject(new ErrorCtor('Task cancelled: queue cleared'))
     }
     this.notifyIdleIfNeeded()
   }

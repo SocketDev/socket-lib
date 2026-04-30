@@ -12,6 +12,8 @@ import type { ColorName } from './colors'
 import type { ThemeName } from './themes/themes'
 import type { Theme } from './themes/types'
 
+import { ArrayIsArray } from './primordials'
+
 /**
  * Options for creating themed links.
  */
@@ -74,7 +76,7 @@ export function link(text: string, url: string, options?: LinkOptions): string {
     // Use named color method if available
     const colorMethod = colors[linkColor as ColorName]
     colored = colorMethod ? colorMethod(text) : colors.cyan(text)
-  } else if (Array.isArray(linkColor)) {
+  } else if (ArrayIsArray(linkColor)) {
     // RGB color - for now fallback to cyan
     // Note: RGB color support to be implemented
     colored = colors.cyan(text)

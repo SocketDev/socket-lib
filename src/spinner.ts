@@ -35,6 +35,14 @@ import { getTheme } from './themes/context'
 import { THEMES } from './themes/themes'
 import { resolveColor } from './themes/utils'
 
+import {
+  ArrayIsArray,
+  MathMax,
+  MathRound,
+  ObjectDefineProperties,
+  TypeErrorCtor,
+} from './primordials'
+
 const COLOR_INHERIT = 'inherit'
 
 /**
@@ -292,7 +300,7 @@ function desc(value: unknown) {
  */
 function formatProgress(progress: ProgressInfo): string {
   const { current, total, unit } = progress
-  const percentage = total === 0 ? 0 : Math.round((current / total) * 100)
+  const percentage = total === 0 ? 0 : MathRound((current / total) * 100)
   const bar = renderProgressBar(percentage)
   const count = unit ? `${current}/${total} ${unit}` : `${current}/${total}`
   return `${bar} ${percentage}% (${count})`
@@ -318,11 +326,11 @@ function normalizeText(value: unknown) {
  * @private
  */
 function renderProgressBar(percentage: number, width: number = 20): string {
-  const filled = Math.max(
+  const filled = MathMax(
     0,
     Math.min(width, Math.round((percentage / 100) * width)),
   )
-  const empty = Math.max(0, width - filled)
+  const empty = MathMax(0, width - filled)
   const bar = '█'.repeat(filled) + '░'.repeat(empty)
   // Use cyan color for the progress bar
   // colors is imported at the top
@@ -502,7 +510,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           )
           // resolveColor can return 'inherit' or gradients which aren't valid for spinner
           // Fall back to primary for these cases
-          if (resolved === 'inherit' || Array.isArray(resolved[0])) {
+          if (resolved === 'inherit' || ArrayIsArray(resolved[0])) {
             defaultColor = theme.colors.primary
           } else {
             defaultColor = resolved as ColorValue
@@ -520,7 +528,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
               n => typeof n === 'number' && n >= 0 && n <= 255,
             ))
         ) {
-          throw new TypeError(
+          throw new TypeErrorCtor(
             'RGB color must be an array of 3 numbers between 0 and 255',
           )
         }
@@ -683,7 +691,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           let shimmerColor: ColorRgb | Palette
           if (this.#shimmer.color === COLOR_INHERIT) {
             shimmerColor = this.color
-          } else if (Array.isArray(this.#shimmer.color[0])) {
+          } else if (ArrayIsArray(this.#shimmer.color[0])) {
             shimmerColor = this.#shimmer.color as Palette
           } else {
             shimmerColor = toRgb(this.#shimmer.color as ColorValue)
@@ -798,7 +806,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           this.#indentation = ''
         } else {
           const amount = spaces ?? 2
-          const newLength = Math.max(0, this.#indentation.length - amount)
+          const newLength = MathMax(0, this.#indentation.length - amount)
           this.#indentation = this.#indentation.slice(0, newLength)
         }
         this.#updateSpinnerText()
@@ -1028,7 +1036,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           const newCurrent = this.#progress.current + amount
           this.#progress = {
             __proto__: null,
-            current: Math.max(0, Math.min(newCurrent, this.#progress.total)),
+            current: MathMax(0, Math.min(newCurrent, this.#progress.total)),
             total: this.#progress.total,
             ...(this.#progress.unit ? { unit: this.#progress.unit } : {}),
           } as ProgressInfo
@@ -1369,7 +1377,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       new (options?: SpinnerOptions | undefined): Spinner
     }
     // Add aliases.
-    Object.defineProperties(_Spinner.prototype, {
+    ObjectDefineProperties(_Spinner.prototype, {
       error: desc(_Spinner.prototype.fail),
       errorAndStop: desc(_Spinner.prototype.failAndStop),
       warning: desc(_Spinner.prototype.warn),

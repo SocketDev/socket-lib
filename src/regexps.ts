@@ -4,15 +4,23 @@
  * helpers.
  */
 
+import {
+  MapCtor,
+  SetCtor,
+  StringFromCodePoint,
+  StringPrototypeCharCodeAt,
+  StringPrototypeCodePointAt,
+} from './primordials'
+
 // Spec-compliant fallback for TC39 RegExp.escape (Node 24+ ships native):
 // https://tc39.es/ecma262/#sec-regexp.escape
 // https://tc39.es/ecma262/#sec-encodeforregexpescape
 
 // SyntaxCharacter set plus `/` — these get a plain backslash prefix.
-const SYNTAX_CHARACTERS = new Set('^$\\.*+?()[]{}|/')
+const SYNTAX_CHARACTERS = new SetCtor('^$\\.*+?()[]{}|/')
 
 // ControlEscape mappings: \t \n \v \f \r (spec Table 62).
-const CONTROL_ESCAPES = new Map<number, string>([
+const CONTROL_ESCAPES = new MapCtor<number, string>([
   [0x09, '\\t'],
   [0x0a, '\\n'],
   [0x0b, '\\v'],
@@ -23,7 +31,7 @@ const CONTROL_ESCAPES = new Map<number, string>([
 // Other ASCII punctuators the spec explicitly hex-escapes (§22.2.5.1.1),
 // plus any whitespace / line terminator / lone surrogate the spec routes
 // through the same branch.
-const OTHER_PUNCTUATORS = new Set(',-=<>#&!%:;@~\'`"')
+const OTHER_PUNCTUATORS = new SetCtor(',-=<>#&!%:;@~\'`"')
 
 // Additional whitespace / line terminator / surrogate code points the
 // spec requires escaping. We enumerate the ones that commonly appear in
@@ -32,7 +40,7 @@ const OTHER_PUNCTUATORS = new Set(',-=<>#&!%:;@~\'`"')
 // LineTerminator: LF, CR, LS (U+2028), PS (U+2029).
 // Lone surrogates: U+D800..U+DFFF.
 function isSpecHexEscapeCp(cp: number): boolean {
-  if (OTHER_PUNCTUATORS.has(String.fromCodePoint(cp))) {
+  if (OTHER_PUNCTUATORS.has(StringFromCodePoint(cp))) {
     return true
   }
   // LineTerminator.
@@ -70,7 +78,7 @@ function escapeRegExpFallback(str: string): string {
   // Iterate by code point (String iterator yields UTF-16-safe chars).
   let isFirst = true
   for (const char of str) {
-    const cp = char.codePointAt(0)!
+    const cp = StringPrototypeCodePointAt(char, 0)!
     // Leading [0-9A-Za-z] always gets \xHH (guards against \0..\9 /
     // \c merging in a larger pattern).
     if (
@@ -93,7 +101,7 @@ function escapeRegExpFallback(str: string): string {
         } else {
           // Emit per UTF-16 code unit (\uXXXX each).
           for (let i = 0; i < char.length; i++) {
-            out += '\\u' + hex4(char.charCodeAt(i))
+            out += '\\u' + hex4(StringPrototypeCharCodeAt(char, i))
           }
         }
       } else {

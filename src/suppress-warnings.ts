@@ -4,13 +4,17 @@
 
 import process from 'node:process'
 
-import { ReflectApply } from './primordials'
+import {
+  ObjectGetOwnPropertySymbols,
+  ReflectApply,
+  SetCtor,
+} from './primordials'
 
 // Store the original emitWarning function to avoid repeat wrapping.
 let originalEmitWarning: typeof process.emitWarning | undefined
 
 // Track which warning types are currently suppressed.
-const suppressedWarnings = new Set<string>()
+const suppressedWarnings = new SetCtor<string>()
 
 /**
  * Internal function to set up warning suppression.
@@ -94,7 +98,7 @@ export function setMaxEventTargetListeners(
   if (!target) {
     return
   }
-  const symbols = Object.getOwnPropertySymbols(target)
+  const symbols = ObjectGetOwnPropertySymbols(target)
   const kMaxEventTargetListeners = symbols.find(
     s => s.description === 'events.maxEventTargetListeners',
   )

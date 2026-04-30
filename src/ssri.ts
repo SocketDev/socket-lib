@@ -3,6 +3,8 @@
  * Provides conversion and validation for SSRI and hex hash formats.
  */
 
+import { BufferFrom, ErrorCtor } from './primordials'
+
 /**
  * Convert hex format hash to SSRI format.
  *
@@ -23,10 +25,10 @@
 /*@__NO_SIDE_EFFECTS__*/
 export function hexToSsri(hex: string, algorithm = 'sha256'): string {
   if (!/^[a-f0-9]+$/i.test(hex)) {
-    throw new Error(`Invalid hex format: ${hex}`)
+    throw new ErrorCtor(`Invalid hex format: ${hex}`)
   }
   // Convert hex to base64.
-  const buffer = Buffer.from(hex, 'hex')
+  const buffer = BufferFrom!(hex, 'hex')
   const base64Hash = buffer.toString('base64')
   return `${algorithm}-${base64Hash}`
 }
@@ -93,7 +95,7 @@ export function parseSsri(ssri: string): {
 } {
   const match = /^([a-z0-9]+)-([A-Za-z0-9+/]+=*)$/i.exec(ssri)
   if (!match || !match[1] || !match[2] || match[2].length < 2) {
-    throw new Error(`Invalid SSRI format: ${ssri}`)
+    throw new ErrorCtor(`Invalid SSRI format: ${ssri}`)
   }
   const algorithm = match[1]
   const base64Hash = match[2]
@@ -120,10 +122,10 @@ export function parseSsri(ssri: string): {
 export function ssriToHex(ssri: string): string {
   const match = /^([a-z0-9]+)-([A-Za-z0-9+/]+=*)$/i.exec(ssri)
   if (!match || !match[2] || match[2].length < 2) {
-    throw new Error(`Invalid SSRI format: ${ssri}`)
+    throw new ErrorCtor(`Invalid SSRI format: ${ssri}`)
   }
   const base64Hash = match[2]
   // Convert base64 to hex.
-  const buffer = Buffer.from(base64Hash, 'base64')
+  const buffer = BufferFrom!(base64Hash, 'base64')
   return buffer.toString('hex')
 }

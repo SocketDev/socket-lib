@@ -23,6 +23,13 @@
  * ```
  */
 
+import {
+  ArrayIsArray,
+  NumberIsInteger,
+  ObjectGetOwnPropertySymbols,
+  TypeErrorCtor,
+} from '../primordials'
+
 import type {
   Infer,
   ParseResult,
@@ -40,7 +47,7 @@ function isTypeBoxSchema(schema: unknown): boolean {
   if (schema === null || typeof schema !== 'object') {
     return false
   }
-  for (const sym of Object.getOwnPropertySymbols(schema)) {
+  for (const sym of ObjectGetOwnPropertySymbols(schema)) {
     if (sym.description === 'TypeBox.Kind') {
       return typeof (schema as Record<symbol, unknown>)[sym] === 'string'
     }
@@ -63,7 +70,7 @@ function normalizeTypeBoxErrors(
     out.push({
       path: segs.map(s => {
         const n = Number(s)
-        return Number.isInteger(n) && String(n) === s ? n : s
+        return NumberIsInteger(n) && String(n) === s ? n : s
       }),
       message: err.message,
     })
@@ -82,7 +89,7 @@ function normalizeZodError(err: unknown): ValidationIssue[] {
     return [{ path: [], message: String(err) }]
   }
   const issues = (err as { issues?: unknown }).issues
-  if (!Array.isArray(issues)) {
+  if (!ArrayIsArray(issues)) {
     return [{ path: [], message: 'Unknown validation error' }]
   }
   return issues.map(issue => {
@@ -91,7 +98,7 @@ function normalizeZodError(err: unknown): ValidationIssue[] {
       message?: string
     }
     return {
-      path: Array.isArray(i.path) ? i.path : [],
+      path: ArrayIsArray(i.path) ? i.path : [],
       message: typeof i.message === 'string' ? i.message : 'Invalid value',
     }
   })
@@ -163,7 +170,7 @@ export function validateSchema<S>(
     }
   }
 
-  throw new TypeError(
+  throw new TypeErrorCtor(
     'validateSchema: unsupported schema kind. Expected a Zod schema or ' +
       'an object with a safeParse method.',
   )

@@ -46,6 +46,8 @@ import { getDefaultLogger } from './logger'
 import { pRetry } from './promises'
 import { onExit } from './signal-exit'
 
+import { DateNow, ErrorCtor, MapCtor, MathMax, SetCtor } from './primordials'
+
 let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.
@@ -118,8 +120,8 @@ export interface ProcessLockOptions {
  * based locks.
  */
 class ProcessLockManager {
-  private activeLocks = new Set<string>()
-  private touchTimers = new Map<string, NodeJS.Timeout>()
+  private activeLocks = new SetCtor<string>()
+  private touchTimers = new MapCtor<string, NodeJS.Timeout>()
   private exitHandlerRegistered = false
 
   /**
@@ -166,7 +168,7 @@ class ProcessLockManager {
       if (fs.existsSync(lockPath)) {
         // utimesSync accepts numeric timestamps (seconds). Pass Date.now() / 1000
         // to avoid the Date allocation on every touch tick.
-        const now = Date.now() / 1000
+        const now = DateNow() / 1000
         fs.utimesSync(lockPath, now, now)
       }
     } catch (e) {
@@ -233,7 +235,7 @@ class ProcessLockManager {
       // stale). Node returns mtime with ms precision on all platforms
       // we support; APFS's second-level filesystem precision just
       // means the low bits are zero, which the subtraction handles.
-      return Date.now() - stats.mtime.getTime() > staleMs
+      return DateNow() - stats.mtime.getTime() > staleMs
     } catch {
       return false
     }
@@ -322,14 +324,14 @@ class ProcessLockManager {
           // Handle lock contention - lock already exists.
           if (code === 'EEXIST') {
             if (this.isStale(lockPath, staleMs)) {
-              throw new Error(`Stale lock detected: ${lockPath}`)
+              throw new ErrorCtor(`Stale lock detected: ${lockPath}`)
             }
-            throw new Error(`Lock already exists: ${lockPath}`)
+            throw new ErrorCtor(`Lock already exists: ${lockPath}`)
           }
 
           // Handle permission errors - not retryable.
           if (code === 'EACCES' || code === 'EPERM') {
-            throw new Error(
+            throw new ErrorCtor(
               `Permission denied creating lock: ${lockPath}. ` +
                 'Check directory permissions or run with appropriate access.',
               { cause: e },
@@ -338,7 +340,7 @@ class ProcessLockManager {
 
           // Handle read-only filesystem - not retryable.
           if (code === 'EROFS') {
-            throw new Error(
+            throw new ErrorCtor(
               `Cannot create lock on read-only filesystem: ${lockPath}`,
               { cause: e },
             )
@@ -346,13 +348,13 @@ class ProcessLockManager {
 
           // Handle parent path issues - not retryable.
           if (code === 'ENOTDIR') {
-            const lastSlashIndex = Math.max(
+            const lastSlashIndex = MathMax(
               lockPath.lastIndexOf('/'),
               lockPath.lastIndexOf('\\'),
             )
             const parentDir =
               lastSlashIndex === -1 ? '.' : lockPath.slice(0, lastSlashIndex)
-            throw new Error(
+            throw new ErrorCtor(
               `Cannot create lock directory: ${lockPath}\n` +
                 'A path component is a file when it should be a directory.\n' +
                 `Parent path: ${parentDir}\n` +
@@ -365,13 +367,13 @@ class ProcessLockManager {
           }
 
           if (code === 'ENOENT') {
-            const lastSlashIndex = Math.max(
+            const lastSlashIndex = MathMax(
               lockPath.lastIndexOf('/'),
               lockPath.lastIndexOf('\\'),
             )
             const parentDir =
               lastSlashIndex === -1 ? '.' : lockPath.slice(0, lastSlashIndex)
-            throw new Error(
+            throw new ErrorCtor(
               `Cannot create lock directory: ${lockPath}\n` +
                 `Parent directory does not exist: ${parentDir}\n` +
                 'To resolve:\n' +
@@ -383,7 +385,7 @@ class ProcessLockManager {
           }
 
           // Re-throw other errors with context.
-          throw new Error(`Failed to acquire lock: ${lockPath}`, {
+          throw new ErrorCtor(`Failed to acquire lock: ${lockPath}`, {
             cause: e,
           })
         }

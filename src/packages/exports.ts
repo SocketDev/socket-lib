@@ -6,6 +6,14 @@ import { isArray } from '../arrays'
 import { LOOP_SENTINEL } from '../constants/core'
 import { isObject, isObjectObject } from '../objects'
 
+import {
+  ErrorCtor,
+  ObjectGetOwnPropertyNames,
+  SetCtor,
+  StringPrototypeCharCodeAt,
+  StringPrototypeStartsWith,
+} from '../primordials'
+
 /**
  * Find types definition for a specific subpath in package exports.
  *
@@ -25,7 +33,7 @@ export function findTypesForSubpath(
   let pos = 0
   while (pos < queue.length) {
     if (pos === LOOP_SENTINEL) {
-      throw new Error(
+      throw new ErrorCtor(
         'Detected infinite loop in entry exports crawl of getTypesForSubpath',
       )
     }
@@ -41,7 +49,7 @@ export function findTypesForSubpath(
         }
       }
     } else if (isObject(value)) {
-      const keys = Object.getOwnPropertyNames(value)
+      const keys = ObjectGetOwnPropertyNames(value)
       for (let i = 0, { length } = keys; i < length; i += 1) {
         const key = keys[i] as string
         const item = value[key]
@@ -75,8 +83,8 @@ export function getExportFilePaths(entryExports: unknown): string[] {
   const paths = []
 
   // Traverse the exports object to find actual file paths.
-  for (const key of Object.getOwnPropertyNames(entryExports)) {
-    if (!key.startsWith('.')) {
+  for (const key of ObjectGetOwnPropertyNames(entryExports)) {
+    if (!StringPrototypeStartsWith(key, '.')) {
       continue
     }
 
@@ -87,7 +95,7 @@ export function getExportFilePaths(entryExports: unknown): string[] {
       paths.push(value)
     } else if (isObject(value)) {
       // Conditional or nested export.
-      for (const subKey of Object.getOwnPropertyNames(value)) {
+      for (const subKey of ObjectGetOwnPropertyNames(value)) {
         const subValue = value[subKey]
         if (typeof subValue === 'string') {
           paths.push(subValue)
@@ -98,7 +106,7 @@ export function getExportFilePaths(entryExports: unknown): string[] {
               paths.push(item)
             } else if (isObject(item)) {
               // Nested conditional.
-              for (const nestedKey of Object.getOwnPropertyNames(item)) {
+              for (const nestedKey of ObjectGetOwnPropertyNames(item)) {
                 const nestedValue = item[nestedKey]
                 if (typeof nestedValue === 'string') {
                   paths.push(nestedValue)
@@ -112,7 +120,7 @@ export function getExportFilePaths(entryExports: unknown): string[] {
   }
 
   // Remove duplicates and filter out non-file paths.
-  return [...new Set(paths)].filter(p => p.startsWith('./'))
+  return [...new SetCtor(paths)].filter(p => StringPrototypeStartsWith(p, './'))
 }
 
 /**
@@ -130,8 +138,8 @@ export function getSubpaths(entryExports: unknown): string[] {
     return []
   }
   // Return the keys of the exports object (the subpaths).
-  return Object.getOwnPropertyNames(entryExports).filter(key =>
-    key.startsWith('.'),
+  return ObjectGetOwnPropertyNames(entryExports).filter(key =>
+    StringPrototypeStartsWith(key, '.'),
   )
 }
 
@@ -149,7 +157,7 @@ export function isConditionalExports(entryExports: unknown): boolean {
   if (!isObjectObject(entryExports)) {
     return false
   }
-  const keys = Object.getOwnPropertyNames(entryExports)
+  const keys = ObjectGetOwnPropertyNames(entryExports)
   const { length } = keys
   if (!length) {
     return false
@@ -160,7 +168,7 @@ export function isConditionalExports(entryExports: unknown): boolean {
   // an object of main entry condition name keys only.
   for (let i = 0; i < length; i += 1) {
     const key = keys[i] as string
-    if (key.length > 0 && key.charCodeAt(0) === 46 /*'.'*/) {
+    if (key.length > 0 && StringPrototypeCharCodeAt(key, 0) === 46 /*'.'*/) {
       return false
     }
   }
@@ -179,7 +187,7 @@ export function isConditionalExports(entryExports: unknown): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isSubpathExports(entryExports: unknown): boolean {
   if (isObjectObject(entryExports)) {
-    const keys = Object.getOwnPropertyNames(entryExports)
+    const keys = ObjectGetOwnPropertyNames(entryExports)
     for (let i = 0, { length } = keys; i < length; i += 1) {
       // Subpath entry exports contain keys starting with '.'.
       // Entry exports cannot contain some keys starting with '.' and some not.

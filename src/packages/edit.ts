@@ -25,6 +25,12 @@ import { isNodeModules } from '../paths/normalize'
 import { normalizePackageJson } from './normalize'
 import { resolvePackageJsonDirname } from '../paths/packages'
 
+import {
+  ErrorCtor,
+  JSONStringify,
+  StringPrototypeEndsWith,
+} from '../primordials'
+
 // Define the interface for the dynamic class
 interface EditablePackageJsonConstructor {
   new (): EditablePackageJsonInstance
@@ -202,7 +208,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           if (!path) {
             return ''
           }
-          if (path.endsWith('package.json')) {
+          if (StringPrototypeEndsWith(path, 'package.json')) {
             return path
           }
           const nodePath = getPath()
@@ -336,7 +342,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
         override async save(options?: SaveOptions): Promise<boolean> {
           if (!this._canSave || this.content === undefined) {
-            throw new Error('No package.json to save to')
+            throw new ErrorCtor('No package.json to save to')
           }
 
           // Check if save is needed, using packageSort for package.json
@@ -373,7 +379,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
         override saveSync(options?: SaveOptions): boolean {
           if (!this._canSave || this.content === undefined) {
-            throw new Error('No package.json to save to')
+            throw new ErrorCtor('No package.json to save to')
           }
           const { ignoreWhitespace = false, sort = false } = {
             __proto__: null,
@@ -401,7 +407,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             newline === undefined || newline === null
               ? '\n'
               : (newline as string)
-          const fileContent = `${JSON.stringify(
+          const fileContent = `${JSONStringify(
             content,
             undefined,
             format,
@@ -456,7 +462,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             newline === undefined || newline === null
               ? '\n'
               : (newline as string)
-          const fileContent = `${JSON.stringify(
+          const fileContent = `${JSONStringify(
             content,
             undefined,
             format,
@@ -527,7 +533,7 @@ export async function toEditablePackageJson(
   return (
     await EditablePackageJson.load(pkgJsonPath, { create: true })
   ).fromJSON(
-    `${JSON.stringify(
+    `${JSONStringify(
       normalize
         ? normalizePackageJson(pkgJson, {
             ...(isNodeModules(pkgJsonPath) ? {} : { preserve: ['repository'] }),
@@ -567,7 +573,7 @@ export function toEditablePackageJsonSync(
   const EditablePackageJson = getEditablePackageJsonClass()
   const pkgJsonPath = resolvePackageJsonDirname(filepath)
   return new EditablePackageJson().create(pkgJsonPath).fromJSON(
-    `${JSON.stringify(
+    `${JSONStringify(
       normalize
         ? normalizePackageJson(pkgJson, {
             ...(isNodeModules(pkgJsonPath) ? {} : { preserve: ['repository'] }),

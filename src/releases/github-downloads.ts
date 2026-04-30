@@ -7,7 +7,11 @@ import process from 'node:process'
 import { safeMkdir } from '../fs'
 import { httpDownload } from '../http-request'
 import { getDefaultLogger } from '../logger'
-import { ErrorCtor } from '../primordials'
+import {
+  ErrorCtor,
+  StringPrototypeEndsWith,
+  StringPrototypeStartsWith,
+} from '../primordials'
 import { spawn } from '../spawn'
 
 import { getLatestRelease, getReleaseAssetUrl } from './github-api'
@@ -126,7 +130,7 @@ export async function downloadGitHubRelease(
   )
 
   // Make executable on Unix-like systems.
-  const isWindows = binaryName.endsWith('.exe')
+  const isWindows = StringPrototypeEndsWith(binaryName, '.exe')
   if (!isWindows) {
     fs.chmodSync(binaryPath, 0o755)
 
@@ -134,7 +138,7 @@ export async function downloadGitHubRelease(
     if (
       removeMacOSQuarantine &&
       process.platform === 'darwin' &&
-      platformArch.startsWith('darwin')
+      StringPrototypeStartsWith(platformArch, 'darwin')
     ) {
       try {
         await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {

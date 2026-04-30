@@ -4,6 +4,8 @@
 
 import validateNpmPackageName from '../external/validate-npm-package-name'
 
+import { StringPrototypeStartsWith } from '../primordials'
+
 /**
  * Check if package name is a blessed Socket.dev package.
  *
@@ -19,9 +21,9 @@ export function isBlessedPackageName(name: unknown): boolean {
     typeof name === 'string' &&
     (name === 'sfw' ||
       name === 'socket' ||
-      name.startsWith('@socketoverride/') ||
-      name.startsWith('@socketregistry/') ||
-      name.startsWith('@socketsecurity/'))
+      StringPrototypeStartsWith(name, '@socketoverride/') ||
+      StringPrototypeStartsWith(name, '@socketregistry/') ||
+      StringPrototypeStartsWith(name, '@socketsecurity/'))
   )
 }
 

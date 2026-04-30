@@ -8,6 +8,8 @@
  * - Thread-safe for concurrent test execution
  */
 
+import { MapCtor } from '../primordials'
+
 // Shared test hook state (setPath/clearPath/resetPaths in beforeEach/afterEach)
 // IMPORTANT: Use globalThis to ensure singleton across duplicate module instances.
 // Vitest alias resolution can create separate module instances for the same file
@@ -26,8 +28,8 @@ const _globalThis = globalThis as typeof globalThis &
   Record<symbol, PathRewireState | undefined>
 if (!_globalThis[stateSymbol]) {
   _globalThis[stateSymbol] = {
-    testOverrides: new Map<string, string | undefined>(),
-    valueCache: new Map<string, string>(),
+    testOverrides: new MapCtor<string, string | undefined>(),
+    valueCache: new MapCtor<string, string>(),
     cacheInvalidationCallbacks: [] as Array<() => void>,
   }
 }

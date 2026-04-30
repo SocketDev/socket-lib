@@ -7,6 +7,8 @@ import npmPackageArg from '../external/npm-package-arg'
 import { isObjectObject } from '../objects'
 import { isNonEmptyString } from '../strings'
 
+import { StringPrototypeEndsWith } from '../primordials'
+
 /**
  * Extract user and project from GitHub repository URL.
  *
@@ -39,7 +41,7 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
   const userAndRepo = match[1].split('/')
   const user = userAndRepo[0] || ''
   const rawProject = userAndRepo[1] ?? ''
-  const project = rawProject.endsWith('.git')
+  const project = StringPrototypeEndsWith(rawProject, '.git')
     ? rawProject.slice(0, -4)
     : rawProject
   return { user, project }

@@ -8,6 +8,16 @@ import process from 'node:process'
 import { debugLog } from './debug'
 import { errorMessage } from './errors'
 
+import {
+  DateNow,
+  MathMax,
+  MathMin,
+  MathRound,
+  ObjectEntries,
+  ObjectKeys,
+  ObjectValues,
+} from './primordials'
+
 /**
  * Performance metrics collected during execution.
  */
@@ -70,7 +80,7 @@ export function generatePerformanceReport(): string {
   }
 
   const summary = getPerformanceSummary()
-  const operations = Object.keys(summary).sort()
+  const operations = ObjectKeys(summary).sort()
 
   let report = '\n╔═══════════════════════════════════════════════╗\n'
   report += '║         Performance Report                    ║\n'
@@ -92,11 +102,11 @@ export function generatePerformanceReport(): string {
     report += `  Total: ${stats.total}ms\n\n`
   }
 
-  const totalDuration = Object.values(summary).reduce(
+  const totalDuration = ObjectValues(summary).reduce(
     (sum, s) => sum + s.total,
     0,
   )
-  report += `Total measured time: ${Math.round(totalDuration * 100) / 100}ms\n`
+  report += `Total measured time: ${MathRound(totalDuration * 100) / 100}ms\n`
 
   return report
 }
@@ -170,8 +180,8 @@ export function getPerformanceSummary(): Record<
     }
     stats.count++
     stats.total += duration
-    stats.min = Math.min(stats.min, duration)
-    stats.max = Math.max(stats.max, duration)
+    stats.min = MathMin(stats.min, duration)
+    stats.max = MathMax(stats.max, duration)
   }
 
   // Calculate averages and return with proper typing
@@ -183,13 +193,13 @@ export function getPerformanceSummary(): Record<
     { count: number; total: number; avg: number; min: number; max: number }
   >
 
-  for (const { 0: operation, 1: stats } of Object.entries(summary)) {
+  for (const { 0: operation, 1: stats } of ObjectEntries(summary)) {
     result[operation] = {
       count: stats.count,
-      total: Math.round(stats.total * 100) / 100,
-      avg: Math.round((stats.total / stats.count) * 100) / 100,
-      min: Math.round(stats.min * 100) / 100,
-      max: Math.round(stats.max * 100) / 100,
+      total: MathRound(stats.total * 100) / 100,
+      avg: MathRound((stats.total / stats.count) * 100) / 100,
+      min: MathRound(stats.min * 100) / 100,
+      max: MathRound(stats.max * 100) / 100,
     }
   }
 
@@ -299,7 +309,7 @@ export function perfCheckpoint(
   const metric: PerformanceMetrics = {
     operation: `checkpoint:${checkpoint}`,
     duration: 0,
-    timestamp: Date.now(),
+    timestamp: DateNow(),
     ...(metadata ? { metadata } : {}),
   }
 
@@ -339,8 +349,8 @@ export function perfTimer(
     const metric: PerformanceMetrics = {
       operation,
       // Round to 2 decimals
-      duration: Math.round(duration * 100) / 100,
-      timestamp: Date.now(),
+      duration: MathRound(duration * 100) / 100,
+      timestamp: DateNow(),
       metadata: { ...metadata, ...additionalMetadata },
     }
 
@@ -367,7 +377,7 @@ export function printPerformanceSummary(): void {
   }
 
   const summary = getPerformanceSummary()
-  const operations = Object.keys(summary).sort()
+  const operations = ObjectKeys(summary).sort()
 
   debugLog('[perf]\n=== Performance Summary ===')
 
@@ -408,18 +418,18 @@ export function trackMemory(label: string): number {
   }
 
   const usage = process.memoryUsage()
-  const heapUsedMB = Math.round((usage.heapUsed / 1024 / 1024) * 100) / 100
+  const heapUsedMB = MathRound((usage.heapUsed / 1024 / 1024) * 100) / 100
 
   debugLog(`[perf] [MEMORY] ${label}: ${heapUsedMB}MB heap used`)
 
   const metric: PerformanceMetrics = {
     operation: `checkpoint:memory:${label}`,
     duration: 0,
-    timestamp: Date.now(),
+    timestamp: DateNow(),
     metadata: {
       heapUsed: heapUsedMB,
-      heapTotal: Math.round((usage.heapTotal / 1024 / 1024) * 100) / 100,
-      external: Math.round((usage.external / 1024 / 1024) * 100) / 100,
+      heapTotal: MathRound((usage.heapTotal / 1024 / 1024) * 100) / 100,
+      external: MathRound((usage.external / 1024 / 1024) * 100) / 100,
     },
   }
 

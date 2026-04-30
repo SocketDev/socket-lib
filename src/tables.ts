@@ -6,6 +6,8 @@
 import colors from './external/yoctocolors-cjs'
 import { stringWidth } from './strings'
 
+import { MathMax } from './primordials'
+
 export type ColumnAlignment = 'left' | 'right' | 'center'
 
 /**
@@ -37,7 +39,7 @@ function padText(
   align: ColumnAlignment = 'left',
 ): string {
   const textWidth = displayWidth(text)
-  const padding = Math.max(0, width - textWidth)
+  const padding = MathMax(0, width - textWidth)
 
   switch (align) {
     case 'right':
@@ -90,10 +92,10 @@ export function formatSimpleTable(
   // Calculate column widths
   const widths = columns.map(col => {
     const headerWidth = displayWidth(col.header)
-    const maxDataWidth = Math.max(
+    const maxDataWidth = MathMax(
       ...data.map(row => displayWidth(String(row[col.key] ?? ''))),
     )
-    return col.width ?? Math.max(headerWidth, maxDataWidth)
+    return col.width ?? MathMax(headerWidth, maxDataWidth)
   })
 
   const lines: string[] = []
@@ -163,10 +165,10 @@ export function formatTable(
   // Calculate column widths
   const widths = columns.map(col => {
     const headerWidth = displayWidth(col.header)
-    const maxDataWidth = Math.max(
+    const maxDataWidth = MathMax(
       ...data.map(row => displayWidth(String(row[col.key] ?? ''))),
     )
-    return col.width ?? Math.max(headerWidth, maxDataWidth)
+    return col.width ?? MathMax(headerWidth, maxDataWidth)
   })
 
   const lines: string[] = []

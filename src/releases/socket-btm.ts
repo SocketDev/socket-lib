@@ -14,6 +14,8 @@ import { downloadGitHubRelease } from './github-downloads'
 
 import type { AssetPattern, DownloadGitHubReleaseConfig } from './github-types'
 
+import { ErrorCtor } from '../primordials'
+
 export type { Arch, Libc, Platform }
 
 /**
@@ -221,7 +223,7 @@ export async function downloadSocketBtmRelease(
     } else {
       // Pattern provided (wildcard string, object, or RegExp) - need to find matching asset.
       if (tag) {
-        throw new Error(
+        throw new ErrorCtor(
           'Cannot use asset pattern with explicit tag. Either provide exact asset name or omit tag.',
         )
       }
@@ -233,7 +235,9 @@ export async function downloadSocketBtmRelease(
         })) ?? undefined
 
       if (!resolvedTag) {
-        throw new Error(`No ${tool} release with matching asset pattern found`)
+        throw new ErrorCtor(
+          `No ${tool} release with matching asset pattern found`,
+        )
       }
 
       const assetUrl = await getReleaseAssetUrl(
@@ -243,7 +247,7 @@ export async function downloadSocketBtmRelease(
       )
 
       if (!assetUrl) {
-        throw new Error(`No matching asset found in release ${resolvedTag}`)
+        throw new ErrorCtor(`No matching asset found in release ${resolvedTag}`)
       }
 
       // Extract asset name from URL.
@@ -338,7 +342,7 @@ export function getBinaryAssetName(
 ): string {
   const mappedArch = ARCH_MAP[arch]
   if (!mappedArch) {
-    throw new Error(`Unsupported architecture: ${arch}`)
+    throw new ErrorCtor(`Unsupported architecture: ${arch}`)
   }
 
   const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
@@ -354,7 +358,7 @@ export function getBinaryAssetName(
     return `${binaryBaseName}-win32-${mappedArch}${ext}`
   }
 
-  throw new Error(`Unsupported platform: ${platform}`)
+  throw new ErrorCtor(`Unsupported platform: ${platform}`)
 }
 
 /**
@@ -455,12 +459,12 @@ export function getPlatformArch(
 ): string {
   const mappedPlatform = PLATFORM_MAP[platform]
   if (!mappedPlatform) {
-    throw new Error(`Unsupported platform: ${platform}`)
+    throw new ErrorCtor(`Unsupported platform: ${platform}`)
   }
 
   const mappedArch = ARCH_MAP[arch]
   if (!mappedArch) {
-    throw new Error(`Unsupported architecture: ${arch}`)
+    throw new ErrorCtor(`Unsupported architecture: ${arch}`)
   }
 
   const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''

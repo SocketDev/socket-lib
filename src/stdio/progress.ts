@@ -8,6 +8,14 @@ import process from 'node:process'
 import colors from '../external/yoctocolors-cjs'
 import { repeatString, stripAnsi } from '../strings'
 
+import {
+  DateNow,
+  MathFloor,
+  MathMax,
+  MathMin,
+  ObjectEntries,
+} from '../primordials'
+
 export interface ProgressBarOptions {
   /**
    * Width of the progress bar in characters.
@@ -90,7 +98,7 @@ export class ProgressBar {
    */
   constructor(total: number, options?: ProgressBarOptions) {
     this.total = total
-    this.startTime = Date.now()
+    this.startTime = DateNow()
     this.stream = options?.stream || process.stderr
     this.options = {
       width: 40,
@@ -125,10 +133,10 @@ export class ProgressBar {
       return
     }
 
-    this.current = Math.min(current, this.total)
+    this.current = MathMin(current, this.total)
 
     // Throttle rendering
-    const now = Date.now()
+    const now = DateNow()
     if (
       now - this.lastRender < (this.options.renderThrottle ?? 16) &&
       this.current < this.total
@@ -172,8 +180,8 @@ export class ProgressBar {
 
     // Calculate values
     const percent =
-      this.total === 0 ? 0 : Math.floor((this.current / this.total) * 100)
-    const elapsed = Date.now() - this.startTime
+      this.total === 0 ? 0 : MathFloor((this.current / this.total) * 100)
+    const elapsed = DateNow() - this.startTime
     const eta =
       this.current === 0
         ? 0
@@ -184,11 +192,11 @@ export class ProgressBar {
     const filledWidth =
       this.total === 0
         ? 0
-        : Math.min(
+        : MathMin(
             availableWidth,
             Math.floor((this.current / this.total) * availableWidth),
           )
-    const emptyWidth = Math.max(0, availableWidth - filledWidth)
+    const emptyWidth = MathMax(0, availableWidth - filledWidth)
 
     const filled = repeatString(this.options.complete ?? '█', filledWidth)
     const empty = repeatString(this.options.incomplete ?? '░', emptyWidth)
@@ -205,7 +213,7 @@ export class ProgressBar {
 
     // Replace custom tokens
     if (tokens) {
-      for (const [key, value] of Object.entries(tokens)) {
+      for (const [key, value] of ObjectEntries(tokens)) {
         output = output.replace(`:${key}`, String(value))
       }
     }
@@ -234,11 +242,11 @@ export class ProgressBar {
   private formatTime(ms: number): string {
     // Clamp negatives (can happen when current > total due to over-ticking
     // or clock skew) to 0 so we don't render "-1m59s".
-    const seconds = Math.max(0, Math.round(ms / 1000))
+    const seconds = MathMax(0, Math.round(ms / 1000))
     if (seconds < 60) {
       return `${seconds}s`
     }
-    const minutes = Math.floor(seconds / 60)
+    const minutes = MathFloor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}m${remainingSeconds}s`
   }
@@ -286,7 +294,7 @@ export function createProgressIndicator(
   total: number,
   label?: string | undefined,
 ): string {
-  const percent = total === 0 ? 0 : Math.floor((current / total) * 100)
+  const percent = total === 0 ? 0 : MathFloor((current / total) * 100)
   const progress = `${current}/${total}`
 
   let output = ''

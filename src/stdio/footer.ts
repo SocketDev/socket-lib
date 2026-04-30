@@ -6,6 +6,8 @@
 import colors from '../external/yoctocolors-cjs'
 import { repeatString } from '../strings'
 
+import { DateCtor, DateNow } from '../primordials'
+
 export interface FooterOptions {
   /**
    * Width of the footer border in characters.
@@ -106,12 +108,12 @@ export function createFooter(
   }
 
   if (showTimestamp) {
-    const timestamp = new Date().toISOString()
+    const timestamp = new DateCtor().toISOString()
     lines.push(colors.gray(`Completed at: ${timestamp}`))
   }
 
   if (showDuration && startTime) {
-    const duration = Date.now() - startTime
+    const duration = DateNow() - startTime
     const seconds = (duration / 1000).toFixed(2)
     lines.push(colors.gray(`Duration: ${seconds}s`))
   }

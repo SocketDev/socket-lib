@@ -7,6 +7,13 @@ import { WIN32 } from '../constants/platform'
 
 import { search } from '../strings'
 
+import {
+  BufferIsBuffer,
+  StringPrototypeCharAt,
+  StringPrototypeCharCodeAt,
+  StringPrototypeStartsWith,
+} from '../primordials'
+
 // Character code constants.
 // '\'
 const CHAR_BACKWARD_SLASH = 92
@@ -28,26 +35,7 @@ const msysDriveRegExp = /^\/([a-zA-Z])(\/|$)/
 const slashRegExp = /[/\\]/
 const nodeModulesPathRegExp = /(?:^|[/\\])node_modules(?:[/\\]|$)/
 
-let _buffer: typeof import('node:buffer') | undefined
 let _url: typeof import('node:url') | undefined
-
-/**
- * Lazily load the buffer module.
- *
- * Performs on-demand loading of Node.js buffer module to avoid initialization
- * overhead and potential Webpack bundling errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getBuffer() {
-  if (_buffer === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _buffer = /*@__PURE__*/ require('node:buffer')
-  }
-  return _buffer as typeof import('node:buffer')
-}
 
 /**
  * Lazily load the url module.
@@ -214,8 +202,8 @@ function relative(from: string, to: string): string {
   let i = 0
 
   for (; i < length; i += 1) {
-    let fromCode = actualFrom.charCodeAt(fromStart + i)
-    let toCode = actualTo.charCodeAt(toStart + i)
+    let fromCode = StringPrototypeCharCodeAt(actualFrom, fromStart + i)
+    let toCode = StringPrototypeCharCodeAt(actualTo, toStart + i)
 
     // Paths diverge at this character.
     // On Windows, perform case-insensitive comparison.
@@ -237,7 +225,7 @@ function relative(from: string, to: string): string {
     // Track directory separators (both forward and backslash for Windows compatibility).
     // We need this to ensure we only split at directory boundaries.
     // Use original fromCode from actualFrom (before case normalization).
-    if (isPathSeparator(actualFrom.charCodeAt(fromStart + i))) {
+    if (isPathSeparator(StringPrototypeCharCodeAt(actualFrom, fromStart + i))) {
       lastCommonSep = i
     }
   }
@@ -246,7 +234,7 @@ function relative(from: string, to: string): string {
   if (i === length) {
     if (toLen > length) {
       // Destination path is longer.
-      const toCode = actualTo.charCodeAt(toStart + i)
+      const toCode = StringPrototypeCharCodeAt(actualTo, toStart + i)
       if (isPathSeparator(toCode)) {
         // `from` is the exact base path for `to`.
         // Example: from='/foo/bar'; to='/foo/bar/baz' → 'baz'
@@ -260,7 +248,7 @@ function relative(from: string, to: string): string {
       }
     } else if (fromLen > length) {
       // Source path is longer.
-      const fromCode = actualFrom.charCodeAt(fromStart + i)
+      const fromCode = StringPrototypeCharCodeAt(actualFrom, fromStart + i)
       if (isPathSeparator(fromCode)) {
         // `to` is the exact base path for `from`.
         // Example: from='/foo/bar/baz'; to='/foo/bar' → '..'
@@ -281,7 +269,7 @@ function relative(from: string, to: string): string {
   // For each directory, we need to go up one level ('../').
   // Example: from='/a/b/c', to='/a/x' → common='a', need '../..' (up from c, up from b)
   for (i = fromStart + lastCommonSep + 1; i <= fromEnd; i += 1) {
-    const code = actualFrom.charCodeAt(i)
+    const code = StringPrototypeCharCodeAt(actualFrom, i)
 
     // At the end of the path or at a separator, add '../'.
     if (i === fromEnd || isPathSeparator(code)) {
@@ -466,7 +454,7 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
     return false
   }
 
-  const code = filepath.charCodeAt(0)
+  const code = StringPrototypeCharCodeAt(filepath, 0)
 
   // POSIX: absolute paths start with forward slash '/'.
   // This is the simplest case and works for all UNIX-like systems.
@@ -492,8 +480,8 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
     // This matches patterns like 'C:\', 'D:/', 'c:\Users', etc.
     if (
       isWindowsDeviceRoot(code) &&
-      filepath.charCodeAt(1) === CHAR_COLON &&
-      isPathSeparator(filepath.charCodeAt(2))
+      StringPrototypeCharCodeAt(filepath, 1) === CHAR_COLON &&
+      isPathSeparator(StringPrototypeCharCodeAt(filepath, 2))
     ) {
       return true
     }
@@ -600,7 +588,10 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
     // Scoped packages: @scope/name (exactly 2 parts, no backslashes).
     // Paths: @scope/name/subpath (3+ parts) or @scope\name (Windows backslash).
     // Special case: '@/' is a valid path (already handled by separator check).
-    if (filepath.startsWith('@') && !filepath.startsWith('@/')) {
+    if (
+      StringPrototypeStartsWith(filepath, '@') &&
+      !StringPrototypeStartsWith(filepath, '@/')
+    ) {
       const parts = filepath.split('/')
       // If exactly @scope/name with no Windows separators, it's a package name.
       if (parts.length <= 2 && !parts[1]?.includes('\\')) {
@@ -762,7 +753,8 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     return '.'
   }
   if (length < 2) {
-    return length === 1 && filepath.charCodeAt(0) === 92 /*'\\'*/
+    return length === 1 &&
+      StringPrototypeCharCodeAt(filepath, 0) === 92 /*'\\'*/
       ? '/'
       : filepath
   }
@@ -777,13 +769,13 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
   // are okay to convert to forward slashes.
   // https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
   let prefix = ''
-  if (length > 4 && filepath.charCodeAt(3) === 92 /*'\\'*/) {
-    const code2 = filepath.charCodeAt(2)
+  if (length > 4 && StringPrototypeCharCodeAt(filepath, 3) === 92 /*'\\'*/) {
+    const code2 = StringPrototypeCharCodeAt(filepath, 2)
     // Look for \\?\ or \\.\
     if (
       (code2 === 63 /*'?'*/ || code2 === 46) /*'.'*/ &&
-      filepath.charCodeAt(0) === 92 /*'\\'*/ &&
-      filepath.charCodeAt(1) === 92 /*'\\'*/
+      StringPrototypeCharCodeAt(filepath, 0) === 92 /*'\\'*/ &&
+      StringPrototypeCharCodeAt(filepath, 1) === 92 /*'\\'*/
     ) {
       start = 2
       prefix = '//'
@@ -794,12 +786,12 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     // UNC paths must start with exactly two slashes, not more
     if (
       length > 2 &&
-      ((filepath.charCodeAt(0) === 92 /*'\\'*/ &&
-        filepath.charCodeAt(1) === 92 /*'\\'*/ &&
-        filepath.charCodeAt(2) !== 92) /*'\\'*/ ||
-        (filepath.charCodeAt(0) === 47 /*'/'*/ &&
-          filepath.charCodeAt(1) === 47 /*'/'*/ &&
-          filepath.charCodeAt(2) !== 47)) /*'/'*/
+      ((StringPrototypeCharCodeAt(filepath, 0) === 92 /*'\\'*/ &&
+        StringPrototypeCharCodeAt(filepath, 1) === 92 /*'\\'*/ &&
+        StringPrototypeCharCodeAt(filepath, 2) !== 92) /*'\\'*/ ||
+        (StringPrototypeCharCodeAt(filepath, 0) === 47 /*'/'*/ &&
+          StringPrototypeCharCodeAt(filepath, 1) === 47 /*'/'*/ &&
+          StringPrototypeCharCodeAt(filepath, 2) !== 47)) /*'/'*/
     ) {
       // Check if this is a valid UNC path: must have server/share format
       // Find the first segment (server name) and second segment (share name)
@@ -810,15 +802,15 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       let i = 2
       while (
         i < length &&
-        (filepath.charCodeAt(i) === 47 /*'/'*/ ||
-          filepath.charCodeAt(i) === 92) /*'\\'*/
+        (StringPrototypeCharCodeAt(filepath, i) === 47 /*'/'*/ ||
+          StringPrototypeCharCodeAt(filepath, i) === 92) /*'\\'*/
       ) {
         i++
       }
 
       // Find the end of first segment (server name)
       while (i < length) {
-        const char = filepath.charCodeAt(i)
+        const char = StringPrototypeCharCodeAt(filepath, i)
         if (char === 47 /*'/'*/ || char === 92 /*'\\'*/) {
           firstSegmentEnd = i
           break
@@ -831,8 +823,8 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
         i = firstSegmentEnd
         while (
           i < length &&
-          (filepath.charCodeAt(i) === 47 /*'/'*/ ||
-            filepath.charCodeAt(i) === 92) /*'\\'*/
+          (StringPrototypeCharCodeAt(filepath, i) === 47 /*'/'*/ ||
+            StringPrototypeCharCodeAt(filepath, i) === 92) /*'\\'*/
         ) {
           i++
         }
@@ -848,10 +840,10 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
         prefix = '//'
       } else {
         // Just repeated slashes, treat as regular path
-        code = filepath.charCodeAt(start)
+        code = StringPrototypeCharCodeAt(filepath, start)
         while (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
           start += 1
-          code = filepath.charCodeAt(start)
+          code = StringPrototypeCharCodeAt(filepath, start)
         }
         if (start) {
           prefix = '/'
@@ -859,10 +851,10 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       }
     } else {
       // Trim leading slashes for regular paths
-      code = filepath.charCodeAt(start)
+      code = StringPrototypeCharCodeAt(filepath, start)
       while (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
         start += 1
-        code = filepath.charCodeAt(start)
+        code = StringPrototypeCharCodeAt(filepath, start)
       }
       if (start) {
         prefix = '/'
@@ -926,10 +918,10 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       }
     }
     start = nextIndex + 1
-    code = filepath.charCodeAt(start)
+    code = StringPrototypeCharCodeAt(filepath, start)
     while (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
       start += 1
-      code = filepath.charCodeAt(start)
+      code = StringPrototypeCharCodeAt(filepath, start)
     }
     nextIndex = search(filepath, slashRegExp, { fromIndex: start })
   }
@@ -1029,8 +1021,7 @@ export function pathLikeToString(
   if (typeof pathLike === 'string') {
     return pathLike
   }
-  const { Buffer } = getBuffer()
-  if (Buffer.isBuffer(pathLike)) {
+  if (BufferIsBuffer!(pathLike)) {
     return pathLike.toString('utf8')
   }
   const url = getUrl()
@@ -1057,17 +1048,17 @@ export function pathLikeToString(
       // On Windows, strip the leading slash only for malformed URLs that lack drive letters
       // (e.g., `/path` should be `path`, but `/C:/path` should be `C:/path`).
       // On Unix, keep the leading slash for absolute paths (e.g., `/home/user`).
-      if (WIN32 && decodedPathname.startsWith('/')) {
+      if (WIN32 && StringPrototypeStartsWith(decodedPathname, '/')) {
         // Check for drive letter pattern following Node.js source: /[a-zA-Z]:/
         // Character at index 1 should be a letter, character at index 2 should be ':'
         // Convert to lowercase
-        const letter = decodedPathname.charCodeAt(1) | 0x20
+        const letter = StringPrototypeCharCodeAt(decodedPathname, 1) | 0x20
         const hasValidDriveLetter =
           decodedPathname.length >= 3 &&
           letter >= 97 &&
           // 'a' to 'z'
           letter <= 122 &&
-          decodedPathname.charAt(2) === ':'
+          StringPrototypeCharAt(decodedPathname, 2) === ':'
 
         if (!hasValidDriveLetter) {
           // On Windows, preserve Unix-style absolute paths that don't start with a drive letter.
@@ -1264,7 +1255,10 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
 export function trimLeadingDotSlash(pathLike: string | Buffer | URL): string {
   const filepath = pathLikeToString(pathLike)
   // Only trim ./ not ../
-  if (filepath.startsWith('./') || filepath.startsWith('.\\')) {
+  if (
+    StringPrototypeStartsWith(filepath, './') ||
+    StringPrototypeStartsWith(filepath, '.\\')
+  ) {
     return filepath.slice(2)
   }
   return filepath

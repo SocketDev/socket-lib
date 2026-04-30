@@ -19,6 +19,8 @@
 import { validateSchema } from './validate'
 import type { Infer } from './types'
 
+import { ErrorCtor } from '../primordials'
+
 /**
  * Parse `data` against `schema` and return the validated value.
  *
@@ -34,5 +36,5 @@ export function parseSchema<S>(schema: S, data: unknown): Infer<S> {
   const summary = result.errors
     .map(e => `${e.path.join('.') || '(root)'}: ${e.message}`)
     .join(', ')
-  throw new Error(`Validation failed: ${summary}`)
+  throw new ErrorCtor(`Validation failed: ${summary}`)
 }

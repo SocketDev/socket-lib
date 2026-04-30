@@ -6,6 +6,14 @@
 import { ansiRegex, stripAnsi } from './ansi'
 import type { eastAsianWidth as eastAsianWidthType } from './external/get-east-asian-width'
 
+import {
+  MathFloor,
+  MathMax,
+  StringPrototypeCharCodeAt,
+  StringPrototypeCodePointAt,
+  StringPrototypeRepeat,
+} from './primordials'
+
 let _eastAsianWidth: typeof eastAsianWidthType | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getEastAsianWidth() {
@@ -123,7 +131,7 @@ export function centerText(text: string, width: number): string {
   }
 
   const padding = width - textLength
-  const leftPad = Math.floor(padding / 2)
+  const leftPad = MathFloor(padding / 2)
   const rightPad = padding - leftPad
 
   return ' '.repeat(leftPad) + text + ' '.repeat(rightPad)
@@ -271,7 +279,7 @@ export function repeatString(str: string, count: number): string {
   if (count <= 0) {
     return ''
   }
-  return str.repeat(count)
+  return StringPrototypeRepeat(str, count)
 }
 
 export interface SearchOptions {
@@ -329,7 +337,7 @@ export function search(
   if (fromIndex === 0) {
     return str.search(regexp)
   }
-  const offset = fromIndex < 0 ? Math.max(length + fromIndex, 0) : fromIndex
+  const offset = fromIndex < 0 ? MathMax(length + fromIndex, 0) : fromIndex
   const result = str.slice(offset).search(regexp)
   return result === -1 ? -1 : result + offset
 }
@@ -620,7 +628,7 @@ export function stringWidth(text: string): number {
     // Example: If a cluster starts with format characters, skip them to find
     // the actual visible character that determines width.
     const baseSegment = segment.replace(leadingNonPrintingRegex, '')
-    const codePoint = baseSegment.codePointAt(0)
+    const codePoint = StringPrototypeCodePointAt(baseSegment, 0)
 
     if (codePoint === undefined) {
       // If no visible character remains after stripping non-printing chars, skip.
@@ -661,10 +669,10 @@ export function stringWidth(text: string): number {
     // The base character width was already calculated above.
     if (segment.length > 1) {
       for (const char of segment.slice(1)) {
-        const charCode = char.charCodeAt(0)
+        const charCode = StringPrototypeCharCodeAt(char, 0)
         // Check if character is in Halfwidth and Fullwidth Forms range.
         if (charCode >= 0xff_00 && charCode <= 0xff_ef) {
-          const trailingCodePoint = char.codePointAt(0)
+          const trailingCodePoint = StringPrototypeCodePointAt(char, 0)
           if (trailingCodePoint !== undefined) {
             // Add the East Asian Width of this trailing character.
             // Most halfwidth forms contribute 1 column, fullwidth contribute 2.
@@ -710,7 +718,9 @@ export function stringWidth(text: string): number {
 export function stripBom(str: string): string {
   // In JavaScript, string data is stored as UTF-16, so BOM is 0xFEFF.
   // https://tc39.es/ecma262/#sec-unicode-format-control-characters
-  return str.length > 0 && str.charCodeAt(0) === 0xfe_ff ? str.slice(1) : str
+  return str.length > 0 && StringPrototypeCharCodeAt(str, 0) === 0xfe_ff
+    ? str.slice(1)
+    : str
 }
 
 /**
@@ -799,12 +809,12 @@ export function trimNewlines(str: string): string {
   if (length === 0) {
     return str
   }
-  const first = str.charCodeAt(0)
+  const first = StringPrototypeCharCodeAt(str, 0)
   const noFirstNewline = first !== 13 /*'\r'*/ && first !== 10 /*'\n'*/
   if (length === 1) {
     return noFirstNewline ? str : ''
   }
-  const last = str.charCodeAt(length - 1)
+  const last = StringPrototypeCharCodeAt(str, length - 1)
   const noLastNewline = last !== 13 /*'\r'*/ && last !== 10 /*'\n'*/
   if (noFirstNewline && noLastNewline) {
     return str
@@ -812,14 +822,14 @@ export function trimNewlines(str: string): string {
   let start = 0
   let end = length
   while (start < end) {
-    const code = str.charCodeAt(start)
+    const code = StringPrototypeCharCodeAt(str, start)
     if (code !== 13 /*'\r'*/ && code !== 10 /*'\n'*/) {
       break
     }
     start += 1
   }
   while (end > start) {
-    const code = str.charCodeAt(end - 1)
+    const code = StringPrototypeCharCodeAt(str, end - 1)
     if (code !== 13 /*'\r'*/ && code !== 10 /*'\n'*/) {
       break
     }

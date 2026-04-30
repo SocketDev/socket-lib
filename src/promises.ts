@@ -7,6 +7,15 @@ import { arrayChunk } from './arrays'
 import { UNDEFINED_TOKEN } from './constants/core'
 import { getAbortSignal } from './constants/process'
 
+import {
+  MathFloor,
+  MathMax,
+  MathMin,
+  MathRandom,
+  PromiseAllSettled,
+  PromiseCtor,
+} from './primordials'
+
 const abortSignal = getAbortSignal()
 
 /**
@@ -249,7 +258,7 @@ export function normalizeIterationOptions(
   } = { __proto__: null, ...opts } as IterationOptions
 
   // Ensure concurrency is at least 1
-  const normalizedConcurrency = Math.max(1, concurrency)
+  const normalizedConcurrency = MathMax(1, concurrency)
   const retryOpts = resolveRetryOptions(retries)
   return {
     __proto__: null,
@@ -374,7 +383,7 @@ export async function pEach<T>(
     }
     // Process each item in the chunk concurrently.
     // eslint-disable-next-line no-await-in-loop
-    await Promise.allSettled(
+    await PromiseAllSettled(
       chunk.map((item: T) =>
         pRetry((...args: unknown[]) => callbackFn(args[0] as T), {
           ...retries,
@@ -532,7 +541,7 @@ export async function pFilterChunk<T>(
     } else {
       const chunk = chunks[i] as T[]
       // eslint-disable-next-line no-await-in-loop
-      const settled = await Promise.allSettled(
+      const settled = await PromiseAllSettled(
         chunk.map(value =>
           pRetry((...args: unknown[]) => callbackFn(args[0] as T), {
             ...retryOpts,
@@ -680,10 +689,10 @@ export async function pRetry<T>(
       let waitTime = delay
       if (jitter) {
         // Add randomness: Pick a value between 0 and `delay`.
-        waitTime += Math.floor(Math.random() * delay)
+        waitTime += MathFloor(MathRandom() * delay)
       }
       // Clamp wait time to max delay.
-      waitTime = Math.min(waitTime, maxDelayMs as number)
+      waitTime = MathMin(waitTime, maxDelayMs as number)
       if (typeof onRetry === 'function') {
         try {
           const result = onRetry((retries as number) - attempts, e, waitTime)
@@ -692,7 +701,7 @@ export async function pRetry<T>(
           }
           // If onRetry returns a number, use it as the custom delay.
           if (typeof result === 'number' && result >= 0) {
-            waitTime = Math.min(result, maxDelayMs as number)
+            waitTime = MathMin(result, maxDelayMs as number)
           }
         } catch (e) {
           if (onRetryRethrow) {
@@ -715,7 +724,7 @@ export async function pRetry<T>(
       }
 
       // Exponentially increase the delay for the next attempt, capping at maxDelayMs.
-      delay = Math.min(delay * (backoffFactor as number), maxDelayMs as number)
+      delay = MathMin(delay * (backoffFactor as number), maxDelayMs as number)
     }
   }
   if (error !== UNDEFINED_TOKEN) {
@@ -819,7 +828,7 @@ export const withResolvers: <T>() => PromiseWithResolvers<T> =
         // are assigned before the constructor returns.
         let resolve!: (value: T | PromiseLike<T>) => void
         let reject!: (reason?: unknown) => void
-        const promise = new Promise<T>((res, rej) => {
+        const promise = new PromiseCtor<T>((res, rej) => {
           resolve = res
           reject = rej
         })

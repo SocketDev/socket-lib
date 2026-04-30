@@ -8,7 +8,18 @@ import process from 'node:process'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import yoctocolorsCjs from './external/yoctocolors-cjs'
 
-import { ReflectApply, ReflectConstruct } from './primordials'
+import {
+  ErrorCtor,
+  MathMin,
+  ObjectDefineProperties,
+  ObjectEntries,
+  ObjectGetOwnPropertySymbols,
+  ProxyCtor,
+  ReflectApply,
+  ReflectConstruct,
+  ReflectOwnKeys,
+  WeakMapCtor,
+} from './primordials'
 import { applyLinePrefix, isBlankString } from './strings'
 import { getTheme, onThemeChange } from './themes/context'
 import { THEMES } from './themes/themes'
@@ -182,7 +193,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     updateSymbols()
   }
 
-  for (const trapName of Reflect.ownKeys(Reflect)) {
+  for (const trapName of ReflectOwnKeys(Reflect)) {
     const fn = (Reflect as Record<PropertyKey, unknown>)[trapName]
     if (typeof fn === 'function') {
       ;(handler as Record<string, (...args: unknown[]) => unknown>)[
@@ -199,7 +210,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     reset()
   })
 
-  return new Proxy(target, handler)
+  return new ProxyCtor(target, handler)
 })()
 
 const boundConsoleEntries = [
@@ -250,7 +261,7 @@ const maxIndentation = 1000
  * This allows logger to be imported during early Node.js bootstrap before
  * stdout is ready, avoiding ERR_CONSOLE_WRITABLE_STREAM errors.
  */
-const privateConsole = new WeakMap()
+const privateConsole = new WeakMapCtor()
 
 /**
  * WeakMap storing constructor arguments for lazy Console initialization.
@@ -263,7 +274,7 @@ const privateConsole = new WeakMap()
  *
  * The args are deleted from the WeakMap after Console is created (memory cleanup).
  */
-const privateConstructorArgs = new WeakMap()
+const privateConstructorArgs = new WeakMapCtor()
 
 /**
  * Symbol for incrementing the internal log call counter.
@@ -849,7 +860,7 @@ export class Logger {
    */
   clearVisible() {
     if (this.#boundStream) {
-      throw new Error(
+      throw new ErrorCtor(
         'clearVisible() is only available on the main logger instance, not on stream-bound instances',
       )
     }
@@ -1207,7 +1218,7 @@ export class Logger {
    * ```
    */
   indent(spaces = 2) {
-    const spacesToAdd = ' '.repeat(Math.min(spaces, maxIndentation))
+    const spacesToAdd = ' '.repeat(MathMin(spaces, maxIndentation))
     if (this.#boundStream) {
       // Only affect bound stream
       const current = this.#getIndent(this.#boundStream)
@@ -1765,7 +1776,7 @@ function ensurePrototypeInitialized() {
       } as PropertyDescriptor,
     ],
   ]
-  for (const { 0: key, 1: value } of Object.entries(globalConsole)) {
+  for (const { 0: key, 1: value } of ObjectEntries(globalConsole)) {
     if (!(Logger.prototype as any)[key] && typeof value === 'function') {
       // Dynamically name the log method without using Object.defineProperty.
       const { [key]: func } = {
@@ -1807,7 +1818,7 @@ function ensurePrototypeInitialized() {
       ])
     }
   }
-  Object.defineProperties(Logger.prototype, Object.fromEntries(entries))
+  ObjectDefineProperties(Logger.prototype, Object.fromEntries(entries))
 }
 
 /**
@@ -1819,7 +1830,7 @@ function ensurePrototypeInitialized() {
  */
 function getConsoleSymbols(): symbol[] {
   if (_consoleSymbols === undefined) {
-    _consoleSymbols = Object.getOwnPropertySymbols(globalConsole)
+    _consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
   }
   return _consoleSymbols
 }

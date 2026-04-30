@@ -13,12 +13,14 @@ import { findPackageExtensions } from './operations'
 
 import type { NormalizeOptions, PackageJson } from '../packages'
 
+import { RegExpCtor, StringPrototypeStartsWith } from '../primordials'
+
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn
 
 function getEscapedScopeRegExp(): RegExp {
   const firstChar = REGISTRY_SCOPE_DELIMITER[0] as string
-  return new RegExp(
+  return new RegExpCtor(
     `^[^${escapeRegExp(firstChar)}]+${escapeRegExp(REGISTRY_SCOPE_DELIMITER)}(?!${escapeRegExp(firstChar)})`,
   )
 }
@@ -99,7 +101,10 @@ export function resolveEscapedScope(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveOriginalPackageName(sockRegPkgName: string): string {
-  const name = sockRegPkgName.startsWith(`${SOCKET_REGISTRY_SCOPE}/`)
+  const name = StringPrototypeStartsWith(
+    sockRegPkgName,
+    `${SOCKET_REGISTRY_SCOPE}/`,
+  )
     ? sockRegPkgName.slice(SOCKET_REGISTRY_SCOPE.length + 1)
     : sockRegPkgName
   const escapedScope = resolveEscapedScope(name)

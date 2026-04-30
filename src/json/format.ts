@@ -4,6 +4,8 @@
  * determining when JSON files should be saved based on content changes.
  */
 
+import { JSONStringify, ObjectKeys } from '../primordials'
+
 /**
  * Symbols used to store formatting metadata in JSON objects.
  */
@@ -213,7 +215,7 @@ export function sortKeys(
   obj: Record<string, unknown>,
 ): Record<string, unknown> {
   const sorted: Record<string, unknown> = { __proto__: null }
-  const keys = Object.keys(obj).sort()
+  const keys = ObjectKeys(obj).sort()
   for (const key of keys) {
     sorted[key] = obj[key]
   }
@@ -245,7 +247,7 @@ export function stringifyWithFormatting(
   const format = indent === undefined || indent === null ? '  ' : indent
   const eol = newline === undefined || newline === null ? '\n' : newline
 
-  return `${JSON.stringify(content, undefined, format)}\n`.replace(/\n/g, eol)
+  return `${JSONStringify(content, undefined, format)}\n`.replace(/\n/g, eol)
 }
 
 /**

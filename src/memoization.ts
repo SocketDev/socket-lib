@@ -5,6 +5,15 @@
 
 import { debugLog } from './debug'
 
+import {
+  DateNow,
+  JSONStringify,
+  MapCtor,
+  PromiseResolve,
+  TypeErrorCtor,
+  WeakMapCtor,
+} from './primordials'
+
 /**
  * Global registry of memoization cache clear functions.
  */
@@ -43,7 +52,7 @@ type CacheEntry<T> = {
  * @private
  */
 function defaultKeyGen(args: readonly unknown[]): string {
-  return JSON.stringify(args, (_key, value) => {
+  return JSONStringify(args, (_key, value) => {
     if (value === undefined) {
       return '\0undefined'
     }
@@ -147,14 +156,14 @@ export function memoize<Args extends unknown[], Result>(
   } = options
 
   if (ttl < 0) {
-    throw new TypeError('TTL must be non-negative')
+    throw new TypeErrorCtor('TTL must be non-negative')
   }
 
   // LRU via Map insertion-order: delete+re-insert moves a key to the
   // end in O(1). The oldest key is `cache.keys().next().value`. This
   // replaces the prior parallel `accessOrder: string[]` which cost
   // O(n) per hit (indexOf + splice) and scaled poorly for large caches.
-  const cache = new Map<string, CacheEntry<Result>>()
+  const cache = new MapCtor<string, CacheEntry<Result>>()
 
   // Register for global clearing.
   cacheRegistry.push(() => {
@@ -178,7 +187,7 @@ export function memoize<Args extends unknown[], Result>(
     if (ttl === Number.POSITIVE_INFINITY) {
       return false
     }
-    return Date.now() - entry.timestamp > ttl
+    return DateNow() - entry.timestamp > ttl
   }
 
   return function memoized(...args: Args): Result {
@@ -248,7 +257,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
   // LRU via Map insertion-order: see `memoize()` above for the full
   // rationale. Key lifecycle on bump: `cache.delete(key)` +
   // `cache.set(key, entry)` moves the entry to the tail in O(1).
-  const cache = new Map<string, CacheEntry<Promise<Result>>>()
+  const cache = new MapCtor<string, CacheEntry<Promise<Result>>>()
 
   // Register for global clearing.
   cacheRegistry.push(() => {
@@ -272,7 +281,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
     if (ttl === Number.POSITIVE_INFINITY) {
       return false
     }
-    return Date.now() - entry.timestamp > ttl
+    return DateNow() - entry.timestamp > ttl
   }
 
   // Bump an existing cache entry to the tail (most-recently-used) in
@@ -283,7 +292,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
   }
 
   // Track in-flight refreshes to prevent thundering herd on TTL expiry.
-  const refreshing = new Map<string, Promise<Result>>()
+  const refreshing = new MapCtor<string, Promise<Result>>()
 
   return async function memoized(...args: Args): Promise<Result> {
     const key = keyGen(...args)
@@ -325,8 +334,8 @@ export function memoizeAsync<Args extends unknown[], Result>(
         // emptied here first).
         const entry = cache.get(key)
         if (entry) {
-          entry.value = Promise.resolve(result)
-          entry.timestamp = Date.now()
+          entry.value = PromiseResolve(result)
+          entry.timestamp = DateNow()
         }
         return result
       },
@@ -374,7 +383,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
 export function memoizeWeak<K extends object, Result>(
   fn: (key: K) => Result,
 ): (key: K) => Result {
-  const cache = new WeakMap<K, Result>()
+  const cache = new WeakMapCtor<K, Result>()
 
   return function memoized(key: K): Result {
     if (cache.has(key)) {

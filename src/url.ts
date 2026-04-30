@@ -3,6 +3,8 @@
  * Provides URL validation, normalization, and parsing helpers.
  */
 
+import { NumberIsNaN, StringPrototypeEndsWith } from './primordials'
+
 const BooleanCtor = Boolean
 const UrlCtor = URL
 
@@ -49,7 +51,7 @@ export function createRelativeUrl(
 
   if (base) {
     let baseUrl = base
-    if (!baseUrl.endsWith('/')) {
+    if (!StringPrototypeEndsWith(baseUrl, '/')) {
       baseUrl += '/'
     }
     return baseUrl + relativePath
@@ -183,7 +185,7 @@ export function urlSearchParamAsNumber(
     const value = params.get(key)
     if (value !== null) {
       const num = Number(value)
-      return !Number.isNaN(num) ? num : defaultValue
+      return !NumberIsNaN(num) ? num : defaultValue
     }
   }
   return defaultValue

@@ -11,6 +11,8 @@ import { normalizePath } from '../paths/normalize'
 
 import type { LicenseNode } from '../packages'
 
+import { ErrorCtor, MapCtor } from '../primordials'
+
 const copyLeftLicenses = getCopyLeftLicenses()
 
 let _path: typeof import('node:path') | undefined
@@ -106,7 +108,7 @@ export function collectIncompatibleLicenses(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function collectLicenseWarnings(licenseNodes: LicenseNode[]): string[] {
-  const warnings = new Map()
+  const warnings = new MapCtor()
   for (let i = 0, { length } = licenseNodes; i < length; i += 1) {
     const node = licenseNodes[i]
     if (!node) {
@@ -306,7 +308,9 @@ export function visitLicenses(ast: SpdxAstNode, visitor: LicenseVisitor): void {
   let { length: queueLength } = queue
   while (pos < queueLength) {
     if (pos === LOOP_SENTINEL) {
-      throw new Error('Detected infinite loop in ast crawl of visitLicenses')
+      throw new ErrorCtor(
+        'Detected infinite loop in ast crawl of visitLicenses',
+      )
     }
     // AST nodes can be a license node which looks like
     //   {

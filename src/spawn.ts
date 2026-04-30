@@ -42,15 +42,25 @@ import type { EventEmitter } from 'node:events'
 // @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from './external/@npmcli/promise-spawn'
 
+import {
+  ErrorCtor,
+  MapCtor,
+  ObjectDefineProperties,
+  ObjectDefineProperty,
+  ObjectGetOwnPropertyDescriptors,
+  ReflectDeleteProperty,
+  WeakMapCtor,
+} from './primordials'
+
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()
 
 // Cache for lazy stack trace computation.
-const stackCache = new WeakMap<Error, string>()
+const stackCache = new WeakMapCtor<Error, string>()
 
 // Cache for binary path resolutions to avoid repeated PATH searches.
 // Validated with existsSync() which is much cheaper than PATH search.
-const spawnBinPathCache = new Map<string, string>()
+const spawnBinPathCache = new MapCtor<string, string>()
 
 // Define BufferEncoding type for TypeScript compatibility.
 type BufferEncoding = globalThis.BufferEncoding
@@ -501,7 +511,7 @@ export function enhanceSpawnError(error: unknown): unknown {
 
   if (isSynthetic) {
     // Modify the error directly.
-    Object.defineProperty(err, 'message', {
+    ObjectDefineProperty(err, 'message', {
       __proto__: null,
       value: enhancedMessage,
       writable: true,
@@ -513,18 +523,18 @@ export function enhanceSpawnError(error: unknown): unknown {
   }
 
   // Create enhanced error with original error as cause.
-  const enhancedError = new Error(enhancedMessage, {
+  const enhancedError = new ErrorCtor(enhancedMessage, {
     cause: err,
   }) as SpawnError
 
   // Copy all spawn error properties except message and stack.
-  const descriptors = Object.getOwnPropertyDescriptors(err)
-  Reflect.deleteProperty(descriptors, 'message')
-  Reflect.deleteProperty(descriptors, 'stack')
-  Object.defineProperties(enhancedError, descriptors)
+  const descriptors = ObjectGetOwnPropertyDescriptors(err)
+  ReflectDeleteProperty(descriptors, 'message')
+  ReflectDeleteProperty(descriptors, 'stack')
+  ObjectDefineProperties(enhancedError, descriptors)
 
   // Build stack lazily on first access using WeakMap cache.
-  Object.defineProperty(enhancedError, 'stack', {
+  ObjectDefineProperty(enhancedError, 'stack', {
     __proto__: null,
     configurable: true,
     enumerable: false,

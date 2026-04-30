@@ -12,6 +12,8 @@ import { parseUrl } from '../url'
 
 import type { ProvenanceOptions } from '../packages'
 
+import { BufferFrom, JSONParse, StringPrototypeEndsWith } from '../primordials'
+
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
 // `exports.SomeName = void 0;` which causes runtime errors.
@@ -38,11 +40,11 @@ function findProvenance(attestations: unknown[]): unknown {
       // If predicate is not directly available, try to decode from DSSE envelope
       if (!predicate && att.bundle?.dsseEnvelope?.payload) {
         try {
-          const decodedPayload = Buffer.from(
+          const decodedPayload = BufferFrom!(
             att.bundle.dsseEnvelope.payload,
             'base64',
           ).toString('utf8')
-          const statement = JSON.parse(decodedPayload)
+          const statement = JSONParse(decodedPayload)
           predicate = statement.predicate
         } catch {
           // Failed to decode, continue to next attestation
@@ -135,9 +137,9 @@ function isTrustedPublisher(value: unknown): boolean {
   if (hostname) {
     return (
       hostname === 'github.com' ||
-      hostname.endsWith('.github.com') ||
+      StringPrototypeEndsWith(hostname, '.github.com') ||
       hostname === 'gitlab.com' ||
-      hostname.endsWith('.gitlab.com')
+      StringPrototypeEndsWith(hostname, '.gitlab.com')
     )
   }
 
