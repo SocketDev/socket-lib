@@ -21,6 +21,8 @@ import {
   isErrorShim,
 } from '@socketsecurity/lib/errors'
 
+import { describeRequires } from './utils/skip-helpers'
+
 describe('errorMessage', () => {
   it('returns the message of an Error', () => {
     expect(errorMessage(new Error('boom'))).toBe('boom')
@@ -315,7 +317,11 @@ describe('isErrorShim', () => {
 // present — they document the slot-based check that the shim can only
 // approximate, and ensure we're actually calling the builtin when we
 // claim to.
-describe.skipIf(typeof isErrorBuiltin !== 'function')('isErrorBuiltin', () => {
+describeRequires(
+  'Error.isError',
+  typeof isErrorBuiltin === 'function',
+  'isErrorBuiltin',
+  () => {
   // Narrow once so TS knows `isErrorBuiltin` is defined in each `it`.
   const builtin = isErrorBuiltin as (v: unknown) => v is Error
 
@@ -356,4 +362,5 @@ describe.skipIf(typeof isErrorBuiltin !== 'function')('isErrorBuiltin', () => {
   it('is the function isError delegates to when available', () => {
     expect(isError).toBe(builtin)
   })
-})
+  },
+)

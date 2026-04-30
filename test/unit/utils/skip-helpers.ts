@@ -82,3 +82,42 @@ export function describeUnixOnly(name: string, fn: SuiteFn): void {
 export function describeNetworkOnly(name: string, fn: SuiteFn): void {
   describe.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
 }
+
+/**
+ * Describe block gated on a runtime capability (engine version, native
+ * builtin, environment variable, etc.). Pass `available: true` to run,
+ * `false` to skip. The `capability` is shown in the test title as
+ * `[needs:<capability>]` so reporters can surface the reason.
+ *
+ * @example
+ * ```ts
+ * describeRequires(
+ *   'Error.isError',
+ *   typeof Error.isError === 'function',
+ *   'isErrorBuiltin',
+ *   () => {
+ *     it('uses the native builtin', () => { ... })
+ *   }
+ * )
+ * ```
+ */
+export function describeRequires(
+  capability: string,
+  available: boolean,
+  name: string,
+  fn: SuiteFn,
+): void {
+  describe.skipIf(!available)(`[needs:${capability}] ${name}`, fn)
+}
+
+/**
+ * Test gated on a runtime capability. Same shape as `describeRequires`.
+ */
+export function itRequires(
+  capability: string,
+  available: boolean,
+  name: string,
+  fn: TestFn,
+): void {
+  it.skipIf(!available)(`[needs:${capability}] ${name}`, fn)
+}
