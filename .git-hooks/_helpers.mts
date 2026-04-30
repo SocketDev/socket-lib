@@ -146,19 +146,25 @@ function isInsideBackticks(line: string, needleRe: RegExp): boolean {
   for (let i = 0; i < line.length; i++) {
     if (line[i] === '`') {
       const end = line.indexOf('`', i + 1)
-      if (end < 0) break
+      if (end < 0) {
+        break
+      }
       spans.push([i, end])
       i = end
     }
   }
-  if (spans.length === 0) return false
+  if (spans.length === 0) {
+    return false
+  }
   let m: RegExpExecArray | null
   const re = new RegExp(needleRe.source, needleRe.flags.replace('g', '') + 'g')
   while ((m = re.exec(line)) !== null) {
     const start = m.index
     const end = start + m[0].length
     const inside = spans.some(([s, e]) => start > s && end <= e)
-    if (!inside) return false
+    if (!inside) {
+      return false
+    }
   }
   return true
 }
@@ -168,10 +174,18 @@ function looksLikeDocumentation(
   needleRe: RegExp,
   rule?: string,
 ): boolean {
-  if (lineIsSuppressed(line, rule)) return true
-  if (COMMENT_LINE_RE.test(line)) return true
-  if (JSDOC_TAG_RE.test(line)) return true
-  if (isInsideBackticks(line, needleRe)) return true
+  if (lineIsSuppressed(line, rule)) {
+    return true
+  }
+  if (COMMENT_LINE_RE.test(line)) {
+    return true
+  }
+  if (JSDOC_TAG_RE.test(line)) {
+    return true
+  }
+  if (isInsideBackticks(line, needleRe)) {
+    return true
+  }
   return false
 }
 

@@ -411,7 +411,10 @@ export function resolveRealBinSync(binPath: string): string {
     const voltaNodeVersion = voltaPlatform?.node?.runtime
     const voltaNpmVersion = voltaPlatform?.node?.npm
     let voltaBinPath = ''
-    if (basename === 'npm' || basename === 'npx') /* # socket-hook: allow npx */ {
+    if (
+      basename === 'npm' ||
+      basename === 'npx' // # socket-hook: allow npx
+    ) {
       if (voltaNpmVersion) {
         const relCliPath = `bin/${basename}-cli.js`
         voltaBinPath = path.join(
