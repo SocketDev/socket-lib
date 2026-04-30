@@ -190,6 +190,9 @@ catalogs:
     '@socketsecurity/lib':
       specifier: 5.25.1
       version: 5.25.1
+    '@types/node':
+      specifier: 24.9.2
+      version: 24.9.2
 
 overrides:
   '@inquirer/ansi': 2.0.5
@@ -461,6 +464,16 @@ importers:
         specifier: 4.1.12
         version: 4.1.12
 
+  .claude/hooks/auth-rotation-reminder:
+    dependencies:
+      '@socketsecurity/lib':
+        specifier: 'catalog:'
+        version: 5.25.1(typescript@5.9.2)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.9.2
+
   .claude/hooks/check-new-deps:
     dependencies:
       '@socketregistry/packageurl-js':
@@ -474,7 +487,13 @@ importers:
         version: 4.0.1
     devDependencies:
       '@types/node':
-        specifier: 24.9.2
+        specifier: 'catalog:'
+        version: 24.9.2
+
+  .claude/hooks/logger-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
         version: 24.9.2
 
   .claude/hooks/path-guard: {}
@@ -482,19 +501,19 @@ importers:
   .claude/hooks/private-name-guard:
     devDependencies:
       '@types/node':
-        specifier: 24.9.2
+        specifier: 'catalog:'
         version: 24.9.2
 
   .claude/hooks/public-surface-reminder:
     devDependencies:
       '@types/node':
-        specifier: 24.9.2
+        specifier: 'catalog:'
         version: 24.9.2
 
   .claude/hooks/release-workflow-guard:
     devDependencies:
       '@types/node':
-        specifier: 24.9.2
+        specifier: 'catalog:'
         version: 24.9.2
 
   .claude/hooks/stale-process-sweeper: {}

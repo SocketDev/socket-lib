@@ -21,6 +21,7 @@ catalog:
   '@socketregistry/packageurl-js': 1.4.2
   '@socketsecurity/lib': 5.25.1
   '@socketsecurity/sdk': 4.0.1
+  '@types/node': 24.9.2
 
 allowBuilds:
   esbuild: true
