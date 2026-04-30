@@ -160,6 +160,14 @@ export async function auditDirectory({
   const seen = new Set()
 
   function record(file, offset, pattern, primordial) {
+    // `prototypePrimordialName` returns `undefined` when the method
+    // doesn't actually exist on the global's prototype — i.e. the
+    // receiver-name guess was wrong (e.g. `p` named like a Promise
+    // but holding an EditablePackageJson). Skip these to avoid
+    // fabricating gap findings for non-existent methods.
+    if (!primordial) {
+      return
+    }
     const lineStarts = currentFile.lineStarts
     const { line, column } = lineColumnAt(lineStarts, offset)
     const dedupKey = `${file}:${line}:${column}:${primordial}`

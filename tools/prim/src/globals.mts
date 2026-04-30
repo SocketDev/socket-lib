@@ -373,6 +373,47 @@ export function ctorPrimordialName(global) {
   return global + 'Ctor'
 }
 
+// Cache the runtime prototype-method set per global so we don't
+// recompute it for every call site.
+const prototypeMethodCache = new Map()
+
+function getPrototypeMethods(globalName) {
+  let cached = prototypeMethodCache.get(globalName)
+  if (cached) {
+    return cached
+  }
+  const ctor = globalThis[globalName]
+  cached = new Set()
+  if (ctor && typeof ctor === 'function' && ctor.prototype) {
+    for (const name of Object.getOwnPropertyNames(ctor.prototype)) {
+      cached.add(name)
+    }
+    // Buffer extends Uint8Array; include its prototype too.
+    if (
+      globalName === 'Buffer' &&
+      typeof globalThis.Uint8Array === 'function'
+    ) {
+      for (const name of Object.getOwnPropertyNames(
+        globalThis.Uint8Array.prototype,
+      )) {
+        cached.add(name)
+      }
+    }
+  }
+  prototypeMethodCache.set(globalName, cached)
+  return cached
+}
+
+/**
+ * Returns the primordial name for `<global>.prototype.<method>` if the
+ * method actually exists on the global's prototype. Returns `undefined`
+ * when it doesn't — prevents fabricating names like
+ * `PromisePrototypeLoad` when `p` is just a variable named `p` that
+ * isn't actually a Promise.
+ */
 export function prototypePrimordialName(global, method) {
+  if (!getPrototypeMethods(global).has(method)) {
+    return undefined
+  }
   return global + 'Prototype' + method[0].toUpperCase() + method.slice(1)
 }
