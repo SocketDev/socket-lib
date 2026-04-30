@@ -41,6 +41,7 @@ import {
   INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
+  TYPE_NARROWING_STATIC_CALLS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
   ctorPrimordialName,
   guessReceiverType,
@@ -457,6 +458,15 @@ export async function auditDirectory({
         ) {
           return
         }
+        // Skip statics whose return type narrows on the literal call
+        // site (Symbol.for returns `unique symbol`). Rewriting through a
+        // primordial alias collapses to plain `symbol` and breaks
+        // computed-key class members.
+        if (
+          TYPE_NARROWING_STATIC_CALLS.has(`${object.name}.${property.name}`)
+        ) {
+          return
+        }
         record(
           currentFile.relPath,
           node.start,
@@ -568,6 +578,11 @@ export async function auditDirectory({
           `${node.object.name}.${propName}`,
         )
       ) {
+        return
+      }
+      // Skip statics whose return type narrows on the literal call
+      // site (Symbol.for). See codemod.mts for the rationale.
+      if (TYPE_NARROWING_STATIC_CALLS.has(`${node.object.name}.${propName}`)) {
         return
       }
       record(

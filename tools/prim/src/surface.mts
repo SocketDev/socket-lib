@@ -183,6 +183,7 @@ function capitalize(s) {
 function parseExports(sourcePath) {
   const src = readFileSync(sourcePath, 'utf8')
   const exports = new Set()
+  const nullable = new Set()
   // ESM inline form: `export const Foo = …`
   for (const m of src.matchAll(/^export const ([A-Z][a-zA-Z0-9]+)/gm)) {
     exports.add(m[1])
@@ -201,6 +202,16 @@ function parseExports(sourcePath) {
   for (const m of src.matchAll(/\bprimordials\.([A-Z][a-zA-Z0-9]+)\s*=/g)) {
     exports.add(m[1])
   }
+  // Detect nullable typed exports — `export const Foo: T | undefined = …`.
+  // The annotation may span multiple lines; match up to the `=` that
+  // ends the declaration's left-hand side.
+  for (const m of src.matchAll(
+    /^export const ([A-Z][a-zA-Z0-9]+)\s*:\s*([\s\S]+?)\s*=\s/gm,
+  )) {
+    if (/\|\s*undefined\b/.test(m[2])) {
+      nullable.add(m[1])
+    }
+  }
   // Heuristic: detect a Node `per_context/primordials.js` and union in
   // the dynamically-derived surface (the names Node installs via
   // copyPrototype/copyPropsRenamed reflection that aren't in the file
@@ -210,7 +221,7 @@ function parseExports(sourcePath) {
       exports.add(name)
     }
   }
-  return exports
+  return { exports, nullable }
 }
 
 /**
@@ -231,7 +242,7 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
     if (!existsSync(resolved)) {
       throw new Error(`--surface path not found: ${resolved}`)
     }
-    return { source: resolved, exports: parseExports(resolved) }
+    return { source: resolved, ...parseExports(resolved) }
   }
   const sibling = path.resolve(
     targetRoot,
@@ -241,7 +252,7 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
     'primordials.ts',
   )
   if (existsSync(sibling)) {
-    return { source: sibling, exports: parseExports(sibling) }
+    return { source: sibling, ...parseExports(sibling) }
   }
   const installed = path.join(
     targetRoot,
@@ -252,7 +263,7 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
     'primordials.js',
   )
   if (existsSync(installed)) {
-    return { source: installed, exports: parseExports(installed) }
+    return { source: installed, ...parseExports(installed) }
   }
   throw new Error(
     `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${sibling}\n  ${installed}\n` +

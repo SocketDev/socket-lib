@@ -265,6 +265,7 @@ export async function runCli(argv) {
       exported: surface.exports,
       ...(importStyle ? { importStyle } : {}),
       includeGuessed: values['include-guessed'],
+      nullable: surface.nullable,
       scanDir,
       targetRoot,
     })

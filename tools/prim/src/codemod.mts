@@ -35,6 +35,7 @@ import {
   INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
+  TYPE_NARROWING_STATIC_CALLS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
   ctorPrimordialName,
   guessReceiverType,
@@ -102,6 +103,7 @@ export async function applyCodemod({
     specifier: DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER,
   },
   includeGuessed,
+  nullable = new Set(),
   scanDir,
   targetRoot,
 }) {
@@ -121,6 +123,7 @@ export async function applyCodemod({
       exported,
       importStyle,
       includeGuessed,
+      nullable,
       relPath: rel,
       targetRoot,
     })
@@ -200,6 +203,7 @@ async function rewriteFile({
   exported,
   importStyle,
   includeGuessed,
+  nullable,
   relPath,
   targetRoot,
 }) {
@@ -216,8 +220,9 @@ async function rewriteFile({
   // the raw source. We apply rewrites to `src` (raw, with types intact)
   // using positions from the parser's view of `parseSrc` (stripped).
   const ext = path.extname(absPath)
+  const isTsFile = TS_EXTENSIONS.has(ext)
   let parseSrc = src
-  if (TS_EXTENSIONS.has(ext)) {
+  if (isTsFile) {
     try {
       parseSrc = stripTypeScriptTypes(src, { mode: 'strip' })
     } catch {
@@ -290,10 +295,13 @@ async function rewriteFile({
         return
       }
       // Replace `Foo` (the identifier) with `Ctor` (or its aliased form).
+      // Add `!` for nullable ctors in TS sources — see static-call site
+      // for rationale.
+      const ctorNeedsBang = isTsFile && nullable && nullable.has(ctor)
       rewrites.push({
         start: toChar(callee.start),
         end: toChar(callee.end),
-        replacement: localName(ctor),
+        replacement: localName(ctor) + (ctorNeedsBang ? '!' : ''),
       })
       usedPrimordials.add(ctor)
       return
@@ -328,16 +336,29 @@ async function rewriteFile({
       ) {
         return
       }
+      // Skip statics whose return type narrows on the literal call site
+      // (e.g. Symbol.for returns `unique symbol`). Rewriting through a
+      // primordial alias collapses to plain `symbol` and breaks
+      // computed-key class members downstream.
+      if (TYPE_NARROWING_STATIC_CALLS.has(`${object.name}.${property.name}`)) {
+        return
+      }
       const expected = staticPrimordialName(object.name, property.name)
       if (!exported.has(expected)) {
         return
       }
       // Replace `Foo.bar` (the whole MemberExpression callee) with the
       // primordial name (or its aliased form). Args list stays intact.
+      // For nullable primordials (e.g. Buffer.* in cross-env builds where
+      // BufferCtor may be `undefined`), add a `!` non-null assertion
+      // when emitting into a TypeScript source — the call site's
+      // existence proves the runtime is Node, but the type still says
+      // `T | undefined`. Plain JS sources don't get the assertion.
+      const needsBang = isTsFile && nullable && nullable.has(expected)
       rewrites.push({
         start: toChar(node.callee.start),
         end: toChar(node.callee.end),
-        replacement: localName(expected),
+        replacement: localName(expected) + (needsBang ? '!' : ''),
       })
       usedPrimordials.add(expected)
       return
@@ -432,7 +453,8 @@ async function rewriteFile({
       // Couldn't find `)` — bail on this rewrite rather than corrupt.
       return
     }
-    const fnName = localName(expected)
+    const needsBang = isTsFile && nullable && nullable.has(expected)
+    const fnName = localName(expected) + (needsBang ? '!' : '')
     const replacement = argsSrc
       ? `${fnName}(${objSrc}, ${argsSrc})`
       : `${fnName}(${objSrc})`
@@ -501,7 +523,8 @@ async function rewriteFile({
       if (callEnd < 0) {
         continue
       }
-      const fnNameAi = localName(expectedAi)
+      const aiNeedsBang = isTsFile && nullable && nullable.has(expectedAi)
+      const fnNameAi = localName(expectedAi) + (aiNeedsBang ? '!' : '')
       const replacementAi = argsSrc
         ? `${fnNameAi}(${objSrc}, ${argsSrc})`
         : `${fnNameAi}(${objSrc})`
@@ -814,9 +837,7 @@ function ensureImports(src, identifiers, importStyle) {
   // import) stays in `src` and isn't clobbered by the replacement.
   const existingRe =
     kind === 'esm'
-      ? new RegExp(
-          `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escSpec}['"];?`,
-        )
+      ? new RegExp(`import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escSpec}['"];?`)
       : new RegExp(
           `(?:const|let|var)\\s*\\{([^}]*)\\}\\s*=\\s*require\\(\\s*['"]${escSpec}['"]\\s*\\);?`,
         )

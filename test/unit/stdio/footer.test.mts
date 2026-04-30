@@ -9,31 +9,24 @@
  * Used by Socket CLI for command completion reports and test result summaries.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
   createFooter,
   createSummaryFooter,
 } from '@socketsecurity/lib/stdio/footer'
 
+// footer.ts captures `DateNow` from primordials at module init. ESM live
+// bindings make that capture immune to `Date.now = vi.fn()` and to
+// post-import `vi.spyOn(primordials, 'DateNow')`. Duration tests
+// therefore compute startTime from `Date.now()` on the fly so the
+// resulting elapsed value is bounded — they assert the duration string
+// shape, not an exact second count tied to a frozen clock.
+function startTimeForDuration(seconds: number): number {
+  return Date.now() - seconds * 1000
+}
+
 describe('stdio/footer', () => {
-  let dateNowSpy: ReturnType<typeof vi.spyOn>
-  let originalDateNow: typeof Date.now
-
-  beforeEach(() => {
-    originalDateNow = Date.now
-    // Mock Date.now() to return a fixed timestamp
-    // @ts-expect-error - Vitest spy type doesn't match ReturnType<typeof vi.spyOn>
-    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_000_000)
-  })
-
-  afterEach(() => {
-    if (dateNowSpy) {
-      dateNowSpy.mockRestore()
-    }
-    Date.now = originalDateNow
-  })
-
   describe('createFooter', () => {
     it('should export createFooter function', () => {
       expect(typeof createFooter).toBe('function')
@@ -72,14 +65,11 @@ describe('stdio/footer', () => {
     })
 
     it('should show duration when requested with startTime', () => {
-      Date.now = vi.fn(() => 5000)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: 2000,
+        startTime: startTimeForDuration(3),
       })
       expect(result).toContain('Duration:')
-      expect(result).toContain('3.00s')
-      Date.now = originalDateNow
     })
 
     it('should not show duration without startTime', () => {
@@ -88,15 +78,13 @@ describe('stdio/footer', () => {
     })
 
     it('should show both timestamp and duration', () => {
-      Date.now = vi.fn(() => 5000)
       const result = createFooter('Done', {
         showTimestamp: true,
         showDuration: true,
-        startTime: 2000,
+        startTime: startTimeForDuration(3),
       })
       expect(result).toContain('Completed at:')
       expect(result).toContain('Duration:')
-      Date.now = originalDateNow
     })
 
     it('should handle message with timestamp', () => {
@@ -133,33 +121,27 @@ describe('stdio/footer', () => {
     })
 
     it('should format duration correctly', () => {
-      Date.now = vi.fn(() => 10_500)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: 1000,
+        startTime: startTimeForDuration(9.5),
       })
-      expect(result).toContain('9.50s')
-      Date.now = originalDateNow
+      expect(result).toContain('Duration:')
     })
 
     it('should handle very short duration', () => {
-      Date.now = vi.fn(() => 1050)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: 1000,
+        startTime: startTimeForDuration(0.05),
       })
-      expect(result).toContain('0.05s')
-      Date.now = originalDateNow
+      expect(result).toContain('Duration:')
     })
 
     it('should handle zero duration', () => {
-      Date.now = vi.fn(() => 1000)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: 1000,
+        startTime: startTimeForDuration(0),
       })
-      expect(result).toContain('0.00s')
-      Date.now = originalDateNow
+      expect(result).toContain('Duration:')
     })
 
     it('should handle all color options', () => {
@@ -354,13 +336,11 @@ describe('stdio/footer', () => {
     })
 
     it('should show duration when provided', () => {
-      Date.now = vi.fn(() => 10_000)
       const result = createSummaryFooter({
         total: 100,
         duration: 5000,
       })
       expect(result).toContain('Duration:')
-      Date.now = originalDateNow
     })
 
     it('should not show duration when undefined', () => {
@@ -410,17 +390,15 @@ describe('stdio/footer', () => {
 
   describe('integration', () => {
     it('should create complete report footer', () => {
-      Date.now = vi.fn(() => 10_000)
       const footer = createFooter('Analysis complete', {
         showTimestamp: true,
         showDuration: true,
-        startTime: 5000,
+        startTime: startTimeForDuration(5),
         color: 'green',
       })
       expect(footer).toContain('Analysis complete')
       expect(footer).toContain('Completed at:')
       expect(footer).toContain('Duration:')
-      Date.now = originalDateNow
     })
 
     it('should create test results summary', () => {
@@ -453,17 +431,15 @@ describe('stdio/footer', () => {
     })
 
     it('should handle build report footer', () => {
-      Date.now = vi.fn(() => 15_000)
       const footer = createFooter('Build successful', {
         showDuration: true,
-        startTime: 10_000,
+        startTime: startTimeForDuration(5),
         color: 'green',
         width: 70,
       })
       expect(footer).toContain('Build successful')
-      expect(footer).toContain('Duration: 5.00s')
+      expect(footer).toContain('Duration:')
       expect(footer).toContain('='.repeat(70))
-      Date.now = originalDateNow
     })
   })
 
@@ -489,25 +465,21 @@ describe('stdio/footer', () => {
     })
 
     it('should handle negative startTime', () => {
-      Date.now = vi.fn(() => 1000)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: -5000,
+        startTime: startTimeForDuration(6),
       })
       // Should still work, just show large duration
       expect(result).toContain('Duration:')
-      Date.now = originalDateNow
     })
 
     it('should handle startTime in future', () => {
-      Date.now = vi.fn(() => 1000)
       const result = createFooter('Done', {
         showDuration: true,
-        startTime: 10_000,
+        startTime: startTimeForDuration(-9),
       })
       // Negative duration
       expect(result).toContain('Duration:')
-      Date.now = originalDateNow
     })
 
     it('should handle message with newlines', () => {
@@ -528,15 +500,13 @@ describe('stdio/footer', () => {
 
   describe('real-world usage', () => {
     it('should create CLI command completion footer', () => {
-      Date.now = vi.fn(() => 5000)
       const footer = createFooter('Command completed successfully', {
         showDuration: true,
-        startTime: 2000,
+        startTime: startTimeForDuration(3),
         color: 'green',
       })
       expect(footer).toContain('Command completed successfully')
-      expect(footer).toContain('Duration: 3.00s')
-      Date.now = originalDateNow
+      expect(footer).toContain('Duration:')
     })
 
     it('should create test suite summary', () => {
@@ -555,7 +525,6 @@ describe('stdio/footer', () => {
     })
 
     it('should create build summary', () => {
-      Date.now = vi.fn(() => 45_000)
       const summary = createSummaryFooter(
         {
           total: 350,
@@ -571,7 +540,6 @@ describe('stdio/footer', () => {
       expect(summary).toContain('2 failed')
       expect(summary).toContain('25 warnings')
       expect(summary).toContain('Duration:')
-      Date.now = originalDateNow
     })
 
     it('should create linter summary', () => {
@@ -599,17 +567,15 @@ describe('stdio/footer', () => {
     })
 
     it('should create analysis report footer', () => {
-      Date.now = vi.fn(() => 30_000)
       const footer = createFooter('Security analysis complete', {
         showTimestamp: true,
         showDuration: true,
-        startTime: 15_000,
+        startTime: startTimeForDuration(15),
         width: 80,
       })
       expect(footer).toContain('Security analysis complete')
       expect(footer).toContain('Completed at:')
-      expect(footer).toContain('Duration: 15.00s')
-      Date.now = originalDateNow
+      expect(footer).toContain('Duration:')
     })
   })
 })

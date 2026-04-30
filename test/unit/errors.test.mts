@@ -322,45 +322,45 @@ describeRequires(
   typeof isErrorBuiltin === 'function',
   'isErrorBuiltin',
   () => {
-  // Narrow once so TS knows `isErrorBuiltin` is defined in each `it`.
-  const builtin = isErrorBuiltin as (v: unknown) => v is Error
+    // Narrow once so TS knows `isErrorBuiltin` is defined in each `it`.
+    const builtin = isErrorBuiltin as (v: unknown) => v is Error
 
-  it('recognizes Error instances', () => {
-    expect(builtin(new Error('x'))).toBe(true)
-  })
+    it('recognizes Error instances', () => {
+      expect(builtin(new Error('x'))).toBe(true)
+    })
 
-  it('recognizes Error subclasses', () => {
-    expect(builtin(new TypeError('x'))).toBe(true)
-    expect(builtin(new RangeError('x'))).toBe(true)
-  })
+    it('recognizes Error subclasses', () => {
+      expect(builtin(new TypeError('x'))).toBe(true)
+      expect(builtin(new RangeError('x'))).toBe(true)
+    })
 
-  it('recognizes cross-realm Errors', () => {
-    const ctx = vm.createContext({})
-    const remoteErr = vm.runInContext('new Error("cross realm")', ctx)
-    expect(builtin(remoteErr)).toBe(true)
-  })
+    it('recognizes cross-realm Errors', () => {
+      const ctx = vm.createContext({})
+      const remoteErr = vm.runInContext('new Error("cross realm")', ctx)
+      expect(builtin(remoteErr)).toBe(true)
+    })
 
-  it('rejects values faking Symbol.toStringTag = "Error" (slot check)', () => {
-    // This is the key behavior difference from the shim — native uses
-    // the internal `[[ErrorData]]` slot, which cannot be forged.
-    const fake = {}
-    Object.defineProperty(fake, Symbol.toStringTag, { value: 'Error' })
-    expect(builtin(fake)).toBe(false)
-  })
+    it('rejects values faking Symbol.toStringTag = "Error" (slot check)', () => {
+      // This is the key behavior difference from the shim — native uses
+      // the internal `[[ErrorData]]` slot, which cannot be forged.
+      const fake = {}
+      Object.defineProperty(fake, Symbol.toStringTag, { value: 'Error' })
+      expect(builtin(fake)).toBe(false)
+    })
 
-  it('rejects plain objects with name + message', () => {
-    expect(builtin({ name: 'Error', message: 'fake' })).toBe(false)
-  })
+    it('rejects plain objects with name + message', () => {
+      expect(builtin({ name: 'Error', message: 'fake' })).toBe(false)
+    })
 
-  it('rejects null, undefined, and primitives', () => {
-    expect(builtin(null)).toBe(false)
-    expect(builtin(undefined)).toBe(false)
-    expect(builtin('string')).toBe(false)
-    expect(builtin(42)).toBe(false)
-  })
+    it('rejects null, undefined, and primitives', () => {
+      expect(builtin(null)).toBe(false)
+      expect(builtin(undefined)).toBe(false)
+      expect(builtin('string')).toBe(false)
+      expect(builtin(42)).toBe(false)
+    })
 
-  it('is the function isError delegates to when available', () => {
-    expect(isError).toBe(builtin)
-  })
+    it('is the function isError delegates to when available', () => {
+      expect(isError).toBe(builtin)
+    })
   },
 )

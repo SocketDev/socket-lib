@@ -372,6 +372,20 @@ export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
 ])
 
 /**
+ * Static-method calls whose return type narrows based on the literal
+ * call site, in a way that breaks when the call is rewritten through an
+ * aliased variable. Specifically: `Symbol.for(literal)` returns
+ * `unique symbol`, so `class C { [Symbol.for('x')]() {} }` defines a
+ * named member; rewriting to `SymbolFor('x')` returns plain `symbol`,
+ * collapsing the keyed member into the unindexed-symbol bucket and
+ * making `c[Symbol.for('x')]()` ambiguous against any other
+ * symbol-keyed method on the class. The audit + codemod skip these
+ * sites entirely — both reading and writing them through a primordial
+ * would change the static type.
+ */
+export const TYPE_NARROWING_STATIC_CALLS = new Set(['Symbol.for'])
+
+/**
  * Map a tracked global + property name to the corresponding primordial
  * export name in `@socketsecurity/lib/primordials`.
  */

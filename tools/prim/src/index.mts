@@ -15,6 +15,7 @@ export {
   INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
   TRACKED_GLOBALS,
+  TYPE_NARROWING_STATIC_CALLS,
   ctorPrimordialName,
   guessReceiverType,
   prototypePrimordialName,
