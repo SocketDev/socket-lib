@@ -282,8 +282,14 @@ export function guessReceiverType(name) {
     return 'Array'
   }
   // ─── String hints ───────────────────────────────────────────────────
+  // `body` and `content` deliberately excluded — they're commonly
+  // Buffer (HTTP response body, file content) which has its own
+  // `.toString(encoding)` that takes args, distinct from
+  // String.prototype.toString. Mis-classifying them as String produces
+  // false-positive gap findings for primordials that already exist
+  // under `BufferPrototype*` names.
   if (
-    /^(str|s|name|key|val|value|text|line|word|message|msg|input|output|content|body|header|path|url|ext|filename|prefix|suffix|substring|cmd|command|raw|label|title|description|version|hash|sha|tag|slug|spec|sourceCode|source|code)$/.test(
+    /^(str|s|name|key|val|value|text|line|word|message|msg|input|output|header|path|url|ext|filename|prefix|suffix|substring|cmd|command|raw|label|title|description|version|hash|sha|tag|slug|spec|sourceCode|source|code)$/.test(
       name,
     )
   ) {
