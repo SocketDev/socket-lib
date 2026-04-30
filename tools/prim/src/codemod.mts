@@ -24,6 +24,7 @@
  */
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
 import { parse } from 'acorn-wasm'
@@ -138,17 +139,35 @@ export async function applyCodemod({
   return result
 }
 
-// Codemod only handles plain JavaScript. Rewriting TypeScript would
-// require source-mapping between stripped-types and original byte
-// offsets — out of scope. The audit (`prim audit`) does walk TS files,
-// so users can see migration candidates in source even if the codemod
-// can't auto-rewrite them yet.
-const REWRITABLE_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx'])
+// Codemod handles plain JavaScript and TypeScript. For .ts/.mts/.cts
+// sources, we type-strip with Node's `module.stripTypeScriptTypes` in
+// `mode: 'strip'` — that mode REPLACES type annotations with whitespace,
+// preserving the original byte offsets. AST positions from parsing the
+// stripped text therefore map 1:1 to the raw source, so rewrites apply
+// to the raw text directly and types stay intact in the output.
+const REWRITABLE_EXTENSIONS = new Set([
+  '.cjs',
+  '.cts',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.mts',
+  '.ts',
+  '.tsx',
+])
+const TS_EXTENSIONS = new Set(['.cts', '.mts', '.ts', '.tsx'])
 
 function* walkDir(
   dir,
   skipDirs = ['external', 'node_modules', '.cache'],
-  skipFiles = ['primordials.js', 'primordials.mjs', 'primordials.cjs'],
+  skipFiles = [
+    'primordials.cjs',
+    'primordials.cts',
+    'primordials.js',
+    'primordials.mjs',
+    'primordials.mts',
+    'primordials.ts',
+  ],
 ) {
   for (const entry of readdirSync(dir)) {
     if (skipDirs.includes(entry) || skipFiles.includes(entry)) {
@@ -191,9 +210,23 @@ async function rewriteFile({
   const aliasPrefix = importStyle?.aliasPrefix ?? ''
   const localName = (name: string): string => aliasPrefix + name
   const src = readFileSync(absPath, 'utf8')
+  // For TypeScript files, parse a type-stripped copy. `mode: 'strip'`
+  // replaces type annotations with whitespace of the same byte length,
+  // so AST start/end offsets from the stripped source map 1:1 back to
+  // the raw source. We apply rewrites to `src` (raw, with types intact)
+  // using positions from the parser's view of `parseSrc` (stripped).
+  const ext = path.extname(absPath)
+  let parseSrc = src
+  if (TS_EXTENSIONS.has(ext)) {
+    try {
+      parseSrc = stripTypeScriptTypes(src, { mode: 'strip' })
+    } catch {
+      return { rewrites: 0, importAdded: false, skipped: 0 }
+    }
+  }
   let ast
   try {
-    ast = parse(src, {
+    ast = parse(parseSrc, {
       ecmaVersion: 'latest',
       sourceType: 'module',
       locations: false,
@@ -776,13 +809,16 @@ function ensureImports(src, identifiers, importStyle) {
     return colonIdx === -1 ? trimmed : trimmed.slice(0, colonIdx).trim()
   }
   const escSpec = escapeRegex(specifier)
+  // Trailing `;?` is matched without leading `\s*` so the regex stops
+  // at the optional semicolon — anything after (newline, the next
+  // import) stays in `src` and isn't clobbered by the replacement.
   const existingRe =
     kind === 'esm'
       ? new RegExp(
-          `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escSpec}['"]\\s*;?`,
+          `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escSpec}['"];?`,
         )
       : new RegExp(
-          `(?:const|let|var)\\s*\\{([^}]*)\\}\\s*=\\s*require\\(\\s*['"]${escSpec}['"]\\s*\\)\\s*;?`,
+          `(?:const|let|var)\\s*\\{([^}]*)\\}\\s*=\\s*require\\(\\s*['"]${escSpec}['"]\\s*\\);?`,
         )
   const existing = src.match(existingRe)
   if (existing) {
@@ -828,7 +864,10 @@ function ensureImports(src, identifiers, importStyle) {
 
 /**
  * Find the byte offset right after the last import / require statement
- * at module scope. Returns 0 if neither is found, so callers can prepend.
+ * at module scope. Returns the byte offset right after the leading
+ * file-level JSDoc / shebang block when no import/require is found, so
+ * callers prepend BELOW the `@fileoverview` block instead of clobbering
+ * it.
  */
 function findInsertionPoint(src) {
   // ESM: `import ... from '...'`.
@@ -851,5 +890,45 @@ function findInsertionPoint(src) {
       lastEnd = end
     }
   }
-  return lastEnd
+  if (lastEnd > 0) {
+    return lastEnd
+  }
+  // No imports/requires — skip past leading shebang + leading JSDoc /
+  // line-comment block so the inserted import lands BELOW the
+  // `@fileoverview` doc, not above it.
+  let pos = 0
+  // Shebang line.
+  if (src.startsWith('#!')) {
+    const nl = src.indexOf('\n', pos)
+    pos = nl === -1 ? src.length : nl + 1
+  }
+  // Leading whitespace.
+  while (pos < src.length && /\s/.test(src[pos]!)) {
+    pos++
+  }
+  // Leading block comment (`/** … */` or `/* … */`).
+  if (src.startsWith('/*', pos)) {
+    const close = src.indexOf('*/', pos)
+    if (close !== -1) {
+      pos = close + 2
+      // Consume the trailing newline so the inserted import goes on a
+      // fresh line.
+      if (src[pos] === '\n') {
+        pos++
+      }
+    } else {
+      // Unterminated — fall back to prepend.
+      pos = 0
+    }
+  } else if (src.startsWith('//', pos)) {
+    // Leading line-comment block.
+    while (src.startsWith('//', pos)) {
+      const nl = src.indexOf('\n', pos)
+      pos = nl === -1 ? src.length : nl + 1
+    }
+  } else {
+    // No leading comment — prepend at top.
+    pos = 0
+  }
+  return pos
 }

@@ -232,10 +232,38 @@ export async function runCli(argv) {
   // Codemod runs its own pass — don't pre-audit (avoids any
   // shared-AST surprises and is faster).
   if (command === 'mod') {
+    // Auto-detect when we're scanning a tree that owns its OWN
+    // `primordials.ts` (i.e. socket-lib itself, or any project that
+    // re-exports primordials from a local module). When the tree owns
+    // it, inserted imports must be RELATIVE — `'../primordials'` from
+    // a sub-dir, `'./primordials'` from the same dir — not the
+    // package-name specifier `'@socketsecurity/lib/primordials'`,
+    // which would create a circular-self-import.
+    const localPrimordialsPath = findLocalPrimordials(scanDir)
+    const importStyle = localPrimordialsPath
+      ? {
+          kind: 'esm' as const,
+          specifier: (absFile: string): string => {
+            const fileDir = path.dirname(absFile)
+            let rel = path.relative(fileDir, localPrimordialsPath)
+            // Strip the .ts/.mts/.cts/.js extension — bare-specifier
+            // import (TypeScript convention; `tsc` resolves the ext).
+            rel = rel.replace(/\.(?:cjs|cts|js|mjs|mts|ts|tsx)$/, '')
+            // Path.relative drops the leading `./` for same-dir, but
+            // ESM specifiers require `./` or `../` to distinguish
+            // relative paths from package names. Re-add when missing.
+            if (!rel.startsWith('.')) {
+              rel = './' + rel
+            }
+            return rel
+          },
+        }
+      : undefined
     const result = await applyCodemod({
       aiDisambiguate: values['ai-disambiguate'],
       apply: values.apply,
       exported: surface.exports,
+      ...(importStyle ? { importStyle } : {}),
       includeGuessed: values['include-guessed'],
       scanDir,
       targetRoot,
@@ -323,6 +351,41 @@ export async function runCli(argv) {
   }
 
   fail(`unknown command: ${command}\n\n${HELP}`)
+}
+
+// Extensions checked when looking for a sibling `primordials.*` file
+// to switch the codemod into relative-import mode. Sorted alphanumeric.
+const PRIMORDIALS_FILE_EXTS = [
+  '.cjs',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.mts',
+  '.ts',
+]
+
+/**
+ * Walk up from `scanDir` looking for a sibling `primordials.{ts,mts,cts,js,mjs,cjs}`
+ * file. Returns the absolute path to it, or `undefined` if none is found
+ * within the scan root. The codemod uses this to decide whether to insert
+ * relative-path imports (when the project owns primordials) vs. the
+ * package-name specifier (when consuming `@socketsecurity/lib`).
+ *
+ * Search order: scanDir itself, then a single level up. Beyond that we
+ * assume any primordials.* found is unrelated (avoid drifting up to a
+ * monorepo-root primordials owned by a sibling package).
+ */
+function findLocalPrimordials(scanDir): string | undefined {
+  const candidates = [scanDir, path.dirname(scanDir)]
+  for (const dir of candidates) {
+    for (const ext of PRIMORDIALS_FILE_EXTS) {
+      const candidate = path.join(dir, `primordials${ext}`)
+      if (existsSync(candidate)) {
+        return candidate
+      }
+    }
+  }
+  return undefined
 }
 
 function report(
