@@ -14,6 +14,8 @@
  * - Zero dependencies on external HTTP libraries.
  */
 
+import { setTimeout as delay } from 'node:timers/promises'
+
 import { SOCKET_LIB_USER_AGENT } from './constants/socket'
 import { safeDelete } from './fs'
 
@@ -1464,7 +1466,7 @@ export async function httpDownload(
       // Retry with exponential backoff
       const delayMs = retryDelay * 2 ** attempt
       // eslint-disable-next-line no-await-in-loop
-      await new PromiseCtor(resolve => setTimeout(resolve, delayMs))
+      await delay(delayMs)
     }
   }
 
@@ -1686,11 +1688,11 @@ export async function httpRequest(
             ? MathMax(0, retryResult)
             : delayMs
         // eslint-disable-next-line no-await-in-loop
-        await new PromiseCtor(resolve => setTimeout(resolve, actualDelay))
+        await delay(actualDelay)
       } else {
         // Default: retry with exponential backoff
         // eslint-disable-next-line no-await-in-loop
-        await new PromiseCtor(resolve => setTimeout(resolve, delayMs))
+        await delay(delayMs)
       }
     }
   }
@@ -1854,9 +1856,10 @@ export function parseChecksums(text: string): Checksums {
  *
  * @example
  * ```ts
- * const delay = parseRetryAfterHeader(response.headers['retry-after'])
- * if (delay !== undefined) {
- *   await new Promise(resolve => setTimeout(resolve, delay))
+ * import { setTimeout as delay } from 'node:timers/promises'
+ * const ms = parseRetryAfterHeader(response.headers['retry-after'])
+ * if (ms !== undefined) {
+ *   await delay(ms)
  * }
  * ```
  */

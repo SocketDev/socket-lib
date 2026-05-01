@@ -20,6 +20,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/cacache`](../src/cacache.ts)                       | Cacache utilities for Socket ecosystem shared content-addressable cache.                                       |
 | [`@socketsecurity/lib/cache-with-ttl`](../src/cache-with-ttl.ts)         | Generic TTL-based caching utility using cacache.                                                               |
 | [`@socketsecurity/lib/colors`](../src/colors.ts)                         | Color utilities for RGB color conversion and manipulation.                                                     |
+| [`@socketsecurity/lib/crypto`](../src/crypto.ts)                         | Crypto helpers that prefer Node builtins where available.                                                      |
 | [`@socketsecurity/lib/debug`](../src/debug.ts)                           | Debug logging utilities with lazy loading and environment-based control.                                       |
 | [`@socketsecurity/lib/env`](../src/env.ts)                               | Environment variable parsing and conversion utilities.                                                         |
 | [`@socketsecurity/lib/errors`](../src/errors.ts)                         | Error utilities with cause chain support.                                                                      |

@@ -11,7 +11,9 @@
  * form carried around internally is always the object.
  */
 
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { timingSafeEqual } from 'node:crypto'
+
+import { hash } from '../crypto'
 
 import {
   BufferFrom,
@@ -130,8 +132,8 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
  * buffer of bytes.
  */
 export function computeHashes(bytes: Buffer): ComputedHashes {
-  const integrity = `sha512-${createHash('sha512').update(bytes).digest('base64')}`
-  const checksum = createHash('sha256').update(bytes).digest('hex')
+  const integrity = `sha512-${hash('sha512', bytes, 'base64')}`
+  const checksum = hash('sha256', bytes, 'hex')
   return { integrity, checksum }
 }
 

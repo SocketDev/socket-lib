@@ -223,6 +223,10 @@
       "types": "./dist/cover/types.d.ts",
       "default": "./dist/cover/types.js"
     },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "default": "./dist/crypto.js"
+    },
     "./debug": {
       "types": "./dist/debug.d.ts",
       "default": "./dist/debug.js"
