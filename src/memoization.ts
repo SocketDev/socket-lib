@@ -322,31 +322,34 @@ export function memoizeAsync<Args extends unknown[], Result>(
     debugLog(`[memoizeAsync:${name}] miss`, { key })
 
     // Create promise and cache it immediately (for deduplication).
-    const promise = fn(...args).then(
-      result => {
+    // The async IIFE is what gets stored in `refreshing` and `cache`,
+    // so concurrent callers can join the same in-flight computation
+    // before it resolves — that's the dedup contract.
+    const promise = (async () => {
+      try {
+        const result = await fn(...args)
         refreshing.delete(key)
-        // Success — refresh the timestamp so the freshly-computed value
-        // isn't immediately classified as expired. The timestamp was
-        // previously set when the fetch *started*; under a slow fn this
-        // meant `isExpired` could fire right as the value landed, and
-        // every subsequent call past TTL recomputed because the
-        // stale-dedup branch had nothing to join (`refreshing` was
-        // emptied here first).
+        // Success — refresh the timestamp so the freshly-computed
+        // value isn't immediately classified as expired. The
+        // timestamp was previously set when the fetch *started*;
+        // under a slow fn this meant `isExpired` could fire right
+        // as the value landed, and every subsequent call past TTL
+        // recomputed because the stale-dedup branch had nothing to
+        // join (`refreshing` was emptied here first).
         const entry = cache.get(key)
         if (entry) {
           entry.value = PromiseResolve(result)
           entry.timestamp = DateNow()
         }
         return result
-      },
-      error => {
+      } catch (error) {
         refreshing.delete(key)
         // Failure — remove from cache to allow retry.
         cache.delete(key)
         debugLog(`[memoizeAsync:${name}] error`, { key, error })
         throw error
-      },
-    )
+      }
+    })()
     refreshing.set(key, promise)
 
     evictLRU()

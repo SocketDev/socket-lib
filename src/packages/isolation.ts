@@ -98,12 +98,19 @@ async function mergePackageJson(
 }
 
 /**
- * Resolve a path to its real location, handling symlinks.
+ * Resolve a path to its real location, handling symlinks. Falls
+ * back to a non-realpath resolution if the OS rejects the lookup
+ * (ENOENT, EACCES, etc.) — caller still gets a usable absolute
+ * path either way.
  */
 async function resolveRealPath(pathStr: string): Promise<string> {
   const fs = getFs()
   const path = getPath()
-  return await fs.promises.realpath(pathStr).catch(() => path.resolve(pathStr))
+  try {
+    return await fs.promises.realpath(pathStr)
+  } catch {
+    return path.resolve(pathStr)
+  }
 }
 
 /**

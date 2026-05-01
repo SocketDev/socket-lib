@@ -827,10 +827,15 @@ export function spawn(
   )
   /* c8 ignore stop */
   const oldSpawnPromise = spawnPromise
+  // The async IIFE wraps each transformation into a single
+  // try/catch — same semantics as the previous .then/.catch chain,
+  // expressed as straight-line async/await so the success and
+  // failure paths read top-to-bottom.
   let newSpawnPromise: PromiseSpawnResult
   if (shouldStripAnsi && stdioString) {
-    newSpawnPromise = spawnPromise
-      .then((result: unknown) => {
+    newSpawnPromise = (async () => {
+      try {
+        const result = await spawnPromise
         const strippedResult = stripAnsiFromSpawnResult(result)
         // Add exitCode as an alias for code.
         if ('code' in (strippedResult as { code?: number })) {
@@ -839,15 +844,15 @@ export function spawn(
           ).code
         }
         return strippedResult
-      })
-      .catch((error: unknown) => {
+      } catch (error) {
         const strippedError = stripAnsiFromSpawnResult(error)
-        const enhancedError = enhanceSpawnError(strippedError)
-        throw enhancedError
-      }) as PromiseSpawnResult
+        throw enhanceSpawnError(strippedError)
+      }
+    })() as PromiseSpawnResult
   } else {
-    newSpawnPromise = spawnPromise
-      .then((result: unknown) => {
+    newSpawnPromise = (async () => {
+      try {
+        const result = await spawnPromise
         // Add exitCode as an alias for code.
         if (result !== null && typeof result === 'object' && 'code' in result) {
           const res = result as typeof result & {
@@ -858,18 +863,28 @@ export function spawn(
           return res
         }
         return result
-      })
-      .catch((error: unknown) => {
-        const enhancedError = enhanceSpawnError(error)
-        throw enhancedError
-      }) as PromiseSpawnResult
+      } catch (error) {
+        throw enhanceSpawnError(error)
+      }
+    })() as PromiseSpawnResult
   }
   if (shouldRestartSpinner) {
-    newSpawnPromise = newSpawnPromise.finally(() => {
-      spinnerInstance.start()
-    }) as PromiseSpawnResult
+    // Wrap the previous transform in another async IIFE so the
+    // spinner restart fires regardless of resolve/reject. Same
+    // semantics as the prior .finally chain.
+    const prevPromise = newSpawnPromise
+    newSpawnPromise = (async () => {
+      try {
+        return await prevPromise
+      } finally {
+        spinnerInstance.start()
+      }
+    })() as PromiseSpawnResult
   }
-  // Copy process and stdin properties from original promise
+  // Copy process and stdin properties from original promise. The
+  // npm-cli-promise-spawn promise has these attached directly; the
+  // wrapped promise above is a fresh Promise without them, so
+  // forward them explicitly.
   ;(newSpawnPromise as unknown as PromiseSpawnResult).process =
     oldSpawnPromise.process
   ;(newSpawnPromise as unknown as PromiseSpawnResult).stdin = (

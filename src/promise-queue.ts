@@ -6,7 +6,7 @@
  * exposes an idle-wait helper.
  */
 
-import { ErrorCtor, PromiseCtor, PromiseResolve } from './primordials'
+import { ErrorCtor, PromiseCtor } from './primordials'
 
 type QueuedTask<T> = {
   fn: () => Promise<T>
@@ -78,17 +78,23 @@ export class PromiseQueue {
 
     this.running++
 
-    // Wrap in Promise.resolve().then() so a synchronous throw inside
-    // task.fn() converts into a rejection routed to task.reject rather
-    // than escaping as an uncaught exception.
-    PromiseResolve()
-      .then(() => task.fn())
-      .then(task.resolve)
-      .catch(task.reject)
-      .finally(() => {
+    // The async IIFE defers task.fn() by one microtask, which
+    // converts a synchronous throw inside task.fn() into a
+    // rejection routed to task.reject rather than escaping as an
+    // uncaught exception. Same semantics as the prior
+    // PromiseResolve().then(() => task.fn()) wrapper, just
+    // expressed as try/catch/finally.
+    ;(async () => {
+      try {
+        const result = await task.fn()
+        task.resolve(result)
+      } catch (err) {
+        task.reject(err)
+      } finally {
         this.running--
         this.runNext()
-      })
+      }
+    })()
   }
 
   private notifyIdleIfNeeded(): void {

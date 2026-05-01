@@ -823,9 +823,17 @@ async function httpDownloadAttempt(
     const fileStream = createWriteStream(destPath)
 
     const cleanupPartial = () => {
-      getFs()
-        .promises.unlink(destPath)
-        .catch(() => {})
+      // Fire-and-forget: caller doesn't await. The async IIFE keeps
+      // the unlink+swallow in async/await form rather than chaining
+      // .catch on a dangling promise.
+      ;(async () => {
+        try {
+          await getFs().promises.unlink(destPath)
+        } catch {
+          // Swallow — partial-file may be gone, perms may be off; we
+          // don't care, this is best-effort cleanup.
+        }
+      })()
     }
 
     fileStream.on('error', (error: Error) => {
