@@ -5,16 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.26.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.2) - 2026-04-30
-
-### Fixed
-
-- `globs` `glob` / `globSync` / `globStreamLicenses` — strip a trailing `/` from `ignore` patterns before passing them to fast-glob. The gitignore convention of writing directory entries as `dist/` was silently dropped at the deep-filter level (fast-glob walked the entire subtree before discarding results), which on a large `dist/` could push memory past the limit. fast-glob v3.3.3 and the unreleased v4 both have the bug; tracked at [mrmlnc/fast-glob#437](https://github.com/mrmlnc/fast-glob/issues/437). Same workaround as [SocketDev/socket-cli#1288](https://github.com/SocketDev/socket-cli/pull/1288).
-
-## [5.26.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.1) - 2026-04-29
+## [5.26.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.1) - 2026-05-01
 
 ### Added
 
+- `crypto` (new export) — `hash(algorithm, data, encoding)` one-shot helper that prefers Node's native `crypto.hash` (added v21.7.0 / v20.12.0; ~30% faster than `createHash().update().digest()` on small inputs) with a streaming fallback. `getNativeHash` exposed as `@internal` for tests
+- `promises` `fromAsync<T>(source)` — drains an async iterable into an array, per [TC39 Array.fromAsync](https://tc39.es/proposal-array-from-async/). Backed by the new `ArrayFromAsync` primordial (Node 22+) with a `for await` + push fallback
+- `primordials` `ArrayFromAsync` — ES2024 primordial. Unbound, matching `ArrayFrom`
+- `globs` `glob` / `globSync` route through `node:fs.glob` / `node:fs.globSync` (Node 22+) when caller options reduce to `cwd` + `ignore` (mapped to `exclude`); fall back to fast-glob for the wider option surface. Output paths are normalized to forward slashes on Windows to match fast-glob's contract
 - `effects/shimmer` — pure-functional shimmer engine
 - `effects/shimmer-terminal` — terminal (ANSI) renderer for the engine
 - `effects/shimmer-keyframes` — SVG keyframe batcher for the engine
@@ -22,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `http-request` retry/backoff sites use `setTimeout` from `node:timers/promises` instead of hand-rolled `new Promise(r => setTimeout(r, ms))`
+- `dlx/cache`, `dlx/integrity`, `dlx/binary` — 4 one-shot hash sites switched to the new `crypto.hash()` helper
+- `package.json` — pin `publishConfig: {access: "public", provenance: true}` so attestation is a property of the package, not a property of the workflow's `--provenance` CLI flag. Survives any direct-publish path that bypasses `provenance.yml`. `access: "public"` also load-bears for first-publish of `@scoped` packages on a fresh npm registry session.
+- `promise-queue.runNext` — replace the `PromiseResolve().then().catch().finally()` chain with an async IIFE + try/catch/finally. Same semantics (defers `task.fn()` by one microtask so synchronous throws become rejections), more explicit about the success/error/cleanup flow.
+- `packages/isolation.resolveRealPath` — replace `realpath().catch(fallback)` with try/await/catch. Same fall-back-on-ENOENT behavior, clearer that the catch is intentional.
 - **BREAKING**: `spinner` `ShimmerInfo` shape — `{ direction, speed, frame }` (was: `currentDir`, `mode`, `speed`, `step`). User-facing `ShimmerConfig` is unchanged
 - `getLatestRelease` / `getReleaseAssetUrl` return `undefined` (was: `null`) when no result is found, and no longer log on success/retry — errors throw, success returns
 
@@ -34,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `globs` `getGlobMatcher` — narrow the `path.matchesGlob` fast-path that an earlier draft introduced. `path.matchesGlob` doesn't honor the picomatch defaults (`dot: true`, `nocase: true`) that callers expect, so taking the fast-path under those defaults silently changed observable behavior — including breaking the case-insensitive default everywhere a single-pattern matcher was used. The fast-path now activates only when the caller has explicitly opted out of both defaults (`nocase: false` AND `dot: false`), signaling "I want strict, case-sensitive, no-dotfile-match" — exactly what `path.matchesGlob` provides
+- `globs` `glob` / `globSync` — normalize results to forward slashes via `paths/normalize.normalizePath` regardless of which backend (`node:fs.glob` or `fast-glob`) was used. Restores fast-glob's forward-slash contract on Windows, where `node:fs.glob` returns native-OS separators
+- `globs` `glob` / `globSync` / `globStreamLicenses` — strip a trailing `/` from `ignore` patterns before passing them to fast-glob. The gitignore convention of writing directory entries as `dist/` was silently dropped at the deep-filter level (fast-glob walked the entire subtree before discarding results), which on a large `dist/` could push memory past the limit. fast-glob v3.3.3 and the unreleased v4 both have the bug; tracked at [mrmlnc/fast-glob#437](https://github.com/mrmlnc/fast-glob/issues/437). Same workaround as [SocketDev/socket-cli#1288](https://github.com/SocketDev/socket-cli/pull/1288).
 - `releases/github-api` `getLatestRelease` and `getReleaseAssetUrl` transparently fall back to GraphQL when GitHub REST returns 200 + empty body (search-degraded incident shape)
 - `github` `resolveRefToSha` and `fetchGhsaDetails` get the same GraphQL fallback for the same incident shape
 - All fallbacks only fire on the empty-body signature; real 404s, rate-limits, and 5xx still propagate
