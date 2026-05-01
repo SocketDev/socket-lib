@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.27.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.27.0) - 2026-05-01
+
+### Added
+
+- `crypto` (new export) — `hash(algorithm, data, encoding)` one-shot helper that prefers Node's native `crypto.hash` (added v21.7.0 / v20.12.0; ~30% faster than `createHash().update().digest()` on small inputs) with a streaming fallback. `getNativeHash` exposed as `@internal` for tests
+- `promises` `fromAsync<T>(source)` — drains an async iterable into an array, per [TC39 Array.fromAsync](https://tc39.es/proposal-array-from-async/). Backed by the new `ArrayFromAsync` primordial (Node 22+) with a `for await` + push fallback
+- `primordials` `ArrayFromAsync` — ES2024 primordial. Unbound, matching `ArrayFrom`
+- `globs` `getGlobMatcher` fast-paths single non-negated patterns through `path.matchesGlob` (Node 22.5+ / 20.17+) instead of compiling picomatch, with results stored in the existing LRU
+- `globs` `glob` / `globSync` route through `node:fs.glob` / `node:fs.globSync` (Node 22+) when caller options reduce to `cwd` + `ignore` (mapped to `exclude`); fall back to fast-glob for the wider option surface
+
+### Changed
+
+- `http-request` retry/backoff sites use `setTimeout` from `node:timers/promises` instead of hand-rolled `new Promise(r => setTimeout(r, ms))`
+- `dlx/cache`, `dlx/integrity`, `dlx/binary` — 4 one-shot hash sites switched to the new `crypto.hash()` helper
+
 ## [5.26.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.2) - 2026-04-30
 
 ### Fixed
