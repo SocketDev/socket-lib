@@ -105,6 +105,23 @@ export const JSONStringify = JSON.stringify
 
 // ─── Array (static) ────────────────────────────────────────────────────
 export const ArrayFrom = Array.from
+// `Array.fromAsync` is ES2024 (Node 22.0+ / V8 ≥ 12.0). Typed as
+// `Function | undefined` for safety even though Node 22+ always has it.
+// Unbound: matches `ArrayFrom`. The spec algorithm uses `this` as the
+// species constructor, so an undefined `this` falls back to a plain
+// Array — exactly what we want.
+//
+// TS lib may not include `Array.fromAsync` yet (it's in ES2024
+// `lib.es2024.array.d.ts`); typed via the local signature.
+export type ArrayFromAsync = <T>(
+  source:
+    | AsyncIterable<T>
+    | Iterable<T | PromiseLike<T>>
+    | ArrayLike<T | PromiseLike<T>>,
+) => Promise<T[]>
+export const ArrayFromAsync: ArrayFromAsync | undefined = (
+  Array as unknown as { fromAsync?: ArrayFromAsync }
+).fromAsync
 export const ArrayIsArray = Array.isArray
 export const ArrayOf = Array.of
 

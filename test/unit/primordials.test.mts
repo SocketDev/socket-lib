@@ -18,6 +18,7 @@ import {
   applyBind,
   ArrayCtor,
   ArrayFrom,
+  ArrayFromAsync,
   ArrayIsArray,
   ArrayOf,
   ArrayPrototypeAt,
@@ -311,6 +312,57 @@ describe('primordials', () => {
 
     it('ArrayOf composes from args', () => {
       expect(ArrayOf(1, 2, 3)).toEqual([1, 2, 3])
+    })
+
+    // ArrayFromAsync is typed `| undefined` because the proposal is
+    // ES2024; on Node 22+ it's always present. Covers the unbound
+    // form — the spec algorithm uses `this` only for the constructor
+    // and falls back to plain Array when `this` is undefined.
+    it('ArrayFromAsync is defined on Node 22+', () => {
+      expect(typeof ArrayFromAsync).toBe('function')
+    })
+
+    it('ArrayFromAsync drains an async iterable', async () => {
+      async function* gen() {
+        yield 1
+        yield 2
+        yield 3
+      }
+      await expect(ArrayFromAsync!(gen())).resolves.toEqual([1, 2, 3])
+    })
+
+    it('ArrayFromAsync awaits yielded thenables', async () => {
+      async function* gen() {
+        yield Promise.resolve('a')
+        yield Promise.resolve('b')
+      }
+      await expect(ArrayFromAsync!(gen())).resolves.toEqual(['a', 'b'])
+    })
+
+    it('ArrayFromAsync accepts plain iterables of awaitables', async () => {
+      // Spec: source can also be Iterable<T | PromiseLike<T>>.
+      await expect(
+        ArrayFromAsync!([Promise.resolve(1), Promise.resolve(2)]),
+      ).resolves.toEqual([1, 2])
+    })
+
+    it('ArrayFromAsync returns a plain Array when called unbound', async () => {
+      const fn = ArrayFromAsync!
+      async function* gen() {
+        yield 1
+      }
+      const out = await fn(gen())
+      expect(out).toBeInstanceOf(Array)
+      expect(Object.getPrototypeOf(out)).toBe(Array.prototype)
+    })
+
+    it('ArrayFromAsync propagates rejection from the iterator', async () => {
+      const err = new Error('boom')
+      async function* gen() {
+        yield 1
+        throw err
+      }
+      await expect(ArrayFromAsync!(gen())).rejects.toBe(err)
     })
   })
 

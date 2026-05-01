@@ -1188,7 +1188,12 @@ describe('dlx-package', () => {
     })
   })
 
-  describe('ensurePackageInstalled (cached path)', () => {
+  // `tmpDir` and `process.env['SOCKET_DLX_DIR']` are mutated at describe
+  // scope and beforeEach. Under vitest's default
+  // `sequence.concurrent: true` (off-CI), parallel `it` blocks would
+  // overwrite both, making the .npmrc assertion read from the wrong
+  // tmpDir. Force sequential here.
+  describe.sequential('ensurePackageInstalled (cached path)', () => {
     let tmpDir: string
     let savedDlxDir: string | undefined
 

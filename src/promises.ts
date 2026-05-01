@@ -8,12 +8,14 @@ import { UNDEFINED_TOKEN } from './constants/core'
 import { getAbortSignal } from './constants/process'
 
 import {
+  ArrayFromAsync,
   MathFloor,
   MathMax,
   MathMin,
   MathRandom,
   PromiseAllSettled,
   PromiseCtor,
+  PromiseWithResolvers as NativePromiseWithResolvers,
 } from './primordials'
 
 const abortSignal = getAbortSignal()
@@ -785,23 +787,18 @@ export interface PromiseWithResolvers<T> {
   reject: (reason?: unknown) => void
 }
 
-const maybeNativeWithResolvers = (
-  Promise as unknown as {
-    withResolvers?: unknown
-  }
-).withResolvers
-
 /**
  * Create a pending promise together with its `resolve` and `reject`
  * handles as first-class values, per
  * [ECMA-262 §27.2.4.9](https://tc39.es/ecma262/#sec-promise.withResolvers).
  *
- * Bound to native `Promise.withResolvers` when available (Node 20.12+ /
- * 21+ / 22+; V8 ≥ 12.0); otherwise falls back to a spec-equivalent
- * `new Promise(executor)` implementation that captures the handles via
- * closure. The returned object always has own data properties `promise`,
- * `resolve`, `reject` on `Object.prototype` — writable, enumerable, and
- * configurable — matching the spec's `CreateDataPropertyOrThrow` steps.
+ * Uses the `PromiseWithResolvers` primordial (already bound) when
+ * available (Node 20.12+ / 21+ / 22+; V8 ≥ 12.0); otherwise falls back
+ * to a spec-equivalent `new Promise(executor)` that captures the
+ * handles via closure. The returned object always has own data
+ * properties `promise`, `resolve`, `reject` on `Object.prototype` —
+ * writable, enumerable, and configurable — matching the spec's
+ * `CreateDataPropertyOrThrow` steps.
  *
  * Use this instead of the manual
  * `let resolve; const p = new Promise(r => { resolve = r })` dance for
@@ -817,11 +814,8 @@ const maybeNativeWithResolvers = (
  * ```
  */
 export const withResolvers: <T>() => PromiseWithResolvers<T> =
-  typeof maybeNativeWithResolvers === 'function'
-    ? // Bind so callers who destructure the export don't lose `this`.
-      ((maybeNativeWithResolvers as () => PromiseWithResolvers<unknown>).bind(
-        Promise,
-      ) as <T>() => PromiseWithResolvers<T>)
+  NativePromiseWithResolvers !== undefined
+    ? (NativePromiseWithResolvers as <T>() => PromiseWithResolvers<T>)
     : <T>(): PromiseWithResolvers<T> => {
         // Fallback: capture resolvers via closure. The `!` asserts hold
         // because Promise's executor runs synchronously, so both handles
@@ -833,4 +827,42 @@ export const withResolvers: <T>() => PromiseWithResolvers<T> =
           reject = rej
         })
         return { promise, resolve, reject }
+      }
+
+/**
+ * Drain an async iterable into an array, per
+ * [TC39 Array.fromAsync](https://tc39.es/proposal-array-from-async/).
+ *
+ * Uses the `ArrayFromAsync` primordial (already bound) when available
+ * (Node 22+; V8 ≥ 12.0); otherwise falls back to a `for await…of` +
+ * push loop.
+ *
+ * Use this instead of the manual
+ * `const out = []; for await (const x of iter) out.push(x); return out`
+ * dance when collecting an async iterator's values.
+ *
+ * Like the native, this only handles the unary form (no `mapFn` /
+ * `thisArg` overload).
+ *
+ * @example
+ * ```typescript
+ * import { glob } from 'node:fs/promises'
+ * const files = await fromAsync(glob('**\/*.ts', { cwd: '/tmp/proj' }))
+ * ```
+ */
+export const fromAsync: <T>(
+  source: AsyncIterable<T> | Iterable<T | PromiseLike<T>>,
+) => Promise<T[]> =
+  ArrayFromAsync !== undefined
+    ? (ArrayFromAsync as <T>(
+        source: AsyncIterable<T> | Iterable<T | PromiseLike<T>>,
+      ) => Promise<T[]>)
+    : async <T>(
+        source: AsyncIterable<T> | Iterable<T | PromiseLike<T>>,
+      ): Promise<T[]> => {
+        const out: T[] = []
+        for await (const item of source as AsyncIterable<T>) {
+          out.push(item)
+        }
+        return out
       }

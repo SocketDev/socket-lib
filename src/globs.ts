@@ -9,6 +9,7 @@ import {
   LICENSE_GLOB_RECURSIVE,
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
 } from './paths/globs'
+import { fromAsync } from './promises'
 
 import type * as fastGlobType from './external/fast-glob'
 import type picomatchType from './external/picomatch'
@@ -59,7 +60,96 @@ export interface GlobOptions extends FastGlobOptions {
 export type { Pattern, FastGlobOptions }
 
 let _fastGlob: typeof fastGlobType | undefined
+let _fs: typeof import('node:fs') | undefined
+let _fsPromises: typeof import('node:fs/promises') | undefined
+let _path: typeof import('node:path') | undefined
 let _picomatch: typeof picomatchType | undefined
+// `path.matchesGlob` was added in Node v22.5.0 / v20.17.0 (Stable).
+// Engines is >=22, so it's missing only on 22.0.x – 22.4.x.
+// `_matchesGlob` is the resolved native function (or `undefined` if
+// absent or not yet probed). `_matchesGlobProbed` distinguishes the
+// two cases so a missing native is detected only once.
+let _matchesGlob: ((p: string, pattern: string) => boolean) | undefined
+let _matchesGlobProbed = false
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Lazily load the fs/promises module to avoid Webpack errors.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getFsPromises() {
+  if (_fsPromises === undefined) {
+    _fsPromises = /*@__PURE__*/ require('node:fs/promises')
+  }
+  return _fsPromises as typeof import('node:fs/promises')
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
+}
+
+/**
+ * Resolve `path.matchesGlob` (or `undefined` if the runtime predates it).
+ * Probes once and caches the result for every subsequent call.
+ *
+ * Exported for unit tests; not part of the public API.
+ *
+ * @internal
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getMatchesGlob():
+  | ((p: string, pattern: string) => boolean)
+  | undefined {
+  if (!_matchesGlobProbed) {
+    const fn = (
+      getPath() as typeof import('node:path') & {
+        matchesGlob?: unknown
+      }
+    ).matchesGlob
+    if (typeof fn === 'function') {
+      _matchesGlob = fn as (p: string, pattern: string) => boolean
+    }
+    _matchesGlobProbed = true
+  }
+  return _matchesGlob
+}
+
+// Builtin glob support. Engines is >=22 so:
+//   `fs.glob` / `fs.globSync` / `fs.promises.glob` — added v22.0.0
+//     (Stable). Always present. Supports { cwd, exclude,
+//     withFileTypes }. Lacks fast-glob's `absolute`, `onlyFiles`,
+//     `dot`, `caseSensitiveMatch`, `followSymbolicLinks`, etc., so we
+//     only delegate when the caller passes no unsupported options.
+//
+//   `path.matchesGlob(path, pattern)` — added v22.5.0 / v20.17.0
+//     (Stable). Not present on Node 22.0.x – 22.4.x, so feature-detect
+//     at the call site. Single string pattern only; no negation, no
+//     dot/nocase options. Used only for the trivial single-pattern,
+//     no-options matcher case.
 
 const MATCHER_CACHE_MAX_SIZE = 100
 // LRU cache. We exploit Map's insertion-order iteration so eviction is O(1):
@@ -289,28 +379,51 @@ export function getGlobMatcher(
     }
   }
 
-  // Separate positive and negative patterns.
-  const positivePatterns = patterns.filter(
-    p => !StringPrototypeStartsWith(p, '!'),
-  )
-  const negativePatterns = patterns
-    .filter(p => StringPrototypeStartsWith(p, '!'))
-    .map(p => p.slice(1))
-
-  // Use ignore option for negation patterns.
-  const matchOptions = {
-    dot: true,
-    nocase: true,
-    ...options,
-    ...(negativePatterns.length > 0 ? { ignore: negativePatterns } : {}),
+  // Fast path: single non-negated pattern, no ignore, no options that
+  // change semantics → use Node's builtin `path.matchesGlob`. Added in
+  // v22.5.0 / v20.17.0 (Stable). Skips loading picomatch entirely.
+  // Bail out if the caller asks for `dot: false` or `nocase: false`,
+  // since matchesGlob doesn't expose those toggles. `matchesGlob` is
+  // missing on 22.0.x – 22.4.x, so feature-detect.
+  let matcher: ((path: string) => boolean) | undefined
+  if (
+    patterns.length === 1 &&
+    !StringPrototypeStartsWith(patterns[0]!, '!') &&
+    (!options ||
+      ((options.ignore === undefined || options.ignore.length === 0) &&
+        options.dot !== false &&
+        options.nocase !== false))
+  ) {
+    const matchesGlob = getMatchesGlob()
+    if (matchesGlob !== undefined) {
+      const pattern = patterns[0]!
+      matcher = (p: string) => matchesGlob(p, pattern)
+    }
   }
+  if (matcher === undefined) {
+    // Separate positive and negative patterns.
+    const positivePatterns = patterns.filter(
+      p => !StringPrototypeStartsWith(p, '!'),
+    )
+    const negativePatterns = patterns
+      .filter(p => StringPrototypeStartsWith(p, '!'))
+      .map(p => p.slice(1))
 
-  /* c8 ignore next 5 - External picomatch call */
-  const picomatch = getPicomatch()
-  const matcher = picomatch(
-    positivePatterns.length > 0 ? positivePatterns : patterns,
-    matchOptions,
-  ) as (path: string) => boolean
+    // Use ignore option for negation patterns.
+    const matchOptions = {
+      dot: true,
+      nocase: true,
+      ...options,
+      ...(negativePatterns.length > 0 ? { ignore: negativePatterns } : {}),
+    }
+
+    /* c8 ignore next 5 - External picomatch call */
+    const picomatch = getPicomatch()
+    matcher = picomatch(
+      positivePatterns.length > 0 ? positivePatterns : patterns,
+      matchOptions,
+    ) as (path: string) => boolean
+  }
 
   matcherCache.set(key, matcher)
   return matcher
@@ -326,17 +439,50 @@ export function getGlobMatcher(
  * console.log(files) // ['src/index.ts', 'src/utils.ts']
  * ```
  */
+/**
+ * Whether the caller's option bag is fully expressible with
+ * `node:fs.glob` (`cwd` + `exclude`). Any other option means we must
+ * fall back to fast-glob, which exposes the wider surface.
+ *
+ * Exported for unit tests; not part of the public API.
+ *
+ * @internal
+ */
+export function canUseNodeFsGlob(
+  options: FastGlobOptions | undefined,
+): boolean {
+  if (!options) {
+    return true
+  }
+  for (const key of ObjectKeys(options)) {
+    if (key !== 'cwd' && key !== 'ignore') {
+      return false
+    }
+  }
+  return true
+}
+
 /*@__NO_SIDE_EFFECTS__*/
 export function glob(
   patterns: Pattern | Pattern[],
   options?: FastGlobOptions,
 ): Promise<string[]> {
-  /* c8 ignore next - External fast-glob call */
-  const fastGlob = getFastGlob()
   // Strip trailing slashes from ignore patterns before fast-glob sees
   // them; otherwise `dist/` from a .gitignore-derived list silently
   // walks the whole subtree. See the stripTrailingSlash header above.
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
+  // Prefer node:fs/promises.glob (added v22.0.0, Stable) when the
+  // option surface lines up. Avoids loading fast-glob entirely.
+  if (canUseNodeFsGlob(options)) {
+    return fromAsync(
+      getFsPromises().glob(patterns as string | readonly string[], {
+        ...(options?.cwd ? { cwd: options.cwd } : {}),
+        ...(normalizedIgnore ? { exclude: normalizedIgnore } : {}),
+      }),
+    )
+  }
+  /* c8 ignore next - External fast-glob call */
+  const fastGlob = getFastGlob()
   return fastGlob.glob(patterns, {
     ...(options as import('fast-glob').Options),
     ...(normalizedIgnore ? { ignore: normalizedIgnore } : {}),
@@ -407,11 +553,21 @@ export function globSync(
   patterns: Pattern | Pattern[],
   options?: FastGlobOptions,
 ): string[] {
-  /* c8 ignore next - External fast-glob call */
-  const fastGlob = getFastGlob()
   // Strip trailing slashes from ignore patterns; same workaround as
   // the async `glob` above, see stripTrailingSlash header.
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
+  // Prefer node:fs.globSync (added v22.0.0, Stable) when the option
+  // surface lines up. Avoids loading fast-glob entirely.
+  if (canUseNodeFsGlob(options)) {
+    return [
+      ...getFs().globSync(patterns as string | readonly string[], {
+        ...(options?.cwd ? { cwd: options.cwd } : {}),
+        ...(normalizedIgnore ? { exclude: normalizedIgnore } : {}),
+      }),
+    ] as string[]
+  }
+  /* c8 ignore next - External fast-glob call */
+  const fastGlob = getFastGlob()
   return fastGlob.globSync(patterns, {
     ...(options as import('fast-glob').Options),
     ...(normalizedIgnore ? { ignore: normalizedIgnore } : {}),

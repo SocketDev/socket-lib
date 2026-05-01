@@ -505,7 +505,11 @@ describe('globs', () => {
     })
   })
 
-  describe('trailing-slash ignore patterns', () => {
+  // `tmpRoot` is captured at describe scope. Under vitest's default
+  // `sequence.concurrent: true` (off-CI), parallel `it` blocks would
+  // overwrite the shared variable mid-run. Force sequential here so
+  // each test sees its own beforeEach-created directory.
+  describe.sequential('trailing-slash ignore patterns', () => {
     let tmpRoot: string
 
     beforeEach(() => {

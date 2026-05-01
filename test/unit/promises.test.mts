@@ -11,6 +11,7 @@
  */
 
 import {
+  fromAsync,
   normalizeIterationOptions,
   normalizeRetryOptions,
   pEach,
@@ -1241,6 +1242,133 @@ describe('promises', () => {
       expect(keys).toContain('promise')
       expect(keys).toContain('resolve')
       expect(keys).toContain('reject')
+    })
+  })
+
+  describe('fromAsync', () => {
+    // Spec: https://tc39.es/proposal-array-from-async/
+    // On Node 22+ the export is bound to native Array.fromAsync; older
+    // engines hit the closure fallback. Both paths must satisfy the spec.
+
+    it('is a function', () => {
+      expect(typeof fromAsync).toBe('function')
+    })
+
+    it('drains an async iterable into an array', async () => {
+      async function* gen() {
+        yield 1
+        yield 2
+        yield 3
+      }
+      await expect(fromAsync(gen())).resolves.toEqual([1, 2, 3])
+    })
+
+    it('returns an empty array for an empty async iterable', async () => {
+      // eslint-disable-next-line require-yield
+      async function* empty() {
+        return
+      }
+      await expect(fromAsync(empty())).resolves.toEqual([])
+    })
+
+    it('preserves yield order', async () => {
+      async function* gen() {
+        yield 'b'
+        yield 'a'
+        yield 'c'
+      }
+      await expect(fromAsync(gen())).resolves.toEqual(['b', 'a', 'c'])
+    })
+
+    it('awaits each yielded value before pushing', async () => {
+      async function* gen() {
+        yield Promise.resolve(1)
+        yield Promise.resolve(2)
+      }
+      // Spec: yielded thenables are awaited; resulting array contains
+      // the resolved values, not the promises.
+      const out = await fromAsync(gen())
+      expect(out).toEqual([1, 2])
+    })
+
+    it('propagates rejection from the iterator', async () => {
+      const err = new Error('boom')
+      async function* gen() {
+        yield 1
+        throw err
+      }
+      await expect(fromAsync(gen())).rejects.toBe(err)
+    })
+
+    it('also drains plain (sync) iterables of awaitables', async () => {
+      // Spec lets fromAsync accept Iterable<T | PromiseLike<T>> too.
+      const out = await fromAsync([Promise.resolve('a'), Promise.resolve('b')])
+      expect(out).toEqual(['a', 'b'])
+    })
+  })
+
+  // Explicit coverage of the fallback branch. On Node 22+ the module
+  // binds to native `Array.fromAsync` at import time; here we delete
+  // the native method and re-import the module fresh, forcing the
+  // feature-detect to pick the closure fallback.
+  describe('fromAsync — fallback implementation', () => {
+    const hadNative =
+      typeof (Array as unknown as { fromAsync?: unknown }).fromAsync ===
+      'function'
+    const nativeFromAsync = hadNative
+      ? (Array as unknown as { fromAsync: unknown }).fromAsync
+      : undefined
+
+    afterEach(() => {
+      if (hadNative && nativeFromAsync !== undefined) {
+        ;(Array as unknown as { fromAsync: unknown }).fromAsync =
+          nativeFromAsync
+      }
+      vi.resetModules()
+    })
+
+    async function loadFallback(): Promise<
+      <T>(
+        source: AsyncIterable<T> | Iterable<T | PromiseLike<T>>,
+      ) => Promise<T[]>
+    > {
+      delete (Array as unknown as { fromAsync?: unknown }).fromAsync
+      vi.resetModules()
+      const mod = await import('@socketsecurity/lib/promises')
+      return mod.fromAsync
+    }
+
+    it('fallback is a function', async () => {
+      const fallback = await loadFallback()
+      expect(typeof fallback).toBe('function')
+    })
+
+    it('fallback drains an async iterable into an array', async () => {
+      const fallback = await loadFallback()
+      async function* gen() {
+        yield 'x'
+        yield 'y'
+      }
+      await expect(fallback(gen())).resolves.toEqual(['x', 'y'])
+    })
+
+    it('fallback returns empty array for empty iterable', async () => {
+      const fallback = await loadFallback()
+      // eslint-disable-next-line require-yield
+      async function* empty() {
+        return
+      }
+      await expect(fallback(empty())).resolves.toEqual([])
+    })
+
+    it('fallback propagates rejection from the iterator', async () => {
+      const fallback = await loadFallback()
+      const err = new Error('fallback-boom')
+      async function* gen() {
+        yield 1
+        throw err
+      }
+      await expect(fallback(gen())).rejects.toBe(err)
     })
   })
 })

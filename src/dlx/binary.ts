@@ -11,6 +11,7 @@ import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import { spawn } from '../spawn'
+import { hash } from '../crypto'
 import { generateCacheKey } from './cache'
 import { normalizeHash } from './integrity'
 
@@ -614,11 +615,7 @@ export async function downloadBinaryFile(
         if (stats.size > 0) {
           // File exists, compute and return SRI integrity hash.
           const fileBuffer = await fs.promises.readFile(destPath)
-          const hash = crypto
-            .createHash('sha512')
-            .update(fileBuffer)
-            .digest('base64')
-          return `sha512-${hash}`
+          return `sha512-${hash('sha512', fileBuffer, 'base64')}`
         }
       }
 
@@ -638,11 +635,7 @@ export async function downloadBinaryFile(
 
       // Compute SRI integrity hash of downloaded file.
       const fileBuffer = await fs.promises.readFile(destPath)
-      const hash = crypto
-        .createHash('sha512')
-        .update(fileBuffer)
-        .digest('base64')
-      const actualIntegrity = `sha512-${hash}`
+      const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
 
       // Verify integrity if provided (constant-time comparison).
       if (integrity) {
