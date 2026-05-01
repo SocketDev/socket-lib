@@ -6,6 +6,11 @@ name: 📦 Publish
 on:
   workflow_dispatch:
     inputs:
+      dry-run:
+        description: 'Stage everything but pass --dry-run to npm publish; nothing reaches the registry. Default: true — uncheck to opt into a real publish.'
+        required: false
+        default: true
+        type: boolean
       debug:
         description: 'Enable debug output'
         required: false
@@ -21,9 +26,10 @@ permissions:
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@b74ae5083d662df0045731bcf35b4e54b1e03d37 # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@fbfeadaae4087e9dcf35c0d4bd56a96597e492b2 # main
     with:
       debug: ${{ inputs.debug }}
+      dry-run: ${{ inputs.dry-run }}
       package-name: '@socketsecurity/lib'
       setup-script: 'pnpm run build'
       use-trusted-publishing: true
