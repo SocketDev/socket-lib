@@ -728,7 +728,7 @@
     "format:check": "oxfmt --check .",
     "lint": "node scripts/lint.mts",
     "prim": "node tools/prim/bin/prim.mts",
-    "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
+    "security": "node scripts/security.mts",
     "prepare": "husky && node scripts/build/main.mts --quiet",
     "prepublishOnly": "pnpm run build",
     "test": "node scripts/test/main.mts",
