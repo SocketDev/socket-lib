@@ -2,5 +2,8 @@
   "$schema": "./socket-repo-template-schema.json",
   "schemaVersion": 1,
   "repoName": "socket-lib",
-  "kind": "single-package"
+  "kind": "single-package",
+  "lint": {
+    "profile": "rich"
+  }
 }
