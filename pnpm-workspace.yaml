@@ -109,6 +109,7 @@ patchedDependencies:
 # any drift should fail fast, not silently auto-download via @pnpm/exe
 # (which in rc.5 leaves a placeholder launcher that errors at runtime).
 pmOnFail: error
+resolutionMode: highest
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - '@yarnpkg/core@4.5.0'

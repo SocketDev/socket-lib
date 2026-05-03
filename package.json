@@ -724,13 +724,17 @@
     "cover": "node scripts/test/cover.mts",
     "dev": "node scripts/build/main.mts --watch",
     "fix": "node scripts/fix.mts",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
     "lint": "node scripts/lint.mts",
     "prim": "node tools/prim/bin/prim.mts",
     "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
     "prepare": "husky && node scripts/build/main.mts --quiet",
     "prepublishOnly": "pnpm run build",
     "test": "node scripts/test/main.mts",
-    "update": "node scripts/update.mts"
+    "update": "node scripts/update.mts",
+    "xport": "node scripts/xport.mts",
+    "xport:emit-schema": "node scripts/xport-emit-schema.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
