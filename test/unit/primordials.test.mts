@@ -53,9 +53,12 @@ import {
   ArrayPrototypeSplice,
   ArrayPrototypeToReversed,
   ArrayPrototypeToSorted,
+  ArrayPrototypeToSpliced,
   ArrayPrototypeUnshift,
   ArrayPrototypeValues,
+  ArrayPrototypeWith,
   AtomicsWait,
+  BigIntCtor,
   BooleanCtor,
   BufferCtor,
   BufferPrototypeSlice,
@@ -67,10 +70,17 @@ import {
   DatePrototypeValueOf,
   decodeComponent,
   encodeComponent,
+  ErrorCaptureStackTrace,
   ErrorCtor,
+  ErrorPrepareStackTrace,
+  ErrorStackTraceLimit,
   FunctionPrototypeApply,
   FunctionPrototypeBind,
   FunctionPrototypeCall,
+  FunctionPrototypeToString,
+  globalThisRef,
+  InfinityValue,
+  NaNValue,
   IteratorPrototypeNext,
   IteratorPrototypeReturn,
   JSONParse,
@@ -86,21 +96,61 @@ import {
   MapPrototypeValues,
   MapCtor,
   MathAbs,
+  MathAcos,
+  MathAcosh,
+  MathAsin,
+  MathAsinh,
+  MathAtan,
+  MathAtan2,
+  MathAtanh,
+  MathCbrt,
   MathCeil,
+  MathClz32,
+  MathCos,
+  MathCosh,
+  MathE,
+  MathExp,
+  MathExpm1,
+  MathF16round,
   MathFloor,
+  MathFround,
+  MathHypot,
+  MathImul,
+  MathLN10,
+  MathLN2,
+  MathLOG10E,
+  MathLOG2E,
+  MathLog,
+  MathLog10,
+  MathLog1p,
+  MathLog2,
   MathMax,
   MathMin,
+  MathPI,
   MathPow,
   MathRandom,
   MathRound,
+  MathSQRT1_2,
+  MathSQRT2,
   MathSign,
+  MathSin,
+  MathSinh,
   MathSqrt,
+  MathTan,
+  MathTanh,
   MathTrunc,
   NumberCtor,
+  NumberEPSILON,
   NumberIsFinite,
   NumberIsInteger,
   NumberIsNaN,
   NumberIsSafeInteger,
+  NumberMAX_SAFE_INTEGER,
+  NumberMAX_VALUE,
+  NumberMIN_SAFE_INTEGER,
+  NumberMIN_VALUE,
+  NumberNEGATIVE_INFINITY,
+  NumberPOSITIVE_INFINITY,
   NumberParseFloat,
   NumberParseInt,
   NumberPrototypeToFixed,
@@ -126,7 +176,11 @@ import {
   ObjectKeys,
   ObjectPreventExtensions,
   ObjectPrototype,
+  ObjectPrototypeDefineGetter,
+  ObjectPrototypeDefineSetter,
   ObjectPrototypeHasOwnProperty,
+  ObjectPrototypeLookupGetter,
+  ObjectPrototypeLookupSetter,
   ObjectPrototypeIsPrototypeOf,
   ObjectPrototypePropertyIsEnumerable,
   ObjectPrototypeToString,
@@ -201,12 +255,27 @@ import {
   StringPrototypeTrimEnd,
   StringPrototypeTrimStart,
   StringRaw,
+  SymbolAsyncDispose,
   SymbolAsyncIterator,
   SymbolCtor,
+  SymbolDispose,
   SymbolFor,
+  SymbolHasInstance,
+  SymbolIsConcatSpreadable,
   SymbolIterator,
+  SymbolKeyFor,
+  SymbolMatch,
+  SymbolMatchAll,
+  SymbolPrototypeDescription,
+  SymbolPrototypeToString,
+  SymbolPrototypeValueOf,
+  SymbolReplace,
+  SymbolSearch,
+  SymbolSpecies,
+  SymbolSplit,
   SymbolToPrimitive,
   SymbolToStringTag,
+  SymbolUnscopables,
   uncurryThis,
   URLCtor,
   URLSearchParamsCtor,
@@ -234,6 +303,7 @@ describe('primordials', () => {
   describe('constructors', () => {
     it('points at the JavaScript global constructors', () => {
       expect(ArrayCtor).toBe(Array)
+      expect(BigIntCtor).toBe(BigInt)
       expect(BooleanCtor).toBe(Boolean)
       expect(DateCtor).toBe(Date)
       expect(ErrorCtor).toBe(Error)
@@ -263,6 +333,18 @@ describe('primordials', () => {
       expect(new ErrorCtor('boom').message).toBe('boom')
     })
 
+    it('BigIntCtor coerces and constructs BigInts', () => {
+      // BigInt is callable as a function (no `new`); calling it with `new`
+      // throws by spec. The primordial is the function reference, so
+      // both styles below work the same as the global.
+      expect(BigIntCtor(42)).toBe(42n)
+      expect(BigIntCtor('100')).toBe(100n)
+      expect(typeof BigIntCtor(0)).toBe('bigint')
+      expect(
+        () => new (BigIntCtor as unknown as new (n: number) => bigint)(1),
+      ).toThrow(TypeError)
+    })
+
     it('ProxyCtor wraps a target with handlers', () => {
       const target = { a: 1 }
       const proxy = new ProxyCtor(target, {
@@ -282,6 +364,22 @@ describe('primordials', () => {
     it('decodeComponent / encodeComponent round-trip', () => {
       const raw = 'hello world!'
       expect(decodeComponent(encodeComponent(raw))).toBe(raw)
+    })
+  })
+
+  describe('global values', () => {
+    it('InfinityValue / NaNValue mirror the language globals', () => {
+      expect(InfinityValue).toBe(Infinity)
+      expect(InfinityValue).toBe(Number.POSITIVE_INFINITY)
+      expect(Number.isNaN(NaNValue)).toBe(true)
+      // NaN-equal-to-itself isn't a thing — but NaNValue must be a
+      // float NaN, distinct from `null` / `undefined`.
+      expect(typeof NaNValue).toBe('number')
+    })
+
+    it('globalThisRef is the same object as the live globalThis', () => {
+      expect(globalThisRef).toBe(globalThis)
+      expect(typeof globalThisRef.Object).toBe('function')
     })
   })
 
@@ -487,6 +585,84 @@ describe('primordials', () => {
       ).toEqual([1, 2, 3])
       expect(b).toEqual([3, 1, 2])
     })
+
+    it('ArrayPrototypeToSpliced returns a copy with edits', () => {
+      const a: Array<number | string> = [1, 2, 3, 4]
+      const out = ArrayPrototypeToSpliced(a, 1, 2, 'a', 'b', 'c')
+      expect(out).toEqual([1, 'a', 'b', 'c', 4])
+      // Source unchanged (Change Array By Copy invariant).
+      expect(a).toEqual([1, 2, 3, 4])
+    })
+
+    it('ArrayPrototypeWith returns a copy with one index replaced', () => {
+      const a = [10, 20, 30]
+      expect(ArrayPrototypeWith(a, 1, 99)).toEqual([10, 99, 30])
+      // Negative index counts from the end.
+      expect(ArrayPrototypeWith(a, -1, 99)).toEqual([10, 20, 99])
+      // Source unchanged.
+      expect(a).toEqual([10, 20, 30])
+    })
+  })
+
+  describe('Error (static)', () => {
+    it('ErrorCaptureStackTrace attaches a `.stack` to a target object', () => {
+      // Skip on JS engines without the V8 extension (none of our CI
+      // targets, but keeps non-V8 importers safe).
+      if (typeof ErrorCaptureStackTrace !== 'function') {
+        return
+      }
+      const target: { stack?: string } = {}
+      ErrorCaptureStackTrace(target)
+      expect(typeof target.stack).toBe('string')
+      expect(target.stack!.length).toBeGreaterThan(0)
+    })
+
+    it('ErrorCaptureStackTrace skips above `constructorOpt`', () => {
+      if (typeof ErrorCaptureStackTrace !== 'function') {
+        return
+      }
+      function inner(target: { stack?: string }): void {
+        ErrorCaptureStackTrace!(target, inner)
+      }
+      const target: { stack?: string } = {}
+      inner(target)
+      // The frame for `inner` itself should NOT appear since we passed
+      // it as `constructorOpt`.
+      expect(target.stack!).not.toContain(' at inner ')
+    })
+
+    it('ErrorPrepareStackTrace mirrors the engine default at load time', () => {
+      // V8 sets `Error.prepareStackTrace` to a function on Node 22+;
+      // older engines leave it undefined. Either is correct for the
+      // primordial — we just capture whatever the engine had.
+      const live = (Error as { prepareStackTrace?: unknown }).prepareStackTrace
+      expect(ErrorPrepareStackTrace).toBe(live)
+    })
+
+    it('ErrorStackTraceLimit returns the live limit', () => {
+      // The function-shaped export reads the current value rather than
+      // a snapshot, so user code that mutates `Error.stackTraceLimit`
+      // sees the new value on the next call.
+      const orig = Error.stackTraceLimit
+      try {
+        Error.stackTraceLimit = 5
+        expect(ErrorStackTraceLimit()).toBe(5)
+        Error.stackTraceLimit = 25
+        expect(ErrorStackTraceLimit()).toBe(25)
+      } finally {
+        Error.stackTraceLimit = orig
+      }
+    })
+
+    it('ErrorStackTraceLimit returns a number on V8 / undefined on non-V8', () => {
+      const result = ErrorStackTraceLimit()
+      // Either a finite number (V8 / Chromium / Node) or undefined
+      // (non-V8 engines, where the property doesn't exist).
+      expect(
+        result === undefined ||
+          (typeof result === 'number' && Number.isFinite(result)),
+      ).toBe(true)
+    })
   })
 
   describe('Function (prototype)', () => {
@@ -521,6 +697,15 @@ describe('primordials', () => {
         FunctionPrototypeCall(greet as never, { greeting: 'Hi' }, 'Jane'),
       ).toBe('Hi, Jane')
     })
+
+    it('FunctionPrototypeToString returns the source representation', () => {
+      function namedFn(): number {
+        return 1
+      }
+      const out = FunctionPrototypeToString(namedFn as never)
+      // Engine-specific exact format, but must include the function name.
+      expect(out).toContain('namedFn')
+    })
   })
 
   describe('Math', () => {
@@ -542,6 +727,79 @@ describe('primordials', () => {
       expect(r).toBeGreaterThanOrEqual(0)
       expect(r).toBeLessThan(1)
     })
+
+    it('MathImul performs C-style 32-bit signed multiplication', () => {
+      // `Math.imul` always coerces to int32, so its results differ from `*`
+      // for values that overflow IEEE-754 safe integers.
+      expect(MathImul(2, 4)).toBe(8)
+      expect(MathImul(-1, 8)).toBe(-8)
+      expect(MathImul(0xffffffff, 5)).toBe(-5)
+      // 0xffff * 0xffff = 0xfffe0001 — but as int32 that's negative.
+      expect(MathImul(0xffff, 0xffff)).toBe(-131_071)
+    })
+
+    it('exposes Math constants with the correct values', () => {
+      expect(MathE).toBe(Math.E)
+      expect(MathLN10).toBe(Math.LN10)
+      expect(MathLN2).toBe(Math.LN2)
+      expect(MathLOG10E).toBe(Math.LOG10E)
+      expect(MathLOG2E).toBe(Math.LOG2E)
+      expect(MathPI).toBe(Math.PI)
+      expect(MathSQRT1_2).toBe(Math.SQRT1_2)
+      expect(MathSQRT2).toBe(Math.SQRT2)
+    })
+
+    it('inverse trig: acos / asin / atan / atan2 / acosh / asinh / atanh', () => {
+      expect(MathAcos(1)).toBe(0)
+      expect(MathAsin(0)).toBe(0)
+      expect(MathAtan(0)).toBe(0)
+      expect(MathAtan2(1, 1)).toBeCloseTo(Math.PI / 4)
+      expect(MathAcosh(1)).toBe(0)
+      expect(MathAsinh(0)).toBe(0)
+      expect(MathAtanh(0)).toBe(0)
+    })
+
+    it('forward trig: sin / cos / tan / sinh / cosh / tanh', () => {
+      expect(MathSin(0)).toBe(0)
+      expect(MathCos(0)).toBe(1)
+      expect(MathTan(0)).toBe(0)
+      expect(MathSinh(0)).toBe(0)
+      expect(MathCosh(0)).toBe(1)
+      expect(MathTanh(0)).toBe(0)
+    })
+
+    it('exponentials and logarithms: exp / expm1 / log / log1p / log2 / log10', () => {
+      expect(MathExp(0)).toBe(1)
+      expect(MathExpm1(0)).toBe(0)
+      expect(MathLog(Math.E)).toBeCloseTo(1)
+      expect(MathLog1p(0)).toBe(0)
+      expect(MathLog2(8)).toBe(3)
+      expect(MathLog10(1000)).toBe(3)
+    })
+
+    it('rooting: cbrt / hypot / fround', () => {
+      expect(MathCbrt(27)).toBe(3)
+      expect(MathHypot(3, 4)).toBe(5)
+      // `fround` rounds to the nearest float32. 0.1 isn't exactly
+      // representable in either format, but the float32 result must
+      // round-trip back to the same float32 value.
+      expect(MathFround(MathFround(0.1))).toBe(MathFround(0.1))
+    })
+
+    it('integer ops: clz32', () => {
+      expect(MathClz32(1)).toBe(31)
+      expect(MathClz32(0)).toBe(32)
+      expect(MathClz32(0xffff_ffff)).toBe(0)
+    })
+
+    it('MathF16round is undefined or rounds to float16', () => {
+      // ES2025 — undefined on older engines. When defined, rounding
+      // 0.1 to float16 must round-trip the same way.
+      if (typeof MathF16round !== 'function') {
+        return
+      }
+      expect(MathF16round(MathF16round(0.1))).toBe(MathF16round(0.1))
+    })
   })
 
   describe('Number', () => {
@@ -558,6 +816,16 @@ describe('primordials', () => {
     it('parseFloat / parseInt', () => {
       expect(NumberParseFloat('3.14')).toBeCloseTo(3.14)
       expect(NumberParseInt('42', 10)).toBe(42)
+    })
+
+    it('exposes Number constants with the correct values', () => {
+      expect(NumberEPSILON).toBe(Number.EPSILON)
+      expect(NumberMAX_SAFE_INTEGER).toBe(Number.MAX_SAFE_INTEGER)
+      expect(NumberMAX_VALUE).toBe(Number.MAX_VALUE)
+      expect(NumberMIN_SAFE_INTEGER).toBe(Number.MIN_SAFE_INTEGER)
+      expect(NumberMIN_VALUE).toBe(Number.MIN_VALUE)
+      expect(NumberNEGATIVE_INFINITY).toBe(Number.NEGATIVE_INFINITY)
+      expect(NumberPOSITIVE_INFINITY).toBe(Number.POSITIVE_INFINITY)
     })
 
     it('prototype toFixed / toString via uncurry', () => {
@@ -654,6 +922,54 @@ describe('primordials', () => {
       expect(ObjectPrototypeToString(/re/)).toBe('[object RegExp]')
       expect(ObjectPrototypeToString(null)).toBe('[object Null]')
       expect(ObjectPrototypeToString(undefined)).toBe('[object Undefined]')
+    })
+
+    it('Annex B accessors: __defineGetter__ / __lookupGetter__ round-trip', () => {
+      const target: { x?: number } = {}
+      let invoked = 0
+      const getter = (): number => {
+        invoked += 1
+        return 42
+      }
+      ObjectPrototypeDefineGetter(target, 'x', getter)
+      // Reading the property invokes the getter.
+      expect(target.x).toBe(42)
+      expect(invoked).toBe(1)
+      // __lookupGetter__ recovers the captured function.
+      expect(ObjectPrototypeLookupGetter(target, 'x')).toBe(getter)
+      // No setter installed; lookupSetter returns undefined.
+      expect(ObjectPrototypeLookupSetter(target, 'x')).toBe(undefined)
+    })
+
+    it('Annex B accessors: __defineSetter__ / __lookupSetter__ round-trip', () => {
+      const target: { y?: number } = {}
+      let written: unknown
+      const setter = (value: unknown): void => {
+        written = value
+      }
+      ObjectPrototypeDefineSetter(target, 'y', setter)
+      target.y = 7
+      expect(written).toBe(7)
+      expect(ObjectPrototypeLookupSetter(target, 'y')).toBe(setter)
+      // No getter installed; reading falls through to undefined.
+      expect(target.y).toBe(undefined)
+      expect(ObjectPrototypeLookupGetter(target, 'y')).toBe(undefined)
+    })
+
+    it('__lookupGetter__ walks the prototype chain', () => {
+      // Annex B explicitly requires walking up the prototype chain,
+      // which is one of the two real reasons to prefer this over
+      // Object.getOwnPropertyDescriptor.
+      class Parent {
+        get prop(): string {
+          return 'parent'
+        }
+      }
+      class Child extends Parent {}
+      const child = new Child()
+      const getter = ObjectPrototypeLookupGetter(child, 'prop')
+      expect(typeof getter).toBe('function')
+      expect((getter as () => string)?.call(child)).toBe('parent')
     })
   })
 
@@ -800,13 +1116,55 @@ describe('primordials', () => {
   describe('Symbol', () => {
     it('well-known symbols match globals', () => {
       expect(SymbolAsyncIterator).toBe(Symbol.asyncIterator)
+      expect(SymbolHasInstance).toBe(Symbol.hasInstance)
+      expect(SymbolIsConcatSpreadable).toBe(Symbol.isConcatSpreadable)
       expect(SymbolIterator).toBe(Symbol.iterator)
+      expect(SymbolMatch).toBe(Symbol.match)
+      expect(SymbolMatchAll).toBe(Symbol.matchAll)
+      expect(SymbolReplace).toBe(Symbol.replace)
+      expect(SymbolSearch).toBe(Symbol.search)
+      expect(SymbolSpecies).toBe(Symbol.species)
+      expect(SymbolSplit).toBe(Symbol.split)
       expect(SymbolToPrimitive).toBe(Symbol.toPrimitive)
       expect(SymbolToStringTag).toBe(Symbol.toStringTag)
+      expect(SymbolUnscopables).toBe(Symbol.unscopables)
+    })
+
+    it('ES2024 dispose symbols mirror engine state', () => {
+      // Node 20.4+ has both; older Node lacks them. Either way, the
+      // primordial must equal the live global when present.
+      expect(SymbolAsyncDispose).toBe(
+        (Symbol as { asyncDispose?: symbol }).asyncDispose,
+      )
+      expect(SymbolDispose).toBe((Symbol as { dispose?: symbol }).dispose)
     })
 
     it('SymbolFor returns registry symbols', () => {
       expect(SymbolFor('primordials.test')).toBe(Symbol.for('primordials.test'))
+    })
+
+    it('SymbolKeyFor recovers keys from registry symbols', () => {
+      const sym = SymbolFor('primordials.keyfor.test')
+      expect(SymbolKeyFor(sym)).toBe('primordials.keyfor.test')
+      // Unregistered symbols return undefined.
+      expect(SymbolKeyFor(Symbol('not-registered'))).toBe(undefined)
+    })
+
+    it('SymbolPrototypeDescription reads the description accessor', () => {
+      // `Symbol.prototype.description` is a getter; the helper resolves
+      // it via __lookupGetter__ + falls back to direct property access.
+      expect(SymbolPrototypeDescription(Symbol('hello'))).toBe('hello')
+      expect(SymbolPrototypeDescription(Symbol())).toBe(undefined)
+    })
+
+    it('SymbolPrototypeToString matches Symbol#toString', () => {
+      const s = Symbol('xyz')
+      expect(SymbolPrototypeToString(s)).toBe('Symbol(xyz)')
+    })
+
+    it('SymbolPrototypeValueOf returns the symbol itself', () => {
+      const s = Symbol('xyz')
+      expect(SymbolPrototypeValueOf(s)).toBe(s)
     })
   })
 

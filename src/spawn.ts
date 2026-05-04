@@ -32,6 +32,9 @@ import { isArray } from './arrays'
 import { whichSync } from './bin'
 import { getAbortSignal } from './constants/process'
 import { stackWithCauses } from './errors'
+import { getNodeChildProcess } from './node/child-process'
+import { getNodeFs } from './node/fs'
+import { getNodePath } from './node/path'
 import { getOwn, hasOwn } from './objects'
 import { isPath } from './paths/normalize'
 import { getDefaultSpinner } from './spinner'
@@ -69,9 +72,6 @@ type BufferEncoding = globalThis.BufferEncoding
 const windowsScriptExtRegExp = /\.(?:cmd|bat|ps1)$/i
 
 let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
-let _path: typeof import('node:path') | undefined
-let _fs: typeof import('node:fs') | undefined
-let _child_process: typeof import('node:child_process') | undefined
 
 /**
  * Options for spawning a child process with promise-based completion.
@@ -382,49 +382,15 @@ export type SpawnSyncOptions = Omit<SpawnOptions, 'spinner'>
  * @returns The Node.js `child_process` module
  *
  * @example
- * const childProcess = getChildProcess()
+ * const childProcess = getNodeChildProcess()
  * childProcess.spawnSync('ls', ['-la'])
  */
-/*@__NO_SIDE_EFFECTS__*/
-function getChildProcess() {
-  if (_child_process === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _child_process = /*@__PURE__*/ require('node:child_process')
-  }
-  return _child_process as typeof import('node:child_process')
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
 /*@__NO_SIDE_EFFECTS__*/
 function getNpmCliPromiseSpawn() {
   if (_npmCliPromiseSpawn === undefined) {
     _npmCliPromiseSpawn = /*@__PURE__*/ require('./external/@npmcli/promise-spawn')
   }
   return _npmCliPromiseSpawn!
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
 }
 
 /**
@@ -714,7 +680,7 @@ export function spawn(
   let actualCmd = cmd
   if (!isPath(cmd)) {
     // Binary name - check cache first, validate with existsSync().
-    const fs = getFs()
+    const fs = getNodeFs()
     const cached = spawnBinPathCache.get(cmd)
     if (cached) {
       if (fs.existsSync(cached)) {
@@ -773,7 +739,10 @@ export function spawn(
     // not in PATH (e.g., temp directories, project-local bins).
     if (!isPath(actualCmd)) {
       // Extract just the command name without extension for PATH lookup.
-      actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
+      actualCmd = getNodePath().basename(
+        actualCmd,
+        getNodePath().extname(actualCmd),
+      )
     }
   }
   // The stdio option can be a string or an array.
@@ -971,7 +940,10 @@ export function spawnSync(
     // not in PATH (e.g., temp directories, project-local bins).
     if (!isPath(actualCmd)) {
       // Extract just the command name without extension for PATH lookup.
-      actualCmd = getPath().basename(actualCmd, getPath().extname(actualCmd))
+      actualCmd = getNodePath().basename(
+        actualCmd,
+        getNodePath().extname(actualCmd),
+      )
     }
   }
   const { stripAnsi: shouldStripAnsi = true, ...rawSpawnOptions } = {
@@ -985,7 +957,7 @@ export function spawnSync(
     ...rawSpawnOptions,
   } as NodeSpawnOptions & { encoding: BufferEncoding | 'buffer' }
   const stdioString = spawnOptions.encoding !== 'buffer'
-  const result = getChildProcess().spawnSync(actualCmd, args, spawnOptions)
+  const result = getNodeChildProcess().spawnSync(actualCmd, args, spawnOptions)
   if (stdioString) {
     const { stderr, stdout } = result
     if (stdout) {

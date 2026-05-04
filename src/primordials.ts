@@ -25,29 +25,45 @@
  * @see https://github.com/nodejs/node/blob/main/lib/internal/per_context/primordials.js
  */
 
+// ─── Smol bindings (feature-detect) ────────────────────────────────────
+// When running on socket-btm's smol Node binary, two extra builtins
+// are available:
+//
+//   - `node:smol-util` — native uncurryThis / applyBind. ~2x faster
+//     than the JS form's two-dispatch path.
+//   - `node:smol-primordial` — V8 Fast API typed Math.* / Number.is*.
+//     TurboFan inlines them into JIT-compiled callers. ~30-50% gain
+//     on hot loops.
+//
+// On stock Node, browsers, Deno, and Bun, both probes return undefined
+// and exports below fall back to the standard built-ins. Same identifier
+// name across runtimes — consumer code never changes.
+import { getSmolPrimordial } from './smol/primordial'
+import { getSmolUtil } from './smol/util'
+
+const _smolUtil = getSmolUtil()
+const _smolPrimordial = getSmolPrimordial()
+
 // ─── uncurryThis ───────────────────────────────────────────────────────
 // Mirrors Node.js internal/per_context/primordials.js:
 //   const { apply, bind, call } = Function.prototype
 //   const uncurryThis = bind.bind(call)
 const { apply, bind, call } = Function.prototype
-export const uncurryThis = bind.bind(call) as <
-  T,
-  A extends readonly unknown[],
-  R,
->(
-  fn: (this: T, ...args: A) => R,
-) => (self: T, ...args: A) => R
-export const applyBind = bind.bind(apply) as <
-  T,
-  A extends readonly unknown[],
-  R,
->(
-  fn: (this: T, ...args: A) => R,
-) => (self: T, args: A) => R
+export const uncurryThis =
+  _smolUtil?.uncurryThis ??
+  (bind.bind(call) as <T, A extends readonly unknown[], R>(
+    fn: (this: T, ...args: A) => R,
+  ) => (self: T, ...args: A) => R)
+export const applyBind =
+  _smolUtil?.applyBind ??
+  (bind.bind(apply) as <T, A extends readonly unknown[], R>(
+    fn: (this: T, ...args: A) => R,
+  ) => (self: T, args: A) => R)
 
 // ─── Constructors ──────────────────────────────────────────────────────
 export const ArrayCtor: ArrayConstructor = Array
 export const ArrayBufferCtor: ArrayBufferConstructor = ArrayBuffer
+export const BigIntCtor: BigIntConstructor = BigInt
 export const BooleanCtor: BooleanConstructor = Boolean
 // BufferCtor is a Node-only global; `undefined` in the browser. Callers
 // that import it in browser code get a type-safe `undefined` rather than
@@ -94,6 +110,19 @@ export const URLSearchParamsCtor: typeof URLSearchParams = URLSearchParams
 export const WeakMapCtor: WeakMapConstructor = WeakMap
 export const WeakRefCtor: WeakRefConstructor = WeakRef
 export const WeakSetCtor: WeakSetConstructor = WeakSet
+
+// ─── Global values ─────────────────────────────────────────────────────
+// `Infinity` and `NaN` are the language's two non-finite number primitives.
+// They are non-writable / non-configurable on globalThis since ES5, so the
+// captured value is guaranteed to match the live global. Re-exported here
+// for symmetry with `NumberPOSITIVE_INFINITY` / `NumberNaN`.
+export const InfinityValue: number = Infinity
+export const NaNValue: number = NaN
+// `globalThisRef` is the captured `globalThis` reference — same object
+// in every realm and frozen on the spec side. Importers that need to
+// install or read globals safely use this rather than the keyword
+// directly.
+export const globalThisRef: typeof globalThis = globalThis
 
 // ─── Global functions ──────────────────────────────────────────────────
 export const decodeComponent = globalThis.decodeURIComponent
@@ -184,6 +213,10 @@ export const ArrayPrototypeSplice = uncurryThis(Array.prototype.splice) as <T>(
 ) => T[]
 export const ArrayPrototypeToReversed = uncurryThis(Array.prototype.toReversed)
 export const ArrayPrototypeToSorted = uncurryThis(Array.prototype.toSorted)
+// `toSpliced` is a copying variant of `splice`; same `(start, deleteCount, ...items)` signature.
+export const ArrayPrototypeToSpliced = uncurryThis(
+  Array.prototype.toSpliced,
+) as <T>(self: T[], start: number, deleteCount?: number, ...items: T[]) => T[]
 export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
   T,
 >(
@@ -191,6 +224,13 @@ export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
   ...items: T[]
 ) => number
 export const ArrayPrototypeValues = uncurryThis(Array.prototype.values)
+// ES2023 Change Array By Copy — `arr.with(i, v)` returns a copy with
+// index `i` replaced by `v`.
+export const ArrayPrototypeWith = uncurryThis(Array.prototype.with) as <T>(
+  self: T[],
+  index: number,
+  value: T,
+) => T[]
 
 // ─── Buffer (static) ───────────────────────────────────────────────────
 // Buffer is a Node-only global; these helpers are `undefined` in browsers.
@@ -247,6 +287,69 @@ export const ErrorIsError: ((value: unknown) => value is Error) | undefined = (
   Error as { isError?: (v: unknown) => v is Error }
 ).isError
 
+// V8-specific stack trace API. See https://v8.dev/docs/stack-trace-api.
+// These are present on V8 (Node, Chromium, Deno) but not in
+// JavaScriptCore / SpiderMonkey, so each is typed `| undefined` to keep
+// non-V8 importers safe.
+
+// `Error.captureStackTrace(targetObject, constructorOpt?)` — attaches a
+// `.stack` property to `targetObject`. Captured at load time so callers
+// can't intercept by overwriting the global later.
+export const ErrorCaptureStackTrace:
+  | ((targetObject: object, constructorOpt?: Function) => void)
+  | undefined = (
+  Error as {
+    captureStackTrace?: (
+      targetObject: object,
+      constructorOpt?: Function,
+    ) => void
+  }
+).captureStackTrace
+
+// `Error.prepareStackTrace` — invoked by V8 when `error.stack` is first
+// read. Captured at load time so we have the engine default even if
+// user code later overwrites it (some libraries clobber this for
+// source-map remapping). Setter not exposed — assigning to the
+// primordial wouldn't affect V8's lookup, which always reads
+// `Error.prepareStackTrace` fresh.
+export const ErrorPrepareStackTrace:
+  | ((error: Error, structuredStackTrace: NodeJS.CallSite[]) => unknown)
+  | undefined = (
+  Error as {
+    prepareStackTrace?: (
+      error: Error,
+      structuredStackTrace: NodeJS.CallSite[],
+    ) => unknown
+  }
+).prepareStackTrace
+
+// `Error.stackTraceLimit` — max frames V8 captures per stack. May be a
+// data property (today on Node) or an accessor (some bundler shims).
+// Returning a function avoids capturing a stale snapshot — callers that
+// need the live value invoke `ErrorStackTraceLimit()` and get whatever
+// V8 currently reports.
+//
+// `__lookupGetter__` is "annex B legacy" but supported in V8 / SpiderMonkey
+// / JavaScriptCore. We probe it once at load time and fall back to
+// reading the data property if no accessor exists.
+const _stackTraceLimitGetter: (() => number) | undefined = (() => {
+  const getter = (
+    Error as unknown as {
+      __lookupGetter__?: (key: string) => (() => number) | undefined
+    }
+  ).__lookupGetter__?.('stackTraceLimit')
+  if (typeof getter === 'function') {
+    return () => getter.call(Error)
+  }
+  return undefined
+})()
+export function ErrorStackTraceLimit(): number | undefined {
+  if (_stackTraceLimitGetter) {
+    return _stackTraceLimitGetter()
+  }
+  return (Error as { stackTraceLimit?: number }).stackTraceLimit
+}
+
 // ─── Function ──────────────────────────────────────────────────────────
 export const FunctionPrototypeApply = uncurryThis(Function.prototype.apply) as (
   self: (...args: unknown[]) => unknown,
@@ -263,6 +366,9 @@ export const FunctionPrototypeCall = uncurryThis(Function.prototype.call) as (
   thisArg: unknown,
   ...args: unknown[]
 ) => unknown
+export const FunctionPrototypeToString = uncurryThis(
+  Function.prototype.toString,
+) as (self: (...args: unknown[]) => unknown) => string
 
 // ─── Iterator (prototype) ──────────────────────────────────────────────
 // Map#keys() / Set#values() / etc. share an iterator prototype chain.
@@ -298,24 +404,91 @@ export const MapPrototypeKeys = uncurryThis(Map.prototype.keys)
 export const MapPrototypeSet = uncurryThis(Map.prototype.set)
 export const MapPrototypeValues = uncurryThis(Map.prototype.values)
 
-// ─── Math ──────────────────────────────────────────────────────────────
-export const MathAbs = Math.abs
-export const MathCeil = Math.ceil
-export const MathFloor = Math.floor
+// ─── Math (constants) ──────────────────────────────────────────────────
+export const MathE = Math.E
+export const MathLN2 = Math.LN2
+export const MathLN10 = Math.LN10
+export const MathLOG2E = Math.LOG2E
+export const MathLOG10E = Math.LOG10E
+export const MathPI = Math.PI
+export const MathSQRT1_2 = Math.SQRT1_2
+export const MathSQRT2 = Math.SQRT2
+
+// ─── Math (methods) ────────────────────────────────────────────────────
+// Each entry prefers `_smolPrimordial.mathX` when running on the smol
+// Node binary (V8 Fast API typed implementation, TurboFan-inlinable),
+// falling back to `Math.x` on stock Node + non-Node runtimes. Math
+// constants don't get fast-pathed (no benefit — they're already
+// pre-computed scalar values).
+export const MathAbs = _smolPrimordial?.mathAbs ?? Math.abs
+export const MathAcos = _smolPrimordial?.mathAcos ?? Math.acos
+export const MathAcosh = _smolPrimordial?.mathAcosh ?? Math.acosh
+export const MathAsin = _smolPrimordial?.mathAsin ?? Math.asin
+export const MathAsinh = _smolPrimordial?.mathAsinh ?? Math.asinh
+export const MathAtan = _smolPrimordial?.mathAtan ?? Math.atan
+export const MathAtan2 = _smolPrimordial?.mathAtan2 ?? Math.atan2
+export const MathAtanh = _smolPrimordial?.mathAtanh ?? Math.atanh
+export const MathCbrt = _smolPrimordial?.mathCbrt ?? Math.cbrt
+export const MathCeil = _smolPrimordial?.mathCeil ?? Math.ceil
+export const MathClz32 = _smolPrimordial?.mathClz32 ?? Math.clz32
+export const MathCos = _smolPrimordial?.mathCos ?? Math.cos
+export const MathCosh = _smolPrimordial?.mathCosh ?? Math.cosh
+export const MathExp = _smolPrimordial?.mathExp ?? Math.exp
+export const MathExpm1 = _smolPrimordial?.mathExpm1 ?? Math.expm1
+// `Math.f16round` is ES2025 (Node 22+ / V8 12.x). Older engines lack
+// it; the runtime check keeps us undefined-safe instead of crashing
+// at import time. No smol fast-path yet (would need a separate ES2025
+// type signature in the binding).
+export const MathF16round: ((value: number) => number) | undefined = (
+  Math as { f16round?: (value: number) => number }
+).f16round
+export const MathFloor = _smolPrimordial?.mathFloor ?? Math.floor
+export const MathFround = _smolPrimordial?.mathFround ?? Math.fround
+export const MathHypot = _smolPrimordial?.mathHypot ?? Math.hypot
+export const MathImul = _smolPrimordial?.mathImul ?? Math.imul
+export const MathLog = _smolPrimordial?.mathLog ?? Math.log
+export const MathLog1p = _smolPrimordial?.mathLog1p ?? Math.log1p
+export const MathLog2 = _smolPrimordial?.mathLog2 ?? Math.log2
+export const MathLog10 = _smolPrimordial?.mathLog10 ?? Math.log10
+// Math.max / Math.min are variadic. The smol fast path only specializes
+// the 2-arg case at the C++ level; variadic callers fall back to
+// Math.max/min anyway via V8's slow-path machinery. Stick with the
+// stock builtins here — they're already V8-inlined for the common 2-arg
+// case via type feedback.
 export const MathMax = Math.max
 export const MathMin = Math.min
-export const MathPow = Math.pow
+export const MathPow = _smolPrimordial?.mathPow ?? Math.pow
+// Math.random doesn't fit a fast-path shape (no args, side-effecting
+// PRNG state). Stock builtin is already V8-inlined.
 export const MathRandom = Math.random
-export const MathRound = Math.round
-export const MathSign = Math.sign
-export const MathSqrt = Math.sqrt
-export const MathTrunc = Math.trunc
+export const MathRound = _smolPrimordial?.mathRound ?? Math.round
+export const MathSign = _smolPrimordial?.mathSign ?? Math.sign
+export const MathSin = _smolPrimordial?.mathSin ?? Math.sin
+export const MathSinh = _smolPrimordial?.mathSinh ?? Math.sinh
+export const MathSqrt = _smolPrimordial?.mathSqrt ?? Math.sqrt
+export const MathTan = _smolPrimordial?.mathTan ?? Math.tan
+export const MathTanh = _smolPrimordial?.mathTanh ?? Math.tanh
+export const MathTrunc = _smolPrimordial?.mathTrunc ?? Math.trunc
 
-// ─── Number ───────────────────────────────────────────────────────────
-export const NumberIsFinite = Number.isFinite
-export const NumberIsInteger = Number.isInteger
-export const NumberIsNaN = Number.isNaN
-export const NumberIsSafeInteger = Number.isSafeInteger
+// ─── Number (constants) ────────────────────────────────────────────────
+export const NumberEPSILON = Number.EPSILON
+export const NumberMAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER
+export const NumberMAX_VALUE = Number.MAX_VALUE
+export const NumberMIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER
+export const NumberMIN_VALUE = Number.MIN_VALUE
+export const NumberNEGATIVE_INFINITY = Number.NEGATIVE_INFINITY
+export const NumberPOSITIVE_INFINITY = Number.POSITIVE_INFINITY
+
+// ─── Number (methods) ──────────────────────────────────────────────────
+// Predicates prefer the smol fast-path; static parse* keep the stock
+// builtins (their fast paths require Local<String> handling, deferred
+// to a future binding extension).
+export const NumberIsFinite = _smolPrimordial?.numberIsFinite ?? Number.isFinite
+export const NumberIsInteger =
+  _smolPrimordial?.numberIsInteger ?? Number.isInteger
+export const NumberIsNaN = _smolPrimordial?.numberIsNaN ?? Number.isNaN
+export const NumberIsSafeInteger =
+  _smolPrimordial?.numberIsSafeInteger ?? Number.isSafeInteger
 export const NumberParseFloat = Number.parseFloat
 export const NumberParseInt = Number.parseInt
 export const NumberPrototypeToFixed = uncurryThis(Number.prototype.toFixed)
@@ -358,6 +531,43 @@ export const ObjectPrototypePropertyIsEnumerable = uncurryThis(
 )
 export const ObjectPrototypeToString = uncurryThis(Object.prototype.toString)
 export const ObjectPrototypeValueOf = uncurryThis(Object.prototype.valueOf)
+
+// Annex B legacy accessor methods. Spec'd as "normative optional" but
+// implemented in every major engine (V8, SpiderMonkey, JavaScriptCore).
+// Equivalent to Object.defineProperty / Object.getOwnPropertyDescriptor
+// but operate on a target's prototype chain rather than its own props,
+// which is occasionally what you actually want (e.g. probing whether
+// a class defines a getter without instantiating).
+//
+// See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/__lookupGetter__
+const _objectProto = Object.prototype as unknown as {
+  __defineGetter__: (this: object, key: PropertyKey, fn: () => unknown) => void
+  __defineSetter__: (
+    this: object,
+    key: PropertyKey,
+    fn: (value: unknown) => void,
+  ) => void
+  __lookupGetter__: (
+    this: object,
+    key: PropertyKey,
+  ) => (() => unknown) | undefined
+  __lookupSetter__: (
+    this: object,
+    key: PropertyKey,
+  ) => ((value: unknown) => void) | undefined
+}
+export const ObjectPrototypeDefineGetter = uncurryThis(
+  _objectProto.__defineGetter__,
+)
+export const ObjectPrototypeDefineSetter = uncurryThis(
+  _objectProto.__defineSetter__,
+)
+export const ObjectPrototypeLookupGetter = uncurryThis(
+  _objectProto.__lookupGetter__,
+)
+export const ObjectPrototypeLookupSetter = uncurryThis(
+  _objectProto.__lookupSetter__,
+)
 
 // ─── Promise (static) ──────────────────────────────────────────────────
 export const PromiseAll = Promise.all.bind(Promise)
@@ -509,11 +719,47 @@ export const StringPrototypeTrimEnd = uncurryThis(String.prototype.trimEnd)
 export const StringPrototypeTrimStart = uncurryThis(String.prototype.trimStart)
 
 // ─── Symbol ────────────────────────────────────────────────────────────
+// `Symbol.asyncDispose` and `Symbol.dispose` are ES2024 (Node 20.4+).
+// Older engines lack them; use `| undefined` so importers don't crash
+// at load time.
+export const SymbolAsyncDispose: typeof Symbol.asyncDispose | undefined = (
+  Symbol as { asyncDispose?: typeof Symbol.asyncDispose }
+).asyncDispose
 export const SymbolAsyncIterator = Symbol.asyncIterator
+export const SymbolDispose: typeof Symbol.dispose | undefined = (
+  Symbol as { dispose?: typeof Symbol.dispose }
+).dispose
 export const SymbolFor = Symbol.for
+export const SymbolHasInstance = Symbol.hasInstance
+export const SymbolIsConcatSpreadable = Symbol.isConcatSpreadable
 export const SymbolIterator = Symbol.iterator
+export const SymbolKeyFor = Symbol.keyFor
+export const SymbolMatch = Symbol.match
+export const SymbolMatchAll = Symbol.matchAll
+export const SymbolReplace = Symbol.replace
+export const SymbolSearch = Symbol.search
+export const SymbolSpecies = Symbol.species
+export const SymbolSplit = Symbol.split
 export const SymbolToPrimitive = Symbol.toPrimitive
 export const SymbolToStringTag = Symbol.toStringTag
+export const SymbolUnscopables = Symbol.unscopables
+// `description` is an accessor on `Symbol.prototype`, not a method.
+// `__lookupGetter__` resolves it cleanly across engines without
+// touching the live property descriptor.
+const _symbolDescriptionGetter = (
+  Symbol.prototype as unknown as {
+    __lookupGetter__: (key: string) => (() => string | undefined) | undefined
+  }
+).__lookupGetter__('description')
+export function SymbolPrototypeDescription(self: symbol): string | undefined {
+  return _symbolDescriptionGetter
+    ? _symbolDescriptionGetter.call(self)
+    : self.description
+}
+export const SymbolPrototypeToString = uncurryThis(Symbol.prototype.toString)
+export const SymbolPrototypeValueOf = uncurryThis(Symbol.prototype.valueOf) as (
+  self: symbol,
+) => symbol
 
 // ─── URLSearchParams (prototype) ───────────────────────────────────────
 export const URLSearchParamsPrototypeAppend = uncurryThis(

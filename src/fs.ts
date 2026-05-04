@@ -10,6 +10,8 @@ import { getAbortSignal } from './constants/process'
 import { isErrnoException } from './errors'
 import { defaultIgnore, getGlobMatcher } from './globs'
 import { jsonParse } from './json/parse'
+import { getNodeFs } from './node/fs'
+import { getNodePath } from './node/path'
 import { objectFreeze, type Remap } from './objects'
 import { normalizePath, pathLikeToString } from './paths/normalize'
 import { registerCacheInvalidation } from './paths/rewire'
@@ -342,8 +344,6 @@ let _del:
   | undefined
 // Cache for resolved allowed directories
 let _cachedAllowedDirs: string[] | undefined
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
 
 /**
  * Get resolved allowed directories for safe deletion with lazy caching.
@@ -352,7 +352,7 @@ let _path: typeof import('node:path') | undefined
  */
 function getAllowedDirectories(): string[] {
   if (_cachedAllowedDirs === undefined) {
-    const path = getPath()
+    const path = getNodePath()
 
     _cachedAllowedDirs = [
       path.resolve(getOsTmpDir()),
@@ -369,39 +369,6 @@ function getDel() {
     _del = /*@__PURE__*/ require('./external/del')
   }
   return _del!
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js fs module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
 }
 
 /**
@@ -426,7 +393,7 @@ function innerReadDirNames(
     includeEmpty = true,
     sort = true,
   } = { __proto__: null, ...options } as ReadDirOptions
-  const path = getPath()
+  const path = getNodePath()
   const names = dirents
     .filter(
       (d: Dirent) =>
@@ -505,8 +472,8 @@ export async function findUp(
   if (onlyFiles) {
     onlyDirectories = false
   }
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   let dir = path.resolve(cwd)
   const { root } = path.parse(dir)
   const names = isArray(name) ? name : [name as string]
@@ -581,8 +548,8 @@ export function findUpSync(
   if (onlyFiles) {
     onlyDirectories = false
   }
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   let dir = path.resolve(cwd)
   const { root } = path.parse(dir)
   const stopDir = stopAt ? path.resolve(stopAt) : undefined
@@ -690,7 +657,7 @@ export function isDirEmptySync(
     __proto__: null,
     ...options,
   } as IsDirEmptyOptions
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     const files = fs.readdirSync(dirname)
     const { length } = files
@@ -752,7 +719,7 @@ export function isDirSync(filepath: PathLike) {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isSymLinkSync(filepath: PathLike) {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return fs.lstatSync(filepath).isSymbolicLink()
   } catch {}
@@ -913,7 +880,7 @@ export async function readDirNames(
   dirname: PathLike,
   options?: ReadDirOptions | undefined,
 ) {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return innerReadDirNames(
       await fs.promises.readdir(dirname, {
@@ -951,7 +918,7 @@ export async function readDirNames(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readDirNamesSync(dirname: PathLike, options?: ReadDirOptions) {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return innerReadDirNames(
       fs.readdirSync(dirname, {
@@ -991,7 +958,7 @@ export async function readFileBinary(
 ) {
   // Don't specify encoding to get a Buffer.
   const opts = typeof options === 'string' ? { encoding: options } : options
-  const fs = getFs()
+  const fs = getNodeFs()
   return await fs.promises.readFile(filepath, {
     signal: abortSignal,
     ...opts,
@@ -1024,7 +991,7 @@ export function readFileBinarySync(
 ) {
   // Don't specify encoding to get a Buffer
   const opts = typeof options === 'string' ? { encoding: options } : options
-  const fs = getFs()
+  const fs = getNodeFs()
   return fs.readFileSync(filepath, {
     ...opts,
     encoding: null,
@@ -1055,7 +1022,7 @@ export async function readFileUtf8(
   options?: ReadFileOptions | undefined,
 ) {
   const opts = typeof options === 'string' ? { encoding: options } : options
-  const fs = getFs()
+  const fs = getNodeFs()
   return await fs.promises.readFile(filepath, {
     signal: abortSignal,
     ...opts,
@@ -1087,7 +1054,7 @@ export function readFileUtf8Sync(
   options?: ReadFileOptions | undefined,
 ) {
   const opts = typeof options === 'string' ? { encoding: options } : options
-  const fs = getFs()
+  const fs = getNodeFs()
   return fs.readFileSync(filepath, {
     ...opts,
     encoding: 'utf8',
@@ -1134,7 +1101,7 @@ export async function readJson(
     ...opts,
   } as unknown as ReadJsonOptions
   const shouldThrow = throws === undefined || !!throws
-  const fs = getFs()
+  const fs = getNodeFs()
   let content = ''
   try {
     content = await fs.promises.readFile(filepath, {
@@ -1211,7 +1178,7 @@ export function readJsonSync(
     ...opts,
   } as unknown as ReadJsonOptions
   const shouldThrow = throws === undefined || !!throws
-  const fs = getFs()
+  const fs = getNodeFs()
   let content = ''
   try {
     content = fs.readFileSync(filepath, {
@@ -1292,7 +1259,7 @@ export async function safeDelete(
   // Check if we're deleting within allowed directories.
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
-    const path = getPath()
+    const path = getNodePath()
     const allowedDirs = getAllowedDirectories()
 
     // Check if all patterns are within allowed directories.
@@ -1386,7 +1353,7 @@ export function safeDeleteSync(
   // Check if we're deleting within allowed directories.
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
-    const path = getPath()
+    const path = getNodePath()
     const allowedDirs = getAllowedDirectories()
 
     // Check if all patterns are within allowed directories.
@@ -1485,7 +1452,7 @@ export async function safeMkdir(
   path: PathLike,
   options?: MakeDirectoryOptions | undefined,
 ): Promise<void> {
-  const fs = getFs()
+  const fs = getNodeFs()
   const opts = { __proto__: null, recursive: true, ...options }
   try {
     await fs.promises.mkdir(path, opts)
@@ -1530,7 +1497,7 @@ export function safeMkdirSync(
   path: PathLike,
   options?: MakeDirectoryOptions | undefined,
 ): void {
-  const fs = getFs()
+  const fs = getNodeFs()
   const opts = { __proto__: null, recursive: true, ...options }
   try {
     fs.mkdirSync(path, opts)
@@ -1594,7 +1561,7 @@ export async function safeReadFile(
   const encoding = shouldReturnBuffer
     ? null
     : normalizeEncoding(readOpts.encoding)
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return await fs.promises.readFile(filepath, {
       __proto__: null,
@@ -1664,7 +1631,7 @@ export function safeReadFileSync(
   const encoding = shouldReturnBuffer
     ? null
     : normalizeEncoding(readOpts.encoding)
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return fs.readFileSync(filepath, {
       __proto__: null,
@@ -1701,7 +1668,7 @@ export function safeReadFileSync(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function safeStats(filepath: PathLike) {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return await fs.promises.stat(filepath)
   } catch {}
@@ -1728,7 +1695,7 @@ export async function safeStats(filepath: PathLike) {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function safeStatsSync(filepath: PathLike) {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     return fs.statSync(filepath, {
       __proto__: null,
@@ -1760,8 +1727,8 @@ export function safeStatsSync(filepath: PathLike) {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function uniqueSync(filepath: PathLike): string {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const filepathStr = String(filepath)
 
   // If the file doesn't exist, return as is
@@ -1818,7 +1785,7 @@ export function uniqueSync(filepath: PathLike): string {
 export function validateFiles(
   filepaths: string[] | readonly string[],
 ): ValidateFilesResult {
-  const fs = getFs()
+  const fs = getNodeFs()
   const validPaths: string[] = []
   const invalidPaths: string[] = []
   const { R_OK } = fs.constants
@@ -1873,7 +1840,7 @@ export async function writeJson(
     __proto__: null,
     ...opts,
   } as WriteJsonOptions
-  const fs = getFs()
+  const fs = getNodeFs()
   const jsonString = stringify(
     jsonContent,
     EOL || '\n',
@@ -1922,7 +1889,7 @@ export function writeJsonSync(
     __proto__: null,
     ...opts,
   }
-  const fs = getFs()
+  const fs = getNodeFs()
   const jsonString = stringify(
     jsonContent,
     EOL || '\n',

@@ -439,6 +439,58 @@
       "types": "./dist/memoization.d.ts",
       "default": "./dist/memoization.js"
     },
+    "./node/async-hooks": {
+      "types": "./dist/node/async-hooks.d.ts",
+      "default": "./dist/node/async-hooks.js"
+    },
+    "./node/child-process": {
+      "types": "./dist/node/child-process.d.ts",
+      "default": "./dist/node/child-process.js"
+    },
+    "./node/crypto": {
+      "types": "./dist/node/crypto.d.ts",
+      "default": "./dist/node/crypto.js"
+    },
+    "./node/events": {
+      "types": "./dist/node/events.d.ts",
+      "default": "./dist/node/events.js"
+    },
+    "./node/fs": {
+      "types": "./dist/node/fs.d.ts",
+      "default": "./dist/node/fs.js"
+    },
+    "./node/fs-promises": {
+      "types": "./dist/node/fs-promises.d.ts",
+      "default": "./dist/node/fs-promises.js"
+    },
+    "./node/http": {
+      "types": "./dist/node/http.d.ts",
+      "default": "./dist/node/http.js"
+    },
+    "./node/https": {
+      "types": "./dist/node/https.d.ts",
+      "default": "./dist/node/https.js"
+    },
+    "./node/os": {
+      "types": "./dist/node/os.d.ts",
+      "default": "./dist/node/os.js"
+    },
+    "./node/path": {
+      "types": "./dist/node/path.d.ts",
+      "default": "./dist/node/path.js"
+    },
+    "./node/timers-promises": {
+      "types": "./dist/node/timers-promises.d.ts",
+      "default": "./dist/node/timers-promises.js"
+    },
+    "./node/url": {
+      "types": "./dist/node/url.d.ts",
+      "default": "./dist/node/url.js"
+    },
+    "./node/util": {
+      "types": "./dist/node/util.d.ts",
+      "default": "./dist/node/util.js"
+    },
     "./objects": {
       "types": "./dist/objects.d.ts",
       "default": "./dist/objects.js"
@@ -599,6 +651,18 @@
       "types": "./dist/signal-exit.d.ts",
       "default": "./dist/signal-exit.js"
     },
+    "./smol/detect": {
+      "types": "./dist/smol/detect.d.ts",
+      "default": "./dist/smol/detect.js"
+    },
+    "./smol/primordial": {
+      "types": "./dist/smol/primordial.d.ts",
+      "default": "./dist/smol/primordial.js"
+    },
+    "./smol/util": {
+      "types": "./dist/smol/util.d.ts",
+      "default": "./dist/smol/util.js"
+    },
     "./sorts": {
       "types": "./dist/sorts.d.ts",
       "default": "./dist/sorts.js"
@@ -701,9 +765,11 @@
     },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
+    "./socket-repo-template-schema.json": "./socket-repo-template-schema.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json",
     "./tsconfig.test.json": "./tsconfig.test.json",
+    "./xport.json": "./xport.json",
     "./xport.schema.json": "./xport.schema.json"
   },
   "files": [

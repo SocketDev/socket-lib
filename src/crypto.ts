@@ -2,7 +2,8 @@
  * @fileoverview Crypto helpers that prefer Node builtins where available.
  */
 
-let _crypto: typeof import('node:crypto') | undefined
+import { getNodeCrypto } from './node/crypto'
+
 // `crypto.hash(algorithm, data, outputEncoding)` was added in Node
 // v21.7.0 / v20.12.0 (Stable). Engines is >=22, so it's always present
 // here in practice — feature-detect anyway because the type surface
@@ -15,19 +16,6 @@ let _hash: typeof import('node:crypto').hash | undefined
 let _hashProbed = false
 
 /**
- * Lazily load the `node:crypto` module.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getCrypto() {
-  if (_crypto === undefined) {
-    _crypto = /*@__PURE__*/ require('node:crypto')
-  }
-  return _crypto as typeof import('node:crypto')
-}
-
-/**
  * Resolve `crypto.hash` (or `undefined` if the runtime predates it).
  *
  * Exported for unit tests; not part of the public API.
@@ -38,7 +26,7 @@ function getCrypto() {
 export function getNativeHash(): typeof import('node:crypto').hash | undefined {
   if (!_hashProbed) {
     const fn = (
-      getCrypto() as typeof import('node:crypto') & {
+      getNodeCrypto() as typeof import('node:crypto') & {
         hash?: unknown
       }
     ).hash
@@ -84,7 +72,7 @@ export function hash(
   if (native !== undefined) {
     return native(algorithm, data, outputEncoding) as string
   }
-  return getCrypto()
+  return getNodeCrypto()
     .createHash(algorithm)
     .update(data as string | Buffer)
     .digest(outputEncoding)
