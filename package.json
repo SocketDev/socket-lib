@@ -639,9 +639,9 @@
       "types": "./dist/schema/validate.d.ts",
       "default": "./dist/schema/validate.js"
     },
-    "./sea": {
-      "types": "./dist/sea.d.ts",
-      "default": "./dist/sea.js"
+    "./sea/binary": {
+      "types": "./dist/sea/binary.d.ts",
+      "default": "./dist/sea/binary.js"
     },
     "./shadow": {
       "types": "./dist/shadow.d.ts",
@@ -650,10 +650,6 @@
     "./signal-exit": {
       "types": "./dist/signal-exit.d.ts",
       "default": "./dist/signal-exit.js"
-    },
-    "./smol/detect": {
-      "types": "./dist/smol/detect.d.ts",
-      "default": "./dist/smol/detect.js"
     },
     "./smol/primordial": {
       "types": "./dist/smol/primordial.d.ts",

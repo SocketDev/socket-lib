@@ -20,7 +20,7 @@
  * @see https://v8.dev/blog/v8-release-99 — V8 Fast API Calls overview
  */
 
-import { isSmol } from './detect'
+import { isSmol } from './util'
 
 /**
  * Surface of `node:smol-primordial`. See socket-btm's

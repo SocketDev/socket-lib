@@ -1,22 +1,20 @@
 /**
- * @fileoverview Unit tests for socket-btm's smol-binding feature detection.
+ * @fileoverview Unit tests for src/smol/util.ts.
  *
- * Mirrors sea.test.mts in shape:
- *   - isSmol() detects whether the runtime is socket-btm's smol Node binary
- *   - getSmolUtil() / getSmolPrimordial() return the binding when present
+ * Tests both responsibilities of the file:
+ *   - `isSmol()` — memoized boolean detector
+ *   - `getSmolUtil()` — lazy-loader for the `node:smol-util` binding
  *
- * On stock Node (the test runtime), all three return false / undefined.
- * The integration story is verified by socket-btm's own tests running
- * inside the smol binary.
+ * On stock Node (the test runtime), `isSmol()` returns `false` and
+ * `getSmolUtil()` returns `undefined`. The integration story is
+ * verified by socket-btm's own tests running inside the smol binary.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { isSmol } from '@socketsecurity/lib/smol/detect'
-import { getSmolPrimordial } from '@socketsecurity/lib/smol/primordial'
-import { getSmolUtil } from '@socketsecurity/lib/smol/util'
+import { getSmolUtil, isSmol } from '@socketsecurity/lib/smol/util'
 
-describe('smol', () => {
+describe('smol/util', () => {
   describe('isSmol', () => {
     it('returns boolean', () => {
       const result = isSmol()
@@ -56,35 +54,19 @@ describe('smol', () => {
     })
   })
 
-  describe('getSmolPrimordial', () => {
-    it('returns undefined on stock Node', () => {
-      expect(getSmolPrimordial()).toBe(undefined)
-    })
-
-    it('is idempotent across repeated calls', () => {
-      expect(getSmolPrimordial()).toBe(getSmolPrimordial())
-    })
-
-    it('does not throw', () => {
-      expect(() => getSmolPrimordial()).not.toThrow()
-    })
-  })
-
   describe('cached probe semantics', () => {
     it('many calls complete quickly (cached after first)', () => {
       // Trigger probe.
       isSmol()
       getSmolUtil()
-      getSmolPrimordial()
       // Subsequent calls should be cache hits, not re-probes.
       const start = performance.now()
       for (let i = 0; i < 10_000; i += 1) {
         isSmol()
         getSmolUtil()
-        getSmolPrimordial()
       }
       const elapsedMs = performance.now() - start
-      // 30 000 cached returns should be near-instantaneous.
+      // 20 000 cached returns should be near-instantaneous.
       // Generous threshold to avoid CI flake.
       expect(elapsedMs).toBeLessThan(50)
     })
