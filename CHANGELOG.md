@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.27.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.27.0) - 2026-05-04
+
+### Added
+
+- **45 new `primordials` exports** rounding out the surface to 296 total:
+  - `BigIntCtor`
+  - Math: 24 methods (Acos, Atan2, Hypot, Pow, etc.) + 8 constants (E, PI, SQRT2, etc.); `MathF16round` typed `| undefined` for ES2025
+  - Number constants: `EPSILON`, `MAX_SAFE_INTEGER`, `MAX_VALUE`, `MIN_SAFE_INTEGER`, `MIN_VALUE`, `NEGATIVE_INFINITY`, `POSITIVE_INFINITY`
+  - Symbol: 10 well-knowns (`HasInstance`, `KeyFor`, `Match`, `Species`, etc.); `SymbolAsyncDispose` / `SymbolDispose` typed `| undefined` for ES2024; prototype helpers (`Description`, `ToString`, `ValueOf`)
+  - Function: `FunctionPrototypeToString`
+  - Array (ES2023 Change Array By Copy): `ArrayPrototypeToSpliced`, `ArrayPrototypeWith`
+  - Globals: `InfinityValue`, `NaNValue`, `globalThisRef`
+  - Object (annex B): `ObjectPrototype{Define,Lookup}{Getter,Setter}`
+  - Error (V8 stack-trace API, `| undefined`): `ErrorCaptureStackTrace`, `ErrorPrepareStackTrace`, `ErrorStackTraceLimit` (function-shaped, reads live value)
+
+- **`smol/*` (new exports)** — feature-detect + lazy-loaders for socket-btm's smol Node binary:
+  - `smol/detect` — `isSmol()`: memoized boolean, mirrors `isSeaBinary()`
+  - `smol/util` — `getSmolUtil()`: native `uncurryThis` / `applyBind` (~2x faster), or `undefined`
+  - `smol/primordial` — `getSmolPrimordial()`: V8 Fast API typed Math.* / Number.is* (~30-50% faster on hot loops), or `undefined`
+  - `primordials` transparently routes through these on smol; **zero call-site changes**, identical behavior on stock Node, smol, browsers, Deno, Bun
+
+- **`node/*` (new exports)** — per-builtin lazy-loaders for `node:*` modules. Each is `/*@__NO_SIDE_EFFECTS__*/`-marked so bundlers tree-shake the `require()` when unused:
+  - `node/fs` (`getNodeFs`), `node/path` (`getNodePath`), `node/crypto` (`getNodeCrypto`), `node/http` (`getNodeHttp`), `node/https` (`getNodeHttps`), `node/os` (`getNodeOs`), `node/util` (`getNodeUtil`), `node/url` (`getNodeUrl`), `node/events` (`getNodeEvents`)
+  - `node/child-process` (`getNodeChildProcess`), `node/async-hooks` (`getNodeAsyncHooks`), `node/fs-promises` (`getNodeFsPromises`), `node/timers-promises` (`getNodeTimersPromises`)
+  - Replaces ~30 ad-hoc copies of the same lazy-loader boilerplate previously scattered across `http-request.ts`, `spawn.ts`, `fs.ts`, `crypto.ts`, etc.
+
 ## [5.26.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.1) - 2026-05-01
 
 ### Added
