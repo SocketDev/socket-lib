@@ -11,9 +11,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSeaBinaryPath, isSeaBinary } from '@socketsecurity/lib/sea/binary'
+import { getSeaBinaryPath, isSeaBinary } from '@socketsecurity/lib/sea/util'
 
-describe('sea/binary', () => {
+describe('sea/util', () => {
   describe('isSeaBinary', () => {
     it('should return boolean', () => {
       const result = isSeaBinary()

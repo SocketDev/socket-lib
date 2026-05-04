@@ -639,9 +639,9 @@
       "types": "./dist/schema/validate.d.ts",
       "default": "./dist/schema/validate.js"
     },
-    "./sea/binary": {
-      "types": "./dist/sea/binary.d.ts",
-      "default": "./dist/sea/binary.js"
+    "./sea/util": {
+      "types": "./dist/sea/util.d.ts",
+      "default": "./dist/sea/util.js"
     },
     "./shadow": {
       "types": "./dist/shadow.d.ts",

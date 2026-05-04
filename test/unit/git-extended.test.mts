@@ -30,7 +30,7 @@ import {
 } from '@socketsecurity/lib/git'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib/spawn'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
 
 describe('git extended tests', () => {
@@ -201,7 +201,13 @@ describe('git extended tests', () => {
   })
 
   describe('real git operations', () => {
-    // Note: No need to save/restore cwd - we always use explicit cwd options
+    // Note: No need to save/restore cwd - we always use explicit cwd options.
+    //
+    // Each test in this block does 4-15 spawnSync('git', ...) calls,
+    // which legitimately takes 5-10s under CPU contention when the
+    // full test suite runs in parallel. The default vitest 10s
+    // timeout flakes these — bump describe-scope default to 30s.
+    vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 })
 
     it('should work with a temporary git repository', async () => {
       await runWithTempDir(async tmpDir => {

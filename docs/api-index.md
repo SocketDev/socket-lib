@@ -225,9 +225,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## sea/
 
-| Subpath                                                  | Description                                                           |
-| -------------------------------------------------------- | --------------------------------------------------------------------- |
-| [`@socketsecurity/lib/sea/binary`](../src/sea/binary.ts) | SEA (Single Executable Application) binary detection + path accessor. |
+| Subpath                                              | Description                                                           |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| [`@socketsecurity/lib/sea/util`](../src/sea/util.ts) | SEA (Single Executable Application) binary detection + path accessor. |
 
 ## smol/
 
