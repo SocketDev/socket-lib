@@ -1,7 +1,7 @@
 {
   "name": "@socketsecurity/lib",
   "version": "5.27.0",
-  "packageManager": "pnpm@11.0.3",
+  "packageManager": "pnpm@11.0.6+sha512.97f906e1da2bedac3df83cadae04b4753a130092dd49d55cd36825ad3e623e9df3f97754f8f259e699172a360fac569acf2f908e7732bdae3eddb2dcf7e121fd",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
@@ -659,6 +659,10 @@
       "types": "./dist/smol/util.d.ts",
       "default": "./dist/smol/util.js"
     },
+    "./smol/versions": {
+      "types": "./dist/smol/versions.d.ts",
+      "default": "./dist/smol/versions.js"
+    },
     "./sorts": {
       "types": "./dist/sorts.d.ts",
       "default": "./dist/sorts.js"
@@ -775,7 +779,7 @@
   ],
   "engines": {
     "node": ">=22",
-    "pnpm": ">=11.0.0-rc.0"
+    "pnpm": ">=11.0.6"
   },
   "sideEffects": false,
   "scripts": {
