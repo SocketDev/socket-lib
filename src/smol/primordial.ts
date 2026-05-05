@@ -34,26 +34,36 @@ import { isSmol } from './util'
  * get real wins (and which don't).
  */
 export interface SmolPrimordialBinding {
-  // Math (unary, double → double).
+  // Array.isArray. Fast path inlines a single map-pointer comparison.
+  // Typed as a type predicate so callers narrow at the call site —
+  // matches `Array.isArray`'s built-in `arg is any[]` signature exactly.
+  arrayIsArray(v: unknown): v is unknown[]
+  // Date.now. Inlines the wallclock-read into the JIT'd caller.
+  dateNow(): number
   mathAbs(x: number): number
   mathAcos(x: number): number
   mathAcosh(x: number): number
   mathAsin(x: number): number
   mathAsinh(x: number): number
   mathAtan(x: number): number
+  mathAtan2(a: number, b: number): number
   mathAtanh(x: number): number
   mathCbrt(x: number): number
   mathCeil(x: number): number
+  mathClz32(v: number): number
   mathCos(x: number): number
   mathCosh(x: number): number
   mathExp(x: number): number
   mathExpm1(x: number): number
   mathFloor(x: number): number
   mathFround(x: number): number
+  mathHypot(a: number, b: number): number
+  mathImul(a: number, b: number): number
   mathLog(x: number): number
   mathLog1p(x: number): number
   mathLog2(x: number): number
   mathLog10(x: number): number
+  mathPow(a: number, b: number): number
   mathRound(x: number): number
   mathSign(x: number): number
   mathSin(x: number): number
@@ -62,34 +72,19 @@ export interface SmolPrimordialBinding {
   mathTan(x: number): number
   mathTanh(x: number): number
   mathTrunc(x: number): number
-  // Math (binary).
-  mathAtan2(a: number, b: number): number
-  mathHypot(a: number, b: number): number
-  mathPow(a: number, b: number): number
-  // Math (other signatures).
-  mathClz32(v: number): number
-  mathImul(a: number, b: number): number
-  // Number predicates.
   numberIsFinite(v: unknown): boolean
   numberIsInteger(v: unknown): boolean
   numberIsNaN(v: unknown): boolean
   numberIsSafeInteger(v: unknown): boolean
-  // Number static parsers — ASCII-only fast paths.
-  // numberParseInt10 is *radix 10 only*. For other radices fall back
-  // to stock Number.parseInt(s, radix). For two-byte (UTF-16) strings,
-  // V8 routes to the slow path automatically.
+  // ASCII-only fast paths. Two-byte strings fall back to V8's
+  // slow path automatically.
   numberParseFloat(s: string): number
+  // Radix 10 only. Other radices fall back to stock Number.parseInt.
   numberParseInt10(s: string): number
-  // Array.isArray. Fast path inlines a single map-pointer comparison.
-  // Typed as a type predicate so callers narrow at the call site —
-  // matches `Array.isArray`'s built-in `arg is any[]` signature exactly.
-  arrayIsArray(v: unknown): v is unknown[]
-  // Date.now. Inlines the wallclock-read into the JIT'd caller.
-  dateNow(): number
-  // String.prototype.charCodeAt — ASCII fast path.
-  // Returns -1 sentinel for OOB indices (callers must convert to NaN
-  // to match `String.prototype.charCodeAt` spec). The smol-aware
-  // export in `primordials.ts` does this conversion transparently.
+  // ASCII-only fast path. Returns -1 sentinel for OOB indices —
+  // callers must convert to NaN to match `String.prototype.charCodeAt`
+  // spec. The smol-aware export in `primordials.ts` does this
+  // translation transparently.
   stringCharCodeAt(s: string, i: number): number
 }
 
