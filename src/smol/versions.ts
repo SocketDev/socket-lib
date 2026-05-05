@@ -1,0 +1,83 @@
+/**
+ * @fileoverview Lazy-loader for socket-btm's `node:smol-versions`.
+ *
+ * `node:smol-versions` is the multi-ecosystem version helper exposed
+ * by socket-btm's smol Node binary. It supports npm/maven/pypi/nuget/
+ * gem version comparison + range satisfies with internal C++
+ * acceleration on the npm hot path.
+ *
+ * Returns `undefined` on stock Node + non-Node runtimes. Result is
+ * cached across calls.
+ *
+ * @internal — used by `src/versions.ts` to resolve smol-aware version
+ *   ops. Most callers should use the standard `versions` exports,
+ *   which already route through this when smol is present.
+ */
+
+import { isSmol } from './util'
+
+/**
+ * Surface of `node:smol-versions`. See socket-btm's
+ * additions/source-patched/lib/smol-versions.js for the canonical
+ * shape. Each entry takes an optional `ecosystem` (default `'npm'`)
+ * — pass it for non-npm versions; npm callers can omit.
+ */
+export interface SmolVersionsBinding {
+  compare(a: string, b: string, ecosystem?: string): -1 | 0 | 1
+  eq(a: string, b: string, ecosystem?: string): boolean
+  gt(a: string, b: string, ecosystem?: string): boolean
+  gte(a: string, b: string, ecosystem?: string): boolean
+  inc(
+    version: string,
+    release: 'major' | 'minor' | 'patch' | 'prerelease',
+    ecosystem?: string,
+    identifier?: string,
+  ): string | undefined
+  lt(a: string, b: string, ecosystem?: string): boolean
+  lte(a: string, b: string, ecosystem?: string): boolean
+  max(versions: readonly string[], ecosystem?: string): string | undefined
+  maxSatisfying(
+    versions: readonly string[],
+    range: string,
+    ecosystem?: string,
+  ): string | undefined
+  min(versions: readonly string[], ecosystem?: string): string | undefined
+  minSatisfying(
+    versions: readonly string[],
+    range: string,
+    ecosystem?: string,
+  ): string | undefined
+  neq(a: string, b: string, ecosystem?: string): boolean
+  rsort(versions: readonly string[], ecosystem?: string): string[]
+  satisfies(version: string, range: string, ecosystem?: string): boolean
+  sort(versions: readonly string[], ecosystem?: string): string[]
+  valid(version: string, ecosystem?: string): string | undefined
+  filter(
+    versions: readonly string[],
+    range: string,
+    ecosystem?: string,
+  ): string[]
+  coerce(version: string, ecosystem?: string): string | undefined
+}
+
+let _smolVersions: SmolVersionsBinding | null | undefined
+
+/**
+ * Returns `node:smol-versions` when running on the smol Node binary,
+ * otherwise `undefined`. Result is cached across calls.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSmolVersions(): SmolVersionsBinding | undefined {
+  if (_smolVersions === undefined) {
+    if (isSmol()) {
+      try {
+        _smolVersions = require('node:smol-versions') as SmolVersionsBinding
+      } catch {
+        _smolVersions = null
+      }
+    } else {
+      _smolVersions = null
+    }
+  }
+  return _smolVersions ?? undefined
+}

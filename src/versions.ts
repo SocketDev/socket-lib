@@ -1,6 +1,24 @@
 /** @fileoverview Version comparison and validation utilities for Socket ecosystem. */
 
+import { getSmolVersions } from './smol/versions'
+
 import type * as semverType from './external/semver'
+import type { SmolVersionsBinding } from './smol/versions'
+
+// Versions implementation. When running on socket-btm's smol Node
+// binary, prefer `node:smol-versions` — its npm hot path is C++-
+// accelerated via internalBinding('smol_versions_native'), so
+// compare/satisfies/valid are several times faster than the vendored
+// JS semver. Stock Node falls through to the bundled semver.
+//
+// The smol-versions surface is a strict superset of socket-lib's
+// usage of semver — all entry points exposed here have a 1:1 mapping.
+// `getMajorVersion`-style helpers still need the parsed object shape,
+// which neither smol-versions nor stock semver expose by the same
+// name (smol-versions has no `parse` returning `{major, minor, patch}`),
+// so those continue to use the vendored semver directly. See
+// `node:smol-versions` JS shim for the canonical public surface.
+const _smolVersions = getSmolVersions()
 
 let _semver: typeof semverType | undefined
 function getSemver() {
@@ -8,6 +26,13 @@ function getSemver() {
     _semver = require('./external/semver')
   }
   return _semver!
+}
+
+// Pick the impl for ops that exist on both. The cast is safe because
+// the smol-versions binding is a strict superset of the methods we
+// touch here, with identical semantics for npm.
+function getVersionsImpl(): SmolVersionsBinding | typeof semverType {
+  return _smolVersions ?? getSemver()
 }
 
 /**
@@ -44,8 +69,8 @@ export function compareVersions(
 ): -1 | 0 | 1 | undefined {
   try {
     /* c8 ignore next - External semver call */
-    const semver = getSemver()
-    return semver.compare(v1, v2)
+    const impl = getVersionsImpl()
+    return impl.compare(v1, v2) as -1 | 0 | 1
   } catch {
     return undefined
   }
@@ -62,8 +87,8 @@ export function compareVersions(
  */
 export function filterVersions(versions: string[], range: string): string[] {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return versions.filter(v => semver.satisfies(v, range))
+  const impl = getVersionsImpl()
+  return versions.filter(v => impl.satisfies(v, range))
 }
 
 /**
@@ -149,8 +174,8 @@ export function incrementVersion(
  */
 export function isEqual(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.eq(version1, version2)
+  const impl = getVersionsImpl()
+  return impl.eq(version1, version2)
 }
 
 /**
@@ -164,8 +189,8 @@ export function isEqual(version1: string, version2: string): boolean {
  */
 export function isGreaterThan(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.gt(version1, version2)
+  const impl = getVersionsImpl()
+  return impl.gt(version1, version2)
 }
 
 /**
@@ -182,8 +207,8 @@ export function isGreaterThanOrEqual(
   version2: string,
 ): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.gte(version1, version2)
+  const impl = getVersionsImpl()
+  return impl.gte(version1, version2)
 }
 
 /**
@@ -197,8 +222,8 @@ export function isGreaterThanOrEqual(
  */
 export function isLessThan(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.lt(version1, version2)
+  const impl = getVersionsImpl()
+  return impl.lt(version1, version2)
 }
 
 /**
@@ -212,8 +237,8 @@ export function isLessThan(version1: string, version2: string): boolean {
  */
 export function isLessThanOrEqual(version1: string, version2: string): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.lte(version1, version2)
+  const impl = getVersionsImpl()
+  return impl.lte(version1, version2)
 }
 
 /**
@@ -227,8 +252,12 @@ export function isLessThanOrEqual(version1: string, version2: string): boolean {
  */
 export function isValidVersion(version: string): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.valid(version) !== null
+  const impl = getVersionsImpl()
+  // semver.valid returns string | null; smol-versions returns
+  // string | undefined. Both branch correctly under loose-equality
+  // truthiness check, so a generic `!= null` (loose) covers both.
+  // eslint-disable-next-line eqeqeq
+  return impl.valid(version) != null
 }
 
 /**
@@ -313,8 +342,8 @@ export function parseVersion(version: string):
  */
 export function satisfiesVersion(version: string, range: string): boolean {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.satisfies(version, range)
+  const impl = getVersionsImpl()
+  return impl.satisfies(version, range)
 }
 
 /**
@@ -328,8 +357,8 @@ export function satisfiesVersion(version: string, range: string): boolean {
  */
 export function sortVersions(versions: string[]): string[] {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.sort([...versions])
+  const impl = getVersionsImpl()
+  return impl.sort([...versions])
 }
 
 /**
@@ -343,8 +372,8 @@ export function sortVersions(versions: string[]): string[] {
  */
 export function sortVersionsDesc(versions: string[]): string[] {
   /* c8 ignore next - External semver call */
-  const semver = getSemver()
-  return semver.rsort([...versions])
+  const impl = getVersionsImpl()
+  return impl.rsort([...versions])
 }
 
 /**
