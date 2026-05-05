@@ -72,6 +72,35 @@ export function isSmol(): boolean {
  */
 export interface SmolUtilBinding {
   /**
+   * Native equivalent of `Function.prototype.bind.bind(apply)(fn)`.
+   */
+  applyBind: <T, A extends readonly unknown[], R>(
+    fn: (this: T, ...args: A) => R,
+  ) => (self: T, args: A) => R
+  /**
+   * Native equivalent of:
+   *   `(self, args) => { try { return fn.apply(self, args) } catch {} }`.
+   * Returns a function that swallows synchronous throws and returns
+   * `undefined`. Avoids JS-level throw construction on the swallow
+   * path — useful for logger sinks, debug hooks, abort handlers, etc.
+   */
+  applySafe: <T, A extends readonly unknown[], R>(
+    fn: (this: T, ...args: A) => R,
+  ) => (self: T, args: A) => R | undefined
+  /**
+   * Native equivalent of:
+   *   `(...newArgs) => fn.call(thisArg, ...presetArgs, ...newArgs)`.
+   * Same shape as `Function.prototype.bind` but with a single C++
+   * dispatch instead of going through V8's BoundFunction adapter.
+   * Useful where `bind` would be hot — captured callbacks fed to
+   * `setImmediate`/`setTimeout`/promise continuations.
+   */
+  bindCall: <T, P extends readonly unknown[], A extends readonly unknown[], R>(
+    fn: (this: T, ...args: [...P, ...A]) => R,
+    thisArg: T,
+    ...presetArgs: P
+  ) => (...newArgs: A) => R
+  /**
    * Native equivalent of `Function.prototype.bind.bind(call)(fn)`.
    * Single C++ dispatch via `args.Data()` + `v8::Function::Call`.
    */
@@ -79,11 +108,13 @@ export interface SmolUtilBinding {
     fn: (this: T, ...args: A) => R,
   ) => (self: T, ...args: A) => R
   /**
-   * Native equivalent of `Function.prototype.bind.bind(apply)(fn)`.
+   * Native equivalent of:
+   *   `try { return new WeakRef(target) } catch { return undefined }`.
+   * Returns `undefined` for non-Object, non-Symbol inputs that would
+   * make the constructor throw. The Safe suffix follows the project's
+   * non-throwing-wrapper convention.
    */
-  applyBind: <T, A extends readonly unknown[], R>(
-    fn: (this: T, ...args: A) => R,
-  ) => (self: T, args: A) => R
+  weakRefSafe: <T extends object | symbol>(target: T) => WeakRef<T> | undefined
 }
 
 /**

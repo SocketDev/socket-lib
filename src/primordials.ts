@@ -60,6 +60,69 @@ export const applyBind =
     fn: (this: T, ...args: A) => R,
   ) => (self: T, args: A) => R)
 
+// ─── applySafe ─────────────────────────────────────────────────────────
+// Native form skips JS-level throw construction on the swallow path.
+// JS fallback is the obvious shape: applyBind + try/catch around the
+// inner call. Used by logger sinks, debug hooks, abort handlers — any
+// place where the callee is untrusted user code and the host doesn't
+// care whether it threw.
+const _applyBoundForSafe = applyBind
+export const applySafe: <T, A extends readonly unknown[], R>(
+  fn: (this: T, ...args: A) => R,
+) => (self: T, args: A) => R | undefined =
+  _smolUtil?.applySafe ??
+  (<T, A extends readonly unknown[], R>(fn: (this: T, ...args: A) => R) => {
+    const apply2 = _applyBoundForSafe(fn)
+    return (self: T, args: A): R | undefined => {
+      try {
+        return apply2(self, args)
+      } catch {
+        return undefined
+      }
+    }
+  })
+
+// ─── bindCall ──────────────────────────────────────────────────────────
+// Native form is single-dispatch; JS fallback is `Function.prototype.bind`,
+// which goes through V8's BoundFunction adapter on every invocation.
+// 2x per call when the bound function is hot.
+type BindCall = <
+  T,
+  P extends readonly unknown[],
+  A extends readonly unknown[],
+  R,
+>(
+  fn: (this: T, ...args: [...P, ...A]) => R,
+  thisArg: T,
+  ...presetArgs: P
+) => (...newArgs: A) => R
+const _bindCallFallback = ((
+  fn: (...a: unknown[]) => unknown,
+  thisArg: unknown,
+  ...presetArgs: unknown[]
+) =>
+  Function.prototype.bind.apply(fn, [
+    thisArg,
+    ...presetArgs,
+  ])) as unknown as BindCall
+export const bindCall: BindCall = _smolUtil?.bindCall ?? _bindCallFallback
+
+// ─── weakRefSafe ───────────────────────────────────────────────────────
+// `new WeakRef(target)` throws for non-Object, non-Symbol inputs. The
+// Safe form predicates the input first and returns `undefined` for
+// non-wrappable values without paying exception-construction cost.
+export const weakRefSafe: <T extends object | symbol>(
+  target: T,
+) => WeakRef<T> | undefined =
+  _smolUtil?.weakRefSafe ??
+  (<T extends object | symbol>(target: T): WeakRef<T> | undefined => {
+    try {
+      return new WeakRef(target)
+    } catch {
+      return undefined
+    }
+  })
+
 // ─── Constructors ──────────────────────────────────────────────────────
 export const ArrayCtor: ArrayConstructor = Array
 export const ArrayBufferCtor: ArrayBufferConstructor = ArrayBuffer

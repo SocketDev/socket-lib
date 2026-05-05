@@ -16,6 +16,7 @@
 
 import {
   applyBind,
+  applySafe,
   ArrayCtor,
   ArrayFrom,
   ArrayFromAsync,
@@ -59,6 +60,7 @@ import {
   ArrayPrototypeWith,
   AtomicsWait,
   BigIntCtor,
+  bindCall,
   BooleanCtor,
   BufferCtor,
   BufferPrototypeSlice,
@@ -292,6 +294,7 @@ import {
   WeakMapPrototypeHas,
   WeakMapPrototypeSet,
   WeakRefCtor,
+  weakRefSafe,
   WeakSetCtor,
   WeakSetPrototypeAdd,
   WeakSetPrototypeDelete,
@@ -1286,6 +1289,92 @@ describe('primordials', () => {
         args: unknown[],
       ) => unknown[]
       expect(slice([1, 2, 3, 4], [1, 3])).toEqual([2, 3])
+    })
+  })
+
+  describe('applySafe / bindCall / weakRefSafe', () => {
+    it('applySafe swallows synchronous throws and returns undefined', () => {
+      // The function throws, so applySafe must return undefined rather
+      // than propagate. This is the contract: any thrown value (Error,
+      // string, undefined, anything) becomes undefined at the call site.
+      const throwing = applySafe(() => {
+        throw new Error('boom')
+      }) as (self: unknown, args: unknown[]) => unknown
+      expect(throwing(undefined, [])).toBeUndefined()
+    })
+
+    it('applySafe returns the call result on the happy path', () => {
+      const sum = applySafe((a: number, b: number) => a + b) as (
+        self: unknown,
+        args: [number, number],
+      ) => number | undefined
+      expect(sum(undefined, [2, 3])).toBe(5)
+    })
+
+    it('applySafe with non-array second arg returns undefined', () => {
+      // Best-effort contract: a non-array `args` is treated as "no args"
+      // and the call still happens (the native form skips it; the JS
+      // fallback's try/catch catches the TypeError from .apply).
+      const fn = applySafe(() => 42) as unknown as (
+        self: unknown,
+        args: unknown,
+      ) => unknown
+      // On the native path this returns undefined (rejected at the
+      // type guard). On the JS fallback path the inner .apply throws
+      // and applySafe swallows. Both converge on undefined.
+      expect(
+        fn(undefined, 'not-an-array' as unknown as unknown[]),
+      ).toBeUndefined()
+    })
+
+    it('bindCall pre-supplies the `this` plus leading args', () => {
+      function add(this: unknown, a: number, b: number): number {
+        return a + b
+      }
+      const add5 = bindCall(add, undefined, 5)
+      expect(add5(7)).toBe(12)
+    })
+
+    it('bindCall with no preset args is a thin call-with-this wrapper', () => {
+      const addAll = bindCall(function (this: unknown, ...nums: number[]) {
+        return nums.reduce((s, n) => s + n, 0)
+      }, undefined)
+      expect(addAll(1, 2, 3)).toBe(6)
+    })
+
+    it('weakRefSafe wraps an Object', () => {
+      const target = { x: 1 }
+      const ref = weakRefSafe(target)
+      expect(ref).toBeDefined()
+      expect(ref!.deref()).toBe(target)
+    })
+
+    it('weakRefSafe wraps a non-registered Symbol', () => {
+      const sym = Symbol('local')
+      const ref = weakRefSafe(sym)
+      expect(ref).toBeDefined()
+      expect(ref!.deref()).toBe(sym)
+    })
+
+    it('weakRefSafe returns undefined for primitives', () => {
+      // The native form rejects at the predicate; the JS fallback's
+      // `new WeakRef(...)` would throw TypeError and the try/catch
+      // converts it to undefined. Same observable outcome.
+      // Cast through unknown to bypass the `object | symbol` constraint
+      // for testing the failure path.
+      const wrap = weakRefSafe as unknown as (v: unknown) => unknown
+      expect(wrap(42)).toBeUndefined()
+      expect(wrap('hello')).toBeUndefined()
+      expect(wrap(true)).toBeUndefined()
+      expect(wrap(null)).toBeUndefined()
+      expect(wrap(undefined)).toBeUndefined()
+    })
+
+    it('weakRefSafe returns undefined for registered Symbols', () => {
+      // `Symbol.for(_)` returns a registered symbol — WeakRef rejects it.
+      // Both paths converge on undefined.
+      const wrap = weakRefSafe as unknown as (v: unknown) => unknown
+      expect(wrap(Symbol.for('registered'))).toBeUndefined()
     })
   })
 })

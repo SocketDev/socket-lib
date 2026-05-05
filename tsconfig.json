@@ -4,7 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "declaration": false,
     "declarationMap": false,
-    "module": "commonjs",
+    "module": "preserve",
     "moduleResolution": "bundler",
     "noEmit": false,
     "noEmitOnError": false,
