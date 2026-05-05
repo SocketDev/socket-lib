@@ -25,8 +25,13 @@ import { isSmol } from './util'
 /**
  * Surface of `node:smol-primordial`. See socket-btm's
  * additions/source-patched/lib/smol-primordial.js for the canonical
- * shape. All entries are V8 Fast API typed — TurboFan inlines them
- * into JIT-compiled callers.
+ * shape.
+ *
+ * Each entry is registered as a `v8::CFunction` so V8 can inline the
+ * C++ implementation directly into JIT-compiled callers — eliminating
+ * the FunctionCallbackInfo allocation, the HandleScope, and the call-
+ * site trampoline. See the C++ binding file for which signatures
+ * get real wins (and which don't).
  */
 export interface SmolPrimordialBinding {
   // Math (unary, double → double).
@@ -69,6 +74,23 @@ export interface SmolPrimordialBinding {
   numberIsInteger(v: unknown): boolean
   numberIsNaN(v: unknown): boolean
   numberIsSafeInteger(v: unknown): boolean
+  // Number static parsers — ASCII-only fast paths.
+  // numberParseInt10 is *radix 10 only*. For other radices fall back
+  // to stock Number.parseInt(s, radix). For two-byte (UTF-16) strings,
+  // V8 routes to the slow path automatically.
+  numberParseFloat(s: string): number
+  numberParseInt10(s: string): number
+  // Array.isArray. Fast path inlines a single map-pointer comparison.
+  // Typed as a type predicate so callers narrow at the call site —
+  // matches `Array.isArray`'s built-in `arg is any[]` signature exactly.
+  arrayIsArray(v: unknown): v is unknown[]
+  // Date.now. Inlines the wallclock-read into the JIT'd caller.
+  dateNow(): number
+  // String.prototype.charCodeAt — ASCII fast path.
+  // Returns -1 sentinel for OOB indices (callers must convert to NaN
+  // to match `String.prototype.charCodeAt` spec). The smol-aware
+  // export in `primordials.ts` does this conversion transparently.
+  stringCharCodeAt(s: string, i: number): number
 }
 
 let _smolPrimordial: SmolPrimordialBinding | null | undefined

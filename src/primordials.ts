@@ -151,7 +151,10 @@ export type ArrayFromAsync = <T>(
 export const ArrayFromAsync: ArrayFromAsync | undefined = (
   Array as unknown as { fromAsync?: ArrayFromAsync }
 ).fromAsync
-export const ArrayIsArray = Array.isArray
+// `arrayIsArray` is a Fast API binding — a single map-pointer
+// comparison that V8 inlines into JIT'd callers. Spec semantics
+// match Array.isArray (excludes typed arrays + array-like objects).
+export const ArrayIsArray = _smolPrimordial?.arrayIsArray ?? Array.isArray
 export const ArrayOf = Array.of
 
 // ─── ArrayBuffer (static) ──────────────────────────────────────────────
@@ -266,7 +269,10 @@ export const BufferPrototypeToString:
   : undefined
 
 // ─── Date (static) ─────────────────────────────────────────────────────
-export const DateNow = Date.now
+// `dateNow` Fast API binding inlines the wallclock-read into JIT'd
+// callers — meaningful win in tight monitoring loops where Date.now()
+// is called millions of times/sec for performance traces.
+export const DateNow = _smolPrimordial?.dateNow ?? Date.now
 export const DateParse = Date.parse
 export const DateUTC = Date.UTC
 
@@ -489,8 +495,24 @@ export const NumberIsInteger =
 export const NumberIsNaN = _smolPrimordial?.numberIsNaN ?? Number.isNaN
 export const NumberIsSafeInteger =
   _smolPrimordial?.numberIsSafeInteger ?? Number.isSafeInteger
-export const NumberParseFloat = Number.parseFloat
-export const NumberParseInt = Number.parseInt
+// `numberParseFloat` and `numberParseInt10` are FastOneByteString-typed
+// bindings — V8 only invokes the C++ fast path when the input string
+// is sequential one-byte (ASCII). Two-byte strings, BigInt-as-string,
+// etc. fall through to the slow path automatically. parseInt is
+// specialized to radix 10 because every parseInt site in this repo
+// (and in socket-cli) uses `parseInt(s, 10)`. The wrapper below
+// preserves the "missing radix" and "radix !== 10" cases by routing
+// to stock Number.parseInt — only radix 10 (or omitted) hits the
+// Fast API path.
+export const NumberParseFloat =
+  _smolPrimordial?.numberParseFloat ?? Number.parseFloat
+const _smolParseInt10 = _smolPrimordial?.numberParseInt10
+export const NumberParseInt: typeof Number.parseInt = _smolParseInt10
+  ? (s, radix) =>
+      radix === undefined || radix === 10
+        ? _smolParseInt10(s as string)
+        : Number.parseInt(s, radix)
+  : Number.parseInt
 export const NumberPrototypeToFixed = uncurryThis(Number.prototype.toFixed)
 export const NumberPrototypeToString = uncurryThis(Number.prototype.toString)
 
@@ -642,9 +664,20 @@ export const StringRaw = String.raw
 // ─── String (prototype) ────────────────────────────────────────────────
 export const StringPrototypeAt = uncurryThis(String.prototype.at)
 export const StringPrototypeCharAt = uncurryThis(String.prototype.charAt)
-export const StringPrototypeCharCodeAt = uncurryThis(
-  String.prototype.charCodeAt,
-)
+// `stringCharCodeAt` is a Fast API binding with a FastOneByteString
+// receiver — V8 only invokes the C++ fast path for ASCII strings,
+// where it does a single byte load. Two-byte strings fall back.
+// The fast path returns -1 for OOB indices (Fast API can't return
+// NaN from an int32 signature); the wrapper here translates -1 back
+// to NaN to match `String.prototype.charCodeAt` spec.
+const _smolCharCodeAt = _smolPrimordial?.stringCharCodeAt
+export const StringPrototypeCharCodeAt: (s: string, i: number) => number =
+  _smolCharCodeAt
+    ? (s, i) => {
+        const code = _smolCharCodeAt(s, i)
+        return code === -1 ? NaN : code
+      }
+    : uncurryThis(String.prototype.charCodeAt)
 export const StringPrototypeCodePointAt = uncurryThis(
   String.prototype.codePointAt,
 )

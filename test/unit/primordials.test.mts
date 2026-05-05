@@ -818,6 +818,31 @@ describe('primordials', () => {
       expect(NumberParseInt('42', 10)).toBe(42)
     })
 
+    it('parseInt with omitted radix matches radix-10', () => {
+      // The smol-aware wrapper routes radix=10 (and omitted) through
+      // the Fast API path. Radix 16 / 2 / 8 fall back to stock parseInt.
+      expect(NumberParseInt('42')).toBe(42)
+      expect(NumberParseInt('  -7')).toBe(-7)
+      expect(NumberParseInt('+99')).toBe(99)
+      expect(NumberParseInt('123abc')).toBe(123)
+      expect(NumberParseInt('abc')).toBeNaN()
+      expect(NumberParseInt('')).toBeNaN()
+    })
+
+    it('parseInt with non-10 radix falls through to stock', () => {
+      expect(NumberParseInt('ff', 16)).toBe(255)
+      expect(NumberParseInt('1010', 2)).toBe(10)
+      expect(NumberParseInt('17', 8)).toBe(15)
+    })
+
+    it('parseFloat handles signs, exponents, leading whitespace', () => {
+      expect(NumberParseFloat('  -3.14e2')).toBeCloseTo(-314)
+      expect(NumberParseFloat('+1.5')).toBe(1.5)
+      expect(NumberParseFloat('Infinity')).toBe(Infinity)
+      expect(NumberParseFloat('-Infinity')).toBe(-Infinity)
+      expect(NumberParseFloat('not-a-number')).toBeNaN()
+    })
+
     it('exposes Number constants with the correct values', () => {
       expect(NumberEPSILON).toBe(Number.EPSILON)
       expect(NumberMAX_SAFE_INTEGER).toBe(Number.MAX_SAFE_INTEGER)
@@ -1057,6 +1082,29 @@ describe('primordials', () => {
       expect(StringPrototypeCharAt('hello', 1)).toBe('e')
       expect(StringPrototypeCharCodeAt('A', 0)).toBe(65)
       expect(StringPrototypeCodePointAt('😀', 0)).toBe(0x1f600)
+    })
+
+    it('CharCodeAt out-of-bounds returns NaN (matches spec)', () => {
+      // The smol-aware wrapper translates Fast API's -1 sentinel back
+      // to NaN. On stock Node it's the unwrapped uncurryThis form,
+      // which already returns NaN. Both paths must converge.
+      expect(StringPrototypeCharCodeAt('A', 1)).toBeNaN()
+      expect(StringPrototypeCharCodeAt('', 0)).toBeNaN()
+      expect(StringPrototypeCharCodeAt('foo', -1)).toBeNaN()
+      expect(StringPrototypeCharCodeAt('foo', 100)).toBeNaN()
+    })
+
+    it('CharCodeAt handles two-byte / non-ASCII correctly', () => {
+      // Two-byte strings fall through Fast API's one-byte filter and
+      // hit the slow path (or stock JS on non-smol). Either way, the
+      // observable result must match `String.prototype.charCodeAt`.
+      expect(StringPrototypeCharCodeAt('é', 0)).toBe(233)
+      expect(StringPrototypeCharCodeAt('日本', 0)).toBe(0x65e5)
+      expect(StringPrototypeCharCodeAt('日本', 1)).toBe(0x672c)
+      // Surrogate pair: charCodeAt returns the high/low surrogate
+      // code unit, not the codepoint.
+      expect(StringPrototypeCharCodeAt('😀', 0)).toBe(0xd83d)
+      expect(StringPrototypeCharCodeAt('😀', 1)).toBe(0xde00)
     })
 
     it('Concat / EndsWith / StartsWith / Includes', () => {
