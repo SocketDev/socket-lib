@@ -132,26 +132,35 @@ export interface EnsurePackageInstallOptions {
   hash?: HashSpec | undefined
 
   /**
-   * Override the install location. By default, the package lands at
-   * `~/.socket/_dlx/<cacheKey>/` (or `SOCKET_DLX_DIR/<cacheKey>/`),
-   * keyed by spec so multiple specs share a parent dir without
-   * colliding. When `installPath` is set, the package lands directly
-   * at `<installPath>/node_modules/<packageName>/` — no cacheKey
-   * subdirectory.
+   * Override the install root passed to Arborist. By default, the
+   * install root is `~/.socket/_dlx/<cacheKey>/` (or
+   * `SOCKET_DLX_DIR/<cacheKey>/`) — keyed by spec so multiple specs
+   * share a parent dir without colliding. When `installRoot` is set,
+   * the install root is the value verbatim — no cacheKey subdirectory.
+   *
+   * In both cases the package itself lands at
+   * `<installRoot>/node_modules/<packageName>/` with transitive deps as
+   * siblings under the same `node_modules/` directory. That layout is a
+   * fixed property of Arborist; this option only controls the parent.
    *
    * That means **the caller is responsible for keeping per-spec
-   * installs separated** — calling twice with the same `installPath`
+   * installs separated** — calling twice with the same `installRoot`
    * but different specs (e.g. `ink@7` and `ink@8`) overwrites the
-   * earlier install. Either pass a different `installPath` per spec
-   * or pass `force: true` to accept the overwrite.
+   * earlier install. Either pass a different `installRoot` per spec or
+   * pass `force: true` to accept the overwrite.
+   *
+   * Pass a sentinel name (e.g. `_dlx`, `_pkg`, `vendor`) — never one
+   * that ends in `node_modules`, since that turns the install root
+   * into something parent-walking resolvers, IDE indexers, and pnpm
+   * hoisting will mistake for a workspace `node_modules/`.
    *
    * Use cases:
    * - Build pipelines that want the install gitignored alongside their
    *   own outputs and walkable by tools that resolve through
-   *   `node_modules`.
+   *   `node_modules` (e.g. esbuild's `nodePaths`).
    * - Tests that need a deterministic, easily-cleaned install path.
    */
-  installPath?: string | undefined
+  installRoot?: string | undefined
 
   /**
    * Vendored `package-lock.json` to drive a reproducible install. Accepts
@@ -405,7 +414,7 @@ export async function downloadPackage(
     binaryName,
     force: userForce,
     hash,
-    installPath,
+    installRoot,
     lockfile,
     package: packageSpec,
     yes,
@@ -438,7 +447,7 @@ export async function downloadPackage(
     packageName,
     fullPackageSpec,
     force,
-    { hash, installPath, lockfile },
+    { hash, installRoot, lockfile },
   )
 
   // Find binary path.
@@ -477,12 +486,12 @@ export async function ensurePackageInstalled(
 ): Promise<{ installed: boolean; packageDir: string }> {
   const fs = getFs()
   const path = getPath()
-  // installPath bypasses the cache layout entirely: the caller picks the
-  // exact directory the package lands under, no cacheKey appended. They
+  // installRoot bypasses the cache layout entirely: the caller picks the
+  // exact directory Arborist installs under, no cacheKey appended. They
   // own per-spec separation. Default keeps the historical content-addressed
   // <dlxDir>/<cacheKey>/ layout for collision-free parallel specs.
   const packageDir = normalizePath(
-    install?.installPath ??
+    install?.installRoot ??
       path.join(getSocketDlxDir(), generateCacheKey(packageSpec)),
   )
   const installedDir = normalizePath(

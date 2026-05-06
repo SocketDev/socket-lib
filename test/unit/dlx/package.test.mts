@@ -1297,11 +1297,11 @@ describe('dlx-package', () => {
     })
   })
 
-  describe.sequential('ensurePackageInstalled (installPath option)', () => {
+  describe.sequential('ensurePackageInstalled (installRoot option)', () => {
     let tmpDir: string
 
     beforeEach(() => {
-      tmpDir = mkdtempSync(path.join(tmpdir(), 'dlx-pkg-installPath-'))
+      tmpDir = mkdtempSync(path.join(tmpdir(), 'dlx-pkg-installRoot-'))
     })
 
     afterEach(() => {
@@ -1310,12 +1310,12 @@ describe('dlx-package', () => {
       } catch {}
     })
 
-    it('uses installPath verbatim — no cacheKey appended', async () => {
-      // Pre-stage <installPath>/node_modules/<pkg>/package.json directly
+    it('uses installRoot verbatim — no cacheKey appended', async () => {
+      // Pre-stage <installRoot>/node_modules/<pkg>/package.json directly
       // (no cacheKey subdirectory). The early-return path inside
       // ensurePackageInstalled then short-circuits Arborist.
-      const installPath = path.join(tmpDir, 'my-build-cache')
-      const installedDir = path.join(installPath, 'node_modules', 'lodash')
+      const installRoot = path.join(tmpDir, 'my-build-cache')
+      const installedDir = path.join(installRoot, 'node_modules', 'lodash')
       mkdirSync(installedDir, { recursive: true })
       writeFileSync(
         path.join(installedDir, 'package.json'),
@@ -1326,18 +1326,18 @@ describe('dlx-package', () => {
         'lodash',
         'lodash@4.17.21',
         false,
-        { installPath },
+        { installRoot },
       )
 
       expect(result.installed).toBe(false)
       expect(result.packageDir.replace(/\\/g, '/')).toBe(
-        installPath.replace(/\\/g, '/'),
+        installRoot.replace(/\\/g, '/'),
       )
     })
 
     it('does not collide with the default cache layout', async () => {
       // Two parallel "installs" of the same spec — one to the default
-      // dlxDir cache (cacheKey-keyed), one to a custom installPath
+      // dlxDir cache (cacheKey-keyed), one to a custom installRoot
       // (verbatim) — must end up at distinct directories.
       const customPath = path.join(tmpDir, 'custom')
       const defaultDlxDir = path.join(tmpDir, 'default-dlx')
@@ -1367,12 +1367,12 @@ describe('dlx-package', () => {
         JSON.stringify({ name: 'lodash', version: '4.17.21' }),
       )
 
-      // Resolve via installPath.
+      // Resolve via installRoot.
       const customResult = await ensurePackageInstalled(
         'lodash',
         'lodash@4.17.21',
         false,
-        { installPath: customPath },
+        { installRoot: customPath },
       )
       expect(customResult.packageDir.replace(/\\/g, '/')).toBe(
         customPath.replace(/\\/g, '/'),
@@ -1405,9 +1405,9 @@ describe('dlx-package', () => {
     })
 
     it('works with scoped package names', async () => {
-      const installPath = path.join(tmpDir, 'scoped')
+      const installRoot = path.join(tmpDir, 'scoped')
       const installedDir = path.join(
-        installPath,
+        installRoot,
         'node_modules',
         '@scope',
         'pkg',
@@ -1422,12 +1422,12 @@ describe('dlx-package', () => {
         '@scope/pkg',
         '@scope/pkg@2.0.0',
         false,
-        { installPath },
+        { installRoot },
       )
 
       expect(result.installed).toBe(false)
       expect(result.packageDir.replace(/\\/g, '/')).toBe(
-        installPath.replace(/\\/g, '/'),
+        installRoot.replace(/\\/g, '/'),
       )
     })
   })
