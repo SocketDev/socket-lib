@@ -132,6 +132,28 @@ export interface EnsurePackageInstallOptions {
   hash?: HashSpec | undefined
 
   /**
+   * Override the install location. By default, the package lands at
+   * `~/.socket/_dlx/<cacheKey>/` (or `SOCKET_DLX_DIR/<cacheKey>/`),
+   * keyed by spec so multiple specs share a parent dir without
+   * colliding. When `installPath` is set, the package lands directly
+   * at `<installPath>/node_modules/<packageName>/` — no cacheKey
+   * subdirectory.
+   *
+   * That means **the caller is responsible for keeping per-spec
+   * installs separated** — calling twice with the same `installPath`
+   * but different specs (e.g. `ink@7` and `ink@8`) overwrites the
+   * earlier install. Either pass a different `installPath` per spec
+   * or pass `force: true` to accept the overwrite.
+   *
+   * Use cases:
+   * - Build pipelines that want the install gitignored alongside their
+   *   own outputs and walkable by tools that resolve through
+   *   `node_modules`.
+   * - Tests that need a deterministic, easily-cleaned install path.
+   */
+  installPath?: string | undefined
+
+  /**
    * Vendored `package-lock.json` to drive a reproducible install. Accepts
    * a filesystem path (sniffed) or raw JSON content (sniffed via leading
    * `{`), or an explicit `{ type: 'path' | 'content', value }` object.
@@ -383,6 +405,7 @@ export async function downloadPackage(
     binaryName,
     force: userForce,
     hash,
+    installPath,
     lockfile,
     package: packageSpec,
     yes,
@@ -415,7 +438,7 @@ export async function downloadPackage(
     packageName,
     fullPackageSpec,
     force,
-    { hash, lockfile },
+    { hash, installPath, lockfile },
   )
 
   // Find binary path.
@@ -454,8 +477,14 @@ export async function ensurePackageInstalled(
 ): Promise<{ installed: boolean; packageDir: string }> {
   const fs = getFs()
   const path = getPath()
-  const cacheKey = generateCacheKey(packageSpec)
-  const packageDir = normalizePath(path.join(getSocketDlxDir(), cacheKey))
+  // installPath bypasses the cache layout entirely: the caller picks the
+  // exact directory the package lands under, no cacheKey appended. They
+  // own per-spec separation. Default keeps the historical content-addressed
+  // <dlxDir>/<cacheKey>/ layout for collision-free parallel specs.
+  const packageDir = normalizePath(
+    install?.installPath ??
+      path.join(getSocketDlxDir(), generateCacheKey(packageSpec)),
+  )
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
   )

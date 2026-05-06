@@ -1296,4 +1296,139 @@ describe('dlx-package', () => {
       expect(writtenNpmrc).toContain('audit=false')
     })
   })
+
+  describe.sequential('ensurePackageInstalled (installPath option)', () => {
+    let tmpDir: string
+
+    beforeEach(() => {
+      tmpDir = mkdtempSync(path.join(tmpdir(), 'dlx-pkg-installPath-'))
+    })
+
+    afterEach(() => {
+      try {
+        rmSync(tmpDir, { recursive: true, force: true })
+      } catch {}
+    })
+
+    it('uses installPath verbatim — no cacheKey appended', async () => {
+      // Pre-stage <installPath>/node_modules/<pkg>/package.json directly
+      // (no cacheKey subdirectory). The early-return path inside
+      // ensurePackageInstalled then short-circuits Arborist.
+      const installPath = path.join(tmpDir, 'my-build-cache')
+      const installedDir = path.join(installPath, 'node_modules', 'lodash')
+      mkdirSync(installedDir, { recursive: true })
+      writeFileSync(
+        path.join(installedDir, 'package.json'),
+        JSON.stringify({ name: 'lodash', version: '4.17.21' }),
+      )
+
+      const result = await ensurePackageInstalled(
+        'lodash',
+        'lodash@4.17.21',
+        false,
+        { installPath },
+      )
+
+      expect(result.installed).toBe(false)
+      expect(result.packageDir.replace(/\\/g, '/')).toBe(
+        installPath.replace(/\\/g, '/'),
+      )
+    })
+
+    it('does not collide with the default cache layout', async () => {
+      // Two parallel "installs" of the same spec — one to the default
+      // dlxDir cache (cacheKey-keyed), one to a custom installPath
+      // (verbatim) — must end up at distinct directories.
+      const customPath = path.join(tmpDir, 'custom')
+      const defaultDlxDir = path.join(tmpDir, 'default-dlx')
+
+      // Stage at customPath (no cacheKey).
+      const customInstalled = path.join(customPath, 'node_modules', 'lodash')
+      mkdirSync(customInstalled, { recursive: true })
+      writeFileSync(
+        path.join(customInstalled, 'package.json'),
+        JSON.stringify({ name: 'lodash', version: '4.17.21' }),
+      )
+
+      // Stage at default location (with cacheKey).
+      const cacheKey = createHash('sha512')
+        .update('lodash@4.17.21')
+        .digest('hex')
+        .slice(0, 16)
+      const defaultInstalled = path.join(
+        defaultDlxDir,
+        cacheKey,
+        'node_modules',
+        'lodash',
+      )
+      mkdirSync(defaultInstalled, { recursive: true })
+      writeFileSync(
+        path.join(defaultInstalled, 'package.json'),
+        JSON.stringify({ name: 'lodash', version: '4.17.21' }),
+      )
+
+      // Resolve via installPath.
+      const customResult = await ensurePackageInstalled(
+        'lodash',
+        'lodash@4.17.21',
+        false,
+        { installPath: customPath },
+      )
+      expect(customResult.packageDir.replace(/\\/g, '/')).toBe(
+        customPath.replace(/\\/g, '/'),
+      )
+
+      // Resolve via default (point SOCKET_DLX_DIR at our default-dlx tmp).
+      const savedDlxDir = process.env['SOCKET_DLX_DIR']
+      process.env['SOCKET_DLX_DIR'] = defaultDlxDir
+      setPath('socket-dlx-dir', defaultDlxDir)
+      try {
+        const defaultResult = await ensurePackageInstalled(
+          'lodash',
+          'lodash@4.17.21',
+          false,
+        )
+        expect(defaultResult.packageDir.replace(/\\/g, '/')).toBe(
+          path.join(defaultDlxDir, cacheKey).replace(/\\/g, '/'),
+        )
+        // Distinct paths — proves the option doesn't accidentally fold
+        // into the default layout.
+        expect(defaultResult.packageDir).not.toBe(customResult.packageDir)
+      } finally {
+        if (savedDlxDir === undefined) {
+          delete process.env['SOCKET_DLX_DIR']
+        } else {
+          process.env['SOCKET_DLX_DIR'] = savedDlxDir
+        }
+        setPath('socket-dlx-dir', undefined)
+      }
+    })
+
+    it('works with scoped package names', async () => {
+      const installPath = path.join(tmpDir, 'scoped')
+      const installedDir = path.join(
+        installPath,
+        'node_modules',
+        '@scope',
+        'pkg',
+      )
+      mkdirSync(installedDir, { recursive: true })
+      writeFileSync(
+        path.join(installedDir, 'package.json'),
+        JSON.stringify({ name: '@scope/pkg', version: '2.0.0' }),
+      )
+
+      const result = await ensurePackageInstalled(
+        '@scope/pkg',
+        '@scope/pkg@2.0.0',
+        false,
+        { installPath },
+      )
+
+      expect(result.installed).toBe(false)
+      expect(result.packageDir.replace(/\\/g, '/')).toBe(
+        installPath.replace(/\\/g, '/'),
+      )
+    })
+  })
 })
