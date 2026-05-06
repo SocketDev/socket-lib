@@ -319,6 +319,18 @@ export function memoizeAsync<Args extends unknown[], Result>(
       cache.delete(key)
     }
 
+    // Cold-path dedup: a concurrent first-time caller may have
+    // already kicked off the work (and therefore populated
+    // `refreshing`) before the entry made it into `cache`. Without
+    // this check, every concurrent first-time caller for the same
+    // key invokes `fn()` independently, defeating the documented
+    // dedup contract.
+    const inflightCold = refreshing.get(key)
+    if (inflightCold) {
+      debugLog(`[memoizeAsync:${name}] cold-dedup`, { key })
+      return await inflightCold
+    }
+
     debugLog(`[memoizeAsync:${name}] miss`, { key })
 
     // Create promise and cache it immediately (for deduplication).
