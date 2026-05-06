@@ -32,10 +32,11 @@ import { parseArgs as parseLibArgs } from '../argv/parse'
 
 const logger = getDefaultLogger()
 
-// Mirrors the xport.json / xport.schema.json convention: bare-name
-// data file at repo root, sibling `.schema.json` for the JSON Schema.
-// One file per repo for all socket-lib checks; section per check.
-const DEFAULT_CONFIG_PATH = 'socket-lib.json'
+// Lives in `.config/` next to tsconfig.base.json, taze.config.mts,
+// etc. — the existing fleet pattern for tooling configs that
+// consumers read. One file per repo for all socket-lib checks;
+// section per check.
+const DEFAULT_CONFIG_PATH = '.config/socket-lib.json'
 const CONFIG_SECTION = 'primordials'
 
 interface ParsedArgs {
@@ -83,7 +84,7 @@ function printHelp(): void {
   logger.log('  --quiet           Silent on success.')
   logger.log('  --help, -h        Print this help.')
   logger.log('')
-  logger.log('Config (socket-lib.json — primordials section):')
+  logger.log('Config (.config/socket-lib.json — primordials section):')
   logger.log('  {')
   logger.log('    "primordials": {')
   logger.log('      "aliasMap":         { "Array": "ArrayCtor" },')
