@@ -140,11 +140,20 @@ interface GitDiffSpawnArgs {
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
-// LRU cache for git diff results. We exploit Map's insertion-order iteration
-// so eviction is O(1): delete the first key. Touching on read (delete + set)
-// keeps the most-recently-used entry at the back.
-const gitDiffCache = new MapCtor<string, string[]>()
+// LRU cache for git diff results with TTL. We exploit Map's insertion-order
+// iteration so eviction is O(1): delete the first key. Touching on read
+// (delete + set) keeps the most-recently-used entry at the back. TTL keeps
+// long-running tools (watch mode, devserver) from serving stale results
+// after the working tree changes.
+type GitDiffCacheEntry = {
+  readonly expiresAt: number
+  readonly result: string[]
+}
+const gitDiffCache = new MapCtor<string, GitDiffCacheEntry>()
 const GIT_CACHE_MAX_SIZE = 100
+// 2s — long enough to dedup rapid in-process callers, short enough that
+// edits made by the user feel reflected on the next call.
+const GIT_CACHE_TTL_MS = 2_000
 
 // Cached git binary path to avoid repeated PATH searches.
 let _gitPath: string | undefined
@@ -157,13 +166,18 @@ const realpathCache = new MapCtor<string, string>()
 const gitRootCache = new MapCtor<string, string>()
 
 function getCachedGitDiff(key: string): string[] | undefined {
-  const result = gitDiffCache.get(key)
-  if (result) {
-    // Re-insert to mark as most-recently-used.
-    gitDiffCache.delete(key)
-    gitDiffCache.set(key, result)
+  const entry = gitDiffCache.get(key)
+  if (!entry) {
+    return undefined
   }
-  return result
+  if (Date.now() >= entry.expiresAt) {
+    gitDiffCache.delete(key)
+    return undefined
+  }
+  // Re-insert to mark as most-recently-used.
+  gitDiffCache.delete(key)
+  gitDiffCache.set(key, entry)
+  return entry.result
 }
 
 /**
@@ -537,7 +551,7 @@ function setCachedGitDiff(key: string, result: string[]): void {
       gitDiffCache.delete(oldest)
     }
   }
-  gitDiffCache.set(key, result)
+  gitDiffCache.set(key, { expiresAt: Date.now() + GIT_CACHE_TTL_MS, result })
 }
 
 /**
