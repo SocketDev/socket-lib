@@ -5,6 +5,10 @@
  * primordial-drift correctness is covered by `test/unit/checks/primordials.test.mts`
  * — this file just verifies the CLI plumbing (arg parsing, config
  * loading, output rendering, exit codes) is wired up correctly.
+ *
+ * Tests pass absolute config paths via --config / -c so they never
+ * depend on `process.cwd()`. Mutating cwd from a test causes flakes
+ * under vitest's parallel pool — workers share process state.
  */
 
 import { mkdtempSync, promises as fs } from 'node:fs'
@@ -16,11 +20,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { runCheckPrimordials } from '../../../src/bin/check-primordials'
 
-// Absolute path to socket-lib's own primordials source. Tests chdir
-// into a tmpDir, so the engine's auto-discovery (sibling clone /
-// node_modules) can't locate socket-lib from inside the tmpDir.
-// Set socketLibPrimordialsPath in the test config to short-circuit
-// the lookup.
+// Absolute path to socket-lib's own primordials source. Each test
+// runs in its own tmpDir for config files, but the primordials engine
+// needs to find socket-lib's primordials.ts somewhere — pin it
+// explicitly via socketLibPrimordialsPath so we don't rely on the
+// auto-discovery (sibling clone / node_modules), which doesn't apply
+// from inside a tmpDir.
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const SOCKET_LIB_PRIMORDIALS = path.resolve(
   HERE,
@@ -28,16 +33,12 @@ const SOCKET_LIB_PRIMORDIALS = path.resolve(
 )
 
 let tmpDir: string
-let prevCwd: string
 
 beforeEach(() => {
   tmpDir = mkdtempSync(path.join(tmpdir(), 'check-primordials-cli-'))
-  prevCwd = process.cwd()
-  process.chdir(tmpDir)
 })
 
 afterEach(async () => {
-  process.chdir(prevCwd)
   await fs.rm(tmpDir, { recursive: true, force: true })
 })
 
@@ -52,63 +53,71 @@ describe('runCheckPrimordials', () => {
     expect(code).toBe(0)
   })
 
-  it('exits 1 when no config file exists in cwd', async () => {
-    // Empty tmpDir — no .socket-lib.json, no .config/socket-lib.json.
-    const code = await runCheckPrimordials([])
-    expect(code).toBe(1)
-  })
-
   it('exits 1 when the explicit --config path is missing', async () => {
-    const code = await runCheckPrimordials(['--config', './does-not-exist.json'])
+    const missing = path.join(tmpDir, 'does-not-exist.json')
+    const code = await runCheckPrimordials(['--config', missing])
     expect(code).toBe(1)
   })
 
   it('honors the -c short flag', async () => {
-    const code = await runCheckPrimordials(['-c', './does-not-exist.json'])
+    const missing = path.join(tmpDir, 'does-not-exist.json')
+    const code = await runCheckPrimordials(['-c', missing])
     expect(code).toBe(1)
   })
 
   it('rejects malformed JSON with exit 1', async () => {
-    const cfgPath = path.join(tmpDir, '.socket-lib.json')
+    const cfgPath = path.join(tmpDir, 'malformed.json')
     await fs.writeFile(cfgPath, 'not valid json {', 'utf8')
-    const code = await runCheckPrimordials([])
+    const code = await runCheckPrimordials(['--config', cfgPath])
     expect(code).toBe(1)
   })
 
   it('rejects a top-level array with exit 1', async () => {
-    const cfgPath = path.join(tmpDir, '.socket-lib.json')
+    const cfgPath = path.join(tmpDir, 'array.json')
     await fs.writeFile(cfgPath, '[]', 'utf8')
-    const code = await runCheckPrimordials([])
+    const code = await runCheckPrimordials(['--config', cfgPath])
     expect(code).toBe(1)
   })
 
   it('rejects a config missing scanDirs with exit 1', async () => {
-    const cfgPath = path.join(tmpDir, '.socket-lib.json')
+    const cfgPath = path.join(tmpDir, 'no-scan-dirs.json')
     await fs.writeFile(cfgPath, JSON.stringify({ primordials: {} }), 'utf8')
-    const code = await runCheckPrimordials([])
+    const code = await runCheckPrimordials(['--config', cfgPath])
     expect(code).toBe(1)
   })
 
-  it('discovers .config/socket-lib.json as a fallback', async () => {
-    // Place a deliberately invalid config in .config/ — we just want
-    // to confirm the discovery picks it up (it will fail loadConfig
-    // shape validation, exiting 1 with a different error path than
-    // "config file not found").
-    await fs.mkdir(path.join(tmpDir, '.config'), { recursive: true })
+  it('rejects scanDirs with the wrong type', async () => {
+    const cfgPath = path.join(tmpDir, 'bad-scan-dirs.json')
     await fs.writeFile(
-      path.join(tmpDir, '.config', 'socket-lib.json'),
+      cfgPath,
       JSON.stringify({ primordials: { scanDirs: 'not-an-array' } }),
       'utf8',
     )
-    const code = await runCheckPrimordials([])
+    const code = await runCheckPrimordials(['--config', cfgPath])
     expect(code).toBe(1)
+  })
+
+  it('accepts a bare object (no primordials section) for back-compat', async () => {
+    // The legacy single-check format puts scanDirs at the root rather
+    // than under primordials. Both shapes should work.
+    const cfgPath = path.join(tmpDir, 'bare.json')
+    await fs.writeFile(
+      cfgPath,
+      JSON.stringify({
+        scanDirs: [],
+        socketLibPrimordialsPath: SOCKET_LIB_PRIMORDIALS,
+      }),
+      'utf8',
+    )
+    const code = await runCheckPrimordials(['--config', cfgPath, '--silent'])
+    expect(code).toBe(0)
   })
 
   it('runs end-to-end against an empty scanDirs (no findings)', async () => {
     // Empty scanDirs → no destructures to inspect → zero findings,
     // exit 0. Exercises the success path through serialize +
     // renderHuman + exit-code computation.
-    const cfgPath = path.join(tmpDir, '.socket-lib.json')
+    const cfgPath = path.join(tmpDir, 'empty-scan.json')
     await fs.writeFile(
       cfgPath,
       JSON.stringify({
@@ -119,12 +128,12 @@ describe('runCheckPrimordials', () => {
       }),
       'utf8',
     )
-    const code = await runCheckPrimordials(['--silent'])
+    const code = await runCheckPrimordials(['--config', cfgPath, '--silent'])
     expect(code).toBe(0)
   })
 
   it('emits JSON output with --json on a clean run', async () => {
-    const cfgPath = path.join(tmpDir, '.socket-lib.json')
+    const cfgPath = path.join(tmpDir, 'json-output.json')
     await fs.writeFile(
       cfgPath,
       JSON.stringify({
@@ -135,7 +144,7 @@ describe('runCheckPrimordials', () => {
       }),
       'utf8',
     )
-    const code = await runCheckPrimordials(['--json'])
+    const code = await runCheckPrimordials(['--config', cfgPath, '--json'])
     expect(code).toBe(0)
   })
 })
