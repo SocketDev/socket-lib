@@ -76,7 +76,12 @@ async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   return Buffer.concat(chunks)
 }
 
-describe('compression', () => {
+// Tests share a module-scoped `tmpDir` set up in `beforeEach`. Vitest's
+// `sequence.concurrent` setting (true locally) would otherwise run tests
+// in parallel, racing the tmpDir mutation. `describe.sequential` keeps
+// the file's tests sequential regardless of the global setting — file
+// IO tests want one-at-a-time semantics anyway.
+describe.sequential('compression', () => {
   describe('brotli — in-memory', () => {
     it('round-trips a string through compressBrotli + decompressBrotli', async () => {
       const compressed = await compressBrotli(SMALL_TEXT)
