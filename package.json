@@ -139,6 +139,10 @@
       "types": "./dist/colors.d.ts",
       "default": "./dist/colors.js"
     },
+    "./compression": {
+      "types": "./dist/compression.d.ts",
+      "default": "./dist/compression.js"
+    },
     "./constants/agents": {
       "types": "./dist/constants/agents.d.ts",
       "default": "./dist/constants/agents.js"
