@@ -22,7 +22,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   compressBrotli,
   compressBrotliFile,
-  compressBrotliInPlace,
   compressGzip,
   compressGzipFile,
   createBrotliCompressor,
@@ -31,11 +30,10 @@ import {
   createGzipDecompressor,
   decompressBrotli,
   decompressBrotliFile,
-  decompressBrotliInPlace,
   decompressGzip,
   decompressGzipFile,
-  hasBrotliExtension,
-  hasGzipExtension,
+  hasBrotliExt,
+  hasGzipExt,
   isBrotliCompressed,
   isGzipCompressed,
 } from '../../src/compression'
@@ -296,41 +294,41 @@ describe('compression', () => {
   })
 
   describe('detection — extensions', () => {
-    it('hasBrotliExtension matches .br and .brotli (case-insensitive)', () => {
-      expect(hasBrotliExtension('foo.br')).toBe(true)
-      expect(hasBrotliExtension('foo.brotli')).toBe(true)
-      expect(hasBrotliExtension('foo.BR')).toBe(true)
-      expect(hasBrotliExtension('foo.Brotli')).toBe(true)
-      expect(hasBrotliExtension('path/to/foo.json.br')).toBe(true)
+    it('hasBrotliExt matches .br and .brotli (case-insensitive)', () => {
+      expect(hasBrotliExt('foo.br')).toBe(true)
+      expect(hasBrotliExt('foo.brotli')).toBe(true)
+      expect(hasBrotliExt('foo.BR')).toBe(true)
+      expect(hasBrotliExt('foo.Brotli')).toBe(true)
+      expect(hasBrotliExt('path/to/foo.json.br')).toBe(true)
     })
 
-    it('hasBrotliExtension rejects non-brotli extensions', () => {
-      expect(hasBrotliExtension('foo.gz')).toBe(false)
-      expect(hasBrotliExtension('foo.json')).toBe(false)
-      expect(hasBrotliExtension('foo')).toBe(false)
-      expect(hasBrotliExtension('foo.brz')).toBe(false)
+    it('hasBrotliExt rejects non-brotli extensions', () => {
+      expect(hasBrotliExt('foo.gz')).toBe(false)
+      expect(hasBrotliExt('foo.json')).toBe(false)
+      expect(hasBrotliExt('foo')).toBe(false)
+      expect(hasBrotliExt('foo.brz')).toBe(false)
     })
 
-    it('hasGzipExtension matches .gz / .gzip / .tgz (case-insensitive)', () => {
-      expect(hasGzipExtension('foo.gz')).toBe(true)
-      expect(hasGzipExtension('foo.gzip')).toBe(true)
-      expect(hasGzipExtension('foo.tgz')).toBe(true)
-      expect(hasGzipExtension('FOO.GZ')).toBe(true)
+    it('hasGzipExt matches .gz / .gzip / .tgz (case-insensitive)', () => {
+      expect(hasGzipExt('foo.gz')).toBe(true)
+      expect(hasGzipExt('foo.gzip')).toBe(true)
+      expect(hasGzipExt('foo.tgz')).toBe(true)
+      expect(hasGzipExt('FOO.GZ')).toBe(true)
     })
 
-    it('hasGzipExtension rejects non-gzip extensions', () => {
-      expect(hasGzipExtension('foo.br')).toBe(false)
-      expect(hasGzipExtension('foo.json')).toBe(false)
-      expect(hasGzipExtension('foo')).toBe(false)
+    it('hasGzipExt rejects non-gzip extensions', () => {
+      expect(hasGzipExt('foo.br')).toBe(false)
+      expect(hasGzipExt('foo.json')).toBe(false)
+      expect(hasGzipExt('foo')).toBe(false)
     })
   })
 
-  describe('replace-in-place', () => {
-    it('compressBrotliInPlace writes .br and removes original', async () => {
+  describe('inPlace option', () => {
+    it('compressBrotliFile { inPlace: true } writes .br and removes original', async () => {
       const srcPath = path.join(tmpDir, 'data.json')
       await fs.writeFile(srcPath, LARGE_TEXT, 'utf8')
 
-      const newPath = await compressBrotliInPlace(srcPath)
+      const newPath = await compressBrotliFile(srcPath, { inPlace: true })
       expect(newPath).toBe(`${srcPath}.br`)
 
       // Original should be gone, .br should exist
@@ -340,41 +338,105 @@ describe('compression', () => {
       expect(restored.toString('utf8')).toBe(LARGE_TEXT)
     })
 
-    it('decompressBrotliInPlace strips .br and removes the .br file', async () => {
+    it('decompressBrotliFile { inPlace: true } strips .br and removes the .br file', async () => {
       const originalPath = path.join(tmpDir, 'data.json')
       const brPath = `${originalPath}.br`
       await fs.writeFile(originalPath, LARGE_TEXT, 'utf8')
-      await compressBrotliInPlace(originalPath)
-      // originalPath is now gone, brPath exists
+      await compressBrotliFile(originalPath, { inPlace: true })
 
-      const restoredPath = await decompressBrotliInPlace(brPath)
+      const restoredPath = await decompressBrotliFile(brPath, { inPlace: true })
       expect(restoredPath).toBe(originalPath)
 
-      // .br should be gone, restored should exist with original content
       await expect(fs.access(brPath)).rejects.toThrow()
       const restored = await fs.readFile(restoredPath, 'utf8')
       expect(restored).toBe(LARGE_TEXT)
     })
 
-    it('decompressBrotliInPlace rejects files without .br/.brotli extension', async () => {
+    it('decompressBrotliFile { inPlace: true } rejects files without .br/.brotli extension', async () => {
       const p = path.join(tmpDir, 'no-extension')
       await fs.writeFile(p, 'data', 'utf8')
-      await expect(decompressBrotliInPlace(p)).rejects.toThrow(
-        /no \.br\/\.brotli extension/,
-      )
+      await expect(
+        decompressBrotliFile(p, { inPlace: true }),
+      ).rejects.toThrow(/no \.br\/\.brotli extension/)
     })
 
-    it('decompressBrotliInPlace handles .brotli suffix too', async () => {
+    it('decompressBrotliFile { inPlace: true } handles .brotli suffix too', async () => {
       const originalPath = path.join(tmpDir, 'data.txt')
       const brotliPath = `${originalPath}.brotli`
       await fs.writeFile(originalPath, SMALL_TEXT, 'utf8')
       await compressBrotliFile(originalPath, brotliPath)
       await fs.rm(originalPath)
 
-      const restoredPath = await decompressBrotliInPlace(brotliPath)
+      const restoredPath = await decompressBrotliFile(brotliPath, {
+        inPlace: true,
+      })
       expect(restoredPath).toBe(originalPath)
       const restored = await fs.readFile(restoredPath, 'utf8')
       expect(restored).toBe(SMALL_TEXT)
+    })
+
+    it('compressBrotliFile { inPlace: true } honors level option', async () => {
+      const srcPath = path.join(tmpDir, 'level.txt')
+      await fs.writeFile(srcPath, LARGE_TEXT, 'utf8')
+      const destPath = await compressBrotliFile(srcPath, {
+        inPlace: true,
+        level: 1,
+      })
+      expect(destPath).toBe(`${srcPath}.br`)
+      const restored = await decompressBrotli(await fs.readFile(destPath))
+      expect(restored.toString('utf8')).toBe(LARGE_TEXT)
+    })
+
+    it('compressGzipFile { inPlace: true } writes .gz and removes original', async () => {
+      const srcPath = path.join(tmpDir, 'data.txt')
+      await fs.writeFile(srcPath, LARGE_TEXT, 'utf8')
+
+      const newPath = await compressGzipFile(srcPath, { inPlace: true })
+      expect(newPath).toBe(`${srcPath}.gz`)
+
+      await expect(fs.access(srcPath)).rejects.toThrow()
+      const restored = await decompressGzip(await fs.readFile(newPath))
+      expect(restored.toString('utf8')).toBe(LARGE_TEXT)
+    })
+
+    it('decompressGzipFile { inPlace: true } strips .gz', async () => {
+      const originalPath = path.join(tmpDir, 'data.txt')
+      await fs.writeFile(originalPath, LARGE_TEXT, 'utf8')
+      const gzPath = await compressGzipFile(originalPath, { inPlace: true })
+      const restoredPath = await decompressGzipFile(gzPath, { inPlace: true })
+      expect(restoredPath).toBe(originalPath)
+      const restored = await fs.readFile(restoredPath, 'utf8')
+      expect(restored).toBe(LARGE_TEXT)
+    })
+
+    it('decompressGzipFile { inPlace: true } maps .tgz → .tar', async () => {
+      const tarPath = path.join(tmpDir, 'archive.tar')
+      const tgzPath = path.join(tmpDir, 'archive.tgz')
+      await fs.writeFile(tarPath, LARGE_TEXT, 'utf8')
+      await compressGzipFile(tarPath, tgzPath)
+      await fs.rm(tarPath)
+
+      const restoredPath = await decompressGzipFile(tgzPath, { inPlace: true })
+      expect(restoredPath).toBe(tarPath)
+    })
+
+    it('compressBrotliFile without dest or inPlace throws', async () => {
+      const srcPath = path.join(tmpDir, 'lonely.txt')
+      await fs.writeFile(srcPath, 'data', 'utf8')
+      // @ts-expect-error testing the bad-args case
+      await expect(compressBrotliFile(srcPath)).rejects.toThrow(
+        /missing destPath/,
+      )
+    })
+
+    it('returns the destination path from explicit (src, dest)', async () => {
+      const srcPath = path.join(tmpDir, 'src.txt')
+      const destPath = path.join(tmpDir, 'dest.br')
+      await fs.writeFile(srcPath, SMALL_TEXT, 'utf8')
+      const result = await compressBrotliFile(srcPath, destPath)
+      expect(result).toBe(destPath)
+      // Source should still be there (not inPlace)
+      expect((await fs.stat(srcPath)).size).toBeGreaterThan(0)
     })
   })
 

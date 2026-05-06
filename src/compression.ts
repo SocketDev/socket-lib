@@ -73,6 +73,27 @@ export interface CompressOptions {
   size?: number | undefined
 }
 
+/**
+ * Options for the file-to-file helpers. Pass `{ inPlace: true }` to
+ * skip the explicit destPath argument: the helper picks the
+ * canonical destination (`.br` / `.gz` suffix on compress; suffix
+ * stripped on decompress) and removes the source file on success.
+ *
+ *   await compressBrotliFile('input.json', { inPlace: true })
+ *   // => writes input.json.br, deletes input.json
+ *
+ *   await decompressBrotliFile('input.json.br', { inPlace: true })
+ *   // => writes input.json, deletes input.json.br
+ */
+export interface CompressFileOptions extends CompressOptions {
+  /**
+   * Replace the source file: derive destPath from srcPath, then
+   * `safeDelete(srcPath)` after the write succeeds. When set, the
+   * `destPath` positional argument must be omitted.
+   */
+  inPlace?: boolean | undefined
+}
+
 interface ResolvedBrotliOptions extends BrotliOptions {
   params: NonNullable<BrotliOptions['params']>
 }
@@ -129,44 +150,98 @@ export async function decompressBrotli(input: Buffer): Promise<Buffer> {
 }
 
 /**
- * Stream-compress a file with brotli. Source and destination must
- * differ. The source file is left intact — call `safeDelete(srcPath)`
- * separately if you want a replace-in-place workflow.
+ * Stream-compress a file with brotli. Two call shapes:
+ *
+ *   compressBrotliFile(src, dest, options?)
+ *     Writes compressed output to `dest`. Source is left intact.
+ *
+ *   compressBrotliFile(src, { inPlace: true, ...options })
+ *     Writes to `<src>.br` and deletes `src` after the write
+ *     succeeds. Returns the new path.
+ *
+ * Returns the destination path in both shapes — same string the
+ * caller passed in or the computed `.br` path for inPlace.
  */
 export async function compressBrotliFile(
   srcPath: string,
   destPath: string,
   options?: CompressOptions | undefined,
-): Promise<void> {
-  if (srcPath === destPath) {
-    throw new Error(
-      `compressBrotliFile: srcPath and destPath must differ; got ${srcPath}`,
-    )
-  }
+): Promise<string>
+export async function compressBrotliFile(
+  srcPath: string,
+  options: CompressFileOptions,
+): Promise<string>
+export async function compressBrotliFile(
+  srcPath: string,
+  destOrOptions?: string | CompressFileOptions,
+  maybeOptions?: CompressOptions | undefined,
+): Promise<string> {
+  const { destPath, options, inPlace } = resolveFileArgs(
+    'compressBrotliFile',
+    srcPath,
+    destOrOptions,
+    maybeOptions,
+    p => `${p}.br`,
+  )
   await pipeline(
     createReadStream(srcPath),
     createBrotliCompress(resolveBrotliOptions(options)),
     createWriteStream(destPath),
   )
+  if (inPlace) {
+    await safeDelete(srcPath)
+  }
+  return destPath
 }
 
 /**
- * Stream-decompress a brotli file. Source and destination must differ.
+ * Stream-decompress a brotli file. Two call shapes:
+ *
+ *   decompressBrotliFile(src, dest)
+ *     Writes decompressed output to `dest`. Source is left intact.
+ *
+ *   decompressBrotliFile(src, { inPlace: true })
+ *     Strips the `.br`/`.brotli` suffix to derive the destination,
+ *     then deletes the compressed source after the write succeeds.
+ *     Throws if `src` has no recognizable extension.
+ *
+ * Returns the destination path in both shapes.
  */
 export async function decompressBrotliFile(
   srcPath: string,
   destPath: string,
-): Promise<void> {
-  if (srcPath === destPath) {
-    throw new Error(
-      `decompressBrotliFile: srcPath and destPath must differ; got ${srcPath}`,
-    )
-  }
+): Promise<string>
+export async function decompressBrotliFile(
+  srcPath: string,
+  options: CompressFileOptions,
+): Promise<string>
+export async function decompressBrotliFile(
+  srcPath: string,
+  destOrOptions?: string | CompressFileOptions,
+): Promise<string> {
+  const { destPath, inPlace } = resolveFileArgs(
+    'decompressBrotliFile',
+    srcPath,
+    destOrOptions,
+    undefined,
+    p => {
+      if (!hasBrotliExt(p)) {
+        throw new Error(
+          `decompressBrotliFile: ${p} has no .br/.brotli extension; can't infer destination`,
+        )
+      }
+      return p.replace(BROTLI_EXT_RE, '')
+    },
+  )
   await pipeline(
     createReadStream(srcPath),
     createBrotliDecompress(),
     createWriteStream(destPath),
   )
+  if (inPlace) {
+    await safeDelete(srcPath)
+  }
+  return destPath
 }
 
 /**
@@ -209,42 +284,97 @@ export async function decompressGzip(input: Buffer): Promise<Buffer> {
 }
 
 /**
- * Stream-compress a file with gzip. Source and destination must differ.
+ * Stream-compress a file with gzip. Two call shapes:
+ *
+ *   compressGzipFile(src, dest, options?)
+ *     Writes compressed output to `dest`. Source is left intact.
+ *
+ *   compressGzipFile(src, { inPlace: true, ...options })
+ *     Writes to `<src>.gz` and deletes `src` after the write
+ *     succeeds. Returns the new path.
  */
 export async function compressGzipFile(
   srcPath: string,
   destPath: string,
   options?: CompressOptions | undefined,
-): Promise<void> {
-  if (srcPath === destPath) {
-    throw new Error(
-      `compressGzipFile: srcPath and destPath must differ; got ${srcPath}`,
-    )
-  }
+): Promise<string>
+export async function compressGzipFile(
+  srcPath: string,
+  options: CompressFileOptions,
+): Promise<string>
+export async function compressGzipFile(
+  srcPath: string,
+  destOrOptions?: string | CompressFileOptions,
+  maybeOptions?: CompressOptions | undefined,
+): Promise<string> {
+  const { destPath, options, inPlace } = resolveFileArgs(
+    'compressGzipFile',
+    srcPath,
+    destOrOptions,
+    maybeOptions,
+    p => `${p}.gz`,
+  )
   await pipeline(
     createReadStream(srcPath),
     createGzip(resolveGzipOptions(options)),
     createWriteStream(destPath),
   )
+  if (inPlace) {
+    await safeDelete(srcPath)
+  }
+  return destPath
 }
 
 /**
- * Stream-decompress a gzip file. Source and destination must differ.
+ * Stream-decompress a gzip file. Two call shapes:
+ *
+ *   decompressGzipFile(src, dest)
+ *     Writes decompressed output to `dest`. Source is left intact.
+ *
+ *   decompressGzipFile(src, { inPlace: true })
+ *     Strips the `.gz`/`.gzip`/`.tgz` suffix to derive the
+ *     destination, then deletes the compressed source after the
+ *     write succeeds. Throws if `src` has no recognizable extension.
  */
 export async function decompressGzipFile(
   srcPath: string,
   destPath: string,
-): Promise<void> {
-  if (srcPath === destPath) {
-    throw new Error(
-      `decompressGzipFile: srcPath and destPath must differ; got ${srcPath}`,
-    )
-  }
+): Promise<string>
+export async function decompressGzipFile(
+  srcPath: string,
+  options: CompressFileOptions,
+): Promise<string>
+export async function decompressGzipFile(
+  srcPath: string,
+  destOrOptions?: string | CompressFileOptions,
+): Promise<string> {
+  const { destPath, inPlace } = resolveFileArgs(
+    'decompressGzipFile',
+    srcPath,
+    destOrOptions,
+    undefined,
+    p => {
+      if (!hasGzipExt(p)) {
+        throw new Error(
+          `decompressGzipFile: ${p} has no .gz/.gzip/.tgz extension; can't infer destination`,
+        )
+      }
+      // .tgz → .tar (gzip-of-tar), other suffixes just strip
+      if (/\.tgz$/i.test(p)) {
+        return p.replace(/\.tgz$/i, '.tar')
+      }
+      return p.replace(GZIP_EXT_RE, '')
+    },
+  )
   await pipeline(
     createReadStream(srcPath),
     createGunzip(),
     createWriteStream(destPath),
   )
+  if (inPlace) {
+    await safeDelete(srcPath)
+  }
+  return destPath
 }
 
 /**
@@ -303,58 +433,70 @@ export function isGzipCompressed(input: Buffer): boolean {
   )
 }
 
-const BROTLI_EXTENSION_RE = /\.(br|brotli)$/i
-const GZIP_EXTENSION_RE = /\.(gz|gzip|tgz)$/i
+const BROTLI_EXT_RE = /\.(br|brotli)$/i
+const GZIP_EXT_RE = /\.(gz|gzip|tgz)$/i
 
 /**
- * Filename-extension check for brotli (`.br` / `.brotli`).
+ * Extension check for brotli paths — matches `.br` / `.brotli`
+ * (case-insensitive). Naming follows node:path's `extname`.
  */
-export function hasBrotliExtension(filePath: string): boolean {
-  return BROTLI_EXTENSION_RE.test(filePath)
+export function hasBrotliExt(filePath: string): boolean {
+  return BROTLI_EXT_RE.test(filePath)
 }
 
 /**
- * Filename-extension check for gzip (`.gz` / `.gzip` / `.tgz`).
+ * Extension check for gzip paths — matches `.gz` / `.gzip` / `.tgz`
+ * (case-insensitive). Naming follows node:path's `extname`.
  */
-export function hasGzipExtension(filePath: string): boolean {
-  return GZIP_EXTENSION_RE.test(filePath)
+export function hasGzipExt(filePath: string): boolean {
+  return GZIP_EXT_RE.test(filePath)
 }
 
-// ── Replace-in-place wrappers ───────────────────────────────────────
+// ── Internal: file-arg resolver ─────────────────────────────────────
+
+interface ResolvedFileArgs {
+  destPath: string
+  options: CompressOptions | undefined
+  inPlace: boolean
+}
 
 /**
- * Compress a file in place: write `<srcPath>.br` and delete the
- * original. Returns the new (`.br`) path. Useful for upload pipelines
- * where the disk copy is now meant to be brotli.
- *
- * If the destination already exists it is overwritten. The original
- * is removed only after a successful compress + write.
+ * Disambiguate the `(src, dest, options?)` and `(src, options)`
+ * call shapes. Returns the resolved destPath, options, and inPlace
+ * flag. Validates that the explicit destPath is not the same as
+ * srcPath, since same-path streams would deadlock on read.
  */
-export async function compressBrotliInPlace(
+function resolveFileArgs(
+  fnName: string,
   srcPath: string,
-  options?: CompressOptions | undefined,
-): Promise<string> {
-  const destPath = `${srcPath}.br`
-  await compressBrotliFile(srcPath, destPath, options)
-  await safeDelete(srcPath)
-  return destPath
-}
-
-/**
- * Decompress a `.br` file in place: write the un-suffixed path and
- * delete the `.br`. Throws if the source has no `.br`/`.brotli`
- * extension (refusing to guess the original name).
- */
-export async function decompressBrotliInPlace(
-  srcPath: string,
-): Promise<string> {
-  if (!hasBrotliExtension(srcPath)) {
-    throw new Error(
-      `decompressBrotliInPlace: ${srcPath} has no .br/.brotli extension; can't infer destination`,
-    )
+  destOrOptions: string | CompressFileOptions | undefined,
+  maybeOptions: CompressOptions | undefined,
+  computeInPlaceDest: (src: string) => string,
+): ResolvedFileArgs {
+  if (typeof destOrOptions === 'string') {
+    if (srcPath === destOrOptions) {
+      throw new Error(
+        `${fnName}: srcPath and destPath must differ; got ${srcPath}`,
+      )
+    }
+    return Object.freeze({
+      __proto__: null,
+      destPath: destOrOptions,
+      options: maybeOptions,
+      inPlace: false,
+    } as unknown as ResolvedFileArgs)
   }
-  const destPath = srcPath.replace(BROTLI_EXTENSION_RE, '')
-  await decompressBrotliFile(srcPath, destPath)
-  await safeDelete(srcPath)
-  return destPath
+  // Options object (or undefined → not inPlace, no destPath given).
+  if (destOrOptions?.inPlace) {
+    return Object.freeze({
+      __proto__: null,
+      destPath: computeInPlaceDest(srcPath),
+      options: destOrOptions,
+      inPlace: true,
+    } as unknown as ResolvedFileArgs)
+  }
+  // No destPath, no inPlace — caller forgot the destination.
+  throw new Error(
+    `${fnName}: missing destPath; pass an explicit destination or { inPlace: true }`,
+  )
 }
