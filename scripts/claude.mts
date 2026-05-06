@@ -4132,6 +4132,14 @@ Fix this issue now by making the necessary changes.`
             )
             resolve()
           })
+          // Without an `error` listener the script wedges if the
+          // claude binary is missing or fails to spawn (`ENOENT`,
+          // `EACCES`): `'close'` never fires and `progressInterval`
+          // keeps logging forever.
+          claudeProcess.on('error', () => {
+            clearProgressInterval()
+            resolve()
+          })
         })
 
         // Give file system a moment to sync
