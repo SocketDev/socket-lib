@@ -27,10 +27,7 @@ import { runCheckPrimordials } from '../../../src/bin/check-primordials'
 // auto-discovery (sibling clone / node_modules), which doesn't apply
 // from inside a tmpDir.
 const HERE = path.dirname(fileURLToPath(import.meta.url))
-const SOCKET_LIB_PRIMORDIALS = path.resolve(
-  HERE,
-  '../../../src/primordials.ts',
-)
+const SOCKET_LIB_PRIMORDIALS = path.resolve(HERE, '../../../src/primordials.ts')
 
 let tmpDir: string
 

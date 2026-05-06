@@ -69,6 +69,7 @@ The umbrella rule: never run a git command that mutates state belonging to a pat
 🚨 If you see a lint error, type error, test failure, broken comment, or stale comment **anywhere in your reading window** — fix it. Don't label it "pre-existing" and skip past. The label is a tell that you're rationalizing avoiding work; the user reads "pre-existing" the same as "I noticed but chose not to."
 
 The only exceptions:
+
 - The fix is genuinely out of scope (a 2000-line refactor would derail a one-line bug fix). State the trade-off explicitly and ask before deferring.
 - You don't have permission (the file belongs to another session per the parallel-Claude rule).
 
@@ -76,9 +77,10 @@ In all other cases: fix it in the same commit, or in a sibling commit on the sam
 
 ### Drift watch
 
-🚨 **Drift across fleet repos is a defect, not a feature.** When you see two socket-* repos pinning different versions of the same shared resource — a tool in `external-tools.json`, a workflow SHA, a CLAUDE.md fleet block, an action in `.github/actions/`, an upstream submodule SHA, a hook in `.claude/hooks/` — **opt for the latest**. The repo with the newer version is the source of truth; older repos catch up.
+🚨 **Drift across fleet repos is a defect, not a feature.** When you see two socket-\* repos pinning different versions of the same shared resource — a tool in `external-tools.json`, a workflow SHA, a CLAUDE.md fleet block, an action in `.github/actions/`, an upstream submodule SHA, a hook in `.claude/hooks/` — **opt for the latest**. The repo with the newer version is the source of truth; older repos catch up.
 
 Where drift commonly hides:
+
 - `external-tools.json` — pnpm/zizmor/sfw versions + per-platform sha256s
 - `socket-registry/.github/actions/*` — composite-action SHAs pinned in consumer workflows
 - `template/CLAUDE.md` `<!-- BEGIN FLEET-CANONICAL -->` block — must be byte-identical across the fleet
@@ -88,6 +90,7 @@ Where drift commonly hides:
 - pnpm/Node `packageManager`/`engines` fields
 
 How to check:
+
 1. If you're editing one of these in repo A, grep the same thing in repos B/C/D. If A is older, bump A first; if A is newer, plan a sync to B/C/D.
 2. `socket-registry`'s `setup-and-install` action is the canonical source for tool SHAs. Diverging from it is drift.
 3. `socket-repo-template`'s `template/` tree is the canonical source for `.claude/`, CLAUDE.md fleet block, and hook code. Diverging is drift.
