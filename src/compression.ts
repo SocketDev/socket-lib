@@ -33,8 +33,9 @@
  * the call is hot or the input is large.
  */
 
-import { createReadStream, createWriteStream } from 'node:fs'
 import { Buffer } from 'node:buffer'
+import { createReadStream, createWriteStream } from 'node:fs'
+import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import {
   brotliCompress,
@@ -230,7 +231,7 @@ export async function decompressBrotliFile(
           `decompressBrotliFile: ${p} has no .br/.brotli extension; can't infer destination`,
         )
       }
-      return p.replace(BROTLI_EXT_RE, '')
+      return stripCompressedExt(p, BROTLI_EXTS)
     },
   )
   await pipeline(
@@ -359,11 +360,7 @@ export async function decompressGzipFile(
           `decompressGzipFile: ${p} has no .gz/.gzip/.tgz extension; can't infer destination`,
         )
       }
-      // .tgz → .tar (gzip-of-tar), other suffixes just strip
-      if (/\.tgz$/i.test(p)) {
-        return p.replace(/\.tgz$/i, '.tar')
-      }
-      return p.replace(GZIP_EXT_RE, '')
+      return stripCompressedExt(p, GZIP_EXTS)
     },
   )
   await pipeline(
@@ -433,15 +430,20 @@ export function isGzipCompressed(input: Buffer): boolean {
   )
 }
 
-const BROTLI_EXT_RE = /\.(br|brotli)$/i
-const GZIP_EXT_RE = /\.(gz|gzip|tgz)$/i
+// Use Sets — O(1) lookup, sorted alphanumerically per CLAUDE.md so
+// adding a new extension stays a one-line append. node:path's extname
+// is case-sensitive (it reflects the OS path semantics), but our
+// extension classifier is policy: ".BR" should classify the same as
+// ".br" regardless of host OS. Lowercase the extname before lookup.
+const BROTLI_EXTS: ReadonlySet<string> = new Set(['.br', '.brotli'])
+const GZIP_EXTS: ReadonlySet<string> = new Set(['.gz', '.gzip', '.tgz'])
 
 /**
  * Extension check for brotli paths — matches `.br` / `.brotli`
  * (case-insensitive). Naming follows node:path's `extname`.
  */
 export function hasBrotliExt(filePath: string): boolean {
-  return BROTLI_EXT_RE.test(filePath)
+  return BROTLI_EXTS.has(path.extname(filePath).toLowerCase())
 }
 
 /**
@@ -449,7 +451,27 @@ export function hasBrotliExt(filePath: string): boolean {
  * (case-insensitive). Naming follows node:path's `extname`.
  */
 export function hasGzipExt(filePath: string): boolean {
-  return GZIP_EXT_RE.test(filePath)
+  return GZIP_EXTS.has(path.extname(filePath).toLowerCase())
+}
+
+/**
+ * Strip a recognized compression extension from a filename, returning
+ * the path without it. Returns the input unchanged when no recognized
+ * extension is present. Case-insensitive — preserves the rest of the
+ * path's casing. The `.tgz` extension maps to `.tar` (not "no
+ * extension"), since `.tgz` is conventionally `.tar.gz` collapsed.
+ */
+function stripCompressedExt(filePath: string, exts: ReadonlySet<string>): string {
+  const ext = path.extname(filePath)
+  const lower = ext.toLowerCase()
+  if (!exts.has(lower)) {
+    return filePath
+  }
+  // .tgz is short for .tar.gz — when stripping, recover the .tar.
+  if (lower === '.tgz') {
+    return filePath.slice(0, -ext.length) + '.tar'
+  }
+  return filePath.slice(0, -ext.length)
 }
 
 // ── Internal: file-arg resolver ─────────────────────────────────────
