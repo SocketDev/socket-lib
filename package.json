@@ -7,6 +7,9 @@
     "access": "public",
     "provenance": true
   },
+  "bin": {
+    "socket-lib": "./dist/bin/socket-lib.js"
+  },
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -127,6 +130,18 @@
       "types": "./dist/bin.d.ts",
       "default": "./dist/bin.js"
     },
+    "./bin/check": {
+      "types": "./dist/bin/check.d.ts",
+      "default": "./dist/bin/check.js"
+    },
+    "./bin/check-primordials": {
+      "types": "./dist/bin/check-primordials.d.ts",
+      "default": "./dist/bin/check-primordials.js"
+    },
+    "./bin/socket-lib": {
+      "types": "./dist/bin/socket-lib.d.ts",
+      "default": "./dist/bin/socket-lib.js"
+    },
     "./cacache": {
       "types": "./dist/cacache.d.ts",
       "default": "./dist/cacache.js"
@@ -134,6 +149,10 @@
     "./cache-with-ttl": {
       "types": "./dist/cache-with-ttl.d.ts",
       "default": "./dist/cache-with-ttl.js"
+    },
+    "./checks/primordials": {
+      "types": "./dist/checks/primordials.d.ts",
+      "default": "./dist/checks/primordials.js"
     },
     "./colors": {
       "types": "./dist/colors.d.ts",

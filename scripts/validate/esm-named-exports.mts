@@ -53,6 +53,22 @@ function checkEsmNamedExports(filePath) {
   if (normalizedPath.startsWith('external/')) {
     return { path: filePath, ok: true, skipped: true }
   }
+  // Skip CLI entry points (files with a `#!/usr/bin/env node` shebang
+  // under bin/) — they're scripts that side-effect-run at load time,
+  // not modules with named exports. The package.json `bin` field
+  // points at them; consumers invoke via `pnpm exec`. Sibling
+  // files in bin/ that DO have named exports (subcommand handlers
+  // imported by the entry) still go through the regular check.
+  if (normalizedPath.startsWith('bin/')) {
+    try {
+      const head = readFileSync(filePath, 'utf-8').slice(0, 256)
+      if (head.startsWith('#!/usr/bin/env node')) {
+        return { path: filePath, ok: true, skipped: true }
+      }
+    } catch {
+      // Fall through — let the regular check report a real read error.
+    }
+  }
 
   try {
     // Read the file source to check export pattern
