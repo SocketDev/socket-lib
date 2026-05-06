@@ -123,9 +123,9 @@ describe('checks/primordials', () => {
     })
 
     it('returns empty for files mentioning primordials only in comments', () => {
-      expect(
-        extractPrimordialsNames('// reads primordials elsewhere'),
-      ).toEqual([])
+      expect(extractPrimordialsNames('// reads primordials elsewhere')).toEqual(
+        [],
+      )
     })
   })
 
@@ -150,9 +150,9 @@ describe('checks/primordials', () => {
     })
 
     it('captures `export declare function Foo` (.d.ts form)', () => {
-      expect(
-        extractTsExports('export declare function Foo(): void'),
-      ).toEqual(['Foo'])
+      expect(extractTsExports('export declare function Foo(): void')).toEqual([
+        'Foo',
+      ])
     })
 
     it('mixes source and declaration forms', () => {
@@ -332,10 +332,7 @@ describe('checks/primordials', () => {
     })
 
     it('walks scanDirs recursively', () => {
-      writeFile(
-        'src/deep/nested/path/file.js',
-        'const { Foo } = primordials',
-      )
+      writeFile('src/deep/nested/path/file.js', 'const { Foo } = primordials')
       setupLib(['Foo'])
 
       const result = checkPrimordials(makeConfig({}))

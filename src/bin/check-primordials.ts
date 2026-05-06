@@ -76,9 +76,7 @@ function printHelp(): void {
   logger.log('  socket-lib check prim        [opts]    # short alias')
   logger.log('')
   logger.log('Options:')
-  logger.log(
-    `  --config <path>   Config file. Default: ${DEFAULT_CONFIG_PATH}`,
-  )
+  logger.log(`  --config <path>   Config file. Default: ${DEFAULT_CONFIG_PATH}`)
   logger.log('  --explain         Print one detailed line per finding.')
   logger.log('  --json            Machine-readable JSON output.')
   logger.log('  --quiet           Silent on success.')
@@ -89,7 +87,9 @@ function printHelp(): void {
   logger.log('    "primordials": {')
   logger.log('      "aliasMap":         { "Array": "ArrayCtor" },')
   logger.log('      "nodeInternalOnly": ["SafeMap", "SafeSet"],')
-  logger.log('      "scanDirs":         ["src", "additions/source-patched/lib"]')
+  logger.log(
+    '      "scanDirs":         ["src", "additions/source-patched/lib"]',
+  )
   logger.log('    }')
   logger.log('  }')
   logger.log('')
@@ -118,18 +118,12 @@ function loadConfig(configPath: string): PrimordialsCheckConfig {
   // check (primordials, paths, public-surface, ...). When the file
   // has the section, use it; otherwise treat the whole file as the
   // primordials config (back-compat with single-check setups).
-  if (
-    typeof parsed !== 'object' ||
-    parsed === null ||
-    Array.isArray(parsed)
-  ) {
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     throw new Error('config root must be an object')
   }
   const root = parsed as Record<string, unknown>
   const sectional = root[CONFIG_SECTION]
-  const raw = (
-    sectional !== undefined ? sectional : root
-  ) as RawConfig
+  const raw = (sectional !== undefined ? sectional : root) as RawConfig
 
   // Validate shape with concrete error messages — config files are
   // hand-edited and a misspelling here is the most common failure
@@ -152,7 +146,10 @@ function loadConfig(configPath: string): PrimordialsCheckConfig {
   ) {
     throw new Error('config.aliasMap must be an object of source→target')
   }
-  if (raw.nodeInternalOnly !== undefined && !Array.isArray(raw.nodeInternalOnly)) {
+  if (
+    raw.nodeInternalOnly !== undefined &&
+    !Array.isArray(raw.nodeInternalOnly)
+  ) {
     throw new Error('config.nodeInternalOnly must be an array of strings')
   }
 
@@ -204,10 +201,7 @@ function serialize(result: PrimordialsCheckResult): {
   }
 }
 
-function renderHuman(
-  result: PrimordialsCheckResult,
-  args: ParsedArgs,
-): void {
+function renderHuman(result: PrimordialsCheckResult, args: ParsedArgs): void {
   if (result.findings.length === 0) {
     if (!args.silent) {
       logger.success(
