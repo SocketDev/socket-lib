@@ -545,7 +545,11 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
    */
   async function deleteAll(pattern?: string | undefined): Promise<number> {
     // Build full prefix/pattern by combining cache prefix with optional pattern.
-    const fullPrefix = pattern ? `${opts.prefix}:${pattern}` : opts.prefix
+    // The no-pattern case appends the namespace boundary (`:`) so a cache
+    // with prefix `ttl-cache` doesn't sweep entries belonging to a sibling
+    // cache with prefix `ttl-cache-foo` (cacache.clear matches via
+    // entry.key.startsWith).
+    const fullPrefix = pattern ? `${opts.prefix}:${pattern}` : `${opts.prefix}:`
 
     // Delete matching in-memory entries.
     if (!pattern) {

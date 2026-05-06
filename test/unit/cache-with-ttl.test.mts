@@ -288,6 +288,33 @@ describe.sequential('cache-with-ttl', () => {
       expect(typeof count).toBe('number')
       expect(count).toBeGreaterThanOrEqual(0)
     })
+
+    // Regression for the cross-cache wipe described by socket-lib
+    // scanning-quality H2: deleteAll() with no pattern used to pass
+    // the bare prefix to cacache.clear, which matches via
+    // entry.key.startsWith — so a cache named `test-cache` would
+    // sweep entries belonging to a sibling `test-cache-sibling`.
+    it('should not wipe sibling caches whose prefix shares a stem', async () => {
+      const sibling = createTtlCache({
+        ttl: 60_000,
+        prefix: 'test-cache-sibling',
+        memoize: true,
+      })
+      try {
+        await cache.set('a', 'in-cache')
+        await sibling.set('b', 'in-sibling')
+
+        await cache.deleteAll()
+
+        expect(await cache.get('a')).toBeUndefined()
+        // The sibling's entry must survive — the namespace boundary
+        // (`test-cache:`) prevents the prefix match from spilling
+        // into `test-cache-sibling:b`.
+        expect(await sibling.get('b')).toBe('in-sibling')
+      } finally {
+        await sibling.clear()
+      }
+    })
   })
 
   describe('getAll', () => {
