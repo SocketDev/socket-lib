@@ -219,12 +219,12 @@ Core infrastructure library for Socket.dev security tools.
 
 - TypeScript → CommonJS (ES2022) via esbuild; types via tsgo (TypeScript Native Preview)
 - Output: `dist/`
-- Build scripts: all in `scripts/` as `.mjs`. Shell scripts (`.sh`) FORBIDDEN.
+- Build scripts: all in `scripts/` as `.mts`. Shell scripts (`.sh`) FORBIDDEN.
 - **Main build** (`pnpm build`): clean → build source + types + externals in parallel → fix exports
 
 ### Package Exports
 
-All modules exported via `package.json` exports field. When adding modules, update exports or run `scripts/generate-package-exports.mjs`.
+All modules exported via `package.json` exports field. When adding modules, update exports or run `scripts/fix/generate-package-exports.mts`.
 
 ### Testing
 
