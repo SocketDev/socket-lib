@@ -19,7 +19,7 @@ packages:
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
   '@socketregistry/packageurl-js': 1.4.2
-  '@socketsecurity/lib': 5.25.1
+  '@socketsecurity/lib': 5.28.0
   '@socketsecurity/sdk': 4.0.1
   '@types/node': 24.9.2
 
@@ -109,7 +109,6 @@ patchedDependencies:
 # any drift should fail fast, not silently auto-download via @pnpm/exe
 # (which in rc.5 leaves a placeholder launcher that errors at runtime).
 pmOnFail: error
-resolutionMode: highest
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - '@yarnpkg/core@4.5.0'

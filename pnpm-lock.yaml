@@ -191,8 +191,8 @@ catalogs:
       specifier: 1.4.2
       version: 1.4.2
     '@socketsecurity/lib':
-      specifier: 5.25.1
-      version: 5.25.1
+      specifier: 5.28.0
+      version: 5.28.0
     '@socketsecurity/sdk':
       specifier: 4.0.1
       version: 4.0.1
@@ -220,8 +220,8 @@ overrides:
   execa: 5.1.1
   has-flag: 5.0.1
   hosted-git-info: 8.1.0
-  json-parse-even-better-errors: 5.0.0
   isexe: 3.1.1
+  json-parse-even-better-errors: 5.0.0
   lru-cache: 11.2.2
   make-fetch-happen: 15.0.5
   minimatch: 9.0.6
@@ -235,8 +235,8 @@ overrides:
   npm-normalize-package-bin: 5.0.0
   npm-package-arg: 12.0.2
   npm-pick-manifest: 10.0.0
-  pacote: 21.5.0
   p-map: 7.0.4
+  pacote: 21.5.0
   picomatch: 4.0.4
   proc-log: 6.1.0
   semver: 7.7.2
@@ -474,7 +474,7 @@ importers:
     dependencies:
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.25.1(typescript@5.9.2)
+        version: 5.28.0(typescript@5.9.2)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -487,7 +487,7 @@ importers:
         version: 1.4.2
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.25.1(typescript@5.9.2)
+        version: 5.28.0(typescript@5.9.2)
       '@socketsecurity/sdk':
         specifier: 'catalog:'
         version: 4.0.1
@@ -520,7 +520,7 @@ importers:
     devDependencies:
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.25.1(typescript@5.9.2)
+        version: 5.28.0(typescript@5.9.2)
       '@types/node':
         specifier: 'catalog:'
         version: 24.9.2
@@ -1761,8 +1761,8 @@ packages:
     resolution: {integrity: sha512-f8AqJMH1+BL15G6bHDzb1jyY+wW4gOYQs5JumSxmnE/H/+KgqbIZgaPwDdRwoeciDGojoSVrRHiTZjbe7n7dJA==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/lib@5.25.1':
-    resolution: {integrity: sha512-I/sXk5FDOF7FVstzYn8tKtCvRe97KU/hl4p0e3OI1O9gma2uYypDiJT/n3axvtkqOyNFxWICWuXfy8Hnzeaw6Q==}
+  '@socketsecurity/lib@5.26.1':
+    resolution: {integrity: sha512-ppyhOC/vPBY0gZVRtzNpmf/8nodILERmNV8J62pzVo7GvAB9S1q0/k/vSF2tor2NJEDtim+m6N+J5qtQ0mR99A==}
     engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -1770,9 +1770,10 @@ packages:
       typescript:
         optional: true
 
-  '@socketsecurity/lib@5.26.1':
-    resolution: {integrity: sha512-ppyhOC/vPBY0gZVRtzNpmf/8nodILERmNV8J62pzVo7GvAB9S1q0/k/vSF2tor2NJEDtim+m6N+J5qtQ0mR99A==}
-    engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
+  '@socketsecurity/lib@5.28.0':
+    resolution: {integrity: sha512-SVVq+ODU3H6KAQXwaANnnq2sNHj+JgHM67R0ww93V8J38upiSUlUR8Mxx3P5mo922B+gY6WNFU0zSJfEOjbKew==}
+    engines: {node: '>=22', pnpm: '>=11.0.6'}
+    hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -4638,11 +4639,11 @@ snapshots:
     dependencies:
       yoctocolors-cjs: 2.1.3
 
-  '@socketsecurity/lib@5.25.1(typescript@5.9.2)':
+  '@socketsecurity/lib@5.26.1(typescript@5.9.2)':
     optionalDependencies:
       typescript: 5.9.2
 
-  '@socketsecurity/lib@5.26.1(typescript@5.9.2)':
+  '@socketsecurity/lib@5.28.0(typescript@5.9.2)':
     optionalDependencies:
       typescript: 5.9.2
 
