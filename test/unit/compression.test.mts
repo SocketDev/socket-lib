@@ -355,9 +355,9 @@ describe('compression', () => {
     it('decompressBrotliFile { inPlace: true } rejects files without .br/.brotli extension', async () => {
       const p = path.join(tmpDir, 'no-extension')
       await fs.writeFile(p, 'data', 'utf8')
-      await expect(
-        decompressBrotliFile(p, { inPlace: true }),
-      ).rejects.toThrow(/no \.br\/\.brotli extension/)
+      await expect(decompressBrotliFile(p, { inPlace: true })).rejects.toThrow(
+        /no \.br\/\.brotli extension/,
+      )
     })
 
     it('decompressBrotliFile { inPlace: true } handles .brotli suffix too', async () => {

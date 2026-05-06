@@ -112,9 +112,7 @@ function resolveBrotliOptions(
   return { params }
 }
 
-function resolveGzipOptions(
-  options: CompressOptions | undefined,
-): ZlibOptions {
+function resolveGzipOptions(options: CompressOptions | undefined): ZlibOptions {
   const level = options?.level
   if (level === undefined) {
     return { __proto__: null } as unknown as ZlibOptions
@@ -250,9 +248,7 @@ export async function decompressBrotliFile(
  * pipeline. The `pipeline` from `node:stream/promises` is the safe
  * way to wire it up — it handles error propagation across all stages.
  */
-export function createBrotliCompressor(
-  options?: CompressOptions | undefined,
-) {
+export function createBrotliCompressor(options?: CompressOptions | undefined) {
   return createBrotliCompress(resolveBrotliOptions(options))
 }
 
@@ -377,9 +373,7 @@ export async function decompressGzipFile(
 /**
  * Create a gzip compress transform stream.
  */
-export function createGzipCompressor(
-  options?: CompressOptions | undefined,
-) {
+export function createGzipCompressor(options?: CompressOptions | undefined) {
   return createGzip(resolveGzipOptions(options))
 }
 
@@ -461,7 +455,10 @@ export function hasGzipExt(filePath: string): boolean {
  * path's casing. The `.tgz` extension maps to `.tar` (not "no
  * extension"), since `.tgz` is conventionally `.tar.gz` collapsed.
  */
-function stripCompressedExt(filePath: string, exts: ReadonlySet<string>): string {
+function stripCompressedExt(
+  filePath: string,
+  exts: ReadonlySet<string>,
+): string {
   const ext = path.extname(filePath)
   const lower = ext.toLowerCase()
   if (!exts.has(lower)) {
