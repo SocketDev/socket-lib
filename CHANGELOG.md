@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.28.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.28.0) - 2026-05-06
+
+### Added
+
+- **`compression` (new export)** — brotli + gzip helpers with three calling shapes (in-memory `Buffer`, file-to-file, raw streams) and a single `{ inPlace: true }` option for compress/decompress-in-place. 28 named exports total:
+  - In-memory: `compressBrotli`, `decompressBrotli`, `compressGzip`, `decompressGzip`
+  - File-to-file: `compressBrotliFile`, `decompressBrotliFile`, `compressGzipFile`, `decompressGzipFile` — each with three overloads (explicit dest, in-place, options object). The gzip in-place path follows `.tgz` → `.tar` convention so a round-trip is lossless
+  - Streams: `createBrotliCompressor`, `createBrotliDecompressor`, `createGzipCompressor`, `createGzipDecompressor`
+  - Detection: `isBrotliCompressed(buffer)` / `isGzipCompressed(buffer)` (magic-byte sniffing)
+  - Path classification: `hasBrotliExt(filePath)` / `hasGzipExt(filePath)` — case-insensitive `path.extname` match against `.br` / `.brotli` / `.gz` / `.gzip` / `.tgz`
+  - Helpers: `BROTLI_EXTS` / `GZIP_EXTS` `ReadonlySet<string>` constants; `stripExt(filePath, exts)` for trimming a recognized extension from a path; `resolveBrotliOptions` / `resolveGzipOptions` for translating `CompressOptions` into the underlying zlib option shapes
+  - `CompressOptions` / `CompressFileOptions` interfaces
+- **`socket-lib` CLI (new `bin` entry)** — fleet-wide static-analysis dispatcher invoked via `pnpm exec socket-lib <command>`. Initial subcommand: `check primordials` (alias `check prim`) — diffs every name destructured from `primordials` in scanned source against `@socketsecurity/lib`'s exposed primordials set, emitting unmapped or missing-from-lib findings. Reads sectional config from `.socket-lib.json` (with `.config/socket-lib.json` as a fallback) or a bare object for single-check setups. Flags: `--config / -c <path>` (defaults to `.socket-lib.json`, falls back to `.config/socket-lib.json`), `--explain`, `--json`, `--silent`, `--help`. Lifted from socket-btm's `scripts/check-primordials-coverage.mts` so the same drift gate now ships to every consumer.
+
 ## [5.27.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.27.0) - 2026-05-04
 
 ### Added

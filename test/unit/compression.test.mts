@@ -16,10 +16,13 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { Readable, Writable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
+import { constants as zlibConstants } from 'node:zlib'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
+  BROTLI_EXTS,
+  GZIP_EXTS,
   compressBrotli,
   compressBrotliFile,
   compressGzip,
@@ -36,6 +39,9 @@ import {
   hasGzipExt,
   isBrotliCompressed,
   isGzipCompressed,
+  resolveBrotliOptions,
+  resolveGzipOptions,
+  stripExt,
 } from '../../src/compression'
 
 // Two fixture sizes:
@@ -110,6 +116,14 @@ describe('compression', () => {
       const compressed = await compressBrotli(utf8)
       const decompressed = await decompressBrotli(compressed)
       expect(decompressed.toString('utf8')).toBe(utf8)
+    })
+
+    it('honors an explicit size hint without overwriting it', async () => {
+      // Caller-supplied { size } shouldn't be replaced by buf.byteLength.
+      // Round-trips correctly regardless of the hint value.
+      const compressed = await compressBrotli(SMALL_TEXT, { size: 4096 })
+      const decompressed = await decompressBrotli(compressed)
+      expect(decompressed.toString('utf8')).toBe(SMALL_TEXT)
     })
   })
 
@@ -409,6 +423,14 @@ describe('compression', () => {
       expect(restored).toBe(LARGE_TEXT)
     })
 
+    it('decompressGzipFile { inPlace: true } rejects files without .gz/.gzip/.tgz extension', async () => {
+      const p = path.join(tmpDir, 'no-extension')
+      await fs.writeFile(p, 'data', 'utf8')
+      await expect(decompressGzipFile(p, { inPlace: true })).rejects.toThrow(
+        /no \.gz\/\.gzip\/\.tgz extension/,
+      )
+    })
+
     it('decompressGzipFile { inPlace: true } maps .tgz → .tar', async () => {
       const tarPath = path.join(tmpDir, 'archive.tar')
       const tgzPath = path.join(tmpDir, 'archive.tgz')
@@ -455,6 +477,145 @@ describe('compression', () => {
       await expect(
         decompressBrotli(Buffer.from('not actually compressed')),
       ).rejects.toThrow()
+    })
+  })
+
+  describe('extension constants', () => {
+    it('BROTLI_EXTS contains the canonical brotli suffixes', () => {
+      expect(BROTLI_EXTS.has('.br')).toBe(true)
+      expect(BROTLI_EXTS.has('.brotli')).toBe(true)
+      expect(BROTLI_EXTS.has('.gz')).toBe(false)
+    })
+
+    it('GZIP_EXTS contains the canonical gzip suffixes including .tgz', () => {
+      expect(GZIP_EXTS.has('.gz')).toBe(true)
+      expect(GZIP_EXTS.has('.gzip')).toBe(true)
+      expect(GZIP_EXTS.has('.tgz')).toBe(true)
+      expect(GZIP_EXTS.has('.br')).toBe(false)
+    })
+
+    it('hasBrotliExt agrees with BROTLI_EXTS membership (case-folded)', () => {
+      for (const ext of BROTLI_EXTS) {
+        expect(hasBrotliExt(`foo${ext}`)).toBe(true)
+        expect(hasBrotliExt(`foo${ext.toUpperCase()}`)).toBe(true)
+      }
+    })
+
+    it('hasGzipExt agrees with GZIP_EXTS membership (case-folded)', () => {
+      for (const ext of GZIP_EXTS) {
+        expect(hasGzipExt(`foo${ext}`)).toBe(true)
+        expect(hasGzipExt(`foo${ext.toUpperCase()}`)).toBe(true)
+      }
+    })
+  })
+
+  describe('stripExt', () => {
+    it('strips a recognized brotli extension', () => {
+      expect(stripExt('foo.br', BROTLI_EXTS)).toBe('foo')
+      expect(stripExt('foo.json.br', BROTLI_EXTS)).toBe('foo.json')
+      expect(stripExt('foo.brotli', BROTLI_EXTS)).toBe('foo')
+    })
+
+    it('strips a recognized gzip extension', () => {
+      expect(stripExt('foo.gz', GZIP_EXTS)).toBe('foo')
+      expect(stripExt('foo.json.gz', GZIP_EXTS)).toBe('foo.json')
+      expect(stripExt('foo.gzip', GZIP_EXTS)).toBe('foo')
+    })
+
+    it('strips .tgz (no .tar recovery — that is a caller convention)', () => {
+      expect(stripExt('archive.tgz', GZIP_EXTS)).toBe('archive')
+      expect(stripExt('path/to/archive.tgz', GZIP_EXTS)).toBe('path/to/archive')
+    })
+
+    it('returns the input unchanged when ext is not recognized', () => {
+      expect(stripExt('foo.json', BROTLI_EXTS)).toBe('foo.json')
+      expect(stripExt('foo.json', GZIP_EXTS)).toBe('foo.json')
+      expect(stripExt('foo', BROTLI_EXTS)).toBe('foo')
+      expect(stripExt('', BROTLI_EXTS)).toBe('')
+    })
+
+    it('is case-insensitive on the extension but preserves the rest', () => {
+      expect(stripExt('Foo.BR', BROTLI_EXTS)).toBe('Foo')
+      expect(stripExt('PATH/To/File.BR', BROTLI_EXTS)).toBe('PATH/To/File')
+      expect(stripExt('Archive.TGZ', GZIP_EXTS)).toBe('Archive')
+    })
+
+    it('only honors the trailing extension, not embedded ones', () => {
+      // foo.br.json is a .json file (last extname wins), so brotli set
+      // shouldn't strip anything.
+      expect(stripExt('foo.br.json', BROTLI_EXTS)).toBe('foo.br.json')
+      // archive.tgz.txt similarly.
+      expect(stripExt('archive.tgz.txt', GZIP_EXTS)).toBe('archive.tgz.txt')
+    })
+
+    it('respects custom extension sets', () => {
+      const customSet: ReadonlySet<string> = new Set(['.zst'])
+      expect(stripExt('payload.zst', customSet)).toBe('payload')
+      expect(stripExt('payload.gz', customSet)).toBe('payload.gz')
+    })
+  })
+
+  describe('resolveBrotliOptions', () => {
+    it('defaults level to 11 when no options given', () => {
+      const opts = resolveBrotliOptions(undefined)
+      const params = opts.params as Record<number, number>
+      expect(params[zlibConstants.BROTLI_PARAM_QUALITY]).toBe(11)
+    })
+
+    it('honors an explicit level', () => {
+      const opts = resolveBrotliOptions({ level: 4 })
+      const params = opts.params as Record<number, number>
+      expect(params[zlibConstants.BROTLI_PARAM_QUALITY]).toBe(4)
+    })
+
+    it('forwards a positive size hint as BROTLI_PARAM_SIZE_HINT', () => {
+      const opts = resolveBrotliOptions({ size: 1234 })
+      const params = opts.params as Record<number, number>
+      expect(params[zlibConstants.BROTLI_PARAM_SIZE_HINT]).toBe(1234)
+    })
+
+    it('omits the size hint when size is zero or negative', () => {
+      const zero = resolveBrotliOptions({ size: 0 })
+      const neg = resolveBrotliOptions({ size: -5 })
+      const zeroParams = zero.params as Record<number, number | undefined>
+      const negParams = neg.params as Record<number, number | undefined>
+      expect(zeroParams[zlibConstants.BROTLI_PARAM_SIZE_HINT]).toBeUndefined()
+      expect(negParams[zlibConstants.BROTLI_PARAM_SIZE_HINT]).toBeUndefined()
+    })
+
+    it('combines level + size in one call', () => {
+      const opts = resolveBrotliOptions({ level: 3, size: 999 })
+      const params = opts.params as Record<number, number>
+      expect(params[zlibConstants.BROTLI_PARAM_QUALITY]).toBe(3)
+      expect(params[zlibConstants.BROTLI_PARAM_SIZE_HINT]).toBe(999)
+    })
+  })
+
+  describe('resolveGzipOptions', () => {
+    it('returns an empty options object when no level given', () => {
+      const opts = resolveGzipOptions(undefined)
+      expect(opts).toBeDefined()
+      expect((opts as { level?: number }).level).toBeUndefined()
+    })
+
+    it('forwards an explicit level', () => {
+      const opts = resolveGzipOptions({ level: 9 }) as { level?: number }
+      expect(opts.level).toBe(9)
+    })
+
+    it('uses a null prototype to keep the result clean', () => {
+      const opts = resolveGzipOptions({ level: 6 })
+      expect(Object.getPrototypeOf(opts)).toBeNull()
+    })
+
+    it('round-trips through compressGzip with the resolved level', async () => {
+      // The lowest-level call (level 1) compresses faster but worse
+      // than the default — verify both work end-to-end.
+      const fast = await compressGzip(LARGE_TEXT, { level: 1 })
+      const max = await compressGzip(LARGE_TEXT, { level: 9 })
+      expect(max.byteLength).toBeLessThanOrEqual(fast.byteLength)
+      const restored = await decompressGzip(max)
+      expect(restored.toString('utf8')).toBe(LARGE_TEXT)
     })
   })
 })

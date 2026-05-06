@@ -32,15 +32,26 @@ import { parseArgs as parseLibArgs } from '../argv/parse'
 
 const logger = getDefaultLogger()
 
-// Lives in `.config/` next to tsconfig.base.json, taze.config.mts,
-// etc. — the existing fleet pattern for tooling configs that
-// consumers read. One file per repo for all socket-lib checks;
-// section per check.
-const DEFAULT_CONFIG_PATH = '.config/socket-lib.json'
+// Default config name. We accept both the root-level dotfile (the
+// canonical `.<tool>rc.json` shape) and the `.config/`-rooted variant
+// (the fleet pattern for tooling configs). Look up in this order when
+// `--config` was not explicitly passed, falling through to the next
+// candidate if the file is missing — first hit wins. One file per
+// repo for all socket-lib checks; section per check.
+// At the repo root we use the canonical `.<tool>.json` dotfile shape.
+// Inside `.config/`, the directory itself is already hidden, so the
+// fleet convention drops the leading dot — every existing file under
+// `.config/` (taze.config.mts, vitest.config.mts, tsconfig.base.json,
+// ...) is bare-named. Match that.
+const DEFAULT_CONFIG_PATH = '.socket-lib.json'
+const FALLBACK_CONFIG_PATHS: readonly string[] = [
+  '.socket-lib.json',
+  '.config/socket-lib.json',
+]
 const CONFIG_SECTION = 'primordials'
 
 interface ParsedArgs {
-  readonly config: string
+  readonly config: string | undefined
   readonly json: boolean
   readonly explain: boolean
   readonly silent: boolean
@@ -52,20 +63,44 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     args: argv,
     strict: false,
     options: {
-      config: { type: 'string', default: DEFAULT_CONFIG_PATH },
+      config: { type: 'string', short: 'c' },
       explain: { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       json: { type: 'boolean' },
       silent: { type: 'boolean' },
     },
   })
+  // `config` is left undefined when neither `--config` nor `-c` was
+  // passed, so the resolver below can fall back to the search list.
+  // An explicit value short-circuits the search.
+  const explicitConfig = values['config']
   return {
-    config: String(values['config'] ?? DEFAULT_CONFIG_PATH),
+    config: typeof explicitConfig === 'string' ? explicitConfig : undefined,
     json: Boolean(values['json']),
     explain: Boolean(values['explain']),
     silent: Boolean(values['silent']),
     help: Boolean(values['help']),
   }
+}
+
+/**
+ * Pick the config file. Returns the explicit `--config` argument when
+ * given (even if it doesn't exist — the caller will surface the error
+ * with the path they typed). Otherwise probes the fallback list in
+ * order and returns the first hit. Returns the head of the list when
+ * none exist, so the caller's "config file not found" error message
+ * names the canonical default.
+ */
+function resolveConfigPath(explicit: string | undefined): string {
+  if (explicit !== undefined) {
+    return explicit
+  }
+  for (const candidate of FALLBACK_CONFIG_PATHS) {
+    if (existsSync(path.resolve(candidate))) {
+      return candidate
+    }
+  }
+  return FALLBACK_CONFIG_PATHS[0]!
 }
 
 function printHelp(): void {
@@ -76,13 +111,16 @@ function printHelp(): void {
   logger.log('  socket-lib check prim        [opts]    # short alias')
   logger.log('')
   logger.log('Options:')
-  logger.log(`  --config <path>   Config file. Default: ${DEFAULT_CONFIG_PATH}`)
-  logger.log('  --explain         Print one detailed line per finding.')
-  logger.log('  --json            Machine-readable JSON output.')
-  logger.log('  --quiet           Silent on success.')
-  logger.log('  --help, -h        Print this help.')
+  logger.log(
+    `  --config, -c <path>   Config file. Default: ${DEFAULT_CONFIG_PATH}`,
+  )
+  logger.log(`                        (falls back to .config/socket-lib.json)`)
+  logger.log('  --explain             Print one detailed line per finding.')
+  logger.log('  --json                Machine-readable JSON output.')
+  logger.log('  --silent              Silent on success.')
+  logger.log('  --help, -h            Print this help.')
   logger.log('')
-  logger.log('Config (.config/socket-lib.json — primordials section):')
+  logger.log('Config (.socket-lib.json — primordials section):')
   logger.log('  {')
   logger.log('    "primordials": {')
   logger.log('      "aliasMap":         { "Array": "ArrayCtor" },')
@@ -238,7 +276,7 @@ export async function runCheckPrimordials(
   }
   let config: PrimordialsCheckConfig
   try {
-    config = loadConfig(path.resolve(args.config))
+    config = loadConfig(path.resolve(resolveConfigPath(args.config)))
   } catch (e) {
     logger.error(`socket-lib check primordials: ${errorMessage(e)}`)
     return 1

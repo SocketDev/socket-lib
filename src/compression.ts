@@ -53,6 +53,7 @@ import {
 import { promisify } from 'node:util'
 
 import { safeDelete } from './fs'
+import { StringPrototypeToLowerCase } from './primordials'
 
 const brotliCompressAsync = promisify(brotliCompress)
 const brotliDecompressAsync = promisify(brotliDecompress)
@@ -99,7 +100,13 @@ interface ResolvedBrotliOptions extends BrotliOptions {
   params: NonNullable<BrotliOptions['params']>
 }
 
-function resolveBrotliOptions(
+/**
+ * Translate `CompressOptions` into the `BrotliOptions` zlib expects.
+ * Defaults `quality` to 11 (max) when not provided, and forwards a
+ * positive `size` hint. Exposed for callers building their own zlib
+ * pipelines and for unit-test coverage.
+ */
+export function resolveBrotliOptions(
   options: CompressOptions | undefined,
 ): ResolvedBrotliOptions {
   const level = options?.level ?? 11
@@ -112,7 +119,15 @@ function resolveBrotliOptions(
   return { params }
 }
 
-function resolveGzipOptions(options: CompressOptions | undefined): ZlibOptions {
+/**
+ * Translate `CompressOptions` into the `ZlibOptions` zlib expects.
+ * Returns an empty options object when no `level` is given (zlib uses
+ * its default, level 6). Exposed for parity with
+ * `resolveBrotliOptions` and for unit-test coverage.
+ */
+export function resolveGzipOptions(
+  options: CompressOptions | undefined,
+): ZlibOptions {
   const level = options?.level
   if (level === undefined) {
     return { __proto__: null } as unknown as ZlibOptions
@@ -229,7 +244,7 @@ export async function decompressBrotliFile(
           `decompressBrotliFile: ${p} has no .br/.brotli extension; can't infer destination`,
         )
       }
-      return stripCompressedExt(p, BROTLI_EXTS)
+      return stripExt(p, BROTLI_EXTS)
     },
   )
   await pipeline(
@@ -356,7 +371,12 @@ export async function decompressGzipFile(
           `decompressGzipFile: ${p} has no .gz/.gzip/.tgz extension; can't infer destination`,
         )
       }
-      return stripCompressedExt(p, GZIP_EXTS)
+      // .tgz is conventionally .tar.gz collapsed — recover the .tar so
+      // a round-trip through compress/decompress is lossless.
+      const stripped = stripExt(p, GZIP_EXTS)
+      return StringPrototypeToLowerCase(path.extname(p)) === '.tgz'
+        ? `${stripped}.tar`
+        : stripped
     },
   )
   await pipeline(
@@ -429,15 +449,19 @@ export function isGzipCompressed(input: Buffer): boolean {
 // is case-sensitive (it reflects the OS path semantics), but our
 // extension classifier is policy: ".BR" should classify the same as
 // ".br" regardless of host OS. Lowercase the extname before lookup.
-const BROTLI_EXTS: ReadonlySet<string> = new Set(['.br', '.brotli'])
-const GZIP_EXTS: ReadonlySet<string> = new Set(['.gz', '.gzip', '.tgz'])
+//
+// Exported so callers can introspect what counts as a "brotli" or
+// "gzip" extension without re-implementing the list, and so tests can
+// pin the recognized sets.
+export const BROTLI_EXTS: ReadonlySet<string> = new Set(['.br', '.brotli'])
+export const GZIP_EXTS: ReadonlySet<string> = new Set(['.gz', '.gzip', '.tgz'])
 
 /**
  * Extension check for brotli paths — matches `.br` / `.brotli`
  * (case-insensitive). Naming follows node:path's `extname`.
  */
 export function hasBrotliExt(filePath: string): boolean {
-  return BROTLI_EXTS.has(path.extname(filePath).toLowerCase())
+  return BROTLI_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
 }
 
 /**
@@ -445,28 +469,27 @@ export function hasBrotliExt(filePath: string): boolean {
  * (case-insensitive). Naming follows node:path's `extname`.
  */
 export function hasGzipExt(filePath: string): boolean {
-  return GZIP_EXTS.has(path.extname(filePath).toLowerCase())
+  return GZIP_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
 }
 
 /**
- * Strip a recognized compression extension from a filename, returning
- * the path without it. Returns the input unchanged when no recognized
- * extension is present. Case-insensitive — preserves the rest of the
- * path's casing. The `.tgz` extension maps to `.tar` (not "no
- * extension"), since `.tgz` is conventionally `.tar.gz` collapsed.
+ * Strip the trailing extension from a filename when it matches one of
+ * `exts`. Returns the input unchanged when the trailing extname isn't
+ * in the set. Case-insensitive on the extension — preserves the rest
+ * of the path's casing.
+ *
+ * The `exts` set decides what counts. Pass `BROTLI_EXTS` / `GZIP_EXTS`
+ * (re-exported from this module) for the canonical compression sets,
+ * or your own set for custom classifiers.
+ *
+ * This helper is generic — it does NOT know that `.tgz` is short for
+ * `.tar.gz`. Callers that need that convention compose this with their
+ * own follow-up (see `decompressGzipFile` for the canonical example).
  */
-function stripCompressedExt(
-  filePath: string,
-  exts: ReadonlySet<string>,
-): string {
+export function stripExt(filePath: string, exts: ReadonlySet<string>): string {
   const ext = path.extname(filePath)
-  const lower = ext.toLowerCase()
-  if (!exts.has(lower)) {
+  if (!exts.has(StringPrototypeToLowerCase(ext))) {
     return filePath
-  }
-  // .tgz is short for .tar.gz — when stripping, recover the .tar.
-  if (lower === '.tgz') {
-    return filePath.slice(0, -ext.length) + '.tar'
   }
   return filePath.slice(0, -ext.length)
 }
