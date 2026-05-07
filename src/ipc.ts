@@ -8,6 +8,7 @@
 import process from 'node:process'
 
 import { Type } from './external/@sinclair/typebox'
+import { safeDelete } from './fs'
 import { getOsTmpDir } from './paths/socket'
 import { parseSchema } from './schema/parse'
 
@@ -208,7 +209,7 @@ export async function writeIpcStub(
   } catch (e) {
     const err = e as NodeJS.ErrnoException
     if (err.code === 'EEXIST') {
-      await fs.promises.unlink(stubPath)
+      await safeDelete(stubPath)
       handle = await fs.promises.open(stubPath, flags, 0o600)
     } else {
       throw err

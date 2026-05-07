@@ -26,6 +26,7 @@ import {
 } from '@socketsecurity/lib/packages/operations'
 import type { PackageJson } from '@socketsecurity/lib/packages'
 import { describe, expect, it } from 'vitest'
+import { describeNetworkOnly } from '../utils/skip-helpers'
 import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('packages/operations', () => {
@@ -589,7 +590,7 @@ describe('packages/operations', () => {
     }, 120_000)
   })
 
-  describe('resolveGitHubTgzUrl', () => {
+  describeNetworkOnly('resolveGitHubTgzUrl', () => {
     it('should return empty string when package.json not found', async () => {
       const pkgJson: PackageJson = {
         name: 'test-package',

@@ -56,7 +56,7 @@ function getPath() {
   return _path as typeof import('node:path')
 }
 import { errorMessage } from '../errors'
-import { readFileUtf8Sync, safeMkdirSync } from '../fs'
+import { readFileUtf8Sync, safeDeleteSync, safeMkdirSync } from '../fs'
 import { getDefaultLogger } from '../logger'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
@@ -242,7 +242,7 @@ export class DlxManifest {
       // Clean up temp file on error.
       try {
         if (fs.existsSync(tempPath)) {
-          fs.unlinkSync(tempPath)
+          safeDeleteSync(tempPath)
         }
       } catch {
         // Best effort cleanup.
@@ -286,7 +286,7 @@ export class DlxManifest {
     await processLock.withLock(this.lockPath, async () => {
       try {
         if (fs.existsSync(this.manifestPath)) {
-          fs.unlinkSync(this.manifestPath)
+          safeDeleteSync(this.manifestPath)
         }
       } catch (e) {
         logger.warn(`Failed to clear all cache: ${errorMessage(e)}`)
@@ -408,7 +408,7 @@ export class DlxManifest {
         // Clean up temp file on error.
         try {
           if (fs.existsSync(tempPath)) {
-            fs.unlinkSync(tempPath)
+            safeDeleteSync(tempPath)
           }
         } catch {
           // Best effort cleanup.

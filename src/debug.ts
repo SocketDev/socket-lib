@@ -39,7 +39,7 @@ interface InspectOptions {
   [key: string]: unknown
 }
 
-export type { DebugOptions, NamespacesOrOptions, InspectOptions }
+export type { DebugOptions, InspectOptions, NamespacesOrOptions }
 
 const debugByNamespace = new MapCtor()
 
@@ -242,7 +242,7 @@ export function debugCache(
 
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const args = meta !== undefined ? [prefix, meta] : [prefix]
-  console.log(...args)
+  ReflectApply(logger.info, logger, args)
 }
 
 /**

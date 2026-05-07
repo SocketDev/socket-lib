@@ -88,8 +88,9 @@ async function readFile(filepath: string): Promise<string> {
     }
   }
 
-  // This line should never be reached but TypeScript requires it
-  throw new ErrorCtor('Unreachable code')
+  throw new ErrorCtor(
+    `readFile: exhausted ${maxRetries + 1} attempts reading ${filepath}`,
+  )
 }
 
 /**
@@ -199,7 +200,9 @@ export function getEditableJsonClass<
 
       static async create<T = Record<string, unknown>>(
         path: string,
-        opts: EditableJsonOptions<T> = {},
+        opts: EditableJsonOptions<T> = {
+          __proto__: null,
+        } as EditableJsonOptions<T>,
       ): Promise<EditableJsonInstance<T>> {
         const instance = new EditableJson<T>()
         instance.create(path)
@@ -208,20 +211,18 @@ export function getEditableJsonClass<
 
       static async load<T = Record<string, unknown>>(
         path: string,
-        opts: EditableJsonOptions<T> = {},
+        opts: EditableJsonOptions<T> = {
+          __proto__: null,
+        } as EditableJsonOptions<T>,
       ): Promise<EditableJsonInstance<T>> {
         const instance = new EditableJson<T>()
-        // Avoid try/catch if we aren't going to create
         if (!opts.create) {
           return await instance.load(path)
         }
         try {
           return await instance.load(path)
         } catch (err: unknown) {
-          if (
-            !(err as Error).message.includes('ENOENT') &&
-            !(err as Error).message.includes('no such file')
-          ) {
+          if (!isErrnoException(err) || err.code !== 'ENOENT') {
             throw err
           }
           return instance.create(path)
@@ -272,14 +273,6 @@ export function getEditableJsonClass<
         this.fromJSON(this._readFileContent)
         // Add AFTER fromJSON is called in case it errors.
         this._readFileJson = parseJson(this._readFileContent)
-        return this
-      }
-
-      update(content: Partial<T>): this {
-        this._content = {
-          ...this._content,
-          ...content,
-        } as T
         return this
       }
 
@@ -354,6 +347,14 @@ export function getEditableJsonClass<
         this._readFileContent = fileContent
         this._readFileJson = parseJson(fileContent)
         return true
+      }
+
+      update(content: Partial<T>): this {
+        this._content = {
+          ...this._content,
+          ...content,
+        } as T
+        return this
       }
 
       willSave(options?: EditableJsonSaveOptions): boolean {

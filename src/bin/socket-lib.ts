@@ -23,7 +23,7 @@ import { runCheck } from './check'
 
 const logger = getDefaultLogger()
 
-function printHelp(): void {
+export function printHelp(): void {
   logger.log('socket-lib — fleet-wide static-analysis CLI')
   logger.log('')
   logger.log('Usage:')
@@ -35,8 +35,9 @@ function printHelp(): void {
   logger.log('Run `socket-lib check --help` for the list of checks.')
 }
 
-async function main(): Promise<number> {
-  const args = process.argv.slice(2)
+export async function main(
+  args: readonly string[] = process.argv.slice(2),
+): Promise<number> {
   const command = args[0]
 
   if (!command || command === '--help' || command === '-h') {

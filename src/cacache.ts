@@ -120,32 +120,10 @@ export async function clear(
     }
   }
 
-  const hasWildcard = opts.prefix.includes('*')
-
-  // For simple prefix (no wildcards), use faster iteration.
-  if (!hasWildcard) {
-    let removed = 0
-    /* c8 ignore next - External cacache call */
-    const stream = cacache.ls.stream(cacheDir)
-
-    for await (const entry of stream) {
-      if (entry.key.startsWith(opts.prefix)) {
-        try {
-          /* c8 ignore next - External cacache call */
-          await cacache.rm.entry(cacheDir, entry.key)
-          removed++
-        } catch {
-          // Ignore individual removal errors (e.g., already removed by another process).
-        }
-      }
-    }
-
-    return removed
-  }
-
-  // For wildcard patterns, need to match each entry. Compile the
-  // matcher once outside the stream loop so wildcard scans are
-  // O(1)-per-key instead of re-compiling the regex on every entry.
+  // Compile the matcher once outside the stream loop. For non-wildcard
+  // prefixes the matcher is a cheap startsWith; for wildcards it's a
+  // pre-anchored regex. Either way, key-matching is O(1)-per-key in the
+  // hot loop instead of re-evaluating the regex per entry.
   let removed = 0
   const matches = createPatternMatcher(opts.prefix)
   /* c8 ignore next - External cacache call */
@@ -158,7 +136,7 @@ export async function clear(
         await cacache.rm.entry(cacheDir, entry.key)
         removed++
       } catch {
-        // Ignore individual removal errors.
+        // Ignore individual removal errors (e.g., already removed by another process).
       }
     }
   }

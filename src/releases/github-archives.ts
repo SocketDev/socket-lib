@@ -7,7 +7,7 @@ import {
   detectArchiveFormat,
   extractArchive,
 } from '../archives'
-import { safeMkdir } from '../fs'
+import { safeDelete, safeMkdir } from '../fs'
 import { getDefaultLogger } from '../logger'
 import { ErrorCtor } from '../primordials'
 
@@ -17,16 +17,7 @@ import type { AssetPattern, RepoConfig } from './github-types'
 
 const logger = getDefaultLogger()
 
-let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
-
-/*@__NO_SIDE_EFFECTS__*/
-function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
 
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
@@ -70,12 +61,16 @@ export async function downloadAndExtractArchive(
     format?: ArchiveFormat
     quiet?: boolean
     strip?: number
-  } = {},
+  } = { __proto__: null } as {
+    cleanup?: boolean
+    format?: ArchiveFormat
+    quiet?: boolean
+    strip?: number
+  },
 ): Promise<string> {
   const { cleanup = true, format, quiet = false, strip } = options
 
   const path = getPath()
-  const fs = getFs()
 
   await safeMkdir(outputDir)
 
@@ -118,7 +113,7 @@ export async function downloadAndExtractArchive(
     // Cleanup temporary archive file if requested
     if (cleanup) {
       try {
-        await fs.promises.unlink(archivePath)
+        await safeDelete(archivePath)
         if (!quiet) {
           logger.info('Cleaned up temporary archive file')
         }
@@ -160,12 +155,13 @@ export async function downloadAndExtractZip(
   assetPattern: string | AssetPattern,
   outputDir: string,
   repoConfig: RepoConfig,
-  options: { cleanup?: boolean; quiet?: boolean } = {},
+  options: { cleanup?: boolean; quiet?: boolean } = {
+    __proto__: null,
+  } as { cleanup?: boolean; quiet?: boolean },
 ): Promise<string> {
   const { cleanup = true, quiet = false } = options
 
   const path = getPath()
-  const fs = getFs()
 
   await safeMkdir(outputDir)
 
@@ -195,7 +191,7 @@ export async function downloadAndExtractZip(
     // Cleanup temporary zip file if requested
     if (cleanup) {
       try {
-        await fs.promises.unlink(zipPath)
+        await safeDelete(zipPath)
         if (!quiet) {
           logger.info('Cleaned up temporary zip file')
         }
