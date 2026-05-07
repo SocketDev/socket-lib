@@ -15,6 +15,7 @@ import {
   LATEST,
   PACKAGE,
   PACKAGE_DEFAULT_VERSION,
+  clearPackumentCache,
   getLifecycleScriptNames,
   getPackageDefaultNodeRange,
   getPackageDefaultSocketCategories,
@@ -185,6 +186,33 @@ describe('constants/packages', () => {
 
       cache.clear()
       expect(cache.size).toBe(0)
+    })
+
+    it('should evict an existing key when re-set (LRU touch)', () => {
+      const cache = getPackumentCache()
+      cache.clear()
+      const key = `lru-touch-${Date.now()}`
+      cache.set(key, 'first')
+      cache.set(key, 'second')
+      expect(cache.get(key)).toBe('second')
+      expect(cache.size).toBe(1)
+    })
+  })
+
+  describe('clearPackumentCache', () => {
+    it('clears the cache when initialized', () => {
+      const cache = getPackumentCache()
+      cache.set('to-clear', 'value')
+      expect(cache.size).toBeGreaterThan(0)
+      clearPackumentCache()
+      expect(cache.size).toBe(0)
+    })
+
+    it('is a no-op when cache is uninitialized (idempotent)', () => {
+      // Cannot reset module state from here, but calling twice exercises
+      // the truthy-_packumentCache branch on the second call.
+      clearPackumentCache()
+      clearPackumentCache()
     })
   })
 

@@ -65,6 +65,7 @@ async function readFile(filepath: string): Promise<string> {
 
   // Retry on ENOENT since files may not be immediately accessible after writes
   // Windows needs more retries due to slower filesystem operations
+  /* c8 ignore next - Windows-only retry count; tested on Windows runners. */
   const maxRetries = process.platform === 'win32' ? 5 : 1
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -82,6 +83,7 @@ async function readFile(filepath: string): Promise<string> {
       // Wait before retry with exponential backoff
       // Windows: 50ms, 100ms, 150ms, 200ms, 250ms (total 750ms + attempts)
       // Others: 20ms
+      /* c8 ignore next - Windows-only delay; tested on Windows runners. */
       const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
       // eslint-disable-next-line no-await-in-loop
       await sleep(delay)

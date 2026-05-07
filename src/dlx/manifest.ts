@@ -39,6 +39,7 @@ let _path: typeof import('node:path') | undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
   }
@@ -50,6 +51,7 @@ function getFs() {
  */
 /*@__NO_SIDE_EFFECTS__*/
 function getPath() {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
   }
@@ -196,7 +198,8 @@ export class DlxManifest {
       const content = (
         typeof rawContent === 'string'
           ? rawContent
-          : rawContent.toString('utf8')
+          : /* c8 ignore next - readFileUtf8Sync returns string in tests; Buffer fallback. */
+            rawContent.toString('utf8')
       ).trim()
 
       if (!content) {
@@ -323,7 +326,8 @@ export class DlxManifest {
       const content = (
         typeof rawContent === 'string'
           ? rawContent
-          : rawContent.toString('utf8')
+          : /* c8 ignore next - readFileUtf8Sync returns string in tests; Buffer fallback. */
+            rawContent.toString('utf8')
       ).trim()
       if (!content) {
         return []

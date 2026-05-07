@@ -82,10 +82,12 @@ export function getNodeHardenFlags(): string[] {
       // Add permission-specific grants for Node 24+.
       flags.push(...getNodePermissionFlags())
     } else if (major >= 20) {
+      /* c8 ignore next - Node 20-23 fallback; tests run on Node 22+. */
       flags.push('--experimental-permission')
     }
 
     // Force uncaught exceptions policy for N-API addons (Node.js 22+).
+    /* c8 ignore next 3 - Node-version-specific; tests run on a single major. */
     if (major >= 22) {
       flags.push('--force-node-api-uncaught-exceptions-policy')
     }
@@ -159,6 +161,7 @@ export function getNodePermissionFlags(): string[] {
         '--allow-child-process',
       ]
     } else {
+      /* c8 ignore next 3 - Node 20-23 fallback; tests run on Node 22+. */
       // Node.js 20-23 with --experimental-permission doesn't require explicit grants
       // or uses different permission API.
       _nodePermissionFlags = []
@@ -212,6 +215,8 @@ export function supportsNodeDisableSigusr1Flag(): boolean {
   if (major >= 24) {
     return minor >= 8
   }
+  /* c8 ignore start - Version-specific arms; tests run on a single
+     Node major. Each branch fires only on its target major. */
   if (major === 23) {
     return minor >= 7
   }
@@ -219,6 +224,7 @@ export function supportsNodeDisableSigusr1Flag(): boolean {
     return minor >= 14
   }
   return false
+  /* c8 ignore stop */
 }
 
 /**
@@ -251,6 +257,7 @@ export function supportsNodePermissionFlag(): boolean {
  */
 export function supportsNodeRequireModule(): boolean {
   const major = getNodeMajorVersion()
+  /* c8 ignore next - 22-specific arm; tests run on a single Node major. */
   return major >= 23 || (major === 22 && getNodeMinorVersion() >= 12)
 }
 
@@ -262,6 +269,7 @@ export function supportsNodeRequireModule(): boolean {
  */
 export function supportsNodeRun(): boolean {
   const major = getNodeMajorVersion()
+  /* c8 ignore next - 22-specific arm; tests run on a single Node major. */
   return major >= 23 || (major === 22 && getNodeMinorVersion() >= 11)
 }
 

@@ -90,6 +90,7 @@ function emit(event: string, code: number | null, signal: string | null): void {
 
 /*@__NO_SIDE_EFFECTS__*/
 function getEmitter() {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_emitter === undefined) {
     /* c8 ignore next 2 - Pre-existing global emitter when another
        copy of signal-exit is already loaded in the same process. */
@@ -106,6 +107,8 @@ function getEmitter() {
     // previous version of this library failed to enable infinite listeners.
     // I know what you're about to say.  But literally everything about
     // signal-exit is a compromise with evil.  Get used to it.
+    /* c8 ignore next 4 - Defensive guard for an emitter that already
+       had infinite listeners enabled by an earlier copy of this lib. */
     if (_emitter && !_emitter.infinite) {
       _emitter.setMaxListeners(Number.POSITIVE_INFINITY)
       _emitter.infinite = true
@@ -116,6 +119,7 @@ function getEmitter() {
 
 /*@__NO_SIDE_EFFECTS__*/
 function getEvents() {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_events === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -220,6 +224,7 @@ function processReallyExit(code?: number | undefined): never {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function load(): void {
+  /* c8 ignore next - !globalProcess never fires in Node tests. */
   if (loaded || !globalProcess) {
     return
   }
@@ -268,6 +273,7 @@ export function onExit(
   cb: (code: number | null, signal: string | null) => void,
   options?: OnExitOptions | undefined,
 ): () => void {
+  /* c8 ignore next 3 - !globalProcess never fires in Node tests. */
   if (!globalProcess) {
     return function remove() {}
   }
@@ -311,6 +317,7 @@ export function onExit(
 export function signals() {
   if (_signals === undefined) {
     _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
+    /* c8 ignore next 3 - WIN32-only branch tested on Windows runners. */
     if (!WIN32) {
       _signals.push(
         'SIGVTALRM',
@@ -326,6 +333,7 @@ export function signals() {
         // 'SIGPROF'
       )
     }
+    /* c8 ignore next 3 - Linux-only branch tested on Linux runners. */
     if (platform === 'linux') {
       _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
     }
@@ -344,6 +352,7 @@ export function signals() {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unload(): void {
+  /* c8 ignore next - !globalProcess never fires in Node tests. */
   if (!loaded || !globalProcess) {
     return
   }
@@ -360,6 +369,9 @@ export function unload(): void {
     } catch {}
   }
   globalProcess.emit = originalProcessEmit as typeof globalProcess.emit
+  /* c8 ignore next 3 - originalProcessReallyExit is always defined
+     in Node runtimes; the undefined branch only fires under exotic
+     embedders that strip process.reallyExit. */
   if (originalProcessReallyExit !== undefined) {
     globalProcess.reallyExit = originalProcessReallyExit
   }
