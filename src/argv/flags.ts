@@ -168,12 +168,14 @@ export function getLogLevel(input?: FlagInput): string {
  * ```
  */
 export function isAll(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg is module-frozen process.argv slice;
-     no-input branch only reachable when invoked from a process whose
-     argv contains the flag, which test runners can't simulate. */
+  // processArg is module-frozen process.argv slice; no-input branch only
+  // reachable when invoked from a process whose argv contains the flag,
+  // which test runners can't simulate.
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--all')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--all')
   }
@@ -191,10 +193,12 @@ export function isAll(input?: FlagInput): boolean {
  * ```
  */
 export function isChanged(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--changed')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--changed')
   }
@@ -213,10 +217,12 @@ export function isChanged(input?: FlagInput): boolean {
  * ```
  */
 export function isCoverage(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--coverage') || processArg.includes('--cover')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return (
       StringPrototypeIncludes(input, '--coverage') ||
@@ -237,10 +243,12 @@ export function isCoverage(input?: FlagInput): boolean {
  * ```
  */
 export function isDebug(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--debug')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--debug')
   }
@@ -258,10 +266,12 @@ export function isDebug(input?: FlagInput): boolean {
  * ```
  */
 export function isDryRun(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--dry-run')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--dry-run')
   }
@@ -279,10 +289,12 @@ export function isDryRun(input?: FlagInput): boolean {
  * ```
  */
 export function isFix(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--fix')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--fix')
   }
@@ -300,10 +312,12 @@ export function isFix(input?: FlagInput): boolean {
  * ```
  */
 export function isForce(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--force')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--force')
   }
@@ -321,10 +335,12 @@ export function isForce(input?: FlagInput): boolean {
  * ```
  */
 export function isHelp(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--help') || processArg.includes('-h')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return (
       StringPrototypeIncludes(input, '--help') ||
@@ -345,10 +361,12 @@ export function isHelp(input?: FlagInput): boolean {
  * ```
  */
 export function isJson(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--json')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--json')
   }
@@ -366,10 +384,12 @@ export function isJson(input?: FlagInput): boolean {
  * ```
  */
 export function isQuiet(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--quiet') || processArg.includes('--silent')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return (
       StringPrototypeIncludes(input, '--quiet') ||
@@ -390,10 +410,12 @@ export function isQuiet(input?: FlagInput): boolean {
  * ```
  */
 export function isStaged(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--staged')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--staged')
   }
@@ -411,10 +433,12 @@ export function isStaged(input?: FlagInput): boolean {
  * ```
  */
 export function isUpdate(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--update') || processArg.includes('-u')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return (
       StringPrototypeIncludes(input, '--update') ||
@@ -435,10 +459,12 @@ export function isUpdate(input?: FlagInput): boolean {
  * ```
  */
 export function isVerbose(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--verbose')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return StringPrototypeIncludes(input, '--verbose')
   }
@@ -456,10 +482,12 @@ export function isVerbose(input?: FlagInput): boolean {
  * ```
  */
 export function isWatch(input?: FlagInput): boolean {
-  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
+  // processArg no-input branch (see isAll).
+  /* c8 ignore start */
   if (!input) {
     return processArg.includes('--watch') || processArg.includes('-w')
   }
+  /* c8 ignore stop */
   if (ArrayIsArray(input)) {
     return (
       StringPrototypeIncludes(input, '--watch') ||

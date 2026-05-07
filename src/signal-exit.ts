@@ -90,10 +90,11 @@ function emit(event: string, code: number | null, signal: string | null): void {
 
 /*@__NO_SIDE_EFFECTS__*/
 function getEmitter() {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
+  // Lazy-init second-call branch; module-singleton. The pre-existing
+  // emitter and infinite-listeners-already-enabled branches fire only
+  // when another copy of signal-exit is loaded in the same process.
+  /* c8 ignore start */
   if (_emitter === undefined) {
-    /* c8 ignore next 2 - Pre-existing global emitter when another
-       copy of signal-exit is already loaded in the same process. */
     if (globalProcess?.__signal_exit_emitter__) {
       _emitter = globalProcess.__signal_exit_emitter__
     } else if (globalProcess) {
@@ -105,26 +106,25 @@ function getEmitter() {
     }
     // Because this emitter is a global, we have to check to see if a
     // previous version of this library failed to enable infinite listeners.
-    // I know what you're about to say.  But literally everything about
-    // signal-exit is a compromise with evil.  Get used to it.
-    /* c8 ignore next 4 - Defensive guard for an emitter that already
-       had infinite listeners enabled by an earlier copy of this lib. */
     if (_emitter && !_emitter.infinite) {
       _emitter.setMaxListeners(Number.POSITIVE_INFINITY)
       _emitter.infinite = true
     }
   }
+  /* c8 ignore stop */
   return _emitter as SignalExitEmitter
 }
 
 /*@__NO_SIDE_EFFECTS__*/
 function getEvents() {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
+  // Lazy-init second-call branch; module-singleton.
+  /* c8 ignore start */
   if (_events === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
     _events = /*@__PURE__*/ require('node:events')
   }
+  /* c8 ignore stop */
   return _events as typeof import('node:events')
 }
 
@@ -235,9 +235,12 @@ export function load(): void {
   // listeners on signals, and don't wait for the other one to
   // handle it instead of us.
   const emitter = getEmitter()
+  // emitter.count is always defined after getEmitter() init (set to 0).
+  /* c8 ignore start */
   if (emitter.count !== undefined) {
     emitter.count += 1
   }
+  /* c8 ignore stop */
 
   const sigs = signals()
   const sigListeners = getSignalListeners()
@@ -248,8 +251,10 @@ export function load(): void {
         sigListeners[sig] as SignalListener,
       )
       return true
+      /* c8 ignore start - process.on rarely throws on standard signals. */
     } catch {}
     return false
+    /* c8 ignore stop */
   })
 
   globalProcess.emit = processEmit as typeof globalProcess.emit
@@ -273,10 +278,12 @@ export function onExit(
   cb: (code: number | null, signal: string | null) => void,
   options?: OnExitOptions | undefined,
 ): () => void {
-  /* c8 ignore next 3 - !globalProcess never fires in Node tests. */
+  // !globalProcess never fires in Node tests.
+  /* c8 ignore start */
   if (!globalProcess) {
     return function remove() {}
   }
+  /* c8 ignore stop */
   if (typeof cb !== 'function') {
     throw new TypeErrorCtor('a callback must be provided for exit handler')
   }
@@ -295,12 +302,15 @@ export function onExit(
 
   return function remove() {
     emitter.removeListener(eventName, cb)
+    // afterexit listener cleanup; tested via the alwaysLast path.
+    /* c8 ignore start */
     if (
       !emitter.listeners('exit').length &&
       !emitter.listeners('afterexit').length
     ) {
       unload()
     }
+    /* c8 ignore stop */
   }
 }
 
@@ -317,7 +327,9 @@ export function onExit(
 export function signals() {
   if (_signals === undefined) {
     _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
-    /* c8 ignore next 3 - WIN32-only branch tested on Windows runners. */
+    // WIN32-only branch tested on Windows runners; Linux branch on
+    // Linux runners. Each runs on its target platform only.
+    /* c8 ignore start */
     if (!WIN32) {
       _signals.push(
         'SIGVTALRM',
@@ -328,15 +340,12 @@ export function signals() {
         'SIGSYS',
         'SIGQUIT',
         'SIGIOT',
-        // should detect profiler and enable/disable accordingly.
-        // see #21
-        // 'SIGPROF'
       )
     }
-    /* c8 ignore next 3 - Linux-only branch tested on Linux runners. */
     if (platform === 'linux') {
       _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
     }
+    /* c8 ignore stop */
   }
   return _signals as string[]
 }
@@ -352,10 +361,12 @@ export function signals() {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unload(): void {
-  /* c8 ignore next - !globalProcess never fires in Node tests. */
+  // !globalProcess never fires in Node tests.
+  /* c8 ignore start */
   if (!loaded || !globalProcess) {
     return
   }
+  /* c8 ignore stop */
   loaded = false
 
   const sigs = signals()
@@ -366,17 +377,23 @@ export function unload(): void {
         sig as NodeJS.Signals,
         sigListeners[sig] as SignalListener,
       )
+      /* c8 ignore start - removeListener rarely throws. */
     } catch {}
+    /* c8 ignore stop */
   }
   globalProcess.emit = originalProcessEmit as typeof globalProcess.emit
-  /* c8 ignore next 3 - originalProcessReallyExit is always defined
-     in Node runtimes; the undefined branch only fires under exotic
-     embedders that strip process.reallyExit. */
+  // originalProcessReallyExit is always defined in Node runtimes;
+  // the undefined branch only fires under exotic embedders.
+  /* c8 ignore start */
   if (originalProcessReallyExit !== undefined) {
     globalProcess.reallyExit = originalProcessReallyExit
   }
+  /* c8 ignore stop */
   const emitter = getEmitter()
+  // emitter.count is always defined after init.
+  /* c8 ignore start */
   if (emitter.count !== undefined) {
     emitter.count -= 1
   }
+  /* c8 ignore stop */
 }

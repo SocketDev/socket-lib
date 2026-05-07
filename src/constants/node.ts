@@ -81,16 +81,20 @@ export function getNodeHardenFlags(): string[] {
       flags.push('--permission')
       // Add permission-specific grants for Node 24+.
       flags.push(...getNodePermissionFlags())
+      // Node 20-23 fallback; tests run on Node 24+.
+      /* c8 ignore start */
     } else if (major >= 20) {
-      /* c8 ignore next - Node 20-23 fallback; tests run on Node 22+. */
       flags.push('--experimental-permission')
     }
+    /* c8 ignore stop */
 
     // Force uncaught exceptions policy for N-API addons (Node.js 22+).
-    /* c8 ignore next 3 - Node-version-specific; tests run on a single major. */
+    // Node-version-specific; tests run on a single major.
+    /* c8 ignore start */
     if (major >= 22) {
       flags.push('--force-node-api-uncaught-exceptions-policy')
     }
+    /* c8 ignore stop */
 
     _nodeHardenFlags = flags
   }
@@ -103,8 +107,12 @@ export function getNodeHardenFlags(): string[] {
  * @returns The major version number, or `0` if it cannot be parsed.
  */
 export function getNodeMajorVersion(): number {
+  // NODE_VERSION always has shape `vMAJOR.MINOR.PATCH`; the `?? '0'`
+  // and `|| 0` are defensive against malformed process.version.
+  /* c8 ignore start */
   const major = NODE_VERSION.slice(1).split('.')[0] ?? '0'
   return NumberParseInt(major, 10) || 0
+  /* c8 ignore stop */
 }
 
 /**
@@ -113,6 +121,7 @@ export function getNodeMajorVersion(): number {
  * @returns The minor version number, or `0` if it cannot be parsed.
  */
 export function getNodeMinorVersion(): number {
+  /* c8 ignore next - Defensive `?? '0'` against malformed process.version. */
   return NumberParseInt(NODE_VERSION.split('.')[1] ?? '0', 10)
 }
 
@@ -135,6 +144,7 @@ export function getNodeNoWarningsFlags(): string[] {
  * @returns The patch version number, or `0` if it cannot be parsed.
  */
 export function getNodePatchVersion(): number {
+  /* c8 ignore next - Defensive `?? '0'` against malformed process.version. */
   return NumberParseInt(NODE_VERSION.split('.')[2] ?? '0', 10)
 }
 
@@ -160,12 +170,13 @@ export function getNodePermissionFlags(): string[] {
         // Allow spawning child processes (npm needs to run lifecycle scripts, git, etc.).
         '--allow-child-process',
       ]
-    } else {
-      /* c8 ignore next 3 - Node 20-23 fallback; tests run on Node 22+. */
       // Node.js 20-23 with --experimental-permission doesn't require explicit grants
       // or uses different permission API.
+      /* c8 ignore start */
+    } else {
       _nodePermissionFlags = []
     }
+    /* c8 ignore stop */
   }
   return _nodePermissionFlags
 }

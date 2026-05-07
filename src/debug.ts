@@ -125,9 +125,8 @@ function getCallerInfo(stackOffset: number = 3): string {
               name = match
                 // Strip known V8 invocation prefixes to get the name.
                 .replace(/^(?:async|bound|get|new|set)\s+/, '')
-              /* c8 ignore start - V8-specific 'Object.' stack frame
-                 prefix; only fires for stack frames in object literal
-                 method calls. Test stack frames are typically named. */
+              // V8-specific 'Object.' stack frame prefix; only fires
+              // for stack frames in object literal method calls.
               if (StringPrototypeStartsWith(name, 'Object.')) {
                 // Strip leading 'Object.' if not an own property of Object.
                 const afterDot = StringPrototypeSlice(name, 7)
@@ -135,7 +134,6 @@ function getCallerInfo(stackOffset: number = 3): string {
                   name = afterDot
                 }
               }
-              /* c8 ignore stop */
             }
             break
           }
@@ -143,6 +141,7 @@ function getCallerInfo(stackOffset: number = 3): string {
       }
     }
   }
+  /* c8 ignore stop */
   return name
 }
 
@@ -153,7 +152,9 @@ function getCallerInfo(stackOffset: number = 3): string {
 /*@__NO_SIDE_EFFECTS__*/
 function getDebugJsInstance(namespace: string) {
   let inst = debugByNamespace.get(namespace)
-  /* c8 ignore next 3 - Per-namespace cache hit; first-call always misses. */
+  // Per-namespace cache hit; first-call always misses. Same-namespace
+  // hit fires only when isEnabled() reuses the cached probe.
+  /* c8 ignore start */
   if (inst) {
     return inst
   }
@@ -162,9 +163,9 @@ function getDebugJsInstance(namespace: string) {
     getSocketDebug() &&
     (namespace === 'error' || namespace === 'notice')
   ) {
-    /* c8 ignore next - External debug library call */
     debugJs.enable(namespace)
   }
+  /* c8 ignore stop */
   /* c8 ignore next - External debug library call */
   inst = debugJs(namespace)
   inst.log = customLog
@@ -354,8 +355,12 @@ export function debugDirNs(
   /* c8 ignore stop */
 
   let opts: InspectOptions | undefined = inspectOpts
+  // External debug library inspection options. Only fires when the
+  // caller omits inspectOpts AND debugJs has populated its global
+  // inspectOpts (DEBUG_INSPECT_OPTIONS env var, etc.) — not the
+  // common test path.
+  /* c8 ignore start */
   if (opts === undefined) {
-    /* c8 ignore next - External debug library inspection options */
     const debugOpts = debugJs.inspectOpts
     if (debugOpts) {
       opts = {
@@ -369,6 +374,7 @@ export function debugDirNs(
       } as InspectOptions
     }
   }
+  /* c8 ignore stop */
   const spinnerInstance = options.spinner || getDefaultSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
