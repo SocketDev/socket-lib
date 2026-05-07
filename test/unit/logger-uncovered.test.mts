@@ -161,4 +161,35 @@ describe('logger — uncovered methods', () => {
       expect(stderr.text).toContain('skipped')
     })
   })
+
+  describe('write()', () => {
+    it('writes raw text directly to stdout (bypassing Console formatting)', () => {
+      const { logger, stdout } = makeLogger()
+      logger.write('raw output without newline')
+      expect(stdout.text).toContain('raw output without newline')
+    })
+
+    it('returns the logger for chaining', () => {
+      const { logger } = makeLogger()
+      expect(logger.write('x')).toBe(logger)
+    })
+  })
+
+  describe('errorNewline()', () => {
+    it('writes a blank stderr line when previous output was non-blank', () => {
+      const { logger, stderr } = makeLogger()
+      logger.error('first')
+      logger.errorNewline()
+      // Two newlines minimum: one for 'first', one for the blank.
+      expect(stderr.text.split('\n').length).toBeGreaterThan(2)
+    })
+
+    it('skips when previous output was already blank', () => {
+      const { logger, stderr } = makeLogger()
+      logger.errorNewline()
+      const before = stderr.text
+      logger.errorNewline()
+      expect(stderr.text).toBe(before)
+    })
+  })
 })

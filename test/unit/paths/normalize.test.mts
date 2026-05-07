@@ -526,6 +526,13 @@ describe('paths/normalize', () => {
       // Result should not contain backslashes
       expect(result.includes('\\\\')).toBe(false)
     })
+
+    it('returns empty string when from and to resolve to the same path', () => {
+      // After path.resolve, identical inputs are exactly equal —
+      // the same-path early return fires.
+      const result = relativeResolve('/foo/bar', '/foo/bar')
+      expect(result).toBe('')
+    })
   })
 
   describe('toUnixPath', () => {

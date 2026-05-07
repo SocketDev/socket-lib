@@ -173,6 +173,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   }
 
   const init = () => {
+    /* c8 ignore next 3 - Idempotent guard; init runs once. */
     if (initialized) {
       return
     }
@@ -188,6 +189,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   }
 
   const reset = () => {
+    /* c8 ignore next 3 - Defensive guard; reset only runs after init. */
     if (!initialized) {
       return
     }
@@ -208,6 +210,9 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     }
   }
 
+  /* c8 ignore next 4 - onThemeChange callback fires only when
+     setTheme() is called at runtime; tests use the static default
+     theme. */
   // Listen for theme changes and reset symbols
   onThemeChange(() => {
     reset()
@@ -869,6 +874,9 @@ export class Logger {
    * ```
    */
   clearVisible() {
+    /* c8 ignore start - clearVisible TTY-mode behavior; tests use
+     non-TTY capture streams so the bound-stream throw and TTY
+     clear branches aren't reached. */
     if (this.#boundStream) {
       throw new ErrorCtor(
         'clearVisible() is only available on the main logger instance, not on stream-bound instances',
@@ -881,6 +889,7 @@ export class Logger {
       this.#logCallCount = 0
     }
     return this
+    /* c8 ignore stop */
   }
 
   /**

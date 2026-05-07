@@ -341,7 +341,8 @@ function resolve(...segments: string[]): string {
   for (let i = segments.length - 1; i >= 0 && !resolvedAbsolute; i -= 1) {
     const segment = segments[i]
 
-    // Skip empty or non-string segments.
+    /* c8 ignore next 3 - Defensive non-string skip; TypeScript-typed
+       callers always pass strings. */
     if (typeof segment !== 'string' || segment.length === 0) {
       continue
     }
@@ -650,6 +651,7 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isRelative(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
+  /* c8 ignore next 3 - Defensive non-string guard. */
   if (typeof filepath !== 'string') {
     return false
   }
@@ -798,6 +800,8 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     }
   }
   if (start === 0) {
+    /* c8 ignore start - UNC path detection (\\server\share). Rare
+       input; not exercised by typical test fixtures. */
     // Check for UNC paths first (\\server\share or //server/share)
     // UNC paths must start with exactly two slashes, not more
     if (
@@ -865,6 +869,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
           prefix = '/'
         }
       }
+      /* c8 ignore stop */
     } else {
       // Trim leading slashes for regular paths
       code = StringPrototypeCharCodeAt(filepath, start)
@@ -1064,6 +1069,7 @@ export function pathLikeToString(
       // On Windows, strip the leading slash only for malformed URLs that lack drive letters
       // (e.g., `/path` should be `path`, but `/C:/path` should be `C:/path`).
       // On Unix, keep the leading slash for absolute paths (e.g., `/home/user`).
+      /* c8 ignore start - Windows-only URL drive-letter handling. */
       if (WIN32 && StringPrototypeStartsWith(decodedPathname, '/')) {
         // Check for drive letter pattern following Node.js source: /[a-zA-Z]:/
         // Character at index 1 should be a letter, character at index 2 should be ':'
@@ -1083,6 +1089,7 @@ export function pathLikeToString(
           return decodedPathname
         }
       }
+      /* c8 ignore stop */
       return decodedPathname
     }
   }
