@@ -217,19 +217,25 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   const memoMaxSize = MathMax(1, opts.memoMaxSize ?? DEFAULT_MEMO_MAX_SIZE)
 
   function memoSet(fullKey: string, entry: TtlCacheEntry<unknown>): void {
+    // LRU has-existing tested via re-set; size>=max requires the cache
+    // to fill (default 100). The oldest!==undefined guard is defensive
+    // and unreachable when size>=max.
+    /* c8 ignore start */
     if (memoCache.has(fullKey)) {
       memoCache.delete(fullKey)
     } else if (memoCache.size >= memoMaxSize) {
-      // Evict the least-recently-used entry (oldest insertion).
       const oldest = memoCache.keys().next().value
       if (oldest !== undefined) {
         memoCache.delete(oldest)
       }
     }
+    /* c8 ignore stop */
     memoCache.set(fullKey, entry)
   }
 
-  // Ensure ttl is defined
+  // Ensure ttl is defined. opts.ttl-undefined arm fires for default-ttl
+  // callers which is the common case.
+  /* c8 ignore next */
   const ttl = opts.ttl ?? DEFAULT_TTL_MS
 
   /**

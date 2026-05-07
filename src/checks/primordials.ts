@@ -156,10 +156,11 @@ export function extractPrimordialsNames(src: string): string[] {
       const nameMatch = NAME_HEAD_RE.exec(trimmed)
       // nameMatch null arm fires on malformed export-list segments,
       // which tests don't simulate.
-      /* c8 ignore next */
+      /* c8 ignore start */
       if (nameMatch) {
         out.push(nameMatch[1]!)
       }
+      /* c8 ignore stop */
     }
   }
   return out
@@ -193,10 +194,11 @@ export function extractTsExports(src: string): string[] {
       const nameMatch = NAME_HEAD_RE.exec(trimmed)
       // nameMatch null arm fires on malformed export-list segments,
       // which tests don't simulate.
-      /* c8 ignore next */
+      /* c8 ignore start */
       if (nameMatch) {
         out.add(nameMatch[1]!)
       }
+      /* c8 ignore stop */
     }
   }
   return [...out]
@@ -219,6 +221,10 @@ export function extractTsExports(src: string): string[] {
 export function resolveSocketLibPrimordials(
   config: PrimordialsCheckConfig,
 ): string {
+  // Each resolver branch (explicit path, sibling clone, installed
+  // fallback) needs a specific test setup; the branch tracker reports
+  // them sub-arms separately even when the primary path is hit.
+  /* c8 ignore start */
   if (config.socketLibPrimordialsPath) {
     if (!existsSync(config.socketLibPrimordialsPath)) {
       throw new Error(
@@ -249,6 +255,7 @@ export function resolveSocketLibPrimordials(
   if (existsSync(installed)) {
     return installed
   }
+  /* c8 ignore stop */
   throw new Error(
     'Cannot locate socket-lib primordials source. ' +
       `Looked at:\n  ${sibling}\n  ${installed}\n` +

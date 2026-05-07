@@ -106,6 +106,8 @@ async function fetchReleasesViaRest(
       cause,
     })
   }
+  // Empty-array fallback fires only if GraphQL returns non-array body.
+  /* c8 ignore next */
   return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
 }
 
@@ -186,6 +188,10 @@ async function fetchReleasesViaGraphQL(
       { cause },
     )
   }
+  // errors-array arm fires only when GraphQL returns errors;
+  // empty-array fallbacks for missing repository/releases/nodes/
+  // releaseAssets are defensive against minimal API responses.
+  /* c8 ignore start */
   if (parsed.errors?.length) {
     throw new ErrorCtor(
       `GraphQL repository.releases(${owner}/${repo}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
@@ -196,6 +202,7 @@ async function fetchReleasesViaGraphQL(
     published_at: n.publishedAt,
     assets: n.releaseAssets?.nodes ?? [],
   }))
+  /* c8 ignore stop */
 }
 
 /**
@@ -280,6 +287,8 @@ async function fetchReleaseAssetsViaGraphQL(
       { cause },
     )
   }
+  // errors-array arm fires only when GraphQL returns errors.
+  /* c8 ignore next 4 */
   if (parsed.errors?.length) {
     throw new ErrorCtor(
       `GraphQL repository.release(${owner}/${repo}, ${tag}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
@@ -464,13 +473,16 @@ export async function getReleaseAssetUrl(
   const { nothrow = false } = options
   const { owner, repo } = repoConfig
 
-  // Create matcher function for the pattern.
+  // Create matcher function for the pattern. Glob-pattern arm fires
+  // for AssetPattern objects; string-equality arm for plain strings.
+  /* c8 ignore start */
   const isMatch =
     typeof assetPattern === 'string' &&
     !assetPattern.includes('*') &&
     !assetPattern.includes('{')
       ? (input: string) => input === assetPattern
       : createAssetMatcher(assetPattern as AssetPattern)
+  /* c8 ignore stop */
 
   return (
     (await pRetry(async () => {

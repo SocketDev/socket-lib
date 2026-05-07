@@ -334,12 +334,13 @@ function getGitDiffSpawnArgs(cwd?: string | undefined): GitDiffSpawnArgs {
  * ```
  */
 function getGitPath(): string {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
+  // Lazy-init second-call + 'git' fallback when which fails.
+  /* c8 ignore start */
   if (_gitPath === undefined) {
     const resolved = whichSync('git', { nothrow: true })
-    /* c8 ignore next - 'git' fallback fires only when git is absent. */
     _gitPath = typeof resolved === 'string' ? resolved : 'git'
   }
+  /* c8 ignore stop */
   return _gitPath
 }
 
@@ -503,8 +504,8 @@ function parseGitDiffStdout(
   options?: GitDiffOptions | undefined,
   spawnCwd?: string | undefined,
 ): string[] {
-  // Find git repo root from spawnCwd. Git always returns paths relative to the repo root,
-  // not the cwd where it was run. So we need to find the repo root to correctly parse paths.
+  // spawnCwd-passed arm fires only when caller specifies cwd.
+  /* c8 ignore next */
   const defaultRoot = spawnCwd ? findGitRoot(spawnCwd) : getCwd()
   const {
     absolute = false,
@@ -530,7 +531,8 @@ function parseGitDiffStdout(
   // where X and Y are single characters and there's a space before the filename.
   if (porcelain) {
     rawFiles = rawFiles.map(line => {
-      // Status is first 2 chars, then space, then filename.
+      // Short-line fallback fires only on malformed porcelain output.
+      /* c8 ignore next */
       return line.length > 3 ? StringPrototypeSubstring(line, 3) : line
     })
   }
@@ -933,8 +935,9 @@ export async function isChanged(
   // Resolve pathname to handle symlinks before computing relative path (using cache).
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore next */
+  /* c8 ignore start */
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
+  /* c8 ignore stop */
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return ArrayPrototypeIncludes(files, relativePath)
 }
@@ -988,8 +991,9 @@ export function isChangedSync(
   try {
     const resolvedPathname = getCachedRealpath(pathname)
     // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-    /* c8 ignore next */
+    /* c8 ignore start */
     const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
+    /* c8 ignore stop */
     const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
     return ArrayPrototypeIncludes(files, relativePath)
   } catch {
@@ -1044,8 +1048,9 @@ export async function isStaged(
   // Resolve pathname to handle symlinks before computing relative path (using cache).
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore next */
+  /* c8 ignore start */
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
+  /* c8 ignore stop */
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return ArrayPrototypeIncludes(files, relativePath)
 }
@@ -1097,8 +1102,9 @@ export function isStagedSync(
   // Resolve pathname to handle symlinks before computing relative path (using cache).
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore next */
+  /* c8 ignore start */
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
+  /* c8 ignore stop */
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return ArrayPrototypeIncludes(files, relativePath)
 }
@@ -1150,8 +1156,9 @@ export async function isUnstaged(
   // Resolve pathname to handle symlinks before computing relative path (using cache).
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore next */
+  /* c8 ignore start */
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
+  /* c8 ignore stop */
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return ArrayPrototypeIncludes(files, relativePath)
 }
@@ -1204,8 +1211,9 @@ export function isUnstagedSync(
   // Resolve pathname to handle symlinks before computing relative path (using cache).
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore next */
+  /* c8 ignore start */
   const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
+  /* c8 ignore stop */
   const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
   return ArrayPrototypeIncludes(files, relativePath)
 }

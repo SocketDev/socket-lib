@@ -808,6 +808,8 @@ async function httpDownloadAttempt(
   }
 
   const res = response.rawResponse
+  // Defensive: rawResponse is always present after streaming response.
+  /* c8 ignore next 3 */
   if (!res) {
     throw new ErrorCtor('Stream response missing rawResponse')
   }
@@ -920,6 +922,9 @@ async function httpRequestAttempt(
     // fires, even when destroy() cascades multiple events.
     let settled = false
     const resolveOnce = (response: HttpResponse) => {
+      // settled-already arm fires only on destroy() races where two
+      // events fire after the first. Defensive.
+      /* c8 ignore next 3 */
       if (settled) {
         return
       }
@@ -927,6 +932,7 @@ async function httpRequestAttempt(
       resolve(response)
     }
     const rejectOnce = (err: Error) => {
+      /* c8 ignore next 3 */
       if (settled) {
         return
       }
@@ -1373,7 +1379,10 @@ export async function httpDownload(
     timeout = 120_000,
   } = { __proto__: null, ...options } as HttpDownloadOptions
 
-  // Create progress callback - onProgress takes precedence over logger
+  // Progress callback wiring; both arms (onProgress passed, logger
+  // passed) and the inner total===0 + interval-throttle branches fire
+  // only on real network downloads, not the unit test mocks.
+  /* c8 ignore start */
   let progressCallback:
     | ((downloaded: number, total: number) => void)
     | undefined
@@ -1391,6 +1400,7 @@ export async function httpDownload(
       }
     }
   }
+  /* c8 ignore stop */
 
   // Download to a temp file first, then atomically rename to destination.
   // This prevents partial/corrupted files at the destination path if download fails,

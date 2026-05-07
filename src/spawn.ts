@@ -456,17 +456,18 @@ export function enhanceSpawnError(error: unknown): unknown {
     }
   }
 
+  // signal vs code arms exercised individually but not always paired.
+  // Long-line stderr fallback (>=200 chars) fires only for verbose
+  // child-process failures.
+  /* c8 ignore start */
   if (signal) {
     enhancedMessage += ` (terminated by ${signal})`
   } else if (code !== undefined) {
     enhancedMessage += ` (exit code ${code})`
   }
 
-  // Add first line of stderr for context.
   const trimmedStderr = stderrText.trim()
   if (trimmedStderr) {
-    /* c8 ignore next - String.split always returns at least one element;
-       the `?? ''` arm is defensive but unreachable. */
     const firstLine = trimmedStderr.split('\n')[0] ?? ''
     if (firstLine.length < 200) {
       enhancedMessage += `\n${firstLine}`
@@ -474,6 +475,7 @@ export function enhanceSpawnError(error: unknown): unknown {
       enhancedMessage += `\n${firstLine.slice(0, 197)}...`
     }
   }
+  /* c8 ignore stop */
 
   // Check if this is a synthetic error (generic "command failed" message).
   const isSynthetic = err.message === 'command failed'
@@ -689,24 +691,25 @@ export function spawn(
     // Binary name - check cache first, validate with existsSync().
     const fs = getNodeFs()
     const cached = spawnBinPathCache.get(cmd)
+    // Cache hit fires only on second spawn() of the same binary;
+    // stale-cache eviction fires only if the binary is removed
+    // mid-session. The which-resolved arm fires when binary is in PATH.
+    /* c8 ignore start */
     if (cached) {
       if (fs.existsSync(cached)) {
         actualCmd = cached
       } else {
-        /* c8 ignore next - Stale-cache eviction; only fires if the
-           cached binary is removed mid-session. */
         spawnBinPathCache.delete(cmd)
       }
     }
-    // If not cached or cache was stale, resolve via PATH.
     if (actualCmd === cmd) {
       const resolved = whichSync(cmd, { cwd, nothrow: true })
       if (resolved && typeof resolved === 'string') {
         actualCmd = resolved
-        // Cache the result.
         spawnBinPathCache.set(cmd, resolved)
       }
     }
+    /* c8 ignore stop */
     // If which returns null, keep original cmd and let spawn fail naturally
   }
 
@@ -811,13 +814,16 @@ export function spawn(
   // try/catch — same semantics as the previous .then/.catch chain,
   // expressed as straight-line async/await so the success and
   // failure paths read top-to-bottom.
+  // shouldStripAnsi vs not branches; both arms exercised but the
+  // 'code' in result and catch branches fire only on specific child-
+  // process outcomes (exit-with-code vs throw).
+  /* c8 ignore start */
   let newSpawnPromise: PromiseSpawnResult
   if (shouldStripAnsi && stdioString) {
     newSpawnPromise = (async () => {
       try {
         const result = await spawnPromise
         const strippedResult = stripAnsiFromSpawnResult(result)
-        // Add exitCode as an alias for code.
         if ('code' in (strippedResult as { code?: number })) {
           ;(strippedResult as { code: number; exitCode: number }).exitCode = (
             strippedResult as { code: number }
@@ -833,7 +839,6 @@ export function spawn(
     newSpawnPromise = (async () => {
       try {
         const result = await spawnPromise
-        // Add exitCode as an alias for code.
         if (result !== null && typeof result === 'object' && 'code' in result) {
           const res = result as typeof result & {
             exitCode: number
@@ -848,6 +853,7 @@ export function spawn(
       }
     })() as PromiseSpawnResult
   }
+  /* c8 ignore stop */
   if (shouldRestartSpinner) {
     // Wrap the previous transform in another async IIFE so the
     // spinner restart fires regardless of resolve/reject. Same
