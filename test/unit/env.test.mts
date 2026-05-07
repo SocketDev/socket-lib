@@ -418,6 +418,30 @@ describe('env', () => {
         expect(proxy[Symbol.iterator as any]).toBeUndefined()
       })
 
+      it('returns undefined descriptor for Symbol keys', () => {
+        const base = { PATH: '/usr/bin' }
+        const proxy = createEnvProxy(base)
+        const sym = Symbol('test')
+        const descriptor = Object.getOwnPropertyDescriptor(proxy, sym)
+        expect(descriptor).toBeUndefined()
+      })
+
+      it('reports false for Symbol keys via `in` operator', () => {
+        const base = { PATH: '/usr/bin' }
+        const proxy = createEnvProxy(base)
+        const sym = Symbol('test')
+        expect(sym in proxy).toBe(false)
+      })
+
+      it('finds keys via case-insensitive lookup in overrides', () => {
+        const base = { PATH: '/usr/bin' }
+        const overrides = { Path: '/override' }
+        const proxy = createEnvProxy(base, overrides)
+        // Trigger case-insensitive `has` path: query upper-cased name
+        // present only via mixed-case override.
+        expect('PATH' in proxy).toBe(true)
+      })
+
       it('should handle undefined values in base', () => {
         const base = { PATH: undefined as any, HOME: '/home/user' }
         const proxy = createEnvProxy(base)

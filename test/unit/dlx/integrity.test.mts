@@ -59,6 +59,12 @@ describe('dlx/integrity', () => {
       expect(() => normalizeHash('not-a-hash')).toThrow(TypeError)
     })
 
+    it('rejects unknown hash object type', () => {
+      expect(() =>
+        normalizeHash({ type: 'sha1', value: 'abc' } as never),
+      ).toThrow(TypeError)
+    })
+
     it('rejects integrity object with malformed value', () => {
       expect(() =>
         normalizeHash({ type: 'integrity', value: 'notsha512' }),

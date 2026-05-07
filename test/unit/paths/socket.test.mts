@@ -133,6 +133,13 @@ describe('paths/socket', () => {
       expect(second).toContain('/new/home/.socket')
       expect(second).not.toBe(first)
     })
+
+    it('honors SOCKET_HOME env override', () => {
+      setEnv('SOCKET_HOME', '/custom/socket/dir')
+      resetPaths()
+      const result = getSocketUserDir()
+      expect(result).toBe('/custom/socket/dir')
+    })
   })
 
   describe('getSocketHomePath', () => {
