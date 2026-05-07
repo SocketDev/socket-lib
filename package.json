@@ -1,7 +1,7 @@
 {
   "name": "@socketsecurity/lib",
   "version": "5.28.0",
-  "packageManager": "pnpm@11.0.7",
+  "packageManager": "pnpm@11.0.8",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
@@ -973,7 +973,7 @@
   ],
   "engines": {
     "node": ">=22",
-    "pnpm": ">=11.0.7"
+    "pnpm": ">=11.0.8"
   },
   "sideEffects": false,
   "scripts": {
