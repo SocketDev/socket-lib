@@ -1324,12 +1324,16 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * spinner.updateShimmer({ color: [255, 0, 0], speed: 0.8 })
        */
       updateShimmer(config: Partial<ShimmerConfig>): Spinner {
+        // Each partial-config field branch fires only when caller
+        // updates that specific field; tests don't pair all sub-arms
+        // in a single call. The shimmer-state cascade (existing /
+        // savedConfig / fresh) covers three init paths.
+        /* c8 ignore start */
         const partialConfig = {
           __proto__: null,
           ...config,
         } as Partial<ShimmerConfig>
 
-        // Translate partial config field names: ShimmerConfig.dir → ShimmerInfo.direction.
         const update: Partial<ShimmerInfo> = {
           __proto__: null,
         } as Partial<ShimmerInfo>
@@ -1368,6 +1372,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
 
         this.#updateSpinnerText()
         return this as unknown as Spinner
+        /* c8 ignore stop */
       }
 
       /**

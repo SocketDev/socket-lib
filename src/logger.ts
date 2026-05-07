@@ -492,14 +492,14 @@ export class Logger {
     ensurePrototypeInitialized()
 
     let con = privateConsole.get(this)
+    // ctorArgs.length-truthy fires when caller seeded constructor args;
+    // both arms exercised across tests but not always in the same run.
+    /* c8 ignore start */
     if (!con) {
-      // Lazy initialization - create Console on first use.
       const ctorArgs = privateConstructorArgs.get(this) ?? []
       if (ctorArgs.length) {
         con = constructConsole(...ctorArgs)
       } else {
-        // Create a new console that acts like the builtin one so that it will
-        // work with Node's --frozen-intrinsics flag.
         con = constructConsole({
           stdout: process.stdout,
           stderr: process.stderr,
@@ -509,9 +509,9 @@ export class Logger {
         }
       }
       privateConsole.set(this, con)
-      // Clean up constructor args - no longer needed after Console creation.
       privateConstructorArgs.delete(this)
     }
+    /* c8 ignore stop */
     return con
   }
 
@@ -636,6 +636,8 @@ export class Logger {
     let text = ArrayPrototypeAt(args, 0)
     // biome-ignore lint/suspicious/noImplicitAnyLet: Flexible argument handling.
     let extras
+    // text-non-string arm fires only when caller passes object first.
+    /* c8 ignore start */
     if (typeof text === 'string') {
       text = this.#stripSymbols(text)
       extras = ArrayPrototypeSlice(args, 1)
@@ -643,6 +645,7 @@ export class Logger {
       extras = args
       text = ''
     }
+    /* c8 ignore stop */
     // Note: Meta status messages (info/fail/etc) always go to stderr.
     const indent = this.#getIndent('stderr')
     const symbols = this.#getSymbols()

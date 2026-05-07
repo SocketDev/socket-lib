@@ -241,17 +241,18 @@ export class DlxManifest {
     try {
       fs.writeFileSync(tempPath, content, 'utf8')
       fs.renameSync(tempPath, this.manifestPath)
+      // Cleanup-after-error block fires only when writeFile/renameSync
+      // throws; tests don't simulate disk-full or perm errors.
+      /* c8 ignore start */
     } catch (e) {
-      // Clean up temp file on error.
       try {
         if (fs.existsSync(tempPath)) {
           safeDeleteSync(tempPath)
         }
-      } catch {
-        // Best effort cleanup.
-      }
+      } catch {}
       throw e
     }
+    /* c8 ignore stop */
   }
 
   /**

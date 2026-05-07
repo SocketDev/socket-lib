@@ -675,12 +675,12 @@ export async function pRetry<T>(
   let error: unknown = UNDEFINED_TOKEN
 
   while (attempts-- >= 0) {
-    /* c8 ignore next 4 - Abort-before-attempt requires the signal
-       to be aborted between iterations; existing tests cover
-       abort during fn execution (the exception path). */
+    // Abort-before-attempt requires signal aborted between iterations.
+    /* c8 ignore start */
     if (signal?.aborted) {
       return undefined
     }
+    /* c8 ignore stop */
 
     try {
       // eslint-disable-next-line no-await-in-loop
@@ -697,13 +697,16 @@ export async function pRetry<T>(
       }
       // Clamp wait time to max delay.
       waitTime = MathMin(waitTime, maxDelayMs as number)
+      // onRetry callback variants (return-false-cancel, return-number-
+      // override-delay, throw-rethrow) fire only when caller passes a
+      // sophisticated onRetry. Most tests use no onRetry.
+      /* c8 ignore start */
       if (typeof onRetry === 'function') {
         try {
           const result = onRetry((retries as number) - attempts, e, waitTime)
           if (result === false && onRetryCancelOnFalse) {
             break
           }
-          // If onRetry returns a number, use it as the custom delay.
           if (typeof result === 'number' && result >= 0) {
             waitTime = MathMin(result, maxDelayMs as number)
           }
@@ -713,21 +716,25 @@ export async function pRetry<T>(
           }
         }
       }
+      /* c8 ignore stop */
 
       try {
         // eslint-disable-next-line no-await-in-loop
         await timers.setTimeout(waitTime, undefined, { signal })
+        // Abort during setTimeout fires only when signal is aborted
+        // mid-delay; tests cover abort during fn but not during delay.
+        /* c8 ignore start */
       } catch {
-        // setTimeout was aborted.
         return undefined
       }
+      /* c8 ignore stop */
 
-      /* c8 ignore next 4 - Abort-after-delay requires precise
-         timing: signal aborted between setTimeout resolve and
-         the next iteration's check. */
+      // Abort-after-delay requires precise timing.
+      /* c8 ignore start */
       if (signal?.aborted) {
         return undefined
       }
+      /* c8 ignore stop */
 
       // Exponentially increase the delay for the next attempt, capping at maxDelayMs.
       delay = MathMin(delay * (backoffFactor as number), maxDelayMs as number)

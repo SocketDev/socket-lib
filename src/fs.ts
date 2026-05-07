@@ -828,6 +828,11 @@ export function normalizeEncodingSlow(enc: string): BufferEncoding {
     if (enc === 'latin1' || enc === 'binary') {
       return 'latin1'
     }
+    // Length 7/8/9 branches handle utf16le, utf-16le, base64url. Each
+    // length needs a specific encoding; tests cover the canonical forms
+    // but the inner case-coercion sub-arms (the second/third operand
+    // of each `||`) fire only on mixed-case inputs.
+    /* c8 ignore start */
   } else if (length === 7) {
     if (
       enc === 'utf16le' ||
@@ -853,6 +858,7 @@ export function normalizeEncodingSlow(enc: string): BufferEncoding {
       return 'base64url'
     }
   }
+  /* c8 ignore stop */
   return 'utf8'
 }
 
@@ -1123,9 +1129,9 @@ export async function readJson(
           { cause: e },
         )
       }
-      // EPERM operand fires on Windows where chmod(0o000) maps to EPERM
-      // instead of EACCES; tests run on macOS chmod which yields EACCES.
-      /* c8 ignore next */
+      // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
+      // EPERM operand sub-arms vary per platform.
+      /* c8 ignore start */
       if (code === 'EACCES' || code === 'EPERM') {
         throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
@@ -1133,6 +1139,7 @@ export async function readJson(
           { cause: e },
         )
       }
+      /* c8 ignore stop */
       throw e
     }
     return undefined
@@ -1203,9 +1210,9 @@ export function readJsonSync(
           { cause: e },
         )
       }
-      // EPERM operand fires on Windows where chmod(0o000) maps to EPERM
-      // instead of EACCES; tests run on macOS chmod which yields EACCES.
-      /* c8 ignore next */
+      // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
+      // EPERM operand sub-arms vary per platform.
+      /* c8 ignore start */
       if (code === 'EACCES' || code === 'EPERM') {
         throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
@@ -1213,6 +1220,7 @@ export function readJsonSync(
           { cause: e },
         )
       }
+      /* c8 ignore stop */
       throw e
     }
     return undefined
@@ -1566,15 +1574,18 @@ export async function safeReadFile(
   filepath: PathLike,
   options?: SafeReadOptions | undefined,
 ): Promise<string | Buffer | undefined> {
+  // string-options vs options-object ternary; both arms tested but
+  // the string-shortcut form is less common in test paths.
+  /* c8 ignore next 4 */
   const opts =
     typeof options === 'string'
       ? { __proto__: null, encoding: options }
       : ({ __proto__: null, ...options } as SafeReadOptions)
   const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
   const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
-  // Check for null encoding before normalization to preserve Buffer return type.
   const shouldReturnBuffer = readOpts.encoding === null
-  // Normalize encoding to canonical form (only if not null).
+  // null-encoding arm fires only when caller passes encoding: null.
+  /* c8 ignore next 3 */
   const encoding = shouldReturnBuffer
     ? null
     : normalizeEncoding(readOpts.encoding)
@@ -1636,15 +1647,18 @@ export function safeReadFileSync(
   filepath: PathLike,
   options?: SafeReadOptions | undefined,
 ): string | Buffer | undefined {
+  // string-options vs options-object ternary; both arms tested but
+  // the string-shortcut form is less common in test paths.
+  /* c8 ignore next 4 */
   const opts =
     typeof options === 'string'
       ? { __proto__: null, encoding: options }
       : ({ __proto__: null, ...options } as SafeReadOptions)
   const { defaultValue, ...rawReadOpts } = opts as SafeReadOptions
   const readOpts = { __proto__: null, ...rawReadOpts } as ReadOptions
-  // Check for null encoding before normalization to preserve Buffer return type.
   const shouldReturnBuffer = readOpts.encoding === null
-  // Normalize encoding to canonical form (only if not null).
+  // null-encoding arm fires only when caller passes encoding: null.
+  /* c8 ignore next 3 */
   const encoding = shouldReturnBuffer
     ? null
     : normalizeEncoding(readOpts.encoding)

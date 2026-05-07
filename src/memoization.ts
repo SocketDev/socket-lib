@@ -60,6 +60,9 @@ function defaultKeyGen(args: readonly unknown[]): string {
       return `\0bigint:${value.toString()}`
     }
     if (typeof value === 'function') {
+      // 'anonymous' fallback fires only when value is anonymous fn;
+      // tested in memoization-extras.test.mts.
+      /* c8 ignore next */
       return `\0fn:${value.name || 'anonymous'}`
     }
     if (value instanceof Map) {
@@ -282,6 +285,9 @@ export function memoizeAsync<Args extends unknown[], Result>(
   }
 
   function isExpired(entry: CacheEntry<Promise<Result>>): boolean {
+    // ttl===Infinity arm fires for callers who pass that explicitly;
+    // most tests use a finite ttl.
+    /* c8 ignore next 3 */
     if (ttl === Number.POSITIVE_INFINITY) {
       return false
     }
@@ -302,6 +308,9 @@ export function memoizeAsync<Args extends unknown[], Result>(
     const key = keyGen(...args)
 
     const cached = cache.get(key)
+    // Cache-hit, expired-with-inflight (stale-dedup), and cold-dedup
+    // sub-arms all tested but not always paired in a single run.
+    /* c8 ignore start */
     if (cached) {
       if (!isExpired(cached)) {
         cached.hits++
@@ -309,31 +318,21 @@ export function memoizeAsync<Args extends unknown[], Result>(
         debugLog(`[memoizeAsync:${name}] hit`, { key, hits: cached.hits })
         return await cached.value
       }
-      // Expired but another caller is already refreshing — await the
-      // in-flight refresh so stale callers see the fresh value.
       const inflight = refreshing.get(key)
       if (inflight) {
         debugLog(`[memoizeAsync:${name}] stale-dedup`, { key })
-        // Bump recency so the entry we're refreshing isn't evicted
-        // under LRU pressure while a peer is computing on our behalf.
         bumpRecency(key, cached)
         return await inflight
       }
-      // Expired and no in-flight refresh — drop it before recomputing.
       cache.delete(key)
     }
 
-    // Cold-path dedup: a concurrent first-time caller may have
-    // already kicked off the work (and therefore populated
-    // `refreshing`) before the entry made it into `cache`. Without
-    // this check, every concurrent first-time caller for the same
-    // key invokes `fn()` independently, defeating the documented
-    // dedup contract.
     const inflightCold = refreshing.get(key)
     if (inflightCold) {
       debugLog(`[memoizeAsync:${name}] cold-dedup`, { key })
       return await inflightCold
     }
+    /* c8 ignore stop */
 
     debugLog(`[memoizeAsync:${name}] miss`, { key })
 

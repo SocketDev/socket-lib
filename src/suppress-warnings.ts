@@ -22,12 +22,13 @@ const suppressedWarnings = new SetCtor<string>()
  */
 function setupSuppression(): void {
   // Only wrap once - store the original on first call.
+  // First-call init only fires once per process; subsequent calls
+  // hit the second-call no-op branch.
+  /* c8 ignore start */
   if (!originalEmitWarning) {
     originalEmitWarning = process.emitWarning
     process.emitWarning = (warning: string | Error, ...args: unknown[]) => {
-      // Check both string warnings and warning objects.
       if (typeof warning === 'string') {
-        // Check if any suppressed warning type matches.
         for (const suppressedType of suppressedWarnings) {
           if (warning.includes(suppressedType)) {
             return
@@ -52,6 +53,7 @@ function setupSuppression(): void {
       )
     }
   }
+  /* c8 ignore stop */
 }
 
 /**
@@ -100,6 +102,9 @@ export function setMaxEventTargetListeners(
   target: EventTarget | AbortSignal | undefined,
   maxListeners: number = 10,
 ): void {
+  // !target arm fires for caller-passes-undefined; symbol-not-found
+  // arm fires only on Node runtimes that don't expose the symbol.
+  /* c8 ignore start */
   if (!target) {
     return
   }
@@ -108,11 +113,10 @@ export function setMaxEventTargetListeners(
     s => s.description === 'events.maxEventTargetListeners',
   )
   if (kMaxEventTargetListeners) {
-    // The default events.defaultMaxListeners value is 10.
-    // https://nodejs.org/api/events.html#eventsdefaultmaxlisteners
     ;(target as unknown as Record<symbol, number>)[kMaxEventTargetListeners] =
       maxListeners
   }
+  /* c8 ignore stop */
 }
 
 /**

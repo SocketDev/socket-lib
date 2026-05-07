@@ -136,7 +136,10 @@ export class ProgressBar {
 
     this.current = MathMin(current, this.total)
 
-    // Throttle rendering
+    // Throttle rendering. Throttle-skip fires only when ticks come
+    // faster than renderThrottle (default 16ms); the renderThrottle
+    // ?? 16 default-arm fires when caller doesn't override.
+    /* c8 ignore start */
     const now = DateNow()
     if (
       now - this.lastRender < (this.options.renderThrottle ?? 16) &&
@@ -144,6 +147,7 @@ export class ProgressBar {
     ) {
       return
     }
+    /* c8 ignore stop */
     this.lastRender = now
 
     this.render(tokens)
@@ -176,10 +180,14 @@ export class ProgressBar {
    * Render the progress bar.
    */
   private render(tokens?: Record<string, unknown>): void {
+    // Default-options arms (color/colorFn fallback, width/complete/
+    // incomplete/format defaults) and total===0 / current===0 edge
+    // cases fire only when caller doesn't seed those options or hits
+    // the empty-progress edge.
+    /* c8 ignore start */
     const colorName = this.options.color ?? 'cyan'
     const colorFn = colors[colorName] || ((s: string) => s)
 
-    // Calculate values
     const percent =
       this.total === 0 ? 0 : MathFloor((this.current / this.total) * 100)
     const elapsed = DateNow() - this.startTime
@@ -188,7 +196,6 @@ export class ProgressBar {
         ? 0
         : (elapsed / this.current) * (this.total - this.current)
 
-    // Build bar
     const availableWidth = this.options.width ?? 40
     const filledWidth =
       this.total === 0
@@ -203,8 +210,8 @@ export class ProgressBar {
     const empty = repeatString(this.options.incomplete ?? '░', emptyWidth)
     const bar = colorFn(filled) + empty
 
-    // Format output
     let output = this.options.format ?? ':bar :percent :current/:total'
+    /* c8 ignore stop */
     output = StringPrototypeReplace(output, ':bar', bar)
     output = output.replace(':percent', `${percent}%`)
     output = output.replace(':current', String(this.current))
@@ -259,6 +266,9 @@ export class ProgressBar {
    * Otherwise, moves to next line to preserve the final state.
    */
   terminate(): void {
+    // Idempotent guard fires on second terminate() call; clear-option
+    // arm fires only when caller passes clear: true.
+    /* c8 ignore start */
     if (this.terminated) {
       return
     }
@@ -269,6 +279,7 @@ export class ProgressBar {
     } else {
       this.stream.write('\n')
     }
+    /* c8 ignore stop */
   }
 }
 

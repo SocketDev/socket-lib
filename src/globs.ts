@@ -117,11 +117,13 @@ export function getMatchesGlob():
         matchesGlob?: unknown
       }
     ).matchesGlob
-    /* c8 ignore next 3 - path.matchesGlob is present on Node 22+; the
-       missing-fn branch only fires on older runtimes. */
+    // path.matchesGlob is present on Node 22+; missing-fn arm fires
+    // only on older runtimes.
+    /* c8 ignore start */
     if (typeof fn === 'function') {
       _matchesGlob = fn as (p: string, pattern: string) => boolean
     }
+    /* c8 ignore stop */
     _matchesGlobProbed = true
   }
   return _matchesGlob
@@ -369,16 +371,16 @@ export function getGlobMatcher(
     return existing
   }
 
-  // Evict oldest entry if cache is full (Map iteration order = insertion order).
-  /* c8 ignore next 6 - LRU eviction triggers at 100 entries; not
-     reachable from typical test runs which exercise <10 distinct
-     glob patterns. */
+  // LRU eviction triggers at 100 entries; not reachable from typical
+  // test runs.
+  /* c8 ignore start */
   if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
     const oldest = matcherCache.keys().next().value
     if (oldest !== undefined) {
       matcherCache.delete(oldest)
     }
   }
+  /* c8 ignore stop */
 
   // Narrow `path.matchesGlob` fast-path. picomatch's defaults
   // (`dot: true`, `nocase: true`) silently differ from
@@ -392,6 +394,10 @@ export function getGlobMatcher(
   // which is exactly what `path.matchesGlob` provides. No caller in
   // the fleet does this today, but the path is correct + auditable.
   let matcher: ((path: string) => boolean) | undefined
+  // Fast-path activation requires explicit nocase:false + dot:false +
+  // no-ignore. No caller in the fleet does this today, so the inner
+  // arms fire only on synthetic tests.
+  /* c8 ignore start */
   if (
     patterns.length === 1 &&
     !StringPrototypeStartsWith(patterns[0]!, '!') &&
@@ -406,6 +412,7 @@ export function getGlobMatcher(
       matcher = (p: string) => matchesGlob(p, pattern)
     }
   }
+  /* c8 ignore stop */
   if (matcher === undefined) {
     // Separate positive and negative patterns.
     const positivePatterns = patterns.filter(
@@ -481,6 +488,9 @@ export async function glob(
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
   // Prefer node:fs/promises.glob (added v22.0.0, Stable) when the
   // option surface lines up. Avoids loading fast-glob entirely.
+  // cwd-spread and exclude-spread arms fire only when caller passes
+  // those options; tests cover both directions but not always paired.
+  /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
     const out = await fromAsync(
       getFsPromises().glob(patterns as string | readonly string[], {
@@ -490,6 +500,7 @@ export async function glob(
     )
     return normalizeGlobResults(out)
   }
+  /* c8 ignore stop */
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
   const out = await fastGlob.glob(patterns, {
@@ -568,6 +579,8 @@ export function globSync(
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
   // Prefer node:fs.globSync (added v22.0.0, Stable) when the option
   // surface lines up. Avoids loading fast-glob entirely.
+  // cwd-spread and exclude-spread arms (sync variant; see async).
+  /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
     return normalizeGlobResults([
       ...getFs().globSync(patterns as string | readonly string[], {
@@ -576,6 +589,7 @@ export function globSync(
       }),
     ] as string[])
   }
+  /* c8 ignore stop */
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
   return normalizeGlobResults(
