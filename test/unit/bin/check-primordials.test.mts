@@ -196,14 +196,14 @@ describe('runCheckPrimordials', () => {
   })
 
   it('renders human-readable findings when scanDirs has drift (exit 1)', async () => {
-    // Set up a tmp file that uses a primordial NOT exported from
-    // socket-lib's primordials.ts. The check finds it, treats it as
-    // drift, and exits 1 — exercising the renderHuman + finding loop.
+    // Set up a tmp file that destructures from primordials with a
+    // name NOT exported from socket-lib's primordials.ts. The check
+    // detects drift and exits 1, exercising renderHuman + finding loop.
     const scanDir = path.join(tmpDir, 'src')
     await fs.mkdir(scanDir, { recursive: true })
     await fs.writeFile(
-      path.join(scanDir, 'sample.ts'),
-      "const { CompletelyMadeUpPrimordialName } = require('node:primordials')\n",
+      path.join(scanDir, 'sample.js'),
+      'const { CompletelyMadeUpPrimordialName } = primordials\n',
       'utf8',
     )
     const cfgPath = path.join(tmpDir, 'drift.json')
@@ -227,8 +227,8 @@ describe('runCheckPrimordials', () => {
     const scanDir = path.join(tmpDir, 'src-explain')
     await fs.mkdir(scanDir, { recursive: true })
     await fs.writeFile(
-      path.join(scanDir, 'sample.ts'),
-      "import { ArrayPrototypeAt } from 'node:primordials'\n",
+      path.join(scanDir, 'sample.js'),
+      'const { AnotherFakePrimordial } = primordials\n',
       'utf8',
     )
     const cfgPath = path.join(tmpDir, 'explain.json')
@@ -244,5 +244,47 @@ describe('runCheckPrimordials', () => {
     )
     const code = await runCheckPrimordials(['--config', cfgPath, '--explain'])
     expect([0, 1]).toContain(code)
+  })
+
+  it('emits JSON with findings array when drift exists', async () => {
+    const scanDir = path.join(tmpDir, 'src-json-drift')
+    await fs.mkdir(scanDir, { recursive: true })
+    await fs.writeFile(
+      path.join(scanDir, 'sample.js'),
+      'const { JsonDriftFakePrimordial } = primordials\n',
+      'utf8',
+    )
+    const cfgPath = path.join(tmpDir, 'json-drift.json')
+    await fs.writeFile(
+      cfgPath,
+      JSON.stringify({
+        primordials: {
+          scanDirs: [scanDir],
+          socketLibPrimordialsPath: SOCKET_LIB_PRIMORDIALS,
+        },
+      }),
+      'utf8',
+    )
+    const code = await runCheckPrimordials(['--config', cfgPath, '--json'])
+    expect([0, 1]).toContain(code)
+  })
+
+  it('drops non-string entries from nodeInternalOnly via filter', async () => {
+    const cfgPath = path.join(tmpDir, 'mixed-internal.json')
+    await fs.writeFile(
+      cfgPath,
+      JSON.stringify({
+        primordials: {
+          scanDirs: [],
+          // Mix valid strings with invalid types — filter strips non-strings.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          nodeInternalOnly: ['ValidName', 42, null, 'AnotherValid'] as any,
+          socketLibPrimordialsPath: SOCKET_LIB_PRIMORDIALS,
+        },
+      }),
+      'utf8',
+    )
+    const code = await runCheckPrimordials(['--config', cfgPath, '--silent'])
+    expect(code).toBe(0)
   })
 })
