@@ -15,7 +15,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { downloadBinaryFile } from '../../../src/dlx/binary'
-import { safeDeleteSync } from '../../../src/fs'
+import { safeDelete } from '../../../src/fs'
 import { httpDownload } from '../../../src/http-request'
 
 vi.mock('../../../src/http-request', async importOriginal => {
@@ -48,10 +48,10 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     vi.mocked(httpDownload).mockClear()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.restoreAllMocks()
     try {
-      safeDeleteSync(testDir, { force: true })
+      await safeDelete(testDir, { force: true })
     } catch {}
   })
 

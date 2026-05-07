@@ -51,14 +51,13 @@ describe.sequential('dlx/packages — error branches', () => {
     vi.mocked(safeDeleteSync).mockClear()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     resetEnv()
     invalidateCaches()
-    // Mock wraps original.safeDeleteSync, so default-impl call
-    // through to the real delete. Clean the parent of testDlxDir
-    // so the random root goes too.
+    // Clean the parent of testDlxDir so the random root goes too.
+    // Mock wraps original.safeDelete; default-impl calls through.
     try {
-      safeDeleteSync(path.dirname(testDlxDir), { force: true })
+      await safeDelete(path.dirname(testDlxDir), { force: true })
     } catch {}
   })
 

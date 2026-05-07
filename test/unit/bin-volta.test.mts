@@ -17,7 +17,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { resolveRealBinSync } from '../../src/bin'
-import { safeDeleteSync } from '../../src/fs'
+import { safeDelete } from '../../src/fs'
 
 describe.sequential('bin.ts — Volta resolution', () => {
   let voltaRoot: string
@@ -34,9 +34,9 @@ describe.sequential('bin.ts — Volta resolution', () => {
     })
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      safeDeleteSync(voltaRoot, { force: true })
+      await safeDelete(voltaRoot, { force: true })
     } catch {}
   })
 

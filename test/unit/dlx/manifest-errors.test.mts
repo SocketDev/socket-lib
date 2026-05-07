@@ -19,6 +19,7 @@ import { DlxManifest } from '../../../src/dlx/manifest'
 
 import {
   readFileUtf8Sync,
+  safeDelete,
   safeDeleteSync,
   safeMkdirSync,
 } from '../../../src/fs'
@@ -54,13 +55,12 @@ describe.sequential('dlx/manifest — error branches', () => {
     vi.mocked(safeMkdirSync).mockClear()
   })
 
-  afterEach(() => {
-    // The mock wraps `original.safeDeleteSync` so default invocations
-    // call through to the real impl. Cleanup runs before
-    // restoreAllMocks() so this call goes through the mock wrapper to
-    // the real function — fast path, no special cases needed.
+  afterEach(async () => {
+    // The vi.mock factory spreads `...original`, so `safeDelete`
+    // (async) is passed through unchanged. Use the async form per
+    // CLAUDE.md preference for async surrounding code.
     try {
-      safeDeleteSync(testDir, { force: true })
+      await safeDelete(testDir, { force: true })
     } catch {}
     vi.restoreAllMocks()
   })

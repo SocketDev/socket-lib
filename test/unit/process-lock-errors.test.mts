@@ -11,7 +11,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { processLock } from '../../src/process-lock'
-import { safeDeleteSync } from '../../src/fs'
+import { safeDelete, safeDeleteSync } from '../../src/fs'
 
 vi.mock('../../src/fs', async importOriginal => {
   const original = await importOriginal<typeof import('../../src/fs')>()
@@ -35,10 +35,9 @@ describe.sequential('process-lock — error branches', () => {
     vi.mocked(safeDeleteSync).mockClear()
   })
 
-  afterEach(() => {
-    // Mock wraps original.safeDeleteSync — default-impl call through.
+  afterEach(async () => {
     try {
-      safeDeleteSync(testDir, { force: true })
+      await safeDelete(testDir, { force: true })
     } catch {}
     vi.restoreAllMocks()
   })

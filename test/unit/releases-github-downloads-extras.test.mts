@@ -18,7 +18,7 @@ import {
   downloadReleaseAsset,
 } from '../../src/releases/github-downloads'
 
-import { safeDeleteSync } from '../../src/fs'
+import { safeDelete } from '../../src/fs'
 import { httpDownload } from '../../src/http-request'
 import {
   getLatestRelease,
@@ -64,10 +64,10 @@ describe.sequential('releases/github-downloads — extras', () => {
     vi.mocked(httpDownload).mockClear()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.restoreAllMocks()
     try {
-      safeDeleteSync(testDir, { force: true })
+      await safeDelete(testDir, { force: true })
     } catch {}
   })
 

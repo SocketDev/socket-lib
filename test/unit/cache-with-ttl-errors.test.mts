@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createTtlCache } from '../../src/cache-with-ttl'
 import { resetEnv, setEnv } from '../../src/env/rewire'
-import { safeDeleteSync } from '../../src/fs'
+import { safeDelete } from '../../src/fs'
 import { invalidateCaches } from '../../src/paths/rewire'
 
 import * as cacacheModule from '../../src/cacache'
@@ -45,7 +45,7 @@ describe.sequential('cache-with-ttl — error branches', () => {
     resetEnv()
     invalidateCaches()
     try {
-      safeDeleteSync(testCacheDir, { force: true })
+      await safeDelete(testCacheDir, { force: true })
     } catch {}
   })
 
