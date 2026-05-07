@@ -113,6 +113,8 @@ export function setMaxEventTargetListeners(
     s => s.description === 'events.maxEventTargetListeners',
   )
   if (kMaxEventTargetListeners) {
+    // The default events.defaultMaxListeners value is 10.
+    // https://nodejs.org/api/events.html#eventsdefaultmaxlisteners
     ;(target as unknown as Record<symbol, number>)[kMaxEventTargetListeners] =
       maxListeners
   }

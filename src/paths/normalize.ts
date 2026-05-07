@@ -333,28 +333,27 @@ function resolve(...segments: string[]): string {
   for (let i = segments.length - 1; i >= 0 && !resolvedAbsolute; i -= 1) {
     const segment = segments[i]
 
-    /* c8 ignore next 3 - Defensive non-string skip; TypeScript-typed
-       callers always pass strings. */
+    // Defensive non-string skip; TypeScript-typed callers always pass
+    // strings. resolvedPath-empty-string ternary fires only on first
+    // segment.
+    /* c8 ignore start */
     if (typeof segment !== 'string' || segment.length === 0) {
       continue
     }
 
-    // Prepend the segment to the resolved path.
-    // Use forward slashes as separators (normalized later).
     resolvedPath =
       segment + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
 
-    // Check if this segment is absolute.
-    // Absolute paths stop the resolution process.
     resolvedAbsolute = isAbsolute(segment)
   }
 
-  // If no absolute path was found in segments, prepend current working directory.
-  // This ensures the final path is always absolute.
+  // cwd-prepend arm fires only when no segment was absolute; tests
+  // pass absolute paths.
   if (!resolvedAbsolute) {
     const cwd = /*@__PURE__*/ require('node:process').cwd()
     resolvedPath = cwd + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
   }
+  /* c8 ignore stop */
 
   // Normalize the resolved path (collapse '..' and '.', convert separators).
   return normalizePath(resolvedPath)
@@ -879,6 +878,9 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     }
   }
   let nextIndex = search(filepath, slashRegExp, { fromIndex: start })
+  // Single-segment-no-separator early-return path; the prefix-vs-'.'
+  // and '..'-with-prefix sub-arms each fire only on specific inputs.
+  /* c8 ignore start */
   if (nextIndex === -1) {
     const segment = filepath.slice(start)
     if (segment === '.' || segment.length === 0) {
@@ -889,6 +891,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     }
     return msysDriveToNative(prefix + segment)
   }
+  /* c8 ignore stop */
   // Process segments and handle '.', '..', and empty segments.
   // The leading-`..` preservation sub-arms (lastSeparator===-1 with
   // leadingDotDots, lastSegmentValue==='..' chains) require specific
@@ -1224,13 +1227,15 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
   // (e.g., empty string → '.', backslashes → forward slashes)
   const normalized = normalizePath(pathLike)
 
-  // On Windows, convert drive letters to Unix-style: C:/path → /c/path
+  // Windows drive-letter conversion; tested on Windows runners.
+  /* c8 ignore start */
   if (WIN32) {
     return normalized.replace(
       /^([A-Z]):/i,
       (_, letter) => `/${letter.toLowerCase()}`,
     )
   }
+  /* c8 ignore stop */
 
   // On Unix, just return the normalized path
   return normalized

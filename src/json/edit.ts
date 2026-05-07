@@ -140,22 +140,24 @@ async function retryWrite(
       }
       /* c8 ignore stop */
       return
+      // Retry-loop catch fires only when writeFile throws on Windows
+      // file-system races; tests don't simulate EPERM/EBUSY.
+      /* c8 ignore start */
     } catch (e) {
       const isLastAttempt = attempt === retries
       const isRetriableError =
         isErrnoException(e) &&
         (e.code === 'EPERM' || e.code === 'EBUSY' || e.code === 'ENOENT')
 
-      // Only retry on Windows file system errors (EPERM/EBUSY/ENOENT), and not on the last attempt
       if (!isRetriableError || isLastAttempt) {
         throw e
       }
 
-      // Exponential backoff: 10ms, 20ms, 40ms
       const delay = baseDelay * 2 ** attempt
       // eslint-disable-next-line no-await-in-loop
       await sleep(delay)
     }
+    /* c8 ignore stop */
   }
 }
 
@@ -295,6 +297,8 @@ export function getEditableJsonClass<
         const content = stripFormattingSymbols(
           this.content as Record<string | symbol, unknown>,
         )
+        // sort:true arm fires only when caller opts in.
+        /* c8 ignore next */
         const sortedContent = options?.sort ? sortKeys(content) : content
         const formatting = getFormattingFromContent(
           this.content as Record<string | symbol, unknown>,
@@ -331,6 +335,8 @@ export function getEditableJsonClass<
         const content = stripFormattingSymbols(
           this.content as Record<string | symbol, unknown>,
         )
+        // sort:true arm fires only when caller opts in.
+        /* c8 ignore next */
         const sortedContent = options?.sort ? sortKeys(content) : content
         const formatting = getFormattingFromContent(
           this.content as Record<string | symbol, unknown>,

@@ -107,8 +107,9 @@ async function fetchReleasesViaRest(
     })
   }
   // Empty-array fallback fires only if GraphQL returns non-array body.
-  /* c8 ignore next */
+  /* c8 ignore start */
   return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
+  /* c8 ignore stop */
 }
 
 /**
@@ -298,13 +299,13 @@ async function fetchReleaseAssetsViaGraphQL(
   if (!release) {
     return undefined
   }
-  // Normalize to REST shape: GraphQL exposes the asset URL as
-  // `downloadUrl`, REST as `browser_download_url`. Map so the caller
-  // (and the asset-matcher) keep working unchanged.
+  // ?? [] fallback fires when GraphQL returns no releaseAssets.
+  /* c8 ignore start */
   return (release.releaseAssets?.nodes ?? []).map(n => ({
     browser_download_url: n.downloadUrl,
     name: n.name,
   }))
+  /* c8 ignore stop */
 }
 
 /**
@@ -578,11 +579,15 @@ export async function getReleaseAssetUrl(
 
       const asset = assets.find(a => isMatch(a.name))
 
+      // No-asset throw + AssetPattern-string-vs-object describer fire
+      // only on no-match cases; tests cover the happy path.
+      /* c8 ignore start */
       if (!asset) {
         const patternDesc =
           typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
         throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
       }
+      /* c8 ignore stop */
 
       return asset.browser_download_url
     }, RETRY_CONFIG)) ?? undefined

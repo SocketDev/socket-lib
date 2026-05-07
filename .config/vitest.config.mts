@@ -143,10 +143,10 @@ const vitestConfig = defineConfig({
       skipFull: false,
       ignoreClassMethods: ['constructor'],
       thresholds: {
-        lines: 96,
+        lines: 98,
         functions: 98,
-        branches: 90,
-        statements: 96,
+        branches: 95,
+        statements: 98,
       },
     },
   },

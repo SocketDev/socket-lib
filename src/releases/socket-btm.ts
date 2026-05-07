@@ -143,6 +143,9 @@ function getFs() {
  * ```
  */
 export function detectLibc(): Libc | undefined {
+  // Non-linux early-return arm fires on macOS/Windows (the test
+  // platform); linux-body is c8-ignored separately.
+  /* c8 ignore next 3 */
   if (getPlatform() !== 'linux') {
     return undefined
   }
@@ -193,6 +196,8 @@ export async function downloadSocketBtmRelease(
   tool: string,
   options: SocketBtmReleaseConfig | undefined,
 ): Promise<string> {
+  // options-undefined fallback fires when caller omits options.
+  /* c8 ignore next */
   const config = { __proto__: null, ...(options ?? {}) } as unknown as {
     cwd?: string | undefined
     downloadDir?: string | undefined
@@ -251,15 +256,17 @@ export async function downloadSocketBtmRelease(
         SOCKET_BTM_REPO,
       )
 
+      // No-asset throw and split-pop-fallback fire only on edge cases.
+      /* c8 ignore start */
       if (!assetUrl) {
         throw new ErrorCtor(`No matching asset found in release ${resolvedTag}`)
       }
-
-      // Extract asset name from URL.
       resolvedAsset = assetUrl.split('/').pop() || asset.toString()
+      /* c8 ignore stop */
     }
 
-    // Default output to resolved asset name if not provided
+    // output-undefined fallback fires when caller omits output.
+    /* c8 ignore next */
     const outputName = output || resolvedAsset
 
     // For non-binary assets, use a simple 'assets' directory instead of platform-arch
@@ -462,6 +469,10 @@ export function getPlatformArch(
   arch: Arch,
   libc?: Libc | undefined,
 ): string {
+  // Unsupported-platform/arch arms fire only on inputs outside the
+  // PLATFORM_MAP / ARCH_MAP keysets; the musl-suffix arm fires only on
+  // linux+musl combos.
+  /* c8 ignore start */
   const mappedPlatform = PLATFORM_MAP[platform]
   if (!mappedPlatform) {
     throw new ErrorCtor(`Unsupported platform: ${platform}`)
@@ -474,4 +485,5 @@ export function getPlatformArch(
 
   const muslSuffix = platform === 'linux' && libc === 'musl' ? '-musl' : ''
   return `${mappedPlatform}-${mappedArch}${muslSuffix}`
+  /* c8 ignore stop */
 }

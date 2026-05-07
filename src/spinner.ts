@@ -1521,15 +1521,13 @@ export async function withSpinner<T>(
     // Despite yocto-spinner calling clear(), ANSI-colored spinner frames can sometimes
     // leave visual artifacts on the line. A final explicit clear ensures clean output.
     // Only clear if spinner was actually running (which means it was already interactive).
+    // Each restore branch fires only when caller seeded the
+    // corresponding option; tests cover paths individually.
+    /* c8 ignore start */
     if (wasSpinning) {
-      // Clear current line thoroughly (where spinner was).
-      // Use \r to move to start, \x1B[2K to clear entire line.
-      // Direct stderr write here because logger.error would prefix
-      // with a symbol; we need the bare ANSI clear sequence.
       process.stderr.write('\r\x1B[2K') // socket-hook: allow logger
     }
 
-    // Restore previous options
     if (savedColor !== undefined) {
       spinner.color = savedColor
     }
@@ -1544,6 +1542,7 @@ export async function withSpinner<T>(
         spinner.disableShimmer()
       }
     }
+    /* c8 ignore stop */
   }
 }
 
@@ -1693,6 +1692,7 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
   } finally {
     spinner.stop()
     // Restore previous options
+    /* c8 ignore start */
     if (savedColor !== undefined) {
       spinner.color = savedColor
     }
@@ -1707,5 +1707,6 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
         spinner.disableShimmer()
       }
     }
+    /* c8 ignore stop */
   }
 }

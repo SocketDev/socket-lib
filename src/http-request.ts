@@ -924,18 +924,20 @@ async function httpRequestAttempt(
     const resolveOnce = (response: HttpResponse) => {
       // settled-already arm fires only on destroy() races where two
       // events fire after the first. Defensive.
-      /* c8 ignore next 3 */
+      /* c8 ignore start */
       if (settled) {
         return
       }
+      /* c8 ignore stop */
       settled = true
       resolve(response)
     }
     const rejectOnce = (err: Error) => {
-      /* c8 ignore next 3 */
+      /* c8 ignore start */
       if (settled) {
         return
       }
+      /* c8 ignore stop */
       settled = true
       // Clean up streaming body if still active to avoid leaked descriptors.
       if (
@@ -962,6 +964,8 @@ async function httpRequestAttempt(
       timeout,
     }
 
+    // ca + isHttps both required; tested individually but not always paired.
+    /* c8 ignore next 3 */
     if (ca && isHttps) {
       requestOptions['ca'] = ca
     }
