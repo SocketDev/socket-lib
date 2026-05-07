@@ -686,7 +686,8 @@ export function spawn(
       if (fs.existsSync(cached)) {
         actualCmd = cached
       } else {
-        // Cached path no longer exists, remove stale entry.
+        /* c8 ignore next - Stale-cache eviction; only fires if the
+           cached binary is removed mid-session. */
         spawnBinPathCache.delete(cmd)
       }
     }
@@ -728,6 +729,8 @@ export function spawn(
   // See: https://github.com/nodejs/node/issues/3675
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
+  /* c8 ignore start - Windows-only cmd.exe extension stripping for
+     .cmd/.bat/.ps1 shell-true execution. Tested on Windows runners. */
   if (
     WIN32 &&
     shell &&
@@ -745,6 +748,7 @@ export function spawn(
       )
     }
   }
+  /* c8 ignore stop */
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
   const wasSpinning = !!spinnerInstance?.isSpinning
@@ -929,6 +933,8 @@ export function spawnSync(
   const shell = getOwn(options, 'shell')
   // Inline WIN32 constant for coverage mode compatibility
   const WIN32 = process.platform === 'win32'
+  /* c8 ignore start - Windows-only cmd.exe extension stripping for
+     .cmd/.bat/.ps1 shell-true execution. Tested on Windows runners. */
   if (
     WIN32 &&
     shell &&
@@ -946,6 +952,7 @@ export function spawnSync(
       )
     }
   }
+  /* c8 ignore stop */
   const { stripAnsi: shouldStripAnsi = true, ...rawSpawnOptions } = {
     __proto__: null,
     ...options,

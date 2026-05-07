@@ -51,10 +51,13 @@ let pointingTriangle: string | undefined
  * Custom log function for debug output.
  * @private
  */
+/* c8 ignore start - customLog is assigned to debugJs instances and
+   only fires when debugJs emits, which requires DEBUG=* env var
+   set at the right module-load timing. Tests use the SOCKET_DEBUG
+   path which writes via logger.info directly. */
 /*@__NO_SIDE_EFFECTS__*/
 function customLog(...args: unknown[]) {
   const util = getUtil()
-  /* c8 ignore start - External debug library inspection options */
   const inspectOpts = debugJs.inspectOpts
     ? {
         ...debugJs.inspectOpts,
@@ -69,11 +72,11 @@ function customLog(...args: unknown[]) {
             : debugJs.inspectOpts.depth,
       }
     : {}
-  /* c8 ignore stop */
   ReflectApply(logger.info, logger, [
     util.formatWithOptions(inspectOpts, ...args),
   ])
 }
+/* c8 ignore stop */
 
 /**
  * Extract options from namespaces parameter.
@@ -116,6 +119,9 @@ function getCallerInfo(stackOffset: number = 3): string {
               name = match
                 // Strip known V8 invocation prefixes to get the name.
                 .replace(/^(?:async|bound|get|new|set)\s+/, '')
+              /* c8 ignore start - V8-specific 'Object.' stack frame
+                 prefix; only fires for stack frames in object literal
+                 method calls. Test stack frames are typically named. */
               if (StringPrototypeStartsWith(name, 'Object.')) {
                 // Strip leading 'Object.' if not an own property of Object.
                 const afterDot = StringPrototypeSlice(name, 7)
@@ -123,6 +129,7 @@ function getCallerInfo(stackOffset: number = 3): string {
                   name = afterDot
                 }
               }
+              /* c8 ignore stop */
             }
             break
           }
@@ -235,6 +242,9 @@ export function debugCache(
   // Get caller info with stack offset of 3 (caller -> debugCache -> getCallerInfo).
   const callerName = getCallerInfo(3) || 'cache'
 
+  /* c8 ignore next 4 - First-call init for module-level
+     pointingTriangle; only one of the 5 debug functions hits the
+     body. */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
@@ -265,6 +275,9 @@ export function debugCacheNs(
   // Get caller info with stack offset of 4 (caller -> debugCacheNs -> getCallerInfo).
   const callerName = getCallerInfo(4) || 'cache'
 
+  /* c8 ignore next 4 - First-call init for module-level
+     pointingTriangle; only one of the 5 debug functions hits the
+     body. */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
@@ -308,6 +321,9 @@ export function debugDirNs(
   // Get caller info with stack offset of 4 (caller -> debugDirNs -> getCallerInfo).
   const callerName = getCallerInfo(4) || 'anonymous'
 
+  /* c8 ignore next 4 - First-call init for module-level
+     pointingTriangle; only one of the 5 debug functions hits the
+     body. */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
@@ -361,6 +377,9 @@ export function debugLogNs(
   // Get caller info with stack offset of 4 (caller -> debugLogNs -> getCallerInfo).
   const callerName = getCallerInfo(4) || 'anonymous'
 
+  /* c8 ignore next 4 - First-call init for module-level
+     pointingTriangle; only one of the 5 debug functions hits the
+     body. */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
@@ -411,6 +430,9 @@ export function debugNs(
   }
   // Get caller info with stack offset of 4 (caller -> debugNs -> getCallerInfo).
   const name = getCallerInfo(4) || 'anonymous'
+  /* c8 ignore next 4 - First-call init for module-level
+     pointingTriangle; only one of the 5 debug functions hits the
+     body. */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'

@@ -1535,6 +1535,19 @@ describe('fs', () => {
       expect(normalizeEncoding('binary')).toBe('latin1')
       expect(normalizeEncoding('BINARY')).toBe('latin1')
       expect(normalizeEncoding('BiNaRy')).toBe('latin1')
+      expect(normalizeEncoding('LaTiN1')).toBe('latin1')
+    })
+
+    it('should normalize mixed-case utf16le (length 7)', () => {
+      expect(normalizeEncoding('UtF16Le')).toBe('utf16le')
+    })
+
+    it('should normalize mixed-case utf-16le (length 8)', () => {
+      expect(normalizeEncoding('UtF-16le')).toBe('utf16le')
+    })
+
+    it('should normalize mixed-case base64url (length 9)', () => {
+      expect(normalizeEncoding('Base64Url')).toBe('base64url')
     })
 
     it('should normalize ucs2 and ucs-2 to utf16le', () => {

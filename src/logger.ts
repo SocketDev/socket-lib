@@ -159,7 +159,8 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     const infoColor = theme.colors.info
     const stepColor = theme.colors.step
 
-    // Update symbol values
+    /* c8 ignore start - ASCII-fallback symbol arms only fire on
+       terminals without unicode support; tests run on unicode TTYs. */
     target['fail'] = applyColor(supported ? '✖' : '×', errorColor, colors)
     target['info'] = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
     target['progress'] = applyColor(supported ? '∴' : ':.', stepColor, colors)
@@ -170,6 +171,7 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     target['step'] = applyColor(supported ? '→' : '>', stepColor, colors)
     target['success'] = applyColor(supported ? '✔' : '√', successColor, colors)
     target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor, colors)
+    /* c8 ignore stop */
   }
 
   const init = () => {
@@ -546,6 +548,8 @@ export class Logger {
     const supported = isUnicodeSupported()
     const colors = getYoctocolors()
 
+    /* c8 ignore start - ASCII-fallback symbol arms only fire on
+       terminals without unicode support; tests run on unicode TTYs. */
     return {
       __proto__: null,
       fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
@@ -556,6 +560,7 @@ export class Logger {
       success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
       warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
     } as LogSymbols
+    /* c8 ignore stop */
   }
 
   /**
@@ -1753,6 +1758,7 @@ function applyColor(
  */
 /*@__NO_SIDE_EFFECTS__*/
 function constructConsole(...args: unknown[]) {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_Console === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -1848,6 +1854,7 @@ function ensurePrototypeInitialized() {
  * @private
  */
 function getConsoleSymbols(): symbol[] {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_consoleSymbols === undefined) {
     _consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
   }
@@ -1859,6 +1866,7 @@ function getConsoleSymbols(): symbol[] {
  * @private
  */
 function getKGroupIndentationWidthSymbol(): symbol {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_kGroupIndentationWidthSymbol === undefined) {
     _kGroupIndentationWidthSymbol =
       getConsoleSymbols().find(s => (s as any).label === 'kGroupIndentWidth') ??

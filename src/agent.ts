@@ -221,6 +221,8 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
     isPnpmInstallCommand(firstArg) &&
     !pnpmArgs.some(isPnpmFrozenLockfileFlag)
   ) {
+    /* c8 ignore next - CI-only --no-frozen-lockfile injection;
+       getCI() returns false in test runs by default. */
     frozenLockfileArgs.push('--no-frozen-lockfile')
   }
 

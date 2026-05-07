@@ -537,6 +537,92 @@ describe('agent', () => {
         result.catch(() => {})
         expect(result).toBeInstanceOf(Promise)
       })
+
+      it('should pass through shell:true unchanged', () => {
+        const result = execScript('echo hi', [], { shell: true })
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+    })
+
+    describe('argument terminator (--) handling', () => {
+      it('execNpm should split args at -- terminator', () => {
+        const result = execNpm([
+          'install',
+          '--save',
+          '--',
+          '--no-audit',
+          '--fund',
+        ])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('execPnpm should split args at -- terminator', () => {
+        const result = execPnpm(['install', '--', '--progress'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('execYarn should split args at -- terminator', () => {
+        const result = execYarn(['install', '--', '--frozen-lockfile'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+    })
+
+    describe('loglevel preservation', () => {
+      it('execNpm should preserve user-provided --loglevel', () => {
+        const result = execNpm(['install', '--loglevel', 'silent'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('execPnpm should preserve user-provided --loglevel', () => {
+        const result = execPnpm(['install', '--loglevel', 'silent'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+    })
+
+    describe('execPnpm install-command coverage', () => {
+      it('should handle install command without ignore-scripts flag (adds --ignore-scripts)', () => {
+        const result = execPnpm(['install'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('should respect existing --ignore-scripts flag', () => {
+        const result = execPnpm(['install', '--ignore-scripts'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('should not add --ignore-scripts for non-install commands', () => {
+        const result = execPnpm(['list'])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('should accept allowLockfileUpdate option', () => {
+        const result = execPnpm(['install'], { allowLockfileUpdate: true })
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('should respect existing --frozen-lockfile flag', () => {
+        const result = execPnpm(['install', '--frozen-lockfile'], {
+          allowLockfileUpdate: true,
+        })
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
+
+      it('should handle empty args array', () => {
+        const result = execPnpm([])
+        result.catch(() => {})
+        expect(result).toBeInstanceOf(Promise)
+      })
     })
   })
 

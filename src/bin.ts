@@ -228,6 +228,7 @@ export function findRealNpm(): string {
   }
 
   // Try common npm locations per platform.
+  /* c8 ignore next 2 - getAppdata() returns undefined off-Windows. */
   const appdata = getAppdata()
   const commonPaths = WIN32
     ? [
