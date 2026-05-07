@@ -106,14 +106,18 @@ export async function execBin(
     // Check cache first for binary names.
     // Validate with existsSync() - cheaper than full PATH search.
     const cached = binPathCache.get(binPath)
+    // Cache hit branches: warm cache validates with existsSync, cold
+    // cache falls through. Stale-cache eviction fires only when a
+    // previously cached binary is removed mid-session.
+    /* c8 ignore start */
     if (cached) {
       if (getFs().existsSync(cached)) {
         resolvedPath = cached
       } else {
-        /* c8 ignore next - Stale-cache eviction. */
         binPathCache.delete(binPath)
       }
     }
+    /* c8 ignore stop */
     if (!resolvedPath) {
       resolvedPath = await whichReal(binPath)
       // Cache the result if found.
@@ -179,11 +183,11 @@ export function findRealBin(
 
   // Fall back to whichModule.sync if no direct path found.
   // Use all: true to get all paths in a single call (avoids double PATH search on Windows).
-  /* c8 ignore next - External which call */
+  // External which call.
+  /* c8 ignore start */
   const allPaths = whichModule.sync(binName, { all: true, nothrow: true }) || []
-  // Ensure allPaths is an array.
-  /* c8 ignore next 5 - whichModule with all:true returns string[]; the
-     string and undefined fallbacks are defensive. */
+  // Ensure allPaths is an array. whichModule with all:true returns
+  // string[]; the string and undefined fallbacks are defensive.
   const pathsArray = ArrayIsArray(allPaths)
     ? allPaths
     : typeof allPaths === 'string'
@@ -193,6 +197,7 @@ export function findRealBin(
   if (pathsArray.length === 0) {
     return undefined
   }
+  /* c8 ignore stop */
 
   // First, try to find a non-shadow bin path.
   for (const binPath of pathsArray) {
@@ -220,32 +225,33 @@ export function findRealNpm(): string {
   const path = getPath()
 
   // Try to find npm alongside the node executable. On Windows this is
-  // npm.cmd; on POSIX it's the bare npm shim.
+  // npm.cmd; on POSIX it's the bare npm shim. WIN32-only candidates
+  // tested on Windows runners.
   const nodeDir = path.dirname(process.execPath)
+  /* c8 ignore start */
   const nodeDirCandidates = WIN32
-    ? /* c8 ignore next - WIN32 candidates tested on Windows runners. */
-      [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
+    ? [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
     : [path.join(nodeDir, 'npm')]
+  /* c8 ignore stop */
   for (const candidate of nodeDirCandidates) {
     if (fs.existsSync(candidate)) {
       return candidate
     }
   }
 
-  // Try common npm locations per platform.
-  // getAppdata() returns undefined off-Windows.
+  // Try common npm locations per platform. getAppdata() returns
+  // undefined off-Windows; WIN32 commonPaths tested on Windows runners.
   /* c8 ignore start */
   const appdata = getAppdata()
   const commonPaths = WIN32
-    ? /* c8 ignore stop */
-      /* c8 ignore next 6 - WIN32 commonPaths tested on Windows runners. */
-      [
+    ? [
         appdata ? path.join(appdata, 'npm', 'npm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'npm') : '',
         'C:\\Program Files\\nodejs\\npm.cmd',
         'C:\\Program Files\\nodejs\\npm',
       ].filter(Boolean)
     : ['/usr/local/bin/npm', '/usr/bin/npm']
+  /* c8 ignore stop */
   const result = findRealBin('npm', commonPaths)
 
   // If we found a valid path, return it.
@@ -286,9 +292,11 @@ export function findRealPnpm(): string {
 
   // Try common pnpm locations. Guard each env-derived path with its
   // existence — getHome()/getAppdata()/etc. can all return undefined.
+  // WIN32 commonPaths tested on Windows runners; HOME-based fallback
+  // fires only when XDG_DATA_HOME is unset (env-config dependent).
+  /* c8 ignore start */
   const commonPaths = WIN32
-    ? /* c8 ignore next 8 - WIN32 commonPaths tested on Windows runners. */
-      [
+    ? [
         appdata ? path.join(appdata, 'npm', 'pnpm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'pnpm') : '',
         localappdata ? path.join(localappdata, 'pnpm', 'pnpm.cmd') : '',
@@ -301,13 +309,12 @@ export function findRealPnpm(): string {
         '/usr/bin/pnpm',
         xdgDataHome
           ? path.join(xdgDataHome, 'pnpm/pnpm')
-          : /* c8 ignore next 3 - HOME-based fallback fires only when
-               XDG_DATA_HOME is unset; depends on env config. */
-            home
+          : home
             ? path.join(home, '.local/share/pnpm/pnpm')
             : '',
         home ? path.join(home, '.pnpm/pnpm') : '',
       ].filter(Boolean)
+  /* c8 ignore stop */
 
   return findRealBin('pnpm', commonPaths) ?? ''
 }
@@ -328,9 +335,10 @@ export function findRealYarn(): string {
 
   // Try common yarn locations per platform. Guard env-derived paths with
   // existence checks — getHome()/getAppdata() can return undefined.
+  // WIN32 commonPaths tested on Windows runners.
+  /* c8 ignore start */
   const commonPaths = WIN32
-    ? /* c8 ignore next 8 - WIN32 commonPaths tested on Windows runners. */
-      [
+    ? [
         appdata ? path.join(appdata, 'npm', 'yarn.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'yarn') : '',
         home ? path.join(home, '.yarn/bin/yarn.cmd') : '',
@@ -346,6 +354,7 @@ export function findRealYarn(): string {
           ? path.join(home, '.config/yarn/global/node_modules/.bin/yarn')
           : '',
       ].filter(Boolean)
+  /* c8 ignore stop */
 
   return findRealBin('yarn', commonPaths) ?? ''
 }

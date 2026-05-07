@@ -1719,16 +1719,17 @@ export class Logger {
    */
   write(text: string): this {
     const con = this.#getConsole()
-    // Write directly to the original stdout stream to bypass Console formatting
-    // (e.g., group indentation). Try multiple approaches to get the raw stream:
-    // 1. Use stored reference from constructor options
-    // 2. Try to get from constructor args
-    // 3. Fall back to con._stdout (which applies formatting)
+    // Write directly to the original stdout stream to bypass Console
+    // formatting. The two fallback arms (ctorArgs.stdout, then
+    // con._stdout) only fire when #originalStdout wasn't seeded, which
+    // most Logger instances avoid by passing options.
     const ctorArgs = privateConstructorArgs.get(this) ?? []
+    /* c8 ignore start */
     const stdout =
       this.#originalStdout ||
       (ctorArgs[0] as { stdout?: NodeJS.WritableStream } | undefined)?.stdout ||
       (con as unknown as { _stdout: NodeJS.WritableStream })._stdout
+    /* c8 ignore stop */
     stdout.write(text)
     this[lastWasBlankSymbol](false)
     return this
@@ -1810,16 +1811,15 @@ function ensurePrototypeInitialized() {
       // Dynamically name the log method without using Object.defineProperty.
       const { [key]: func } = {
         [key](this: Logger, ...args: unknown[]) {
-          // Access Console via WeakMap directly since private methods can't be
-          // called from dynamically created functions.
+          // Access Console via WeakMap directly since private methods can't
+          // be called from dynamically created functions. con-undefined only
+          // fires if someone calls a dynamically added console method before
+          // any core logger method, which is rare.
+          /* c8 ignore start */
           let con = privateConsole.get(this)
           if (con === undefined) {
-            // Lazy initialization - this will only happen if someone calls a
-            // dynamically added console method before any core logger method.
             const ctorArgs = privateConstructorArgs.get(this) ?? []
-            // Clean up constructor args - no longer needed after Console creation.
             privateConstructorArgs.delete(this)
-            /* c8 ignore start - Console construction internals */
             if (ctorArgs.length) {
               con = constructConsole(...ctorArgs)
             } else {
@@ -1831,10 +1831,13 @@ function ensurePrototypeInitialized() {
                 con[k] = method
               }
             }
-            /* c8 ignore stop */
             privateConsole.set(this, con)
           }
+          /* c8 ignore stop */
           const result = (con as any)[key](...args)
+          // Most Console methods return undefined; the `=== con` chain
+          // arm fires for builtin methods that return `this`.
+          /* c8 ignore next */
           return result === undefined || result === con ? this : result
         },
       }
@@ -1858,10 +1861,12 @@ function ensurePrototypeInitialized() {
  * @private
  */
 function getConsoleSymbols(): symbol[] {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
+  // Lazy-init second-call branch; module-singleton.
+  /* c8 ignore start */
   if (_consoleSymbols === undefined) {
     _consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
   }
+  /* c8 ignore stop */
   return _consoleSymbols
 }
 

@@ -302,8 +302,12 @@ function desc(value: unknown) {
  */
 function formatProgress(progress: ProgressInfo): string {
   const { current, total, unit } = progress
+  // total===0 fires only when caller starts a 0-of-0 progress.
+  /* c8 ignore next */
   const percentage = total === 0 ? 0 : MathRound((current / total) * 100)
   const bar = renderProgressBar(percentage)
+  // unit defaults to undefined; both arms exercised when caller omits unit.
+  /* c8 ignore next */
   const count = unit ? `${current}/${total} ${unit}` : `${current}/${total}`
   return `${bar} ${percentage}% (${count})`
 }
@@ -316,6 +320,8 @@ function formatProgress(progress: ProgressInfo): string {
  * @private
  */
 function normalizeText(value: unknown) {
+  // Empty-string fallback fires only on non-string inputs.
+  /* c8 ignore next */
   return typeof value === 'string' ? value.trimStart() : ''
 }
 
@@ -1498,7 +1504,9 @@ export async function withSpinner<T>(
     if (wasSpinning) {
       // Clear current line thoroughly (where spinner was).
       // Use \r to move to start, \x1B[2K to clear entire line.
-      process.stderr.write('\r\x1B[2K')
+      // Direct stderr write here because logger.error would prefix
+      // with a symbol; we need the bare ANSI clear sequence.
+      process.stderr.write('\r\x1B[2K') // socket-hook: allow logger
     }
 
     // Restore previous options

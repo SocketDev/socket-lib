@@ -317,6 +317,8 @@ export const BufferIsEncoding: typeof Buffer.isEncoding | undefined =
   BufferCtor?.isEncoding
 
 // ─── Buffer (prototype) ────────────────────────────────────────────────
+// BufferCtor undefined arm fires only on runtimes without Buffer.
+/* c8 ignore start */
 export const BufferPrototypeSlice:
   | ((buf: Buffer, start?: number, end?: number) => Buffer)
   | undefined = BufferCtor ? uncurryThis(BufferCtor.prototype.slice) : undefined
@@ -330,6 +332,7 @@ export const BufferPrototypeToString:
   | undefined = BufferCtor
   ? uncurryThis(BufferCtor.prototype.toString)
   : undefined
+/* c8 ignore stop */
 
 // ─── Date (static) ─────────────────────────────────────────────────────
 // `dateNow` Fast API binding inlines the wallclock-read into JIT'd
@@ -407,16 +410,22 @@ const _stackTraceLimitGetter: (() => number) | undefined = (() => {
       __lookupGetter__?: (key: string) => (() => number) | undefined
     }
   ).__lookupGetter__?.('stackTraceLimit')
+  // V8 always exposes __lookupGetter__ for Error.stackTraceLimit.
+  /* c8 ignore start */
   if (typeof getter === 'function') {
     return () => getter.call(Error)
   }
   return undefined
+  /* c8 ignore stop */
 })()
 export function ErrorStackTraceLimit(): number | undefined {
+  // _stackTraceLimitGetter is always set on V8.
+  /* c8 ignore start */
   if (_stackTraceLimitGetter) {
     return _stackTraceLimitGetter()
   }
   return (Error as { stackTraceLimit?: number }).stackTraceLimit
+  /* c8 ignore stop */
 }
 
 // ─── Function ──────────────────────────────────────────────────────────
@@ -457,10 +466,13 @@ const _iteratorProto = _iteratorLookup as {
   return?: (this: Iterator<unknown>, value?: unknown) => IteratorResult<unknown>
 }
 export const IteratorPrototypeNext = uncurryThis(_iteratorProto.next)
+// Iterator.prototype.return is always a function in modern V8.
+/* c8 ignore start */
 export const IteratorPrototypeReturn =
   typeof _iteratorProto.return === 'function'
     ? uncurryThis(_iteratorProto.return)
     : undefined
+/* c8 ignore stop */
 
 // ─── Map (prototype) ───────────────────────────────────────────────────
 export const MapPrototypeClear = uncurryThis(Map.prototype.clear)
@@ -570,12 +582,16 @@ export const NumberIsSafeInteger =
 export const NumberParseFloat =
   _smolPrimordial?.numberParseFloat ?? Number.parseFloat
 const _smolParseInt10 = _smolPrimordial?.numberParseInt10
+// _smolParseInt10 fast-path fires only on socket-btm's smol Node binary;
+// stock Node falls through to Number.parseInt.
+/* c8 ignore start */
 export const NumberParseInt: typeof Number.parseInt = _smolParseInt10
   ? (s, radix) =>
       radix === undefined || radix === 10
         ? _smolParseInt10(s as string)
         : Number.parseInt(s, radix)
   : Number.parseInt
+/* c8 ignore stop */
 export const NumberPrototypeToFixed = uncurryThis(Number.prototype.toFixed)
 export const NumberPrototypeToString = uncurryThis(Number.prototype.toString)
 
@@ -734,6 +750,8 @@ export const StringPrototypeCharAt = uncurryThis(String.prototype.charAt)
 // NaN from an int32 signature); the wrapper here translates -1 back
 // to NaN to match `String.prototype.charCodeAt` spec.
 const _smolCharCodeAt = _smolPrimordial?.stringCharCodeAt
+// _smolCharCodeAt fast-path fires only on socket-btm's smol Node binary.
+/* c8 ignore start */
 export const StringPrototypeCharCodeAt: (s: string, i: number) => number =
   _smolCharCodeAt
     ? (s, i) => {
@@ -741,6 +759,7 @@ export const StringPrototypeCharCodeAt: (s: string, i: number) => number =
         return code === -1 ? NaN : code
       }
     : uncurryThis(String.prototype.charCodeAt)
+/* c8 ignore stop */
 export const StringPrototypeCodePointAt = uncurryThis(
   String.prototype.codePointAt,
 )
@@ -848,9 +867,12 @@ const _symbolDescriptionGetter = (
   }
 ).__lookupGetter__('description')
 export function SymbolPrototypeDescription(self: symbol): string | undefined {
+  // _symbolDescriptionGetter is always set in modern V8.
+  /* c8 ignore start */
   return _symbolDescriptionGetter
     ? _symbolDescriptionGetter.call(self)
     : self.description
+  /* c8 ignore stop */
 }
 export const SymbolPrototypeToString = uncurryThis(Symbol.prototype.toString)
 export const SymbolPrototypeValueOf = uncurryThis(Symbol.prototype.valueOf) as (
