@@ -98,6 +98,21 @@ async function main(): Promise<void> {
     logger.log('First 10:', registryPkgFiles.slice(0, 10))
   }
 
+  // Build the set of source files once so we can emit a `source` export
+  // condition only when the corresponding `src/<path>.ts` exists. The
+  // `source` condition lets vitest (which sets `conditions: ['source']`)
+  // resolve `@socketsecurity/lib/<subpath>` to `src/*.ts` for accurate
+  // coverage attribution; production / consumer resolves still land on
+  // `default` (the dist build).
+  const srcRoot = path.join(registryPkgPath, 'src')
+  const srcFiles = new Set<string>(
+    await fastGlob.glob(['**/*.{ts,mts,cts}'], {
+      cwd: srcRoot,
+      ignore: ['**/*.d.ts', 'external/**'],
+      gitignore: false,
+    }),
+  )
+
   const jsonExports = {}
   const subpathExports = registryPkgFiles.reduce((o, p) => {
     const ext = p.endsWith(EXT_DTS) ? EXT_DTS : path.extname(p)
@@ -119,11 +134,33 @@ async function main(): Promise<void> {
       } else {
         publicPath = `./${exportPath.slice(0, -ext.length)}`
       }
+      // Resolve a matching source file for the `source` condition.
+      // Only emit it when the file actually exists — some dist files
+      // (re-exports, generated bundles) have no `src` twin.
+      let sourcePath: string | undefined
+      if (!isDts && p.startsWith('dist/')) {
+        const distRel = p.slice(5).slice(0, -ext.length)
+        for (const candidate of [
+          `${distRel}.ts`,
+          `${distRel}.mts`,
+          `${distRel}.cts`,
+        ]) {
+          if (srcFiles.has(candidate)) {
+            sourcePath = `./src/${candidate}`
+            break
+          }
+        }
+      }
       if (o[publicPath]) {
         o[publicPath][isDts ? 'types' : 'default'] = filePath
+        if (sourcePath && !o[publicPath].source) {
+          o[publicPath].source = sourcePath
+        }
       } else {
         o[publicPath] = {
-          // Order is significant. Default should be specified last.
+          // Order is significant: `source` first (most specific dev
+          // condition), then `types`, then `default` last.
+          source: sourcePath,
           types: isDts ? filePath : undefined,
           default: isDts ? undefined : filePath,
         }
