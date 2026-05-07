@@ -533,6 +533,42 @@ describe('paths/normalize', () => {
       const result = relativeResolve('/foo/bar', '/foo/bar')
       expect(result).toBe('')
     })
+
+    it('returns empty string when paths normalize to the same target', () => {
+      // resolve() collapses trailing-slash and "." segments — the
+      // post-resolve same-path branch fires.
+      const result = relativeResolve('/foo/bar', '/foo/bar/.')
+      expect(result).toBe('')
+    })
+
+    it('returns empty for trailing-slash normalization', () => {
+      const result = relativeResolve('/foo/bar/', '/foo/bar')
+      expect(result).toBe('')
+    })
+
+    it('returns descendant path when from is the root and to is a child', () => {
+      // from='/'; to='/foo/bar' → 'foo/bar' (the i===0 destination-longer branch)
+      const result = relativeResolve('/', '/foo/bar')
+      expect(result).toBe('foo/bar')
+    })
+
+    it('returns ../.. when from is a descendant and to is the root', () => {
+      // from='/foo/bar'; to='/' → '../..' (the i===0 source-longer branch)
+      const result = relativeResolve('/foo/bar', '/')
+      expect(result).toBe('../..')
+    })
+
+    it('returns base segment when from is exact ancestor of to', () => {
+      // from='/foo/bar'; to='/foo/bar/baz' → 'baz' (separator-following branch)
+      const result = relativeResolve('/foo/bar', '/foo/bar/baz')
+      expect(result).toBe('baz')
+    })
+
+    it('returns .. when to is exact ancestor of from', () => {
+      // from='/foo/bar/baz'; to='/foo/bar' → '..' (separator-after-last-common)
+      const result = relativeResolve('/foo/bar/baz', '/foo/bar')
+      expect(result).toBe('..')
+    })
   })
 
   describe('toUnixPath', () => {

@@ -182,6 +182,8 @@ export function findRealBin(
   /* c8 ignore next - External which call */
   const allPaths = whichModule.sync(binName, { all: true, nothrow: true }) || []
   // Ensure allPaths is an array.
+  /* c8 ignore next 5 - whichModule with all:true returns string[]; the
+     string and undefined fallbacks are defensive. */
   const pathsArray = ArrayIsArray(allPaths)
     ? allPaths
     : typeof allPaths === 'string'

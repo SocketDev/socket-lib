@@ -748,7 +748,42 @@ describe('fs', () => {
         expect(result).toBeUndefined()
       }, 'readJsonSync-invalid-no-throw-')
     })
+
+    if (process.platform !== 'win32') {
+      it('should throw "Permission denied" on EACCES', async () => {
+        await runWithTempDir(async tmpDir => {
+          const testFile = path.join(tmpDir, 'no-read.json')
+          await fs.writeFile(testFile, '{"x":1}', 'utf8')
+          await fs.chmod(testFile, 0o000)
+          try {
+            expect(() => readJsonSync(testFile)).toThrow(/Permission denied/)
+          } finally {
+            // Restore so cleanup can proceed.
+            await fs.chmod(testFile, 0o644)
+          }
+        }, 'readJsonSync-eacces-')
+      })
+    }
   })
+
+  if (process.platform !== 'win32') {
+    describe('readJson — permission errors', () => {
+      it('should throw "Permission denied" on EACCES (async)', async () => {
+        await runWithTempDir(async tmpDir => {
+          const testFile = path.join(tmpDir, 'no-read.json')
+          await fs.writeFile(testFile, '{"x":1}', 'utf8')
+          await fs.chmod(testFile, 0o000)
+          try {
+            await expect(readJson(testFile)).rejects.toThrow(
+              /Permission denied/,
+            )
+          } finally {
+            await fs.chmod(testFile, 0o644)
+          }
+        }, 'readJson-eacces-')
+      })
+    })
+  }
 
   describe('safeDelete', () => {
     it('should delete files in temp directory', async () => {
