@@ -308,6 +308,10 @@ export function execScript(
     return execYarn(['run', scriptName, ...resolvedArgs], spawnOptions)
   }
 
+  /* c8 ignore start - No-lockfile fallback. findUpSync walks ancestor
+     directories, so reaching this in unit tests requires a tmpdir
+     whose ancestors have no pnpm-lock/package-lock/yarn.lock —
+     fragile in CI runners that have a pnpm-lock at the workspace root. */
   return spawn(
     getExecPath(),
     [
@@ -320,6 +324,7 @@ export function execScript(
       ...spawnOptions,
     },
   )
+  /* c8 ignore stop */
 }
 
 /**

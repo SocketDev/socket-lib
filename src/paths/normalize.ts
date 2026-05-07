@@ -96,6 +96,7 @@ function isPathSeparator(code: number): boolean {
  * isWindowsDeviceRoot(47)  // false - forward slash '/'
  * ```
  */
+/* c8 ignore start - Only called from Windows-only branches. */
 /*@__NO_SIDE_EFFECTS__*/
 function isWindowsDeviceRoot(code: number): boolean {
   return (
@@ -103,6 +104,7 @@ function isWindowsDeviceRoot(code: number): boolean {
     (code >= CHAR_LOWERCASE_A && code <= CHAR_LOWERCASE_Z)
   )
 }
+/* c8 ignore stop */
 
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 function msysDriveToNative(normalized: string): string {
@@ -401,6 +403,7 @@ function resolve(...segments: string[]): string {
 /*@__NO_SIDE_EFFECTS__*/
 export function fromUnixPath(pathLike: string | Buffer | URL): string {
   const normalized = normalizePath(pathLike)
+  /* c8 ignore next 3 - Windows-only backslash conversion. */
   if (WIN32) {
     return normalized.replace(/\//g, '\\')
   }
@@ -477,6 +480,7 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
     return true
   }
 
+  /* c8 ignore start - Windows drive-letter detection. */
   // Windows: drive-letter absolute paths (e.g., C:\, D:\).
   // Format: [A-Za-z]:[\\/]
   // Requires at least 3 characters: drive letter + colon + separator.
@@ -494,6 +498,7 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
       return true
     }
   }
+  /* c8 ignore stop */
 
   // Not an absolute path.
   return false

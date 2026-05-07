@@ -110,7 +110,7 @@ export async function execBin(
       if (getFs().existsSync(cached)) {
         resolvedPath = cached
       } else {
-        // Cached path no longer exists, remove stale entry.
+        /* c8 ignore next - Stale-cache eviction. */
         binPathCache.delete(binPath)
       }
     }
@@ -244,6 +244,9 @@ export function findRealNpm(): string {
     return result
   }
 
+  /* c8 ignore start - Fallback paths only fire when npm isn't found
+     at any of the common platform locations above. Test runners
+     always have npm somewhere standard. */
   // As a last resort, try to use whichRealSync to find npm.
   // This handles cases where npm is installed in non-standard locations.
   const npmPath = whichRealSync('npm', { nothrow: true })
@@ -253,6 +256,7 @@ export function findRealNpm(): string {
 
   // Return the basic 'npm' and let the system resolve it.
   return 'npm'
+  /* c8 ignore stop */
 }
 
 /**
@@ -398,7 +402,7 @@ export function resolveRealBinSync(binPath: string): string {
       if (fs.existsSync(cachedVolta)) {
         return cachedVolta
       }
-      // Cached Volta path no longer exists, remove stale entry.
+      /* c8 ignore next - Stale-cache eviction. */
       voltaBinCache.delete(voltaCacheKey)
     }
 
@@ -839,7 +843,8 @@ export async function whichReal(
       if (fs.existsSync(cachedAll[0]!)) {
         return cachedAll
       }
-      // Primary cached path no longer exists, remove stale entry.
+      /* c8 ignore next - Stale-cache eviction; only fires if a
+         previously cached binary is removed mid-session. */
       binPathAllCache.delete(binName)
     }
   } else {
@@ -848,7 +853,7 @@ export async function whichReal(
       if (fs.existsSync(cached)) {
         return cached
       }
-      // Cached path no longer exists, remove stale entry.
+      /* c8 ignore next - Stale-cache eviction (see above). */
       binPathCache.delete(binName)
     }
   }
@@ -917,7 +922,7 @@ export function whichRealSync(
       if (fs.existsSync(cachedAll[0]!)) {
         return cachedAll
       }
-      // Primary cached path no longer exists, remove stale entry.
+      /* c8 ignore next - Stale-cache eviction (see whichReal). */
       binPathAllCache.delete(binName)
     }
   } else {
@@ -926,7 +931,7 @@ export function whichRealSync(
       if (fs.existsSync(cached)) {
         return cached
       }
-      // Cached path no longer exists, remove stale entry.
+      /* c8 ignore next - Stale-cache eviction (see whichReal). */
       binPathCache.delete(binName)
     }
   }

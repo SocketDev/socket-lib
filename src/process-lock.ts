@@ -134,6 +134,8 @@ class ProcessLockManager {
     }
 
     onExit(() => {
+      /* c8 ignore start - Exit-handler body only fires on real
+         process exit. Subprocess test infra would be needed. */
       // Clear all touch timers.
       for (const timer of this.touchTimers.values()) {
         clearInterval(timer)
@@ -151,6 +153,7 @@ class ProcessLockManager {
           // Ignore cleanup errors during exit.
         }
       }
+      /* c8 ignore stop */
     })
 
     this.exitHandlerRegistered = true

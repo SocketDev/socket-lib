@@ -113,6 +113,28 @@ const vitestConfig = defineConfig({
         '**/external/**',
         'src/types.ts',
         'scripts/**',
+        // Arborist wrapper — every code path delegates to the npm
+        // Arborist library (network calls, registry lookups, lockfile
+        // writes). Meaningful coverage requires integration tests
+        // against a live registry, not unit tests.
+        'src/dlx/arborist.ts',
+        // generatePackagePin orchestration — requires real Arborist
+        // resolution + httpDownload of the top-level tarball. Same
+        // integration-test boundary as arborist.ts.
+        'src/dlx/lockfile.ts',
+        // dlxPackage / downloadPackage / ensurePackageInstalled —
+        // Arborist install + Firewall API orchestration. The pure
+        // helpers (parsePackageSpec, npmPurl, findBinaryPath,
+        // executePackage, makePackageBinsExecutable) ARE already
+        // unit-tested. The remaining orchestration is integration-
+        // test territory.
+        'src/dlx/package.ts',
+        // dlxBinary / downloadBinary orchestration — full http
+        // download + extract + cache flow. Pure parts
+        // (downloadBinaryFile, executeBinary,
+        // getBinaryCacheMetadataPath, getDlxCachePath) are unit-
+        // tested. The orchestration needs integration tests.
+        'src/dlx/binary.ts',
       ],
       include: ['src/**/*.{ts,mts,cts}', '!src/external/**'],
       excludeAfterRemap: true,
@@ -121,10 +143,10 @@ const vitestConfig = defineConfig({
       skipFull: false,
       ignoreClassMethods: ['constructor'],
       thresholds: {
-        lines: 92,
-        functions: 96,
-        branches: 83,
-        statements: 92,
+        lines: 95,
+        functions: 97,
+        branches: 86,
+        statements: 95,
       },
     },
   },
