@@ -8,7 +8,7 @@
  * paths.
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
@@ -56,6 +56,15 @@ describe.sequential('dlx/manifest — error branches', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    // safeDeleteSync from the SUT module is mocked; use node:fs.rmSync
+    // directly here to clean up the tmpdir without going through the
+    // mocked surface. CLAUDE.md prefers safeDelete[Sync] in src/, but
+    // tests that mock the lib boundary need the raw escape hatch.
+    try {
+      rmSync(testDir, { recursive: true, force: true })
+    } catch {
+      // Best-effort cleanup; OS sweeps tmpdir eventually anyway.
+    }
   })
 
   describe('readManifest catch path', () => {
@@ -69,6 +78,16 @@ describe.sequential('dlx/manifest — error branches', () => {
       const result = manifest.getAllPackages()
       expect(result).toEqual([])
     })
+
+    it('returns empty array from getAllPackages when manifest content is empty', () => {
+      writeFileSync(manifestPath, '   \n  ', 'utf8')
+      expect(manifest.getAllPackages()).toEqual([])
+    })
+
+    it('returns empty array from getAllPackages when manifest does not exist', () => {
+      // No file written at manifestPath.
+      expect(manifest.getAllPackages()).toEqual([])
+    })
   })
 
   describe('clear() catch path', () => {
@@ -79,6 +98,16 @@ describe.sequential('dlx/manifest — error branches', () => {
       })
       // Should not throw — the catch swallows and warns.
       await expect(manifest.clear('pkg-a')).resolves.toBeUndefined()
+    })
+
+    it('returns early when the manifest does not exist', async () => {
+      // No file written at manifestPath — clear() short-circuits.
+      await expect(manifest.clear('pkg-x')).resolves.toBeUndefined()
+    })
+
+    it('returns early when the manifest is empty/whitespace', async () => {
+      writeFileSync(manifestPath, '   \n  ', 'utf8')
+      await expect(manifest.clear('pkg-x')).resolves.toBeUndefined()
     })
   })
 

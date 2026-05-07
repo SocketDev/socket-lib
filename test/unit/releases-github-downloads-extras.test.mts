@@ -7,7 +7,7 @@
  * tests run hermetically.
  */
 
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -65,6 +65,9 @@ describe.sequential('releases/github-downloads — extras', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    try {
+      rmSync(testDir, { recursive: true, force: true })
+    } catch {}
   })
 
   describe('downloadGitHubRelease — toolPrefix tag resolution', () => {

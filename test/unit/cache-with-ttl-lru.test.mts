@@ -7,6 +7,7 @@
  * exercise the in-memory cache only.
  */
 
+import { rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -29,6 +30,9 @@ describe.sequential('cache-with-ttl — LRU + clock skew', () => {
 
   afterEach(() => {
     resetEnv()
+    try {
+      rmSync(testCacheDir, { recursive: true, force: true })
+    } catch {}
   })
 
   it('evicts the oldest entry when memoMaxSize is reached', async () => {

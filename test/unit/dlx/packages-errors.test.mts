@@ -7,7 +7,7 @@
  * catch handlers in removeDlxPackage[Sync].
  */
 
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
@@ -54,6 +54,11 @@ describe.sequential('dlx/packages — error branches', () => {
   afterEach(() => {
     resetEnv()
     invalidateCaches()
+    // testDlxDir is <tmp>/socket-dlx-err-<uuid>/_dlx — clean the
+    // parent so the random root goes too.
+    try {
+      rmSync(path.dirname(testDlxDir), { recursive: true, force: true })
+    } catch {}
   })
 
   describe('removeDlxPackage (async)', () => {

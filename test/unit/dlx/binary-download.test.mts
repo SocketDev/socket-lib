@@ -8,7 +8,7 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -49,6 +49,9 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    try {
+      rmSync(testDir, { recursive: true, force: true })
+    } catch {}
   })
 
   it('downloads and returns the SRI integrity hash', async () => {

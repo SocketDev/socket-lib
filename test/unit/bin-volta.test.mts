@@ -10,7 +10,7 @@
  * the Volta resolution branch.
  */
 
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -34,7 +34,11 @@ describe.sequential('bin.ts — Volta resolution', () => {
   })
 
   afterEach(() => {
-    // Best-effort cleanup; tmp dirs are auto-cleaned by OS eventually.
+    // voltaRoot was minted via mkdtempSync; clean its parent (the tmp
+    // wrapper dir mkdtemp creates).
+    try {
+      rmSync(voltaRoot, { recursive: true, force: true })
+    } catch {}
   })
 
   function writePlatform(platform: {

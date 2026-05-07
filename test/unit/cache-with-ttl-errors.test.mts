@@ -5,6 +5,7 @@
  * try/catch around JSON.parse and cacache.remove.
  */
 
+import { rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -43,6 +44,9 @@ describe.sequential('cache-with-ttl — error branches', () => {
     vi.restoreAllMocks()
     resetEnv()
     invalidateCaches()
+    try {
+      rmSync(testCacheDir, { recursive: true, force: true })
+    } catch {}
   })
 
   describe('get() — corrupted entry path', () => {
