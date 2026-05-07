@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./index.mjs",
-  "types": "./index.d.mts",
+  "main": "./acorn-wasm-sync.mts",
   "exports": {
-    ".": {
-      "types": "./index.d.mts",
-      "import": "./index.mjs",
-      "require": "./acorn_wasm.cjs"
-    }
+    ".": "./acorn-wasm-sync.mts"
   }
 }

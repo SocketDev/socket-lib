@@ -762,7 +762,7 @@ exports.__wbindgen_object_drop_ref = function(arg0) {
     takeObject(arg0);
 };
 
-const wasmPath = `${__dirname}/acorn_wasm.wasm`;
+const wasmPath = `${__dirname}/./acorn.wasm`;
 const wasmBytes = require('fs').readFileSync(wasmPath);
 const wasmModule = new WebAssembly.Module(wasmBytes);
 const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, imports).exports;
