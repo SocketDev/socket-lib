@@ -423,12 +423,14 @@ export function getGlobMatcher(
       ...(negativePatterns.length > 0 ? { ignore: negativePatterns } : {}),
     }
 
-    /* c8 ignore next 5 - External picomatch call */
+    // External picomatch call
+    /* c8 ignore start */
     const picomatch = getPicomatch()
     matcher = picomatch(
       positivePatterns.length > 0 ? positivePatterns : patterns,
       matchOptions,
     ) as (path: string) => boolean
+    /* c8 ignore stop */
   }
 
   matcherCache.set(key, matcher)

@@ -175,10 +175,12 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   }
 
   const init = () => {
-    /* c8 ignore next 3 - Idempotent guard; init runs once. */
+    // Idempotent guard; init runs once.
+    /* c8 ignore start */
     if (initialized) {
       return
     }
+    /* c8 ignore stop */
 
     updateSymbols()
     initialized = true
@@ -191,10 +193,12 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   }
 
   const reset = () => {
-    /* c8 ignore next 3 - Defensive guard; reset only runs after init. */
+    // Defensive guard; reset only runs after init.
+    /* c8 ignore start */
     if (!initialized) {
       return
     }
+    /* c8 ignore stop */
 
     // Update symbols with new theme colors
     updateSymbols()

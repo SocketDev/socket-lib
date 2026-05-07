@@ -43,9 +43,11 @@ function getSemver() {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
-  /* c8 ignore next 2 - External semver calls */
+  // External semver calls
+  /* c8 ignore start */
   const semver = getSemver()
   const validA: string | null = semver.valid(a)
+  /* c8 ignore stop */
   const validB: string | null = semver.valid(b)
 
   if (!validA && !validB) {
@@ -140,11 +142,13 @@ export function naturalSorter<T>(
   arrayToSort: T[],
 ): ReturnType<FastSortFunction> {
   if (_naturalSorter === undefined) {
-    /* c8 ignore next 4 - External fast-sort call */
+    // External fast-sort call
+    /* c8 ignore start */
     const fastSort = getFastSort()
     _naturalSorter = fastSort.createNewSortInstance({
       comparer: naturalCompare,
     }) as FastSortFunction
+    /* c8 ignore stop */
   }
   return (_naturalSorter as FastSortFunction)(arrayToSort)
 }

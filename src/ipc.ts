@@ -58,15 +58,19 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
   const path = getPath()
   const dir = path.dirname(filePath)
   await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
-  /* c8 ignore next 3 - Windows skip-path; tested on Windows runners. */
+  // Windows skip-path; tested on Windows runners.
+  /* c8 ignore start */
   if (process.platform === 'win32') {
     return
   }
+  /* c8 ignore stop */
   const stats = await fs.promises.lstat(dir)
-  /* c8 ignore next 3 - Defensive: mkdir just succeeded so dir is a directory. */
+  // Defensive: mkdir just succeeded so dir is a directory.
+  /* c8 ignore start */
   if (!stats.isDirectory()) {
     throw new ErrorCtor(`IPC path is not a directory: ${dir}`)
   }
+  /* c8 ignore stop */
   const getuid = process.getuid
   /* c8 ignore next - process.getuid is always present on POSIX. */
   const ownUid = typeof getuid === 'function' ? getuid.call(process) : -1

@@ -533,12 +533,14 @@ export async function getReleaseAssetUrl(
             { cause },
           )
         }
-        /* c8 ignore next 5 - GraphQL fallback returned no release. */
+        // GraphQL fallback returned no release.
+        /* c8 ignore start */
         if (fallbackAssets === undefined) {
           if (nothrow) {
             return undefined
           }
           throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
+          /* c8 ignore stop */
         }
         assets = fallbackAssets
       } else {

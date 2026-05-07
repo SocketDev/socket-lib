@@ -61,9 +61,11 @@ export async function runCheck(args: readonly string[]): Promise<number> {
   switch (canonical) {
     case 'primordials':
       return await runCheckPrimordials(args.slice(1))
-    /* c8 ignore next 3 - Unreachable; CHECKS map is exhaustive. */
+    // Unreachable; CHECKS map is exhaustive.
+    /* c8 ignore start */
     default:
       logger.error(`socket-lib check: missing handler for '${canonical}'`)
       return 1
+    /* c8 ignore stop */
   }
 }

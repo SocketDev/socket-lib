@@ -574,10 +574,12 @@ export async function ensurePackageInstalled(
       // scan all resolved packages before downloading any tarballs.
       try {
         // Arborist is imported at the top
-        /* c8 ignore next 3 - External Arborist constructor */
+        // External Arborist constructor
+        /* c8 ignore start */
         const arb = new Arborist({
           path: packageDir,
           // Use Socket's shared cacache directory (~/.socket/_cacache).
+          /* c8 ignore stop */
           cache: getSocketCacacheDir(),
           // Skip devDependencies (production-only like npx).
           omit: ['dev'],
@@ -739,13 +741,15 @@ export function findBinaryPath(
     } else {
       // Multiple binaries - use npm's battle-tested resolution strategy first.
       try {
-        /* c8 ignore next 6 - External libnpmexec call */
+        // External libnpmexec call
+        /* c8 ignore start */
         const { getBinFromManifest } = libnpmexec
         binName = getBinFromManifest({
           name: packageName,
           bin: binObj,
           _id: `${packageName}@${(pkgJson as { version?: string }).version || 'unknown'}`,
         })
+        /* c8 ignore stop */
         binPath = binObj[binName]
       } catch {
         // npm's strategy failed - fall back to user-friendly resolution:

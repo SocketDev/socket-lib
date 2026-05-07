@@ -404,10 +404,12 @@ function resolve(...segments: string[]): string {
 /*@__NO_SIDE_EFFECTS__*/
 export function fromUnixPath(pathLike: string | Buffer | URL): string {
   const normalized = normalizePath(pathLike)
-  /* c8 ignore next 3 - Windows-only backslash conversion. */
+  // Windows-only backslash conversion.
+  /* c8 ignore start */
   if (WIN32) {
     return normalized.replace(/\//g, '\\')
   }
+  /* c8 ignore stop */
   return normalized
 }
 
@@ -651,10 +653,12 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isRelative(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
-  /* c8 ignore next 3 - Defensive non-string guard. */
+  // Defensive non-string guard.
+  /* c8 ignore start */
   if (typeof filepath !== 'string') {
     return false
   }
+  /* c8 ignore stop */
   // Empty string is considered relative.
   if (filepath.length === 0) {
     return true

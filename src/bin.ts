@@ -233,10 +233,12 @@ export function findRealNpm(): string {
   }
 
   // Try common npm locations per platform.
-  /* c8 ignore next 2 - getAppdata() returns undefined off-Windows. */
+  // getAppdata() returns undefined off-Windows.
+  /* c8 ignore start */
   const appdata = getAppdata()
   const commonPaths = WIN32
-    ? /* c8 ignore next 6 - WIN32 commonPaths tested on Windows runners. */
+    ? /* c8 ignore stop */
+      /* c8 ignore next 6 - WIN32 commonPaths tested on Windows runners. */
       [
         appdata ? path.join(appdata, 'npm', 'npm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'npm') : '',

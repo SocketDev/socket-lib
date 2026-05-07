@@ -26,12 +26,14 @@ let _conjunctionFormatter: Intl.ListFormat | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getConjunctionFormatter() {
   if (_conjunctionFormatter === undefined) {
-    /* c8 ignore next 5 - Intl.ListFormat initialization */
+    // Intl.ListFormat initialization
+    /* c8 ignore start */
     _conjunctionFormatter = new Intl.ListFormat('en', {
       style: 'long',
       // "and" lists.
       type: 'conjunction',
     })
+    /* c8 ignore stop */
   }
   return _conjunctionFormatter
 }
@@ -57,12 +59,14 @@ let _disjunctionFormatter: Intl.ListFormat | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getDisjunctionFormatter() {
   if (_disjunctionFormatter === undefined) {
-    /* c8 ignore next 5 - Intl.ListFormat initialization */
+    // Intl.ListFormat initialization
+    /* c8 ignore start */
     _disjunctionFormatter = new Intl.ListFormat('en', {
       style: 'long',
       // "or" lists.
       type: 'disjunction',
     })
+    /* c8 ignore stop */
   }
   return _disjunctionFormatter
 }

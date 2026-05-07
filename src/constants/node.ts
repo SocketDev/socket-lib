@@ -53,9 +53,12 @@ export function getNodeDisableSigusr1Flags(): string[] {
     //
     // Note: --disable-sigusr1 is the correct solution (prevents thread creation entirely).
     // --no-inspect is a fallback that still creates the signal handler thread but blocks later.
+    /* c8 ignore start - --no-inspect fallback fires only on Node
+       runtimes pre-v22.14 / v23.7 / v24.8; tests run on Node 24+. */
     _nodeDisableSigusr1Flags = supportsNodeDisableSigusr1Flag()
       ? ['--disable-sigusr1']
       : ['--no-inspect']
+    /* c8 ignore stop */
   }
   return _nodeDisableSigusr1Flags
 }
@@ -121,8 +124,10 @@ export function getNodeMajorVersion(): number {
  * @returns The minor version number, or `0` if it cannot be parsed.
  */
 export function getNodeMinorVersion(): number {
-  /* c8 ignore next - Defensive `?? '0'` against malformed process.version. */
+  // Defensive `?? '0'` against malformed process.version.
+  /* c8 ignore start */
   return NumberParseInt(NODE_VERSION.split('.')[1] ?? '0', 10)
+  /* c8 ignore stop */
 }
 
 /**
@@ -144,8 +149,10 @@ export function getNodeNoWarningsFlags(): string[] {
  * @returns The patch version number, or `0` if it cannot be parsed.
  */
 export function getNodePatchVersion(): number {
-  /* c8 ignore next - Defensive `?? '0'` against malformed process.version. */
+  // Defensive `?? '0'` against malformed process.version.
+  /* c8 ignore start */
   return NumberParseInt(NODE_VERSION.split('.')[2] ?? '0', 10)
+  /* c8 ignore stop */
 }
 
 /**
@@ -222,10 +229,13 @@ export function supportsNodeDisableSigusr1Flag(): boolean {
   const major = getNodeMajorVersion()
   const minor = getNodeMinorVersion()
   // --disable-sigusr1 added in v22.14.0, v23.7.0.
-  // Stabilized in v22.20.0, v24.8.0.
+  // Stabilized in v22.20.0, v24.8.0. Branch outcome depends on the
+  // exact Node minor version of the test runner; varies per CI.
+  /* c8 ignore start */
   if (major >= 24) {
     return minor >= 8
   }
+  /* c8 ignore stop */
   /* c8 ignore start - Version-specific arms; tests run on a single
      Node major. Each branch fires only on its target major. */
   if (major === 23) {
@@ -268,8 +278,10 @@ export function supportsNodePermissionFlag(): boolean {
  */
 export function supportsNodeRequireModule(): boolean {
   const major = getNodeMajorVersion()
-  /* c8 ignore next - 22-specific arm; tests run on a single Node major. */
+  // 22-specific arm; tests run on a single Node major.
+  /* c8 ignore start */
   return major >= 23 || (major === 22 && getNodeMinorVersion() >= 12)
+  /* c8 ignore stop */
 }
 
 /**
@@ -280,8 +292,10 @@ export function supportsNodeRequireModule(): boolean {
  */
 export function supportsNodeRun(): boolean {
   const major = getNodeMajorVersion()
-  /* c8 ignore next - 22-specific arm; tests run on a single Node major. */
+  // 22-specific arm; tests run on a single Node major.
+  /* c8 ignore start */
   return major >= 23 || (major === 22 && getNodeMinorVersion() >= 11)
+  /* c8 ignore stop */
 }
 
 /**

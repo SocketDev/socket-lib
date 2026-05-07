@@ -55,10 +55,12 @@ export function isRunningInTemporaryExecutor(cwd = process.cwd()): boolean {
     '.yarn/$$',
   ]
 
-  /* c8 ignore next 3 - Windows-only Yarn temp pattern. */
+  // Windows-only Yarn temp pattern.
+  /* c8 ignore start */
   if (WIN32) {
     tempPatterns.push('AppData/Local/Temp/xfs-')
   }
+  /* c8 ignore stop */
 
   return tempPatterns.some(pattern => normalizedCwd.includes(pattern))
 }
