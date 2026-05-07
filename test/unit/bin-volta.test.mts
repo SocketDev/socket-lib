@@ -10,13 +10,14 @@
  * the Volta resolution branch.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { resolveRealBinSync } from '../../src/bin'
+import { safeDeleteSync } from '../../src/fs'
 
 describe.sequential('bin.ts — Volta resolution', () => {
   let voltaRoot: string
@@ -34,10 +35,8 @@ describe.sequential('bin.ts — Volta resolution', () => {
   })
 
   afterEach(() => {
-    // voltaRoot was minted via mkdtempSync; clean its parent (the tmp
-    // wrapper dir mkdtemp creates).
     try {
-      rmSync(voltaRoot, { recursive: true, force: true })
+      safeDeleteSync(voltaRoot, { force: true })
     } catch {}
   })
 

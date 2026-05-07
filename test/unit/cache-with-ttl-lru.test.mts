@@ -7,12 +7,12 @@
  * exercise the in-memory cache only.
  */
 
-import { rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { safeDeleteSync } from '@socketsecurity/lib/fs'
 import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -31,7 +31,7 @@ describe.sequential('cache-with-ttl — LRU + clock skew', () => {
   afterEach(() => {
     resetEnv()
     try {
-      rmSync(testCacheDir, { recursive: true, force: true })
+      safeDeleteSync(testCacheDir, { force: true })
     } catch {}
   })
 

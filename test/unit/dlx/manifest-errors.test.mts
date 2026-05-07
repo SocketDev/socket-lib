@@ -8,7 +8,7 @@
  * paths.
  */
 
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
@@ -55,16 +55,14 @@ describe.sequential('dlx/manifest — error branches', () => {
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
-    // safeDeleteSync from the SUT module is mocked; use node:fs.rmSync
-    // directly here to clean up the tmpdir without going through the
-    // mocked surface. CLAUDE.md prefers safeDelete[Sync] in src/, but
-    // tests that mock the lib boundary need the raw escape hatch.
+    // The mock wraps `original.safeDeleteSync` so default invocations
+    // call through to the real impl. Cleanup runs before
+    // restoreAllMocks() so this call goes through the mock wrapper to
+    // the real function — fast path, no special cases needed.
     try {
-      rmSync(testDir, { recursive: true, force: true })
-    } catch {
-      // Best-effort cleanup; OS sweeps tmpdir eventually anyway.
-    }
+      safeDeleteSync(testDir, { force: true })
+    } catch {}
+    vi.restoreAllMocks()
   })
 
   describe('readManifest catch path', () => {

@@ -8,13 +8,14 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { downloadBinaryFile } from '../../../src/dlx/binary'
+import { safeDeleteSync } from '../../../src/fs'
 import { httpDownload } from '../../../src/http-request'
 
 vi.mock('../../../src/http-request', async importOriginal => {
@@ -50,7 +51,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     try {
-      rmSync(testDir, { recursive: true, force: true })
+      safeDeleteSync(testDir, { force: true })
     } catch {}
   })
 

@@ -4,7 +4,7 @@
  * handler whose only purpose is "log and continue / log and rethrow."
  */
 
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -36,10 +36,11 @@ describe.sequential('process-lock — error branches', () => {
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    // Mock wraps original.safeDeleteSync — default-impl call through.
     try {
-      rmSync(testDir, { recursive: true, force: true })
+      safeDeleteSync(testDir, { force: true })
     } catch {}
+    vi.restoreAllMocks()
   })
 
   describe('release()', () => {

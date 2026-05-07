@@ -7,7 +7,7 @@
  * tests run hermetically.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -18,11 +18,12 @@ import {
   downloadReleaseAsset,
 } from '../../src/releases/github-downloads'
 
+import { safeDeleteSync } from '../../src/fs'
+import { httpDownload } from '../../src/http-request'
 import {
   getLatestRelease,
   getReleaseAssetUrl,
 } from '../../src/releases/github-api'
-import { httpDownload } from '../../src/http-request'
 
 vi.mock('../../src/releases/github-api', async importOriginal => {
   const original =
@@ -66,7 +67,7 @@ describe.sequential('releases/github-downloads — extras', () => {
   afterEach(() => {
     vi.restoreAllMocks()
     try {
-      rmSync(testDir, { recursive: true, force: true })
+      safeDeleteSync(testDir, { force: true })
     } catch {}
   })
 

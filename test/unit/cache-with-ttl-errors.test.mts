@@ -5,7 +5,6 @@
  * try/catch around JSON.parse and cacache.remove.
  */
 
-import { rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -13,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createTtlCache } from '../../src/cache-with-ttl'
 import { resetEnv, setEnv } from '../../src/env/rewire'
+import { safeDeleteSync } from '../../src/fs'
 import { invalidateCaches } from '../../src/paths/rewire'
 
 import * as cacacheModule from '../../src/cacache'
@@ -45,7 +45,7 @@ describe.sequential('cache-with-ttl — error branches', () => {
     resetEnv()
     invalidateCaches()
     try {
-      rmSync(testCacheDir, { recursive: true, force: true })
+      safeDeleteSync(testCacheDir, { force: true })
     } catch {}
   })
 
