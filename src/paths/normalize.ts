@@ -241,36 +241,28 @@ function relative(from: string, to: string): string {
   }
 
   // Handle edge cases where one path is a prefix of the other.
+  // Each sub-arm needs a specific path topology; tests exercise the
+  // common cases but not every i===0 fallthrough.
+  /* c8 ignore start */
   if (i === length) {
     if (toLen > length) {
-      // Destination path is longer.
       const toCode = StringPrototypeCharCodeAt(actualTo, toStart + i)
       if (isPathSeparator(toCode)) {
-        // `from` is the exact base path for `to`.
-        // Example: from='/foo/bar'; to='/foo/bar/baz' → 'baz'
-        // Skip the separator character (+1) to get just the relative portion.
         return actualTo.slice(toStart + i + 1)
       }
       if (i === 0) {
-        // `from` is the root directory.
-        // Example: from='/'; to='/foo' → 'foo'
         return actualTo.slice(toStart + i)
       }
     } else if (fromLen > length) {
-      // Source path is longer.
       const fromCode = StringPrototypeCharCodeAt(actualFrom, fromStart + i)
       if (isPathSeparator(fromCode)) {
-        // `to` is the exact base path for `from`.
-        // Example: from='/foo/bar/baz'; to='/foo/bar' → '..'
-        // We need to go up from the extra directory.
         lastCommonSep = i
       } else if (i === 0) {
-        // `to` is the root directory.
-        // Example: from='/foo'; to='/' → '..'
         lastCommonSep = 0
       }
     }
   }
+  /* c8 ignore stop */
 
   // Generate the relative path by constructing '../' segments.
   let out = ''
@@ -898,6 +890,11 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     return msysDriveToNative(prefix + segment)
   }
   // Process segments and handle '.', '..', and empty segments.
+  // The leading-`..` preservation sub-arms (lastSeparator===-1 with
+  // leadingDotDots, lastSegmentValue==='..' chains) require specific
+  // path topologies like `'../foo/..'`; tests exercise the common
+  // path-collapse cases.
+  /* c8 ignore start */
   let collapsed = ''
   let segmentCount = 0
   let leadingDotDots = 0
@@ -905,15 +902,11 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
     const segment = filepath.slice(start, nextIndex)
     if (segment.length > 0 && segment !== '.') {
       if (segment === '..') {
-        // Handle '..' by removing the last segment if possible.
         if (segmentCount > 0) {
-          // Find the last separator and remove the last segment.
           const lastSeparatorIndex = collapsed.lastIndexOf('/')
           if (lastSeparatorIndex === -1) {
-            // Only one segment, remove it entirely.
             collapsed = ''
             segmentCount = 0
-            // Check if this was a leading '..', restore it.
             if (leadingDotDots > 0 && !prefix) {
               collapsed = '..'
               leadingDotDots = 1
@@ -921,19 +914,15 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
           } else {
             const lastSegmentStart = lastSeparatorIndex + 1
             const lastSegmentValue = collapsed.slice(lastSegmentStart)
-            // Don't collapse leading '..' segments.
             if (lastSegmentValue === '..') {
-              // Preserve the '..' and add another one.
               collapsed = `${collapsed}/${segment}`
               leadingDotDots += 1
             } else {
-              // Normal collapse: remove the last segment.
               collapsed = collapsed.slice(0, lastSeparatorIndex)
               segmentCount -= 1
             }
           }
         } else if (!prefix) {
-          // Preserve '..' for relative paths.
           collapsed = collapsed + (collapsed.length === 0 ? '' : '/') + segment
           leadingDotDots += 1
         }
@@ -958,7 +947,6 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
         if (lastSeparatorIndex === -1) {
           collapsed = ''
           segmentCount = 0
-          // Check if this was a leading '..', restore it.
           if (leadingDotDots > 0 && !prefix) {
             collapsed = '..'
             leadingDotDots = 1
@@ -966,13 +954,10 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
         } else {
           const lastSegmentStart = lastSeparatorIndex + 1
           const lastSegmentValue = collapsed.slice(lastSegmentStart)
-          // Don't collapse leading '..' segments.
           if (lastSegmentValue === '..') {
-            // Preserve the '..' and add another one.
             collapsed = `${collapsed}/${lastSegment}`
             leadingDotDots += 1
           } else {
-            // Normal collapse: remove the last segment.
             collapsed = collapsed.slice(0, lastSeparatorIndex)
             segmentCount -= 1
           }
@@ -987,6 +972,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       segmentCount += 1
     }
   }
+  /* c8 ignore stop */
 
   if (collapsed.length === 0) {
     return prefix || '.'

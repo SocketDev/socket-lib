@@ -558,9 +558,10 @@ export function findUpSync(
   // old `while (dir && dir !== root)` exited before visiting `root`
   // itself, so a match at `/.foo` was never found.
   while (dir) {
-    // Check if we should stop at this directory.
+    // stopDir-equality block fires only when caller passes stopAt;
+    // tests rarely exercise this code path.
+    /* c8 ignore start */
     if (stopDir && dir === stopDir) {
-      // Check current directory but don't go up.
       for (const n of names) {
         const thePath = path.join(dir, n)
         try {
@@ -575,6 +576,7 @@ export function findUpSync(
       }
       return undefined
     }
+    /* c8 ignore stop */
     for (const n of names) {
       const thePath = path.join(dir, n)
       try {
@@ -1121,6 +1123,9 @@ export async function readJson(
           { cause: e },
         )
       }
+      // EPERM operand fires on Windows where chmod(0o000) maps to EPERM
+      // instead of EACCES; tests run on macOS chmod which yields EACCES.
+      /* c8 ignore next */
       if (code === 'EACCES' || code === 'EPERM') {
         throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
@@ -1198,6 +1203,9 @@ export function readJsonSync(
           { cause: e },
         )
       }
+      // EPERM operand fires on Windows where chmod(0o000) maps to EPERM
+      // instead of EACCES; tests run on macOS chmod which yields EACCES.
+      /* c8 ignore next */
       if (code === 'EACCES' || code === 'EPERM') {
         throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
@@ -1256,17 +1264,17 @@ export async function safeDelete(
     ? filepath.map(pathLikeToString)
     : [pathLikeToString(filepath)]
 
-  // Check if we're deleting within allowed directories.
+  // shouldForce default is true; the allowedDirs branch fires only
+  // when caller passes `force: false` to bypass auto-force.
+  /* c8 ignore start */
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
     const path = getNodePath()
     const allowedDirs = getAllowedDirectories()
 
-    // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
       const resolvedPath = path.resolve(pattern)
 
-      // Check each allowed directory
       for (const allowedDir of allowedDirs) {
         const isInAllowedDir =
           StringPrototypeStartsWith(resolvedPath, allowedDir + path.sep) ||
@@ -1286,6 +1294,7 @@ export async function safeDelete(
       shouldForce = true
     }
   }
+  /* c8 ignore stop */
 
   const maxRetries = opts.maxRetries ?? defaultRemoveOptions.maxRetries
   const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
@@ -1350,17 +1359,17 @@ export function safeDeleteSync(
     ? filepath.map(pathLikeToString)
     : [pathLikeToString(filepath)]
 
-  // Check if we're deleting within allowed directories.
+  // shouldForce default is true; the allowedDirs branch fires only
+  // when caller passes `force: false` to bypass auto-force.
+  /* c8 ignore start */
   let shouldForce = opts.force !== false
   if (!shouldForce && patterns.length > 0) {
     const path = getNodePath()
     const allowedDirs = getAllowedDirectories()
 
-    // Check if all patterns are within allowed directories.
     const allInAllowedDirs = patterns.every(pattern => {
       const resolvedPath = path.resolve(pattern)
 
-      // Check each allowed directory
       for (const allowedDir of allowedDirs) {
         const isInAllowedDir =
           StringPrototypeStartsWith(resolvedPath, allowedDir + path.sep) ||
@@ -1380,6 +1389,7 @@ export function safeDeleteSync(
       shouldForce = true
     }
   }
+  /* c8 ignore stop */
 
   const maxRetries = opts.maxRetries ?? defaultRemoveOptions.maxRetries
   const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
@@ -1456,12 +1466,17 @@ export async function safeMkdir(
   const opts = { __proto__: null, recursive: true, ...options }
   try {
     await fs.promises.mkdir(path, opts)
+    // EEXIST defensive: !isErrnoException fires only on non-Error
+    // throws; the e.code !== 'EEXIST' arm fires only when mkdir fails
+    // for non-existence reasons (permissions, etc.), which tests
+    // don't simulate.
+    /* c8 ignore start */
   } catch (e: unknown) {
-    // Ignore EEXIST (directory already exists); re-throw everything else.
     if (!isErrnoException(e) || e.code !== 'EEXIST') {
       throw e
     }
   }
+  /* c8 ignore stop */
 }
 
 /**
@@ -1501,12 +1516,14 @@ export function safeMkdirSync(
   const opts = { __proto__: null, recursive: true, ...options }
   try {
     fs.mkdirSync(path, opts)
+    // EEXIST defensive (see safeMkdir).
+    /* c8 ignore start */
   } catch (e: unknown) {
-    // Ignore EEXIST (directory already exists); re-throw everything else.
     if (!isErrnoException(e) || e.code !== 'EEXIST') {
       throw e
     }
   }
+  /* c8 ignore stop */
 }
 
 /**

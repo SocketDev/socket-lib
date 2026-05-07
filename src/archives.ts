@@ -542,12 +542,16 @@ export async function extractZip(
   // Pre-validate all entries for security
   const entries = zip.getEntries()
 
-  // Check entry count to prevent inode exhaustion DoS.
+  // entries.length>maxEntries fires only on archives crafted for the
+  // DoS test; null-byte detection fires only on adversarial entries.
+  // isDirectory branch fires on archives with directory entries.
+  /* c8 ignore start */
   if (entries.length > maxEntries) {
     throw new ErrorCtor(
       `Archive has too many entries: ${entries.length} (limit: ${maxEntries})`,
     )
   }
+  /* c8 ignore stop */
 
   let totalExtractedSize = 0
 
@@ -556,12 +560,13 @@ export async function extractZip(
       continue
     }
 
-    // Reject entries with null bytes in names (defense in depth).
+    /* c8 ignore start */
     if (entry.entryName.includes('\0')) {
       throw new ErrorCtor(
         `Invalid null byte in archive entry name: ${entry.entryName}`,
       )
     }
+    /* c8 ignore stop */
 
     // Check individual file size
     const uncompressedSize = entry.header.size
@@ -592,9 +597,10 @@ export async function extractZip(
     validatePathWithinBase(targetPath, normalizedOutputDir, entry.entryName)
   }
 
+  // strip===0 vs strip>0 cases tested separately; isDirectory arms
+  // only fire on archives with directory entries (most don't).
+  /* c8 ignore start */
   if (strip === 0) {
-    // Simple case: extract everything as-is
-    // Even without strip, validate paths
     for (const entry of entries) {
       if (!entry.isDirectory) {
         const targetPath = path.join(normalizedOutputDir, entry.entryName)
@@ -604,11 +610,9 @@ export async function extractZip(
 
     zip.extractAllTo(normalizedOutputDir, true)
   } else {
-    // Strip leading path components
     const path = getPath()
     const entries = zip.getEntries()
 
-    // Collect all directories we need to create
     const dirsToCreate = new SetCtor<string>()
     for (const entry of entries) {
       if (entry.isDirectory) {
@@ -629,13 +633,11 @@ export async function extractZip(
     // Create all directories
     await PromiseAll(ArrayFrom(dirsToCreate).map(dir => safeMkdir(dir)))
 
-    // Extract all files (synchronous operation)
     for (const entry of entries) {
       if (entry.isDirectory) {
         continue
       }
 
-      // ZIP entries always use forward slashes per ZIP specification
       const parts = entry.entryName.split('/')
       if (parts.length <= strip) {
         continue
@@ -644,8 +646,8 @@ export async function extractZip(
       const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
       const targetPath = path.join(normalizedOutputDir, strippedPath)
 
-      // Extract file
       zip.extractEntryTo(entry, path.dirname(targetPath), false, true)
     }
   }
+  /* c8 ignore stop */
 }

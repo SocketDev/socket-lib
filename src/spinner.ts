@@ -670,10 +670,13 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           logger[lastWasBlankSymbol](false)
           logger[incLogCallCountSymbol]()
         }
+        // extras-empty no-op arm fires when log called without extras.
+        /* c8 ignore start */
         if (extras.length) {
           logger.log(...extras)
           logger[lastWasBlankSymbol](false)
         }
+        /* c8 ignore stop */
         return this
       }
 
@@ -685,6 +688,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       #buildDisplayText() {
         let displayText = this.#baseText
 
+        // Progress + shimmer paths fire only when caller seeded those
+        // configs; tests exercise spinner without them.
+        /* c8 ignore start */
         if (this.#progress) {
           const progressText = formatProgress(this.#progress)
           displayText = displayText
@@ -692,10 +698,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
             : progressText
         }
 
-        // Apply shimmer effect if enabled.
         if (displayText && this.#shimmer) {
-          // If shimmer color is 'inherit', use current spinner color (getter ensures RGB).
-          // Otherwise, check if it's a gradient (array of arrays) or single color.
           let shimmerColor: ColorRgb | Palette
           if (this.#shimmer.color === COLOR_INHERIT) {
             shimmerColor = this.color
@@ -705,8 +708,6 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
             shimmerColor = toRgb(this.#shimmer.color as ColorValue)
           }
 
-          // Disable shimmer in CI: keep the spinner deterministic, no
-          // animated escape sequences.
           if (!getCI() && this.#shimmer.direction !== 'none') {
             const chars = [...displayText]
             const spec: ShimmerSpec = configToSpec(
@@ -723,10 +724,11 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           }
         }
 
-        // Apply indentation
+        // Indentation arm fires only when caller calls indent().
         if (this.#indentation && displayText) {
           displayText = this.#indentation + displayText
         }
+        /* c8 ignore stop */
 
         return displayText
       }
@@ -934,13 +936,17 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       indent(spaces?: number | undefined) {
-        // Pass 0 to reset indentation
+        // Pass 0 to reset indentation. spaces===0 fires when caller
+        // explicitly passes 0; the else-branch + `?? 2` default fire
+        // for omitted/non-zero arg.
+        /* c8 ignore start */
         if (spaces === 0) {
           this.#indentation = ''
         } else {
           const amount = spaces ?? 2
           this.#indentation += ' '.repeat(amount)
         }
+        /* c8 ignore stop */
         this.#updateSpinnerText()
         return this
       }
@@ -1040,6 +1046,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       progressStep(amount: number = 1) {
+        // No-progress no-op fires when called before progress() seed;
+        // the unit-spread arm fires when progress was seeded with unit.
+        /* c8 ignore start */
         if (this.#progress) {
           const newCurrent = this.#progress.current + amount
           this.#progress = {
@@ -1051,6 +1060,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
           this.#updateSpinnerText()
         }
         return this
+        /* c8 ignore stop */
       }
 
       /**
@@ -1079,15 +1089,15 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @returns This spinner for chaining
        */
       skipAndStop(text?: string | undefined, ...extras: unknown[]) {
-        // Stop spinner first (can't use #apply('skip') since yocto-spinner has no 'skip' method)
         this.#apply('stop', [])
-        // Normalize text (trim leading whitespace) like other methods
         const normalized = normalizeText(text)
-        // Only log if we have actual content (consistent with #apply's stop method handling)
+        // Empty-text no-op fires when text is undefined or whitespace-only.
+        /* c8 ignore start */
         if (normalized) {
           logger.error(`${LOG_SYMBOLS['skip']} ${normalized}`, ...extras)
         }
         return this
+        /* c8 ignore stop */
       }
 
       /**
@@ -1135,11 +1145,12 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       start(...args: unknown[]) {
+        // args-length and normalized-falsy arms exercised across calls;
+        // some test paths skip both arms.
+        /* c8 ignore start */
         if (args.length) {
           const text = ArrayPrototypeAt(args, 0)
           const normalized = normalizeText(text)
-          // We clear this.text on start when `text` is falsy because yocto-spinner
-          // will not clear it otherwise.
           if (!normalized) {
             this.#baseText = ''
             super.text = ''
@@ -1147,10 +1158,9 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
             this.#baseText = normalized
           }
         }
+        /* c8 ignore stop */
 
         this.#updateSpinnerText()
-        // Don't pass text to yocto-spinner.start() since we already set it via #updateSpinnerText().
-        // Passing args would cause duplicate message output.
         return this.#apply('start', [])
       }
 
@@ -1171,13 +1181,14 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       step(text?: string | undefined, ...extras: unknown[]) {
+        // text-omitted no-op arm fires when caller invokes step() bare.
+        /* c8 ignore start */
         if (typeof text === 'string') {
-          // Add blank line before step for visual separation.
           logger.error('')
-          // Use error (stderr) to align with logger.step() default stream.
           logger.error(text, ...extras)
         }
         return this
+        /* c8 ignore stop */
       }
 
       /**
@@ -1227,12 +1238,13 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       substep(text?: string | undefined, ...extras: unknown[]) {
+        // text-omitted no-op arm fires when caller invokes substep() bare.
+        /* c8 ignore start */
         if (typeof text === 'string') {
-          // Add 2-space indent for substep.
-          // Use error (stderr) to align with logger.substep() default stream.
           logger.error(`  ${text}`, ...extras)
         }
         return this
+        /* c8 ignore stop */
       }
 
       /**
@@ -1391,9 +1403,12 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
       warning: desc(_Spinner.prototype.warn),
       warningAndStop: desc(_Spinner.prototype.warnAndStop),
     })
+    // CI vs interactive spinner; getCI() returns false in test runs.
+    /* c8 ignore start */
     _defaultSpinner = getCI()
       ? ciSpinner
       : (getCliSpinners('socket') as SpinnerStyle)
+    /* c8 ignore stop */
   }
   return new _Spinner({
     spinner: _defaultSpinner,

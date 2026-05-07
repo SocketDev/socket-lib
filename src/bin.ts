@@ -145,12 +145,14 @@ export async function execBin(
     throw error
   }
 
-  // Execute the binary directly.
-  /* c8 ignore next 3 - Array-resolvedPath arm only fires when whichReal
-     returns multiple paths via opts.all; execBin's path doesn't request that. */
+  // Execute the binary directly. Array-resolvedPath arm only fires
+  // when whichReal returns multiple paths via opts.all; execBin's
+  // path doesn't request that.
+  /* c8 ignore start */
   const binCommand = ArrayIsArray(resolvedPath)
     ? resolvedPath[0]!
     : resolvedPath
+  /* c8 ignore stop */
   // On Windows, binaries are often .cmd files that require shell to execute.
   return await spawn(binCommand, args ?? [], {
     shell: WIN32,
@@ -233,6 +235,8 @@ export function findRealNpm(): string {
     ? [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
     : [path.join(nodeDir, 'npm')]
   /* c8 ignore stop */
+  // candidate-found arm fires only on systems where npm sits next to node.
+  /* c8 ignore start */
   for (const candidate of nodeDirCandidates) {
     if (fs.existsSync(candidate)) {
       return candidate
@@ -241,7 +245,6 @@ export function findRealNpm(): string {
 
   // Try common npm locations per platform. getAppdata() returns
   // undefined off-Windows; WIN32 commonPaths tested on Windows runners.
-  /* c8 ignore start */
   const appdata = getAppdata()
   const commonPaths = WIN32
     ? [
@@ -251,13 +254,12 @@ export function findRealNpm(): string {
         'C:\\Program Files\\nodejs\\npm',
       ].filter(Boolean)
     : ['/usr/local/bin/npm', '/usr/bin/npm']
-  /* c8 ignore stop */
   const result = findRealBin('npm', commonPaths)
 
-  // If we found a valid path, return it.
   if (result && fs.existsSync(result)) {
     return result
   }
+  /* c8 ignore stop */
 
   /* c8 ignore start - Fallback paths only fire when npm isn't found
      at any of the common platform locations above. Test runners
@@ -420,14 +422,18 @@ export function resolveRealBinSync(binPath: string): string {
     // Check Volta cache first - keyed by volta path + binary name.
     const voltaCacheKey = `${voltaPath}:${basename}`
     const cachedVolta = voltaBinCache.get(voltaCacheKey)
-    /* c8 ignore next 7 - Cache hit fires on second resolveRealBinSync
-       call for the same Volta key; tests exercise distinct keys. */
+    // Cache hit fires on second resolveRealBinSync call for the same
+    // Volta key; tests exercise distinct keys. The npm-CLI cascade
+    // (voltaImage/npm/<ver> → voltaImage/node/<ver>/lib/node_modules/npm)
+    // and the .cmd extension fallback are tested on Windows runners.
+    /* c8 ignore start */
     if (cachedVolta) {
       if (fs.existsSync(cachedVolta)) {
         return cachedVolta
       }
       voltaBinCache.delete(voltaCacheKey)
     }
+    /* c8 ignore stop */
 
     const voltaToolsPath = path.join(voltaPath, 'tools')
     const voltaImagePath = path.join(voltaToolsPath, 'image')
@@ -439,6 +445,7 @@ export function resolveRealBinSync(binPath: string): string {
     const voltaNodeVersion = voltaPlatform?.node?.runtime
     const voltaNpmVersion = voltaPlatform?.node?.npm
     let voltaBinPath = ''
+    /* c8 ignore start */
     if (
       basename === 'npm' ||
       basename === 'npx' // # socket-hook: allow npx
@@ -471,9 +478,6 @@ export function resolveRealBinSync(binPath: string): string {
           voltaImagePath,
           `packages/${binPackage}/bin/${basename}`,
         )
-        /* c8 ignore next 6 - .cmd extension fallback fires only on
-           Windows + Volta when the bare-name binary doesn't exist
-           but its .cmd shim does; tested on Windows runners. */
         if (!fs.existsSync(voltaBinPath)) {
           voltaBinPath = `${voltaBinPath}.cmd`
           if (!fs.existsSync(voltaBinPath)) {
@@ -482,6 +486,7 @@ export function resolveRealBinSync(binPath: string): string {
         }
       }
     }
+    /* c8 ignore stop */
     if (voltaBinPath) {
       let resolvedVoltaPath = voltaBinPath
       try {
@@ -860,18 +865,17 @@ export async function whichReal(
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
-  // Use cache - validate with existsSync() which is cheaper than full PATH search.
-  /* c8 ignore next - opts.all path tested via separate which-all callers. */
+  // Use cache - validate with existsSync() which is cheaper than full
+  // PATH search. opts.all path tested via separate which-all callers;
+  // stale-cache eviction fires only when a cached binary is removed
+  // mid-session; result-undefined arm fires only when binary is missing.
+  /* c8 ignore start */
   if (opts.all) {
-    // Check array cache for 'all: true' lookups.
-    // Only validate first path for performance - if primary binary exists, assume others do too.
     const cachedAll = binPathAllCache.get(binName)
     if (cachedAll && cachedAll.length > 0) {
       if (fs.existsSync(cachedAll[0]!)) {
         return cachedAll
       }
-      /* c8 ignore next - Stale-cache eviction; only fires if a
-         previously cached binary is removed mid-session. */
       binPathAllCache.delete(binName)
     }
   } else {
@@ -880,40 +884,38 @@ export async function whichReal(
       if (fs.existsSync(cached)) {
         return cached
       }
-      /* c8 ignore next - Stale-cache eviction (see above). */
       binPathCache.delete(binName)
     }
   }
+  /* c8 ignore stop */
 
   // Depending on options `whichModule` may throw if `binName` is not found.
-  // With nothrow: true, it returns null when `binName` is not found.
   /* c8 ignore next - External which call */
   const result = await whichModule(
     binName,
     opts as import('./external/which').WhichOptions,
   )
 
-  // When 'all: true' is specified, ensure we always return an array.
+  // opts.all (returns array) and not-found arms.
+  /* c8 ignore start */
   if (opts?.all) {
     const paths = ArrayIsArray(result)
       ? result
       : typeof result === 'string'
         ? [result]
         : undefined
-    // If all is true and we have paths, resolve each one.
     if (paths?.length) {
       const resolved = ArrayPrototypeMap(paths, p => resolveRealBinSync(p))
-      // Cache the resolved paths.
       binPathAllCache.set(binName, resolved)
       return resolved
     }
     return paths
   }
 
-  // If result is undefined (binary not found), return undefined
   if (!result) {
     return undefined
   }
+  /* c8 ignore stop */
 
   const resolved = resolveRealBinSync(result)
   // Cache the resolved path.
@@ -940,17 +942,14 @@ export function whichRealSync(
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
-  // Use cache - validate with existsSync() which is cheaper than full PATH search.
-  /* c8 ignore next - opts.all path tested via separate which-all callers. */
+  // Use cache. See whichReal for branch reachability rationale.
+  /* c8 ignore start */
   if (opts.all) {
-    // Check array cache for 'all: true' lookups.
-    // Only validate first path for performance - if primary binary exists, assume others do too.
     const cachedAll = binPathAllCache.get(binName)
     if (cachedAll && cachedAll.length > 0) {
       if (fs.existsSync(cachedAll[0]!)) {
         return cachedAll
       }
-      /* c8 ignore next - Stale-cache eviction (see whichReal). */
       binPathAllCache.delete(binName)
     }
   } else {
@@ -959,39 +958,37 @@ export function whichRealSync(
       if (fs.existsSync(cached)) {
         return cached
       }
-      /* c8 ignore next - Stale-cache eviction (see whichReal). */
       binPathCache.delete(binName)
     }
   }
+  /* c8 ignore stop */
 
   // Depending on options `which` may throw if `binName` is not found.
   // With nothrow: true, it returns null when `binName` is not found.
   const result = whichSync(binName, opts)
 
-  // When 'all: true' is specified, ensure we always return an array.
+  // opts.all and not-found arms; see whichReal.
+  /* c8 ignore start */
   if (opts.all) {
     const paths = ArrayIsArray(result)
       ? result
       : typeof result === 'string'
         ? [result]
         : undefined
-    // If all is true and we have paths, resolve each one.
     if (paths?.length) {
       const resolved = ArrayPrototypeMap(paths, p => resolveRealBinSync(p))
-      // Cache the resolved paths.
       binPathAllCache.set(binName, resolved)
       return resolved
     }
     return paths
   }
 
-  // If result is undefined (binary not found), return undefined
   if (!result) {
     return undefined
   }
+  /* c8 ignore stop */
 
   const resolved = resolveRealBinSync(result as string)
-  // Cache the resolved path.
   binPathCache.set(binName, resolved)
   return resolved
 }

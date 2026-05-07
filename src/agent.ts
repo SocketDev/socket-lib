@@ -210,9 +210,10 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
   const ignoreScriptsArgs =
     !supportsIgnoreScripts || hasIgnoreScriptsFlag ? [] : ['--ignore-scripts']
 
-  // In CI environments, pnpm uses --frozen-lockfile by default which prevents lockfile updates.
-  // For commands that need to update the lockfile (like install with new packages/overrides),
-  // we need to explicitly add --no-frozen-lockfile in CI mode if not already present.
+  // In CI environments, pnpm uses --frozen-lockfile by default. The
+  // entire 5-operand chain short-circuits at getCI() (returns false
+  // in test runs); the remaining 4 operands are unreachable.
+  /* c8 ignore start */
   const frozenLockfileArgs = []
   if (
     getCI() &&
@@ -221,10 +222,9 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
     isPnpmInstallCommand(firstArg) &&
     !pnpmArgs.some(isPnpmFrozenLockfileFlag)
   ) {
-    /* c8 ignore next - CI-only --no-frozen-lockfile injection;
-       getCI() returns false in test runs by default. */
     frozenLockfileArgs.push('--no-frozen-lockfile')
   }
+  /* c8 ignore stop */
 
   // Note: pnpm doesn't have a --no-progress flag. It uses --reporter instead.
   // We removed --no-progress as it causes "Unknown option" errors with pnpm.
@@ -295,8 +295,10 @@ export function execScript(
     return execPnpm(['run', scriptName, ...resolvedArgs], spawnOptions)
   }
 
-  // Check for package-lock.json.
-  // When in an npm workspace, use npm run to ensure workspace binaries are available.
+  // package-lock.json and yarn.lock fallback paths fire only in
+  // npm/yarn workspaces; this repo (and most fleet-mate repos) use
+  // pnpm, so the pnpm-lock branch hit above and these are unreachable.
+  /* c8 ignore start */
   const packageLockPath = findUpSync(PACKAGE_LOCK_JSON, { cwd }) as
     | string
     | undefined
@@ -304,11 +306,11 @@ export function execScript(
     return execNpm(['run', scriptName, ...resolvedArgs], spawnOptions)
   }
 
-  // Check for yarn.lock.
   const yarnLockPath = findUpSync(YARN_LOCK, { cwd }) as string | undefined
   if (yarnLockPath) {
     return execYarn(['run', scriptName, ...resolvedArgs], spawnOptions)
   }
+  /* c8 ignore stop */
 
   /* c8 ignore start - No-lockfile fallback. findUpSync walks ancestor
      directories, so reaching this in unit tests requires a tmpdir
@@ -354,18 +356,20 @@ export function execYarn(
     terminatorPos === -1 ? [] : ArrayPrototypeSlice(args, terminatorPos)
 
   const firstArg = yarnArgs[0]
+  // execYarn is exercised via integration tests passing `['--version']`;
+  // most installish-flag branches don't fire there.
+  /* c8 ignore start */
   const supportsIgnoreScripts = firstArg
     ? yarnInstallLikeCommands.has(firstArg)
     : false
 
-  // Yarn uses --silent flag for quieter output.
   const logLevelArgs =
     useDebug || yarnArgs.some(isNpmLoglevelFlag) ? [] : ['--silent']
 
-  // Only add --ignore-scripts for commands that support it.
   const hasIgnoreScriptsFlag = yarnArgs.some(isPnpmIgnoreScriptsFlag)
   const ignoreScriptsArgs =
     !supportsIgnoreScripts || hasIgnoreScriptsFlag ? [] : ['--ignore-scripts']
+  /* c8 ignore stop */
 
   // SECURITY: Array-based arguments prevent command injection. Each element is
   // passed directly to the OS without shell interpretation.

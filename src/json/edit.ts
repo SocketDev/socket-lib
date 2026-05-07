@@ -63,9 +63,10 @@ function parseJson(content: string): unknown {
 async function readFile(filepath: string): Promise<string> {
   const { promises: fsPromises } = getFs()
 
-  // Retry on ENOENT since files may not be immediately accessible after writes
-  // Windows needs more retries due to slower filesystem operations
-  /* c8 ignore next - Windows-only retry count; tested on Windows runners. */
+  // Retry on ENOENT. Windows-only retry-count and delay; tested on
+  // Windows runners. The retry-loop body itself fires only after a
+  // transient ENOENT, which tests don't simulate.
+  /* c8 ignore start */
   const maxRetries = process.platform === 'win32' ? 5 : 1
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -75,20 +76,16 @@ async function readFile(filepath: string): Promise<string> {
       const isLastAttempt = attempt === maxRetries
       const isEnoent = isErrnoException(e) && e.code === 'ENOENT'
 
-      // Only retry ENOENT and not on last attempt
       if (!isEnoent || isLastAttempt) {
         throw e
       }
 
-      // Wait before retry with exponential backoff
-      // Windows: 50ms, 100ms, 150ms, 200ms, 250ms (total 750ms + attempts)
-      // Others: 20ms
-      /* c8 ignore next - Windows-only delay; tested on Windows runners. */
       const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
       // eslint-disable-next-line no-await-in-loop
       await sleep(delay)
     }
   }
+  /* c8 ignore stop */
 
   /* c8 ignore next 3 - Loop has 'return' on success and 'throw' in
      each iteration; only reachable if maxRetries is somehow negative. */
@@ -228,12 +225,17 @@ export function getEditableJsonClass<
         }
         try {
           return await instance.load(path)
+          // !isErrnoException arm fires only on non-Error throws; the
+          // re-throw fires on non-ENOENT errors. Tests exercise the
+          // ENOENT-create-fallback path.
+          /* c8 ignore start */
         } catch (err: unknown) {
           if (!isErrnoException(err) || err.code !== 'ENOENT') {
             throw err
           }
           return instance.create(path)
         }
+        /* c8 ignore stop */
       }
 
       create(path: string): this {

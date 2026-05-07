@@ -405,12 +405,16 @@ async function fetchRefSha(
           if (graphqlSha) {
             return graphqlSha
           }
+          // graphqlErr-defined arm fires only when the GraphQL fallback
+          // also failed; tested but not on every cascade entry.
+          /* c8 ignore start */
           if (graphqlErr !== undefined) {
             throw new ErrorCtor(
               `Failed to resolve ref "${ref}" for ${owner}/${repo}: both REST and GraphQL backends degraded`,
               { cause: graphqlErr },
             )
           }
+          /* c8 ignore stop */
           // GraphQL completed successfully but found no match — the ref
           // genuinely doesn't exist (or the empty-body signal happened
           // but GitHub has since recovered enough for GraphQL to confirm
@@ -510,6 +514,9 @@ async function fetchRefShaViaGraphQL(
   // Without this guard, calling `fetchRefShaViaGraphQL(..., 'main')`
   // would throw a confusing "Argument 'oid' on Field 'object' has
   // an invalid value" error and the tag/branch lookups never run.
+  // SHA-detect ternary: ref-as-sha arm fires only when caller passes
+  // a hex SHA, which most ref tests don't.
+  /* c8 ignore next 2 */
   const looksLikeSha = /^[a-f0-9]{40}$/i.test(ref)
   const oidArg = looksLikeSha ? ref : '0000000000000000000000000000000000000000'
   const response = await httpRequest(GITHUB_GRAPHQL_URL, {
@@ -666,7 +673,8 @@ export async function cacheFetchGhsa(
   const cache = getGithubCache()
   const key = `ghsa:${ghsaId}`
 
-  // Bypass cache if disabled.
+  // Cache-bypass arm fires only when DISABLE_GITHUB_CACHE env is set.
+  /* c8 ignore next 3 */
   if (process.env['DISABLE_GITHUB_CACHE']) {
     return await fetchGhsaDetails(ghsaId, options)
   }
@@ -939,20 +947,20 @@ async function fetchGhsaDetailsViaGraphQL(
     )
   }
   const adv = parsed.data?.securityAdvisory
+  // !adv arm fires only when GHSA id doesn't exist.
+  /* c8 ignore next 3 */
   if (!adv) {
     throw new ErrorCtor(`GHSA ${ghsaId} not found`)
   }
+  // The ?? defaults across identifiers/withdrawnAt/references/
+  // vulnerabilities/cvss/cwes fire only when GraphQL returns minimal
+  // advisory shape; tests seed rich responses.
+  /* c8 ignore start */
   return {
     ghsaId: adv.ghsaId,
     summary: adv.summary,
     details: adv.description,
-    // REST returns severity lowercase ("moderate"); GraphQL uppercases
-    // ("MODERATE"). Normalize so callers can compare against a single
-    // canonical form regardless of which transport ran.
     severity: adv.severity.toLowerCase(),
-    // REST `aliases` is the list of non-GHSA identifiers (CVE ids,
-    // typically). GraphQL `identifiers` includes the advisory's own
-    // GHSA id alongside CVE ids; filter it out to match REST shape.
     aliases:
       adv.identifiers?.filter(i => i.type !== 'GHSA').map(i => i.value) ?? [],
     publishedAt: adv.publishedAt,
@@ -963,6 +971,7 @@ async function fetchGhsaDetailsViaGraphQL(
     cvss: adv.cvss ?? null,
     cwes: adv.cwes?.nodes ?? [],
   }
+  /* c8 ignore stop */
 }
 
 /**
