@@ -293,6 +293,18 @@ describe('Logger', () => {
       const result = logger.groupEnd()
       expect(result).toBe(logger)
     })
+
+    it('should support group() with no label (length=0 branch)', () => {
+      const result = logger.group()
+      expect(result).toBe(logger)
+      logger.groupEnd()
+    })
+
+    it('should support groupCollapsed() with no label', () => {
+      const result = logger.groupCollapsed()
+      expect(result).toBe(logger)
+      logger.groupEnd()
+    })
   })
 
   describe('multiple arguments', () => {

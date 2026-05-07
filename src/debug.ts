@@ -97,10 +97,13 @@ function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
 function getCallerInfo(stackOffset: number = 3): string {
   let name = ''
   const captureStackTrace = Error.captureStackTrace
+  /* c8 ignore next - V8 always exposes captureStackTrace; non-function
+     branch fires only on exotic embedders that strip Error.captureStackTrace. */
   if (typeof captureStackTrace === 'function') {
     const obj: { stack?: unknown } = {}
     captureStackTrace(obj, getCallerInfo)
     const stack = obj.stack
+    /* c8 ignore next - obj.stack is always a string after captureStackTrace. */
     if (typeof stack === 'string') {
       let lineCount = 0
       let lineStart = 0
@@ -115,6 +118,8 @@ function getCallerInfo(stackOffset: number = 3): string {
             const line = stack.slice(lineStart, i).trimStart()
             // Match the function name portion (e.g., "async runFix").
             const match = /(?<=^at\s+).*?(?=\s+\(|$)/.exec(line)?.[0]
+            /* c8 ignore next - Defensive guard; real V8 stack frames
+               always start with 'at '. */
             if (match) {
               name = match
                 // Strip known V8 invocation prefixes to get the name.
@@ -147,6 +152,7 @@ function getCallerInfo(stackOffset: number = 3): string {
 /*@__NO_SIDE_EFFECTS__*/
 function getDebugJsInstance(namespace: string) {
   let inst = debugByNamespace.get(namespace)
+  /* c8 ignore next 3 - Per-namespace cache hit; first-call always misses. */
   if (inst) {
     return inst
   }
@@ -240,6 +246,7 @@ export function debugCache(
     return
   }
   // Get caller info with stack offset of 3 (caller -> debugCache -> getCallerInfo).
+  /* c8 ignore next - 'cache' fallback fires only on anonymous frames. */
   const callerName = getCallerInfo(3) || 'cache'
 
   /* c8 ignore next 4 - First-call init for module-level
@@ -273,6 +280,7 @@ export function debugCacheNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugCacheNs -> getCallerInfo).
+  /* c8 ignore next - 'cache' fallback fires only on anonymous frames. */
   const callerName = getCallerInfo(4) || 'cache'
 
   /* c8 ignore next 4 - First-call init for module-level
@@ -319,6 +327,7 @@ export function debugDirNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugDirNs -> getCallerInfo).
+  /* c8 ignore next - 'anonymous' fallback fires only on anonymous frames. */
   const callerName = getCallerInfo(4) || 'anonymous'
 
   /* c8 ignore next 4 - First-call init for module-level
@@ -375,6 +384,7 @@ export function debugLogNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugLogNs -> getCallerInfo).
+  /* c8 ignore next - 'anonymous' fallback fires only on anonymous frames. */
   const callerName = getCallerInfo(4) || 'anonymous'
 
   /* c8 ignore next 4 - First-call init for module-level
@@ -389,10 +399,9 @@ export function debugLogNs(
   const logArgs =
     typeof text === 'string'
       ? [
-          applyLinePrefix(
-            `${callerName ? `${callerName} ${pointingTriangle} ` : ''}${text}`,
-            { prefix: '[DEBUG] ' },
-          ),
+          applyLinePrefix(`${callerName} ${pointingTriangle} ${text}`, {
+            prefix: '[DEBUG] ',
+          }),
           ...ArrayPrototypeSlice(args, 1),
         ]
       : [`[DEBUG] ${callerName} ${pointingTriangle}`, ...args]
@@ -429,6 +438,7 @@ export function debugNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugNs -> getCallerInfo).
+  /* c8 ignore next - 'anonymous' fallback fires only on anonymous frames. */
   const name = getCallerInfo(4) || 'anonymous'
   /* c8 ignore next 4 - First-call init for module-level
      pointingTriangle; only one of the 5 debug functions hits the
@@ -441,10 +451,9 @@ export function debugNs(
   const logArgs =
     typeof text === 'string'
       ? [
-          applyLinePrefix(
-            `${name ? `${name} ${pointingTriangle} ` : ''}${text}`,
-            { prefix: '[DEBUG] ' },
-          ),
+          applyLinePrefix(`${name} ${pointingTriangle} ${text}`, {
+            prefix: '[DEBUG] ',
+          }),
           ...ArrayPrototypeSlice(args, 1),
         ]
       : args

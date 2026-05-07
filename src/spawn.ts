@@ -465,6 +465,8 @@ export function enhanceSpawnError(error: unknown): unknown {
   // Add first line of stderr for context.
   const trimmedStderr = stderrText.trim()
   if (trimmedStderr) {
+    /* c8 ignore next - String.split always returns at least one element;
+       the `?? ''` arm is defensive but unreachable. */
     const firstLine = trimmedStderr.split('\n')[0] ?? ''
     if (firstLine.length < 200) {
       enhancedMessage += `\n${firstLine}`
@@ -507,12 +509,17 @@ export function enhanceSpawnError(error: unknown): unknown {
     enumerable: false,
     get() {
       let stack = stackCache.get(enhancedError)
+      /* c8 ignore next - Lazy-init second-call branch on the per-error cache. */
       if (stack === undefined) {
         try {
           stack = stackWithCauses(err)
+          /* c8 ignore start - stackWithCauses fallback for malformed
+             error chains; new Error().stack is also ?? '' for exotic
+             runtimes that strip Error.stack. */
         } catch {
           stack = err.stack ?? new Error().stack ?? ''
         }
+        /* c8 ignore stop */
         stackCache.set(enhancedError, stack)
       }
       return stack

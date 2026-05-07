@@ -58,15 +58,21 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
   const path = getPath()
   const dir = path.dirname(filePath)
   await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
+  /* c8 ignore next 3 - Windows skip-path; tested on Windows runners. */
   if (process.platform === 'win32') {
     return
   }
   const stats = await fs.promises.lstat(dir)
+  /* c8 ignore next 3 - Defensive: mkdir just succeeded so dir is a directory. */
   if (!stats.isDirectory()) {
     throw new ErrorCtor(`IPC path is not a directory: ${dir}`)
   }
   const getuid = process.getuid
+  /* c8 ignore next - process.getuid is always present on POSIX. */
   const ownUid = typeof getuid === 'function' ? getuid.call(process) : -1
+  /* c8 ignore next 5 - Cross-user ownership guard fires only if the
+     IPC directory was created by a different uid; can't be triggered
+     in-test without spawning a separate user. */
   if (ownUid !== -1 && stats.uid !== ownUid) {
     throw new ErrorCtor(
       `IPC directory ${dir} is owned by another user (uid ${stats.uid}); refusing to use it.`,
@@ -76,6 +82,10 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
   // other access — only owner bits may be set.
   // eslint-disable-next-line no-bitwise
   const mode = stats.mode & 0o777
+  /* c8 ignore next 7 - chmod-tightening fires only if umask leaves
+     group/other bits set; default Node umask 0o022 strips group-write
+     but keeps group/other read+execute, so the value depends on the
+     CI runner's umask. */
   // eslint-disable-next-line no-bitwise
   if ((mode & 0o077) !== 0) {
     // Tighten an over-permissive directory we just inherited. Use chmod

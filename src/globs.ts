@@ -117,6 +117,8 @@ export function getMatchesGlob():
         matchesGlob?: unknown
       }
     ).matchesGlob
+    /* c8 ignore next 3 - path.matchesGlob is present on Node 22+; the
+       missing-fn branch only fires on older runtimes. */
     if (typeof fn === 'function') {
       _matchesGlob = fn as (p: string, pattern: string) => boolean
     }

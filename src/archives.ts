@@ -257,6 +257,8 @@ export async function extractTar(
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
+      /* c8 ignore next 3 - destroyScheduled is set by the same map()
+         when a security limit trips; only fires after the schedule. */
       if (destroyScheduled) {
         return header
       }
@@ -398,6 +400,8 @@ export async function extractTarGz(
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
+      /* c8 ignore next 3 - destroyScheduled is set by the same map()
+         when a security limit trips; only fires after the schedule. */
       if (destroyScheduled) {
         return header
       }

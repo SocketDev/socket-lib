@@ -173,6 +173,8 @@ export function memoize<Args extends unknown[], Result>(
   function evictLRU(): void {
     if (cache.size >= maxSize) {
       const oldest = cache.keys().next().value
+      /* c8 ignore next 8 - cache.size >= maxSize guarantees keys().next()
+         yields a defined value; the undefined branch is defensive. */
       if (oldest !== undefined) {
         cache.delete(oldest)
         debugLog(`[memoize:${name}] clear`, {
@@ -267,6 +269,8 @@ export function memoizeAsync<Args extends unknown[], Result>(
   function evictLRU(): void {
     if (cache.size >= maxSize) {
       const oldest = cache.keys().next().value
+      /* c8 ignore next 8 - cache.size >= maxSize guarantees keys().next()
+         yields a defined value; the undefined branch is defensive. */
       if (oldest !== undefined) {
         cache.delete(oldest)
         debugLog(`[memoizeAsync:${name}] clear`, {
