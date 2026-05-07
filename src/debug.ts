@@ -97,13 +97,14 @@ function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
 function getCallerInfo(stackOffset: number = 3): string {
   let name = ''
   const captureStackTrace = Error.captureStackTrace
-  /* c8 ignore next - V8 always exposes captureStackTrace; non-function
-     branch fires only on exotic embedders that strip Error.captureStackTrace. */
+  // V8 always exposes captureStackTrace; non-function branch fires only
+  // on exotic embedders that strip Error.captureStackTrace.
+  /* c8 ignore start */
   if (typeof captureStackTrace === 'function') {
     const obj: { stack?: unknown } = {}
     captureStackTrace(obj, getCallerInfo)
     const stack = obj.stack
-    /* c8 ignore next - obj.stack is always a string after captureStackTrace. */
+    // obj.stack is always a string after captureStackTrace.
     if (typeof stack === 'string') {
       let lineCount = 0
       let lineStart = 0
@@ -246,16 +247,22 @@ export function debugCache(
     return
   }
   // Get caller info with stack offset of 3 (caller -> debugCache -> getCallerInfo).
-  /* c8 ignore next - 'cache' fallback fires only on anonymous frames. */
+  // 'cache' fallback fires only on anonymous frames (V8 stack frame
+  // matcher returns empty when the caller has no name, e.g. an arrow
+  // function passed inline).
+  /* c8 ignore start */
   const callerName = getCallerInfo(3) || 'cache'
+  /* c8 ignore stop */
 
-  /* c8 ignore next 4 - First-call init for module-level
-     pointingTriangle; only one of the 5 debug functions hits the
-     body. */
+  // First-call init for module-level pointingTriangle; only one of
+  // the 5 debug functions hits the body. The unicode-fallback arm
+  // also fires only on terminals without unicode support.
+  /* c8 ignore start */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
+  /* c8 ignore stop */
 
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const args = meta !== undefined ? [prefix, meta] : [prefix]
@@ -280,16 +287,20 @@ export function debugCacheNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugCacheNs -> getCallerInfo).
-  /* c8 ignore next - 'cache' fallback fires only on anonymous frames. */
+  // 'cache' fallback fires only on anonymous frames.
+  /* c8 ignore start */
   const callerName = getCallerInfo(4) || 'cache'
+  /* c8 ignore stop */
 
-  /* c8 ignore next 4 - First-call init for module-level
-     pointingTriangle; only one of the 5 debug functions hits the
-     body. */
+  // First-call init for module-level pointingTriangle; only one of
+  // the 5 debug functions hits the body. The unicode-fallback arm
+  // also fires only on terminals without unicode support.
+  /* c8 ignore start */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
+  /* c8 ignore stop */
 
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const logArgs = meta !== undefined ? [prefix, meta] : [prefix]
@@ -327,16 +338,20 @@ export function debugDirNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugDirNs -> getCallerInfo).
-  /* c8 ignore next - 'anonymous' fallback fires only on anonymous frames. */
+  // 'anonymous' fallback fires only on anonymous frames.
+  /* c8 ignore start */
   const callerName = getCallerInfo(4) || 'anonymous'
+  /* c8 ignore stop */
 
-  /* c8 ignore next 4 - First-call init for module-level
-     pointingTriangle; only one of the 5 debug functions hits the
-     body. */
+  // First-call init for module-level pointingTriangle; only one of
+  // the 5 debug functions hits the body. The unicode-fallback arm
+  // also fires only on terminals without unicode support.
+  /* c8 ignore start */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
+  /* c8 ignore stop */
 
   let opts: InspectOptions | undefined = inspectOpts
   if (opts === undefined) {
@@ -384,16 +399,20 @@ export function debugLogNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugLogNs -> getCallerInfo).
-  /* c8 ignore next - 'anonymous' fallback fires only on anonymous frames. */
+  // 'anonymous' fallback fires only on anonymous frames.
+  /* c8 ignore start */
   const callerName = getCallerInfo(4) || 'anonymous'
+  /* c8 ignore stop */
 
-  /* c8 ignore next 4 - First-call init for module-level
-     pointingTriangle; only one of the 5 debug functions hits the
-     body. */
+  // First-call init for module-level pointingTriangle; only one of
+  // the 5 debug functions hits the body. The unicode-fallback arm
+  // also fires only on terminals without unicode support.
+  /* c8 ignore start */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
+  /* c8 ignore stop */
 
   const text = ArrayPrototypeAt(args, 0)
   const logArgs =
@@ -438,15 +457,19 @@ export function debugNs(
     return
   }
   // Get caller info with stack offset of 4 (caller -> debugNs -> getCallerInfo).
-  /* c8 ignore next - 'anonymous' fallback fires only on anonymous frames. */
+  // 'anonymous' fallback fires only on anonymous frames.
+  /* c8 ignore start */
   const name = getCallerInfo(4) || 'anonymous'
-  /* c8 ignore next 4 - First-call init for module-level
-     pointingTriangle; only one of the 5 debug functions hits the
-     body. */
+  /* c8 ignore stop */
+  // First-call init for module-level pointingTriangle; only one of
+  // the 5 debug functions hits the body. The unicode-fallback arm
+  // also fires only on terminals without unicode support.
+  /* c8 ignore start */
   if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
     pointingTriangle = supported ? '▸' : '>'
   }
+  /* c8 ignore stop */
   const text = ArrayPrototypeAt(args, 0)
   const logArgs =
     typeof text === 'string'

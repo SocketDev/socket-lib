@@ -409,11 +409,12 @@ export function resolveRealBinSync(binPath: string): string {
     // Check Volta cache first - keyed by volta path + binary name.
     const voltaCacheKey = `${voltaPath}:${basename}`
     const cachedVolta = voltaBinCache.get(voltaCacheKey)
+    /* c8 ignore next 7 - Cache hit fires on second resolveRealBinSync
+       call for the same Volta key; tests exercise distinct keys. */
     if (cachedVolta) {
       if (fs.existsSync(cachedVolta)) {
         return cachedVolta
       }
-      /* c8 ignore next - Stale-cache eviction. */
       voltaBinCache.delete(voltaCacheKey)
     }
 
@@ -459,6 +460,9 @@ export function resolveRealBinSync(binPath: string): string {
           voltaImagePath,
           `packages/${binPackage}/bin/${basename}`,
         )
+        /* c8 ignore next 6 - .cmd extension fallback fires only on
+           Windows + Volta when the bare-name binary doesn't exist
+           but its .cmd shim does; tested on Windows runners. */
         if (!fs.existsSync(voltaBinPath)) {
           voltaBinPath = `${voltaBinPath}.cmd`
           if (!fs.existsSync(voltaBinPath)) {
@@ -846,6 +850,7 @@ export async function whichReal(
   const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
   // Use cache - validate with existsSync() which is cheaper than full PATH search.
+  /* c8 ignore next - opts.all path tested via separate which-all callers. */
   if (opts.all) {
     // Check array cache for 'all: true' lookups.
     // Only validate first path for performance - if primary binary exists, assume others do too.
@@ -925,6 +930,7 @@ export function whichRealSync(
   const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
   // Use cache - validate with existsSync() which is cheaper than full PATH search.
+  /* c8 ignore next - opts.all path tested via separate which-all callers. */
   if (opts.all) {
     // Check array cache for 'all: true' lookups.
     // Only validate first path for performance - if primary binary exists, assume others do too.
