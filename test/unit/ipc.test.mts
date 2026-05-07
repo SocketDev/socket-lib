@@ -97,5 +97,28 @@ describe('ipc', () => {
         }
       }, 'ipc-perm-test-')
     })
+
+    it('tightens an over-permissive IPC directory (chmod 0o700)', async () => {
+      if (process.platform === 'win32') {
+        return
+      }
+      await runWithTempDir(async tmpDir => {
+        setPath('tmpdir', tmpDir)
+        try {
+          // Pre-create the per-app IPC dir with 0o755 (group + other
+          // bits set). ensureIpcDirectory walks the chmod-tighten
+          // branch when the existing dir's perm bits include 0o077.
+          const appIpcDir = path.join(tmpDir, '.socket-ipc', 'chmod-test')
+          await fs.mkdir(appIpcDir, { recursive: true })
+          await fs.chmod(appIpcDir, 0o755)
+          await writeIpcStub('chmod-test', { x: 1 })
+          const stat = await fs.stat(appIpcDir)
+          // eslint-disable-next-line no-bitwise
+          expect(stat.mode & 0o777).toBe(0o700)
+        } finally {
+          resetPaths()
+        }
+      }, 'ipc-chmod-test-')
+    })
   })
 })
