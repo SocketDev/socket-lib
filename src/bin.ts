@@ -142,6 +142,8 @@ export async function execBin(
   }
 
   // Execute the binary directly.
+  /* c8 ignore next 3 - Array-resolvedPath arm only fires when whichReal
+     returns multiple paths via opts.all; execBin's path doesn't request that. */
   const binCommand = ArrayIsArray(resolvedPath)
     ? resolvedPath[0]!
     : resolvedPath
@@ -219,7 +221,8 @@ export function findRealNpm(): string {
   // npm.cmd; on POSIX it's the bare npm shim.
   const nodeDir = path.dirname(process.execPath)
   const nodeDirCandidates = WIN32
-    ? [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
+    ? /* c8 ignore next - WIN32 candidates tested on Windows runners. */
+      [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
     : [path.join(nodeDir, 'npm')]
   for (const candidate of nodeDirCandidates) {
     if (fs.existsSync(candidate)) {
@@ -231,7 +234,8 @@ export function findRealNpm(): string {
   /* c8 ignore next 2 - getAppdata() returns undefined off-Windows. */
   const appdata = getAppdata()
   const commonPaths = WIN32
-    ? [
+    ? /* c8 ignore next 6 - WIN32 commonPaths tested on Windows runners. */
+      [
         appdata ? path.join(appdata, 'npm', 'npm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'npm') : '',
         'C:\\Program Files\\nodejs\\npm.cmd',
@@ -279,7 +283,8 @@ export function findRealPnpm(): string {
   // Try common pnpm locations. Guard each env-derived path with its
   // existence — getHome()/getAppdata()/etc. can all return undefined.
   const commonPaths = WIN32
-    ? [
+    ? /* c8 ignore next 8 - WIN32 commonPaths tested on Windows runners. */
+      [
         appdata ? path.join(appdata, 'npm', 'pnpm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'pnpm') : '',
         localappdata ? path.join(localappdata, 'pnpm', 'pnpm.cmd') : '',
@@ -292,7 +297,9 @@ export function findRealPnpm(): string {
         '/usr/bin/pnpm',
         xdgDataHome
           ? path.join(xdgDataHome, 'pnpm/pnpm')
-          : home
+          : /* c8 ignore next 3 - HOME-based fallback fires only when
+               XDG_DATA_HOME is unset; depends on env config. */
+            home
             ? path.join(home, '.local/share/pnpm/pnpm')
             : '',
         home ? path.join(home, '.pnpm/pnpm') : '',
@@ -318,7 +325,8 @@ export function findRealYarn(): string {
   // Try common yarn locations per platform. Guard env-derived paths with
   // existence checks — getHome()/getAppdata() can return undefined.
   const commonPaths = WIN32
-    ? [
+    ? /* c8 ignore next 8 - WIN32 commonPaths tested on Windows runners. */
+      [
         appdata ? path.join(appdata, 'npm', 'yarn.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'yarn') : '',
         home ? path.join(home, '.yarn/bin/yarn.cmd') : '',
