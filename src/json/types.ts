@@ -246,11 +246,12 @@ export interface EditableJsonInstance<T = Record<string, unknown>> {
   fromJSON(json: string): this
 
   /**
-   * Load a JSON file from the specified path.
+   * Load a JSON file from the specified path. Throws on read or parse
+   * errors. The static `EditableJson.load(path, { create: true })`
+   * surface handles ENOENT recovery.
    * @param path - The file path to load
-   * @param create - Whether to create the file if it doesn't exist
    */
-  load(path: string, create?: boolean): Promise<this>
+  load(path: string): Promise<this>
 
   /**
    * Update the JSON content with new values.

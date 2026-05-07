@@ -256,20 +256,9 @@ export function getEditableJsonClass<
         return this
       }
 
-      async load(path: string, create?: boolean): Promise<this> {
+      async load(path: string): Promise<this> {
         this._path = path
-        let parseErr: unknown
-        try {
-          this._readFileContent = await readFile(this.filename)
-        } catch (e) {
-          if (!create) {
-            throw e
-          }
-          parseErr = e
-        }
-        if (parseErr) {
-          throw parseErr
-        }
+        this._readFileContent = await readFile(this.filename)
         this.fromJSON(this._readFileContent)
         // Add AFTER fromJSON is called in case it errors.
         this._readFileJson = parseJson(this._readFileContent)
