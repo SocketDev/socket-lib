@@ -792,8 +792,8 @@
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json",
     "./tsconfig.test.json": "./tsconfig.test.json",
-    "./xport.json": "./xport.json",
-    "./xport.schema.json": "./xport.schema.json"
+    "./lockstep.json": "./lockstep.json",
+    "./lockstep.schema.json": "./lockstep.schema.json"
   },
   "files": [
     "dist",
@@ -822,8 +822,8 @@
     "prepublishOnly": "pnpm run build",
     "test": "node scripts/test/main.mts",
     "update": "node scripts/update.mts",
-    "xport": "node scripts/xport.mts",
-    "xport:emit-schema": "node scripts/xport-emit-schema.mts"
+    "lockstep": "node scripts/lockstep.mts",
+    "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",

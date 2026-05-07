@@ -47,7 +47,7 @@ const ESCALATION_PATTERNS = [
   /^\.oxfmtrc\.json$/,
   /^vitest\.config\.(mjs|mts|js|ts)$/,
   /^package\.json$/,
-  /^xport\.schema\.json$/,
+  /^lockstep\.schema\.json$/,
 ]
 
 function log(msg: string): void {
