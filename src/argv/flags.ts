@@ -168,6 +168,9 @@ export function getLogLevel(input?: FlagInput): string {
  * ```
  */
 export function isAll(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg is module-frozen process.argv slice;
+     no-input branch only reachable when invoked from a process whose
+     argv contains the flag, which test runners can't simulate. */
   if (!input) {
     return processArg.includes('--all')
   }
@@ -188,6 +191,7 @@ export function isAll(input?: FlagInput): boolean {
  * ```
  */
 export function isChanged(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--changed')
   }
@@ -209,6 +213,7 @@ export function isChanged(input?: FlagInput): boolean {
  * ```
  */
 export function isCoverage(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--coverage') || processArg.includes('--cover')
   }
@@ -232,6 +237,7 @@ export function isCoverage(input?: FlagInput): boolean {
  * ```
  */
 export function isDebug(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--debug')
   }
@@ -252,6 +258,7 @@ export function isDebug(input?: FlagInput): boolean {
  * ```
  */
 export function isDryRun(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--dry-run')
   }
@@ -272,6 +279,7 @@ export function isDryRun(input?: FlagInput): boolean {
  * ```
  */
 export function isFix(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--fix')
   }
@@ -292,6 +300,7 @@ export function isFix(input?: FlagInput): boolean {
  * ```
  */
 export function isForce(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--force')
   }
@@ -312,6 +321,7 @@ export function isForce(input?: FlagInput): boolean {
  * ```
  */
 export function isHelp(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--help') || processArg.includes('-h')
   }
@@ -335,6 +345,7 @@ export function isHelp(input?: FlagInput): boolean {
  * ```
  */
 export function isJson(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--json')
   }
@@ -355,6 +366,7 @@ export function isJson(input?: FlagInput): boolean {
  * ```
  */
 export function isQuiet(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--quiet') || processArg.includes('--silent')
   }
@@ -378,6 +390,7 @@ export function isQuiet(input?: FlagInput): boolean {
  * ```
  */
 export function isStaged(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--staged')
   }
@@ -398,6 +411,7 @@ export function isStaged(input?: FlagInput): boolean {
  * ```
  */
 export function isUpdate(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--update') || processArg.includes('-u')
   }
@@ -421,6 +435,7 @@ export function isUpdate(input?: FlagInput): boolean {
  * ```
  */
 export function isVerbose(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--verbose')
   }
@@ -441,6 +456,7 @@ export function isVerbose(input?: FlagInput): boolean {
  * ```
  */
 export function isWatch(input?: FlagInput): boolean {
+  /* c8 ignore next 3 - processArg no-input branch (see isAll). */
   if (!input) {
     return processArg.includes('--watch') || processArg.includes('-w')
   }

@@ -106,12 +106,14 @@ function isWindowsDeviceRoot(code: number): boolean {
 
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 function msysDriveToNative(normalized: string): string {
+  /* c8 ignore start - Windows-only branch. */
   if (WIN32) {
     return normalized.replace(
       msysDriveRegExp,
       (_, letter, sep) => `${letter.toUpperCase()}:${sep || '/'}`,
     )
   }
+  /* c8 ignore stop */
   return normalized
 }
 
@@ -174,6 +176,7 @@ function relative(from: string, to: string): string {
     return ''
   }
 
+  /* c8 ignore start - Windows-only case-insensitive comparison. */
   // Windows: perform case-insensitive comparison.
   // NTFS and FAT32 preserve case but are case-insensitive for lookups.
   // This means 'C:\Foo\bar.txt' and 'c:\foo\BAR.TXT' refer to the same file.
@@ -185,6 +188,7 @@ function relative(from: string, to: string): string {
       return ''
     }
   }
+  /* c8 ignore stop */
 
   // Skip the leading separator for comparison.
   // We compare paths starting after the root separator to find common directories.
@@ -209,6 +213,7 @@ function relative(from: string, to: string): string {
 
     // Paths diverge at this character.
     // On Windows, perform case-insensitive comparison.
+    /* c8 ignore start - Windows-only case folding. */
     if (WIN32) {
       // Normalize to lowercase for case-insensitive comparison.
       // Convert A-Z (65-90) to a-z (97-122).
@@ -219,6 +224,7 @@ function relative(from: string, to: string): string {
         toCode += 32
       }
     }
+    /* c8 ignore stop */
 
     if (fromCode !== toCode) {
       break

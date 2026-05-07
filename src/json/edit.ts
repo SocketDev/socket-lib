@@ -88,6 +88,8 @@ async function readFile(filepath: string): Promise<string> {
     }
   }
 
+  /* c8 ignore next 3 - Loop has 'return' on success and 'throw' in
+     each iteration; only reachable if maxRetries is somehow negative. */
   throw new ErrorCtor(
     `readFile: exhausted ${maxRetries + 1} attempts reading ${filepath}`,
   )
@@ -111,6 +113,8 @@ async function retryWrite(
     try {
       // eslint-disable-next-line no-await-in-loop
       await fsPromises.writeFile(filepath, content)
+      /* c8 ignore start - Windows-only flush+verify loop. Tested on
+         Windows runners. */
       // On Windows, add a delay and verify file exists to ensure it's fully flushed
       // This prevents ENOENT errors when immediately reading after write
       // Windows CI runners are significantly slower than local development
@@ -135,6 +139,7 @@ async function retryWrite(
           accessRetries++
         }
       }
+      /* c8 ignore stop */
       return
     } catch (e) {
       const isLastAttempt = attempt === retries

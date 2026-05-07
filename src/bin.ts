@@ -462,6 +462,10 @@ export function resolveRealBinSync(binPath: string): string {
       return resolvedVoltaPath
     }
   }
+  /* c8 ignore start - Windows-only wrapper-script resolution; tested
+     on Windows runners. The whole `if (WIN32)` block parses npm/npx/ // socket-hook: allow npx
+     pnpm/yarn .cmd/.bat/.ps1 shims to extract the underlying CLI JS
+     path. Unreachable on macOS/Linux. */
   if (WIN32) {
     const hasKnownExt =
       extLowered === '' ||
@@ -746,6 +750,7 @@ export function resolveRealBinSync(binPath: string): string {
       }
     }
   }
+  /* c8 ignore stop */
   try {
     const realPath = fs.realpathSync.native(binPath)
     return normalizePath(realPath)

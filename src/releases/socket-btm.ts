@@ -145,6 +145,8 @@ export function detectLibc(): Libc | undefined {
     return undefined
   }
 
+  /* c8 ignore start - Linux-only musl/glibc detection; tested on
+     Linux runners. macOS/Windows runners take the early-return above. */
   try {
     const fs = getFs()
     // Check for musl-specific dynamic linker.
@@ -168,6 +170,7 @@ export function detectLibc(): Libc | undefined {
     // If detection fails, default to glibc (most common).
     return 'glibc'
   }
+  /* c8 ignore stop */
 }
 
 /**

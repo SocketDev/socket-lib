@@ -124,6 +124,9 @@ function getSignalListeners() {
     _sigListeners = { __proto__: null } as unknown as SignalListenerMap
     const emitter = getEmitter()
     const sigs = signals()
+    /* c8 ignore start - Signal-listener body fires only on real
+       process signals; can't be triggered in-test without subprocess
+       infrastructure. */
     for (const sig of sigs) {
       _sigListeners[sig] = function listener() {
         // If there are no other listeners, an exit is coming!
@@ -142,10 +145,13 @@ function getSignalListeners() {
         }
       }
     }
+    /* c8 ignore stop */
   }
   return _sigListeners as SignalListenerMap
 }
 
+/* c8 ignore start - processEmit + processReallyExit interceptors
+   only fire on real process exit/emit; can't be triggered in-test. */
 /*@__NO_SIDE_EFFECTS__*/
 function processEmit(
   this: NodeJS.Process,
@@ -195,6 +201,7 @@ function processReallyExit(code?: number | undefined): never {
   )
   throw new ErrorCtor('processReallyExit should never return')
 }
+/* c8 ignore stop */
 
 /**
  * Load signal handlers and hook into process exit events.
