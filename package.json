@@ -959,12 +959,12 @@
       "default": "./dist/words.js"
     },
     "./data/extensions.json": "./data/extensions.json",
+    "./lockstep.json": "./lockstep.json",
+    "./lockstep.schema.json": "./lockstep.schema.json",
     "./package.json": "./package.json",
     "./tsconfig.dts.json": "./tsconfig.dts.json",
     "./tsconfig.json": "./tsconfig.json",
-    "./tsconfig.test.json": "./tsconfig.test.json",
-    "./lockstep.json": "./lockstep.json",
-    "./lockstep.schema.json": "./lockstep.schema.json"
+    "./tsconfig.test.json": "./tsconfig.test.json"
   },
   "files": [
     "dist",
