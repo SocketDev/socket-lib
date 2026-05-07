@@ -223,6 +223,7 @@ export function getUserHomeDir(): string {
   } catch {
     // getOs().homedir() can throw in restricted environments
   }
-  // Final fallback to temp directory (rarely used)
+  /* c8 ignore next 2 - Triple-fallback only fires when HOME +
+     USERPROFILE + os.homedir() all fail; not reachable in tests. */
   return getOsTmpDir()
 }

@@ -67,6 +67,8 @@ export async function main(
 declare const require: { main: unknown }
 declare const module: unknown
 
+/* c8 ignore next 5 - CJS CLI entry guard; only fires when this
+   module is invoked as the bin (`socket-lib`), not when imported. */
 if (typeof require !== 'undefined' && require.main === module) {
   void main().then(code => {
     process.exit(code)

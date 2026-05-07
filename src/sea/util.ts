@@ -45,7 +45,8 @@ export function isSeaBinary(): boolean {
       const seaModule = require('node:sea')
       _isSea = seaModule.isSea()
     } catch {
-      // Node.js < 24 or SEA module not available.
+      /* c8 ignore next - Node.js < 24 fallback; node:sea is in
+         supported Node 22+ as of this codebase. */
       _isSea = false
     }
   }

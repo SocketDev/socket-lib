@@ -118,7 +118,8 @@ export async function downloadAndExtractArchive(
           logger.info('Cleaned up temporary archive file')
         }
       } catch (e) {
-        // Ignore cleanup errors
+        /* c8 ignore next 3 - safeDelete rarely throws on a known-
+           existing tmpfile; defensive log path. */
         if (!quiet) {
           logger.warn(`Failed to cleanup archive file: ${e}`)
         }
@@ -196,7 +197,8 @@ export async function downloadAndExtractZip(
           logger.info('Cleaned up temporary zip file')
         }
       } catch (e) {
-        // Ignore cleanup errors
+        /* c8 ignore next 3 - safeDelete rarely throws on a known-
+           existing tmpfile; defensive log path. */
         if (!quiet) {
           logger.warn(`Failed to cleanup zip file: ${e}`)
         }

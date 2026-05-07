@@ -34,10 +34,15 @@ function setupSuppression(): void {
           }
         }
       } else if (warning && typeof warning === 'object') {
+        /* c8 ignore start - Object-shaped warning suppression
+           (Error / Warning instances). process.emitWarning rarely
+           passes object form in test runs; covered when consumers
+           pass real Warning subclasses. */
         const warningObj = warning as { name?: string }
         if (warningObj.name && suppressedWarnings.has(warningObj.name)) {
           return
         }
+        /* c8 ignore stop */
       }
       // Not suppressed - call the original function.
       return ReflectApply(

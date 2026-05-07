@@ -70,11 +70,13 @@ let _smolVersions: SmolVersionsBinding | null | undefined
 export function getSmolVersions(): SmolVersionsBinding | undefined {
   if (_smolVersions === undefined) {
     if (isSmol()) {
+      /* c8 ignore start - smol Node binary only. */
       try {
         _smolVersions = require('node:smol-versions') as SmolVersionsBinding
       } catch {
         _smolVersions = null
       }
+      /* c8 ignore stop */
     } else {
       _smolVersions = null
     }

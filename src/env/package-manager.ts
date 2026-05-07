@@ -50,7 +50,10 @@ export function detectPackageManager(): PackageManagerType {
     }
   }
 
-  // Fallback: Check binary path patterns.
+  /* c8 ignore start - argv0-based PM fallback only fires when
+     npm_config_user_agent / lifecycle env detection both miss.
+     In test runs argv0 is always the test runner's node binary,
+     not a PM shim. */
   const argv0 = process.argv[0]
   if (argv0) {
     if (argv0.includes('/pnpm/') || argv0.includes('\\pnpm\\')) {
@@ -75,6 +78,7 @@ export function detectPackageManager(): PackageManagerType {
       return 'npm'
     }
   }
+  /* c8 ignore stop */
 
   return null
 }

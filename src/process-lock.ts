@@ -175,6 +175,8 @@ class ProcessLockManager {
         fs.utimesSync(lockPath, now, now)
       }
     } catch (e) {
+      /* c8 ignore next - Defensive touch-error log; only fires if
+         utimesSync throws on a lock we just successfully created. */
       logger.warn(`Failed to touch lock ${lockPath}: ${errorMessage(e)}`)
     }
   }
@@ -240,6 +242,9 @@ class ProcessLockManager {
       // means the low bits are zero, which the subtraction handles.
       return DateNow() - stats.mtime.getTime() > staleMs
     } catch {
+      /* c8 ignore next - statSync error → not stale; only fires
+         when stat throws (rare; throwIfNoEntry: false catches
+         missing files). */
       return false
     }
   }

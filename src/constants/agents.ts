@@ -20,6 +20,8 @@ const _npmBinPath = /*@__PURE__*/ (() => {
   try {
     return which.sync('npm', { nothrow: true }) || null
   } catch {
+    /* c8 ignore next - which.sync throw catch; module-init IIFE
+       runs once at load time before tests can intercept. */
     return null
   }
 })()
@@ -32,6 +34,8 @@ export const NPM_BIN_PATH = _npmBinPath || 'npm'
 export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
   try {
     // Reuse cached npm bin path to avoid duplicate which.sync call.
+    /* c8 ignore next 3 - Module-init IIFE; only reachable when
+       which.sync returns null at module load. */
     if (!_npmBinPath) {
       return undefined
     }
@@ -53,8 +57,11 @@ export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
     if (existsSync(nodeModulesPath)) {
       return nodeModulesPath
     }
+    /* c8 ignore next - Falls through when cli.js isn't at the
+       expected node_modules location. */
     return undefined
   } catch {
+    /* c8 ignore next - Module-init IIFE catch; can't intercept. */
     return undefined
   }
 })()

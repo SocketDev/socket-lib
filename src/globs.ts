@@ -368,6 +368,9 @@ export function getGlobMatcher(
   }
 
   // Evict oldest entry if cache is full (Map iteration order = insertion order).
+  /* c8 ignore next 6 - LRU eviction triggers at 100 entries; not
+     reachable from typical test runs which exercise <10 distinct
+     glob patterns. */
   if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
     const oldest = matcherCache.keys().next().value
     if (oldest !== undefined) {

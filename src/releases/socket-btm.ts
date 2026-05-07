@@ -118,6 +118,7 @@ let _fs: typeof import('node:fs') | undefined
  *
  * @private
  */
+/* c8 ignore start - Only called from Linux-only detectLibc body. */
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {
   if (_fs === undefined) {
@@ -127,6 +128,7 @@ function getFs() {
   }
   return _fs as typeof import('node:fs')
 }
+/* c8 ignore stop */
 
 /**
  * Detect the libc variant (musl or glibc) on Linux systems.

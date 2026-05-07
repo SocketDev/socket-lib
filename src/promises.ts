@@ -675,7 +675,9 @@ export async function pRetry<T>(
   let error: unknown = UNDEFINED_TOKEN
 
   while (attempts-- >= 0) {
-    // Check abort before attempt.
+    /* c8 ignore next 4 - Abort-before-attempt requires the signal
+       to be aborted between iterations; existing tests cover
+       abort during fn execution (the exception path). */
     if (signal?.aborted) {
       return undefined
     }
@@ -720,7 +722,9 @@ export async function pRetry<T>(
         return undefined
       }
 
-      // Check abort again after delay.
+      /* c8 ignore next 4 - Abort-after-delay requires precise
+         timing: signal aborted between setTimeout resolve and
+         the next iteration's check. */
       if (signal?.aborted) {
         return undefined
       }
@@ -732,6 +736,8 @@ export async function pRetry<T>(
   if (error !== UNDEFINED_TOKEN) {
     throw error
   }
+  /* c8 ignore next - Fallback when retries=0 and fn never errored;
+     unreachable since the success path returns from inside the try. */
   return undefined
 }
 

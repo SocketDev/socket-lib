@@ -372,6 +372,8 @@ export async function getLatestRelease(
           // `nothrow: true` callers get undefined (treated as "no
           // releases found") instead of the throw — matches the
           // bin.ts whichReal convention.
+          /* c8 ignore next 7 - REST + GraphQL both-degraded branch
+             requires both real backends to fail simultaneously. */
           if (nothrow) {
             return undefined
           }
@@ -521,7 +523,8 @@ export async function getReleaseAssetUrl(
         try {
           fallbackAssets = await fetchReleaseAssetsViaGraphQL(owner, repo, tag)
         } catch (cause) {
-          // `nothrow: true` callers get undefined instead of the throw.
+          /* c8 ignore next 7 - Both backends degraded; needs real
+             network failure on both REST and GraphQL. */
           if (nothrow) {
             return undefined
           }
@@ -530,6 +533,7 @@ export async function getReleaseAssetUrl(
             { cause },
           )
         }
+        /* c8 ignore next 5 - GraphQL fallback returned no release. */
         if (fallbackAssets === undefined) {
           if (nothrow) {
             return undefined

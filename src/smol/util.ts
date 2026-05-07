@@ -132,11 +132,15 @@ let _smolUtil: SmolUtilBinding | null | undefined
 export function getSmolUtil(): SmolUtilBinding | undefined {
   if (_smolUtil === undefined) {
     if (isSmol()) {
+      /* c8 ignore start - node:smol-util is only available on the
+         smol Node binary built by socket-btm. Stock Node always
+         takes the else branch (sets _smolUtil = null). */
       try {
         _smolUtil = require('node:smol-util') as SmolUtilBinding
       } catch {
         _smolUtil = null
       }
+      /* c8 ignore stop */
     } else {
       _smolUtil = null
     }

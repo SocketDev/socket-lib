@@ -98,12 +98,14 @@ let _smolPrimordial: SmolPrimordialBinding | null | undefined
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
   if (_smolPrimordial === undefined) {
     if (isSmol()) {
+      /* c8 ignore start - smol Node binary only. */
       try {
         _smolPrimordial =
           require('node:smol-primordial') as SmolPrimordialBinding
       } catch {
         _smolPrimordial = null
       }
+      /* c8 ignore stop */
     } else {
       _smolPrimordial = null
     }

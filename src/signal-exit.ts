@@ -72,6 +72,9 @@ let _sigListeners: SignalListenerMap | undefined
 let loaded = false
 let _signals: string[] | undefined
 
+/* c8 ignore start - Only called from signal-listener body and
+   processEmit/processReallyExit interceptors, all of which are
+   c8-ignored. Cannot be reached from the test runner. */
 /*@__NO_SIDE_EFFECTS__*/
 function emit(event: string, code: number | null, signal: string | null): void {
   const emitter = getEmitter()
@@ -83,10 +86,13 @@ function emit(event: string, code: number | null, signal: string | null): void {
   }
   emitter.emit(event, code, signal)
 }
+/* c8 ignore stop */
 
 /*@__NO_SIDE_EFFECTS__*/
 function getEmitter() {
   if (_emitter === undefined) {
+    /* c8 ignore next 2 - Pre-existing global emitter when another
+       copy of signal-exit is already loaded in the same process. */
     if (globalProcess?.__signal_exit_emitter__) {
       _emitter = globalProcess.__signal_exit_emitter__
     } else if (globalProcess) {
