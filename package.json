@@ -103,6 +103,26 @@
       "types": "./dist/abort.d.ts",
       "default": "./dist/abort.js"
     },
+    "./ai/discover": {
+      "source": "./src/ai/discover.mts",
+      "default": "./dist/ai/discover.js"
+    },
+    "./ai/profiles": {
+      "source": "./src/ai/profiles.mts",
+      "default": "./dist/ai/profiles.js"
+    },
+    "./ai/spawn": {
+      "source": "./src/ai/spawn.mts",
+      "default": "./dist/ai/spawn.js"
+    },
+    "./ai/types": {
+      "source": "./src/ai/types.mts",
+      "default": "./dist/ai/types.js"
+    },
+    "./ai/worktree": {
+      "source": "./src/ai/worktree.mts",
+      "default": "./dist/ai/worktree.js"
+    },
     "./ansi": {
       "source": "./src/ansi.ts",
       "types": "./dist/ansi.d.ts",
