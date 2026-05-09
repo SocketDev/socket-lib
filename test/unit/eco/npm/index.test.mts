@@ -28,7 +28,7 @@ import {
   isPnpmIgnoreScriptsFlag,
   isPnpmInstallCommand,
   isPnpmLoglevelFlag,
-} from '@socketsecurity/lib/agent'
+} from '@socketsecurity/lib/eco/npm'
 
 describe('agent', () => {
   describe('Flag checking functions', () => {
