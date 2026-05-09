@@ -31,8 +31,14 @@ else
 fi
 
 if [ -z "${DISABLE_PRECOMMIT_TEST}" ]; then
-  # Only run tests if there are staged test files
-  pnpm test --staged
+  STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+  if echo "$STAGED" | grep -qE '\.(spec|test)\.(cts|mts|m?[jt]s|tsx?)$|^lib/|^src/|^packages/[^/]+/(lib|src)/'; then
+    if [ -n "${DISABLE_PRECOMMIT_LINT}" ]; then
+      pnpm test --fast
+    else
+      pnpm test
+    fi
+  fi
 else
   echo "Skipping testing due to DISABLE_PRECOMMIT_TEST env var"
 fi
