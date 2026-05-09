@@ -55,8 +55,8 @@ import {
 // generic type parameters, etc.). The strip-then-parse approach is
 // reliable and uses only Node built-ins (`module.stripTypeScriptTypes`,
 // available 22.6+).
-const TS_EXTENSIONS = new Set(['.ts', '.mts', '.cts', '.tsx'])
-const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx'])
+const TS_EXTENSIONS = new Set(['.cts', '.mts', '.ts', '.tsx'])
+const JS_EXTENSIONS = new Set(['.cjs', '.js', '.jsx', '.mjs'])
 // `.d.ts`, `.d.mts`, `.d.cts` are type-only declaration files — no
 // runtime code, so they can never contain a primordial call site.
 // `path.extname` returns just `.ts` for `foo.d.ts`, so we have to

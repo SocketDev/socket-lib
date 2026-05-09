@@ -10,7 +10,10 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { spawn } from '@socketsecurity/lib-stable/spawn'
+
+const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..', '..')
@@ -173,11 +176,11 @@ async function main(): Promise<void> {
     // Formatting is best-effort — don't fail the build if oxfmt is missing.
   }
   // eslint-disable-next-line no-console
-  console.log(`Wrote ${rows.length} exports to docs/api-index.md`)
+  logger.log(`Wrote ${rows.length} exports to docs/api-index.md`)
 }
 
 main().catch(err => {
   // eslint-disable-next-line no-console
-  console.error(err)
+  logger.fail(err)
   process.exitCode = 1
 })

@@ -32,7 +32,7 @@ async function runTypeCheck(quiet = false): Promise<number> {
       logger.error('Type checks failed')
     }
     if (result.stdout) {
-      console.log(result.stdout)
+      logger.log(result.stdout)
     }
     return result.exitCode
   }

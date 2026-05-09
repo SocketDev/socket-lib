@@ -14,7 +14,7 @@
 
 class AuditReport {
   static async load() {
-    return null
+    return undefined
   }
   constructor() {
     throw new Error(

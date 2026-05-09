@@ -269,7 +269,7 @@ async function rewriteFile({
   // conversion entirely (the map is identity).
   const byteToChar = buildByteToCharMap(src)
   const toChar = (off: number): number =>
-    byteToChar === null ? off : (byteToChar[off] ?? off)
+    byteToChar === undefined ? off : (byteToChar[off] ?? off)
 
   const rewrites = []
   const usedPrimordials = new Set()
@@ -725,7 +725,7 @@ function repairEndPositions(node) {
  * gives the char index that byte starts. Bytes inside a multi-byte
  * codepoint share the char index of the codepoint's lead byte.
  */
-function buildByteToCharMap(src: string): number[] | null {
+function buildByteToCharMap(src: string): number[] | undefined {
   // Scan: any code unit ≥ 0x80 implies a multi-byte UTF-8 representation.
   let hasNonAscii = false
   for (let i = 0; i < src.length; i++) {
@@ -735,7 +735,7 @@ function buildByteToCharMap(src: string): number[] | null {
     }
   }
   if (!hasNonAscii) {
-    return null
+    return undefined
   }
   const buf = Buffer.from(src, 'utf8')
   const map = Array.from({ length: buf.length + 1 })

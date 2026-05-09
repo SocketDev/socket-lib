@@ -296,7 +296,7 @@ function formatDuration(ms) {
 class ProgressTracker {
   constructor() {
     this.phases = []
-    this.currentPhase = null
+    this.currentPhase = undefined
     this.startTime = Date.now()
     this.history = this.loadHistory()
   }
@@ -343,7 +343,7 @@ class ProgressTracker {
     if (this.currentPhase) {
       this.currentPhase.duration = Date.now() - this.currentPhase.start
       this.phases.push(this.currentPhase)
-      this.currentPhase = null
+      this.currentPhase = undefined
     }
   }
 
@@ -393,7 +393,7 @@ class ProgressTracker {
       }
     }
 
-    return total > 0 ? total : null
+    return total > 0 ? total : undefined
   }
 
   showProgress() {
@@ -635,7 +635,7 @@ async function celebrateSuccess(costTracker, stats = {}) {
   // Update success streak.
   try {
     const streakPath = path.join(CLAUDE_HOME, 'streak.json')
-    let streak = { current: 0, best: 0, lastSuccess: null }
+    let streak = { current: 0, best: 0, lastSuccess: undefined }
     if (existsSync(streakPath)) {
       streak = JSON.parse(await fs.readFile(streakPath, 'utf8'))
     }
@@ -996,7 +996,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
     ? 'the-brain'
     : opts.pinky
       ? 'pinky'
-      : null
+      : undefined
   const mode = modelStrategy.selectMode(task, {
     forceModel,
     lastError: opts.lastError,
@@ -1030,7 +1030,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
     opts.timeout || (opts.interactive === false ? 180_000 : 600_000)
   const showProgress = opts.showProgress !== false && opts.interactive === false
   const startTime = Date.now()
-  let progressInterval = null
+  let progressInterval = undefined
   let timedOut = false
 
   try {
@@ -1084,7 +1084,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
             log.warn(`Claude timed out after ${Math.round(elapsed / 1000)}s`)
             if (progressInterval) {
               clearInterval(progressInterval)
-              progressInterval = null
+              progressInterval = undefined
             }
           } else {
             log.progress(
@@ -1119,7 +1119,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
       // Clear progress interval
       if (progressInterval) {
         clearInterval(progressInterval)
-        progressInterval = null
+        progressInterval = undefined
         if (!opts.silent && !timedOut) {
           const elapsed = Date.now() - startTime
           log.done(`Claude completed in ${Math.round(elapsed / 1000)}s`)
@@ -1430,12 +1430,12 @@ class ModelStrategy {
     this.escalationThreshold = 2
     // 5 minutes
     this.brainTimeout = 5 * 60 * 1000
-    this.brainActivatedAt = null
+    this.brainActivatedAt = undefined
     this.lastTaskComplexity = new Map()
   }
 
   selectMode(task, options = {}) {
-    const { forceModel = null } = options
+    const { forceModel = undefined } = options
 
     // Honor explicit flags.
     if (forceModel === 'the-brain') {
@@ -1454,7 +1454,7 @@ class ModelStrategy {
         log.substep(`🧠 Brain mode active (${remaining}s remaining)`)
         return 'the-brain'
       }
-      this.brainActivatedAt = null
+      this.brainActivatedAt = undefined
       log.substep('🐭 Reverting to Pinky mode')
     }
 
@@ -1543,7 +1543,7 @@ const modelStrategy = new ModelStrategy()
 async function getSmartContext(options = {}) {
   const {
     commits = 5,
-    fileTypes = null,
+    fileTypes = undefined,
     includeUncommitted = true,
     maxFiles = 30,
   } = options
@@ -1867,7 +1867,7 @@ function prepareClaudeArgs(args = [], options = {}) {
     ? 'the-brain'
     : _opts.pinky
       ? 'pinky'
-      : null
+      : undefined
 
   const mode = modelStrategy.selectMode(task, {
     forceModel,
@@ -1914,13 +1914,13 @@ async function executeParallel(tasks, workers = 3) {
   log.substep(`🚀 Executing ${tasks.length} tasks with ${workers} workers`)
   const results = []
   let inFlight = 0
-  let slotWaiter = null
+  let slotWaiter = undefined
 
   const releaseSlot = () => {
     inFlight--
     if (slotWaiter) {
       const resolve = slotWaiter
-      slotWaiter = null
+      slotWaiter = undefined
       resolve()
     }
   }
@@ -2134,27 +2134,26 @@ Output ONLY the updated CLAUDE.md content, nothing else.`
 
   return `You are updating the CLAUDE.md file in the ${projectName} project.
 
-The socket-registry/CLAUDE.md is the CANONICAL source for all cross-project standards. Your task:
+The socket-repo-template/template/CLAUDE.md is the CANONICAL source for all cross-project standards (the FLEET-CANONICAL block). Your task:
 
-1. Read the canonical ../socket-registry/CLAUDE.md
+1. Read the canonical socket-repo-template/template/CLAUDE.md (fleet block).
 2. Read the current CLAUDE.md in ${projectName}
 3. Update ${projectName}/CLAUDE.md to:
-   - Reference the canonical socket-registry/CLAUDE.md for all shared standards
-   - Remove any redundant cross-project information that's already in socket-registry
-   - Keep ONLY project-specific guidelines and requirements
-   - Add a clear reference at the top pointing to socket-registry/CLAUDE.md as the canonical source
+   - Keep the fleet-canonical block byte-identical (synced via sync-scaffolding).
+   - Drop any redundant cross-project content that's already in the fleet block.
+   - Keep ONLY project-specific guidelines and requirements below the fleet markers.
 
 The ${projectName}/CLAUDE.md should contain:
-- A reference to socket-registry/CLAUDE.md as the canonical source
-- Project-specific architecture notes
-- Project-specific commands and workflows
-- Project-specific dependencies or requirements
-- Any unique patterns or rules for this project only
+- The fleet-canonical block (byte-identical with the template).
+- Project-specific architecture notes.
+- Project-specific commands and workflows.
+- Project-specific dependencies or requirements.
+- Any unique patterns or rules for this project only.
 
 Start the file with something like:
 # CLAUDE.md
 
-**CANONICAL REFERENCE**: See ../socket-registry/CLAUDE.md for shared Socket standards.
+The fleet-canonical block is synced from socket-repo-template's template/CLAUDE.md.
 
 Then include only PROJECT-SPECIFIC content.
 
@@ -2661,13 +2660,13 @@ async function autonomousFixSession(
   // Auto-fixable issue types (high confidence)
   const autoFixableTypes = new Set([
     'console-log',
-    'missing-await',
-    'unused-variable',
-    'missing-semicolon',
-    'wrong-import-path',
     'deprecated-api',
-    'type-error',
     'lint-error',
+    'missing-await',
+    'missing-semicolon',
+    'type-error',
+    'unused-variable',
+    'wrong-import-path',
   ])
 
   // Determine which issues to auto-fix
@@ -3969,8 +3968,8 @@ async function runGreen(claudeCmd, options = {}) {
   ]
 
   let autoFixAttempts = 0
-  let lastAnalysis = null
-  let lastErrorHash = null
+  let lastAnalysis = undefined
+  let lastErrorHash = undefined
 
   for (const check of localChecks) {
     log.progress(`[${repoName}] ${check.name}`)
@@ -4099,7 +4098,7 @@ Fix this issue now by making the necessary changes.`
 
         // Monitor progress with timeout
         let isCleared = false
-        let progressInterval = null
+        let progressInterval = undefined
         const clearProgressInterval = () => {
           if (!isCleared && progressInterval) {
             clearInterval(progressInterval)
@@ -4414,7 +4413,7 @@ Let's work through this together to get CI passing.`
 
   // Monitor workflow with retries
   let retryCount = 0
-  let lastRunId = null
+  let lastRunId = undefined
   let pushTime = Date.now()
   // Track which jobs we've already fixed (jobName -> true)
   let fixedJobs = new Map()
@@ -4494,7 +4493,7 @@ Let's work through this together to get CI passing.`
     }
 
     // Filter runs to find one matching our commit SHA or recent push
-    let matchingRun = null
+    let matchingRun = undefined
 
     // Debug: log current SHA and available runs
     if (pollAttempt === 0) {

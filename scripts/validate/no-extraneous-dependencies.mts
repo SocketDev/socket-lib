@@ -141,7 +141,7 @@ function checkFileExists(specifier, fromFile) {
     }
   }
 
-  return { exists: false, resolvedPath: null }
+  return { exists: false, resolvedPath: undefined }
 }
 
 /**

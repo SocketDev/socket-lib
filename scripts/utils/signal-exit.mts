@@ -21,7 +21,7 @@ export function onExit(callback) {
   }
 
   const exitHandler = () => {
-    callback(process.exitCode || 0, null)
+    callback(process.exitCode || 0, undefined)
   }
 
   signals.forEach(signal => {

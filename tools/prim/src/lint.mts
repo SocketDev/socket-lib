@@ -68,8 +68,8 @@ const CTOR_NAMES = new Set([
   'WeakSet',
 ])
 
-const TS_EXTENSIONS = new Set(['.ts', '.mts', '.cts', '.tsx'])
-const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx'])
+const TS_EXTENSIONS = new Set(['.cts', '.mts', '.ts', '.tsx'])
+const JS_EXTENSIONS = new Set(['.cjs', '.js', '.jsx', '.mjs'])
 
 const PARSE_OPTIONS = {
   ecmaVersion: 'latest',
@@ -142,10 +142,10 @@ const DEFAULT_PRIMORDIAL_SOURCES = [
  */
 function classifySource(node, primordialSources) {
   if (!node) {
-    return null
+    return undefined
   }
   if (node.type === 'Identifier') {
-    return primordialSources.has(node.name) ? node.name : null
+    return primordialSources.has(node.name) ? node.name : undefined
   }
   if (
     node.type === 'CallExpression' &&
@@ -167,9 +167,9 @@ function classifySource(node, primordialSources) {
     if (tail && primordialSources.has(tail)) {
       return spec
     }
-    return null
+    return undefined
   }
-  return null
+  return undefined
 }
 
 /** Pretty-print the source for finding output. */

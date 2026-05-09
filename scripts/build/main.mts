@@ -66,7 +66,7 @@ async function buildSource(
       if (!quiet) {
         logger.error('Clean failed')
       }
-      return { exitCode, buildTime: 0, result: null }
+      return { exitCode, buildTime: 0, result: undefined }
     }
   }
 
@@ -86,7 +86,7 @@ async function buildSource(
       logger.error('Source build failed')
       logger.error(error)
     }
-    return { exitCode: 1, buildTime: 0, result: null }
+    return { exitCode: 1, buildTime: 0, result: undefined }
   }
 }
 

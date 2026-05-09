@@ -54,11 +54,11 @@ async function processDirectory(
               plugins: [],
             })
 
-            let valueIdentifier = null
-            let exportCallStart = null
-            let exportCallEnd = null
-            let toCommonJSStart = null
-            let toCommonJSEnd = null
+            let valueIdentifier = undefined
+            let exportCallStart = undefined
+            let exportCallEnd = undefined
+            let toCommonJSStart = undefined
+            let toCommonJSEnd = undefined
 
             // Find __export call with default export
             const walk = node => {
@@ -120,8 +120,8 @@ async function processDirectory(
 
             if (
               valueIdentifier &&
-              exportCallStart !== null &&
-              toCommonJSStart !== null
+              exportCallStart !== undefined &&
+              toCommonJSStart !== undefined
             ) {
               // Remove the __export call and surrounding statement
               // Find the semicolon and newline after the call
