@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "5.28.0",
+  "version": "6.0.0",
   "packageManager": "pnpm@11.0.8",
   "license": "MIT",
   "publishConfig": {
@@ -102,11 +102,6 @@
       "source": "./src/abort.ts",
       "types": "./dist/abort.d.ts",
       "default": "./dist/abort.js"
-    },
-    "./agent": {
-      "source": "./src/agent.ts",
-      "types": "./dist/agent.d.ts",
-      "default": "./dist/agent.js"
     },
     "./ansi": {
       "source": "./src/ansi.ts",
@@ -347,6 +342,81 @@
       "source": "./src/dlx/paths.ts",
       "types": "./dist/dlx/paths.d.ts",
       "default": "./dist/dlx/paths.js"
+    },
+    "./eco/npm": {
+      "source": "./src/eco/npm/index.ts",
+      "types": "./dist/eco/npm/index.d.ts",
+      "default": "./dist/eco/npm/index.js"
+    },
+    "./eco/npm/bun": {
+      "source": "./src/eco/npm/bun/index.ts",
+      "types": "./dist/eco/npm/bun/index.d.ts",
+      "default": "./dist/eco/npm/bun/index.js"
+    },
+    "./eco/npm/npm": {
+      "source": "./src/eco/npm/npm/index.ts",
+      "types": "./dist/eco/npm/npm/index.d.ts",
+      "default": "./dist/eco/npm/npm/index.js"
+    },
+    "./eco/npm/npm/exec": {
+      "source": "./src/eco/npm/npm/exec.ts",
+      "types": "./dist/eco/npm/npm/exec.d.ts",
+      "default": "./dist/eco/npm/npm/exec.js"
+    },
+    "./eco/npm/npm/flags": {
+      "source": "./src/eco/npm/npm/flags.ts",
+      "types": "./dist/eco/npm/npm/flags.d.ts",
+      "default": "./dist/eco/npm/npm/flags.js"
+    },
+    "./eco/npm/pnpm": {
+      "source": "./src/eco/npm/pnpm/index.ts",
+      "types": "./dist/eco/npm/pnpm/index.d.ts",
+      "default": "./dist/eco/npm/pnpm/index.js"
+    },
+    "./eco/npm/pnpm/exec": {
+      "source": "./src/eco/npm/pnpm/exec.ts",
+      "types": "./dist/eco/npm/pnpm/exec.d.ts",
+      "default": "./dist/eco/npm/pnpm/exec.js"
+    },
+    "./eco/npm/pnpm/flags": {
+      "source": "./src/eco/npm/pnpm/flags.ts",
+      "types": "./dist/eco/npm/pnpm/flags.d.ts",
+      "default": "./dist/eco/npm/pnpm/flags.js"
+    },
+    "./eco/npm/script": {
+      "source": "./src/eco/npm/script.ts",
+      "types": "./dist/eco/npm/script.d.ts",
+      "default": "./dist/eco/npm/script.js"
+    },
+    "./eco/npm/vlt": {
+      "source": "./src/eco/npm/vlt/index.ts",
+      "types": "./dist/eco/npm/vlt/index.d.ts",
+      "default": "./dist/eco/npm/vlt/index.js"
+    },
+    "./eco/npm/yarnpkg": {
+      "source": "./src/eco/npm/yarnpkg/index.ts",
+      "types": "./dist/eco/npm/yarnpkg/index.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/index.js"
+    },
+    "./eco/npm/yarnpkg/berry": {
+      "source": "./src/eco/npm/yarnpkg/berry/index.ts",
+      "types": "./dist/eco/npm/yarnpkg/berry/index.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/berry/index.js"
+    },
+    "./eco/npm/yarnpkg/yarn": {
+      "source": "./src/eco/npm/yarnpkg/yarn/index.ts",
+      "types": "./dist/eco/npm/yarnpkg/yarn/index.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/yarn/index.js"
+    },
+    "./eco/npm/yarnpkg/yarn/exec": {
+      "source": "./src/eco/npm/yarnpkg/yarn/exec.ts",
+      "types": "./dist/eco/npm/yarnpkg/yarn/exec.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/yarn/exec.js"
+    },
+    "./eco/npm/yarnpkg/zpm": {
+      "source": "./src/eco/npm/yarnpkg/zpm/index.ts",
+      "types": "./dist/eco/npm/yarnpkg/zpm/index.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/zpm/index.js"
     },
     "./effects/pulse-frames": {
       "source": "./src/effects/pulse-frames.ts",

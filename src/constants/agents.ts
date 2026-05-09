@@ -72,6 +72,13 @@ export const NPM_REGISTRY_URL = 'https://registry.npmjs.org'
 // Agent variants.
 export const YARN_BERRY = 'yarn/berry'
 export const YARN_CLASSIC = 'yarn/classic'
+// ZPM is the Yarn 6 Rust rewrite (yarnpkg/zpm). JSON-based lockfile,
+// __metadata.version >= 9, "entries" key. Versioning skipped from
+// Berry v4 to ZPM v6 (no v5). Distinct enough from Berry/Classic
+// that downstream tooling (sdxgen parsers, lockfile readers) treat
+// it as a separate agent. The canonical name across the fleet is
+// "zpm" (matches socket-sdxgen's parser dir name).
+export const ZPM = 'zpm'
 
 // Lock files.
 export const PACKAGE_LOCK = 'package-lock'
