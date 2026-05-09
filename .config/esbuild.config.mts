@@ -199,6 +199,46 @@ function createPathShorteningPlugin() {
   }
 }
 
+/**
+ * Plugin to strip `.mts` / `.cts` source extensions from runtime
+ * relative imports in compiled JS output. We keep the extensions in
+ * source (Node erasable-syntax support, deterministic resolution),
+ * but at runtime `dist/` only has `.js`, so the literal `./foo.mts`
+ * references would fail to resolve.
+ */
+export function createSourceExtensionStripPlugin() {
+  return {
+    name: 'strip-source-extensions',
+    setup(build) {
+      build.onEnd(async result => {
+        if (!result.outputFiles && result.metafile) {
+          const fs = await import('node:fs/promises')
+          const outputs = Object.keys(result.metafile.outputs).filter(f =>
+            f.endsWith('.js'),
+          )
+          // Match `require("./x.mts")` / `from "./x.cts"` / similar — only
+          // relative specifiers, only the runtime-source extensions we
+          // emit. Bare-package or non-relative forms are left alone.
+          const re =
+            /(\b(?:require|from)\s*\(?\s*["'])(\.{1,2}\/[^"']+)\.(mts|cts)(["'])/g
+          for (const outputPath of outputs) {
+            // eslint-disable-next-line no-await-in-loop
+            const content = await fs.readFile(outputPath, 'utf8')
+            if (!content.includes('.mts') && !content.includes('.cts')) {
+              continue
+            }
+            const next = content.replace(re, '$1$2$4')
+            if (next !== content) {
+              // eslint-disable-next-line no-await-in-loop
+              await fs.writeFile(outputPath, next, 'utf8')
+            }
+          }
+        }
+      })
+    },
+  }
+}
+
 // Build configuration for CommonJS output
 export const buildConfig = {
   entryPoints,
@@ -218,8 +258,11 @@ export const buildConfig = {
   metafile: true,
   logLevel: 'info',
 
-  // Use plugins for path shortening
-  plugins: [createPathShorteningPlugin()].filter(Boolean),
+  // Use plugins for path shortening + source-extension cleanup.
+  plugins: [
+    createPathShorteningPlugin(),
+    createSourceExtensionStripPlugin(),
+  ].filter(Boolean),
 
   // Note: Cannot use "external" with bundle: false.
   // esbuild automatically treats all imports as external when not bundling.

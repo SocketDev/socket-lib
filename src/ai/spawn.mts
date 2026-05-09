@@ -33,6 +33,10 @@ import type {
 const MAX_ATTEMPTS = 3
 const BACKOFF_BASE_MS = 5_000
 
+export function backoffFor(attempt: number): number {
+  return BACKOFF_BASE_MS * 3 ** (attempt - 1)
+}
+
 /**
  * Build CLI arg list for a given agent. The flag names differ across
  * agents but the conceptual surface is the same: "here are the
@@ -44,7 +48,7 @@ const BACKOFF_BASE_MS = 5_000
  *   1. The relevant case below.
  *   2. The agent's docs link (cited inline).
  */
-function buildArgs(
+export function buildArgs(
   agent: AiAgentName,
   opts: SpawnAiAgentOptions,
 ): string[] {
@@ -141,16 +145,12 @@ function buildArgs(
   }
 }
 
-function isOverloaded(stdout: string, stderr: string): boolean {
+export function isOverloaded(stdout: string, stderr: string): boolean {
   const re = /API Error: 529|Overloaded/i
   return re.test(stdout) || re.test(stderr)
 }
 
-function backoffFor(attempt: number): number {
-  return BACKOFF_BASE_MS * 3 ** (attempt - 1)
-}
-
-async function pickAgent(
+export async function pickAgent(
   requested: AiAgentName | undefined,
   cwd: string,
 ): Promise<AiAgentName> {

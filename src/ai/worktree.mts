@@ -64,7 +64,11 @@ export interface WorktreeRunSettled<T> {
   readonly worktreePath: string
 }
 
-function git(cwd: string, ...args: string[]): string {
+export function currentBranch(repo: string): string {
+  return git(repo, 'symbolic-ref', '--short', 'HEAD')
+}
+
+export function git(cwd: string, ...args: string[]): string {
   const result = spawnSync('git', args, {
     cwd,
     stdio: 'pipe',
@@ -73,23 +77,10 @@ function git(cwd: string, ...args: string[]): string {
   return String(result.stdout ?? '').trim()
 }
 
-function tryGit(cwd: string, ...args: string[]): { ok: boolean; output: string } {
-  try {
-    const output = git(cwd, ...args)
-    return { ok: true, output }
-  } catch (e) {
-    if (isSpawnError(e)) {
-      return { ok: false, output: String(e.stderr ?? e.stdout ?? '') }
-    }
-    return { ok: false, output: errorMessage(e) }
-  }
-}
-
-function currentBranch(repo: string): string {
-  return git(repo, 'symbolic-ref', '--short', 'HEAD')
-}
-
-function hasCommittedChanges(worktree: string, baseBranch: string): boolean {
+export function hasCommittedChanges(
+  worktree: string,
+  baseBranch: string,
+): boolean {
   const log = tryGit(worktree, 'log', '--oneline', `${baseBranch}..HEAD`)
   if (!log.ok) {
     return false
@@ -97,102 +88,12 @@ function hasCommittedChanges(worktree: string, baseBranch: string): boolean {
   return log.output.trim().length > 0
 }
 
-function hasStagedOrUnstaged(worktree: string): boolean {
+export function hasStagedOrUnstaged(worktree: string): boolean {
   const status = tryGit(worktree, 'status', '--porcelain')
   return status.ok && status.output.trim().length > 0
 }
 
-/**
- * Run `fn` for each item in parallel, each invocation isolated in
- * its own git worktree. Results are merged back into the base branch
- * with `git merge --ff-only`; non-FF merges are reported as failures
- * and the worktree is preserved (regardless of cleanup policy).
- *
- * @example
- * ```ts
- * import { spawnAiAgentsInWorktrees } from '@socketsecurity/lib/ai/worktree'
- * import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
- * import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
- *
- * const repos = ['socket-addon', 'socket-btm', 'socket-lib']
- * const settled = await spawnAiAgentsInWorktrees(repos, async ({ cwd }) => {
- *   return await spawnAiAgent({
- *     ...EDIT_ONLY_PROFILE,
- *     prompt: 'Run the cleanup task',
- *     cwd,
- *   })
- * }, {
- *   baseRepo: '/Users/<user>/projects/socket-repo-template',
- *   concurrency: 3,
- *   cleanup: 'on-empty',
- * })
- * ```
- */
-export async function spawnAiAgentsInWorktrees<I, T>(
-  items: readonly I[],
-  fn: (
-    item: I,
-    ctx: WorktreeRunContext,
-  ) => Promise<T>,
-  options: WorktreeRunOptions,
-): Promise<readonly WorktreeRunSettled<T>[]> {
-  const cleanup = options.cleanup ?? 'always'
-  const namePrefix = options.namePrefix ?? 'agent-task'
-  const concurrency = Math.max(
-    1,
-    Math.min(
-      options.concurrency ?? DEFAULT_CONCURRENCY,
-      MAX_CONCURRENCY,
-    ),
-  )
-  const baseRepo = options.baseRepo
-  if (!existsSync(path.join(baseRepo, '.git'))) {
-    throw new Error(
-      `spawnAiAgentsInWorktrees: baseRepo is not a git checkout: ${baseRepo}`,
-    )
-  }
-  const branch = options.branch ?? currentBranch(baseRepo)
-  const worktreeRoot =
-    options.worktreeRoot ??
-    path.join(
-      process.platform === 'win32' ? process.env['TEMP'] ?? '.' : '/tmp',
-      `${namePrefix}-${Date.now()}`,
-    )
-
-  const settled: WorktreeRunSettled<T>[] = []
-
-  // Cap concurrency with a small slot pool. Promise.allSettled-shape
-  // results: one item's failure doesn't abort siblings.
-  let cursor = 0
-  async function worker(): Promise<void> {
-    for (;;) {
-      const idx = cursor
-      cursor += 1
-      if (idx >= items.length) {
-        return
-      }
-      const item = items[idx] as I
-      const worktreeBranch = `${namePrefix}-${idx}-${Date.now()}`
-      const worktreePath = path.join(worktreeRoot, `${namePrefix}-${idx}`)
-      const result: WorktreeRunSettled<T> = await runOne(
-        item,
-        idx,
-        worktreeBranch,
-        worktreePath,
-        baseRepo,
-        branch,
-        cleanup,
-        fn,
-      )
-      settled[idx] = result
-    }
-  }
-
-  await Promise.all(Array.from({ length: concurrency }, () => worker()))
-  return settled
-}
-
-async function runOne<I, T>(
+export async function runOne<I, T>(
   item: I,
   index: number,
   worktreeBranch: string,
@@ -273,5 +174,104 @@ async function runOne<I, T>(
     status: 'fulfilled',
     value,
     worktreePath,
+  }
+}
+
+/**
+ * Run `fn` for each item in parallel, each invocation isolated in
+ * its own git worktree. Results are merged back into the base branch
+ * with `git merge --ff-only`; non-FF merges are reported as failures
+ * and the worktree is preserved (regardless of cleanup policy).
+ *
+ * @example
+ * ```ts
+ * import { spawnAiAgentsInWorktrees } from '@socketsecurity/lib/ai/worktree'
+ * import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
+ * import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
+ *
+ * const repos = ['socket-addon', 'socket-btm', 'socket-lib']
+ * const settled = await spawnAiAgentsInWorktrees(repos, async ({ cwd }) => {
+ *   return await spawnAiAgent({
+ *     ...EDIT_ONLY_PROFILE,
+ *     prompt: 'Run the cleanup task',
+ *     cwd,
+ *   })
+ * }, {
+ *   baseRepo: '/Users/<user>/projects/socket-repo-template',
+ *   concurrency: 3,
+ *   cleanup: 'on-empty',
+ * })
+ * ```
+ */
+export async function spawnAiAgentsInWorktrees<I, T>(
+  items: readonly I[],
+  fn: (item: I, ctx: WorktreeRunContext) => Promise<T>,
+  options: WorktreeRunOptions,
+): Promise<ReadonlyArray<WorktreeRunSettled<T>>> {
+  const cleanup = options.cleanup ?? 'always'
+  const namePrefix = options.namePrefix ?? 'agent-task'
+  const concurrency = Math.max(
+    1,
+    Math.min(options.concurrency ?? DEFAULT_CONCURRENCY, MAX_CONCURRENCY),
+  )
+  const baseRepo = options.baseRepo
+  if (!existsSync(path.join(baseRepo, '.git'))) {
+    throw new Error(
+      `spawnAiAgentsInWorktrees: baseRepo is not a git checkout: ${baseRepo}`,
+    )
+  }
+  const branch = options.branch ?? currentBranch(baseRepo)
+  const worktreeRoot =
+    options.worktreeRoot ??
+    path.join(
+      process.platform === 'win32' ? (process.env['TEMP'] ?? '.') : '/tmp',
+      `${namePrefix}-${Date.now()}`,
+    )
+
+  const settled: Array<WorktreeRunSettled<T>> = []
+
+  // Cap concurrency with a small slot pool. Promise.allSettled-shape
+  // results: one item's failure doesn't abort siblings.
+  let cursor = 0
+  async function worker(): Promise<void> {
+    for (;;) {
+      const idx = cursor
+      cursor += 1
+      if (idx >= items.length) {
+        return
+      }
+      const item = items[idx] as I
+      const worktreeBranch = `${namePrefix}-${idx}-${Date.now()}`
+      const worktreePath = path.join(worktreeRoot, `${namePrefix}-${idx}`)
+      const result: WorktreeRunSettled<T> = await runOne(
+        item,
+        idx,
+        worktreeBranch,
+        worktreePath,
+        baseRepo,
+        branch,
+        cleanup,
+        fn,
+      )
+      settled[idx] = result
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, () => worker()))
+  return settled
+}
+
+export function tryGit(
+  cwd: string,
+  ...args: string[]
+): { ok: boolean; output: string } {
+  try {
+    const output = git(cwd, ...args)
+    return { ok: true, output }
+  } catch (e) {
+    if (isSpawnError(e)) {
+      return { ok: false, output: String(e.stderr ?? e.stdout ?? '') }
+    }
+    return { ok: false, output: errorMessage(e) }
   }
 }

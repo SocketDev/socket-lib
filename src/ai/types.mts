@@ -88,9 +88,7 @@ export interface SpawnAiAgentOptions {
  * the absolute path resolved by `which`; missing agents are absent
  * from the map (not present-with-undefined).
  */
-export type DiscoveredAgents = Readonly<
-  Partial<Record<AiAgentName, string>>
->
+export type DiscoveredAgents = Readonly<Partial<Record<AiAgentName, string>>>
 
 /**
  * Cleanup policy for `spawnAiAgentsInWorktrees`. Default 'always'.

@@ -25,6 +25,8 @@ import { whichSync } from '../bin'
 import { errorMessage } from '../errors'
 import { getDefaultLogger } from '../logger'
 
+const logger = getDefaultLogger()
+
 import type { AiAgentName, DiscoveredAgents } from './types.mts'
 
 const KNOWN_AGENTS: readonly AiAgentName[] = [
@@ -44,56 +46,8 @@ interface OnDiskCache {
   readonly writtenAt: number
 }
 
-function cachePathFor(repoRoot: string): string {
+export function cachePathFor(repoRoot: string): string {
   return path.join(repoRoot, '.cache', 'agent-discovery.json')
-}
-
-function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
-  if (!existsSync(cachePath)) {
-    return undefined
-  }
-  try {
-    const raw = readFileSync(cachePath, 'utf8')
-    const parsed = JSON.parse(raw) as OnDiskCache
-    if (
-      typeof parsed.writtenAt !== 'number' ||
-      Date.now() - parsed.writtenAt > CACHE_TTL_MS
-    ) {
-      return undefined
-    }
-    return parsed.agents
-  } catch {
-    // Malformed cache — treat as miss.
-    return undefined
-  }
-}
-
-async function writeDiskCache(
-  cachePath: string,
-  agents: DiscoveredAgents,
-): Promise<void> {
-  try {
-    await mkdir(path.dirname(cachePath), { recursive: true })
-    const payload: OnDiskCache = { agents, writtenAt: Date.now() }
-    writeFileSync(cachePath, JSON.stringify(payload, undefined, 2) + '\n')
-  } catch (e) {
-    // Cache-write failure is non-fatal — discovery still works for
-    // the current process via the in-process cache.
-    getDefaultLogger().error(
-      `discoverAiAgents: cache write failed (${errorMessage(e)})`,
-    )
-  }
-}
-
-function discoverFresh(): DiscoveredAgents {
-  const out: { -readonly [K in AiAgentName]?: string } = {}
-  for (const name of KNOWN_AGENTS) {
-    const found = whichSync(name)
-    if (typeof found === 'string' && found) {
-      out[name] = found
-    }
-  }
-  return out
 }
 
 /**
@@ -134,6 +88,17 @@ export async function discoverAiAgents(
   return fresh
 }
 
+export function discoverFresh(): DiscoveredAgents {
+  const out: { -readonly [K in AiAgentName]?: string } = {}
+  for (const name of KNOWN_AGENTS) {
+    const found = whichSync(name)
+    if (typeof found === 'string' && found) {
+      out[name] = found
+    }
+  }
+  return out
+}
+
 /**
  * Synchronous in-process lookup. Skips disk cache + which(). Returns
  * undefined if discoverAiAgents() hasn't been called yet in this
@@ -146,10 +111,47 @@ export function getDiscoveredAiAgents(): DiscoveredAgents | undefined {
   return inProcessCache
 }
 
+export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
+  if (!existsSync(cachePath)) {
+    return undefined
+  }
+  try {
+    const raw = readFileSync(cachePath, 'utf8')
+    const parsed = JSON.parse(raw) as OnDiskCache
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      typeof parsed.writtenAt !== 'number' ||
+      Date.now() - parsed.writtenAt > CACHE_TTL_MS
+    ) {
+      return undefined
+    }
+    return parsed.agents
+  } catch {
+    // Malformed cache — treat as miss.
+    return undefined
+  }
+}
+
 /**
  * Reset the in-process cache. Tests use this; production callers
  * shouldn't need it (use `refresh: true` on discoverAiAgents()).
  */
 export function resetAiAgentDiscoveryCache(): void {
   inProcessCache = undefined
+}
+
+export async function writeDiskCache(
+  cachePath: string,
+  agents: DiscoveredAgents,
+): Promise<void> {
+  try {
+    await mkdir(path.dirname(cachePath), { recursive: true })
+    const payload: OnDiskCache = { agents, writtenAt: Date.now() }
+    writeFileSync(cachePath, JSON.stringify(payload, undefined, 2) + '\n')
+  } catch (e) {
+    // Cache-write failure is non-fatal — discovery still works for
+    // the current process via the in-process cache.
+    logger.error(`discoverAiAgents: cache write failed (${errorMessage(e)})`)
+  }
 }
