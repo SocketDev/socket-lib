@@ -97,7 +97,7 @@ function createPathShorteningPlugin() {
                 const existingPath = conflictDetector.get(shortPath)
                 if (existingPath !== longPath) {
                   // Conflict detected - keep original path
-                  console.warn(
+                  logger.warn(
                     `⚠ Path conflict detected:\n  "${shortPath}"\n  Maps to: "${existingPath}"\n  Also from: "${longPath}"\n  Keeping original paths to avoid conflict.`,
                   )
                   shortPath = longPath
@@ -186,7 +186,7 @@ function createPathShorteningPlugin() {
               // eslint-disable-next-line no-await-in-loop
               await fs.writeFile(outputPath, magicString.toString(), 'utf8')
             } catch (e) {
-              console.error(
+              logger.fail(
                 `Failed to shorten paths in ${outputPath}:`,
                 e.message,
               )
