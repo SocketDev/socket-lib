@@ -23,6 +23,7 @@ import path from 'node:path'
 
 import { whichSync } from '../bin'
 import { errorMessage } from '../errors'
+import { getDefaultLogger } from '../logger'
 
 import type { AiAgentName, DiscoveredAgents } from './types.mts'
 
@@ -78,8 +79,8 @@ async function writeDiskCache(
   } catch (e) {
     // Cache-write failure is non-fatal — discovery still works for
     // the current process via the in-process cache.
-    process.stderr.write(
-      `discoverAiAgents: cache write failed (${errorMessage(e)})\n`,
+    getDefaultLogger().error(
+      `discoverAiAgents: cache write failed (${errorMessage(e)})`,
     )
   }
 }
