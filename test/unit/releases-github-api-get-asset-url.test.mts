@@ -9,11 +9,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getReleaseAssetUrl } from '../../src/releases/github-api'
 import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
 
-import { httpRequest } from '../../src/http-request'
+import { httpRequest } from '../../src/http-request/request'
 
 import { createMockHttpResponse } from './utils/http-mock'
 
-vi.mock('../../src/http-request')
+vi.mock('../../src/http-request/request')
 
 const JSONStringify = JSON.stringify
 

@@ -22,7 +22,7 @@
  */
 
 import { errorMessage } from '../errors'
-import { httpRequest } from '../http-request'
+import { httpRequest } from '../http-request/request'
 import { DateCtor, ErrorCtor, JSONParse } from '../primordials'
 
 import { getGitHubToken } from './token'

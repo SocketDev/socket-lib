@@ -25,6 +25,12 @@ const vitestConfig = defineConfig({
     // to src/*.ts instead of dist/*.js. This enables proper v8 coverage
     // attribution to source files.
     conditions: ['source'],
+    // Dedupe ensures a single module instance when the same source file is
+    // reached via two import shapes — `@socketsecurity/lib/<sub>` from tests
+    // and `./<sub>` from co-located leaves — so `instanceof` checks against
+    // exported error classes (e.g. `HttpResponseError`) compare the same
+    // prototype on both sides.
+    dedupe: ['@socketsecurity/lib'],
     preserveSymlinks: false,
     alias: {
       cacache: path.resolve(projectRoot, 'src/external/cacache'),

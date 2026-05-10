@@ -7,7 +7,7 @@
  * filtering pipeline doesn't care which transport produced the data.
  */
 
-import { httpRequest } from '../http-request'
+import { httpRequest } from '../http-request/request'
 import {
   ArrayIsArray,
   DateParse,

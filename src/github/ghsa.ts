@@ -14,7 +14,7 @@
 
 import process from 'node:process'
 
-import { httpRequest } from '../http-request'
+import { httpRequest } from '../http-request/request'
 import { ErrorCtor, JSONParse, JSONStringify } from '../primordials'
 
 import { fetchGitHub } from './fetch'

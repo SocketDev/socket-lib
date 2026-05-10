@@ -19,21 +19,24 @@ import { Writable } from 'node:stream'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { SOCKET_LIB_USER_AGENT } from '@socketsecurity/lib/constants/socket'
+import { SOCKET_LIB_USER_AGENT } from '../../src/constants/socket'
 import {
-  enrichErrorMessage,
   fetchChecksums,
-  HttpResponseError,
-  httpDownload,
-  httpJson,
-  httpRequest,
-  httpText,
   parseChecksums,
+} from '../../src/http-request/checksums'
+import { httpJson, httpText } from '../../src/http-request/convenience'
+import { httpDownload } from '../../src/http-request/download'
+import { enrichErrorMessage } from '../../src/http-request/errors'
+import {
   parseRetryAfterHeader,
-  readIncomingResponse,
   sanitizeHeaders,
-} from '@socketsecurity/lib/http-request'
-import { Logger } from '@socketsecurity/lib/logger'
+} from '../../src/http-request/headers'
+import {
+  httpRequest,
+  readIncomingResponse,
+} from '../../src/http-request/request'
+import { HttpResponseError } from '../../src/http-request/types'
+import { Logger } from '../../src/logger'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 
@@ -42,7 +45,7 @@ import type {
   HttpHookResponseInfo,
   IncomingRequest,
   IncomingResponse,
-} from '@socketsecurity/lib/http-request'
+} from '../../src/http-request/types'
 
 // Test server setup
 let httpServer: http.Server
@@ -2919,7 +2922,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     it('should handle stream errors without double-firing hooks', async () => {
       const { Readable } = await import('node:stream')
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request').HttpHookResponseInfo
+        import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
       > = []
 
       const errorStream = new Readable({
@@ -3202,7 +3205,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
   describe('maxResponseSize - settle guard', () => {
     it('should fire onResponse exactly once when maxResponseSize exceeded', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request').HttpHookResponseInfo
+        import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
       > = []
 
       await httpRequest(`${httpBaseUrl}/large-body`, {
@@ -3264,7 +3267,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
   describe('redirect hook and cleanup', () => {
     it('should fire onResponse exactly once per redirect hop on maxRedirects exceeded', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request').HttpHookResponseInfo
+        import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
       > = []
 
       await httpRequest(`${httpBaseUrl}/redirect-loop-1`, {

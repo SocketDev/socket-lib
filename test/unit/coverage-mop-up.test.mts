@@ -9,7 +9,7 @@
  * - promise-queue.ts (1) - empty-shift race
  * - env.ts (3)           - Symbol/non-string proxy edge cases
  * - objects.ts (3)       - merge nested array + null source
- * - http-request.ts (4)  - timeout / error wrapping
+ * - http-request/* (4)  - timeout / error wrapping
  * - paths/socket.ts (1)  - SOCKET_HOME unset fallback
  * - paths/rewire.ts (1)  - resetPaths idempotent call
  */

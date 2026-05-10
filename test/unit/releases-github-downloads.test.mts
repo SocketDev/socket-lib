@@ -14,12 +14,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { downloadReleaseAsset } from '../../src/releases/github-downloads'
 import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
 
-import type { HttpDownloadResult } from '../../src/http-request'
-import { httpDownload, httpRequest } from '../../src/http-request'
+import { httpDownload } from '../../src/http-request/download'
+import { httpRequest } from '../../src/http-request/request'
 
 import { createMockHttpResponse } from './utils/http-mock'
 
-vi.mock('../../src/http-request')
+import type { HttpDownloadResult } from '../../src/http-request/types'
+
+vi.mock('../../src/http-request/download')
+vi.mock('../../src/http-request/request')
 
 const JSONStringify = JSON.stringify
 

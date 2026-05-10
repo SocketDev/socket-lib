@@ -16,11 +16,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { downloadBinaryFile } from '../../../src/dlx/binary'
 import { safeDelete } from '../../../src/fs/safe'
-import { httpDownload } from '../../../src/http-request'
+import { httpDownload } from '../../../src/http-request/download'
 
-vi.mock('../../../src/http-request', async importOriginal => {
+vi.mock('../../../src/http-request/download', async importOriginal => {
   const original =
-    await importOriginal<typeof import('../../../src/http-request')>()
+    await importOriginal<typeof import('../../../src/http-request/download')>()
   return {
     ...original,
     httpDownload: vi.fn(

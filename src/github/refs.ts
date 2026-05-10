@@ -23,7 +23,7 @@ import process from 'node:process'
 
 import { createTtlCache } from '../cache-with-ttl'
 import { errorMessage } from '../errors'
-import { httpRequest } from '../http-request'
+import { httpRequest } from '../http-request/request'
 import { ErrorCtor, JSONParse, JSONStringify } from '../primordials'
 
 import { fetchGitHub } from './fetch'

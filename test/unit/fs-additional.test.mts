@@ -25,10 +25,7 @@ import {
   safeStats,
   safeStatsSync,
 } from '@socketsecurity/lib/fs/inspect'
-import {
-  readDirNames,
-  readDirNamesSync,
-} from '@socketsecurity/lib/fs/read-dir'
+import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
 import {
   readFileBinary,
   readFileBinarySync,

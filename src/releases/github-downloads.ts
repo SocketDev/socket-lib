@@ -5,7 +5,7 @@
 import process from 'node:process'
 
 import { safeMkdir } from '../fs/safe'
-import { httpDownload } from '../http-request'
+import { httpDownload } from '../http-request/download'
 import { getDefaultLogger } from '../logger'
 import {
   ErrorCtor,

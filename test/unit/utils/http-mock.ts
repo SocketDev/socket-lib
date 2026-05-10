@@ -1,9 +1,9 @@
 /**
  * @fileoverview Shared HTTP-response mock helper for tests that mock
- * `@socketsecurity/lib/http-request`.
+ * `@socketsecurity/lib/http-request/*`.
  */
 
-import type { HttpResponse } from '../../../src/http-request'
+import type { HttpResponse } from '../../../src/http-request/types'
 
 /**
  * Create a mock HttpResponse object for testing.
