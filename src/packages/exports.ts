@@ -4,7 +4,7 @@
 
 import { isArray } from '../arrays'
 import { LOOP_SENTINEL } from '../constants/core'
-import { isObject, isObjectObject } from '../objects'
+import { isObject, isObjectObject } from '../objects/predicates'
 
 import { ArrayPrototypePush } from '../primordials/array'
 

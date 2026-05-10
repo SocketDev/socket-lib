@@ -295,7 +295,7 @@ export interface WritableStreamType {
  * @property {number | undefined} uid - User identity (POSIX)
  * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or escape arguments on Windows (requires shell: true). Use when you need exact argument control. Default: false
  */
-export type SpawnOptions = import('../objects').Remap<
+export type SpawnOptions = import('../objects/types').Remap<
   NodeSpawnOptions & {
     spinner?: import('../spinner/types').Spinner | undefined
     stdioString?: boolean

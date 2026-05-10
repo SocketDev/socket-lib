@@ -236,9 +236,13 @@ describe('release-workflow-guard hook', () => {
         'build.yml',
         WF_WITH_DRY_RUN,
       ))
-      const r = await runHook('gh workflow run build.yml -f dry-run=true', 'Bash', {
-        CLAUDE_PROJECT_DIR: projectDir,
-      })
+      const r = await runHook(
+        'gh workflow run build.yml -f dry-run=true',
+        'Bash',
+        {
+          CLAUDE_PROJECT_DIR: projectDir,
+        },
+      )
       assert.equal(r.code, 0, `Expected 0 but got ${r.code}: ${r.stderr}`)
       assert.match(r.stderr, /ALLOWED/)
       assert.match(r.stderr, /verifiable dry-run/)
@@ -329,9 +333,13 @@ describe('release-workflow-guard hook', () => {
       // intentionally fails the verification rather than guessing.
       const wf = WF_WITH_DRY_RUN.replace('dry-run:', 'dry_run:')
       ;({ projectDir, cleanup } = await makeWorkflowFixture('build.yml', wf))
-      const r = await runHook('gh workflow run build.yml -f dry-run=true', 'Bash', {
-        CLAUDE_PROJECT_DIR: projectDir,
-      })
+      const r = await runHook(
+        'gh workflow run build.yml -f dry-run=true',
+        'Bash',
+        {
+          CLAUDE_PROJECT_DIR: projectDir,
+        },
+      )
       assert.equal(r.code, 2)
     })
 
@@ -345,11 +353,7 @@ describe('release-workflow-guard hook', () => {
       const matchingName = path.basename(targetProjectDir)
       const wfDir = path.join(targetProjectDir, '.github', 'workflows')
       await fs.mkdir(wfDir, { recursive: true })
-      await fs.writeFile(
-        path.join(wfDir, 'build.yml'),
-        WF_WITH_DRY_RUN,
-        'utf8',
-      )
+      await fs.writeFile(path.join(wfDir, 'build.yml'), WF_WITH_DRY_RUN, 'utf8')
       try {
         const r = await runHook(
           `gh workflow run build.yml --repo SocketDev/${matchingName} -f dry-run=true`,

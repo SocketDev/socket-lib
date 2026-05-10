@@ -9,7 +9,7 @@ import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import debugJs from './external/debug'
 
 import { getDefaultLogger } from './logger/default'
-import { hasOwn } from './objects'
+import { hasOwn } from './objects/predicates'
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from './primordials/array'
 import { DateNow } from './primordials/date'
 import { MapCtor } from './primordials/map-set'

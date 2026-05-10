@@ -8,7 +8,7 @@ import type { Abortable } from 'node:events'
 import type { ObjectEncodingOptions, OpenMode } from 'node:fs'
 
 import type { JsonReviver } from '../json/types'
-import type { Remap } from '../objects'
+import type { Remap } from '../objects/types'
 
 /**
  * Supported text encodings for Node.js Buffers.

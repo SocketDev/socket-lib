@@ -18,7 +18,8 @@ import pacote from '../external/pacote'
 import semver from '../external/semver'
 
 import { isArray } from '../arrays'
-import { isObjectObject, objectEntries } from '../objects'
+import { isObjectObject } from '../objects/predicates'
+import { objectEntries } from '../objects/sort'
 import { resolvePackageJsonEntryExports } from './exports'
 import { isRegistryFetcherType } from './validation'
 

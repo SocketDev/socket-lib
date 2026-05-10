@@ -28,7 +28,7 @@ import {
   supportsNodeRun,
 } from '../../constants/node'
 import { findUpSync } from '../../fs/find-up'
-import { getOwn } from '../../objects'
+import { getOwn } from '../../objects/inspect'
 import { ArrayIsArray } from '../../primordials/array'
 import { spawn } from '../../spawn/core'
 

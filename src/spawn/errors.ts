@@ -15,7 +15,7 @@
  */
 
 import { stackWithCauses } from '../errors'
-import { hasOwn } from '../objects'
+import { hasOwn } from '../objects/predicates'
 import { ErrorCtor } from '../primordials/error'
 import {
   ObjectDefineProperties,

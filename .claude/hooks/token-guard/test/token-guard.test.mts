@@ -19,7 +19,10 @@ if (!nodeBin) {
   throw new Error('"node" not found on PATH')
 }
 
-function runHook(command: string, toolName = 'Bash'): {
+function runHook(
+  command: string,
+  toolName = 'Bash',
+): {
   code: number | null
   stdout: string
   stderr: string
@@ -55,16 +58,10 @@ describe('token-guard hook', () => {
       assert.equal(runHook('node scripts/build.mts').code, 0)
     })
     it('sed with redaction on .env', () => {
-      assert.equal(
-        runHook("sed 's/=.*/=<redacted>/' .env.local").code,
-        0,
-      )
+      assert.equal(runHook("sed 's/=.*/=<redacted>/' .env.local").code, 0)
     })
     it('grep key-names-only on .env', () => {
-      assert.equal(
-        runHook("grep -v '^#' .env.local | cut -d= -f1").code,
-        0,
-      )
+      assert.equal(runHook("grep -v '^#' .env.local | cut -d= -f1").code, 0)
     })
     it('curl without Authorization header', () => {
       assert.equal(runHook('curl -sS https://api.example.com').code, 0)
@@ -102,9 +99,7 @@ describe('token-guard hook', () => {
       assert.match(r.stderr, /Linear API token/)
     })
     it('GitHub PAT', () => {
-      const r = runHook(
-        'echo ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcd1234',
-      )
+      const r = runHook('echo ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcd1234')
       assert.equal(r.code, 2)
       assert.match(r.stderr, /GitHub personal access token/)
     })
@@ -175,10 +170,7 @@ describe('token-guard hook', () => {
       assert.equal(runHook('echo $API_KEY').code, 2)
     })
     it('ruby -e with $TOKEN', () => {
-      assert.equal(
-        runHook('ruby -e "puts ENV[\'ACCESS_TOKEN\']"').code,
-        2,
-      )
+      assert.equal(runHook('ruby -e "puts ENV[\'ACCESS_TOKEN\']"').code, 2)
     })
   })
 

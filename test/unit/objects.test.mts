@@ -14,28 +14,37 @@
  * Lazy getters are critical for performance - deferring expensive computations until needed.
  */
 
-import type { GetterDefObj } from '@socketsecurity/lib/objects'
 import {
   createConstantsObject,
   createLazyGetter,
   defineGetter,
   defineLazyGetter,
   defineLazyGetters,
-  entryKeyComparator,
+} from '@socketsecurity/lib/objects/getters'
+import {
   getKeys,
   getOwn,
   getOwnPropertyValues,
+} from '@socketsecurity/lib/objects/inspect'
+import {
+  merge,
+  objectAssign,
+  objectFreeze,
+} from '@socketsecurity/lib/objects/mutate'
+import {
   hasKeys,
   hasOwn,
   isObject,
   isObjectObject,
-  merge,
-  objectAssign,
+} from '@socketsecurity/lib/objects/predicates'
+import {
+  entryKeyComparator,
   objectEntries,
-  objectFreeze,
   toSortedObject,
   toSortedObjectFromEntries,
-} from '@socketsecurity/lib/objects'
+} from '@socketsecurity/lib/objects/sort'
+
+import type { GetterDefObj } from '@socketsecurity/lib/objects/types'
 import { describe, expect, it } from 'vitest'
 
 describe('objects', () => {

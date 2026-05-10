@@ -80,7 +80,7 @@ interface InquirerContext {
  * Extended context with spinner support.
  * Allows passing a spinner instance to be managed during prompts.
  */
-export type Context = import('../objects').Remap<
+export type Context = import('../objects/types').Remap<
   InquirerContext & {
     /** Optional spinner to stop/start during prompt display */
     spinner?: import('../spinner/types').Spinner | undefined

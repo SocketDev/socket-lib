@@ -6,7 +6,7 @@ import { LOOP_SENTINEL } from '../constants/core'
 import { getCopyLeftLicenses } from '../constants/licenses'
 import spdxCorrect from '../external/spdx-correct'
 import spdxExpParse from '../external/spdx-expression-parse'
-import { hasOwn } from '../objects'
+import { hasOwn } from '../objects/predicates'
 import { normalizePath } from '../paths/normalize'
 
 import type { LicenseNode } from '../packages'

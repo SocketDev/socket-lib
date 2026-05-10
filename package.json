@@ -888,10 +888,35 @@
       "types": "./dist/node/util.d.ts",
       "default": "./dist/node/util.js"
     },
-    "./objects": {
-      "source": "./src/objects.ts",
-      "types": "./dist/objects.d.ts",
-      "default": "./dist/objects.js"
+    "./objects/getters": {
+      "source": "./src/objects/getters.ts",
+      "types": "./dist/objects/getters.d.ts",
+      "default": "./dist/objects/getters.js"
+    },
+    "./objects/inspect": {
+      "source": "./src/objects/inspect.ts",
+      "types": "./dist/objects/inspect.d.ts",
+      "default": "./dist/objects/inspect.js"
+    },
+    "./objects/mutate": {
+      "source": "./src/objects/mutate.ts",
+      "types": "./dist/objects/mutate.d.ts",
+      "default": "./dist/objects/mutate.js"
+    },
+    "./objects/predicates": {
+      "source": "./src/objects/predicates.ts",
+      "types": "./dist/objects/predicates.d.ts",
+      "default": "./dist/objects/predicates.js"
+    },
+    "./objects/sort": {
+      "source": "./src/objects/sort.ts",
+      "types": "./dist/objects/sort.d.ts",
+      "default": "./dist/objects/sort.js"
+    },
+    "./objects/types": {
+      "source": "./src/objects/types.ts",
+      "types": "./dist/objects/types.d.ts",
+      "default": "./dist/objects/types.js"
     },
     "./package-extensions": {
       "source": "./src/package-extensions.ts",

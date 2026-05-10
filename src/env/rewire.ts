@@ -11,7 +11,7 @@
 
 import process from 'node:process'
 
-import { hasOwn } from '../objects'
+import { hasOwn } from '../objects/predicates'
 import { envAsBoolean } from './helpers'
 
 import { MapCtor } from '../primordials/map-set'

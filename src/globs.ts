@@ -3,7 +3,7 @@
  * Provides file filtering and glob matcher functions for npm-like behavior.
  */
 
-import { objectFreeze as ObjectFreeze } from './objects'
+import { objectFreeze as ObjectFreeze } from './objects/mutate'
 import {
   LICENSE_GLOB,
   LICENSE_GLOB_RECURSIVE,

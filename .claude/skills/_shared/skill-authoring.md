@@ -31,15 +31,15 @@ The same File-size rule from CLAUDE.md applies — soft cap 500, hard cap 1000 �
 
 What goes where:
 
-| Path | Purpose |
-|---|---|
-| `<skill>/SKILL.md` | Orchestrator: when to use, modes, phase list, links to deeper files. Reads top-to-bottom in one screen. |
-| `<skill>/reference.md` | Long-form depth: bash blocks, full validation rules, sample outputs, recovery procedures. Loaded by the orchestrator when a phase needs it. |
-| `<skill>/scans/`, `phases/`, `tools/` | One file per discrete unit when the skill enumerates many (e.g., `scanning-quality/scans/<type>.md`). Adding a new unit = one new file, no SKILL.md touch. |
-| `<skill>/templates/<name>.tmpl` | File scaffolding (`.tmpl` files copied verbatim by `install` / `setup` modes — gate scripts, allowlist starters, etc.). Distinct from `reference.md` which is prose, not scaffolding. |
-| `<skill>/run.mts` | Skill-specific executable runner. Inline prompts so prompts and code can't drift. Per CLAUDE.md _Tooling — Runners are `.mts`, not `.sh`_. |
-| `_shared/<topic>.md` | Shared **prose** (variant-analysis discipline, compound-lessons workflow, multi-agent backends). Cross-skill load surface. |
-| `_shared/scripts/<helper>.mts` | Shared **TypeScript** helpers imported by per-skill `run.mts` (default-branch resolution, report formatting, spawn wrappers). Internal automation — not a public library, hence `scripts/` not `lib/`. Use `@socketsecurity/lib/spawn` for subprocesses, never raw `node:child_process`. |
+| Path                                  | Purpose                                                                                                                                                                                                                                                                                  |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<skill>/SKILL.md`                    | Orchestrator: when to use, modes, phase list, links to deeper files. Reads top-to-bottom in one screen.                                                                                                                                                                                  |
+| `<skill>/reference.md`                | Long-form depth: bash blocks, full validation rules, sample outputs, recovery procedures. Loaded by the orchestrator when a phase needs it.                                                                                                                                              |
+| `<skill>/scans/`, `phases/`, `tools/` | One file per discrete unit when the skill enumerates many (e.g., `scanning-quality/scans/<type>.md`). Adding a new unit = one new file, no SKILL.md touch.                                                                                                                               |
+| `<skill>/templates/<name>.tmpl`       | File scaffolding (`.tmpl` files copied verbatim by `install` / `setup` modes — gate scripts, allowlist starters, etc.). Distinct from `reference.md` which is prose, not scaffolding.                                                                                                    |
+| `<skill>/run.mts`                     | Skill-specific executable runner. Inline prompts so prompts and code can't drift. Per CLAUDE.md _Tooling — Runners are `.mts`, not `.sh`_.                                                                                                                                               |
+| `_shared/<topic>.md`                  | Shared **prose** (variant-analysis discipline, compound-lessons workflow, multi-agent backends). Cross-skill load surface.                                                                                                                                                               |
+| `_shared/scripts/<helper>.mts`        | Shared **TypeScript** helpers imported by per-skill `run.mts` (default-branch resolution, report formatting, spawn wrappers). Internal automation — not a public library, hence `scripts/` not `lib/`. Use `@socketsecurity/lib/spawn` for subprocesses, never raw `node:child_process`. |
 
 ## Auditor agents
 
@@ -51,12 +51,12 @@ Skills that author other artifacts (skills, hooks, slash commands, subagents) sh
 
 Three audit dimensions per artifact:
 
-| Artifact | Auditor checks |
-|---|---|
-| Skill | frontmatter complete, when-to-use unambiguous, tool surface minimal, no buried opinions |
-| Hook | matcher tight, command exits fast, doesn't depend on session state, can't deadlock |
-| Slash command | argument shape clear, idempotent, doesn't touch shared state without confirmation |
-| Subagent | prompt self-contained (no "based on the conversation"), tool surface matches the task, return shape documented |
+| Artifact      | Auditor checks                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| Skill         | frontmatter complete, when-to-use unambiguous, tool surface minimal, no buried opinions                        |
+| Hook          | matcher tight, command exits fast, doesn't depend on session state, can't deadlock                             |
+| Slash command | argument shape clear, idempotent, doesn't touch shared state without confirmation                              |
+| Subagent      | prompt self-contained (no "based on the conversation"), tool surface matches the task, return shape documented |
 
 A fleet skill that does this well is the canonical reference; the auditor is a `Task` agent spawned by the authoring skill, not a long-running daemon.
 
@@ -91,15 +91,15 @@ The Anthropic docs codify several rules; honor them:
 
 When scaffolding a new fleet repo, or when a sync question arises ("how does the fleet do X?"), mimic the reference that matches both axes (`layout` + `native`) in `.config/socket-repo-template.json`:
 
-| layout × native | Best reference | Notes |
-|---|---|---|
-| `single-package` × `none` | **`socket-packageurl-js`** or **`socket-sdk-js`** | Clean `pnpm-workspace.yaml`, canonical `scripts/{check,fix,clean,cover,security,update,lockstep,build}.mts`, simple `lockstep.json` with empty `rows`. |
-| `monorepo` × `producer` | **`socket-btm`** | 10+ packages (`build-infra`, per-tool-builder workspaces), deep `pnpm --filter` patterns, full `packages: [packages/*, .claude/hooks/*]`, richer catalog, lockstep + submodules + native release matrix. The canonical "monorepo done right" reference. |
-| `monorepo` × `consumer` | **`socket-cli`** | 3-package layout (`build-infra`, `cli`, `package-builder`); consumes prebuilts from socket-btm. |
-| `monorepo` × `none` | `socket-registry` | Mono npm publish path, no native artifacts via the fleet's release-checksums infra. |
-| `monorepo` × `none` + lang-parity | `ultrathink` | Per-language ports tracked entirely in `lockstep.json` `lang-parity` rows, not via release-checksums. Each port has its own build matrix. |
-| Library with vendored upstreams | `socket-lib` | Shows `packages: [.claude/hooks/*, tools/*, vendor/*]`, vendored-as-workspace pattern. |
-| Skill marketplace / no real build graph | `skills` | Dep-free shims for `clean.mts` / `cover.mts` are acceptable; document the deviation in the script's header. |
+| layout × native                         | Best reference                                    | Notes                                                                                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `single-package` × `none`               | **`socket-packageurl-js`** or **`socket-sdk-js`** | Clean `pnpm-workspace.yaml`, canonical `scripts/{check,fix,clean,cover,security,update,lockstep,build}.mts`, simple `lockstep.json` with empty `rows`.                                                                                                  |
+| `monorepo` × `producer`                 | **`socket-btm`**                                  | 10+ packages (`build-infra`, per-tool-builder workspaces), deep `pnpm --filter` patterns, full `packages: [packages/*, .claude/hooks/*]`, richer catalog, lockstep + submodules + native release matrix. The canonical "monorepo done right" reference. |
+| `monorepo` × `consumer`                 | **`socket-cli`**                                  | 3-package layout (`build-infra`, `cli`, `package-builder`); consumes prebuilts from socket-btm.                                                                                                                                                         |
+| `monorepo` × `none`                     | `socket-registry`                                 | Mono npm publish path, no native artifacts via the fleet's release-checksums infra.                                                                                                                                                                     |
+| `monorepo` × `none` + lang-parity       | `ultrathink`                                      | Per-language ports tracked entirely in `lockstep.json` `lang-parity` rows, not via release-checksums. Each port has its own build matrix.                                                                                                               |
+| Library with vendored upstreams         | `socket-lib`                                      | Shows `packages: [.claude/hooks/*, tools/*, vendor/*]`, vendored-as-workspace pattern.                                                                                                                                                                  |
+| Skill marketplace / no real build graph | `skills`                                          | Dep-free shims for `clean.mts` / `cover.mts` are acceptable; document the deviation in the script's header.                                                                                                                                             |
 
 **Don't cross axes when picking a reference.** A `single-package` × `none` repo (`socket-lib`) and a `monorepo` × `consumer` repo (`socket-cli`) ship very different `scripts/*.mts` shapes — `socket-cli`'s scripts assume `packages/` and `pnpm --filter`, which break in a single-package repo. Match both axes.
 
@@ -107,14 +107,14 @@ When scaffolding a new fleet repo, or when a sync question arises ("how does the
 
 The fleet standardizes on the **VoidZero tool suite** for JavaScript/TypeScript tooling. VoidZero (https://voidzero.dev) maintains the unified upstream stack we adopt component-by-component:
 
-| Layer | Tool | Status in the fleet |
-|---|---|---|
-| Test runner | **Vitest** | ✓ Adopted fleet-wide (catalog-pinned). |
-| Linter | **Oxlint** (Oxc) | ✓ Adopted fleet-wide. |
-| Formatter | **Oxfmt** (Oxc) | ✓ Adopted fleet-wide. |
-| Bundler (libraries) | **esbuild** today; **Rolldown** under evaluation | Migration tracked separately; pilot in socket-packageurl-js. |
-| Dev server / app build | **Vite** | Used implicitly via Vitest; not directly invoked by the fleet's library repos. |
-| Unified CLI / monorepo orchestrator | **Vite+** | **Not adopted.** Alpha-stage; revenue-via-enterprise-support trajectory; no concrete pain point our existing `pnpm run *` orchestration doesn't already solve. Reconsider when (a) Vite+ ships 1.0 stable, AND (b) we have a problem it solves better than current scaffolding. |
+| Layer                               | Tool                                             | Status in the fleet                                                                                                                                                                                                                                                             |
+| ----------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Test runner                         | **Vitest**                                       | ✓ Adopted fleet-wide (catalog-pinned).                                                                                                                                                                                                                                          |
+| Linter                              | **Oxlint** (Oxc)                                 | ✓ Adopted fleet-wide.                                                                                                                                                                                                                                                           |
+| Formatter                           | **Oxfmt** (Oxc)                                  | ✓ Adopted fleet-wide.                                                                                                                                                                                                                                                           |
+| Bundler (libraries)                 | **esbuild** today; **Rolldown** under evaluation | Migration tracked separately; pilot in socket-packageurl-js.                                                                                                                                                                                                                    |
+| Dev server / app build              | **Vite**                                         | Used implicitly via Vitest; not directly invoked by the fleet's library repos.                                                                                                                                                                                                  |
+| Unified CLI / monorepo orchestrator | **Vite+**                                        | **Not adopted.** Alpha-stage; revenue-via-enterprise-support trajectory; no concrete pain point our existing `pnpm run *` orchestration doesn't already solve. Reconsider when (a) Vite+ ships 1.0 stable, AND (b) we have a problem it solves better than current scaffolding. |
 
 **Why component-by-component, not the bundle.** Each VoidZero component matures independently. Adopting individually mature components (Vitest 4.x, Oxlint 1.5x, Oxfmt 0.37+, Rolldown 1.0+) lets the fleet move at the pace of the slowest part — not at the pace of the whole bundle. Adopting Vite+ would couple the fleet to whichever component is least mature at any given time.
 
@@ -132,8 +132,15 @@ We don't adopt Vite+ as a runtime dependency, but its **resolver pattern** is wo
 
 ```ts
 // vite-plus/packages/cli/src/resolve-test.ts
-export async function test(): Promise<{ binPath: string; envs: Record<string, string> }> {
-  const binPath = join(dirname(resolve('@voidzero-dev/vite-plus-test')), 'dist', 'cli.js')
+export async function test(): Promise<{
+  binPath: string
+  envs: Record<string, string>
+}> {
+  const binPath = join(
+    dirname(resolve('@voidzero-dev/vite-plus-test')),
+    'dist',
+    'cli.js',
+  )
   return { binPath, envs: { ...DEFAULT_ENVS } }
 }
 ```
@@ -146,7 +153,10 @@ The Rust dispatcher then execs `binPath` with the user's args. Swapping the tool
 
 ```ts
 // Caller (per-repo scripts/check.mts):
-import { resolveLinter, runResolved } from '../.claude/skills/_shared/scripts/resolve-tools.mts'
+import {
+  resolveLinter,
+  runResolved,
+} from '../.claude/skills/_shared/scripts/resolve-tools.mts'
 const result = await runResolved(resolveLinter({ mode: 'check' }), { cwd })
 ```
 
