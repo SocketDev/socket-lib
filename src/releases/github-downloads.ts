@@ -12,7 +12,7 @@ import {
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
 } from '../primordials'
-import { spawn } from '../spawn'
+import { spawn } from '../spawn/core'
 
 import { getLatestRelease, getReleaseAssetUrl } from './github-api'
 

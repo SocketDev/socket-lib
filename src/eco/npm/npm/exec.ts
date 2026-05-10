@@ -18,7 +18,7 @@ import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
 } from '../../../primordials'
-import { spawn } from '../../../spawn'
+import { spawn } from '../../../spawn/core'
 
 import {
   isNpmAuditFlag,
@@ -27,7 +27,7 @@ import {
   isNpmProgressFlag,
 } from './flags'
 
-import type { SpawnOptions } from '../../../spawn'
+import type { SpawnOptions } from '../../../spawn/types'
 
 /**
  * Execute npm commands with optimized flags and settings.

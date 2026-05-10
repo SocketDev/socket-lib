@@ -22,7 +22,7 @@ import {
 import { isNpmLoglevelFlag, isNpmProgressFlag } from '../../npm/flags'
 import { isPnpmIgnoreScriptsFlag } from '../../pnpm/flags'
 
-import type { SpawnOptions } from '../../../../spawn'
+import type { SpawnOptions } from '../../../../spawn/types'
 
 // Commands that support --ignore-scripts in yarn (similar to npm/pnpm).
 const yarnInstallLikeCommands = new Set([

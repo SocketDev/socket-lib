@@ -9,9 +9,9 @@
 
 import { getGhToken, getGithubToken } from '../env/github'
 import { getSocketCliGithubToken } from '../env/socket-cli'
-import { spawn } from '../spawn'
+import { spawn } from '../spawn/core'
 
-import type { SpawnOptions } from '../spawn'
+import type { SpawnOptions } from '../spawn/types'
 
 /**
  * Get GitHub authentication token from environment variables.

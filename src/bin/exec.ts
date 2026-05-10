@@ -24,13 +24,13 @@
 import { WIN32 } from '../constants/platform'
 import { isPath } from '../paths/normalize'
 import { ArrayIsArray, ErrorCtor } from '../primordials'
-import { spawn } from '../spawn'
+import { spawn } from '../spawn/core'
 
 import { binPathCache, getFs } from './_internals'
 import { resolveRealBinSync } from './resolve'
 import { whichReal } from './which'
 
-import type { SpawnOptions } from '../spawn'
+import type { SpawnOptions } from '../spawn/types'
 
 /**
  * Execute a binary with the given arguments.

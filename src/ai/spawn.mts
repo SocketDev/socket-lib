@@ -18,7 +18,8 @@
  */
 
 import { errorMessage } from '../errors'
-import { isSpawnError, spawn } from '../spawn'
+import { spawn } from '../spawn/core'
+import { isSpawnError } from '../spawn/errors'
 
 import { discoverAiAgents } from './discover.mts'
 

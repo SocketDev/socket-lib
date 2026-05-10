@@ -23,7 +23,7 @@ import {
   PNPM_INSTALL_LIKE_COMMANDS,
 } from './flags'
 
-import type { SpawnOptions } from '../../../spawn'
+import type { SpawnOptions } from '../../../spawn/types'
 
 export interface PnpmOptions extends SpawnOptions {
   allowLockfileUpdate?: boolean

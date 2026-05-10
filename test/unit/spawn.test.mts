@@ -14,12 +14,9 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  isSpawnError,
-  isStdioType,
-  spawn,
-  spawnSync,
-} from '@socketsecurity/lib/spawn'
+import { spawn, spawnSync } from '@socketsecurity/lib/spawn/core'
+import { isSpawnError } from '@socketsecurity/lib/spawn/errors'
+import { isStdioType } from '@socketsecurity/lib/spawn/stdio'
 
 import { itUnixOnly, itWindowsOnly } from './utils/skip-helpers'
 

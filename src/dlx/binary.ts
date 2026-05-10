@@ -12,13 +12,13 @@ import { isObjectObject } from '../objects'
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
-import { spawn } from '../spawn'
+import { spawn } from '../spawn/core'
 import { hash } from '../crypto'
 import { generateCacheKey } from './cache'
 import { normalizeHash } from './integrity'
 
 import type { HashSpec } from './integrity'
-import type { SpawnExtra, SpawnOptions } from '../spawn'
+import type { SpawnExtra, SpawnOptions } from '../spawn/types'
 
 import {
   ArrayIsArray,

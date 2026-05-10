@@ -42,12 +42,12 @@ import { httpJson } from '../http-request/convenience'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
-import { spawn } from '../spawn'
+import { spawn } from '../spawn/core'
 import { generateCacheKey } from './cache'
 
 import type { HashSpec } from './integrity'
 import type { LockfileSpec } from './lockfile'
-import type { SpawnExtra, SpawnOptions } from '../spawn'
+import type { SpawnExtra, SpawnOptions } from '../spawn/types'
 
 import {
   ErrorCtor,

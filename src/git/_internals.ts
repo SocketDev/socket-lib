@@ -15,7 +15,7 @@ import {
   MapCtor,
   StringPrototypeSubstring,
 } from '../primordials'
-import { spawn, spawnSync } from '../spawn'
+import { spawn, spawnSync } from '../spawn/core'
 import { stripAnsi } from '../strings'
 import { findGitRoot, getCachedRealpath, getCwd, getPath } from './repo'
 

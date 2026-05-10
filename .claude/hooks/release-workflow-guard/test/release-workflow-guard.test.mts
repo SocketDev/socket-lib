@@ -20,7 +20,8 @@ import { afterEach, describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 
 import { safeDelete } from '@socketsecurity/lib/fs'
-import { isSpawnError, spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/spawn/core'
+import { isSpawnError } from '@socketsecurity/lib/spawn/errors'
 
 const hookScript = new URL('../index.mts', import.meta.url).pathname
 

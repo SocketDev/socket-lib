@@ -9,7 +9,8 @@
  * Cross-platform: shells out to git via @socketsecurity/lib/spawn, which
  * works the same on macOS / Linux / Windows.
  */
-import { isSpawnError, spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/spawn/core'
+import { isSpawnError } from '@socketsecurity/lib/spawn/errors'
 
 export type ResolveDefaultBranchOptions = {
   /** Working directory; defaults to process.cwd(). */

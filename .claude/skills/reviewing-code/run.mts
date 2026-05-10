@@ -22,7 +22,8 @@ import process from 'node:process'
 
 import { safeDelete } from '@socketsecurity/lib/fs'
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
-import { isSpawnError, spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/spawn/core'
+import { isSpawnError } from '@socketsecurity/lib/spawn/errors'
 
 const logger = getDefaultLogger()
 

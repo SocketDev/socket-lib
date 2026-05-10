@@ -14,7 +14,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { findGitRoot } from '@socketsecurity/lib/git/repo'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/spawn/core'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../unit/utils/temp-file-helper'
 
