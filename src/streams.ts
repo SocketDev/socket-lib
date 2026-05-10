@@ -7,8 +7,9 @@ import {
   parallelMap as siParallelMap,
   transform as siTransform,
 } from './external/streaming-iterables'
-import type { IterationOptions } from './promises'
-import { normalizeIterationOptions, pRetry } from './promises'
+import type { IterationOptions } from './promises/types'
+import { normalizeIterationOptions } from './promises/options'
+import { pRetry } from './promises/retry'
 
 /**
  * Execute a function for each item in an iterable in parallel.

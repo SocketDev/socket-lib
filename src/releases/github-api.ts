@@ -17,7 +17,7 @@ import {
   ObjectFreeze,
   StringPrototypeStartsWith,
 } from '../primordials'
-import { pRetry } from '../promises'
+import { pRetry } from '../promises/retry'
 
 import { createAssetMatcher } from './github-assets'
 import { getAuthHeaders } from './github-auth'

@@ -11,17 +11,18 @@
  */
 
 import {
-  fromAsync,
-  normalizeIterationOptions,
-  normalizeRetryOptions,
   pEach,
   pEachChunk,
   pFilter,
   pFilterChunk,
-  pRetry,
+} from '../../src/promises/iterate'
+import {
+  normalizeIterationOptions,
+  normalizeRetryOptions,
   resolveRetryOptions,
-  withResolvers,
-} from '@socketsecurity/lib/promises'
+} from '../../src/promises/options'
+import { fromAsync, withResolvers } from '../../src/promises/resolvers'
+import { pRetry } from '../../src/promises/retry'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {
@@ -1176,7 +1177,7 @@ describe('promises', () => {
     > {
       delete (Promise as unknown as { withResolvers?: unknown }).withResolvers
       vi.resetModules()
-      const mod = await import('@socketsecurity/lib/promises')
+      const mod = await import('../../src/promises/resolvers')
       return mod.withResolvers as () => {
         promise: Promise<unknown>
         resolve: Function
@@ -1334,7 +1335,7 @@ describe('promises', () => {
     > {
       delete (Array as unknown as { fromAsync?: unknown }).fromAsync
       vi.resetModules()
-      const mod = await import('@socketsecurity/lib/promises')
+      const mod = await import('../../src/promises/resolvers')
       return mod.fromAsync
     }
 

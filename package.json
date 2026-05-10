@@ -1013,10 +1013,30 @@
       "types": "./dist/promise-queue.d.ts",
       "default": "./dist/promise-queue.js"
     },
-    "./promises": {
-      "source": "./src/promises.ts",
-      "types": "./dist/promises.d.ts",
-      "default": "./dist/promises.js"
+    "./promises/iterate": {
+      "source": "./src/promises/iterate.ts",
+      "types": "./dist/promises/iterate.d.ts",
+      "default": "./dist/promises/iterate.js"
+    },
+    "./promises/options": {
+      "source": "./src/promises/options.ts",
+      "types": "./dist/promises/options.d.ts",
+      "default": "./dist/promises/options.js"
+    },
+    "./promises/resolvers": {
+      "source": "./src/promises/resolvers.ts",
+      "types": "./dist/promises/resolvers.d.ts",
+      "default": "./dist/promises/resolvers.js"
+    },
+    "./promises/retry": {
+      "source": "./src/promises/retry.ts",
+      "types": "./dist/promises/retry.d.ts",
+      "default": "./dist/promises/retry.js"
+    },
+    "./promises/types": {
+      "source": "./src/promises/types.ts",
+      "types": "./dist/promises/types.d.ts",
+      "default": "./dist/promises/types.js"
     },
     "./regexps": {
       "source": "./src/regexps.ts",

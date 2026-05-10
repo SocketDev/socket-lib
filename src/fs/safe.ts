@@ -19,7 +19,7 @@ import {
   SharedArrayBufferCtor,
   StringPrototypeStartsWith,
 } from '../primordials'
-import { pRetry } from '../promises'
+import { pRetry } from '../promises/retry'
 
 import { getAllowedDirectories } from './_internals'
 // Side-effect import: registers invalidatePathCache with paths/rewire

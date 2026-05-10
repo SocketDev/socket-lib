@@ -43,7 +43,7 @@
 import { errorMessage } from './errors'
 import { safeDeleteSync } from './fs/safe'
 import { getDefaultLogger } from './logger/default'
-import { pRetry } from './promises'
+import { pRetry } from './promises/retry'
 import { onExit } from './signal-exit'
 
 import { DateNow, ErrorCtor, MapCtor, MathMax, SetCtor } from './primordials'

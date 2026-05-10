@@ -2,7 +2,7 @@
 
 import { safeMkdir, safeMkdirSync } from '../fs/safe'
 import { getSocketDlxDir } from '../paths/socket'
-import { pEach } from '../promises'
+import { pEach } from '../promises/iterate'
 import {
   listDlxPackages,
   listDlxPackagesAsync,

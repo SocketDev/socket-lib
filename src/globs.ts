@@ -10,7 +10,7 @@ import {
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
 } from './paths/globs'
 import { normalizePath } from './paths/normalize'
-import { fromAsync } from './promises'
+import { fromAsync } from './promises/resolvers'
 
 import type * as fastGlobType from './external/fast-glob'
 import type picomatchType from './external/picomatch'
