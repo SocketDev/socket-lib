@@ -34,7 +34,7 @@ describe('coverage mop-up — tiny gaps', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const target: any = { a: { b: 1 } }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const source: any = { a: null }
+      const source: any = { a: undefined }
       const result = merge(target, source) as { a: unknown }
       expect(result.a).toBeNull()
     })

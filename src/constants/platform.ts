@@ -8,7 +8,7 @@ let _os: typeof import('node:os') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getOs() {
+export function getOs() {
   if (_os === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

@@ -32,7 +32,7 @@ const logger = getDefaultLogger()
 /**
  * Get all .js files recursively in a directory.
  */
-function getJsFilesRecursive(dir, files = []) {
+export function getJsFilesRecursive(dir, files = []) {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
 
@@ -56,7 +56,7 @@ function getJsFilesRecursive(dir, files = []) {
 /**
  * Get all .js files and directories in the external directory.
  */
-function getExternalModules(dir) {
+export function getExternalModules(dir) {
   return getJsFilesRecursive(dir).filter(file => {
     // Ensure the file is actually in the external directory
     // (not some symlink or weird path)
@@ -75,7 +75,7 @@ const DEFAULT_ONLY_ALLOWED = new Set([
 /**
  * Check if module exports work correctly for both CJS and ESM.
  */
-async function checkModuleExports(filePath) {
+export async function checkModuleExports(filePath) {
   const relativePath = path.relative(externalDir, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues = []

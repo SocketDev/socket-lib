@@ -17,7 +17,7 @@ const HOOK = path.join(here, '..', 'pre-push.mts')
 
 const ZERO_SHA = '0000000000000000000000000000000000000000'
 
-function setupRepo(): string {
+export function setupRepo(): string {
   const dir = mkdtempSync(path.join(tmpdir(), 'pre-push-test-'))
   spawnSync('git', ['init', '-q', '-b', 'main'], { cwd: dir })
   spawnSync('git', ['config', 'user.email', 'test@example.com'], { cwd: dir })
@@ -49,7 +49,7 @@ function setupRepo(): string {
   return dir
 }
 
-function commit(
+export function commit(
   dir: string,
   file: string,
   content: string,
@@ -62,7 +62,7 @@ function commit(
   return r.stdout.toString().trim()
 }
 
-async function runHook(
+export async function runHook(
   cwd: string,
   pushLine: string,
 ): Promise<{ code: number; stderr: string }> {

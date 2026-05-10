@@ -24,7 +24,7 @@ interface FakeStreamEntry {
   key: string
 }
 
-function makeFakeStream(
+export function makeFakeStream(
   entries: FakeStreamEntry[],
 ): AsyncIterable<FakeStreamEntry> {
   return {

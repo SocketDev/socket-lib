@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const HOOK = path.join(here, '..', 'pre-commit.mts')
 
-function setupRepo(): string {
+export function setupRepo(): string {
   const dir = mkdtempSync(path.join(tmpdir(), 'pre-commit-test-'))
   spawnSync('git', ['init', '-q'], { cwd: dir })
   spawnSync('git', ['config', 'user.email', 'test@example.com'], { cwd: dir })
@@ -24,7 +24,9 @@ function setupRepo(): string {
   return dir
 }
 
-async function runHook(cwd: string): Promise<{ code: number; stderr: string }> {
+export async function runHook(
+  cwd: string,
+): Promise<{ code: number; stderr: string }> {
   const child = spawn(process.execPath, [HOOK], {
     cwd,
     stdio: 'pipe',

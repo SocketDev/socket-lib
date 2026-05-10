@@ -94,7 +94,7 @@ const NAME_HEAD_RE = /^([A-Za-z_$][A-Za-z0-9_$]*)/
  * inside primordials destructures would otherwise leak captured
  * names; stripping first keeps the regex simple.
  */
-function stripComments(src: string): string {
+export function stripComments(src: string): string {
   let out = src.replace(/\/\*[\s\S]*?\*\//g, '')
   out = out.replace(/^[\t ]*\/\/.*$/gm, '')
   out = out.replace(/[\t ]+\/\/.*$/gm, '')
@@ -102,7 +102,7 @@ function stripComments(src: string): string {
 }
 
 /** Recursively collect every `*.js` file under `dir`. */
-function collectJsFiles(dir: string): string[] {
+export function collectJsFiles(dir: string): string[] {
   const out: string[] = []
   if (!existsSync(dir)) {
     return out

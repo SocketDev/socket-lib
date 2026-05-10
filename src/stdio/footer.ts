@@ -9,6 +9,9 @@ import { repeatString } from '../strings/format'
 import { ArrayPrototypePush } from '../primordials/array'
 
 import { DateCtor, DateNow } from '../primordials/date'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
 export interface FooterOptions {
   /**
    * Width of the footer border in characters.
@@ -200,7 +203,7 @@ export function createSummaryFooter(
  */
 export function printFooter(message?: string | undefined): void {
   const border = repeatString('─', 55)
-  console.log(border)
+  logger.log(border)
   if (message) {
     console.log(colors.green(message))
   }

@@ -58,7 +58,7 @@ describe('url', () => {
     })
 
     it('should return false for null', () => {
-      expect(isUrl(null)).toBe(false)
+      expect(isUrl(undefined)).toBe(false)
     })
 
     it('should return false for undefined', () => {
@@ -177,7 +177,7 @@ describe('url', () => {
     })
 
     it('should return empty array for null', () => {
-      expect(urlSearchParamAsArray(null)).toEqual([])
+      expect(urlSearchParamAsArray(undefined)).toEqual([])
     })
 
     it('should return empty array for undefined', () => {
@@ -232,8 +232,10 @@ describe('url', () => {
     })
 
     it('should return default value for null', () => {
-      expect(urlSearchParamAsBoolean(null)).toBe(false)
-      expect(urlSearchParamAsBoolean(null, { defaultValue: true })).toBe(true)
+      expect(urlSearchParamAsBoolean(undefined)).toBe(false)
+      expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
+        true,
+      )
     })
 
     it('should return default value for undefined', () => {
@@ -254,7 +256,9 @@ describe('url', () => {
     })
 
     it('should use custom default value', () => {
-      expect(urlSearchParamAsBoolean(null, { defaultValue: true })).toBe(true)
+      expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
+        true,
+      )
       expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
         true,
       )
@@ -299,7 +303,7 @@ describe('url', () => {
     })
 
     it('should return empty array for null params', () => {
-      expect(urlSearchParamsGetArray(null, 'key')).toEqual([])
+      expect(urlSearchParamsGetArray(undefined, 'key')).toEqual([])
     })
 
     it('should return empty array for undefined params', () => {
@@ -347,9 +351,9 @@ describe('url', () => {
     })
 
     it('should return default value for null params', () => {
-      expect(urlSearchParamsGetBoolean(null, 'key')).toBe(false)
+      expect(urlSearchParamsGetBoolean(undefined, 'key')).toBe(false)
       expect(
-        urlSearchParamsGetBoolean(null, 'key', { defaultValue: true }),
+        urlSearchParamsGetBoolean(undefined, 'key', { defaultValue: true }),
       ).toBe(true)
     })
 
@@ -446,9 +450,9 @@ describe('url', () => {
     })
 
     it('should return default value for null params', () => {
-      expect(urlSearchParamAsString(null, 'key')).toBe('')
+      expect(urlSearchParamAsString(undefined, 'key')).toBe('')
       expect(
-        urlSearchParamAsString(null, 'key', { defaultValue: 'default' }),
+        urlSearchParamAsString(undefined, 'key', { defaultValue: 'default' }),
       ).toBe('default')
     })
 
@@ -520,8 +524,10 @@ describe('url', () => {
     })
 
     it('should return default value for null params', () => {
-      expect(urlSearchParamAsNumber(null, 'key')).toBe(0)
-      expect(urlSearchParamAsNumber(null, 'key', { defaultValue: 42 })).toBe(42)
+      expect(urlSearchParamAsNumber(undefined, 'key')).toBe(0)
+      expect(
+        urlSearchParamAsNumber(undefined, 'key', { defaultValue: 42 }),
+      ).toBe(42)
     })
 
     it('should return default value for undefined params', () => {

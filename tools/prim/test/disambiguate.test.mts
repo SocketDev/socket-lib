@@ -28,7 +28,7 @@ if (range.test(version)) {
 }
 `
 
-function makeTempRoot() {
+export function makeTempRoot() {
   const dir = mkdtempSync(path.join(tmpdir(), 'prim-disambiguate-'))
   return dir
 }

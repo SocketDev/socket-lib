@@ -36,6 +36,7 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib/spawn/core'
 import { describe, expect, it, vi } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 describe('git extended tests', () => {
   const projectRoot = normalizePath(process.cwd())
@@ -460,7 +461,7 @@ describe('git extended tests', () => {
         spawnSync('git', ['commit', '-m', 'Add file'], { cwd: tmpDir })
 
         // Delete the file
-        await fs.unlink(delFile)
+        await safeDelete(delFile)
 
         // Should show as changed (deleted)
         const changed = await getChangedFiles({ cwd: tmpDir })

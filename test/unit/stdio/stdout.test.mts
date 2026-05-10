@@ -538,12 +538,15 @@ describe('stdio/stdout', () => {
 
     it('should handle null-like terminal dimensions', () => {
       Object.defineProperty(stdout, 'columns', {
-        value: null,
+        value: undefined,
         configurable: true,
       })
       expect(getColumns()).toBe(80)
 
-      Object.defineProperty(stdout, 'rows', { value: null, configurable: true })
+      Object.defineProperty(stdout, 'rows', {
+        value: undefined,
+        configurable: true,
+      })
       expect(getRows()).toBe(24)
     })
   })

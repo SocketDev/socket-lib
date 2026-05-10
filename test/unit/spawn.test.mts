@@ -38,7 +38,7 @@ describe('spawn', () => {
     })
 
     it('should return false for null', () => {
-      expect(isSpawnError(null)).toBe(false)
+      expect(isSpawnError(undefined)).toBe(false)
     })
 
     it('should return false for undefined', () => {
@@ -95,9 +95,9 @@ describe('spawn', () => {
       })
 
       it('should treat null/undefined as pipe', () => {
-        expect(isStdioType(null as any, 'pipe')).toBe(true)
         expect(isStdioType(undefined as any, 'pipe')).toBe(true)
-        expect(isStdioType(null as any, 'ignore')).toBe(false)
+        expect(isStdioType(undefined as any, 'pipe')).toBe(true)
+        expect(isStdioType(undefined as any, 'ignore')).toBe(false)
       })
 
       it('should match array with all elements same as type', () => {

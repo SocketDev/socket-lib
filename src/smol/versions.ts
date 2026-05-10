@@ -74,11 +74,11 @@ export function getSmolVersions(): SmolVersionsBinding | undefined {
       try {
         _smolVersions = require('node:smol-versions') as SmolVersionsBinding
       } catch {
-        _smolVersions = null
+        _smolVersions = undefined
       }
       /* c8 ignore stop */
     } else {
-      _smolVersions = null
+      _smolVersions = undefined
     }
   }
   return _smolVersions ?? undefined

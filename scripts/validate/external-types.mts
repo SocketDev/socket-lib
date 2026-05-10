@@ -31,7 +31,10 @@ const logger = getDefaultLogger()
 /**
  * Get all .d.ts files recursively in a directory.
  */
-function getDtsFilesRecursive(dir: string, files: string[] = []): string[] {
+export function getDtsFilesRecursive(
+  dir: string,
+  files: string[] = [],
+): string[] {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
 
@@ -54,7 +57,7 @@ function getDtsFilesRecursive(dir: string, files: string[] = []): string[] {
 /**
  * Check if a .d.ts file uses proper module export patterns.
  */
-function checkTypeDefinition(filePath) {
+export function checkTypeDefinition(filePath) {
   const relativePath = path.relative(externalDir, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues = []

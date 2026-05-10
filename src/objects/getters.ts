@@ -12,7 +12,7 @@
  * level evaluation between siblings, so ESM tolerates.
  */
 
-import { kInternalsSymbol, UNDEFINED_TOKEN } from '../constants/core'
+import { kInternalsSymbol } from '../constants/core'
 import { SetCtor } from '../primordials/map-set'
 import {
   ObjectDefineProperties,
@@ -77,11 +77,13 @@ export function createConstantsObject(
     __proto__: null,
     getters: options.getters
       ? ObjectFreeze(
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.setPrototypeOf requires `null` for null-prototype objects.
           ObjectSetPrototypeOf(toSortedObject(options.getters), null),
         )
       : undefined,
     internals: options.internals
       ? ObjectFreeze(
+          // oxlint-disable-next-line socket/prefer-undefined-over-null
           ObjectSetPrototypeOf(toSortedObject(options.internals), null),
         )
       : undefined,
@@ -94,7 +96,8 @@ export function createConstantsObject(
         )
       : undefined,
     props: props
-      ? ObjectFreeze(ObjectSetPrototypeOf(toSortedObject(props), null))
+      ? // oxlint-disable-next-line socket/prefer-undefined-over-null
+        ObjectFreeze(ObjectSetPrototypeOf(toSortedObject(props), null))
       : undefined,
   })
   const lazyGetterStats = ObjectFreeze({
@@ -160,11 +163,16 @@ export function createLazyGetter<T>(
   getter: () => T,
   stats?: LazyGetterStats | undefined,
 ): () => T {
-  let lazyValue: T | typeof UNDEFINED_TOKEN = UNDEFINED_TOKEN
+  // Use a unique sentinel object so memoization works even when the
+  // getter legitimately returns `undefined`. A shared sentinel value
+  // (like `UNDEFINED_TOKEN === undefined`) would cause repeated calls
+  // for getters whose result is `undefined`.
+  const UNCOMPUTED = {}
+  let lazyValue: T | typeof UNCOMPUTED = UNCOMPUTED
   // Dynamically name the getter without using Object.defineProperty.
   const { [name]: lazyGetter } = {
     [name]() {
-      if (lazyValue === UNDEFINED_TOKEN) {
+      if (lazyValue === UNCOMPUTED) {
         stats?.initialized?.add(name)
         lazyValue = getter()
       }

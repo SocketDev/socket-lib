@@ -56,7 +56,7 @@ let _path: typeof import('node:path') | undefined
  * fails the check.
  * @internal
  */
-async function ensureIpcDirectory(filePath: string): Promise<void> {
+export async function ensureIpcDirectory(filePath: string): Promise<void> {
   const fs = getFs()
   const path = getPath()
   const dir = path.dirname(filePath)
@@ -107,7 +107,7 @@ async function ensureIpcDirectory(filePath: string): Promise<void> {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
   }
@@ -119,7 +119,7 @@ function getFs() {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
   }
@@ -233,7 +233,7 @@ export async function writeIpcStub(
     }
   }
   try {
-    await handle.writeFile(JSONStringify(validated, null, 2), 'utf8')
+    await handle.writeFile(JSONStringify(validated, undefined, 2), 'utf8')
   } finally {
     await handle.close()
   }

@@ -20,7 +20,7 @@ import { getCodeCoverage } from '@socketsecurity/lib/cover/code'
 
 let tmpDir: string
 
-function writeCoverageFile(data: unknown): string {
+export function writeCoverageFile(data: unknown): string {
   const file = path.join(tmpDir, 'coverage-final.json')
   writeFileSync(file, JSON.stringify(data))
   return file
@@ -98,7 +98,7 @@ describe.sequential('cover/code', () => {
 
     it('skips entries that are not objects', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': null,
+        '/a.ts': undefined,
         '/b.ts': 'not an object',
         '/c.ts': { s: { '0': 1 }, b: {}, f: {} },
       })
@@ -109,7 +109,7 @@ describe.sequential('cover/code', () => {
 
     it('skips non-object s/b/f buckets', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': { s: 'not an object', b: null, f: undefined },
+        '/a.ts': { s: 'not an object', b: undefined, f: undefined },
       })
       const result = await getCodeCoverage({ coveragePath })
       expect(result.statements.total).toBe(0)
@@ -127,7 +127,7 @@ describe.sequential('cover/code', () => {
       const coveragePath = writeCoverageFile({
         '/a.ts': {
           s: { '0': 'not a number', '1': 1 },
-          f: { '0': null, '1': 2 },
+          f: { '0': undefined, '1': 2 },
           b: { '0': [1, 'bad', 3] },
         },
       })
@@ -152,12 +152,12 @@ describe.sequential('cover/code', () => {
         writeFileSync(coveragePath, JSON.stringify({}))
         const promise = Promise.resolve({
           code: 0,
-          signal: null,
+          signal: undefined,
           stdout: Buffer.from(''),
           stderr: Buffer.from(''),
         }) as any
-        promise.process = null
-        promise.stdin = null
+        promise.process = undefined
+        promise.stdin = undefined
         return promise
       }) as any)
       const result = await getCodeCoverage({

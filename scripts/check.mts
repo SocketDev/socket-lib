@@ -22,7 +22,7 @@ import { runCommandQuiet, runParallel } from './utils/run-command.mts'
 
 const logger = getDefaultLogger()
 
-async function runTypeCheck(quiet = false): Promise<number> {
+export async function runTypeCheck(quiet = false): Promise<number> {
   if (!quiet) {
     logger.progress('Checking TypeScript')
   }

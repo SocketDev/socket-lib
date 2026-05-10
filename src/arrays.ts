@@ -25,7 +25,7 @@ let _conjunctionFormatter: Intl.ListFormat | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getConjunctionFormatter() {
+export function getConjunctionFormatter() {
   if (_conjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
     /* c8 ignore start */
@@ -58,7 +58,7 @@ let _disjunctionFormatter: Intl.ListFormat | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getDisjunctionFormatter() {
+export function getDisjunctionFormatter() {
   if (_disjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
     /* c8 ignore start */

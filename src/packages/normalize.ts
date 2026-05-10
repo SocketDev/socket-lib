@@ -22,7 +22,7 @@ import {
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn
 
-function getEscapedScopeRegExp(): RegExp {
+export function getEscapedScopeRegExp(): RegExp {
   const firstChar = REGISTRY_SCOPE_DELIMITER[0] as string
   return new RegExpCtor(
     `^[^${escapeRegExp(firstChar)}]+${escapeRegExp(REGISTRY_SCOPE_DELIMITER)}(?!${escapeRegExp(firstChar)})`,

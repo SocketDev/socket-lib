@@ -10,9 +10,9 @@
  * but not auto-fixed (sorting computed values would change behavior).
  */
 
-const SET_NAMES = new Set(['Set', 'SafeSet'])
+const SET_NAMES = new Set(['SafeSet', 'Set'])
 
-function isSortableElement(node) {
+export function isSortableElement(node) {
   return (
     node !== null &&
     node.type === 'Literal' &&
@@ -20,7 +20,7 @@ function isSortableElement(node) {
   )
 }
 
-function compareSortable(a, b) {
+export function compareSortable(a, b) {
   const aVal = String(a.value)
   const bVal = String(b.value)
   if (aVal < bVal) {

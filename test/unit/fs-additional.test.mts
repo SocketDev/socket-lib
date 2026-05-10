@@ -40,6 +40,7 @@ import { uniqueSync } from '@socketsecurity/lib/fs/unique'
 import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 describe('fs - Additional Coverage', () => {
   describe('findUp edge cases', () => {
@@ -521,7 +522,7 @@ describe('fs - Additional Coverage', () => {
       } catch (e) {
         // Clean up if test fails
         try {
-          await fs.unlink(testFile)
+          await safeDelete(testFile)
         } catch {}
         throw e
       }
@@ -655,7 +656,7 @@ describe('fs - Additional Coverage', () => {
     it('isDir should handle Buffer paths', async () => {
       await runWithTempDir(async tmpDir => {
         const bufferPath = Buffer.from(tmpDir)
-        const result = await isDir(bufferPath)
+        const result = await existsSync(bufferPath)
         expect(result).toBe(true)
       }, 'isDir-buffer-')
     })

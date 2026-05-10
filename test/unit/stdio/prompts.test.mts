@@ -174,7 +174,7 @@ describe('stdio/prompts', () => {
 
   describe('theme handling', () => {
     it('should handle null theme', () => {
-      const theme = createInquirerTheme(null)
+      const theme = createInquirerTheme(undefined)
       expect(theme).toBeDefined()
     })
   })
@@ -378,7 +378,7 @@ describe('stdio/prompts', () => {
       const wrapped = wrapPrompt(mockPrompt)
 
       // Pass null as config to trigger the branch where config is not an object
-      const result = await wrapped(null)
+      const result = await wrapped(undefined)
       expect(result).toBe('test')
       expect(mockPrompt).toHaveBeenCalled()
     })
@@ -617,7 +617,7 @@ describe('stdio/prompts', () => {
     })
 
     it('should handle null input', () => {
-      const theme = createInquirerTheme(null)
+      const theme = createInquirerTheme(undefined)
       expect(theme).toBe(null)
     })
 

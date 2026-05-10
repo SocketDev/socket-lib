@@ -51,7 +51,7 @@ type CacheEntry<T> = {
  * `Map`/`Set` arguments (which `JSON.stringify` drops or collapses).
  * @private
  */
-function defaultKeyGen(args: readonly unknown[]): string {
+export function defaultKeyGen(args: readonly unknown[]): string {
   return JSONStringify(args, (_key, value) => {
     if (value === undefined) {
       return '\0undefined'

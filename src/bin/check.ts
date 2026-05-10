@@ -30,7 +30,7 @@ const ALIASES: ReadonlyMap<string, readonly string[]> = new Map([
   ['primordials', ['prim']],
 ])
 
-function printHelp(): void {
+export function printHelp(): void {
   logger.log('socket-lib check — fleet-wide static-analysis checks')
   logger.log('')
   logger.log('Usage:')

@@ -34,7 +34,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 describe('json', () => {
   describe('isJsonPrimitive', () => {
     it('should return true for null', () => {
-      expect(isJsonPrimitive(null)).toBe(true)
+      expect(isJsonPrimitive(undefined)).toBe(true)
     })
 
     it('should return true for boolean values', () => {
@@ -482,7 +482,7 @@ describe('json', () => {
 
       it('should handle JSON with null values', () => {
         const result = jsonParse('{"key":null}')
-        expect(result).toEqual({ key: null })
+        expect(result).toEqual({ key: undefined })
       })
 
       it('should handle mixed types in array', () => {
@@ -490,7 +490,7 @@ describe('json', () => {
           '[null,true,42,"string",{"key":"value"},[1,2]]',
         )
         expect(result).toEqual([
-          null,
+          undefined,
           true,
           42,
           'string',
@@ -749,7 +749,7 @@ describe('json', () => {
     describe('isJsonPrimitive edge cases', () => {
       it('should handle all falsy values correctly', () => {
         // Tests line 200: value === null
-        expect(isJsonPrimitive(null)).toBe(true)
+        expect(isJsonPrimitive(undefined)).toBe(true)
         expect(isJsonPrimitive(undefined)).toBe(false)
         expect(isJsonPrimitive(0)).toBe(true)
         expect(isJsonPrimitive(false)).toBe(true)

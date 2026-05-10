@@ -32,7 +32,7 @@ const entryPoints = fg.sync('**/*.{ts,mts,cts}', {
  * Plugin to shorten module paths in bundled output with conflict detection.
  * Uses @babel/parser and magic-string for precise AST-based modifications.
  */
-function createPathShorteningPlugin() {
+export function createPathShorteningPlugin() {
   return {
     name: 'shorten-module-paths',
     setup(build) {

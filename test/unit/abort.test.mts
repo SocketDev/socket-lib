@@ -24,7 +24,7 @@ describe('abort', () => {
     })
 
     it('should return a new signal when all signals are null', () => {
-      const signal = createCompositeAbortSignal(null, null, undefined)
+      const signal = createCompositeAbortSignal(undefined, undefined, undefined)
       expect(signal).toBeInstanceOf(AbortSignal)
       expect(signal.aborted).toBe(false)
     })
@@ -38,7 +38,7 @@ describe('abort', () => {
     it('should return the same signal when one valid and others null', () => {
       const controller = new AbortController()
       const signal = createCompositeAbortSignal(
-        null,
+        undefined,
         controller.signal,
         undefined,
       )
@@ -139,11 +139,11 @@ describe('abort', () => {
     it('should handle many signals with nulls mixed in', async () => {
       const controllers = Array.from({ length: 3 }, () => new AbortController())
       const signal = createCompositeAbortSignal(
-        null,
+        undefined,
         controllers[0]!.signal,
         undefined,
         controllers[1]!.signal,
-        null,
+        undefined,
         controllers[2]!.signal,
       )
 
@@ -159,11 +159,11 @@ describe('abort', () => {
     it('should return the single signal when only one valid signal among nulls', () => {
       const controller = new AbortController()
       const signal = createCompositeAbortSignal(
-        null,
-        null,
+        undefined,
+        undefined,
         controller.signal,
         undefined,
-        null,
+        undefined,
       )
 
       expect(signal).toBe(controller.signal)
@@ -343,8 +343,8 @@ describe('abort', () => {
     })
 
     it('should throw TypeError for null timeout', () => {
-      expect(() => createTimeoutSignal(null as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal(null as any)).toThrow(
+      expect(() => createTimeoutSignal(undefined as any)).toThrow(TypeError)
+      expect(() => createTimeoutSignal(undefined as any)).toThrow(
         'timeout must be a number',
       )
     })

@@ -393,7 +393,7 @@ export function ctorPrimordialName(global) {
 // recompute it for every call site.
 const prototypeMethodCache = new Map()
 
-function getPrototypeMethods(globalName) {
+export function getPrototypeMethods(globalName) {
   let cached = prototypeMethodCache.get(globalName)
   if (cached) {
     return cached

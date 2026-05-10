@@ -245,7 +245,7 @@ afterAll(async () => {
   })
 })
 
-function makeRawRequest(url: string): Promise<http.IncomingMessage> {
+export function makeRawRequest(url: string): Promise<http.IncomingMessage> {
   return new Promise((resolve, reject) => {
     http.get(url, resolve).on('error', reject)
   })
@@ -1393,7 +1393,9 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const testServer = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(
-          JSON.stringify({ contentType: req.headers['content-type'] || null }),
+          JSON.stringify({
+            contentType: req.headers['content-type'] || undefined,
+          }),
         )
       })
 
@@ -1420,7 +1422,9 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const testServer = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(
-          JSON.stringify({ contentType: req.headers['content-type'] || null }),
+          JSON.stringify({
+            contentType: req.headers['content-type'] || undefined,
+          }),
         )
       })
 
@@ -2347,7 +2351,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const fakeMsg = new Readable({
         read() {
           this.push('body')
-          this.push(null)
+          this.push(undefined)
         },
       }) as unknown as IncomingResponse
       Object.assign(fakeMsg, {
@@ -2782,7 +2786,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       const result = sanitizeHeaders({
         present: 'value',
         absent: undefined,
-        empty: null,
+        empty: undefined,
       })
 
       expect(result['present']).toBe('value')
@@ -3311,7 +3315,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         },
         destroy(_err, callback) {
           streamDestroyed = true
-          callback(null)
+          callback(undefined)
         },
       })
 
@@ -3336,7 +3340,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         },
         destroy(_err, callback) {
           streamDestroyed = true
-          callback(null)
+          callback(undefined)
         },
       })
 

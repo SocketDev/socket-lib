@@ -57,7 +57,9 @@ export interface RemoveOptions {
  * Anchors both ends — `foo*bar` matches exactly `foo<anything>bar`,
  * not `foo<anything>bar<more>`.
  */
-function createPatternMatcher(pattern: string): (key: string) => boolean {
+export function createPatternMatcher(
+  pattern: string,
+): (key: string) => boolean {
   if (!pattern.includes('*')) {
     return (key: string) => StringPrototypeStartsWith(key, pattern)
   }

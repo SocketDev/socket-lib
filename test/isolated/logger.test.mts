@@ -142,7 +142,7 @@ describe('Logger', () => {
     it('should handle non-string arguments', () => {
       testLogger.log(123)
       testLogger.log({ key: 'value' })
-      testLogger.log(null)
+      testLogger.log(undefined)
       testLogger.log(undefined)
       expect(stdoutChunks.length).toBeGreaterThan(0)
     })
@@ -1049,7 +1049,7 @@ describe('Logger', () => {
     })
 
     it('should handle null and undefined', () => {
-      testLogger.log(null)
+      testLogger.log(undefined)
       testLogger.log(undefined)
       expect(stdoutChunks.length).toBe(2)
     })

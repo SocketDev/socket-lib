@@ -128,7 +128,7 @@ describe.sequential('cache-with-ttl', () => {
     })
 
     it('should handle null values', async () => {
-      await cache.set('null-key', null)
+      await cache.set('null-key', undefined)
       const value = await cache.get('null-key')
       expect(value).toBe(null)
     })

@@ -21,7 +21,7 @@ import type { SmolVersionsBinding } from './smol/versions'
 const _smolVersions = getSmolVersions()
 
 let _semver: typeof semverType | undefined
-function getSemver() {
+export function getSemver() {
   if (_semver === undefined) {
     _semver = require('./external/semver')
   }
@@ -31,7 +31,7 @@ function getSemver() {
 // Pick the impl for ops that exist on both. The cast is safe because
 // the smol-versions binding is a strict superset of the methods we
 // touch here, with identical semantics for npm.
-function getVersionsImpl(): SmolVersionsBinding | typeof semverType {
+export function getVersionsImpl(): SmolVersionsBinding | typeof semverType {
   return _smolVersions ?? getSemver()
 }
 

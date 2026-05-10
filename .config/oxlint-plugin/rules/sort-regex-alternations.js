@@ -31,7 +31,7 @@ const SOCKET_HOOK_MARKER_RE =
 
 const SIMPLE_ALT_ELEMENT_RE = /^[\w\-:./]+$/
 
-function isLineMarkered(line) {
+export function isLineMarkered(line) {
   const m = line.match(SOCKET_HOOK_MARKER_RE)
   if (!m) {
     return false
@@ -45,7 +45,7 @@ function isLineMarkered(line) {
  * Walks the pattern character by character to handle nested groups +
  * character classes correctly.
  */
-function findAlternationGroups(pattern) {
+export function findAlternationGroups(pattern) {
   const groups = []
   // Stack entries: { start: idx of '(' in original, alts: [{start, end}], altStart: idx }
   const stack = []
@@ -137,15 +137,15 @@ function findAlternationGroups(pattern) {
  * Sort an alternation in alphanumeric order. Returns null if any
  * element isn't a simple literal (caller should report-only).
  */
-function sortAlternativesIfSimple(pattern, group) {
+export function sortAlternativesIfSimple(pattern, group) {
   const alts = group.altsRanges.map(r => pattern.slice(r.start, r.end))
   const allSimple = alts.every(a => SIMPLE_ALT_ELEMENT_RE.test(a))
   if (!allSimple) {
-    return null
+    return undefined
   }
   const sorted = [...alts].sort()
   if (alts.every((a, i) => a === sorted[i])) {
-    return null
+    return undefined
   }
   return { actual: alts, sorted }
 }

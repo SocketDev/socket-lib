@@ -50,7 +50,7 @@ export async function readFileBinary(
   return await fs.promises.readFile(filepath, {
     signal: abortSignal,
     ...opts,
-    encoding: null,
+    encoding: undefined,
   })
 }
 
@@ -82,7 +82,7 @@ export function readFileBinarySync(
   const fs = getNodeFs()
   return fs.readFileSync(filepath, {
     ...opts,
-    encoding: null,
+    encoding: undefined,
   } as ObjectEncodingOptions)
 }
 
@@ -202,7 +202,7 @@ export async function safeReadFile(
   // null-encoding arm fires only when caller passes encoding: null.
   /* c8 ignore next 3 */
   const encoding = shouldReturnBuffer
-    ? null
+    ? undefined
     : normalizeEncoding(readOpts.encoding)
   const fs = getNodeFs()
   try {
@@ -275,7 +275,7 @@ export function safeReadFileSync(
   // null-encoding arm fires only when caller passes encoding: null.
   /* c8 ignore next 3 */
   const encoding = shouldReturnBuffer
-    ? null
+    ? undefined
     : normalizeEncoding(readOpts.encoding)
   const fs = getNodeFs()
   try {

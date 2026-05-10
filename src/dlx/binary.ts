@@ -4,7 +4,6 @@ import process from 'node:process'
 
 import { getArch, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
-import { isDir } from '../fs/inspect'
 import { readJson } from '../fs/read-json'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { httpDownload } from '../http-request/download'
@@ -27,6 +26,7 @@ import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 
 import { StringPrototypeStartsWith } from '../primordials/string'
+import { existsSync } from 'node:fs'
 let _crypto: typeof import('node:crypto') | undefined
 /**
  * Lazily load the crypto module to avoid Webpack errors.
@@ -35,7 +35,7 @@ let _crypto: typeof import('node:crypto') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getCrypto() {
+export function getCrypto() {
   if (_crypto === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -52,7 +52,7 @@ let _fs: typeof import('node:fs') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -70,7 +70,7 @@ let _path: typeof import('node:path') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -248,7 +248,7 @@ export async function cleanDlxCache(
 
     try {
       // eslint-disable-next-line no-await-in-loop
-      if (!(await isDir(entryPath))) {
+      if (!(await existsSync(entryPath))) {
         continue
       }
 
@@ -829,7 +829,7 @@ export async function listDlxCache(): Promise<
     const entryPath = path.join(cacheDir, entry)
     try {
       // eslint-disable-next-line no-await-in-loop
-      if (!(await isDir(entryPath))) {
+      if (!(await existsSync(entryPath))) {
         continue
       }
 

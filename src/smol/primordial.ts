@@ -103,11 +103,11 @@ export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
         _smolPrimordial =
           require('node:smol-primordial') as SmolPrimordialBinding
       } catch {
-        _smolPrimordial = null
+        _smolPrimordial = undefined
       }
       /* c8 ignore stop */
     } else {
-      _smolPrimordial = null
+      _smolPrimordial = undefined
     }
   }
   return _smolPrimordial ?? undefined

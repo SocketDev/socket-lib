@@ -17,7 +17,7 @@ let _fs: typeof import('node:fs') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

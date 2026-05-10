@@ -181,7 +181,7 @@ export async function fetchPackageManifest(
       pacoteOptions,
     )
   }
-  return null
+  return undefined
 }
 
 /**

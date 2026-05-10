@@ -15,7 +15,7 @@ import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create a delayed promise
-function delay(ms: number, value?: unknown): Promise<unknown> {
+export function delay(ms: number, value?: unknown): Promise<unknown> {
   return new Promise(resolve => setTimeout(() => resolve(value), ms))
 }
 

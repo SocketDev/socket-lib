@@ -90,7 +90,7 @@ const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new SetCtor([
 const BINARY_PATH_CACHE_MAX_SIZE = 200
 const binaryPathCache = new MapCtor<string, string>()
 
-function binaryPathCacheSet(key: string, value: string): void {
+export function binaryPathCacheSet(key: string, value: string): void {
   if (binaryPathCache.has(key)) {
     binaryPathCache.delete(key)
   } else if (binaryPathCache.size >= BINARY_PATH_CACHE_MAX_SIZE) {
@@ -247,7 +247,7 @@ export interface DlxPackageResult {
  * @param requestedPackage - Top-level package name (for error messages)
  * @private
  */
-async function checkFirewallPurls(
+export async function checkFirewallPurls(
   arb: InstanceType<typeof Arborist>,
   requestedPackage: string,
 ): Promise<void> {
@@ -328,7 +328,7 @@ async function checkFirewallPurls(
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -345,7 +345,7 @@ function getFs() {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

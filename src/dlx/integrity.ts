@@ -67,7 +67,7 @@ const INTEGRITY_PREFIX = 'sha512-'
 const INTEGRITY_BODY_RE = /^[A-Za-z0-9+/=]+$/
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
-function isIntegrityString(s: string): boolean {
+export function isIntegrityString(s: string): boolean {
   if (!StringPrototypeStartsWith(s, INTEGRITY_PREFIX)) {
     return false
   }
@@ -75,7 +75,7 @@ function isIntegrityString(s: string): boolean {
   return body.length > 0 && INTEGRITY_BODY_RE.test(body)
 }
 
-function isChecksumString(s: string): boolean {
+export function isChecksumString(s: string): boolean {
   return CHECKSUM_RE.test(s)
 }
 

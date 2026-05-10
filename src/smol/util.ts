@@ -138,11 +138,11 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
       try {
         _smolUtil = require('node:smol-util') as SmolUtilBinding
       } catch {
-        _smolUtil = null
+        _smolUtil = undefined
       }
       /* c8 ignore stop */
     } else {
-      _smolUtil = null
+      _smolUtil = undefined
     }
   }
   return _smolUtil ?? undefined

@@ -92,7 +92,7 @@ const PARSE_OPTIONS = {
  *                                (`primordials`, `require('foo')`, etc.).
  */
 
-function buildLineStarts(src) {
+export function buildLineStarts(src) {
   const starts = [0]
   for (let i = 0; i < src.length; i += 1) {
     if (src.charCodeAt(i) === 10) {
@@ -102,7 +102,7 @@ function buildLineStarts(src) {
   return starts
 }
 
-function lineColumnAt(lineStarts, offset) {
+export function lineColumnAt(lineStarts, offset) {
   let lo = 0
   let hi = lineStarts.length - 1
   while (lo < hi) {
@@ -140,7 +140,7 @@ const DEFAULT_PRIMORDIAL_SOURCES = [
  * the canonical source name (e.g. `primordials`, `internal/foo`) for
  * sources we recognize, or `null` for everything else.
  */
-function classifySource(node, primordialSources) {
+export function classifySource(node, primordialSources) {
   if (!node) {
     return undefined
   }
@@ -173,7 +173,7 @@ function classifySource(node, primordialSources) {
 }
 
 /** Pretty-print the source for finding output. */
-function describeSource(node) {
+export function describeSource(node) {
   if (!node) {
     return '<unknown>'
   }

@@ -24,7 +24,7 @@ const logger = getDefaultLogger()
 /**
  * Get all .js files in a directory recursively.
  */
-function getJsFiles(dir, files = []) {
+export function getJsFiles(dir, files = []) {
   const entries = readdirSync(dir, { withFileTypes: true })
 
   for (const entry of entries) {
@@ -43,7 +43,7 @@ function getJsFiles(dir, files = []) {
 /**
  * Check if a module export needs .default or works directly.
  */
-function checkExport(filePath) {
+export function checkExport(filePath) {
   // Skip external packages - they are internal implementation details
   // used by public dist/* modules. We only validate public exports.
   const relativePath = path.relative(distDir, filePath)

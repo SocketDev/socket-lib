@@ -36,6 +36,7 @@ import { extractZip } from '@socketsecurity/lib/archives/zip'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 import { runWithTempDir } from './utils/temp-file-helper'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Test archive fixtures
 let testZipPath: string
@@ -406,7 +407,7 @@ describe('archives', () => {
         expect(file2).toBe('targz-strip-content2')
 
         // Cleanup
-        await fs.unlink(tarGzWithStripPath).catch(() => {})
+        await safeDelete(tarGzWithStripPath).catch(() => {})
       }, 'extractTarGz-strip-')
     })
 

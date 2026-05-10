@@ -74,6 +74,6 @@ describe('schema/parse', () => {
   })
 
   it('propagates TypeError for unsupported schema (not a validation error)', () => {
-    expect(() => parseSchema(null, 'x')).toThrow(TypeError)
+    expect(() => parseSchema(undefined, 'x')).toThrow(TypeError)
   })
 })

@@ -10,7 +10,7 @@ import { getEnvValue } from './rewire'
 /**
  * Package manager type detected from environment.
  */
-export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | null
+export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined
 
 /**
  * Detect which package manager is currently running based on environment variables.
@@ -80,7 +80,7 @@ export function detectPackageManager(): PackageManagerType {
   }
   /* c8 ignore stop */
 
-  return null
+  return undefined
 }
 
 /**
@@ -94,13 +94,15 @@ export function detectPackageManager(): PackageManagerType {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function getPackageManagerInfo(): {
-  name: string
-  version: string
-} | null {
+export function getPackageManagerInfo():
+  | {
+      name: string
+      version: string
+    }
+  | undefined {
   const userAgent = getPackageManagerUserAgent()
   if (!userAgent) {
-    return null
+    return undefined
   }
 
   // Parse "pnpm/8.15.1 npm/? node/v20.11.0 darwin arm64".
@@ -112,7 +114,7 @@ export function getPackageManagerInfo(): {
     }
   }
 
-  return null
+  return undefined
 }
 
 /**

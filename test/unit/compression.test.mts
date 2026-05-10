@@ -43,6 +43,8 @@ import {
   resolveGzipOptions,
   stripExt,
 } from '../../src/compression'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '@socketsecurity/lib/fs'
 
 // Two fixture sizes:
 //   - small: a few hundred bytes — exercises the in-memory path
@@ -65,10 +67,12 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true })
+  await safeDelete(tmpDir)
 })
 
-async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+export async function streamToBuffer(
+  stream: NodeJS.ReadableStream,
+): Promise<Buffer> {
   const chunks: Buffer[] = []
   for await (const chunk of stream) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
@@ -290,7 +294,7 @@ describe.sequential('compression', () => {
 
     it('isGzipCompressed rejects non-Buffer inputs', () => {
       expect(isGzipCompressed('plain' as unknown as Buffer)).toBe(false)
-      expect(isGzipCompressed(null as unknown as Buffer)).toBe(false)
+      expect(isGzipCompressed(undefined as unknown as Buffer)).toBe(false)
     })
 
     it('isBrotliCompressed accepts buffers >= 4 bytes', async () => {
@@ -384,7 +388,7 @@ describe.sequential('compression', () => {
       const brotliPath = `${originalPath}.brotli`
       await fs.writeFile(originalPath, SMALL_TEXT, 'utf8')
       await compressBrotliFile(originalPath, brotliPath)
-      await fs.rm(originalPath)
+      await safeDelete(originalPath)
 
       const restoredPath = await decompressBrotliFile(brotliPath, {
         inPlace: true,

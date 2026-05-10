@@ -39,7 +39,7 @@ const JSONParse = JSON.parse
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-function isBuffer(x: unknown): x is Buffer {
+export function isBuffer(x: unknown): x is Buffer {
   if (!x || typeof x !== 'object') {
     return false
   }
@@ -177,7 +177,10 @@ const DANGEROUS_KEYS = new SetCtor(['__proto__', 'constructor', 'prototype'])
  *
  * @internal
  */
-function prototypePollutionReviver(key: string, value: unknown): unknown {
+export function prototypePollutionReviver(
+  key: string,
+  value: unknown,
+): unknown {
   if (DANGEROUS_KEYS.has(key)) {
     throw new ErrorCtor(
       'JSON contains potentially malicious prototype pollution keys',

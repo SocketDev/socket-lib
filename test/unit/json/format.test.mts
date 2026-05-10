@@ -280,7 +280,10 @@ describe('json-format', () => {
 
     it('should use default indent when null', () => {
       const content = { key: 'value' }
-      const formatting = { indent: null as unknown as number, newline: '\n' }
+      const formatting = {
+        indent: undefined as unknown as number,
+        newline: '\n',
+      }
       const result = stringifyWithFormatting(content, formatting)
       expect(result).toBe('{\n  "key": "value"\n}\n')
     })
@@ -294,7 +297,7 @@ describe('json-format', () => {
 
     it('should use default newline when null', () => {
       const content = { key: 'value' }
-      const formatting = { indent: 2, newline: null as unknown as string }
+      const formatting = { indent: 2, newline: undefined as unknown as string }
       const result = stringifyWithFormatting(content, formatting)
       expect(result).toBe('{\n  "key": "value"\n}\n')
     })
@@ -375,7 +378,7 @@ describe('json-format', () => {
 
     it('should return defaults when indent is null', () => {
       const content = {
-        [INDENT_SYMBOL]: null,
+        [INDENT_SYMBOL]: undefined,
         [NEWLINE_SYMBOL]: '\n',
       } as ContentWithSymbols
       const formatting = getFormattingFromContent(content)
@@ -394,7 +397,7 @@ describe('json-format', () => {
     it('should return defaults when newline is null', () => {
       const content = {
         [INDENT_SYMBOL]: 2,
-        [NEWLINE_SYMBOL]: null,
+        [NEWLINE_SYMBOL]: undefined,
       } as ContentWithSymbols
       const formatting = getFormattingFromContent(content)
       expect(formatting.newline).toBe('\n')

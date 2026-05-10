@@ -320,7 +320,7 @@ describe('path utilities', () => {
 
     it('should handle non-string types', () => {
       // pathLikeToString returns '' for null/undefined, which is relative
-      expect(isRelative(null as any)).toBe(true)
+      expect(isRelative(undefined as any)).toBe(true)
       expect(isRelative(undefined as any)).toBe(true)
     })
   })
@@ -560,7 +560,7 @@ describe('path utilities', () => {
 
     describe('Null and undefined input', () => {
       it('should return empty string for null', () => {
-        expect(pathLikeToString(null)).toBe('')
+        expect(pathLikeToString(undefined)).toBe('')
       })
 
       it('should return empty string for undefined', () => {

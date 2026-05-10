@@ -38,7 +38,7 @@ let _path: typeof import('node:path') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
@@ -50,7 +50,7 @@ function getFs() {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
@@ -239,7 +239,7 @@ export class DlxManifest {
     }
 
     // Write atomically.
-    const content = JSONStringify(data, null, 2)
+    const content = JSONStringify(data, undefined, 2)
     const tempPath = `${this.manifestPath}.tmp`
 
     try {

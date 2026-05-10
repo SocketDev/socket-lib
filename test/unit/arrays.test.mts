@@ -132,7 +132,7 @@ describe('arrays', () => {
     })
 
     it('should return false for non-arrays', () => {
-      expect(isArray(null)).toBe(false)
+      expect(isArray(undefined)).toBe(false)
       expect(isArray(undefined)).toBe(false)
       expect(isArray({})).toBe(false)
       expect(isArray('array')).toBe(false)
@@ -328,9 +328,9 @@ describe('arrays', () => {
     })
 
     it('arrayUnique should handle null and undefined', () => {
-      const arr = [null, undefined, null, undefined, 1, null]
+      const arr = [undefined, undefined, undefined, undefined, 1, undefined]
       const result = arrayUnique(arr)
-      expect(result).toEqual([null, undefined, 1])
+      expect(result).toEqual([undefined, undefined, 1])
     })
 
     it('joinAnd should handle numbers coerced to strings', () => {

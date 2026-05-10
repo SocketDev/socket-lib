@@ -183,8 +183,8 @@ const loadAllowlist = (): AllowlistEntry[] => {
           : blockLines.join('\n').replace(/\n+$/, '')
       ;(current as any)[blockKey] = value
     }
-    blockKey = null
-    blockKind = null
+    blockKey = undefined
+    blockKind = undefined
     blockLines = []
   }
   const indentOf = (line: string): number => {
@@ -333,13 +333,13 @@ const isAllowlisted = (finding: Finding): boolean =>
 // ──────────────────────────────────────────────────────────────────
 
 const SKIP_DIRS = new Set([
+  '.cache',
   '.git',
-  'node_modules',
   'build',
   'dist',
+  'node_modules',
   'out',
   'target',
-  '.cache',
   'upstream',
 ])
 
@@ -426,7 +426,7 @@ const extractPathCalls = (
           continue
         }
         if (ch === inString) {
-          inString = null
+          inString = undefined
         }
       } else {
         if (ch === '"' || ch === "'" || ch === '`') {

@@ -35,7 +35,7 @@ let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
 /**
  * Find the first attestation with valid provenance data.
  */
-function findProvenance(attestations: unknown[]): unknown {
+export function findProvenance(attestations: unknown[]): unknown {
   for (const attestation of attestations) {
     const att = attestation as {
       bundle?: { dsseEnvelope?: { payload?: string } }
@@ -80,7 +80,7 @@ function findProvenance(attestations: unknown[]): unknown {
 /**
  * Extract and filter SLSA provenance attestations from attestation data.
  */
-function getAttestations(attestationData: unknown): unknown[] {
+export function getAttestations(attestationData: unknown): unknown[] {
   const data = attestationData as { attestations?: unknown[] }
   if (!data.attestations || !ArrayIsArray(data.attestations)) {
     return []
@@ -96,7 +96,7 @@ function getAttestations(attestationData: unknown): unknown[] {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-function getFetcher() {
+export function getFetcher() {
   if (_fetcher === undefined) {
     // module is imported at the top
     _fetcher = makeFetchHappen.defaults({
@@ -113,7 +113,7 @@ function getFetcher() {
 /**
  * Check if a value indicates a trusted publisher (GitHub or GitLab).
  */
-function isTrustedPublisher(value: unknown): boolean {
+export function isTrustedPublisher(value: unknown): boolean {
   if (typeof value !== 'string' || !value) {
     return false
   }

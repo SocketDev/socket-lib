@@ -25,7 +25,7 @@ const logger = getDefaultLogger()
 /**
  * Get all .js files and directories in the external directory.
  */
-function getExternalModules(dir) {
+export function getExternalModules(dir) {
   const modules = []
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
@@ -73,7 +73,7 @@ const DEFAULT_ONLY_ALLOWED = new Set([
 /**
  * Check if an external module export is usable without .default.
  */
-function checkExternalExport(filePath) {
+export function checkExternalExport(filePath) {
   const relativePath = path.relative(externalDir, filePath)
   const normalizedPath = normalizePath(relativePath)
 

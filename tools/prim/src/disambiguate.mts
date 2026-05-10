@@ -137,11 +137,11 @@ const CACHE_FILENAME = 'disambiguate.json'
 // a different verdict on the same snippet).
 const CACHE_SCHEMA_VERSION = 1
 
-function cachePath(targetRoot) {
+export function cachePath(targetRoot) {
   return path.join(targetRoot, '.prim-cache', CACHE_FILENAME)
 }
 
-function loadCache(targetRoot) {
+export function loadCache(targetRoot) {
   const filePath = cachePath(targetRoot)
   if (!existsSync(filePath)) {
     return { schema: CACHE_SCHEMA_VERSION, entries: {} }
@@ -159,7 +159,7 @@ function loadCache(targetRoot) {
   }
 }
 
-function saveCache(targetRoot, cache) {
+export function saveCache(targetRoot, cache) {
   const filePath = cachePath(targetRoot)
   mkdirSync(path.dirname(filePath), { recursive: true })
   writeFileSync(filePath, JSON.stringify(cache, null, 2) + '\n')
@@ -172,7 +172,7 @@ function saveCache(targetRoot, cache) {
  * + the receiver identifier so an unrelated edit elsewhere in the
  * file doesn't invalidate the cache.
  */
-function computeKey(methodName, receiverName, snippet) {
+export function computeKey(methodName, receiverName, snippet) {
   const hash = createHash('sha256')
   hash.update('v1\n')
   hash.update(methodName)
@@ -197,7 +197,7 @@ function computeKey(methodName, receiverName, snippet) {
  * true-positive (re.test) gets ~99% accuracy on the cacache→semver
  * shape that motivated this whole subsystem.
  */
-function buildPrompt({
+export function buildPrompt({
   methodName,
   receiverName,
   filePath,
@@ -259,7 +259,7 @@ Examples:
  * Tolerates surrounding chatter — looks for the literal `VERDICT:`
  * and `REASON:` keys.
  */
-function parseResponse(text, candidates) {
+export function parseResponse(text, candidates) {
   const verdictMatch = /^\s*VERDICT:\s*([A-Za-z]+)/m.exec(text)
   const reasonMatch = /^\s*REASON:\s*(.+?)$/m.exec(text)
   if (!verdictMatch) {
@@ -285,7 +285,7 @@ function parseResponse(text, candidates) {
  * Lazily load the SDK only when a real call is needed. Keeps the
  * audit lightweight when AI defer is off (no install, no import).
  */
-async function loadSdk() {
+export async function loadSdk() {
   // The SDK is an optional peer; require it dynamically so the
   // audit/codemod don't pay the import cost when AI defer is off.
   // eslint-disable-next-line no-unsanitized/method

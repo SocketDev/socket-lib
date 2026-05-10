@@ -24,7 +24,7 @@ const isWatch = process.argv.includes('--watch')
 /**
  * Standard build for production
  */
-async function buildJS(): Promise<number> {
+export async function buildJS(): Promise<number> {
   try {
     if (!isQuiet) {
       logger.step('Building JavaScript with esbuild')
@@ -60,7 +60,7 @@ async function buildJS(): Promise<number> {
 /**
  * Watch mode with incremental builds (68% faster rebuilds)
  */
-async function watchJS(): Promise<number> {
+export async function watchJS(): Promise<number> {
   try {
     if (!isQuiet) {
       logger.step('Starting watch mode with incremental builds')

@@ -295,7 +295,7 @@ describe.sequential('fs - Sync Functions', () => {
         string: 'value',
         number: 42,
         boolean: true,
-        null: null,
+        null: undefined,
         array: [1, 2, 3],
         object: { nested: 'value' },
       }

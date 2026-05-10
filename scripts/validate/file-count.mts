@@ -28,7 +28,7 @@ const MAX_FILES_PER_COMMIT = 50
 /**
  * Check if too many files are staged for commit.
  */
-async function validateStagedFileCount() {
+export async function validateStagedFileCount() {
   try {
     // Check if we're in a git repository
     const { stdout: gitRoot } = await execAsync(

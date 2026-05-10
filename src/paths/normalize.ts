@@ -49,7 +49,7 @@ let _url: typeof import('node:url') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getUrl() {
+export function getUrl() {
   if (_url === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -75,7 +75,7 @@ function getUrl() {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-function isPathSeparator(code: number): boolean {
+export function isPathSeparator(code: number): boolean {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH
 }
 
@@ -99,7 +99,7 @@ function isPathSeparator(code: number): boolean {
  */
 /* c8 ignore start - Only called from Windows-only branches. */
 /*@__NO_SIDE_EFFECTS__*/
-function isWindowsDeviceRoot(code: number): boolean {
+export function isWindowsDeviceRoot(code: number): boolean {
   return (
     (code >= CHAR_UPPERCASE_A && code <= CHAR_UPPERCASE_Z) ||
     (code >= CHAR_LOWERCASE_A && code <= CHAR_LOWERCASE_Z)
@@ -108,7 +108,7 @@ function isWindowsDeviceRoot(code: number): boolean {
 /* c8 ignore stop */
 
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
-function msysDriveToNative(normalized: string): string {
+export function msysDriveToNative(normalized: string): string {
   /* c8 ignore start - Windows-only branch. */
   if (WIN32) {
     return normalized.replace(
@@ -163,7 +163,7 @@ function msysDriveToNative(normalized: string): string {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-function relative(from: string, to: string): string {
+export function relative(from: string, to: string): string {
   // Quick return if paths are already identical.
   if (from === to) {
     return ''
@@ -324,7 +324,7 @@ function relative(from: string, to: string): string {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-function resolve(...segments: string[]): string {
+export function resolve(...segments: string[]): string {
   let resolvedPath = ''
   let resolvedAbsolute = false
 

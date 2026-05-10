@@ -24,8 +24,8 @@
 
 const LEGACY_ALIASES = new Set([
   'SOCKET_API_KEY',
-  'SOCKET_SECURITY_API_TOKEN',
   'SOCKET_SECURITY_API_KEY',
+  'SOCKET_SECURITY_API_TOKEN',
 ])
 
 const CANONICAL = 'SOCKET_API_TOKEN'
@@ -124,10 +124,7 @@ const rule = {
         ) {
           return
         }
-        if (
-          obj.object.type !== 'Identifier' ||
-          obj.object.name !== 'process'
-        ) {
+        if (obj.object.type !== 'Identifier' || obj.object.name !== 'process') {
           return
         }
         if (hasBypassComment(node)) {

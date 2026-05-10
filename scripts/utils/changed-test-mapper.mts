@@ -36,7 +36,7 @@ const CORE_FILES = [
  * @param {string} filepath - Path to source file
  * @returns {string[]} Array of test file paths
  */
-function mapSourceToTests(filepath: string): string[] {
+export function mapSourceToTests(filepath: string): string[] {
   const normalized = normalizePath(filepath)
 
   // Skip non-code files

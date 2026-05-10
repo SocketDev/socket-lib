@@ -732,8 +732,8 @@ describe.sequential('github', () => {
                   oid: 'graphql-commit-sha-aaa',
                 },
               },
-              branchRef: null,
-              commit: null,
+              branchRef: undefined,
+              commit: undefined,
             },
           },
         })
@@ -767,8 +767,8 @@ describe.sequential('github', () => {
                   target: { oid: 'annotated-commit-sha-bbb' },
                 },
               },
-              branchRef: null,
-              commit: null,
+              branchRef: undefined,
+              commit: undefined,
             },
           },
         })
@@ -793,9 +793,9 @@ describe.sequential('github', () => {
         .reply(200, {
           data: {
             repository: {
-              tagRef: null,
+              tagRef: undefined,
               branchRef: { target: { oid: 'branch-head-sha-ccc' } },
-              commit: null,
+              commit: undefined,
             },
           },
         })
@@ -867,9 +867,9 @@ describe.sequential('github', () => {
         .reply(200, {
           data: {
             repository: {
-              tagRef: null,
-              branchRef: null,
-              commit: null,
+              tagRef: undefined,
+              branchRef: undefined,
+              commit: undefined,
             },
           },
         })
@@ -898,8 +898,8 @@ describe.sequential('github', () => {
               tagRef: {
                 target: { __typename: 'Commit', oid: 'auth-sha-ddd' },
               },
-              branchRef: null,
-              commit: null,
+              branchRef: undefined,
+              commit: undefined,
             },
           },
         })
@@ -928,7 +928,7 @@ describe.sequential('github', () => {
         aliases: ['CVE-2024-1234'],
         published_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-02T00:00:00Z',
-        withdrawn_at: null,
+        withdrawn_at: undefined,
         references: [{ url: 'https://example.com/advisory' }],
         vulnerabilities: [
           {
@@ -976,7 +976,7 @@ describe.sequential('github', () => {
               severity: 'MODERATE',
               publishedAt: '2024-03-15T00:00:00Z',
               updatedAt: '2024-03-16T00:00:00Z',
-              withdrawnAt: null,
+              withdrawnAt: undefined,
               cvss: { score: 5.3, vectorString: 'CVSS:3.1/AV:N' },
               cwes: {
                 nodes: [
@@ -1074,7 +1074,7 @@ describe.sequential('github', () => {
         .get('/advisories/GHSA-graphql-null-xx')
         .reply(200, '')
         .post('/graphql')
-        .reply(200, { data: { securityAdvisory: null } })
+        .reply(200, { data: { securityAdvisory: undefined } })
 
       await expect(fetchGhsaDetails('GHSA-graphql-null-xx')).rejects.toThrow(
         // The GraphQL "null securityAdvisory" path now wraps in the
@@ -1125,8 +1125,8 @@ describe.sequential('github', () => {
               severity: 'LOW',
               publishedAt: '2024-04-01T00:00:00Z',
               updatedAt: '2024-04-01T00:00:00Z',
-              withdrawnAt: null,
-              cvss: null,
+              withdrawnAt: undefined,
+              cvss: undefined,
               cwes: { nodes: [] },
               references: [],
               vulnerabilities: { nodes: [] },
@@ -1161,10 +1161,10 @@ describe.sequential('github', () => {
         aliases: [],
         published_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
-        withdrawn_at: null,
+        withdrawn_at: undefined,
         references: [],
         vulnerabilities: [],
-        cvss: null,
+        cvss: undefined,
         cwes: [],
       }
 

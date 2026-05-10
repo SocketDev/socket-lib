@@ -31,7 +31,7 @@ const COVERAGE_EMOJI_THRESHOLDS = [
 /**
  * Calculate overall coverage percentage.
  */
-function calculateOverall(
+export function calculateOverall(
   code: FormatCoverageOptions['code'],
   type: FormatCoverageOptions['type'],
 ): string {
@@ -76,7 +76,7 @@ export function formatCoverage(options: FormatCoverageOptions): string {
   const { code, format, type } = opts
 
   if (format === 'json') {
-    return JSONStringify({ code, type }, null, 2)
+    return JSONStringify({ code, type }, undefined, 2)
   }
 
   const overall = calculateOverall(code, type)

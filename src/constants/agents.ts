@@ -18,11 +18,11 @@ export const NPX = 'npx' // # socket-hook: allow npx
 // Shared between NPM_BIN_PATH and NPM_REAL_EXEC_PATH to avoid duplicate which.sync calls.
 const _npmBinPath = /*@__PURE__*/ (() => {
   try {
-    return which.sync('npm', { nothrow: true }) || null
+    return which.sync('npm', { nothrow: true }) || undefined
   } catch {
     /* c8 ignore next - which.sync throw catch; module-init IIFE
        runs once at load time before tests can intercept. */
-    return null
+    return undefined
   }
 })()
 

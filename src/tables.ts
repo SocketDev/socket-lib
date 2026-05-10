@@ -27,14 +27,14 @@ export type TableColumn = {
  * Uses `stringWidth` so multi-cell glyphs (full-width CJK, emoji, combined
  * code points) contribute their actual terminal column count to padding.
  */
-function displayWidth(text: string): number {
+export function displayWidth(text: string): number {
   return stringWidth(text)
 }
 
 /**
  * Pad text to specified width with alignment.
  */
-function padText(
+export function padText(
   text: string,
   width: number,
   align: ColumnAlignment = 'left',

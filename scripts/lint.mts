@@ -45,7 +45,7 @@ const CONFIG_PATTERNS = [
 /**
  * Get oxfmt exclude patterns from .oxfmtrc.json.
  */
-function getOxfmtExcludePatterns(): string[] {
+export function getOxfmtExcludePatterns(): string[] {
   try {
     const oxfmtConfigPath = path.join(process.cwd(), '.oxfmtrc.json')
     if (!existsSync(oxfmtConfigPath)) {
@@ -65,7 +65,7 @@ function getOxfmtExcludePatterns(): string[] {
 /**
  * Check if a file matches any of the exclude patterns.
  */
-function isExcludedByFormatter(
+export function isExcludedByFormatter(
   file: string,
   excludePatterns: string[],
 ): boolean {
@@ -91,7 +91,7 @@ function isExcludedByFormatter(
 /**
  * Check if we should run all linters based on changed files.
  */
-function shouldRunAllLinters(changedFiles: string[]): {
+export function shouldRunAllLinters(changedFiles: string[]): {
   runAll: boolean
   reason?: string
 } {
@@ -115,7 +115,7 @@ function shouldRunAllLinters(changedFiles: string[]): {
 /**
  * Filter files to only those that should be linted.
  */
-function filterLintableFiles(files: string[]): string[] {
+export function filterLintableFiles(files: string[]): string[] {
   // Only include extensions actually supported by oxfmt/oxlint
   const lintableExtensions = new Set([
     '.cjs',
@@ -147,7 +147,7 @@ function filterLintableFiles(files: string[]): string[] {
 /**
  * Run linters on specific files.
  */
-async function runLintOnFiles(
+export async function runLintOnFiles(
   files: string[],
   options: { fix?: boolean; quiet?: boolean } = {},
 ): Promise<number> {
@@ -222,7 +222,7 @@ async function runLintOnFiles(
 /**
  * Run linters on all files.
  */
-async function runLintOnAll(
+export async function runLintOnAll(
   options: { fix?: boolean; quiet?: boolean } = {},
 ): Promise<number> {
   const { fix = false, quiet = false } = options
@@ -284,7 +284,7 @@ interface FilesToLintResult {
   mode: string
 }
 
-async function getFilesToLint(options: {
+export async function getFilesToLint(options: {
   all?: boolean
   changed?: boolean
   staged?: boolean

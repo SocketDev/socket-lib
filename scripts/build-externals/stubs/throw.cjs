@@ -5,7 +5,7 @@
  */
 'use strict'
 
-function throwStub(moduleName) {
+export function throwStub(moduleName) {
   throw new Error(
     `Module '${moduleName}' is stubbed and should not be called. ` +
       'This is likely a bundling error or unexpected code path.',

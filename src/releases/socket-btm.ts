@@ -119,7 +119,7 @@ let _fs: typeof import('node:fs') | undefined
  */
 /* c8 ignore start - Only called from Linux-only detectLibc body. */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

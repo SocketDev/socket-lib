@@ -10,7 +10,7 @@ let _path: typeof import('node:path') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

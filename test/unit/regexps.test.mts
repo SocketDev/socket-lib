@@ -21,7 +21,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { escapeRegExp } from '@socketsecurity/lib/regexps'
 
 /** `new RegExp(escapeRegExp(input))` must match exactly `input`. */
-function expectLiteralRoundtrip(input: string): void {
+export function expectLiteralRoundtrip(input: string): void {
   const re = new RegExp(`^${escapeRegExp(input)}$`)
   expect(re.test(input)).toBe(true)
 }

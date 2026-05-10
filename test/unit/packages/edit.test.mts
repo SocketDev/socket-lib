@@ -1175,7 +1175,7 @@ describe('packages/editable', () => {
           data: { name: 'test', version: '1.0.0' },
         })
 
-        ;(pkg.content as any)[Symbol.for('indent')] = null
+        ;(pkg.content as any)[Symbol.for('indent')] = undefined
 
         await pkg.save()
 
@@ -1191,7 +1191,7 @@ describe('packages/editable', () => {
           data: { name: 'test', version: '1.0.0' },
         })
 
-        ;(pkg.content as any)[Symbol.for('newline')] = null
+        ;(pkg.content as any)[Symbol.for('newline')] = undefined
 
         await pkg.save()
 

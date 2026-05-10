@@ -40,7 +40,7 @@ const OTHER_PUNCTUATORS = new SetCtor(',-=<>#&!%:;@~\'`"')
 // Whitespace: TAB, VT, FF, SP, NBSP, ZWNBSP, plus Unicode Space_Separator.
 // LineTerminator: LF, CR, LS (U+2028), PS (U+2029).
 // Lone surrogates: U+D800..U+DFFF.
-function isSpecHexEscapeCp(cp: number): boolean {
+export function isSpecHexEscapeCp(cp: number): boolean {
   if (OTHER_PUNCTUATORS.has(StringFromCodePoint(cp))) {
     return true
   }
@@ -66,15 +66,15 @@ function isSpecHexEscapeCp(cp: number): boolean {
   return false
 }
 
-function hex2(n: number): string {
+export function hex2(n: number): string {
   return NumberPrototypeToString(n, 16).padStart(2, '0')
 }
 
-function hex4(n: number): string {
+export function hex4(n: number): string {
   return NumberPrototypeToString(n, 16).padStart(4, '0')
 }
 
-function escapeRegExpFallback(str: string): string {
+export function escapeRegExpFallback(str: string): string {
   let out = ''
   // Iterate by code point (String iterator yields UTF-16-safe chars).
   let isFirst = true

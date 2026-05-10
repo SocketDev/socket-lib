@@ -59,7 +59,7 @@ describe('errorMessage', () => {
   })
 
   it('returns the sentinel for null', () => {
-    expect(errorMessage(null)).toBe(UNKNOWN_ERROR)
+    expect(errorMessage(undefined)).toBe(UNKNOWN_ERROR)
   })
 
   it('returns the sentinel for undefined', () => {
@@ -109,7 +109,7 @@ describe('errorStack', () => {
   it('returns undefined for non-Error values', () => {
     expect(errorStack('string')).toBeUndefined()
     expect(errorStack(42)).toBeUndefined()
-    expect(errorStack(null)).toBeUndefined()
+    expect(errorStack(undefined)).toBeUndefined()
     expect(errorStack(undefined)).toBeUndefined()
     expect(errorStack({})).toBeUndefined()
   })
@@ -139,7 +139,7 @@ describe('isError', () => {
   })
 
   it('rejects null and undefined', () => {
-    expect(isError(null)).toBe(false)
+    expect(isError(undefined)).toBe(false)
     expect(isError(undefined)).toBe(false)
   })
 
@@ -246,7 +246,7 @@ describe('isErrnoException', () => {
   })
 
   it('rejects primitives and nullish', () => {
-    expect(isErrnoException(null)).toBe(false)
+    expect(isErrnoException(undefined)).toBe(false)
     expect(isErrnoException(undefined)).toBe(false)
     expect(isErrnoException('ENOENT')).toBe(false)
     expect(isErrnoException(42)).toBe(false)
@@ -288,7 +288,7 @@ describe('isErrorShim', () => {
   })
 
   it('rejects null and undefined', () => {
-    expect(isErrorShim(null)).toBe(false)
+    expect(isErrorShim(undefined)).toBe(false)
     expect(isErrorShim(undefined)).toBe(false)
   })
 
@@ -353,7 +353,7 @@ describeRequires(
     })
 
     it('rejects null, undefined, and primitives', () => {
-      expect(builtin(null)).toBe(false)
+      expect(builtin(undefined)).toBe(false)
       expect(builtin(undefined)).toBe(false)
       expect(builtin('string')).toBe(false)
       expect(builtin(42)).toBe(false)

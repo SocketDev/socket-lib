@@ -35,7 +35,7 @@ vi.mock('../../../src/http-request/download', async importOriginal => {
   }
 })
 
-function sha512OfBuffer(buf: Buffer): string {
+export function sha512OfBuffer(buf: Buffer): string {
   const h = createHash('sha512').update(buf).digest('base64')
   return `sha512-${h}`
 }

@@ -33,7 +33,7 @@ import { JSONParse } from '../primordials/json'
 import { ObjectKeys } from '../primordials/object'
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
   }
@@ -42,7 +42,7 @@ function getFs() {
 
 let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
   }
@@ -117,7 +117,7 @@ export interface SafeReifyOptions extends SafeArboristOptions {
  *   audit: false, fund: false, ignoreScripts: true, save: false,
  *   saveBundle: false, silent: true, progress: false
  */
-function getBaseArboristOptions(installPath: string, quiet: boolean) {
+export function getBaseArboristOptions(installPath: string, quiet: boolean) {
   return {
     __proto__: null,
     path: installPath,
@@ -137,7 +137,7 @@ function getBaseArboristOptions(installPath: string, quiet: boolean) {
  * support one top-level dep per snapshot, which keeps the result
  * unambiguous (no "which of N deps did we pin?").
  */
-function readSingleDependency(packageJsonPath: string): string {
+export function readSingleDependency(packageJsonPath: string): string {
   const fs = getFs()
   const raw = fs.readFileSync(packageJsonPath, 'utf8')
   const pkg = JSONParse(raw) as {
@@ -158,7 +158,7 @@ function readSingleDependency(packageJsonPath: string): string {
  * Arborist's `Inventory` extends `Map`, so iteration yields `[key, node]`
  * pairs — use `.values()` to get nodes directly.
  */
-function readTopLevelFromIdealTree(
+export function readTopLevelFromIdealTree(
   tree: unknown,
   targetName: string,
 ): {

@@ -125,7 +125,7 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
  *
  * @returns {import('esbuild').Plugin}
  */
-function createForceNodeModulesPlugin() {
+export function createForceNodeModulesPlugin() {
   /**
    * Packages that must be resolved from node_modules to prevent circular dependencies.
    *
@@ -243,7 +243,7 @@ function createForceNodeModulesPlugin() {
  * Create esbuild plugin to stub modules using files from stubs/ directory.
  * stubMap keys are regex patterns; values are stub filenames.
  */
-function createStubPlugin(
+export function createStubPlugin(
   stubMap: Record<string, string | [RegExp, string]> = STUB_MAP,
 ) {
   // Pre-compile regex patterns and load stub contents

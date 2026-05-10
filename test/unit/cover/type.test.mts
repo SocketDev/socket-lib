@@ -32,7 +32,7 @@ describe('cover/type', () => {
     it('parses successful spawn output', async () => {
       vi.mocked(spawn).mockResolvedValueOnce({
         code: 0,
-        signal: null,
+        signal: undefined,
         stdout: Buffer.from('1234 / 5678 21.74%'),
         stderr: Buffer.from(''),
       } as any)
@@ -43,7 +43,7 @@ describe('cover/type', () => {
     it('parses output with leading whitespace and other text', async () => {
       vi.mocked(spawn).mockResolvedValueOnce({
         code: 0,
-        signal: null,
+        signal: undefined,
         stdout: Buffer.from('some files\n  500 / 1000 50.00%\nsome more text'),
         stderr: Buffer.from(''),
       } as any)
@@ -54,7 +54,7 @@ describe('cover/type', () => {
     it('returns null when output is unparseable', async () => {
       vi.mocked(spawn).mockResolvedValueOnce({
         code: 0,
-        signal: null,
+        signal: undefined,
         stdout: Buffer.from('no metrics here'),
         stderr: Buffer.from(''),
       } as any)
@@ -65,7 +65,7 @@ describe('cover/type', () => {
     it('returns null when spawn output is empty', async () => {
       vi.mocked(spawn).mockResolvedValueOnce({
         code: 0,
-        signal: null,
+        signal: undefined,
         stdout: undefined,
         stderr: Buffer.from(''),
       } as any)
@@ -104,7 +104,7 @@ describe('cover/type', () => {
     it('uses process.cwd() when no cwd provided', async () => {
       vi.mocked(spawn).mockResolvedValueOnce({
         code: 0,
-        signal: null,
+        signal: undefined,
         stdout: Buffer.from('1 / 1 100.00%'),
         stderr: Buffer.from(''),
       } as any)
@@ -116,7 +116,7 @@ describe('cover/type', () => {
     it('passes --detail to type-coverage', async () => {
       vi.mocked(spawn).mockResolvedValueOnce({
         code: 0,
-        signal: null,
+        signal: undefined,
         stdout: Buffer.from('100 / 200 50.00%'),
         stderr: Buffer.from(''),
       } as any)

@@ -35,7 +35,7 @@ const TAG_NETWORK = '[network]'
 type TestFn = () => void | Promise<void>
 type SuiteFn = () => void
 
-function tagged(name: string, tag: string): string {
+export function tagged(name: string, tag: string): string {
   return `${tag} ${name}`
 }
 

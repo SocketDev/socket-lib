@@ -27,7 +27,7 @@ const distExternalDir = path.join(rootDir, 'dist', 'external')
  * @param {boolean} options.quiet - Suppress individual package output
  * @returns {Promise<{bundledCount: number, totalSize: number}>}
  */
-async function bundleAllPackages(options = {}) {
+export async function bundleAllPackages(options = {}) {
   const { quiet = false } = options
   let bundledCount = 0
   let totalSize = 0
@@ -220,7 +220,7 @@ export async function buildExternals(options = {}) {
  * @param {object} options - Options
  * @param {boolean} options.quiet - Suppress output
  */
-async function fixNodeGypStrings(dir, options = {}) {
+export async function fixNodeGypStrings(dir, options = {}) {
   const { quiet = false } = options
 
   // Find all .js files in dist/external

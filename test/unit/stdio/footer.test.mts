@@ -22,7 +22,7 @@ import {
 // therefore compute startTime from `Date.now()` on the fly so the
 // resulting elapsed value is bounded — they assert the duration string
 // shape, not an exact second count tied to a frozen clock.
-function startTimeForDuration(seconds: number): number {
+export function startTimeForDuration(seconds: number): number {
   return Date.now() - seconds * 1000
 }
 

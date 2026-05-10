@@ -18,14 +18,14 @@ import {
 import { describe, expect, it } from 'vitest'
 
 // Helper to create async iterable from array
-async function* asyncIterable<T>(items: T[]): AsyncIterable<T> {
+export async function* asyncIterable<T>(items: T[]): AsyncIterable<T> {
   for (const item of items) {
     yield item
   }
 }
 
 // Helper to collect async iterable into array
-async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
+export async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
   const results: T[] = []
   for await (const item of iterable) {
     results.push(item)
@@ -428,7 +428,7 @@ describe('streams', () => {
     })
 
     it('should handle null-like values in data', async () => {
-      const input = [null, undefined, 0, '', false]
+      const input = [undefined, undefined, 0, '', false]
       const result = parallelMap(input, async x => String(x))
       const output = await collect(result)
       expect(output).toEqual(['null', 'undefined', '0', '', 'false'])

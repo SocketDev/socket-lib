@@ -150,7 +150,7 @@ describe('signal-exit', () => {
     })
 
     it('should throw TypeError for non-function callback', () => {
-      expect(() => onExit(null as any)).toThrow(TypeError)
+      expect(() => onExit(undefined as any)).toThrow(TypeError)
       expect(() => onExit(undefined as any)).toThrow(TypeError)
       expect(() => onExit(42 as any)).toThrow(TypeError)
       expect(() => onExit('string' as any)).toThrow(TypeError)

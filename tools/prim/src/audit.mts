@@ -61,13 +61,13 @@ const JS_EXTENSIONS = new Set(['.cjs', '.js', '.jsx', '.mjs'])
 // runtime code, so they can never contain a primordial call site.
 // `path.extname` returns just `.ts` for `foo.d.ts`, so we have to
 // match against the basename's secondary suffix.
-function isDeclarationFile(absPath) {
+export function isDeclarationFile(absPath) {
   const base = path.basename(absPath)
   return /\.d\.[mc]?ts$/.test(base)
 }
 
 /** Returns true if the file's extension is one we walk. */
-function isSourceFile(absPath) {
+export function isSourceFile(absPath) {
   if (isDeclarationFile(absPath)) {
     return false
   }
@@ -91,7 +91,7 @@ const PARSE_OPTIONS = {
  * compute line/column from `node.start` (a 0-based byte offset)
  * ourselves.
  */
-function lineColumnAt(lineStarts, offset) {
+export function lineColumnAt(lineStarts, offset) {
   // Binary search for the largest lineStarts entry ≤ offset.
   let lo = 0
   let hi = lineStarts.length - 1
@@ -109,7 +109,7 @@ function lineColumnAt(lineStarts, offset) {
   }
 }
 
-function buildLineStarts(src) {
+export function buildLineStarts(src) {
   const starts = [0]
   for (let i = 0; i < src.length; i += 1) {
     if (src.charCodeAt(i) === 10) {

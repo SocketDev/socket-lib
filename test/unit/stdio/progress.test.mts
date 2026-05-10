@@ -15,7 +15,7 @@ import {
   createProgressIndicator,
 } from '@socketsecurity/lib/stdio/progress'
 
-function createMockStream(isTTY = true): NodeJS.WriteStream {
+export function createMockStream(isTTY = true): NodeJS.WriteStream {
   const writes: string[] = []
   return {
     isTTY,

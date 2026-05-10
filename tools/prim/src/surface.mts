@@ -90,7 +90,7 @@ const NODE_PRIMORDIAL_NAMESPACES = [
  * `ArrayPrototypeMap` aren't directly assigned in the source (they're
  * installed by reflection), so name-only regex parsing misses them.
  */
-function deriveNodeBootstrapSurface() {
+export function deriveNodeBootstrapSurface() {
   const exports = new Set()
 
   for (const ns of NODE_PRIMORDIAL_NAMESPACES) {
@@ -176,14 +176,14 @@ function deriveNodeBootstrapSurface() {
   return exports
 }
 
-function capitalize(s) {
+export function capitalize(s) {
   if (!s) {
     return s
   }
   return s[0].toUpperCase() + s.slice(1)
 }
 
-function parseExports(sourcePath) {
+export function parseExports(sourcePath) {
   // Post-split layout: `sourcePath` may be a directory of leaves
   // (`primordials/`). Concatenate every leaf so the regex passes below
   // see the same shape as the legacy single-file path. Track which
@@ -219,16 +219,22 @@ function parseExports(sourcePath) {
       // This is intentionally narrower than parseExports below — we
       // only need to know "which leaf does Foo live in", not the
       // nullable info or per_context heuristics.
-      for (const m of leafContent.matchAll(/^export const ([A-Z][a-zA-Z0-9]+)/gm)) {
+      for (const m of leafContent.matchAll(
+        /^export const ([A-Z][a-zA-Z0-9]+)/gm,
+      )) {
         exportToLeaf.set(m[1], leafName)
       }
-      for (const m of leafContent.matchAll(/^export function ([A-Z][a-zA-Z0-9]+)/gm)) {
+      for (const m of leafContent.matchAll(
+        /^export function ([A-Z][a-zA-Z0-9]+)/gm,
+      )) {
         exportToLeaf.set(m[1], leafName)
       }
       // Also capture lower-case helpers (`uncurryThis`, `applyBind`,
       // `applySafe`, `bindCall`, `weakRefSafe`) since the codemod
       // emits these for the bundle transform.
-      for (const m of leafContent.matchAll(/^export const ([a-z][a-zA-Z0-9]+)/gm)) {
+      for (const m of leafContent.matchAll(
+        /^export const ([a-z][a-zA-Z0-9]+)/gm,
+      )) {
         exportToLeaf.set(m[1], leafName)
       }
       parts.push(leafContent)

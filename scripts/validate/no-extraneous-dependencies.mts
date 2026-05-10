@@ -43,7 +43,7 @@ const BUILTIN_MODULES = new Set([
 /**
  * Parse JavaScript code into AST
  */
-function parseCode(code, filePath) {
+export function parseCode(code, filePath) {
   try {
     return parse(code, {
       allowImportExportEverywhere: true,
@@ -58,7 +58,7 @@ function parseCode(code, filePath) {
 /**
  * Extract all require() specifiers from a file using Babel AST
  */
-async function extractRequireSpecifiers(filePath) {
+export async function extractRequireSpecifiers(filePath) {
   const content = await fs.readFile(filePath, 'utf8')
   const ast = parseCode(content, filePath)
   const specifiers = []
@@ -90,14 +90,14 @@ async function extractRequireSpecifiers(filePath) {
 /**
  * Check if a specifier is a bare specifier (package name, not relative path)
  */
-function isBareSpecifier(specifier) {
+export function isBareSpecifier(specifier) {
   return !specifier.startsWith('.') && !specifier.startsWith('/')
 }
 
 /**
  * Get package name from a bare specifier (strip subpaths)
  */
-function getPackageName(specifier) {
+export function getPackageName(specifier) {
   // Scoped package: @scope/package or @scope/package/subpath
   if (specifier.startsWith('@')) {
     const parts = specifier.split('/')
@@ -115,7 +115,7 @@ function getPackageName(specifier) {
 /**
  * Check if a relative require path resolves to an existing file
  */
-function checkFileExists(specifier, fromFile) {
+export function checkFileExists(specifier, fromFile) {
   const fromDir = path.dirname(fromFile)
   const extensions = ['', '.js', '.mjs', '.cjs', '.json', '.node']
 
@@ -147,7 +147,7 @@ function checkFileExists(specifier, fromFile) {
 /**
  * Find all JavaScript files in dist directory recursively
  */
-async function findDistFiles(distPath) {
+export async function findDistFiles(distPath) {
   const files = []
 
   try {
@@ -178,7 +178,7 @@ async function findDistFiles(distPath) {
 /**
  * Read and parse package.json
  */
-async function readPackageJson() {
+export async function readPackageJson() {
   const packageJsonPath = path.join(rootPath, 'package.json')
   const content = await fs.readFile(packageJsonPath, 'utf8')
   return JSON.parse(content)
@@ -187,7 +187,7 @@ async function readPackageJson() {
 /**
  * Validate require() calls in dist/ files
  */
-async function validateNoExtraneousDependencies() {
+export async function validateNoExtraneousDependencies() {
   const pkg = await readPackageJson()
 
   const dependencies = new Set(Object.keys(pkg.dependencies || {}))

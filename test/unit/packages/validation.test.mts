@@ -70,7 +70,7 @@ describe('packages/validation', () => {
     })
 
     it('should return false for non-string values', () => {
-      expect(isBlessedPackageName(null)).toBe(false)
+      expect(isBlessedPackageName(undefined)).toBe(false)
       expect(isBlessedPackageName(undefined)).toBe(false)
       expect(isBlessedPackageName(123)).toBe(false)
       expect(isBlessedPackageName({})).toBe(false)
@@ -310,7 +310,7 @@ describe('packages/validation', () => {
 
   describe('edge cases', () => {
     it('should handle null and undefined for isBlessedPackageName', () => {
-      expect(isBlessedPackageName(null)).toBe(false)
+      expect(isBlessedPackageName(undefined)).toBe(false)
       expect(isBlessedPackageName(undefined)).toBe(false)
     })
 

@@ -374,7 +374,7 @@ describe('tables', () => {
     })
 
     it('should handle null values', () => {
-      const data = [{ value: null }]
+      const data = [{ value: undefined }]
       const columns = [{ key: 'value', header: 'Value' }]
 
       const result = formatTable(data, columns)

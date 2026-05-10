@@ -217,7 +217,9 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
         return createMockHttpResponse(Buffer.from(''), true, 200)
       }
       return createMockHttpResponse(
-        Buffer.from(JSONStringify({ data: { repository: { release: null } } })),
+        Buffer.from(
+          JSONStringify({ data: { repository: { release: undefined } } }),
+        ),
         true,
         200,
       )

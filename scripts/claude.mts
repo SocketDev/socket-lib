@@ -23,6 +23,8 @@ import colors from 'yoctocolors-cjs'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import { parseArgs } from './utils/parse-args.mts'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '@socketsecurity/lib/fs'
 
 const logger = getDefaultLogger()
 
@@ -4792,7 +4794,7 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
 
           // Clean up temp file
           try {
-            await fs.unlink(tmpFile)
+            await safeDelete(tmpFile)
           } catch {}
 
           if (exitCode !== 0) {
@@ -5112,7 +5114,7 @@ Fix the issue by making necessary file changes. Be direct, don't ask questions.`
 
                 // Clean up temp file
                 try {
-                  await fs.unlink(tmpFile)
+                  await safeDelete(tmpFile)
                 } catch {}
 
                 if (exitCode !== 0) {
@@ -5238,7 +5240,7 @@ Fix the issue by making necessary file changes. Be direct, don't ask questions.`
 /**
  * Continuous monitoring mode - watches for changes and auto-fixes issues.
  */
-async function runWatchMode(claudeCmd, options = {}) {
+export async function runWatchMode(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Watch Mode - Continuous Monitoring')
 
@@ -5389,7 +5391,7 @@ async function runWatchMode(claudeCmd, options = {}) {
 /**
  * Show available Claude operations.
  */
-function showOperations() {
+export function showOperations() {
   logger.log('\nCore operations:')
   logger.log('  --commit       Create commits with Claude assistance')
   logger.log(

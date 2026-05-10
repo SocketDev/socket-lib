@@ -21,7 +21,7 @@
 
 const SCRIPT_ENTRY_NAMES = new Set(['main'])
 
-function declVisibility(node) {
+export function declVisibility(node) {
   // ExportNamedDeclaration wrapping a FunctionDeclaration.
   if (
     node.type === 'ExportNamedDeclaration' &&
@@ -67,8 +67,8 @@ const rule = {
     return {
       Program(programNode) {
         let lastVisibilityRank = -1
-        let lastNameInGroup = null
-        let currentVisibility = null
+        let lastNameInGroup = undefined
+        let currentVisibility = undefined
 
         for (const node of programNode.body) {
           const info = declVisibility(node)

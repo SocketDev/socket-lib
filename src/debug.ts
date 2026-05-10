@@ -55,7 +55,7 @@ let pointingTriangle: string | undefined
    set at the right module-load timing. Tests use the SOCKET_DEBUG
    path which writes via logger.info directly. */
 /*@__NO_SIDE_EFFECTS__*/
-function customLog(...args: unknown[]) {
+export function customLog(...args: unknown[]) {
   const util = getUtil()
   const inspectOpts = debugJs.inspectOpts
     ? {
@@ -82,7 +82,7 @@ function customLog(...args: unknown[]) {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
+export function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
   return namespaces !== null && typeof namespaces === 'object'
     ? ({ __proto__: null, ...namespaces } as DebugOptions)
     : ({ __proto__: null, namespaces } as DebugOptions)
@@ -93,7 +93,7 @@ function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getCallerInfo(stackOffset: number = 3): string {
+export function getCallerInfo(stackOffset: number = 3): string {
   let name = ''
   const captureStackTrace = Error.captureStackTrace
   // V8 always exposes captureStackTrace; non-function branch fires only
@@ -149,7 +149,7 @@ function getCallerInfo(stackOffset: number = 3): string {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getDebugJsInstance(namespace: string) {
+export function getDebugJsInstance(namespace: string) {
   let inst = debugByNamespace.get(namespace)
   // Per-namespace cache hit; first-call always misses. Same-namespace
   // hit fires only when isEnabled() reuses the cached probe.
@@ -177,7 +177,7 @@ function getDebugJsInstance(namespace: string) {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getUtil() {
+export function getUtil() {
   if (_util === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -191,7 +191,7 @@ function getUtil() {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function isEnabled(namespaces: string | undefined) {
+export function isEnabled(namespaces: string | undefined) {
   // Check if debugging is enabled at all
   if (!getSocketDebug()) {
     return false
@@ -368,7 +368,7 @@ export function debugDirNs(
           debugOpts.showHidden === null ? undefined : debugOpts.showHidden,
         depth:
           debugOpts.depth === null || typeof debugOpts.depth === 'boolean'
-            ? null
+            ? undefined
             : debugOpts.depth,
       } as InspectOptions
     }

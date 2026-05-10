@@ -28,6 +28,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { itWindowsOnly } from '../utils/skip-helpers'
 import { mockHomeDir, runWithTempDir } from '../utils/temp-file-helper'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '@socketsecurity/lib/fs'
 
 // Test server setup
 let httpServer: http.Server
@@ -475,7 +477,7 @@ describe.sequential('dlx-binary', () => {
             .substring(0, 16)
           const cachePath = getDlxCachePath()
           const metaPath = path.join(cachePath, cacheKey, '.dlx-metadata.json')
-          await fs.unlink(metaPath)
+          await safeDelete(metaPath)
 
           // Second call should re-download due to missing metadata
           const result = await dlxBinary(['--version'], {
@@ -1174,7 +1176,7 @@ describe.sequential('dlx-binary', () => {
           await fs.writeFile(binaryPath, '', 'utf8')
 
           // Delete binary to cause stat failure.
-          await fs.unlink(binaryPath)
+          await safeDelete(binaryPath)
 
           const list = await listDlxCache()
           // Should skip entry that fails to stat

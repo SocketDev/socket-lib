@@ -4,6 +4,9 @@
  */
 
 import { repeatString } from '../strings/format'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
 
 export interface DividerOptions {
   /**
@@ -89,7 +92,7 @@ export const dividers = {
  * ```
  */
 export function printDivider(options?: DividerOptions): void {
-  console.log(divider(options))
+  logger.log(divider(options))
 }
 
 /**

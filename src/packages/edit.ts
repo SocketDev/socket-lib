@@ -138,7 +138,7 @@ let _EditablePackageJsonClass: EditablePackageJsonConstructor | undefined
 
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -153,7 +153,7 @@ let _path: typeof import('node:path') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -164,7 +164,7 @@ function getPath() {
 
 let _util: typeof import('node:util') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getUtil() {
+export function getUtil() {
   if (_util === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -539,7 +539,7 @@ export async function toEditablePackageJson(
             ...normalizeOptions,
           })
         : pkgJson,
-      null,
+      undefined,
       2,
     )}\n`,
   )
@@ -579,7 +579,7 @@ export function toEditablePackageJsonSync(
             ...normalizeOptions,
           })
         : pkgJson,
-      null,
+      undefined,
       2,
     )}\n`,
   )

@@ -36,6 +36,7 @@ import {
   resolveSocketLibPrimordials,
   type PrimordialsCheckConfig,
 } from '../../../src/checks/primordials'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 let tmpDir: string
 
@@ -44,17 +45,17 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true })
+  await safeDelete(tmpDir)
 })
 
-function writeFile(rel: string, content: string): string {
+export function writeFile(rel: string, content: string): string {
   const full = path.join(tmpDir, rel)
   mkdirSync(path.dirname(full), { recursive: true })
   writeFileSync(full, content, 'utf8')
   return full
 }
 
-function makeConfig(
+export function makeConfig(
   overrides: Partial<PrimordialsCheckConfig>,
 ): PrimordialsCheckConfig {
   return {

@@ -148,9 +148,9 @@ describe('memoization', () => {
 
       // null and undefined produce distinct cache keys so each argument
       // gets its own cached value (prevents stale/cross-contaminated results).
-      expect(memoized(null)).toBe('null')
+      expect(memoized(undefined)).toBe('null')
       expect(memoized(undefined)).toBe('undefined')
-      expect(memoized(null)).toBe('null')
+      expect(memoized(undefined)).toBe('null')
       expect(fn).toHaveBeenCalledTimes(2)
     })
 
@@ -477,7 +477,7 @@ describe('memoization', () => {
       expect(fn).toHaveBeenCalledTimes(1)
 
       // Clear reference (in real scenario, GC would collect)
-      obj = null
+      obj = undefined
 
       // Create new object
       const obj2 = { x: 5 }
@@ -522,7 +522,7 @@ describe('memoization', () => {
     })
 
     it('should work with null and undefined', () => {
-      const fn1 = vi.fn(() => null)
+      const fn1 = vi.fn(() => undefined)
       const once1 = once(fn1)
 
       expect(once1()).toBe(null)

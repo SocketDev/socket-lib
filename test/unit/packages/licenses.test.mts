@@ -284,7 +284,7 @@ describe('packages/licenses', () => {
     it('should handle null in license nodes array', () => {
       const nodes = [
         { license: 'MIT', inFile: undefined },
-        null as any,
+        undefined as any,
         { license: 'Apache-2.0', inFile: undefined },
       ]
       const result = collectIncompatibleLicenses(nodes)

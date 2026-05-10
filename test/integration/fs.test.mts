@@ -44,7 +44,7 @@ describe('fs integration', () => {
               value: 'test',
             },
           },
-          nullValue: null,
+          nullValue: undefined,
           boolValue: true,
         }
 

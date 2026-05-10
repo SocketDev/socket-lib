@@ -28,7 +28,7 @@ import { getDefaultLogger } from '../../src/logger/default'
 
 const logger = getDefaultLogger()
 
-function makeMockSpinner() {
+export function makeMockSpinner() {
   return {
     isSpinning: false,
     start: vi.fn(),

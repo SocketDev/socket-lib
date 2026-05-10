@@ -26,7 +26,7 @@ type PackageExports = Record<
 
 type Row = { subpath: string; file: string; summary: string }
 
-function extractSummary(srcPath: string): string {
+export function extractSummary(srcPath: string): string {
   let content: string
   try {
     content = readFileSync(srcPath, 'utf8')
@@ -61,7 +61,7 @@ function extractSummary(srcPath: string): string {
   return trimmed.length > 220 ? `${trimmed.slice(0, 217)}...` : trimmed
 }
 
-function buildRows(exports: PackageExports): Row[] {
+export function buildRows(exports: PackageExports): Row[] {
   const rows: Row[] = []
   for (const [subpath, value] of Object.entries(exports)) {
     if (subpath === '.' || subpath === './index' || subpath.endsWith('.json')) {
@@ -88,7 +88,7 @@ function buildRows(exports: PackageExports): Row[] {
   return rows
 }
 
-function groupRows(rows: Row[]): Map<string, Row[]> {
+export function groupRows(rows: Row[]): Map<string, Row[]> {
   const groups = new Map<string, Row[]>()
   for (const row of rows) {
     const key = row.subpath.includes('/')
@@ -101,7 +101,7 @@ function groupRows(rows: Row[]): Map<string, Row[]> {
   return groups
 }
 
-function renderMarkdown(groups: Map<string, Row[]>): string {
+export function renderMarkdown(groups: Map<string, Row[]>): string {
   const keys = [...groups.keys()].sort((a, b) => {
     if (a === 'Top-level') {
       return -1

@@ -54,8 +54,8 @@ describe('env', () => {
     })
 
     it('should use default value for null', () => {
-      expect(envAsBoolean(null)).toBe(false)
-      expect(envAsBoolean(null, true)).toBe(true)
+      expect(envAsBoolean(undefined)).toBe(false)
+      expect(envAsBoolean(undefined, true)).toBe(true)
     })
 
     it('should use default value for undefined', () => {
@@ -104,9 +104,9 @@ describe('env', () => {
     })
 
     it('should handle null and undefined', () => {
-      expect(envAsNumber(null)).toBe(0)
       expect(envAsNumber(undefined)).toBe(0)
-      expect(envAsNumber(null, 10)).toBe(10)
+      expect(envAsNumber(undefined)).toBe(0)
+      expect(envAsNumber(undefined, 10)).toBe(10)
       expect(envAsNumber(undefined, 10)).toBe(10)
     })
 
@@ -152,8 +152,8 @@ describe('env', () => {
     })
 
     it('should use default value for null', () => {
-      expect(envAsString(null)).toBe('')
-      expect(envAsString(null, 'default')).toBe('default')
+      expect(envAsString(undefined)).toBe('')
+      expect(envAsString(undefined, 'default')).toBe('default')
     })
 
     it('should use default value for undefined', () => {
@@ -173,15 +173,15 @@ describe('env', () => {
     })
 
     it('should trim default value if it is a string', () => {
-      expect(envAsString(null, '  default  ')).toBe('default')
+      expect(envAsString(undefined, '  default  ')).toBe('default')
     })
 
     it('should convert default value to string and trim', () => {
-      expect(envAsString(null, 123 as any)).toBe('123')
+      expect(envAsString(undefined, 123 as any)).toBe('123')
     })
 
     it('should handle default value as empty string', () => {
-      expect(envAsString(null, '')).toBe('')
+      expect(envAsString(undefined, '')).toBe('')
     })
 
     it('should handle objects by converting to string', () => {

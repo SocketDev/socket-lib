@@ -59,7 +59,7 @@ let _fs: typeof import('node:fs') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
   }
@@ -72,7 +72,7 @@ let _path: typeof import('node:path') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
   }

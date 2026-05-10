@@ -169,7 +169,7 @@ const REWRITABLE_EXTENSIONS = new Set([
 ])
 const TS_EXTENSIONS = new Set(['.cts', '.mts', '.ts', '.tsx'])
 
-function* walkDir(
+export function* walkDir(
   dir,
   skipDirs = ['external', 'node_modules', '.cache'],
   skipFiles = [
@@ -205,7 +205,7 @@ function* walkDir(
  * methods (.test, .then, etc.) calls into the locked-down Claude SDK.
  * Sync codepath when `aiDisambiguate` is false — same behavior as before.
  */
-async function rewriteFile({
+export async function rewriteFile({
   absPath,
   aiDisambiguate,
   apply,
@@ -645,7 +645,7 @@ async function rewriteFile({
  * known end of the last argument, so we're scanning within the
  * remaining `<ws>* (,)? <ws>* )` slice.
  */
-function findClosingParen(src: string, from: number): number {
+export function findClosingParen(src: string, from: number): number {
   let i = from
   while (i < src.length) {
     const c = src.charCodeAt(i)
@@ -704,7 +704,7 @@ function findClosingParen(src: string, from: number): number {
  * Returns the (possibly repaired) end of `node` so parents can fold it
  * into their own computation.
  */
-function repairEndPositions(node) {
+export function repairEndPositions(node) {
   if (!node || typeof node !== 'object') {
     return 0
   }
@@ -772,7 +772,7 @@ function repairEndPositions(node) {
  * gives the char index that byte starts. Bytes inside a multi-byte
  * codepoint share the char index of the codepoint's lead byte.
  */
-function buildByteToCharMap(src: string): number[] | undefined {
+export function buildByteToCharMap(src: string): number[] | undefined {
   // Scan: any code unit ≥ 0x80 implies a multi-byte UTF-8 representation.
   let hasNonAscii = false
   for (let i = 0; i < src.length; i++) {
@@ -823,7 +823,7 @@ function buildByteToCharMap(src: string): number[] | undefined {
  * structured visitors that we want to share with codemod. This walker
  * visits every node depth-first.
  */
-function walkAst(node, visit) {
+export function walkAst(node, visit) {
   if (!node || typeof node !== 'object') {
     return
   }
@@ -847,7 +847,7 @@ function walkAst(node, visit) {
 /**
  * Escape a string for use inside a regex character class / pattern.
  */
-function escapeRegex(s) {
+export function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
@@ -864,7 +864,7 @@ function escapeRegex(s) {
  * Returns the rewritten source and a boolean indicating whether anything
  * was added/changed (vs already-present-and-complete).
  */
-function ensureImports(src, identifiers, importStyle) {
+export function ensureImports(src, identifiers, importStyle) {
   const { kind, specifier } = importStyle
   const aliasPrefix: string = importStyle.aliasPrefix ?? ''
   // Render one identifier as a destructure entry: `Foo` if no alias,
@@ -937,7 +937,7 @@ function ensureImports(src, identifiers, importStyle) {
  * callers prepend BELOW the `@fileoverview` block instead of clobbering
  * it.
  */
-function findInsertionPoint(src) {
+export function findInsertionPoint(src) {
   // ESM: `import ... from '...'`.
   const importRe = /^import\s.+?from\s+['"][^'"]+['"]\s*;?\s*$/gm
   // CJS: `const|let|var ... = require('...')`. We don't try to handle

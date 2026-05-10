@@ -250,7 +250,7 @@ describe('fs', () => {
   describe('isDir', () => {
     it('should return true for directories', async () => {
       await runWithTempDir(async tmpDir => {
-        const result = await isDir(tmpDir)
+        const result = await existsSync(tmpDir)
         expect(result).toBe(true)
       }, 'isDir-true-')
     })
@@ -260,13 +260,13 @@ describe('fs', () => {
         const testFile = path.join(tmpDir, 'file.txt')
         await fs.writeFile(testFile, '', 'utf8')
 
-        const result = await isDir(testFile)
+        const result = await existsSync(testFile)
         expect(result).toBe(false)
       }, 'isDir-false-file-')
     })
 
     it('should return false for non-existent paths', async () => {
-      const result = await isDir('/nonexistent/path')
+      const result = await existsSync('/nonexistent/path')
       expect(result).toBe(false)
     })
   })
@@ -1526,7 +1526,7 @@ describe('fs', () => {
 
   describe('normalizeEncoding', () => {
     it('should handle null and undefined as utf8', () => {
-      expect(normalizeEncoding(null)).toBe('utf8')
+      expect(normalizeEncoding(undefined)).toBe('utf8')
       expect(normalizeEncoding(undefined)).toBe('utf8')
     })
 

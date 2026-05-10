@@ -23,7 +23,7 @@ let _async_hooks: typeof import('node:async_hooks') | undefined
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getAsyncHooks() {
+export function getAsyncHooks() {
   if (_async_hooks === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

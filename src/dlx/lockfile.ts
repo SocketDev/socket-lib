@@ -30,7 +30,7 @@ import {
 } from '../primordials/string'
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
   }
@@ -39,7 +39,7 @@ function getFs() {
 
 let _path: typeof import('node:path') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
   }
@@ -132,7 +132,7 @@ export class DlxLockfileError extends Error {
  * Extract the package name from a spec like `'name@range'` or
  * `'@scope/name@range'` or a bare `'name'`.
  */
-function specName(spec: string): string {
+export function specName(spec: string): string {
   const atIdx = StringPrototypeLastIndexOf(spec, '@')
   if (atIdx <= 0) {
     return spec
@@ -143,7 +143,7 @@ function specName(spec: string): string {
 /**
  * Extract the version range (or `'latest'`) from a spec.
  */
-function specRange(spec: string): string {
+export function specRange(spec: string): string {
   const atIdx = StringPrototypeLastIndexOf(spec, '@')
   if (atIdx <= 0) {
     return 'latest'
@@ -213,7 +213,7 @@ export async function generatePackagePin(
         private: true,
         dependencies: { [specName(spec)]: specRange(spec) },
       },
-      null,
+      undefined,
       2,
     )
     await fs.promises.writeFile(

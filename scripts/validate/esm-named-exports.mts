@@ -25,7 +25,7 @@ const logger = getDefaultLogger()
 /**
  * Get all .js files in a directory recursively.
  */
-function getJsFiles(dir, files = []) {
+export function getJsFiles(dir, files = []) {
   const entries = readdirSync(dir, { withFileTypes: true })
 
   for (const entry of entries) {
@@ -46,7 +46,7 @@ function getJsFiles(dir, files = []) {
  * Good: module.exports = { foo, bar, baz }
  * Bad: module.exports = value or module.exports.default = value
  */
-function checkEsmNamedExports(filePath) {
+export function checkEsmNamedExports(filePath) {
   // Skip external packages - they are bundled dependencies
   const relativePath = path.relative(distDir, filePath)
   const normalizedPath = normalizePath(relativePath)

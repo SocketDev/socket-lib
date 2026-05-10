@@ -19,7 +19,7 @@ const suppressedWarnings = new SetCtor<string>()
  * Internal function to set up warning suppression.
  * Only wraps process.emitWarning once, regardless of how many times it's called.
  */
-function setupSuppression(): void {
+export function setupSuppression(): void {
   // Only wrap once - store the original on first call.
   // First-call init only fires once per process; subsequent calls
   // hit the second-call no-op branch.

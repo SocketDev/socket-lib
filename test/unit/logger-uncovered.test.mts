@@ -37,7 +37,10 @@ class CaptureStream extends Writable {
   }
 }
 
-function makeLogger(opts?: { stdoutTTY?: boolean; stderrTTY?: boolean }) {
+export function makeLogger(opts?: {
+  stdoutTTY?: boolean
+  stderrTTY?: boolean
+}) {
   const stdout = new CaptureStream({ isTTY: opts?.stdoutTTY ?? false })
   const stderr = new CaptureStream({ isTTY: opts?.stderrTTY ?? false })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

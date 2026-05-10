@@ -38,12 +38,15 @@ const NODE_JS_EXTENSIONS = new SetCtor(['.js', '.mjs', '.cjs'] as const)
 const PACKAGE_JSON_PATH_CACHE_MAX_SIZE = 200
 const PACKAGE_JSON_NEGATIVE_TTL_MS = 10_000
 type PackageJsonPathEntry = {
-  path: string | null
+  path: string | undefined
   at: number
 }
 const packageJsonPathCache = new MapCtor<string, PackageJsonPathEntry>()
 
-function packageJsonPathCacheSet(key: string, value: string | null): void {
+export function packageJsonPathCacheSet(
+  key: string,
+  value: string | undefined,
+): void {
   if (packageJsonPathCache.has(key)) {
     packageJsonPathCache.delete(key)
   } else if (packageJsonPathCache.size >= PACKAGE_JSON_PATH_CACHE_MAX_SIZE) {
@@ -59,7 +62,7 @@ function packageJsonPathCacheSet(key: string, value: string | null): void {
 // content is not served if the file is modified or replaced.
 type PackageJsonCacheEntry = {
   mtimeMs: number
-  content: object | null
+  content: object | undefined
 }
 const packageJsonContentCache = new MapCtor<string, PackageJsonCacheEntry>()
 
@@ -80,7 +83,7 @@ export interface ExecutableDetectionResult {
  * @returns Path to package.json if found, undefined otherwise
  * @private
  */
-function findPackageJson(filePath: string): string | undefined {
+export function findPackageJson(filePath: string): string | undefined {
   const fs = getFs()
   const path = getPath()
 
@@ -92,7 +95,7 @@ function findPackageJson(filePath: string): string | undefined {
     // Negative entries expire after a short TTL so a directory that later
     // gains a package.json (npm install in a sibling workspace, etc.) is
     // re-probed instead of permanently stuck on the cached "not found".
-    if (cached.path === null) {
+    if (cached.path === undefined) {
       if (DateNow() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {
         return undefined
       }
@@ -122,7 +125,7 @@ function findPackageJson(filePath: string): string | undefined {
   }
 
   // Cache the negative result.
-  packageJsonPathCacheSet(startDir, null)
+  packageJsonPathCacheSet(startDir, undefined)
   return undefined
 }
 
@@ -131,7 +134,7 @@ function findPackageJson(filePath: string): string | undefined {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     _fs = /*@__PURE__*/ require('node:fs')
   }
@@ -143,7 +146,7 @@ function getFs() {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     _path = /*@__PURE__*/ require('node:path')
   }
@@ -158,7 +161,7 @@ function getPath() {
  * @returns Parsed package.json or null if invalid
  * @private
  */
-function readPackageJson(packageJsonPath: string): object | null {
+export function readPackageJson(packageJsonPath: string): object | undefined {
   const fs = getFs()
 
   let mtimeMs = 0
@@ -166,7 +169,7 @@ function readPackageJson(packageJsonPath: string): object | null {
     mtimeMs = fs.statSync(packageJsonPath).mtimeMs
   } catch {
     packageJsonContentCache.delete(packageJsonPath)
-    return null
+    return undefined
   }
 
   const cached = packageJsonContentCache.get(packageJsonPath)
@@ -179,8 +182,11 @@ function readPackageJson(packageJsonPath: string): object | null {
     packageJsonContentCache.set(packageJsonPath, { mtimeMs, content })
     return content
   } catch {
-    packageJsonContentCache.set(packageJsonPath, { mtimeMs, content: null })
-    return null
+    packageJsonContentCache.set(packageJsonPath, {
+      mtimeMs,
+      content: undefined,
+    })
+    return undefined
   }
 }
 

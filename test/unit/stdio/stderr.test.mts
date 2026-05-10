@@ -540,12 +540,15 @@ describe('stdio/stderr', () => {
 
     it('should handle null-like terminal dimensions', () => {
       Object.defineProperty(stderr, 'columns', {
-        value: null,
+        value: undefined,
         configurable: true,
       })
       expect(getColumns()).toBe(80)
 
-      Object.defineProperty(stderr, 'rows', { value: null, configurable: true })
+      Object.defineProperty(stderr, 'rows', {
+        value: undefined,
+        configurable: true,
+      })
       expect(getRows()).toBe(24)
     })
 

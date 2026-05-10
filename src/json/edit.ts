@@ -39,7 +39,7 @@ let _EditableJsonClass: EditableJsonConstructor | undefined
 
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
     _fs = /*@__PURE__*/ require('node:fs')
@@ -51,7 +51,7 @@ function getFs() {
  * Parse JSON content and extract formatting metadata.
  * @private
  */
-function parseJson(content: string): unknown {
+export function parseJson(content: string): unknown {
   return JSONParse(content)
 }
 
@@ -59,7 +59,7 @@ function parseJson(content: string): unknown {
  * Read file content from disk with retry logic for ENOENT errors.
  * @private
  */
-async function readFile(filepath: string): Promise<string> {
+export async function readFile(filepath: string): Promise<string> {
   const { promises: fsPromises } = getFs()
 
   // Retry on ENOENT. Windows-only retry-count and delay; tested on
@@ -98,7 +98,7 @@ async function readFile(filepath: string): Promise<string> {
  * Windows can have transient file locking issues with temp directories.
  * @private
  */
-async function retryWrite(
+export async function retryWrite(
   filepath: string,
   content: string,
   retries = 3,

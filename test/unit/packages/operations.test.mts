@@ -730,7 +730,7 @@ describe('packages/operations', () => {
     })
 
     it('should handle resolvePackageName with null values', () => {
-      const purlObj = { name: 'package', namespace: null as any }
+      const purlObj = { name: 'package', namespace: undefined as any }
       const result = resolvePackageName(purlObj)
       expect(result).toBe('package')
     })

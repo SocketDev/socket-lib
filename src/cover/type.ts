@@ -18,7 +18,7 @@ import { NumberParseInt } from '../primordials/number'
  */
 export async function getTypeCoverage(
   options?: GetTypeCoverageOptions | undefined,
-): Promise<TypeCoverageResult | null> {
+): Promise<TypeCoverageResult | undefined> {
   const opts = {
     __proto__: null,
     cwd: process.cwd(),
@@ -44,7 +44,7 @@ export async function getTypeCoverage(
     const match = /(\d+) \/ (\d+) ([\d.]+)%/.exec(outputText)
 
     if (!match || !match[1] || !match[2] || !match[3]) {
-      return null
+      return undefined
     }
 
     return {
@@ -60,6 +60,6 @@ export async function getTypeCoverage(
       )
     }
     // If not generating, return null when type-coverage isn't available.
-    return null
+    return undefined
   }
 }

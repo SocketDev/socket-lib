@@ -18,7 +18,7 @@ export type ThemeChangeListener = (theme: Theme) => void
  * Emit theme change event to listeners.
  * @private
  */
-function emitThemeChange(theme: Theme): void {
+export function emitThemeChange(theme: Theme): void {
   for (const listener of listeners) {
     listener(theme)
   }
@@ -29,7 +29,7 @@ function emitThemeChange(theme: Theme): void {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getAsyncHooks() {
+export function getAsyncHooks() {
   if (_async_hooks === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

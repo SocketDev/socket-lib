@@ -10,7 +10,7 @@ let _path: typeof import('node:path') | undefined
  * Get the path module.
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -25,7 +25,7 @@ function getPath() {
  * classify the same regardless of the host we're running on.
  */
 /*@__NO_SIDE_EFFECTS__*/
-function isPackageJsonFile(filepath: string): boolean {
+export function isPackageJsonFile(filepath: string): boolean {
   return (
     filepath === 'package.json' ||
     StringPrototypeEndsWith(filepath, '/package.json') ||

@@ -507,7 +507,7 @@ interface ResolvedFileArgs {
  * flag. Validates that the explicit destPath is not the same as
  * srcPath, since same-path streams would deadlock on read.
  */
-function resolveFileArgs(
+export function resolveFileArgs(
   fnName: string,
   srcPath: string,
   destOrOptions: string | CompressFileOptions | undefined,

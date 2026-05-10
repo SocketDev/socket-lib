@@ -58,7 +58,7 @@ interface ParsedArgs {
   readonly help: boolean
 }
 
-function parseArgs(argv: readonly string[]): ParsedArgs {
+export function parseArgs(argv: readonly string[]): ParsedArgs {
   const { values } = parseLibArgs({
     args: argv,
     strict: false,
@@ -91,7 +91,7 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
  * none exist, so the caller's "config file not found" error message
  * names the canonical default.
  */
-function resolveConfigPath(explicit: string | undefined): string {
+export function resolveConfigPath(explicit: string | undefined): string {
   if (explicit !== undefined) {
     return explicit
   }
@@ -103,7 +103,7 @@ function resolveConfigPath(explicit: string | undefined): string {
   return FALLBACK_CONFIG_PATHS[0]!
 }
 
-function printHelp(): void {
+export function printHelp(): void {
   logger.log('socket-lib check primordials — primordials drift check')
   logger.log('')
   logger.log('Usage:')
@@ -142,7 +142,7 @@ interface RawConfig {
   socketLibPrimordialsPath?: unknown
 }
 
-function loadConfig(configPath: string): PrimordialsCheckConfig {
+export function loadConfig(configPath: string): PrimordialsCheckConfig {
   if (!existsSync(configPath)) {
     throw new Error(`config file not found: ${configPath}`)
   }
@@ -222,7 +222,7 @@ interface SerializedFinding {
   hint: string
 }
 
-function serialize(result: PrimordialsCheckResult): {
+export function serialize(result: PrimordialsCheckResult): {
   ok: boolean
   used: number
   findings: SerializedFinding[]
@@ -239,7 +239,10 @@ function serialize(result: PrimordialsCheckResult): {
   }
 }
 
-function renderHuman(result: PrimordialsCheckResult, args: ParsedArgs): void {
+export function renderHuman(
+  result: PrimordialsCheckResult,
+  args: ParsedArgs,
+): void {
   if (result.findings.length === 0) {
     if (!args.silent) {
       logger.success(

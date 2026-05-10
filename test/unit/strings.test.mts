@@ -132,7 +132,7 @@ describe('strings', () => {
     })
 
     it('should return false for non-strings', () => {
-      expect(isBlankString(null)).toBe(false)
+      expect(isBlankString(undefined)).toBe(false)
       expect(isBlankString(undefined)).toBe(false)
       expect(isBlankString(123)).toBe(false)
       expect(isBlankString({})).toBe(false)
@@ -151,7 +151,7 @@ describe('strings', () => {
     })
 
     it('should return false for non-strings', () => {
-      expect(isNonEmptyString(null)).toBe(false)
+      expect(isNonEmptyString(undefined)).toBe(false)
       expect(isNonEmptyString(undefined)).toBe(false)
       expect(isNonEmptyString(123)).toBe(false)
       expect(isNonEmptyString([])).toBe(false)
@@ -271,7 +271,7 @@ describe('strings', () => {
     })
 
     it('should return 0 for non-string input', () => {
-      expect(stringWidth(null as any)).toBe(0)
+      expect(stringWidth(undefined as any)).toBe(0)
       expect(stringWidth(undefined as any)).toBe(0)
       expect(stringWidth(123 as any)).toBe(0)
     })
@@ -557,7 +557,7 @@ describe('strings', () => {
     describe('stringWidth edge cases', () => {
       it('should return 0 for non-string input', () => {
         // Tests line 546-547: typeof check and !text.length
-        expect(stringWidth(null as unknown as string)).toBe(0)
+        expect(stringWidth(undefined as unknown as string)).toBe(0)
         expect(stringWidth(undefined as unknown as string)).toBe(0)
         // @ts-expect-error - Testing runtime behavior with invalid argument type
         expect(stringWidth(123)).toBe(0)
@@ -688,7 +688,7 @@ describe('strings', () => {
       })
 
       it('should handle non-string types', () => {
-        expect(isBlankString(null)).toBe(false)
+        expect(isBlankString(undefined)).toBe(false)
         expect(isBlankString(undefined)).toBe(false)
         expect(isBlankString(123)).toBe(false)
         expect(isBlankString({})).toBe(false)
@@ -813,7 +813,7 @@ describe('strings', () => {
 
     describe('stringWidth edge case coverage', () => {
       it('should handle non-string input', () => {
-        expect(stringWidth(null as any)).toBe(0)
+        expect(stringWidth(undefined as any)).toBe(0)
         expect(stringWidth(undefined as any)).toBe(0)
         expect(stringWidth(123 as any)).toBe(0)
       })
@@ -907,7 +907,7 @@ describe('strings', () => {
       })
 
       it('should return false for non-strings', () => {
-        expect(isNonEmptyString(null)).toBe(false)
+        expect(isNonEmptyString(undefined)).toBe(false)
         expect(isNonEmptyString(undefined)).toBe(false)
         expect(isNonEmptyString(123)).toBe(false)
         expect(isNonEmptyString([])).toBe(false)

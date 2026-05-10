@@ -27,6 +27,10 @@ import { whichReal, whichRealSync } from '../../src/bin/which'
 import { isError } from '@socketsecurity/lib/errors'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { safeDelete } from '@socketsecurity/lib/fs'
+
+const logger = getDefaultLogger()
 
 describe('bin', () => {
   describe('isShadowBinPath', () => {
@@ -231,7 +235,7 @@ describe('bin', () => {
             (e.message.includes('EPERM') ||
               e.message.includes('operation not permitted'))
           ) {
-            console.log('Skipping symlink test - not supported')
+            logger.log('Skipping symlink test - not supported')
           } else {
             throw e
           }
@@ -1436,7 +1440,7 @@ echo "test"
         expect(result1.code).toBe(0)
 
         // Delete the binary
-        await fs.unlink(binPath)
+        await safeDelete(binPath)
 
         // Second call should fail because binary no longer exists
         await expect(execBin(binPath, [])).rejects.toThrow()

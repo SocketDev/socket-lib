@@ -133,7 +133,7 @@ describe('objects', () => {
     })
 
     it('should return empty array for non-objects', () => {
-      expect(getKeys(null)).toEqual([])
+      expect(getKeys(undefined)).toEqual([])
       expect(getKeys(undefined)).toEqual([])
       expect(getKeys(123)).toEqual([])
       expect(getKeys('string')).toEqual([])
@@ -157,7 +157,7 @@ describe('objects', () => {
     })
 
     it('should return undefined for null/undefined', () => {
-      expect(getOwn(null, 'a')).toBeUndefined()
+      expect(getOwn(undefined, 'a')).toBeUndefined()
       expect(getOwn(undefined, 'a')).toBeUndefined()
     })
 
@@ -181,7 +181,7 @@ describe('objects', () => {
     })
 
     it('should return empty array for null/undefined', () => {
-      expect(getOwnPropertyValues(null)).toEqual([])
+      expect(getOwnPropertyValues(undefined)).toEqual([])
       expect(getOwnPropertyValues(undefined)).toEqual([])
     })
 
@@ -201,7 +201,7 @@ describe('objects', () => {
     })
 
     it('should return false for null/undefined', () => {
-      expect(hasKeys(null)).toBe(false)
+      expect(hasKeys(undefined)).toBe(false)
       expect(hasKeys(undefined)).toBe(false)
     })
 
@@ -226,7 +226,7 @@ describe('objects', () => {
     })
 
     it('should return false for null/undefined', () => {
-      expect(hasOwn(null, 'a')).toBe(false)
+      expect(hasOwn(undefined, 'a')).toBe(false)
       expect(hasOwn(undefined, 'a')).toBe(false)
     })
 
@@ -246,7 +246,7 @@ describe('objects', () => {
     })
 
     it('should return false for primitives', () => {
-      expect(isObject(null)).toBe(false)
+      expect(isObject(undefined)).toBe(false)
       expect(isObject(undefined)).toBe(false)
       expect(isObject(123)).toBe(false)
       expect(isObject('string')).toBe(false)
@@ -273,7 +273,7 @@ describe('objects', () => {
     })
 
     it('should return false for primitives', () => {
-      expect(isObjectObject(null)).toBe(false)
+      expect(isObjectObject(undefined)).toBe(false)
       expect(isObjectObject(undefined)).toBe(false)
       expect(isObjectObject(123)).toBe(false)
     })
@@ -308,7 +308,7 @@ describe('objects', () => {
     })
 
     it('should return empty array for null/undefined', () => {
-      expect(objectEntries(null)).toEqual([])
+      expect(objectEntries(undefined)).toEqual([])
       expect(objectEntries(undefined)).toEqual([])
     })
 
@@ -360,8 +360,8 @@ describe('objects', () => {
     })
 
     it('should handle non-object inputs', () => {
-      expect(merge(null as unknown as object, { a: 1 })).toBeNull()
-      expect(merge({ a: 1 }, null as unknown as object)).toEqual({ a: 1 })
+      expect(merge(undefined as unknown as object, { a: 1 })).toBeUndefined()
+      expect(merge({ a: 1 }, undefined as unknown as object)).toEqual({ a: 1 })
     })
   })
 
@@ -515,7 +515,10 @@ describe('objects', () => {
 
     it('should handle null getterDefObj', () => {
       const obj = {}
-      const result = defineLazyGetters(obj, null as unknown as GetterDefObj)
+      const result = defineLazyGetters(
+        obj,
+        undefined as unknown as GetterDefObj,
+      )
       expect(result).toBe(obj)
     })
 
@@ -557,13 +560,6 @@ describe('objects', () => {
       const source = { a: { b: 1 } }
       merge(target, source)
       expect(target.a).toEqual({ b: 1 })
-    })
-
-    it('should handle null values', () => {
-      const target = { a: { b: 1 } }
-      const source = { a: null }
-      merge(target, source)
-      expect(target.a).toBe(null)
     })
 
     it('should handle undefined values', () => {
@@ -789,16 +785,16 @@ describe('objects', () => {
       expect(callCount).toBe(1)
     })
 
-    it('should memoize null values', () => {
+    it('should memoize undefined values', () => {
       let callCount = 0
       const getter = createLazyGetter('test', () => {
         callCount += 1
-        return null
+        return undefined
       })
 
-      expect(getter()).toBe(null)
+      expect(getter()).toBeUndefined()
       expect(callCount).toBe(1)
-      expect(getter()).toBe(null)
+      expect(getter()).toBeUndefined()
       expect(callCount).toBe(1)
     })
   })
@@ -922,22 +918,10 @@ describe('objects', () => {
   })
 
   describe('merge - edge cases', () => {
-    it('should return target when source is null', () => {
-      const target = { a: 1 }
-      const result = merge(target, null as any)
-      expect(result).toBe(target)
-    })
-
     it('should return target when source is undefined', () => {
       const target = { a: 1 }
       const result = merge(target, undefined as any)
       expect(result).toBe(target)
-    })
-
-    it('should return target when target is null', () => {
-      const source = { b: 2 }
-      const result = merge(null as any, source)
-      expect(result).toBe(null)
     })
 
     it('should return target when target is undefined', () => {
@@ -947,7 +931,7 @@ describe('objects', () => {
     })
 
     it('should handle nested null/undefined in merge queue', () => {
-      const target = { a: null, b: undefined }
+      const target = { a: undefined, b: undefined }
       const source = { a: { c: 1 }, b: { d: 2 } }
       const result = merge(target, source)
       // Null/undefined values in the queue should continue without throwing

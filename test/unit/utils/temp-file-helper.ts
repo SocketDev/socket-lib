@@ -11,6 +11,7 @@ import process from 'node:process'
 import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 /**
  * Mock the home directory for cross-platform testing.
@@ -147,7 +148,7 @@ export async function withTempFile(
 
   const cleanup = async () => {
     try {
-      await fs.unlink(tempFile)
+      await safeDelete(tempFile)
     } catch {
       // Ignore cleanup errors.
     }

@@ -39,7 +39,7 @@ const allExternalPackages = [
  * @param {string} filePath - The path to the file being processed
  * @returns {string} The relative path prefix (e.g., './' or '../')
  */
-function getExternalPathPrefix(filePath) {
+export function getExternalPathPrefix(filePath) {
   const dir = path.dirname(filePath)
   const relativePath = path.relative(dir, distExternalDir)
   // Normalize to forward slashes and ensure it starts with ./ or ../
@@ -54,7 +54,7 @@ function getExternalPathPrefix(filePath) {
  * @param {boolean} verbose - Show individual file fixes
  * @returns {Promise<boolean>} True if file was modified
  */
-async function fixFileImports(filePath, verbose = false) {
+export async function fixFileImports(filePath, verbose = false) {
   let content = await fs.readFile(filePath, 'utf8')
   let modified = false
 
@@ -100,7 +100,7 @@ async function fixFileImports(filePath, verbose = false) {
  * @param {boolean} verbose - Show individual file fixes
  * @returns {Promise<number>} Number of files fixed
  */
-async function processDirectory(dir, verbose = false) {
+export async function processDirectory(dir, verbose = false) {
   let fixedCount = 0
 
   try {
@@ -133,7 +133,7 @@ async function processDirectory(dir, verbose = false) {
   return fixedCount
 }
 
-async function fixExternalImports() {
+export async function fixExternalImports() {
   const verbose = process.argv.includes('--verbose')
   const quiet = isQuiet()
 

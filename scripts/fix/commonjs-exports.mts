@@ -23,7 +23,7 @@ const distDir = path.resolve(__dirname, '..', '..', 'dist')
  * Process files in a directory and fix CommonJS exports.
  * Handles files with `export default` by transforming __toCommonJS patterns.
  */
-async function processDirectory(
+export async function processDirectory(
   dir: string,
   verbose: boolean = false,
 ): Promise<number> {
@@ -219,7 +219,7 @@ async function processDirectory(
   return fixedCount
 }
 
-async function fixConstantExports() {
+export async function fixConstantExports() {
   const verbose = process.argv.includes('--verbose')
   const quiet = isQuiet()
 

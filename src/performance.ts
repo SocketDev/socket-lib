@@ -31,7 +31,7 @@ const performanceMetrics: PerformanceMetrics[] = []
 /**
  * Check if performance tracking is enabled.
  */
-function isPerfEnabled(): boolean {
+export function isPerfEnabled(): boolean {
   return process.env['DEBUG']?.includes('perf') || false
 }
 

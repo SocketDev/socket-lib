@@ -50,13 +50,13 @@ const ESCALATION_PATTERNS = [
   /^lockstep\.schema\.json$/,
 ]
 
-function log(msg: string): void {
+export function log(msg: string): void {
   if (!quiet) {
     logger.log(msg)
   }
 }
 
-function gitFiles(command: string): string[] {
+export function gitFiles(command: string): string[] {
   try {
     const out = execSync(command, {
       encoding: 'utf8',
@@ -71,15 +71,15 @@ function gitFiles(command: string): string[] {
   }
 }
 
-function getStagedFiles(): string[] {
+export function getStagedFiles(): string[] {
   return gitFiles('git diff --cached --name-only --diff-filter=ACMR')
 }
 
-function getModifiedFiles(): string[] {
+export function getModifiedFiles(): string[] {
   return gitFiles('git diff --name-only --diff-filter=ACMR HEAD')
 }
 
-function shouldEscalate(files: string[]): boolean {
+export function shouldEscalate(files: string[]): boolean {
   for (const f of files) {
     for (const pattern of ESCALATION_PATTERNS) {
       if (pattern.test(f)) {
@@ -98,7 +98,7 @@ function shouldEscalate(files: string[]): boolean {
  *   - single repo:    src/... → test
  * Adapt to your repo's layout if different.
  */
-function resolveTestPatterns(files: string[]): string[] {
+export function resolveTestPatterns(files: string[]): string[] {
   const patterns = new Set<string>()
   for (const f of files) {
     // Test file itself.
@@ -122,7 +122,7 @@ function resolveTestPatterns(files: string[]): string[] {
   return [...patterns]
 }
 
-function runAll(): number {
+export function runAll(): number {
   log('Test scope: all')
   try {
     execSync('pnpm exec vitest run', { stdio })
@@ -134,7 +134,7 @@ function runAll(): number {
   }
 }
 
-function runPatterns(patterns: string[]): number {
+export function runPatterns(patterns: string[]): number {
   if (patterns.length === 0) {
     log('No tests to run; skipping.')
     return 0

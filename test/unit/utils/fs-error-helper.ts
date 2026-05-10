@@ -69,7 +69,11 @@ export interface FsAsyncErrorSpec {
   once?: boolean
 }
 
-function makeErrnoError(code: FsErrorCode, op: string, path: string): Error {
+export function makeErrnoError(
+  code: FsErrorCode,
+  op: string,
+  path: string,
+): Error {
   const e = new Error(
     `${code}: simulated ${op} failure on ${path}`,
   ) as Error & {

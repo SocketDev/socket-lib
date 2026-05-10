@@ -27,7 +27,7 @@ let _path: typeof import('node:path') | undefined
 /**
  * Calculate coverage metric with percentage.
  */
-function calculateMetric(data: {
+export function calculateMetric(data: {
   covered: number
   total: number
 }): CoverageMetric {
@@ -46,7 +46,7 @@ function calculateMetric(data: {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getFs() {
+export function getFs() {
   if (_fs === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
@@ -60,7 +60,7 @@ function getFs() {
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
-function getPath() {
+export function getPath() {
   if (_path === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 

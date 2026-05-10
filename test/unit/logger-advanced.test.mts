@@ -113,7 +113,7 @@ describe.sequential('Logger - Advanced Features', () => {
     it('should handle falsy values', () => {
       logger.assert(0, 'Zero is falsy')
       logger.assert('', 'Empty string is falsy')
-      logger.assert(null, 'Null is falsy')
+      logger.assert(undefined, 'Null is falsy')
       expect(stderrData.length).toBeGreaterThan(0)
     })
   })

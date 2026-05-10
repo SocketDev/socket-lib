@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { runCheckPrimordials } from '../../../src/bin/check-primordials'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Absolute path to socket-lib's own primordials source. Each test
 // runs in its own tmpDir for config files, but the primordials engine
@@ -36,7 +37,7 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true })
+  await safeDelete(tmpDir)
 })
 
 describe('runCheckPrimordials', () => {
@@ -278,7 +279,7 @@ describe('runCheckPrimordials', () => {
           scanDirs: [],
           // Mix valid strings with invalid types — filter strips non-strings.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeInternalOnly: ['ValidName', 42, null, 'AnotherValid'] as any,
+          nodeInternalOnly: ['ValidName', 42, undefined, 'AnotherValid'] as any,
           socketLibPrimordialsPath: SOCKET_LIB_PRIMORDIALS,
         },
       }),

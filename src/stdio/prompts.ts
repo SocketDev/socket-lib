@@ -115,7 +115,7 @@ export type Separator = SeparatorType
  * Handles both named colors and RGB tuples.
  * @private
  */
-function applyColor(text: string, color: ColorValue): string {
+export function applyColor(text: string, color: ColorValue): string {
   if (typeof color === 'string') {
     // Named color like 'green', 'red', etc.
     return (yoctocolorsCjs as any)[color](text)
@@ -131,7 +131,7 @@ function applyColor(text: string, color: ColorValue): string {
  * @param value - Value to check
  * @returns True if value is a Socket Theme
  */
-function isSocketTheme(value: unknown): value is Theme {
+export function isSocketTheme(value: unknown): value is Theme {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -145,7 +145,7 @@ function isSocketTheme(value: unknown): value is Theme {
  * @param theme - Theme name or object
  * @returns Resolved Theme
  */
-function resolveTheme(theme: Theme | ThemeName): Theme {
+export function resolveTheme(theme: Theme | ThemeName): Theme {
   return typeof theme === 'string' ? (THEMES[theme] ?? THEMES.socket) : theme
 }
 

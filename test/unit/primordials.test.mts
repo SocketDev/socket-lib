@@ -731,7 +731,7 @@ describe('primordials', () => {
 
     it('FunctionPrototypeBind returns a bound function', () => {
       const add = (a: number, b: number): number => a + b
-      const add3 = FunctionPrototypeBind(add as never, null, 3) as (
+      const add3 = FunctionPrototypeBind(add as never, undefined, 3) as (
         b: number,
       ) => number
       expect(add3(4)).toBe(7)
@@ -913,7 +913,7 @@ describe('primordials', () => {
   describe('Object (static)', () => {
     it('Assign / Create / DefineProperty / DefineProperties', () => {
       expect(ObjectAssign({}, { a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 })
-      const nullProto = ObjectCreate(null)
+      const nullProto = ObjectCreate(undefined)
       expect(Object.getPrototypeOf(nullProto)).toBe(null)
       const obj: Record<string, number> = {}
       ObjectDefineProperty(obj, 'x', { value: 42, enumerable: true })
@@ -996,7 +996,7 @@ describe('primordials', () => {
       expect(ObjectPrototypeToString([])).toBe('[object Array]')
       expect(ObjectPrototypeToString(new Error())).toBe('[object Error]')
       expect(ObjectPrototypeToString(/re/)).toBe('[object RegExp]')
-      expect(ObjectPrototypeToString(null)).toBe('[object Null]')
+      expect(ObjectPrototypeToString(undefined)).toBe('[object Null]')
       expect(ObjectPrototypeToString(undefined)).toBe('[object Undefined]')
     })
 
@@ -1085,7 +1085,7 @@ describe('primordials', () => {
       const proto = { foo: 1 }
       const obj = ObjectCreate(proto)
       expect(ReflectGetPrototypeOf(obj)).toBe(proto)
-      ReflectSetPrototypeOf(obj, null)
+      ReflectSetPrototypeOf(obj, undefined)
       expect(ReflectGetPrototypeOf(obj)).toBe(null)
     })
 
@@ -1414,7 +1414,7 @@ describe('primordials', () => {
       expect(wrap(42)).toBeUndefined()
       expect(wrap('hello')).toBeUndefined()
       expect(wrap(true)).toBeUndefined()
-      expect(wrap(null)).toBeUndefined()
+      expect(wrap(undefined)).toBeUndefined()
       expect(wrap(undefined)).toBeUndefined()
     })
 

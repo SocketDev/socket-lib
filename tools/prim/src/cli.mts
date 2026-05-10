@@ -369,7 +369,7 @@ const PRIMORDIALS_FILE_EXTS = ['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts']
  * assume any primordials.* found is unrelated (avoid drifting up to a
  * monorepo-root primordials owned by a sibling package).
  */
-function findLocalPrimordials(scanDir): string | undefined {
+export function findLocalPrimordials(scanDir): string | undefined {
   const candidates = [scanDir, path.dirname(scanDir)]
   for (let i = 0, { length: dl } = candidates; i < dl; i++) {
     const dir = candidates[i]!
@@ -383,7 +383,7 @@ function findLocalPrimordials(scanDir): string | undefined {
   return undefined
 }
 
-function report(
+export function report(
   findings,
   json,
   targetName,
@@ -412,7 +412,7 @@ function report(
   }
 }
 
-function reportLint(findings, json, targetName) {
+export function reportLint(findings, json, targetName) {
   if (json) {
     process.stdout.write(
       formatJson({
@@ -427,7 +427,7 @@ function reportLint(findings, json, targetName) {
   process.stdout.write(formatLintFindings(findings, { targetName }))
 }
 
-function reportMod(result, json, applied) {
+export function reportMod(result, json, applied) {
   if (json) {
     process.stdout.write(
       formatJson({
@@ -463,7 +463,7 @@ function reportMod(result, json, applied) {
   }
 }
 
-function fail(msg) {
+export function fail(msg) {
   process.stderr.write(`prim: ${msg}\n`)
   process.exit(1)
 }

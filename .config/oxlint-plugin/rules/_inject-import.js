@@ -19,7 +19,12 @@
  *   - whether a top-level `localName` identifier already exists
  *     (any const/let/var or import-as-local with that name)
  */
-export function summarizeImportTarget(program, specifier, importName, localName) {
+export function summarizeImportTarget(
+  program,
+  specifier,
+  importName,
+  localName,
+) {
   let lastImport
   let hasImport = false
   let hasLocal = false

@@ -33,7 +33,7 @@ vi.mock('../../../src/fs/safe', async importOriginal => {
   }
 })
 
-function makeFsError(code: string): Error {
+export function makeFsError(code: string): Error {
   const e = new Error(`simulated ${code}`) as Error & { code: string }
   e.code = code
   return e

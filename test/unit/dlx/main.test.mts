@@ -41,6 +41,7 @@ import {
 } from '@socketsecurity/lib/dlx/paths'
 import { safeDeleteSync } from '@socketsecurity/lib/fs/safe'
 import { getSocketDlxDir } from '@socketsecurity/lib/paths/socket'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 describe.sequential('dlx', () => {
   const testPackageName = 'test-package'
@@ -63,7 +64,7 @@ describe.sequential('dlx', () => {
 
     // Remove test directory
     try {
-      await fs.promises.rm(testDlxDir, { recursive: true, force: true })
+      await safeDelete(testDlxDir)
     } catch {}
 
     // Restore original env

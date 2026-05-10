@@ -15,7 +15,7 @@ import { readPackageJson } from '@socketsecurity/lib-stable/packages'
 const logger = getDefaultLogger()
 
 // Helper to write package.json with proper formatting
-async function writePackageJson(filePath, data) {
+export async function writePackageJson(filePath, data) {
   const content = `${JSON.stringify(data, null, 2)}\n`
   await fs.writeFile(filePath, content, 'utf8')
 }

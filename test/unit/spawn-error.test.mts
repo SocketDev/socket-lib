@@ -11,7 +11,7 @@ import { enhanceSpawnError, isSpawnError } from '../../src/spawn/errors'
 
 describe('spawn — enhanceSpawnError', () => {
   it('returns null inputs unchanged', () => {
-    expect(enhanceSpawnError(null)).toBeNull()
+    expect(enhanceSpawnError(undefined)).toBeNull()
   })
 
   it('returns non-object inputs unchanged', () => {
@@ -145,7 +145,7 @@ describe('spawn — isSpawnError', () => {
   })
 
   it('returns false for non-objects', () => {
-    expect(isSpawnError(null)).toBe(false)
+    expect(isSpawnError(undefined)).toBe(false)
     expect(isSpawnError('string')).toBe(false)
     expect(isSpawnError(42)).toBe(false)
   })

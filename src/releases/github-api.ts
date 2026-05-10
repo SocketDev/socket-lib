@@ -74,7 +74,7 @@ interface ReleaseRow {
  *   NOT thrown because pRetry can't help — a 200 OK is "done" as
  *   far as retry policy is concerned.
  */
-async function fetchReleasesViaRest(
+export async function fetchReleasesViaRest(
   owner: string,
   repo: string,
 ): Promise<ReleaseRow[]> {
@@ -137,7 +137,7 @@ async function fetchReleasesViaRest(
  *   data path inside GitHub. That's the entire reason this
  *   fallback exists.
  */
-async function fetchReleasesViaGraphQL(
+export async function fetchReleasesViaGraphQL(
   owner: string,
   repo: string,
 ): Promise<ReleaseRow[]> {
@@ -234,7 +234,7 @@ async function fetchReleasesViaGraphQL(
  *     that point both transports are degraded and we want the
  *     pRetry wrapper to back off and retry).
  */
-async function fetchReleaseAssetsViaGraphQL(
+export async function fetchReleaseAssetsViaGraphQL(
   owner: string,
   repo: string,
   tag: string,

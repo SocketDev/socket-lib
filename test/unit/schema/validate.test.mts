@@ -215,7 +215,7 @@ describe('schema/validate', () => {
 
   describe('unsupported schema kind', () => {
     it('throws TypeError for null', () => {
-      expect(() => validateSchema(null, 'x')).toThrow(TypeError)
+      expect(() => validateSchema(undefined, 'x')).toThrow(TypeError)
     })
 
     it('throws TypeError for a plain object without safeParse', () => {

@@ -77,7 +77,11 @@ let _signals: string[] | undefined
    processEmit/processReallyExit interceptors, all of which are
    c8-ignored. Cannot be reached from the test runner. */
 /*@__NO_SIDE_EFFECTS__*/
-function emit(event: string, code: number | null, signal: string | null): void {
+export function emit(
+  event: string,
+  code: number | undefined,
+  signal: string | undefined,
+): void {
   const emitter = getEmitter()
   if (emitter.emitted?.[event]) {
     return
@@ -90,7 +94,7 @@ function emit(event: string, code: number | null, signal: string | null): void {
 /* c8 ignore stop */
 
 /*@__NO_SIDE_EFFECTS__*/
-function getEmitter() {
+export function getEmitter() {
   // Lazy-init second-call branch; module-singleton. The pre-existing
   // emitter and infinite-listeners-already-enabled branches fire only
   // when another copy of signal-exit is loaded in the same process.
@@ -117,7 +121,7 @@ function getEmitter() {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-function getEvents() {
+export function getEvents() {
   // Lazy-init second-call branch; module-singleton.
   /* c8 ignore start */
   if (_events === undefined) {
@@ -130,7 +134,7 @@ function getEvents() {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-function getSignalListeners() {
+export function getSignalListeners() {
   if (_sigListeners === undefined) {
     _sigListeners = { __proto__: null } as unknown as SignalListenerMap
     const emitter = getEmitter()
@@ -147,8 +151,8 @@ function getSignalListeners() {
         const listeners = globalProcess?.listeners(sig as NodeJS.Signals) || []
         if (listeners.length === emitter.count) {
           unload()
-          emit('exit', null, sig)
-          emit('afterexit', null, sig)
+          emit('exit', undefined, sig)
+          emit('afterexit', undefined, sig)
           // "SIGHUP" throws an `ENOSYS` error on Windows,
           // so use a supported signal instead.
           const killSig = WIN32 && sig === 'SIGHUP' ? 'SIGINT' : sig
@@ -164,7 +168,7 @@ function getSignalListeners() {
 /* c8 ignore start - processEmit + processReallyExit interceptors
    only fire on real process exit/emit; can't be triggered in-test. */
 /*@__NO_SIDE_EFFECTS__*/
-function processEmit(
+export function processEmit(
   this: NodeJS.Process,
   eventName: string,
   exitCode?: number | undefined,
@@ -185,9 +189,9 @@ function processEmit(
       [eventName, actualExitCode, ...args],
     ) as boolean
     const numExitCode =
-      typeof actualExitCode === 'number' ? actualExitCode : null
-    emit('exit', numExitCode, null)
-    emit('afterexit', numExitCode, null)
+      typeof actualExitCode === 'number' ? actualExitCode : undefined
+    emit('exit', numExitCode, undefined)
+    emit('afterexit', numExitCode, undefined)
     return result
   }
   return ReflectApply(
@@ -198,13 +202,13 @@ function processEmit(
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-function processReallyExit(code?: number | undefined): never {
+export function processReallyExit(code?: number | undefined): never {
   const exitCode = code || 0
   if (globalProcess) {
     globalProcess.exitCode = exitCode
   }
-  emit('exit', exitCode, null)
-  emit('afterexit', exitCode, null)
+  emit('exit', exitCode, undefined)
+  emit('afterexit', exitCode, undefined)
   ReflectApply(
     originalProcessReallyExit as (code?: number) => never,
     globalProcess,
@@ -276,6 +280,7 @@ export function load(): void {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function onExit(
+  // oxlint-disable-next-line socket/prefer-undefined-over-null -- mirrors upstream signal-exit API (signal/code are `null` for non-signal/non-exit events).
   cb: (code: number | null, signal: string | null) => void,
   options?: OnExitOptions | undefined,
 ): () => void {

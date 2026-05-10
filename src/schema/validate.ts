@@ -43,7 +43,7 @@ import type {
  *
  * @internal
  */
-function isTypeBoxSchema(schema: unknown): boolean {
+export function isTypeBoxSchema(schema: unknown): boolean {
   if (schema === null || typeof schema !== 'object') {
     return false
   }
@@ -61,7 +61,7 @@ function isTypeBoxSchema(schema: unknown): boolean {
  *
  * @internal
  */
-function normalizeTypeBoxErrors(
+export function normalizeTypeBoxErrors(
   errors: Iterable<{ path: string; message: string }>,
 ): ValidationIssue[] {
   const out: ValidationIssue[] = []
@@ -84,7 +84,7 @@ function normalizeTypeBoxErrors(
  *
  * @internal
  */
-function normalizeZodError(err: unknown): ValidationIssue[] {
+export function normalizeZodError(err: unknown): ValidationIssue[] {
   if (err === null || typeof err !== 'object') {
     return [{ path: [], message: String(err) }]
   }

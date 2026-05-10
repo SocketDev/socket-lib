@@ -49,7 +49,7 @@ interface BuildSourceResult {
   result: BuildResult | null
 }
 
-async function buildSource(
+export async function buildSource(
   options: BuildSourceOptions = {},
 ): Promise<BuildSourceResult> {
   const { quiet = false, skipClean = false, verbose = false } = options
@@ -100,7 +100,9 @@ interface BuildTypesOptions {
   verbose?: boolean
 }
 
-async function buildTypes(options: BuildTypesOptions = {}): Promise<number> {
+export async function buildTypes(
+  options: BuildTypesOptions = {},
+): Promise<number> {
   const {
     quiet = false,
     skipClean = false,
@@ -139,7 +141,7 @@ async function buildTypes(options: BuildTypesOptions = {}): Promise<number> {
  * Build external dependencies.
  * Returns exitCode for external logging.
  */
-async function buildExternals(
+export async function buildExternals(
   options: { quiet?: boolean; verbose?: boolean } = {},
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
@@ -172,7 +174,7 @@ async function buildExternals(
  * Fix exports after build.
  * Returns exitCode for external logging.
  */
-async function fixExports(
+export async function fixExports(
   options: { quiet?: boolean; verbose?: boolean } = {},
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
@@ -204,7 +206,7 @@ async function fixExports(
 /**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
-async function watchBuild(
+export async function watchBuild(
   options: { quiet?: boolean; verbose?: boolean } = {},
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
@@ -275,7 +277,7 @@ async function watchBuild(
 /**
  * Check if build is needed.
  */
-function isBuildNeeded(): boolean {
+export function isBuildNeeded(): boolean {
   const distPath = path.join(rootPath, 'dist', 'index.js')
   const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
 

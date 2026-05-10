@@ -330,7 +330,7 @@ describe('Logger', () => {
     })
 
     it('should handle null and undefined', () => {
-      logger.log(null)
+      logger.log(undefined)
       logger.log(undefined)
       expect(stdoutData.length).toBeGreaterThan(0)
     })
