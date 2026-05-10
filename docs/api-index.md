@@ -15,7 +15,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/ansi`](../src/ansi.ts)                             | ANSI escape code utilities.                                                       |
 | [`@socketsecurity/lib/archives`](../src/archives.ts)                     | Generic archive extraction utilities.                                             |
 | [`@socketsecurity/lib/arrays`](../src/arrays.ts)                         | Array utility functions for formatting lists and collections.                     |
-| [`@socketsecurity/lib/bin`](../src/bin.ts)                               | Binary path resolution and execution utilities for package managers.              |
 | [`@socketsecurity/lib/cacache`](../src/cacache.ts)                       | Cacache utilities for Socket ecosystem shared content-addressable cache.          |
 | [`@socketsecurity/lib/cache-with-ttl`](../src/cache-with-ttl.ts)         | Generic TTL-based caching utility using cacache.                                  |
 | [`@socketsecurity/lib/colors`](../src/colors.ts)                         | Color utilities for RGB color conversion and manipulation.                        |
@@ -72,11 +71,17 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## bin/
 
-| Subpath                                                                        | Description                                          |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| [`@socketsecurity/lib/bin/check`](../src/bin/check.ts)                         | `socket-lib check <name>` subcommand group.          |
-| [`@socketsecurity/lib/bin/check-primordials`](../src/bin/check-primordials.ts) | `socket-lib check primordials` handler.              |
-| [`@socketsecurity/lib/bin/socket-lib`](../src/bin/socket-lib.ts)               | `socket-lib` CLI entry point — top-level dispatcher. |
+| Subpath                                                                        | Description                                                                                                                                         |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/bin/check`](../src/bin/check.ts)                         | `socket-lib check <name>` subcommand group.                                                                                                         |
+| [`@socketsecurity/lib/bin/check-primordials`](../src/bin/check-primordials.ts) | `socket-lib check primordials` handler.                                                                                                             |
+| [`@socketsecurity/lib/bin/exec`](../src/bin/exec.ts)                           | `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.                                             |
+| [`@socketsecurity/lib/bin/find`](../src/bin/find.ts)                           | Find specific package-manager binaries with platform- aware fallbacks.                                                                              |
+| [`@socketsecurity/lib/bin/resolve`](../src/bin/resolve.ts)                     | Resolve a binary path to the underlying script file.                                                                                                |
+| [`@socketsecurity/lib/bin/shadow`](../src/bin/shadow.ts)                       | Shadow-bin detection.                                                                                                                               |
+| [`@socketsecurity/lib/bin/socket-lib`](../src/bin/socket-lib.ts)               | `socket-lib` CLI entry point — top-level dispatcher.                                                                                                |
+| [`@socketsecurity/lib/bin/types`](../src/bin/types.ts)                         | Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`. |
+| [`@socketsecurity/lib/bin/which`](../src/bin/which.ts)                         | Look up binaries on PATH.                                                                                                                           |
 
 ## checks/
 

@@ -14,17 +14,16 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { execBin } from '../../src/bin/exec'
 import {
-  execBin,
   findRealBin,
   findRealNpm,
   findRealPnpm,
   findRealYarn,
-  isShadowBinPath,
-  resolveRealBinSync,
-  whichReal,
-  whichRealSync,
-} from '@socketsecurity/lib/bin'
+} from '../../src/bin/find'
+import { resolveRealBinSync } from '../../src/bin/resolve'
+import { isShadowBinPath } from '../../src/bin/shadow'
+import { whichReal, whichRealSync } from '../../src/bin/which'
 import { isError } from '@socketsecurity/lib/errors'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'

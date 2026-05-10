@@ -10,7 +10,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { whichSync } from '@socketsecurity/lib/bin'
+import { whichSync } from '@socketsecurity/lib/bin/which'
 import { spawnSync } from '@socketsecurity/lib/spawn'
 
 const hookScript = new URL('../index.mts', import.meta.url).pathname

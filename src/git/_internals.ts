@@ -5,7 +5,7 @@
  * `staged.ts`, `unstaged.ts`) call into these helpers; nothing else should.
  */
 
-import { whichSync } from '../bin'
+import { whichSync } from '../bin/which'
 import { debugNs } from '../debug'
 import { getGlobMatcher } from '../globs'
 import { normalizePath } from '../paths/normalize'

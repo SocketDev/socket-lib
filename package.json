@@ -153,11 +153,6 @@
       "types": "./dist/arrays.d.ts",
       "default": "./dist/arrays.js"
     },
-    "./bin": {
-      "source": "./src/bin.ts",
-      "types": "./dist/bin.d.ts",
-      "default": "./dist/bin.js"
-    },
     "./bin/check": {
       "source": "./src/bin/check.ts",
       "types": "./dist/bin/check.d.ts",
@@ -168,10 +163,40 @@
       "types": "./dist/bin/check-primordials.d.ts",
       "default": "./dist/bin/check-primordials.js"
     },
+    "./bin/exec": {
+      "source": "./src/bin/exec.ts",
+      "types": "./dist/bin/exec.d.ts",
+      "default": "./dist/bin/exec.js"
+    },
+    "./bin/find": {
+      "source": "./src/bin/find.ts",
+      "types": "./dist/bin/find.d.ts",
+      "default": "./dist/bin/find.js"
+    },
+    "./bin/resolve": {
+      "source": "./src/bin/resolve.ts",
+      "types": "./dist/bin/resolve.d.ts",
+      "default": "./dist/bin/resolve.js"
+    },
+    "./bin/shadow": {
+      "source": "./src/bin/shadow.ts",
+      "types": "./dist/bin/shadow.d.ts",
+      "default": "./dist/bin/shadow.js"
+    },
     "./bin/socket-lib": {
       "source": "./src/bin/socket-lib.ts",
       "types": "./dist/bin/socket-lib.d.ts",
       "default": "./dist/bin/socket-lib.js"
+    },
+    "./bin/types": {
+      "source": "./src/bin/types.ts",
+      "types": "./dist/bin/types.d.ts",
+      "default": "./dist/bin/types.js"
+    },
+    "./bin/which": {
+      "source": "./src/bin/which.ts",
+      "types": "./dist/bin/which.d.ts",
+      "default": "./dist/bin/which.js"
     },
     "./cacache": {
       "source": "./src/cacache.ts",

@@ -21,7 +21,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { whichSync } from '../bin'
+import { whichSync } from '../bin/which'
 import { errorMessage } from '../errors'
 import { getDefaultLogger } from '../logger/default'
 

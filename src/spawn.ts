@@ -29,7 +29,7 @@
 import process from 'node:process'
 
 import { isArray } from './arrays'
-import { whichSync } from './bin'
+import { whichSync } from './bin/which'
 import { getAbortSignal } from './constants/process'
 import { stackWithCauses } from './errors'
 import { getNodeChildProcess } from './node/child-process'

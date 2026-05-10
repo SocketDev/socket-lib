@@ -12,7 +12,7 @@
  * eco/npm/yarn-{berry,zpm}/exec.ts file, and yarn-classic stays here.
  */
 
-import { execBin } from '../../../../bin'
+import { execBin } from '../../../../bin/exec'
 import { isDebug } from '../../../../debug'
 import {
   ArrayPrototypeIndexOf,

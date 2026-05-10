@@ -5,7 +5,7 @@
  * in the args array are properly escaped by Node.js when passed to execBin().
  */
 
-import { execBin } from '../../../bin'
+import { execBin } from '../../../bin/exec'
 import { isDebug } from '../../../debug'
 import { getCI } from '../../../env/ci'
 import {
