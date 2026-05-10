@@ -21,7 +21,7 @@
 
 import process from 'node:process'
 
-import { createTtlCache } from '../cache-with-ttl'
+import { createTtlCache } from '../cache-with-ttl/cache'
 import { errorMessage } from '../errors'
 import { httpRequest } from '../http-request/request'
 import { ErrorCtor } from '../primordials/error'
@@ -35,7 +35,7 @@ import {
   GitHubEmptyBodyError,
 } from './types'
 
-import type { TtlCache } from '../cache-with-ttl'
+import type { TtlCache } from '../cache-with-ttl/types'
 import type {
   GitHubCommit,
   GitHubFetchOptions,

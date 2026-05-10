@@ -223,10 +223,15 @@
       "types": "./dist/cacache.d.ts",
       "default": "./dist/cacache.js"
     },
-    "./cache-with-ttl": {
-      "source": "./src/cache-with-ttl.ts",
-      "types": "./dist/cache-with-ttl.d.ts",
-      "default": "./dist/cache-with-ttl.js"
+    "./cache-with-ttl/cache": {
+      "source": "./src/cache-with-ttl/cache.ts",
+      "types": "./dist/cache-with-ttl/cache.d.ts",
+      "default": "./dist/cache-with-ttl/cache.js"
+    },
+    "./cache-with-ttl/types": {
+      "source": "./src/cache-with-ttl/types.ts",
+      "types": "./dist/cache-with-ttl/types.d.ts",
+      "default": "./dist/cache-with-ttl/types.js"
     },
     "./checks/primordials": {
       "source": "./src/checks/primordials.ts",

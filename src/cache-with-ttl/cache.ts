@@ -1,181 +1,43 @@
 /**
- * @fileoverview Generic TTL-based caching utility using cacache.
+ * @fileoverview `createTtlCache` — generic TTL-based cache built on
+ * top of cacache (persistent) plus an in-memory LRU memo layer.
  *
- * Provides a simple interface for caching data with time-to-live (TTL) expiration.
- * Uses cacache for persistent storage with metadata for TTL tracking.
+ * Two-tier caching: hot data lives in `memoCache` (Map<string,
+ * TtlCacheEntry>) capped at `memoMaxSize` entries with LRU eviction
+ * via Map insertion-order semantics. Persistent storage uses cacache
+ * so cached values survive process restarts.
  *
- * Features:
- * - Automatic expiration based on TTL
- * - In-memory memoization for hot data
- * - Persistent storage across process restarts
- * - Type-safe with generics
- *
- * Usage:
- * ```ts
- * const cache = createTtlCache({ ttl: 5 * 60 * 1000 }) // 5 minutes
- * const data = await cache.getOrFetch('key', async () => fetchData())
- * ```
+ * Key features:
+ * - Per-key namespacing via `prefix` so multiple caches share one
+ *   cacache directory without conflicting.
+ * - `getOrFetch` deduplicates concurrent requests for the same key
+ *   (thundering-herd protection via `inflightRequests` map).
+ * - Wildcard support for `getAll` / `deleteAll` (single-key methods
+ *   throw on `*`).
+ * - Clock-skew detection: entries with suspiciously-far-future
+ *   `expiresAt` are treated as expired.
  */
 
-import * as cacache from './cacache'
-
-import { DateNow } from './primordials/date'
-
-import { TypeErrorCtor } from './primordials/error'
-
-import { JSONParse } from './primordials/json'
-
-import { MapCtor } from './primordials/map-set'
-
-import { MathMax } from './primordials/math'
-
-import { RegExpCtor, RegExpPrototypeTest } from './primordials/regexp'
-
+import * as cacache from '../cacache'
+import { DateNow } from '../primordials/date'
+import { TypeErrorCtor } from '../primordials/error'
+import { JSONParse } from '../primordials/json'
+import { MapCtor } from '../primordials/map-set'
+import { MathMax } from '../primordials/math'
+import { RegExpCtor, RegExpPrototypeTest } from '../primordials/regexp'
 import {
   StringPrototypeIncludes,
   StringPrototypeReplaceAll,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from './primordials/string'
-export interface ClearOptions {
-  /**
-   * Only clear in-memory memoization cache, not persistent cache.
-   * Useful for forcing a refresh of cached data without removing it from disk.
-   *
-   * @default false
-   */
-  memoOnly?: boolean | undefined
-}
+} from '../primordials/string'
 
-export interface TtlCache {
-  /**
-   * Get cached data without fetching.
-   * Returns undefined if not found or expired.
-   *
-   * @param key - Cache key (must not contain wildcards)
-   * @throws {TypeError} If key contains wildcards (*)
-   */
-  get<T>(key: string): Promise<T | undefined>
-  /**
-   * Get all cached entries matching a pattern.
-   * Supports wildcards (*) for flexible matching.
-   *
-   * @param pattern - Key pattern (supports * wildcards, or use '*' for all entries)
-   * @returns Map of matching entries (key -> value)
-   *
-   * @example
-   * // Get all organization entries
-   * const orgs = await cache.getAll<OrgData>('organizations:*')
-   * for (const [key, org] of orgs) {
-   *   console.log(`${key}: ${org.name}`)
-   * }
-   *
-   * @example
-   * // Get all entries with this cache's prefix
-   * const all = await cache.getAll<unknown>('*')
-   */
-  getAll<T>(pattern: string): Promise<Map<string, T>>
-  /**
-   * Get cached data or fetch and cache if missing/expired.
-   *
-   * @param key - Cache key (must not contain wildcards)
-   */
-  getOrFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T>
-  /**
-   * Set cached data with TTL.
-   *
-   * @param key - Cache key (must not contain wildcards)
-   * @throws {TypeError} If key contains wildcards (*)
-   */
-  set<T>(key: string, data: T): Promise<void>
-  /**
-   * Delete a specific cache entry.
-   *
-   * @param key - Cache key (must not contain wildcards)
-   * @throws {TypeError} If key contains wildcards (*)
-   */
-  delete(key: string): Promise<void>
-  /**
-   * Delete all cache entries matching a pattern.
-   * Supports wildcards (*) for flexible matching.
-   *
-   * @param pattern - Key pattern (supports * wildcards, or omit to delete all)
-   * @returns Number of entries deleted
-   *
-   * @example
-   * // Delete all entries with this cache's prefix
-   * await cache.deleteAll()
-   *
-   * @example
-   * // Delete entries matching prefix
-   * await cache.deleteAll('organizations')
-   *
-   * @example
-   * // Delete entries with wildcard pattern
-   * await cache.deleteAll('scans:abc*')
-   * await cache.deleteAll('npm/lodash/*')
-   */
-  deleteAll(pattern?: string | undefined): Promise<number>
-  /**
-   * Clear all cache entries (like Map.clear()).
-   * Optionally clear only in-memory cache.
-   *
-   * @param options - Optional configuration
-   * @param options.memoOnly - If true, only clears in-memory cache
-   *
-   * @example
-   * // Clear everything (memory + disk)
-   * await cache.clear()
-   *
-   * @example
-   * // Clear only in-memory cache (force refresh)
-   * await cache.clear({ memoOnly: true })
-   */
-  clear(options?: ClearOptions | undefined): Promise<void>
-}
-
-export interface TtlCacheEntry<T> {
-  data: T
-  expiresAt: number
-}
-
-export interface TtlCacheOptions {
-  /**
-   * Time-to-live in milliseconds.
-   * @default 5 * 60 * 1000 (5 minutes)
-   */
-  ttl?: number | undefined
-  /**
-   * Enable in-memory memoization for hot data.
-   * @default true
-   */
-  memoize?: boolean | undefined
-  /**
-   * Maximum number of entries to keep in the in-memory memo cache. When
-   * exceeded, the least-recently-used entry is evicted. The persistent
-   * (cacache) layer is unaffected.
-   * @default 1000
-   */
-  memoMaxSize?: number | undefined
-  /**
-   * Custom cache key prefix.
-   * Must not contain wildcards (*).
-   * Use clear({ prefix: "pattern*" }) for wildcard matching instead.
-   *
-   * @default 'ttl-cache'
-   * @throws {TypeError} If prefix contains wildcards
-   *
-   * @example
-   * // Valid
-   * createTtlCache({ prefix: 'socket-sdk' })
-   * createTtlCache({ prefix: 'my-app:cache' })
-   *
-   * @example
-   * // Invalid - throws TypeError
-   * createTtlCache({ prefix: 'socket-*' })
-   */
-  prefix?: string | undefined
-}
+import type {
+  ClearOptions,
+  TtlCache,
+  TtlCacheEntry,
+  TtlCacheOptions,
+} from './types'
 
 // 5 minutes
 const DEFAULT_TTL_MS = 5 * 60 * 1000
@@ -279,8 +141,6 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Wildcard matching with regex. Anchor both ends so `foo*bar` matches
     // exactly `foo<anything>bar` and not `foo<anything>bar<anything else>`.
-    // Missing the `$` anchor let `deleteAll('foo*bar')` also sweep
-    // `foo123bar-extra`, which silently over-deletes.
     const escaped = StringPrototypeReplaceAll(
       fullPattern,
       /[.+?^${}()|[\]\\]/g,
@@ -291,11 +151,6 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     return (key: string) => RegExpPrototypeTest(regex, key)
   }
 
-  /**
-   * Get cached data without fetching.
-   *
-   * @throws {TypeError} If key contains wildcards (*)
-   */
   async function get<T>(key: string): Promise<T | undefined> {
     if (StringPrototypeIncludes(key, '*')) {
       throw new TypeErrorCtor(
@@ -353,17 +208,10 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     return undefined
   }
 
-  /**
-   * Get all cached entries matching a pattern.
-   * Supports wildcards (*) for flexible matching.
-   */
   async function getAll<T>(pattern: string): Promise<Map<string, T>> {
     const results = new MapCtor<string, T>()
     const matches = createMatcher(pattern)
 
-    // Memoize-enabled, expired-skip, and prefix-strip branches fire
-    // only when caller seeds memoize+prefix and tests have populated
-    // entries. Tests run getAll with simpler config than full coverage.
     /* c8 ignore start */
     if (opts.memoize) {
       for (const [key, entry] of memoCache.entries()) {
@@ -385,8 +233,8 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     /* c8 ignore stop */
 
     // Check persistent cache for entries not in memory.
-    const cacheDir = (await import('./paths/socket')).getSocketCacacheDir()
-    const cacacheModule = await import('./cacache')
+    const cacheDir = (await import('../paths/socket')).getSocketCacacheDir()
+    const cacacheModule = await import('../cacache')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 
     for await (const cacheEntry of stream) {
@@ -440,11 +288,6 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     return results
   }
 
-  /**
-   * Set cached data with TTL.
-   *
-   * @throws {TypeError} If key contains wildcards (*)
-   */
   async function set<T>(key: string, data: T): Promise<void> {
     if (StringPrototypeIncludes(key, '*')) {
       throw new TypeErrorCtor(
@@ -464,33 +307,24 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     }
 
     // Update persistent cache (don't fail if this errors).
-    // In-memory cache is already updated, so immediate reads will succeed.
     try {
       await cacache.put(fullKey, JSON.stringify(entry), {
         metadata: { expiresAt: entry.expiresAt },
       })
     } catch {
       // Ignore persistent cache errors - in-memory cache is the source of truth.
-      // This can happen during test setup or if the cache directory is not accessible.
     }
   }
 
   // Track in-flight fetch requests to prevent duplicate fetches
   const inflightRequests = new MapCtor<string, Promise<unknown>>()
 
-  /**
-   * Get cached data or fetch and cache if missing/expired.
-   * Deduplicates concurrent requests with the same key.
-   */
   async function getOrFetch<T>(
     key: string,
     fetcher: () => Promise<T>,
   ): Promise<T> {
     const fullKey = buildKey(key)
 
-    // Join an in-flight fetch (thundering-herd dedup). Pre-existing
-    // and re-check arms fire only on concurrent calls; tests rarely
-    // exercise that.
     /* c8 ignore start */
     const preexisting = inflightRequests.get(fullKey)
     if (preexisting) {
@@ -529,11 +363,6 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     return await promise
   }
 
-  /**
-   * Delete a specific cache entry.
-   *
-   * @throws {TypeError} If key contains wildcards (*)
-   */
   async function deleteEntry(key: string): Promise<void> {
     if (StringPrototypeIncludes(key, '*')) {
       throw new TypeErrorCtor(
@@ -550,25 +379,14 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     }
   }
 
-  /**
-   * Delete all cache entries matching a pattern.
-   * Supports wildcards (*) in patterns.
-   * Delegates to cacache.clear() which handles pattern matching efficiently.
-   */
   async function deleteAll(pattern?: string | undefined): Promise<number> {
     // Build full prefix/pattern by combining cache prefix with optional pattern.
-    // The no-pattern case appends the namespace boundary (`:`) so a cache
-    // with prefix `ttl-cache` doesn't sweep entries belonging to a sibling
-    // cache with prefix `ttl-cache-foo` (cacache.clear matches via
-    // entry.key.startsWith).
     const fullPrefix = pattern ? `${opts.prefix}:${pattern}` : `${opts.prefix}:`
 
     // Delete matching in-memory entries.
     if (!pattern) {
-      // Delete all in-memory entries for this cache.
       memoCache.clear()
     } else {
-      // Delete matching in-memory entries using shared matcher logic.
       const matches = createMatcher(pattern)
       for (const key of memoCache.keys()) {
         if (matches(key)) {
@@ -578,15 +396,10 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     }
 
     // Delete matching persistent cache entries.
-    // Delegate to cacache.clear() which handles wildcards efficiently.
     const removed = await cacache.clear({ prefix: fullPrefix })
     return (removed ?? 0) as number
   }
 
-  /**
-   * Clear all cache entries (like Map.clear()).
-   * Optionally clear only in-memory cache.
-   */
   async function clear(options?: ClearOptions | undefined): Promise<void> {
     const opts = { __proto__: null, ...options } as ClearOptions
 
