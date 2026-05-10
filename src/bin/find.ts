@@ -33,7 +33,7 @@ import { getAppdata, getLocalappdata } from '../env/windows'
 import { getXdgDataHome } from '../env/xdg'
 import whichModule from '../external/which'
 import { ArrayIsArray } from '../primordials/array'
-import { getFs, getPath } from './_internals'
+import { getFs, getPath } from './_internal'
 import { isShadowBinPath } from './shadow'
 import { whichRealSync } from './which'
 

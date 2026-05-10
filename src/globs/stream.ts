@@ -16,7 +16,7 @@ import {
   defaultIgnore,
   getFastGlob,
   normalizeIgnorePatterns,
-} from './_internals'
+} from './_internal'
 
 import type { GlobOptions } from './types'
 

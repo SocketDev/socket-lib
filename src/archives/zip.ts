@@ -20,7 +20,7 @@ import {
   getAdmZip,
   getPath,
   validatePathWithinBase,
-} from './_internals'
+} from './_internal'
 
 import type { ExtractOptions } from './types'
 

@@ -15,7 +15,7 @@
  * directory to find the real CLI script.
  *
  * Caching: per-Volta-key cache + a final `realpathSync` to dedupe
- * symlinked installations. Both caches live in `_internals.ts` so
+ * symlinked installations. Both caches live in `_internal.ts` so
  * `which.ts` can flush them when its own cache eviction fires.
  *
  * Cycles with `which.ts`: `resolveRealBinSync` calls `whichRealSync`
@@ -28,7 +28,7 @@ import { WIN32 } from '../constants/platform'
 import { readJsonSync } from '../fs/read-json'
 import { normalizePath } from '../paths/normalize'
 import { StringPrototypeStartsWith } from '../primordials/string'
-import { getFs, getPath, voltaBinCache } from './_internals'
+import { getFs, getPath, voltaBinCache } from './_internal'
 import { whichRealSync } from './which'
 
 /*@__NO_SIDE_EFFECTS__*/

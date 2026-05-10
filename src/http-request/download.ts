@@ -23,7 +23,7 @@ import { ErrorCtor } from '../primordials/error'
 import { MathFloor } from '../primordials/math'
 import { NumberParseInt } from '../primordials/number'
 import { PromiseCtor } from '../primordials/promise'
-import { getCrypto, getFs } from './_internals'
+import { getCrypto, getFs } from './_internal'
 import { httpRequestAttempt } from './request'
 import { HttpResponseError } from './types'
 

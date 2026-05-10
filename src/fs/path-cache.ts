@@ -10,7 +10,7 @@
 
 import { registerCacheInvalidation } from '../paths/rewire'
 
-import { clearAllowedDirectories } from './_internals'
+import { clearAllowedDirectories } from './_internal'
 
 /**
  * Invalidate the cached allowed directories.

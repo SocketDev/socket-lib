@@ -15,7 +15,7 @@
  *   so a missing binary returns `undefined` instead of bubbling a
  *   `which` package error.
  *
- * Caching matches `_internals.binPathCache` and `binPathAllCache`. Both
+ * Caching matches `_internal.binPathCache` and `binPathAllCache`. Both
  * caches validate hits with `existsSync` so a tool reinstall mid-session
  * doesn't return a stale path.
  */
@@ -23,7 +23,7 @@
 import whichModule from '../external/which'
 import { isPath } from '../paths/normalize'
 import { ArrayIsArray, ArrayPrototypeMap } from '../primordials/array'
-import { binPathAllCache, binPathCache, getFs } from './_internals'
+import { binPathAllCache, binPathCache, getFs } from './_internal'
 import { resolveRealBinSync } from './resolve'
 
 import type { WhichOptions } from './types'

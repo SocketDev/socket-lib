@@ -3,7 +3,7 @@
  * helpers shared across `git/*` leaves. Owns `findGitRoot`, the realpath
  * cache, the cwd resolver, and the lazy `node:fs` / `node:path` loaders
  * — pulling these together keeps the dependency direction one-way:
- * `_internals.ts` and the public-surface leaves all import from here.
+ * `_internal.ts` and the public-surface leaves all import from here.
  */
 
 import process from 'node:process'

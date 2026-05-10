@@ -18,7 +18,7 @@ import { SharedArrayBufferCtor } from '../primordials/globals'
 import { StringPrototypeStartsWith } from '../primordials/string'
 import { pRetry } from '../promises/retry'
 
-import { getAllowedDirectories } from './_internals'
+import { getAllowedDirectories } from './_internal'
 // Side-effect import: registers invalidatePathCache with paths/rewire
 // so test-time path overrides flush the allowed-directories cache used
 // by safeDelete / safeDeleteSync below. Without this import, rewiring

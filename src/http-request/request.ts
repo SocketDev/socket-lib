@@ -30,7 +30,7 @@ import { MathMax } from '../primordials/math'
 import { NumberIsNaN } from '../primordials/number'
 import { PromiseCtor } from '../primordials/promise'
 import { URLCtor } from '../primordials/url'
-import { getHttp, getHttps } from './_internals'
+import { getHttp, getHttps } from './_internal'
 import { enrichErrorMessage } from './errors'
 import { HttpResponseError } from './types'
 

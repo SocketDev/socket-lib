@@ -10,11 +10,7 @@ import { JSONStringify } from '../primordials/json'
 import { ObjectKeys } from '../primordials/object'
 import { StringPrototypeStartsWith } from '../primordials/string'
 
-import {
-  MATCHER_CACHE_MAX_SIZE,
-  getPicomatch,
-  matcherCache,
-} from './_internals'
+import { MATCHER_CACHE_MAX_SIZE, getPicomatch, matcherCache } from './_internal'
 
 import type { Pattern } from './types'
 

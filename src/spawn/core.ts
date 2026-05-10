@@ -43,7 +43,7 @@ import {
   spawnBinPathCache,
   stripAnsiFromSpawnResult,
   windowsScriptExtRegExp,
-} from './_internals'
+} from './_internal'
 import { enhanceSpawnError } from './errors'
 import { isStdioType } from './stdio'
 

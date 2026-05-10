@@ -44,7 +44,7 @@ import {
   getFsPromises,
   normalizeGlobResults,
   normalizeIgnorePatterns,
-} from './_internals'
+} from './_internal'
 
 import type { FastGlobOptions, Pattern } from './types'
 

@@ -19,7 +19,7 @@
  *   `ensurePrototypeInitialized()` from inside a method body, so the
  *   import cycle never resolves at module-load time — by the time
  *   `ensurePrototypeInitialized` actually runs, both modules are
- *   fully evaluated. Same pattern as `fs/path-cache` ↔ `fs/_internals`.
+ *   fully evaluated. Same pattern as `fs/path-cache` ↔ `fs/_internal`.
  */
 
 import process from 'node:process'
@@ -33,7 +33,7 @@ import {
   globalConsole,
   privateConsole,
   privateConstructorArgs,
-} from './_internals'
+} from './_internal'
 import { Logger } from './core'
 import { getKGroupIndentationWidthSymbol } from './symbols'
 

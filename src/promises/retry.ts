@@ -10,7 +10,7 @@
 
 import { UNDEFINED_TOKEN } from '../constants/core'
 import { MathFloor, MathMin, MathRandom } from '../primordials/math'
-import { getTimers } from './_internals'
+import { getTimers } from './_internal'
 import { normalizeRetryOptions } from './options'
 
 import type { RetryOptions } from './types'

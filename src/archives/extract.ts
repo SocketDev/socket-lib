@@ -6,7 +6,7 @@
 import { ErrorCtor } from '../primordials/error'
 
 import { detectArchiveFormat } from './detect'
-import { getPath } from './_internals'
+import { getPath } from './_internal'
 import { extractTar, extractTarGz } from './tar'
 import { extractZip } from './zip'
 

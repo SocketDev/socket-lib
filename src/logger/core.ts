@@ -6,7 +6,7 @@
  * the underlying `Console` methods.
  *
  * Console construction is deliberately lazy: the constructor only
- * stashes its args in `_internals.privateConstructorArgs`; the actual
+ * stashes its args in `_internal.privateConstructorArgs`; the actual
  * `node:console` instance is built on first call to `#getConsole()`.
  * This lets the logger be imported during early Node.js bootstrap
  * before stdout is ready, avoiding `ERR_CONSOLE_WRITABLE_STREAM`.
@@ -16,7 +16,7 @@
  *   - color helpers — `./colors` (`applyColor`, `getYoctocolors`)
  *   - log symbols + symbol getters — `./symbols`
  *   - lazy console init + prototype mirror — `./console-init`
- *   - shared private state — `./_internals`
+ *   - shared private state — `./_internal`
  */
 
 /* oxlint-disable socket/no-status-emoji */
@@ -49,7 +49,7 @@ import {
   maxIndentation,
   privateConsole,
   privateConstructorArgs,
-} from './_internals'
+} from './_internal'
 import {
   LOG_SYMBOLS,
   getKGroupIndentationWidthSymbol,
