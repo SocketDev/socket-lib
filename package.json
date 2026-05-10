@@ -738,10 +738,30 @@
       "types": "./dist/github/types.d.ts",
       "default": "./dist/github/types.js"
     },
-    "./globs": {
-      "source": "./src/globs.ts",
-      "types": "./dist/globs.d.ts",
-      "default": "./dist/globs.js"
+    "./globs/defaults": {
+      "source": "./src/globs/defaults.ts",
+      "types": "./dist/globs/defaults.d.ts",
+      "default": "./dist/globs/defaults.js"
+    },
+    "./globs/glob": {
+      "source": "./src/globs/glob.ts",
+      "types": "./dist/globs/glob.d.ts",
+      "default": "./dist/globs/glob.js"
+    },
+    "./globs/matcher": {
+      "source": "./src/globs/matcher.ts",
+      "types": "./dist/globs/matcher.d.ts",
+      "default": "./dist/globs/matcher.js"
+    },
+    "./globs/stream": {
+      "source": "./src/globs/stream.ts",
+      "types": "./dist/globs/stream.d.ts",
+      "default": "./dist/globs/stream.js"
+    },
+    "./globs/types": {
+      "source": "./src/globs/types.ts",
+      "types": "./dist/globs/types.d.ts",
+      "default": "./dist/globs/types.js"
     },
     "./http-request/checksums": {
       "source": "./src/http-request/checksums.ts",

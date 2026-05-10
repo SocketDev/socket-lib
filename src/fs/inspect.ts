@@ -8,7 +8,8 @@
  * directly.
  */
 
-import { defaultIgnore, getGlobMatcher } from '../globs'
+import { defaultIgnore } from '../globs/_internals'
+import { getGlobMatcher } from '../globs/matcher'
 import { getNodeFs } from '../node/fs'
 import { pathLikeToString } from '../paths/normalize'
 

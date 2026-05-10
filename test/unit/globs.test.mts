@@ -17,13 +17,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import {
-  defaultIgnore,
-  getGlobMatcher,
-  glob,
-  globStreamLicenses,
-  globSync,
-} from '@socketsecurity/lib/globs'
+import { defaultIgnore } from '@socketsecurity/lib/globs/defaults'
+import { glob, globSync } from '@socketsecurity/lib/globs/glob'
+import { getGlobMatcher } from '@socketsecurity/lib/globs/matcher'
+import { globStreamLicenses } from '@socketsecurity/lib/globs/stream'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('globs', () => {
