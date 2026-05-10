@@ -105,22 +105,27 @@
     },
     "./ai/discover": {
       "source": "./src/ai/discover.mts",
+      "types": "./dist/ai/discover.d.mts",
       "default": "./dist/ai/discover.js"
     },
     "./ai/profiles": {
       "source": "./src/ai/profiles.mts",
+      "types": "./dist/ai/profiles.d.mts",
       "default": "./dist/ai/profiles.js"
     },
     "./ai/spawn": {
       "source": "./src/ai/spawn.mts",
+      "types": "./dist/ai/spawn.d.mts",
       "default": "./dist/ai/spawn.js"
     },
     "./ai/types": {
       "source": "./src/ai/types.mts",
+      "types": "./dist/ai/types.d.mts",
       "default": "./dist/ai/types.js"
     },
     "./ai/worktree": {
       "source": "./src/ai/worktree.mts",
+      "types": "./dist/ai/worktree.d.mts",
       "default": "./dist/ai/worktree.js"
     },
     "./ansi": {
@@ -583,10 +588,30 @@
       "types": "./dist/git.d.ts",
       "default": "./dist/git.js"
     },
-    "./github": {
-      "source": "./src/github.ts",
-      "types": "./dist/github.d.ts",
-      "default": "./dist/github.js"
+    "./github/fetch": {
+      "source": "./src/github/fetch.ts",
+      "types": "./dist/github/fetch.d.ts",
+      "default": "./dist/github/fetch.js"
+    },
+    "./github/ghsa": {
+      "source": "./src/github/ghsa.ts",
+      "types": "./dist/github/ghsa.d.ts",
+      "default": "./dist/github/ghsa.js"
+    },
+    "./github/refs": {
+      "source": "./src/github/refs.ts",
+      "types": "./dist/github/refs.d.ts",
+      "default": "./dist/github/refs.js"
+    },
+    "./github/token": {
+      "source": "./src/github/token.ts",
+      "types": "./dist/github/token.d.ts",
+      "default": "./dist/github/token.js"
+    },
+    "./github/types": {
+      "source": "./src/github/types.ts",
+      "types": "./dist/github/types.d.ts",
+      "default": "./dist/github/types.js"
     },
     "./globs": {
       "source": "./src/globs.ts",
@@ -1007,6 +1032,9 @@
       "source": "./src/temporary-executor.ts",
       "types": "./dist/temporary-executor.d.ts",
       "default": "./dist/temporary-executor.js"
+    },
+    "./test/integration/esm-imports.test": {
+      "default": "./test/integration/esm-imports.test.mjs"
     },
     "./themes/context": {
       "source": "./src/themes/context.ts",

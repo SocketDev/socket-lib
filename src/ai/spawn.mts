@@ -17,8 +17,6 @@
  * backoff (5s / 15s / 45s). Each retry is a fresh subprocess.
  */
 
-import process from 'node:process'
-
 import { errorMessage } from '../errors'
 import { isSpawnError, spawn } from '../spawn'
 

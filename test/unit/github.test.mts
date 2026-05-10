@@ -12,17 +12,17 @@
  */
 
 import process from 'node:process'
+import { fetchGitHub, getGhsaUrl } from '@socketsecurity/lib/github/fetch'
 import {
   cacheFetchGhsa,
-  clearRefCache,
   fetchGhsaDetails,
-  fetchGitHub,
-  getGhsaUrl,
+} from '@socketsecurity/lib/github/ghsa'
+import { clearRefCache, resolveRefToSha } from '@socketsecurity/lib/github/refs'
+import {
   getGitHubToken,
   getGitHubTokenFromGitConfig,
   getGitHubTokenWithFallback,
-  resolveRefToSha,
-} from '@socketsecurity/lib/github'
+} from '@socketsecurity/lib/github/token'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'

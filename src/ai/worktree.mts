@@ -60,7 +60,7 @@ export interface WorktreeRunSettled<T> {
   readonly error?: unknown
   readonly merged: boolean
   readonly status: 'fulfilled' | 'rejected'
-  readonly value?: T
+  readonly value?: T | undefined
   readonly worktreePath: string
 }
 

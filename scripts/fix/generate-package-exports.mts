@@ -24,7 +24,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Constants for socket-lib
 const constants = {
-  EXT_DTS: '.d.ts',
   EXT_JSON: '.json',
   registryPkgPath: path.join(__dirname, '..', '..'),
   ignoreGlobs: [
@@ -39,7 +38,7 @@ const constants = {
   PACKAGE_DEFAULT_NODE_RANGE: '>=22',
 }
 
-const { EXT_DTS, EXT_JSON } = constants
+const { EXT_JSON } = constants
 
 /**
  * Generate exports and browser fields for registry package.
@@ -69,7 +68,7 @@ async function main(): Promise<void> {
   }
 
   const registryPkgFiles = [
-    ...(await fastGlob.glob(['**/*.{cjs,js,json,d.ts}'], {
+    ...(await fastGlob.glob(['**/*.{cjs,js,mjs,json,d.ts,d.mts,d.cts}'], {
       cwd: registryPkgPath,
       ignore: [
         '**/node_modules/**',
@@ -114,8 +113,25 @@ async function main(): Promise<void> {
   )
 
   const jsonExports = {}
+  // Detect declaration files with their full compound extension so the
+  // public path strips `.d.ts` / `.d.mts` / `.d.cts` and the
+  // `types` condition points at the right artifact.
+  const detectExt = (p: string): string => {
+    if (p.endsWith('.d.ts')) {
+      return '.d.ts'
+    }
+    if (p.endsWith('.d.mts')) {
+      return '.d.mts'
+    }
+    if (p.endsWith('.d.cts')) {
+      return '.d.cts'
+    }
+    return path.extname(p)
+  }
+  const isDtsExt = (ext: string): boolean =>
+    ext === '.d.ts' || ext === '.d.mts' || ext === '.d.cts'
   const subpathExports = registryPkgFiles.reduce((o, p) => {
-    const ext = p.endsWith(EXT_DTS) ? EXT_DTS : path.extname(p)
+    const ext = detectExt(p)
     // Strip 'dist/' prefix from export path but keep it in file path.
     const exportPath = p.startsWith('dist/') ? p.slice(5) : p
     const filePath = `./${p}`
@@ -123,7 +139,7 @@ async function main(): Promise<void> {
     if (ext === EXT_JSON) {
       jsonExports[`./${exportPath}`] = filePath
     } else {
-      const isDts = ext === EXT_DTS
+      const isDts = isDtsExt(ext)
       const basename = path.basename(exportPath, ext)
       // For index files, expose only the directory path (e.g., './themes'),
       // not the redundant './themes/index' form.
