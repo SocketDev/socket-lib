@@ -13,7 +13,7 @@
 import { describe, expect, it } from 'vitest'
 import colors from 'yoctocolors-cjs'
 
-import { stripAnsi } from '@socketsecurity/lib/strings'
+import { stripAnsi } from '@socketsecurity/lib/ansi'
 import { formatSimpleTable, formatTable } from '@socketsecurity/lib/tables'
 
 describe('tables', () => {

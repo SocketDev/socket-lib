@@ -70,22 +70,22 @@ export async function transformPrimordials(
 
   // The codemod needs to know which primordials we export so it doesn't
   // try to call out to identifiers we haven't actually exported. Read
-  // the surface from src/primordials.ts (the ESM source) rather than
-  // dist/primordials.js (esbuild-compiled with a `__export(obj, {…})`
-  // form parseExports doesn't recognize). The runtime require still
-  // points at dist/primordials.js — we just use the .ts source as a
-  // catalog of names.
-  const srcPrimordialsTs = path.join(distRoot, '..', 'src', 'primordials.ts')
-  const surface = loadPrimordialsSurface(distRoot, srcPrimordialsTs)
+  // the surface from src/primordials/ (the directory of ESM leaves
+  // post-split) rather than dist/primordials/*.js (esbuild-compiled
+  // with a `__export(obj, {…})` form parseExports doesn't recognize).
+  // `loadPrimordialsSurface` concatenates every leaf in the directory
+  // and parses the unified output as a single primordials surface.
+  const srcPrimordialsDir = path.join(distRoot, '..', 'src', 'primordials')
+  const surface = loadPrimordialsSurface(distRoot, srcPrimordialsDir)
 
-  // Per-file specifier: walk up from the bundle to dist/, then down to
-  // primordials.js. We strip a leading './' replacement because Node's
-  // CJS resolver requires either an absolute path or one starting with
-  // `./`/`../`; bare 'primordials.js' would trigger a node_modules
-  // lookup. Forward-slash normalize for Windows.
-  const runtimePrimordialsAbs = path.join(distRoot, 'primordials.js')
-  const specifier = (absFile: string) => {
-    const rel = path.relative(path.dirname(absFile), runtimePrimordialsAbs)
+  // Per-leaf specifier: walk up from the bundle to dist/, then down to
+  // primordials/<leaf>.js. We strip a leading './' replacement because
+  // Node's CJS resolver requires either an absolute path or one
+  // starting with `./`/`../`; bare 'primordials/x.js' would trigger a
+  // node_modules lookup. Forward-slash normalize for Windows.
+  const leafSpecifier = (absFile: string, leaf: string) => {
+    const target = path.join(distRoot, 'primordials', `${leaf}.js`)
+    const rel = path.relative(path.dirname(absFile), target)
     const normalized = rel.split(path.sep).join('/')
     return normalized.startsWith('.') ? normalized : `./${normalized}`
   }
@@ -102,7 +102,18 @@ export async function transformPrimordials(
     exported: surface.exports,
     apply: true,
     includeGuessed: false,
-    importStyle: { kind: 'cjs', specifier, aliasPrefix: '_p_' },
+    importStyle: {
+      kind: 'cjs',
+      // splitByLeaf is the active path; specifier is unused but
+      // required by the type — pass a sentinel that would trip a
+      // sanity check if accidentally used.
+      specifier: () => '<unused: splitByLeaf is set>',
+      aliasPrefix: '_p_',
+      splitByLeaf: {
+        exportToLeaf: surface.exportToLeaf,
+        leafSpecifier,
+      },
+    },
   })
 
   if (!quiet && result.filesChanged > 0) {

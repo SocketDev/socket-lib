@@ -2,7 +2,7 @@
  * @fileoverview Coverage output formatters.
  */
 
-import { indentString } from '../strings'
+import { indentString } from '../strings/format'
 
 import type { FormatCoverageOptions } from './types'
 

@@ -38,7 +38,8 @@ import { MathMin } from '../primordials/math'
 import { ReflectApply } from '../primordials/reflect'
 
 import { StringPrototypeReplace } from '../primordials/string'
-import { applyLinePrefix, isBlankString } from '../strings'
+import { applyLinePrefix } from '../strings/format'
+import { isBlankString } from '../strings/predicates'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
 

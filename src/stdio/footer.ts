@@ -4,7 +4,7 @@
  */
 
 import colors from '../external/yoctocolors-cjs'
-import { repeatString } from '../strings'
+import { repeatString } from '../strings/format'
 
 import { ArrayPrototypePush } from '../primordials/array'
 

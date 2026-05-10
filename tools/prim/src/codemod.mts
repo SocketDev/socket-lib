@@ -68,7 +68,16 @@ const DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
  * `const { ObjectDefineProperty: _p_ObjectDefineProperty } = …`,
  * avoiding any clash with the bundle's own identifiers.
  *
- * @typedef {{ kind: 'esm' | 'cjs', specifier: string | ((absFile: string) => string), aliasPrefix?: string }} ImportStyle
+ * `splitByLeaf` (optional) groups identifiers by leaf name and emits
+ * one import / require per leaf. Used after the primordials split,
+ * where consumers no longer share a single barrel — instead each
+ * primordial lives in `@socketsecurity/lib/primordials/<leaf>`.
+ * `exportToLeaf` maps every export name to its leaf; `leafSpecifier`
+ * receives the consumer's absolute path plus the leaf name and
+ * returns the import target. When `splitByLeaf` is set, the top-level
+ * `specifier` is ignored.
+ *
+ * @typedef {{ kind: 'esm' | 'cjs', specifier: string | ((absFile: string) => string), aliasPrefix?: string, splitByLeaf?: { exportToLeaf: Map<string, string>, leafSpecifier: (absFile: string, leaf: string) => string } }} ImportStyle
  */
 
 /**
@@ -568,19 +577,57 @@ async function rewriteFile({
 
   // Add the import/require block. Find the last existing import (or
   // require, in CJS mode) and insert after it; if none, prepend.
-  const resolvedSpecifier =
-    typeof importStyle.specifier === 'function'
-      ? importStyle.specifier(absPath)
-      : importStyle.specifier
-  const { newSource, importAdded } = ensureImports(
-    out,
-    [...usedPrimordials].sort(),
-    {
+  let newSource = out
+  let importAdded = false
+  if (importStyle.splitByLeaf) {
+    // Group identifiers by leaf, emit one import per leaf with the
+    // leaf-resolved specifier.
+    const { exportToLeaf, leafSpecifier } = importStyle.splitByLeaf
+    const byLeaf = new Map()
+    const idents = [...usedPrimordials].sort()
+    for (const id of idents) {
+      const leaf = exportToLeaf.get(id)
+      if (!leaf) {
+        // A used primordial not in the leaf map means the surface
+        // catalog and the leaf map drifted — skip it (the codemod
+        // already filtered to `exported`, so this is an internal-
+        // consistency error if it fires).
+        continue
+      }
+      let arr = byLeaf.get(leaf)
+      if (!arr) {
+        arr = []
+        byLeaf.set(leaf, arr)
+      }
+      arr.push(id)
+    }
+    // Sort leaves so emitted blocks are deterministic.
+    for (const leaf of [...byLeaf.keys()].sort()) {
+      const leafIdents = byLeaf.get(leaf).sort()
+      const leafSpec = leafSpecifier(absPath, leaf)
+      const out2 = ensureImports(newSource, leafIdents, {
+        kind: importStyle.kind,
+        specifier: leafSpec,
+        aliasPrefix,
+      })
+      newSource = out2.newSource
+      if (out2.importAdded) {
+        importAdded = true
+      }
+    }
+  } else {
+    const resolvedSpecifier =
+      typeof importStyle.specifier === 'function'
+        ? importStyle.specifier(absPath)
+        : importStyle.specifier
+    const result2 = ensureImports(newSource, [...usedPrimordials].sort(), {
       kind: importStyle.kind,
       specifier: resolvedSpecifier,
       aliasPrefix,
-    },
-  )
+    })
+    newSource = result2.newSource
+    importAdded = result2.importAdded
+  }
 
   if (apply) {
     writeFileSync(absPath, newSource)

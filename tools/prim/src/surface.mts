@@ -7,17 +7,20 @@
  *   1. Explicit `--surface <path>` flag — overrides everything else.
  *      Use this to point at Node.js's `lib/internal/per_context/primordials.js`,
  *      a vendored copy, or any other primordials file.
- *   2. From a sibling socket-lib checkout (`../socket-lib/src/primordials.ts`).
+ *   2. From a sibling socket-lib checkout
+ *      (`../socket-lib/src/primordials/` after the split, with a
+ *      `../socket-lib/src/primordials.ts` legacy fallback).
  *      Used during fleet development — picks up unreleased exports.
- *   3. From the installed `@socketsecurity/lib/dist/primordials.js`. Used
- *      when running the audit on a target that has lib as a dep.
+ *   3. From the installed `@socketsecurity/lib/dist/primordials/` (or
+ *      legacy `dist/primordials.js`). Used when running the audit on a
+ *      target that has lib as a dep.
  *
  * Either way, we parse out the `export const Foo` symbol names — no
  * type info needed. For non-ESM surfaces (Node's per_context primordials
  * use `primordials.X = ...` assignments), we also recognize that form.
  */
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 /**
@@ -181,7 +184,59 @@ function capitalize(s) {
 }
 
 function parseExports(sourcePath) {
-  const src = readFileSync(sourcePath, 'utf8')
+  // Post-split layout: `sourcePath` may be a directory of leaves
+  // (`primordials/`). Concatenate every leaf so the regex passes below
+  // see the same shape as the legacy single-file path. Track which
+  // leaf each name came from so the codemod can emit per-leaf imports
+  // (transform-primordials uses this).
+  const stat = statSync(sourcePath)
+  let src
+  // exportToLeaf is empty for the legacy single-file path.
+  const exportToLeaf = new Map()
+  if (stat.isDirectory()) {
+    const parts = []
+    for (const name of readdirSync(sourcePath).sort()) {
+      if (
+        !(
+          name.endsWith('.ts') ||
+          name.endsWith('.mts') ||
+          name.endsWith('.cts') ||
+          name.endsWith('.js') ||
+          name.endsWith('.d.ts')
+        )
+      ) {
+        continue
+      }
+      const full = path.join(sourcePath, name)
+      if (!statSync(full).isFile()) {
+        continue
+      }
+      const leafContent = readFileSync(full, 'utf8')
+      // Strip extensions to produce the leaf name (e.g. `array.ts` →
+      // `array`, `globals.d.ts` → `globals`).
+      const leafName = name.replace(/\.(?:d\.)?[mc]?ts$|\.js$/, '')
+      // Walk the leaf content and tag each export name with the leaf.
+      // This is intentionally narrower than parseExports below — we
+      // only need to know "which leaf does Foo live in", not the
+      // nullable info or per_context heuristics.
+      for (const m of leafContent.matchAll(/^export const ([A-Z][a-zA-Z0-9]+)/gm)) {
+        exportToLeaf.set(m[1], leafName)
+      }
+      for (const m of leafContent.matchAll(/^export function ([A-Z][a-zA-Z0-9]+)/gm)) {
+        exportToLeaf.set(m[1], leafName)
+      }
+      // Also capture lower-case helpers (`uncurryThis`, `applyBind`,
+      // `applySafe`, `bindCall`, `weakRefSafe`) since the codemod
+      // emits these for the bundle transform.
+      for (const m of leafContent.matchAll(/^export const ([a-z][a-zA-Z0-9]+)/gm)) {
+        exportToLeaf.set(m[1], leafName)
+      }
+      parts.push(leafContent)
+    }
+    src = parts.join('\n')
+  } else {
+    src = readFileSync(sourcePath, 'utf8')
+  }
   const exports = new Set()
   const nullable = new Set()
   // ESM inline form: `export const Foo = …`
@@ -221,7 +276,7 @@ function parseExports(sourcePath) {
       exports.add(name)
     }
   }
-  return { exports, nullable }
+  return { exports, nullable, exportToLeaf }
 }
 
 /**
@@ -229,8 +284,14 @@ function parseExports(sourcePath) {
  *
  * Lookup order:
  *   1. Explicit `surfacePath` argument (from `--surface <path>` CLI flag).
- *   2. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling checkout).
- *   3. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`.
+ *   2. `<targetRoot>/../socket-lib/src/primordials/` (sibling, post-split
+ *      directory layout).
+ *   3. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling, legacy
+ *      single-file layout).
+ *   4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/`
+ *      (installed, post-split).
+ *   5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`
+ *      (installed, legacy).
  *
  * @param {string} targetRoot - The repo being audited.
  * @param {string} [surfacePath] - Explicit path to a primordials source file.
@@ -244,17 +305,38 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
     }
     return { source: resolved, ...parseExports(resolved) }
   }
-  const sibling = path.resolve(
+  const siblingDir = path.resolve(
+    targetRoot,
+    '..',
+    'socket-lib',
+    'src',
+    'primordials',
+  )
+  if (existsSync(siblingDir)) {
+    return { source: siblingDir, ...parseExports(siblingDir) }
+  }
+  const siblingLegacy = path.resolve(
     targetRoot,
     '..',
     'socket-lib',
     'src',
     'primordials.ts',
   )
-  if (existsSync(sibling)) {
-    return { source: sibling, ...parseExports(sibling) }
+  if (existsSync(siblingLegacy)) {
+    return { source: siblingLegacy, ...parseExports(siblingLegacy) }
   }
-  const installed = path.join(
+  const installedDir = path.join(
+    targetRoot,
+    'node_modules',
+    '@socketsecurity',
+    'lib',
+    'dist',
+    'primordials',
+  )
+  if (existsSync(installedDir)) {
+    return { source: installedDir, ...parseExports(installedDir) }
+  }
+  const installedLegacy = path.join(
     targetRoot,
     'node_modules',
     '@socketsecurity',
@@ -262,11 +344,11 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
     'dist',
     'primordials.js',
   )
-  if (existsSync(installed)) {
-    return { source: installed, ...parseExports(installed) }
+  if (existsSync(installedLegacy)) {
+    return { source: installedLegacy, ...parseExports(installedLegacy) }
   }
   throw new Error(
-    `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${sibling}\n  ${installed}\n` +
+    `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
       `Pass --surface <path> to specify a primordials source explicitly.`,
   )
 }

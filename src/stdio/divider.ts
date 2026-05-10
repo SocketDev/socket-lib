@@ -3,7 +3,7 @@
  * Provides various line styles for visual separation in CLI output.
  */
 
-import { repeatString } from '../strings'
+import { repeatString } from '../strings/format'
 
 export interface DividerOptions {
   /**

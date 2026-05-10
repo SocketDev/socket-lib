@@ -4,7 +4,7 @@
  */
 
 import colors from './external/yoctocolors-cjs'
-import { stringWidth } from './strings'
+import { stringWidth } from './strings/width'
 
 import { ArrayPrototypePush } from './primordials/array'
 

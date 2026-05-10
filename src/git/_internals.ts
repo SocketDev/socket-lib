@@ -14,7 +14,7 @@ import { JSONStringify } from '../primordials/json'
 import { MapCtor } from '../primordials/map-set'
 import { StringPrototypeSubstring } from '../primordials/string'
 import { spawn, spawnSync } from '../spawn/core'
-import { stripAnsi } from '../strings'
+import { stripAnsi } from '../ansi'
 import { findGitRoot, getCachedRealpath, getCwd, getPath } from './repo'
 
 import type { GitDiffOptions } from './types'

@@ -6,7 +6,8 @@
 import process from 'node:process'
 
 import colors from '../external/yoctocolors-cjs'
-import { repeatString, stripAnsi } from '../strings'
+import { stripAnsi } from '../ansi'
+import { repeatString } from '../strings/format'
 
 import { DateNow } from '../primordials/date'
 

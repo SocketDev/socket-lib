@@ -6,7 +6,7 @@
  * file from the public exports map.
  */
 
-import { stripAnsi } from '../strings'
+import { stripAnsi } from '../ansi'
 import { MapCtor, WeakMapCtor } from '../primordials/map-set'
 // @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from '../external/@npmcli/promise-spawn'

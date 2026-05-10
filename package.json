@@ -998,11 +998,6 @@
       "types": "./dist/performance.d.ts",
       "default": "./dist/performance.js"
     },
-    "./primordials": {
-      "source": "./src/primordials.ts",
-      "types": "./dist/primordials.d.ts",
-      "default": "./dist/primordials.js"
-    },
     "./primordials/array": {
       "source": "./src/primordials/array.ts",
       "types": "./dist/primordials/array.d.ts",
@@ -1313,10 +1308,35 @@
       "types": "./dist/streams.d.ts",
       "default": "./dist/streams.js"
     },
-    "./strings": {
-      "source": "./src/strings.ts",
-      "types": "./dist/strings.d.ts",
-      "default": "./dist/strings.js"
+    "./strings/format": {
+      "source": "./src/strings/format.ts",
+      "types": "./dist/strings/format.d.ts",
+      "default": "./dist/strings/format.js"
+    },
+    "./strings/predicates": {
+      "source": "./src/strings/predicates.ts",
+      "types": "./dist/strings/predicates.d.ts",
+      "default": "./dist/strings/predicates.js"
+    },
+    "./strings/search": {
+      "source": "./src/strings/search.ts",
+      "types": "./dist/strings/search.d.ts",
+      "default": "./dist/strings/search.js"
+    },
+    "./strings/transform": {
+      "source": "./src/strings/transform.ts",
+      "types": "./dist/strings/transform.d.ts",
+      "default": "./dist/strings/transform.js"
+    },
+    "./strings/types": {
+      "source": "./src/strings/types.ts",
+      "types": "./dist/strings/types.d.ts",
+      "default": "./dist/strings/types.js"
+    },
+    "./strings/width": {
+      "source": "./src/strings/width.ts",
+      "types": "./dist/strings/width.d.ts",
+      "default": "./dist/strings/width.js"
     },
     "./suppress-warnings": {
       "source": "./src/suppress-warnings.ts",

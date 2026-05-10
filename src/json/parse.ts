@@ -6,7 +6,7 @@
  */
 
 import { validateSchema } from '../schema/validate'
-import { stripBom } from '../strings'
+import { stripBom } from '../strings/transform'
 import type { Schema } from '../schema/types'
 import { BufferByteLength } from '../primordials/buffer'
 import { ErrorCtor } from '../primordials/error'

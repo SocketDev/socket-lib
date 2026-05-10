@@ -5,7 +5,7 @@
 import npmPackageArg from '../external/npm-package-arg'
 
 import { isObjectObject } from '../objects'
-import { isNonEmptyString } from '../strings'
+import { isNonEmptyString } from '../strings/predicates'
 
 import { StringPrototypeEndsWith } from '../primordials/string'
 /**
