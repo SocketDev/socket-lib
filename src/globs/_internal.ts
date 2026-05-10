@@ -1,55 +1,28 @@
 /**
  * @fileoverview Private internals for `globs/*` modules — lazy module
- * accessors, default ignore list, normalization helpers, and the
- * matcher LRU cache. Underscore prefix excludes from public exports.
+ * accessors, normalization helpers, and the matcher LRU cache. The
+ * `defaultIgnore` list lives in the public `defaults.ts` file; this
+ * file re-exports it so co-located helpers can import everything
+ * through one path.
  */
 
-import { objectFreeze as ObjectFreeze } from '../objects/mutate'
-import { normalizePath } from '../paths/normalize'
 import { ArrayCtor, ArrayIsArray } from '../primordials/array'
 import { MapCtor } from '../primordials/map-set'
 import { StringPrototypeCharCodeAt } from '../primordials/string'
+import { normalizePath } from '../paths/normalize'
+
+import { defaultIgnore } from './defaults'
 
 import type * as fastGlobType from '../external/fast-glob'
 import type picomatchType from '../external/picomatch'
+
+export { defaultIgnore }
 
 export const MATCHER_CACHE_MAX_SIZE = 100
 // LRU cache. We exploit Map's insertion-order iteration so eviction is O(1):
 // delete the first key. On read, delete + set moves the entry to the back,
 // keeping the cache in recency order.
 export const matcherCache = new MapCtor<string, (path: string) => boolean>()
-
-export const defaultIgnore = ObjectFreeze([
-  // https://docs.npmjs.com/cli/v10/configuring-npm/package-json#files
-  '**/.git',
-  '**/.npmrc',
-  '**/node_modules',
-  // https://github.com/npm/npm-packlist/blob/v10.0.0/lib/index.js#L15-L38
-  '**/.DS_Store',
-  '**/.gitignore',
-  '**/.hg',
-  '**/.lock-wscript',
-  '**/.npmignore',
-  '**/.svn',
-  '**/.wafpickle-*',
-  '**/.*.swp',
-  '**/._*/**',
-  '**/archived-packages/**',
-  '**/build/config.gypi',
-  '**/CVS',
-  '**/npm-debug.log',
-  '**/*.orig',
-  // Inline generic socket-registry .gitignore entries.
-  '**/.env',
-  '**/.eslintcache',
-  '**/.nvm',
-  '**/.tap',
-  '**/.vscode',
-  '**/*.tsbuildinfo',
-  '**/Thumbs.db',
-  // Inline additional ignores.
-  '**/bower_components',
-])
 
 let _fastGlob: typeof fastGlobType | undefined
 let _fs: typeof import('node:fs') | undefined
@@ -157,7 +130,3 @@ export function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
   }
   return normalized
 }
-
-// Re-export defaultIgnore for public consumption (some consumers use
-// it as a starting point for their own ignore arrays).
-export { defaultIgnore as defaultIgnoreList }

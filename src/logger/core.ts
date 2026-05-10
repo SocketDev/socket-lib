@@ -57,7 +57,7 @@ import {
   lastWasBlankSymbol,
 } from './symbols'
 
-import { constructConsole, ensurePrototypeInitialized } from './console-init'
+import { constructConsole, ensurePrototypeInitialized } from './console'
 
 import type { LogSymbols, Task } from './types'
 

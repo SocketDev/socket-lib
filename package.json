@@ -838,10 +838,10 @@
       "types": "./dist/logger/colors.d.ts",
       "default": "./dist/logger/colors.js"
     },
-    "./logger/console-init": {
-      "source": "./src/logger/console-init.ts",
-      "types": "./dist/logger/console-init.d.ts",
-      "default": "./dist/logger/console-init.js"
+    "./logger/console": {
+      "source": "./src/logger/console.ts",
+      "types": "./dist/logger/console.d.ts",
+      "default": "./dist/logger/console.js"
     },
     "./logger/core": {
       "source": "./src/logger/core.ts",
@@ -1308,6 +1308,11 @@
       "types": "./dist/spinner/core.d.ts",
       "default": "./dist/spinner/core.js"
     },
+    "./spinner/format": {
+      "source": "./src/spinner/format.ts",
+      "types": "./dist/spinner/format.d.ts",
+      "default": "./dist/spinner/format.js"
+    },
     "./spinner/registry": {
       "source": "./src/spinner/registry.ts",
       "types": "./dist/spinner/registry.d.ts",
@@ -1317,11 +1322,6 @@
       "source": "./src/spinner/types.ts",
       "types": "./dist/spinner/types.d.ts",
       "default": "./dist/spinner/types.js"
-    },
-    "./spinner/utils": {
-      "source": "./src/spinner/utils.ts",
-      "types": "./dist/spinner/utils.d.ts",
-      "default": "./dist/spinner/utils.js"
     },
     "./spinner/with": {
       "source": "./src/spinner/with.ts",

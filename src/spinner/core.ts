@@ -51,7 +51,7 @@ import {
   desc,
   formatProgress,
   normalizeText,
-} from './utils'
+} from './format'
 
 import type {
   ProgressInfo,

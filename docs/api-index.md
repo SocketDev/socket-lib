@@ -239,13 +239,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## globs/
 
-| Subpath                                                          | Description                                                                                                                               |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/globs/defaults`](../src/globs/defaults.ts) | Public re-export of `defaultIgnore` — the npm-packlist- derived ignore list used as a starting point for caller-customized ignore arrays. |
-| [`@socketsecurity/lib/globs/glob`](../src/globs/glob.ts)         | `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up.                      |
-| [`@socketsecurity/lib/globs/matcher`](../src/globs/matcher.ts)   | `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache.                                                    |
-| [`@socketsecurity/lib/globs/stream`](../src/globs/stream.ts)     | `globStreamLicenses` — license-file discovery as an async stream.                                                                         |
-| [`@socketsecurity/lib/globs/types`](../src/globs/types.ts)       | Public type surface for `globs/*` modules.                                                                                                |
+| Subpath                                                          | Description                                                                                                          |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/globs/defaults`](../src/globs/defaults.ts) | The npm-packlist-derived `defaultIgnore` list.                                                                       |
+| [`@socketsecurity/lib/globs/glob`](../src/globs/glob.ts)         | `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up. |
+| [`@socketsecurity/lib/globs/matcher`](../src/globs/matcher.ts)   | `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache.                               |
+| [`@socketsecurity/lib/globs/stream`](../src/globs/stream.ts)     | `globStreamLicenses` — license-file discovery as an async stream.                                                    |
+| [`@socketsecurity/lib/globs/types`](../src/globs/types.ts)       | Public type surface for `globs/*` modules.                                                                           |
 
 ## http-request/
 
@@ -270,14 +270,14 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## logger/
 
-| Subpath                                                                    | Description                                                                                                                                                                            |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/logger/colors`](../src/logger/colors.ts)             | Color application helpers for `logger/*` modules.                                                                                                                                      |
-| [`@socketsecurity/lib/logger/console-init`](../src/logger/console-init.ts) | Lazy `Console` construction + dynamic prototype mirroring for `Logger`.                                                                                                                |
-| [`@socketsecurity/lib/logger/core`](../src/logger/core.ts)                 | The `Logger` class — the public class surface for `logger/*`.                                                                                                                          |
-| [`@socketsecurity/lib/logger/default`](../src/logger/default.ts)           | Module-singleton owner for the shared default `Logger` instance.                                                                                                                       |
-| [`@socketsecurity/lib/logger/symbols`](../src/logger/symbols.ts)           | Symbol exports + the `LOG_SYMBOLS` proxy.                                                                                                                                              |
-| [`@socketsecurity/lib/logger/types`](../src/logger/types.ts)               | Public type surface for `logger/*` modules — the `LogSymbols` shape, the `LoggerMethods` mapped type that mirrors `console`, and the `Task` interface returned by `Logger.createTask`. |
+| Subpath                                                          | Description                                                                                                                                                                            |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/logger/colors`](../src/logger/colors.ts)   | Color application helpers for `logger/*` modules.                                                                                                                                      |
+| [`@socketsecurity/lib/logger/console`](../src/logger/console.ts) | Lazy `Console` construction + dynamic prototype mirroring for `Logger`.                                                                                                                |
+| [`@socketsecurity/lib/logger/core`](../src/logger/core.ts)       | The `Logger` class — the public class surface for `logger/*`.                                                                                                                          |
+| [`@socketsecurity/lib/logger/default`](../src/logger/default.ts) | Module-singleton owner for the shared default `Logger` instance.                                                                                                                       |
+| [`@socketsecurity/lib/logger/symbols`](../src/logger/symbols.ts) | Symbol exports + the `LOG_SYMBOLS` proxy.                                                                                                                                              |
+| [`@socketsecurity/lib/logger/types`](../src/logger/types.ts)     | Public type surface for `logger/*` modules — the `LogSymbols` shape, the `LoggerMethods` mapped type that mirrors `console`, and the `Task` interface returned by `Logger.createTask`. |
 
 ## node/
 
@@ -417,9 +417,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                              | Description                                                                                                                                                                                                                  |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/spinner/core`](../src/spinner/core.ts)         | Spinner factory — builds the lazy-init `Spinner` class that wraps `yocto-spinner` with Socket-specific behaviors (custom RGB color pipeline, shimmer, progress bar, indented step messages, status methods that don't aut... |
+| [`@socketsecurity/lib/spinner/format`](../src/spinner/format.ts)     | Stateless helpers shared by `spinner/*` modules — the `ciSpinner` constant for non-interactive output, the `COLOR_INHERIT` sentinel for shimmer color references, plus pure formatters (`desc`, `formatProgress`, `normal... |
 | [`@socketsecurity/lib/spinner/registry`](../src/spinner/registry.ts) | Spinner-style registry — exposes the union of the standard `cli-spinners` collection and Socket's custom `socket` pulse animation, plus a lazy default-spinner singleton.                                                    |
 | [`@socketsecurity/lib/spinner/types`](../src/spinner/types.ts)       | Public type surface for `spinner/*` modules — the `Spinner` instance shape, configuration option records, progress and shimmer state types, plus the `withSpinner*` option records.                                          |
-| [`@socketsecurity/lib/spinner/utils`](../src/spinner/utils.ts)       | Stateless helpers shared by `spinner/*` modules — the `ciSpinner` constant for non-interactive output, the `COLOR_INHERIT` sentinel for shimmer color references, plus pure formatters (`desc`, `formatProgress`, `normal... |
 | [`@socketsecurity/lib/spinner/with`](../src/spinner/with.ts)         | Lifecycle wrappers around `Spinner` — `withSpinner` (async, push-pop options + auto-stop), `withSpinnerRestore` (conditionally restart a previously-spinning instance), and `withSpinnerSync` (sync sibling of `withSpinn... |
 
 ## stdio/
