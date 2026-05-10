@@ -2,11 +2,10 @@
  * @fileoverview GitHub release archive download + extraction.
  */
 
-import {
-  type ArchiveFormat,
-  detectArchiveFormat,
-  extractArchive,
-} from '../archives'
+import { detectArchiveFormat } from '../archives/detect'
+import { extractArchive } from '../archives/extract'
+
+import type { ArchiveFormat } from '../archives/types'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { getDefaultLogger } from '../logger/default'
 import { ErrorCtor } from '../primordials/error'

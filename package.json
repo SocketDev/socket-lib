@@ -133,10 +133,30 @@
       "types": "./dist/ansi.d.ts",
       "default": "./dist/ansi.js"
     },
-    "./archives": {
-      "source": "./src/archives.ts",
-      "types": "./dist/archives.d.ts",
-      "default": "./dist/archives.js"
+    "./archives/detect": {
+      "source": "./src/archives/detect.ts",
+      "types": "./dist/archives/detect.d.ts",
+      "default": "./dist/archives/detect.js"
+    },
+    "./archives/extract": {
+      "source": "./src/archives/extract.ts",
+      "types": "./dist/archives/extract.d.ts",
+      "default": "./dist/archives/extract.js"
+    },
+    "./archives/tar": {
+      "source": "./src/archives/tar.ts",
+      "types": "./dist/archives/tar.d.ts",
+      "default": "./dist/archives/tar.js"
+    },
+    "./archives/types": {
+      "source": "./src/archives/types.ts",
+      "types": "./dist/archives/types.d.ts",
+      "default": "./dist/archives/types.js"
+    },
+    "./archives/zip": {
+      "source": "./src/archives/zip.ts",
+      "types": "./dist/archives/zip.d.ts",
+      "default": "./dist/archives/zip.js"
     },
     "./argv/flags": {
       "source": "./src/argv/flags.ts",

@@ -10,7 +10,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { detectArchiveFormat } from '@socketsecurity/lib/archives'
+import { detectArchiveFormat } from '@socketsecurity/lib/archives/detect'
 
 describe('releases-github-archive', () => {
   describe('archive format detection', () => {
