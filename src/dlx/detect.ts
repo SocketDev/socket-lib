@@ -17,8 +17,11 @@
 import { isInSocketDlx } from './paths'
 import { getSocketDlxDir } from '../paths/socket'
 
-import { DateNow, JSONParse, MapCtor, SetCtor } from '../primordials'
+import { DateNow } from '../primordials/date'
 
+import { JSONParse } from '../primordials/json'
+
+import { MapCtor, SetCtor } from '../primordials/map-set'
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 

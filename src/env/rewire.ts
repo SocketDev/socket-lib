@@ -14,8 +14,9 @@ import process from 'node:process'
 import { hasOwn } from '../objects'
 import { envAsBoolean } from './helpers'
 
-import { MapCtor, ObjectEntries } from '../primordials'
+import { MapCtor } from '../primordials/map-set'
 
+import { ObjectEntries } from '../primordials/object'
 let _async_hooks: typeof import('node:async_hooks') | undefined
 /**
  * Lazily load the async_hooks module to avoid Webpack errors.

@@ -20,14 +20,13 @@ import { normalizeHash } from './integrity'
 import type { HashSpec } from './integrity'
 import type { SpawnExtra, SpawnOptions } from '../spawn/types'
 
-import {
-  ArrayIsArray,
-  ArrayPrototypeFind,
-  DateNow,
-  ErrorCtor,
-  StringPrototypeStartsWith,
-} from '../primordials'
+import { ArrayIsArray, ArrayPrototypeFind } from '../primordials/array'
 
+import { DateNow } from '../primordials/date'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { StringPrototypeStartsWith } from '../primordials/string'
 let _crypto: typeof import('node:crypto') | undefined
 /**
  * Lazily load the crypto module to avoid Webpack errors.

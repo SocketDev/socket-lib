@@ -4,12 +4,11 @@
 
 import process from 'node:process'
 
-import {
-  ObjectGetOwnPropertySymbols,
-  ReflectApply,
-  SetCtor,
-} from './primordials'
+import { SetCtor } from './primordials/map-set'
 
+import { ObjectGetOwnPropertySymbols } from './primordials/object'
+
+import { ReflectApply } from './primordials/reflect'
 // Store the original emitWarning function to avoid repeat wrapping.
 let originalEmitWarning: typeof process.emitWarning | undefined
 

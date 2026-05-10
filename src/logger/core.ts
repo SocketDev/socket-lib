@@ -29,14 +29,15 @@ import process from 'node:process'
 
 import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
 
-import {
-  ArrayPrototypeAt,
-  ArrayPrototypeSlice,
-  ErrorCtor,
-  MathMin,
-  ReflectApply,
-  StringPrototypeReplace,
-} from '../primordials'
+import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { MathMin } from '../primordials/math'
+
+import { ReflectApply } from '../primordials/reflect'
+
+import { StringPrototypeReplace } from '../primordials/string'
 import { applyLinePrefix, isBlankString } from '../strings'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'

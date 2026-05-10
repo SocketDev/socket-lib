@@ -6,13 +6,13 @@ import { indentString } from '../strings'
 
 import type { FormatCoverageOptions } from './types'
 
+import { JSONStringify } from '../primordials/json'
+
 import {
-  JSONStringify,
   NumberIsNaN,
   NumberParseFloat,
   NumberPrototypeToFixed,
-} from '../primordials'
-
+} from '../primordials/number'
 /**
  * Coverage emoji thresholds for visual feedback.
  */

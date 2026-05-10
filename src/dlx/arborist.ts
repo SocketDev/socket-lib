@@ -24,13 +24,13 @@
 import Arborist from '../external/@npmcli/arborist'
 import { getSocketCacacheDir } from '../paths/socket'
 
-import {
-  ArrayPrototypePush,
-  ErrorCtor,
-  JSONParse,
-  ObjectKeys,
-} from '../primordials'
+import { ArrayPrototypePush } from '../primordials/array'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { JSONParse } from '../primordials/json'
+
+import { ObjectKeys } from '../primordials/object'
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {

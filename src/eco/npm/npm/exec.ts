@@ -17,7 +17,7 @@ import { isDebug } from '../../../debug'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
-} from '../../../primordials'
+} from '../../../primordials/array'
 import { spawn } from '../../../spawn/core'
 
 import {

@@ -50,14 +50,11 @@
  * ```
  */
 
-import {
-  ArrayIsArray,
-  ErrorCtor,
-  MathAbs,
-  MathFloor,
-  MathRound,
-} from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { MathAbs, MathFloor, MathRound } from '../primordials/math'
 // === Types ===
 
 /**

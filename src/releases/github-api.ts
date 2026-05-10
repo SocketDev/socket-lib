@@ -8,15 +8,12 @@
  */
 
 import { httpRequest } from '../http-request/request'
-import {
-  ArrayIsArray,
-  DateParse,
-  ErrorCtor,
-  JSONParse,
-  JSONStringify,
-  ObjectFreeze,
-  StringPrototypeStartsWith,
-} from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
+import { DateParse } from '../primordials/date'
+import { ErrorCtor } from '../primordials/error'
+import { JSONParse, JSONStringify } from '../primordials/json'
+import { ObjectFreeze } from '../primordials/object'
+import { StringPrototypeStartsWith } from '../primordials/string'
 import { pRetry } from '../promises/retry'
 
 import { createAssetMatcher } from './github-assets'

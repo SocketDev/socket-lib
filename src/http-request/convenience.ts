@@ -9,8 +9,7 @@
  * never have to inspect `.ok` themselves.
  */
 
-import { ErrorCtor } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
 import { httpRequest } from './request'
 import { HttpResponseError } from './types'
 

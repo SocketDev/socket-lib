@@ -64,8 +64,11 @@ import { getDefaultLogger } from '../logger/default'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 
-import { DateNow, JSONParse, JSONStringify, ObjectKeys } from '../primordials'
+import { DateNow } from '../primordials/date'
 
+import { JSONParse, JSONStringify } from '../primordials/json'
+
+import { ObjectKeys } from '../primordials/object'
 const fs = getFs()
 const path = getPath()
 const logger = getDefaultLogger()

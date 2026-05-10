@@ -8,8 +8,11 @@ import { readJson } from '../fs/read-json'
 import { isObjectObject } from '../objects'
 import { spawn } from '../spawn/core'
 
-import { ArrayIsArray, ErrorCtor, ObjectValues } from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { ObjectValues } from '../primordials/object'
 import type {
   CodeCoverageResult,
   CoverageMetric,

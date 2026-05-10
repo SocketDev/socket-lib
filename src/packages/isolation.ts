@@ -14,14 +14,16 @@ import { readPackageJson } from './operations'
 
 import type { PackageJson } from '../packages'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { JSONParse } from '../primordials/json'
+
+import { ObjectEntries } from '../primordials/object'
+
 import {
-  ErrorCtor,
-  JSONParse,
-  ObjectEntries,
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 export type IsolatePackageOptions = {
   imports?: Record<string, string> | undefined
   install?: ((cwd: string) => Promise<void>) | undefined

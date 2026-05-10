@@ -24,12 +24,9 @@
 
 import process from 'node:process'
 
-import {
-  ObjectDefineProperties,
-  ObjectEntries,
-  ReflectConstruct,
-} from '../primordials'
+import { ObjectDefineProperties, ObjectEntries } from '../primordials/object'
 
+import { ReflectConstruct } from '../primordials/reflect'
 import {
   boundConsoleEntries,
   consolePropAttributes,

@@ -34,10 +34,10 @@ import {
   ArrayIsArray,
   ArrayPrototypeAt,
   ArrayPrototypeSlice,
-  MathMax,
-  ObjectDefineProperties,
-  TypeErrorCtor,
-} from '../primordials'
+} from '../primordials/array'
+import { TypeErrorCtor } from '../primordials/error'
+import { MathMax } from '../primordials/math'
+import { ObjectDefineProperties } from '../primordials/object'
 import { isBlankString, stringWidth } from '../strings'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'

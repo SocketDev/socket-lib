@@ -20,8 +20,7 @@
  *      lookup is expensive enough that caching is worth the memory.
  */
 
-import { MapCtor } from '../primordials'
-
+import { MapCtor } from '../primordials/map-set'
 export const binPathCache = new MapCtor<string, string>()
 
 export const binPathAllCache = new MapCtor<string, string[]>()

@@ -3,8 +3,7 @@
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 
-import { StringPrototypeStartsWith } from '../primordials'
-
+import { StringPrototypeStartsWith } from '../primordials/string'
 let _path: typeof import('node:path') | undefined
 /**
  * Lazily load the path module to avoid Webpack errors.

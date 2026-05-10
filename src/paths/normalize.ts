@@ -7,15 +7,16 @@ import { WIN32 } from '../constants/platform'
 
 import { search } from '../strings'
 
+import { BufferIsBuffer } from '../primordials/buffer'
+
+import { RegExpPrototypeTest } from '../primordials/regexp'
+
 import {
-  BufferIsBuffer,
-  RegExpPrototypeTest,
   StringPrototypeCharAt,
   StringPrototypeCharCodeAt,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 // Character code constants.
 // '\'
 const CHAR_BACKWARD_SLASH = 92

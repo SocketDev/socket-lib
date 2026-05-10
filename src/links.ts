@@ -12,8 +12,7 @@ import type { ColorName } from './colors'
 import type { ThemeName } from './themes/themes'
 import type { Theme } from './themes/types'
 
-import { ArrayIsArray } from './primordials'
-
+import { ArrayIsArray } from './primordials/array'
 /**
  * Options for creating themed links.
  */

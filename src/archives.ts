@@ -14,16 +14,18 @@ import { normalizePath } from './paths/normalize'
 import type AdmZipType from './external/adm-zip'
 import type tarFsType from './external/tar-fs'
 
+import { ArrayFrom, ArrayPrototypeSlice } from './primordials/array'
+
+import { ErrorCtor } from './primordials/error'
+
+import { SetCtor } from './primordials/map-set'
+
+import { PromiseAll } from './primordials/promise'
+
 import {
-  ArrayFrom,
-  ArrayPrototypeSlice,
-  ErrorCtor,
-  PromiseAll,
-  SetCtor,
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
-} from './primordials'
-
+} from './primordials/string'
 /**
  * Archive format type.
  */

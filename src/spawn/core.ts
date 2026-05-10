@@ -35,7 +35,7 @@ import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { getOwn } from '../objects'
 import { isPath } from '../paths/normalize'
-import { RegExpPrototypeTest } from '../primordials'
+import { RegExpPrototypeTest } from '../primordials/regexp'
 import { getDefaultSpinner } from '../spinner/registry'
 
 import {

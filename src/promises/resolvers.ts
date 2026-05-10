@@ -10,12 +10,12 @@
  * the rest of the module.
  */
 
+import { ArrayFromAsync } from '../primordials/array'
+
 import {
-  ArrayFromAsync,
   PromiseCtor,
   PromiseWithResolvers as NativePromiseWithResolvers,
-} from '../primordials'
-
+} from '../primordials/promise'
 import type { PromiseWithResolvers } from './types'
 
 /**

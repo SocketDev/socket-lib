@@ -12,8 +12,11 @@ import { lifecycleScriptNames as lifecycleScriptNamesImport } from './lifecycle-
 import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from './package-default-node-range'
 import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from './package-default-socket-categories'
 
-import { ArrayFrom, ObjectEntries, ReflectGetPrototypeOf } from '../primordials'
+import { ArrayFrom } from '../primordials/array'
 
+import { ObjectEntries } from '../primordials/object'
+
+import { ReflectGetPrototypeOf } from '../primordials/reflect'
 let _lifecycleScriptNames: string[]
 let _packageDefaultNodeRange: string | undefined
 let _packageDefaultSocketCategories: readonly string[]

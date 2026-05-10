@@ -6,8 +6,9 @@
 import colors from '../external/yoctocolors-cjs'
 import { repeatString } from '../strings'
 
-import { ArrayPrototypePush, DateCtor, DateNow } from '../primordials'
+import { ArrayPrototypePush } from '../primordials/array'
 
+import { DateCtor, DateNow } from '../primordials/date'
 export interface FooterOptions {
   /**
    * Width of the footer border in characters.

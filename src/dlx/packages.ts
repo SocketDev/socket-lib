@@ -5,8 +5,9 @@ import { safeDelete, safeDeleteSync } from '../fs/safe'
 import { getSocketDlxDir } from '../paths/socket'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 
-import { ArrayPrototypeFilter, ErrorCtor } from '../primordials'
+import { ArrayPrototypeFilter } from '../primordials/array'
 
+import { ErrorCtor } from '../primordials/error'
 let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.

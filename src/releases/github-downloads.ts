@@ -7,11 +7,11 @@ import process from 'node:process'
 import { safeMkdir } from '../fs/safe'
 import { httpDownload } from '../http-request/download'
 import { getDefaultLogger } from '../logger/default'
+import { ErrorCtor } from '../primordials/error'
 import {
-  ErrorCtor,
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
-} from '../primordials'
+} from '../primordials/string'
 import { spawn } from '../spawn/core'
 
 import { getLatestRelease, getReleaseAssetUrl } from './github-api'

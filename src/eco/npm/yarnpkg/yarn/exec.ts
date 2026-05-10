@@ -17,8 +17,7 @@ import { isDebug } from '../../../../debug'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
-} from '../../../../primordials'
-
+} from '../../../../primordials/array'
 import { isNpmLoglevelFlag, isNpmProgressFlag } from '../../npm/flags'
 import { isPnpmIgnoreScriptsFlag } from '../../pnpm/flags'
 

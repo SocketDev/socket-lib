@@ -7,8 +7,7 @@
  * `normalizeIterationOptions` (concurrency + retries combined).
  */
 
-import { MathMax } from '../primordials'
-
+import { MathMax } from '../primordials/math'
 import { abortSignal } from './_internals'
 
 import type { IterationOptions, RetryOptions } from './types'

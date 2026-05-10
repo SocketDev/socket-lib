@@ -8,8 +8,7 @@
 
 import { jsonParse } from '../json/parse'
 import { getNodeFs } from '../node/fs'
-import { ErrorCtor } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
 import type { PathLike } from 'node:fs'
 
 import type { ReadJsonOptions } from './types'

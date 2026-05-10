@@ -6,15 +6,18 @@ import { isArray } from '../arrays'
 import { LOOP_SENTINEL } from '../constants/core'
 import { isObject, isObjectObject } from '../objects'
 
+import { ArrayPrototypePush } from '../primordials/array'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { SetCtor } from '../primordials/map-set'
+
+import { ObjectGetOwnPropertyNames } from '../primordials/object'
+
 import {
-  ArrayPrototypePush,
-  ErrorCtor,
-  ObjectGetOwnPropertyNames,
-  SetCtor,
   StringPrototypeCharCodeAt,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 /**
  * Find types definition for a specific subpath in package exports.
  *

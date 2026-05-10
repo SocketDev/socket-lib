@@ -7,8 +7,8 @@
  */
 
 import { getNodeFs } from '../node/fs'
-import { JSONStringify, StringPrototypeReplace } from '../primordials'
-
+import { JSONStringify } from '../primordials/json'
+import { StringPrototypeReplace } from '../primordials/string'
 import type { ObjectEncodingOptions, PathLike, WriteFileOptions } from 'node:fs'
 
 import type { JsonReviver } from '../json/types'

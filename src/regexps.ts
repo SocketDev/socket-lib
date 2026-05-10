@@ -4,15 +4,15 @@
  * helpers.
  */
 
+import { MapCtor, SetCtor } from './primordials/map-set'
+
+import { NumberPrototypeToString } from './primordials/number'
+
 import {
-  MapCtor,
-  NumberPrototypeToString,
-  SetCtor,
   StringFromCodePoint,
   StringPrototypeCharCodeAt,
   StringPrototypeCodePointAt,
-} from './primordials'
-
+} from './primordials/string'
 // Spec-compliant fallback for TC39 RegExp.escape (Node 24+ ships native):
 // https://tc39.es/ecma262/#sec-regexp.escape
 // https://tc39.es/ecma262/#sec-encodeforregexpescape

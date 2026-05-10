@@ -20,8 +20,7 @@
  *     so we don't pin the original args for the lifetime of the logger.
  */
 
-import { WeakMapCtor } from '../primordials'
-
+import { WeakMapCtor } from '../primordials/map-set'
 /**
  * The global `console` reference captured at module load. Pinned to
  * a local so dynamic `console` overrides at runtime can't affect the

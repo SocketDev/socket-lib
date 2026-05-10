@@ -6,8 +6,9 @@
  * exposes an idle-wait helper.
  */
 
-import { ErrorCtor, PromiseCtor } from './primordials'
+import { ErrorCtor } from './primordials/error'
 
+import { PromiseCtor } from './primordials/promise'
 type QueuedTask<T> = {
   fn: () => Promise<T>
   resolve: (value: T) => void

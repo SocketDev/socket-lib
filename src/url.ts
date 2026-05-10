@@ -3,12 +3,12 @@
  * Provides URL validation, normalization, and parsing helpers.
  */
 
+import { NumberIsNaN } from './primordials/number'
+
 import {
-  NumberIsNaN,
   StringPrototypeEndsWith,
   StringPrototypeReplace,
-} from './primordials'
-
+} from './primordials/string'
 const BooleanCtor = Boolean
 const UrlCtor = URL
 

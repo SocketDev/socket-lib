@@ -9,12 +9,10 @@ import { whichSync } from '../bin/which'
 import { debugNs } from '../debug'
 import { getGlobMatcher } from '../globs'
 import { normalizePath } from '../paths/normalize'
-import {
-  BufferIsBuffer,
-  JSONStringify,
-  MapCtor,
-  StringPrototypeSubstring,
-} from '../primordials'
+import { BufferIsBuffer } from '../primordials/buffer'
+import { JSONStringify } from '../primordials/json'
+import { MapCtor } from '../primordials/map-set'
+import { StringPrototypeSubstring } from '../primordials/string'
 import { spawn, spawnSync } from '../spawn/core'
 import { stripAnsi } from '../strings'
 import { findGitRoot, getCachedRealpath, getCwd, getPath } from './repo'

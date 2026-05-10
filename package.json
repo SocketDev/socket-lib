@@ -1003,6 +1003,96 @@
       "types": "./dist/primordials.d.ts",
       "default": "./dist/primordials.js"
     },
+    "./primordials/array": {
+      "source": "./src/primordials/array.ts",
+      "types": "./dist/primordials/array.d.ts",
+      "default": "./dist/primordials/array.js"
+    },
+    "./primordials/buffer": {
+      "source": "./src/primordials/buffer.ts",
+      "types": "./dist/primordials/buffer.d.ts",
+      "default": "./dist/primordials/buffer.js"
+    },
+    "./primordials/date": {
+      "source": "./src/primordials/date.ts",
+      "types": "./dist/primordials/date.d.ts",
+      "default": "./dist/primordials/date.js"
+    },
+    "./primordials/error": {
+      "source": "./src/primordials/error.ts",
+      "types": "./dist/primordials/error.d.ts",
+      "default": "./dist/primordials/error.js"
+    },
+    "./primordials/function": {
+      "source": "./src/primordials/function.ts",
+      "types": "./dist/primordials/function.d.ts",
+      "default": "./dist/primordials/function.js"
+    },
+    "./primordials/globals": {
+      "source": "./src/primordials/globals.ts",
+      "types": "./dist/primordials/globals.d.ts",
+      "default": "./dist/primordials/globals.js"
+    },
+    "./primordials/json": {
+      "source": "./src/primordials/json.ts",
+      "types": "./dist/primordials/json.d.ts",
+      "default": "./dist/primordials/json.js"
+    },
+    "./primordials/map-set": {
+      "source": "./src/primordials/map-set.ts",
+      "types": "./dist/primordials/map-set.d.ts",
+      "default": "./dist/primordials/map-set.js"
+    },
+    "./primordials/math": {
+      "source": "./src/primordials/math.ts",
+      "types": "./dist/primordials/math.d.ts",
+      "default": "./dist/primordials/math.js"
+    },
+    "./primordials/number": {
+      "source": "./src/primordials/number.ts",
+      "types": "./dist/primordials/number.d.ts",
+      "default": "./dist/primordials/number.js"
+    },
+    "./primordials/object": {
+      "source": "./src/primordials/object.ts",
+      "types": "./dist/primordials/object.d.ts",
+      "default": "./dist/primordials/object.js"
+    },
+    "./primordials/promise": {
+      "source": "./src/primordials/promise.ts",
+      "types": "./dist/primordials/promise.d.ts",
+      "default": "./dist/primordials/promise.js"
+    },
+    "./primordials/reflect": {
+      "source": "./src/primordials/reflect.ts",
+      "types": "./dist/primordials/reflect.d.ts",
+      "default": "./dist/primordials/reflect.js"
+    },
+    "./primordials/regexp": {
+      "source": "./src/primordials/regexp.ts",
+      "types": "./dist/primordials/regexp.d.ts",
+      "default": "./dist/primordials/regexp.js"
+    },
+    "./primordials/string": {
+      "source": "./src/primordials/string.ts",
+      "types": "./dist/primordials/string.d.ts",
+      "default": "./dist/primordials/string.js"
+    },
+    "./primordials/symbol": {
+      "source": "./src/primordials/symbol.ts",
+      "types": "./dist/primordials/symbol.d.ts",
+      "default": "./dist/primordials/symbol.js"
+    },
+    "./primordials/uncurry": {
+      "source": "./src/primordials/uncurry.ts",
+      "types": "./dist/primordials/uncurry.d.ts",
+      "default": "./dist/primordials/uncurry.js"
+    },
+    "./primordials/url": {
+      "source": "./src/primordials/url.ts",
+      "types": "./dist/primordials/url.d.ts",
+      "default": "./dist/primordials/url.js"
+    },
     "./process-lock": {
       "source": "./src/process-lock.ts",
       "types": "./dist/process-lock.d.ts",

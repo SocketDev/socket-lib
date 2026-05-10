@@ -14,8 +14,7 @@ import { downloadGitHubRelease } from './github-downloads'
 
 import type { AssetPattern, DownloadGitHubReleaseConfig } from './github-types'
 
-import { ErrorCtor } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
 export type { Arch, Libc, Platform }
 
 /**

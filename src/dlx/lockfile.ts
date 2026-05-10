@@ -20,14 +20,14 @@ import { computeHashes } from './integrity'
 
 import type { ComputedHashes } from './integrity'
 
+import { DateCtor, DateNow } from '../primordials/date'
+
+import { JSONStringify } from '../primordials/json'
+
 import {
-  DateCtor,
-  DateNow,
-  JSONStringify,
   StringPrototypeLastIndexOf,
   StringPrototypeSlice,
-} from '../primordials'
-
+} from '../primordials/string'
 let _fs: typeof import('node:fs') | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getFs() {

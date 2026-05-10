@@ -6,8 +6,7 @@
 import colors from '../external/yoctocolors-cjs'
 import { centerText, repeatString } from '../strings'
 
-import { ArrayPrototypePush } from '../primordials'
-
+import { ArrayPrototypePush } from '../primordials/array'
 export interface HeaderOptions {
   /**
    * Width of the header in characters.

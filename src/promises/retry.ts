@@ -9,8 +9,7 @@
  */
 
 import { UNDEFINED_TOKEN } from '../constants/core'
-import { MathFloor, MathMin, MathRandom } from '../primordials'
-
+import { MathFloor, MathMin, MathRandom } from '../primordials/math'
 import { getTimers } from './_internals'
 import { normalizeRetryOptions } from './options'
 

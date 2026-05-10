@@ -49,20 +49,22 @@ import type { HashSpec } from './integrity'
 import type { LockfileSpec } from './lockfile'
 import type { SpawnExtra, SpawnOptions } from '../spawn/types'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { MapCtor, SetCtor } from '../primordials/map-set'
+
+import { ObjectKeys, ObjectValues } from '../primordials/object'
+
+import { PromiseAllSettled } from '../primordials/promise'
+
+import { RegExpPrototypeTest } from '../primordials/regexp'
+
 import {
-  ErrorCtor,
-  MapCtor,
-  ObjectKeys,
-  ObjectValues,
-  PromiseAllSettled,
-  RegExpPrototypeTest,
-  SetCtor,
   StringPrototypeLastIndexOf,
   StringPrototypeReplace,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 

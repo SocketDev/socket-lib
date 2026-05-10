@@ -7,8 +7,7 @@
  */
 
 import { stripAnsi } from '../strings'
-import { MapCtor, WeakMapCtor } from '../primordials'
-
+import { MapCtor, WeakMapCtor } from '../primordials/map-set'
 // @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from '../external/@npmcli/promise-spawn'
 

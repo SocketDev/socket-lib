@@ -14,8 +14,7 @@
  */
 
 import { arrayChunk } from '../arrays'
-import { PromiseAllSettled } from '../primordials'
-
+import { PromiseAllSettled } from '../primordials/promise'
 import { normalizeIterationOptions, normalizeRetryOptions } from './options'
 import { pRetry } from './retry'
 

@@ -29,7 +29,7 @@ import {
 } from '../../constants/node'
 import { findUpSync } from '../../fs/find-up'
 import { getOwn } from '../../objects'
-import { ArrayIsArray } from '../../primordials'
+import { ArrayIsArray } from '../../primordials/array'
 import { spawn } from '../../spawn/core'
 
 import { execNpm } from './npm/exec'

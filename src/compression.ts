@@ -53,8 +53,7 @@ import {
 import { promisify } from 'node:util'
 
 import { safeDelete } from './fs/safe'
-import { StringPrototypeToLowerCase } from './primordials'
-
+import { StringPrototypeToLowerCase } from './primordials/string'
 const brotliCompressAsync = promisify(brotliCompress)
 const brotliDecompressAsync = promisify(brotliDecompress)
 const gzipAsync = promisify(gzip)

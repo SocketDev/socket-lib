@@ -22,17 +22,14 @@
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
-import {
-  BufferConcat,
-  DateNow,
-  ErrorCtor,
-  JSONParse,
-  MathMax,
-  NumberIsNaN,
-  PromiseCtor,
-  URLCtor,
-} from '../primordials'
-
+import { BufferConcat } from '../primordials/buffer'
+import { DateNow } from '../primordials/date'
+import { ErrorCtor } from '../primordials/error'
+import { JSONParse } from '../primordials/json'
+import { MathMax } from '../primordials/math'
+import { NumberIsNaN } from '../primordials/number'
+import { PromiseCtor } from '../primordials/promise'
+import { URLCtor } from '../primordials/url'
 import { getHttp, getHttps } from './_internals'
 import { enrichErrorMessage } from './errors'
 import { HttpResponseError } from './types'

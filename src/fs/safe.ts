@@ -13,12 +13,9 @@ import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { objectFreeze } from '../objects'
 import { pathLikeToString } from '../paths/normalize'
-import {
-  AtomicsWait,
-  Int32ArrayCtor,
-  SharedArrayBufferCtor,
-  StringPrototypeStartsWith,
-} from '../primordials'
+import { AtomicsWait, Int32ArrayCtor } from '../primordials/array'
+import { SharedArrayBufferCtor } from '../primordials/globals'
+import { StringPrototypeStartsWith } from '../primordials/string'
 import { pRetry } from '../promises/retry'
 
 import { getAllowedDirectories } from './_internals'

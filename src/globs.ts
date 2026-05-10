@@ -15,16 +15,18 @@ import { fromAsync } from './promises/resolvers'
 import type * as fastGlobType from './external/fast-glob'
 import type picomatchType from './external/picomatch'
 
+import { ArrayCtor, ArrayIsArray } from './primordials/array'
+
+import { JSONStringify } from './primordials/json'
+
+import { MapCtor } from './primordials/map-set'
+
+import { ObjectKeys } from './primordials/object'
+
 import {
-  ArrayCtor,
-  ArrayIsArray,
-  JSONStringify,
-  MapCtor,
-  ObjectKeys,
   StringPrototypeCharCodeAt,
   StringPrototypeStartsWith,
-} from './primordials'
-
+} from './primordials/string'
 // Type definitions
 type Pattern = string
 

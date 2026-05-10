@@ -16,14 +16,13 @@
 
 import { stackWithCauses } from '../errors'
 import { hasOwn } from '../objects'
+import { ErrorCtor } from '../primordials/error'
 import {
-  ErrorCtor,
   ObjectDefineProperties,
   ObjectDefineProperty,
   ObjectGetOwnPropertyDescriptors,
-  ReflectDeleteProperty,
-} from '../primordials'
-
+} from '../primordials/object'
+import { ReflectDeleteProperty } from '../primordials/reflect'
 import { stackCache } from './_internals'
 
 import type { SpawnError } from './types'

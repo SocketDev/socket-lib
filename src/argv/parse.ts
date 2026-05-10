@@ -8,12 +8,11 @@ import process from 'node:process'
 
 import yargsParser from '../external/yargs-parser'
 
-import {
-  ArrayPrototypeIncludes,
-  ObjectEntries,
-  StringPrototypeStartsWith,
-} from '../primordials'
+import { ArrayPrototypeIncludes } from '../primordials/array'
 
+import { ObjectEntries } from '../primordials/object'
+
+import { StringPrototypeStartsWith } from '../primordials/string'
 /**
  * Yargs parser options interface.
  */

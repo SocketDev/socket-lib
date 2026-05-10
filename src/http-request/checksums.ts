@@ -16,12 +16,12 @@
  * the verification logic close to the manifest source.
  */
 
+import { ErrorCtor } from '../primordials/error'
+
 import {
-  ErrorCtor,
   StringPrototypeSplit,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 import { httpRequest } from './request'
 
 import type { Checksums, FetchChecksumsOptions } from './types'

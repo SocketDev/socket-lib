@@ -11,8 +11,7 @@ import { getCI } from '../../../env/ci'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
-} from '../../../primordials'
-
+} from '../../../primordials/array'
 import { isNpmProgressFlag } from '../npm/flags'
 
 import {

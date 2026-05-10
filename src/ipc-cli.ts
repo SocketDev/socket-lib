@@ -7,8 +7,7 @@
  * for cases where data exceeds env-var size limits.
  */
 
-import { ObjectFreeze } from './primordials'
-
+import { ObjectFreeze } from './primordials/object'
 export interface IpcObject {
   SOCKET_CLI_FIX?: string | undefined
   SOCKET_CLI_OPTIMIZE?: boolean | undefined

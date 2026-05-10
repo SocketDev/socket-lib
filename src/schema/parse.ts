@@ -19,8 +19,7 @@
 import { validateSchema } from './validate'
 import type { Infer } from './types'
 
-import { ErrorCtor } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
 /**
  * Parse `data` against `schema` and return the validated value.
  *

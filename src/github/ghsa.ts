@@ -15,8 +15,8 @@
 import process from 'node:process'
 
 import { httpRequest } from '../http-request/request'
-import { ErrorCtor, JSONParse, JSONStringify } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
+import { JSONParse, JSONStringify } from '../primordials/json'
 import { fetchGitHub } from './fetch'
 import { getGithubCache } from './refs'
 import { getGitHubToken } from './token'

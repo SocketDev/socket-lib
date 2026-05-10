@@ -10,8 +10,9 @@ import {
 } from './constants/core'
 
 import { isArray } from './arrays'
+import { ErrorCtor } from './primordials/error'
+import { SetCtor } from './primordials/map-set'
 import {
-  ErrorCtor,
   ObjectDefineProperties,
   ObjectDefineProperty,
   ObjectFreeze,
@@ -23,9 +24,8 @@ import {
   ObjectKeys,
   ObjectPrototype,
   ObjectSetPrototypeOf,
-  ReflectOwnKeys,
-  SetCtor,
-} from './primordials'
+} from './primordials/object'
+import { ReflectOwnKeys } from './primordials/reflect'
 import { localeCompare } from './sorts'
 
 // Type definitions

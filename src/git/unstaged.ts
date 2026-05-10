@@ -5,7 +5,7 @@
  */
 
 import { normalizePath } from '../paths/normalize'
-import { ArrayPrototypeIncludes } from '../primordials'
+import { ArrayPrototypeIncludes } from '../primordials/array'
 import { getGitDiffSpawnArgs, innerDiff, innerDiffSync } from './_internals'
 import { getCachedRealpath, getCwd, getPath } from './repo'
 

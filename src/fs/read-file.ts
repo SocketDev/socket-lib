@@ -11,8 +11,7 @@
 
 import { getAbortSignal } from '../constants/process'
 import { getNodeFs } from '../node/fs'
-import { BufferIsBuffer } from '../primordials'
-
+import { BufferIsBuffer } from '../primordials/buffer'
 import { normalizeEncoding } from './encoding'
 
 import type { Abortable } from 'node:events'

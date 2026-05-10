@@ -23,7 +23,8 @@
 
 import { WIN32 } from '../constants/platform'
 import { isPath } from '../paths/normalize'
-import { ArrayIsArray, ErrorCtor } from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
+import { ErrorCtor } from '../primordials/error'
 import { spawn } from '../spawn/core'
 
 import { binPathCache, getFs } from './_internals'

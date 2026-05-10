@@ -3,8 +3,9 @@
  * Provides conversion and validation for SSRI and hex hash formats.
  */
 
-import { BufferFrom, BufferPrototypeToString, ErrorCtor } from './primordials'
+import { BufferFrom, BufferPrototypeToString } from './primordials/buffer'
 
+import { ErrorCtor } from './primordials/error'
 /**
  * Convert hex format hash to SSRI format.
  *

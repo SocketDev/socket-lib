@@ -46,8 +46,13 @@ import { getDefaultLogger } from './logger/default'
 import { pRetry } from './promises/retry'
 import { onExit } from './signal-exit'
 
-import { DateNow, ErrorCtor, MapCtor, MathMax, SetCtor } from './primordials'
+import { DateNow } from './primordials/date'
 
+import { ErrorCtor } from './primordials/error'
+
+import { MapCtor, SetCtor } from './primordials/map-set'
+
+import { MathMax } from './primordials/math'
 let _fs: typeof import('node:fs') | undefined
 /**
  * Lazily load the fs module to avoid Webpack errors.

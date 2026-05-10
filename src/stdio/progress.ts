@@ -8,15 +8,13 @@ import process from 'node:process'
 import colors from '../external/yoctocolors-cjs'
 import { repeatString, stripAnsi } from '../strings'
 
-import {
-  DateNow,
-  MathFloor,
-  MathMax,
-  MathMin,
-  ObjectEntries,
-  StringPrototypeReplace,
-} from '../primordials'
+import { DateNow } from '../primordials/date'
 
+import { MathFloor, MathMax, MathMin } from '../primordials/math'
+
+import { ObjectEntries } from '../primordials/object'
+
+import { StringPrototypeReplace } from '../primordials/string'
 export interface ProgressBarOptions {
   /**
    * Width of the progress bar in characters.

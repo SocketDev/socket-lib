@@ -10,15 +10,14 @@ import debugJs from './external/debug'
 
 import { getDefaultLogger } from './logger/default'
 import { hasOwn } from './objects'
+import { ArrayPrototypeAt, ArrayPrototypeSlice } from './primordials/array'
+import { DateNow } from './primordials/date'
+import { MapCtor } from './primordials/map-set'
+import { ReflectApply } from './primordials/reflect'
 import {
-  ArrayPrototypeAt,
-  ArrayPrototypeSlice,
-  DateNow,
-  MapCtor,
-  ReflectApply,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from './primordials'
+} from './primordials/string'
 import { getDefaultSpinner } from './spinner/registry'
 import { applyLinePrefix } from './strings'
 

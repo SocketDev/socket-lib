@@ -6,8 +6,7 @@ import type { ColorValue } from '../colors'
 import type { Palette } from '../effects/shimmer'
 import type { ColorReference, Theme, ThemeColors } from './types'
 
-import { ArrayIsArray } from '../primordials'
-
+import { ArrayIsArray } from '../primordials/array'
 /**
  * Rainbow gradient colors used for the `'rainbow'` color keyword.
  * 10 hues — cycles through the full color spectrum with smooth transitions.

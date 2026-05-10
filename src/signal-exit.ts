@@ -3,8 +3,9 @@
  * Provides cross-platform signal exit detection and cleanup handlers.
  */
 
-import { ErrorCtor, ReflectApply, TypeErrorCtor } from './primordials'
+import { ErrorCtor, TypeErrorCtor } from './primordials/error'
 
+import { ReflectApply } from './primordials/reflect'
 // Inlined signal-exit:
 // https://socket.dev/npm/package/signal-exit/overview/4.1.0
 // ISC License

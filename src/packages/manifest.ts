@@ -24,8 +24,7 @@ import { isRegistryFetcherType } from './validation'
 
 import type { PackageJson, PacoteOptions } from '../packages'
 
-import { ObjectFromEntries } from '../primordials'
-
+import { ObjectFromEntries } from '../primordials/object'
 const abortSignal = getAbortSignal()
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()

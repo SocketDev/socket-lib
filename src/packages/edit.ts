@@ -25,12 +25,11 @@ import { isNodeModules } from '../paths/normalize'
 import { normalizePackageJson } from './normalize'
 import { resolvePackageJsonDirname } from '../paths/packages'
 
-import {
-  ErrorCtor,
-  JSONStringify,
-  StringPrototypeEndsWith,
-} from '../primordials'
+import { ErrorCtor } from '../primordials/error'
 
+import { JSONStringify } from '../primordials/json'
+
+import { StringPrototypeEndsWith } from '../primordials/string'
 // Define the interface for the dynamic class
 interface EditablePackageJsonConstructor {
   new (): EditablePackageJsonInstance

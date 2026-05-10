@@ -15,11 +15,8 @@
 
 import { UNKNOWN_ERROR } from './constants/core'
 import { messageWithCauses, stackWithCauses } from './external/pony-cause'
-import {
-  ObjectPrototypeToString,
-  StringPrototypeCharCodeAt,
-} from './primordials'
-
+import { ObjectPrototypeToString } from './primordials/object'
+import { StringPrototypeCharCodeAt } from './primordials/string'
 export { UNKNOWN_ERROR, messageWithCauses, stackWithCauses }
 
 /**

@@ -6,8 +6,7 @@
 import type { Theme } from './types'
 import { SOCKET_THEME, THEMES, type ThemeName } from './themes'
 
-import { SetCtor } from '../primordials'
-
+import { SetCtor } from '../primordials/map-set'
 let _async_hooks: typeof import('node:async_hooks') | undefined
 
 /**

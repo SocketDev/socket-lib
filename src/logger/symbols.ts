@@ -18,11 +18,11 @@
 
 import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
 
-import {
-  ObjectGetOwnPropertySymbols,
-  ProxyCtor,
-  ReflectOwnKeys,
-} from '../primordials'
+import { ProxyCtor } from '../primordials/globals'
+
+import { ObjectGetOwnPropertySymbols } from '../primordials/object'
+
+import { ReflectOwnKeys } from '../primordials/reflect'
 import { getTheme, onThemeChange } from '../themes/context'
 
 import { applyColor, getYoctocolors } from './colors'

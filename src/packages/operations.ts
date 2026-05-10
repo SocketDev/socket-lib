@@ -43,8 +43,7 @@ import {
   StringPrototypeIndexOf,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 const abortSignal = getAbortSignal()
 const packageExtensions = getPackageExtensions()
 const packumentCache = getPackumentCache()

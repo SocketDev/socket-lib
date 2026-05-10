@@ -3,15 +3,15 @@
 import cacache from './external/cacache'
 import { getSocketCacacheDir } from './paths/socket'
 
+import { TypeErrorCtor } from './primordials/error'
+
+import { RegExpCtor, RegExpPrototypeTest } from './primordials/regexp'
+
 import {
-  RegExpCtor,
-  RegExpPrototypeTest,
   StringPrototypeIncludes,
   StringPrototypeReplaceAll,
   StringPrototypeStartsWith,
-  TypeErrorCtor,
-} from './primordials'
-
+} from './primordials/string'
 export interface GetOptions {
   integrity?: string | undefined
   size?: number | undefined

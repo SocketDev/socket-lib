@@ -8,16 +8,11 @@ import process from 'node:process'
 import { debugLog } from './debug'
 import { errorMessage } from './errors'
 
-import {
-  DateNow,
-  MathMax,
-  MathMin,
-  MathRound,
-  ObjectEntries,
-  ObjectKeys,
-  ObjectValues,
-} from './primordials'
+import { DateNow } from './primordials/date'
 
+import { MathMax, MathMin, MathRound } from './primordials/math'
+
+import { ObjectEntries, ObjectKeys, ObjectValues } from './primordials/object'
 /**
  * Performance metrics collected during execution.
  */

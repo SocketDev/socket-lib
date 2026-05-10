@@ -4,8 +4,7 @@
 
 import { normalizePath } from './normalize'
 
-import { StringPrototypeEndsWith } from '../primordials'
-
+import { StringPrototypeEndsWith } from '../primordials/string'
 let _path: typeof import('node:path') | undefined
 /**
  * Get the path module.

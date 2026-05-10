@@ -24,8 +24,8 @@ import process from 'node:process'
 import { createTtlCache } from '../cache-with-ttl'
 import { errorMessage } from '../errors'
 import { httpRequest } from '../http-request/request'
-import { ErrorCtor, JSONParse, JSONStringify } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
+import { JSONParse, JSONStringify } from '../primordials/json'
 import { fetchGitHub } from './fetch'
 import { getGitHubToken } from './token'
 import {

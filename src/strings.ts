@@ -6,10 +6,11 @@
 import { ansiRegex, stripAnsi } from './ansi'
 import type { eastAsianWidth as eastAsianWidthType } from './external/get-east-asian-width'
 
+import { MathFloor, MathMax } from './primordials/math'
+
+import { RegExpPrototypeTest } from './primordials/regexp'
+
 import {
-  MathFloor,
-  MathMax,
-  RegExpPrototypeTest,
   StringPrototypeCharCodeAt,
   StringPrototypeCodePointAt,
   StringPrototypeIncludes,
@@ -17,8 +18,7 @@ import {
   StringPrototypeReplace,
   StringPrototypeSearch,
   StringPrototypeSlice,
-} from './primordials'
-
+} from './primordials/string'
 let _eastAsianWidth: typeof eastAsianWidthType | undefined
 /*@__NO_SIDE_EFFECTS__*/
 function getEastAsianWidth() {

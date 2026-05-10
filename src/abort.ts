@@ -2,13 +2,11 @@
  * @fileoverview Abort signal utilities.
  */
 
-import {
-  MathCeil,
-  NumberIsFinite,
-  NumberIsNaN,
-  TypeErrorCtor,
-} from './primordials'
+import { TypeErrorCtor } from './primordials/error'
 
+import { MathCeil } from './primordials/math'
+
+import { NumberIsFinite, NumberIsNaN } from './primordials/number'
 /**
  * Create a composite AbortSignal from multiple signals.
  *

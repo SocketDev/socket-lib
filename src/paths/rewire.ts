@@ -8,8 +8,7 @@
  * - Thread-safe for concurrent test execution
  */
 
-import { MapCtor } from '../primordials'
-
+import { MapCtor } from '../primordials/map-set'
 // Shared test hook state (setPath/clearPath/resetPaths in beforeEach/afterEach)
 // IMPORTANT: Use globalThis to ensure singleton across duplicate module instances.
 // Vitest alias resolution can create separate module instances for the same file

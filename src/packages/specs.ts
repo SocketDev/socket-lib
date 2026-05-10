@@ -7,8 +7,7 @@ import npmPackageArg from '../external/npm-package-arg'
 import { isObjectObject } from '../objects'
 import { isNonEmptyString } from '../strings'
 
-import { StringPrototypeEndsWith } from '../primordials'
-
+import { StringPrototypeEndsWith } from '../primordials/string'
 /**
  * Extract user and project from GitHub repository URL.
  *

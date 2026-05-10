@@ -13,13 +13,12 @@ import { findPackageExtensions } from './operations'
 
 import type { NormalizeOptions, PackageJson } from '../packages'
 
+import { RegExpCtor, RegExpPrototypeExec } from '../primordials/regexp'
+
 import {
-  RegExpCtor,
-  RegExpPrototypeExec,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 const ArrayIsArray = Array.isArray
 const ObjectHasOwn = Object.hasOwn
 

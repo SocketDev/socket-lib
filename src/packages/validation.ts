@@ -4,8 +4,7 @@
 
 import validateNpmPackageName from '../external/validate-npm-package-name'
 
-import { StringPrototypeStartsWith } from '../primordials'
-
+import { StringPrototypeStartsWith } from '../primordials/string'
 /**
  * Check if package name is a blessed Socket.dev package.
  *

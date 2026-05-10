@@ -6,8 +6,9 @@
 import colors from './external/yoctocolors-cjs'
 import { stringWidth } from './strings'
 
-import { ArrayPrototypePush, MathMax } from './primordials'
+import { ArrayPrototypePush } from './primordials/array'
 
+import { MathMax } from './primordials/math'
 export type ColumnAlignment = 'left' | 'right' | 'center'
 
 /**

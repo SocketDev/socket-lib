@@ -12,14 +12,15 @@ import { parseUrl } from '../url'
 
 import type { ProvenanceOptions } from '../packages'
 
+import { BufferFrom } from '../primordials/buffer'
+
+import { JSONParse } from '../primordials/json'
+
 import {
-  BufferFrom,
-  JSONParse,
   StringPrototypeEndsWith,
   StringPrototypeIncludes,
   StringPrototypeSplit,
-} from '../primordials'
-
+} from '../primordials/string'
 // IMPORTANT: Do not use destructuring here - use direct assignment instead.
 // tsgo has a bug that incorrectly transpiles destructured exports, resulting in
 // `exports.SomeName = void 0;` which causes runtime errors.

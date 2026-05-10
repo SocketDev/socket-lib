@@ -15,13 +15,14 @@ import { timingSafeEqual } from 'node:crypto'
 
 import { hash } from '../crypto'
 
+import { BufferFrom } from '../primordials/buffer'
+
+import { TypeErrorCtor } from '../primordials/error'
+
 import {
-  BufferFrom,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-  TypeErrorCtor,
-} from '../primordials'
-
+} from '../primordials/string'
 /**
  * Tagged union representing an expected hash.
  *

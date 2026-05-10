@@ -19,20 +19,24 @@
 
 import * as cacache from './cacache'
 
+import { DateNow } from './primordials/date'
+
+import { TypeErrorCtor } from './primordials/error'
+
+import { JSONParse } from './primordials/json'
+
+import { MapCtor } from './primordials/map-set'
+
+import { MathMax } from './primordials/math'
+
+import { RegExpCtor, RegExpPrototypeTest } from './primordials/regexp'
+
 import {
-  DateNow,
-  JSONParse,
-  MapCtor,
-  MathMax,
-  RegExpCtor,
-  RegExpPrototypeTest,
   StringPrototypeIncludes,
   StringPrototypeReplaceAll,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-  TypeErrorCtor,
-} from './primordials'
-
+} from './primordials/string'
 export interface ClearOptions {
   /**
    * Only clear in-memory memoization cache, not persistent cache.

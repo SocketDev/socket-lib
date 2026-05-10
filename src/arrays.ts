@@ -3,8 +3,9 @@
  * Provides conjunction and disjunction formatters using Intl.ListFormat.
  */
 
-import { ErrorCtor, SetCtor } from './primordials'
+import { ErrorCtor } from './primordials/error'
 
+import { SetCtor } from './primordials/map-set'
 let _conjunctionFormatter: Intl.ListFormat | undefined
 /**
  * Get a cached Intl.ListFormat instance for conjunction (and) formatting.

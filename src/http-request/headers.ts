@@ -13,15 +13,15 @@
  * Node.js `http`/`https` modules into the bundle.
  */
 
-import {
-  ArrayIsArray,
-  DateCtor,
-  DateNow,
-  NumberIsNaN,
-  ObjectKeys,
-  SetCtor,
-} from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
 
+import { DateCtor, DateNow } from '../primordials/date'
+
+import { SetCtor } from '../primordials/map-set'
+
+import { NumberIsNaN } from '../primordials/number'
+
+import { ObjectKeys } from '../primordials/object'
 const RETRY_AFTER_INT_RE = /^\d+$/
 
 /**

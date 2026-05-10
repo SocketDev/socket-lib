@@ -18,14 +18,11 @@
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { safeDelete } from '../fs/safe'
-import {
-  BufferFrom,
-  ErrorCtor,
-  MathFloor,
-  NumberParseInt,
-  PromiseCtor,
-} from '../primordials'
-
+import { BufferFrom } from '../primordials/buffer'
+import { ErrorCtor } from '../primordials/error'
+import { MathFloor } from '../primordials/math'
+import { NumberParseInt } from '../primordials/number'
+import { PromiseCtor } from '../primordials/promise'
 import { getCrypto, getFs } from './_internals'
 import { httpRequestAttempt } from './request'
 import { HttpResponseError } from './types'

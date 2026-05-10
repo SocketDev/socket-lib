@@ -9,8 +9,7 @@ import {
 } from '../archives'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { getDefaultLogger } from '../logger/default'
-import { ErrorCtor } from '../primordials'
-
+import { ErrorCtor } from '../primordials/error'
 import { downloadReleaseAsset } from './github-downloads'
 
 import type { AssetPattern, RepoConfig } from './github-types'

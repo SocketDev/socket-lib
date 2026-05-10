@@ -11,8 +11,11 @@ import { normalizePath } from '../paths/normalize'
 
 import type { LicenseNode } from '../packages'
 
-import { ErrorCtor, MapCtor, RegExpPrototypeExec } from '../primordials'
+import { ErrorCtor } from '../primordials/error'
 
+import { MapCtor } from '../primordials/map-set'
+
+import { RegExpPrototypeExec } from '../primordials/regexp'
 const copyLeftLicenses = getCopyLeftLicenses()
 
 let _path: typeof import('node:path') | undefined

@@ -5,15 +5,15 @@
 
 import { debugLog } from './debug'
 
-import {
-  DateNow,
-  JSONStringify,
-  MapCtor,
-  PromiseResolve,
-  TypeErrorCtor,
-  WeakMapCtor,
-} from './primordials'
+import { DateNow } from './primordials/date'
 
+import { TypeErrorCtor } from './primordials/error'
+
+import { JSONStringify } from './primordials/json'
+
+import { MapCtor, WeakMapCtor } from './primordials/map-set'
+
+import { PromiseResolve } from './primordials/promise'
 /**
  * Global registry of memoization cache clear functions.
  */

@@ -4,8 +4,9 @@
  * determining when JSON files should be saved based on content changes.
  */
 
-import { JSONStringify, ObjectKeys } from '../primordials'
+import { JSONStringify } from '../primordials/json'
 
+import { ObjectKeys } from '../primordials/object'
 /**
  * Symbols used to store formatting metadata in JSON objects.
  */

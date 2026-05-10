@@ -8,8 +8,9 @@
 import { validateSchema } from '../schema/validate'
 import { stripBom } from '../strings'
 import type { Schema } from '../schema/types'
-import { BufferByteLength, ErrorCtor, SetCtor } from '../primordials'
-
+import { BufferByteLength } from '../primordials/buffer'
+import { ErrorCtor } from '../primordials/error'
+import { SetCtor } from '../primordials/map-set'
 import type {
   JsonParseOptions,
   JsonPrimitive,

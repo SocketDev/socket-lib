@@ -16,9 +16,9 @@
  *   1. Walk the configured `scanDirs` for `*.js` files.
  *   2. From each file, extract names from every
  *      `const { Foo, Bar } = primordials` destructure.
- *   3. Read socket-lib's `primordials.ts` (sibling clone) or
- *      `primordials.d.ts` (installed `node_modules`) and pull every
- *      exported name.
+ *   3. Read socket-lib's `primordials/` directory (sibling clone) or
+ *      `primordials/*.d.ts` (installed `node_modules`) and pull every
+ *      exported name across all leaves.
  *   4. Diff: every destructured name must be either (a) in socket-lib
  *      verbatim, (b) in socket-lib via the configured alias map, or
  *      (c) in the configured node-internal-only allowlist.
@@ -209,12 +209,16 @@ export function extractTsExports(src: string): string[] {
 /**
  * Locate socket-lib's primordials source. Search order:
  *
- *   1. `config.socketLibPrimordialsPath` if explicitly set.
- *   2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials.ts`.
- *      Preferred for the dev-loop case where a developer is editing
- *      socket-lib and a consumer in parallel.
+ *   1. `config.socketLibPrimordialsPath` if explicitly set. Accepts
+ *      either a single file (legacy `primordials.ts` / `.d.ts`) or a
+ *      directory of leaves (`primordials/`).
+ *   2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials/`
+ *      (post-split layout) or `<repoRoot>/../socket-lib/src/primordials.ts`
+ *      (legacy single-file layout). Preferred for the dev-loop case
+ *      where a developer is editing socket-lib and a consumer in parallel.
  *   3. Installed copy — `<repoRoot>/node_modules/@socketsecurity/lib/
- *      dist/primordials.d.ts`. The CI fallback.
+ *      dist/primordials/` (post-split) or `<repoRoot>/node_modules/
+ *      @socketsecurity/lib/dist/primordials.d.ts` (legacy). The CI fallback.
  *
  * Throws when none of the candidates exist.
  */
@@ -234,17 +238,38 @@ export function resolveSocketLibPrimordials(
     return config.socketLibPrimordialsPath
   }
   const repoRoot = config.repoRoot ?? process.cwd()
-  const sibling = path.resolve(
+  const siblingDir = path.resolve(
+    repoRoot,
+    '..',
+    'socket-lib',
+    'src',
+    'primordials',
+  )
+  if (existsSync(siblingDir)) {
+    return siblingDir
+  }
+  const siblingLegacy = path.resolve(
     repoRoot,
     '..',
     'socket-lib',
     'src',
     'primordials.ts',
   )
-  if (existsSync(sibling)) {
-    return sibling
+  if (existsSync(siblingLegacy)) {
+    return siblingLegacy
   }
-  const installed = path.resolve(
+  const installedDir = path.resolve(
+    repoRoot,
+    'node_modules',
+    '@socketsecurity',
+    'lib',
+    'dist',
+    'primordials',
+  )
+  if (existsSync(installedDir)) {
+    return installedDir
+  }
+  const installedLegacy = path.resolve(
     repoRoot,
     'node_modules',
     '@socketsecurity',
@@ -252,15 +277,48 @@ export function resolveSocketLibPrimordials(
     'dist',
     'primordials.d.ts',
   )
-  if (existsSync(installed)) {
-    return installed
+  if (existsSync(installedLegacy)) {
+    return installedLegacy
   }
   /* c8 ignore stop */
   throw new Error(
     'Cannot locate socket-lib primordials source. ' +
-      `Looked at:\n  ${sibling}\n  ${installed}\n` +
+      `Looked at:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
       'Either clone socket-lib at ../socket-lib or run `pnpm install`.',
   )
+}
+
+/**
+ * Read TS exports from a resolved primordials path. Handles both the
+ * legacy single-file layout (returns one file's exports) and the
+ * post-split directory layout (concatenates exports across every
+ * `*.ts` / `*.d.ts` leaf).
+ */
+export function readSocketLibPrimordialNames(resolved: string): Set<string> {
+  const stat = statSync(resolved)
+  if (stat.isFile()) {
+    return new Set(extractTsExports(readFileSync(resolved, 'utf8')))
+  }
+  // Directory: concatenate all *.ts and *.d.ts leaves.
+  const out = new Set<string>()
+  // Each scanned leaf either has TS exports or is a leftover declaration
+  // file; we don't separate them — the parser handles both forms.
+  /* c8 ignore start */
+  for (const name of readdirSync(resolved)) {
+    if (!name.endsWith('.ts') && !name.endsWith('.d.ts')) {
+      continue
+    }
+    const full = path.join(resolved, name)
+    const fileStat = statSync(full)
+    if (!fileStat.isFile()) {
+      continue
+    }
+    for (const exp of extractTsExports(readFileSync(full, 'utf8'))) {
+      out.add(exp)
+    }
+  }
+  /* c8 ignore stop */
+  return out
 }
 
 // ── Check ───────────────────────────────────────────────────────────
@@ -314,11 +372,10 @@ export function checkPrimordials(
     }
   }
 
-  // Read socket-lib's exported names.
+  // Read socket-lib's exported names. The resolver returns either a
+  // file (legacy single-file layout) or a directory (post-split).
   const socketLibPath = resolveSocketLibPrimordials(config)
-  const socketLibNames = new Set(
-    extractTsExports(readFileSync(socketLibPath, 'utf8')),
-  )
+  const socketLibNames = readSocketLibPrimordialNames(socketLibPath)
 
   // Diff.
   const findings: PrimordialsFinding[] = []
@@ -346,7 +403,7 @@ export function checkPrimordials(
         hint:
           `\`${name}\` is mapped to socket-lib's \`${aliased}\`, but ` +
           `\`${aliased}\` is not exported. Add \`export const ${aliased} = ${name}\` ` +
-          'to socket-lib/src/primordials.ts.',
+          'to the appropriate leaf under socket-lib/src/primordials/.',
       })
       continue
     }
@@ -359,7 +416,7 @@ export function checkPrimordials(
         `\`${name}\` is destructured from \`primordials\` but no ` +
         `socket-lib mapping exists. Pick one: ` +
         joinOr([
-          `add \`${name}\` to socket-lib/src/primordials.ts`,
+          `add \`${name}\` to the appropriate leaf under socket-lib/src/primordials/`,
           `add a \`${name}\` → \`<libName>\` entry to the alias map`,
           `add \`${name}\` to nodeInternalOnly (if Node-internal only)`,
         ]) +

@@ -12,8 +12,11 @@ import { safeDelete } from './fs/safe'
 import { getOsTmpDir } from './paths/socket'
 import { parseSchema } from './schema/parse'
 
-import { DateNow, ErrorCtor, JSONStringify } from './primordials'
+import { DateNow } from './primordials/date'
 
+import { ErrorCtor } from './primordials/error'
+
+import { JSONStringify } from './primordials/json'
 /**
  * IPC stub file schema - validates the structure of stub files.
  * Stub files are used for passing data between processes via filesystem.

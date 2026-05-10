@@ -8,8 +8,9 @@ import { spawn } from '../spawn/core'
 
 import type { GetTypeCoverageOptions, TypeCoverageResult } from './types'
 
-import { ErrorCtor, NumberParseInt } from '../primordials'
+import { ErrorCtor } from '../primordials/error'
 
+import { NumberParseInt } from '../primordials/number'
 /**
  * Get TypeScript type coverage metrics.
  *

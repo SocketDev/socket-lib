@@ -23,8 +23,9 @@
 
 import { errorMessage } from '../errors'
 import { httpRequest } from '../http-request/request'
-import { DateCtor, ErrorCtor, JSONParse } from '../primordials'
-
+import { DateCtor } from '../primordials/date'
+import { ErrorCtor } from '../primordials/error'
+import { JSONParse } from '../primordials/json'
 import { getGitHubToken } from './token'
 import { GitHubEmptyBodyError } from './types'
 

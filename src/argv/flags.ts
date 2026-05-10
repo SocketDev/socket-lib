@@ -7,8 +7,9 @@
 
 import process from 'node:process'
 
-import { ArrayIsArray, StringPrototypeIncludes } from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
 
+import { StringPrototypeIncludes } from '../primordials/string'
 /**
  * Flag values object from parsed arguments.
  */

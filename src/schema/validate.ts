@@ -23,13 +23,13 @@
  * ```
  */
 
-import {
-  ArrayIsArray,
-  NumberIsInteger,
-  ObjectGetOwnPropertySymbols,
-  TypeErrorCtor,
-} from '../primordials'
+import { ArrayIsArray } from '../primordials/array'
 
+import { TypeErrorCtor } from '../primordials/error'
+
+import { NumberIsInteger } from '../primordials/number'
+
+import { ObjectGetOwnPropertySymbols } from '../primordials/object'
 import type {
   Infer,
   ParseResult,

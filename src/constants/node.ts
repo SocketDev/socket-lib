@@ -9,8 +9,7 @@ import process from 'node:process'
 
 import { maintainedNodeVersions } from './maintained-node-versions'
 
-import { NumberParseInt } from '../primordials'
-
+import { NumberParseInt } from '../primordials/number'
 const NODE_VERSION = process.version
 
 let _nodeDisableSigusr1Flags: string[]

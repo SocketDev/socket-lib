@@ -8,8 +8,7 @@
 
 import colors from '../external/yoctocolors-cjs'
 
-import { MathMax, MathRound } from '../primordials'
-
+import { MathMax, MathRound } from '../primordials/math'
 import type { ProgressInfo, SpinnerStyle } from './types'
 
 /**

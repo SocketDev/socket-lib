@@ -7,8 +7,7 @@ import picomatch from '../external/picomatch'
 import {
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
-} from '../primordials'
-
+} from '../primordials/string'
 /**
  * Create a matcher function for a pattern using picomatch for glob patterns
  * or simple prefix/suffix matching for object patterns.

@@ -22,8 +22,7 @@
 
 import whichModule from '../external/which'
 import { isPath } from '../paths/normalize'
-import { ArrayIsArray, ArrayPrototypeMap } from '../primordials'
-
+import { ArrayIsArray, ArrayPrototypeMap } from '../primordials/array'
 import { binPathAllCache, binPathCache, getFs } from './_internals'
 import { resolveRealBinSync } from './resolve'
 

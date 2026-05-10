@@ -3,8 +3,9 @@
  * Provides constants and helpers for terminal formatting.
  */
 
-import { RegExpCtor, StringPrototypeReplace } from './primordials'
+import { RegExpCtor } from './primordials/regexp'
 
+import { StringPrototypeReplace } from './primordials/string'
 // ANSI escape codes - commonly used sequences.
 export const ANSI_BOLD = '\x1b[1m'
 export const ANSI_DIM = '\x1b[2m'

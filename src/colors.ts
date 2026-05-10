@@ -3,8 +3,7 @@
  * Provides type-safe color handling with named colors and RGB tuples.
  */
 
-import { ArrayIsArray } from './primordials'
-
+import { ArrayIsArray } from './primordials/array'
 /**
  * Special 'inherit' color value that uses the current color context.
  * Used with effects like shimmer to dynamically inherit color.

@@ -4,8 +4,7 @@
  * set of copy-left SPDX identifiers used when classifying package licenses.
  */
 
-import { SetCtor } from '../primordials'
-
+import { SetCtor } from '../primordials/map-set'
 // License identifiers.
 export const MIT = 'MIT'
 export const UNLICENCED = 'UNLICENCED'
