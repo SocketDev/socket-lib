@@ -1,5 +1,7 @@
 /** @fileoverview DLX binary execution utilities for Socket ecosystem. */
 
+/* oxlint-disable socket/prefer-exists-sync -- DLX binary metadata uses stat for size/mtime; not existence-only checks. */
+
 import process from 'node:process'
 
 import { getArch, WIN32 } from '../constants/platform'

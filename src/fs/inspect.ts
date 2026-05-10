@@ -8,6 +8,8 @@
  * directly.
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- this module IS the stat-wrapper surface; callers use these for type discrimination (isFile/isDirectory) or metadata, not pure existence checks. */
+
 import { defaultIgnore } from '../globs/defaults'
 import { getGlobMatcher } from '../globs/matcher'
 import { getNodeFs } from '../node/fs'

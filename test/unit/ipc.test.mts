@@ -7,6 +7,8 @@
  * Used by Socket CLI for parent-child process communication.
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
+
 import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'

@@ -10,6 +10,8 @@
  * Used by Socket CLI dlxBinary() for package extraction and execution.
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
+
 import { createHash } from 'node:crypto'
 import {
   existsSync,

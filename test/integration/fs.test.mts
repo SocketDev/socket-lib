@@ -9,6 +9,8 @@
  * Used by Socket CLI for config files, package.json manipulation, and cache.
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
+
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'

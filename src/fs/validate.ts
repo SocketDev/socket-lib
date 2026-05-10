@@ -52,6 +52,7 @@ export function validateFiles(
 
   for (const filepath of filepaths) {
     try {
+      // oxlint-disable-next-line socket/prefer-exists-sync -- accessSync(R_OK) checks read permission, not just existence.
       fs.accessSync(filepath, R_OK)
       validPaths.push(filepath)
     } catch {

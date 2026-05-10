@@ -103,7 +103,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
 ${contentWithoutStrict}`
     await fs.writeFile(outputPath, finalContent)
 
-    // Get file size for logging.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- need size for logging.
     const stats = await fs.stat(outputPath)
     const sizeKB = Math.round(stats.size / 1024)
     if (!quiet) {

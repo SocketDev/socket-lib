@@ -14,6 +14,8 @@
  * Validates cross-platform behavior, error handling, and edge cases (missing files, permissions).
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- tests verify stat() output (isDirectory, isFile, mtime, size) — not existence checks. */
+
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'

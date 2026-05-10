@@ -6,6 +6,8 @@
  * `/.foo` was never found. The current shape visits root, then breaks.
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory(). */
+
 import process from 'node:process'
 
 import { isArray } from '../arrays'

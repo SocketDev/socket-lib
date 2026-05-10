@@ -11,6 +11,8 @@
  * Used by Socket CLI to prevent concurrent operations on shared resources.
  */
 
+/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
+
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
