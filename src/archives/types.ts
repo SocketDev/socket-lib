@@ -1,5 +1,7 @@
 /**
- * @fileoverview Public type surface for `archives/*` modules.
+ * @fileoverview Public type surface for `archives/*` modules — the
+ * `ArchiveFormat` union and the `ExtractOptions` security-limit
+ * record. Pure types, no runtime side effects.
  */
 
 /**

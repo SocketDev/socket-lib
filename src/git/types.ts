@@ -1,7 +1,7 @@
 /**
- * @fileoverview Public type surface for `git/*` modules — interfaces only.
- * Pure types with no runtime side effects so this module stays cheap to
- * import everywhere.
+ * @fileoverview Public type surface for `git/*` modules — the
+ * `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration
+ * records. Pure types, no runtime side effects.
  */
 
 /**

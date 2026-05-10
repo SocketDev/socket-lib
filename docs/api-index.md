@@ -56,13 +56,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## archives/
 
-| Subpath                                                              | Description                                                                                                 |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/archives/detect`](../src/archives/detect.ts)   | Format detection by file extension.                                                                         |
-| [`@socketsecurity/lib/archives/extract`](../src/archives/extract.ts) | `extractArchive` — format-detecting dispatcher that routes to `extractTar` / `extractTarGz` / `extractZip`. |
-| [`@socketsecurity/lib/archives/tar`](../src/archives/tar.ts)         | Tar / tar.gz extraction with security limits and symlink rejection.                                         |
-| [`@socketsecurity/lib/archives/types`](../src/archives/types.ts)     | Public type surface for `archives/*` modules.                                                               |
-| [`@socketsecurity/lib/archives/zip`](../src/archives/zip.ts)         | Zip extraction with security limits and path traversal validation.                                          |
+| Subpath                                                              | Description                                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/archives/detect`](../src/archives/detect.ts)   | Format detection by file extension.                                                                                      |
+| [`@socketsecurity/lib/archives/extract`](../src/archives/extract.ts) | `extractArchive` — format-detecting dispatcher that routes to `extractTar` / `extractTarGz` / `extractZip`.              |
+| [`@socketsecurity/lib/archives/tar`](../src/archives/tar.ts)         | Tar / tar.gz extraction with security limits and symlink rejection.                                                      |
+| [`@socketsecurity/lib/archives/types`](../src/archives/types.ts)     | Public type surface for `archives/*` modules — the `ArchiveFormat` union and the `ExtractOptions` security-limit record. |
+| [`@socketsecurity/lib/archives/zip`](../src/archives/zip.ts)         | Zip extraction with security limits and path traversal validation.                                                       |
 
 ## argv/
 
@@ -87,10 +87,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## cache-with-ttl/
 
-| Subpath                                                                      | Description                                                                                                       |
-| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/cache-with-ttl/cache`](../src/cache-with-ttl/cache.ts) | `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer. |
-| [`@socketsecurity/lib/cache-with-ttl/types`](../src/cache-with-ttl/types.ts) | Public type surface for `cache-with-ttl/*` modules.                                                               |
+| Subpath                                                                      | Description                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/cache-with-ttl/cache`](../src/cache-with-ttl/cache.ts) | `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer.                                                                                                            |
+| [`@socketsecurity/lib/cache-with-ttl/types`](../src/cache-with-ttl/types.ts) | Public type surface for `cache-with-ttl/*` modules — the `TtlCache` interface (the seven-method API returned by `createTtlCache`), the `TtlCacheEntry` storage shape, and the `TtlCacheOptions` / `ClearOptions` configur... |
 
 ## checks/
 
@@ -224,7 +224,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/git/changed`](../src/git/changed.ts)   | "Anything different from HEAD" helpers — the broad-strokes `git status --porcelain` view that lumps staged, unstaged, and untracked paths together. |
 | [`@socketsecurity/lib/git/repo`](../src/git/repo.ts)         | Git repository discovery + foundational lazy fs/path/cwd helpers shared across `git/*` leaves.                                                      |
 | [`@socketsecurity/lib/git/staged`](../src/git/staged.ts)     | "Ready for the next commit" helpers — `git diff --cached` over only the index.                                                                      |
-| [`@socketsecurity/lib/git/types`](../src/git/types.ts)       | Public type surface for `git/*` modules — interfaces only.                                                                                          |
+| [`@socketsecurity/lib/git/types`](../src/git/types.ts)       | Public type surface for `git/*` modules — the `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration records.                          |
 | [`@socketsecurity/lib/git/unstaged`](../src/git/unstaged.ts) | "Edited but not yet staged" helpers — `git diff` over the working tree only.                                                                        |
 
 ## github/
@@ -239,13 +239,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## globs/
 
-| Subpath                                                          | Description                                                                                                          |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/globs/defaults`](../src/globs/defaults.ts) | The npm-packlist-derived `defaultIgnore` list.                                                                       |
-| [`@socketsecurity/lib/globs/glob`](../src/globs/glob.ts)         | `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up. |
-| [`@socketsecurity/lib/globs/matcher`](../src/globs/matcher.ts)   | `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache.                               |
-| [`@socketsecurity/lib/globs/stream`](../src/globs/stream.ts)     | `globStreamLicenses` — license-file discovery as an async stream.                                                    |
-| [`@socketsecurity/lib/globs/types`](../src/globs/types.ts)       | Public type surface for `globs/*` modules.                                                                           |
+| Subpath                                                          | Description                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/globs/defaults`](../src/globs/defaults.ts) | The npm-packlist-derived `defaultIgnore` list.                                                                                                                                                                               |
+| [`@socketsecurity/lib/globs/glob`](../src/globs/glob.ts)         | `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up.                                                                                                         |
+| [`@socketsecurity/lib/globs/matcher`](../src/globs/matcher.ts)   | `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache.                                                                                                                                       |
+| [`@socketsecurity/lib/globs/stream`](../src/globs/stream.ts)     | `globStreamLicenses` — license-file discovery as an async stream.                                                                                                                                                            |
+| [`@socketsecurity/lib/globs/types`](../src/globs/types.ts)       | Public type surface for `globs/*` modules — the `Pattern` alias, the `FastGlobOptions` mirror of fast-glob's option surface, and the `GlobOptions` extension that adds Socket-specific `recursive` / `ignoreOriginals` fl... |
 
 ## http-request/
 

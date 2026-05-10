@@ -1,5 +1,9 @@
 /**
- * @fileoverview Public type surface for `cache-with-ttl/*` modules.
+ * @fileoverview Public type surface for `cache-with-ttl/*` modules —
+ * the `TtlCache` interface (the seven-method API returned by
+ * `createTtlCache`), the `TtlCacheEntry` storage shape, and the
+ * `TtlCacheOptions` / `ClearOptions` configuration records. Pure
+ * types, no runtime side effects.
  */
 
 export interface ClearOptions {
