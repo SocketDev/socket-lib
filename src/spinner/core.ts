@@ -1,428 +1,70 @@
 /**
- * @fileoverview CLI spinner utilities for long-running operations.
- * Provides animated progress indicators with CI environment detection.
+ * @fileoverview Spinner factory — builds the lazy-init `Spinner`
+ * class that wraps `yocto-spinner` with Socket-specific behaviors
+ * (custom RGB color pipeline, shimmer, progress bar, indented step
+ * messages, status methods that don't auto-stop, *AndStop variants
+ * that auto-clear). The class graph is constructed inside the
+ * factory body so the `super()` call binds against the live
+ * `YoctoSpinner` constructor; splitting it further would require
+ * exposing the parent class as a module-level dependency, which
+ * breaks the lazy-init guarantee.
  */
 
-import process from 'node:process'
-import type { Writable } from 'node:stream'
-
-import colors from './external/yoctocolors-cjs'
-
-import type { ColorInherit, ColorRgb, ColorValue } from './colors'
-import { isRgbTuple, toRgb } from './colors'
-import { getAbortSignal } from './constants/process'
-import { getCI } from './env/ci'
-import { isDebug } from './debug'
-import { generateSocketSpinnerFrames } from './effects/pulse-frames'
+import type { ColorInherit, ColorRgb, ColorValue } from '../colors'
+import { isRgbTuple, toRgb } from '../colors'
+import { getAbortSignal } from '../constants/process'
+import { isDebug } from '../debug'
 import type {
   Palette,
   ShimmerConfig,
   ShimmerDirection,
   ShimmerSpec,
-} from './effects/shimmer'
-import { configToSpec, frameColors } from './effects/shimmer'
-import { colorsToAnsi } from './effects/shimmer-terminal'
-import yoctoSpinner from './external/@socketregistry/yocto-spinner'
-import { getDefaultLogger } from './logger/default'
+} from '../effects/shimmer'
+import { configToSpec, frameColors } from '../effects/shimmer'
+import { colorsToAnsi } from '../effects/shimmer-terminal'
+import { getCI } from '../env/ci'
+import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
+import { getDefaultLogger } from '../logger/default'
 import {
   LOG_SYMBOLS,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
-} from './logger/symbols'
-import { hasOwn } from './objects'
-import { isBlankString, stringWidth } from './strings'
-import { getTheme } from './themes/context'
-import { THEMES } from './themes/themes'
-import { resolveColor } from './themes/utils'
-
+} from '../logger/symbols'
 import {
   ArrayIsArray,
   ArrayPrototypeAt,
   ArrayPrototypeSlice,
   MathMax,
-  MathRound,
   ObjectDefineProperties,
   TypeErrorCtor,
-} from './primordials'
+} from '../primordials'
+import { isBlankString, stringWidth } from '../strings'
+import { getTheme } from '../themes/context'
+import { THEMES } from '../themes/themes'
+import { resolveColor } from '../themes/utils'
 
-const COLOR_INHERIT = 'inherit'
+import { getCliSpinners } from './registry'
+import {
+  COLOR_INHERIT,
+  ciSpinner,
+  desc,
+  formatProgress,
+  normalizeText,
+} from './utils'
 
-/**
- * Symbol types for status messages.
- * Maps to log symbols: fail (✗), info (ℹ), skip (↻), success (✓), warn (⚠).
- */
-export type SymbolType = 'fail' | 'info' | 'skip' | 'success' | 'warn'
-
-/**
- * Progress tracking information for display in spinner.
- * Used by `progress()` and `progressStep()` methods to show animated progress bars.
- */
-export type ProgressInfo = {
-  /** Current progress value */
-  current: number
-  /** Total/maximum progress value */
-  total: number
-  /** Optional unit label displayed after the progress count (e.g., 'files', 'items') */
-  unit?: string | undefined
-}
-
-/**
- * Internal shimmer runtime state. Holds the user-facing config plus a
- * monotonic frame counter; the spinner advances `frame` on each animation
- * tick and feeds the current frame to the shimmer engine.
- */
-export type ShimmerInfo = {
-  /** User-facing color reference (inherit, explicit value, or palette). */
-  color: ColorInherit | ColorValue | Palette
-  /** Current direction (driven by config, snapshotted here for getters). */
-  direction: ShimmerDirection
-  /** Steps per frame. */
-  speed: number
-  /** Monotonic frame counter — advanced on each animation tick. */
-  frame: number
-}
-
-/**
- * Spinner instance for displaying animated loading indicators.
- * Provides methods for status updates, progress tracking, and text shimmer effects.
- *
- * KEY BEHAVIORS:
- * - Methods WITHOUT "AndStop" keep the spinner running (e.g., `success()`, `fail()`)
- * - Methods WITH "AndStop" auto-clear the spinner line (e.g., `successAndStop()`, `failAndStop()`)
- * - Status messages (done, success, fail, info, warn, reason, step, substep) go to stderr
- * - Data messages (`log()`) go to stdout
- *
- * @example
- * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner'
- *
- * const spinner = Spinner({ text: 'Loading…' })
- * spinner.start()
- *
- * // Show success while continuing to spin
- * spinner.success('Step 1 complete')
- *
- * // Stop the spinner with success message
- * spinner.successAndStop('All done!')
- * ```
- */
-export type Spinner = {
-  /** Current spinner color as RGB tuple */
-  color: ColorRgb
-  /** Current spinner animation style */
-  spinner: SpinnerStyle
-
-  /** Whether spinner is currently animating */
-  get isSpinning(): boolean
-
-  /** Get current shimmer state (enabled/disabled and configuration) */
-  get shimmerState(): ShimmerInfo | undefined
-
-  /** Clear the current line without stopping the spinner */
-  clear(): Spinner
-
-  /** Show debug message without stopping (only if debug mode enabled) */
-  debug(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show debug message and stop the spinner (only if debug mode enabled) */
-  debugAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Decrease indentation by specified spaces (default: 2) */
-  dedent(spaces?: number | undefined): Spinner
-
-  /** Disable shimmer effect (preserves config for later re-enable) */
-  disableShimmer(): Spinner
-
-  /** Alias for `success()` - show success without stopping */
-  done(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Alias for `successAndStop()` - show success and stop */
-  doneAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Enable shimmer effect (restores saved config or uses defaults) */
-  enableShimmer(): Spinner
-
-  /** Alias for `fail()` - show error without stopping */
-  error(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Alias for `failAndStop()` - show error and stop */
-  errorAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Show failure (✗) without stopping the spinner */
-  fail(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show failure (✗) and stop the spinner, auto-clearing the line */
-  failAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Increase indentation by specified spaces (default: 2) */
-  indent(spaces?: number | undefined): Spinner
-
-  /** Show info (ℹ) message without stopping the spinner */
-  info(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show info (ℹ) message and stop the spinner, auto-clearing the line */
-  infoAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Log to stdout without stopping the spinner */
-  log(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Log and stop the spinner, auto-clearing the line */
-  logAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Update progress bar with current/total values and optional unit */
-  progress(current: number, total: number, unit?: string | undefined): Spinner
-  /** Increment progress by specified amount (default: 1) */
-  progressStep(amount?: number): Spinner
-
-  /** Set complete shimmer configuration */
-  setShimmer(config: ShimmerConfig): Spinner
-
-  /** Show skip (↻) message without stopping the spinner */
-  skip(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show skip (↻) message and stop the spinner, auto-clearing the line */
-  skipAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Start spinning with optional text */
-  start(text?: string | undefined): Spinner
-
-  /** Show main step message to stderr without stopping */
-  step(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Stop spinning and clear internal state, auto-clearing the line */
-  stop(text?: string | undefined): Spinner
-  /** Stop and show final text without clearing the line */
-  stopAndPersist(text?: string | undefined): Spinner
-
-  /** Show indented substep message to stderr without stopping */
-  substep(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Show success (✓) without stopping the spinner */
-  success(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show success (✓) and stop the spinner, auto-clearing the line */
-  successAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-
-  /** Get current spinner text (getter) or set new text (setter) */
-  text(value: string): Spinner
-  text(): string
-
-  /** Update partial shimmer configuration */
-  updateShimmer(config: Partial<ShimmerConfig>): Spinner
-
-  /** Show warning (⚠) without stopping the spinner */
-  warn(text?: string | undefined, ...extras: unknown[]): Spinner
-  /** Show warning (⚠) and stop the spinner, auto-clearing the line */
-  warnAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
-}
-
-/**
- * Configuration options for creating a spinner instance.
- */
-export type SpinnerOptions = {
-  /**
-   * Spinner color as RGB tuple or color name.
-   * @default [140, 82, 255] Socket purple
-   */
-  readonly color?: ColorValue | undefined
-  /**
-   * Shimmer effect configuration or direction string.
-   * When enabled, text will have an animated shimmer effect.
-   * @default undefined No shimmer effect
-   */
-  readonly shimmer?: ShimmerConfig | ShimmerDirection | undefined
-  /**
-   * Animation style with frames and timing.
-   * @default 'socket' Custom Socket animation in CLI, minimal in CI
-   */
-  readonly spinner?: SpinnerStyle | undefined
-  /**
-   * Abort signal for cancelling the spinner.
-   * @default getAbortSignal() from process constants
-   */
-  readonly signal?: AbortSignal | undefined
-  /**
-   * Output stream for spinner rendering.
-   * @default process.stderr
-   */
-  readonly stream?: Writable | undefined
-  /**
-   * Initial text to display with the spinner.
-   * @default undefined No initial text
-   */
-  readonly text?: string | undefined
-  /**
-   * Theme to use for spinner colors.
-   * Accepts theme name ('socket', 'sunset', etc.) or Theme object.
-   * @default Current theme from getTheme()
-   */
-  readonly theme?:
-    | import('./themes/types').Theme
-    | import('./themes/themes').ThemeName
-    | undefined
-}
-
-/**
- * Animation style definition for spinner frames.
- * Defines the visual appearance and timing of the spinner animation.
- */
-export type SpinnerStyle = {
-  /** Array of animation frames (strings to display sequentially) */
-  readonly frames: string[]
-  /**
-   * Milliseconds between frame changes.
-   * @default 80 Standard frame rate
-   */
-  readonly interval?: number | undefined
-}
-
-/**
- * Minimal spinner style for CI environments.
- * Uses empty frame and max interval to effectively disable animation in CI.
- */
-export const ciSpinner: SpinnerStyle = {
-  frames: [''],
-  interval: 2_147_483_647,
-}
-
-/**
- * Create a property descriptor for defining non-enumerable properties.
- * Used for adding aliased methods to the Spinner prototype.
- * @param value - Value for the property
- * @returns Property descriptor object
- * @private
- */
-function desc(value: unknown) {
-  return {
-    __proto__: null,
-    configurable: true,
-    value,
-    writable: true,
-  }
-}
-
-/**
- * Format progress information as a visual progress bar with percentage and count.
- * @param progress - Progress tracking information
- * @returns Formatted string with colored progress bar, percentage, and count
- * @private
- * @example "███████░░░░░░░░░░░░░ 35% (7/20 files)"
- */
-function formatProgress(progress: ProgressInfo): string {
-  const { current, total, unit } = progress
-  // total===0 fires only when caller starts a 0-of-0 progress.
-  /* c8 ignore next */
-  const percentage = total === 0 ? 0 : MathRound((current / total) * 100)
-  const bar = renderProgressBar(percentage)
-  // unit defaults to undefined; both arms exercised when caller omits unit.
-  /* c8 ignore next */
-  const count = unit ? `${current}/${total} ${unit}` : `${current}/${total}`
-  return `${bar} ${percentage}% (${count})`
-}
-
-/**
- * Normalize text input by trimming leading whitespace.
- * Non-string values are converted to empty string.
- * @param value - Text to normalize
- * @returns Normalized string with leading whitespace removed
- * @private
- */
-function normalizeText(value: unknown) {
-  // Empty-string fallback fires only on non-string inputs.
-  /* c8 ignore next */
-  return typeof value === 'string' ? value.trimStart() : ''
-}
-
-/**
- * Render a progress bar using block characters (█ for filled, ░ for empty).
- * @param percentage - Progress percentage (0-100)
- * @param width - Total width of progress bar in characters
- * @returns Colored progress bar string
- * @default width=20
- * @private
- */
-function renderProgressBar(percentage: number, width: number = 20): string {
-  const filled = MathMax(
-    0,
-    Math.min(width, Math.round((percentage / 100) * width)),
-  )
-  const empty = MathMax(0, width - filled)
-  const bar = '█'.repeat(filled) + '░'.repeat(empty)
-  // Use cyan color for the progress bar
-  // colors is imported at the top
-  return colors.cyan(bar)
-}
-
-let _cliSpinners: Record<string, SpinnerStyle> | undefined
-
-/**
- * Get available CLI spinner styles or a specific style by name.
- * Extends the standard cli-spinners collection with Socket custom spinners.
- *
- * Custom spinners:
- * - `socket` (default): Socket pulse animation with sparkles and lightning
- *
- * @param styleName - Optional name of specific spinner style to retrieve
- * @returns Specific spinner style if name provided, all styles if omitted, `undefined` if style not found
- * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
- *
- * @example
- * ```ts
- * // Get all available spinner styles
- * const allSpinners = getCliSpinners()
- *
- * // Get specific style
- * const socketStyle = getCliSpinners('socket')
- * const dotsStyle = getCliSpinners('dots')
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getCliSpinners(
-  styleName?: string | undefined,
-): SpinnerStyle | Record<string, SpinnerStyle> | undefined {
-  if (_cliSpinners === undefined) {
-    /* c8 ignore start - External yoctoSpinner initialization */
-    const YoctoCtor: any = yoctoSpinner as any
-    // Get the YoctoSpinner class to access static properties.
-    const tempInstance: any = YoctoCtor({})
-    const YoctoSpinnerClass: any = tempInstance.constructor as any
-    /* c8 ignore stop */
-    // Extend the standard cli-spinners collection with Socket custom spinners.
-    _cliSpinners = {
-      __proto__: null,
-      ...YoctoSpinnerClass.spinners,
-      socket: generateSocketSpinnerFrames(),
-    }
-  }
-  if (typeof styleName === 'string' && _cliSpinners) {
-    return hasOwn(_cliSpinners, styleName) ? _cliSpinners[styleName] : undefined
-  }
-  return _cliSpinners
-}
+import type {
+  ProgressInfo,
+  ShimmerInfo,
+  Spinner as SpinnerType,
+  SpinnerOptions,
+  SpinnerStyle,
+  SymbolType,
+} from './types'
 
 let _Spinner: {
-  new (options?: SpinnerOptions | undefined): Spinner
+  new (options?: SpinnerOptions | undefined): SpinnerType
 }
 let _defaultSpinner: SpinnerStyle | undefined
-let _spinner: ReturnType<typeof Spinner> | undefined
-
-/**
- * Get the default spinner instance.
- * Lazily creates the spinner to avoid circular dependencies during module initialization.
- * Reuses the same instance across calls.
- *
- * @returns Shared default spinner instance
- *
- * @example
- * ```ts
- * import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
- *
- * const spinner = getDefaultSpinner()
- * spinner.start('Loading…')
- * ```
- */
-export function getDefaultSpinner(): ReturnType<typeof Spinner> {
-  if (_spinner === undefined) {
-    _spinner = Spinner()
-  }
-  return _spinner
-}
-
-// REMOVED: Deprecated `spinner` export
-// Migration: Use getDefaultSpinner() instead
-// See: getDefaultSpinner() function above
 
 /**
  * Create a spinner instance for displaying loading indicators.
@@ -450,7 +92,7 @@ export function getDefaultSpinner(): ReturnType<typeof Spinner> {
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner'
+ * import { Spinner } from '@socketsecurity/lib/spinner/core'
  *
  * // Basic usage
  * const spinner = Spinner({ text: 'Loading data…' })
@@ -476,7 +118,7 @@ export function getDefaultSpinner(): ReturnType<typeof Spinner> {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function Spinner(options?: SpinnerOptions | undefined): Spinner {
+export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
   if (_Spinner === undefined) {
     /* c8 ignore start - External yoctoSpinner initialization */
     const YoctoCtor = yoctoSpinner as any
@@ -832,11 +474,11 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @example
        * spinner.disableShimmer()
        */
-      disableShimmer(): Spinner {
+      disableShimmer(): SpinnerType {
         // Disable shimmer but preserve config.
         this.#shimmer = undefined
         this.#updateSpinnerText()
-        return this as unknown as Spinner
+        return this as unknown as SpinnerType
       }
 
       /**
@@ -875,7 +517,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * @example
        * spinner.enableShimmer()
        */
-      enableShimmer(): Spinner {
+      enableShimmer(): SpinnerType {
         if (this.#shimmerSavedConfig) {
           // Restore saved config (reset frame counter to 0).
           this.#shimmer = { ...this.#shimmerSavedConfig, frame: 0 }
@@ -891,7 +533,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         }
 
         this.#updateSpinnerText()
-        return this as unknown as Spinner
+        return this as unknown as SpinnerType
       }
 
       /**
@@ -1115,7 +757,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        *   speed: 0.5
        * })
        */
-      setShimmer(config: ShimmerConfig): Spinner {
+      setShimmer(config: ShimmerConfig): SpinnerType {
         this.#shimmer = {
           __proto__: null,
           color:
@@ -1127,7 +769,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         } as ShimmerInfo
         this.#shimmerSavedConfig = this.#shimmer
         this.#updateSpinnerText()
-        return this as unknown as Spinner
+        return this as unknown as SpinnerType
       }
 
       /**
@@ -1293,8 +935,8 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * ```
        */
       text(): string
-      text(value: string): Spinner
-      text(value?: string): string | Spinner {
+      text(value: string): SpinnerType
+      text(value?: string): string | SpinnerType {
         // biome-ignore lint/complexity/noArguments: Function overload for getter/setter pattern.
         if (arguments.length === 0) {
           // Getter: return current base text
@@ -1303,7 +945,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         // Setter: update base text and refresh display
         this.#baseText = value ?? ''
         this.#updateSpinnerText()
-        return this as unknown as Spinner
+        return this as unknown as SpinnerType
       }
 
       /**
@@ -1323,7 +965,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
        * // Update multiple properties
        * spinner.updateShimmer({ color: [255, 0, 0], speed: 0.8 })
        */
-      updateShimmer(config: Partial<ShimmerConfig>): Spinner {
+      updateShimmer(config: Partial<ShimmerConfig>): SpinnerType {
         // Each partial-config field branch fires only when caller
         // updates that specific field; tests don't pair all sub-arms
         // in a single call. The shimmer-state cascade (existing /
@@ -1371,7 +1013,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         this.#shimmerSavedConfig = this.#shimmer
 
         this.#updateSpinnerText()
-        return this as unknown as Spinner
+        return this as unknown as SpinnerType
         /* c8 ignore stop */
       }
 
@@ -1399,7 +1041,7 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
         return this.#apply('warning', [text, ...extras])
       }
     } as unknown as {
-      new (options?: SpinnerOptions | undefined): Spinner
+      new (options?: SpinnerOptions | undefined): SpinnerType
     }
     // Add aliases.
     ObjectDefineProperties(_Spinner.prototype, {
@@ -1419,294 +1061,4 @@ export function Spinner(options?: SpinnerOptions | undefined): Spinner {
     spinner: _defaultSpinner,
     ...options,
   })
-}
-
-/**
- * Configuration options for `withSpinner()` helper.
- * @template T - Return type of the async operation
- */
-export type WithSpinnerOptions<T> = {
-  /** Message to display while the spinner is running */
-  message: string
-  /** Async function to execute while spinner is active */
-  operation: () => Promise<T>
-  /**
-   * Optional spinner instance to use.
-   * If not provided, operation runs without spinner.
-   */
-  spinner?: Spinner | undefined
-  /**
-   * Optional spinner options to apply during the operation.
-   * These options will be pushed when the operation starts and popped when it completes.
-   * Supports color and shimmer configuration.
-   */
-  withOptions?: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>> | undefined
-}
-
-/**
- * Execute an async operation with spinner lifecycle management.
- * Ensures `spinner.stop()` is always called via try/finally, even if the operation throws.
- * Provides safe cleanup and consistent spinner behavior.
- *
- * @template T - Return type of the operation
- * @param options - Configuration object
- * @param options.message - Message to display while spinner is running
- * @param options.operation - Async function to execute
- * @param options.spinner - Optional spinner instance (if not provided, no spinner is used)
- * @returns Result of the operation
- * @throws Re-throws any error from operation after stopping spinner
- *
- * @example
- * ```ts
- * import { Spinner, withSpinner } from '@socketsecurity/lib/spinner'
- *
- * const spinner = Spinner()
- *
- * // With spinner instance
- * const result = await withSpinner({
- *   message: 'Processing…',
- *   operation: async () => {
- *     return await processData()
- *   },
- *   spinner
- * })
- *
- * // Without spinner instance (no-op, just runs operation)
- * const result = await withSpinner({
- *   message: 'Processing…',
- *   operation: async () => {
- *     return await processData()
- *   }
- * })
- * ```
- */
-export async function withSpinner<T>(
-  options: WithSpinnerOptions<T>,
-): Promise<T> {
-  const { message, operation, spinner, withOptions } = {
-    __proto__: null,
-    ...options,
-  } as WithSpinnerOptions<T>
-
-  if (!spinner) {
-    return await operation()
-  }
-
-  // Save current options if we're going to change them
-  const savedColor =
-    withOptions?.color !== undefined ? spinner.color : undefined
-  const savedShimmerState =
-    withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
-
-  // Apply temporary options
-  if (withOptions?.color !== undefined) {
-    spinner.color = toRgb(withOptions.color)
-  }
-  if (withOptions?.shimmer !== undefined) {
-    if (typeof withOptions.shimmer === 'string') {
-      spinner.updateShimmer({ dir: withOptions.shimmer })
-    } else {
-      spinner.setShimmer(withOptions.shimmer)
-    }
-  }
-
-  spinner.start(message)
-  try {
-    return await operation()
-  } finally {
-    const wasSpinning = spinner.isSpinning
-    spinner.stop()
-
-    // Clear any remaining spinner artifacts that yocto-spinner's clear() misses.
-    // Despite yocto-spinner calling clear(), ANSI-colored spinner frames can sometimes
-    // leave visual artifacts on the line. A final explicit clear ensures clean output.
-    // Only clear if spinner was actually running (which means it was already interactive).
-    // Each restore branch fires only when caller seeded the
-    // corresponding option; tests cover paths individually.
-    /* c8 ignore start */
-    if (wasSpinning) {
-      process.stderr.write('\r\x1B[2K') // socket-hook: allow logger
-    }
-
-    if (savedColor !== undefined) {
-      spinner.color = savedColor
-    }
-    if (withOptions?.shimmer !== undefined) {
-      if (savedShimmerState) {
-        spinner.setShimmer({
-          color: savedShimmerState.color as any,
-          dir: savedShimmerState.direction,
-          speed: savedShimmerState.speed,
-        })
-      } else {
-        spinner.disableShimmer()
-      }
-    }
-    /* c8 ignore stop */
-  }
-}
-
-/**
- * Configuration options for `withSpinnerRestore()` helper.
- * @template T - Return type of the async operation
- */
-export type WithSpinnerRestoreOptions<T> = {
-  /** Async function to execute while spinner is stopped */
-  operation: () => Promise<T>
-  /** Optional spinner instance to restore after operation */
-  spinner?: Spinner | undefined
-  /** Whether spinner was spinning before the operation (used to conditionally restart) */
-  wasSpinning: boolean
-}
-
-/**
- * Execute an async operation with conditional spinner restart.
- * Useful when you need to temporarily stop a spinner for an operation,
- * then restore it to its previous state (if it was spinning).
- *
- * @template T - Return type of the operation
- * @param options - Configuration object
- * @param options.operation - Async function to execute
- * @param options.spinner - Optional spinner instance to manage
- * @param options.wasSpinning - Whether spinner was spinning before the operation
- * @returns Result of the operation
- * @throws Re-throws any error from operation after restoring spinner state
- *
- * @example
- * ```ts
- * import { getDefaultSpinner, withSpinnerRestore } from '@socketsecurity/lib/spinner'
- *
- * const spinner = getDefaultSpinner()
- * const wasSpinning = spinner.isSpinning
- * spinner.stop()
- *
- * const result = await withSpinnerRestore({
- *   operation: async () => {
- *     // Do work without spinner
- *     return await someOperation()
- *   },
- *   spinner,
- *   wasSpinning
- * })
- * // Spinner is automatically restarted if wasSpinning was true
- * ```
- */
-export async function withSpinnerRestore<T>(
-  options: WithSpinnerRestoreOptions<T>,
-): Promise<T> {
-  const { operation, spinner, wasSpinning } = {
-    __proto__: null,
-    ...options,
-  } as WithSpinnerRestoreOptions<T>
-
-  try {
-    return await operation()
-  } finally {
-    if (spinner && wasSpinning) {
-      spinner.start()
-    }
-  }
-}
-
-/**
- * Configuration options for `withSpinnerSync()` helper.
- * @template T - Return type of the sync operation
- */
-export type WithSpinnerSyncOptions<T> = {
-  /** Message to display while the spinner is running */
-  message: string
-  /** Synchronous function to execute while spinner is active */
-  operation: () => T
-  /**
-   * Optional spinner instance to use.
-   * If not provided, operation runs without spinner.
-   */
-  spinner?: Spinner | undefined
-  /**
-   * Optional spinner options to apply during the operation.
-   * These options will be pushed when the operation starts and popped when it completes.
-   * Supports color and shimmer configuration.
-   */
-  withOptions?: Partial<Pick<SpinnerOptions, 'color' | 'shimmer'>> | undefined
-}
-
-/**
- * Execute a synchronous operation with spinner lifecycle management.
- * Ensures `spinner.stop()` is always called via try/finally, even if the operation throws.
- * Provides safe cleanup and consistent spinner behavior for sync operations.
- *
- * @template T - Return type of the operation
- * @param options - Configuration object
- * @param options.message - Message to display while spinner is running
- * @param options.operation - Synchronous function to execute
- * @param options.spinner - Optional spinner instance (if not provided, no spinner is used)
- * @returns Result of the operation
- * @throws Re-throws any error from operation after stopping spinner
- *
- * @example
- * ```ts
- * import { Spinner, withSpinnerSync } from '@socketsecurity/lib/spinner'
- *
- * const spinner = Spinner()
- *
- * const result = withSpinnerSync({
- *   message: 'Processing…',
- *   operation: () => {
- *     return processDataSync()
- *   },
- *   spinner
- * })
- * ```
- */
-export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
-  const { message, operation, spinner, withOptions } = {
-    __proto__: null,
-    ...options,
-  } as WithSpinnerSyncOptions<T>
-
-  if (!spinner) {
-    return operation()
-  }
-
-  // Save current options if we're going to change them
-  const savedColor =
-    withOptions?.color !== undefined ? spinner.color : undefined
-  const savedShimmerState =
-    withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
-
-  // Apply temporary options
-  if (withOptions?.color !== undefined) {
-    spinner.color = toRgb(withOptions.color)
-  }
-  if (withOptions?.shimmer !== undefined) {
-    if (typeof withOptions.shimmer === 'string') {
-      spinner.updateShimmer({ dir: withOptions.shimmer })
-    } else {
-      spinner.setShimmer(withOptions.shimmer)
-    }
-  }
-
-  spinner.start(message)
-  try {
-    return operation()
-  } finally {
-    spinner.stop()
-    // Restore previous options
-    /* c8 ignore start */
-    if (savedColor !== undefined) {
-      spinner.color = savedColor
-    }
-    if (withOptions?.shimmer !== undefined) {
-      if (savedShimmerState) {
-        spinner.setShimmer({
-          color: savedShimmerState.color as any,
-          dir: savedShimmerState.direction,
-          speed: savedShimmerState.speed,
-        })
-      } else {
-        spinner.disableShimmer()
-      }
-    }
-    /* c8 ignore stop */
-  }
 }

@@ -7,7 +7,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { setEnv, resetEnv } from '../../src/env/rewire'
-import { Spinner, withSpinnerRestore } from '../../src/spinner'
+import { Spinner } from '../../src/spinner/core'
+import { withSpinnerRestore } from '../../src/spinner/with'
 
 describe.sequential('spinner — extras', () => {
   beforeEach(() => {

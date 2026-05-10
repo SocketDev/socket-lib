@@ -5,7 +5,7 @@
 
 import type { ColorValue } from '../colors'
 import type { ShimmerDirection } from '../effects/shimmer'
-import type { SpinnerStyle } from '../spinner'
+import type { SpinnerStyle } from '../spinner/types'
 
 /**
  * Color reference — direct value or semantic keyword.

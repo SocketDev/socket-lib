@@ -37,7 +37,7 @@ import { getNodeFs } from './node/fs'
 import { getNodePath } from './node/path'
 import { getOwn, hasOwn } from './objects'
 import { isPath } from './paths/normalize'
-import { getDefaultSpinner } from './spinner'
+import { getDefaultSpinner } from './spinner/registry'
 import { stripAnsi } from './strings'
 
 import type { SendHandle, Serializable, StdioOptions } from 'node:child_process'
@@ -335,7 +335,7 @@ interface WritableStreamType {
  * @property {number | undefined} gid - Group identity (POSIX)
  * @property {boolean | string | undefined} shell - Run command in shell
  * @property {AbortSignal | undefined} signal - Abort signal
- * @property {import('./spinner').Spinner | undefined} spinner - Spinner instance to pause during execution
+ * @property {import('./spinner/types').Spinner | undefined} spinner - Spinner instance to pause during execution
  * @property {StdioType | undefined} stdio - Stdio configuration
  * @property {boolean | undefined} stdioString - Convert output to strings (default: `true`)
  * @property {boolean | undefined} stripAnsi - Remove ANSI codes from output (default: `true`)
@@ -345,7 +345,7 @@ interface WritableStreamType {
  */
 export type SpawnOptions = import('./objects').Remap<
   NodeSpawnOptions & {
-    spinner?: import('./spinner').Spinner | undefined
+    spinner?: import('./spinner/types').Spinner | undefined
     stdioString?: boolean
     stripAnsi?: boolean
   }

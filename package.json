@@ -1088,10 +1088,30 @@
       "types": "./dist/spawn.d.ts",
       "default": "./dist/spawn.js"
     },
-    "./spinner": {
-      "source": "./src/spinner.ts",
-      "types": "./dist/spinner.d.ts",
-      "default": "./dist/spinner.js"
+    "./spinner/core": {
+      "source": "./src/spinner/core.ts",
+      "types": "./dist/spinner/core.d.ts",
+      "default": "./dist/spinner/core.js"
+    },
+    "./spinner/registry": {
+      "source": "./src/spinner/registry.ts",
+      "types": "./dist/spinner/registry.d.ts",
+      "default": "./dist/spinner/registry.js"
+    },
+    "./spinner/types": {
+      "source": "./src/spinner/types.ts",
+      "types": "./dist/spinner/types.d.ts",
+      "default": "./dist/spinner/types.js"
+    },
+    "./spinner/utils": {
+      "source": "./src/spinner/utils.ts",
+      "types": "./dist/spinner/utils.d.ts",
+      "default": "./dist/spinner/utils.js"
+    },
+    "./spinner/with": {
+      "source": "./src/spinner/with.ts",
+      "types": "./dist/spinner/with.d.ts",
+      "default": "./dist/spinner/with.js"
     },
     "./ssri": {
       "source": "./src/ssri.ts",

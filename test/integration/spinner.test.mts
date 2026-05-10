@@ -13,7 +13,8 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { Spinner, withSpinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/core'
+import { withSpinner } from '@socketsecurity/lib/spinner/with'
 
 describe('spinner integration', () => {
   // Mock stdout/stderr to prevent actual spinner output during tests

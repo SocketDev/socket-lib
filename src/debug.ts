@@ -19,7 +19,7 @@ import {
   StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from './primordials'
-import { getDefaultSpinner } from './spinner'
+import { getDefaultSpinner } from './spinner/registry'
 import { applyLinePrefix } from './strings'
 
 const logger = getDefaultLogger()

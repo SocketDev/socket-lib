@@ -20,7 +20,7 @@ import * as selectModuleImport from '../external/@inquirer/select'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 import type { ColorValue } from '../colors'
-import { getDefaultSpinner } from '../spinner'
+import { getDefaultSpinner } from '../spinner/registry'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
@@ -83,7 +83,7 @@ interface InquirerContext {
 export type Context = import('../objects').Remap<
   InquirerContext & {
     /** Optional spinner to stop/start during prompt display */
-    spinner?: import('../spinner').Spinner | undefined
+    spinner?: import('../spinner/types').Spinner | undefined
   }
 >
 
