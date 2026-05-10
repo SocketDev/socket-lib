@@ -638,10 +638,30 @@
       "types": "./dist/fs/write-json.d.ts",
       "default": "./dist/fs/write-json.js"
     },
-    "./git": {
-      "source": "./src/git.ts",
-      "types": "./dist/git.d.ts",
-      "default": "./dist/git.js"
+    "./git/changed": {
+      "source": "./src/git/changed.ts",
+      "types": "./dist/git/changed.d.ts",
+      "default": "./dist/git/changed.js"
+    },
+    "./git/repo": {
+      "source": "./src/git/repo.ts",
+      "types": "./dist/git/repo.d.ts",
+      "default": "./dist/git/repo.js"
+    },
+    "./git/staged": {
+      "source": "./src/git/staged.ts",
+      "types": "./dist/git/staged.d.ts",
+      "default": "./dist/git/staged.js"
+    },
+    "./git/types": {
+      "source": "./src/git/types.ts",
+      "types": "./dist/git/types.d.ts",
+      "default": "./dist/git/types.js"
+    },
+    "./git/unstaged": {
+      "source": "./src/git/unstaged.ts",
+      "types": "./dist/git/unstaged.d.ts",
+      "default": "./dist/git/unstaged.js"
     },
     "./github/fetch": {
       "source": "./src/github/fetch.ts",

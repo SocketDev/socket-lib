@@ -14,20 +14,24 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import {
-  findGitRoot,
   getChangedFiles,
   getChangedFilesSync,
-  getStagedFiles,
-  getStagedFilesSync,
-  getUnstagedFiles,
-  getUnstagedFilesSync,
   isChanged,
   isChangedSync,
+} from '@socketsecurity/lib/git/changed'
+import { findGitRoot } from '@socketsecurity/lib/git/repo'
+import {
+  getStagedFiles,
+  getStagedFilesSync,
   isStaged,
   isStagedSync,
+} from '@socketsecurity/lib/git/staged'
+import {
+  getUnstagedFiles,
+  getUnstagedFilesSync,
   isUnstaged,
   isUnstagedSync,
-} from '@socketsecurity/lib/git'
+} from '@socketsecurity/lib/git/unstaged'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib/spawn'
 import { describe, expect, it, vi } from 'vitest'
