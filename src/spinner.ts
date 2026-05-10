@@ -23,12 +23,12 @@ import type {
 import { configToSpec, frameColors } from './effects/shimmer'
 import { colorsToAnsi } from './effects/shimmer-terminal'
 import yoctoSpinner from './external/@socketregistry/yocto-spinner'
+import { getDefaultLogger } from './logger/default'
 import {
   LOG_SYMBOLS,
-  getDefaultLogger,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
-} from './logger'
+} from './logger/symbols'
 import { hasOwn } from './objects'
 import { isBlankString, stringWidth } from './strings'
 import { getTheme } from './themes/context'

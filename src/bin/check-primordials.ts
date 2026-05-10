@@ -21,7 +21,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { errorMessage } from '../errors'
-import { getDefaultLogger } from '../logger'
+import { getDefaultLogger } from '../logger/default'
 import {
   type PrimordialsCheckConfig,
   type PrimordialsCheckResult,

@@ -60,7 +60,7 @@ function getPath() {
 import { errorMessage } from '../errors'
 import { readFileUtf8Sync } from '../fs/read-file'
 import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
-import { getDefaultLogger } from '../logger'
+import { getDefaultLogger } from '../logger/default'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 

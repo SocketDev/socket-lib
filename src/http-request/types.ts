@@ -7,7 +7,7 @@
 
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type { Readable } from 'node:stream'
-import type { Logger } from '../logger'
+import type { Logger } from '../logger/core'
 
 /** IncomingMessage received as a response to a client request (http.request callback). */
 export type IncomingResponse = IncomingMessage
@@ -499,7 +499,7 @@ export interface HttpDownloadOptions {
    *
    * @example
    * ```ts
-   * import { getDefaultLogger } from '@socketsecurity/lib/logger'
+   * import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
    *
    * const logger = getDefaultLogger()
    * await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {

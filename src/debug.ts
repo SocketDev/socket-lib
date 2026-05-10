@@ -8,7 +8,7 @@ import { getSocketDebug } from './env/socket'
 import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
 import debugJs from './external/debug'
 
-import { getDefaultLogger } from './logger'
+import { getDefaultLogger } from './logger/default'
 import { hasOwn } from './objects'
 import {
   ArrayPrototypeAt,

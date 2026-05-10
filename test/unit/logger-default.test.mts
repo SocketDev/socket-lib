@@ -9,7 +9,7 @@
  * Used by Socket tools for centralized logging without explicit Logger instantiation.
  */
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '../../src/logger/default'
 import { describe, expect, it } from 'vitest'
 
 describe('getDefaultLogger', () => {

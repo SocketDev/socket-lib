@@ -12,12 +12,12 @@
  */
 import { Writable } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { Logger } from '../../src/logger/core'
 import {
   LOG_SYMBOLS,
-  Logger,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
-} from '@socketsecurity/lib/logger'
+} from '../../src/logger/symbols'
 import { setTheme } from '@socketsecurity/lib/themes/context'
 import { THEMES } from '@socketsecurity/lib/themes/themes'
 

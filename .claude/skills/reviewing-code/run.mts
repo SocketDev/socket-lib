@@ -21,7 +21,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { safeDelete } from '@socketsecurity/lib/fs'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 import { isSpawnError, spawn } from '@socketsecurity/lib/spawn'
 
 const logger = getDefaultLogger()

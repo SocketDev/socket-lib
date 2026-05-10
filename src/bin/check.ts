@@ -13,7 +13,7 @@
  *   prim          → primordials
  */
 
-import { getDefaultLogger } from '../logger'
+import { getDefaultLogger } from '../logger/default'
 
 import { runCheckPrimordials } from './check-primordials'
 

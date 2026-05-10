@@ -1,0 +1,40 @@
+/**
+ * @fileoverview Color application helpers for `logger/*` modules.
+ * Wraps the vendored `yoctocolors-cjs` palette so the logger can
+ * accept either a named color (`'green'`) or an explicit RGB tuple
+ * (`[255, 0, 0]`); RGB tuples are emitted via the 24-bit
+ * `[38;2;...m` escape because `yoctocolors-cjs` doesn't ship an
+ * `rgb()` helper.
+ */
+
+import yoctocolorsCjs from '../external/yoctocolors-cjs'
+
+import type { ColorValue } from '../colors'
+
+/**
+ * Apply a color to text using yoctocolors.
+ * Handles both named colors and RGB tuples.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function applyColor(
+  text: string,
+  color: ColorValue,
+  colors: typeof yoctocolorsCjs,
+): string {
+  if (typeof color === 'string') {
+    // Named color like 'green', 'red', etc.
+    return (colors as any)[color](text)
+  }
+  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
+  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
+  const { 0: r, 1: g, 2: b } = color
+  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
+}
+
+/**
+ * Get the yoctocolors module for terminal colors.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getYoctocolors() {
+  return yoctocolorsCjs
+}

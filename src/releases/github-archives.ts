@@ -8,7 +8,7 @@ import {
   extractArchive,
 } from '../archives'
 import { safeDelete, safeMkdir } from '../fs/safe'
-import { getDefaultLogger } from '../logger'
+import { getDefaultLogger } from '../logger/default'
 import { ErrorCtor } from '../primordials'
 
 import { downloadReleaseAsset } from './github-downloads'

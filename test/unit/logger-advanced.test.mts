@@ -14,7 +14,7 @@
 
 import { Writable } from 'node:stream'
 
-import { Logger } from '@socketsecurity/lib/logger'
+import { Logger } from '../../src/logger/core'
 import { describe, expect, it, beforeEach } from 'vitest'
 
 // Disable concurrent execution for this suite to prevent state sharing between tests

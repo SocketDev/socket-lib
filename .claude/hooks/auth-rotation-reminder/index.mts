@@ -55,7 +55,7 @@ import process from 'node:process'
 
 import { errorMessage } from '@socketsecurity/lib/errors'
 import { safeDelete } from '@socketsecurity/lib/fs'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 import { DEFAULT_SKIP_IDS, SERVICES } from './services.mts'
 import type { Service } from './services.mts'

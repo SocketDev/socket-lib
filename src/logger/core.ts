@@ -1,310 +1,63 @@
 /**
- * @fileoverview Console logging utilities with line prefix support.
- * Provides enhanced console methods with formatted output capabilities.
+ * @fileoverview The `Logger` class — the public class surface for
+ * `logger/*`. Owns the per-instance state (parent, bound stream,
+ * indent buffers, theme), the symbol-prefixed semantic methods
+ * (`success`, `fail`, `info`, ...), and the chainable wrappers around
+ * the underlying `Console` methods.
+ *
+ * Console construction is deliberately lazy: the constructor only
+ * stashes its args in `_internals.privateConstructorArgs`; the actual
+ * `node:console` instance is built on first call to `#getConsole()`.
+ * This lets the logger be imported during early Node.js bootstrap
+ * before stdout is ready, avoiding `ERR_CONSOLE_WRITABLE_STREAM`.
+ *
+ * Free helpers live in sibling leaves (per `socket-lib`'s
+ * export-top-level-functions rule):
+ *   - color helpers — `./colors` (`applyColor`, `getYoctocolors`)
+ *   - log symbols + symbol getters — `./symbols`
+ *   - lazy console init + prototype mirror — `./console-init`
+ *   - shared private state — `./_internals`
  */
+
+/* oxlint-disable socket/no-status-emoji */
+// This module's `#getSymbols()` builds per-instance status emoji
+// for the very methods the rule recommends (logger.success / .fail /
+// .warn). Disabling the rule for the canonical owner — same reason
+// it's disabled in `./symbols`.
 
 import process from 'node:process'
 
-import isUnicodeSupported from './external/@socketregistry/is-unicode-supported'
-import yoctocolorsCjs from './external/yoctocolors-cjs'
+import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
 
 import {
   ArrayPrototypeAt,
   ArrayPrototypeSlice,
   ErrorCtor,
   MathMin,
-  ObjectDefineProperties,
-  ObjectEntries,
-  ObjectGetOwnPropertySymbols,
-  ProxyCtor,
   ReflectApply,
-  ReflectConstruct,
-  ReflectOwnKeys,
   StringPrototypeReplace,
-  WeakMapCtor,
-} from './primordials'
-import { applyLinePrefix, isBlankString } from './strings'
-import { getTheme, onThemeChange } from './themes/context'
-import { THEMES } from './themes/themes'
+} from '../primordials'
+import { applyLinePrefix, isBlankString } from '../strings'
+import { getTheme } from '../themes/context'
+import { THEMES } from '../themes/themes'
 
-import type { ColorValue } from './colors'
+import { applyColor, getYoctocolors } from './colors'
+import {
+  boundConsoleEntries,
+  maxIndentation,
+  privateConsole,
+  privateConstructorArgs,
+} from './_internals'
+import {
+  LOG_SYMBOLS,
+  getKGroupIndentationWidthSymbol,
+  incLogCallCountSymbol,
+  lastWasBlankSymbol,
+} from './symbols'
 
-/**
- * Log symbols for terminal output with colored indicators.
- *
- * Each symbol provides visual feedback for different message types, with
- * Unicode and ASCII fallback support.
- *
- * @example
- * ```typescript
- * import { LOG_SYMBOLS } from '@socketsecurity/lib'
- *
- * console.log(`${LOG_SYMBOLS.success} Operation completed`)
- * console.log(`${LOG_SYMBOLS.fail} Operation failed`)
- * console.log(`${LOG_SYMBOLS.warn} Warning message`)
- * console.log(`${LOG_SYMBOLS.info} Information message`)
- * console.log(`${LOG_SYMBOLS.step} Processing step`)
- * console.log(`${LOG_SYMBOLS.progress} Working on task`)
- * ```
- */
-type LogSymbols = {
-  /** Red colored failure symbol (✖ or × in ASCII) */
-  fail: string
-  /** Blue colored information symbol (ℹ or i in ASCII) */
-  info: string
-  /** Cyan colored progress indicator symbol (∴ or :. in ASCII) */
-  progress: string
-  /** Cyan colored skip symbol (↻ or @ in ASCII) */
-  skip: string
-  /** Cyan colored step symbol (→ or > in ASCII) */
-  step: string
-  /** Green colored success symbol (✔ or √ in ASCII) */
-  success: string
-  /** Yellow colored warning symbol (⚠ or ‼ in ASCII) */
-  warn: string
-}
+import { constructConsole, ensurePrototypeInitialized } from './console-init'
 
-/**
- * Type definition for logger methods that mirror console methods.
- *
- * All methods return the logger instance for method chaining.
- */
-type LoggerMethods = {
-  [K in keyof typeof console]: (typeof console)[K] extends (
-    ...args: infer A
-  ) => any
-    ? (...args: A) => Logger
-    : (typeof console)[K]
-}
-
-/**
- * A task that can be executed with automatic start/complete logging.
- *
- * @example
- * ```typescript
- * const task = logger.createTask('Database migration')
- * task.run(() => {
- *   // Migration logic here
- * })
- * // Logs: "Starting task: Database migration"
- * // Logs: "Completed task: Database migration"
- * ```
- */
-interface Task {
-  /**
-   * Executes the task function with automatic logging.
-   *
-   * @template T - The return type of the task function
-   * @param f - The function to execute
-   * @returns The result of the task function
-   */
-  run<T>(f: () => T): T
-}
-
-export type { LogSymbols, LoggerMethods, Task }
-
-const globalConsole = console
-
-let _Console: typeof import('node:console').Console | undefined
-let _consoleSymbols: symbol[] | undefined
-let _kGroupIndentationWidthSymbol: symbol | undefined
-let _prototypeInitialized = false
-// Private singleton instance
-let _logger: Logger | undefined
-
-/**
- * Log symbols for terminal output with colored indicators.
- *
- * Provides colored Unicode symbols (✖, ℹ, ∴, →, ✔, ⚠) with ASCII fallbacks (×, i, :., >, √, ‼)
- * for terminals that don't support Unicode. Symbols are colored according to the active
- * theme's color palette (error, info, reason, step, success, warning).
- *
- * The symbols are lazily initialized on first access and automatically update when the
- * fallback theme changes (via setTheme()). Note that LOG_SYMBOLS reflect the global
- * fallback theme, not async-local theme contexts from withTheme().
- *
- * @example
- * ```typescript
- * import { LOG_SYMBOLS } from '@socketsecurity/lib'
- *
- * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Theme error color ✖
- * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Theme info color ℹ
- * console.log(`${LOG_SYMBOLS.progress} Working on task`)   // Theme step color ∴
- * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Theme step color →
- * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
- * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Theme warning color ⚠
- * ```
- */
-export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
-  const target: Record<string, string> = {
-    __proto__: null,
-  } as unknown as Record<string, string>
-
-  let initialized = false
-
-  // Mutable handler to simulate a frozen target.
-  const handler: ProxyHandler<Record<string, string>> = {
-    __proto__: null,
-  } as unknown as ProxyHandler<Record<string, string>>
-
-  const updateSymbols = () => {
-    const supported = isUnicodeSupported()
-    const colors = getYoctocolors()
-    const theme = getTheme()
-
-    // Get colors from theme
-    const successColor = theme.colors.success
-    const errorColor = theme.colors.error
-    const warningColor = theme.colors.warning
-    const infoColor = theme.colors.info
-    const stepColor = theme.colors.step
-
-    /* c8 ignore start - ASCII-fallback symbol arms only fire on
-       terminals without unicode support; tests run on unicode TTYs. */
-    target['fail'] = applyColor(supported ? '✖' : '×', errorColor, colors)
-    target['info'] = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
-    target['progress'] = applyColor(supported ? '∴' : ':.', stepColor, colors)
-    target['reason'] = colors.dim(
-      applyColor(supported ? '∴' : ':.', warningColor, colors),
-    )
-    target['skip'] = applyColor(supported ? '↻' : '@', stepColor, colors)
-    target['step'] = applyColor(supported ? '→' : '>', stepColor, colors)
-    target['success'] = applyColor(supported ? '✔' : '√', successColor, colors)
-    target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor, colors)
-    /* c8 ignore stop */
-  }
-
-  const init = () => {
-    // Idempotent guard; init runs once.
-    /* c8 ignore start */
-    if (initialized) {
-      return
-    }
-    /* c8 ignore stop */
-
-    updateSymbols()
-    initialized = true
-
-    // The handler of a Proxy is mutable after proxy instantiation.
-    // We delete the traps to defer to native behavior for better performance.
-    for (const trapName in handler) {
-      delete handler[trapName as keyof ProxyHandler<Record<string, string>>]
-    }
-  }
-
-  const reset = () => {
-    // Defensive guard; reset only runs after init.
-    /* c8 ignore start */
-    if (!initialized) {
-      return
-    }
-    /* c8 ignore stop */
-
-    // Update symbols with new theme colors
-    updateSymbols()
-  }
-
-  for (const trapName of ReflectOwnKeys(Reflect)) {
-    const fn = (Reflect as Record<PropertyKey, unknown>)[trapName]
-    if (typeof fn === 'function') {
-      ;(handler as Record<string, (...args: unknown[]) => unknown>)[
-        trapName as string
-      ] = (...args: unknown[]) => {
-        init()
-        return fn(...args)
-      }
-    }
-  }
-
-  /* c8 ignore next 4 - onThemeChange callback fires only when
-     setTheme() is called at runtime; tests use the static default
-     theme. */
-  // Listen for theme changes and reset symbols
-  onThemeChange(() => {
-    reset()
-  })
-
-  return new ProxyCtor(target, handler)
-})()
-
-const boundConsoleEntries = [
-  // Add bound properties from console[kBindProperties](ignoreErrors, colorMode, groupIndentation).
-  // https://github.com/nodejs/node/blob/v24.0.1/lib/internal/console/constructor.js#L230-L265
-  '_stderrErrorHandler',
-  '_stdoutErrorHandler',
-  // Add methods that need to be bound to function properly.
-  'assert',
-  'clear',
-  'count',
-  'countReset',
-  'createTask',
-  'debug',
-  'dir',
-  'dirxml',
-  'error',
-  // Skip group methods because in at least Node 20 with the Node --frozen-intrinsics
-  // flag it triggers a readonly property for Symbol(kGroupIndent). Instead, we
-  // implement these methods ourselves.
-  //'group',
-  //'groupCollapsed',
-  //'groupEnd',
-  'info',
-  'log',
-  'table',
-  'time',
-  'timeEnd',
-  'timeLog',
-  'trace',
-  'warn',
-]
-  .filter(n => typeof (globalConsole as any)[n] === 'function')
-  .map(n => [n, (globalConsole as any)[n].bind(globalConsole)])
-
-const consolePropAttributes = {
-  __proto__: null,
-  writable: true,
-  enumerable: false,
-  configurable: true,
-}
-const maxIndentation = 1000
-
-/**
- * WeakMap storing the Console instance for each Logger.
- *
- * Console creation is lazy - deferred until first logging method call.
- * This allows logger to be imported during early Node.js bootstrap before
- * stdout is ready, avoiding ERR_CONSOLE_WRITABLE_STREAM errors.
- */
-const privateConsole = new WeakMapCtor()
-
-/**
- * WeakMap storing constructor arguments for lazy Console initialization.
- *
- * WeakMap is required instead of a private field (#constructorArgs) because:
- * 1. Private fields can't be accessed from dynamically created functions
- * 2. Logger adds console methods dynamically to its prototype (lines 1560+)
- * 3. These dynamic methods need constructor args for lazy initialization
- * 4. WeakMap allows both regular methods and dynamic functions to access args
- *
- * The args are deleted from the WeakMap after Console is created (memory cleanup).
- */
-const privateConstructorArgs = new WeakMapCtor()
-
-/**
- * Symbol for incrementing the internal log call counter.
- *
- * This is an internal symbol used to track the number of times logging
- * methods have been called on a logger instance.
- */
-export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
-
-/**
- * Symbol for tracking whether the last logged line was blank.
- *
- * This is used internally to prevent multiple consecutive blank lines
- * and to determine whether to add spacing before certain messages.
- */
-export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
+import type { LogSymbols, Task } from './types'
 
 /**
  * Enhanced console logger with indentation, colored symbols, and stream management.
@@ -324,7 +77,9 @@ export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
  *
  * @example
  * ```typescript
- * import { logger } from '@socketsecurity/lib'
+ * import { Logger } from '@socketsecurity/lib/logger/core'
+ *
+ * const logger = new Logger()
  *
  * // Basic logging with symbols
  * logger.success('Build completed')
@@ -388,7 +143,7 @@ export class Logger {
   #logCallCount = 0
   #options: Record<string, unknown>
   #originalStdout?: NodeJS.WritableStream | undefined
-  #theme?: import('./themes/types').Theme
+  #theme?: import('../themes/types').Theme
 
   /**
    * Creates a new Logger instance.
@@ -435,7 +190,7 @@ export class Logger {
           }
         } else {
           // Theme object
-          this.#theme = themeOption as import('./themes/types').Theme
+          this.#theme = themeOption as import('../themes/types').Theme
         }
       }
     } else {
@@ -580,7 +335,7 @@ export class Logger {
    * Returns instance theme if set, otherwise falls back to context theme.
    * @private
    */
-  #getTheme(): import('./themes/types').Theme {
+  #getTheme(): import('../themes/types').Theme {
     return this.#theme ?? getTheme()
   }
 
@@ -1737,184 +1492,4 @@ export class Logger {
     this[lastWasBlankSymbol](false)
     return this
   }
-}
-
-/**
- * Apply a color to text using yoctocolors.
- * Handles both named colors and RGB tuples.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function applyColor(
-  text: string,
-  color: ColorValue,
-  colors: typeof yoctocolorsCjs,
-): string {
-  if (typeof color === 'string') {
-    // Named color like 'green', 'red', etc.
-    return (colors as any)[color](text)
-  }
-  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
-  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
-  const { 0: r, 1: g, 2: b } = color
-  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
-}
-
-/**
- * Construct a new Console instance.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function constructConsole(...args: unknown[]) {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_Console === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    const nodeConsole = /*@__PURE__*/ require('node:console')
-    _Console = nodeConsole.Console
-  }
-  return ReflectConstruct(
-    _Console! as new (...args: unknown[]) => Console, // eslint-disable-line no-undef
-    args,
-  )
-}
-
-/**
- * Lazily add dynamic console methods to Logger prototype.
- *
- * This is deferred until first access to avoid calling Object.entries(globalConsole)
- * during early Node.js bootstrap before stdout is ready.
- * @private
- */
-function ensurePrototypeInitialized() {
-  if (_prototypeInitialized) {
-    return
-  }
-  _prototypeInitialized = true
-
-  const entries: Array<[string | symbol, PropertyDescriptor]> = [
-    [
-      getKGroupIndentationWidthSymbol(),
-      {
-        ...consolePropAttributes,
-        value: 2,
-      },
-    ],
-    [
-      Symbol.toStringTag,
-      {
-        __proto__: null,
-        configurable: true,
-        value: 'logger',
-      } as PropertyDescriptor,
-    ],
-  ]
-  for (const { 0: key, 1: value } of ObjectEntries(globalConsole)) {
-    if (!(Logger.prototype as any)[key] && typeof value === 'function') {
-      // Dynamically name the log method without using Object.defineProperty.
-      const { [key]: func } = {
-        [key](this: Logger, ...args: unknown[]) {
-          // Access Console via WeakMap directly since private methods can't
-          // be called from dynamically created functions. con-undefined only
-          // fires if someone calls a dynamically added console method before
-          // any core logger method, which is rare.
-          /* c8 ignore start */
-          let con = privateConsole.get(this)
-          if (con === undefined) {
-            const ctorArgs = privateConstructorArgs.get(this) ?? []
-            privateConstructorArgs.delete(this)
-            if (ctorArgs.length) {
-              con = constructConsole(...ctorArgs)
-            } else {
-              con = constructConsole({
-                stdout: process.stdout,
-                stderr: process.stderr,
-              }) as typeof console & Record<string, unknown>
-              for (const { 0: k, 1: method } of boundConsoleEntries) {
-                con[k] = method
-              }
-            }
-            privateConsole.set(this, con)
-          }
-          /* c8 ignore stop */
-          const result = (con as any)[key](...args)
-          // Most Console methods return undefined; the `=== con` chain
-          // arm fires for builtin methods that return `this`.
-          /* c8 ignore next */
-          return result === undefined || result === con ? this : result
-        },
-      }
-      entries.push([
-        key,
-        {
-          ...consolePropAttributes,
-          value: func,
-        },
-      ])
-    }
-  }
-  ObjectDefineProperties(Logger.prototype, Object.fromEntries(entries))
-}
-
-/**
- * Lazily get console symbols on first access.
- *
- * Deferred to avoid accessing global console during early Node.js bootstrap
- * before stdout is ready.
- * @private
- */
-function getConsoleSymbols(): symbol[] {
-  // Lazy-init second-call branch; module-singleton.
-  /* c8 ignore start */
-  if (_consoleSymbols === undefined) {
-    _consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
-  }
-  /* c8 ignore stop */
-  return _consoleSymbols
-}
-
-/**
- * Lazily get kGroupIndentationWidth symbol on first access.
- * @private
- */
-function getKGroupIndentationWidthSymbol(): symbol {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_kGroupIndentationWidthSymbol === undefined) {
-    _kGroupIndentationWidthSymbol =
-      getConsoleSymbols().find(s => (s as any).label === 'kGroupIndentWidth') ??
-      Symbol('kGroupIndentWidth')
-  }
-  return _kGroupIndentationWidthSymbol
-}
-
-/**
- * Get the yoctocolors module for terminal colors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-function getYoctocolors() {
-  return yoctocolorsCjs
-}
-
-/**
- * Get the default logger instance.
- * Lazily creates the logger to avoid circular dependencies during module initialization.
- * Reuses the same instance across calls.
- *
- * @returns Shared default logger instance
- *
- * @example
- * ```ts
- * import { getDefaultLogger } from '@socketsecurity/lib/logger'
- *
- * const logger = getDefaultLogger()
- * logger.log('Application started')
- * logger.success('Configuration loaded')
- * ```
- */
-export function getDefaultLogger(): Logger {
-  if (_logger === undefined) {
-    _logger = new Logger()
-  }
-  return _logger
 }

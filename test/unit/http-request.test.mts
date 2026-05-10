@@ -36,7 +36,7 @@ import {
   readIncomingResponse,
 } from '../../src/http-request/request'
 import { HttpResponseError } from '../../src/http-request/types'
-import { Logger } from '../../src/logger'
+import { Logger } from '../../src/logger/core'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 

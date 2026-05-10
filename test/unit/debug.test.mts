@@ -24,7 +24,7 @@ import {
   isDebugNs,
 } from '../../src/debug'
 import { clearEnv, resetEnv, setEnv } from '../../src/env/rewire'
-import { getDefaultLogger } from '../../src/logger'
+import { getDefaultLogger } from '../../src/logger/default'
 
 const logger = getDefaultLogger()
 

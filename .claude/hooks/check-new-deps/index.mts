@@ -28,7 +28,7 @@ import type { PackageURL } from '@socketregistry/packageurl-js'
 import {
   SOCKET_PUBLIC_API_TOKEN,
 } from '@socketsecurity/lib/constants/socket'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 import {
   normalizePath,
 } from '@socketsecurity/lib/paths/normalize'
