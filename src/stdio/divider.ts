@@ -3,8 +3,8 @@
  * Provides various line styles for visual separation in CLI output.
  */
 
+import { getDefaultLogger } from '../logger/default'
 import { repeatString } from '../strings/format'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
 
@@ -122,7 +122,7 @@ export function printDottedDivider(): void {
  * ```
  */
 export function printSectionBreak(options?: DividerOptions): void {
-  console.log(sectionBreak(options))
+  logger.log(sectionBreak(options))
 }
 
 /**

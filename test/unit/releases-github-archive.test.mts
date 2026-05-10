@@ -11,6 +11,10 @@
 import { describe, expect, it } from 'vitest'
 
 import { detectArchiveFormat } from '@socketsecurity/lib/archives/detect'
+import {
+  downloadAndExtractArchive,
+  downloadAndExtractZip,
+} from '@socketsecurity/lib/releases/github-archives'
 
 describe('releases-github-archive', () => {
   describe('archive format detection', () => {
@@ -42,17 +46,13 @@ describe('releases-github-archive', () => {
   })
 
   describe('downloadAndExtractZip integration', () => {
-    it('should be exported for backward compatibility', async () => {
-      const { downloadAndExtractZip } =
-        await import('@socketsecurity/lib/releases/github-archives')
+    it('should be exported for backward compatibility', () => {
       expect(typeof downloadAndExtractZip).toBe('function')
     })
   })
 
   describe('downloadAndExtractArchive integration', () => {
-    it('should be exported for all archive formats', async () => {
-      const { downloadAndExtractArchive } =
-        await import('@socketsecurity/lib/releases/github-archives')
+    it('should be exported for all archive formats', () => {
       expect(typeof downloadAndExtractArchive).toBe('function')
     })
   })

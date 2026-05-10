@@ -6,8 +6,8 @@
 import colors from '../external/yoctocolors-cjs'
 import { centerText, repeatString } from '../strings/format'
 
+import { getDefaultLogger } from '../logger/default'
 import { ArrayPrototypePush } from '../primordials/array'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
 export interface HeaderOptions {
@@ -168,6 +168,6 @@ export function createSectionHeader(
 export function printHeader(title: string): void {
   const border = repeatString('═', 55)
   logger.log(border)
-  console.log(`  ${title}`)
-  console.log(border)
+  logger.log(`  ${title}`)
+  logger.log(border)
 }

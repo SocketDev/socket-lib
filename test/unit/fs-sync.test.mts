@@ -242,6 +242,7 @@ describe.sequential('fs - Sync Functions', () => {
       writeFileSync(file, content)
 
       const result = safeReadFileSync(file, {
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
         encoding: null,
       } as unknown as SafeReadOptions & { encoding: null })
       expect(Buffer.isBuffer(result)).toBe(true)

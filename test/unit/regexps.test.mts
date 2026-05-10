@@ -181,6 +181,7 @@ describe('regexps', () => {
       // the fallback on re-import.
       delete (RegExp as unknown as { escape?: unknown }).escape
       vi.resetModules()
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises fallback after deleting RegExp.escape.
       const mod = await import('@socketsecurity/lib/regexps')
       return mod.escapeRegExp
     }

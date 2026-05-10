@@ -57,6 +57,7 @@ export async function getSmolPower(): Promise<SmolPower | undefined> {
   }
   // Cast through `unknown` because system Node's typings don't
   // declare the module — only node-smol's lib.d.ts does.
+  // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- optional node-smol module gated by isBuiltin() check.
   _smolPower = (await import(
     'node:smol-power' as string
   )) as unknown as SmolPower

@@ -86,7 +86,7 @@ describe.sequential('process-lock', () => {
 
     it('should handle stale lock removal', async () => {
       // Create a lock directory manually to simulate stale lock
-      const fs = await import('node:fs')
+      const fs = fsCjs
       fs.mkdirSync(testLockPath, { recursive: false })
 
       // Modify mtime to make it appear stale
@@ -269,7 +269,7 @@ describe.sequential('process-lock', () => {
     })
 
     it('should reclaim locks beyond stale timeout', async () => {
-      const fs = await import('node:fs')
+      const fs = fsCjs
 
       // Create lock directory
       fs.mkdirSync(testLockPath, { recursive: false })
@@ -379,7 +379,7 @@ describe.sequential('process-lock', () => {
 
   describe('touch timer', () => {
     it('keeps the lock fresh past the stale timeout when touchInterval is set', async () => {
-      const fs = await import('node:fs')
+      const fs = fsCjs
       // Short stale window, fast touch.
       const release = await processLock.acquire(testLockPath, {
         staleMs: 200,
@@ -394,7 +394,7 @@ describe.sequential('process-lock', () => {
     })
 
     it('does not start a touch timer when touchIntervalMs is 0', async () => {
-      const fs = await import('node:fs')
+      const fs = fsCjs
       const release = await processLock.acquire(testLockPath, {
         touchIntervalMs: 0,
         staleMs: 5000,

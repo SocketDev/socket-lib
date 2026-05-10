@@ -12,10 +12,10 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, promises as fs } from 'node:fs'
+import { createWriteStream, existsSync, promises as fs } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
-import { Writable } from 'node:stream'
+import { Readable, Writable } from 'node:stream'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -1394,7 +1394,8 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(
           JSON.stringify({
-            contentType: req.headers['content-type'] || undefined,
+            // oxlint-disable-next-line socket/prefer-undefined-over-null -- JSON.stringify drops undefined keys; null preserves the field so toBeNull() can assert.
+            contentType: req.headers['content-type'] || null,
           }),
         )
       })
@@ -1423,7 +1424,8 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(
           JSON.stringify({
-            contentType: req.headers['content-type'] || undefined,
+            // oxlint-disable-next-line socket/prefer-undefined-over-null -- JSON.stringify drops undefined keys; null preserves the field so toBeNull() can assert.
+            contentType: req.headers['content-type'] || null,
           }),
         )
       })
@@ -2169,7 +2171,6 @@ abc123def456789012345678901234567890123456789012345678901234abcd
         expect(response.ok).toBe(true)
 
         const destPath = path.join(tmpDir, 'streamed.txt')
-        const { createWriteStream } = await import('node:fs')
         await new Promise<void>((resolve, reject) => {
           const ws = createWriteStream(destPath)
           ws.on('error', reject)
@@ -2346,9 +2347,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(response.body.length).toBe(10_000)
     })
 
-    it('should default status to 0 when statusCode is undefined', async () => {
-      const { Readable } = await import('node:stream')
-      const fakeMsg = new Readable({
+    it('should default status to 0 when statusCode is undefined', async () => {      const fakeMsg = new Readable({
         read() {
           this.push('body')
           this.push(undefined)
@@ -2818,9 +2817,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
   })
 
   describe('streaming body', () => {
-    it('should pipe a Readable stream as request body', async () => {
-      const { Readable } = await import('node:stream')
-      const body = Readable.from(Buffer.from('streamed data'))
+    it('should pipe a Readable stream as request body', async () => {      const body = Readable.from(Buffer.from('streamed data'))
 
       const response = await httpRequest(`${httpBaseUrl}/echo-body`, {
         method: 'POST',
@@ -2831,8 +2828,6 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should auto-merge FormData-like getHeaders()', async () => {
-      const { Readable } = await import('node:stream')
-
       // Create a minimal FormData-like object.
       const boundary = 'test-boundary-123'
       const formBody = [
@@ -2866,8 +2861,6 @@ abc123def456789012345678901234567890123456789012345678901234abcd
     })
 
     it('should allow user headers to override stream headers', async () => {
-      const { Readable } = await import('node:stream')
-
       const stream = Readable.from(
         Buffer.from('override test'),
       ) as import('node:stream').Readable & {
@@ -2894,9 +2887,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(data.hasMultipart).toBe(false)
     })
 
-    it('should throw when streaming body is used with retries > 0', async () => {
-      const { Readable } = await import('node:stream')
-      const body = Readable.from(Buffer.from('data'))
+    it('should throw when streaming body is used with retries > 0', async () => {      const body = Readable.from(Buffer.from('data'))
 
       await expect(
         httpRequest(`${httpBaseUrl}/echo-body`, {
@@ -2907,9 +2898,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       ).rejects.toThrow(/Streaming body.*cannot be used with retries/)
     })
 
-    it('should disable redirects for streaming bodies', async () => {
-      const { Readable } = await import('node:stream')
-      const body = Readable.from(Buffer.from('redirect-body'))
+    it('should disable redirects for streaming bodies', async () => {      const body = Readable.from(Buffer.from('redirect-body'))
 
       // /redirect returns 302 -> /text, but with a stream body
       // redirects are disabled, so we get the raw 302.
@@ -2923,9 +2912,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(response.ok).toBe(false)
     })
 
-    it('should handle stream errors without double-firing hooks', async () => {
-      const { Readable } = await import('node:stream')
-      const responseInfos: Array<
+    it('should handle stream errors without double-firing hooks', async () => {      const responseInfos: Array<
         import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
       > = []
 
@@ -3304,9 +3291,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
   })
 
   describe('stream body cleanup on failure', () => {
-    it('should destroy source stream body on request timeout', async () => {
-      const { Readable } = await import('node:stream')
-      let streamDestroyed = false
+    it('should destroy source stream body on request timeout', async () => {      let streamDestroyed = false
 
       // Create a slow stream that will outlive the request.
       const slowStream = new Readable({
@@ -3330,9 +3315,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
       expect(streamDestroyed).toBe(true)
     })
 
-    it('should destroy source stream body on connection error', async () => {
-      const { Readable } = await import('node:stream')
-      let streamDestroyed = false
+    it('should destroy source stream body on connection error', async () => {      let streamDestroyed = false
 
       const stream = new Readable({
         read() {

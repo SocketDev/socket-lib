@@ -289,6 +289,7 @@ export async function loadSdk() {
   // The SDK is an optional peer; require it dynamically so the
   // audit/codemod don't pay the import cost when AI defer is off.
   // eslint-disable-next-line no-unsanitized/method
+  // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- optional peer SDK; load on demand to avoid forcing the install.
   const mod = await import('@anthropic-ai/claude-agent-sdk')
   if (typeof mod.query !== 'function') {
     throw new Error(

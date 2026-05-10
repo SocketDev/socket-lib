@@ -352,7 +352,7 @@ describe('ipc-cli', () => {
     })
 
     async function freshGetIpc(): Promise<IpcObject> {
-      // Dynamic import to pick up a fresh module instance after resetModules.
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- pick up a fresh module instance after vi.resetModules.
       const mod = (await import('@socketsecurity/lib/ipc-cli')) as {
         getIpc: () => Promise<IpcObject>
       }

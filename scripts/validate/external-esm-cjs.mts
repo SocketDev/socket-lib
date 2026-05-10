@@ -137,8 +137,8 @@ export async function checkModuleExports(filePath) {
   // Test 2: ESM import - should work correctly
   let esmModule
   try {
-    // Dynamic import to test ESM interop
     const moduleUrl = pathToFileURL(filePath).href
+    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- module path is computed from filePath at runtime.
     esmModule = await import(moduleUrl)
   } catch (e) {
     issues.push(`ESM import failed: ${e.message}`)

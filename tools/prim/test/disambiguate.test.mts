@@ -14,7 +14,15 @@
  */
 
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, test } from 'node:test'
@@ -118,7 +126,6 @@ describe('disambiguateReceiver', () => {
       // built cache entry that matches the key shape, then call again.
       // Instead: rely on the fact that cache key is sha256(method +
       // receiver + snippet); we can compute it inline.
-      const { createHash } = await import('node:crypto')
       const h = createHash('sha256')
       h.update('v1\n')
       h.update('test')
@@ -128,7 +135,6 @@ describe('disambiguateReceiver', () => {
       h.update(FIXTURE_SNIPPET)
       const key = h.digest('hex')
       const cachePath = path.join(cacheDir, 'disambiguate.json')
-      const { writeFileSync } = await import('node:fs')
       writeFileSync(
         cachePath,
         JSON.stringify({
@@ -178,7 +184,6 @@ describe('locked-down tool surface', () => {
     // set the model is told about. Anything not in here is invisible
     // to the model. This is the security-critical line; a future edit
     // that adds Bash/Edit/Write here is the bug this test is for.
-    const { readFileSync } = await import('node:fs')
     const src = readFileSync(
       new URL('../src/disambiguate.mts', import.meta.url),
       'utf8',
@@ -194,8 +199,7 @@ describe('locked-down tool surface', () => {
     // into the SDK call. Verify the literal `tools: BASE_TOOLS` line
     // is in the source. Renaming the constant without updating the
     // call site would silently fall back to the SDK default (= all
-    // claude_code tools available), so this guard catches that.
-    const { readFileSync } = await import('node:fs')
+    // claude_code tools available), so this guard catches that.   
     const src = readFileSync(
       new URL('../src/disambiguate.mts', import.meta.url),
       'utf8',
@@ -215,8 +219,7 @@ describe('locked-down tool surface', () => {
     // through to canUseTool, which is undefined → undefined behavior
     // in non-interactive scripts. This test catches the regression
     // shape where someone "simplifies" by dropping permissionMode
-    // or switches it to 'default' without realizing what changed.
-    const { readFileSync } = await import('node:fs')
+    // or switches it to 'default' without realizing what changed.   
     const src = readFileSync(
       new URL('../src/disambiguate.mts', import.meta.url),
       'utf8',
@@ -240,7 +243,6 @@ describe('locked-down tool surface', () => {
   })
 
   test('source declares Bash/Edit/Write in DENIED_TOOLS', async () => {
-    const { readFileSync } = await import('node:fs')
     const src = readFileSync(
       new URL('../src/disambiguate.mts', import.meta.url),
       'utf8',

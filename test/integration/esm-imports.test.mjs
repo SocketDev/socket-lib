@@ -4,6 +4,8 @@
  * esbuild-compiled CommonJS modules.
  */
 
+// oxlint-disable socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
+
 import { describe, expect, it } from 'vitest'
 
 describe('ESM imports from CommonJS', () => {

@@ -29,9 +29,8 @@ import {
 
 describe('performance', () => {
   describe('module import', () => {
-    it('should import performance module', async () => {
-      const module = await import('@socketsecurity/lib/performance')
-      expect(module).toBeDefined()
+    it('should import performance module', () => {
+      expect(perfTimer).toBeDefined()
     })
   })
 

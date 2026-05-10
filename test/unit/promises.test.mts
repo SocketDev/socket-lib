@@ -1177,6 +1177,7 @@ describe('promises', () => {
     > {
       delete (Promise as unknown as { withResolvers?: unknown }).withResolvers
       vi.resetModules()
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises the fallback path after deleting Promise.withResolvers, which requires re-evaluating the module post-vi.resetModules.
       const mod = await import('../../src/promises/resolvers')
       return mod.withResolvers as () => {
         promise: Promise<unknown>
@@ -1335,6 +1336,7 @@ describe('promises', () => {
     > {
       delete (Array as unknown as { fromAsync?: unknown }).fromAsync
       vi.resetModules()
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises the fallback path after deleting Array.fromAsync.
       const mod = await import('../../src/promises/resolvers')
       return mod.fromAsync
     }

@@ -6,7 +6,13 @@
  * tmpdir.
  */
 
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -87,8 +93,7 @@ describe.sequential('dlx/packages', () => {
       const dlxRoot = tmpDir
       mkdirSync(path.join(dlxRoot, 'pkg-a'), { recursive: true })
       // Drop a file (not a directory) — should be filtered out.
-      const fs = await import('node:fs')
-      fs.writeFileSync(path.join(dlxRoot, 'not-a-package.txt'), '')
+      writeFileSync(path.join(dlxRoot, 'not-a-package.txt'), '')
       const result = await listDlxPackagesAsync()
       expect(result).toEqual(['pkg-a'])
     })

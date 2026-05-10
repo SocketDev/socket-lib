@@ -4,7 +4,7 @@
  * handler whose only purpose is "log and continue / log and rethrow."
  */
 
-import { mkdirSync, mkdtempSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, utimesSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -62,9 +62,8 @@ describe.sequential('process-lock — error branches', () => {
       const lockPath = path.join(testDir, 'stale.lock')
       // Create the lock path manually with old mtime.
       mkdirSync(lockPath, { recursive: true })
-      const fs = await import('node:fs')
       const past = new Date(Date.now() - 60_000)
-      fs.utimesSync(lockPath, past, past)
+      utimesSync(lockPath, past, past)
       // staleMs: 1000 → 60s mtime is stale → acquire removes and succeeds.
       const release = await processLock.acquire(lockPath, {
         retries: 0,

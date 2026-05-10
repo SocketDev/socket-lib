@@ -95,6 +95,7 @@ describe('crypto', () => {
     }> {
       delete cryptoMod.hash
       vi.resetModules()
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- re-import after vi.resetModules to exercise the native-hash fallback.
       const mod = await import('@socketsecurity/lib/crypto')
       return { hash: mod.hash, getNativeHash: mod.getNativeHash }
     }

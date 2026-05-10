@@ -16,6 +16,7 @@ import {
 /**
  * Coverage emoji thresholds for visual feedback.
  */
+// oxlint-disable socket/no-status-emoji -- coverage gamification UI; these emoji are part of the public output contract.
 const COVERAGE_EMOJI_THRESHOLDS = [
   { emoji: ' 🚀', threshold: 99 },
   { emoji: ' 🎯', threshold: 95 },
@@ -27,6 +28,7 @@ const COVERAGE_EMOJI_THRESHOLDS = [
   { emoji: ' 🔨', threshold: 50 },
   { emoji: ' ⚠️', threshold: 0 },
 ]
+// oxlint-enable socket/no-status-emoji
 
 /**
  * Calculate overall coverage percentage.

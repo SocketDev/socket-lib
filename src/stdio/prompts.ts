@@ -204,10 +204,9 @@ export function createInquirerTheme(
         highlight: (text: string) => applyColor(text, primaryColor),
       },
       icon: {
-        // Use success color for confirmed items
+        // oxlint-disable-next-line socket/no-status-emoji -- Inquirer theme icon; consumed by the prompt library, not log output.
         checked: applyColor('✓', successColor),
         unchecked: ' ',
-        // Cursor uses primary color
         cursor: applyColor('❯', primaryColor),
       },
     }

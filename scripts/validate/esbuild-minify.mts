@@ -20,7 +20,7 @@ export async function validateEsbuildMinify() {
   const configPath = path.join(rootPath, '.config/esbuild.config.mts')
 
   try {
-    // Dynamic import of the esbuild config
+    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- esbuild config path is computed at runtime.
     const config = await import(configPath)
 
     const violations = []

@@ -8,8 +8,9 @@ import { repeatString } from '../strings/format'
 
 import { ArrayPrototypePush } from '../primordials/array'
 
+import { getDefaultLogger } from '../logger/default'
+import { LOG_SYMBOLS } from '../logger/symbols'
 import { DateCtor, DateNow } from '../primordials/date'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
 export interface FooterOptions {
@@ -159,23 +160,29 @@ export function createSummaryFooter(
   }
 
   if (stats.success !== undefined) {
-    ArrayPrototypePush(parts, colors.green(`✓ ${stats.success} passed`))
+    ArrayPrototypePush(
+      parts,
+      `${LOG_SYMBOLS['success']} ${stats.success} passed`,
+    )
   }
 
   if (stats.failed !== undefined && stats.failed > 0) {
-    ArrayPrototypePush(parts, colors.red(`✗ ${stats.failed} failed`))
+    ArrayPrototypePush(parts, `${LOG_SYMBOLS['fail']} ${stats.failed} failed`)
   }
 
   if (stats.skipped !== undefined && stats.skipped > 0) {
-    ArrayPrototypePush(parts, colors.yellow(`○ ${stats.skipped} skipped`))
+    ArrayPrototypePush(parts, `${LOG_SYMBOLS['skip']} ${stats.skipped} skipped`)
   }
 
   if (stats.warnings !== undefined && stats.warnings > 0) {
-    ArrayPrototypePush(parts, colors.yellow(`⚠ ${stats.warnings} warnings`))
+    ArrayPrototypePush(
+      parts,
+      `${LOG_SYMBOLS['warn']} ${stats.warnings} warnings`,
+    )
   }
 
   if (stats.errors !== undefined && stats.errors > 0) {
-    ArrayPrototypePush(parts, colors.red(`✗ ${stats.errors} errors`))
+    ArrayPrototypePush(parts, `${LOG_SYMBOLS['fail']} ${stats.errors} errors`)
   }
 
   const message = parts.join(' | ')
@@ -205,6 +212,6 @@ export function printFooter(message?: string | undefined): void {
   const border = repeatString('─', 55)
   logger.log(border)
   if (message) {
-    console.log(colors.green(message))
+    logger.log(colors.green(message))
   }
 }
