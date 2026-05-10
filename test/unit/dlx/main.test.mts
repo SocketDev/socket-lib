@@ -39,7 +39,7 @@ import {
   getDlxPackageNodeModulesDir,
   isInSocketDlx,
 } from '@socketsecurity/lib/dlx/paths'
-import { safeDeleteSync } from '@socketsecurity/lib/fs'
+import { safeDeleteSync } from '@socketsecurity/lib/fs/safe'
 import { getSocketDlxDir } from '@socketsecurity/lib/paths/socket'
 
 describe.sequential('dlx', () => {

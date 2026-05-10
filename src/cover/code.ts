@@ -4,7 +4,7 @@
 
 import process from 'node:process'
 
-import { readJson } from '../fs'
+import { readJson } from '../fs/read-json'
 import { isObjectObject } from '../objects'
 import { spawn } from '../spawn'
 

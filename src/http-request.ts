@@ -17,7 +17,7 @@
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { SOCKET_LIB_USER_AGENT } from './constants/socket'
-import { safeDelete } from './fs'
+import { safeDelete } from './fs/safe'
 
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type { Readable } from 'node:stream'

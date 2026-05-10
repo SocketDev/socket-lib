@@ -7,7 +7,7 @@ import {
   detectArchiveFormat,
   extractArchive,
 } from '../archives'
-import { safeDelete, safeMkdir } from '../fs'
+import { safeDelete, safeMkdir } from '../fs/safe'
 import { getDefaultLogger } from '../logger'
 import { ErrorCtor } from '../primordials'
 

@@ -18,7 +18,7 @@ import {
   downloadReleaseAsset,
 } from '../../src/releases/github-downloads'
 
-import { safeDelete } from '../../src/fs'
+import { safeDelete } from '../../src/fs/safe'
 import { httpDownload } from '../../src/http-request'
 import {
   getLatestRelease,

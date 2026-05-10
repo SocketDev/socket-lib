@@ -15,7 +15,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { downloadBinaryFile } from '../../../src/dlx/binary'
-import { safeDelete } from '../../../src/fs'
+import { safeDelete } from '../../../src/fs/safe'
 import { httpDownload } from '../../../src/http-request'
 
 vi.mock('../../../src/http-request', async importOriginal => {

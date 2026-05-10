@@ -21,11 +21,11 @@ import {
   removeDlxPackageSync,
 } from '../../../src/dlx/packages'
 
-import { safeDelete, safeDeleteSync } from '../../../src/fs'
+import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
 
 // Mock the fs helpers at the resolved path the SUT imports.
-vi.mock('../../../src/fs', async importOriginal => {
-  const original = await importOriginal<typeof import('../../../src/fs')>()
+vi.mock('../../../src/fs/safe', async importOriginal => {
+  const original = await importOriginal<typeof import('../../../src/fs/safe')>()
   return {
     ...original,
     safeDelete: vi.fn(original.safeDelete),

@@ -4,7 +4,7 @@
 
 import process from 'node:process'
 
-import { safeMkdir } from '../fs'
+import { safeMkdir } from '../fs/safe'
 import { httpDownload } from '../http-request'
 import { getDefaultLogger } from '../logger'
 import {

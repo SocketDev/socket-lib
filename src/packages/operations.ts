@@ -19,7 +19,7 @@ import { PackageURL } from '../external/@socketregistry/packageurl-js'
 import pacote from '../external/pacote'
 import * as semver from '../external/semver'
 
-import { readJson, readJsonSync } from '../fs'
+import { readJson, readJsonSync } from '../fs/read-json'
 import { isObjectObject, merge } from '../objects'
 import type {
   ExtractOptions,

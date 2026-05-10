@@ -578,10 +578,65 @@
       "types": "./dist/errors.d.ts",
       "default": "./dist/errors.js"
     },
-    "./fs": {
-      "source": "./src/fs.ts",
-      "types": "./dist/fs.d.ts",
-      "default": "./dist/fs.js"
+    "./fs/encoding": {
+      "source": "./src/fs/encoding.ts",
+      "types": "./dist/fs/encoding.d.ts",
+      "default": "./dist/fs/encoding.js"
+    },
+    "./fs/find-up": {
+      "source": "./src/fs/find-up.ts",
+      "types": "./dist/fs/find-up.d.ts",
+      "default": "./dist/fs/find-up.js"
+    },
+    "./fs/inspect": {
+      "source": "./src/fs/inspect.ts",
+      "types": "./dist/fs/inspect.d.ts",
+      "default": "./dist/fs/inspect.js"
+    },
+    "./fs/path-cache": {
+      "source": "./src/fs/path-cache.ts",
+      "types": "./dist/fs/path-cache.d.ts",
+      "default": "./dist/fs/path-cache.js"
+    },
+    "./fs/read-dir": {
+      "source": "./src/fs/read-dir.ts",
+      "types": "./dist/fs/read-dir.d.ts",
+      "default": "./dist/fs/read-dir.js"
+    },
+    "./fs/read-file": {
+      "source": "./src/fs/read-file.ts",
+      "types": "./dist/fs/read-file.d.ts",
+      "default": "./dist/fs/read-file.js"
+    },
+    "./fs/read-json": {
+      "source": "./src/fs/read-json.ts",
+      "types": "./dist/fs/read-json.d.ts",
+      "default": "./dist/fs/read-json.js"
+    },
+    "./fs/safe": {
+      "source": "./src/fs/safe.ts",
+      "types": "./dist/fs/safe.d.ts",
+      "default": "./dist/fs/safe.js"
+    },
+    "./fs/types": {
+      "source": "./src/fs/types.ts",
+      "types": "./dist/fs/types.d.ts",
+      "default": "./dist/fs/types.js"
+    },
+    "./fs/unique": {
+      "source": "./src/fs/unique.ts",
+      "types": "./dist/fs/unique.d.ts",
+      "default": "./dist/fs/unique.js"
+    },
+    "./fs/validate": {
+      "source": "./src/fs/validate.ts",
+      "types": "./dist/fs/validate.d.ts",
+      "default": "./dist/fs/validate.js"
+    },
+    "./fs/write-json": {
+      "source": "./src/fs/write-json.ts",
+      "types": "./dist/fs/write-json.d.ts",
+      "default": "./dist/fs/write-json.js"
     },
     "./git": {
       "source": "./src/git.ts",

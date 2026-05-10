@@ -11,10 +11,10 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { processLock } from '../../src/process-lock'
-import { safeDelete, safeDeleteSync } from '../../src/fs'
+import { safeDelete, safeDeleteSync } from '../../src/fs/safe'
 
-vi.mock('../../src/fs', async importOriginal => {
-  const original = await importOriginal<typeof import('../../src/fs')>()
+vi.mock('../../src/fs/safe', async importOriginal => {
+  const original = await importOriginal<typeof import('../../src/fs/safe')>()
   return {
     ...original,
     safeDeleteSync: vi.fn(original.safeDeleteSync),

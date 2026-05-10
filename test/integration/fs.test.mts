@@ -13,13 +13,10 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import {
-  readJson,
-  safeDelete,
-  safeMkdir,
-  safeStats,
-  writeJson,
-} from '@socketsecurity/lib/fs'
+import { safeStats } from '@socketsecurity/lib/fs/inspect'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
+import { safeDelete, safeMkdir } from '@socketsecurity/lib/fs/safe'
+import { writeJson } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../unit/utils/temp-file-helper'
 

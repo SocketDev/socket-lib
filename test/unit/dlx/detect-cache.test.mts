@@ -14,7 +14,7 @@ import {
   detectLocalExecutableType,
   isJsFilePath,
 } from '../../../src/dlx/detect'
-import { safeDeleteSync } from '../../../src/fs'
+import { safeDeleteSync } from '../../../src/fs/safe'
 
 describe.sequential('dlx/detect — cache + stale paths', () => {
   let testDir: string

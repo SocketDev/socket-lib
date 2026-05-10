@@ -36,7 +36,7 @@ import {
   extractTarGz,
   extractZip,
 } from '@socketsecurity/lib/archives'
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 

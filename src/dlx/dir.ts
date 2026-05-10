@@ -1,6 +1,6 @@
 /** @fileoverview Directory management utilities for DLX installations. */
 
-import { safeMkdir, safeMkdirSync } from '../fs'
+import { safeMkdir, safeMkdirSync } from '../fs/safe'
 import { getSocketDlxDir } from '../paths/socket'
 import { pEach } from '../promises'
 import {

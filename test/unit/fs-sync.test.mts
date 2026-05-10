@@ -21,16 +21,15 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import type { SafeReadOptions } from '@socketsecurity/lib/fs'
+import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
 
+import { isSymLinkSync, safeStatsSync } from '@socketsecurity/lib/fs/inspect'
 import {
-  isSymLinkSync,
   readFileBinary,
-  readJsonSync,
   safeReadFileSync,
-  safeStatsSync,
-  writeJsonSync,
-} from '@socketsecurity/lib/fs'
+} from '@socketsecurity/lib/fs/read-file'
+import { readJsonSync } from '@socketsecurity/lib/fs/read-json'
+import { writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 import { beforeEach, describe, expect, it, afterEach } from 'vitest'
 
 describe.sequential('fs - Sync Functions', () => {

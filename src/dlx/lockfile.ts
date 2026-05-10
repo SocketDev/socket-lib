@@ -14,7 +14,7 @@
 import { tmpdir } from 'node:os'
 
 import pacote from '../external/pacote'
-import { safeDelete, safeMkdir } from '../fs'
+import { safeDelete, safeMkdir } from '../fs/safe'
 import { safeIdealTree, writeSafeNpmrc } from './arborist'
 import { computeHashes } from './integrity'
 

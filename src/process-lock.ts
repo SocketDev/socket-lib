@@ -41,7 +41,7 @@
  */
 
 import { errorMessage } from './errors'
-import { safeDeleteSync } from './fs'
+import { safeDeleteSync } from './fs/safe'
 import { getDefaultLogger } from './logger'
 import { pRetry } from './promises'
 import { onExit } from './signal-exit'

@@ -21,39 +21,44 @@ import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {
-  findUp,
-  findUpSync,
+  normalizeEncoding,
+  normalizeEncodingSlow,
+} from '@socketsecurity/lib/fs/encoding'
+import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
+import {
   isDir,
   isDirEmptySync,
   isDirSync,
   isSymLinkSync,
-  normalizeEncoding,
-  normalizeEncodingSlow,
+  safeStats,
+  safeStatsSync,
+} from '@socketsecurity/lib/fs/inspect'
+import {
   readDirNames,
   readDirNamesSync,
+} from '@socketsecurity/lib/fs/read-dir'
+import {
   readFileBinary,
   readFileBinarySync,
   readFileUtf8,
   readFileUtf8Sync,
-  readJson,
-  readJsonSync,
+  safeReadFile,
+  safeReadFileSync,
+} from '@socketsecurity/lib/fs/read-file'
+import { readJson, readJsonSync } from '@socketsecurity/lib/fs/read-json'
+import {
   safeDelete,
   safeDeleteSync,
   safeMkdir,
   safeMkdirSync,
-  safeReadFile,
-  safeReadFileSync,
-  safeStats,
-  safeStatsSync,
-  uniqueSync,
-  validateFiles,
-  writeJson,
-  writeJsonSync,
-} from '@socketsecurity/lib/fs'
+} from '@socketsecurity/lib/fs/safe'
+import { uniqueSync } from '@socketsecurity/lib/fs/unique'
+import { validateFiles } from '@socketsecurity/lib/fs/validate'
+import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 
-import type { SafeReadOptions } from '@socketsecurity/lib/fs'
+import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
 
 describe('fs', () => {
   describe('findUp', () => {

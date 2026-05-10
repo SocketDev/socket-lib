@@ -17,18 +17,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { DlxManifest } from '../../../src/dlx/manifest'
 
+import { readFileUtf8Sync } from '../../../src/fs/read-file'
 import {
-  readFileUtf8Sync,
   safeDelete,
   safeDeleteSync,
   safeMkdirSync,
-} from '../../../src/fs'
+} from '../../../src/fs/safe'
 
-vi.mock('../../../src/fs', async importOriginal => {
-  const original = await importOriginal<typeof import('../../../src/fs')>()
+vi.mock('../../../src/fs/read-file', async importOriginal => {
+  const original =
+    await importOriginal<typeof import('../../../src/fs/read-file')>()
   return {
     ...original,
     readFileUtf8Sync: vi.fn(original.readFileUtf8Sync),
+  }
+})
+
+vi.mock('../../../src/fs/safe', async importOriginal => {
+  const original = await importOriginal<typeof import('../../../src/fs/safe')>()
+  return {
+    ...original,
     safeDeleteSync: vi.fn(original.safeDeleteSync),
     safeMkdirSync: vi.fn(original.safeMkdirSync),
   }

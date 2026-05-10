@@ -17,30 +17,30 @@ import { existsSync, promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
+import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
 import {
-  findUp,
-  findUpSync,
   isDir,
   isDirEmptySync,
   isDirSync,
+  safeStats,
+  safeStatsSync,
+} from '@socketsecurity/lib/fs/inspect'
+import {
   readDirNames,
   readDirNamesSync,
+} from '@socketsecurity/lib/fs/read-dir'
+import {
   readFileBinary,
   readFileBinarySync,
   readFileUtf8,
   readFileUtf8Sync,
-  readJson,
-  readJsonSync,
-  safeDelete,
-  safeDeleteSync,
   safeReadFile,
   safeReadFileSync,
-  safeStats,
-  safeStatsSync,
-  uniqueSync,
-  writeJson,
-  writeJsonSync,
-} from '@socketsecurity/lib/fs'
+} from '@socketsecurity/lib/fs/read-file'
+import { readJson, readJsonSync } from '@socketsecurity/lib/fs/read-json'
+import { safeDelete, safeDeleteSync } from '@socketsecurity/lib/fs/safe'
+import { uniqueSync } from '@socketsecurity/lib/fs/unique'
+import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
 

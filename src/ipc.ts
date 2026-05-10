@@ -8,7 +8,7 @@
 import process from 'node:process'
 
 import { Type } from './external/@sinclair/typebox'
-import { safeDelete } from './fs'
+import { safeDelete } from './fs/safe'
 import { getOsTmpDir } from './paths/socket'
 import { parseSchema } from './schema/parse'
 

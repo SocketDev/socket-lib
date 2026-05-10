@@ -9,7 +9,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'
 
 /**

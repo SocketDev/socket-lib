@@ -20,7 +20,7 @@ import {
 } from '../../src/releases/github-archives'
 
 import { extractArchive } from '../../src/archives'
-import { safeDeleteSync } from '../../src/fs'
+import { safeDeleteSync } from '../../src/fs/safe'
 import { downloadReleaseAsset } from '../../src/releases/github-downloads'
 
 // Mock at the resolved path the SUT imports (relative within src/).

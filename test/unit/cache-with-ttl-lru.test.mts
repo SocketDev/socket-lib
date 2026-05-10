@@ -12,7 +12,7 @@ import path from 'node:path'
 
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

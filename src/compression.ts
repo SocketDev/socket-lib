@@ -52,7 +52,7 @@ import {
 } from 'node:zlib'
 import { promisify } from 'node:util'
 
-import { safeDelete } from './fs'
+import { safeDelete } from './fs/safe'
 import { StringPrototypeToLowerCase } from './primordials'
 
 const brotliCompressAsync = promisify(brotliCompress)

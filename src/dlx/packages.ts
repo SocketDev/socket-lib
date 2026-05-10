@@ -1,6 +1,7 @@
 /** @fileoverview Package management utilities for DLX installations. */
 
-import { readDirNamesSync, safeDelete, safeDeleteSync } from '../fs'
+import { readDirNamesSync } from '../fs/read-dir'
+import { safeDelete, safeDeleteSync } from '../fs/safe'
 import { getSocketDlxDir } from '../paths/socket'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 

@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createTtlCache } from '../../src/cache-with-ttl'
 import { resetEnv, setEnv } from '../../src/env/rewire'
-import { safeDelete } from '../../src/fs'
+import { safeDelete } from '../../src/fs/safe'
 import { invalidateCaches } from '../../src/paths/rewire'
 
 import * as cacacheModule from '../../src/cacache'

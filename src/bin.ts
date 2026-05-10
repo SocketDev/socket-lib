@@ -10,7 +10,7 @@ import { getHome } from './env/home'
 import { getAppdata, getLocalappdata } from './env/windows'
 import { getXdgDataHome } from './env/xdg'
 import whichModule from './external/which'
-import { readJsonSync } from './fs'
+import { readJsonSync } from './fs/read-json'
 import { isPath, normalizePath } from './paths/normalize'
 import { spawn } from './spawn'
 

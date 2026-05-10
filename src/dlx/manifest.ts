@@ -58,7 +58,8 @@ function getPath() {
   return _path as typeof import('node:path')
 }
 import { errorMessage } from '../errors'
-import { readFileUtf8Sync, safeDeleteSync, safeMkdirSync } from '../fs'
+import { readFileUtf8Sync } from '../fs/read-file'
+import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
 import { getDefaultLogger } from '../logger'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'

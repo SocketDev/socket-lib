@@ -19,7 +19,7 @@ import { join } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import process from 'node:process'
 
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
 import {
   detectIndent,

@@ -22,7 +22,7 @@ import {
   parsePackageSpec,
   resolveBinaryPath,
 } from '../../../src/dlx/package'
-import { safeDeleteSync } from '../../../src/fs'
+import { safeDeleteSync } from '../../../src/fs/safe'
 
 describe.sequential('dlx/package — pure functions', () => {
   let testDir: string
