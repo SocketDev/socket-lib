@@ -322,8 +322,10 @@ async function main(): Promise<void> {
             `Verified ${inquirerResults.length} @inquirer ${pluralize('module', { count: inquirerResults.length })}:`,
           )
           for (const result of inquirerResults) {
+            // oxlint-disable-next-line socket/no-status-emoji -- inline diagnostic label, not a status line.
             const hasDefault = result.hasEsmDefault ? '✓ default' : ''
             const hasSeparator =
+              // oxlint-disable-next-line socket/no-status-emoji -- inline diagnostic label, not a status line.
               result.cjsKeys > 0 ? `✓ ${result.cjsKeys} exports` : ''
             logger.substep(
               `${result.path}: ${[hasDefault, hasSeparator].filter(Boolean).join(', ')}`,

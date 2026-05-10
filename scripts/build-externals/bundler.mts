@@ -107,12 +107,12 @@ ${contentWithoutStrict}`
     const stats = await fs.stat(outputPath)
     const sizeKB = Math.round(stats.size / 1024)
     if (!quiet) {
-      logger.log(`    ✓ Bundled ${packageName} (${sizeKB}KB)`)
+      logger.success(`Bundled ${packageName} (${sizeKB}KB)`)
     }
     return sizeKB
   } catch (e) {
     if (!quiet) {
-      logger.log(`    ✗ Failed to bundle ${packageName}: ${e.message}`)
+      logger.fail(`Failed to bundle ${packageName}: ${e.message}`)
     }
     // Propagate the failure. The orchestrator wraps optional packages in
     // try/catch and logs a "Skipping optional package" message; required

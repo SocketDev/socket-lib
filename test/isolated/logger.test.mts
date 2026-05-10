@@ -10,6 +10,9 @@
  * - Internal state tracking (logCallCount, lastWasBlank)
  * Uses custom Writable streams to capture output without console pollution.
  */
+
+/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output. */
+
 import { Writable } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Logger } from '../../src/logger/core'

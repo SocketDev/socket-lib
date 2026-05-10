@@ -9,6 +9,8 @@
  * Used by Socket CLI for command completion reports and test result summaries.
  */
 
+/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */
+
 import { describe, expect, it } from 'vitest'
 
 import {

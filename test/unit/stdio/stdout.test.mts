@@ -9,6 +9,8 @@
  * Used by Socket tools for standard output and interactive CLI features.
  */
 
+/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */
+
 import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 

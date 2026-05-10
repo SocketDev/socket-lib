@@ -12,6 +12,8 @@
  * - Complex indentation scenarios and edge cases
  */
 
+/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */
+
 import { Writable } from 'node:stream'
 
 import { Logger } from '../../src/logger/core'

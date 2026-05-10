@@ -1,3 +1,5 @@
+/* oxlint-disable socket/no-placeholders -- this file IS the rule definition; TODO/FIXME/XXX literals are the lookup table. */
+
 /**
  * @fileoverview Per CLAUDE.md "Completion" rule: never leave TODO /
  * FIXME / XXX / shims / stubs / placeholders. Finish the work 100% or

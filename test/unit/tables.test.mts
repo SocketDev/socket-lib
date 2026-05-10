@@ -10,6 +10,8 @@
  * Used by Socket CLI for displaying package lists, scan results, and reports.
  */
 
+/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */
+
 import { describe, expect, it } from 'vitest'
 import colors from 'yoctocolors-cjs'
 

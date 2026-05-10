@@ -12,6 +12,8 @@
  * (the human picks the right method).
  */
 
+/* oxlint-disable socket/no-status-emoji -- this file IS the rule definition; emoji literals are the lookup table. */
+
 const EMOJI_TO_METHOD = {
   '✓': 'success',
   '✔': 'success',
