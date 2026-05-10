@@ -13,6 +13,8 @@
  * Complements primary fs.test.ts by focusing on uncommon code paths and error conditions.
  */
 
+/* oxlint-disable socket/prefer-safe-delete, socket/prefer-exists-sync -- tests verify raw fs behavior (unlink semantics, stat output) — not the lib wrappers. */
+
 import { existsSync, promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -40,7 +42,6 @@ import { uniqueSync } from '@socketsecurity/lib/fs/unique'
 import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 describe('fs - Additional Coverage', () => {
   describe('findUp edge cases', () => {

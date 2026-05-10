@@ -36,7 +36,6 @@ import { extractZip } from '@socketsecurity/lib/archives/zip'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 import { runWithTempDir } from './utils/temp-file-helper'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Test archive fixtures
 let testZipPath: string

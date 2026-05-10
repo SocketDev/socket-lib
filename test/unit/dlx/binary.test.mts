@@ -11,6 +11,8 @@
  * Used by Socket CLI for secure one-off package execution.
  */
 
+/* oxlint-disable socket/prefer-safe-delete, socket/prefer-exists-sync -- tests verify raw fs behavior (unlink semantics, stat output) — not the lib wrappers. */
+
 import { createHash } from 'node:crypto'
 import { existsSync, promises as fs } from 'node:fs'
 import http from 'node:http'
@@ -29,7 +31,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { itWindowsOnly } from '../utils/skip-helpers'
 import { mockHomeDir, runWithTempDir } from '../utils/temp-file-helper'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
-import { safeDelete } from '@socketsecurity/lib/fs'
 
 // Test server setup
 let httpServer: http.Server

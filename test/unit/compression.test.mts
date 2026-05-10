@@ -10,6 +10,8 @@
  * replace-in-place wrappers.
  */
 
+/* oxlint-disable socket/prefer-safe-delete, socket/prefer-exists-sync -- tests verify raw fs behavior (unlink semantics, stat output) — not the lib wrappers. */
+
 import { Buffer } from 'node:buffer'
 import { mkdtempSync, promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -44,7 +46,6 @@ import {
   stripExt,
 } from '../../src/compression'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
-import { safeDelete } from '@socketsecurity/lib/fs'
 
 // Two fixture sizes:
 //   - small: a few hundred bytes — exercises the in-memory path

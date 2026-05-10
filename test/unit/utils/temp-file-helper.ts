@@ -11,7 +11,6 @@ import process from 'node:process'
 import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 /**
  * Mock the home directory for cross-platform testing.

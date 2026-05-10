@@ -4,6 +4,8 @@
  * Requires Claude Code (claude) CLI to be installed.
  */
 
+/* oxlint-disable socket/no-status-emoji, socket/prefer-exists-sync -- custom logger wrapper with color-coded prefixes; stat() calls read mtime for cleanup decisions. */
+
 import { spawn } from 'node:child_process'
 import crypto from 'node:crypto'
 import {
@@ -24,7 +26,6 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import { parseArgs } from './utils/parse-args.mts'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
-import { safeDelete } from '@socketsecurity/lib/fs'
 
 const logger = getDefaultLogger()
 
@@ -118,13 +119,13 @@ const log = {
   warn: msg => logger.log(`${colors.yellow('⚠')} ${msg}`),
 }
 
-function printHeader(title) {
+export function printHeader(title) {
   logger.log(`\n${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message) {
+export function printFooter(message) {
   logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
     logger.log(`  ${colors.green('✓')} ${message}`)
@@ -134,7 +135,7 @@ function printFooter(message) {
 /**
  * Initialize storage directories.
  */
-async function initStorage() {
+export async function initStorage() {
   await fs.mkdir(CLAUDE_HOME, { recursive: true })
   await fs.mkdir(STORAGE_PATHS.cache, { recursive: true })
   await fs.mkdir(REPO_STORAGE.snapshots, { recursive: true })
@@ -144,7 +145,7 @@ async function initStorage() {
 /**
  * Clean up old data using del package.
  */
-async function cleanupOldData() {
+export async function cleanupOldData() {
   const now = Date.now()
 
   // Clean old snapshots in current repo.
@@ -278,7 +279,7 @@ class CostTracker {
 /**
  * Format duration in human-readable form.
  */
-function formatDuration(ms) {
+export function formatDuration(ms) {
   const seconds = Math.floor(ms / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
@@ -511,7 +512,7 @@ class SnapshotManager {
 /**
  * Proactive pre-commit detection.
  */
-async function runPreCommitScan(claudeCmd) {
+export async function runPreCommitScan(claudeCmd) {
   log.step('Running proactive pre-commit scan')
 
   const staged = await runCommandWithOutput(
@@ -608,7 +609,7 @@ ${diff.stdout}
 /**
  * Success celebration with stats.
  */
-async function celebrateSuccess(costTracker, stats = {}) {
+export async function celebrateSuccess(costTracker, stats = {}) {
   const messages = [
     "🎉 CI is green! You're a legend!",
     "✨ All tests passed! Claude's got your back!",
@@ -669,7 +670,7 @@ async function celebrateSuccess(costTracker, stats = {}) {
 /**
  * Analyze error to identify root cause and suggest fix strategies.
  */
-async function analyzeRootCause(claudeCmd, error, context = {}) {
+export async function analyzeRootCause(claudeCmd, error, context = {}) {
   const ctx = { __proto__: null, ...context }
   const errorHash = hashError(error)
 
@@ -801,7 +802,7 @@ ${similarErrors.length > 0 ? `**Similar Past Errors:**\n${similarErrors.map(e =>
 /**
  * Load error history from storage.
  */
-async function loadErrorHistory() {
+export async function loadErrorHistory() {
   const historyPath = path.join(CLAUDE_HOME, 'error-history.json')
   try {
     if (existsSync(historyPath)) {
@@ -818,7 +819,7 @@ async function loadErrorHistory() {
 /**
  * Save error outcome to history for learning.
  */
-async function saveErrorHistory(errorHash, outcome, strategy, description) {
+export async function saveErrorHistory(errorHash, outcome, strategy, description) {
   const historyPath = path.join(CLAUDE_HOME, 'error-history.json')
   try {
     let data = { errors: [] }
@@ -849,7 +850,7 @@ async function saveErrorHistory(errorHash, outcome, strategy, description) {
 /**
  * Find similar errors from history.
  */
-function findSimilarErrors(errorHash, history) {
+export function findSimilarErrors(errorHash, history) {
   return history
     .filter(e => e.errorHash === errorHash && e.outcome === 'success')
     .slice(-3)
@@ -858,7 +859,7 @@ function findSimilarErrors(errorHash, history) {
 /**
  * Display root cause analysis to user.
  */
-function displayAnalysis(analysis) {
+export function displayAnalysis(analysis) {
   if (!analysis) {
     return
   }
@@ -906,7 +907,7 @@ function displayAnalysis(analysis) {
   }
 }
 
-async function runCommand(command, args = [], options = {}) {
+export async function runCommand(command, args = [], options = {}) {
   const opts = { __proto__: null, ...options }
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
@@ -926,7 +927,7 @@ async function runCommand(command, args = [], options = {}) {
   })
 }
 
-async function runCommandWithOutput(command, args = [], options = {}) {
+export async function runCommandWithOutput(command, args = [], options = {}) {
   const opts = { __proto__: null, ...options }
   const { input, ...spawnOpts } = opts
 
@@ -988,7 +989,7 @@ setInterval(() => {
  * Run Claude Code with a prompt.
  * Handles caching, model tracking, and retry logic.
  */
-async function runClaude(claudeCmd, prompt, options = {}) {
+export async function runClaude(claudeCmd, prompt, options = {}) {
   const opts = { __proto__: null, ...options }
   const args = prepareClaudeArgs([], opts)
 
@@ -1161,7 +1162,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
 /**
  * Check if Claude Code CLI is available.
  */
-async function checkClaude() {
+export async function checkClaude() {
   const checkCommand = WIN32 ? 'where' : 'which'
 
   log.progress('Checking for Claude Code CLI')
@@ -1189,7 +1190,7 @@ async function checkClaude() {
  * Ensure Claude Code is authenticated, prompting for authentication if needed.
  * Returns true if authenticated, false if unable to authenticate.
  */
-async function ensureClaudeAuthenticated(claudeCmd) {
+export async function ensureClaudeAuthenticated(claudeCmd) {
   let attempts = 0
   const maxAttempts = 3
 
@@ -1290,7 +1291,7 @@ async function ensureClaudeAuthenticated(claudeCmd) {
  * Ensure GitHub CLI is authenticated, prompting for login if needed.
  * Returns true if authenticated, false if unable to authenticate.
  */
-async function ensureGitHubAuthenticated() {
+export async function ensureGitHubAuthenticated() {
   let attempts = 0
   const maxAttempts = 3
 
@@ -1351,7 +1352,7 @@ async function ensureGitHubAuthenticated() {
  * @param {string} repo - The repository name
  * @returns {Promise<{isPR: boolean, prNumber?: number, prTitle?: string}>}
  */
-async function checkIfCommitIsPartOfPR(sha, owner, repo) {
+export async function checkIfCommitIsPartOfPR(sha, owner, repo) {
   try {
     const result = await runCommandWithOutput('gh', [
       'pr',
@@ -1393,7 +1394,7 @@ async function checkIfCommitIsPartOfPR(sha, owner, repo) {
  * @param {string} errorOutput - The error output to hash
  * @returns {string} A hex hash of the normalized error
  */
-function hashError(errorOutput) {
+export function hashError(errorOutput) {
   // Normalize error for semantic comparison
   const normalized = errorOutput
     .trim()
@@ -1542,7 +1543,7 @@ const modelStrategy = new ModelStrategy()
  * Smart context loading - focus on recently changed files for efficiency.
  * Reduces context by 90% while catching 95% of issues.
  */
-async function getSmartContext(options = {}) {
+export async function getSmartContext(options = {}) {
   const {
     commits = 5,
     fileTypes = undefined,
@@ -1640,7 +1641,7 @@ async function getSmartContext(options = {}) {
 /**
  * Infer what the developer is working on from commit messages.
  */
-function inferIntent(messages) {
+export function inferIntent(messages) {
   const patterns = {
     bugfix: /fix|bug|issue|error|crash/i,
     feature: /add|implement|feature|new/i,
@@ -1758,7 +1759,7 @@ Improvements:
 /**
  * Build enhanced prompt with context.
  */
-async function buildEnhancedPrompt(template, basePrompt, options = {}) {
+export async function buildEnhancedPrompt(template, basePrompt, options = {}) {
   const context = await getSmartContext(options)
 
   // Add project info
@@ -1798,7 +1799,7 @@ async function buildEnhancedPrompt(template, basePrompt, options = {}) {
  * Filter CI logs to extract only relevant failure information
  * Removes runner setup noise and focuses on actual errors
  */
-function filterCILogs(rawLogs) {
+export function filterCILogs(rawLogs) {
   const lines = rawLogs.split('\n')
   const relevantLines = []
   let inErrorSection = false
@@ -1859,7 +1860,7 @@ function filterCILogs(rawLogs) {
  * Claude Code uses natural language prompts, not the same flags.
  * We'll translate our flags into appropriate context.
  */
-function prepareClaudeArgs(args = [], options = {}) {
+export function prepareClaudeArgs(args = [], options = {}) {
   const _opts = { __proto__: null, ...options }
   const claudeArgs = [...args]
 
@@ -1898,7 +1899,7 @@ function prepareClaudeArgs(args = [], options = {}) {
  * Execute tasks in parallel with multiple workers.
  * Default: 3 workers (balanced performance without overwhelming system)
  */
-async function executeParallel(tasks, workers = 3) {
+export async function executeParallel(tasks, workers = 3) {
   if (workers === 1 || tasks.length === 1) {
     // Sequential execution
     const results = []
@@ -1957,7 +1958,7 @@ async function executeParallel(tasks, workers = 3) {
 /**
  * Determine if parallel execution should be used.
  */
-function shouldRunParallel(options = {}) {
+export function shouldRunParallel(options = {}) {
   const opts = { __proto__: null, ...options }
   // Parallel is only used when:
   // 1. --cross-repo is specified (multi-repo mode)
@@ -1974,7 +1975,7 @@ function shouldRunParallel(options = {}) {
  * conflicting interactive prompts. If agents need user interaction, they would queue
  * and block each other. Use --seq flag for sequential execution with full interactivity.
  */
-async function runParallel(tasks, description = 'tasks', taskNames = []) {
+export async function runParallel(tasks, description = 'tasks', taskNames = []) {
   log.info(`Running ${tasks.length} ${description} in parallel...`)
 
   const startTime = Date.now()
@@ -2047,7 +2048,7 @@ async function runParallel(tasks, description = 'tasks', taskNames = []) {
 /**
  * Ensure .claude directory is in .gitignore.
  */
-async function ensureClaudeInGitignore() {
+export async function ensureClaudeInGitignore() {
   const gitignorePath = path.join(rootPath, '.gitignore')
 
   try {
@@ -2088,7 +2089,7 @@ async function ensureClaudeInGitignore() {
 /**
  * Find Socket projects in parent directory.
  */
-async function findSocketProjects() {
+export async function findSocketProjects() {
   const projects = []
 
   for (const projectName of SOCKET_PROJECTS) {
@@ -2110,7 +2111,7 @@ async function findSocketProjects() {
 /**
  * Create a Claude prompt for syncing CLAUDE.md files.
  */
-function createSyncPrompt(projectName, isRegistry = false) {
+export function createSyncPrompt(projectName, isRegistry = false) {
   if (isRegistry) {
     return `You are updating the CLAUDE.md file in the socket-registry project, which is the CANONICAL source for all cross-project Socket standards.
 
@@ -2165,7 +2166,7 @@ Output ONLY the updated CLAUDE.md content, nothing else.`
 /**
  * Update a project's CLAUDE.md using Claude.
  */
-async function updateProjectClaudeMd(claudeCmd, project, options = {}) {
+export async function updateProjectClaudeMd(claudeCmd, project, options = {}) {
   const _opts = { __proto__: null, ...options }
   const { claudeMdPath, name } = project
   const isRegistry = name === 'socket-registry'
@@ -2230,7 +2231,7 @@ ${currentContent}
 /**
  * Commit changes in a project.
  */
-async function commitChanges(project) {
+export async function commitChanges(project) {
   const { name, path: projectPath } = project
 
   log.progress(`Committing changes in ${name}`)
@@ -2281,7 +2282,7 @@ async function commitChanges(project) {
 /**
  * Sync CLAUDE.md files across Socket projects.
  */
-async function syncClaudeMd(claudeCmd, options = {}) {
+export async function syncClaudeMd(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('CLAUDE.md Synchronization')
 
@@ -2432,7 +2433,7 @@ async function syncClaudeMd(claudeCmd, options = {}) {
 /**
  * Scan a project for issues and generate a report.
  */
-async function scanProjectForIssues(claudeCmd, project, options = {}) {
+export async function scanProjectForIssues(claudeCmd, project, options = {}) {
   const _opts = { __proto__: null, ...options }
   const { name, path: projectPath } = project
 
@@ -2610,7 +2611,7 @@ Provide ONLY the JSON array, nothing else.`
 /**
  * Autonomous fix session - auto-fixes high-confidence issues.
  */
-async function autonomousFixSession(
+export async function autonomousFixSession(
   claudeCmd,
   scanResults,
   projects,
@@ -2736,7 +2737,7 @@ Apply the fix and return ONLY the fixed code snippet.`
 /**
  * Interactive fix session with Claude.
  */
-async function interactiveFixSession(
+export async function interactiveFixSession(
   claudeCmd,
   scanResults,
   _projects,
@@ -2827,7 +2828,7 @@ Start by recommending which issues to fix first.`
 /**
  * Run security and quality scan on Socket projects.
  */
-async function runSecurityScan(claudeCmd, options = {}) {
+export async function runSecurityScan(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Security & Quality Scanner')
 
@@ -2925,7 +2926,7 @@ async function runSecurityScan(claudeCmd, options = {}) {
  * Interactive prompts would conflict if multiple agents needed user input simultaneously.
  * Use --seq flag if you need interactive debugging across multiple repos.
  */
-async function runClaudeCommit(claudeCmd, options = {}) {
+export async function runClaudeCommit(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Claude-Assisted Commit')
 
@@ -3157,7 +3158,7 @@ Remember: small commits, follow project standards, no AI attribution.`
 /**
  * Review code changes before committing.
  */
-async function runCodeReview(claudeCmd, options = {}) {
+export async function runCodeReview(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Code Review')
 
@@ -3194,7 +3195,7 @@ Also check for CLAUDE.md compliance and cross-platform compatibility.`
 /**
  * Analyze and manage dependencies.
  */
-async function runDependencyAnalysis(claudeCmd, options = {}) {
+export async function runDependencyAnalysis(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Dependency Analysis')
 
@@ -3253,7 +3254,7 @@ Focus on actionable recommendations. Always recommend exact versions when sugges
 /**
  * Generate test cases for existing code.
  */
-async function runTestGeneration(claudeCmd, options = {}) {
+export async function runTestGeneration(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Test Generation')
 
@@ -3322,7 +3323,7 @@ Output the complete test file content.`
 /**
  * Generate or update documentation.
  */
-async function runDocumentation(claudeCmd, options = {}) {
+export async function runDocumentation(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Documentation Generation')
 
@@ -3354,7 +3355,7 @@ Output the documentation updates or new content.`
 /**
  * Suggest code refactoring improvements.
  */
-async function runRefactor(claudeCmd, options = {}) {
+export async function runRefactor(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Code Refactoring Analysis')
 
@@ -3401,7 +3402,7 @@ Provide the refactored code with explanations.`
 /**
  * Optimize code for performance.
  */
-async function runOptimization(claudeCmd, options = {}) {
+export async function runOptimization(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Performance Optimization')
 
@@ -3449,7 +3450,7 @@ Provide optimized code with benchmarks/explanations.`
 /**
  * Comprehensive security and quality audit.
  */
-async function runAudit(claudeCmd, options = {}) {
+export async function runAudit(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Security & Quality Audit')
 
@@ -3493,7 +3494,7 @@ Provide actionable recommendations with priorities.`
 /**
  * Explain code or concepts.
  */
-async function runExplain(claudeCmd, options = {}) {
+export async function runExplain(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Code Explanation')
 
@@ -3552,7 +3553,7 @@ Focus on practical understanding for developers.`
 /**
  * Help with migrations.
  */
-async function runMigration(claudeCmd, options = {}) {
+export async function runMigration(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Migration Assistant')
 
@@ -3597,7 +3598,7 @@ Be specific and actionable.`
 /**
  * Clean up code by removing unused elements.
  */
-async function runCleanup(claudeCmd, options = {}) {
+export async function runCleanup(claudeCmd, options = {}) {
   const _opts = { __proto__: null, ...options }
   printHeader('Code Cleanup')
 
@@ -3633,7 +3634,7 @@ Format as actionable tasks.`
 /**
  * Help with debugging issues.
  */
-async function runDebug(claudeCmd, options = {}) {
+export async function runDebug(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   printHeader('Debugging Assistant')
 
@@ -3683,7 +3684,7 @@ Be specific and actionable.`
  * @param {object} options - Options from parent command
  * @returns {Promise<string>} Generated commit message
  */
-async function generateCommitMessage(claudeCmd, cwd, options = {}) {
+export async function generateCommitMessage(claudeCmd, cwd, options = {}) {
   const opts = { __proto__: null, ...options }
 
   // Get git diff of staged changes
@@ -3787,7 +3788,7 @@ Commit message:`
  * Calculate adaptive poll delay based on CI state.
  * Polls faster when jobs are running, slower when queued.
  */
-function calculatePollDelay(status, attempt, hasActiveJobs = false) {
+export function calculatePollDelay(status, attempt, hasActiveJobs = false) {
   // If jobs are actively running, poll more frequently
   if (hasActiveJobs || status === 'in_progress') {
     // Start at 5s, gradually increase to 15s max
@@ -3832,7 +3833,7 @@ const JOB_PRIORITIES = {
  * @param {string} jobName - The name of the CI job
  * @returns {number} Priority level (higher = more important)
  */
-function getJobPriority(jobName) {
+export function getJobPriority(jobName) {
   const lowerName = jobName.toLowerCase()
 
   // Check for exact or partial matches
@@ -3851,7 +3852,7 @@ function getJobPriority(jobName) {
  * @param {string} cwd - Working directory
  * @returns {Promise<{valid: boolean, warnings: string[]}>} Validation result
  */
-async function validateBeforePush(cwd) {
+export async function validateBeforePush(cwd) {
   const warnings = []
 
   // Check for common issues in staged changes
@@ -3877,7 +3878,8 @@ async function validateBeforePush(cwd) {
     warnings.push(`${colors.yellow('⚠')} Debugger statement detected`)
   }
 
-  // Check 4: No TODO/FIXME without issue link
+  // oxlint-disable-next-line socket/no-placeholders -- regex pattern below scans for deferral markers in diffs; the words appear in the regex literal, not as actual placeholders.
+  // Check 4: deferral-marker scan
   const todoMatches = diff.match(/^\+.*\/\/\s*(TODO|FIXME)(?!\s*\(#\d+\))/gim)
   if (todoMatches && todoMatches.length > 0) {
     warnings.push(
@@ -3904,7 +3906,7 @@ async function validateBeforePush(cwd) {
  * NOTE: This operates on the current repo by default. Use --cross-repo for all Socket projects.
  * Multi-repo parallel execution would conflict with interactive prompts if fixes fail.
  */
-async function runGreen(claudeCmd, options = {}) {
+export async function runGreen(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
   const maxRetries = Number.parseInt(opts['max-retries'] || '3', 10)
   const isDryRun = opts['dry-run']
