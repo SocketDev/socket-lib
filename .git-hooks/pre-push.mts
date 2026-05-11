@@ -21,8 +21,8 @@ import { existsSync, statSync } from 'node:fs'
 import { basename } from 'node:path'
 import process from 'node:process'
 
-import { errorMessage } from '@socketsecurity/lib/errors/message'
-import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
+import { errorMessage } from '@socketsecurity/lib/errors'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 import {
   containsAiAttribution,
@@ -39,6 +39,7 @@ import {
   scanSocketApiKeys,
   shouldSkipFile,
   socketHookMarkerFor,
+  splitLines,
 } from './_helpers.mts'
 
 const logger = getDefaultLogger()
@@ -382,7 +383,7 @@ const main = async (): Promise<number> => {
 
   const stdin = await readStdin()
   let totalErrors = 0
-  const refLines = stdin.trim().split('\n').filter(Boolean)
+  const refLines = splitLines(stdin.trim()).filter(Boolean)
 
   for (const refLine of refLines) {
     const [localRef, localSha, , remoteSha] = refLine.split(/\s+/)
