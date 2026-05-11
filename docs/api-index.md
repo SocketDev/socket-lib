@@ -44,10 +44,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## argv/
 
-| Subpath                                                  | Description                                        |
-| -------------------------------------------------------- | -------------------------------------------------- |
-| [`@socketsecurity/lib/argv/flags`](../src/argv/flags.ts) | Common flag utilities for Socket CLI applications. |
-| [`@socketsecurity/lib/argv/parse`](../src/argv/parse.ts) | Argument parsing utilities for CLI applications.   |
+| Subpath                                                                      | Description                                                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/argv/flag-predicates`](../src/argv/flag-predicates.ts) | Flag predicates — `is*` checks across parsed `FlagValues`, raw `process.argv`, or no input. |
+| [`@socketsecurity/lib/argv/flag-types`](../src/argv/flag-types.ts)           | Types + `COMMON_FLAGS` table for argv flag parsing.                                         |
+| [`@socketsecurity/lib/argv/flags`](../src/argv/flags.ts)                     | Common flag utilities for Socket CLI applications.                                          |
+| [`@socketsecurity/lib/argv/parse`](../src/argv/parse.ts)                     | Argument parsing utilities for CLI applications.                                            |
 
 ## arrays/
 

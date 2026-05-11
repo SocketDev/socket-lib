@@ -173,6 +173,16 @@
       "types": "./dist/archives/zip.d.ts",
       "default": "./dist/archives/zip.js"
     },
+    "./argv/flag-predicates": {
+      "source": "./src/argv/flag-predicates.ts",
+      "types": "./dist/argv/flag-predicates.d.ts",
+      "default": "./dist/argv/flag-predicates.js"
+    },
+    "./argv/flag-types": {
+      "source": "./src/argv/flag-types.ts",
+      "types": "./dist/argv/flag-types.d.ts",
+      "default": "./dist/argv/flag-types.js"
+    },
     "./argv/flags": {
       "source": "./src/argv/flags.ts",
       "types": "./dist/argv/flags.d.ts",
