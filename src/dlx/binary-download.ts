@@ -1,0 +1,238 @@
+/**
+ * @fileoverview Download helpers for dlx binaries — fetch tarballs from
+ * URLs, verify integrity, cache to disk with concurrency locking.
+ *
+ *   - `downloadBinary` — high-level URL→cached-binary flow
+ *   - `downloadBinaryFile` — low-level fetch+verify with processLock
+ *
+ * Split out of `dlx/binary.ts` for size hygiene.
+ */
+
+import process from 'node:process'
+
+import { getArch, WIN32 } from '../constants/platform'
+import { DLX_BINARY_CACHE_TTL } from '../constants/time'
+import { hash } from '../crypto/hash'
+import { safeDelete, safeMkdir } from '../fs/safe'
+import { httpDownload } from '../http-request/download'
+import { normalizePath } from '../paths/normalize'
+import { processLock } from '../process-lock/instance'
+import { generateCacheKey } from './cache'
+import { normalizeHash } from './integrity'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { getCrypto, getFs, getPath } from './_internal'
+import {
+  getDlxCachePath,
+  isBinaryCacheValid,
+  writeBinaryCacheMetadata,
+} from './binary-cache'
+
+import type { DlxBinaryOptions } from './binary-types'
+
+/**
+ * Download a binary from a URL with caching (without execution).
+ * Similar to downloadPackage from dlx/package.
+ *
+ * @returns Object containing the path to the cached binary and whether it was downloaded
+ *
+ * @example
+ * ```typescript
+ * const { binaryPath, downloaded } = await downloadBinary({
+ *   url: 'https://example.com/tool-linux-x64',
+ *   name: 'tool',
+ * })
+ * console.log(`Binary at: ${binaryPath}, fresh: ${downloaded}`)
+ * ```
+ */
+export async function downloadBinary(
+  options: Omit<DlxBinaryOptions, 'spawnOptions'>,
+): Promise<{ binaryPath: string; downloaded: boolean }> {
+  const {
+    cacheTtl = DLX_BINARY_CACHE_TTL,
+    force = false,
+    hash: hashSpec,
+    integrity: rawIntegrity,
+    name,
+    sha256: rawSha256,
+    url,
+  } = { __proto__: null, ...options } as DlxBinaryOptions
+  let integrity = rawIntegrity
+  let sha256 = rawSha256
+  if (hashSpec !== undefined) {
+    const normalized = normalizeHash(hashSpec)
+    if (normalized.type === 'integrity') {
+      integrity = normalized.value
+    } else {
+      sha256 = normalized.value
+    }
+  }
+  const fs = getFs()
+  const path = getPath()
+  // Generate cache paths similar to pnpm/npx structure.
+  const cacheDir = getDlxCachePath()
+  const binaryName = name || `binary-${process.platform}-${getArch()}`
+  // Create spec from URL and binary name for unique cache identity.
+  const spec = `${url}:${binaryName}`
+  const cacheKey = generateCacheKey(spec)
+  const cacheEntryDir = path.join(cacheDir, cacheKey)
+  const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
+
+  let downloaded = false
+
+  // Check if we need to download.
+  if (
+    !force &&
+    fs.existsSync(cacheEntryDir) &&
+    (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
+  ) {
+    // Binary is cached and valid.
+    downloaded = false
+  } else {
+    // Ensure cache directory exists before downloading.
+    try {
+      await safeMkdir(cacheEntryDir)
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (code === 'EACCES' || code === 'EPERM') {
+        throw new ErrorCtor(
+          `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
+            'Please check directory permissions or run with appropriate access.',
+          { cause: e },
+        )
+      }
+      if (code === 'EROFS') {
+        throw new ErrorCtor(
+          `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
+            'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
+          { cause: e },
+        )
+      }
+      throw new ErrorCtor(
+        `Failed to create binary cache directory: ${cacheEntryDir}`,
+        { cause: e },
+      )
+    }
+
+    // Download the binary.
+    const computedIntegrity = await downloadBinaryFile(
+      url,
+      binaryPath,
+      integrity,
+      sha256,
+    )
+
+    // Get file size for metadata.
+    const stats = await fs.promises.stat(binaryPath)
+    await writeBinaryCacheMetadata(
+      cacheEntryDir,
+      cacheKey,
+      url,
+      computedIntegrity || '',
+      stats.size,
+    )
+    downloaded = true
+  }
+
+  return {
+    binaryPath,
+    downloaded,
+  }
+}
+
+/**
+ * Download a file from a URL with integrity checking and concurrent download protection.
+ * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
+ *
+ * Supports two integrity verification methods:
+ * - sha256: Hex SHA-256 checksum (verified inline during download via httpDownload)
+ * - integrity: SRI format sha512-<base64> (verified post-download)
+ *
+ * The sha256 option is preferred as it fails early during download if the checksum doesn't match.
+ *
+ * @example
+ * ```typescript
+ * const integrity = await downloadBinaryFile(
+ *   'https://example.com/tool-linux-x64',
+ *   '/tmp/dlx-cache/tool'
+ * )
+ * console.log(`Integrity: ${integrity}`)
+ * ```
+ */
+export async function downloadBinaryFile(
+  url: string,
+  destPath: string,
+  integrity?: string | undefined,
+  sha256?: string | undefined,
+): Promise<string> {
+  // Use process lock to prevent concurrent downloads.
+  // Lock is placed in the cache entry directory as 'concurrency.lock'.
+  const crypto = getCrypto()
+  const fs = getFs()
+  const path = getPath()
+  const cacheEntryDir = path.dirname(destPath)
+  const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
+
+  return await processLock.withLock(
+    lockPath,
+    async () => {
+      // Check if file was downloaded while waiting for lock.
+      if (fs.existsSync(destPath)) {
+        const stats = await fs.promises.stat(destPath)
+        if (stats.size > 0) {
+          // File exists, compute and return SRI integrity hash.
+          const fileBuffer = await fs.promises.readFile(destPath)
+          return `sha512-${hash('sha512', fileBuffer, 'base64')}`
+        }
+      }
+
+      // Download the file with optional SHA-256 verification.
+      // The sha256 option enables inline verification during download,
+      // which is more secure as it fails early if the checksum doesn't match.
+      try {
+        await httpDownload(url, destPath, sha256 ? { sha256 } : undefined)
+      } catch (e) {
+        throw new Error(
+          `Failed to download binary from ${url}\n` +
+            `Destination: ${destPath}\n` +
+            'Check your internet connection or verify the URL is accessible.',
+          { cause: e },
+        )
+      }
+
+      // Compute SRI integrity hash of downloaded file.
+      const fileBuffer = await fs.promises.readFile(destPath)
+      const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
+
+      // Verify integrity if provided (constant-time comparison).
+      if (integrity) {
+        const integrityMatch =
+          actualIntegrity.length === integrity.length &&
+          crypto.timingSafeEqual(
+            Buffer.from(actualIntegrity),
+            Buffer.from(integrity),
+          )
+        if (!integrityMatch) {
+          // Clean up invalid file.
+          await safeDelete(destPath)
+          throw new Error(
+            `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
+          )
+        }
+      }
+
+      // Make executable on POSIX systems.
+      if (!WIN32) {
+        await fs.promises.chmod(destPath, 0o755)
+      }
+
+      return actualIntegrity
+    },
+    {
+      // Align with npm npx locking strategy.
+      staleMs: 5000,
+      touchIntervalMs: 2000,
+    },
+  )
+}

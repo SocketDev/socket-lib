@@ -468,10 +468,25 @@
       "types": "./dist/dlx/binary.d.ts",
       "default": "./dist/dlx/binary.js"
     },
+    "./dlx/binary-cache": {
+      "source": "./src/dlx/binary-cache.ts",
+      "types": "./dist/dlx/binary-cache.d.ts",
+      "default": "./dist/dlx/binary-cache.js"
+    },
+    "./dlx/binary-download": {
+      "source": "./src/dlx/binary-download.ts",
+      "types": "./dist/dlx/binary-download.d.ts",
+      "default": "./dist/dlx/binary-download.js"
+    },
     "./dlx/binary-resolution": {
       "source": "./src/dlx/binary-resolution.ts",
       "types": "./dist/dlx/binary-resolution.d.ts",
       "default": "./dist/dlx/binary-resolution.js"
+    },
+    "./dlx/binary-types": {
+      "source": "./src/dlx/binary-types.ts",
+      "types": "./dist/dlx/binary-types.d.ts",
+      "default": "./dist/dlx/binary-types.js"
     },
     "./dlx/cache": {
       "source": "./src/dlx/cache.ts",

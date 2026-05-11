@@ -1,295 +1,48 @@
-/** @fileoverview DLX binary execution utilities for Socket ecosystem. */
-
-/* oxlint-disable socket/prefer-exists-sync -- DLX binary metadata uses stat for size/mtime; not existence-only checks. */
+/**
+ * @fileoverview DLX binary execution utilities for Socket ecosystem.
+ *
+ * High-level entry points for downloading standalone URL-hosted
+ * binaries (not npm packages — see `./package` for those) and
+ * executing them with cross-platform shell handling.
+ *
+ *   - `dlxBinary` — download (if needed) + execute
+ *   - `executeBinary` — execute an already-cached binary
+ *
+ * Supporting surface lives in sibling leaves and is re-exported here
+ * so existing `dlx/binary` importers keep working unchanged:
+ *
+ *   - lazy `node:fs` / `node:path` / `node:crypto` + LRU cache — `./_internal`
+ *   - types — `./binary-types`
+ *   - on-disk cache metadata — `./binary-cache`
+ *   - download + integrity verification — `./binary-download`
+ */
 
 import process from 'node:process'
 
 import { getArch, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { readJson } from '../fs/read-json'
-import { safeDelete, safeMkdir } from '../fs/safe'
-import { httpDownload } from '../http-request/download'
-import { isObjectObject } from '../objects/predicates'
+import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
-import { getSocketDlxDir } from '../paths/socket'
-import { processLock } from '../process-lock/instance'
 import { spawn } from '../spawn/core'
-import { hash } from '../crypto/hash'
 import { generateCacheKey } from './cache'
 import { normalizeHash } from './integrity'
 
-import type { HashSpec } from './integrity'
-import type { SpawnExtra, SpawnOptions } from '../spawn/types'
-
-import { ArrayIsArray, ArrayPrototypeFind } from '../primordials/array'
-
-import { DateNow } from '../primordials/date'
+import { ArrayIsArray } from '../primordials/array'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { StringPrototypeStartsWith } from '../primordials/string'
-import { existsSync } from 'node:fs'
-let _crypto: typeof import('node:crypto') | undefined
-/**
- * Lazily load the crypto module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getCrypto() {
-  if (_crypto === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
+import { getFs, getPath } from './_internal'
+import {
+  getBinaryCacheMetadataPath,
+  getDlxCachePath,
+  isBinaryCacheValid,
+  writeBinaryCacheMetadata,
+} from './binary-cache'
+import { downloadBinaryFile } from './binary-download'
 
-    _crypto = /*@__PURE__*/ require('node:crypto')
-  }
-  return _crypto as typeof import('node:crypto')
-}
-
-let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
-export interface DlxBinaryOptions {
-  /**
-   * URL to download the binary from.
-   */
-  url: string
-
-  /**
-   * Optional name for the cached binary (defaults to URL hash).
-   */
-  name?: string | undefined
-
-  /**
-   * Expected hash for verification. Accepts either:
-   * - A bare sha512 SRI string (`sha512-<base64>`), sniffed as integrity.
-   * - A bare sha256 hex string (64 hex chars), sniffed as checksum.
-   * - An explicit `{ type: 'integrity' | 'checksum', value }` object.
-   *
-   * This is the preferred field. `integrity` and `sha256` remain as
-   * lower-level escapes; if both `hash` and one of those is set, `hash`
-   * wins for the matching flavor.
-   */
-  hash?: HashSpec | undefined
-
-  /**
-   * Expected SRI integrity hash (sha512-<base64>) for verification.
-   * Lower-level alternative to `hash`.
-   */
-  integrity?: string | undefined
-
-  /**
-   * Expected SHA-256 hex checksum for verification.
-   * Passed to httpDownload for inline verification during download.
-   * This is more secure than post-download verification as it fails early.
-   * Lower-level alternative to `hash`.
-   */
-  sha256?: string | undefined
-
-  /**
-   * Cache TTL in milliseconds (default: 7 days).
-   */
-  cacheTtl?: number | undefined
-
-  /**
-   * Force re-download even if cached.
-   * Aligns with npm/npx --force flag.
-   */
-  force?: boolean | undefined
-
-  /**
-   * Skip confirmation prompts (auto-approve).
-   * Aligns with npx --yes/-y flag.
-   */
-  yes?: boolean | undefined
-
-  /**
-   * Suppress output (quiet mode).
-   * Aligns with npx --quiet/-q and pnpm --silent/-s flags.
-   */
-  quiet?: boolean | undefined
-
-  /**
-   * Additional spawn options.
-   */
-  spawnOptions?: SpawnOptions | undefined
-}
-
-export interface DlxBinaryResult {
-  /** Path to the cached binary. */
-  binaryPath: string
-  /** Whether the binary was newly downloaded. */
-  downloaded: boolean
-  /** The spawn promise for the running process. */
-  spawnPromise: ReturnType<typeof spawn>
-}
-
-/**
- * Metadata structure for cached binaries (.dlx-metadata.json).
- * Unified schema shared across TypeScript (dlxBinary) and C++ stub extractor.
- *
- * Fields:
- * - version: Schema version (currently "1.0.0")
- * - cache_key: First 16 chars of SHA-512 hash (matches directory name)
- * - timestamp: Unix timestamp in milliseconds
- * - integrity: SRI hash (sha512-<base64>, aligned with npm)
- * - size: Size of cached binary in bytes
- * - source: Origin information
- *   - type: "download" | "extract" | "package"
- *   - url: Download URL (if type is "download")
- *   - path: Source binary path (if type is "extract")
- *   - spec: Package spec (if type is "package")
- * - update_check: Update checking metadata (optional)
- *   - last_check: Timestamp of last update check
- *   - last_notification: Timestamp of last user notification
- *   - latest_known: Latest known version string
- *
- * Example:
- * ```json
- * {
- *   "version": "1.0.0",
- *   "cache_key": "a1b2c3d4e5f67890",
- *   "timestamp": 1730332800000,
- *   "integrity": "sha512-abc123base64...",
- *   "size": 15000000,
- *   "source": {
- *     "type": "download",
- *     "url": "https://example.com/binary"
- *   },
- *   "update_check": {
- *     "last_check": 1730332800000,
- *     "last_notification": 1730246400000,
- *     "latest_known": "2.1.0"
- *   }
- * }
- * ```
- *
- * @internal This interface documents the metadata file format.
- */
-export interface DlxMetadata {
-  version: string
-  cache_key: string
-  timestamp: number
-  integrity: string
-  size: number
-  source?: {
-    type: 'download' | 'extract' | 'package'
-    url?: string
-    path?: string
-    spec?: string
-  }
-  update_check?: {
-    last_check: number
-    last_notification: number
-    latest_known: string
-  }
-}
-
-/**
- * Clean expired entries from the DLX cache.
- *
- * @example
- * ```typescript
- * // Remove cache entries older than the default TTL
- * const removed = await cleanDlxCache()
- *
- * // Remove entries older than 1 hour
- * const removed2 = await cleanDlxCache(60 * 60 * 1000)
- * ```
- */
-export async function cleanDlxCache(
-  maxAge: number = DLX_BINARY_CACHE_TTL,
-): Promise<number> {
-  const cacheDir = getDlxCachePath()
-  const fs = getFs()
-
-  if (!fs.existsSync(cacheDir)) {
-    return 0
-  }
-
-  let cleaned = 0
-  const now = DateNow()
-  const path = getPath()
-  const entries = await fs.promises.readdir(cacheDir)
-
-  for (const entry of entries) {
-    const entryPath = path.join(cacheDir, entry)
-    const metaPath = getBinaryCacheMetadataPath(entryPath)
-
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      if (!(await existsSync(entryPath))) {
-        continue
-      }
-
-      // eslint-disable-next-line no-await-in-loop
-      const metadata = await readJson(metaPath, { throws: false })
-      if (!metadata || typeof metadata !== 'object' || ArrayIsArray(metadata)) {
-        continue
-      }
-      const timestamp = (metadata as Record<string, unknown>)['timestamp']
-      // If timestamp is missing or invalid, treat as expired (age = infinity)
-      const age =
-        typeof timestamp === 'number' && timestamp > 0
-          ? now - timestamp
-          : Number.POSITIVE_INFINITY
-
-      // Treat future timestamps (clock skew) as expired
-      if (age < 0 || age > maxAge) {
-        // Remove entire cache entry directory.
-        // eslint-disable-next-line no-await-in-loop
-        await safeDelete(entryPath, { force: true, recursive: true })
-        cleaned += 1
-      }
-    } catch {
-      // If we can't read metadata, check if directory is empty or corrupted.
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        const contents = await fs.promises.readdir(entryPath)
-        if (!contents.length) {
-          // Remove empty directory.
-          // eslint-disable-next-line no-await-in-loop
-          await safeDelete(entryPath)
-          cleaned += 1
-        }
-      } catch {}
-    }
-  }
-
-  return cleaned
-}
+import type { DlxBinaryOptions, DlxBinaryResult } from './binary-types'
+import type { SpawnExtra, SpawnOptions } from '../spawn/types'
 
 /**
  * Download and execute a binary from a URL with caching.
@@ -433,25 +186,19 @@ export async function dlxBinary(
   const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
   // Windows cmd.exe PATH resolution behavior:
   // When shell: true on Windows with .cmd/.bat/.ps1 files, spawn will automatically
-  // strip the full path down to just the basename without extension (e.g.,
-  // C:\cache\test.cmd becomes just "test"). Windows cmd.exe then searches for "test"
-  // in directories listed in PATH, trying each extension from PATHEXT environment
-  // variable (.COM, .EXE, .BAT, .CMD, etc.) until it finds a match.
+  // strip the full path down to just the basename without extension. Windows cmd.exe
+  // then searches for the binary in directories listed in PATH, trying each extension
+  // from PATHEXT environment variable until it finds a match.
   //
   // Since our binaries are downloaded to a custom cache directory that's not in PATH
   // (unlike system package managers like npm/pnpm/yarn which are already in PATH),
   // we must prepend the cache directory to PATH so cmd.exe can locate the binary.
-  //
-  // This approach is consistent with how other tools handle Windows command execution:
-  // - npm's promise-spawn: uses which.sync() to find commands in PATH
-  // - cross-spawn: spawns cmd.exe with escaped arguments
-  // - Node.js spawn with shell: true: delegates to cmd.exe which uses PATH
   const finalSpawnOptions = needsShell
     ? {
         ...spawnOptions,
         env: {
           ...spawnOptions?.env,
-          PATH: `${cacheEntryDir}${getPath().delimiter}${process.env['PATH'] || ''}`,
+          PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
         },
         shell: true,
       }
@@ -466,215 +213,8 @@ export async function dlxBinary(
 }
 
 /**
- * Download a binary from a URL with caching (without execution).
- * Similar to downloadPackage from dlx-package.
- *
- * @returns Object containing the path to the cached binary and whether it was downloaded
- *
- * @example
- * ```typescript
- * const { binaryPath, downloaded } = await downloadBinary({
- *   url: 'https://example.com/tool-linux-x64',
- *   name: 'tool',
- * })
- * console.log(`Binary at: ${binaryPath}, fresh: ${downloaded}`)
- * ```
- */
-export async function downloadBinary(
-  options: Omit<DlxBinaryOptions, 'spawnOptions'>,
-): Promise<{ binaryPath: string; downloaded: boolean }> {
-  const {
-    cacheTtl = DLX_BINARY_CACHE_TTL,
-    force = false,
-    hash,
-    integrity: rawIntegrity,
-    name,
-    sha256: rawSha256,
-    url,
-  } = { __proto__: null, ...options } as DlxBinaryOptions
-  let integrity = rawIntegrity
-  let sha256 = rawSha256
-  if (hash !== undefined) {
-    const normalized = normalizeHash(hash)
-    if (normalized.type === 'integrity') {
-      integrity = normalized.value
-    } else {
-      sha256 = normalized.value
-    }
-  }
-  const fs = getFs()
-  const path = getPath()
-  // Generate cache paths similar to pnpm/npx structure.
-  const cacheDir = getDlxCachePath()
-  const binaryName = name || `binary-${process.platform}-${getArch()}`
-  // Create spec from URL and binary name for unique cache identity.
-  const spec = `${url}:${binaryName}`
-  const cacheKey = generateCacheKey(spec)
-  const cacheEntryDir = path.join(cacheDir, cacheKey)
-  const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
-
-  let downloaded = false
-
-  // Check if we need to download.
-  if (
-    !force &&
-    fs.existsSync(cacheEntryDir) &&
-    (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
-  ) {
-    // Binary is cached and valid.
-    downloaded = false
-  } else {
-    // Ensure cache directory exists before downloading.
-    try {
-      await safeMkdir(cacheEntryDir)
-    } catch (e) {
-      const code = (e as NodeJS.ErrnoException).code
-      if (code === 'EACCES' || code === 'EPERM') {
-        throw new ErrorCtor(
-          `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
-            'Please check directory permissions or run with appropriate access.',
-          { cause: e },
-        )
-      }
-      if (code === 'EROFS') {
-        throw new ErrorCtor(
-          `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
-            'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
-          { cause: e },
-        )
-      }
-      throw new ErrorCtor(
-        `Failed to create binary cache directory: ${cacheEntryDir}`,
-        { cause: e },
-      )
-    }
-
-    // Download the binary.
-    const computedIntegrity = await downloadBinaryFile(
-      url,
-      binaryPath,
-      integrity,
-      sha256,
-    )
-
-    // Get file size for metadata.
-    const stats = await fs.promises.stat(binaryPath)
-    await writeBinaryCacheMetadata(
-      cacheEntryDir,
-      cacheKey,
-      url,
-      computedIntegrity || '',
-      stats.size,
-    )
-    downloaded = true
-  }
-
-  return {
-    binaryPath,
-    downloaded,
-  }
-}
-
-/**
- * Download a file from a URL with integrity checking and concurrent download protection.
- * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
- * Internal helper function for downloading binary files.
- *
- * Supports two integrity verification methods:
- * - sha256: Hex SHA-256 checksum (verified inline during download via httpDownload)
- * - integrity: SRI format sha512-<base64> (verified post-download)
- *
- * The sha256 option is preferred as it fails early during download if the checksum doesn't match.
- *
- * @example
- * ```typescript
- * const integrity = await downloadBinaryFile(
- *   'https://example.com/tool-linux-x64',
- *   '/tmp/dlx-cache/tool'
- * )
- * console.log(`Integrity: ${integrity}`)
- * ```
- */
-export async function downloadBinaryFile(
-  url: string,
-  destPath: string,
-  integrity?: string | undefined,
-  sha256?: string | undefined,
-): Promise<string> {
-  // Use process lock to prevent concurrent downloads.
-  // Lock is placed in the cache entry directory as 'concurrency.lock'.
-  const crypto = getCrypto()
-  const fs = getFs()
-  const path = getPath()
-  const cacheEntryDir = path.dirname(destPath)
-  const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
-
-  return await processLock.withLock(
-    lockPath,
-    async () => {
-      // Check if file was downloaded while waiting for lock.
-      if (fs.existsSync(destPath)) {
-        const stats = await fs.promises.stat(destPath)
-        if (stats.size > 0) {
-          // File exists, compute and return SRI integrity hash.
-          const fileBuffer = await fs.promises.readFile(destPath)
-          return `sha512-${hash('sha512', fileBuffer, 'base64')}`
-        }
-      }
-
-      // Download the file with optional SHA-256 verification.
-      // The sha256 option enables inline verification during download,
-      // which is more secure as it fails early if the checksum doesn't match.
-      try {
-        await httpDownload(url, destPath, sha256 ? { sha256 } : undefined)
-      } catch (e) {
-        throw new Error(
-          `Failed to download binary from ${url}\n` +
-            `Destination: ${destPath}\n` +
-            'Check your internet connection or verify the URL is accessible.',
-          { cause: e },
-        )
-      }
-
-      // Compute SRI integrity hash of downloaded file.
-      const fileBuffer = await fs.promises.readFile(destPath)
-      const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
-
-      // Verify integrity if provided (constant-time comparison).
-      if (integrity) {
-        const integrityMatch =
-          actualIntegrity.length === integrity.length &&
-          crypto.timingSafeEqual(
-            Buffer.from(actualIntegrity),
-            Buffer.from(integrity),
-          )
-        if (!integrityMatch) {
-          // Clean up invalid file.
-          await safeDelete(destPath)
-          throw new Error(
-            `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
-          )
-        }
-      }
-
-      // Make executable on POSIX systems.
-      if (!WIN32) {
-        await fs.promises.chmod(destPath, 0o755)
-      }
-
-      return actualIntegrity
-    },
-    {
-      // Align with npm npx locking strategy.
-      staleMs: 5000,
-      touchIntervalMs: 2000,
-    },
-  )
-}
-
-/**
  * Execute a cached binary without re-downloading.
- * Similar to executePackage from dlx-package.
+ * Similar to executePackage from dlx/package.
  * Binary must have been previously downloaded via downloadBinary or dlxBinary.
  *
  * @param binaryPath Path to the cached binary (from downloadBinary result)
@@ -703,13 +243,7 @@ export function executeBinary(
   // Note: .exe files are actual binaries and don't need shell mode.
   const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
 
-  // Windows cmd.exe PATH resolution behavior:
-  // When shell: true on Windows with .cmd/.bat/.ps1 files, spawn will automatically
-  // strip the full path down to just the basename without extension. Windows cmd.exe
-  // then searches for the binary in directories listed in PATH.
-  //
-  // Since our binaries are downloaded to a custom cache directory that's not in PATH,
-  // we must prepend the cache directory to PATH so cmd.exe can locate the binary.
+  // Windows: prepend cache dir to PATH so cmd.exe can locate the binary.
   const path = getPath()
   const cacheEntryDir = path.dirname(binaryPath)
   const finalSpawnOptions = needsShell
@@ -726,195 +260,20 @@ export function executeBinary(
   return spawn(binaryPath, args, finalSpawnOptions, spawnExtra)
 }
 
-/**
- * Get metadata file path for a cached binary.
- *
- * @example
- * ```typescript
- * const metaPath = getBinaryCacheMetadataPath('/tmp/dlx-cache/a1b2c3d4')
- * // '/tmp/dlx-cache/a1b2c3d4/.dlx-metadata.json'
- * ```
- */
-export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
-  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
-}
-
-/**
- * Get the DLX binary cache directory path.
- * Alias of `getSocketDlxDir` — DLX binary cache uses the same directory
- * as dlx-package for unified DLX storage.
- *
- * @example
- * ```typescript
- * const cachePath = getDlxCachePath()
- * ```
- */
-export const getDlxCachePath = getSocketDlxDir
-
-/**
- * Check if a cached binary is still valid.
- *
- * @example
- * ```typescript
- * const ttl = 7 * 24 * 60 * 60 * 1000
- * const valid = await isBinaryCacheValid('/tmp/dlx-cache/a1b2c3d4', ttl)
- * if (!valid) {
- *   // Re-download the binary
- * }
- * ```
- */
-export async function isBinaryCacheValid(
-  cacheEntryPath: string,
-  cacheTtl: number,
-): Promise<boolean> {
-  const fs = getFs()
-  try {
-    const metaPath = getBinaryCacheMetadataPath(cacheEntryPath)
-    if (!fs.existsSync(metaPath)) {
-      return false
-    }
-
-    const metadata = await readJson(metaPath, { throws: false })
-    if (!isObjectObject(metadata)) {
-      return false
-    }
-    const now = DateNow()
-    const timestamp = (metadata as Record<string, unknown>)['timestamp']
-    // If timestamp is missing or invalid, cache is invalid
-    if (typeof timestamp !== 'number' || timestamp <= 0) {
-      return false
-    }
-    const age = now - timestamp
-    // Reject future timestamps (clock skew or corruption)
-    if (age < 0) {
-      return false
-    }
-    return age < cacheTtl
-  } catch {
-    return false
-  }
-}
-
-/**
- * Get information about cached binaries.
- *
- * @example
- * ```typescript
- * const entries = await listDlxCache()
- * for (const entry of entries) {
- *   console.log(`${entry.name}: ${entry.size} bytes`)
- * }
- * ```
- */
-export async function listDlxCache(): Promise<
-  Array<{
-    age: number
-    integrity: string
-    name: string
-    size: number
-    url: string
-  }>
-> {
-  const cacheDir = getDlxCachePath()
-  const fs = getFs()
-
-  if (!fs.existsSync(cacheDir)) {
-    return []
-  }
-
-  const results = []
-  const now = DateNow()
-  const path = getPath()
-  const entries = await fs.promises.readdir(cacheDir)
-
-  for (const entry of entries) {
-    const entryPath = path.join(cacheDir, entry)
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      if (!(await existsSync(entryPath))) {
-        continue
-      }
-
-      const metaPath = getBinaryCacheMetadataPath(entryPath)
-      // eslint-disable-next-line no-await-in-loop
-      const metadata = await readJson(metaPath, { throws: false })
-      if (!metadata || typeof metadata !== 'object' || ArrayIsArray(metadata)) {
-        continue
-      }
-
-      const metaObj = metadata as Record<string, unknown>
-
-      // Get URL from unified schema (source.url) or legacy schema (url).
-      // Allow empty URL for backward compatibility with partial metadata.
-      const source = metaObj['source'] as Record<string, unknown> | undefined
-      const url =
-        (source?.['url'] as string) || (metaObj['url'] as string) || ''
-
-      // Find the binary file in the directory.
-      // eslint-disable-next-line no-await-in-loop
-      const files = await fs.promises.readdir(entryPath)
-      const binaryFile = ArrayPrototypeFind(
-        files,
-        f => !StringPrototypeStartsWith(f, '.'),
-      )
-
-      if (binaryFile) {
-        const binaryPath = path.join(entryPath, binaryFile)
-        // eslint-disable-next-line no-await-in-loop
-        const binaryStats = await fs.promises.stat(binaryPath)
-
-        results.push({
-          age: now - ((metaObj['timestamp'] as number) || 0),
-          integrity: (metaObj['integrity'] as string) || '',
-          name: binaryFile,
-          size: binaryStats.size,
-          url,
-        })
-      }
-    } catch {}
-  }
-
-  return results
-}
-
-/**
- * Write metadata for a cached binary.
- * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
- * Schema documentation: See DlxMetadata interface in this file (exported).
- *
- * @example
- * ```typescript
- * await writeBinaryCacheMetadata(
- *   '/tmp/dlx-cache/a1b2c3d4',
- *   'a1b2c3d4',
- *   'https://example.com/tool',
- *   'sha512-abc123...',
- *   15000000
- * )
- * ```
- */
-export async function writeBinaryCacheMetadata(
-  cacheEntryPath: string,
-  cacheKey: string,
-  url: string,
-  integrity: string,
-  size: number,
-): Promise<void> {
-  const metaPath = getBinaryCacheMetadataPath(cacheEntryPath)
-  const metadata: DlxMetadata = {
-    version: '1.0.0',
-    cache_key: cacheKey,
-    timestamp: DateNow(),
-    integrity,
-    size,
-    source: {
-      type: 'download',
-      url,
-    },
-  }
-  const fs = getFs()
-  // Use atomic write-then-rename pattern to prevent corruption on crash
-  const tmpPath = `${metaPath}.tmp.${process.pid}`
-  await fs.promises.writeFile(tmpPath, JSON.stringify(metadata, null, 2))
-  await fs.promises.rename(tmpPath, metaPath)
-}
+// Re-exports — preserve the historical `dlx/binary` surface so
+// downstream importers don't have to chase the split.
+export { getCrypto, getFs, getPath } from './_internal'
+export {
+  cleanDlxCache,
+  getBinaryCacheMetadataPath,
+  getDlxCachePath,
+  isBinaryCacheValid,
+  listDlxCache,
+  writeBinaryCacheMetadata,
+} from './binary-cache'
+export { downloadBinary, downloadBinaryFile } from './binary-download'
+export type {
+  DlxBinaryOptions,
+  DlxBinaryResult,
+  DlxMetadata,
+} from './binary-types'
