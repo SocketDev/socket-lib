@@ -90,7 +90,6 @@ const logger = {
   log: (msg: string) => process.stdout.write(msg + '\n'),
   error: (msg: string) => process.stderr.write(msg + '\n'),
   step: (msg: string) => process.stdout.write(`→ ${msg}\n`),
-  // oxlint-disable-next-line socket/no-status-emoji -- this file can't import @socketsecurity/lib (it validates the package's own paths); local logger replica.
   success: (msg: string) => process.stdout.write(`✔ ${msg}\n`),
   substep: (msg: string) => process.stdout.write(`  ${msg}\n`),
 }
@@ -184,8 +183,8 @@ const loadAllowlist = (): AllowlistEntry[] => {
           : blockLines.join('\n').replace(/\n+$/, '')
       ;(current as any)[blockKey] = value
     }
-    blockKey = undefined
-    blockKind = undefined
+    blockKey = null
+    blockKind = null
     blockLines = []
   }
   const indentOf = (line: string): number => {
@@ -334,13 +333,13 @@ const isAllowlisted = (finding: Finding): boolean =>
 // ──────────────────────────────────────────────────────────────────
 
 const SKIP_DIRS = new Set([
-  '.cache',
   '.git',
+  'node_modules',
   'build',
   'dist',
-  'node_modules',
   'out',
   'target',
+  '.cache',
   'upstream',
 ])
 
@@ -427,7 +426,7 @@ const extractPathCalls = (
           continue
         }
         if (ch === inString) {
-          inString = undefined
+          inString = null
         }
       } else {
         if (ch === '"' || ch === "'" || ch === '`') {
