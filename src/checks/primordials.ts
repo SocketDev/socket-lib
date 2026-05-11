@@ -90,240 +90,6 @@ export interface PrimordialsCheckResult {
 const NAME_HEAD_RE = /^([A-Za-z_$][A-Za-z0-9_$]*)/
 
 /**
- * Strip `/* … *‍/` block comments and `//` line comments. Comments
- * inside primordials destructures would otherwise leak captured
- * names; stripping first keeps the regex simple.
- */
-export function stripComments(src: string): string {
-  let out = src.replace(/\/\*[\s\S]*?\*\//g, '')
-  out = out.replace(/^[\t ]*\/\/.*$/gm, '')
-  out = out.replace(/[\t ]+\/\/.*$/gm, '')
-  return out
-}
-
-/** Recursively collect every `*.js` file under `dir`. */
-export function collectJsFiles(dir: string): string[] {
-  const out: string[] = []
-  if (!existsSync(dir)) {
-    return out
-  }
-  const stack = [dir]
-  while (stack.length > 0) {
-    const cur = stack.pop()!
-    let entries: string[]
-    try {
-      entries = readdirSync(cur)
-    } catch {
-      continue
-    }
-    for (const name of entries) {
-      const full = path.join(cur, name)
-      let stat
-      try {
-        stat = statSync(full)
-      } catch {
-        continue
-      }
-      if (stat.isDirectory()) {
-        stack.push(full)
-      } else if (stat.isFile() && full.endsWith('.js')) {
-        out.push(full)
-      }
-    }
-  }
-  return out
-}
-
-/**
- * Pull every `const { … } = primordials` destructure body out of
- * `src`. Comments are stripped first so commentary inside a
- * destructure doesn't leak into captured names. The body regex
- * disallows nested `}`, which is safe after the comment-strip pass —
- * destructures themselves don't contain `}`.
- */
-export function extractPrimordialsNames(src: string): string[] {
-  const cleaned = stripComments(src)
-  const re = /const\s*\{\s*([^}]*?)\}\s*=\s*primordials\b/g
-  const out: string[] = []
-  let m: RegExpExecArray | null
-  while ((m = re.exec(cleaned)) !== null) {
-    for (const raw of m[1]!.split(',')) {
-      const trimmed = raw.trim()
-      if (!trimmed) {
-        continue
-      }
-      // `Foo: BarAlias` keeps `Foo` (the source name on the LHS).
-      const nameMatch = NAME_HEAD_RE.exec(trimmed)
-      // nameMatch null arm fires on malformed export-list segments,
-      // which tests don't simulate.
-      /* c8 ignore start */
-      if (nameMatch) {
-        out.push(nameMatch[1]!)
-      }
-      /* c8 ignore stop */
-    }
-  }
-  return out
-}
-
-/**
- * Pull every `export const Foo` / `export function Foo` /
- * `export { Foo }` from a TS file. Also matches `.d.ts` declaration
- * forms (`export declare const Foo`, `export declare function Foo`)
- * since the fallback path reads `primordials.d.ts` from
- * `node_modules` when no sibling clone is present.
- */
-export function extractTsExports(src: string): string[] {
-  const out = new Set<string>()
-  for (const m of src.matchAll(
-    /^export\s+(?:declare\s+)?const\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm,
-  )) {
-    out.add(m[1]!)
-  }
-  for (const m of src.matchAll(
-    /^export\s+(?:declare\s+)?function\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm,
-  )) {
-    out.add(m[1]!)
-  }
-  for (const m of src.matchAll(/^export\s*\{\s*([^}]+)\}/gm)) {
-    for (const raw of m[1]!.split(',')) {
-      const trimmed = raw.trim()
-      if (!trimmed) {
-        continue
-      }
-      const nameMatch = NAME_HEAD_RE.exec(trimmed)
-      // nameMatch null arm fires on malformed export-list segments,
-      // which tests don't simulate.
-      /* c8 ignore start */
-      if (nameMatch) {
-        out.add(nameMatch[1]!)
-      }
-      /* c8 ignore stop */
-    }
-  }
-  return [...out]
-}
-
-// ── Resolver ────────────────────────────────────────────────────────
-
-/**
- * Locate socket-lib's primordials source. Search order:
- *
- *   1. `config.socketLibPrimordialsPath` if explicitly set. Accepts
- *      either a single file (legacy `primordials.ts` / `.d.ts`) or a
- *      directory of leaves (`primordials/`).
- *   2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials/`
- *      (post-split layout) or `<repoRoot>/../socket-lib/src/primordials.ts`
- *      (legacy single-file layout). Preferred for the dev-loop case
- *      where a developer is editing socket-lib and a consumer in parallel.
- *   3. Installed copy — `<repoRoot>/node_modules/@socketsecurity/lib/
- *      dist/primordials/` (post-split) or `<repoRoot>/node_modules/
- *      @socketsecurity/lib/dist/primordials.d.ts` (legacy). The CI fallback.
- *
- * Throws when none of the candidates exist.
- */
-export function resolveSocketLibPrimordials(
-  config: PrimordialsCheckConfig,
-): string {
-  // Each resolver branch (explicit path, sibling clone, installed
-  // fallback) needs a specific test setup; the branch tracker reports
-  // them sub-arms separately even when the primary path is hit.
-  /* c8 ignore start */
-  if (config.socketLibPrimordialsPath) {
-    if (!existsSync(config.socketLibPrimordialsPath)) {
-      throw new Error(
-        `socketLibPrimordialsPath does not exist: ${config.socketLibPrimordialsPath}`,
-      )
-    }
-    return config.socketLibPrimordialsPath
-  }
-  const repoRoot = config.repoRoot ?? process.cwd()
-  const siblingDir = path.resolve(
-    repoRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials',
-  )
-  if (existsSync(siblingDir)) {
-    return siblingDir
-  }
-  const siblingLegacy = path.resolve(
-    repoRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials.ts',
-  )
-  if (existsSync(siblingLegacy)) {
-    return siblingLegacy
-  }
-  const installedDir = path.resolve(
-    repoRoot,
-    'node_modules',
-    '@socketsecurity',
-    'lib',
-    'dist',
-    'primordials',
-  )
-  if (existsSync(installedDir)) {
-    return installedDir
-  }
-  const installedLegacy = path.resolve(
-    repoRoot,
-    'node_modules',
-    '@socketsecurity',
-    'lib',
-    'dist',
-    'primordials.d.ts',
-  )
-  if (existsSync(installedLegacy)) {
-    return installedLegacy
-  }
-  /* c8 ignore stop */
-  throw new Error(
-    'Cannot locate socket-lib primordials source. ' +
-      `Looked at:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
-      'Either clone socket-lib at ../socket-lib or run `pnpm install`.',
-  )
-}
-
-/**
- * Read TS exports from a resolved primordials path. Handles both the
- * legacy single-file layout (returns one file's exports) and the
- * post-split directory layout (concatenates exports across every
- * `*.ts` / `*.d.ts` leaf).
- */
-export function readSocketLibPrimordialNames(resolved: string): Set<string> {
-  const stat = statSync(resolved)
-  if (stat.isFile()) {
-    return new Set(extractTsExports(readFileSync(resolved, 'utf8')))
-  }
-  // Directory: concatenate all *.ts and *.d.ts leaves.
-  const out = new Set<string>()
-  // Each scanned leaf either has TS exports or is a leftover declaration
-  // file; we don't separate them — the parser handles both forms.
-  /* c8 ignore start */
-  for (const name of readdirSync(resolved)) {
-    if (!name.endsWith('.ts') && !name.endsWith('.d.ts')) {
-      continue
-    }
-    const full = path.join(resolved, name)
-    const fileStat = statSync(full)
-    if (!fileStat.isFile()) {
-      continue
-    }
-    for (const exp of extractTsExports(readFileSync(full, 'utf8'))) {
-      out.add(exp)
-    }
-  }
-  /* c8 ignore stop */
-  return out
-}
-
-// ── Check ───────────────────────────────────────────────────────────
-
-/**
  * Run the primordials drift check against the configured repo.
  * Returns the full result including raw inputs (used names, lib
  * exports) so renderers can show context, plus a sorted list of
@@ -430,4 +196,234 @@ export function checkPrimordials(
     socketLibNames,
     findings,
   }
+}
+
+/** Recursively collect every `*.js` file under `dir`. */
+export function collectJsFiles(dir: string): string[] {
+  const out: string[] = []
+  if (!existsSync(dir)) {
+    return out
+  }
+  const stack = [dir]
+  while (stack.length > 0) {
+    const cur = stack.pop()!
+    let entries: string[]
+    try {
+      entries = readdirSync(cur)
+    } catch {
+      continue
+    }
+    for (const name of entries) {
+      const full = path.join(cur, name)
+      let stat
+      try {
+        stat = statSync(full)
+      } catch {
+        continue
+      }
+      if (stat.isDirectory()) {
+        stack.push(full)
+      } else if (stat.isFile() && full.endsWith('.js')) {
+        out.push(full)
+      }
+    }
+  }
+  return out
+}
+
+/**
+ * Pull every `const { … } = primordials` destructure body out of
+ * `src`. Comments are stripped first so commentary inside a
+ * destructure doesn't leak into captured names. The body regex
+ * disallows nested `}`, which is safe after the comment-strip pass —
+ * destructures themselves don't contain `}`.
+ */
+export function extractPrimordialsNames(src: string): string[] {
+  const cleaned = stripComments(src)
+  const re = /const\s*\{\s*([^}]*?)\}\s*=\s*primordials\b/g
+  const out: string[] = []
+  let m: RegExpExecArray | null
+  while ((m = re.exec(cleaned)) !== null) {
+    for (const raw of m[1]!.split(',')) {
+      const trimmed = raw.trim()
+      if (!trimmed) {
+        continue
+      }
+      // `Foo: BarAlias` keeps `Foo` (the source name on the LHS).
+      const nameMatch = NAME_HEAD_RE.exec(trimmed)
+      // nameMatch null arm fires on malformed export-list segments,
+      // which tests don't simulate.
+      /* c8 ignore start */
+      if (nameMatch) {
+        out.push(nameMatch[1]!)
+      }
+      /* c8 ignore stop */
+    }
+  }
+  return out
+}
+
+/**
+ * Pull every `export const Foo` / `export function Foo` /
+ * `export { Foo }` from a TS file. Also matches `.d.ts` declaration
+ * forms (`export declare const Foo`, `export declare function Foo`)
+ * since the fallback path reads `primordials.d.ts` from
+ * `node_modules` when no sibling clone is present.
+ */
+export function extractTsExports(src: string): string[] {
+  const out = new Set<string>()
+  for (const m of src.matchAll(
+    /^export\s+(?:declare\s+)?const\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm,
+  )) {
+    out.add(m[1]!)
+  }
+  for (const m of src.matchAll(
+    /^export\s+(?:declare\s+)?function\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm,
+  )) {
+    out.add(m[1]!)
+  }
+  for (const m of src.matchAll(/^export\s*\{\s*([^}]+)\}/gm)) {
+    for (const raw of m[1]!.split(',')) {
+      const trimmed = raw.trim()
+      if (!trimmed) {
+        continue
+      }
+      const nameMatch = NAME_HEAD_RE.exec(trimmed)
+      // nameMatch null arm fires on malformed export-list segments,
+      // which tests don't simulate.
+      /* c8 ignore start */
+      if (nameMatch) {
+        out.add(nameMatch[1]!)
+      }
+      /* c8 ignore stop */
+    }
+  }
+  return [...out]
+}
+
+/**
+ * Read TS exports from a resolved primordials path. Handles both the
+ * legacy single-file layout (returns one file's exports) and the
+ * post-split directory layout (concatenates exports across every
+ * `*.ts` / `*.d.ts` leaf).
+ */
+export function readSocketLibPrimordialNames(resolved: string): Set<string> {
+  const stat = statSync(resolved)
+  if (stat.isFile()) {
+    return new Set(extractTsExports(readFileSync(resolved, 'utf8')))
+  }
+  // Directory: concatenate all *.ts and *.d.ts leaves.
+  const out = new Set<string>()
+  // Each scanned leaf either has TS exports or is a leftover declaration
+  // file; we don't separate them — the parser handles both forms.
+  /* c8 ignore start */
+  for (const name of readdirSync(resolved)) {
+    if (!name.endsWith('.ts') && !name.endsWith('.d.ts')) {
+      continue
+    }
+    const full = path.join(resolved, name)
+    const fileStat = statSync(full)
+    if (!fileStat.isFile()) {
+      continue
+    }
+    for (const exp of extractTsExports(readFileSync(full, 'utf8'))) {
+      out.add(exp)
+    }
+  }
+  /* c8 ignore stop */
+  return out
+}
+
+/**
+ * Locate socket-lib's primordials source. Search order:
+ *
+ *   1. `config.socketLibPrimordialsPath` if explicitly set. Accepts
+ *      either a single file (legacy `primordials.ts` / `.d.ts`) or a
+ *      directory of leaves (`primordials/`).
+ *   2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials/`
+ *      (post-split layout) or `<repoRoot>/../socket-lib/src/primordials.ts`
+ *      (legacy single-file layout). Preferred for the dev-loop case
+ *      where a developer is editing socket-lib and a consumer in parallel.
+ *   3. Installed copy — `<repoRoot>/node_modules/@socketsecurity/lib/
+ *      dist/primordials/` (post-split) or `<repoRoot>/node_modules/
+ *      @socketsecurity/lib/dist/primordials.d.ts` (legacy). The CI fallback.
+ *
+ * Throws when none of the candidates exist.
+ */
+export function resolveSocketLibPrimordials(
+  config: PrimordialsCheckConfig,
+): string {
+  // Each resolver branch (explicit path, sibling clone, installed
+  // fallback) needs a specific test setup; the branch tracker reports
+  // them sub-arms separately even when the primary path is hit.
+  /* c8 ignore start */
+  if (config.socketLibPrimordialsPath) {
+    if (!existsSync(config.socketLibPrimordialsPath)) {
+      throw new Error(
+        `socketLibPrimordialsPath does not exist: ${config.socketLibPrimordialsPath}`,
+      )
+    }
+    return config.socketLibPrimordialsPath
+  }
+  const repoRoot = config.repoRoot ?? process.cwd()
+  const siblingDir = path.resolve(
+    repoRoot,
+    '..',
+    'socket-lib',
+    'src',
+    'primordials',
+  )
+  if (existsSync(siblingDir)) {
+    return siblingDir
+  }
+  const siblingLegacy = path.resolve(
+    repoRoot,
+    '..',
+    'socket-lib',
+    'src',
+    'primordials.ts',
+  )
+  if (existsSync(siblingLegacy)) {
+    return siblingLegacy
+  }
+  const installedDir = path.resolve(
+    repoRoot,
+    'node_modules',
+    '@socketsecurity',
+    'lib',
+    'dist',
+    'primordials',
+  )
+  if (existsSync(installedDir)) {
+    return installedDir
+  }
+  const installedLegacy = path.resolve(
+    repoRoot,
+    'node_modules',
+    '@socketsecurity',
+    'lib',
+    'dist',
+    'primordials.d.ts',
+  )
+  if (existsSync(installedLegacy)) {
+    return installedLegacy
+  }
+  /* c8 ignore stop */
+  throw new Error(
+    'Cannot locate socket-lib primordials source. ' +
+      `Looked at:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
+      'Either clone socket-lib at ../socket-lib or run `pnpm install`.',
+  )
+}
+
+/**
+ * Strip `/* … *‍/` block comments and `//` line comments. Comments
+ * inside primordials destructures would otherwise leak captured
+ * names; stripping first keeps the regex simple.
+ */
+export function stripComments(src: string): string {
+  let out = src.replace(/\/\*[\s\S]*?\*\//g, '')
+  out = out.replace(/^[\t ]*\/\/.*$/gm, '')
+  out = out.replace(/[\t ]+\/\/.*$/gm, '')
+  return out
 }

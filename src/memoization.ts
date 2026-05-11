@@ -47,51 +47,6 @@ type CacheEntry<T> = {
 }
 
 /**
- * Default cache key generator that disambiguates `undefined`, `BigInt`, and
- * `Map`/`Set` arguments (which `JSON.stringify` drops or collapses).
- * @private
- */
-export function defaultKeyGen(args: readonly unknown[]): string {
-  return JSONStringify(args, (_key, value) => {
-    if (value === undefined) {
-      return '\0undefined'
-    }
-    if (typeof value === 'bigint') {
-      return `\0bigint:${value.toString()}`
-    }
-    if (typeof value === 'function') {
-      // 'anonymous' fallback fires only when value is anonymous fn;
-      // tested in memoization-extras.test.mts.
-      /* c8 ignore next */
-      return `\0fn:${value.name || 'anonymous'}`
-    }
-    if (value instanceof Map) {
-      return { __tag: 'Map', entries: Array.from(value.entries()) }
-    }
-    if (value instanceof Set) {
-      return { __tag: 'Set', values: Array.from(value.values()) }
-    }
-    return value
-  })
-}
-
-/**
- * Clear all memoization caches.
- * Useful for testing or when you need to force recomputation.
- *
- * @example
- * ```typescript
- * clearAllMemoizationCaches()
- * ```
- */
-export function clearAllMemoizationCaches(): void {
-  debugLog('[memoize:all] clear', { action: 'clear-all-caches' })
-  for (const clear of cacheRegistry) {
-    clear()
-  }
-}
-
-/**
  * Create a memoized version of a method.
  * Preserves 'this' context for class methods.
  *
@@ -126,6 +81,51 @@ export function Memoize(options: MemoizeOptions<unknown[]> = {}) {
 
     return descriptor
   }
+}
+
+/**
+ * Clear all memoization caches.
+ * Useful for testing or when you need to force recomputation.
+ *
+ * @example
+ * ```typescript
+ * clearAllMemoizationCaches()
+ * ```
+ */
+export function clearAllMemoizationCaches(): void {
+  debugLog('[memoize:all] clear', { action: 'clear-all-caches' })
+  for (const clear of cacheRegistry) {
+    clear()
+  }
+}
+
+/**
+ * Default cache key generator that disambiguates `undefined`, `BigInt`, and
+ * `Map`/`Set` arguments (which `JSON.stringify` drops or collapses).
+ * @private
+ */
+export function defaultKeyGen(args: readonly unknown[]): string {
+  return JSONStringify(args, (_key, value) => {
+    if (value === undefined) {
+      return '\0undefined'
+    }
+    if (typeof value === 'bigint') {
+      return `\0bigint:${value.toString()}`
+    }
+    if (typeof value === 'function') {
+      // 'anonymous' fallback fires only when value is anonymous fn;
+      // tested in memoization-extras.test.mts.
+      /* c8 ignore next */
+      return `\0fn:${value.name || 'anonymous'}`
+    }
+    if (value instanceof Map) {
+      return { __tag: 'Map', entries: Array.from(value.entries()) }
+    }
+    if (value instanceof Set) {
+      return { __tag: 'Set', values: Array.from(value.values()) }
+    }
+    return value
+  })
 }
 
 /**

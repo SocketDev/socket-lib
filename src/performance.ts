@@ -29,13 +29,6 @@ export type PerformanceMetrics = {
 const performanceMetrics: PerformanceMetrics[] = []
 
 /**
- * Check if performance tracking is enabled.
- */
-export function isPerfEnabled(): boolean {
-  return process.env['DEBUG']?.includes('perf') || false
-}
-
-/**
  * Clear all collected performance metrics.
  *
  * @example
@@ -199,6 +192,13 @@ export function getPerformanceSummary(): Record<
   }
 
   return result
+}
+
+/**
+ * Check if performance tracking is enabled.
+ */
+export function isPerfEnabled(): boolean {
+  return process.env['DEBUG']?.includes('perf') || false
 }
 
 /**

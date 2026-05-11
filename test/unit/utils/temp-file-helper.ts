@@ -13,6 +13,19 @@ import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'
 
 /**
+ * Creates a unique temporary directory for testing.
+ * The directory is created in the system's temp directory with a unique name.
+ */
+export async function createTempDir(prefix: string): Promise<string> {
+  const tempBaseDir = os.tmpdir()
+  const tempDirName = `${prefix}${randomUUID()}`
+  const tempDir = path.join(tempBaseDir, tempDirName)
+
+  await fs.mkdir(tempDir, { recursive: true })
+  return tempDir
+}
+
+/**
  * Mock the home directory for cross-platform testing.
  * Uses env rewiring for thread-safe test isolation.
  * On Unix: Sets HOME
@@ -74,16 +87,19 @@ export function mockHomeDir(homeDir: string): () => void {
 }
 
 /**
- * Creates a unique temporary directory for testing.
- * The directory is created in the system's temp directory with a unique name.
+ * Helper to run a callback with a temporary directory that's automatically cleaned up.
+ * Useful for tests that need a temp directory for the duration of a test case.
  */
-export async function createTempDir(prefix: string): Promise<string> {
-  const tempBaseDir = os.tmpdir()
-  const tempDirName = `${prefix}${randomUUID()}`
-  const tempDir = path.join(tempBaseDir, tempDirName)
-
-  await fs.mkdir(tempDir, { recursive: true })
-  return tempDir
+export async function runWithTempDir(
+  callback: (tempDir: string) => Promise<void>,
+  prefix = 'tmp',
+): Promise<void> {
+  const { cleanup, path: tempDir } = await withTempDir(prefix)
+  try {
+    await callback(tempDir)
+  } finally {
+    await cleanup()
+  }
 }
 
 /**
@@ -106,22 +122,6 @@ export async function withTempDir(prefix: string): Promise<{
   }
 
   return { cleanup, path: tempDir }
-}
-
-/**
- * Helper to run a callback with a temporary directory that's automatically cleaned up.
- * Useful for tests that need a temp directory for the duration of a test case.
- */
-export async function runWithTempDir(
-  callback: (tempDir: string) => Promise<void>,
-  prefix = 'tmp',
-): Promise<void> {
-  const { cleanup, path: tempDir } = await withTempDir(prefix)
-  try {
-    await callback(tempDir)
-  } finally {
-    await cleanup()
-  }
 }
 
 /**

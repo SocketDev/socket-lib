@@ -10,13 +10,6 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 const logger = getDefaultLogger()
 
 /**
- * Ensure directory exists.
- */
-export async function ensureDir(dir: string): Promise<void> {
-  await fs.mkdir(dir, { recursive: true })
-}
-
-/**
  * Copy local TypeScript declaration files only.
  * JavaScript files are either bundled by esbuild or manually vendored (handled separately).
  */
@@ -103,4 +96,11 @@ export async function copyScopedFiles(
   }
 
   return count
+}
+
+/**
+ * Ensure directory exists.
+ */
+export async function ensureDir(dir: string): Promise<void> {
+  await fs.mkdir(dir, { recursive: true })
 }

@@ -26,6 +26,33 @@ type PackageExports = Record<
 
 type Row = { subpath: string; file: string; summary: string }
 
+export function buildRows(exports: PackageExports): Row[] {
+  const rows: Row[] = []
+  for (const [subpath, value] of Object.entries(exports)) {
+    if (subpath === '.' || subpath === './index' || subpath.endsWith('.json')) {
+      continue
+    }
+    if (typeof value === 'string' || !value || !value.default) {
+      continue
+    }
+    const def = value.default
+    if (!def.startsWith('./dist/')) {
+      continue
+    }
+    const srcPath = def
+      .replace(/^\.\/dist\//, path.join(rootPath, 'src') + path.sep)
+      .replace(/\.js$/, '.ts')
+    const display = subpath.slice(2)
+    rows.push({
+      subpath: display,
+      file: path.relative(rootPath, srcPath).replaceAll(path.sep, '/'),
+      summary: extractSummary(srcPath),
+    })
+  }
+  rows.sort((a, b) => a.subpath.localeCompare(b.subpath))
+  return rows
+}
+
 export function extractSummary(srcPath: string): string {
   let content: string
   try {
@@ -59,33 +86,6 @@ export function extractSummary(srcPath: string): string {
     return trimmed.slice(0, dotIdx + 1)
   }
   return trimmed.length > 220 ? `${trimmed.slice(0, 217)}...` : trimmed
-}
-
-export function buildRows(exports: PackageExports): Row[] {
-  const rows: Row[] = []
-  for (const [subpath, value] of Object.entries(exports)) {
-    if (subpath === '.' || subpath === './index' || subpath.endsWith('.json')) {
-      continue
-    }
-    if (typeof value === 'string' || !value || !value.default) {
-      continue
-    }
-    const def = value.default
-    if (!def.startsWith('./dist/')) {
-      continue
-    }
-    const srcPath = def
-      .replace(/^\.\/dist\//, path.join(rootPath, 'src') + path.sep)
-      .replace(/\.js$/, '.ts')
-    const display = subpath.slice(2)
-    rows.push({
-      subpath: display,
-      file: path.relative(rootPath, srcPath).replaceAll(path.sep, '/'),
-      summary: extractSummary(srcPath),
-    })
-  }
-  rows.sort((a, b) => a.subpath.localeCompare(b.subpath))
-  return rows
 }
 
 export function groupRows(rows: Row[]): Map<string, Row[]> {

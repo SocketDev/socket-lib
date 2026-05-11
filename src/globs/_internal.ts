@@ -29,6 +29,14 @@ let _fs: typeof import('node:fs') | undefined
 let _fsPromises: typeof import('node:fs/promises') | undefined
 let _picomatch: typeof picomatchType | undefined
 
+/*@__NO_SIDE_EFFECTS__*/
+export function getFastGlob() {
+  if (_fastGlob === undefined) {
+    _fastGlob = /*@__PURE__*/ require('../external/fast-glob.js')
+  }
+  return _fastGlob!
+}
+
 /**
  * Lazily load the fs module to avoid Webpack errors.
  *
@@ -56,40 +64,11 @@ export function getFsPromises() {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-export function getFastGlob() {
-  if (_fastGlob === undefined) {
-    _fastGlob = /*@__PURE__*/ require('../external/fast-glob.js')
-  }
-  return _fastGlob!
-}
-
-/*@__NO_SIDE_EFFECTS__*/
 export function getPicomatch() {
   if (_picomatch === undefined) {
     _picomatch = /*@__PURE__*/ require('../external/picomatch.js')
   }
   return _picomatch!
-}
-
-/**
- * Strip a trailing `/` from a glob pattern so fast-glob's deep filter
- * matches it. See header comment in `glob.ts` for the full rationale —
- * shortest summary: a `dist/` ignore pattern lets fast-glob walk the
- * whole subtree before filtering, while `dist` (no slash) skips the
- * walk entirely.
- *
- * charCode 47 is `/`. Reading it that way avoids a per-call string
- * allocation for the literal — primordials-friendly, no behavior
- * change vs. `pattern.endsWith('/')`.
- */
-export function stripTrailingSlash(pattern: string): string {
-  if (
-    pattern.length > 1 &&
-    StringPrototypeCharCodeAt(pattern, pattern.length - 1) === 47 /*'/'*/
-  ) {
-    return pattern.slice(0, -1)
-  }
-  return pattern
 }
 
 /**
@@ -129,4 +108,25 @@ export function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
     normalized[i] = stripTrailingSlash(source[i]!)
   }
   return normalized
+}
+
+/**
+ * Strip a trailing `/` from a glob pattern so fast-glob's deep filter
+ * matches it. See header comment in `glob.ts` for the full rationale —
+ * shortest summary: a `dist/` ignore pattern lets fast-glob walk the
+ * whole subtree before filtering, while `dist` (no slash) skips the
+ * walk entirely.
+ *
+ * charCode 47 is `/`. Reading it that way avoids a per-call string
+ * allocation for the literal — primordials-friendly, no behavior
+ * change vs. `pattern.endsWith('/')`.
+ */
+export function stripTrailingSlash(pattern: string): string {
+  if (
+    pattern.length > 1 &&
+    StringPrototypeCharCodeAt(pattern, pattern.length - 1) === 47 /*'/'*/
+  ) {
+    return pattern.slice(0, -1)
+  }
+  return pattern
 }

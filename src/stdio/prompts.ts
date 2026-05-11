@@ -127,29 +127,6 @@ export function applyColor(text: string, color: ColorValue): string {
 }
 
 /**
- * Check if value is a Socket Theme object.
- * @param value - Value to check
- * @returns True if value is a Socket Theme
- */
-export function isSocketTheme(value: unknown): value is Theme {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'name' in value &&
-    'colors' in value
-  )
-}
-
-/**
- * Resolve theme name or object to Theme.
- * @param theme - Theme name or object
- * @returns Resolved Theme
- */
-export function resolveTheme(theme: Theme | ThemeName): Theme {
-  return typeof theme === 'string' ? (THEMES[theme] ?? THEMES.socket) : theme
-}
-
-/**
  * Convert Socket theme to @inquirer theme format.
  * Maps our theme colors to inquirer's style functions.
  * Handles theme names, Theme objects, and passes through @inquirer themes.
@@ -239,6 +216,29 @@ export function createSeparator(
   text?: string,
 ): InstanceType<typeof ActualSeparator> {
   return new ActualSeparator(text)
+}
+
+/**
+ * Check if value is a Socket Theme object.
+ * @param value - Value to check
+ * @returns True if value is a Socket Theme
+ */
+export function isSocketTheme(value: unknown): value is Theme {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'name' in value &&
+    'colors' in value
+  )
+}
+
+/**
+ * Resolve theme name or object to Theme.
+ * @param theme - Theme name or object
+ * @returns Resolved Theme
+ */
+export function resolveTheme(theme: Theme | ThemeName): Theme {
+  return typeof theme === 'string' ? (THEMES[theme] ?? THEMES.socket) : theme
 }
 
 /**

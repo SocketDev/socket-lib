@@ -34,46 +34,6 @@ const CONTROL_ESCAPES = new MapCtor<number, string>([
 // through the same branch.
 const OTHER_PUNCTUATORS = new SetCtor(',-=<>#&!%:;@~\'`"')
 
-// Additional whitespace / line terminator / surrogate code points the
-// spec requires escaping. We enumerate the ones that commonly appear in
-// string inputs; `String#codePointAt` iteration surfaces them as numbers.
-// Whitespace: TAB, VT, FF, SP, NBSP, ZWNBSP, plus Unicode Space_Separator.
-// LineTerminator: LF, CR, LS (U+2028), PS (U+2029).
-// Lone surrogates: U+D800..U+DFFF.
-export function isSpecHexEscapeCp(cp: number): boolean {
-  if (OTHER_PUNCTUATORS.has(StringFromCodePoint(cp))) {
-    return true
-  }
-  // LineTerminator.
-  if (cp === 0x0a || cp === 0x0d || cp === 0x2028 || cp === 0x2029) {
-    return true
-  }
-  // Whitespace subset (ASCII/common — matches WhiteSpace production).
-  if (
-    cp === 0x09 ||
-    cp === 0x0b ||
-    cp === 0x0c ||
-    cp === 0x20 ||
-    cp === 0xa0 ||
-    cp === 0xfeff
-  ) {
-    return true
-  }
-  // Lone surrogates.
-  if (cp >= 0xd800 && cp <= 0xdfff) {
-    return true
-  }
-  return false
-}
-
-export function hex2(n: number): string {
-  return NumberPrototypeToString(n, 16).padStart(2, '0')
-}
-
-export function hex4(n: number): string {
-  return NumberPrototypeToString(n, 16).padStart(4, '0')
-}
-
 export function escapeRegExpFallback(str: string): string {
   let out = ''
   // Iterate by code point (String iterator yields UTF-16-safe chars).
@@ -113,6 +73,46 @@ export function escapeRegExpFallback(str: string): string {
     isFirst = false
   }
   return out
+}
+
+export function hex2(n: number): string {
+  return NumberPrototypeToString(n, 16).padStart(2, '0')
+}
+
+export function hex4(n: number): string {
+  return NumberPrototypeToString(n, 16).padStart(4, '0')
+}
+
+// Additional whitespace / line terminator / surrogate code points the
+// spec requires escaping. We enumerate the ones that commonly appear in
+// string inputs; `String#codePointAt` iteration surfaces them as numbers.
+// Whitespace: TAB, VT, FF, SP, NBSP, ZWNBSP, plus Unicode Space_Separator.
+// LineTerminator: LF, CR, LS (U+2028), PS (U+2029).
+// Lone surrogates: U+D800..U+DFFF.
+export function isSpecHexEscapeCp(cp: number): boolean {
+  if (OTHER_PUNCTUATORS.has(StringFromCodePoint(cp))) {
+    return true
+  }
+  // LineTerminator.
+  if (cp === 0x0a || cp === 0x0d || cp === 0x2028 || cp === 0x2029) {
+    return true
+  }
+  // Whitespace subset (ASCII/common — matches WhiteSpace production).
+  if (
+    cp === 0x09 ||
+    cp === 0x0b ||
+    cp === 0x0c ||
+    cp === 0x20 ||
+    cp === 0xa0 ||
+    cp === 0xfeff
+  ) {
+    return true
+  }
+  // Lone surrogates.
+  if (cp >= 0xd800 && cp <= 0xdfff) {
+    return true
+  }
+  return false
 }
 
 /**

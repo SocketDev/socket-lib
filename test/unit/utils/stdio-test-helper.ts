@@ -67,6 +67,29 @@ export function setupStdioTest(
 }
 
 /**
+ * Returns a beforeEach/afterEach setup for stdio stream testing.
+ * Use this to eliminate repetitive setup code entirely.
+ */
+export function setupStdioTestSuite(stream: NodeJS.WriteStream & Writable) {
+  let context: StdioTestContext
+
+  beforeEach(() => {
+    context = setupStdioTest(stream)
+    // Clear call history to ensure tests start with clean slate
+    context.writeSpy.mockClear()
+    context.cursorToSpy?.mockClear()
+    context.clearLineSpy?.mockClear()
+    context.clearScreenDownSpy?.mockClear()
+  })
+
+  afterEach(() => {
+    teardownStdioTest(stream, context)
+  })
+
+  return () => context
+}
+
+/**
  * Tears down mocks and restores original properties.
  * Reduces ~20 lines of duplicate teardown code per test file.
  */
@@ -99,27 +122,4 @@ export function teardownStdioTest(
     value: context.originalRows,
     configurable: true,
   })
-}
-
-/**
- * Returns a beforeEach/afterEach setup for stdio stream testing.
- * Use this to eliminate repetitive setup code entirely.
- */
-export function setupStdioTestSuite(stream: NodeJS.WriteStream & Writable) {
-  let context: StdioTestContext
-
-  beforeEach(() => {
-    context = setupStdioTest(stream)
-    // Clear call history to ensure tests start with clean slate
-    context.writeSpy.mockClear()
-    context.cursorToSpy?.mockClear()
-    context.clearLineSpy?.mockClear()
-    context.clearScreenDownSpy?.mockClear()
-  })
-
-  afterEach(() => {
-    teardownStdioTest(stream, context)
-  })
-
-  return () => context
 }

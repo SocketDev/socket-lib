@@ -29,32 +29,6 @@ const { pluralize } = require('@socketsecurity/lib-stable/words')
 const logger = getDefaultLogger()
 
 /**
- * Get all .d.ts files recursively in a directory.
- */
-export function getDtsFilesRecursive(
-  dir: string,
-  files: string[] = [],
-): string[] {
-  try {
-    const entries = readdirSync(dir, { withFileTypes: true })
-
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name)
-
-      if (entry.isFile() && entry.name.endsWith('.d.ts')) {
-        files.push(fullPath)
-      } else if (entry.isDirectory()) {
-        getDtsFilesRecursive(fullPath, files)
-      }
-    }
-  } catch {
-    // Directory might not be accessible
-  }
-
-  return files
-}
-
-/**
  * Check if a .d.ts file uses proper module export patterns.
  */
 export function checkTypeDefinition(filePath) {
@@ -151,6 +125,32 @@ export function checkTypeDefinition(filePath) {
     issues,
     hasExport,
   }
+}
+
+/**
+ * Get all .d.ts files recursively in a directory.
+ */
+export function getDtsFilesRecursive(
+  dir: string,
+  files: string[] = [],
+): string[] {
+  try {
+    const entries = readdirSync(dir, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name)
+
+      if (entry.isFile() && entry.name.endsWith('.d.ts')) {
+        files.push(fullPath)
+      } else if (entry.isDirectory()) {
+        getDtsFilesRecursive(fullPath, files)
+      }
+    }
+  } catch {
+    // Directory might not be accessible
+  }
+
+  return files
 }
 
 async function main(): Promise<void> {

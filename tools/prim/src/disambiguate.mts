@@ -137,54 +137,6 @@ const CACHE_FILENAME = 'disambiguate.json'
 // a different verdict on the same snippet).
 const CACHE_SCHEMA_VERSION = 1
 
-export function cachePath(targetRoot) {
-  return path.join(targetRoot, '.prim-cache', CACHE_FILENAME)
-}
-
-export function loadCache(targetRoot) {
-  const filePath = cachePath(targetRoot)
-  if (!existsSync(filePath)) {
-    return { schema: CACHE_SCHEMA_VERSION, entries: {} }
-  }
-  try {
-    const data = JSON.parse(readFileSync(filePath, 'utf8'))
-    if (data?.schema !== CACHE_SCHEMA_VERSION) {
-      // Schema mismatch: treat as empty. Don't delete — the operator
-      // may want to inspect the previous shape before we overwrite.
-      return { schema: CACHE_SCHEMA_VERSION, entries: {} }
-    }
-    return data
-  } catch {
-    return { schema: CACHE_SCHEMA_VERSION, entries: {} }
-  }
-}
-
-export function saveCache(targetRoot, cache) {
-  const filePath = cachePath(targetRoot)
-  mkdirSync(path.dirname(filePath), { recursive: true })
-  writeFileSync(filePath, JSON.stringify(cache, null, 2) + '\n')
-}
-
-/**
- * Hash the inputs that determine the verdict. Two snippets with the
- * same hash will get the same verdict (and re-using the cached one
- * is correct). Includes the method name + the surrounding source
- * + the receiver identifier so an unrelated edit elsewhere in the
- * file doesn't invalidate the cache.
- */
-export function computeKey(methodName, receiverName, snippet) {
-  const hash = createHash('sha256')
-  hash.update('v1\n')
-  hash.update(methodName)
-  hash.update('\n')
-  hash.update(receiverName)
-  hash.update('\n')
-  hash.update(snippet)
-  return hash.digest('hex')
-}
-
-// ─── Prompt ──────────────────────────────────────────────────────────
-
 /**
  * Build the disambiguation prompt. The model is allowed to read
  * files in the target repo (via Read/Grep/Glob), but the prompt is
@@ -255,48 +207,46 @@ Examples:
 }
 
 /**
- * Parse the model's response to extract the verdict and reason.
- * Tolerates surrounding chatter — looks for the literal `VERDICT:`
- * and `REASON:` keys.
+ * Build a source snippet around (line, column). Used by audit/codemod
+ * to gather the context Claude needs.
+ *
+ * @param {string} src             Full source text.
+ * @param {number[]} lineStarts    Start-of-line offsets (1-indexed view).
+ * @param {number} line            1-based.
+ * @param {number} contextLines    Lines before+after to include.
+ * @returns {string}
  */
-export function parseResponse(text, candidates) {
-  const verdictMatch = /^\s*VERDICT:\s*([A-Za-z]+)/m.exec(text)
-  const reasonMatch = /^\s*REASON:\s*(.+?)$/m.exec(text)
-  if (!verdictMatch) {
-    return { type: undefined, reason: 'no-verdict-line' }
-  }
-  const raw = verdictMatch[1]
-  const reason = reasonMatch ? reasonMatch[1].trim() : '(no reason supplied)'
-  if (raw === 'Other' || raw === 'Unsure') {
-    return { type: undefined, reason }
-  }
-  if (candidates.includes(raw)) {
-    return { type: raw, reason }
-  }
-  return {
-    type: undefined,
-    reason: `unexpected verdict "${raw}" (expected one of ${candidates.join(', ')}, "Other", "Unsure")`,
-  }
+export function buildSnippet(src, lineStarts, line, contextLines = 8) {
+  const startLine = Math.max(1, line - contextLines)
+  const endLine = Math.min(lineStarts.length, line + contextLines)
+  const startOffset = lineStarts[startLine - 1] ?? 0
+  const endOffset =
+    endLine < lineStarts.length
+      ? (lineStarts[endLine] ?? src.length) - 1
+      : src.length
+  return src.slice(startOffset, endOffset)
 }
 
-// ─── Public API ──────────────────────────────────────────────────────
+export function cachePath(targetRoot) {
+  return path.join(targetRoot, '.prim-cache', CACHE_FILENAME)
+}
 
 /**
- * Lazily load the SDK only when a real call is needed. Keeps the
- * audit lightweight when AI defer is off (no install, no import).
+ * Hash the inputs that determine the verdict. Two snippets with the
+ * same hash will get the same verdict (and re-using the cached one
+ * is correct). Includes the method name + the surrounding source
+ * + the receiver identifier so an unrelated edit elsewhere in the
+ * file doesn't invalidate the cache.
  */
-export async function loadSdk() {
-  // The SDK is an optional peer; require it dynamically so the
-  // audit/codemod don't pay the import cost when AI defer is off.
-  // eslint-disable-next-line no-unsanitized/method
-  // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- optional peer SDK; load on demand to avoid forcing the install.
-  const mod = await import('@anthropic-ai/claude-agent-sdk')
-  if (typeof mod.query !== 'function') {
-    throw new Error(
-      '@anthropic-ai/claude-agent-sdk is installed but does not export `query`. Expected SDK ≥ 0.2.0.',
-    )
-  }
-  return mod.query
+export function computeKey(methodName, receiverName, snippet) {
+  const hash = createHash('sha256')
+  hash.update('v1\n')
+  hash.update(methodName)
+  hash.update('\n')
+  hash.update(receiverName)
+  hash.update('\n')
+  hash.update(snippet)
+  return hash.digest('hex')
 }
 
 /**
@@ -449,23 +399,69 @@ export async function disambiguateReceiver({
   }
 }
 
+export function loadCache(targetRoot) {
+  const filePath = cachePath(targetRoot)
+  if (!existsSync(filePath)) {
+    return { schema: CACHE_SCHEMA_VERSION, entries: {} }
+  }
+  try {
+    const data = JSON.parse(readFileSync(filePath, 'utf8'))
+    if (data?.schema !== CACHE_SCHEMA_VERSION) {
+      // Schema mismatch: treat as empty. Don't delete — the operator
+      // may want to inspect the previous shape before we overwrite.
+      return { schema: CACHE_SCHEMA_VERSION, entries: {} }
+    }
+    return data
+  } catch {
+    return { schema: CACHE_SCHEMA_VERSION, entries: {} }
+  }
+}
+
 /**
- * Build a source snippet around (line, column). Used by audit/codemod
- * to gather the context Claude needs.
- *
- * @param {string} src             Full source text.
- * @param {number[]} lineStarts    Start-of-line offsets (1-indexed view).
- * @param {number} line            1-based.
- * @param {number} contextLines    Lines before+after to include.
- * @returns {string}
+ * Lazily load the SDK only when a real call is needed. Keeps the
+ * audit lightweight when AI defer is off (no install, no import).
  */
-export function buildSnippet(src, lineStarts, line, contextLines = 8) {
-  const startLine = Math.max(1, line - contextLines)
-  const endLine = Math.min(lineStarts.length, line + contextLines)
-  const startOffset = lineStarts[startLine - 1] ?? 0
-  const endOffset =
-    endLine < lineStarts.length
-      ? (lineStarts[endLine] ?? src.length) - 1
-      : src.length
-  return src.slice(startOffset, endOffset)
+export async function loadSdk() {
+  // The SDK is an optional peer; require it dynamically so the
+  // audit/codemod don't pay the import cost when AI defer is off.
+  // eslint-disable-next-line no-unsanitized/method
+  // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- optional peer SDK; load on demand to avoid forcing the install.
+  const mod = await import('@anthropic-ai/claude-agent-sdk')
+  if (typeof mod.query !== 'function') {
+    throw new Error(
+      '@anthropic-ai/claude-agent-sdk is installed but does not export `query`. Expected SDK ≥ 0.2.0.',
+    )
+  }
+  return mod.query
+}
+
+/**
+ * Parse the model's response to extract the verdict and reason.
+ * Tolerates surrounding chatter — looks for the literal `VERDICT:`
+ * and `REASON:` keys.
+ */
+export function parseResponse(text, candidates) {
+  const verdictMatch = /^\s*VERDICT:\s*([A-Za-z]+)/m.exec(text)
+  const reasonMatch = /^\s*REASON:\s*(.+?)$/m.exec(text)
+  if (!verdictMatch) {
+    return { type: undefined, reason: 'no-verdict-line' }
+  }
+  const raw = verdictMatch[1]
+  const reason = reasonMatch ? reasonMatch[1].trim() : '(no reason supplied)'
+  if (raw === 'Other' || raw === 'Unsure') {
+    return { type: undefined, reason }
+  }
+  if (candidates.includes(raw)) {
+    return { type: raw, reason }
+  }
+  return {
+    type: undefined,
+    reason: `unexpected verdict "${raw}" (expected one of ${candidates.join(', ')}, "Other", "Unsure")`,
+  }
+}
+
+export function saveCache(targetRoot, cache) {
+  const filePath = cachePath(targetRoot)
+  mkdirSync(path.dirname(filePath), { recursive: true })
+  writeFileSync(filePath, JSON.stringify(cache, null, 2) + '\n')
 }

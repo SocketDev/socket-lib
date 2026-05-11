@@ -33,6 +33,57 @@ const SLSA_PROVENANCE_V1_0 = 'https://slsa.dev/provenance/v1'
 let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
 
 /**
+ * Fetch package provenance information from npm registry.
+ *
+ * @example
+ * ```typescript
+ * const provenance = await fetchPackageProvenance('lodash', '4.17.21')
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export async function fetchPackageProvenance(
+  pkgName: string,
+  pkgVersion: string,
+  options?: ProvenanceOptions,
+): Promise<unknown> {
+  const { signal, timeout = 10_000 } = {
+    __proto__: null,
+    ...options,
+  } as ProvenanceOptions
+
+  if (signal?.aborted) {
+    return undefined
+  }
+
+  // Create composite signal combining external signal with timeout
+  const timeoutSignal = createTimeoutSignal(timeout)
+  const compositeSignal = createCompositeAbortSignal(signal, timeoutSignal)
+  const fetcher = getFetcher()
+
+  try {
+    const response = await fetcher(
+      // The npm registry attestations API endpoint.
+      `${NPM_REGISTRY_URL}/-/npm/v1/attestations/${encodeURIComponent(pkgName)}@${encodeURIComponent(pkgVersion)}`,
+      {
+        method: 'GET',
+        signal: compositeSignal,
+        headers: {
+          'User-Agent': 'socket-registry',
+        },
+      } as {
+        method: string
+        signal: AbortSignal
+        headers: Record<string, string>
+      },
+    )
+    if (response.ok) {
+      return getProvenanceDetails(await response.json())
+    }
+  } catch {}
+  return undefined
+}
+
+/**
  * Find the first attestation with valid provenance data.
  */
 export function findProvenance(attestations: unknown[]): unknown {
@@ -111,104 +162,6 @@ export function getFetcher() {
 }
 
 /**
- * Check if a value indicates a trusted publisher (GitHub or GitLab).
- */
-export function isTrustedPublisher(value: unknown): boolean {
-  if (typeof value !== 'string' || !value) {
-    return false
-  }
-
-  let url = parseUrl(value)
-  let hostname = url?.hostname
-
-  // Handle GitHub workflow refs with @ syntax by trying the first part.
-  // Example: "https://github.com/owner/repo/.github/workflows/ci.yml@refs/heads/main"
-  if (!url && StringPrototypeIncludes(value, '@')) {
-    const firstPart = StringPrototypeSplit(value, '@')[0]
-    if (firstPart) {
-      url = parseUrl(firstPart)
-    }
-    if (url) {
-      hostname = url.hostname
-    }
-  }
-
-  // Try common URL prefixes if not already a complete URL.
-  if (!url) {
-    const httpsUrl = parseUrl(`https://${value}`)
-    if (httpsUrl) {
-      hostname = httpsUrl.hostname
-    }
-  }
-
-  if (hostname) {
-    return (
-      hostname === 'github.com' ||
-      StringPrototypeEndsWith(hostname, '.github.com') ||
-      hostname === 'gitlab.com' ||
-      StringPrototypeEndsWith(hostname, '.gitlab.com')
-    )
-  }
-
-  // Fallback: check for provider keywords in non-URL strings.
-  return (
-    StringPrototypeIncludes(value, 'github') ||
-    StringPrototypeIncludes(value, 'gitlab')
-  )
-}
-
-/**
- * Fetch package provenance information from npm registry.
- *
- * @example
- * ```typescript
- * const provenance = await fetchPackageProvenance('lodash', '4.17.21')
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export async function fetchPackageProvenance(
-  pkgName: string,
-  pkgVersion: string,
-  options?: ProvenanceOptions,
-): Promise<unknown> {
-  const { signal, timeout = 10_000 } = {
-    __proto__: null,
-    ...options,
-  } as ProvenanceOptions
-
-  if (signal?.aborted) {
-    return undefined
-  }
-
-  // Create composite signal combining external signal with timeout
-  const timeoutSignal = createTimeoutSignal(timeout)
-  const compositeSignal = createCompositeAbortSignal(signal, timeoutSignal)
-  const fetcher = getFetcher()
-
-  try {
-    const response = await fetcher(
-      // The npm registry attestations API endpoint.
-      `${NPM_REGISTRY_URL}/-/npm/v1/attestations/${encodeURIComponent(pkgName)}@${encodeURIComponent(pkgVersion)}`,
-      {
-        method: 'GET',
-        signal: compositeSignal,
-        headers: {
-          'User-Agent': 'socket-registry',
-        },
-      } as {
-        method: string
-        signal: AbortSignal
-        headers: Record<string, string>
-      },
-    )
-    if (response.ok) {
-      return getProvenanceDetails(await response.json())
-    }
-  } catch {}
-  return undefined
-}
-
-/**
  * Convert raw attestation data to user-friendly provenance details.
  *
  * @example
@@ -275,4 +228,51 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
     workflowPlatform,
     workflowRunId,
   }
+}
+
+/**
+ * Check if a value indicates a trusted publisher (GitHub or GitLab).
+ */
+export function isTrustedPublisher(value: unknown): boolean {
+  if (typeof value !== 'string' || !value) {
+    return false
+  }
+
+  let url = parseUrl(value)
+  let hostname = url?.hostname
+
+  // Handle GitHub workflow refs with @ syntax by trying the first part.
+  // Example: "https://github.com/owner/repo/.github/workflows/ci.yml@refs/heads/main"
+  if (!url && StringPrototypeIncludes(value, '@')) {
+    const firstPart = StringPrototypeSplit(value, '@')[0]
+    if (firstPart) {
+      url = parseUrl(firstPart)
+    }
+    if (url) {
+      hostname = url.hostname
+    }
+  }
+
+  // Try common URL prefixes if not already a complete URL.
+  if (!url) {
+    const httpsUrl = parseUrl(`https://${value}`)
+    if (httpsUrl) {
+      hostname = httpsUrl.hostname
+    }
+  }
+
+  if (hostname) {
+    return (
+      hostname === 'github.com' ||
+      StringPrototypeEndsWith(hostname, '.github.com') ||
+      hostname === 'gitlab.com' ||
+      StringPrototypeEndsWith(hostname, '.gitlab.com')
+    )
+  }
+
+  // Fallback: check for provider keywords in non-URL strings.
+  return (
+    StringPrototypeIncludes(value, 'github') ||
+    StringPrototypeIncludes(value, 'gitlab')
+  )
 }

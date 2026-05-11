@@ -112,24 +112,6 @@ const ARCH_MAP = {
 let _fs: typeof import('node:fs') | undefined
 
 /**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/* c8 ignore start - Only called from Linux-only detectLibc body. */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-/* c8 ignore stop */
-
-/**
  * Detect the libc variant (musl or glibc) on Linux systems.
  * Returns undefined for non-Linux platforms.
  *
@@ -391,6 +373,24 @@ export function getBinaryName(
 ): string {
   return platform === 'win32' ? `${binaryBaseName}.exe` : binaryBaseName
 }
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/* c8 ignore start - Only called from Linux-only detectLibc body. */
+/*@__NO_SIDE_EFFECTS__*/
+export function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+/* c8 ignore stop */
 
 /**
  * Get platform-arch identifier for directory structure and asset names.

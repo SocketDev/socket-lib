@@ -24,6 +24,29 @@ let _AdmZip: typeof AdmZipType | undefined
 let _tarFs: typeof tarFsType | undefined
 let _path: typeof import('node:path') | undefined
 
+/**
+ * Assert that an archive file exists on disk before handing it to the
+ * underlying extractor. Normalizes the "missing archive" surface across
+ * all three extractors (zip/tar/tar.gz): each now throws a Node-style
+ * `ENOENT` error with the archive path. Without this preflight, `zip`
+ * goes through adm-zip and surfaces as `"Invalid filename"`, while
+ * `tar`/`tar.gz` surface the raw Node `ENOENT` — inconsistent, and
+ * adm-zip's message didn't include the path.
+ *
+ * @throws Error with `code: 'ENOENT'` if archivePath doesn't exist.
+ * @private
+ */
+export function assertArchiveExists(archivePath: string): void {
+  if (!existsSync(archivePath)) {
+    const err = new ErrorCtor(
+      `ENOENT: no such file or directory, open '${archivePath}'`,
+    ) as Error & { code: string; path: string }
+    err.code = 'ENOENT'
+    err.path = archivePath
+    throw err
+  }
+}
+
 /*@__NO_SIDE_EFFECTS__*/
 export function getAdmZip() {
   if (_AdmZip === undefined) {
@@ -81,28 +104,5 @@ export function validatePathWithinBase(
     throw new ErrorCtor(
       `Path traversal attempt detected: entry "${entryName}" would extract to "${resolvedTarget}" outside target directory "${resolvedBase}"`,
     )
-  }
-}
-
-/**
- * Assert that an archive file exists on disk before handing it to the
- * underlying extractor. Normalizes the "missing archive" surface across
- * all three extractors (zip/tar/tar.gz): each now throws a Node-style
- * `ENOENT` error with the archive path. Without this preflight, `zip`
- * goes through adm-zip and surfaces as `"Invalid filename"`, while
- * `tar`/`tar.gz` surface the raw Node `ENOENT` — inconsistent, and
- * adm-zip's message didn't include the path.
- *
- * @throws Error with `code: 'ENOENT'` if archivePath doesn't exist.
- * @private
- */
-export function assertArchiveExists(archivePath: string): void {
-  if (!existsSync(archivePath)) {
-    const err = new ErrorCtor(
-      `ENOENT: no such file or directory, open '${archivePath}'`,
-    ) as Error & { code: string; path: string }
-    err.code = 'ENOENT'
-    err.path = archivePath
-    throw err
   }
 }

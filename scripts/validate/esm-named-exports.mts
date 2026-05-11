@@ -23,25 +23,6 @@ const { pluralize } = require('@socketsecurity/lib-stable/words')
 const logger = getDefaultLogger()
 
 /**
- * Get all .js files in a directory recursively.
- */
-export function getJsFiles(dir, files = []) {
-  const entries = readdirSync(dir, { withFileTypes: true })
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name)
-
-    if (entry.isDirectory()) {
-      getJsFiles(fullPath, files)
-    } else if (entry.isFile() && entry.name.endsWith('.js')) {
-      files.push(fullPath)
-    }
-  }
-
-  return files
-}
-
-/**
  * Check if a module exports named exports in an ESM-compatible way.
  * Good: module.exports = { foo, bar, baz }
  * Bad: module.exports = value or module.exports.default = value
@@ -157,6 +138,25 @@ export function checkEsmNamedExports(filePath) {
       reason: `Failed to analyze: ${e.message}`,
     }
   }
+}
+
+/**
+ * Get all .js files in a directory recursively.
+ */
+export function getJsFiles(dir, files = []) {
+  const entries = readdirSync(dir, { withFileTypes: true })
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+
+    if (entry.isDirectory()) {
+      getJsFiles(fullPath, files)
+    } else if (entry.isFile() && entry.name.endsWith('.js')) {
+      files.push(fullPath)
+    }
+  }
+
+  return files
 }
 
 async function main(): Promise<void> {

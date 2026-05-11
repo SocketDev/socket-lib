@@ -12,14 +12,6 @@
 
 const SET_NAMES = new Set(['SafeSet', 'Set'])
 
-export function isSortableElement(node) {
-  return (
-    node !== null &&
-    node.type === 'Literal' &&
-    (typeof node.value === 'string' || typeof node.value === 'number')
-  )
-}
-
 export function compareSortable(a, b) {
   const aVal = String(a.value)
   const bVal = String(b.value)
@@ -30,6 +22,14 @@ export function compareSortable(a, b) {
     return 1
   }
   return 0
+}
+
+export function isSortableElement(node) {
+  return (
+    node !== null &&
+    node.type === 'Literal' &&
+    (typeof node.value === 'string' || typeof node.value === 'number')
+  )
 }
 
 /** @type {import('eslint').Rule.RuleModule} */

@@ -19,6 +19,26 @@ const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.resolve(__dirname, '..', '..', 'dist')
 
+export async function fixConstantExports() {
+  const verbose = process.argv.includes('--verbose')
+  const quiet = isQuiet()
+
+  try {
+    const fixedCount = await processDirectory(distDir, verbose)
+
+    if (!quiet) {
+      const title =
+        fixedCount > 0
+          ? `CommonJS Exports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
+          : 'CommonJS Exports (no changes)'
+      logger.success(title)
+    }
+  } catch (e) {
+    logger.error(`Failed to fix CommonJS exports: ${e.message}`)
+    process.exitCode = 1
+  }
+}
+
 /**
  * Process files in a directory and fix CommonJS exports.
  * Handles files with `export default` by transforming __toCommonJS patterns.
@@ -217,26 +237,6 @@ export async function processDirectory(
   }
 
   return fixedCount
-}
-
-export async function fixConstantExports() {
-  const verbose = process.argv.includes('--verbose')
-  const quiet = isQuiet()
-
-  try {
-    const fixedCount = await processDirectory(distDir, verbose)
-
-    if (!quiet) {
-      const title =
-        fixedCount > 0
-          ? `CommonJS Exports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
-          : 'CommonJS Exports (no changes)'
-      logger.success(title)
-    }
-  } catch (e) {
-    logger.error(`Failed to fix CommonJS exports: ${e.message}`)
-    process.exitCode = 1
-  }
 }
 
 fixConstantExports().catch(error => {

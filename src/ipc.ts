@@ -116,18 +116,6 @@ export function getFs() {
 }
 
 /**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
-/**
  * Get the IPC stub path for a given application.
  *
  * Generates a unique file path for IPC stub files that are used to pass
@@ -159,6 +147,18 @@ export function getIpcStubPath(appName: string): string {
   const path = getPath()
   const stubDir = path.join(tempDir, '.socket-ipc', appName)
   return path.join(stubDir, `stub-${process.pid}.json`)
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }
 
 /**

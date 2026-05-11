@@ -74,43 +74,6 @@ const TEXT_EXTENSIONS = new Set([
 ])
 
 /**
- * Check if file should be scanned.
- */
-export function shouldScanFile(filename) {
-  const ext = path.extname(filename).toLowerCase()
-  return TEXT_EXTENSIONS.has(ext)
-}
-
-/**
- * Recursively find all text files to scan.
- */
-export async function findTextFiles(dir, files = []) {
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
-
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name)
-
-      if (entry.isDirectory()) {
-        // Skip certain directories and hidden directories (except .github)
-        if (
-          !SKIP_DIRS.has(entry.name) &&
-          (!entry.name.startsWith('.') || entry.name === '.github')
-        ) {
-          await findTextFiles(fullPath, files)
-        }
-      } else if (entry.isFile() && shouldScanFile(entry.name)) {
-        files.push(fullPath)
-      }
-    }
-  } catch {
-    // Skip directories we can't read
-  }
-
-  return files
-}
-
-/**
  * Check file contents for CDN references.
  */
 export async function checkFileForCdnRefs(filePath) {
@@ -155,6 +118,43 @@ export async function checkFileForCdnRefs(filePath) {
     // For other errors, try to continue
     return []
   }
+}
+
+/**
+ * Recursively find all text files to scan.
+ */
+export async function findTextFiles(dir, files = []) {
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name)
+
+      if (entry.isDirectory()) {
+        // Skip certain directories and hidden directories (except .github)
+        if (
+          !SKIP_DIRS.has(entry.name) &&
+          (!entry.name.startsWith('.') || entry.name === '.github')
+        ) {
+          await findTextFiles(fullPath, files)
+        }
+      } else if (entry.isFile() && shouldScanFile(entry.name)) {
+        files.push(fullPath)
+      }
+    }
+  } catch {
+    // Skip directories we can't read
+  }
+
+  return files
+}
+
+/**
+ * Check if file should be scanned.
+ */
+export function shouldScanFile(filename) {
+  const ext = path.extname(filename).toLowerCase()
+  return TEXT_EXTENSIONS.has(ext)
 }
 
 /**

@@ -6,20 +6,6 @@ import { getSocketDlxDir } from '../paths/socket'
 import { StringPrototypeStartsWith } from '../primordials/string'
 let _path: typeof import('node:path') | undefined
 /**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path!
-}
-
-/**
  * Get the installed package directory within DLX node_modules.
  *
  * @example
@@ -73,6 +59,20 @@ export function getDlxPackageJsonPath(packageName: string): string {
 export function getDlxPackageNodeModulesDir(packageName: string): string {
   const path = getPath()
   return normalizePath(path.join(getDlxPackageDir(packageName), 'node_modules'))
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path!
 }
 
 /**

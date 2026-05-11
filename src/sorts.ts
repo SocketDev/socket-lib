@@ -17,20 +17,6 @@ let _naturalCompare: ((x: string, y: string) => number) | undefined
 let _naturalSorter: FastSortFunction | undefined
 let _semver: typeof semverType | undefined
 
-export function getFastSort() {
-  if (_fastSort === undefined) {
-    _fastSort = require('./external/fast-sort.js')
-  }
-  return _fastSort!
-}
-
-export function getSemver() {
-  if (_semver === undefined) {
-    _semver = require('./external/semver.js')
-  }
-  return _semver!
-}
-
 /**
  * Compare semantic versions.
  *
@@ -76,6 +62,20 @@ export function compareSemver(a: string, b: string): number {
 /*@__NO_SIDE_EFFECTS__*/
 export function compareStr(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
+}
+
+export function getFastSort() {
+  if (_fastSort === undefined) {
+    _fastSort = require('./external/fast-sort.js')
+  }
+  return _fastSort!
+}
+
+export function getSemver() {
+  if (_semver === undefined) {
+    _semver = require('./external/semver.js')
+  }
+  return _semver!
 }
 
 /**

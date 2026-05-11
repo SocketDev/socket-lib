@@ -48,162 +48,6 @@ interface ReleaseRow {
 }
 
 /**
- * Fetch the latest 100 releases for a repo via REST.
- *
- * Why this returns `[]` on TWO different cases:
- *   - HTTP 200 + zero-byte body. This is the documented GitHub
- *     "search degraded" incident shape (see status.github.com).
- *     The releases listing endpoint shares an Elasticsearch index
- *     with search; when that ES is degraded, `/releases` returns
- *     a successful 200 OK but with NO BODY. There's no error code,
- *     no Retry-After, no rate-limit header — just an empty payload.
- *   - HTTP 200 + literal `[]`. This is the *normal* "the repo has
- *     no releases" response — say a brand-new repo with no
- *     published versions.
- *
- *   Both produce the same `[]` here because the helper can't tell
- *   them apart without context. The CALLER (getLatestRelease) does
- *   the cross-check: if REST returns `[]`, query GraphQL once. If
- *   GraphQL also returns `[]`, the repo really is empty. If it
- *   returns >0, REST was lying and we use GraphQL's answer.
- *
- * Why we throw on non-OK status:
- *   `pRetry` wraps this call and retries on thrown errors with
- *   exponential backoff. A 5xx is transient and worth retrying;
- *   we want it to throw so pRetry can do its job. Empty body is
- *   NOT thrown because pRetry can't help — a 200 OK is "done" as
- *   far as retry policy is concerned.
- */
-export async function fetchReleasesViaRest(
-  owner: string,
-  repo: string,
-): Promise<ReleaseRow[]> {
-  const response = await httpRequest(
-    `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
-    { headers: getAuthHeaders() },
-  )
-  if (!response.ok) {
-    throw new ErrorCtor(
-      `Failed to fetch ${owner}/${repo} releases: ${response.status}`,
-    )
-  }
-  const text = response.body.toString('utf8')
-  if (text.length === 0) {
-    // 200 OK + empty body — the documented GitHub-search-degraded
-    // signature. Return [] so the caller can decide whether to fall
-    // back rather than throwing (we don't want pRetry to burn
-    // attempts on a known incident shape).
-    return []
-  }
-  let parsed: unknown
-  try {
-    parsed = JSONParse(text)
-  } catch (cause) {
-    throw new ErrorCtor(`Failed to parse ${owner}/${repo} releases response`, {
-      cause,
-    })
-  }
-  // Empty-array fallback fires only if GraphQL returns non-array body.
-  /* c8 ignore start */
-  return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
-  /* c8 ignore stop */
-}
-
-/**
- * Fetch the latest 100 releases for a repo via GraphQL.
- *
- * Why this exists:
- *   `fetchReleasesViaRest` can return `[]` for two reasons (real
- *   empty repo vs. GitHub-incident-degraded backend). When REST
- *   returns nothing, the caller in `getLatestRelease` calls THIS
- *   to disambiguate — if we return >0 here, REST was lying.
- *
- * Field shape diffs we normalize:
- *   GraphQL returns       REST equivalent      Why they differ
- *   `tagName`             `tag_name`           camelCase vs. snake_case
- *   `publishedAt`         `published_at`       camelCase vs. snake_case
- *   `releaseAssets.nodes` `assets`             GraphQL connection
- *                                              wrapper unwrapped
- *
- *   We re-shape inside the `.map(...)` at the bottom so callers
- *   downstream can use the SAME code path regardless of which
- *   transport ran.
- *
- * Why we hit a different backend:
- *   GraphQL queries don't go through the same Elasticsearch index
- *   that REST listings rely on. During incidents that drop the ES
- *   index (or its connectivity), GraphQL's `repository.releases`
- *   connection keeps working because it reads from a different
- *   data path inside GitHub. That's the entire reason this
- *   fallback exists.
- */
-export async function fetchReleasesViaGraphQL(
-  owner: string,
-  repo: string,
-): Promise<ReleaseRow[]> {
-  const response = await httpRequest('https://api.github.com/graphql', {
-    body: JSONStringify({
-      query: `query($owner: String!, $repo: String!) {
-        repository(owner: $owner, name: $repo) {
-          releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
-            nodes {
-              tagName
-              publishedAt
-              releaseAssets(first: 100) { nodes { name } }
-            }
-          }
-        }
-      }`,
-      variables: { owner, repo },
-    }),
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    method: 'POST',
-  })
-  if (!response.ok) {
-    throw new ErrorCtor(
-      `Failed to fetch ${owner}/${repo} releases (GraphQL): ${response.status}`,
-    )
-  }
-  let parsed: {
-    data?: {
-      repository?: {
-        releases?: {
-          nodes?: Array<{
-            tagName: string
-            publishedAt: string
-            releaseAssets?: { nodes?: Array<{ name: string }> }
-          }>
-        }
-      }
-    }
-    errors?: Array<{ message: string }>
-  }
-  try {
-    parsed = JSONParse(response.body.toString('utf8'))
-  } catch (cause) {
-    throw new ErrorCtor(
-      `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
-      { cause },
-    )
-  }
-  // errors-array arm fires only when GraphQL returns errors;
-  // empty-array fallbacks for missing repository/releases/nodes/
-  // releaseAssets are defensive against minimal API responses.
-  /* c8 ignore start */
-  if (parsed.errors?.length) {
-    throw new ErrorCtor(
-      `GraphQL repository.releases(${owner}/${repo}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
-    )
-  }
-  return (parsed.data?.repository?.releases?.nodes ?? []).map(n => ({
-    tag_name: n.tagName,
-    published_at: n.publishedAt,
-    assets: n.releaseAssets?.nodes ?? [],
-  }))
-  /* c8 ignore stop */
-}
-
-/**
  * Fetch the assets of a single release identified by tag via GraphQL.
  *
  * Why this exists:
@@ -302,6 +146,162 @@ export async function fetchReleaseAssetsViaGraphQL(
     browser_download_url: n.downloadUrl,
     name: n.name,
   }))
+  /* c8 ignore stop */
+}
+
+/**
+ * Fetch the latest 100 releases for a repo via GraphQL.
+ *
+ * Why this exists:
+ *   `fetchReleasesViaRest` can return `[]` for two reasons (real
+ *   empty repo vs. GitHub-incident-degraded backend). When REST
+ *   returns nothing, the caller in `getLatestRelease` calls THIS
+ *   to disambiguate — if we return >0 here, REST was lying.
+ *
+ * Field shape diffs we normalize:
+ *   GraphQL returns       REST equivalent      Why they differ
+ *   `tagName`             `tag_name`           camelCase vs. snake_case
+ *   `publishedAt`         `published_at`       camelCase vs. snake_case
+ *   `releaseAssets.nodes` `assets`             GraphQL connection
+ *                                              wrapper unwrapped
+ *
+ *   We re-shape inside the `.map(...)` at the bottom so callers
+ *   downstream can use the SAME code path regardless of which
+ *   transport ran.
+ *
+ * Why we hit a different backend:
+ *   GraphQL queries don't go through the same Elasticsearch index
+ *   that REST listings rely on. During incidents that drop the ES
+ *   index (or its connectivity), GraphQL's `repository.releases`
+ *   connection keeps working because it reads from a different
+ *   data path inside GitHub. That's the entire reason this
+ *   fallback exists.
+ */
+export async function fetchReleasesViaGraphQL(
+  owner: string,
+  repo: string,
+): Promise<ReleaseRow[]> {
+  const response = await httpRequest('https://api.github.com/graphql', {
+    body: JSONStringify({
+      query: `query($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+            nodes {
+              tagName
+              publishedAt
+              releaseAssets(first: 100) { nodes { name } }
+            }
+          }
+        }
+      }`,
+      variables: { owner, repo },
+    }),
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    method: 'POST',
+  })
+  if (!response.ok) {
+    throw new ErrorCtor(
+      `Failed to fetch ${owner}/${repo} releases (GraphQL): ${response.status}`,
+    )
+  }
+  let parsed: {
+    data?: {
+      repository?: {
+        releases?: {
+          nodes?: Array<{
+            tagName: string
+            publishedAt: string
+            releaseAssets?: { nodes?: Array<{ name: string }> }
+          }>
+        }
+      }
+    }
+    errors?: Array<{ message: string }>
+  }
+  try {
+    parsed = JSONParse(response.body.toString('utf8'))
+  } catch (cause) {
+    throw new ErrorCtor(
+      `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
+      { cause },
+    )
+  }
+  // errors-array arm fires only when GraphQL returns errors;
+  // empty-array fallbacks for missing repository/releases/nodes/
+  // releaseAssets are defensive against minimal API responses.
+  /* c8 ignore start */
+  if (parsed.errors?.length) {
+    throw new ErrorCtor(
+      `GraphQL repository.releases(${owner}/${repo}) returned errors: ${parsed.errors.map(e => e.message).join('; ')}`,
+    )
+  }
+  return (parsed.data?.repository?.releases?.nodes ?? []).map(n => ({
+    tag_name: n.tagName,
+    published_at: n.publishedAt,
+    assets: n.releaseAssets?.nodes ?? [],
+  }))
+  /* c8 ignore stop */
+}
+
+/**
+ * Fetch the latest 100 releases for a repo via REST.
+ *
+ * Why this returns `[]` on TWO different cases:
+ *   - HTTP 200 + zero-byte body. This is the documented GitHub
+ *     "search degraded" incident shape (see status.github.com).
+ *     The releases listing endpoint shares an Elasticsearch index
+ *     with search; when that ES is degraded, `/releases` returns
+ *     a successful 200 OK but with NO BODY. There's no error code,
+ *     no Retry-After, no rate-limit header — just an empty payload.
+ *   - HTTP 200 + literal `[]`. This is the *normal* "the repo has
+ *     no releases" response — say a brand-new repo with no
+ *     published versions.
+ *
+ *   Both produce the same `[]` here because the helper can't tell
+ *   them apart without context. The CALLER (getLatestRelease) does
+ *   the cross-check: if REST returns `[]`, query GraphQL once. If
+ *   GraphQL also returns `[]`, the repo really is empty. If it
+ *   returns >0, REST was lying and we use GraphQL's answer.
+ *
+ * Why we throw on non-OK status:
+ *   `pRetry` wraps this call and retries on thrown errors with
+ *   exponential backoff. A 5xx is transient and worth retrying;
+ *   we want it to throw so pRetry can do its job. Empty body is
+ *   NOT thrown because pRetry can't help — a 200 OK is "done" as
+ *   far as retry policy is concerned.
+ */
+export async function fetchReleasesViaRest(
+  owner: string,
+  repo: string,
+): Promise<ReleaseRow[]> {
+  const response = await httpRequest(
+    `https://api.github.com/repos/${owner}/${repo}/releases?per_page=100`,
+    { headers: getAuthHeaders() },
+  )
+  if (!response.ok) {
+    throw new ErrorCtor(
+      `Failed to fetch ${owner}/${repo} releases: ${response.status}`,
+    )
+  }
+  const text = response.body.toString('utf8')
+  if (text.length === 0) {
+    // 200 OK + empty body — the documented GitHub-search-degraded
+    // signature. Return [] so the caller can decide whether to fall
+    // back rather than throwing (we don't want pRetry to burn
+    // attempts on a known incident shape).
+    return []
+  }
+  let parsed: unknown
+  try {
+    parsed = JSONParse(text)
+  } catch (cause) {
+    throw new ErrorCtor(`Failed to parse ${owner}/${repo} releases response`, {
+      cause,
+    })
+  }
+  // Empty-array fallback fires only if GraphQL returns non-array body.
+  /* c8 ignore start */
+  return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
   /* c8 ignore stop */
 }
 

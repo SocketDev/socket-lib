@@ -165,59 +165,6 @@ export function getSignalListeners() {
   return _sigListeners as SignalListenerMap
 }
 
-/* c8 ignore start - processEmit + processReallyExit interceptors
-   only fire on real process exit/emit; can't be triggered in-test. */
-/*@__NO_SIDE_EFFECTS__*/
-export function processEmit(
-  this: NodeJS.Process,
-  eventName: string,
-  exitCode?: number | undefined,
-  ...args: unknown[]
-): boolean {
-  if (eventName === 'exit') {
-    let actualExitCode = exitCode
-    if (actualExitCode === undefined) {
-      const processExitCode = globalProcess?.exitCode
-      actualExitCode =
-        typeof processExitCode === 'number' ? processExitCode : undefined
-    } else if (globalProcess) {
-      globalProcess.exitCode = actualExitCode
-    }
-    const result = ReflectApply(
-      originalProcessEmit as (...args: unknown[]) => boolean,
-      this,
-      [eventName, actualExitCode, ...args],
-    ) as boolean
-    const numExitCode =
-      typeof actualExitCode === 'number' ? actualExitCode : undefined
-    emit('exit', numExitCode, undefined)
-    emit('afterexit', numExitCode, undefined)
-    return result
-  }
-  return ReflectApply(
-    originalProcessEmit as (...args: unknown[]) => boolean,
-    this,
-    [eventName, exitCode, ...args],
-  ) as boolean
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function processReallyExit(code?: number | undefined): never {
-  const exitCode = code || 0
-  if (globalProcess) {
-    globalProcess.exitCode = exitCode
-  }
-  emit('exit', exitCode, undefined)
-  emit('afterexit', exitCode, undefined)
-  ReflectApply(
-    originalProcessReallyExit as (code?: number) => never,
-    globalProcess,
-    [exitCode],
-  )
-  throw new ErrorCtor('processReallyExit should never return')
-}
-/* c8 ignore stop */
-
 /**
  * Load signal handlers and hook into process exit events.
  *
@@ -319,6 +266,59 @@ export function onExit(
     /* c8 ignore stop */
   }
 }
+
+/* c8 ignore start - processEmit + processReallyExit interceptors
+   only fire on real process exit/emit; can't be triggered in-test. */
+/*@__NO_SIDE_EFFECTS__*/
+export function processEmit(
+  this: NodeJS.Process,
+  eventName: string,
+  exitCode?: number | undefined,
+  ...args: unknown[]
+): boolean {
+  if (eventName === 'exit') {
+    let actualExitCode = exitCode
+    if (actualExitCode === undefined) {
+      const processExitCode = globalProcess?.exitCode
+      actualExitCode =
+        typeof processExitCode === 'number' ? processExitCode : undefined
+    } else if (globalProcess) {
+      globalProcess.exitCode = actualExitCode
+    }
+    const result = ReflectApply(
+      originalProcessEmit as (...args: unknown[]) => boolean,
+      this,
+      [eventName, actualExitCode, ...args],
+    ) as boolean
+    const numExitCode =
+      typeof actualExitCode === 'number' ? actualExitCode : undefined
+    emit('exit', numExitCode, undefined)
+    emit('afterexit', numExitCode, undefined)
+    return result
+  }
+  return ReflectApply(
+    originalProcessEmit as (...args: unknown[]) => boolean,
+    this,
+    [eventName, exitCode, ...args],
+  ) as boolean
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+export function processReallyExit(code?: number | undefined): never {
+  const exitCode = code || 0
+  if (globalProcess) {
+    globalProcess.exitCode = exitCode
+  }
+  emit('exit', exitCode, undefined)
+  emit('afterexit', exitCode, undefined)
+  ReflectApply(
+    originalProcessReallyExit as (code?: number) => never,
+    globalProcess,
+    [exitCode],
+  )
+  throw new ErrorCtor('processReallyExit should never return')
+}
+/* c8 ignore stop */
 
 /**
  * Get the list of signals that are currently being monitored.

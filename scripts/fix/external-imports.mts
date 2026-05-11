@@ -33,18 +33,24 @@ const allExternalPackages = [
   }),
 ]
 
-/**
- * Calculate the relative path from a file to the external directory.
- *
- * @param {string} filePath - The path to the file being processed
- * @returns {string} The relative path prefix (e.g., './' or '../')
- */
-export function getExternalPathPrefix(filePath) {
-  const dir = path.dirname(filePath)
-  const relativePath = path.relative(dir, distExternalDir)
-  // Normalize to forward slashes and ensure it starts with ./ or ../
-  const normalized = relativePath.replace(/\\/g, '/')
-  return normalized.startsWith('.') ? normalized : `./${normalized}`
+export async function fixExternalImports() {
+  const verbose = process.argv.includes('--verbose')
+  const quiet = isQuiet()
+
+  try {
+    const fixedCount = await processDirectory(distDir, verbose)
+
+    if (!quiet) {
+      const title =
+        fixedCount > 0
+          ? `External Imports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
+          : 'External Imports (no changes)'
+      logger.success(title)
+    }
+  } catch (e) {
+    logger.error(`Failed to fix external imports: ${e.message}`)
+    process.exitCode = 1
+  }
 }
 
 /**
@@ -94,6 +100,20 @@ export async function fixFileImports(filePath, verbose = false) {
 }
 
 /**
+ * Calculate the relative path from a file to the external directory.
+ *
+ * @param {string} filePath - The path to the file being processed
+ * @returns {string} The relative path prefix (e.g., './' or '../')
+ */
+export function getExternalPathPrefix(filePath) {
+  const dir = path.dirname(filePath)
+  const relativePath = path.relative(dir, distExternalDir)
+  // Normalize to forward slashes and ensure it starts with ./ or ../
+  const normalized = relativePath.replace(/\\/g, '/')
+  return normalized.startsWith('.') ? normalized : `./${normalized}`
+}
+
+/**
  * Process files in a directory and fix external imports.
  *
  * @param {string} dir - Directory to process
@@ -131,26 +151,6 @@ export async function processDirectory(dir, verbose = false) {
   }
 
   return fixedCount
-}
-
-export async function fixExternalImports() {
-  const verbose = process.argv.includes('--verbose')
-  const quiet = isQuiet()
-
-  try {
-    const fixedCount = await processDirectory(distDir, verbose)
-
-    if (!quiet) {
-      const title =
-        fixedCount > 0
-          ? `External Imports (${fixedCount} file${fixedCount === 1 ? '' : 's'})`
-          : 'External Imports (no changes)'
-      logger.success(title)
-    }
-  } catch (e) {
-    logger.error(`Failed to fix external imports: ${e.message}`)
-    process.exitCode = 1
-  }
 }
 
 fixExternalImports().catch(error => {

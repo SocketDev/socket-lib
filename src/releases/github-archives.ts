@@ -17,14 +17,6 @@ const logger = getDefaultLogger()
 
 let _path: typeof import('node:path') | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
 /**
  * Download and extract an archive from a GitHub release.
  * Supports zip, tar, tar.gz, and tgz formats.
@@ -205,4 +197,12 @@ export async function downloadAndExtractZip(
   }
 
   return outputDir
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+export function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }

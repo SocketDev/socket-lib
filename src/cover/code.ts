@@ -42,34 +42,6 @@ export function calculateMetric(data: {
 }
 
 /**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
-/**
  * Get code coverage metrics from v8 coverage-final.json.
  *
  * @throws {Error} When coverage file doesn't exist and generateIfMissing is false.
@@ -190,4 +162,32 @@ export async function getCodeCoverage(
     lines: calculateMetric(totals.lines),
     statements: calculateMetric(totals.statements),
   }
+}
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Lazily load the path module to avoid Webpack errors.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getPath() {
+  if (_path === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }

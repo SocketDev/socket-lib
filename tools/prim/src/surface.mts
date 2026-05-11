@@ -82,6 +82,13 @@ const NODE_PRIMORDIAL_NAMESPACES = [
   'Reflect',
 ]
 
+export function capitalize(s) {
+  if (!s) {
+    return s
+  }
+  return s[0].toUpperCase() + s.slice(1)
+}
+
 /**
  * Compute the full set of primordials Node's bootstrap installs by
  * enumerating the static + prototype methods of the upstream globals.
@@ -176,11 +183,78 @@ export function deriveNodeBootstrapSurface() {
   return exports
 }
 
-export function capitalize(s) {
-  if (!s) {
-    return s
+/**
+ * Find a usable primordials source.
+ *
+ * Lookup order:
+ *   1. Explicit `surfacePath` argument (from `--surface <path>` CLI flag).
+ *   2. `<targetRoot>/../socket-lib/src/primordials/` (sibling, post-split
+ *      directory layout).
+ *   3. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling, legacy
+ *      single-file layout).
+ *   4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/`
+ *      (installed, post-split).
+ *   5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`
+ *      (installed, legacy).
+ *
+ * @param {string} targetRoot - The repo being audited.
+ * @param {string} [surfacePath] - Explicit path to a primordials source file.
+ * @returns {{ source: string; exports: Set<string> }}
+ */
+export function loadPrimordialsSurface(targetRoot, surfacePath) {
+  if (surfacePath) {
+    const resolved = path.resolve(surfacePath)
+    if (!existsSync(resolved)) {
+      throw new Error(`--surface path not found: ${resolved}`)
+    }
+    return { source: resolved, ...parseExports(resolved) }
   }
-  return s[0].toUpperCase() + s.slice(1)
+  const siblingDir = path.resolve(
+    targetRoot,
+    '..',
+    'socket-lib',
+    'src',
+    'primordials',
+  )
+  if (existsSync(siblingDir)) {
+    return { source: siblingDir, ...parseExports(siblingDir) }
+  }
+  const siblingLegacy = path.resolve(
+    targetRoot,
+    '..',
+    'socket-lib',
+    'src',
+    'primordials.ts',
+  )
+  if (existsSync(siblingLegacy)) {
+    return { source: siblingLegacy, ...parseExports(siblingLegacy) }
+  }
+  const installedDir = path.join(
+    targetRoot,
+    'node_modules',
+    '@socketsecurity',
+    'lib',
+    'dist',
+    'primordials',
+  )
+  if (existsSync(installedDir)) {
+    return { source: installedDir, ...parseExports(installedDir) }
+  }
+  const installedLegacy = path.join(
+    targetRoot,
+    'node_modules',
+    '@socketsecurity',
+    'lib',
+    'dist',
+    'primordials.js',
+  )
+  if (existsSync(installedLegacy)) {
+    return { source: installedLegacy, ...parseExports(installedLegacy) }
+  }
+  throw new Error(
+    `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
+      `Pass --surface <path> to specify a primordials source explicitly.`,
+  )
 }
 
 export function parseExports(sourcePath) {
@@ -283,78 +357,4 @@ export function parseExports(sourcePath) {
     }
   }
   return { exports, nullable, exportToLeaf }
-}
-
-/**
- * Find a usable primordials source.
- *
- * Lookup order:
- *   1. Explicit `surfacePath` argument (from `--surface <path>` CLI flag).
- *   2. `<targetRoot>/../socket-lib/src/primordials/` (sibling, post-split
- *      directory layout).
- *   3. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling, legacy
- *      single-file layout).
- *   4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/`
- *      (installed, post-split).
- *   5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`
- *      (installed, legacy).
- *
- * @param {string} targetRoot - The repo being audited.
- * @param {string} [surfacePath] - Explicit path to a primordials source file.
- * @returns {{ source: string; exports: Set<string> }}
- */
-export function loadPrimordialsSurface(targetRoot, surfacePath) {
-  if (surfacePath) {
-    const resolved = path.resolve(surfacePath)
-    if (!existsSync(resolved)) {
-      throw new Error(`--surface path not found: ${resolved}`)
-    }
-    return { source: resolved, ...parseExports(resolved) }
-  }
-  const siblingDir = path.resolve(
-    targetRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials',
-  )
-  if (existsSync(siblingDir)) {
-    return { source: siblingDir, ...parseExports(siblingDir) }
-  }
-  const siblingLegacy = path.resolve(
-    targetRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials.ts',
-  )
-  if (existsSync(siblingLegacy)) {
-    return { source: siblingLegacy, ...parseExports(siblingLegacy) }
-  }
-  const installedDir = path.join(
-    targetRoot,
-    'node_modules',
-    '@socketsecurity',
-    'lib',
-    'dist',
-    'primordials',
-  )
-  if (existsSync(installedDir)) {
-    return { source: installedDir, ...parseExports(installedDir) }
-  }
-  const installedLegacy = path.join(
-    targetRoot,
-    'node_modules',
-    '@socketsecurity',
-    'lib',
-    'dist',
-    'primordials.js',
-  )
-  if (existsSync(installedLegacy)) {
-    return { source: installedLegacy, ...parseExports(installedLegacy) }
-  }
-  throw new Error(
-    `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
-      `Pass --surface <path> to specify a primordials source explicitly.`,
-  )
 }

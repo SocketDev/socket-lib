@@ -16,46 +16,6 @@ let originalEmitWarning: typeof process.emitWarning | undefined
 const suppressedWarnings = new SetCtor<string>()
 
 /**
- * Internal function to set up warning suppression.
- * Only wraps process.emitWarning once, regardless of how many times it's called.
- */
-export function setupSuppression(): void {
-  // Only wrap once - store the original on first call.
-  // First-call init only fires once per process; subsequent calls
-  // hit the second-call no-op branch.
-  /* c8 ignore start */
-  if (!originalEmitWarning) {
-    originalEmitWarning = process.emitWarning
-    process.emitWarning = (warning: string | Error, ...args: unknown[]) => {
-      if (typeof warning === 'string') {
-        for (const suppressedType of suppressedWarnings) {
-          if (warning.includes(suppressedType)) {
-            return
-          }
-        }
-      } else if (warning && typeof warning === 'object') {
-        /* c8 ignore start - Object-shaped warning suppression
-           (Error / Warning instances). process.emitWarning rarely
-           passes object form in test runs; covered when consumers
-           pass real Warning subclasses. */
-        const warningObj = warning as { name?: string }
-        if (warningObj.name && suppressedWarnings.has(warningObj.name)) {
-          return
-        }
-        /* c8 ignore stop */
-      }
-      // Not suppressed - call the original function.
-      return ReflectApply(
-        originalEmitWarning as typeof process.emitWarning,
-        process,
-        [warning, ...args],
-      )
-    }
-  }
-  /* c8 ignore stop */
-}
-
-/**
  * Restore the original process.emitWarning function.
  * Call this to re-enable all warnings after suppressing them.
  *
@@ -116,6 +76,46 @@ export function setMaxEventTargetListeners(
     // https://nodejs.org/api/events.html#eventsdefaultmaxlisteners
     ;(target as unknown as Record<symbol, number>)[kMaxEventTargetListeners] =
       maxListeners
+  }
+  /* c8 ignore stop */
+}
+
+/**
+ * Internal function to set up warning suppression.
+ * Only wraps process.emitWarning once, regardless of how many times it's called.
+ */
+export function setupSuppression(): void {
+  // Only wrap once - store the original on first call.
+  // First-call init only fires once per process; subsequent calls
+  // hit the second-call no-op branch.
+  /* c8 ignore start */
+  if (!originalEmitWarning) {
+    originalEmitWarning = process.emitWarning
+    process.emitWarning = (warning: string | Error, ...args: unknown[]) => {
+      if (typeof warning === 'string') {
+        for (const suppressedType of suppressedWarnings) {
+          if (warning.includes(suppressedType)) {
+            return
+          }
+        }
+      } else if (warning && typeof warning === 'object') {
+        /* c8 ignore start - Object-shaped warning suppression
+           (Error / Warning instances). process.emitWarning rarely
+           passes object form in test runs; covered when consumers
+           pass real Warning subclasses. */
+        const warningObj = warning as { name?: string }
+        if (warningObj.name && suppressedWarnings.has(warningObj.name)) {
+          return
+        }
+        /* c8 ignore stop */
+      }
+      // Not suppressed - call the original function.
+      return ReflectApply(
+        originalEmitWarning as typeof process.emitWarning,
+        process,
+        [warning, ...args],
+      )
+    }
   }
   /* c8 ignore stop */
 }

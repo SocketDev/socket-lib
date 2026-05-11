@@ -78,44 +78,6 @@ export function getPath() {
 }
 
 /**
- * Merge and write package.json with original and new values.
- */
-export async function mergePackageJson(
-  pkgJsonPath: string,
-  originalPkgJson: PackageJson | undefined,
-): Promise<PackageJson> {
-  const fs = getFs()
-  let pkgJson: PackageJson
-  try {
-    pkgJson = JSONParse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
-  } catch (e) {
-    throw new ErrorCtor(`Failed to parse ${pkgJsonPath}: ${errorMessage(e)}`, {
-      cause: e,
-    })
-  }
-  const mergedPkgJson = originalPkgJson
-    ? { ...originalPkgJson, ...pkgJson }
-    : pkgJson
-  return mergedPkgJson
-}
-
-/**
- * Resolve a path to its real location, handling symlinks. Falls
- * back to a non-realpath resolution if the OS rejects the lookup
- * (ENOENT, EACCES, etc.) — caller still gets a usable absolute
- * path either way.
- */
-export async function resolveRealPath(pathStr: string): Promise<string> {
-  const fs = getFs()
-  const path = getPath()
-  try {
-    return await fs.promises.realpath(pathStr)
-  } catch {
-    return path.resolve(pathStr)
-  }
-}
-
-/**
  * Isolates a package in a temporary test environment.
  *
  * Supports multiple input types:
@@ -314,5 +276,43 @@ export async function isolatePackage(
   return {
     exports,
     tmpdir: installedPath,
+  }
+}
+
+/**
+ * Merge and write package.json with original and new values.
+ */
+export async function mergePackageJson(
+  pkgJsonPath: string,
+  originalPkgJson: PackageJson | undefined,
+): Promise<PackageJson> {
+  const fs = getFs()
+  let pkgJson: PackageJson
+  try {
+    pkgJson = JSONParse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
+  } catch (e) {
+    throw new ErrorCtor(`Failed to parse ${pkgJsonPath}: ${errorMessage(e)}`, {
+      cause: e,
+    })
+  }
+  const mergedPkgJson = originalPkgJson
+    ? { ...originalPkgJson, ...pkgJson }
+    : pkgJson
+  return mergedPkgJson
+}
+
+/**
+ * Resolve a path to its real location, handling symlinks. Falls
+ * back to a non-realpath resolution if the OS rejects the lookup
+ * (ENOENT, EACCES, etc.) — caller still gets a usable absolute
+ * path either way.
+ */
+export async function resolveRealPath(pathStr: string): Promise<string> {
+  const fs = getFs()
+  const path = getPath()
+  try {
+    return await fs.promises.realpath(pathStr)
+  } catch {
+    return path.resolve(pathStr)
   }
 }

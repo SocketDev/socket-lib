@@ -48,6 +48,31 @@ export function getOs() {
 }
 
 /**
+ * Get the OS home directory.
+ * Can be overridden in tests using setPath('homedir', ...) from paths/rewire.
+ */
+export function getOsHomeDir(): string {
+  // Always check for overrides - don't cache when using rewire
+  return getPathValue('homedir', () => getOs().homedir())
+}
+/**
+ * Get the OS temporary directory.
+ * Can be overridden in tests using setPath('tmpdir', ...) from paths/rewire.
+ */
+
+/**
+ * Get the OS temporary directory.
+ * Can be overridden in tests using setPath('tmpdir', ...) from paths/rewire.
+ */
+export function getOsTmpDir(): string {
+  // Always check for overrides - don't cache when using rewire
+  return getPathValue('tmpdir', () => getOs().tmpdir())
+}
+/**
+ * Get a Socket app cache directory (~/.socket/_<appName>/cache).
+ */
+
+/**
  * Lazily load the path module to avoid Webpack errors.
  * @private
  */
@@ -60,27 +85,15 @@ export function getPath() {
 }
 
 /**
- * Get the OS home directory.
- * Can be overridden in tests using setPath('homedir', ...) from paths/rewire.
- */
-export function getOsHomeDir(): string {
-  // Always check for overrides - don't cache when using rewire
-  return getPathValue('homedir', () => getOs().homedir())
-}
-/**
- * Get the OS temporary directory.
- * Can be overridden in tests using setPath('tmpdir', ...) from paths/rewire.
- */
-export function getOsTmpDir(): string {
-  // Always check for overrides - don't cache when using rewire
-  return getPathValue('tmpdir', () => getOs().tmpdir())
-}
-/**
  * Get a Socket app cache directory (~/.socket/_<appName>/cache).
  */
 export function getSocketAppCacheDir(appName: string): string {
   return normalizePath(getPath().join(getSocketAppDir(appName), CACHE_DIR))
 }
+/**
+ * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
+ */
+
 /**
  * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
  */
@@ -92,11 +105,26 @@ export function getSocketAppCacheTtlDir(appName: string): string {
 /**
  * Get a Socket app directory (~/.socket/_<appName>).
  */
+
+/**
+ * Get a Socket app directory (~/.socket/_<appName>).
+ */
 export function getSocketAppDir(appName: string): string {
   return normalizePath(
     getPath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${appName}`),
   )
 }
+/**
+ * Get the Socket cacache directory (~/.socket/_cacache).
+ * Can be overridden with SOCKET_CACACHE_DIR environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
+ *
+ * Priority order:
+ *   1. Test override via setPath('socket-cacache-dir', ...)
+ *   2. SOCKET_CACACHE_DIR - Full override of cacache directory
+ *   3. Default: $SOCKET_HOME/_cacache or $HOME/.socket/_cacache
+ */
+
 /**
  * Get the Socket cacache directory (~/.socket/_cacache).
  * Can be overridden with SOCKET_CACACHE_DIR environment variable or via setPath() for testing.
@@ -120,9 +148,26 @@ export function getSocketCacacheDir(): string {
 /**
  * Get the Socket CLI directory (~/.socket/_socket).
  */
+
+/**
+ * Get the Socket CLI directory (~/.socket/_socket).
+ */
 export function getSocketCliDir(): string {
   return getSocketAppDir(SOCKET_CLI_APP_NAME)
 }
+/**
+ * Get the Socket DLX directory (~/.socket/_dlx).
+ * Can be overridden with SOCKET_DLX_DIR environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
+ *
+ * Priority order:
+ *   1. Test override via setPath('socket-dlx-dir', ...)
+ *   2. SOCKET_DLX_DIR - Full override of DLX cache directory
+ *   3. SOCKET_HOME/_dlx - Base directory override (inherits from getSocketUserDir)
+ *   4. Default: $HOME/.socket/_dlx
+ *   5. Fallback: /tmp/.socket/_dlx (Unix) or %TEMP%\.socket\_dlx (Windows)
+ */
+
 /**
  * Get the Socket DLX directory (~/.socket/_dlx).
  * Can be overridden with SOCKET_DLX_DIR environment variable or via setPath() for testing.
@@ -152,15 +197,28 @@ export function getSocketDlxDir(): string {
  * Get the Socket home directory (~/.socket).
  * Alias for getSocketUserDir() for consistency across Socket projects.
  */
+
+/**
+ * Get the Socket home directory (~/.socket).
+ * Alias for getSocketUserDir() for consistency across Socket projects.
+ */
 export function getSocketHomePath(): string {
   return getSocketUserDir()
 }
 /**
  * Get the Socket Registry directory (~/.socket/_registry).
  */
+
+/**
+ * Get the Socket Registry directory (~/.socket/_registry).
+ */
 export function getSocketRegistryDir(): string {
   return getSocketAppDir(SOCKET_REGISTRY_APP_NAME)
 }
+/**
+ * Get the Socket Registry GitHub cache directory (~/.socket/_registry/cache/ttl/github).
+ */
+
 /**
  * Get the Socket Registry GitHub cache directory (~/.socket/_registry/cache/ttl/github).
  */
@@ -183,6 +241,18 @@ export function getSocketRegistryGithubCacheDir(): string {
  *   3. Default: $HOME/.socket
  *   4. Fallback: /tmp/.socket (Unix) or %TEMP%\.socket (Windows)
  */
+
+/**
+ * Get the Socket user directory (~/.socket).
+ * Can be overridden with SOCKET_HOME environment variable or via setPath() for testing.
+ * Result is cached via getPathValue for performance.
+ *
+ * Priority order:
+ *   1. Test override via setPath('socket-user-dir', ...)
+ *   2. SOCKET_HOME - Base directory override
+ *   3. Default: $HOME/.socket
+ *   4. Fallback: /tmp/.socket (Unix) or %TEMP%\.socket (Windows)
+ */
 export function getSocketUserDir(): string {
   return getPathValue('socket-user-dir', () => {
     const socketHome = getSocketHome()
@@ -192,6 +262,18 @@ export function getSocketUserDir(): string {
     return normalizePath(getPath().join(getUserHomeDir(), DOT_SOCKET_DIR))
   })
 }
+/**
+ * Get the user's home directory.
+ * Uses environment variables directly to support test mocking.
+ * Falls back to temporary directory if home is not available.
+ *
+ * Priority order:
+ *   1. HOME environment variable (Unix)
+ *   2. USERPROFILE environment variable (Windows)
+ *   3. getOs().homedir()
+ *   4. Fallback: getOs().tmpdir() (rarely used, for restricted environments)
+ */
+
 /**
  * Get the user's home directory.
  * Uses environment variables directly to support test mocking.

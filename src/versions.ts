@@ -21,20 +21,6 @@ import type { SmolVersionsBinding } from './smol/versions'
 const _smolVersions = getSmolVersions()
 
 let _semver: typeof semverType | undefined
-export function getSemver() {
-  if (_semver === undefined) {
-    _semver = require('./external/semver')
-  }
-  return _semver!
-}
-
-// Pick the impl for ops that exist on both. The cast is safe because
-// the smol-versions binding is a strict superset of the methods we
-// touch here, with identical semantics for npm.
-export function getVersionsImpl(): SmolVersionsBinding | typeof semverType {
-  return _smolVersions ?? getSemver()
-}
-
 /**
  * Coerce a version string to valid semver format.
  *
@@ -134,6 +120,20 @@ export function getPatchVersion(version: string): number | undefined {
   const semver = getSemver()
   const parsed = semver.parse(version)
   return parsed?.patch
+}
+
+export function getSemver() {
+  if (_semver === undefined) {
+    _semver = require('./external/semver')
+  }
+  return _semver!
+}
+
+// Pick the impl for ops that exist on both. The cast is safe because
+// the smol-versions binding is a strict superset of the methods we
+// touch here, with identical semantics for npm.
+export function getVersionsImpl(): SmolVersionsBinding | typeof semverType {
+  return _smolVersions ?? getSemver()
 }
 
 /**

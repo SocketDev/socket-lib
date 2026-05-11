@@ -35,46 +35,6 @@ const TAG_NETWORK = '[network]'
 type TestFn = () => void | Promise<void>
 type SuiteFn = () => void
 
-export function tagged(name: string, tag: string): string {
-  return `${tag} ${name}`
-}
-
-/**
- * Test that only runs on Windows. Skipped on Unix-likes.
- */
-export function itWindowsOnly(name: string, fn: TestFn): void {
-  it.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
-}
-
-/**
- * Test that only runs on Unix-likes (Linux, macOS). Skipped on Windows.
- */
-export function itUnixOnly(name: string, fn: TestFn): void {
-  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
-}
-
-/**
- * Test that hits the live network. Skipped when
- * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
- */
-export function itNetworkOnly(name: string, fn: TestFn): void {
-  it.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
-}
-
-/**
- * Describe block that only runs on Windows. Skipped on Unix-likes.
- */
-export function describeWindowsOnly(name: string, fn: SuiteFn): void {
-  describe.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
-}
-
-/**
- * Describe block that only runs on Unix-likes. Skipped on Windows.
- */
-export function describeUnixOnly(name: string, fn: SuiteFn): void {
-  describe.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
-}
-
 /**
  * Describe block that hits the live network. Skipped when
  * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
@@ -111,6 +71,28 @@ export function describeRequires(
 }
 
 /**
+ * Describe block that only runs on Unix-likes. Skipped on Windows.
+ */
+export function describeUnixOnly(name: string, fn: SuiteFn): void {
+  describe.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
+}
+
+/**
+ * Describe block that only runs on Windows. Skipped on Unix-likes.
+ */
+export function describeWindowsOnly(name: string, fn: SuiteFn): void {
+  describe.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
+}
+
+/**
+ * Test that hits the live network. Skipped when
+ * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
+ */
+export function itNetworkOnly(name: string, fn: TestFn): void {
+  it.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
+}
+
+/**
  * Test gated on a runtime capability. Same shape as `describeRequires`.
  */
 export function itRequires(
@@ -120,4 +102,22 @@ export function itRequires(
   fn: TestFn,
 ): void {
   it.skipIf(!available)(`[needs:${capability}] ${name}`, fn)
+}
+
+/**
+ * Test that only runs on Unix-likes (Linux, macOS). Skipped on Windows.
+ */
+export function itUnixOnly(name: string, fn: TestFn): void {
+  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
+}
+
+/**
+ * Test that only runs on Windows. Skipped on Unix-likes.
+ */
+export function itWindowsOnly(name: string, fn: TestFn): void {
+  it.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
+}
+
+export function tagged(name: string, tag: string): string {
+  return `${tag} ${name}`
 }

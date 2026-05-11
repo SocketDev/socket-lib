@@ -21,6 +21,46 @@ const rootDir = path.resolve(__dirname, '..', '..')
 const distExternalDir = path.join(rootDir, 'dist', 'external')
 
 /**
+ * Main build function.
+ *
+ * @param {object} options - Build options
+ * @param {boolean} options.verbose - Show detailed output
+ * @param {boolean} options.quiet - Suppress all output
+ * @returns {Promise<void>}
+ */
+export async function buildExternals(options = {}) {
+  const { quiet = false, verbose = false } = options
+
+  // Default behavior: show header but not individual packages (concise)
+  // --verbose: show all package details
+  // --quiet: show nothing
+  const showDetails = verbose && !quiet
+
+  // Ensure dist/external directory exists.
+  await ensureDir(distExternalDir)
+
+  // Bundle all packages
+  const { bundledCount, totalSize } = await bundleAllPackages({
+    quiet: quiet || !showDetails,
+  })
+
+  // Post-process: Fix node-gyp strings to prevent bundler issues for consumers
+  await fixNodeGypStrings(distExternalDir, { quiet })
+
+  // Post-process: rewrite well-known global calls (Buffer.from, Date.now,
+  // Object.keys, …) to socket-lib's primordials surface so the bundled
+  // externals don't depend on a clean caller realm. The codemod has a
+  // built-in workaround for the acorn-wasm parser's range-serialization
+  // bug (it repairs broken `end` positions by walking children, and
+  // scans source for the closing `)` when the call's outer end is
+  // unreliable — see tools/prim/src/codemod.mts).
+  const distRoot = path.dirname(distExternalDir)
+  await transformPrimordials(distRoot, distExternalDir, { quiet })
+
+  return { bundledCount, totalSize }
+}
+
+/**
  * Bundle all external packages.
  *
  * @param {object} options - Options
@@ -168,46 +208,6 @@ export async function bundleAllPackages(options = {}) {
       }
     }
   }
-
-  return { bundledCount, totalSize }
-}
-
-/**
- * Main build function.
- *
- * @param {object} options - Build options
- * @param {boolean} options.verbose - Show detailed output
- * @param {boolean} options.quiet - Suppress all output
- * @returns {Promise<void>}
- */
-export async function buildExternals(options = {}) {
-  const { quiet = false, verbose = false } = options
-
-  // Default behavior: show header but not individual packages (concise)
-  // --verbose: show all package details
-  // --quiet: show nothing
-  const showDetails = verbose && !quiet
-
-  // Ensure dist/external directory exists.
-  await ensureDir(distExternalDir)
-
-  // Bundle all packages
-  const { bundledCount, totalSize } = await bundleAllPackages({
-    quiet: quiet || !showDetails,
-  })
-
-  // Post-process: Fix node-gyp strings to prevent bundler issues for consumers
-  await fixNodeGypStrings(distExternalDir, { quiet })
-
-  // Post-process: rewrite well-known global calls (Buffer.from, Date.now,
-  // Object.keys, …) to socket-lib's primordials surface so the bundled
-  // externals don't depend on a clean caller realm. The codemod has a
-  // built-in workaround for the acorn-wasm parser's range-serialization
-  // bug (it repairs broken `end` positions by walking children, and
-  // scans source for the closing `)` when the call's outer end is
-  // unreliable — see tools/prim/src/codemod.mts).
-  const distRoot = path.dirname(distExternalDir)
-  await transformPrimordials(distRoot, distExternalDir, { quiet })
 
   return { bundledCount, totalSize }
 }

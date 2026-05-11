@@ -178,89 +178,6 @@ export const WHITE: RGB = [255, 255, 255]
 // === Palette helpers ===
 
 /**
- * Linearly interpolate between two RGB colors. `t` is clamped to [0, 1].
- *
- * @param a color at `t=0`
- * @param b color at `t=1`
- * @param t blend factor; values outside [0, 1] are clamped
- * @returns blended RGB with each channel rounded to integer
- */
-export function blendRgb(a: RGB, b: RGB, t: number): RGB {
-  const k = t < 0 ? 0 : t > 1 ? 1 : t
-  return [
-    MathRound(a[0] + (b[0] - a[0]) * k),
-    MathRound(a[1] + (b[1] - a[1]) * k),
-    MathRound(a[2] + (b[2] - a[2]) * k),
-  ]
-}
-
-/**
- * Build a per-char palette function that cycles through a fixed palette:
- * `(i) => palette[i % palette.length]`.
- *
- * @throws {Error} if `palette` is empty
- */
-export function gradient(palette: Palette): (i: number) => RGB {
-  if (palette.length === 0) {
-    throw new ErrorCtor('gradient palette must not be empty')
-  }
-  return i => palette[i % palette.length]!
-}
-
-/**
- * Build a per-char palette function that returns the same color for every
- * char index. Useful when shimmering text with a single base color.
- */
-export function solidColor(color: RGB): (i: number) => RGB {
-  return () => color
-}
-
-// === Kernels ===
-
-/**
- * Discrete on/off kernel — each char is either fully `highlightColor`
- * (within `halfWidth` of the wave center) or fully `baseColor`. No blend.
- *
- * Matches claude-code's spinner behavior at `halfWidth=1` (a 3-char bright
- * zone: the char at the wave center plus its left and right neighbors).
- *
- * @param halfWidth chars on each side of the wave center to highlight
- * @default halfWidth=1
- */
-export function blockKernel(halfWidth: number = 1): Kernel {
-  return (d, ctx) =>
-    MathAbs(d) <= halfWidth ? ctx.highlightColor : ctx.baseColor
-}
-
-/**
- * Smooth blend kernel — char's color blends from `baseColor` toward
- * `highlightColor` as it approaches the wave center. Falloff curve is
- * `(1 - |d|/halfWidth)^falloff`, giving a soft glow with a wider radius
- * than `blockKernel`.
- *
- * Matches socket-lib's previous default at `halfWidth=2.5, falloff=2.5`.
- *
- * @param halfWidth chars on each side affected by the wave
- * @param falloff intensity exponent (higher = sharper peak)
- * @default halfWidth=2.5, falloff=2.5
- */
-export function smoothKernel(
-  halfWidth: number = 2.5,
-  falloff: number = 2.5,
-): Kernel {
-  return (d, ctx) => {
-    const dist = MathAbs(d)
-    if (dist >= halfWidth) {
-      return ctx.baseColor
-    }
-    const t = (1 - dist / halfWidth) ** falloff
-    return blendRgb(ctx.baseColor, ctx.highlightColor, t)
-  }
-}
-
-// === Position generators (sweep functions) ===
-
-/**
  * Build a position function for bidirectional motion: the wave does one
  * left-to-right pass, then one right-to-left pass, then loops.
  *
@@ -281,6 +198,143 @@ export function bidirectionalSweep(
     }
     return textLength + padding - 1 - (f - cycle)
   }
+}
+
+/**
+ * Linearly interpolate between two RGB colors. `t` is clamped to [0, 1].
+ *
+ * @param a color at `t=0`
+ * @param b color at `t=1`
+ * @param t blend factor; values outside [0, 1] are clamped
+ * @returns blended RGB with each channel rounded to integer
+ */
+export function blendRgb(a: RGB, b: RGB, t: number): RGB {
+  const k = t < 0 ? 0 : t > 1 ? 1 : t
+  return [
+    MathRound(a[0] + (b[0] - a[0]) * k),
+    MathRound(a[1] + (b[1] - a[1]) * k),
+    MathRound(a[2] + (b[2] - a[2]) * k),
+  ]
+}
+
+/**
+ * Discrete on/off kernel — each char is either fully `highlightColor`
+ * (within `halfWidth` of the wave center) or fully `baseColor`. No blend.
+ *
+ * Matches claude-code's spinner behavior at `halfWidth=1` (a 3-char bright
+ * zone: the char at the wave center plus its left and right neighbors).
+ *
+ * @param halfWidth chars on each side of the wave center to highlight
+ * @default halfWidth=1
+ */
+export function blockKernel(halfWidth: number = 1): Kernel {
+  return (d, ctx) =>
+    MathAbs(d) <= halfWidth ? ctx.highlightColor : ctx.baseColor
+}
+
+/**
+ * Translate a flat {@link ShimmerConfig} into a {@link ShimmerSpec}.
+ * Applies defaults for omitted fields; resolves `color` and `highlight`
+ * (which may be a single RGB or a palette) into per-char palette
+ * functions.
+ *
+ * The spinner uses this internally; callers who only need the standard
+ * shape can call this directly. Advanced callers can construct a
+ * `ShimmerSpec` by hand to plug in custom kernels or position generators.
+ */
+export function configToSpec(
+  config: ShimmerConfig,
+  textLength: number,
+): ShimmerSpec {
+  const dir = config.dir ?? 'ltr'
+  const padding = config.padding ?? 2
+  const speed = config.speed ?? 1 / 3
+  const baseColor = resolvePalette(config.color, DEFAULT_BASE_COLOR)
+  const highlightColor = resolvePalette(config.highlight, WHITE)
+  const kernel =
+    config.kernel === 'block'
+      ? blockKernel(1)
+      : smoothKernel(config.width ?? 2.5)
+  // Caller passes integer frame counts; spec applies `speed` to convert to
+  // shimmer steps. Speed=1/3 means 3 frames advance the wave by 1 char.
+  const sweep = directionToSweep(dir, textLength, padding)
+  return {
+    positionAt: frame => sweep(frame * speed),
+    kernel,
+    baseColor,
+    highlightColor,
+  }
+}
+
+/**
+ * Translate a {@link ShimmerDirection} string to its position-generator
+ * function. Used by {@link configToSpec}; exported for callers that want
+ * to swap kernel or palette while keeping the standard sweep mapping.
+ */
+export function directionToSweep(
+  dir: ShimmerDirection,
+  textLength: number,
+  padding: number,
+): (frame: number) => number {
+  switch (dir) {
+    case 'rtl':
+      return rtlSweep(textLength, padding)
+    case 'bi':
+      return bidirectionalSweep(textLength, padding)
+    case 'random':
+      return randomSweep(textLength, padding)
+    case 'none':
+      return noSweep()
+    default:
+      return ltrSweep(textLength, padding)
+  }
+}
+
+/**
+ * Compute per-character colors for a single frame. This is the engine.
+ *
+ * @param spec functional shimmer specification
+ * @param textLength number of chars to color
+ * @param frame caller-controlled frame counter (any number; the position
+ *   generator handles wrapping)
+ * @returns one RGB tuple per char index, in order
+ *
+ * @example
+ * ```ts
+ * const colors = frameColors(spec, 'Loading'.length, frameCounter)
+ * // colors[0] = the color of 'L' at this frame
+ * // colors[6] = the color of 'g' at this frame
+ * ```
+ */
+export function frameColors(
+  spec: ShimmerSpec,
+  textLength: number,
+  frame: number,
+): RGB[] {
+  const wavePos = spec.positionAt(frame)
+  const out: RGB[] = []
+  for (let i = 0; i < textLength; i++) {
+    const ctx: KernelContext = {
+      __proto__: null,
+      baseColor: spec.baseColor(i),
+      highlightColor: spec.highlightColor(i),
+    } as unknown as KernelContext
+    out.push(spec.kernel(i - wavePos, ctx))
+  }
+  return out
+}
+
+/**
+ * Build a per-char palette function that cycles through a fixed palette:
+ * `(i) => palette[i % palette.length]`.
+ *
+ * @throws {Error} if `palette` is empty
+ */
+export function gradient(palette: Palette): (i: number) => RGB {
+  if (palette.length === 0) {
+    throw new ErrorCtor('gradient palette must not be empty')
+  }
+  return i => palette[i % palette.length]!
 }
 
 /**
@@ -344,83 +398,6 @@ export function randomSweep(
 }
 
 /**
- * Build a position function for right-to-left motion: the wave starts at
- * the right edge, decreases by 1 per frame, exits at `-padding` left of
- * char 0, then wraps.
- *
- * @param textLength number of chars in the target string
- * @param padding off-screen chars on each side
- * @default padding=2
- */
-export function rtlSweep(
-  textLength: number,
-  padding: number = 2,
-): (frame: number) => number {
-  const cycle = textLength + 2 * padding
-  return frame => textLength + padding - 1 - (((frame % cycle) + cycle) % cycle)
-}
-
-// === Spec construction ===
-
-/**
- * Translate a {@link ShimmerDirection} string to its position-generator
- * function. Used by {@link configToSpec}; exported for callers that want
- * to swap kernel or palette while keeping the standard sweep mapping.
- */
-export function directionToSweep(
-  dir: ShimmerDirection,
-  textLength: number,
-  padding: number,
-): (frame: number) => number {
-  switch (dir) {
-    case 'rtl':
-      return rtlSweep(textLength, padding)
-    case 'bi':
-      return bidirectionalSweep(textLength, padding)
-    case 'random':
-      return randomSweep(textLength, padding)
-    case 'none':
-      return noSweep()
-    default:
-      return ltrSweep(textLength, padding)
-  }
-}
-
-/**
- * Translate a flat {@link ShimmerConfig} into a {@link ShimmerSpec}.
- * Applies defaults for omitted fields; resolves `color` and `highlight`
- * (which may be a single RGB or a palette) into per-char palette
- * functions.
- *
- * The spinner uses this internally; callers who only need the standard
- * shape can call this directly. Advanced callers can construct a
- * `ShimmerSpec` by hand to plug in custom kernels or position generators.
- */
-export function configToSpec(
-  config: ShimmerConfig,
-  textLength: number,
-): ShimmerSpec {
-  const dir = config.dir ?? 'ltr'
-  const padding = config.padding ?? 2
-  const speed = config.speed ?? 1 / 3
-  const baseColor = resolvePalette(config.color, DEFAULT_BASE_COLOR)
-  const highlightColor = resolvePalette(config.highlight, WHITE)
-  const kernel =
-    config.kernel === 'block'
-      ? blockKernel(1)
-      : smoothKernel(config.width ?? 2.5)
-  // Caller passes integer frame counts; spec applies `speed` to convert to
-  // shimmer steps. Speed=1/3 means 3 frames advance the wave by 1 char.
-  const sweep = directionToSweep(dir, textLength, padding)
-  return {
-    positionAt: frame => sweep(frame * speed),
-    kernel,
-    baseColor,
-    highlightColor,
-  }
-}
-
-/**
  * Resolve a {@link ShimmerConfig.color}-shaped input into a per-char
  * palette function. Accepts a single RGB tuple, an ordered palette, or
  * `undefined` (in which case `defaultColor` is used).
@@ -441,38 +418,53 @@ export function resolvePalette(
   return solidColor(source as RGB)
 }
 
-// === Engine ===
+/**
+ * Build a position function for right-to-left motion: the wave starts at
+ * the right edge, decreases by 1 per frame, exits at `-padding` left of
+ * char 0, then wraps.
+ *
+ * @param textLength number of chars in the target string
+ * @param padding off-screen chars on each side
+ * @default padding=2
+ */
+export function rtlSweep(
+  textLength: number,
+  padding: number = 2,
+): (frame: number) => number {
+  const cycle = textLength + 2 * padding
+  return frame => textLength + padding - 1 - (((frame % cycle) + cycle) % cycle)
+}
 
 /**
- * Compute per-character colors for a single frame. This is the engine.
+ * Smooth blend kernel — char's color blends from `baseColor` toward
+ * `highlightColor` as it approaches the wave center. Falloff curve is
+ * `(1 - |d|/halfWidth)^falloff`, giving a soft glow with a wider radius
+ * than `blockKernel`.
  *
- * @param spec functional shimmer specification
- * @param textLength number of chars to color
- * @param frame caller-controlled frame counter (any number; the position
- *   generator handles wrapping)
- * @returns one RGB tuple per char index, in order
+ * Matches socket-lib's previous default at `halfWidth=2.5, falloff=2.5`.
  *
- * @example
- * ```ts
- * const colors = frameColors(spec, 'Loading'.length, frameCounter)
- * // colors[0] = the color of 'L' at this frame
- * // colors[6] = the color of 'g' at this frame
- * ```
+ * @param halfWidth chars on each side affected by the wave
+ * @param falloff intensity exponent (higher = sharper peak)
+ * @default halfWidth=2.5, falloff=2.5
  */
-export function frameColors(
-  spec: ShimmerSpec,
-  textLength: number,
-  frame: number,
-): RGB[] {
-  const wavePos = spec.positionAt(frame)
-  const out: RGB[] = []
-  for (let i = 0; i < textLength; i++) {
-    const ctx: KernelContext = {
-      __proto__: null,
-      baseColor: spec.baseColor(i),
-      highlightColor: spec.highlightColor(i),
-    } as unknown as KernelContext
-    out.push(spec.kernel(i - wavePos, ctx))
+export function smoothKernel(
+  halfWidth: number = 2.5,
+  falloff: number = 2.5,
+): Kernel {
+  return (d, ctx) => {
+    const dist = MathAbs(d)
+    if (dist >= halfWidth) {
+      return ctx.baseColor
+    }
+    const t = (1 - dist / halfWidth) ** falloff
+    return blendRgb(ctx.baseColor, ctx.highlightColor, t)
   }
-  return out
+}
+
+/**
+ * Build a per-char palette function that returns the same color for every
+ * char index. Useful when shimmering text with a single base color.
+ */
+export function solidColor(color: RGB): (i: number) => RGB {
+  return () => color
 }

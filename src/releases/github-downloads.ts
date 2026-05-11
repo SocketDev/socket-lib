@@ -27,22 +27,6 @@ const logger = getDefaultLogger()
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
 /**
  * Download a binary from any GitHub repository with version caching.
  *
@@ -211,4 +195,20 @@ export async function downloadReleaseAsset(
     retries: 2,
     retryDelay: 5000,
   })
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+export function getFs() {
+  if (_fs === undefined) {
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+export function getPath() {
+  if (_path === undefined) {
+    _path = /*@__PURE__*/ require('node:path')
+  }
+  return _path as typeof import('node:path')
 }

@@ -49,32 +49,6 @@ export interface RemoveOptions {
 }
 
 /**
- * Build a key→boolean matcher for `pattern`. For non-wildcard patterns
- * this returns a prefix-startsWith predicate (no regex allocation); for
- * wildcard patterns it compiles the regex *once* and closes over it so
- * the caller can apply the same matcher across N keys in O(1)-per-key.
- *
- * Anchors both ends — `foo*bar` matches exactly `foo<anything>bar`,
- * not `foo<anything>bar<more>`.
- */
-export function createPatternMatcher(
-  pattern: string,
-): (key: string) => boolean {
-  if (!pattern.includes('*')) {
-    return (key: string) => StringPrototypeStartsWith(key, pattern)
-  }
-  // Escape regex special characters except `*`, then convert `*` to `.*`.
-  const escaped = StringPrototypeReplaceAll(
-    pattern,
-    /[.+?^${}()|[\]\\]/g,
-    '\\$&',
-  )
-  const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
-  const regex = new RegExpCtor(`^${regexPattern}$`)
-  return (key: string) => RegExpPrototypeTest(regex, key)
-}
-
-/**
  * Clear entries from the Socket shared cache.
  *
  * Supports wildcard patterns (*) in prefix for flexible matching.
@@ -144,6 +118,32 @@ export async function clear(
   }
 
   return removed
+}
+
+/**
+ * Build a key→boolean matcher for `pattern`. For non-wildcard patterns
+ * this returns a prefix-startsWith predicate (no regex allocation); for
+ * wildcard patterns it compiles the regex *once* and closes over it so
+ * the caller can apply the same matcher across N keys in O(1)-per-key.
+ *
+ * Anchors both ends — `foo*bar` matches exactly `foo<anything>bar`,
+ * not `foo<anything>bar<more>`.
+ */
+export function createPatternMatcher(
+  pattern: string,
+): (key: string) => boolean {
+  if (!pattern.includes('*')) {
+    return (key: string) => StringPrototypeStartsWith(key, pattern)
+  }
+  // Escape regex special characters except `*`, then convert `*` to `.*`.
+  const escaped = StringPrototypeReplaceAll(
+    pattern,
+    /[.+?^${}()|[\]\\]/g,
+    '\\$&',
+  )
+  const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
+  const regex = new RegExpCtor(`^${regexPattern}$`)
+  return (key: string) => RegExpPrototypeTest(regex, key)
 }
 
 /**

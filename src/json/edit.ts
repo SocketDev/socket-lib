@@ -38,128 +38,6 @@ const JSONParse = JSON.parse
 let _EditableJsonClass: EditableJsonConstructor | undefined
 
 let _fs: typeof import('node:fs') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Parse JSON content and extract formatting metadata.
- * @private
- */
-export function parseJson(content: string): unknown {
-  return JSONParse(content)
-}
-
-/**
- * Read file content from disk with retry logic for ENOENT errors.
- * @private
- */
-export async function readFile(filepath: string): Promise<string> {
-  const { promises: fsPromises } = getFs()
-
-  // Retry on ENOENT. Windows-only retry-count and delay; tested on
-  // Windows runners. The retry-loop body itself fires only after a
-  // transient ENOENT, which tests don't simulate.
-  /* c8 ignore start */
-  const maxRetries = process.platform === 'win32' ? 5 : 1
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      return await fsPromises.readFile(filepath, 'utf8')
-    } catch (e) {
-      const isLastAttempt = attempt === maxRetries
-      const isEnoent = isErrnoException(e) && e.code === 'ENOENT'
-
-      if (!isEnoent || isLastAttempt) {
-        throw e
-      }
-
-      const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
-      // eslint-disable-next-line no-await-in-loop
-      await sleep(delay)
-    }
-  }
-  /* c8 ignore stop */
-
-  /* c8 ignore next 3 - Loop has 'return' on success and 'throw' in
-     each iteration; only reachable if maxRetries is somehow negative. */
-  throw new ErrorCtor(
-    `readFile: exhausted ${maxRetries + 1} attempts reading ${filepath}`,
-  )
-}
-
-/**
- * Retry a file write operation with exponential backoff on Windows EPERM errors.
- * Windows can have transient file locking issues with temp directories.
- * @private
- */
-export async function retryWrite(
-  filepath: string,
-  content: string,
-  retries = 3,
-  baseDelay = 10,
-): Promise<void> {
-  const fs = getFs()
-  const { promises: fsPromises } = fs
-
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      await fsPromises.writeFile(filepath, content)
-      /* c8 ignore start - Windows-only flush+verify loop. Tested on
-         Windows runners. */
-      // On Windows, add a delay and verify file exists to ensure it's fully flushed
-      // This prevents ENOENT errors when immediately reading after write
-      // Windows CI runners are significantly slower than local development
-      if (process.platform === 'win32') {
-        // Initial delay to allow OS to flush the write
-        // eslint-disable-next-line no-await-in-loop
-        await sleep(50)
-        // Verify the file is actually present with retries
-        let accessRetries = 0
-        const maxAccessRetries = 5
-        while (accessRetries < maxAccessRetries) {
-          if (fs.existsSync(filepath)) {
-            // Small final delay to ensure stability
-            // eslint-disable-next-line no-await-in-loop
-            await sleep(10)
-            break
-          }
-          // If file isn't present yet, wait with increasing delays
-          const delay = 20 * (accessRetries + 1)
-          // eslint-disable-next-line no-await-in-loop
-          await sleep(delay)
-          accessRetries++
-        }
-      }
-      /* c8 ignore stop */
-      return
-      // Retry-loop catch fires only when writeFile throws on Windows
-      // file-system races; tests don't simulate EPERM/EBUSY.
-      /* c8 ignore start */
-    } catch (e) {
-      const isLastAttempt = attempt === retries
-      const isRetriableError =
-        isErrnoException(e) &&
-        (e.code === 'EPERM' || e.code === 'EBUSY' || e.code === 'ENOENT')
-
-      if (!isRetriableError || isLastAttempt) {
-        throw e
-      }
-
-      const delay = baseDelay * 2 ** attempt
-      // eslint-disable-next-line no-await-in-loop
-      await sleep(delay)
-    }
-    /* c8 ignore stop */
-  }
-}
-
 /**
  * Get the EditableJson class for JSON file manipulation.
  *
@@ -375,4 +253,126 @@ export function getEditableJsonClass<
     } as EditableJsonConstructor
   }
   return _EditableJsonClass as EditableJsonConstructor<T>
+}
+
+/*@__NO_SIDE_EFFECTS__*/
+export function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
+}
+
+/**
+ * Parse JSON content and extract formatting metadata.
+ * @private
+ */
+export function parseJson(content: string): unknown {
+  return JSONParse(content)
+}
+
+/**
+ * Read file content from disk with retry logic for ENOENT errors.
+ * @private
+ */
+export async function readFile(filepath: string): Promise<string> {
+  const { promises: fsPromises } = getFs()
+
+  // Retry on ENOENT. Windows-only retry-count and delay; tested on
+  // Windows runners. The retry-loop body itself fires only after a
+  // transient ENOENT, which tests don't simulate.
+  /* c8 ignore start */
+  const maxRetries = process.platform === 'win32' ? 5 : 1
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await fsPromises.readFile(filepath, 'utf8')
+    } catch (e) {
+      const isLastAttempt = attempt === maxRetries
+      const isEnoent = isErrnoException(e) && e.code === 'ENOENT'
+
+      if (!isEnoent || isLastAttempt) {
+        throw e
+      }
+
+      const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(delay)
+    }
+  }
+  /* c8 ignore stop */
+
+  /* c8 ignore next 3 - Loop has 'return' on success and 'throw' in
+     each iteration; only reachable if maxRetries is somehow negative. */
+  throw new ErrorCtor(
+    `readFile: exhausted ${maxRetries + 1} attempts reading ${filepath}`,
+  )
+}
+
+/**
+ * Retry a file write operation with exponential backoff on Windows EPERM errors.
+ * Windows can have transient file locking issues with temp directories.
+ * @private
+ */
+export async function retryWrite(
+  filepath: string,
+  content: string,
+  retries = 3,
+  baseDelay = 10,
+): Promise<void> {
+  const fs = getFs()
+  const { promises: fsPromises } = fs
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await fsPromises.writeFile(filepath, content)
+      /* c8 ignore start - Windows-only flush+verify loop. Tested on
+         Windows runners. */
+      // On Windows, add a delay and verify file exists to ensure it's fully flushed
+      // This prevents ENOENT errors when immediately reading after write
+      // Windows CI runners are significantly slower than local development
+      if (process.platform === 'win32') {
+        // Initial delay to allow OS to flush the write
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(50)
+        // Verify the file is actually present with retries
+        let accessRetries = 0
+        const maxAccessRetries = 5
+        while (accessRetries < maxAccessRetries) {
+          if (fs.existsSync(filepath)) {
+            // Small final delay to ensure stability
+            // eslint-disable-next-line no-await-in-loop
+            await sleep(10)
+            break
+          }
+          // If file isn't present yet, wait with increasing delays
+          const delay = 20 * (accessRetries + 1)
+          // eslint-disable-next-line no-await-in-loop
+          await sleep(delay)
+          accessRetries++
+        }
+      }
+      /* c8 ignore stop */
+      return
+      // Retry-loop catch fires only when writeFile throws on Windows
+      // file-system races; tests don't simulate EPERM/EBUSY.
+      /* c8 ignore start */
+    } catch (e) {
+      const isLastAttempt = attempt === retries
+      const isRetriableError =
+        isErrnoException(e) &&
+        (e.code === 'EPERM' || e.code === 'EBUSY' || e.code === 'ENOENT')
+
+      if (!isRetriableError || isLastAttempt) {
+        throw e
+      }
+
+      const delay = baseDelay * 2 ** attempt
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(delay)
+    }
+    /* c8 ignore stop */
+  }
 }

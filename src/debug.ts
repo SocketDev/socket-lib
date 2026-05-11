@@ -78,150 +78,6 @@ export function customLog(...args: unknown[]) {
 /* c8 ignore stop */
 
 /**
- * Extract options from namespaces parameter.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
-  return namespaces !== null && typeof namespaces === 'object'
-    ? ({ __proto__: null, ...namespaces } as DebugOptions)
-    : ({ __proto__: null, namespaces } as DebugOptions)
-}
-
-/**
- * Extract caller information from the stack trace.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getCallerInfo(stackOffset: number = 3): string {
-  let name = ''
-  const captureStackTrace = Error.captureStackTrace
-  // V8 always exposes captureStackTrace; non-function branch fires only
-  // on exotic embedders that strip Error.captureStackTrace.
-  /* c8 ignore start */
-  if (typeof captureStackTrace === 'function') {
-    const obj: { stack?: unknown } = {}
-    captureStackTrace(obj, getCallerInfo)
-    const stack = obj.stack
-    // obj.stack is always a string after captureStackTrace.
-    if (typeof stack === 'string') {
-      let lineCount = 0
-      let lineStart = 0
-      for (let i = 0, { length } = stack; i < length; i += 1) {
-        if (stack[i] === '\n') {
-          lineCount += 1
-          if (lineCount < stackOffset) {
-            // Store the start index of the next line.
-            lineStart = i + 1
-          } else {
-            // Extract the full line and trim it.
-            const line = stack.slice(lineStart, i).trimStart()
-            // Match the function name portion (e.g., "async runFix").
-            const match = /(?<=^at\s+).*?(?=\s+\(|$)/.exec(line)?.[0]
-            /* c8 ignore next - Defensive guard; real V8 stack frames
-               always start with 'at '. */
-            if (match) {
-              name = match
-                // Strip known V8 invocation prefixes to get the name.
-                .replace(/^(?:async|bound|get|new|set)\s+/, '')
-              // V8-specific 'Object.' stack frame prefix; only fires
-              // for stack frames in object literal method calls.
-              if (StringPrototypeStartsWith(name, 'Object.')) {
-                // Strip leading 'Object.' if not an own property of Object.
-                const afterDot = StringPrototypeSlice(name, 7)
-                if (!hasOwn(Object, afterDot)) {
-                  name = afterDot
-                }
-              }
-            }
-            break
-          }
-        }
-      }
-    }
-  }
-  /* c8 ignore stop */
-  return name
-}
-
-/**
- * Get or create a debug instance for a namespace.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getDebugJsInstance(namespace: string) {
-  let inst = debugByNamespace.get(namespace)
-  // Per-namespace cache hit; first-call always misses. Same-namespace
-  // hit fires only when isEnabled() reuses the cached probe.
-  /* c8 ignore start */
-  if (inst) {
-    return inst
-  }
-  if (
-    !getDebug() &&
-    getSocketDebug() &&
-    (namespace === 'error' || namespace === 'notice')
-  ) {
-    debugJs.enable(namespace)
-  }
-  /* c8 ignore stop */
-  /* c8 ignore next - External debug library call */
-  inst = debugJs(namespace)
-  inst.log = customLog
-  debugByNamespace.set(namespace, inst)
-  return inst
-}
-
-/**
- * Lazily load the util module.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getUtil() {
-  if (_util === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _util = /*@__PURE__*/ require('node:util')
-  }
-  return _util as typeof import('node:util')
-}
-
-/**
- * Check if debug is enabled for given namespaces.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function isEnabled(namespaces: string | undefined) {
-  // Check if debugging is enabled at all
-  if (!getSocketDebug()) {
-    return false
-  }
-  if (typeof namespaces !== 'string' || !namespaces || namespaces === '*') {
-    return true
-  }
-  // Namespace splitting logic is based the 'debug' package implementation:
-  // https://github.com/debug-js/debug/blob/4.4.1/src/common.js#L169-L173.
-  const split = namespaces
-    .trim()
-    .replace(/\s+/g, ',')
-    .split(',')
-    .filter(Boolean)
-  const names = []
-  const skips = []
-  for (const ns of split) {
-    if (StringPrototypeStartsWith(ns, '-')) {
-      skips.push(ns.slice(1))
-    } else {
-      names.push(ns)
-    }
-  }
-  if (names.length && !names.some(ns => getDebugJsInstance(ns).enabled)) {
-    return false
-  }
-  return skips.every(ns => !getDebugJsInstance(ns).enabled)
-}
-
-/**
  * Debug output with caller info (wrapper for debugNs with default namespace).
  */
 export function debug(...args: unknown[]): void {
@@ -440,16 +296,6 @@ export function debugLogNs(
 }
 
 /**
- * Create a Node.js util.debuglog compatible function.
- * Returns a function that conditionally writes debug messages to stderr.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function debuglog(section: string) {
-  const util = getUtil()
-  return util.debuglog(section)
-}
-
-/**
  * Debug output with caller info.
  */
 export function debugNs(
@@ -495,6 +341,16 @@ export function debugNs(
 }
 
 /**
+ * Create a Node.js util.debuglog compatible function.
+ * Returns a function that conditionally writes debug messages to stderr.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function debuglog(section: string) {
+  const util = getUtil()
+  return util.debuglog(section)
+}
+
+/**
  * Create timing functions for measuring code execution time.
  * Returns an object with start() and end() methods, plus a callable function.
  */
@@ -526,6 +382,115 @@ export function debugtime(label: string) {
 }
 
 /**
+ * Extract options from namespaces parameter.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
+  return namespaces !== null && typeof namespaces === 'object'
+    ? ({ __proto__: null, ...namespaces } as DebugOptions)
+    : ({ __proto__: null, namespaces } as DebugOptions)
+}
+
+/**
+ * Extract caller information from the stack trace.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getCallerInfo(stackOffset: number = 3): string {
+  let name = ''
+  const captureStackTrace = Error.captureStackTrace
+  // V8 always exposes captureStackTrace; non-function branch fires only
+  // on exotic embedders that strip Error.captureStackTrace.
+  /* c8 ignore start */
+  if (typeof captureStackTrace === 'function') {
+    const obj: { stack?: unknown } = {}
+    captureStackTrace(obj, getCallerInfo)
+    const stack = obj.stack
+    // obj.stack is always a string after captureStackTrace.
+    if (typeof stack === 'string') {
+      let lineCount = 0
+      let lineStart = 0
+      for (let i = 0, { length } = stack; i < length; i += 1) {
+        if (stack[i] === '\n') {
+          lineCount += 1
+          if (lineCount < stackOffset) {
+            // Store the start index of the next line.
+            lineStart = i + 1
+          } else {
+            // Extract the full line and trim it.
+            const line = stack.slice(lineStart, i).trimStart()
+            // Match the function name portion (e.g., "async runFix").
+            const match = /(?<=^at\s+).*?(?=\s+\(|$)/.exec(line)?.[0]
+            /* c8 ignore next - Defensive guard; real V8 stack frames
+               always start with 'at '. */
+            if (match) {
+              name = match
+                // Strip known V8 invocation prefixes to get the name.
+                .replace(/^(?:async|bound|get|new|set)\s+/, '')
+              // V8-specific 'Object.' stack frame prefix; only fires
+              // for stack frames in object literal method calls.
+              if (StringPrototypeStartsWith(name, 'Object.')) {
+                // Strip leading 'Object.' if not an own property of Object.
+                const afterDot = StringPrototypeSlice(name, 7)
+                if (!hasOwn(Object, afterDot)) {
+                  name = afterDot
+                }
+              }
+            }
+            break
+          }
+        }
+      }
+    }
+  }
+  /* c8 ignore stop */
+  return name
+}
+
+/**
+ * Get or create a debug instance for a namespace.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getDebugJsInstance(namespace: string) {
+  let inst = debugByNamespace.get(namespace)
+  // Per-namespace cache hit; first-call always misses. Same-namespace
+  // hit fires only when isEnabled() reuses the cached probe.
+  /* c8 ignore start */
+  if (inst) {
+    return inst
+  }
+  if (
+    !getDebug() &&
+    getSocketDebug() &&
+    (namespace === 'error' || namespace === 'notice')
+  ) {
+    debugJs.enable(namespace)
+  }
+  /* c8 ignore stop */
+  /* c8 ignore next - External debug library call */
+  inst = debugJs(namespace)
+  inst.log = customLog
+  debugByNamespace.set(namespace, inst)
+  return inst
+}
+
+/**
+ * Lazily load the util module.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getUtil() {
+  if (_util === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _util = /*@__PURE__*/ require('node:util')
+  }
+  return _util as typeof import('node:util')
+}
+
+/**
  * Check if debug mode is enabled.
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -539,4 +504,39 @@ export function isDebug(): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isDebugNs(namespaces: string | undefined): boolean {
   return !!getSocketDebug() && isEnabled(namespaces)
+}
+
+/**
+ * Check if debug is enabled for given namespaces.
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function isEnabled(namespaces: string | undefined) {
+  // Check if debugging is enabled at all
+  if (!getSocketDebug()) {
+    return false
+  }
+  if (typeof namespaces !== 'string' || !namespaces || namespaces === '*') {
+    return true
+  }
+  // Namespace splitting logic is based the 'debug' package implementation:
+  // https://github.com/debug-js/debug/blob/4.4.1/src/common.js#L169-L173.
+  const split = namespaces
+    .trim()
+    .replace(/\s+/g, ',')
+    .split(',')
+    .filter(Boolean)
+  const names = []
+  const skips = []
+  for (const ns of split) {
+    if (StringPrototypeStartsWith(ns, '-')) {
+      skips.push(ns.slice(1))
+    } else {
+      names.push(ns)
+    }
+  }
+  if (names.length && !names.some(ns => getDebugJsInstance(ns).enabled)) {
+    return false
+  }
+  return skips.every(ns => !getDebugJsInstance(ns).enabled)
 }

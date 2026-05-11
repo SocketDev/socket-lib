@@ -104,6 +104,17 @@ export const AMBIGUOUS_PROTOTYPE_METHODS = new Map([
  */
 
 /**
+ * Returns the candidates list and hint for an ambiguous method,
+ * or `undefined` if the name isn't ambiguous.
+ *
+ * @param {string} methodName
+ * @returns {{candidates: string[], hint: string}|undefined}
+ */
+export function getAmbiguousCase(methodName) {
+  return AMBIGUOUS_PROTOTYPE_METHODS.get(methodName)
+}
+
+/**
  * Returns true if the property name is in the ambiguous table.
  * Caller decides whether to invoke the static guess path, the AI
  * defer path, or both.
@@ -113,15 +124,4 @@ export const AMBIGUOUS_PROTOTYPE_METHODS = new Map([
  */
 export function isAmbiguousMethod(methodName) {
   return AMBIGUOUS_PROTOTYPE_METHODS.has(methodName)
-}
-
-/**
- * Returns the candidates list and hint for an ambiguous method,
- * or `undefined` if the name isn't ambiguous.
- *
- * @param {string} methodName
- * @returns {{candidates: string[], hint: string}|undefined}
- */
-export function getAmbiguousCase(methodName) {
-  return AMBIGUOUS_PROTOTYPE_METHODS.get(methodName)
 }

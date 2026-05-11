@@ -32,30 +32,6 @@ export function displayWidth(text: string): number {
 }
 
 /**
- * Pad text to specified width with alignment.
- */
-export function padText(
-  text: string,
-  width: number,
-  align: ColumnAlignment = 'left',
-): string {
-  const textWidth = displayWidth(text)
-  const padding = MathMax(0, width - textWidth)
-
-  switch (align) {
-    case 'right':
-      return ' '.repeat(padding) + text
-    case 'center': {
-      const leftPad = Math.floor(padding / 2)
-      const rightPad = padding - leftPad
-      return ' '.repeat(leftPad) + text + ' '.repeat(rightPad)
-    }
-    default:
-      return text + ' '.repeat(padding)
-  }
-}
-
-/**
  * Format data as a simple table without borders.
  * Lighter weight alternative to formatTable().
  *
@@ -212,4 +188,28 @@ export function formatTable(
   ArrayPrototypePush(lines, colors.dim(bottomBorder))
 
   return lines.join('\n')
+}
+
+/**
+ * Pad text to specified width with alignment.
+ */
+export function padText(
+  text: string,
+  width: number,
+  align: ColumnAlignment = 'left',
+): string {
+  const textWidth = displayWidth(text)
+  const padding = MathMax(0, width - textWidth)
+
+  switch (align) {
+    case 'right':
+      return ' '.repeat(padding) + text
+    case 'center': {
+      const leftPad = Math.floor(padding / 2)
+      const rightPad = padding - leftPad
+      return ' '.repeat(leftPad) + text + ' '.repeat(rightPad)
+    }
+    default:
+      return text + ' '.repeat(padding)
+  }
 }

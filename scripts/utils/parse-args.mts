@@ -17,6 +17,31 @@ interface ParseArgsResult {
 }
 
 /**
+ * Extract positional arguments from process.argv.
+ */
+export function getPositionalArgs(startIndex: number = 2): string[] {
+  const args = process.argv.slice(startIndex)
+  const positionals: string[] = []
+
+  for (const arg of args) {
+    // Stop at first flag
+    if (arg.startsWith('-')) {
+      break
+    }
+    positionals.push(arg)
+  }
+
+  return positionals
+}
+
+/**
+ * Check if a specific flag is present in argv.
+ */
+export function hasFlag(flag: string, argv: string[] = process.argv): boolean {
+  return argv.includes(`--${flag}`) || argv.includes(`-${flag.charAt(0)}`)
+}
+
+/**
  * Parse command-line arguments using Node.js built-in parseArgs.
  * Simplified version for build scripts that don't need yargs-parser features.
  */
@@ -52,29 +77,4 @@ export function parseArgs(
     }
     throw e
   }
-}
-
-/**
- * Extract positional arguments from process.argv.
- */
-export function getPositionalArgs(startIndex: number = 2): string[] {
-  const args = process.argv.slice(startIndex)
-  const positionals: string[] = []
-
-  for (const arg of args) {
-    // Stop at first flag
-    if (arg.startsWith('-')) {
-      break
-    }
-    positionals.push(arg)
-  }
-
-  return positionals
-}
-
-/**
- * Check if a specific flag is present in argv.
- */
-export function hasFlag(flag: string, argv: string[] = process.argv): boolean {
-  return argv.includes(`--${flag}`) || argv.includes(`-${flag.charAt(0)}`)
 }

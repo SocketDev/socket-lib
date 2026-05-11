@@ -19,6 +19,24 @@ interface CommandEntry {
 const logger = getDefaultLogger()
 
 /**
+ * Log and run a command.
+ * @param {string} description - Description of what the command does
+ * @param {string} command - The command to run
+ * @param {string[]} args - Arguments
+ * @param {object} options - Spawn options
+ * @returns {Promise<number>} Exit code
+ */
+export async function logAndRun(
+  description: string,
+  command: string,
+  args: string[] = [],
+  options: SpawnOptions = {},
+): Promise<number> {
+  logger.log(description)
+  return runCommand(command, args, options)
+}
+
+/**
  * Run a command and return a promise that resolves with the exit code.
  * @param {string} command - The command to run
  * @param {string[]} args - Arguments to pass to the command
@@ -45,70 +63,6 @@ export async function runCommand(
     }
     throw e
   }
-}
-
-/**
- * Run a command synchronously.
- * @param {string} command - The command to run
- * @param {string[]} args - Arguments to pass to the command
- * @param {object} options - Spawn options
- * @returns {number} Exit code
- */
-export function runCommandSync(
-  command: string,
-  args: string[] = [],
-  options: SpawnSyncOptions = {},
-): number {
-  const result = spawnSync(command, args, {
-    stdio: 'inherit',
-    ...(process.platform === 'win32' && { shell: true }),
-    ...options,
-  })
-
-  return result.status || 0
-}
-
-/**
- * Run a pnpm script.
- * @param {string} scriptName - The pnpm script to run
- * @param {string[]} extraArgs - Additional arguments
- * @param {object} options - Spawn options
- * @returns {Promise<number>} Exit code
- */
-export async function runPnpmScript(
-  scriptName: string,
-  extraArgs: string[] = [],
-  options: SpawnOptions = {},
-): Promise<number> {
-  return runCommand('pnpm', ['run', scriptName, ...extraArgs], options)
-}
-
-/**
- * Run multiple commands in sequence, stopping on first failure.
- * @param {Array<{command: string, args?: string[], options?: object}>} commands
- * @returns {Promise<number>} Exit code of first failing command, or 0 if all succeed
- */
-export async function runSequence(commands: CommandEntry[]): Promise<number> {
-  for (const { args = [], command, options = {} } of commands) {
-    const exitCode = await runCommand(command, args, options)
-    if (exitCode !== 0) {
-      return exitCode
-    }
-  }
-  return 0
-}
-
-/**
- * Run multiple commands in parallel.
- * @param {Array<{command: string, args?: string[], options?: object}>} commands
- * @returns {Promise<number[]>} Array of exit codes
- */
-export async function runParallel(commands: CommandEntry[]): Promise<number[]> {
-  const promises = commands.map(({ args = [], command, options = {} }) =>
-    runCommand(command, args, options),
-  )
-  const results = await Promise.allSettled(promises)
-  return results.map(r => (r.status === 'fulfilled' ? r.value : 1))
 }
 
 /**
@@ -166,19 +120,65 @@ export async function runCommandQuiet(
 }
 
 /**
- * Log and run a command.
- * @param {string} description - Description of what the command does
+ * Run a command synchronously.
  * @param {string} command - The command to run
- * @param {string[]} args - Arguments
+ * @param {string[]} args - Arguments to pass to the command
+ * @param {object} options - Spawn options
+ * @returns {number} Exit code
+ */
+export function runCommandSync(
+  command: string,
+  args: string[] = [],
+  options: SpawnSyncOptions = {},
+): number {
+  const result = spawnSync(command, args, {
+    stdio: 'inherit',
+    ...(process.platform === 'win32' && { shell: true }),
+    ...options,
+  })
+
+  return result.status || 0
+}
+
+/**
+ * Run multiple commands in parallel.
+ * @param {Array<{command: string, args?: string[], options?: object}>} commands
+ * @returns {Promise<number[]>} Array of exit codes
+ */
+export async function runParallel(commands: CommandEntry[]): Promise<number[]> {
+  const promises = commands.map(({ args = [], command, options = {} }) =>
+    runCommand(command, args, options),
+  )
+  const results = await Promise.allSettled(promises)
+  return results.map(r => (r.status === 'fulfilled' ? r.value : 1))
+}
+
+/**
+ * Run a pnpm script.
+ * @param {string} scriptName - The pnpm script to run
+ * @param {string[]} extraArgs - Additional arguments
  * @param {object} options - Spawn options
  * @returns {Promise<number>} Exit code
  */
-export async function logAndRun(
-  description: string,
-  command: string,
-  args: string[] = [],
+export async function runPnpmScript(
+  scriptName: string,
+  extraArgs: string[] = [],
   options: SpawnOptions = {},
 ): Promise<number> {
-  logger.log(description)
-  return runCommand(command, args, options)
+  return runCommand('pnpm', ['run', scriptName, ...extraArgs], options)
+}
+
+/**
+ * Run multiple commands in sequence, stopping on first failure.
+ * @param {Array<{command: string, args?: string[], options?: object}>} commands
+ * @returns {Promise<number>} Exit code of first failing command, or 0 if all succeed
+ */
+export async function runSequence(commands: CommandEntry[]): Promise<number> {
+  for (const { args = [], command, options = {} } of commands) {
+    const exitCode = await runCommand(command, args, options)
+    if (exitCode !== 0) {
+      return exitCode
+    }
+  }
+  return 0
 }

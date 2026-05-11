@@ -67,16 +67,26 @@ const INTEGRITY_PREFIX = 'sha512-'
 const INTEGRITY_BODY_RE = /^[A-Za-z0-9+/=]+$/
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
+/**
+ * Compute both integrity (sha512 SRI) and checksum (sha256 hex) for a
+ * buffer of bytes.
+ */
+export function computeHashes(bytes: Buffer): ComputedHashes {
+  const integrity = `sha512-${hash('sha512', bytes, 'base64')}`
+  const checksum = hash('sha256', bytes, 'hex')
+  return { integrity, checksum }
+}
+
+export function isChecksumString(s: string): boolean {
+  return CHECKSUM_RE.test(s)
+}
+
 export function isIntegrityString(s: string): boolean {
   if (!StringPrototypeStartsWith(s, INTEGRITY_PREFIX)) {
     return false
   }
   const body = StringPrototypeSlice(s, INTEGRITY_PREFIX.length)
   return body.length > 0 && INTEGRITY_BODY_RE.test(body)
-}
-
-export function isChecksumString(s: string): boolean {
-  return CHECKSUM_RE.test(s)
 }
 
 /**
@@ -126,16 +136,6 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
   throw new TypeErrorCtor(
     `Unrecognized hash format. Expected SRI integrity ("sha512-<base64>") or sha256 hex (64 hex chars), got: ${spec}`,
   )
-}
-
-/**
- * Compute both integrity (sha512 SRI) and checksum (sha256 hex) for a
- * buffer of bytes.
- */
-export function computeHashes(bytes: Buffer): ComputedHashes {
-  const integrity = `sha512-${hash('sha512', bytes, 'base64')}`
-  const checksum = hash('sha256', bytes, 'hex')
-  return { integrity, checksum }
 }
 
 /**

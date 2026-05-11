@@ -48,13 +48,6 @@ afterEach(async () => {
   await safeDelete(tmpDir)
 })
 
-export function writeFile(rel: string, content: string): string {
-  const full = path.join(tmpDir, rel)
-  mkdirSync(path.dirname(full), { recursive: true })
-  writeFileSync(full, content, 'utf8')
-  return full
-}
-
 export function makeConfig(
   overrides: Partial<PrimordialsCheckConfig>,
 ): PrimordialsCheckConfig {
@@ -65,6 +58,13 @@ export function makeConfig(
     repoRoot: tmpDir,
     ...overrides,
   }
+}
+
+export function writeFile(rel: string, content: string): string {
+  const full = path.join(tmpDir, rel)
+  mkdirSync(path.dirname(full), { recursive: true })
+  writeFileSync(full, content, 'utf8')
+  return full
 }
 
 describe('checks/primordials', () => {

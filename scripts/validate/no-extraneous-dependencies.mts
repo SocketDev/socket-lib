@@ -41,18 +41,35 @@ const BUILTIN_MODULES = new Set([
 ])
 
 /**
- * Parse JavaScript code into AST
+ * Check if a relative require path resolves to an existing file
  */
-export function parseCode(code, filePath) {
-  try {
-    return parse(code, {
-      allowImportExportEverywhere: true,
-      allowReturnOutsideFunction: true,
-      sourceType: 'unambiguous',
-    })
-  } catch (e) {
-    throw new Error(`Failed to parse ${filePath}: ${e.message}`)
+export function checkFileExists(specifier, fromFile) {
+  const fromDir = path.dirname(fromFile)
+  const extensions = ['', '.js', '.mjs', '.cjs', '.json', '.node']
+
+  // Try with different extensions
+  for (const ext of extensions) {
+    const fullPath = path.resolve(fromDir, specifier + ext)
+    if (existsSync(fullPath)) {
+      return { exists: true, resolvedPath: fullPath }
+    }
   }
+
+  // Try as directory with index file
+  const dirPath = path.resolve(fromDir, specifier)
+  for (const indexFile of [
+    'index.js',
+    'index.mjs',
+    'index.cjs',
+    'index.json',
+  ]) {
+    const indexPath = path.join(dirPath, indexFile)
+    if (existsSync(indexPath)) {
+      return { exists: true, resolvedPath: indexPath }
+    }
+  }
+
+  return { exists: false, resolvedPath: undefined }
 }
 
 /**
@@ -88,63 +105,6 @@ export async function extractRequireSpecifiers(filePath) {
 }
 
 /**
- * Check if a specifier is a bare specifier (package name, not relative path)
- */
-export function isBareSpecifier(specifier) {
-  return !specifier.startsWith('.') && !specifier.startsWith('/')
-}
-
-/**
- * Get package name from a bare specifier (strip subpaths)
- */
-export function getPackageName(specifier) {
-  // Scoped package: @scope/package or @scope/package/subpath
-  if (specifier.startsWith('@')) {
-    const parts = specifier.split('/')
-    if (parts.length >= 2) {
-      return `${parts[0]}/${parts[1]}`
-    }
-    return specifier
-  }
-
-  // Regular package: package or package/subpath
-  const parts = specifier.split('/')
-  return parts[0]
-}
-
-/**
- * Check if a relative require path resolves to an existing file
- */
-export function checkFileExists(specifier, fromFile) {
-  const fromDir = path.dirname(fromFile)
-  const extensions = ['', '.js', '.mjs', '.cjs', '.json', '.node']
-
-  // Try with different extensions
-  for (const ext of extensions) {
-    const fullPath = path.resolve(fromDir, specifier + ext)
-    if (existsSync(fullPath)) {
-      return { exists: true, resolvedPath: fullPath }
-    }
-  }
-
-  // Try as directory with index file
-  const dirPath = path.resolve(fromDir, specifier)
-  for (const indexFile of [
-    'index.js',
-    'index.mjs',
-    'index.cjs',
-    'index.json',
-  ]) {
-    const indexPath = path.join(dirPath, indexFile)
-    if (existsSync(indexPath)) {
-      return { exists: true, resolvedPath: indexPath }
-    }
-  }
-
-  return { exists: false, resolvedPath: undefined }
-}
-
-/**
  * Find all JavaScript files in dist directory recursively
  */
 export async function findDistFiles(distPath) {
@@ -173,6 +133,46 @@ export async function findDistFiles(distPath) {
   }
 
   return files
+}
+
+/**
+ * Get package name from a bare specifier (strip subpaths)
+ */
+export function getPackageName(specifier) {
+  // Scoped package: @scope/package or @scope/package/subpath
+  if (specifier.startsWith('@')) {
+    const parts = specifier.split('/')
+    if (parts.length >= 2) {
+      return `${parts[0]}/${parts[1]}`
+    }
+    return specifier
+  }
+
+  // Regular package: package or package/subpath
+  const parts = specifier.split('/')
+  return parts[0]
+}
+
+/**
+ * Check if a specifier is a bare specifier (package name, not relative path)
+ */
+export function isBareSpecifier(specifier) {
+  return !specifier.startsWith('.') && !specifier.startsWith('/')
+}
+
+/**
+ * Parse JavaScript code into AST
+ */
+export function parseCode(code, filePath) {
+  try {
+    return parse(code, {
+      allowImportExportEverywhere: true,
+      allowReturnOutsideFunction: true,
+      sourceType: 'unambiguous',
+    })
+  } catch (e) {
+    throw new Error(`Failed to parse ${filePath}: ${e.message}`)
+  }
 }
 
 /**

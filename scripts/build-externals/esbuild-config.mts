@@ -285,36 +285,6 @@ export function createStubPlugin(
 }
 
 /**
- * Get package-specific esbuild options.
- *
- * @param {string} packageName - The package name
- * @returns {object} Package-specific esbuild options
- */
-export function getPackageSpecificOptions(packageName) {
-  const opts = {}
-
-  if (packageName === 'browserslist') {
-    // Browserslist's data updates frequently - we can exclude some update checking.
-    opts.define = {
-      'process.versions.node': '"18.0.0"',
-    }
-  } else if (packageName === '@socketregistry/packageurl-js') {
-    // packageurl-js imports from socket-lib, creating a circular dependency.
-    // Mark socket-lib imports as external to avoid bundling issues.
-    opts.external = [...(opts.external || []), '@socketsecurity/lib/*']
-  } else if (packageName === 'yargs-parser') {
-    // yargs-parser uses import.meta.url which isn't available in CommonJS.
-    // Replace import.meta.url with __filename wrapped in pathToFileURL.
-    opts.define = {
-      ...opts.define,
-      'import.meta.url': '__filename',
-    }
-  }
-
-  return opts
-}
-
-/**
  * Get base esbuild configuration for bundling.
  *
  * @param {string} entryPoint - Entry point path
@@ -408,4 +378,34 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
     // Footer for generated code (if needed)
     ...(packageOpts.footer && { footer: packageOpts.footer }),
   }
+}
+
+/**
+ * Get package-specific esbuild options.
+ *
+ * @param {string} packageName - The package name
+ * @returns {object} Package-specific esbuild options
+ */
+export function getPackageSpecificOptions(packageName) {
+  const opts = {}
+
+  if (packageName === 'browserslist') {
+    // Browserslist's data updates frequently - we can exclude some update checking.
+    opts.define = {
+      'process.versions.node': '"18.0.0"',
+    }
+  } else if (packageName === '@socketregistry/packageurl-js') {
+    // packageurl-js imports from socket-lib, creating a circular dependency.
+    // Mark socket-lib imports as external to avoid bundling issues.
+    opts.external = [...(opts.external || []), '@socketsecurity/lib/*']
+  } else if (packageName === 'yargs-parser') {
+    // yargs-parser uses import.meta.url which isn't available in CommonJS.
+    // Replace import.meta.url with __filename wrapped in pathToFileURL.
+    opts.define = {
+      ...opts.define,
+      'import.meta.url': '__filename',
+    }
+  }
+
+  return opts
 }

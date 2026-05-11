@@ -12,23 +12,6 @@ import {
 
 let _fs: typeof import('node:fs') | undefined
 /**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js fs module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
  * Clear all DLX package installations.
  *
  * @example
@@ -93,4 +76,21 @@ export async function ensureDlxDir(): Promise<void> {
  */
 export function ensureDlxDirSync(): void {
   safeMkdirSync(getSocketDlxDir())
+}
+
+/**
+ * Lazily load the fs module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @returns The Node.js fs module
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getFs() {
+  if (_fs === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _fs = /*@__PURE__*/ require('node:fs')
+  }
+  return _fs as typeof import('node:fs')
 }

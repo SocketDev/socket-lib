@@ -22,37 +22,6 @@ let _matchesGlob: ((p: string, pattern: string) => boolean) | undefined
 let _matchesGlobProbed = false
 
 /**
- * Resolve `path.matchesGlob` (or `undefined` if the runtime predates
- * it). Probes once and caches the result for every subsequent call.
- *
- * Used by `getGlobMatcher`'s narrow fast-path — see the conditions
- * spelled out at the call site. Exported for unit tests.
- *
- * @internal
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getMatchesGlob():
-  | ((p: string, pattern: string) => boolean)
-  | undefined {
-  if (!_matchesGlobProbed) {
-    const fn = /*@__PURE__*/ (
-      require('node:path') as typeof import('node:path') & {
-        matchesGlob?: unknown
-      }
-    ).matchesGlob
-    // path.matchesGlob is present on Node 22+; missing-fn arm fires
-    // only on older runtimes.
-    /* c8 ignore start */
-    if (typeof fn === 'function') {
-      _matchesGlob = fn as (p: string, pattern: string) => boolean
-    }
-    /* c8 ignore stop */
-    _matchesGlobProbed = true
-  }
-  return _matchesGlob
-}
-
-/**
  * Return a glob-matcher function, memoized by pattern + options.
  *
  * The returned function is a fast synchronous predicate built on picomatch.
@@ -175,4 +144,35 @@ export function getGlobMatcher(
 
   matcherCache.set(key, matcher)
   return matcher
+}
+
+/**
+ * Resolve `path.matchesGlob` (or `undefined` if the runtime predates
+ * it). Probes once and caches the result for every subsequent call.
+ *
+ * Used by `getGlobMatcher`'s narrow fast-path — see the conditions
+ * spelled out at the call site. Exported for unit tests.
+ *
+ * @internal
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getMatchesGlob():
+  | ((p: string, pattern: string) => boolean)
+  | undefined {
+  if (!_matchesGlobProbed) {
+    const fn = /*@__PURE__*/ (
+      require('node:path') as typeof import('node:path') & {
+        matchesGlob?: unknown
+      }
+    ).matchesGlob
+    // path.matchesGlob is present on Node 22+; missing-fn arm fires
+    // only on older runtimes.
+    /* c8 ignore start */
+    if (typeof fn === 'function') {
+      _matchesGlob = fn as (p: string, pattern: string) => boolean
+    }
+    /* c8 ignore stop */
+    _matchesGlobProbed = true
+  }
+  return _matchesGlob
 }

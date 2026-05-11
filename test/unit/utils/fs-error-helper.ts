@@ -90,6 +90,35 @@ export function makeErrnoError(
 }
 
 /**
+ * Async variant — spies on `fs.promises.<op>`. Same path-scoped match,
+ * but throws via a rejected Promise.
+ */
+export function mockFsAsyncError(spec: FsAsyncErrorSpec): () => void {
+  const target = fsPromisesBuiltin as unknown as Record<string, unknown>
+  const original = target[spec.op] as (...args: unknown[]) => unknown
+  if (typeof original !== 'function') {
+    throw new Error(`fs.promises.${spec.op} is not a function`)
+  }
+  let used = false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const spy: any = vi
+    .spyOn(fsPromisesBuiltin as never, spec.op as never)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .mockImplementation(async (...args: any[]) => {
+      const argPath = typeof args[0] === 'string' ? args[0] : String(args[0])
+      const matches = argPath === spec.path || argPath.startsWith(spec.path)
+      if (!matches || (spec.once && used)) {
+        return await original(...args)
+      }
+      used = true
+      throw makeErrnoError(spec.code, spec.op, spec.path)
+    })
+  return () => {
+    spy.mockRestore()
+  }
+}
+
+/**
  * Spy on a sync fs method so calls matching `spec.path` throw an
  * errno-typed Error. Returns a restore function the caller must invoke
  * (in a finally block or afterEach) to undo the spy.
@@ -110,35 +139,6 @@ export function mockFsError(spec: FsErrorSpec): () => void {
       const matches = argPath === spec.path || argPath.startsWith(spec.path)
       if (!matches || (spec.once && used)) {
         return original(...args)
-      }
-      used = true
-      throw makeErrnoError(spec.code, spec.op, spec.path)
-    })
-  return () => {
-    spy.mockRestore()
-  }
-}
-
-/**
- * Async variant — spies on `fs.promises.<op>`. Same path-scoped match,
- * but throws via a rejected Promise.
- */
-export function mockFsAsyncError(spec: FsAsyncErrorSpec): () => void {
-  const target = fsPromisesBuiltin as unknown as Record<string, unknown>
-  const original = target[spec.op] as (...args: unknown[]) => unknown
-  if (typeof original !== 'function') {
-    throw new Error(`fs.promises.${spec.op} is not a function`)
-  }
-  let used = false
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const spy: any = vi
-    .spyOn(fsPromisesBuiltin as never, spec.op as never)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .mockImplementation(async (...args: any[]) => {
-      const argPath = typeof args[0] === 'string' ? args[0] : String(args[0])
-      const matches = argPath === spec.path || argPath.startsWith(spec.path)
-      if (!matches || (spec.once && used)) {
-        return await original(...args)
       }
       used = true
       throw makeErrnoError(spec.code, spec.op, spec.path)

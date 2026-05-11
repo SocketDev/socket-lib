@@ -27,6 +27,24 @@ import { normalizePath } from '../paths/normalize'
 let _isSea: boolean | undefined
 
 /**
+ * Get the current SEA binary path.
+ * Only valid when running as a SEA binary.
+ *
+ * @example
+ * ```typescript
+ * const binPath = getSeaBinaryPath()
+ * if (binPath) {
+ *   console.log(`Running as SEA binary: ${binPath}`)
+ * }
+ * ```
+ */
+export function getSeaBinaryPath(): string | undefined {
+  return isSeaBinary() && process.argv[0]
+    ? normalizePath(process.argv[0])
+    : undefined
+}
+
+/**
  * Detect if the current process is running as a SEA binary.
  * Uses Node.js 24+ native API with caching for performance.
  *
@@ -51,22 +69,4 @@ export function isSeaBinary(): boolean {
     }
   }
   return _isSea ?? false
-}
-
-/**
- * Get the current SEA binary path.
- * Only valid when running as a SEA binary.
- *
- * @example
- * ```typescript
- * const binPath = getSeaBinaryPath()
- * if (binPath) {
- *   console.log(`Running as SEA binary: ${binPath}`)
- * }
- * ```
- */
-export function getSeaBinaryPath(): string | undefined {
-  return isSeaBinary() && process.argv[0]
-    ? normalizePath(process.argv[0])
-    : undefined
 }
