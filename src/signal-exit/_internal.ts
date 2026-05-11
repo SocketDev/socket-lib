@@ -52,62 +52,6 @@ let _emitter: SignalExitEmitter | undefined
 let _loaded = false
 let _signals: string[] | undefined
 
-/**
- * Read the loaded flag from a sibling leaf (lifecycle / on-exit).
- * @private
- */
-export function isLoaded(): boolean {
-  return _loaded
-}
-
-/**
- * Set the `loaded` flag from a sibling leaf (load / unload).
- * @private
- */
-export function setLoaded(value: boolean): void {
-  _loaded = value
-}
-
-/**
- * Get the cached signal list. Triggers lazy init on first call;
- * after `load()` runs it returns the filtered subset of successfully
- * registered signals instead of the full default list.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSignals(): string[] {
-  if (_signals === undefined) {
-    _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
-    // WIN32-only branch tested on Windows runners; Linux branch on
-    // Linux runners. Each runs on its target platform only.
-    /* c8 ignore start */
-    if (!WIN32) {
-      _signals.push(
-        'SIGVTALRM',
-        'SIGXCPU',
-        'SIGXFSZ',
-        'SIGUSR2',
-        'SIGTRAP',
-        'SIGSYS',
-        'SIGQUIT',
-        'SIGIOT',
-      )
-    }
-    if (platform === 'linux') {
-      _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
-    }
-    /* c8 ignore stop */
-  }
-  return _signals as string[]
-}
-
-/**
- * Replace the cached signal list (used by `load()`'s filter step).
- * @private
- */
-export function setSignals(value: string[]): void {
-  _signals = value
-}
-
 /* c8 ignore start - Only called from signal-listener body and
    processEmit/processReallyExit interceptors, all of which are
    c8-ignored. Cannot be reached from the test runner. */
@@ -166,4 +110,60 @@ export function getEvents() {
   }
   /* c8 ignore stop */
   return _events as typeof import('node:events')
+}
+
+/**
+ * Get the cached signal list. Triggers lazy init on first call;
+ * after `load()` runs it returns the filtered subset of successfully
+ * registered signals instead of the full default list.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSignals(): string[] {
+  if (_signals === undefined) {
+    _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
+    // WIN32-only branch tested on Windows runners; Linux branch on
+    // Linux runners. Each runs on its target platform only.
+    /* c8 ignore start */
+    if (!WIN32) {
+      _signals.push(
+        'SIGVTALRM',
+        'SIGXCPU',
+        'SIGXFSZ',
+        'SIGUSR2',
+        'SIGTRAP',
+        'SIGSYS',
+        'SIGQUIT',
+        'SIGIOT',
+      )
+    }
+    if (platform === 'linux') {
+      _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
+    }
+    /* c8 ignore stop */
+  }
+  return _signals as string[]
+}
+
+/**
+ * Read the loaded flag from a sibling leaf (lifecycle / on-exit).
+ * @private
+ */
+export function isLoaded(): boolean {
+  return _loaded
+}
+
+/**
+ * Set the `loaded` flag from a sibling leaf (load / unload).
+ * @private
+ */
+export function setLoaded(value: boolean): void {
+  _loaded = value
+}
+
+/**
+ * Replace the cached signal list (used by `load()`'s filter step).
+ * @private
+ */
+export function setSignals(value: string[]): void {
+  _signals = value
 }
