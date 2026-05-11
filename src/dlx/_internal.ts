@@ -11,8 +11,25 @@
 
 import { MapCtor } from '../primordials/map-set'
 
+let _crypto: typeof import('node:crypto') | undefined
 let _fs: typeof import('node:fs') | undefined
 let _path: typeof import('node:path') | undefined
+
+/**
+ * Lazily load the crypto module to avoid Webpack errors.
+ * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ *
+ * @private
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getCrypto() {
+  if (_crypto === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    _crypto = /*@__PURE__*/ require('node:crypto')
+  }
+  return _crypto as typeof import('node:crypto')
+}
 
 /**
  * Lazily load the fs module to avoid Webpack errors.
