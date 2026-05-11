@@ -15,7 +15,7 @@ import path from 'node:path'
 import type {
   EditablePackageJson,
   PackageJson,
-} from '@socketsecurity/lib/packages'
+} from '@socketsecurity/lib/packages/types'
 import {
   getEditablePackageJsonClass,
   pkgJsonToEditable,

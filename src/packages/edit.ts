@@ -20,7 +20,7 @@ import type {
   NormalizeOptions,
   PackageJson,
   SaveOptions,
-} from '../packages'
+} from './types'
 import { isNodeModules } from '../paths/normalize'
 import { normalizePackageJson } from './normalize'
 import { resolvePackageJsonDirname } from '../paths/packages'

@@ -30,7 +30,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 
-import { joinOr } from '../arrays'
+import { joinOr } from '../arrays/join'
 
 // ── Config ──────────────────────────────────────────────────────────
 

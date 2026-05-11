@@ -1,77 +1,11 @@
 /**
- * @fileoverview Package registry management with Socket.dev specific utilities.
- * Provides npm package analysis, dependency resolution, and registry operations.
+ * @fileoverview Public type surface for `packages/*` modules — the
+ * `PackageJson` shape (npm-extended with a `socket` field) plus option
+ * bags consumed across `edit` / `manifest` / `normalize` / `operations`
+ * / `provenance` / `licenses`. Pure types, no runtime side effects.
  */
 
-import type { CategoryString } from './types/types'
-
-import {
-  getEditablePackageJsonClass,
-  pkgJsonToEditable,
-  toEditablePackageJson,
-  toEditablePackageJsonSync,
-} from './packages/edit'
-import {
-  findTypesForSubpath,
-  getExportFilePaths,
-  getSubpaths,
-  isConditionalExports,
-  isSubpathExports,
-  resolvePackageJsonEntryExports,
-} from './packages/exports'
-import { isolatePackage } from './packages/isolation'
-import {
-  collectIncompatibleLicenses,
-  collectLicenseWarnings,
-  createAstNode,
-  createBinaryOperationNode,
-  createLicenseNode,
-  parseSpdxExp,
-  resolvePackageLicenses,
-  visitLicenses,
-} from './packages/licenses'
-import {
-  createPackageJson,
-  fetchPackageManifest,
-  fetchPackagePackument,
-} from './packages/manifest'
-import {
-  normalizePackageJson,
-  resolveEscapedScope,
-  resolveOriginalPackageName,
-  unescapeScope,
-} from './packages/normalize'
-import {
-  extractPackage,
-  findPackageExtensions,
-  getReleaseTag,
-  packPackage,
-  readPackageJson,
-  readPackageJsonSync,
-  resolveGitHubTgzUrl,
-  resolvePackageName,
-  resolveRegistryPackageName,
-} from './packages/operations'
-import {
-  fetchPackageProvenance,
-  getProvenanceDetails,
-} from './packages/provenance'
-import {
-  getRepoUrlDetails,
-  gitHubTagRefUrl,
-  gitHubTgzUrl,
-  isGitHubTgzSpec,
-  isGitHubUrlSpec,
-} from './packages/specs'
-import {
-  isBlessedPackageName,
-  isRegistryFetcherType,
-  isValidPackageName,
-} from './packages/validation'
-import {
-  resolvePackageJsonDirname,
-  resolvePackageJsonPath,
-} from './paths/packages'
+import type { CategoryString } from '../types/types'
 
 // Type for package.json exports field.
 type PackageExports = {
@@ -80,7 +14,7 @@ type PackageExports = {
 
 // Re-export the EditablePackageJson instance type for convenient access
 export type EditablePackageJson =
-  import('./packages/edit').EditablePackageJsonInstance
+  import('./edit').EditablePackageJsonInstance
 
 /**
  * Extended PackageJson type based on NPMCliPackageJson.Content with Socket-specific additions.
@@ -215,69 +149,4 @@ export type PacoteOptions = {
   packumentCache?: Map<string, unknown> | undefined
   preferOffline?: boolean | undefined
   fullMetadata?: boolean | undefined
-}
-
-export type {
-  IsolatePackageOptions,
-  IsolatePackageResult,
-} from './packages/isolation'
-
-export type {
-  InternalAstNode,
-  InternalBinaryOperationNode,
-  InternalLicenseNode,
-  LicenseVisitor,
-  SpdxAstNode,
-  SpdxBinaryOperationNode,
-  SpdxLicenseNode,
-} from './packages/licenses'
-
-export {
-  collectIncompatibleLicenses,
-  collectLicenseWarnings,
-  createAstNode,
-  createBinaryOperationNode,
-  createLicenseNode,
-  createPackageJson,
-  extractPackage,
-  fetchPackageManifest,
-  fetchPackagePackument,
-  fetchPackageProvenance,
-  findPackageExtensions,
-  findTypesForSubpath,
-  getEditablePackageJsonClass,
-  getExportFilePaths,
-  getProvenanceDetails,
-  getReleaseTag,
-  getRepoUrlDetails,
-  getSubpaths,
-  gitHubTagRefUrl,
-  gitHubTgzUrl,
-  isBlessedPackageName,
-  isConditionalExports,
-  isGitHubTgzSpec,
-  isGitHubUrlSpec,
-  isolatePackage,
-  isRegistryFetcherType,
-  isSubpathExports,
-  isValidPackageName,
-  normalizePackageJson,
-  packPackage,
-  parseSpdxExp,
-  pkgJsonToEditable,
-  readPackageJson,
-  readPackageJsonSync,
-  resolveEscapedScope,
-  resolveGitHubTgzUrl,
-  resolveOriginalPackageName,
-  resolvePackageJsonDirname,
-  resolvePackageJsonEntryExports,
-  resolvePackageJsonPath,
-  resolvePackageLicenses,
-  resolvePackageName,
-  resolveRegistryPackageName,
-  toEditablePackageJson,
-  toEditablePackageJsonSync,
-  unescapeScope,
-  visitLicenses,
 }

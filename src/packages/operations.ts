@@ -28,7 +28,7 @@ import type {
   PackageJson,
   PacoteOptions,
   ReadPackageJsonOptions,
-} from '../packages'
+} from './types'
 import { normalizePackageJson } from './normalize'
 import { resolvePackageJsonPath } from '../paths/packages'
 import {
@@ -379,5 +379,5 @@ export function resolveRegistryPackageName(pkgName: string): string {
     : pkgName
 }
 
-// Re-export types from lib/packages.
-export type { PackageJson } from '../packages'
+// Re-export types from packages/types.
+export type { PackageJson } from './types'

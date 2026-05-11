@@ -8,7 +8,7 @@
  */
 
 import { LOOP_SENTINEL } from '../constants/core'
-import { isArray } from '../arrays'
+import { isArray } from '../arrays/predicates'
 import { ErrorCtor } from '../primordials/error'
 import { ReflectOwnKeys } from '../primordials/reflect'
 

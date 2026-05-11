@@ -11,7 +11,7 @@ import normalizePackageData from '../external/normalize-package-data'
 import { merge } from '../objects/mutate'
 import { findPackageExtensions } from './operations'
 
-import type { NormalizeOptions, PackageJson } from '../packages'
+import type { NormalizeOptions, PackageJson } from './types'
 
 import { RegExpCtor, RegExpPrototypeExec } from '../primordials/regexp'
 

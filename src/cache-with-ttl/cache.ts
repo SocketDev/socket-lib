@@ -18,7 +18,9 @@
  *   `expiresAt` are treated as expired.
  */
 
-import * as cacache from '../cacache'
+import { clear as cacacheClear } from '../cacache/clear'
+import { safeGet as cacacheSafeGet } from '../cacache/read'
+import { put as cacachePut, remove as cacacheRemove } from '../cacache/write'
 import { DateNow } from '../primordials/date'
 import { TypeErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
@@ -175,7 +177,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     }
 
     // Check persistent cache.
-    const cacheEntry = await cacache.safeGet(fullKey)
+    const cacheEntry = await cacacheSafeGet(fullKey)
     if (cacheEntry) {
       let entry: TtlCacheEntry<T>
       try {
@@ -183,7 +185,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       } catch {
         // Corrupted cache entry, treat as miss and remove.
         try {
-          await cacache.remove(fullKey)
+          await cacacheRemove(fullKey)
         } catch {
           // Ignore removal errors.
         }
@@ -200,7 +202,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
       // or cache dir is inaccessible.
       /* c8 ignore start */
       try {
-        await cacache.remove(fullKey)
+        await cacacheRemove(fullKey)
       } catch {}
       /* c8 ignore stop */
     }
@@ -234,7 +236,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Check persistent cache for entries not in memory.
     const cacheDir = (await import('../paths/socket')).getSocketCacacheDir()
-    const cacacheModule = await import('../cacache')
+    const cacacheModule = await import('../cacache/accessor')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 
     for await (const cacheEntry of stream) {
@@ -258,7 +260,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
       // Get entry from cache.
       try {
-        const entry = await cacache.safeGet(cacheEntry.key)
+        const entry = await cacacheSafeGet(cacheEntry.key)
         if (!entry) {
           continue
         }
@@ -269,7 +271,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
         // Skip if expired.
         if (isExpired(parsed)) {
-          await cacache.remove(cacheEntry.key)
+          await cacacheRemove(cacheEntry.key)
           continue
         }
 
@@ -308,7 +310,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Update persistent cache (don't fail if this errors).
     try {
-      await cacache.put(fullKey, JSON.stringify(entry), {
+      await cacachePut(fullKey, JSON.stringify(entry), {
         metadata: { expiresAt: entry.expiresAt },
       })
     } catch {
@@ -373,7 +375,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     const fullKey = buildKey(key)
     memoCache.delete(fullKey)
     try {
-      await cacache.remove(fullKey)
+      await cacacheRemove(fullKey)
     } catch {
       // Ignore removal errors - entry may not exist or cache may be inaccessible.
     }
@@ -396,7 +398,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     }
 
     // Delete matching persistent cache entries.
-    const removed = await cacache.clear({ prefix: fullPrefix })
+    const removed = await cacacheClear({ prefix: fullPrefix })
     return (removed ?? 0) as number
   }
 

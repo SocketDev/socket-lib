@@ -13,20 +13,16 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import {
-  clear,
-  get,
-  getCacache,
-  put,
-  remove,
-  safeGet,
-  withTmp,
-} from '@socketsecurity/lib/cacache'
+import { getCacache } from '@socketsecurity/lib/cacache/accessor'
+import { clear } from '@socketsecurity/lib/cacache/clear'
+import { get, safeGet } from '@socketsecurity/lib/cacache/read'
+import { withTmp } from '@socketsecurity/lib/cacache/tmp'
 import type {
   GetOptions,
   PutOptions,
   RemoveOptions,
-} from '@socketsecurity/lib/cacache'
+} from '@socketsecurity/lib/cacache/types'
+import { put, remove } from '@socketsecurity/lib/cacache/write'
 
 describe('cacache', () => {
   describe('getCacache', () => {

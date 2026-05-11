@@ -12,7 +12,7 @@ import { getOsTmpDir } from '../paths/socket'
 import { spawn } from '../spawn/core'
 import { readPackageJson } from './operations'
 
-import type { PackageJson } from '../packages'
+import type { PackageJson } from './types'
 
 import { ErrorCtor } from '../primordials/error'
 

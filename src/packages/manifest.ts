@@ -17,13 +17,13 @@ import npmPackageArg from '../external/npm-package-arg'
 import pacote from '../external/pacote'
 import semver from '../external/semver'
 
-import { isArray } from '../arrays'
+import { isArray } from '../arrays/predicates'
 import { isObjectObject } from '../objects/predicates'
 import { objectEntries } from '../objects/sort'
 import { resolvePackageJsonEntryExports } from './exports'
 import { isRegistryFetcherType } from './validation'
 
-import type { PackageJson, PacoteOptions } from '../packages'
+import type { PackageJson, PacoteOptions } from './types'
 
 import { ObjectFromEntries } from '../primordials/object'
 const abortSignal = getAbortSignal()

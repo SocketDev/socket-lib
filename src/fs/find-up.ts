@@ -10,7 +10,7 @@
 
 import process from 'node:process'
 
-import { isArray } from '../arrays'
+import { isArray } from '../arrays/predicates'
 import { getAbortSignal } from '../constants/process'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'

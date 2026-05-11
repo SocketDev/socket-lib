@@ -4,7 +4,7 @@
  * tolerate `null` / `undefined` without throwing.
  */
 
-import { isArray } from '../arrays'
+import { isArray } from '../arrays/predicates'
 import {
   ObjectGetPrototypeOf,
   ObjectHasOwn,

@@ -7,7 +7,7 @@
  * callers don't race-condition each other.
  */
 
-import { isArray } from '../arrays'
+import { isArray } from '../arrays/predicates'
 import { isErrnoException } from '../errors/predicates'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'

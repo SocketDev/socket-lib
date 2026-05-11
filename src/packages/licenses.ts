@@ -9,7 +9,7 @@ import spdxExpParse from '../external/spdx-expression-parse'
 import { hasOwn } from '../objects/predicates'
 import { normalizePath } from '../paths/normalize'
 
-import type { LicenseNode } from '../packages'
+import type { LicenseNode } from './types'
 
 import { ErrorCtor } from '../primordials/error'
 

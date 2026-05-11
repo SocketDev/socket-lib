@@ -183,10 +183,30 @@
       "types": "./dist/argv/parse.d.ts",
       "default": "./dist/argv/parse.js"
     },
-    "./arrays": {
-      "source": "./src/arrays.ts",
-      "types": "./dist/arrays.d.ts",
-      "default": "./dist/arrays.js"
+    "./arrays/chunk": {
+      "source": "./src/arrays/chunk.ts",
+      "types": "./dist/arrays/chunk.d.ts",
+      "default": "./dist/arrays/chunk.js"
+    },
+    "./arrays/join": {
+      "source": "./src/arrays/join.ts",
+      "types": "./dist/arrays/join.d.ts",
+      "default": "./dist/arrays/join.js"
+    },
+    "./arrays/predicates": {
+      "source": "./src/arrays/predicates.ts",
+      "types": "./dist/arrays/predicates.d.ts",
+      "default": "./dist/arrays/predicates.js"
+    },
+    "./arrays/types": {
+      "source": "./src/arrays/types.ts",
+      "types": "./dist/arrays/types.d.ts",
+      "default": "./dist/arrays/types.js"
+    },
+    "./arrays/unique": {
+      "source": "./src/arrays/unique.ts",
+      "types": "./dist/arrays/unique.d.ts",
+      "default": "./dist/arrays/unique.js"
     },
     "./bin/check": {
       "source": "./src/bin/check.ts",
@@ -233,10 +253,35 @@
       "types": "./dist/bin/which.d.ts",
       "default": "./dist/bin/which.js"
     },
-    "./cacache": {
-      "source": "./src/cacache.ts",
-      "types": "./dist/cacache.d.ts",
-      "default": "./dist/cacache.js"
+    "./cacache/accessor": {
+      "source": "./src/cacache/accessor.ts",
+      "types": "./dist/cacache/accessor.d.ts",
+      "default": "./dist/cacache/accessor.js"
+    },
+    "./cacache/clear": {
+      "source": "./src/cacache/clear.ts",
+      "types": "./dist/cacache/clear.d.ts",
+      "default": "./dist/cacache/clear.js"
+    },
+    "./cacache/read": {
+      "source": "./src/cacache/read.ts",
+      "types": "./dist/cacache/read.d.ts",
+      "default": "./dist/cacache/read.js"
+    },
+    "./cacache/tmp": {
+      "source": "./src/cacache/tmp.ts",
+      "types": "./dist/cacache/tmp.d.ts",
+      "default": "./dist/cacache/tmp.js"
+    },
+    "./cacache/types": {
+      "source": "./src/cacache/types.ts",
+      "types": "./dist/cacache/types.d.ts",
+      "default": "./dist/cacache/types.js"
+    },
+    "./cacache/write": {
+      "source": "./src/cacache/write.ts",
+      "types": "./dist/cacache/write.d.ts",
+      "default": "./dist/cacache/write.js"
     },
     "./cache-with-ttl/cache": {
       "source": "./src/cache-with-ttl/cache.ts",
@@ -1043,11 +1088,6 @@
       "types": "./dist/package-extensions/types.d.ts",
       "default": "./dist/package-extensions/types.js"
     },
-    "./packages": {
-      "source": "./src/packages.ts",
-      "types": "./dist/packages.d.ts",
-      "default": "./dist/packages.js"
-    },
     "./packages/edit": {
       "source": "./src/packages/edit.ts",
       "types": "./dist/packages/edit.d.ts",
@@ -1092,6 +1132,11 @@
       "source": "./src/packages/specs.ts",
       "types": "./dist/packages/specs.d.ts",
       "default": "./dist/packages/specs.js"
+    },
+    "./packages/types": {
+      "source": "./src/packages/types.ts",
+      "types": "./dist/packages/types.d.ts",
+      "default": "./dist/packages/types.js"
     },
     "./packages/validation": {
       "source": "./src/packages/validation.ts",
@@ -1626,10 +1671,25 @@
       "types": "./dist/types/types.d.ts",
       "default": "./dist/types/types.js"
     },
-    "./url": {
-      "source": "./src/url.ts",
-      "types": "./dist/url.d.ts",
-      "default": "./dist/url.js"
+    "./url/parse": {
+      "source": "./src/url/parse.ts",
+      "types": "./dist/url/parse.d.ts",
+      "default": "./dist/url/parse.js"
+    },
+    "./url/predicates": {
+      "source": "./src/url/predicates.ts",
+      "types": "./dist/url/predicates.d.ts",
+      "default": "./dist/url/predicates.js"
+    },
+    "./url/search-params": {
+      "source": "./src/url/search-params.ts",
+      "types": "./dist/url/search-params.d.ts",
+      "default": "./dist/url/search-params.js"
+    },
+    "./url/types": {
+      "source": "./src/url/types.ts",
+      "types": "./dist/url/types.d.ts",
+      "default": "./dist/url/types.js"
     },
     "./versions": {
       "source": "./src/versions.ts",

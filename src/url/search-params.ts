@@ -1,104 +1,20 @@
 /**
- * @fileoverview URL parsing and validation utilities.
- * Provides URL validation, normalization, and parsing helpers.
+ * @fileoverview URL search-param coercion helpers — `urlSearchParamAs*`
+ * normalise a raw `string | null | undefined` value into a typed shape
+ * (array / boolean / number / string) with a default. `urlSearchParamsGet*`
+ * take a `URLSearchParams` instance and a key.
  */
 
-import { NumberIsNaN } from './primordials/number'
+import { NumberIsNaN } from '../primordials/number'
 
-import {
-  StringPrototypeEndsWith,
-  StringPrototypeReplace,
-} from './primordials/string'
+import type {
+  UrlSearchParamAsBooleanOptions,
+  UrlSearchParamAsNumberOptions,
+  UrlSearchParamAsStringOptions,
+  UrlSearchParamsGetBooleanOptions,
+} from './types'
+
 const BooleanCtor = Boolean
-const UrlCtor = URL
-
-export interface CreateRelativeUrlOptions {
-  base?: string
-}
-
-export interface UrlSearchParamAsBooleanOptions {
-  defaultValue?: boolean
-}
-
-export interface UrlSearchParamAsNumberOptions {
-  defaultValue?: number
-}
-
-export interface UrlSearchParamAsStringOptions {
-  defaultValue?: string
-}
-
-export interface UrlSearchParamsGetBooleanOptions {
-  defaultValue?: boolean
-}
-
-/**
- * Create a relative URL for testing.
- *
- * @example
- * ```typescript
- * createRelativeUrl('/api/test')                                    // 'api/test'
- * createRelativeUrl('/api/test', { base: 'https://example.com' })  // 'https://example.com/api/test'
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function createRelativeUrl(
-  path: string,
-  options?: CreateRelativeUrlOptions | undefined,
-): string {
-  const { base = '' } = {
-    __proto__: null,
-    ...options,
-  } as CreateRelativeUrlOptions
-  // Remove leading slash to make it relative.
-  const relativePath = StringPrototypeReplace(path, /^\//, '')
-
-  if (base) {
-    let baseUrl = base
-    if (!StringPrototypeEndsWith(baseUrl, '/')) {
-      baseUrl += '/'
-    }
-    return baseUrl + relativePath
-  }
-
-  return relativePath
-}
-
-/**
- * Check if a value is a valid URL.
- *
- * @example
- * ```typescript
- * isUrl('https://example.com') // true
- * isUrl('not a url')           // false
- * isUrl(null)                  // false
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function isUrl(value: string | URL | null | undefined): boolean {
-  return (
-    ((typeof value === 'string' && value !== '') ||
-      (value !== null && typeof value === 'object')) &&
-    !!parseUrl(value)
-  )
-}
-
-/**
- * Parse a value as a URL.
- *
- * @example
- * ```typescript
- * parseUrl('https://example.com')  // URL { href: 'https://example.com/' }
- * parseUrl('invalid')              // undefined
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function parseUrl(value: string | URL): URL | undefined {
-  try {
-    return new UrlCtor(value)
-  } catch {}
-  return undefined
-}
 
 /**
  * Convert a URL search parameter to an array.

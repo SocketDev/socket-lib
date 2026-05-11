@@ -10,17 +10,16 @@
  * Used by Socket tools for API URL construction and query parameter parsing.
  */
 
+import { createRelativeUrl, parseUrl } from '@socketsecurity/lib/url/parse'
+import { isUrl } from '@socketsecurity/lib/url/predicates'
 import {
-  createRelativeUrl,
-  isUrl,
-  parseUrl,
   urlSearchParamAsArray,
   urlSearchParamAsBoolean,
   urlSearchParamAsNumber,
   urlSearchParamAsString,
   urlSearchParamsGetArray,
   urlSearchParamsGetBoolean,
-} from '@socketsecurity/lib/url'
+} from '@socketsecurity/lib/url/search-params'
 import { describe, expect, it } from 'vitest'
 
 describe('url', () => {

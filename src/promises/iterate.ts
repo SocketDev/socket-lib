@@ -13,7 +13,7 @@
  *     pagination page size). Useful when chunk size != concurrency cap.
  */
 
-import { arrayChunk } from '../arrays'
+import { arrayChunk } from '../arrays/chunk'
 import { PromiseAllSettled } from '../primordials/promise'
 import { normalizeIterationOptions, normalizeRetryOptions } from './options'
 import { pRetry } from './retry'
