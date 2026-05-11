@@ -40,7 +40,7 @@
 
 import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
 

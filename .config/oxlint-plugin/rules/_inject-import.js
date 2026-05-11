@@ -15,12 +15,25 @@
 /**
  * Walk a Program node body once and figure out:
  *   - the last top-level ImportDeclaration node (or undefined)
- *   - whether `importName` is already imported from `specifier`
+ *   - whether `importName` is already imported (from ANY source)
  *   - whether a top-level `localName` identifier already exists
  *     (any const/let/var or import-as-local with that name)
+ *
+ * Import detection ignores the specifier path: a file inside the lib
+ * package itself imports `getDefaultLogger` from `'../logger'`, while
+ * a downstream repo imports the same name from
+ * `'@socketsecurity/lib/logger'`. Both resolve to the same identifier;
+ * either should count as "already imported" so the autofix doesn't
+ * inject a duplicate (and broken — see issue #64).
+ *
+ * `specifier` is retained in the signature for backward compatibility
+ * but is no longer used for the match decision. Callers may pass any
+ * truthy value (typically the canonical package path the rule would
+ * inject if the import were missing).
  */
 export function summarizeImportTarget(
   program,
+  // eslint-disable-next-line no-unused-vars
   specifier,
   importName,
   localName,
@@ -31,19 +44,23 @@ export function summarizeImportTarget(
   for (const stmt of program.body) {
     if (stmt.type === 'ImportDeclaration') {
       lastImport = stmt
-      const source = stmt.source && stmt.source.value
-      if (source === specifier) {
-        for (const spec of stmt.specifiers) {
-          if (
-            spec.type === 'ImportSpecifier' &&
-            spec.imported &&
-            spec.imported.name === importName
-          ) {
-            hasImport = true
-          }
-          if (localName && spec.local && spec.local.name === localName) {
-            hasLocal = true
-          }
+      for (const spec of stmt.specifiers) {
+        if (
+          spec.type === 'ImportSpecifier' &&
+          spec.imported &&
+          spec.imported.name === importName
+        ) {
+          hasImport = true
+        }
+        if (
+          localName &&
+          spec.local &&
+          spec.local.name === localName &&
+          (spec.type === 'ImportSpecifier' ||
+            spec.type === 'ImportDefaultSpecifier' ||
+            spec.type === 'ImportNamespaceSpecifier')
+        ) {
+          hasLocal = true
         }
       }
       continue
