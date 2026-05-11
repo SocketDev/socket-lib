@@ -198,7 +198,7 @@ export async function runOne<I, T>(
  *     cwd,
  *   })
  * }, {
- *   baseRepo: '/Users/<user>/projects/socket-repo-template',
+ *   baseRepo: '/Users/<user>/projects/socket-wheelhouse',
  *   concurrency: 3,
  *   cleanup: 'on-empty',
  * })
