@@ -6,7 +6,7 @@
  * import everywhere.
  */
 
-import type { Logger } from './core'
+import type { Logger } from './logger'
 
 /**
  * Log symbols for terminal output with colored indicators.

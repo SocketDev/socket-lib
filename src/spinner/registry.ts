@@ -11,7 +11,7 @@ import { generateSocketSpinnerFrames } from '../effects/pulse-frames'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
 import { hasOwn } from '../objects/predicates'
 
-import { Spinner } from './core'
+import { Spinner } from './spinner'
 
 import type { Spinner as SpinnerType, SpinnerStyle } from './types'
 

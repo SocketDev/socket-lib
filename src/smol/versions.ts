@@ -14,7 +14,7 @@
  *   which already route through this when smol is present.
  */
 
-import { isSmol } from './util'
+import { isSmol } from './detect'
 
 /**
  * Surface of `node:smol-versions`. See socket-btm's
