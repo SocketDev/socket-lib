@@ -12,7 +12,7 @@ import {
   getColumnsOf,
   getRowsOf,
   isTTYOf,
-} from './_stream'
+} from './_internal'
 
 // Get the actual stdout stream
 const stdout: NodeJS.WriteStream = process.stdout

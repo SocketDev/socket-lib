@@ -1218,6 +1218,11 @@
       "types": "./dist/packages/validation.d.ts",
       "default": "./dist/packages/validation.js"
     },
+    "./paths/conversion": {
+      "source": "./src/paths/conversion.ts",
+      "types": "./dist/paths/conversion.d.ts",
+      "default": "./dist/paths/conversion.js"
+    },
     "./paths/dirnames": {
       "source": "./src/paths/dirnames.ts",
       "types": "./dist/paths/dirnames.d.ts",
@@ -1247,6 +1252,16 @@
       "source": "./src/paths/packages.ts",
       "types": "./dist/paths/packages.d.ts",
       "default": "./dist/paths/packages.js"
+    },
+    "./paths/predicates": {
+      "source": "./src/paths/predicates.ts",
+      "types": "./dist/paths/predicates.d.ts",
+      "default": "./dist/paths/predicates.js"
+    },
+    "./paths/resolve": {
+      "source": "./src/paths/resolve.ts",
+      "types": "./dist/paths/resolve.d.ts",
+      "default": "./dist/paths/resolve.js"
     },
     "./paths/rewire": {
       "source": "./src/paths/rewire.ts",

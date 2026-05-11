@@ -413,16 +413,19 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## paths/
 
-| Subpath                                                            | Description                                              |
-| ------------------------------------------------------------------ | -------------------------------------------------------- |
-| [`@socketsecurity/lib/paths/dirnames`](../src/paths/dirnames.ts)   | Directory name and path pattern constants.               |
-| [`@socketsecurity/lib/paths/exts`](../src/paths/exts.ts)           | File extension constants.                                |
-| [`@socketsecurity/lib/paths/filenames`](../src/paths/filenames.ts) | File name constants.                                     |
-| [`@socketsecurity/lib/paths/globs`](../src/paths/globs.ts)         | Glob pattern constants.                                  |
-| [`@socketsecurity/lib/paths/normalize`](../src/paths/normalize.ts) | Path manipulation utilities with cross-platform support. |
-| [`@socketsecurity/lib/paths/packages`](../src/paths/packages.ts)   | Package.json path resolution utilities.                  |
-| [`@socketsecurity/lib/paths/rewire`](../src/paths/rewire.ts)       | Path rewiring utilities for testing.                     |
-| [`@socketsecurity/lib/paths/socket`](../src/paths/socket.ts)       | Path utilities for Socket ecosystem directories.         |
+| Subpath                                                              | Description                                                                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/paths/conversion`](../src/paths/conversion.ts) | Path conversion utilities — MSYS↔native bridging and string-shape helpers.      |
+| [`@socketsecurity/lib/paths/dirnames`](../src/paths/dirnames.ts)     | Directory name and path pattern constants.                                      |
+| [`@socketsecurity/lib/paths/exts`](../src/paths/exts.ts)             | File extension constants.                                                       |
+| [`@socketsecurity/lib/paths/filenames`](../src/paths/filenames.ts)   | File name constants.                                                            |
+| [`@socketsecurity/lib/paths/globs`](../src/paths/globs.ts)           | Glob pattern constants.                                                         |
+| [`@socketsecurity/lib/paths/normalize`](../src/paths/normalize.ts)   | Path normalization — the core `normalizePath` and its MSYS drive-letter helper. |
+| [`@socketsecurity/lib/paths/packages`](../src/paths/packages.ts)     | Package.json path resolution utilities.                                         |
+| [`@socketsecurity/lib/paths/predicates`](../src/paths/predicates.ts) | Path predicates — `is*` checks for path shape and kind.                         |
+| [`@socketsecurity/lib/paths/resolve`](../src/paths/resolve.ts)       | Path resolution utilities — `resolve`, `relative`, `relativeResolve`.           |
+| [`@socketsecurity/lib/paths/rewire`](../src/paths/rewire.ts)         | Path rewiring utilities for testing.                                            |
+| [`@socketsecurity/lib/paths/socket`](../src/paths/socket.ts)         | Path utilities for Socket ecosystem directories.                                |
 
 ## performance/
 

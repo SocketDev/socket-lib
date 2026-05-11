@@ -11,7 +11,7 @@ import {
   getColumnsOf,
   getRowsOf,
   isTTYOf,
-} from './_stream'
+} from './_internal'
 
 // Get the actual stderr stream
 const stderr: NodeJS.WriteStream = process.stderr

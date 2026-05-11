@@ -5,7 +5,9 @@
  */
 'use strict'
 
-export function throwStub(moduleName) {
+// `export` is invalid in CJS — this file is inlined as text by esbuild.
+// oxlint-disable-next-line socket/export-top-level-functions
+function throwStub(moduleName) {
   throw new Error(
     `Module '${moduleName}' is stubbed and should not be called. ` +
       'This is likely a bundling error or unexpected code path.',
