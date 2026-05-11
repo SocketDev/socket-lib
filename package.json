@@ -1218,6 +1218,11 @@
       "types": "./dist/packages/edit.d.ts",
       "default": "./dist/packages/edit.js"
     },
+    "./packages/edit-class": {
+      "source": "./src/packages/edit-class.ts",
+      "types": "./dist/packages/edit-class.d.ts",
+      "default": "./dist/packages/edit-class.js"
+    },
     "./packages/exports": {
       "source": "./src/packages/exports.ts",
       "types": "./dist/packages/exports.d.ts",
