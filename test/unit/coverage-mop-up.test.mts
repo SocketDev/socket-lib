@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { merge } from '../../src/objects'
+import { merge } from '../../src/objects/mutate'
 import { urlSearchParamAsBoolean } from '../../src/url'
 
 describe('coverage mop-up — tiny gaps', () => {
@@ -30,13 +30,13 @@ describe('coverage mop-up — tiny gaps', () => {
   })
 
   describe('objects.ts merge', () => {
-    it('skips falsy currentSource/currentTarget at queue level (null source)', () => {
+    it('skips falsy currentSource/currentTarget at queue level (undefined source)', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const target: any = { a: { b: 1 } }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const source: any = { a: undefined }
       const result = merge(target, source) as { a: unknown }
-      expect(result.a).toBeNull()
+      expect(result.a).toBeUndefined()
     })
 
     it('skips array-array at queue level (skip if either is array)', () => {

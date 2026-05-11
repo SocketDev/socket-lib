@@ -38,10 +38,10 @@ describe('releases-github-archive', () => {
       expect(detectArchiveFormat('package-v1.0.0.tgz')).toBe('tgz')
     })
 
-    it('should return null for unsupported formats', () => {
-      expect(detectArchiveFormat('release.exe')).toBeNull()
-      expect(detectArchiveFormat('release.dmg')).toBeNull()
-      expect(detectArchiveFormat('release')).toBeNull()
+    it('should return undefined for unsupported formats', () => {
+      expect(detectArchiveFormat('release.exe')).toBeUndefined()
+      expect(detectArchiveFormat('release.dmg')).toBeUndefined()
+      expect(detectArchiveFormat('release')).toBeUndefined()
     })
   })
 

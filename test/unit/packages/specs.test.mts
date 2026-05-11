@@ -56,12 +56,13 @@ describe('packages/specs', () => {
       // npm's `npm pkg get repository.url` canonicalizes to `git+https://`
       // or `git+ssh://` prefixes. The scheme pattern accepts `+` so these
       // match the same as plain `https://github.com/…`.
-      expect(
-        getRepoUrlDetails('git+https://github.com/npm/cli.git'),
-      ).toEqual({ user: 'npm', project: 'cli' })
-      expect(
-        getRepoUrlDetails('git+ssh://git@github.com/npm/cli.git'),
-      ).toEqual({ user: 'npm', project: 'cli' })
+      expect(getRepoUrlDetails('git+https://github.com/npm/cli.git')).toEqual({
+        user: 'npm',
+        project: 'cli',
+      })
+      expect(getRepoUrlDetails('git+ssh://git@github.com/npm/cli.git')).toEqual(
+        { user: 'npm', project: 'cli' },
+      )
     })
 
     it('returns empty strings for invalid URL', () => {
@@ -80,7 +81,9 @@ describe('packages/specs', () => {
         user: '',
         project: '',
       })
-      expect(getRepoUrlDetails('https://fake-github.com.attacker.tld/a/b')).toEqual({
+      expect(
+        getRepoUrlDetails('https://fake-github.com.attacker.tld/a/b'),
+      ).toEqual({
         user: '',
         project: '',
       })
@@ -160,7 +163,9 @@ describe('packages/specs', () => {
 
     it('should handle SHA with mixed case', () => {
       const url = gitHubTgzUrl('user', 'repo', 'AbC123DeF456')
-      expect(url).toBe('https://github.com/user/repo/archive/AbC123DeF456.tar.gz')
+      expect(url).toBe(
+        'https://github.com/user/repo/archive/AbC123DeF456.tar.gz',
+      )
     })
   })
 
@@ -255,7 +260,9 @@ describe('packages/specs', () => {
     })
 
     it('should reject non-GitHub git URL', () => {
-      const result = isGitHubUrlSpec('git+https://gitlab.com/user/repo.git#main')
+      const result = isGitHubUrlSpec(
+        'git+https://gitlab.com/user/repo.git#main',
+      )
       expect(result).toBe(false)
     })
 

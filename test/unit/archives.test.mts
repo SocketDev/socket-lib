@@ -152,12 +152,12 @@ describe('archives', () => {
       expect(detectArchiveFormat('/absolute/path/archive.tgz')).toBe('tgz')
     })
 
-    it('should return null for unknown formats', () => {
-      expect(detectArchiveFormat('file.txt')).toBeNull()
-      expect(detectArchiveFormat('archive.rar')).toBeNull()
-      expect(detectArchiveFormat('archive.7z')).toBeNull()
-      expect(detectArchiveFormat('noextension')).toBeNull()
-      expect(detectArchiveFormat('')).toBeNull()
+    it('should return undefined for unknown formats', () => {
+      expect(detectArchiveFormat('file.txt')).toBeUndefined()
+      expect(detectArchiveFormat('archive.rar')).toBeUndefined()
+      expect(detectArchiveFormat('archive.7z')).toBeUndefined()
+      expect(detectArchiveFormat('noextension')).toBeUndefined()
+      expect(detectArchiveFormat('')).toBeUndefined()
     })
   })
 

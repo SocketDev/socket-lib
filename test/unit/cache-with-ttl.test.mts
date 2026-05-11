@@ -127,12 +127,6 @@ describe.sequential('cache-with-ttl', () => {
       expect(value).toBe('value2')
     })
 
-    it('should handle null values', async () => {
-      await cache.set('null-key', undefined)
-      const value = await cache.get('null-key')
-      expect(value).toBe(null)
-    })
-
     it('should handle undefined values', async () => {
       await cache.set('undefined-key', undefined)
       const value = await cache.get('undefined-key')

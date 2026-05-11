@@ -199,7 +199,7 @@ describe('locked-down tool surface', () => {
     // into the SDK call. Verify the literal `tools: BASE_TOOLS` line
     // is in the source. Renaming the constant without updating the
     // call site would silently fall back to the SDK default (= all
-    // claude_code tools available), so this guard catches that.   
+    // claude_code tools available), so this guard catches that.
     const src = readFileSync(
       new URL('../src/disambiguate.mts', import.meta.url),
       'utf8',
@@ -219,7 +219,7 @@ describe('locked-down tool surface', () => {
     // through to canUseTool, which is undefined → undefined behavior
     // in non-interactive scripts. This test catches the regression
     // shape where someone "simplifies" by dropping permissionMode
-    // or switches it to 'default' without realizing what changed.   
+    // or switches it to 'default' without realizing what changed.
     const src = readFileSync(
       new URL('../src/disambiguate.mts', import.meta.url),
       'utf8',

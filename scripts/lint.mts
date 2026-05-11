@@ -33,21 +33,14 @@ const CORE_FILES = new Set([
 ])
 
 // Config patterns that trigger a full lint
-const CONFIG_PATTERNS = [
-  '.config/**',
-  'scripts/utils/**',
-  'pnpm-lock.yaml',
-  'tsconfig*.json',
-  '.oxlintrc.json',
-  '.oxfmtrc.json',
-]
+const CONFIG_PATTERNS = ['.config/**', 'scripts/utils/**', 'pnpm-lock.yaml']
 
 /**
- * Get oxfmt exclude patterns from .oxfmtrc.json.
+ * Get oxfmt exclude patterns from .config/oxfmtrc.json.
  */
 export function getOxfmtExcludePatterns(): string[] {
   try {
-    const oxfmtConfigPath = path.join(process.cwd(), '.oxfmtrc.json')
+    const oxfmtConfigPath = path.join(process.cwd(), '.config', 'oxfmtrc.json')
     if (!existsSync(oxfmtConfigPath)) {
       return []
     }
@@ -57,7 +50,7 @@ export function getOxfmtExcludePatterns(): string[] {
 
     return ignorePatterns
   } catch {
-    // If we can't read .oxfmtrc.json, return empty array
+    // If we can't read .config/oxfmtrc.json, return empty array
     return []
   }
 }
@@ -168,6 +161,8 @@ export async function runLintOnFiles(
       args: [
         'exec',
         'oxfmt',
+        '-c',
+        '.config/oxfmtrc.json',
         ...(fix ? [] : ['--check']),
         '--no-error-on-unmatched-pattern',
         ...files,
@@ -176,7 +171,14 @@ export async function runLintOnFiles(
       enabled: true,
     },
     {
-      args: ['exec', 'oxlint', ...(fix ? ['--fix'] : []), ...files],
+      args: [
+        'exec',
+        'oxlint',
+        '-c',
+        '.config/oxlintrc.json',
+        ...(fix ? ['--fix'] : []),
+        ...files,
+      ],
       name: 'oxlint',
       enabled: true,
     },
@@ -233,11 +235,25 @@ export async function runLintOnAll(
 
   const linters = [
     {
-      args: ['exec', 'oxfmt', ...(fix ? [] : ['--check']), '.'],
+      args: [
+        'exec',
+        'oxfmt',
+        '-c',
+        '.config/oxfmtrc.json',
+        ...(fix ? [] : ['--check']),
+        '.',
+      ],
       name: 'oxfmt',
     },
     {
-      args: ['exec', 'oxlint', ...(fix ? ['--fix'] : []), '.'],
+      args: [
+        'exec',
+        'oxlint',
+        '-c',
+        '.config/oxlintrc.json',
+        ...(fix ? ['--fix'] : []),
+        '.',
+      ],
       name: 'oxlint',
     },
   ]

@@ -1467,12 +1467,7 @@
       "default": "./dist/words.js"
     },
     "./data/extensions.json": "./data/extensions.json",
-    "./lockstep.json": "./lockstep.json",
-    "./lockstep.schema.json": "./lockstep.schema.json",
-    "./package.json": "./package.json",
-    "./tsconfig.dts.json": "./tsconfig.dts.json",
-    "./tsconfig.json": "./tsconfig.json",
-    "./tsconfig.test.json": "./tsconfig.test.json"
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -1492,8 +1487,8 @@
     "cover": "node scripts/test/cover.mts",
     "dev": "node scripts/build/main.mts --watch",
     "fix": "node scripts/fix.mts",
-    "format": "oxfmt --write .",
-    "format:check": "oxfmt --check .",
+    "format": "oxfmt -c .config/oxfmtrc.json --write .",
+    "format:check": "oxfmt -c .config/oxfmtrc.json --check .",
     "lint": "node scripts/lint.mts",
     "prim": "node tools/prim/bin/prim.mts",
     "security": "node scripts/security.mts",

@@ -12,7 +12,10 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import type { EditablePackageJson, PackageJson } from '@socketsecurity/lib/packages'
+import type {
+  EditablePackageJson,
+  PackageJson,
+} from '@socketsecurity/lib/packages'
 import {
   getEditablePackageJsonClass,
   pkgJsonToEditable,
@@ -117,7 +120,7 @@ describe('packages/editable', () => {
         const EditablePackageJson = getEditablePackageJsonClass()
 
         await expect(
-          EditablePackageJson.load(tmpDir, { create: false })
+          EditablePackageJson.load(tmpDir, { create: false }),
         ).rejects.toThrow()
       }, 'editable-load-error-')
     })
@@ -137,7 +140,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -165,7 +168,7 @@ describe('packages/editable', () => {
         const EditablePackageJson = getEditablePackageJsonClass()
 
         await expect(
-          EditablePackageJson.load(tmpDir, { create: true })
+          EditablePackageJson.load(tmpDir, { create: true }),
         ).resolves.toBeDefined()
       }, 'editable-load-fallback-')
     })
@@ -190,7 +193,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -211,7 +214,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -231,7 +234,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -253,7 +256,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -354,7 +357,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -403,7 +406,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -420,7 +423,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -439,7 +442,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -456,7 +459,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -475,7 +478,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -492,7 +495,7 @@ describe('packages/editable', () => {
           const pkgData = { name: 'test', version: '1.0.0' }
           await fs.writeFile(
             path.join(tmpDir, 'package.json'),
-            JSON.stringify(pkgData)
+            JSON.stringify(pkgData),
           )
 
           const EditablePackageJson = getEditablePackageJsonClass()
@@ -570,7 +573,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -605,7 +608,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -622,7 +625,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -653,7 +656,8 @@ describe('packages/editable', () => {
     it('should preserve custom newline characters', async () => {
       await runWithTempDir(async tmpDir => {
         const pkgPath = path.join(tmpDir, 'package.json')
-        const pkgData = '{\r\n  "name": "test",\r\n  "version": "1.0.0"\r\n}\r\n'
+        const pkgData =
+          '{\r\n  "name": "test",\r\n  "version": "1.0.0"\r\n}\r\n'
         await fs.writeFile(pkgPath, pkgData)
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -686,7 +690,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -702,7 +706,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -732,7 +736,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2) + '\n'
+          JSON.stringify(pkgData, null, 2) + '\n',
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -753,7 +757,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -790,7 +794,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -817,7 +821,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -834,7 +838,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2) + '\n'
+          JSON.stringify(pkgData, null, 2) + '\n',
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -937,7 +941,7 @@ describe('packages/editable', () => {
 
       const editable = (await toEditablePackageJson(
         pkgJson,
-        {}
+        {},
       )) as EditablePackageJson
 
       expect(editable).toBeDefined()
@@ -1056,7 +1060,7 @@ describe('packages/editable', () => {
 
       const editable = toEditablePackageJsonSync(
         pkgJson,
-        {}
+        {},
       ) as EditablePackageJson
 
       expect(editable).toBeDefined()
@@ -1211,7 +1215,7 @@ describe('packages/editable', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -1234,7 +1238,7 @@ describe('packages/editable', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()

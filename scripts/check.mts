@@ -26,7 +26,11 @@ export async function runTypeCheck(quiet = false): Promise<number> {
   if (!quiet) {
     logger.progress('Checking TypeScript')
   }
-  const result = await runCommandQuiet('tsgo', ['--noEmit'])
+  const result = await runCommandQuiet('tsgo', [
+    '--noEmit',
+    '-p',
+    '.config/tsconfig.json',
+  ])
   if (result.exitCode !== 0) {
     if (!quiet) {
       logger.error('Type checks failed')

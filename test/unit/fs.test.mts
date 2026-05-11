@@ -1758,7 +1758,7 @@ describe('fs', () => {
     it('should return defaultValue as Buffer when encoding is null and defaultValue is Buffer', async () => {
       const defaultBuffer = Buffer.from('default')
       const result = safeReadFileSync('/nonexistent/file.bin', {
-          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
         encoding: null,
         defaultValue: defaultBuffer,
       } as unknown as SafeReadOptions & { encoding: null })
@@ -1768,7 +1768,7 @@ describe('fs', () => {
 
     it('should return undefined when encoding is null and defaultValue is not a Buffer', () => {
       const result = safeReadFileSync('/nonexistent/file.bin', {
-          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
         encoding: null,
         defaultValue: 'not a buffer',
       } as unknown as SafeReadOptions & { encoding: null })
@@ -1795,7 +1795,7 @@ describe('fs', () => {
     it('should return defaultValue as Buffer when encoding is null and defaultValue is Buffer', async () => {
       const defaultBuffer = Buffer.from('default')
       const result = await safeReadFile('/nonexistent/file.bin', {
-          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
         encoding: null,
         defaultValue: defaultBuffer,
       } as unknown as SafeReadOptions & { encoding: null })
@@ -1805,7 +1805,7 @@ describe('fs', () => {
 
     it('should return undefined when encoding is null and defaultValue is not a Buffer', async () => {
       const result = await safeReadFile('/nonexistent/file.bin', {
-          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node fs API: `null` encoding returns Buffer; `undefined` defaults to utf-8.
         encoding: null,
         defaultValue: 'not a buffer',
       } as unknown as SafeReadOptions & { encoding: null })

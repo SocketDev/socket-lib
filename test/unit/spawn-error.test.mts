@@ -10,8 +10,8 @@ import { spawn } from '../../src/spawn/core'
 import { enhanceSpawnError, isSpawnError } from '../../src/spawn/errors'
 
 describe('spawn — enhanceSpawnError', () => {
-  it('returns null inputs unchanged', () => {
-    expect(enhanceSpawnError(undefined)).toBeNull()
+  it('returns undefined inputs unchanged', () => {
+    expect(enhanceSpawnError(undefined)).toBeUndefined()
   })
 
   it('returns non-object inputs unchanged', () => {

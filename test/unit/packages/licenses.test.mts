@@ -62,15 +62,15 @@ describe('packages/licenses', () => {
 
   describe('collectLicenseWarnings', () => {
     it('should warn about UNLICENSED packages', () => {
-      const nodes: LicenseNode[] = [{ license: 'UNLICENSED', inFile: undefined }]
+      const nodes: LicenseNode[] = [
+        { license: 'UNLICENSED', inFile: undefined },
+      ]
       const warnings = collectLicenseWarnings(nodes)
       expect(warnings).toContain('Package is unlicensed')
     })
 
     it('should warn about licenses in files', () => {
-      const nodes: LicenseNode[] = [
-        { license: 'MIT', inFile: 'LICENSE.txt' },
-      ]
+      const nodes: LicenseNode[] = [{ license: 'MIT', inFile: 'LICENSE.txt' }]
       const warnings = collectLicenseWarnings(nodes)
       expect(warnings.length).toBeGreaterThan(0)
       expect(warnings[0]).toContain('LICENSE.txt')

@@ -819,7 +819,12 @@ export async function loadErrorHistory() {
 /**
  * Save error outcome to history for learning.
  */
-export async function saveErrorHistory(errorHash, outcome, strategy, description) {
+export async function saveErrorHistory(
+  errorHash,
+  outcome,
+  strategy,
+  description,
+) {
   const historyPath = path.join(CLAUDE_HOME, 'error-history.json')
   try {
     let data = { errors: [] }
@@ -1975,7 +1980,11 @@ export function shouldRunParallel(options = {}) {
  * conflicting interactive prompts. If agents need user interaction, they would queue
  * and block each other. Use --seq flag for sequential execution with full interactivity.
  */
-export async function runParallel(tasks, description = 'tasks', taskNames = []) {
+export async function runParallel(
+  tasks,
+  description = 'tasks',
+  taskNames = [],
+) {
   log.info(`Running ${tasks.length} ${description} in parallel...`)
 
   const startTime = Date.now()

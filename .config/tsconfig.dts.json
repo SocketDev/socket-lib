@@ -7,13 +7,13 @@
     "noEmit": false,
     "sourceMap": false
   },
-  "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts"],
+  "include": ["../src/**/*.ts", "../src/**/*.mts", "../src/**/*.cts"],
   "exclude": [
-    ".cache",
-    "dist/**/*",
-    "lib",
-    "node_modules",
-    "src/**/*.js",
-    "test"
+    "../.cache",
+    "../dist/**/*",
+    "../lib",
+    "../node_modules",
+    "../src/**/*.js",
+    "../test"
   ]
 }

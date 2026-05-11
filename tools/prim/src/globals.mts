@@ -119,8 +119,12 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
   // ─── Array only ─────────────────────────────────────────────────────
   ['copyWithin', 'Array'],
   ['fill', 'Array'],
-  ['findLast', 'Array'],
-  ['findLastIndex', 'Array'],
+  // `findLast` / `findLastIndex` deliberately omitted — adm-zip ships its
+  // own `Utils.findLast(arr, predicate)` utility with a DIFFERENT signature
+  // (predicate is arg 2, not arg 1), and rewriting `Utils.findLast(...)` to
+  // `ArrayPrototypeFindLast(Utils, ...)` blows up at runtime. Promote back
+  // to UNAMBIGUOUS when a callsite-aware AI disambiguator can rule out the
+  // custom-method case.
   ['flat', 'Array'],
   ['flatMap', 'Array'],
   ['toReversed', 'Array'],

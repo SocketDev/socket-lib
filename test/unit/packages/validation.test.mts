@@ -63,9 +63,7 @@ describe('packages/validation', () => {
 
     it('should return false for scopes that do not match exactly', () => {
       expect(isBlessedPackageName('@socket/package')).toBe(false)
-      expect(isBlessedPackageName('@socketregistry-fork/package')).toBe(
-        false,
-      )
+      expect(isBlessedPackageName('@socketregistry-fork/package')).toBe(false)
       expect(isBlessedPackageName('@socketsecurity-fork/package')).toBe(false)
     })
 

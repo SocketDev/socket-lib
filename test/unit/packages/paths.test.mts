@@ -72,7 +72,9 @@ describe('packages/paths', () => {
     })
 
     it('should handle Windows-style paths', () => {
-      const result = resolvePackageJsonDirname('C:\\path\\to\\project\\package.json')
+      const result = resolvePackageJsonDirname(
+        'C:\\path\\to\\project\\package.json',
+      )
       // Normalize for cross-platform comparison
       const expected = path.dirname('C:\\path\\to\\project\\package.json')
       expect(result).toBe(expected.replace(/\\/g, '/'))
@@ -85,7 +87,9 @@ describe('packages/paths', () => {
     })
 
     it('should normalize paths', () => {
-      const result = resolvePackageJsonDirname('/path/to/../project/package.json')
+      const result = resolvePackageJsonDirname(
+        '/path/to/../project/package.json',
+      )
       expect(result).toBe('/path/project')
     })
 
@@ -100,7 +104,9 @@ describe('packages/paths', () => {
     })
 
     it('should handle paths with spaces', () => {
-      const result = resolvePackageJsonDirname('/path/to/my project/package.json')
+      const result = resolvePackageJsonDirname(
+        '/path/to/my project/package.json',
+      )
       expect(result).toBe('/path/to/my project')
     })
 
@@ -110,7 +116,9 @@ describe('packages/paths', () => {
     })
 
     it('should handle paths ending with /package.json', () => {
-      const result = resolvePackageJsonDirname('node_modules/lodash/package.json')
+      const result = resolvePackageJsonDirname(
+        'node_modules/lodash/package.json',
+      )
       expect(result).toBe('node_modules/lodash')
     })
   })
@@ -275,7 +283,9 @@ describe('packages/paths', () => {
 
   describe('edge cases', () => {
     it('should handle multiple slashes', () => {
-      const result1 = resolvePackageJsonDirname('/path//to///project/package.json')
+      const result1 = resolvePackageJsonDirname(
+        '/path//to///project/package.json',
+      )
       expect(result1).toBe('/path/to/project')
 
       const result2 = resolvePackageJsonPath('/path//to///project')
@@ -283,7 +293,9 @@ describe('packages/paths', () => {
     })
 
     it('should handle dot segments in paths', () => {
-      const result1 = resolvePackageJsonDirname('/path/./to/./project/package.json')
+      const result1 = resolvePackageJsonDirname(
+        '/path/./to/./project/package.json',
+      )
       expect(result1).toBe('/path/to/project')
 
       const result2 = resolvePackageJsonPath('/path/./to/./project')
@@ -291,7 +303,9 @@ describe('packages/paths', () => {
     })
 
     it('should handle parent directory references', () => {
-      const result1 = resolvePackageJsonDirname('/path/to/../project/package.json')
+      const result1 = resolvePackageJsonDirname(
+        '/path/to/../project/package.json',
+      )
       expect(result1).toBe('/path/project')
 
       const result2 = resolvePackageJsonPath('/path/to/../project')
@@ -317,7 +331,9 @@ describe('packages/paths', () => {
     })
 
     it('should handle paths with dots in directory names', () => {
-      const result1 = resolvePackageJsonDirname('/path/to/my.project/package.json')
+      const result1 = resolvePackageJsonDirname(
+        '/path/to/my.project/package.json',
+      )
       expect(result1).toBe('/path/to/my.project')
 
       const result2 = resolvePackageJsonPath('/path/to/my.project')
@@ -386,7 +402,9 @@ describe('packages/paths', () => {
     it('should handle Socket registry packages', () => {
       const socketDir = 'node_modules/@socketregistry/lodash'
       const pkgJsonPath = resolvePackageJsonPath(socketDir)
-      expect(pkgJsonPath).toBe('node_modules/@socketregistry/lodash/package.json')
+      expect(pkgJsonPath).toBe(
+        'node_modules/@socketregistry/lodash/package.json',
+      )
 
       const dir = resolvePackageJsonDirname(pkgJsonPath)
       expect(dir).toBe(socketDir)

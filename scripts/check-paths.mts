@@ -183,8 +183,8 @@ const loadAllowlist = (): AllowlistEntry[] => {
           : blockLines.join('\n').replace(/\n+$/, '')
       ;(current as any)[blockKey] = value
     }
-    blockKey = null
-    blockKind = null
+    blockKey = undefined
+    blockKind = undefined
     blockLines = []
   }
   const indentOf = (line: string): number => {
@@ -332,16 +332,7 @@ const isAllowlisted = (finding: Finding): boolean =>
 // File walking
 // ──────────────────────────────────────────────────────────────────
 
-const SKIP_DIRS = new Set([
-  '.git',
-  'node_modules',
-  'build',
-  'dist',
-  'out',
-  'target',
-  '.cache',
-  'upstream',
-])
+const SKIP_DIRS = new Set(['.cache', '.git', 'build', 'dist', 'node_modules', 'out', 'target', 'upstream'])
 
 const walk = function* (
   dir: string,
@@ -426,7 +417,7 @@ const extractPathCalls = (
           continue
         }
         if (ch === inString) {
-          inString = null
+          inString = undefined
         }
       } else {
         if (ch === '"' || ch === "'" || ch === '`') {

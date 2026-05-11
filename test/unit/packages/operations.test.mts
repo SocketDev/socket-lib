@@ -143,7 +143,7 @@ describe('packages/operations', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
 
         const result = await readPackageJson(tmpDir)
@@ -176,7 +176,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = await readPackageJson(tmpDir, { normalize: true })
@@ -192,7 +192,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = await readPackageJson(tmpDir, { editable: true })
@@ -206,7 +206,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', version: '1.0.0', custom: 'field' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         // When using editable with normalize, the options are passed to the editable converter
@@ -215,7 +215,7 @@ describe('packages/operations', () => {
             editable: true,
             normalize: true,
             preserve: ['custom'],
-          })
+          }),
         ).resolves.toBeDefined()
       }, 'read-pkg-json-editable-normalize-')
     })
@@ -223,7 +223,7 @@ describe('packages/operations', () => {
     it('should throw when throws option is true and file missing', async () => {
       await runWithTempDir(async tmpDir => {
         await expect(
-          readPackageJson(tmpDir, { throws: true })
+          readPackageJson(tmpDir, { throws: true }),
         ).rejects.toThrow()
       }, 'read-pkg-json-throws-')
     })
@@ -233,7 +233,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', custom: 'field' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = await readPackageJson(tmpDir, {
@@ -246,10 +246,7 @@ describe('packages/operations', () => {
 
     it('should handle malformed JSON gracefully', async () => {
       await runWithTempDir(async tmpDir => {
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          '{ invalid json'
-        )
+        await fs.writeFile(path.join(tmpDir, 'package.json'), '{ invalid json')
 
         const result = await readPackageJson(tmpDir, { throws: false })
         expect(result).toBeUndefined()
@@ -261,7 +258,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', custom: 'field' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = await readPackageJson(tmpDir)
@@ -276,7 +273,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test-sync', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = readPackageJsonSync(tmpDir)
@@ -297,10 +294,13 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
-        const result = readPackageJsonSync(tmpDir, { editable: false, normalize: true } as any)
+        const result = readPackageJsonSync(tmpDir, {
+          editable: false,
+          normalize: true,
+        } as any)
         expect(result?.version).toBeDefined()
       }, 'read-pkg-json-sync-normalize-')
     })
@@ -310,7 +310,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = readPackageJsonSync(tmpDir, { editable: true })
@@ -321,9 +321,7 @@ describe('packages/operations', () => {
 
     it('should throw when throws option is true and file missing', async () => {
       await runWithTempDir(async tmpDir => {
-        expect(() =>
-          readPackageJsonSync(tmpDir, { throws: true })
-        ).toThrow()
+        expect(() => readPackageJsonSync(tmpDir, { throws: true })).toThrow()
       }, 'read-pkg-json-sync-throws-')
     })
 
@@ -332,7 +330,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', version: '1.0.0', custom: 'field' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         // When using editable with normalize, the options are passed to the editable converter
@@ -341,7 +339,7 @@ describe('packages/operations', () => {
             editable: true,
             normalize: true,
             preserve: ['custom'],
-          } as any)
+          } as any),
         ).not.toThrow()
       }, 'read-pkg-json-sync-editable-norm-')
     })
@@ -351,7 +349,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', custom: 'field' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = readPackageJsonSync(tmpDir, {
@@ -385,7 +383,7 @@ describe('packages/operations', () => {
         await fs.mkdir(dest, { recursive: true })
 
         let callbackPath = ''
-        await extractPackage('is-number@7.0.0', { dest }, async (destPath) => {
+        await extractPackage('is-number@7.0.0', { dest }, async destPath => {
           callbackPath = destPath
         })
 
@@ -437,9 +435,9 @@ describe('packages/operations', () => {
       await extractPackage(
         'is-number@7.0.0',
         { tmpPrefix: 'test-prefix-' } as any,
-        async (destPath) => {
+        async destPath => {
           tmpPath = destPath
-        }
+        },
       )
 
       expect(tmpPath).toBeTruthy()
@@ -457,12 +455,9 @@ describe('packages/operations', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2)
+          JSON.stringify(pkgData, null, 2),
         )
-        await fs.writeFile(
-          path.join(tmpDir, 'index.js'),
-          'module.exports = {}'
-        )
+        await fs.writeFile(path.join(tmpDir, 'index.js'), 'module.exports = {}')
 
         const tarball = await packPackage(tmpDir)
         expect(tarball).toBeDefined()
@@ -475,7 +470,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
         await fs.writeFile(path.join(tmpDir, 'index.js'), '')
 
@@ -581,10 +576,10 @@ describe('packages/operations', () => {
       await runWithTempDir(async tmpDir => {
         const extractDest = path.join(tmpDir, 'extracted')
         await fs.mkdir(extractDest, { recursive: true })
-        await extractPackage(
-          'github:jonschlinkert/is-number#7.0.0',
-          { dest: extractDest, Arborist } as any,
-        )
+        await extractPackage('github:jonschlinkert/is-number#7.0.0', {
+          dest: extractDest,
+          Arborist,
+        } as any)
         expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
       }, 'git-fetcher-')
     }, 120_000)
@@ -609,7 +604,7 @@ describe('packages/operations', () => {
         }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const tgzUrl = 'https://github.com/user/repo/archive/abc123.tar.gz'
@@ -690,21 +685,19 @@ describe('packages/operations', () => {
   describe('edge cases and error handling', () => {
     it('should handle extractPackage with invalid spec', async () => {
       await expect(
-        extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' })
+        extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' }),
       ).rejects.toThrow()
     }, 30_000)
 
     it('should handle packPackage with invalid path', async () => {
-      await expect(
-        packPackage('/non/existent/path')
-      ).rejects.toThrow()
+      await expect(packPackage('/non/existent/path')).rejects.toThrow()
     }, 30_000)
 
     it('should handle readPackageJson with invalid JSON', async () => {
       await runWithTempDir(async tmpDir => {
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          'not valid json {{'
+          'not valid json {{',
         )
 
         const result = await readPackageJson(tmpDir, { throws: false })
@@ -716,7 +709,7 @@ describe('packages/operations', () => {
       await runWithTempDir(async tmpDir => {
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          'not valid json {{'
+          'not valid json {{',
         )
 
         const result = readPackageJsonSync(tmpDir, { throws: false })
@@ -773,7 +766,7 @@ describe('packages/operations', () => {
 
     it('extractPackage rejects for invalid spec', async () => {
       await expect(
-        extractPackage('invalid-spec-xyz', { dest: '/tmp/test' })
+        extractPackage('invalid-spec-xyz', { dest: '/tmp/test' }),
       ).rejects.toThrow()
     }, 30_000)
 
@@ -803,7 +796,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', custom: 'value' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = await readPackageJson(tmpDir, {
@@ -822,7 +815,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', custom: 'value' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         const result = readPackageJsonSync(tmpDir, {
@@ -860,7 +853,7 @@ describe('packages/operations', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData)
+          JSON.stringify(pkgData),
         )
 
         // Read as editable
