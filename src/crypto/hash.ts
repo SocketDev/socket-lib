@@ -1,8 +1,11 @@
 /**
- * @fileoverview Crypto helpers that prefer Node builtins where available.
+ * @fileoverview Crypto hash helpers that prefer Node builtins where
+ * available. Probes `node:crypto.hash()` (added v21.7.0 / v20.12.0) and
+ * falls back to the streaming `createHash().update().digest()` chain
+ * on older runtimes.
  */
 
-import { getNodeCrypto } from './node/crypto'
+import { getNodeCrypto } from '../node/crypto'
 
 // `crypto.hash(algorithm, data, outputEncoding)` was added in Node
 // v21.7.0 / v20.12.0 (Stable). Engines is >=22, so it's always present
@@ -53,7 +56,7 @@ export function getNativeHash(): typeof import('node:crypto').hash | undefined {
  *
  * @example
  * ```typescript
- * import { hash } from '@socketsecurity/lib/crypto'
+ * import { hash } from '@socketsecurity/lib/crypto/hash'
  *
  * hash('sha256', 'hello', 'hex')
  * // '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'

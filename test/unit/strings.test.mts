@@ -14,7 +14,7 @@
  * stringWidth() based on string-width by Sindre Sorhus (MIT).
  */
 
-import { ansiRegex, stripAnsi } from '@socketsecurity/lib/ansi'
+import { ansiRegex, stripAnsi } from '@socketsecurity/lib/ansi/strip'
 import {
   applyLinePrefix,
   centerText,

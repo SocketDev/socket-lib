@@ -13,7 +13,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib/ansi'
+import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib/ansi/constants'
 import {
   blockKernel,
   configToSpec,

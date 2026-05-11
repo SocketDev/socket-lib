@@ -1,6 +1,6 @@
 /** @fileoverview Cache key generation utilities for DLX package installations. */
 
-import { hash } from '../crypto'
+import { hash } from '../crypto/hash'
 
 /**
  * Generate a cache directory name using npm/npx approach.

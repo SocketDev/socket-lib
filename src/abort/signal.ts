@@ -1,12 +1,12 @@
 /**
- * @fileoverview Abort signal utilities.
+ * @fileoverview Abort signal utilities — composite signal construction
+ * from multiple sources and timeout-driven signal creation.
  */
 
-import { TypeErrorCtor } from './primordials/error'
+import { TypeErrorCtor } from '../primordials/error'
+import { MathCeil } from '../primordials/math'
+import { NumberIsFinite, NumberIsNaN } from '../primordials/number'
 
-import { MathCeil } from './primordials/math'
-
-import { NumberIsFinite, NumberIsNaN } from './primordials/number'
 /**
  * Create a composite AbortSignal from multiple signals.
  *

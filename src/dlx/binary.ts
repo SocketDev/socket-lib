@@ -14,7 +14,7 @@ import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock'
 import { spawn } from '../spawn/core'
-import { hash } from '../crypto'
+import { hash } from '../crypto/hash'
 import { generateCacheKey } from './cache'
 import { normalizeHash } from './integrity'
 

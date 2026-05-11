@@ -4,7 +4,7 @@
  * Follows the cli-spinners format: https://github.com/sindresorhus/cli-spinners
  */
 
-import { ANSI_BOLD, ANSI_DIM, ANSI_RESET } from '../ansi'
+import { ANSI_BOLD, ANSI_DIM, ANSI_RESET } from '../ansi/constants'
 
 export type SocketFramesOptions = {
   readonly baseColor?: readonly [number, number, number] | undefined

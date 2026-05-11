@@ -13,7 +13,7 @@
 
 import { timingSafeEqual } from 'node:crypto'
 
-import { hash } from '../crypto'
+import { hash } from '../crypto/hash'
 
 import { BufferFrom } from '../primordials/buffer'
 

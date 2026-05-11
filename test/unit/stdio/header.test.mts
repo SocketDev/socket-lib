@@ -12,7 +12,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { stripAnsi } from '@socketsecurity/lib/ansi'
+import { stripAnsi } from '@socketsecurity/lib/ansi/strip'
 import { printFooter } from '@socketsecurity/lib/stdio/footer'
 import {
   createHeader,

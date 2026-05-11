@@ -16,9 +16,8 @@ import {
   ANSI_RESET,
   ANSI_STRIKETHROUGH,
   ANSI_UNDERLINE,
-  ansiRegex,
-  stripAnsi,
-} from '../../dist/ansi.js'
+} from '../../dist/ansi/constants.js'
+import { ansiRegex, stripAnsi } from '../../dist/ansi/strip.js'
 
 describe('ansi', () => {
   describe('constants', () => {

@@ -5,11 +5,11 @@
  * to fix compatibility issues, missing peer dependencies, etc.
  */
 
-import * as yarnPkgExtensions from './external/@yarnpkg/extensions'
+import * as yarnPkgExtensions from '../external/@yarnpkg/extensions'
+
+import type { PackageExtension } from './types'
 
 const { freeze: ObjectFreeze } = Object
-
-type PackageExtension = readonly [string, Record<string, unknown>]
 
 const packageExtensions = ObjectFreeze(
   (

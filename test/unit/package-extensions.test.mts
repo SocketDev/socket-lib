@@ -9,7 +9,7 @@
  * Used by Socket package manager for applying compatibility patches to dependencies.
  */
 
-import { packageExtensions } from '@socketsecurity/lib/package-extensions'
+import { packageExtensions } from '@socketsecurity/lib/package-extensions/data'
 import { describe, expect, it } from 'vitest'
 
 describe('package-extensions', () => {

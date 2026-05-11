@@ -98,10 +98,15 @@
     "zlib": false
   },
   "exports": {
-    "./abort": {
-      "source": "./src/abort.ts",
-      "types": "./dist/abort.d.ts",
-      "default": "./dist/abort.js"
+    "./abort/signal": {
+      "source": "./src/abort/signal.ts",
+      "types": "./dist/abort/signal.d.ts",
+      "default": "./dist/abort/signal.js"
+    },
+    "./abort/types": {
+      "source": "./src/abort/types.ts",
+      "types": "./dist/abort/types.d.ts",
+      "default": "./dist/abort/types.js"
     },
     "./ai/discover": {
       "source": "./src/ai/discover.mts",
@@ -128,10 +133,20 @@
       "types": "./dist/ai/worktree.d.mts",
       "default": "./dist/ai/worktree.js"
     },
-    "./ansi": {
-      "source": "./src/ansi.ts",
-      "types": "./dist/ansi.d.ts",
-      "default": "./dist/ansi.js"
+    "./ansi/constants": {
+      "source": "./src/ansi/constants.ts",
+      "types": "./dist/ansi/constants.d.ts",
+      "default": "./dist/ansi/constants.js"
+    },
+    "./ansi/strip": {
+      "source": "./src/ansi/strip.ts",
+      "types": "./dist/ansi/strip.d.ts",
+      "default": "./dist/ansi/strip.js"
+    },
+    "./ansi/types": {
+      "source": "./src/ansi/types.ts",
+      "types": "./dist/ansi/types.d.ts",
+      "default": "./dist/ansi/types.js"
     },
     "./archives/detect": {
       "source": "./src/archives/detect.ts",
@@ -353,10 +368,15 @@
       "types": "./dist/cover/types.d.ts",
       "default": "./dist/cover/types.js"
     },
-    "./crypto": {
-      "source": "./src/crypto.ts",
-      "types": "./dist/crypto.d.ts",
-      "default": "./dist/crypto.js"
+    "./crypto/hash": {
+      "source": "./src/crypto/hash.ts",
+      "types": "./dist/crypto/hash.d.ts",
+      "default": "./dist/crypto/hash.js"
+    },
+    "./crypto/types": {
+      "source": "./src/crypto/types.ts",
+      "types": "./dist/crypto/types.d.ts",
+      "default": "./dist/crypto/types.js"
     },
     "./debug": {
       "source": "./src/debug.ts",
@@ -963,10 +983,15 @@
       "types": "./dist/objects/types.d.ts",
       "default": "./dist/objects/types.js"
     },
-    "./package-extensions": {
-      "source": "./src/package-extensions.ts",
-      "types": "./dist/package-extensions.d.ts",
-      "default": "./dist/package-extensions.js"
+    "./package-extensions/data": {
+      "source": "./src/package-extensions/data.ts",
+      "types": "./dist/package-extensions/data.d.ts",
+      "default": "./dist/package-extensions/data.js"
+    },
+    "./package-extensions/types": {
+      "source": "./src/package-extensions/types.ts",
+      "types": "./dist/package-extensions/types.d.ts",
+      "default": "./dist/package-extensions/types.js"
     },
     "./packages": {
       "source": "./src/packages.ts",

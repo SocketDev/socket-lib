@@ -23,7 +23,7 @@
  * ```
  */
 
-import { ANSI_RESET } from '../ansi'
+import { ANSI_RESET } from '../ansi/constants'
 import { frameColors, type RGB, type ShimmerSpec } from './shimmer'
 
 /**

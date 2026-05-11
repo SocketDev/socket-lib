@@ -15,7 +15,7 @@
 import { describe, expect, it } from 'vitest'
 import colors from 'yoctocolors-cjs'
 
-import { stripAnsi } from '@socketsecurity/lib/ansi'
+import { stripAnsi } from '@socketsecurity/lib/ansi/strip'
 import { formatSimpleTable, formatTable } from '@socketsecurity/lib/tables'
 
 describe('tables', () => {

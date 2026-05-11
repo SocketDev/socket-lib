@@ -5,7 +5,7 @@
  * `primordials/string` for the most common use case.
  */
 
-import { stripAnsi } from '../ansi'
+import { stripAnsi } from '../ansi/strip'
 import { MathFloor } from '../primordials/math'
 import {
   StringPrototypeIncludes,

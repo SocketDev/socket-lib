@@ -16,7 +16,7 @@
  * Standard Annex #11 references.
  */
 
-import { stripAnsi } from '../ansi'
+import { stripAnsi } from '../ansi/strip'
 import { RegExpPrototypeTest } from '../primordials/regexp'
 import {
   StringPrototypeCharCodeAt,
