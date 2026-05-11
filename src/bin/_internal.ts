@@ -27,39 +27,8 @@ export const binPathAllCache = new MapCtor<string, string[]>()
 
 export const voltaBinCache = new MapCtor<string, string>()
 
-let _fs: typeof import('node:fs') | undefined
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-let _path: typeof import('node:path') | undefined
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+// Re-export canonical node:fs / node:path loaders under the bin/ legacy
+// names for siblings (which, find, exec, …). New code should import
+// getNodeFs / getNodePath from '@socketsecurity/lib/node/{fs,path}'.
+export { getNodeFs as getFs } from '../node/fs'
+export { getNodePath as getPath } from '../node/path'

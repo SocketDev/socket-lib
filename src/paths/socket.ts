@@ -32,20 +32,8 @@ import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR } from './dirnames'
 import { normalizePath } from './normalize'
 import { getPathValue } from './rewire'
 
-let _os: typeof import('node:os') | undefined
-let _path: typeof import('node:path') | undefined
-
-/**
- * Lazily load the os module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getOs() {
-  if (_os === undefined) {
-    _os = /*@__PURE__*/ require('node:os')
-  }
-  return _os as typeof import('node:os')
-}
+import { getNodeOs } from '../node/os'
+import { getNodePath } from '../node/path'
 
 /**
  * Get the OS home directory.
@@ -53,7 +41,7 @@ export function getOs() {
  */
 export function getOsHomeDir(): string {
   // Always check for overrides - don't cache when using rewire
-  return getPathValue('homedir', () => getOs().homedir())
+  return getPathValue('homedir', () => getNodeOs().homedir())
 }
 /**
  * Get the OS temporary directory.
@@ -66,29 +54,17 @@ export function getOsHomeDir(): string {
  */
 export function getOsTmpDir(): string {
   // Always check for overrides - don't cache when using rewire
-  return getPathValue('tmpdir', () => getOs().tmpdir())
+  return getPathValue('tmpdir', () => getNodeOs().tmpdir())
 }
 /**
  * Get a Socket app cache directory (~/.socket/_<appName>/cache).
  */
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
 
 /**
  * Get a Socket app cache directory (~/.socket/_<appName>/cache).
  */
 export function getSocketAppCacheDir(appName: string): string {
-  return normalizePath(getPath().join(getSocketAppDir(appName), CACHE_DIR))
+  return normalizePath(getNodePath().join(getSocketAppDir(appName), CACHE_DIR))
 }
 /**
  * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
@@ -99,7 +75,7 @@ export function getSocketAppCacheDir(appName: string): string {
  */
 export function getSocketAppCacheTtlDir(appName: string): string {
   return normalizePath(
-    getPath().join(getSocketAppCacheDir(appName), CACHE_TTL_DIR),
+    getNodePath().join(getSocketAppCacheDir(appName), CACHE_TTL_DIR),
   )
 }
 /**
@@ -111,7 +87,7 @@ export function getSocketAppCacheTtlDir(appName: string): string {
  */
 export function getSocketAppDir(appName: string): string {
   return normalizePath(
-    getPath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${appName}`),
+    getNodePath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${appName}`),
   )
 }
 /**
@@ -141,7 +117,7 @@ export function getSocketCacacheDir(): string {
       return normalizePath(getSocketCacacheDirEnv() as string)
     }
     return normalizePath(
-      getPath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
+      getNodePath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
     )
   })
 }
@@ -186,7 +162,7 @@ export function getSocketDlxDir(): string {
       return normalizePath(getSocketDlxDirEnv() as string)
     }
     return normalizePath(
-      getPath().join(
+      getNodePath().join(
         getSocketUserDir(),
         `${SOCKET_APP_PREFIX}${SOCKET_DLX_APP_NAME}`,
       ),
@@ -224,7 +200,7 @@ export function getSocketRegistryDir(): string {
  */
 export function getSocketRegistryGithubCacheDir(): string {
   return normalizePath(
-    getPath().join(
+    getNodePath().join(
       getSocketAppCacheTtlDir(SOCKET_REGISTRY_APP_NAME),
       CACHE_GITHUB_DIR,
     ),
@@ -259,7 +235,7 @@ export function getSocketUserDir(): string {
     if (socketHome) {
       return normalizePath(socketHome)
     }
-    return normalizePath(getPath().join(getUserHomeDir(), DOT_SOCKET_DIR))
+    return normalizePath(getNodePath().join(getUserHomeDir(), DOT_SOCKET_DIR))
   })
 }
 /**
@@ -270,8 +246,8 @@ export function getSocketUserDir(): string {
  * Priority order:
  *   1. HOME environment variable (Unix)
  *   2. USERPROFILE environment variable (Windows)
- *   3. getOs().homedir()
- *   4. Fallback: getOs().tmpdir() (rarely used, for restricted environments)
+ *   3. getNodeOs().homedir()
+ *   4. Fallback: getNodeOs().tmpdir() (rarely used, for restricted environments)
  */
 
 /**
@@ -282,8 +258,8 @@ export function getSocketUserDir(): string {
  * Priority order:
  *   1. HOME environment variable (Unix)
  *   2. USERPROFILE environment variable (Windows)
- *   3. getOs().homedir()
- *   4. Fallback: getOs().tmpdir() (rarely used, for restricted environments)
+ *   3. getNodeOs().homedir()
+ *   4. Fallback: getNodeOs().tmpdir() (rarely used, for restricted environments)
  */
 export function getUserHomeDir(): string {
   // Try HOME first (Unix)
@@ -296,14 +272,14 @@ export function getUserHomeDir(): string {
   if (userProfile) {
     return userProfile
   }
-  // Try getOs().homedir()
+  // Try getNodeOs().homedir()
   try {
     const osHome = getOsHomeDir()
     if (osHome) {
       return osHome
     }
   } catch {
-    // getOs().homedir() can throw in restricted environments
+    // getNodeOs().homedir() can throw in restricted environments
   }
   /* c8 ignore next 2 - Triple-fallback only fires when HOME +
      USERPROFILE + os.homedir() all fail; not reachable in tests. */

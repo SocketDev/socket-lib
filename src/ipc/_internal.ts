@@ -19,29 +19,8 @@ export const IpcStubSchema = Type.Object({
   data: Type.Unknown(),
 })
 
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+// Re-export canonical node:fs / node:path loaders under the ipc/
+// legacy names for siblings. New code should import getNodeFs /
+// getNodePath from '@socketsecurity/lib/node/{fs,path}'.
+export { getNodeFs as getFs } from '../node/fs'
+export { getNodePath as getPath } from '../node/path'

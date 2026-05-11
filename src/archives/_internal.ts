@@ -22,7 +22,13 @@ export const DEFAULT_MAX_ENTRIES = 100_000
 
 let _AdmZip: typeof AdmZipType | undefined
 let _tarFs: typeof tarFsType | undefined
-let _path: typeof import('node:path') | undefined
+
+import { getNodePath } from '../node/path'
+
+// Re-export canonical node:path loader under the archives/ legacy name
+// for siblings (extract.ts, …). New code should import getNodePath
+// from '@socketsecurity/lib/node/path' directly.
+export { getNodePath as getPath } from '../node/path'
 
 /**
  * Assert that an archive file exists on disk before handing it to the
@@ -55,19 +61,6 @@ export function getAdmZip() {
   return _AdmZip!
 }
 
-/**
- * Lazily load the path module to avoid Webpack errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
 /*@__NO_SIDE_EFFECTS__*/
 export function getTarFs() {
   if (_tarFs === undefined) {
@@ -91,7 +84,7 @@ export function validatePathWithinBase(
   baseDir: string,
   entryName: string,
 ): void {
-  const path = getPath()
+  const path = getNodePath()
   const resolvedTarget = path.resolve(targetPath)
   const resolvedBase = path.resolve(baseDir)
 

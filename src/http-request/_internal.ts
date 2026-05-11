@@ -14,32 +14,14 @@
  * the same module names to `false`).
  */
 
-let _crypto: typeof import('node:crypto') | undefined
-let _fs: typeof import('node:fs') | undefined
 let _http: typeof import('node:http') | undefined
 let _https: typeof import('node:https') | undefined
 
-/**
- * Lazily load the crypto module to avoid Webpack errors.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getCrypto() {
-  if (_crypto === undefined) {
-    _crypto = /*@__PURE__*/ require('node:crypto')
-  }
-  return _crypto as typeof import('node:crypto')
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
+// Re-export canonical node:crypto / node:fs loaders under the
+// http-request/ legacy names. New code should import
+// getNodeCrypto / getNodeFs from '@socketsecurity/lib/node/{crypto,fs}'.
+export { getNodeCrypto as getCrypto } from '../node/crypto'
+export { getNodeFs as getFs } from '../node/fs'
 
 /**
  * Lazily load http and https modules to avoid Webpack errors.

@@ -5,19 +5,8 @@
 import { normalizePath } from './normalize'
 
 import { StringPrototypeEndsWith } from '../primordials/string'
-let _path: typeof import('node:path') | undefined
-/**
- * Get the path module.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import { getNodePath } from '../node/path'
 
 /**
  * Whether `filepath`'s final segment is exactly `package.json`. Accepts both
@@ -39,7 +28,7 @@ export function isPackageJsonFile(filepath: string): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageJsonDirname(filepath: string): string {
   if (isPackageJsonFile(filepath)) {
-    const path = getPath()
+    const path = getNodePath()
     return normalizePath(path.dirname(filepath))
   }
   return normalizePath(filepath)
@@ -53,6 +42,6 @@ export function resolvePackageJsonPath(filepath: string): string {
   if (isPackageJsonFile(filepath)) {
     return normalizePath(filepath)
   }
-  const path = getPath()
+  const path = getNodePath()
   return normalizePath(path.join(filepath, 'package.json'))
 }

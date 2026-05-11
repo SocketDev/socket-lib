@@ -25,9 +25,13 @@ export const MATCHER_CACHE_MAX_SIZE = 100
 export const matcherCache = new MapCtor<string, (path: string) => boolean>()
 
 let _fastGlob: typeof fastGlobType | undefined
-let _fs: typeof import('node:fs') | undefined
-let _fsPromises: typeof import('node:fs/promises') | undefined
 let _picomatch: typeof picomatchType | undefined
+
+// Re-export canonical node:fs / node:fs/promises loaders under the
+// globs/ legacy names. New code should import getNodeFs /
+// getNodeFsPromises from '@socketsecurity/lib/node/{fs,fs-promises}'.
+export { getNodeFs as getFs } from '../node/fs'
+export { getNodeFsPromises as getFsPromises } from '../node/fs-promises'
 
 /*@__NO_SIDE_EFFECTS__*/
 export function getFastGlob() {
@@ -35,32 +39,6 @@ export function getFastGlob() {
     _fastGlob = /*@__PURE__*/ require('../external/fast-glob.js')
   }
   return _fastGlob!
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the fs/promises module to avoid Webpack errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFsPromises() {
-  if (_fsPromises === undefined) {
-    _fsPromises = /*@__PURE__*/ require('node:fs/promises')
-  }
-  return _fsPromises as typeof import('node:fs/promises')
 }
 
 /*@__NO_SIDE_EFFECTS__*/

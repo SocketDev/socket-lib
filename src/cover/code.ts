@@ -13,6 +13,10 @@ import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 
 import { ObjectValues } from '../primordials/object'
+
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
+
 import type {
   CodeCoverageResult,
   CoverageMetric,
@@ -20,9 +24,6 @@ import type {
   V8CoverageData,
   V8FileCoverage,
 } from './types'
-
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
 
 /**
  * Calculate coverage metric with percentage.
@@ -50,7 +51,7 @@ export function calculateMetric(data: {
 export async function getCodeCoverage(
   options?: GetCodeCoverageOptions | undefined,
 ): Promise<CodeCoverageResult> {
-  const path = getPath()
+  const path = getNodePath()
   const opts = {
     __proto__: null,
     coveragePath: path.join(process.cwd(), 'coverage/coverage-final.json'),
@@ -65,7 +66,7 @@ export async function getCodeCoverage(
   }
 
   // Check if coverage file exists.
-  const fs = getFs()
+  const fs = getNodeFs()
   if (!fs.existsSync(coveragePath)) {
     if (generateIfMissing) {
       // Run vitest to generate coverage.
@@ -162,32 +163,4 @@ export async function getCodeCoverage(
     lines: calculateMetric(totals.lines),
     statements: calculateMetric(totals.statements),
   }
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
 }

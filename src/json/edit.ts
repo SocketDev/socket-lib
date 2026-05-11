@@ -6,6 +6,8 @@ import process from 'node:process'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { isErrnoException } from '../errors/predicates'
+import { getNodeFs } from '../node/fs'
+
 import { ErrorCtor } from '../primordials/error'
 import {
   INDENT_SYMBOL,
@@ -36,8 +38,6 @@ const newlineSymbol = NEWLINE_SYMBOL
 const JSONParse = JSON.parse
 
 let _EditableJsonClass: EditableJsonConstructor | undefined
-
-let _fs: typeof import('node:fs') | undefined
 /**
  * Get the EditableJson class for JSON file manipulation.
  *
@@ -223,7 +223,7 @@ export function getEditableJsonClass<
         const fileContent = stringifyWithFormatting(sortedContent, formatting)
 
         // Save to disk
-        const fs = getFs()
+        const fs = getNodeFs()
         fs.writeFileSync(this.filename, fileContent)
         this._readFileContent = fileContent
         this._readFileJson = parseJson(fileContent)
@@ -255,15 +255,6 @@ export function getEditableJsonClass<
   return _EditableJsonClass as EditableJsonConstructor<T>
 }
 
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
 /**
  * Parse JSON content and extract formatting metadata.
  * @private
@@ -277,7 +268,7 @@ export function parseJson(content: string): unknown {
  * @private
  */
 export async function readFile(filepath: string): Promise<string> {
-  const { promises: fsPromises } = getFs()
+  const { promises: fsPromises } = getNodeFs()
 
   // Retry on ENOENT. Windows-only retry-count and delay; tested on
   // Windows runners. The retry-loop body itself fires only after a
@@ -321,7 +312,7 @@ export async function retryWrite(
   retries = 3,
   baseDelay = 10,
 ): Promise<void> {
-  const fs = getFs()
+  const fs = getNodeFs()
   const { promises: fsPromises } = fs
 
   for (let attempt = 0; attempt <= retries; attempt++) {
