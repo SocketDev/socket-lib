@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- mapper helpers interleaved with module-level pattern config they consume; reordering would split state from its consumers. */
 /**
  * @fileoverview Maps changed source files to test files for affected test running.
  * Uses git utilities from socket-registry to detect changes.

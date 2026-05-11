@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- 5700-line CLI tool with helper functions organized by command grouping (run*, validate*, etc.); module-level const config sandwiched between groups blocks autofix and manual reorder would either split state or change initialization order. */
 /**
  * @fileoverview Claude Code-powered utilities for Socket projects.
  * Provides various AI-assisted development tools and automations using Claude Code CLI.

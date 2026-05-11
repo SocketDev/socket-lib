@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- build-runner helpers interleaved with config constants and module-level state; reordering would split state from its consumers. */
 /**
  * @fileoverview Fast build runner using esbuild for smaller bundles and faster builds.
  */

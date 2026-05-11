@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- validator helpers interleaved with module-level config they consume; reordering would split state from its consumers. */
 /**
  * @fileoverview Validate that all dist/external/* exports work correctly for internal use
  * Ensures require('./dist/external/foo') returns usable values without .default wrappers
