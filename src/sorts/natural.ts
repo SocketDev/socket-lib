@@ -1,82 +1,20 @@
 /**
- * @fileoverview Sorting comparison functions including locale-aware and natural sorting.
- * Provides various comparison utilities for arrays and collections.
+ * @fileoverview Locale-aware + numeric-aware comparison via
+ * `Intl.Collator`, plus the `naturalSorter` helper that wires the
+ * fast-sort engine to the natural comparator.
+ *
+ * Collator instances are lazy-created and cached because
+ * `new Intl.Collator()` is 10-14ms in Node — too expensive to call
+ * per-comparison.
  */
 
-import type * as fastSortType from './external/fast-sort'
-import type * as semverType from './external/semver'
+import { getFastSort } from './_internal'
 
-// Type for fast-sort sorter function.
-type FastSortFunction = ReturnType<
-  typeof import('fast-sort').createNewSortInstance
->
+import type { FastSortFunction } from './types'
 
-let _fastSort: typeof fastSortType | undefined
 let _localeCompare: ((x: string, y: string) => number) | undefined
 let _naturalCompare: ((x: string, y: string) => number) | undefined
 let _naturalSorter: FastSortFunction | undefined
-let _semver: typeof semverType | undefined
-
-/**
- * Compare semantic versions.
- *
- * @example
- * ```typescript
- * compareSemver('1.0.0', '2.0.0')  // -1
- * compareSemver('2.0.0', '1.0.0')  // 1
- * compareSemver('1.0.0', '1.0.0')  // 0
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function compareSemver(a: string, b: string): number {
-  // External semver calls
-  /* c8 ignore start */
-  const semver = getSemver()
-  const validA: string | null = semver.valid(a)
-  /* c8 ignore stop */
-  const validB: string | null = semver.valid(b)
-
-  if (!validA && !validB) {
-    return 0
-  }
-  if (!validA) {
-    return -1
-  }
-  if (!validB) {
-    return 1
-  }
-  /* c8 ignore next - External semver call */
-  return semver.compare(a, b) as number
-}
-
-/**
- * Simple string comparison.
- *
- * @example
- * ```typescript
- * compareStr('a', 'b')  // -1
- * compareStr('b', 'a')  // 1
- * compareStr('a', 'a')  // 0
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function compareStr(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0
-}
-
-export function getFastSort() {
-  if (_fastSort === undefined) {
-    _fastSort = require('./external/fast-sort.js')
-  }
-  return _fastSort!
-}
-
-export function getSemver() {
-  if (_semver === undefined) {
-    _semver = require('./external/semver.js')
-  }
-  return _semver!
-}
 
 /**
  * Compare two strings using locale-aware comparison.

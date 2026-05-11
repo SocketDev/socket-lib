@@ -11,12 +11,12 @@
  */
 
 import {
-  compareSemver,
-  compareStr,
   localeCompare,
   naturalCompare,
   naturalSorter,
-} from '@socketsecurity/lib/sorts'
+} from '@socketsecurity/lib/sorts/natural'
+import { compareSemver } from '@socketsecurity/lib/sorts/semver'
+import { compareStr } from '@socketsecurity/lib/sorts/strings'
 import { describe, expect, it } from 'vitest'
 
 describe('sorts', () => {

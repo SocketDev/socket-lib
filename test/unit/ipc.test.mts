@@ -16,7 +16,8 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { getIpcStubPath, writeIpcStub } from '../../src/ipc'
+import { getIpcStubPath } from '../../src/ipc/paths'
+import { writeIpcStub } from '../../src/ipc/write'
 import { resetPaths, setPath } from '../../src/paths/rewire'
 
 import { runWithTempDir } from './utils/temp-file-helper'

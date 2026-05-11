@@ -843,11 +843,6 @@
       "types": "./dist/http-request/types.d.ts",
       "default": "./dist/http-request/types.js"
     },
-    "./ipc": {
-      "source": "./src/ipc.ts",
-      "types": "./dist/ipc.d.ts",
-      "default": "./dist/ipc.js"
-    },
     "./ipc-cli/get": {
       "source": "./src/ipc-cli/get.ts",
       "types": "./dist/ipc-cli/get.d.ts",
@@ -857,6 +852,26 @@
       "source": "./src/ipc-cli/types.ts",
       "types": "./dist/ipc-cli/types.d.ts",
       "default": "./dist/ipc-cli/types.js"
+    },
+    "./ipc/directory": {
+      "source": "./src/ipc/directory.ts",
+      "types": "./dist/ipc/directory.d.ts",
+      "default": "./dist/ipc/directory.js"
+    },
+    "./ipc/paths": {
+      "source": "./src/ipc/paths.ts",
+      "types": "./dist/ipc/paths.d.ts",
+      "default": "./dist/ipc/paths.js"
+    },
+    "./ipc/types": {
+      "source": "./src/ipc/types.ts",
+      "types": "./dist/ipc/types.d.ts",
+      "default": "./dist/ipc/types.js"
+    },
+    "./ipc/write": {
+      "source": "./src/ipc/write.ts",
+      "types": "./dist/ipc/write.d.ts",
+      "default": "./dist/ipc/write.js"
     },
     "./json/edit": {
       "source": "./src/json/edit.ts",
@@ -1363,10 +1378,25 @@
       "types": "./dist/smol/versions.d.ts",
       "default": "./dist/smol/versions.js"
     },
-    "./sorts": {
-      "source": "./src/sorts.ts",
-      "types": "./dist/sorts.d.ts",
-      "default": "./dist/sorts.js"
+    "./sorts/natural": {
+      "source": "./src/sorts/natural.ts",
+      "types": "./dist/sorts/natural.d.ts",
+      "default": "./dist/sorts/natural.js"
+    },
+    "./sorts/semver": {
+      "source": "./src/sorts/semver.ts",
+      "types": "./dist/sorts/semver.d.ts",
+      "default": "./dist/sorts/semver.js"
+    },
+    "./sorts/strings": {
+      "source": "./src/sorts/strings.ts",
+      "types": "./dist/sorts/strings.d.ts",
+      "default": "./dist/sorts/strings.js"
+    },
+    "./sorts/types": {
+      "source": "./src/sorts/types.ts",
+      "types": "./dist/sorts/types.d.ts",
+      "default": "./dist/sorts/types.js"
     },
     "./spawn/core": {
       "source": "./src/spawn/core.ts",
@@ -1518,15 +1548,40 @@
       "types": "./dist/strings/width.d.ts",
       "default": "./dist/strings/width.js"
     },
-    "./suppress-warnings": {
-      "source": "./src/suppress-warnings.ts",
-      "types": "./dist/suppress-warnings.d.ts",
-      "default": "./dist/suppress-warnings.js"
+    "./suppress-warnings/core": {
+      "source": "./src/suppress-warnings/core.ts",
+      "types": "./dist/suppress-warnings/core.d.ts",
+      "default": "./dist/suppress-warnings/core.js"
     },
-    "./tables": {
-      "source": "./src/tables.ts",
-      "types": "./dist/tables.d.ts",
-      "default": "./dist/tables.js"
+    "./suppress-warnings/event-target": {
+      "source": "./src/suppress-warnings/event-target.ts",
+      "types": "./dist/suppress-warnings/event-target.d.ts",
+      "default": "./dist/suppress-warnings/event-target.js"
+    },
+    "./suppress-warnings/types": {
+      "source": "./src/suppress-warnings/types.ts",
+      "types": "./dist/suppress-warnings/types.d.ts",
+      "default": "./dist/suppress-warnings/types.js"
+    },
+    "./tables/bordered": {
+      "source": "./src/tables/bordered.ts",
+      "types": "./dist/tables/bordered.d.ts",
+      "default": "./dist/tables/bordered.js"
+    },
+    "./tables/padding": {
+      "source": "./src/tables/padding.ts",
+      "types": "./dist/tables/padding.d.ts",
+      "default": "./dist/tables/padding.js"
+    },
+    "./tables/simple": {
+      "source": "./src/tables/simple.ts",
+      "types": "./dist/tables/simple.d.ts",
+      "default": "./dist/tables/simple.js"
+    },
+    "./tables/types": {
+      "source": "./src/tables/types.ts",
+      "types": "./dist/tables/types.d.ts",
+      "default": "./dist/tables/types.js"
     },
     "./temporary-executor/detect": {
       "source": "./src/temporary-executor/detect.ts",

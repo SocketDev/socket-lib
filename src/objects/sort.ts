@@ -9,7 +9,7 @@
 
 import { ObjectFromEntries } from '../primordials/object'
 import { ReflectOwnKeys } from '../primordials/reflect'
-import { localeCompare } from '../sorts'
+import { localeCompare } from '../sorts/natural'
 
 import type { SortedObject } from './types'
 

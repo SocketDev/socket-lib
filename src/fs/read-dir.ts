@@ -7,7 +7,7 @@
 
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
-import { naturalCompare } from '../sorts'
+import { naturalCompare } from '../sorts/natural'
 
 import { isDirEmptySync } from './inspect'
 

@@ -1,14 +1,14 @@
 /**
- * @fileoverview Utilities to suppress specific process warnings.
+ * @fileoverview `process.emitWarning` suppression. Single shared
+ * wrapper installed on first call, driven by a membership Set so
+ * repeated `suppressWarningType` calls are cheap.
  */
 
 import process from 'node:process'
 
-import { SetCtor } from './primordials/map-set'
+import { SetCtor } from '../primordials/map-set'
+import { ReflectApply } from '../primordials/reflect'
 
-import { ObjectGetOwnPropertySymbols } from './primordials/object'
-
-import { ReflectApply } from './primordials/reflect'
 // Store the original emitWarning function to avoid repeat wrapping.
 let originalEmitWarning: typeof process.emitWarning | undefined
 
@@ -32,52 +32,6 @@ export function restoreWarnings(): void {
     originalEmitWarning = undefined
     suppressedWarnings.clear()
   }
-}
-
-/**
- * Set max listeners on an EventTarget (like AbortSignal) to avoid TypeError.
- *
- * By manually setting `kMaxEventTargetListeners` on the target we avoid:
- *   TypeError [ERR_INVALID_ARG_TYPE]: The "emitter" argument must be an
- *   instance of EventEmitter or EventTarget. Received an instance of
- *   AbortSignal
- *
- * in some patch releases of Node 18-23 when calling events.getMaxListeners().
- * See https://github.com/nodejs/node/pull/56807.
- *
- * Instead of calling events.setMaxListeners(n, target) we set the symbol
- * property directly to avoid depending on 'node:events' module.
- *
- * @param target - The EventTarget or AbortSignal to configure
- * @param maxListeners - Maximum number of listeners (defaults to 10, the Node.js default)
- *
- * @example
- * import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
- *
- * const controller = new AbortController()
- * setMaxEventTargetListeners(controller.signal)
- */
-export function setMaxEventTargetListeners(
-  target: EventTarget | AbortSignal | undefined,
-  maxListeners: number = 10,
-): void {
-  // !target arm fires for caller-passes-undefined; symbol-not-found
-  // arm fires only on Node runtimes that don't expose the symbol.
-  /* c8 ignore start */
-  if (!target) {
-    return
-  }
-  const symbols = ObjectGetOwnPropertySymbols(target)
-  const kMaxEventTargetListeners = symbols.find(
-    s => s.description === 'events.maxEventTargetListeners',
-  )
-  if (kMaxEventTargetListeners) {
-    // The default events.defaultMaxListeners value is 10.
-    // https://nodejs.org/api/events.html#eventsdefaultmaxlisteners
-    ;(target as unknown as Record<symbol, number>)[kMaxEventTargetListeners] =
-      maxListeners
-  }
-  /* c8 ignore stop */
 }
 
 /**
@@ -121,18 +75,14 @@ export function setupSuppression(): void {
 }
 
 /**
- * Suppress MaxListenersExceededWarning messages.
- * This is useful in tests or scripts where multiple listeners are expected.
- *
- * @example
- * import { suppressMaxListenersWarning } from '@socketsecurity/lib/suppress-warnings'
- *
- * suppressMaxListenersWarning()
- */
-/**
  * Silence `MaxListenersExceededWarning` messages from `process.emitWarning`.
  * Installs a single shared wrapper around `process.emitWarning` on first call
  * so repeat invocations are cheap.
+ *
+ * @example
+ * import { suppressMaxListenersWarning } from '@socketsecurity/lib/suppress-warnings/core'
+ *
+ * suppressMaxListenersWarning()
  */
 export function suppressMaxListenersWarning(): void {
   suppressedWarnings.add('MaxListenersExceededWarning')
@@ -145,7 +95,7 @@ export function suppressMaxListenersWarning(): void {
  * @param warningType - The warning type to suppress (e.g., 'DeprecationWarning', 'ExperimentalWarning')
  *
  * @example
- * import { suppressWarningType } from '@socketsecurity/lib/suppress-warnings'
+ * import { suppressWarningType } from '@socketsecurity/lib/suppress-warnings/core'
  *
  * suppressWarningType('ExperimentalWarning')
  */
@@ -162,7 +112,7 @@ export function suppressWarningType(warningType: string): void {
  * @returns The result of the callback
  *
  * @example
- * import { withSuppressedWarnings } from '@socketsecurity/lib/suppress-warnings'
+ * import { withSuppressedWarnings } from '@socketsecurity/lib/suppress-warnings/core'
  *
  * const result = await withSuppressedWarnings('ExperimentalWarning', async () => {
  *   // Code that triggers experimental warnings
