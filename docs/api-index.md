@@ -301,15 +301,18 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## http-request/
 
-| Subpath                                                                              | Description                                                                                                     |
-| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/http-request/checksums`](../src/http-request/checksums.ts)     | Checksum file fetching + parsing for download verification.                                                     |
-| [`@socketsecurity/lib/http-request/convenience`](../src/http-request/convenience.ts) | Thin convenience wrappers over `httpRequest` — `httpJson` and `httpText`.                                       |
-| [`@socketsecurity/lib/http-request/download`](../src/http-request/download.ts)       | Streaming file downloads with retries, progress callbacks, and SHA-256 verification.                            |
-| [`@socketsecurity/lib/http-request/errors`](../src/http-request/errors.ts)           | Error-message enrichment for HTTP/HTTPS requests.                                                               |
-| [`@socketsecurity/lib/http-request/headers`](../src/http-request/headers.ts)         | Header utilities for HTTP/HTTPS requests.                                                                       |
-| [`@socketsecurity/lib/http-request/request`](../src/http-request/request.ts)         | Core HTTP/HTTPS request loop.                                                                                   |
-| [`@socketsecurity/lib/http-request/types`](../src/http-request/types.ts)             | Public type surface for `http-request/*` modules — interfaces, type aliases, and the `HttpResponseError` class. |
+| Subpath                                                                                    | Description                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/http-request/checksums`](../src/http-request/checksums.ts)           | Checksum file fetching + parsing for download verification.                                                                                                     |
+| [`@socketsecurity/lib/http-request/convenience`](../src/http-request/convenience.ts)       | Thin convenience wrappers over `httpRequest` — `httpJson` and `httpText`.                                                                                       |
+| [`@socketsecurity/lib/http-request/download`](../src/http-request/download.ts)             | Streaming file downloads with retries, progress callbacks, and SHA-256 verification.                                                                            |
+| [`@socketsecurity/lib/http-request/download-types`](../src/http-request/download-types.ts) | Types for HTTP download + checksum-fetch operations.                                                                                                            |
+| [`@socketsecurity/lib/http-request/errors`](../src/http-request/errors.ts)                 | Error-message enrichment for HTTP/HTTPS requests.                                                                                                               |
+| [`@socketsecurity/lib/http-request/headers`](../src/http-request/headers.ts)               | Header utilities for HTTP/HTTPS requests.                                                                                                                       |
+| [`@socketsecurity/lib/http-request/request`](../src/http-request/request.ts)               | Core HTTP/HTTPS request loop.                                                                                                                                   |
+| [`@socketsecurity/lib/http-request/request-types`](../src/http-request/request-types.ts)   | Types for HTTP request configuration — options, hooks, and Node `IncomingMessage` aliases.                                                                      |
+| [`@socketsecurity/lib/http-request/response-types`](../src/http-request/response-types.ts) | Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`.                                |
+| [`@socketsecurity/lib/http-request/types`](../src/http-request/types.ts)                   | Public type surface for `http-request/*` modules — barrel re-exporting the split type leaves so existing `http-request/types` importers keep working unchanged. |
 
 ## ipc-cli/
 

@@ -948,6 +948,11 @@
       "types": "./dist/http-request/download.d.ts",
       "default": "./dist/http-request/download.js"
     },
+    "./http-request/download-types": {
+      "source": "./src/http-request/download-types.ts",
+      "types": "./dist/http-request/download-types.d.ts",
+      "default": "./dist/http-request/download-types.js"
+    },
     "./http-request/errors": {
       "source": "./src/http-request/errors.ts",
       "types": "./dist/http-request/errors.d.ts",
@@ -962,6 +967,16 @@
       "source": "./src/http-request/request.ts",
       "types": "./dist/http-request/request.d.ts",
       "default": "./dist/http-request/request.js"
+    },
+    "./http-request/request-types": {
+      "source": "./src/http-request/request-types.ts",
+      "types": "./dist/http-request/request-types.d.ts",
+      "default": "./dist/http-request/request-types.js"
+    },
+    "./http-request/response-types": {
+      "source": "./src/http-request/response-types.ts",
+      "types": "./dist/http-request/response-types.d.ts",
+      "default": "./dist/http-request/response-types.js"
     },
     "./http-request/types": {
       "source": "./src/http-request/types.ts",
