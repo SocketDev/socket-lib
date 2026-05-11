@@ -28,7 +28,8 @@ import { DateNow } from '../primordials/date'
 
 import { StringPrototypeStartsWith } from '../primordials/string'
 
-import { getFs, getPath } from './_internal'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 import type { DlxMetadata } from './binary-types'
 
@@ -48,7 +49,7 @@ export async function cleanDlxCache(
   maxAge: number = DLX_BINARY_CACHE_TTL,
 ): Promise<number> {
   const cacheDir = getDlxCachePath()
-  const fs = getFs()
+  const fs = getNodeFs()
 
   if (!fs.existsSync(cacheDir)) {
     return 0
@@ -56,7 +57,7 @@ export async function cleanDlxCache(
 
   let cleaned = 0
   const now = DateNow()
-  const path = getPath()
+  const path = getNodePath()
   const entries = await fs.promises.readdir(cacheDir)
 
   for (const entry of entries) {
@@ -116,7 +117,7 @@ export async function cleanDlxCache(
  * ```
  */
 export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
-  return getPath().join(cacheEntryPath, '.dlx-metadata.json')
+  return getNodePath().join(cacheEntryPath, '.dlx-metadata.json')
 }
 
 /**
@@ -147,7 +148,7 @@ export async function isBinaryCacheValid(
   cacheEntryPath: string,
   cacheTtl: number,
 ): Promise<boolean> {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     const metaPath = getBinaryCacheMetadataPath(cacheEntryPath)
     if (!fs.existsSync(metaPath)) {
@@ -196,7 +197,7 @@ export async function listDlxCache(): Promise<
   }>
 > {
   const cacheDir = getDlxCachePath()
-  const fs = getFs()
+  const fs = getNodeFs()
 
   if (!fs.existsSync(cacheDir)) {
     return []
@@ -204,7 +205,7 @@ export async function listDlxCache(): Promise<
 
   const results = []
   const now = DateNow()
-  const path = getPath()
+  const path = getNodePath()
   const entries = await fs.promises.readdir(cacheDir)
 
   for (const entry of entries) {
@@ -291,7 +292,7 @@ export async function writeBinaryCacheMetadata(
       url,
     },
   }
-  const fs = getFs()
+  const fs = getNodeFs()
   // Use atomic write-then-rename pattern to prevent corruption on crash
   const tmpPath = `${metaPath}.tmp.${process.pid}`
   await fs.promises.writeFile(tmpPath, JSON.stringify(metadata, null, 2))

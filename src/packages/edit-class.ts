@@ -28,7 +28,9 @@ import { JSONStringify } from '../primordials/json'
 
 import { StringPrototypeEndsWith } from '../primordials/string'
 
-import { getFs, getPath, getUtil } from './_internal'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
+import { getNodeUtil } from '../node/util'
 
 import type {
   EditablePackageJsonOptions,
@@ -104,7 +106,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           if (StringPrototypeEndsWith(path, 'package.json')) {
             return path
           }
-          const nodePath = getPath()
+          const nodePath = getNodePath()
           return nodePath.join(path, 'package.json')
         }
 
@@ -185,7 +187,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
         override async load(path: string, create?: boolean): Promise<this> {
           this._path = path
-          const { promises: fsPromises } = getFs()
+          const { promises: fsPromises } = getNodeFs()
           let parseErr: unknown
           try {
             this._readFileContent = await read(this.filename)
@@ -196,7 +198,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             parseErr = e
           }
           if (parseErr) {
-            const nodePath = getPath()
+            const nodePath = getNodePath()
             const indexFile = nodePath.resolve(this.path || '', 'index.js')
             let indexFileContent: string
             try {
@@ -263,7 +265,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           const fileContent = stringifyWithFormatting(sortedContent, formatting)
 
           // Save to disk
-          const { promises: fsPromises } = getFs()
+          const { promises: fsPromises } = getNodeFs()
           await fsPromises.writeFile(this.filename, fileContent)
           this._readFileContent = fileContent
           this._readFileJson = parse(fileContent)
@@ -287,7 +289,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
           if (
             ignoreWhitespace &&
-            getUtil().isDeepStrictEqual(content, this._readFileJson)
+            getNodeUtil().isDeepStrictEqual(content, this._readFileJson)
           ) {
             return false
           }
@@ -313,7 +315,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             return false
           }
 
-          const fs = getFs()
+          const fs = getNodeFs()
           fs.writeFileSync(this.filename, fileContent)
           this._readFileContent = fileContent
           this._readFileJson = parse(fileContent)
@@ -342,7 +344,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
           if (
             ignoreWhitespace &&
-            getUtil().isDeepStrictEqual(content, this._readFileJson)
+            getNodeUtil().isDeepStrictEqual(content, this._readFileJson)
           ) {
             return false
           }

@@ -32,7 +32,8 @@ import { ArrayIsArray } from '../primordials/array'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { getFs, getPath } from './_internal'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 import {
   getBinaryCacheMetadataPath,
   getDlxCachePath,
@@ -82,8 +83,8 @@ export async function dlxBinary(
       sha256 = normalized.value
     }
   }
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   // Map --yes flag to force behavior (auto-approve/skip prompts)
   const force = yes === true ? true : userForce
   // Generate cache paths similar to pnpm/npx structure.
@@ -244,7 +245,7 @@ export function executeBinary(
   const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
 
   // Windows: prepend cache dir to PATH so cmd.exe can locate the binary.
-  const path = getPath()
+  const path = getNodePath()
   const cacheEntryDir = path.dirname(binaryPath)
   const finalSpawnOptions = needsShell
     ? {
@@ -261,8 +262,10 @@ export function executeBinary(
 }
 
 // Re-exports — preserve the historical `dlx/binary` surface so
-// downstream importers don't have to chase the split.
-export { getCrypto, getFs, getPath } from './_internal'
+// downstream importers don't have to chase the split. The lazy
+// `node:fs` / `node:path` / `node:crypto` loaders were removed: use
+// the canonical `getNodeFs` / `getNodePath` / `getNodeCrypto` from
+// `@socketsecurity/lib/node/{fs,path,crypto}` instead.
 export {
   cleanDlxCache,
   getBinaryCacheMetadataPath,

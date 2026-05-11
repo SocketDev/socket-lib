@@ -1,68 +1,14 @@
 /**
- * @fileoverview Shared internals for the `dlx/package` split — lazy
- * `node:fs` / `node:path` loaders + the bounded LRU cache used by
- * `resolveBinaryPath` on Windows. Kept as a leaf so every other dlx
- * file in the split (`spec`, `firewall`, `binary-resolution`,
- * `package` itself) can layer above it without cycles.
+ * @fileoverview Shared internals for the `dlx/*` module — the bounded
+ * LRU cache used by `resolveBinaryPath` on Windows.
  *
- * `binary.ts` ships its own duplicate `getFs` / `getPath` for now —
- * collapsing them into this single source of truth is a follow-up.
+ * Webpack-safe lazy `node:fs` / `node:path` / `node:crypto` loaders
+ * live in the canonical `@socketsecurity/lib/node/{fs,path,crypto}`
+ * helpers — import `getNodeFs` / `getNodePath` / `getNodeCrypto`
+ * directly from there.
  */
 
 import { MapCtor } from '../primordials/map-set'
-
-let _crypto: typeof import('node:crypto') | undefined
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
-
-/**
- * Lazily load the crypto module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getCrypto() {
-  if (_crypto === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _crypto = /*@__PURE__*/ require('node:crypto')
-  }
-  return _crypto as typeof import('node:crypto')
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
 
 // Cache for binary path resolution to avoid repeated extension checks
 // on Windows. Bounded LRU: a long-running process that resolves many

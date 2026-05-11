@@ -22,7 +22,9 @@ import { normalizeHash } from './integrity'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { getCrypto, getFs, getPath } from './_internal'
+import { getNodeCrypto } from '../node/crypto'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 import {
   getDlxCachePath,
   isBinaryCacheValid,
@@ -68,8 +70,8 @@ export async function downloadBinary(
       sha256 = normalized.value
     }
   }
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
   const binaryName = name || `binary-${process.platform}-${getArch()}`
@@ -168,9 +170,9 @@ export async function downloadBinaryFile(
 ): Promise<string> {
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
-  const crypto = getCrypto()
-  const fs = getFs()
-  const path = getPath()
+  const crypto = getNodeCrypto()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const cacheEntryDir = path.dirname(destPath)
   const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
 

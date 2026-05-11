@@ -19,12 +19,10 @@ import { ErrorCtor } from '../primordials/error'
 
 import { ObjectKeys, ObjectValues } from '../primordials/object'
 
-import {
-  binaryPathCache,
-  binaryPathCacheSet,
-  getFs,
-  getPath,
-} from './_internal'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
+
+import { binaryPathCache, binaryPathCacheSet } from './_internal'
 
 /**
  * Find the binary path for an installed package.
@@ -51,7 +49,7 @@ export function findBinaryPath(
   packageName: string,
   binaryName?: string,
 ): string {
-  const path = getPath()
+  const path = getNodePath()
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
   )
@@ -158,8 +156,8 @@ export function makePackageBinsExecutable(
     return
   }
 
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const installedDir = normalizePath(
     path.join(packageDir, 'node_modules', packageName),
   )
@@ -221,7 +219,7 @@ export function resolveBinaryPath(basePath: string): string {
     return basePath
   }
 
-  const fs = getFs()
+  const fs = getNodeFs()
 
   // Check cache first - validate with existsSync.
   const cached = binaryPathCache.get(basePath)

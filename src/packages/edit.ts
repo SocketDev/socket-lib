@@ -10,12 +10,14 @@
  *   - `toEditablePackageJson` — async path-based load
  *   - `toEditablePackageJsonSync` — sync path-based load
  *
- * The class factory + Webpack-safe lazy `node:fs` / `node:path` /
- * `node:util` loaders live in sibling leaves and are re-exported
- * here so existing `packages/edit` importers keep working unchanged:
+ * The class factory lives in a sibling leaf and is re-exported here
+ * so existing `packages/edit` importers keep working unchanged:
  *
- *   - lazy loaders — `./_internal`
  *   - `getEditablePackageJsonClass` — `./edit-class`
+ *
+ * Lazy `node:fs` / `node:path` / `node:util` loaders use the canonical
+ * `getNodeFs` / `getNodePath` / `getNodeUtil` helpers from
+ * `@socketsecurity/lib/node/{fs,path,util}`.
  */
 
 import { JSONStringify } from '../primordials/json'
@@ -221,6 +223,8 @@ export function toEditablePackageJsonSync(
 }
 
 // Re-exports — preserve the historical `packages/edit` surface so
-// downstream importers don't have to chase the split.
-export { getFs, getPath, getUtil } from './_internal'
+// downstream importers don't have to chase the split. The lazy
+// `node:fs` / `node:path` / `node:util` loaders were removed: use the
+// canonical `getNodeFs` / `getNodePath` / `getNodeUtil` from
+// `@socketsecurity/lib/node/{fs,path,util}` instead.
 export { getEditablePackageJsonClass } from './edit-class'

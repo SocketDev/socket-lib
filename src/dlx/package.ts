@@ -52,7 +52,8 @@ import { processLock } from '../process-lock/instance'
 import { spawn } from '../spawn/core'
 import { generateCacheKey } from './cache'
 
-import { getFs, getPath } from './_internal'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 import { findBinaryPath, makePackageBinsExecutable } from './binary-resolution'
 import { checkFirewallPurls } from './firewall'
 import { parsePackageSpec } from './spec'
@@ -208,8 +209,8 @@ export async function ensurePackageInstalled(
   force: boolean,
   install?: EnsurePackageInstallOptions | undefined,
 ): Promise<{ installed: boolean; packageDir: string }> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   // installRoot bypasses the cache layout entirely: the caller picks the
   // exact directory Arborist installs under, no cacheKey appended. They
   // own per-spec separation. Default keeps the historical content-addressed
@@ -414,8 +415,11 @@ export function executePackage(
 }
 
 // Re-exports — preserve the historical `dlx/package` surface so
-// downstream importers don't have to chase the split.
-export { binaryPathCacheSet, getFs, getPath } from './_internal'
+// downstream importers don't have to chase the split. The lazy
+// `node:fs` / `node:path` loaders were removed: use the canonical
+// `getNodeFs` / `getNodePath` from `@socketsecurity/lib/node/{fs,path}`
+// instead.
+export { binaryPathCacheSet } from './_internal'
 export {
   findBinaryPath,
   makePackageBinsExecutable,
