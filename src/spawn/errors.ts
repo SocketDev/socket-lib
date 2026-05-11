@@ -14,7 +14,7 @@
  * non-error paths don't pay the `stackWithCauses` cost.
  */
 
-import { stackWithCauses } from '../errors'
+import { stackWithCauses } from '../errors/stack'
 import { hasOwn } from '../objects/predicates'
 import { ErrorCtor } from '../primordials/error'
 import {

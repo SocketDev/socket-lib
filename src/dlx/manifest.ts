@@ -57,7 +57,7 @@ export function getPath() {
   }
   return _path as typeof import('node:path')
 }
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { readFileUtf8Sync } from '../fs/read-file'
 import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
 import { getDefaultLogger } from '../logger/default'

@@ -6,14 +6,10 @@
  * exposes an idle-wait helper.
  */
 
-import { ErrorCtor } from './primordials/error'
+import { ErrorCtor } from '../primordials/error'
+import { PromiseCtor } from '../primordials/promise'
 
-import { PromiseCtor } from './primordials/promise'
-type QueuedTask<T> = {
-  fn: () => Promise<T>
-  resolve: (value: T) => void
-  reject: (error: unknown) => void
-}
+import type { QueuedTask } from './types'
 
 export class PromiseQueue {
   private queue: Array<QueuedTask<unknown>> = []

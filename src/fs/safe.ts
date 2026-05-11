@@ -8,7 +8,7 @@
  */
 
 import { isArray } from '../arrays'
-import { isErrnoException } from '../errors'
+import { isErrnoException } from '../errors/predicates'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { objectFreeze } from '../objects/mutate'

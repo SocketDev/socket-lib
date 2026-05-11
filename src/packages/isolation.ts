@@ -6,7 +6,7 @@
 import npmPackageArg from '../external/npm-package-arg'
 
 import { WIN32 } from '../constants/platform'
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
 import { spawn } from '../spawn/core'

@@ -13,13 +13,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  hexToSsri,
-  isValidHex,
-  isValidSsri,
-  parseSsri,
-  ssriToHex,
-} from '@socketsecurity/lib/ssri'
+import { hexToSsri, ssriToHex } from '@socketsecurity/lib/ssri/convert'
+import { parseSsri } from '@socketsecurity/lib/ssri/parse'
+import { isValidHex, isValidSsri } from '@socketsecurity/lib/ssri/validate'
 
 describe('ssri', () => {
   describe('ssriToHex', () => {

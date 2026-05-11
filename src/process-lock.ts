@@ -40,7 +40,7 @@
  * - Automatic cleanup on process exit
  */
 
-import { errorMessage } from './errors'
+import { errorMessage } from './errors/message'
 import { safeDeleteSync } from './fs/safe'
 import { getDefaultLogger } from './logger/default'
 import { pRetry } from './promises/retry'

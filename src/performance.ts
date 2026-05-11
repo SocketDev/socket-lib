@@ -6,7 +6,7 @@
 import process from 'node:process'
 
 import { debugLog } from './debug'
-import { errorMessage } from './errors'
+import { errorMessage } from './errors/message'
 
 import { DateNow } from './primordials/date'
 

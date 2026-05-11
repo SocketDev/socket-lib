@@ -1,21 +1,27 @@
 /**
- * @fileoverview Regular expression utilities including a spec-compliant
- * `RegExp.escape` fallback. Provides regex escaping and pattern matching
- * helpers.
+ * @fileoverview Spec-compliant fallback for the TC39 `RegExp.escape`
+ * (https://tc39.es/ecma262/#sec-regexp.escape). Implements
+ * `escapeRegExpFallback` plus the `isSpecHexEscapeCp` classifier used
+ * by both the fallback and downstream callers.
+ *
+ * The fallback handles every branch of the spec
+ * `EncodeForRegExpEscape` algorithm: leading [0-9A-Za-z] are always
+ * `\xHH`-escaped (guards against `\0..\9` / `\c` merging in a larger
+ * pattern), syntax characters (and `/`) get a plain backslash prefix,
+ * the `ControlEscape` set maps to its `\t \n \v \f \r` names, the
+ * other punctuators and the whitespace / line-terminator / lone-surrogate
+ * code points route through `\xHH` or `\uHHHH`. Every other code
+ * point is emitted verbatim.
  */
 
-import { MapCtor, SetCtor } from './primordials/map-set'
-
-import { NumberPrototypeToString } from './primordials/number'
-
+import { MapCtor, SetCtor } from '../primordials/map-set'
 import {
   StringFromCodePoint,
   StringPrototypeCharCodeAt,
   StringPrototypeCodePointAt,
-} from './primordials/string'
-// Spec-compliant fallback for TC39 RegExp.escape (Node 24+ ships native):
-// https://tc39.es/ecma262/#sec-regexp.escape
-// https://tc39.es/ecma262/#sec-encodeforregexpescape
+} from '../primordials/string'
+
+import { hex2, hex4 } from './hex'
 
 // SyntaxCharacter set plus `/` — these get a plain backslash prefix.
 const SYNTAX_CHARACTERS = new SetCtor('^$\\.*+?()[]{}|/')
@@ -75,14 +81,6 @@ export function escapeRegExpFallback(str: string): string {
   return out
 }
 
-export function hex2(n: number): string {
-  return NumberPrototypeToString(n, 16).padStart(2, '0')
-}
-
-export function hex4(n: number): string {
-  return NumberPrototypeToString(n, 16).padStart(4, '0')
-}
-
 // Additional whitespace / line terminator / surrogate code points the
 // spec requires escaping. We enumerate the ones that commonly appear in
 // string inputs; `String#codePointAt` iteration surfaces them as numbers.
@@ -114,27 +112,3 @@ export function isSpecHexEscapeCp(cp: number): boolean {
   }
   return false
 }
-
-/**
- * Escape special characters in a string so the result can be safely
- * concatenated into any regular-expression Pattern position without
- * altering the meaning of surrounding syntax.
- *
- * Bound to native `RegExp.escape` when available (TC39 Stage 4, Node 24+ /
- * V8 13.7); otherwise falls back to a spec-compliant implementation. Both
- * paths satisfy the spec guarantee: `new RegExp(escapeRegExp(s))` matches
- * exactly the literal string `s`.
- *
- * Reference: https://tc39.es/ecma262/#sec-regexp.escape
- *
- * @example
- * ```typescript
- * new RegExp(escapeRegExp('[test]'))  // matches literal '[test]'
- * new RegExp('[' + escapeRegExp('a-z') + ']')  // matches 'a', '-', or 'z'
- * ```
- */
-const maybeNativeEscape = (RegExp as unknown as { escape?: unknown }).escape
-export const escapeRegExp: (str: string) => string =
-  typeof maybeNativeEscape === 'function'
-    ? (maybeNativeEscape as (str: string) => string)
-    : escapeRegExpFallback

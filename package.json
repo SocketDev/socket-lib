@@ -653,10 +653,25 @@
       "types": "./dist/env/xdg.d.ts",
       "default": "./dist/env/xdg.js"
     },
-    "./errors": {
-      "source": "./src/errors.ts",
-      "types": "./dist/errors.d.ts",
-      "default": "./dist/errors.js"
+    "./errors/message": {
+      "source": "./src/errors/message.ts",
+      "types": "./dist/errors/message.d.ts",
+      "default": "./dist/errors/message.js"
+    },
+    "./errors/predicates": {
+      "source": "./src/errors/predicates.ts",
+      "types": "./dist/errors/predicates.d.ts",
+      "default": "./dist/errors/predicates.js"
+    },
+    "./errors/stack": {
+      "source": "./src/errors/stack.ts",
+      "types": "./dist/errors/stack.d.ts",
+      "default": "./dist/errors/stack.js"
+    },
+    "./errors/types": {
+      "source": "./src/errors/types.ts",
+      "types": "./dist/errors/types.d.ts",
+      "default": "./dist/errors/types.js"
     },
     "./fs/encoding": {
       "source": "./src/fs/encoding.ts",
@@ -1208,10 +1223,15 @@
       "types": "./dist/process-lock.d.ts",
       "default": "./dist/process-lock.js"
     },
-    "./promise-queue": {
-      "source": "./src/promise-queue.ts",
-      "types": "./dist/promise-queue.d.ts",
-      "default": "./dist/promise-queue.js"
+    "./promise-queue/queue": {
+      "source": "./src/promise-queue/queue.ts",
+      "types": "./dist/promise-queue/queue.d.ts",
+      "default": "./dist/promise-queue/queue.js"
+    },
+    "./promise-queue/types": {
+      "source": "./src/promise-queue/types.ts",
+      "types": "./dist/promise-queue/types.d.ts",
+      "default": "./dist/promise-queue/types.js"
     },
     "./promises/iterate": {
       "source": "./src/promises/iterate.ts",
@@ -1238,10 +1258,25 @@
       "types": "./dist/promises/types.d.ts",
       "default": "./dist/promises/types.js"
     },
-    "./regexps": {
-      "source": "./src/regexps.ts",
-      "types": "./dist/regexps.d.ts",
-      "default": "./dist/regexps.js"
+    "./regexps/escape": {
+      "source": "./src/regexps/escape.ts",
+      "types": "./dist/regexps/escape.d.ts",
+      "default": "./dist/regexps/escape.js"
+    },
+    "./regexps/hex": {
+      "source": "./src/regexps/hex.ts",
+      "types": "./dist/regexps/hex.d.ts",
+      "default": "./dist/regexps/hex.js"
+    },
+    "./regexps/spec": {
+      "source": "./src/regexps/spec.ts",
+      "types": "./dist/regexps/spec.d.ts",
+      "default": "./dist/regexps/spec.js"
+    },
+    "./regexps/types": {
+      "source": "./src/regexps/types.ts",
+      "types": "./dist/regexps/types.d.ts",
+      "default": "./dist/regexps/types.js"
     },
     "./releases/github-api": {
       "source": "./src/releases/github-api.ts",
@@ -1378,10 +1413,25 @@
       "types": "./dist/spinner/with.d.ts",
       "default": "./dist/spinner/with.js"
     },
-    "./ssri": {
-      "source": "./src/ssri.ts",
-      "types": "./dist/ssri.d.ts",
-      "default": "./dist/ssri.js"
+    "./ssri/convert": {
+      "source": "./src/ssri/convert.ts",
+      "types": "./dist/ssri/convert.d.ts",
+      "default": "./dist/ssri/convert.js"
+    },
+    "./ssri/parse": {
+      "source": "./src/ssri/parse.ts",
+      "types": "./dist/ssri/parse.d.ts",
+      "default": "./dist/ssri/parse.js"
+    },
+    "./ssri/types": {
+      "source": "./src/ssri/types.ts",
+      "types": "./dist/ssri/types.d.ts",
+      "default": "./dist/ssri/types.js"
+    },
+    "./ssri/validate": {
+      "source": "./src/ssri/validate.ts",
+      "types": "./dist/ssri/validate.d.ts",
+      "default": "./dist/ssri/validate.js"
     },
     "./stdio/clear": {
       "source": "./src/stdio/clear.ts",

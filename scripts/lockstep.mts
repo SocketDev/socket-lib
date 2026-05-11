@@ -40,7 +40,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { errorMessage } from '@socketsecurity/lib/errors'
+import { errorMessage } from '@socketsecurity/lib/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 import { spawnSync } from '@socketsecurity/lib/spawn/core'
 import { validateSchema } from '@socketsecurity/lib/schema/validate'

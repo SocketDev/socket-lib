@@ -21,7 +21,7 @@
  * GHSA fetch path — the only other consumer is the GHSA module.
  */
 
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { httpRequest } from '../http-request/request'
 import { DateCtor } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'

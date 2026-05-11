@@ -32,7 +32,7 @@
 
 import { WIN32 } from '../constants/platform'
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
-import { isError } from '../errors'
+import { isError } from '../errors/predicates'
 import Arborist from '../external/@npmcli/arborist'
 import libnpmexec from '../external/libnpmexec'
 import npmPackageArg from '../external/npm-package-arg'

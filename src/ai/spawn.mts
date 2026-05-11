@@ -17,7 +17,7 @@
  * backoff (5s / 15s / 45s). Each retry is a fresh subprocess.
  */
 
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { spawn } from '../spawn/core'
 import { isSpawnError } from '../spawn/errors'
 

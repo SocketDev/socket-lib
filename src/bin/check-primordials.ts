@@ -20,7 +20,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/default'
 import {
   type PrimordialsCheckConfig,

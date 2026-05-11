@@ -23,7 +23,7 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { spawnSync } from '../spawn/core'
 import { isSpawnError } from '../spawn/errors'
 

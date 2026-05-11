@@ -24,7 +24,7 @@ import {
 import { resolveRealBinSync } from '../../src/bin/resolve'
 import { isShadowBinPath } from '../../src/bin/shadow'
 import { whichReal, whichRealSync } from '../../src/bin/which'
-import { isError } from '@socketsecurity/lib/errors'
+import { isError } from '@socketsecurity/lib/errors/predicates'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'

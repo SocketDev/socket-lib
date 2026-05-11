@@ -22,7 +22,7 @@ import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 
 import { whichSync } from '../bin/which'
-import { errorMessage } from '../errors'
+import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/default'
 
 const logger = getDefaultLogger()

@@ -5,7 +5,7 @@
 import process from 'node:process'
 import { setTimeout as sleep } from 'node:timers/promises'
 
-import { isErrnoException } from '../errors'
+import { isErrnoException } from '../errors/predicates'
 import { ErrorCtor } from '../primordials/error'
 import {
   INDENT_SYMBOL,

@@ -6,7 +6,7 @@ import {
   REGISTRY_SCOPE_DELIMITER,
   SOCKET_REGISTRY_SCOPE,
 } from '../constants/socket'
-import { escapeRegExp } from '../regexps'
+import { escapeRegExp } from '../regexps/escape'
 import normalizePackageData from '../external/normalize-package-data'
 import { merge } from '../objects/mutate'
 import { findPackageExtensions } from './operations'
