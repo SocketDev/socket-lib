@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- helper functions interleaved with module-level Set / Map constants of global identifiers they consume. */
 /**
  * @fileoverview Built-in JavaScript globals the audit tracks.
  *

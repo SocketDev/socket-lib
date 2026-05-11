@@ -10,10 +10,7 @@
  * Used by Socket tools for processing large datasets and streaming operations.
  */
 
-import {
-  parallelEach,
-  parallelMap,
-} from '@socketsecurity/lib/streams/parallel'
+import { parallelEach, parallelMap } from '@socketsecurity/lib/streams/parallel'
 import { transform } from '@socketsecurity/lib/streams/transform'
 import { describe, expect, it } from 'vitest'
 

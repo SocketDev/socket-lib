@@ -7,7 +7,10 @@ import { getPacoteCachePath } from '../constants/packages'
 
 import makeFetchHappen from '../external/make-fetch-happen'
 
-import { createCompositeAbortSignal, createTimeoutSignal } from '../abort/signal'
+import {
+  createCompositeAbortSignal,
+  createTimeoutSignal,
+} from '../abort/signal'
 import { parseUrl } from '../url/parse'
 
 import type { ProvenanceOptions } from './types'

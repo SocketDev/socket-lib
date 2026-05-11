@@ -44,21 +44,6 @@ interface FirewallResponse {
 }
 
 /**
- * Build a PURL string for an npm package.
- * Follows the PURL spec for the npm type:
- *   - Scoped: `@scope/pkg` → `pkg:npm/%40scope/pkg@version`
- *   - Unscoped: `pkg` → `pkg:npm/pkg@version`
- */
-export function npmPurl(name: string, version: string): string {
-  const encoded = StringPrototypeStartsWith(name, '@')
-    ? `%40${StringPrototypeSlice(name, 1)}`
-    : name
-  // PURL spec: '+' in version must be encoded as %2B
-  const encodedVersion = StringPrototypeReplace(version, /\+/g, '%2B')
-  return `pkg:npm/${encoded}@${encodedVersion}`
-}
-
-/**
  * Check all resolved packages in an Arborist ideal tree against the
  * Socket Firewall API (public, no auth required).
  * Throws if any dependency has critical or high severity alerts.
@@ -139,4 +124,19 @@ export async function checkFirewallPurls(
         'Visit https://socket.dev for more information.',
     )
   }
+}
+
+/**
+ * Build a PURL string for an npm package.
+ * Follows the PURL spec for the npm type:
+ *   - Scoped: `@scope/pkg` → `pkg:npm/%40scope/pkg@version`
+ *   - Unscoped: `pkg` → `pkg:npm/pkg@version`
+ */
+export function npmPurl(name: string, version: string): string {
+  const encoded = StringPrototypeStartsWith(name, '@')
+    ? `%40${StringPrototypeSlice(name, 1)}`
+    : name
+  // PURL spec: '+' in version must be encoded as %2B
+  const encodedVersion = StringPrototypeReplace(version, /\+/g, '%2B')
+  return `pkg:npm/${encoded}@${encodedVersion}`
 }

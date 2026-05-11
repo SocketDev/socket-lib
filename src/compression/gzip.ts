@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- functions ordered by call graph (compress/decompress variants share helpers); type / const declarations between them block autofix. */
 /**
  * @fileoverview Gzip compression / decompression — same calling shapes
  * as brotli: in-memory, file-to-file, and raw-stream variants. Default

@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- build-config helpers interleaved with esbuild plugin objects / option constants; reordering would split state from its consumers. */
 /**
  * @fileoverview esbuild configuration for socket-lib
  * Fast JS compilation with esbuild, declarations with tsgo

@@ -13,8 +13,7 @@ type PackageExports = {
 }
 
 // Re-export the EditablePackageJson instance type for convenient access
-export type EditablePackageJson =
-  import('./edit').EditablePackageJsonInstance
+export type EditablePackageJson = import('./edit').EditablePackageJsonInstance
 
 /**
  * Extended PackageJson type based on NPMCliPackageJson.Content with Socket-specific additions.

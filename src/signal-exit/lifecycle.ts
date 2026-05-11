@@ -91,10 +91,7 @@ export function load(): void {
   setSignals(
     sigs.filter(sig => {
       try {
-        proc.on(
-          sig as NodeJS.Signals,
-          sigListeners[sig] as SignalListener,
-        )
+        proc.on(sig as NodeJS.Signals, sigListeners[sig] as SignalListener)
         return true
         /* c8 ignore start - process.on rarely throws on standard signals. */
       } catch {}

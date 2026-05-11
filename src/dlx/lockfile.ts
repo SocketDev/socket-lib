@@ -115,29 +115,6 @@ export class DlxLockfileError extends Error {
 }
 
 /**
- * Extract the package name from a spec like `'name@range'` or
- * `'@scope/name@range'` or a bare `'name'`.
- */
-export function specName(spec: string): string {
-  const atIdx = StringPrototypeLastIndexOf(spec, '@')
-  if (atIdx <= 0) {
-    return spec
-  }
-  return StringPrototypeSlice(spec, 0, atIdx)
-}
-
-/**
- * Extract the version range (or `'latest'`) from a spec.
- */
-export function specRange(spec: string): string {
-  const atIdx = StringPrototypeLastIndexOf(spec, '@')
-  if (atIdx <= 0) {
-    return 'latest'
-  }
-  return StringPrototypeSlice(spec, atIdx + 1) || 'latest'
-}
-
-/**
  * Generate a vendorable pin for an npm package without installing it.
  *
  * Runs Arborist in lockfile-only mode (`packageLockOnly: true`) against a
@@ -228,4 +205,27 @@ export async function generatePackagePin(
       await safeDelete(scratch, { force: true })
     } catch {}
   }
+}
+
+/**
+ * Extract the package name from a spec like `'name@range'` or
+ * `'@scope/name@range'` or a bare `'name'`.
+ */
+export function specName(spec: string): string {
+  const atIdx = StringPrototypeLastIndexOf(spec, '@')
+  if (atIdx <= 0) {
+    return spec
+  }
+  return StringPrototypeSlice(spec, 0, atIdx)
+}
+
+/**
+ * Extract the version range (or `'latest'`) from a spec.
+ */
+export function specRange(spec: string): string {
+  const atIdx = StringPrototypeLastIndexOf(spec, '@')
+  if (atIdx <= 0) {
+    return 'latest'
+  }
+  return StringPrototypeSlice(spec, atIdx + 1) || 'latest'
 }

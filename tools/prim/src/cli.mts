@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- subcommand handlers ordered by user-facing command grouping; module-level config between them blocks autofix. */
 /**
  * @fileoverview `prim` CLI entry point.
  *
@@ -123,7 +124,7 @@ EXAMPLES
   prim audit --target . --dir src
 
   # Only the gaps (what's missing from socket-lib's primordials):
-  prim audit --target ../socket-cli --gaps
+  prim audit --target ../sibling-repo --gaps
 
   # Only the migration candidates (what we could rewrite today):
   prim audit --target . --dir dist --coverage
@@ -157,7 +158,7 @@ const ARG_OPTIONS = {
 export async function runCli(argv) {
   // Bare `prim` / `prim help` / `prim --help` → print help.
   if (argv.length === 0 || argv[0] === 'help') {
-    process.stdout.write(HELP)
+    process.stdout.write(HELP) // socket-hook: allow console
     return
   }
 
@@ -176,7 +177,7 @@ export async function runCli(argv) {
   const { values, positionals } = parsed
 
   if (values.help || positionals.length === 0) {
-    process.stdout.write(HELP)
+    process.stdout.write(HELP) // socket-hook: allow console
     return
   }
 
@@ -326,24 +327,22 @@ export async function runCli(argv) {
       // findings on stdout stay machine-pipeable.
       const totalSkipped = parseFailureFiles.length + stripFailureFiles.length
       if (totalSkipped > 0) {
-        process.stderr.write(
-          `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. ` +
-            `Audit is incomplete.\n`,
-        )
+        // CLI tool: stderr for human warnings keeps stdout pure
+        // machine-pipeable JSON / findings text.
+        const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
+        process.stderr.write(warnMsg) // socket-hook: allow console
         if (parseFailureFiles.length > 0) {
-          process.stderr.write(
-            `  parse-failed (${parseFailureFiles.length}):\n`,
-          )
+          const header = `  parse-failed (${parseFailureFiles.length}):\n`
+          process.stderr.write(header) // socket-hook: allow console
           for (const f of parseFailureFiles) {
-            process.stderr.write(`    ${f}\n`)
+            process.stderr.write(`    ${f}\n`) // socket-hook: allow console
           }
         }
         if (stripFailureFiles.length > 0) {
-          process.stderr.write(
-            `  ts-strip-failed (${stripFailureFiles.length}):\n`,
-          )
+          const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
+          process.stderr.write(header) // socket-hook: allow console
           for (const f of stripFailureFiles) {
-            process.stderr.write(`    ${f}\n`)
+            process.stderr.write(`    ${f}\n`) // socket-hook: allow console
           }
         }
       }
@@ -395,75 +394,70 @@ export function report(
     // Embed the failure lists in the JSON output so machine consumers
     // can see what got skipped — non-enumerable handles on the array
     // don't survive JSON.stringify, so we lift them onto the wrapper.
-    process.stdout.write(
-      formatJson({
-        targetName,
-        mode,
-        count: findings.length,
-        findings,
-        parseFailures: parseFailureFiles.length,
-        parseFailureFiles,
-        stripFailures: stripFailureFiles.length,
-        stripFailureFiles,
-      }) + '\n',
-    )
+    // Raw stdout keeps CLI output machine-pipeable (no logger prefixes / colors).
+    const payload = formatJson({
+      targetName,
+      mode,
+      count: findings.length,
+      findings,
+      parseFailures: parseFailureFiles.length,
+      parseFailureFiles,
+      stripFailures: stripFailureFiles.length,
+      stripFailureFiles,
+    })
+    process.stdout.write(`${payload}\n`) // socket-hook: allow console
   } else {
-    process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n')
+    process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n') // socket-hook: allow console
   }
 }
 
 export function reportLint(findings, json, targetName) {
   if (json) {
-    process.stdout.write(
-      formatJson({
-        targetName,
-        mode: 'lint',
-        count: findings.length,
-        findings,
-      }) + '\n',
-    )
+    const payload = formatJson({
+      targetName,
+      mode: 'lint',
+      count: findings.length,
+      findings,
+    })
+    process.stdout.write(`${payload}\n`) // socket-hook: allow console
     return
   }
-  process.stdout.write(formatLintFindings(findings, { targetName }))
+  process.stdout.write(formatLintFindings(findings, { targetName })) // socket-hook: allow console
 }
 
 export function reportMod(result, json, applied) {
   if (json) {
-    process.stdout.write(
-      formatJson({
-        applied,
-        filesChanged: result.filesChanged,
-        rewriteCount: result.rewriteCount,
-        skipped: result.skipped,
-        files: result.files,
-      }) + '\n',
-    )
+    const payload = formatJson({
+      applied,
+      filesChanged: result.filesChanged,
+      rewriteCount: result.rewriteCount,
+      skipped: result.skipped,
+      files: result.files,
+    })
+    process.stdout.write(`${payload}\n`) // socket-hook: allow console
     return
   }
   const verb = applied ? 'Wrote' : 'Would write'
   if (result.rewriteCount === 0) {
-    process.stdout.write('mod: no rewrites needed.\n')
+    process.stdout.write('mod: no rewrites needed.\n') // socket-hook: allow console
     return
   }
-  process.stdout.write(
-    `mod: ${verb} ${result.rewriteCount} rewrite(s) across ${result.filesChanged} file(s).\n`,
-  )
+  const summary = `mod: ${verb} ${result.rewriteCount} rewrite(s) across ${result.filesChanged} file(s).\n`
+  process.stdout.write(summary) // socket-hook: allow console
   if (result.skipped > 0) {
-    process.stdout.write(
-      `mod: skipped ${result.skipped} candidate(s) — pass --include-guessed to rewrite receiver-guessed sites too.\n`,
-    )
+    const skippedMsg = `mod: skipped ${result.skipped} candidate(s) — pass --include-guessed to rewrite receiver-guessed sites too.\n`
+    process.stdout.write(skippedMsg) // socket-hook: allow console
   }
   if (!applied) {
-    process.stdout.write('mod: dry run — pass --apply to write changes.\n')
+    process.stdout.write('mod: dry run — pass --apply to write changes.\n') // socket-hook: allow console
   }
   for (const f of result.files) {
-    process.stdout.write(
-      `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`,
-    )
+    const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
+    process.stdout.write(fileLine) // socket-hook: allow console
   }
 }
 
 export function fail(msg) {
-  process.stderr.write(`prim: ${msg}\n`)
+  process.stderr.write(`prim: ${msg}\n`) // socket-hook: allow console
   process.exit(1)
 }

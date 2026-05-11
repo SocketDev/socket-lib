@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- helper functions are interleaved with `readPackageJson` and cache state needed by them; reordering would split that state or change initialization order. */
 /**
  * @fileoverview Executable type detection for DLX and local filesystem paths.
  *

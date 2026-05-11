@@ -10,35 +10,12 @@ import { ObjectPrototypeToString } from '../primordials/object'
 import { StringPrototypeCharCodeAt } from '../primordials/string'
 
 /**
- * `Error.isError` fallback shim — the in-language approximation used
- * when the native ES2025 method isn't available.
- *
- * Exported separately so test suites on engines that ship the native
- * method can still exercise the shim branch directly. Consumers should
- * prefer {@link isError}, which picks the native method when present.
- */
-export function isErrorShim(value: unknown): value is Error {
-  if (value === null || typeof value !== 'object') {
-    return false
-  }
-  return ObjectPrototypeToString(value) === '[object Error]'
-}
-
-/**
  * Reference to the native ES2025 `Error.isError` when the running
  * engine ships it, otherwise `undefined`. Exposed separately so tests
  * and callers can detect the fast-path without re-probing.
  */
 export const isErrorBuiltin: ((value: unknown) => value is Error) | undefined =
   (Error as unknown as { isError?: (v: unknown) => v is Error }).isError
-
-/**
- * Prefer the native ES2025 `Error.isError` when available (exact
- * `[[ErrorData]]` slot check, cross-realm-safe); fall back to
- * {@link isErrorShim} otherwise.
- */
-export const isError: (value: unknown) => value is Error =
-  isErrorBuiltin ?? isErrorShim
 
 /**
  * Narrow a caught value to a Node.js `ErrnoException` — an Error with a
@@ -78,3 +55,26 @@ export function isErrnoException(
   const first = StringPrototypeCharCodeAt(code, 0)
   return first >= 65 /* 'A' */ && first <= 90 /* 'Z' */
 }
+
+/**
+ * `Error.isError` fallback shim — the in-language approximation used
+ * when the native ES2025 method isn't available.
+ *
+ * Exported separately so test suites on engines that ship the native
+ * method can still exercise the shim branch directly. Consumers should
+ * prefer {@link isError}, which picks the native method when present.
+ */
+export function isErrorShim(value: unknown): value is Error {
+  if (value === null || typeof value !== 'object') {
+    return false
+  }
+  return ObjectPrototypeToString(value) === '[object Error]'
+}
+
+/**
+ * Prefer the native ES2025 `Error.isError` when available (exact
+ * `[[ErrorData]]` slot check, cross-realm-safe); fall back to
+ * {@link isErrorShim} otherwise.
+ */
+export const isError: (value: unknown) => value is Error =
+  isErrorBuiltin ?? isErrorShim

@@ -7,7 +7,10 @@
  */
 
 import { hasOwn } from '../objects/predicates'
-import { StringPrototypeSlice, StringPrototypeStartsWith } from '../primordials/string'
+import {
+  StringPrototypeSlice,
+  StringPrototypeStartsWith,
+} from '../primordials/string'
 
 /**
  * Extract caller information from the stack trace.

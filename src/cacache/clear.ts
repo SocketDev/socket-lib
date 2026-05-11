@@ -7,7 +7,10 @@
 
 import { getSocketCacacheDir } from '../paths/socket'
 import { RegExpCtor, RegExpPrototypeTest } from '../primordials/regexp'
-import { StringPrototypeReplaceAll, StringPrototypeStartsWith } from '../primordials/string'
+import {
+  StringPrototypeReplaceAll,
+  StringPrototypeStartsWith,
+} from '../primordials/string'
 
 import { getCacache } from './_internal'
 

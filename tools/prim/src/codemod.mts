@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- codemod helpers ordered by AST walk phase; module-level config / pattern tables between them block autofix. */
 /**
  * @fileoverview Codemod: rewrite call sites to use primordials.
  *

@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- lint-rule helpers ordered by visit order; rule config tables between them block autofix. */
 /**
  * @fileoverview `prim lint` — structural lint rules for primordials usage.
  *

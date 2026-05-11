@@ -5,7 +5,10 @@
  * base).
  */
 
-import { StringPrototypeEndsWith, StringPrototypeReplace } from '../primordials/string'
+import {
+  StringPrototypeEndsWith,
+  StringPrototypeReplace,
+} from '../primordials/string'
 
 import type { CreateRelativeUrlOptions } from './types'
 

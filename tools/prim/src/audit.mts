@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- AST-walk helpers ordered by call graph; state / config constants between them block autofix. */
 /**
  * @fileoverview Walk a directory of JavaScript/TypeScript and emit
  * findings: every site where a primordial would (or already does)

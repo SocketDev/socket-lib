@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- `makeFlagPredicate` factory is referenced by const declarations interleaved with it; reordering function decls would either split that state or change initialization order. */
 /**
  * @fileoverview Flag predicates — `is*` checks across parsed
  * `FlagValues`, raw `process.argv`, or no input.
@@ -35,7 +36,7 @@ const processArg = [...process.argv]
  *   (defaults to the first long flag with `--` stripped).
  * @private
  */
-function makeFlagPredicate(
+export function makeFlagPredicate(
   longFlags: readonly string[],
   shortFlags: readonly string[] = [],
   keys: readonly string[] = [longFlags[0]!.replace(/^--/, '')],

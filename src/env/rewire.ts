@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- AsyncLocalStorage / module state is interleaved with the lazy-loader functions; reordering would split that state from its consumers. */
 /**
  * @fileoverview Environment variable rewiring utilities for testing.
  * Uses AsyncLocalStorage for context-isolated overrides that work with concurrent tests.

@@ -41,7 +41,8 @@ vi.mock('../../src/releases/github-downloads', () => ({
 }))
 
 vi.mock('../../src/archives/extract', async importOriginal => {
-  const original = await importOriginal<typeof import('../../src/archives/extract')>()
+  const original =
+    await importOriginal<typeof import('../../src/archives/extract')>()
   return {
     ...original,
     extractArchive: vi.fn(async () => {}),

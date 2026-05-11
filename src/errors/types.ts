@@ -4,5 +4,3 @@
  * `NodeJS.ErrnoException` types directly. Pure types, no runtime
  * side effects.
  */
-
-

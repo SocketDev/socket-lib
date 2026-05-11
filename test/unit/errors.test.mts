@@ -11,10 +11,7 @@ import vm from 'node:vm'
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  UNKNOWN_ERROR,
-  errorMessage,
-} from '@socketsecurity/lib/errors/message'
+import { UNKNOWN_ERROR, errorMessage } from '@socketsecurity/lib/errors/message'
 import {
   isErrnoException,
   isError,

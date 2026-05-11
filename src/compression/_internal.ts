@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- internal helpers ordered by call graph; type/const declarations sandwiched between them block autofix. */
 /**
  * @fileoverview Private internals for `compression/*` modules —
  * `resolveFileArgs` disambiguates the `(src, dest, options?)` vs

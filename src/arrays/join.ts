@@ -4,10 +4,7 @@
  * `joinOr` ("a, b, or c").
  */
 
-import {
-  getConjunctionFormatter,
-  getDisjunctionFormatter,
-} from './_internal'
+import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
 
 /**
  * Join array elements with proper "and" conjunction formatting.
