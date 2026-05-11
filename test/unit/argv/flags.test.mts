@@ -26,8 +26,8 @@ import {
   isUpdate,
   isVerbose,
   isWatch,
-  type FlagValues,
-} from '@socketsecurity/lib/argv/flags'
+} from '@socketsecurity/lib/argv/flag-predicates'
+import type { FlagValues } from '@socketsecurity/lib/argv/flag-types'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/flags', () => {

@@ -14,7 +14,8 @@ import {
 } from '../primordials/string'
 import { spawn } from '../spawn/core'
 
-import { getLatestRelease, getReleaseAssetUrl } from './github-api'
+import { getReleaseAssetUrl } from './github-asset-url'
+import { getLatestRelease } from './github-listing'
 
 import type {
   AssetPattern,

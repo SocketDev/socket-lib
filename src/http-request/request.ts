@@ -19,9 +19,10 @@ import { MathMax } from '../primordials/math'
 import { NumberIsNaN } from '../primordials/number'
 
 import { httpRequestAttempt } from './request-attempt'
-import { HttpResponseError } from './types'
+import { HttpResponseError } from './response-types'
 
-import type { HttpRequestOptions, HttpResponse } from './types'
+import type { HttpRequestOptions } from './request-types'
+import type { HttpResponse } from './response-types'
 
 /**
  * Make an HTTP/HTTPS request with retry logic and redirect support.

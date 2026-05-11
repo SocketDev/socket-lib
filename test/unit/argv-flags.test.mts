@@ -11,7 +11,6 @@
  */
 
 import {
-  COMMON_FLAGS,
   getLogLevel,
   isAll,
   isChanged,
@@ -27,8 +26,11 @@ import {
   isUpdate,
   isVerbose,
   isWatch,
+} from '@socketsecurity/lib/argv/flag-predicates'
+import {
+  COMMON_FLAGS,
   type FlagValues,
-} from '@socketsecurity/lib/argv/flags'
+} from '@socketsecurity/lib/argv/flag-types'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/flags', () => {

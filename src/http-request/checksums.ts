@@ -24,7 +24,7 @@ import {
 } from '../primordials/string'
 import { httpRequest } from './request'
 
-import type { Checksums, FetchChecksumsOptions } from './types'
+import type { Checksums, FetchChecksumsOptions } from './download-types'
 
 const CHECKSUM_BSD_RE = /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/
 const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/

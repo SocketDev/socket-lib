@@ -14,18 +14,21 @@ import {
   getPlatformArch,
 } from '../../src/releases/socket-btm'
 
-import {
-  getLatestRelease,
-  getReleaseAssetUrl,
-} from '../../src/releases/github-api'
+import { getReleaseAssetUrl } from '../../src/releases/github-asset-url'
+import { getLatestRelease } from '../../src/releases/github-listing'
 import { downloadGitHubRelease } from '../../src/releases/github-downloads'
 
 // Mock the downstream github release helpers so we can verify socket-btm's
 // config construction without issuing real network or filesystem operations.
 // Uses src path so vi.mock() intercepts cross-module imports within src/ files.
-vi.mock('../../src/releases/github-api', () => ({
-  getLatestRelease: vi.fn(),
+vi.mock('../../src/releases/github-asset-url', () => ({
+  fetchReleaseAssetsViaGraphQL: vi.fn(),
   getReleaseAssetUrl: vi.fn(),
+}))
+vi.mock('../../src/releases/github-listing', () => ({
+  fetchReleasesViaGraphQL: vi.fn(),
+  fetchReleasesViaRest: vi.fn(),
+  getLatestRelease: vi.fn(),
 }))
 vi.mock('../../src/releases/github-downloads', () => ({
   downloadGitHubRelease: vi.fn(),

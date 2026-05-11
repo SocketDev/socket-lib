@@ -21,7 +21,7 @@ import { httpRequest } from '../../src/http-request/request'
 
 import { createMockHttpResponse } from './utils/http-mock'
 
-import type { HttpDownloadResult } from '../../src/http-request/types'
+import type { HttpDownloadResult } from '../../src/http-request/download-types'
 
 vi.mock('../../src/http-request/download')
 vi.mock('../../src/http-request/request')

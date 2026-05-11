@@ -35,7 +35,7 @@ import {
   httpRequest,
   readIncomingResponse,
 } from '../../src/http-request/request'
-import { HttpResponseError } from '../../src/http-request/types'
+import { HttpResponseError } from '../../src/http-request/response-types'
 import { Logger } from '../../src/logger/core'
 
 import { runWithTempDir } from './utils/temp-file-helper'
@@ -45,7 +45,7 @@ import type {
   HttpHookResponseInfo,
   IncomingRequest,
   IncomingResponse,
-} from '../../src/http-request/types'
+} from '../../src/http-request/request-types'
 
 // Test server setup
 let httpServer: http.Server

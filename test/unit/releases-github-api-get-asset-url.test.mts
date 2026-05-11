@@ -6,7 +6,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { getReleaseAssetUrl } from '../../src/releases/github-api'
+import { getReleaseAssetUrl } from '../../src/releases/github-asset-url'
 import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
 
 import { httpRequest } from '../../src/http-request/request'

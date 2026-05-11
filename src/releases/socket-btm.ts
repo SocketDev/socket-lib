@@ -9,7 +9,8 @@ import {
   getPlatform,
   type Platform,
 } from '../constants/platform'
-import { getLatestRelease, getReleaseAssetUrl } from './github-api'
+import { getReleaseAssetUrl } from './github-asset-url'
+import { getLatestRelease } from './github-listing'
 import { downloadGitHubRelease } from './github-downloads'
 
 import { getNodeFs } from '../node/fs'

@@ -28,9 +28,9 @@ import { enrichErrorMessage } from './errors'
 import type {
   HttpHookResponseInfo,
   HttpRequestOptions,
-  HttpResponse,
   IncomingResponse,
-} from './types'
+} from './request-types'
+import type { HttpResponse } from './response-types'
 
 /**
  * Single HTTP request attempt (used internally by httpRequest with retry logic).

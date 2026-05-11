@@ -12,7 +12,8 @@
 import { BufferConcat } from '../primordials/buffer'
 import { JSONParse } from '../primordials/json'
 
-import type { HttpResponse, IncomingResponse } from './types'
+import type { IncomingResponse } from './request-types'
+import type { HttpResponse } from './response-types'
 
 /**
  * Read and buffer a client-side IncomingResponse into an HttpResponse.

@@ -20,18 +20,24 @@ import {
 
 import { safeDelete } from '../../src/fs/safe'
 import { httpDownload } from '../../src/http-request/download'
-import {
-  getLatestRelease,
-  getReleaseAssetUrl,
-} from '../../src/releases/github-api'
+import { getReleaseAssetUrl } from '../../src/releases/github-asset-url'
+import { getLatestRelease } from '../../src/releases/github-listing'
 
-vi.mock('../../src/releases/github-api', async importOriginal => {
+vi.mock('../../src/releases/github-asset-url', async importOriginal => {
   const original =
-    await importOriginal<typeof import('../../src/releases/github-api')>()
+    await importOriginal<typeof import('../../src/releases/github-asset-url')>()
+  return {
+    ...original,
+    getReleaseAssetUrl: vi.fn(),
+  }
+})
+
+vi.mock('../../src/releases/github-listing', async importOriginal => {
+  const original =
+    await importOriginal<typeof import('../../src/releases/github-listing')>()
   return {
     ...original,
     getLatestRelease: vi.fn(),
-    getReleaseAssetUrl: vi.fn(),
   }
 })
 

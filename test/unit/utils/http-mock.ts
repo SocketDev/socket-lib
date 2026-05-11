@@ -3,7 +3,7 @@
  * `@socketsecurity/lib/http-request/*`.
  */
 
-import type { HttpResponse } from '../../../src/http-request/types'
+import type { HttpResponse } from '../../../src/http-request/response-types'
 
 /**
  * Create a mock HttpResponse object for testing.

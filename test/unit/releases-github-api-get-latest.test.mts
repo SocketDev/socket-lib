@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getLatestRelease } from '../../src/releases/github-api'
+import { getLatestRelease } from '../../src/releases/github-listing'
 import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
 
 import { httpRequest } from '../../src/http-request/request'

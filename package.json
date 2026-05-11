@@ -183,11 +183,6 @@
       "types": "./dist/argv/flag-types.d.ts",
       "default": "./dist/argv/flag-types.js"
     },
-    "./argv/flags": {
-      "source": "./src/argv/flags.ts",
-      "types": "./dist/argv/flags.d.ts",
-      "default": "./dist/argv/flags.js"
-    },
     "./argv/parse": {
       "source": "./src/argv/parse.ts",
       "types": "./dist/argv/parse.d.ts",
@@ -1013,11 +1008,6 @@
       "types": "./dist/http-request/response-types.d.ts",
       "default": "./dist/http-request/response-types.js"
     },
-    "./http-request/types": {
-      "source": "./src/http-request/types.ts",
-      "types": "./dist/http-request/types.d.ts",
-      "default": "./dist/http-request/types.js"
-    },
     "./ipc-cli/get": {
       "source": "./src/ipc-cli/get.ts",
       "types": "./dist/ipc-cli/get.d.ts",
@@ -1077,6 +1067,11 @@
       "source": "./src/links/types.ts",
       "types": "./dist/links/types.d.ts",
       "default": "./dist/links/types.js"
+    },
+    "./logger": {
+      "source": "./src/logger.ts",
+      "types": "./dist/logger.d.ts",
+      "default": "./dist/logger.js"
     },
     "./logger/colors": {
       "source": "./src/logger/colors.ts",
@@ -1548,11 +1543,6 @@
       "types": "./dist/regexps/types.d.ts",
       "default": "./dist/regexps/types.js"
     },
-    "./releases/github-api": {
-      "source": "./src/releases/github-api.ts",
-      "types": "./dist/releases/github-api.d.ts",
-      "default": "./dist/releases/github-api.js"
-    },
     "./releases/github-archives": {
       "source": "./src/releases/github-archives.ts",
       "types": "./dist/releases/github-archives.d.ts",
@@ -1682,6 +1672,11 @@
       "source": "./src/sorts/types.ts",
       "types": "./dist/sorts/types.d.ts",
       "default": "./dist/sorts/types.js"
+    },
+    "./spawn": {
+      "source": "./src/spawn.ts",
+      "types": "./dist/spawn.d.ts",
+      "default": "./dist/spawn.js"
     },
     "./spawn/core": {
       "source": "./src/spawn/core.ts",

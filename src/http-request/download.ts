@@ -25,9 +25,9 @@ import { NumberParseInt } from '../primordials/number'
 import { PromiseCtor } from '../primordials/promise'
 import { getCrypto, getFs } from './_internal'
 import { httpRequestAttempt } from './request'
-import { HttpResponseError } from './types'
+import { HttpResponseError } from './response-types'
 
-import type { HttpDownloadOptions, HttpDownloadResult } from './types'
+import type { HttpDownloadOptions, HttpDownloadResult } from './download-types'
 
 /**
  * Download a file from a URL to a local path with redirect support, retry logic, and progress callbacks.

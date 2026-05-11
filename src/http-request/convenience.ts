@@ -11,9 +11,9 @@
 
 import { ErrorCtor } from '../primordials/error'
 import { httpRequest } from './request'
-import { HttpResponseError } from './types'
+import { HttpResponseError } from './response-types'
 
-import type { HttpRequestOptions } from './types'
+import type { HttpRequestOptions } from './request-types'
 
 /**
  * Perform an HTTP request and parse JSON response.
