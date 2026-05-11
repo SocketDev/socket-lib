@@ -19,7 +19,7 @@ import type { MemoizeOptions } from './types'
  * @returns Modified descriptor with memoized method
  *
  * @example
- * import { Memoize } from '@socketsecurity/lib/memoization/decorator'
+ * import { Memoize } from '@socketsecurity/lib/memo/decorator'
  *
  * class Calculator {
  *   @Memoize()

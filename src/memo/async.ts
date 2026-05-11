@@ -24,7 +24,7 @@ import type { CacheEntry, MemoizeOptions } from './types'
  * @returns Memoized version of the async function
  *
  * @example
- * import { memoizeAsync } from '@socketsecurity/lib/memoization/memoize-async'
+ * import { memoizeAsync } from '@socketsecurity/lib/memo/async'
  *
  * const fetchUser = memoizeAsync(async (id: string) => {
  *   const response = await fetch(`/api/users/${id}`)

@@ -23,7 +23,7 @@ import type { CacheEntry, MemoizeOptions } from './types'
  * @returns Memoized version of the function
  *
  * @example
- * import { memoize } from '@socketsecurity/lib/memoization/memoize'
+ * import { memoize } from '@socketsecurity/lib/memo/memoize'
  *
  * const expensiveOperation = memoize((n: number) => {
  *   // Heavy computation

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Public type surface for `memoization/*` modules —
+ * @fileoverview Public type surface for `memo/*` modules —
  * `MemoizeOptions` is the user-facing options bag accepted by every
  * memoize entrypoint, `CacheEntry<T>` is the internal row stored in
  * each per-function cache. Pure types, no runtime side effects.

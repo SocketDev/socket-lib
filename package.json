@@ -1023,40 +1023,40 @@
       "types": "./dist/logger/types.d.ts",
       "default": "./dist/logger/types.js"
     },
-    "./memoization/clear": {
-      "source": "./src/memoization/clear.ts",
-      "types": "./dist/memoization/clear.d.ts",
-      "default": "./dist/memoization/clear.js"
+    "./memo/async": {
+      "source": "./src/memo/async.ts",
+      "types": "./dist/memo/async.d.ts",
+      "default": "./dist/memo/async.js"
     },
-    "./memoization/decorator": {
-      "source": "./src/memoization/decorator.ts",
-      "types": "./dist/memoization/decorator.d.ts",
-      "default": "./dist/memoization/decorator.js"
+    "./memo/clear": {
+      "source": "./src/memo/clear.ts",
+      "types": "./dist/memo/clear.d.ts",
+      "default": "./dist/memo/clear.js"
     },
-    "./memoization/memoize": {
-      "source": "./src/memoization/memoize.ts",
-      "types": "./dist/memoization/memoize.d.ts",
-      "default": "./dist/memoization/memoize.js"
+    "./memo/decorator": {
+      "source": "./src/memo/decorator.ts",
+      "types": "./dist/memo/decorator.d.ts",
+      "default": "./dist/memo/decorator.js"
     },
-    "./memoization/memoize-async": {
-      "source": "./src/memoization/memoize-async.ts",
-      "types": "./dist/memoization/memoize-async.d.ts",
-      "default": "./dist/memoization/memoize-async.js"
+    "./memo/memoize": {
+      "source": "./src/memo/memoize.ts",
+      "types": "./dist/memo/memoize.d.ts",
+      "default": "./dist/memo/memoize.js"
     },
-    "./memoization/memoize-weak": {
-      "source": "./src/memoization/memoize-weak.ts",
-      "types": "./dist/memoization/memoize-weak.d.ts",
-      "default": "./dist/memoization/memoize-weak.js"
+    "./memo/once": {
+      "source": "./src/memo/once.ts",
+      "types": "./dist/memo/once.d.ts",
+      "default": "./dist/memo/once.js"
     },
-    "./memoization/once": {
-      "source": "./src/memoization/once.ts",
-      "types": "./dist/memoization/once.d.ts",
-      "default": "./dist/memoization/once.js"
+    "./memo/types": {
+      "source": "./src/memo/types.ts",
+      "types": "./dist/memo/types.d.ts",
+      "default": "./dist/memo/types.js"
     },
-    "./memoization/types": {
-      "source": "./src/memoization/types.ts",
-      "types": "./dist/memoization/types.d.ts",
-      "default": "./dist/memoization/types.js"
+    "./memo/weak": {
+      "source": "./src/memo/weak.ts",
+      "types": "./dist/memo/weak.d.ts",
+      "default": "./dist/memo/weak.js"
     },
     "./node/async-hooks": {
       "source": "./src/node/async-hooks.ts",

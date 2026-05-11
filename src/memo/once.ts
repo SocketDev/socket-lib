@@ -15,7 +15,7 @@ import { debugLog } from '../debug/output'
  * @returns Memoized version that only executes once
  *
  * @example
- * import { once } from '@socketsecurity/lib/memoization/once'
+ * import { once } from '@socketsecurity/lib/memo/once'
  *
  * const initialize = once(() => {
  *   console.log('Initializing…')

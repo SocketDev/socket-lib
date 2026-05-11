@@ -17,7 +17,7 @@ import { WeakMapCtor } from '../primordials/map-set'
  * @returns Memoized version using WeakMap
  *
  * @example
- * import { memoizeWeak } from '@socketsecurity/lib/memoization/memoize-weak'
+ * import { memoizeWeak } from '@socketsecurity/lib/memo/weak'
  *
  * const processConfig = memoizeWeak((config: Config) => {
  *   return expensiveTransform(config)

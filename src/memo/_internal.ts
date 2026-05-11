@@ -1,5 +1,5 @@
 /**
- * @fileoverview Private internals for `memoization/*` modules — the
+ * @fileoverview Private internals for `memo/*` modules — the
  * shared `cacheRegistry` (each memoize variant registers its
  * per-instance clear function here so `clearAllMemoizationCaches`
  * can fan out). `defaultKeyGen` is co-located because both `memoize`

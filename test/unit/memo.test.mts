@@ -11,12 +11,12 @@
  * Used by Socket tools to optimize expensive operations and API calls.
  */
 
-import { clearAllMemoizationCaches } from '@socketsecurity/lib/memoization/clear'
-import { Memoize } from '@socketsecurity/lib/memoization/decorator'
-import { memoize } from '@socketsecurity/lib/memoization/memoize'
-import { memoizeAsync } from '@socketsecurity/lib/memoization/memoize-async'
-import { memoizeWeak } from '@socketsecurity/lib/memoization/memoize-weak'
-import { once } from '@socketsecurity/lib/memoization/once'
+import { clearAllMemoizationCaches } from '@socketsecurity/lib/memo/clear'
+import { Memoize } from '@socketsecurity/lib/memo/decorator'
+import { memoize } from '@socketsecurity/lib/memo/memoize'
+import { memoizeAsync } from '@socketsecurity/lib/memo/async'
+import { memoizeWeak } from '@socketsecurity/lib/memo/weak'
+import { once } from '@socketsecurity/lib/memo/once'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('memoization', () => {
@@ -146,9 +146,11 @@ describe('memoization', () => {
 
       // null and undefined produce distinct cache keys so each argument
       // gets its own cached value (prevents stale/cross-contaminated results).
-      expect(memoized(undefined)).toBe('null')
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- intentionally testing that null and undefined map to distinct cache keys.
+      expect(memoized(null)).toBe('null')
       expect(memoized(undefined)).toBe('undefined')
-      expect(memoized(undefined)).toBe('null')
+      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      expect(memoized(null)).toBe('null')
       expect(fn).toHaveBeenCalledTimes(2)
     })
 
@@ -520,7 +522,8 @@ describe('memoization', () => {
     })
 
     it('should work with null and undefined', () => {
-      const fn1 = vi.fn(() => undefined)
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- once() must memoize null returns the same as any other value.
+      const fn1 = vi.fn(() => null)
       const once1 = once(fn1)
 
       expect(once1()).toBe(null)
