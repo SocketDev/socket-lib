@@ -281,13 +281,16 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## github/
 
-| Subpath                                                      | Description                                                                                            |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| [`@socketsecurity/lib/github/fetch`](../src/github/fetch.ts) | Authenticated GitHub REST fetch.                                                                       |
-| [`@socketsecurity/lib/github/ghsa`](../src/github/ghsa.ts)   | GitHub Security Advisory (GHSA) lookups.                                                               |
-| [`@socketsecurity/lib/github/refs`](../src/github/refs.ts)   | Resolve GitHub git refs (tag / branch / commit) to full commit SHAs.                                   |
-| [`@socketsecurity/lib/github/token`](../src/github/token.ts) | GitHub token resolution.                                                                               |
-| [`@socketsecurity/lib/github/types`](../src/github/types.ts) | Public type surface for `github/*` modules — interfaces, named errors, and the API base-URL constants. |
+| Subpath                                                                    | Description                                                                                            |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/github/fetch`](../src/github/fetch.ts)               | Authenticated GitHub REST fetch.                                                                       |
+| [`@socketsecurity/lib/github/ghsa`](../src/github/ghsa.ts)                 | GitHub Security Advisory (GHSA) lookups.                                                               |
+| [`@socketsecurity/lib/github/refs`](../src/github/refs.ts)                 | Resolve GitHub git refs (tag / branch / commit) to full commit SHAs.                                   |
+| [`@socketsecurity/lib/github/refs-cache`](../src/github/refs-cache.ts)     | TtlCache singleton for github/refs.                                                                    |
+| [`@socketsecurity/lib/github/refs-graphql`](../src/github/refs-graphql.ts) | Resolve a GitHub git ref via GraphQL.                                                                  |
+| [`@socketsecurity/lib/github/refs-rest`](../src/github/refs-rest.ts)       | Resolve a GitHub git ref via REST tier-cascade.                                                        |
+| [`@socketsecurity/lib/github/token`](../src/github/token.ts)               | GitHub token resolution.                                                                               |
+| [`@socketsecurity/lib/github/types`](../src/github/types.ts)               | Public type surface for `github/*` modules — interfaces, named errors, and the API base-URL constants. |
 
 ## globs/
 

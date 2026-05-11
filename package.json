@@ -898,6 +898,21 @@
       "types": "./dist/github/refs.d.ts",
       "default": "./dist/github/refs.js"
     },
+    "./github/refs-cache": {
+      "source": "./src/github/refs-cache.ts",
+      "types": "./dist/github/refs-cache.d.ts",
+      "default": "./dist/github/refs-cache.js"
+    },
+    "./github/refs-graphql": {
+      "source": "./src/github/refs-graphql.ts",
+      "types": "./dist/github/refs-graphql.d.ts",
+      "default": "./dist/github/refs-graphql.js"
+    },
+    "./github/refs-rest": {
+      "source": "./src/github/refs-rest.ts",
+      "types": "./dist/github/refs-rest.d.ts",
+      "default": "./dist/github/refs-rest.js"
+    },
     "./github/token": {
       "source": "./src/github/token.ts",
       "types": "./dist/github/token.d.ts",
