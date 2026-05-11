@@ -21,7 +21,6 @@ import path from 'node:path'
 import process from 'node:process'
 import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
 import {
-  isDir,
   isDirEmptySync,
   isDirSync,
   safeStats,

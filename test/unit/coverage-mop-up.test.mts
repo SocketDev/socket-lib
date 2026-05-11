@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { merge } from '../../src/objects/mutate'
-import { urlSearchParamAsBoolean } from '../../src/url'
+import { urlSearchParamAsBoolean } from '../../src/url/search-params'
 
 describe('coverage mop-up — tiny gaps', () => {
   describe('url.ts urlSearchParamAsBoolean', () => {

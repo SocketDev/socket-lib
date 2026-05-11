@@ -19,7 +19,7 @@ import {
   downloadAndExtractZip,
 } from '../../src/releases/github-archives'
 
-import { extractArchive } from '../../src/archives'
+import { extractArchive } from '../../src/archives/extract'
 import { safeDeleteSync } from '../../src/fs/safe'
 import { downloadReleaseAsset } from '../../src/releases/github-downloads'
 
@@ -40,8 +40,8 @@ vi.mock('../../src/releases/github-downloads', () => ({
   ),
 }))
 
-vi.mock('../../src/archives', async importOriginal => {
-  const original = await importOriginal<typeof import('../../src/archives')>()
+vi.mock('../../src/archives/extract', async importOriginal => {
+  const original = await importOriginal<typeof import('../../src/archives/extract')>()
   return {
     ...original,
     extractArchive: vi.fn(async () => {}),

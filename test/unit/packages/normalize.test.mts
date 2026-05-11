@@ -17,7 +17,7 @@ import {
   unescapeScope,
 } from '../../../dist/packages/normalize.js'
 
-import type { PackageJson } from '../../../dist/packages.js'
+import type { PackageJson } from '../../../dist/packages/types.js'
 
 describe('normalizePackageJson', () => {
   it('should normalize basic package.json', () => {

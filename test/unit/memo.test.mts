@@ -471,7 +471,7 @@ describe('memoization', () => {
       const fn = vi.fn((obj: { x: number }) => obj.x * 2)
       const memoized = memoizeWeak(fn)
 
-      let obj: { x: number } | null = { x: 5 }
+      let obj: { x: number } | undefined = { x: 5 }
 
       expect(memoized(obj)).toBe(10)
       expect(fn).toHaveBeenCalledTimes(1)

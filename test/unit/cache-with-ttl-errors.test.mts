@@ -10,18 +10,25 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createTtlCache } from '../../src/cache-with-ttl'
+import { createTtlCache } from '../../src/cache-with-ttl/cache'
 import { resetEnv, setEnv } from '../../src/env/rewire'
 import { safeDelete } from '../../src/fs/safe'
 import { invalidateCaches } from '../../src/paths/rewire'
 
-import * as cacacheModule from '../../src/cacache'
+import * as cacacheRead from '../../src/cacache/read'
+import * as cacacheWrite from '../../src/cacache/write'
 
-vi.mock('../../src/cacache', async importOriginal => {
-  const original = await importOriginal<typeof import('../../src/cacache')>()
+vi.mock('../../src/cacache/read', async importOriginal => {
+  const original = await importOriginal<typeof cacacheRead>()
   return {
     ...original,
     safeGet: vi.fn(original.safeGet),
+  }
+})
+vi.mock('../../src/cacache/write', async importOriginal => {
+  const original = await importOriginal<typeof cacacheWrite>()
+  return {
+    ...original,
     remove: vi.fn(original.remove),
   }
 })
@@ -36,8 +43,8 @@ describe.sequential('cache-with-ttl — error branches', () => {
       `socket-cache-err-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     )
     setEnv('SOCKET_CACACHE_DIR', testCacheDir)
-    vi.mocked(cacacheModule.safeGet).mockClear()
-    vi.mocked(cacacheModule.remove).mockClear()
+    vi.mocked(cacacheRead.safeGet).mockClear()
+    vi.mocked(cacacheWrite.remove).mockClear()
   })
 
   afterEach(async () => {
@@ -57,14 +64,14 @@ describe.sequential('cache-with-ttl — error branches', () => {
         memoize: false,
       })
       // Return a valid cacache entry shape with malformed JSON in data.
-      vi.mocked(cacacheModule.safeGet).mockResolvedValueOnce({
+      vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from('this is not valid json{{{', 'utf8'),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       const result = await cache.get('any-key')
       expect(result).toBeUndefined()
       // The catch branch attempts to remove the corrupt entry.
-      expect(cacacheModule.remove).toHaveBeenCalled()
+      expect(cacacheWrite.remove).toHaveBeenCalled()
     })
 
     it('swallows remove errors during corrupted-entry cleanup', async () => {
@@ -73,11 +80,11 @@ describe.sequential('cache-with-ttl — error branches', () => {
         prefix: 'corrupt-rm-fail',
         memoize: false,
       })
-      vi.mocked(cacacheModule.safeGet).mockResolvedValueOnce({
+      vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from('garbage', 'utf8'),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
-      vi.mocked(cacacheModule.remove).mockRejectedValueOnce(
+      vi.mocked(cacacheWrite.remove).mockRejectedValueOnce(
         new Error('rm-failed'),
       )
       // Even with rm failing, get() must still return undefined cleanly.
@@ -97,13 +104,13 @@ describe.sequential('cache-with-ttl — error branches', () => {
         data: 'value',
         expiresAt: Date.now() - 10_000,
       }
-      vi.mocked(cacacheModule.safeGet).mockResolvedValueOnce({
+      vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from(JSON.stringify(expiredEntry), 'utf8'),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       const result = await cache.get('expired-key')
       expect(result).toBeUndefined()
-      expect(cacacheModule.remove).toHaveBeenCalled()
+      expect(cacacheWrite.remove).toHaveBeenCalled()
     })
 
     it('swallows remove errors during expired-entry cleanup', async () => {
@@ -116,11 +123,11 @@ describe.sequential('cache-with-ttl — error branches', () => {
         data: 'value',
         expiresAt: Date.now() - 10_000,
       }
-      vi.mocked(cacacheModule.safeGet).mockResolvedValueOnce({
+      vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from(JSON.stringify(expiredEntry), 'utf8'),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
-      vi.mocked(cacacheModule.remove).mockRejectedValueOnce(
+      vi.mocked(cacacheWrite.remove).mockRejectedValueOnce(
         new Error('rm-failed-2'),
       )
       await expect(cache.get('expired-key')).resolves.toBeUndefined()
@@ -140,7 +147,7 @@ describe.sequential('cache-with-ttl — error branches', () => {
         // 10 minutes in the future, well past ttl + skew window
         expiresAt: Date.now() + 600_000,
       }
-      vi.mocked(cacacheModule.safeGet).mockResolvedValueOnce({
+      vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from(JSON.stringify(skewedEntry), 'utf8'),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)

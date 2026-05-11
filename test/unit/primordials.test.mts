@@ -913,7 +913,8 @@ describe('primordials', () => {
   describe('Object (static)', () => {
     it('Assign / Create / DefineProperty / DefineProperties', () => {
       expect(ObjectAssign({}, { a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 })
-      const nullProto = ObjectCreate(undefined)
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.create(null) is the only way to make a null-prototype object.
+      const nullProto = ObjectCreate(null)
       expect(Object.getPrototypeOf(nullProto)).toBe(null)
       const obj: Record<string, number> = {}
       ObjectDefineProperty(obj, 'x', { value: 42, enumerable: true })
@@ -1085,7 +1086,8 @@ describe('primordials', () => {
       const proto = { foo: 1 }
       const obj = ObjectCreate(proto)
       expect(ReflectGetPrototypeOf(obj)).toBe(proto)
-      ReflectSetPrototypeOf(obj, undefined)
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- Reflect.setPrototypeOf requires `null` for null-prototype.
+      ReflectSetPrototypeOf(obj, null)
       expect(ReflectGetPrototypeOf(obj)).toBe(null)
     })
 

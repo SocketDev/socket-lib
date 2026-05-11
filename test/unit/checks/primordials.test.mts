@@ -23,7 +23,7 @@
  *     - Multiple files contribute to same name's `files` list
  */
 
-import { mkdirSync, mkdtempSync, promises as fs, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 

@@ -246,11 +246,14 @@ describe('cacache', () => {
       const originalRmAll = cacache.rm.all
 
       try {
-        cacache.rm.all = vi.fn().mockRejectedValue(
-          Object.assign(new Error('ENOTEMPTY'), {
-            code: 'ENOTEMPTY',
-          }),
-        )
+        cacache.rm.all = Object.assign(
+          vi.fn().mockRejectedValue(
+            Object.assign(new Error('ENOTEMPTY'), {
+              code: 'ENOTEMPTY',
+            }),
+          ),
+          { sync: vi.fn() },
+        ) as typeof cacache.rm.all
 
         // Should not throw
         await expect(clear()).resolves.toBeUndefined()
@@ -264,11 +267,14 @@ describe('cacache', () => {
       const originalRmAll = cacache.rm.all
 
       try {
-        cacache.rm.all = vi.fn().mockRejectedValue(
-          Object.assign(new Error('EACCES'), {
-            code: 'EACCES',
-          }),
-        )
+        cacache.rm.all = Object.assign(
+          vi.fn().mockRejectedValue(
+            Object.assign(new Error('EACCES'), {
+              code: 'EACCES',
+            }),
+          ),
+          { sync: vi.fn() },
+        ) as typeof cacache.rm.all
 
         await expect(clear()).rejects.toThrow('EACCES')
       } finally {

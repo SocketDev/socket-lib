@@ -13,12 +13,14 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createTtlCache } from '../../src/cache-with-ttl'
+import { createTtlCache } from '../../src/cache-with-ttl/cache'
 import { resetEnv, setEnv } from '../../src/env/rewire'
 import { safeDelete } from '../../src/fs/safe'
 import { invalidateCaches } from '../../src/paths/rewire'
 
-import * as cacacheModule from '../../src/cacache'
+import * as cacacheInternal from '../../src/cacache/_internal'
+import * as cacacheRead from '../../src/cacache/read'
+import * as cacacheWrite from '../../src/cacache/write'
 
 interface FakeStreamEntry {
   key: string
@@ -36,12 +38,24 @@ export function makeFakeStream(
   }
 }
 
-vi.mock('../../src/cacache', async importOriginal => {
-  const original = await importOriginal<typeof import('../../src/cacache')>()
+vi.mock('../../src/cacache/_internal', async importOriginal => {
+  const original = await importOriginal<typeof cacacheInternal>()
   return {
     ...original,
     getCacache: vi.fn(original.getCacache),
+  }
+})
+vi.mock('../../src/cacache/read', async importOriginal => {
+  const original = await importOriginal<typeof cacacheRead>()
+  return {
+    ...original,
     safeGet: vi.fn(original.safeGet),
+  }
+})
+vi.mock('../../src/cacache/write', async importOriginal => {
+  const original = await importOriginal<typeof cacacheWrite>()
+  return {
+    ...original,
     remove: vi.fn(original.remove),
   }
 })
@@ -56,9 +70,9 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
       `socket-getall-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     )
     setEnv('SOCKET_CACACHE_DIR', testCacheDir)
-    vi.mocked(cacacheModule.getCacache).mockClear()
-    vi.mocked(cacacheModule.safeGet).mockClear()
-    vi.mocked(cacacheModule.remove).mockClear()
+    vi.mocked(cacacheInternal.getCacache).mockClear()
+    vi.mocked(cacacheRead.safeGet).mockClear()
+    vi.mocked(cacacheWrite.remove).mockClear()
   })
 
   afterEach(async () => {
@@ -90,8 +104,8 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
-    vi.mocked(cacacheModule.getCacache).mockReturnValue(fakeCacache)
-    vi.mocked(cacacheModule.safeGet).mockImplementation(async (key: string) => {
+    vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
+    vi.mocked(cacacheRead.safeGet).mockImplementation(async (key: string) => {
       if (key === 'pfx:keep-a') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return { data: Buffer.from(JSON.stringify(validEntry), 'utf8') } as any
@@ -111,7 +125,7 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
     expect(result.size).toBe(1)
     expect(result.get('keep-a')).toBe('value-a')
     // Expired entry triggers cacache.remove.
-    expect(cacacheModule.remove).toHaveBeenCalledWith('pfx:expired')
+    expect(cacacheWrite.remove).toHaveBeenCalledWith('pfx:expired')
   })
 
   it('updates memoize cache from persistent results when memoize:true', async () => {
@@ -127,8 +141,8 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
-    vi.mocked(cacacheModule.getCacache).mockReturnValue(fakeCacache)
-    vi.mocked(cacacheModule.safeGet).mockResolvedValue(
+    vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
+    vi.mocked(cacacheRead.safeGet).mockResolvedValue(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { data: Buffer.from(JSON.stringify(validEntry), 'utf8') } as any,
     )
@@ -138,10 +152,10 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
     // Subsequent get() should hit memo cache (we can't directly assert
     // memoSet, but the value is returned without a second persistent
     // lookup — verified by clearing safeGet and re-getting).
-    vi.mocked(cacacheModule.safeGet).mockClear()
+    vi.mocked(cacacheRead.safeGet).mockClear()
     const cached = await cache.get<string>('k1')
     expect(cached).toBe('memoized')
-    expect(cacacheModule.safeGet).not.toHaveBeenCalled()
+    expect(cacacheRead.safeGet).not.toHaveBeenCalled()
   })
 
   it('skips entries already in in-memory results (memoize:true dedup)', async () => {
@@ -159,9 +173,9 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
-    vi.mocked(cacacheModule.getCacache).mockReturnValue(fakeCacache)
+    vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     // safeGet should NOT be called for the dedup'd entry.
-    vi.mocked(cacacheModule.safeGet).mockClear()
+    vi.mocked(cacacheRead.safeGet).mockClear()
     const result = await cache.getAll<string>('*')
     expect(result.get('shared')).toBe('from-memo')
   })
@@ -178,8 +192,8 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
-    vi.mocked(cacacheModule.getCacache).mockReturnValue(fakeCacache)
-    vi.mocked(cacacheModule.safeGet).mockRejectedValueOnce(
+    vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
+    vi.mocked(cacacheRead.safeGet).mockRejectedValueOnce(
       new Error('safeGet-failed'),
     )
     // getAll must not propagate the error.
@@ -198,8 +212,8 @@ describe.sequential('cache-with-ttl — getAll wildcard', () => {
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
-    vi.mocked(cacacheModule.getCacache).mockReturnValue(fakeCacache)
-    vi.mocked(cacacheModule.safeGet).mockResolvedValueOnce(undefined)
+    vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
+    vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce(undefined)
     const result = await cache.getAll<string>('*')
     expect(result.size).toBe(0)
   })

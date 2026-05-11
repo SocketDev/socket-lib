@@ -28,7 +28,6 @@ import {
 } from '@socketsecurity/lib/fs/encoding'
 import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
 import {
-  isDir,
   isDirEmptySync,
   isDirSync,
   isSymLinkSync,
