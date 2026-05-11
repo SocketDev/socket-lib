@@ -50,32 +50,8 @@ const FS_CP_OPTIONS = {
   ...(WIN32 ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
 
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 /**
  * Isolates a package in a temporary test environment.
@@ -91,8 +67,8 @@ export async function isolatePackage(
   packageSpec: string,
   options?: IsolatePackageOptions | undefined,
 ): Promise<IsolatePackageResult> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const opts = { __proto__: null, ...options } as IsolatePackageOptions
   const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
 
@@ -286,7 +262,7 @@ export async function mergePackageJson(
   pkgJsonPath: string,
   originalPkgJson: PackageJson | undefined,
 ): Promise<PackageJson> {
-  const fs = getFs()
+  const fs = getNodeFs()
   let pkgJson: PackageJson
   try {
     pkgJson = JSONParse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
@@ -308,8 +284,8 @@ export async function mergePackageJson(
  * path either way.
  */
 export async function resolveRealPath(pathStr: string): Promise<string> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   try {
     return await fs.promises.realpath(pathStr)
   } catch {

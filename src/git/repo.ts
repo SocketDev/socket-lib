@@ -9,8 +9,9 @@
 import process from 'node:process'
 
 import { MapCtor } from '../primordials/map-set'
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
+
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 // Cache for realpathSync results to avoid repeated filesystem calls.
 // Validated with existsSync() which is cheaper than realpathSync().
@@ -41,8 +42,8 @@ export const gitRootCache = new MapCtor<string, string>()
  * ```
  */
 export function findGitRoot(startPath: string): string {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
 
   // Check cache first - git roots don't change during process lifetime.
   // Cache hit fires on second call for same startPath; first-call
@@ -91,7 +92,7 @@ export function findGitRoot(startPath: string): string {
  * path exists but realpath resolution is restricted.
  */
 export function getCachedRealpath(pathname: string): string {
-  const fs = getFs()
+  const fs = getNodeFs()
   const cached = realpathCache.get(pathname)
   // Cache hit fires on second call for the same pathname; first-call
   // misses. Stale-cache eviction fires if cwd symlink target is
@@ -142,33 +143,9 @@ export function getCwd(): string {
   return getCachedRealpath(process.cwd())
 }
 
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+// Re-export canonical node lazy loaders under the `git/repo` legacy
+// names so existing siblings keep working. New code should import
+// `getNodeFs` / `getNodePath` from `@socketsecurity/lib/node/{fs,path}`
+// directly.
+export { getNodeFs as getFs } from '../node/fs'
+export { getNodePath as getPath } from '../node/path'

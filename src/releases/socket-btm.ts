@@ -12,6 +12,8 @@ import {
 import { getLatestRelease, getReleaseAssetUrl } from './github-api'
 import { downloadGitHubRelease } from './github-downloads'
 
+import { getNodeFs } from '../node/fs'
+
 import type { AssetPattern, DownloadGitHubReleaseConfig } from './github-types'
 
 import { ErrorCtor } from '../primordials/error'
@@ -109,8 +111,6 @@ const ARCH_MAP = {
   x64: 'x64',
 } as unknown as Record<string, string>
 
-let _fs: typeof import('node:fs') | undefined
-
 /**
  * Detect the libc variant (musl or glibc) on Linux systems.
  * Returns undefined for non-Linux platforms.
@@ -134,7 +134,7 @@ export function detectLibc(): Libc | undefined {
   /* c8 ignore start - Linux-only musl/glibc detection; tested on
      Linux runners. macOS/Windows runners take the early-return above. */
   try {
-    const fs = getFs()
+    const fs = getNodeFs()
     // Check for musl-specific dynamic linker.
     // These files only exist on musl systems.
     const muslPaths = [
@@ -380,17 +380,6 @@ export function getBinaryName(
  *
  * @private
  */
-/* c8 ignore start - Only called from Linux-only detectLibc body. */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-/* c8 ignore stop */
 
 /**
  * Get platform-arch identifier for directory structure and asset names.

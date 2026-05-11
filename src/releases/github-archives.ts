@@ -11,11 +11,11 @@ import { getDefaultLogger } from '../logger/default'
 import { ErrorCtor } from '../primordials/error'
 import { downloadReleaseAsset } from './github-downloads'
 
+import { getNodePath } from '../node/path'
+
 import type { AssetPattern, RepoConfig } from './github-types'
 
 const logger = getDefaultLogger()
-
-let _path: typeof import('node:path') | undefined
 
 /**
  * Download and extract an archive from a GitHub release.
@@ -60,7 +60,7 @@ export async function downloadAndExtractArchive(
 ): Promise<string> {
   const { cleanup = true, format, quiet = false, strip } = options
 
-  const path = getPath()
+  const path = getNodePath()
 
   await safeMkdir(outputDir)
 
@@ -152,7 +152,7 @@ export async function downloadAndExtractZip(
 ): Promise<string> {
   const { cleanup = true, quiet = false } = options
 
-  const path = getPath()
+  const path = getNodePath()
 
   await safeMkdir(outputDir)
 
@@ -197,12 +197,4 @@ export async function downloadAndExtractZip(
   }
 
   return outputDir
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
 }

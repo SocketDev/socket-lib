@@ -22,10 +22,10 @@ import type {
   RepoConfig,
 } from './github-types'
 
-const logger = getDefaultLogger()
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
+const logger = getDefaultLogger()
 
 /**
  * Download a binary from any GitHub repository with version caching.
@@ -75,7 +75,7 @@ export async function downloadGitHubRelease(
     throw new ErrorCtor('Either toolPrefix or tag must be provided')
   }
 
-  const path = getPath()
+  const path = getNodePath()
   // Resolve download directory (can be absolute or relative to cwd).
   const resolvedDownloadDir = path.isAbsolute(downloadDir)
     ? downloadDir
@@ -87,7 +87,7 @@ export async function downloadGitHubRelease(
   const versionPath = path.join(binaryDir, '.version')
 
   // Check if already downloaded.
-  const fs = getFs()
+  const fs = getNodeFs()
   if (fs.existsSync(versionPath) && fs.existsSync(binaryPath)) {
     const cachedVersion = (
       await fs.promises.readFile(versionPath, 'utf8')
@@ -184,7 +184,7 @@ export async function downloadReleaseAsset(
     throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
   }
 
-  const path = getPath()
+  const path = getNodePath()
   await safeMkdir(path.dirname(outputPath))
 
   // Download using httpDownload which supports redirects and retries.
@@ -195,20 +195,4 @@ export async function downloadReleaseAsset(
     retries: 2,
     retryDelay: 5000,
   })
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
 }

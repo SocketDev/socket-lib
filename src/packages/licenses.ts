@@ -18,18 +18,7 @@ import { MapCtor } from '../primordials/map-set'
 import { RegExpPrototypeExec } from '../primordials/regexp'
 const copyLeftLicenses = getCopyLeftLicenses()
 
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import { getNodePath } from '../node/path'
 
 const BINARY_OPERATION_NODE_TYPE = 'BinaryOperation'
 const LICENSE_NODE_TYPE = 'License'
@@ -256,7 +245,7 @@ export function resolvePackageLicenses(
   // https://github.com/kemitchell/validate-npm-package-license.js/blob/v3.0.4/index.js#L48-L53
   const match = RegExpPrototypeExec(fileReferenceRegExp, licenseFieldValue)
   if (match) {
-    const path = getPath()
+    const path = getNodePath()
     return [
       {
         license: licenseFieldValue,
