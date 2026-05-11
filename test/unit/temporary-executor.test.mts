@@ -12,7 +12,7 @@
 import process from 'node:process'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { isRunningInTemporaryExecutor } from '@socketsecurity/lib/temporary-executor'
+import { isRunningInTemporaryExecutor } from '@socketsecurity/lib/temporary-executor/detect'
 
 describe('temporary-executor', () => {
   describe('isRunningInTemporaryExecutor', () => {

@@ -8,7 +8,7 @@ import { getTheme } from './themes/context'
 import { THEMES } from './themes/themes'
 import { resolveColor } from './themes/utils'
 
-import type { ColorName } from './colors'
+import type { ColorName } from './colors/types'
 import type { ThemeName } from './themes/themes'
 import type { Theme } from './themes/types'
 

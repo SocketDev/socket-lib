@@ -3,7 +3,7 @@
  * Type-safe theming for spinners, loggers, prompts, and links.
  */
 
-import type { ColorValue } from '../colors'
+import type { ColorValue } from '../colors/types'
 import type { ShimmerDirection } from '../effects/shimmer'
 import type { SpinnerStyle } from '../spinner/types'
 

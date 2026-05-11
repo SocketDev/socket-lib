@@ -253,10 +253,20 @@
       "types": "./dist/checks/primordials.d.ts",
       "default": "./dist/checks/primordials.js"
     },
-    "./colors": {
-      "source": "./src/colors.ts",
-      "types": "./dist/colors.d.ts",
-      "default": "./dist/colors.js"
+    "./colors/convert": {
+      "source": "./src/colors/convert.ts",
+      "types": "./dist/colors/convert.d.ts",
+      "default": "./dist/colors/convert.js"
+    },
+    "./colors/palette": {
+      "source": "./src/colors/palette.ts",
+      "types": "./dist/colors/palette.d.ts",
+      "default": "./dist/colors/palette.js"
+    },
+    "./colors/types": {
+      "source": "./src/colors/types.ts",
+      "types": "./dist/colors/types.d.ts",
+      "default": "./dist/colors/types.js"
     },
     "./compression": {
       "source": "./src/compression.ts",
@@ -1443,10 +1453,15 @@
       "types": "./dist/tables.d.ts",
       "default": "./dist/tables.js"
     },
-    "./temporary-executor": {
-      "source": "./src/temporary-executor.ts",
-      "types": "./dist/temporary-executor.d.ts",
-      "default": "./dist/temporary-executor.js"
+    "./temporary-executor/detect": {
+      "source": "./src/temporary-executor/detect.ts",
+      "types": "./dist/temporary-executor/detect.d.ts",
+      "default": "./dist/temporary-executor/detect.js"
+    },
+    "./temporary-executor/types": {
+      "source": "./src/temporary-executor/types.ts",
+      "types": "./dist/temporary-executor/types.d.ts",
+      "default": "./dist/temporary-executor/types.js"
     },
     "./test/integration/esm-imports.test": {
       "default": "./test/integration/esm-imports.test.mjs"
@@ -1471,10 +1486,15 @@
       "types": "./dist/themes/utils.d.ts",
       "default": "./dist/themes/utils.js"
     },
-    "./types": {
-      "source": "./src/types.ts",
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
+    "./types/purl": {
+      "source": "./src/types/purl.ts",
+      "types": "./dist/types/purl.d.ts",
+      "default": "./dist/types/purl.js"
+    },
+    "./types/types": {
+      "source": "./src/types/types.ts",
+      "types": "./dist/types/types.d.ts",
+      "default": "./dist/types/types.js"
     },
     "./url": {
       "source": "./src/url.ts",
@@ -1486,10 +1506,25 @@
       "types": "./dist/versions.d.ts",
       "default": "./dist/versions.js"
     },
-    "./words": {
-      "source": "./src/words.ts",
-      "types": "./dist/words.d.ts",
-      "default": "./dist/words.js"
+    "./words/article": {
+      "source": "./src/words/article.ts",
+      "types": "./dist/words/article.d.ts",
+      "default": "./dist/words/article.js"
+    },
+    "./words/capitalize": {
+      "source": "./src/words/capitalize.ts",
+      "types": "./dist/words/capitalize.d.ts",
+      "default": "./dist/words/capitalize.js"
+    },
+    "./words/pluralize": {
+      "source": "./src/words/pluralize.ts",
+      "types": "./dist/words/pluralize.d.ts",
+      "default": "./dist/words/pluralize.js"
+    },
+    "./words/types": {
+      "source": "./src/words/types.ts",
+      "types": "./dist/words/types.d.ts",
+      "default": "./dist/words/types.js"
     },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json"

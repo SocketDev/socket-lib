@@ -10,7 +10,7 @@
 
 import process from 'node:process'
 
-import { toRgb } from '../colors'
+import { toRgb } from '../colors/convert'
 
 import type {
   WithSpinnerOptions,

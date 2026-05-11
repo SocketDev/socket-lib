@@ -2,7 +2,7 @@
  * @fileoverview Theme utilities — color resolution and composition.
  */
 
-import type { ColorValue } from '../colors'
+import type { ColorValue } from '../colors/types'
 import type { Palette } from '../effects/shimmer'
 import type { ColorReference, Theme, ThemeColors } from './types'
 

@@ -8,7 +8,7 @@
 
 import type { Writable } from 'node:stream'
 
-import type { ColorInherit, ColorRgb, ColorValue } from '../colors'
+import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
 import type {
   Palette,
   ShimmerConfig,

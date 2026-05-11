@@ -5,8 +5,8 @@
 
 import process from 'node:process'
 
-import { WIN32 } from './constants/platform'
-import { normalizePath } from './paths/normalize'
+import { WIN32 } from '../constants/platform'
+import { normalizePath } from '../paths/normalize'
 
 /**
  * Detects if the current process is running in a temporary package execution context

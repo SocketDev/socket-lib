@@ -10,8 +10,8 @@
  * breaks the lazy-init guarantee.
  */
 
-import type { ColorInherit, ColorRgb, ColorValue } from '../colors'
-import { isRgbTuple, toRgb } from '../colors'
+import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
+import { isRgbTuple, toRgb } from '../colors/convert'
 import { getAbortSignal } from '../constants/process'
 import { isDebug } from '../debug'
 import type {

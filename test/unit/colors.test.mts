@@ -9,13 +9,12 @@
  * Used throughout Socket CLI for consistent color handling in spinners, loggers, and UI.
  */
 
-import {
-  type ColorName,
-  type ColorRgb,
-  type ColorValue,
-  isRgbTuple,
-  toRgb,
-} from '@socketsecurity/lib/colors'
+import { isRgbTuple, toRgb } from '@socketsecurity/lib/colors/convert'
+import type {
+  ColorName,
+  ColorRgb,
+  ColorValue,
+} from '@socketsecurity/lib/colors/types'
 import { describe, expect, it } from 'vitest'
 
 describe('colors', () => {

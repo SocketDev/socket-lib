@@ -9,7 +9,7 @@
 
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
-import type { ColorValue } from '../colors'
+import type { ColorValue } from '../colors/types'
 
 /**
  * Apply a color to text using yoctocolors.

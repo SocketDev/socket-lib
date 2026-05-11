@@ -24,8 +24,10 @@ const distPath = path.join(rootPath, 'dist')
 const entryPoints = fg.sync('**/*.{ts,mts,cts}', {
   cwd: srcPath,
   absolute: true,
-  // Skip declaration files.
-  ignore: ['**/*.d.ts', '**/types/**', '**/external/**'],
+  // Skip declaration files and vendored externals. The `src/types/`
+  // directory carries real runtime modules (Phase 4 split) and must
+  // be compiled like any other source.
+  ignore: ['**/*.d.ts', '**/external/**'],
 })
 
 /**
