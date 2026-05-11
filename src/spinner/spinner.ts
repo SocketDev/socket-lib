@@ -91,32 +91,6 @@ let _defaultSpinner: SpinnerStyle | undefined
  * @param options - Configuration options for the spinner
  * @returns New spinner instance
  *
- * @example
- * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
- *
- * // Basic usage
- * const spinner = Spinner({ text: 'Loading data…' })
- * spinner.start()
- * await fetchData()
- * spinner.successAndStop('Data loaded!')
- *
- * // With custom color
- * const spinner = Spinner({
- *   text: 'Processing…',
- *   color: [255, 0, 0] // Red
- * })
- *
- * // With shimmer effect
- * const spinner = Spinner({
- *   text: 'Building…',
- *   shimmer: { dir: 'ltr', speed: 0.5 }
- * })
- *
- * // Show progress
- * spinner.progress(5, 10, 'files')
- * spinner.progressStep() // Increment by 1
- * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
@@ -446,12 +420,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @returns This spinner for chaining
        * @default spaces=2
        *
-       * @example
-       * ```ts
-       * spinner.dedent()    // Remove 2 spaces
-       * spinner.dedent(4)   // Remove 4 spaces
-       * spinner.dedent(0)   // Reset to zero indentation
-       * ```
        */
       dedent(spaces?: number | undefined) {
         // Pass 0 to reset indentation
@@ -571,12 +539,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @returns This spinner for chaining
        * @default spaces=2
        *
-       * @example
-       * ```ts
-       * spinner.indent()    // Add 2 spaces
-       * spinner.indent(4)   // Add 4 spaces
-       * spinner.indent(0)   // Reset to zero indentation
-       * ```
        */
       indent(spaces?: number | undefined) {
         // Pass 0 to reset indentation. spaces===0 fires when caller
@@ -651,11 +613,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @param unit - Optional unit label (e.g., 'files', 'items')
        * @returns This spinner for chaining
        *
-       * @example
-       * ```ts
-       * spinner.progress(5, 10)            // "███████░░░░░░░░░░░░░ 50% (5/10)"
-       * spinner.progress(7, 20, 'files')   // "███████░░░░░░░░░░░░░ 35% (7/20 files)"
-       * ```
        */
       progress = (
         current: number,
@@ -681,12 +638,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @returns This spinner for chaining
        * @default amount=1
        *
-       * @example
-       * ```ts
-       * spinner.progress(0, 10, 'files')
-       * spinner.progressStep()    // Progress: 1/10
-       * spinner.progressStep(3)   // Progress: 4/10
-       * ```
        */
       progressStep(amount: number = 1) {
         // No-progress no-op fires when called before progress() seed;
@@ -780,12 +731,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @param text - Optional text to display with the spinner
        * @returns This spinner for chaining
        *
-       * @example
-       * ```ts
-       * spinner.start('Loading…')
-       * // Later:
-       * spinner.successAndStop('Done!')
-       * ```
        */
       start(...args: unknown[]) {
         // args-length and normalized-falsy arms exercised across calls;
@@ -816,12 +761,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @param extras - Additional values to log
        * @returns This spinner for chaining
        *
-       * @example
-       * ```ts
-       * spinner.step('Building application')
-       * spinner.substep('Compiling TypeScript')
-       * spinner.substep('Bundling assets')
-       * ```
        */
       step(text?: string | undefined, ...extras: unknown[]) {
         // text-omitted no-op arm fires when caller invokes step() bare.
@@ -842,14 +781,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @param text - Optional final text to display after stopping
        * @returns This spinner for chaining
        *
-       * @example
-       * ```ts
-       * spinner.start('Processing…')
-       * // Do work
-       * spinner.stop() // Just stop, no message
-       * // or
-       * spinner.stop('Finished processing')
-       * ```
        */
       stop(...args: unknown[]) {
         // Clear internal state.
@@ -873,12 +804,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @param extras - Additional values to log
        * @returns This spinner for chaining
        *
-       * @example
-       * ```ts
-       * spinner.step('Building application')
-       * spinner.substep('Compiling TypeScript')
-       * spinner.substep('Bundling assets')
-       * ```
        */
       substep(text?: string | undefined, ...extras: unknown[]) {
         // text-omitted no-op arm fires when caller invokes substep() bare.
@@ -924,16 +849,6 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @param value - Text to display (omit to get current text)
        * @returns Current text (getter) or this spinner (setter)
        *
-       * @example
-       * ```ts
-       * // Setter
-       * spinner.text('Loading data…')
-       * spinner.text('Processing…')
-       *
-       * // Getter
-       * const current = spinner.text()
-       * console.log(current) // "Processing…"
-       * ```
        */
       text(): string
       text(value: string): SpinnerType
