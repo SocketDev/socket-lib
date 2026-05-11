@@ -44,7 +44,7 @@ import { errorMessage } from './errors/message'
 import { safeDeleteSync } from './fs/safe'
 import { getDefaultLogger } from './logger/default'
 import { pRetry } from './promises/retry'
-import { onExit } from './signal-exit'
+import { onExit } from './signal-exit/on-exit'
 
 import { DateNow } from './primordials/date'
 

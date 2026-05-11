@@ -16,16 +16,20 @@ import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   clearPerformanceMetrics,
-  generatePerformanceReport,
   getPerformanceMetrics,
   getPerformanceSummary,
+} from '@socketsecurity/lib/performance/metrics'
+import {
+  generatePerformanceReport,
+  printPerformanceSummary,
+} from '@socketsecurity/lib/performance/report'
+import {
   measure,
   measureSync,
   perfCheckpoint,
   perfTimer,
-  printPerformanceSummary,
   trackMemory,
-} from '@socketsecurity/lib/performance'
+} from '@socketsecurity/lib/performance/timer'
 
 describe('performance', () => {
   describe('module import', () => {

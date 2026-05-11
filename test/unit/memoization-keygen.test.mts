@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { memoize } from '@socketsecurity/lib/memoization'
+import { memoize } from '@socketsecurity/lib/memoization/memoize'
 
 describe('memoization — defaultKeyGen edge args', () => {
   it('disambiguates undefined arguments', () => {

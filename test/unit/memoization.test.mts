@@ -11,14 +11,12 @@
  * Used by Socket tools to optimize expensive operations and API calls.
  */
 
-import {
-  clearAllMemoizationCaches,
-  Memoize,
-  memoize,
-  memoizeAsync,
-  memoizeWeak,
-  once,
-} from '@socketsecurity/lib/memoization'
+import { clearAllMemoizationCaches } from '@socketsecurity/lib/memoization/clear'
+import { Memoize } from '@socketsecurity/lib/memoization/decorator'
+import { memoize } from '@socketsecurity/lib/memoization/memoize'
+import { memoizeAsync } from '@socketsecurity/lib/memoization/memoize-async'
+import { memoizeWeak } from '@socketsecurity/lib/memoization/memoize-weak'
+import { once } from '@socketsecurity/lib/memoization/once'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('memoization', () => {

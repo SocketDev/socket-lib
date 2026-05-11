@@ -978,10 +978,40 @@
       "types": "./dist/logger/types.d.ts",
       "default": "./dist/logger/types.js"
     },
-    "./memoization": {
-      "source": "./src/memoization.ts",
-      "types": "./dist/memoization.d.ts",
-      "default": "./dist/memoization.js"
+    "./memoization/clear": {
+      "source": "./src/memoization/clear.ts",
+      "types": "./dist/memoization/clear.d.ts",
+      "default": "./dist/memoization/clear.js"
+    },
+    "./memoization/decorator": {
+      "source": "./src/memoization/decorator.ts",
+      "types": "./dist/memoization/decorator.d.ts",
+      "default": "./dist/memoization/decorator.js"
+    },
+    "./memoization/memoize": {
+      "source": "./src/memoization/memoize.ts",
+      "types": "./dist/memoization/memoize.d.ts",
+      "default": "./dist/memoization/memoize.js"
+    },
+    "./memoization/memoize-async": {
+      "source": "./src/memoization/memoize-async.ts",
+      "types": "./dist/memoization/memoize-async.d.ts",
+      "default": "./dist/memoization/memoize-async.js"
+    },
+    "./memoization/memoize-weak": {
+      "source": "./src/memoization/memoize-weak.ts",
+      "types": "./dist/memoization/memoize-weak.d.ts",
+      "default": "./dist/memoization/memoize-weak.js"
+    },
+    "./memoization/once": {
+      "source": "./src/memoization/once.ts",
+      "types": "./dist/memoization/once.d.ts",
+      "default": "./dist/memoization/once.js"
+    },
+    "./memoization/types": {
+      "source": "./src/memoization/types.ts",
+      "types": "./dist/memoization/types.d.ts",
+      "default": "./dist/memoization/types.js"
     },
     "./node/async-hooks": {
       "source": "./src/node/async-hooks.ts",
@@ -1183,10 +1213,30 @@
       "types": "./dist/paths/socket.d.ts",
       "default": "./dist/paths/socket.js"
     },
-    "./performance": {
-      "source": "./src/performance.ts",
-      "types": "./dist/performance.d.ts",
-      "default": "./dist/performance.js"
+    "./performance/enabled": {
+      "source": "./src/performance/enabled.ts",
+      "types": "./dist/performance/enabled.d.ts",
+      "default": "./dist/performance/enabled.js"
+    },
+    "./performance/metrics": {
+      "source": "./src/performance/metrics.ts",
+      "types": "./dist/performance/metrics.d.ts",
+      "default": "./dist/performance/metrics.js"
+    },
+    "./performance/report": {
+      "source": "./src/performance/report.ts",
+      "types": "./dist/performance/report.d.ts",
+      "default": "./dist/performance/report.js"
+    },
+    "./performance/timer": {
+      "source": "./src/performance/timer.ts",
+      "types": "./dist/performance/timer.d.ts",
+      "default": "./dist/performance/timer.js"
+    },
+    "./performance/types": {
+      "source": "./src/performance/types.ts",
+      "types": "./dist/performance/types.d.ts",
+      "default": "./dist/performance/types.js"
     },
     "./primordials/array": {
       "source": "./src/primordials/array.ts",
@@ -1403,10 +1453,30 @@
       "types": "./dist/shadow/types.d.ts",
       "default": "./dist/shadow/types.js"
     },
-    "./signal-exit": {
-      "source": "./src/signal-exit.ts",
-      "types": "./dist/signal-exit.d.ts",
-      "default": "./dist/signal-exit.js"
+    "./signal-exit/intercept": {
+      "source": "./src/signal-exit/intercept.ts",
+      "types": "./dist/signal-exit/intercept.d.ts",
+      "default": "./dist/signal-exit/intercept.js"
+    },
+    "./signal-exit/lifecycle": {
+      "source": "./src/signal-exit/lifecycle.ts",
+      "types": "./dist/signal-exit/lifecycle.d.ts",
+      "default": "./dist/signal-exit/lifecycle.js"
+    },
+    "./signal-exit/on-exit": {
+      "source": "./src/signal-exit/on-exit.ts",
+      "types": "./dist/signal-exit/on-exit.d.ts",
+      "default": "./dist/signal-exit/on-exit.js"
+    },
+    "./signal-exit/signals": {
+      "source": "./src/signal-exit/signals.ts",
+      "types": "./dist/signal-exit/signals.d.ts",
+      "default": "./dist/signal-exit/signals.js"
+    },
+    "./signal-exit/types": {
+      "source": "./src/signal-exit/types.ts",
+      "types": "./dist/signal-exit/types.d.ts",
+      "default": "./dist/signal-exit/types.js"
     },
     "./smol/primordial": {
       "source": "./src/smol/primordial.ts",
