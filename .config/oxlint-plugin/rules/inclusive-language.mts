@@ -58,7 +58,7 @@ const REPORT_ONLY_TERMS = ['master', 'slave']
 const BYPASS_RE = /inclusive-language:\s*external-api/
 
 /** Build a regex matching any legacy stem with word boundaries. */
-export function buildDetectorRegex() {
+function buildDetectorRegex() {
   const stems = [
     ...SUBSTITUTIONS.map(([legacy]) => legacy),
     ...REPORT_ONLY_TERMS,
@@ -74,7 +74,7 @@ const DETECTOR_RE = buildDetectorRegex()
  * the new stem. Returns undefined when there's no autofix-able
  * substitution (master/slave).
  */
-export function rewriteHit(match) {
+function rewriteHit(match) {
   const lower = match.toLowerCase()
   for (const [legacy, replacement] of SUBSTITUTIONS) {
     if (!lower.startsWith(legacy)) {
@@ -95,7 +95,7 @@ export function rewriteHit(match) {
   return undefined
 }
 
-export function findHits(text) {
+function findHits(text) {
   const hits = []
   DETECTOR_RE.lastIndex = 0
   let m
@@ -143,6 +143,17 @@ const rule = {
       const after = sourceCode.getCommentsAfter(node)
       for (const c of [...before, ...after]) {
         if (BYPASS_RE.test(c.value)) {
+          return true
+        }
+      }
+      // Fall-back: scan the entire source line containing the node for
+      // a trailing bypass comment. AST-level "after" comments stop at
+      // the statement boundary, but a chained method call's string
+      // literal won't see a trailing comment on the same physical line.
+      const loc = node.loc
+      if (loc && loc.start.line === loc.end.line) {
+        const lineText = sourceCode.lines?.[loc.start.line - 1]
+        if (lineText && BYPASS_RE.test(lineText)) {
           return true
         }
       }
