@@ -1518,6 +1518,11 @@
       "types": "./dist/releases/github-archives.d.ts",
       "default": "./dist/releases/github-archives.js"
     },
+    "./releases/github-asset-url": {
+      "source": "./src/releases/github-asset-url.ts",
+      "types": "./dist/releases/github-asset-url.d.ts",
+      "default": "./dist/releases/github-asset-url.js"
+    },
     "./releases/github-assets": {
       "source": "./src/releases/github-assets.ts",
       "types": "./dist/releases/github-assets.d.ts",
@@ -1532,6 +1537,11 @@
       "source": "./src/releases/github-downloads.ts",
       "types": "./dist/releases/github-downloads.d.ts",
       "default": "./dist/releases/github-downloads.js"
+    },
+    "./releases/github-listing": {
+      "source": "./src/releases/github-listing.ts",
+      "types": "./dist/releases/github-listing.d.ts",
+      "default": "./dist/releases/github-listing.js"
     },
     "./releases/github-types": {
       "source": "./src/releases/github-types.ts",
