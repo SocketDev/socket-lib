@@ -8,7 +8,7 @@
 
 import process from 'node:process'
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 import { errorMessage } from '../errors/message'
 import { DateNow } from '../primordials/date'
 import { MathRound } from '../primordials/math'

@@ -11,27 +11,33 @@
  */
 
 import {
-  coerceVersion,
   compareVersions,
-  filterVersions,
-  getMajorVersion,
-  getMinorVersion,
-  getPatchVersion,
-  incrementVersion,
   isEqual,
   isGreaterThan,
   isGreaterThanOrEqual,
   isLessThan,
   isLessThanOrEqual,
-  isValidVersion,
-  maxVersion,
-  minVersion,
-  parseVersion,
-  satisfiesVersion,
   sortVersions,
   sortVersionsDesc,
+} from '@socketsecurity/lib/versions/compare'
+import {
+  incrementVersion,
   versionDiff,
-} from '@socketsecurity/lib/versions'
+} from '@socketsecurity/lib/versions/modify'
+import {
+  coerceVersion,
+  getMajorVersion,
+  getMinorVersion,
+  getPatchVersion,
+  isValidVersion,
+  parseVersion,
+} from '@socketsecurity/lib/versions/parse'
+import {
+  filterVersions,
+  maxVersion,
+  minVersion,
+  satisfiesVersion,
+} from '@socketsecurity/lib/versions/range'
 import { describe, expect, it } from 'vitest'
 
 describe('versions', () => {

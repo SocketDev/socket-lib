@@ -24,27 +24,29 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   BROTLI_EXTS,
-  GZIP_EXTS,
   compressBrotli,
   compressBrotliFile,
-  compressGzip,
-  compressGzipFile,
   createBrotliCompressor,
   createBrotliDecompressor,
-  createGzipCompressor,
-  createGzipDecompressor,
   decompressBrotli,
   decompressBrotliFile,
+  hasBrotliExt,
+  isBrotliCompressed,
+  resolveBrotliOptions,
+} from '../../src/compression/brotli'
+import {
+  GZIP_EXTS,
+  compressGzip,
+  compressGzipFile,
+  createGzipCompressor,
+  createGzipDecompressor,
   decompressGzip,
   decompressGzipFile,
-  hasBrotliExt,
   hasGzipExt,
-  isBrotliCompressed,
   isGzipCompressed,
-  resolveBrotliOptions,
   resolveGzipOptions,
-  stripExt,
-} from '../../src/compression'
+} from '../../src/compression/gzip'
+import { stripExt } from '../../src/compression/paths'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Two fixture sizes:

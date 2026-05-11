@@ -5,7 +5,7 @@
  * across every memoize instance.
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 
 import { cacheRegistry } from './_internal'
 

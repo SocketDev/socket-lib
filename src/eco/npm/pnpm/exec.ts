@@ -6,7 +6,7 @@
  */
 
 import { execBin } from '../../../bin/exec'
-import { isDebug } from '../../../debug'
+import { isDebug } from '../../../debug/namespace'
 import { getCI } from '../../../env/ci'
 import {
   ArrayPrototypeIndexOf,

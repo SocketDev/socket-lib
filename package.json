@@ -313,10 +313,25 @@
       "types": "./dist/colors/types.d.ts",
       "default": "./dist/colors/types.js"
     },
-    "./compression": {
-      "source": "./src/compression.ts",
-      "types": "./dist/compression.d.ts",
-      "default": "./dist/compression.js"
+    "./compression/brotli": {
+      "source": "./src/compression/brotli.ts",
+      "types": "./dist/compression/brotli.d.ts",
+      "default": "./dist/compression/brotli.js"
+    },
+    "./compression/gzip": {
+      "source": "./src/compression/gzip.ts",
+      "types": "./dist/compression/gzip.d.ts",
+      "default": "./dist/compression/gzip.js"
+    },
+    "./compression/paths": {
+      "source": "./src/compression/paths.ts",
+      "types": "./dist/compression/paths.d.ts",
+      "default": "./dist/compression/paths.js"
+    },
+    "./compression/types": {
+      "source": "./src/compression/types.ts",
+      "types": "./dist/compression/types.d.ts",
+      "default": "./dist/compression/types.js"
     },
     "./constants/agents": {
       "source": "./src/constants/agents.ts",
@@ -433,10 +448,25 @@
       "types": "./dist/crypto/types.d.ts",
       "default": "./dist/crypto/types.js"
     },
-    "./debug": {
-      "source": "./src/debug.ts",
-      "types": "./dist/debug.d.ts",
-      "default": "./dist/debug.js"
+    "./debug/caller-info": {
+      "source": "./src/debug/caller-info.ts",
+      "types": "./dist/debug/caller-info.d.ts",
+      "default": "./dist/debug/caller-info.js"
+    },
+    "./debug/namespace": {
+      "source": "./src/debug/namespace.ts",
+      "types": "./dist/debug/namespace.d.ts",
+      "default": "./dist/debug/namespace.js"
+    },
+    "./debug/output": {
+      "source": "./src/debug/output.ts",
+      "types": "./dist/debug/output.d.ts",
+      "default": "./dist/debug/output.js"
+    },
+    "./debug/types": {
+      "source": "./src/debug/types.ts",
+      "types": "./dist/debug/types.d.ts",
+      "default": "./dist/debug/types.js"
     },
     "./dlx/arborist": {
       "source": "./src/dlx/arborist.ts",
@@ -588,10 +618,15 @@
       "types": "./dist/effects/shimmer-terminal.d.ts",
       "default": "./dist/effects/shimmer-terminal.js"
     },
-    "./env": {
-      "source": "./src/env.ts",
-      "types": "./dist/env.d.ts",
-      "default": "./dist/env.js"
+    "./env/boolean": {
+      "source": "./src/env/boolean.ts",
+      "types": "./dist/env/boolean.d.ts",
+      "default": "./dist/env/boolean.js"
+    },
+    "./env/case-insensitive": {
+      "source": "./src/env/case-insensitive.ts",
+      "types": "./dist/env/case-insensitive.d.ts",
+      "default": "./dist/env/case-insensitive.js"
     },
     "./env/ci": {
       "source": "./src/env/ci.ts",
@@ -638,6 +673,11 @@
       "types": "./dist/env/npm.d.ts",
       "default": "./dist/env/npm.js"
     },
+    "./env/number": {
+      "source": "./src/env/number.ts",
+      "types": "./dist/env/number.d.ts",
+      "default": "./dist/env/number.js"
+    },
     "./env/package-manager": {
       "source": "./src/env/package-manager.ts",
       "types": "./dist/env/package-manager.d.ts",
@@ -652,6 +692,11 @@
       "source": "./src/env/pre-commit.ts",
       "types": "./dist/env/pre-commit.d.ts",
       "default": "./dist/env/pre-commit.js"
+    },
+    "./env/proxy": {
+      "source": "./src/env/proxy.ts",
+      "types": "./dist/env/proxy.d.ts",
+      "default": "./dist/env/proxy.js"
     },
     "./env/rewire": {
       "source": "./src/env/rewire.ts",
@@ -673,6 +718,11 @@
       "types": "./dist/env/socket-cli.d.ts",
       "default": "./dist/env/socket-cli.js"
     },
+    "./env/string": {
+      "source": "./src/env/string.ts",
+      "types": "./dist/env/string.d.ts",
+      "default": "./dist/env/string.js"
+    },
     "./env/temp-dir": {
       "source": "./src/env/temp-dir.ts",
       "types": "./dist/env/temp-dir.d.ts",
@@ -687,6 +737,11 @@
       "source": "./src/env/test.ts",
       "types": "./dist/env/test.d.ts",
       "default": "./dist/env/test.js"
+    },
+    "./env/types": {
+      "source": "./src/env/types.ts",
+      "types": "./dist/env/types.d.ts",
+      "default": "./dist/env/types.js"
     },
     "./env/windows": {
       "source": "./src/env/windows.ts",
@@ -1328,10 +1383,20 @@
       "types": "./dist/primordials/url.d.ts",
       "default": "./dist/primordials/url.js"
     },
-    "./process-lock": {
-      "source": "./src/process-lock.ts",
-      "types": "./dist/process-lock.d.ts",
-      "default": "./dist/process-lock.js"
+    "./process-lock/instance": {
+      "source": "./src/process-lock/instance.ts",
+      "types": "./dist/process-lock/instance.d.ts",
+      "default": "./dist/process-lock/instance.js"
+    },
+    "./process-lock/manager": {
+      "source": "./src/process-lock/manager.ts",
+      "types": "./dist/process-lock/manager.d.ts",
+      "default": "./dist/process-lock/manager.js"
+    },
+    "./process-lock/types": {
+      "source": "./src/process-lock/types.ts",
+      "types": "./dist/process-lock/types.d.ts",
+      "default": "./dist/process-lock/types.js"
     },
     "./promise-queue/queue": {
       "source": "./src/promise-queue/queue.ts",
@@ -1761,10 +1826,30 @@
       "types": "./dist/url/types.d.ts",
       "default": "./dist/url/types.js"
     },
-    "./versions": {
-      "source": "./src/versions.ts",
-      "types": "./dist/versions.d.ts",
-      "default": "./dist/versions.js"
+    "./versions/compare": {
+      "source": "./src/versions/compare.ts",
+      "types": "./dist/versions/compare.d.ts",
+      "default": "./dist/versions/compare.js"
+    },
+    "./versions/modify": {
+      "source": "./src/versions/modify.ts",
+      "types": "./dist/versions/modify.d.ts",
+      "default": "./dist/versions/modify.js"
+    },
+    "./versions/parse": {
+      "source": "./src/versions/parse.ts",
+      "types": "./dist/versions/parse.d.ts",
+      "default": "./dist/versions/parse.js"
+    },
+    "./versions/range": {
+      "source": "./src/versions/range.ts",
+      "types": "./dist/versions/range.d.ts",
+      "default": "./dist/versions/range.js"
+    },
+    "./versions/types": {
+      "source": "./src/versions/types.ts",
+      "types": "./dist/versions/types.d.ts",
+      "default": "./dist/versions/types.js"
     },
     "./words/article": {
       "source": "./src/words/article.ts",

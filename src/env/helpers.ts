@@ -7,11 +7,9 @@
  * the root `env` module for new code — it supports both modes via options.
  */
 
-import {
-  envAsBoolean as envAsBooleanRoot,
-  envAsNumber as envAsNumberRoot,
-  envAsString as envAsStringRoot,
-} from '../env'
+import { envAsBoolean as envAsBooleanRoot } from './boolean'
+import { envAsNumber as envAsNumberRoot } from './number'
+import { envAsString as envAsStringRoot } from './string'
 
 /**
  * Convert an environment variable string to a boolean.

@@ -13,7 +13,7 @@
 
 import { NPM_BIN_PATH } from '../../../constants/agents'
 import { WIN32 } from '../../../constants/platform'
-import { isDebug } from '../../../debug'
+import { isDebug } from '../../../debug/namespace'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,

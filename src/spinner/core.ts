@@ -13,7 +13,7 @@
 import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
 import { isRgbTuple, toRgb } from '../colors/convert'
 import { getAbortSignal } from '../constants/process'
-import { isDebug } from '../debug'
+import { isDebug } from '../debug/namespace'
 import type {
   Palette,
   ShimmerConfig,

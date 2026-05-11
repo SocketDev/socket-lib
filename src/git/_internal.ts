@@ -6,7 +6,7 @@
  */
 
 import { whichSync } from '../bin/which'
-import { debugNs } from '../debug'
+import { debugNs } from '../debug/output'
 import { getGlobMatcher } from '../globs/matcher'
 import { normalizePath } from '../paths/normalize'
 import { BufferIsBuffer } from '../primordials/buffer'

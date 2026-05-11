@@ -9,6 +9,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { isDebug, isDebugNs } from '../../src/debug/namespace'
 import {
   debug,
   debugCache,
@@ -20,9 +21,7 @@ import {
   debugNs,
   debuglog,
   debugtime,
-  isDebug,
-  isDebugNs,
-} from '../../src/debug'
+} from '../../src/debug/output'
 import { clearEnv, resetEnv, setEnv } from '../../src/env/rewire'
 import { getDefaultLogger } from '../../src/logger/default'
 

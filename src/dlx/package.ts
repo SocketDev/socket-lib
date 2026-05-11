@@ -41,7 +41,7 @@ import { safeMkdir } from '../fs/safe'
 import { httpJson } from '../http-request/convenience'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
-import { processLock } from '../process-lock'
+import { processLock } from '../process-lock/instance'
 import { spawn } from '../spawn/core'
 import { generateCacheKey } from './cache'
 

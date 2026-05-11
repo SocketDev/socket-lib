@@ -62,7 +62,7 @@ import { readFileUtf8Sync } from '../fs/read-file'
 import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
 import { getDefaultLogger } from '../logger/default'
 import { getSocketDlxDir } from '../paths/socket'
-import { processLock } from '../process-lock'
+import { processLock } from '../process-lock/instance'
 
 import { DateNow } from '../primordials/date'
 

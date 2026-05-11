@@ -5,7 +5,7 @@
  * the general-purpose memoizer needs.
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 
 /**
  * Simple once() for zero-argument initialization functions.

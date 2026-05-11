@@ -5,7 +5,7 @@
  * eviction. First (and only) argument must be an object.
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 import { WeakMapCtor } from '../primordials/map-set'
 
 /**

@@ -1,7 +1,9 @@
 /**
- * @fileoverview Process locking utilities with stale detection and exit cleanup.
- * Provides cross-platform inter-process synchronization using directory-based locks.
- * Aligned with npm's npx locking strategy (5-second stale timeout, periodic touching).
+ * @fileoverview `ProcessLockManager` — the class that owns active
+ * locks, touch timers, and the exit-handler registration. Provides
+ * `acquire` / `release` / `withLock`. Co-located with the touch and
+ * staleness helpers because they share private state (`activeLocks`
+ * + `touchTimers`).
  *
  * ## Why directories instead of files?
  *
@@ -40,91 +42,28 @@
  * - Automatic cleanup on process exit
  */
 
-import { errorMessage } from './errors/message'
-import { safeDeleteSync } from './fs/safe'
-import { getDefaultLogger } from './logger/default'
-import { pRetry } from './promises/retry'
-import { onExit } from './signal-exit/on-exit'
+import { errorMessage } from '../errors/message'
+import { safeDeleteSync } from '../fs/safe'
+import { getDefaultLogger } from '../logger/default'
+import { DateNow } from '../primordials/date'
+import { ErrorCtor } from '../primordials/error'
+import { MapCtor, SetCtor } from '../primordials/map-set'
+import { MathMax } from '../primordials/math'
+import { pRetry } from '../promises/retry'
+import { onExit } from '../signal-exit/on-exit'
 
-import { DateNow } from './primordials/date'
+import { getFs, getPath } from './_internal'
 
-import { ErrorCtor } from './primordials/error'
-
-import { MapCtor, SetCtor } from './primordials/map-set'
-
-import { MathMax } from './primordials/math'
-let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import type { ProcessLockOptions } from './types'
 
 const logger = getDefaultLogger()
-
-/**
- * Lock acquisition options.
- */
-export interface ProcessLockOptions {
-  /**
-   * Maximum number of retry attempts.
-   * @default 3
-   */
-  retries?: number | undefined
-
-  /**
-   * Base delay between retries in milliseconds.
-   * @default 100
-   */
-  baseDelayMs?: number | undefined
-
-  /**
-   * Maximum delay between retries in milliseconds.
-   * @default 1000
-   */
-  maxDelayMs?: number | undefined
-
-  /**
-   * Stale lock timeout in milliseconds.
-   * Locks older than this are considered abandoned and can be reclaimed.
-   * Aligned with npm's npx locking strategy (5 seconds).
-   * @default 5000 (5 seconds)
-   */
-  staleMs?: number | undefined
-
-  /**
-   * Interval for touching lock file to keep it fresh in milliseconds.
-   * Set to 0 to disable periodic touching.
-   * @default 2000 (2 seconds)
-   */
-  touchIntervalMs?: number | undefined
-}
 
 /**
  * Process lock manager with stale detection and exit cleanup.
  * Provides cross-platform inter-process synchronization using file-system
  * based locks.
  */
-class ProcessLockManager {
+export class ProcessLockManager {
   private activeLocks = new SetCtor<string>()
   private touchTimers = new MapCtor<string, NodeJS.Timeout>()
   private exitHandlerRegistered = false
@@ -472,6 +411,3 @@ class ProcessLockManager {
     }
   }
 }
-
-// Export singleton instance.
-export const processLock = new ProcessLockManager()

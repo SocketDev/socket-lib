@@ -6,7 +6,7 @@
  * land a value that's already "expired".
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 import { DateNow } from '../primordials/date'
 import { MapCtor } from '../primordials/map-set'
 import { PromiseResolve } from '../primordials/promise'

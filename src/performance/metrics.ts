@@ -5,7 +5,7 @@
  * `clearPerformanceMetrics` empties the array in place.
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 import { MathMax, MathMin, MathRound } from '../primordials/math'
 import { ObjectEntries } from '../primordials/object'
 

@@ -5,7 +5,7 @@
  * shared `cacheRegistry` so `clearAllMemoizationCaches` can sweep it.
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 import { DateNow } from '../primordials/date'
 import { TypeErrorCtor } from '../primordials/error'
 import { MapCtor } from '../primordials/map-set'

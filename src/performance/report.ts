@@ -6,7 +6,7 @@
  * `getPerformanceSummary` rollup.
  */
 
-import { debugLog } from '../debug'
+import { debugLog } from '../debug/output'
 import { MathRound } from '../primordials/math'
 import { ObjectKeys, ObjectValues } from '../primordials/object'
 

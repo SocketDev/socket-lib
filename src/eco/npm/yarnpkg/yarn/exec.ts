@@ -13,7 +13,7 @@
  */
 
 import { execBin } from '../../../../bin/exec'
-import { isDebug } from '../../../../debug'
+import { isDebug } from '../../../../debug/namespace'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
