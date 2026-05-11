@@ -325,9 +325,11 @@ describe('arrays', () => {
     })
 
     it('arrayUnique should handle null and undefined', () => {
-      const arr = [undefined, undefined, undefined, undefined, 1, undefined]
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- intentionally testing that null and undefined are distinct values in Set.
+      const arr = [null, null, undefined, undefined, 1, null]
       const result = arrayUnique(arr)
-      expect(result).toEqual([undefined, undefined, 1])
+      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      expect(result).toEqual([null, undefined, 1])
     })
 
     it('joinAnd should handle numbers coerced to strings', () => {

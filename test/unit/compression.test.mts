@@ -46,7 +46,7 @@ import {
   isGzipCompressed,
   resolveGzipOptions,
 } from '../../src/compression/gzip'
-import { stripExt } from '../../src/compression/paths'
+import { stripExt } from '../../src/compression/_internal'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Two fixture sizes:
