@@ -37,7 +37,6 @@ pnpm exec agentshield scan
 ```
 
 Checks `.claude/` for:
-
 - Hardcoded secrets in CLAUDE.md and settings
 - Overly permissive tool allow lists (e.g. `Bash(*)`)
 - Prompt injection patterns in agent definitions
@@ -61,7 +60,6 @@ zizmor .github/
 ```
 
 Checks for:
-
 - Unpinned actions (must use full SHA, not tags)
 - Secrets used outside `env:` blocks
 - Injection risks from untrusted inputs (template injection)
@@ -76,7 +74,6 @@ Capture findings. Update queue phase.
 Spawn the `security-reviewer` agent (see `agents/security-reviewer.md`) with the combined output from AgentShield and zizmor.
 
 The agent:
-
 1. Applies CLAUDE.md security rules to evaluate the findings
 2. Calculates an A-F grade per `_shared/report-format.md`
 3. Generates a prioritized report (CRITICAL first)
@@ -90,7 +87,6 @@ Update queue: `status: done`, write `findings_count` and final grade.
 ## Adjacent scans
 
 Code-side security (insecure defaults, fail-open patterns, security-regression in a diff) lives in `scanning-quality`'s modular scans:
-
 - [`scanning-quality/scans/insecure-defaults.md`](../scanning-quality/scans/insecure-defaults.md) — code-side fail-open defaults.
 - [`scanning-quality/scans/differential.md`](../scanning-quality/scans/differential.md) — security regressions introduced by the current diff.
 

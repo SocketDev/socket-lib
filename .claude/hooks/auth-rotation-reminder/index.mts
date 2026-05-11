@@ -75,7 +75,11 @@ const GLOBAL_SKIP_LIST = path.join(STATE_DIR, 'services-skip')
 // the paths stay correct regardless of session cwd — process.cwd()
 // drifts when the user navigates into a subpackage.
 const PROJECT_DIR = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd()
-const PROJECT_SNOOZE = path.join(PROJECT_DIR, '.claude', 'auth-rotation.snooze')
+const PROJECT_SNOOZE = path.join(
+  PROJECT_DIR,
+  '.claude',
+  'auth-rotation.snooze',
+)
 const PROJECT_SKIP_LIST = path.join(
   PROJECT_DIR,
   '.claude',

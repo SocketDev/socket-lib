@@ -9,7 +9,12 @@
 // depending on actual fleet-repo checkouts.
 
 import { spawn } from 'node:child_process'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -46,10 +51,7 @@ async function runHook(
 }
 
 function userTurn(text: string): string {
-  return (
-    JSON.stringify({ type: 'user', message: { role: 'user', content: text } }) +
-    '\n'
-  )
+  return JSON.stringify({ type: 'user', message: { role: 'user', content: text } }) + '\n'
 }
 
 interface RepoSetup {
@@ -57,9 +59,7 @@ interface RepoSetup {
 }
 
 /** Create a temp dir that looks like a fleet repo. */
-function makeFakeFleetRepo(
-  setup: RepoSetup = { hasFleetCanonical: true },
-): string {
+function makeFakeFleetRepo(setup: RepoSetup = { hasFleetCanonical: true }): string {
   const repo = mkdtempSync(path.join(tmpdir(), 'fake-fleet-repo-'))
   writeFileSync(path.join(repo, 'package.json'), '{"name":"fake-fleet"}\n')
   const claudeMarker = setup.hasFleetCanonical
@@ -103,7 +103,7 @@ test('Edit on a canonical path outside a fleet repo passes', async () => {
   // Tmp dir without CLAUDE.md → the walk-up never finds a fleet root.
   const dir = mkdtempSync(path.join(tmpdir(), 'non-fleet-'))
   try {
-    const file = path.join(dir, '.config/oxlint-plugin/rules/foo.js')
+    const file = path.join(dir, '.config/oxlint-plugin/rules/foo.mts')
     mkdirSync(path.dirname(file), { recursive: true })
     writeFileSync(file, '// content\n')
     const result = await runHook({
@@ -121,7 +121,7 @@ test('Edit on .config/oxlint-plugin/rules/* in a fleet repo is BLOCKED', async (
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/rules/example.js',
+      '.config/oxlint-plugin/rules/example.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
@@ -184,7 +184,7 @@ test('Write tool also blocked, not just Edit', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/rules/new-rule.js',
+      '.config/oxlint-plugin/rules/new-rule.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, content: 'export default {}' },
@@ -199,7 +199,10 @@ test('Write tool also blocked, not just Edit', async () => {
 test('MultiEdit tool also blocked', async () => {
   const repo = makeFakeFleetRepo()
   try {
-    const file = makeCanonicalFile(repo, '.config/oxlint-plugin/rules/foo.js')
+    const file = makeCanonicalFile(
+      repo,
+      '.config/oxlint-plugin/rules/foo.mts',
+    )
     const result = await runHook({
       tool_input: { file_path: file, edits: [] },
       tool_name: 'MultiEdit',
@@ -215,7 +218,7 @@ test('repo without FLEET-CANONICAL marker passes through', async () => {
   // sees CLAUDE.md but no marker, so the path doesn't qualify.
   const repo = makeFakeFleetRepo({ hasFleetCanonical: false })
   try {
-    const file = makeCanonicalFile(repo, '.config/oxlint-plugin/rules/x.js')
+    const file = makeCanonicalFile(repo, '.config/oxlint-plugin/rules/x.mts')
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
       tool_name: 'Edit',
@@ -249,10 +252,10 @@ test('bypass phrase variants do NOT count', async () => {
     const file = makeCanonicalFile(repo, '.git-hooks/pre-push.mts')
     // Each of these should NOT bypass — phrase must be exact.
     for (const variant of [
-      'allow fleet-fork bypass', // lowercase
-      'Allow fleet fork bypass', // space instead of hyphen
-      'Allow fleet-fork', // no "bypass"
-      'fleet-fork bypass', // no "Allow"
+      'allow fleet-fork bypass',         // lowercase
+      'Allow fleet fork bypass',          // space instead of hyphen
+      'Allow fleet-fork',                 // no "bypass"
+      'fleet-fork bypass',                // no "Allow"
     ]) {
       const result = await runHook(
         {

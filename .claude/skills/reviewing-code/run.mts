@@ -21,9 +21,8 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { safeDelete } from '@socketsecurity/lib/fs'
-import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
-import { spawn } from '@socketsecurity/lib/spawn/core'
-import { isSpawnError } from '@socketsecurity/lib/spawn/errors'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { isSpawnError, spawn } from '@socketsecurity/lib/spawn'
 
 const logger = getDefaultLogger()
 
@@ -145,8 +144,7 @@ const ROLES: Readonly<Record<Role, RoleSpec>> = {
   __proto__: null,
   discovery: {
     preferenceOrder: ['codex', 'kimi', 'claude'],
-    buildPrompt:
-      ctx => `Take a look at the current branch and give me a full and thorough review. This is a big one, so take your time.
+    buildPrompt: ctx => `Take a look at the current branch and give me a full and thorough review. This is a big one, so take your time.
 
 Scope:
 - current branch: ${ctx.branch}
@@ -197,8 +195,7 @@ Impact
   },
   'discovery-secondary': {
     preferenceOrder: ['codex', 'kimi', 'claude'],
-    buildPrompt:
-      ctx => `Take another look at the current branch and search for additional high-confidence findings that are not already documented in \`${ctx.outputPath}\`.
+    buildPrompt: ctx => `Take another look at the current branch and search for additional high-confidence findings that are not already documented in \`${ctx.outputPath}\`.
 
 Scope:
 - current branch: ${ctx.branch}
@@ -221,8 +218,7 @@ Instructions:
   },
   remediation: {
     preferenceOrder: ['codex', 'kimi', 'claude'],
-    buildPrompt:
-      ctx => `Read the existing review report at \`${ctx.outputPath}\` and augment it with concrete fix suggestions and regression tests for every finding.
+    buildPrompt: ctx => `Read the existing review report at \`${ctx.outputPath}\` and augment it with concrete fix suggestions and regression tests for every finding.
 
 Scope:
 - current branch: ${ctx.branch}
@@ -249,8 +245,7 @@ Instructions:
   verify: {
     preferenceOrder: ['claude', 'kimi', 'codex'],
     headingForVerify: 'Verification',
-    buildPrompt:
-      ctx => `Review the saved markdown findings report at \`${ctx.outputPath}\` for accuracy.
+    buildPrompt: ctx => `Review the saved markdown findings report at \`${ctx.outputPath}\` for accuracy.
 
 Scope:
 - current branch: ${ctx.branch}
@@ -520,7 +515,9 @@ function normalizeMarkdown(text: string): string {
   }
   const firstStartsWithUpdated = /^Updated\s+\[/.test(lines[0] ?? '')
   const thirdIsCodeFence =
-    lines[2] === '```markdown' || lines[2] === '```md' || lines[2] === '```'
+    lines[2] === '```markdown' ||
+    lines[2] === '```md' ||
+    lines[2] === '```'
   let lastNonEmpty = lines.length - 1
   while (lastNonEmpty >= 0 && lines[lastNonEmpty]!.trim() === '') {
     lastNonEmpty--
@@ -560,11 +557,12 @@ async function appendSkipNote(
   role: Role,
   reason: string,
 ): Promise<void> {
-  const existing = existsSync(reportPath)
-    ? await fs.readFile(reportPath, 'utf8')
-    : ''
+  const existing = existsSync(reportPath) ? await fs.readFile(reportPath, 'utf8') : ''
   const note = `> Skipped pass: **${role}** — ${reason}`
-  await fs.writeFile(reportPath, `${existing.trimEnd()}\n\n${note}\n`)
+  await fs.writeFile(
+    reportPath,
+    `${existing.trimEnd()}\n\n${note}\n`,
+  )
 }
 
 async function main(): Promise<void> {
@@ -583,7 +581,7 @@ async function main(): Promise<void> {
   const branch =
     branchRaw.length > 0
       ? branchRaw
-      : `detached-${await git(['rev-parse', '--short', 'HEAD'], repoRoot)}`
+      : `detached-${(await git(['rev-parse', '--short', 'HEAD'], repoRoot))}`
   const baseRef = await resolveBaseRef(args.baseRef, repoRoot)
   const mergeBase = await git(['merge-base', baseRef, 'HEAD'], repoRoot)
   const range = `${mergeBase}..HEAD`
@@ -613,7 +611,9 @@ async function main(): Promise<void> {
   }
 
   const available = await detectAvailableBackends()
-  logger.info(`Available backends: ${[...available].join(', ') || '(none)'}`)
+  logger.info(
+    `Available backends: ${[...available].join(', ') || '(none)'}`,
+  )
   logger.info(`Logs and prompts kept under: ${tempDir}`)
 
   const rolesToRun = ALL_ROLES.filter(r => {
@@ -657,13 +657,13 @@ async function main(): Promise<void> {
     } else if (role === 'discovery-secondary') {
       // Only overwrite if the secondary pass actually returned a
       // different document (caller asked for "no diff = no change").
-      const before = existsSync(outputPath)
-        ? await fs.readFile(outputPath, 'utf8')
-        : ''
+      const before = existsSync(outputPath) ? await fs.readFile(outputPath, 'utf8') : ''
       if (before.trim() !== result.output.trim()) {
         await fs.writeFile(outputPath, result.output)
       } else {
-        logger.info(`${passLabel}: no additional findings; report unchanged`)
+        logger.info(
+          `${passLabel}: no additional findings; report unchanged`,
+        )
       }
     } else {
       await fs.writeFile(outputPath, result.output)
@@ -695,7 +695,12 @@ async function resolveBaseRef(
   // Default-branch fallback per CLAUDE.md: symbolic-ref → origin/main → origin/master.
   try {
     const headRef = await git(
-      ['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD'],
+      [
+        'symbolic-ref',
+        '--quiet',
+        '--short',
+        'refs/remotes/origin/HEAD',
+      ],
       cwd,
     )
     if (headRef.length > 0) {

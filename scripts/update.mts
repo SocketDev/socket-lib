@@ -22,9 +22,9 @@
  * their own scripts/ dir and wire it in via a `"update": "node
  * scripts/update.mts"` package.json entry.
  */
-import { spawn } from '@socketsecurity/lib/spawn/core'
+import { spawn } from '@socketsecurity/lib/spawn'
 
-export async function run(cmd: string, args: string[]): Promise<boolean> {
+async function run(cmd: string, args: string[]): Promise<boolean> {
   try {
     await spawn(cmd, args, { stdio: 'inherit' })
     return true

@@ -22,7 +22,7 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import { spawn } from '@socketsecurity/lib/spawn/core'
+import { spawn } from '@socketsecurity/lib/spawn'
 
 /**
  * Result of a resolver. `args` is the full argv passed to `pnpm exec`,
@@ -96,14 +96,8 @@ const FLEET_TEST_CONFIG = '.config/vitest.config.mts'
  * a swap to a tool with different config-discovery rules doesn't
  * silently change behavior.
  */
-export function resolveLinter(
-  options: ResolveLinterOptions = {},
-): ResolvedTool {
-  const {
-    config = FLEET_LINTER_CONFIG,
-    mode = 'check',
-    paths = ['.'],
-  } = options
+export function resolveLinter(options: ResolveLinterOptions = {}): ResolvedTool {
+  const { config = FLEET_LINTER_CONFIG, mode = 'check', paths = ['.'] } = options
   const args: string[] = ['oxlint', '--config', config]
   if (mode === 'fix') {
     args.push('--fix')
@@ -118,11 +112,7 @@ export function resolveLinter(
 export function resolveFormatter(
   options: ResolveFormatterOptions = {},
 ): ResolvedTool {
-  const {
-    config = FLEET_FORMATTER_CONFIG,
-    mode = 'fix',
-    paths = ['.'],
-  } = options
+  const { config = FLEET_FORMATTER_CONFIG, mode = 'fix', paths = ['.'] } = options
   const args: string[] = ['oxfmt', '--config', config]
   if (mode === 'check') {
     args.push('--check')
@@ -174,9 +164,7 @@ export function resolveTestRunner(
  * `pnpm exec`), so this resolver returns the binary name only — the
  * caller picks which API surface to import.
  */
-export function resolveBundler(
-  _options: ResolveBundlerOptions = {},
-): ResolvedTool {
+export function resolveBundler(_options: ResolveBundlerOptions = {}): ResolvedTool {
   return {
     args: ['esbuild'],
     envs: {},
@@ -216,9 +204,6 @@ export async function runResolved(
  * cwd's `node_modules/.bin/`? Useful for soft-failing when a repo
  * opted out of one of the fleet's tools.
  */
-export function hasResolvedTool(
-  name: string,
-  cwd: string = process.cwd(),
-): boolean {
+export function hasResolvedTool(name: string, cwd: string = process.cwd()): boolean {
   return existsSync(path.join(cwd, 'node_modules', '.bin', name))
 }

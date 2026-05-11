@@ -29,23 +29,20 @@
 
 import process from 'node:process'
 
-import { which } from '@socketsecurity/lib/bin/which'
+import { which } from '@socketsecurity/lib/bin'
 import { WIN32 } from '@socketsecurity/lib/constants/platform'
-import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
-import { spawn } from '@socketsecurity/lib/spawn/core'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { spawn } from '@socketsecurity/lib/spawn'
 
 const logger = getDefaultLogger()
 
-export async function hasExecutable(name: string): Promise<boolean> {
+async function hasExecutable(name: string): Promise<boolean> {
   // socket-lib's `which` returns null when the binary isn't on PATH
   // (no throw), so a simple truthy check suffices.
   return Boolean(await which(name))
 }
 
-export async function runTool(
-  command: string,
-  args: string[],
-): Promise<number> {
+async function runTool(command: string, args: string[]): Promise<number> {
   try {
     const result = await spawn(command, args, {
       stdio: 'inherit',
