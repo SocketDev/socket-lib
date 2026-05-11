@@ -26,8 +26,7 @@ import {
 import { safeDelete } from '../fs/safe'
 import { StringPrototypeToLowerCase } from '../primordials/string'
 
-import { resolveFileArgs } from './_internal'
-import { stripExt } from './paths'
+import { resolveFileArgs, stripExt } from './_internal'
 
 import type { CompressFileOptions, CompressOptions } from './types'
 

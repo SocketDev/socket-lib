@@ -253,11 +253,6 @@
       "types": "./dist/bin/which.d.ts",
       "default": "./dist/bin/which.js"
     },
-    "./cacache/accessor": {
-      "source": "./src/cacache/accessor.ts",
-      "types": "./dist/cacache/accessor.d.ts",
-      "default": "./dist/cacache/accessor.js"
-    },
     "./cacache/clear": {
       "source": "./src/cacache/clear.ts",
       "types": "./dist/cacache/clear.d.ts",
@@ -322,11 +317,6 @@
       "source": "./src/compression/gzip.ts",
       "types": "./dist/compression/gzip.d.ts",
       "default": "./dist/compression/gzip.js"
-    },
-    "./compression/paths": {
-      "source": "./src/compression/paths.ts",
-      "types": "./dist/compression/paths.d.ts",
-      "default": "./dist/compression/paths.js"
     },
     "./compression/types": {
       "source": "./src/compression/types.ts",
@@ -1528,10 +1518,10 @@
       "types": "./dist/signal-exit/lifecycle.d.ts",
       "default": "./dist/signal-exit/lifecycle.js"
     },
-    "./signal-exit/on-exit": {
-      "source": "./src/signal-exit/on-exit.ts",
-      "types": "./dist/signal-exit/on-exit.d.ts",
-      "default": "./dist/signal-exit/on-exit.js"
+    "./signal-exit/register": {
+      "source": "./src/signal-exit/register.ts",
+      "types": "./dist/signal-exit/register.d.ts",
+      "default": "./dist/signal-exit/register.js"
     },
     "./signal-exit/signals": {
       "source": "./src/signal-exit/signals.ts",

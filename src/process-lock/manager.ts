@@ -50,7 +50,7 @@ import { ErrorCtor } from '../primordials/error'
 import { MapCtor, SetCtor } from '../primordials/map-set'
 import { MathMax } from '../primordials/math'
 import { pRetry } from '../promises/retry'
-import { onExit } from '../signal-exit/on-exit'
+import { onExit } from '../signal-exit/register'
 
 import { getFs, getPath } from './_internal'
 

@@ -8,7 +8,7 @@ import { getSocketCacacheDir } from '../paths/socket'
 import { TypeErrorCtor } from '../primordials/error'
 import { StringPrototypeIncludes } from '../primordials/string'
 
-import { getCacache } from './accessor'
+import { getCacache } from './_internal'
 
 import type { PutOptions } from './types'
 

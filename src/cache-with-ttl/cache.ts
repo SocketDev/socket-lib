@@ -236,7 +236,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Check persistent cache for entries not in memory.
     const cacheDir = (await import('../paths/socket')).getSocketCacacheDir()
-    const cacacheModule = await import('../cacache/accessor')
+    const cacacheModule = await import('../cacache/_internal')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 
     for await (const cacheEntry of stream) {

@@ -9,7 +9,7 @@ import { getSocketCacacheDir } from '../paths/socket'
 import { RegExpCtor, RegExpPrototypeTest } from '../primordials/regexp'
 import { StringPrototypeReplaceAll, StringPrototypeStartsWith } from '../primordials/string'
 
-import { getCacache } from './accessor'
+import { getCacache } from './_internal'
 
 import type { RemoveOptions } from './types'
 

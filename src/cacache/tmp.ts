@@ -8,7 +8,7 @@
 
 import { getSocketCacacheDir } from '../paths/socket'
 
-import { getCacache } from './accessor'
+import { getCacache } from './_internal'
 
 /**
  * Execute a callback with a temporary directory for cache operations.

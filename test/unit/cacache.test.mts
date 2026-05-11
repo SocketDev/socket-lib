@@ -13,7 +13,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { getCacache } from '@socketsecurity/lib/cacache/accessor'
+import { getCacache } from '@socketsecurity/lib/cacache/_internal'
 import { clear } from '@socketsecurity/lib/cacache/clear'
 import { get, safeGet } from '@socketsecurity/lib/cacache/read'
 import { withTmp } from '@socketsecurity/lib/cacache/tmp'

@@ -75,14 +75,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## cacache/
 
-| Subpath                                                              | Description                                                                                                                                         |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/cacache/accessor`](../src/cacache/accessor.ts) | Accessor for the vendored `cacache` module.                                                                                                         |
-| [`@socketsecurity/lib/cacache/clear`](../src/cacache/clear.ts)       | Bulk-clear entries from the Socket shared cacache — `clear()` plus its wildcard helper `createPatternMatcher`.                                      |
-| [`@socketsecurity/lib/cacache/read`](../src/cacache/read.ts)         | Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns `undefined` on miss).                                                        |
-| [`@socketsecurity/lib/cacache/tmp`](../src/cacache/tmp.ts)           | `withTmp` — run a callback with a freshly-created temp directory under the cacache root.                                                            |
-| [`@socketsecurity/lib/cacache/types`](../src/cacache/types.ts)       | Public type surface for `cacache/*` modules — the `CacheEntry` row shape returned by reads and the option bags consumed by `clear` / `get` / `put`. |
-| [`@socketsecurity/lib/cacache/write`](../src/cacache/write.ts)       | Cache write entrypoints — `put` (insert/replace by key) and `remove` (single-key delete).                                                           |
+| Subpath                                                        | Description                                                                                                                                         |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/cacache/clear`](../src/cacache/clear.ts) | Bulk-clear entries from the Socket shared cacache — `clear()` plus its wildcard helper `createPatternMatcher`.                                      |
+| [`@socketsecurity/lib/cacache/read`](../src/cacache/read.ts)   | Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns `undefined` on miss).                                                        |
+| [`@socketsecurity/lib/cacache/tmp`](../src/cacache/tmp.ts)     | `withTmp` — run a callback with a freshly-created temp directory under the cacache root.                                                            |
+| [`@socketsecurity/lib/cacache/types`](../src/cacache/types.ts) | Public type surface for `cacache/*` modules — the `CacheEntry` row shape returned by reads and the option bags consumed by `clear` / `get` / `put`. |
+| [`@socketsecurity/lib/cacache/write`](../src/cacache/write.ts) | Cache write entrypoints — `put` (insert/replace by key) and `remove` (single-key delete).                                                           |
 
 ## cache-with-ttl/
 
@@ -111,7 +110,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/compression/brotli`](../src/compression/brotli.ts) | Brotli compression / decompression — in-memory, file-to-file, and raw-stream variants.                                                                                      |
 | [`@socketsecurity/lib/compression/gzip`](../src/compression/gzip.ts)     | Gzip compression / decompression — same calling shapes as brotli: in-memory, file-to-file, and raw-stream variants.                                                         |
-| [`@socketsecurity/lib/compression/paths`](../src/compression/paths.ts)   | Path/extension helpers shared by the brotli and gzip file functions — `stripExt` for trailing-extension removal.                                                            |
 | [`@socketsecurity/lib/compression/types`](../src/compression/types.ts)   | Public type surface for `compression/*` modules — the `CompressOptions` accepted by every compression entrypoint and `CompressFileOptions` which extends it with `inPlace`. |
 
 ## constants/
@@ -532,7 +530,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/signal-exit/intercept`](../src/signal-exit/intercept.ts) | Process-method interceptors — `processEmit` replaces `process.emit` and `processReallyExit` replaces `process.reallyExit` while `load()` is active.                                      |
 | [`@socketsecurity/lib/signal-exit/lifecycle`](../src/signal-exit/lifecycle.ts) | `load` and `unload` — install and remove the `signal-exit` listeners.                                                                                                                    |
-| [`@socketsecurity/lib/signal-exit/on-exit`](../src/signal-exit/on-exit.ts)     | `onExit` — register a callback for process exit / signal.                                                                                                                                |
+| [`@socketsecurity/lib/signal-exit/register`](../src/signal-exit/register.ts)   | `onExit` — register a callback for process exit / signal.                                                                                                                                |
 | [`@socketsecurity/lib/signal-exit/signals`](../src/signal-exit/signals.ts)     | `signals()` — list the signals this process is watching.                                                                                                                                 |
 | [`@socketsecurity/lib/signal-exit/types`](../src/signal-exit/types.ts)         | Public type surface for `signal-exit/*` modules — the `OnExitOptions` consumed by `onExit`, plus the shared internal types for the signal emitter, emitted-signal map, and listener map. |
 
