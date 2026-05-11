@@ -1,21 +1,6 @@
 /** @fileoverview Platform detection and OS-specific constants. */
 
-let _os: typeof import('node:os') | undefined
-/**
- * Lazily load the os module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getOs() {
-  if (_os === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _os = /*@__PURE__*/ require('node:os')
-  }
-  return _os as typeof import('node:os')
-}
+import { getNodeOs } from '../node/os'
 
 /**
  * CPU architecture type.
@@ -39,7 +24,7 @@ let _arch: Arch | undefined
  */
 export function getArch(): Arch {
   if (_arch === undefined) {
-    _arch = getOs().arch()
+    _arch = getNodeOs().arch()
   }
   return _arch
 }
@@ -51,7 +36,7 @@ let _platform: Platform | undefined
  */
 export function getPlatform(): Platform {
   if (_platform === undefined) {
-    _platform = getOs().platform()
+    _platform = getNodeOs().platform()
   }
   return _platform
 }
