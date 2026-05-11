@@ -496,6 +496,7 @@ export function checkVersionPin(
     const pref = [
       'refs/remotes/origin/HEAD',
       'refs/remotes/origin/main',
+      // inclusive-language: external-api — git's historical default branch.
       'refs/remotes/origin/master',
     ]
     for (const p of pref) {

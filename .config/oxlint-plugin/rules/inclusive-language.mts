@@ -1,3 +1,5 @@
+/* oxlint-disable socket/inclusive-language -- this file IS the rule definition; the legacy terms are lookup-table data, not real usage. */
+
 /**
  * @fileoverview Per CLAUDE.md "Inclusive language" rule (full table
  * in docs/references/inclusive-language.md).
