@@ -23,48 +23,7 @@
  *   the smol binary that exposes the `node:smol-util` binding.
  */
 
-// ─── isSmol ────────────────────────────────────────────────────────────
-
-/**
- * Cached smol-binary detection result.
- */
-let _isSmol: boolean | undefined
-
-/**
- * Detect if the current process is running on socket-btm's smol Node
- * binary. Memoized on first call.
- *
- * Defensive across runtimes: returns `false` on stock Node, browsers
- * (no `node:module`), Deno / Bun (different module resolution), and
- * worker threads (each has its own builtin table).
- *
- * @example
- * ```ts
- * import { isSmol } from '@socketsecurity/lib/smol/util'
- *
- * if (isSmol()) {
- *   // running on the smol binary; native fast paths available
- * }
- * ```
- */
-export function isSmol(): boolean {
-  if (_isSmol === undefined) {
-    try {
-      // eslint-disable-next-line n/prefer-node-protocol
-      const mod = require('node:module') as {
-        isBuiltin?: (name: string) => boolean
-      }
-      _isSmol =
-        typeof mod.isBuiltin === 'function' && mod.isBuiltin('node:smol-util')
-    } catch {
-      // Not Node, or `node:module` unavailable.
-      _isSmol = false
-    }
-  }
-  return _isSmol ?? false
-}
-
-// ─── getSmolUtil ───────────────────────────────────────────────────────
+// ─── types ─────────────────────────────────────────────────────────────
 
 /**
  * Surface of `node:smol-util`. See socket-btm's
@@ -117,12 +76,21 @@ export interface SmolUtilBinding {
   weakRefSafe: <T extends object | symbol>(target: T) => WeakRef<T> | undefined
 }
 
+// ─── module-level caches ───────────────────────────────────────────────
+
+/**
+ * Cached smol-binary detection result.
+ */
+let _isSmol: boolean | undefined
+
 /**
  * Cached `node:smol-util` binding. `null` = probed and unavailable;
  * `undefined` = not yet probed. JS truthiness collapses both to "no
  * binding" at the call site.
  */
 let _smolUtil: SmolUtilBinding | null | undefined
+
+// ─── exports (alphabetical) ────────────────────────────────────────────
 
 /**
  * Returns `node:smol-util` when running on the smol Node binary,
@@ -146,4 +114,38 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
     }
   }
   return _smolUtil ?? undefined
+}
+
+/**
+ * Detect if the current process is running on socket-btm's smol Node
+ * binary. Memoized on first call.
+ *
+ * Defensive across runtimes: returns `false` on stock Node, browsers
+ * (no `node:module`), Deno / Bun (different module resolution), and
+ * worker threads (each has its own builtin table).
+ *
+ * @example
+ * ```ts
+ * import { isSmol } from '@socketsecurity/lib/smol/detect'
+ *
+ * if (isSmol()) {
+ *   // running on the smol binary; native fast paths available
+ * }
+ * ```
+ */
+export function isSmol(): boolean {
+  if (_isSmol === undefined) {
+    try {
+      // eslint-disable-next-line n/prefer-node-protocol
+      const mod = require('node:module') as {
+        isBuiltin?: (name: string) => boolean
+      }
+      _isSmol =
+        typeof mod.isBuiltin === 'function' && mod.isBuiltin('node:smol-util')
+    } catch {
+      // Not Node, or `node:module` unavailable.
+      _isSmol = false
+    }
+  }
+  return _isSmol ?? false
 }

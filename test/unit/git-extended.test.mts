@@ -33,7 +33,7 @@ import {
   isUnstagedSync,
 } from '@socketsecurity/lib/git/unstaged'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
-import { spawnSync } from '@socketsecurity/lib/spawn/core'
+import { spawnSync } from '@socketsecurity/lib/spawn/spawn'
 import { describe, expect, it, vi } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'

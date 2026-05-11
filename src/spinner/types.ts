@@ -56,7 +56,7 @@ export type ShimmerInfo = {
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/core'
+ * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
  *
  * const spinner = Spinner({ text: 'Loading…' })
  * spinner.start()

@@ -18,7 +18,7 @@ import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
 } from '../../../primordials/array'
-import { spawn } from '../../../spawn/core'
+import { spawn } from '../../../spawn/spawn'
 
 import {
   isNpmAuditFlag,

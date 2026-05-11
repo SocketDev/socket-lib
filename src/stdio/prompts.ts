@@ -24,7 +24,7 @@ import { getDefaultSpinner } from '../spinner/registry'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
-import { resolveColor } from '../themes/utils'
+import { resolveColor } from '../themes/resolve'
 
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()

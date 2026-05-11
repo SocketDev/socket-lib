@@ -1,3 +1,4 @@
+/* oxlint-disable socket/sort-source-methods -- CLI handler with helper functions interleaved with module-level config constants; reordering would split state from its consumers. */
 /**
  * @fileoverview `socket-lib check primordials` handler.
  *
@@ -21,7 +22,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { errorMessage } from '../errors/message'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import {
   type PrimordialsCheckConfig,
   type PrimordialsCheckResult,

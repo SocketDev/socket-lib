@@ -17,7 +17,7 @@
 
 import process from 'node:process'
 
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 
 import { runCheck } from './check'
 

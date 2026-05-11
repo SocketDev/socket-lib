@@ -44,7 +44,7 @@
 
 import { errorMessage } from '../errors/message'
 import { safeDeleteSync } from '../fs/safe'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 import { MapCtor, SetCtor } from '../primordials/map-set'

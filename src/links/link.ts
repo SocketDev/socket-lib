@@ -7,7 +7,7 @@ import yoctocolorsCjs from '../external/yoctocolors-cjs'
 import { ArrayIsArray } from '../primordials/array'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
-import { resolveColor } from '../themes/utils'
+import { resolveColor } from '../themes/resolve'
 
 import type { ColorName } from '../colors/types'
 

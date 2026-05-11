@@ -333,11 +333,6 @@
       "types": "./dist/constants/agents.d.ts",
       "default": "./dist/constants/agents.js"
     },
-    "./constants/core": {
-      "source": "./src/constants/core.ts",
-      "types": "./dist/constants/core.d.ts",
-      "default": "./dist/constants/core.js"
-    },
     "./constants/encoding": {
       "source": "./src/constants/encoding.ts",
       "types": "./dist/constants/encoding.d.ts",
@@ -392,6 +387,11 @@
       "source": "./src/constants/process.ts",
       "types": "./dist/constants/process.d.ts",
       "default": "./dist/constants/process.js"
+    },
+    "./constants/sentinels": {
+      "source": "./src/constants/sentinels.ts",
+      "types": "./dist/constants/sentinels.d.ts",
+      "default": "./dist/constants/sentinels.js"
     },
     "./constants/socket": {
       "source": "./src/constants/socket.ts",
@@ -553,20 +553,10 @@
       "types": "./dist/dlx/types.d.ts",
       "default": "./dist/dlx/types.js"
     },
-    "./eco/npm": {
-      "source": "./src/eco/npm/index.ts",
-      "types": "./dist/eco/npm/index.d.ts",
-      "default": "./dist/eco/npm/index.js"
-    },
-    "./eco/npm/bun": {
-      "source": "./src/eco/npm/bun/index.ts",
-      "types": "./dist/eco/npm/bun/index.d.ts",
-      "default": "./dist/eco/npm/bun/index.js"
-    },
-    "./eco/npm/npm": {
-      "source": "./src/eco/npm/npm/index.ts",
-      "types": "./dist/eco/npm/npm/index.d.ts",
-      "default": "./dist/eco/npm/npm/index.js"
+    "./eco/npm/bun/exec": {
+      "source": "./src/eco/npm/bun/exec.ts",
+      "types": "./dist/eco/npm/bun/exec.d.ts",
+      "default": "./dist/eco/npm/bun/exec.js"
     },
     "./eco/npm/npm/exec": {
       "source": "./src/eco/npm/npm/exec.ts",
@@ -577,11 +567,6 @@
       "source": "./src/eco/npm/npm/flags.ts",
       "types": "./dist/eco/npm/npm/flags.d.ts",
       "default": "./dist/eco/npm/npm/flags.js"
-    },
-    "./eco/npm/pnpm": {
-      "source": "./src/eco/npm/pnpm/index.ts",
-      "types": "./dist/eco/npm/pnpm/index.d.ts",
-      "default": "./dist/eco/npm/pnpm/index.js"
     },
     "./eco/npm/pnpm/exec": {
       "source": "./src/eco/npm/pnpm/exec.ts",
@@ -598,35 +583,15 @@
       "types": "./dist/eco/npm/script.d.ts",
       "default": "./dist/eco/npm/script.js"
     },
-    "./eco/npm/vlt": {
-      "source": "./src/eco/npm/vlt/index.ts",
-      "types": "./dist/eco/npm/vlt/index.d.ts",
-      "default": "./dist/eco/npm/vlt/index.js"
-    },
-    "./eco/npm/yarnpkg": {
-      "source": "./src/eco/npm/yarnpkg/index.ts",
-      "types": "./dist/eco/npm/yarnpkg/index.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/index.js"
-    },
-    "./eco/npm/yarnpkg/berry": {
-      "source": "./src/eco/npm/yarnpkg/berry/index.ts",
-      "types": "./dist/eco/npm/yarnpkg/berry/index.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/berry/index.js"
-    },
-    "./eco/npm/yarnpkg/yarn": {
-      "source": "./src/eco/npm/yarnpkg/yarn/index.ts",
-      "types": "./dist/eco/npm/yarnpkg/yarn/index.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/yarn/index.js"
+    "./eco/npm/vlt/exec": {
+      "source": "./src/eco/npm/vlt/exec.ts",
+      "types": "./dist/eco/npm/vlt/exec.d.ts",
+      "default": "./dist/eco/npm/vlt/exec.js"
     },
     "./eco/npm/yarnpkg/yarn/exec": {
       "source": "./src/eco/npm/yarnpkg/yarn/exec.ts",
       "types": "./dist/eco/npm/yarnpkg/yarn/exec.d.ts",
       "default": "./dist/eco/npm/yarnpkg/yarn/exec.js"
-    },
-    "./eco/npm/yarnpkg/zpm": {
-      "source": "./src/eco/npm/yarnpkg/zpm/index.ts",
-      "types": "./dist/eco/npm/yarnpkg/zpm/index.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/zpm/index.js"
     },
     "./effects/pulse-frames": {
       "source": "./src/effects/pulse-frames.ts",
@@ -1068,11 +1033,6 @@
       "types": "./dist/links/types.d.ts",
       "default": "./dist/links/types.js"
     },
-    "./logger": {
-      "source": "./src/logger.ts",
-      "types": "./dist/logger.d.ts",
-      "default": "./dist/logger.js"
-    },
     "./logger/colors": {
       "source": "./src/logger/colors.ts",
       "types": "./dist/logger/colors.d.ts",
@@ -1083,15 +1043,10 @@
       "types": "./dist/logger/console.d.ts",
       "default": "./dist/logger/console.js"
     },
-    "./logger/core": {
-      "source": "./src/logger/core.ts",
-      "types": "./dist/logger/core.d.ts",
-      "default": "./dist/logger/core.js"
-    },
-    "./logger/default": {
-      "source": "./src/logger/default.ts",
-      "types": "./dist/logger/default.d.ts",
-      "default": "./dist/logger/default.js"
+    "./logger/logger": {
+      "source": "./src/logger/logger.ts",
+      "types": "./dist/logger/logger.d.ts",
+      "default": "./dist/logger/logger.js"
     },
     "./logger/symbols": {
       "source": "./src/logger/symbols.ts",
@@ -1598,10 +1553,10 @@
       "types": "./dist/schema/validate.d.ts",
       "default": "./dist/schema/validate.js"
     },
-    "./sea/util": {
-      "source": "./src/sea/util.ts",
-      "types": "./dist/sea/util.d.ts",
-      "default": "./dist/sea/util.js"
+    "./sea/detect": {
+      "source": "./src/sea/detect.ts",
+      "types": "./dist/sea/detect.d.ts",
+      "default": "./dist/sea/detect.js"
     },
     "./shadow/skip": {
       "source": "./src/shadow/skip.ts",
@@ -1638,15 +1593,15 @@
       "types": "./dist/signal-exit/types.d.ts",
       "default": "./dist/signal-exit/types.js"
     },
+    "./smol/detect": {
+      "source": "./src/smol/detect.ts",
+      "types": "./dist/smol/detect.d.ts",
+      "default": "./dist/smol/detect.js"
+    },
     "./smol/primordial": {
       "source": "./src/smol/primordial.ts",
       "types": "./dist/smol/primordial.d.ts",
       "default": "./dist/smol/primordial.js"
-    },
-    "./smol/util": {
-      "source": "./src/smol/util.ts",
-      "types": "./dist/smol/util.d.ts",
-      "default": "./dist/smol/util.js"
     },
     "./smol/versions": {
       "source": "./src/smol/versions.ts",
@@ -1673,20 +1628,15 @@
       "types": "./dist/sorts/types.d.ts",
       "default": "./dist/sorts/types.js"
     },
-    "./spawn": {
-      "source": "./src/spawn.ts",
-      "types": "./dist/spawn.d.ts",
-      "default": "./dist/spawn.js"
-    },
-    "./spawn/core": {
-      "source": "./src/spawn/core.ts",
-      "types": "./dist/spawn/core.d.ts",
-      "default": "./dist/spawn/core.js"
-    },
     "./spawn/errors": {
       "source": "./src/spawn/errors.ts",
       "types": "./dist/spawn/errors.d.ts",
       "default": "./dist/spawn/errors.js"
+    },
+    "./spawn/spawn": {
+      "source": "./src/spawn/spawn.ts",
+      "types": "./dist/spawn/spawn.d.ts",
+      "default": "./dist/spawn/spawn.js"
     },
     "./spawn/stdio": {
       "source": "./src/spawn/stdio.ts",
@@ -1698,11 +1648,6 @@
       "types": "./dist/spawn/types.d.ts",
       "default": "./dist/spawn/types.js"
     },
-    "./spinner/core": {
-      "source": "./src/spinner/core.ts",
-      "types": "./dist/spinner/core.d.ts",
-      "default": "./dist/spinner/core.js"
-    },
     "./spinner/format": {
       "source": "./src/spinner/format.ts",
       "types": "./dist/spinner/format.d.ts",
@@ -1712,6 +1657,11 @@
       "source": "./src/spinner/registry.ts",
       "types": "./dist/spinner/registry.d.ts",
       "default": "./dist/spinner/registry.js"
+    },
+    "./spinner/spinner": {
+      "source": "./src/spinner/spinner.ts",
+      "types": "./dist/spinner/spinner.d.ts",
+      "default": "./dist/spinner/spinner.js"
     },
     "./spinner/types": {
       "source": "./src/spinner/types.ts",
@@ -1828,15 +1778,15 @@
       "types": "./dist/strings/width.d.ts",
       "default": "./dist/strings/width.js"
     },
-    "./suppress-warnings/core": {
-      "source": "./src/suppress-warnings/core.ts",
-      "types": "./dist/suppress-warnings/core.d.ts",
-      "default": "./dist/suppress-warnings/core.js"
-    },
     "./suppress-warnings/event-target": {
       "source": "./src/suppress-warnings/event-target.ts",
       "types": "./dist/suppress-warnings/event-target.d.ts",
       "default": "./dist/suppress-warnings/event-target.js"
+    },
+    "./suppress-warnings/suppress": {
+      "source": "./src/suppress-warnings/suppress.ts",
+      "types": "./dist/suppress-warnings/suppress.d.ts",
+      "default": "./dist/suppress-warnings/suppress.js"
     },
     "./suppress-warnings/types": {
       "source": "./src/suppress-warnings/types.ts",
@@ -1881,6 +1831,11 @@
       "types": "./dist/themes/context.d.ts",
       "default": "./dist/themes/context.js"
     },
+    "./themes/resolve": {
+      "source": "./src/themes/resolve.ts",
+      "types": "./dist/themes/resolve.d.ts",
+      "default": "./dist/themes/resolve.js"
+    },
     "./themes/themes": {
       "source": "./src/themes/themes.ts",
       "types": "./dist/themes/themes.d.ts",
@@ -1890,11 +1845,6 @@
       "source": "./src/themes/types.ts",
       "types": "./dist/themes/types.d.ts",
       "default": "./dist/themes/types.js"
-    },
-    "./themes/utils": {
-      "source": "./src/themes/utils.ts",
-      "types": "./dist/themes/utils.d.ts",
-      "default": "./dist/themes/utils.js"
     },
     "./types/purl": {
       "source": "./src/types/purl.ts",

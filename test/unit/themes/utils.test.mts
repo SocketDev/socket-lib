@@ -16,7 +16,7 @@ import {
   extendTheme,
   resolveColor,
   resolveShimmerColor,
-} from '@socketsecurity/lib/themes/utils'
+} from '@socketsecurity/lib/themes/resolve'
 import { describe, expect, it } from 'vitest'
 
 const BASE_COLORS = {
@@ -33,7 +33,7 @@ const BASE_COLORS = {
   prompt: 'cyan' as const,
 }
 
-describe('themes/utils', () => {
+describe('themes/resolve', () => {
   describe('resolveColor', () => {
     it('should resolve primary keyword', () => {
       const result = resolveColor('primary', {

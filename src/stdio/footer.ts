@@ -8,7 +8,7 @@ import { repeatString } from '../strings/format'
 
 import { ArrayPrototypePush } from '../primordials/array'
 
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import { LOG_SYMBOLS } from '../logger/symbols'
 import { DateCtor, DateNow } from '../primordials/date'
 

@@ -36,7 +36,7 @@ import {
   readIncomingResponse,
 } from '../../src/http-request/request'
 import { HttpResponseError } from '../../src/http-request/response-types'
-import { Logger } from '../../src/logger/core'
+import { Logger } from '../../src/logger/logger'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 
@@ -2918,7 +2918,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
 
     it('should handle stream errors without double-firing hooks', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
+        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
       > = []
 
       const errorStream = new Readable({
@@ -3201,7 +3201,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
   describe('maxResponseSize - settle guard', () => {
     it('should fire onResponse exactly once when maxResponseSize exceeded', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
+        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
       > = []
 
       await httpRequest(`${httpBaseUrl}/large-body`, {
@@ -3263,7 +3263,7 @@ abc123def456789012345678901234567890123456789012345678901234abcd
   describe('redirect hook and cleanup', () => {
     it('should fire onResponse exactly once per redirect hop on maxRedirects exceeded', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/types').HttpHookResponseInfo
+        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
       > = []
 
       await httpRequest(`${httpBaseUrl}/redirect-loop-1`, {

@@ -42,7 +42,7 @@
  * @example Discrete claude-code-style shimmer with a rainbow gradient:
  * ```ts
  * import { configToSpec } from '@socketsecurity/lib/effects/shimmer'
- * import { RAINBOW_GRADIENT } from '@socketsecurity/lib/themes/utils'
+ * import { RAINBOW_GRADIENT } from '@socketsecurity/lib/themes/resolve'
  * const spec = configToSpec(
  *   { color: RAINBOW_GRADIENT, dir: 'ltr', kernel: 'block' },
  *   'ultrathink'.length,

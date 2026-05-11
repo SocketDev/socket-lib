@@ -2,7 +2,7 @@
  * @fileoverview SPDX license parsing and analysis utilities.
  */
 
-import { LOOP_SENTINEL } from '../constants/core'
+import { LOOP_SENTINEL } from '../constants/sentinels'
 import { getCopyLeftLicenses } from '../constants/licenses'
 import spdxCorrect from '../external/spdx-correct'
 import spdxExpParse from '../external/spdx-expression-parse'

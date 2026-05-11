@@ -27,7 +27,7 @@ import { whichReal, whichRealSync } from '../../src/bin/which'
 import { isError } from '@socketsecurity/lib/errors/predicates'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './utils/temp-file-helper'
-import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 const logger = getDefaultLogger()

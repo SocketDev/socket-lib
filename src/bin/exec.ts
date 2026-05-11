@@ -25,7 +25,7 @@ import { WIN32 } from '../constants/platform'
 import { isPath } from '../paths/normalize'
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 
 import { binPathCache, getFs } from './_internal'
 import { resolveRealBinSync } from './resolve'

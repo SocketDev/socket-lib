@@ -48,7 +48,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/argv/flag-predicates`](../src/argv/flag-predicates.ts) | Flag predicates — `is*` checks across parsed `FlagValues`, raw `process.argv`, or no input. |
 | [`@socketsecurity/lib/argv/flag-types`](../src/argv/flag-types.ts)           | Types + `COMMON_FLAGS` table for argv flag parsing.                                         |
-| [`@socketsecurity/lib/argv/flags`](../src/argv/flags.ts)                     | Common flag utilities for Socket CLI applications.                                          |
 | [`@socketsecurity/lib/argv/parse`](../src/argv/parse.ts)                     | Argument parsing utilities for CLI applications.                                            |
 
 ## arrays/
@@ -119,7 +118,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                                                                                    | Description                                                    |
 | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | [`@socketsecurity/lib/constants/agents`](../src/constants/agents.ts)                                                       | Package manager agent constants.                               |
-| [`@socketsecurity/lib/constants/core`](../src/constants/core.ts)                                                           | Core primitives and fundamental constants.                     |
 | [`@socketsecurity/lib/constants/encoding`](../src/constants/encoding.ts)                                                   | Character encoding and character code constants.               |
 | [`@socketsecurity/lib/constants/github`](../src/constants/github.ts)                                                       | GitHub API and cache constants.                                |
 | [`@socketsecurity/lib/constants/licenses`](../src/constants/licenses.ts)                                                   | License identifier constants.                                  |
@@ -131,6 +129,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/constants/packages`](../src/constants/packages.ts)                                                   | Package metadata, defaults, extensions, and lifecycle helpers. |
 | [`@socketsecurity/lib/constants/platform`](../src/constants/platform.ts)                                                   | Platform detection and OS-specific constants.                  |
 | [`@socketsecurity/lib/constants/process`](../src/constants/process.ts)                                                     | Process control helpers.                                       |
+| [`@socketsecurity/lib/constants/sentinels`](../src/constants/sentinels.ts)                                                 | Core primitives and fundamental constants.                     |
 | [`@socketsecurity/lib/constants/socket`](../src/constants/socket.ts)                                                       | Socket.dev branding and identifier constants.                  |
 | [`@socketsecurity/lib/constants/testing`](../src/constants/testing.ts)                                                     | Testing framework and CI-related string constants.             |
 | [`@socketsecurity/lib/constants/time`](../src/constants/time.ts)                                                           | Time-related numeric constants.                                |
@@ -188,21 +187,14 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                                                | Description                                                                                                                       |
 | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/eco/npm`](../src/eco/npm/index.ts)                               | npm-ecosystem package manager surface.                                                                                            |
-| [`@socketsecurity/lib/eco/npm/bun`](../src/eco/npm/bun/index.ts)                       | Bun tool surface.                                                                                                                 |
-| [`@socketsecurity/lib/eco/npm/npm`](../src/eco/npm/npm/index.ts)                       | _(no description)_                                                                                                                |
+| [`@socketsecurity/lib/eco/npm/bun/exec`](../src/eco/npm/bun/exec.ts)                   | Bun tool surface.                                                                                                                 |
 | [`@socketsecurity/lib/eco/npm/npm/exec`](../src/eco/npm/npm/exec.ts)                   | Execute npm commands with optimized flags and security defaults.                                                                  |
 | [`@socketsecurity/lib/eco/npm/npm/flags`](../src/eco/npm/npm/flags.ts)                 | npm CLI flag predicates.                                                                                                          |
-| [`@socketsecurity/lib/eco/npm/pnpm`](../src/eco/npm/pnpm/index.ts)                     | _(no description)_                                                                                                                |
 | [`@socketsecurity/lib/eco/npm/pnpm/exec`](../src/eco/npm/pnpm/exec.ts)                 | Execute pnpm commands with optimized flags and security defaults.                                                                 |
 | [`@socketsecurity/lib/eco/npm/pnpm/flags`](../src/eco/npm/pnpm/flags.ts)               | pnpm CLI flag predicates.                                                                                                         |
 | [`@socketsecurity/lib/eco/npm/script`](../src/eco/npm/script.ts)                       | Cross-tool script runner — picks the right package manager by detecting the nearest lockfile and dispatches to its exec function. |
-| [`@socketsecurity/lib/eco/npm/vlt`](../src/eco/npm/vlt/index.ts)                       | vlt tool surface.                                                                                                                 |
-| [`@socketsecurity/lib/eco/npm/yarnpkg`](../src/eco/npm/yarnpkg/index.ts)               | Yarn family barrel — Classic + Berry + ZPM.                                                                                       |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/berry`](../src/eco/npm/yarnpkg/berry/index.ts)   | Yarn Berry (v2-v5) tool surface.                                                                                                  |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn`](../src/eco/npm/yarnpkg/yarn/index.ts)     | _(no description)_                                                                                                                |
+| [`@socketsecurity/lib/eco/npm/vlt/exec`](../src/eco/npm/vlt/exec.ts)                   | vlt tool surface.                                                                                                                 |
 | [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/exec`](../src/eco/npm/yarnpkg/yarn/exec.ts) | Execute Yarn Classic (v1.x) commands with optimized flags and security defaults.                                                  |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/zpm`](../src/eco/npm/yarnpkg/zpm/index.ts)       | ZPM (Yarn 6+, Rust rewrite at yarnpkg/zpm) tool surface.                                                                          |
 
 ## effects/
 
@@ -306,20 +298,19 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## http-request/
 
-| Subpath                                                                                      | Description                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/http-request/checksums`](../src/http-request/checksums.ts)             | Checksum file fetching + parsing for download verification.                                                                                                     |
-| [`@socketsecurity/lib/http-request/convenience`](../src/http-request/convenience.ts)         | Thin convenience wrappers over `httpRequest` — `httpJson` and `httpText`.                                                                                       |
-| [`@socketsecurity/lib/http-request/download`](../src/http-request/download.ts)               | Streaming file downloads with retries, progress callbacks, and SHA-256 verification.                                                                            |
-| [`@socketsecurity/lib/http-request/download-types`](../src/http-request/download-types.ts)   | Types for HTTP download + checksum-fetch operations.                                                                                                            |
-| [`@socketsecurity/lib/http-request/errors`](../src/http-request/errors.ts)                   | Error-message enrichment for HTTP/HTTPS requests.                                                                                                               |
-| [`@socketsecurity/lib/http-request/headers`](../src/http-request/headers.ts)                 | Header utilities for HTTP/HTTPS requests.                                                                                                                       |
-| [`@socketsecurity/lib/http-request/request`](../src/http-request/request.ts)                 | Core HTTP/HTTPS request loop — the retry orchestrator.                                                                                                          |
-| [`@socketsecurity/lib/http-request/request-attempt`](../src/http-request/request-attempt.ts) | Single HTTP request attempt — the workhorse beneath the retrying `httpRequest` orchestrator.                                                                    |
-| [`@socketsecurity/lib/http-request/request-types`](../src/http-request/request-types.ts)     | Types for HTTP request configuration — options, hooks, and Node `IncomingMessage` aliases.                                                                      |
-| [`@socketsecurity/lib/http-request/response-reader`](../src/http-request/response-reader.ts) | Read a raw Node `IncomingMessage` into our `HttpResponse` shape.                                                                                                |
-| [`@socketsecurity/lib/http-request/response-types`](../src/http-request/response-types.ts)   | Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`.                                |
-| [`@socketsecurity/lib/http-request/types`](../src/http-request/types.ts)                     | Public type surface for `http-request/*` modules — barrel re-exporting the split type leaves so existing `http-request/types` importers keep working unchanged. |
+| Subpath                                                                                      | Description                                                                                                                      |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/http-request/checksums`](../src/http-request/checksums.ts)             | Checksum file fetching + parsing for download verification.                                                                      |
+| [`@socketsecurity/lib/http-request/convenience`](../src/http-request/convenience.ts)         | Thin convenience wrappers over `httpRequest` — `httpJson` and `httpText`.                                                        |
+| [`@socketsecurity/lib/http-request/download`](../src/http-request/download.ts)               | Streaming file downloads with retries, progress callbacks, and SHA-256 verification.                                             |
+| [`@socketsecurity/lib/http-request/download-types`](../src/http-request/download-types.ts)   | Types for HTTP download + checksum-fetch operations.                                                                             |
+| [`@socketsecurity/lib/http-request/errors`](../src/http-request/errors.ts)                   | Error-message enrichment for HTTP/HTTPS requests.                                                                                |
+| [`@socketsecurity/lib/http-request/headers`](../src/http-request/headers.ts)                 | Header utilities for HTTP/HTTPS requests.                                                                                        |
+| [`@socketsecurity/lib/http-request/request`](../src/http-request/request.ts)                 | Core HTTP/HTTPS request loop — the retry orchestrator.                                                                           |
+| [`@socketsecurity/lib/http-request/request-attempt`](../src/http-request/request-attempt.ts) | Single HTTP request attempt — the workhorse beneath the retrying `httpRequest` orchestrator.                                     |
+| [`@socketsecurity/lib/http-request/request-types`](../src/http-request/request-types.ts)     | Types for HTTP request configuration — options, hooks, and Node `IncomingMessage` aliases.                                       |
+| [`@socketsecurity/lib/http-request/response-reader`](../src/http-request/response-reader.ts) | Read a raw Node `IncomingMessage` into our `HttpResponse` shape.                                                                 |
+| [`@socketsecurity/lib/http-request/response-types`](../src/http-request/response-types.ts)   | Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`. |
 
 ## ipc-cli/
 
@@ -359,8 +350,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/logger/colors`](../src/logger/colors.ts)   | Color application helpers for `logger/*` modules.                                                                                                                                      |
 | [`@socketsecurity/lib/logger/console`](../src/logger/console.ts) | Lazy `Console` construction + dynamic prototype mirroring for `Logger`.                                                                                                                |
-| [`@socketsecurity/lib/logger/core`](../src/logger/core.ts)       | The `Logger` class — the public class surface for `logger/*`.                                                                                                                          |
-| [`@socketsecurity/lib/logger/default`](../src/logger/default.ts) | Module-singleton owner for the shared default `Logger` instance.                                                                                                                       |
+| [`@socketsecurity/lib/logger/logger`](../src/logger/logger.ts)   | The `Logger` class + the shared-default `getDefaultLogger()` accessor — the public class surface for `logger/*`.                                                                       |
 | [`@socketsecurity/lib/logger/symbols`](../src/logger/symbols.ts) | Symbol exports + the `LOG_SYMBOLS` proxy.                                                                                                                                              |
 | [`@socketsecurity/lib/logger/types`](../src/logger/types.ts)     | Public type surface for `logger/*` modules — the `LogSymbols` shape, the `LoggerMethods` mapped type that mirrors `console`, and the `Task` interface returned by `Logger.createTask`. |
 
@@ -514,17 +504,16 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## releases/
 
-| Subpath                                                                                | Description                                                                                                                                     |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/releases/github-api`](../src/releases/github-api.ts)             | GitHub release API barrel — re-exports the split listing + asset-url leaves so existing `releases/github-api` importers keep working unchanged. |
-| [`@socketsecurity/lib/releases/github-archives`](../src/releases/github-archives.ts)   | GitHub release archive download + extraction.                                                                                                   |
-| [`@socketsecurity/lib/releases/github-asset-url`](../src/releases/github-asset-url.ts) | Per-release asset-URL discovery for GitHub releases.                                                                                            |
-| [`@socketsecurity/lib/releases/github-assets`](../src/releases/github-assets.ts)       | Asset matching helpers for GitHub releases.                                                                                                     |
-| [`@socketsecurity/lib/releases/github-auth`](../src/releases/github-auth.ts)           | GitHub API authentication header helpers.                                                                                                       |
-| [`@socketsecurity/lib/releases/github-downloads`](../src/releases/github-downloads.ts) | GitHub release asset downloads.                                                                                                                 |
-| [`@socketsecurity/lib/releases/github-listing`](../src/releases/github-listing.ts)     | GitHub release listing via REST + GraphQL.                                                                                                      |
-| [`@socketsecurity/lib/releases/github-types`](../src/releases/github-types.ts)         | Public types for GitHub release download utilities.                                                                                             |
-| [`@socketsecurity/lib/releases/socket-btm`](../src/releases/socket-btm.ts)             | Socket-btm release download utilities.                                                                                                          |
+| Subpath                                                                                | Description                                          |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [`@socketsecurity/lib/releases/github-archives`](../src/releases/github-archives.ts)   | GitHub release archive download + extraction.        |
+| [`@socketsecurity/lib/releases/github-asset-url`](../src/releases/github-asset-url.ts) | Per-release asset-URL discovery for GitHub releases. |
+| [`@socketsecurity/lib/releases/github-assets`](../src/releases/github-assets.ts)       | Asset matching helpers for GitHub releases.          |
+| [`@socketsecurity/lib/releases/github-auth`](../src/releases/github-auth.ts)           | GitHub API authentication header helpers.            |
+| [`@socketsecurity/lib/releases/github-downloads`](../src/releases/github-downloads.ts) | GitHub release asset downloads.                      |
+| [`@socketsecurity/lib/releases/github-listing`](../src/releases/github-listing.ts)     | GitHub release listing via REST + GraphQL.           |
+| [`@socketsecurity/lib/releases/github-types`](../src/releases/github-types.ts)         | Public types for GitHub release download utilities.  |
+| [`@socketsecurity/lib/releases/socket-btm`](../src/releases/socket-btm.ts)             | Socket-btm release download utilities.               |
 
 ## schema/
 
@@ -536,9 +525,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## sea/
 
-| Subpath                                              | Description                                                           |
-| ---------------------------------------------------- | --------------------------------------------------------------------- |
-| [`@socketsecurity/lib/sea/util`](../src/sea/util.ts) | SEA (Single Executable Application) binary detection + path accessor. |
+| Subpath                                                  | Description                                                           |
+| -------------------------------------------------------- | --------------------------------------------------------------------- |
+| [`@socketsecurity/lib/sea/detect`](../src/sea/detect.ts) | SEA (Single Executable Application) binary detection + path accessor. |
 
 ## shadow/
 
@@ -561,8 +550,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                            | Description                                                  |
 | ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts)         | Smol detection + lazy-loader for `node:smol-util`.           |
 | [`@socketsecurity/lib/smol/primordial`](../src/smol/primordial.ts) | Lazy-loader for socket-btm's `node:smol-primordial` binding. |
-| [`@socketsecurity/lib/smol/util`](../src/smol/util.ts)             | Smol detection + lazy-loader for `node:smol-util`.           |
 | [`@socketsecurity/lib/smol/versions`](../src/smol/versions.ts)     | Lazy-loader for socket-btm's `node:smol-versions`.           |
 
 ## sorts/
@@ -578,8 +567,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                      | Description                                                   |
 | ------------------------------------------------------------ | ------------------------------------------------------------- |
-| [`@socketsecurity/lib/spawn/core`](../src/spawn/core.ts)     | Child process spawning utilities with cross-platform support. |
 | [`@socketsecurity/lib/spawn/errors`](../src/spawn/errors.ts) | Spawn error classification and enhancement.                   |
+| [`@socketsecurity/lib/spawn/spawn`](../src/spawn/spawn.ts)   | Child process spawning utilities with cross-platform support. |
 | [`@socketsecurity/lib/spawn/stdio`](../src/spawn/stdio.ts)   | Stdio configuration helpers for `spawn` callers.              |
 | [`@socketsecurity/lib/spawn/types`](../src/spawn/types.ts)   | Public type surface for `spawn/*` modules.                    |
 
@@ -587,9 +576,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                              | Description                                                                                                                                                                                                                  |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/spinner/core`](../src/spinner/core.ts)         | Spinner factory — builds the lazy-init `Spinner` class that wraps `yocto-spinner` with Socket-specific behaviors (custom RGB color pipeline, shimmer, progress bar, indented step messages, status methods that don't aut... |
 | [`@socketsecurity/lib/spinner/format`](../src/spinner/format.ts)     | Stateless helpers shared by `spinner/*` modules — the `ciSpinner` constant for non-interactive output, the `COLOR_INHERIT` sentinel for shimmer color references, plus pure formatters (`desc`, `formatProgress`, `normal... |
 | [`@socketsecurity/lib/spinner/registry`](../src/spinner/registry.ts) | Spinner-style registry — exposes the union of the standard `cli-spinners` collection and Socket's custom `socket` pulse animation, plus a lazy default-spinner singleton.                                                    |
+| [`@socketsecurity/lib/spinner/spinner`](../src/spinner/spinner.ts)   | Spinner factory — builds the lazy-init `Spinner` class that wraps `yocto-spinner` with Socket-specific behaviors (custom RGB color pipeline, shimmer, progress bar, indented step messages, status methods that don't aut... |
 | [`@socketsecurity/lib/spinner/types`](../src/spinner/types.ts)       | Public type surface for `spinner/*` modules — the `Spinner` instance shape, configuration option records, progress and shimmer state types, plus the `withSpinner*` option records.                                          |
 | [`@socketsecurity/lib/spinner/with`](../src/spinner/with.ts)         | Lifecycle wrappers around `Spinner` — `withSpinner` (async, push-pop options + auto-stop), `withSpinnerRestore` (conditionally restart a previously-spinning instance), and `withSpinnerSync` (sync sibling of `withSpinn... |
 
@@ -638,8 +627,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                                                          | Description                                                   |
 | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
-| [`@socketsecurity/lib/suppress-warnings/core`](../src/suppress-warnings/core.ts)                 | `process.emitWarning` suppression.                            |
 | [`@socketsecurity/lib/suppress-warnings/event-target`](../src/suppress-warnings/event-target.ts) | Bump the max-listener cap on an EventTarget (or AbortSignal). |
+| [`@socketsecurity/lib/suppress-warnings/suppress`](../src/suppress-warnings/suppress.ts)         | `process.emitWarning` suppression.                            |
 | [`@socketsecurity/lib/suppress-warnings/types`](../src/suppress-warnings/types.ts)               | Public type surface for `suppress-warnings/*` modules.        |
 
 ## tables/
@@ -663,9 +652,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                          | Description                                         |
 | ---------------------------------------------------------------- | --------------------------------------------------- |
 | [`@socketsecurity/lib/themes/context`](../src/themes/context.ts) | Elegant theme context management.                   |
+| [`@socketsecurity/lib/themes/resolve`](../src/themes/resolve.ts) | Theme utilities — color resolution and composition. |
 | [`@socketsecurity/lib/themes/themes`](../src/themes/themes.ts)   | Elegant theme definitions for Socket libraries.     |
 | [`@socketsecurity/lib/themes/types`](../src/themes/types.ts)     | Elegant theme type system.                          |
-| [`@socketsecurity/lib/themes/utils`](../src/themes/utils.ts)     | Theme utilities — color resolution and composition. |
 
 ## types/
 

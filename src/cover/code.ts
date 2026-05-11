@@ -6,7 +6,7 @@ import process from 'node:process'
 
 import { readJson } from '../fs/read-json'
 import { isObjectObject } from '../objects/predicates'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 
 import { ArrayIsArray } from '../primordials/array'
 

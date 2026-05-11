@@ -12,7 +12,7 @@
  * level evaluation between siblings, so ESM tolerates.
  */
 
-import { kInternalsSymbol } from '../constants/core'
+import { kInternalsSymbol } from '../constants/sentinels'
 import { SetCtor } from '../primordials/map-set'
 import {
   ObjectDefineProperties,

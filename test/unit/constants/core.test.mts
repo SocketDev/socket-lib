@@ -24,9 +24,9 @@ import {
   UNKNOWN_ERROR,
   UNKNOWN_VALUE,
   V,
-} from '@socketsecurity/lib/constants/core'
+} from '@socketsecurity/lib/constants/sentinels'
 
-describe('constants/core', () => {
+describe('constants/sentinels', () => {
   describe('symbols', () => {
     it('should export kInternalsSymbol as a symbol', () => {
       expect(typeof kInternalsSymbol).toBe('symbol')

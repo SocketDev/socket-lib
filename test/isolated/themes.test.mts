@@ -22,7 +22,7 @@ import {
   createTheme,
   extendTheme,
   resolveColor,
-} from '@socketsecurity/lib/themes/utils'
+} from '@socketsecurity/lib/themes/resolve'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('themes', () => {

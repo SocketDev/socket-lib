@@ -14,7 +14,7 @@
  * See: https://github.com/SocketDev/socket-packageurl-js/issues/3
  */
 
-import { getSmolUtil } from '../smol/util'
+import { getSmolUtil } from '../smol/detect'
 
 const _smolUtil = getSmolUtil()
 

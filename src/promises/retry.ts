@@ -8,7 +8,7 @@
  * cycle since both sides reference each other through functions only.
  */
 
-import { UNDEFINED_TOKEN } from '../constants/core'
+import { UNDEFINED_TOKEN } from '../constants/sentinels'
 import { MathFloor, MathMin, MathRandom } from '../primordials/math'
 import { getTimers } from './_internal'
 import { normalizeRetryOptions } from './options'

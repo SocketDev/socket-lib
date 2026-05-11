@@ -9,7 +9,7 @@
 
 import { getGhToken, getGithubToken } from '../env/github'
 import { getSocketCliGithubToken } from '../env/socket-cli'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 
 import type { SpawnOptions } from '../spawn/types'
 

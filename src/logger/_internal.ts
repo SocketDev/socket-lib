@@ -1,5 +1,5 @@
 /**
- * @fileoverview Private state shared between the `logger/core` class
+ * @fileoverview Private state shared between the `logger/logger` class
  * (which owns the public `Logger` surface) and `logger/console-init`
  * (which mutates `Logger.prototype` to mirror `globalConsole`). The
  * `_` prefix keeps this module out of the generated package.json

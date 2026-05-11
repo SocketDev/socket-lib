@@ -9,7 +9,7 @@
  */
 
 import type { HashSpec } from './integrity'
-import type { spawn } from '../spawn/core'
+import type { spawn } from '../spawn/spawn'
 import type { SpawnOptions } from '../spawn/types'
 
 export interface DlxBinaryOptions {

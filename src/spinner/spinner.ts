@@ -24,7 +24,7 @@ import { configToSpec, frameColors } from '../effects/shimmer'
 import { colorsToAnsi } from '../effects/shimmer-terminal'
 import { getCI } from '../env/ci'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import {
   LOG_SYMBOLS,
   incLogCallCountSymbol,
@@ -42,7 +42,7 @@ import { isBlankString } from '../strings/predicates'
 import { stringWidth } from '../strings/width'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
-import { resolveColor } from '../themes/utils'
+import { resolveColor } from '../themes/resolve'
 
 import { getCliSpinners } from './registry'
 import {
@@ -93,7 +93,7 @@ let _defaultSpinner: SpinnerStyle | undefined
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/core'
+ * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
  *
  * // Basic usage
  * const spinner = Spinner({ text: 'Loading data…' })

@@ -23,7 +23,7 @@ import path from 'node:path'
 
 import { whichSync } from '../bin/which'
 import { errorMessage } from '../errors/message'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 
 const logger = getDefaultLogger()
 

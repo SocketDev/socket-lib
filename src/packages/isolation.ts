@@ -9,7 +9,7 @@ import { WIN32 } from '../constants/platform'
 import { errorMessage } from '../errors/message'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 import { readPackageJson } from './operations'
 
 import type { PackageJson } from './types'

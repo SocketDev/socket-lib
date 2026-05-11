@@ -6,7 +6,7 @@
  * re-exported for callers that need them directly.
  */
 
-import { UNKNOWN_ERROR } from '../constants/core'
+import { UNKNOWN_ERROR } from '../constants/sentinels'
 import { messageWithCauses } from '../external/pony-cause'
 
 import { isError } from './predicates'

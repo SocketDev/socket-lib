@@ -13,7 +13,7 @@ import { BufferIsBuffer } from '../primordials/buffer'
 import { JSONStringify } from '../primordials/json'
 import { MapCtor } from '../primordials/map-set'
 import { StringPrototypeSubstring } from '../primordials/string'
-import { spawn, spawnSync } from '../spawn/core'
+import { spawn, spawnSync } from '../spawn/spawn'
 import { stripAnsi } from '../ansi/strip'
 import { findGitRoot, getCachedRealpath, getCwd, getPath } from './repo'
 

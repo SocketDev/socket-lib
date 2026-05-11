@@ -6,13 +6,13 @@ import process from 'node:process'
 
 import { safeMkdir } from '../fs/safe'
 import { httpDownload } from '../http-request/download'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import { ErrorCtor } from '../primordials/error'
 import {
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
 } from '../primordials/string'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 
 import { getReleaseAssetUrl } from './github-asset-url'
 import { getLatestRelease } from './github-listing'

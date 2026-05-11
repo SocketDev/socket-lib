@@ -4,7 +4,7 @@
 
 import process from 'node:process'
 
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 
 import type { GetTypeCoverageOptions, TypeCoverageResult } from './types'
 

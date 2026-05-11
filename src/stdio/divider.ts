@@ -3,7 +3,7 @@
  * Provides various line styles for visual separation in CLI output.
  */
 
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import { repeatString } from '../strings/format'
 
 const logger = getDefaultLogger()

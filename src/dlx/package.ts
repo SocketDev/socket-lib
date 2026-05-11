@@ -49,7 +49,7 @@ import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock/instance'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 import { generateCacheKey } from './cache'
 
 import { getNodeFs } from '../node/fs'

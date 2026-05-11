@@ -14,9 +14,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock spawn at the package specifier — src resolution is enabled in
 // vitest.config.mts via the 'source' export condition.
-vi.mock('@socketsecurity/lib/spawn/core')
+vi.mock('@socketsecurity/lib/spawn/spawn')
 
-import { spawn } from '@socketsecurity/lib/spawn/core'
+import { spawn } from '@socketsecurity/lib/spawn/spawn'
 import { getTypeCoverage } from '@socketsecurity/lib/cover/type'
 
 describe('cover/type', () => {

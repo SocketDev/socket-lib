@@ -24,7 +24,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 import { errorMessage } from '../errors/message'
-import { spawnSync } from '../spawn/core'
+import { spawnSync } from '../spawn/spawn'
 import { isSpawnError } from '../spawn/errors'
 
 import type { WorktreeCleanup } from './types.mts'

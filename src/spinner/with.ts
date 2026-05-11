@@ -33,7 +33,7 @@ import type {
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/core'
+ * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
  * import { withSpinner } from '@socketsecurity/lib/spinner/with'
  *
  * const spinner = Spinner()
@@ -187,7 +187,7 @@ export async function withSpinnerRestore<T>(
  *
  * @example
  * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/core'
+ * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
  * import { withSpinnerSync } from '@socketsecurity/lib/spinner/with'
  *
  * const spinner = Spinner()

@@ -7,7 +7,7 @@
  * stack on a recursive descent.
  */
 
-import { LOOP_SENTINEL } from '../constants/core'
+import { LOOP_SENTINEL } from '../constants/sentinels'
 import { isArray } from '../arrays/predicates'
 import { ErrorCtor } from '../primordials/error'
 import { ReflectOwnKeys } from '../primordials/reflect'

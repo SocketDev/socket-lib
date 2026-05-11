@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/smol/util.ts.
+ * @fileoverview Unit tests for src/smol/detect.ts.
  *
  * Tests both responsibilities of the file:
  *   - `isSmol()` — memoized boolean detector
@@ -12,9 +12,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolUtil, isSmol } from '@socketsecurity/lib/smol/util'
+import { getSmolUtil, isSmol } from '@socketsecurity/lib/smol/detect'
 
-describe('smol/util', () => {
+describe('smol/detect', () => {
   describe('isSmol', () => {
     it('returns boolean', () => {
       const result = isSmol()

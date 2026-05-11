@@ -24,7 +24,7 @@ import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { readJson } from '../fs/read-json'
 import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
-import { spawn } from '../spawn/core'
+import { spawn } from '../spawn/spawn'
 import { generateCacheKey } from './cache'
 import { normalizeHash } from './integrity'
 
@@ -169,7 +169,8 @@ export async function dlxBinary(
       sha256,
     )
 
-    // Get file size for metadata.
+    // Get file size for metadata (intentional: need stats.size, not just existence).
+    // oxlint-disable-next-line socket/prefer-exists-sync
     const stats = await fs.promises.stat(binaryPath)
     await writeBinaryCacheMetadata(
       cacheEntryDir,

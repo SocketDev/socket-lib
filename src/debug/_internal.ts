@@ -10,7 +10,7 @@
 
 import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
 import debugJs from '../external/debug'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/logger'
 import { MapCtor } from '../primordials/map-set'
 import { ReflectApply } from '../primordials/reflect'
 

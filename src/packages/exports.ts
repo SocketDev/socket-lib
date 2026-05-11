@@ -3,7 +3,7 @@
  */
 
 import { isArray } from '../arrays/predicates'
-import { LOOP_SENTINEL } from '../constants/core'
+import { LOOP_SENTINEL } from '../constants/sentinels'
 import { isObject, isObjectObject } from '../objects/predicates'
 
 import { ArrayPrototypePush } from '../primordials/array'
