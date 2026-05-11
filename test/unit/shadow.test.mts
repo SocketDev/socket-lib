@@ -13,7 +13,7 @@
 import process from 'node:process'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { shouldSkipShadow } from '@socketsecurity/lib/shadow'
+import { shouldSkipShadow } from '@socketsecurity/lib/shadow/skip'
 
 describe('shadow', () => {
   describe('shouldSkipShadow', () => {

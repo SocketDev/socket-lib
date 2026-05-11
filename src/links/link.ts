@@ -3,25 +3,15 @@
  * Provides colored hyperlinks using theme configuration.
  */
 
-import yoctocolorsCjs from './external/yoctocolors-cjs'
-import { getTheme } from './themes/context'
-import { THEMES } from './themes/themes'
-import { resolveColor } from './themes/utils'
+import yoctocolorsCjs from '../external/yoctocolors-cjs'
+import { ArrayIsArray } from '../primordials/array'
+import { getTheme } from '../themes/context'
+import { THEMES } from '../themes/themes'
+import { resolveColor } from '../themes/utils'
 
-import type { ColorName } from './colors/types'
-import type { ThemeName } from './themes/themes'
-import type { Theme } from './themes/types'
+import type { ColorName } from '../colors/types'
 
-import { ArrayIsArray } from './primordials/array'
-/**
- * Options for creating themed links.
- */
-export type LinkOptions = {
-  /** Theme to use (overrides global) */
-  theme?: Theme | ThemeName | undefined
-  /** Show URL as fallback if terminal doesn't support links */
-  fallback?: boolean | undefined
-}
+import type { LinkOptions } from './types'
 
 /**
  * Create a themed hyperlink for terminal output.
@@ -38,7 +28,7 @@ export type LinkOptions = {
  *
  * @example
  * ```ts
- * import { link } from '@socketsecurity/lib/links'
+ * import { link } from '@socketsecurity/lib/links/link'
  *
  * // Use current theme
  * console.log(link('Documentation', 'https://socket.dev'))
@@ -96,7 +86,7 @@ export function link(text: string, url: string, options?: LinkOptions): string {
  *
  * @example
  * ```ts
- * import { links } from '@socketsecurity/lib/links'
+ * import { links } from '@socketsecurity/lib/links/link'
  *
  * const formatted = links([
  *   ['Documentation', 'https://socket.dev'],

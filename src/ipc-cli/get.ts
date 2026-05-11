@@ -7,16 +7,9 @@
  * for cases where data exceeds env-var size limits.
  */
 
-import { ObjectFreeze } from './primordials/object'
-export interface IpcObject {
-  SOCKET_CLI_FIX?: string | undefined
-  SOCKET_CLI_OPTIMIZE?: boolean | undefined
-  SOCKET_CLI_SHADOW_ACCEPT_RISKS?: boolean | undefined
-  SOCKET_CLI_SHADOW_API_TOKEN?: string | undefined
-  SOCKET_CLI_SHADOW_BIN?: string | undefined
-  SOCKET_CLI_SHADOW_PROGRESS?: boolean | undefined
-  SOCKET_CLI_SHADOW_SILENT?: boolean | undefined
-}
+import { ObjectFreeze } from '../primordials/object'
+
+import type { IpcObject } from './types'
 
 let _ipcObject: IpcObject | undefined
 

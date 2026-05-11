@@ -833,10 +833,15 @@
       "types": "./dist/ipc.d.ts",
       "default": "./dist/ipc.js"
     },
-    "./ipc-cli": {
-      "source": "./src/ipc-cli.ts",
-      "types": "./dist/ipc-cli.d.ts",
-      "default": "./dist/ipc-cli.js"
+    "./ipc-cli/get": {
+      "source": "./src/ipc-cli/get.ts",
+      "types": "./dist/ipc-cli/get.d.ts",
+      "default": "./dist/ipc-cli/get.js"
+    },
+    "./ipc-cli/types": {
+      "source": "./src/ipc-cli/types.ts",
+      "types": "./dist/ipc-cli/types.d.ts",
+      "default": "./dist/ipc-cli/types.js"
     },
     "./json/edit": {
       "source": "./src/json/edit.ts",
@@ -858,10 +863,15 @@
       "types": "./dist/json/types.d.ts",
       "default": "./dist/json/types.js"
     },
-    "./links": {
-      "source": "./src/links.ts",
-      "types": "./dist/links.d.ts",
-      "default": "./dist/links.js"
+    "./links/link": {
+      "source": "./src/links/link.ts",
+      "types": "./dist/links/link.d.ts",
+      "default": "./dist/links/link.js"
+    },
+    "./links/types": {
+      "source": "./src/links/types.ts",
+      "types": "./dist/links/types.d.ts",
+      "default": "./dist/links/types.js"
     },
     "./logger/colors": {
       "source": "./src/logger/colors.ts",
@@ -1288,10 +1298,15 @@
       "types": "./dist/sea/util.d.ts",
       "default": "./dist/sea/util.js"
     },
-    "./shadow": {
-      "source": "./src/shadow.ts",
-      "types": "./dist/shadow.d.ts",
-      "default": "./dist/shadow.js"
+    "./shadow/skip": {
+      "source": "./src/shadow/skip.ts",
+      "types": "./dist/shadow/skip.d.ts",
+      "default": "./dist/shadow/skip.js"
+    },
+    "./shadow/types": {
+      "source": "./src/shadow/types.ts",
+      "types": "./dist/shadow/types.d.ts",
+      "default": "./dist/shadow/types.js"
     },
     "./signal-exit": {
       "source": "./src/signal-exit.ts",
@@ -1408,10 +1423,20 @@
       "types": "./dist/stdio/stdout.d.ts",
       "default": "./dist/stdio/stdout.js"
     },
-    "./streams": {
-      "source": "./src/streams.ts",
-      "types": "./dist/streams.d.ts",
-      "default": "./dist/streams.js"
+    "./streams/parallel": {
+      "source": "./src/streams/parallel.ts",
+      "types": "./dist/streams/parallel.d.ts",
+      "default": "./dist/streams/parallel.js"
+    },
+    "./streams/transform": {
+      "source": "./src/streams/transform.ts",
+      "types": "./dist/streams/transform.d.ts",
+      "default": "./dist/streams/transform.js"
+    },
+    "./streams/types": {
+      "source": "./src/streams/types.ts",
+      "types": "./dist/streams/types.d.ts",
+      "default": "./dist/streams/types.js"
     },
     "./strings/format": {
       "source": "./src/strings/format.ts",

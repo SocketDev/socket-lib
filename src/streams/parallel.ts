@@ -1,15 +1,15 @@
 /**
- * @fileoverview Stream processing utilities with streaming-iterables integration.
- * Provides async stream handling and transformation functions.
+ * @fileoverview Parallel iteration helpers — `parallelMap()` and the
+ * fire-and-forget `parallelEach()`. Built on top of
+ * `streaming-iterables.parallelMap` with the project's `pRetry`
+ * wrapper applied per item.
  */
 
-import {
-  parallelMap as siParallelMap,
-  transform as siTransform,
-} from './external/streaming-iterables'
-import type { IterationOptions } from './promises/types'
-import { normalizeIterationOptions } from './promises/options'
-import { pRetry } from './promises/retry'
+import { parallelMap as siParallelMap } from '../external/streaming-iterables'
+import { normalizeIterationOptions } from '../promises/options'
+import { pRetry } from '../promises/retry'
+
+import type { IterationOptions } from '../promises/types'
 
 /**
  * Execute a function for each item in an iterable in parallel.
@@ -55,41 +55,6 @@ export function parallelMap<T, U>(
   const opts = normalizeIterationOptions(options)
   /* c8 ignore next - External streaming-iterables call */
   const result = siParallelMap(
-    opts.concurrency,
-    async (item: T) => {
-      const result = await pRetry((...args: unknown[]) => func(args[0] as T), {
-        ...opts.retries,
-        args: [item],
-      })
-      return result as U
-    },
-    iterable,
-  )
-  return result as AsyncIterable<U>
-}
-
-/**
- * Transform an iterable with a function.
- *
- * @example
- * ```typescript
- * const lines = ['hello', 'world']
- * for await (const upper of transform(lines, async (line) => {
- *   return line.toUpperCase()
- * })) {
- *   console.log(upper)  // 'HELLO', 'WORLD'
- * }
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function transform<T, U>(
-  iterable: Iterable<T> | AsyncIterable<T>,
-  func: (item: T) => Promise<U>,
-  options?: number | IterationOptions,
-): AsyncIterable<U> {
-  const opts = normalizeIterationOptions(options)
-  /* c8 ignore next - External streaming-iterables call */
-  const result = siTransform(
     opts.concurrency,
     async (item: T) => {
       const result = await pRetry((...args: unknown[]) => func(args[0] as T), {

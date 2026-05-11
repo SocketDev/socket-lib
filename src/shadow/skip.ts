@@ -5,12 +5,9 @@
 
 import process from 'node:process'
 
-import { normalizePath } from './paths/normalize'
+import { normalizePath } from '../paths/normalize'
 
-export interface ShadowInstallationOptions {
-  cwd?: string | undefined
-  win32?: boolean | undefined
-}
+import type { ShadowInstallationOptions } from './types'
 
 /**
  * Determines if shadow binaries should be installed.
