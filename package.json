@@ -968,10 +968,20 @@
       "types": "./dist/http-request/request.d.ts",
       "default": "./dist/http-request/request.js"
     },
+    "./http-request/request-attempt": {
+      "source": "./src/http-request/request-attempt.ts",
+      "types": "./dist/http-request/request-attempt.d.ts",
+      "default": "./dist/http-request/request-attempt.js"
+    },
     "./http-request/request-types": {
       "source": "./src/http-request/request-types.ts",
       "types": "./dist/http-request/request-types.d.ts",
       "default": "./dist/http-request/request-types.js"
+    },
+    "./http-request/response-reader": {
+      "source": "./src/http-request/response-reader.ts",
+      "types": "./dist/http-request/response-reader.d.ts",
+      "default": "./dist/http-request/response-reader.js"
     },
     "./http-request/response-types": {
       "source": "./src/http-request/response-types.ts",
