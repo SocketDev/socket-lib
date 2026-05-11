@@ -31,23 +31,9 @@ import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
 
 import { ObjectKeys } from '../primordials/object'
-let _fs: typeof import('node:fs') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
 
-let _path: typeof import('node:path') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 /**
  * Shared options for the safe-arborist operations below.
@@ -138,7 +124,7 @@ export function getBaseArboristOptions(installPath: string, quiet: boolean) {
  * unambiguous (no "which of N deps did we pin?").
  */
 export function readSingleDependency(packageJsonPath: string): string {
-  const fs = getFs()
+  const fs = getNodeFs()
   const raw = fs.readFileSync(packageJsonPath, 'utf8')
   const pkg = JSONParse(raw) as {
     dependencies?: Record<string, string>
@@ -218,8 +204,8 @@ export function readTopLevelFromIdealTree(
 export async function safeIdealTree(
   options: SafeArboristOptions,
 ): Promise<SafeIdealTreeResult> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const { before, path: installPath, quiet = true } = options
   const targetName = readSingleDependency(
     path.join(installPath, 'package.json'),
@@ -296,8 +282,8 @@ export async function writeSafeNpmrc(
   installPath: string,
   options?: WriteSafeNpmrcOptions | undefined,
 ): Promise<void> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const { minReleaseDays, minReleaseMins } = {
     __proto__: null,
     ...options,

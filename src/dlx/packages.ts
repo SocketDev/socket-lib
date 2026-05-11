@@ -8,23 +8,8 @@ import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths'
 import { ArrayPrototypeFilter } from '../primordials/array'
 
 import { ErrorCtor } from '../primordials/error'
-let _fs: typeof import('node:fs') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js fs module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
+import { getNodeFs } from '../node/fs'
 
 /**
  * Check if a package is installed in DLX.
@@ -37,7 +22,7 @@ export function getFs() {
  * ```
  */
 export function isDlxPackageInstalled(packageName: string): boolean {
-  const fs = getFs()
+  const fs = getNodeFs()
   return fs.existsSync(getDlxInstalledPackageDir(packageName))
 }
 
@@ -68,7 +53,7 @@ export function listDlxPackages(): string[] {
  * ```
  */
 export async function listDlxPackagesAsync(): Promise<string[]> {
-  const fs = getFs()
+  const fs = getNodeFs()
   try {
     const entries = await fs.promises.readdir(getSocketDlxDir(), {
       withFileTypes: true,

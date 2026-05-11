@@ -22,8 +22,9 @@ import { DateNow } from '../primordials/date'
 import { JSONParse } from '../primordials/json'
 
 import { MapCtor, SetCtor } from '../primordials/map-set'
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
+
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 /**
  * Node.js script file extensions.
@@ -84,8 +85,8 @@ export interface ExecutableDetectionResult {
  * @private
  */
 export function findPackageJson(filePath: string): string | undefined {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
 
   const startDir = path.dirname(path.resolve(filePath))
 
@@ -130,30 +131,6 @@ export function findPackageJson(filePath: string): string | undefined {
 }
 
 /**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
-
-/**
  * Read and parse package.json with caching.
  * Results are cached to avoid repeated file reads.
  *
@@ -162,7 +139,7 @@ export function getPath() {
  * @private
  */
 export function readPackageJson(packageJsonPath: string): object | undefined {
-  const fs = getFs()
+  const fs = getNodeFs()
 
   let mtimeMs = 0
   try {
@@ -207,8 +184,8 @@ export function readPackageJson(packageJsonPath: string): object | undefined {
 export function detectDlxExecutableType(
   filePath: string,
 ): ExecutableDetectionResult {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
 
   const dlxDir = getSocketDlxDir()
   const absolutePath = path.resolve(filePath)
@@ -329,7 +306,7 @@ export function detectLocalExecutableType(
  * ```
  */
 export function isJsFilePath(filePath: string): boolean {
-  const path = getPath()
+  const path = getNodePath()
   const ext = path.extname(filePath).toLowerCase()
   return NODE_JS_EXTENSIONS.has(ext as '.js' | '.mjs' | '.cjs')
 }

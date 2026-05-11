@@ -28,23 +28,9 @@ import {
   StringPrototypeLastIndexOf,
   StringPrototypeSlice,
 } from '../primordials/string'
-let _fs: typeof import('node:fs') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
 
-let _path: typeof import('node:path') | undefined
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 /**
  * Lockfile source for the `lockfile` option on `downloadPackage`.
@@ -176,8 +162,8 @@ export function specRange(spec: string): string {
 export async function generatePackagePin(
   options: GeneratePackagePinOptions,
 ): Promise<PinDetails> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const { minReleaseDays, minReleaseMins, package: spec } = options
   if (typeof spec !== 'string' || spec.length === 0) {
     throw new DlxLockfileError('generatePackagePin requires a package spec')

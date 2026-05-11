@@ -31,32 +31,6 @@
  * - Rate limiting registry requests
  */
 
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_fs === undefined) {
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_path === undefined) {
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
 import { errorMessage } from '../errors/message'
 import { readFileUtf8Sync } from '../fs/read-file'
 import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
@@ -69,8 +43,12 @@ import { DateNow } from '../primordials/date'
 import { JSONParse, JSONStringify } from '../primordials/json'
 
 import { ObjectKeys } from '../primordials/object'
-const fs = getFs()
-const path = getPath()
+
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
+
+const fs = getNodeFs()
+const path = getNodePath()
 const logger = getDefaultLogger()
 
 /**

@@ -4,7 +4,8 @@ import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
 
 import { StringPrototypeStartsWith } from '../primordials/string'
-let _path: typeof import('node:path') | undefined
+
+import { getNodePath } from '../node/path'
 /**
  * Get the installed package directory within DLX node_modules.
  *
@@ -14,7 +15,7 @@ let _path: typeof import('node:path') | undefined
  * ```
  */
 export function getDlxInstalledPackageDir(packageName: string): string {
-  const path = getPath()
+  const path = getNodePath()
   return normalizePath(
     path.join(getDlxPackageNodeModulesDir(packageName), packageName),
   )
@@ -29,7 +30,7 @@ export function getDlxInstalledPackageDir(packageName: string): string {
  * ```
  */
 export function getDlxPackageDir(packageName: string): string {
-  const path = getPath()
+  const path = getNodePath()
   return normalizePath(path.join(getSocketDlxDir(), packageName))
 }
 
@@ -42,7 +43,7 @@ export function getDlxPackageDir(packageName: string): string {
  * ```
  */
 export function getDlxPackageJsonPath(packageName: string): string {
-  const path = getPath()
+  const path = getNodePath()
   return normalizePath(
     path.join(getDlxInstalledPackageDir(packageName), 'package.json'),
   )
@@ -57,22 +58,8 @@ export function getDlxPackageJsonPath(packageName: string): string {
  * ```
  */
 export function getDlxPackageNodeModulesDir(packageName: string): string {
-  const path = getPath()
+  const path = getNodePath()
   return normalizePath(path.join(getDlxPackageDir(packageName), 'node_modules'))
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path!
 }
 
 /**
@@ -94,7 +81,7 @@ export function isInSocketDlx(filePath: string): boolean {
     return false
   }
 
-  const path = getPath()
+  const path = getNodePath()
   const dlxDir = normalizePath(getSocketDlxDir())
   const absolutePath = normalizePath(path.resolve(filePath))
 
