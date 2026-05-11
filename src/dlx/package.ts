@@ -1,5 +1,5 @@
 /**
- * @fileoverview DLX package execution - Install and execute npm packages.
+ * @fileoverview DLX package execution — install and execute npm packages.
  *
  * This module provides functionality to install and execute npm packages
  * in the ~/.socket/_dlx directory, similar to npx but with Socket's own cache.
@@ -20,339 +20,60 @@
  * - Range versions (^1.0.0, ~1.0.0) auto-force to get latest within range
  * - User can override with explicit force: false
  *
- * Key difference from dlx-binary.ts:
- * - dlx-binary.ts: Downloads standalone binaries from URLs
- * - dlx-package.ts: Installs npm packages from registries
+ * Key difference from dlx/binary.ts:
+ * - dlx/binary.ts: Downloads standalone binaries from URLs
+ * - dlx/package.ts: Installs npm packages from registries
  *
  * Implementation:
  * - Uses Arborist for package installation (like npx, no npm CLI required)
  * - Split into downloadPackage() and executePackage() for flexibility
  * - dlxPackage() combines both for convenience
+ *
+ * Module shape: this file holds the three async orchestrators
+ * (`dlxPackage`, `downloadPackage`, `ensurePackageInstalled`) and the
+ * synchronous `executePackage`. The supporting surface lives in
+ * sibling leaves and is re-exported here so existing
+ * `dlx/package` importers keep working unchanged:
+ *
+ *   - types — `./types`
+ *   - PURL + firewall — `./firewall`
+ *   - spec parsing — `./spec`
+ *   - binary resolution — `./binary-resolution`
+ *   - lazy `node:fs` / `node:path` + LRU cache — `./_internal`
  */
 
 import { WIN32 } from '../constants/platform'
-import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
 import { isError } from '../errors/predicates'
 import Arborist from '../external/@npmcli/arborist'
-import libnpmexec from '../external/libnpmexec'
-import npmPackageArg from '../external/npm-package-arg'
-import { readJsonSync } from '../fs/read-json'
 import { safeMkdir } from '../fs/safe'
-import { httpJson } from '../http-request/convenience'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process-lock/instance'
 import { spawn } from '../spawn/core'
 import { generateCacheKey } from './cache'
 
-import type { HashSpec } from './integrity'
-import type { LockfileSpec } from './lockfile'
+import { getFs, getPath } from './_internal'
+import { findBinaryPath, makePackageBinsExecutable } from './binary-resolution'
+import { checkFirewallPurls } from './firewall'
+import { parsePackageSpec } from './spec'
+
+import type {
+  DlxPackageOptions,
+  DlxPackageResult,
+  DownloadPackageResult,
+  EnsurePackageInstallOptions,
+} from './types'
 import type { SpawnExtra, SpawnOptions } from '../spawn/types'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { MapCtor, SetCtor } from '../primordials/map-set'
-
-import { ObjectKeys, ObjectValues } from '../primordials/object'
-
-import { PromiseAllSettled } from '../primordials/promise'
-
 import { RegExpPrototypeTest } from '../primordials/regexp'
-
-import {
-  StringPrototypeLastIndexOf,
-  StringPrototypeReplace,
-  StringPrototypeSlice,
-  StringPrototypeStartsWith,
-} from '../primordials/string'
-let _fs: typeof import('node:fs') | undefined
-let _path: typeof import('node:path') | undefined
 
 /**
  * Regex to check if a version string contains range operators.
  * Matches any version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
  */
 const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
-
-const FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
-const FIREWALL_TIMEOUT = 10_000
-const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new SetCtor([
-  'critical',
-  'high',
-])
-
-// Cache for binary path resolution to avoid repeated extension checks
-// on Windows. Bounded LRU: a long-running process that resolves many
-// distinct binary paths used to accumulate entries forever, and entries
-// for paths that have since been garbage-collected by `cleanDlxCache`
-// were never reclaimed. Map iteration order = insertion order; accessing
-// an entry re-inserts it to bump recency.
-const BINARY_PATH_CACHE_MAX_SIZE = 200
-const binaryPathCache = new MapCtor<string, string>()
-
-export function binaryPathCacheSet(key: string, value: string): void {
-  if (binaryPathCache.has(key)) {
-    binaryPathCache.delete(key)
-  } else if (binaryPathCache.size >= BINARY_PATH_CACHE_MAX_SIZE) {
-    const oldest = binaryPathCache.keys().next().value
-    if (oldest !== undefined) {
-      binaryPathCache.delete(oldest)
-    }
-  }
-  binaryPathCache.set(key, value)
-}
-
-interface FirewallAlert {
-  severity?: string
-  type?: string
-  key?: string
-}
-
-interface FirewallResponse {
-  alerts?: FirewallAlert[]
-}
-
-export interface DownloadPackageResult {
-  /** Path to the installed package directory. */
-  packageDir: string
-  /** Path to the binary. */
-  binaryPath: string
-  /** Whether the package was newly installed. */
-  installed: boolean
-}
-
-/**
- * Shared install-pinning options used by both {@link DlxPackageOptions}
- * and the lower-level {@link ensurePackageInstalled}.
- */
-export interface EnsurePackageInstallOptions {
-  /**
-   * Expected hash of the top-level package tarball. Accepts either:
-   * - A bare sha512 SRI string (sniffed as integrity).
-   * - A bare sha256 hex string (sniffed as checksum).
-   * - An explicit `{ type: 'integrity' | 'checksum', value }` object.
-   */
-  hash?: HashSpec | undefined
-
-  /**
-   * Override the install root passed to Arborist. By default, the
-   * install root is `~/.socket/_dlx/<cacheKey>/` (or
-   * `SOCKET_DLX_DIR/<cacheKey>/`) — keyed by spec so multiple specs
-   * share a parent dir without colliding. When `installRoot` is set,
-   * the install root is the value verbatim — no cacheKey subdirectory.
-   *
-   * In both cases the package itself lands at
-   * `<installRoot>/node_modules/<packageName>/` with transitive deps as
-   * siblings under the same `node_modules/` directory. That layout is a
-   * fixed property of Arborist; this option only controls the parent.
-   *
-   * That means **the caller is responsible for keeping per-spec
-   * installs separated** — calling twice with the same `installRoot`
-   * but different specs (e.g. `ink@7` and `ink@8`) overwrites the
-   * earlier install. Either pass a different `installRoot` per spec or
-   * pass `force: true` to accept the overwrite.
-   *
-   * Pass a sentinel name (e.g. `_dlx`, `_pkg`, `vendor`) — never one
-   * that ends in `node_modules`, since that turns the install root
-   * into something parent-walking resolvers, IDE indexers, and pnpm
-   * hoisting will mistake for a workspace `node_modules/`.
-   *
-   * Use cases:
-   * - Build pipelines that want the install gitignored alongside their
-   *   own outputs and walkable by tools that resolve through
-   *   `node_modules` (e.g. esbuild's `nodePaths`).
-   * - Tests that need a deterministic, easily-cleaned install path.
-   */
-  installRoot?: string | undefined
-
-  /**
-   * Vendored `package-lock.json` to drive a reproducible install. Accepts
-   * a filesystem path (sniffed) or raw JSON content (sniffed via leading
-   * `{`), or an explicit `{ type: 'path' | 'content', value }` object.
-   *
-   * When provided, the lockfile is written into the install dir before
-   * Arborist runs and a hardened `.npmrc` is placed alongside it.
-   */
-  lockfile?: LockfileSpec | undefined
-}
-
-export interface DlxPackageOptions extends EnsurePackageInstallOptions {
-  /**
-   * Package to install (e.g., '@cyclonedx/cdxgen@10.0.0').
-   * Aligns with npx --package flag.
-   */
-  package: string
-
-  /**
-   * Binary name to execute (optional - auto-detected in most cases).
-   *
-   * Auto-detection logic:
-   * 1. If package has only one binary, uses it automatically
-   * 2. Tries user-provided binaryName
-   * 3. Tries last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
-   * 4. Falls back to first binary
-   *
-   * Only needed when package has multiple binaries and auto-detection fails.
-   *
-   * @example
-   * // Auto-detected (single binary)
-   * { package: '@socketsecurity/cli' }  // Finds 'socket' binary automatically
-   *
-   * // Explicit (multiple binaries)
-   * { package: 'some-tool', binaryName: 'specific-tool' }
-   */
-  binaryName?: string | undefined
-
-  /**
-   * Force reinstallation even if package exists.
-   * Aligns with npx --yes/-y flag behavior.
-   */
-  force?: boolean | undefined
-
-  /**
-   * Skip confirmation prompts (auto-approve).
-   * Aligns with npx --yes/-y flag.
-   */
-  yes?: boolean | undefined
-
-  /**
-   * Suppress output (quiet mode).
-   * Aligns with npx --quiet/-q and pnpm --silent/-s flags.
-   */
-  quiet?: boolean | undefined
-
-  /**
-   * Additional spawn options for the execution.
-   */
-  spawnOptions?: SpawnOptions | undefined
-}
-
-export interface DlxPackageResult {
-  /** Path to the installed package directory. */
-  packageDir: string
-  /** Path to the binary that was executed. */
-  binaryPath: string
-  /** Whether the package was newly installed. */
-  installed: boolean
-  /** The spawn promise for the running process. */
-  spawnPromise: ReturnType<typeof spawn>
-}
-
-/**
- * Check all resolved packages in an Arborist ideal tree against the
- * Socket Firewall API (public, no auth required).
- * Throws if any dependency has critical or high severity alerts.
- *
- * @param arb - Arborist instance with populated idealTree
- * @param requestedPackage - Top-level package name (for error messages)
- * @private
- */
-export async function checkFirewallPurls(
-  arb: InstanceType<typeof Arborist>,
-  requestedPackage: string,
-): Promise<void> {
-  const idealTree = arb.idealTree
-  if (!idealTree) {
-    return
-  }
-
-  // Collect PURLs for all non-root resolved nodes.
-  const purls: Array<{ purl: string; name: string; version: string }> = []
-  for (const node of idealTree.inventory.values()) {
-    if (node.isProjectRoot) {
-      continue
-    }
-    const { name, version } = node.package
-    if (!name || !version) {
-      continue
-    }
-    purls.push({ purl: npmPurl(name, version), name, version })
-  }
-  if (purls.length === 0) {
-    return
-  }
-
-  const blocked: Array<{
-    name: string
-    version: string
-    alerts: string[]
-  }> = []
-
-  // Check all PURLs against the public firewall API in parallel.
-  await PromiseAllSettled(
-    purls.map(async ({ name, purl, version }) => {
-      try {
-        const data = await httpJson<FirewallResponse>(
-          `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`,
-          {
-            headers: { 'User-Agent': SOCKET_LIB_USER_AGENT },
-            timeout: FIREWALL_TIMEOUT,
-            retries: 1,
-            retryDelay: 500,
-          },
-        )
-        const blocking = (data.alerts ?? []).filter(
-          a => a.severity && FIREWALL_BLOCK_SEVERITIES.has(a.severity),
-        )
-        if (blocking.length > 0) {
-          blocked.push({
-            name,
-            version,
-            alerts: blocking.map(
-              a => `${a.severity}: ${a.type ?? a.key ?? 'unknown'}`,
-            ),
-          })
-        }
-      } catch {
-        // Firewall API errors are non-fatal — allow install to proceed.
-      }
-    }),
-  )
-
-  if (blocked.length > 0) {
-    const details = blocked
-      .map(b => `  ${b.name}@${b.version}: ${b.alerts.join(', ')}`)
-      .join('\n')
-    throw new ErrorCtor(
-      `Socket Firewall blocked installation of "${requestedPackage}".\n` +
-        `The following dependencies have security alerts:\n${details}\n\n` +
-        'Visit https://socket.dev for more information.',
-    )
-  }
-}
-
-/**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getFs() {
-  if (_fs === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _fs = /*@__PURE__*/ require('node:fs')
-  }
-  return _fs as typeof import('node:fs')
-}
-
-/**
- * Lazily load the path module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
- *
- * @returns The Node.js path module
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getPath() {
-  if (_path === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    _path = /*@__PURE__*/ require('node:path')
-  }
-  return _path as typeof import('node:path')
-}
 
 /**
  * Execute a package via DLX - install if needed and run its binary.
@@ -692,300 +413,19 @@ export function executePackage(
   return spawn(binaryPath, args, finalOptions, spawnExtra)
 }
 
-/**
- * Find the binary path for an installed package.
- * Uses npm's bin resolution strategy with user-friendly fallbacks.
- * Resolves platform-specific wrappers (.cmd, .ps1, etc.) on Windows.
- *
- * Resolution strategy (cherry-picked from libnpmexec):
- * 1. Use npm's getBinFromManifest (handles aliases and standard cases)
- * 2. Fall back to user-provided binaryName if npm's strategy fails
- * 3. Try last segment of package name as final fallback
- * 4. Use first binary as last resort
- *
- * @example
- * ```typescript
- * const binPath = findBinaryPath(
- *   '/tmp/.socket/_dlx/a1b2c3d4',
- *   'prettier'
- * )
- * console.log(`Binary: ${binPath}`)
- * ```
- */
-export function findBinaryPath(
-  packageDir: string,
-  packageName: string,
-  binaryName?: string,
-): string {
-  const path = getPath()
-  const installedDir = normalizePath(
-    path.join(packageDir, 'node_modules', packageName),
-  )
-  const pkgJsonPath = path.join(installedDir, 'package.json')
-
-  // Read package.json to find bin entry.
-  const pkgJson = readJsonSync(pkgJsonPath) as Record<string, unknown>
-  const bin = pkgJson['bin']
-
-  let binName: string | undefined
-  let binPath: string | undefined
-
-  if (typeof bin === 'string') {
-    // Single binary - use it directly.
-    binPath = bin
-  } else if (typeof bin === 'object' && bin !== null) {
-    const binObj = bin as Record<string, string>
-    const binKeys = ObjectKeys(binObj)
-
-    // If only one binary, use it regardless of name.
-    if (binKeys.length === 1) {
-      binName = binKeys[0]!
-      binPath = binObj[binName]
-    } else {
-      // Multiple binaries - use npm's battle-tested resolution strategy first.
-      try {
-        // External libnpmexec call
-        /* c8 ignore start */
-        const { getBinFromManifest } = libnpmexec
-        binName = getBinFromManifest({
-          name: packageName,
-          bin: binObj,
-          _id: `${packageName}@${(pkgJson as { version?: string }).version || 'unknown'}`,
-        })
-        /* c8 ignore stop */
-        binPath = binObj[binName]
-      } catch {
-        // npm's strategy failed - fall back to user-friendly resolution:
-        // 1. User-provided binaryName
-        // 2. Last segment of package name (e.g., 'cli' from '@socketsecurity/cli')
-        // 3. First binary as fallback
-        const lastSegment = packageName.split('/').pop() ?? packageName
-        const candidates = [
-          binaryName,
-          lastSegment,
-          packageName.replace(/^@[^/]+\//, ''),
-        ].filter(Boolean)
-
-        for (const candidate of candidates) {
-          if (candidate && binObj[candidate]) {
-            binName = candidate
-            binPath = binObj[candidate]
-            break
-          }
-        }
-
-        // Fallback to first binary if nothing matched.
-        if (!binPath && binKeys.length > 0) {
-          binName = binKeys[0]!
-          binPath = binObj[binName]
-        }
-      }
-    }
-  }
-
-  if (!binPath) {
-    throw new ErrorCtor(`No binary found for package "${packageName}"`)
-  }
-
-  const rawPath = normalizePath(path.join(installedDir, binPath))
-
-  // Resolve platform-specific wrapper (Windows .cmd/.ps1/etc.)
-  return resolveBinaryPath(rawPath)
-}
-
-/**
- * Make all binaries in an installed package executable.
- * Reads the package.json bin field and makes all binaries executable (chmod 0o755).
- * Handles both single binary (string) and multiple binaries (object) formats.
- *
- * Aligns with npm's approach:
- * - Uses 0o755 permission (matches npm's cmd-shim)
- * - Reads bin field from package.json (matches npm's bin-links and libnpmexec)
- * - Handles both string and object bin formats
- *
- * References:
- * - npm cmd-shim: https://github.com/npm/cmd-shim/blob/main/lib/index.js
- * - npm getBinFromManifest: https://github.com/npm/libnpmexec/blob/main/lib/get-bin-from-manifest.js
- *
- * @example
- * ```typescript
- * makePackageBinsExecutable(
- *   '/tmp/.socket/_dlx/a1b2c3d4',
- *   'prettier'
- * )
- * ```
- */
-export function makePackageBinsExecutable(
-  packageDir: string,
-  packageName: string,
-): void {
-  if (WIN32) {
-    // Windows doesn't need chmod
-    return
-  }
-
-  const fs = getFs()
-  const path = getPath()
-  const installedDir = normalizePath(
-    path.join(packageDir, 'node_modules', packageName),
-  )
-  const pkgJsonPath = path.join(installedDir, 'package.json')
-
-  try {
-    const pkgJson = readJsonSync(pkgJsonPath) as Record<string, unknown>
-    const bin = pkgJson['bin']
-
-    if (!bin) {
-      return
-    }
-
-    const binPaths: string[] = []
-
-    if (typeof bin === 'string') {
-      // Single binary
-      binPaths.push(bin)
-    } else if (typeof bin === 'object' && bin !== null) {
-      // Multiple binaries
-      const binObj = bin as Record<string, string>
-      binPaths.push(...ObjectValues(binObj))
-    }
-
-    // Make all binaries executable
-    for (const binPath of binPaths) {
-      const fullPath = normalizePath(path.join(installedDir, binPath))
-      if (fs.existsSync(fullPath)) {
-        try {
-          fs.chmodSync(fullPath, 0o755)
-        } catch {
-          // Ignore chmod errors on individual binaries
-        }
-      }
-    }
-  } catch {
-    // Ignore errors reading package.json or making binaries executable
-    // This is non-critical functionality
-  }
-}
-
-/**
- * Build a PURL string for an npm package.
- * Follows the PURL spec for the npm type:
- *   - Scoped: `@scope/pkg` → `pkg:npm/%40scope/pkg@version`
- *   - Unscoped: `pkg` → `pkg:npm/pkg@version`
- *
- */
-export function npmPurl(name: string, version: string): string {
-  const encoded = StringPrototypeStartsWith(name, '@')
-    ? `%40${StringPrototypeSlice(name, 1)}`
-    : name
-  // PURL spec: '+' in version must be encoded as %2B
-  const encodedVersion = StringPrototypeReplace(version, /\+/g, '%2B')
-  return `pkg:npm/${encoded}@${encodedVersion}`
-}
-
-/**
- * Parse package spec into name and version using npm-package-arg.
- * Examples:
- * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
- * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
- * - 'lodash' → { name: 'lodash', version: undefined }
- *
- * @example
- * ```typescript
- * parsePackageSpec('lodash@4.17.21')
- * // { name: 'lodash', version: '4.17.21' }
- *
- * parsePackageSpec('@scope/pkg')
- * // { name: '@scope/pkg', version: undefined }
- * ```
- */
-export function parsePackageSpec(spec: string): {
-  name: string
-  version: string | undefined
-} {
-  try {
-    // npmPackageArg is imported at the top
-    /* c8 ignore next - External npm-package-arg call */
-    const parsed = npmPackageArg(spec)
-
-    // Extract version from different types of specs.
-    // For registry specs, use fetchSpec (the version/range).
-    // For git/file/etc, version will be undefined.
-    const version =
-      parsed.type === 'tag'
-        ? parsed.fetchSpec
-        : parsed.type === 'version' || parsed.type === 'range'
-          ? parsed.fetchSpec
-          : undefined
-
-    return {
-      name: parsed.name || spec,
-      version,
-    }
-  } catch {
-    // Fallback to simple parsing if npm-package-arg fails.
-    const atIndex = StringPrototypeLastIndexOf(spec, '@')
-    if (atIndex === -1 || atIndex === 0) {
-      // No version or scoped package without version (@ only at position 0).
-      return { name: spec, version: undefined }
-    }
-    const sliced = StringPrototypeSlice(spec, atIndex + 1)
-    return {
-      name: StringPrototypeSlice(spec, 0, atIndex),
-      // A trailing `@` (e.g. `'pkg@'`) yields an empty slice — normalize
-      // to undefined so downstream "no version" checks behave.
-      version: sliced || undefined,
-    }
-  }
-}
-
-/**
- * Resolve binary path with cross-platform wrapper support.
- * On Windows, checks for .cmd, .bat, .ps1, .exe wrappers in order.
- * On Unix, uses path directly.
- *
- * Aligns with npm/npx binary resolution strategy.
- *
- * @example
- * ```typescript
- * const resolved = resolveBinaryPath('/tmp/.socket/_dlx/a1b2c3d4/prettier')
- * // On Windows: may resolve to '.cmd' or '.ps1' wrapper
- * // On Unix: returns the path unchanged
- * ```
- */
-export function resolveBinaryPath(basePath: string): string {
-  if (!WIN32) {
-    // Unix: use path directly
-    return basePath
-  }
-
-  const fs = getFs()
-
-  // Check cache first - validate with existsSync.
-  const cached = binaryPathCache.get(basePath)
-  if (cached) {
-    if (fs.existsSync(cached)) {
-      // Bump recency on hit.
-      binaryPathCacheSet(basePath, cached)
-      return cached
-    }
-    // Cached path no longer exists, remove stale entry.
-    binaryPathCache.delete(basePath)
-  }
-
-  // Windows: check for wrappers in priority order
-  // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
-  const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
-
-  for (const ext of extensions) {
-    const testPath = basePath + ext
-    if (fs.existsSync(testPath)) {
-      // Cache the result.
-      binaryPathCacheSet(basePath, testPath)
-      return testPath
-    }
-  }
-
-  // Fallback to original path if no wrapper found
-  return basePath
-}
+// Re-exports — preserve the historical `dlx/package` surface so
+// downstream importers don't have to chase the split.
+export { binaryPathCacheSet, getFs, getPath } from './_internal'
+export {
+  findBinaryPath,
+  makePackageBinsExecutable,
+  resolveBinaryPath,
+} from './binary-resolution'
+export { checkFirewallPurls, npmPurl } from './firewall'
+export { parsePackageSpec } from './spec'
+export type {
+  DlxPackageOptions,
+  DlxPackageResult,
+  DownloadPackageResult,
+  EnsurePackageInstallOptions,
+} from './types'
