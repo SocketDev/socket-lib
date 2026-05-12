@@ -12,7 +12,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                      | Description                                                                                                      |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/abort/signal`](../src/abort/signal.ts) | Abort signal utilities — composite signal construction from multiple sources and timeout-driven signal creation. |
-| [`@socketsecurity/lib/abort/types`](../src/abort/types.ts)   | Public type surface for `abort/*` modules — currently no exported types.                                         |
 
 ## ai/
 
@@ -26,11 +25,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## ansi/
 
-| Subpath                                                          | Description                                                             |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`@socketsecurity/lib/ansi/constants`](../src/ansi/constants.ts) | ANSI escape code constants.                                             |
-| [`@socketsecurity/lib/ansi/strip`](../src/ansi/strip.ts)         | ANSI escape-code regex factory and stripping helper.                    |
-| [`@socketsecurity/lib/ansi/types`](../src/ansi/types.ts)         | Public type surface for `ansi/*` modules — currently no exported types. |
+| Subpath                                                          | Description                                          |
+| ---------------------------------------------------------------- | ---------------------------------------------------- |
+| [`@socketsecurity/lib/ansi/constants`](../src/ansi/constants.ts) | ANSI escape code constants.                          |
+| [`@socketsecurity/lib/ansi/strip`](../src/ansi/strip.ts)         | ANSI escape-code regex factory and stripping helper. |
 
 ## archives/
 
@@ -57,7 +55,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/arrays/chunk`](../src/arrays/chunk.ts)           | Split an array into fixed-size chunks.                                                  |
 | [`@socketsecurity/lib/arrays/join`](../src/arrays/join.ts)             | Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and locale-correct. |
 | [`@socketsecurity/lib/arrays/predicates`](../src/arrays/predicates.ts) | Array type-guard predicates.                                                            |
-| [`@socketsecurity/lib/arrays/types`](../src/arrays/types.ts)           | Public type surface for `arrays/*` modules.                                             |
 | [`@socketsecurity/lib/arrays/unique`](../src/arrays/unique.ts)         | Deduplicate an array via `Set`.                                                         |
 
 ## bin/
@@ -138,10 +135,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## crypto/
 
-| Subpath                                                      | Description                                                               |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/crypto/hash`](../src/crypto/hash.ts)   | Crypto hash helpers that prefer Node builtins where available.            |
-| [`@socketsecurity/lib/crypto/types`](../src/crypto/types.ts) | Public type surface for `crypto/*` modules — currently no exported types. |
+| Subpath                                                    | Description                                                    |
+| ---------------------------------------------------------- | -------------------------------------------------------------- |
+| [`@socketsecurity/lib/crypto/hash`](../src/crypto/hash.ts) | Crypto hash helpers that prefer Node builtins where available. |
 
 ## debug/
 
@@ -231,12 +227,11 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## errors/
 
-| Subpath                                                                | Description                                                                                                                                                 |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/errors/message`](../src/errors/message.ts)       | Human-readable error-message extractor.                                                                                                                     |
-| [`@socketsecurity/lib/errors/predicates`](../src/errors/predicates.ts) | Error type-guard predicates — `isError` (with the `isErrorBuiltin` / `isErrorShim` building blocks) and the libuv errno-code narrower `isErrnoException`.   |
-| [`@socketsecurity/lib/errors/stack`](../src/errors/stack.ts)           | Stack-trace extractor with cause-chain support.                                                                                                             |
-| [`@socketsecurity/lib/errors/types`](../src/errors/types.ts)           | Public type surface for `errors/*` modules — currently re-exports nothing; helpers narrow to the standard `Error` / `NodeJS.ErrnoException` types directly. |
+| Subpath                                                                | Description                                                                                                                                               |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/errors/message`](../src/errors/message.ts)       | Human-readable error-message extractor.                                                                                                                   |
+| [`@socketsecurity/lib/errors/predicates`](../src/errors/predicates.ts) | Error type-guard predicates — `isError` (with the `isErrorBuiltin` / `isErrorShim` building blocks) and the libuv errno-code narrower `isErrnoException`. |
+| [`@socketsecurity/lib/errors/stack`](../src/errors/stack.ts)           | Stack-trace extractor with cause-chain support.                                                                                                           |
 
 ## fs/
 
@@ -463,14 +458,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## process/
 
-| Subpath                                                                            | Description                                                                                                                                   |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/process/abort`](../src/process/abort.ts)                     | Process control helpers.                                                                                                                      |
-| [`@socketsecurity/lib/process/lock-instance`](../src/process/lock-instance.ts)     | Singleton `processLock` instance — the canonical cross-cutting lock manager.                                                                  |
-| [`@socketsecurity/lib/process/lock-manager`](../src/process/lock-manager.ts)       | `ProcessLockManager` — the class that owns active locks, touch timers, and the exit-handler registration.                                     |
-| [`@socketsecurity/lib/process/lock-types`](../src/process/lock-types.ts)           | Public type surface for `process/lock-*` modules — the `ProcessLockOptions` bag accepted by `processLock.acquire` and `processLock.withLock`. |
-| [`@socketsecurity/lib/process/transient`](../src/process/transient.ts)             | Temporary package executor detection utilities for Socket ecosystem.                                                                          |
-| [`@socketsecurity/lib/process/transient-types`](../src/process/transient-types.ts) | Public type surface for `process/*` modules — currently no exported types.                                                                    |
+| Subpath                                                                        | Description                                                                                                                                   |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/process/abort`](../src/process/abort.ts)                 | Process control helpers.                                                                                                                      |
+| [`@socketsecurity/lib/process/lock-instance`](../src/process/lock-instance.ts) | Singleton `processLock` instance — the canonical cross-cutting lock manager.                                                                  |
+| [`@socketsecurity/lib/process/lock-manager`](../src/process/lock-manager.ts)   | `ProcessLockManager` — the class that owns active locks, touch timers, and the exit-handler registration.                                     |
+| [`@socketsecurity/lib/process/lock-types`](../src/process/lock-types.ts)       | Public type surface for `process/lock-*` modules — the `ProcessLockOptions` bag accepted by `processLock.acquire` and `processLock.withLock`. |
+| [`@socketsecurity/lib/process/transient`](../src/process/transient.ts)         | Temporary package executor detection utilities for Socket ecosystem.                                                                          |
 
 ## promise-queue/
 
@@ -496,7 +490,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/regexps/escape`](../src/regexps/escape.ts) | Public `escapeRegExp` entry — binds to native `RegExp.escape` (TC39 Stage 4, Node 24+ / V8 13.7) when available, otherwise falls back to the spec-compliant implementation in `./spec`. |
 | [`@socketsecurity/lib/regexps/hex`](../src/regexps/hex.ts)       | Hex-encoding helpers — fixed-width `\xHH` (`hex2`) and `\uHHHH` (`hex4`) producers used by the spec-compliant `RegExp.escape` fallback to emit canonical escape sequences.              |
 | [`@socketsecurity/lib/regexps/spec`](../src/regexps/spec.ts)     | Spec-compliant fallback for the TC39 `RegExp.escape` (https://tc39.es/ecma262/#sec-regexp.escape).                                                                                      |
-| [`@socketsecurity/lib/regexps/types`](../src/regexps/types.ts)   | Public type surface for `regexps/*` modules — currently no exported types.                                                                                                              |
 
 ## releases/
 
@@ -584,7 +577,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`@socketsecurity/lib/ssri/convert`](../src/ssri/convert.ts)   | SSRI ↔ hex digest conversion helpers — `hexToSsri` wraps a hex digest in `<algorithm>-<base64>` form, `ssriToHex` decodes the base64 half back to hex. |
 | [`@socketsecurity/lib/ssri/parse`](../src/ssri/parse.ts)       | SSRI parser — splits a `<algorithm>-<base64hash>` string into its component fields.                                                                    |
-| [`@socketsecurity/lib/ssri/types`](../src/ssri/types.ts)       | Public type surface for `ssri/*` modules — currently no exported types.                                                                                |
 | [`@socketsecurity/lib/ssri/validate`](../src/ssri/validate.ts) | SSRI/hex format validators — predicates that report whether a string looks like a hex digest or an SSRI integrity string.                              |
 
 ## stdio/
@@ -602,11 +594,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## streams/
 
-| Subpath                                                                | Description                                                                                                                                 |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/streams/parallel`](../src/streams/parallel.ts)   | Parallel iteration helpers — `parallelMap()` and the fire-and-forget `parallelEach()`.                                                      |
-| [`@socketsecurity/lib/streams/transform`](../src/streams/transform.ts) | Streaming transform helper — `transform()` wraps `streaming-iterables.transform` with the project's `pRetry` per-item retry policy.         |
-| [`@socketsecurity/lib/streams/types`](../src/streams/types.ts)         | Public type surface for `streams/*` modules — currently re-exports nothing; stream helpers borrow `IterationOptions` from `promises/types`. |
+| Subpath                                                                | Description                                                                                                                         |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/streams/parallel`](../src/streams/parallel.ts)   | Parallel iteration helpers — `parallelMap()` and the fire-and-forget `parallelEach()`.                                              |
+| [`@socketsecurity/lib/streams/transform`](../src/streams/transform.ts) | Streaming transform helper — `transform()` wraps `streaming-iterables.transform` with the project's `pRetry` per-item retry policy. |
 
 ## strings/
 
@@ -676,7 +667,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------- |
 | [`@socketsecurity/lib/warnings/event-target`](../src/warnings/event-target.ts) | Bump the max-listener cap on an EventTarget (or AbortSignal). |
 | [`@socketsecurity/lib/warnings/suppress`](../src/warnings/suppress.ts)         | `process.emitWarning` suppression.                            |
-| [`@socketsecurity/lib/warnings/types`](../src/warnings/types.ts)               | Public type surface for `warnings/*` modules.                 |
 
 ## words/
 

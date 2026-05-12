@@ -103,11 +103,6 @@
       "types": "./dist/abort/signal.d.ts",
       "default": "./dist/abort/signal.js"
     },
-    "./abort/types": {
-      "source": "./src/abort/types.ts",
-      "types": "./dist/abort/types.d.ts",
-      "default": "./dist/abort/types.js"
-    },
     "./ai/discover": {
       "source": "./src/ai/discover.mts",
       "types": "./dist/ai/discover.d.mts",
@@ -142,11 +137,6 @@
       "source": "./src/ansi/strip.ts",
       "types": "./dist/ansi/strip.d.ts",
       "default": "./dist/ansi/strip.js"
-    },
-    "./ansi/types": {
-      "source": "./src/ansi/types.ts",
-      "types": "./dist/ansi/types.d.ts",
-      "default": "./dist/ansi/types.js"
     },
     "./archives/detect": {
       "source": "./src/archives/detect.ts",
@@ -202,11 +192,6 @@
       "source": "./src/arrays/predicates.ts",
       "types": "./dist/arrays/predicates.d.ts",
       "default": "./dist/arrays/predicates.js"
-    },
-    "./arrays/types": {
-      "source": "./src/arrays/types.ts",
-      "types": "./dist/arrays/types.d.ts",
-      "default": "./dist/arrays/types.js"
     },
     "./arrays/unique": {
       "source": "./src/arrays/unique.ts",
@@ -422,11 +407,6 @@
       "source": "./src/crypto/hash.ts",
       "types": "./dist/crypto/hash.d.ts",
       "default": "./dist/crypto/hash.js"
-    },
-    "./crypto/types": {
-      "source": "./src/crypto/types.ts",
-      "types": "./dist/crypto/types.d.ts",
-      "default": "./dist/crypto/types.js"
     },
     "./debug/caller-info": {
       "source": "./src/debug/caller-info.ts",
@@ -747,11 +727,6 @@
       "source": "./src/errors/stack.ts",
       "types": "./dist/errors/stack.d.ts",
       "default": "./dist/errors/stack.js"
-    },
-    "./errors/types": {
-      "source": "./src/errors/types.ts",
-      "types": "./dist/errors/types.d.ts",
-      "default": "./dist/errors/types.js"
     },
     "./fs/encoding": {
       "source": "./src/fs/encoding.ts",
@@ -1443,11 +1418,6 @@
       "types": "./dist/process/transient.d.ts",
       "default": "./dist/process/transient.js"
     },
-    "./process/transient-types": {
-      "source": "./src/process/transient-types.ts",
-      "types": "./dist/process/transient-types.d.ts",
-      "default": "./dist/process/transient-types.js"
-    },
     "./promise-queue/queue": {
       "source": "./src/promise-queue/queue.ts",
       "types": "./dist/promise-queue/queue.d.ts",
@@ -1497,11 +1467,6 @@
       "source": "./src/regexps/spec.ts",
       "types": "./dist/regexps/spec.d.ts",
       "default": "./dist/regexps/spec.js"
-    },
-    "./regexps/types": {
-      "source": "./src/regexps/types.ts",
-      "types": "./dist/regexps/types.d.ts",
-      "default": "./dist/regexps/types.js"
     },
     "./releases/github-archives": {
       "source": "./src/releases/github-archives.ts",
@@ -1688,11 +1653,6 @@
       "types": "./dist/ssri/parse.d.ts",
       "default": "./dist/ssri/parse.js"
     },
-    "./ssri/types": {
-      "source": "./src/ssri/types.ts",
-      "types": "./dist/ssri/types.d.ts",
-      "default": "./dist/ssri/types.js"
-    },
     "./ssri/validate": {
       "source": "./src/ssri/validate.ts",
       "types": "./dist/ssri/validate.d.ts",
@@ -1747,11 +1707,6 @@
       "source": "./src/streams/transform.ts",
       "types": "./dist/streams/transform.d.ts",
       "default": "./dist/streams/transform.js"
-    },
-    "./streams/types": {
-      "source": "./src/streams/types.ts",
-      "types": "./dist/streams/types.d.ts",
-      "default": "./dist/streams/types.js"
     },
     "./strings/format": {
       "source": "./src/strings/format.ts",
@@ -1900,11 +1855,6 @@
       "source": "./src/warnings/suppress.ts",
       "types": "./dist/warnings/suppress.d.ts",
       "default": "./dist/warnings/suppress.js"
-    },
-    "./warnings/types": {
-      "source": "./src/warnings/types.ts",
-      "types": "./dist/warnings/types.d.ts",
-      "default": "./dist/warnings/types.js"
     },
     "./words/article": {
       "source": "./src/words/article.ts",
