@@ -283,16 +283,6 @@
       "types": "./dist/cacache/write.d.ts",
       "default": "./dist/cacache/write.js"
     },
-    "./cache-with-ttl/cache": {
-      "source": "./src/cache-with-ttl/cache.ts",
-      "types": "./dist/cache-with-ttl/cache.d.ts",
-      "default": "./dist/cache-with-ttl/cache.js"
-    },
-    "./cache-with-ttl/types": {
-      "source": "./src/cache-with-ttl/types.ts",
-      "types": "./dist/cache-with-ttl/types.d.ts",
-      "default": "./dist/cache-with-ttl/types.js"
-    },
     "./checks/primordials": {
       "source": "./src/checks/primordials.ts",
       "types": "./dist/checks/primordials.d.ts",
@@ -1053,6 +1043,11 @@
       "types": "./dist/logger/symbols.d.ts",
       "default": "./dist/logger/symbols.js"
     },
+    "./logger/symbols-builder": {
+      "source": "./src/logger/symbols-builder.ts",
+      "types": "./dist/logger/symbols-builder.d.ts",
+      "default": "./dist/logger/symbols-builder.js"
+    },
     "./logger/types": {
       "source": "./src/logger/types.ts",
       "types": "./dist/logger/types.d.ts",
@@ -1188,16 +1183,6 @@
       "types": "./dist/objects/types.d.ts",
       "default": "./dist/objects/types.js"
     },
-    "./package-extensions/data": {
-      "source": "./src/package-extensions/data.ts",
-      "types": "./dist/package-extensions/data.d.ts",
-      "default": "./dist/package-extensions/data.js"
-    },
-    "./package-extensions/types": {
-      "source": "./src/package-extensions/types.ts",
-      "types": "./dist/package-extensions/types.d.ts",
-      "default": "./dist/package-extensions/types.js"
-    },
     "./packages/edit": {
       "source": "./src/packages/edit.ts",
       "types": "./dist/packages/edit.d.ts",
@@ -1313,30 +1298,40 @@
       "types": "./dist/paths/socket.d.ts",
       "default": "./dist/paths/socket.js"
     },
-    "./performance/enabled": {
-      "source": "./src/performance/enabled.ts",
-      "types": "./dist/performance/enabled.d.ts",
-      "default": "./dist/performance/enabled.js"
+    "./perf/enabled": {
+      "source": "./src/perf/enabled.ts",
+      "types": "./dist/perf/enabled.d.ts",
+      "default": "./dist/perf/enabled.js"
     },
-    "./performance/metrics": {
-      "source": "./src/performance/metrics.ts",
-      "types": "./dist/performance/metrics.d.ts",
-      "default": "./dist/performance/metrics.js"
+    "./perf/metrics": {
+      "source": "./src/perf/metrics.ts",
+      "types": "./dist/perf/metrics.d.ts",
+      "default": "./dist/perf/metrics.js"
     },
-    "./performance/report": {
-      "source": "./src/performance/report.ts",
-      "types": "./dist/performance/report.d.ts",
-      "default": "./dist/performance/report.js"
+    "./perf/report": {
+      "source": "./src/perf/report.ts",
+      "types": "./dist/perf/report.d.ts",
+      "default": "./dist/perf/report.js"
     },
-    "./performance/timer": {
-      "source": "./src/performance/timer.ts",
-      "types": "./dist/performance/timer.d.ts",
-      "default": "./dist/performance/timer.js"
+    "./perf/timer": {
+      "source": "./src/perf/timer.ts",
+      "types": "./dist/perf/timer.d.ts",
+      "default": "./dist/perf/timer.js"
     },
-    "./performance/types": {
-      "source": "./src/performance/types.ts",
-      "types": "./dist/performance/types.d.ts",
-      "default": "./dist/performance/types.js"
+    "./perf/types": {
+      "source": "./src/perf/types.ts",
+      "types": "./dist/perf/types.d.ts",
+      "default": "./dist/perf/types.js"
+    },
+    "./pkg-ext/data": {
+      "source": "./src/pkg-ext/data.ts",
+      "types": "./dist/pkg-ext/data.d.ts",
+      "default": "./dist/pkg-ext/data.js"
+    },
+    "./pkg-ext/types": {
+      "source": "./src/pkg-ext/types.ts",
+      "types": "./dist/pkg-ext/types.d.ts",
+      "default": "./dist/pkg-ext/types.js"
     },
     "./primordials/array": {
       "source": "./src/primordials/array.ts",
@@ -1428,20 +1423,20 @@
       "types": "./dist/primordials/url.d.ts",
       "default": "./dist/primordials/url.js"
     },
-    "./process-lock/instance": {
-      "source": "./src/process-lock/instance.ts",
-      "types": "./dist/process-lock/instance.d.ts",
-      "default": "./dist/process-lock/instance.js"
+    "./proc-lock/instance": {
+      "source": "./src/proc-lock/instance.ts",
+      "types": "./dist/proc-lock/instance.d.ts",
+      "default": "./dist/proc-lock/instance.js"
     },
-    "./process-lock/manager": {
-      "source": "./src/process-lock/manager.ts",
-      "types": "./dist/process-lock/manager.d.ts",
-      "default": "./dist/process-lock/manager.js"
+    "./proc-lock/manager": {
+      "source": "./src/proc-lock/manager.ts",
+      "types": "./dist/proc-lock/manager.d.ts",
+      "default": "./dist/proc-lock/manager.js"
     },
-    "./process-lock/types": {
-      "source": "./src/process-lock/types.ts",
-      "types": "./dist/process-lock/types.d.ts",
-      "default": "./dist/process-lock/types.js"
+    "./proc-lock/types": {
+      "source": "./src/proc-lock/types.ts",
+      "types": "./dist/proc-lock/types.d.ts",
+      "default": "./dist/proc-lock/types.js"
     },
     "./promise-queue/queue": {
       "source": "./src/promise-queue/queue.ts",
@@ -1778,21 +1773,6 @@
       "types": "./dist/strings/width.d.ts",
       "default": "./dist/strings/width.js"
     },
-    "./suppress-warnings/event-target": {
-      "source": "./src/suppress-warnings/event-target.ts",
-      "types": "./dist/suppress-warnings/event-target.d.ts",
-      "default": "./dist/suppress-warnings/event-target.js"
-    },
-    "./suppress-warnings/suppress": {
-      "source": "./src/suppress-warnings/suppress.ts",
-      "types": "./dist/suppress-warnings/suppress.d.ts",
-      "default": "./dist/suppress-warnings/suppress.js"
-    },
-    "./suppress-warnings/types": {
-      "source": "./src/suppress-warnings/types.ts",
-      "types": "./dist/suppress-warnings/types.d.ts",
-      "default": "./dist/suppress-warnings/types.js"
-    },
     "./tables/bordered": {
       "source": "./src/tables/bordered.ts",
       "types": "./dist/tables/bordered.d.ts",
@@ -1845,6 +1825,16 @@
       "source": "./src/themes/types.ts",
       "types": "./dist/themes/types.d.ts",
       "default": "./dist/themes/types.js"
+    },
+    "./ttl-cache/cache": {
+      "source": "./src/ttl-cache/cache.ts",
+      "types": "./dist/ttl-cache/cache.d.ts",
+      "default": "./dist/ttl-cache/cache.js"
+    },
+    "./ttl-cache/types": {
+      "source": "./src/ttl-cache/types.ts",
+      "types": "./dist/ttl-cache/types.d.ts",
+      "default": "./dist/ttl-cache/types.js"
     },
     "./types/purl": {
       "source": "./src/types/purl.ts",
@@ -1900,6 +1890,21 @@
       "source": "./src/versions/types.ts",
       "types": "./dist/versions/types.d.ts",
       "default": "./dist/versions/types.js"
+    },
+    "./warnings/event-target": {
+      "source": "./src/warnings/event-target.ts",
+      "types": "./dist/warnings/event-target.d.ts",
+      "default": "./dist/warnings/event-target.js"
+    },
+    "./warnings/suppress": {
+      "source": "./src/warnings/suppress.ts",
+      "types": "./dist/warnings/suppress.d.ts",
+      "default": "./dist/warnings/suppress.js"
+    },
+    "./warnings/types": {
+      "source": "./src/warnings/types.ts",
+      "types": "./dist/warnings/types.d.ts",
+      "default": "./dist/warnings/types.js"
     },
     "./words/article": {
       "source": "./src/words/article.ts",

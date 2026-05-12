@@ -13,7 +13,7 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createTtlCache } from '../../src/cache-with-ttl/cache'
+import { createTtlCache } from '../../src/ttl-cache/cache'
 import { resetEnv, setEnv } from '../../src/env/rewire'
 import { safeDelete } from '../../src/fs/safe'
 import { invalidateCaches } from '../../src/paths/rewire'

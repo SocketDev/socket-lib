@@ -12,7 +12,7 @@ import { ProcessLockManager } from './manager'
  *
  * @example
  * ```typescript
- * import { processLock } from '@socketsecurity/lib/process-lock/instance'
+ * import { processLock } from '@socketsecurity/lib/proc-lock/instance'
  *
  * await processLock.withLock('/tmp/my-lock', async () => {
  *   // critical section

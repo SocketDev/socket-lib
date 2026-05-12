@@ -6,7 +6,7 @@
  */
 
 import pacote from '../external/pacote'
-import { packageExtensions as packageExtensionsImport } from '../package-extensions/data'
+import { packageExtensions as packageExtensionsImport } from '../pkg-ext/data'
 import { normalizePath } from '../paths/normalize'
 import { lifecycleScriptNames as lifecycleScriptNamesImport } from './lifecycle-script-names'
 import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from './package-default-node-range'

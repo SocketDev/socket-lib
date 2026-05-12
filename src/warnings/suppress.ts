@@ -80,7 +80,7 @@ export function setupSuppression(): void {
  * so repeat invocations are cheap.
  *
  * @example
- * import { suppressMaxListenersWarning } from '@socketsecurity/lib/suppress-warnings/suppress'
+ * import { suppressMaxListenersWarning } from '@socketsecurity/lib/warnings/suppress'
  *
  * suppressMaxListenersWarning()
  */
@@ -95,7 +95,7 @@ export function suppressMaxListenersWarning(): void {
  * @param warningType - The warning type to suppress (e.g., 'DeprecationWarning', 'ExperimentalWarning')
  *
  * @example
- * import { suppressWarningType } from '@socketsecurity/lib/suppress-warnings/suppress'
+ * import { suppressWarningType } from '@socketsecurity/lib/warnings/suppress'
  *
  * suppressWarningType('ExperimentalWarning')
  */
@@ -112,7 +112,7 @@ export function suppressWarningType(warningType: string): void {
  * @returns The result of the callback
  *
  * @example
- * import { withSuppressedWarnings } from '@socketsecurity/lib/suppress-warnings/suppress'
+ * import { withSuppressedWarnings } from '@socketsecurity/lib/warnings/suppress'
  *
  * const result = await withSuppressedWarnings('ExperimentalWarning', async () => {
  *   // Code that triggers experimental warnings

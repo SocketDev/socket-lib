@@ -27,7 +27,7 @@ import type { PerformanceMetrics } from './types'
  * @returns Result of the function and duration
  *
  * @example
- * import { measure } from '@socketsecurity/lib/performance/timer'
+ * import { measure } from '@socketsecurity/lib/perf/timer'
  *
  * const { result, duration } = await measure('fetch-packages', async () => {
  *   return await fetchPackages()
@@ -65,7 +65,7 @@ export async function measure<T>(
  * @returns Result of the function and duration
  *
  * @example
- * import { measureSync } from '@socketsecurity/lib/performance/timer'
+ * import { measureSync } from '@socketsecurity/lib/perf/timer'
  *
  * const { result, duration } = measureSync('parse-json', () => {
  *   return JSON.parse(data)
@@ -101,7 +101,7 @@ export function measureSync<T>(
  * @param metadata - Optional metadata
  *
  * @example
- * import { perfCheckpoint } from '@socketsecurity/lib/performance/timer'
+ * import { perfCheckpoint } from '@socketsecurity/lib/perf/timer'
  *
  * perfCheckpoint('start-scan')
  * // ... do work ...
@@ -138,7 +138,7 @@ export function perfCheckpoint(
  * @returns Stop function that completes the timing
  *
  * @example
- * import { perfTimer } from '@socketsecurity/lib/performance/timer'
+ * import { perfTimer } from '@socketsecurity/lib/perf/timer'
  *
  * const stop = perfTimer('api-call')
  * await fetchData()
@@ -179,7 +179,7 @@ export function perfTimer(
  * @returns Memory usage in MB
  *
  * @example
- * import { trackMemory } from '@socketsecurity/lib/performance/timer'
+ * import { trackMemory } from '@socketsecurity/lib/perf/timer'
  *
  * const memBefore = trackMemory('before-operation')
  * await heavyOperation()

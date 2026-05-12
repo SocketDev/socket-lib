@@ -48,7 +48,7 @@ import Arborist from '../external/@npmcli/arborist'
 import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
-import { processLock } from '../process-lock/instance'
+import { processLock } from '../proc-lock/instance'
 import { spawn } from '../spawn/spawn'
 import { generateCacheKey } from './cache'
 

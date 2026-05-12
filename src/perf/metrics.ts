@@ -17,7 +17,7 @@ import type { PerformanceMetrics } from './types'
  * Clear all collected performance metrics.
  *
  * @example
- * import { clearPerformanceMetrics } from '@socketsecurity/lib/performance/metrics'
+ * import { clearPerformanceMetrics } from '@socketsecurity/lib/perf/metrics'
  *
  * clearPerformanceMetrics()
  */
@@ -33,7 +33,7 @@ export function clearPerformanceMetrics(): void {
  * @returns Array of performance metrics
  *
  * @example
- * import { getPerformanceMetrics } from '@socketsecurity/lib/performance/metrics'
+ * import { getPerformanceMetrics } from '@socketsecurity/lib/perf/metrics'
  *
  * const metrics = getPerformanceMetrics()
  * console.log(metrics)
@@ -48,7 +48,7 @@ export function getPerformanceMetrics(): PerformanceMetrics[] {
  * @returns Summary of metrics grouped by operation
  *
  * @example
- * import { getPerformanceSummary } from '@socketsecurity/lib/performance/metrics'
+ * import { getPerformanceSummary } from '@socketsecurity/lib/perf/metrics'
  *
  * const summary = getPerformanceSummary()
  * console.log(summary)

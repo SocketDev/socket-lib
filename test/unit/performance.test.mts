@@ -18,18 +18,18 @@ import {
   clearPerformanceMetrics,
   getPerformanceMetrics,
   getPerformanceSummary,
-} from '@socketsecurity/lib/performance/metrics'
+} from '@socketsecurity/lib/perf/metrics'
 import {
   generatePerformanceReport,
   printPerformanceSummary,
-} from '@socketsecurity/lib/performance/report'
+} from '@socketsecurity/lib/perf/report'
 import {
   measure,
   measureSync,
   perfCheckpoint,
   perfTimer,
   trackMemory,
-} from '@socketsecurity/lib/performance/timer'
+} from '@socketsecurity/lib/perf/timer'
 
 describe('performance', () => {
   describe('module import', () => {

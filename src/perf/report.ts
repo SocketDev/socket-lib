@@ -21,7 +21,7 @@ import { getPerformanceSummary } from './metrics'
  * @returns Formatted performance report
  *
  * @example
- * import { generatePerformanceReport } from '@socketsecurity/lib/performance/report'
+ * import { generatePerformanceReport } from '@socketsecurity/lib/perf/report'
  *
  * console.log(generatePerformanceReport())
  * // ╔═══════════════════════════════════════════════╗
@@ -77,7 +77,7 @@ export function generatePerformanceReport(): string {
  * Only prints when DEBUG=perf is enabled.
  *
  * @example
- * import { printPerformanceSummary } from '@socketsecurity/lib/performance/report'
+ * import { printPerformanceSummary } from '@socketsecurity/lib/perf/report'
  *
  * printPerformanceSummary()
  * // Performance Summary:

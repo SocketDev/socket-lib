@@ -1,5 +1,5 @@
 /**
- * @fileoverview Public type surface for `performance/*` modules — the
+ * @fileoverview Public type surface for `perf/*` modules — the
  * `PerformanceMetrics` row shape pushed onto the shared metrics array
  * by `perfTimer` / `measure` / `measureSync` / `perfCheckpoint` /
  * `trackMemory`. Pure types, no runtime side effects.

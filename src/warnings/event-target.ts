@@ -27,7 +27,7 @@ import { ObjectGetOwnPropertySymbols } from '../primordials/object'
  * @param maxListeners - Maximum number of listeners (defaults to 10, the Node.js default)
  *
  * @example
- * import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings/event-target'
+ * import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
  *
  * const controller = new AbortController()
  * setMaxEventTargetListeners(controller.signal)

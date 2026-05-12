@@ -19,8 +19,8 @@ import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
-import { processLock } from '@socketsecurity/lib/process-lock/instance'
-import type { ProcessLockOptions } from '@socketsecurity/lib/process-lock/types'
+import { processLock } from '@socketsecurity/lib/proc-lock/instance'
+import type { ProcessLockOptions } from '@socketsecurity/lib/proc-lock/types'
 import { safeDeleteSync } from '@socketsecurity/lib/fs/safe'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
