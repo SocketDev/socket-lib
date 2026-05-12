@@ -13,7 +13,8 @@ import { ErrorCtor } from '../primordials/error'
 
 import { fetchGitHub } from './fetch'
 import { fetchRefShaViaGraphQL } from './refs-graphql'
-import { GITHUB_API_BASE_URL, GitHubEmptyBodyError } from './types'
+import { GITHUB_API_BASE_URL } from './constants'
+import { GitHubEmptyBodyError } from './errors'
 
 import type {
   GitHubCommit,

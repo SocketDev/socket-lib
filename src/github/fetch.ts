@@ -27,7 +27,7 @@ import { DateCtor } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
 import { getGitHubToken } from './token'
-import { GitHubEmptyBodyError } from './types'
+import { GitHubEmptyBodyError } from './errors'
 
 import type { GitHubFetchOptions, GitHubRateLimitError } from './types'
 

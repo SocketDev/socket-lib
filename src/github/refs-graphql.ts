@@ -13,7 +13,7 @@ import { httpRequest } from '../http-request/request'
 import { JSONParse, JSONStringify } from '../primordials/json'
 
 import { getGitHubToken } from './token'
-import { GITHUB_GRAPHQL_URL } from './types'
+import { GITHUB_GRAPHQL_URL } from './constants'
 
 import type { GitHubFetchOptions } from './types'
 

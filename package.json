@@ -833,6 +833,16 @@
       "types": "./dist/git/unstaged.d.ts",
       "default": "./dist/git/unstaged.js"
     },
+    "./github/constants": {
+      "source": "./src/github/constants.ts",
+      "types": "./dist/github/constants.d.ts",
+      "default": "./dist/github/constants.js"
+    },
+    "./github/errors": {
+      "source": "./src/github/errors.ts",
+      "types": "./dist/github/errors.d.ts",
+      "default": "./dist/github/errors.js"
+    },
     "./github/fetch": {
       "source": "./src/github/fetch.ts",
       "types": "./dist/github/fetch.d.ts",

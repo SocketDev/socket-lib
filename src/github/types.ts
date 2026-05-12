@@ -1,67 +1,9 @@
 /**
- * @fileoverview Public type surface for `github/*` modules — interfaces,
- * named errors, and the API base-URL constants. Pure types and small
- * value constants only; no I/O or runtime side effects so this module
- * stays cheap to import everywhere.
+ * @fileoverview Public type surface for `github/*` modules — pure
+ * interfaces. No I/O or runtime side effects so this module stays
+ * cheap to import everywhere. Constants live in `./constants`,
+ * named errors in `./errors`.
  */
-
-/**
- * GitHub API base URL constant. Inlined so the value is captured at
- * coverage-mode bundle time rather than referenced through a module
- * graph indirection.
- */
-export const GITHUB_API_BASE_URL = 'https://api.github.com'
-
-export const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
-
-/**
- * Default TTL for the GitHub cache (5 minutes). Used by ref resolution
- * and the GHSA cache layer.
- */
-export const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000
-
-/**
- * Thrown by `fetchGitHub` when GitHub returns HTTP 200 OK with a
- * zero-byte body — the "successful empty response" pattern.
- *
- * Why this exists (background for new contributors):
- *   GitHub's REST API has a documented failure mode that is *very*
- *   easy to miss in code review. During incidents where the search
- *   / Elasticsearch backing index is degraded (see GitHub status
- *   pages with titles like "search is degraded" or "Pull Requests
- *   degraded"), the REST `/repos/...` GET endpoints return:
- *     - HTTP status: 200 OK   ← looks like success
- *     - Body:        ""       ← but the payload is empty
- *     - Headers:     no Retry-After, no rate-limit signal, nothing
- *
- *   Without a typed error, calling code does
- *     `JSON.parse(response.body.toString('utf8'))`
- *   on an empty string, which throws a confusing
- *   `SyntaxError: Unexpected end of JSON input`. That error has
- *   nothing to do with our code — but it's the only signal upstream
- *   sees. This class wraps that case in a *named* error so callers
- *   can `instanceof GitHubEmptyBodyError` and choose what to do:
- *   retry the same endpoint later, fall back to GraphQL (which uses
- *   a different backend and is unaffected by ES outages), or surface
- *   a clean message to the user.
- *
- *   The HTTP status is hard-coded to 200 because that's *exactly*
- *   what makes this insidious — a real 4xx/5xx would already be
- *   handled by the rate-limit / status-code branch above.
- */
-export class GitHubEmptyBodyError extends Error {
-  /** HTTP status (always 200 — that's what makes this case insidious). */
-  status: number
-  constructor(url: string) {
-    // Library-API error: terse and stable so callers can switch on
-    // .name / instanceof without parsing the message. The verbose
-    // background ("documented incident shape", status URL) lives in
-    // the JSDoc above the class declaration.
-    super(`GitHub API returned HTTP 200 with empty body: ${url}`)
-    this.name = 'GitHubEmptyBodyError'
-    this.status = 200
-  }
-}
 
 /**
  * Options for GitHub API fetch requests.

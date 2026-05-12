@@ -14,7 +14,7 @@
 
 import { createTtlCache } from '../ttl-cache/cache'
 
-import { DEFAULT_CACHE_TTL_MS } from './types'
+import { DEFAULT_CACHE_TTL_MS } from './constants'
 
 import type { TtlCache } from '../ttl-cache/types'
 

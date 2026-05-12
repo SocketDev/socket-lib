@@ -266,16 +266,18 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## github/
 
-| Subpath                                                                    | Description                                                                                            |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [`@socketsecurity/lib/github/fetch`](../src/github/fetch.ts)               | Authenticated GitHub REST fetch.                                                                       |
-| [`@socketsecurity/lib/github/ghsa`](../src/github/ghsa.ts)                 | GitHub Security Advisory (GHSA) lookups.                                                               |
-| [`@socketsecurity/lib/github/refs`](../src/github/refs.ts)                 | Resolve GitHub git refs (tag / branch / commit) to full commit SHAs.                                   |
-| [`@socketsecurity/lib/github/refs-cache`](../src/github/refs-cache.ts)     | TtlCache singleton for github/refs.                                                                    |
-| [`@socketsecurity/lib/github/refs-graphql`](../src/github/refs-graphql.ts) | Resolve a GitHub git ref via GraphQL.                                                                  |
-| [`@socketsecurity/lib/github/refs-rest`](../src/github/refs-rest.ts)       | Resolve a GitHub git ref via REST tier-cascade.                                                        |
-| [`@socketsecurity/lib/github/token`](../src/github/token.ts)               | GitHub token resolution.                                                                               |
-| [`@socketsecurity/lib/github/types`](../src/github/types.ts)               | Public type surface for `github/*` modules — interfaces, named errors, and the API base-URL constants. |
+| Subpath                                                                    | Description                                                          |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [`@socketsecurity/lib/github/constants`](../src/github/constants.ts)       | GitHub API URL + cache-TTL constants.                                |
+| [`@socketsecurity/lib/github/errors`](../src/github/errors.ts)             | Named errors thrown by `github/*` helpers.                           |
+| [`@socketsecurity/lib/github/fetch`](../src/github/fetch.ts)               | Authenticated GitHub REST fetch.                                     |
+| [`@socketsecurity/lib/github/ghsa`](../src/github/ghsa.ts)                 | GitHub Security Advisory (GHSA) lookups.                             |
+| [`@socketsecurity/lib/github/refs`](../src/github/refs.ts)                 | Resolve GitHub git refs (tag / branch / commit) to full commit SHAs. |
+| [`@socketsecurity/lib/github/refs-cache`](../src/github/refs-cache.ts)     | TtlCache singleton for github/refs.                                  |
+| [`@socketsecurity/lib/github/refs-graphql`](../src/github/refs-graphql.ts) | Resolve a GitHub git ref via GraphQL.                                |
+| [`@socketsecurity/lib/github/refs-rest`](../src/github/refs-rest.ts)       | Resolve a GitHub git ref via REST tier-cascade.                      |
+| [`@socketsecurity/lib/github/token`](../src/github/token.ts)               | GitHub token resolution.                                             |
+| [`@socketsecurity/lib/github/types`](../src/github/types.ts)               | Public type surface for `github/*` modules — pure interfaces.        |
 
 ## globs/
 
@@ -383,7 +385,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/objects/getters`](../src/objects/getters.ts)       | Lazy-getter primitives + `createConstantsObject`.                                                                         |
 | [`@socketsecurity/lib/objects/inspect`](../src/objects/inspect.ts)       | Object inspection helpers — `getKeys`, `getOwn`, `getOwnPropertyValues`.                                                  |
 | [`@socketsecurity/lib/objects/mutate`](../src/objects/mutate.ts)         | Object mutation helpers — `merge` (deep recursive), `objectAssign` (alias for native), `objectFreeze` (alias for native). |
-| [`@socketsecurity/lib/objects/predicates`](../src/objects/predicates.ts) | Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isObjectObject`.                                                    |
+| [`@socketsecurity/lib/objects/predicates`](../src/objects/predicates.ts) | Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`.                                                     |
 | [`@socketsecurity/lib/objects/sort`](../src/objects/sort.ts)             | Sorted-object helpers: `entryKeyComparator`, `objectEntries`, `toSortedObject`, `toSortedObjectFromEntries`.              |
 | [`@socketsecurity/lib/objects/types`](../src/objects/types.ts)           | Public type surface for `objects/*` modules — getter definition shapes and the `Remap` type helper.                       |
 

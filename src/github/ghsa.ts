@@ -20,7 +20,8 @@ import { JSONParse, JSONStringify } from '../primordials/json'
 import { fetchGitHub } from './fetch'
 import { getGithubCache } from './refs'
 import { getGitHubToken } from './token'
-import { GITHUB_GRAPHQL_URL, GitHubEmptyBodyError } from './types'
+import { GITHUB_GRAPHQL_URL } from './constants'
+import { GitHubEmptyBodyError } from './errors'
 
 import type { GhsaDetails, GitHubFetchOptions } from './types'
 
