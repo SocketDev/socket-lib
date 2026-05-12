@@ -54,9 +54,9 @@ describe('env/package-manager', () => {
   })
 
   describe('getPackageManagerInfo', () => {
-    it('should return null when no user agent', () => {
+    it('should return undefined when no user agent', () => {
       setEnv('npm_config_user_agent', '')
-      expect(getPackageManagerInfo()).toBeNull()
+      expect(getPackageManagerInfo()).toBeUndefined()
     })
 
     it('should parse pnpm user agent', () => {
@@ -85,12 +85,12 @@ describe('env/package-manager', () => {
 
     it('should handle malformed user agent', () => {
       setEnv('npm_config_user_agent', 'invalid')
-      expect(getPackageManagerInfo()).toBeNull()
+      expect(getPackageManagerInfo()).toBeUndefined()
     })
 
     it('should handle empty user agent', () => {
       setEnv('npm_config_user_agent', '')
-      expect(getPackageManagerInfo()).toBeNull()
+      expect(getPackageManagerInfo()).toBeUndefined()
     })
   })
 
@@ -116,20 +116,20 @@ describe('env/package-manager', () => {
         expect(detectPackageManager()).toBe('bun')
       })
 
-      it('should return null for unknown user agent', () => {
+      it('should return undefined for unknown user agent', () => {
         setEnv('npm_config_user_agent', 'unknown/1.0.0')
-        expect(detectPackageManager()).toBeNull()
+        expect(detectPackageManager()).toBeUndefined()
       })
     })
 
     describe('fallback path detection', () => {
-      it('should return null when no detection possible', () => {
+      it('should return undefined when no detection possible', () => {
         setEnv('npm_config_user_agent', '')
         // Note: In a real environment, process.argv[0] would be node path
-        // This test verifies null is returned when no package manager is detected
+        // This test verifies undefined is returned when no package manager is detected
         const result = detectPackageManager()
         // Result depends on actual process.argv[0], so we just verify it's a valid type
-        expect(result === null || typeof result === 'string').toBe(true)
+        expect(result === undefined || typeof result === 'string').toBe(true)
       })
     })
   })
@@ -168,7 +168,7 @@ describe('env/package-manager', () => {
       setEnv('npm_config_user_agent', '')
       const userAgent = getPackageManagerUserAgent()
       expect(userAgent === '' || userAgent === undefined).toBe(true)
-      expect(getPackageManagerInfo()).toBeNull()
+      expect(getPackageManagerInfo()).toBeUndefined()
     })
   })
 

@@ -23,12 +23,12 @@ import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Absolute path to socket-lib's own primordials source. Each test
 // runs in its own tmpDir for config files, but the primordials engine
-// needs to find socket-lib's primordials.ts somewhere — pin it
-// explicitly via socketLibPrimordialsPath so we don't rely on the
+// needs to find socket-lib's primordials/ directory somewhere — pin
+// it explicitly via socketLibPrimordialsPath so we don't rely on the
 // auto-discovery (sibling clone / node_modules), which doesn't apply
 // from inside a tmpDir.
 const HERE = path.dirname(fileURLToPath(import.meta.url))
-const SOCKET_LIB_PRIMORDIALS = path.resolve(HERE, '../../../src/primordials.ts')
+const SOCKET_LIB_PRIMORDIALS = path.resolve(HERE, '../../../src/primordials')
 
 let tmpDir: string
 

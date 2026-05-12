@@ -60,7 +60,7 @@ describe('json/safe-parse', () => {
     it('should handle mixed arrays', () => {
       const json = '[1,"string",true,null,{"obj":true}]'
       const result = safeJsonParse(json)
-      expect(result).toEqual([1, 'string', true, undefined, { obj: true }])
+      expect(result).toEqual([1, 'string', true, null, { obj: true }])
     })
   })
 

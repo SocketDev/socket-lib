@@ -34,7 +34,7 @@ export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined
  * detectPackageManager() // 'yarn'
  *
  * // Outside package manager context
- * detectPackageManager() // null
+ * detectPackageManager() // undefined
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
