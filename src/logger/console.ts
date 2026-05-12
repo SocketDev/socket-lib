@@ -24,7 +24,11 @@
 
 import process from 'node:process'
 
-import { ObjectDefineProperties, ObjectEntries } from '../primordials/object'
+import {
+  ObjectDefineProperties,
+  ObjectEntries,
+  ObjectFromEntries,
+} from '../primordials/object'
 
 import { ReflectConstruct } from '../primordials/reflect'
 import {
@@ -131,5 +135,5 @@ export function ensurePrototypeInitialized() {
       ])
     }
   }
-  ObjectDefineProperties(Logger.prototype, Object.fromEntries(entries))
+  ObjectDefineProperties(Logger.prototype, ObjectFromEntries(entries))
 }

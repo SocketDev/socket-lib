@@ -8,6 +8,7 @@
 
 import { ProxyCtor } from '../primordials/globals'
 import { SetCtor } from '../primordials/map-set'
+import { ObjectKeys } from '../primordials/object'
 
 import { findCaseInsensitiveEnvKey } from './case-insensitive'
 
@@ -109,8 +110,8 @@ export function createEnvProxy(
 
     ownKeys(_target) {
       const keys = new Set<string>([
-        ...Object.keys(base),
-        ...(overrides ? Object.keys(overrides) : []),
+        ...ObjectKeys(base),
+        ...(overrides ? ObjectKeys(overrides) : []),
       ])
       return [...keys]
     },

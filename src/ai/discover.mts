@@ -24,6 +24,7 @@ import path from 'node:path'
 import { whichSync } from '../bin/which'
 import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/logger'
+import { JSONParse, JSONStringify } from '../primordials/json'
 
 const logger = getDefaultLogger()
 
@@ -117,7 +118,7 @@ export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
   }
   try {
     const raw = readFileSync(cachePath, 'utf8')
-    const parsed = JSON.parse(raw) as OnDiskCache
+    const parsed = JSONParse(raw) as OnDiskCache
     if (
       typeof parsed !== 'object' ||
       parsed === null ||
@@ -148,7 +149,7 @@ export async function writeDiskCache(
   try {
     await mkdir(path.dirname(cachePath), { recursive: true })
     const payload: OnDiskCache = { agents, writtenAt: Date.now() }
-    writeFileSync(cachePath, JSON.stringify(payload, undefined, 2) + '\n')
+    writeFileSync(cachePath, JSONStringify(payload, undefined, 2) + '\n')
   } catch (e) {
     // Cache-write failure is non-fatal — discovery still works for
     // the current process via the in-process cache.

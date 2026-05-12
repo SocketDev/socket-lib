@@ -26,6 +26,8 @@ import { ArrayIsArray, ArrayPrototypeFind } from '../primordials/array'
 
 import { DateNow } from '../primordials/date'
 
+import { JSONStringify } from '../primordials/json'
+
 import { StringPrototypeStartsWith } from '../primordials/string'
 
 import { getNodeFs } from '../node/fs'
@@ -295,6 +297,6 @@ export async function writeBinaryCacheMetadata(
   const fs = getNodeFs()
   // Use atomic write-then-rename pattern to prevent corruption on crash
   const tmpPath = `${metaPath}.tmp.${process.pid}`
-  await fs.promises.writeFile(tmpPath, JSON.stringify(metadata, null, 2))
+  await fs.promises.writeFile(tmpPath, JSONStringify(metadata, null, 2))
   await fs.promises.rename(tmpPath, metaPath)
 }

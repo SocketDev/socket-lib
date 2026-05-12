@@ -20,6 +20,7 @@ import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
 import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
+import { ObjectKeys } from '../primordials/object'
 import { PromiseCtor } from '../primordials/promise'
 import { URLCtor } from '../primordials/url'
 
@@ -197,7 +198,7 @@ export async function httpRequestAttempt(
               'proxy-authenticate',
               'proxy-authorization',
             ])
-            for (const key of Object.keys(headers)) {
+            for (const key of ObjectKeys(headers)) {
               if (!stripped.has(key.toLowerCase())) {
                 ;(redirectHeaders as Record<string, unknown>)[key] = (
                   headers as Record<string, unknown>

@@ -23,7 +23,7 @@ import { safeGet as cacacheSafeGet } from '../cacache/read'
 import { put as cacachePut, remove as cacacheRemove } from '../cacache/write'
 import { DateNow } from '../primordials/date'
 import { TypeErrorCtor } from '../primordials/error'
-import { JSONParse } from '../primordials/json'
+import { JSONParse, JSONStringify } from '../primordials/json'
 import { MapCtor } from '../primordials/map-set'
 import { MathMax } from '../primordials/math'
 import { RegExpCtor, RegExpPrototypeTest } from '../primordials/regexp'
@@ -310,7 +310,7 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
 
     // Update persistent cache (don't fail if this errors).
     try {
-      await cacachePut(fullKey, JSON.stringify(entry), {
+      await cacachePut(fullKey, JSONStringify(entry), {
         metadata: { expiresAt: entry.expiresAt },
       })
     } catch {

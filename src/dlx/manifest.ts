@@ -255,7 +255,7 @@ export class DlxManifest {
           return
         }
 
-        const data = JSON.parse(content) as Record<
+        const data = JSONParse(content) as Record<
           string,
           DlxManifestEntry | StoreRecord
         >
@@ -369,7 +369,7 @@ export class DlxManifest {
         if (fs.existsSync(this.manifestPath)) {
           const content = fs.readFileSync(this.manifestPath, 'utf8')
           if (content.trim()) {
-            data = JSON.parse(content) as Record<string, StoreRecord>
+            data = JSONParse(content) as Record<string, StoreRecord>
           }
         }
       } catch (e) {
@@ -388,7 +388,7 @@ export class DlxManifest {
       }
 
       // Write atomically.
-      const content = JSON.stringify(data, null, 2)
+      const content = JSONStringify(data, null, 2)
       const tempPath = `${this.manifestPath}.tmp`
 
       try {

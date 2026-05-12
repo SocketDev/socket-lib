@@ -9,9 +9,11 @@ import { whichSync } from '../bin/which'
 import { debugNs } from '../debug/output'
 import { getGlobMatcher } from '../globs/matcher'
 import { normalizePath } from '../paths/normalize'
+import { ArrayIsArray } from '../primordials/array'
 import { BufferIsBuffer } from '../primordials/buffer'
 import { JSONStringify } from '../primordials/json'
 import { MapCtor } from '../primordials/map-set'
+import { ObjectKeys } from '../primordials/object'
 import { StringPrototypeSubstring } from '../primordials/string'
 import { spawn, spawnSync } from '../spawn/spawn'
 import { stripAnsi } from '../ansi/strip'
@@ -354,9 +356,9 @@ export function setCachedGitDiff(key: string, result: string[]): void {
  */
 export function stableKey(value: unknown): string {
   return JSONStringify(value, (_key, val) => {
-    if (val && typeof val === 'object' && !Array.isArray(val)) {
+    if (val && typeof val === 'object' && !ArrayIsArray(val)) {
       const sorted: Record<string, unknown> = {}
-      for (const k of Object.keys(val as object).sort()) {
+      for (const k of ObjectKeys(val as object).sort()) {
         sorted[k] = (val as Record<string, unknown>)[k]
       }
       return sorted

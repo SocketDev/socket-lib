@@ -18,6 +18,7 @@
  */
 
 import { errorMessage } from '../errors/message'
+import { ObjectKeys } from '../primordials/object'
 import { spawn } from '../spawn/spawn'
 import { isSpawnError } from '../spawn/errors'
 
@@ -157,7 +158,7 @@ export async function pickAgent(
   if (requested) {
     if (!(requested in discovered)) {
       throw new Error(
-        `spawnAiAgent: requested agent "${requested}" is not on PATH. Install the CLI or pass a different agent. Discovered: ${Object.keys(discovered).join(', ') || '(none)'}`,
+        `spawnAiAgent: requested agent "${requested}" is not on PATH. Install the CLI or pass a different agent. Discovered: ${ObjectKeys(discovered).join(', ') || '(none)'}`,
       )
     }
     return requested

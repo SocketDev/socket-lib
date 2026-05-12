@@ -16,7 +16,7 @@ import type { PackageJson } from './types'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { JSONParse } from '../primordials/json'
+import { JSONParse, JSONStringify } from '../primordials/json'
 
 import { ObjectEntries } from '../primordials/object'
 
@@ -141,7 +141,7 @@ export async function isolatePackage(
     // Installing from registry first, then copying source on top if provided.
     await fs.promises.writeFile(
       path.join(packageTempDir, 'package.json'),
-      JSON.stringify(
+      JSONStringify(
         {
           name: 'test-temp',
           private: true,
@@ -221,7 +221,7 @@ export async function isolatePackage(
 
     await fs.promises.writeFile(
       pkgJsonPath,
-      JSON.stringify(finalPkgJson, null, 2),
+      JSONStringify(finalPkgJson, null, 2),
     )
   }
 
