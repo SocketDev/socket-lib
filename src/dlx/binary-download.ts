@@ -198,7 +198,7 @@ export async function downloadBinaryFile(
       try {
         await httpDownload(url, destPath, sha256 ? { sha256 } : undefined)
       } catch (e) {
-        throw new Error(
+        throw new ErrorCtor(
           `Failed to download binary from ${url}\n` +
             `Destination: ${destPath}\n` +
             'Check your internet connection or verify the URL is accessible.',
@@ -221,7 +221,7 @@ export async function downloadBinaryFile(
         if (!integrityMatch) {
           // Clean up invalid file.
           await safeDelete(destPath)
-          throw new Error(
+          throw new ErrorCtor(
             `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
           )
         }

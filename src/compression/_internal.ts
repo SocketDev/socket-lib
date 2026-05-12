@@ -10,6 +10,7 @@
 
 import path from 'node:path'
 
+import { ErrorCtor } from '../primordials/error'
 import { StringPrototypeToLowerCase } from '../primordials/string'
 
 import type { CompressFileOptions, CompressOptions } from './types'
@@ -57,7 +58,7 @@ export function resolveFileArgs(
 ): ResolvedFileArgs {
   if (typeof destOrOptions === 'string') {
     if (srcPath === destOrOptions) {
-      throw new Error(
+      throw new ErrorCtor(
         `${fnName}: srcPath and destPath must differ; got ${srcPath}`,
       )
     }
@@ -78,7 +79,7 @@ export function resolveFileArgs(
     } as unknown as ResolvedFileArgs)
   }
   // No destPath, no inPlace — caller forgot the destination.
-  throw new Error(
+  throw new ErrorCtor(
     `${fnName}: missing destPath; pass an explicit destination or { inPlace: true }`,
   )
 }

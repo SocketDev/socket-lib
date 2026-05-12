@@ -18,6 +18,7 @@
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
 
 import { DateNow } from '../primordials/date'
+import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
 import { PromiseCtor } from '../primordials/promise'
 import { URLCtor } from '../primordials/url'
@@ -162,7 +163,7 @@ export async function httpRequestAttempt(
             // Hook already emitted above — reject directly to avoid double-fire.
             settled = true
             reject(
-              new Error(
+              new ErrorCtor(
                 `Too many redirects (exceeded maximum: ${maxRedirects})`,
               ),
             )
@@ -178,7 +179,7 @@ export async function httpRequestAttempt(
             // Hook already emitted above — reject directly to avoid double-fire.
             settled = true
             reject(
-              new Error(
+              new ErrorCtor(
                 `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
               ),
             )
@@ -242,7 +243,7 @@ export async function httpRequestAttempt(
             body: emptyBody,
             headers: res.headers,
             json: () => {
-              throw new Error('Cannot parse JSON from a streaming response')
+              throw new ErrorCtor('Cannot parse JSON from a streaming response')
             },
             ok,
             rawResponse: res,
@@ -264,7 +265,7 @@ export async function httpRequestAttempt(
             const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
             const maxMB = (maxResponseSize / (1024 * 1024)).toFixed(2)
             rejectOnce(
-              new Error(
+              new ErrorCtor(
                 `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
               ),
             )
@@ -326,13 +327,13 @@ export async function httpRequestAttempt(
         method,
         error as NodeJS.ErrnoException,
       )
-      rejectOnce(new Error(message, { cause: error }))
+      rejectOnce(new ErrorCtor(message, { cause: error }))
     })
 
     request.on('timeout', () => {
       request.destroy()
       rejectOnce(
-        new Error(
+        new ErrorCtor(
           `${method} request timed out after ${timeout}ms: ${url}\n→ Server did not respond in time.\n→ Try: Increase timeout or check network connectivity.`,
         ),
       )

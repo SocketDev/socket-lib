@@ -11,6 +11,8 @@
  * for the canonical pattern of agent-conditional logic).
  */
 
+import { ErrorCtor } from '../../../primordials/error'
+
 /**
  * Execute vlt commands. Not yet implemented — throws.
  *
@@ -18,7 +20,7 @@
  * (array-based args, Windows shell handling, debug-level filtering).
  */
 export function execVlt(_args: string[], _options?: unknown): never {
-  throw new Error(
+  throw new ErrorCtor(
     'execVlt is not yet implemented in @socketsecurity/lib/eco/npm/vlt. Track at task #58 (socket-lib 6.x: implement execVlt).',
   )
 }

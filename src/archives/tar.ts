@@ -22,6 +22,7 @@ import { createGunzip } from 'node:zlib'
 
 import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
+import { ErrorCtor } from '../primordials/error'
 
 import {
   assertArchiveExists,
@@ -93,7 +94,7 @@ export async function extractTar(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `Archive has too many entries: exceeded limit of ${maxEntries}`,
             ),
           )
@@ -106,7 +107,7 @@ export async function extractTar(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `Invalid null byte in archive entry name: ${header.name}`,
             ),
           )
@@ -119,7 +120,7 @@ export async function extractTar(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
             ),
           )
@@ -132,7 +133,7 @@ export async function extractTar(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
             ),
           )
@@ -147,7 +148,7 @@ export async function extractTar(
           destroyScheduled = true
           process.nextTick(() => {
             extractStream.destroy(
-              new Error(
+              new ErrorCtor(
                 `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
               ),
             )
@@ -236,7 +237,7 @@ export async function extractTarGz(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `Archive has too many entries: exceeded limit of ${maxEntries}`,
             ),
           )
@@ -249,7 +250,7 @@ export async function extractTarGz(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `Invalid null byte in archive entry name: ${header.name}`,
             ),
           )
@@ -262,7 +263,7 @@ export async function extractTarGz(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
             ),
           )
@@ -275,7 +276,7 @@ export async function extractTarGz(
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
-            new Error(
+            new ErrorCtor(
               `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
             ),
           )
@@ -290,7 +291,7 @@ export async function extractTarGz(
           destroyScheduled = true
           process.nextTick(() => {
             extractStream.destroy(
-              new Error(
+              new ErrorCtor(
                 `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
               ),
             )

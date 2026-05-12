@@ -25,7 +25,9 @@ import { getLatestRelease } from '../../../src/releases/github-listing'
 
 vi.mock('../../../src/releases/github-asset-url', async importOriginal => {
   const original =
-    await importOriginal<typeof import('../../../src/releases/github-asset-url')>()
+    await importOriginal<
+      typeof import('../../../src/releases/github-asset-url')
+    >()
   return {
     ...original,
     getReleaseAssetUrl: vi.fn(),
@@ -34,7 +36,9 @@ vi.mock('../../../src/releases/github-asset-url', async importOriginal => {
 
 vi.mock('../../../src/releases/github-listing', async importOriginal => {
   const original =
-    await importOriginal<typeof import('../../../src/releases/github-listing')>()
+    await importOriginal<
+      typeof import('../../../src/releases/github-listing')
+    >()
   return {
     ...original,
     getLatestRelease: vi.fn(),

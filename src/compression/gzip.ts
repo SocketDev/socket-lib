@@ -25,6 +25,7 @@ import {
 } from 'node:zlib'
 
 import { safeDelete } from '../fs/safe'
+import { ErrorCtor } from '../primordials/error'
 import { StringPrototypeToLowerCase } from '../primordials/string'
 
 import { resolveFileArgs, stripExt } from './_internal'
@@ -141,7 +142,7 @@ export async function decompressGzipFile(
     undefined,
     p => {
       if (!hasGzipExt(p)) {
-        throw new Error(
+        throw new ErrorCtor(
           `decompressGzipFile: ${p} has no .gz/.gzip/.tgz extension; can't infer destination`,
         )
       }

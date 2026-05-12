@@ -25,6 +25,7 @@ import {
 } from 'node:zlib'
 
 import { safeDelete } from '../fs/safe'
+import { ErrorCtor } from '../primordials/error'
 import { StringPrototypeToLowerCase } from '../primordials/string'
 
 import { resolveFileArgs, stripExt } from './_internal'
@@ -160,7 +161,7 @@ export async function decompressBrotliFile(
     undefined,
     p => {
       if (!hasBrotliExt(p)) {
-        throw new Error(
+        throw new ErrorCtor(
           `decompressBrotliFile: ${p} has no .br/.brotli extension; can't infer destination`,
         )
       }

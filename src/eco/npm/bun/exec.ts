@@ -11,6 +11,8 @@
  * lockfile). Reference: socket-sdxgen/src/parsers/bun/.
  */
 
+import { ErrorCtor } from '../../../primordials/error'
+
 /**
  * Execute Bun commands. Not yet implemented — throws.
  *
@@ -18,7 +20,7 @@
  * (array-based args, Windows shell handling, debug-level filtering).
  */
 export function execBun(_args: string[], _options?: unknown): never {
-  throw new Error(
+  throw new ErrorCtor(
     'execBun is not yet implemented in @socketsecurity/lib/eco/npm/bun. Track at task #57 (socket-lib 6.x: implement execBun).',
   )
 }

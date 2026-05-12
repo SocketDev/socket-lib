@@ -286,7 +286,9 @@ export async function httpDownloadAttempt(
       fileStream.destroy()
       cleanupPartial()
       reject(
-        new Error(`Failed to write file: ${error.message}`, { cause: error }),
+        new ErrorCtor(`Failed to write file: ${error.message}`, {
+          cause: error,
+        }),
       )
     })
 

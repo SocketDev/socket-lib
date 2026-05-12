@@ -31,6 +31,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import { joinOr } from '../arrays/join'
+import { ErrorCtor } from '../primordials/error'
 
 // ── Config ──────────────────────────────────────────────────────────
 
@@ -359,7 +360,7 @@ export function resolveSocketLibPrimordials(
   /* c8 ignore start */
   if (config.socketLibPrimordialsPath) {
     if (!existsSync(config.socketLibPrimordialsPath)) {
-      throw new Error(
+      throw new ErrorCtor(
         `socketLibPrimordialsPath does not exist: ${config.socketLibPrimordialsPath}`,
       )
     }
@@ -409,7 +410,7 @@ export function resolveSocketLibPrimordials(
     return installedLegacy
   }
   /* c8 ignore stop */
-  throw new Error(
+  throw new ErrorCtor(
     'Cannot locate socket-lib primordials source. ' +
       `Looked at:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
       'Either clone socket-lib at ../socket-lib or run `pnpm install`.',

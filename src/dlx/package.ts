@@ -339,7 +339,7 @@ export async function ensurePackageInstalled(
         }
         const code = (e as { code?: string } | null)?.code
         if (code === 'E404' || code === 'ETARGET') {
-          throw new Error(
+          throw new ErrorCtor(
             `Package not found: ${packageSpec}\n` +
               'Verify the package exists on npm registry and check the version.\n' +
               `Visit https://www.npmjs.com/package/${packageName} to see available versions.`,
@@ -351,13 +351,13 @@ export async function ensurePackageInstalled(
           code === 'ETIMEDOUT' ||
           code === 'EAI_AGAIN'
         ) {
-          throw new Error(
+          throw new ErrorCtor(
             `Network error installing ${packageSpec}\n` +
               'Check your internet connection and try again.',
             { cause: e },
           )
         }
-        throw new Error(
+        throw new ErrorCtor(
           `Failed to install package: ${packageSpec}\n` +
             `Destination: ${installedDir}\n` +
             'Check npm registry connectivity or package name.',

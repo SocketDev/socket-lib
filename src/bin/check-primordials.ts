@@ -23,6 +23,7 @@ import process from 'node:process'
 
 import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/logger'
+import { ErrorCtor } from '../primordials/error'
 import {
   type PrimordialsCheckConfig,
   type PrimordialsCheckResult,
@@ -145,20 +146,20 @@ interface RawConfig {
 
 export function loadConfig(configPath: string): PrimordialsCheckConfig {
   if (!existsSync(configPath)) {
-    throw new Error(`config file not found: ${configPath}`)
+    throw new ErrorCtor(`config file not found: ${configPath}`)
   }
   let parsed: unknown
   try {
     parsed = JSON.parse(readFileSync(configPath, 'utf8'))
   } catch (e) {
-    throw new Error(`config file is not valid JSON: ${errorMessage(e)}`)
+    throw new ErrorCtor(`config file is not valid JSON: ${errorMessage(e)}`)
   }
   // The fleet convention is `.socket-lib.json` with a section per
   // check (primordials, paths, public-surface, ...). When the file
   // has the section, use it; otherwise treat the whole file as the
   // primordials config (back-compat with single-check setups).
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    throw new Error('config root must be an object')
+    throw new ErrorCtor('config root must be an object')
   }
   const root = parsed as Record<string, unknown>
   const sectional = root[CONFIG_SECTION]
@@ -168,13 +169,13 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   // hand-edited and a misspelling here is the most common failure
   // mode. Don't let a wrong type slip through to the check engine.
   if (!Array.isArray(raw.scanDirs)) {
-    throw new Error(
+    throw new ErrorCtor(
       `config.scanDirs must be an array of strings (got ${typeof raw.scanDirs})`,
     )
   }
   for (const [i, v] of raw.scanDirs.entries()) {
     if (typeof v !== 'string') {
-      throw new Error(`config.scanDirs[${i}] must be a string`)
+      throw new ErrorCtor(`config.scanDirs[${i}] must be a string`)
     }
   }
   if (
@@ -183,13 +184,13 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
       raw.aliasMap === null ||
       Array.isArray(raw.aliasMap))
   ) {
-    throw new Error('config.aliasMap must be an object of source→target')
+    throw new ErrorCtor('config.aliasMap must be an object of source→target')
   }
   if (
     raw.nodeInternalOnly !== undefined &&
     !Array.isArray(raw.nodeInternalOnly)
   ) {
-    throw new Error('config.nodeInternalOnly must be an array of strings')
+    throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
   }
 
   const aliasMap = new Map<string, string>(
