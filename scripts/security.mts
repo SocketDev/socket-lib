@@ -29,10 +29,10 @@
 
 import process from 'node:process'
 
-import { which } from '@socketsecurity/lib/bin'
+import { which } from '@socketsecurity/lib/bin/which'
 import { WIN32 } from '@socketsecurity/lib/constants/platform'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
+import { spawn } from '@socketsecurity/lib/spawn/spawn'
 
 const logger = getDefaultLogger()
 

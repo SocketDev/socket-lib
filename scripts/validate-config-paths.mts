@@ -39,7 +39,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
 
 const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -132,8 +132,7 @@ function main(): void {
   }
 
   if (findings.length === 0) {
-    const total =
-      CONFIG_BASENAMES.length + CONCRETE_TSCONFIG_BASENAMES.length
+    const total = CONFIG_BASENAMES.length + CONCRETE_TSCONFIG_BASENAMES.length
     logger.success(
       `Config-path hygiene OK — ${total} basenames checked, no drift.`,
     )
