@@ -23,7 +23,10 @@ import process from 'node:process'
 
 import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/logger'
+import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
+import { JSONParse, JSONStringify } from '../primordials/json'
+import { ObjectEntries } from '../primordials/object'
 import {
   type PrimordialsCheckConfig,
   type PrimordialsCheckResult,
@@ -150,7 +153,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   }
   let parsed: unknown
   try {
-    parsed = JSON.parse(readFileSync(configPath, 'utf8'))
+    parsed = JSONParse(readFileSync(configPath, 'utf8'))
   } catch (e) {
     throw new ErrorCtor(`config file is not valid JSON: ${errorMessage(e)}`)
   }
@@ -158,7 +161,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   // check (primordials, paths, public-surface, ...). When the file
   // has the section, use it; otherwise treat the whole file as the
   // primordials config (back-compat with single-check setups).
-  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+  if (typeof parsed !== 'object' || parsed === null || ArrayIsArray(parsed)) {
     throw new ErrorCtor('config root must be an object')
   }
   const root = parsed as Record<string, unknown>
@@ -168,7 +171,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   // Validate shape with concrete error messages — config files are
   // hand-edited and a misspelling here is the most common failure
   // mode. Don't let a wrong type slip through to the check engine.
-  if (!Array.isArray(raw.scanDirs)) {
+  if (!ArrayIsArray(raw.scanDirs)) {
     throw new ErrorCtor(
       `config.scanDirs must be an array of strings (got ${typeof raw.scanDirs})`,
     )
@@ -182,19 +185,19 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
     raw.aliasMap !== undefined &&
     (typeof raw.aliasMap !== 'object' ||
       raw.aliasMap === null ||
-      Array.isArray(raw.aliasMap))
+      ArrayIsArray(raw.aliasMap))
   ) {
     throw new ErrorCtor('config.aliasMap must be an object of source→target')
   }
   if (
     raw.nodeInternalOnly !== undefined &&
-    !Array.isArray(raw.nodeInternalOnly)
+    !ArrayIsArray(raw.nodeInternalOnly)
   ) {
     throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
   }
 
   const aliasMap = new Map<string, string>(
-    Object.entries((raw.aliasMap ?? {}) as Record<string, string>),
+    ObjectEntries((raw.aliasMap ?? {}) as Record<string, string>),
   )
   const nodeInternalOnly = new Set(
     ((raw.nodeInternalOnly ?? []) as string[]).filter(
@@ -294,7 +297,7 @@ export async function runCheckPrimordials(
     return 1
   }
   if (args.json) {
-    logger.log(JSON.stringify(serialize(result), null, 2))
+    logger.log(JSONStringify(serialize(result), null, 2))
   } else {
     renderHuman(result, args)
   }

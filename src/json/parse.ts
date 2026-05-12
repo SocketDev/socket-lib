@@ -10,6 +10,7 @@ import { stripBom } from '../strings/transform'
 import type { Schema } from '../schema/types'
 import { BufferByteLength } from '../primordials/buffer'
 import { ErrorCtor } from '../primordials/error'
+import { JSONParse } from '../primordials/json'
 import { SetCtor } from '../primordials/map-set'
 import type {
   JsonParseOptions,
@@ -17,12 +18,6 @@ import type {
   JsonValue,
   SafeJsonParseOptions,
 } from './types'
-
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const JSONParse = JSON.parse
 
 /**
  * Check if a value is a Buffer instance.

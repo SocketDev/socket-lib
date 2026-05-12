@@ -15,6 +15,7 @@ import { parseUrl } from '../url/parse'
 
 import type { ProvenanceOptions } from './types'
 
+import { ArrayIsArray } from '../primordials/array'
 import { BufferFrom } from '../primordials/buffer'
 
 import { JSONParse } from '../primordials/json'
@@ -24,12 +25,6 @@ import {
   StringPrototypeIncludes,
   StringPrototypeSplit,
 } from '../primordials/string'
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const ArrayIsArray = Array.isArray
-
 const SLSA_PROVENANCE_V0_2 = 'https://slsa.dev/provenance/v0.2'
 const SLSA_PROVENANCE_V1_0 = 'https://slsa.dev/provenance/v1'
 

@@ -13,14 +13,14 @@ import { findPackageExtensions } from './operations'
 
 import type { NormalizeOptions, PackageJson } from './types'
 
+import { ArrayIsArray } from '../primordials/array'
+import { ObjectHasOwn } from '../primordials/object'
 import { RegExpCtor, RegExpPrototypeExec } from '../primordials/regexp'
 
 import {
   StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from '../primordials/string'
-const ArrayIsArray = Array.isArray
-const ObjectHasOwn = Object.hasOwn
 
 export function getEscapedScopeRegExp(): RegExp {
   const firstChar = REGISTRY_SCOPE_DELIMITER[0] as string

@@ -9,6 +9,7 @@ import { isErrnoException } from '../errors/predicates'
 import { getNodeFs } from '../node/fs'
 
 import { ErrorCtor } from '../primordials/error'
+import { JSONParse } from '../primordials/json'
 import {
   INDENT_SYMBOL,
   NEWLINE_SYMBOL,
@@ -30,12 +31,6 @@ import type {
 
 const identSymbol = INDENT_SYMBOL
 const newlineSymbol = NEWLINE_SYMBOL
-
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const JSONParse = JSON.parse
 
 let _EditableJsonClass: EditableJsonConstructor | undefined
 /**
