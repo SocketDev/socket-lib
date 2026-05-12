@@ -7,7 +7,7 @@ import {
   getPackageDefaultSocketCategories,
   getPackumentCache,
 } from '../constants/packages'
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 import {
   SOCKET_GITHUB_ORG,
   SOCKET_REGISTRY_REPO_NAME,

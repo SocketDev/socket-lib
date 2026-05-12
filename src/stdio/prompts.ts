@@ -3,7 +3,7 @@
  * Provides inquirer.js integration with spinner support, context handling, and theming.
  */
 
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 
 // @ts-expect-error - external vendored module
 import checkboxRaw from '../external/@inquirer/checkbox'

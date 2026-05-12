@@ -12,7 +12,7 @@
 
 import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
 import { isRgbTuple, toRgb } from '../colors/convert'
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 import { isDebug } from '../debug/namespace'
 import type {
   Palette,

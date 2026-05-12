@@ -1,5 +1,5 @@
 /**
- * @fileoverview Public type surface for `proc-lock/*` modules — the
+ * @fileoverview Public type surface for `process/lock-*` modules — the
  * `ProcessLockOptions` bag accepted by `processLock.acquire` and
  * `processLock.withLock`. Pure types, no runtime side effects.
  */

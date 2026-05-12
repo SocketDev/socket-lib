@@ -16,7 +16,7 @@ import { hash } from '../crypto/hash'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { httpDownload } from '../http-request/download'
 import { normalizePath } from '../paths/normalize'
-import { processLock } from '../proc-lock/instance'
+import { processLock } from '../process/lock-instance'
 import { generateCacheKey } from './cache'
 import { normalizeHash } from './integrity'
 

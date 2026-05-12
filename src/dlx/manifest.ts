@@ -36,7 +36,7 @@ import { readFileUtf8Sync } from '../fs/read-file'
 import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
 import { getDefaultLogger } from '../logger/logger'
 import { getSocketDlxDir } from '../paths/socket'
-import { processLock } from '../proc-lock/instance'
+import { processLock } from '../process/lock-instance'
 
 import { DateNow } from '../primordials/date'
 

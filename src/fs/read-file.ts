@@ -9,7 +9,7 @@
  * encoding once and forwards untouched options to `node:fs`.
  */
 
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 import { getNodeFs } from '../node/fs'
 import { BufferIsBuffer } from '../primordials/buffer'
 import { normalizeEncoding } from './encoding'

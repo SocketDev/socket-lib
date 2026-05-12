@@ -11,7 +11,7 @@
 import process from 'node:process'
 
 import { isArray } from '../arrays/predicates'
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'

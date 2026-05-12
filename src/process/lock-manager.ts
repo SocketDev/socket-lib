@@ -54,7 +54,7 @@ import { onExit } from '../signal-exit/register'
 
 import { getFs, getPath } from './_internal'
 
-import type { ProcessLockOptions } from './types'
+import type { ProcessLockOptions } from './lock-types'
 
 const logger = getDefaultLogger()
 

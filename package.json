@@ -373,11 +373,6 @@
       "types": "./dist/constants/platform.d.ts",
       "default": "./dist/constants/platform.js"
     },
-    "./constants/process": {
-      "source": "./src/constants/process.ts",
-      "types": "./dist/constants/process.d.ts",
-      "default": "./dist/constants/process.js"
-    },
     "./constants/sentinels": {
       "source": "./src/constants/sentinels.ts",
       "types": "./dist/constants/sentinels.d.ts",
@@ -1423,20 +1418,35 @@
       "types": "./dist/primordials/url.d.ts",
       "default": "./dist/primordials/url.js"
     },
-    "./proc-lock/instance": {
-      "source": "./src/proc-lock/instance.ts",
-      "types": "./dist/proc-lock/instance.d.ts",
-      "default": "./dist/proc-lock/instance.js"
+    "./process/abort": {
+      "source": "./src/process/abort.ts",
+      "types": "./dist/process/abort.d.ts",
+      "default": "./dist/process/abort.js"
     },
-    "./proc-lock/manager": {
-      "source": "./src/proc-lock/manager.ts",
-      "types": "./dist/proc-lock/manager.d.ts",
-      "default": "./dist/proc-lock/manager.js"
+    "./process/lock-instance": {
+      "source": "./src/process/lock-instance.ts",
+      "types": "./dist/process/lock-instance.d.ts",
+      "default": "./dist/process/lock-instance.js"
     },
-    "./proc-lock/types": {
-      "source": "./src/proc-lock/types.ts",
-      "types": "./dist/proc-lock/types.d.ts",
-      "default": "./dist/proc-lock/types.js"
+    "./process/lock-manager": {
+      "source": "./src/process/lock-manager.ts",
+      "types": "./dist/process/lock-manager.d.ts",
+      "default": "./dist/process/lock-manager.js"
+    },
+    "./process/lock-types": {
+      "source": "./src/process/lock-types.ts",
+      "types": "./dist/process/lock-types.d.ts",
+      "default": "./dist/process/lock-types.js"
+    },
+    "./process/transient": {
+      "source": "./src/process/transient.ts",
+      "types": "./dist/process/transient.d.ts",
+      "default": "./dist/process/transient.js"
+    },
+    "./process/transient-types": {
+      "source": "./src/process/transient-types.ts",
+      "types": "./dist/process/transient-types.d.ts",
+      "default": "./dist/process/transient-types.js"
     },
     "./promise-queue/queue": {
       "source": "./src/promise-queue/queue.ts",
@@ -1792,16 +1802,6 @@
       "source": "./src/tables/types.ts",
       "types": "./dist/tables/types.d.ts",
       "default": "./dist/tables/types.js"
-    },
-    "./temporary-executor/detect": {
-      "source": "./src/temporary-executor/detect.ts",
-      "types": "./dist/temporary-executor/detect.d.ts",
-      "default": "./dist/temporary-executor/detect.js"
-    },
-    "./temporary-executor/types": {
-      "source": "./src/temporary-executor/types.ts",
-      "types": "./dist/temporary-executor/types.d.ts",
-      "default": "./dist/temporary-executor/types.js"
     },
     "./test/integration/esm-imports.test": {
       "default": "./test/integration/esm-imports.test.mjs"

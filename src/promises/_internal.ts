@@ -4,7 +4,7 @@
  * prefix excludes from public exports.
  */
 
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 
 export const abortSignal = getAbortSignal()
 

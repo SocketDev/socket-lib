@@ -18,12 +18,12 @@ import { normalizePath } from '../paths/normalize'
  *
  * @example
  * ```typescript
- * if (isRunningInTemporaryExecutor()) {
+ * if (isTransientProcess()) {
  *   console.log('Running in a temporary executor context')
  * }
  * ```
  */
-export function isRunningInTemporaryExecutor(cwd = process.cwd()): boolean {
+export function isTransientProcess(cwd = process.cwd()): boolean {
   // Check environment variable for exec/npx/dlx indicators.
   const userAgent = process.env['npm_config_user_agent']
   if (

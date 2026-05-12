@@ -29,7 +29,7 @@
 import process from 'node:process'
 
 import { whichSync } from '../bin/which'
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 import { getNodeChildProcess } from '../node/child-process'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'

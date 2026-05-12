@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getAbortController,
   getAbortSignal,
-} from '@socketsecurity/lib/constants/process'
+} from '@socketsecurity/lib/process/abort'
 
 describe('constants/process', () => {
   describe('getAbortController', () => {

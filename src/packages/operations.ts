@@ -7,7 +7,7 @@ import {
   getPackumentCache,
   getPacoteCachePath,
 } from '../constants/packages'
-import { getAbortSignal } from '../constants/process'
+import { getAbortSignal } from '../process/abort'
 import { REGISTRY_SCOPE_DELIMITER } from '../constants/socket'
 
 import cacache from '../external/cacache'
