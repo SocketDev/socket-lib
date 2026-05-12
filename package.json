@@ -518,21 +518,6 @@
       "types": "./dist/dlx/types.d.ts",
       "default": "./dist/dlx/types.js"
     },
-    "./eco/category": {
-      "source": "./src/eco/category.ts",
-      "types": "./dist/eco/category.d.ts",
-      "default": "./dist/eco/category.js"
-    },
-    "./eco/interop": {
-      "source": "./src/eco/interop.ts",
-      "types": "./dist/eco/interop.d.ts",
-      "default": "./dist/eco/interop.js"
-    },
-    "./eco/manifest": {
-      "source": "./src/eco/manifest.ts",
-      "types": "./dist/eco/manifest.d.ts",
-      "default": "./dist/eco/manifest.js"
-    },
     "./eco/npm/bun/exec": {
       "source": "./src/eco/npm/bun/exec.ts",
       "types": "./dist/eco/npm/bun/exec.d.ts",
@@ -577,6 +562,11 @@
       "source": "./src/eco/purl.ts",
       "types": "./dist/eco/purl.d.ts",
       "default": "./dist/eco/purl.js"
+    },
+    "./eco/types": {
+      "source": "./src/eco/types.ts",
+      "types": "./dist/eco/types.d.ts",
+      "default": "./dist/eco/types.js"
     },
     "./effects/pulse-frames": {
       "source": "./src/effects/pulse-frames.ts",
