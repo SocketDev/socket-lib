@@ -25,7 +25,7 @@ export { UNKNOWN_ERROR, messageWithCauses }
  * try {
  *   await readConfig(path)
  * } catch (e) {
- *   throw new Error(`Failed to read ${path}: ${errorMessage(e)}`, { cause: e })
+ *   throw new ErrorCtor(`Failed to read ${path}: ${errorMessage(e)}`, { cause: e })
  * }
  */
 export function errorMessage(value: unknown): string {

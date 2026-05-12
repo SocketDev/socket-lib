@@ -127,10 +127,10 @@ export function enhanceSpawnError(error: unknown): unknown {
         try {
           stack = stackWithCauses(err)
           /* c8 ignore start - stackWithCauses fallback for malformed
-             error chains; new Error().stack is also ?? '' for exotic
+             error chains; new ErrorCtor().stack is also ?? '' for exotic
              runtimes that strip Error.stack. */
         } catch {
-          stack = err.stack ?? new Error().stack ?? ''
+          stack = err.stack ?? new ErrorCtor().stack ?? ''
         }
         /* c8 ignore stop */
         stackCache.set(enhancedError, stack)

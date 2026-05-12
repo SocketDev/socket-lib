@@ -96,7 +96,7 @@ export async function getGitHubTokenFromGitConfig(
  * ```ts
  * const token = await getGitHubTokenWithFallback()
  * if (!token) {
- *   throw new Error('GitHub token required')
+ *   throw new ErrorCtor('GitHub token required')
  * }
  * ```
  */

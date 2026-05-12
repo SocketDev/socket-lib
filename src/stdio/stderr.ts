@@ -164,7 +164,7 @@ export function writeErrorLine(text: string = ''): void {
  * @example
  * ```ts
  * try {
- *   throw new Error('Something went wrong')
+ *   throw new ErrorCtor('Something went wrong')
  * } catch (e) {
  *   writeStackTrace(e as Error)
  * }
