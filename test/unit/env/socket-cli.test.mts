@@ -11,7 +11,6 @@ import {
   getSocketCliApiBaseUrl,
   getSocketCliApiProxy,
   getSocketCliApiTimeout,
-  getSocketCliApiToken,
   getSocketCliConfig,
   getSocketCliFix,
   getSocketCliGithubToken,
@@ -91,35 +90,6 @@ describe('socket-cli env', () => {
     it('should handle invalid numbers', () => {
       setEnv('SOCKET_CLI_API_TIMEOUT', 'invalid')
       expect(getSocketCliApiTimeout()).toBe(0)
-    })
-  })
-
-  describe('getSocketCliApiToken', () => {
-    it('should return token when SOCKET_CLI_API_TOKEN is set', () => {
-      setEnv('SOCKET_CLI_API_TOKEN', 'test-token-123')
-      expect(getSocketCliApiToken()).toBe('test-token-123')
-    })
-
-    it('should return token when SOCKET_API_TOKEN is set', () => {
-      setEnv('SOCKET_API_TOKEN', 'canonical-token')
-      expect(getSocketCliApiToken()).toBe('canonical-token')
-    })
-
-    it('should prefer SOCKET_API_TOKEN over legacy names', () => {
-      setEnv('SOCKET_API_TOKEN', 'canonical-token')
-      setEnv('SOCKET_CLI_API_TOKEN', 'legacy-token')
-      expect(getSocketCliApiToken()).toBe('canonical-token')
-    })
-
-    it('should return undefined when not set', () => {
-      // Clear all token env vars that getSocketCliApiToken falls back to,
-      // including the canonical SOCKET_API_TOKEN that CI runners may have set.
-      setEnv('SOCKET_API_TOKEN', undefined)
-      setEnv('SOCKET_CLI_API_TOKEN', undefined)
-      setEnv('SOCKET_CLI_API_KEY', undefined)
-      setEnv('SOCKET_SECURITY_API_TOKEN', undefined)
-      setEnv('SOCKET_SECURITY_API_KEY', undefined)
-      expect(getSocketCliApiToken()).toBeUndefined()
     })
   })
 

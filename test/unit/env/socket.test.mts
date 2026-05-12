@@ -11,11 +11,15 @@
  */
 
 import {
+  getMcpHttpMode,
+  getMcpPort,
   getSocketAcceptRisks,
   getSocketApiBaseUrl,
   getSocketApiProxy,
   getSocketApiTimeout,
   getSocketApiToken,
+  getSocketApiUrl,
+  getSocketBranchName,
   getSocketCacacheDirEnv,
   getSocketConfig,
   getSocketDebug,
@@ -23,9 +27,15 @@ import {
   getSocketHome,
   getSocketNoApiToken,
   getSocketNpmRegistry,
+  getSocketOauthIntrospectionClientId,
+  getSocketOauthIntrospectionClientSecret,
+  getSocketOauthIssuer,
+  getSocketOauthRequiredScopes,
   getSocketOrgSlug,
   getSocketRegistryUrl,
+  getSocketRepositoryName,
   getSocketViewAllRisks,
+  getTrustProxy,
 } from '@socketsecurity/lib/env/socket'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -95,13 +105,53 @@ describe('socket env', () => {
   })
 
   describe('getSocketApiToken', () => {
-    it('should return token when set', () => {
-      setEnv('SOCKET_API_TOKEN', 'test-token-123')
-      expect(getSocketApiToken()).toBe('test-token-123')
+    it('should return token when SOCKET_API_TOKEN is set', () => {
+      setEnv('SOCKET_API_TOKEN', 'canonical-token')
+      expect(getSocketApiToken()).toBe('canonical-token')
+    })
+
+    it('should fall back to SOCKET_API_KEY', () => {
+      setEnv('SOCKET_API_KEY', 'mcp-key')
+      expect(getSocketApiToken()).toBe('mcp-key')
+    })
+
+    it('should fall back to SOCKET_CLI_API_TOKEN', () => {
+      setEnv('SOCKET_CLI_API_TOKEN', 'cli-token')
+      expect(getSocketApiToken()).toBe('cli-token')
+    })
+
+    it('should fall back to SOCKET_CLI_API_KEY', () => {
+      setEnv('SOCKET_CLI_API_KEY', 'cli-key')
+      expect(getSocketApiToken()).toBe('cli-key')
+    })
+
+    it('should fall back to SOCKET_SECURITY_API_TOKEN', () => {
+      setEnv('SOCKET_SECURITY_API_TOKEN', 'security-token')
+      expect(getSocketApiToken()).toBe('security-token')
+    })
+
+    it('should fall back to SOCKET_SECURITY_API_KEY', () => {
+      setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
+      expect(getSocketApiToken()).toBe('security-key')
+    })
+
+    it('should prefer SOCKET_API_TOKEN over all legacy names', () => {
+      setEnv('SOCKET_API_TOKEN', 'canonical-token')
+      setEnv('SOCKET_API_KEY', 'mcp-key')
+      setEnv('SOCKET_CLI_API_TOKEN', 'cli-token')
+      setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
+      expect(getSocketApiToken()).toBe('canonical-token')
     })
 
     it('should return undefined when not set', () => {
+      // Clear all token env vars that getSocketApiToken falls back to,
+      // including the canonical SOCKET_API_TOKEN that CI runners may have set.
       setEnv('SOCKET_API_TOKEN', undefined)
+      setEnv('SOCKET_API_KEY', undefined)
+      setEnv('SOCKET_CLI_API_TOKEN', undefined)
+      setEnv('SOCKET_CLI_API_KEY', undefined)
+      setEnv('SOCKET_SECURITY_API_TOKEN', undefined)
+      setEnv('SOCKET_SECURITY_API_KEY', undefined)
       expect(getSocketApiToken()).toBeUndefined()
     })
   })
@@ -223,6 +273,164 @@ describe('socket env', () => {
     it('should return false when unset or falsy', () => {
       setEnv('SOCKET_VIEW_ALL_RISKS', '')
       expect(getSocketViewAllRisks()).toBe(false)
+    })
+  })
+
+  describe('getSocketApiUrl', () => {
+    it('should return URL when set', () => {
+      setEnv('SOCKET_API_URL', 'https://api.example.test/v0/purl')
+      expect(getSocketApiUrl()).toBe('https://api.example.test/v0/purl')
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_API_URL', undefined)
+      expect(getSocketApiUrl()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketOauthIssuer', () => {
+    it('should return issuer URL when set', () => {
+      setEnv('SOCKET_OAUTH_ISSUER', 'https://issuer.example.test')
+      expect(getSocketOauthIssuer()).toBe('https://issuer.example.test')
+    })
+
+    it('should default to empty string when not set', () => {
+      setEnv('SOCKET_OAUTH_ISSUER', undefined)
+      expect(getSocketOauthIssuer()).toBe('')
+    })
+  })
+
+  describe('getSocketOauthIntrospectionClientId', () => {
+    it('should return client ID when set', () => {
+      setEnv('SOCKET_OAUTH_INTROSPECTION_CLIENT_ID', 'client-abc')
+      expect(getSocketOauthIntrospectionClientId()).toBe('client-abc')
+    })
+
+    it('should default to empty string when not set', () => {
+      setEnv('SOCKET_OAUTH_INTROSPECTION_CLIENT_ID', undefined)
+      expect(getSocketOauthIntrospectionClientId()).toBe('')
+    })
+  })
+
+  describe('getSocketOauthIntrospectionClientSecret', () => {
+    it('should return client secret when set', () => {
+      setEnv('SOCKET_OAUTH_INTROSPECTION_CLIENT_SECRET', 'secret-xyz')
+      expect(getSocketOauthIntrospectionClientSecret()).toBe('secret-xyz')
+    })
+
+    it('should default to empty string when not set', () => {
+      setEnv('SOCKET_OAUTH_INTROSPECTION_CLIENT_SECRET', undefined)
+      expect(getSocketOauthIntrospectionClientSecret()).toBe('')
+    })
+  })
+
+  describe('getSocketOauthRequiredScopes', () => {
+    it('should return scopes string when set', () => {
+      setEnv('SOCKET_OAUTH_REQUIRED_SCOPES', 'packages:list packages:read')
+      expect(getSocketOauthRequiredScopes()).toBe('packages:list packages:read')
+    })
+
+    it('should default to "packages:list" when not set', () => {
+      setEnv('SOCKET_OAUTH_REQUIRED_SCOPES', undefined)
+      expect(getSocketOauthRequiredScopes()).toBe('packages:list')
+    })
+  })
+
+  describe('getMcpHttpMode', () => {
+    it('should return true when set to literal "true"', () => {
+      setEnv('MCP_HTTP_MODE', 'true')
+      expect(getMcpHttpMode()).toBe(true)
+    })
+
+    it('should return false when set to anything else', () => {
+      setEnv('MCP_HTTP_MODE', '1')
+      expect(getMcpHttpMode()).toBe(false)
+      setEnv('MCP_HTTP_MODE', 'yes')
+      expect(getMcpHttpMode()).toBe(false)
+      setEnv('MCP_HTTP_MODE', 'TRUE')
+      expect(getMcpHttpMode()).toBe(false)
+    })
+
+    it('should return false when not set', () => {
+      setEnv('MCP_HTTP_MODE', undefined)
+      expect(getMcpHttpMode()).toBe(false)
+    })
+  })
+
+  describe('getMcpPort', () => {
+    it('should return parsed port when set to valid number', () => {
+      setEnv('MCP_PORT', '8080')
+      expect(getMcpPort()).toBe(8080)
+    })
+
+    it('should default to 3000 when not set', () => {
+      setEnv('MCP_PORT', undefined)
+      expect(getMcpPort()).toBe(3000)
+    })
+
+    it('should default to 3000 when set to invalid number', () => {
+      setEnv('MCP_PORT', 'not-a-number')
+      expect(getMcpPort()).toBe(3000)
+    })
+
+    it('should default to 3000 when set to 0', () => {
+      setEnv('MCP_PORT', '0')
+      expect(getMcpPort()).toBe(3000)
+    })
+  })
+
+  describe('getTrustProxy', () => {
+    it('should return true when set to literal "true"', () => {
+      setEnv('TRUST_PROXY', 'true')
+      expect(getTrustProxy()).toBe(true)
+    })
+
+    it('should return false when set to anything else', () => {
+      setEnv('TRUST_PROXY', '1')
+      expect(getTrustProxy()).toBe(false)
+      setEnv('TRUST_PROXY', 'yes')
+      expect(getTrustProxy()).toBe(false)
+    })
+
+    it('should return false when not set', () => {
+      setEnv('TRUST_PROXY', undefined)
+      expect(getTrustProxy()).toBe(false)
+    })
+  })
+
+  describe('getSocketBranchName', () => {
+    it('should return branch name when set', () => {
+      setEnv('SOCKET_BRANCH_NAME', 'feature/x')
+      expect(getSocketBranchName()).toBe('feature/x')
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_BRANCH_NAME', undefined)
+      expect(getSocketBranchName()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketRepositoryName', () => {
+    it('should return repo name when SOCKET_REPOSITORY_NAME is set', () => {
+      setEnv('SOCKET_REPOSITORY_NAME', 'my-repo')
+      expect(getSocketRepositoryName()).toBe('my-repo')
+    })
+
+    it('should fall back to SOCKET_REPO_NAME', () => {
+      setEnv('SOCKET_REPO_NAME', 'coana-repo')
+      expect(getSocketRepositoryName()).toBe('coana-repo')
+    })
+
+    it('should prefer SOCKET_REPOSITORY_NAME over SOCKET_REPO_NAME', () => {
+      setEnv('SOCKET_REPOSITORY_NAME', 'canonical')
+      setEnv('SOCKET_REPO_NAME', 'coana-style')
+      expect(getSocketRepositoryName()).toBe('canonical')
+    })
+
+    it('should return undefined when neither set', () => {
+      setEnv('SOCKET_REPOSITORY_NAME', undefined)
+      setEnv('SOCKET_REPO_NAME', undefined)
+      expect(getSocketRepositoryName()).toBeUndefined()
     })
   })
 })

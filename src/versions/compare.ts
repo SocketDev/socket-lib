@@ -69,16 +69,16 @@ export const lt: (a: string, b: string) => boolean = impl.lt.bind(impl)
 export const lte: (a: string, b: string) => boolean = impl.lte.bind(impl)
 
 /**
+ * Sort versions in descending order.
+ */
+export function rsort(versions: readonly string[]): string[] {
+  return impl.rsort([...versions])
+}
+
+/**
  * Sort versions in ascending order. The input is spread so callers can
  * pass a `readonly string[]` even when the impl mutates internally.
  */
 export function sort(versions: readonly string[]): string[] {
   return impl.sort([...versions])
-}
-
-/**
- * Sort versions in descending order.
- */
-export function rsort(versions: readonly string[]): string[] {
-  return impl.rsort([...versions])
 }

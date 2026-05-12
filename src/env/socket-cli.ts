@@ -93,33 +93,6 @@ export function getSocketCliApiTimeout(): number {
 }
 
 /**
- * Socket CLI API authentication token.
- * Checks SOCKET_API_TOKEN (canonical), then the legacy names
- * SOCKET_CLI_API_TOKEN, SOCKET_CLI_API_KEY, SOCKET_SECURITY_API_TOKEN,
- * SOCKET_SECURITY_API_KEY. Maintains full v1.x backward compatibility.
- *
- * @returns API token or undefined
- *
- * @example
- * ```typescript
- * import { getSocketCliApiToken } from '@socketsecurity/lib/env/socket-cli'
- *
- * const token = getSocketCliApiToken()
- * // e.g. a Socket API token string or undefined
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketCliApiToken(): string | undefined {
-  return (
-    getEnvValue('SOCKET_API_TOKEN') ||
-    getEnvValue('SOCKET_CLI_API_TOKEN') ||
-    getEnvValue('SOCKET_CLI_API_KEY') ||
-    getEnvValue('SOCKET_SECURITY_API_TOKEN') ||
-    getEnvValue('SOCKET_SECURITY_API_KEY')
-  )
-}
-
-/**
  * Bootstrap cache directory path.
  * Set by bootstrap wrappers to pass dlx cache location to CLI.
  *

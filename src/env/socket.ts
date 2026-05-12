@@ -6,6 +6,47 @@ import { envAsBoolean, envAsNumber } from './helpers'
 import { getEnvValue } from './rewire'
 
 /**
+ * Whether the MCP server should run in HTTP mode.
+ * MCP_HTTP_MODE — when set to the literal string `'true'`, the MCP
+ * server serves over HTTP instead of stdio. Returns `false` for any
+ * other value (including unset).
+ *
+ * @returns `true` if HTTP mode is enabled, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { getMcpHttpMode } from '@socketsecurity/lib/env/socket'
+ *
+ * if (getMcpHttpMode()) { startHttpServer() }
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getMcpHttpMode(): boolean {
+  return getEnvValue('MCP_HTTP_MODE') === 'true'
+}
+
+/**
+ * MCP HTTP server listen port.
+ * MCP_PORT — port the MCP HTTP server binds to. Defaults to `3000`
+ * (matches socket-mcp's documented default). Invalid / non-numeric
+ * values also fall back to `3000`.
+ *
+ * @returns The MCP server port (default `3000`)
+ *
+ * @example
+ * ```typescript
+ * import { getMcpPort } from '@socketsecurity/lib/env/socket'
+ *
+ * const port = getMcpPort()
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getMcpPort(): number {
+  const parsed = envAsNumber(getEnvValue('MCP_PORT'))
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 3000
+}
+
+/**
  * SOCKET_ACCEPT_RISKS environment variable getter.
  * Whether to accept all Socket Security risks.
  *
@@ -83,10 +124,19 @@ export function getSocketApiTimeout(): number {
 }
 
 /**
- * SOCKET_API_TOKEN environment variable getter.
  * Socket Security API authentication token.
  *
- * @returns The API token, or `undefined` if not set
+ * Checks the canonical SOCKET_API_TOKEN first, then a chain of
+ * legacy aliases for full v1.x backward compatibility plus the bare
+ * SOCKET_API_KEY form used by older MCP-server installs:
+ *
+ *   SOCKET_API_TOKEN  → SOCKET_API_KEY
+ *                     → SOCKET_CLI_API_TOKEN
+ *                     → SOCKET_CLI_API_KEY
+ *                     → SOCKET_SECURITY_API_TOKEN
+ *                     → SOCKET_SECURITY_API_KEY
+ *
+ * @returns The API token, or `undefined` if no name in the chain is set
  *
  * @example
  * ```typescript
@@ -98,7 +148,54 @@ export function getSocketApiTimeout(): number {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiToken(): string | undefined {
-  return getEnvValue('SOCKET_API_TOKEN')
+  return (
+    getEnvValue('SOCKET_API_TOKEN') ||
+    getEnvValue('SOCKET_API_KEY') ||
+    getEnvValue('SOCKET_CLI_API_TOKEN') ||
+    getEnvValue('SOCKET_CLI_API_KEY') ||
+    getEnvValue('SOCKET_SECURITY_API_TOKEN') ||
+    getEnvValue('SOCKET_SECURITY_API_KEY')
+  )
+}
+
+/**
+ * Socket API endpoint URL override.
+ * SOCKET_API_URL — when set, replaces the app's default Socket API
+ * base. Each consumer composes its own default (e.g. socket-mcp's
+ * depscore endpoint vs. socket-cli's scan endpoints), so this helper
+ * returns the raw override and lets the caller fall back.
+ *
+ * @returns The API URL override, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketApiUrl } from '@socketsecurity/lib/env/socket'
+ *
+ * const apiUrl = getSocketApiUrl() ?? 'https://api.socket.dev/v0/...'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketApiUrl(): string | undefined {
+  return getEnvValue('SOCKET_API_URL')
+}
+
+/**
+ * Git branch name for the current Socket scan.
+ * SOCKET_BRANCH_NAME — set by CI / GHA to label the scan with the
+ * source branch. Used by basics and coana.
+ *
+ * @returns The branch name, or `undefined` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketBranchName } from '@socketsecurity/lib/env/socket'
+ *
+ * const branch = getSocketBranchName()
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketBranchName(): string | undefined {
+  return getEnvValue('SOCKET_BRANCH_NAME')
 }
 
 /**
@@ -236,6 +333,86 @@ export function getSocketNpmRegistry(): string | undefined {
 }
 
 /**
+ * OAuth introspection client ID for the MCP HTTP server.
+ * SOCKET_OAUTH_INTROSPECTION_CLIENT_ID — client credential used to
+ * call the issuer's introspection endpoint. Empty string when unset.
+ *
+ * @returns The OAuth client ID, or `''` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketOauthIntrospectionClientId } from '@socketsecurity/lib/env/socket'
+ *
+ * const clientId = getSocketOauthIntrospectionClientId()
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketOauthIntrospectionClientId(): string {
+  return getEnvValue('SOCKET_OAUTH_INTROSPECTION_CLIENT_ID') ?? ''
+}
+
+/**
+ * OAuth introspection client secret for the MCP HTTP server.
+ * SOCKET_OAUTH_INTROSPECTION_CLIENT_SECRET — paired with the client
+ * ID for authenticated introspection requests. Empty string when
+ * unset.
+ *
+ * @returns The OAuth client secret, or `''` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketOauthIntrospectionClientSecret } from '@socketsecurity/lib/env/socket'
+ *
+ * const clientSecret = getSocketOauthIntrospectionClientSecret()
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketOauthIntrospectionClientSecret(): string {
+  return getEnvValue('SOCKET_OAUTH_INTROSPECTION_CLIENT_SECRET') ?? ''
+}
+
+/**
+ * OAuth issuer URL for the MCP HTTP server.
+ * SOCKET_OAUTH_ISSUER — issuer to validate inbound OAuth tokens
+ * against. Returns the empty string when unset; callers treat empty
+ * as "no issuer configured".
+ *
+ * @returns The OAuth issuer URL, or `''` if not set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketOauthIssuer } from '@socketsecurity/lib/env/socket'
+ *
+ * const issuer = getSocketOauthIssuer()
+ * if (issuer) { ... }
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketOauthIssuer(): string {
+  return getEnvValue('SOCKET_OAUTH_ISSUER') ?? ''
+}
+
+/**
+ * Required OAuth scopes for the MCP HTTP server.
+ * SOCKET_OAUTH_REQUIRED_SCOPES — whitespace-separated list of scopes
+ * inbound tokens must carry. Defaults to `'packages:list'` (the
+ * minimum scope socket-mcp's depscore tool needs).
+ *
+ * @returns The required-scopes string, defaulting to `'packages:list'`
+ *
+ * @example
+ * ```typescript
+ * import { getSocketOauthRequiredScopes } from '@socketsecurity/lib/env/socket'
+ *
+ * const scopes = getSocketOauthRequiredScopes().split(/\s+/u)
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketOauthRequiredScopes(): string {
+  return getEnvValue('SOCKET_OAUTH_REQUIRED_SCOPES') ?? 'packages:list'
+}
+
+/**
  * SOCKET_ORG_SLUG environment variable getter.
  * Socket Security organization slug identifier.
  *
@@ -274,6 +451,30 @@ export function getSocketRegistryUrl(): string | undefined {
 }
 
 /**
+ * Repository name for the current Socket scan.
+ * SOCKET_REPOSITORY_NAME (canonical) — set by CI / GHA to label the
+ * scan with the source repository. Also accepts `SOCKET_REPO_NAME` as
+ * an alias. Used by basics and coana.
+ *
+ * @returns The repository name, or `undefined` if neither is set
+ *
+ * @example
+ * ```typescript
+ * import { getSocketRepositoryName } from '@socketsecurity/lib/env/socket'
+ *
+ * const repo = getSocketRepositoryName()
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketRepositoryName(): string | undefined {
+  return (
+    getEnvValue('SOCKET_REPOSITORY_NAME') ||
+    // Used by Coana.
+    getEnvValue('SOCKET_REPO_NAME')
+  )
+}
+
+/**
  * SOCKET_VIEW_ALL_RISKS environment variable getter.
  * Whether to view all Socket Security risks.
  *
@@ -291,4 +492,25 @@ export function getSocketRegistryUrl(): string | undefined {
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketViewAllRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_VIEW_ALL_RISKS'))
+}
+
+/**
+ * Whether the MCP HTTP server should trust upstream proxy headers.
+ * TRUST_PROXY — when set to the literal string `'true'`, the server
+ * honors `X-Forwarded-Host` / `X-Forwarded-Proto` when composing
+ * OAuth metadata URLs. Off by default to prevent header spoofing
+ * when no upstream proxy is present.
+ *
+ * @returns `true` if proxy headers are trusted, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * import { getTrustProxy } from '@socketsecurity/lib/env/socket'
+ *
+ * if (getTrustProxy()) { ... }
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getTrustProxy(): boolean {
+  return getEnvValue('TRUST_PROXY') === 'true'
 }
