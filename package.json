@@ -723,6 +723,11 @@
       "types": "./dist/env/xdg.d.ts",
       "default": "./dist/env/xdg.js"
     },
+    "./errors": {
+      "source": "./src/errors/message.ts",
+      "types": "./dist/errors/message.d.ts",
+      "default": "./dist/errors/message.js"
+    },
     "./errors/message": {
       "source": "./src/errors/message.ts",
       "types": "./dist/errors/message.d.ts",
@@ -1012,6 +1017,11 @@
       "source": "./src/links/types.ts",
       "types": "./dist/links/types.d.ts",
       "default": "./dist/links/types.js"
+    },
+    "./logger": {
+      "source": "./src/logger/logger.ts",
+      "types": "./dist/logger/logger.d.ts",
+      "default": "./dist/logger/logger.js"
     },
     "./logger/colors": {
       "source": "./src/logger/colors.ts",

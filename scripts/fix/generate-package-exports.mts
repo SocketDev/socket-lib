@@ -228,6 +228,25 @@ async function main(): Promise<void> {
     subpathExports[aliasPath] = aliasValue
   }
 
+  // Fleet-compat barrel aliases. The fleet's socket-wheelhouse template
+  // imports getDefaultLogger from '@socketsecurity/lib/logger' and
+  // errorMessage from '@socketsecurity/lib/errors'. socket-lib's own
+  // public surface no longer ships top-level barrel modules — every leaf
+  // is its own subpath — so we expose these two as exports-map aliases
+  // that point at the canonical primary subpath. Source-level barrels
+  // would violate the "no barrel files" CLAUDE.md rule; an exports-map
+  // alias is just a re-pointer with no source file behind it.
+  const fleetCompatAliases: Array<[string, string]> = [
+    ['./logger', './logger/logger'],
+    ['./errors', './errors/message'],
+  ]
+  for (const { 0: alias, 1: target } of fleetCompatAliases) {
+    const targetValue = subpathExports[target]
+    if (targetValue && !subpathExports[alias]) {
+      subpathExports[alias] = targetValue
+    }
+  }
+
   // Create exports object with proper ordering:
   // 1. Main exports (. and ./index)
   // 2. SCREAMING_SNAKE_CASE constants
