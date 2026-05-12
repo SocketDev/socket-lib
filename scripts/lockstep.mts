@@ -40,9 +40,9 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { errorMessage } from '@socketsecurity/lib/errors/message'
-import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
-import { spawnSync } from '@socketsecurity/lib/spawn/spawn'
+import { errorMessage } from '@socketsecurity/lib/errors'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { spawnSync } from '@socketsecurity/lib/spawn'
 import { validateSchema } from '@socketsecurity/lib/schema/validate'
 
 import {

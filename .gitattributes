@@ -21,8 +21,10 @@
 .claude/hooks/auth-rotation-reminder/test/auth-rotation-reminder.test.mts linguist-generated=true
 .claude/hooks/auth-rotation-reminder/tsconfig.json linguist-generated=true
 .claude/hooks/check-new-deps/README.md linguist-generated=true
+.claude/hooks/check-new-deps/audit.mts linguist-generated=true
 .claude/hooks/check-new-deps/index.mts linguist-generated=true
 .claude/hooks/check-new-deps/package.json linguist-generated=true
+.claude/hooks/check-new-deps/types.mts linguist-generated=true
 .claude/hooks/claude-md-size-guard/README.md linguist-generated=true
 .claude/hooks/claude-md-size-guard/index.mts linguist-generated=true
 .claude/hooks/claude-md-size-guard/package.json linguist-generated=true
@@ -165,6 +167,7 @@
 .config/rolldown/lib-stub.mts linguist-generated=true
 .config/socket-wheelhouse-schema.json linguist-generated=true
 .config/taze.config.mts linguist-generated=true
+.config/tsconfig.base.json linguist-generated=true
 .git-hooks/_helpers.mts linguist-generated=true
 .git-hooks/commit-msg.mts linguist-generated=true
 .git-hooks/pre-commit.mts linguist-generated=true
