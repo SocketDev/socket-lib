@@ -1,113 +1,134 @@
 /**
- * @fileoverview Comparison operators — `compareVersions` returns
- * `-1 | 0 | 1`, the `is*Than*` predicates wrap the underlying
- * binary comparators, and `sortVersions` / `sortVersionsDesc`
- * apply them across an array. All go through `getVersionsImpl()`
- * so smol-versions wins on the smol Node binary.
+ * @fileoverview Version comparison operators aligned with
+ * `node:smol-versions` (the C++-accelerated multi-ecosystem version
+ * helper shipped by the smol Node binary). The same names + signatures
+ * also match the `semver` JS lib — both impls expose this surface, so
+ * `getVersionsImpl()` swaps between them at runtime without callers
+ * caring which is active.
+ *
+ *   - `compare(a, b)` — returns `-1 | 0 | 1`
+ *   - `eq(a, b)`, `neq(a, b)`         — equality / inequality
+ *   - `lt(a, b)`, `lte(a, b)`         — less-than / less-or-equal
+ *   - `gt(a, b)`, `gte(a, b)`         — greater-than / greater-or-equal
+ *   - `sort(versions)`                — ascending sort
+ *   - `rsort(versions)`               — descending sort
+ *
+ * The `compare()` return is tightened to `-1 | 0 | 1 | undefined` here
+ * (smol-versions can throw on malformed input; this wrapper swallows
+ * to undefined for the caller's convenience).
  */
 
 import { getVersionsImpl } from './_internal'
 
 /**
  * Compare two semantic version strings.
- * @returns -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2, or undefined if invalid.
+ * @returns -1 if a < b, 0 if a === b, 1 if a > b, or undefined if invalid.
  *
  * @example
  * ```typescript
- * compareVersions('1.0.0', '2.0.0') // -1
- * compareVersions('1.0.0', '1.0.0') // 0
- * compareVersions('2.0.0', '1.0.0') // 1
+ * compare('1.0.0', '2.0.0') // -1
+ * compare('1.0.0', '1.0.0') // 0
+ * compare('2.0.0', '1.0.0') // 1
  * ```
  */
-export function compareVersions(
-  v1: string,
-  v2: string,
-): -1 | 0 | 1 | undefined {
+export function compare(a: string, b: string): -1 | 0 | 1 | undefined {
   try {
     /* c8 ignore next - External semver call */
-    const impl = getVersionsImpl()
-    return impl.compare(v1, v2) as -1 | 0 | 1
+    return getVersionsImpl().compare(a, b) as -1 | 0 | 1
   } catch {
     return undefined
   }
 }
 
 /**
- * Check if version1 equals version2.
+ * Check if a equals b.
  *
  * @example
  * ```typescript
- * isEqual('1.0.0', '1.0.0') // true
- * isEqual('1.0.0', '2.0.0') // false
+ * eq('1.0.0', '1.0.0') // true
+ * eq('1.0.0', '2.0.0') // false
  * ```
  */
-export function isEqual(version1: string, version2: string): boolean {
+export function eq(a: string, b: string): boolean {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
-  return impl.eq(version1, version2)
+  return getVersionsImpl().eq(a, b)
 }
 
 /**
- * Check if version1 is greater than version2.
+ * Check if a does not equal b.
  *
  * @example
  * ```typescript
- * isGreaterThan('2.0.0', '1.0.0') // true
- * isGreaterThan('1.0.0', '2.0.0') // false
+ * neq('1.0.0', '2.0.0') // true
+ * neq('1.0.0', '1.0.0') // false
  * ```
  */
-export function isGreaterThan(version1: string, version2: string): boolean {
-  /* c8 ignore next - External semver call */
+export function neq(a: string, b: string): boolean {
   const impl = getVersionsImpl()
-  return impl.gt(version1, version2)
+  /* c8 ignore start - External semver call; .neq exists on
+     smol-versions but not on the vendored semver export — fall back
+     to !eq when missing. */
+  if (typeof (impl as { neq?: unknown }).neq === 'function') {
+    return (impl as { neq: (a: string, b: string) => boolean }).neq(a, b)
+  }
+  return !impl.eq(a, b)
+  /* c8 ignore stop */
 }
 
 /**
- * Check if version1 is greater than or equal to version2.
+ * Check if a is greater than b.
  *
  * @example
  * ```typescript
- * isGreaterThanOrEqual('2.0.0', '1.0.0') // true
- * isGreaterThanOrEqual('1.0.0', '1.0.0') // true
+ * gt('2.0.0', '1.0.0') // true
+ * gt('1.0.0', '2.0.0') // false
  * ```
  */
-export function isGreaterThanOrEqual(
-  version1: string,
-  version2: string,
-): boolean {
+export function gt(a: string, b: string): boolean {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
-  return impl.gte(version1, version2)
+  return getVersionsImpl().gt(a, b)
 }
 
 /**
- * Check if version1 is less than version2.
+ * Check if a is greater than or equal to b.
  *
  * @example
  * ```typescript
- * isLessThan('1.0.0', '2.0.0') // true
- * isLessThan('2.0.0', '1.0.0') // false
+ * gte('2.0.0', '1.0.0') // true
+ * gte('1.0.0', '1.0.0') // true
  * ```
  */
-export function isLessThan(version1: string, version2: string): boolean {
+export function gte(a: string, b: string): boolean {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
-  return impl.lt(version1, version2)
+  return getVersionsImpl().gte(a, b)
 }
 
 /**
- * Check if version1 is less than or equal to version2.
+ * Check if a is less than b.
  *
  * @example
  * ```typescript
- * isLessThanOrEqual('1.0.0', '2.0.0') // true
- * isLessThanOrEqual('1.0.0', '1.0.0') // true
+ * lt('1.0.0', '2.0.0') // true
+ * lt('2.0.0', '1.0.0') // false
  * ```
  */
-export function isLessThanOrEqual(version1: string, version2: string): boolean {
+export function lt(a: string, b: string): boolean {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
-  return impl.lte(version1, version2)
+  return getVersionsImpl().lt(a, b)
+}
+
+/**
+ * Check if a is less than or equal to b.
+ *
+ * @example
+ * ```typescript
+ * lte('1.0.0', '2.0.0') // true
+ * lte('1.0.0', '1.0.0') // true
+ * ```
+ */
+export function lte(a: string, b: string): boolean {
+  /* c8 ignore next - External semver call */
+  return getVersionsImpl().lte(a, b)
 }
 
 /**
@@ -115,14 +136,13 @@ export function isLessThanOrEqual(version1: string, version2: string): boolean {
  *
  * @example
  * ```typescript
- * sortVersions(['2.0.0', '1.0.0', '1.5.0'])
+ * sort(['2.0.0', '1.0.0', '1.5.0'])
  * // ['1.0.0', '1.5.0', '2.0.0']
  * ```
  */
-export function sortVersions(versions: string[]): string[] {
+export function sort(versions: readonly string[]): string[] {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
-  return impl.sort([...versions])
+  return getVersionsImpl().sort([...versions])
 }
 
 /**
@@ -130,12 +150,11 @@ export function sortVersions(versions: string[]): string[] {
  *
  * @example
  * ```typescript
- * sortVersionsDesc(['1.0.0', '2.0.0', '1.5.0'])
+ * rsort(['1.0.0', '2.0.0', '1.5.0'])
  * // ['2.0.0', '1.5.0', '1.0.0']
  * ```
  */
-export function sortVersionsDesc(versions: string[]): string[] {
+export function rsort(versions: readonly string[]): string[] {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
-  return impl.rsort([...versions])
+  return getVersionsImpl().rsort([...versions])
 }

@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for semantic version comparison and manipulation utilities.
  *
  * Tests version utility functions:
- * - Comparison: compareVersions(), isGreaterThan(), isLessThan(), isEqual()
+ * - Comparison: compare(), gt(), lt(), eq()
  * - Extraction: getMajorVersion(), getMinorVersion(), getPatchVersion()
  * - Manipulation: incrementVersion(), coerceVersion()
  * - Filtering: filterVersions(), maxVersion(), minVersion()
@@ -11,14 +11,14 @@
  */
 
 import {
-  compareVersions,
-  isEqual,
-  isGreaterThan,
-  isGreaterThanOrEqual,
-  isLessThan,
-  isLessThanOrEqual,
-  sortVersions,
-  sortVersionsDesc,
+  compare,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  sort,
+  rsort,
 } from '@socketsecurity/lib/versions/compare'
 import {
   incrementVersion,
@@ -53,26 +53,26 @@ describe('versions', () => {
     })
   })
 
-  describe('compareVersions', () => {
+  describe('compare', () => {
     it('should compare equal versions', () => {
-      expect(compareVersions('1.0.0', '1.0.0')).toBe(0)
+      expect(compare('1.0.0', '1.0.0')).toBe(0)
     })
 
     it('should return -1 when first is less than second', () => {
-      expect(compareVersions('1.0.0', '2.0.0')).toBe(-1)
-      expect(compareVersions('1.0.0', '1.1.0')).toBe(-1)
-      expect(compareVersions('1.0.0', '1.0.1')).toBe(-1)
+      expect(compare('1.0.0', '2.0.0')).toBe(-1)
+      expect(compare('1.0.0', '1.1.0')).toBe(-1)
+      expect(compare('1.0.0', '1.0.1')).toBe(-1)
     })
 
     it('should return 1 when first is greater than second', () => {
-      expect(compareVersions('2.0.0', '1.0.0')).toBe(1)
-      expect(compareVersions('1.1.0', '1.0.0')).toBe(1)
-      expect(compareVersions('1.0.1', '1.0.0')).toBe(1)
+      expect(compare('2.0.0', '1.0.0')).toBe(1)
+      expect(compare('1.1.0', '1.0.0')).toBe(1)
+      expect(compare('1.0.1', '1.0.0')).toBe(1)
     })
 
     it('should return undefined for invalid versions', () => {
-      expect(compareVersions('invalid', '1.0.0')).toBeUndefined()
-      expect(compareVersions('1.0.0', 'invalid')).toBeUndefined()
+      expect(compare('invalid', '1.0.0')).toBeUndefined()
+      expect(compare('1.0.0', 'invalid')).toBeUndefined()
     })
   })
 
@@ -154,42 +154,42 @@ describe('versions', () => {
     })
   })
 
-  describe('isEqual', () => {
+  describe('eq', () => {
     it('should check version equality', () => {
-      expect(isEqual('1.0.0', '1.0.0')).toBe(true)
-      expect(isEqual('1.0.0', '1.0.1')).toBe(false)
+      expect(eq('1.0.0', '1.0.0')).toBe(true)
+      expect(eq('1.0.0', '1.0.1')).toBe(false)
     })
   })
 
-  describe('isGreaterThan', () => {
+  describe('gt', () => {
     it('should check if first version is greater', () => {
-      expect(isGreaterThan('2.0.0', '1.0.0')).toBe(true)
-      expect(isGreaterThan('1.0.0', '2.0.0')).toBe(false)
-      expect(isGreaterThan('1.0.0', '1.0.0')).toBe(false)
+      expect(gt('2.0.0', '1.0.0')).toBe(true)
+      expect(gt('1.0.0', '2.0.0')).toBe(false)
+      expect(gt('1.0.0', '1.0.0')).toBe(false)
     })
   })
 
-  describe('isGreaterThanOrEqual', () => {
+  describe('gte', () => {
     it('should check if first version is greater or equal', () => {
-      expect(isGreaterThanOrEqual('2.0.0', '1.0.0')).toBe(true)
-      expect(isGreaterThanOrEqual('1.0.0', '1.0.0')).toBe(true)
-      expect(isGreaterThanOrEqual('1.0.0', '2.0.0')).toBe(false)
+      expect(gte('2.0.0', '1.0.0')).toBe(true)
+      expect(gte('1.0.0', '1.0.0')).toBe(true)
+      expect(gte('1.0.0', '2.0.0')).toBe(false)
     })
   })
 
-  describe('isLessThan', () => {
+  describe('lt', () => {
     it('should check if first version is less', () => {
-      expect(isLessThan('1.0.0', '2.0.0')).toBe(true)
-      expect(isLessThan('2.0.0', '1.0.0')).toBe(false)
-      expect(isLessThan('1.0.0', '1.0.0')).toBe(false)
+      expect(lt('1.0.0', '2.0.0')).toBe(true)
+      expect(lt('2.0.0', '1.0.0')).toBe(false)
+      expect(lt('1.0.0', '1.0.0')).toBe(false)
     })
   })
 
-  describe('isLessThanOrEqual', () => {
+  describe('lte', () => {
     it('should check if first version is less or equal', () => {
-      expect(isLessThanOrEqual('1.0.0', '2.0.0')).toBe(true)
-      expect(isLessThanOrEqual('1.0.0', '1.0.0')).toBe(true)
-      expect(isLessThanOrEqual('2.0.0', '1.0.0')).toBe(false)
+      expect(lte('1.0.0', '2.0.0')).toBe(true)
+      expect(lte('1.0.0', '1.0.0')).toBe(true)
+      expect(lte('2.0.0', '1.0.0')).toBe(false)
     })
   })
 
@@ -259,10 +259,10 @@ describe('versions', () => {
     })
   })
 
-  describe('sortVersions', () => {
+  describe('sort', () => {
     it('should sort versions in ascending order', () => {
       const versions = ['2.0.0', '1.0.0', '1.9.0', '1.5.0']
-      expect(sortVersions(versions)).toEqual([
+      expect(sort(versions)).toEqual([
         '1.0.0',
         '1.5.0',
         '1.9.0',
@@ -272,15 +272,15 @@ describe('versions', () => {
 
     it('should not mutate original array', () => {
       const versions = ['2.0.0', '1.0.0']
-      sortVersions(versions)
+      sort(versions)
       expect(versions).toEqual(['2.0.0', '1.0.0'])
     })
   })
 
-  describe('sortVersionsDesc', () => {
+  describe('rsort', () => {
     it('should sort versions in descending order', () => {
       const versions = ['1.0.0', '2.0.0', '1.5.0', '1.9.0']
-      expect(sortVersionsDesc(versions)).toEqual([
+      expect(rsort(versions)).toEqual([
         '2.0.0',
         '1.9.0',
         '1.5.0',
@@ -290,7 +290,7 @@ describe('versions', () => {
 
     it('should not mutate original array', () => {
       const versions = ['1.0.0', '2.0.0']
-      sortVersionsDesc(versions)
+      rsort(versions)
       expect(versions).toEqual(['1.0.0', '2.0.0'])
     })
   })
