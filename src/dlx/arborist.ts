@@ -103,7 +103,10 @@ export interface SafeReifyOptions extends SafeArboristOptions {
  *   audit: false, fund: false, ignoreScripts: true, save: false,
  *   saveBundle: false, silent: true, progress: false
  */
-export function getBaseArboristOptions(installPath: string, quiet: boolean) {
+export function getBaseArboristOptions(
+  installPath: string,
+  options: { quiet: boolean },
+) {
   return {
     __proto__: null,
     path: installPath,
@@ -114,7 +117,7 @@ export function getBaseArboristOptions(installPath: string, quiet: boolean) {
     progress: false,
     save: false,
     saveBundle: false,
-    silent: quiet,
+    silent: options.quiet,
   } as unknown as ConstructorParameters<typeof Arborist>[0]
 }
 
@@ -211,7 +214,7 @@ export async function safeIdealTree(
     path.join(installPath, 'package.json'),
   )
   const arb = new Arborist({
-    ...(getBaseArboristOptions(installPath, quiet) as object),
+    ...(getBaseArboristOptions(installPath, { quiet }) as object),
     ...(before !== undefined ? { before } : {}),
     packageLockOnly: true,
     save: true,
@@ -240,7 +243,7 @@ export async function safeIdealTree(
 export async function safeReify(options: SafeReifyOptions): Promise<void> {
   const { packageLock = true, path: installPath, quiet = true } = options
   const arb = new Arborist({
-    ...(getBaseArboristOptions(installPath, quiet) as object),
+    ...(getBaseArboristOptions(installPath, { quiet }) as object),
     packageLock,
   } as unknown as ConstructorParameters<typeof Arborist>[0])
   /* c8 ignore next - External Arborist call */
