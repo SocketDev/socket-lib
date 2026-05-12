@@ -62,9 +62,5 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
  * `'✔  Done'` input becomes `'Done'`.
  */
 export function stripLoggerSymbols(text: string): string {
-  return StringPrototypeReplace(
-    text,
-    /^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[️\s]*/u,
-    '',
-  )
+  return StringPrototypeReplace(text, /^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[️\s]*/u, '')
 }

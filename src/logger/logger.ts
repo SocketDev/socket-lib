@@ -87,7 +87,7 @@ export class Logger {
    * console constructor arguments for advanced use cases.
    *
    * @param args - Optional console constructor arguments
- */
+   */
   constructor(...args: unknown[]) {
     // Store constructor args for lazy Console initialization.
     privateConstructorArgs.set(this, args)
@@ -320,7 +320,7 @@ export class Logger {
    * cached and reused on subsequent accesses.
    *
    * @returns A logger instance bound to stderr
- */
+   */
   get stderr(): Logger {
     if (!this.#stderrLogger) {
       // Pass parent's constructor args to maintain config.
@@ -345,7 +345,7 @@ export class Logger {
    * cached and reused on subsequent accesses.
    *
    * @returns A logger instance bound to stdout
- */
+   */
   get stdout(): Logger {
     if (!this.#stdoutLogger) {
       // Pass parent's constructor args to maintain config.
@@ -369,7 +369,7 @@ export class Logger {
    * `success()`, `fail()`, etc. Useful for testing and monitoring logging activity.
    *
    * @returns The number of times logging methods have been called
- */
+   */
   get logCallCount() {
     const root = this.#getRoot()
     return root.#logCallCount
@@ -380,7 +380,7 @@ export class Logger {
    *
    * This is called automatically by logging methods and should not
    * be called directly in normal usage.
- */
+   */
   [incLogCallCountSymbol]() {
     const root = this.#getRoot()
     root.#logCallCount += 1
@@ -420,7 +420,7 @@ export class Logger {
    *
    * @param value - The value to test
    * @param message - Optional message and additional arguments to log
- */
+   */
   assert(value: unknown, ...message: unknown[]): this {
     const con = this.#getConsole()
     con.assert(value, message[0] as string, ...message.slice(1))
@@ -438,7 +438,7 @@ export class Logger {
    * The stream to clear (stderr or stdout) depends on whether the logger
    * is stream-bound.
    *
- */
+   */
   clearLine(): this {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
@@ -467,7 +467,7 @@ export class Logger {
    * if the output is a TTY.
    *
    * @throws {Error} If called on a stream-bound logger instance
- */
+   */
   clearVisible() {
     /* c8 ignore start - clearVisible TTY-mode behavior; tests use
      non-TTY capture streams so the bound-stream throw and TTY
@@ -494,7 +494,7 @@ export class Logger {
    *
    * @param label - Optional label for the counter
    * @default 'default'
- */
+   */
   count(label?: string | undefined): this {
     const con = this.#getConsole()
     con.count(label)
@@ -511,7 +511,7 @@ export class Logger {
    *
    * @param name - The name of the task
    * @returns A task object with a `run()` method
- */
+   */
   createTask(name: string): Task {
     return {
       run: <T>(f: () => T): T => {
@@ -531,7 +531,7 @@ export class Logger {
    * only that stream's indentation.
    *
    * @default 2
- */
+   */
   dedent(spaces = 2) {
     if (this.#boundStream) {
       // Only affect bound stream
@@ -555,7 +555,7 @@ export class Logger {
    *
    * @param obj - The object to display
    * @param options - Optional formatting options (Node.js inspect options)
- */
+   */
   dir(obj: unknown, options?: unknown | undefined): this {
     const con = this.#getConsole()
     con.dir(obj, options as import('node:util').InspectOptions | undefined)
@@ -569,7 +569,7 @@ export class Logger {
    * Works like `console.dirxml()`. In Node.js, behaves the same as `dir()`.
    *
    * @param data - The data to display
- */
+   */
   dirxml(...data: unknown[]): this {
     const con = this.#getConsole()
     con.dirxml(data)
@@ -584,7 +584,7 @@ export class Logger {
    * automatically clear the current line - call `clearLine()` first if
    * needed after using `progress()`.
    *
- */
+   */
   done(...args: unknown[]): this {
     return this.#symbolApply('success', args)
   }
@@ -595,7 +595,7 @@ export class Logger {
    * Automatically applies current indentation. All arguments are formatted
    * and logged like `console.error()`.
    *
- */
+   */
   error(...args: unknown[]): this {
     return this.#apply('error', args)
   }
@@ -606,7 +606,7 @@ export class Logger {
    * Prevents multiple consecutive blank lines. Useful for adding spacing
    * between sections without creating excessive whitespace.
    *
- */
+   */
   errorNewline() {
     return this.#getLastWasBlank('stderr') ? this : this.error('')
   }
@@ -618,7 +618,7 @@ export class Logger {
    * Always outputs to stderr. If the message starts with an existing
    * symbol, it will be stripped and replaced.
    *
- */
+   */
   fail(...args: unknown[]): this {
     return this.#symbolApply('fail', args)
   }
@@ -631,7 +631,7 @@ export class Logger {
    * `kGroupIndentWidth` (default 2 spaces). Call `groupEnd()` to close.
    *
    * @param label - Optional label to display before the group
- */
+   */
   group(...label: unknown[]): this {
     const { length } = label
     if (length) {
@@ -652,7 +652,7 @@ export class Logger {
    * it behaves identically to `group()`.
    *
    * @param label - Optional label to display before the group
- */
+   */
   // groupCollapsed is an alias of group.
   // https://nodejs.org/api/console.html#consolegroupcollapsed
   groupCollapsed(...label: unknown[]): this {
@@ -665,7 +665,7 @@ export class Logger {
    * Must be called once for each `group()` or `groupCollapsed()` call
    * to properly close the group and restore indentation.
    *
- */
+   */
   groupEnd() {
     this.dedent((this as any)[getKGroupIndentationWidthSymbol()])
     return this
@@ -679,7 +679,7 @@ export class Logger {
    * only that stream's indentation. Maximum indentation is 1000 spaces.
    *
    * @default 2
- */
+   */
   indent(spaces = 2) {
     const spacesToAdd = ' '.repeat(MathMin(spaces, maxIndentation))
     if (this.#boundStream) {
@@ -703,7 +703,7 @@ export class Logger {
    * Always outputs to stderr. If the message starts with an existing
    * symbol, it will be stripped and replaced.
    *
- */
+   */
   info(...args: unknown[]): this {
     return this.#symbolApply('info', args)
   }
@@ -715,7 +715,7 @@ export class Logger {
    * and logged like `console.log()`. This is the primary method for
    * standard output.
    *
- */
+   */
   log(...args: unknown[]): this {
     return this.#apply('log', args)
   }
@@ -726,7 +726,7 @@ export class Logger {
    * Prevents multiple consecutive blank lines. Useful for adding spacing
    * between sections without creating excessive whitespace.
    *
- */
+   */
   logNewline() {
     return this.#getLastWasBlank('stdout') ? this : this.log('')
   }
@@ -740,7 +740,7 @@ export class Logger {
    * stream-bound.
    *
    * @param text - The progress message to display
- */
+   */
   progress(text: string): this {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
@@ -760,7 +760,7 @@ export class Logger {
    * When called on a stream-bound logger (`.stderr` or `.stdout`), resets
    * only that stream's indentation.
    *
- */
+   */
   resetIndent() {
     if (this.#boundStream) {
       // Only reset bound stream
@@ -780,7 +780,7 @@ export class Logger {
    * Always outputs to stderr. If the message starts with an existing
    * symbol, it will be stripped and replaced.
    *
- */
+   */
   skip(...args: unknown[]): this {
     return this.#symbolApply('skip', args)
   }
@@ -796,7 +796,7 @@ export class Logger {
    *
    * @param msg - The step message to log
    * @param extras - Additional arguments to log
- */
+   */
   step(msg: string, ...extras: unknown[]): this {
     // Add blank line before the step message.
     if (!this.#getLastWasBlank('stdout')) {
@@ -828,7 +828,7 @@ export class Logger {
    *
    * @param msg - The substep message to log
    * @param extras - Additional arguments to log
- */
+   */
   substep(msg: string, ...extras: unknown[]): this {
     // Add 2-space indent to the message.
     const indentedMsg = `  ${msg}`
@@ -843,7 +843,7 @@ export class Logger {
    * Always outputs to stderr. If the message starts with an existing
    * symbol, it will be stripped and replaced.
    *
- */
+   */
   success(...args: unknown[]): this {
     return this.#symbolApply('success', args)
   }
@@ -857,7 +857,7 @@ export class Logger {
    *
    * @param tabularData - The data to display as a table
    * @param properties - Optional array of property names to include
- */
+   */
   table(
     tabularData: unknown,
     properties?: readonly string[] | undefined,
@@ -877,7 +877,7 @@ export class Logger {
    *
    * @param label - Optional label for the timer
    * @default 'default'
- */
+   */
   time(label?: string | undefined): this {
     const con = this.#getConsole()
     con.time(label)
@@ -892,7 +892,7 @@ export class Logger {
    *
    * @param label - Optional label for the timer
    * @default 'default'
- */
+   */
   timeEnd(label?: string | undefined): this {
     const con = this.#getConsole()
     con.timeEnd(label)
@@ -910,7 +910,7 @@ export class Logger {
    * @param label - Optional label for the timer
    * @param data - Additional data to log with the time
    * @default 'default'
- */
+   */
   timeLog(label?: string | undefined, ...data: unknown[]): this {
     const con = this.#getConsole()
     con.timeLog(label, ...data)
@@ -926,7 +926,7 @@ export class Logger {
    *
    * @param message - Optional message to display with the trace
    * @param args - Additional arguments to log
- */
+   */
   trace(message?: unknown | undefined, ...args: unknown[]): this {
     const con = this.#getConsole()
     con.trace(message, ...args)
@@ -941,7 +941,7 @@ export class Logger {
    * Always outputs to stderr. If the message starts with an existing
    * symbol, it will be stripped and replaced.
    *
- */
+   */
   warn(...args: unknown[]): this {
     return this.#symbolApply('warn', args)
   }
@@ -953,7 +953,7 @@ export class Logger {
    * low-level control. Does not apply any indentation or formatting.
    *
    * @param text - The text to write
- */
+   */
   write(text: string): this {
     const con = this.#getConsole()
     // Write directly to the original stdout stream to bypass Console

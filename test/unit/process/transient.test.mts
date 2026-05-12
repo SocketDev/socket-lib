@@ -95,17 +95,13 @@ describe('process/transient', () => {
 
       it('should detect execution from npm cache directory', () => {
         process.env['npm_config_cache'] = '/home/user/.npm'
-        expect(
-          isTransientProcess('/home/user/.npm/_npx/abc123'),
-        ).toBe(true)
+        expect(isTransientProcess('/home/user/.npm/_npx/abc123')).toBe(true)
       })
 
       it('should detect execution from Windows npm cache', () => {
         process.env['npm_config_cache'] = 'C:\\Users\\user\\AppData\\npm-cache'
         expect(
-          isTransientProcess(
-            'C:\\Users\\user\\AppData\\npm-cache\\_npx\\123',
-          ),
+          isTransientProcess('C:\\Users\\user\\AppData\\npm-cache\\_npx\\123'),
         ).toBe(true)
       })
 
@@ -116,16 +112,14 @@ describe('process/transient', () => {
 
       it('should not detect when npm_config_cache is not set', () => {
         delete process.env['npm_config_cache']
-        expect(
-          isTransientProcess('/home/user/.npm/_npx/abc123'),
-        ).toBe(true) // Still detects due to _npx pattern
+        expect(isTransientProcess('/home/user/.npm/_npx/abc123')).toBe(true) // Still detects due to _npx pattern
       })
 
       it('should handle npm cache path with forward slashes on Windows', () => {
         process.env['npm_config_cache'] = 'C:/Users/user/AppData/npm-cache'
-        expect(
-          isTransientProcess('C:/Users/user/AppData/npm-cache/_npx'),
-        ).toBe(true)
+        expect(isTransientProcess('C:/Users/user/AppData/npm-cache/_npx')).toBe(
+          true,
+        )
       })
 
       it('should handle empty npm_config_cache', () => {
@@ -136,21 +130,15 @@ describe('process/transient', () => {
 
     describe('temporary path patterns', () => {
       it('should detect _npx directory', () => {
-        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(true)
       })
 
       it('should detect _npx in nested path', () => {
-        expect(
-          isTransientProcess('/home/user/.cache/_npx/abc/def'),
-        ).toBe(true)
+        expect(isTransientProcess('/home/user/.cache/_npx/abc/def')).toBe(true)
       })
 
       it('should detect .pnpm-store directory', () => {
-        expect(
-          isTransientProcess('/home/user/.pnpm-store/dlx-123'),
-        ).toBe(true)
+        expect(isTransientProcess('/home/user/.pnpm-store/dlx-123')).toBe(true)
       })
 
       it('should detect dlx- prefix', () => {
@@ -158,41 +146,31 @@ describe('process/transient', () => {
       })
 
       it('should detect dlx- in nested path', () => {
-        expect(
-          isTransientProcess('/var/tmp/pnpm/dlx-package/bin'),
-        ).toBe(true)
+        expect(isTransientProcess('/var/tmp/pnpm/dlx-package/bin')).toBe(true)
       })
 
       it('should detect Yarn Berry PnP virtual packages', () => {
         expect(
-          isTransientProcess(
-            '/home/user/project/.yarn/$$/virtual/package',
-          ),
+          isTransientProcess('/home/user/project/.yarn/$$/virtual/package'),
         ).toBe(true)
       })
 
       it('should detect Yarn $$ pattern anywhere in path', () => {
-        expect(
-          isTransientProcess('/project/.yarn/$$/cache/package'),
-        ).toBe(true)
+        expect(isTransientProcess('/project/.yarn/$$/cache/package')).toBe(true)
       })
 
       it('should not detect normal project directories', () => {
-        expect(isTransientProcess('/home/user/my-project')).toBe(
-          false,
-        )
+        expect(isTransientProcess('/home/user/my-project')).toBe(false)
       })
 
       it('should not detect node_modules', () => {
-        expect(
-          isTransientProcess('/home/user/project/node_modules/.bin'),
-        ).toBe(false)
+        expect(isTransientProcess('/home/user/project/node_modules/.bin')).toBe(
+          false,
+        )
       })
 
       it('should not detect normal pnpm-store (without dot)', () => {
-        expect(isTransientProcess('/home/user/pnpm-store')).toBe(
-          false,
-        )
+        expect(isTransientProcess('/home/user/pnpm-store')).toBe(false)
       })
     })
 
@@ -226,21 +204,17 @@ describe('process/transient', () => {
 
     describe('path normalization', () => {
       it('should handle paths with backslashes', () => {
-        expect(
-          isTransientProcess('C:\\Users\\user\\.npm\\_npx\\123'),
-        ).toBe(true)
-      })
-
-      it('should handle paths with forward slashes', () => {
-        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(
+        expect(isTransientProcess('C:\\Users\\user\\.npm\\_npx\\123')).toBe(
           true,
         )
       })
 
+      it('should handle paths with forward slashes', () => {
+        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(true)
+      })
+
       it('should handle mixed slash paths', () => {
-        expect(
-          isTransientProcess('C:/Users/user/.npm\\_npx/123'),
-        ).toBe(true)
+        expect(isTransientProcess('C:/Users/user/.npm\\_npx/123')).toBe(true)
       })
 
       it('should normalize before pattern matching', () => {
@@ -281,9 +255,7 @@ describe('process/transient', () => {
 
       it('should detect when both user agent and path pattern match', () => {
         process.env['npm_config_user_agent'] = 'npm/8.19.2 node/v18.12.0 npx'
-        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(true)
       })
 
       it('should detect when user agent matches but path does not', () => {
@@ -294,24 +266,18 @@ describe('process/transient', () => {
       it('should detect when path matches but user agent does not', () => {
         process.env['npm_config_user_agent'] =
           'npm/8.19.2 node/v18.12.0 darwin x64'
-        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(true)
       })
 
       it('should detect when npm cache and path both match', () => {
         process.env['npm_config_cache'] = '/home/user/.npm'
-        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/.npm/_npx/123')).toBe(true)
       })
 
       it('should not detect when no conditions match', () => {
         delete process.env['npm_config_user_agent']
         delete process.env['npm_config_cache']
-        expect(isTransientProcess('/home/user/my-project')).toBe(
-          false,
-        )
+        expect(isTransientProcess('/home/user/my-project')).toBe(false)
       })
     })
 
@@ -340,45 +306,33 @@ describe('process/transient', () => {
       })
 
       it('should handle paths with special characters', () => {
-        expect(isTransientProcess('/home/user/@scope/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/@scope/_npx/123')).toBe(true)
       })
 
       it('should handle paths with spaces', () => {
-        expect(
-          isTransientProcess('/home/user/my folder/_npx/123'),
-        ).toBe(true)
+        expect(isTransientProcess('/home/user/my folder/_npx/123')).toBe(true)
       })
 
       it('should handle Unicode in paths', () => {
-        expect(isTransientProcess('/home/用户/.npm/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/用户/.npm/_npx/123')).toBe(true)
       })
 
       it('should handle multiple pattern matches', () => {
-        expect(
-          isTransientProcess('/home/user/_npx/dlx-abc/.pnpm-store'),
-        ).toBe(true)
+        expect(isTransientProcess('/home/user/_npx/dlx-abc/.pnpm-store')).toBe(
+          true,
+        )
       })
 
       it('should match pattern as substring anywhere in path', () => {
-        expect(isTransientProcess('/home/user/my_npx_folder')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/my_npx_folder')).toBe(true)
       })
 
       it('should match pattern in filename', () => {
-        expect(isTransientProcess('/home/user/something_npx')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/home/user/something_npx')).toBe(true)
       })
 
       it('should handle WSL paths', () => {
-        expect(isTransientProcess('/mnt/c/Users/user/_npx/123')).toBe(
-          true,
-        )
+        expect(isTransientProcess('/mnt/c/Users/user/_npx/123')).toBe(true)
       })
     })
 
@@ -403,17 +357,15 @@ describe('process/transient', () => {
         process.env['npm_config_user_agent'] = 'npm/9.5.0 node/v18.15.0 npx'
         process.env['npm_config_cache'] = '/home/user/.npm'
         expect(
-          isTransientProcess(
-            '/home/user/.npm/_npx/12345/node_modules',
-          ),
+          isTransientProcess('/home/user/.npm/_npx/12345/node_modules'),
         ).toBe(true)
       })
 
       it('should detect pnpm dlx execution', () => {
         process.env['npm_config_user_agent'] = 'pnpm/8.6.0 node/v18.12.0 dlx'
-        expect(
-          isTransientProcess('/tmp/.pnpm-store/dlx-abc/package'),
-        ).toBe(true)
+        expect(isTransientProcess('/tmp/.pnpm-store/dlx-abc/package')).toBe(
+          true,
+        )
       })
 
       it('should detect yarn dlx execution', () => {
@@ -424,9 +376,9 @@ describe('process/transient', () => {
       it('should not detect regular npm install', () => {
         process.env['npm_config_user_agent'] =
           'npm/9.5.0 node/v18.15.0 darwin x64'
-        expect(
-          isTransientProcess('/home/user/project/node_modules'),
-        ).toBe(false)
+        expect(isTransientProcess('/home/user/project/node_modules')).toBe(
+          false,
+        )
       })
 
       it('should not detect regular pnpm install', () => {
@@ -437,9 +389,7 @@ describe('process/transient', () => {
 
       it('should not detect global installation', () => {
         delete process.env['npm_config_user_agent']
-        expect(
-          isTransientProcess('/usr/local/lib/node_modules'),
-        ).toBe(false)
+        expect(isTransientProcess('/usr/local/lib/node_modules')).toBe(false)
       })
     })
   })
