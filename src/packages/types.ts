@@ -5,7 +5,7 @@
  * / `provenance` / `licenses`. Pure types, no runtime side effects.
  */
 
-import type { CategoryString } from '../types/types'
+import type { CategoryString } from '../eco/category'
 
 // Type for package.json exports field.
 type PackageExports = {

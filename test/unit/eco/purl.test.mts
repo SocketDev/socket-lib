@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { PURL_Type } from '@socketsecurity/lib/types/purl'
+import { PURL_Type } from '@socketsecurity/lib/eco/purl'
 
 describe('types', () => {
   describe('PURL_Type enum', () => {
