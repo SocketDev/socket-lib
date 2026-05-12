@@ -20,7 +20,7 @@ import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe.sequential('cache-with-ttl', () => {
+describe.sequential('ttl-cache', () => {
   let cache: ReturnType<typeof createTtlCache>
   let testCacheDir: string
 

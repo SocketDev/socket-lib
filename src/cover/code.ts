@@ -5,7 +5,7 @@
 import process from 'node:process'
 
 import { readJson } from '../fs/read-json'
-import { isObjectObject } from '../objects/predicates'
+import { isPlainObject } from '../objects/predicates'
 import { spawn } from '../spawn/spawn'
 
 import { ArrayIsArray } from '../primordials/array'
@@ -84,7 +84,7 @@ export async function getCodeCoverage(
   // Read and parse coverage-final.json.
   const coverageData = (await readJson(coveragePath)) as unknown
 
-  if (!isObjectObject(coverageData)) {
+  if (!isPlainObject(coverageData)) {
     throw new ErrorCtor(`Invalid coverage data format in "${coveragePath}"`)
   }
 
@@ -100,14 +100,14 @@ export async function getCodeCoverage(
   const v8Data = coverageData as V8CoverageData
 
   for (const fileCoverage of ObjectValues(v8Data)) {
-    if (!isObjectObject(fileCoverage)) {
+    if (!isPlainObject(fileCoverage)) {
       continue
     }
 
     const fc = fileCoverage as V8FileCoverage
 
     // Aggregate statements.
-    if (fc.s && isObjectObject(fc.s)) {
+    if (fc.s && isPlainObject(fc.s)) {
       const statementCounts = ObjectValues(fc.s)
       for (const count of statementCounts) {
         if (typeof count === 'number') {
@@ -120,7 +120,7 @@ export async function getCodeCoverage(
     }
 
     // Aggregate branches.
-    if (fc.b && isObjectObject(fc.b)) {
+    if (fc.b && isPlainObject(fc.b)) {
       const branchCounts = ObjectValues(fc.b)
       for (const branches of branchCounts) {
         if (ArrayIsArray(branches)) {
@@ -137,7 +137,7 @@ export async function getCodeCoverage(
     }
 
     // Aggregate functions.
-    if (fc.f && isObjectObject(fc.f)) {
+    if (fc.f && isPlainObject(fc.f)) {
       const functionCounts = ObjectValues(fc.f)
       for (const count of functionCounts) {
         if (typeof count === 'number') {

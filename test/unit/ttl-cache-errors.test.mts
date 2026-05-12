@@ -1,5 +1,5 @@
 /**
- * @fileoverview Tests for catch branches in src/cache-with-ttl.ts that
+ * @fileoverview Tests for catch branches in src/ttl-cache.ts that
  * fire when persistent-cache reads or writes fail. Mocks the cacache
  * helpers (`safeGet`, `remove`, `safePut`) so the SUT exercises the
  * try/catch around JSON.parse and cacache.remove.
@@ -33,7 +33,7 @@ vi.mock('../../src/cacache/write', async importOriginal => {
   }
 })
 
-describe.sequential('cache-with-ttl — error branches', () => {
+describe.sequential('ttl-cache — error branches', () => {
   let testCacheDir: string
 
   beforeEach(() => {

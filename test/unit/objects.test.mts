@@ -5,7 +5,7 @@
  * - Lazy getters: createLazyGetter(), defineLazyGetter(), defineLazyGetters() with memoization
  * - Property definition: defineGetter() for custom getters on objects
  * - Object utilities: merge(), toSortedObject(), toSortedObjectFromEntries()
- * - Type guards: isObject(), isObjectObject() (excludes arrays/null)
+ * - Type guards: isObject(), isPlainObject() (excludes arrays/null)
  * - Property access: getOwn(), hasOwn(), getKeys(), hasKeys(), getOwnPropertyValues()
  * - Aliases: objectAssign, objectEntries, objectFreeze (direct references to Object.*)
  * - Constants: createConstantsObject() for frozen objects with typed getters
@@ -35,7 +35,7 @@ import {
   hasKeys,
   hasOwn,
   isObject,
-  isObjectObject,
+  isPlainObject,
 } from '@socketsecurity/lib/objects/predicates'
 import {
   entryKeyComparator,
@@ -254,28 +254,28 @@ describe('objects', () => {
     })
   })
 
-  describe('isObjectObject', () => {
+  describe('isPlainObject', () => {
     it('should return true for plain objects', () => {
-      expect(isObjectObject({})).toBe(true)
-      expect(isObjectObject({ a: 1 })).toBe(true)
-      expect(isObjectObject(Object.create(null))).toBe(true)
+      expect(isPlainObject({})).toBe(true)
+      expect(isPlainObject({ a: 1 })).toBe(true)
+      expect(isPlainObject(Object.create(null))).toBe(true)
     })
 
     it('should return false for arrays', () => {
-      expect(isObjectObject([])).toBe(false)
-      expect(isObjectObject([1, 2, 3])).toBe(false)
+      expect(isPlainObject([])).toBe(false)
+      expect(isPlainObject([1, 2, 3])).toBe(false)
     })
 
     it('should return false for other objects', () => {
-      expect(isObjectObject(new Date())).toBe(false)
-      expect(isObjectObject(new Map())).toBe(false)
-      expect(isObjectObject(new Set())).toBe(false)
+      expect(isPlainObject(new Date())).toBe(false)
+      expect(isPlainObject(new Map())).toBe(false)
+      expect(isPlainObject(new Set())).toBe(false)
     })
 
     it('should return false for primitives', () => {
-      expect(isObjectObject(undefined)).toBe(false)
-      expect(isObjectObject(undefined)).toBe(false)
-      expect(isObjectObject(123)).toBe(false)
+      expect(isPlainObject(undefined)).toBe(false)
+      expect(isPlainObject(undefined)).toBe(false)
+      expect(isPlainObject(123)).toBe(false)
     })
   })
 
@@ -799,23 +799,23 @@ describe('objects', () => {
     })
   })
 
-  describe('isObjectObject - additional tests', () => {
+  describe('isPlainObject - additional tests', () => {
     it('should return false for RegExp', () => {
-      expect(isObjectObject(/test/)).toBe(false)
+      expect(isPlainObject(/test/)).toBe(false)
     })
 
     it('should return false for Error', () => {
-      expect(isObjectObject(new Error())).toBe(false)
+      expect(isPlainObject(new Error())).toBe(false)
     })
 
     it('should return true for Object.create(Object.prototype)', () => {
-      expect(isObjectObject(Object.create(Object.prototype))).toBe(true)
+      expect(isPlainObject(Object.create(Object.prototype))).toBe(true)
     })
 
     it('should return false for objects with custom prototypes', () => {
       const proto = { custom: true }
       const obj = Object.create(proto)
-      expect(isObjectObject(obj)).toBe(false)
+      expect(isPlainObject(obj)).toBe(false)
     })
   })
 

@@ -4,7 +4,7 @@
 
 import npmPackageArg from '../external/npm-package-arg'
 
-import { isObjectObject } from '../objects/predicates'
+import { isPlainObject } from '../objects/predicates'
 import { isNonEmptyString } from '../strings/predicates'
 
 import { StringPrototypeEndsWith } from '../primordials/string'
@@ -94,7 +94,7 @@ export function gitHubTgzUrl(
 /*@__NO_SIDE_EFFECTS__*/
 export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
   let parsedSpec: unknown
-  if (isObjectObject(spec)) {
+  if (isPlainObject(spec)) {
     parsedSpec = spec
   } else {
     // module is imported at the top
@@ -118,7 +118,7 @@ export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {
   let parsedSpec: unknown
-  if (isObjectObject(spec)) {
+  if (isPlainObject(spec)) {
     parsedSpec = spec
   } else {
     // module is imported at the top

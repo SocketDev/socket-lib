@@ -21,7 +21,7 @@ import * as semver from '../external/semver'
 
 import { readJson, readJsonSync } from '../fs/read-json'
 import { merge } from '../objects/mutate'
-import { isObjectObject } from '../objects/predicates'
+import { isPlainObject } from '../objects/predicates'
 import type {
   ExtractOptions,
   NormalizeOptions,
@@ -289,7 +289,7 @@ export async function resolveGitHubTgzUrl(
   pkgNameOrId: string,
   where?: unknown,
 ): Promise<string> {
-  const whereIsPkgJson = isObjectObject(where)
+  const whereIsPkgJson = isPlainObject(where)
   const pkgJson = whereIsPkgJson
     ? where
     : await readPackageJson(where as string, { normalize: true })

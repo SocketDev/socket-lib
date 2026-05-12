@@ -15,7 +15,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { safeStats } from '@socketsecurity/lib/fs/inspect'
+import { safeStat } from '@socketsecurity/lib/fs/inspect'
 import { readJson } from '@socketsecurity/lib/fs/read-json'
 import { safeDelete, safeMkdir } from '@socketsecurity/lib/fs/safe'
 import { writeJson } from '@socketsecurity/lib/fs/write-json'
@@ -70,7 +70,7 @@ describe('fs integration', () => {
         const readData = await readJson(filePath)
         expect(readData).toEqual(data)
 
-        const dirStats = await safeStats(deepDir)
+        const dirStats = await safeStat(deepDir)
         expect(dirStats).toBeDefined()
         expect(dirStats?.isDirectory()).toBe(true)
       }, 'fs-deep-json-')
@@ -90,21 +90,21 @@ describe('fs integration', () => {
         expect(content).toBe('test content')
 
         // Source should still exist
-        const srcStats = await safeStats(srcPath)
+        const srcStats = await safeStat(srcPath)
         expect(srcStats).toBeDefined()
       }, 'fs-copy-test-')
     })
 
-    it('should check file existence with safeStats', async () => {
+    it('should check file existence with safeStat', async () => {
       await runWithTempDir(async tmpDir => {
         const filePath = path.join(tmpDir, 'exists.txt')
 
-        let stats = await safeStats(filePath)
+        let stats = await safeStat(filePath)
         expect(stats).toBeUndefined()
 
         await fs.writeFile(filePath, 'content', 'utf8')
 
-        stats = await safeStats(filePath)
+        stats = await safeStat(filePath)
         expect(stats).toBeDefined()
         expect(stats?.isFile()).toBe(true)
       }, 'fs-exists-test-')
@@ -141,7 +141,7 @@ describe('fs integration', () => {
 
       await safeMkdir(testDir)
 
-      const stats = await safeStats(testDir)
+      const stats = await safeStat(testDir)
       expect(stats).toBeDefined()
       expect(stats?.isDirectory()).toBe(true)
 

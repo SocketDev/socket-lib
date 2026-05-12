@@ -7,8 +7,8 @@
  * - File reading: readFileUtf8/Sync(), readFileBinary/Sync(), safeReadFile/Sync()
  * - JSON operations: readJson/Sync(), writeJson/Sync() with proper encoding
  * - Directory listing: readDirNames/Sync() for directory contents
- * - Safe operations: safeStats/Sync(), safeDelete/Sync() with error handling
- * - Utilities: isSymLinkSync(), uniqueSync(), validateFiles()
+ * - Safe operations: safeStat/Sync(), safeDelete/Sync() with error handling
+ * - Utilities: isSymlinkSync(), uniqueSync(), validateFiles()
  * - Encoding: normalizeEncoding(), normalizeEncodingSlow() for encoding normalization
  * Tests use temporary directories (runWithTempDir) for isolated filesystem operations.
  * Validates cross-platform behavior, error handling, and edge cases (missing files, permissions).
@@ -30,9 +30,9 @@ import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
 import {
   isDirEmptySync,
   isDirSync,
-  isSymLinkSync,
-  safeStats,
-  safeStatsSync,
+  isSymlinkSync,
+  safeStat,
+  safeStatSync,
 } from '@socketsecurity/lib/fs/inspect'
 import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
 import {
@@ -354,7 +354,7 @@ describe('fs', () => {
     })
   })
 
-  describe('isSymLinkSync', () => {
+  describe('isSymlinkSync', () => {
     it('should return true for symlinks', async () => {
       await runWithTempDir(async tmpDir => {
         const targetFile = path.join(tmpDir, 'target.txt')
@@ -363,7 +363,7 @@ describe('fs', () => {
         const linkPath = path.join(tmpDir, 'link.txt')
         await fs.symlink(targetFile, linkPath)
 
-        const result = isSymLinkSync(linkPath)
+        const result = isSymlinkSync(linkPath)
         expect(result).toBe(true)
       }, 'isSymLink-true-')
     })
@@ -373,13 +373,13 @@ describe('fs', () => {
         const testFile = path.join(tmpDir, 'file.txt')
         await fs.writeFile(testFile, '', 'utf8')
 
-        const result = isSymLinkSync(testFile)
+        const result = isSymlinkSync(testFile)
         expect(result).toBe(false)
       }, 'isSymLink-false-')
     })
 
     it('should return false for non-existent paths', () => {
-      const result = isSymLinkSync('/nonexistent/path')
+      const result = isSymlinkSync('/nonexistent/path')
       expect(result).toBe(false)
     })
   })
@@ -1010,54 +1010,54 @@ describe('fs', () => {
     })
   })
 
-  describe('safeStats', () => {
+  describe('safeStat', () => {
     it('should return stats for existing files', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'test.txt')
         await fs.writeFile(testFile, '', 'utf8')
 
-        const result = await safeStats(testFile)
+        const result = await safeStat(testFile)
         expect(result).toBeDefined()
         expect(result?.isFile()).toBe(true)
-      }, 'safeStats-file-')
+      }, 'safeStat-file-')
     })
 
     it('should return stats for directories', async () => {
       await runWithTempDir(async tmpDir => {
-        const result = await safeStats(tmpDir)
+        const result = await safeStat(tmpDir)
         expect(result).toBeDefined()
         expect(result?.isDirectory()).toBe(true)
-      }, 'safeStats-dir-')
+      }, 'safeStat-dir-')
     })
 
     it('should return undefined for non-existent paths', async () => {
-      const result = await safeStats('/nonexistent/path')
+      const result = await safeStat('/nonexistent/path')
       expect(result).toBeUndefined()
     })
   })
 
-  describe('safeStatsSync', () => {
+  describe('safeStatSync', () => {
     it('should return stats for existing files', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'test.txt')
         await fs.writeFile(testFile, '', 'utf8')
 
-        const result = safeStatsSync(testFile)
+        const result = safeStatSync(testFile)
         expect(result).toBeDefined()
         expect(result?.isFile()).toBe(true)
-      }, 'safeStatsSync-file-')
+      }, 'safeStatSync-file-')
     })
 
     it('should return stats for directories', async () => {
       await runWithTempDir(async tmpDir => {
-        const result = safeStatsSync(tmpDir)
+        const result = safeStatSync(tmpDir)
         expect(result).toBeDefined()
         expect(result?.isDirectory()).toBe(true)
-      }, 'safeStatsSync-dir-')
+      }, 'safeStatSync-dir-')
     })
 
     it('should return undefined for non-existent paths', () => {
-      const result = safeStatsSync('/nonexistent/path')
+      const result = safeStatSync('/nonexistent/path')
       expect(result).toBeUndefined()
     })
   })

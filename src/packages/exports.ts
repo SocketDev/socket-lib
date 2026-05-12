@@ -4,7 +4,7 @@
 
 import { isArray } from '../arrays/predicates'
 import { LOOP_SENTINEL } from '../constants/sentinels'
-import { isObject, isObjectObject } from '../objects/predicates'
+import { isObject, isPlainObject } from '../objects/predicates'
 
 import { ArrayPrototypePush } from '../primordials/array'
 
@@ -158,7 +158,7 @@ export function getSubpaths(entryExports: unknown): string[] {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isConditionalExports(entryExports: unknown): boolean {
-  if (!isObjectObject(entryExports)) {
+  if (!isPlainObject(entryExports)) {
     return false
   }
   const keys = ObjectGetOwnPropertyNames(entryExports)
@@ -190,7 +190,7 @@ export function isConditionalExports(entryExports: unknown): boolean {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isSubpathExports(entryExports: unknown): boolean {
-  if (isObjectObject(entryExports)) {
+  if (isPlainObject(entryExports)) {
     const keys = ObjectGetOwnPropertyNames(entryExports)
     for (let i = 0, { length } = keys; i < length; i += 1) {
       // Subpath entry exports contain keys starting with '.'.

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Tests for LRU eviction + clock-skew detection in createTtlCache.
  *
- * The main cache-with-ttl.test.mts skips the in-memory LRU eviction
+ * The main ttl-cache.test.mts skips the in-memory LRU eviction
  * branch (memoMaxSize) and the future-expiresAt clock-skew branch in
  * isExpired. These are testable without filesystem fixtures since they
  * exercise the in-memory cache only.
@@ -16,7 +16,7 @@ import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-describe.sequential('cache-with-ttl — LRU + clock skew', () => {
+describe.sequential('ttl-cache — LRU + clock skew', () => {
   let testCacheDir: string
 
   beforeEach(() => {

@@ -19,7 +19,7 @@ import { existsSync } from 'node:fs'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { readJson } from '../fs/read-json'
 import { safeDelete } from '../fs/safe'
-import { isObjectObject } from '../objects/predicates'
+import { isPlainObject } from '../objects/predicates'
 import { getSocketDlxDir } from '../paths/socket'
 
 import { ArrayIsArray, ArrayPrototypeFind } from '../primordials/array'
@@ -156,7 +156,7 @@ export async function isBinaryCacheValid(
     }
 
     const metadata = await readJson(metaPath, { throws: false })
-    if (!isObjectObject(metadata)) {
+    if (!isPlainObject(metadata)) {
       return false
     }
     const now = DateNow()

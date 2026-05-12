@@ -1,6 +1,6 @@
 /**
  * @fileoverview Object type guards: `hasKeys`, `hasOwn`, `isObject`,
- * `isObjectObject`. All four narrow `unknown` to a typed shape and
+ * `isPlainObject`. All four narrow `unknown` to a typed shape and
  * tolerate `null` / `undefined` without throwing.
  */
 
@@ -114,15 +114,15 @@ export function isObject(
  *
  * @example
  * ```ts
- * isObjectObject({})                     // true
- * isObjectObject({ a: 1 })               // true
- * isObjectObject(Object.create(null))    // true
- * isObjectObject([])                     // false
- * isObjectObject(new Date())             // false
+ * isPlainObject({})                     // true
+ * isPlainObject({ a: 1 })               // true
+ * isPlainObject(Object.create(null))    // true
+ * isPlainObject([])                     // false
+ * isPlainObject(new Date())             // false
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function isObjectObject(
+export function isPlainObject(
   value: unknown,
 ): value is { [key: PropertyKey]: unknown } {
   if (value === null || typeof value !== 'object' || isArray(value)) {

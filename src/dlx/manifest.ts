@@ -191,7 +191,10 @@ export class DlxManifest {
         >
       }
 
-      return JSONParse(content) as Record<string, DlxManifestEntry | StoreRecord>
+      return JSONParse(content) as Record<
+        string,
+        DlxManifestEntry | StoreRecord
+      >
     } catch (e) {
       logger.warn(`Failed to read manifest: ${errorMessage(e)}`)
       return { __proto__: null } as unknown as Record<

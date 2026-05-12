@@ -31,7 +31,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 const cjsRequire = createRequire(import.meta.url)
 const fsCjs = cjsRequire('node:fs') as typeof import('node:fs')
 
-describe.sequential('process-lock', () => {
+describe.sequential('process/lock', () => {
   let testLockPath: string
 
   beforeEach(() => {

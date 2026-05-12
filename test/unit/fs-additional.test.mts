@@ -23,8 +23,8 @@ import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
 import {
   isDirEmptySync,
   isDirSync,
-  safeStats,
-  safeStatsSync,
+  safeStat,
+  safeStatSync,
 } from '@socketsecurity/lib/fs/inspect'
 import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
 import {
@@ -661,28 +661,28 @@ describe('fs - Additional Coverage', () => {
       }, 'isDir-buffer-')
     })
 
-    it('safeStats should handle Buffer paths', async () => {
+    it('safeStat should handle Buffer paths', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'test.txt')
         await fs.writeFile(testFile, '', 'utf8')
         const bufferPath = Buffer.from(testFile)
 
-        const result = await safeStats(bufferPath)
+        const result = await safeStat(bufferPath)
         expect(result).toBeDefined()
         expect(result?.isFile()).toBe(true)
-      }, 'safeStats-buffer-')
+      }, 'safeStat-buffer-')
     })
 
-    it('safeStatsSync should handle Buffer paths', async () => {
+    it('safeStatSync should handle Buffer paths', async () => {
       await runWithTempDir(async tmpDir => {
         const testFile = path.join(tmpDir, 'test.txt')
         await fs.writeFile(testFile, '', 'utf8')
         const bufferPath = Buffer.from(testFile)
 
-        const result = safeStatsSync(bufferPath)
+        const result = safeStatSync(bufferPath)
         expect(result).toBeDefined()
         expect(result?.isFile()).toBe(true)
-      }, 'safeStatsSync-buffer-')
+      }, 'safeStatSync-buffer-')
     })
   })
 })

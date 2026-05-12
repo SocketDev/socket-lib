@@ -18,7 +18,7 @@ import pacote from '../external/pacote'
 import semver from '../external/semver'
 
 import { isArray } from '../arrays/predicates'
-import { isObjectObject } from '../objects/predicates'
+import { isPlainObject } from '../objects/predicates'
 import { objectEntries } from '../objects/sort'
 import { resolvePackageJsonEntryExports } from './exports'
 import { isRegistryFetcherType } from './validation'
@@ -82,15 +82,15 @@ export function createPackageJson(
       directory,
     },
     ...(type ? { type } : {}),
-    ...(isObjectObject(entryExports) ? { exports: { ...entryExports } } : {}),
+    ...(isPlainObject(entryExports) ? { exports: { ...entryExports } } : {}),
     ...(entryExports ? {} : { main: `${main ?? './index.js'}` }),
     sideEffects: sideEffects !== undefined && !!sideEffects,
-    ...(isObjectObject(dependencies)
+    ...(isPlainObject(dependencies)
       ? { dependencies: { ...dependencies } }
       : {}),
-    ...(isObjectObject(overrides) ? { overrides: { ...overrides } } : {}),
-    ...(isObjectObject(resolutions) ? { resolutions: { ...resolutions } } : {}),
-    ...(isObjectObject(engines)
+    ...(isPlainObject(overrides) ? { overrides: { ...overrides } } : {}),
+    ...(isPlainObject(resolutions) ? { resolutions: { ...resolutions } } : {}),
+    ...(isPlainObject(engines)
       ? {
           engines: ObjectFromEntries(
             objectEntries(engines).map((pair: [PropertyKey, unknown]) => {
@@ -123,7 +123,7 @@ export function createPackageJson(
         }
       : { engines: { node: packageDefaultNodeRange } }),
     files: isArray(files) ? files.slice() : ['*.d.ts', '*.js'],
-    ...(isObjectObject(socket)
+    ...(isPlainObject(socket)
       ? { socket: { ...socket } }
       : {
           socket: {

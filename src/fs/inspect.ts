@@ -35,7 +35,7 @@ import type { IsDirEmptyOptions } from './types'
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function isDir(filepath: PathLike) {
-  return !!(await safeStats(filepath))?.isDirectory()
+  return !!(await safeStat(filepath))?.isDirectory()
 }
 
 /**
@@ -108,7 +108,7 @@ export function isDirEmptySync(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isDirSync(filepath: PathLike) {
-  return !!safeStatsSync(filepath)?.isDirectory()
+  return !!safeStatSync(filepath)?.isDirectory()
 }
 
 /**
@@ -120,13 +120,13 @@ export function isDirSync(filepath: PathLike) {
  *
  * @example
  * ```ts
- * if (isSymLinkSync('./my-link')) {
+ * if (isSymlinkSync('./my-link')) {
  *   console.log('Path is a symbolic link')
  * }
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function isSymLinkSync(filepath: PathLike) {
+export function isSymlinkSync(filepath: PathLike) {
   const fs = getNodeFs()
   try {
     return fs.lstatSync(filepath).isSymbolicLink()
@@ -145,7 +145,7 @@ export function isSymLinkSync(filepath: PathLike) {
  * @example
  * ```ts
  * // Check if file exists and get its stats
- * const stats = await safeStats('./file.txt')
+ * const stats = await safeStat('./file.txt')
  * if (stats) {
  *   console.log('File size:', stats.size)
  *   console.log('Modified:', stats.mtime)
@@ -153,7 +153,7 @@ export function isSymLinkSync(filepath: PathLike) {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export async function safeStats(filepath: PathLike) {
+export async function safeStat(filepath: PathLike) {
   const fs = getNodeFs()
   try {
     return await fs.promises.stat(filepath)
@@ -172,7 +172,7 @@ export async function safeStats(filepath: PathLike) {
  * @example
  * ```ts
  * // Check if file exists and get its size
- * const stats = safeStatsSync('./file.txt')
+ * const stats = safeStatSync('./file.txt')
  * if (stats) {
  *   console.log('File size:', stats.size)
  *   console.log('Is directory:', stats.isDirectory())
@@ -180,7 +180,7 @@ export async function safeStats(filepath: PathLike) {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function safeStatsSync(filepath: PathLike) {
+export function safeStatSync(filepath: PathLike) {
   const fs = getNodeFs()
   try {
     return fs.statSync(filepath, {

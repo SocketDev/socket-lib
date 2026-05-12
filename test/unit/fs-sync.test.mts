@@ -2,11 +2,11 @@
  * @fileoverview Tests for synchronous fs utilities.
  *
  * Tests sync fs functions:
- * - isSymLinkSync() for checking symlinks synchronously
+ * - isSymlinkSync() for checking symlinks synchronously
  * - readJsonSync() for reading JSON files synchronously
  * - writeJsonSync() for writing JSON files synchronously
  * - safeReadFileSync() for safe file reading synchronously
- * - safeStatsSync() for safe stat calls synchronously
+ * - safeStatSync() for safe stat calls synchronously
  * - readFileBinary() for reading binary files
  */
 
@@ -23,7 +23,7 @@ import { join } from 'node:path'
 
 import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
 
-import { isSymLinkSync, safeStatsSync } from '@socketsecurity/lib/fs/inspect'
+import { isSymlinkSync, safeStatSync } from '@socketsecurity/lib/fs/inspect'
 import {
   readFileBinary,
   safeReadFileSync,
@@ -46,7 +46,7 @@ describe.sequential('fs - Sync Functions', () => {
     }
   })
 
-  describe('isSymLinkSync', () => {
+  describe('isSymlinkSync', () => {
     it('should return true for symlinks', () => {
       const targetFile = join(testDir, 'target.txt')
       const linkFile = join(testDir, 'link.txt')
@@ -54,26 +54,26 @@ describe.sequential('fs - Sync Functions', () => {
       writeFileSync(targetFile, 'content')
       symlinkSync(targetFile, linkFile)
 
-      expect(isSymLinkSync(linkFile)).toBe(true)
+      expect(isSymlinkSync(linkFile)).toBe(true)
     })
 
     it('should return false for regular files', () => {
       const regularFile = join(testDir, 'regular.txt')
       writeFileSync(regularFile, 'content')
 
-      expect(isSymLinkSync(regularFile)).toBe(false)
+      expect(isSymlinkSync(regularFile)).toBe(false)
     })
 
     it('should return false for non-existent files', () => {
       const nonExistent = join(testDir, 'does-not-exist.txt')
-      expect(isSymLinkSync(nonExistent)).toBe(false)
+      expect(isSymlinkSync(nonExistent)).toBe(false)
     })
 
     it('should return false for directories', () => {
       const subDir = join(testDir, 'subdir')
       mkdirSync(subDir)
 
-      expect(isSymLinkSync(subDir)).toBe(false)
+      expect(isSymlinkSync(subDir)).toBe(false)
     })
   })
 
@@ -250,12 +250,12 @@ describe.sequential('fs - Sync Functions', () => {
     })
   })
 
-  describe('safeStatsSync', () => {
+  describe('safeStatSync', () => {
     it('should return stats for existing file', () => {
       const file = join(testDir, 'stats.txt')
       writeFileSync(file, 'content')
 
-      const stats = safeStatsSync(file)
+      const stats = safeStatSync(file)
       expect(stats).toBeDefined()
       expect(stats?.isFile()).toBe(true)
     })
@@ -264,14 +264,14 @@ describe.sequential('fs - Sync Functions', () => {
       const dir = join(testDir, 'stats-dir')
       mkdirSync(dir)
 
-      const stats = safeStatsSync(dir)
+      const stats = safeStatSync(dir)
       expect(stats).toBeDefined()
       expect(stats?.isDirectory()).toBe(true)
     })
 
     it('should return undefined for non-existent paths', () => {
       const nonExistent = join(testDir, 'no-stats.txt')
-      const stats = safeStatsSync(nonExistent)
+      const stats = safeStatSync(nonExistent)
       expect(stats).toBeUndefined()
     })
 
@@ -282,7 +282,7 @@ describe.sequential('fs - Sync Functions', () => {
       writeFileSync(targetFile, 'content')
       symlinkSync(targetFile, linkFile)
 
-      const stats = safeStatsSync(linkFile)
+      const stats = safeStatSync(linkFile)
       expect(stats).toBeDefined()
       expect(stats?.isSymbolicLink()).toBe(false) // follows link by default
       expect(stats?.isFile()).toBe(true)
@@ -319,9 +319,9 @@ describe.sequential('fs - Sync Functions', () => {
       expect(safeReadFileSync(file2)).toBe('content2')
       expect(safeReadFileSync(file3)).toBeUndefined()
 
-      expect(safeStatsSync(file1)?.isFile()).toBe(true)
-      expect(safeStatsSync(file2)?.isFile()).toBe(true)
-      expect(safeStatsSync(file3)).toBeUndefined()
+      expect(safeStatSync(file1)?.isFile()).toBe(true)
+      expect(safeStatSync(file2)?.isFile()).toBe(true)
+      expect(safeStatSync(file3)).toBeUndefined()
     })
   })
 })

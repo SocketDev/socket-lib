@@ -12,7 +12,7 @@
 import { packageExtensions } from '@socketsecurity/lib/pkg-ext/data'
 import { describe, expect, it } from 'vitest'
 
-describe('package-extensions', () => {
+describe('pkg-ext', () => {
   describe('packageExtensions', () => {
     it('should be defined', () => {
       expect(packageExtensions).toBeDefined()

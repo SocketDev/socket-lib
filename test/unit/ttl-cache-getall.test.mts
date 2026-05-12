@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for the wildcard-pattern getAll() path in
- * src/cache-with-ttl.ts that walks cacache.ls.stream.
+ * src/ttl-cache.ts that walks cacache.ls.stream.
  *
  * Mocks the cacache module's `getCacache().ls.stream` to yield fake
  * entries so we can exercise: prefix-mismatch skip, pattern-match
@@ -60,7 +60,7 @@ vi.mock('../../src/cacache/write', async importOriginal => {
   }
 })
 
-describe.sequential('cache-with-ttl — getAll wildcard', () => {
+describe.sequential('ttl-cache — getAll wildcard', () => {
   let testCacheDir: string
 
   beforeEach(() => {

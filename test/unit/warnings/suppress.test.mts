@@ -20,7 +20,7 @@ import {
 import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe('suppress-warnings', () => {
+describe('warnings/suppress', () => {
   let originalEmitWarning: typeof process.emitWarning
   let emitWarningSpy: ReturnType<typeof vi.fn>
 
