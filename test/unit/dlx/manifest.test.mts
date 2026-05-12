@@ -4,7 +4,7 @@
  * Tests type guards and utilities for dlx (download and execute) manifest entries:
  * - isPackageEntry() validates package-type manifest entries
  * - isBinaryEntry() validates binary-type manifest entries
- * - ManifestEntry discriminated union with 'package' or 'binary' types
+ * - DlxManifestEntry discriminated union with 'package' or 'binary' types
  * - Tests type narrowing, cache_key validation, and timestamp handling
  * - Ensures TypeScript type guards work correctly for manifest parsing
  * dlx manifests track cached npm packages and binaries for npx-like execution.
@@ -17,7 +17,7 @@ import {
   isPackageEntry,
   isBinaryEntry,
   DlxManifest,
-  type ManifestEntry,
+  type DlxManifestEntry,
   type PackageDetails,
   type BinaryDetails,
   type StoreRecord,
@@ -27,7 +27,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 describe('dlx-manifest', () => {
   describe('isPackageEntry', () => {
     it('should return true for package entries', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'package',
         cache_key: 'test-package@1.0.0',
         timestamp: Date.now(),
@@ -39,7 +39,7 @@ describe('dlx-manifest', () => {
     })
 
     it('should return false for binary entries', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'binary',
         cache_key: 'test-binary',
         timestamp: Date.now(),
@@ -57,7 +57,7 @@ describe('dlx-manifest', () => {
 
   describe('isBinaryEntry', () => {
     it('should return true for binary entries', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'binary',
         cache_key: 'test-binary',
         timestamp: Date.now(),
@@ -73,7 +73,7 @@ describe('dlx-manifest', () => {
     })
 
     it('should return false for package entries', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'package',
         cache_key: 'test-package@1.0.0',
         timestamp: Date.now(),
@@ -85,9 +85,9 @@ describe('dlx-manifest', () => {
     })
   })
 
-  describe('ManifestEntry types', () => {
+  describe('DlxManifestEntry types', () => {
     it('should support package entries with update_check', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'package',
         cache_key: 'test@1.0.0',
         timestamp: Date.now(),
@@ -109,7 +109,7 @@ describe('dlx-manifest', () => {
     })
 
     it('should support binary entries with all fields', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'binary',
         cache_key: 'binary-key',
         timestamp: Date.now(),
@@ -135,7 +135,7 @@ describe('dlx-manifest', () => {
 
   describe('type guards', () => {
     it('should narrow types correctly with isPackageEntry', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'package',
         cache_key: 'test',
         timestamp: Date.now(),
@@ -149,7 +149,7 @@ describe('dlx-manifest', () => {
     })
 
     it('should narrow types correctly with isBinaryEntry', () => {
-      const entry: ManifestEntry = {
+      const entry: DlxManifestEntry = {
         type: 'binary',
         cache_key: 'test',
         timestamp: Date.now(),

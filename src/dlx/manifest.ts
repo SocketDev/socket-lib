@@ -94,7 +94,7 @@ export interface BinaryDetails {
  * Unified manifest entry for all cached items (packages and binaries).
  * Shared fields at root, type-specific fields in details.
  */
-export interface ManifestEntry {
+export interface DlxManifestEntry {
   type: 'package' | 'binary'
   cache_key: string
   timestamp: number
@@ -127,8 +127,8 @@ export interface DlxManifestOptions {
  * ```
  */
 export function isBinaryEntry(
-  entry: ManifestEntry,
-): entry is ManifestEntry & { details: BinaryDetails } {
+  entry: DlxManifestEntry,
+): entry is DlxManifestEntry & { details: BinaryDetails } {
   return entry.type === 'binary'
 }
 
@@ -144,8 +144,8 @@ export function isBinaryEntry(
  * ```
  */
 export function isPackageEntry(
-  entry: ManifestEntry,
-): entry is ManifestEntry & { details: PackageDetails } {
+  entry: DlxManifestEntry,
+): entry is DlxManifestEntry & { details: PackageDetails } {
   return entry.type === 'package'
 }
 
@@ -167,12 +167,12 @@ export class DlxManifest {
    * Read the entire manifest file.
    * @private
    */
-  private readManifest(): Record<string, ManifestEntry | StoreRecord> {
+  private readManifest(): Record<string, DlxManifestEntry | StoreRecord> {
     try {
       if (!fs.existsSync(this.manifestPath)) {
         return { __proto__: null } as unknown as Record<
           string,
-          ManifestEntry | StoreRecord
+          DlxManifestEntry | StoreRecord
         >
       }
 
@@ -187,16 +187,16 @@ export class DlxManifest {
       if (!content) {
         return { __proto__: null } as unknown as Record<
           string,
-          ManifestEntry | StoreRecord
+          DlxManifestEntry | StoreRecord
         >
       }
 
-      return JSONParse(content) as Record<string, ManifestEntry | StoreRecord>
+      return JSONParse(content) as Record<string, DlxManifestEntry | StoreRecord>
     } catch (e) {
       logger.warn(`Failed to read manifest: ${errorMessage(e)}`)
       return { __proto__: null } as unknown as Record<
         string,
-        ManifestEntry | StoreRecord
+        DlxManifestEntry | StoreRecord
       >
     }
   }
@@ -206,7 +206,7 @@ export class DlxManifest {
    * @private
    */
   private async writeManifest(
-    data: Record<string, ManifestEntry | StoreRecord>,
+    data: Record<string, DlxManifestEntry | StoreRecord>,
   ): Promise<void> {
     // Ensure directory exists.
     const manifestDir = path.dirname(this.manifestPath)
@@ -254,7 +254,7 @@ export class DlxManifest {
 
         const data = JSON.parse(content) as Record<
           string,
-          ManifestEntry | StoreRecord
+          DlxManifestEntry | StoreRecord
         >
         delete data[name]
 
@@ -327,13 +327,13 @@ export class DlxManifest {
   /**
    * Get a manifest entry by spec (e.g., "@socketsecurity/cli@^2.0.11").
    */
-  getManifestEntry(spec: string): ManifestEntry | undefined {
+  getManifestEntry(spec: string): DlxManifestEntry | undefined {
     const data = this.readManifest()
     const entry = data[spec]
 
     // Check if it's a new-format entry (has 'type' field).
     if (entry && 'type' in entry) {
-      return entry as ManifestEntry
+      return entry as DlxManifestEntry
     }
 
     return undefined
