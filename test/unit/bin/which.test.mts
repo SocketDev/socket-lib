@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { which, whichSync } from '../../src/bin/which'
+import { which, whichSync } from '../../../src/bin/which'
 
 describe('bin — which / whichSync', () => {
   describe('which', () => {

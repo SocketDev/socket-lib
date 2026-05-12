@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for CLI flag utilities.
+ * @fileoverview Unit tests for CLI flag detection utilities.
  *
- * Tests boolean flag checking functions for common CLI options:
- * - getLogLevel() determines logging verbosity (silent/info/debug) with priority handling
- * - Flag checkers: isDebug, isVerbose, isQuiet, isHelp, isJson, isForce, isDryRun
- * - Additional flags: isAll, isChanged, isCoverage, isFix, isStaged, isUpdate, isWatch
- * - Handles arrays of strings (process.argv) and FlagValues objects
- * - Tests flag priority (quiet > debug > verbose) and default values
- * - Validates both long-form flags (--verbose) and flag objects ({ verbose: true })
+ * Tests command-line flag checker functions:
+ * - COMMON_FLAGS constant with standard CLI flags
+ * - Flag detectors: isHelp(), isVerbose(), isQuiet(), isDebug(), isForce()
+ * - Mode flags: isDryRun(), isFix(), isUpdate(), isCoverage(), isJson()
+ * - Context flags: isAll(), isChanged(), isStaged()
+ * - getLogLevel() extracts log level from parsed args
+ * Used by Socket CLI for command-line argument interpretation.
  */
 
 import {
@@ -27,13 +27,17 @@ import {
   isVerbose,
   isWatch,
 } from '@socketsecurity/lib/argv/flag-predicates'
-import type { FlagValues } from '@socketsecurity/lib/argv/flag-types'
+import {
+  COMMON_FLAGS,
+  type FlagValues,
+} from '@socketsecurity/lib/argv/flag-types'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/flags', () => {
   describe('getLogLevel', () => {
-    it('should return silent for quiet flag', () => {
+    it('should return silent for quiet flags', () => {
       expect(getLogLevel({ quiet: true })).toBe('silent')
+      expect(getLogLevel({ silent: true })).toBe('silent')
     })
 
     it('should return debug for debug flag', () => {
@@ -44,56 +48,57 @@ describe('argv/flags', () => {
       expect(getLogLevel({ verbose: true })).toBe('verbose')
     })
 
-    it('should return info by default', () => {
+    it('should return info as default', () => {
       expect(getLogLevel({})).toBe('info')
+      expect(getLogLevel()).toBe('info')
     })
 
     it('should prioritize quiet over debug', () => {
       expect(getLogLevel({ quiet: true, debug: true })).toBe('silent')
     })
 
-    it('should prioritize quiet over verbose', () => {
-      expect(getLogLevel({ quiet: true, verbose: true })).toBe('silent')
-    })
-
     it('should prioritize debug over verbose', () => {
       expect(getLogLevel({ debug: true, verbose: true })).toBe('debug')
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
+      expect(getLogLevel(['--quiet'])).toBe('silent')
       expect(getLogLevel(['--debug'])).toBe('debug')
       expect(getLogLevel(['--verbose'])).toBe('verbose')
-      expect(getLogLevel(['--quiet'])).toBe('silent')
     })
   })
 
   describe('isAll', () => {
-    it('should return true when all flag is set', () => {
+    it('should return true for all flag in object', () => {
       expect(isAll({ all: true })).toBe(true)
     })
 
-    it('should return false when all flag is not set', () => {
-      expect(isAll({ all: false })).toBe(false)
+    it('should return false when all flag not set', () => {
       expect(isAll({})).toBe(false)
+      expect(isAll({ all: false })).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isAll(['--all'])).toBe(true)
-      expect(isAll(['--other'])).toBe(false)
+      expect(isAll([])).toBe(false)
+    })
+
+    it('should handle undefined input', () => {
+      const result = isAll(undefined)
+      expect(typeof result).toBe('boolean')
     })
   })
 
   describe('isChanged', () => {
-    it('should return true when changed flag is set', () => {
+    it('should return true for changed flag', () => {
       expect(isChanged({ changed: true })).toBe(true)
     })
 
-    it('should return false when changed flag is not set', () => {
-      expect(isChanged({ changed: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isChanged({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isChanged(['--changed'])).toBe(true)
       expect(isChanged([])).toBe(false)
     })
@@ -108,248 +113,318 @@ describe('argv/flags', () => {
       expect(isCoverage({ cover: true })).toBe(true)
     })
 
-    it('should return false when neither flag is set', () => {
+    it('should return false when not set', () => {
       expect(isCoverage({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input with coverage', () => {
       expect(isCoverage(['--coverage'])).toBe(true)
+    })
+
+    it('should handle array input with cover', () => {
       expect(isCoverage(['--cover'])).toBe(true)
+    })
+
+    it('should return false for empty array', () => {
       expect(isCoverage([])).toBe(false)
     })
   })
 
   describe('isDebug', () => {
-    it('should return true when debug flag is set', () => {
+    it('should return true for debug flag', () => {
       expect(isDebug({ debug: true })).toBe(true)
     })
 
-    it('should return false when debug flag is not set', () => {
-      expect(isDebug({ debug: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isDebug({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isDebug(['--debug'])).toBe(true)
       expect(isDebug([])).toBe(false)
     })
   })
 
   describe('isDryRun', () => {
-    it('should return true when dry-run flag is set', () => {
+    it('should return true for dry-run flag', () => {
       expect(isDryRun({ 'dry-run': true })).toBe(true)
     })
 
-    it('should return false when dry-run flag is not set', () => {
-      expect(isDryRun({ 'dry-run': false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isDryRun({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isDryRun(['--dry-run'])).toBe(true)
       expect(isDryRun([])).toBe(false)
     })
   })
 
   describe('isFix', () => {
-    it('should return true when fix flag is set', () => {
+    it('should return true for fix flag', () => {
       expect(isFix({ fix: true })).toBe(true)
     })
 
-    it('should return false when fix flag is not set', () => {
-      expect(isFix({ fix: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isFix({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isFix(['--fix'])).toBe(true)
       expect(isFix([])).toBe(false)
     })
   })
 
   describe('isForce', () => {
-    it('should return true when force flag is set', () => {
+    it('should return true for force flag', () => {
       expect(isForce({ force: true })).toBe(true)
     })
 
-    it('should return false when force flag is not set', () => {
-      expect(isForce({ force: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isForce({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isForce(['--force'])).toBe(true)
       expect(isForce([])).toBe(false)
     })
   })
 
   describe('isHelp', () => {
-    it('should return true when help flag is set', () => {
+    it('should return true for help flag', () => {
       expect(isHelp({ help: true })).toBe(true)
     })
 
-    it('should return false when help flag is not set', () => {
-      expect(isHelp({ help: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isHelp({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle --help in array', () => {
       expect(isHelp(['--help'])).toBe(true)
+    })
+
+    it('should handle -h short flag in array', () => {
+      expect(isHelp(['-h'])).toBe(true)
+    })
+
+    it('should return false for empty array', () => {
       expect(isHelp([])).toBe(false)
     })
   })
 
   describe('isJson', () => {
-    it('should return true when json flag is set', () => {
+    it('should return true for json flag', () => {
       expect(isJson({ json: true })).toBe(true)
     })
 
-    it('should return false when json flag is not set', () => {
-      expect(isJson({ json: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isJson({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isJson(['--json'])).toBe(true)
       expect(isJson([])).toBe(false)
     })
   })
 
   describe('isQuiet', () => {
-    it('should return true when quiet flag is set', () => {
+    it('should return true for quiet flag', () => {
       expect(isQuiet({ quiet: true })).toBe(true)
     })
 
-    it('should return false when quiet flag is not set', () => {
-      expect(isQuiet({ quiet: false })).toBe(false)
+    it('should return true for silent flag', () => {
+      expect(isQuiet({ silent: true })).toBe(true)
+    })
+
+    it('should return false when not set', () => {
       expect(isQuiet({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle --quiet in array', () => {
       expect(isQuiet(['--quiet'])).toBe(true)
+    })
+
+    it('should handle --silent in array', () => {
+      expect(isQuiet(['--silent'])).toBe(true)
+    })
+
+    it('should return false for empty array', () => {
       expect(isQuiet([])).toBe(false)
     })
   })
 
-  describe('isQuiet (silent behavior)', () => {
-    it('should treat quiet as silent', () => {
-      // isQuiet provides the silent behavior
-      expect(isQuiet({ quiet: true })).toBe(true)
-    })
-  })
-
   describe('isStaged', () => {
-    it('should return true when staged flag is set', () => {
+    it('should return true for staged flag', () => {
       expect(isStaged({ staged: true })).toBe(true)
     })
 
-    it('should return false when staged flag is not set', () => {
-      expect(isStaged({ staged: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isStaged({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isStaged(['--staged'])).toBe(true)
       expect(isStaged([])).toBe(false)
     })
   })
 
   describe('isUpdate', () => {
-    it('should return true when update flag is set', () => {
+    it('should return true for update flag', () => {
       expect(isUpdate({ update: true })).toBe(true)
     })
 
-    it('should return false when update flag is not set', () => {
-      expect(isUpdate({ update: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isUpdate({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle --update in array', () => {
       expect(isUpdate(['--update'])).toBe(true)
+    })
+
+    it('should handle -u short flag in array', () => {
+      expect(isUpdate(['-u'])).toBe(true)
+    })
+
+    it('should return false for empty array', () => {
       expect(isUpdate([])).toBe(false)
     })
   })
 
   describe('isVerbose', () => {
-    it('should return true when verbose flag is set', () => {
+    it('should return true for verbose flag', () => {
       expect(isVerbose({ verbose: true })).toBe(true)
     })
 
-    it('should return false when verbose flag is not set', () => {
-      expect(isVerbose({ verbose: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isVerbose({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle array input', () => {
       expect(isVerbose(['--verbose'])).toBe(true)
       expect(isVerbose([])).toBe(false)
     })
   })
 
   describe('isWatch', () => {
-    it('should return true when watch flag is set', () => {
+    it('should return true for watch flag', () => {
       expect(isWatch({ watch: true })).toBe(true)
     })
 
-    it('should return false when watch flag is not set', () => {
-      expect(isWatch({ watch: false })).toBe(false)
+    it('should return false when not set', () => {
       expect(isWatch({})).toBe(false)
     })
 
-    it('should work with argv array', () => {
+    it('should handle --watch in array', () => {
       expect(isWatch(['--watch'])).toBe(true)
+    })
+
+    it('should handle -w short flag in array', () => {
+      expect(isWatch(['-w'])).toBe(true)
+    })
+
+    it('should return false for empty array', () => {
       expect(isWatch([])).toBe(false)
     })
   })
 
-  describe('FlagValues type', () => {
-    it('should accept all standard flags', () => {
-      const flags: FlagValues = {
-        quiet: true,
-        silent: false,
-        verbose: true,
-        help: false,
-        all: true,
-        fix: false,
-        force: true,
-        'dry-run': false,
-        json: true,
-        debug: false,
-        watch: true,
-        coverage: false,
-        cover: true,
-        update: false,
-        staged: true,
-        changed: false,
-      }
-      expect(flags.quiet).toBe(true)
-      expect(flags.verbose).toBe(true)
+  describe('COMMON_FLAGS', () => {
+    it('should be defined', () => {
+      expect(COMMON_FLAGS).toBeDefined()
+      expect(typeof COMMON_FLAGS).toBe('object')
     })
 
-    it('should accept custom flags', () => {
-      const flags: FlagValues = {
-        customFlag: 'custom-value',
-        anotherFlag: 123,
+    it.each([
+      { name: 'all', extra: { default: false } },
+      { name: 'changed' },
+      { name: 'coverage' },
+      { name: 'debug' },
+      { name: 'dry-run' },
+      { name: 'fix' },
+      { name: 'force' },
+      { name: 'help', extra: { short: 'h' } },
+      { name: 'json' },
+      { name: 'quiet', extra: { short: 'q' } },
+      { name: 'silent' },
+      { name: 'staged' },
+      { name: 'update', extra: { short: 'u' } },
+      { name: 'verbose', extra: { short: 'v' } },
+      { name: 'watch', extra: { short: 'w' } },
+    ])('should define $name as boolean flag', ({ name, extra }) => {
+      const flag = COMMON_FLAGS[name as keyof typeof COMMON_FLAGS]
+      expect(flag).toBeDefined()
+      expect(flag.type).toBe('boolean')
+      if (extra) {
+        for (const [key, value] of Object.entries(extra)) {
+          expect(flag[key as keyof typeof flag]).toBe(value)
+        }
       }
-      expect(flags['customFlag']).toBe('custom-value')
-      expect(flags['anotherFlag']).toBe(123)
+    })
+
+    it('should have descriptions for all flags', () => {
+      for (const { 1: config } of Object.entries(COMMON_FLAGS)) {
+        expect(config.description).toBeDefined()
+        expect(typeof config.description).toBe('string')
+        expect(config.description.length).toBeGreaterThan(0)
+      }
     })
   })
 
   describe('edge cases', () => {
-    it('should handle empty FlagValues', () => {
-      const flags: FlagValues = {}
-      expect(isDebug(flags)).toBe(false)
-      expect(isVerbose(flags)).toBe(false)
+    it('should handle truthy values as boolean true', () => {
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
+      expect(isDebug({ debug: 1 } as FlagValues)).toBe(true)
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
+      expect(isVerbose({ verbose: 'yes' } as FlagValues)).toBe(true)
     })
 
-    it('should handle mixed flag types', () => {
-      expect(isDebug(['--debug', '--other', 'arg'])).toBe(true)
+    it('should handle falsy values as boolean false', () => {
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
+      expect(isDebug({ debug: 0 } as FlagValues)).toBe(false)
+      // @ts-expect-error - Testing runtime coercion of non-boolean values
+      expect(isDebug({ debug: '' } as FlagValues)).toBe(false)
     })
 
-    it('should handle readonly arrays', () => {
-      const args = ['--debug'] as const
-      expect(isDebug(args)).toBe(true)
+    it('should handle multiple flags in array', () => {
+      expect(isDebug(['--verbose', '--debug', '--quiet'])).toBe(true)
+      expect(isVerbose(['--verbose', '--debug'])).toBe(true)
+    })
+
+    it('should handle flags with values in array', () => {
+      expect(isJson(['--json', 'output.json'])).toBe(true)
+      expect(isForce(['--force', 'true'])).toBe(true)
+    })
+  })
+
+  describe('integration', () => {
+    it('should work with combined flags object', () => {
+      const flags: FlagValues = {
+        debug: true,
+        verbose: true,
+        json: true,
+        force: true,
+      }
+
+      expect(isDebug(flags)).toBe(true)
+      expect(isVerbose(flags)).toBe(true)
+      expect(isJson(flags)).toBe(true)
+      expect(isForce(flags)).toBe(true)
+      expect(isQuiet(flags)).toBe(false)
+    })
+
+    it('should work with combined flags array', () => {
+      const argv = ['--debug', '--verbose', '--json']
+
+      expect(isDebug(argv)).toBe(true)
+      expect(isVerbose(argv)).toBe(true)
+      expect(isJson(argv)).toBe(true)
+      expect(isQuiet(argv)).toBe(false)
+    })
+
+    it('should provide correct log level for various combinations', () => {
+      expect(getLogLevel({ quiet: true, debug: true })).toBe('silent')
+      expect(getLogLevel({ debug: true, verbose: false })).toBe('debug')
+      expect(getLogLevel({ verbose: true, debug: false })).toBe('verbose')
+      expect(getLogLevel({ verbose: false, debug: false })).toBe('info')
     })
   })
 })

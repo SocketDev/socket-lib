@@ -40,7 +40,7 @@ import { safeDelete, safeDeleteSync } from '@socketsecurity/lib/fs/safe'
 import { uniqueSync } from '@socketsecurity/lib/fs/unique'
 import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper'
+import { runWithTempDir } from '../utils/temp-file-helper'
 
 describe('fs - Additional Coverage', () => {
   describe('findUp edge cases', () => {

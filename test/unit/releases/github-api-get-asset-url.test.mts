@@ -6,14 +6,14 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { getReleaseAssetUrl } from '../../src/releases/github-asset-url'
-import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
+import { getReleaseAssetUrl } from '../../../src/releases/github-asset-url'
+import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
 
-import { httpRequest } from '../../src/http-request/request'
+import { httpRequest } from '../../../src/http-request/request'
 
-import { createMockHttpResponse } from './utils/http-mock'
+import { createMockHttpResponse } from '../utils/http-mock'
 
-vi.mock('../../src/http-request/request')
+vi.mock('../../../src/http-request/request')
 
 const JSONStringify = JSON.stringify
 

@@ -17,14 +17,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   downloadAndExtractArchive,
   downloadAndExtractZip,
-} from '../../src/releases/github-archives'
+} from '../../../src/releases/github-archives'
 
-import { extractArchive } from '../../src/archives/extract'
-import { safeDeleteSync } from '../../src/fs/safe'
-import { downloadReleaseAsset } from '../../src/releases/github-downloads'
+import { extractArchive } from '../../../src/archives/extract'
+import { safeDeleteSync } from '../../../src/fs/safe'
+import { downloadReleaseAsset } from '../../../src/releases/github-downloads'
 
 // Mock at the resolved path the SUT imports (relative within src/).
-vi.mock('../../src/releases/github-downloads', () => ({
+vi.mock('../../../src/releases/github-downloads', () => ({
   downloadReleaseAsset: vi.fn(
     async (
       _tag: string,
@@ -40,9 +40,9 @@ vi.mock('../../src/releases/github-downloads', () => ({
   ),
 }))
 
-vi.mock('../../src/archives/extract', async importOriginal => {
+vi.mock('../../../src/archives/extract', async importOriginal => {
   const original =
-    await importOriginal<typeof import('../../src/archives/extract')>()
+    await importOriginal<typeof import('../../../src/archives/extract')>()
   return {
     ...original,
     extractArchive: vi.fn(async () => {}),

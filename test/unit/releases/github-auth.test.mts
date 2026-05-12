@@ -15,8 +15,8 @@ import { describe, expect, it } from 'vitest'
 // @ts-expect-error - no type declarations
 import picomatch from 'picomatch'
 
-import { getAuthHeaders } from '../../src/releases/github-auth'
-import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
+import { getAuthHeaders } from '../../../src/releases/github-auth'
+import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
 
 describe('releases/github-auth', () => {
   describe('SOCKET_BTM_REPO', () => {

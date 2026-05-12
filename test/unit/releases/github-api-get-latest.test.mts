@@ -6,15 +6,15 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getLatestRelease } from '../../src/releases/github-listing'
-import { SOCKET_BTM_REPO } from '../../src/releases/socket-btm'
+import { getLatestRelease } from '../../../src/releases/github-listing'
+import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
 
-import { httpRequest } from '../../src/http-request/request'
+import { httpRequest } from '../../../src/http-request/request'
 
-import { createMockHttpResponse } from './utils/http-mock'
+import { createMockHttpResponse } from '../utils/http-mock'
 
 // Mock httpRequest so tests don't issue real network calls.
-vi.mock('../../src/http-request/request')
+vi.mock('../../../src/http-request/request')
 
 // Match the production source's primordials convention.
 const JSONStringify = JSON.stringify
