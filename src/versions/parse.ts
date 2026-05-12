@@ -8,7 +8,7 @@
  * `semver` directly — smol-versions doesn't expose the parsed shape.
  */
 
-import { getSemver, getVersionsImpl } from './_internal'
+import { getSemver, impl } from './_internal'
 
 import type { ParsedVersion } from './types'
 
@@ -85,7 +85,6 @@ export function getPatchVersion(version: string): number | undefined {
  */
 export function isValidVersion(version: string): boolean {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
   // semver.valid returns string | null; smol-versions returns
   // string | undefined. Both branch correctly under loose-equality
   // truthiness check, so a generic `!= null` (loose) covers both.

@@ -6,7 +6,7 @@
  * options aren't part of the smol-versions surface.
  */
 
-import { getSemver, getVersionsImpl } from './_internal'
+import { getSemver, impl } from './_internal'
 
 /**
  * Get all versions from an array that satisfy a semver range.
@@ -19,7 +19,6 @@ import { getSemver, getVersionsImpl } from './_internal'
  */
 export function filterVersions(versions: string[], range: string): string[] {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
   return versions.filter(v => impl.satisfies(v, range))
 }
 
@@ -72,6 +71,5 @@ export function minVersion(versions: string[]): string | undefined {
  */
 export function satisfiesVersion(version: string, range: string): boolean {
   /* c8 ignore next - External semver call */
-  const impl = getVersionsImpl()
   return impl.satisfies(version, range)
 }
