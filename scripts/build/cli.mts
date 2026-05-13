@@ -180,7 +180,7 @@ export async function fixExports(
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const fixArgs = ['scripts/fix/main.mts']
+  const fixArgs = ['scripts/fix/cli.mts']
   if (quiet) {
     fixArgs.push('--quiet')
   }
