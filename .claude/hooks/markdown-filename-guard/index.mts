@@ -36,6 +36,8 @@
 import path from 'node:path'
 import process from 'node:process'
 
+import { readStdin } from '../_shared/transcript.mts'
+
 type ToolInput = {
   tool_input?:
     | {
@@ -67,17 +69,6 @@ const ALLOWED_SCREAMING_CASE: ReadonlySet<string> = new Set([
   'SUPPORT',
   'TRADEMARK',
 ])
-
-function readStdin(): Promise<string> {
-  return new Promise(resolve => {
-    let buf = ''
-    process.stdin.setEncoding('utf8')
-    process.stdin.on('data', chunk => {
-      buf += chunk
-    })
-    process.stdin.on('end', () => resolve(buf))
-  })
-}
 
 /**
  * Strip a leading repo-absolute prefix (anything up through and
