@@ -5,6 +5,104 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.0) - 2026-05-12
+
+The v6 line is a public-surface reshape. Every top-level barrel module is gone — what was `@socketsecurity/lib/fs` is now imported leaf-by-leaf as `@socketsecurity/lib/fs/safe`, `@socketsecurity/lib/fs/read-json`, etc. This makes tree-shaking work properly, makes types load faster, and surfaces what each consumer actually depends on.
+
+The vast majority of consumer updates are mechanical import-path rewrites; the runtime behavior is unchanged. Two fleet-compat aliases (`@socketsecurity/lib/logger` and `@socketsecurity/lib/errors`) are kept for the fleet's git-hook templates.
+
+### Removed (breaking)
+
+- **Top-level barrel modules.** The following barrels no longer ship — import from the named leaf subpath instead. Each was a re-export module that defeated tree-shaking and made TypeScript resolve far more than callers actually used.
+  - `fs` → import from `fs/safe`, `fs/read-json`, `fs/write-json`, `fs/atomic`, `fs/types`, etc.
+  - `http-request` → import from `http-request/request`, `http-request/convenience` (`httpJson` / `httpText`), `http-request/response-types`, `http-request/retry`, etc.
+  - `logger` (kept as fleet-compat alias to `logger/logger`) — leaves: `logger/logger`, `logger/colors`, `logger/console`, `logger/symbols`
+  - `spinner` → `spinner/spinner`, `spinner/predicates`
+  - `git` → `git/repo`, `git/status`, `git/refs`, `git/diff`, `git/blame`, `git/commit`, etc.
+  - `github` → `github/fetch`, `github/refs-rest`, `github/refs-graphql`, `github/ghsa`, `github/token`, `github/types`, `github/constants`, `github/errors`
+  - `spawn` → `spawn/spawn`, `spawn/predicates`, `spawn/errors`, `spawn/types`
+  - `bin` → `bin/which`, `bin/exec`, etc.
+  - `primordials` → import each constructor / prototype-method reference from its category leaf (`primordials/array`, `primordials/string`, `primordials/json`, `primordials/object`, etc.)
+  - `objects` → `objects/predicates`, `objects/mutate`, `objects/inspect`, `objects/sort`, `objects/getters`
+  - `strings` → `strings/case`, `strings/transform`, `strings/predicates`, `strings/normalize`, `strings/util`
+  - `promises` → `promises/sleep`, `promises/race`, `promises/retry`, `promises/timeout`, `promises/queue` (was `promise-queue`)
+  - `arrays` → `arrays/predicates`, `arrays/transform`, `arrays/join`, `arrays/dedupe`
+  - `url` → `url/parse`, `url/normalize`, `url/predicates`
+  - `packages` → `packages/edit`, `packages/normalize`, `packages/manifest`, `packages/operations`, `packages/provenance`, `packages/licenses`, `packages/types`, `packages/isolation`
+  - `cacache` → `cacache/read`, `cacache/write`, `cacache/clear`
+  - `signal-exit`, `compression`, `archives`, `globs`, `regexps`, `ssri`, `colors`, `ansi`, `crypto`, `abort`, `streams`, `links`, `shadow`, `ipc`, `ipc-cli`, `errors`, `words`, `tables`, `sorts`, `env`, `debug`, `versions`, `types` — all delivered as leaf subpaths under their respective dirs.
+
+- **`src/agent.ts` removed.** Package-manager exec/flags helpers split into `eco/npm/<tool>/{exec,flags}` (`bun`, `npm`, `pnpm`, `vlt`, `yarnpkg/yarn`). Import e.g. `@socketsecurity/lib/eco/npm/pnpm/exec` instead of `@socketsecurity/lib/agent`.
+
+- **`src/types/` removed.** Schema types are now under `eco/`:
+  - `PURL_Type` / `PURLString` / `EcosystemString` → `eco/purl`
+  - `CategoryString` / `InteropString` / `Manifest` / `ManifestEntry` / `ManifestEntryData` → `eco/types`
+
+- **`memoization/` directory renamed to `memo/`.** `memoize-*` leaf prefixes dropped. Import from `memo/cache`, `memo/clear`, `memo/_internal` etc.
+
+- **Subdir renames for clarity / brevity:**
+  - `performance/` → `perf/`
+  - `suppress-warnings/` → `warnings/`
+  - `cache-with-ttl/` → `ttl-cache/`
+  - `process-lock/` → `process/` (consolidated with the new `process/transient` + `process/abort` leaves)
+  - `package-extensions/` → `pkg-ext/`
+  - `temporary-executor/` → `process/transient` (`isRunningInTemporaryExecutor` → `isTransientProcess`)
+
+### Renamed (breaking)
+
+- **`versions` API aligned with `node:smol-versions` native binding.** When socket-btm's smol Node binary is present, version comparisons run through the C++-accelerated binding; otherwise the vendored `semver` JS impl is used. Both expose identical names + signatures, picked once at module load:
+  - `compareVersions` → `compare`
+  - `isEqual` → `eq` (added `neq` to match the smol surface)
+  - `isLessThan` / `isLessThanOrEqual` → `lt` / `lte`
+  - `isGreaterThan` / `isGreaterThanOrEqual` → `gt` / `gte`
+  - `sortVersions` → `sort`
+  - `sortVersionsDesc` → `rsort`
+
+- **`dlx/manifest` type rename.** `ManifestEntry` (the dlx-local install record) → `DlxManifestEntry` to disambiguate from the unrelated `eco/types` `ManifestEntry` (the registry manifest tuple).
+
+- **`dlx/arborist` `getBaseArboristOptions` signature.** The second positional `quiet: boolean` argument is now an options object: `getBaseArboristOptions(installPath, { quiet })`.
+
+- **Misnamed predicates renamed for clarity.** Predicates that scanned the _current_ process / cwd were named as if they were generic — they now carry the scope in the name. Tests aligned to match.
+
+### Added
+
+- **`ai` module — locked-down AI agent spawn helpers.** New `ai/discover` + `ai/spawn` leaves for invoking Claude / Codex / Gemini / OpenCode CLIs from headless contexts with the four mandatory lockdown flags enforced at the type level (`tools`, `allowedTools`, `disallowedTools`, `permissionMode: 'dontAsk'`). Retries 3 attempts on HTTP 529 / "Overloaded" with 5s / 15s / 45s exponential backoff. Each retry is a fresh subprocess. Sibling `ai/types` exports `AiAgentName`, `DiscoveredAgents`, `SpawnAiAgentOptions`, `AgentSpawnResult`.
+
+- **`socket-lib check primordials --fix` flag** — for codebases tracking primordials drift via `.socket-lib.json`, the CLI's existing `check primordials` command now supports `--fix` (and `--write`) to apply the suggested rewrites in place.
+
+- **Fleet-compat exports-map aliases:** `@socketsecurity/lib/logger` resolves to `logger/logger`; `@socketsecurity/lib/errors` resolves to `errors/message`. These exist so the canonical socket-wheelhouse hook templates resolve in socket-lib's own checkout; they're not source-level barrels.
+
+### Performance
+
+- **Version operations are bound once at module load.** The smol-vs-semver branch was previously redone on every `compare` / `lt` / `gt` / `sort` call. v6 picks the impl once when the module first loads; each export forwards to the resolved binding directly with no per-call branching or wrapper closure.
+
+### Migration
+
+A near-total mechanical rewrite of imports. Two patterns cover ~95% of consumer migrations:
+
+```diff
+- import { safeDelete, readJson, writeJson } from '@socketsecurity/lib/fs'
++ import { safeDelete } from '@socketsecurity/lib/fs/safe'
++ import { readJson } from '@socketsecurity/lib/fs/read-json'
++ import { writeJson } from '@socketsecurity/lib/fs/write-json'
+
+- import { httpJson } from '@socketsecurity/lib/http-request'
++ import { httpJson } from '@socketsecurity/lib/http-request/convenience'
+```
+
+For the versions API, name + parameter rewrites:
+
+```diff
+- import { compareVersions, isLessThan, sortVersions } from '@socketsecurity/lib/versions'
+- compareVersions(version1, version2)
+- isLessThan(version1, version2)
+- sortVersions(arr)
++ import { compare, lt, sort } from '@socketsecurity/lib/versions/compare'
++ compare(a, b)
++ lt(a, b)
++ sort(arr)
+```
+
 ## [5.28.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.28.0) - 2026-05-06
 
 ### Added
