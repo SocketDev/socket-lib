@@ -19,6 +19,8 @@ import { PackageURL } from '../external/@socketregistry/packageurl-js'
 import pacote from '../external/pacote'
 import * as semver from '../external/semver'
 
+import { getSmolPurl } from '../smol/purl'
+
 import { readJson, readJsonSync } from '../fs/read-json'
 import { merge } from '../objects/mutate'
 import { isPlainObject } from '../objects/predicates'
@@ -373,7 +375,13 @@ export function resolvePackageName(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveRegistryPackageName(pkgName: string): string {
-  const purlObj = PackageURL.fromString(`pkg:npm/${pkgName}`)
+  const input = `pkg:npm/${pkgName}`
+  // Prefer node:smol-purl on the smol binary (C++-accelerated, with
+  // a 10 000-entry result cache); fall back to packageurl-js JS impl.
+  const smolPurl = getSmolPurl()
+  const purlObj = smolPurl
+    ? smolPurl.parse(input)
+    : PackageURL.fromString(input)
   return purlObj.namespace
     ? `${purlObj.namespace.slice(1)}${REGISTRY_SCOPE_DELIMITER}${purlObj.name}`
     : pkgName

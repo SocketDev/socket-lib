@@ -1603,6 +1603,11 @@
       "types": "./dist/smol/primordial.d.ts",
       "default": "./dist/smol/primordial.js"
     },
+    "./smol/purl": {
+      "source": "./src/smol/purl.ts",
+      "types": "./dist/smol/purl.d.ts",
+      "default": "./dist/smol/purl.js"
+    },
     "./smol/versions": {
       "source": "./src/smol/versions.ts",
       "types": "./dist/smol/versions.d.ts",

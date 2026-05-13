@@ -552,6 +552,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ------------------------------------------------------------------ | ------------------------------------------------------------ |
 | [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts)         | Smol detection + lazy-loader for `node:smol-util`.           |
 | [`@socketsecurity/lib/smol/primordial`](../src/smol/primordial.ts) | Lazy-loader for socket-btm's `node:smol-primordial` binding. |
+| [`@socketsecurity/lib/smol/purl`](../src/smol/purl.ts)             | Lazy-loader for socket-btm's `node:smol-purl` binding.       |
 | [`@socketsecurity/lib/smol/versions`](../src/smol/versions.ts)     | Lazy-loader for socket-btm's `node:smol-versions`.           |
 
 ## sorts/
