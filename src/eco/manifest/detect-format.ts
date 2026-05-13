@@ -63,7 +63,7 @@ const _jsSupportedFiles: SupportedFiles = ObjectFreeze({
   lockfiles: LOCKFILE_NAMES,
 }) as unknown as SupportedFiles
 
-function jsDetectFormat(filename: string): FormatDescriptor | undefined {
+export function jsDetectFormat(filename: string): FormatDescriptor | undefined {
   const lastSlash = filename.lastIndexOf('/')
   const basename = lastSlash === -1 ? filename : filename.slice(lastSlash + 1)
   switch (basename) {

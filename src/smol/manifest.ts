@@ -161,7 +161,10 @@ export interface SmolManifestBinding {
   ): readonly PackageRef[]
   detectFormat(filename: string): FormatDescriptor | undefined
   readonly supportedFiles: SupportedFiles
-  readonly ManifestError: new (message: string, code: string) => ManifestErrorLike
+  readonly ManifestError: new (
+    message: string,
+    code: string,
+  ) => ManifestErrorLike
 }
 
 let _smolManifest: SmolManifestBinding | null | undefined
@@ -178,11 +181,11 @@ export function getSmolManifest(): SmolManifestBinding | undefined {
       try {
         _smolManifest = require('node:smol-manifest') as SmolManifestBinding
       } catch {
-        _smolManifest = null
+        _smolManifest = undefined
       }
       /* c8 ignore stop */
     } else {
-      _smolManifest = null
+      _smolManifest = undefined
     }
   }
   return _smolManifest ?? undefined

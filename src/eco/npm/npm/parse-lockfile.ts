@@ -71,19 +71,6 @@ export function addToIndex(
   }
 }
 
-export function resolveDepType(pkg: RawPackage): DepType {
-  if (pkg.dev) {
-    return 'dev'
-  }
-  if (pkg.optional) {
-    return 'optional'
-  }
-  if (pkg.peer) {
-    return 'peer'
-  }
-  return 'prod'
-}
-
 export function buildPackageRef(name: string, pkg: RawPackage): PackageRef {
   let vcsUrl: string | undefined
   let vcsCommit: string | undefined
@@ -118,39 +105,30 @@ export function buildPackageRef(name: string, pkg: RawPackage): PackageRef {
   }) as unknown as PackageRef
 }
 
-export function parseV2V3(
-  data: RawLockfile,
-  rawPackages: Record<string, RawPackage>,
-): ParsedLockfile {
-  const packageIndex: PackageIndex = { __proto__: null } as PackageIndex
-  const pkgKeys = ObjectKeys(rawPackages)
-  // Pre-size: subtract 1 for the root '' entry if present.
-  const packages: PackageRef[] = new Array(
-    rawPackages[''] !== undefined ? pkgKeys.length - 1 : pkgKeys.length,
-  )
-  let pkgCount = 0
-
-  for (let ki = 0, { length } = pkgKeys; ki < length; ki++) {
-    const pkgPath = pkgKeys[ki]!
-    if (pkgPath === '') {
-      continue
-    }
-    const pkg = rawPackages[pkgPath]!
-    const name = extractPackageNameFromPath(pkgPath)
-    const ref = buildPackageRef(name, pkg)
-    packages[pkgCount] = ref
-    addToIndex(packageIndex, name, pkgCount)
-    pkgCount++
+export function jsParsePackageLock(content: string): ParsedLockfile {
+  let data: RawLockfile
+  try {
+    data = JSONParse(content) as RawLockfile
+  } catch (e) {
+    throw new ManifestError(
+      `Invalid JSON: ${errorMessage(e)}`,
+      'ERR_INVALID_JSON',
+    )
   }
-  packages.length = pkgCount
-
+  if (data.packages) {
+    return parseV2V3(data, data.packages)
+  }
+  if (data.dependencies) {
+    return parseV1(data, data.dependencies)
+  }
+  // Empty lockfile — return shape with zero packages.
   return ObjectFreeze({
     __proto__: null,
     type: 'lockfile',
     lockVersion: String(data.lockfileVersion ?? 1),
     ecosystem: 'npm',
-    packages: ObjectFreeze(packages),
-    _index: packageIndex,
+    packages: ObjectFreeze([] as PackageRef[]),
+    _index: { __proto__: null } as unknown as PackageIndex,
   }) as unknown as ParsedLockfile
 }
 
@@ -158,7 +136,9 @@ export function parseV1(
   data: RawLockfile,
   rootDeps: Record<string, RawPackage>,
 ): ParsedLockfile {
-  const packageIndex: PackageIndex = { __proto__: null } as PackageIndex
+  const packageIndex: PackageIndex = {
+    __proto__: null,
+  } as unknown as PackageIndex
   const packages: PackageRef[] = []
   const visited = new Set<string>()
 
@@ -209,31 +189,55 @@ export function parseV1(
   }) as unknown as ParsedLockfile
 }
 
-export function jsParsePackageLock(content: string): ParsedLockfile {
-  let data: RawLockfile
-  try {
-    data = JSONParse(content) as RawLockfile
-  } catch (e) {
-    throw new ManifestError(
-      `Invalid JSON: ${errorMessage(e)}`,
-      'ERR_INVALID_JSON',
-    )
+export function parseV2V3(
+  data: RawLockfile,
+  rawPackages: Record<string, RawPackage>,
+): ParsedLockfile {
+  const packageIndex: PackageIndex = {
+    __proto__: null,
+  } as unknown as PackageIndex
+  const pkgKeys = ObjectKeys(rawPackages)
+  // Pre-size: subtract 1 for the root '' entry if present.
+  const packages: PackageRef[] = Array.from({
+    length: rawPackages[''] !== undefined ? pkgKeys.length - 1 : pkgKeys.length,
+  })
+  let pkgCount = 0
+
+  for (let ki = 0, { length } = pkgKeys; ki < length; ki++) {
+    const pkgPath = pkgKeys[ki]!
+    if (pkgPath === '') {
+      continue
+    }
+    const pkg = rawPackages[pkgPath]!
+    const name = extractPackageNameFromPath(pkgPath)
+    const ref = buildPackageRef(name, pkg)
+    packages[pkgCount] = ref
+    addToIndex(packageIndex, name, pkgCount)
+    pkgCount++
   }
-  if (data.packages) {
-    return parseV2V3(data, data.packages)
-  }
-  if (data.dependencies) {
-    return parseV1(data, data.dependencies)
-  }
-  // Empty lockfile — return shape with zero packages.
+  packages.length = pkgCount
+
   return ObjectFreeze({
     __proto__: null,
     type: 'lockfile',
     lockVersion: String(data.lockfileVersion ?? 1),
     ecosystem: 'npm',
-    packages: ObjectFreeze([] as PackageRef[]),
-    _index: { __proto__: null } as PackageIndex,
+    packages: ObjectFreeze(packages),
+    _index: packageIndex,
   }) as unknown as ParsedLockfile
+}
+
+export function resolveDepType(pkg: RawPackage): DepType {
+  if (pkg.dev) {
+    return 'dev'
+  }
+  if (pkg.optional) {
+    return 'optional'
+  }
+  if (pkg.peer) {
+    return 'peer'
+  }
+  return 'prod'
 }
 
 const _smol = getSmolManifest()

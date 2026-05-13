@@ -548,6 +548,11 @@
       "types": "./dist/eco/npm/npm/exec.d.ts",
       "default": "./dist/eco/npm/npm/exec.js"
     },
+    "./eco/npm/npm/extract-package-name-from-path": {
+      "source": "./src/eco/npm/npm/extract-package-name-from-path.ts",
+      "types": "./dist/eco/npm/npm/extract-package-name-from-path.d.ts",
+      "default": "./dist/eco/npm/npm/extract-package-name-from-path.js"
+    },
     "./eco/npm/npm/flags": {
       "source": "./src/eco/npm/npm/flags.ts",
       "types": "./dist/eco/npm/npm/flags.d.ts",
@@ -557,6 +562,16 @@
       "source": "./src/eco/npm/npm/lockfile-format.ts",
       "types": "./dist/eco/npm/npm/lockfile-format.d.ts",
       "default": "./dist/eco/npm/npm/lockfile-format.js"
+    },
+    "./eco/npm/npm/parse-git-url": {
+      "source": "./src/eco/npm/npm/parse-git-url.ts",
+      "types": "./dist/eco/npm/npm/parse-git-url.d.ts",
+      "default": "./dist/eco/npm/npm/parse-git-url.js"
+    },
+    "./eco/npm/npm/parse-lockfile": {
+      "source": "./src/eco/npm/npm/parse-lockfile.ts",
+      "types": "./dist/eco/npm/npm/parse-lockfile.d.ts",
+      "default": "./dist/eco/npm/npm/parse-lockfile.js"
     },
     "./eco/npm/parse-package-json": {
       "source": "./src/eco/npm/parse-package-json.ts",
