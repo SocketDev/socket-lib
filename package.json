@@ -558,6 +558,11 @@
       "types": "./dist/eco/npm/npm/lockfile-format.d.ts",
       "default": "./dist/eco/npm/npm/lockfile-format.js"
     },
+    "./eco/npm/parse-package-json": {
+      "source": "./src/eco/npm/parse-package-json.ts",
+      "types": "./dist/eco/npm/parse-package-json.d.ts",
+      "default": "./dist/eco/npm/parse-package-json.js"
+    },
     "./eco/npm/pnpm/exec": {
       "source": "./src/eco/npm/pnpm/exec.ts",
       "types": "./dist/eco/npm/pnpm/exec.d.ts",
