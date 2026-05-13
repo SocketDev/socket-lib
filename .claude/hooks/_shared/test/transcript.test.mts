@@ -149,7 +149,10 @@ test('bypassPhrasePresent: finds the phrase', () => {
     JSON.stringify({ role: 'user', content: 'Allow revert bypass please' }),
   )
   try {
-    assert.equal(bypassPhrasePresent(f, 'Allow revert bypass'), true)
+    assert.equal(
+      bypassPhrasePresent(f, 'Allow revert bypass'),
+      true,
+    )
   } finally {
     cleanup(f)
   }
@@ -160,7 +163,10 @@ test('bypassPhrasePresent: case-sensitive (lowercase does not count)', () => {
     JSON.stringify({ role: 'user', content: 'allow revert bypass please' }),
   )
   try {
-    assert.equal(bypassPhrasePresent(f, 'Allow revert bypass'), false)
+    assert.equal(
+      bypassPhrasePresent(f, 'Allow revert bypass'),
+      false,
+    )
   } finally {
     cleanup(f)
   }
@@ -171,14 +177,20 @@ test('bypassPhrasePresent: paraphrase does not count', () => {
     JSON.stringify({ role: 'user', content: 'please revert that' }),
   )
   try {
-    assert.equal(bypassPhrasePresent(f, 'Allow revert bypass'), false)
+    assert.equal(
+      bypassPhrasePresent(f, 'Allow revert bypass'),
+      false,
+    )
   } finally {
     cleanup(f)
   }
 })
 
 test('bypassPhrasePresent: missing transcript returns false', () => {
-  assert.equal(bypassPhrasePresent(undefined, 'Allow revert bypass'), false)
+  assert.equal(
+    bypassPhrasePresent(undefined, 'Allow revert bypass'),
+    false,
+  )
 })
 
 test('readLastAssistantText: returns most-recent assistant turn', () => {

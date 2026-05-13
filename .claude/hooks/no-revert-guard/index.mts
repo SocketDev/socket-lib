@@ -217,9 +217,7 @@ async function main(): Promise<void> {
 
   // Look for the canonical bypass phrase in user turns. The match is
   // case-sensitive and substring-based — a paraphrase doesn't count.
-  if (
-    bypassPhrasePresent(payload.transcript_path, triggered.check.bypassPhrase)
-  ) {
+  if (bypassPhrasePresent(payload.transcript_path, triggered.check.bypassPhrase)) {
     return
   }
 

@@ -39,12 +39,12 @@ export const MathAbs = _smolPrimordial?.mathAbs ?? Math.abs
 
 ## Adopted modules
 
-| File            | Binding                | What it accelerates                                        | Consumers                          |
-| --------------- | ---------------------- | ---------------------------------------------------------- | ---------------------------------- |
-| `detect.ts`     | `node:smol-util`       | `uncurryThis`, `applyBind`, `applySafe`, `bindCall`, `weakRefSafe` — V8 Fast API replacements for the JS `bind.bind(call)(fn)` idiom. | `src/primordials/uncurry.ts`, `src/primordials/reflect.ts` |
-| `primordial.ts` | `node:smol-primordial` | `Math.*`, `Number.is*`, `Array.isArray`, `Date.now`, `String.prototype.charCodeAt`, `Number.parseInt/parseFloat` — registered as `v8::CFunction` so V8 inlines them into JIT'd callers. | `src/primordials/{math,number,date,array,string}.ts` |
-| `purl.ts`       | `node:smol-purl`       | PURL parse / build / normalize / equals — C++-accelerated with a 10 000-entry result cache. | `src/packages/operations.ts` (`resolveRegistryPackageName`) |
-| `versions.ts`   | `node:smol-versions`   | Multi-ecosystem version comparison + range-satisfies — npm hot path goes through `internalBinding('smol_versions_native')`. | `src/versions/_internal.ts` (eager-bound `impl` at module load) |
+| File            | Binding                | What it accelerates                                                                                                                                                                     | Consumers                                                       |
+| --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `detect.ts`     | `node:smol-util`       | `uncurryThis`, `applyBind`, `applySafe`, `bindCall`, `weakRefSafe` — V8 Fast API replacements for the JS `bind.bind(call)(fn)` idiom.                                                   | `src/primordials/uncurry.ts`, `src/primordials/reflect.ts`      |
+| `primordial.ts` | `node:smol-primordial` | `Math.*`, `Number.is*`, `Array.isArray`, `Date.now`, `String.prototype.charCodeAt`, `Number.parseInt/parseFloat` — registered as `v8::CFunction` so V8 inlines them into JIT'd callers. | `src/primordials/{math,number,date,array,string}.ts`            |
+| `purl.ts`       | `node:smol-purl`       | PURL parse / build / normalize / equals — C++-accelerated with a 10 000-entry result cache.                                                                                             | `src/packages/operations.ts` (`resolveRegistryPackageName`)     |
+| `versions.ts`   | `node:smol-versions`   | Multi-ecosystem version comparison + range-satisfies — npm hot path goes through `internalBinding('smol_versions_native')`.                                                             | `src/versions/_internal.ts` (eager-bound `impl` at module load) |
 
 ## Not adopted (and why)
 

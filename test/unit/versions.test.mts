@@ -262,12 +262,7 @@ describe('versions', () => {
   describe('sort', () => {
     it('should sort versions in ascending order', () => {
       const versions = ['2.0.0', '1.0.0', '1.9.0', '1.5.0']
-      expect(sort(versions)).toEqual([
-        '1.0.0',
-        '1.5.0',
-        '1.9.0',
-        '2.0.0',
-      ])
+      expect(sort(versions)).toEqual(['1.0.0', '1.5.0', '1.9.0', '2.0.0'])
     })
 
     it('should not mutate original array', () => {
@@ -280,12 +275,7 @@ describe('versions', () => {
   describe('rsort', () => {
     it('should sort versions in descending order', () => {
       const versions = ['1.0.0', '2.0.0', '1.5.0', '1.9.0']
-      expect(rsort(versions)).toEqual([
-        '2.0.0',
-        '1.9.0',
-        '1.5.0',
-        '1.0.0',
-      ])
+      expect(rsort(versions)).toEqual(['2.0.0', '1.9.0', '1.5.0', '1.0.0'])
     })
 
     it('should not mutate original array', () => {

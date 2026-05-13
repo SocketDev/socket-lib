@@ -81,12 +81,10 @@ function extractTurnPieces(content: unknown): string[] {
  *
  * Returns undefined for malformed events so the caller can skip cleanly.
  */
-function resolveRoleAndContent(evt: unknown):
-  | {
-      content: unknown
-      role: string | undefined
-    }
-  | undefined {
+function resolveRoleAndContent(evt: unknown): {
+  content: unknown
+  role: string | undefined
+} | undefined {
   if (!evt || typeof evt !== 'object') {
     return undefined
   }

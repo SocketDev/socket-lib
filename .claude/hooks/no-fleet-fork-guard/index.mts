@@ -53,9 +53,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { errorMessage } from '@socketsecurity/lib/errors'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
+import {
+  bypassPhrasePresent,
+  readStdin,
+} from '../_shared/transcript.mts'
 
 type ToolInput = {
   tool_input?: { file_path?: string } | undefined
