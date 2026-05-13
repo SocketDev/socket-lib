@@ -18,6 +18,7 @@ packages:
 # repo itself ships. Pinning them here keeps the entire hook tree in
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
+  '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 1.4.2
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@socketsecurity/lib': 5.28.0

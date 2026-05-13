@@ -518,10 +518,30 @@
       "types": "./dist/dlx/types.d.ts",
       "default": "./dist/dlx/types.js"
     },
+    "./eco/manifest/detect-format": {
+      "source": "./src/eco/manifest/detect-format.ts",
+      "types": "./dist/eco/manifest/detect-format.d.ts",
+      "default": "./dist/eco/manifest/detect-format.js"
+    },
+    "./eco/manifest/manifest-error": {
+      "source": "./src/eco/manifest/manifest-error.ts",
+      "types": "./dist/eco/manifest/manifest-error.d.ts",
+      "default": "./dist/eco/manifest/manifest-error.js"
+    },
+    "./eco/manifest/types": {
+      "source": "./src/eco/manifest/types.ts",
+      "types": "./dist/eco/manifest/types.d.ts",
+      "default": "./dist/eco/manifest/types.js"
+    },
     "./eco/npm/bun/exec": {
       "source": "./src/eco/npm/bun/exec.ts",
       "types": "./dist/eco/npm/bun/exec.d.ts",
       "default": "./dist/eco/npm/bun/exec.js"
+    },
+    "./eco/npm/manifest-format": {
+      "source": "./src/eco/npm/manifest-format.ts",
+      "types": "./dist/eco/npm/manifest-format.d.ts",
+      "default": "./dist/eco/npm/manifest-format.js"
     },
     "./eco/npm/npm/exec": {
       "source": "./src/eco/npm/npm/exec.ts",
@@ -533,6 +553,11 @@
       "types": "./dist/eco/npm/npm/flags.d.ts",
       "default": "./dist/eco/npm/npm/flags.js"
     },
+    "./eco/npm/npm/lockfile-format": {
+      "source": "./src/eco/npm/npm/lockfile-format.ts",
+      "types": "./dist/eco/npm/npm/lockfile-format.d.ts",
+      "default": "./dist/eco/npm/npm/lockfile-format.js"
+    },
     "./eco/npm/pnpm/exec": {
       "source": "./src/eco/npm/pnpm/exec.ts",
       "types": "./dist/eco/npm/pnpm/exec.d.ts",
@@ -542,6 +567,11 @@
       "source": "./src/eco/npm/pnpm/flags.ts",
       "types": "./dist/eco/npm/pnpm/flags.d.ts",
       "default": "./dist/eco/npm/pnpm/flags.js"
+    },
+    "./eco/npm/pnpm/lockfile-format": {
+      "source": "./src/eco/npm/pnpm/lockfile-format.ts",
+      "types": "./dist/eco/npm/pnpm/lockfile-format.d.ts",
+      "default": "./dist/eco/npm/pnpm/lockfile-format.js"
     },
     "./eco/npm/script": {
       "source": "./src/eco/npm/script.ts",
@@ -557,6 +587,11 @@
       "source": "./src/eco/npm/yarnpkg/yarn/exec.ts",
       "types": "./dist/eco/npm/yarnpkg/yarn/exec.d.ts",
       "default": "./dist/eco/npm/yarnpkg/yarn/exec.js"
+    },
+    "./eco/npm/yarnpkg/yarn/lockfile-format": {
+      "source": "./src/eco/npm/yarnpkg/yarn/lockfile-format.ts",
+      "types": "./dist/eco/npm/yarnpkg/yarn/lockfile-format.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/yarn/lockfile-format.js"
     },
     "./eco/purl": {
       "source": "./src/eco/purl.ts",
@@ -1598,6 +1633,11 @@
       "types": "./dist/smol/detect.d.ts",
       "default": "./dist/smol/detect.js"
     },
+    "./smol/manifest": {
+      "source": "./src/smol/manifest.ts",
+      "types": "./dist/smol/manifest.d.ts",
+      "default": "./dist/smol/manifest.js"
+    },
     "./smol/primordial": {
       "source": "./src/smol/primordial.ts",
       "types": "./dist/smol/primordial.d.ts",
@@ -1973,7 +2013,6 @@
     "get-east-asian-width": "1.3.0",
     "globals": "16.4.0",
     "has-flag": "5.0.1",
-    "husky": "9.1.7",
     "libnpmexec": "10.2.3",
     "libnpmpack": "9.0.9",
     "lint-staged": "15.2.11",
