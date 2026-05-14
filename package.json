@@ -518,15 +518,65 @@
       "types": "./dist/dlx/types.d.ts",
       "default": "./dist/dlx/types.js"
     },
+    "./eco/cargo/lockfile-format": {
+      "source": "./src/eco/cargo/lockfile-format.ts",
+      "types": "./dist/eco/cargo/lockfile-format.d.ts",
+      "default": "./dist/eco/cargo/lockfile-format.js"
+    },
+    "./eco/cargo/manifest-format": {
+      "source": "./src/eco/cargo/manifest-format.ts",
+      "types": "./dist/eco/cargo/manifest-format.d.ts",
+      "default": "./dist/eco/cargo/manifest-format.js"
+    },
+    "./eco/cargo/parse-lockfile": {
+      "source": "./src/eco/cargo/parse-lockfile.ts",
+      "types": "./dist/eco/cargo/parse-lockfile.d.ts",
+      "default": "./dist/eco/cargo/parse-lockfile.js"
+    },
+    "./eco/manifest/analyze-lockfile": {
+      "source": "./src/eco/manifest/analyze-lockfile.ts",
+      "types": "./dist/eco/manifest/analyze-lockfile.d.ts",
+      "default": "./dist/eco/manifest/analyze-lockfile.js"
+    },
     "./eco/manifest/detect-format": {
       "source": "./src/eco/manifest/detect-format.ts",
       "types": "./dist/eco/manifest/detect-format.d.ts",
       "default": "./dist/eco/manifest/detect-format.js"
     },
+    "./eco/manifest/find-packages": {
+      "source": "./src/eco/manifest/find-packages.ts",
+      "types": "./dist/eco/manifest/find-packages.d.ts",
+      "default": "./dist/eco/manifest/find-packages.js"
+    },
+    "./eco/manifest/get-package": {
+      "source": "./src/eco/manifest/get-package.ts",
+      "types": "./dist/eco/manifest/get-package.d.ts",
+      "default": "./dist/eco/manifest/get-package.js"
+    },
+    "./eco/manifest/get-package-versions": {
+      "source": "./src/eco/manifest/get-package-versions.ts",
+      "types": "./dist/eco/manifest/get-package-versions.d.ts",
+      "default": "./dist/eco/manifest/get-package-versions.js"
+    },
     "./eco/manifest/manifest-error": {
       "source": "./src/eco/manifest/manifest-error.ts",
       "types": "./dist/eco/manifest/manifest-error.d.ts",
       "default": "./dist/eco/manifest/manifest-error.js"
+    },
+    "./eco/manifest/parse": {
+      "source": "./src/eco/manifest/parse.ts",
+      "types": "./dist/eco/manifest/parse.d.ts",
+      "default": "./dist/eco/manifest/parse.js"
+    },
+    "./eco/manifest/parse-lockfile": {
+      "source": "./src/eco/manifest/parse-lockfile.ts",
+      "types": "./dist/eco/manifest/parse-lockfile.d.ts",
+      "default": "./dist/eco/manifest/parse-lockfile.js"
+    },
+    "./eco/manifest/parse-manifest": {
+      "source": "./src/eco/manifest/parse-manifest.ts",
+      "types": "./dist/eco/manifest/parse-manifest.d.ts",
+      "default": "./dist/eco/manifest/parse-manifest.js"
     },
     "./eco/manifest/types": {
       "source": "./src/eco/manifest/types.ts",
@@ -578,6 +628,11 @@
       "types": "./dist/eco/npm/parse-package-json.d.ts",
       "default": "./dist/eco/npm/parse-package-json.js"
     },
+    "./eco/npm/pnpm/detect-pnpm-version": {
+      "source": "./src/eco/npm/pnpm/detect-pnpm-version.ts",
+      "types": "./dist/eco/npm/pnpm/detect-pnpm-version.d.ts",
+      "default": "./dist/eco/npm/pnpm/detect-pnpm-version.js"
+    },
     "./eco/npm/pnpm/exec": {
       "source": "./src/eco/npm/pnpm/exec.ts",
       "types": "./dist/eco/npm/pnpm/exec.d.ts",
@@ -592,6 +647,21 @@
       "source": "./src/eco/npm/pnpm/lockfile-format.ts",
       "types": "./dist/eco/npm/pnpm/lockfile-format.d.ts",
       "default": "./dist/eco/npm/pnpm/lockfile-format.js"
+    },
+    "./eco/npm/pnpm/parse-lockfile": {
+      "source": "./src/eco/npm/pnpm/parse-lockfile.ts",
+      "types": "./dist/eco/npm/pnpm/parse-lockfile.d.ts",
+      "default": "./dist/eco/npm/pnpm/parse-lockfile.js"
+    },
+    "./eco/npm/pnpm/parse-pnpm-package-id-v5": {
+      "source": "./src/eco/npm/pnpm/parse-pnpm-package-id-v5.ts",
+      "types": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v5.d.ts",
+      "default": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v5.js"
+    },
+    "./eco/npm/pnpm/parse-pnpm-package-id-v6-v9": {
+      "source": "./src/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.ts",
+      "types": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.d.ts",
+      "default": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.js"
     },
     "./eco/npm/script": {
       "source": "./src/eco/npm/script.ts",
@@ -612,6 +682,16 @@
       "source": "./src/eco/npm/yarnpkg/yarn/lockfile-format.ts",
       "types": "./dist/eco/npm/yarnpkg/yarn/lockfile-format.d.ts",
       "default": "./dist/eco/npm/yarnpkg/yarn/lockfile-format.js"
+    },
+    "./eco/npm/yarnpkg/yarn/parse-lockfile": {
+      "source": "./src/eco/npm/yarnpkg/yarn/parse-lockfile.ts",
+      "types": "./dist/eco/npm/yarnpkg/yarn/parse-lockfile.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/yarn/parse-lockfile.js"
+    },
+    "./eco/npm/yarnpkg/yarn/parse-yarn-descriptor": {
+      "source": "./src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.ts",
+      "types": "./dist/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.d.ts",
+      "default": "./dist/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.js"
     },
     "./eco/purl": {
       "source": "./src/eco/purl.ts",
@@ -797,6 +877,101 @@
       "source": "./src/errors/stack.ts",
       "types": "./dist/errors/stack.d.ts",
       "default": "./dist/errors/stack.js"
+    },
+    "./external-tools/bazel/asset-names": {
+      "source": "./src/external-tools/bazel/asset-names.ts",
+      "types": "./dist/external-tools/bazel/asset-names.d.ts",
+      "default": "./dist/external-tools/bazel/asset-names.js"
+    },
+    "./external-tools/bazel/from-path": {
+      "source": "./src/external-tools/bazel/from-path.ts",
+      "types": "./dist/external-tools/bazel/from-path.d.ts",
+      "default": "./dist/external-tools/bazel/from-path.js"
+    },
+    "./external-tools/bazel/from-vfs": {
+      "source": "./src/external-tools/bazel/from-vfs.ts",
+      "types": "./dist/external-tools/bazel/from-vfs.d.ts",
+      "default": "./dist/external-tools/bazel/from-vfs.js"
+    },
+    "./external-tools/bazel/read-bazel-version-file": {
+      "source": "./src/external-tools/bazel/read-bazel-version-file.ts",
+      "types": "./dist/external-tools/bazel/read-bazel-version-file.d.ts",
+      "default": "./dist/external-tools/bazel/read-bazel-version-file.js"
+    },
+    "./external-tools/bazel/resolve": {
+      "source": "./src/external-tools/bazel/resolve.ts",
+      "types": "./dist/external-tools/bazel/resolve.d.ts",
+      "default": "./dist/external-tools/bazel/resolve.js"
+    },
+    "./external-tools/bazel/resolve-asset-url": {
+      "source": "./src/external-tools/bazel/resolve-asset-url.ts",
+      "types": "./dist/external-tools/bazel/resolve-asset-url.d.ts",
+      "default": "./dist/external-tools/bazel/resolve-asset-url.js"
+    },
+    "./external-tools/bazel/resolve-bazel-version": {
+      "source": "./src/external-tools/bazel/resolve-bazel-version.ts",
+      "types": "./dist/external-tools/bazel/resolve-bazel-version.d.ts",
+      "default": "./dist/external-tools/bazel/resolve-bazel-version.js"
+    },
+    "./external-tools/bazel/types": {
+      "source": "./src/external-tools/bazel/types.ts",
+      "types": "./dist/external-tools/bazel/types.d.ts",
+      "default": "./dist/external-tools/bazel/types.js"
+    },
+    "./external-tools/jre/asset-names": {
+      "source": "./src/external-tools/jre/asset-names.ts",
+      "types": "./dist/external-tools/jre/asset-names.d.ts",
+      "default": "./dist/external-tools/jre/asset-names.js"
+    },
+    "./external-tools/jre/detect-platform-arch": {
+      "source": "./src/external-tools/jre/detect-platform-arch.ts",
+      "types": "./dist/external-tools/jre/detect-platform-arch.d.ts",
+      "default": "./dist/external-tools/jre/detect-platform-arch.js"
+    },
+    "./external-tools/jre/from-java-home": {
+      "source": "./src/external-tools/jre/from-java-home.ts",
+      "types": "./dist/external-tools/jre/from-java-home.d.ts",
+      "default": "./dist/external-tools/jre/from-java-home.js"
+    },
+    "./external-tools/jre/from-path": {
+      "source": "./src/external-tools/jre/from-path.ts",
+      "types": "./dist/external-tools/jre/from-path.d.ts",
+      "default": "./dist/external-tools/jre/from-path.js"
+    },
+    "./external-tools/jre/from-vfs": {
+      "source": "./src/external-tools/jre/from-vfs.ts",
+      "types": "./dist/external-tools/jre/from-vfs.d.ts",
+      "default": "./dist/external-tools/jre/from-vfs.js"
+    },
+    "./external-tools/jre/resolve": {
+      "source": "./src/external-tools/jre/resolve.ts",
+      "types": "./dist/external-tools/jre/resolve.d.ts",
+      "default": "./dist/external-tools/jre/resolve.js"
+    },
+    "./external-tools/jre/types": {
+      "source": "./src/external-tools/jre/types.ts",
+      "types": "./dist/external-tools/jre/types.d.ts",
+      "default": "./dist/external-tools/jre/types.js"
+    },
+    "./external-tools/sbt/from-path": {
+      "source": "./src/external-tools/sbt/from-path.ts",
+      "types": "./dist/external-tools/sbt/from-path.d.ts",
+      "default": "./dist/external-tools/sbt/from-path.js"
+    },
+    "./external-tools/sbt/from-vfs": {
+      "source": "./src/external-tools/sbt/from-vfs.ts",
+      "types": "./dist/external-tools/sbt/from-vfs.d.ts",
+      "default": "./dist/external-tools/sbt/from-vfs.js"
+    },
+    "./external-tools/sbt/resolve": {
+      "source": "./src/external-tools/sbt/resolve.ts",
+      "types": "./dist/external-tools/sbt/resolve.d.ts",
+      "default": "./dist/external-tools/sbt/resolve.js"
+    },
+    "./external-tools/sbt/types": {
+      "source": "./src/external-tools/sbt/types.ts",
+      "types": "./dist/external-tools/sbt/types.d.ts",
+      "default": "./dist/external-tools/sbt/types.js"
     },
     "./fs/encoding": {
       "source": "./src/fs/encoding.ts",
@@ -1653,6 +1828,11 @@
       "types": "./dist/smol/detect.d.ts",
       "default": "./dist/smol/detect.js"
     },
+    "./smol/is-module-builtin": {
+      "source": "./src/smol/is-module-builtin.ts",
+      "types": "./dist/smol/is-module-builtin.d.ts",
+      "default": "./dist/smol/is-module-builtin.js"
+    },
     "./smol/manifest": {
       "source": "./src/smol/manifest.ts",
       "types": "./dist/smol/manifest.d.ts",
@@ -1672,6 +1852,11 @@
       "source": "./src/smol/versions.ts",
       "types": "./dist/smol/versions.d.ts",
       "default": "./dist/smol/versions.js"
+    },
+    "./smol/vfs": {
+      "source": "./src/smol/vfs.ts",
+      "types": "./dist/smol/vfs.d.ts",
+      "default": "./dist/smol/vfs.js"
     },
     "./sorts/natural": {
       "source": "./src/sorts/natural.ts",
