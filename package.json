@@ -1358,6 +1358,11 @@
       "types": "./dist/node/https.d.ts",
       "default": "./dist/node/https.js"
     },
+    "./node/module": {
+      "source": "./src/node/module.ts",
+      "types": "./dist/node/module.d.ts",
+      "default": "./dist/node/module.js"
+    },
     "./node/os": {
       "source": "./src/node/os.ts",
       "types": "./dist/node/os.d.ts",
@@ -1827,11 +1832,6 @@
       "source": "./src/smol/detect.ts",
       "types": "./dist/smol/detect.d.ts",
       "default": "./dist/smol/detect.js"
-    },
-    "./smol/is-module-builtin": {
-      "source": "./src/smol/is-module-builtin.ts",
-      "types": "./dist/smol/is-module-builtin.d.ts",
-      "default": "./dist/smol/is-module-builtin.js"
     },
     "./smol/manifest": {
       "source": "./src/smol/manifest.ts",

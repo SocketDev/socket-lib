@@ -428,6 +428,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/node/fs-promises`](../src/node/fs-promises.ts)         | Lazy-loader for `node:fs/promises`.     |
 | [`@socketsecurity/lib/node/http`](../src/node/http.ts)                       | Lazy-loader for `node:http`.            |
 | [`@socketsecurity/lib/node/https`](../src/node/https.ts)                     | Lazy-loader for `node:https`.           |
+| [`@socketsecurity/lib/node/module`](../src/node/module.ts)                   | Lazy-loader for `node:module`.          |
 | [`@socketsecurity/lib/node/os`](../src/node/os.ts)                           | Lazy-loader for `node:os`.              |
 | [`@socketsecurity/lib/node/path`](../src/node/path.ts)                       | Lazy-loader for `node:path`.            |
 | [`@socketsecurity/lib/node/timers-promises`](../src/node/timers-promises.ts) | Lazy-loader for `node:timers/promises`. |
@@ -599,15 +600,14 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## smol/
 
-| Subpath                                                                          | Description                                                                                                                                     |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts)                       | Smol detection + lazy-loader for `node:smol-util`.                                                                                              |
-| [`@socketsecurity/lib/smol/is-module-builtin`](../src/smol/is-module-builtin.ts) | `isModuleBuiltin(name)` — thin wrapper around `node:module`'s `isBuiltin(name)` for use as the per-module gate before `require('node:smol-*')`. |
-| [`@socketsecurity/lib/smol/manifest`](../src/smol/manifest.ts)                   | Lazy-loader for socket-btm's `node:smol-manifest`.                                                                                              |
-| [`@socketsecurity/lib/smol/primordial`](../src/smol/primordial.ts)               | Lazy-loader for socket-btm's `node:smol-primordial` binding.                                                                                    |
-| [`@socketsecurity/lib/smol/purl`](../src/smol/purl.ts)                           | Lazy-loader for socket-btm's `node:smol-purl` binding.                                                                                          |
-| [`@socketsecurity/lib/smol/versions`](../src/smol/versions.ts)                   | Lazy-loader for socket-btm's `node:smol-versions`.                                                                                              |
-| [`@socketsecurity/lib/smol/vfs`](../src/smol/vfs.ts)                             | Lazy-loader for socket-btm's `node:smol-vfs`.                                                                                                   |
+| Subpath                                                            | Description                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts)         | Smol detection + lazy-loader for `node:smol-util`.           |
+| [`@socketsecurity/lib/smol/manifest`](../src/smol/manifest.ts)     | Lazy-loader for socket-btm's `node:smol-manifest`.           |
+| [`@socketsecurity/lib/smol/primordial`](../src/smol/primordial.ts) | Lazy-loader for socket-btm's `node:smol-primordial` binding. |
+| [`@socketsecurity/lib/smol/purl`](../src/smol/purl.ts)             | Lazy-loader for socket-btm's `node:smol-purl` binding.       |
+| [`@socketsecurity/lib/smol/versions`](../src/smol/versions.ts)     | Lazy-loader for socket-btm's `node:smol-versions`.           |
+| [`@socketsecurity/lib/smol/vfs`](../src/smol/vfs.ts)               | Lazy-loader for socket-btm's `node:smol-vfs`.                |
 
 ## sorts/
 
