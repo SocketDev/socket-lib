@@ -64,7 +64,7 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 - **Publish / release / build-release workflows** — never `gh workflow run|dispatch` or `gh api …/dispatches`. Dispatches are irrevocable. The user runs them manually. Bypass: a `gh workflow run` with `-f dry-run=true` is allowed when the target workflow declares a `dry-run:` input under `workflow_dispatch.inputs` and no force-prod override (`-f release=true` / `-f publish=true` / `-f prod=true`) is set.
 - **Workflow input naming** — `workflow_dispatch.inputs` keys are kebab-case (`dry-run`, `build-mode`), not snake_case. The release-workflow-guard hook only recognizes kebab; a `dry_run` input silently fails the dry-run bypass.
 - **`pull_request_target` is privileged** — it runs in the BASE repo's context with secrets. Never combine it with `actions/checkout` of `${{ github.event.pull_request.head.* }}` AND a step that executes the checked-out fork code (`pnpm i` / `npm i` / `pnpm build` / `cargo build` / `make` / etc.). Prefer the split-workflow pattern (build in `pull_request`, publish artifact, separate `workflow_run` posts the comment) or gate `pull_request_target` on `types: [labeled]` so only maintainers can trigger. Enforced by `.claude/hooks/pull-request-target-guard/`.
-- **No external issue/PR refs in commit messages or PR bodies.** GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/(issues|pull)/<num>` mentions back to the target issue, spamming the maintainer with `added N commits that reference this issue` events. Only SocketDev-owned refs are allowed (`SocketDev/<repo>#<num>` is fine). For upstream maintainer issues, link them in *the PR description prose* (which doesn't trigger backrefs from commits) or use `[#1203](https://npmx.dev/...)` link form that omits the `owner/repo#` token. Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/no-external-issue-ref-guard/`).
+- **No external issue/PR refs in commit messages or PR bodies.** GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/(issues|pull)/<num>` mentions back to the target issue, spamming the maintainer with `added N commits that reference this issue` events. Only SocketDev-owned refs are allowed (`SocketDev/<repo>#<num>` is fine). For upstream maintainer issues, link them in _the PR description prose_ (which doesn't trigger backrefs from commits) or use `[#1203](https://npmx.dev/...)` link form that omits the `owner/repo#` token. Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/no-external-issue-ref-guard/`).
 
 ### Commits & PRs
 
@@ -127,6 +127,7 @@ Rules:
 
 - **After finishing a logical unit of work, commit it.** Use a Conventional Commits message per the _Commits & PRs_ rule. Never leave the working tree dirty between turns.
 - **Surgical staging only** — `git add <specific-file>`, never `-A` / `.` (per the _Parallel Claude sessions_ rule). The dirty-worktree rule is no excuse to sweep in files you didn't touch.
+- **Stage only when you're about to commit.** `git add` and `git commit` belong on the same line (chained with `&&`) OR in the same Bash call. Don't stage as a side-effect of "preparing" — staging is a commit-time action. A turn that ends with staged-but-uncommitted hunks is the failure mode the previous bullet warns against (enforced by `.claude/hooks/no-orphaned-staging/`).
 - **If you genuinely can't commit yet** (the change is mid-refactor, tests are failing, you're waiting on user input), say so explicitly in the turn summary so the user knows the dirty state is intentional. Silent dirty worktrees are the failure mode.
 - **Worktrees from `git worktree add`** — same rule, sharper: a transient task-worktree must be left clean (committed + pushed) before `git worktree remove`, or the removal refuses and you've stranded the work.
 
@@ -209,12 +210,14 @@ Full rationale + cascade behavior in [`docs/claude.md/lint-rules.md`](docs/claud
 
 A path is constructed exactly once. Everywhere else references the constructed value.
 
-- **Within a package**: every script imports its own `scripts/paths.mts`. No `path.join('build', mode, …)` outside that module.
+- **Within a package**: every script imports its own `scripts/paths.mts`. No `path.join('build', mode, …)` outside that module. `paths.mts` is per-package (like `package.json`) — every package that has a `scripts/` dir has its own.
 - **Across packages**: package B imports package A's `paths.mts` via the workspace `exports` field. Never `path.join(PKG, '..', '<sibling>', 'build', …)`.
+- **Sub-packages inherit**: a sub-package's `paths.mts` `export * from '<rel>/paths.mts'` from the nearest ancestor and adds local overrides below the re-export. Don't re-derive `REPO_ROOT` / `CONFIG_DIR` / `NODE_MODULES_CACHE_DIR` (enforced by `.claude/hooks/paths-mts-inherit-guard/`).
+- **Not just build paths**: `paths.mts` is for _every_ path the package constructs — config files (`socket-wheelhouse.json`), lockfiles, cache dirs, manifest files. The fleet ships a starter `template/scripts/paths.mts` that exports the common constants + `loadSocketWheelhouseConfig()`.
 - **Workflows / Dockerfiles / shell** can't `import` TS — construct once, reference by output / `ENV` / variable.
 - **Canonical layout**: build outputs live at `<package-root>/build/<mode>/<platform-arch>/out/Final/<artifact>`, where `mode ∈ {dev, prod}` and `platform-arch` is the Node-style `<process.platform>-<process.arch>` (e.g. `darwin-arm64`, `linux-x64`). socket-btm is the worked example; ultrathink follows it; smaller TS-only repos that don't fork by platform may use `'any'` as the platform-arch sentinel but keep the same nesting. Each package's `scripts/paths.mts` exports `PACKAGE_ROOT`, `BUILD_ROOT`, and `getBuildPaths(mode, platformArch)` returning at minimum `outputFinalDir` + `outputFinalFile`/`outputFinalBinary`.
 
-Three-level enforcement: `.claude/hooks/path-guard/` blocks at edit time; `scripts/check-paths.mts` is the whole-repo gate run by `pnpm check`; `/guarding-paths` is the audit-and-fix skill. Find the canonical owner and import from it.
+Three-level enforcement: `.claude/hooks/path-guard/` blocks build-path construction outside `paths.mts` at edit time; `.claude/hooks/paths-mts-inherit-guard/` blocks sub-package `paths.mts` files that don't inherit from the nearest ancestor; `scripts/check-paths.mts` is the whole-repo gate run by `pnpm check`; `/guarding-paths` is the audit-and-fix skill. Find the canonical owner and import from it.
 
 ### Background Bash
 
