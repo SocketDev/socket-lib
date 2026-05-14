@@ -50,6 +50,7 @@ const vitestConfig = defineConfig({
       INLINED_LIB_VERSION: rootPkgJson.version,
     },
     globalSetup: [path.resolve(__dirname, 'vitest-global-setup.mts')],
+    setupFiles: [path.resolve(__dirname, 'vitest-setup-tests.mts')],
     globals: false,
     environment: 'node',
     include: [

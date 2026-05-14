@@ -361,7 +361,13 @@ describe('packages/operations', () => {
     })
   })
 
-  describe('extractPackage', () => {
+  // Network-only: extractPackage delegates to pacote, which fetches
+  // the tarball from registry.npmjs.org. There's no useful unit-test
+  // shape without the registry — these are de facto integration
+  // tests. Skipped when SOCKET_LIB_SKIP_NETWORK_TESTS is set so
+  // pre-commit + air-gapped CI lanes don't hit the public registry
+  // and trip Socket Firewall rate-limits.
+  describeNetworkOnly('extractPackage', () => {
     it('should extract package to destination directory', async () => {
       await runWithTempDir(async tmpDir => {
         const dest = path.join(tmpDir, 'extracted')
@@ -444,7 +450,8 @@ describe('packages/operations', () => {
     }, 30_000)
   })
 
-  describe('packPackage', () => {
+  // Network-only: see comment on `extractPackage` above.
+  describeNetworkOnly('packPackage', () => {
     it('should pack a package tarball', async () => {
       await runWithTempDir(async tmpDir => {
         // Create a simple package to pack
@@ -516,7 +523,8 @@ describe('packages/operations', () => {
     }, 30_000)
   })
 
-  describe('pacote fetcher coverage', () => {
+  // Network-only: exercises pacote's remote-tarball fetcher path.
+  describeNetworkOnly('pacote fetcher coverage', () => {
     // These tests guard against re-stubbing the non-registry pacote
     // fetchers. Each spec type reaches a different fetcher inside
     // pacote/lib — if any of dir/file/remote/git is stubbed with
@@ -734,10 +742,12 @@ describe('packages/operations', () => {
     })
   })
 
-  describe('lazy loading', () => {
+  // Network-only subset of lazy-loading tests: those that exercise
+  // extractPackage / resolveGitHubTgzUrl through pacote / GitHub.
+  describeNetworkOnly('lazy loading (network)', () => {
     it('should lazy load cacache on first use', async () => {
-      // This test verifies that cacache is only loaded when needed
-      // Using extractPackage without dest should trigger cacache loading
+      // This test verifies that cacache is only loaded when needed.
+      // Using extractPackage without dest triggers cacache loading.
       let called = false
       await extractPackage('is-number@7.0.0', (async () => {
         called = true
@@ -754,7 +764,9 @@ describe('packages/operations', () => {
 
       await expect(resolveGitHubTgzUrl('test', pkgJson)).resolves.toBeDefined()
     }, 30_000)
+  })
 
+  describe('lazy loading', () => {
     it('getReleaseTag returns a string for package spec', () => {
       const tag = getReleaseTag('package@1.0.0')
       expect(typeof tag).toBe('string')
@@ -775,7 +787,7 @@ describe('packages/operations', () => {
     })
   })
 
-  describe('options handling', () => {
+  describeNetworkOnly('options handling (network)', () => {
     it('should handle extractPackage with all options', async () => {
       await runWithTempDir(async tmpDir => {
         const dest = path.join(tmpDir, 'extracted')
@@ -790,7 +802,9 @@ describe('packages/operations', () => {
         expect(existsSync(path.join(dest, 'package.json'))).toBe(true)
       }, 'extract-all-opts-')
     }, 30_000)
+  })
 
+  describe('options handling', () => {
     it('should handle readPackageJson with all options', async () => {
       await runWithTempDir(async tmpDir => {
         const pkgData = { name: 'test', custom: 'value' }
@@ -829,7 +843,7 @@ describe('packages/operations', () => {
     })
   })
 
-  describe('integration scenarios', () => {
+  describeNetworkOnly('integration scenarios (network)', () => {
     it('should extract, read, and pack a package', async () => {
       await runWithTempDir(async tmpDir => {
         const extractDest = path.join(tmpDir, 'extracted')
@@ -847,7 +861,9 @@ describe('packages/operations', () => {
         expect(Buffer.isBuffer(tarball)).toBe(true)
       }, 'integration-extract-read-pack-')
     }, 60000)
+  })
 
+  describe('integration scenarios', () => {
     it('should handle editable package.json workflow', async () => {
       await runWithTempDir(async tmpDir => {
         const pkgData = { name: 'test', version: '1.0.0' }
