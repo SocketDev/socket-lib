@@ -20,7 +20,7 @@
  * @see https://v8.dev/blog/v8-release-99 — V8 Fast API Calls overview
  */
 
-import { getNodeModule } from '../node/module'
+import { isNodeBuiltin } from '../node/module'
 
 /**
  * Surface of `node:smol-primordial`. See socket-btm's
@@ -99,7 +99,7 @@ let _smolPrimordialProbed = false
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
   if (!_smolPrimordialProbed) {
     _smolPrimordialProbed = true
-    if (getNodeModule().isBuiltin('node:smol-primordial')) {
+    if (isNodeBuiltin('node:smol-primordial')) {
       _smolPrimordial = require('node:smol-primordial') as SmolPrimordialBinding
     }
   }

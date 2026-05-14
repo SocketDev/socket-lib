@@ -17,7 +17,7 @@
  *   only matters where the hot path warrants the native acceleration.
  */
 
-import { getNodeModule } from '../node/module'
+import { isNodeBuiltin } from '../node/module'
 
 /**
  * Surface of a parsed PURL — the shape both smol-purl's `parse()` and
@@ -98,7 +98,7 @@ let _smolPurlProbed = false
 export function getSmolPurl(): SmolPurlBinding | undefined {
   if (!_smolPurlProbed) {
     _smolPurlProbed = true
-    if (getNodeModule().isBuiltin('node:smol-purl')) {
+    if (isNodeBuiltin('node:smol-purl')) {
       _smolPurl = require('node:smol-purl') as SmolPurlBinding
     }
   }

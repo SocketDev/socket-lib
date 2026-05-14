@@ -23,7 +23,7 @@
  *   the smol binary that exposes the `node:smol-util` binding.
  */
 
-import { getNodeModule } from '../node/module'
+import { isNodeBuiltin } from '../node/module'
 
 // ─── types ─────────────────────────────────────────────────────────────
 
@@ -103,7 +103,7 @@ let _smolUtilProbed = false
 export function getSmolUtil(): SmolUtilBinding | undefined {
   if (!_smolUtilProbed) {
     _smolUtilProbed = true
-    if (getNodeModule().isBuiltin('node:smol-util')) {
+    if (isNodeBuiltin('node:smol-util')) {
       _smolUtil = require('node:smol-util') as SmolUtilBinding
     }
   }
@@ -129,7 +129,7 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
  */
 export function isSmol(): boolean {
   if (_isSmol === undefined) {
-    _isSmol = getNodeModule().isBuiltin('node:smol-util')
+    _isSmol = isNodeBuiltin('node:smol-util')
   }
   return _isSmol
 }

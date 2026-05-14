@@ -28,7 +28,7 @@
  * missing.
  */
 
-import { getNodeModule } from '../node/module'
+import { isNodeBuiltin } from '../node/module'
 
 /**
  * A `SmolVirtualFileSystem` instance mirroring upstream `node:vfs`'s
@@ -119,7 +119,7 @@ let _smolVfsProbed = false
 export function getSmolVfs(): SmolVirtualFileSystem | undefined {
   if (!_smolVfsProbed) {
     _smolVfsProbed = true
-    if (getNodeModule().isBuiltin('node:smol-vfs')) {
+    if (isNodeBuiltin('node:smol-vfs')) {
       const binding = require('node:smol-vfs') as SmolVirtualFileSystemBinding
       _smolVfs = binding.getSmolVfs()
     }
