@@ -9,7 +9,7 @@
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
@@ -50,7 +50,7 @@ describe.sequential('dlx/manifest — error branches', () => {
   let manifest: DlxManifest
 
   beforeEach(() => {
-    testDir = path.join(tmpdir(), `socket-manifest-err-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-manifest-err-${randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
     manifestPath = path.join(testDir, '.dlx-manifest.json')
     manifest = new DlxManifest({ manifestPath })

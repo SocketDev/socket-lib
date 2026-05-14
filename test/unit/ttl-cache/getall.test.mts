@@ -8,7 +8,7 @@
  * memoize-update branch.
  */
 
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -66,7 +66,7 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
   beforeEach(() => {
     invalidateCaches()
     testCacheDir = path.join(
-      tmpdir(),
+      os.tmpdir(),
       `socket-getall-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     )
     setEnv('SOCKET_CACACHE_DIR', testCacheDir)

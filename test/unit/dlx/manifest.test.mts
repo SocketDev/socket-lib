@@ -11,7 +11,7 @@
  */
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import { join } from 'node:path'
 import {
   isPackageEntry,
@@ -191,7 +191,7 @@ describe('dlx-manifest', () => {
     beforeEach(() => {
       // Create unique temp directory for each test
       testDir = join(
-        tmpdir(),
+        os.tmpdir(),
         `dlx-manifest-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       )
       mkdirSync(testDir, { recursive: true })

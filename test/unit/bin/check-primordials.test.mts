@@ -12,7 +12,7 @@
  */
 
 import { mkdtempSync, promises as fs } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -33,7 +33,7 @@ const SOCKET_LIB_PRIMORDIALS = path.resolve(HERE, '../../../src/primordials')
 let tmpDir: string
 
 beforeEach(() => {
-  tmpDir = mkdtempSync(path.join(tmpdir(), 'check-primordials-cli-'))
+  tmpDir = mkdtempSync(path.join(os.tmpdir(), 'check-primordials-cli-'))
 })
 
 afterEach(async () => {

@@ -15,7 +15,7 @@
 
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import * as path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
@@ -37,7 +37,7 @@ describe.sequential('process/lock', () => {
   beforeEach(() => {
     // Create a unique lock path for each test to ensure isolation
     testLockPath = path.join(
-      tmpdir(),
+      os.tmpdir(),
       `socket-test-lock-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     )
   })

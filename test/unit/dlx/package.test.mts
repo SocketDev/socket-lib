@@ -21,7 +21,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -1203,7 +1203,7 @@ describe('dlx-package', () => {
     // matching what generateCacheKey produces. The early-return path inside
     // ensurePackageInstalled then short-circuits Arborist entirely.
     beforeEach(() => {
-      tmpDir = mkdtempSync(path.join(tmpdir(), 'dlx-pkg-cached-'))
+      tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-cached-'))
       savedDlxDir = process.env['SOCKET_DLX_DIR']
       process.env['SOCKET_DLX_DIR'] = tmpDir
       setPath('socket-dlx-dir', tmpDir)
@@ -1303,7 +1303,7 @@ describe('dlx-package', () => {
     let tmpDir: string
 
     beforeEach(() => {
-      tmpDir = mkdtempSync(path.join(tmpdir(), 'dlx-pkg-installRoot-'))
+      tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-installRoot-'))
     })
 
     afterEach(() => {

@@ -14,7 +14,7 @@
  */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { defaultIgnore } from '@socketsecurity/lib/globs/defaults'
@@ -510,7 +510,7 @@ describe('globs', () => {
     let tmpRoot: string
 
     beforeEach(() => {
-      tmpRoot = mkdtempSync(path.join(tmpdir(), 'socket-lib-globs-'))
+      tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-globs-'))
       mkdirSync(path.join(tmpRoot, 'dist'), { recursive: true })
       mkdirSync(path.join(tmpRoot, 'src'), { recursive: true })
       writeFileSync(path.join(tmpRoot, 'package.json'), '{}')

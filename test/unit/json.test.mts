@@ -14,7 +14,7 @@
  */
 
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import { join } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import process from 'node:process'
@@ -894,7 +894,7 @@ describe('json', () => {
     let testDir: string
 
     beforeEach(async () => {
-      testDir = await mkdtemp(join(tmpdir(), 'editable-json-test-'))
+      testDir = await mkdtemp(join(os.tmpdir(), 'editable-json-test-'))
     })
 
     afterEach(async () => {

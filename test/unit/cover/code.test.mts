@@ -8,7 +8,7 @@
  */
 
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,7 +28,7 @@ export function writeCoverageFile(data: unknown): string {
 
 describe.sequential('cover/code', () => {
   beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(tmpdir(), 'socket-lib-cover-test-'))
+    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-cover-test-'))
     vi.mocked(spawn).mockReset()
   })
 

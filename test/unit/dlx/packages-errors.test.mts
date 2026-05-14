@@ -8,7 +8,7 @@
  */
 
 import { mkdirSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
@@ -44,7 +44,11 @@ describe.sequential('dlx/packages — error branches', () => {
 
   beforeEach(() => {
     invalidateCaches()
-    testDlxDir = path.join(tmpdir(), `socket-dlx-err-${randomUUID()}`, '_dlx')
+    testDlxDir = path.join(
+      os.tmpdir(),
+      `socket-dlx-err-${randomUUID()}`,
+      '_dlx',
+    )
     mkdirSync(testDlxDir, { recursive: true })
     setEnv('SOCKET_DLX_DIR', testDlxDir)
     vi.mocked(safeDelete).mockClear()

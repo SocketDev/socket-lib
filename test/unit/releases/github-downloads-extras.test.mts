@@ -8,7 +8,7 @@
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -68,7 +68,7 @@ describe.sequential('releases/github-downloads — extras', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = mkdtempSync(path.join(tmpdir(), 'gh-downloads-extras-'))
+    testDir = mkdtempSync(path.join(os.tmpdir(), 'gh-downloads-extras-'))
     vi.mocked(getLatestRelease).mockClear()
     vi.mocked(getReleaseAssetUrl).mockClear()
     vi.mocked(httpDownload).mockClear()

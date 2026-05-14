@@ -12,7 +12,7 @@
  * Used by Socket tools for temporary data caching with expiration (API responses, metadata).
  */
 
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import * as path from 'node:path'
 
 import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
@@ -31,7 +31,7 @@ describe.sequential('ttl-cache', () => {
 
     // Create a unique cache directory for each test to ensure isolation.
     testCacheDir = path.join(
-      tmpdir(),
+      os.tmpdir(),
       `socket-test-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     )
     setEnv('SOCKET_CACACHE_DIR', testCacheDir)

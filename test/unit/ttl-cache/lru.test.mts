@@ -7,7 +7,7 @@
  * exercise the in-memory cache only.
  */
 
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
@@ -22,7 +22,7 @@ describe.sequential('ttl-cache — LRU + clock skew', () => {
   beforeEach(() => {
     invalidateCaches()
     testCacheDir = path.join(
-      tmpdir(),
+      os.tmpdir(),
       `socket-test-cache-lru-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     )
     setEnv('SOCKET_CACACHE_DIR', testCacheDir)

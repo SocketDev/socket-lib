@@ -24,7 +24,7 @@
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -41,7 +41,7 @@ import { safeDelete } from '@socketsecurity/lib/fs/safe'
 let tmpDir: string
 
 beforeEach(() => {
-  tmpDir = mkdtempSync(path.join(tmpdir(), 'primordials-check-'))
+  tmpDir = mkdtempSync(path.join(os.tmpdir(), 'primordials-check-'))
 })
 
 afterEach(async () => {

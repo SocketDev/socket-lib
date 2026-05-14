@@ -18,7 +18,7 @@ import {
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import { join } from 'node:path'
 
 import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
@@ -36,7 +36,7 @@ describe.sequential('fs - Sync Functions', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = join(tmpdir(), `socket-lib-test-${randomUUID()}`)
+    testDir = join(os.tmpdir(), `socket-lib-test-${randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 

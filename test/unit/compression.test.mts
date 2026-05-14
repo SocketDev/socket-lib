@@ -14,7 +14,7 @@
 
 import { Buffer } from 'node:buffer'
 import { mkdtempSync, promises as fs } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { Readable, Writable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
@@ -66,7 +66,7 @@ const LARGE_TEXT = JSON.stringify({
 let tmpDir: string
 
 beforeEach(() => {
-  tmpDir = mkdtempSync(path.join(tmpdir(), 'compression-test-'))
+  tmpDir = mkdtempSync(path.join(os.tmpdir(), 'compression-test-'))
 })
 
 afterEach(async () => {

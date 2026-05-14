@@ -11,7 +11,7 @@
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -26,7 +26,7 @@ describe.sequential('bin.ts — Volta resolution', () => {
     // Source code uses voltaPath = binPath.slice(0, voltaIndex) which
     // gives the PARENT of `.volta/`, then appends `tools/`. So we put
     // `tools/` at the parent, alongside `.volta/`.
-    voltaRoot = mkdtempSync(path.join(tmpdir(), 'volta-'))
+    voltaRoot = mkdtempSync(path.join(os.tmpdir(), 'volta-'))
     mkdirSync(path.join(voltaRoot, '.volta', 'bin'), { recursive: true })
     mkdirSync(path.join(voltaRoot, 'tools', 'image'), { recursive: true })
     mkdirSync(path.join(voltaRoot, 'tools', 'user', 'bin'), {

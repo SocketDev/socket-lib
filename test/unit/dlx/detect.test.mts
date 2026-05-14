@@ -27,7 +27,7 @@ import {
 } from '@socketsecurity/lib/dlx/detect'
 import { resetPaths, setPath } from '@socketsecurity/lib/paths/rewire'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import { join } from 'node:path'
 
 describe('DLX Executable Type Detection', () => {
@@ -35,7 +35,7 @@ describe('DLX Executable Type Detection', () => {
   let mockDlxDir: string
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'dlx-detect-test-'))
+    tempDir = mkdtempSync(join(os.tmpdir(), 'dlx-detect-test-'))
     mockDlxDir = join(tempDir, '.socket', '_dlx')
     mkdirSync(mockDlxDir, { recursive: true })
     // Use path rewire to override DLX directory for all modules

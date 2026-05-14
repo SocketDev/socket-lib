@@ -11,7 +11,7 @@
  * inline in `./package.ts` — no helper.
  */
 
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 
 import pacote from '../external/pacote'
 import { safeDelete, safeMkdir } from '../fs/safe'
@@ -164,7 +164,7 @@ export async function generatePackagePin(
         : 0
   const before = ageMs > 0 ? new DateCtor(DateNow() - ageMs) : undefined
   const scratch = path.join(
-    tmpdir(),
+    os.tmpdir(),
     `socket-lib-pin-${process.pid}-${Date.now()}`,
   )
   await safeMkdir(scratch, { recursive: true })

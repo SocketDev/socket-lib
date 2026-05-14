@@ -9,7 +9,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import { join } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -58,7 +58,7 @@ describe.sequential('releases/github-archives', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = join(tmpdir(), `socket-lib-archives-test-${randomUUID()}`)
+    testDir = join(os.tmpdir(), `socket-lib-archives-test-${randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
     vi.mocked(downloadReleaseAsset).mockClear()
     vi.mocked(extractArchive).mockClear()

@@ -5,7 +5,7 @@
  */
 
 import { mkdirSync, mkdtempSync, utimesSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -31,7 +31,7 @@ describe.sequential('process-lock — error branches', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = mkdtempSync(path.join(tmpdir(), 'plock-err-'))
+    testDir = mkdtempSync(path.join(os.tmpdir(), 'plock-err-'))
     vi.mocked(safeDeleteSync).mockClear()
   })
 

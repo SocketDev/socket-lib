@@ -13,7 +13,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -32,7 +32,7 @@ let savedDlxDir: string | undefined
 
 describe.sequential('dlx/packages', () => {
   beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(tmpdir(), 'socket-dlx-test-'))
+    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-dlx-test-'))
     savedDlxDir = process.env['SOCKET_DLX_DIR']
     process.env['SOCKET_DLX_DIR'] = tmpDir
     // Override the cached path lookup so tests don't need a fresh process.

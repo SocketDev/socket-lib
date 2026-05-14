@@ -4,7 +4,7 @@
  */
 
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
@@ -20,7 +20,7 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = path.join(tmpdir(), `socket-detect-cache-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-detect-cache-${randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 

@@ -8,7 +8,7 @@
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
@@ -28,7 +28,7 @@ describe.sequential('dlx/package — pure functions', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = path.join(tmpdir(), `socket-lib-dlx-pure-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-lib-dlx-pure-${randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 
