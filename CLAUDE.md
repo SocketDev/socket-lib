@@ -33,7 +33,7 @@ git worktree remove ../<repo>-<task>
 
 The `BASE` lookup resolves the remote's default branch — usually `main`, but legacy repos still use `master`. Never hard-code one; use `git symbolic-ref refs/remotes/origin/HEAD` (or fall back to `main` if the remote isn't set). See [Default branch fallback](#default-branch-fallback) below.
 
-**Required for staging:** surgical `git add <specific-file>`. Never `-A` / `.`.
+**Required for staging:** surgical `git add <specific-file>`. Never `-A` / `.` (enforced by `.claude/hooks/overeager-staging-guard/`; bypass: `Allow add-all bypass`).
 
 **Never revert files you didn't touch.** If `git status` shows unfamiliar changes, leave them — they belong to another session, an upstream pull, or a hook side-effect.
 
@@ -64,7 +64,7 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 - **Publish / release / build-release workflows** — never `gh workflow run|dispatch` or `gh api …/dispatches`. Dispatches are irrevocable. The user runs them manually. Bypass: a `gh workflow run` with `-f dry-run=true` is allowed when the target workflow declares a `dry-run:` input under `workflow_dispatch.inputs` and no force-prod override (`-f release=true` / `-f publish=true` / `-f prod=true`) is set.
 - **Workflow input naming** — `workflow_dispatch.inputs` keys are kebab-case (`dry-run`, `build-mode`), not snake_case. The release-workflow-guard hook only recognizes kebab; a `dry_run` input silently fails the dry-run bypass.
 - **`pull_request_target` is privileged** — it runs in the BASE repo's context with secrets. Never combine it with `actions/checkout` of `${{ github.event.pull_request.head.* }}` AND a step that executes the checked-out fork code (`pnpm i` / `npm i` / `pnpm build` / `cargo build` / `make` / etc.). Prefer the split-workflow pattern (build in `pull_request`, publish artifact, separate `workflow_run` posts the comment) or gate `pull_request_target` on `types: [labeled]` so only maintainers can trigger. Enforced by `.claude/hooks/pull-request-target-guard/`.
-- **No external issue/PR refs in commit messages or PR bodies.** GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/(issues|pull)/<num>` mentions back to the target issue, spamming the maintainer with `added N commits that reference this issue` events. Only SocketDev-owned refs are allowed (`SocketDev/<repo>#<num>` is fine). For upstream maintainer issues, link them in _the PR description prose_ (which doesn't trigger backrefs from commits) or use `[#1203](https://npmx.dev/...)` link form that omits the `owner/repo#` token. Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/no-external-issue-ref-guard/`).
+- **No external issue/PR refs in commit messages or PR bodies.** GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/(issues|pull)/<num>` mentions back to the target issue, spamming the maintainer with `added N commits that reference this issue` events. Only SocketDev-owned refs are allowed (`SocketDev/<repo>#<num>` is fine). For upstream maintainer issues, link them in *the PR description prose* (which doesn't trigger backrefs from commits) or use `[#1203](https://npmx.dev/...)` link form that omits the `owner/repo#` token. Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/no-external-issue-ref-guard/`).
 
 ### Commits & PRs
 
@@ -109,7 +109,7 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 - 🚨 NEVER pass `--experimental-strip-types` to Node (enforced by `.claude/hooks/no-experimental-strip-types-guard/`).
 - **New dependencies** — every new dep added to `package.json` runs a Socket-score check at edit time; low-scoring deps block (enforced by `.claude/hooks/check-new-deps/`).
 - **Backward compatibility** — FORBIDDEN to maintain. Actively remove when encountered.
-- Full ruleset (packageManager field, `.config/` placement, `.mts` runners, soak window, shallow submodules, monorepo `engines.node`) in [`docs/claude.md/tooling.md`](docs/claude.md/tooling.md).
+- Full ruleset (packageManager field, `.config/` placement, `.mts` runners, soak window, shallow submodules, monorepo `engines.node`) in [`docs/claude.md/fleet/tooling.md`](docs/claude.md/fleet/tooling.md).
 
 ### Fix it, don't defer
 
@@ -133,9 +133,13 @@ Rules:
 
 The principle: the working tree at end-of-turn should match the user's mental model of where the work is. "Done" means committed; anything else is paused, and pause states need to be announced.
 
+### Untracked-by-default for vendored / build-copied trees
+
+🚨 Untracked dirs under `additions/source-patched/`, `vendor/`, `third_party/`, `external/`, `upstream/`, `deps/<libname>/`, `pkg-node/`, or `*-bundled`/`*-vendored` paths are **untracked-by-default**. Before staging: `git status --ignored` + read `.gitignore` (look for `dir/*` + `!dir/file` allowlists — the allowlisted file is our hand-written glue, not the whole tree) + grep for the build script that copies the dir in. Ban "must be" / "presumably" / "looks like" when handling someone else's tree — run the command instead. Ask before committing 100+ file or multi-MB drops. Full playbook in [`docs/claude.md/fleet/untracked-by-default.md`](docs/claude.md/fleet/untracked-by-default.md).
+
 ### Hook bypasses require the canonical phrase
 
-🚨 Reverting tracked changes or bypassing a hook (--no-verify, DISABLE*PRECOMMIT*\*, --no-gpg-sign, force-push) requires the user to type **`Allow <X> bypass`** verbatim in a recent user turn (e.g. `Allow revert bypass`, `Allow no-verify bypass`). Paraphrases don't count (enforced by `.claude/hooks/no-revert-guard/`). Full phrase table: [`docs/claude.md/bypass-phrases.md`](docs/claude.md/bypass-phrases.md).
+🚨 Reverting tracked changes or bypassing a hook (--no-verify, DISABLE*PRECOMMIT*\*, --no-gpg-sign, force-push) requires the user to type **`Allow <X> bypass`** verbatim in a recent user turn (e.g. `Allow revert bypass`, `Allow no-verify bypass`). Paraphrases don't count (enforced by `.claude/hooks/no-revert-guard/`). Full phrase table: [`docs/claude.md/fleet/bypass-phrases.md`](docs/claude.md/fleet/bypass-phrases.md).
 
 ### Variant analysis on every High/Critical finding
 
@@ -152,6 +156,10 @@ Every new `.claude/hooks/<name>/` hook must have a matching `(enforced by `.clau
 ### Plan review before approval
 
 For non-trivial work (multi-file refactor, new feature, migration), the plan itself is a deliverable. List steps numerically, name files you'll touch, name rules you'll honor — don't bury the plan in prose. If the plan touches fleet-shared resources (this CLAUDE.md fleet block, hooks, `_shared/`), invite a second-opinion pass before writing code. If the plan adds a fleet rule, name the original incident (per _Compound lessons_) (enforced by `.claude/hooks/plan-review-reminder/`).
+
+### Plan storage
+
+🚨 Design / implementation / migration plan docs live at `<repo-root>/.claude/plans/<lowercase-hyphenated>.md` and are **never tracked by version control** — the fleet `.gitignore` excludes `/.claude/*` and `plans/` is intentionally absent from the allowlist. Don't write plans into `docs/plans/` or a package-level `<pkg>/docs/plans/`. Full rationale + migration guidance in [`docs/claude.md/fleet/plan-storage.md`](docs/claude.md/fleet/plan-storage.md).
 
 ### Drift watch
 
@@ -178,23 +186,27 @@ Never silently let drift sit. Either reconcile in the same PR or open a follow-u
 
 ### Never fork fleet-canonical files locally
 
-🚨 Edit fleet-canonical files (anything in the sync manifest) ONLY in `socket-wheelhouse/template/...` — never in a downstream repo. Spot a missing helper in a downstream copy? Lift it upstream and re-cascade (enforced by `.claude/hooks/no-fleet-fork-guard/`; bypass: `Allow fleet-fork bypass`). Full canonical-surface list + lifting workflow: [`docs/claude.md/no-local-fork-canonical.md`](docs/claude.md/no-local-fork-canonical.md).
+🚨 Edit fleet-canonical files (anything in the sync manifest) ONLY in `socket-wheelhouse/template/...` — never in a downstream repo. Spot a missing helper in a downstream copy? Lift it upstream and re-cascade (enforced by `.claude/hooks/no-fleet-fork-guard/`; bypass: `Allow fleet-fork bypass`). Full canonical-surface list + lifting workflow: [`docs/claude.md/wheelhouse/no-local-fork-canonical.md`](docs/claude.md/wheelhouse/no-local-fork-canonical.md).
 
 ### Code style
 
 - **Comments** — default to none. When you do write one, audience is a junior dev: explain the constraint, the hidden invariant, the "why this and not the obvious thing." No teacher-tone. No `// Plan:` / `// Task:` / `// As requested ...` meta-labels and no `// removed X` / `// previously Y` references — that's commit-message territory (enforced by `.claude/hooks/no-meta-comments-guard/`).
+- **Parser comments — exception to "default to none."** Parsers that mirror an upstream reference (test262, eco lockfile parsers, smol-manifest, acorn) get step-by-step prose + upstream-pinned source links so the dual-impl invariant stays verifiable across forks. Full convention in [`docs/claude.md/fleet/parser-comments.md`](docs/claude.md/fleet/parser-comments.md).
+- **Pointer comments** — `// see X` / `// see X for details` / `// full rationale in Y` is acceptable when BOTH (a) the destination actually carries the load-bearing explanation, AND (b) the inline form carries the one-line claim so a reader who never follows the pointer still walks away with the *why*. A pointer with neither is dead weight; a pointer with only (a) fails CLAUDE.md's "the reader should fix the problem from the comment alone" test (enforced by `.claude/hooks/pointer-comment-guard/`).
 - **Completion** — never leave `TODO` / `FIXME` / `XXX` / shims / stubs / placeholders. Finish 100%.
 - **`null` vs `undefined`** — use `undefined`. `null` only for `__proto__: null` or external APIs.
 - **HTTP** — never `fetch()`. Use `httpJson` / `httpText` / `httpRequest` from `@socketsecurity/lib/http-request`.
 - **File deletion** — `safeDelete()` / `safeDeleteSync()` from `@socketsecurity/lib/fs`. Never `fs.rm` / `fs.unlink` / `rm -rf` directly.
 - **Edits** — Edit tool, never `sed` / `awk`.
+- **CI detection** — `'CI' in process.env` (presence check), never `process.env.CI` (truthy). Ecosystem convention — handles `CI=` / `CI=0` / `CI=false` setups correctly while the truthy form mis-classifies them.
+- **`node:os` imports** — `import os from 'node:os'` + `os.tmpdir()` / `os.platform()` etc., never `import { tmpdir } from 'node:os'`. Keeps callsites grep-able and avoids per-export rename drift.
 - **Logger** — `getDefaultLogger()` from `@socketsecurity/lib/logger`, never `process.std{err,out}.write` or `console.*` in source (enforced by `.claude/hooks/logger-guard/`).
 - **Doc filenames** — `lowercase-with-hyphens.md` in `docs/` or `.claude/`; SCREAMING_CASE only for the GitHub-rendered set (README, CHANGELOG, CONTRIBUTING, …) at repo root. `<source>.<ext>.md` allowed for docs describing a code file (enforced by `.claude/hooks/markdown-filename-guard/`).
-- Full ruleset (object literals, imports, subprocesses, file existence, generated reports, sorting, Promise.race, Safe suffix, `node:smol-*` modules, inclusive language) in [`docs/claude.md/code-style.md`](docs/claude.md/code-style.md). See also [`docs/claude.md/sorting.md`](docs/claude.md/sorting.md) and [`docs/claude.md/inclusive-language.md`](docs/claude.md/inclusive-language.md).
+- Full ruleset (object literals, imports, subprocesses, file existence, generated reports, sorting, Promise.race, Safe suffix, `node:smol-*` modules, inclusive language) in [`docs/claude.md/fleet/code-style.md`](docs/claude.md/fleet/code-style.md). See also [`docs/claude.md/fleet/sorting.md`](docs/claude.md/fleet/sorting.md) and [`docs/claude.md/fleet/inclusive-language.md`](docs/claude.md/fleet/inclusive-language.md).
 
 ### File size
 
-Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, split along natural seams — group by domain, not line count; name files for what's in them; co-locate helpers with consumers. Exceptions: a single function that legitimately needs the space (note it inline), or a generated artifact. Full playbook in [`docs/claude.md/file-size.md`](docs/claude.md/file-size.md).
+Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, split along natural seams — group by domain, not line count; name files for what's in them; co-locate helpers with consumers. Exceptions: a single function that legitimately needs the space (note it inline), or a generated artifact. Full playbook in [`docs/claude.md/fleet/file-size.md`](docs/claude.md/fleet/file-size.md).
 
 ### Lint rules: errors over warnings, fixable over reporting
 
@@ -204,7 +216,7 @@ Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, spl
 - **Tooling: oxlint + oxfmt only.** No ESLint, no Prettier. Fleet socket-\* oxlint plugin lives in `template/.config/oxlint-plugin/`.
 - **Invoke oxfmt / oxlint with `-c .config/...rc.json` explicitly.** Both tools accept a `-c PATH` (oxfmt) / `--config PATH` (oxlint). The fleet keeps both configs under `.config/`, not at repo root. Without the flag, the tools fall through to their built-in defaults — oxfmt's default is double-quotes + semis, the opposite of the fleet style, and would silently rewrite ~200 files on `pnpm run format`. Canonical script bodies in `manifest.mts` already encode the flag; the sync-scaffolding gate rewrites drifted scripts back to the canonical form.
 
-Full rationale + cascade behavior in [`docs/claude.md/lint-rules.md`](docs/claude.md/lint-rules.md).
+Full rationale + cascade behavior in [`docs/claude.md/fleet/lint-rules.md`](docs/claude.md/fleet/lint-rules.md).
 
 ### 1 path, 1 reference
 
@@ -213,7 +225,7 @@ A path is constructed exactly once. Everywhere else references the constructed v
 - **Within a package**: every script imports its own `scripts/paths.mts`. No `path.join('build', mode, …)` outside that module. `paths.mts` is per-package (like `package.json`) — every package that has a `scripts/` dir has its own.
 - **Across packages**: package B imports package A's `paths.mts` via the workspace `exports` field. Never `path.join(PKG, '..', '<sibling>', 'build', …)`.
 - **Sub-packages inherit**: a sub-package's `paths.mts` `export * from '<rel>/paths.mts'` from the nearest ancestor and adds local overrides below the re-export. Don't re-derive `REPO_ROOT` / `CONFIG_DIR` / `NODE_MODULES_CACHE_DIR` (enforced by `.claude/hooks/paths-mts-inherit-guard/`).
-- **Not just build paths**: `paths.mts` is for _every_ path the package constructs — config files (`socket-wheelhouse.json`), lockfiles, cache dirs, manifest files. The fleet ships a starter `template/scripts/paths.mts` that exports the common constants + `loadSocketWheelhouseConfig()`.
+- **Not just build paths**: `paths.mts` is for *every* path the package constructs — config files (`socket-wheelhouse.json`), lockfiles, cache dirs, manifest files. The fleet ships a starter `template/scripts/paths.mts` that exports the common constants + `loadSocketWheelhouseConfig()`.
 - **Workflows / Dockerfiles / shell** can't `import` TS — construct once, reference by output / `ENV` / variable.
 - **Canonical layout**: build outputs live at `<package-root>/build/<mode>/<platform-arch>/out/Final/<artifact>`, where `mode ∈ {dev, prod}` and `platform-arch` is the Node-style `<process.platform>-<process.arch>` (e.g. `darwin-arm64`, `linux-x64`). socket-btm is the worked example; ultrathink follows it; smaller TS-only repos that don't fork by platform may use `'any'` as the platform-arch sentinel but keep the same nesting. Each package's `scripts/paths.mts` exports `PACKAGE_ROOT`, `BUILD_ROOT`, and `getBuildPaths(mode, platformArch)` returning at minimum `outputFinalDir` + `outputFinalFile`/`outputFinalBinary`.
 
@@ -244,7 +256,7 @@ An error message is UI. The reader should fix the problem from the message alone
 3. **Saw vs. wanted** — the bad value and the allowed shape or set.
 4. **Fix** — one imperative action (`rename the key to …`).
 
-Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socketsecurity/lib/errors` over hand-rolled checks. Use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays` for allowed-set lists. Full guidance in [`docs/claude.md/error-messages.md`](docs/claude.md/error-messages.md).
+Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socketsecurity/lib/errors` over hand-rolled checks. Use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays` for allowed-set lists. Full guidance in [`docs/claude.md/fleet/error-messages.md`](docs/claude.md/fleet/error-messages.md).
 
 ### Token hygiene
 
@@ -254,15 +266,15 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 **Socket API token env var** — canonical fleet name is `SOCKET_API_TOKEN` (legacy `SOCKET_API_KEY` / `SOCKET_SECURITY_API_TOKEN` / `SOCKET_SECURITY_API_KEY` accepted as aliases for one cycle). Don't confuse with `SOCKET_CLI_API_TOKEN` (socket-cli's separate setting).
 
-Full spec (hook details, personal-path placeholders, cross-repo path references) in [`docs/claude.md/token-hygiene.md`](docs/claude.md/token-hygiene.md).
+Full spec (hook details, personal-path placeholders, cross-repo path references) in [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
 
 ### Agents & skills
 
 - `/scanning-security` — AgentShield + zizmor audit
 - `/scanning-quality` — quality analysis
 - Shared subskills in `.claude/skills/_shared/`
-- **Handing off to another agent** — see [`docs/claude.md/agent-delegation.md`](docs/claude.md/agent-delegation.md).
-- **Skill scope tiers** (fleet / partial / unique), the `updating` umbrella + `updating-*` siblings convention, and the `scripts/run-skill-fleet.mts` cross-fleet runner in [`docs/claude.md/agents-and-skills.md`](docs/claude.md/agents-and-skills.md).
+- **Handing off to another agent** — see [`docs/claude.md/fleet/agent-delegation.md`](docs/claude.md/fleet/agent-delegation.md).
+- **Skill scope tiers** (fleet / partial / unique), the `updating` umbrella + `updating-*` siblings convention, and the `scripts/run-skill-fleet.mts` cross-fleet runner in [`docs/claude.md/fleet/agents-and-skills.md`](docs/claude.md/fleet/agents-and-skills.md).
 
 <!-- END FLEET-CANONICAL -->
 
