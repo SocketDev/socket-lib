@@ -15,6 +15,46 @@
  *
  * Forgiving by design — unknown keys ignored, missing versions
  * default to `0.0.0`. Never throws.
+ *
+ * Source material (in lock-step order, newest → oldest):
+ *
+ *   1. **C++ native parser** in socket-btm/node-smol-builder:
+ *      additions/source-patched/src/socketsecurity/manifest/parser_pnpm.cc
+ *      Same algorithm, same fixes — keep the two in lock-step.
+ *
+ *   2. **socket-sdxgen** — algorithm oracle:
+ *      socket-sdxgen/src/parsers/pnpm/pnpm-lock-v5.mts
+ *      socket-sdxgen/src/parsers/pnpm/pnpm-lock-v6.mts
+ *      socket-sdxgen/src/parsers/pnpm/pnpm-lock-v9.mts
+ *
+ *   3. **cdxgen** (pinned v11.11.0):
+ *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
+ *      (parsePnpmLock)
+ *
+ *   4. **pnpm lockfile spec** + reference implementation:
+ *      https://github.com/pnpm/spec/blob/master/lockfile/9.0.md
+ *      https://github.com/pnpm/pnpm/blob/main/packages/lockfile-file/
+ *
+ * Bug fixes implemented here (and in the native parser):
+ *
+ *   - Fix 3a Empty-version guard in importer block-shape walk —
+ *            v9 nested-property entries (`pkg:` parent + indented
+ *            `version:` child) no longer emit a phantom parent
+ *            PackageRef with `version: ''`.
+ *
+ *   - Fix 3b workspace/file/link protocol filter — importer deps
+ *            with `workspace:` / `file:` / `link:` values are
+ *            workspace-local refs, not shippable registry artifacts.
+ *
+ *   - Fix 5  pnpm v9 isDev derivation from importer prod/devOnly
+ *            sets, post-pass classified. The v9 format dropped per-
+ *            snapshot `dev: true` markers, so isDev must be derived
+ *            from importers. Prior impls left every v9 snapshot as
+ *            `depType: 'prod'`.
+ *
+ * Regression fixtures live under socket-btm's test/fixtures/
+ * sdxgen-bug-regressions/ — every shipped fix has a matching
+ * fixture directory there.
  */
 
 import { ArrayPrototypePush } from '../../../primordials/array'

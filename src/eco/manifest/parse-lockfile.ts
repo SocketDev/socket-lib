@@ -89,16 +89,11 @@ export const parseLockfile: (
       content: string,
       ecosystem: EcosystemString,
       format?: LockfileFormat | undefined,
-    ) => {
-      // smol-manifest doesn't ship a cargo parser; route there only.
-      if (ecosystem === 'cargo' || format === 'cargo') {
-        return jsParseLockfile(content, ecosystem, format)
-      }
-      return _smol.parseLockfile(
+    ) =>
+      _smol.parseLockfile(
         content,
         ecosystem,
-        format as 'npm' | 'yarn' | 'pnpm' | 'composer' | undefined,
+        format as 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo' | undefined,
       ) as ParsedLockfile
-    }
   : /* c8 ignore stop */
     jsParseLockfile

@@ -21,6 +21,35 @@
  *
  * The parser is forgiving — unknown keys ignored, missing fields
  * default to empty. It never throws.
+ *
+ * Source material (in lock-step order, newest → oldest):
+ *
+ *   1. **C++ native parser** in socket-btm/node-smol-builder:
+ *      additions/source-patched/src/socketsecurity/manifest/parser_cargo.cc
+ *      Same algorithm — keep the two in lock-step.
+ *
+ *   2. **socket-sdxgen** — algorithm oracle, broader coverage:
+ *      socket-sdxgen/src/parsers/cargo/index.mts (851 lines)
+ *
+ *   3. **cdxgen** (pinned v11.11.0):
+ *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/rust.js
+ *      (parseCargoLock)
+ *
+ *   4. **Cargo's own lockfile encoder** — the source of truth for
+ *      the format we're parsing:
+ *      https://github.com/rust-lang/cargo/blob/master/src/cargo/core/resolver/encode.rs
+ *      Lockfile format docs:
+ *        https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
+ *        https://doc.rust-lang.org/cargo/reference/resolver.html#lockfile-format
+ *
+ * Regression guard:
+ *
+ *   - `[[patch.unused]]` blocks must NOT materialize as PackageRefs.
+ *     Only `[[package]]` opens an entry; any other section header
+ *     (including `[[patch.unused]]`, `[metadata]`, `[patch.crates-io]`,
+ *     …) closes the current entry to undefined. See the fixture under
+ *     socket-btm's test/fixtures/sdxgen-bug-regressions/
+ *     cargo-patch-unused-no-leak/.
  */
 
 import { ArrayPrototypePush } from '../../primordials/array'

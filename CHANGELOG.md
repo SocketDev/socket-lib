@@ -76,6 +76,22 @@ The vast majority of consumer updates are mechanical import-path rewrites; the r
 
 - **Version operations are bound once at module load.** The smol-vs-semver branch was previously redone on every `compare` / `lt` / `gt` / `sort` call. v6 picks the impl once when the module first loads; each export forwards to the resolved binding directly with no per-call branching or wrapper closure.
 
+- **Native lockfile parsing via `node:smol-manifest`.** When running on socket-btm's smol Node binary, every `parseLockfile` call routes through the C++ `smol_manifest_native` binding instead of the TS fallback. Covers npm v1/v2/v3, yarn classic + Berry, pnpm v5/v6/v9, and cargo. The TS impl under `src/eco/<pm>/parse-*` remains the stock-Node fallback and the equivalence oracle for the native impl. Consumers who target both runtimes import unchanged from `@socketsecurity/lib/eco/manifest/parse-lockfile` — the dispatch is internal.
+
+### Fixed
+
+- **pnpm v9 `isDev` derivation.** Previously the parser left every snapshot entry as `depType: 'prod'` regardless of which importer section it appeared under, because pnpm v9 removed the per-snapshot `dev: true` marker that v5/v6 used. The TS parser (and the new native parser) now derive `isDev` per-package by collecting `prod` and `dev-only` name sets from every importer's `dependencies` / `devDependencies` / `optionalDependencies` blocks, then post-pass classifying each snapshot: a package is `dev` iff it appears only in dev across all importers. Tiebreak goes to prod, matching pnpm's own resolver semantics.
+
+- **yarn `dependenciesMeta` inversion.** Previously a `dependenciesMeta.<child>.optional = true` flag flipped the PARENT's `isOptional`, surfacing every package with `fsevents`-shaped optional peers as optional itself. The parser now consumes the block for position only — `dependenciesMeta` flags refer to a child's relationship from the parent's view, never the parent itself.
+
+- **pnpm v9 importer block-shape empty version.** A block-shape importer entry (`pkg:` line + nested `specifier:` / `version:` properties) was emitting a phantom PackageRef for the parent line with `version: ''` before the indented `version:` line was consumed. The parent line is now skipped via an empty-version guard.
+
+- **pnpm v9 workspace / file / link protocol filter.** Importer dep values like `workspace:^1.0.0`, `file:./local.tgz`, and `link:packages/foo` are workspace-local references, not registry artifacts. They are now filtered before PackageRef emission.
+
+- **npm v1 alias extraction.** Aliased installs encoded as `"alias-name": { "version": "npm:<real>@<ver>" }` now surface the real registry identity on the PackageRef (`name`, `version`); `_index` keeps the alias key so consumers can still look up by the declared name.
+
+- **npm v2/v3 workspace + alias name preference.** Workspace entries keyed by relative path (`packages/ui` rather than `node_modules/...`) and aliased installs (`node_modules/<alias>` with a `name: "<real>"` field) now prefer the explicit `pkg.name` over the path-derived fallback.
+
 ### Migration
 
 A near-total mechanical rewrite of imports. Two patterns cover ~95% of consumer migrations:

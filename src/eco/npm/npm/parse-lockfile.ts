@@ -15,6 +15,46 @@
  * v2/v3 uses the flat `packages` key; v1 uses recursive `dependencies`.
  * The two paths converge on the same `ParsedLockfile` shape so
  * downstream consumers don't branch on `lockVersion`.
+ *
+ * Source material (in lock-step order, newest → oldest):
+ *
+ *   1. **C++ native parser** in socket-btm/node-smol-builder:
+ *      additions/source-patched/src/socketsecurity/manifest/parser_npm.cc
+ *      Same algorithm, same fixes — keep the two in lock-step.
+ *
+ *   2. **socket-sdxgen** — algorithm oracle, broader production
+ *      exposure:
+ *      socket-sdxgen/src/parsers/npm/package-lock-v1.mts
+ *      socket-sdxgen/src/parsers/npm/package-lock-v2.mts
+ *      socket-sdxgen/src/parsers/npm/npm-shrinkwrap.mts
+ *
+ *   3. **cdxgen** (pinned v11.11.0) — sdxgen's upstream baseline:
+ *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
+ *      (parseLockFile / parsePkgLock)
+ *
+ *   4. **npm lockfile specs**:
+ *      v1 (legacy): https://docs.npmjs.com/cli/v6/configuring-npm/package-lock-json
+ *      v2/v3:       https://docs.npmjs.com/cli/v10/configuring-npm/package-lock-json
+ *      arborist (canonical reader/writer):
+ *        https://github.com/npm/cli/tree/latest/workspaces/arborist
+ *
+ * Bug fixes implemented here (and in the native parser):
+ *
+ *   - Fix 1  v1 alias extraction. `version: "npm:<real>@<ver>"`
+ *            surfaces the real registry identity on the PackageRef;
+ *            `_index` keeps the original alias key for lookups.
+ *
+ *   - Fix 2a v2/v3 workspace path entries prefer `pkg.name` over
+ *            path-derived fallback (workspace paths like
+ *            `packages/ui` lack the `node_modules/` prefix).
+ *
+ *   - Fix 2b v2/v3 aliased installs (`node_modules/<alias>` with
+ *            `name: "<real>"` field) prefer `pkg.name`. Same code
+ *            path as Fix 2a.
+ *
+ * Regression fixtures live under socket-btm's test/fixtures/
+ * sdxgen-bug-regressions/ — every shipped fix has a matching
+ * fixture directory there.
  */
 
 import { ManifestError } from '../../manifest/manifest-error'
