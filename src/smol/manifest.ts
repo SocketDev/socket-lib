@@ -16,7 +16,7 @@
  *   through this when smol is present.
  */
 
-import { isSmol } from './detect'
+import { isModuleBuiltin } from './is-module-builtin'
 
 import type { EcosystemString } from '../eco/purl'
 
@@ -167,7 +167,8 @@ export interface SmolManifestBinding {
   ) => ManifestErrorLike
 }
 
-let _smolManifest: SmolManifestBinding | null | undefined
+let _smolManifest: SmolManifestBinding | undefined
+let _smolManifestProbed = false
 
 /**
  * Returns `node:smol-manifest` when running on the smol Node binary,
@@ -175,18 +176,11 @@ let _smolManifest: SmolManifestBinding | null | undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolManifest(): SmolManifestBinding | undefined {
-  if (_smolManifest === undefined) {
-    if (isSmol()) {
-      /* c8 ignore start - smol Node binary only. */
-      try {
-        _smolManifest = require('node:smol-manifest') as SmolManifestBinding
-      } catch {
-        _smolManifest = undefined
-      }
-      /* c8 ignore stop */
-    } else {
-      _smolManifest = undefined
+  if (!_smolManifestProbed) {
+    _smolManifestProbed = true
+    if (isModuleBuiltin('node:smol-manifest')) {
+      _smolManifest = require('node:smol-manifest') as SmolManifestBinding
     }
   }
-  return _smolManifest ?? undefined
+  return _smolManifest
 }

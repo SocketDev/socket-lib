@@ -14,7 +14,7 @@
  *   which already route through this when smol is present.
  */
 
-import { isSmol } from './detect'
+import { isModuleBuiltin } from './is-module-builtin'
 
 /**
  * Surface of `node:smol-versions`. See socket-btm's
@@ -60,7 +60,8 @@ export interface SmolVersionsBinding {
   coerce(version: string, ecosystem?: string): string | undefined
 }
 
-let _smolVersions: SmolVersionsBinding | null | undefined
+let _smolVersions: SmolVersionsBinding | undefined
+let _smolVersionsProbed = false
 
 /**
  * Returns `node:smol-versions` when running on the smol Node binary,
@@ -68,18 +69,11 @@ let _smolVersions: SmolVersionsBinding | null | undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolVersions(): SmolVersionsBinding | undefined {
-  if (_smolVersions === undefined) {
-    if (isSmol()) {
-      /* c8 ignore start - smol Node binary only. */
-      try {
-        _smolVersions = require('node:smol-versions') as SmolVersionsBinding
-      } catch {
-        _smolVersions = undefined
-      }
-      /* c8 ignore stop */
-    } else {
-      _smolVersions = undefined
+  if (!_smolVersionsProbed) {
+    _smolVersionsProbed = true
+    if (isModuleBuiltin('node:smol-versions')) {
+      _smolVersions = require('node:smol-versions') as SmolVersionsBinding
     }
   }
-  return _smolVersions ?? undefined
+  return _smolVersions
 }

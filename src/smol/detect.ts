@@ -23,6 +23,8 @@
  *   the smol binary that exposes the `node:smol-util` binding.
  */
 
+import { isModuleBuiltin } from './is-module-builtin'
+
 // ─── types ─────────────────────────────────────────────────────────────
 
 /**
@@ -88,7 +90,8 @@ let _isSmol: boolean | undefined
  * `undefined` = not yet probed. JS truthiness collapses both to "no
  * binding" at the call site.
  */
-let _smolUtil: SmolUtilBinding | null | undefined
+let _smolUtil: SmolUtilBinding | undefined
+let _smolUtilProbed = false
 
 // ─── exports (alphabetical) ────────────────────────────────────────────
 
@@ -98,22 +101,13 @@ let _smolUtil: SmolUtilBinding | null | undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolUtil(): SmolUtilBinding | undefined {
-  if (_smolUtil === undefined) {
-    if (isSmol()) {
-      /* c8 ignore start - node:smol-util is only available on the
-         smol Node binary built by socket-btm. Stock Node always
-         takes the else branch (sets _smolUtil = null). */
-      try {
-        _smolUtil = require('node:smol-util') as SmolUtilBinding
-      } catch {
-        _smolUtil = undefined
-      }
-      /* c8 ignore stop */
-    } else {
-      _smolUtil = undefined
+  if (!_smolUtilProbed) {
+    _smolUtilProbed = true
+    if (isModuleBuiltin('node:smol-util')) {
+      _smolUtil = require('node:smol-util') as SmolUtilBinding
     }
   }
-  return _smolUtil ?? undefined
+  return _smolUtil
 }
 
 /**
@@ -135,17 +129,7 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
  */
 export function isSmol(): boolean {
   if (_isSmol === undefined) {
-    try {
-      // eslint-disable-next-line n/prefer-node-protocol
-      const mod = require('node:module') as {
-        isBuiltin?: (name: string) => boolean
-      }
-      _isSmol =
-        typeof mod.isBuiltin === 'function' && mod.isBuiltin('node:smol-util')
-    } catch {
-      // Not Node, or `node:module` unavailable.
-      _isSmol = false
-    }
+    _isSmol = isModuleBuiltin('node:smol-util')
   }
-  return _isSmol ?? false
+  return _isSmol
 }

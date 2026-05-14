@@ -17,7 +17,7 @@
  *   only matters where the hot path warrants the native acceleration.
  */
 
-import { isSmol } from './detect'
+import { isModuleBuiltin } from './is-module-builtin'
 
 /**
  * Surface of a parsed PURL — the shape both smol-purl's `parse()` and
@@ -87,7 +87,8 @@ export interface SmolPurlBinding {
   equals(a: string, b: string): boolean
 }
 
-let _smolPurl: SmolPurlBinding | null | undefined
+let _smolPurl: SmolPurlBinding | undefined
+let _smolPurlProbed = false
 
 /**
  * Returns `node:smol-purl` when running on the smol Node binary,
@@ -95,18 +96,11 @@ let _smolPurl: SmolPurlBinding | null | undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolPurl(): SmolPurlBinding | undefined {
-  if (_smolPurl === undefined) {
-    if (isSmol()) {
-      /* c8 ignore start - smol Node binary only. */
-      try {
-        _smolPurl = require('node:smol-purl') as SmolPurlBinding
-      } catch {
-        _smolPurl = undefined
-      }
-      /* c8 ignore stop */
-    } else {
-      _smolPurl = undefined
+  if (!_smolPurlProbed) {
+    _smolPurlProbed = true
+    if (isModuleBuiltin('node:smol-purl')) {
+      _smolPurl = require('node:smol-purl') as SmolPurlBinding
     }
   }
-  return _smolPurl ?? undefined
+  return _smolPurl
 }

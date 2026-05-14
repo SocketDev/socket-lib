@@ -20,7 +20,7 @@
  * @see https://v8.dev/blog/v8-release-99 — V8 Fast API Calls overview
  */
 
-import { isSmol } from './detect'
+import { isModuleBuiltin } from './is-module-builtin'
 
 /**
  * Surface of `node:smol-primordial`. See socket-btm's
@@ -88,7 +88,8 @@ export interface SmolPrimordialBinding {
   stringCharCodeAt(s: string, i: number): number
 }
 
-let _smolPrimordial: SmolPrimordialBinding | null | undefined
+let _smolPrimordial: SmolPrimordialBinding | undefined
+let _smolPrimordialProbed = false
 
 /**
  * Returns `node:smol-primordial` when running on the smol Node
@@ -96,19 +97,11 @@ let _smolPrimordial: SmolPrimordialBinding | null | undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
-  if (_smolPrimordial === undefined) {
-    if (isSmol()) {
-      /* c8 ignore start - smol Node binary only. */
-      try {
-        _smolPrimordial =
-          require('node:smol-primordial') as SmolPrimordialBinding
-      } catch {
-        _smolPrimordial = undefined
-      }
-      /* c8 ignore stop */
-    } else {
-      _smolPrimordial = undefined
+  if (!_smolPrimordialProbed) {
+    _smolPrimordialProbed = true
+    if (isModuleBuiltin('node:smol-primordial')) {
+      _smolPrimordial = require('node:smol-primordial') as SmolPrimordialBinding
     }
   }
-  return _smolPrimordial ?? undefined
+  return _smolPrimordial
 }
