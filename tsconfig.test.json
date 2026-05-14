@@ -3,10 +3,10 @@
   "compilerOptions": {
     "declarationMap": false,
     "module": "esnext",
-    "rootDir": "..",
+    "rootDir": ".",
     "sourceMap": false,
     "types": ["node", "vitest"]
   },
-  "include": ["../test/**/*.ts", "../test/**/*.mts", "../src/**/*.ts"],
-  "exclude": ["../.cache", "../dist/**/*", "../node_modules"]
+  "include": ["./test/**/*.ts", "./test/**/*.mts", "./src/**/*.ts"],
+  "exclude": ["./.cache", "./dist/**/*", "./node_modules"]
 }

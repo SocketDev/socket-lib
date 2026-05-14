@@ -1,0 +1,35 @@
+{
+  "extends": "./.config/tsconfig.base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "declarationMap": false,
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "noEmit": false,
+    "noEmitOnError": false,
+    "outDir": "./dist",
+    "paths": {
+      "adm-zip": ["./src/external/adm-zip"],
+      "cacache": ["./src/external/cacache"],
+      "make-fetch-happen": ["./src/external/make-fetch-happen"],
+      "fast-sort": ["./src/external/fast-sort"],
+      "pacote": ["./src/external/pacote"],
+      "tar-fs": ["./src/external/tar-fs"]
+    },
+    "rootDir": "./src",
+    "sourceMap": false,
+    "types": ["node"],
+    "verbatimModuleSyntax": false
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.d.ts"],
+  "exclude": [
+    "./.cache",
+    "./dist/**/*",
+    "./lib",
+    "./node_modules",
+    "./src/**/*.js",
+    "./test"
+  ]
+}

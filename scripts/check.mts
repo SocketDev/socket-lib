@@ -29,7 +29,7 @@ export async function runTypeCheck(quiet = false): Promise<number> {
   const result = await runCommandQuiet('tsgo', [
     '--noEmit',
     '-p',
-    '.config/tsconfig.json',
+    'tsconfig.json',
   ])
   if (result.exitCode !== 0) {
     if (!quiet) {

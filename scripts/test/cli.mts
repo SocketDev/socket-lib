@@ -44,7 +44,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '../..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 
-const tsconfigPath = '.config/tsconfig.check.json'
+const tsconfigPath = 'tsconfig.check.json'
 
 // Track running processes for cleanup
 const runningProcesses = new Set()

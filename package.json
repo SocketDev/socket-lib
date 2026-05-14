@@ -2157,8 +2157,11 @@
       "default": "./dist/words/types.js"
     },
     "./data/extensions.json": "./data/extensions.json",
-    "./lockstep.schema.json": "./lockstep.schema.json",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./tsconfig.check.json": "./tsconfig.check.json",
+    "./tsconfig.dts.json": "./tsconfig.dts.json",
+    "./tsconfig.json": "./tsconfig.json",
+    "./tsconfig.test.json": "./tsconfig.test.json"
   },
   "files": [
     "dist",

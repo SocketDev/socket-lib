@@ -4,11 +4,11 @@
     "declarationMap": false,
     "module": "esnext",
     "noEmit": true,
-    "rootDir": "..",
+    "rootDir": ".",
     "skipLibCheck": true,
     "sourceMap": false,
     "types": ["node", "vitest"]
   },
-  "include": ["../src/**/*.ts", "../test/**/*.ts", "../test/**/*.mts"],
-  "exclude": ["../.cache", "../dist/**/*", "../node_modules"]
+  "include": ["./src/**/*.ts", "./test/**/*.ts", "./test/**/*.mts"],
+  "exclude": ["./.cache", "./dist/**/*", "./node_modules"]
 }
