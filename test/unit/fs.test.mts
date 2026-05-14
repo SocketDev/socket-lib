@@ -251,7 +251,7 @@ describe('fs', () => {
   describe('isDir', () => {
     it('should return true for directories', async () => {
       await runWithTempDir(async tmpDir => {
-        const result = await existsSync(tmpDir)
+        const result = isDirSync(tmpDir)
         expect(result).toBe(true)
       }, 'isDir-true-')
     })
@@ -261,13 +261,13 @@ describe('fs', () => {
         const testFile = path.join(tmpDir, 'file.txt')
         await fs.writeFile(testFile, '', 'utf8')
 
-        const result = await existsSync(testFile)
+        const result = isDirSync(testFile)
         expect(result).toBe(false)
       }, 'isDir-false-file-')
     })
 
     it('should return false for non-existent paths', async () => {
-      const result = await existsSync('/nonexistent/path')
+      const result = isDirSync('/nonexistent/path')
       expect(result).toBe(false)
     })
   })

@@ -997,7 +997,8 @@ describe('primordials', () => {
       expect(ObjectPrototypeToString([])).toBe('[object Array]')
       expect(ObjectPrototypeToString(new Error())).toBe('[object Error]')
       expect(ObjectPrototypeToString(/re/)).toBe('[object RegExp]')
-      expect(ObjectPrototypeToString(undefined)).toBe('[object Null]')
+      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      expect(ObjectPrototypeToString(null)).toBe('[object Null]')
       expect(ObjectPrototypeToString(undefined)).toBe('[object Undefined]')
     })
 

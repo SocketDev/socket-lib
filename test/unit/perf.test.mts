@@ -12,8 +12,9 @@
  * Used for benchmarking, profiling, and timing operations in Socket tools.
  */
 
-import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import {
   clearPerformanceMetrics,
   getPerformanceMetrics,
@@ -31,7 +32,13 @@ import {
   trackMemory,
 } from '@socketsecurity/lib/perf/timer'
 
-describe('performance', () => {
+// The perf module shares a module-scoped `performanceMetrics` array,
+// so concurrent tests would race each other when pushing / clearing.
+// vitest.config.mts sets `sequence.concurrent: !CI`, so locally tests
+// in this file would run in parallel. Force sequential execution to
+// keep `clearPerformanceMetrics()` + `getPerformanceMetrics()[0]`
+// assertions deterministic.
+describe.sequential('performance', () => {
   describe('module import', () => {
     it('should import performance module', () => {
       expect(perfTimer).toBeDefined()
@@ -97,16 +104,13 @@ describe('performance', () => {
   })
 
   describe('perfTimer()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -149,10 +153,9 @@ describe('performance', () => {
     })
 
     it('should return no-op when DEBUG=perf is not set', () => {
-      // Actually unset the env var — `env['DEBUG'] = undefined` coerces
-      // to the string 'undefined' which matches `.includes('perf')`
-      // would falsely true if 'perf' ever appeared in any prefix.
-      delete process.env['DEBUG']
+      // Pin DEBUG to undefined via the rewire mock so isPerfEnabled()
+      // sees "missing" without mutating process.env.
+      setEnv('DEBUG', undefined)
       const stop = perfTimer('no-debug')
       stop()
       const metrics = getPerformanceMetrics()
@@ -170,16 +173,13 @@ describe('performance', () => {
   })
 
   describe('measure()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -217,7 +217,7 @@ describe('performance', () => {
     })
 
     it('should return zero duration when perf disabled', async () => {
-      process.env['DEBUG'] = undefined
+      setEnv('DEBUG', undefined)
       const result = await measure('no-perf', async () => 'value')
       expect(result.result).toBe('value')
       expect(result.duration).toBe(0)
@@ -225,16 +225,13 @@ describe('performance', () => {
   })
 
   describe('measureSync()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -284,16 +281,13 @@ describe('performance', () => {
   })
 
   describe('getPerformanceMetrics()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -322,15 +316,12 @@ describe('performance', () => {
   })
 
   describe('clearPerformanceMetrics()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -357,16 +348,13 @@ describe('performance', () => {
   })
 
   describe('getPerformanceSummary()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -417,34 +405,31 @@ describe('performance', () => {
   })
 
   describe('printPerformanceSummary()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
     it('should not print when perf disabled', () => {
+      setEnv('DEBUG', undefined)
       expect(() => {
         printPerformanceSummary()
       }).not.toThrow()
     })
 
     it('should not print when no metrics', () => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
       expect(() => {
         printPerformanceSummary()
       }).not.toThrow()
     })
 
     it('should print when perf enabled and metrics exist', () => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
       measureSync('test', () => 1)
       expect(() => {
         printPerformanceSummary()
@@ -453,16 +438,13 @@ describe('performance', () => {
   })
 
   describe('perfCheckpoint()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -486,7 +468,7 @@ describe('performance', () => {
     })
 
     it('should not create metric when perf disabled', () => {
-      process.env['DEBUG'] = originalDebug
+      setEnv('DEBUG', undefined)
       perfCheckpoint('disabled')
       const metrics = getPerformanceMetrics()
       expect(metrics.length).toBe(0)
@@ -494,16 +476,13 @@ describe('performance', () => {
   })
 
   describe('trackMemory()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
@@ -528,7 +507,7 @@ describe('performance', () => {
     })
 
     it('should return zero when perf disabled', () => {
-      process.env['DEBUG'] = originalDebug
+      setEnv('DEBUG', undefined)
       const mem = trackMemory('no-perf')
       expect(mem).toBe(0)
     })
@@ -540,32 +519,29 @@ describe('performance', () => {
   })
 
   describe('generatePerformanceReport()', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 
     it('should return message when perf disabled', () => {
+      setEnv('DEBUG', undefined)
       const report = generatePerformanceReport()
       expect(report).toContain('no performance data collected')
     })
 
     it('should return message when no metrics', () => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
       const report = generatePerformanceReport()
       expect(report).toContain('no performance data collected')
     })
 
     it('should generate report with metrics', () => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
       measureSync('test-op', () => 42)
       const report = generatePerformanceReport()
       expect(report).toContain('Performance Report')
@@ -578,8 +554,7 @@ describe('performance', () => {
     })
 
     it('should include total measured time', () => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
       measureSync('op1', () => 1)
       measureSync('op2', () => 2)
       const report = generatePerformanceReport()
@@ -587,8 +562,7 @@ describe('performance', () => {
     })
 
     it('should format report with box drawing characters', () => {
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
       measureSync('test', () => 1)
       const report = generatePerformanceReport()
       expect(report).toContain('╔')
@@ -601,16 +575,13 @@ describe('performance', () => {
   })
 
   describe('integration scenarios', () => {
-    let originalDebug: string | undefined
-
     beforeEach(() => {
       clearPerformanceMetrics()
-      originalDebug = process.env['DEBUG']
-      process.env['DEBUG'] = 'perf'
+      setEnv('DEBUG', 'perf')
     })
 
     afterEach(() => {
-      process.env['DEBUG'] = originalDebug
+      resetEnv()
       clearPerformanceMetrics()
     })
 

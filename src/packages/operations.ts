@@ -335,7 +335,17 @@ export async function resolveGitHubTgzUrl(
     if (apiUrl) {
       // fetcher is initialized at the top
       const resp = await fetcher(apiUrl)
-      const json = (await resp.json()) as { object?: { sha?: string } }
+      // resp.json() throws on non-JSON bodies (e.g. SFW block-page HTML
+      // when api.github.com isn't allow-listed, or any other proxy
+      // intercept that returns a non-JSON body). Treat that as "no
+      // sha found" and fall through to the empty-string return; the
+      // caller decides whether to retry without the GitHub URL.
+      let json: { object?: { sha?: string } } | undefined
+      try {
+        json = (await resp.json()) as { object?: { sha?: string } }
+      } catch {
+        json = undefined
+      }
       const sha = json?.object?.sha
       if (sha) {
         return gitHubTgzUrl(user, project, sha)

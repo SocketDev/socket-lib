@@ -277,29 +277,39 @@ describe('stdio/footer', () => {
       expect(result).toContain('|')
     })
 
+    // createSummaryFooter renders the canonical LOG_SYMBOLS shapes
+    // (✔/✖/↻/⚠) — the same set used by logger.success / logger.fail /
+    // logger.skip / logger.warn. Earlier expectations of ✓/✗/○
+    // predated the migration to LOG_SYMBOLS in symbols-builder.ts.
     it('should use checkmark for success', () => {
       const result = createSummaryFooter({ success: 100 })
-      expect(result).toContain('✓')
+      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      expect(result).toContain('✔')
     })
 
     it('should use cross for failed', () => {
       const result = createSummaryFooter({ failed: 5 })
-      expect(result).toContain('✗')
+      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      expect(result).toContain('✖')
     })
 
     it('should use circle for skipped', () => {
       const result = createSummaryFooter({ skipped: 3 })
-      expect(result).toContain('○')
+      // socket-lib's skip symbol is ↻ (cyan recycle); see
+      // src/logger/symbols-builder.ts.
+      expect(result).toContain('↻')
     })
 
     it('should use warning symbol for warnings', () => {
       const result = createSummaryFooter({ warnings: 10 })
+      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
       expect(result).toContain('⚠')
     })
 
     it('should use cross for errors', () => {
       const result = createSummaryFooter({ errors: 2 })
-      expect(result).toContain('✗')
+      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      expect(result).toContain('✖')
     })
 
     it('should handle empty stats', () => {

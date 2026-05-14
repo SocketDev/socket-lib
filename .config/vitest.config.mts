@@ -79,8 +79,13 @@ const vitestConfig = defineConfig({
     pool: 'threads',
     poolOptions: {
       threads: {
-        maxThreads: process.env.CI ? 4 : 16,
-        minThreads: process.env.CI ? 2 : 4,
+        // Use `'CI' in process.env` instead of `process.env.CI` so an
+        // empty-string CI value (some self-hosted setups) still counts
+        // as "CI mode" — the latter coerces "" to false and would
+        // mis-tune the pool. The truthy-value form would also miss
+        // `CI=0` / `CI=false` setups.
+        maxThreads: 'CI' in process.env ? 4 : 16,
+        minThreads: 'CI' in process.env ? 2 : 4,
         isolate: false,
         useAtomics: true,
       },
@@ -89,9 +94,9 @@ const vitestConfig = defineConfig({
     testTimeout: 10_000,
     hookTimeout: 10_000,
     sequence: {
-      concurrent: !process.env.CI,
+      concurrent: !('CI' in process.env),
     },
-    bail: process.env.CI ? 1 : 0,
+    bail: 'CI' in process.env ? 1 : 0,
     server: {
       deps: {
         inline: [/@socketsecurity\/lib/, 'zod'],

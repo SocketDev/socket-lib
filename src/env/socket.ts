@@ -218,6 +218,90 @@ export function getSocketCacacheDirEnv(): string | undefined {
 }
 
 /**
+ * SOCKET_CLOUD_AUTH_URL environment variable getter.
+ * SocketCloud OAuth authorization URL. depot's better-auth provider
+ * config reads this to override the default authorize endpoint when
+ * pointing at a staging or self-hosted SocketCloud server.
+ *
+ * @returns The override URL, or `undefined` when default applies
+ *
+ * @example
+ * ```typescript
+ * import { getSocketCloudAuthUrl } from '@socketsecurity/lib/env/socket'
+ *
+ * const url = getSocketCloudAuthUrl() ?? 'https://api.socket.dev/v1/oauth2/authorize'
+ * ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCloudAuthUrl(): string | undefined {
+  return getEnvValue('SOCKET_CLOUD_AUTH_URL')
+}
+
+/**
+ * SOCKET_CLOUD_CLIENT_ID environment variable getter.
+ * OAuth client ID for SocketCloud. Required (alongside
+ * SOCKET_CLOUD_CLIENT_SECRET) to enable the SocketCloud auth
+ * provider. Returns `undefined` when not configured — callers
+ * should treat that as "SocketCloud auth disabled".
+ *
+ * @returns The client ID, or `undefined` if not set
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCloudClientId(): string | undefined {
+  return getEnvValue('SOCKET_CLOUD_CLIENT_ID')
+}
+
+/**
+ * SOCKET_CLOUD_CLIENT_SECRET environment variable getter.
+ * OAuth client secret for SocketCloud. Required (alongside
+ * SOCKET_CLOUD_CLIENT_ID) to enable the SocketCloud auth provider.
+ * Returns `undefined` when not configured.
+ *
+ * @returns The client secret, or `undefined` if not set
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCloudClientSecret(): string | undefined {
+  return getEnvValue('SOCKET_CLOUD_CLIENT_SECRET')
+}
+
+/**
+ * SOCKET_CLOUD_INTROSPECT_URL environment variable getter.
+ * SocketCloud OAuth token-introspection URL. depot uses this to
+ * verify access tokens against the SocketCloud authorization
+ * server. Defaults handled at the call site.
+ *
+ * @returns The override URL, or `undefined` when default applies
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCloudIntrospectUrl(): string | undefined {
+  return getEnvValue('SOCKET_CLOUD_INTROSPECT_URL')
+}
+
+/**
+ * SOCKET_CLOUD_TOKEN_URL environment variable getter.
+ * SocketCloud OAuth token-exchange URL. depot's better-auth provider
+ * config reads this to override the default token endpoint.
+ *
+ * @returns The override URL, or `undefined` when default applies
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCloudTokenUrl(): string | undefined {
+  return getEnvValue('SOCKET_CLOUD_TOKEN_URL')
+}
+
+/**
+ * SOCKET_CLOUD_USERINFO_URL environment variable getter.
+ * SocketCloud OAuth userinfo endpoint. depot uses this to fetch the
+ * authenticated principal's profile after an OAuth code exchange.
+ *
+ * @returns The override URL, or `undefined` when default applies
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function getSocketCloudUserinfoUrl(): string | undefined {
+  return getEnvValue('SOCKET_CLOUD_USERINFO_URL')
+}
+
+/**
  * SOCKET_CONFIG environment variable getter.
  * Socket Security configuration file path.
  *

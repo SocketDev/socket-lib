@@ -189,6 +189,12 @@ export function createInquirerTheme(
     }
   }
 
+  // Undefined/null collapse to an empty theme so callers can pass
+  // `getTheme()` without a guard. @inquirer accepts an empty theme
+  // object and falls back to its built-in default palette.
+  if (theme === undefined || theme === null) {
+    return {}
+  }
   // Otherwise it's already an @inquirer theme, return as-is
   return theme as Record<string, unknown>
 }

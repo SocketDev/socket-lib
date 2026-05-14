@@ -337,7 +337,10 @@ describe('git', () => {
     })
 
     it('should handle multiple file checks', async () => {
-      const files = ['package.json', 'tsconfig.json', 'README.md']
+      // Use files known to exist in the repo so realpathSync doesn't
+      // ENOENT. README.md / package.json / pnpm-lock.yaml are always
+      // present at the repo root.
+      const files = ['package.json', 'pnpm-lock.yaml', 'README.md']
       const results = await Promise.all(
         files.map(file => isChanged(file, { cwd: projectRoot })),
       )
@@ -347,7 +350,11 @@ describe('git', () => {
     })
 
     it('should handle files in subdirectories', async () => {
-      const result = await isChanged('src/logger.ts', { cwd: projectRoot })
+      // src/logger.ts was reshaped into src/logger/logger.ts as part
+      // of the v6.0.0 sub-leaf split.
+      const result = await isChanged('src/logger/logger.ts', {
+        cwd: projectRoot,
+      })
       expect(typeof result).toBe('boolean')
     })
   })

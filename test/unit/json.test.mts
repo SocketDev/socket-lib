@@ -34,7 +34,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 describe('json', () => {
   describe('isJsonPrimitive', () => {
     it('should return true for null', () => {
-      expect(isJsonPrimitive(undefined)).toBe(true)
+      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      expect(isJsonPrimitive(null)).toBe(true)
     })
 
     it('should return true for boolean values', () => {
@@ -482,7 +483,8 @@ describe('json', () => {
 
       it('should handle JSON with null values', () => {
         const result = jsonParse('{"key":null}')
-        expect(result).toEqual({ key: undefined })
+        // oxlint-disable-next-line socket/prefer-undefined-over-null
+        expect(result).toEqual({ key: null })
       })
 
       it('should handle mixed types in array', () => {
@@ -490,7 +492,8 @@ describe('json', () => {
           '[null,true,42,"string",{"key":"value"},[1,2]]',
         )
         expect(result).toEqual([
-          undefined,
+          // oxlint-disable-next-line socket/prefer-undefined-over-null
+          null,
           true,
           42,
           'string',
@@ -749,7 +752,8 @@ describe('json', () => {
     describe('isJsonPrimitive edge cases', () => {
       it('should handle all falsy values correctly', () => {
         // Tests line 200: value === null
-        expect(isJsonPrimitive(undefined)).toBe(true)
+        // oxlint-disable-next-line socket/prefer-undefined-over-null
+        expect(isJsonPrimitive(null)).toBe(true)
         expect(isJsonPrimitive(undefined)).toBe(false)
         expect(isJsonPrimitive(0)).toBe(true)
         expect(isJsonPrimitive(false)).toBe(true)

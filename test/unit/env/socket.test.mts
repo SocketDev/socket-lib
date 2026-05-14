@@ -21,6 +21,12 @@ import {
   getSocketApiUrl,
   getSocketBranchName,
   getSocketCacacheDirEnv,
+  getSocketCloudAuthUrl,
+  getSocketCloudClientId,
+  getSocketCloudClientSecret,
+  getSocketCloudIntrospectUrl,
+  getSocketCloudTokenUrl,
+  getSocketCloudUserinfoUrl,
   getSocketConfig,
   getSocketDebug,
   getSocketDlxDirEnv,
@@ -105,32 +111,57 @@ describe('socket env', () => {
   })
 
   describe('getSocketApiToken', () => {
+    // getEnvValue falls back to process.env when neither isolated
+    // nor shared overrides have a value. Developers commonly have
+    // SOCKET_API_KEY (or another alias) set in their shell for daily
+    // use, which would leak into the fallback-chain tests below. Pin
+    // each alias to undefined so only the one we set per-test wins.
+    const ALL_TOKEN_ALIASES = [
+      'SOCKET_API_TOKEN',
+      'SOCKET_API_KEY',
+      'SOCKET_CLI_API_TOKEN',
+      'SOCKET_CLI_API_KEY',
+      'SOCKET_SECURITY_API_TOKEN',
+      'SOCKET_SECURITY_API_KEY',
+    ] as const
+    const clearAllAliases = () => {
+      for (const alias of ALL_TOKEN_ALIASES) {
+        setEnv(alias, undefined)
+      }
+    }
+
     it('should return token when SOCKET_API_TOKEN is set', () => {
+      clearAllAliases()
       setEnv('SOCKET_API_TOKEN', 'canonical-token')
       expect(getSocketApiToken()).toBe('canonical-token')
     })
 
     it('should fall back to SOCKET_API_KEY', () => {
+      clearAllAliases()
       setEnv('SOCKET_API_KEY', 'mcp-key')
       expect(getSocketApiToken()).toBe('mcp-key')
     })
 
     it('should fall back to SOCKET_CLI_API_TOKEN', () => {
+      clearAllAliases()
       setEnv('SOCKET_CLI_API_TOKEN', 'cli-token')
       expect(getSocketApiToken()).toBe('cli-token')
     })
 
     it('should fall back to SOCKET_CLI_API_KEY', () => {
+      clearAllAliases()
       setEnv('SOCKET_CLI_API_KEY', 'cli-key')
       expect(getSocketApiToken()).toBe('cli-key')
     })
 
     it('should fall back to SOCKET_SECURITY_API_TOKEN', () => {
+      clearAllAliases()
       setEnv('SOCKET_SECURITY_API_TOKEN', 'security-token')
       expect(getSocketApiToken()).toBe('security-token')
     })
 
     it('should fall back to SOCKET_SECURITY_API_KEY', () => {
+      clearAllAliases()
       setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
       expect(getSocketApiToken()).toBe('security-key')
     })
@@ -165,6 +196,92 @@ describe('socket env', () => {
     it('should return undefined when not set', () => {
       setEnv('SOCKET_CACACHE_DIR', undefined)
       expect(getSocketCacacheDirEnv()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketCloudAuthUrl', () => {
+    it('should return auth URL when set', () => {
+      setEnv('SOCKET_CLOUD_AUTH_URL', 'https://staging.example/oauth/authorize')
+      expect(getSocketCloudAuthUrl()).toBe(
+        'https://staging.example/oauth/authorize',
+      )
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_CLOUD_AUTH_URL', undefined)
+      expect(getSocketCloudAuthUrl()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketCloudClientId', () => {
+    it('should return client ID when set', () => {
+      setEnv('SOCKET_CLOUD_CLIENT_ID', 'depot-client-abc123')
+      expect(getSocketCloudClientId()).toBe('depot-client-abc123')
+    })
+
+    it('should return undefined when not set (= cloud auth disabled)', () => {
+      setEnv('SOCKET_CLOUD_CLIENT_ID', undefined)
+      expect(getSocketCloudClientId()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketCloudClientSecret', () => {
+    it('should return client secret when set', () => {
+      setEnv('SOCKET_CLOUD_CLIENT_SECRET', 'shhh-very-secret')
+      expect(getSocketCloudClientSecret()).toBe('shhh-very-secret')
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_CLOUD_CLIENT_SECRET', undefined)
+      expect(getSocketCloudClientSecret()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketCloudIntrospectUrl', () => {
+    it('should return introspect URL when set', () => {
+      setEnv(
+        'SOCKET_CLOUD_INTROSPECT_URL',
+        'https://staging.example/oauth/introspect',
+      )
+      expect(getSocketCloudIntrospectUrl()).toBe(
+        'https://staging.example/oauth/introspect',
+      )
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_CLOUD_INTROSPECT_URL', undefined)
+      expect(getSocketCloudIntrospectUrl()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketCloudTokenUrl', () => {
+    it('should return token URL when set', () => {
+      setEnv('SOCKET_CLOUD_TOKEN_URL', 'https://staging.example/oauth/token')
+      expect(getSocketCloudTokenUrl()).toBe(
+        'https://staging.example/oauth/token',
+      )
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_CLOUD_TOKEN_URL', undefined)
+      expect(getSocketCloudTokenUrl()).toBeUndefined()
+    })
+  })
+
+  describe('getSocketCloudUserinfoUrl', () => {
+    it('should return userinfo URL when set', () => {
+      setEnv(
+        'SOCKET_CLOUD_USERINFO_URL',
+        'https://staging.example/oauth/userinfo',
+      )
+      expect(getSocketCloudUserinfoUrl()).toBe(
+        'https://staging.example/oauth/userinfo',
+      )
+    })
+
+    it('should return undefined when not set', () => {
+      setEnv('SOCKET_CLOUD_USERINFO_URL', undefined)
+      expect(getSocketCloudUserinfoUrl()).toBeUndefined()
     })
   })
 
@@ -411,12 +528,23 @@ describe('socket env', () => {
   })
 
   describe('getSocketRepositoryName', () => {
+    // Same env-leak guard as getSocketApiToken above: developers
+    // commonly have SOCKET_REPOSITORY_NAME (or its alias) set in
+    // their shell. Pin both to undefined per-test so only the one
+    // we set wins.
+    const clearRepoAliases = () => {
+      setEnv('SOCKET_REPOSITORY_NAME', undefined)
+      setEnv('SOCKET_REPO_NAME', undefined)
+    }
+
     it('should return repo name when SOCKET_REPOSITORY_NAME is set', () => {
+      clearRepoAliases()
       setEnv('SOCKET_REPOSITORY_NAME', 'my-repo')
       expect(getSocketRepositoryName()).toBe('my-repo')
     })
 
     it('should fall back to SOCKET_REPO_NAME', () => {
+      clearRepoAliases()
       setEnv('SOCKET_REPO_NAME', 'coana-repo')
       expect(getSocketRepositoryName()).toBe('coana-repo')
     })

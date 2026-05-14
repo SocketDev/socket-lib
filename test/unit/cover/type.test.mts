@@ -59,7 +59,7 @@ describe('cover/type', () => {
         stderr: Buffer.from(''),
       } as any)
       const result = await getTypeCoverage({ cwd: '/some/path' })
-      expect(result).toBeNull()
+      expect(result).toBeUndefined()
     })
 
     it('returns null when spawn output is empty', async () => {
@@ -70,7 +70,7 @@ describe('cover/type', () => {
         stderr: Buffer.from(''),
       } as any)
       const result = await getTypeCoverage({ cwd: '/some/path' })
-      expect(result).toBeNull()
+      expect(result).toBeUndefined()
     })
 
     it('returns null when spawn rejects and generateIfMissing=false', async () => {
@@ -79,13 +79,13 @@ describe('cover/type', () => {
         cwd: '/some/path',
         generateIfMissing: false,
       })
-      expect(result).toBeNull()
+      expect(result).toBeUndefined()
     })
 
     it('returns null when spawn rejects and generateIfMissing is omitted (default false)', async () => {
       vi.mocked(spawn).mockRejectedValueOnce(new Error('not installed'))
       const result = await getTypeCoverage({ cwd: '/some/path' })
-      expect(result).toBeNull()
+      expect(result).toBeUndefined()
     })
 
     it('throws when spawn rejects and generateIfMissing=true', async () => {

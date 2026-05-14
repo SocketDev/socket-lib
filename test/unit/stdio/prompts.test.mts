@@ -616,14 +616,16 @@ describe('stdio/prompts', () => {
       expect(theme).toBe(arr)
     })
 
-    it('should handle null input', () => {
-      const theme = createInquirerTheme(undefined)
-      expect(theme).toBe(null)
+    it('should collapse null input to an empty theme', () => {
+      // createInquirerTheme handles null/undefined by returning {}
+      // so callers can pass getTheme() without a guard.
+      const theme = createInquirerTheme(undefined as unknown as undefined)
+      expect(theme).toEqual({})
     })
 
-    it('should handle undefined input', () => {
+    it('should collapse undefined input to an empty theme', () => {
       const theme = createInquirerTheme(undefined)
-      expect(theme).toBe(undefined)
+      expect(theme).toEqual({})
     })
 
     it('should handle number input', () => {
