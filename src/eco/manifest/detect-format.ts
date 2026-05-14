@@ -14,6 +14,14 @@
  */
 
 import {
+  CARGO_LOCK_FILENAME,
+  CARGO_LOCK_FORMAT,
+} from '../cargo/lockfile-format'
+import {
+  CARGO_TOML_FILENAME,
+  CARGO_TOML_FORMAT,
+} from '../cargo/manifest-format'
+import {
   PACKAGE_JSON_FILENAME,
   PACKAGE_JSON_FORMAT,
 } from '../npm/manifest-format'
@@ -32,6 +40,11 @@ import {
 import { ObjectFreeze } from '../../primordials/object'
 import { getSmolManifest } from '../../smol/manifest'
 
+import {
+  StringPrototypeLastIndexOf,
+  StringPrototypeSlice,
+} from '../../primordials/string'
+
 import type { FormatDescriptor, SupportedFiles } from './types'
 
 // Composer descriptors stay inline until `src/eco/composer/` exists.
@@ -48,12 +61,17 @@ const COMPOSER_LOCK_FORMAT = ObjectFreeze({
   type: 'lockfile',
 }) as unknown as FormatDescriptor
 
-const MANIFEST_NAMES = ObjectFreeze([PACKAGE_JSON_FILENAME, 'composer.json'])
+const MANIFEST_NAMES = ObjectFreeze([
+  PACKAGE_JSON_FILENAME,
+  CARGO_TOML_FILENAME,
+  'composer.json',
+])
 
 const LOCKFILE_NAMES = ObjectFreeze([
   ...PACKAGE_LOCK_FILENAMES,
   YARN_LOCK_FILENAME,
   PNPM_LOCK_FILENAME,
+  CARGO_LOCK_FILENAME,
   'composer.lock',
 ])
 
@@ -64,11 +82,14 @@ const _jsSupportedFiles: SupportedFiles = ObjectFreeze({
 }) as unknown as SupportedFiles
 
 export function jsDetectFormat(filename: string): FormatDescriptor | undefined {
-  const lastSlash = filename.lastIndexOf('/')
-  const basename = lastSlash === -1 ? filename : filename.slice(lastSlash + 1)
+  const lastSlash = StringPrototypeLastIndexOf(filename, '/')
+  const basename =
+    lastSlash === -1 ? filename : StringPrototypeSlice(filename, lastSlash + 1)
   switch (basename) {
     case PACKAGE_JSON_FILENAME:
       return PACKAGE_JSON_FORMAT
+    case CARGO_TOML_FILENAME:
+      return CARGO_TOML_FORMAT
     case 'composer.json':
       return COMPOSER_JSON_FORMAT
     case 'package-lock.json':
@@ -78,6 +99,8 @@ export function jsDetectFormat(filename: string): FormatDescriptor | undefined {
       return YARN_LOCK_FORMAT
     case PNPM_LOCK_FILENAME:
       return PNPM_LOCK_FORMAT
+    case CARGO_LOCK_FILENAME:
+      return CARGO_LOCK_FORMAT
     case 'composer.lock':
       return COMPOSER_LOCK_FORMAT
     default:

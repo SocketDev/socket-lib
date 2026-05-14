@@ -9,25 +9,36 @@
  * socket-btm's smol-manifest internal `extractPackageNameFromPath`.
  */
 
+import {
+  StringPrototypeIndexOf,
+  StringPrototypeLastIndexOf,
+  StringPrototypeReplaceAll,
+  StringPrototypeSlice,
+  StringPrototypeSplit,
+} from '../../../primordials/string'
+
 const NODE_MODULES_PREFIX = 'node_modules/'
 
 export function extractPackageNameFromPath(pkgPath: string): string {
-  const normalized = pkgPath.replaceAll('\\', '/')
-  const lastNmIdx = normalized.lastIndexOf(NODE_MODULES_PREFIX)
+  const normalized = StringPrototypeReplaceAll(pkgPath, '\\', '/')
+  const lastNmIdx = StringPrototypeLastIndexOf(normalized, NODE_MODULES_PREFIX)
   if (lastNmIdx === -1) {
     return normalized
   }
-  const withoutPrefix = normalized.slice(lastNmIdx + NODE_MODULES_PREFIX.length)
+  const withoutPrefix = StringPrototypeSlice(
+    normalized,
+    lastNmIdx + NODE_MODULES_PREFIX.length,
+  )
   if (withoutPrefix[0] === '@') {
-    const parts = withoutPrefix.split('/')
+    const parts = StringPrototypeSplit(withoutPrefix, '/')
     if (parts.length < 2) {
       return withoutPrefix
     }
     return `${parts[0]}/${parts[1]}`
   }
-  const firstSlash = withoutPrefix.indexOf('/')
+  const firstSlash = StringPrototypeIndexOf(withoutPrefix, '/')
   if (firstSlash === -1) {
     return withoutPrefix
   }
-  return withoutPrefix.slice(0, firstSlash)
+  return StringPrototypeSlice(withoutPrefix, 0, firstSlash)
 }

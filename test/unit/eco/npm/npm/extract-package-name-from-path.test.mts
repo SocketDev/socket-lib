@@ -41,4 +41,14 @@ describe('eco/npm/npm/extract-package-name-from-path', () => {
   it('returns the original path if no node_modules prefix is present', () => {
     expect(extractPackageNameFromPath('vendor/foo')).toBe('vendor/foo')
   })
+
+  it('returns the unscoped name when nested under a parent path', () => {
+    expect(extractPackageNameFromPath('node_modules/lodash/lib/index')).toBe(
+      'lodash',
+    )
+  })
+
+  it('falls back when a scoped name has fewer than 2 parts', () => {
+    expect(extractPackageNameFromPath('node_modules/@onlyone')).toBe('@onlyone')
+  })
 })

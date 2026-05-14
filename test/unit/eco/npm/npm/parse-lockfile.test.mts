@@ -150,6 +150,36 @@ describe('eco/npm/npm/parse-lockfile', () => {
       expect(result.lockVersion).toBe('3')
     })
 
+    it('caps v1 recursion depth and throws RangeError', () => {
+      // Build a 70-level deep nested dependencies structure.
+      let inner: Record<string, unknown> = {
+        deepest: { version: '1.0.0' },
+      }
+      for (let i = 69; i >= 0; i--) {
+        inner = { [`lvl${i}`]: { version: '1.0.0', dependencies: inner } }
+      }
+      const content = JSON.stringify({
+        lockfileVersion: 1,
+        dependencies: inner,
+      })
+      expect(() => parsePackageLock(content)).toThrow(RangeError)
+    })
+
+    it('promotes a 3-occurrence v2/v3 entry into a [n, n, n] index', () => {
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            'node_modules/a': { version: '1.0.0' },
+            'node_modules/x/node_modules/a': { version: '2.0.0' },
+            'node_modules/y/node_modules/a': { version: '3.0.0' },
+          },
+        }),
+      )
+      const idxEntry = (result._index as { a?: unknown })['a']
+      expect(idxEntry).toEqual([0, 1, 2])
+    })
+
     it('freezes the result and packages list', () => {
       const result = parsePackageLock(
         JSON.stringify({

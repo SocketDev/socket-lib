@@ -81,7 +81,7 @@ describe('eco/manifest/detect-format', () => {
     })
 
     it('returns undefined for unrecognized filenames', () => {
-      expect(detectFormat('Cargo.toml')).toBe(undefined)
+      expect(detectFormat('go.mod')).toBe(undefined)
       expect(detectFormat('README.md')).toBe(undefined)
       expect(detectFormat('')).toBe(undefined)
     })

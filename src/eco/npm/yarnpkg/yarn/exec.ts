@@ -21,10 +21,12 @@ import {
 import { isNpmLoglevelFlag, isNpmProgressFlag } from '../../npm/flags'
 import { isPnpmIgnoreScriptsFlag } from '../../pnpm/flags'
 
+import { SetCtor } from '../../../../primordials/map-set'
+
 import type { SpawnOptions } from '../../../../spawn/types'
 
 // Commands that support --ignore-scripts in yarn (similar to npm/pnpm).
-const yarnInstallLikeCommands = new Set([
+const yarnInstallLikeCommands = new SetCtor([
   'add',
   'import',
   'install',

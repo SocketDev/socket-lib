@@ -19,8 +19,10 @@
 
 import { ManifestError } from '../../manifest/manifest-error'
 import { errorMessage } from '../../../errors/message'
-import { ArrayPrototypePush } from '../../../primordials/array'
+import { ArrayFrom, ArrayPrototypePush } from '../../../primordials/array'
+import { RangeErrorCtor } from '../../../primordials/error'
 import { JSONParse } from '../../../primordials/json'
+import { SetCtor } from '../../../primordials/map-set'
 import { ObjectFreeze, ObjectKeys } from '../../../primordials/object'
 import { getSmolManifest } from '../../../smol/manifest'
 import { extractPackageNameFromPath } from './extract-package-name-from-path'
@@ -140,7 +142,7 @@ export function parseV1(
     __proto__: null,
   } as unknown as PackageIndex
   const packages: PackageRef[] = []
-  const visited = new Set<string>()
+  const visited = new SetCtor<string>()
 
   const flatten = (
     deps: Record<string, RawPackage>,
@@ -148,7 +150,7 @@ export function parseV1(
     depth: number,
   ): void => {
     if (depth > MAX_LOCKFILE_DEPTH) {
-      throw new RangeError(
+      throw new RangeErrorCtor(
         `Lockfile dependency nesting exceeds ${MAX_LOCKFILE_DEPTH} levels at ${parentPath}`,
       )
     }
@@ -198,7 +200,7 @@ export function parseV2V3(
   } as unknown as PackageIndex
   const pkgKeys = ObjectKeys(rawPackages)
   // Pre-size: subtract 1 for the root '' entry if present.
-  const packages: PackageRef[] = Array.from({
+  const packages: PackageRef[] = ArrayFrom({
     length: rawPackages[''] !== undefined ? pkgKeys.length - 1 : pkgKeys.length,
   })
   let pkgCount = 0
