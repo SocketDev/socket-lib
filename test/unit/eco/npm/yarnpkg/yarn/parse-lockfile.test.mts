@@ -148,6 +148,39 @@ describe('eco/npm/yarnpkg/yarn/parse-lockfile', () => {
       ).not.toThrow()
     })
 
+    it('terminates a dependencies: block when a sibling entry begins', () => {
+      // Two top-level entries; the first has a dependencies: block
+      // followed immediately by another package header at column 0.
+      // The dep-list scanner exits via the non-4-space-indent break
+      // (consumeDependencyList line ~110).
+      const lock = `"a@^1":\n  version "1.0.0"\n  dependencies:\n    inner "^2"\n"b@^1":\n  version "1.5.0"\n`
+      const result = parseYarnLock(lock)
+      const a = result.packages.find(p => p.name === 'a')!
+      const b = result.packages.find(p => p.name === 'b')!
+      expect(a.dependencies).toEqual(['inner'])
+      expect(b.version).toBe('1.5.0')
+    })
+
+    it('skips Berry soft-linked entries that are NOT @workspace:', () => {
+      // Berry tags portal-protocol entries as linkType: soft too. The
+      // header doesn't contain `@workspace:`, so the workspace-skip
+      // short-circuit doesn't fire and the linkType-based skip
+      // (line 242) is the one that catches it.
+      const lock = `__metadata:\n  version: 6\n\n"my-portal@portal:./local":\n  version: 0.0.0\n  resolution: "my-portal@portal:./local"\n  linkType: soft\n`
+      const result = parseYarnLock(lock)
+      expect(result.packages.find(p => p.name === 'my-portal')).toBe(undefined)
+    })
+
+    it('handles a __metadata block as the final content (no entries after)', () => {
+      // The __metadata block is the last thing in the file; after
+      // skipIndentedBlock consumes its body, the position reaches EOF
+      // without finding another top-level entry (line 300).
+      const lock = `__metadata:\n  version: 6\n  cacheKey: 8\n`
+      const result = parseYarnLock(lock)
+      expect(result.packages).toEqual([])
+      expect(result.lockVersion).toBe('berry')
+    })
+
     it('extracts http(s) resolved from Berry resolution field', () => {
       const lock = `__metadata:\n  version: 6\n\n"foo@npm:^1.0.0":\n  version: 1.0.0\n  resolution: "https://example.com/foo.tgz"\n  linkType: hard\n`
       const result = parseYarnLock(lock)
