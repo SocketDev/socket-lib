@@ -62,8 +62,17 @@ export function addToYarnIndex(
 export function consumeDependenciesMeta(
   content: string,
   startPos: number,
-  entry: YarnEntryState,
+  _entry: YarnEntryState,
 ): number {
+  // `dependenciesMeta.<child>.optional = true` flags a CHILD as
+  // optional (the parent listed it as an optional peer / optional
+  // subdependency), not the parent itself. Flipping the parent's
+  // `isOptional` based on any child's flag was inverted semantics —
+  // it made every package with `fsevents`-like optional children
+  // (very common) show up as optional. Consume the block to advance
+  // `pos`, but don't synthesize anything from it. The parent's own
+  // optionality comes from how upstream references it, which yarn
+  // lockfiles don't encode at the entry level.
   let pos = startPos
   while (pos < content.length) {
     const eol = StringPrototypeIndexOf(content, '\n', pos)
@@ -77,13 +86,6 @@ export function consumeDependenciesMeta(
       line[3] !== ' '
     ) {
       break
-    }
-    const metaLine = StringPrototypeTrim(line)
-    if (
-      StringPrototypeIndexOf(metaLine, 'optional:') !== -1 &&
-      StringPrototypeIndexOf(metaLine, 'true') !== -1
-    ) {
-      entry.isOptional = true
     }
     pos = end + 1
   }

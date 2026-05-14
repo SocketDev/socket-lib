@@ -131,6 +131,68 @@ describe('eco/npm/npm/parse-lockfile', () => {
       )
       expect(result.packages.map(p => p.name).sort()).toEqual(['a', 'b'])
     })
+
+    it('extracts real name + version from npm: aliased installs', () => {
+      // npm v1 lockfiles encode aliased deps as
+      // `version: "npm:<real-name>@<real-version>"`. The component
+      // should reference the real registry package, not the alias.
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 1,
+          dependencies: {
+            'string-width-cjs': {
+              version: 'npm:string-width@4.2.3',
+              resolved:
+                'https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz',
+            },
+          },
+        }),
+      )
+      const sw = result.packages.find(p => p.name === 'string-width')!
+      expect(sw.version).toBe('4.2.3')
+    })
+  })
+
+  describe('v2/v3 workspaces + alias', () => {
+    it('prefers pkg.name for workspace path entries', () => {
+      // Workspace entries are keyed by their relative path (no
+      // `node_modules/` prefix). Use the explicit `pkg.name` field
+      // instead of the path-derived fallback.
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            'packages/ui': {
+              name: '@my-org/ui',
+              version: '0.0.0',
+            },
+            'node_modules/regular-dep': { version: '1.0.0' },
+          },
+        }),
+      )
+      const ws = result.packages.find(p => p.name === '@my-org/ui')!
+      expect(ws.version).toBe('0.0.0')
+      const reg = result.packages.find(p => p.name === 'regular-dep')!
+      expect(reg.version).toBe('1.0.0')
+    })
+
+    it('prefers pkg.name for aliased v2/v3 entries', () => {
+      // npm v2/v3 writes aliased installs as
+      //   "node_modules/<alias>": { name: "<real>", version: "..." }
+      // — use `pkg.name` so the component is keyed by the real name.
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            'node_modules/sw-cjs': {
+              name: 'string-width',
+              version: '4.2.3',
+            },
+          },
+        }),
+      )
+      expect(result.packages.map(p => p.name)).toEqual(['string-width'])
+    })
   })
 
   describe('errors + edge cases', () => {

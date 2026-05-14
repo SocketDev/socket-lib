@@ -184,7 +184,19 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
             const depVersion = StringPrototypeTrim(
               StringPrototypeSlice(trimmed, colonIdx + 1),
             )
-            if (StringPrototypeIndexOf(depVersion, 'link:') === 0) {
+            // Skip block-style v9 importer entries (where the parent
+            // line is `name:` and the version is nested under it as a
+            // separate `version:` property). The nested-line skip above
+            // handles the children; this guard stops the parent line
+            // from being emitted with empty version. Also skip
+            // workspace-local protocol refs (`link:` / `workspace:` /
+            // `file:`) — they aren't shippable artifacts.
+            if (
+              depVersion.length === 0 ||
+              StringPrototypeIndexOf(depVersion, 'link:') === 0 ||
+              StringPrototypeIndexOf(depVersion, 'workspace:') === 0 ||
+              StringPrototypeIndexOf(depVersion, 'file:') === 0
+            ) {
               continue
             }
             const versionWithoutPeer = stripPeerSuffix(depVersion)

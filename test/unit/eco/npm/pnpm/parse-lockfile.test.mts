@@ -104,6 +104,27 @@ describe('eco/npm/pnpm/parse-lockfile', () => {
       const vitest = result.packages.find(p => p.name === 'vitest')!
       expect(vitest.isDev).toBe(true)
     })
+
+    it('does NOT emit entries with empty version strings', () => {
+      // pnpm v9 importer entries that use the block shape
+      //   pkg:
+      //     specifier: ^1
+      //     version: 1.0.0
+      // were previously emitted with an empty `version` for the parent
+      // line. Verify every package now has a non-empty version.
+      for (const pkg of result.packages) {
+        expect(pkg.version).not.toBe('')
+      }
+    })
+
+    it('skips workspace: + file: protocol versions in importers', () => {
+      const lock = `lockfileVersion: '9.0'\n\nimporters:\n\n  .:\n    dependencies:\n      ws-dep: workspace:^1.0.0\n      file-dep: file:./local.tgz\n      real-dep: 1.0.0\n`
+      const r = parsePnpmLock(lock)
+      const names = r.packages.map(p => p.name)
+      expect(names).toContain('real-dep')
+      expect(names).not.toContain('ws-dep')
+      expect(names).not.toContain('file-dep')
+    })
   })
 
   describe('edge cases', () => {

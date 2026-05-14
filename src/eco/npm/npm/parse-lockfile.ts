@@ -28,6 +28,12 @@ import { getSmolManifest } from '../../../smol/manifest'
 import { extractPackageNameFromPath } from './extract-package-name-from-path'
 import { parseGitUrl } from './parse-git-url'
 
+import {
+  StringPrototypeLastIndexOf,
+  StringPrototypeSlice,
+  StringPrototypeStartsWith,
+} from '../../../primordials/string'
+
 import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
 
 // Cap recursion depth on v1 nested `dependencies`. The `visited` set
@@ -38,6 +44,7 @@ import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
 const MAX_LOCKFILE_DEPTH = 64
 
 interface RawPackage {
+  readonly name?: unknown
   readonly version?: unknown
   readonly resolved?: unknown
   readonly integrity?: unknown
@@ -88,10 +95,27 @@ export function buildPackageRef(name: string, pkg: RawPackage): PackageRef {
     depsKey && typeof depsKey === 'object'
       ? ObjectKeys(depsKey as Record<string, unknown>)
       : []
+  // Aliased installs in npm v1 lockfiles encode the real identity in
+  // the version field as `npm:<real-name>@<real-version>`. Emitting
+  // the alias directly would produce a malformed purl
+  // (`pkg:npm/alias@npm%3Areal%401.0`) pointing at a non-existent
+  // package. Detect the prefix and extract the underlying name +
+  // version so downstream consumers reference the actual registry
+  // package.
+  let effectiveName = name
+  let version = typeof pkg.version === 'string' ? pkg.version : '0.0.0'
+  if (StringPrototypeStartsWith(version, 'npm:')) {
+    const rest = StringPrototypeSlice(version, 'npm:'.length)
+    const atIdx = StringPrototypeLastIndexOf(rest, '@')
+    if (atIdx > 0) {
+      effectiveName = StringPrototypeSlice(rest, 0, atIdx)
+      version = StringPrototypeSlice(rest, atIdx + 1)
+    }
+  }
   return ObjectFreeze({
     __proto__: null,
-    name,
-    version: typeof pkg.version === 'string' ? pkg.version : '0.0.0',
+    name: effectiveName,
+    version,
     resolved: typeof pkg.resolved === 'string' ? pkg.resolved : undefined,
     integrity: typeof pkg.integrity === 'string' ? pkg.integrity : undefined,
     ecosystem: 'npm',
@@ -211,7 +235,17 @@ export function parseV2V3(
       continue
     }
     const pkg = rawPackages[pkgPath]!
-    const name = extractPackageNameFromPath(pkgPath)
+    // Workspace entries in npm v2/v3 lockfiles are keyed by their
+    // relative path (e.g. `packages/foo`) without a `node_modules/`
+    // prefix. For those, prefer `pkg.name` from the entry body —
+    // falling back to the path-derived name keeps node_modules/*
+    // entries working unchanged. Same fallback chain covers aliased
+    // installs (which carry the alias name in `pkg.name`).
+    const nameFromPath = extractPackageNameFromPath(pkgPath)
+    const name =
+      typeof pkg.name === 'string' && pkg.name.length > 0
+        ? pkg.name
+        : nameFromPath
     const ref = buildPackageRef(name, pkg)
     packages[pkgCount] = ref
     addToIndex(packageIndex, name, pkgCount)
