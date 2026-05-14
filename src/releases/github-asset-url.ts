@@ -184,111 +184,127 @@ export async function getReleaseAssetUrl(
       : createAssetMatcher(assetPattern as AssetPattern)
   /* c8 ignore stop */
 
-  return (
-    (await pRetry(async () => {
-      const response = await httpRequest(
-        `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
+  // Fetch the assets list with retry semantics for transient errors.
+  // Matching the asset name happens AFTER the retry block — a no-match
+  // is a deterministic failure on a stable payload, so retrying with
+  // exponential backoff (RETRY_CONFIG) burns the test/CI clock for
+  // nothing while the answer is fixed. Tests that exercise the
+  // no-match path used to wait 5s + 10s = 15s before the final throw.
+  const assets = await pRetry(async () => {
+    const response = await httpRequest(
+      `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
+      {
+        headers: getAuthHeaders(),
+      },
+    )
 
-      if (!response.ok) {
+    if (!response.ok) {
+      throw new ErrorCtor(
+        `Failed to fetch ${owner}/${repo} release ${tag}: ${response.status}`,
+      )
+    }
+
+    // -------------------------------------------------------
+    // 200 OK + zero-byte body = GitHub Elasticsearch incident.
+    // The status says "success" but the payload is empty.
+    // Cross-check via GraphQL `repository.release(tagName)`,
+    // which uses a different backend — when REST is degraded
+    // GraphQL is usually still serving the same data.
+    //
+    // The two transports expose the SAME asset data with one
+    // field-name diff (`downloadUrl` vs. `browser_download_url`)
+    // that `fetchReleaseAssetsViaGraphQL` normalizes. After
+    // normalization we go back to the SAME asset matcher path
+    // below — the rest of the function doesn't know which
+    // transport produced the asset list.
+    //
+    // Three outcomes from the GraphQL fallback:
+    //   - assets returned: continue with matching as normal
+    //   - `undefined` returned: GraphQL says no release with this
+    //     tag exists. Throw a clear error so the user knows
+    //     the tag is genuinely missing rather than masking a
+    //     transient with a silent skip.
+    //   - GraphQL itself throws: `pRetry` retries the whole
+    //     `getReleaseAssetUrl` call (REST included). This is
+    //     intentional — if both transports fail we want
+    //     backoff, not a blind error.
+    // -------------------------------------------------------
+    let assets: Array<{ name: string; browser_download_url: string }>
+    if (response.body.byteLength === 0) {
+      // REST is degraded — silently route to GraphQL. Only error
+      // out (with a clear, informative message) if BOTH transports
+      // fail to return assets for this tag.
+      let fallbackAssets:
+        | Array<{ name: string; browser_download_url: string }>
+        | undefined
+      try {
+        fallbackAssets = await fetchReleaseAssetsViaGraphQL(owner, repo, tag)
+      } catch (cause) {
+        /* c8 ignore next 7 - Both backends degraded; needs real
+             network failure on both REST and GraphQL. */
+        if (nothrow) {
+          return undefined
+        }
         throw new ErrorCtor(
-          `Failed to fetch ${owner}/${repo} release ${tag}: ${response.status}`,
+          `Failed to fetch ${owner}/${repo} release ${tag}: both REST and GraphQL backends degraded`,
+          { cause },
+        )
+      }
+      // GraphQL fallback returned no release.
+      /* c8 ignore start */
+      if (fallbackAssets === undefined) {
+        if (nothrow) {
+          return undefined
+        }
+        throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
+        /* c8 ignore stop */
+      }
+      assets = fallbackAssets
+    } else {
+      let release: {
+        assets: Array<{ name: string; browser_download_url: string }>
+      }
+      try {
+        release = JSONParse(response.body.toString('utf8'))
+      } catch (cause) {
+        throw new ErrorCtor(
+          `Failed to parse ${owner}/${repo} release ${tag} response`,
+          { cause },
         )
       }
 
-      // -------------------------------------------------------
-      // 200 OK + zero-byte body = GitHub Elasticsearch incident.
-      // The status says "success" but the payload is empty.
-      // Cross-check via GraphQL `repository.release(tagName)`,
-      // which uses a different backend — when REST is degraded
-      // GraphQL is usually still serving the same data.
-      //
-      // The two transports expose the SAME asset data with one
-      // field-name diff (`downloadUrl` vs. `browser_download_url`)
-      // that `fetchReleaseAssetsViaGraphQL` normalizes. After
-      // normalization we go back to the SAME asset matcher path
-      // below — the rest of the function doesn't know which
-      // transport produced the asset list.
-      //
-      // Three outcomes from the GraphQL fallback:
-      //   - assets returned: continue with matching as normal
-      //   - `undefined` returned: GraphQL says no release with this
-      //     tag exists. Throw a clear error so the user knows
-      //     the tag is genuinely missing rather than masking a
-      //     transient with a silent skip.
-      //   - GraphQL itself throws: `pRetry` retries the whole
-      //     `getReleaseAssetUrl` call (REST included). This is
-      //     intentional — if both transports fail we want
-      //     backoff, not a blind error.
-      // -------------------------------------------------------
-      let assets: Array<{ name: string; browser_download_url: string }>
-      if (response.body.byteLength === 0) {
-        // REST is degraded — silently route to GraphQL. Only error
-        // out (with a clear, informative message) if BOTH transports
-        // fail to return assets for this tag.
-        let fallbackAssets:
-          | Array<{ name: string; browser_download_url: string }>
-          | undefined
-        try {
-          fallbackAssets = await fetchReleaseAssetsViaGraphQL(owner, repo, tag)
-        } catch (cause) {
-          /* c8 ignore next 7 - Both backends degraded; needs real
-             network failure on both REST and GraphQL. */
-          if (nothrow) {
-            return undefined
-          }
-          throw new ErrorCtor(
-            `Failed to fetch ${owner}/${repo} release ${tag}: both REST and GraphQL backends degraded`,
-            { cause },
-          )
-        }
-        // GraphQL fallback returned no release.
-        /* c8 ignore start */
-        if (fallbackAssets === undefined) {
-          if (nothrow) {
-            return undefined
-          }
-          throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
-          /* c8 ignore stop */
-        }
-        assets = fallbackAssets
-      } else {
-        let release: {
-          assets: Array<{ name: string; browser_download_url: string }>
-        }
-        try {
-          release = JSONParse(response.body.toString('utf8'))
-        } catch (cause) {
-          throw new ErrorCtor(
-            `Failed to parse ${owner}/${repo} release ${tag} response`,
-            { cause },
-          )
-        }
-
-        if (!ArrayIsArray(release.assets)) {
-          throw new ErrorCtor(
-            `Release ${tag} has no assets in ${owner}/${repo}`,
-          )
-        }
-        assets = release.assets
+      if (!ArrayIsArray(release.assets)) {
+        throw new ErrorCtor(`Release ${tag} has no assets in ${owner}/${repo}`)
       }
+      assets = release.assets
+    }
 
-      const asset = assets.find(a => isMatch(a.name))
+    return assets
+  }, RETRY_CONFIG)
 
-      // No-asset throw + AssetPattern-string-vs-object describer fire
-      // only on no-match cases; tests cover the happy path.
-      /* c8 ignore start */
-      if (!asset) {
-        const patternDesc =
-          typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-        throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
-      }
-      /* c8 ignore stop */
+  // pRetry returns undefined on signal-aborted; treat the same as the
+  // fetched-but-empty case below.
+  if (!assets) {
+    if (nothrow) {
+      return undefined
+    }
+    throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
+  }
 
-      return asset.browser_download_url
-    }, RETRY_CONFIG)) ?? undefined
-  )
+  const asset = assets.find(a => isMatch(a.name))
+
+  // No-asset throw + AssetPattern-string-vs-object describer fire
+  // only on no-match cases; tests cover the happy path.
+  /* c8 ignore start */
+  if (!asset) {
+    if (nothrow) {
+      return undefined
+    }
+    const patternDesc =
+      typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
+    throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
+  }
+  /* c8 ignore stop */
+
+  return asset.browser_download_url
 }

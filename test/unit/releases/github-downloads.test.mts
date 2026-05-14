@@ -154,7 +154,7 @@ describe('releases/github-downloads', () => {
           SOCKET_BTM_REPO,
         ),
       ).rejects.toThrow('Asset nonexistent-*.xyz not found in release v1.0.0')
-    }, 40_000)
+    })
   })
 
   // .sequential is required because vitest's config sets
