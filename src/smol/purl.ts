@@ -98,9 +98,11 @@ let _smolPurlProbed = false
 export function getSmolPurl(): SmolPurlBinding | undefined {
   if (!_smolPurlProbed) {
     _smolPurlProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-purl')) {
       _smolPurl = require('node:smol-purl') as SmolPurlBinding
     }
+    /* c8 ignore stop */
   }
   return _smolPurl
 }

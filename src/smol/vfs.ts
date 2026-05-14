@@ -119,10 +119,12 @@ let _smolVfsProbed = false
 export function getSmolVfs(): SmolVirtualFileSystem | undefined {
   if (!_smolVfsProbed) {
     _smolVfsProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-vfs')) {
       const binding = require('node:smol-vfs') as SmolVirtualFileSystemBinding
       _smolVfs = binding.getSmolVfs()
     }
+    /* c8 ignore stop */
   }
   return _smolVfs
 }

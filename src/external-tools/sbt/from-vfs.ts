@@ -21,7 +21,11 @@ export const SBT_VFS_KEY = 'sbt-launch.jar'
 
 export async function sbtFromVfs(): Promise<ResolvedSbt | undefined> {
   const vfs = getSmolVfs()
-  if (!vfs || !vfs.has(SBT_VFS_KEY)) {
+  if (!vfs) {
+    return undefined
+  }
+  /* c8 ignore start - smol Node binary only. */
+  if (!vfs.has(SBT_VFS_KEY)) {
     return undefined
   }
   const realPath = await vfs.extract(SBT_VFS_KEY)
@@ -30,4 +34,5 @@ export async function sbtFromVfs(): Promise<ResolvedSbt | undefined> {
     isJar: true,
     source: 'vfs',
   }
+  /* c8 ignore stop */
 }

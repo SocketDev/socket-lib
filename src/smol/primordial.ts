@@ -99,9 +99,11 @@ let _smolPrimordialProbed = false
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
   if (!_smolPrimordialProbed) {
     _smolPrimordialProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-primordial')) {
       _smolPrimordial = require('node:smol-primordial') as SmolPrimordialBinding
     }
+    /* c8 ignore stop */
   }
   return _smolPrimordial
 }

@@ -25,7 +25,11 @@ export const JRE_VFS_KEY = 'jre'
 
 export async function jreFromVfs(): Promise<ResolvedJre | undefined> {
   const vfs = getSmolVfs()
-  if (!vfs || !vfs.has(JRE_VFS_KEY)) {
+  if (!vfs) {
+    return undefined
+  }
+  /* c8 ignore start - smol Node binary only. */
+  if (!vfs.has(JRE_VFS_KEY)) {
     return undefined
   }
   const javaHome = await vfs.extract(JRE_VFS_KEY)
@@ -38,4 +42,5 @@ export async function jreFromVfs(): Promise<ResolvedJre | undefined> {
     javaHome,
     source: 'vfs',
   }
+  /* c8 ignore stop */
 }

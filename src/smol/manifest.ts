@@ -178,9 +178,11 @@ let _smolManifestProbed = false
 export function getSmolManifest(): SmolManifestBinding | undefined {
   if (!_smolManifestProbed) {
     _smolManifestProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-manifest')) {
       _smolManifest = require('node:smol-manifest') as SmolManifestBinding
     }
+    /* c8 ignore stop */
   }
   return _smolManifest
 }

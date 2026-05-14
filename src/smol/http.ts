@@ -74,9 +74,11 @@ let _smolHttpProbed = false
 export function getSmolHttp(): SmolHttpBinding | undefined {
   if (!_smolHttpProbed) {
     _smolHttpProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-http')) {
       _smolHttp = require('node:smol-http') as SmolHttpBinding
     }
+    /* c8 ignore stop */
   }
   return _smolHttp
 }

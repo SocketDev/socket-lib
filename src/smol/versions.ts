@@ -71,9 +71,11 @@ let _smolVersionsProbed = false
 export function getSmolVersions(): SmolVersionsBinding | undefined {
   if (!_smolVersionsProbed) {
     _smolVersionsProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-versions')) {
       _smolVersions = require('node:smol-versions') as SmolVersionsBinding
     }
+    /* c8 ignore stop */
   }
   return _smolVersions
 }

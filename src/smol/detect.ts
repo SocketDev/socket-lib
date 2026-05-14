@@ -103,9 +103,11 @@ let _smolUtilProbed = false
 export function getSmolUtil(): SmolUtilBinding | undefined {
   if (!_smolUtilProbed) {
     _smolUtilProbed = true
+    /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-util')) {
       _smolUtil = require('node:smol-util') as SmolUtilBinding
     }
+    /* c8 ignore stop */
   }
   return _smolUtil
 }

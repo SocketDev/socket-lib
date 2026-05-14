@@ -19,7 +19,11 @@ export const BAZEL_VFS_KEY = 'bazel'
 
 export async function bazelFromVfs(): Promise<ResolvedBazel | undefined> {
   const vfs = getSmolVfs()
-  if (!vfs || !vfs.has(BAZEL_VFS_KEY)) {
+  if (!vfs) {
+    return undefined
+  }
+  /* c8 ignore start - smol Node binary only. */
+  if (!vfs.has(BAZEL_VFS_KEY)) {
     return undefined
   }
   const realPath = await vfs.extract(BAZEL_VFS_KEY)
@@ -27,4 +31,5 @@ export async function bazelFromVfs(): Promise<ResolvedBazel | undefined> {
     path: realPath,
     source: 'vfs',
   }
+  /* c8 ignore stop */
 }
