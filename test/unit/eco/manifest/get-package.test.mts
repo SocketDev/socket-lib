@@ -20,9 +20,15 @@ const LOCK = parsePackageLock(
 )
 
 describe('eco/manifest/get-package', () => {
-  it('returns the first matching entry', () => {
+  it('returns the first matching entry (multi-version)', () => {
     const a = getPackage(LOCK, 'a')!
     expect(a.name).toBe('a')
+  })
+
+  it('returns the entry for a single-version name', () => {
+    const b = getPackage(LOCK, 'b')!
+    expect(b.name).toBe('b')
+    expect(b.version).toBe('1.0.0')
   })
 
   it('returns undefined for an unknown name', () => {

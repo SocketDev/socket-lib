@@ -96,6 +96,14 @@ describe('eco/cargo/parse-lockfile', () => {
       expect((synIdx as number[]).length).toBe(2)
     })
 
+    it('extends the index array when a name has 3+ entries', () => {
+      const lock = `[[package]]\nname = "foo"\nversion = "1.0.0"\n\n[[package]]\nname = "foo"\nversion = "2.0.0"\n\n[[package]]\nname = "foo"\nversion = "3.0.0"\n`
+      const triple = parseCargoLock(lock)
+      const fooIdx = (triple._index as { foo?: unknown })['foo']
+      expect(Array.isArray(fooIdx)).toBe(true)
+      expect(fooIdx).toEqual([0, 1, 2])
+    })
+
     it('extracts git VCS metadata from a git+ source', () => {
       const git = parseCargoLock(CARGO_LOCK_GIT)
       const foo = git.packages.find(p => p.name === 'foo')!
@@ -180,6 +188,18 @@ describe('eco/cargo/parse-lockfile', () => {
 
     it('parseInlineArray handles bare unquoted entries', () => {
       expect(parseInlineArray('[ foo, bar ]')).toEqual(['foo', 'bar'])
+    })
+
+    it('parseInlineArray stops on trailing whitespace + comma', () => {
+      // Whitespace-only suffix after the last comma — loop exits via
+      // the "i >= inner.length" break after the inner whitespace skip.
+      expect(parseInlineArray('[ "a", "b",  ]')).toEqual(['a', 'b'])
+    })
+
+    it('parseInlineArray bails on an unterminated quoted entry', () => {
+      // Opening quote without a matching closing quote — the loop
+      // exits via the "closeIdx === -1" break, returning what we have.
+      expect(parseInlineArray('[ "a", "unterminated ]')).toEqual(['a'])
     })
   })
 })

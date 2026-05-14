@@ -65,6 +65,25 @@ describe('eco/manifest/parse-lockfile', () => {
       )
       expect(result.lockVersion).toBe('9')
     })
+
+    it('routes cargo ecosystem to parseCargoLock', () => {
+      const result = parseLockfile(
+        '[[package]]\nname = "serde"\nversion = "1.0.0"\n',
+        'cargo',
+      )
+      expect(result.ecosystem).toBe('cargo')
+      expect(result.packages[0]!.name).toBe('serde')
+    })
+
+    it('routes cargo format (within an npm ecosystem call) to parseCargoLock', () => {
+      const result = parseLockfile(
+        '[[package]]\nname = "tokio"\nversion = "1.0.0"\n',
+        'npm',
+        'cargo',
+      )
+      expect(result.ecosystem).toBe('cargo')
+      expect(result.packages[0]!.name).toBe('tokio')
+    })
   })
 
   describe('parseLockfile (auto-sniff)', () => {
