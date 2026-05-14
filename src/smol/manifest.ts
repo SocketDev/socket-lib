@@ -16,7 +16,7 @@
  *   through this when smol is present.
  */
 
-import { isModuleBuiltin } from './is-module-builtin'
+import { getNodeModule } from '../node/module'
 
 import type { EcosystemString } from '../eco/purl'
 
@@ -178,7 +178,7 @@ let _smolManifestProbed = false
 export function getSmolManifest(): SmolManifestBinding | undefined {
   if (!_smolManifestProbed) {
     _smolManifestProbed = true
-    if (isModuleBuiltin('node:smol-manifest')) {
+    if (getNodeModule().isBuiltin('node:smol-manifest')) {
       _smolManifest = require('node:smol-manifest') as SmolManifestBinding
     }
   }

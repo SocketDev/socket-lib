@@ -14,7 +14,7 @@
  *   which already route through this when smol is present.
  */
 
-import { isModuleBuiltin } from './is-module-builtin'
+import { getNodeModule } from '../node/module'
 
 /**
  * Surface of `node:smol-versions`. See socket-btm's
@@ -71,7 +71,7 @@ let _smolVersionsProbed = false
 export function getSmolVersions(): SmolVersionsBinding | undefined {
   if (!_smolVersionsProbed) {
     _smolVersionsProbed = true
-    if (isModuleBuiltin('node:smol-versions')) {
+    if (getNodeModule().isBuiltin('node:smol-versions')) {
       _smolVersions = require('node:smol-versions') as SmolVersionsBinding
     }
   }
