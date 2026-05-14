@@ -603,6 +603,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                            | Description                                                  |
 | ------------------------------------------------------------------ | ------------------------------------------------------------ |
 | [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts)         | Smol detection + lazy-loader for `node:smol-util`.           |
+| [`@socketsecurity/lib/smol/http`](../src/smol/http.ts)             | Lazy-loader for socket-btm's `node:smol-http`.               |
+| [`@socketsecurity/lib/smol/https`](../src/smol/https.ts)           | Lazy-loader for socket-btm's `node:smol-https`.              |
 | [`@socketsecurity/lib/smol/manifest`](../src/smol/manifest.ts)     | Lazy-loader for socket-btm's `node:smol-manifest`.           |
 | [`@socketsecurity/lib/smol/primordial`](../src/smol/primordial.ts) | Lazy-loader for socket-btm's `node:smol-primordial` binding. |
 | [`@socketsecurity/lib/smol/purl`](../src/smol/purl.ts)             | Lazy-loader for socket-btm's `node:smol-purl` binding.       |

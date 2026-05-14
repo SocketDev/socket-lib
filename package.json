@@ -1833,6 +1833,16 @@
       "types": "./dist/smol/detect.d.ts",
       "default": "./dist/smol/detect.js"
     },
+    "./smol/http": {
+      "source": "./src/smol/http.ts",
+      "types": "./dist/smol/http.d.ts",
+      "default": "./dist/smol/http.js"
+    },
+    "./smol/https": {
+      "source": "./src/smol/https.ts",
+      "types": "./dist/smol/https.d.ts",
+      "default": "./dist/smol/https.js"
+    },
     "./smol/manifest": {
       "source": "./src/smol/manifest.ts",
       "types": "./dist/smol/manifest.d.ts",
