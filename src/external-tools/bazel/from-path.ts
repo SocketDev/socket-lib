@@ -13,12 +13,16 @@ import type { ResolvedBazel } from './types'
 
 export async function bazelFromPath(): Promise<ResolvedBazel | undefined> {
   const bazelisk = await which('bazelisk', { nothrow: true })
+  /* c8 ignore start - reached only when bazelisk is on PATH. */
   if (typeof bazelisk === 'string') {
     return { path: bazelisk, source: 'path' }
   }
+  /* c8 ignore stop */
   const bazel = await which('bazel', { nothrow: true })
+  /* c8 ignore start - reached only when bazel is on PATH. */
   if (typeof bazel === 'string') {
     return { path: bazel, source: 'path' }
   }
+  /* c8 ignore stop */
   return undefined
 }

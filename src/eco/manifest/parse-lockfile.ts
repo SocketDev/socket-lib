@@ -84,7 +84,8 @@ export const parseLockfile: (
   ecosystem: EcosystemString,
   format?: LockfileFormat | undefined,
 ) => ParsedLockfile = _smol
-  ? (
+  ? /* c8 ignore start - smol Node binary only. */
+    (
       content: string,
       ecosystem: EcosystemString,
       format?: LockfileFormat | undefined,
@@ -99,4 +100,5 @@ export const parseLockfile: (
         format as 'npm' | 'yarn' | 'pnpm' | 'composer' | undefined,
       ) as ParsedLockfile
     }
-  : jsParseLockfile
+  : /* c8 ignore stop */
+    jsParseLockfile

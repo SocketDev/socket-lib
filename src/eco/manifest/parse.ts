@@ -34,10 +34,14 @@ export function jsParse(
 
 const _smol = getSmolManifest()
 
+/* c8 ignore start - smol-fallback branch is smol Node binary only. */
+const smolParse = _smol
+  ? (filename: string, content: string) =>
+      _smol.parse(filename, content) as ParsedManifest | ParsedLockfile
+  : undefined
+/* c8 ignore stop */
+
 export const parse: (
   filename: string,
   content: string,
-) => ParsedManifest | ParsedLockfile = _smol
-  ? (filename: string, content: string) =>
-      _smol.parse(filename, content) as ParsedManifest | ParsedLockfile
-  : jsParse
+) => ParsedManifest | ParsedLockfile = smolParse ?? jsParse

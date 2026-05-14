@@ -16,9 +16,11 @@ export async function sbtFromPath(): Promise<ResolvedSbt | undefined> {
   if (typeof sbt !== 'string') {
     return undefined
   }
+  /* c8 ignore start - reached only when sbt is on PATH. */
   return {
     path: sbt,
     isJar: false,
     source: 'path',
   }
+  /* c8 ignore stop */
 }

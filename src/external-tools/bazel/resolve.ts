@@ -30,9 +30,11 @@ export function _resetBazelResolution(): void {
 
 export async function doResolveBazel(): Promise<ResolvedBazel | undefined> {
   const fromVfs = await bazelFromVfs()
+  /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
     return fromVfs
   }
+  /* c8 ignore stop */
   return bazelFromPath()
 }
 

@@ -40,10 +40,12 @@ export async function resolveBazelVersion(
   // `getLatestRelease` returns the tag (which for Bazel is the plain
   // version number, e.g. `7.4.0`). It already retries on rate-limit
   // and falls back from REST to GraphQL during GitHub incidents.
+  /* c8 ignore start - network fallback; covered by integration tests. */
   const latest = await getLatestRelease(
     '',
     { owner: 'bazelbuild', repo: 'bazel' },
     { nothrow: true },
   )
   return latest ?? undefined
+  /* c8 ignore stop */
 }

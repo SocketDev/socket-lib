@@ -346,6 +346,7 @@ export function stripPeerSuffix(version: string): string {
 const _smol = getSmolManifest()
 
 export const parsePnpmLock: (content: string) => ParsedLockfile = _smol
-  ? (content: string) =>
+  ? /* c8 ignore next 2 - smol Node binary only. */
+    (content: string) =>
       _smol.parseLockfile(content, 'npm', 'pnpm') as ParsedLockfile
   : jsParsePnpmLock

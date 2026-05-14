@@ -38,9 +38,11 @@ export function _resetJreResolution(): void {
 
 export async function doResolveJre(): Promise<ResolvedJre | undefined> {
   const fromVfs = await jreFromVfs()
+  /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
     return fromVfs
   }
+  /* c8 ignore stop */
   const fromJavaHome = jreFromJavaHome()
   if (fromJavaHome) {
     return fromJavaHome

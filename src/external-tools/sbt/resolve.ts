@@ -32,9 +32,11 @@ export function _resetSbtResolution(): void {
 
 export async function doResolveSbt(): Promise<ResolvedSbt | undefined> {
   const fromVfs = await sbtFromVfs()
+  /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
     return fromVfs
   }
+  /* c8 ignore stop */
   return sbtFromPath()
 }
 

@@ -245,6 +245,7 @@ export function resolveDepType(pkg: RawPackage): DepType {
 const _smol = getSmolManifest()
 
 export const parsePackageLock: (content: string) => ParsedLockfile = _smol
-  ? (content: string) =>
+  ? /* c8 ignore next 2 - smol Node binary only. */
+    (content: string) =>
       _smol.parseLockfile(content, 'npm', 'npm') as ParsedLockfile
   : jsParsePackageLock

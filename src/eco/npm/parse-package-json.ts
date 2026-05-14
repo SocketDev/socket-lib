@@ -116,5 +116,6 @@ export function resolveRepository(value: unknown): string | undefined {
 const _smol = getSmolManifest()
 
 export const parsePackageJson: (content: string) => ParsedManifest = _smol
-  ? (content: string) => _smol.parseManifest(content, 'npm') as ParsedManifest
+  ? /* c8 ignore next 1 - smol Node binary only. */
+    (content: string) => _smol.parseManifest(content, 'npm') as ParsedManifest
   : jsParsePackageJson
