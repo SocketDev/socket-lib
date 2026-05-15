@@ -2,18 +2,22 @@
  * @fileoverview Generic "download tier" for external-tools resolvers.
  *
  * The per-tool resolvers (jre, bazel, sbt) each have local-discovery
- * tiers — VFS, env-var pointer, system PATH. This helper adds a fourth
- * option: fetch the archive from a URL into the dlx cache with
- * integrity verification, and return a typed record describing the
- * cached download.
+ * tiers — VFS, env-var pointer, system PATH. This module adds two
+ * helpers covering the fourth tier:
+ *
+ *   - `downloadToolArchive` — fetch the archive into the dlx cache,
+ *     return the path + computed integrity. Stops at "bytes on disk."
+ *   - `downloadAndExtractTool` — chains `downloadToolArchive` into
+ *     `archives.extractArchive`. Returns the extracted directory path
+ *     plus the integrity. Idempotent: skips extraction when the output
+ *     directory already has content.
  *
  * What this does NOT do:
- *   - Extract the archive. socket-lib doesn't yet ship a tar.gz / zip
- *     decompressor. Callers (or a future `extract` helper) handle
- *     extraction and construct their own `ResolvedJre` / `ResolvedBazel`
- *     / `ResolvedSbt` from the extracted tree.
  *   - Pick the URL. Adoptium / Bazel-mirror / Maven URL construction
- *     is consumer-specific; this helper takes a URL and runs with it.
+ *     is consumer-specific; these helpers take a URL and run with it.
+ *   - Build a `Resolved*` record. The caller knows the per-tool layout
+ *     (which subdirectory holds the executable) and constructs the
+ *     final `ResolvedJre` / `ResolvedBazel` / `ResolvedSbt`.
  *
  * Trust-on-first-use:
  *   - First call with no `integrity`: downloads, returns the computed
@@ -28,9 +32,91 @@
  *     logic, or progress reporters.
  */
 
+import { existsSync } from 'node:fs'
+import { promises as fsPromises } from 'node:fs'
+
+import { extractArchive } from '../archives/extract'
+import { safeMkdir } from '../fs/safe'
+
 import { downloadBinary } from '../dlx/binary-download'
 
+import type { ExtractOptions } from '../archives/types'
 import type { HashSpec } from '../integrity'
+
+/**
+ * Result of `downloadAndExtractTool`. Extends `DownloadedArchive` with
+ * the extracted directory path and an `extracted` flag indicating
+ * whether this call performed extraction (vs. reusing an existing
+ * extracted tree).
+ */
+export interface ExtractedTool extends DownloadedArchive {
+  /** Absolute path to the directory where the archive was extracted. */
+  readonly extractedDir: string
+  /**
+   * Whether this call extracted (vs. found the directory already
+   * populated). Idempotent re-runs see `extracted: false`.
+   */
+  readonly extracted: boolean
+}
+
+export interface DownloadAndExtractOptions extends DownloadOptions {
+  /**
+   * Absolute path of the directory to extract into. Created if
+   * missing. Idempotent: when the directory exists and is non-empty,
+   * extraction is skipped and the existing tree is returned.
+   */
+  extractedDir: string
+  /**
+   * Pass-through options to `archives.extractArchive` — covers
+   * `strip` for tar-style leading-component stripping plus the
+   * security-limit knobs (maxEntries, maxFileSize, maxTotalSize).
+   */
+  extractOptions?: ExtractOptions | undefined
+}
+
+/**
+ * Download an archive (with integrity verification) and extract it
+ * into `extractedDir`. Idempotent: if `extractedDir` already exists
+ * and is non-empty, extraction is skipped — the helper still
+ * downloads (or cache-hits) the archive so the integrity is
+ * surfaced consistently.
+ *
+ * @example
+ * ```typescript
+ * const { extractedDir, integrity } = await downloadAndExtractTool({
+ *   url: 'https://example.com/jre-21-darwin-arm64.tar.gz',
+ *   name: 'jre-21-darwin-arm64',
+ *   extractedDir: '/Users/me/.cache/socket/jre/21/darwin-arm64',
+ *   extractOptions: { strip: 1 },
+ * })
+ * // Caller constructs ResolvedJre from extractedDir.
+ * ```
+ */
+export async function downloadAndExtractTool(
+  opts: DownloadAndExtractOptions,
+): Promise<ExtractedTool> {
+  const archive = await downloadToolArchive(opts)
+  const { extractOptions, extractedDir } = opts
+  // Skip extraction when the target dir already has content. Empty
+  // dir → treat as not-yet-extracted (handles a half-created mkdir).
+  let extracted = false
+  if (existsSync(extractedDir)) {
+    const entries = await fsPromises.readdir(extractedDir)
+    if (entries.length === 0) {
+      await extractArchive(archive.archivePath, extractedDir, extractOptions)
+      extracted = true
+    }
+  } else {
+    await safeMkdir(extractedDir)
+    await extractArchive(archive.archivePath, extractedDir, extractOptions)
+    extracted = true
+  }
+  return {
+    ...archive,
+    extractedDir,
+    extracted,
+  }
+}
 
 /**
  * Result of a from-download tier call. `source: 'download'` mirrors
