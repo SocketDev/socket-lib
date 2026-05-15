@@ -1793,6 +1793,21 @@
       "types": "./dist/sea/detect.d.ts",
       "default": "./dist/sea/detect.js"
     },
+    "./secrets/keychain": {
+      "source": "./src/secrets/keychain.ts",
+      "types": "./dist/secrets/keychain.d.ts",
+      "default": "./dist/secrets/keychain.js"
+    },
+    "./secrets/shell-env": {
+      "source": "./src/secrets/shell-env.ts",
+      "types": "./dist/secrets/shell-env.d.ts",
+      "default": "./dist/secrets/shell-env.js"
+    },
+    "./secrets/types": {
+      "source": "./src/secrets/types.ts",
+      "types": "./dist/secrets/types.d.ts",
+      "default": "./dist/secrets/types.js"
+    },
     "./shadow/skip": {
       "source": "./src/shadow/skip.ts",
       "types": "./dist/shadow/skip.d.ts",
