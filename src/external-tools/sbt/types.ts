@@ -8,7 +8,7 @@
  * `java -jar <launcherPath>` using the JRE resolved via `resolveJre()`.
  */
 
-export type SbtSource = 'vfs' | 'path'
+export type SbtSource = 'vfs' | 'path' | 'download'
 
 /**
  * A resolved SBT launcher.

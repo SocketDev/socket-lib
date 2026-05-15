@@ -873,6 +873,11 @@
       "types": "./dist/external-tools/bazel/asset-names.d.ts",
       "default": "./dist/external-tools/bazel/asset-names.js"
     },
+    "./external-tools/bazel/from-download": {
+      "source": "./src/external-tools/bazel/from-download.ts",
+      "types": "./dist/external-tools/bazel/from-download.d.ts",
+      "default": "./dist/external-tools/bazel/from-download.js"
+    },
     "./external-tools/bazel/from-path": {
       "source": "./src/external-tools/bazel/from-path.ts",
       "types": "./dist/external-tools/bazel/from-path.d.ts",
@@ -962,6 +967,11 @@
       "source": "./src/external-tools/sbt/asset-names.ts",
       "types": "./dist/external-tools/sbt/asset-names.d.ts",
       "default": "./dist/external-tools/sbt/asset-names.js"
+    },
+    "./external-tools/sbt/from-download": {
+      "source": "./src/external-tools/sbt/from-download.ts",
+      "types": "./dist/external-tools/sbt/from-download.d.ts",
+      "default": "./dist/external-tools/sbt/from-download.js"
     },
     "./external-tools/sbt/from-path": {
       "source": "./src/external-tools/sbt/from-path.ts",

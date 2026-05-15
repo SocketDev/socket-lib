@@ -273,6 +273,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath | Description |
 | --- | --- |
 | [`@socketsecurity/lib/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts) | Upstream Bazel release asset-name mapping per `platform-arch`. |
+| [`@socketsecurity/lib/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts) | `bazelFromDownload()` — fetches the upstream Bazel binary and returns a `ResolvedBazel` pointing at the cached executable. |
 | [`@socketsecurity/lib/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts) | `bazelFromPath()` — looks for `bazelisk` first, then `bazel`, on the system PATH. |
 | [`@socketsecurity/lib/external-tools/bazel/from-vfs`](../src/external-tools/bazel/from-vfs.ts) | `bazelFromVfs()` — extracts the Bazel binary from the smol binary's VFS. |
 | [`@socketsecurity/lib/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | `readBazelVersionFile(workspaceDir)` — walks up from `workspaceDir` looking for a `.bazelversion` file (the Bazel/Bazelisk convention for pinning the project's Bazel version). |
@@ -291,6 +292,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/external-tools/jre/types`](../src/external-tools/jre/types.ts) | Shared types for JRE resolution. |
 | [`@socketsecurity/lib/external-tools/manifest`](../src/external-tools/manifest.ts) | Reader for `external-tools.json` — the fleet manifest describing downloadable external binaries (sfw, zizmor, etc.) with pinned versions, per-platform asset names, and integrity hashes. |
 | [`@socketsecurity/lib/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts) | SBT distribution download-URL builder. |
+| [`@socketsecurity/lib/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts) | `sbtFromDownload()` — fetches the SBT launcher tarball, extracts it, and returns a `ResolvedSbt` pointing at the `bin/sbt` script. |
 | [`@socketsecurity/lib/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts) | `sbtFromPath()` — looks for the `sbt` shell script on the system PATH. |
 | [`@socketsecurity/lib/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts) | `sbtFromVfs()` — extracts the SBT launcher jar from the smol binary's VFS. |
 | [`@socketsecurity/lib/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts) | `resolveSbt()` — SBT resolution entry point. |

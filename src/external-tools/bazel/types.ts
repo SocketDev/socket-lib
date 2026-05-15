@@ -2,7 +2,7 @@
  * @fileoverview Shared types for Bazel resolution.
  */
 
-export type BazelSource = 'vfs' | 'path'
+export type BazelSource = 'vfs' | 'path' | 'download'
 
 /**
  * A resolved Bazel installation.
