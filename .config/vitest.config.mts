@@ -80,12 +80,13 @@ const vitestConfig = defineConfig({
     pool: 'threads',
     poolOptions: {
       threads: {
-        // Worker heap ceiling. test/unit/constants/github.test.mts
-        // intentionally mutates an imported binding to assert
-        // immutability; under vitest's worker-isolation the resulting
-        // assignment-to-readonly trap balloons the heap. Raising the
-        // per-worker limit clears the OOM without papering over the
-        // test's intent.
+        // Worker heap ceiling. Each worker thread is its own V8 isolate
+        // with its own heap; --max-old-space-size caps the thread's heap
+        // independently of the parent process. 4 GB absorbs the
+        // cumulative heap pressure across ~7000 tests sharing a worker
+        // (isolate: false, below). Tests that genuinely can't fit even
+        // at this ceiling live under test/isolated/ and run through
+        // vitest.config.isolated.mts (singleThread + isolate: true).
         execArgv: ['--max-old-space-size=4096'],
         // Use `'CI' in process.env` instead of `process.env.CI` so an
         // empty-string CI value (some self-hosted setups) still counts
