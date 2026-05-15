@@ -583,14 +583,14 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## secrets/
 
-| Subpath                                                                | Description                                                                                        |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib/secrets/keychain`](../src/secrets/keychain.ts)   | Cross-platform secret-storage helper.                                                              |
-| [`@socketsecurity/lib/secrets/linux`](../src/secrets/linux.ts)         | Linux Secret Service backend via `secret-tool`.                                                    |
-| [`@socketsecurity/lib/secrets/macos`](../src/secrets/macos.ts)         | macOS Keychain backend via `security(1)`.                                                          |
-| [`@socketsecurity/lib/secrets/shell-env`](../src/secrets/shell-env.ts) | Materialize a secret into the user's shell-startup file as a literal `export VAR='<value>'` block. |
-| [`@socketsecurity/lib/secrets/types`](../src/secrets/types.ts)         | Public type surface for `secrets/*`.                                                               |
-| [`@socketsecurity/lib/secrets/windows`](../src/secrets/windows.ts)     | Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback.     |
+| Subpath                                                              | Description                                                                                    |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/secrets/keychain`](../src/secrets/keychain.ts) | Cross-platform secret-storage helper.                                                          |
+| [`@socketsecurity/lib/secrets/linux`](../src/secrets/linux.ts)       | Linux Secret Service backend via `secret-tool`.                                                |
+| [`@socketsecurity/lib/secrets/macos`](../src/secrets/macos.ts)       | macOS Keychain backend via `security(1)`.                                                      |
+| [`@socketsecurity/lib/secrets/rc`](../src/secrets/rc.ts)             | Write a managed `export VAR='<value>'` block to the user's shell rc ("run commands") file.     |
+| [`@socketsecurity/lib/secrets/types`](../src/secrets/types.ts)       | Public type surface for `secrets/*`.                                                           |
+| [`@socketsecurity/lib/secrets/windows`](../src/secrets/windows.ts)   | Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback. |
 
 ## shadow/
 

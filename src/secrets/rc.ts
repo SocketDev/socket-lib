@@ -1,31 +1,45 @@
 /**
- * @fileoverview Materialize a secret into the user's shell-startup
- * file as a literal `export VAR='<value>'` block. macOS only for
- * now.
+ * @fileoverview Write a managed `export VAR='<value>'` block to the
+ * user's shell rc ("run commands") file. macOS only for now.
  *
- * Use case: `readSecret()` round-trips through the OS keychain on
- * every call. On macOS each call triggers a Keychain auth prompt
- * unless the keychain item's ACL allows the calling process. That's
- * the right shape for tools that read the secret once per process
- * — but if you wire `readSecret()` into a shell rc file, the user
- * gets an auth prompt on every new shell. Claude Code's Bash tool
- * spawns a fresh shell per command, which means continuous prompt
- * flood.
+ * `rc` is the historical Unix suffix for shell-startup files
+ * (`.bashrc`, `.zshrc`, `.cshrc`) — short for "run commands", a
+ * convention from MIT's CTSS (1965) carried through Multics into
+ * Unix. This module writes a managed block into that file so the
+ * value is exported into every subsequent shell session.
+ *
+ * Use case: `readSecret()` from `./keychain` round-trips through
+ * the OS credential store on every call. On macOS each call
+ * triggers a Keychain auth prompt unless the keychain item's ACL
+ * allows the calling process. That's the right shape for tools
+ * that read the secret once per process — but if you wire
+ * `readSecret()` into a shell rc file directly, the user gets an
+ * auth prompt on every new shell. Claude Code's Bash tool spawns
+ * a fresh shell per command, which means continuous prompt flood.
  *
  * Solution: write the literal value into ~/.zshenv (or equivalent)
  * **once**, at install time, so every subsequent shell session
  * picks up the env var without re-reading the keychain. The
  * keychain is still the canonical store; this helper is just a
- * cache materialization.
+ * cached materialization that lives in the rc file.
  *
- * Block layout (idempotent — re-running updates in place):
+ * API:
+ *
+ *   write({ service, exports, notes?, legacySentinels? })
+ *     → { rcPath, outcome: 'inserted' | 'updated' | 'unchanged' } | undefined
+ *
+ *   clear(service, legacySentinels?)
+ *     → boolean (true when a block was found and removed)
+ *
+ * Block layout (idempotent — re-running with the same exports
+ * returns `outcome: 'unchanged'`):
  *
  *   # BEGIN <service> env (managed)
  *   # Token persisted by <installer>.
  *   # Rotate via: <rotate-command>
  *   export VAR_1='<value>'
  *   export VAR_2='<value>'
- *   # END <service> env
+ *   # END <service> env (managed)
  *
  * Target file by shell:
  *   zsh  → ~/.zshenv  (sourced by every zsh, including non-interactive)
@@ -41,7 +55,35 @@ import { homedir, platform } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-export interface MaterializeOptions {
+function buildBlock(opts: WriteOptions): {
+  begin: string
+  end: string
+  body: string
+  full: string
+} {
+  // Symmetric BEGIN/END sentinels — the `(managed)` suffix is on
+  // both so a `BEGIN → END` text-substitution swap produces the
+  // matching END string for migration regexes.
+  const begin = `# BEGIN ${opts.service} env (managed)`
+  const end = `# END ${opts.service} env (managed)`
+  const noteLines = (opts.notes ?? []).map(line => `# ${line}`)
+  const exportLines = Object.entries(opts.exports).map(
+    ([name, value]) => `export ${name}=${shellSingleQuote(value)}`,
+  )
+  const body = [...noteLines, ...exportLines].join('\n')
+  return {
+    begin,
+    end,
+    body,
+    full: `${begin}\n${body}\n${end}`,
+  }
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+export interface WriteOptions {
   /**
    * Logical service name. Used to compose the BEGIN/END sentinels
    * (`# BEGIN <service> env (managed)`) so multiple tools can
@@ -71,7 +113,7 @@ export interface MaterializeOptions {
   legacySentinels?: readonly string[]
 }
 
-export interface MaterializeResult {
+export interface WriteResult {
   rcPath: string
   outcome: 'inserted' | 'updated' | 'unchanged'
 }
@@ -96,42 +138,15 @@ function pickRcFile(): string | undefined {
   return undefined
 }
 
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
 function shellSingleQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`
 }
 
-function buildBlock(opts: MaterializeOptions): {
-  begin: string
-  end: string
-  body: string
-  full: string
-} {
-  // Symmetric BEGIN/END sentinels — the `(managed)` suffix is on
-  // both so a `BEGIN → END` text-substitution swap produces the
-  // matching END string for migration regexes.
-  const begin = `# BEGIN ${opts.service} env (managed)`
-  const end = `# END ${opts.service} env (managed)`
-  const noteLines = (opts.notes ?? []).map(line => `# ${line}`)
-  const exportLines = Object.entries(opts.exports).map(
-    ([name, value]) => `export ${name}=${shellSingleQuote(value)}`,
-  )
-  const body = [...noteLines, ...exportLines].join('\n')
-  return {
-    begin,
-    end,
-    body,
-    full: `${begin}\n${body}\n${end}`,
-  }
-}
-
 /**
  * Insert or update the managed env-var block in the user's shell
- * startup file. macOS only — Linux + Windows return `undefined`
- * (callers fall back to a copy-pasteable instruction).
+ * run-commands file (`~/.zshenv` for zsh, `~/.bashrc` /
+ * `~/.bash_profile` for bash). macOS only — Linux + Windows return
+ * `undefined` (callers fall back to a copy-pasteable instruction).
  *
  * The block is matched by BEGIN/END sentinels, so it coexists with
  * other managed blocks (homebrew, nvm, etc.). Idempotent: re-running
@@ -142,9 +157,7 @@ function buildBlock(opts: MaterializeOptions): {
  * BEGIN string. Each legacy block (matched by `BEGIN <legacy>` →
  * `END <legacy>`) is stripped before the new block is written.
  */
-export function materializeToShellRc(
-  opts: MaterializeOptions,
-): MaterializeResult | undefined {
+export function write(opts: WriteOptions): WriteResult | undefined {
   if (platform() !== 'darwin') {
     return undefined
   }
@@ -216,11 +229,11 @@ export function materializeToShellRc(
 }
 
 /**
- * Remove the managed block from the user's shell rc. Used by an
- * uninstall / clear flow. Returns `true` when a block was found
+ * Remove the managed block from the user's shell rc file. Used by
+ * an uninstall / clear flow. Returns `true` when a block was found
  * and removed, `false` when no block was present.
  */
-export function unmaterializeFromShellRc(
+export function clear(
   service: string,
   legacySentinels: readonly string[] = [],
 ): boolean {

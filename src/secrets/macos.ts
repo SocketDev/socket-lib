@@ -54,6 +54,39 @@ function runAsync(args: readonly string[], opts: SpawnOpts = {}): Promise<{
   })
 }
 
+export async function deleteMacOS(
+  service: string,
+  account: string,
+): Promise<'removed' | 'absent'> {
+  // Exit 0 = removed; exit 44 = SecKeychainSearchCopyNext: item not
+  // found (treat as already-absent — caller's desired state). Any
+  // other non-zero is an unusual failure; we don't surface it because
+  // the public API contract is "idempotent best-effort delete."
+  const r = await runAsync(
+    ['delete-generic-password', '-s', service, '-a', account],
+    { stdio: 'ignore' },
+  )
+  return r.status === 0 ? 'removed' : 'absent'
+}
+
+export function deleteMacOSSync(
+  service: string,
+  account: string,
+): 'removed' | 'absent' {
+  const r = spawnSync(
+    SECURITY_BIN,
+    ['delete-generic-password', '-s', service, '-a', account],
+    { stdio: 'ignore' },
+  )
+  return r.status === 0 ? 'removed' : 'absent'
+}
+
+export function isMacOSBackendAvailable(): boolean {
+  // `security(1)` is a base-system binary. We could shell out to
+  // confirm, but on any reachable macOS host it's always there.
+  return true
+}
+
 export async function readMacOS(
   service: string,
   account: string,
@@ -148,37 +181,4 @@ export function writeMacOSSync(
       `security(1) add-generic-password failed (status=${r.status}, account=${account}): ${r.stderr.trim()}`,
     )
   }
-}
-
-export async function deleteMacOS(
-  service: string,
-  account: string,
-): Promise<'removed' | 'absent'> {
-  // Exit 0 = removed; exit 44 = SecKeychainSearchCopyNext: item not
-  // found (treat as already-absent — caller's desired state). Any
-  // other non-zero is an unusual failure; we don't surface it because
-  // the public API contract is "idempotent best-effort delete."
-  const r = await runAsync(
-    ['delete-generic-password', '-s', service, '-a', account],
-    { stdio: 'ignore' },
-  )
-  return r.status === 0 ? 'removed' : 'absent'
-}
-
-export function deleteMacOSSync(
-  service: string,
-  account: string,
-): 'removed' | 'absent' {
-  const r = spawnSync(
-    SECURITY_BIN,
-    ['delete-generic-password', '-s', service, '-a', account],
-    { stdio: 'ignore' },
-  )
-  return r.status === 0 ? 'removed' : 'absent'
-}
-
-export function isMacOSBackendAvailable(): boolean {
-  // `security(1)` is a base-system binary. We could shell out to
-  // confirm, but on any reachable macOS host it's always there.
-  return true
 }

@@ -24,9 +24,9 @@
  * IMPORTANT: do NOT invoke these helpers from a shell rc / .zshenv
  * file (or any other always-on-startup hook). On macOS each call
  * triggers a Keychain auth prompt; piling that into per-shell
- * startup floods the user with prompts. Use `materializeToShellRc`
- * from `./shell-env` to write a one-time literal `export` block
- * instead. (Incident memory: socket-cli session 2026-05-15.)
+ * startup floods the user with prompts. Use `write` from `./rc`
+ * to write a one-time literal `export` block into the user's shell
+ * rc file instead. (Incident memory: socket-cli session 2026-05-15.)
  */
 
 import { platform } from 'node:os'
@@ -73,7 +73,7 @@ export type { SecretSlot } from './types'
 
 type Platform = 'darwin' | 'linux' | 'win32' | 'other'
 
-function detectPlatform(): Platform {
+export function detectPlatform(): Platform {
   const p = platform()
   if (p === 'darwin' || p === 'linux' || p === 'win32') {
     return p

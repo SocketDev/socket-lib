@@ -22,6 +22,38 @@ import { spawn, spawnSync } from 'node:child_process'
 
 const SECRET_TOOL_BIN = 'secret-tool'
 
+export async function deleteLinux(
+  service: string,
+  account: string,
+): Promise<'removed' | 'absent'> {
+  return new Promise(resolve => {
+    const child = spawn(
+      SECRET_TOOL_BIN,
+      ['clear', 'service', service, 'user', account],
+      { stdio: 'ignore' },
+    )
+    child.on('error', () => resolve('absent'))
+    child.on('close', status => resolve(status === 0 ? 'removed' : 'absent'))
+  })
+}
+
+export function deleteLinuxSync(
+  service: string,
+  account: string,
+): 'removed' | 'absent' {
+  const r = spawnSync(
+    SECRET_TOOL_BIN,
+    ['clear', 'service', service, 'user', account],
+    { stdio: 'ignore' },
+  )
+  return r.status === 0 ? 'removed' : 'absent'
+}
+
+export function isLinuxBackendAvailable(): boolean {
+  const r = spawnSync(SECRET_TOOL_BIN, ['--version'], { stdio: 'ignore' })
+  return r.status === 0
+}
+
 export async function readLinux(
   service: string,
   account: string,
@@ -132,36 +164,4 @@ export function writeLinuxSync(
         'or ensure a Secret Service provider (gnome-keyring, kwallet) is running.',
     )
   }
-}
-
-export async function deleteLinux(
-  service: string,
-  account: string,
-): Promise<'removed' | 'absent'> {
-  return new Promise(resolve => {
-    const child = spawn(
-      SECRET_TOOL_BIN,
-      ['clear', 'service', service, 'user', account],
-      { stdio: 'ignore' },
-    )
-    child.on('error', () => resolve('absent'))
-    child.on('close', status => resolve(status === 0 ? 'removed' : 'absent'))
-  })
-}
-
-export function deleteLinuxSync(
-  service: string,
-  account: string,
-): 'removed' | 'absent' {
-  const r = spawnSync(
-    SECRET_TOOL_BIN,
-    ['clear', 'service', service, 'user', account],
-    { stdio: 'ignore' },
-  )
-  return r.status === 0 ? 'removed' : 'absent'
-}
-
-export function isLinuxBackendAvailable(): boolean {
-  const r = spawnSync(SECRET_TOOL_BIN, ['--version'], { stdio: 'ignore' })
-  return r.status === 0
 }

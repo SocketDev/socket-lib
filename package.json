@@ -1808,10 +1808,10 @@
       "types": "./dist/secrets/macos.d.ts",
       "default": "./dist/secrets/macos.js"
     },
-    "./secrets/shell-env": {
-      "source": "./src/secrets/shell-env.ts",
-      "types": "./dist/secrets/shell-env.d.ts",
-      "default": "./dist/secrets/shell-env.js"
+    "./secrets/rc": {
+      "source": "./src/secrets/rc.ts",
+      "types": "./dist/secrets/rc.d.ts",
+      "default": "./dist/secrets/rc.js"
     },
     "./secrets/types": {
       "source": "./src/secrets/types.ts",

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Unit tests for the secrets/ module — both the
  * keychain backend (per-platform OS credential store) and the
- * shell-env materializer (literal-export rc-block writer).
+ * rc-file writer (literal-export shell-rc block).
  *
  * Strategy:
  *   - Keychain tests round-trip a unique throwaway value through
@@ -9,8 +9,8 @@
  *     skips when the backend isn't available (libsecret missing on
  *     Linux, etc.). Service name is `socket-lib-test-<rand>` so we
  *     never collide with real socket-cli / socket-mcp entries.
- *   - shell-env tests drive the materializer against a fake HOME
- *     and assert the on-disk shape (no real ~/.zshenv touched).
+ *   - rc tests drive `write` / `clear` against a fake HOME and
+ *     assert the on-disk shape (no real ~/.zshenv touched).
  */
 
 import {
@@ -35,15 +35,12 @@ import {
   writeSecretToSlots,
 } from '../../src/secrets/keychain'
 
-import {
-  materializeToShellRc,
-  unmaterializeFromShellRc,
-} from '../../src/secrets/shell-env'
+import * as rc from '../../src/secrets/rc'
 
 const IS_MACOS = platform() === 'darwin'
 const BACKEND_OK = getBackendAvailability().available
 
-function rng(): string {
+export function rng(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
@@ -127,11 +124,11 @@ describe('secrets/keychain', () => {
   })
 })
 
-function withFakeHome(): {
+export function withFakeHome(): {
   rcPath: string
   cleanup: () => void
 } {
-  const fake = mkdtempSync(path.join(tmpdir(), 'shell-env-test-'))
+  const fake = mkdtempSync(path.join(tmpdir(), 'secrets-rc-test-'))
   const prevHome = process.env['HOME']
   const prevShell = process.env['SHELL']
   process.env['HOME'] = fake
@@ -155,12 +152,12 @@ function withFakeHome(): {
   }
 }
 
-describe('secrets/shell-env', () => {
+describe('secrets/rc', () => {
   it.skipIf(!IS_MACOS)('inserts a managed block with literal exports', () => {
     const { rcPath, cleanup } = withFakeHome()
     try {
       writeFileSync(rcPath, '# existing\nexport PATH=$PATH:/foo\n')
-      const r = materializeToShellRc({
+      const r = rc.write({
         service: 'test-svc',
         exports: { TEST_VAR: 'value-1', TEST_ALIAS: 'value-1' },
         notes: ['Test note'],
@@ -186,7 +183,7 @@ describe('secrets/shell-env', () => {
     const { rcPath, cleanup } = withFakeHome()
     try {
       writeFileSync(rcPath, '')
-      materializeToShellRc({
+      rc.write({
         service: 'test-svc',
         exports: { TEST_VAR: "value'with'quotes" },
       })
@@ -198,15 +195,15 @@ describe('secrets/shell-env', () => {
     }
   })
 
-  it.skipIf(!IS_MACOS)('unmaterializeFromShellRc removes the block', () => {
+  it.skipIf(!IS_MACOS)('clear removes the block', () => {
     const { rcPath, cleanup } = withFakeHome()
     try {
       writeFileSync(rcPath, '# before\n')
-      materializeToShellRc({
+      rc.write({
         service: 'test-svc',
         exports: { TEST_VAR: 'v' },
       })
-      const removed = unmaterializeFromShellRc('test-svc')
+      const removed = rc.clear('test-svc')
       expect(removed).toBe(true)
       const content = readFileSync(rcPath, 'utf8')
       expect(content).not.toMatch(/BEGIN test-svc env/)
@@ -223,7 +220,7 @@ describe('secrets/shell-env', () => {
 SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_TOKEN -w 2>/dev/null)"
 # END socket-cli keychain bridge`
       writeFileSync(rcPath, `# existing\n\n${legacyBlock}\n`)
-      const r = materializeToShellRc({
+      const r = rc.write({
         service: 'socket-cli',
         exports: { SOCKET_API_TOKEN: 'literal-value' },
         legacySentinels: ['# BEGIN socket-cli keychain bridge (managed)'],
@@ -248,7 +245,7 @@ SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_T
       try {
         // Force an "other" shell so pickRcFile returns undefined.
         process.env['SHELL'] = '/bin/exotic-shell'
-        const r = materializeToShellRc({
+        const r = rc.write({
           service: 'test-svc',
           exports: { TEST: 'v' },
         })
