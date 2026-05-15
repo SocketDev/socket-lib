@@ -28,6 +28,7 @@ import { jreFromJavaHome } from './from-java-home'
 import { jreFromPath } from './from-path'
 import { jreFromVfs } from './from-vfs'
 
+import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedJre } from './types'
 
@@ -43,11 +44,18 @@ export interface ResolveJreOptions {
         platformArch: string
         integrity?: HashSpec | undefined
         cacheDir?: string | undefined
+        downloader?: BinaryDownloader | undefined
       }
     | undefined
 }
 
 const _resolutionCache = new Map<string, Promise<ResolvedJre | undefined>>()
+
+/* c8 ignore start - test-only escape hatch. */
+export function _resetJreResolution(): void {
+  _resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function cacheKey(opts: ResolveJreOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
@@ -62,12 +70,6 @@ export function cacheKey(opts: ResolveJreOptions | undefined): string {
         : ''
   return `dl:${version}:${platformArch}:${integrityKey}:${cacheDir ?? ''}`
 }
-
-/* c8 ignore start - test-only escape hatch. */
-export function _resetJreResolution(): void {
-  _resolutionCache.clear()
-}
-/* c8 ignore stop */
 
 export async function doResolveJre(
   opts?: ResolveJreOptions | undefined,

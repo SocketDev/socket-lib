@@ -20,6 +20,7 @@ import { sbtFromDownload } from './from-download'
 import { sbtFromPath } from './from-path'
 import { sbtFromVfs } from './from-vfs'
 
+import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedSbt } from './types'
 
@@ -34,6 +35,7 @@ export interface ResolveSbtOptions {
         version: string
         integrity?: HashSpec | undefined
         cacheDir?: string | undefined
+        downloader?: BinaryDownloader | undefined
       }
     | undefined
 }

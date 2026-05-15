@@ -14,7 +14,6 @@ import {
   mkdtempSync,
   readdirSync,
 } from 'node:fs'
-import { writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -28,37 +27,10 @@ import {
 } from '../../../src/external-tools/from-download'
 import { safeDelete } from '../../../src/fs/safe'
 
-import type { BinaryDownloader } from '../../../src/external-tools/from-download'
-
-const FAKE_INTEGRITY =
-  'sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='
-
-/**
- * Build a fake-downloader factory that writes the given payload to
- * the binaryPath the caller supplies via `name`. Returns the
- * downloader plus a "calls" array so tests can assert what got
- * requested.
- */
-export function makeFakeDownloader(payload: Buffer | string): {
-  downloader: BinaryDownloader
-  calls: Array<{ url: string; name: string }>
-} {
-  const calls: Array<{ url: string; name: string }> = []
-  // Each fake-downloader test gets its own scratch dir so concurrent
-  // tests don't collide on the same binaryPath.
-  const scratchDir = mkdtempSync(path.join(os.tmpdir(), 'from-download-test-'))
-  const downloader = (async (opts: Parameters<BinaryDownloader>[0]) => {
-    calls.push({ url: opts.url, name: opts.name })
-    const binaryPath = path.join(scratchDir, opts.name)
-    writeFileSync(binaryPath, payload)
-    return {
-      binaryPath,
-      downloaded: true,
-      integrity: FAKE_INTEGRITY,
-    }
-  }) as BinaryDownloader
-  return { downloader, calls }
-}
+import {
+  FAKE_INTEGRITY_VALUE as FAKE_INTEGRITY,
+  makeFakeDownloader,
+} from './_fake-downloader.mts'
 
 describe('external-tools/from-download', () => {
   let scratch: string

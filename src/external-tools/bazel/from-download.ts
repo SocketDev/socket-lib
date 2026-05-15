@@ -22,6 +22,7 @@ import { downloadToolArchive } from '../from-download'
 
 import { getBazelDownloadUrl } from './asset-names'
 
+import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedBazel } from './types'
 
@@ -32,6 +33,11 @@ export interface BazelFromDownloadOptions {
   platformArch: string
   /** Optional pinned integrity from `external-tools.json`. */
   integrity?: HashSpec | undefined
+  /**
+   * Inject a custom downloader. Forwarded to the underlying
+   * `downloadToolArchive`. Defaults to dlx.
+   */
+  downloader?: BinaryDownloader | undefined
 }
 
 /**
@@ -50,7 +56,7 @@ export interface BazelFromDownloadOptions {
 export async function bazelFromDownload(
   opts: BazelFromDownloadOptions,
 ): Promise<ResolvedBazel | undefined> {
-  const { integrity, platformArch, version } = opts
+  const { downloader, integrity, platformArch, version } = opts
   const url = getBazelDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined
@@ -59,6 +65,7 @@ export async function bazelFromDownload(
     url,
     name: `bazel-${version}-${platformArch}`,
     integrity,
+    downloader,
   })
   return {
     path: archive.archivePath,

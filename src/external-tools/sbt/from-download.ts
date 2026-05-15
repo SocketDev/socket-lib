@@ -21,6 +21,7 @@ import { downloadAndExtractTool } from '../from-download'
 
 import { getSbtDownloadUrl } from './asset-names'
 
+import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedSbt } from './types'
 
@@ -33,6 +34,11 @@ export interface SbtFromDownloadOptions {
    * Override the cache directory. Default: `<getSocketDlxDir()>/sbt/<version>/`.
    */
   cacheDir?: string | undefined
+  /**
+   * Inject a custom downloader. Forwarded to the underlying
+   * `downloadAndExtractTool`. Defaults to dlx.
+   */
+  downloader?: BinaryDownloader | undefined
 }
 
 /**
@@ -48,17 +54,20 @@ export interface SbtFromDownloadOptions {
 export async function sbtFromDownload(
   opts: SbtFromDownloadOptions,
 ): Promise<ResolvedSbt | undefined> {
-  const { cacheDir, integrity, version } = opts
+  const { cacheDir, downloader, integrity, version } = opts
   const url = getSbtDownloadUrl({ version })
   const extractedDir = cacheDir ?? path.join(getSocketDlxDir(), 'sbt', version)
   // strip:1 unwraps the top-level `sbt/` directory the tgz contains,
   // so `bin/sbt` lands at extractedDir/bin/sbt.
   await downloadAndExtractTool({
     url,
-    name: `sbt-${version}`,
+    // `.tgz` suffix is load-bearing: extractArchive auto-detects
+    // format from the cached filename's extension.
+    name: `sbt-${version}.tgz`,
     integrity,
     extractedDir,
     extractOptions: { strip: 1 },
+    downloader,
   })
   return {
     path: path.join(extractedDir, 'bin', 'sbt'),

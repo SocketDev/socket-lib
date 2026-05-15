@@ -20,6 +20,7 @@ import { bazelFromDownload } from './from-download'
 import { bazelFromPath } from './from-path'
 import { bazelFromVfs } from './from-vfs'
 
+import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedBazel } from './types'
 
@@ -34,6 +35,7 @@ export interface ResolveBazelOptions {
         version: string
         platformArch: string
         integrity?: HashSpec | undefined
+        downloader?: BinaryDownloader | undefined
       }
     | undefined
 }

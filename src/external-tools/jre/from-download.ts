@@ -30,6 +30,7 @@ import { downloadAndExtractTool } from '../from-download'
 
 import { getAdoptiumDownloadUrl } from './asset-names'
 
+import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedJre } from './types'
 
@@ -49,6 +50,11 @@ export interface JreFromDownloadOptions {
    * `<getSocketDlxDir()>/jre/<version>/<platformArch>/`.
    */
   cacheDir?: string | undefined
+  /**
+   * Inject a custom downloader. Forwarded to the underlying
+   * `downloadAndExtractTool`. Defaults to dlx.
+   */
+  downloader?: BinaryDownloader | undefined
 }
 
 /**
@@ -67,7 +73,7 @@ export interface JreFromDownloadOptions {
 export async function jreFromDownload(
   opts: JreFromDownloadOptions,
 ): Promise<ResolvedJre | undefined> {
-  const { cacheDir, integrity, platformArch, version } = opts
+  const { cacheDir, downloader, integrity, platformArch, version } = opts
   const url = getAdoptiumDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined
@@ -75,15 +81,20 @@ export async function jreFromDownload(
   const extractedDir =
     cacheDir ??
     path.join(getSocketDlxDir(), 'jre', String(version), platformArch)
+  // Extension is load-bearing: extractArchive auto-detects format
+  // from the cached filename. Adoptium ships `.tar.gz` on
+  // mac/linux and `.zip` on windows.
+  const archiveExt = platformArch.startsWith('win-') ? '.zip' : '.tar.gz'
   // strip:1 unwraps the top-level `jdk-21.0.x-jre/` directory that
   // Adoptium archives include, so the resulting tree has `bin/` etc.
   // at extractedDir root.
   await downloadAndExtractTool({
     url,
-    name: `adoptium-jre-${version}-${platformArch}`,
+    name: `adoptium-jre-${version}-${platformArch}${archiveExt}`,
     integrity,
     extractedDir,
     extractOptions: { strip: 1 },
+    downloader,
   })
   const javaBinary = process.platform === 'win32' ? 'java.exe' : 'java'
   // macOS Adoptium archives nest the runnable JRE under
