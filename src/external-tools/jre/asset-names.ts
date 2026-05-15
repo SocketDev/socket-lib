@@ -78,6 +78,79 @@ export const ADOPTIUM_QUERY_MAP: Readonly<Record<string, AdoptiumAssetQuery>> =
   }) as unknown as Readonly<Record<string, AdoptiumAssetQuery>>
 
 /**
+ * Options for {@link getAdoptiumDownloadUrl}.
+ */
+export interface AdoptiumDownloadOptions {
+  /**
+   * Java feature version (the major). `21` for Java 21, `17` for 17,
+   * etc. Adoptium accepts the bare integer; we pass it through as a
+   * string in the URL.
+   */
+  version: number
+  /**
+   * Fleet platform-arch token — same vocabulary as `getPlatformArch`
+   * output. Looked up in `ADOPTIUM_QUERY_MAP`; returns `undefined`
+   * when Adoptium doesn't publish a build for that target (e.g.
+   * `win-arm64` for older majors).
+   */
+  platformArch: string
+  /**
+   * Whether to fetch the JRE or the full JDK.
+   * @default 'jre'
+   */
+  type?: 'jre' | 'jdk' | undefined
+  /**
+   * Adoptium release channel.
+   * @default 'ga'
+   */
+  releaseType?: 'ga' | 'ea' | undefined
+}
+
+/**
+ * Build the `latest-binary` download URL on Adoptium's API. Hitting
+ * the URL with a normal HTTP GET returns the JRE/JDK archive bytes
+ * (`tar.gz` on macOS/Linux, `zip` on Windows). The URL is stable for
+ * a given `{version, releaseType}` combination — Adoptium serves the
+ * newest patch release behind it.
+ *
+ * Returns `undefined` when no Adoptium build exists for the
+ * requested platform-arch; the caller should surface an installable
+ * error rather than blindly fetching a 404.
+ *
+ * Reference: https://adoptium.net/temurin/releases/?package=jre
+ *
+ * @example
+ * ```typescript
+ * const url = getAdoptiumDownloadUrl({
+ *   version: 21,
+ *   platformArch: 'darwin-arm64',
+ * })
+ * // → 'https://api.adoptium.net/v3/binary/latest/21/ga/mac/aarch64/jre/hotspot/normal/eclipse'
+ *
+ * // Hand to downloadAndExtractTool:
+ * await downloadAndExtractTool({
+ *   url: url!,
+ *   name: 'adoptium-jre-21-darwin-arm64',
+ *   extractedDir: cacheDir,
+ *   extractOptions: { strip: 1 },
+ * })
+ * ```
+ */
+export function getAdoptiumDownloadUrl(
+  opts: AdoptiumDownloadOptions,
+): string | undefined {
+  const { platformArch, releaseType = 'ga', type = 'jre', version } = opts
+  const query = ADOPTIUM_QUERY_MAP[platformArch]
+  if (!query) {
+    return undefined
+  }
+  return (
+    `https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/` +
+    `${query.os}/${query.architecture}/${type}/hotspot/normal/eclipse`
+  )
+}
+
+/**
  * Returns the Adoptium query parameters for a given platform-arch,
  * or `undefined` if no Adoptium build exists for that target.
  */
