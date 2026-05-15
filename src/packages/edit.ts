@@ -1,14 +1,13 @@
 /**
  * @fileoverview Editable package.json manipulation utilities.
  *
- * Convenience wrappers around the `EditablePackageJson` class for the
- * two common shapes: "I have a plain object, give me an editable" and
- * "I have a path, load it as editable (sync or async)."
+ * Convenience wrappers around the `EditablePackageJson` class. Both
+ * the in-memory and path-backed flows funnel through the same two
+ * entry points — pass `path` to persist, omit it to stay in memory:
  *
  *   - `EditablePackageJsonInstance` — public interface for instances
- *   - `pkgJsonToEditable` — wrap an in-memory PackageJson object
- *   - `toEditablePackageJson` — async path-based load
- *   - `toEditablePackageJsonSync` — sync path-based load
+ *   - `toEditablePackageJson` — async (in-memory if no `path`, loads from disk if `path` set)
+ *   - `toEditablePackageJsonSync` — sync version of the above
  *
  * The class factory lives in a sibling leaf and is re-exported here
  * so existing `packages/edit` importers keep working unchanged:
@@ -118,29 +117,6 @@ export interface EditablePackageJsonInstance {
 }
 
 /**
- * Convert a package.json object to an editable instance.
- *
- * @example
- * ```typescript
- * const editable = pkgJsonToEditable({ name: 'my-pkg', version: '1.0.0' })
- * ```
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function pkgJsonToEditable(
-  pkgJson: PackageJson,
-  options?: EditablePackageJsonOptions,
-): unknown {
-  const { normalize, ...normalizeOptions } = {
-    __proto__: null,
-    ...options,
-  } as EditablePackageJsonOptions
-  const EditablePackageJson = getEditablePackageJsonClass()
-  return new EditablePackageJson().fromContent(
-    normalize ? normalizePackageJson(pkgJson, normalizeOptions) : pkgJson,
-  )
-}
-
-/**
  * Convert package.json to editable instance with file persistence.
  *
  * @example
@@ -156,15 +132,17 @@ export async function toEditablePackageJson(
   pkgJson: PackageJson,
   options?: EditablePackageJsonOptions,
 ): Promise<unknown> {
-  const { path: filepath, ...pkgJsonToEditableOptions } = {
+  const { path: filepath, ...restOptions } = {
     __proto__: null,
     ...options,
   }
-  const { normalize, ...normalizeOptions } = pkgJsonToEditableOptions
-  if (typeof filepath !== 'string') {
-    return pkgJsonToEditable(pkgJson, pkgJsonToEditableOptions)
-  }
+  const { normalize, ...normalizeOptions } = restOptions
   const EditablePackageJson = getEditablePackageJsonClass()
+  if (typeof filepath !== 'string') {
+    return new EditablePackageJson().fromContent(
+      normalize ? normalizePackageJson(pkgJson, normalizeOptions) : pkgJson,
+    )
+  }
   const pkgJsonPath = resolvePackageJsonDirname(filepath)
   return (
     await EditablePackageJson.load(pkgJsonPath, { create: true })
@@ -198,15 +176,17 @@ export function toEditablePackageJsonSync(
   pkgJson: PackageJson,
   options?: EditablePackageJsonOptions,
 ): unknown {
-  const { path: filepath, ...pkgJsonToEditableOptions } = {
+  const { path: filepath, ...restOptions } = {
     __proto__: null,
     ...options,
   }
-  const { normalize, ...normalizeOptions } = pkgJsonToEditableOptions
-  if (typeof filepath !== 'string') {
-    return pkgJsonToEditable(pkgJson, pkgJsonToEditableOptions)
-  }
+  const { normalize, ...normalizeOptions } = restOptions
   const EditablePackageJson = getEditablePackageJsonClass()
+  if (typeof filepath !== 'string') {
+    return new EditablePackageJson().fromContent(
+      normalize ? normalizePackageJson(pkgJson, normalizeOptions) : pkgJson,
+    )
+  }
   const pkgJsonPath = resolvePackageJsonDirname(filepath)
   return new EditablePackageJson().create(pkgJsonPath).fromJSON(
     `${JSONStringify(
