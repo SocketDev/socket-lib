@@ -280,6 +280,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts) | `resolveBazelAssetUrl(version, platformArch)` — builds the upstream GitHub Releases download URL for a Bazel binary. |
 | [`@socketsecurity/lib/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts) | `resolveBazelVersion({ cwd })` — picks the Bazel version to run for a project, matching the bazelisk precedence: 1. |
 | [`@socketsecurity/lib/external-tools/bazel/types`](../src/external-tools/bazel/types.ts) | Shared types for Bazel resolution. |
+| [`@socketsecurity/lib/external-tools/from-download`](../src/external-tools/from-download.ts) | Generic "download tier" for external-tools resolvers. |
 | [`@socketsecurity/lib/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts) | Adoptium API platform-arch → asset-query mappings. |
 | [`@socketsecurity/lib/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts) | `getCurrentPlatformArch()` — resolves the current machine to a `platform-arch` string suitable for the Adoptium asset-name map. |
 | [`@socketsecurity/lib/external-tools/jre/from-java-home`](../src/external-tools/jre/from-java-home.ts) | `jreFromJavaHome()` — checks `$JAVA_HOME` for an existing JRE/JDK. |

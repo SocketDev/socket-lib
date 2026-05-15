@@ -908,6 +908,11 @@
       "types": "./dist/external-tools/bazel/types.d.ts",
       "default": "./dist/external-tools/bazel/types.js"
     },
+    "./external-tools/from-download": {
+      "source": "./src/external-tools/from-download.ts",
+      "types": "./dist/external-tools/from-download.d.ts",
+      "default": "./dist/external-tools/from-download.js"
+    },
     "./external-tools/jre/asset-names": {
       "source": "./src/external-tools/jre/asset-names.ts",
       "types": "./dist/external-tools/jre/asset-names.d.ts",
