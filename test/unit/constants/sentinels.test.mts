@@ -152,21 +152,20 @@ describe('constants/sentinels', () => {
     })
   })
 
-  describe('constant immutability', () => {
-    it('should not allow reassignment of LOOP_SENTINEL', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        LOOP_SENTINEL = 999
-      }).toThrow()
+  describe('constant identity', () => {
+    // ESM-imported `const` bindings are read-only by spec; we don't
+    // re-verify that here. Earlier revs attempted an assignment-to-
+    // readonly trap which is correct in theory but triggers a vite-
+    // SSR transform that balloons the worker heap. Test the value
+    // identity instead — that's what callers actually rely on.
+    it('LOOP_SENTINEL is the canonical singleton', () => {
+      expect(LOOP_SENTINEL).toBe(1_000_000)
+      expect(typeof LOOP_SENTINEL).toBe('number')
     })
 
-    it('should not allow reassignment of string constants', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        UNKNOWN_ERROR = 'Different error'
-      }).toThrow()
+    it('UNKNOWN_ERROR is the canonical singleton', () => {
+      expect(UNKNOWN_ERROR).toBe('Unknown error')
+      expect(typeof UNKNOWN_ERROR).toBe('string')
     })
   })
 

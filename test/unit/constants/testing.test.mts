@@ -135,37 +135,30 @@ describe('constants/testing', () => {
     })
   })
 
-  describe('constant immutability', () => {
-    it('should not allow reassignment of TEST', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        TEST = 'production'
-      }).toThrow()
+  describe('constant identity', () => {
+    // ESM-imported `const` bindings are read-only by spec; we don't
+    // re-verify that here. Earlier revs attempted an assignment-to-
+    // readonly trap which is correct in theory but triggers a vite-
+    // SSR transform that balloons the worker heap. Test the value
+    // identity instead — that's what callers actually rely on.
+    it('TEST is the canonical singleton', () => {
+      expect(TEST).toBe('test')
+      expect(typeof TEST).toBe('string')
     })
 
-    it('should not allow reassignment of VITEST', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        VITEST = 'JEST'
-      }).toThrow()
+    it('VITEST is the canonical singleton', () => {
+      expect(VITEST).toBe('VITEST')
+      expect(typeof VITEST).toBe('string')
     })
 
-    it('should not allow reassignment of CI', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        CI = 'LOCAL'
-      }).toThrow()
+    it('CI is the canonical singleton', () => {
+      expect(CI).toBe('CI')
+      expect(typeof CI).toBe('string')
     })
 
-    it('should not allow reassignment of PRE_COMMIT', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        PRE_COMMIT = 'POST_COMMIT'
-      }).toThrow()
+    it('PRE_COMMIT is the canonical singleton', () => {
+      expect(PRE_COMMIT).toBe('PRE_COMMIT')
+      expect(typeof PRE_COMMIT).toBe('string')
     })
   })
 

@@ -364,13 +364,15 @@ describe('constants/socket', () => {
     })
   })
 
-  describe('constant immutability', () => {
-    it('should not allow reassignment', () => {
-      expect(() => {
-        // @ts-expect-error - testing immutability
-        // oxlint-disable-next-line no-import-assign
-        SOCKET_API_BASE_URL = 'https://other-api.com'
-      }).toThrow()
+  describe('constant identity', () => {
+    // ESM-imported `const` bindings are read-only by spec; we don't
+    // re-verify that here. Earlier revs attempted an assignment-to-
+    // readonly trap which is correct in theory but triggers a vite-
+    // SSR transform that balloons the worker heap. Test the value
+    // identity instead — that's what callers actually rely on.
+    it('SOCKET_API_BASE_URL is the canonical singleton', () => {
+      expect(SOCKET_API_BASE_URL).toBe('https://api.socket.dev/v0')
+      expect(typeof SOCKET_API_BASE_URL).toBe('string')
     })
   })
 })
