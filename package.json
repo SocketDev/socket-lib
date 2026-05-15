@@ -2048,6 +2048,31 @@
       "types": "./dist/tables/types.d.ts",
       "default": "./dist/tables/types.js"
     },
+    "./temporal/instant": {
+      "source": "./src/temporal/instant.ts",
+      "types": "./dist/temporal/instant.d.ts",
+      "default": "./dist/temporal/instant.js"
+    },
+    "./temporal/now": {
+      "source": "./src/temporal/now.ts",
+      "types": "./dist/temporal/now.d.ts",
+      "default": "./dist/temporal/now.js"
+    },
+    "./temporal/slots": {
+      "source": "./src/temporal/slots.ts",
+      "types": "./dist/temporal/slots.d.ts",
+      "default": "./dist/temporal/slots.js"
+    },
+    "./temporal/system": {
+      "source": "./src/temporal/system.ts",
+      "types": "./dist/temporal/system.d.ts",
+      "default": "./dist/temporal/system.js"
+    },
+    "./temporal/temporal": {
+      "source": "./src/temporal/temporal.ts",
+      "types": "./dist/temporal/temporal.d.ts",
+      "default": "./dist/temporal/temporal.js"
+    },
     "./test/integration/esm-imports.test": {
       "default": "./test/integration/esm-imports.test.mjs"
     },
