@@ -80,6 +80,13 @@ const vitestConfig = defineConfig({
     pool: 'threads',
     poolOptions: {
       threads: {
+        // Worker heap ceiling. test/unit/constants/github.test.mts
+        // intentionally mutates an imported binding to assert
+        // immutability; under vitest's worker-isolation the resulting
+        // assignment-to-readonly trap balloons the heap. Raising the
+        // per-worker limit clears the OOM without papering over the
+        // test's intent.
+        execArgv: ['--max-old-space-size=4096'],
         // Use `'CI' in process.env` instead of `process.env.CI` so an
         // empty-string CI value (some self-hosted setups) still counts
         // as "CI mode" — the latter coerces "" to false and would
