@@ -5,10 +5,17 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import process from 'node:process'
 import { defineConfig } from 'vitest/config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
+
+// Worker heap cap: smaller in CI (GitHub Actions ubuntu-latest has
+// ~7 GB total RAM — leave room for the runner + OS), generous locally
+// where developer machines typically have plenty of RAM.
+const isCI = !!process.env['CI']
+const workerHeapMB = isCI ? 6144 : 12288
 
 // Normalize paths for cross-platform glob patterns (forward slashes on Windows)
 const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
@@ -42,15 +49,23 @@ const vitestConfigIsolated = defineConfig({
     ],
     exclude: ['**/node_modules/**', '**/dist/**'],
     reporters: ['default'],
-    // Full isolation for tests that modify shared module state
-    pool: 'threads',
+    // Pin the worker's v8 old-generation heap ceiling so CI runs are
+    // deterministic regardless of host RAM (Node defaults its heap
+    // cap based on detected physical memory — varies by machine).
+    // NOTE: this must be `test.execArgv`, not `poolOptions.X.execArgv`,
+    // because vitest 4 silently ignores the latter. Pool is `forks`
+    // because Node worker_threads reject --max-old-space-size in
+    // execArgv (ERR_WORKER_INVALID_EXEC_ARGV).
+    execArgv: [`--max-old-space-size=${workerHeapMB}`],
+    // Full isolation for tests that modify shared module state.
+    // Forks pool gives each test file its own child process.
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        singleThread: true,
-        maxThreads: 1,
-        minThreads: 1,
+      forks: {
+        singleFork: true,
+        maxForks: 1,
+        minForks: 1,
         isolate: true,
-        useAtomics: true,
       },
     },
     testTimeout: 10_000,

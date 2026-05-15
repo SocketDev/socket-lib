@@ -77,17 +77,19 @@ const vitestConfig = defineConfig({
         : [toGlobPath(path.resolve(projectRoot, 'test/npm/**'))]),
     ],
     reporters: ['default'],
+    // Threads pool is faster than forks (~3× lower startup, shared
+    // module graph). Workers inherit the parent's v8 heap autodetect
+    // (~4 GB on a 64 GB host, ~3 GB on CI ubuntu-latest). We do not
+    // pin --max-old-space-size here because Node's worker_threads
+    // reject it in execArgv (ERR_WORKER_INVALID_EXEC_ARGV); tests
+    // that need an explicit heap cap or per-file isolation live under
+    // test/isolated/ and run through vitest.config.isolated.mts
+    // (forks pool, per-file heap cap, isolate: true). Note also that
+    // vitest 4 silently ignores `poolOptions.X.execArgv` — even if
+    // threads accepted heap flags, that key wouldn't reach the worker.
     pool: 'threads',
     poolOptions: {
       threads: {
-        // Worker heap ceiling. Each worker thread is its own V8 isolate
-        // with its own heap; --max-old-space-size caps the thread's heap
-        // independently of the parent process. 4 GB absorbs the
-        // cumulative heap pressure across ~7000 tests sharing a worker
-        // (isolate: false, below). Tests that genuinely can't fit even
-        // at this ceiling live under test/isolated/ and run through
-        // vitest.config.isolated.mts (singleThread + isolate: true).
-        execArgv: ['--max-old-space-size=4096'],
         // Use `'CI' in process.env` instead of `process.env.CI` so an
         // empty-string CI value (some self-hosted setups) still counts
         // as "CI mode" — the latter coerces "" to false and would

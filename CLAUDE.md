@@ -34,7 +34,7 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 - **Real customer / company names** — never write one into a commit, PR, issue, comment, or release note. Replace with `Acme Inc` or rewrite the sentence to not need the reference. (No enumerated denylist exists — a denylist is itself a leak.)
 - **Private repos / internal project names** — never mention. Omit the reference entirely; don't substitute "an internal tool" — the placeholder is a tell.
 - **Linear refs** — never put `SOC-123`/`ENG-456`/Linear URLs in code, comments, or PR text. Linear lives in Linear.
-- **Publish / release / build-release workflows** — never `gh workflow run|dispatch` or `gh api …/dispatches`. Dispatches are irrevocable. The user runs them manually. Bypass: a `gh workflow run` with `-f dry-run=true` is allowed when the target workflow declares a `dry-run:` input under `workflow_dispatch.inputs` and no force-prod override (`-f release=true` / `-f publish=true` / `-f prod=true`) is set.
+- **Publish / release / build-release workflows** — never `gh workflow run|dispatch` or `gh api …/dispatches`. Dispatches are irrevocable. The user runs them manually. Bypass: either a `gh workflow run -f dry-run=true` when the workflow declares a `dry-run:` input and no force-prod override (`-f release=true` / `-f publish=true` / `-f prod=true`) is set, OR `Allow workflow-dispatch bypass` typed verbatim by the user for workflows without a dry-run input (e.g. node-smol build) or one-off recovery dispatches.
 - **Workflow input naming** — `workflow_dispatch.inputs` keys are kebab-case (`dry-run`, `build-mode`), not snake_case. The release-workflow-guard hook only recognizes kebab; a `dry_run` input silently fails the dry-run bypass.
 - **`pull_request_target` is privileged** — it runs in the BASE repo's context with secrets. Never combine it with `actions/checkout` of `${{ github.event.pull_request.head.* }}` AND a step that executes the checked-out fork code (`pnpm i` / `npm i` / `pnpm build` / `cargo build` / `make` / etc.). Prefer the split-workflow pattern (build in `pull_request`, publish artifact, separate `workflow_run` posts the comment) or gate `pull_request_target` on `types: [labeled]` so only maintainers can trigger. Enforced by `.claude/hooks/pull-request-target-guard/`.
 - **No external issue/PR refs in commit messages or PR bodies.** GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/(issues|pull)/<num>` mentions back to the target issue, spamming the maintainer with `added N commits that reference this issue` events. Only SocketDev-owned refs are allowed (`SocketDev/<repo>#<num>` is fine). For upstream maintainer issues, link them in _the PR description prose_ (which doesn't trigger backrefs from commits) or use `[#1203](https://npmx.dev/...)` link form that omits the `owner/repo#` token. Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/no-external-issue-ref-guard/`).
@@ -63,8 +63,9 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 - 🚨 NEVER use `npx`, `pnpm dlx`, or `yarn dlx` — use `pnpm exec <package>` or `pnpm run <script>` # socket-hook: allow npx
 - 🚨 NEVER pass `--experimental-strip-types` to Node (enforced by `.claude/hooks/no-experimental-strip-types-guard/`).
 - **New dependencies** — every new dep added to `package.json` runs a Socket-score check at edit time; low-scoring deps block (enforced by `.claude/hooks/check-new-deps/`).
+- **Bundler**: `rolldown`, NOT `esbuild`. The fleet standardizes on rolldown for direct bundling (see `template/.config/rolldown/`). Transitive esbuild deps (e.g. via vitest) are unavoidable today — the rule is no _new direct_ esbuild use anywhere in the fleet.
 - **Backward compatibility** — FORBIDDEN to maintain. Actively remove when encountered.
-- Full ruleset (packageManager field, `.config/` placement, `.mts` runners, soak window, shallow submodules, monorepo `engines.node`) in [`docs/claude.md/fleet/tooling.md`](docs/claude.md/fleet/tooling.md).
+- Full ruleset (packageManager field, `.config/` placement, `.mts` runners, soak time, shallow submodules, monorepo `engines.node`) in [`docs/claude.md/fleet/tooling.md`](docs/claude.md/fleet/tooling.md).
 
 ### Fix it, don't defer
 
@@ -184,7 +185,7 @@ An error message is UI. The reader should fix the problem from the message alone
 3. **Saw vs. wanted** — the bad value and the allowed shape or set.
 4. **Fix** — one imperative action (`rename the key to …`).
 
-Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socketsecurity/lib/errors` over hand-rolled checks. Use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays` for allowed-set lists. Full guidance in [`docs/claude.md/fleet/error-messages.md`](docs/claude.md/fleet/error-messages.md).
+Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socketsecurity/lib/errors` over hand-rolled checks. Use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays` for allowed-set lists. Vague-shape `throw new Error("…")` strings are flagged on Stop (enforced by `.claude/hooks/error-message-quality-reminder/`). Full guidance in [`docs/claude.md/fleet/error-messages.md`](docs/claude.md/fleet/error-messages.md).
 
 ### Token hygiene
 
@@ -246,6 +247,8 @@ All modules exported via `package.json` exports field. When adding modules, upda
 - Test files in `test/`, naming matches source
 - 🚨 **NEVER use `--` before test paths** — runs all tests
 - NEVER write source-code-scanning tests — verify behavior with real function calls
+
+🚨 **Vitest OOM with no per-test failure → suspect an infinite stream / unbounded async loop, NOT cumulative memory.** When the worker reports `FATAL ERROR: Ineffective mark-compacts near heap limit` with `tests 0ms` (or per-test results never flush), one test is spinning. Most common culprit: a Node `Readable` that calls `this.push(undefined)` instead of `this.push(null)` — only `null` terminates the stream, so `read()` is invoked forever and chunks accumulate until v8 OOMs. The error masquerades as "cumulative leak across many tests" because all prior tests ran fine but vitest can't print results before the runaway blows the heap. **Before splitting files or raising `--max-old-space-size`, bisect with `pnpm exec vitest -t '<describe-name>'`** to find the offending test. See the OOM-history block at the top of `test/isolated/http-request-advanced-2.test.mts` for the canonical example (a multi-day misdiagnosis avoided by checking for `push(undefined)` first).
 
 ### CI Integration
 
