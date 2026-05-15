@@ -83,7 +83,7 @@ interface InquirerContext {
 export type Context = import('../objects/types').Remap<
   InquirerContext & {
     /** Optional spinner to stop/start during prompt display */
-    spinner?: import('../spinner/types').Spinner | undefined
+    spinner?: import('../spinner/types').SpinnerInstance | undefined
   }
 >
 

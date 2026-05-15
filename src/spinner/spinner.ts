@@ -56,14 +56,14 @@ import {
 import type {
   ProgressInfo,
   ShimmerInfo,
-  Spinner as SpinnerType,
+  SpinnerInstance,
   SpinnerOptions,
   SpinnerStyle,
   SymbolType,
 } from './types'
 
 let _Spinner: {
-  new (options?: SpinnerOptions | undefined): SpinnerType
+  new (options?: SpinnerOptions | undefined): SpinnerInstance
 }
 let _defaultSpinner: SpinnerStyle | undefined
 
@@ -93,7 +93,7 @@ let _defaultSpinner: SpinnerStyle | undefined
  *
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
+export function Spinner(options?: SpinnerOptions | undefined): SpinnerInstance {
   if (_Spinner === undefined) {
     /* c8 ignore start - External yoctoSpinner initialization */
     const YoctoCtor = yoctoSpinner as any
@@ -443,11 +443,11 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @example
        * spinner.disableShimmer()
        */
-      disableShimmer(): SpinnerType {
+      disableShimmer(): SpinnerInstance {
         // Disable shimmer but preserve config.
         this.#shimmer = undefined
         this.#updateSpinnerText()
-        return this as unknown as SpinnerType
+        return this as unknown as SpinnerInstance
       }
 
       /**
@@ -486,7 +486,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * @example
        * spinner.enableShimmer()
        */
-      enableShimmer(): SpinnerType {
+      enableShimmer(): SpinnerInstance {
         if (this.#shimmerSavedConfig) {
           // Restore saved config (reset frame counter to 0).
           this.#shimmer = { ...this.#shimmerSavedConfig, frame: 0 }
@@ -502,7 +502,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
         }
 
         this.#updateSpinnerText()
-        return this as unknown as SpinnerType
+        return this as unknown as SpinnerInstance
       }
 
       /**
@@ -709,7 +709,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        *   speed: 0.5
        * })
        */
-      setShimmer(config: ShimmerConfig): SpinnerType {
+      setShimmer(config: ShimmerConfig): SpinnerInstance {
         this.#shimmer = {
           __proto__: null,
           color:
@@ -721,7 +721,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
         } as ShimmerInfo
         this.#shimmerSavedConfig = this.#shimmer
         this.#updateSpinnerText()
-        return this as unknown as SpinnerType
+        return this as unknown as SpinnerInstance
       }
 
       /**
@@ -851,8 +851,8 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        *
        */
       text(): string
-      text(value: string): SpinnerType
-      text(value?: string): string | SpinnerType {
+      text(value: string): SpinnerInstance
+      text(value?: string): string | SpinnerInstance {
         // biome-ignore lint/complexity/noArguments: Function overload for getter/setter pattern.
         if (arguments.length === 0) {
           // Getter: return current base text
@@ -861,7 +861,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
         // Setter: update base text and refresh display
         this.#baseText = value ?? ''
         this.#updateSpinnerText()
-        return this as unknown as SpinnerType
+        return this as unknown as SpinnerInstance
       }
 
       /**
@@ -881,7 +881,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
        * // Update multiple properties
        * spinner.updateShimmer({ color: [255, 0, 0], speed: 0.8 })
        */
-      updateShimmer(config: Partial<ShimmerConfig>): SpinnerType {
+      updateShimmer(config: Partial<ShimmerConfig>): SpinnerInstance {
         // Each partial-config field branch fires only when caller
         // updates that specific field; tests don't pair all sub-arms
         // in a single call. The shimmer-state cascade (existing /
@@ -929,7 +929,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
         this.#shimmerSavedConfig = this.#shimmer
 
         this.#updateSpinnerText()
-        return this as unknown as SpinnerType
+        return this as unknown as SpinnerInstance
         /* c8 ignore stop */
       }
 
@@ -957,7 +957,7 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerType {
         return this.#apply('warning', [text, ...extras])
       }
     } as unknown as {
-      new (options?: SpinnerOptions | undefined): SpinnerType
+      new (options?: SpinnerOptions | undefined): SpinnerInstance
     }
     // Add aliases.
     ObjectDefineProperties(_Spinner.prototype, {

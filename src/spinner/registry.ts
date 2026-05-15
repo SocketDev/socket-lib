@@ -13,10 +13,10 @@ import { hasOwn } from '../objects/predicates'
 
 import { Spinner } from './spinner'
 
-import type { Spinner as SpinnerType, SpinnerStyle } from './types'
+import type { SpinnerInstance, SpinnerStyle } from './types'
 
 let _cliSpinners: Record<string, SpinnerStyle> | undefined
-let _spinner: SpinnerType | undefined
+let _spinner: SpinnerInstance | undefined
 
 /**
  * Get available CLI spinner styles or a specific style by name.
@@ -78,7 +78,7 @@ export function getCliSpinners(
  * spinner.start('Loading…')
  * ```
  */
-export function getDefaultSpinner(): SpinnerType {
+export function getDefaultSpinner(): SpinnerInstance {
   if (_spinner === undefined) {
     _spinner = Spinner()
   }

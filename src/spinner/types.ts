@@ -68,7 +68,7 @@ export type ShimmerInfo = {
  * spinner.successAndStop('All done!')
  * ```
  */
-export type Spinner = {
+export type SpinnerInstance = {
   /** Current spinner color as RGB tuple */
   color: ColorRgb
   /** Current spinner animation style */
@@ -81,93 +81,100 @@ export type Spinner = {
   get shimmerState(): ShimmerInfo | undefined
 
   /** Clear the current line without stopping the spinner */
-  clear(): Spinner
+  clear(): SpinnerInstance
 
   /** Show debug message without stopping (only if debug mode enabled) */
-  debug(text?: string | undefined, ...extras: unknown[]): Spinner
+  debug(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Show debug message and stop the spinner (only if debug mode enabled) */
-  debugAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  debugAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Decrease indentation by specified spaces (default: 2) */
-  dedent(spaces?: number | undefined): Spinner
+  dedent(spaces?: number | undefined): SpinnerInstance
 
   /** Disable shimmer effect (preserves config for later re-enable) */
-  disableShimmer(): Spinner
+  disableShimmer(): SpinnerInstance
 
   /** Alias for `success()` - show success without stopping */
-  done(text?: string | undefined, ...extras: unknown[]): Spinner
+  done(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Alias for `successAndStop()` - show success and stop */
-  doneAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  doneAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Enable shimmer effect (restores saved config or uses defaults) */
-  enableShimmer(): Spinner
+  enableShimmer(): SpinnerInstance
 
   /** Alias for `fail()` - show error without stopping */
-  error(text?: string | undefined, ...extras: unknown[]): Spinner
+  error(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Alias for `failAndStop()` - show error and stop */
-  errorAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  errorAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Show failure (✗) without stopping the spinner */
-  fail(text?: string | undefined, ...extras: unknown[]): Spinner
+  fail(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Show failure (✗) and stop the spinner, auto-clearing the line */
-  failAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  failAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Increase indentation by specified spaces (default: 2) */
-  indent(spaces?: number | undefined): Spinner
+  indent(spaces?: number | undefined): SpinnerInstance
 
   /** Show info (ℹ) message without stopping the spinner */
-  info(text?: string | undefined, ...extras: unknown[]): Spinner
+  info(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Show info (ℹ) message and stop the spinner, auto-clearing the line */
-  infoAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  infoAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Log to stdout without stopping the spinner */
-  log(text?: string | undefined, ...extras: unknown[]): Spinner
+  log(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Log and stop the spinner, auto-clearing the line */
-  logAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  logAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Update progress bar with current/total values and optional unit */
-  progress(current: number, total: number, unit?: string | undefined): Spinner
+  progress(
+    current: number,
+    total: number,
+    unit?: string | undefined,
+  ): SpinnerInstance
   /** Increment progress by specified amount (default: 1) */
-  progressStep(amount?: number): Spinner
+  progressStep(amount?: number): SpinnerInstance
 
   /** Set complete shimmer configuration */
-  setShimmer(config: ShimmerConfig): Spinner
+  setShimmer(config: ShimmerConfig): SpinnerInstance
 
   /** Show skip (↻) message without stopping the spinner */
-  skip(text?: string | undefined, ...extras: unknown[]): Spinner
+  skip(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Show skip (↻) message and stop the spinner, auto-clearing the line */
-  skipAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  skipAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Start spinning with optional text */
-  start(text?: string | undefined): Spinner
+  start(text?: string | undefined): SpinnerInstance
 
   /** Show main step message to stderr without stopping */
-  step(text?: string | undefined, ...extras: unknown[]): Spinner
+  step(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Stop spinning and clear internal state, auto-clearing the line */
-  stop(text?: string | undefined): Spinner
+  stop(text?: string | undefined): SpinnerInstance
   /** Stop and show final text without clearing the line */
-  stopAndPersist(text?: string | undefined): Spinner
+  stopAndPersist(text?: string | undefined): SpinnerInstance
 
   /** Show indented substep message to stderr without stopping */
-  substep(text?: string | undefined, ...extras: unknown[]): Spinner
+  substep(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /** Show success (✓) without stopping the spinner */
-  success(text?: string | undefined, ...extras: unknown[]): Spinner
+  success(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Show success (✓) and stop the spinner, auto-clearing the line */
-  successAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  successAndStop(
+    text?: string | undefined,
+    ...extras: unknown[]
+  ): SpinnerInstance
 
   /** Get current spinner text (getter) or set new text (setter) */
-  text(value: string): Spinner
+  text(value: string): SpinnerInstance
   text(): string
 
   /** Update partial shimmer configuration */
-  updateShimmer(config: Partial<ShimmerConfig>): Spinner
+  updateShimmer(config: Partial<ShimmerConfig>): SpinnerInstance
 
   /** Show warning (⚠) without stopping the spinner */
-  warn(text?: string | undefined, ...extras: unknown[]): Spinner
+  warn(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /** Show warning (⚠) and stop the spinner, auto-clearing the line */
-  warnAndStop(text?: string | undefined, ...extras: unknown[]): Spinner
+  warnAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 }
 
 /**
@@ -249,7 +256,7 @@ export type WithSpinnerOptions<T> = {
    * Optional spinner instance to use.
    * If not provided, operation runs without spinner.
    */
-  spinner?: Spinner | undefined
+  spinner?: SpinnerInstance | undefined
   /**
    * Optional spinner options to apply during the operation.
    * These options will be pushed when the operation starts and popped when it completes.
@@ -266,7 +273,7 @@ export type WithSpinnerRestoreOptions<T> = {
   /** Async function to execute while spinner is stopped */
   operation: () => Promise<T>
   /** Optional spinner instance to restore after operation */
-  spinner?: Spinner | undefined
+  spinner?: SpinnerInstance | undefined
   /** Whether spinner was spinning before the operation (used to conditionally restart) */
   wasSpinning: boolean
 }
@@ -284,7 +291,7 @@ export type WithSpinnerSyncOptions<T> = {
    * Optional spinner instance to use.
    * If not provided, operation runs without spinner.
    */
-  spinner?: Spinner | undefined
+  spinner?: SpinnerInstance | undefined
   /**
    * Optional spinner options to apply during the operation.
    * These options will be pushed when the operation starts and popped when it completes.
