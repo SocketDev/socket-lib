@@ -585,6 +585,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                              | Description                                                                                    |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/secrets/find`](../src/secrets/find.ts)         | Resolve a secret from the canonical fleet precedence order: process env → OS keychain.         |
 | [`@socketsecurity/lib/secrets/keychain`](../src/secrets/keychain.ts) | Cross-platform secret-storage helper.                                                          |
 | [`@socketsecurity/lib/secrets/linux`](../src/secrets/linux.ts)       | Linux Secret Service backend via `secret-tool`.                                                |
 | [`@socketsecurity/lib/secrets/macos`](../src/secrets/macos.ts)       | macOS Keychain backend via `security(1)`.                                                      |

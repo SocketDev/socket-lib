@@ -32,6 +32,14 @@
 import { platform } from 'node:os'
 
 import {
+  dedupeRead,
+  getCached,
+  has as cacheHas,
+  invalidate,
+  invalidateAll,
+  setCached,
+} from './_cache'
+import {
   deleteMacOS,
   deleteMacOSSync,
   isMacOSBackendAvailable,
@@ -96,16 +104,22 @@ export async function deleteSecret({
   service,
   account,
 }: DeleteOptions): Promise<'removed' | 'absent'> {
+  let outcome: 'removed' | 'absent'
   switch (detectPlatform()) {
     case 'darwin':
-      return deleteMacOS(service, account)
+      outcome = await deleteMacOS(service, account)
+      break
     case 'linux':
-      return deleteLinux(service, account)
+      outcome = await deleteLinux(service, account)
+      break
     case 'win32':
-      return deleteWindows(service, account)
+      outcome = await deleteWindows(service, account)
+      break
     default:
-      return 'absent'
+      outcome = 'absent'
   }
+  invalidate(service, account)
+  return outcome
 }
 
 export interface DeleteFromSlotsOptions {
@@ -141,16 +155,22 @@ export function deleteSecretSync({
   service,
   account,
 }: DeleteOptions): 'removed' | 'absent' {
+  let outcome: 'removed' | 'absent'
   switch (detectPlatform()) {
     case 'darwin':
-      return deleteMacOSSync(service, account)
+      outcome = deleteMacOSSync(service, account)
+      break
     case 'linux':
-      return deleteLinuxSync(service, account)
+      outcome = deleteLinuxSync(service, account)
+      break
     case 'win32':
-      return deleteWindowsSync(service, account)
+      outcome = deleteWindowsSync(service, account)
+      break
     default:
-      return 'absent'
+      outcome = 'absent'
   }
+  invalidate(service, account)
+  return outcome
 }
 
 /**
@@ -211,16 +231,21 @@ export async function readSecret({
   service,
   account,
 }: ReadOptions): Promise<string | undefined> {
-  switch (detectPlatform()) {
-    case 'darwin':
-      return readMacOS(service, account)
-    case 'linux':
-      return readLinux(service, account)
-    case 'win32':
-      return readWindows(service, account)
-    default:
-      return undefined
-  }
+  // Process-scoped cache hit short-circuits the OS call. Concurrent
+  // reads of the same key share one in-flight Promise via dedupeRead.
+  // Cache is invalidated by writeSecret / deleteSecret.
+  return dedupeRead(service, account, async () => {
+    switch (detectPlatform()) {
+      case 'darwin':
+        return readMacOS(service, account)
+      case 'linux':
+        return readLinux(service, account)
+      case 'win32':
+        return readWindows(service, account)
+      default:
+        return undefined
+    }
+  })
 }
 
 export interface ReadFromSlotsOptions {
@@ -266,16 +291,25 @@ export function readSecretSync({
   service,
   account,
 }: ReadOptions): string | undefined {
+  if (cacheHas(service, account)) {
+    return getCached(service, account)
+  }
+  let value: string | undefined
   switch (detectPlatform()) {
     case 'darwin':
-      return readMacOSSync(service, account)
+      value = readMacOSSync(service, account)
+      break
     case 'linux':
-      return readLinuxSync(service, account)
+      value = readLinuxSync(service, account)
+      break
     case 'win32':
-      return readWindowsSync(service, account)
+      value = readWindowsSync(service, account)
+      break
     default:
-      return undefined
+      value = undefined
   }
+  setCached(service, account, value)
+  return value
 }
 
 export interface WriteOptions {
@@ -315,14 +349,17 @@ export async function writeSecret({
   switch (platform_) {
     case 'darwin':
       await writeMacOS(service, account, value, lbl)
-      return
+      break
     case 'linux':
       await writeLinux(service, account, value, lbl)
-      return
+      break
     case 'win32':
       await writeWindows(service, account, value, lbl)
-      return
+      break
   }
+  // Refresh the cache so subsequent reads return the new value
+  // without a re-fetch (and without surfacing the stale prior value).
+  setCached(service, account, value)
 }
 
 export function writeSecretSync({
@@ -345,14 +382,15 @@ export function writeSecretSync({
   switch (platform_) {
     case 'darwin':
       writeMacOSSync(service, account, value, lbl)
-      return
+      break
     case 'linux':
       writeLinuxSync(service, account, value, lbl)
-      return
+      break
     case 'win32':
       writeWindowsSync(service, account, value, lbl)
-      return
+      break
   }
+  setCached(service, account, value)
 }
 
 export interface WriteToSlotsOptions {
@@ -399,4 +437,14 @@ export function writeSecretToSlotsSync({
     results.push({ account, outcome: 'written' })
   }
   return results
+}
+
+/**
+ * Drop the in-process read cache. Tests use this between cases to
+ * force a fresh OS call; production code generally doesn't need it
+ * (process exit drops the cache anyway, and `writeSecret` /
+ * `deleteSecret` already invalidate per-key entries automatically).
+ */
+export function clearCache(): void {
+  invalidateAll()
 }

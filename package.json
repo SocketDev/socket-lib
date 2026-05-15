@@ -1793,6 +1793,11 @@
       "types": "./dist/sea/detect.d.ts",
       "default": "./dist/sea/detect.js"
     },
+    "./secrets/find": {
+      "source": "./src/secrets/find.ts",
+      "types": "./dist/secrets/find.d.ts",
+      "default": "./dist/secrets/find.js"
+    },
     "./secrets/keychain": {
       "source": "./src/secrets/keychain.ts",
       "types": "./dist/secrets/keychain.d.ts",

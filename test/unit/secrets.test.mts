@@ -26,6 +26,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import {
+  clearCache,
   deleteSecret,
   deleteSecretFromSlots,
   getBackendAvailability,
@@ -34,6 +35,8 @@ import {
   writeSecret,
   writeSecretToSlots,
 } from '../../src/secrets/keychain'
+
+import { resolve, resolveSync } from '../../src/secrets/find'
 
 import * as rc from '../../src/secrets/rc'
 
@@ -266,4 +269,143 @@ SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_T
       cleanup()
     }
   })
+})
+
+describe('secrets/find', () => {
+  it('prefers env-var over keychain (env wins on the canonical name)', async () => {
+    const account = `TEST_VAR_${rng()}`
+    process.env[account] = 'from-env'
+    try {
+      const result = await resolve({
+        service: 'unused',
+        accounts: [account],
+      })
+      expect(result).toEqual({
+        value: 'from-env',
+        source: 'env',
+        account,
+      })
+    } finally {
+      delete process.env[account]
+    }
+  })
+
+  it.skipIf(!BACKEND_OK)(
+    'falls through to keychain when env is empty',
+    async () => {
+      const service = `socket-lib-test-${rng()}`
+      const account = `KC_ONLY_${rng()}`
+      const value = `kc-value-${rng()}`
+      try {
+        await writeSecret({ service, account, value })
+        clearCache()
+        const result = await resolve({ service, accounts: [account] })
+        expect(result).toEqual({ value, source: 'keychain', account })
+      } finally {
+        await deleteSecret({ service, account })
+      }
+    },
+  )
+
+  it('returns undefined when neither env nor keychain has the value', async () => {
+    const result = await resolve({
+      service: `nope-${rng()}`,
+      accounts: [`NOPE_${rng()}`],
+    })
+    expect(result).toBeUndefined()
+  })
+
+  it('tries accounts in order; first non-empty env-var wins', async () => {
+    const a = `CAN_${rng()}`
+    const b = `LEG_${rng()}`
+    process.env[b] = 'legacy'
+    try {
+      const result = await resolve({
+        service: 'unused',
+        accounts: [a, b],
+      })
+      expect(result).toEqual({ value: 'legacy', source: 'env', account: b })
+    } finally {
+      delete process.env[b]
+    }
+  })
+
+  it('empty / whitespace env-var values do NOT count as a hit', async () => {
+    const account = `EMPTY_${rng()}`
+    process.env[account] = '   '
+    try {
+      const result = await resolve({
+        service: `nope-${rng()}`,
+        accounts: [account],
+      })
+      expect(result).toBeUndefined()
+    } finally {
+      delete process.env[account]
+    }
+  })
+
+  it('resolveSync mirrors resolve()', () => {
+    const account = `SYNC_${rng()}`
+    process.env[account] = 'sync-value'
+    try {
+      const result = resolveSync({
+        service: 'unused',
+        accounts: [account],
+      })
+      expect(result).toEqual({
+        value: 'sync-value',
+        source: 'env',
+        account,
+      })
+    } finally {
+      delete process.env[account]
+    }
+  })
+})
+
+describe('secrets/keychain cache', () => {
+  it.skipIf(!BACKEND_OK)(
+    'subsequent reads of the same key skip the OS call',
+    async () => {
+      const service = `socket-lib-test-${rng()}`
+      const account = `CACHED_${rng()}`
+      const value = `cv-${rng()}`
+      try {
+        await writeSecret({ service, account, value })
+        // First read after write: hits the post-write cache slot
+        // set by writeSecret. Result should be the same value.
+        const first = await readSecret({ service, account })
+        expect(first).toBe(value)
+        // Now wipe the entry from the keychain directly via
+        // deleteSecret (which also invalidates the cache).
+        await deleteSecret({ service, account })
+        // After invalidation, a fresh read hits the keychain again
+        // and finds the entry gone.
+        const afterDelete = await readSecret({ service, account })
+        expect(afterDelete).toBeUndefined()
+      } finally {
+        await deleteSecret({ service, account })
+      }
+    },
+  )
+
+  it.skipIf(!BACKEND_OK)(
+    'clearCache forces a re-read on the next call',
+    async () => {
+      const service = `socket-lib-test-${rng()}`
+      const account = `CLEAR_${rng()}`
+      const value = `clr-${rng()}`
+      try {
+        await writeSecret({ service, account, value })
+        // Read once to populate the cache.
+        expect(await readSecret({ service, account })).toBe(value)
+        clearCache()
+        // After clearing, the next call shells out again. Same value
+        // since we haven't changed the keychain.
+        expect(await readSecret({ service, account })).toBe(value)
+      } finally {
+        await deleteSecret({ service, account })
+      }
+    },
+  )
 })

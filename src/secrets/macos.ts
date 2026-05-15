@@ -11,11 +11,17 @@
  * in the user's session, so the leakage surface is `ps(1)` for one
  * other process on the same user). Delete is best-effort.
  *
- * ACL: `-T '' -A` does NOT make the entry callable from any process
- * without prompting. We deliberately omit `-T` so the entry uses the
- * default ACL — what the operator expects from a `security add`
- * directly. If a downstream tool wants its own ACL, it can `security
- * set-generic-password-partition-list` after the write.
+ * ACL: writes use `-A -T ''` so any application on the user's
+ * account can read the entry without an extra Keychain prompt. The
+ * first write still prompts once (creating / updating the entry
+ * requires the user to authorize that one action), but every later
+ * read is silent — sfw, socket-cli, MCP servers, and the bash shell
+ * itself all read the same value with no UI. The trust model: the
+ * user explicitly authorized the install flow that wrote this; the
+ * value is theirs to use across their tooling, not a credential
+ * earmarked for a single binary path. Revocable in Keychain Access.app
+ * if the user changes their mind. This restores the original
+ * wheelhouse `token-storage.mts` behavior dropped in v6's first cut.
  */
 
 import { spawn, spawnSync } from 'node:child_process'
@@ -128,12 +134,25 @@ export async function writeMacOS(
   value: string,
   label: string,
 ): Promise<void> {
-  // `-U` updates if the entry already exists; without -U a second
-  // `add-generic-password` errors. `-D` sets the kind (shown in
-  // Keychain Access.app), `-l` is the display label.
+  // Flags:
+  //   `-U`     update if exists; without it a second add errors.
+  //   `-D`     kind/description shown in Keychain Access.app.
+  //   `-l`     display label in Keychain Access.app.
+  //   `-T ''`  no specific app in the ACL — combined with `-A` this
+  //            grants "any app may read without prompting" so future
+  //            reads from any process don't surface a Keychain auth
+  //            prompt. Without this flag, the first read by every
+  //            new binary path triggers a prompt. (Incident memory:
+  //            socket-cli session 2026-05-15 — keychain prompts on
+  //            every Bash tool invocation.)
+  //   `-A`     allow access by any application without warning,
+  //            paired with `-T ''`.
   const r = await runAsync([
     'add-generic-password',
     '-U',
+    '-A',
+    '-T',
+    '',
     '-s',
     service,
     '-a',
@@ -158,11 +177,15 @@ export function writeMacOSSync(
   value: string,
   label: string,
 ): void {
+  // Mirrors writeMacOS — see that function for the ACL flag rationale.
   const r = spawnSync(
     SECURITY_BIN,
     [
       'add-generic-password',
       '-U',
+      '-A',
+      '-T',
+      '',
       '-s',
       service,
       '-a',
