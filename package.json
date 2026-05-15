@@ -1798,6 +1798,16 @@
       "types": "./dist/secrets/keychain.d.ts",
       "default": "./dist/secrets/keychain.js"
     },
+    "./secrets/linux": {
+      "source": "./src/secrets/linux.ts",
+      "types": "./dist/secrets/linux.d.ts",
+      "default": "./dist/secrets/linux.js"
+    },
+    "./secrets/macos": {
+      "source": "./src/secrets/macos.ts",
+      "types": "./dist/secrets/macos.d.ts",
+      "default": "./dist/secrets/macos.js"
+    },
     "./secrets/shell-env": {
       "source": "./src/secrets/shell-env.ts",
       "types": "./dist/secrets/shell-env.d.ts",
@@ -1807,6 +1817,11 @@
       "source": "./src/secrets/types.ts",
       "types": "./dist/secrets/types.d.ts",
       "default": "./dist/secrets/types.js"
+    },
+    "./secrets/windows": {
+      "source": "./src/secrets/windows.ts",
+      "types": "./dist/secrets/windows.d.ts",
+      "default": "./dist/secrets/windows.js"
     },
     "./shadow/skip": {
       "source": "./src/shadow/skip.ts",

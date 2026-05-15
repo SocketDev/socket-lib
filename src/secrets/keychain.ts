@@ -39,7 +39,7 @@ import {
   readMacOSSync,
   writeMacOS,
   writeMacOSSync,
-} from './_macos'
+} from './macos'
 import {
   deleteLinux,
   deleteLinuxSync,
@@ -48,7 +48,7 @@ import {
   readLinuxSync,
   writeLinux,
   writeLinuxSync,
-} from './_linux'
+} from './linux'
 import {
   deleteWindows,
   deleteWindowsSync,
@@ -57,7 +57,7 @@ import {
   readWindowsSync,
   writeWindows,
   writeWindowsSync,
-} from './_windows'
+} from './windows'
 import type {
   BackendAvailability,
   SecretDeleteResult,
@@ -79,6 +79,121 @@ function detectPlatform(): Platform {
     return p
   }
   return 'other'
+}
+
+export interface DeleteOptions {
+  service: string
+  account: string
+}
+
+/**
+ * Remove a secret from the OS credential store. Idempotent —
+ * succeeds whether the entry exists or not. Returns the per-slot
+ * outcome so callers can log "actually removed X" vs "X was
+ * already absent."
+ */
+export async function deleteSecret({
+  service,
+  account,
+}: DeleteOptions): Promise<'removed' | 'absent'> {
+  switch (detectPlatform()) {
+    case 'darwin':
+      return deleteMacOS(service, account)
+    case 'linux':
+      return deleteLinux(service, account)
+    case 'win32':
+      return deleteWindows(service, account)
+    default:
+      return 'absent'
+  }
+}
+
+export interface DeleteFromSlotsOptions {
+  service: string
+  accounts: readonly string[]
+}
+
+export async function deleteSecretFromSlots({
+  service,
+  accounts,
+}: DeleteFromSlotsOptions): Promise<SecretDeleteResult[]> {
+  const results: SecretDeleteResult[] = []
+  for (const account of accounts) {
+    const outcome = await deleteSecret({ service, account })
+    results.push({ account, outcome })
+  }
+  return results
+}
+
+export function deleteSecretFromSlotsSync({
+  service,
+  accounts,
+}: DeleteFromSlotsOptions): SecretDeleteResult[] {
+  const results: SecretDeleteResult[] = []
+  for (const account of accounts) {
+    const outcome = deleteSecretSync({ service, account })
+    results.push({ account, outcome })
+  }
+  return results
+}
+
+export function deleteSecretSync({
+  service,
+  account,
+}: DeleteOptions): 'removed' | 'absent' {
+  switch (detectPlatform()) {
+    case 'darwin':
+      return deleteMacOSSync(service, account)
+    case 'linux':
+      return deleteLinuxSync(service, account)
+    case 'win32':
+      return deleteWindowsSync(service, account)
+    default:
+      return 'absent'
+  }
+}
+
+/**
+ * Diagnostic: tell the operator whether the OS credential backend
+ * is reachable. Used by installers to report up-front (before any
+ * prompt fires) when libsecret-tools or the CredentialManager
+ * module aren't installed.
+ */
+export function getBackendAvailability(): BackendAvailability {
+  const platform_ = detectPlatform()
+  switch (platform_) {
+    case 'darwin': {
+      return {
+        available: isMacOSBackendAvailable(),
+        toolName: 'security(1)',
+        installHint: undefined,
+      }
+    }
+    case 'linux': {
+      const available = isLinuxBackendAvailable()
+      return {
+        available,
+        toolName: 'secret-tool',
+        installHint: available
+          ? undefined
+          : 'apt install libsecret-tools  (Debian/Ubuntu) | ' +
+            'dnf install libsecret  (Fedora/RHEL)',
+      }
+    }
+    case 'win32': {
+      return {
+        available: isWindowsBackendAvailable(),
+        toolName: 'PowerShell (CredentialManager / DPAPI)',
+        installHint: undefined,
+      }
+    }
+    default:
+      return {
+        available: false,
+        toolName: 'n/a',
+        installHint: `Platform ${platform()} is not supported.`,
+      }
+  }
 }
 
 export interface ReadOptions {
@@ -103,22 +218,6 @@ export async function readSecret({
       return readLinux(service, account)
     case 'win32':
       return readWindows(service, account)
-    default:
-      return undefined
-  }
-}
-
-export function readSecretSync({
-  service,
-  account,
-}: ReadOptions): string | undefined {
-  switch (detectPlatform()) {
-    case 'darwin':
-      return readMacOSSync(service, account)
-    case 'linux':
-      return readLinuxSync(service, account)
-    case 'win32':
-      return readWindowsSync(service, account)
     default:
       return undefined
   }
@@ -161,6 +260,22 @@ export function readSecretFromSlotsSync({
     }
   }
   return undefined
+}
+
+export function readSecretSync({
+  service,
+  account,
+}: ReadOptions): string | undefined {
+  switch (detectPlatform()) {
+    case 'darwin':
+      return readMacOSSync(service, account)
+    case 'linux':
+      return readLinuxSync(service, account)
+    case 'win32':
+      return readWindowsSync(service, account)
+    default:
+      return undefined
+  }
 }
 
 export interface WriteOptions {
@@ -284,119 +399,4 @@ export function writeSecretToSlotsSync({
     results.push({ account, outcome: 'written' })
   }
   return results
-}
-
-export interface DeleteOptions {
-  service: string
-  account: string
-}
-
-/**
- * Remove a secret from the OS credential store. Idempotent —
- * succeeds whether the entry exists or not. Returns the per-slot
- * outcome so callers can log "actually removed X" vs "X was
- * already absent."
- */
-export async function deleteSecret({
-  service,
-  account,
-}: DeleteOptions): Promise<'removed' | 'absent'> {
-  switch (detectPlatform()) {
-    case 'darwin':
-      return deleteMacOS(service, account)
-    case 'linux':
-      return deleteLinux(service, account)
-    case 'win32':
-      return deleteWindows(service, account)
-    default:
-      return 'absent'
-  }
-}
-
-export function deleteSecretSync({
-  service,
-  account,
-}: DeleteOptions): 'removed' | 'absent' {
-  switch (detectPlatform()) {
-    case 'darwin':
-      return deleteMacOSSync(service, account)
-    case 'linux':
-      return deleteLinuxSync(service, account)
-    case 'win32':
-      return deleteWindowsSync(service, account)
-    default:
-      return 'absent'
-  }
-}
-
-export interface DeleteFromSlotsOptions {
-  service: string
-  accounts: readonly string[]
-}
-
-export async function deleteSecretFromSlots({
-  service,
-  accounts,
-}: DeleteFromSlotsOptions): Promise<SecretDeleteResult[]> {
-  const results: SecretDeleteResult[] = []
-  for (const account of accounts) {
-    const outcome = await deleteSecret({ service, account })
-    results.push({ account, outcome })
-  }
-  return results
-}
-
-export function deleteSecretFromSlotsSync({
-  service,
-  accounts,
-}: DeleteFromSlotsOptions): SecretDeleteResult[] {
-  const results: SecretDeleteResult[] = []
-  for (const account of accounts) {
-    const outcome = deleteSecretSync({ service, account })
-    results.push({ account, outcome })
-  }
-  return results
-}
-
-/**
- * Diagnostic: tell the operator whether the OS credential backend
- * is reachable. Used by installers to report up-front (before any
- * prompt fires) when libsecret-tools or the CredentialManager
- * module aren't installed.
- */
-export function getBackendAvailability(): BackendAvailability {
-  const platform_ = detectPlatform()
-  switch (platform_) {
-    case 'darwin': {
-      return {
-        available: isMacOSBackendAvailable(),
-        toolName: 'security(1)',
-        installHint: undefined,
-      }
-    }
-    case 'linux': {
-      const available = isLinuxBackendAvailable()
-      return {
-        available,
-        toolName: 'secret-tool',
-        installHint: available
-          ? undefined
-          : 'apt install libsecret-tools  (Debian/Ubuntu) | ' +
-            'dnf install libsecret  (Fedora/RHEL)',
-      }
-    }
-    case 'win32': {
-      return {
-        available: isWindowsBackendAvailable(),
-        toolName: 'PowerShell (CredentialManager / DPAPI)',
-        installHint: undefined,
-      }
-    }
-    default:
-      return {
-        available: false,
-        toolName: 'n/a',
-        installHint: `Platform ${platform()} is not supported.`,
-      }
-  }
 }
