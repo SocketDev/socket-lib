@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 import {
   FIND_PACKAGES_PATTERN_MAX_LEN,
   findPackages,
-} from '@socketsecurity/lib/eco/manifest/find-packages'
-import { parsePackageLock } from '@socketsecurity/lib/eco/npm/npm/parse-lockfile'
+} from '@socketsecurity/lib-stable/eco/manifest/find-packages'
+import { parsePackageLock } from '@socketsecurity/lib-stable/eco/npm/npm/parse-lockfile'
 
 const LOCK = parsePackageLock(
   JSON.stringify({

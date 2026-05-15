@@ -15,13 +15,13 @@ import path from 'node:path'
 import type {
   EditablePackageJson,
   PackageJson,
-} from '@socketsecurity/lib/packages/types'
+} from '@socketsecurity/lib-stable/packages/types'
 import {
   getEditablePackageJsonClass,
   pkgJsonToEditable,
   toEditablePackageJson,
   toEditablePackageJsonSync,
-} from '@socketsecurity/lib/packages/edit'
+} from '@socketsecurity/lib-stable/packages/edit'
 import { describe, expect, it } from 'vitest'
 
 import { runWithTempDir } from '../utils/temp-file-helper'

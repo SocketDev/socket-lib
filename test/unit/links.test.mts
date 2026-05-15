@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { link, links } from '@socketsecurity/lib/links/link'
+import { link, links } from '@socketsecurity/lib-stable/links/link'
 
 describe('links', () => {
   describe('link()', () => {

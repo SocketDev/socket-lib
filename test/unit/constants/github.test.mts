@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 import {
   CACHE_GITHUB_DIR,
   GITHUB_API_BASE_URL,
-} from '@socketsecurity/lib/constants/github'
+} from '@socketsecurity/lib-stable/constants/github'
 
 describe('constants/github', () => {
   describe('GITHUB_API_BASE_URL', () => {

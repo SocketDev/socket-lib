@@ -29,11 +29,14 @@ process.on('uncaughtException', err => {
   throw err
 })
 
-import { detectArchiveFormat } from '@socketsecurity/lib/archives/detect'
-import { extractArchive } from '@socketsecurity/lib/archives/extract'
-import { extractTar, extractTarGz } from '@socketsecurity/lib/archives/tar'
-import { extractZip } from '@socketsecurity/lib/archives/zip'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { detectArchiveFormat } from '@socketsecurity/lib-stable/archives/detect'
+import { extractArchive } from '@socketsecurity/lib-stable/archives/extract'
+import {
+  extractTar,
+  extractTarGz,
+} from '@socketsecurity/lib-stable/archives/tar'
+import { extractZip } from '@socketsecurity/lib-stable/archives/zip'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 import { runWithTempDir } from './utils/temp-file-helper'
 

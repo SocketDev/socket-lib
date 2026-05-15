@@ -11,7 +11,7 @@
  */
 
 import process from 'node:process'
-import { spawn, spawnSync } from '@socketsecurity/lib/spawn/spawn'
+import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn/spawn'
 import { describe, expect, it } from 'vitest'
 
 describe('spawn integration', () => {

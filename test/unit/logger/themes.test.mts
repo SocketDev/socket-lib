@@ -12,7 +12,7 @@ import { Writable } from 'node:stream'
 
 import { Logger } from '../../../src/logger/logger'
 import { LOG_SYMBOLS } from '../../../src/logger/symbols'
-import { THEMES } from '@socketsecurity/lib/themes/themes'
+import { THEMES } from '@socketsecurity/lib-stable/themes/themes'
 import { describe, expect, it, beforeEach } from 'vitest'
 
 describe('Logger - Theme Handling', () => {

@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BAZEL_VFS_KEY,
   bazelFromVfs,
-} from '@socketsecurity/lib/external-tools/bazel/from-vfs'
+} from '@socketsecurity/lib-stable/external-tools/bazel/from-vfs'
 
 describe('external-tools/bazel/from-vfs', () => {
   it('returns undefined on stock Node (no node:smol-vfs)', async () => {

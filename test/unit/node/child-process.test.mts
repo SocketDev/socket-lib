@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeChildProcess } from '@socketsecurity/lib/node/child-process'
+import { getNodeChildProcess } from '@socketsecurity/lib-stable/node/child-process'
 
 describe('node/child-process', () => {
   it('returns the node:child_process module', () => {

@@ -19,9 +19,9 @@ import os from 'node:os'
 import * as path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
-import { processLock } from '@socketsecurity/lib/process/lock-instance'
-import type { ProcessLockOptions } from '@socketsecurity/lib/process/lock-types'
-import { safeDeleteSync } from '@socketsecurity/lib/fs/safe'
+import { processLock } from '@socketsecurity/lib-stable/process/lock-instance'
+import type { ProcessLockOptions } from '@socketsecurity/lib-stable/process/lock-types'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 // process-lock lazily does `require('node:fs')` inside getFs(). The require'd

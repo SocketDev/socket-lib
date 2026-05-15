@@ -34,7 +34,10 @@ const vitestConfigIsolated = defineConfig({
       'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
       pacote: path.resolve(projectRoot, 'src/external/pacote'),
       '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
+      // Both names resolve to src/ — `lib` is the canonical published
+      // name, `lib-stable` is the fleet-wide infra alias.
       '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
+      '@socketsecurity/lib-stable': path.resolve(projectRoot, 'src'),
     },
   },
   test: {

@@ -14,8 +14,8 @@ import {
   getComspec,
   getLocalappdata,
   getUserprofile,
-} from '@socketsecurity/lib/env/windows'
-import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '@socketsecurity/lib-stable/env/windows'
+import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('windows env', () => {

@@ -21,15 +21,18 @@ import {
 import os from 'node:os'
 import { join } from 'node:path'
 
-import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
+import type { SafeReadOptions } from '@socketsecurity/lib-stable/fs/types'
 
-import { isSymlinkSync, safeStatSync } from '@socketsecurity/lib/fs/inspect'
+import {
+  isSymlinkSync,
+  safeStatSync,
+} from '@socketsecurity/lib-stable/fs/inspect'
 import {
   readFileBinary,
   safeReadFileSync,
-} from '@socketsecurity/lib/fs/read-file'
-import { readJsonSync } from '@socketsecurity/lib/fs/read-json'
-import { writeJsonSync } from '@socketsecurity/lib/fs/write-json'
+} from '@socketsecurity/lib-stable/fs/read-file'
+import { readJsonSync } from '@socketsecurity/lib-stable/fs/read-json'
+import { writeJsonSync } from '@socketsecurity/lib-stable/fs/write-json'
 import { beforeEach, describe, expect, it, afterEach } from 'vitest'
 
 describe.sequential('fs - Sync Functions', () => {

@@ -6,8 +6,12 @@
  * Uses rewire for test isolation. Used for conditional behavior in Git hooks.
  */
 
-import { getPreCommit } from '@socketsecurity/lib/env/pre-commit'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getPreCommit } from '@socketsecurity/lib-stable/env/pre-commit'
+import {
+  clearEnv,
+  resetEnv,
+  setEnv,
+} from '@socketsecurity/lib-stable/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/pre-commit', () => {

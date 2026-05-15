@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeEvents } from '@socketsecurity/lib/node/events'
+import { getNodeEvents } from '@socketsecurity/lib-stable/node/events'
 
 describe('node/events', () => {
   it('returns the node:events module', () => {

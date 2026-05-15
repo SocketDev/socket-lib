@@ -14,8 +14,12 @@ import {
   getLang,
   getLcAll,
   getLcMessages,
-} from '@socketsecurity/lib/env/locale'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '@socketsecurity/lib-stable/env/locale'
+import {
+  clearEnv,
+  resetEnv,
+  setEnv,
+} from '@socketsecurity/lib-stable/env/rewire'
 
 describe('env/locale', () => {
   afterEach(() => {

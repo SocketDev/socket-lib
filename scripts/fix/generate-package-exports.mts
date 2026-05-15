@@ -5,7 +5,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.json' with { type: 'json' }
+import builtinNames from '@socketregistry/packageurl-js-stable/data/npm/builtin-names.json' with { type: 'json' }
 import fastGlob from 'fast-glob'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'

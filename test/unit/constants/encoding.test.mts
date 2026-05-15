@@ -19,7 +19,7 @@ import {
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
   UTF8,
-} from '@socketsecurity/lib/constants/encoding'
+} from '@socketsecurity/lib-stable/constants/encoding'
 
 describe('constants/encoding', () => {
   describe('encoding', () => {

@@ -24,8 +24,8 @@ import {
   listDlxPackagesAsync,
   removeDlxPackage,
   removeDlxPackageSync,
-} from '@socketsecurity/lib/dlx/packages'
-import { setPath } from '@socketsecurity/lib/paths/rewire'
+} from '@socketsecurity/lib-stable/dlx/packages'
+import { setPath } from '@socketsecurity/lib-stable/paths/rewire'
 
 let tmpDir: string
 let savedDlxDir: string | undefined

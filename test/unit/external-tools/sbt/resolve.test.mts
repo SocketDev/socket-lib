@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   _resetSbtResolution,
   resolveSbt,
-} from '@socketsecurity/lib/external-tools/sbt/resolve'
+} from '@socketsecurity/lib-stable/external-tools/sbt/resolve'
 
 describe('external-tools/sbt/resolve', () => {
   beforeEach(() => {

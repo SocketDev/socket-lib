@@ -11,7 +11,7 @@
  * Used by Socket tools for rate-limited parallel operations (API calls, file I/O).
  */
 
-import { PromiseQueue } from '@socketsecurity/lib/promise-queue/queue'
+import { PromiseQueue } from '@socketsecurity/lib-stable/promise-queue/queue'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create a delayed promise

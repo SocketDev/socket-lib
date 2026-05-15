@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { runCheckPrimordials } from '../../../src/bin/check-primordials'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Absolute path to socket-lib's own primordials source. Each test
 // runs in its own tmpDir for config files, but the primordials engine

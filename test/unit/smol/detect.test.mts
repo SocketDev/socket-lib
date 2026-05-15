@@ -12,7 +12,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolUtil, isSmol } from '@socketsecurity/lib/smol/detect'
+import { getSmolUtil, isSmol } from '@socketsecurity/lib-stable/smol/detect'
 
 describe('smol/detect', () => {
   describe('isSmol', () => {

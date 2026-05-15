@@ -17,7 +17,7 @@
  * Used throughout Socket tools for cross-platform path handling.
  */
 
-import { WIN32 } from '@socketsecurity/lib/constants/platform'
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -33,7 +33,7 @@ import {
   splitPath,
   toUnixPath,
   trimLeadingDotSlash,
-} from '@socketsecurity/lib/paths/normalize'
+} from '@socketsecurity/lib-stable/paths/normalize'
 
 import { itUnixOnly, itWindowsOnly } from '../utils/skip-helpers'
 

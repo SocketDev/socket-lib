@@ -24,8 +24,8 @@ import {
   isJsFilePath,
   isNativeBinary,
   isNodePackage,
-} from '@socketsecurity/lib/dlx/detect'
-import { resetPaths, setPath } from '@socketsecurity/lib/paths/rewire'
+} from '@socketsecurity/lib-stable/dlx/detect'
+import { resetPaths, setPath } from '@socketsecurity/lib-stable/paths/rewire'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import { join } from 'node:path'

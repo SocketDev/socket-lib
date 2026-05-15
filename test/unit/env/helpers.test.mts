@@ -13,7 +13,7 @@ import {
   envAsBoolean,
   envAsNumber,
   envAsString,
-} from '@socketsecurity/lib/env/helpers'
+} from '@socketsecurity/lib-stable/env/helpers'
 import { describe, expect, it } from 'vitest'
 
 describe('env/helpers', () => {

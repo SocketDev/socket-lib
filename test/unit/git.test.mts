@@ -21,20 +21,20 @@ import {
   getChangedFilesSync,
   isChanged,
   isChangedSync,
-} from '@socketsecurity/lib/git/changed'
-import { findGitRoot } from '@socketsecurity/lib/git/repo'
+} from '@socketsecurity/lib-stable/git/changed'
+import { findGitRoot } from '@socketsecurity/lib-stable/git/repo'
 import {
   getStagedFiles,
   getStagedFilesSync,
   isStaged,
   isStagedSync,
-} from '@socketsecurity/lib/git/staged'
+} from '@socketsecurity/lib-stable/git/staged'
 import {
   getUnstagedFiles,
   getUnstagedFilesSync,
   isUnstaged,
   isUnstagedSync,
-} from '@socketsecurity/lib/git/unstaged'
+} from '@socketsecurity/lib-stable/git/unstaged'
 
 describe('git', () => {
   const projectRoot = process.cwd()

@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getGlobMatcher,
   getMatchesGlob,
-} from '@socketsecurity/lib/globs/matcher'
+} from '@socketsecurity/lib-stable/globs/matcher'
 
 describe('globs — extra coverage', () => {
   describe('getMatchesGlob', () => {

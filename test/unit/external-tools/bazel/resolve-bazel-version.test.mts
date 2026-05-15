@@ -18,8 +18,8 @@ import path from 'node:path'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
-import { resolveBazelVersion } from '@socketsecurity/lib/external-tools/bazel/resolve-bazel-version'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { resolveBazelVersion } from '@socketsecurity/lib-stable/external-tools/bazel/resolve-bazel-version'
 
 export async function withTmpDir(
   fn: (dir: string) => Promise<void>,

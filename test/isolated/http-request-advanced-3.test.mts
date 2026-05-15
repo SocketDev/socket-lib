@@ -132,7 +132,7 @@ describe('http-request', () => {
 
     it('should handle stream errors without double-firing hooks', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
+        import('@socketsecurity/lib-stable/http-request/request-types').HttpHookResponseInfo
       > = []
 
       const errorStream = new Readable({
@@ -415,7 +415,7 @@ describe('http-request', () => {
   describe('maxResponseSize - settle guard', () => {
     it('should fire onResponse exactly once when maxResponseSize exceeded', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
+        import('@socketsecurity/lib-stable/http-request/request-types').HttpHookResponseInfo
       > = []
 
       await httpRequest(`${fixture.baseUrl}/large-body`, {
@@ -477,7 +477,7 @@ describe('http-request', () => {
   describe('redirect hook and cleanup', () => {
     it('should fire onResponse exactly once per redirect hop on maxRedirects exceeded', async () => {
       const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
+        import('@socketsecurity/lib-stable/http-request/request-types').HttpHookResponseInfo
       > = []
 
       await httpRequest(`${fixture.baseUrl}/redirect-loop-1`, {

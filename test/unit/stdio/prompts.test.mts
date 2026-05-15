@@ -24,8 +24,11 @@ import {
   wrapPrompt,
   type Choice,
   type Context,
-} from '@socketsecurity/lib/stdio/prompts'
-import { THEMES, type ThemeName } from '@socketsecurity/lib/themes/themes'
+} from '@socketsecurity/lib-stable/stdio/prompts'
+import {
+  THEMES,
+  type ThemeName,
+} from '@socketsecurity/lib-stable/themes/themes'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('stdio/prompts', () => {

@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodePath } from '@socketsecurity/lib/node/path'
+import { getNodePath } from '@socketsecurity/lib-stable/node/path'
 
 describe('node/path', () => {
   it('returns the node:path module', () => {

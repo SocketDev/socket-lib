@@ -17,7 +17,7 @@ import {
   hasFlag,
   parseArgs,
   parseArgsWithDefaults,
-} from '@socketsecurity/lib/argv/parse'
+} from '@socketsecurity/lib-stable/argv/parse'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/parse', () => {

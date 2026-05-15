@@ -13,8 +13,8 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
-import { readBazelVersionFile } from '@socketsecurity/lib/external-tools/bazel/read-bazel-version-file'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { readBazelVersionFile } from '@socketsecurity/lib-stable/external-tools/bazel/read-bazel-version-file'
 
 export async function withTmpDir(
   fn: (dir: string) => Promise<void>,

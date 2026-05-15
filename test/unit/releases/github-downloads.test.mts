@@ -10,7 +10,7 @@
 
 import { existsSync } from 'node:fs'
 
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { downloadReleaseAsset } from '../../../src/releases/github-downloads'

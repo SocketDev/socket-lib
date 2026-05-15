@@ -14,23 +14,23 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
 import {
   clearPerformanceMetrics,
   getPerformanceMetrics,
   getPerformanceSummary,
-} from '@socketsecurity/lib/perf/metrics'
+} from '@socketsecurity/lib-stable/perf/metrics'
 import {
   generatePerformanceReport,
   printPerformanceSummary,
-} from '@socketsecurity/lib/perf/report'
+} from '@socketsecurity/lib-stable/perf/report'
 import {
   measure,
   measureSync,
   perfCheckpoint,
   perfTimer,
   trackMemory,
-} from '@socketsecurity/lib/perf/timer'
+} from '@socketsecurity/lib-stable/perf/timer'
 
 // The perf module shares a module-scoped `performanceMetrics` array,
 // so concurrent tests would race each other when pushing / clearing.

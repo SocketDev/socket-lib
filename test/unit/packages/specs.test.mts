@@ -16,7 +16,7 @@ import {
   gitHubTgzUrl,
   isGitHubTgzSpec,
   isGitHubUrlSpec,
-} from '@socketsecurity/lib/packages/specs'
+} from '@socketsecurity/lib-stable/packages/specs'
 import { describe, expect, it } from 'vitest'
 
 describe('packages/specs', () => {

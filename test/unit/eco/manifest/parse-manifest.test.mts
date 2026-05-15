@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '@socketsecurity/lib/eco/manifest/manifest-error'
-import { parseManifest } from '@socketsecurity/lib/eco/manifest/parse-manifest'
+import { ManifestError } from '@socketsecurity/lib-stable/eco/manifest/manifest-error'
+import { parseManifest } from '@socketsecurity/lib-stable/eco/manifest/parse-manifest'
 
 describe('eco/manifest/parse-manifest', () => {
   it('routes npm to parsePackageJson', () => {

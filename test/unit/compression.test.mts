@@ -47,7 +47,7 @@ import {
   resolveGzipOptions,
 } from '../../src/compression/gzip'
 import { stripExt } from '../../src/compression/_internal'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Two fixture sizes:
 //   - small: a few hundred bytes — exercises the in-memory path

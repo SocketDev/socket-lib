@@ -10,8 +10,11 @@
  * Used by Socket tools for processing large datasets and streaming operations.
  */
 
-import { parallelEach, parallelMap } from '@socketsecurity/lib/streams/parallel'
-import { transform } from '@socketsecurity/lib/streams/transform'
+import {
+  parallelEach,
+  parallelMap,
+} from '@socketsecurity/lib-stable/streams/parallel'
+import { transform } from '@socketsecurity/lib-stable/streams/transform'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create async iterable from array

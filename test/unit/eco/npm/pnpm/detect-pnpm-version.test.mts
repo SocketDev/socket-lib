@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { detectPnpmVersion } from '@socketsecurity/lib/eco/npm/pnpm/detect-pnpm-version'
+import { detectPnpmVersion } from '@socketsecurity/lib-stable/eco/npm/pnpm/detect-pnpm-version'
 
 describe('eco/npm/pnpm/detect-pnpm-version', () => {
   it('detects v5', () => {

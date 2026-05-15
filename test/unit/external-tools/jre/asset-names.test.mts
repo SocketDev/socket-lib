@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   ADOPTIUM_QUERY_MAP,
   getAdoptiumQuery,
-} from '@socketsecurity/lib/external-tools/jre/asset-names'
+} from '@socketsecurity/lib-stable/external-tools/jre/asset-names'
 
 describe('external-tools/jre/asset-names', () => {
   it('covers all 8 socket targets', () => {

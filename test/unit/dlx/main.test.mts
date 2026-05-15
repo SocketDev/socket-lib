@@ -17,31 +17,31 @@ import path from 'node:path'
 import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { generateCacheKey } from '@socketsecurity/lib/dlx/cache'
+import { generateCacheKey } from '@socketsecurity/lib-stable/dlx/cache'
 import {
   clearDlx,
   clearDlxSync,
   dlxDirExists,
   ensureDlxDir,
   ensureDlxDirSync,
-} from '@socketsecurity/lib/dlx/dir'
+} from '@socketsecurity/lib-stable/dlx/dir'
 import {
   isDlxPackageInstalled,
   listDlxPackages,
   listDlxPackagesAsync,
   removeDlxPackage,
   removeDlxPackageSync,
-} from '@socketsecurity/lib/dlx/packages'
+} from '@socketsecurity/lib-stable/dlx/packages'
 import {
   getDlxInstalledPackageDir,
   getDlxPackageDir,
   getDlxPackageJsonPath,
   getDlxPackageNodeModulesDir,
   isInSocketDlx,
-} from '@socketsecurity/lib/dlx/paths'
-import { safeDeleteSync } from '@socketsecurity/lib/fs/safe'
-import { getSocketDlxDir } from '@socketsecurity/lib/paths/socket'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+} from '@socketsecurity/lib-stable/dlx/paths'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import { getSocketDlxDir } from '@socketsecurity/lib-stable/paths/socket'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('dlx', () => {
   const testPackageName = 'test-package'
