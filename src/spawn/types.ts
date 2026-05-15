@@ -22,6 +22,9 @@
 import type { SendHandle, Serializable, StdioOptions } from 'node:child_process'
 import type { EventEmitter } from 'node:events'
 
+import type { Remap } from '../objects/types'
+import type { Spinner } from '../spinner/types'
+
 // Define BufferEncoding type for TypeScript compatibility.
 export type BufferEncoding = globalThis.BufferEncoding
 
@@ -211,6 +214,18 @@ export interface NodeSpawnOptions {
   killSignal?: NodeJS.Signals | number | undefined
 }
 
+/*@__NO_SIDE_EFFECTS__*/
+// Duplicated from Node.js child_process.SpawnSyncOptions. Mirrors
+// Node's split: the sync API adds `input`, `maxBuffer`, and `encoding`
+// on top of the common spawn options. Async spawn doesn't accept these
+// — `input` would be meaningless without a sync write to stdin —
+// so they live on a separate interface to keep the async type honest.
+export interface NodeSpawnSyncOptions extends NodeSpawnOptions {
+  input?: string | NodeJS.ArrayBufferView | undefined
+  maxBuffer?: number | undefined
+  encoding?: BufferEncoding | 'buffer' | null | undefined
+}
+
 // Duplicated from Node.js child_process.ChildProcess
 // This represents a spawned child process
 export interface ChildProcess extends EventEmitter {
@@ -295,9 +310,9 @@ export interface WritableStreamType {
  * @property {number | undefined} uid - User identity (POSIX)
  * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or escape arguments on Windows (requires shell: true). Use when you need exact argument control. Default: false
  */
-export type SpawnOptions = import('../objects/types').Remap<
+export type SpawnOptions = Remap<
   NodeSpawnOptions & {
-    spinner?: import('../spinner/types').Spinner | undefined
+    spinner?: Spinner | undefined
     stdioString?: boolean
     stripAnsi?: boolean
   }
@@ -324,6 +339,15 @@ export type SpawnStdioResult = {
 
 /**
  * Options for synchronously spawning a child process with {@link spawnSync}.
- * Same as {@link SpawnOptions} but excludes the `spinner` property (not applicable for synchronous execution).
+ *
+ * Mirrors {@link SpawnOptions} (stdioString, stripAnsi) but builds on
+ * Node's sync option shape ({@link NodeSpawnSyncOptions}) — which adds
+ * `input`, `maxBuffer`, and `encoding` that the async API doesn't have.
+ * The `spinner` field is excluded (not applicable for synchronous execution).
  */
-export type SpawnSyncOptions = Omit<SpawnOptions, 'spinner'>
+export type SpawnSyncOptions = Remap<
+  NodeSpawnSyncOptions & {
+    stdioString?: boolean
+    stripAnsi?: boolean
+  }
+>
