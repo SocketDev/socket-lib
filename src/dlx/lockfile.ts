@@ -16,9 +16,10 @@ import os from 'node:os'
 import pacote from '../external/pacote'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { safeIdealTree, writeSafeNpmrc } from './arborist'
-import { computeHashes } from './integrity'
 
-import type { ComputedHashes } from './integrity'
+import { computeHashes } from '../integrity'
+
+import type { ComputedHashes } from '../integrity'
 
 import { DateCtor, DateNow } from '../primordials/date'
 

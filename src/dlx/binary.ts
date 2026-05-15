@@ -26,7 +26,8 @@ import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
 import { spawn } from '../spawn/spawn'
 import { generateCacheKey } from './cache'
-import { normalizeHash } from './integrity'
+
+import { normalizeHash } from '../integrity'
 
 import { ArrayIsArray } from '../primordials/array'
 

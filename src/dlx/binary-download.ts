@@ -18,7 +18,8 @@ import { httpDownload } from '../http-request/download'
 import { normalizePath } from '../paths/normalize'
 import { processLock } from '../process/lock-instance'
 import { generateCacheKey } from './cache'
-import { normalizeHash } from './integrity'
+
+import { normalizeHash } from '../integrity'
 
 import { ErrorCtor } from '../primordials/error'
 

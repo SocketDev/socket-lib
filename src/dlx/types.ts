@@ -9,7 +9,7 @@
  *   - `DlxPackageResult` — what `dlxPackage` returns
  */
 
-import type { HashSpec } from './integrity'
+import type { HashSpec } from '../integrity'
 import type { LockfileSpec } from './lockfile'
 import type { spawn } from '../spawn/spawn'
 import type { SpawnOptions } from '../spawn/types'

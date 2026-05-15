@@ -478,11 +478,6 @@
       "types": "./dist/dlx/firewall.d.ts",
       "default": "./dist/dlx/firewall.js"
     },
-    "./dlx/integrity": {
-      "source": "./src/dlx/integrity.ts",
-      "types": "./dist/dlx/integrity.d.ts",
-      "default": "./dist/dlx/integrity.js"
-    },
     "./dlx/lockfile": {
       "source": "./src/dlx/lockfile.ts",
       "types": "./dist/dlx/lockfile.d.ts",
@@ -1182,6 +1177,11 @@
       "source": "./src/http-request/response-types.ts",
       "types": "./dist/http-request/response-types.d.ts",
       "default": "./dist/http-request/response-types.js"
+    },
+    "./integrity": {
+      "source": "./src/integrity.ts",
+      "types": "./dist/integrity.d.ts",
+      "default": "./dist/integrity.js"
     },
     "./ipc-cli/get": {
       "source": "./src/ipc-cli/get.ts",

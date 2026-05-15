@@ -1,5 +1,8 @@
 /**
- * @fileoverview Integrity specification helpers for dlx downloads.
+ * @fileoverview Integrity specification helpers for downloads and
+ * file verification. Used by `dlx/binary-download` and external-tools
+ * resolvers; safe to consume from any module that needs to verify
+ * bytes against an expected hash.
  *
  * Single supported format per flavor:
  *   - integrity: SRI with sha512 only (what npm registry returns)
@@ -13,16 +16,16 @@
 
 import { timingSafeEqual } from 'node:crypto'
 
-import { hash } from '../crypto/hash'
+import { hash } from './crypto/hash'
 
-import { BufferFrom } from '../primordials/buffer'
+import { BufferFrom } from './primordials/buffer'
 
-import { TypeErrorCtor } from '../primordials/error'
+import { TypeErrorCtor } from './primordials/error'
 
 import {
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../primordials/string'
+} from './primordials/string'
 /**
  * Tagged union representing an expected hash.
  *

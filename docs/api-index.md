@@ -12,6 +12,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath | Description |
 | --- | --- |
 | [`@socketsecurity/lib/errors`](../src/errors/message.ts) | Human-readable error-message extractor. |
+| [`@socketsecurity/lib/integrity`](../src/integrity.ts) | Integrity specification helpers for downloads and file verification. |
 | [`@socketsecurity/lib/logger`](../src/logger/logger.ts) | The `Logger` class + the shared-default `getDefaultLogger()` accessor — the public class surface for `logger/*`. |
 
 ## abort/
@@ -169,7 +170,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/dlx/detect`](../src/dlx/detect.ts) | Executable type detection for DLX and local filesystem paths. |
 | [`@socketsecurity/lib/dlx/dir`](../src/dlx/dir.ts) | Directory management utilities for DLX installations. |
 | [`@socketsecurity/lib/dlx/firewall`](../src/dlx/firewall.ts) | Socket Firewall integration for dlx installs. |
-| [`@socketsecurity/lib/dlx/integrity`](../src/dlx/integrity.ts) | Integrity specification helpers for dlx downloads. |
 | [`@socketsecurity/lib/dlx/lockfile`](../src/dlx/lockfile.ts) | Package pin generation for dlx installs. |
 | [`@socketsecurity/lib/dlx/manifest`](../src/dlx/manifest.ts) | DLX manifest storage utilities. |
 | [`@socketsecurity/lib/dlx/package`](../src/dlx/package.ts) | DLX package execution — install and execute npm packages. |
@@ -730,8 +730,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 | --- | --- |
 | [`@socketsecurity/lib/url/parse`](../src/url/parse.ts) | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base). |
 | [`@socketsecurity/lib/url/predicates`](../src/url/predicates.ts) | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`. |
-| [`@socketsecurity/lib/url/search-params`](../src/url/search-params.ts) | URL search-param coercion helpers — `urlSearchParamAs*` normalise a raw `string | null | undefined` value into a typed shape (array / boolean / number / string) with a default. |
-| [`@socketsecurity/lib/url/types`](../src/url/types.ts) | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamAs*`, and `urlSearchParamsGet*`. |
+| [`@socketsecurity/lib/url/search-params`](../src/url/search-params.ts) | URL search-param coercion helpers — `urlSearchParamsAs*` normalise a raw `string | null | undefined` value into a typed shape (array / boolean / number / string) with a default. |
+| [`@socketsecurity/lib/url/types`](../src/url/types.ts) | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`. |
 
 ## versions/
 
