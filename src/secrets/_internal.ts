@@ -1,5 +1,9 @@
 /**
- * @fileoverview Process-scoped read cache for the keychain backend.
+ * @fileoverview Private internals for `secrets/` — process-scoped
+ * read cache for the keychain backend. Underscore-prefixed and
+ * skipped by the export generator (`dist/**\/_*` ignore pattern in
+ * `scripts/fix/generate-package-exports.mts`) so this module is
+ * NOT part of the public API surface. Imported by `./keychain.ts`.
  *
  * Every `readSecret` call shells out to the OS credential CLI
  * (`security`, `secret-tool`, PowerShell). On macOS, the first read

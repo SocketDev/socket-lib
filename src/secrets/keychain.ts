@@ -38,7 +38,7 @@ import {
   invalidate,
   invalidateAll,
   setCached,
-} from './_cache'
+} from './_internal'
 import {
   deleteMacOS,
   deleteMacOSSync,
