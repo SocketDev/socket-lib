@@ -19,29 +19,6 @@ let _hash: typeof import('node:crypto').hash | undefined
 let _hashProbed = false
 
 /**
- * Resolve `crypto.hash` (or `undefined` if the runtime predates it).
- *
- * Exported for unit tests; not part of the public API.
- *
- * @internal
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getNativeHash(): typeof import('node:crypto').hash | undefined {
-  if (!_hashProbed) {
-    const fn = (
-      getNodeCrypto() as typeof import('node:crypto') & {
-        hash?: unknown
-      }
-    ).hash
-    if (typeof fn === 'function') {
-      _hash = fn as typeof import('node:crypto').hash
-    }
-    _hashProbed = true
-  }
-  return _hash
-}
-
-/**
  * Compute a one-shot cryptographic hash.
  *
  * Prefers Node's `crypto.hash(algorithm, data, outputEncoding)` (added
@@ -71,7 +48,7 @@ export function hash(
   data: string | NodeJS.ArrayBufferView,
   outputEncoding: 'hex' | 'base64' | 'base64url' | 'binary',
 ): string {
-  const native = getNativeHash()
+  const native = nativeHash()
   if (native !== undefined) {
     return native(algorithm, data, outputEncoding) as string
   }
@@ -79,4 +56,27 @@ export function hash(
     .createHash(algorithm)
     .update(data as string | Buffer)
     .digest(outputEncoding)
+}
+
+/**
+ * Resolve `crypto.hash` (or `undefined` if the runtime predates it).
+ *
+ * Exported for unit tests; not part of the public API.
+ *
+ * @internal
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function nativeHash(): typeof import('node:crypto').hash | undefined {
+  if (!_hashProbed) {
+    const fn = (
+      getNodeCrypto() as typeof import('node:crypto') & {
+        hash?: unknown
+      }
+    ).hash
+    if (typeof fn === 'function') {
+      _hash = fn as typeof import('node:crypto').hash
+    }
+    _hashProbed = true
+  }
+  return _hash
 }
