@@ -6,7 +6,7 @@
  * back to `undefined` on parse or read failure.
  */
 
-import { jsonParse } from '../json/parse'
+import { parseJson } from '../json/parse'
 import { getNodeFs } from '../node/fs'
 import { ErrorCtor } from '../primordials/error'
 import type { PathLike } from 'node:fs'
@@ -88,7 +88,7 @@ export async function readJson(
     }
     return undefined
   }
-  return jsonParse(content, {
+  return parseJson(content, {
     filepath: String(filepath),
     reviver,
     throws: shouldThrow,
@@ -169,7 +169,7 @@ export function readJsonSync(
     }
     return undefined
   }
-  return jsonParse(content, {
+  return parseJson(content, {
     filepath: String(filepath),
     reviver,
     throws: shouldThrow,

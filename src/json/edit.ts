@@ -126,7 +126,7 @@ export function getEditableJsonClass<
       }
 
       fromJSON(data: string): this {
-        const parsed = parseJson(data) as T & Record<symbol, unknown>
+        const parsed = JSONParse(data) as T & Record<symbol, unknown>
         // Extract and preserve formatting metadata
         const indent = detectIndent(data)
         const newline = detectNewline(data)
@@ -144,7 +144,7 @@ export function getEditableJsonClass<
         this._readFileContent = await readFile(this.filename)
         this.fromJSON(this._readFileContent)
         // Add AFTER fromJSON is called in case it errors.
-        this._readFileJson = parseJson(this._readFileContent)
+        this._readFileJson = JSONParse(this._readFileContent)
         return this
       }
 
@@ -182,7 +182,7 @@ export function getEditableJsonClass<
         // Save to disk with retry logic for Windows file locking issues
         await retryWrite(this.filename, fileContent)
         this._readFileContent = fileContent
-        this._readFileJson = parseJson(fileContent)
+        this._readFileJson = JSONParse(fileContent)
         return true
       }
 
@@ -221,7 +221,7 @@ export function getEditableJsonClass<
         const fs = getNodeFs()
         fs.writeFileSync(this.filename, fileContent)
         this._readFileContent = fileContent
-        this._readFileJson = parseJson(fileContent)
+        this._readFileJson = JSONParse(fileContent)
         return true
       }
 
@@ -248,14 +248,6 @@ export function getEditableJsonClass<
     } as EditableJsonConstructor
   }
   return _EditableJsonClass as EditableJsonConstructor<T>
-}
-
-/**
- * Parse JSON content and extract formatting metadata.
- * @private
- */
-export function parseJson(content: string): unknown {
-  return JSONParse(content)
 }
 
 /**

@@ -78,22 +78,22 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 export type JsonReviver = (key: string, value: unknown) => unknown
 
 /**
- * Options for `safeJsonParse`: security controls for untrusted JSON.
+ * Options for `parseJsonSafe`: security controls for untrusted JSON.
  *
- * Distinct from `JsonParseOptions` (which is scoped to reviver /
+ * Distinct from `ParseJsonOptions` (which is scoped to reviver /
  * error-handling for trusted-source fs reads). Use this type when
  * parsing user input, network payloads, or anything beyond a trust
  * boundary.
  *
  * @example
  * ```ts
- * const options: SafeJsonParseOptions = {
+ * const options: ParseJsonSafeOptions = {
  *   maxSize: 1024 * 1024, // 1MB limit
  *   allowPrototype: false // Block prototype pollution
  * }
  * ```
  */
-export interface SafeJsonParseOptions {
+export interface ParseJsonSafeOptions {
   /**
    * Allow dangerous prototype pollution keys (`__proto__`, `constructor`, `prototype`).
    * Set to `true` only if you trust the JSON source completely.
@@ -103,10 +103,10 @@ export interface SafeJsonParseOptions {
    * @example
    * ```ts
    * // Will throw error by default
-   * safeJsonParse('{"__proto__": {"polluted": true}}')
+   * parseJsonSafe('{"__proto__": {"polluted": true}}')
    *
    * // Allows the parse (dangerous!)
-   * safeJsonParse('{"__proto__": {"polluted": true}}', undefined, {
+   * parseJsonSafe('{"__proto__": {"polluted": true}}', undefined, {
    *   allowPrototype: true
    * })
    * ```
@@ -122,7 +122,7 @@ export interface SafeJsonParseOptions {
    * @example
    * ```ts
    * // Limit to 1KB
-   * safeJsonParse(jsonString, undefined, { maxSize: 1024 })
+   * parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
    * ```
    */
   maxSize?: number | undefined
@@ -131,7 +131,7 @@ export interface SafeJsonParseOptions {
 /**
  * Options for JSON parsing operations.
  */
-export interface JsonParseOptions {
+export interface ParseJsonOptions {
   /**
    * Optional filepath for improved error messages.
    * When provided, errors will be prefixed with the filepath.
@@ -139,7 +139,7 @@ export interface JsonParseOptions {
    * @example
    * ```ts
    * // Error message will be: "config.json: Unexpected token } in JSON"
-   * jsonParse('invalid', { filepath: 'config.json' })
+   * parseJson('invalid', { filepath: 'config.json' })
    * ```
    */
   filepath?: string | undefined
@@ -170,10 +170,10 @@ export interface JsonParseOptions {
    * @example
    * ```ts
    * // Throws error
-   * jsonParse('invalid', { throws: true })
+   * parseJson('invalid', { throws: true })
    *
    * // Returns undefined
-   * const result = jsonParse('invalid', { throws: false })
+   * const result = parseJson('invalid', { throws: false })
    * ```
    */
   throws?: boolean | undefined

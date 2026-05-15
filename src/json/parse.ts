@@ -1,7 +1,7 @@
 /**
  * @fileoverview JSON parsing utilities with Buffer detection and BOM stripping.
  * Provides safe JSON parsing with automatic encoding handling, plus
- * `safeJsonParse` for untrusted input (prototype-pollution protection +
+ * `parseJsonSafe` for untrusted input (prototype-pollution protection +
  * size limits + optional schema validation).
  */
 
@@ -13,10 +13,10 @@ import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
 import { SetCtor } from '../primordials/map-set'
 import type {
-  JsonParseOptions,
+  ParseJsonOptions,
   JsonPrimitive,
   JsonValue,
-  SafeJsonParseOptions,
+  ParseJsonSafeOptions,
 } from './types'
 
 /**
@@ -107,29 +107,29 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
  * @example
  * ```ts
  * // Basic usage
- * const data = jsonParse('{"name":"example"}')
+ * const data = parseJson('{"name":"example"}')
  * console.log(data.name) // => 'example'
  *
  * // Parse Buffer with UTF-8 BOM
  * const buffer = Buffer.from('\uFEFF{"value":42}')
- * const data = jsonParse(buffer)
+ * const data = parseJson(buffer)
  * console.log(data.value) // => 42
  *
  * // Enhanced error messages with filepath
  * try {
- *   jsonParse('invalid', { filepath: 'config.json' })
+ *   parseJson('invalid', { filepath: 'config.json' })
  * } catch (e) {
  *   console.error(e.message)
  *   // => "config.json: Unexpected token i in JSON at position 0"
  * }
  *
  * // Suppress errors
- * const result = jsonParse('invalid', { throws: false })
+ * const result = parseJson('invalid', { throws: false })
  * console.log(result) // => undefined
  *
  * // Transform values with reviver
  * const json = '{"created":"2024-01-15T10:30:00Z"}'
- * const data = jsonParse(json, {
+ * const data = parseJson(json, {
  *   reviver: (key, value) => {
  *     if (key === 'created' && typeof value === 'string') {
  *       return new Date(value)
@@ -141,14 +141,14 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function jsonParse(
+export function parseJson(
   content: string | Buffer,
-  options?: JsonParseOptions | undefined,
+  options?: ParseJsonOptions | undefined,
 ): JsonValue | undefined {
   const { filepath, reviver, throws } = {
     __proto__: null,
     ...options,
-  } as JsonParseOptions
+  } as ParseJsonOptions
   const shouldThrow = throws === undefined || !!throws
   const jsonStr = isBuffer(content) ? content.toString('utf8') : content
   try {
@@ -166,24 +166,6 @@ export function jsonParse(
 }
 
 const DANGEROUS_KEYS = new SetCtor(['__proto__', 'constructor', 'prototype'])
-
-/**
- * JSON.parse reviver that rejects prototype pollution keys at any depth.
- *
- * @internal
- */
-export function prototypePollutionReviver(
-  key: string,
-  value: unknown,
-): unknown {
-  if (DANGEROUS_KEYS.has(key)) {
-    throw new ErrorCtor(
-      'JSON contains potentially malicious prototype pollution keys',
-    )
-  }
-  return value
-}
-
 const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
 
 /**
@@ -199,7 +181,7 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  *    `@socketsecurity/lib/schema/validate`.
  *
  * For trusted-source reads (package.json, local config files), prefer
- * `jsonParse()` — it offers Buffer/BOM handling and filepath-aware error
+ * `parseJson()` — it offers Buffer/BOM handling and filepath-aware error
  * messages, without the untrusted-input overhead.
  *
  * @throws {Error} When `jsonString` exceeds `maxSize`.
@@ -211,27 +193,27 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  * @example
  * ```ts
  * // Basic parsing with type inference.
- * const data = safeJsonParse<User>('{"name":"Alice","age":30}')
+ * const data = parseJsonSafe<User>('{"name":"Alice","age":30}')
  *
  * // With schema validation.
  * import { z } from 'zod'
  * const userSchema = z.object({ name: z.string(), age: z.number() })
- * const user = safeJsonParse('{"name":"Alice","age":30}', userSchema)
+ * const user = parseJsonSafe('{"name":"Alice","age":30}', userSchema)
  *
  * // With size limit.
- * const data = safeJsonParse(jsonString, undefined, { maxSize: 1024 })
+ * const data = parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
  *
  * // Allow prototype keys (DANGEROUS — only for trusted sources).
- * const data = safeJsonParse('{"__proto__":{}}', undefined, {
+ * const data = parseJsonSafe('{"__proto__":{}}', undefined, {
  *   allowPrototype: true,
  * })
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function safeJsonParse<T = unknown>(
+export function parseJsonSafe<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
-  options: SafeJsonParseOptions = {},
+  options: ParseJsonSafeOptions = {},
 ): T {
   const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = options
 
@@ -269,4 +251,21 @@ export function safeJsonParse<T = unknown>(
   }
 
   return parsed as T
+}
+
+/**
+ * JSON.parse reviver that rejects prototype pollution keys at any depth.
+ *
+ * @internal
+ */
+export function prototypePollutionReviver(
+  key: string,
+  value: unknown,
+): unknown {
+  if (DANGEROUS_KEYS.has(key)) {
+    throw new ErrorCtor(
+      'JSON contains potentially malicious prototype pollution keys',
+    )
+  }
+  return value
 }
