@@ -2235,7 +2235,7 @@
     "@npmcli/promise-spawn": "8.0.3",
     "@sinclair/typebox": "0.34.49",
     "@socketregistry/is-unicode-supported": "1.0.5",
-    "@socketregistry/packageurl-js": "catalog:",
+    "@socketregistry/packageurl-js": "1.4.2",
     "@socketregistry/packageurl-js-stable": "npm:@socketregistry/packageurl-js@1.4.2",
     "@socketregistry/yocto-spinner": "1.0.25",
     "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.28.0",

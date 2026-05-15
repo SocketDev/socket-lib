@@ -190,9 +190,6 @@ catalogs:
     '@sinclair/typebox':
       specifier: 0.34.49
       version: 0.34.49
-    '@socketregistry/packageurl-js':
-      specifier: 1.4.2
-      version: 1.4.2
     '@socketregistry/packageurl-js-stable':
       specifier: npm:@socketregistry/packageurl-js@1.4.2
       version: 1.4.2
@@ -320,7 +317,7 @@ importers:
         specifier: 1.0.5
         version: 1.0.5
       '@socketregistry/packageurl-js':
-        specifier: 'catalog:'
+        specifier: 1.4.2
         version: 1.4.2
       '@socketregistry/packageurl-js-stable':
         specifier: npm:@socketregistry/packageurl-js@1.4.2
