@@ -47,6 +47,16 @@ export interface ResolveOptions {
    * is only consulted when the canonical entry is missing.
    */
   accounts: readonly string[]
+  /**
+   * When `true`, skip the keychain fallback entirely. The resolver
+   * checks `process.env[account]` for each account and returns
+   * `undefined` immediately if none match. Use this in headless
+   * contexts (CI runners, bootstrap hooks) where a Keychain auth
+   * prompt is unacceptable.
+   *
+   * @default false
+   */
+  allowEnvOnly?: boolean | undefined
 }
 
 export interface ResolveResult {
@@ -68,7 +78,7 @@ export interface ResolveResult {
  * `undefined` for missing or empty values so the caller can fall
  * through to the next source without distinguishing the two cases.
  */
-function readEnv(name: string): string | undefined {
+export function readEnv(name: string): string | undefined {
   const value = process.env[name]
   if (typeof value !== 'string') {
     return undefined
@@ -85,13 +95,16 @@ function readEnv(name: string): string | undefined {
 export async function resolve(
   opts: ResolveOptions,
 ): Promise<ResolveResult | undefined> {
-  const { service, accounts } = opts
+  const { accounts, allowEnvOnly, service } = opts
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromEnv = readEnv(account)
     if (fromEnv) {
       return { value: fromEnv, source: 'env', account }
     }
+  }
+  if (allowEnvOnly) {
+    return undefined
   }
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
@@ -108,13 +121,16 @@ export async function resolve(
  * validators that run before any `await` machinery exists).
  */
 export function resolveSync(opts: ResolveOptions): ResolveResult | undefined {
-  const { service, accounts } = opts
+  const { accounts, allowEnvOnly, service } = opts
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromEnv = readEnv(account)
     if (fromEnv) {
       return { value: fromEnv, source: 'env', account }
     }
+  }
+  if (allowEnvOnly) {
+    return undefined
   }
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!

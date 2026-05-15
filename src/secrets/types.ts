@@ -36,10 +36,15 @@ export interface SecretSlot {
  * Result of a write attempt. The `account` is echoed back so a batch
  * caller (writeSecretToSlots) can correlate per-slot outcomes without
  * reconstructing the input order.
+ *
+ * `outcome: 'unchanged'` is returned when the stored value already
+ * matches the requested value — the helper short-circuits without
+ * issuing an OS write. Callers logging "rotated N tokens" should
+ * filter for `outcome === 'written'` to avoid lying about no-ops.
  */
 export interface SecretWriteResult {
   account: string
-  outcome: 'written'
+  outcome: 'written' | 'unchanged'
 }
 
 /**

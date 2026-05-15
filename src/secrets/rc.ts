@@ -55,7 +55,7 @@ import { homedir, platform } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-function buildBlock(opts: WriteOptions): {
+export function buildBlock(opts: WriteOptions): {
   begin: string
   end: string
   body: string
@@ -79,7 +79,54 @@ function buildBlock(opts: WriteOptions): {
   }
 }
 
-function escapeRegExp(s: string): string {
+/**
+ * Remove the managed block from the user's shell rc file. Used by
+ * an uninstall / clear flow. Returns `true` when a block was found
+ * and removed, `false` when no block was present.
+ */
+export function clear(
+  service: string,
+  legacySentinels: readonly string[] = [],
+): boolean {
+  if (platform() !== 'darwin') {
+    return false
+  }
+  const rcPath = pickRcFile()
+  if (!rcPath || !existsSync(rcPath)) {
+    return false
+  }
+  let existing = readFileSync(rcPath, 'utf8')
+  let removedAny = false
+
+  const sentinelsToStrip = [
+    `# BEGIN ${service} env (managed)`,
+    ...legacySentinels,
+  ]
+  for (const begin of sentinelsToStrip) {
+    const end = begin.replace(/\bBEGIN\b/, 'END')
+    const endStripped = end.replace(/\s*\(managed\)\s*$/, '')
+    const endAlt =
+      end === endStripped
+        ? escapeRegExp(end)
+        : `(?:${escapeRegExp(end)}|${escapeRegExp(endStripped)})`
+    const re = new RegExp(
+      `\n*${escapeRegExp(begin)}[\\s\\S]*?${endAlt}\n?`,
+      'g',
+    )
+    const next = existing.replace(re, '\n')
+    if (next !== existing) {
+      removedAny = true
+      existing = next
+    }
+  }
+
+  if (removedAny) {
+    writeFileSync(rcPath, existing.replace(/\n{3,}/g, '\n\n'))
+  }
+  return removedAny
+}
+
+export function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
@@ -111,20 +158,57 @@ export interface WriteOptions {
    * `BEGIN`).
    */
   legacySentinels?: readonly string[]
+  /**
+   * Override the auto-detected shell. By default the helper reads
+   * `$SHELL` and targets the matching rc file:
+   *   - zsh  → `~/.zshenv`
+   *   - bash → `~/.bashrc` (or `~/.bash_profile` if `~/.bashrc` is
+   *            absent)
+   *   - fish → `~/.config/fish/config.fish`
+   *
+   * Useful when an installer is running under a different shell
+   * than the user normally uses (e.g. invoked from a sudo /bin/sh
+   * but the user is a zsh user).
+   */
+  shell?: 'zsh' | 'bash' | 'fish' | undefined
+  /**
+   * Override the auto-picked rc path entirely. Use this when the
+   * user has a non-standard layout (chezmoi, dotfile managers, a
+   * separate `~/.zshenv.local` they source from `~/.zshenv`, etc.).
+   * The file is created if missing.
+   */
+  rcPath?: string | undefined
 }
 
-export interface WriteResult {
-  rcPath: string
-  outcome: 'inserted' | 'updated' | 'unchanged'
-}
+export type WriteResult =
+  | {
+      rcPath: string
+      outcome: 'inserted' | 'updated' | 'unchanged'
+    }
+  | {
+      rcPath: undefined
+      outcome: 'skipped'
+      reason: 'unsupported-platform' | 'unknown-shell'
+    }
 
-function pickRcFile(): string | undefined {
+export function pickRcFile(
+  shellOverride?: 'zsh' | 'bash' | 'fish',
+): string | undefined {
   const home = homedir()
-  const shell = process.env['SHELL'] ?? ''
-  if (/zsh$/.test(shell)) {
+  const shellPath = process.env['SHELL'] ?? ''
+  const shell: 'zsh' | 'bash' | 'fish' | undefined =
+    shellOverride ??
+    (shellPath.endsWith('zsh')
+      ? 'zsh'
+      : shellPath.endsWith('bash')
+        ? 'bash'
+        : shellPath.endsWith('fish')
+          ? 'fish'
+          : undefined)
+  if (shell === 'zsh') {
     return path.join(home, '.zshenv')
   }
-  if (/bash$/.test(shell)) {
+  if (shell === 'bash') {
     const bashrc = path.join(home, '.bashrc')
     if (existsSync(bashrc)) {
       return bashrc
@@ -135,18 +219,23 @@ function pickRcFile(): string | undefined {
     }
     return bashrc
   }
+  if (shell === 'fish') {
+    return path.join(home, '.config', 'fish', 'config.fish')
+  }
   return undefined
 }
 
-function shellSingleQuote(value: string): string {
+export function shellSingleQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`
 }
 
 /**
  * Insert or update the managed env-var block in the user's shell
  * run-commands file (`~/.zshenv` for zsh, `~/.bashrc` /
- * `~/.bash_profile` for bash). macOS only — Linux + Windows return
- * `undefined` (callers fall back to a copy-pasteable instruction).
+ * `~/.bash_profile` for bash, `~/.config/fish/config.fish` for fish).
+ * macOS only — Linux + Windows return `{outcome: 'skipped', reason:
+ * 'unsupported-platform'}` so callers can fall back to a copy-
+ * pasteable instruction without special-casing an `undefined` return.
  *
  * The block is matched by BEGIN/END sentinels, so it coexists with
  * other managed blocks (homebrew, nvm, etc.). Idempotent: re-running
@@ -156,14 +245,22 @@ function shellSingleQuote(value: string): string {
  * `legacySentinels` lets a consumer migrate the block from an older
  * BEGIN string. Each legacy block (matched by `BEGIN <legacy>` →
  * `END <legacy>`) is stripped before the new block is written.
+ *
+ * `shell` and `rcPath` override the auto-detected target — useful
+ * for chezmoi / dotfile-manager users or installers running under
+ * a non-default shell.
  */
-export function write(opts: WriteOptions): WriteResult | undefined {
+export function write(opts: WriteOptions): WriteResult {
   if (platform() !== 'darwin') {
-    return undefined
+    return {
+      rcPath: undefined,
+      outcome: 'skipped',
+      reason: 'unsupported-platform',
+    }
   }
-  const rcPath = pickRcFile()
+  const rcPath = opts.rcPath ?? pickRcFile(opts.shell)
   if (!rcPath) {
-    return undefined
+    return { rcPath: undefined, outcome: 'skipped', reason: 'unknown-shell' }
   }
   const { begin, end, full: desiredBlock } = buildBlock(opts)
 
@@ -226,51 +323,4 @@ export function write(opts: WriteOptions): WriteResult | undefined {
   // 'inserted' / 'updated' / 'unchanged', and the new BEGIN/END
   // sentinel didn't exist on disk before, so 'inserted' is honest.
   return { rcPath, outcome: 'inserted' }
-}
-
-/**
- * Remove the managed block from the user's shell rc file. Used by
- * an uninstall / clear flow. Returns `true` when a block was found
- * and removed, `false` when no block was present.
- */
-export function clear(
-  service: string,
-  legacySentinels: readonly string[] = [],
-): boolean {
-  if (platform() !== 'darwin') {
-    return false
-  }
-  const rcPath = pickRcFile()
-  if (!rcPath || !existsSync(rcPath)) {
-    return false
-  }
-  let existing = readFileSync(rcPath, 'utf8')
-  let removedAny = false
-
-  const sentinelsToStrip = [
-    `# BEGIN ${service} env (managed)`,
-    ...legacySentinels,
-  ]
-  for (const begin of sentinelsToStrip) {
-    const end = begin.replace(/\bBEGIN\b/, 'END')
-    const endStripped = end.replace(/\s*\(managed\)\s*$/, '')
-    const endAlt =
-      end === endStripped
-        ? escapeRegExp(end)
-        : `(?:${escapeRegExp(end)}|${escapeRegExp(endStripped)})`
-    const re = new RegExp(
-      `\n*${escapeRegExp(begin)}[\\s\\S]*?${endAlt}\n?`,
-      'g',
-    )
-    const next = existing.replace(re, '\n')
-    if (next !== existing) {
-      removedAny = true
-      existing = next
-    }
-  }
-
-  if (removedAny) {
-    writeFileSync(rcPath, existing.replace(/\n{3,}/g, '\n\n'))
-  }
-  return removedAny
 }

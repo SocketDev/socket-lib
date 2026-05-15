@@ -72,21 +72,14 @@ import type {
   SecretWriteResult,
 } from './types'
 
-export type {
-  BackendAvailability,
-  SecretDeleteResult,
-  SecretWriteResult,
-} from './types'
-export type { SecretSlot } from './types'
-
-type Platform = 'darwin' | 'linux' | 'win32' | 'other'
-
-export function detectPlatform(): Platform {
-  const p = platform()
-  if (p === 'darwin' || p === 'linux' || p === 'win32') {
-    return p
-  }
-  return 'other'
+/**
+ * Drop the in-process read cache. Tests use this between cases to
+ * force a fresh OS call; production code generally doesn't need it
+ * (process exit drops the cache anyway, and `writeSecret` /
+ * `deleteSecret` already invalidate per-key entries automatically).
+ */
+export function clearCache(): void {
+  invalidateAll()
 }
 
 export interface DeleteOptions {
@@ -171,6 +164,35 @@ export function deleteSecretSync({
   }
   invalidate(service, account)
   return outcome
+}
+
+export type {
+  BackendAvailability,
+  SecretDeleteResult,
+  SecretWriteResult,
+} from './types'
+export type { SecretSlot } from './types'
+
+type Platform = 'darwin' | 'linux' | 'win32' | 'other'
+
+/**
+ * Resolve the current OS to one of our four backend categories.
+ *
+ * Exported only because the fleet's `export-top-level-functions`
+ * lint rule requires top-level functions to be exported for
+ * testability. Not part of the public `secrets/keychain` API
+ * surface — consumers should call `readSecret` / `writeSecret` /
+ * `getBackendAvailability` instead, which handle the dispatch
+ * internally.
+ *
+ * @internal
+ */
+export function detectPlatform(): Platform {
+  const p = platform()
+  if (p === 'darwin' || p === 'linux' || p === 'win32') {
+    return p
+  }
+  return 'other'
 }
 
 /**
@@ -328,13 +350,20 @@ export interface WriteOptions {
  * Persist a single secret to the OS credential store. Throws on
  * write failure — the caller is in a setup flow and should see why
  * persistence failed, not silently continue.
+ *
+ * Returns the outcome:
+ *   - `'written'`   — value persisted (entry was absent or differed).
+ *   - `'unchanged'` — current stored value already matches; no OS
+ *                     write performed. Useful for idempotent flows
+ *                     (re-running an installer shouldn't show "rewrote
+ *                     N secrets" when nothing actually changed).
  */
 export async function writeSecret({
   service,
   account,
   value,
   label,
-}: WriteOptions): Promise<void> {
+}: WriteOptions): Promise<'written' | 'unchanged'> {
   if (!value || typeof value !== 'string') {
     throw new TypeError('writeSecret: value must be a non-empty string')
   }
@@ -344,6 +373,13 @@ export async function writeSecret({
       `Unsupported platform: ${platform()}. ` +
         'Secret storage requires macOS, Linux, or Windows.',
     )
+  }
+  // No-op detection: if the stored value already matches, skip the OS
+  // call. dedupeRead caches the result, so back-to-back idempotent
+  // writes incur at most one read per process.
+  const current = await readSecret({ service, account })
+  if (current === value) {
+    return 'unchanged'
   }
   const lbl = label ?? `${service} credential`
   switch (platform_) {
@@ -360,6 +396,7 @@ export async function writeSecret({
   // Refresh the cache so subsequent reads return the new value
   // without a re-fetch (and without surfacing the stale prior value).
   setCached(service, account, value)
+  return 'written'
 }
 
 export function writeSecretSync({
@@ -367,7 +404,7 @@ export function writeSecretSync({
   account,
   value,
   label,
-}: WriteOptions): void {
+}: WriteOptions): 'written' | 'unchanged' {
   if (!value || typeof value !== 'string') {
     throw new TypeError('writeSecret: value must be a non-empty string')
   }
@@ -377,6 +414,10 @@ export function writeSecretSync({
       `Unsupported platform: ${platform()}. ` +
         'Secret storage requires macOS, Linux, or Windows.',
     )
+  }
+  const current = readSecretSync({ service, account })
+  if (current === value) {
+    return 'unchanged'
   }
   const lbl = label ?? `${service} credential`
   switch (platform_) {
@@ -391,6 +432,7 @@ export function writeSecretSync({
       break
   }
   setCached(service, account, value)
+  return 'written'
 }
 
 export interface WriteToSlotsOptions {
@@ -419,8 +461,8 @@ export async function writeSecretToSlots({
 }: WriteToSlotsOptions): Promise<SecretWriteResult[]> {
   const results: SecretWriteResult[] = []
   for (const account of accounts) {
-    await writeSecret({ service, account, value, label })
-    results.push({ account, outcome: 'written' })
+    const outcome = await writeSecret({ service, account, value, label })
+    results.push({ account, outcome })
   }
   return results
 }
@@ -433,18 +475,8 @@ export function writeSecretToSlotsSync({
 }: WriteToSlotsOptions): SecretWriteResult[] {
   const results: SecretWriteResult[] = []
   for (const account of accounts) {
-    writeSecretSync({ service, account, value, label })
-    results.push({ account, outcome: 'written' })
+    const outcome = writeSecretSync({ service, account, value, label })
+    results.push({ account, outcome })
   }
   return results
-}
-
-/**
- * Drop the in-process read cache. Tests use this between cases to
- * force a fresh OS call; production code generally doesn't need it
- * (process exit drops the cache anyway, and `writeSecret` /
- * `deleteSecret` already invalidate per-key entries automatically).
- */
-export function clearCache(): void {
-  invalidateAll()
 }
