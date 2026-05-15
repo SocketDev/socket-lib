@@ -261,6 +261,40 @@ export async function listDlxCache(): Promise<
 }
 
 /**
+ * Read the DlxMetadata for a cached binary. Returns `undefined` when
+ * the metadata file is missing, unreadable, or doesn't match the
+ * expected shape. Useful for callers that want to recover the
+ * integrity / size / source URL of an already-cached download
+ * without re-fetching.
+ *
+ * @example
+ * ```typescript
+ * const meta = await readBinaryCacheMetadata(cacheEntryDir)
+ * if (meta) {
+ *   console.log(`Pinned integrity: ${meta.integrity}`)
+ * }
+ * ```
+ */
+export async function readBinaryCacheMetadata(
+  cacheEntryPath: string,
+): Promise<DlxMetadata | undefined> {
+  const fs = getNodeFs()
+  try {
+    const metaPath = getBinaryCacheMetadataPath(cacheEntryPath)
+    if (!fs.existsSync(metaPath)) {
+      return undefined
+    }
+    const metadata = await readJson(metaPath, { throws: false })
+    if (!isPlainObject(metadata)) {
+      return undefined
+    }
+    return metadata as unknown as DlxMetadata
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * Write metadata for a cached binary.
  * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
  *

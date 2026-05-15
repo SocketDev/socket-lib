@@ -29,6 +29,7 @@ import { getNodePath } from '../node/path'
 import {
   getDlxCachePath,
   isBinaryCacheValid,
+  readBinaryCacheMetadata,
   writeBinaryCacheMetadata,
 } from './binary-cache'
 
@@ -38,20 +39,35 @@ import type { DlxBinaryOptions } from './binary-types'
  * Download a binary from a URL with caching (without execution).
  * Similar to downloadPackage from dlx/package.
  *
- * @returns Object containing the path to the cached binary and whether it was downloaded
+ * Returns `{binaryPath, downloaded, integrity}`. The `integrity` field
+ * is the SRI-formatted `sha512-<base64>` hash of the cached file —
+ * computed by the downloader on first fetch, persisted to cache
+ * metadata, and re-read on subsequent cache hits. This supports the
+ * trust-on-first-use pattern:
+ *
+ *   // 1. First call — caller has no pinned integrity yet.
+ *   const { integrity } = await downloadBinary({ url, name: 'tool' })
+ *   // Caller writes `integrity` back to external-tools.json or similar.
+ *
+ *   // 2. Subsequent calls — caller pins the integrity for verification.
+ *   await downloadBinary({ url, name: 'tool', hash: integrity })
+ *
+ * @returns `{binaryPath, downloaded, integrity}` — binary location,
+ *   whether this call fetched (vs. cache-hit), and the computed SRI
+ *   integrity for future pinning.
  *
  * @example
  * ```typescript
- * const { binaryPath, downloaded } = await downloadBinary({
+ * const { binaryPath, integrity } = await downloadBinary({
  *   url: 'https://example.com/tool-linux-x64',
  *   name: 'tool',
  * })
- * console.log(`Binary at: ${binaryPath}, fresh: ${downloaded}`)
+ * console.log(`Binary at: ${binaryPath}, pin: ${integrity}`)
  * ```
  */
 export async function downloadBinary(
   options: Omit<DlxBinaryOptions, 'spawnOptions'>,
-): Promise<{ binaryPath: string; downloaded: boolean }> {
+): Promise<{ binaryPath: string; downloaded: boolean; integrity: string }> {
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
     force = false,
@@ -83,6 +99,7 @@ export async function downloadBinary(
   const binaryPath = normalizePath(path.join(cacheEntryDir, binaryName))
 
   let downloaded = false
+  let actualIntegrity = ''
 
   // Check if we need to download.
   if (
@@ -90,8 +107,19 @@ export async function downloadBinary(
     fs.existsSync(cacheEntryDir) &&
     (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
   ) {
-    // Binary is cached and valid.
+    // Binary is cached and valid. Read the integrity from cache
+    // metadata so callers doing trust-on-first-use can pin it
+    // without re-fetching.
     downloaded = false
+    const cachedMeta = await readBinaryCacheMetadata(cacheEntryDir)
+    if (cachedMeta?.integrity) {
+      actualIntegrity = cachedMeta.integrity
+    } else {
+      // Metadata missing or malformed — recompute from the on-disk
+      // binary so the caller still gets a usable integrity string.
+      const fileBuffer = await fs.promises.readFile(binaryPath)
+      actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
+    }
   } else {
     // Ensure cache directory exists before downloading.
     try {
@@ -119,7 +147,7 @@ export async function downloadBinary(
     }
 
     // Download the binary.
-    const computedIntegrity = await downloadBinaryFile(
+    actualIntegrity = await downloadBinaryFile(
       url,
       binaryPath,
       integrity,
@@ -133,7 +161,7 @@ export async function downloadBinary(
       cacheEntryDir,
       cacheKey,
       url,
-      computedIntegrity || '',
+      actualIntegrity,
       stats.size,
     )
     downloaded = true
@@ -142,6 +170,7 @@ export async function downloadBinary(
   return {
     binaryPath,
     downloaded,
+    integrity: actualIntegrity,
   }
 }
 
