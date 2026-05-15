@@ -1,5 +1,5 @@
 /**
- * @fileoverview URL search-param coercion helpers — `urlSearchParamAs*`
+ * @fileoverview URL search-param coercion helpers — `urlSearchParamsAs*`
  * normalise a raw `string | null | undefined` value into a typed shape
  * (array / boolean / number / string) with a default. `urlSearchParamsGet*`
  * take a `URLSearchParams` instance and a key.
@@ -8,9 +8,9 @@
 import { NumberIsNaN } from '../primordials/number'
 
 import type {
-  UrlSearchParamAsBooleanOptions,
-  UrlSearchParamAsNumberOptions,
-  UrlSearchParamAsStringOptions,
+  UrlSearchParamsAsBooleanOptions,
+  UrlSearchParamsAsNumberOptions,
+  UrlSearchParamsAsStringOptions,
   UrlSearchParamsGetBooleanOptions,
 } from './types'
 
@@ -21,12 +21,12 @@ const BooleanCtor = Boolean
  *
  * @example
  * ```typescript
- * urlSearchParamAsArray('a, b, c') // ['a', 'b', 'c']
- * urlSearchParamAsArray(null)      // []
+ * urlSearchParamsAsArray('a, b, c') // ['a', 'b', 'c']
+ * urlSearchParamsAsArray(null)      // []
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamAsArray(
+export function urlSearchParamsAsArray(
   value: string | null | undefined,
 ): string[] {
   return typeof value === 'string'
@@ -43,20 +43,20 @@ export function urlSearchParamAsArray(
  *
  * @example
  * ```typescript
- * urlSearchParamAsBoolean('true') // true
- * urlSearchParamAsBoolean('0')    // false
- * urlSearchParamAsBoolean(null)   // false
+ * urlSearchParamsAsBoolean('true') // true
+ * urlSearchParamsAsBoolean('0')    // false
+ * urlSearchParamsAsBoolean(null)   // false
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamAsBoolean(
+export function urlSearchParamsAsBoolean(
   value: string | null | undefined,
-  options?: UrlSearchParamAsBooleanOptions | undefined,
+  options?: UrlSearchParamsAsBooleanOptions | undefined,
 ): boolean {
   const { defaultValue = false } = {
     __proto__: null,
     ...options,
-  } as UrlSearchParamAsBooleanOptions
+  } as UrlSearchParamsAsBooleanOptions
   if (typeof value === 'string') {
     const trimmed = value.trim()
     // Empty string → use defaultValue, same as null/undefined. Previously
@@ -87,20 +87,20 @@ export function urlSearchParamAsBoolean(
  * @example
  * ```typescript
  * const params = new URLSearchParams('limit=10')
- * urlSearchParamAsNumber(params, 'limit') // 10
- * urlSearchParamAsNumber(params, 'other') // 0
+ * urlSearchParamsAsNumber(params, 'limit') // 10
+ * urlSearchParamsAsNumber(params, 'other') // 0
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamAsNumber(
+export function urlSearchParamsAsNumber(
   params: URLSearchParams | null | undefined,
   key: string,
-  options?: UrlSearchParamAsNumberOptions | undefined,
+  options?: UrlSearchParamsAsNumberOptions | undefined,
 ): number {
   const { defaultValue = 0 } = {
     __proto__: null,
     ...options,
-  } as UrlSearchParamAsNumberOptions
+  } as UrlSearchParamsAsNumberOptions
   if (params && typeof params.get === 'function') {
     const value = params.get(key)
     if (value !== null) {
@@ -117,20 +117,20 @@ export function urlSearchParamAsNumber(
  * @example
  * ```typescript
  * const params = new URLSearchParams('name=socket')
- * urlSearchParamAsString(params, 'name')  // 'socket'
- * urlSearchParamAsString(params, 'other') // ''
+ * urlSearchParamsAsString(params, 'name')  // 'socket'
+ * urlSearchParamsAsString(params, 'other') // ''
  * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
-export function urlSearchParamAsString(
+export function urlSearchParamsAsString(
   params: URLSearchParams | null | undefined,
   key: string,
-  options?: UrlSearchParamAsStringOptions | undefined,
+  options?: UrlSearchParamsAsStringOptions | undefined,
 ): string {
   const { defaultValue = '' } = {
     __proto__: null,
     ...options,
-  } as UrlSearchParamAsStringOptions
+  } as UrlSearchParamsAsStringOptions
   if (params && typeof params.get === 'function') {
     const value = params.get(key)
     return value !== null ? value : defaultValue
@@ -157,7 +157,7 @@ export function urlSearchParamsGetArray(
     // If single value contains commas, split it
     const firstValue = values[0]
     if (values.length === 1 && firstValue && firstValue.includes(',')) {
-      return urlSearchParamAsArray(firstValue)
+      return urlSearchParamsAsArray(firstValue)
     }
     return values
   }
@@ -187,7 +187,7 @@ export function urlSearchParamsGetBoolean(
   if (params && typeof params.get === 'function') {
     const value = params.get(key)
     return value !== null
-      ? urlSearchParamAsBoolean(value, { defaultValue })
+      ? urlSearchParamsAsBoolean(value, { defaultValue })
       : defaultValue
   }
   return defaultValue
