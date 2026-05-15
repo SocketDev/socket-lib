@@ -248,7 +248,7 @@ All modules exported via `package.json` exports field. When adding modules, upda
 - 🚨 **NEVER use `--` before test paths** — runs all tests
 - NEVER write source-code-scanning tests — verify behavior with real function calls
 
-🚨 **Vitest OOM with no per-test failure → suspect an infinite stream / unbounded async loop, NOT cumulative memory.** When the worker reports `FATAL ERROR: Ineffective mark-compacts near heap limit` with `tests 0ms` (or per-test results never flush), one test is spinning. Most common culprit: a Node `Readable` that calls `this.push(undefined)` instead of `this.push(null)` — only `null` terminates the stream, so `read()` is invoked forever and chunks accumulate until v8 OOMs. The error masquerades as "cumulative leak across many tests" because all prior tests ran fine but vitest can't print results before the runaway blows the heap. **Before splitting files or raising `--max-old-space-size`, bisect with `pnpm exec vitest -t '<describe-name>'`** to find the offending test. See the OOM-history block at the top of `test/isolated/http-request-advanced-2.test.mts` for the canonical example (a multi-day misdiagnosis avoided by checking for `push(undefined)` first).
+🚨 **Vitest OOM with no per-test failure → infinite stream, not cumulative memory.** `FATAL ERROR: Ineffective mark-compacts near heap limit` + `tests 0ms`: one test is spinning. Top culprit: `Readable` with `this.push(undefined)` (only `null` ends the stream). Bisect with `pnpm exec vitest -t '<describe>'` **before** splitting files or raising heap. See `test/isolated/http-request-advanced-2.test.mts` for the canonical example.
 
 ### CI Integration
 
