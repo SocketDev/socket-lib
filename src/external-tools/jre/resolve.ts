@@ -6,37 +6,72 @@
  *   1. VFS  — smol binary's embedded JRE (zero network, fast)
  *   2. JAVA_HOME — user-pinned via env var
  *   3. PATH — `java` (or `java.exe`) on the system PATH
+ *   4. download — Adoptium fetch + extract (only when
+ *      `downloadIfMissing` is passed)
  *
- * Returns `undefined` if none of the sources turned up a JRE. The
- * caller (socket-cli or another consumer) decides what to do then
- * — typically download into a managed cache and retry, or fail with
- * an actionable error.
+ * Returns `undefined` if all of the enabled sources miss. The caller
+ * decides what to do then — typically prompt the user, surface an
+ * install instruction, or fail with an actionable error.
  *
- * Memoized: the first call walks the chain; subsequent calls return
- * the cached promise. Cache is per-process; the resolver assumes a
- * JRE won't appear/disappear at runtime (which is true in practice
- * for every reasonable deployment).
+ * Memoized per option-shape: calls with identical options return the
+ * same cached promise. Calling without `downloadIfMissing` and then
+ * with `downloadIfMissing` produces two distinct cache entries so the
+ * second call can fall through to the download tier even after the
+ * first call's "all local tiers missed → undefined" memoized.
  *
  * Test-only escape hatch: `_resetJreResolution()` clears the cache
- * so tests can exercise the resolver fresh without spawning new
- * processes.
+ * so tests can exercise the resolver fresh.
  */
 
+import { jreFromDownload } from './from-download'
 import { jreFromJavaHome } from './from-java-home'
 import { jreFromPath } from './from-path'
 import { jreFromVfs } from './from-vfs'
 
+import type { HashSpec } from '../../integrity'
 import type { ResolvedJre } from './types'
 
-let _resolved: Promise<ResolvedJre | undefined> | undefined
+export interface ResolveJreOptions {
+  /**
+   * When set, the resolver falls through to an Adoptium download
+   * after the local-discovery tiers miss. Omit to keep the resolver
+   * read-only (no network).
+   */
+  downloadIfMissing?:
+    | {
+        version: number
+        platformArch: string
+        integrity?: HashSpec | undefined
+        cacheDir?: string | undefined
+      }
+    | undefined
+}
+
+const _resolutionCache = new Map<string, Promise<ResolvedJre | undefined>>()
+
+export function cacheKey(opts: ResolveJreOptions | undefined): string {
+  if (!opts?.downloadIfMissing) {
+    return 'local-only'
+  }
+  const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
+  const integrityKey =
+    typeof integrity === 'string'
+      ? integrity
+      : integrity
+        ? `${integrity.type}:${integrity.value}`
+        : ''
+  return `dl:${version}:${platformArch}:${integrityKey}:${cacheDir ?? ''}`
+}
 
 /* c8 ignore start - test-only escape hatch. */
 export function _resetJreResolution(): void {
-  _resolved = undefined
+  _resolutionCache.clear()
 }
 /* c8 ignore stop */
 
-export async function doResolveJre(): Promise<ResolvedJre | undefined> {
+export async function doResolveJre(
+  opts?: ResolveJreOptions | undefined,
+): Promise<ResolvedJre | undefined> {
   const fromVfs = await jreFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -47,12 +82,24 @@ export async function doResolveJre(): Promise<ResolvedJre | undefined> {
   if (fromJavaHome) {
     return fromJavaHome
   }
-  return jreFromPath()
+  const fromPath = await jreFromPath()
+  if (fromPath) {
+    return fromPath
+  }
+  if (opts?.downloadIfMissing) {
+    return jreFromDownload(opts.downloadIfMissing)
+  }
+  return undefined
 }
 
-export function resolveJre(): Promise<ResolvedJre | undefined> {
-  if (!_resolved) {
-    _resolved = doResolveJre()
+export function resolveJre(
+  opts?: ResolveJreOptions | undefined,
+): Promise<ResolvedJre | undefined> {
+  const key = cacheKey(opts)
+  let cached = _resolutionCache.get(key)
+  if (!cached) {
+    cached = doResolveJre(opts)
+    _resolutionCache.set(key, cached)
   }
-  return _resolved
+  return cached
 }

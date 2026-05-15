@@ -85,3 +85,55 @@ export function getBazelAssetEntry(
 ): BazelAssetEntry | undefined {
   return BAZEL_ASSET_MAP[platformArch]
 }
+
+/**
+ * Options for {@link getBazelDownloadUrl}.
+ */
+export interface BazelDownloadOptions {
+  /**
+   * Bazel release version, e.g. `'7.4.1'`. Passed verbatim into the
+   * release tag — the helper doesn't validate against bazel's
+   * release feed, it just formats the URL.
+   */
+  version: string
+  /**
+   * Fleet platform-arch token — looked up in `BAZEL_ASSET_MAP`.
+   * Returns `undefined` when no entry exists for the target.
+   */
+  platformArch: string
+}
+
+/**
+ * Build the GitHub release-asset download URL for an upstream Bazel
+ * binary. Returns `undefined` when no entry exists for the requested
+ * platform-arch.
+ *
+ * Note: the underlying asset may be a compat-layer build (see
+ * `BazelAssetEntry.native`). Callers that require a native binary
+ * should check `getBazelAssetEntry(platformArch).native` before
+ * downloading.
+ *
+ * Reference: https://github.com/bazelbuild/bazel/releases
+ *
+ * @example
+ * ```typescript
+ * const url = getBazelDownloadUrl({
+ *   version: '7.4.1',
+ *   platformArch: 'darwin-arm64',
+ * })
+ * // → 'https://github.com/bazelbuild/bazel/releases/download/7.4.1/bazel-7.4.1-darwin-arm64'
+ * ```
+ */
+export function getBazelDownloadUrl(
+  opts: BazelDownloadOptions,
+): string | undefined {
+  const { platformArch, version } = opts
+  const entry = BAZEL_ASSET_MAP[platformArch]
+  if (!entry) {
+    return undefined
+  }
+  return (
+    `https://github.com/bazelbuild/bazel/releases/download/${version}/` +
+    `bazel-${version}-${entry.suffix}`
+  )
+}

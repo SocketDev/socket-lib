@@ -283,12 +283,14 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/external-tools/from-download`](../src/external-tools/from-download.ts) | Generic "download tier" for external-tools resolvers. |
 | [`@socketsecurity/lib/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts) | Adoptium API platform-arch → asset-query mappings. |
 | [`@socketsecurity/lib/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts) | `getCurrentPlatformArch()` — resolves the current machine to a `platform-arch` string suitable for the Adoptium asset-name map. |
+| [`@socketsecurity/lib/external-tools/jre/from-download`](../src/external-tools/jre/from-download.ts) | `jreFromDownload()` — fetches Adoptium JRE and returns a `ResolvedJre` pointing at the extracted java binary. |
 | [`@socketsecurity/lib/external-tools/jre/from-java-home`](../src/external-tools/jre/from-java-home.ts) | `jreFromJavaHome()` — checks `$JAVA_HOME` for an existing JRE/JDK. |
 | [`@socketsecurity/lib/external-tools/jre/from-path`](../src/external-tools/jre/from-path.ts) | `jreFromPath()` — looks for `java` (or `java.exe`) on the system PATH via socket-lib's `which`. |
 | [`@socketsecurity/lib/external-tools/jre/from-vfs`](../src/external-tools/jre/from-vfs.ts) | `jreFromVfs()` — extracts the JRE directory tree from the smol binary's VFS and returns the resolved-shape pointing into the extracted directory. |
 | [`@socketsecurity/lib/external-tools/jre/resolve`](../src/external-tools/jre/resolve.ts) | `resolveJre()` — the JRE resolution entry point. |
 | [`@socketsecurity/lib/external-tools/jre/types`](../src/external-tools/jre/types.ts) | Shared types for JRE resolution. |
 | [`@socketsecurity/lib/external-tools/manifest`](../src/external-tools/manifest.ts) | Reader for `external-tools.json` — the fleet manifest describing downloadable external binaries (sfw, zizmor, etc.) with pinned versions, per-platform asset names, and integrity hashes. |
+| [`@socketsecurity/lib/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts) | SBT distribution download-URL builder. |
 | [`@socketsecurity/lib/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts) | `sbtFromPath()` — looks for the `sbt` shell script on the system PATH. |
 | [`@socketsecurity/lib/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts) | `sbtFromVfs()` — extracts the SBT launcher jar from the smol binary's VFS. |
 | [`@socketsecurity/lib/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts) | `resolveSbt()` — SBT resolution entry point. |

@@ -1,0 +1,198 @@
+/**
+ * @fileoverview Integration tests for src/external-tools/from-download.ts.
+ *
+ * Exercises the chain end-to-end with the `downloader?` injection point —
+ * no network, no real Adoptium fetch. The fake downloader writes a
+ * pre-built tar archive to disk and returns the dlx-shape `{binaryPath,
+ * downloaded, integrity}` so `downloadAndExtractTool` can hand the
+ * archive to `extractArchive`.
+ */
+
+import {
+  createWriteStream,
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+} from 'node:fs'
+import { writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+
+import tarFs from 'tar-fs'
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+import {
+  downloadAndExtractTool,
+  downloadToolArchive,
+} from '../../../src/external-tools/from-download'
+import { safeDelete } from '../../../src/fs/safe'
+
+import type { BinaryDownloader } from '../../../src/external-tools/from-download'
+
+const FAKE_INTEGRITY =
+  'sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='
+
+/**
+ * Build a fake-downloader factory that writes the given payload to
+ * the binaryPath the caller supplies via `name`. Returns the
+ * downloader plus a "calls" array so tests can assert what got
+ * requested.
+ */
+export function makeFakeDownloader(payload: Buffer | string): {
+  downloader: BinaryDownloader
+  calls: Array<{ url: string; name: string }>
+} {
+  const calls: Array<{ url: string; name: string }> = []
+  // Each fake-downloader test gets its own scratch dir so concurrent
+  // tests don't collide on the same binaryPath.
+  const scratchDir = mkdtempSync(path.join(os.tmpdir(), 'from-download-test-'))
+  const downloader = (async (opts: Parameters<BinaryDownloader>[0]) => {
+    calls.push({ url: opts.url, name: opts.name })
+    const binaryPath = path.join(scratchDir, opts.name)
+    writeFileSync(binaryPath, payload)
+    return {
+      binaryPath,
+      downloaded: true,
+      integrity: FAKE_INTEGRITY,
+    }
+  }) as BinaryDownloader
+  return { downloader, calls }
+}
+
+describe('external-tools/from-download', () => {
+  let scratch: string
+  beforeEach(() => {
+    scratch = mkdtempSync(path.join(os.tmpdir(), 'from-download-test-'))
+  })
+  afterEach(async () => {
+    await safeDelete(scratch)
+  })
+
+  describe('downloadToolArchive', () => {
+    it('passes url + name + integrity through to the downloader', async () => {
+      const { calls, downloader } = makeFakeDownloader('fake-archive-bytes')
+      const result = await downloadToolArchive({
+        url: 'https://example.com/tool.tgz',
+        name: 'tool-1.2.3',
+        integrity: FAKE_INTEGRITY,
+        downloader,
+      })
+      expect(calls).toEqual([
+        { url: 'https://example.com/tool.tgz', name: 'tool-1.2.3' },
+      ])
+      expect(result.source).toBe('download')
+      expect(result.integrity).toBe(FAKE_INTEGRITY)
+      expect(result.archivePath.endsWith('tool-1.2.3')).toBe(true)
+    })
+
+    it('returns downloaded: true and the computed integrity', async () => {
+      const { downloader } = makeFakeDownloader('payload')
+      const result = await downloadToolArchive({
+        url: 'https://example.com/x',
+        name: 'x',
+        downloader,
+      })
+      expect(result.downloaded).toBe(true)
+      expect(result.integrity).toBe(FAKE_INTEGRITY)
+    })
+  })
+
+  describe('downloadAndExtractTool', () => {
+    /**
+     * Build a real tar archive containing `source/hello.txt`. Packs
+     * the parent dir so the entry name is `source/hello.txt` (with
+     * the `source/` wrapper), which mirrors how Adoptium / Bazel /
+     * SBT archives are shaped.
+     */
+    async function buildTarFixture(scratchDir: string): Promise<string> {
+      const fs = require('node:fs') as typeof import('node:fs')
+      const packRoot = path.join(scratchDir, 'pack-root')
+      fs.mkdirSync(path.join(packRoot, 'source'), { recursive: true })
+      fs.writeFileSync(path.join(packRoot, 'source', 'hello.txt'), 'world')
+      const archivePath = path.join(scratchDir, 'fixture.tar')
+      await new Promise<void>((resolve, reject) => {
+        const out = createWriteStream(archivePath)
+        tarFs.pack(packRoot).pipe(out)
+        out.on('finish', () => resolve())
+        out.on('error', reject)
+      })
+      return archivePath
+    }
+
+    it('extracts a tar archive into the target dir on first call', async () => {
+      const tarPath = await buildTarFixture(scratch)
+      const tarBytes = require('node:fs').readFileSync(tarPath) as Buffer
+      const { downloader } = makeFakeDownloader(tarBytes)
+      const extractedDir = path.join(scratch, 'extracted')
+
+      const result = await downloadAndExtractTool({
+        url: 'https://example.com/fixture.tar',
+        name: 'fixture-1.0.0.tar',
+        extractedDir,
+        downloader,
+      })
+
+      expect(result.extracted).toBe(true)
+      expect(result.extractedDir).toBe(extractedDir)
+      expect(existsSync(path.join(extractedDir, 'source', 'hello.txt'))).toBe(
+        true,
+      )
+    })
+
+    it('is idempotent: re-running with a populated target dir skips extraction', async () => {
+      const tarPath = await buildTarFixture(scratch)
+      const tarBytes = require('node:fs').readFileSync(tarPath) as Buffer
+      const { downloader } = makeFakeDownloader(tarBytes)
+      const extractedDir = path.join(scratch, 'extracted')
+
+      const first = await downloadAndExtractTool({
+        url: 'https://example.com/fixture.tar',
+        name: 'fixture-1.0.0.tar',
+        extractedDir,
+        downloader,
+      })
+      expect(first.extracted).toBe(true)
+
+      const second = await downloadAndExtractTool({
+        url: 'https://example.com/fixture.tar',
+        name: 'fixture-1.0.0.tar',
+        extractedDir,
+        downloader,
+      })
+      expect(second.extracted).toBe(false)
+      // The tree from the first call should still be present.
+      expect(readdirSync(extractedDir).length).toBeGreaterThan(0)
+    })
+
+    it('forwards extractOptions.strip to extractArchive', async () => {
+      // Build a tar wrapping `top/inner.txt`. With strip: 1, the
+      // extracted tree should contain `inner.txt` directly.
+      const fs = require('node:fs') as typeof import('node:fs')
+      const packRoot = path.join(scratch, 'strip-pack')
+      fs.mkdirSync(path.join(packRoot, 'top'), { recursive: true })
+      fs.writeFileSync(path.join(packRoot, 'top', 'inner.txt'), 'hi')
+      const archivePath = path.join(scratch, 'wrap.tar')
+      await new Promise<void>((resolve, reject) => {
+        const out = createWriteStream(archivePath)
+        tarFs.pack(packRoot).pipe(out)
+        out.on('finish', () => resolve())
+        out.on('error', reject)
+      })
+      const tarBytes = fs.readFileSync(archivePath)
+      const { downloader } = makeFakeDownloader(tarBytes)
+      const extractedDir = path.join(scratch, 'extracted')
+
+      await downloadAndExtractTool({
+        url: 'https://example.com/wrap.tar',
+        name: 'wrap-1.0.0.tar',
+        extractedDir,
+        extractOptions: { strip: 1 },
+        downloader,
+      })
+
+      expect(existsSync(path.join(extractedDir, 'inner.txt'))).toBe(true)
+      expect(existsSync(path.join(extractedDir, 'top'))).toBe(false)
+    })
+  })
+})

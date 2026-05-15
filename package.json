@@ -923,6 +923,11 @@
       "types": "./dist/external-tools/jre/detect-platform-arch.d.ts",
       "default": "./dist/external-tools/jre/detect-platform-arch.js"
     },
+    "./external-tools/jre/from-download": {
+      "source": "./src/external-tools/jre/from-download.ts",
+      "types": "./dist/external-tools/jre/from-download.d.ts",
+      "default": "./dist/external-tools/jre/from-download.js"
+    },
     "./external-tools/jre/from-java-home": {
       "source": "./src/external-tools/jre/from-java-home.ts",
       "types": "./dist/external-tools/jre/from-java-home.d.ts",
@@ -952,6 +957,11 @@
       "source": "./src/external-tools/manifest.ts",
       "types": "./dist/external-tools/manifest.d.ts",
       "default": "./dist/external-tools/manifest.js"
+    },
+    "./external-tools/sbt/asset-names": {
+      "source": "./src/external-tools/sbt/asset-names.ts",
+      "types": "./dist/external-tools/sbt/asset-names.d.ts",
+      "default": "./dist/external-tools/sbt/asset-names.js"
     },
     "./external-tools/sbt/from-path": {
       "source": "./src/external-tools/sbt/from-path.ts",
