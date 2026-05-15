@@ -13,7 +13,7 @@
 import process from 'node:process'
 
 import { hasOwn } from '../objects/predicates'
-import { envAsBoolean } from './helpers'
+import { envAsBoolean } from './boolean'
 
 import { MapCtor } from '../primordials/map-set'
 

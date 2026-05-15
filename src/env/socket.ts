@@ -2,7 +2,8 @@
  * @fileoverview Socket Security environment variable getters.
  */
 
-import { envAsBoolean, envAsNumber } from './helpers'
+import { envAsBoolean } from './boolean'
+import { envAsNumber } from './number'
 import { getEnvValue } from './rewire'
 
 /**

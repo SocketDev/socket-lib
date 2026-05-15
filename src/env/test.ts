@@ -3,7 +3,8 @@
  * Provides access to test framework environment variables and utilities.
  */
 
-import { envAsBoolean, envAsString } from './helpers'
+import { envAsBoolean } from './boolean'
+import { envAsString } from './string'
 import { getNodeEnv } from './node-env'
 import { getEnvValue } from './rewire'
 

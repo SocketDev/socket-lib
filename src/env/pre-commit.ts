@@ -4,7 +4,7 @@
  * detect when code is running inside a pre-commit hook.
  */
 
-import { envAsBoolean } from './helpers'
+import { envAsBoolean } from './boolean'
 import { getEnvValue } from './rewire'
 
 /**

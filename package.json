@@ -748,11 +748,6 @@
       "types": "./dist/env/github.d.ts",
       "default": "./dist/env/github.js"
     },
-    "./env/helpers": {
-      "source": "./src/env/helpers.ts",
-      "types": "./dist/env/helpers.d.ts",
-      "default": "./dist/env/helpers.js"
-    },
     "./env/home": {
       "source": "./src/env/home.ts",
       "types": "./dist/env/home.d.ts",

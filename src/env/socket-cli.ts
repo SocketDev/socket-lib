@@ -3,7 +3,8 @@
  * Provides typed getters for SOCKET_CLI_* environment variables (excluding shadow).
  */
 
-import { envAsBoolean, envAsNumber } from './helpers'
+import { envAsBoolean } from './boolean'
+import { envAsNumber } from './number'
 import { getEnvValue } from './rewire'
 
 /**
