@@ -316,20 +316,17 @@ importers:
       '@socketregistry/is-unicode-supported':
         specifier: 1.0.5
         version: 1.0.5
-      '@socketregistry/packageurl-js':
-        specifier: 1.4.2
-        version: 1.4.2
       '@socketregistry/packageurl-js-stable':
-        specifier: npm:@socketregistry/packageurl-js@1.4.2
+        specifier: 'catalog:'
         version: '@socketregistry/packageurl-js@1.4.2'
       '@socketregistry/yocto-spinner':
         specifier: 1.0.25
         version: 1.0.25
       '@socketsecurity/lib-stable':
-        specifier: npm:@socketsecurity/lib@5.28.0
+        specifier: 'catalog:'
         version: '@socketsecurity/lib@5.28.0(typescript@5.9.2)'
       '@socketsecurity/sdk-stable':
-        specifier: npm:@socketsecurity/sdk@4.0.1
+        specifier: 'catalog:'
         version: '@socketsecurity/sdk@4.0.1'
       '@types/node':
         specifier: 24.9.2
