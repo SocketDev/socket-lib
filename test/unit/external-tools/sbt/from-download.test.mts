@@ -22,7 +22,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { sbtFromDownload } from '../../../../src/external-tools/sbt/from-download'
 import { safeDelete } from '../../../../src/fs/safe'
 
-import { makeFakeDownloader } from '../../../util/fake-downloader'
+import { makeFakeDownloader } from '../../../lib/fake-downloader'
 
 /**
  * Build an SBT-shape tarball: top-level `sbt/bin/sbt` script. After

@@ -24,7 +24,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { jreFromDownload } from '../../../../src/external-tools/jre/from-download'
 import { safeDelete } from '../../../../src/fs/safe'
 
-import { makeFakeDownloader } from '../../../util/fake-downloader'
+import { makeFakeDownloader } from '../../../lib/fake-downloader'
 
 /**
  * Build a JRE-shape tarball: top-level `jdk-21/bin/java`. After

@@ -39,7 +39,7 @@ import {
 } from '../../../src/external-tools/sbt/resolve'
 import { safeDelete } from '../../../src/fs/safe'
 
-import { makeFakeDownloader } from '../../util/fake-downloader'
+import { makeFakeDownloader } from '../../lib/fake-downloader'
 
 export function buildJreTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')
