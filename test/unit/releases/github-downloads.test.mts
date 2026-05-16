@@ -19,7 +19,7 @@ import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
 import { httpDownload } from '../../../src/http-request/download'
 import { httpRequest } from '../../../src/http-request/request'
 
-import { createMockHttpResponse } from '../utils/http-mock'
+import { createMockHttpResponse } from '../util/http-mock'
 
 import type { HttpDownloadResult } from '../../../src/http-request/download-types'
 

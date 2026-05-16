@@ -39,7 +39,7 @@ import {
   resolveBinaryPath,
 } from '@socketsecurity/lib-stable/dlx/package'
 import { setPath } from '@socketsecurity/lib-stable/paths/rewire'
-import { runWithTempDir } from '../utils/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('dlx-package', () => {
   describe('generatePackageCacheKey', () => {

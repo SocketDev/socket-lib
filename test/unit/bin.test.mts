@@ -26,7 +26,7 @@ import { isShadowBinPath } from '../../src/bin/shadow'
 import { whichReal, whichRealSync } from '../../src/bin/which'
 import { isError } from '@socketsecurity/lib-stable/errors/predicates'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from './utils/temp-file-helper'
+import { runWithTempDir } from './util/temp-file-helper'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/logger'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

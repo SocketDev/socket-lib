@@ -35,7 +35,7 @@ import {
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib-stable/spawn/spawn'
 import { describe, expect, it, vi } from 'vitest'
-import { runWithTempDir } from '../utils/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('git extended tests', () => {

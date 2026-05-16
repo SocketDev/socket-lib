@@ -60,7 +60,7 @@ import {
   writeJsonSync,
 } from '@socketsecurity/lib-stable/fs/write-json'
 
-import { runWithTempDir } from './utils/temp-file-helper'
+import { runWithTempDir } from './util/temp-file-helper'
 
 import type { SafeReadOptions } from '@socketsecurity/lib-stable/fs/types'
 

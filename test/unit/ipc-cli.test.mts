@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getIpc } from '@socketsecurity/lib-stable/ipc-cli/get'
 
-import { FAKE_SOCKET_TOKEN } from './utils/fake-tokens'
+import { FAKE_SOCKET_TOKEN } from './util/fake-tokens'
 
 import type { IpcObject } from '@socketsecurity/lib-stable/ipc-cli/types'
 

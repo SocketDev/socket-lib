@@ -26,8 +26,8 @@ import {
 } from '@socketsecurity/lib-stable/packages/operations'
 import type { PackageJson } from '@socketsecurity/lib-stable/packages/types'
 import { describe, expect, it } from 'vitest'
-import { describeNetworkOnly } from '../utils/skip-helpers'
-import { runWithTempDir } from '../utils/temp-file-helper'
+import { describeNetworkOnly } from '../util/skip-helpers'
+import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('packages/operations', () => {
   describe('getReleaseTag', () => {

@@ -18,7 +18,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runCommandQuiet, runParallel } from './utils/run-command.mts'
+import { runCommandQuiet, runParallel } from './util/run-command.mts'
 
 const logger = getDefaultLogger()
 

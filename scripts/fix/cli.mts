@@ -9,7 +9,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runSequence } from '../utils/run-command.mts'
+import { runSequence } from '../util/run-command.mts'
 
 const logger = getDefaultLogger()
 

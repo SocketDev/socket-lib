@@ -14,7 +14,7 @@ import {
   generatePackagePin,
 } from '@socketsecurity/lib-stable/dlx/lockfile'
 
-import { describeNetworkOnly } from '../utils/skip-helpers'
+import { describeNetworkOnly } from '../util/skip-helpers'
 
 describe('dlx/lockfile/generatePackagePin', () => {
   describe('option validation', () => {

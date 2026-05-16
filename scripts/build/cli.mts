@@ -20,8 +20,8 @@ import {
   buildConfig,
   watchConfig,
 } from '../../.config/esbuild.config.mts'
-import { parseArgs } from '../utils/parse-args.mts'
-import { runSequence } from '../utils/run-command.mts'
+import { parseArgs } from '../util/parse-args.mts'
+import { runSequence } from '../util/run-command.mts'
 
 import type { BuildResult } from 'esbuild'
 

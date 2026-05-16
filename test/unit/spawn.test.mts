@@ -18,7 +18,7 @@ import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn/spawn'
 import { isSpawnError } from '@socketsecurity/lib-stable/spawn/errors'
 import { isStdioType } from '@socketsecurity/lib-stable/spawn/stdio'
 
-import { itUnixOnly, itWindowsOnly } from './utils/skip-helpers'
+import { itUnixOnly, itWindowsOnly } from './util/skip-helpers'
 
 describe('spawn', () => {
   describe('isSpawnError', () => {

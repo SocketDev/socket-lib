@@ -13,7 +13,7 @@
  *
  * @example
  * ```ts
- * import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../utils/skip-helpers'
+ * import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/skip-helpers'
  *
  * itWindowsOnly('should convert MSYS drive letter paths', () => { ... })
  * itUnixOnly('should not convert MSYS-like paths on Unix', () => { ... })

@@ -35,7 +35,7 @@ import {
   trimLeadingDotSlash,
 } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { itUnixOnly, itWindowsOnly } from '../utils/skip-helpers'
+import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
 
 describe('paths/normalize', () => {
   describe('normalizePath', () => {

@@ -16,8 +16,8 @@ import {
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { parseArgs } from './utils/parse-args.mts'
-import { runCommandQuiet } from './utils/run-command.mts'
+import { parseArgs } from './util/parse-args.mts'
+import { runCommandQuiet } from './util/run-command.mts'
 
 const logger = getDefaultLogger()
 
@@ -34,7 +34,7 @@ const CORE_FILES = new Set([
 ])
 
 // Config patterns that trigger a full lint
-const CONFIG_PATTERNS = ['.config/**', 'scripts/utils/**', 'pnpm-lock.yaml']
+const CONFIG_PATTERNS = ['.config/**', 'scripts/util/**', 'pnpm-lock.yaml']
 
 /**
  * Get oxfmt exclude patterns from .config/oxfmtrc.json.

@@ -28,8 +28,8 @@ import {
 } from '@socketsecurity/lib-stable/dlx/binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { itWindowsOnly } from '../utils/skip-helpers'
-import { mockHomeDir, runWithTempDir } from '../utils/temp-file-helper'
+import { itWindowsOnly } from '../util/skip-helpers'
+import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Test server setup

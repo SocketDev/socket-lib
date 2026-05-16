@@ -11,7 +11,7 @@ import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
 
 import { httpRequest } from '../../../src/http-request/request'
 
-import { createMockHttpResponse } from '../utils/http-mock'
+import { createMockHttpResponse } from '../util/http-mock'
 
 // Mock httpRequest so tests don't issue real network calls.
 vi.mock('../../../src/http-request/request')

@@ -25,7 +25,7 @@ import {
   writeStackTrace,
   writeWarning,
 } from '@socketsecurity/lib-stable/stdio/stderr'
-import { setupStdioTestSuite } from '../utils/stdio-test-helper'
+import { setupStdioTestSuite } from '../util/stdio-test-helper'
 
 describe('stdio/stderr', () => {
   const getContext = setupStdioTestSuite(stderr)

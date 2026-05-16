@@ -20,7 +20,7 @@ import { getIpcStubPath } from '../../src/ipc/paths'
 import { writeIpcStub } from '../../src/ipc/write'
 import { resetPaths, setPath } from '../../src/paths/rewire'
 
-import { runWithTempDir } from './utils/temp-file-helper'
+import { runWithTempDir } from './util/temp-file-helper'
 
 describe('ipc', () => {
   describe('getIpcStubPath', () => {

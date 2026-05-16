@@ -28,7 +28,7 @@ import {
   write,
   writeLine,
 } from '@socketsecurity/lib-stable/stdio/stdout'
-import { setupStdioTestSuite } from '../utils/stdio-test-helper'
+import { setupStdioTestSuite } from '../util/stdio-test-helper'
 
 describe('stdio/stdout', () => {
   const getContext = setupStdioTestSuite(stdout)

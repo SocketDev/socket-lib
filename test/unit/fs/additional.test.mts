@@ -46,7 +46,7 @@ import {
   writeJsonSync,
 } from '@socketsecurity/lib-stable/fs/write-json'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../utils/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('fs - Additional Coverage', () => {
   describe('findUp edge cases', () => {

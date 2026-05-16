@@ -23,7 +23,7 @@ import {
 } from '@socketsecurity/lib-stable/errors/predicates'
 import { errorStack } from '@socketsecurity/lib-stable/errors/stack'
 
-import { describeRequires } from './utils/skip-helpers'
+import { describeRequires } from './util/skip-helpers'
 
 describe('errorMessage', () => {
   it('returns the message of an Error', () => {

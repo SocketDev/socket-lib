@@ -24,7 +24,7 @@ import {
 } from '@socketsecurity/lib-stable/packages/edit'
 import { describe, expect, it } from 'vitest'
 
-import { runWithTempDir } from '../utils/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('packages/editable', () => {
   describe('getEditablePackageJsonClass', () => {

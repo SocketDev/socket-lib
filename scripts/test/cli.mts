@@ -16,9 +16,9 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import type { SpawnOptions } from 'node:child_process'
 
-import { getTestsToRun } from '../utils/changed-test-mapper.mts'
-import { parseArgs } from '../utils/parse-args.mts'
-import { onExit } from '../utils/signal-exit.mts'
+import { getTestsToRun } from '../util/changed-test-mapper.mts'
+import { parseArgs } from '../util/parse-args.mts'
+import { onExit } from '../util/signal-exit.mts'
 
 const logger = getDefaultLogger()
 const spinner = getDefaultSpinner()
