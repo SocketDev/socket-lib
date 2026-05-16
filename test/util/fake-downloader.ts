@@ -4,9 +4,6 @@
  * produce, then returns the dlx-shape `{binaryPath, downloaded,
  * integrity}` result. Lets tests exercise the from-download chain
  * end-to-end without hitting the network.
- *
- * Underscore-prefixed filename keeps this out of vitest's
- * test-discovery scan (vitest matches `*.test.mts` by default).
  */
 
 import { mkdtempSync, writeFileSync } from 'node:fs'

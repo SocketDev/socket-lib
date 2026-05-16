@@ -30,7 +30,7 @@ import { safeDelete } from '../../../src/fs/safe'
 import {
   FAKE_INTEGRITY_VALUE as FAKE_INTEGRITY,
   makeFakeDownloader,
-} from './_fake-downloader.mts'
+} from '../../util/fake-downloader'
 
 describe('external-tools/from-download', () => {
   let scratch: string
