@@ -19,7 +19,7 @@
  * parser that's better lived at the application boundary.
  *
  * Prompt minimization: every keychain read short-circuits through
- * the process-scoped cache in `./_cache.ts`. So calling `resolve`
+ * the process-scoped cache in `./_internal.ts`. So calling `resolve`
  * multiple times in one process spawns at most one `security`
  * (macOS) / `secret-tool` (Linux) / `powershell` (Windows) per
  * `{service, account}` pair. Combined with macOS's `-A -T ''` ACL
