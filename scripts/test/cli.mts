@@ -11,7 +11,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
+import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import type { SpawnOptions } from 'node:child_process'

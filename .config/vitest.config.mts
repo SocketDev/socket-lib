@@ -74,6 +74,17 @@ const vitestConfig = defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/dist/external/**',
+      // The `include` whitelist above only matches test/unit/** and
+      // test/integration/**, so these excludes are defense-in-depth
+      // for runs that bypass the whitelist (e.g. `vitest run <path>`
+      // pointed outside the whitelist). The dirs listed here all use
+      // `node --test` not vitest; their suites produce zero vitest
+      // describe/it blocks and would be reported as failures.
+      // Mirrors socket-wheelhouse template/.config/vitest.config.mts.
+      '.git-hooks/**',
+      '.config/oxlint-plugin/test/**',
+      'scripts/**/test/**',
+      '.claude/hooks/**/test/**',
       toGlobPath(path.resolve(projectRoot, 'test/isolated/**')),
       ...(process.env.INCLUDE_NPM_TESTS
         ? []
