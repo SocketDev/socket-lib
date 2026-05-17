@@ -14,25 +14,25 @@
  * stringWidth() based on string-width by Sindre Sorhus (MIT).
  */
 
-import { ansiRegex, stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
+import { ansiRegex, stripAnsi } from '@socketsecurity/lib/ansi/strip'
 import {
   applyLinePrefix,
   centerText,
   fromCharCode,
   indentString,
   repeatString,
-} from '@socketsecurity/lib-stable/strings/format'
+} from '@socketsecurity/lib/strings/format'
 import {
   isBlankString,
   isNonEmptyString,
-} from '@socketsecurity/lib-stable/strings/predicates'
-import { search } from '@socketsecurity/lib-stable/strings/search'
+} from '@socketsecurity/lib/strings/predicates'
+import { search } from '@socketsecurity/lib/strings/search'
 import {
   stripBom,
   toKebabCase,
   trimNewlines,
-} from '@socketsecurity/lib-stable/strings/transform'
-import { stringWidth } from '@socketsecurity/lib-stable/strings/width'
+} from '@socketsecurity/lib/strings/transform'
+import { stringWidth } from '@socketsecurity/lib/strings/width'
 import { describe, expect, it } from 'vitest'
 
 describe('strings', () => {

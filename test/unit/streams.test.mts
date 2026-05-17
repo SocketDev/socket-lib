@@ -13,8 +13,8 @@
 import {
   parallelEach,
   parallelMap,
-} from '@socketsecurity/lib-stable/streams/parallel'
-import { transform } from '@socketsecurity/lib-stable/streams/transform'
+} from '@socketsecurity/lib/streams/parallel'
+import { transform } from '@socketsecurity/lib/streams/transform'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create async iterable from array

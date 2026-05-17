@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolManifest } from '@socketsecurity/lib-stable/smol/manifest'
+import { getSmolManifest } from '@socketsecurity/lib/smol/manifest'
 
 describe('smol/manifest', () => {
   describe('getSmolManifest', () => {

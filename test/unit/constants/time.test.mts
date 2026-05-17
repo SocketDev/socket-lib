@@ -16,7 +16,7 @@ import {
   MILLISECONDS_PER_HOUR,
   MILLISECONDS_PER_MINUTE,
   MILLISECONDS_PER_SECOND,
-} from '@socketsecurity/lib-stable/constants/time'
+} from '@socketsecurity/lib/constants/time'
 
 describe('constants/time', () => {
   describe('time multipliers', () => {

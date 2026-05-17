@@ -10,11 +10,11 @@
  * No rewire needed - tests pure functions and proxy creation.
  */
 
-import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
-import { findCaseInsensitiveEnvKey } from '@socketsecurity/lib-stable/env/case-insensitive'
-import { envAsNumber } from '@socketsecurity/lib-stable/env/number'
-import { createEnvProxy } from '@socketsecurity/lib-stable/env/proxy'
-import { envAsString } from '@socketsecurity/lib-stable/env/string'
+import { envAsBoolean } from '@socketsecurity/lib/env/boolean'
+import { findCaseInsensitiveEnvKey } from '@socketsecurity/lib/env/case-insensitive'
+import { envAsNumber } from '@socketsecurity/lib/env/number'
+import { createEnvProxy } from '@socketsecurity/lib/env/proxy'
+import { envAsString } from '@socketsecurity/lib/env/string'
 import { describe, expect, it } from 'vitest'
 
 describe('env', () => {

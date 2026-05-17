@@ -13,8 +13,8 @@
 import {
   createRelativeUrl,
   parseUrl,
-} from '@socketsecurity/lib-stable/url/parse'
-import { isUrl } from '@socketsecurity/lib-stable/url/predicates'
+} from '@socketsecurity/lib/url/parse'
+import { isUrl } from '@socketsecurity/lib/url/predicates'
 import {
   urlSearchParamAsArray,
   urlSearchParamAsBoolean,
@@ -22,7 +22,7 @@ import {
   urlSearchParamAsString,
   urlSearchParamsGetArray,
   urlSearchParamsGetBoolean,
-} from '@socketsecurity/lib-stable/url/search-params'
+} from '@socketsecurity/lib/url/search-params'
 import { describe, expect, it } from 'vitest'
 
 describe('url', () => {

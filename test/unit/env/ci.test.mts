@@ -8,12 +8,12 @@
  * Critical for conditional behavior in CI environments (GitHub Actions, GitLab CI, etc.).
  */
 
-import { getCI } from '@socketsecurity/lib-stable/env/ci'
+import { getCI } from '@socketsecurity/lib/env/ci'
 import {
   clearEnv,
   resetEnv,
   setEnv,
-} from '@socketsecurity/lib-stable/env/rewire'
+} from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('env/ci', () => {

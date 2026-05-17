@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import {
   JRE_VFS_KEY,
   jreFromVfs,
-} from '@socketsecurity/lib-stable/external-tools/jre/from-vfs'
+} from '@socketsecurity/lib/external-tools/jre/from-vfs'
 
 describe('external-tools/jre/from-vfs', () => {
   it('returns undefined on stock Node (no node:smol-vfs)', async () => {

@@ -10,10 +10,10 @@
 import os from 'node:os'
 import path from 'node:path'
 
-import { createTtlCache } from '@socketsecurity/lib-stable/ttl-cache/cache'
-import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-import { invalidateCaches } from '@socketsecurity/lib-stable/paths/rewire'
+import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe.sequential('ttl-cache — LRU + clock skew', () => {

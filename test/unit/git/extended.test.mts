@@ -18,25 +18,25 @@ import {
   getChangedFilesSync,
   isChanged,
   isChangedSync,
-} from '@socketsecurity/lib-stable/git/changed'
-import { findGitRoot } from '@socketsecurity/lib-stable/git/repo'
+} from '@socketsecurity/lib/git/changed'
+import { findGitRoot } from '@socketsecurity/lib/git/repo'
 import {
   getStagedFiles,
   getStagedFilesSync,
   isStaged,
   isStagedSync,
-} from '@socketsecurity/lib-stable/git/staged'
+} from '@socketsecurity/lib/git/staged'
 import {
   getUnstagedFiles,
   getUnstagedFilesSync,
   isUnstaged,
   isUnstagedSync,
-} from '@socketsecurity/lib-stable/git/unstaged'
-import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
-import { spawnSync } from '@socketsecurity/lib-stable/spawn/spawn'
+} from '@socketsecurity/lib/git/unstaged'
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { spawnSync } from '@socketsecurity/lib/spawn/spawn'
 import { describe, expect, it, vi } from 'vitest'
 import { runWithTempDir } from '../util/temp-file-helper'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 describe('git extended tests', () => {
   const projectRoot = normalizePath(process.cwd())

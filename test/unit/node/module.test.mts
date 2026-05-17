@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getNodeModule,
   isNodeBuiltin,
-} from '@socketsecurity/lib-stable/node/module'
+} from '@socketsecurity/lib/node/module'
 
 describe('node/module', () => {
   describe('getNodeModule', () => {

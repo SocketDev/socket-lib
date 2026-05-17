@@ -14,8 +14,8 @@ import {
   clearEnv,
   resetEnv,
   setEnv,
-} from '@socketsecurity/lib-stable/env/rewire'
-import { getTerm } from '@socketsecurity/lib-stable/env/term'
+} from '@socketsecurity/lib/env/rewire'
+import { getTerm } from '@socketsecurity/lib/env/term'
 
 describe('env/term', () => {
   afterEach(() => {

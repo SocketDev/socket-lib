@@ -10,7 +10,7 @@
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 
-import { getNativeHash, hash } from '@socketsecurity/lib-stable/crypto/hash'
+import { getNativeHash, hash } from '@socketsecurity/lib/crypto/hash'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('crypto', () => {
@@ -96,7 +96,7 @@ describe('crypto', () => {
       delete cryptoMod.hash
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- re-import after vi.resetModules to exercise the native-hash fallback.
-      const mod = await import('@socketsecurity/lib-stable/crypto/hash')
+      const mod = await import('@socketsecurity/lib/crypto/hash')
       return { hash: mod.hash, getNativeHash: mod.getNativeHash }
     }
 

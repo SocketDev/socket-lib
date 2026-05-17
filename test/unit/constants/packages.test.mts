@@ -22,7 +22,7 @@ import {
   getPackageExtensions,
   getPackumentCache,
   getPacoteCachePath,
-} from '@socketsecurity/lib-stable/constants/packages'
+} from '@socketsecurity/lib/constants/packages'
 
 describe('constants/packages', () => {
   describe('package constants', () => {

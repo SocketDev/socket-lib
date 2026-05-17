@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeFsPromises } from '@socketsecurity/lib-stable/node/fs-promises'
+import { getNodeFsPromises } from '@socketsecurity/lib/node/fs-promises'
 
 describe('node/fs-promises', () => {
   it('returns the node:fs/promises module', () => {

@@ -16,8 +16,8 @@ import {
   getNpmLifecycleEvent,
   getNpmRegistry,
   getNpmToken,
-} from '@socketsecurity/lib-stable/env/npm'
-import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
+} from '@socketsecurity/lib/env/npm'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('npm env', () => {

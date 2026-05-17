@@ -14,8 +14,8 @@ import {
   clearEnv,
   resetEnv,
   setEnv,
-} from '@socketsecurity/lib-stable/env/rewire'
-import { getShell } from '@socketsecurity/lib-stable/env/shell'
+} from '@socketsecurity/lib/env/rewire'
+import { getShell } from '@socketsecurity/lib/env/shell'
 
 describe('env/shell', () => {
   afterEach(() => {

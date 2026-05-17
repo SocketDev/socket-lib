@@ -16,7 +16,7 @@ import {
   extendTheme,
   resolveColor,
   resolveShimmerColor,
-} from '@socketsecurity/lib-stable/themes/resolve'
+} from '@socketsecurity/lib/themes/resolve'
 import { describe, expect, it } from 'vitest'
 
 const BASE_COLORS = {

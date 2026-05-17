@@ -21,7 +21,7 @@ import {
   restoreCursor,
   saveCursor,
   showCursor,
-} from '@socketsecurity/lib-stable/stdio/clear'
+} from '@socketsecurity/lib/stdio/clear'
 
 describe('stdio/clear', () => {
   describe('clearLine', () => {

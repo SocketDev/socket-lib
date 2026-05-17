@@ -15,9 +15,9 @@
 import os from 'node:os'
 import * as path from 'node:path'
 
-import { createTtlCache } from '@socketsecurity/lib-stable/ttl-cache/cache'
-import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
-import { invalidateCaches } from '@socketsecurity/lib-stable/paths/rewire'
+import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe.sequential('ttl-cache', () => {

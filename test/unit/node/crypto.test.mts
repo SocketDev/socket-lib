@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeCrypto } from '@socketsecurity/lib-stable/node/crypto'
+import { getNodeCrypto } from '@socketsecurity/lib/node/crypto'
 
 describe('node/crypto', () => {
   it('returns the node:crypto module', () => {

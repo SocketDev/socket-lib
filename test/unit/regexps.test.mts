@@ -18,7 +18,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { escapeRegExp } from '@socketsecurity/lib-stable/regexps/escape'
+import { escapeRegExp } from '@socketsecurity/lib/regexps/escape'
 
 /** `new RegExp(escapeRegExp(input))` must match exactly `input`. */
 export function expectLiteralRoundtrip(input: string): void {
@@ -182,7 +182,7 @@ describe('regexps', () => {
       delete (RegExp as unknown as { escape?: unknown }).escape
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises fallback after deleting RegExp.escape.
-      const mod = await import('@socketsecurity/lib-stable/regexps/escape')
+      const mod = await import('@socketsecurity/lib/regexps/escape')
       return mod.escapeRegExp
     }
 

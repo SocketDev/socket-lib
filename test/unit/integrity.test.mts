@@ -9,12 +9,12 @@ import {
   computeHashes,
   normalizeHash,
   verifyHash,
-} from '@socketsecurity/lib-stable/dlx/integrity'
+} from '@socketsecurity/lib/dlx/integrity'
 
 import type {
   ComputedHashes,
   NormalizedHash,
-} from '@socketsecurity/lib-stable/dlx/integrity'
+} from '@socketsecurity/lib/dlx/integrity'
 
 describe('dlx/integrity', () => {
   describe('normalizeHash', () => {

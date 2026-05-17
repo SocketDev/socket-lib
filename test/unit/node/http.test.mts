@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeHttp } from '@socketsecurity/lib-stable/node/http'
+import { getNodeHttp } from '@socketsecurity/lib/node/http'
 
 describe('node/http', () => {
   it('returns the node:http module', () => {

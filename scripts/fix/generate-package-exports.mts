@@ -5,12 +5,12 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import builtinNames from '@socketregistry/packageurl-js-stable/data/npm/builtin-names.json' with { type: 'json' }
+import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.json' with { type: 'json' }
 import fastGlob from 'fast-glob'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { toSortedObject } from '@socketsecurity/lib-stable/objects'
-import { readPackageJson } from '@socketsecurity/lib-stable/packages'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { toSortedObject } from '@socketsecurity/lib/objects'
+import { readPackageJson } from '@socketsecurity/lib/packages'
 
 const logger = getDefaultLogger()
 

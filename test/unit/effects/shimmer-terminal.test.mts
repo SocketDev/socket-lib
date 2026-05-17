@@ -13,20 +13,20 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib-stable/ansi/constants'
+import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib/ansi/constants'
 import {
   blockKernel,
   configToSpec,
   solidColor,
   type RGB,
   type ShimmerSpec,
-} from '@socketsecurity/lib-stable/effects/shimmer'
+} from '@socketsecurity/lib/effects/shimmer'
 import {
   ANSI_RESET,
   ansiTruecolor,
   colorsToAnsi,
   renderFrame,
-} from '@socketsecurity/lib-stable/effects/shimmer-terminal'
+} from '@socketsecurity/lib/effects/shimmer-terminal'
 
 const RED: RGB = [255, 0, 0]
 const GREEN: RGB = [0, 255, 0]

@@ -1,3 +1,3 @@
 'use strict'
 
-module.exports = require('@socketregistry/packageurl-js-stable')
+module.exports = require('@socketregistry/packageurl-js')

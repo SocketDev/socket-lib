@@ -26,7 +26,7 @@ import {
   relativeResolve,
   splitPath,
   trimLeadingDotSlash,
-} from '@socketsecurity/lib-stable/paths/normalize'
+} from '@socketsecurity/lib/paths/normalize'
 import { describe, expect, it } from 'vitest'
 
 describe('path utilities', () => {

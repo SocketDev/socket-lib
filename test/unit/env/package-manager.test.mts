@@ -12,8 +12,8 @@ import {
   detectPackageManager,
   getPackageManagerInfo,
   getPackageManagerUserAgent,
-} from '@socketsecurity/lib-stable/env/package-manager'
-import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
+} from '@socketsecurity/lib/env/package-manager'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/package-manager', () => {

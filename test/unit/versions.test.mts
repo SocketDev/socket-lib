@@ -19,11 +19,11 @@ import {
   lte,
   sort,
   rsort,
-} from '@socketsecurity/lib-stable/versions/compare'
+} from '@socketsecurity/lib/versions/compare'
 import {
   incrementVersion,
   versionDiff,
-} from '@socketsecurity/lib-stable/versions/modify'
+} from '@socketsecurity/lib/versions/modify'
 import {
   coerceVersion,
   getMajorVersion,
@@ -31,13 +31,13 @@ import {
   getPatchVersion,
   isValidVersion,
   parseVersion,
-} from '@socketsecurity/lib-stable/versions/parse'
+} from '@socketsecurity/lib/versions/parse'
 import {
   filterVersions,
   maxVersion,
   minVersion,
   satisfiesVersion,
-} from '@socketsecurity/lib-stable/versions/range'
+} from '@socketsecurity/lib/versions/range'
 import { describe, expect, it } from 'vitest'
 
 describe('versions', () => {

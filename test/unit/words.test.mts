@@ -9,9 +9,9 @@
  * Used by Socket CLI for grammatically correct user-facing messages.
  */
 
-import { capitalize } from '@socketsecurity/lib-stable/words/capitalize'
-import { determineArticle } from '@socketsecurity/lib-stable/words/article'
-import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
+import { capitalize } from '@socketsecurity/lib/words/capitalize'
+import { determineArticle } from '@socketsecurity/lib/words/article'
+import { pluralize } from '@socketsecurity/lib/words/pluralize'
 import { describe, expect, it } from 'vitest'
 
 describe('words', () => {

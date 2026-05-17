@@ -26,11 +26,11 @@ import {
   isUpdate,
   isVerbose,
   isWatch,
-} from '@socketsecurity/lib-stable/argv/flag-predicates'
+} from '@socketsecurity/lib/argv/flag-predicates'
 import {
   COMMON_FLAGS,
   type FlagValues,
-} from '@socketsecurity/lib-stable/argv/flag-types'
+} from '@socketsecurity/lib/argv/flag-types'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/flags', () => {

@@ -11,7 +11,7 @@ import {
   newPnpmEntry,
   parsePnpmLock,
   stripPeerSuffix,
-} from '@socketsecurity/lib-stable/eco/npm/pnpm/parse-lockfile'
+} from '@socketsecurity/lib/eco/npm/pnpm/parse-lockfile'
 
 const PNPM_V5 = `lockfileVersion: 5.4
 

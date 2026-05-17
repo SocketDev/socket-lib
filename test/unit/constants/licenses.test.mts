@@ -15,7 +15,7 @@ import {
   MIT,
   UNLICENCED,
   UNLICENSED,
-} from '@socketsecurity/lib-stable/constants/licenses'
+} from '@socketsecurity/lib/constants/licenses'
 
 describe('constants/licenses', () => {
   describe('license identifier constants', () => {

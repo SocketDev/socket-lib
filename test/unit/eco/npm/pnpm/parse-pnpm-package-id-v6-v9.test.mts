@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parsePnpmPackageIdV6V9 } from '@socketsecurity/lib-stable/eco/npm/pnpm/parse-pnpm-package-id-v6-v9'
+import { parsePnpmPackageIdV6V9 } from '@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v6-v9'
 
 describe('eco/npm/pnpm/parse-pnpm-package-id-v6-v9', () => {
   it('parses an unscoped name@version', () => {

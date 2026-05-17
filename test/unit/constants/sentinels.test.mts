@@ -24,7 +24,7 @@ import {
   UNKNOWN_ERROR,
   UNKNOWN_VALUE,
   V,
-} from '@socketsecurity/lib-stable/constants/sentinels'
+} from '@socketsecurity/lib/constants/sentinels'
 
 describe('constants/sentinels', () => {
   describe('symbols', () => {

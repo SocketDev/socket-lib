@@ -14,12 +14,12 @@ import {
   clearEnv,
   resetEnv,
   setEnv,
-} from '@socketsecurity/lib-stable/env/rewire'
+} from '@socketsecurity/lib/env/rewire'
 import {
   getTemp,
   getTmp,
   getTmpdir,
-} from '@socketsecurity/lib-stable/env/temp-dir'
+} from '@socketsecurity/lib/env/temp-dir'
 
 describe('env/temp-dir', () => {
   afterEach(() => {

@@ -19,19 +19,19 @@ import { join } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import process from 'node:process'
 
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-import { getEditableJsonClass } from '@socketsecurity/lib-stable/json/edit'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
 import {
   detectIndent,
   detectNewline,
   sortKeys,
   stringifyWithFormatting,
   stripFormattingSymbols,
-} from '@socketsecurity/lib-stable/json/format'
+} from '@socketsecurity/lib/json/format'
 import {
   isJsonPrimitive,
   jsonParse,
-} from '@socketsecurity/lib-stable/json/parse'
+} from '@socketsecurity/lib/json/parse'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('json', () => {

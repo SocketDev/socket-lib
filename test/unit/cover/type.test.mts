@@ -16,8 +16,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // vitest.config.mts via the 'source' export condition.
 vi.mock('@socketsecurity/lib/spawn/spawn')
 
-import { spawn } from '@socketsecurity/lib-stable/spawn/spawn'
-import { getTypeCoverage } from '@socketsecurity/lib-stable/cover/type'
+import { spawn } from '@socketsecurity/lib/spawn/spawn'
+import { getTypeCoverage } from '@socketsecurity/lib/cover/type'
 
 describe('cover/type', () => {
   beforeEach(() => {

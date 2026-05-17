@@ -21,8 +21,8 @@ import {
   incLogCallCountSymbol,
   lastWasBlankSymbol,
 } from '../../src/logger/symbols'
-import { setTheme } from '@socketsecurity/lib-stable/themes/context'
-import { THEMES } from '@socketsecurity/lib-stable/themes/themes'
+import { setTheme } from '@socketsecurity/lib/themes/context'
+import { THEMES } from '@socketsecurity/lib/themes/themes'
 
 describe('LOG_SYMBOLS', () => {
   it('should lazily initialize symbols', () => {

@@ -37,7 +37,7 @@ const vitestConfigIsolated = defineConfig({
       // Both names resolve to src/ — `lib` is the canonical published
       // name, `lib-stable` is the fleet-wide infra alias.
       '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
-      '@socketsecurity/lib-stable': path.resolve(projectRoot, 'src'),
+      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
     },
   },
   test: {

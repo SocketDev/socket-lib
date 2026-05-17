@@ -17,7 +17,7 @@ import {
   NODE_MODULES,
   NODE_MODULES_GLOB_RECURSIVE,
   SLASH_NODE_MODULES_SLASH,
-} from '@socketsecurity/lib-stable/paths/dirnames'
+} from '@socketsecurity/lib/paths/dirnames'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/dirnames', () => {

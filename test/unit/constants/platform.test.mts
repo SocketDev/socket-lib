@@ -22,7 +22,7 @@ import {
   S_IXOTH,
   S_IXUSR,
   WIN32,
-} from '@socketsecurity/lib-stable/constants/platform'
+} from '@socketsecurity/lib/constants/platform'
 
 describe('constants/platform', () => {
   describe('platform detection', () => {

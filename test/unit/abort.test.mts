@@ -12,7 +12,7 @@
 import {
   createCompositeAbortSignal,
   createTimeoutSignal,
-} from '@socketsecurity/lib-stable/abort/signal'
+} from '@socketsecurity/lib/abort/signal'
 import { describe, expect, it } from 'vitest'
 
 describe('abort', () => {

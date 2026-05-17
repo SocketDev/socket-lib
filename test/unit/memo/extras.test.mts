@@ -6,8 +6,8 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { memoize } from '@socketsecurity/lib-stable/memo/memoize'
-import { memoizeAsync } from '@socketsecurity/lib-stable/memo/async'
+import { memoize } from '@socketsecurity/lib/memo/memoize'
+import { memoizeAsync } from '@socketsecurity/lib/memo/async'
 
 describe('memoization — extras', () => {
   describe('memoize — TTL guard + expiration', () => {

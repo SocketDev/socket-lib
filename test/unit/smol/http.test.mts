@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolHttp } from '@socketsecurity/lib-stable/smol/http'
+import { getSmolHttp } from '@socketsecurity/lib/smol/http'
 
 describe('smol/http', () => {
   describe('getSmolHttp', () => {

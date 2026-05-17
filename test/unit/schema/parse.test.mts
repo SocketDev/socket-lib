@@ -6,7 +6,7 @@
 import * as zodV3 from 'zod/v3'
 import { describe, expect, it } from 'vitest'
 
-import { parseSchema } from '@socketsecurity/lib-stable/schema/parse'
+import { parseSchema } from '@socketsecurity/lib/schema/parse'
 
 describe('schema/parse', () => {
   it('returns the typed value for valid input', () => {

@@ -16,13 +16,13 @@ import {
   setTheme,
   withTheme,
   withThemeSync,
-} from '@socketsecurity/lib-stable/themes/context'
-import { SOCKET_THEME, THEMES } from '@socketsecurity/lib-stable/themes/themes'
+} from '@socketsecurity/lib/themes/context'
+import { SOCKET_THEME, THEMES } from '@socketsecurity/lib/themes/themes'
 import {
   createTheme,
   extendTheme,
   resolveColor,
-} from '@socketsecurity/lib-stable/themes/resolve'
+} from '@socketsecurity/lib/themes/resolve'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('themes', () => {

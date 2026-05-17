@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeTimersPromises } from '@socketsecurity/lib-stable/node/timers-promises'
+import { getNodeTimersPromises } from '@socketsecurity/lib/node/timers-promises'
 
 describe('node/timers-promises', () => {
   it('returns the node:timers/promises module', () => {

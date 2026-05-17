@@ -15,7 +15,7 @@ import {
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
   README_GLOB,
   README_GLOB_RECURSIVE,
-} from '@socketsecurity/lib-stable/paths/globs'
+} from '@socketsecurity/lib/paths/globs'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/globs', () => {

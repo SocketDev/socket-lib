@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolPurl } from '@socketsecurity/lib-stable/smol/purl'
+import { getSmolPurl } from '@socketsecurity/lib/smol/purl'
 
 describe('smol/purl', () => {
   describe('getSmolPurl', () => {

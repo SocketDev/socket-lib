@@ -30,7 +30,7 @@ const vitestConfig = defineConfig({
     // and `./<sub>` from co-located leaves — so `instanceof` checks against
     // exported error classes (e.g. `HttpResponseError`) compare the same
     // prototype on both sides.
-    dedupe: ['@socketsecurity/lib', '@socketsecurity/lib-stable'],
+    dedupe: ['@socketsecurity/lib', '@socketsecurity/lib'],
     preserveSymlinks: false,
     alias: {
       cacache: path.resolve(projectRoot, 'src/external/cacache'),
@@ -44,7 +44,7 @@ const vitestConfig = defineConfig({
       // Both names resolve to src/ — `lib` is the canonical published
       // name, `lib-stable` is the fleet-wide infra alias.
       '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
-      '@socketsecurity/lib-stable': path.resolve(projectRoot, 'src'),
+      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
     },
   },
   test: {

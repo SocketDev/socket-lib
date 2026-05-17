@@ -19,10 +19,10 @@ packages:
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
   '@sinclair/typebox': 0.34.49
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@5.28.0'
-  '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
-  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
+  '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
+  '@socketsecurity/lib': 'npm:@socketsecurity/lib@5.28.0'
+  '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.2'
+  '@socketsecurity/sdk': 'npm:@socketsecurity/sdk@4.0.1'
   '@types/mdast': 4.0.4
   '@types/node': 24.9.2
   '@typescript/native-preview': 7.0.0-dev.20260415.1
@@ -59,56 +59,65 @@ minimumReleaseAgeExclude:
 # future flip can't silently change install behavior.
 blockExoticSubdeps: true
 
+# Force every consumer of Socket's own packages to resolve through the
+# catalog-pinned published versions. The `catalog:` form rewrites
+# `workspace:*`, `^x.y.z`, and bare-version specs alike to the version
+# in the default `catalog:` block above. This defeats accidental
+# local-checkout resolution when a sibling repo is on disk.
 overrides:
-  '@inquirer/ansi': 2.0.5
-  '@inquirer/core': 11.1.8
-  '@inquirer/figures': 2.0.5
-  '@npmcli/arborist': 9.1.6
-  '@npmcli/git': 6.0.3
-  '@npmcli/installed-package-contents': 4.0.0
-  '@npmcli/name-from-folder': 4.0.0
-  '@npmcli/promise-spawn': 9.0.1
-  '@npmcli/redact': 4.0.0
-  '@npmcli/run-script': 10.0.0
-  '@sigstore/core': 3.1.0
-  '@sigstore/sign': 4.1.0
-  ansi-regex: 6.2.2
-  brace-expansion: 5.0.5
-  chownr: 3.0.0
-  debug: 4.4.3
-  execa: 5.1.1
-  has-flag: 5.0.1
-  hosted-git-info: 8.1.0
-  isexe: 3.1.1
-  json-parse-even-better-errors: 5.0.0
-  lru-cache: 11.2.2
-  make-fetch-happen: 15.0.5
-  minimatch: 9.0.6
-  minipass: 7.1.3
-  minipass-fetch: 4.0.1
-  minipass-flush: 1.0.7
-  minipass-sized: 1.0.3
-  minipass@7: 7.1.3
-  minizlib: 3.1.0
-  npm-bundled: 5.0.0
-  npm-normalize-package-bin: 5.0.0
-  npm-package-arg: 12.0.2
-  npm-pick-manifest: 10.0.0
-  p-map: 7.0.4
-  pacote: 21.5.0
-  picomatch: 4.0.4
-  proc-log: 6.1.0
-  semver: 7.7.2
-  signal-exit: 4.1.0
-  spdx-expression-parse: 4.0.0
-  ssri: 12.0.0
-  string-width: 8.1.0
-  strip-ansi: 7.1.2
-  supports-color: 10.2.2
-  tar: 7.5.11
-  which: 5.0.0
-  wrap-ansi: 9.0.2
-  yoctocolors-cjs: 2.1.3
+  '@inquirer/ansi': '2.0.5'
+  '@inquirer/core': '11.1.8'
+  '@inquirer/figures': '2.0.5'
+  '@npmcli/arborist': '9.1.6'
+  '@npmcli/git': '6.0.3'
+  '@npmcli/installed-package-contents': '4.0.0'
+  '@npmcli/name-from-folder': '4.0.0'
+  '@npmcli/promise-spawn': '9.0.1'
+  '@npmcli/redact': '4.0.0'
+  '@npmcli/run-script': '10.0.0'
+  '@sigstore/core': '3.1.0'
+  '@sigstore/sign': '4.1.0'
+  '@socketregistry/packageurl-js': 'catalog:'
+  '@socketsecurity/lib': 'catalog:'
+  '@socketsecurity/registry': 'catalog:'
+  '@socketsecurity/sdk': 'catalog:'
+  'ansi-regex': '6.2.2'
+  'brace-expansion': '5.0.5'
+  'chownr': '3.0.0'
+  'debug': '4.4.3'
+  'execa': '5.1.1'
+  'has-flag': '5.0.1'
+  'hosted-git-info': '8.1.0'
+  'isexe': '3.1.1'
+  'json-parse-even-better-errors': '5.0.0'
+  'lru-cache': '11.2.2'
+  'make-fetch-happen': '15.0.5'
+  'minimatch': '9.0.6'
+  'minipass': '7.1.3'
+  'minipass-fetch': '4.0.1'
+  'minipass-flush': '1.0.7'
+  'minipass-sized': '1.0.3'
+  'minipass@7': '7.1.3'
+  'minizlib': '3.1.0'
+  'npm-bundled': '5.0.0'
+  'npm-normalize-package-bin': '5.0.0'
+  'npm-package-arg': '12.0.2'
+  'npm-pick-manifest': '10.0.0'
+  'p-map': '7.0.4'
+  'pacote': '21.5.0'
+  'picomatch': '4.0.4'
+  'proc-log': '6.1.0'
+  'semver': '7.7.2'
+  'signal-exit': '4.1.0'
+  'spdx-expression-parse': '4.0.0'
+  'ssri': '12.0.0'
+  'string-width': '8.1.0'
+  'strip-ansi': '7.1.2'
+  'supports-color': '10.2.2'
+  'tar': '7.5.11'
+  'which': '5.0.0'
+  'wrap-ansi': '9.0.2'
+  'yoctocolors-cjs': '2.1.3'
 
 patchedDependencies:
   '@npmcli/run-script@10.0.0': patches/@npmcli__run-script@10.0.0.patch

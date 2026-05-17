@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getSeaBinaryPath,
   isSeaBinary,
-} from '@socketsecurity/lib-stable/sea/detect'
+} from '@socketsecurity/lib/sea/detect'
 
 describe('sea/detect', () => {
   describe('isSeaBinary', () => {

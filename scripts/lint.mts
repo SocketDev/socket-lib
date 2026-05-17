@@ -8,13 +8,13 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
+import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import {
   getChangedFilesSync,
   getStagedFilesSync,
-} from '@socketsecurity/lib-stable/git'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
+} from '@socketsecurity/lib/git'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { parseArgs } from './util/parse-args.mts'
 import { runCommandQuiet } from './util/run-command.mts'

@@ -31,7 +31,7 @@ import {
   supportsNodeRequireModule,
   supportsNodeRun,
   supportsProcessSend,
-} from '@socketsecurity/lib-stable/constants/node'
+} from '@socketsecurity/lib/constants/node'
 import { describe, expect, it } from 'vitest'
 
 describe('node constants', () => {

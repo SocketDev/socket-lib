@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { resolveBazelAssetUrl } from '@socketsecurity/lib-stable/external-tools/bazel/resolve-asset-url'
+import { resolveBazelAssetUrl } from '@socketsecurity/lib/external-tools/bazel/resolve-asset-url'
 
 describe('external-tools/bazel/resolve-asset-url', () => {
   it('builds a darwin-arm64 URL', () => {

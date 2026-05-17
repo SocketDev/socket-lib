@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import {
   detectFormat,
   supportedFiles,
-} from '@socketsecurity/lib-stable/eco/manifest/detect-format'
+} from '@socketsecurity/lib/eco/manifest/detect-format'
 
 describe('eco/manifest/detect-format', () => {
   describe('detectFormat', () => {

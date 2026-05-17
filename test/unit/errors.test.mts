@@ -14,14 +14,14 @@ import { describe, expect, it } from 'vitest'
 import {
   UNKNOWN_ERROR,
   errorMessage,
-} from '@socketsecurity/lib-stable/errors/message'
+} from '@socketsecurity/lib/errors/message'
 import {
   isErrnoException,
   isError,
   isErrorBuiltin,
   isErrorShim,
-} from '@socketsecurity/lib-stable/errors/predicates'
-import { errorStack } from '@socketsecurity/lib-stable/errors/stack'
+} from '@socketsecurity/lib/errors/predicates'
+import { errorStack } from '@socketsecurity/lib/errors/stack'
 
 import { describeRequires } from './util/skip-helpers'
 

@@ -29,7 +29,7 @@ import {
   type RGB,
   type ShimmerDirection,
   type ShimmerSpec,
-} from '@socketsecurity/lib-stable/effects/shimmer'
+} from '@socketsecurity/lib/effects/shimmer'
 
 const RED: RGB = [255, 0, 0]
 const GREEN: RGB = [0, 255, 0]

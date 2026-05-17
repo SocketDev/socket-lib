@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { extractPackageNameFromPath } from '@socketsecurity/lib-stable/eco/npm/npm/extract-package-name-from-path'
+import { extractPackageNameFromPath } from '@socketsecurity/lib/eco/npm/npm/extract-package-name-from-path'
 
 describe('eco/npm/npm/extract-package-name-from-path', () => {
   it('returns the final segment for a flat node_modules path', () => {

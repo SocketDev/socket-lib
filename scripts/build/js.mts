@@ -7,7 +7,7 @@ import process from 'node:process'
 
 import { build, context } from 'esbuild'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 import {
   analyzeMetafile,

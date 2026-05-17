@@ -19,8 +19,8 @@ import {
   getGithubRepository,
   getGithubServerUrl,
   getGithubToken,
-} from '@socketsecurity/lib-stable/env/github'
-import { resetEnv, setEnv } from '@socketsecurity/lib-stable/env/rewire'
+} from '@socketsecurity/lib/env/github'
+import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('github env', () => {

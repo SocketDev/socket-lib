@@ -12,13 +12,13 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
-import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
+import { stripAnsi } from '@socketsecurity/lib/ansi/strip'
+import { printFooter } from '@socketsecurity/lib/stdio/footer'
 import {
   createHeader,
   createSectionHeader,
   printHeader,
-} from '@socketsecurity/lib-stable/stdio/header'
+} from '@socketsecurity/lib/stdio/header'
 
 describe('stdio/header', () => {
   describe('createHeader', () => {

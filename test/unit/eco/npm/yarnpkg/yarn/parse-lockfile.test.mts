@@ -14,7 +14,7 @@ import {
   skipIndentedBlock,
   stripQuotes,
   valueAfterKey,
-} from '@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/parse-lockfile'
+} from '@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-lockfile'
 
 const CLASSIC = `
 # yarn lockfile v1

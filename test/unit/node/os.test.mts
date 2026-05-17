@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeOs } from '@socketsecurity/lib-stable/node/os'
+import { getNodeOs } from '@socketsecurity/lib/node/os'
 
 describe('node/os', () => {
   it('returns the node:os module', () => {

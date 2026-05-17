@@ -10,7 +10,7 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
-import { safeJsonParse } from '@socketsecurity/lib-stable/json/parse'
+import { safeJsonParse } from '@socketsecurity/lib/json/parse'
 
 describe('json/safe-parse', () => {
   describe('safeJsonParse', () => {

@@ -26,7 +26,7 @@ import {
   EXT_PS1,
   EXT_YAML,
   EXT_YML,
-} from '@socketsecurity/lib-stable/paths/exts'
+} from '@socketsecurity/lib/paths/exts'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/exts', () => {

@@ -16,12 +16,12 @@ import {
   clearEnv,
   resetEnv,
   setEnv,
-} from '@socketsecurity/lib-stable/env/rewire'
+} from '@socketsecurity/lib/env/rewire'
 import {
   getXdgCacheHome,
   getXdgConfigHome,
   getXdgDataHome,
-} from '@socketsecurity/lib-stable/env/xdg'
+} from '@socketsecurity/lib/env/xdg'
 
 describe('env/xdg', () => {
   afterEach(() => {
