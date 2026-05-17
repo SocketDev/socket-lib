@@ -4,7 +4,7 @@
  */
 
 import process from 'node:process'
-import { isQuiet } from '@socketsecurity/lib/argv/flag-predicates'
+import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter } from '@socketsecurity/lib/stdio/footer'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
