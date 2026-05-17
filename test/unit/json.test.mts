@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for JSON parsing utilities.
  *
  * Tests JSON parsing with Buffer support and BOM handling:
- * - jsonParse() parses JSON strings or UTF-8 Buffers with automatic BOM stripping
+ * - parseJson() parses JSON strings or UTF-8 Buffers with automatic BOM stripping
  * - isJsonPrimitive() type guard for null, boolean, number, string
  * - Buffer detection via duck-typing (checks length, copy, slice, constructor.isBuffer)
  * - BOM (Byte Order Mark U+FEFF) stripped from beginning of input
@@ -30,7 +30,7 @@ import {
 } from '@socketsecurity/lib/json/format'
 import {
   isJsonPrimitive,
-  jsonParse,
+  parseJson,
 } from '@socketsecurity/lib/json/parse'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -89,29 +89,29 @@ describe('json', () => {
     })
   })
 
-  describe('jsonParse', () => {
+  describe('parseJson', () => {
     describe('valid JSON parsing', () => {
       it('should parse valid JSON string', () => {
-        const result = jsonParse('{"key":"value"}')
+        const result = parseJson('{"key":"value"}')
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should parse JSON array', () => {
-        const result = jsonParse('[1,2,3]')
+        const result = parseJson('[1,2,3]')
         expect(result).toEqual([1, 2, 3])
       })
 
       it('should parse JSON primitives', () => {
-        expect(jsonParse('null')).toBe(null)
-        expect(jsonParse('true')).toBe(true)
-        expect(jsonParse('false')).toBe(false)
-        expect(jsonParse('42')).toBe(42)
-        expect(jsonParse('"string"')).toBe('string')
+        expect(parseJson('null')).toBe(null)
+        expect(parseJson('true')).toBe(true)
+        expect(parseJson('false')).toBe(false)
+        expect(parseJson('42')).toBe(42)
+        expect(parseJson('"string"')).toBe('string')
       })
 
       it('should parse nested JSON objects', () => {
         const json = '{"nested":{"key":"value"},"array":[1,2,3]}'
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual({
           nested: { key: 'value' },
           array: [1, 2, 3],
@@ -119,15 +119,15 @@ describe('json', () => {
       })
 
       it('should parse empty object', () => {
-        expect(jsonParse('{}')).toEqual({})
+        expect(parseJson('{}')).toEqual({})
       })
 
       it('should parse empty array', () => {
-        expect(jsonParse('[]')).toEqual([])
+        expect(parseJson('[]')).toEqual([])
       })
 
       it('should parse JSON with whitespace', () => {
-        const result = jsonParse('  { "key" : "value" }  ')
+        const result = parseJson('  { "key" : "value" }  ')
         expect(result).toEqual({ key: 'value' })
       })
 
@@ -136,7 +136,7 @@ describe('json', () => {
           "key": "value",
           "number": 42
         }`
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual({ key: 'value', number: 42 })
       })
     })
@@ -144,72 +144,72 @@ describe('json', () => {
     describe('Buffer support', () => {
       it('should parse JSON from Buffer', () => {
         const buffer = Buffer.from('{"key":"value"}', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should parse JSON from Buffer with UTF-8 encoding', () => {
         const buffer = Buffer.from('[1,2,3]', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual([1, 2, 3])
       })
 
       it('should handle Buffer with BOM', () => {
         const buffer = Buffer.from('\uFEFF{"key":"value"}', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should parse empty Buffer', () => {
         const buffer = Buffer.from('null', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toBe(null)
       })
 
       it('should handle empty Buffer content', () => {
         const buffer = Buffer.from('{}', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({})
       })
 
       it('should handle Buffer with nested objects', () => {
         const buffer = Buffer.from('{"a":{"b":{"c":1}}}', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({ a: { b: { c: 1 } } })
       })
 
       it('should handle Buffer with array content', () => {
         const buffer = Buffer.from('["a","b","c"]', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual(['a', 'b', 'c'])
       })
 
       it('should handle Buffer with number content', () => {
         const buffer = Buffer.from('42', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toBe(42)
       })
 
       it('should handle Buffer with boolean content', () => {
         const buffer = Buffer.from('true', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toBe(true)
       })
 
       it('should handle Buffer with string content', () => {
         const buffer = Buffer.from('"hello world"', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toBe('hello world')
       })
 
       it('should throw error for invalid JSON in Buffer', () => {
         const buffer = Buffer.from('invalid json', 'utf8')
-        expect(() => jsonParse(buffer)).toThrow()
+        expect(() => parseJson(buffer)).toThrow()
       })
 
       it('should return undefined for invalid JSON in Buffer with throws false', () => {
         const buffer = Buffer.from('invalid json', 'utf8')
-        const result = jsonParse(buffer, { throws: false })
+        const result = parseJson(buffer, { throws: false })
         expect(result).toBe(undefined)
       })
 
@@ -221,14 +221,14 @@ describe('json', () => {
           }
           return value
         }
-        const result = jsonParse(buffer, { reviver })
+        const result = parseJson(buffer, { reviver })
         expect(result).toEqual({ num: 20 })
       })
 
       it('should handle Buffer with filepath option', () => {
         const buffer = Buffer.from('invalid', 'utf8')
         try {
-          jsonParse(buffer, { filepath: '/test/buffer.json' })
+          parseJson(buffer, { filepath: '/test/buffer.json' })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).toContain('/test/buffer.json')
@@ -238,7 +238,7 @@ describe('json', () => {
       it('should handle Buffer with all options', () => {
         const buffer = Buffer.from('{"value":5}', 'utf8')
         const reviver = (_key: string, value: unknown) => value
-        const result = jsonParse(buffer, {
+        const result = parseJson(buffer, {
           filepath: '/test.json',
           reviver,
           throws: true,
@@ -249,17 +249,17 @@ describe('json', () => {
 
     describe('BOM stripping', () => {
       it('should strip BOM from beginning of string', () => {
-        const result = jsonParse('\uFEFF{"key":"value"}')
+        const result = parseJson('\uFEFF{"key":"value"}')
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should strip BOM from array', () => {
-        const result = jsonParse('\uFEFF[1,2,3]')
+        const result = parseJson('\uFEFF[1,2,3]')
         expect(result).toEqual([1, 2, 3])
       })
 
       it('should handle string without BOM', () => {
-        const result = jsonParse('{"key":"value"}')
+        const result = parseJson('{"key":"value"}')
         expect(result).toEqual({ key: 'value' })
       })
     })
@@ -272,7 +272,7 @@ describe('json', () => {
           }
           return value
         }
-        const result = jsonParse('{"a":1,"b":2}', { reviver })
+        const result = parseJson('{"a":1,"b":2}', { reviver })
         expect(result).toEqual({ a: 2, b: 4 })
       })
 
@@ -282,7 +282,7 @@ describe('json', () => {
           keys.push(key)
           return value
         }
-        jsonParse('{"a":1}', { reviver })
+        parseJson('{"a":1}', { reviver })
         expect(keys).toContain('a')
         expect(keys).toContain('')
       })
@@ -294,7 +294,7 @@ describe('json', () => {
           }
           return value
         }
-        const result = jsonParse('{"keep":"yes","filter":"no"}', { reviver })
+        const result = parseJson('{"keep":"yes","filter":"no"}', { reviver })
         expect(result).toEqual({ keep: 'yes' })
       })
 
@@ -305,56 +305,56 @@ describe('json', () => {
           }
           return value
         }
-        const result = jsonParse('{"nested":{"key":"value"}}', { reviver })
+        const result = parseJson('{"nested":{"key":"value"}}', { reviver })
         expect(result).toEqual({ nested: 'replaced' })
       })
     })
 
     describe('error handling with throws option', () => {
       it('should throw error for invalid JSON by default', () => {
-        expect(() => jsonParse('invalid json')).toThrow()
+        expect(() => parseJson('invalid json')).toThrow()
       })
 
       it('should throw error when throws is true', () => {
-        expect(() => jsonParse('invalid json', { throws: true })).toThrow()
+        expect(() => parseJson('invalid json', { throws: true })).toThrow()
       })
 
       it('should throw error when throws is explicitly undefined', () => {
-        expect(() => jsonParse('invalid json', { throws: undefined })).toThrow()
+        expect(() => parseJson('invalid json', { throws: undefined })).toThrow()
       })
 
       it('should return undefined when throws is false', () => {
-        const result = jsonParse('invalid json', { throws: false })
+        const result = parseJson('invalid json', { throws: false })
         expect(result).toBe(undefined)
       })
 
       it('should throw for malformed JSON object', () => {
-        expect(() => jsonParse('{invalid}')).toThrow()
+        expect(() => parseJson('{invalid}')).toThrow()
       })
 
       it('should throw for unclosed JSON object', () => {
-        expect(() => jsonParse('{"key":"value"')).toThrow()
+        expect(() => parseJson('{"key":"value"')).toThrow()
       })
 
       it('should throw for unclosed JSON array', () => {
-        expect(() => jsonParse('[1,2,3')).toThrow()
+        expect(() => parseJson('[1,2,3')).toThrow()
       })
 
       it('should throw for trailing comma', () => {
-        expect(() => jsonParse('{"key":"value",}')).toThrow()
+        expect(() => parseJson('{"key":"value",}')).toThrow()
       })
 
       it('should throw for single quotes', () => {
-        expect(() => jsonParse("{'key':'value'}")).toThrow()
+        expect(() => parseJson("{'key':'value'}")).toThrow()
       })
 
       it('should return undefined for empty string with throws false', () => {
-        const result = jsonParse('', { throws: false })
+        const result = parseJson('', { throws: false })
         expect(result).toBe(undefined)
       })
 
       it('should throw for empty string by default', () => {
-        expect(() => jsonParse('')).toThrow()
+        expect(() => parseJson('')).toThrow()
       })
     })
 
@@ -362,7 +362,7 @@ describe('json', () => {
       it('should include filepath in error message', () => {
         const filepath = '/path/to/file.json'
         try {
-          jsonParse('invalid json', { filepath })
+          parseJson('invalid json', { filepath })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).toContain(filepath)
@@ -372,7 +372,7 @@ describe('json', () => {
       it('should prepend filepath to error message', () => {
         const filepath = '/test/file.json'
         try {
-          jsonParse('{invalid}', { filepath })
+          parseJson('{invalid}', { filepath })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).toMatch(/^\/test\/file\.json:/)
@@ -383,7 +383,7 @@ describe('json', () => {
         const buffer = Buffer.from('invalid json', 'utf8')
         const filepath = '/path/to/buffer.json'
         try {
-          jsonParse(buffer, { filepath })
+          parseJson(buffer, { filepath })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).toContain(filepath)
@@ -391,7 +391,7 @@ describe('json', () => {
       })
 
       it('should not modify error when throws is false', () => {
-        const result = jsonParse('invalid', {
+        const result = parseJson('invalid', {
           filepath: '/test.json',
           throws: false,
         })
@@ -400,7 +400,7 @@ describe('json', () => {
 
       it('should handle empty filepath', () => {
         try {
-          jsonParse('invalid', { filepath: '' })
+          parseJson('invalid', { filepath: '' })
           expect.fail('Should have thrown')
         } catch (e) {
           expect(e).toBeInstanceOf(Error)
@@ -411,7 +411,7 @@ describe('json', () => {
     describe('combined options', () => {
       it('should use reviver with filepath', () => {
         const reviver = (_key: string, value: unknown) => value
-        const result = jsonParse('{"key":"value"}', {
+        const result = parseJson('{"key":"value"}', {
           filepath: '/test.json',
           reviver,
         })
@@ -420,7 +420,7 @@ describe('json', () => {
 
       it('should use reviver with throws false', () => {
         const reviver = (_key: string, value: unknown) => value
-        const result = jsonParse('{"key":"value"}', {
+        const result = parseJson('{"key":"value"}', {
           throws: false,
           reviver,
         })
@@ -429,7 +429,7 @@ describe('json', () => {
 
       it('should use all options together', () => {
         const reviver = (_key: string, value: unknown) => value
-        const result = jsonParse('{"key":"value"}', {
+        const result = parseJson('{"key":"value"}', {
           filepath: '/test.json',
           throws: true,
           reviver,
@@ -439,7 +439,7 @@ describe('json', () => {
 
       it('should handle error with all options', () => {
         const reviver = (_key: string, value: unknown) => value
-        const result = jsonParse('invalid', {
+        const result = parseJson('invalid', {
           filepath: '/test.json',
           throws: false,
           reviver,
@@ -451,47 +451,47 @@ describe('json', () => {
     describe('edge cases', () => {
       it('should parse JSON with special characters', () => {
         const json = '{"special":"\\n\\t\\r\\b\\f\\"\\\\/"}'
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual({ special: '\n\t\r\b\f"\\/' })
       })
 
       it('should parse JSON with unicode escapes', () => {
         const json = '{"unicode":"\\u0048\\u0065\\u006c\\u006c\\u006f"}'
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual({ unicode: 'Hello' })
       })
 
       it('should parse JSON with negative numbers', () => {
-        const result = jsonParse('{"negative":-42}')
+        const result = parseJson('{"negative":-42}')
         expect(result).toEqual({ negative: -42 })
       })
 
       it('should parse JSON with scientific notation', () => {
-        const result = jsonParse('{"scientific":1.23e10}')
+        const result = parseJson('{"scientific":1.23e10}')
         expect(result).toEqual({ scientific: 1.23e10 })
       })
 
       it('should parse JSON with very nested structure', () => {
         const json = '{"a":{"b":{"c":{"d":{"e":"deep"}}}}}'
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual({ a: { b: { c: { d: { e: 'deep' } } } } })
       })
 
       it('should parse large array', () => {
         const array = Array.from({ length: 1000 }, (_, i) => i)
         const json = JSON.stringify(array)
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual(array)
       })
 
       it('should handle JSON with null values', () => {
-        const result = jsonParse('{"key":null}')
+        const result = parseJson('{"key":null}')
         // oxlint-disable-next-line socket/prefer-undefined-over-null
         expect(result).toEqual({ key: null })
       })
 
       it('should handle mixed types in array', () => {
-        const result = jsonParse(
+        const result = parseJson(
           '[null,true,42,"string",{"key":"value"},[1,2]]',
         )
         expect(result).toEqual([
@@ -506,73 +506,73 @@ describe('json', () => {
       })
 
       it('should handle zero', () => {
-        expect(jsonParse('0')).toBe(0)
-        expect(jsonParse('-0')).toBe(-0)
+        expect(parseJson('0')).toBe(0)
+        expect(parseJson('-0')).toBe(-0)
       })
 
       it('should handle empty string value', () => {
-        const result = jsonParse('{"empty":""}')
+        const result = parseJson('{"empty":""}')
         expect(result).toEqual({ empty: '' })
       })
     })
 
     describe('options object behavior', () => {
       it('should work with empty options object', () => {
-        const result = jsonParse('{"key":"value"}', {})
+        const result = parseJson('{"key":"value"}', {})
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work without options', () => {
-        const result = jsonParse('{"key":"value"}')
+        const result = parseJson('{"key":"value"}')
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work with undefined options', () => {
-        const result = jsonParse('{"key":"value"}', undefined)
+        const result = parseJson('{"key":"value"}', undefined)
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work with throws explicitly set to true', () => {
-        const result = jsonParse('{"key":"value"}', { throws: true })
+        const result = parseJson('{"key":"value"}', { throws: true })
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work with throws explicitly set to false', () => {
-        const result = jsonParse('{"key":"value"}', { throws: false })
+        const result = parseJson('{"key":"value"}', { throws: false })
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work with only reviver option', () => {
         const reviver = (_key: string, value: unknown) => value
-        const result = jsonParse('{"key":"value"}', { reviver })
+        const result = parseJson('{"key":"value"}', { reviver })
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work with only filepath option', () => {
-        const result = jsonParse('{"key":"value"}', { filepath: '/test.json' })
+        const result = parseJson('{"key":"value"}', { filepath: '/test.json' })
         expect(result).toEqual({ key: 'value' })
       })
 
       it('should work with only throws option', () => {
-        const result = jsonParse('{"key":"value"}', { throws: false })
+        const result = parseJson('{"key":"value"}', { throws: false })
         expect(result).toEqual({ key: 'value' })
       })
     })
 
     describe('string vs Buffer edge cases', () => {
       it('should handle string with special unicode characters', () => {
-        const result = jsonParse('{"emoji":"😀"}')
+        const result = parseJson('{"emoji":"😀"}')
         expect(result).toEqual({ emoji: '😀' })
       })
 
       it('should handle Buffer with special unicode characters', () => {
         const buffer = Buffer.from('{"emoji":"😀"}', 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({ emoji: '😀' })
       })
 
       it('should handle string with escaped unicode', () => {
-        const result = jsonParse('{"escaped":"\\u0041\\u0042\\u0043"}')
+        const result = parseJson('{"escaped":"\\u0041\\u0042\\u0043"}')
         expect(result).toEqual({ escaped: 'ABC' })
       })
 
@@ -581,14 +581,14 @@ describe('json', () => {
           '{"escaped":"\\u0041\\u0042\\u0043"}',
           'utf8',
         )
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({ escaped: 'ABC' })
       })
 
       it('should handle very long JSON string', () => {
         const longArray = Array.from({ length: 10_000 }, (_, i) => i)
         const json = JSON.stringify(longArray)
-        const result = jsonParse(json)
+        const result = parseJson(json)
         expect(result).toEqual(longArray)
       })
 
@@ -596,12 +596,12 @@ describe('json', () => {
         const longArray = Array.from({ length: 10_000 }, (_, i) => i)
         const json = JSON.stringify(longArray)
         const buffer = Buffer.from(json, 'utf8')
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual(longArray)
       })
 
       it('should handle whitespace-only JSON with BOM', () => {
-        const result = jsonParse('\uFEFF   "value"   ')
+        const result = parseJson('\uFEFF   "value"   ')
         expect(result).toBe('value')
       })
 
@@ -611,7 +611,7 @@ describe('json', () => {
           '\uFEFF{"text":"\\uFEFF embedded BOM"}',
           'utf8',
         )
-        const result = jsonParse(buffer)
+        const result = parseJson(buffer)
         expect(result).toEqual({ text: '\uFEFF embedded BOM' })
       })
     })
@@ -619,7 +619,7 @@ describe('json', () => {
     describe('error message formatting', () => {
       it('should preserve original error type', () => {
         try {
-          jsonParse('invalid')
+          parseJson('invalid')
           expect.fail('Should have thrown')
         } catch (e) {
           expect(e).toBeInstanceOf(SyntaxError)
@@ -629,7 +629,7 @@ describe('json', () => {
       it('should preserve original error for Buffer', () => {
         const buffer = Buffer.from('invalid', 'utf8')
         try {
-          jsonParse(buffer)
+          parseJson(buffer)
           expect.fail('Should have thrown')
         } catch (e) {
           expect(e).toBeInstanceOf(SyntaxError)
@@ -638,7 +638,7 @@ describe('json', () => {
 
       it('should handle filepath with special characters', () => {
         try {
-          jsonParse('invalid', { filepath: '/path/with spaces/file.json' })
+          parseJson('invalid', { filepath: '/path/with spaces/file.json' })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).toContain('/path/with spaces/file.json')
@@ -648,7 +648,7 @@ describe('json', () => {
       it('should handle very long filepath', () => {
         const longPath = `/very/long/path/${'a'.repeat(1000)}/file.json`
         try {
-          jsonParse('invalid', { filepath: longPath })
+          parseJson('invalid', { filepath: longPath })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).toContain(longPath)
@@ -657,7 +657,7 @@ describe('json', () => {
 
       it('should not modify error when filepath is undefined', () => {
         try {
-          jsonParse('invalid', { filepath: undefined })
+          parseJson('invalid', { filepath: undefined })
           expect.fail('Should have thrown')
         } catch (e) {
           expect((e as Error).message).not.toContain('undefined')
@@ -668,17 +668,17 @@ describe('json', () => {
     describe('isBuffer internal function edge cases', () => {
       it('should handle falsy values that are not Buffers', () => {
         // Tests line 156: if (!x || typeof x !== 'object')
-        expect(jsonParse('null')).toBe(null)
-        expect(jsonParse('false')).toBe(false)
-        expect(jsonParse('0')).toBe(0)
+        expect(parseJson('null')).toBe(null)
+        expect(parseJson('false')).toBe(false)
+        expect(parseJson('0')).toBe(0)
       })
 
       it('should handle objects without length property', () => {
         // Tests line 160-161: typeof obj['length'] !== 'number'
-        // jsonParse with an object that looks nothing like a Buffer should fail gracefully
+        // parseJson with an object that looks nothing like a Buffer should fail gracefully
         expect(() => {
           // @ts-expect-error - testing runtime behavior with invalid input
-          jsonParse({ some: 'object' })
+          parseJson({ some: 'object' })
         }).toThrow()
       })
 
@@ -686,7 +686,7 @@ describe('json', () => {
         // Tests line 160-161: typeof obj['length'] !== 'number'
         expect(() => {
           // @ts-expect-error - testing runtime behavior
-          jsonParse({ length: 'not a number' })
+          parseJson({ length: 'not a number' })
         }).toThrow()
       })
 
@@ -694,24 +694,24 @@ describe('json', () => {
         // Tests line 163-164: missing copy or slice methods
         expect(() => {
           // @ts-expect-error - testing runtime behavior
-          jsonParse({ length: 10 })
+          parseJson({ length: 10 })
         }).toThrow()
 
         expect(() => {
           // @ts-expect-error - testing runtime behavior
-          jsonParse({ length: 10, copy: 'not a function' })
+          parseJson({ length: 10, copy: 'not a function' })
         }).toThrow()
 
         expect(() => {
           // @ts-expect-error - testing runtime behavior
-          jsonParse({ length: 10, slice: 'not a function' })
+          parseJson({ length: 10, slice: 'not a function' })
         }).toThrow()
       })
 
       it('should handle array-like objects with non-number first element', () => {
         // Tests line 166-171: length > 0 but obj[0] is not a number
         expect(() => {
-          jsonParse({
+          parseJson({
             length: 1,
             0: 'not a number',
             // @ts-expect-error - Testing Buffer-like object with invalid method signatures
@@ -725,7 +725,7 @@ describe('json', () => {
       it('should handle objects without proper constructor', () => {
         // Tests line 174-177: constructor.isBuffer checks
         expect(() => {
-          jsonParse({
+          parseJson({
             length: 0,
             // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             copy: () => {},
@@ -737,7 +737,7 @@ describe('json', () => {
         }).toThrow()
 
         expect(() => {
-          jsonParse({
+          parseJson({
             length: 0,
             // @ts-expect-error - Testing Buffer-like object with invalid method signatures
             copy: () => {},

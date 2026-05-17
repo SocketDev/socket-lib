@@ -17,15 +17,15 @@
 import { describe, expect, it } from 'vitest'
 
 import { merge } from '../../src/objects/mutate'
-import { urlSearchParamAsBoolean } from '../../src/url/search-params'
+import { urlSearchParamsAsBoolean } from '../../src/url/search-params'
 
 describe('coverage mop-up — tiny gaps', () => {
-  describe('url.ts urlSearchParamAsBoolean', () => {
+  describe('url.ts urlSearchParamsAsBoolean', () => {
     it('returns coerced boolean for non-string non-null values (number)', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(urlSearchParamAsBoolean(0 as any)).toBe(false)
+      expect(urlSearchParamsAsBoolean(0 as any)).toBe(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(urlSearchParamAsBoolean(1 as any)).toBe(true)
+      expect(urlSearchParamsAsBoolean(1 as any)).toBe(true)
     })
   })
 

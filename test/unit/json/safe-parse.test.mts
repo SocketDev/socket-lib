@@ -1,7 +1,7 @@
 /**
  * @fileoverview Unit tests for safe JSON parsing.
  *
- * - safeJsonParse() blocks prototype pollution attacks (__proto__, constructor, prototype)
+ * - parseJsonSafe() blocks prototype pollution attacks (__proto__, constructor, prototype)
  * - Size limit enforcement to prevent DoS attacks via massive JSON payloads
  * - Schema validation via Zod-compatible schemas
  * - Handles malformed JSON, nested objects, and edge cases
@@ -10,48 +10,48 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
-import { safeJsonParse } from '@socketsecurity/lib/json/parse'
+import { parseJsonSafe } from '@socketsecurity/lib/json/parse'
 
 describe('json/safe-parse', () => {
-  describe('safeJsonParse', () => {
+  describe('parseJsonSafe', () => {
     it('should parse valid JSON', () => {
-      const result = safeJsonParse('{"name":"test","value":123}')
+      const result = parseJsonSafe('{"name":"test","value":123}')
       expect(result).toEqual({ name: 'test', value: 123 })
     })
 
     it('should parse arrays', () => {
-      expect(safeJsonParse('[1,2,3]')).toEqual([1, 2, 3])
+      expect(parseJsonSafe('[1,2,3]')).toEqual([1, 2, 3])
     })
 
     it('should parse strings', () => {
-      expect(safeJsonParse('"hello"')).toBe('hello')
+      expect(parseJsonSafe('"hello"')).toBe('hello')
     })
 
     it('should parse numbers', () => {
-      expect(safeJsonParse('42')).toBe(42)
+      expect(parseJsonSafe('42')).toBe(42)
     })
 
     it('should parse booleans', () => {
-      expect(safeJsonParse('true')).toBe(true)
-      expect(safeJsonParse('false')).toBe(false)
+      expect(parseJsonSafe('true')).toBe(true)
+      expect(parseJsonSafe('false')).toBe(false)
     })
 
     it('should parse null', () => {
-      expect(safeJsonParse('null')).toBeNull()
+      expect(parseJsonSafe('null')).toBeNull()
     })
 
     it('should handle empty objects and arrays', () => {
-      expect(safeJsonParse('{}')).toEqual({})
-      expect(safeJsonParse('[]')).toEqual([])
+      expect(parseJsonSafe('{}')).toEqual({})
+      expect(parseJsonSafe('[]')).toEqual([])
     })
 
     it('should throw on invalid JSON', () => {
-      expect(() => safeJsonParse('not valid json')).toThrow(/Failed to parse/)
+      expect(() => parseJsonSafe('not valid json')).toThrow(/Failed to parse/)
     })
 
     it('should handle deeply nested JSON', () => {
       const json = '{"a":{"b":{"c":{"d":{"e":"value"}}}}}'
-      const result = safeJsonParse<{
+      const result = parseJsonSafe<{
         a: { b: { c: { d: { e: string } } } }
       }>(json)
       expect(result.a.b.c.d.e).toBe('value')
@@ -59,38 +59,38 @@ describe('json/safe-parse', () => {
 
     it('should handle mixed arrays', () => {
       const json = '[1,"string",true,null,{"obj":true}]'
-      const result = safeJsonParse(json)
+      const result = parseJsonSafe(json)
       expect(result).toEqual([1, 'string', true, null, { obj: true }])
     })
   })
 
   describe('prototype pollution protection', () => {
     it('should block __proto__ key at top level', () => {
-      expect(() => safeJsonParse('{"__proto__":{"polluted":true}}')).toThrow(
+      expect(() => parseJsonSafe('{"__proto__":{"polluted":true}}')).toThrow(
         /prototype pollution/,
       )
     })
 
     it('should block constructor key at top level', () => {
       expect(() =>
-        safeJsonParse('{"constructor":{"prototype":{"polluted":true}}}'),
+        parseJsonSafe('{"constructor":{"prototype":{"polluted":true}}}'),
       ).toThrow(/prototype pollution/)
     })
 
     it('should block prototype key at top level', () => {
-      expect(() => safeJsonParse('{"prototype":{"polluted":true}}')).toThrow(
+      expect(() => parseJsonSafe('{"prototype":{"polluted":true}}')).toThrow(
         /prototype pollution/,
       )
     })
 
     it('should block __proto__ at any depth', () => {
       expect(() =>
-        safeJsonParse('{"a":{"b":{"__proto__":{"polluted":true}}}}'),
+        parseJsonSafe('{"a":{"b":{"__proto__":{"polluted":true}}}}'),
       ).toThrow(/prototype pollution/)
     })
 
     it('should allow pollution keys when allowPrototype is true', () => {
-      const result = safeJsonParse('{"__proto__":{"x":1}}', undefined, {
+      const result = parseJsonSafe('{"__proto__":{"x":1}}', undefined, {
         allowPrototype: true,
       })
       expect(result).toBeDefined()
@@ -100,21 +100,21 @@ describe('json/safe-parse', () => {
   describe('size limit enforcement', () => {
     it('should throw when JSON exceeds maxSize', () => {
       const large = JSON.stringify({ data: 'x'.repeat(1000) })
-      expect(() => safeJsonParse(large, undefined, { maxSize: 100 })).toThrow(
+      expect(() => parseJsonSafe(large, undefined, { maxSize: 100 })).toThrow(
         /exceeds maximum size/,
       )
     })
 
     it('should succeed within maxSize', () => {
       const small = JSON.stringify({ data: 'x'.repeat(10) })
-      expect(safeJsonParse(small, undefined, { maxSize: 100 })).toEqual({
+      expect(parseJsonSafe(small, undefined, { maxSize: 100 })).toEqual({
         data: 'x'.repeat(10),
       })
     })
 
     it('should use default 10MB limit', () => {
       const small = '{"x":1}'
-      expect(safeJsonParse(small)).toEqual({ x: 1 })
+      expect(parseJsonSafe(small)).toEqual({ x: 1 })
     })
   })
 
@@ -125,7 +125,7 @@ describe('json/safe-parse', () => {
         age: z.number(),
       })
       const json = '{"name":"Alice","age":30}'
-      const result = safeJsonParse(json, userSchema)
+      const result = parseJsonSafe(json, userSchema)
       expect(result).toEqual({ name: 'Alice', age: 30 })
     })
 
@@ -135,7 +135,7 @@ describe('json/safe-parse', () => {
         age: z.number(),
       })
       const json = '{"name":"Alice","age":"invalid"}'
-      expect(() => safeJsonParse(json, userSchema)).toThrow(/Validation failed/)
+      expect(() => parseJsonSafe(json, userSchema)).toThrow(/Validation failed/)
     })
 
     it('should include field path in validation error', () => {
@@ -143,7 +143,7 @@ describe('json/safe-parse', () => {
         required: z.string(),
       })
       const json = '{}'
-      expect(() => safeJsonParse(json, schema)).toThrow(/required/)
+      expect(() => parseJsonSafe(json, schema)).toThrow(/required/)
     })
 
     it('should handle nested schema', () => {
@@ -154,18 +154,18 @@ describe('json/safe-parse', () => {
         }),
       })
       const json = '{"user":{"name":"Test","email":"test@example.com"}}'
-      const result = safeJsonParse(json, schema)
+      const result = parseJsonSafe(json, schema)
       expect(result.user.name).toBe('Test')
     })
 
     it('should handle array schema validation', () => {
       const schema = z.array(z.number())
-      expect(safeJsonParse('[1,2,3,4,5]', schema)).toEqual([1, 2, 3, 4, 5])
+      expect(parseJsonSafe('[1,2,3,4,5]', schema)).toEqual([1, 2, 3, 4, 5])
     })
 
     it('should throw on invalid array items', () => {
       const schema = z.array(z.number())
-      expect(() => safeJsonParse('[1,2,"string",4]', schema)).toThrow(
+      expect(() => parseJsonSafe('[1,2,"string",4]', schema)).toThrow(
         /Validation failed/,
       )
     })

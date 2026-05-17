@@ -5,7 +5,7 @@
  * - isUrl() validates URL strings
  * - parseUrl() parses URLs with error handling
  * - createRelativeUrl() constructs relative URLs
- * - urlSearchParamAs*() typed query parameter extractors (String, Number, Boolean, Array)
+ * - urlSearchParamsAs*() typed query parameter extractors (String, Number, Boolean, Array)
  * - urlSearchParamsGet*() URLSearchParams helper methods
  * Used by Socket tools for API URL construction and query parameter parsing.
  */
@@ -16,10 +16,10 @@ import {
 } from '@socketsecurity/lib/url/parse'
 import { isUrl } from '@socketsecurity/lib/url/predicates'
 import {
-  urlSearchParamAsArray,
-  urlSearchParamAsBoolean,
-  urlSearchParamAsNumber,
-  urlSearchParamAsString,
+  urlSearchParamsAsArray,
+  urlSearchParamsAsBoolean,
+  urlSearchParamsAsNumber,
+  urlSearchParamsAsString,
   urlSearchParamsGetArray,
   urlSearchParamsGetBoolean,
 } from '@socketsecurity/lib/url/search-params'
@@ -151,9 +151,9 @@ describe('url', () => {
     })
   })
 
-  describe('urlSearchParamAsArray', () => {
+  describe('urlSearchParamsAsArray', () => {
     it('should split comma-separated values', () => {
-      expect(urlSearchParamAsArray('foo,bar,baz')).toEqual([
+      expect(urlSearchParamsAsArray('foo,bar,baz')).toEqual([
         'foo',
         'bar',
         'baz',
@@ -161,12 +161,12 @@ describe('url', () => {
     })
 
     it('should trim whitespace from values', () => {
-      expect(urlSearchParamAsArray('foo, bar, baz')).toEqual([
+      expect(urlSearchParamsAsArray('foo, bar, baz')).toEqual([
         'foo',
         'bar',
         'baz',
       ])
-      expect(urlSearchParamAsArray(' foo , bar , baz ')).toEqual([
+      expect(urlSearchParamsAsArray(' foo , bar , baz ')).toEqual([
         'foo',
         'bar',
         'baz',
@@ -174,94 +174,94 @@ describe('url', () => {
     })
 
     it('should filter out empty values', () => {
-      expect(urlSearchParamAsArray('foo,,bar')).toEqual(['foo', 'bar'])
-      expect(urlSearchParamAsArray('foo, , bar')).toEqual(['foo', 'bar'])
+      expect(urlSearchParamsAsArray('foo,,bar')).toEqual(['foo', 'bar'])
+      expect(urlSearchParamsAsArray('foo, , bar')).toEqual(['foo', 'bar'])
     })
 
     it('should return empty array for null', () => {
-      expect(urlSearchParamAsArray(undefined)).toEqual([])
+      expect(urlSearchParamsAsArray(undefined)).toEqual([])
     })
 
     it('should return empty array for undefined', () => {
-      expect(urlSearchParamAsArray(undefined)).toEqual([])
+      expect(urlSearchParamsAsArray(undefined)).toEqual([])
     })
 
     it('should return empty array for empty string', () => {
-      expect(urlSearchParamAsArray('')).toEqual([])
+      expect(urlSearchParamsAsArray('')).toEqual([])
     })
 
     it('should return empty array for whitespace-only string', () => {
-      expect(urlSearchParamAsArray('   ')).toEqual([])
+      expect(urlSearchParamsAsArray('   ')).toEqual([])
     })
 
     it('should handle single value', () => {
-      expect(urlSearchParamAsArray('foo')).toEqual(['foo'])
+      expect(urlSearchParamsAsArray('foo')).toEqual(['foo'])
     })
 
     it('should handle values with spaces but no commas', () => {
-      expect(urlSearchParamAsArray('foo bar')).toEqual(['foo bar'])
+      expect(urlSearchParamsAsArray('foo bar')).toEqual(['foo bar'])
     })
   })
 
-  describe('urlSearchParamAsBoolean', () => {
+  describe('urlSearchParamsAsBoolean', () => {
     it('should return true for "true" string', () => {
-      expect(urlSearchParamAsBoolean('true')).toBe(true)
-      expect(urlSearchParamAsBoolean('TRUE')).toBe(true)
-      expect(urlSearchParamAsBoolean('True')).toBe(true)
+      expect(urlSearchParamsAsBoolean('true')).toBe(true)
+      expect(urlSearchParamsAsBoolean('TRUE')).toBe(true)
+      expect(urlSearchParamsAsBoolean('True')).toBe(true)
     })
 
     it('should return true for "1" string', () => {
-      expect(urlSearchParamAsBoolean('1')).toBe(true)
+      expect(urlSearchParamsAsBoolean('1')).toBe(true)
     })
 
     it('should return false for "false" string', () => {
-      expect(urlSearchParamAsBoolean('false')).toBe(false)
-      expect(urlSearchParamAsBoolean('FALSE')).toBe(false)
+      expect(urlSearchParamsAsBoolean('false')).toBe(false)
+      expect(urlSearchParamsAsBoolean('FALSE')).toBe(false)
     })
 
     it('should return false for "0" string', () => {
-      expect(urlSearchParamAsBoolean('0')).toBe(false)
+      expect(urlSearchParamsAsBoolean('0')).toBe(false)
     })
 
     it('accepts the same truthy vocabulary as envAsBoolean', () => {
       // Expanded set so callers get consistent behavior across env vars
       // and query strings: '1' | 'true' | 'yes' | 'on' (case-insensitive).
-      expect(urlSearchParamAsBoolean('yes')).toBe(true)
-      expect(urlSearchParamAsBoolean('Yes')).toBe(true)
-      expect(urlSearchParamAsBoolean('on')).toBe(true)
-      expect(urlSearchParamAsBoolean('hello')).toBe(false)
-      expect(urlSearchParamAsBoolean('no')).toBe(false)
+      expect(urlSearchParamsAsBoolean('yes')).toBe(true)
+      expect(urlSearchParamsAsBoolean('Yes')).toBe(true)
+      expect(urlSearchParamsAsBoolean('on')).toBe(true)
+      expect(urlSearchParamsAsBoolean('hello')).toBe(false)
+      expect(urlSearchParamsAsBoolean('no')).toBe(false)
     })
 
     it('should return default value for null', () => {
-      expect(urlSearchParamAsBoolean(undefined)).toBe(false)
-      expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
+      expect(urlSearchParamsAsBoolean(undefined)).toBe(false)
+      expect(urlSearchParamsAsBoolean(undefined, { defaultValue: true })).toBe(
         true,
       )
     })
 
     it('should return default value for undefined', () => {
-      expect(urlSearchParamAsBoolean(undefined)).toBe(false)
-      expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
+      expect(urlSearchParamsAsBoolean(undefined)).toBe(false)
+      expect(urlSearchParamsAsBoolean(undefined, { defaultValue: true })).toBe(
         true,
       )
     })
 
     it('should trim whitespace before checking', () => {
-      expect(urlSearchParamAsBoolean(' true ')).toBe(true)
-      expect(urlSearchParamAsBoolean(' 1 ')).toBe(true)
-      expect(urlSearchParamAsBoolean(' false ')).toBe(false)
+      expect(urlSearchParamsAsBoolean(' true ')).toBe(true)
+      expect(urlSearchParamsAsBoolean(' 1 ')).toBe(true)
+      expect(urlSearchParamsAsBoolean(' false ')).toBe(false)
     })
 
     it('should handle empty string as false', () => {
-      expect(urlSearchParamAsBoolean('')).toBe(false)
+      expect(urlSearchParamsAsBoolean('')).toBe(false)
     })
 
     it('should use custom default value', () => {
-      expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
+      expect(urlSearchParamsAsBoolean(undefined, { defaultValue: true })).toBe(
         true,
       )
-      expect(urlSearchParamAsBoolean(undefined, { defaultValue: true })).toBe(
+      expect(urlSearchParamsAsBoolean(undefined, { defaultValue: true })).toBe(
         true,
       )
     })
@@ -437,133 +437,133 @@ describe('url', () => {
     })
   })
 
-  describe('urlSearchParamAsString', () => {
+  describe('urlSearchParamsAsString', () => {
     it('should get string value from URLSearchParams', () => {
       const params = new URLSearchParams('name=value')
-      expect(urlSearchParamAsString(params, 'name')).toBe('value')
+      expect(urlSearchParamsAsString(params, 'name')).toBe('value')
     })
 
     it('should return default value for missing key', () => {
       const params = new URLSearchParams('foo=bar')
-      expect(urlSearchParamAsString(params, 'missing')).toBe('')
+      expect(urlSearchParamsAsString(params, 'missing')).toBe('')
       expect(
-        urlSearchParamAsString(params, 'missing', { defaultValue: 'default' }),
+        urlSearchParamsAsString(params, 'missing', { defaultValue: 'default' }),
       ).toBe('default')
     })
 
     it('should return default value for null params', () => {
-      expect(urlSearchParamAsString(undefined, 'key')).toBe('')
+      expect(urlSearchParamsAsString(undefined, 'key')).toBe('')
       expect(
-        urlSearchParamAsString(undefined, 'key', { defaultValue: 'default' }),
+        urlSearchParamsAsString(undefined, 'key', { defaultValue: 'default' }),
       ).toBe('default')
     })
 
     it('should return default value for undefined params', () => {
-      expect(urlSearchParamAsString(undefined, 'key')).toBe('')
+      expect(urlSearchParamsAsString(undefined, 'key')).toBe('')
       expect(
-        urlSearchParamAsString(undefined, 'key', { defaultValue: 'default' }),
+        urlSearchParamsAsString(undefined, 'key', { defaultValue: 'default' }),
       ).toBe('default')
     })
 
     it('should handle empty string value', () => {
       const params = new URLSearchParams('key=')
-      expect(urlSearchParamAsString(params, 'key')).toBe('')
+      expect(urlSearchParamsAsString(params, 'key')).toBe('')
     })
 
     it('should handle special characters in value', () => {
       const params = new URLSearchParams('key=hello%20world')
-      expect(urlSearchParamAsString(params, 'key')).toBe('hello world')
+      expect(urlSearchParamsAsString(params, 'key')).toBe('hello world')
     })
 
     it('should get first value when multiple exist', () => {
       const params = new URLSearchParams()
       params.append('key', 'first')
       params.append('key', 'second')
-      expect(urlSearchParamAsString(params, 'key')).toBe('first')
+      expect(urlSearchParamsAsString(params, 'key')).toBe('first')
     })
 
     it('should preserve whitespace in values', () => {
       const params = new URLSearchParams('key=%20value%20')
-      expect(urlSearchParamAsString(params, 'key')).toBe(' value ')
+      expect(urlSearchParamsAsString(params, 'key')).toBe(' value ')
     })
   })
 
-  describe('urlSearchParamAsNumber', () => {
+  describe('urlSearchParamsAsNumber', () => {
     it('should parse integer values', () => {
       const params = new URLSearchParams('count=42')
-      expect(urlSearchParamAsNumber(params, 'count')).toBe(42)
+      expect(urlSearchParamsAsNumber(params, 'count')).toBe(42)
     })
 
     it('should parse negative numbers', () => {
       const params = new URLSearchParams('value=-10')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(-10)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(-10)
     })
 
     it('should parse floating point numbers', () => {
       const params = new URLSearchParams('price=19.99')
-      expect(urlSearchParamAsNumber(params, 'price')).toBe(19.99)
+      expect(urlSearchParamsAsNumber(params, 'price')).toBe(19.99)
     })
 
     it('should parse zero', () => {
       const params = new URLSearchParams('value=0')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(0)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(0)
     })
 
     it('should return default value for invalid numbers', () => {
       const params = new URLSearchParams('value=notanumber')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(0)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(0)
       expect(
-        urlSearchParamAsNumber(params, 'value', { defaultValue: 42 }),
+        urlSearchParamsAsNumber(params, 'value', { defaultValue: 42 }),
       ).toBe(42)
     })
 
     it('should return default value for missing key', () => {
       const params = new URLSearchParams('foo=bar')
-      expect(urlSearchParamAsNumber(params, 'missing')).toBe(0)
+      expect(urlSearchParamsAsNumber(params, 'missing')).toBe(0)
       expect(
-        urlSearchParamAsNumber(params, 'missing', { defaultValue: 100 }),
+        urlSearchParamsAsNumber(params, 'missing', { defaultValue: 100 }),
       ).toBe(100)
     })
 
     it('should return default value for null params', () => {
-      expect(urlSearchParamAsNumber(undefined, 'key')).toBe(0)
+      expect(urlSearchParamsAsNumber(undefined, 'key')).toBe(0)
       expect(
-        urlSearchParamAsNumber(undefined, 'key', { defaultValue: 42 }),
+        urlSearchParamsAsNumber(undefined, 'key', { defaultValue: 42 }),
       ).toBe(42)
     })
 
     it('should return default value for undefined params', () => {
-      expect(urlSearchParamAsNumber(undefined, 'key')).toBe(0)
+      expect(urlSearchParamsAsNumber(undefined, 'key')).toBe(0)
       expect(
-        urlSearchParamAsNumber(undefined, 'key', { defaultValue: 42 }),
+        urlSearchParamsAsNumber(undefined, 'key', { defaultValue: 42 }),
       ).toBe(42)
     })
 
     it('should return default value for empty string', () => {
       const params = new URLSearchParams('value=')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(0)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(0)
     })
 
     it('should parse scientific notation', () => {
       const params = new URLSearchParams('value=1e3')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(1000)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(1000)
     })
 
     it('should parse hex numbers', () => {
       const params = new URLSearchParams('value=0x10')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(16)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(16)
     })
 
     it('should handle Infinity', () => {
       const params = new URLSearchParams('value=Infinity')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(
         Number.POSITIVE_INFINITY,
       )
     })
 
     it('should handle whitespace around numbers', () => {
       const params = new URLSearchParams('value=%20%2042%20%20')
-      expect(urlSearchParamAsNumber(params, 'value')).toBe(42)
+      expect(urlSearchParamsAsNumber(params, 'value')).toBe(42)
     })
   })
 })

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Unit tests for crypto helpers.
  *
- * Covers `hash()` and the `getNativeHash()` feature-detect:
+ * Covers `hash()` and the `nativeHash()` feature-detect:
  * - one-shot hashing for sha256, sha512 across hex / base64 / base64url
  * - native vs. fallback (createHash().update().digest()) parity
  * - feature-detect tri-state: native present, native missing
@@ -10,7 +10,7 @@
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 
-import { getNativeHash, hash } from '@socketsecurity/lib/crypto/hash'
+import { nativeHash, hash } from '@socketsecurity/lib/crypto/hash'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('crypto', () => {
@@ -56,18 +56,18 @@ describe('crypto', () => {
     })
   })
 
-  describe('getNativeHash', () => {
+  describe('nativeHash', () => {
     // Exposed for tests; not part of the public API. Returns the
     // native `crypto.hash` when available (Node 21.7+ / 20.12+) or
     // `null` on older runtimes.
 
     it('returns a function on a runtime with crypto.hash', () => {
       // Node 22+ always has it.
-      expect(typeof getNativeHash()).toBe('function')
+      expect(typeof nativeHash()).toBe('function')
     })
 
     it('returns the same value on subsequent calls (memoized)', () => {
-      expect(getNativeHash()).toBe(getNativeHash())
+      expect(nativeHash()).toBe(nativeHash())
     })
   })
 
@@ -91,17 +91,17 @@ describe('crypto', () => {
 
     async function loadFallback(): Promise<{
       hash: typeof hash
-      getNativeHash: typeof getNativeHash
+      nativeHash: typeof nativeHash
     }> {
       delete cryptoMod.hash
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- re-import after vi.resetModules to exercise the native-hash fallback.
       const mod = await import('@socketsecurity/lib/crypto/hash')
-      return { hash: mod.hash, getNativeHash: mod.getNativeHash }
+      return { hash: mod.hash, nativeHash: mod.nativeHash }
     }
 
-    it('getNativeHash returns undefined when crypto.hash is missing', async () => {
-      const { getNativeHash: gnh } = await loadFallback()
+    it('nativeHash returns undefined when crypto.hash is missing', async () => {
+      const { nativeHash: gnh } = await loadFallback()
       expect(gnh()).toBeUndefined()
     })
 
@@ -125,7 +125,7 @@ describe('crypto', () => {
     })
 
     it('fallback memoizes the missing-native result', async () => {
-      const { getNativeHash: gnh } = await loadFallback()
+      const { nativeHash: gnh } = await loadFallback()
       expect(gnh()).toBeUndefined()
       expect(gnh()).toBeUndefined()
     })

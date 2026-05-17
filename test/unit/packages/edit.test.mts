@@ -18,7 +18,6 @@ import type {
 } from '@socketsecurity/lib/packages/types'
 import {
   getEditablePackageJsonClass,
-  pkgJsonToEditable,
   toEditablePackageJson,
   toEditablePackageJsonSync,
 } from '@socketsecurity/lib/packages/edit'
@@ -851,14 +850,14 @@ describe('packages/editable', () => {
     })
   })
 
-  describe('pkgJsonToEditable', () => {
+  describe('toEditablePackageJsonSync', () => {
     it('should convert package.json to editable instance', () => {
       const pkgJson: PackageJson = {
         name: 'test-package',
         version: '1.0.0',
       }
 
-      const editable = pkgJsonToEditable(pkgJson) as EditablePackageJson
+      const editable = toEditablePackageJsonSync(pkgJson) as EditablePackageJson
 
       expect(editable).toBeDefined()
       expect(editable.content.name).toBe('test-package')
@@ -872,7 +871,7 @@ describe('packages/editable', () => {
         custom: 'field',
       }
 
-      const editable = pkgJsonToEditable(pkgJson) as EditablePackageJson
+      const editable = toEditablePackageJsonSync(pkgJson) as EditablePackageJson
 
       expect(editable.content['custom']).toBe('field')
     })
@@ -882,7 +881,7 @@ describe('packages/editable', () => {
         name: 'test-package',
       }
 
-      const editable = pkgJsonToEditable(pkgJson, {
+      const editable = toEditablePackageJsonSync(pkgJson, {
         normalize: true,
       }) as EditablePackageJson
 
@@ -897,7 +896,7 @@ describe('packages/editable', () => {
         custom: 'field',
       }
 
-      const editable = pkgJsonToEditable(pkgJson, {
+      const editable = toEditablePackageJsonSync(pkgJson, {
         normalize: true,
         preserve: ['custom'],
       }) as EditablePackageJson
@@ -908,7 +907,7 @@ describe('packages/editable', () => {
     it('should handle empty package.json', () => {
       const pkgJson: PackageJson = {}
 
-      const editable = pkgJsonToEditable(pkgJson) as EditablePackageJson
+      const editable = toEditablePackageJsonSync(pkgJson) as EditablePackageJson
 
       expect(editable).toBeDefined()
       expect(editable.content).toBeDefined()
@@ -933,7 +932,7 @@ describe('packages/editable', () => {
       }, 'toeditable-')
     })
 
-    it('should convert without path (like pkgJsonToEditable)', async () => {
+    it('should convert without path (like toEditablePackageJsonSync)', async () => {
       const pkgJson: PackageJson = {
         name: 'test-package',
         version: '1.0.0',
