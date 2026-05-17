@@ -20,9 +20,23 @@ packages:
 catalog:
   '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
+  # -stable aliases: pnpm `overrides:` can't redirect a package's own
+  # name when used inside that same package — Node ESM treats it as a
+  # self-reference and resolves through the local `exports` map, not
+  # the override. The 4 Socket-published packages therefore need a
+  # SECOND name (`<canonical>-stable`) aliased via `npm:` to the
+  # published version. Build / hook / script / config code uses the
+  # -stable name so it always resolves to the published catalog
+  # version regardless of where the importing file lives. src/ + test/
+  # code uses the canonical name because vitest aliases that to local
+  # src/.
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@socketsecurity/lib': 'npm:@socketsecurity/lib@5.28.0'
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@5.28.0'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.2'
+  '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/sdk': 'npm:@socketsecurity/sdk@4.0.1'
+  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
   '@types/mdast': 4.0.4
   '@types/node': 24.9.2
   '@typescript/native-preview': 7.0.0-dev.20260415.1

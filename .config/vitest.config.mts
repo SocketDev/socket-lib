@@ -21,16 +21,16 @@ const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
 const vitestConfig = defineConfig({
   cacheDir: path.resolve(projectRoot, 'node_modules/.cache/vitest'),
   resolve: {
-    // Use 'source' export condition so @socketsecurity/lib/* imports resolve
+    // Use 'source' export condition so @socketsecurity/lib-stable/* imports resolve
     // to src/*.ts instead of dist/*.js. This enables proper v8 coverage
     // attribution to source files.
     conditions: ['source'],
     // Dedupe ensures a single module instance when the same source file is
-    // reached via two import shapes — `@socketsecurity/lib/<sub>` from tests
+    // reached via two import shapes — `@socketsecurity/lib-stable/<sub>` from tests
     // and `./<sub>` from co-located leaves — so `instanceof` checks against
     // exported error classes (e.g. `HttpResponseError`) compare the same
     // prototype on both sides.
-    dedupe: ['@socketsecurity/lib', '@socketsecurity/lib'],
+    dedupe: ['@socketsecurity/lib-stable', '@socketsecurity/lib-stable'],
     preserveSymlinks: false,
     alias: {
       cacache: path.resolve(projectRoot, 'src/external/cacache'),
@@ -41,9 +41,9 @@ const vitestConfig = defineConfig({
       'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
       pacote: path.resolve(projectRoot, 'src/external/pacote'),
       '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
-      // Resolve `@socketsecurity/lib` to local src/ so test files don't
+      // Resolve `@socketsecurity/lib-stable` to local src/ so test files don't
       // pull in the published version through the pnpm overrides block.
-      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
+      '@socketsecurity/lib-stable': path.resolve(projectRoot, 'src'),
     },
   },
   test: {

@@ -304,7 +304,7 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
     outfile,
     external: [
       'node:*',
-      '@socketsecurity/registry',
+      '@socketsecurity/registry-stable',
       'assert',
       'buffer',
       'child_process',
@@ -394,10 +394,10 @@ export function getPackageSpecificOptions(packageName) {
     opts.define = {
       'process.versions.node': '"18.0.0"',
     }
-  } else if (packageName === '@socketregistry/packageurl-js') {
+  } else if (packageName === '@socketregistry/packageurl-js-stable') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.
-    opts.external = [...(opts.external || []), '@socketsecurity/lib/*']
+    opts.external = [...(opts.external || []), '@socketsecurity/lib-stable/*']
   } else if (packageName === 'yargs-parser') {
     // yargs-parser uses import.meta.url which isn't available in CommonJS.
     // Replace import.meta.url with __filename wrapped in pathToFileURL.

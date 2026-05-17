@@ -31,7 +31,7 @@ export async function getLocalPackagePath(packageName, rootDir) {
   }
 
   // Check sibling projects (e.g. socket-packageurl-js).
-  if (packageName === '@socketregistry/packageurl-js') {
+  if (packageName === '@socketregistry/packageurl-js-stable') {
     const siblingPath = path.resolve(
       rootDir,
       '..',

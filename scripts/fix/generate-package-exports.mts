@@ -5,12 +5,12 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import builtinNames from '@socketregistry/packageurl-js/data/npm/builtin-names.json' with { type: 'json' }
+import builtinNames from '@socketregistry/packageurl-js-stable/data/npm/builtin-names.json' with { type: 'json' }
 import fastGlob from 'fast-glob'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { toSortedObject } from '@socketsecurity/lib/objects'
-import { readPackageJson } from '@socketsecurity/lib/packages'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { toSortedObject } from '@socketsecurity/lib-stable/objects'
+import { readPackageJson } from '@socketsecurity/lib-stable/packages'
 
 const logger = getDefaultLogger()
 
@@ -81,7 +81,7 @@ async function main(): Promise<void> {
         'scripts/**',
         'src/**',
         // tools/ and vendor/ are workspace packages for internal use,
-        // not public exports of @socketsecurity/lib.
+        // not public exports of @socketsecurity/lib-stable.
         'tools/**',
         'vendor/**',
         // Files prefixed with _ are private helpers, not public API.
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
   // Build the set of source files once so we can emit a `source` export
   // condition only when the corresponding `src/<path>.ts` exists. The
   // `source` condition lets vitest (which sets `conditions: ['source']`)
-  // resolve `@socketsecurity/lib/<subpath>` to `src/*.ts` for accurate
+  // resolve `@socketsecurity/lib-stable/<subpath>` to `src/*.ts` for accurate
   // coverage attribution; production / consumer resolves still land on
   // `default` (the dist build).
   const srcRoot = path.join(registryPkgPath, 'src')
@@ -229,8 +229,8 @@ async function main(): Promise<void> {
   }
 
   // Fleet-compat barrel aliases. The fleet's socket-wheelhouse template
-  // imports getDefaultLogger from '@socketsecurity/lib/logger' and
-  // errorMessage from '@socketsecurity/lib/errors'. socket-lib's own
+  // imports getDefaultLogger from '@socketsecurity/lib-stable/logger' and
+  // errorMessage from '@socketsecurity/lib-stable/errors'. socket-lib's own
   // public surface no longer ships top-level barrel modules — every leaf
   // is its own subpath — so we expose these two as exports-map aliases
   // that point at the canonical primary subpath. Source-level barrels

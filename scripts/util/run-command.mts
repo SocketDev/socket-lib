@@ -2,13 +2,13 @@
 
 import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { spawn, spawnSync } from '@socketsecurity/lib/spawn'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn'
 
 import type {
   SpawnOptions,
   SpawnSyncOptions,
-} from '@socketsecurity/lib/spawn'
+} from '@socketsecurity/lib-stable/spawn'
 
 interface CommandEntry {
   command: string
@@ -56,7 +56,7 @@ export async function runCommand(
     })
     return result.code
   } catch (e) {
-    // spawn() from @socketsecurity/lib throws on non-zero exit
+    // spawn() from @socketsecurity/lib-stable throws on non-zero exit
     // Return the exit code from the error
     if (e && typeof e === 'object' && 'code' in e) {
       return (e as { code: number }).code
@@ -95,7 +95,7 @@ export async function runCommandQuiet(
       stdout: result.stdout,
     }
   } catch (e) {
-    // spawn() from @socketsecurity/lib throws on non-zero exit
+    // spawn() from @socketsecurity/lib-stable throws on non-zero exit
     // Return the exit code and output from the error
     if (
       e &&

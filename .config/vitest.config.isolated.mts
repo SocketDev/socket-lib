@@ -34,9 +34,9 @@ const vitestConfigIsolated = defineConfig({
       'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
       pacote: path.resolve(projectRoot, 'src/external/pacote'),
       '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
-      // Resolve `@socketsecurity/lib` to local src/ so test files don't
+      // Resolve `@socketsecurity/lib-stable` to local src/ so test files don't
       // pull in the published version through the pnpm overrides block.
-      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
+      '@socketsecurity/lib-stable': path.resolve(projectRoot, 'src'),
     },
   },
   test: {

@@ -10,8 +10,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { spawn } from '@socketsecurity/lib-stable/spawn'
 
 const logger = getDefaultLogger()
 
@@ -116,7 +116,7 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
   lines.push('# API Index')
   lines.push('')
   lines.push(
-    'Every subpath exported by **@socketsecurity/lib**, grouped by namespace.',
+    'Every subpath exported by **@socketsecurity/lib-stable**, grouped by namespace.',
   )
   lines.push(
     'Each entry links to the source module and shows the first sentence of its `@fileoverview`.',
@@ -145,7 +145,7 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
     for (const row of groups.get(key) ?? []) {
       const summary = row.summary || '_(no description)_'
       lines.push(
-        `| [\`@socketsecurity/lib/${row.subpath}\`](../${row.file}) | ${summary} |`,
+        `| [\`@socketsecurity/lib-stable/${row.subpath}\`](../${row.file}) | ${summary} |`,
       )
     }
     lines.push('')

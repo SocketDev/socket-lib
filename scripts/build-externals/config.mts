@@ -86,7 +86,7 @@ export const scopedPackages = [
   },
   // @sinclair/typebox powers validateSchema()'s TypeBox path. Bundle
   // so consumers don't need to install typebox separately — they just
-  // import from @socketsecurity/lib/schema/validate and pass in
+  // import from @socketsecurity/lib-stable/schema/validate and pass in
   // TypeBox schemas built with our vendored copy of Type.*.
   //
   // Bundles both the core entry (for Type.* builders) and the /value
