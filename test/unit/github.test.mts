@@ -12,18 +12,12 @@
  */
 
 import process from 'node:process'
-import {
-  fetchGitHub,
-  getGhsaUrl,
-} from '@socketsecurity/lib/github/fetch'
+import { fetchGitHub, getGhsaUrl } from '@socketsecurity/lib/github/fetch'
 import {
   cacheFetchGhsa,
   fetchGhsaDetails,
 } from '@socketsecurity/lib/github/ghsa'
-import {
-  clearRefCache,
-  resolveRefToSha,
-} from '@socketsecurity/lib/github/refs'
+import { clearRefCache, resolveRefToSha } from '@socketsecurity/lib/github/refs'
 import {
   getGitHubToken,
   getGitHubTokenFromGitConfig,

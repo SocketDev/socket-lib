@@ -10,10 +10,7 @@
  * Used by Socket tools for API URL construction and query parameter parsing.
  */
 
-import {
-  createRelativeUrl,
-  parseUrl,
-} from '@socketsecurity/lib/url/parse'
+import { createRelativeUrl, parseUrl } from '@socketsecurity/lib/url/parse'
 import { isUrl } from '@socketsecurity/lib/url/predicates'
 import {
   urlSearchParamsAsArray,

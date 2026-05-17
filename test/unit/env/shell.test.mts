@@ -10,11 +10,7 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import {
-  clearEnv,
-  resetEnv,
-  setEnv,
-} from '@socketsecurity/lib/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { getShell } from '@socketsecurity/lib/env/shell'
 
 describe('env/shell', () => {

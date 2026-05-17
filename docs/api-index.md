@@ -9,758 +9,758 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## Top-level
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/errors`](../src/errors/message.ts) | Human-readable error-message extractor. |
-| [`@socketsecurity/lib/integrity`](../src/integrity.ts) | Integrity specification helpers for downloads and file verification. |
-| [`@socketsecurity/lib/logger`](../src/logger/logger.ts) | The `Logger` class + the shared-default `getDefaultLogger()` accessor — the public class surface for `logger/*`. |
+| Subpath                                                  | Description                                                                                                      |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/errors`](../src/errors/message.ts) | Human-readable error-message extractor.                                                                          |
+| [`@socketsecurity/lib/integrity`](../src/integrity.ts)   | Integrity specification helpers for downloads and file verification.                                             |
+| [`@socketsecurity/lib/logger`](../src/logger/logger.ts)  | The `Logger` class + the shared-default `getDefaultLogger()` accessor — the public class surface for `logger/*`. |
 
 ## abort/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                      | Description                                                                                                      |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/abort/signal`](../src/abort/signal.ts) | Abort signal utilities — composite signal construction from multiple sources and timeout-driven signal creation. |
 
 ## ai/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                    | Description        |
+| ---------------------------------------------------------- | ------------------ |
 | [`@socketsecurity/lib/ai/discover`](../src/ai/discover.ts) | _(no description)_ |
 | [`@socketsecurity/lib/ai/profiles`](../src/ai/profiles.ts) | _(no description)_ |
-| [`@socketsecurity/lib/ai/spawn`](../src/ai/spawn.ts) | _(no description)_ |
-| [`@socketsecurity/lib/ai/types`](../src/ai/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib/ai/spawn`](../src/ai/spawn.ts)       | _(no description)_ |
+| [`@socketsecurity/lib/ai/types`](../src/ai/types.ts)       | _(no description)_ |
 | [`@socketsecurity/lib/ai/worktree`](../src/ai/worktree.ts) | _(no description)_ |
 
 ## ansi/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/ansi/constants`](../src/ansi/constants.ts) | ANSI escape code constants. |
-| [`@socketsecurity/lib/ansi/strip`](../src/ansi/strip.ts) | ANSI escape-code regex factory and stripping helper. |
+| Subpath                                                          | Description                                          |
+| ---------------------------------------------------------------- | ---------------------------------------------------- |
+| [`@socketsecurity/lib/ansi/constants`](../src/ansi/constants.ts) | ANSI escape code constants.                          |
+| [`@socketsecurity/lib/ansi/strip`](../src/ansi/strip.ts)         | ANSI escape-code regex factory and stripping helper. |
 
 ## archives/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/archives/detect`](../src/archives/detect.ts) | Format detection by file extension. |
-| [`@socketsecurity/lib/archives/extract`](../src/archives/extract.ts) | `extractArchive` — format-detecting dispatcher that routes to `extractTar` / `extractTarGz` / `extractZip`. |
-| [`@socketsecurity/lib/archives/tar`](../src/archives/tar.ts) | Tar / tar.gz extraction with security limits and symlink rejection. |
-| [`@socketsecurity/lib/archives/types`](../src/archives/types.ts) | Public type surface for `archives/*` modules — the `ArchiveFormat` union and the `ExtractOptions` security-limit record. |
-| [`@socketsecurity/lib/archives/zip`](../src/archives/zip.ts) | Zip extraction with security limits and path traversal validation. |
+| Subpath                                                              | Description                                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/archives/detect`](../src/archives/detect.ts)   | Format detection by file extension.                                                                                      |
+| [`@socketsecurity/lib/archives/extract`](../src/archives/extract.ts) | `extractArchive` — format-detecting dispatcher that routes to `extractTar` / `extractTarGz` / `extractZip`.              |
+| [`@socketsecurity/lib/archives/tar`](../src/archives/tar.ts)         | Tar / tar.gz extraction with security limits and symlink rejection.                                                      |
+| [`@socketsecurity/lib/archives/types`](../src/archives/types.ts)     | Public type surface for `archives/*` modules — the `ArchiveFormat` union and the `ExtractOptions` security-limit record. |
+| [`@socketsecurity/lib/archives/zip`](../src/archives/zip.ts)         | Zip extraction with security limits and path traversal validation.                                                       |
 
 ## argv/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                                      | Description                                                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/argv/flag-predicates`](../src/argv/flag-predicates.ts) | Flag predicates — `is*` checks across parsed `FlagValues`, raw `process.argv`, or no input. |
-| [`@socketsecurity/lib/argv/flag-types`](../src/argv/flag-types.ts) | Types + `COMMON_FLAGS` table for argv flag parsing. |
-| [`@socketsecurity/lib/argv/parse`](../src/argv/parse.ts) | Argument parsing utilities for CLI applications. |
+| [`@socketsecurity/lib/argv/flag-types`](../src/argv/flag-types.ts)           | Types + `COMMON_FLAGS` table for argv flag parsing.                                         |
+| [`@socketsecurity/lib/argv/parse`](../src/argv/parse.ts)                     | Argument parsing utilities for CLI applications.                                            |
 
 ## arrays/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/arrays/chunk`](../src/arrays/chunk.ts) | Split an array into fixed-size chunks. |
-| [`@socketsecurity/lib/arrays/join`](../src/arrays/join.ts) | Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and locale-correct. |
-| [`@socketsecurity/lib/arrays/predicates`](../src/arrays/predicates.ts) | Array type-guard predicates. |
-| [`@socketsecurity/lib/arrays/unique`](../src/arrays/unique.ts) | Deduplicate an array via `Set`. |
+| Subpath                                                                | Description                                                                             |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/arrays/chunk`](../src/arrays/chunk.ts)           | Split an array into fixed-size chunks.                                                  |
+| [`@socketsecurity/lib/arrays/join`](../src/arrays/join.ts)             | Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and locale-correct. |
+| [`@socketsecurity/lib/arrays/predicates`](../src/arrays/predicates.ts) | Array type-guard predicates.                                                            |
+| [`@socketsecurity/lib/arrays/unique`](../src/arrays/unique.ts)         | Deduplicate an array via `Set`.                                                         |
 
 ## bin/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/bin/check`](../src/bin/check.ts) | `socket-lib check <name>` subcommand group. |
-| [`@socketsecurity/lib/bin/check-primordials`](../src/bin/check-primordials.ts) | `socket-lib check primordials` handler. |
-| [`@socketsecurity/lib/bin/exec`](../src/bin/exec.ts) | `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling. |
-| [`@socketsecurity/lib/bin/find`](../src/bin/find.ts) | Find specific package-manager binaries with platform- aware fallbacks. |
-| [`@socketsecurity/lib/bin/resolve`](../src/bin/resolve.ts) | Resolve a binary path to the underlying script file. |
-| [`@socketsecurity/lib/bin/shadow`](../src/bin/shadow.ts) | Shadow-bin detection. |
-| [`@socketsecurity/lib/bin/socket-lib`](../src/bin/socket-lib.ts) | `socket-lib` CLI entry point — top-level dispatcher. |
-| [`@socketsecurity/lib/bin/types`](../src/bin/types.ts) | Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`. |
-| [`@socketsecurity/lib/bin/which`](../src/bin/which.ts) | Look up binaries on PATH. |
+| Subpath                                                                        | Description                                                                                                                                         |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/bin/check`](../src/bin/check.ts)                         | `socket-lib check <name>` subcommand group.                                                                                                         |
+| [`@socketsecurity/lib/bin/check-primordials`](../src/bin/check-primordials.ts) | `socket-lib check primordials` handler.                                                                                                             |
+| [`@socketsecurity/lib/bin/exec`](../src/bin/exec.ts)                           | `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.                                             |
+| [`@socketsecurity/lib/bin/find`](../src/bin/find.ts)                           | Find specific package-manager binaries with platform- aware fallbacks.                                                                              |
+| [`@socketsecurity/lib/bin/resolve`](../src/bin/resolve.ts)                     | Resolve a binary path to the underlying script file.                                                                                                |
+| [`@socketsecurity/lib/bin/shadow`](../src/bin/shadow.ts)                       | Shadow-bin detection.                                                                                                                               |
+| [`@socketsecurity/lib/bin/socket-lib`](../src/bin/socket-lib.ts)               | `socket-lib` CLI entry point — top-level dispatcher.                                                                                                |
+| [`@socketsecurity/lib/bin/types`](../src/bin/types.ts)                         | Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`. |
+| [`@socketsecurity/lib/bin/which`](../src/bin/which.ts)                         | Look up binaries on PATH.                                                                                                                           |
 
 ## cacache/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/cacache/clear`](../src/cacache/clear.ts) | Bulk-clear entries from the Socket shared cacache — `clear()` plus its wildcard helper `createPatternMatcher`. |
-| [`@socketsecurity/lib/cacache/read`](../src/cacache/read.ts) | Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns `undefined` on miss). |
-| [`@socketsecurity/lib/cacache/tmp`](../src/cacache/tmp.ts) | `withTmp` — run a callback with a freshly-created temp directory under the cacache root. |
+| Subpath                                                        | Description                                                                                                                                         |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/cacache/clear`](../src/cacache/clear.ts) | Bulk-clear entries from the Socket shared cacache — `clear()` plus its wildcard helper `createPatternMatcher`.                                      |
+| [`@socketsecurity/lib/cacache/read`](../src/cacache/read.ts)   | Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns `undefined` on miss).                                                        |
+| [`@socketsecurity/lib/cacache/tmp`](../src/cacache/tmp.ts)     | `withTmp` — run a callback with a freshly-created temp directory under the cacache root.                                                            |
 | [`@socketsecurity/lib/cacache/types`](../src/cacache/types.ts) | Public type surface for `cacache/*` modules — the `CacheEntry` row shape returned by reads and the option bags consumed by `clear` / `get` / `put`. |
-| [`@socketsecurity/lib/cacache/write`](../src/cacache/write.ts) | Cache write entrypoints — `put` (insert/replace by key) and `remove` (single-key delete). |
+| [`@socketsecurity/lib/cacache/write`](../src/cacache/write.ts) | Cache write entrypoints — `put` (insert/replace by key) and `remove` (single-key delete).                                                           |
 
 ## checks/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                                  | Description                             |
+| ------------------------------------------------------------------------ | --------------------------------------- |
 | [`@socketsecurity/lib/checks/primordials`](../src/checks/primordials.ts) | Primordials drift check — generic core. |
 
 ## colors/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                          | Description                                                                                                                                                         |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/colors/convert`](../src/colors/convert.ts) | Color conversion helpers — `isRgbTuple()` narrows a `ColorValue` to the RGB-tuple branch, and `toRgb()` resolves a named color or passes through an existing tuple. |
-| [`@socketsecurity/lib/colors/palette`](../src/colors/palette.ts) | Named-color palette — maps each `ColorName` to its canonical RGB tuple. |
-| [`@socketsecurity/lib/colors/types`](../src/colors/types.ts) | Public type surface for `colors/*` modules — the `ColorInherit` literal, the `ColorName` named-color union, the `ColorRgb` tuple, and the `ColorValue` super-union. |
+| [`@socketsecurity/lib/colors/palette`](../src/colors/palette.ts) | Named-color palette — maps each `ColorName` to its canonical RGB tuple.                                                                                             |
+| [`@socketsecurity/lib/colors/types`](../src/colors/types.ts)     | Public type surface for `colors/*` modules — the `ColorInherit` literal, the `ColorName` named-color union, the `ColorRgb` tuple, and the `ColorValue` super-union. |
 
 ## compression/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/compression/brotli`](../src/compression/brotli.ts) | Brotli compression / decompression — in-memory, file-to-file, and raw-stream variants. |
-| [`@socketsecurity/lib/compression/gzip`](../src/compression/gzip.ts) | Gzip compression / decompression — same calling shapes as brotli: in-memory, file-to-file, and raw-stream variants. |
-| [`@socketsecurity/lib/compression/types`](../src/compression/types.ts) | Public type surface for `compression/*` modules — the `CompressOptions` accepted by every compression entrypoint and `CompressFileOptions` which extends it with `inPlace`. |
+| Subpath                                                                  | Description                                                                                                                                                                 |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/compression/brotli`](../src/compression/brotli.ts) | Brotli compression / decompression — in-memory, file-to-file, and raw-stream variants.                                                                                      |
+| [`@socketsecurity/lib/compression/gzip`](../src/compression/gzip.ts)     | Gzip compression / decompression — same calling shapes as brotli: in-memory, file-to-file, and raw-stream variants.                                                         |
+| [`@socketsecurity/lib/compression/types`](../src/compression/types.ts)   | Public type surface for `compression/*` modules — the `CompressOptions` accepted by every compression entrypoint and `CompressFileOptions` which extends it with `inPlace`. |
 
 ## constants/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/constants/agents`](../src/constants/agents.ts) | Package manager agent constants. |
-| [`@socketsecurity/lib/constants/encoding`](../src/constants/encoding.ts) | Character encoding and character code constants. |
-| [`@socketsecurity/lib/constants/github`](../src/constants/github.ts) | GitHub API and cache constants. |
-| [`@socketsecurity/lib/constants/licenses`](../src/constants/licenses.ts) | License identifier constants. |
-| [`@socketsecurity/lib/constants/lifecycle-script-names`](../src/constants/lifecycle-script-names.ts) | NPM lifecycle script names. |
-| [`@socketsecurity/lib/constants/maintained-node-versions`](../src/constants/maintained-node-versions.ts) | Maintained Node.js versions without external dependencies. |
-| [`@socketsecurity/lib/constants/node`](../src/constants/node.ts) | Node.js runtime version and capability helpers. |
-| [`@socketsecurity/lib/constants/package-default-node-range`](../src/constants/package-default-node-range.ts) | Default Node.js version range for packages. |
-| [`@socketsecurity/lib/constants/package-default-socket-categories`](../src/constants/package-default-socket-categories.ts) | Default Socket security categories for packages. |
-| [`@socketsecurity/lib/constants/packages`](../src/constants/packages.ts) | Package metadata, defaults, extensions, and lifecycle helpers. |
-| [`@socketsecurity/lib/constants/platform`](../src/constants/platform.ts) | Platform detection and OS-specific constants. |
-| [`@socketsecurity/lib/constants/sentinels`](../src/constants/sentinels.ts) | Core primitives and fundamental constants. |
-| [`@socketsecurity/lib/constants/socket`](../src/constants/socket.ts) | Socket.dev branding and identifier constants. |
-| [`@socketsecurity/lib/constants/testing`](../src/constants/testing.ts) | Testing framework and CI-related string constants. |
-| [`@socketsecurity/lib/constants/time`](../src/constants/time.ts) | Time-related numeric constants. |
-| [`@socketsecurity/lib/constants/typescript`](../src/constants/typescript.ts) | TypeScript availability detection. |
+| Subpath                                                                                                                    | Description                                                    |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [`@socketsecurity/lib/constants/agents`](../src/constants/agents.ts)                                                       | Package manager agent constants.                               |
+| [`@socketsecurity/lib/constants/encoding`](../src/constants/encoding.ts)                                                   | Character encoding and character code constants.               |
+| [`@socketsecurity/lib/constants/github`](../src/constants/github.ts)                                                       | GitHub API and cache constants.                                |
+| [`@socketsecurity/lib/constants/licenses`](../src/constants/licenses.ts)                                                   | License identifier constants.                                  |
+| [`@socketsecurity/lib/constants/lifecycle-script-names`](../src/constants/lifecycle-script-names.ts)                       | NPM lifecycle script names.                                    |
+| [`@socketsecurity/lib/constants/maintained-node-versions`](../src/constants/maintained-node-versions.ts)                   | Maintained Node.js versions without external dependencies.     |
+| [`@socketsecurity/lib/constants/node`](../src/constants/node.ts)                                                           | Node.js runtime version and capability helpers.                |
+| [`@socketsecurity/lib/constants/package-default-node-range`](../src/constants/package-default-node-range.ts)               | Default Node.js version range for packages.                    |
+| [`@socketsecurity/lib/constants/package-default-socket-categories`](../src/constants/package-default-socket-categories.ts) | Default Socket security categories for packages.               |
+| [`@socketsecurity/lib/constants/packages`](../src/constants/packages.ts)                                                   | Package metadata, defaults, extensions, and lifecycle helpers. |
+| [`@socketsecurity/lib/constants/platform`](../src/constants/platform.ts)                                                   | Platform detection and OS-specific constants.                  |
+| [`@socketsecurity/lib/constants/sentinels`](../src/constants/sentinels.ts)                                                 | Core primitives and fundamental constants.                     |
+| [`@socketsecurity/lib/constants/socket`](../src/constants/socket.ts)                                                       | Socket.dev branding and identifier constants.                  |
+| [`@socketsecurity/lib/constants/testing`](../src/constants/testing.ts)                                                     | Testing framework and CI-related string constants.             |
+| [`@socketsecurity/lib/constants/time`](../src/constants/time.ts)                                                           | Time-related numeric constants.                                |
+| [`@socketsecurity/lib/constants/typescript`](../src/constants/typescript.ts)                                               | TypeScript availability detection.                             |
 
 ## cover/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/cover/code`](../src/cover/code.ts) | Code coverage utilities for parsing v8 coverage data. |
-| [`@socketsecurity/lib/cover/formatters`](../src/cover/formatters.ts) | Coverage output formatters. |
-| [`@socketsecurity/lib/cover/type`](../src/cover/type.ts) | TypeScript type coverage utilities. |
-| [`@socketsecurity/lib/cover/types`](../src/cover/types.ts) | Type definitions for coverage utilities. |
+| Subpath                                                              | Description                                           |
+| -------------------------------------------------------------------- | ----------------------------------------------------- |
+| [`@socketsecurity/lib/cover/code`](../src/cover/code.ts)             | Code coverage utilities for parsing v8 coverage data. |
+| [`@socketsecurity/lib/cover/formatters`](../src/cover/formatters.ts) | Coverage output formatters.                           |
+| [`@socketsecurity/lib/cover/type`](../src/cover/type.ts)             | TypeScript type coverage utilities.                   |
+| [`@socketsecurity/lib/cover/types`](../src/cover/types.ts)           | Type definitions for coverage utilities.              |
 
 ## crypto/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                    | Description                                                    |
+| ---------------------------------------------------------- | -------------------------------------------------------------- |
 | [`@socketsecurity/lib/crypto/hash`](../src/crypto/hash.ts) | Crypto hash helpers that prefer Node builtins where available. |
 
 ## debug/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/debug/caller-info`](../src/debug/caller-info.ts) | `getCallerInfo` — extract the caller's function name from the V8 stack trace at a given offset. |
-| [`@socketsecurity/lib/debug/namespace`](../src/debug/namespace.ts) | Namespace-handling helpers — `extractOptions` normalises the polymorphic first argument that every `*Ns` function takes, `getDebugJsInstance` per-namespace caches the underlying `debug-js` instance with `customLog` pa... |
-| [`@socketsecurity/lib/debug/output`](../src/debug/output.ts) | Output entrypoints — `debug` / `debugCache` / `debugDir` / `debugLog` and their `*Ns` namespace variants, plus `debuglog` (node-util-compatible) and `debugtime` (start/end timers). |
-| [`@socketsecurity/lib/debug/types`](../src/debug/types.ts) | Public type surface for `debug/*` modules — the options bag accepted by every `debug*Ns` entrypoint and the `InspectOptions` mirror of `node:util`'s shape (the public subset we accept; not the full thing). |
+| Subpath                                                                | Description                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/debug/caller-info`](../src/debug/caller-info.ts) | `getCallerInfo` — extract the caller's function name from the V8 stack trace at a given offset.                                                                                                                              |
+| [`@socketsecurity/lib/debug/namespace`](../src/debug/namespace.ts)     | Namespace-handling helpers — `extractOptions` normalises the polymorphic first argument that every `*Ns` function takes, `getDebugJsInstance` per-namespace caches the underlying `debug-js` instance with `customLog` pa... |
+| [`@socketsecurity/lib/debug/output`](../src/debug/output.ts)           | Output entrypoints — `debug` / `debugCache` / `debugDir` / `debugLog` and their `*Ns` namespace variants, plus `debuglog` (node-util-compatible) and `debugtime` (start/end timers).                                         |
+| [`@socketsecurity/lib/debug/types`](../src/debug/types.ts)             | Public type surface for `debug/*` modules — the options bag accepted by every `debug*Ns` entrypoint and the `InspectOptions` mirror of `node:util`'s shape (the public subset we accept; not the full thing).                |
 
 ## dlx/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/dlx/arborist`](../src/dlx/arborist.ts) | Safe Arborist wrapper for dlx installs and lockfile-only resolution. |
-| [`@socketsecurity/lib/dlx/binary`](../src/dlx/binary.ts) | DLX binary execution utilities for Socket ecosystem. |
-| [`@socketsecurity/lib/dlx/binary-cache`](../src/dlx/binary-cache.ts) | On-disk cache metadata helpers for dlx binaries. |
-| [`@socketsecurity/lib/dlx/binary-download`](../src/dlx/binary-download.ts) | Download helpers for dlx binaries — fetch tarballs from URLs, verify integrity, cache to disk with concurrency locking. |
-| [`@socketsecurity/lib/dlx/binary-resolution`](../src/dlx/binary-resolution.ts) | Binary resolution for installed dlx packages. |
-| [`@socketsecurity/lib/dlx/binary-types`](../src/dlx/binary-types.ts) | Public option / result interfaces for dlx binary operations. |
-| [`@socketsecurity/lib/dlx/cache`](../src/dlx/cache.ts) | Cache key generation utilities for DLX package installations. |
-| [`@socketsecurity/lib/dlx/detect`](../src/dlx/detect.ts) | Executable type detection for DLX and local filesystem paths. |
-| [`@socketsecurity/lib/dlx/dir`](../src/dlx/dir.ts) | Directory management utilities for DLX installations. |
-| [`@socketsecurity/lib/dlx/firewall`](../src/dlx/firewall.ts) | Socket Firewall integration for dlx installs. |
-| [`@socketsecurity/lib/dlx/lockfile`](../src/dlx/lockfile.ts) | Package pin generation for dlx installs. |
-| [`@socketsecurity/lib/dlx/manifest`](../src/dlx/manifest.ts) | DLX manifest storage utilities. |
-| [`@socketsecurity/lib/dlx/package`](../src/dlx/package.ts) | DLX package execution — install and execute npm packages. |
-| [`@socketsecurity/lib/dlx/packages`](../src/dlx/packages.ts) | Package management utilities for DLX installations. |
-| [`@socketsecurity/lib/dlx/paths`](../src/dlx/paths.ts) | Path utilities for DLX package installations. |
-| [`@socketsecurity/lib/dlx/spec`](../src/dlx/spec.ts) | Parse `package@version` specs into `{name, version}`. |
-| [`@socketsecurity/lib/dlx/types`](../src/dlx/types.ts) | Public option / result interfaces for dlx package operations. |
+| Subpath                                                                        | Description                                                                                                             |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/dlx/arborist`](../src/dlx/arborist.ts)                   | Safe Arborist wrapper for dlx installs and lockfile-only resolution.                                                    |
+| [`@socketsecurity/lib/dlx/binary`](../src/dlx/binary.ts)                       | DLX binary execution utilities for Socket ecosystem.                                                                    |
+| [`@socketsecurity/lib/dlx/binary-cache`](../src/dlx/binary-cache.ts)           | On-disk cache metadata helpers for dlx binaries.                                                                        |
+| [`@socketsecurity/lib/dlx/binary-download`](../src/dlx/binary-download.ts)     | Download helpers for dlx binaries — fetch tarballs from URLs, verify integrity, cache to disk with concurrency locking. |
+| [`@socketsecurity/lib/dlx/binary-resolution`](../src/dlx/binary-resolution.ts) | Binary resolution for installed dlx packages.                                                                           |
+| [`@socketsecurity/lib/dlx/binary-types`](../src/dlx/binary-types.ts)           | Public option / result interfaces for dlx binary operations.                                                            |
+| [`@socketsecurity/lib/dlx/cache`](../src/dlx/cache.ts)                         | Cache key generation utilities for DLX package installations.                                                           |
+| [`@socketsecurity/lib/dlx/detect`](../src/dlx/detect.ts)                       | Executable type detection for DLX and local filesystem paths.                                                           |
+| [`@socketsecurity/lib/dlx/dir`](../src/dlx/dir.ts)                             | Directory management utilities for DLX installations.                                                                   |
+| [`@socketsecurity/lib/dlx/firewall`](../src/dlx/firewall.ts)                   | Socket Firewall integration for dlx installs.                                                                           |
+| [`@socketsecurity/lib/dlx/lockfile`](../src/dlx/lockfile.ts)                   | Package pin generation for dlx installs.                                                                                |
+| [`@socketsecurity/lib/dlx/manifest`](../src/dlx/manifest.ts)                   | DLX manifest storage utilities.                                                                                         |
+| [`@socketsecurity/lib/dlx/package`](../src/dlx/package.ts)                     | DLX package execution — install and execute npm packages.                                                               |
+| [`@socketsecurity/lib/dlx/packages`](../src/dlx/packages.ts)                   | Package management utilities for DLX installations.                                                                     |
+| [`@socketsecurity/lib/dlx/paths`](../src/dlx/paths.ts)                         | Path utilities for DLX package installations.                                                                           |
+| [`@socketsecurity/lib/dlx/spec`](../src/dlx/spec.ts)                           | Parse `package@version` specs into `{name, version}`.                                                                   |
+| [`@socketsecurity/lib/dlx/types`](../src/dlx/types.ts)                         | Public option / result interfaces for dlx package operations.                                                           |
 
 ## eco/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/eco/cargo/lockfile-format`](../src/eco/cargo/lockfile-format.ts) | Format descriptor for `Cargo.lock` — Rust's Cargo-managed lockfile. |
-| [`@socketsecurity/lib/eco/cargo/manifest-format`](../src/eco/cargo/manifest-format.ts) | Format descriptor for `Cargo.toml` — Rust's package manifest. |
-| [`@socketsecurity/lib/eco/cargo/parse-lockfile`](../src/eco/cargo/parse-lockfile.ts) | `parseCargoLock(content)` — parses a Rust `Cargo.lock` (v1/v2/v3/v4) into a `ParsedLockfile`. |
-| [`@socketsecurity/lib/eco/manifest/analyze-lockfile`](../src/eco/manifest/analyze-lockfile.ts) | `analyzeLockfile(lockfile)` — returns a `LockfileStats` summary (counts by dep type, total packages, per-ecosystem breakdown). |
-| [`@socketsecurity/lib/eco/manifest/detect-format`](../src/eco/manifest/detect-format.ts) | `detectFormat(filename)` — maps a filename (or path) to its `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile format), or returns `undefined` if nothing matched. |
-| [`@socketsecurity/lib/eco/manifest/find-packages`](../src/eco/manifest/find-packages.ts) | `findPackages(lockfile, pattern)` — returns all `PackageRef`s whose name matches the regex/string pattern. |
-| [`@socketsecurity/lib/eco/manifest/get-package`](../src/eco/manifest/get-package.ts) | `getPackage(lockfile, name)` — O(1) lookup of the first matching `PackageRef` by name in a `ParsedLockfile`. |
-| [`@socketsecurity/lib/eco/manifest/get-package-versions`](../src/eco/manifest/get-package-versions.ts) | `getPackageVersions(lockfile, name)` — returns all `PackageRef`s that match the given name in a `ParsedLockfile`. |
-| [`@socketsecurity/lib/eco/manifest/manifest-error`](../src/eco/manifest/manifest-error.ts) | `ManifestError` — the error class every parser in `src/eco/<pm>/parse-*` and every dispatcher in `src/eco/manifest/*` throws on invalid / unsupported input. |
-| [`@socketsecurity/lib/eco/manifest/parse`](../src/eco/manifest/parse.ts) | `parse(filename, content)` — auto-detects format from filename then dispatches to `parseManifest` or `parseLockfile`. |
-| [`@socketsecurity/lib/eco/manifest/parse-lockfile`](../src/eco/manifest/parse-lockfile.ts) | `parseLockfile(content, ecosystem, format?)` — dispatches to the right per-PM lockfile parser. |
-| [`@socketsecurity/lib/eco/manifest/parse-manifest`](../src/eco/manifest/parse-manifest.ts) | `parseManifest(content, ecosystem)` — dispatches to the right per-ecosystem manifest parser. |
-| [`@socketsecurity/lib/eco/manifest/types`](../src/eco/manifest/types.ts) | Shared types for manifest + lockfile parsing. |
-| [`@socketsecurity/lib/eco/npm/bun/exec`](../src/eco/npm/bun/exec.ts) | Bun tool surface. |
-| [`@socketsecurity/lib/eco/npm/manifest-format`](../src/eco/npm/manifest-format.ts) | Format descriptor for `package.json` — the manifest shape shared across the entire npm-family ecosystem (npm, pnpm, yarn, bun, vlt). |
-| [`@socketsecurity/lib/eco/npm/npm/exec`](../src/eco/npm/npm/exec.ts) | Execute npm commands with optimized flags and security defaults. |
+| Subpath                                                                                                                  | Description                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/eco/cargo/lockfile-format`](../src/eco/cargo/lockfile-format.ts)                                   | Format descriptor for `Cargo.lock` — Rust's Cargo-managed lockfile.                                                                                                                                                          |
+| [`@socketsecurity/lib/eco/cargo/manifest-format`](../src/eco/cargo/manifest-format.ts)                                   | Format descriptor for `Cargo.toml` — Rust's package manifest.                                                                                                                                                                |
+| [`@socketsecurity/lib/eco/cargo/parse-lockfile`](../src/eco/cargo/parse-lockfile.ts)                                     | `parseCargoLock(content)` — parses a Rust `Cargo.lock` (v1/v2/v3/v4) into a `ParsedLockfile`.                                                                                                                                |
+| [`@socketsecurity/lib/eco/manifest/analyze-lockfile`](../src/eco/manifest/analyze-lockfile.ts)                           | `analyzeLockfile(lockfile)` — returns a `LockfileStats` summary (counts by dep type, total packages, per-ecosystem breakdown).                                                                                               |
+| [`@socketsecurity/lib/eco/manifest/detect-format`](../src/eco/manifest/detect-format.ts)                                 | `detectFormat(filename)` — maps a filename (or path) to its `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile format), or returns `undefined` if nothing matched.                                                 |
+| [`@socketsecurity/lib/eco/manifest/find-packages`](../src/eco/manifest/find-packages.ts)                                 | `findPackages(lockfile, pattern)` — returns all `PackageRef`s whose name matches the regex/string pattern.                                                                                                                   |
+| [`@socketsecurity/lib/eco/manifest/get-package`](../src/eco/manifest/get-package.ts)                                     | `getPackage(lockfile, name)` — O(1) lookup of the first matching `PackageRef` by name in a `ParsedLockfile`.                                                                                                                 |
+| [`@socketsecurity/lib/eco/manifest/get-package-versions`](../src/eco/manifest/get-package-versions.ts)                   | `getPackageVersions(lockfile, name)` — returns all `PackageRef`s that match the given name in a `ParsedLockfile`.                                                                                                            |
+| [`@socketsecurity/lib/eco/manifest/manifest-error`](../src/eco/manifest/manifest-error.ts)                               | `ManifestError` — the error class every parser in `src/eco/<pm>/parse-*` and every dispatcher in `src/eco/manifest/*` throws on invalid / unsupported input.                                                                 |
+| [`@socketsecurity/lib/eco/manifest/parse`](../src/eco/manifest/parse.ts)                                                 | `parse(filename, content)` — auto-detects format from filename then dispatches to `parseManifest` or `parseLockfile`.                                                                                                        |
+| [`@socketsecurity/lib/eco/manifest/parse-lockfile`](../src/eco/manifest/parse-lockfile.ts)                               | `parseLockfile(content, ecosystem, format?)` — dispatches to the right per-PM lockfile parser.                                                                                                                               |
+| [`@socketsecurity/lib/eco/manifest/parse-manifest`](../src/eco/manifest/parse-manifest.ts)                               | `parseManifest(content, ecosystem)` — dispatches to the right per-ecosystem manifest parser.                                                                                                                                 |
+| [`@socketsecurity/lib/eco/manifest/types`](../src/eco/manifest/types.ts)                                                 | Shared types for manifest + lockfile parsing.                                                                                                                                                                                |
+| [`@socketsecurity/lib/eco/npm/bun/exec`](../src/eco/npm/bun/exec.ts)                                                     | Bun tool surface.                                                                                                                                                                                                            |
+| [`@socketsecurity/lib/eco/npm/manifest-format`](../src/eco/npm/manifest-format.ts)                                       | Format descriptor for `package.json` — the manifest shape shared across the entire npm-family ecosystem (npm, pnpm, yarn, bun, vlt).                                                                                         |
+| [`@socketsecurity/lib/eco/npm/npm/exec`](../src/eco/npm/npm/exec.ts)                                                     | Execute npm commands with optimized flags and security defaults.                                                                                                                                                             |
 | [`@socketsecurity/lib/eco/npm/npm/extract-package-name-from-path`](../src/eco/npm/npm/extract-package-name-from-path.ts) | `extractPackageNameFromPath(pkgPath)` — given an npm v2/v3 lockfile entry key like `node_modules/a/node_modules/b`, returns the final package name (`b`), preserving scoped-package boundaries (`@scope/name` stays joined). |
-| [`@socketsecurity/lib/eco/npm/npm/flags`](../src/eco/npm/npm/flags.ts) | npm CLI flag predicates. |
-| [`@socketsecurity/lib/eco/npm/npm/lockfile-format`](../src/eco/npm/npm/lockfile-format.ts) | Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser). |
-| [`@socketsecurity/lib/eco/npm/npm/parse-git-url`](../src/eco/npm/npm/parse-git-url.ts) | `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`). |
-| [`@socketsecurity/lib/eco/npm/npm/parse-lockfile`](../src/eco/npm/npm/parse-lockfile.ts) | `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`. |
-| [`@socketsecurity/lib/eco/npm/parse-package-json`](../src/eco/npm/parse-package-json.ts) | `parsePackageJson(content)` — parses a `package.json` string into a `ParsedManifest`. |
-| [`@socketsecurity/lib/eco/npm/pnpm/detect-pnpm-version`](../src/eco/npm/pnpm/detect-pnpm-version.ts) | `detectPnpmVersion(content)` — scans a pnpm-lock.yaml for its `lockfileVersion:` line and returns `5`, `6`, or `9`. |
-| [`@socketsecurity/lib/eco/npm/pnpm/exec`](../src/eco/npm/pnpm/exec.ts) | Execute pnpm commands with optimized flags and security defaults. |
-| [`@socketsecurity/lib/eco/npm/pnpm/flags`](../src/eco/npm/pnpm/flags.ts) | pnpm CLI flag predicates. |
-| [`@socketsecurity/lib/eco/npm/pnpm/lockfile-format`](../src/eco/npm/pnpm/lockfile-format.ts) | Format descriptor for `pnpm-lock.yaml` — pnpm's YAML-formatted lockfile (v5/v6/v9). |
-| [`@socketsecurity/lib/eco/npm/pnpm/parse-lockfile`](../src/eco/npm/pnpm/parse-lockfile.ts) | `parsePnpmLock(content)` — parses a `pnpm-lock.yaml` (v5, v6, or v9) into a `ParsedLockfile`. |
-| [`@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v5`](../src/eco/npm/pnpm/parse-pnpm-package-id-v5.ts) | `parsePnpmPackageIdV5(pkgId)` — extracts `{ name, version }` from a pnpm v5 package key. |
-| [`@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v6-v9`](../src/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.ts) | `parsePnpmPackageIdV6V9(pkgId)` — extracts `{ name, version }` from a pnpm v6/v9 package key. |
-| [`@socketsecurity/lib/eco/npm/script`](../src/eco/npm/script.ts) | Cross-tool script runner — picks the right package manager by detecting the nearest lockfile and dispatches to its exec function. |
-| [`@socketsecurity/lib/eco/npm/vlt/exec`](../src/eco/npm/vlt/exec.ts) | vlt tool surface. |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/exec`](../src/eco/npm/yarnpkg/yarn/exec.ts) | Execute Yarn Classic (v1.x) commands with optimized flags and security defaults. |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/lockfile-format`](../src/eco/npm/yarnpkg/yarn/lockfile-format.ts) | Format descriptor for `yarn.lock` — yarn's lockfile (Classic v1 + Berry v6 share the filename; the parser auto-discriminates on `__metadata:` presence). |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-lockfile`](../src/eco/npm/yarnpkg/yarn/parse-lockfile.ts) | `parseYarnLock(content)` — parses a `yarn.lock` (Classic v1 or Berry v6) into a `ParsedLockfile`. |
-| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-yarn-descriptor`](../src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.ts) | `parseYarnDescriptor(descriptor)` — extracts the package name from a yarn lockfile spec key. |
-| [`@socketsecurity/lib/eco/purl`](../src/eco/purl.ts) | PURL (Package URL) ecosystem identifiers shared across every package manager Socket understands. |
-| [`@socketsecurity/lib/eco/types`](../src/eco/types.ts) | Socket Registry ecosystem schema types — tags for packages and the manifest entries the registry build pipeline emits. |
+| [`@socketsecurity/lib/eco/npm/npm/flags`](../src/eco/npm/npm/flags.ts)                                                   | npm CLI flag predicates.                                                                                                                                                                                                     |
+| [`@socketsecurity/lib/eco/npm/npm/lockfile-format`](../src/eco/npm/npm/lockfile-format.ts)                               | Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).                                                                                |
+| [`@socketsecurity/lib/eco/npm/npm/parse-git-url`](../src/eco/npm/npm/parse-git-url.ts)                                   | `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`).                                                                 |
+| [`@socketsecurity/lib/eco/npm/npm/parse-lockfile`](../src/eco/npm/npm/parse-lockfile.ts)                                 | `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.                                                                                                  |
+| [`@socketsecurity/lib/eco/npm/parse-package-json`](../src/eco/npm/parse-package-json.ts)                                 | `parsePackageJson(content)` — parses a `package.json` string into a `ParsedManifest`.                                                                                                                                        |
+| [`@socketsecurity/lib/eco/npm/pnpm/detect-pnpm-version`](../src/eco/npm/pnpm/detect-pnpm-version.ts)                     | `detectPnpmVersion(content)` — scans a pnpm-lock.yaml for its `lockfileVersion:` line and returns `5`, `6`, or `9`.                                                                                                          |
+| [`@socketsecurity/lib/eco/npm/pnpm/exec`](../src/eco/npm/pnpm/exec.ts)                                                   | Execute pnpm commands with optimized flags and security defaults.                                                                                                                                                            |
+| [`@socketsecurity/lib/eco/npm/pnpm/flags`](../src/eco/npm/pnpm/flags.ts)                                                 | pnpm CLI flag predicates.                                                                                                                                                                                                    |
+| [`@socketsecurity/lib/eco/npm/pnpm/lockfile-format`](../src/eco/npm/pnpm/lockfile-format.ts)                             | Format descriptor for `pnpm-lock.yaml` — pnpm's YAML-formatted lockfile (v5/v6/v9).                                                                                                                                          |
+| [`@socketsecurity/lib/eco/npm/pnpm/parse-lockfile`](../src/eco/npm/pnpm/parse-lockfile.ts)                               | `parsePnpmLock(content)` — parses a `pnpm-lock.yaml` (v5, v6, or v9) into a `ParsedLockfile`.                                                                                                                                |
+| [`@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v5`](../src/eco/npm/pnpm/parse-pnpm-package-id-v5.ts)           | `parsePnpmPackageIdV5(pkgId)` — extracts `{ name, version }` from a pnpm v5 package key.                                                                                                                                     |
+| [`@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v6-v9`](../src/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.ts)     | `parsePnpmPackageIdV6V9(pkgId)` — extracts `{ name, version }` from a pnpm v6/v9 package key.                                                                                                                                |
+| [`@socketsecurity/lib/eco/npm/script`](../src/eco/npm/script.ts)                                                         | Cross-tool script runner — picks the right package manager by detecting the nearest lockfile and dispatches to its exec function.                                                                                            |
+| [`@socketsecurity/lib/eco/npm/vlt/exec`](../src/eco/npm/vlt/exec.ts)                                                     | vlt tool surface.                                                                                                                                                                                                            |
+| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/exec`](../src/eco/npm/yarnpkg/yarn/exec.ts)                                   | Execute Yarn Classic (v1.x) commands with optimized flags and security defaults.                                                                                                                                             |
+| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/lockfile-format`](../src/eco/npm/yarnpkg/yarn/lockfile-format.ts)             | Format descriptor for `yarn.lock` — yarn's lockfile (Classic v1 + Berry v6 share the filename; the parser auto-discriminates on `__metadata:` presence).                                                                     |
+| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-lockfile`](../src/eco/npm/yarnpkg/yarn/parse-lockfile.ts)               | `parseYarnLock(content)` — parses a `yarn.lock` (Classic v1 or Berry v6) into a `ParsedLockfile`.                                                                                                                            |
+| [`@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-yarn-descriptor`](../src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.ts) | `parseYarnDescriptor(descriptor)` — extracts the package name from a yarn lockfile spec key.                                                                                                                                 |
+| [`@socketsecurity/lib/eco/purl`](../src/eco/purl.ts)                                                                     | PURL (Package URL) ecosystem identifiers shared across every package manager Socket understands.                                                                                                                             |
+| [`@socketsecurity/lib/eco/types`](../src/eco/types.ts)                                                                   | Socket Registry ecosystem schema types — tags for packages and the manifest entries the registry build pipeline emits.                                                                                                       |
 
 ## effects/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/effects/pulse-frames`](../src/effects/pulse-frames.ts) | Socket pulse animation frames generator. |
-| [`@socketsecurity/lib/effects/shimmer`](../src/effects/shimmer.ts) | Shimmer animation engine — pure functions, zero deps. |
-| [`@socketsecurity/lib/effects/shimmer-keyframes`](../src/effects/shimmer-keyframes.ts) | SVG keyframe batcher for the shimmer engine. |
-| [`@socketsecurity/lib/effects/shimmer-terminal`](../src/effects/shimmer-terminal.ts) | Terminal renderer for the shimmer engine. |
+| Subpath                                                                                | Description                                           |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [`@socketsecurity/lib/effects/pulse-frames`](../src/effects/pulse-frames.ts)           | Socket pulse animation frames generator.              |
+| [`@socketsecurity/lib/effects/shimmer`](../src/effects/shimmer.ts)                     | Shimmer animation engine — pure functions, zero deps. |
+| [`@socketsecurity/lib/effects/shimmer-keyframes`](../src/effects/shimmer-keyframes.ts) | SVG keyframe batcher for the shimmer engine.          |
+| [`@socketsecurity/lib/effects/shimmer-terminal`](../src/effects/shimmer-terminal.ts)   | Terminal renderer for the shimmer engine.             |
 
 ## env/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/env/boolean`](../src/env/boolean.ts) | `envAsBoolean` — coerce an env-var-shaped value into a boolean. |
-| [`@socketsecurity/lib/env/case-insensitive`](../src/env/case-insensitive.ts) | Case-insensitive environment-variable key lookup — `findCaseInsensitiveEnvKey` walks `Object.keys(env)` with an O(1) length-prefilter before the (expensive) `toUpperCase` comparison. |
-| [`@socketsecurity/lib/env/ci`](../src/env/ci.ts) | CI environment variable getter. |
-| [`@socketsecurity/lib/env/debug`](../src/env/debug.ts) | DEBUG environment variable getter. |
-| [`@socketsecurity/lib/env/github`](../src/env/github.ts) | GitHub Actions environment variable getters. |
-| [`@socketsecurity/lib/env/home`](../src/env/home.ts) | HOME environment variable getter with Windows fallback. |
-| [`@socketsecurity/lib/env/locale`](../src/env/locale.ts) | Locale and language environment variable getters. |
-| [`@socketsecurity/lib/env/node-auth-token`](../src/env/node-auth-token.ts) | NODE_AUTH_TOKEN environment variable getter. |
-| [`@socketsecurity/lib/env/node-env`](../src/env/node-env.ts) | NODE_ENV environment variable getter. |
-| [`@socketsecurity/lib/env/npm`](../src/env/npm.ts) | NPM environment variable getters. |
-| [`@socketsecurity/lib/env/number`](../src/env/number.ts) | `envAsNumber` — coerce an env-var-shaped value into a number. |
-| [`@socketsecurity/lib/env/package-manager`](../src/env/package-manager.ts) | Package manager environment detection. |
-| [`@socketsecurity/lib/env/path`](../src/env/path.ts) | PATH environment variable getter. |
-| [`@socketsecurity/lib/env/pre-commit`](../src/env/pre-commit.ts) | PRE_COMMIT environment variable getter. |
-| [`@socketsecurity/lib/env/proxy`](../src/env/proxy.ts) | `createEnvProxy` — wrap `process.env` (or any env-like record) in a Proxy that adds case-insensitive lookups for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an `overrides` layer. |
-| [`@socketsecurity/lib/env/rewire`](../src/env/rewire.ts) | Environment variable rewiring utilities for testing. |
-| [`@socketsecurity/lib/env/shell`](../src/env/shell.ts) | SHELL environment variable getter. |
-| [`@socketsecurity/lib/env/socket`](../src/env/socket.ts) | Socket Security environment variable getters. |
-| [`@socketsecurity/lib/env/socket-cli`](../src/env/socket-cli.ts) | Socket CLI environment variables. |
-| [`@socketsecurity/lib/env/string`](../src/env/string.ts) | `envAsString` — coerce an env-var-shaped value into a string. |
-| [`@socketsecurity/lib/env/temp-dir`](../src/env/temp-dir.ts) | Temporary directory environment variable getters. |
-| [`@socketsecurity/lib/env/term`](../src/env/term.ts) | TERM environment variable getter. |
-| [`@socketsecurity/lib/env/test`](../src/env/test.ts) | Test environment variable getters and detection. |
-| [`@socketsecurity/lib/env/types`](../src/env/types.ts) | Public type surface for the cross-cutting `env/*` leaves split out of the legacy single-file `env.ts` — option bags consumed by `envAsBoolean` / `envAsNumber` / `envAsString`. |
-| [`@socketsecurity/lib/env/windows`](../src/env/windows.ts) | Windows environment variable getters. |
-| [`@socketsecurity/lib/env/xdg`](../src/env/xdg.ts) | XDG Base Directory Specification environment variable getters. |
+| Subpath                                                                      | Description                                                                                                                                                                                   |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/env/boolean`](../src/env/boolean.ts)                   | `envAsBoolean` — coerce an env-var-shaped value into a boolean.                                                                                                                               |
+| [`@socketsecurity/lib/env/case-insensitive`](../src/env/case-insensitive.ts) | Case-insensitive environment-variable key lookup — `findCaseInsensitiveEnvKey` walks `Object.keys(env)` with an O(1) length-prefilter before the (expensive) `toUpperCase` comparison.        |
+| [`@socketsecurity/lib/env/ci`](../src/env/ci.ts)                             | CI environment variable getter.                                                                                                                                                               |
+| [`@socketsecurity/lib/env/debug`](../src/env/debug.ts)                       | DEBUG environment variable getter.                                                                                                                                                            |
+| [`@socketsecurity/lib/env/github`](../src/env/github.ts)                     | GitHub Actions environment variable getters.                                                                                                                                                  |
+| [`@socketsecurity/lib/env/home`](../src/env/home.ts)                         | HOME environment variable getter with Windows fallback.                                                                                                                                       |
+| [`@socketsecurity/lib/env/locale`](../src/env/locale.ts)                     | Locale and language environment variable getters.                                                                                                                                             |
+| [`@socketsecurity/lib/env/node-auth-token`](../src/env/node-auth-token.ts)   | NODE_AUTH_TOKEN environment variable getter.                                                                                                                                                  |
+| [`@socketsecurity/lib/env/node-env`](../src/env/node-env.ts)                 | NODE_ENV environment variable getter.                                                                                                                                                         |
+| [`@socketsecurity/lib/env/npm`](../src/env/npm.ts)                           | NPM environment variable getters.                                                                                                                                                             |
+| [`@socketsecurity/lib/env/number`](../src/env/number.ts)                     | `envAsNumber` — coerce an env-var-shaped value into a number.                                                                                                                                 |
+| [`@socketsecurity/lib/env/package-manager`](../src/env/package-manager.ts)   | Package manager environment detection.                                                                                                                                                        |
+| [`@socketsecurity/lib/env/path`](../src/env/path.ts)                         | PATH environment variable getter.                                                                                                                                                             |
+| [`@socketsecurity/lib/env/pre-commit`](../src/env/pre-commit.ts)             | PRE_COMMIT environment variable getter.                                                                                                                                                       |
+| [`@socketsecurity/lib/env/proxy`](../src/env/proxy.ts)                       | `createEnvProxy` — wrap `process.env` (or any env-like record) in a Proxy that adds case-insensitive lookups for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an `overrides` layer. |
+| [`@socketsecurity/lib/env/rewire`](../src/env/rewire.ts)                     | Environment variable rewiring utilities for testing.                                                                                                                                          |
+| [`@socketsecurity/lib/env/shell`](../src/env/shell.ts)                       | SHELL environment variable getter.                                                                                                                                                            |
+| [`@socketsecurity/lib/env/socket`](../src/env/socket.ts)                     | Socket Security environment variable getters.                                                                                                                                                 |
+| [`@socketsecurity/lib/env/socket-cli`](../src/env/socket-cli.ts)             | Socket CLI environment variables.                                                                                                                                                             |
+| [`@socketsecurity/lib/env/string`](../src/env/string.ts)                     | `envAsString` — coerce an env-var-shaped value into a string.                                                                                                                                 |
+| [`@socketsecurity/lib/env/temp-dir`](../src/env/temp-dir.ts)                 | Temporary directory environment variable getters.                                                                                                                                             |
+| [`@socketsecurity/lib/env/term`](../src/env/term.ts)                         | TERM environment variable getter.                                                                                                                                                             |
+| [`@socketsecurity/lib/env/test`](../src/env/test.ts)                         | Test environment variable getters and detection.                                                                                                                                              |
+| [`@socketsecurity/lib/env/types`](../src/env/types.ts)                       | Public type surface for the cross-cutting `env/*` leaves split out of the legacy single-file `env.ts` — option bags consumed by `envAsBoolean` / `envAsNumber` / `envAsString`.               |
+| [`@socketsecurity/lib/env/windows`](../src/env/windows.ts)                   | Windows environment variable getters.                                                                                                                                                         |
+| [`@socketsecurity/lib/env/xdg`](../src/env/xdg.ts)                           | XDG Base Directory Specification environment variable getters.                                                                                                                                |
 
 ## errors/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/errors/message`](../src/errors/message.ts) | Human-readable error-message extractor. |
+| Subpath                                                                | Description                                                                                                                                               |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/errors/message`](../src/errors/message.ts)       | Human-readable error-message extractor.                                                                                                                   |
 | [`@socketsecurity/lib/errors/predicates`](../src/errors/predicates.ts) | Error type-guard predicates — `isError` (with the `isErrorBuiltin` / `isErrorShim` building blocks) and the libuv errno-code narrower `isErrnoException`. |
-| [`@socketsecurity/lib/errors/stack`](../src/errors/stack.ts) | Stack-trace extractor with cause-chain support. |
+| [`@socketsecurity/lib/errors/stack`](../src/errors/stack.ts)           | Stack-trace extractor with cause-chain support.                                                                                                           |
 
 ## external-tools/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts) | Upstream Bazel release asset-name mapping per `platform-arch`. |
-| [`@socketsecurity/lib/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts) | `bazelFromDownload()` — fetches the upstream Bazel binary and returns a `ResolvedBazel` pointing at the cached executable. |
-| [`@socketsecurity/lib/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts) | `bazelFromPath()` — looks for `bazelisk` first, then `bazel`, on the system PATH. |
-| [`@socketsecurity/lib/external-tools/bazel/from-vfs`](../src/external-tools/bazel/from-vfs.ts) | `bazelFromVfs()` — extracts the Bazel binary from the smol binary's VFS. |
-| [`@socketsecurity/lib/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | `readBazelVersionFile(workspaceDir)` — walks up from `workspaceDir` looking for a `.bazelversion` file (the Bazel/Bazelisk convention for pinning the project's Bazel version). |
-| [`@socketsecurity/lib/external-tools/bazel/resolve`](../src/external-tools/bazel/resolve.ts) | `resolveBazel()` — Bazel resolution entry point. |
-| [`@socketsecurity/lib/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts) | `resolveBazelAssetUrl(version, platformArch)` — builds the upstream GitHub Releases download URL for a Bazel binary. |
-| [`@socketsecurity/lib/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts) | `resolveBazelVersion({ cwd })` — picks the Bazel version to run for a project, matching the bazelisk precedence: 1. |
-| [`@socketsecurity/lib/external-tools/bazel/types`](../src/external-tools/bazel/types.ts) | Shared types for Bazel resolution. |
-| [`@socketsecurity/lib/external-tools/from-download`](../src/external-tools/from-download.ts) | Generic "download tier" for external-tools resolvers. |
-| [`@socketsecurity/lib/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts) | Adoptium API platform-arch → asset-query mappings. |
-| [`@socketsecurity/lib/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts) | `getCurrentPlatformArch()` — resolves the current machine to a `platform-arch` string suitable for the Adoptium asset-name map. |
-| [`@socketsecurity/lib/external-tools/jre/from-download`](../src/external-tools/jre/from-download.ts) | `jreFromDownload()` — fetches Adoptium JRE and returns a `ResolvedJre` pointing at the extracted java binary. |
-| [`@socketsecurity/lib/external-tools/jre/from-java-home`](../src/external-tools/jre/from-java-home.ts) | `jreFromJavaHome()` — checks `$JAVA_HOME` for an existing JRE/JDK. |
-| [`@socketsecurity/lib/external-tools/jre/from-path`](../src/external-tools/jre/from-path.ts) | `jreFromPath()` — looks for `java` (or `java.exe`) on the system PATH via socket-lib's `which`. |
-| [`@socketsecurity/lib/external-tools/jre/from-vfs`](../src/external-tools/jre/from-vfs.ts) | `jreFromVfs()` — extracts the JRE directory tree from the smol binary's VFS and returns the resolved-shape pointing into the extracted directory. |
-| [`@socketsecurity/lib/external-tools/jre/resolve`](../src/external-tools/jre/resolve.ts) | `resolveJre()` — the JRE resolution entry point. |
-| [`@socketsecurity/lib/external-tools/jre/types`](../src/external-tools/jre/types.ts) | Shared types for JRE resolution. |
-| [`@socketsecurity/lib/external-tools/manifest`](../src/external-tools/manifest.ts) | Reader for `external-tools.json` — the fleet manifest describing downloadable external binaries (sfw, zizmor, etc.) with pinned versions, per-platform asset names, and integrity hashes. |
-| [`@socketsecurity/lib/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts) | SBT distribution download-URL builder. |
-| [`@socketsecurity/lib/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts) | `sbtFromDownload()` — fetches the SBT launcher tarball, extracts it, and returns a `ResolvedSbt` pointing at the `bin/sbt` script. |
-| [`@socketsecurity/lib/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts) | `sbtFromPath()` — looks for the `sbt` shell script on the system PATH. |
-| [`@socketsecurity/lib/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts) | `sbtFromVfs()` — extracts the SBT launcher jar from the smol binary's VFS. |
-| [`@socketsecurity/lib/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts) | `resolveSbt()` — SBT resolution entry point. |
-| [`@socketsecurity/lib/external-tools/sbt/types`](../src/external-tools/sbt/types.ts) | Shared types for SBT resolution. |
+| Subpath                                                                                                                      | Description                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts)                         | Upstream Bazel release asset-name mapping per `platform-arch`.                                                                                                                            |
+| [`@socketsecurity/lib/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts)                     | `bazelFromDownload()` — fetches the upstream Bazel binary and returns a `ResolvedBazel` pointing at the cached executable.                                                                |
+| [`@socketsecurity/lib/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts)                             | `bazelFromPath()` — looks for `bazelisk` first, then `bazel`, on the system PATH.                                                                                                         |
+| [`@socketsecurity/lib/external-tools/bazel/from-vfs`](../src/external-tools/bazel/from-vfs.ts)                               | `bazelFromVfs()` — extracts the Bazel binary from the smol binary's VFS.                                                                                                                  |
+| [`@socketsecurity/lib/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | `readBazelVersionFile(workspaceDir)` — walks up from `workspaceDir` looking for a `.bazelversion` file (the Bazel/Bazelisk convention for pinning the project's Bazel version).           |
+| [`@socketsecurity/lib/external-tools/bazel/resolve`](../src/external-tools/bazel/resolve.ts)                                 | `resolveBazel()` — Bazel resolution entry point.                                                                                                                                          |
+| [`@socketsecurity/lib/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts)             | `resolveBazelAssetUrl(version, platformArch)` — builds the upstream GitHub Releases download URL for a Bazel binary.                                                                      |
+| [`@socketsecurity/lib/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts)     | `resolveBazelVersion({ cwd })` — picks the Bazel version to run for a project, matching the bazelisk precedence: 1.                                                                       |
+| [`@socketsecurity/lib/external-tools/bazel/types`](../src/external-tools/bazel/types.ts)                                     | Shared types for Bazel resolution.                                                                                                                                                        |
+| [`@socketsecurity/lib/external-tools/from-download`](../src/external-tools/from-download.ts)                                 | Generic "download tier" for external-tools resolvers.                                                                                                                                     |
+| [`@socketsecurity/lib/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts)                             | Adoptium API platform-arch → asset-query mappings.                                                                                                                                        |
+| [`@socketsecurity/lib/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts)           | `getCurrentPlatformArch()` — resolves the current machine to a `platform-arch` string suitable for the Adoptium asset-name map.                                                           |
+| [`@socketsecurity/lib/external-tools/jre/from-download`](../src/external-tools/jre/from-download.ts)                         | `jreFromDownload()` — fetches Adoptium JRE and returns a `ResolvedJre` pointing at the extracted java binary.                                                                             |
+| [`@socketsecurity/lib/external-tools/jre/from-java-home`](../src/external-tools/jre/from-java-home.ts)                       | `jreFromJavaHome()` — checks `$JAVA_HOME` for an existing JRE/JDK.                                                                                                                        |
+| [`@socketsecurity/lib/external-tools/jre/from-path`](../src/external-tools/jre/from-path.ts)                                 | `jreFromPath()` — looks for `java` (or `java.exe`) on the system PATH via socket-lib's `which`.                                                                                           |
+| [`@socketsecurity/lib/external-tools/jre/from-vfs`](../src/external-tools/jre/from-vfs.ts)                                   | `jreFromVfs()` — extracts the JRE directory tree from the smol binary's VFS and returns the resolved-shape pointing into the extracted directory.                                         |
+| [`@socketsecurity/lib/external-tools/jre/resolve`](../src/external-tools/jre/resolve.ts)                                     | `resolveJre()` — the JRE resolution entry point.                                                                                                                                          |
+| [`@socketsecurity/lib/external-tools/jre/types`](../src/external-tools/jre/types.ts)                                         | Shared types for JRE resolution.                                                                                                                                                          |
+| [`@socketsecurity/lib/external-tools/manifest`](../src/external-tools/manifest.ts)                                           | Reader for `external-tools.json` — the fleet manifest describing downloadable external binaries (sfw, zizmor, etc.) with pinned versions, per-platform asset names, and integrity hashes. |
+| [`@socketsecurity/lib/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts)                             | SBT distribution download-URL builder.                                                                                                                                                    |
+| [`@socketsecurity/lib/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts)                         | `sbtFromDownload()` — fetches the SBT launcher tarball, extracts it, and returns a `ResolvedSbt` pointing at the `bin/sbt` script.                                                        |
+| [`@socketsecurity/lib/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts)                                 | `sbtFromPath()` — looks for the `sbt` shell script on the system PATH.                                                                                                                    |
+| [`@socketsecurity/lib/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts)                                   | `sbtFromVfs()` — extracts the SBT launcher jar from the smol binary's VFS.                                                                                                                |
+| [`@socketsecurity/lib/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts)                                     | `resolveSbt()` — SBT resolution entry point.                                                                                                                                              |
+| [`@socketsecurity/lib/external-tools/sbt/types`](../src/external-tools/sbt/types.ts)                                         | Shared types for SBT resolution.                                                                                                                                                          |
 
 ## fs/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/fs/encoding`](../src/fs/encoding.ts) | Encoding-name normalization. |
-| [`@socketsecurity/lib/fs/find-up`](../src/fs/find-up.ts) | Walk parent directories to locate a file or directory by name. |
-| [`@socketsecurity/lib/fs/inspect`](../src/fs/inspect.ts) | Filesystem inspection helpers — `stat` / `lstat` wrappers that return `undefined` instead of throwing, and the directory / symlink / emptiness predicates layered on top. |
-| [`@socketsecurity/lib/fs/path-cache`](../src/fs/path-cache.ts) | Cache-invalidation entry point for the allowed-directories list used by `safeDelete` / `safeDeleteSync`. |
-| [`@socketsecurity/lib/fs/read-dir`](../src/fs/read-dir.ts) | Async/sync directory listing — returns directory names only (filtering out files), with optional emptiness suppression and natural-order sorting. |
-| [`@socketsecurity/lib/fs/read-file`](../src/fs/read-file.ts) | File-content readers — UTF-8 / binary / safe variants (sync + async). |
-| [`@socketsecurity/lib/fs/read-json`](../src/fs/read-json.ts) | Read-and-parse helpers for JSON files. |
-| [`@socketsecurity/lib/fs/safe`](../src/fs/safe.ts) | Safe deletion + idempotent directory creation. |
-| [`@socketsecurity/lib/fs/types`](../src/fs/types.ts) | Public type surface for `fs/*` modules — option shapes, encoding union, and result records. |
-| [`@socketsecurity/lib/fs/unique`](../src/fs/unique.ts) | Generate a unique filepath by appending `-1`, `-2`, … before the extension until the path is free. |
-| [`@socketsecurity/lib/fs/validate`](../src/fs/validate.ts) | Pre-flight readability check for file lists. |
-| [`@socketsecurity/lib/fs/write-json`](../src/fs/write-json.ts) | JSON writers that match the wire-format conventions a tool ecosystem expects: configurable indentation, configurable EOL, trailing newline by default. |
+| Subpath                                                        | Description                                                                                                                                                               |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/fs/encoding`](../src/fs/encoding.ts)     | Encoding-name normalization.                                                                                                                                              |
+| [`@socketsecurity/lib/fs/find-up`](../src/fs/find-up.ts)       | Walk parent directories to locate a file or directory by name.                                                                                                            |
+| [`@socketsecurity/lib/fs/inspect`](../src/fs/inspect.ts)       | Filesystem inspection helpers — `stat` / `lstat` wrappers that return `undefined` instead of throwing, and the directory / symlink / emptiness predicates layered on top. |
+| [`@socketsecurity/lib/fs/path-cache`](../src/fs/path-cache.ts) | Cache-invalidation entry point for the allowed-directories list used by `safeDelete` / `safeDeleteSync`.                                                                  |
+| [`@socketsecurity/lib/fs/read-dir`](../src/fs/read-dir.ts)     | Async/sync directory listing — returns directory names only (filtering out files), with optional emptiness suppression and natural-order sorting.                         |
+| [`@socketsecurity/lib/fs/read-file`](../src/fs/read-file.ts)   | File-content readers — UTF-8 / binary / safe variants (sync + async).                                                                                                     |
+| [`@socketsecurity/lib/fs/read-json`](../src/fs/read-json.ts)   | Read-and-parse helpers for JSON files.                                                                                                                                    |
+| [`@socketsecurity/lib/fs/safe`](../src/fs/safe.ts)             | Safe deletion + idempotent directory creation.                                                                                                                            |
+| [`@socketsecurity/lib/fs/types`](../src/fs/types.ts)           | Public type surface for `fs/*` modules — option shapes, encoding union, and result records.                                                                               |
+| [`@socketsecurity/lib/fs/unique`](../src/fs/unique.ts)         | Generate a unique filepath by appending `-1`, `-2`, … before the extension until the path is free.                                                                        |
+| [`@socketsecurity/lib/fs/validate`](../src/fs/validate.ts)     | Pre-flight readability check for file lists.                                                                                                                              |
+| [`@socketsecurity/lib/fs/write-json`](../src/fs/write-json.ts) | JSON writers that match the wire-format conventions a tool ecosystem expects: configurable indentation, configurable EOL, trailing newline by default.                    |
 
 ## git/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/git/changed`](../src/git/changed.ts) | "Anything different from HEAD" helpers — the broad-strokes `git status --porcelain` view that lumps staged, unstaged, and untracked paths together. |
-| [`@socketsecurity/lib/git/repo`](../src/git/repo.ts) | Git repository discovery + foundational lazy fs/path/cwd helpers shared across `git/*` leaves. |
-| [`@socketsecurity/lib/git/staged`](../src/git/staged.ts) | "Ready for the next commit" helpers — `git diff --cached` over only the index. |
-| [`@socketsecurity/lib/git/types`](../src/git/types.ts) | Public type surface for `git/*` modules — the `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration records. |
-| [`@socketsecurity/lib/git/unstaged`](../src/git/unstaged.ts) | "Edited but not yet staged" helpers — `git diff` over the working tree only. |
+| Subpath                                                      | Description                                                                                                                                         |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/git/changed`](../src/git/changed.ts)   | "Anything different from HEAD" helpers — the broad-strokes `git status --porcelain` view that lumps staged, unstaged, and untracked paths together. |
+| [`@socketsecurity/lib/git/repo`](../src/git/repo.ts)         | Git repository discovery + foundational lazy fs/path/cwd helpers shared across `git/*` leaves.                                                      |
+| [`@socketsecurity/lib/git/staged`](../src/git/staged.ts)     | "Ready for the next commit" helpers — `git diff --cached` over only the index.                                                                      |
+| [`@socketsecurity/lib/git/types`](../src/git/types.ts)       | Public type surface for `git/*` modules — the `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration records.                          |
+| [`@socketsecurity/lib/git/unstaged`](../src/git/unstaged.ts) | "Edited but not yet staged" helpers — `git diff` over the working tree only.                                                                        |
 
 ## github/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/github/constants`](../src/github/constants.ts) | GitHub API URL + cache-TTL constants. |
-| [`@socketsecurity/lib/github/errors`](../src/github/errors.ts) | Named errors thrown by `github/*` helpers. |
-| [`@socketsecurity/lib/github/fetch`](../src/github/fetch.ts) | Authenticated GitHub REST fetch. |
-| [`@socketsecurity/lib/github/ghsa`](../src/github/ghsa.ts) | GitHub Security Advisory (GHSA) lookups. |
-| [`@socketsecurity/lib/github/refs`](../src/github/refs.ts) | Resolve GitHub git refs (tag / branch / commit) to full commit SHAs. |
-| [`@socketsecurity/lib/github/refs-cache`](../src/github/refs-cache.ts) | TtlCache singleton for github/refs. |
-| [`@socketsecurity/lib/github/refs-graphql`](../src/github/refs-graphql.ts) | Resolve a GitHub git ref via GraphQL. |
-| [`@socketsecurity/lib/github/refs-rest`](../src/github/refs-rest.ts) | Resolve a GitHub git ref via REST tier-cascade. |
-| [`@socketsecurity/lib/github/token`](../src/github/token.ts) | GitHub token resolution. |
-| [`@socketsecurity/lib/github/types`](../src/github/types.ts) | Public type surface for `github/*` modules — pure interfaces. |
+| Subpath                                                                    | Description                                                          |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [`@socketsecurity/lib/github/constants`](../src/github/constants.ts)       | GitHub API URL + cache-TTL constants.                                |
+| [`@socketsecurity/lib/github/errors`](../src/github/errors.ts)             | Named errors thrown by `github/*` helpers.                           |
+| [`@socketsecurity/lib/github/fetch`](../src/github/fetch.ts)               | Authenticated GitHub REST fetch.                                     |
+| [`@socketsecurity/lib/github/ghsa`](../src/github/ghsa.ts)                 | GitHub Security Advisory (GHSA) lookups.                             |
+| [`@socketsecurity/lib/github/refs`](../src/github/refs.ts)                 | Resolve GitHub git refs (tag / branch / commit) to full commit SHAs. |
+| [`@socketsecurity/lib/github/refs-cache`](../src/github/refs-cache.ts)     | TtlCache singleton for github/refs.                                  |
+| [`@socketsecurity/lib/github/refs-graphql`](../src/github/refs-graphql.ts) | Resolve a GitHub git ref via GraphQL.                                |
+| [`@socketsecurity/lib/github/refs-rest`](../src/github/refs-rest.ts)       | Resolve a GitHub git ref via REST tier-cascade.                      |
+| [`@socketsecurity/lib/github/token`](../src/github/token.ts)               | GitHub token resolution.                                             |
+| [`@socketsecurity/lib/github/types`](../src/github/types.ts)               | Public type surface for `github/*` modules — pure interfaces.        |
 
 ## globs/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/globs/defaults`](../src/globs/defaults.ts) | The npm-packlist-derived `defaultIgnore` list. |
-| [`@socketsecurity/lib/globs/glob`](../src/globs/glob.ts) | `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up. |
-| [`@socketsecurity/lib/globs/matcher`](../src/globs/matcher.ts) | `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache. |
-| [`@socketsecurity/lib/globs/stream`](../src/globs/stream.ts) | `globStreamLicenses` — license-file discovery as an async stream. |
-| [`@socketsecurity/lib/globs/types`](../src/globs/types.ts) | Public type surface for `globs/*` modules — the `Pattern` alias, the `FastGlobOptions` mirror of fast-glob's option surface, and the `GlobOptions` extension that adds Socket-specific `recursive` / `ignoreOriginals` fl... |
+| Subpath                                                          | Description                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/globs/defaults`](../src/globs/defaults.ts) | The npm-packlist-derived `defaultIgnore` list.                                                                                                                                                                               |
+| [`@socketsecurity/lib/globs/glob`](../src/globs/glob.ts)         | `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up.                                                                                                         |
+| [`@socketsecurity/lib/globs/matcher`](../src/globs/matcher.ts)   | `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache.                                                                                                                                       |
+| [`@socketsecurity/lib/globs/stream`](../src/globs/stream.ts)     | `globStreamLicenses` — license-file discovery as an async stream.                                                                                                                                                            |
+| [`@socketsecurity/lib/globs/types`](../src/globs/types.ts)       | Public type surface for `globs/*` modules — the `Pattern` alias, the `FastGlobOptions` mirror of fast-glob's option surface, and the `GlobOptions` extension that adds Socket-specific `recursive` / `ignoreOriginals` fl... |
 
 ## http-request/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/http-request/checksums`](../src/http-request/checksums.ts) | Checksum file fetching + parsing for download verification. |
-| [`@socketsecurity/lib/http-request/convenience`](../src/http-request/convenience.ts) | Thin convenience wrappers over `httpRequest` — `httpJson` and `httpText`. |
-| [`@socketsecurity/lib/http-request/download`](../src/http-request/download.ts) | Streaming file downloads with retries, progress callbacks, and SHA-256 verification. |
-| [`@socketsecurity/lib/http-request/download-types`](../src/http-request/download-types.ts) | Types for HTTP download + checksum-fetch operations. |
-| [`@socketsecurity/lib/http-request/errors`](../src/http-request/errors.ts) | Error-message enrichment for HTTP/HTTPS requests. |
-| [`@socketsecurity/lib/http-request/headers`](../src/http-request/headers.ts) | Header utilities for HTTP/HTTPS requests. |
-| [`@socketsecurity/lib/http-request/request`](../src/http-request/request.ts) | Core HTTP/HTTPS request loop — the retry orchestrator. |
-| [`@socketsecurity/lib/http-request/request-attempt`](../src/http-request/request-attempt.ts) | Single HTTP request attempt — the workhorse beneath the retrying `httpRequest` orchestrator. |
-| [`@socketsecurity/lib/http-request/request-types`](../src/http-request/request-types.ts) | Types for HTTP request configuration — options, hooks, and Node `IncomingMessage` aliases. |
-| [`@socketsecurity/lib/http-request/response-reader`](../src/http-request/response-reader.ts) | Read a raw Node `IncomingMessage` into our `HttpResponse` shape. |
-| [`@socketsecurity/lib/http-request/response-types`](../src/http-request/response-types.ts) | Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`. |
+| Subpath                                                                                      | Description                                                                                                                      |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/http-request/checksums`](../src/http-request/checksums.ts)             | Checksum file fetching + parsing for download verification.                                                                      |
+| [`@socketsecurity/lib/http-request/convenience`](../src/http-request/convenience.ts)         | Thin convenience wrappers over `httpRequest` — `httpJson` and `httpText`.                                                        |
+| [`@socketsecurity/lib/http-request/download`](../src/http-request/download.ts)               | Streaming file downloads with retries, progress callbacks, and SHA-256 verification.                                             |
+| [`@socketsecurity/lib/http-request/download-types`](../src/http-request/download-types.ts)   | Types for HTTP download + checksum-fetch operations.                                                                             |
+| [`@socketsecurity/lib/http-request/errors`](../src/http-request/errors.ts)                   | Error-message enrichment for HTTP/HTTPS requests.                                                                                |
+| [`@socketsecurity/lib/http-request/headers`](../src/http-request/headers.ts)                 | Header utilities for HTTP/HTTPS requests.                                                                                        |
+| [`@socketsecurity/lib/http-request/request`](../src/http-request/request.ts)                 | Core HTTP/HTTPS request loop — the retry orchestrator.                                                                           |
+| [`@socketsecurity/lib/http-request/request-attempt`](../src/http-request/request-attempt.ts) | Single HTTP request attempt — the workhorse beneath the retrying `httpRequest` orchestrator.                                     |
+| [`@socketsecurity/lib/http-request/request-types`](../src/http-request/request-types.ts)     | Types for HTTP request configuration — options, hooks, and Node `IncomingMessage` aliases.                                       |
+| [`@socketsecurity/lib/http-request/response-reader`](../src/http-request/response-reader.ts) | Read a raw Node `IncomingMessage` into our `HttpResponse` shape.                                                                 |
+| [`@socketsecurity/lib/http-request/response-types`](../src/http-request/response-types.ts)   | Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`. |
 
 ## ipc-cli/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/ipc-cli/get`](../src/ipc-cli/get.ts) | Socket CLI child-process IPC object getter. |
+| Subpath                                                        | Description                                                                                                                                                             |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/ipc-cli/get`](../src/ipc-cli/get.ts)     | Socket CLI child-process IPC object getter.                                                                                                                             |
 | [`@socketsecurity/lib/ipc-cli/types`](../src/ipc-cli/types.ts) | Public type surface for `ipc-cli/*` modules — the `IpcObject` record describing the `SOCKET_CLI_*` env-var shape forwarded from a parent Socket CLI to a child process. |
 
 ## ipc/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/ipc/directory`](../src/ipc/directory.ts) | Stub-directory creation + permission audit. |
-| [`@socketsecurity/lib/ipc/paths`](../src/ipc/paths.ts) | IPC stub path resolution. |
-| [`@socketsecurity/lib/ipc/types`](../src/ipc/types.ts) | Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff. |
-| [`@socketsecurity/lib/ipc/write`](../src/ipc/write.ts) | Atomic stub write — `O_CREAT|O_WRONLY|O_EXCL| O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component. |
+| Subpath                                                        | Description                                                                                      |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/ipc/directory`](../src/ipc/directory.ts) | Stub-directory creation + permission audit.                                                      |
+| [`@socketsecurity/lib/ipc/paths`](../src/ipc/paths.ts)         | IPC stub path resolution.                                                                        |
+| [`@socketsecurity/lib/ipc/types`](../src/ipc/types.ts)         | Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff. |
+| [`@socketsecurity/lib/ipc/write`](../src/ipc/write.ts)         | Atomic stub write — `O_CREAT                                                                     | O_WRONLY | O_EXCL | O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component. |
 
 ## json/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/json/edit`](../src/json/edit.ts) | Editable JSON file manipulation with formatting preservation. |
+| Subpath                                                    | Description                                                         |
+| ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| [`@socketsecurity/lib/json/edit`](../src/json/edit.ts)     | Editable JSON file manipulation with formatting preservation.       |
 | [`@socketsecurity/lib/json/format`](../src/json/format.ts) | Shared utilities for JSON formatting preservation and manipulation. |
-| [`@socketsecurity/lib/json/parse`](../src/json/parse.ts) | JSON parsing utilities with Buffer detection and BOM stripping. |
-| [`@socketsecurity/lib/json/types`](../src/json/types.ts) | JSON type definitions and interfaces. |
+| [`@socketsecurity/lib/json/parse`](../src/json/parse.ts)   | JSON parsing utilities with Buffer detection and BOM stripping.     |
+| [`@socketsecurity/lib/json/types`](../src/json/types.ts)   | JSON type definitions and interfaces.                               |
 
 ## links/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/links/link`](../src/links/link.ts) | Themed hyperlink utilities for terminal output. |
+| Subpath                                                    | Description                                                           |
+| ---------------------------------------------------------- | --------------------------------------------------------------------- |
+| [`@socketsecurity/lib/links/link`](../src/links/link.ts)   | Themed hyperlink utilities for terminal output.                       |
 | [`@socketsecurity/lib/links/types`](../src/links/types.ts) | Public type surface for `links/*` modules — the `LinkOptions` record. |
 
 ## logger/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/logger/colors`](../src/logger/colors.ts) | Color application helpers for `logger/*` modules. |
-| [`@socketsecurity/lib/logger/console`](../src/logger/console.ts) | Lazy `Console` construction + dynamic prototype mirroring for `Logger`. |
-| [`@socketsecurity/lib/logger/logger`](../src/logger/logger.ts) | The `Logger` class + the shared-default `getDefaultLogger()` accessor — the public class surface for `logger/*`. |
-| [`@socketsecurity/lib/logger/symbols`](../src/logger/symbols.ts) | Symbol exports + the `LOG_SYMBOLS` proxy. |
-| [`@socketsecurity/lib/logger/symbols-builder`](../src/logger/symbols-builder.ts) | Free-function helpers for per-instance log-symbol construction + symbol stripping. |
-| [`@socketsecurity/lib/logger/types`](../src/logger/types.ts) | Public type surface for `logger/*` modules — the `LogSymbols` shape, the `LoggerMethods` mapped type that mirrors `console`, and the `Task` interface returned by `Logger.createTask`. |
+| Subpath                                                                          | Description                                                                                                                                                                            |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/logger/colors`](../src/logger/colors.ts)                   | Color application helpers for `logger/*` modules.                                                                                                                                      |
+| [`@socketsecurity/lib/logger/console`](../src/logger/console.ts)                 | Lazy `Console` construction + dynamic prototype mirroring for `Logger`.                                                                                                                |
+| [`@socketsecurity/lib/logger/logger`](../src/logger/logger.ts)                   | The `Logger` class + the shared-default `getDefaultLogger()` accessor — the public class surface for `logger/*`.                                                                       |
+| [`@socketsecurity/lib/logger/symbols`](../src/logger/symbols.ts)                 | Symbol exports + the `LOG_SYMBOLS` proxy.                                                                                                                                              |
+| [`@socketsecurity/lib/logger/symbols-builder`](../src/logger/symbols-builder.ts) | Free-function helpers for per-instance log-symbol construction + symbol stripping.                                                                                                     |
+| [`@socketsecurity/lib/logger/types`](../src/logger/types.ts)                     | Public type surface for `logger/*` modules — the `LogSymbols` shape, the `LoggerMethods` mapped type that mirrors `console`, and the `Task` interface returned by `Logger.createTask`. |
 
 ## memo/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/memo/async`](../src/memo/async.ts) | `memoizeAsync` — async-aware memoizer with the same LRU+TTL contract as `memoize`, plus thundering-herd dedup. |
-| [`@socketsecurity/lib/memo/clear`](../src/memo/clear.ts) | `clearAllMemoizationCaches` — fan out to every per-cache clear function registered in `_internal.cacheRegistry`. |
-| [`@socketsecurity/lib/memo/decorator`](../src/memo/decorator.ts) | `Memoize` — class-method decorator that wraps the decorated method via `memoize`. |
-| [`@socketsecurity/lib/memo/memoize`](../src/memo/memoize.ts) | `memoize` — synchronous function memoizer with LRU eviction (Map insertion-order based), optional TTL, and optional custom key generator. |
-| [`@socketsecurity/lib/memo/once`](../src/memo/once.ts) | `once` — zero-argument memoizer. |
-| [`@socketsecurity/lib/memo/types`](../src/memo/types.ts) | Public type surface for `memo/*` modules — `MemoizeOptions` is the user-facing options bag accepted by every memoize entrypoint, `CacheEntry<T>` is the internal row stored in each per-function cache. |
-| [`@socketsecurity/lib/memo/weak`](../src/memo/weak.ts) | `memoizeWeak` — memoizer keyed by an object reference via `WeakMap`. |
+| Subpath                                                          | Description                                                                                                                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/memo/async`](../src/memo/async.ts)         | `memoizeAsync` — async-aware memoizer with the same LRU+TTL contract as `memoize`, plus thundering-herd dedup.                                                                                          |
+| [`@socketsecurity/lib/memo/clear`](../src/memo/clear.ts)         | `clearAllMemoizationCaches` — fan out to every per-cache clear function registered in `_internal.cacheRegistry`.                                                                                        |
+| [`@socketsecurity/lib/memo/decorator`](../src/memo/decorator.ts) | `Memoize` — class-method decorator that wraps the decorated method via `memoize`.                                                                                                                       |
+| [`@socketsecurity/lib/memo/memoize`](../src/memo/memoize.ts)     | `memoize` — synchronous function memoizer with LRU eviction (Map insertion-order based), optional TTL, and optional custom key generator.                                                               |
+| [`@socketsecurity/lib/memo/once`](../src/memo/once.ts)           | `once` — zero-argument memoizer.                                                                                                                                                                        |
+| [`@socketsecurity/lib/memo/types`](../src/memo/types.ts)         | Public type surface for `memo/*` modules — `MemoizeOptions` is the user-facing options bag accepted by every memoize entrypoint, `CacheEntry<T>` is the internal row stored in each per-function cache. |
+| [`@socketsecurity/lib/memo/weak`](../src/memo/weak.ts)           | `memoizeWeak` — memoizer keyed by an object reference via `WeakMap`.                                                                                                                                    |
 
 ## node/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/node/async-hooks`](../src/node/async-hooks.ts) | Lazy-loader for `node:async_hooks`. |
-| [`@socketsecurity/lib/node/child-process`](../src/node/child-process.ts) | Lazy-loader for `node:child_process`. |
-| [`@socketsecurity/lib/node/crypto`](../src/node/crypto.ts) | Lazy-loader for `node:crypto`. |
-| [`@socketsecurity/lib/node/events`](../src/node/events.ts) | Lazy-loader for `node:events`. |
-| [`@socketsecurity/lib/node/fs`](../src/node/fs.ts) | Lazy-loader for `node:fs`. |
-| [`@socketsecurity/lib/node/fs-promises`](../src/node/fs-promises.ts) | Lazy-loader for `node:fs/promises`. |
-| [`@socketsecurity/lib/node/http`](../src/node/http.ts) | Lazy-loader for `node:http`. |
-| [`@socketsecurity/lib/node/https`](../src/node/https.ts) | Lazy-loader for `node:https`. |
-| [`@socketsecurity/lib/node/module`](../src/node/module.ts) | Lazy-loader for `node:module`. |
-| [`@socketsecurity/lib/node/os`](../src/node/os.ts) | Lazy-loader for `node:os`. |
-| [`@socketsecurity/lib/node/path`](../src/node/path.ts) | Lazy-loader for `node:path`. |
+| Subpath                                                                      | Description                             |
+| ---------------------------------------------------------------------------- | --------------------------------------- |
+| [`@socketsecurity/lib/node/async-hooks`](../src/node/async-hooks.ts)         | Lazy-loader for `node:async_hooks`.     |
+| [`@socketsecurity/lib/node/child-process`](../src/node/child-process.ts)     | Lazy-loader for `node:child_process`.   |
+| [`@socketsecurity/lib/node/crypto`](../src/node/crypto.ts)                   | Lazy-loader for `node:crypto`.          |
+| [`@socketsecurity/lib/node/events`](../src/node/events.ts)                   | Lazy-loader for `node:events`.          |
+| [`@socketsecurity/lib/node/fs`](../src/node/fs.ts)                           | Lazy-loader for `node:fs`.              |
+| [`@socketsecurity/lib/node/fs-promises`](../src/node/fs-promises.ts)         | Lazy-loader for `node:fs/promises`.     |
+| [`@socketsecurity/lib/node/http`](../src/node/http.ts)                       | Lazy-loader for `node:http`.            |
+| [`@socketsecurity/lib/node/https`](../src/node/https.ts)                     | Lazy-loader for `node:https`.           |
+| [`@socketsecurity/lib/node/module`](../src/node/module.ts)                   | Lazy-loader for `node:module`.          |
+| [`@socketsecurity/lib/node/os`](../src/node/os.ts)                           | Lazy-loader for `node:os`.              |
+| [`@socketsecurity/lib/node/path`](../src/node/path.ts)                       | Lazy-loader for `node:path`.            |
 | [`@socketsecurity/lib/node/timers-promises`](../src/node/timers-promises.ts) | Lazy-loader for `node:timers/promises`. |
-| [`@socketsecurity/lib/node/url`](../src/node/url.ts) | Lazy-loader for `node:url`. |
-| [`@socketsecurity/lib/node/util`](../src/node/util.ts) | Lazy-loader for `node:util`. |
+| [`@socketsecurity/lib/node/url`](../src/node/url.ts)                         | Lazy-loader for `node:url`.             |
+| [`@socketsecurity/lib/node/util`](../src/node/util.ts)                       | Lazy-loader for `node:util`.            |
 
 ## objects/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/objects/getters`](../src/objects/getters.ts) | Lazy-getter primitives + `createConstantsObject`. |
-| [`@socketsecurity/lib/objects/inspect`](../src/objects/inspect.ts) | Object inspection helpers — `getKeys`, `getOwn`, `getOwnPropertyValues`. |
-| [`@socketsecurity/lib/objects/mutate`](../src/objects/mutate.ts) | Object mutation helpers — `merge` (deep recursive), `objectAssign` (alias for native), `objectFreeze` (alias for native). |
-| [`@socketsecurity/lib/objects/predicates`](../src/objects/predicates.ts) | Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`. |
-| [`@socketsecurity/lib/objects/sort`](../src/objects/sort.ts) | Sorted-object helpers: `entryKeyComparator`, `objectEntries`, `toSortedObject`, `toSortedObjectFromEntries`. |
-| [`@socketsecurity/lib/objects/types`](../src/objects/types.ts) | Public type surface for `objects/*` modules — getter definition shapes and the `Remap` type helper. |
+| Subpath                                                                  | Description                                                                                                               |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/objects/getters`](../src/objects/getters.ts)       | Lazy-getter primitives + `createConstantsObject`.                                                                         |
+| [`@socketsecurity/lib/objects/inspect`](../src/objects/inspect.ts)       | Object inspection helpers — `getKeys`, `getOwn`, `getOwnPropertyValues`.                                                  |
+| [`@socketsecurity/lib/objects/mutate`](../src/objects/mutate.ts)         | Object mutation helpers — `merge` (deep recursive), `objectAssign` (alias for native), `objectFreeze` (alias for native). |
+| [`@socketsecurity/lib/objects/predicates`](../src/objects/predicates.ts) | Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`.                                                     |
+| [`@socketsecurity/lib/objects/sort`](../src/objects/sort.ts)             | Sorted-object helpers: `entryKeyComparator`, `objectEntries`, `toSortedObject`, `toSortedObjectFromEntries`.              |
+| [`@socketsecurity/lib/objects/types`](../src/objects/types.ts)           | Public type surface for `objects/*` modules — getter definition shapes and the `Remap` type helper.                       |
 
 ## packages/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/packages/edit`](../src/packages/edit.ts) | Editable package.json manipulation utilities. |
-| [`@socketsecurity/lib/packages/edit-class`](../src/packages/edit-class.ts) | The `EditablePackageJson` class factory. |
-| [`@socketsecurity/lib/packages/exports`](../src/packages/exports.ts) | Package exports field utilities. |
-| [`@socketsecurity/lib/packages/isolation`](../src/packages/isolation.ts) | Package isolation utilities for testing. |
-| [`@socketsecurity/lib/packages/licenses`](../src/packages/licenses.ts) | SPDX license parsing and analysis utilities. |
-| [`@socketsecurity/lib/packages/manifest`](../src/packages/manifest.ts) | Package manifest and packument fetching utilities. |
-| [`@socketsecurity/lib/packages/normalize`](../src/packages/normalize.ts) | Package.json normalization utilities. |
-| [`@socketsecurity/lib/packages/operations`](../src/packages/operations.ts) | Package operations including extraction, packing, and I/O. |
-| [`@socketsecurity/lib/packages/provenance`](../src/packages/provenance.ts) | Package provenance and attestation verification utilities. |
-| [`@socketsecurity/lib/packages/specs`](../src/packages/specs.ts) | Package spec parsing and GitHub URL utilities. |
-| [`@socketsecurity/lib/packages/types`](../src/packages/types.ts) | Public type surface for `packages/*` modules — the `PackageJson` shape (npm-extended with a `socket` field) plus option bags consumed across `edit` / `manifest` / `normalize` / `operations` / `provenance` / `licenses`. |
-| [`@socketsecurity/lib/packages/validation`](../src/packages/validation.ts) | Package name validation utilities. |
+| Subpath                                                                    | Description                                                                                                                                                                                                                |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/packages/edit`](../src/packages/edit.ts)             | Editable package.json manipulation utilities.                                                                                                                                                                              |
+| [`@socketsecurity/lib/packages/edit-class`](../src/packages/edit-class.ts) | The `EditablePackageJson` class factory.                                                                                                                                                                                   |
+| [`@socketsecurity/lib/packages/exports`](../src/packages/exports.ts)       | Package exports field utilities.                                                                                                                                                                                           |
+| [`@socketsecurity/lib/packages/isolation`](../src/packages/isolation.ts)   | Package isolation utilities for testing.                                                                                                                                                                                   |
+| [`@socketsecurity/lib/packages/licenses`](../src/packages/licenses.ts)     | SPDX license parsing and analysis utilities.                                                                                                                                                                               |
+| [`@socketsecurity/lib/packages/manifest`](../src/packages/manifest.ts)     | Package manifest and packument fetching utilities.                                                                                                                                                                         |
+| [`@socketsecurity/lib/packages/normalize`](../src/packages/normalize.ts)   | Package.json normalization utilities.                                                                                                                                                                                      |
+| [`@socketsecurity/lib/packages/operations`](../src/packages/operations.ts) | Package operations including extraction, packing, and I/O.                                                                                                                                                                 |
+| [`@socketsecurity/lib/packages/provenance`](../src/packages/provenance.ts) | Package provenance and attestation verification utilities.                                                                                                                                                                 |
+| [`@socketsecurity/lib/packages/specs`](../src/packages/specs.ts)           | Package spec parsing and GitHub URL utilities.                                                                                                                                                                             |
+| [`@socketsecurity/lib/packages/types`](../src/packages/types.ts)           | Public type surface for `packages/*` modules — the `PackageJson` shape (npm-extended with a `socket` field) plus option bags consumed across `edit` / `manifest` / `normalize` / `operations` / `provenance` / `licenses`. |
+| [`@socketsecurity/lib/packages/validation`](../src/packages/validation.ts) | Package name validation utilities.                                                                                                                                                                                         |
 
 ## paths/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/paths/conversion`](../src/paths/conversion.ts) | Path conversion utilities — MSYS↔native bridging and string-shape helpers. |
-| [`@socketsecurity/lib/paths/dirnames`](../src/paths/dirnames.ts) | Directory name and path pattern constants. |
-| [`@socketsecurity/lib/paths/exts`](../src/paths/exts.ts) | File extension constants. |
-| [`@socketsecurity/lib/paths/filenames`](../src/paths/filenames.ts) | File name constants. |
-| [`@socketsecurity/lib/paths/globs`](../src/paths/globs.ts) | Glob pattern constants. |
-| [`@socketsecurity/lib/paths/normalize`](../src/paths/normalize.ts) | Path normalization — the core `normalizePath` and its MSYS drive-letter helper. |
-| [`@socketsecurity/lib/paths/packages`](../src/paths/packages.ts) | Package.json path resolution utilities. |
-| [`@socketsecurity/lib/paths/predicates`](../src/paths/predicates.ts) | Path predicates — `is*` checks for path shape and kind. |
-| [`@socketsecurity/lib/paths/resolve`](../src/paths/resolve.ts) | Path resolution utilities — `resolve`, `relative`, `relativeResolve`. |
-| [`@socketsecurity/lib/paths/rewire`](../src/paths/rewire.ts) | Path rewiring utilities for testing. |
-| [`@socketsecurity/lib/paths/socket`](../src/paths/socket.ts) | Path utilities for Socket ecosystem directories. |
+| Subpath                                                              | Description                                                                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/paths/conversion`](../src/paths/conversion.ts) | Path conversion utilities — MSYS↔native bridging and string-shape helpers.      |
+| [`@socketsecurity/lib/paths/dirnames`](../src/paths/dirnames.ts)     | Directory name and path pattern constants.                                      |
+| [`@socketsecurity/lib/paths/exts`](../src/paths/exts.ts)             | File extension constants.                                                       |
+| [`@socketsecurity/lib/paths/filenames`](../src/paths/filenames.ts)   | File name constants.                                                            |
+| [`@socketsecurity/lib/paths/globs`](../src/paths/globs.ts)           | Glob pattern constants.                                                         |
+| [`@socketsecurity/lib/paths/normalize`](../src/paths/normalize.ts)   | Path normalization — the core `normalizePath` and its MSYS drive-letter helper. |
+| [`@socketsecurity/lib/paths/packages`](../src/paths/packages.ts)     | Package.json path resolution utilities.                                         |
+| [`@socketsecurity/lib/paths/predicates`](../src/paths/predicates.ts) | Path predicates — `is*` checks for path shape and kind.                         |
+| [`@socketsecurity/lib/paths/resolve`](../src/paths/resolve.ts)       | Path resolution utilities — `resolve`, `relative`, `relativeResolve`.           |
+| [`@socketsecurity/lib/paths/rewire`](../src/paths/rewire.ts)         | Path rewiring utilities for testing.                                            |
+| [`@socketsecurity/lib/paths/socket`](../src/paths/socket.ts)         | Path utilities for Socket ecosystem directories.                                |
 
 ## perf/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/perf/enabled`](../src/perf/enabled.ts) | Feature-flag check — `isPerfEnabled()` returns true when `DEBUG=perf` is set in the environment. |
+| Subpath                                                      | Description                                                                                                                                                                                                                  |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/perf/enabled`](../src/perf/enabled.ts) | Feature-flag check — `isPerfEnabled()` returns true when `DEBUG=perf` is set in the environment.                                                                                                                             |
 | [`@socketsecurity/lib/perf/metrics`](../src/perf/metrics.ts) | Read-side helpers — `getPerformanceMetrics` returns a shallow copy of the recorded rows, `getPerformanceSummary` rolls them up per operation (count / total / avg / min / max), and `clearPerformanceMetrics` empties the... |
-| [`@socketsecurity/lib/perf/report`](../src/perf/report.ts) | Report-side helpers — `generatePerformanceReport` returns a multi-line ASCII-bordered report string; `printPerformanceSummary` writes a one-line-per-op summary through `debugLog`. |
-| [`@socketsecurity/lib/perf/timer`](../src/perf/timer.ts) | Recording-side helpers — `perfTimer` (returns a stop() closure), `measure` / `measureSync` (timed wrappers around an async / sync function), `perfCheckpoint` (zero-duration marker), and `trackMemory` (records heap-use... |
-| [`@socketsecurity/lib/perf/types`](../src/perf/types.ts) | Public type surface for `perf/*` modules — the `PerformanceMetrics` row shape pushed onto the shared metrics array by `perfTimer` / `measure` / `measureSync` / `perfCheckpoint` / `trackMemory`. |
+| [`@socketsecurity/lib/perf/report`](../src/perf/report.ts)   | Report-side helpers — `generatePerformanceReport` returns a multi-line ASCII-bordered report string; `printPerformanceSummary` writes a one-line-per-op summary through `debugLog`.                                          |
+| [`@socketsecurity/lib/perf/timer`](../src/perf/timer.ts)     | Recording-side helpers — `perfTimer` (returns a stop() closure), `measure` / `measureSync` (timed wrappers around an async / sync function), `perfCheckpoint` (zero-duration marker), and `trackMemory` (records heap-use... |
+| [`@socketsecurity/lib/perf/types`](../src/perf/types.ts)     | Public type surface for `perf/*` modules — the `PerformanceMetrics` row shape pushed onto the shared metrics array by `perfTimer` / `measure` / `measureSync` / `perfCheckpoint` / `trackMemory`.                            |
 
 ## pkg-ext/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/pkg-ext/data`](../src/pkg-ext/data.ts) | Package extensions for compatibility adjustments. |
+| Subpath                                                        | Description                                                                                                                                |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/pkg-ext/data`](../src/pkg-ext/data.ts)   | Package extensions for compatibility adjustments.                                                                                          |
 | [`@socketsecurity/lib/pkg-ext/types`](../src/pkg-ext/types.ts) | Public type surface for `pkg-ext/*` modules — the `PackageExtension` tuple shape used by the merged Yarn / Socket-curated extensions list. |
 
 ## primordials/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/primordials/array`](../src/primordials/array.ts) | Safe references to `Array`, typed-array, `ArrayBuffer`, `DataView`, `Atomics`, and shared iterator-prototype primordials. |
-| [`@socketsecurity/lib/primordials/buffer`](../src/primordials/buffer.ts) | Safe references to Node's `Buffer` global. |
-| [`@socketsecurity/lib/primordials/date`](../src/primordials/date.ts) | Safe references to `Date`. |
-| [`@socketsecurity/lib/primordials/error`](../src/primordials/error.ts) | Safe references to `Error` and its subclass constructors, plus V8's stack-trace API. |
-| [`@socketsecurity/lib/primordials/function`](../src/primordials/function.ts) | Safe references to `Function.prototype` methods. |
-| [`@socketsecurity/lib/primordials/globals`](../src/primordials/globals.ts) | Safe references to top-level globals that don't fit a larger primordials leaf — primitive constructors (`Boolean`, `BigInt`), `Proxy`, `SharedArrayBuffer`, language-level constants (`Infinity`, `NaN`, `globalThis`), a... |
-| [`@socketsecurity/lib/primordials/json`](../src/primordials/json.ts) | Safe references to `JSON.parse` / `JSON.stringify`. |
-| [`@socketsecurity/lib/primordials/map-set`](../src/primordials/map-set.ts) | Safe references to `Map`, `Set`, `WeakMap`, `WeakSet`, and `WeakRef`. |
-| [`@socketsecurity/lib/primordials/math`](../src/primordials/math.ts) | Safe references to `Math` constants and methods. |
-| [`@socketsecurity/lib/primordials/number`](../src/primordials/number.ts) | Safe references to `Number`, its constants, predicates, and parse helpers. |
-| [`@socketsecurity/lib/primordials/object`](../src/primordials/object.ts) | Safe references to `Object` static methods and prototype methods. |
-| [`@socketsecurity/lib/primordials/promise`](../src/primordials/promise.ts) | Safe references to `Promise` static methods, prototype methods, and the ES2024 `withResolvers` factory. |
-| [`@socketsecurity/lib/primordials/reflect`](../src/primordials/reflect.ts) | Safe references to `Reflect.*`. |
-| [`@socketsecurity/lib/primordials/regexp`](../src/primordials/regexp.ts) | Safe references to `RegExp` and its prototype methods. |
-| [`@socketsecurity/lib/primordials/string`](../src/primordials/string.ts) | Safe references to `String` static methods and prototype methods. |
-| [`@socketsecurity/lib/primordials/symbol`](../src/primordials/symbol.ts) | Safe references to `Symbol`, well-known symbols, and `Symbol.prototype`. |
-| [`@socketsecurity/lib/primordials/uncurry`](../src/primordials/uncurry.ts) | `uncurryThis` and the cluster of helpers built atop it. |
-| [`@socketsecurity/lib/primordials/url`](../src/primordials/url.ts) | Safe references to `URL`, `URLSearchParams`, and the `URLSearchParams.prototype` methods. |
+| Subpath                                                                      | Description                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/primordials/array`](../src/primordials/array.ts)       | Safe references to `Array`, typed-array, `ArrayBuffer`, `DataView`, `Atomics`, and shared iterator-prototype primordials.                                                                                                    |
+| [`@socketsecurity/lib/primordials/buffer`](../src/primordials/buffer.ts)     | Safe references to Node's `Buffer` global.                                                                                                                                                                                   |
+| [`@socketsecurity/lib/primordials/date`](../src/primordials/date.ts)         | Safe references to `Date`.                                                                                                                                                                                                   |
+| [`@socketsecurity/lib/primordials/error`](../src/primordials/error.ts)       | Safe references to `Error` and its subclass constructors, plus V8's stack-trace API.                                                                                                                                         |
+| [`@socketsecurity/lib/primordials/function`](../src/primordials/function.ts) | Safe references to `Function.prototype` methods.                                                                                                                                                                             |
+| [`@socketsecurity/lib/primordials/globals`](../src/primordials/globals.ts)   | Safe references to top-level globals that don't fit a larger primordials leaf — primitive constructors (`Boolean`, `BigInt`), `Proxy`, `SharedArrayBuffer`, language-level constants (`Infinity`, `NaN`, `globalThis`), a... |
+| [`@socketsecurity/lib/primordials/json`](../src/primordials/json.ts)         | Safe references to `JSON.parse` / `JSON.stringify`.                                                                                                                                                                          |
+| [`@socketsecurity/lib/primordials/map-set`](../src/primordials/map-set.ts)   | Safe references to `Map`, `Set`, `WeakMap`, `WeakSet`, and `WeakRef`.                                                                                                                                                        |
+| [`@socketsecurity/lib/primordials/math`](../src/primordials/math.ts)         | Safe references to `Math` constants and methods.                                                                                                                                                                             |
+| [`@socketsecurity/lib/primordials/number`](../src/primordials/number.ts)     | Safe references to `Number`, its constants, predicates, and parse helpers.                                                                                                                                                   |
+| [`@socketsecurity/lib/primordials/object`](../src/primordials/object.ts)     | Safe references to `Object` static methods and prototype methods.                                                                                                                                                            |
+| [`@socketsecurity/lib/primordials/promise`](../src/primordials/promise.ts)   | Safe references to `Promise` static methods, prototype methods, and the ES2024 `withResolvers` factory.                                                                                                                      |
+| [`@socketsecurity/lib/primordials/reflect`](../src/primordials/reflect.ts)   | Safe references to `Reflect.*`.                                                                                                                                                                                              |
+| [`@socketsecurity/lib/primordials/regexp`](../src/primordials/regexp.ts)     | Safe references to `RegExp` and its prototype methods.                                                                                                                                                                       |
+| [`@socketsecurity/lib/primordials/string`](../src/primordials/string.ts)     | Safe references to `String` static methods and prototype methods.                                                                                                                                                            |
+| [`@socketsecurity/lib/primordials/symbol`](../src/primordials/symbol.ts)     | Safe references to `Symbol`, well-known symbols, and `Symbol.prototype`.                                                                                                                                                     |
+| [`@socketsecurity/lib/primordials/uncurry`](../src/primordials/uncurry.ts)   | `uncurryThis` and the cluster of helpers built atop it.                                                                                                                                                                      |
+| [`@socketsecurity/lib/primordials/url`](../src/primordials/url.ts)           | Safe references to `URL`, `URLSearchParams`, and the `URLSearchParams.prototype` methods.                                                                                                                                    |
 
 ## process/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/process/abort`](../src/process/abort.ts) | Process control helpers. |
-| [`@socketsecurity/lib/process/lock-instance`](../src/process/lock-instance.ts) | Singleton `processLock` instance — the canonical cross-cutting lock manager. |
-| [`@socketsecurity/lib/process/lock-manager`](../src/process/lock-manager.ts) | `ProcessLockManager` — the class that owns active locks, touch timers, and the exit-handler registration. |
-| [`@socketsecurity/lib/process/lock-types`](../src/process/lock-types.ts) | Public type surface for `process/lock-*` modules — the `ProcessLockOptions` bag accepted by `processLock.acquire` and `processLock.withLock`. |
-| [`@socketsecurity/lib/process/transient`](../src/process/transient.ts) | Temporary package executor detection utilities for Socket ecosystem. |
+| Subpath                                                                        | Description                                                                                                                                   |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/process/abort`](../src/process/abort.ts)                 | Process control helpers.                                                                                                                      |
+| [`@socketsecurity/lib/process/lock-instance`](../src/process/lock-instance.ts) | Singleton `processLock` instance — the canonical cross-cutting lock manager.                                                                  |
+| [`@socketsecurity/lib/process/lock-manager`](../src/process/lock-manager.ts)   | `ProcessLockManager` — the class that owns active locks, touch timers, and the exit-handler registration.                                     |
+| [`@socketsecurity/lib/process/lock-types`](../src/process/lock-types.ts)       | Public type surface for `process/lock-*` modules — the `ProcessLockOptions` bag accepted by `processLock.acquire` and `processLock.withLock`. |
+| [`@socketsecurity/lib/process/transient`](../src/process/transient.ts)         | Temporary package executor detection utilities for Socket ecosystem.                                                                          |
 
 ## promise-queue/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/promise-queue/queue`](../src/promise-queue/queue.ts) | Bounded concurrency promise queue. |
+| Subpath                                                                    | Description                                                                                                                        |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/promise-queue/queue`](../src/promise-queue/queue.ts) | Bounded concurrency promise queue.                                                                                                 |
 | [`@socketsecurity/lib/promise-queue/types`](../src/promise-queue/types.ts) | Public type surface for `promise-queue/*` modules — the `QueuedTask` storage shape used by the bounded-concurrency `PromiseQueue`. |
 
 ## promises/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/promises/iterate`](../src/promises/iterate.ts) | Concurrency-controlled async iteration helpers: `pEach`, `pEachChunk`, `pFilter`, `pFilterChunk`. |
-| [`@socketsecurity/lib/promises/options`](../src/promises/options.ts) | Option-shape normalizers for the iteration / retry helpers. |
-| [`@socketsecurity/lib/promises/resolvers`](../src/promises/resolvers.ts) | ECMA-262 standalone async helpers — `withResolvers` (Promise.withResolvers) and `fromAsync` (Array.fromAsync). |
-| [`@socketsecurity/lib/promises/retry`](../src/promises/retry.ts) | `pRetry` — exponential-backoff retry with optional jitter, abort-signal support, and an `onRetry` hook for customizing delays or canceling retries entirely. |
-| [`@socketsecurity/lib/promises/types`](../src/promises/types.ts) | Public type surface for `promises/*` modules: `RetryOptions`, `IterationOptions`, and `PromiseWithResolvers`. |
+| Subpath                                                                  | Description                                                                                                                                                  |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/promises/iterate`](../src/promises/iterate.ts)     | Concurrency-controlled async iteration helpers: `pEach`, `pEachChunk`, `pFilter`, `pFilterChunk`.                                                            |
+| [`@socketsecurity/lib/promises/options`](../src/promises/options.ts)     | Option-shape normalizers for the iteration / retry helpers.                                                                                                  |
+| [`@socketsecurity/lib/promises/resolvers`](../src/promises/resolvers.ts) | ECMA-262 standalone async helpers — `withResolvers` (Promise.withResolvers) and `fromAsync` (Array.fromAsync).                                               |
+| [`@socketsecurity/lib/promises/retry`](../src/promises/retry.ts)         | `pRetry` — exponential-backoff retry with optional jitter, abort-signal support, and an `onRetry` hook for customizing delays or canceling retries entirely. |
+| [`@socketsecurity/lib/promises/types`](../src/promises/types.ts)         | Public type surface for `promises/*` modules: `RetryOptions`, `IterationOptions`, and `PromiseWithResolvers`.                                                |
 
 ## regexps/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                          | Description                                                                                                                                                                             |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/regexps/escape`](../src/regexps/escape.ts) | Public `escapeRegExp` entry — binds to native `RegExp.escape` (TC39 Stage 4, Node 24+ / V8 13.7) when available, otherwise falls back to the spec-compliant implementation in `./spec`. |
-| [`@socketsecurity/lib/regexps/hex`](../src/regexps/hex.ts) | Hex-encoding helpers — fixed-width `\xHH` (`hex2`) and `\uHHHH` (`hex4`) producers used by the spec-compliant `RegExp.escape` fallback to emit canonical escape sequences. |
-| [`@socketsecurity/lib/regexps/spec`](../src/regexps/spec.ts) | Spec-compliant fallback for the TC39 `RegExp.escape` (https://tc39.es/ecma262/#sec-regexp.escape). |
+| [`@socketsecurity/lib/regexps/hex`](../src/regexps/hex.ts)       | Hex-encoding helpers — fixed-width `\xHH` (`hex2`) and `\uHHHH` (`hex4`) producers used by the spec-compliant `RegExp.escape` fallback to emit canonical escape sequences.              |
+| [`@socketsecurity/lib/regexps/spec`](../src/regexps/spec.ts)     | Spec-compliant fallback for the TC39 `RegExp.escape` (https://tc39.es/ecma262/#sec-regexp.escape).                                                                                      |
 
 ## releases/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/releases/github-archives`](../src/releases/github-archives.ts) | GitHub release archive download + extraction. |
+| Subpath                                                                                | Description                                          |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [`@socketsecurity/lib/releases/github-archives`](../src/releases/github-archives.ts)   | GitHub release archive download + extraction.        |
 | [`@socketsecurity/lib/releases/github-asset-url`](../src/releases/github-asset-url.ts) | Per-release asset-URL discovery for GitHub releases. |
-| [`@socketsecurity/lib/releases/github-assets`](../src/releases/github-assets.ts) | Asset matching helpers for GitHub releases. |
-| [`@socketsecurity/lib/releases/github-auth`](../src/releases/github-auth.ts) | GitHub API authentication header helpers. |
-| [`@socketsecurity/lib/releases/github-downloads`](../src/releases/github-downloads.ts) | GitHub release asset downloads. |
-| [`@socketsecurity/lib/releases/github-listing`](../src/releases/github-listing.ts) | GitHub release listing via REST + GraphQL. |
-| [`@socketsecurity/lib/releases/github-types`](../src/releases/github-types.ts) | Public types for GitHub release download utilities. |
-| [`@socketsecurity/lib/releases/socket-btm`](../src/releases/socket-btm.ts) | Socket-btm release download utilities. |
+| [`@socketsecurity/lib/releases/github-assets`](../src/releases/github-assets.ts)       | Asset matching helpers for GitHub releases.          |
+| [`@socketsecurity/lib/releases/github-auth`](../src/releases/github-auth.ts)           | GitHub API authentication header helpers.            |
+| [`@socketsecurity/lib/releases/github-downloads`](../src/releases/github-downloads.ts) | GitHub release asset downloads.                      |
+| [`@socketsecurity/lib/releases/github-listing`](../src/releases/github-listing.ts)     | GitHub release listing via REST + GraphQL.           |
+| [`@socketsecurity/lib/releases/github-types`](../src/releases/github-types.ts)         | Public types for GitHub release download utilities.  |
+| [`@socketsecurity/lib/releases/socket-btm`](../src/releases/socket-btm.ts)             | Socket-btm release download utilities.               |
 
 ## schema/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/schema/parse`](../src/schema/parse.ts) | Throwing twin of `validateSchema`. |
-| [`@socketsecurity/lib/schema/types`](../src/schema/types.ts) | Shared types for schema validation. |
+| Subpath                                                            | Description                                |
+| ------------------------------------------------------------------ | ------------------------------------------ |
+| [`@socketsecurity/lib/schema/parse`](../src/schema/parse.ts)       | Throwing twin of `validateSchema`.         |
+| [`@socketsecurity/lib/schema/types`](../src/schema/types.ts)       | Shared types for schema validation.        |
 | [`@socketsecurity/lib/schema/validate`](../src/schema/validate.ts) | Universal schema validator — non-throwing. |
 
 ## sea/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                  | Description                                                           |
+| -------------------------------------------------------- | --------------------------------------------------------------------- |
 | [`@socketsecurity/lib/sea/detect`](../src/sea/detect.ts) | SEA (Single Executable Application) binary detection + path accessor. |
 
 ## secrets/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/secrets/find`](../src/secrets/find.ts) | Resolve a secret from the canonical fleet precedence order: process env → OS keychain. |
-| [`@socketsecurity/lib/secrets/keychain`](../src/secrets/keychain.ts) | Cross-platform secret-storage helper. |
-| [`@socketsecurity/lib/secrets/linux`](../src/secrets/linux.ts) | Linux Secret Service backend via `secret-tool`. |
-| [`@socketsecurity/lib/secrets/macos`](../src/secrets/macos.ts) | macOS Keychain backend via `security(1)`. |
-| [`@socketsecurity/lib/secrets/rc`](../src/secrets/rc.ts) | Write a managed `export VAR='<value>'` block to the user's shell rc ("run commands") file. |
-| [`@socketsecurity/lib/secrets/types`](../src/secrets/types.ts) | Public type surface for `secrets/*`. |
-| [`@socketsecurity/lib/secrets/windows`](../src/secrets/windows.ts) | Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback. |
+| Subpath                                                              | Description                                                                                    |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/secrets/find`](../src/secrets/find.ts)         | Resolve a secret from the canonical fleet precedence order: process env → OS keychain.         |
+| [`@socketsecurity/lib/secrets/keychain`](../src/secrets/keychain.ts) | Cross-platform secret-storage helper.                                                          |
+| [`@socketsecurity/lib/secrets/linux`](../src/secrets/linux.ts)       | Linux Secret Service backend via `secret-tool`.                                                |
+| [`@socketsecurity/lib/secrets/macos`](../src/secrets/macos.ts)       | macOS Keychain backend via `security(1)`.                                                      |
+| [`@socketsecurity/lib/secrets/rc`](../src/secrets/rc.ts)             | Write a managed `export VAR='<value>'` block to the user's shell rc ("run commands") file.     |
+| [`@socketsecurity/lib/secrets/types`](../src/secrets/types.ts)       | Public type surface for `secrets/*`.                                                           |
+| [`@socketsecurity/lib/secrets/windows`](../src/secrets/windows.ts)   | Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback. |
 
 ## shadow/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/shadow/skip`](../src/shadow/skip.ts) | Shadow binary installation utilities for Socket ecosystem. |
+| Subpath                                                      | Description                                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/shadow/skip`](../src/shadow/skip.ts)   | Shadow binary installation utilities for Socket ecosystem.                           |
 | [`@socketsecurity/lib/shadow/types`](../src/shadow/types.ts) | Public type surface for `shadow/*` modules — the `ShadowInstallationOptions` record. |
 
 ## signal-exit/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/signal-exit/intercept`](../src/signal-exit/intercept.ts) | Process-method interceptors — `processEmit` replaces `process.emit` and `processReallyExit` replaces `process.reallyExit` while `load()` is active. |
-| [`@socketsecurity/lib/signal-exit/lifecycle`](../src/signal-exit/lifecycle.ts) | `load` and `unload` — install and remove the `signal-exit` listeners. |
-| [`@socketsecurity/lib/signal-exit/register`](../src/signal-exit/register.ts) | `onExit` — register a callback for process exit / signal. |
-| [`@socketsecurity/lib/signal-exit/signals`](../src/signal-exit/signals.ts) | `signals()` — list the signals this process is watching. |
-| [`@socketsecurity/lib/signal-exit/types`](../src/signal-exit/types.ts) | Public type surface for `signal-exit/*` modules — the `OnExitOptions` consumed by `onExit`, plus the shared internal types for the signal emitter, emitted-signal map, and listener map. |
+| Subpath                                                                        | Description                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/signal-exit/intercept`](../src/signal-exit/intercept.ts) | Process-method interceptors — `processEmit` replaces `process.emit` and `processReallyExit` replaces `process.reallyExit` while `load()` is active.                                      |
+| [`@socketsecurity/lib/signal-exit/lifecycle`](../src/signal-exit/lifecycle.ts) | `load` and `unload` — install and remove the `signal-exit` listeners.                                                                                                                    |
+| [`@socketsecurity/lib/signal-exit/register`](../src/signal-exit/register.ts)   | `onExit` — register a callback for process exit / signal.                                                                                                                                |
+| [`@socketsecurity/lib/signal-exit/signals`](../src/signal-exit/signals.ts)     | `signals()` — list the signals this process is watching.                                                                                                                                 |
+| [`@socketsecurity/lib/signal-exit/types`](../src/signal-exit/types.ts)         | Public type surface for `signal-exit/*` modules — the `OnExitOptions` consumed by `onExit`, plus the shared internal types for the signal emitter, emitted-signal map, and listener map. |
 
 ## smol/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts) | Smol detection + lazy-loader for `node:smol-util`. |
-| [`@socketsecurity/lib/smol/http`](../src/smol/http.ts) | Lazy-loader for socket-btm's `node:smol-http`. |
-| [`@socketsecurity/lib/smol/https`](../src/smol/https.ts) | Lazy-loader for socket-btm's `node:smol-https`. |
-| [`@socketsecurity/lib/smol/manifest`](../src/smol/manifest.ts) | Lazy-loader for socket-btm's `node:smol-manifest`. |
+| Subpath                                                            | Description                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| [`@socketsecurity/lib/smol/detect`](../src/smol/detect.ts)         | Smol detection + lazy-loader for `node:smol-util`.           |
+| [`@socketsecurity/lib/smol/http`](../src/smol/http.ts)             | Lazy-loader for socket-btm's `node:smol-http`.               |
+| [`@socketsecurity/lib/smol/https`](../src/smol/https.ts)           | Lazy-loader for socket-btm's `node:smol-https`.              |
+| [`@socketsecurity/lib/smol/manifest`](../src/smol/manifest.ts)     | Lazy-loader for socket-btm's `node:smol-manifest`.           |
 | [`@socketsecurity/lib/smol/primordial`](../src/smol/primordial.ts) | Lazy-loader for socket-btm's `node:smol-primordial` binding. |
-| [`@socketsecurity/lib/smol/purl`](../src/smol/purl.ts) | Lazy-loader for socket-btm's `node:smol-purl` binding. |
-| [`@socketsecurity/lib/smol/versions`](../src/smol/versions.ts) | Lazy-loader for socket-btm's `node:smol-versions`. |
-| [`@socketsecurity/lib/smol/vfs`](../src/smol/vfs.ts) | Lazy-loader for socket-btm's `node:smol-vfs`. |
+| [`@socketsecurity/lib/smol/purl`](../src/smol/purl.ts)             | Lazy-loader for socket-btm's `node:smol-purl` binding.       |
+| [`@socketsecurity/lib/smol/versions`](../src/smol/versions.ts)     | Lazy-loader for socket-btm's `node:smol-versions`.           |
+| [`@socketsecurity/lib/smol/vfs`](../src/smol/vfs.ts)               | Lazy-loader for socket-btm's `node:smol-vfs`.                |
 
 ## sorts/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                        | Description                                                                                                                                             |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib/sorts/natural`](../src/sorts/natural.ts) | Locale-aware + numeric-aware comparison via `Intl.Collator`, plus the `naturalSorter` helper that wires the fast-sort engine to the natural comparator. |
-| [`@socketsecurity/lib/sorts/semver`](../src/sorts/semver.ts) | Semver-aware string comparison. |
-| [`@socketsecurity/lib/sorts/strings`](../src/sorts/strings.ts) | Plain string comparison. |
-| [`@socketsecurity/lib/sorts/types`](../src/sorts/types.ts) | Public type surface for `sorts/*` modules — the `FastSortFunction` shape returned by `naturalSorter`. |
+| [`@socketsecurity/lib/sorts/semver`](../src/sorts/semver.ts)   | Semver-aware string comparison.                                                                                                                         |
+| [`@socketsecurity/lib/sorts/strings`](../src/sorts/strings.ts) | Plain string comparison.                                                                                                                                |
+| [`@socketsecurity/lib/sorts/types`](../src/sorts/types.ts)     | Public type surface for `sorts/*` modules — the `FastSortFunction` shape returned by `naturalSorter`.                                                   |
 
 ## spawn/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/spawn/errors`](../src/spawn/errors.ts) | Spawn error classification and enhancement. |
-| [`@socketsecurity/lib/spawn/spawn`](../src/spawn/spawn.ts) | Child process spawning utilities with cross-platform support. |
-| [`@socketsecurity/lib/spawn/stdio`](../src/spawn/stdio.ts) | Stdio configuration helpers for `spawn` callers. |
-| [`@socketsecurity/lib/spawn/types`](../src/spawn/types.ts) | Public type surface for `spawn/*` modules. |
+| Subpath                                                      | Description                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------- |
+| [`@socketsecurity/lib/spawn/errors`](../src/spawn/errors.ts) | Spawn error classification and enhancement.                   |
+| [`@socketsecurity/lib/spawn/spawn`](../src/spawn/spawn.ts)   | Child process spawning utilities with cross-platform support. |
+| [`@socketsecurity/lib/spawn/stdio`](../src/spawn/stdio.ts)   | Stdio configuration helpers for `spawn` callers.              |
+| [`@socketsecurity/lib/spawn/types`](../src/spawn/types.ts)   | Public type surface for `spawn/*` modules.                    |
 
 ## spinner/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/spinner/format`](../src/spinner/format.ts) | Stateless helpers shared by `spinner/*` modules — the `ciSpinner` constant for non-interactive output, the `COLOR_INHERIT` sentinel for shimmer color references, plus pure formatters (`desc`, `formatProgress`, `normal... |
-| [`@socketsecurity/lib/spinner/registry`](../src/spinner/registry.ts) | Spinner-style registry — exposes the union of the standard `cli-spinners` collection and Socket's custom `socket` pulse animation, plus a lazy default-spinner singleton. |
-| [`@socketsecurity/lib/spinner/spinner`](../src/spinner/spinner.ts) | Spinner factory — builds the lazy-init `Spinner` class that wraps `yocto-spinner` with Socket-specific behaviors (custom RGB color pipeline, shimmer, progress bar, indented step messages, status methods that don't aut... |
-| [`@socketsecurity/lib/spinner/types`](../src/spinner/types.ts) | Public type surface for `spinner/*` modules — the `Spinner` instance shape, configuration option records, progress and shimmer state types, plus the `withSpinner*` option records. |
-| [`@socketsecurity/lib/spinner/with`](../src/spinner/with.ts) | Lifecycle wrappers around `Spinner` — `withSpinner` (async, push-pop options + auto-stop), `withSpinnerRestore` (conditionally restart a previously-spinning instance), and `withSpinnerSync` (sync sibling of `withSpinn... |
+| Subpath                                                              | Description                                                                                                                                                                                                                  |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/spinner/format`](../src/spinner/format.ts)     | Stateless helpers shared by `spinner/*` modules — the `ciSpinner` constant for non-interactive output, the `COLOR_INHERIT` sentinel for shimmer color references, plus pure formatters (`desc`, `formatProgress`, `normal... |
+| [`@socketsecurity/lib/spinner/registry`](../src/spinner/registry.ts) | Spinner-style registry — exposes the union of the standard `cli-spinners` collection and Socket's custom `socket` pulse animation, plus a lazy default-spinner singleton.                                                    |
+| [`@socketsecurity/lib/spinner/spinner`](../src/spinner/spinner.ts)   | Spinner factory — builds the lazy-init `Spinner` class that wraps `yocto-spinner` with Socket-specific behaviors (custom RGB color pipeline, shimmer, progress bar, indented step messages, status methods that don't aut... |
+| [`@socketsecurity/lib/spinner/types`](../src/spinner/types.ts)       | Public type surface for `spinner/*` modules — the `Spinner` instance shape, configuration option records, progress and shimmer state types, plus the `withSpinner*` option records.                                          |
+| [`@socketsecurity/lib/spinner/with`](../src/spinner/with.ts)         | Lifecycle wrappers around `Spinner` — `withSpinner` (async, push-pop options + auto-stop), `withSpinnerRestore` (conditionally restart a previously-spinning instance), and `withSpinnerSync` (sync sibling of `withSpinn... |
 
 ## ssri/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/ssri/convert`](../src/ssri/convert.ts) | SSRI ↔ hex digest conversion helpers — `hexToSsri` wraps a hex digest in `<algorithm>-<base64>` form, `ssriToHex` decodes the base64 half back to hex. |
-| [`@socketsecurity/lib/ssri/parse`](../src/ssri/parse.ts) | SSRI parser — splits a `<algorithm>-<base64hash>` string into its component fields. |
-| [`@socketsecurity/lib/ssri/validate`](../src/ssri/validate.ts) | SSRI/hex format validators — predicates that report whether a string looks like a hex digest or an SSRI integrity string. |
+| Subpath                                                        | Description                                                                                                                                            |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib/ssri/convert`](../src/ssri/convert.ts)   | SSRI ↔ hex digest conversion helpers — `hexToSsri` wraps a hex digest in `<algorithm>-<base64>` form, `ssriToHex` decodes the base64 half back to hex. |
+| [`@socketsecurity/lib/ssri/parse`](../src/ssri/parse.ts)       | SSRI parser — splits a `<algorithm>-<base64hash>` string into its component fields.                                                                    |
+| [`@socketsecurity/lib/ssri/validate`](../src/ssri/validate.ts) | SSRI/hex format validators — predicates that report whether a string looks like a hex digest or an SSRI integrity string.                              |
 
 ## stdio/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/stdio/clear`](../src/stdio/clear.ts) | Terminal clearing and cursor utilities. |
-| [`@socketsecurity/lib/stdio/divider`](../src/stdio/divider.ts) | Console divider and separator utilities. |
-| [`@socketsecurity/lib/stdio/footer`](../src/stdio/footer.ts) | Console footer/summary formatting utilities. |
-| [`@socketsecurity/lib/stdio/header`](../src/stdio/header.ts) | Console header/banner formatting utilities. |
-| [`@socketsecurity/lib/stdio/progress`](../src/stdio/progress.ts) | Progress bar utilities for CLI applications. |
-| [`@socketsecurity/lib/stdio/prompts`](../src/stdio/prompts.ts) | User prompt utilities for interactive scripts. |
-| [`@socketsecurity/lib/stdio/stderr`](../src/stdio/stderr.ts) | Standard error stream utilities. |
-| [`@socketsecurity/lib/stdio/stdout`](../src/stdio/stdout.ts) | Standard output stream utilities. |
+| Subpath                                                          | Description                                    |
+| ---------------------------------------------------------------- | ---------------------------------------------- |
+| [`@socketsecurity/lib/stdio/clear`](../src/stdio/clear.ts)       | Terminal clearing and cursor utilities.        |
+| [`@socketsecurity/lib/stdio/divider`](../src/stdio/divider.ts)   | Console divider and separator utilities.       |
+| [`@socketsecurity/lib/stdio/footer`](../src/stdio/footer.ts)     | Console footer/summary formatting utilities.   |
+| [`@socketsecurity/lib/stdio/header`](../src/stdio/header.ts)     | Console header/banner formatting utilities.    |
+| [`@socketsecurity/lib/stdio/progress`](../src/stdio/progress.ts) | Progress bar utilities for CLI applications.   |
+| [`@socketsecurity/lib/stdio/prompts`](../src/stdio/prompts.ts)   | User prompt utilities for interactive scripts. |
+| [`@socketsecurity/lib/stdio/stderr`](../src/stdio/stderr.ts)     | Standard error stream utilities.               |
+| [`@socketsecurity/lib/stdio/stdout`](../src/stdio/stdout.ts)     | Standard output stream utilities.              |
 
 ## streams/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/streams/parallel`](../src/streams/parallel.ts) | Parallel iteration helpers — `parallelMap()` and the fire-and-forget `parallelEach()`. |
+| Subpath                                                                | Description                                                                                                                         |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/streams/parallel`](../src/streams/parallel.ts)   | Parallel iteration helpers — `parallelMap()` and the fire-and-forget `parallelEach()`.                                              |
 | [`@socketsecurity/lib/streams/transform`](../src/streams/transform.ts) | Streaming transform helper — `transform()` wraps `streaming-iterables.transform` with the project's `pRetry` per-item retry policy. |
 
 ## strings/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/strings/format`](../src/strings/format.ts) | Line formatting helpers: `applyLinePrefix`, `centerText`, `indentString`, `repeatString`. |
-| [`@socketsecurity/lib/strings/predicates`](../src/strings/predicates.ts) | String predicates: `isBlankString` and `isNonEmptyString`. |
-| [`@socketsecurity/lib/strings/search`](../src/strings/search.ts) | `search` — like `String.prototype.search` but with a configurable starting index. |
-| [`@socketsecurity/lib/strings/transform`](../src/strings/transform.ts) | String transformations: `stripBom`, `toKebabCase`, `trimNewlines`. |
-| [`@socketsecurity/lib/strings/types`](../src/strings/types.ts) | Public type surface for `strings/*` modules — branded string types and option interfaces. |
-| [`@socketsecurity/lib/strings/width`](../src/strings/width.ts) | `stringWidth` — calculate visual terminal width. |
+| Subpath                                                                  | Description                                                                               |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/strings/format`](../src/strings/format.ts)         | Line formatting helpers: `applyLinePrefix`, `centerText`, `indentString`, `repeatString`. |
+| [`@socketsecurity/lib/strings/predicates`](../src/strings/predicates.ts) | String predicates: `isBlankString` and `isNonEmptyString`.                                |
+| [`@socketsecurity/lib/strings/search`](../src/strings/search.ts)         | `search` — like `String.prototype.search` but with a configurable starting index.         |
+| [`@socketsecurity/lib/strings/transform`](../src/strings/transform.ts)   | String transformations: `stripBom`, `toKebabCase`, `trimNewlines`.                        |
+| [`@socketsecurity/lib/strings/types`](../src/strings/types.ts)           | Public type surface for `strings/*` modules — branded string types and option interfaces. |
+| [`@socketsecurity/lib/strings/width`](../src/strings/width.ts)           | `stringWidth` — calculate visual terminal width.                                          |
 
 ## tables/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/tables/bordered`](../src/tables/bordered.ts) | Bordered table renderer using Unicode box-drawing characters (`┌`, `─`, `│`, `┴`, …). |
-| [`@socketsecurity/lib/tables/padding`](../src/tables/padding.ts) | Cell padding + display-width measurement — shared helpers used by both the simple and bordered table renderers. |
-| [`@socketsecurity/lib/tables/simple`](../src/tables/simple.ts) | Borderless table renderer — columns separated by two spaces, header underlined with `─`. |
-| [`@socketsecurity/lib/tables/types`](../src/tables/types.ts) | Public type surface for `tables/*` modules — the `ColumnAlignment` union + `TableColumn` config record. |
+| Subpath                                                            | Description                                                                                                     |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/tables/bordered`](../src/tables/bordered.ts) | Bordered table renderer using Unicode box-drawing characters (`┌`, `─`, `│`, `┴`, …).                           |
+| [`@socketsecurity/lib/tables/padding`](../src/tables/padding.ts)   | Cell padding + display-width measurement — shared helpers used by both the simple and bordered table renderers. |
+| [`@socketsecurity/lib/tables/simple`](../src/tables/simple.ts)     | Borderless table renderer — columns separated by two spaces, header underlined with `─`.                        |
+| [`@socketsecurity/lib/tables/types`](../src/tables/types.ts)       | Public type surface for `tables/*` modules — the `ColumnAlignment` union + `TableColumn` config record.         |
 
 ## temporal/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/temporal/instant`](../src/temporal/instant.ts) | Spec clause 8 — Temporal.Instant Objects. |
-| [`@socketsecurity/lib/temporal/now`](../src/temporal/now.ts) | Spec clause 6 — Temporal.Now. |
-| [`@socketsecurity/lib/temporal/slots`](../src/temporal/slots.ts) | Internal-slot machinery for Temporal objects. |
-| [`@socketsecurity/lib/temporal/system`](../src/temporal/system.ts) | Spec clause 21.x host hook — wallclock reader. |
-| [`@socketsecurity/lib/temporal/temporal`](../src/temporal/temporal.ts) | Public aggregator for the `Temporal` surface. |
+| Subpath                                                                | Description                                    |
+| ---------------------------------------------------------------------- | ---------------------------------------------- |
+| [`@socketsecurity/lib/temporal/instant`](../src/temporal/instant.ts)   | Spec clause 8 — Temporal.Instant Objects.      |
+| [`@socketsecurity/lib/temporal/now`](../src/temporal/now.ts)           | Spec clause 6 — Temporal.Now.                  |
+| [`@socketsecurity/lib/temporal/slots`](../src/temporal/slots.ts)       | Internal-slot machinery for Temporal objects.  |
+| [`@socketsecurity/lib/temporal/system`](../src/temporal/system.ts)     | Spec clause 21.x host hook — wallclock reader. |
+| [`@socketsecurity/lib/temporal/temporal`](../src/temporal/temporal.ts) | Public aggregator for the `Temporal` surface.  |
 
 ## themes/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/themes/context`](../src/themes/context.ts) | Elegant theme context management. |
+| Subpath                                                          | Description                                         |
+| ---------------------------------------------------------------- | --------------------------------------------------- |
+| [`@socketsecurity/lib/themes/context`](../src/themes/context.ts) | Elegant theme context management.                   |
 | [`@socketsecurity/lib/themes/resolve`](../src/themes/resolve.ts) | Theme utilities — color resolution and composition. |
-| [`@socketsecurity/lib/themes/themes`](../src/themes/themes.ts) | Elegant theme definitions for Socket libraries. |
-| [`@socketsecurity/lib/themes/types`](../src/themes/types.ts) | Elegant theme type system. |
+| [`@socketsecurity/lib/themes/themes`](../src/themes/themes.ts)   | Elegant theme definitions for Socket libraries.     |
+| [`@socketsecurity/lib/themes/types`](../src/themes/types.ts)     | Elegant theme type system.                          |
 
 ## ttl-cache/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/ttl-cache/cache`](../src/ttl-cache/cache.ts) | `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer. |
+| Subpath                                                            | Description                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/ttl-cache/cache`](../src/ttl-cache/cache.ts) | `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer.                                                                                                            |
 | [`@socketsecurity/lib/ttl-cache/types`](../src/ttl-cache/types.ts) | Public type surface for `ttl-cache/*` modules — the `TtlCache` interface (the seven-method API returned by `createTtlCache`), the `TtlCacheEntry` storage shape, and the `TtlCacheOptions` / `ClearOptions` configuration... |
 
 ## url/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/url/parse`](../src/url/parse.ts) | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base). |
-| [`@socketsecurity/lib/url/predicates`](../src/url/predicates.ts) | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`. |
-| [`@socketsecurity/lib/url/search-params`](../src/url/search-params.ts) | URL search-param coercion helpers — `urlSearchParamsAs*` normalise a raw `string | null | undefined` value into a typed shape (array / boolean / number / string) with a default. |
-| [`@socketsecurity/lib/url/types`](../src/url/types.ts) | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`. |
+| Subpath                                                                | Description                                                                                                                                                                             |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/url/parse`](../src/url/parse.ts)                 | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base). |
+| [`@socketsecurity/lib/url/predicates`](../src/url/predicates.ts)       | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`.                                                                                       |
+| [`@socketsecurity/lib/url/search-params`](../src/url/search-params.ts) | URL search-param coercion helpers — `urlSearchParamsAs*` normalise a raw `string                                                                                                        | null | undefined` value into a typed shape (array / boolean / number / string) with a default. |
+| [`@socketsecurity/lib/url/types`](../src/url/types.ts)                 | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`.                                           |
 
 ## versions/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/versions/compare`](../src/versions/compare.ts) | Version comparison operators aligned with `node:smol-versions` (the C++-accelerated multi-ecosystem version helper shipped by the smol Node binary). |
-| [`@socketsecurity/lib/versions/modify`](../src/versions/modify.ts) | Mutation helpers — `incrementVersion` bumps a version by release type ('major' | 'minor' | 'patch' | 'pre*'), and `versionDiff` returns the kind of step between two versions. |
-| [`@socketsecurity/lib/versions/parse`](../src/versions/parse.ts) | Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc... |
-| [`@socketsecurity/lib/versions/range`](../src/versions/range.ts) | Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array. |
-| [`@socketsecurity/lib/versions/types`](../src/versions/types.ts) | Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion` (a stable subset of semver's SemVer instance, exposed as a structural type rather than leaking the upstream class). |
+| Subpath                                                              | Description                                                                                                                                                                                                                  |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/versions/compare`](../src/versions/compare.ts) | Version comparison operators aligned with `node:smol-versions` (the C++-accelerated multi-ecosystem version helper shipped by the smol Node binary).                                                                         |
+| [`@socketsecurity/lib/versions/modify`](../src/versions/modify.ts)   | Mutation helpers — `incrementVersion` bumps a version by release type ('major'                                                                                                                                               | 'minor' | 'patch' | 'pre\*'), and `versionDiff` returns the kind of step between two versions. |
+| [`@socketsecurity/lib/versions/parse`](../src/versions/parse.ts)     | Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc... |
+| [`@socketsecurity/lib/versions/range`](../src/versions/range.ts)     | Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array.                                              |
+| [`@socketsecurity/lib/versions/types`](../src/versions/types.ts)     | Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion` (a stable subset of semver's SemVer instance, exposed as a structural type rather than leaking the upstream class).       |
 
 ## warnings/
 
-| Subpath | Description |
-| --- | --- |
+| Subpath                                                                        | Description                                                   |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------- |
 | [`@socketsecurity/lib/warnings/event-target`](../src/warnings/event-target.ts) | Bump the max-listener cap on an EventTarget (or AbortSignal). |
-| [`@socketsecurity/lib/warnings/suppress`](../src/warnings/suppress.ts) | `process.emitWarning` suppression. |
+| [`@socketsecurity/lib/warnings/suppress`](../src/warnings/suppress.ts)         | `process.emitWarning` suppression.                            |
 
 ## words/
 
-| Subpath | Description |
-| --- | --- |
-| [`@socketsecurity/lib/words/article`](../src/words/article.ts) | Indefinite-article picker — `determineArticle()` returns `'a'` or `'an'` based on the leading vowel of a word. |
+| Subpath                                                              | Description                                                                                                                                  |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib/words/article`](../src/words/article.ts)       | Indefinite-article picker — `determineArticle()` returns `'a'` or `'an'` based on the leading vowel of a word.                               |
 | [`@socketsecurity/lib/words/capitalize`](../src/words/capitalize.ts) | Word-case helpers — `capitalize()` produces an upper-first / lower-rest variant that iterates by code point so surrogate pairs aren't split. |
-| [`@socketsecurity/lib/words/pluralize`](../src/words/pluralize.ts) | Simple count-based pluralization helper — appends a trailing `'s'` when the count is anything other than 1. |
-| [`@socketsecurity/lib/words/types`](../src/words/types.ts) | Public type surface for `words/*` modules — the `PluralizeOptions` record. |
+| [`@socketsecurity/lib/words/pluralize`](../src/words/pluralize.ts)   | Simple count-based pluralization helper — appends a trailing `'s'` when the count is anything other than 1.                                  |
+| [`@socketsecurity/lib/words/types`](../src/words/types.ts)           | Public type surface for `words/*` modules — the `PluralizeOptions` record.                                                                   |

@@ -28,10 +28,7 @@ import {
   stringifyWithFormatting,
   stripFormattingSymbols,
 } from '@socketsecurity/lib/json/format'
-import {
-  isJsonPrimitive,
-  parseJson,
-} from '@socketsecurity/lib/json/parse'
+import { isJsonPrimitive, parseJson } from '@socketsecurity/lib/json/parse'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('json', () => {

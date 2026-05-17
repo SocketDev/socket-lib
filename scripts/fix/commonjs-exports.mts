@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
-import { isQuiet } from '@socketsecurity/lib/argv/flags'
+import { isQuiet } from '@socketsecurity/lib/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()

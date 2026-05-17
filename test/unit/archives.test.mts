@@ -31,10 +31,7 @@ process.on('uncaughtException', err => {
 
 import { detectArchiveFormat } from '@socketsecurity/lib/archives/detect'
 import { extractArchive } from '@socketsecurity/lib/archives/extract'
-import {
-  extractTar,
-  extractTarGz,
-} from '@socketsecurity/lib/archives/tar'
+import { extractTar, extractTarGz } from '@socketsecurity/lib/archives/tar'
 import { extractZip } from '@socketsecurity/lib/archives/zip'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 

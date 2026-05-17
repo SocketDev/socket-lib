@@ -28,38 +28,6 @@ import { spawn, spawnSync } from 'node:child_process'
 
 const SECURITY_BIN = 'security'
 
-interface SpawnOpts {
-  stdio?: 'ignore' | 'pipe' | ['ignore', 'pipe', 'pipe']
-}
-
-function runAsync(args: readonly string[], opts: SpawnOpts = {}): Promise<{
-  status: number | null
-  stdout: string
-  stderr: string
-}> {
-  return new Promise(resolve => {
-    const child = spawn(SECURITY_BIN, args as string[], {
-      stdio: opts.stdio ?? ['ignore', 'pipe', 'pipe'],
-    })
-    let stdout = ''
-    let stderr = ''
-    if (child.stdout) {
-      child.stdout.setEncoding('utf8')
-      child.stdout.on('data', chunk => {
-        stdout += chunk
-      })
-    }
-    if (child.stderr) {
-      child.stderr.setEncoding('utf8')
-      child.stderr.on('data', chunk => {
-        stderr += chunk
-      })
-    }
-    child.on('error', () => resolve({ status: -1, stdout, stderr }))
-    child.on('close', status => resolve({ status, stdout, stderr }))
-  })
-}
-
 export async function deleteMacOS(
   service: string,
   account: string,
@@ -126,6 +94,41 @@ export function readMacOSSync(
   }
   const out = r.stdout.trim()
   return out || undefined
+}
+
+interface SpawnOpts {
+  stdio?: 'ignore' | 'pipe' | ['ignore', 'pipe', 'pipe']
+}
+
+export function runAsync(
+  args: readonly string[],
+  opts: SpawnOpts = {},
+): Promise<{
+  status: number | null
+  stdout: string
+  stderr: string
+}> {
+  return new Promise(resolve => {
+    const child = spawn(SECURITY_BIN, args as string[], {
+      stdio: opts.stdio ?? ['ignore', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    if (child.stdout) {
+      child.stdout.setEncoding('utf8')
+      child.stdout.on('data', chunk => {
+        stdout += chunk
+      })
+    }
+    if (child.stderr) {
+      child.stderr.setEncoding('utf8')
+      child.stderr.on('data', chunk => {
+        stderr += chunk
+      })
+    }
+    child.on('error', () => resolve({ status: -1, stdout, stderr }))
+    child.on('close', status => resolve({ status, stdout, stderr }))
+  })
 }
 
 export async function writeMacOS(

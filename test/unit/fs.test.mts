@@ -34,10 +34,7 @@ import {
   safeStat,
   safeStatSync,
 } from '@socketsecurity/lib/fs/inspect'
-import {
-  readDirNames,
-  readDirNamesSync,
-} from '@socketsecurity/lib/fs/read-dir'
+import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
 import {
   readFileBinary,
   readFileBinarySync,
@@ -55,10 +52,7 @@ import {
 } from '@socketsecurity/lib/fs/safe'
 import { uniqueSync } from '@socketsecurity/lib/fs/unique'
 import { validateFiles } from '@socketsecurity/lib/fs/validate'
-import {
-  writeJson,
-  writeJsonSync,
-} from '@socketsecurity/lib/fs/write-json'
+import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 
 import { runWithTempDir } from './util/temp-file-helper'
 

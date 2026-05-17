@@ -33,139 +33,6 @@ export function buildTarget(service: string, account: string): string {
   return `${service}:${account}`
 }
 
-function getDpapiFilePath(service: string, account: string): string {
-  const appData =
-    process.env['APPDATA'] ?? path.join(homedir(), 'AppData', 'Roaming')
-  return path.join(appData, service, `${account}.enc`)
-}
-
-function quotePs(value: string): string {
-  // PowerShell single-quoted strings: escape embedded ' by doubling.
-  return `'${value.replace(/'/g, "''")}'`
-}
-
-async function readDpapi(filePath: string): Promise<string | undefined> {
-  if (!existsSync(filePath)) {
-    return undefined
-  }
-  const script = `
-    $bytes = [Convert]::FromBase64String((Get-Content -Raw ${quotePs(filePath)}))
-    $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($bytes, $null, 'CurrentUser')
-    [System.Text.Encoding]::UTF8.GetString($plain)
-  `
-  const r = await runPsAsync(script)
-  if (r.status !== 0) {
-    return undefined
-  }
-  const out = r.stdout.trim()
-  return out || undefined
-}
-
-function readDpapiSync(filePath: string): string | undefined {
-  if (!existsSync(filePath)) {
-    return undefined
-  }
-  const script = `
-    $bytes = [Convert]::FromBase64String((Get-Content -Raw ${quotePs(filePath)}))
-    $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($bytes, $null, 'CurrentUser')
-    [System.Text.Encoding]::UTF8.GetString($plain)
-  `
-  const r = runPsSync(script)
-  if (r.status !== 0) {
-    return undefined
-  }
-  const out = r.stdout.trim()
-  return out || undefined
-}
-
-function runPsAsync(script: string, input?: string): Promise<{
-  status: number | null
-  stdout: string
-  stderr: string
-}> {
-  return new Promise(resolve => {
-    const child = spawn(
-      POWERSHELL_BIN,
-      ['-NoProfile', '-Command', script],
-      { stdio: ['pipe', 'pipe', 'pipe'] },
-    )
-    let stdout = ''
-    let stderr = ''
-    child.stdout.setEncoding('utf8')
-    child.stdout.on('data', chunk => {
-      stdout += chunk
-    })
-    child.stderr.setEncoding('utf8')
-    child.stderr.on('data', chunk => {
-      stderr += chunk
-    })
-    child.on('error', () => resolve({ status: -1, stdout, stderr }))
-    child.on('close', status => resolve({ status, stdout, stderr }))
-    if (input !== undefined) {
-      child.stdin.end(input)
-    } else {
-      child.stdin.end()
-    }
-  })
-}
-
-function runPsSync(script: string, input?: string): {
-  status: number | null
-  stdout: string
-  stderr: string
-} {
-  const r = spawnSync(POWERSHELL_BIN, ['-NoProfile', '-Command', script], {
-    encoding: 'utf8',
-    input,
-    stdio: ['pipe', 'pipe', 'pipe'],
-  })
-  return { status: r.status, stdout: r.stdout, stderr: r.stderr }
-}
-
-async function writeDpapi(filePath: string, value: string): Promise<void> {
-  const dir = path.dirname(filePath)
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true })
-  }
-  const script = `
-    $token = $input | Out-String
-    $token = $token.Trim()
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
-    $protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, 'CurrentUser')
-    [Convert]::ToBase64String($protected) | Set-Content -Path ${quotePs(filePath)} -NoNewline
-  `
-  const r = await runPsAsync(script, value)
-  if (r.status !== 0) {
-    throw new Error(
-      `DPAPI file write failed: ${r.stderr.trim()}. ` +
-        'Install the CredentialManager PowerShell module (' +
-        '`Install-Module CredentialManager -Scope CurrentUser`) for a cleaner storage path.',
-    )
-  }
-}
-
-function writeDpapiSync(filePath: string, value: string): void {
-  const dir = path.dirname(filePath)
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true })
-  }
-  const script = `
-    $token = $input | Out-String
-    $token = $token.Trim()
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
-    $protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, 'CurrentUser')
-    [Convert]::ToBase64String($protected) | Set-Content -Path ${quotePs(filePath)} -NoNewline
-  `
-  const r = runPsSync(script, value)
-  if (r.status !== 0) {
-    throw new Error(
-      `DPAPI file write failed: ${r.stderr.trim()}. ` +
-        'Install the CredentialManager PowerShell module (' +
-        '`Install-Module CredentialManager -Scope CurrentUser`) for a cleaner storage path.',
-    )
-  }
-}
-
 export async function deleteWindows(
   service: string,
   account: string,
@@ -222,6 +89,12 @@ export function deleteWindowsSync(
   return removedAny ? 'removed' : 'absent'
 }
 
+export function getDpapiFilePath(service: string, account: string): string {
+  const appData =
+    process.env['APPDATA'] ?? path.join(homedir(), 'AppData', 'Roaming')
+  return path.join(appData, service, `${account}.enc`)
+}
+
 export function isWindowsBackendAvailable(): boolean {
   // PowerShell ships with Windows 10+; we treat the CredentialManager
   // module + DPAPI fallback as a unified backend. If PowerShell is
@@ -230,6 +103,45 @@ export function isWindowsBackendAvailable(): boolean {
     stdio: 'ignore',
   })
   return r.status === 0
+}
+
+export function quotePs(value: string): string {
+  // PowerShell single-quoted strings: escape embedded ' by doubling.
+  return `'${value.replace(/'/g, "''")}'`
+}
+
+export async function readDpapi(filePath: string): Promise<string | undefined> {
+  if (!existsSync(filePath)) {
+    return undefined
+  }
+  const script = `
+    $bytes = [Convert]::FromBase64String((Get-Content -Raw ${quotePs(filePath)}))
+    $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($bytes, $null, 'CurrentUser')
+    [System.Text.Encoding]::UTF8.GetString($plain)
+  `
+  const r = await runPsAsync(script)
+  if (r.status !== 0) {
+    return undefined
+  }
+  const out = r.stdout.trim()
+  return out || undefined
+}
+
+export function readDpapiSync(filePath: string): string | undefined {
+  if (!existsSync(filePath)) {
+    return undefined
+  }
+  const script = `
+    $bytes = [Convert]::FromBase64String((Get-Content -Raw ${quotePs(filePath)}))
+    $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($bytes, $null, 'CurrentUser')
+    [System.Text.Encoding]::UTF8.GetString($plain)
+  `
+  const r = runPsSync(script)
+  if (r.status !== 0) {
+    return undefined
+  }
+  const out = r.stdout.trim()
+  return out || undefined
 }
 
 export async function readWindows(
@@ -272,6 +184,101 @@ export function readWindowsSync(
     }
   }
   return readDpapiSync(getDpapiFilePath(service, account))
+}
+
+export function runPsAsync(
+  script: string,
+  input?: string,
+): Promise<{
+  status: number | null
+  stdout: string
+  stderr: string
+}> {
+  return new Promise(resolve => {
+    const child = spawn(POWERSHELL_BIN, ['-NoProfile', '-Command', script], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', chunk => {
+      stdout += chunk
+    })
+    child.stderr.setEncoding('utf8')
+    child.stderr.on('data', chunk => {
+      stderr += chunk
+    })
+    child.on('error', () => resolve({ status: -1, stdout, stderr }))
+    child.on('close', status => resolve({ status, stdout, stderr }))
+    if (input !== undefined) {
+      child.stdin.end(input)
+    } else {
+      child.stdin.end()
+    }
+  })
+}
+
+export function runPsSync(
+  script: string,
+  input?: string,
+): {
+  status: number | null
+  stdout: string
+  stderr: string
+} {
+  const r = spawnSync(POWERSHELL_BIN, ['-NoProfile', '-Command', script], {
+    encoding: 'utf8',
+    input,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  })
+  return { status: r.status, stdout: r.stdout, stderr: r.stderr }
+}
+
+export async function writeDpapi(
+  filePath: string,
+  value: string,
+): Promise<void> {
+  const dir = path.dirname(filePath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
+  const script = `
+    $token = $input | Out-String
+    $token = $token.Trim()
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
+    $protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, 'CurrentUser')
+    [Convert]::ToBase64String($protected) | Set-Content -Path ${quotePs(filePath)} -NoNewline
+  `
+  const r = await runPsAsync(script, value)
+  if (r.status !== 0) {
+    throw new Error(
+      `DPAPI file write failed: ${r.stderr.trim()}. ` +
+        'Install the CredentialManager PowerShell module (' +
+        '`Install-Module CredentialManager -Scope CurrentUser`) for a cleaner storage path.',
+    )
+  }
+}
+
+export function writeDpapiSync(filePath: string, value: string): void {
+  const dir = path.dirname(filePath)
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
+  const script = `
+    $token = $input | Out-String
+    $token = $token.Trim()
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
+    $protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, 'CurrentUser')
+    [Convert]::ToBase64String($protected) | Set-Content -Path ${quotePs(filePath)} -NoNewline
+  `
+  const r = runPsSync(script, value)
+  if (r.status !== 0) {
+    throw new Error(
+      `DPAPI file write failed: ${r.stderr.trim()}. ` +
+        'Install the CredentialManager PowerShell module (' +
+        '`Install-Module CredentialManager -Scope CurrentUser`) for a cleaner storage path.',
+    )
+  }
 }
 
 export async function writeWindows(

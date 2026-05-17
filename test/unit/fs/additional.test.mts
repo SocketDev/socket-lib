@@ -26,10 +26,7 @@ import {
   safeStat,
   safeStatSync,
 } from '@socketsecurity/lib/fs/inspect'
-import {
-  readDirNames,
-  readDirNamesSync,
-} from '@socketsecurity/lib/fs/read-dir'
+import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
 import {
   readFileBinary,
   readFileBinarySync,
@@ -41,10 +38,7 @@ import {
 import { readJson, readJsonSync } from '@socketsecurity/lib/fs/read-json'
 import { safeDelete, safeDeleteSync } from '@socketsecurity/lib/fs/safe'
 import { uniqueSync } from '@socketsecurity/lib/fs/unique'
-import {
-  writeJson,
-  writeJsonSync,
-} from '@socketsecurity/lib/fs/write-json'
+import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-file-helper'
 

@@ -25,10 +25,7 @@ import {
   type Choice,
   type Context,
 } from '@socketsecurity/lib/stdio/prompts'
-import {
-  THEMES,
-  type ThemeName,
-} from '@socketsecurity/lib/themes/themes'
+import { THEMES, type ThemeName } from '@socketsecurity/lib/themes/themes'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('stdio/prompts', () => {

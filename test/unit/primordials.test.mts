@@ -101,10 +101,7 @@ import {
   globalThisRef,
 } from '@socketsecurity/lib/primordials/globals'
 
-import {
-  JSONParse,
-  JSONStringify,
-} from '@socketsecurity/lib/primordials/json'
+import { JSONParse, JSONStringify } from '@socketsecurity/lib/primordials/json'
 
 import {
   MapCtor,

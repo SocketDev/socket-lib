@@ -11,11 +11,7 @@ import {
   getVitest,
   isTest,
 } from '@socketsecurity/lib/env/test'
-import {
-  clearEnv,
-  resetEnv,
-  setEnv,
-} from '@socketsecurity/lib/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/test', () => {

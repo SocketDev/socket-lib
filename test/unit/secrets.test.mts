@@ -48,21 +48,18 @@ export function rng(): string {
 }
 
 describe('secrets/keychain', () => {
-  it.skipIf(!BACKEND_OK)(
-    'write/read/delete round-trip',
-    async () => {
-      const service = `socket-lib-test-${rng()}`
-      const account = 'TEST_TOKEN'
-      const value = `test-value-${rng()}`
-      try {
-        await writeSecret({ service, account, value })
-        const back = await readSecret({ service, account })
-        expect(back).toBe(value)
-      } finally {
-        await deleteSecret({ service, account })
-      }
-    },
-  )
+  it.skipIf(!BACKEND_OK)('write/read/delete round-trip', async () => {
+    const service = `socket-lib-test-${rng()}`
+    const account = 'TEST_TOKEN'
+    const value = `test-value-${rng()}`
+    try {
+      await writeSecret({ service, account, value })
+      const back = await readSecret({ service, account })
+      expect(back).toBe(value)
+    } finally {
+      await deleteSecret({ service, account })
+    }
+  })
 
   it.skipIf(!BACKEND_OK)(
     'read returns undefined for absent entry',
@@ -241,23 +238,20 @@ SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_T
     }
   })
 
-  it.skipIf(!IS_MACOS)(
-    'returns undefined on non-existent rc location',
-    () => {
-      const { cleanup } = withFakeHome()
-      try {
-        // Force an "other" shell so pickRcFile returns undefined.
-        process.env['SHELL'] = '/bin/exotic-shell'
-        const r = rc.write({
-          service: 'test-svc',
-          exports: { TEST: 'v' },
-        })
-        expect(r).toBeUndefined()
-      } finally {
-        cleanup()
-      }
-    },
-  )
+  it.skipIf(!IS_MACOS)('returns undefined on non-existent rc location', () => {
+    const { cleanup } = withFakeHome()
+    try {
+      // Force an "other" shell so pickRcFile returns undefined.
+      process.env['SHELL'] = '/bin/exotic-shell'
+      const r = rc.write({
+        service: 'test-svc',
+        exports: { TEST: 'v' },
+      })
+      expect(r).toBeUndefined()
+    } finally {
+      cleanup()
+    }
+  })
 
   // Verify existsSync of the temp file (sanity).
   it('temp-home fixture sets up correctly', () => {

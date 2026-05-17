@@ -8,7 +8,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { isQuiet } from '@socketsecurity/lib/argv/flags'
+import { isQuiet } from '@socketsecurity/lib/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 import { externalPackages, scopedPackages } from '../build-externals/config.mts'

@@ -41,9 +41,8 @@ const vitestConfig = defineConfig({
       'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
       pacote: path.resolve(projectRoot, 'src/external/pacote'),
       '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
-      // Both names resolve to src/ — `lib` is the canonical published
-      // name, `lib-stable` is the fleet-wide infra alias.
-      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
+      // Resolve `@socketsecurity/lib` to local src/ so test files don't
+      // pull in the published version through the pnpm overrides block.
       '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
     },
   },

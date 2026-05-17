@@ -23,10 +23,7 @@ import { join } from 'node:path'
 
 import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
 
-import {
-  isSymlinkSync,
-  safeStatSync,
-} from '@socketsecurity/lib/fs/inspect'
+import { isSymlinkSync, safeStatSync } from '@socketsecurity/lib/fs/inspect'
 import {
   readFileBinary,
   safeReadFileSync,

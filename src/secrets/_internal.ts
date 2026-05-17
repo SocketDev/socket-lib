@@ -36,49 +36,10 @@
 const valueCache = new Map<string, string | undefined>()
 const inflight = new Map<string, Promise<string | undefined>>()
 
-function cacheKey(service: string, account: string): string {
+export function cacheKey(service: string, account: string): string {
   // ` ` is invalid in either a real service name or an
   // account name, so it's a safe separator that can't collide.
   return `${service} ${account}`
-}
-
-/**
- * Look up a cached value. Returns `undefined` for both "cached as
- * absent" and "not yet cached" — callers that need to distinguish
- * those cases should use `has` first.
- */
-export function getCached(
-  service: string,
-  account: string,
-): string | undefined {
-  return valueCache.get(cacheKey(service, account))
-}
-
-export function has(service: string, account: string): boolean {
-  return valueCache.has(cacheKey(service, account))
-}
-
-/**
- * Store a value (or `undefined` to record an absent entry) so later
- * reads of the same key short-circuit the OS call.
- */
-export function setCached(
-  service: string,
-  account: string,
-  value: string | undefined,
-): void {
-  valueCache.set(cacheKey(service, account), value)
-}
-
-/**
- * Drop a cached value. Called by `writeSecret` / `deleteSecret`
- * after the underlying OS state changes so a subsequent
- * `readSecret` reflects the new reality. Also called by
- * `invalidateAll()` for service-wide refreshes.
- */
-export function invalidate(service: string, account: string): void {
-  valueCache.delete(cacheKey(service, account))
-  inflight.delete(cacheKey(service, account))
 }
 
 /**
@@ -114,10 +75,49 @@ export async function dedupeRead(
 }
 
 /**
+ * Look up a cached value. Returns `undefined` for both "cached as
+ * absent" and "not yet cached" — callers that need to distinguish
+ * those cases should use `has` first.
+ */
+export function getCached(
+  service: string,
+  account: string,
+): string | undefined {
+  return valueCache.get(cacheKey(service, account))
+}
+
+export function has(service: string, account: string): boolean {
+  return valueCache.has(cacheKey(service, account))
+}
+
+/**
+ * Drop a cached value. Called by `writeSecret` / `deleteSecret`
+ * after the underlying OS state changes so a subsequent
+ * `readSecret` reflects the new reality. Also called by
+ * `invalidateAll()` for service-wide refreshes.
+ */
+export function invalidate(service: string, account: string): void {
+  valueCache.delete(cacheKey(service, account))
+  inflight.delete(cacheKey(service, account))
+}
+
+/**
  * Wipe the entire cache. Tests use this between cases; consumers
  * generally don't need it (process exit drops the cache anyway).
  */
 export function invalidateAll(): void {
   valueCache.clear()
   inflight.clear()
+}
+
+/**
+ * Store a value (or `undefined` to record an absent entry) so later
+ * reads of the same key short-circuit the OS call.
+ */
+export function setCached(
+  service: string,
+  account: string,
+  value: string | undefined,
+): void {
+  valueCache.set(cacheKey(service, account), value)
 }

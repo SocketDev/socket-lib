@@ -15,11 +15,15 @@ of code shouldn't have to scroll to the import block to understand what
 ```ts
 // NO — what is being read?
 import { read, write, del } from '@socketsecurity/lib/secrets/keychain'
-read({ service, account })          // 200 LOC later: which read?
+read({ service, account }) // 200 LOC later: which read?
 
 // YES — call site stands alone
-import { readSecret, writeSecret, deleteSecret } from '@socketsecurity/lib/secrets/keychain'
-readSecret({ service, account })    // obvious
+import {
+  readSecret,
+  writeSecret,
+  deleteSecret,
+} from '@socketsecurity/lib/secrets/keychain'
+readSecret({ service, account }) // obvious
 ```
 
 Node's stdlib follows the same rule: `fs.writeFileSync`, not `fs.writeSync`.
@@ -47,7 +51,7 @@ parseJsonSafe  not  safeJsonParse
 toEditablePackageJson  not  pkgJsonToEditable
 ```
 
-The verb tells the reader the *kind* of operation; the noun says *what* it
+The verb tells the reader the _kind_ of operation; the noun says _what_ it
 operates on.
 
 ## Plural matches the underlying type

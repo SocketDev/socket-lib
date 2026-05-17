@@ -7,11 +7,7 @@
  */
 
 import { getPreCommit } from '@socketsecurity/lib/env/pre-commit'
-import {
-  clearEnv,
-  resetEnv,
-  setEnv,
-} from '@socketsecurity/lib/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/pre-commit', () => {

@@ -26,11 +26,7 @@ import {
   getSocketUserDir,
   getUserHomeDir,
 } from '@socketsecurity/lib/paths/socket'
-import {
-  clearEnv,
-  resetEnv,
-  setEnv,
-} from '@socketsecurity/lib/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import {
   clearPath,
   resetPaths,

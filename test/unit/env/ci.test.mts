@@ -9,11 +9,7 @@
  */
 
 import { getCI } from '@socketsecurity/lib/env/ci'
-import {
-  clearEnv,
-  resetEnv,
-  setEnv,
-} from '@socketsecurity/lib/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('env/ci', () => {
