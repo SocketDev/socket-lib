@@ -45,7 +45,11 @@ import { REPO_ROOT } from './paths.mts'
 // `loadSocketWheelhouseConfig` from `./paths.mts` would force every
 // consumer to widen their paths.mts surface — wrong direction. Keep
 // the per-package paths.mts narrow; carry the standalone helpers here.
-const NODE_MODULES_CACHE_DIR = path.join(REPO_ROOT, 'node_modules', '.cache')
+const NODE_MODULES_CACHE_DIR = path.join(
+  REPO_ROOT,
+  'node_modules',
+  '.cache',
+)
 
 const SOCKET_WHEELHOUSE_CONFIG_PRIMARY_REL = '.config/socket-wheelhouse.json'
 const SOCKET_WHEELHOUSE_CONFIG_LEGACY_REL = '.socket-wheelhouse.json'
@@ -54,7 +58,7 @@ interface LoadedSocketWheelhouseConfig {
   readonly value: Record<string, unknown>
 }
 
-export function loadSocketWheelhouseConfig(
+function loadSocketWheelhouseConfig(
   repoRoot: string,
 ): LoadedSocketWheelhouseConfig | undefined {
   const primary = path.join(repoRoot, SOCKET_WHEELHOUSE_CONFIG_PRIMARY_REL)
@@ -64,9 +68,7 @@ export function loadSocketWheelhouseConfig(
     : existsSync(legacy)
       ? legacy
       : undefined
-  if (!target) {
-    return undefined
-  }
+  if (!target) return undefined
   let raw: string
   try {
     raw = readFileSync(target, 'utf8')
@@ -176,7 +178,7 @@ interface CliFlags {
   json: boolean
 }
 
-export function parseFlags(): CliFlags {
+function parseFlags(): CliFlags {
   const argv = process.argv.slice(2)
   return {
     fix: argv.includes('--fix'),
@@ -191,10 +193,8 @@ export function parseFlags(): CliFlags {
  * (parse error, missing fields, wrong repo) are treated as absent —
  * the next run will rewrite them.
  */
-export function readCache(repo: string): CacheEntry | undefined {
-  if (!existsSync(CACHE_FILE)) {
-    return undefined
-  }
+function readCache(repo: string): CacheEntry | undefined {
+  if (!existsSync(CACHE_FILE)) return undefined
   let raw: string
   try {
     raw = readFileSync(CACHE_FILE, 'utf8')
@@ -207,20 +207,14 @@ export function readCache(repo: string): CacheEntry | undefined {
   } catch {
     return undefined
   }
-  if (entry.repo !== repo) {
-    return undefined
-  }
+  if (entry.repo !== repo) return undefined
   const verifiedAt = Date.parse(entry.verifiedAt)
-  if (!Number.isFinite(verifiedAt)) {
-    return undefined
-  }
-  if (Date.now() - verifiedAt > (entry.ttl ?? TTL_MS)) {
-    return undefined
-  }
+  if (!Number.isFinite(verifiedAt)) return undefined
+  if (Date.now() - verifiedAt > (entry.ttl ?? TTL_MS)) return undefined
   return entry
 }
 
-export function writeCache(entry: CacheEntry): void {
+function writeCache(entry: CacheEntry): void {
   if (!existsSync(NODE_MODULES_CACHE_DIR)) {
     mkdirSync(NODE_MODULES_CACHE_DIR, { recursive: true })
   }
@@ -236,21 +230,18 @@ export function writeCache(entry: CacheEntry): void {
  * SocketDev fork's settings, not upstream's. The git remote is the
  * source of truth for "which repo does this checkout push to."
  */
-export function resolveRepo(): string | undefined {
-  const remote = spawnSync('git', ['config', '--get', 'remote.origin.url'], {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-  })
-  if (remote.status !== 0) {
-    return undefined
-  }
+function resolveRepo(): string | undefined {
+  const remote = spawnSync(
+    'git',
+    ['config', '--get', 'remote.origin.url'],
+    { cwd: REPO_ROOT, encoding: 'utf8' },
+  )
+  if (remote.status !== 0) return undefined
   const url = remote.stdout.trim()
   // Match `git@github.com:owner/repo[.git]` or
   // `https://github.com/owner/repo[.git]`.
   const m = /github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/.exec(url)
-  if (!m) {
-    return undefined
-  }
+  if (!m) return undefined
   return `${m[1]}/${m[2]}`
 }
 
@@ -259,7 +250,7 @@ export function resolveRepo(): string | undefined {
  * or undefined on any error. The caller decides whether undefined is
  * an audit-failing condition or a soft skip.
  */
-export function ghApi<T>(
+function ghApi<T>(
   endpoint: string,
   method: 'GET' | 'PATCH' = 'GET',
   body?: Record<string, unknown>,
@@ -288,9 +279,7 @@ export function ghApi<T>(
     }
     return undefined
   }
-  if (!r.stdout.trim()) {
-    return undefined as unknown as T
-  }
+  if (!r.stdout.trim()) return undefined as unknown as T
   try {
     return JSON.parse(r.stdout) as T
   } catch {
@@ -306,11 +295,7 @@ export function ghApi<T>(
  *
  * Alphabetical order.
  */
-const REQUIRED_APP_SLUGS = [
-  'cursor',
-  'socket-security',
-  'socket-trufflehog',
-] as const
+const REQUIRED_APP_SLUGS = ['cursor', 'socket-security', 'socket-trufflehog'] as const
 
 interface CheckSuitesPayload {
   check_suites?: Array<{
@@ -339,18 +324,14 @@ interface CheckSuitesPayload {
  * `{ <name>: <value or null> }`. Empty object when the API isn't
  * available or the call fails — equivalent to "no opt-outs."
  */
-export function loadCustomProperties(
-  repo: string,
-): Record<string, string | null> {
+function loadCustomProperties(repo: string): Record<string, string | null> {
   const props = ghApi<CustomPropertyValue[]>(`repos/${repo}/properties/values`)
-  if (!Array.isArray(props)) {
-    return {}
-  }
+  if (!Array.isArray(props)) return {}
   const out: Record<string, string | null> = {}
   for (const p of props) {
     if (typeof p.property_name === 'string') {
       out[p.property_name] =
-        p.value === null || typeof p.value === 'string' ? p.value : undefined
+        p.value === null || typeof p.value === 'string' ? p.value : null
     }
   }
   return out
@@ -377,31 +358,22 @@ export function loadCustomProperties(
  * The maintainer's signed statement IS the install record — trust +
  * verify-once-via-eyeballs > unreliable automation.
  */
-export function readDeclaredApps(): Set<string> {
+function readDeclaredApps(): Set<string> {
   const declared = new Set<string>()
   const loaded = loadSocketWheelhouseConfig(REPO_ROOT)
-  if (!loaded) {
-    return declared
-  }
+  if (!loaded) return declared
   const github = loaded.value['github']
-  if (typeof github !== 'object' || github === null) {
-    return declared
-  }
+  if (typeof github !== 'object' || github === null) return declared
   const apps = (github as Record<string, unknown>)['apps']
   if (Array.isArray(apps)) {
     for (const a of apps) {
-      if (typeof a === 'string') {
-        declared.add(a)
-      }
+      if (typeof a === 'string') declared.add(a)
     }
   }
   return declared
 }
 
-export function detectInstalledApps(
-  repo: string,
-  defaultBranch: string,
-): Set<string> {
+function detectInstalledApps(repo: string, defaultBranch: string): Set<string> {
   const seen = new Set<string>()
   // List of commits, not a single commit — `/commits` (plural) with
   // `sha` query for the branch ref. The singular `/commits/{ref}`
@@ -410,32 +382,24 @@ export function detectInstalledApps(
     `repos/${repo}/commits?sha=${encodeURIComponent(defaultBranch)}&per_page=10`,
   )
   for (const c of commits ?? []) {
-    if (!c.sha) {
-      continue
-    }
+    if (!c.sha) continue
     const suites = ghApi<CheckSuitesPayload>(
       `repos/${repo}/commits/${c.sha}/check-suites?per_page=100`,
     )
     for (const s of suites?.check_suites ?? []) {
-      if (s.app?.slug) {
-        seen.add(s.app.slug)
-      }
+      if (s.app?.slug) seen.add(s.app.slug)
     }
-    if (seen.size >= REQUIRED_APP_SLUGS.length) {
-      break
-    }
+    if (seen.size >= REQUIRED_APP_SLUGS.length) break
   }
   return seen
 }
 
 interface WorkflowsPayload {
-  workflows?:
-    | Array<{
-        name?: string | undefined
-        path?: string | undefined
-        state?: string | undefined
-      }>
-    | undefined
+  workflows?: Array<{
+    name?: string | undefined
+    path?: string | undefined
+    state?: string | undefined
+  }> | undefined
 }
 
 /**
@@ -466,55 +430,33 @@ const SHARED_WORKFLOW_BASENAMES = [
   'test.yml',
 ] as const
 
-export function detectLocalShadows(
+function detectLocalShadows(
   repo: string,
 ): Array<{ basename: string; localPath: string }> {
   const out: Array<{ basename: string; localPath: string }> = []
-  const wf = ghApi<WorkflowsPayload>(
-    `repos/${repo}/actions/workflows?per_page=100`,
-  )
-  if (!wf?.workflows) {
-    return out
-  }
+  const wf = ghApi<WorkflowsPayload>(`repos/${repo}/actions/workflows?per_page=100`)
+  if (!wf?.workflows) return out
   for (const w of wf.workflows) {
-    if (!w.path || !w.path.startsWith('.github/workflows/')) {
-      continue
-    }
+    if (!w.path || !w.path.startsWith('.github/workflows/')) continue
     const basename = w.path.slice('.github/workflows/'.length)
-    if (basename.startsWith('_local-not-for-reuse-')) {
-      continue
-    }
-    if (
-      !SHARED_WORKFLOW_BASENAMES.includes(
-        basename as (typeof SHARED_WORKFLOW_BASENAMES)[number],
-      )
-    ) {
-      continue
-    }
-    const r = spawnSync('gh', ['api', `repos/${repo}/contents/${w.path}`], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    })
-    if (r.status !== 0) {
-      continue
-    }
+    if (basename.startsWith('_local-not-for-reuse-')) continue
+    if (!SHARED_WORKFLOW_BASENAMES.includes(basename as typeof SHARED_WORKFLOW_BASENAMES[number])) continue
+    const r = spawnSync(
+      'gh',
+      ['api', `repos/${repo}/contents/${w.path}`],
+      { cwd: REPO_ROOT, encoding: 'utf8' },
+    )
+    if (r.status !== 0) continue
     let bodyRaw: string
     try {
-      const obj = JSON.parse(r.stdout) as {
-        content?: string
-        encoding?: string
-      }
-      if (obj.encoding !== 'base64' || !obj.content) {
-        continue
-      }
+      const obj = JSON.parse(r.stdout) as { content?: string; encoding?: string }
+      if (obj.encoding !== 'base64' || !obj.content) continue
       bodyRaw = Buffer.from(obj.content, 'base64').toString('utf8')
     } catch {
       continue
     }
     // Exemption 1: delegates to the shared workflow via `uses:`.
-    if (
-      /uses:\s*SocketDev\/socket-registry\/\.github\/workflows\//.test(bodyRaw)
-    ) {
+    if (/uses:\s*SocketDev\/socket-registry\/\.github\/workflows\//.test(bodyRaw)) {
       continue
     }
     // Exemption 2: explicit opt-out comment. Single unified fleet
@@ -548,7 +490,7 @@ export function detectLocalShadows(
  * would mean the eventual lift forgets the reminder existed. Warn
  * = visible-but-not-CI-blocking.
  */
-export function severityOverride(
+function severityOverride(
   ruleKey: string,
   props: Record<string, string | null>,
 ): Severity {
@@ -574,9 +516,9 @@ export function severityOverride(
   // warnings instead of errors so the maintainer sees the reminder
   // without CI red.
   const customerFacingRules = new Set([
+    'has_wiki must be false',
     'has_discussions must be false',
     'has_projects must be false',
-    'has_wiki must be false',
     'pull_request_creation_policy must be collaborators_only',
   ])
   if (
@@ -589,7 +531,7 @@ export function severityOverride(
   return 'error'
 }
 
-export function evaluate(
+function evaluate(
   repo: string,
   apiRepo: RepoApiPayload,
   apiProtection: BranchProtectionPayload | undefined,
@@ -608,9 +550,7 @@ export function evaluate(
     fixUrl: string,
     fixPatch: Record<string, unknown> | undefined,
   ): void => {
-    if (current === expected) {
-      return
-    }
+    if (current === expected) return
     findings.push({
       rule,
       severity: severityOverride(rule, customProps),
@@ -618,9 +558,7 @@ export function evaluate(
       expected,
       fixUrl,
       fixable: fixPatch !== undefined,
-      ...(fixPatch !== undefined
-        ? { fixPatch, fixRequires: 'repo:admin' }
-        : {}),
+      ...(fixPatch !== undefined ? { fixPatch, fixRequires: 'repo:admin' } : {}),
     })
   }
 
@@ -634,74 +572,20 @@ export function evaluate(
     // and then set it. Manual.
     undefined,
   )
-  check(
-    'has_wiki must be false',
-    apiRepo.has_wiki,
-    false,
-    `${settingsUrl}#features`,
-    { has_wiki: false },
-  )
-  check(
-    'has_discussions must be false',
-    apiRepo.has_discussions,
-    false,
-    `${settingsUrl}#features`,
-    { has_discussions: false },
-  )
-  check(
-    'has_projects must be false',
-    apiRepo.has_projects,
-    false,
-    `${settingsUrl}#features`,
-    { has_projects: false },
-  )
+  check('has_wiki must be false', apiRepo.has_wiki, false, `${settingsUrl}#features`, { has_wiki: false })
+  check('has_discussions must be false', apiRepo.has_discussions, false, `${settingsUrl}#features`, { has_discussions: false })
+  check('has_projects must be false', apiRepo.has_projects, false, `${settingsUrl}#features`, { has_projects: false })
   // Note: `allow_forking` is intentionally NOT checked. The actual
   // "no outside-contributor PRs" gate is `pull_request_creation_
   // policy: collaborators_only` (checked below). Letting people fork
   // for read access / personal-use is the open-source default and
   // doesn't bypass PR review.
-  check(
-    'allow_squash_merge must be true',
-    apiRepo.allow_squash_merge,
-    true,
-    `${settingsUrl}#pull-requests`,
-    { allow_squash_merge: true },
-  )
-  check(
-    'allow_merge_commit must be false',
-    apiRepo.allow_merge_commit,
-    false,
-    `${settingsUrl}#pull-requests`,
-    { allow_merge_commit: false },
-  )
-  check(
-    'allow_rebase_merge must be false',
-    apiRepo.allow_rebase_merge,
-    false,
-    `${settingsUrl}#pull-requests`,
-    { allow_rebase_merge: false },
-  )
-  check(
-    'allow_auto_merge must be true',
-    apiRepo.allow_auto_merge,
-    true,
-    `${settingsUrl}#pull-requests`,
-    { allow_auto_merge: true },
-  )
-  check(
-    'allow_update_branch must be true',
-    apiRepo.allow_update_branch,
-    true,
-    `${settingsUrl}#pull-requests`,
-    { allow_update_branch: true },
-  )
-  check(
-    'delete_branch_on_merge must be true',
-    apiRepo.delete_branch_on_merge,
-    true,
-    `${settingsUrl}#pull-requests`,
-    { delete_branch_on_merge: true },
-  )
+  check('allow_squash_merge must be true', apiRepo.allow_squash_merge, true, `${settingsUrl}#pull-requests`, { allow_squash_merge: true })
+  check('allow_merge_commit must be false', apiRepo.allow_merge_commit, false, `${settingsUrl}#pull-requests`, { allow_merge_commit: false })
+  check('allow_rebase_merge must be false', apiRepo.allow_rebase_merge, false, `${settingsUrl}#pull-requests`, { allow_rebase_merge: false })
+  check('allow_auto_merge must be true', apiRepo.allow_auto_merge, true, `${settingsUrl}#pull-requests`, { allow_auto_merge: true })
+  check('allow_update_branch must be true', apiRepo.allow_update_branch, true, `${settingsUrl}#pull-requests`, { allow_update_branch: true })
+  check('delete_branch_on_merge must be true', apiRepo.delete_branch_on_merge, true, `${settingsUrl}#pull-requests`, { delete_branch_on_merge: true })
   check(
     'pull_request_creation_policy must be collaborators_only',
     apiRepo.pull_request_creation_policy,
@@ -723,10 +607,7 @@ export function evaluate(
   } else if (apiProtection.required_signatures?.enabled !== true) {
     findings.push({
       rule: 'main branch protection: required_signatures must be enabled',
-      severity: severityOverride(
-        'branch-protection-required-signatures',
-        customProps,
-      ),
+      severity: severityOverride('branch-protection-required-signatures', customProps),
       current: apiProtection.required_signatures?.enabled ?? false,
       expected: true,
       fixUrl: branchesUrl,
@@ -747,8 +628,7 @@ export function evaluate(
         // app installation is universal. (Could be made overridable
         // per-property if a use case emerges.)
         severity: 'error',
-        current:
-          'not detected on recent check-suites or declared in .github/required-apps.yml',
+        current: 'not detected on recent check-suites or declared in .github/required-apps.yml',
         expected: 'installed + declared',
         fixUrl: `https://github.com/apps/${slug}`,
         fixable: false,
@@ -777,7 +657,7 @@ export function evaluate(
   return findings
 }
 
-export function applyFixes(repo: string, findings: readonly Finding[]): number {
+function applyFixes(repo: string, findings: readonly Finding[]): number {
   const patchable = findings.filter(f => f.fixable && f.fixPatch)
   if (patchable.length === 0) {
     return 0
@@ -788,9 +668,7 @@ export function applyFixes(repo: string, findings: readonly Finding[]): number {
   for (const f of patchable) {
     Object.assign(patch, f.fixPatch)
   }
-  process.stdout.write(
-    `\n🔧 Applying ${patchable.length} fixes via PATCH /repos/${repo}:\n`,
-  )
+  process.stdout.write(`\n🔧 Applying ${patchable.length} fixes via PATCH /repos/${repo}:\n`)
   for (const [k, v] of Object.entries(patch)) {
     process.stdout.write(`    ${k} = ${JSON.stringify(v)}\n`)
   }
@@ -804,11 +682,7 @@ export function applyFixes(repo: string, findings: readonly Finding[]): number {
   return patchable.length
 }
 
-export function printReport(
-  findings: readonly Finding[],
-  repo: string,
-  json: boolean,
-): void {
+function printReport(findings: readonly Finding[], repo: string, json: boolean): void {
   if (json) {
     process.stdout.write(JSON.stringify({ repo, findings }, null, 2) + '\n')
     return
@@ -838,32 +712,18 @@ export function printReport(
   // Manual-verify items — always print.
   const settingsUrl = `https://github.com/${repo}/settings`
   process.stdout.write('Manual-verify (no REST API; check via UI):\n')
-  process.stdout.write(
-    `  • Commit comments must be disabled: ${settingsUrl} → General → Commits\n`,
-  )
-  process.stdout.write(
-    `  • Release immutability enabled: ${settingsUrl} → General → Releases\n`,
-  )
-  process.stdout.write(
-    `  • Sponsorships button off: ${settingsUrl} → General → Features\n`,
-  )
-  process.stdout.write(
-    `  • Auto-close issues with merged linked PRs ON: ${settingsUrl} → General → Pull Requests\n`,
-  )
-  process.stdout.write(
-    `  • Single-push branch+tag update limit = 5: ${settingsUrl} → General → Pushes\n`,
-  )
-  process.stdout.write(
-    `  • Required Actions secrets present (ANTHROPIC_API_KEY, SOCKET_API_TOKEN): ${settingsUrl}/secrets/actions\n`,
-  )
+  process.stdout.write(`  • Commit comments must be disabled: ${settingsUrl} → General → Commits\n`)
+  process.stdout.write(`  • Release immutability enabled: ${settingsUrl} → General → Releases\n`)
+  process.stdout.write(`  • Sponsorships button off: ${settingsUrl} → General → Features\n`)
+  process.stdout.write(`  • Auto-close issues with merged linked PRs ON: ${settingsUrl} → General → Pull Requests\n`)
+  process.stdout.write(`  • Single-push branch+tag update limit = 5: ${settingsUrl} → General → Pushes\n`)
+  process.stdout.write(`  • Required Actions secrets present (ANTHROPIC_API_KEY, SOCKET_API_TOKEN): ${settingsUrl}/secrets/actions\n`)
 }
 
 function main(): number {
   // CI bypass — settings audits are local-run only. See header comment.
   if (process.env['CI'] === 'true') {
-    process.stdout.write(
-      'CI=true detected; skipping GitHub settings audit (local-run only).\n',
-    )
+    process.stdout.write('CI=true detected; skipping GitHub settings audit (local-run only).\n')
     return 0
   }
 
@@ -880,9 +740,7 @@ function main(): number {
   if (!flags.force && !flags.fix) {
     const cached = readCache(repo)
     if (cached?.pass) {
-      const ageHours = Math.round(
-        (Date.now() - Date.parse(cached.verifiedAt)) / 3600_000,
-      )
+      const ageHours = Math.round((Date.now() - Date.parse(cached.verifiedAt)) / 3600_000)
       process.stdout.write(
         `✓ Cache fresh (${ageHours}h old, < 7d TTL). Use --force to re-check.\n`,
       )

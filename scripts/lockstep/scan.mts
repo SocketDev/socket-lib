@@ -19,41 +19,6 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 
-export function countPatternHits(files: string[], patterns: string[]): number {
-  if (patterns.length === 0) {
-    return 0
-  }
-  // Manifest authors occasionally land a bad regex; surface the bad
-  // pattern and keep going rather than throwing a SyntaxError that
-  // kills the whole run.
-  const compiled: RegExp[] = []
-  for (const p of patterns) {
-    try {
-      compiled.push(new RegExp(p))
-    } catch (e) {
-      logger.warn(
-        `lockstep: skipping invalid regex ${JSON.stringify(p)}: ${errorMessage(e)}`,
-      )
-    }
-  }
-  let hits = 0
-  for (const pat of compiled) {
-    for (const file of files) {
-      let content: string
-      try {
-        content = readFileSync(file, 'utf8')
-      } catch {
-        continue
-      }
-      if (pat.test(content)) {
-        hits += 1
-        break
-      }
-    }
-  }
-  return hits
-}
-
 export function walkDirFiles(dir: string, extRe: RegExp): string[] {
   const files: string[] = []
   if (!existsSync(dir)) {
@@ -87,4 +52,39 @@ export function walkDirFiles(dir: string, extRe: RegExp): string[] {
     }
   }
   return files
+}
+
+export function countPatternHits(files: string[], patterns: string[]): number {
+  if (patterns.length === 0) {
+    return 0
+  }
+  // Manifest authors occasionally land a bad regex; surface the bad
+  // pattern and keep going rather than throwing a SyntaxError that
+  // kills the whole run.
+  const compiled: RegExp[] = []
+  for (const p of patterns) {
+    try {
+      compiled.push(new RegExp(p))
+    } catch (e) {
+      logger.warn(
+        `lockstep: skipping invalid regex ${JSON.stringify(p)}: ${errorMessage(e)}`,
+      )
+    }
+  }
+  let hits = 0
+  for (const pat of compiled) {
+    for (const file of files) {
+      let content: string
+      try {
+        content = readFileSync(file, 'utf8')
+      } catch {
+        continue
+      }
+      if (pat.test(content)) {
+        hits += 1
+        break
+      }
+    }
+  }
+  return hits
 }

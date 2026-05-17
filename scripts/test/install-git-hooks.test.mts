@@ -22,7 +22,17 @@ import { fileURLToPath } from 'node:url'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const SCRIPT = path.join(here, '..', 'install-git-hooks.mts')
 
-export // Initialize an empty git repo at dir. Uses `git init` so the .git
+function makeTmpRepo(): { dir: string; cleanup: () => void } {
+  const dir = mkdtempSync(path.join(tmpdir(), 'install-git-hooks-test-'))
+  return {
+    dir,
+    cleanup: () => {
+      rmSync(dir, { force: true, recursive: true })
+    },
+  }
+}
+
+// Initialize an empty git repo at dir. Uses `git init` so the .git
 // directory has the same shape git itself expects (objects/, refs/,
 // HEAD, …). Inheriting the user's git config could pollute the local
 // `core.hooksPath` we're trying to inspect, so the test config sets a
@@ -33,24 +43,14 @@ function gitInit(dir: string): void {
   assert.strictEqual(r.status, 0, `git init failed: ${r.stderr}`)
 }
 
-export function makeTmpRepo(): { dir: string; cleanup: () => void } {
-  const dir = mkdtempSync(path.join(tmpdir(), 'install-git-hooks-test-'))
-  return {
-    dir,
-    cleanup: () => {
-      rmSync(dir, { force: true, recursive: true })
-    },
-  }
-}
-
-export function readLocalConfig(dir: string, key: string): string | undefined {
+function readLocalConfig(dir: string, key: string): string | undefined {
   const r = spawnSync('git', ['-C', dir, 'config', '--local', '--get', key], {
     encoding: 'utf8',
   })
   return r.status === 0 ? r.stdout.trim() : undefined
 }
 
-export function runInstaller(dir: string): { code: number; stderr: string } {
+function runInstaller(dir: string): { code: number; stderr: string } {
   const r = spawnSync(process.execPath, [SCRIPT], {
     cwd: dir,
     encoding: 'utf8',
@@ -63,10 +63,7 @@ test('install-git-hooks: sets core.hooksPath when .git + .git-hooks both present
   try {
     gitInit(dir)
     mkdirSync(path.join(dir, '.git-hooks'), { recursive: true })
-    writeFileSync(
-      path.join(dir, '.git-hooks', 'pre-commit'),
-      '#!/bin/sh\nexit 0\n',
-    )
+    writeFileSync(path.join(dir, '.git-hooks', 'pre-commit'), '#!/bin/sh\nexit 0\n')
 
     const result = runInstaller(dir)
     assert.strictEqual(result.code, 0, `installer stderr: ${result.stderr}`)

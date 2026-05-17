@@ -13,13 +13,13 @@ import { readdirSync } from 'node:fs'
 import path from 'node:path'
 
 export const SKIP_DIRS = new Set([
-  '.cache',
   '.git',
+  'node_modules',
   'build',
   'dist',
-  'node_modules',
   'out',
   'target',
+  '.cache',
   'upstream',
 ])
 
