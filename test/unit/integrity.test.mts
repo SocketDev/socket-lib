@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for dlx integrity helpers.
+ * @fileoverview Unit tests for integrity helpers.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -9,14 +9,14 @@ import {
   computeHashes,
   normalizeHash,
   verifyHash,
-} from '@socketsecurity/lib/dlx/integrity'
+} from '@socketsecurity/lib/integrity'
 
 import type {
   ComputedHashes,
   NormalizedHash,
-} from '@socketsecurity/lib/dlx/integrity'
+} from '@socketsecurity/lib/integrity'
 
-describe('dlx/integrity', () => {
+describe('integrity', () => {
   describe('normalizeHash', () => {
     it('sniffs sha512 SRI string as integrity', () => {
       const result = normalizeHash('sha512-abc123==')
