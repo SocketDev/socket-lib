@@ -50,44 +50,63 @@ interface CheckResult {
 
 const CACHE_TTL_THRESHOLD_SECONDS = 28800
 
-function isMac(): boolean {
-  return os.platform() === 'darwin'
-}
-
-function isLinux(): boolean {
-  return os.platform() === 'linux'
-}
-
-function readGpgAgentConf(): string | undefined {
-  const confPath = path.join(os.homedir(), '.gnupg', 'gpg-agent.conf')
-  if (!existsSync(confPath)) {
-    return undefined
-  }
-  try {
-    return readFileSync(confPath, 'utf8')
-  } catch {
-    return undefined
-  }
-}
-
-function parseTtl(content: string, directive: string): number | undefined {
-  // gpg-agent.conf supports comments via `#`; directives are
-  // `directive value` on a line. Take the LAST occurrence (gpg-agent
-  // semantics: later wins on duplicates).
-  const lines = content.split('\n')
-  let match: number | undefined
-  for (let i = 0, { length } = lines; i < length; i += 1) {
-    const ln = lines[i]!.trim()
-    if (ln.startsWith('#') || !ln) {
-      continue
-    }
-    const re = new RegExp(`^${directive}\\s+(\\d+)\\s*(?:#.*)?$`)
-    const m = re.exec(ln)
-    if (m && m[1]) {
-      match = Number(m[1])
+export function checkCommitGpgsign(): CheckResult {
+  const r = spawnSync('git', ['config', '--global', '--get', 'commit.gpgsign'], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  const value = typeof r.stdout === 'string' ? r.stdout.trim() : ''
+  if (r.status !== 0 || !value) {
+    return {
+      name: 'commit.gpgsign',
+      ok: true,
+      detail: 'unset (no signing → no prompts; nothing to optimize).',
     }
   }
-  return match
+  if (value !== 'true') {
+    return {
+      name: 'commit.gpgsign',
+      ok: true,
+      detail: `${value} (signing disabled; nothing to optimize).`,
+    }
+  }
+  // Signing IS on globally. Check the key exists.
+  const keyR = spawnSync(
+    'git',
+    ['config', '--global', '--get', 'user.signingkey'],
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+  )
+  const key = typeof keyR.stdout === 'string' ? keyR.stdout.trim() : ''
+  if (!key) {
+    return {
+      name: 'commit.gpgsign',
+      ok: false,
+      detail: 'commit.gpgsign=true but user.signingkey is unset. Commits will fail or prompt for key selection on every sign.',
+      fix:
+        'gpg --list-secret-keys --keyid-format LONG  # find your key id\n' +
+        'git config --global user.signingkey <KEYID>',
+    }
+  }
+  // Confirm gpg can find the key without prompting.
+  const checkR = spawnSync('gpg', ['--list-secret-keys', key], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  if (checkR.status !== 0) {
+    return {
+      name: 'commit.gpgsign',
+      ok: false,
+      detail: `signing key ${key} is configured but gpg can't find it. Every sign will fail.`,
+      fix:
+        `gpg --list-secret-keys --keyid-format LONG  # confirm or pick another key\n` +
+        `git config --global user.signingkey <KEYID>`,
+    }
+  }
+  return {
+    name: 'commit.gpgsign',
+    ok: true,
+    detail: `enabled, key ${key} found.`,
+  }
 }
 
 function checkGpgAgentCacheTtl(): CheckResult {
@@ -180,6 +199,45 @@ function checkGpgTtyExported(): CheckResult {
   }
 }
 
+function checkKeychainTokenAcl(): CheckResult {
+  if (!isMac()) {
+    return {
+      name: 'macOS Keychain token ACL',
+      ok: true,
+      detail: 'skipped (non-macOS).',
+    }
+  }
+  // `security find-generic-password -s socket-cli -a SOCKET_API_TOKEN -g`
+  // would print the entry. We don't want to trigger a Keychain unlock
+  // dialog by reading the password — instead, just check whether the
+  // entry exists via the non-password-fetching form.
+  const r = spawnSync(
+    'security',
+    ['find-generic-password', '-s', 'socket-cli', '-a', 'SOCKET_API_TOKEN'],
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+  )
+  if (r.status !== 0) {
+    return {
+      name: 'macOS Keychain token ACL',
+      ok: false,
+      detail:
+        'No socket-cli/SOCKET_API_TOKEN entry in the Keychain. Tools that fall back to keychain (when env is empty) will prompt for input on first use.',
+      fix:
+        'node .claude/hooks/setup-security-tools/install.mts\n' +
+        '  # prompts for the token interactively and persists it to the Keychain with -T "" (any app can read).',
+    }
+  }
+  // Entry exists. We can't programmatically inspect the ACL without
+  // triggering an unlock prompt; trust that setup-security-tools wrote
+  // it with `-T ''`. Report as OK with a note.
+  return {
+    name: 'macOS Keychain token ACL',
+    ok: true,
+    detail:
+      'socket-cli/SOCKET_API_TOKEN entry present. Assumes ACL=any app (-T "") from setup-security-tools — if you still get Keychain prompts, open Keychain Access → search "socket-cli" → click "Always Allow" once for /usr/bin/security.',
+  }
+}
+
 function checkPinentryProgram(): CheckResult {
   if (!isMac()) {
     return {
@@ -222,65 +280,6 @@ function checkPinentryProgram(): CheckResult {
     name: 'pinentry-program',
     ok: true,
     detail: `${program} (pinentry-mac, Keychain-integrated).`,
-  }
-}
-
-function checkCommitGpgsign(): CheckResult {
-  const r = spawnSync('git', ['config', '--global', '--get', 'commit.gpgsign'], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  })
-  const value = typeof r.stdout === 'string' ? r.stdout.trim() : ''
-  if (r.status !== 0 || !value) {
-    return {
-      name: 'commit.gpgsign',
-      ok: true,
-      detail: 'unset (no signing → no prompts; nothing to optimize).',
-    }
-  }
-  if (value !== 'true') {
-    return {
-      name: 'commit.gpgsign',
-      ok: true,
-      detail: `${value} (signing disabled; nothing to optimize).`,
-    }
-  }
-  // Signing IS on globally. Check the key exists.
-  const keyR = spawnSync(
-    'git',
-    ['config', '--global', '--get', 'user.signingkey'],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
-  )
-  const key = typeof keyR.stdout === 'string' ? keyR.stdout.trim() : ''
-  if (!key) {
-    return {
-      name: 'commit.gpgsign',
-      ok: false,
-      detail: 'commit.gpgsign=true but user.signingkey is unset. Commits will fail or prompt for key selection on every sign.',
-      fix:
-        'gpg --list-secret-keys --keyid-format LONG  # find your key id\n' +
-        'git config --global user.signingkey <KEYID>',
-    }
-  }
-  // Confirm gpg can find the key without prompting.
-  const checkR = spawnSync('gpg', ['--list-secret-keys', key], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  })
-  if (checkR.status !== 0) {
-    return {
-      name: 'commit.gpgsign',
-      ok: false,
-      detail: `signing key ${key} is configured but gpg can't find it. Every sign will fail.`,
-      fix:
-        `gpg --list-secret-keys --keyid-format LONG  # confirm or pick another key\n` +
-        `git config --global user.signingkey <KEYID>`,
-    }
-  }
-  return {
-    name: 'commit.gpgsign',
-    ok: true,
-    detail: `enabled, key ${key} found.`,
   }
 }
 
@@ -336,42 +335,64 @@ function checkSocketTokenInEnv(): CheckResult {
   }
 }
 
-function checkKeychainTokenAcl(): CheckResult {
-  if (!isMac()) {
-    return {
-      name: 'macOS Keychain token ACL',
-      ok: true,
-      detail: 'skipped (non-macOS).',
+function isLinux(): boolean {
+  return os.platform() === 'linux'
+}
+
+function isMac(): boolean {
+  return os.platform() === 'darwin'
+}
+
+function parseTtl(content: string, directive: string): number | undefined {
+  // gpg-agent.conf supports comments via `#`; directives are
+  // `directive value` on a line. Take the LAST occurrence (gpg-agent
+  // semantics: later wins on duplicates).
+  const lines = content.split('\n')
+  let match: number | undefined
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const ln = lines[i]!.trim()
+    if (ln.startsWith('#') || !ln) {
+      continue
+    }
+    const re = new RegExp(`^${directive}\\s+(\\d+)\\s*(?:#.*)?$`)
+    const m = re.exec(ln)
+    if (m && m[1]) {
+      match = Number(m[1])
     }
   }
-  // `security find-generic-password -s socket-cli -a SOCKET_API_TOKEN -g`
-  // would print the entry. We don't want to trigger a Keychain unlock
-  // dialog by reading the password — instead, just check whether the
-  // entry exists via the non-password-fetching form.
-  const r = spawnSync(
-    'security',
-    ['find-generic-password', '-s', 'socket-cli', '-a', 'SOCKET_API_TOKEN'],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
-  )
-  if (r.status !== 0) {
-    return {
-      name: 'macOS Keychain token ACL',
-      ok: false,
-      detail:
-        'No socket-cli/SOCKET_API_TOKEN entry in the Keychain. Tools that fall back to keychain (when env is empty) will prompt for input on first use.',
-      fix:
-        'node .claude/hooks/setup-security-tools/install.mts\n' +
-        '  # prompts for the token interactively and persists it to the Keychain with -T "" (any app can read).',
+  return match
+}
+
+function printReport(summary: CheckSummary): void {
+  logger.error('')
+  logger.error(`=== prompt-less auth setup audit (${summary.ok}/${summary.total} ok) ===`)
+  for (let i = 0, { length } = summary.results; i < length; i += 1) {
+    const r = summary.results[i]!
+    const status = r.ok ? '[ok]  ' : '[FAIL]'
+    logger.error('')
+    logger.error(`${status} ${r.name}`)
+    logger.error(`       ${r.detail}`)
+    if (!r.ok && r.fix) {
+      logger.error('')
+      logger.error('       fix:')
+      const fixLines = r.fix.split('\n')
+      for (let j = 0, l = fixLines.length; j < l; j += 1) {
+        logger.error(`         ${fixLines[j]!}`)
+      }
     }
   }
-  // Entry exists. We can't programmatically inspect the ACL without
-  // triggering an unlock prompt; trust that setup-security-tools wrote
-  // it with `-T ''`. Report as OK with a note.
-  return {
-    name: 'macOS Keychain token ACL',
-    ok: true,
-    detail:
-      'socket-cli/SOCKET_API_TOKEN entry present. Assumes ACL=any app (-T "") from setup-security-tools — if you still get Keychain prompts, open Keychain Access → search "socket-cli" → click "Always Allow" once for /usr/bin/security.',
+  logger.error('')
+}
+
+function readGpgAgentConf(): string | undefined {
+  const confPath = path.join(os.homedir(), '.gnupg', 'gpg-agent.conf')
+  if (!existsSync(confPath)) {
+    return undefined
+  }
+  try {
+    return readFileSync(confPath, 'utf8')
+  } catch {
+    return undefined
   }
 }
 
@@ -398,27 +419,6 @@ function runAllChecks(): CheckSummary {
     failed: results.length - ok,
     results,
   }
-}
-
-function printReport(summary: CheckSummary): void {
-  logger.error('')
-  logger.error(`=== prompt-less auth setup audit (${summary.ok}/${summary.total} ok) ===`)
-  for (let i = 0, { length } = summary.results; i < length; i += 1) {
-    const r = summary.results[i]!
-    const status = r.ok ? '[ok]  ' : '[FAIL]'
-    logger.error('')
-    logger.error(`${status} ${r.name}`)
-    logger.error(`       ${r.detail}`)
-    if (!r.ok && r.fix) {
-      logger.error('')
-      logger.error('       fix:')
-      const fixLines = r.fix.split('\n')
-      for (let j = 0, l = fixLines.length; j < l; j += 1) {
-        logger.error(`         ${fixLines[j]!}`)
-      }
-    }
-  }
-  logger.error('')
 }
 
 function main(): void {

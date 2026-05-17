@@ -19,41 +19,6 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 
-export function walkDirFiles(dir: string, extRe: RegExp): string[] {
-  const files: string[] = []
-  if (!existsSync(dir)) {
-    return files
-  }
-  const stack: string[] = [dir]
-  while (stack.length > 0) {
-    const current = stack.pop()!
-    let entries: string[] = []
-    try {
-      entries = readdirSync(current)
-    } catch {
-      continue
-    }
-    for (const entry of entries) {
-      if (entry === 'node_modules' || entry === '.git' || entry === 'dist') {
-        continue
-      }
-      const full = path.join(current, entry)
-      let stat
-      try {
-        stat = statSync(full)
-      } catch {
-        continue
-      }
-      if (stat.isDirectory()) {
-        stack.push(full)
-      } else if (stat.isFile() && extRe.test(entry)) {
-        files.push(full)
-      }
-    }
-  }
-  return files
-}
-
 export function countPatternHits(files: string[], patterns: string[]): number {
   if (patterns.length === 0) {
     return 0
@@ -87,4 +52,39 @@ export function countPatternHits(files: string[], patterns: string[]): number {
     }
   }
   return hits
+}
+
+export function walkDirFiles(dir: string, extRe: RegExp): string[] {
+  const files: string[] = []
+  if (!existsSync(dir)) {
+    return files
+  }
+  const stack: string[] = [dir]
+  while (stack.length > 0) {
+    const current = stack.pop()!
+    let entries: string[] = []
+    try {
+      entries = readdirSync(current)
+    } catch {
+      continue
+    }
+    for (const entry of entries) {
+      if (entry === 'node_modules' || entry === '.git' || entry === 'dist') {
+        continue
+      }
+      const full = path.join(current, entry)
+      let stat
+      try {
+        stat = statSync(full)
+      } catch {
+        continue
+      }
+      if (stat.isDirectory()) {
+        stack.push(full)
+      } else if (stat.isFile() && extRe.test(entry)) {
+        files.push(full)
+      }
+    }
+  }
+  return files
 }

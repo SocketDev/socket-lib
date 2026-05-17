@@ -22,17 +22,7 @@ import { fileURLToPath } from 'node:url'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const SCRIPT = path.join(here, '..', 'install-git-hooks.mts')
 
-function makeTmpRepo(): { dir: string; cleanup: () => void } {
-  const dir = mkdtempSync(path.join(tmpdir(), 'install-git-hooks-test-'))
-  return {
-    dir,
-    cleanup: () => {
-      rmSync(dir, { force: true, recursive: true })
-    },
-  }
-}
-
-// Initialize an empty git repo at dir. Uses `git init` so the .git
+export // Initialize an empty git repo at dir. Uses `git init` so the .git
 // directory has the same shape git itself expects (objects/, refs/,
 // HEAD, …). Inheriting the user's git config could pollute the local
 // `core.hooksPath` we're trying to inspect, so the test config sets a
@@ -41,6 +31,16 @@ function makeTmpRepo(): { dir: string; cleanup: () => void } {
 function gitInit(dir: string): void {
   const r = spawnSync('git', ['init', '--quiet', dir], { encoding: 'utf8' })
   assert.strictEqual(r.status, 0, `git init failed: ${r.stderr}`)
+}
+
+function makeTmpRepo(): { dir: string; cleanup: () => void } {
+  const dir = mkdtempSync(path.join(tmpdir(), 'install-git-hooks-test-'))
+  return {
+    dir,
+    cleanup: () => {
+      rmSync(dir, { force: true, recursive: true })
+    },
+  }
 }
 
 function readLocalConfig(dir: string, key: string): string | undefined {

@@ -64,7 +64,7 @@ const rootDir = path.resolve(__dirname, '..', '..')
 // Dispatcher.
 // ---------------------------------------------------------------------------
 
-function evaluate(
+export function evaluate(
   rowsWithArea: Array<{ row: Row; area: string }>,
   merged: Manifest,
 ): Report[] {
