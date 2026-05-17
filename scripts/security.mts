@@ -38,13 +38,16 @@ import { spawn } from '@socketsecurity/lib-stable/spawn'
 
 const logger = getDefaultLogger()
 
-async function hasExecutable(name: string): Promise<boolean> {
+export async function hasExecutable(name: string): Promise<boolean> {
   // socket-lib's `which` returns null when the binary isn't on PATH
   // (no throw), so a simple truthy check suffices.
   return Boolean(await which(name))
 }
 
-async function runTool(command: string, args: string[]): Promise<number> {
+export async function runTool(
+  command: string,
+  args: string[],
+): Promise<number> {
   try {
     const result = await spawn(command, args, {
       stdio: 'inherit',
@@ -62,7 +65,9 @@ async function runTool(command: string, args: string[]): Promise<number> {
 
 async function main(): Promise<void> {
   if (!(await hasExecutable('agentshield'))) {
-    logger.info('agentshield not installed; run "pnpm run setup-security-tools" to install')
+    logger.info(
+      'agentshield not installed; run "pnpm run setup-security-tools" to install',
+    )
   } else {
     const agentshieldCode = await runTool('agentshield', ['scan'])
     if (agentshieldCode !== 0) {
@@ -72,7 +77,9 @@ async function main(): Promise<void> {
   }
 
   if (!(await hasExecutable('zizmor'))) {
-    logger.info('zizmor not installed; run "pnpm run setup-security-tools" to install')
+    logger.info(
+      'zizmor not installed; run "pnpm run setup-security-tools" to install',
+    )
     return
   }
 

@@ -30,7 +30,7 @@ import { httpRequest } from '../../src/http-request/request'
 import { Logger } from '../../src/logger/logger'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
-import { runWithTempDir } from '../unit/utils/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper'
 
 setupHttpFixture()
 

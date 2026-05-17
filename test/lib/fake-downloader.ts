@@ -10,7 +10,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import type { BinaryDownloader } from '../../../src/external-tools/from-download'
+import type { BinaryDownloader } from '../../src/external-tools/from-download'
 
 const FAKE_INTEGRITY =
   'sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='
@@ -27,8 +27,11 @@ export function makeFakeDownloader(payload: Buffer | string): {
   const calls: Array<{ url: string; name: string }> = []
   const scratchDir = mkdtempSync(path.join(os.tmpdir(), 'from-download-test-'))
   const downloader = (async (opts: Parameters<BinaryDownloader>[0]) => {
-    calls.push({ url: opts.url, name: opts.name })
-    const binaryPath = path.join(scratchDir, opts.name)
+    // `name` is optional on DlxBinaryOptions; default for tests that
+    // omit it (matches dlx's own fallback to a platform-arch synth).
+    const name = opts.name ?? 'fake-binary'
+    calls.push({ url: opts.url, name })
+    const binaryPath = path.join(scratchDir, name)
     writeFileSync(binaryPath, payload)
     return {
       binaryPath,

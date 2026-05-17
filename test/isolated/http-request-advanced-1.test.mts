@@ -25,7 +25,7 @@ import { enrichErrorMessage } from '../../src/http-request/errors'
 import { httpRequest } from '../../src/http-request/request'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
-import { runWithTempDir } from '../unit/utils/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper'
 
 import type {
   HttpHookRequestInfo,

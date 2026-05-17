@@ -20,32 +20,7 @@ import type { Report } from './types.mts'
 
 const logger = getDefaultLogger()
 
-export interface AreaSummary {
-  area: string
-  total: number
-  ok: number
-  drift: number
-  error: number
-}
-
-export function summarize(reports: Report[]): AreaSummary[] {
-  const byArea = new Map<string, AreaSummary>()
-  for (const r of reports) {
-    let s = byArea.get(r.area)
-    if (!s) {
-      s = { area: r.area, total: 0, ok: 0, drift: 0, error: 0 }
-      byArea.set(r.area, s)
-    }
-    s.total += 1
-    s[r.severity] += 1
-  }
-  return [...byArea.values()].sort((a, b) => a.area.localeCompare(b.area))
-}
-
-export function emitHuman(
-  reports: Report[],
-  summaries: AreaSummary[],
-): number {
+export function emitHuman(reports: Report[], summaries: AreaSummary[]): number {
   logger.info(
     `lockstep — ${reports.length} row(s) across ${summaries.length} area(s)`,
   )
@@ -129,4 +104,26 @@ export function emitHuman(
     return 2
   }
   return 0
+}
+
+export interface AreaSummary {
+  area: string
+  total: number
+  ok: number
+  drift: number
+  error: number
+}
+
+export function summarize(reports: Report[]): AreaSummary[] {
+  const byArea = new Map<string, AreaSummary>()
+  for (const r of reports) {
+    let s = byArea.get(r.area)
+    if (!s) {
+      s = { area: r.area, total: 0, ok: 0, drift: 0, error: 0 }
+      byArea.set(r.area, s)
+    }
+    s.total += 1
+    s[r.severity] += 1
+  }
+  return [...byArea.values()].sort((a, b) => a.area.localeCompare(b.area))
 }

@@ -52,7 +52,9 @@ const loadAllowlistFromJson = (
       break
     }
   }
-  if (!configPath) return undefined
+  if (!configPath) {
+    return undefined
+  }
   let raw: string
   try {
     raw = readFileSync(configPath, 'utf8')
@@ -66,7 +68,9 @@ const loadAllowlistFromJson = (
     return undefined
   }
   const arr = cfg.pathsAllowlist
-  if (arr === undefined) return undefined
+  if (arr === undefined) {
+    return undefined
+  }
   if (!Array.isArray(arr)) {
     process.stderr.write(
       `[check-paths] pathsAllowlist in ${configPath} must be an array; ignoring.\n`,
@@ -90,10 +94,18 @@ const loadAllowlistFromJson = (
       continue
     }
     const entry: AllowlistEntry = { reason: obj['reason'] }
-    if (typeof obj['file'] === 'string') entry.file = obj['file']
-    if (typeof obj['pattern'] === 'string') entry.pattern = obj['pattern']
-    if (typeof obj['rule'] === 'string') entry.rule = obj['rule']
-    if (typeof obj['line'] === 'number') entry.line = obj['line']
+    if (typeof obj['file'] === 'string') {
+      entry.file = obj['file']
+    }
+    if (typeof obj['pattern'] === 'string') {
+      entry.pattern = obj['pattern']
+    }
+    if (typeof obj['rule'] === 'string') {
+      entry.rule = obj['rule']
+    }
+    if (typeof obj['line'] === 'number') {
+      entry.line = obj['line']
+    }
     if (typeof obj['snippet_hash'] === 'string') {
       entry.snippet_hash = obj['snippet_hash']
     }

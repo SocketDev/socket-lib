@@ -20,7 +20,7 @@ import { readJson } from '@socketsecurity/lib/fs/read-json'
 import { safeDelete, safeMkdir } from '@socketsecurity/lib/fs/safe'
 import { writeJson } from '@socketsecurity/lib/fs/write-json'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../unit/utils/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper'
 
 describe('fs integration', () => {
   describe('JSON file operations', () => {

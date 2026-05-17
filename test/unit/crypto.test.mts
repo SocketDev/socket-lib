@@ -80,11 +80,11 @@ describe('crypto', () => {
       hash?: unknown
     }
     const hadNative = typeof cryptoMod.hash === 'function'
-    const nativeHash = hadNative ? cryptoMod.hash : undefined
+    const savedNativeHash = hadNative ? cryptoMod.hash : undefined
 
     afterEach(() => {
-      if (hadNative && nativeHash !== undefined) {
-        cryptoMod.hash = nativeHash
+      if (hadNative && savedNativeHash !== undefined) {
+        cryptoMod.hash = savedNativeHash
       }
       vi.resetModules()
     })
