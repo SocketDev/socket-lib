@@ -2276,7 +2276,8 @@
     "test": "node scripts/test/cli.mts",
     "update": "node scripts/update.mts",
     "lockstep": "node scripts/lockstep.mts",
-    "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts"
+    "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts",
+    "setup-security-tools": "node .claude/hooks/setup-security-tools/install.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
