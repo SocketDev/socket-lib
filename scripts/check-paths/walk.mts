@@ -12,7 +12,16 @@
 import { readdirSync } from 'node:fs'
 import path from 'node:path'
 
-export const SKIP_DIRS = new Set(['.cache', '.git', 'build', 'dist', 'node_modules', 'out', 'target', 'upstream'])
+export const SKIP_DIRS = new Set([
+  '.git',
+  'node_modules',
+  'build',
+  'dist',
+  'out',
+  'target',
+  '.cache',
+  'upstream',
+])
 
 export const walk = function* (
   repoRoot: string,
