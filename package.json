@@ -1844,6 +1844,11 @@
       "types": "./dist/secrets/rc.d.ts",
       "default": "./dist/secrets/rc.js"
     },
+    "./secrets/socket-api-token": {
+      "source": "./src/secrets/socket-api-token.ts",
+      "types": "./dist/secrets/socket-api-token.d.ts",
+      "default": "./dist/secrets/socket-api-token.js"
+    },
     "./secrets/types": {
       "source": "./src/secrets/types.ts",
       "types": "./dist/secrets/types.d.ts",

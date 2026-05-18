@@ -588,15 +588,16 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## secrets/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/secrets/find`](../src/secrets/find.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/keychain`](../src/secrets/keychain.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/linux`](../src/secrets/linux.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/macos`](../src/secrets/macos.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/rc`](../src/secrets/rc.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/types`](../src/secrets/types.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/windows`](../src/secrets/windows.ts)   | _(no description)_ |
+| Subpath                                                                                     | Description        |
+| ------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/secrets/find`](../src/secrets/find.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/keychain`](../src/secrets/keychain.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/linux`](../src/secrets/linux.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/macos`](../src/secrets/macos.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/rc`](../src/secrets/rc.ts)                             | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/socket-api-token`](../src/secrets/socket-api-token.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/types`](../src/secrets/types.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/windows`](../src/secrets/windows.ts)                   | _(no description)_ |
 
 ## shadow/
 

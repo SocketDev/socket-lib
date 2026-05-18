@@ -72,6 +72,8 @@ The vast majority of consumer updates are mechanical import-path rewrites; the r
 
 - **Fleet-compat exports-map aliases:** `@socketsecurity/lib/logger` resolves to `logger/logger`; `@socketsecurity/lib/errors` resolves to `errors/message`. These exist so the canonical socket-wheelhouse hook templates resolve in socket-lib's own checkout; they're not source-level barrels.
 
+- **`secrets/socket-api-token` convenience helper.** New `readSocketApiToken()` + `readSocketApiTokenSync()` exports wrap `secrets/find` with the fleet-canonical Socket API token lookup: keychain service `socket-cli`, env-var precedence `SOCKET_API_TOKEN` (canonical) → `SOCKET_API_KEY` (legacy alias). Consumers (firewall, wheelhouse hooks, ad-hoc scripts) no longer need to hard-code those constants. Accepts `{ allowEnvOnly }` to suppress the keychain fallback in headless contexts where a Keychain auth prompt is unacceptable.
+
 ### Performance
 
 - **Version operations are bound once at module load.** The smol-vs-semver branch was previously redone on every `compare` / `lt` / `gt` / `sort` call. v6 picks the impl once when the module first loads; each export forwards to the resolved binding directly with no per-call branching or wrapper closure.
