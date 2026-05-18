@@ -69,13 +69,13 @@ export type PromiseSpawnOptions = {
  * const { code, stdout } = await result
  * console.log(stdout) // 'hello'
  */
-export type PromiseSpawnResult = Promise<{
+export type PromiseSpawnResult<T = string | Buffer> = Promise<{
   cmd: string
   args: string[] | readonly string[]
   code: number
   signal: NodeJS.Signals | null
-  stdout: string | Buffer
-  stderr: string | Buffer
+  stdout: T
+  stderr: T
 }> & {
   process: ChildProcess
   stdin: WritableStreamType | null
@@ -317,7 +317,7 @@ export type SpawnOptions = Remap<
     stripAnsi?: boolean
   }
 >
-export type SpawnResult = PromiseSpawnResult
+export type SpawnResult<T = string | Buffer> = PromiseSpawnResult<T>
 /**
  * Result object returned when a spawned process completes.
  *

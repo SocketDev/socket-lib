@@ -363,11 +363,8 @@ describe('spawn', () => {
         },
       )
       expect(result.status).toBe(0)
-      const output =
-        typeof result.stdout === 'string'
-          ? result.stdout.trim()
-          : result.stdout?.toString().trim()
-      expect(output).toBe('test-value')
+      // Default stdioString: true → stdout is typed as string.
+      expect(result.stdout.trim()).toBe('test-value')
     })
 
     it('should handle stdioString: true (default)', () => {
@@ -393,13 +390,9 @@ describe('spawn', () => {
         {},
       )
       expect(result.status).toBe(0)
-      // ANSI codes should be stripped (default behavior)
-      const output =
-        typeof result.stdout === 'string'
-          ? result.stdout
-          : result.stdout?.toString()
-      expect(output).not.toContain('\x1b[31m')
-      expect(output).toContain('red')
+      // ANSI codes should be stripped (default behavior); stdout is string.
+      expect(result.stdout).not.toContain('\x1b[31m')
+      expect(result.stdout).toContain('red')
     })
 
     it('should not strip ANSI codes when stripAnsi: false', () => {
@@ -411,12 +404,8 @@ describe('spawn', () => {
         },
       )
       expect(result.status).toBe(0)
-      // ANSI codes should NOT be stripped
-      const output =
-        typeof result.stdout === 'string'
-          ? result.stdout
-          : result.stdout?.toString()
-      expect(output).toContain('\x1b[31m')
+      // ANSI codes should NOT be stripped; stdout is string.
+      expect(result.stdout).toContain('\x1b[31m')
     })
 
     it('should handle readonly args array', () => {

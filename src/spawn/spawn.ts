@@ -126,6 +126,30 @@ const spinner = getDefaultSpinner()
  *   }
  * }
  */
+// Typed overloads — narrow the resolved stdout/stderr based on `stdioString`.
+// Default (stdioString: true) → strings. `stdioString: false` → Buffers.
+export function spawn(
+  cmd: string,
+  args?: string[] | readonly string[],
+): SpawnResult<string>
+export function spawn(
+  cmd: string,
+  args: string[] | readonly string[] | undefined,
+  options: SpawnOptions & { stdioString?: true | undefined },
+  extra?: SpawnExtra | undefined,
+): SpawnResult<string>
+export function spawn(
+  cmd: string,
+  args: string[] | readonly string[] | undefined,
+  options: SpawnOptions & { stdioString: false },
+  extra?: SpawnExtra | undefined,
+): SpawnResult<Buffer>
+export function spawn(
+  cmd: string,
+  args?: string[] | readonly string[],
+  options?: SpawnOptions | undefined,
+  extra?: SpawnExtra | undefined,
+): SpawnResult
 export function spawn(
   cmd: string,
   args?: string[] | readonly string[],
@@ -378,6 +402,42 @@ export function spawn(
  *   console.error('Failed to spawn:', result.error)
  * }
  */
+// Typed overloads — narrow the return based on `stdioString` / `encoding`.
+// Default behavior (stdioString: true, encoding: undefined) returns strings;
+// passing `stdioString: false` or `encoding: 'buffer' | null` returns Buffers.
+// Anything else (e.g. caller passes a runtime-computed options object) falls
+// through to the untyped `string | Buffer` form.
+export function spawnSync(
+  cmd: string,
+  args?: string[] | readonly string[],
+): SpawnSyncReturns<string>
+export function spawnSync(
+  cmd: string,
+  args: string[] | readonly string[] | undefined,
+  options: SpawnSyncOptions & {
+    stdioString?: true | undefined
+    encoding?: Exclude<BufferEncoding, never> | undefined
+  },
+): SpawnSyncReturns<string>
+export function spawnSync(
+  cmd: string,
+  args: string[] | readonly string[] | undefined,
+  options: SpawnSyncOptions & {
+    stdioString: false
+  },
+): SpawnSyncReturns<Buffer>
+export function spawnSync(
+  cmd: string,
+  args: string[] | readonly string[] | undefined,
+  options: SpawnSyncOptions & {
+    encoding: 'buffer' | null
+  },
+): SpawnSyncReturns<Buffer>
+export function spawnSync(
+  cmd: string,
+  args?: string[] | readonly string[],
+  options?: SpawnSyncOptions | undefined,
+): SpawnSyncReturns<string | Buffer>
 export function spawnSync(
   cmd: string,
   args?: string[] | readonly string[],
