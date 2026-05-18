@@ -30,7 +30,7 @@ const vitestConfig = defineConfig({
     // and `./<sub>` from co-located leaves — so `instanceof` checks against
     // exported error classes (e.g. `HttpResponseError`) compare the same
     // prototype on both sides.
-    dedupe: ['@socketsecurity/lib-stable', '@socketsecurity/lib-stable'],
+    dedupe: ['@socketsecurity/lib', '@socketsecurity/lib-stable'],
     preserveSymlinks: false,
     alias: {
       cacache: path.resolve(projectRoot, 'src/external/cacache'),
@@ -41,8 +41,12 @@ const vitestConfig = defineConfig({
       'fast-sort': path.resolve(projectRoot, 'src/external/fast-sort'),
       pacote: path.resolve(projectRoot, 'src/external/pacote'),
       '@socketregistry/scripts': path.resolve(projectRoot, 'scripts'),
-      // Resolve `@socketsecurity/lib-stable` to local src/ so test files don't
-      // pull in the published version through the pnpm overrides block.
+      // Resolve `@socketsecurity/lib(-stable)` to local src/ so test files
+      // don't pull in the published version through the pnpm overrides block
+      // and so the workspace self-import + a test's `@socketsecurity/lib/<sub>`
+      // import share one module instance (matters for `Object.is` /
+      // `instanceof` checks across import shapes).
+      '@socketsecurity/lib': path.resolve(projectRoot, 'src'),
       '@socketsecurity/lib-stable': path.resolve(projectRoot, 'src'),
     },
   },
