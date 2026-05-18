@@ -1,5 +1,5 @@
 /**
- * @fileoverview Maintained Node.js versions without external dependencies.
+ * @file Maintained Node.js versions without external dependencies.
  */
 
 import { ObjectAssign } from '../primordials/object'

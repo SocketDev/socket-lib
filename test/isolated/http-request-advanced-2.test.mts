@@ -1,43 +1,32 @@
 /**
- * @fileoverview Unit tests for HTTP/HTTPS request utilities — advanced surface (part 2 of 3).
- *
- * Covers readIncomingResponse, HttpResponseError, throwOnError,
- * onRetry, parseRetryAfterHeader, and sanitizeHeaders.
- *
- * ┌────────────────────────────────────────────────────────────────┐
- * │  OOM HISTORY — READ BEFORE TOUCHING THIS FILE                   │
- * ├────────────────────────────────────────────────────────────────┤
- * │  The original http-request.test.mts (3390 lines, 202 tests)     │
- * │  appeared to OOM the test worker due to "cumulative state       │
- * │  across many tests". The real culprit was ONE test in the       │
- * │  `readIncomingResponse` describe that built a Readable with     │
- * │  `this.push(undefined)` instead of `this.push(null)`. Stream    │
- * │  machinery only terminates on the null sentinel; `undefined`    │
- * │  is silently treated as "no chunk this tick" and read() is      │
- * │  called again, pushing yet another 'body' chunk. The runaway    │
- * │  spins until v8 OOMs.                                           │
- * │                                                                 │
- * │  Because vitest only reports per-test results when the suite    │
- * │  finishes cleanly, the OOM looked like it happened "after N     │
- * │  tests passed" — but actually all earlier tests ran fine and    │
- * │  the runaway started on the broken test, blowing the heap       │
- * │  before vitest could flush results. This caused a multi-day     │
- * │  misdiagnosis (split files, raised heap caps, switched pool     │
- * │  type) before the actual one-character bug was found.           │
- * │                                                                 │
- * │  Lesson: when a vitest suite OOMs with no per-test failures,    │
- * │  suspect an infinite stream / unbounded async loop BEFORE       │
- * │  reaching for heap caps or splits. Bisect with `-t` (test       │
- * │  name filter) or `pnpm exec vitest -t '<describe>'` to find     │
- * │  the offender quickly.                                          │
- * └────────────────────────────────────────────────────────────────┘
- *
- * Split from the original advanced surface so each test file is
- * scoped to a reasonable surface — splits also let bisection of
- * future runaway tests land faster.
- *
- * Shares the test server with the sibling http-request-*.test.mts
- * files via http-request-fixtures.mts.
+ * @file Unit tests for HTTP/HTTPS request utilities — advanced surface (part 2
+ *   of 3). Covers readIncomingResponse, HttpResponseError, throwOnError,
+ *   onRetry, parseRetryAfterHeader, and sanitizeHeaders.
+ *   ┌────────────────────────────────────────────────────────────────┐ │ OOM
+ *   HISTORY — READ BEFORE TOUCHING THIS FILE │
+ *   ├────────────────────────────────────────────────────────────────┤ │ The
+ *   original http-request.test.mts (3390 lines, 202 tests) │ │ appeared to OOM
+ *   the test worker due to "cumulative state │ │ across many tests". The real
+ *   culprit was ONE test in the │ │ `readIncomingResponse` describe that built
+ *   a Readable with │ │ `this.push(undefined)` instead of `this.push(null)`.
+ *   Stream │ │ machinery only terminates on the null sentinel; `undefined` │ │
+ *   is silently treated as "no chunk this tick" and read() is │ │ called again,
+ *   pushing yet another 'body' chunk. The runaway │ │ spins until v8 OOMs. │ │
+ *   │ │ Because vitest only reports per-test results when the suite │ │
+ *   finishes cleanly, the OOM looked like it happened "after N │ │ tests
+ *   passed" — but actually all earlier tests ran fine and │ │ the runaway
+ *   started on the broken test, blowing the heap │ │ before vitest could flush
+ *   results. This caused a multi-day │ │ misdiagnosis (split files, raised heap
+ *   caps, switched pool │ │ type) before the actual one-character bug was
+ *   found. │ │ │ │ Lesson: when a vitest suite OOMs with no per-test failures,
+ *   │ │ suspect an infinite stream / unbounded async loop BEFORE │ │ reaching
+ *   for heap caps or splits. Bisect with `-t` (test │ │ name filter) or `pnpm
+ *   exec vitest -t '<describe>'` to find │ │ the offender quickly. │
+ *   └────────────────────────────────────────────────────────────────┘ Split
+ *   from the original advanced surface so each test file is scoped to a
+ *   reasonable surface — splits also let bisection of future runaway tests land
+ *   faster. Shares the test server with the sibling http-request-*.test.mts
+ *   files via http-request-fixtures.mts.
  */
 
 import http from 'node:http'

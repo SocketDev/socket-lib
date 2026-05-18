@@ -1,10 +1,9 @@
 /**
- * @fileoverview Object mutation helpers — `merge` (deep recursive),
- * `objectAssign` (alias for native), `objectFreeze` (alias for native).
- *
- * `merge` includes infinite-loop detection via `LOOP_SENTINEL` because
- * `__proto__` and self-referential graphs would otherwise blow the
- * stack on a recursive descent.
+ * @file Object mutation helpers — `merge` (deep recursive), `objectAssign`
+ *   (alias for native), `objectFreeze` (alias for native). `merge` includes
+ *   infinite-loop detection via `LOOP_SENTINEL` because `__proto__` and
+ *   self-referential graphs would otherwise blow the stack on a recursive
+ *   descent.
  */
 
 import { LOOP_SENTINEL } from '../constants/sentinels'
@@ -21,24 +20,25 @@ import { isObject } from './predicates'
  * completely replace arrays in target (no element-wise merging). Objects are
  * merged recursively. Includes infinite loop detection for safety.
  *
+ * @example
+ *   ;```ts
+ *   merge(
+ *     { config: { api: 'v1', timeout: 1000 } },
+ *     { config: { api: 'v2', retries: 3 } },
+ *   )
+ *   // { config: { api: 'v2', timeout: 1000, retries: 3 } }
+ *   ```
+ *
+ * @example
+ *   ;```ts
+ *   // Arrays are replaced, not merged
+ *   merge({ arr: [1, 2] }, { arr: [3] }) // { arr: [3] }
+ *   ```
+ *
  * @param target - The object to merge into (will be modified)
- * @param source - The object to merge from
+ * @param source - The object to merge from.
+ *
  * @returns The modified target object
- *
- * @example
- * ```ts
- * merge(
- *   { config: { api: 'v1', timeout: 1000 } },
- *   { config: { api: 'v2', retries: 3 } }
- * )
- * // { config: { api: 'v2', timeout: 1000, retries: 3 } }
- * ```
- *
- * @example
- * ```ts
- * // Arrays are replaced, not merged
- * merge({ arr: [1, 2] }, { arr: [3] }) // { arr: [3] }
- * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function merge<T extends object, U extends object>(
@@ -102,13 +102,13 @@ export function merge<T extends object, U extends object>(
 /**
  * Alias for native `Object.assign`.
  *
- * Copies all enumerable own properties from one or more source objects
- * to a target object and returns the modified target object.
+ * Copies all enumerable own properties from one or more source objects to a
+ * target object and returns the modified target object.
  *
  * @example
- * ```ts
- * objectAssign({ a: 1 }, { b: 2 }) // { a: 1, b: 2 }
- * ```
+ *   ;```ts
+ *   objectAssign({ a: 1 }, { b: 2 }) // { a: 1, b: 2 }
+ *   ```
  */
 export const objectAssign = Object.assign
 
@@ -119,10 +119,10 @@ export const objectAssign = Object.assign
  * properties from being removed or modified. Makes the object immutable.
  *
  * @example
- * ```ts
- * const obj = { a: 1 }
- * objectFreeze(obj)
- * obj.a = 2 // Silently fails (or throws in strict mode)
- * ```
+ *   ;```ts
+ *   const obj = { a: 1 }
+ *   objectFreeze(obj)
+ *   obj.a = 2 // Silently fails (or throws in strict mode)
+ *   ```
  */
 export const objectFreeze = Object.freeze

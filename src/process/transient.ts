@@ -1,6 +1,7 @@
 /**
- * @fileoverview Temporary package executor detection utilities for Socket ecosystem.
- * Identifies and handles temporary execution contexts such as npx, pnpm dlx, and yarn dlx.
+ * @file Temporary package executor detection utilities for Socket ecosystem.
+ *   Identifies and handles temporary execution contexts such as npx, pnpm dlx,
+ *   and yarn dlx.
  */
 
 import process from 'node:process'
@@ -9,19 +10,20 @@ import { WIN32 } from '../constants/platform'
 import { normalizePath } from '../paths/normalize'
 
 /**
- * Detects if the current process is running in a temporary package execution context
- * such as npm exec, npx, pnpm dlx, or yarn dlx.
+ * Detects if the current process is running in a temporary package execution
+ * context such as npm exec, npx, pnpm dlx, or yarn dlx.
  *
- * When package managers run commands via exec/npx/dlx, they execute in temporary directories
- * that are cleaned up after execution. Creating persistent shadows or modifying PATH
- * in these contexts can break subsequent package manager commands.
+ * When package managers run commands via exec/npx/dlx, they execute in
+ * temporary directories that are cleaned up after execution. Creating
+ * persistent shadows or modifying PATH in these contexts can break subsequent
+ * package manager commands.
  *
  * @example
- * ```typescript
- * if (isTransientProcess()) {
- *   console.log('Running in a temporary executor context')
- * }
- * ```
+ *   ;```typescript
+ *   if (isTransientProcess()) {
+ *     console.log('Running in a temporary executor context')
+ *   }
+ *   ```
  */
 export function isTransientProcess(cwd = process.cwd()): boolean {
   // Check environment variable for exec/npx/dlx indicators.

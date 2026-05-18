@@ -1,20 +1,20 @@
 /**
- * @fileoverview GitHub API authentication header helpers.
+ * @file GitHub API authentication header helpers.
  */
 
 import process from 'node:process'
 
 /**
- * Get GitHub authentication headers if token is available.
- * Checks GH_TOKEN or GITHUB_TOKEN environment variables.
- *
- * @returns Headers object with Authorization header if token exists.
+ * Get GitHub authentication headers if token is available. Checks GH_TOKEN or
+ * GITHUB_TOKEN environment variables.
  *
  * @example
- * ```typescript
- * const headers = getAuthHeaders()
- * // { Accept: 'application/vnd.github+json', Authorization: 'Bearer ...' }
- * ```
+ *   ;```typescript
+ *   const headers = getAuthHeaders()
+ *   // { Accept: 'application/vnd.github+json', Authorization: 'Bearer ...' }
+ *   ```
+ *
+ * @returns Headers object with Authorization header if token exists.
  */
 export function getAuthHeaders(): Record<string, string> {
   const token = process.env['GH_TOKEN'] || process.env['GITHUB_TOKEN']

@@ -1,10 +1,9 @@
 /**
- * @fileoverview Safe references to `Math` constants and methods.
- *
- * Methods prefer the smol fast-path (`node:smol-primordial`) when
- * available — V8 Fast API typed implementations TurboFan inlines into
- * JIT'd callers. Constants stay as the stock `Math.X` since they are
- * pre-computed scalar values with no fast-path benefit.
+ * @file Safe references to `Math` constants and methods. Methods prefer the
+ *   smol fast-path (`node:smol-primordial`) when available — V8 Fast API typed
+ *   implementations TurboFan inlines into JIT'd callers. Constants stay as the
+ *   stock `Math.X` since they are pre-computed scalar values with no fast-path
+ *   benefit.
  */
 
 import { getSmolPrimordial } from '../smol/primordial'

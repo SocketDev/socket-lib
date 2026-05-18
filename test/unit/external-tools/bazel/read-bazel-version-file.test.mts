@@ -1,10 +1,8 @@
 /**
- * @fileoverview Unit tests for read-bazel-version-file.ts.
- *
- * Each test owns its own tmpdir (allocated inside the test, not
- * via beforeEach) because vitest's `isolate: false` + concurrent
- * runs make a shared `let tmpDir` variable race across tests in
- * the same describe block.
+ * @file Unit tests for read-bazel-version-file.ts. Each test owns its own
+ *   tmpdir (allocated inside the test, not via beforeEach) because vitest's
+ *   `isolate: false` + concurrent runs make a shared `let tmpDir` variable race
+ *   across tests in the same describe block.
  */
 
 import fs from 'node:fs/promises'

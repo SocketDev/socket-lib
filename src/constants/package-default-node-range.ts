@@ -1,5 +1,5 @@
 /**
- * @fileoverview Default Node.js version range for packages.
+ * @file Default Node.js version range for packages.
  */
 
 import { maintainedNodeVersions } from './maintained-node-versions'

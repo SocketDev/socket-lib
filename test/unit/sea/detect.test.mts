@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for Node.js Single Executable Application (SEA) utilities.
+ * @file Unit tests for Node.js Single Executable Application (SEA) utilities.
+ *   Tests Node.js SEA (Single Executable Application) detection:
  *
- * Tests Node.js SEA (Single Executable Application) detection:
- * - isSeaBinary() detects if running as SEA binary
- * - getSeaBinaryPath() returns SEA binary path if applicable
- * - NODE_SEA_FUSE environment detection
- * - Process state inspection for SEA mode
- * Used by Socket CLI to detect standalone executable deployment.
+ *   - isSeaBinary() detects if running as SEA binary
+ *   - getSeaBinaryPath() returns SEA binary path if applicable
+ *   - NODE_SEA_FUSE environment detection
+ *   - Process state inspection for SEA mode Used by Socket CLI to detect
+ *     standalone executable deployment.
  */
 
 import { describe, expect, it } from 'vitest'

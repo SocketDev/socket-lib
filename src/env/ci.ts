@@ -1,8 +1,7 @@
 /**
- * @fileoverview CI environment variable getter.
- * Exports `getCI()`, which returns whether the `CI` environment variable is
- * present (using the rewire helper so tests can override without touching
- * `process.env`).
+ * @file CI environment variable getter. Exports `getCI()`, which returns
+ *   whether the `CI` environment variable is present (using the rewire helper
+ *   so tests can override without touching `process.env`).
  */
 
 import { isInEnv } from './rewire'
@@ -10,16 +9,16 @@ import { isInEnv } from './rewire'
 /**
  * Returns whether the CI environment variable is set.
  *
- * @returns `true` if running in a CI environment, `false` otherwise
- *
  * @example
- * ```typescript
- * import { getCI } from '@socketsecurity/lib/env/ci'
+ *   ;```typescript
+ *   import { getCI } from '@socketsecurity/lib/env/ci'
  *
- * if (getCI()) {
- *   console.log('Running in CI')
- * }
- * ```
+ *   if (getCI()) {
+ *     console.log('Running in CI')
+ *   }
+ *   ```
+ *
+ * @returns `true` if running in a CI environment, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getCI(): boolean {

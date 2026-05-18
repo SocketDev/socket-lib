@@ -1,27 +1,25 @@
 /**
- * @fileoverview Error-message enrichment for HTTP/HTTPS requests.
- *
- * `enrichErrorMessage` translates Node.js network error codes
- * (`ECONNREFUSED`, `ENOTFOUND`, `ETIMEDOUT`, etc.) into user-facing
- * guidance prefixed with the failing method + URL. The wording is
- * generic — no product-specific branding — so the request leaves can
- * use it for any caller. `request.ts` invokes this on the `request`
- * `'error'` event before rejecting, which is what surfaces the
- * actionable messages to consumers.
+ * @file Error-message enrichment for HTTP/HTTPS requests. `enrichErrorMessage`
+ *   translates Node.js network error codes (`ECONNREFUSED`, `ENOTFOUND`,
+ *   `ETIMEDOUT`, etc.) into user-facing guidance prefixed with the failing
+ *   method + URL. The wording is generic — no product-specific branding — so
+ *   the request leaves can use it for any caller. `request.ts` invokes this on
+ *   the `request` `'error'` event before rejecting, which is what surfaces the
+ *   actionable messages to consumers.
  */
 
 /**
- * Build an enriched error message based on the error code.
- * Generic guidance (no product-specific branding).
+ * Build an enriched error message based on the error code. Generic guidance (no
+ * product-specific branding).
  *
  * @example
- * ```typescript
- * try {
- *   await fetch('https://api.example.com')
- * } catch (e) {
- *   console.error(enrichErrorMessage('https://api.example.com', 'GET', e))
- * }
- * ```
+ *   ;```typescript
+ *   try {
+ *     await fetch('https://api.example.com')
+ *   } catch (e) {
+ *     console.error(enrichErrorMessage('https://api.example.com', 'GET', e))
+ *   }
+ *   ```
  */
 export function enrichErrorMessage(
   url: string,

@@ -1,11 +1,11 @@
 /**
- * @fileoverview Unit tests for which binary resolution utilities.
+ * @file Unit tests for which binary resolution utilities. Tests binary
+ *   resolution using `which`:
  *
- * Tests binary resolution using `which`:
- * - which() async binary resolution in PATH
- * - whichSync() synchronous binary resolution
- * - Path detection (absolute, relative, bare names)
- * - Cross-platform binary resolution
+ *   - which() async binary resolution in PATH
+ *   - whichSync() synchronous binary resolution
+ *   - Path detection (absolute, relative, bare names)
+ *   - Cross-platform binary resolution
  */
 
 import process from 'node:process'

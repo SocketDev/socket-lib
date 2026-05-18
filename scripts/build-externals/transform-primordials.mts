@@ -1,51 +1,40 @@
 /**
- * @fileoverview Post-bundle transform that rewrites bundled CJS externals
- * to call socket-lib's primordials surface instead of mutable globals.
+ * @file Post-bundle transform that rewrites bundled CJS externals to call
+ *   socket-lib's primordials surface instead of mutable globals. Pipeline:
+ *   esbuild produces dist/external/*.js (CJS bundles) → this transform parses
+ *   each bundle, finds well-known global call sites (Buffer.from, Date.now,
+ *   Object.keys, …), rewrites them to primordial-shaped calls, and prepends a
+ *   CJS require pulling the primordials it needs from a relative path → the
+ *   resulting bundle no longer depends on globals being intact;
+ *   prototype-pollution attacks against the caller realm can't redirect the
+ *   bundled package's behavior. The work is delegated to `applyCodemod()` from
+ *   tools/prim, the same codemod the standalone `prim mod` CLI uses on src/. We
+ *   hand it an `importStyle: { kind: 'cjs', specifier: <per-file-relative-path>
+ *   }` so the inserted statement is a CJS `const { … } = require(…)` rather
+ *   than the ESM `import { … } from …` default. The relative-path computation
+ *   per file is the only piece this module owns: dist/external/foo.js needs
+ *   `../primordials.js`, but dist/external/@npmcli/x/y.js needs
+ *   `../../../primordials.js`. The codemod's specifier-as-function form covers
+ *   that — see tools/prim/src/codemod.mts ImportStyle. The acorn-wasm parser
+ *   has a known range-serialization bug: many node kinds (CallExpression,
+ *   VariableDeclaration, BlockStatement, Program, MemberExpression, etc.) come
+ *   back with `end` set to 0 or a stale unrelated offset because
+ *   compact_serialize.rs's `node.end()` falls through to `(self.data >> 32) as
+ *   u32` for any kind whose data field stores a heap pointer or packed child
+ *   IDs rather than an end position. Inner expression positions (Identifier,
+ *   Literal, etc.) are correct. Workaround lives in
+ *   tools/prim/src/codemod.mts:
  *
- * Pipeline:
- *   esbuild produces dist/external/*.js (CJS bundles)
- *     → this transform parses each bundle, finds well-known global call
- *       sites (Buffer.from, Date.now, Object.keys, …), rewrites them to
- *       primordial-shaped calls, and prepends a CJS require pulling the
- *       primordials it needs from a relative path
- *     → the resulting bundle no longer depends on globals being intact;
- *       prototype-pollution attacks against the caller realm can't
- *       redirect the bundled package's behavior.
- *
- * The work is delegated to `applyCodemod()` from tools/prim, the same
- * codemod the standalone `prim mod` CLI uses on src/. We hand it an
- * `importStyle: { kind: 'cjs', specifier: <per-file-relative-path> }`
- * so the inserted statement is a CJS `const { … } = require(…)` rather
- * than the ESM `import { … } from …` default.
- *
- * The relative-path computation per file is the only piece this module
- * owns: dist/external/foo.js needs `../primordials.js`, but
- * dist/external/@npmcli/x/y.js needs `../../../primordials.js`. The
- * codemod's specifier-as-function form covers that — see
- * tools/prim/src/codemod.mts ImportStyle.
- *
- * The acorn-wasm parser has a known range-serialization bug: many node
- * kinds (CallExpression, VariableDeclaration, BlockStatement, Program,
- * MemberExpression, etc.) come back with `end` set to 0 or a stale
- * unrelated offset because compact_serialize.rs's `node.end()` falls
- * through to `(self.data >> 32) as u32` for any kind whose data field
- * stores a heap pointer or packed child IDs rather than an end
- * position. Inner expression positions (Identifier, Literal, etc.)
- * are correct.
- *
- * Workaround lives in tools/prim/src/codemod.mts:
- *   - `repairEndPositions(ast)` walks depth-first and for any node
- *     whose `end < max child end`, substitutes the descendant-derived
- *     value. Fixes MemberExpression, Identifier, etc. ends — enough
- *     for the static `Foo.bar(args) → FooBar(args)` rewrite path.
- *   - For the prototype `obj.method(args) → Primordial(obj, args)`
- *     path the codemod scans source forward from the last argument's
- *     end to find the matching `)` — see `findClosingParen()`.
- *
- * The transform now runs unconditionally as part of the externals
- * build. If the wasm parser is fixed upstream, both workarounds
- * become no-ops (correct ends pass through unchanged) and can be
- * removed.
+ *   - `repairEndPositions(ast)` walks depth-first and for any node whose `end <
+ *     max child end`, substitutes the descendant-derived value. Fixes
+ *     MemberExpression, Identifier, etc. ends — enough for the static
+ *     `Foo.bar(args) → FooBar(args)` rewrite path.
+ *   - For the prototype `obj.method(args) → Primordial(obj, args)` path the
+ *     codemod scans source forward from the last argument's end to find the
+ *     matching `)` — see `findClosingParen()`. The transform now runs
+ *     unconditionally as part of the externals build. If the wasm parser is
+ *     fixed upstream, both workarounds become no-ops (correct ends pass through
+ *     unchanged) and can be removed.
  */
 
 import path from 'node:path'
@@ -55,10 +44,11 @@ import { applyCodemod, loadPrimordialsSurface } from 'prim'
 /**
  * Apply the primordials codemod to every JS file under `distExternalDir`.
  *
- * @param {string} distRoot          Absolute path to dist/.
- * @param {string} distExternalDir   Absolute path to dist/external/.
+ * @param {string} distRoot Absolute path to dist/.
+ * @param {string} distExternalDir Absolute path to dist/external/.
  * @param {object} [options]
  * @param {boolean} [options.quiet]
+ *
  * @returns {Promise<{ filesChanged: number; rewriteCount: number }>}
  */
 export async function transformPrimordials(

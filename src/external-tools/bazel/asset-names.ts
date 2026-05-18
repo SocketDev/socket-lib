@@ -1,29 +1,32 @@
 /**
- * @fileoverview Upstream Bazel release asset-name mapping per
- * `platform-arch`. Bazel's GitHub Releases use a consistent naming
- * pattern (`bazel-<version>-<os>-<arch>[.exe]`); this leaf encodes
- * the platform-arch → suffix map so the bazelisk-style downloader
- * can build the right URL without spreading the convention.
+ * @file Upstream Bazel release asset-name mapping per `platform-arch`. Bazel's
+ *   GitHub Releases use a consistent naming pattern
+ *   (`bazel-<version>-<os>-<arch>[.exe]`); this leaf encodes the platform-arch
+ *   → suffix map so the bazelisk-style downloader can build the right URL
+ *   without spreading the convention. Bazel publishes native binaries for 5 of
+ *   socket's 8 targets. The 3 gap targets use compat-layer fallbacks:
  *
- * Bazel publishes native binaries for 5 of socket's 8 targets. The
- * 3 gap targets use compat-layer fallbacks:
- *   - `linux-x64-musl` / `linux-arm64-musl` → glibc binary + gcompat
- *     (user must `apk add gcompat` on Alpine)
- *   - `win-arm64` → Windows x64 binary via Prism emulation
- *
- * Callers can read `BAZEL_ASSET_MAP[platformArch].native` to see
- * whether the binary is native to the target or runs under a compat
- * layer.
+ *   - `linux-x64-musl` / `linux-arm64-musl` → glibc binary + gcompat (user must
+ *     `apk add gcompat` on Alpine)
+ *   - `win-arm64` → Windows x64 binary via Prism emulation Callers can read
+ *     `BAZEL_ASSET_MAP[platformArch].native` to see whether the binary is
+ *     native to the target or runs under a compat layer.
  */
 
 import { ObjectFreeze } from '../../primordials/object'
 
 export interface BazelAssetEntry {
-  /** Asset-name suffix appended to `bazel-<version>-`. */
+  /**
+   * Asset-name suffix appended to `bazel-<version>-`.
+   */
   readonly suffix: string
-  /** `true` if this is an upstream-native build; `false` if it runs via compat. */
+  /**
+   * `true` if this is an upstream-native build; `false` if it runs via compat.
+   */
   readonly native: boolean
-  /** Human-readable note about compatibility quirks (if any). */
+  /**
+   * Human-readable note about compatibility quirks (if any).
+   */
   readonly note: string | undefined
 }
 
@@ -91,38 +94,36 @@ export function getBazelAssetEntry(
  */
 export interface BazelDownloadOptions {
   /**
-   * Bazel release version, e.g. `'7.4.1'`. Passed verbatim into the
-   * release tag — the helper doesn't validate against bazel's
-   * release feed, it just formats the URL.
+   * Bazel release version, e.g. `'7.4.1'`. Passed verbatim into the release tag
+   * — the helper doesn't validate against bazel's release feed, it just formats
+   * the URL.
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `BAZEL_ASSET_MAP`.
-   * Returns `undefined` when no entry exists for the target.
+   * Fleet platform-arch token — looked up in `BAZEL_ASSET_MAP`. Returns
+   * `undefined` when no entry exists for the target.
    */
   platformArch: string
 }
 
 /**
- * Build the GitHub release-asset download URL for an upstream Bazel
- * binary. Returns `undefined` when no entry exists for the requested
- * platform-arch.
+ * Build the GitHub release-asset download URL for an upstream Bazel binary.
+ * Returns `undefined` when no entry exists for the requested platform-arch.
  *
  * Note: the underlying asset may be a compat-layer build (see
- * `BazelAssetEntry.native`). Callers that require a native binary
- * should check `getBazelAssetEntry(platformArch).native` before
- * downloading.
+ * `BazelAssetEntry.native`). Callers that require a native binary should check
+ * `getBazelAssetEntry(platformArch).native` before downloading.
  *
- * Reference: https://github.com/bazelbuild/bazel/releases
+ * Reference: https://github.com/bazelbuild/bazel/releases.
  *
  * @example
- * ```typescript
- * const url = getBazelDownloadUrl({
- *   version: '7.4.1',
- *   platformArch: 'darwin-arm64',
- * })
- * // → 'https://github.com/bazelbuild/bazel/releases/download/7.4.1/bazel-7.4.1-darwin-arm64'
- * ```
+ *   ;```typescript
+ *   const url = getBazelDownloadUrl({
+ *     version: '7.4.1',
+ *     platformArch: 'darwin-arm64',
+ *   })
+ *   // → 'https://github.com/bazelbuild/bazel/releases/download/7.4.1/bazel-7.4.1-darwin-arm64'
+ *   ```
  */
 export function getBazelDownloadUrl(
   opts: BazelDownloadOptions,

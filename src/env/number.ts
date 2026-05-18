@@ -1,8 +1,8 @@
 /**
- * @fileoverview `envAsNumber` — coerce an env-var-shaped value into
- * a number. `mode: 'int'` uses `parseInt(_, 10)`; `mode: 'float'`
- * uses `Number()`. Non-finite results round-trip through
- * `defaultValue` unless `allowInfinity: true` is set.
+ * @file `envAsNumber` — coerce an env-var-shaped value into a number. `mode:
+ *   'int'` uses `parseInt(_, 10)`; `mode: 'float'` uses `Number()`. Non-finite
+ *   results round-trip through `defaultValue` unless `allowInfinity: true` is
+ *   set.
  */
 
 import type { EnvAsNumberOptions } from './types'
@@ -22,19 +22,20 @@ const NumberParseInt = Number.parseInt
  * Back-compat overload: passing a bare number as the second argument is
  * equivalent to `{ defaultValue: N }`.
  *
- * @param value - The value to convert
- * @param defaultValueOrOptions - Default (number) or options object
- * @returns The parsed number, or the default value if parsing fails
- *
  * @example
- * ```typescript
- * import { envAsNumber } from '@socketsecurity/lib/env/number'
+ *   ;```typescript
+ *   import { envAsNumber } from '@socketsecurity/lib/env/number'
  *
- * envAsNumber('3000')              // 3000 (int mode)
- * envAsNumber('3.14', { mode: 'float' }) // 3.14
- * envAsNumber('abc')               // 0
- * envAsNumber(undefined, 42)       // 42 (legacy positional default)
- * ```
+ *   envAsNumber('3000') // 3000 (int mode)
+ *   envAsNumber('3.14', { mode: 'float' }) // 3.14
+ *   envAsNumber('abc') // 0
+ *   envAsNumber(undefined, 42) // 42 (legacy positional default)
+ *   ```
+ *
+ * @param value - The value to convert.
+ * @param defaultValueOrOptions - Default (number) or options object.
+ *
+ * @returns The parsed number, or the default value if parsing fails
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function envAsNumber(

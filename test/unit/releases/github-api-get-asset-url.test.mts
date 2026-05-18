@@ -1,7 +1,6 @@
 /**
- * @fileoverview Unit tests for GitHub `getReleaseAssetUrl`.
- *
- * Covers REST + GraphQL fallback for per-tag asset URL discovery.
+ * @file Unit tests for GitHub `getReleaseAssetUrl`. Covers REST + GraphQL
+ *   fallback for per-tag asset URL discovery.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'

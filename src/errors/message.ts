@@ -1,9 +1,9 @@
 /**
- * @fileoverview Human-readable error-message extractor. `errorMessage`
- * walks the `cause` chain via pony-cause's `messageWithCauses` for
- * Errors and falls back to the shared `UNKNOWN_ERROR` sentinel for
- * everything else. `messageWithCauses` and `UNKNOWN_ERROR` are
- * re-exported for callers that need them directly.
+ * @file Human-readable error-message extractor. `errorMessage` walks the
+ *   `cause` chain via pony-cause's `messageWithCauses` for Errors and falls
+ *   back to the shared `UNKNOWN_ERROR` sentinel for everything else.
+ *   `messageWithCauses` and `UNKNOWN_ERROR` are re-exported for callers that
+ *   need them directly.
  */
 
 import { UNKNOWN_ERROR } from '../constants/sentinels'
@@ -16,17 +16,18 @@ export { UNKNOWN_ERROR, messageWithCauses }
 /**
  * Extract a human-readable message from any caught value.
  *
- * Walks the `cause` chain for Errors (via {@link messageWithCauses});
- * coerces primitives and objects to string; returns
- * {@link UNKNOWN_ERROR} for `null`, `undefined`, empty strings,
- * `[object Object]`, or Errors with no message.
+ * Walks the `cause` chain for Errors (via {@link messageWithCauses}); coerces
+ * primitives and objects to string; returns {@link UNKNOWN_ERROR} for `null`,
+ * `undefined`, empty strings, `[object Object]`, or Errors with no message.
  *
  * @example
- * try {
- *   await readConfig(path)
- * } catch (e) {
- *   throw new ErrorCtor(`Failed to read ${path}: ${errorMessage(e)}`, { cause: e })
- * }
+ *   try {
+ *     await readConfig(path)
+ *   } catch (e) {
+ *     throw new ErrorCtor(`Failed to read ${path}: ${errorMessage(e)}`, {
+ *       cause: e,
+ *     })
+ *   }
  */
 export function errorMessage(value: unknown): string {
   if (isError(value)) {

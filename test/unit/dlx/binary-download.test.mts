@@ -1,10 +1,8 @@
 /**
- * @fileoverview Tests for downloadBinaryFile in src/dlx/binary.ts:
- * integrity verification, retry-on-existing-file fast path, download
- * failure wrapping, and chmod-on-Unix.
- *
- * Mocks httpDownload so the test runs hermetically without making real
- * network calls.
+ * @file Tests for downloadBinaryFile in src/dlx/binary.ts: integrity
+ *   verification, retry-on-existing-file fast path, download failure wrapping,
+ *   and chmod-on-Unix. Mocks httpDownload so the test runs hermetically without
+ *   making real network calls.
  */
 
 import { createHash } from 'node:crypto'

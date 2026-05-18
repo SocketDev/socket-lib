@@ -1,6 +1,6 @@
 /**
- * @fileoverview Standard error stream utilities.
- * Provides utilities for writing to stderr with formatting and control.
+ * @file Standard error stream utilities. Provides utilities for writing to
+ *   stderr with formatting and control.
  */
 
 import process from 'node:process'
@@ -17,32 +17,30 @@ import {
 const stderr: NodeJS.WriteStream = process.stderr
 
 /**
- * Clear the current line on stderr.
- * Only works in TTY environments.
+ * Clear the current line on stderr. Only works in TTY environments.
  *
  * @example
- * ```ts
- * writeError('Processing...')
- * clearLine()
- * writeError('Done!')
- * ```
+ *   ;```ts
+ *   writeError('Processing...')
+ *   clearLine()
+ *   writeError('Done!')
+ *   ```
  */
 export function clearLine(): void {
   clearLineOn(stderr)
 }
 
 /**
- * Move cursor to specific position on stderr.
- * Only works in TTY environments.
+ * Move cursor to specific position on stderr. Only works in TTY environments.
+ *
+ * @example
+ *   ;```ts
+ *   cursorTo(0) // Move to start of line
+ *   cursorTo(10, 5) // Move to column 10, row 5
+ *   ```
  *
  * @param x - Column position (0-based)
  * @param y - Row position (0-based, optional)
- *
- * @example
- * ```ts
- * cursorTo(0) // Move to start of line
- * cursorTo(10, 5) // Move to column 10, row 5
- * ```
  */
 export function cursorTo(x: number, y?: number | undefined): void {
   cursorToOn(stderr, x, y)
@@ -51,14 +49,15 @@ export function cursorTo(x: number, y?: number | undefined): void {
 /**
  * Get the number of columns (width) in the terminal.
  *
- * @returns Terminal width in characters
+ * @example
+ *   ```ts
+ *   const width = getColumns()
+ *   console.error(`Terminal is ${width} characters wide`)
+ *   ```
+ *
  * @default 80
  *
- * @example
- * ```ts
- * const width = getColumns()
- * console.error(`Terminal is ${width} characters wide`)
- * ```
+ * @returns Terminal width in characters
  */
 export function getColumns(): number {
   return getColumnsOf(stderr)
@@ -67,14 +66,15 @@ export function getColumns(): number {
 /**
  * Get the number of rows (height) in the terminal.
  *
- * @returns Terminal height in lines
+ * @example
+ *   ```ts
+ *   const height = getRows()
+ *   console.error(`Terminal is ${height} lines tall`)
+ *   ```
+ *
  * @default 24
  *
- * @example
- * ```ts
- * const height = getRows()
- * console.error(`Terminal is ${height} lines tall`)
- * ```
+ * @returns Terminal height in lines
  */
 export function getRows(): number {
   return getRowsOf(stderr)
@@ -83,16 +83,16 @@ export function getRows(): number {
 /**
  * Check if stderr is connected to a TTY (terminal).
  *
- * @returns `true` if stderr is a TTY, `false` if piped/redirected
- *
  * @example
- * ```ts
- * if (isTTY()) {
- *   // Show colored error messages
- * } else {
- *   // Use plain text
- * }
- * ```
+ *   ;```ts
+ *   if (isTTY()) {
+ *     // Show colored error messages
+ *   } else {
+ *     // Use plain text
+ *   }
+ *   ```
+ *
+ * @returns `true` if stderr is a TTY, `false` if piped/redirected
  */
 export function isTTY(): boolean {
   return isTTYOf(stderr)
@@ -101,13 +101,13 @@ export function isTTY(): boolean {
 /**
  * Write text to stderr without adding a newline.
  *
- * @param text - Text to write
- *
  * @example
- * ```ts
- * writeError('Downloading...')
- * // Later update progress
- * ```
+ *   ;```ts
+ *   writeError('Downloading...')
+ *   // Later update progress
+ *   ```
+ *
+ * @param text - Text to write.
  */
 export function writeError(text: string): void {
   stderr.write(text)
@@ -116,18 +116,19 @@ export function writeError(text: string): void {
 /**
  * Write a formatted error message to stderr.
  *
- * @param message - Error message text
- * @param prefix - Prefix label for the error
+ * @example
+ *   ;```ts
+ *   writeErrorFormatted('File not found')
+ *   // Output: 'Error: File not found'
+ *
+ *   writeErrorFormatted('Connection failed', 'Network')
+ *   // Output: 'Network: Connection failed'
+ *   ```
+ *
  * @default prefix 'Error'
  *
- * @example
- * ```ts
- * writeErrorFormatted('File not found')
- * // Output: 'Error: File not found'
- *
- * writeErrorFormatted('Connection failed', 'Network')
- * // Output: 'Network: Connection failed'
- * ```
+ * @param message - Error message text.
+ * @param prefix - Prefix label for the error.
  */
 export function writeErrorFormatted(
   message: string,
@@ -138,37 +139,37 @@ export function writeErrorFormatted(
 }
 
 /**
- * Write a line to stderr with trailing newline.
- * Used for error messages, warnings, and diagnostic output.
- * Passing no argument writes an empty line.
- *
- * @param text - Text to write (defaults to the empty string)
- * @default text ''
+ * Write a line to stderr with trailing newline. Used for error messages,
+ * warnings, and diagnostic output. Passing no argument writes an empty line.
  *
  * @example
- * ```ts
- * writeErrorLine('Error: File not found')
- * writeErrorLine() // Write empty line
- * ```
+ *   ;```ts
+ *   writeErrorLine('Error: File not found')
+ *   writeErrorLine() // Write empty line
+ *   ```
+ *
+ * @default text ''
+ *
+ * @param text - Text to write (defaults to the empty string)
  */
 export function writeErrorLine(text: string = ''): void {
   stderr.write(`${text}\n`)
 }
 
 /**
- * Write an error's stack trace to stderr.
- * Falls back to formatted error message if no stack is available.
- *
- * @param error - Error object to write
+ * Write an error's stack trace to stderr. Falls back to formatted error message
+ * if no stack is available.
  *
  * @example
- * ```ts
- * try {
- *   throw new ErrorCtor('Something went wrong')
- * } catch (e) {
- *   writeStackTrace(e as Error)
- * }
- * ```
+ *   ;```ts
+ *   try {
+ *     throw new ErrorCtor('Something went wrong')
+ *   } catch (e) {
+ *     writeStackTrace(e as Error)
+ *   }
+ *   ```
+ *
+ * @param error - Error object to write.
  */
 export function writeStackTrace(error: Error): void {
   if (error.stack) {
@@ -181,18 +182,19 @@ export function writeStackTrace(error: Error): void {
 /**
  * Write a formatted warning message to stderr.
  *
- * @param message - Warning message text
- * @param prefix - Prefix label for the warning
+ * @example
+ *   ;```ts
+ *   writeWarning('Deprecated API usage')
+ *   // Output: 'Warning: Deprecated API usage'
+ *
+ *   writeWarning('Invalid config', 'Config')
+ *   // Output: 'Config: Invalid config'
+ *   ```
+ *
  * @default prefix 'Warning'
  *
- * @example
- * ```ts
- * writeWarning('Deprecated API usage')
- * // Output: 'Warning: Deprecated API usage'
- *
- * writeWarning('Invalid config', 'Config')
- * // Output: 'Config: Invalid config'
- * ```
+ * @param message - Warning message text.
+ * @param prefix - Prefix label for the warning.
  */
 export function writeWarning(
   message: string,

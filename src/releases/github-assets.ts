@@ -1,5 +1,5 @@
 /**
- * @fileoverview Asset matching helpers for GitHub releases.
+ * @file Asset matching helpers for GitHub releases.
  */
 
 import picomatch from '../external/picomatch'
@@ -9,18 +9,20 @@ import {
   StringPrototypeStartsWith,
 } from '../primordials/string'
 /**
- * Create a matcher function for a pattern using picomatch for glob patterns
- * or simple prefix/suffix matching for object patterns.
- *
- * @param pattern - Pattern to match (string glob, prefix/suffix object, or RegExp)
- * @returns Function that tests if a string matches the pattern
+ * Create a matcher function for a pattern using picomatch for glob patterns or
+ * simple prefix/suffix matching for object patterns.
  *
  * @example
- * ```typescript
- * const isMatch = createAssetMatcher('tool-*-linux-x64')
- * isMatch('tool-v1.0-linux-x64')  // true
- * isMatch('tool-v1.0-darwin-arm64')  // false
- * ```
+ *   ;```typescript
+ *   const isMatch = createAssetMatcher('tool-*-linux-x64')
+ *   isMatch('tool-v1.0-linux-x64') // true
+ *   isMatch('tool-v1.0-darwin-arm64') // false
+ *   ```
+ *
+ * @param pattern - Pattern to match (string glob, prefix/suffix object, or
+ *   RegExp)
+ *
+ * @returns Function that tests if a string matches the pattern
  */
 export function createAssetMatcher(
   pattern: string | { prefix: string; suffix: string } | RegExp,

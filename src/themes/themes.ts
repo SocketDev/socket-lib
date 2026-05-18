@@ -1,17 +1,16 @@
 /**
- * @fileoverview Elegant theme definitions for Socket libraries.
- * Sophisticated color palettes crafted for clarity and visual harmony.
- *
- * Philosophy: Every color choice serves a purpose. Bright variants ensure
- * terminal legibility without compromising sophistication. Minimal emoji use,
- * refined symbols with color—elegance in restraint.
+ * @file Elegant theme definitions for Socket libraries. Sophisticated color
+ *   palettes crafted for clarity and visual harmony. Philosophy: Every color
+ *   choice serves a purpose. Bright variants ensure terminal legibility without
+ *   compromising sophistication. Minimal emoji use, refined symbols with
+ *   color—elegance in restraint.
  */
 
 import type { Theme } from './types'
 
 /**
- * Socket Security — The signature theme.
- * Refined violet with subtle shimmer, designed for focus and elegance.
+ * Socket Security — The signature theme. Refined violet with subtle shimmer,
+ * designed for focus and elegance.
  */
 export const SOCKET_THEME: Theme = {
   name: 'socket',
@@ -47,8 +46,8 @@ export const SOCKET_THEME: Theme = {
 }
 
 /**
- * Sunset — Vibrant twilight gradient.
- * Warm sunset palette with orange and purple/pink tones.
+ * Sunset — Vibrant twilight gradient. Warm sunset palette with orange and
+ * purple/pink tones.
  */
 export const SUNSET_THEME: Theme = {
   name: 'sunset',
@@ -88,8 +87,8 @@ export const SUNSET_THEME: Theme = {
 }
 
 /**
- * Terracotta — Solid warmth.
- * Rich terracotta and ember tones for grounded confidence.
+ * Terracotta — Solid warmth. Rich terracotta and ember tones for grounded
+ * confidence.
  */
 export const TERRACOTTA_THEME: Theme = {
   name: 'terracotta',
@@ -126,8 +125,7 @@ export const TERRACOTTA_THEME: Theme = {
 }
 
 /**
- * Lush — Steel elegance.
- * Python-inspired steel blue with golden accents.
+ * Lush — Steel elegance. Python-inspired steel blue with golden accents.
  */
 export const LUSH_THEME: Theme = {
   name: 'lush',
@@ -158,8 +156,8 @@ export const LUSH_THEME: Theme = {
 }
 
 /**
- * Ultra — Premium intensity.
- * Prismatic shimmer for deep analysis, where complexity meets elegance.
+ * Ultra — Premium intensity. Prismatic shimmer for deep analysis, where
+ * complexity meets elegance.
  */
 export const ULTRA_THEME: Theme = {
   name: 'ultra',

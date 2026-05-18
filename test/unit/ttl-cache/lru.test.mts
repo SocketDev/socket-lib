@@ -1,10 +1,9 @@
 /**
- * @fileoverview Tests for LRU eviction + clock-skew detection in createTtlCache.
- *
- * The main ttl-cache.test.mts skips the in-memory LRU eviction
- * branch (memoMaxSize) and the future-expiresAt clock-skew branch in
- * isExpired. These are testable without filesystem fixtures since they
- * exercise the in-memory cache only.
+ * @file Tests for LRU eviction + clock-skew detection in createTtlCache. The
+ *   main ttl-cache.test.mts skips the in-memory LRU eviction branch
+ *   (memoMaxSize) and the future-expiresAt clock-skew branch in isExpired.
+ *   These are testable without filesystem fixtures since they exercise the
+ *   in-memory cache only.
  */
 
 import os from 'node:os'

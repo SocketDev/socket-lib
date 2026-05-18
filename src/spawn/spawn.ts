@@ -1,29 +1,21 @@
 /**
- * @fileoverview Child process spawning utilities with cross-platform support.
- * Provides enhanced spawn functionality with stdio handling and error management.
+ * @file Child process spawning utilities with cross-platform support. Provides
+ *   enhanced spawn functionality with stdio handling and error management.
+ *   SECURITY: Array-Based Arguments Prevent Command Injection This module uses
+ *   array-based arguments for all command execution, which is the PRIMARY
+ *   DEFENSE against command injection attacks. When you pass arguments as an
+ *   array to spawn(): spawn('npx', ['sfw', tool, ...args], { shell: true })
+ *   Node.js handles escaping automatically. Each argument is passed directly to
+ *   the OS without shell interpretation. Shell metacharacters like ; | & $ ( )
+ *   ` are treated as LITERAL STRINGS, not as commands. This approach is secure
+ *   even when shell: true is used on Windows for .cmd/.bat file resolution.
+ *   UNSAFE ALTERNATIVE (not used in this codebase): spawn(`npx sfw ${tool}
+ *   ${args.join(' ')}`, { shell: true }) // ✖ VULNERABLE String concatenation
+ *   allows injection. For example, if tool = "foo; rm -rf /", the shell would
+ *   execute both commands. Array-based arguments prevent this. References:
  *
- * SECURITY: Array-Based Arguments Prevent Command Injection
- *
- * This module uses array-based arguments for all command execution, which is the
- * PRIMARY DEFENSE against command injection attacks. When you pass arguments as
- * an array to spawn():
- *
- *   spawn('npx', ['sfw', tool, ...args], { shell: true })
- *
- * Node.js handles escaping automatically. Each argument is passed directly to the
- * OS without shell interpretation. Shell metacharacters like ; | & $ ( ) ` are
- * treated as LITERAL STRINGS, not as commands. This approach is secure even when
- * shell: true is used on Windows for .cmd/.bat file resolution.
- *
- * UNSAFE ALTERNATIVE (not used in this codebase):
- *   spawn(`npx sfw ${tool} ${args.join(' ')}`, { shell: true })  // ✖ VULNERABLE
- *
- * String concatenation allows injection. For example, if tool = "foo; rm -rf /",
- * the shell would execute both commands. Array-based arguments prevent this.
- *
- * References:
- * - https://nodejs.org/api/child_process.html#child_processspawncommand-args-options
- * - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
+ *   - https://nodejs.org/api/child_process.html#child_processspawncommand-args-options
+ *   - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
  */
 
 import process from 'node:process'
@@ -66,65 +58,51 @@ const spinner = getDefaultSpinner()
 
 /**
  * Spawn a child process and return a promise that resolves when it completes.
- * Provides enhanced error handling, output capture, and cross-platform support.
+ * Provides enhanced error handling, output capture, and cross-platform
+ * support.
  *
- * SECURITY: This function uses array-based arguments which prevent command injection.
- * Arguments in the `args` array are passed directly to the OS without shell
- * interpretation. Shell metacharacters (;|&$()`) are treated as literal strings,
- * not as commands or operators. This is the PRIMARY SECURITY DEFENSE.
+ * SECURITY: This function uses array-based arguments which prevent command
+ * injection. Arguments in the `args` array are passed directly to the OS
+ * without shell interpretation. Shell metacharacters (;|&$()`) are treated as
+ * literal strings, not as commands or operators. This is the PRIMARY SECURITY
+ * DEFENSE.
  *
- * Even when shell: true is used (on Windows for .cmd/.bat execution), the array-based
- * approach remains secure because Node.js properly escapes each argument before passing
- * to the shell.
+ * Even when shell: true is used (on Windows for .cmd/.bat execution), the
+ * array-based approach remains secure because Node.js properly escapes each
+ * argument before passing to the shell.
  *
- * @param {string} cmd - Command to execute (not user-controlled)
- * @param {string[] | readonly string[] | undefined} args - Array of arguments (safe even with user input)
- * @param {SpawnOptions | undefined} options - Spawn options for process configuration
- * @param {SpawnExtra | undefined} extra - Extra options for promise-spawn
- * @returns {SpawnResult} Promise that resolves with process exit information
+ * @param {string} cmd - Command to execute (not user-controlled) @param
+ * {string[] | readonly string[] | undefined} args - Array of arguments (safe
+ * even with user input) @param {SpawnOptions | undefined} options - Spawn
+ * options for process configuration @param {SpawnExtra | undefined} extra -
+ * Extra options for promise-spawn @returns {SpawnResult} Promise that resolves
+ * with process exit information.
  *
- * @throws {SpawnError} When the process exits with non-zero code or is terminated by signal
+ * @throws {SpawnError} When the process exits with non-zero code or is
+ * terminated by signal.
  *
- * @example
- * // Basic usage - spawn and wait for completion
- * const result = await spawn('git', ['status'])
- * console.log(result.stdout)
+ * @example // Basic usage - spawn and wait for completion const result = await
+ * spawn('git', ['status']) console.log(result.stdout)
  *
- * @example
- * // With options - set working directory and environment
- * const result = await spawn('npm', ['install'], {
- *   cwd: '/path/to/project',
- *   env: { NODE_ENV: 'production' }
- * })
+ * @example // With options - set working directory and environment const result
+ * = await spawn('npm', ['install'], { cwd: '/path/to/project', env: { NODE_ENV:
+ * 'production' } })
  *
- * @example
- * // ✔ DO THIS - Array-based arguments (safe)
- * spawn('git', ['commit', '-m', userMessage])
- * // Each argument is properly escaped, even if userMessage = "foo; rm -rf /"
+ * @example // ✔ DO THIS - Array-based arguments (safe) spawn('git', ['commit',
+ * '-m', userMessage]) // Each argument is properly escaped, even if userMessage
+ * = "foo; rm -rf /"
  *
- * @example
- * // ✖ NEVER DO THIS - String concatenation (vulnerable)
- * spawn(`git commit -m "${userMessage}"`, { shell: true })
- * // Vulnerable to injection if userMessage = '"; rm -rf / #'
+ * @example // ✖ NEVER DO THIS - String concatenation (vulnerable) spawn(`git
+ * commit -m "${userMessage}"`, { shell: true }) // Vulnerable to injection if
+ * userMessage = '"; rm -rf / #'
  *
- * @example
- * // Access stdin for interactive processes
- * const result = spawn('cat', [])
- * result.stdin?.write('Hello\n')
- * result.stdin?.end()
- * const { stdout } = await result
- * console.log(stdout) // 'Hello'
+ * @example // Access stdin for interactive processes const result =
+ * spawn('cat', []) result.stdin?.write('Hello\n') result.stdin?.end() const {
+ * stdout } = await result console.log(stdout) // 'Hello'
  *
- * @example
- * // Handle errors with exit codes
- * try {
- *   await spawn('exit', ['1'])
- * } catch (e) {
- *   if (isSpawnError(e)) {
- *     console.error(`Failed with code ${e.code}`)
- *     console.error(e.stderr)
- *   }
- * }
+ * @example // Handle errors with exit codes try { await spawn('exit', ['1']) }
+ * catch (e) { if (isSpawnError(e)) { console.error(`Failed with code
+ * ${e.code}`) console.error(e.stderr) } }
  */
 // Typed overloads — narrow the resolved stdout/stderr based on `stdioString`.
 // Default (stdioString: true) → strings. `stdioString: false` → Buffers.
@@ -362,45 +340,50 @@ export function spawn(
 }
 
 /**
- * Synchronously spawn a child process and wait for it to complete.
- * Blocks execution until the process exits, returning all output and exit information.
+ * Synchronously spawn a child process and wait for it to complete. Blocks
+ * execution until the process exits, returning all output and exit
+ * information.
  *
- * WARNING: This function blocks the event loop. Use {@link spawn} for async operations.
- *
- * @param {string} cmd - Command to execute
- * @param {string[] | readonly string[] | undefined} args - Array of arguments
- * @param {SpawnSyncOptions | undefined} options - Spawn options for process configuration
- * @returns {SpawnSyncReturns<string | Buffer>} Process result with exit code and captured output
+ * WARNING: This function blocks the event loop. Use {@link spawn} for async
+ * operations.
  *
  * @example
- * // Basic synchronous spawn
- * const result = spawnSync('git', ['status'])
- * console.log(result.stdout)
- * console.log(result.status) // exit code
+ *   // Basic synchronous spawn
+ *   const result = spawnSync('git', ['status'])
+ *   console.log(result.stdout)
+ *   console.log(result.status) // exit code
  *
  * @example
- * // With options
- * const result = spawnSync('npm', ['install'], {
- *   cwd: '/path/to/project',
- *   stdioString: true
- * })
- * if (result.status !== 0) {
- *   console.error(result.stderr)
- * }
+ *   // With options
+ *   const result = spawnSync('npm', ['install'], {
+ *     cwd: '/path/to/project',
+ *     stdioString: true,
+ *   })
+ *   if (result.status !== 0) {
+ *     console.error(result.stderr)
+ *   }
  *
  * @example
- * // Get raw buffer output
- * const result = spawnSync('cat', ['binary-file'], {
- *   stdioString: false
- * })
- * console.log(result.stdout) // Buffer
+ *   // Get raw buffer output
+ *   const result = spawnSync('cat', ['binary-file'], {
+ *     stdioString: false,
+ *   })
+ *   console.log(result.stdout) // Buffer
  *
  * @example
- * // Handle process errors
- * const result = spawnSync('nonexistent-command')
- * if (result.error) {
- *   console.error('Failed to spawn:', result.error)
- * }
+ *   // Handle process errors
+ *   const result = spawnSync('nonexistent-command')
+ *   if (result.error) {
+ *     console.error('Failed to spawn:', result.error)
+ *   }
+ *
+ * @param {string} cmd - Command to execute.
+ * @param {string[] | readonly string[] | undefined} args - Array of arguments.
+ * @param {SpawnSyncOptions | undefined} options - Spawn options for process
+ *   configuration.
+ *
+ * @returns {SpawnSyncReturns<string | Buffer>} Process result with exit code
+ *   and captured output.
  */
 // Typed overloads — narrow the return based on `stdioString` / `encoding`.
 // Default behavior (stdioString: true, encoding: undefined) returns strings;

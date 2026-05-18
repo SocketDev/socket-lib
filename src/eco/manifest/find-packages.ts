@@ -1,13 +1,10 @@
 /**
- * @fileoverview `findPackages(lockfile, pattern)` — returns all
- * `PackageRef`s whose name matches the regex/string pattern.
+ * @file `findPackages(lockfile, pattern)` — returns all `PackageRef`s whose
+ *   name matches the regex/string pattern. Pattern length is capped at 256
+ *   chars to bound ReDoS amplification against large lockfiles. Both string and
+ *   RegExp inputs are hardened via `hardenRegExp` (where available) — matches
+ *   socket-btm's smol behavior. Throws:
  *
- * Pattern length is capped at 256 chars to bound ReDoS amplification
- * against large lockfiles. Both string and RegExp inputs are hardened
- * via `hardenRegExp` (where available) — matches socket-btm's smol
- * behavior.
- *
- * Throws:
  *   - `TypeError` — pattern is not a string or RegExp
  *   - `RangeError` — pattern exceeds FIND_PACKAGES_PATTERN_MAX_LEN
  */

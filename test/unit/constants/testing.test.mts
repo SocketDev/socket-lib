@@ -1,12 +1,11 @@
 /**
- * @fileoverview Unit tests for testing framework constants and CI environment detection.
+ * @file Unit tests for testing framework constants and CI environment
+ *   detection. Tests testing-related constants:
  *
- * Tests testing-related constants:
- * - Test framework detection (Vitest, Jest, Mocha)
- * - CI environment indicators
- * - Test timeout defaults
- * - Test environment markers
- * Frozen constants for test configuration.
+ *   - Test framework detection (Vitest, Jest, Mocha)
+ *   - CI environment indicators
+ *   - Test timeout defaults
+ *   - Test environment markers Frozen constants for test configuration.
  */
 
 import process from 'node:process'

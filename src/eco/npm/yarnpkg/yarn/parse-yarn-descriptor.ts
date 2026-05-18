@@ -1,16 +1,14 @@
 /**
- * @fileoverview `parseYarnDescriptor(descriptor)` — extracts the
- * package name from a yarn lockfile spec key.
+ * @file `parseYarnDescriptor(descriptor)` — extracts the package name from a
+ *   yarn lockfile spec key. Spec formats handled:
  *
- * Spec formats handled:
  *   - Yarn Classic: `name@^1.0.0` → `name`
  *   - Berry npm: `name@npm:^1.0.0` → `name`
  *   - Berry workspace: `name@workspace:^1.0.0` → `name`
  *   - Berry patch: `patch:name@npm:1.0.0#…` → `name`
  *   - Berry patch (encoded): `patch:name@npm%3A1.0.0#…` → `name`
- *   - Scoped: `@scope/name@^1.0.0` → `@scope/name`
- *
- * Matches socket-btm's smol-manifest internal `parseYarnDescriptor`.
+ *   - Scoped: `@scope/name@^1.0.0` → `@scope/name` Matches socket-btm's
+ *     smol-manifest internal `parseYarnDescriptor`.
  */
 
 import {

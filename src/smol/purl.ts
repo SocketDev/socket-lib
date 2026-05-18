@@ -1,14 +1,11 @@
 /**
- * @fileoverview Lazy-loader for socket-btm's `node:smol-purl` binding.
- *
- * `node:smol-purl` is a C++-accelerated PURL (Package URL) parser
- * exposed by socket-btm's smol Node binary. It parses, builds, and
- * validates PURL strings using primordial-cached string ops, with a
- * 10 000-entry result cache.
- *
- * Returns `undefined` on stock Node + non-Node runtimes. Result is
- * cached across calls. Callers fall back to the JS
- * `@socketregistry/packageurl-js` import on the undefined path.
+ * @file Lazy-loader for socket-btm's `node:smol-purl` binding. `node:smol-purl`
+ *   is a C++-accelerated PURL (Package URL) parser exposed by socket-btm's smol
+ *   Node binary. It parses, builds, and validates PURL strings using
+ *   primordial-cached string ops, with a 10 000-entry result cache. Returns
+ *   `undefined` on stock Node + non-Node runtimes. Result is cached across
+ *   calls. Callers fall back to the JS `@socketregistry/packageurl-js` import
+ *   on the undefined path.
  *
  * @internal — used by `src/packages/operations.ts` to resolve the
  *   `pkg:npm/<name>` parse on `resolveRegistryPackageName`. Most
@@ -21,10 +18,9 @@ import { isNodeBuiltin } from '../node/module'
 
 /**
  * Surface of a parsed PURL — the shape both smol-purl's `parse()` and
- * `packageurl-js`'s `PackageURL.fromString()` agree on. Frozen plain
- * object on smol; `PackageURL` class instance on stock Node. Both
- * expose the same readable fields, so consumers can destructure
- * uniformly.
+ * `packageurl-js`'s `PackageURL.fromString()` agree on. Frozen plain object on
+ * smol; `PackageURL` class instance on stock Node. Both expose the same
+ * readable fields, so consumers can destructure uniformly.
  */
 export interface ParsedPurl {
   readonly type: string
@@ -53,9 +49,9 @@ export interface PurlBuildOptions {
  * Surface of `node:smol-purl`. See socket-btm's
  * additions/source-patched/lib/smol-purl.js for the canonical shape.
  *
- * Only the ops socket-lib actually uses are typed here; smol-purl also
- * exposes `parseBatch`, `cacheStats`, `clearCache`, `types`, etc., but
- * those aren't part of the lib's consumer surface today.
+ * Only the ops socket-lib actually uses are typed here; smol-purl also exposes
+ * `parseBatch`, `cacheStats`, `clearCache`, `types`, etc., but those aren't
+ * part of the lib's consumer surface today.
  */
 export interface SmolPurlBinding {
   /**
@@ -63,13 +59,13 @@ export interface SmolPurlBinding {
    */
   parse(purl: string): ParsedPurl
   /**
-   * Try to parse a PURL string. Returns `undefined` on any failure
-   * (matches the Safe-suffix non-throwing convention).
+   * Try to parse a PURL string. Returns `undefined` on any failure (matches the
+   * Safe-suffix non-throwing convention).
    */
   tryParse(purl: string): ParsedPurl | undefined
   /**
-   * Build a PURL string from components. Throws on invalid input
-   * (missing type / name).
+   * Build a PURL string from components. Throws on invalid input (missing type
+   * / name).
    */
   build(options: PurlBuildOptions): string
   /**
@@ -91,8 +87,8 @@ let _smolPurl: SmolPurlBinding | undefined
 let _smolPurlProbed = false
 
 /**
- * Returns `node:smol-purl` when running on the smol Node binary,
- * otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-purl` when running on the smol Node binary, otherwise
+ * `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolPurl(): SmolPurlBinding | undefined {

@@ -1,13 +1,14 @@
 /**
- * @fileoverview Unit tests for theme utility functions.
+ * @file Unit tests for theme utility functions. Tests color resolution
+ *   utilities for Socket's theme system:
  *
- * Tests color resolution utilities for Socket's theme system:
- * - resolveColor() resolves semantic color keywords (primary, secondary) to actual colors
- * - Handles color values as strings ('blue', 'red') or RGB tuples ([255, 0, 0])
- * - Fallback behavior: 'secondary' falls back to 'primary' when undefined
- * - 'inherit' keyword passes through unchanged
- * - Direct color values (non-keywords) pass through unchanged
- * Enables consistent theming across Socket CLI tools with semantic color names.
+ *   - resolveColor() resolves semantic color keywords (primary, secondary) to
+ *     actual colors
+ *   - Handles color values as strings ('blue', 'red') or RGB tuples ([255, 0, 0])
+ *   - Fallback behavior: 'secondary' falls back to 'primary' when undefined
+ *   - 'inherit' keyword passes through unchanged
+ *   - Direct color values (non-keywords) pass through unchanged Enables
+ *     consistent theming across Socket CLI tools with semantic color names.
  */
 
 import {

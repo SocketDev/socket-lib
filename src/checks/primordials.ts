@@ -1,30 +1,24 @@
 /**
- * @fileoverview Primordials drift check — generic core.
- *
- * Each fleet repo that destructures from Node's internal `primordials`
- * global needs to keep its usage shape-aligned with socket-lib's
- * userland mirror (`@socketsecurity/lib/primordials`). This module is
- * the parser + diff engine; per-repo policy (which dirs to scan,
- * naming aliases, allowlist) lives in a config the caller supplies.
- *
- * Used by the `socket-lib check primordials` CLI subcommand. Kept
- * importable as a library so repos with bespoke needs can compose it
- * directly without going through the CLI.
- *
- * The flow:
+ * @file Primordials drift check — generic core. Each fleet repo that
+ *   destructures from Node's internal `primordials` global needs to keep its
+ *   usage shape-aligned with socket-lib's userland mirror
+ *   (`@socketsecurity/lib/primordials`). This module is the parser + diff
+ *   engine; per-repo policy (which dirs to scan, naming aliases, allowlist)
+ *   lives in a config the caller supplies. Used by the `socket-lib check
+ *   primordials` CLI subcommand. Kept importable as a library so repos with
+ *   bespoke needs can compose it directly without going through the CLI. The
+ *   flow:
  *
  *   1. Walk the configured `scanDirs` for `*.js` files.
- *   2. From each file, extract names from every
- *      `const { Foo, Bar } = primordials` destructure.
+ *   2. From each file, extract names from every `const { Foo, Bar } = primordials`
+ *      destructure.
  *   3. Read socket-lib's `primordials/` directory (sibling clone) or
- *      `primordials/*.d.ts` (installed `node_modules`) and pull every
- *      exported name across all leaves.
- *   4. Diff: every destructured name must be either (a) in socket-lib
- *      verbatim, (b) in socket-lib via the configured alias map, or
- *      (c) in the configured node-internal-only allowlist.
- *
- * Findings come back classified so callers can render or fail-CI on
- * specific kinds.
+ *      `primordials/*.d.ts` (installed `node_modules`) and pull every exported
+ *      name across all leaves.
+ *   4. Diff: every destructured name must be either (a) in socket-lib verbatim,
+ *      (b) in socket-lib via the configured alias map, or (c) in the configured
+ *      node-internal-only allowlist. Findings come back classified so callers
+ *      can render or fail-CI on specific kinds.
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
@@ -37,35 +31,32 @@ import { ErrorCtor } from '../primordials/error'
 
 export interface PrimordialsCheckConfig {
   /**
-   * Repo-relative directories to scan recursively for `*.js` files
-   * containing `primordials` destructures. Each entry is resolved
-   * against `repoRoot`.
+   * Repo-relative directories to scan recursively for `*.js` files containing
+   * `primordials` destructures. Each entry is resolved against `repoRoot`.
    */
   readonly scanDirs: readonly string[]
   /**
-   * Map from the source name a repo destructures (e.g. `Array`) to
-   * the socket-lib export name it should resolve to (e.g.
-   * `ArrayCtor`). socket-lib uses the `Ctor` suffix to avoid
-   * shadowing globals; repos that need the original name go through
-   * the alias.
+   * Map from the source name a repo destructures (e.g. `Array`) to the
+   * socket-lib export name it should resolve to (e.g. `ArrayCtor`). socket-lib
+   * uses the `Ctor` suffix to avoid shadowing globals; repos that need the
+   * original name go through the alias.
    */
   readonly aliasMap: ReadonlyMap<string, string>
   /**
    * Names that exist only in Node's internal `primordials` and are
-   * intentionally NOT mirrored to socket-lib. Adding to this set is
-   * a deliberate decision per name.
+   * intentionally NOT mirrored to socket-lib. Adding to this set is a
+   * deliberate decision per name.
    */
   readonly nodeInternalOnly: ReadonlySet<string>
   /**
-   * Override the auto-resolution of socket-lib's primordials source.
-   * Useful for tests; production callers should leave this undefined
-   * so the resolver picks sibling clone → installed `node_modules`.
+   * Override the auto-resolution of socket-lib's primordials source. Useful for
+   * tests; production callers should leave this undefined so the resolver picks
+   * sibling clone → installed `node_modules`.
    */
   readonly socketLibPrimordialsPath?: string | undefined
   /**
-   * Repo root used to resolve `scanDirs` and to anchor the
-   * sibling-clone fallback (`<repoRoot>/../socket-lib/...`). Defaults
-   * to `process.cwd()`.
+   * Repo root used to resolve `scanDirs` and to anchor the sibling-clone
+   * fallback (`<repoRoot>/../socket-lib/...`). Defaults to `process.cwd()`.
    */
   readonly repoRoot?: string | undefined
 }
@@ -91,10 +82,9 @@ export interface PrimordialsCheckResult {
 const NAME_HEAD_RE = /^([A-Za-z_$][A-Za-z0-9_$]*)/
 
 /**
- * Run the primordials drift check against the configured repo.
- * Returns the full result including raw inputs (used names, lib
- * exports) so renderers can show context, plus a sorted list of
- * findings classified by kind.
+ * Run the primordials drift check against the configured repo. Returns the full
+ * result including raw inputs (used names, lib exports) so renderers can show
+ * context, plus a sorted list of findings classified by kind.
  */
 export function checkPrimordials(
   config: PrimordialsCheckConfig,
@@ -199,7 +189,9 @@ export function checkPrimordials(
   }
 }
 
-/** Recursively collect every `*.js` file under `dir`. */
+/**
+ * Recursively collect every `*.js` file under `dir`.
+ */
 export function collectJsFiles(dir: string): string[] {
   const out: string[] = []
   if (!existsSync(dir)) {
@@ -233,11 +225,10 @@ export function collectJsFiles(dir: string): string[] {
 }
 
 /**
- * Pull every `const { … } = primordials` destructure body out of
- * `src`. Comments are stripped first so commentary inside a
- * destructure doesn't leak into captured names. The body regex
- * disallows nested `}`, which is safe after the comment-strip pass —
- * destructures themselves don't contain `}`.
+ * Pull every `const { … } = primordials` destructure body out of `src`.
+ * Comments are stripped first so commentary inside a destructure doesn't leak
+ * into captured names. The body regex disallows nested `}`, which is safe after
+ * the comment-strip pass — destructures themselves don't contain `}`.
  */
 export function extractPrimordialsNames(src: string): string[] {
   const cleaned = stripComments(src)
@@ -265,11 +256,10 @@ export function extractPrimordialsNames(src: string): string[] {
 }
 
 /**
- * Pull every `export const Foo` / `export function Foo` /
- * `export { Foo }` from a TS file. Also matches `.d.ts` declaration
- * forms (`export declare const Foo`, `export declare function Foo`)
- * since the fallback path reads `primordials.d.ts` from
- * `node_modules` when no sibling clone is present.
+ * Pull every `export const Foo` / `export function Foo` / `export { Foo }` from
+ * a TS file. Also matches `.d.ts` declaration forms (`export declare const
+ * Foo`, `export declare function Foo`) since the fallback path reads
+ * `primordials.d.ts` from `node_modules` when no sibling clone is present.
  */
 export function extractTsExports(src: string): string[] {
   const out = new Set<string>()
@@ -303,10 +293,9 @@ export function extractTsExports(src: string): string[] {
 }
 
 /**
- * Read TS exports from a resolved primordials path. Handles both the
- * legacy single-file layout (returns one file's exports) and the
- * post-split directory layout (concatenates exports across every
- * `*.ts` / `*.d.ts` leaf).
+ * Read TS exports from a resolved primordials path. Handles both the legacy
+ * single-file layout (returns one file's exports) and the post-split directory
+ * layout (concatenates exports across every `*.ts` / `*.d.ts` leaf).
  */
 export function readSocketLibPrimordialNames(resolved: string): Set<string> {
   const stat = statSync(resolved)
@@ -338,16 +327,16 @@ export function readSocketLibPrimordialNames(resolved: string): Set<string> {
 /**
  * Locate socket-lib's primordials source. Search order:
  *
- *   1. `config.socketLibPrimordialsPath` if explicitly set. Accepts
- *      either a single file (legacy `primordials.ts` / `.d.ts`) or a
- *      directory of leaves (`primordials/`).
- *   2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials/`
- *      (post-split layout) or `<repoRoot>/../socket-lib/src/primordials.ts`
- *      (legacy single-file layout). Preferred for the dev-loop case
- *      where a developer is editing socket-lib and a consumer in parallel.
- *   3. Installed copy — `<repoRoot>/node_modules/@socketsecurity/lib/
- *      dist/primordials/` (post-split) or `<repoRoot>/node_modules/
- *      @socketsecurity/lib/dist/primordials.d.ts` (legacy). The CI fallback.
+ * 1. `config.socketLibPrimordialsPath` if explicitly set. Accepts either a single
+ *    file (legacy `primordials.ts` / `.d.ts`) or a directory of leaves
+ *    (`primordials/`).
+ * 2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials/` (post-split
+ *    layout) or `<repoRoot>/../socket-lib/src/primordials.ts` (legacy
+ *    single-file layout). Preferred for the dev-loop case where a developer is
+ *    editing socket-lib and a consumer in parallel.
+ * 3. Installed copy — `<repoRoot>/node_modules/@socketsecurity/lib/
+ *    dist/primordials/` (post-split) or `<repoRoot>/node_modules/
+ *    @socketsecurity/lib/dist/primordials.d.ts` (legacy). The CI fallback.
  *
  * Throws when none of the candidates exist.
  */
@@ -418,9 +407,9 @@ export function resolveSocketLibPrimordials(
 }
 
 /**
- * Strip `/* … *‍/` block comments and `//` line comments. Comments
- * inside primordials destructures would otherwise leak captured
- * names; stripping first keeps the regex simple.
+ * Strip `/* … *‍/` block comments and `//` line comments. Comments inside
+ * primordials destructures would otherwise leak captured names; stripping first
+ * keeps the regex simple.
  */
 export function stripComments(src: string): string {
   let out = src.replace(/\/\*[\s\S]*?\*\//g, '')

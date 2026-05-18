@@ -1,40 +1,31 @@
 /**
- * @fileoverview Safe references to `String` static methods and prototype
- * methods.
+ * @file Safe references to `String` static methods and prototype methods.
+ *   `StringPrototypeCharCodeAt` prefers the smol Fast API binding for ASCII
+ *   inputs (single byte load) and translates the `-1` Fast API sentinel back to
+ *   `NaN` to preserve spec parity. Two-byte strings fall back to the uncurried
+ *   `String.prototype.charCodeAt`.
  *
- * `StringPrototypeCharCodeAt` prefers the smol Fast API binding for
- * ASCII inputs (single byte load) and translates the `-1` Fast API
- * sentinel back to `NaN` to preserve spec parity. Two-byte strings
- * fall back to the uncurried `String.prototype.charCodeAt`.
+ *   ## Fast API surface — and why it's small
  *
- * ## Fast API surface — and why it's small
- *
- * Mirrors the design rationale from socket-btm's
- * `primordial_binding.cc` (lines 41-72). The smol Fast API exposes
- * exactly one string op (`stringCharCodeAt`) because that's the one
- * shape where the C++ trampoline genuinely beats V8's existing
- * hot path: a single ASCII byte load, no encoding dispatch, no
- * HandleScope, returns a primitive.
- *
- * String **searches** (`startsWith` / `endsWith` / `includes` /
- * `indexOf` / `lastIndexOf`) are intentionally NOT exposed. V8's
- * existing hot path dispatches on encoding and runs native SIMD
- * memcmp — a Fast API binding would add overhead without winning.
- * Same for `Map.has` / `Set.has` / `Array.includes`.
- *
- * Fast API also has a hard constraint: a fast-path function cannot
- * return a new V8 object — only primitives, Local<Value/Object/Array>,
- * or FastOneByteString. That rules out anything that produces a new
- * string (`slice`, `substring`, `toUpperCase`, `concat`, `repeat`,
- * `padStart`/`padEnd`, formatted-number) from ever being a Fast API
- * win on the return path.
- *
- * Net: the current surface is approximately the ceiling. Adding more
- * Fast API string ops without a flamegraph showing the cost is a
- * regression risk, not a perf win. See
- * `socket-btm/packages/node-smol-builder/additions/source-patched/`
- * `src/socketsecurity/primordial/primordial_binding.cc:41-72` for
- * the canonical design statement.
+ *   Mirrors the design rationale from socket-btm's `primordial_binding.cc`
+ *   (lines 41-72). The smol Fast API exposes exactly one string op
+ *   (`stringCharCodeAt`) because that's the one shape where the C++ trampoline
+ *   genuinely beats V8's existing hot path: a single ASCII byte load, no
+ *   encoding dispatch, no HandleScope, returns a primitive. String **searches**
+ *   (`startsWith` / `endsWith` / `includes` / `indexOf` / `lastIndexOf`) are
+ *   intentionally NOT exposed. V8's existing hot path dispatches on encoding
+ *   and runs native SIMD memcmp — a Fast API binding would add overhead without
+ *   winning. Same for `Map.has` / `Set.has` / `Array.includes`. Fast API also
+ *   has a hard constraint: a fast-path function cannot return a new V8 object —
+ *   only primitives, Local<Value/Object/Array>, or FastOneByteString. That
+ *   rules out anything that produces a new string (`slice`, `substring`,
+ *   `toUpperCase`, `concat`, `repeat`, `padStart`/`padEnd`, formatted-number)
+ *   from ever being a Fast API win on the return path. Net: the current surface
+ *   is approximately the ceiling. Adding more Fast API string ops without a
+ *   flamegraph showing the cost is a regression risk, not a perf win. See
+ *   `socket-btm/packages/node-smol-builder/additions/source-patched/`
+ *   `src/socketsecurity/primordial/primordial_binding.cc:41-72` for the
+ *   canonical design statement.
  */
 
 import { getSmolPrimordial } from '../smol/primordial'

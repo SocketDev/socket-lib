@@ -1,66 +1,49 @@
 /**
- * @fileoverview Claude-deferred receiver type disambiguation.
+ * @file Claude-deferred receiver type disambiguation. For ambiguous method
+ *   names (`.test`, `.then`, `.exec`, `.catch`, `.finally`) the static analyzer
+ *   cannot decide whether the receiver is a RegExp / Promise / a duck-typed
+ *   user object without following the receiver back to its declaration. This
+ *   module hands the call site to Claude Sonnet with a locked-down tool surface
+ *   (Read, Grep, Glob — no Bash, no Edit, no Write, no WebFetch) so the model
+ *   can grep imports / read type declarations and answer. Security model —
+ *   three independent layers, all required. The official permission evaluation
+ *   flow (per https://code.claude.com/docs/en/agent-sdk/permissions) is:
  *
- * For ambiguous method names (`.test`, `.then`, `.exec`, `.catch`,
- * `.finally`) the static analyzer cannot decide whether the receiver
- * is a RegExp / Promise / a duck-typed user object without following
- * the receiver back to its declaration. This module hands the call
- * site to Claude Sonnet with a locked-down tool surface (Read, Grep,
- * Glob — no Bash, no Edit, no Write, no WebFetch) so the model can
- * grep imports / read type declarations and answer.
- *
- * Security model — three independent layers, all required.
- *
- * The official permission evaluation flow (per
- * https://code.claude.com/docs/en/agent-sdk/permissions) is:
  *   1. Hooks (none here)
  *   2. Deny rules from `disallowedTools` — match → blocked, even in
  *      bypassPermissions mode
- *   3. Permission mode — `dontAsk` denies anything not pre-approved
- *      without calling `canUseTool`
+ *   3. Permission mode — `dontAsk` denies anything not pre-approved without
+ *      calling `canUseTool`
  *   4. Allow rules from `allowedTools` — match → approved
- *   5. `canUseTool` — skipped in `dontAsk` mode (deny by default)
- *
- * The doc explicitly notes (verbatim): "`allowedTools` and
- * `disallowedTools` ... control whether a tool call is approved, not
- * whether the tool is available to Claude." Restricting *availability*
- * is the SDK's separate `tools` option, which sets the base set of
- * tools the model is told about.
- *
- *   • `tools: BASE_TOOLS` — the SDK's `tools` option. Restricts what
- *     the model SEES. With this, the model is never given Bash / Edit /
- *     Write tool definitions, so it can't even attempt to call them.
- *     Saves tokens and clarifies the model's intent.
- *
- *   • `allowedTools: AUTO_APPROVE_TOOLS` — step 4 of the eval flow.
- *     Tools in this list are approved without invoking `canUseTool`.
- *     We list the same names as BASE_TOOLS so the three permitted
- *     tools run end-to-end.
- *
- *   • `disallowedTools: DENIED_TOOLS` — step 2 of the eval flow. Deny
- *     rules win even against bypassPermissions. Defense-in-depth: even
- *     if a future edit removes `tools` and accidentally exposes the
- *     full claude_code preset, this list still blocks Bash/Edit/Write/
- *     WebFetch/WebSearch.
- *
- *   • `permissionMode: 'dontAsk'` — the docs' canonical lockdown recipe
- *     for headless agents. The doc states: "For a locked-down agent,
- *     pair `allowedTools` with `permissionMode: 'dontAsk'`. Listed
- *     tools are approved; anything else is denied outright instead of
- *     prompting." With `default`, unmatched tools fall through to
- *     `canUseTool`, which is undefined → undefined behavior in a
- *     non-interactive script.
- *
- * Caching: every (file, line, column, methodName, snippetHash) →
- * verdict is written to `<targetRoot>/.prim-cache/disambiguate.json`.
- * Subsequent audit runs are free; the cache only grows when a new
- * ambiguous site appears or the surrounding source changes.
- *
- * Opt-in: callers must pass `aiDisambiguate: true` AND have
- * `ANTHROPIC_API_KEY` in env. Without both, this module's
- * `disambiguateReceiver()` short-circuits to `{ type: undefined,
- * source: 'static', reason: 'ai-defer-not-enabled' }`. No silent API
- * calls.
+ *   5. `canUseTool` — skipped in `dontAsk` mode (deny by default) The doc
+ *      explicitly notes (verbatim): "`allowedTools` and `disallowedTools` ...
+ *      control whether a tool call is approved, not whether the tool is
+ *      available to Claude." Restricting _availability_ is the SDK's separate
+ *      `tools` option, which sets the base set of tools the model is told
+ *      about. • `tools: BASE_TOOLS` — the SDK's `tools` option. Restricts what
+ *      the model SEES. With this, the model is never given Bash / Edit / Write
+ *      tool definitions, so it can't even attempt to call them. Saves tokens
+ *      and clarifies the model's intent. • `allowedTools: AUTO_APPROVE_TOOLS` —
+ *      step 4 of the eval flow. Tools in this list are approved without
+ *      invoking `canUseTool`. We list the same names as BASE_TOOLS so the three
+ *      permitted tools run end-to-end. • `disallowedTools: DENIED_TOOLS` — step
+ *      2 of the eval flow. Deny rules win even against bypassPermissions.
+ *      Defense-in-depth: even if a future edit removes `tools` and accidentally
+ *      exposes the full claude_code preset, this list still blocks
+ *      Bash/Edit/Write/ WebFetch/WebSearch. • `permissionMode: 'dontAsk'` — the
+ *      docs' canonical lockdown recipe for headless agents. The doc states:
+ *      "For a locked-down agent, pair `allowedTools` with `permissionMode:
+ *      'dontAsk'`. Listed tools are approved; anything else is denied outright
+ *      instead of prompting." With `default`, unmatched tools fall through to
+ *      `canUseTool`, which is undefined → undefined behavior in a
+ *      non-interactive script. Caching: every (file, line, column, methodName,
+ *      snippetHash) → verdict is written to
+ *      `<targetRoot>/.prim-cache/disambiguate.json`. Subsequent audit runs are
+ *      free; the cache only grows when a new ambiguous site appears or the
+ *      surrounding source changes. Opt-in: callers must pass `aiDisambiguate:
+ *      true` AND have `ANTHROPIC_API_KEY` in env. Without both, this module's
+ *      `disambiguateReceiver()` short-circuits to `{ type: undefined, source:
+ *      'static', reason: 'ai-defer-not-enabled' }`. No silent API calls.
  */
 
 import { createHash } from 'node:crypto'
@@ -122,12 +105,13 @@ const MAX_TOKENS = 256
 
 /**
  * @typedef {Object} CachedVerdict
- * @property {string|undefined} type  Receiver type, or undefined if
- *   "no primordial candidate" / "unsure".
- * @property {string} reason  One-line rationale from the model.
- * @property {number} timestamp  Unix-millis. Not used for invalidation
- *   (entries are keyed on snippetHash; a code change re-keys), just
- *   surfaced to operators for "when did we last call Claude on this".
+ *
+ * @property {string | undefined} type Receiver type, or undefined if "no
+ *   primordial candidate" / "unsure".
+ * @property {string} reason One-line rationale from the model.
+ * @property {number} timestamp Unix-millis. Not used for invalidation (entries
+ *   are keyed on snippetHash; a code change re-keys), just surfaced to
+ *   operators for "when did we last call Claude on this".
  */
 
 const CACHE_FILENAME = 'disambiguate.json'
@@ -138,16 +122,15 @@ const CACHE_FILENAME = 'disambiguate.json'
 const CACHE_SCHEMA_VERSION = 1
 
 /**
- * Build the disambiguation prompt. The model is allowed to read
- * files in the target repo (via Read/Grep/Glob), but the prompt is
- * structured so the answer is one word — minimizes token cost and
- * makes parsing trivial.
+ * Build the disambiguation prompt. The model is allowed to read files in the
+ * target repo (via Read/Grep/Glob), but the prompt is structured so the answer
+ * is one word — minimizes token cost and makes parsing trivial.
  *
  * Following the "examples > description" pattern from
- * platform.claude.com/docs/.../prompt-engineering: showing one
- * canonical false-positive (semver Range.test) and one canonical
- * true-positive (re.test) gets ~99% accuracy on the cacache→semver
- * shape that motivated this whole subsystem.
+ * platform.claude.com/docs/.../prompt-engineering: showing one canonical
+ * false-positive (semver Range.test) and one canonical true-positive (re.test)
+ * gets ~99% accuracy on the cacache→semver shape that motivated this whole
+ * subsystem.
  */
 export function buildPrompt({
   methodName,
@@ -207,13 +190,14 @@ Examples:
 }
 
 /**
- * Build a source snippet around (line, column). Used by audit/codemod
- * to gather the context Claude needs.
+ * Build a source snippet around (line, column). Used by audit/codemod to gather
+ * the context Claude needs.
  *
- * @param {string} src             Full source text.
- * @param {number[]} lineStarts    Start-of-line offsets (1-indexed view).
- * @param {number} line            1-based.
- * @param {number} contextLines    Lines before+after to include.
+ * @param {string} src Full source text.
+ * @param {number[]} lineStarts Start-of-line offsets (1-indexed view).
+ * @param {number} line 1-based.
+ * @param {number} contextLines Lines before+after to include.
+ *
  * @returns {string}
  */
 export function buildSnippet(src, lineStarts, line, contextLines = 8) {
@@ -232,11 +216,10 @@ export function cachePath(targetRoot) {
 }
 
 /**
- * Hash the inputs that determine the verdict. Two snippets with the
- * same hash will get the same verdict (and re-using the cached one
- * is correct). Includes the method name + the surrounding source
- * + the receiver identifier so an unrelated edit elsewhere in the
- * file doesn't invalidate the cache.
+ * Hash the inputs that determine the verdict. Two snippets with the same hash
+ * will get the same verdict (and re-using the cached one is correct). Includes
+ * the method name + the surrounding source + the receiver identifier so an
+ * unrelated edit elsewhere in the file doesn't invalidate the cache.
  */
 export function computeKey(methodName, receiverName, snippet) {
   const hash = createHash('sha256')
@@ -251,15 +234,20 @@ export function computeKey(methodName, receiverName, snippet) {
 
 /**
  * @param {Object} opts
- * @param {string} opts.targetRoot          Repo root (cache lives here).
- * @param {string} opts.methodName          e.g. "test".
- * @param {string} opts.receiverName        e.g. "range".
- * @param {string} opts.filePath            Relative path for prompt.
- * @param {number} opts.line                1-based.
- * @param {number} opts.column              1-based.
- * @param {string} opts.snippet             ~10 lines of surrounding source.
- * @param {boolean} [opts.aiEnabled=false]  Master switch. False = static-only.
- * @returns {Promise<{type:string|undefined, source:string, reason:string}>}
+ * @param {string} opts.targetRoot Repo root (cache lives here).
+ * @param {string} opts.methodName E.g. "test".
+ * @param {string} opts.receiverName E.g. "range".
+ * @param {string} opts.filePath Relative path for prompt.
+ * @param {number} opts.line 1-based.
+ * @param {number} opts.column 1-based.
+ * @param {string} opts.snippet ~10 lines of surrounding source.
+ * @param {boolean} [opts.aiEnabled=false] Master switch. False = static-only.
+ *
+ * @returns {Promise<{
+ *   type: string | undefined
+ *   source: string
+ *   reason: string
+ * }>}
  */
 export async function disambiguateReceiver({
   aiEnabled = false,
@@ -418,8 +406,8 @@ export function loadCache(targetRoot) {
 }
 
 /**
- * Lazily load the SDK only when a real call is needed. Keeps the
- * audit lightweight when AI defer is off (no install, no import).
+ * Lazily load the SDK only when a real call is needed. Keeps the audit
+ * lightweight when AI defer is off (no install, no import).
  */
 export async function loadSdk() {
   // The SDK is an optional peer; require it dynamically so the
@@ -436,9 +424,8 @@ export async function loadSdk() {
 }
 
 /**
- * Parse the model's response to extract the verdict and reason.
- * Tolerates surrounding chatter — looks for the literal `VERDICT:`
- * and `REASON:` keys.
+ * Parse the model's response to extract the verdict and reason. Tolerates
+ * surrounding chatter — looks for the literal `VERDICT:` and `REASON:` keys.
  */
 export function parseResponse(text, candidates) {
   const verdictMatch = /^\s*VERDICT:\s*([A-Za-z]+)/m.exec(text)

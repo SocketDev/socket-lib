@@ -1,8 +1,8 @@
 /**
- * @fileoverview Read-side helpers — `getPerformanceMetrics` returns a
- * shallow copy of the recorded rows, `getPerformanceSummary` rolls
- * them up per operation (count / total / avg / min / max), and
- * `clearPerformanceMetrics` empties the array in place.
+ * @file Read-side helpers — `getPerformanceMetrics` returns a shallow copy of
+ *   the recorded rows, `getPerformanceSummary` rolls them up per operation
+ *   (count / total / avg / min / max), and `clearPerformanceMetrics` empties
+ *   the array in place.
  */
 
 import { debugLog } from '../debug/output'
@@ -17,9 +17,9 @@ import type { PerformanceMetrics } from './types'
  * Clear all collected performance metrics.
  *
  * @example
- * import { clearPerformanceMetrics } from '@socketsecurity/lib/perf/metrics'
+ *   import { clearPerformanceMetrics } from '@socketsecurity/lib/perf/metrics'
  *
- * clearPerformanceMetrics()
+ *   clearPerformanceMetrics()
  */
 export function clearPerformanceMetrics(): void {
   performanceMetrics.length = 0
@@ -27,16 +27,16 @@ export function clearPerformanceMetrics(): void {
 }
 
 /**
- * Get all collected performance metrics.
- * Only available when DEBUG=perf is enabled.
- *
- * @returns Array of performance metrics
+ * Get all collected performance metrics. Only available when DEBUG=perf is
+ * enabled.
  *
  * @example
- * import { getPerformanceMetrics } from '@socketsecurity/lib/perf/metrics'
+ *   import { getPerformanceMetrics } from '@socketsecurity/lib/perf/metrics'
  *
- * const metrics = getPerformanceMetrics()
- * console.log(metrics)
+ *   const metrics = getPerformanceMetrics()
+ *   console.log(metrics)
+ *
+ * @returns Array of performance metrics
  */
 export function getPerformanceMetrics(): PerformanceMetrics[] {
   return [...performanceMetrics]
@@ -45,17 +45,17 @@ export function getPerformanceMetrics(): PerformanceMetrics[] {
 /**
  * Get performance summary statistics.
  *
- * @returns Summary of metrics grouped by operation
- *
  * @example
- * import { getPerformanceSummary } from '@socketsecurity/lib/perf/metrics'
+ *   import { getPerformanceSummary } from '@socketsecurity/lib/perf/metrics'
  *
- * const summary = getPerformanceSummary()
- * console.log(summary)
- * // {
- * //   'api-call': { count: 5, total: 1234, avg: 246.8, min: 100, max: 500 },
- * //   'file-read': { count: 10, total: 50, avg: 5, min: 2, max: 15 }
- * // }
+ *   const summary = getPerformanceSummary()
+ *   console.log(summary)
+ *   // {
+ *   //   'api-call': { count: 5, total: 1234, avg: 246.8, min: 100, max: 500 },
+ *   //   'file-read': { count: 10, total: 50, avg: 5, min: 2, max: 15 }
+ *   // }
+ *
+ * @returns Summary of metrics grouped by operation
  */
 export function getPerformanceSummary(): Record<
   string,

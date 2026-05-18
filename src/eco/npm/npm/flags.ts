@@ -1,21 +1,19 @@
 /**
- * @fileoverview npm CLI flag predicates.
- *
- * Each predicate identifies whether a single argv entry matches a
- * specific npm flag family. They're side-effect-free pure functions
- * marked `@__NO_SIDE_EFFECTS__` so bundlers can tree-shake unused
- * predicates out of consumer bundles.
+ * @file Npm CLI flag predicates. Each predicate identifies whether a single
+ *   argv entry matches a specific npm flag family. They're side-effect-free
+ *   pure functions marked `@__NO_SIDE_EFFECTS__` so bundlers can tree-shake
+ *   unused predicates out of consumer bundles.
  */
 
 /**
  * Check if a command argument is an npm audit flag.
  *
  * @example
- * ```typescript
- * isNpmAuditFlag('--no-audit')  // true
- * isNpmAuditFlag('--audit')     // true
- * isNpmAuditFlag('--save')      // false
- * ```
+ *   ;```typescript
+ *   isNpmAuditFlag('--no-audit') // true
+ *   isNpmAuditFlag('--audit') // true
+ *   isNpmAuditFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmAuditFlag(cmdArg: string): boolean {
@@ -26,11 +24,11 @@ export function isNpmAuditFlag(cmdArg: string): boolean {
  * Check if a command argument is an npm fund flag.
  *
  * @example
- * ```typescript
- * isNpmFundFlag('--no-fund')  // true
- * isNpmFundFlag('--fund')     // true
- * isNpmFundFlag('--save')     // false
- * ```
+ *   ;```typescript
+ *   isNpmFundFlag('--no-fund') // true
+ *   isNpmFundFlag('--fund') // true
+ *   isNpmFundFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmFundFlag(cmdArg: string): boolean {
@@ -41,12 +39,12 @@ export function isNpmFundFlag(cmdArg: string): boolean {
  * Check if a command argument is an npm loglevel flag.
  *
  * @example
- * ```typescript
- * isNpmLoglevelFlag('--loglevel')  // true
- * isNpmLoglevelFlag('--silent')    // true
- * isNpmLoglevelFlag('-s')          // true
- * isNpmLoglevelFlag('--save')      // false
- * ```
+ *   ;```typescript
+ *   isNpmLoglevelFlag('--loglevel') // true
+ *   isNpmLoglevelFlag('--silent') // true
+ *   isNpmLoglevelFlag('-s') // true
+ *   isNpmLoglevelFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmLoglevelFlag(cmdArg: string): boolean {
@@ -64,11 +62,11 @@ export function isNpmLoglevelFlag(cmdArg: string): boolean {
  * Check if a command argument is an npm node-options flag.
  *
  * @example
- * ```typescript
- * isNpmNodeOptionsFlag('--node-options')                            // true
- * isNpmNodeOptionsFlag('--node-options=--max-old-space-size=4096')  // true
- * isNpmNodeOptionsFlag('--save')                                   // false
- * ```
+ *   ;```typescript
+ *   isNpmNodeOptionsFlag('--node-options') // true
+ *   isNpmNodeOptionsFlag('--node-options=--max-old-space-size=4096') // true
+ *   isNpmNodeOptionsFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
@@ -80,11 +78,11 @@ export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
  * Check if a command argument is an npm progress flag.
  *
  * @example
- * ```typescript
- * isNpmProgressFlag('--no-progress')  // true
- * isNpmProgressFlag('--progress')     // true
- * isNpmProgressFlag('--save')         // false
- * ```
+ *   ;```typescript
+ *   isNpmProgressFlag('--no-progress') // true
+ *   isNpmProgressFlag('--progress') // true
+ *   isNpmProgressFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNpmProgressFlag(cmdArg: string): boolean {

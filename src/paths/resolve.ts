@@ -1,6 +1,6 @@
 /**
- * @fileoverview Path resolution utilities — `resolve`, `relative`,
- * `relativeResolve`. Split out of `paths/normalize.ts` for size hygiene.
+ * @file Path resolution utilities — `resolve`, `relative`, `relativeResolve`.
+ *   Split out of `paths/normalize.ts` for size hygiene.
  *
  *   - `resolve` — Node-style `path.resolve()` over absolute-path semantics
  *   - `relative` — relative path from one absolute to another
@@ -19,22 +19,23 @@ import { isAbsolute, isPathSeparator } from './predicates'
  * Calculate the relative path from one path to another.
  *
  * Both inputs are resolved to absolute paths first, then compared to find the
- * longest common base, and finally a relative path is constructed using
- * `../` for parent-directory traversal.
+ * longest common base, and finally a relative path is constructed using `../`
+ * for parent-directory traversal.
  *
  * Windows file systems are case-insensitive; the comparison reflects that.
  *
- * @param {string} from - Source path
- * @param {string} to - Destination path
- * @returns {string} Relative path from `from` to `to`, or empty string if equal
- *
  * @example
- * ```typescript
- * relative('/foo/bar', '/foo/baz')           // '../baz'
- * relative('/foo/bar/baz', '/foo')           // '../..'
- * relative('/foo', '/foo/bar')               // 'bar'
- * relative('/foo/bar', '/foo/bar')           // ''
- * ```
+ *   ;```typescript
+ *   relative('/foo/bar', '/foo/baz') // '../baz'
+ *   relative('/foo/bar/baz', '/foo') // '../..'
+ *   relative('/foo', '/foo/bar') // 'bar'
+ *   relative('/foo/bar', '/foo/bar') // ''
+ *   ```
+ *
+ * @param {string} from - Source path.
+ * @param {string} to - Destination path.
+ *
+ * @returns {string} Relative path from `from` to `to`, or empty string if equal
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function relative(from: string, to: string): string {
@@ -142,16 +143,17 @@ export function relative(from: string, to: string): string {
  * `normalizePath()`. Empty strings (same path) are preserved verbatim rather
  * than collapsed to `.`.
  *
- * @param {string} from - Source path
- * @param {string} to - Destination path
- * @returns {string} Normalized relative path, or empty string if equal
- *
  * @example
- * ```typescript
- * relativeResolve('/foo/bar', '/foo/baz')         // '../baz'
- * relativeResolve('/foo/bar', '/foo/bar')         // ''
- * relativeResolve('/foo/./bar', '/foo/baz')       // '../baz'
- * ```
+ *   ;```typescript
+ *   relativeResolve('/foo/bar', '/foo/baz') // '../baz'
+ *   relativeResolve('/foo/bar', '/foo/bar') // ''
+ *   relativeResolve('/foo/./bar', '/foo/baz') // '../baz'
+ *   ```
+ *
+ * @param {string} from - Source path.
+ * @param {string} to - Destination path.
+ *
+ * @returns {string} Normalized relative path, or empty string if equal
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function relativeResolve(from: string, to: string): string {
@@ -170,16 +172,17 @@ export function relativeResolve(from: string, to: string): string {
  * the first absolute segment, and prepends the cwd if no absolute segment is
  * found. The final path is normalized.
  *
- * @param {...string} segments - Path segments to resolve
- * @returns {string} The resolved absolute path
- *
  * @example
- * ```typescript
- * resolve('foo', 'bar', 'baz')           // '/cwd/foo/bar/baz'
- * resolve('/foo', 'bar', 'baz')          // '/foo/bar/baz'
- * resolve('foo', '/bar', 'baz')          // '/bar/baz'
- * resolve()                              // '/cwd'
- * ```
+ *   ;```typescript
+ *   resolve('foo', 'bar', 'baz') // '/cwd/foo/bar/baz'
+ *   resolve('/foo', 'bar', 'baz') // '/foo/bar/baz'
+ *   resolve('foo', '/bar', 'baz') // '/bar/baz'
+ *   resolve() // '/cwd'
+ *   ```
+ *
+ * @param {...string} segments - Path segments to resolve.
+ *
+ * @returns {string} The resolved absolute path
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolve(...segments: string[]): string {

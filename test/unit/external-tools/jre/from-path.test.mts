@@ -1,10 +1,8 @@
 /**
- * @fileoverview Unit tests for jreFromPath().
- *
- * Doesn't mock `which` — exercises the real resolver against the
- * test runner's PATH. The assertion is shape-only ("if java exists
- * on PATH, we return a resolved object; otherwise undefined") which
- * is what callers actually care about.
+ * @file Unit tests for jreFromPath(). Doesn't mock `which` — exercises the real
+ *   resolver against the test runner's PATH. The assertion is shape-only ("if
+ *   java exists on PATH, we return a resolved object; otherwise undefined")
+ *   which is what callers actually care about.
  */
 
 import path from 'node:path'

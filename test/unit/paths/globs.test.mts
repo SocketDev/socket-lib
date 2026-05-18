@@ -1,11 +1,11 @@
 /**
- * @fileoverview Unit tests for glob pattern constants.
+ * @file Unit tests for glob pattern constants. Tests glob pattern constants
+ *   used throughout Socket tooling:
  *
- * Tests glob pattern constants used throughout Socket tooling:
- * - LICENSE patterns (recursive and non-recursive)
- * - LICENSE.original patterns
- * - README patterns (recursive and non-recursive)
- * Used for file discovery, pattern matching, and codebase traversal.
+ *   - LICENSE patterns (recursive and non-recursive)
+ *   - LICENSE.original patterns
+ *   - README patterns (recursive and non-recursive) Used for file discovery,
+ *     pattern matching, and codebase traversal.
  */
 
 import {

@@ -1,6 +1,6 @@
 /**
- * @fileoverview External package configuration.
- * Defines which packages need bundling and their scopes.
+ * @file External package configuration. Defines which packages need bundling
+ *   and their scopes.
  */
 
 // Define which packages need bundling (ones that are actual npm packages).

@@ -1,13 +1,14 @@
 /**
- * @fileoverview Unit tests for console divider utilities.
+ * @file Unit tests for console divider utilities. Tests divider and separator
+ *   utilities:
  *
- * Tests divider and separator utilities:
- * - divider() - creates divider lines with custom characters and widths
- * - dividers - preset divider styles (thick, thin, dotted, etc.)
- * - printDivider() - prints dividers to console
- * - sectionBreak() - creates section separators with spacing
- * - Convenience functions: printThickDivider(), printThinDivider(), printDottedDivider()
- * Used by Socket CLI for visual separation in terminal output.
+ *   - divider() - creates divider lines with custom characters and widths
+ *   - dividers - preset divider styles (thick, thin, dotted, etc.)
+ *   - printDivider() - prints dividers to console
+ *   - sectionBreak() - creates section separators with spacing
+ *   - Convenience functions: printThickDivider(), printThinDivider(),
+ *     printDottedDivider() Used by Socket CLI for visual separation in terminal
+ *     output.
  */
 
 import {

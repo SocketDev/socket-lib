@@ -1,10 +1,11 @@
 /**
- * @fileoverview Path normalization — the core `normalizePath` and its
- * MSYS drive-letter helper. The rest of the path module's surface
- * (predicates, conversion, resolution) lives in sibling leaves and is
- * re-exported here so existing `paths/normalize` importers keep working.
+ * @file Path normalization — the core `normalizePath` and its MSYS drive-letter
+ *   helper. The rest of the path module's surface (predicates, conversion,
+ *   resolution) lives in sibling leaves and is re-exported here so existing
+ *   `paths/normalize` importers keep working.
  *
- *   - `normalizePath` — backslash → forward-slash, segment collapse, UNC + namespace preservation
+ *   - `normalizePath` — backslash → forward-slash, segment collapse, UNC +
+ *     namespace preservation
  *   - `msysDriveToNative` — `/c/path` → `C:/path` on Windows
  */
 
@@ -33,7 +34,8 @@ export function msysDriveToNative(normalized: string): string {
 }
 
 /**
- * Normalize a path by converting backslashes to forward slashes and collapsing segments.
+ * Normalize a path by converting backslashes to forward slashes and collapsing
+ * segments.
  *
  * - Converts all backslashes (`\`) to forward slashes (`/`)
  * - Collapses repeated slashes
@@ -43,7 +45,18 @@ export function msysDriveToNative(normalized: string): string {
  * - Returns `.` for empty or collapsed paths
  * - On Windows: MSYS drive letters `/c/path` become `C:/path`
  *
- * @param {string | Buffer | URL} pathLike - The path to normalize
+ * @example
+ *   ;```typescript
+ *   normalizePath('foo/bar//baz') // 'foo/bar/baz'
+ *   normalizePath('foo/./bar') // 'foo/bar'
+ *   normalizePath('foo/bar/../baz') // 'foo/baz'
+ *   normalizePath('C:\\Users\\u\\file.txt') // 'C:/Users/u/file.txt'
+ *   normalizePath('\\\\server\\share\\file') // '//server/share/file'
+ *   normalizePath('') // '.'
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to normalize.
+ *
  * @returns {string} The normalized path
  *
  * @security
@@ -51,16 +64,6 @@ export function msysDriveToNative(normalized: string): string {
  * paths like `/../etc/passwd` become `/etc/passwd`. When processing untrusted user input
  * (HTTP requests, file uploads, URL parameters), you MUST validate for path traversal
  * attacks BEFORE calling this function.
- *
- * @example
- * ```typescript
- * normalizePath('foo/bar//baz')              // 'foo/bar/baz'
- * normalizePath('foo/./bar')                 // 'foo/bar'
- * normalizePath('foo/bar/../baz')            // 'foo/baz'
- * normalizePath('C:\\Users\\u\\file.txt')    // 'C:/Users/u/file.txt'
- * normalizePath('\\\\server\\share\\file')   // '//server/share/file'
- * normalizePath('')                          // '.'
- * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizePath(pathLike: string | Buffer | URL): string {

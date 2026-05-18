@@ -1,7 +1,7 @@
 /**
- * @fileoverview Time-related numeric constants.
- * Provides millisecond-per-unit multipliers (second/minute/hour/day) and
- * derived cache TTLs such as the DLX binary cache expiration.
+ * @file Time-related numeric constants. Provides millisecond-per-unit
+ *   multipliers (second/minute/hour/day) and derived cache TTLs such as the DLX
+ *   binary cache expiration.
  */
 
 // Time unit multipliers (milliseconds).

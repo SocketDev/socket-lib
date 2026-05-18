@@ -1,5 +1,5 @@
 /**
- * @fileoverview Directory name and path pattern constants.
+ * @file Directory name and path pattern constants.
  */
 
 // Directory names.

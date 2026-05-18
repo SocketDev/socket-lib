@@ -1,6 +1,6 @@
 /**
- * @fileoverview Fix external package imports to point to dist/external.
- * Rewrites require('package') to require('./external/package') for bundled externals.
+ * @file Fix external package imports to point to dist/external. Rewrites
+ *   require('package') to require('./external/package') for bundled externals.
  */
 
 import { promises as fs } from 'node:fs'
@@ -56,8 +56,9 @@ export async function fixExternalImports() {
 /**
  * Rewrite external package imports in a file.
  *
- * @param {string} filePath - Path to the file to process
- * @param {boolean} verbose - Show individual file fixes
+ * @param {string} filePath - Path to the file to process.
+ * @param {boolean} verbose - Show individual file fixes.
+ *
  * @returns {Promise<boolean>} True if file was modified
  */
 export async function fixFileImports(filePath, verbose = false) {
@@ -102,7 +103,8 @@ export async function fixFileImports(filePath, verbose = false) {
 /**
  * Calculate the relative path from a file to the external directory.
  *
- * @param {string} filePath - The path to the file being processed
+ * @param {string} filePath - The path to the file being processed.
+ *
  * @returns {string} The relative path prefix (e.g., './' or '../')
  */
 export function getExternalPathPrefix(filePath) {
@@ -116,8 +118,9 @@ export function getExternalPathPrefix(filePath) {
 /**
  * Process files in a directory and fix external imports.
  *
- * @param {string} dir - Directory to process
- * @param {boolean} verbose - Show individual file fixes
+ * @param {string} dir - Directory to process.
+ * @param {boolean} verbose - Show individual file fixes.
+ *
  * @returns {Promise<number>} Number of files fixed
  */
 export async function processDirectory(dir, verbose = false) {

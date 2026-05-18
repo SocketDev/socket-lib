@@ -1,17 +1,14 @@
 /**
- * @fileoverview Integrity specification helpers for downloads and
- * file verification. Used by `dlx/binary-download` and external-tools
- * resolvers; safe to consume from any module that needs to verify
- * bytes against an expected hash.
+ * @file Integrity specification helpers for downloads and file verification.
+ *   Used by `dlx/binary-download` and external-tools resolvers; safe to consume
+ *   from any module that needs to verify bytes against an expected hash. Single
+ *   supported format per flavor:
  *
- * Single supported format per flavor:
  *   - integrity: SRI with sha512 only (what npm registry returns)
- *   - checksum:  sha256 hex (what `shasum -a 256` produces; common for
- *                binary release assets on GitHub)
- *
- * Callers may pass a {@link HashSpec} as a bare string (sniffed via
- * format) or as an explicit `{ type, value }` object. The normalized
- * form carried around internally is always the object.
+ *   - checksum: sha256 hex (what `shasum -a 256` produces; common for binary
+ *     release assets on GitHub) Callers may pass a {@link HashSpec} as a bare
+ *     string (sniffed via format) or as an explicit `{ type, value }` object.
+ *     The normalized form carried around internally is always the object.
  */
 
 import { timingSafeEqual } from 'node:crypto'
@@ -30,17 +27,17 @@ import {
  * Tagged union representing an expected hash.
  *
  * @example
- * // Bare SRI (sniffed as integrity):
- * 'sha512-abc...'
+ *   // Bare SRI (sniffed as integrity):
+ *   'sha512-abc...'
  *
  * @example
- * // Bare sha256 hex (sniffed as checksum):
- * 'a1b2c3...'
+ *   // Bare sha256 hex (sniffed as checksum):
+ *   'a1b2c3...'
  *
  * @example
- * // Explicit:
- * { type: 'integrity', value: 'sha512-abc...' }
- * { type: 'checksum', value: 'a1b2c3...' }
+ *   // Explicit:
+ *   { type: 'integrity', value: 'sha512-abc...' }
+ *   { type: 'checksum', value: 'a1b2c3...' }
  */
 export type HashSpec =
   | string
@@ -56,13 +53,17 @@ export interface NormalizedHash {
 }
 
 /**
- * Both hash formats for the same bytes. Returned from downloads so callers
- * can record whichever format their config uses.
+ * Both hash formats for the same bytes. Returned from downloads so callers can
+ * record whichever format their config uses.
  */
 export interface ComputedHashes {
-  /** SRI integrity: `sha512-<base64>`. Matches what the npm registry returns. */
+  /**
+   * SRI integrity: `sha512-<base64>`. Matches what the npm registry returns.
+   */
   integrity: string
-  /** SHA-256 hex (64 chars). Matches `shasum -a 256`. */
+  /**
+   * SHA-256 hex (64 chars). Matches `shasum -a 256`.
+   */
   checksum: string
 }
 
@@ -71,8 +72,8 @@ const INTEGRITY_BODY_RE = /^[A-Za-z0-9+/=]+$/
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
 /**
- * Compute both integrity (sha512 SRI) and checksum (sha256 hex) for a
- * buffer of bytes.
+ * Compute both integrity (sha512 SRI) and checksum (sha256 hex) for a buffer of
+ * bytes.
  */
 export function computeHashes(bytes: Buffer): ComputedHashes {
   const integrity = `sha512-${hash('sha512', bytes, 'base64')}`
@@ -100,8 +101,8 @@ export function isIntegrityString(s: string): boolean {
  * - Bare string of 64 hex chars → checksum.
  * - Anything else throws TypeError.
  *
- * @throws TypeError if the string is not a recognized format, or if an
- *   explicit object's value doesn't match its declared type.
+ * @throws TypeError if the string is not a recognized format, or if an explicit
+ *   object's value doesn't match its declared type.
  */
 export function normalizeHash(spec: HashSpec): NormalizedHash {
   if (typeof spec === 'object' && spec !== null) {
@@ -142,11 +143,11 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
 }
 
 /**
- * Verify computed hashes against an expected {@link NormalizedHash}.
- * Uses `crypto.timingSafeEqual` for constant-time comparison.
+ * Verify computed hashes against an expected {@link NormalizedHash}. Uses
+ * `crypto.timingSafeEqual` for constant-time comparison.
  *
- * @throws DlxHashMismatchError when the hash of the matching type
- *   doesn't match the expected value.
+ * @throws DlxHashMismatchError when the hash of the matching type doesn't match
+ *   the expected value.
  */
 export function verifyHash(
   expected: NormalizedHash,

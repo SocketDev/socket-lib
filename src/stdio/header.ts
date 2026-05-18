@@ -1,6 +1,6 @@
 /**
- * @fileoverview Console header/banner formatting utilities.
- * Provides consistent header formatting for CLI applications.
+ * @file Console header/banner formatting utilities. Provides consistent header
+ *   formatting for CLI applications.
  */
 
 import colors from '../external/yoctocolors-cjs'
@@ -13,21 +13,25 @@ const logger = getDefaultLogger()
 export interface HeaderOptions {
   /**
    * Width of the header in characters.
+   *
    * @default 80
    */
   width?: number | undefined
   /**
    * Character to use for border lines.
+   *
    * @default '='
    */
   borderChar?: string | undefined
   /**
    * Number of blank lines above and below title.
+   *
    * @default 1
    */
   padding?: number | undefined
   /**
    * Color to apply to the title text.
+   *
    * @default 'cyan'
    */
   color?:
@@ -41,34 +45,38 @@ export interface HeaderOptions {
     | undefined
   /**
    * Apply bold styling to title.
+   *
    * @default true
    */
   bold?: boolean | undefined
 }
 
 /**
- * Create a formatted header/banner with borders and centered title.
- * Useful for marking the start of CLI output or creating visual sections.
- *
- * @param title - Title text to display in header
- * @param options - Header formatting options
- * @returns Formatted header string with borders and centered title
+ * Create a formatted header/banner with borders and centered title. Useful for
+ * marking the start of CLI output or creating visual sections.
  *
  * @example
- * ```ts
- * console.log(createHeader('Socket Security Analysis', {
- *   width: 70,
- *   color: 'cyan',
- *   bold: true,
- *   padding: 2
- * }))
- * // Output:
- * // ======================================================================
- * //
- * //                    Socket Security Analysis
- * //
- * // ======================================================================
- * ```
+ *   ;```ts
+ *   console.log(
+ *     createHeader('Socket Security Analysis', {
+ *       width: 70,
+ *       color: 'cyan',
+ *       bold: true,
+ *       padding: 2,
+ *     }),
+ *   )
+ *   // Output:
+ *   // ======================================================================
+ *   //
+ *   //                    Socket Security Analysis
+ *   //
+ *   // ======================================================================
+ *   ```
+ *
+ * @param title - Title text to display in header.
+ * @param options - Header formatting options.
+ *
+ * @returns Formatted header string with borders and centered title
  */
 export function createHeader(title: string, options?: HeaderOptions): string {
   const {
@@ -111,24 +119,27 @@ export function createHeader(title: string, options?: HeaderOptions): string {
 }
 
 /**
- * Create a simple section header without padding.
- * A lighter-weight alternative to `createHeader()` for subsections.
- *
- * @param title - Title text to display in header
- * @param options - Header formatting options
- * @returns Formatted section header string
+ * Create a simple section header without padding. A lighter-weight alternative
+ * to `createHeader()` for subsections.
  *
  * @example
- * ```ts
- * console.log(createSectionHeader('Dependencies', {
- *   width: 50,
- *   color: 'blue'
- * }))
- * // Output:
- * // --------------------------------------------------
- * //                   Dependencies
- * // --------------------------------------------------
- * ```
+ *   ;```ts
+ *   console.log(
+ *     createSectionHeader('Dependencies', {
+ *       width: 50,
+ *       color: 'blue',
+ *     }),
+ *   )
+ *   // Output:
+ *   // --------------------------------------------------
+ *   //                   Dependencies
+ *   // --------------------------------------------------
+ *   ```
+ *
+ * @param title - Title text to display in header.
+ * @param options - Header formatting options.
+ *
+ * @returns Formatted section header string
  */
 export function createSectionHeader(
   title: string,
@@ -150,20 +161,20 @@ export function createSectionHeader(
 }
 
 /**
- * Print a header directly to stdout with standard formatting.
- * Uses fixed width of 55 characters with `═` borders.
- * Simpler alternative to `createHeader()` for quick headers.
- *
- * @param title - Title text to display
+ * Print a header directly to stdout with standard formatting. Uses fixed width
+ * of 55 characters with `═` borders. Simpler alternative to `createHeader()`
+ * for quick headers.
  *
  * @example
- * ```ts
- * printHeader('Package Analysis')
- * // Output:
- * // ═══════════════════════════════════════════════════
- * //   Package Analysis
- * // ═══════════════════════════════════════════════════
- * ```
+ *   ;```ts
+ *   printHeader('Package Analysis')
+ *   // Output:
+ *   // ═══════════════════════════════════════════════════
+ *   //   Package Analysis
+ *   // ═══════════════════════════════════════════════════
+ *   ```
+ *
+ * @param title - Title text to display.
  */
 export function printHeader(title: string): void {
   const border = repeatString('═', 55)

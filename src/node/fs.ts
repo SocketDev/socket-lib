@@ -1,14 +1,10 @@
 /**
- * @fileoverview Lazy-loader for `node:fs`.
- *
- * Bundlers (Webpack/Rollup/esbuild) targeting browsers can't statically
- * resolve `require('node:fs')` — but they CAN drop the call entirely
- * if it's wrapped in a `/*@__NO_SIDE_EFFECTS__*\/`-marked function and
- * never called. So we always go through `getFs()` instead of importing
- * top-level.
- *
- * Cache slot is module-local: first call resolves the require, every
- * subsequent call returns the cached reference.
+ * @file Lazy-loader for `node:fs`. Bundlers (Webpack/Rollup/esbuild) targeting
+ *   browsers can't statically resolve `require('node:fs')` — but they CAN drop
+ *   the call entirely if it's wrapped in a `/*@__NO_SIDE_EFFECTS__*\/`-marked
+ *   function and never called. So we always go through `getFs()` instead of
+ *   importing top-level. Cache slot is module-local: first call resolves the
+ *   require, every subsequent call returns the cached reference.
  */
 
 // eslint-disable-next-line n/prefer-node-protocol

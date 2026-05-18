@@ -1,8 +1,7 @@
 /**
- * @fileoverview Public type surface for `cacache/*` modules — the
- * `CacheEntry` row shape returned by reads and the option bags
- * consumed by `clear` / `get` / `put`. Pure types, no runtime side
- * effects.
+ * @file Public type surface for `cacache/*` modules — the `CacheEntry` row
+ *   shape returned by reads and the option bags consumed by `clear` / `get` /
+ *   `put`. Pure types, no runtime side effects.
  */
 
 export interface GetOptions {
@@ -30,13 +29,13 @@ export interface CacheEntry {
 
 export interface RemoveOptions {
   /**
-   * Optional key prefix to filter removals.
-   * If provided, only keys starting with this prefix will be removed.
-   * Can include wildcards (*) for pattern matching.
+   * Optional key prefix to filter removals. If provided, only keys starting
+   * with this prefix will be removed. Can include wildcards (*) for pattern
+   * matching.
    *
    * @example
-   * { prefix: 'socket-sdk' } // Simple prefix
-   * { prefix: 'socket-sdk:scans:abc*' } // With wildcard
+   *   { prefix: 'socket-sdk' } // Simple prefix
+   *   { prefix: 'socket-sdk:scans:abc*' } // With wildcard
    */
   prefix?: string | undefined
 }

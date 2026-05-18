@@ -1,11 +1,10 @@
 /**
- * @fileoverview Unit tests for TypeScript availability checks.
+ * @file Unit tests for TypeScript availability checks. Tests the pair of
+ *   feature-detection getters:
  *
- * Tests the pair of feature-detection getters:
- * - getTsTypesAvailable() — checks for typescript/lib/lib.d.ts
- * - getTsLibsAvailable() — checks for typescript/lib
- *
- * Each returns a cached boolean based on runtime module resolution.
+ *   - getTsTypesAvailable() — checks for typescript/lib/lib.d.ts
+ *   - getTsLibsAvailable() — checks for typescript/lib Each returns a cached
+ *     boolean based on runtime module resolution.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for console header/banner formatting utilities.
+ * @file Unit tests for console header/banner formatting utilities. Tests header
+ *   and banner formatting utilities:
  *
- * Tests header and banner formatting utilities:
- * - createHeader() - creates formatted headers with borders and centered titles
- * - createSectionHeader() - creates lightweight section headers
- * - printHeader() - prints headers to console
- * - printFooter() - prints footers with optional messages
- * - Options: width, borderChar, padding, color, bold
- * Used by Socket CLI for visual structure and section markers in terminal output.
+ *   - createHeader() - creates formatted headers with borders and centered titles
+ *   - createSectionHeader() - creates lightweight section headers
+ *   - printHeader() - prints headers to console
+ *   - printFooter() - prints footers with optional messages
+ *   - Options: width, borderChar, padding, color, bold Used by Socket CLI for
+ *     visual structure and section markers in terminal output.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,14 +1,11 @@
 /**
- * @fileoverview Unit tests for HTTP/HTTPS request utilities — advanced surface (part 1 of 3).
- *
- * Covers general edge cases, ca option, hooks, maxResponseSize,
- * rawResponse, stream option, enrichErrorMessage, and type aliases.
- * Split from the original advanced surface so each test file fits
- * within the per-worker v8 heap ceiling — cumulative HTTP state
- * retains memory faster than GC can reclaim it within a single file.
- *
- * Shares the test server with the sibling http-request-*.test.mts
- * files via http-request-fixtures.mts.
+ * @file Unit tests for HTTP/HTTPS request utilities — advanced surface (part 1
+ *   of 3). Covers general edge cases, ca option, hooks, maxResponseSize,
+ *   rawResponse, stream option, enrichErrorMessage, and type aliases. Split
+ *   from the original advanced surface so each test file fits within the
+ *   per-worker v8 heap ceiling — cumulative HTTP state retains memory faster
+ *   than GC can reclaim it within a single file. Shares the test server with
+ *   the sibling http-request-*.test.mts files via http-request-fixtures.mts.
  */
 
 import { createWriteStream, promises as fs } from 'node:fs'

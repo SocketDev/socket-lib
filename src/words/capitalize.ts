@@ -1,18 +1,17 @@
 /**
- * @fileoverview Word-case helpers — `capitalize()` produces an
- * upper-first / lower-rest variant that iterates by code point so
- * surrogate pairs aren't split.
+ * @file Word-case helpers — `capitalize()` produces an upper-first / lower-rest
+ *   variant that iterates by code point so surrogate pairs aren't split.
  */
 
 /**
  * Capitalize the first letter of a word.
  *
  * @example
- * ```typescript
- * capitalize('hello')  // 'Hello'
- * capitalize('WORLD')  // 'World'
- * capitalize('')       // ''
- * ```
+ *   ;```typescript
+ *   capitalize('hello') // 'Hello'
+ *   capitalize('WORLD') // 'World'
+ *   capitalize('') // ''
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function capitalize(word: string): string {

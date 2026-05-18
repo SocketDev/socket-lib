@@ -1,18 +1,16 @@
 /* oxlint-disable socket/sort-source-methods -- helper functions are interleaved with `readPackageJson` and cache state needed by them; reordering would split that state or change initialization order. */
 /**
- * @fileoverview Executable type detection for DLX and local filesystem paths.
+ * @file Executable type detection for DLX and local filesystem paths. Provides
+ *   utilities to detect whether a path is a Node.js package or native binary
+ *   executable. Supports both DLX cache paths and local filesystem paths. Key
+ *   Functions:
  *
- * Provides utilities to detect whether a path is a Node.js package or native
- * binary executable. Supports both DLX cache paths and local filesystem paths.
- *
- * Key Functions:
- * - detectExecutableType: Generic entry point for any path
- * - detectDlxExecutableType: DLX cache specific detection
- * - detectLocalExecutableType: Local filesystem specific detection
- *
- * Detection Strategies:
- * - DLX cache: Check for node_modules/ directory
- * - Local paths: Check for package.json with bin field, then file extension
+ *   - detectExecutableType: Generic entry point for any path
+ *   - detectDlxExecutableType: DLX cache specific detection
+ *   - detectLocalExecutableType: Local filesystem specific detection Detection
+ *     Strategies:
+ *   - DLX cache: Check for node_modules/ directory
+ *   - Local paths: Check for package.json with bin field, then file extension
  */
 
 import { isInSocketDlx } from './paths'
@@ -81,9 +79,11 @@ export interface ExecutableDetectionResult {
  * Find package.json in the directory containing the file or parent directories.
  * Results are cached to avoid repeated directory traversal.
  *
- * @param filePath - Path to search from
- * @returns Path to package.json if found, undefined otherwise
  * @private
+ *
+ * @param filePath - Path to search from.
+ *
+ * @returns Path to package.json if found, undefined otherwise
  */
 export function findPackageJson(filePath: string): string | undefined {
   const fs = getNodeFs()
@@ -132,12 +132,14 @@ export function findPackageJson(filePath: string): string | undefined {
 }
 
 /**
- * Read and parse package.json with caching.
- * Results are cached to avoid repeated file reads.
+ * Read and parse package.json with caching. Results are cached to avoid
+ * repeated file reads.
  *
- * @param packageJsonPath - Path to package.json
- * @returns Parsed package.json or null if invalid
  * @private
+ *
+ * @param packageJsonPath - Path to package.json.
+ *
+ * @returns Parsed package.json or null if invalid
  */
 export function readPackageJson(packageJsonPath: string): object | undefined {
   const fs = getNodeFs()
@@ -170,17 +172,18 @@ export function readPackageJson(packageJsonPath: string): object | undefined {
 }
 
 /**
- * Detect executable type for paths in DLX cache.
- * Uses filesystem structure (node_modules/ presence).
- *
- * @param filePath - Path within DLX cache (~/.socket/_dlx/)
- * @returns Detection result
+ * Detect executable type for paths in DLX cache. Uses filesystem structure
+ * (node_modules/ presence).
  *
  * @example
- * ```typescript
- * const result = detectDlxExecutableType('/tmp/.socket/_dlx/a1b2c3d4/tool')
- * console.log(result.type) // 'package' or 'binary'
- * ```
+ *   ;```typescript
+ *   const result = detectDlxExecutableType('/tmp/.socket/_dlx/a1b2c3d4/tool')
+ *   console.log(result.type) // 'package' or 'binary'
+ *   ```
+ *
+ * @param filePath - Path within DLX cache (~/.socket/_dlx/)
+ *
+ * @returns Detection result
  */
 export function detectDlxExecutableType(
   filePath: string,
@@ -211,25 +214,25 @@ export function detectDlxExecutableType(
 }
 
 /**
- * Detect if a path is a Node.js package or native binary executable.
- * Works for both DLX cache paths and local filesystem paths.
+ * Detect if a path is a Node.js package or native binary executable. Works for
+ * both DLX cache paths and local filesystem paths.
  *
- * Detection strategy:
- * 1. If in DLX cache: Use detectDlxExecutableType()
- * 2. Otherwise: Use detectLocalExecutableType()
- *
- * @param filePath - Path to executable (DLX cache or local filesystem)
- * @returns Detection result with type, method, and metadata
+ * Detection strategy: 1. If in DLX cache: Use detectDlxExecutableType() 2.
+ * Otherwise: Use detectLocalExecutableType()
  *
  * @example
- * ```typescript
- * const result = detectExecutableType('/path/to/tool')
- * if (result.type === 'package') {
- *   spawnNode([filePath, ...args])
- * } else {
- *   spawn(filePath, args)
- * }
- * ```
+ *   ;```typescript
+ *   const result = detectExecutableType('/path/to/tool')
+ *   if (result.type === 'package') {
+ *     spawnNode([filePath, ...args])
+ *   } else {
+ *     spawn(filePath, args)
+ *   }
+ *   ```
+ *
+ * @param filePath - Path to executable (DLX cache or local filesystem)
+ *
+ * @returns Detection result with type, method, and metadata
  */
 export function detectExecutableType(
   filePath: string,
@@ -242,19 +245,20 @@ export function detectExecutableType(
 }
 
 /**
- * Detect executable type for local filesystem paths.
- * Uses package.json and file extension checks.
- *
- * @param filePath - Local filesystem path (not in DLX cache)
- * @returns Detection result
+ * Detect executable type for local filesystem paths. Uses package.json and file
+ * extension checks.
  *
  * @example
- * ```typescript
- * const result = detectLocalExecutableType('/usr/local/bin/tool')
- * if (result.type === 'package') {
- *   console.log('Node.js package at:', result.packageJsonPath)
- * }
- * ```
+ *   ;```typescript
+ *   const result = detectLocalExecutableType('/usr/local/bin/tool')
+ *   if (result.type === 'package') {
+ *     console.log('Node.js package at:', result.packageJsonPath)
+ *   }
+ *   ```
+ *
+ * @param filePath - Local filesystem path (not in DLX cache)
+ *
+ * @returns Detection result
  */
 export function detectLocalExecutableType(
   filePath: string,
@@ -296,15 +300,16 @@ export function detectLocalExecutableType(
 /**
  * Check if a file path indicates a Node.js script.
  *
- * @param filePath - Path to check
- * @returns True if file has .js, .mjs, or .cjs extension
- *
  * @example
- * ```typescript
- * isJsFilePath('index.js')   // true
- * isJsFilePath('lib.mjs')    // true
- * isJsFilePath('tool.exe')   // false
- * ```
+ *   ;```typescript
+ *   isJsFilePath('index.js') // true
+ *   isJsFilePath('lib.mjs') // true
+ *   isJsFilePath('tool.exe') // false
+ *   ```
+ *
+ * @param filePath - Path to check.
+ *
+ * @returns True if file has .js, .mjs, or .cjs extension
  */
 export function isJsFilePath(filePath: string): boolean {
   const path = getNodePath()
@@ -315,14 +320,15 @@ export function isJsFilePath(filePath: string): boolean {
 /**
  * Simplified helper: Is this a native binary executable?
  *
- * @param filePath - Path to check
- * @returns True if detected as native binary (not Node.js package)
- *
  * @example
- * ```typescript
- * isNativeBinary('/usr/local/bin/tool')    // true
- * isNativeBinary('/tmp/project/index.js')  // false
- * ```
+ *   ;```typescript
+ *   isNativeBinary('/usr/local/bin/tool') // true
+ *   isNativeBinary('/tmp/project/index.js') // false
+ *   ```
+ *
+ * @param filePath - Path to check.
+ *
+ * @returns True if detected as native binary (not Node.js package)
  */
 export function isNativeBinary(filePath: string): boolean {
   return detectExecutableType(filePath).type === 'binary'
@@ -331,14 +337,15 @@ export function isNativeBinary(filePath: string): boolean {
 /**
  * Simplified helper: Is this a Node.js package?
  *
- * @param filePath - Path to check
- * @returns True if detected as Node.js package
- *
  * @example
- * ```typescript
- * isNodePackage('/tmp/project/index.js')   // true
- * isNodePackage('/usr/local/bin/tool')     // false
- * ```
+ *   ;```typescript
+ *   isNodePackage('/tmp/project/index.js') // true
+ *   isNodePackage('/usr/local/bin/tool') // false
+ *   ```
+ *
+ * @param filePath - Path to check.
+ *
+ * @returns True if detected as Node.js package
  */
 export function isNodePackage(filePath: string): boolean {
   return detectExecutableType(filePath).type === 'package'

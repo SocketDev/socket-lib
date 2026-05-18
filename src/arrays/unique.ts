@@ -1,5 +1,5 @@
 /**
- * @fileoverview Deduplicate an array via `Set`. Preserves
+ * @file Deduplicate an array via `Set`. Preserves
  * first-occurrence order.
  */
 
@@ -12,28 +12,29 @@ import { SetCtor } from '../primordials/map-set'
  * Uses `Set` internally for efficient deduplication. Order of first occurrence
  * is preserved.
  *
- * @param arr - The array to deduplicate (can be readonly)
- * @returns New array with duplicate values removed
- *
  * @example
- * ```ts
- * // Remove duplicate numbers
- * arrayUnique([1, 2, 2, 3, 1, 4])
- * // Returns: [1, 2, 3, 4]
+ *   ;```ts
+ *   // Remove duplicate numbers
+ *   arrayUnique([1, 2, 2, 3, 1, 4])
+ *   // Returns: [1, 2, 3, 4]
  *
- * // Remove duplicate strings
- * arrayUnique(['apple', 'banana', 'apple', 'cherry'])
- * // Returns: ['apple', 'banana', 'cherry']
+ *   // Remove duplicate strings
+ *   arrayUnique(['apple', 'banana', 'apple', 'cherry'])
+ *   // Returns: ['apple', 'banana', 'cherry']
  *
- * // Works with readonly arrays
- * const readonlyArr = [1, 1, 2] as const
- * arrayUnique(readonlyArr)
- * // Returns: [1, 2]
+ *   // Works with readonly arrays
+ *   const readonlyArr = [1, 1, 2] as const
+ *   arrayUnique(readonlyArr)
+ *   // Returns: [1, 2]
  *
- * // Empty arrays return empty
- * arrayUnique([])
- * // Returns: []
- * ```
+ *   // Empty arrays return empty
+ *   arrayUnique([])
+ *   // Returns: []
+ *   ```
+ *
+ * @param arr - The array to deduplicate (can be readonly)
+ *
+ * @returns New array with duplicate values removed
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function arrayUnique<T>(arr: T[] | readonly T[]): T[] {

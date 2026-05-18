@@ -1,26 +1,25 @@
 /**
- * @fileoverview Universal schema validator — non-throwing.
+ * @file Universal schema validator — non-throwing. Accepts any Zod-shaped
+ *   schema (`.safeParse`-exposing) and returns a tagged result `{ ok: true,
+ *   value } | { ok: false, errors }` with normalized `{ path, message }`
+ *   issues. No runtime dependency on `zod` — detection is purely structural.
  *
- * Accepts any Zod-shaped schema (`.safeParse`-exposing) and returns a tagged
- * result `{ ok: true, value } | { ok: false, errors }` with normalized
- * `{ path, message }` issues. No runtime dependency on `zod` — detection
- * is purely structural.
+ * @example
+ *   ;```ts
+ *   import { z } from 'zod'
+ *   import { validateSchema } from '@socketsecurity/lib/schema/validate'
+ *
+ *   const User = z.object({ name: z.string() })
+ *   const r = validateSchema(User, data)
+ *   if (r.ok)
+ *     r.value.name // string
+ *   else r.errors // ValidationIssue[]
+ *   ```
  *
  * @internal
  * socket-lib additionally recognizes TypeBox schemas for its own internal
  * use (e.g. `src/ipc.ts`'s stub-file validation). That path is not a
  * supported consumer API.
- *
- * @example
- * ```ts
- * import { z } from 'zod'
- * import { validateSchema } from '@socketsecurity/lib/schema/validate'
- *
- * const User = z.object({ name: z.string() })
- * const r = validateSchema(User, data)
- * if (r.ok) r.value.name // string
- * else r.errors           // ValidationIssue[]
- * ```
  */
 
 import { ArrayIsArray } from '../primordials/array'
@@ -56,8 +55,8 @@ export function isTypeBoxSchema(schema: unknown): boolean {
 }
 
 /**
- * Normalize a TypeBox `ValueError` iterator into plain issues.
- * TypeBox paths are JSON Pointers (`/user/0/name`); convert to arrays.
+ * Normalize a TypeBox `ValueError` iterator into plain issues. TypeBox paths
+ * are JSON Pointers (`/user/0/name`); convert to arrays.
  *
  * @internal
  */
@@ -79,8 +78,8 @@ export function normalizeTypeBoxErrors(
 }
 
 /**
- * Normalize a Zod error object (v3 or v4) into plain issues.
- * Both versions expose `.issues: Array<{ path, message }>`.
+ * Normalize a Zod error object (v3 or v4) into plain issues. Both versions
+ * expose `.issues: Array<{ path, message }>`.
  *
  * @internal
  */
@@ -107,9 +106,9 @@ export function normalizeZodError(err: unknown): ValidationIssue[] {
 /**
  * Validate `data` against a Zod-style `schema`. Non-throwing.
  *
- * The return type narrows `value` to `Infer<S>`, so callers get
- * `z.infer<typeof S>` with no casts. Errors are normalized to
- * `{ path, message }` regardless of the underlying validator.
+ * The return type narrows `value` to `Infer<S>`, so callers get `z.infer<typeof
+ * S>` with no casts. Errors are normalized to `{ path, message }` regardless of
+ * the underlying validator.
  *
  * @throws {TypeError} When `schema` is not a recognized validator kind.
  */

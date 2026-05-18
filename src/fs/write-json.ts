@@ -1,9 +1,9 @@
 /**
- * @fileoverview JSON writers that match the wire-format conventions a
- * tool ecosystem expects: configurable indentation, configurable EOL,
- * trailing newline by default. The `stringify` helper is exported so
- * callers that already have an `fs` handle can render a buffer without
- * round-tripping through this module's writers.
+ * @file JSON writers that match the wire-format conventions a tool ecosystem
+ *   expects: configurable indentation, configurable EOL, trailing newline by
+ *   default. The `stringify` helper is exported so callers that already have an
+ *   `fs` handle can render a buffer without round-tripping through this
+ *   module's writers.
  */
 
 import { getNodeFs } from '../node/fs'
@@ -18,14 +18,15 @@ import type { WriteJsonOptions } from './types'
 const NEWLINE_REGEX = /\n/g
 
 /**
- * Stringify JSON with custom formatting options.
- * Formats JSON with configurable line endings and indentation.
+ * Stringify JSON with custom formatting options. Formats JSON with configurable
+ * line endings and indentation.
  *
- * @param json - Value to stringify
- * @param EOL - End-of-line sequence
- * @param finalEOL - Whether to add final newline
- * @param replacer - JSON replacer function
- * @param spaces - Indentation spaces or string
+ * @param json - Value to stringify.
+ * @param EOL - End-of-line sequence.
+ * @param finalEOL - Whether to add final newline.
+ * @param replacer - JSON replacer function.
+ * @param spaces - Indentation spaces or string.
+ *
  * @returns Formatted JSON string
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -42,32 +43,33 @@ export function stringify(
 }
 
 /**
- * Write JSON content to a file asynchronously with formatting.
- * Stringifies the value with configurable indentation and line endings.
- * Automatically adds a final newline by default for POSIX compliance.
- *
- * @param filepath - Path to write to
- * @param jsonContent - Value to stringify and write
- * @param options - Write options including formatting and encoding
- * @returns Promise that resolves when write completes
+ * Write JSON content to a file asynchronously with formatting. Stringifies the
+ * value with configurable indentation and line endings. Automatically adds a
+ * final newline by default for POSIX compliance.
  *
  * @example
- * ```ts
- * // Write formatted JSON with default 2-space indentation
- * await writeJson('./data.json', { name: 'example', version: '1.0.0' })
+ *   ;```ts
+ *   // Write formatted JSON with default 2-space indentation
+ *   await writeJson('./data.json', { name: 'example', version: '1.0.0' })
  *
- * // Write with custom indentation
- * await writeJson('./config.json', config, { spaces: 4 })
+ *   // Write with custom indentation
+ *   await writeJson('./config.json', config, { spaces: 4 })
  *
- * // Write with tabs instead of spaces
- * await writeJson('./data.json', data, { spaces: '\t' })
+ *   // Write with tabs instead of spaces
+ *   await writeJson('./data.json', data, { spaces: '\t' })
  *
- * // Write without final newline
- * await writeJson('./inline.json', obj, { finalEOL: false })
+ *   // Write without final newline
+ *   await writeJson('./inline.json', obj, { finalEOL: false })
  *
- * // Write with Windows line endings
- * await writeJson('./win.json', data, { EOL: '\r\n' })
- * ```
+ *   // Write with Windows line endings
+ *   await writeJson('./win.json', data, { EOL: '\r\n' })
+ *   ```
+ *
+ * @param filepath - Path to write to.
+ * @param jsonContent - Value to stringify and write.
+ * @param options - Write options including formatting and encoding.
+ *
+ * @returns Promise that resolves when write completes
  */
 export async function writeJson(
   filepath: PathLike,
@@ -95,28 +97,28 @@ export async function writeJson(
 }
 
 /**
- * Write JSON content to a file synchronously with formatting.
- * Stringifies the value with configurable indentation and line endings.
- * Automatically adds a final newline by default for POSIX compliance.
- *
- * @param filepath - Path to write to
- * @param jsonContent - Value to stringify and write
- * @param options - Write options including formatting and encoding
+ * Write JSON content to a file synchronously with formatting. Stringifies the
+ * value with configurable indentation and line endings. Automatically adds a
+ * final newline by default for POSIX compliance.
  *
  * @example
- * ```ts
- * // Write formatted JSON with default 2-space indentation
- * writeJsonSync('./package.json', pkg)
+ *   ;```ts
+ *   // Write formatted JSON with default 2-space indentation
+ *   writeJsonSync('./package.json', pkg)
  *
- * // Write with custom indentation
- * writeJsonSync('./tsconfig.json', tsconfig, { spaces: 4 })
+ *   // Write with custom indentation
+ *   writeJsonSync('./tsconfig.json', tsconfig, { spaces: 4 })
  *
- * // Write with tabs for indentation
- * writeJsonSync('./data.json', data, { spaces: '\t' })
+ *   // Write with tabs for indentation
+ *   writeJsonSync('./data.json', data, { spaces: '\t' })
  *
- * // Write compacted (no indentation)
- * writeJsonSync('./compact.json', data, { spaces: 0 })
- * ```
+ *   // Write compacted (no indentation)
+ *   writeJsonSync('./compact.json', data, { spaces: 0 })
+ *   ```
+ *
+ * @param filepath - Path to write to.
+ * @param jsonContent - Value to stringify and write.
+ * @param options - Write options including formatting and encoding.
  */
 export function writeJsonSync(
   filepath: PathLike,

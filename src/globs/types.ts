@@ -1,9 +1,8 @@
 /**
- * @fileoverview Public type surface for `globs/*` modules — the
- * `Pattern` alias, the `FastGlobOptions` mirror of fast-glob's option
- * surface, and the `GlobOptions` extension that adds Socket-specific
- * `recursive` / `ignoreOriginals` flags. Pure types, no runtime side
- * effects.
+ * @file Public type surface for `globs/*` modules — the `Pattern` alias, the
+ *   `FastGlobOptions` mirror of fast-glob's option surface, and the
+ *   `GlobOptions` extension that adds Socket-specific `recursive` /
+ *   `ignoreOriginals` flags. Pure types, no runtime side effects.
  */
 
 export type Pattern = string

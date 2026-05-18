@@ -1,14 +1,12 @@
 /**
- * @fileoverview Unit tests for the shimmer terminal adapter.
+ * @file Unit tests for the shimmer terminal adapter. Covers every public export
+ *   of `effects/shimmer-terminal`:
  *
- * Covers every public export of `effects/shimmer-terminal`:
  *   - colorsToAnsi(): per-char ANSI truecolor wrapping
  *   - renderFrame(): one-call engine + wrapping
  *   - ansiTruecolor(): single-RGB → escape-string helper
- *   - ANSI_RESET re-export from `ansi`
- *
- * Surrogate-pair handling is exercised; full grapheme cluster handling is
- * caller responsibility (documented).
+ *   - ANSI_RESET re-export from `ansi` Surrogate-pair handling is exercised; full
+ *     grapheme cluster handling is caller responsibility (documented).
  */
 
 import { describe, expect, it } from 'vitest'

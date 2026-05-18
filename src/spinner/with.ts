@@ -1,11 +1,10 @@
 /**
- * @fileoverview Lifecycle wrappers around `Spinner` — `withSpinner`
- * (async, push-pop options + auto-stop), `withSpinnerRestore`
- * (conditionally restart a previously-spinning instance), and
- * `withSpinnerSync` (sync sibling of `withSpinner`). Each wrapper
- * guarantees `spinner.stop()` runs via `try/finally` even when the
- * inner operation throws, then re-throws the original error so
- * callers see the same failure surface as a plain `await`.
+ * @file Lifecycle wrappers around `Spinner` — `withSpinner` (async, push-pop
+ *   options + auto-stop), `withSpinnerRestore` (conditionally restart a
+ *   previously-spinning instance), and `withSpinnerSync` (sync sibling of
+ *   `withSpinner`). Each wrapper guarantees `spinner.stop()` runs via
+ *   `try/finally` even when the inner operation throws, then re-throws the
+ *   original error so callers see the same failure surface as a plain `await`.
  */
 
 import process from 'node:process'
@@ -19,42 +18,46 @@ import type {
 } from './types'
 
 /**
- * Execute an async operation with spinner lifecycle management.
- * Ensures `spinner.stop()` is always called via try/finally, even if the operation throws.
- * Provides safe cleanup and consistent spinner behavior.
- *
- * @template T - Return type of the operation
- * @param options - Configuration object
- * @param options.message - Message to display while spinner is running
- * @param options.operation - Async function to execute
- * @param options.spinner - Optional spinner instance (if not provided, no spinner is used)
- * @returns Result of the operation
- * @throws Re-throws any error from operation after stopping spinner
+ * Execute an async operation with spinner lifecycle management. Ensures
+ * `spinner.stop()` is always called via try/finally, even if the operation
+ * throws. Provides safe cleanup and consistent spinner behavior.
  *
  * @example
- * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
- * import { withSpinner } from '@socketsecurity/lib/spinner/with'
+ *   ;```ts
+ *   import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+ *   import { withSpinner } from '@socketsecurity/lib/spinner/with'
  *
- * const spinner = Spinner()
+ *   const spinner = Spinner()
  *
- * // With spinner instance
- * const result = await withSpinner({
- *   message: 'Processing…',
- *   operation: async () => {
- *     return await processData()
- *   },
- *   spinner
- * })
+ *   // With spinner instance
+ *   const result = await withSpinner({
+ *     message: 'Processing…',
+ *     operation: async () => {
+ *       return await processData()
+ *     },
+ *     spinner,
+ *   })
  *
- * // Without spinner instance (no-op, just runs operation)
- * const result = await withSpinner({
- *   message: 'Processing…',
- *   operation: async () => {
- *     return await processData()
- *   }
- * })
- * ```
+ *   // Without spinner instance (no-op, just runs operation)
+ *   const result = await withSpinner({
+ *     message: 'Processing…',
+ *     operation: async () => {
+ *       return await processData()
+ *     },
+ *   })
+ *   ```
+ *
+ * @template T - Return type of the operation.
+ *
+ * @param options - Configuration object.
+ * @param options.message - Message to display while spinner is running.
+ * @param options.operation - Async function to execute.
+ * @param options.spinner - Optional spinner instance (if not provided, no
+ *   spinner is used)
+ *
+ * @returns Result of the operation
+ *
+ * @throws Re-throws any error from operation after stopping spinner
  */
 export async function withSpinner<T>(
   options: WithSpinnerOptions<T>,
@@ -123,37 +126,41 @@ export async function withSpinner<T>(
 }
 
 /**
- * Execute an async operation with conditional spinner restart.
- * Useful when you need to temporarily stop a spinner for an operation,
- * then restore it to its previous state (if it was spinning).
- *
- * @template T - Return type of the operation
- * @param options - Configuration object
- * @param options.operation - Async function to execute
- * @param options.spinner - Optional spinner instance to manage
- * @param options.wasSpinning - Whether spinner was spinning before the operation
- * @returns Result of the operation
- * @throws Re-throws any error from operation after restoring spinner state
+ * Execute an async operation with conditional spinner restart. Useful when you
+ * need to temporarily stop a spinner for an operation, then restore it to its
+ * previous state (if it was spinning).
  *
  * @example
- * ```ts
- * import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
- * import { withSpinnerRestore } from '@socketsecurity/lib/spinner/with'
+ *   ;```ts
+ *   import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
+ *   import { withSpinnerRestore } from '@socketsecurity/lib/spinner/with'
  *
- * const spinner = getDefaultSpinner()
- * const wasSpinning = spinner.isSpinning
- * spinner.stop()
+ *   const spinner = getDefaultSpinner()
+ *   const wasSpinning = spinner.isSpinning
+ *   spinner.stop()
  *
- * const result = await withSpinnerRestore({
- *   operation: async () => {
- *     // Do work without spinner
- *     return await someOperation()
- *   },
- *   spinner,
- *   wasSpinning
- * })
- * // Spinner is automatically restarted if wasSpinning was true
- * ```
+ *   const result = await withSpinnerRestore({
+ *     operation: async () => {
+ *       // Do work without spinner
+ *       return await someOperation()
+ *     },
+ *     spinner,
+ *     wasSpinning,
+ *   })
+ *   // Spinner is automatically restarted if wasSpinning was true
+ *   ```
+ *
+ * @template T - Return type of the operation.
+ *
+ * @param options - Configuration object.
+ * @param options.operation - Async function to execute.
+ * @param options.spinner - Optional spinner instance to manage.
+ * @param options.wasSpinning - Whether spinner was spinning before the
+ *   operation.
+ *
+ * @returns Result of the operation
+ *
+ * @throws Re-throws any error from operation after restoring spinner state
  */
 export async function withSpinnerRestore<T>(
   options: WithSpinnerRestoreOptions<T>,
@@ -173,33 +180,38 @@ export async function withSpinnerRestore<T>(
 }
 
 /**
- * Execute a synchronous operation with spinner lifecycle management.
- * Ensures `spinner.stop()` is always called via try/finally, even if the operation throws.
- * Provides safe cleanup and consistent spinner behavior for sync operations.
- *
- * @template T - Return type of the operation
- * @param options - Configuration object
- * @param options.message - Message to display while spinner is running
- * @param options.operation - Synchronous function to execute
- * @param options.spinner - Optional spinner instance (if not provided, no spinner is used)
- * @returns Result of the operation
- * @throws Re-throws any error from operation after stopping spinner
+ * Execute a synchronous operation with spinner lifecycle management. Ensures
+ * `spinner.stop()` is always called via try/finally, even if the operation
+ * throws. Provides safe cleanup and consistent spinner behavior for sync
+ * operations.
  *
  * @example
- * ```ts
- * import { Spinner } from '@socketsecurity/lib/spinner/spinner'
- * import { withSpinnerSync } from '@socketsecurity/lib/spinner/with'
+ *   ;```ts
+ *   import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+ *   import { withSpinnerSync } from '@socketsecurity/lib/spinner/with'
  *
- * const spinner = Spinner()
+ *   const spinner = Spinner()
  *
- * const result = withSpinnerSync({
- *   message: 'Processing…',
- *   operation: () => {
- *     return processDataSync()
- *   },
- *   spinner
- * })
- * ```
+ *   const result = withSpinnerSync({
+ *     message: 'Processing…',
+ *     operation: () => {
+ *       return processDataSync()
+ *     },
+ *     spinner,
+ *   })
+ *   ```
+ *
+ * @template T - Return type of the operation.
+ *
+ * @param options - Configuration object.
+ * @param options.message - Message to display while spinner is running.
+ * @param options.operation - Synchronous function to execute.
+ * @param options.spinner - Optional spinner instance (if not provided, no
+ *   spinner is used)
+ *
+ * @returns Result of the operation
+ *
+ * @throws Re-throws any error from operation after stopping spinner
  */
 export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
   const { message, operation, spinner, withOptions } = {

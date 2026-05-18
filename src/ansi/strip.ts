@@ -1,7 +1,7 @@
 /**
- * @fileoverview ANSI escape-code regex factory and stripping helper.
- * Provides `ansiRegex()` for matching CSI/OSC sequences and `stripAnsi()`
- * for removing ANSI formatting from terminal output.
+ * @file ANSI escape-code regex factory and stripping helper. Provides
+ *   `ansiRegex()` for matching CSI/OSC sequences and `stripAnsi()` for removing
+ *   ANSI formatting from terminal output.
  */
 
 import { RegExpCtor } from '../primordials/regexp'
@@ -14,17 +14,17 @@ const ANSI_REGEX = /\x1b\[[0-9;]*m/g
 /**
  * Create a regular expression for matching ANSI escape codes.
  *
- * Inlined ansi-regex:
- * https://socket.dev/npm/package/ansi-regexp/overview/6.2.2
- * MIT License
- * Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+ * Inlined ansi-regex: https://socket.dev/npm/package/ansi-regexp/overview/6.2.2
+ * MIT License Copyright (c) Sindre Sorhus
+ * [sindresorhus@gmail.com](mailto:sindresorhus@gmail.com)
+ * (https://sindresorhus.com)
  *
  * @example
- * ```typescript
- * const regex = ansiRegex()
- * '\u001b[31mHello\u001b[0m'.match(regex)  // ['\u001b[31m', '\u001b[0m']
- * ansiRegex({ onlyFirst: true })           // matches only the first code
- * ```
+ *   ;```typescript
+ *   const regex = ansiRegex()
+ *   '\u001b[31mHello\u001b[0m'.match(regex) // ['\u001b[31m', '\u001b[0m']
+ *   ansiRegex({ onlyFirst: true }) // matches only the first code
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
@@ -41,14 +41,13 @@ export function ansiRegex(options?: { onlyFirst?: boolean }): RegExp {
 }
 
 /**
- * Strip ANSI escape codes from text.
- * Uses the inlined ansi-regex for matching.
+ * Strip ANSI escape codes from text. Uses the inlined ansi-regex for matching.
  *
  * @example
- * ```typescript
- * stripAnsi('\u001b[31mError\u001b[0m')  // 'Error'
- * stripAnsi('\u001b[1mBold\u001b[0m')    // 'Bold'
- * ```
+ *   ;```typescript
+ *   stripAnsi('\u001b[31mError\u001b[0m') // 'Error'
+ *   stripAnsi('\u001b[1mBold\u001b[0m') // 'Bold'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stripAnsi(text: string): string {

@@ -1,11 +1,9 @@
 /**
- * @fileoverview Safe references to `Promise` static methods, prototype
- * methods, and the ES2024 `withResolvers` factory.
- *
- * Static methods are bound to `Promise` so callers can pass them around
- * as standalone functions (`PromiseAll(arr)` instead of
- * `Promise.all(arr)`); the `this`-receiver capture matches Node's
- * primordials convention.
+ * @file Safe references to `Promise` static methods, prototype methods, and the
+ *   ES2024 `withResolvers` factory. Static methods are bound to `Promise` so
+ *   callers can pass them around as standalone functions (`PromiseAll(arr)`
+ *   instead of `Promise.all(arr)`); the `this`-receiver capture matches Node's
+ *   primordials convention.
  */
 
 import { uncurryThis } from './uncurry'

@@ -1,7 +1,6 @@
 /**
- * @fileoverview Grammatical list joiners via `Intl.ListFormat` —
- * Oxford-comma aware and locale-correct. `joinAnd` ("a, b, and c"),
- * `joinOr` ("a, b, or c").
+ * @file Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and
+ *   locale-correct. `joinAnd` ("a, b, and c"), `joinOr` ("a, b, or c").
  */
 
 import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
@@ -9,36 +8,37 @@ import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
 /**
  * Join array elements with proper "and" conjunction formatting.
  *
- * Formats an array of strings into a grammatically correct list using
- * "and" as the conjunction. Uses `Intl.ListFormat` for proper English
- * formatting with Oxford comma support.
- *
- * @param arr - Array of strings to join (can be readonly)
- * @returns Formatted string with proper "and" conjunction
+ * Formats an array of strings into a grammatically correct list using "and" as
+ * the conjunction. Uses `Intl.ListFormat` for proper English formatting with
+ * Oxford comma support.
  *
  * @example
- * ```ts
- * // Two items
- * joinAnd(['apples', 'oranges'])
- * // Returns: "apples and oranges"
+ *   ```ts
+ *   // Two items
+ *   joinAnd(['apples', 'oranges'])
+ *   // Returns: "apples and oranges"
  *
- * // Three or more items (Oxford comma)
- * joinAnd(['apples', 'oranges', 'bananas'])
- * // Returns: "apples, oranges, and bananas"
+ *   // Three or more items (Oxford comma)
+ *   joinAnd(['apples', 'oranges', 'bananas'])
+ *   // Returns: "apples, oranges, and bananas"
  *
- * // Single item
- * joinAnd(['apples'])
- * // Returns: "apples"
+ *   // Single item
+ *   joinAnd(['apples'])
+ *   // Returns: "apples"
  *
- * // Empty array
- * joinAnd([])
- * // Returns: ""
+ *   // Empty array
+ *   joinAnd([])
+ *   // Returns: ""
  *
- * // Usage in messages
- * const items = ['React', 'Vue', 'Angular']
- * console.log(`You can choose ${joinAnd(items)}`)
- * // Outputs: "You can choose React, Vue, and Angular"
- * ```
+ *   // Usage in messages
+ *   const items = ['React', 'Vue', 'Angular']
+ *   console.log(`You can choose ${joinAnd(items)}`)
+ *   // Outputs: "You can choose React, Vue, and Angular"
+ *   ```
+ *
+ * @param arr - Array of strings to join (can be readonly)
+ *
+ * @returns Formatted string with proper "and" conjunction
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function joinAnd(arr: string[] | readonly string[]): string {
@@ -48,36 +48,37 @@ export function joinAnd(arr: string[] | readonly string[]): string {
 /**
  * Join array elements with proper "or" disjunction formatting.
  *
- * Formats an array of strings into a grammatically correct list using
- * "or" as the disjunction. Uses `Intl.ListFormat` for proper English
- * formatting with Oxford comma support.
- *
- * @param arr - Array of strings to join (can be readonly)
- * @returns Formatted string with proper "or" disjunction
+ * Formats an array of strings into a grammatically correct list using "or" as
+ * the disjunction. Uses `Intl.ListFormat` for proper English formatting with
+ * Oxford comma support.
  *
  * @example
- * ```ts
- * // Two items
- * joinOr(['yes', 'no'])
- * // Returns: "yes or no"
+ *   ```ts
+ *   // Two items
+ *   joinOr(['yes', 'no'])
+ *   // Returns: "yes or no"
  *
- * // Three or more items (Oxford comma)
- * joinOr(['red', 'green', 'blue'])
- * // Returns: "red, green, or blue"
+ *   // Three or more items (Oxford comma)
+ *   joinOr(['red', 'green', 'blue'])
+ *   // Returns: "red, green, or blue"
  *
- * // Single item
- * joinOr(['maybe'])
- * // Returns: "maybe"
+ *   // Single item
+ *   joinOr(['maybe'])
+ *   // Returns: "maybe"
  *
- * // Empty array
- * joinOr([])
- * // Returns: ""
+ *   // Empty array
+ *   joinOr([])
+ *   // Returns: ""
  *
- * // Usage in prompts
- * const options = ['npm', 'yarn', 'pnpm']
- * console.log(`Choose a package manager: ${joinOr(options)}`)
- * // Outputs: "Choose a package manager: npm, yarn, or pnpm"
- * ```
+ *   // Usage in prompts
+ *   const options = ['npm', 'yarn', 'pnpm']
+ *   console.log(`Choose a package manager: ${joinOr(options)}`)
+ *   // Outputs: "Choose a package manager: npm, yarn, or pnpm"
+ *   ```
+ *
+ * @param arr - Array of strings to join (can be readonly)
+ *
+ * @returns Formatted string with proper "or" disjunction
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function joinOr(arr: string[] | readonly string[]): string {

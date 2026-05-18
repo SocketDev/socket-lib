@@ -1,4 +1,6 @@
-/** @fileoverview Path utilities for DLX package installations. */
+/**
+ * @file Path utilities for DLX package installations.
+ */
 
 import { normalizePath } from '../paths/normalize'
 import { getSocketDlxDir } from '../paths/socket'
@@ -10,9 +12,9 @@ import { getNodePath } from '../node/path'
  * Get the installed package directory within DLX node_modules.
  *
  * @example
- * ```typescript
- * const dir = getDlxInstalledPackageDir('prettier')
- * ```
+ *   ;```typescript
+ *   const dir = getDlxInstalledPackageDir('prettier')
+ *   ```
  */
 export function getDlxInstalledPackageDir(packageName: string): string {
   const path = getNodePath()
@@ -25,9 +27,9 @@ export function getDlxInstalledPackageDir(packageName: string): string {
  * Get the DLX installation directory for a specific package.
  *
  * @example
- * ```typescript
- * const dir = getDlxPackageDir('a1b2c3d4')
- * ```
+ *   ;```typescript
+ *   const dir = getDlxPackageDir('a1b2c3d4')
+ *   ```
  */
 export function getDlxPackageDir(packageName: string): string {
   const path = getNodePath()
@@ -38,9 +40,9 @@ export function getDlxPackageDir(packageName: string): string {
  * Get the package.json path for a DLX installed package.
  *
  * @example
- * ```typescript
- * const jsonPath = getDlxPackageJsonPath('prettier')
- * ```
+ *   ;```typescript
+ *   const jsonPath = getDlxPackageJsonPath('prettier')
+ *   ```
  */
 export function getDlxPackageJsonPath(packageName: string): string {
   const path = getNodePath()
@@ -53,9 +55,9 @@ export function getDlxPackageJsonPath(packageName: string): string {
  * Get the node_modules directory for a DLX package installation.
  *
  * @example
- * ```typescript
- * const nmDir = getDlxPackageNodeModulesDir('a1b2c3d4')
- * ```
+ *   ;```typescript
+ *   const nmDir = getDlxPackageNodeModulesDir('a1b2c3d4')
+ *   ```
  */
 export function getDlxPackageNodeModulesDir(packageName: string): string {
   const path = getNodePath()
@@ -63,18 +65,19 @@ export function getDlxPackageNodeModulesDir(packageName: string): string {
 }
 
 /**
- * Check if a file path is within the Socket DLX directory.
- * This is useful for determining if a binary or file is managed by Socket's DLX system.
- *
- * @param filePath - Absolute or relative path to check
- * @returns true if the path is within ~/.socket/_dlx/, false otherwise
+ * Check if a file path is within the Socket DLX directory. This is useful for
+ * determining if a binary or file is managed by Socket's DLX system.
  *
  * @example
- * ```typescript
- * isInSocketDlx('/home/<user>/.socket/_dlx/abc123/bin/socket') // true
- * isInSocketDlx('/usr/local/bin/socket') // false
- * isInSocketDlx(process.argv[0]) // Check if current binary is in DLX
- * ```
+ *   ;```typescript
+ *   isInSocketDlx('/home/<user>/.socket/_dlx/abc123/bin/socket') // true
+ *   isInSocketDlx('/usr/local/bin/socket') // false
+ *   isInSocketDlx(process.argv[0]) // Check if current binary is in DLX
+ *   ```
+ *
+ * @param filePath - Absolute or relative path to check.
+ *
+ * @returns True if the path is within ~/.socket/_dlx/, false otherwise
  */
 export function isInSocketDlx(filePath: string): boolean {
   if (!filePath) {

@@ -1,20 +1,14 @@
 /* oxlint-disable socket/sort-source-methods -- CLI handler with helper functions interleaved with module-level config constants; reordering would split state from its consumers. */
 /**
- * @fileoverview `socket-lib check primordials` handler.
- *
- * Loads a JSON config from disk (default
- * `primordials-coverage.config.json` at the repo root, override with
- * `--config <path>`), runs the drift check, and renders the result.
- *
- *   socket-lib check primordials
- *   socket-lib check primordials --config ./primordials.config.json
- *   socket-lib check primordials --json     # machine-readable output
- *   socket-lib check primordials --explain  # one detailed line per finding
- *   socket-lib check primordials --silent   # silent on success
- *
- * Exit codes:
- *   0 — no drift
- *   1 — drift detected (or config / lookup error)
+ * @file `socket-lib check primordials` handler. Loads a JSON config from disk
+ *   (default `primordials-coverage.config.json` at the repo root, override with
+ *   `--config <path>`), runs the drift check, and renders the result.
+ *   socket-lib check primordials socket-lib check primordials --config
+ *   ./primordials.config.json socket-lib check primordials --json #
+ *   machine-readable output socket-lib check primordials --explain # one
+ *   detailed line per finding socket-lib check primordials --silent # silent on
+ *   success Exit codes: 0 — no drift 1 — drift detected (or config / lookup
+ *   error)
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -89,12 +83,11 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
 }
 
 /**
- * Pick the config file. Returns the explicit `--config` argument when
- * given (even if it doesn't exist — the caller will surface the error
- * with the path they typed). Otherwise probes the fallback list in
- * order and returns the first hit. Returns the head of the list when
- * none exist, so the caller's "config file not found" error message
- * names the canonical default.
+ * Pick the config file. Returns the explicit `--config` argument when given
+ * (even if it doesn't exist — the caller will surface the error with the path
+ * they typed). Otherwise probes the fallback list in order and returns the
+ * first hit. Returns the head of the list when none exist, so the caller's
+ * "config file not found" error message names the canonical default.
  */
 export function resolveConfigPath(explicit: string | undefined): string {
   if (explicit !== undefined) {

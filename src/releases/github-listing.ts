@@ -1,15 +1,14 @@
 /**
- * @fileoverview GitHub release listing via REST + GraphQL.
- *
- * Split out of `releases/github-api.ts` for size hygiene. Holds the
- * "list all releases for a repo" path (both transports + the
- * latest-matching-tag picker that composes them):
+ * @file GitHub release listing via REST + GraphQL. Split out of
+ *   `releases/github-api.ts` for size hygiene. Holds the "list all releases for
+ *   a repo" path (both transports + the latest-matching-tag picker that
+ *   composes them):
  *
  *   - `fetchReleasesViaRest` — canonical REST `/releases?per_page=100` listing
- *   - `fetchReleasesViaGraphQL` — GraphQL fallback when REST's ES index is degraded
- *   - `getLatestRelease` — REST → GraphQL fallback + prefix/asset filter
- *
- * The per-tag asset-URL lookup lives in `./github-asset-url`.
+ *   - `fetchReleasesViaGraphQL` — GraphQL fallback when REST's ES index is
+ *     degraded
+ *   - `getLatestRelease` — REST → GraphQL fallback + prefix/asset filter The
+ *     per-tag asset-URL lookup lives in `./github-asset-url`.
  */
 
 import { httpRequest } from '../http-request/request'
@@ -28,8 +27,8 @@ import { getAuthHeaders } from './github-auth'
 import type { AssetPattern, RepoConfig } from './github-types'
 
 /**
- * Retry configuration for GitHub API requests.
- * Uses exponential backoff to handle transient failures and rate limiting.
+ * Retry configuration for GitHub API requests. Uses exponential backoff to
+ * handle transient failures and rate limiting.
  */
 const RETRY_CONFIG = ObjectFreeze({
   __proto__: null,
@@ -42,10 +41,10 @@ const RETRY_CONFIG = ObjectFreeze({
 })
 
 /**
- * Internal release row shape used by the listing helpers and the
- * filter pipeline in `getLatestRelease`. Both REST and GraphQL paths
- * normalize their output to this shape so downstream code is unaware
- * of which transport produced the data.
+ * Internal release row shape used by the listing helpers and the filter
+ * pipeline in `getLatestRelease`. Both REST and GraphQL paths normalize their
+ * output to this shape so downstream code is unaware of which transport
+ * produced the data.
  */
 interface ReleaseRow {
   tag_name: string
@@ -56,30 +55,24 @@ interface ReleaseRow {
 /**
  * Fetch the latest 100 releases for a repo via GraphQL.
  *
- * Why this exists:
- *   `fetchReleasesViaRest` can return `[]` for two reasons (real
- *   empty repo vs. GitHub-incident-degraded backend). When REST
- *   returns nothing, the caller in `getLatestRelease` calls THIS
- *   to disambiguate — if we return >0 here, REST was lying.
+ * Why this exists: `fetchReleasesViaRest` can return `[]` for two reasons (real
+ * empty repo vs. GitHub-incident-degraded backend). When REST returns nothing,
+ * the caller in `getLatestRelease` calls THIS to disambiguate — if we return >0
+ * here, REST was lying.
  *
- * Field shape diffs we normalize:
- *   GraphQL returns       REST equivalent      Why they differ
- *   `tagName`             `tag_name`           camelCase vs. snake_case
- *   `publishedAt`         `published_at`       camelCase vs. snake_case
- *   `releaseAssets.nodes` `assets`             GraphQL connection
- *                                              wrapper unwrapped
+ * Field shape diffs we normalize: GraphQL returns REST equivalent Why they
+ * differ `tagName` `tag_name` camelCase vs. snake_case `publishedAt`
+ * `published_at` camelCase vs. snake_case `releaseAssets.nodes` `assets`
+ * GraphQL connection wrapper unwrapped.
  *
- *   We re-shape inside the `.map(...)` at the bottom so callers
- *   downstream can use the SAME code path regardless of which
- *   transport ran.
+ * We re-shape inside the `.map(...)` at the bottom so callers downstream can
+ * use the SAME code path regardless of which transport ran.
  *
- * Why we hit a different backend:
- *   GraphQL queries don't go through the same Elasticsearch index
- *   that REST listings rely on. During incidents that drop the ES
- *   index (or its connectivity), GraphQL's `repository.releases`
- *   connection keeps working because it reads from a different
- *   data path inside GitHub. That's the entire reason this
- *   fallback exists.
+ * Why we hit a different backend: GraphQL queries don't go through the same
+ * Elasticsearch index that REST listings rely on. During incidents that drop
+ * the ES index (or its connectivity), GraphQL's `repository.releases`
+ * connection keeps working because it reads from a different data path inside
+ * GitHub. That's the entire reason this fallback exists.
  */
 export async function fetchReleasesViaGraphQL(
   owner: string,
@@ -151,28 +144,25 @@ export async function fetchReleasesViaGraphQL(
  * Fetch the latest 100 releases for a repo via REST.
  *
  * Why this returns `[]` on TWO different cases:
- *   - HTTP 200 + zero-byte body. This is the documented GitHub
- *     "search degraded" incident shape (see status.github.com).
- *     The releases listing endpoint shares an Elasticsearch index
- *     with search; when that ES is degraded, `/releases` returns
- *     a successful 200 OK but with NO BODY. There's no error code,
- *     no Retry-After, no rate-limit header — just an empty payload.
- *   - HTTP 200 + literal `[]`. This is the *normal* "the repo has
- *     no releases" response — say a brand-new repo with no
- *     published versions.
  *
- *   Both produce the same `[]` here because the helper can't tell
- *   them apart without context. The CALLER (getLatestRelease) does
- *   the cross-check: if REST returns `[]`, query GraphQL once. If
- *   GraphQL also returns `[]`, the repo really is empty. If it
- *   returns >0, REST was lying and we use GraphQL's answer.
+ * - HTTP 200 + zero-byte body. This is the documented GitHub "search degraded"
+ *   incident shape (see status.github.com). The releases listing endpoint
+ *   shares an Elasticsearch index with search; when that ES is degraded,
+ *   `/releases` returns a successful 200 OK but with NO BODY. There's no error
+ *   code, no Retry-After, no rate-limit header — just an empty payload.
+ * - HTTP 200 + literal `[]`. This is the _normal_ "the repo has no releases"
+ *   response — say a brand-new repo with no published versions.
  *
- * Why we throw on non-OK status:
- *   `pRetry` wraps this call and retries on thrown errors with
- *   exponential backoff. A 5xx is transient and worth retrying;
- *   we want it to throw so pRetry can do its job. Empty body is
- *   NOT thrown because pRetry can't help — a 200 OK is "done" as
- *   far as retry policy is concerned.
+ * Both produce the same `[]` here because the helper can't tell them apart
+ * without context. The CALLER (getLatestRelease) does the cross-check: if REST
+ * returns `[]`, query GraphQL once. If GraphQL also returns `[]`, the repo
+ * really is empty. If it returns >0, REST was lying and we use GraphQL's
+ * answer.
+ *
+ * Why we throw on non-OK status: `pRetry` wraps this call and retries on thrown
+ * errors with exponential backoff. A 5xx is transient and worth retrying; we
+ * want it to throw so pRetry can do its job. Empty body is NOT thrown because
+ * pRetry can't help — a 200 OK is "done" as far as retry policy is concerned.
  */
 export async function fetchReleasesViaRest(
   owner: string,
@@ -210,24 +200,30 @@ export async function fetchReleasesViaRest(
 }
 
 /**
- * Get latest release tag matching a tool prefix.
- * Optionally filter by releases containing a matching asset.
+ * Get latest release tag matching a tool prefix. Optionally filter by releases
+ * containing a matching asset.
+ *
+ * @example
+ *   ;```typescript
+ *   const tag = await getLatestRelease('lief-', {
+ *     owner: 'SocketDev',
+ *     repo: 'socket-btm',
+ *   })
+ *   console.log(tag) // 'lief-2025-01-15-abc1234'
+ *   ```
  *
  * @param toolPrefix - Tool name prefix to search for (e.g., 'node-smol-')
  * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
- * @param options.assetPattern - Optional pattern to filter releases by matching asset
- * @param options.nothrow - If true, return undefined instead of throwing when both REST and GraphQL backends are degraded. Default: false.
- * @returns Latest release tag or undefined if not found
- * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is false.
+ * @param options - Additional options.
+ * @param options.assetPattern - Optional pattern to filter releases by matching
+ *   asset.
+ * @param options.nothrow - If true, return undefined instead of throwing when
+ *   both REST and GraphQL backends are degraded. Default: false.
  *
- * @example
- * ```typescript
- * const tag = await getLatestRelease('lief-', {
- *   owner: 'SocketDev', repo: 'socket-btm',
- * })
- * console.log(tag) // 'lief-2025-01-15-abc1234'
- * ```
+ * @returns Latest release tag or undefined if not found
+ *
+ * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is
+ *   false.
  */
 export async function getLatestRelease(
   toolPrefix: string,

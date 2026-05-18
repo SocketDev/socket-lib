@@ -1,53 +1,41 @@
 /**
- * @fileoverview Write a managed `export VAR='<value>'` block to the
- * user's shell rc ("run commands") file. macOS only for now.
- *
- * `rc` is the historical Unix suffix for shell-startup files
- * (`.bashrc`, `.zshrc`, `.cshrc`) — short for "run commands", a
- * convention from MIT's CTSS (1965) carried through Multics into
- * Unix. This module writes a managed block into that file so the
- * value is exported into every subsequent shell session.
- *
- * Use case: `readSecret()` from `./keychain` round-trips through
- * the OS credential store on every call. On macOS each call
- * triggers a Keychain auth prompt unless the keychain item's ACL
- * allows the calling process. That's the right shape for tools
- * that read the secret once per process — but if you wire
- * `readSecret()` into a shell rc file directly, the user gets an
- * auth prompt on every new shell. Claude Code's Bash tool spawns
- * a fresh shell per command, which means continuous prompt flood.
- *
- * Solution: write the literal value into ~/.zshenv (or equivalent)
- * **once**, at install time, so every subsequent shell session
- * picks up the env var without re-reading the keychain. The
- * keychain is still the canonical store; this helper is just a
- * cached materialization that lives in the rc file.
- *
- * API:
- *
- *   write({ service, exports, notes?, legacySentinels? })
- *     → { rcPath, outcome: 'inserted' | 'updated' | 'unchanged' } | undefined
- *
- *   clear(service, legacySentinels?)
- *     → boolean (true when a block was found and removed)
- *
- * Block layout (idempotent — re-running with the same exports
- * returns `outcome: 'unchanged'`):
+ * @file Write a managed `export VAR='<value>'` block to the user's shell rc
+ *   ("run commands") file. macOS only for now. `rc` is the historical Unix
+ *   suffix for shell-startup files (`.bashrc`, `.zshrc`, `.cshrc`) — short for
+ *   "run commands", a convention from MIT's CTSS (1965) carried through Multics
+ *   into Unix. This module writes a managed block into that file so the value
+ *   is exported into every subsequent shell session. Use case: `readSecret()`
+ *   from `./keychain` round-trips through the OS credential store on every
+ *   call. On macOS each call triggers a Keychain auth prompt unless the
+ *   keychain item's ACL allows the calling process. That's the right shape for
+ *   tools that read the secret once per process — but if you wire
+ *   `readSecret()` into a shell rc file directly, the user gets an auth prompt
+ *   on every new shell. Claude Code's Bash tool spawns a fresh shell per
+ *   command, which means continuous prompt flood. Solution: write the literal
+ *   value into ~/.zshenv (or equivalent) **once**, at install time, so every
+ *   subsequent shell session picks up the env var without re-reading the
+ *   keychain. The keychain is still the canonical store; this helper is just a
+ *   cached materialization that lives in the rc file. API: write({ service,
+ *   exports, notes?, legacySentinels? }) → { rcPath, outcome: 'inserted' |
+ *   'updated' | 'unchanged' } | undefined clear(service, legacySentinels?) →
+ *   boolean (true when a block was found and removed) Block layout (idempotent
+ *   — re-running with the same exports returns `outcome: 'unchanged'`):
  *
  *   # BEGIN <service> env (managed)
+ *
  *   # Token persisted by <installer>.
+ *
  *   # Rotate via: <rotate-command>
- *   export VAR_1='<value>'
- *   export VAR_2='<value>'
+ *
+ *   export VAR_1='<value>' export VAR_2='<value>'
+ *
  *   # END <service> env (managed)
  *
- * Target file by shell:
- *   zsh  → ~/.zshenv  (sourced by every zsh, including non-interactive)
- *   bash → ~/.bashrc (or ~/.bash_profile fallback)
- *
- * For zsh we deliberately pick .zshenv (not .zshrc) because tools
- * that spawn non-interactive shells (Claude Code, IDE plugins, CI
- * runners) skip .zshrc and would miss the export.
+ *   Target file by shell: zsh → ~/.zshenv (sourced by every zsh, including
+ *   non-interactive) bash → ~/.bashrc (or ~/.bash_profile fallback) For zsh we
+ *   deliberately pick .zshenv (not .zshrc) because tools that spawn
+ *   non-interactive shells (Claude Code, IDE plugins, CI runners) skip .zshrc
+ *   and would miss the export.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -80,9 +68,9 @@ export function buildBlock(opts: WriteOptions): {
 }
 
 /**
- * Remove the managed block from the user's shell rc file. Used by
- * an uninstall / clear flow. Returns `true` when a block was found
- * and removed, `false` when no block was present.
+ * Remove the managed block from the user's shell rc file. Used by an uninstall
+ * / clear flow. Returns `true` when a block was found and removed, `false` when
+ * no block was present.
  */
 export function clear(
   service: string,
@@ -132,50 +120,48 @@ export function escapeRegExp(s: string): string {
 
 export interface WriteOptions {
   /**
-   * Logical service name. Used to compose the BEGIN/END sentinels
-   * (`# BEGIN <service> env (managed)`) so multiple tools can
-   * manage independent blocks in the same rc file without
-   * stepping on each other.
+   * Logical service name. Used to compose the BEGIN/END sentinels (`# BEGIN
+   * <service> env (managed)`) so multiple tools can manage independent blocks
+   * in the same rc file without stepping on each other.
    */
   service: string
   /**
-   * Map of env-var name → literal value to export. Each entry
-   * becomes a single POSIX `export NAME='value'` line.
+   * Map of env-var name → literal value to export. Each entry becomes a single
+   * POSIX `export NAME='value'` line.
    */
   exports: Record<string, string>
   /**
-   * Optional doc-comment lines added at the top of the managed
-   * block (e.g. "Rotate via: my-installer --rotate"). Each entry
-   * is prefixed with `# ` automatically.
+   * Optional doc-comment lines added at the top of the managed block (e.g.
+   * "Rotate via: my-installer --rotate"). Each entry is prefixed with `# `
+   * automatically.
    */
   notes?: readonly string[]
   /**
-   * Legacy sentinel BEGIN strings to sweep before writing the new
-   * block. Used during a rename/migration so an older managed
-   * block is removed rather than ignored. Each entry should be the
-   * literal BEGIN line; the function tolerates any line endings
-   * up to the matching END (same prefix with `END` replacing
-   * `BEGIN`).
+   * Legacy sentinel BEGIN strings to sweep before writing the new block. Used
+   * during a rename/migration so an older managed block is removed rather than
+   * ignored. Each entry should be the literal BEGIN line; the function
+   * tolerates any line endings up to the matching END (same prefix with `END`
+   * replacing `BEGIN`).
    */
   legacySentinels?: readonly string[]
   /**
-   * Override the auto-detected shell. By default the helper reads
-   * `$SHELL` and targets the matching rc file:
-   *   - zsh  → `~/.zshenv`
-   *   - bash → `~/.bashrc` (or `~/.bash_profile` if `~/.bashrc` is
-   *            absent)
-   *   - fish → `~/.config/fish/config.fish`
+   * Override the auto-detected shell. By default the helper reads `$SHELL` and
+   * targets the matching rc file:
    *
-   * Useful when an installer is running under a different shell
-   * than the user normally uses (e.g. invoked from a sudo /bin/sh
-   * but the user is a zsh user).
+   * - Zsh → `~/.zshenv`
+   * - Bash → `~/.bashrc` (or `~/.bash_profile` if `~/.bashrc` is absent)
+   * - Fish → `~/.config/fish/config.fish`
+   *
+   * Useful when an installer is running under a different shell than the user
+   * normally uses (e.g. invoked from a sudo /bin/sh but the user is a zsh
+   * user).
    */
   shell?: 'zsh' | 'bash' | 'fish' | undefined
   /**
-   * Override the auto-picked rc path entirely. Use this when the
-   * user has a non-standard layout (chezmoi, dotfile managers, a
-   * separate `~/.zshenv.local` they source from `~/.zshenv`, etc.).
-   * The file is created if missing.
+   * Override the auto-picked rc path entirely. Use this when the user has a
+   * non-standard layout (chezmoi, dotfile managers, a separate
+   * `~/.zshenv.local` they source from `~/.zshenv`, etc.). The file is created
+   * if missing.
    */
   rcPath?: string | undefined
 }
@@ -230,25 +216,23 @@ export function shellSingleQuote(value: string): string {
 }
 
 /**
- * Insert or update the managed env-var block in the user's shell
- * run-commands file (`~/.zshenv` for zsh, `~/.bashrc` /
- * `~/.bash_profile` for bash, `~/.config/fish/config.fish` for fish).
- * macOS only — Linux + Windows return `{outcome: 'skipped', reason:
- * 'unsupported-platform'}` so callers can fall back to a copy-
- * pasteable instruction without special-casing an `undefined` return.
+ * Insert or update the managed env-var block in the user's shell run-commands
+ * file (`~/.zshenv` for zsh, `~/.bashrc` / `~/.bash_profile` for bash,
+ * `~/.config/fish/config.fish` for fish). macOS only — Linux + Windows return
+ * `{outcome: 'skipped', reason: 'unsupported-platform'}` so callers can fall
+ * back to a copy- pasteable instruction without special-casing an `undefined`
+ * return.
  *
- * The block is matched by BEGIN/END sentinels, so it coexists with
- * other managed blocks (homebrew, nvm, etc.). Idempotent: re-running
- * with the same exports produces `outcome: 'unchanged'` and doesn't
- * touch the file.
+ * The block is matched by BEGIN/END sentinels, so it coexists with other
+ * managed blocks (homebrew, nvm, etc.). Idempotent: re-running with the same
+ * exports produces `outcome: 'unchanged'` and doesn't touch the file.
  *
- * `legacySentinels` lets a consumer migrate the block from an older
- * BEGIN string. Each legacy block (matched by `BEGIN <legacy>` →
- * `END <legacy>`) is stripped before the new block is written.
+ * `legacySentinels` lets a consumer migrate the block from an older BEGIN
+ * string. Each legacy block (matched by `BEGIN <legacy>` → `END <legacy>`) is
+ * stripped before the new block is written.
  *
- * `shell` and `rcPath` override the auto-detected target — useful
- * for chezmoi / dotfile-manager users or installers running under
- * a non-default shell.
+ * `shell` and `rcPath` override the auto-detected target — useful for chezmoi /
+ * dotfile-manager users or installers running under a non-default shell.
  */
 export function write(opts: WriteOptions): WriteResult {
   if (platform() !== 'darwin') {

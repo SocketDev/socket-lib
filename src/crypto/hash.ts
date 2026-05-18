@@ -1,8 +1,7 @@
 /**
- * @fileoverview Crypto hash helpers that prefer Node builtins where
- * available. Probes `node:crypto.hash()` (added v21.7.0 / v20.12.0) and
- * falls back to the streaming `createHash().update().digest()` chain
- * on older runtimes.
+ * @file Crypto hash helpers that prefer Node builtins where available. Probes
+ *   `node:crypto.hash()` (added v21.7.0 / v20.12.0) and falls back to the
+ *   streaming `createHash().update().digest()` chain on older runtimes.
  */
 
 import { getNodeCrypto } from '../node/crypto'
@@ -21,26 +20,24 @@ let _hashProbed = false
 /**
  * Compute a one-shot cryptographic hash.
  *
- * Prefers Node's `crypto.hash(algorithm, data, outputEncoding)` (added
- * v21.7.0 / v20.12.0), which is ~30% faster than the
- * `createHash().update().digest()` chain on small-to-medium inputs
- * because it skips constructing the streaming `Hash` object. Falls
- * back to that chain on older runtimes.
+ * Prefers Node's `crypto.hash(algorithm, data, outputEncoding)` (added v21.7.0
+ * / v20.12.0), which is ~30% faster than the `createHash().update().digest()`
+ * chain on small-to-medium inputs because it skips constructing the streaming
+ * `Hash` object. Falls back to that chain on older runtimes.
  *
- * Use this only for the one-shot case where the entire input is
- * available as a single buffer or string; if you need to feed chunks,
- * stay on `createHash()`.
+ * Use this only for the one-shot case where the entire input is available as a
+ * single buffer or string; if you need to feed chunks, stay on `createHash()`.
  *
  * @example
- * ```typescript
- * import { hash } from '@socketsecurity/lib/crypto/hash'
+ *   ;```typescript
+ *   import { hash } from '@socketsecurity/lib/crypto/hash'
  *
- * hash('sha256', 'hello', 'hex')
- * // '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'
+ *   hash('sha256', 'hello', 'hex')
+ *   // '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'
  *
- * hash('sha512', someBuffer, 'base64')
- * // 'z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=='
- * ```
+ *   hash('sha512', someBuffer, 'base64')
+ *   // 'z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=='
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function hash(

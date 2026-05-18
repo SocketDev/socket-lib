@@ -1,9 +1,8 @@
 /**
- * @fileoverview Report-side helpers — `generatePerformanceReport`
- * returns a multi-line ASCII-bordered report string;
- * `printPerformanceSummary` writes a one-line-per-op summary through
- * `debugLog`. Both gate on `isPerfEnabled()` and use the same
- * `getPerformanceSummary` rollup.
+ * @file Report-side helpers — `generatePerformanceReport` returns a multi-line
+ *   ASCII-bordered report string; `printPerformanceSummary` writes a
+ *   one-line-per-op summary through `debugLog`. Both gate on `isPerfEnabled()`
+ *   and use the same `getPerformanceSummary` rollup.
  */
 
 import { debugLog } from '../debug/output'
@@ -15,25 +14,25 @@ import { isPerfEnabled } from './enabled'
 import { getPerformanceSummary } from './metrics'
 
 /**
- * Create a performance report for the current execution.
- * Only available when DEBUG=perf is enabled.
- *
- * @returns Formatted performance report
+ * Create a performance report for the current execution. Only available when
+ * DEBUG=perf is enabled.
  *
  * @example
- * import { generatePerformanceReport } from '@socketsecurity/lib/perf/report'
+ *   import { generatePerformanceReport } from '@socketsecurity/lib/perf/report'
  *
- * console.log(generatePerformanceReport())
- * // ╔═══════════════════════════════════════════════╗
- * // ║         Performance Report                    ║
- * // ╚═══════════════════════════════════════════════╝
- * //
- * // api-call:
- * //   Calls: 5
- * //   Avg:   246.8ms
- * //   Min:   100ms
- * //   Max:   500ms
- * //   Total: 1234ms
+ *   console.log(generatePerformanceReport())
+ *   // ╔═══════════════════════════════════════════════╗
+ *   // ║         Performance Report                    ║
+ *   // ╚═══════════════════════════════════════════════╝
+ *   //
+ *   // api-call:
+ *   //   Calls: 5
+ *   //   Avg:   246.8ms
+ *   //   Min:   100ms
+ *   //   Max:   500ms
+ *   //   Total: 1234ms
+ *
+ * @returns Formatted performance report
  */
 export function generatePerformanceReport(): string {
   if (!isPerfEnabled() || performanceMetrics.length === 0) {
@@ -73,16 +72,15 @@ export function generatePerformanceReport(): string {
 }
 
 /**
- * Print performance summary to console.
- * Only prints when DEBUG=perf is enabled.
+ * Print performance summary to console. Only prints when DEBUG=perf is enabled.
  *
  * @example
- * import { printPerformanceSummary } from '@socketsecurity/lib/perf/report'
+ *   import { printPerformanceSummary } from '@socketsecurity/lib/perf/report'
  *
- * printPerformanceSummary()
- * // Performance Summary:
- * // api-call: 5 calls, avg 246.8ms (min 100ms, max 500ms, total 1234ms)
- * // file-read: 10 calls, avg 5ms (min 2ms, max 15ms, total 50ms)
+ *   printPerformanceSummary()
+ *   // Performance Summary:
+ *   // api-call: 5 calls, avg 246.8ms (min 100ms, max 500ms, total 1234ms)
+ *   // file-read: 10 calls, avg 5ms (min 2ms, max 15ms, total 50ms)
  */
 export function printPerformanceSummary(): void {
   if (!isPerfEnabled() || performanceMetrics.length === 0) {

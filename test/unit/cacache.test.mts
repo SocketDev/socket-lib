@@ -1,14 +1,14 @@
 /**
- * @fileoverview Unit tests for content-addressable cache (cacache) wrapper utilities.
+ * @file Unit tests for content-addressable cache (cacache) wrapper utilities.
+ *   Tests cacache wrapper functions for content-addressable caching:
  *
- * Tests cacache wrapper functions for content-addressable caching:
- * - getCacache() lazy-loads cacache library
- * - get(), safeGet() retrieve cached content by key
- * - put() stores content with integrity hash
- * - remove() deletes cached entries
- * - clear() purges entire cache
- * - withTmp() provides temporary cache directory
- * Used by Socket tools for package tarball caching and content storage.
+ *   - getCacache() lazy-loads cacache library
+ *   - get(), safeGet() retrieve cached content by key
+ *   - put() stores content with integrity hash
+ *   - remove() deletes cached entries
+ *   - clear() purges entire cache
+ *   - withTmp() provides temporary cache directory Used by Socket tools for
+ *     package tarball caching and content storage.
  */
 
 import { describe, expect, it, vi } from 'vitest'

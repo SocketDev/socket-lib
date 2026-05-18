@@ -1,26 +1,25 @@
 /**
- * @fileoverview Unit tests for the primordials drift check.
+ * @file Unit tests for the primordials drift check. Covers:
  *
- * Covers:
  *   - Source parsing (`extractPrimordialsNames`)
- *     - Plain destructure
- *     - Comment stripping
- *     - `Foo: BarAlias` rename — captures the source name
+ *   - Plain destructure
+ *   - Comment stripping
+ *   - `Foo: BarAlias` rename — captures the source name
  *   - TS export parsing (`extractTsExports`)
- *     - `export const`, `export function`, `export {}`
- *     - `.d.ts` declaration form (`export declare const`)
+ *   - `export const`, `export function`, `export {}`
+ *   - `.d.ts` declaration form (`export declare const`)
  *   - Resolver (`resolveSocketLibPrimordials`)
- *     - Explicit path override
- *     - Sibling clone preference
- *     - node_modules fallback
- *     - Throws when nothing found
+ *   - Explicit path override
+ *   - Sibling clone preference
+ *   - node_modules fallback
+ *   - Throws when nothing found
  *   - End-to-end (`checkPrimordials`)
- *     - All names accounted for → no findings
- *     - Alias-resolved name accounted for via aliasMap
- *     - Missing alias-target reports `missing-from-socket-lib`
- *     - Unmapped name with no entry reports `unmapped`
- *     - nodeInternalOnly skips the diff
- *     - Multiple files contribute to same name's `files` list
+ *   - All names accounted for → no findings
+ *   - Alias-resolved name accounted for via aliasMap
+ *   - Missing alias-target reports `missing-from-socket-lib`
+ *   - Unmapped name with no entry reports `unmapped`
+ *   - nodeInternalOnly skips the diff
+ *   - Multiple files contribute to same name's `files` list
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'

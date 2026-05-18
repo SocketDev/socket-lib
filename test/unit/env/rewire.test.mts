@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for environment variable rewiring system.
+ * @file Unit tests for environment variable rewiring system. Tests the rewire
+ *   module that enables test-time environment variable overrides:
  *
- * Tests the rewire module that enables test-time environment variable overrides:
- * - setEnv() / clearEnv() - override env vars without modifying process.env
- * - resetEnv() - clear all overrides (use in afterEach)
- * - hasOverride() - check if an env var has a test override
- * Allows isolated env var testing without polluting global process.env state.
- * Critical for reliable, parallel test execution without env var conflicts.
+ *   - setEnv() / clearEnv() - override env vars without modifying process.env
+ *   - resetEnv() - clear all overrides (use in afterEach)
+ *   - hasOverride() - check if an env var has a test override Allows isolated env
+ *     var testing without polluting global process.env state. Critical for
+ *     reliable, parallel test execution without env var conflicts.
  */
 
 import process from 'node:process'

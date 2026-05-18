@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for bazelFromPath().
+ * @file Unit tests for bazelFromPath().
  */
 
 import path from 'node:path'

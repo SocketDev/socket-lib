@@ -1,13 +1,12 @@
 /**
- * @fileoverview Symbol exports + the `LOG_SYMBOLS` proxy. The two
- * `Symbol.for(...)` constants are how the spinner (and tests) reach
- * into a `Logger` instance to bump the call counter and toggle
- * blank-line tracking without exposing private fields. The
- * `LOG_SYMBOLS` proxy is the public colored-symbol palette that
- * lazily initializes on first access (so importing the logger
- * during early Node.js bootstrap doesn't pre-resolve the theme
- * before themes are configured) and re-renders whenever
- * `setTheme()` fires `onThemeChange`.
+ * @file Symbol exports + the `LOG_SYMBOLS` proxy. The two `Symbol.for(...)`
+ *   constants are how the spinner (and tests) reach into a `Logger` instance to
+ *   bump the call counter and toggle blank-line tracking without exposing
+ *   private fields. The `LOG_SYMBOLS` proxy is the public colored-symbol
+ *   palette that lazily initializes on first access (so importing the logger
+ *   during early Node.js bootstrap doesn't pre-resolve the theme before themes
+ *   are configured) and re-renders whenever `setTheme()` fires
+ *   `onThemeChange`.
  */
 
 /* oxlint-disable socket/no-status-emoji */
@@ -63,41 +62,43 @@ export function getKGroupIndentationWidthSymbol(): symbol {
 /**
  * Symbol for incrementing the internal log call counter.
  *
- * This is an internal symbol used to track the number of times logging
- * methods have been called on a logger instance.
+ * This is an internal symbol used to track the number of times logging methods
+ * have been called on a logger instance.
  */
 export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
 
 /**
  * Symbol for tracking whether the last logged line was blank.
  *
- * This is used internally to prevent multiple consecutive blank lines
- * and to determine whether to add spacing before certain messages.
+ * This is used internally to prevent multiple consecutive blank lines and to
+ * determine whether to add spacing before certain messages.
  */
 export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
 
 /**
  * Log symbols for terminal output with colored indicators.
  *
- * Provides colored Unicode symbols (✖, ℹ, ∴, →, ✔, ⚠) with ASCII fallbacks (×, i, :., >, √, ‼)
- * for terminals that don't support Unicode. Symbols are colored according to the active
- * theme's color palette (error, info, reason, step, success, warning).
+ * Provides colored Unicode symbols (✖, ℹ, ∴, →, ✔, ⚠) with ASCII fallbacks (×,
+ * i, :., >, √, ‼) for terminals that don't support Unicode. Symbols are colored
+ * according to the active theme's color palette (error, info, reason, step,
+ * success, warning).
  *
- * The symbols are lazily initialized on first access and automatically update when the
- * fallback theme changes (via setTheme()). Note that LOG_SYMBOLS reflect the global
- * fallback theme, not async-local theme contexts from withTheme().
+ * The symbols are lazily initialized on first access and automatically update
+ * when the fallback theme changes (via setTheme()). Note that LOG_SYMBOLS
+ * reflect the global fallback theme, not async-local theme contexts from
+ * withTheme().
  *
  * @example
- * ```typescript
- * import { LOG_SYMBOLS } from '@socketsecurity/lib/logger/symbols'
+ *   ```typescript
+ *   import { LOG_SYMBOLS } from '@socketsecurity/lib/logger/symbols'
  *
- * console.log(`${LOG_SYMBOLS.fail} Build failed`)          // Theme error color ✖
- * console.log(`${LOG_SYMBOLS.info} Starting process`)      // Theme info color ℹ
- * console.log(`${LOG_SYMBOLS.progress} Working on task`)   // Theme step color ∴
- * console.log(`${LOG_SYMBOLS.step} Processing files`)      // Theme step color →
- * console.log(`${LOG_SYMBOLS.success} Build completed`)    // Theme success color ✔
- * console.log(`${LOG_SYMBOLS.warn} Deprecated API used`)   // Theme warning color ⚠
- * ```
+ *   console.log(`${LOG_SYMBOLS.fail} Build failed`) // Theme error color ✖
+ *   console.log(`${LOG_SYMBOLS.info} Starting process`) // Theme info color ℹ
+ *   console.log(`${LOG_SYMBOLS.progress} Working on task`) // Theme step color ∴
+ *   console.log(`${LOG_SYMBOLS.step} Processing files`) // Theme step color →
+ *   console.log(`${LOG_SYMBOLS.success} Build completed`) // Theme success color ✔
+ *   console.log(`${LOG_SYMBOLS.warn} Deprecated API used`) // Theme warning color ⚠
+ *   ```
  */
 export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   const target: Record<string, string> = {

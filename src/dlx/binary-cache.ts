@@ -1,14 +1,13 @@
 /**
- * @fileoverview On-disk cache metadata helpers for dlx binaries.
+ * @file On-disk cache metadata helpers for dlx binaries.
  *
  *   - `getDlxCachePath` — root of the binary cache (alias of getSocketDlxDir)
  *   - `getBinaryCacheMetadataPath` — path to a cache entry's .dlx-metadata.json
  *   - `isBinaryCacheValid` — TTL-based liveness check
  *   - `writeBinaryCacheMetadata` — atomic write of cache metadata
  *   - `cleanDlxCache` — TTL-based eviction sweep
- *   - `listDlxCache` — enumerate cached binaries with their metadata
- *
- * Split out of `dlx/binary.ts` for size hygiene.
+ *   - `listDlxCache` — enumerate cached binaries with their metadata Split out of
+ *     `dlx/binary.ts` for size hygiene.
  */
 
 /* oxlint-disable socket/prefer-exists-sync -- DLX binary metadata uses stat for size/mtime; not existence-only checks. */
@@ -39,13 +38,13 @@ import type { DlxMetadata } from './binary-types'
  * Clean expired entries from the DLX cache.
  *
  * @example
- * ```typescript
- * // Remove cache entries older than the default TTL
- * const removed = await cleanDlxCache()
+ *   ;```typescript
+ *   // Remove cache entries older than the default TTL
+ *   const removed = await cleanDlxCache()
  *
- * // Remove entries older than 1 hour
- * const removed2 = await cleanDlxCache(60 * 60 * 1000)
- * ```
+ *   // Remove entries older than 1 hour
+ *   const removed2 = await cleanDlxCache(60 * 60 * 1000)
+ *   ```
  */
 export async function cleanDlxCache(
   maxAge: number = DLX_BINARY_CACHE_TTL,
@@ -113,24 +112,23 @@ export async function cleanDlxCache(
  * Get metadata file path for a cached binary.
  *
  * @example
- * ```typescript
- * const metaPath = getBinaryCacheMetadataPath('/tmp/dlx-cache/a1b2c3d4')
- * // '/tmp/dlx-cache/a1b2c3d4/.dlx-metadata.json'
- * ```
+ *   ;```typescript
+ *   const metaPath = getBinaryCacheMetadataPath('/tmp/dlx-cache/a1b2c3d4')
+ *   // '/tmp/dlx-cache/a1b2c3d4/.dlx-metadata.json'
+ *   ```
  */
 export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
   return getNodePath().join(cacheEntryPath, '.dlx-metadata.json')
 }
 
 /**
- * Get the DLX binary cache directory path.
- * Alias of `getSocketDlxDir` — DLX binary cache uses the same directory
- * as dlx-package for unified DLX storage.
+ * Get the DLX binary cache directory path. Alias of `getSocketDlxDir` — DLX
+ * binary cache uses the same directory as dlx-package for unified DLX storage.
  *
  * @example
- * ```typescript
- * const cachePath = getDlxCachePath()
- * ```
+ *   ;```typescript
+ *   const cachePath = getDlxCachePath()
+ *   ```
  */
 export const getDlxCachePath = getSocketDlxDir
 
@@ -138,13 +136,13 @@ export const getDlxCachePath = getSocketDlxDir
  * Check if a cached binary is still valid.
  *
  * @example
- * ```typescript
- * const ttl = 7 * 24 * 60 * 60 * 1000
- * const valid = await isBinaryCacheValid('/tmp/dlx-cache/a1b2c3d4', ttl)
- * if (!valid) {
- *   // Re-download the binary
- * }
- * ```
+ *   ;```typescript
+ *   const ttl = 7 * 24 * 60 * 60 * 1000
+ *   const valid = await isBinaryCacheValid('/tmp/dlx-cache/a1b2c3d4', ttl)
+ *   if (!valid) {
+ *     // Re-download the binary
+ *   }
+ *   ```
  */
 export async function isBinaryCacheValid(
   cacheEntryPath: string,
@@ -182,12 +180,12 @@ export async function isBinaryCacheValid(
  * Get information about cached binaries.
  *
  * @example
- * ```typescript
- * const entries = await listDlxCache()
- * for (const entry of entries) {
+ *   ```typescript
+ *   const entries = await listDlxCache()
+ *   for (const entry of entries) {
  *   console.log(`${entry.name}: ${entry.size} bytes`)
- * }
- * ```
+ *   }
+ *   ```
  */
 export async function listDlxCache(): Promise<
   Array<{
@@ -261,19 +259,18 @@ export async function listDlxCache(): Promise<
 }
 
 /**
- * Read the DlxMetadata for a cached binary. Returns `undefined` when
- * the metadata file is missing, unreadable, or doesn't match the
- * expected shape. Useful for callers that want to recover the
- * integrity / size / source URL of an already-cached download
- * without re-fetching.
+ * Read the DlxMetadata for a cached binary. Returns `undefined` when the
+ * metadata file is missing, unreadable, or doesn't match the expected shape.
+ * Useful for callers that want to recover the integrity / size / source URL of
+ * an already-cached download without re-fetching.
  *
  * @example
- * ```typescript
- * const meta = await readBinaryCacheMetadata(cacheEntryDir)
- * if (meta) {
+ *   ```typescript
+ *   const meta = await readBinaryCacheMetadata(cacheEntryDir)
+ *   if (meta) {
  *   console.log(`Pinned integrity: ${meta.integrity}`)
- * }
- * ```
+ *   }
+ *   ```
  */
 export async function readBinaryCacheMetadata(
   cacheEntryPath: string,
@@ -295,19 +292,19 @@ export async function readBinaryCacheMetadata(
 }
 
 /**
- * Write metadata for a cached binary.
- * Uses unified schema shared with C++ decompressor and CLI dlxBinary.
+ * Write metadata for a cached binary. Uses unified schema shared with C++
+ * decompressor and CLI dlxBinary.
  *
  * @example
- * ```typescript
- * await writeBinaryCacheMetadata(
- *   '/tmp/dlx-cache/a1b2c3d4',
- *   'a1b2c3d4',
- *   'https://example.com/tool',
- *   'sha512-abc123...',
- *   15000000
- * )
- * ```
+ *   ;```typescript
+ *   await writeBinaryCacheMetadata(
+ *     '/tmp/dlx-cache/a1b2c3d4',
+ *     'a1b2c3d4',
+ *     'https://example.com/tool',
+ *     'sha512-abc123...',
+ *     15000000,
+ *   )
+ *   ```
  */
 export async function writeBinaryCacheMetadata(
   cacheEntryPath: string,

@@ -1,7 +1,7 @@
 /**
- * @fileoverview `getPackageVersions(lockfile, name)` — returns all
- * `PackageRef`s that match the given name in a `ParsedLockfile`.
- * Returns an empty array when no match exists.
+ * @file `getPackageVersions(lockfile, name)` — returns all `PackageRef`s that
+ *   match the given name in a `ParsedLockfile`. Returns an empty array when no
+ *   match exists.
  */
 
 import { getSmolManifest } from '../../smol/manifest'

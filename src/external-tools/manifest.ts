@@ -1,40 +1,21 @@
 /**
- * @fileoverview Reader for `external-tools.json` — the fleet manifest
- * describing downloadable external binaries (sfw, zizmor, etc.) with
- * pinned versions, per-platform asset names, and integrity hashes.
- *
- * The manifest itself is hand-maintained in each fleet repo's root
- * (`<repo>/external-tools.json`) and consumed by the setup-and-install
- * GitHub action. This reader gives in-process consumers (external-
- * tools resolvers, ad-hoc scripts) the same typed view without each
- * one re-implementing the JSON-parse + shape check + integrity-string
- * validation.
- *
- * Shape:
- *
- *   {
- *     "<tool-name>": {
- *       "description": "human-readable summary",
- *       "version": "1.7.2",
- *       "release": "asset" | "tarball" | ...,
- *       "repository": "github:owner/repo",
- *       "notes": [...],
- *       "checksums": {
- *         "<platform-arch>": {
- *           "asset": "<asset-filename>",
- *           "integrity": "sha256-base64="
- *         }
- *       }
- *     }
- *   }
- *
- * Some tools have flavor variants (e.g. sfw's `free` / `enterprise`)
- * that wrap the `{repository, binaryName, checksums}` triple under
- * a flavor key. Use `getToolFlavor` for those.
- *
- * Some entries (e.g. `rust`) describe a system tool with a different
- * shape — they're skipped by `getTool` and fully readable only via
- * the raw `readManifest` returning unknown.
+ * @file Reader for `external-tools.json` — the fleet manifest describing
+ *   downloadable external binaries (sfw, zizmor, etc.) with pinned versions,
+ *   per-platform asset names, and integrity hashes. The manifest itself is
+ *   hand-maintained in each fleet repo's root (`<repo>/external-tools.json`)
+ *   and consumed by the setup-and-install GitHub action. This reader gives
+ *   in-process consumers (external- tools resolvers, ad-hoc scripts) the same
+ *   typed view without each one re-implementing the JSON-parse + shape check +
+ *   integrity-string validation. Shape: { "<tool-name>": { "description":
+ *   "human-readable summary", "version": "1.7.2", "release": "asset" |
+ *   "tarball" | ..., "repository": "github:owner/repo", "notes": [...],
+ *   "checksums": { "<platform-arch>": { "asset": "<asset-filename>",
+ *   "integrity": "sha256-base64=" } } } } Some tools have flavor variants (e.g.
+ *   sfw's `free` / `enterprise`) that wrap the `{repository, binaryName,
+ *   checksums}` triple under a flavor key. Use `getToolFlavor` for those. Some
+ *   entries (e.g. `rust`) describe a system tool with a different shape —
+ *   they're skipped by `getTool` and fully readable only via the raw
+ *   `readManifest` returning unknown.
  */
 
 import { readJson } from '../fs/read-json'
@@ -43,9 +24,8 @@ import { isIntegrityString } from '../integrity'
 import { ErrorCtor } from '../primordials/error'
 
 /**
- * Lookup helper — return the plain tool entry for `toolName`, or
- * `undefined` if the manifest doesn't have it or the entry is
- * flavored / other-shape.
+ * Lookup helper — return the plain tool entry for `toolName`, or `undefined` if
+ * the manifest doesn't have it or the entry is flavored / other-shape.
  */
 export function getTool(
   manifest: Manifest,
@@ -56,8 +36,8 @@ export function getTool(
 }
 
 /**
- * Lookup helper — return the specific flavor of a flavored tool, or
- * `undefined` if the tool isn't flavored or the flavor doesn't exist.
+ * Lookup helper — return the specific flavor of a flavored tool, or `undefined`
+ * if the tool isn't flavored or the flavor doesn't exist.
  */
 export function getToolFlavor(
   manifest: Manifest,
@@ -72,20 +52,24 @@ export function getToolFlavor(
 }
 
 /**
- * Per-platform asset record: which filename to fetch from the
- * release, plus the integrity hash to verify against.
+ * Per-platform asset record: which filename to fetch from the release, plus the
+ * integrity hash to verify against.
  */
 export interface ToolChecksum {
-  /** Asset filename on the GitHub release page. */
+  /**
+   * Asset filename on the GitHub release page.
+   */
   asset: string
-  /** SRI integrity string, e.g. `sha256-<base64>=`. Validated on read. */
+  /**
+   * SRI integrity string, e.g. `sha256-<base64>=`. Validated on read.
+   */
   integrity: string
 }
 
 /**
- * A downloadable-binary tool entry. `checksums` is keyed by the
- * fleet's platform-arch token (`darwin-arm64`, `linux-x64-musl`,
- * `win-x64`, etc. — same vocabulary as `getPlatformArch`).
+ * A downloadable-binary tool entry. `checksums` is keyed by the fleet's
+ * platform-arch token (`darwin-arm64`, `linux-x64-musl`, `win-x64`, etc. — same
+ * vocabulary as `getPlatformArch`).
  */
 export interface ToolEntry {
   description: string
@@ -98,10 +82,9 @@ export interface ToolEntry {
 }
 
 /**
- * A flavored tool entry — sfw is the canonical example, with `free`
- * and `enterprise` variants sharing the same outer `description` /
- * `version` / `release` but each carrying its own `{repository,
- * binaryName, checksums}`.
+ * A flavored tool entry — sfw is the canonical example, with `free` and
+ * `enterprise` variants sharing the same outer `description` / `version` /
+ * `release` but each carrying its own `{repository, binaryName, checksums}`.
  */
 export interface FlavoredToolEntry {
   description: string
@@ -118,11 +101,10 @@ export interface ToolFlavor {
 }
 
 /**
- * Parsed manifest. `tools` is a flat map; the values are unions
- * because some tools are plain (`ToolEntry`) and some are flavored
- * (`FlavoredToolEntry`). Unknown shapes (rust's `components` entry,
- * future variants) come back as `{ kind: 'other'; raw: unknown }`
- * so callers can opt in to handle them.
+ * Parsed manifest. `tools` is a flat map; the values are unions because some
+ * tools are plain (`ToolEntry`) and some are flavored (`FlavoredToolEntry`).
+ * Unknown shapes (rust's `components` entry, future variants) come back as `{
+ * kind: 'other'; raw: unknown }` so callers can opt in to handle them.
  */
 export interface Manifest {
   tools: Readonly<Record<string, ManifestEntry>>
@@ -236,11 +218,10 @@ export function parseToolEntry(raw: unknown, toolName: string): ManifestEntry {
 }
 
 /**
- * Read an `external-tools.json` file from disk and return the parsed
- * manifest. Throws on malformed JSON or invalid integrity strings;
- * unknown-shape entries (rust components, future variants) come back
- * as `{kind: 'other', raw}` so callers can handle them out-of-band
- * without blocking the manifest read.
+ * Read an `external-tools.json` file from disk and return the parsed manifest.
+ * Throws on malformed JSON or invalid integrity strings; unknown-shape entries
+ * (rust components, future variants) come back as `{kind: 'other', raw}` so
+ * callers can handle them out-of-band without blocking the manifest read.
  */
 export async function readExternalToolsManifest(
   filepath: string,

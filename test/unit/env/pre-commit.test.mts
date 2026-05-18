@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for PRE_COMMIT environment variable getter.
- *
- * Tests getPreCommit() for detecting pre-commit hook execution.
- * Returns boolean indicating if running in pre-commit context (PRE_COMMIT=1).
- * Uses rewire for test isolation. Used for conditional behavior in Git hooks.
+ * @file Unit tests for PRE_COMMIT environment variable getter. Tests
+ *   getPreCommit() for detecting pre-commit hook execution. Returns boolean
+ *   indicating if running in pre-commit context (PRE_COMMIT=1). Uses rewire for
+ *   test isolation. Used for conditional behavior in Git hooks.
  */
 
 import { getPreCommit } from '@socketsecurity/lib/env/pre-commit'

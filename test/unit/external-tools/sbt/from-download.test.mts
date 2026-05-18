@@ -1,7 +1,7 @@
 /**
- * @fileoverview Tests for src/external-tools/sbt/from-download.ts —
- * URL construction, default cache layout, strip:1 unwrap of the
- * top-level sbt/ directory, and the ResolvedSbt return shape.
+ * @file Tests for src/external-tools/sbt/from-download.ts — URL construction,
+ *   default cache layout, strip:1 unwrap of the top-level sbt/ directory, and
+ *   the ResolvedSbt return shape.
  */
 
 import {
@@ -25,9 +25,8 @@ import { safeDelete } from '../../../../src/fs/safe'
 import { makeFakeDownloader } from '../../../lib/fake-downloader'
 
 /**
- * Build an SBT-shape tarball: top-level `sbt/bin/sbt` script. After
- * extraction with strip:1, the extracted dir should contain
- * `bin/sbt` directly.
+ * Build an SBT-shape tarball: top-level `sbt/bin/sbt` script. After extraction
+ * with strip:1, the extracted dir should contain `bin/sbt` directly.
  */
 export async function buildSbtTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')

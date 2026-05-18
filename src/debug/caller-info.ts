@@ -1,9 +1,8 @@
 /**
- * @fileoverview `getCallerInfo` — extract the caller's function
- * name from the V8 stack trace at a given offset. Used by every
- * output function to prefix the debug line with the calling site.
- * Strips V8-injected prefixes (`async`, `bound`, `Object.`, etc.)
- * so the printed name matches what the developer typed.
+ * @file `getCallerInfo` — extract the caller's function name from the V8 stack
+ *   trace at a given offset. Used by every output function to prefix the debug
+ *   line with the calling site. Strips V8-injected prefixes (`async`, `bound`,
+ *   `Object.`, etc.) so the printed name matches what the developer typed.
  */
 
 import { hasOwn } from '../objects/predicates'
@@ -14,6 +13,7 @@ import {
 
 /**
  * Extract caller information from the stack trace.
+ *
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/

@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for color utilities.
+ * @file Unit tests for color utilities. Tests color conversion and type guard
+ *   functions:
  *
- * Tests color conversion and type guard functions:
- * - isRgbTuple() type guard for RGB vs named colors
- * - toRgb() conversion from named colors to RGB tuples
- * - All ColorName mappings to RGB values
- * - RGB tuple passthrough behavior
- * Used throughout Socket CLI for consistent color handling in spinners, loggers, and UI.
+ *   - isRgbTuple() type guard for RGB vs named colors
+ *   - toRgb() conversion from named colors to RGB tuples
+ *   - All ColorName mappings to RGB values
+ *   - RGB tuple passthrough behavior Used throughout Socket CLI for consistent
+ *     color handling in spinners, loggers, and UI.
  */
 
 import { isRgbTuple, toRgb } from '@socketsecurity/lib/colors/convert'

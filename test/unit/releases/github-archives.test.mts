@@ -1,10 +1,9 @@
 /**
- * @fileoverview Unit tests for GitHub release archive download + extraction.
- *
- * Mocks the network (downloadReleaseAsset) and the archive extractor
- * (extractArchive). Each test writes a fake archive at the path the SUT
- * picked, runs through success or failure branches, and asserts on
- * filesystem state + thrown error wrapping.
+ * @file Unit tests for GitHub release archive download + extraction. Mocks the
+ *   network (downloadReleaseAsset) and the archive extractor (extractArchive).
+ *   Each test writes a fake archive at the path the SUT picked, runs through
+ *   success or failure branches, and asserts on filesystem state + thrown error
+ *   wrapping.
  */
 
 import { randomUUID } from 'node:crypto'

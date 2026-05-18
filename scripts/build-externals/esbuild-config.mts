@@ -1,5 +1,5 @@
 /**
- * @fileoverview esbuild configuration for external package bundling.
+ * @file Esbuild configuration for external package bundling.
  */
 
 import { readFileSync } from 'node:fs'
@@ -13,21 +13,20 @@ const stubsDir = path.join(__dirname, 'stubs')
 const requireResolve = createRequire(import.meta.url)
 
 /**
- * Stub configuration - maps module patterns to stub files.
- * Only includes conservative stubs that are safe to use.
+ * Stub configuration - maps module patterns to stub files. Only includes
+ * conservative stubs that are safe to use.
  *
- * SAFETY NOTE for the Arborist-reachable stubs below:
- * We use Arborist via `safeIdealTree` (buildIdealTree + reify in
- * packageLockOnly mode) and `safeReify` only. We never call
- * `arb.audit()` (→ metavuln-calculator → sigstore/tuf) nor
- * `arb.query(...)` (→ @npmcli/query → postcss-selector-parser).
- * If a future caller needs those code paths, drop the corresponding
- * entry from STUB_MAP.
+ * SAFETY NOTE for the Arborist-reachable stubs below: We use Arborist via
+ * `safeIdealTree` (buildIdealTree + reify in packageLockOnly mode) and
+ * `safeReify` only. We never call `arb.audit()` (→ metavuln-calculator →
+ * sigstore/tuf) nor `arb.query(...)` (→ @npmcli/query →
+ * postcss-selector-parser). If a future caller needs those code paths, drop the
+ * corresponding entry from STUB_MAP.
  */
 /**
- * Each entry may be a bare stub filename (matches against args.path only)
- * or a tuple `[importerPattern, stubFilename]` to require args.importer
- * to also match (used to scope relative-path stubs to a specific package).
+ * Each entry may be a bare stub filename (matches against args.path only) or a
+ * tuple `[importerPattern, stubFilename]` to require args.importer to also
+ * match (used to scope relative-path stubs to a specific package).
  */
 const STUB_MAP: Record<string, string | [RegExp, string]> = {
   // Vulnerability calculator — arb.audit() path only.
@@ -121,60 +120,45 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
 
 /**
  * Create esbuild plugin to force npm packages to resolve from node_modules.
- * This prevents tsconfig.json path mappings from creating circular dependencies.
+ * This prevents tsconfig.json path mappings from creating circular
+ * dependencies.
  *
  * @returns {import('esbuild').Plugin}
  */
 export function createForceNodeModulesPlugin() {
   /**
-   * Packages that must be resolved from node_modules to prevent circular dependencies.
+   * Packages that must be resolved from node_modules to prevent circular
+   * dependencies.
    *
-   * THE PROBLEM:
-   * ────────────
-   * Some packages have tsconfig.json path mappings like:
-   *   "cacache": ["./src/external/cacache"]
+   * THE PROBLEM: ──────────── Some packages have tsconfig.json path mappings
+   * like: "cacache": ["./src/external/cacache"]
    *
    * This creates a circular dependency during bundling:
    *
-   *   ┌─────────────────────────────────────────────────┐
-   *   │                                                 │
-   *   │  esbuild bundles: src/external/cacache.js      │
-   *   │       ↓                                         │
-   *   │  File contains: require('cacache')             │
-   *   │       ↓                                         │
-   *   │  tsconfig redirects: 'cacache' → src/external/ │ ← LOOP!
-   *   │       ↓                                         │
-   *   │  esbuild tries to bundle: src/external/cacache │
-   *   │       ↓                                         │
-   *   │  Circular reference! ⚠️                         │
-   *   └─────────────────────────────────────────────────┘
+   * ┌─────────────────────────────────────────────────┐ │ │ │ esbuild bundles:
+   * src/external/cacache.js │ │ ↓ │ │ File contains: require('cacache') │ │ ↓ │
+   * │ tsconfig redirects: 'cacache' → src/external/ │ ← LOOP! │ ↓ │ │ esbuild
+   * tries to bundle: src/external/cacache │ │ ↓ │ │ Circular reference! ⚠️ │
+   * └─────────────────────────────────────────────────┘
    *
-   * THE SOLUTION:
-   * ─────────────
-   * This plugin intercepts resolution and forces these packages to resolve
-   * from node_modules, bypassing the tsconfig path mappings:
+   * THE SOLUTION: ───────────── This plugin intercepts resolution and forces
+   * these packages to resolve from node_modules, bypassing the tsconfig path
+   * mappings:
    *
-   *   src/external/cacache.js
-   *       ↓
-   *   require('cacache')
-   *       ↓
-   *   Plugin intercepts → node_modules/cacache ✓
+   * Src/external/cacache.js ↓ require('cacache') ↓ Plugin intercepts →
+   * node_modules/cacache ✓
    *
    * PACKAGES WITH ACTUAL TSCONFIG MAPPINGS (as of now):
-   * ────────────────────────────────────────────────────
-   * ✓ adm-zip              - line 31 in tsconfig.json
-   * ✓ cacache              - line 32 in tsconfig.json
-   * ✓ make-fetch-happen    - line 33 in tsconfig.json
-   * ✓ fast-sort            - line 34 in tsconfig.json
-   * ✓ pacote               - line 35 in tsconfig.json
-   * ✓ tar-fs               - line 36 in tsconfig.json
+   * ──────────────────────────────────────────────────── ✓ adm-zip - line 31 in
+   * tsconfig.json ✓ cacache - line 32 in tsconfig.json ✓ make-fetch-happen -
+   * line 33 in tsconfig.json ✓ fast-sort - line 34 in tsconfig.json ✓ pacote -
+   * line 35 in tsconfig.json ✓ tar-fs - line 36 in tsconfig.json.
    *
-   * ADDITIONAL PACKAGES (defensive):
-   * ────────────────────────────────
-   * · libnpmexec           - Related to pacote, included for consistency
-   * · libnpmpack           - Related to pacote, included for consistency
-   * · npm-package-arg      - Related to pacote, included for consistency
-   * · normalize-package-data - Related to npm packages, included for consistency
+   * ADDITIONAL PACKAGES (defensive): ──────────────────────────────── ·
+   * libnpmexec - Related to pacote, included for consistency · libnpmpack -
+   * Related to pacote, included for consistency · npm-package-arg - Related to
+   * pacote, included for consistency · normalize-package-data - Related to npm
+   * packages, included for consistency.
    *
    * NOTE: Other external packages (debug, del, semver, etc.) don't have
    * tsconfig mappings, so they naturally resolve from node_modules without
@@ -287,10 +271,11 @@ export function createStubPlugin(
 /**
  * Get base esbuild configuration for bundling.
  *
- * @param {string} entryPoint - Entry point path
- * @param {string} outfile - Output file path
- * @param {object} packageOpts - Package-specific options
- * @returns {object} esbuild configuration
+ * @param {string} entryPoint - Entry point path.
+ * @param {string} outfile - Output file path.
+ * @param {object} packageOpts - Package-specific options.
+ *
+ * @returns {object} Esbuild configuration
  */
 export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
   return {
@@ -383,7 +368,8 @@ export function getEsbuildConfig(entryPoint, outfile, packageOpts = {}) {
 /**
  * Get package-specific esbuild options.
  *
- * @param {string} packageName - The package name
+ * @param {string} packageName - The package name.
+ *
  * @returns {object} Package-specific esbuild options
  */
 export function getPackageSpecificOptions(packageName) {

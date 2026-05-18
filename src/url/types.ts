@@ -1,7 +1,7 @@
 /**
- * @fileoverview Public type surface for `url/*` modules — option
- * interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`,
- * and `urlSearchParamsGet*`. Pure types, no runtime side effects.
+ * @file Public type surface for `url/*` modules — option interfaces consumed by
+ *   `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`. Pure
+ *   types, no runtime side effects.
  */
 
 export interface CreateRelativeUrlOptions {

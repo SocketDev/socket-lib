@@ -1,5 +1,5 @@
 /**
- * @fileoverview Theme utilities — color resolution and composition.
+ * @file Theme utilities — color resolution and composition.
  */
 
 import type { ColorValue } from '../colors/types'
@@ -8,8 +8,8 @@ import type { ColorReference, Theme, ThemeColors } from './types'
 
 import { ArrayIsArray } from '../primordials/array'
 /**
- * Rainbow gradient colors used for the `'rainbow'` color keyword.
- * 10 hues — cycles through the full color spectrum with smooth transitions.
+ * Rainbow gradient colors used for the `'rainbow'` color keyword. 10 hues —
+ * cycles through the full color spectrum with smooth transitions.
  */
 export const RAINBOW_GRADIENT: Palette = [
   // Red/pink.
@@ -37,28 +37,29 @@ export const RAINBOW_GRADIENT: Palette = [
 /**
  * Create new theme from complete specification.
  *
- * @param config - Theme configuration
- * @returns Theme object
- *
  * @example
- * ```ts
- * const theme = createTheme({
- *   name: 'custom',
- *   displayName: 'Custom',
- *   colors: {
- *     primary: [255, 100, 200],
- *     success: 'greenBright',
- *     error: 'redBright',
- *     warning: 'yellowBright',
- *     info: 'blueBright',
- *     step: 'cyanBright',
- *     text: 'white',
- *     textDim: 'gray',
- *     link: 'cyanBright',
- *     prompt: 'primary'
- *   }
- * })
- * ```
+ *   ;```ts
+ *   const theme = createTheme({
+ *     name: 'custom',
+ *     displayName: 'Custom',
+ *     colors: {
+ *       primary: [255, 100, 200],
+ *       success: 'greenBright',
+ *       error: 'redBright',
+ *       warning: 'yellowBright',
+ *       info: 'blueBright',
+ *       step: 'cyanBright',
+ *       text: 'white',
+ *       textDim: 'gray',
+ *       link: 'cyanBright',
+ *       prompt: 'primary',
+ *     },
+ *   })
+ *   ```
+ *
+ * @param config - Theme configuration.
+ *
+ * @returns Theme object
  */
 export function createTheme(
   config: Pick<Theme, 'name' | 'displayName' | 'colors'> &
@@ -77,20 +78,21 @@ export function createTheme(
 }
 
 /**
- * Extend existing theme with custom overrides.
- * Deep merge of colors and effects.
- *
- * @param base - Base theme
- * @param overrides - Custom overrides
- * @returns Extended theme
+ * Extend existing theme with custom overrides. Deep merge of colors and
+ * effects.
  *
  * @example
- * ```ts
- * const custom = extendTheme(SOCKET_THEME, {
- *   name: 'custom',
- *   colors: { primary: [255, 100, 200] }
- * })
- * ```
+ *   ;```ts
+ *   const custom = extendTheme(SOCKET_THEME, {
+ *     name: 'custom',
+ *     colors: { primary: [255, 100, 200] },
+ *   })
+ *   ```
+ *
+ * @param base - Base theme.
+ * @param overrides - Custom overrides.
+ *
+ * @returns Extended theme
  */
 export function extendTheme(
   base: Theme,
@@ -149,18 +151,19 @@ export function extendTheme(
 }
 
 /**
- * Resolve color reference to concrete value.
- * Handles semantic keywords: 'primary', 'secondary', 'rainbow', 'inherit'
- *
- * @param value - Color reference
- * @param colors - Theme palette
- * @returns Resolved color
+ * Resolve color reference to concrete value. Handles semantic keywords:
+ * 'primary', 'secondary', 'rainbow', 'inherit'
  *
  * @example
- * ```ts
- * resolveColor('primary', theme.colors)
- * resolveColor([255, 0, 0], theme.colors)
- * ```
+ *   ;```ts
+ *   resolveColor('primary', theme.colors)
+ *   resolveColor([255, 0, 0], theme.colors)
+ *   ```
+ *
+ * @param value - Color reference.
+ * @param colors - Theme palette.
+ *
+ * @returns Resolved color
  */
 export function resolveColor(
   value: ColorReference | ColorValue,
@@ -187,15 +190,16 @@ export function resolveColor(
 /**
  * Resolve shimmer color with gradient support.
  *
- * @param value - Shimmer color
- * @param theme - Theme context
- * @returns Resolved color
- *
  * @example
- * ```ts
- * resolveShimmerColor('rainbow', theme)
- * resolveShimmerColor('primary', theme)
- * ```
+ *   ;```ts
+ *   resolveShimmerColor('rainbow', theme)
+ *   resolveShimmerColor('primary', theme)
+ *   ```
+ *
+ * @param value - Shimmer color.
+ * @param theme - Theme context.
+ *
+ * @returns Resolved color
  */
 export function resolveShimmerColor(
   value: ColorReference | ColorValue[] | undefined,

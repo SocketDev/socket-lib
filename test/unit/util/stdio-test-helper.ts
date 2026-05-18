@@ -1,5 +1,5 @@
 /**
- * @fileoverview Shared test utilities for stdio stream testing.
+ * @file Shared test utilities for stdio stream testing.
  */
 
 import { WriteStream } from 'node:tty'
@@ -19,8 +19,8 @@ interface StdioTestContext {
 }
 
 /**
- * Sets up common mocks and spies for stdio stream testing.
- * Reduces ~50 lines of duplicate setup code per test file.
+ * Sets up common mocks and spies for stdio stream testing. Reduces ~50 lines of
+ * duplicate setup code per test file.
  */
 export function setupStdioTest(
   stream: NodeJS.WriteStream & Writable,
@@ -67,8 +67,8 @@ export function setupStdioTest(
 }
 
 /**
- * Returns a beforeEach/afterEach setup for stdio stream testing.
- * Use this to eliminate repetitive setup code entirely.
+ * Returns a beforeEach/afterEach setup for stdio stream testing. Use this to
+ * eliminate repetitive setup code entirely.
  */
 export function setupStdioTestSuite(stream: NodeJS.WriteStream & Writable) {
   let context: StdioTestContext
@@ -90,8 +90,8 @@ export function setupStdioTestSuite(stream: NodeJS.WriteStream & Writable) {
 }
 
 /**
- * Tears down mocks and restores original properties.
- * Reduces ~20 lines of duplicate teardown code per test file.
+ * Tears down mocks and restores original properties. Reduces ~20 lines of
+ * duplicate teardown code per test file.
  */
 export function teardownStdioTest(
   stream: NodeJS.WriteStream & Writable,

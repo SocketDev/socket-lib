@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for resolveSbt() — orchestrator + memo.
+ * @file Unit tests for resolveSbt() — orchestrator + memo.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

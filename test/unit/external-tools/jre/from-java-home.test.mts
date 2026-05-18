@@ -1,9 +1,7 @@
 /**
- * @fileoverview Unit tests for jreFromJavaHome().
- *
- * Uses vitest's `vi.stubEnv()` for env mutation — `process.env`
- * assignment races under vitest's `isolate: false` config, but
- * `stubEnv()` is properly scoped per-test.
+ * @file Unit tests for jreFromJavaHome(). Uses vitest's `vi.stubEnv()` for env
+ *   mutation — `process.env` assignment races under vitest's `isolate: false`
+ *   config, but `stubEnv()` is properly scoped per-test.
  */
 
 import path from 'node:path'

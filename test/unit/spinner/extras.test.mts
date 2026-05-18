@@ -1,7 +1,7 @@
 /**
- * @fileoverview Tests for uncovered Spinner methods/paths in
- * src/spinner.ts: debug() with debug-mode enabled, dedent(0) reset,
- * setShimmer config branches, withSpinnerRestore.
+ * @file Tests for uncovered Spinner methods/paths in src/spinner.ts: debug()
+ *   with debug-mode enabled, dedent(0) reset, setShimmer config branches,
+ *   withSpinnerRestore.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

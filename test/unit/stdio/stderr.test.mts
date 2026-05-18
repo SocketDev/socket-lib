@@ -1,12 +1,11 @@
 /**
- * @fileoverview Unit tests for stderr stream utilities.
+ * @file Unit tests for stderr stream utilities. Tests stderr output utilities:
  *
- * Tests stderr output utilities:
- * - writeStderr() writes to stderr stream
- * - Error message formatting
- * - Stream detection (TTY vs pipe)
- * - Color support detection for stderr
- * Used by Socket tools for error reporting and diagnostic output.
+ *   - writeStderr() writes to stderr stream
+ *   - Error message formatting
+ *   - Stream detection (TTY vs pipe)
+ *   - Color support detection for stderr Used by Socket tools for error reporting
+ *     and diagnostic output.
  */
 
 import process from 'node:process'

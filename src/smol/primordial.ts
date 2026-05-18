@@ -1,16 +1,11 @@
 /**
- * @fileoverview Lazy-loader for socket-btm's `node:smol-primordial`
- * binding.
- *
- * `node:smol-primordial` provides V8 Fast API typed implementations
- * of Math.* and Number.is* primordials, registered with
- * `CFunction::Make()` so TurboFan inlines them directly into JIT-
- * compiled JS callers. Bypasses the FunctionCallbackInfo trampoline
- * entirely — ~30-50% gain on hot loops where V8 doesn't already
- * auto-inline.
- *
- * Returns `undefined` on stock Node + non-Node runtimes. Result is
- * cached across calls.
+ * @file Lazy-loader for socket-btm's `node:smol-primordial` binding.
+ *   `node:smol-primordial` provides V8 Fast API typed implementations of Math.*
+ *   and Number.is* primordials, registered with `CFunction::Make()` so TurboFan
+ *   inlines them directly into JIT- compiled JS callers. Bypasses the
+ *   FunctionCallbackInfo trampoline entirely — ~30-50% gain on hot loops where
+ *   V8 doesn't already auto-inline. Returns `undefined` on stock Node +
+ *   non-Node runtimes. Result is cached across calls.
  *
  * @internal — used by `src/primordials.ts` to resolve smol-aware
  *   Math.* / Number.is* fast paths. Most callers should use the
@@ -24,14 +19,13 @@ import { isNodeBuiltin } from '../node/module'
 
 /**
  * Surface of `node:smol-primordial`. See socket-btm's
- * additions/source-patched/lib/smol-primordial.js for the canonical
- * shape.
+ * additions/source-patched/lib/smol-primordial.js for the canonical shape.
  *
- * Each entry is registered as a `v8::CFunction` so V8 can inline the
- * C++ implementation directly into JIT-compiled callers — eliminating
- * the FunctionCallbackInfo allocation, the HandleScope, and the call-
- * site trampoline. See the C++ binding file for which signatures
- * get real wins (and which don't).
+ * Each entry is registered as a `v8::CFunction` so V8 can inline the C++
+ * implementation directly into JIT-compiled callers — eliminating the
+ * FunctionCallbackInfo allocation, the HandleScope, and the call- site
+ * trampoline. See the C++ binding file for which signatures get real wins (and
+ * which don't).
  */
 export interface SmolPrimordialBinding {
   // Array.isArray. Fast path inlines a single map-pointer comparison.
@@ -92,8 +86,8 @@ let _smolPrimordial: SmolPrimordialBinding | undefined
 let _smolPrimordialProbed = false
 
 /**
- * Returns `node:smol-primordial` when running on the smol Node
- * binary, otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-primordial` when running on the smol Node binary,
+ * otherwise `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {

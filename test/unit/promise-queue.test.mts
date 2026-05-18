@@ -1,14 +1,14 @@
 /**
- * @fileoverview Unit tests for concurrent promise queue utilities.
+ * @file Unit tests for concurrent promise queue utilities. Tests PromiseQueue
+ *   class for controlled async concurrency:
  *
- * Tests PromiseQueue class for controlled async concurrency:
- * - Constructor with configurable concurrency limit
- * - add() queues promises with automatic execution
- * - Concurrency control: limits parallel promise execution
- * - onEmpty(), onIdle() lifecycle events
- * - size, pending properties for queue state inspection
- * - Error handling: failed promises don't block queue
- * Used by Socket tools for rate-limited parallel operations (API calls, file I/O).
+ *   - Constructor with configurable concurrency limit
+ *   - add() queues promises with automatic execution
+ *   - Concurrency control: limits parallel promise execution
+ *   - onEmpty(), onIdle() lifecycle events
+ *   - size, pending properties for queue state inspection
+ *   - Error handling: failed promises don't block queue Used by Socket tools for
+ *     rate-limited parallel operations (API calls, file I/O).
  */
 
 import { PromiseQueue } from '@socketsecurity/lib/promise-queue/queue'

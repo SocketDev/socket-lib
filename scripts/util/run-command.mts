@@ -1,4 +1,6 @@
-/** @fileoverview Utility for running shell commands with proper error handling. */
+/**
+ * @file Utility for running shell commands with proper error handling.
+ */
 
 import process from 'node:process'
 
@@ -20,10 +22,12 @@ const logger = getDefaultLogger()
 
 /**
  * Log and run a command.
- * @param {string} description - Description of what the command does
- * @param {string} command - The command to run
- * @param {string[]} args - Arguments
- * @param {object} options - Spawn options
+ *
+ * @param {string} description - Description of what the command does.
+ * @param {string} command - The command to run.
+ * @param {string[]} args - Arguments.
+ * @param {object} options - Spawn options.
+ *
  * @returns {Promise<number>} Exit code
  */
 export async function logAndRun(
@@ -38,9 +42,11 @@ export async function logAndRun(
 
 /**
  * Run a command and return a promise that resolves with the exit code.
- * @param {string} command - The command to run
- * @param {string[]} args - Arguments to pass to the command
- * @param {object} options - Spawn options
+ *
+ * @param {string} command - The command to run.
+ * @param {string[]} args - Arguments to pass to the command.
+ * @param {object} options - Spawn options.
+ *
  * @returns {Promise<number>} Exit code
  */
 export async function runCommand(
@@ -67,10 +73,12 @@ export async function runCommand(
 
 /**
  * Run a command and suppress output.
- * @param {string} command - The command to run
- * @param {string[]} args - Arguments to pass to the command
- * @param {object} options - Spawn options
- * @returns {Promise<{exitCode: number, stdout: string, stderr: string}>}
+ *
+ * @param {string} command - The command to run.
+ * @param {string[]} args - Arguments to pass to the command.
+ * @param {object} options - Spawn options.
+ *
+ * @returns {Promise<{ exitCode: number; stdout: string; stderr: string }>}
  */
 export async function runCommandQuiet(
   command: string,
@@ -121,9 +129,11 @@ export async function runCommandQuiet(
 
 /**
  * Run a command synchronously.
- * @param {string} command - The command to run
- * @param {string[]} args - Arguments to pass to the command
- * @param {object} options - Spawn options
+ *
+ * @param {string} command - The command to run.
+ * @param {string[]} args - Arguments to pass to the command.
+ * @param {object} options - Spawn options.
+ *
  * @returns {number} Exit code
  */
 export function runCommandSync(
@@ -142,7 +152,9 @@ export function runCommandSync(
 
 /**
  * Run multiple commands in parallel.
- * @param {Array<{command: string, args?: string[], options?: object}>} commands
+ *
+ * @param {{ command: string; args?: string[]; options?: object }[]} commands
+ *
  * @returns {Promise<number[]>} Array of exit codes
  */
 export async function runParallel(commands: CommandEntry[]): Promise<number[]> {
@@ -155,9 +167,11 @@ export async function runParallel(commands: CommandEntry[]): Promise<number[]> {
 
 /**
  * Run a pnpm script.
- * @param {string} scriptName - The pnpm script to run
- * @param {string[]} extraArgs - Additional arguments
- * @param {object} options - Spawn options
+ *
+ * @param {string} scriptName - The pnpm script to run.
+ * @param {string[]} extraArgs - Additional arguments.
+ * @param {object} options - Spawn options.
+ *
  * @returns {Promise<number>} Exit code
  */
 export async function runPnpmScript(
@@ -170,8 +184,11 @@ export async function runPnpmScript(
 
 /**
  * Run multiple commands in sequence, stopping on first failure.
- * @param {Array<{command: string, args?: string[], options?: object}>} commands
- * @returns {Promise<number>} Exit code of first failing command, or 0 if all succeed
+ *
+ * @param {{ command: string; args?: string[]; options?: object }[]} commands
+ *
+ * @returns {Promise<number>} Exit code of first failing command, or 0 if all
+ *   succeed.
  */
 export async function runSequence(commands: CommandEntry[]): Promise<number> {
   for (const { args = [], command, options = {} } of commands) {

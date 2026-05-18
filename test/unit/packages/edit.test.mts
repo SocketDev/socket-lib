@@ -1,12 +1,13 @@
 /**
- * @fileoverview Unit tests for editable package.json manipulation utilities.
+ * @file Unit tests for editable package.json manipulation utilities. Tests
+ *   EditablePackageJson class for modifying package.json programmatically:
  *
- * Tests EditablePackageJson class for modifying package.json programmatically:
- * - Field setters: name, version, description, scripts, dependencies
- * - Dependency management: add/remove/update dependencies
- * - Script manipulation: add/remove/update scripts
- * - Serialization: toJSON(), toString() with formatting preservation
- * Critical for Socket CLI package.json editing operations (security fixes, updates).
+ *   - Field setters: name, version, description, scripts, dependencies
+ *   - Dependency management: add/remove/update dependencies
+ *   - Script manipulation: add/remove/update scripts
+ *   - Serialization: toJSON(), toString() with formatting preservation Critical
+ *     for Socket CLI package.json editing operations (security fixes,
+ *     updates).
  */
 
 import { promises as fs } from 'node:fs'

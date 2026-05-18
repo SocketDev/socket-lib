@@ -1,17 +1,15 @@
 /**
- * @fileoverview Cross-tool script runner — picks the right package
- * manager by detecting the nearest lockfile and dispatches to its exec
- * function. Falls back to running `node --run` directly when no
- * lockfile is found.
+ * @file Cross-tool script runner — picks the right package manager by detecting
+ *   the nearest lockfile and dispatches to its exec function. Falls back to
+ *   running `node --run` directly when no lockfile is found. Lockfile
+ *   precedence (first match wins, walking up from cwd):
  *
- * Lockfile precedence (first match wins, walking up from cwd):
  *   1. pnpm-lock.yaml → execPnpm(['run', scriptName, ...args])
  *   2. package-lock.json → execNpm(['run', scriptName, ...args])
  *   3. yarn.lock → execYarn(['run', scriptName, ...args])
- *   4. (no lockfile) → node --run scriptName (or `node <npm-cli> run`
- *      on older Node where `node --run` isn't available)
- *
- * Honors `shell: true` by passing through to spawn() unchanged.
+ *   4. (no lockfile) → node --run scriptName (or `node <npm-cli> run` on older
+ *      Node where `node --run` isn't available) Honors `shell: true` by passing
+ *      through to spawn() unchanged.
  */
 
 import process from 'node:process'
@@ -45,9 +43,11 @@ export interface ExecScriptOptions extends SpawnOptions {
 /**
  * Execute a package.json script using the detected package manager.
  *
- * @param scriptName - The package.json script to run
- * @param args - Either the script arguments or an options object
- * @param options - Spawn options plus `prepost` to force npm-style pre/post scripts
+ * @param scriptName - The package.json script to run.
+ * @param args - Either the script arguments or an options object.
+ * @param options - Spawn options plus `prepost` to force npm-style pre/post
+ *   scripts.
+ *
  * @returns The spawned `ChildProcess`-like promise from the underlying runner.
  */
 export function execScript(

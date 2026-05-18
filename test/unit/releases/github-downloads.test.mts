@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for GitHub release asset downloads.
+ * @file Unit tests for GitHub release asset downloads. Covers:
  *
- * Covers:
- * - downloadReleaseAsset (delegates to getReleaseAssetUrl + httpDownload)
- * - downloadGitHubRelease TOCTOU race protection on cached binaries
+ *   - downloadReleaseAsset (delegates to getReleaseAssetUrl + httpDownload)
+ *   - downloadGitHubRelease TOCTOU race protection on cached binaries
  */
 
 // oxlint-disable socket/no-dynamic-import-outside-bundle -- per-test dynamic imports keep state inside each `it` block under `isolate: false`; see comment block above downloadGitHubRelease describe.

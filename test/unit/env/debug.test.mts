@@ -1,10 +1,10 @@
 /**
- * @fileoverview Unit tests for DEBUG environment variable getter.
- *
- * Tests getDebug() which retrieves the DEBUG environment variable for debug logging control.
- * Returns the DEBUG string value (e.g., "*", "socket:*", "app:*") or undefined if not set.
- * Uses rewire for isolated testing without polluting process.env.
- * DEBUG patterns follow the debug module convention for selective debug output.
+ * @file Unit tests for DEBUG environment variable getter. Tests getDebug()
+ *   which retrieves the DEBUG environment variable for debug logging control.
+ *   Returns the DEBUG string value (e.g., "_", "socket:_", "app:*") or
+ *   undefined if not set. Uses rewire for isolated testing without polluting
+ *   process.env. DEBUG patterns follow the debug module convention for
+ *   selective debug output.
  */
 
 import process from 'node:process'

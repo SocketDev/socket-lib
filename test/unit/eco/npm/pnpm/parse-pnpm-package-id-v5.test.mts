@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for parse-pnpm-package-id-v5.ts.
+ * @file Unit tests for parse-pnpm-package-id-v5.ts.
  */
 
 import { describe, expect, it } from 'vitest'

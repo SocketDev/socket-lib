@@ -1,10 +1,10 @@
 /**
- * @fileoverview Unit tests for crypto helpers.
+ * @file Unit tests for crypto helpers. Covers `hash()` and the `nativeHash()`
+ *   feature-detect:
  *
- * Covers `hash()` and the `nativeHash()` feature-detect:
- * - one-shot hashing for sha256, sha512 across hex / base64 / base64url
- * - native vs. fallback (createHash().update().digest()) parity
- * - feature-detect tri-state: native present, native missing
+ *   - one-shot hashing for sha256, sha512 across hex / base64 / base64url
+ *   - native vs. fallback (createHash().update().digest()) parity
+ *   - feature-detect tri-state: native present, native missing
  */
 
 import { Buffer } from 'node:buffer'

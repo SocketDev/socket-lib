@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for the shimmer engine.
- *
- * The engine is a pure function: (spec, length, frame) → RGB[]. These tests
- * verify the building blocks (kernels, sweep generators, palette helpers)
- * compose correctly and produce deterministic output.
+ * @file Unit tests for the shimmer engine. The engine is a pure function:
+ *   (spec, length, frame) → RGB[]. These tests verify the building blocks
+ *   (kernels, sweep generators, palette helpers) compose correctly and produce
+ *   deterministic output.
  */
 
 import { describe, expect, it } from 'vitest'

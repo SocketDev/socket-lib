@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package spec parsing and GitHub URL utilities.
+ * @file Package spec parsing and GitHub URL utilities.
  */
 
 import npmPackageArg from '../external/npm-package-arg'
@@ -12,10 +12,10 @@ import { StringPrototypeEndsWith } from '../primordials/string'
  * Extract user and project from GitHub repository URL.
  *
  * @example
- * ```typescript
- * getRepoUrlDetails('https://github.com/lodash/lodash.git')
- * // { user: 'lodash', project: 'lodash' }
- * ```
+ *   ;```typescript
+ *   getRepoUrlDetails('https://github.com/lodash/lodash.git')
+ *   // { user: 'lodash', project: 'lodash' }
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getRepoUrlDetails(repoUrl: string = ''): {
@@ -50,10 +50,10 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
  * Generate GitHub API URL for a tag reference.
  *
  * @example
- * ```typescript
- * gitHubTagRefUrl('lodash', 'lodash', 'v4.17.21')
- * // 'https://api.github.com/repos/lodash/lodash/git/ref/tags/v4.17.21'
- * ```
+ *   ;```typescript
+ *   gitHubTagRefUrl('lodash', 'lodash', 'v4.17.21')
+ *   // 'https://api.github.com/repos/lodash/lodash/git/ref/tags/v4.17.21'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function gitHubTagRefUrl(
@@ -68,10 +68,10 @@ export function gitHubTagRefUrl(
  * Generate GitHub tarball download URL for a commit SHA.
  *
  * @example
- * ```typescript
- * gitHubTgzUrl('lodash', 'lodash', 'abc123')
- * // 'https://github.com/lodash/lodash/archive/abc123.tar.gz'
- * ```
+ *   ;```typescript
+ *   gitHubTgzUrl('lodash', 'lodash', 'abc123')
+ *   // 'https://github.com/lodash/lodash/archive/abc123.tar.gz'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function gitHubTgzUrl(
@@ -86,10 +86,10 @@ export function gitHubTgzUrl(
  * Check if a package specifier is a GitHub tarball URL.
  *
  * @example
- * ```typescript
- * isGitHubTgzSpec('https://github.com/user/repo/archive/abc123.tar.gz') // true
- * isGitHubTgzSpec('lodash@4.17.21')                                     // false
- * ```
+ *   ;```typescript
+ *   isGitHubTgzSpec('https://github.com/user/repo/archive/abc123.tar.gz') // true
+ *   isGitHubTgzSpec('lodash@4.17.21') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
@@ -110,10 +110,10 @@ export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
  * Check if a package specifier is a GitHub URL with committish.
  *
  * @example
- * ```typescript
- * isGitHubUrlSpec('github:user/repo#v1.0.0') // true
- * isGitHubUrlSpec('lodash@4.17.21')           // false
- * ```
+ *   ;```typescript
+ *   isGitHubUrlSpec('github:user/repo#v1.0.0') // true
+ *   isGitHubUrlSpec('lodash@4.17.21') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {

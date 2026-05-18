@@ -1,9 +1,7 @@
 /**
- * @fileoverview Unit tests for src/smol/manifest.ts.
- *
- * On stock Node, `getSmolManifest()` returns `undefined`. The
- * integration story is verified by socket-btm's own tests running
- * inside the smol binary.
+ * @file Unit tests for src/smol/manifest.ts. On stock Node, `getSmolManifest()`
+ *   returns `undefined`. The integration story is verified by socket-btm's own
+ *   tests running inside the smol binary.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for the `parse(filename, content)` entry.
+ * @file Unit tests for the `parse(filename, content)` entry.
  */
 
 import { describe, expect, it } from 'vitest'

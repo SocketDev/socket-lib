@@ -1,9 +1,8 @@
 /**
- * @fileoverview Free-function helpers for per-instance log-symbol
- * construction + symbol stripping. Extracted from `logger/logger.ts`
- * (the `Logger` class) so the class stays under the 1000-line hard
- * cap and so other callers (alt loggers, format helpers) can reuse
- * the same logic without instantiating a `Logger`.
+ * @file Free-function helpers for per-instance log-symbol construction + symbol
+ *   stripping. Extracted from `logger/logger.ts` (the `Logger` class) so the
+ *   class stays under the 1000-line hard cap and so other callers (alt loggers,
+ *   format helpers) can reuse the same logic without instantiating a `Logger`.
  *
  *   - `buildLoggerSymbols` — theme + unicode-detection → `LogSymbols` map
  *   - `stripLoggerSymbols` — strip leading status emoji from a string
@@ -28,10 +27,9 @@ import type { Theme } from '../themes/types'
 /**
  * Build a `LogSymbols` map for the given theme.
  *
- * On unicode-supporting terminals returns the canonical icons
- * (`✔`, `✖`, `⚠`, `ℹ`, `→`, `∴`, `↻`); otherwise returns ASCII
- * fallbacks (`√`, `×`, `‼`, `i`, `>`, `:.`, `@`). Colors are pulled
- * from the supplied theme via `applyColor`.
+ * On unicode-supporting terminals returns the canonical icons (`✔`, `✖`, `⚠`,
+ * `ℹ`, `→`, `∴`, `↻`); otherwise returns ASCII fallbacks (`√`, `×`, `‼`, `i`,
+ * `>`, `:.`, `@`). Colors are pulled from the supplied theme via `applyColor`.
  */
 export function buildLoggerSymbols(theme: Theme): LogSymbols {
   const supported = isUnicodeSupported()
@@ -53,13 +51,13 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
 }
 
 /**
- * Strip leading log-status symbols (and variation selectors) from a
- * string. Matches both unicode forms (`✖`, `⚠`, `✔`, `ℹ`, `→`, `∴`,
- * `↻`) and the unambiguous ASCII fallback `:.`. Does not strip lone
- * ASCII letters (`i`, `>`, `@`) since those would mangle real words.
+ * Strip leading log-status symbols (and variation selectors) from a string.
+ * Matches both unicode forms (`✖`, `⚠`, `✔`, `ℹ`, `→`, `∴`, `↻`) and the
+ * unambiguous ASCII fallback `:.`. Does not strip lone ASCII letters (`i`, `>`,
+ * `@`) since those would mangle real words.
  *
- * Handles the trailing variation-selector U+FE0F + whitespace so a
- * `'✔  Done'` input becomes `'Done'`.
+ * Handles the trailing variation-selector U+FE0F + whitespace so a `'✔ Done'`
+ * input becomes `'Done'`.
  */
 export function stripLoggerSymbols(text: string): string {
   return StringPrototypeReplace(text, /^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[️\s]*/u, '')

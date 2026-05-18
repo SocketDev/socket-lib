@@ -1,6 +1,6 @@
 /**
- * @fileoverview Elegant theme context management.
- * Async-aware theming with automatic context isolation via AsyncLocalStorage.
+ * @file Elegant theme context management. Async-aware theming with automatic
+ *   context isolation via AsyncLocalStorage.
  */
 
 import type { Theme } from './types'
@@ -16,6 +16,7 @@ export type ThemeChangeListener = (theme: Theme) => void
 
 /**
  * Emit theme change event to listeners.
+ *
  * @private
  */
 export function emitThemeChange(theme: Theme): void {
@@ -26,6 +27,7 @@ export function emitThemeChange(theme: Theme): void {
 
 /**
  * Lazily load the async_hooks module to avoid Webpack errors.
+ *
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -57,13 +59,13 @@ const listeners: Set<ThemeChangeListener> = new SetCtor()
 /**
  * Get the active theme from context.
  *
- * @returns Current theme
- *
  * @example
- * ```ts
- * const theme = getTheme()
- * console.log(theme.displayName)
- * ```
+ *   ;```ts
+ *   const theme = getTheme()
+ *   console.log(theme.displayName)
+ *   ```
+ *
+ * @returns Current theme
  */
 export function getTheme(): Theme {
   return themeStorage.getStore() ?? fallbackTheme
@@ -72,18 +74,19 @@ export function getTheme(): Theme {
 /**
  * Subscribe to theme change events.
  *
- * @param listener - Change handler
- * @returns Unsubscribe function
- *
  * @example
- * ```ts
- * const unsubscribe = onThemeChange((theme) => {
- *   console.log('Theme:', theme.displayName)
- * })
+ *   ;```ts
+ *   const unsubscribe = onThemeChange(theme => {
+ *     console.log('Theme:', theme.displayName)
+ *   })
  *
- * // Cleanup
- * unsubscribe()
- * ```
+ *   // Cleanup
+ *   unsubscribe()
+ *   ```
+ *
+ * @param listener - Change handler.
+ *
+ * @returns Unsubscribe function
  */
 export function onThemeChange(listener: ThemeChangeListener): () => void {
   listeners.add(listener)
@@ -95,12 +98,12 @@ export function onThemeChange(listener: ThemeChangeListener): () => void {
 /**
  * Set the global fallback theme.
  *
- * @param theme - Theme name or object
- *
  * @example
- * ```ts
- * setTheme('socket-firewall')
- * ```
+ *   ;```ts
+ *   setTheme('socket-firewall')
+ *   ```
+ *
+ * @param theme - Theme name or object.
  */
 export function setTheme(theme: Theme | ThemeName): void {
   fallbackTheme =
@@ -109,20 +112,22 @@ export function setTheme(theme: Theme | ThemeName): void {
 }
 
 /**
- * Execute async operation with scoped theme.
- * Theme automatically restored on completion.
- *
- * @template T - Return type
- * @param theme - Scoped theme
- * @param fn - Async operation
- * @returns Operation result
+ * Execute async operation with scoped theme. Theme automatically restored on
+ * completion.
  *
  * @example
- * ```ts
- * await withTheme('ultra', async () => {
- *   // Operations use Ultra theme
- * })
- * ```
+ *   ;```ts
+ *   await withTheme('ultra', async () => {
+ *     // Operations use Ultra theme
+ *   })
+ *   ```
+ *
+ * @template T - Return type.
+ *
+ * @param theme - Scoped theme.
+ * @param fn - Async operation.
+ *
+ * @returns Operation result
  */
 export async function withTheme<T>(
   theme: Theme | ThemeName,
@@ -137,20 +142,22 @@ export async function withTheme<T>(
 }
 
 /**
- * Execute sync operation with scoped theme.
- * Theme automatically restored on completion.
- *
- * @template T - Return type
- * @param theme - Scoped theme
- * @param fn - Sync operation
- * @returns Operation result
+ * Execute sync operation with scoped theme. Theme automatically restored on
+ * completion.
  *
  * @example
- * ```ts
- * const result = withThemeSync('coana', () => {
- *   return processData()
- * })
- * ```
+ *   ;```ts
+ *   const result = withThemeSync('coana', () => {
+ *     return processData()
+ *   })
+ *   ```
+ *
+ * @template T - Return type.
+ *
+ * @param theme - Scoped theme.
+ * @param fn - Sync operation.
+ *
+ * @returns Operation result
  */
 export function withThemeSync<T>(theme: Theme | ThemeName, fn: () => T): T {
   const resolvedTheme: Theme =

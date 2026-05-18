@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for parse-manifest dispatcher.
+ * @file Unit tests for parse-manifest dispatcher.
  */
 
 import { describe, expect, it } from 'vitest'

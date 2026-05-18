@@ -1,10 +1,10 @@
 /**
- * @fileoverview Unit tests for package.json path resolution utilities.
+ * @file Unit tests for package.json path resolution utilities. Tests path
+ *   utilities for package.json files:
  *
- * Tests path utilities for package.json files:
- * - resolvePackageJsonDirname() - Extract directory from package.json path
- * - resolvePackageJsonPath() - Resolve full package.json path
- * Used for consistent path handling across different operating systems.
+ *   - resolvePackageJsonDirname() - Extract directory from package.json path
+ *   - resolvePackageJsonPath() - Resolve full package.json path Used for
+ *     consistent path handling across different operating systems.
  */
 
 import {

@@ -1,8 +1,8 @@
 /**
- * @fileoverview Unit tests for TypeScript type-coverage helper.
+ * @file Unit tests for TypeScript type-coverage helper. Mocks `spawn` from
+ *   `../../src/spawn` so tests don't need the `type-coverage` binary installed.
+ *   Covers:
  *
- * Mocks `spawn` from `../../src/spawn` so tests don't need the
- * `type-coverage` binary installed. Covers:
  *   - Successful parse of "covered / total percent%" output
  *   - null on unparseable output (no match, partial match)
  *   - null on spawn failure when generateIfMissing=false (default)

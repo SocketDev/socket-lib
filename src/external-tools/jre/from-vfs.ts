@@ -1,10 +1,9 @@
 /**
- * @fileoverview `jreFromVfs()` — extracts the JRE directory tree
- * from the smol binary's VFS and returns the resolved-shape pointing
- * into the extracted directory.
+ * @file `jreFromVfs()` — extracts the JRE directory tree from the smol binary's
+ *   VFS and returns the resolved-shape pointing into the extracted directory.
+ *   Uses the post-alignment `getSmolVfs()` API (matches upstream `node:vfs`).
+ *   Returns `undefined` when:
  *
- * Uses the post-alignment `getSmolVfs()` API (matches upstream
- * `node:vfs`). Returns `undefined` when:
  *   - Not running on a smol binary with the aligned binding
  *   - The binary has no SEA payload (`getSmolVfs() === undefined`)
  *   - The `jre` key doesn't exist in the payload

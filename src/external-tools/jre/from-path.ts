@@ -1,11 +1,9 @@
 /**
- * @fileoverview `jreFromPath()` — looks for `java` (or `java.exe`)
- * on the system PATH via socket-lib's `which`. Returns the resolved-
- * shape object if found; otherwise `undefined`.
- *
- * Derives `javaHome` by walking up two directories from the resolved
- * `java` path (`<javaHome>/bin/java`). That's the JDK/JRE convention
- * every distribution follows.
+ * @file `jreFromPath()` — looks for `java` (or `java.exe`) on the system PATH
+ *   via socket-lib's `which`. Returns the resolved- shape object if found;
+ *   otherwise `undefined`. Derives `javaHome` by walking up two directories
+ *   from the resolved `java` path (`<javaHome>/bin/java`). That's the JDK/JRE
+ *   convention every distribution follows.
  */
 
 import path from 'node:path'

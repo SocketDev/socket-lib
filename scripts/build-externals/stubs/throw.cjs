@@ -1,7 +1,6 @@
 /**
- * Throw stub - errors if called.
- * Used for dependencies that should never be reached in production.
- * Helps catch bugs if accidentally called.
+ * Throw stub - errors if called. Used for dependencies that should never be
+ * reached in production. Helps catch bugs if accidentally called.
  */
 'use strict'
 

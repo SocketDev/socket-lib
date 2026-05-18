@@ -1,37 +1,22 @@
 /**
- * @fileoverview Shared test fixture for the http-request test files.
- *
- * The full http-request test suite was originally a single 3390-line
- * file with 202 tests. Even alone in a fresh worker with a 4 GB heap
- * ceiling, that file OOMs deep into its run — cumulative state
- * (keep-alive sockets, response buffers, closure-captured constants)
- * pushes the worker past the limit. Splitting the tests across two
- * files (core + advanced) lets each file run in its own worker with
- * heap budget intact.
- *
- * This module exports the shared HTTP test server setup so each
- * split file can stand up + tear down its own instance without
- * duplicating the 186-line request handler. The pattern is:
- *
+ * @file Shared test fixture for the http-request test files. The full
+ *   http-request test suite was originally a single 3390-line file with 202
+ *   tests. Even alone in a fresh worker with a 4 GB heap ceiling, that file
+ *   OOMs deep into its run — cumulative state (keep-alive sockets, response
+ *   buffers, closure-captured constants) pushes the worker past the limit.
+ *   Splitting the tests across two files (core + advanced) lets each file run
+ *   in its own worker with heap budget intact. This module exports the shared
+ *   HTTP test server setup so each split file can stand up + tear down its own
+ *   instance without duplicating the 186-line request handler. The pattern is:
  *   import { setupHttpFixture, fixture } from './http-request-fixtures'
- *
- *   setupHttpFixture()
- *
- *   describe('…', () => {
- *     it('…', async () => {
- *       const response = await httpRequest(`${fixture.baseUrl}/text`)
- *       …
- *     })
- *   })
- *
- * `setupHttpFixture()` installs vitest `beforeAll` / `afterAll` hooks
- * in the caller's file scope. `fixture` is a live reference whose
- * `baseUrl` field is populated when the server starts listening.
- *
- * Cleanup discipline: every test in the split files uses
- * `fixture.baseUrl` rather than capturing it into a local — that
- * way the binding refreshes between describes when the server is
- * recycled, and there's no stale-port surprise.
+ *   setupHttpFixture() describe('…', () => { it('…', async () => { const
+ *   response = await httpRequest(`${fixture.baseUrl}/text`) … }) })
+ *   `setupHttpFixture()` installs vitest `beforeAll` / `afterAll` hooks in the
+ *   caller's file scope. `fixture` is a live reference whose `baseUrl` field is
+ *   populated when the server starts listening. Cleanup discipline: every test
+ *   in the split files uses `fixture.baseUrl` rather than capturing it into a
+ *   local — that way the binding refreshes between describes when the server is
+ *   recycled, and there's no stale-port surprise.
  */
 
 import { createHash } from 'node:crypto'
@@ -40,9 +25,9 @@ import http from 'node:http'
 import { afterAll, beforeAll } from 'vitest'
 
 /**
- * Live fixture state. Mutated by `setupHttpFixture()`'s beforeAll
- * hook; read by tests. The shape stays stable across `beforeAll`
- * re-invocations so callers can capture the object reference once.
+ * Live fixture state. Mutated by `setupHttpFixture()`'s beforeAll hook; read by
+ * tests. The shape stays stable across `beforeAll` re-invocations so callers
+ * can capture the object reference once.
  */
 export const fixture = {
   baseUrl: '',
@@ -50,9 +35,8 @@ export const fixture = {
 }
 
 /**
- * Helper for tests that need to bypass the normal httpRequest path
- * and issue a raw http.get against the fixture server (e.g. testing
- * readIncomingResponse).
+ * Helper for tests that need to bypass the normal httpRequest path and issue a
+ * raw http.get against the fixture server (e.g. testing readIncomingResponse).
  */
 export function makeRawRequest(url: string): Promise<http.IncomingMessage> {
   return new Promise((resolve, reject) => {
@@ -61,10 +45,10 @@ export function makeRawRequest(url: string): Promise<http.IncomingMessage> {
 }
 
 /**
- * Install vitest beforeAll / afterAll hooks for the HTTP test
- * server. Call this once at the top of a test file (outside any
- * `describe`). The server listens on a random port (`listen(0)`)
- * and `fixture.baseUrl` is populated before any test runs.
+ * Install vitest beforeAll / afterAll hooks for the HTTP test server. Call this
+ * once at the top of a test file (outside any `describe`). The server listens
+ * on a random port (`listen(0)`) and `fixture.baseUrl` is populated before any
+ * test runs.
  */
 export function setupHttpFixture(): void {
   let httpServer: http.Server

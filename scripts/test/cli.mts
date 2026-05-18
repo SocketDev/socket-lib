@@ -1,7 +1,7 @@
 /* oxlint-disable socket/sort-source-methods -- test-runner helpers interleaved with module-level config / state consumed by them; reordering would split state from its consumers. */
 /**
- * @fileoverview Unified test runner that provides a smooth, single-script experience.
- * Combines check, build, and test steps with clean, consistent output.
+ * @file Unified test runner that provides a smooth, single-script experience.
+ *   Combines check, build, and test steps with clean, consistent output.
  */
 
 import { spawn } from 'node:child_process'

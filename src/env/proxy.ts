@@ -1,9 +1,8 @@
 /**
- * @fileoverview `createEnvProxy` — wrap `process.env` (or any
- * env-like record) in a Proxy that adds case-insensitive lookups
- * for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an
- * `overrides` layer. Intended for cross-platform test harnesses and
- * child-process spawn env normalization.
+ * @file `createEnvProxy` — wrap `process.env` (or any env-like record) in a
+ *   Proxy that adds case-insensitive lookups for known-Windows-sensitive keys
+ *   (PATH, APPDATA, etc.) and an `overrides` layer. Intended for cross-platform
+ *   test harnesses and child-process spawn env normalization.
  */
 
 import { ProxyCtor } from '../primordials/globals'
@@ -30,38 +29,41 @@ const caseInsensitiveKeys = new SetCtor([
 ])
 
 /**
- * Create a case-insensitive environment variable Proxy for Windows compatibility.
- * On Windows, environment variables are case-insensitive (PATH vs Path vs path).
- * This Proxy provides consistent access regardless of case, with priority given
- * to exact matches, then case-insensitive matches for known vars.
+ * Create a case-insensitive environment variable Proxy for Windows
+ * compatibility. On Windows, environment variables are case-insensitive (PATH
+ * vs Path vs path). This Proxy provides consistent access regardless of case,
+ * with priority given to exact matches, then case-insensitive matches for known
+ * vars.
  *
  * **Use Cases:**
+ *
  * - Cross-platform test environments needing consistent env var access
  * - Windows compatibility when passing env to child processes
  * - Merging environment overrides while preserving case-insensitive lookups
  *
- * **Performance Note:**
- * Proxy operations have runtime overhead. Only use when Windows case-insensitive
- * access is required. For most use cases, process.env directly is sufficient.
+ * **Performance Note:** Proxy operations have runtime overhead. Only use when
+ * Windows case-insensitive access is required. For most use cases, process.env
+ * directly is sufficient.
+ *
+ * @example
+ *   // Create a Proxy with overrides
+ *   const env = createEnvProxy(process.env, { NODE_ENV: 'test' })
+ *   console.log(env.PATH) // Works with any case: PATH, Path, path
+ *   console.log(env.NODE_ENV) // 'test'
+ *
+ * @example
+ *   // Pass to child process spawn
+ *   import { createEnvProxy } from '@socketsecurity/lib/env/proxy'
+ *   import { spawn } from '@socketsecurity/lib/spawn'
+ *
+ *   spawn('node', ['script.js'], {
+ *     env: createEnvProxy(process.env, { NODE_ENV: 'test' }),
+ *   })
  *
  * @param base - Base environment object (usually process.env)
- * @param overrides - Optional overrides to merge
+ * @param overrides - Optional overrides to merge.
+ *
  * @returns Proxy that handles case-insensitive env var access
- *
- * @example
- * // Create a Proxy with overrides
- * const env = createEnvProxy(process.env, { NODE_ENV: 'test' })
- * console.log(env.PATH)  // Works with any case: PATH, Path, path
- * console.log(env.NODE_ENV)  // 'test'
- *
- * @example
- * // Pass to child process spawn
- * import { createEnvProxy } from '@socketsecurity/lib/env/proxy'
- * import { spawn } from '@socketsecurity/lib/spawn'
- *
- * spawn('node', ['script.js'], {
- *   env: createEnvProxy(process.env, { NODE_ENV: 'test' })
- * })
  */
 export function createEnvProxy(
   base: NodeJS.ProcessEnv,

@@ -1,11 +1,9 @@
 /**
- * @fileoverview `getCurrentPlatformArch()` — resolves the current
- * machine to a `platform-arch` string suitable for the Adoptium
- * asset-name map. Wraps `getPlatformArch` from `src/releases/socket-btm`
- * so external-tools modules don't need to know about releases'
- * platform/arch typing.
- *
- * Returns `undefined` on unsupported platform/arch combos.
+ * @file `getCurrentPlatformArch()` — resolves the current machine to a
+ *   `platform-arch` string suitable for the Adoptium asset-name map. Wraps
+ *   `getPlatformArch` from `src/releases/socket-btm` so external-tools modules
+ *   don't need to know about releases' platform/arch typing. Returns
+ *   `undefined` on unsupported platform/arch combos.
  */
 
 import process from 'node:process'

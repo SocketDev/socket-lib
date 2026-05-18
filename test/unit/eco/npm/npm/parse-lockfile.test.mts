@@ -1,8 +1,7 @@
 /**
- * @fileoverview Unit tests for src/eco/npm/npm/parse-lockfile.ts.
- *
- * Exercises v1 (recursive `dependencies`) and v2/v3 (flat `packages`)
- * parser branches, plus error + edge-case behavior.
+ * @file Unit tests for src/eco/npm/npm/parse-lockfile.ts. Exercises v1
+ *   (recursive `dependencies`) and v2/v3 (flat `packages`) parser branches,
+ *   plus error + edge-case behavior.
  */
 
 import { describe, expect, it } from 'vitest'

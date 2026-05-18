@@ -1,9 +1,7 @@
 /**
- * @fileoverview Format descriptor for `pnpm-lock.yaml` — pnpm's
- * YAML-formatted lockfile (v5/v6/v9).
- *
- * Returned by `src/eco/manifest/detect-format.ts` when a filename
- * matches `pnpm-lock.yaml`.
+ * @file Format descriptor for `pnpm-lock.yaml` — pnpm's YAML-formatted lockfile
+ *   (v5/v6/v9). Returned by `src/eco/manifest/detect-format.ts` when a filename
+ *   matches `pnpm-lock.yaml`.
  */
 
 import { ObjectFreeze } from '../../../primordials/object'

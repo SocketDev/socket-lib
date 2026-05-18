@@ -1,5 +1,5 @@
 /**
- * @fileoverview Format detection by file extension.
+ * @file Format detection by file extension.
  */
 
 import { StringPrototypeEndsWith } from '../primordials/string'
@@ -9,15 +9,16 @@ import type { ArchiveFormat } from './types'
 /**
  * Detect archive format from file path.
  *
- * @param filePath - Path to archive file
- * @returns Archive format or undefined if unknown
- *
  * @example
- * ```typescript
- * detectArchiveFormat('package.tar.gz')  // 'tar.gz'
- * detectArchiveFormat('archive.zip')     // 'zip'
- * detectArchiveFormat('data.csv')        // undefined
- * ```
+ *   ;```typescript
+ *   detectArchiveFormat('package.tar.gz') // 'tar.gz'
+ *   detectArchiveFormat('archive.zip') // 'zip'
+ *   detectArchiveFormat('data.csv') // undefined
+ *   ```
+ *
+ * @param filePath - Path to archive file.
+ *
+ * @returns Archive format or undefined if unknown
  */
 export function detectArchiveFormat(
   filePath: string,

@@ -1,18 +1,16 @@
 /**
- * @fileoverview Stdio configuration helpers for `spawn` callers.
+ * @file Stdio configuration helpers for `spawn` callers. `isStdioType` is
+ *   dual-purpose:
  *
- * `isStdioType` is dual-purpose:
- *   - One arg: validate that a value is a known stdio mode
- *     (`'pipe'` / `'ignore'` / `'inherit'` / `'overlapped'`).
- *   - Two args: check whether the caller's stdio config matches a
- *     specific mode. Useful in spinner-pause logic — the spinner only
- *     stops when the child writes to a non-piped stream that would
- *     otherwise interleave with spinner redraws.
- *
- * Two-arg behavior special-cases `null` / `undefined` ↔ `'pipe'`
- * because Node.js defaults unspecified entries to `'pipe'`. The
- * three-element-array branch handles the common `[in, out, err]`
- * tuple where all three streams use the same mode.
+ *   - One arg: validate that a value is a known stdio mode (`'pipe'` / `'ignore'`
+ *     / `'inherit'` / `'overlapped'`).
+ *   - Two args: check whether the caller's stdio config matches a specific mode.
+ *     Useful in spinner-pause logic — the spinner only stops when the child
+ *     writes to a non-piped stream that would otherwise interleave with spinner
+ *     redraws. Two-arg behavior special-cases `null` / `undefined` ↔ `'pipe'`
+ *     because Node.js defaults unspecified entries to `'pipe'`. The
+ *     three-element-array branch handles the common `[in, out, err]` tuple
+ *     where all three streams use the same mode.
  */
 
 import { isArray } from '../arrays/predicates'
@@ -20,24 +18,25 @@ import { isArray } from '../arrays/predicates'
 import type { StdioType } from './types'
 
 /**
- * Check if stdio configuration matches a specific type.
- * When called with one argument, validates if it's a valid stdio type.
- * When called with two arguments, checks if the stdio config matches the specified type.
+ * Check if stdio configuration matches a specific type. When called with one
+ * argument, validates if it's a valid stdio type. When called with two
+ * arguments, checks if the stdio config matches the specified type.
  *
- * @param {string | string[]} stdio - Stdio configuration to check
+ * @example
+ *   // Check if valid stdio type
+ *   isStdioType('pipe') // true
+ *   isStdioType('invalid') // false
+ *
+ * @example
+ *   // Check if stdio matches specific type
+ *   isStdioType('pipe', 'pipe') // true
+ *   isStdioType(['pipe', 'pipe', 'pipe'], 'pipe') // true
+ *   isStdioType('ignore', 'pipe') // false
+ *
+ * @param {string | string[]} stdio - Stdio configuration to check.
  * @param {StdioType | undefined} type - Expected stdio type (optional)
+ *
  * @returns {boolean} `true` if stdio matches the type or is valid
- *
- * @example
- * // Check if valid stdio type
- * isStdioType('pipe') // true
- * isStdioType('invalid') // false
- *
- * @example
- * // Check if stdio matches specific type
- * isStdioType('pipe', 'pipe') // true
- * isStdioType(['pipe', 'pipe', 'pipe'], 'pipe') // true
- * isStdioType('ignore', 'pipe') // false
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isStdioType(

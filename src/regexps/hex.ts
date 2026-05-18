@@ -1,7 +1,7 @@
 /**
- * @fileoverview Hex-encoding helpers — fixed-width `\xHH` (`hex2`)
- * and `\uHHHH` (`hex4`) producers used by the spec-compliant
- * `RegExp.escape` fallback to emit canonical escape sequences.
+ * @file Hex-encoding helpers — fixed-width `\xHH` (`hex2`) and `\uHHHH`
+ *   (`hex4`) producers used by the spec-compliant `RegExp.escape` fallback to
+ *   emit canonical escape sequences.
  */
 
 import { NumberPrototypeToString } from '../primordials/number'

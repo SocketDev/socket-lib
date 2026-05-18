@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for semantic version comparison and manipulation utilities.
+ * @file Unit tests for semantic version comparison and manipulation utilities.
+ *   Tests version utility functions:
  *
- * Tests version utility functions:
- * - Comparison: compare(), gt(), lt(), eq()
- * - Extraction: getMajorVersion(), getMinorVersion(), getPatchVersion()
- * - Manipulation: incrementVersion(), coerceVersion()
- * - Filtering: filterVersions(), maxVersion(), minVersion()
- * - Validation: isValidVersion() for semver format checking
- * Used by Socket tools for Node.js version checking and dependency version management.
+ *   - Comparison: compare(), gt(), lt(), eq()
+ *   - Extraction: getMajorVersion(), getMinorVersion(), getPatchVersion()
+ *   - Manipulation: incrementVersion(), coerceVersion()
+ *   - Filtering: filterVersions(), maxVersion(), minVersion()
+ *   - Validation: isValidVersion() for semver format checking Used by Socket
+ *     tools for Node.js version checking and dependency version management.
  */
 
 import {

@@ -1,13 +1,10 @@
 /**
- * @fileoverview Lazy-loader for socket-btm's `node:smol-versions`.
- *
- * `node:smol-versions` is the multi-ecosystem version helper exposed
- * by socket-btm's smol Node binary. It supports npm/maven/pypi/nuget/
- * gem version comparison + range satisfies with internal C++
- * acceleration on the npm hot path.
- *
- * Returns `undefined` on stock Node + non-Node runtimes. Result is
- * cached across calls.
+ * @file Lazy-loader for socket-btm's `node:smol-versions`. `node:smol-versions`
+ *   is the multi-ecosystem version helper exposed by socket-btm's smol Node
+ *   binary. It supports npm/maven/pypi/nuget/ gem version comparison + range
+ *   satisfies with internal C++ acceleration on the npm hot path. Returns
+ *   `undefined` on stock Node + non-Node runtimes. Result is cached across
+ *   calls.
  *
  * @internal — used by `src/versions.ts` to resolve smol-aware version
  *   ops. Most callers should use the standard `versions` exports,
@@ -18,9 +15,9 @@ import { isNodeBuiltin } from '../node/module'
 
 /**
  * Surface of `node:smol-versions`. See socket-btm's
- * additions/source-patched/lib/smol-versions.js for the canonical
- * shape. Each entry takes an optional `ecosystem` (default `'npm'`)
- * — pass it for non-npm versions; npm callers can omit.
+ * additions/source-patched/lib/smol-versions.js for the canonical shape. Each
+ * entry takes an optional `ecosystem` (default `'npm'`) — pass it for non-npm
+ * versions; npm callers can omit.
  */
 export interface SmolVersionsBinding {
   compare(a: string, b: string, ecosystem?: string): -1 | 0 | 1
@@ -64,8 +61,8 @@ let _smolVersions: SmolVersionsBinding | undefined
 let _smolVersionsProbed = false
 
 /**
- * Returns `node:smol-versions` when running on the smol Node binary,
- * otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-versions` when running on the smol Node binary, otherwise
+ * `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolVersions(): SmolVersionsBinding | undefined {

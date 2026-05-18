@@ -1,7 +1,7 @@
 /**
- * @fileoverview Cache read entrypoints — `get` (throws on miss) and
- * `safeGet` (returns `undefined` on miss). Both reject keys containing
- * wildcards; bulk reads go through `clear` / `ls` patterns.
+ * @file Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns
+ *   `undefined` on miss). Both reject keys containing wildcards; bulk reads go
+ *   through `clear` / `ls` patterns.
  */
 
 import { getSocketCacacheDir } from '../paths/socket'
@@ -14,14 +14,15 @@ import type { CacheEntry, GetOptions } from './types'
 
 /**
  * Get data from the Socket shared cache by key.
- * @throws {Error} When cache entry is not found.
- * @throws {TypeError} If key contains wildcards (*)
  *
  * @example
- * ```typescript
- * const entry = await get('socket-sdk:scans:abc123')
- * console.log(entry.data.toString('utf8'))
- * ```
+ *   ;```typescript
+ *   const entry = await get('socket-sdk:scans:abc123')
+ *   console.log(entry.data.toString('utf8'))
+ *   ```
+ *
+ * @throws {Error} When cache entry is not found.
+ * @throws {TypeError} If key contains wildcards (*)
  */
 export async function get(
   key: string,
@@ -41,12 +42,12 @@ export async function get(
  * Get data from the Socket shared cache by key without throwing.
  *
  * @example
- * ```typescript
- * const entry = await safeGet('socket-sdk:scans:abc123')
- * if (entry) {
- *   console.log(entry.data.toString('utf8'))
- * }
- * ```
+ *   ;```typescript
+ *   const entry = await safeGet('socket-sdk:scans:abc123')
+ *   if (entry) {
+ *     console.log(entry.data.toString('utf8'))
+ *   }
+ *   ```
  */
 export async function safeGet(
   key: string,

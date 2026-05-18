@@ -1,7 +1,7 @@
 /**
- * @fileoverview `process.emitWarning` suppression. Single shared
- * wrapper installed on first call, driven by a membership Set so
- * repeated `suppressWarningType` calls are cheap.
+ * @file `process.emitWarning` suppression. Single shared wrapper installed on
+ *   first call, driven by a membership Set so repeated `suppressWarningType`
+ *   calls are cheap.
  */
 
 import process from 'node:process'
@@ -16,15 +16,15 @@ let originalEmitWarning: typeof process.emitWarning | undefined
 const suppressedWarnings = new SetCtor<string>()
 
 /**
- * Restore the original process.emitWarning function.
- * Call this to re-enable all warnings after suppressing them.
+ * Restore the original process.emitWarning function. Call this to re-enable all
+ * warnings after suppressing them.
  *
  * @example
- * ```typescript
- * suppressMaxListenersWarning()
- * // ... do work ...
- * restoreWarnings() // Re-enable all warnings
- * ```
+ *   ;```typescript
+ *   suppressMaxListenersWarning()
+ *   // ... do work ...
+ *   restoreWarnings() // Re-enable all warnings
+ *   ```
  */
 export function restoreWarnings(): void {
   if (originalEmitWarning) {
@@ -35,8 +35,8 @@ export function restoreWarnings(): void {
 }
 
 /**
- * Internal function to set up warning suppression.
- * Only wraps process.emitWarning once, regardless of how many times it's called.
+ * Internal function to set up warning suppression. Only wraps
+ * process.emitWarning once, regardless of how many times it's called.
  */
 export function setupSuppression(): void {
   // Only wrap once - store the original on first call.
@@ -80,9 +80,9 @@ export function setupSuppression(): void {
  * so repeat invocations are cheap.
  *
  * @example
- * import { suppressMaxListenersWarning } from '@socketsecurity/lib/warnings/suppress'
+ *   import { suppressMaxListenersWarning } from '@socketsecurity/lib/warnings/suppress'
  *
- * suppressMaxListenersWarning()
+ *   suppressMaxListenersWarning()
  */
 export function suppressMaxListenersWarning(): void {
   suppressedWarnings.add('MaxListenersExceededWarning')
@@ -92,12 +92,13 @@ export function suppressMaxListenersWarning(): void {
 /**
  * Suppress all process warnings of a specific type.
  *
- * @param warningType - The warning type to suppress (e.g., 'DeprecationWarning', 'ExperimentalWarning')
- *
  * @example
- * import { suppressWarningType } from '@socketsecurity/lib/warnings/suppress'
+ *   import { suppressWarningType } from '@socketsecurity/lib/warnings/suppress'
  *
- * suppressWarningType('ExperimentalWarning')
+ *   suppressWarningType('ExperimentalWarning')
+ *
+ * @param warningType - The warning type to suppress (e.g.,
+ *   'DeprecationWarning', 'ExperimentalWarning')
  */
 export function suppressWarningType(warningType: string): void {
   suppressedWarnings.add(warningType)
@@ -107,17 +108,21 @@ export function suppressWarningType(warningType: string): void {
 /**
  * Suppress warnings temporarily within a callback.
  *
- * @param warningType - The warning type to suppress
- * @param callback - Function to execute with warnings suppressed
- * @returns The result of the callback
- *
  * @example
- * import { withSuppressedWarnings } from '@socketsecurity/lib/warnings/suppress'
+ *   import { withSuppressedWarnings } from '@socketsecurity/lib/warnings/suppress'
  *
- * const result = await withSuppressedWarnings('ExperimentalWarning', async () => {
- *   // Code that triggers experimental warnings
- *   return someValue
- * })
+ *   const result = await withSuppressedWarnings(
+ *     'ExperimentalWarning',
+ *     async () => {
+ *       // Code that triggers experimental warnings
+ *       return someValue
+ *     },
+ *   )
+ *
+ * @param warningType - The warning type to suppress.
+ * @param callback - Function to execute with warnings suppressed.
+ *
+ * @returns The result of the callback
  */
 export async function withSuppressedWarnings<T>(
   warningType: string,

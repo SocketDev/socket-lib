@@ -1,11 +1,8 @@
 /**
- * @fileoverview Unit tests for stdio/progress.
- *
- * Covers ProgressBar class (constructor defaults, update, tick, throttling,
- * render path with custom tokens/colors, time formatting, terminate, clear)
- * and the createProgressIndicator helper.
- *
- * Uses a mock stream so tests don't write to the real stderr.
+ * @file Unit tests for stdio/progress. Covers ProgressBar class (constructor
+ *   defaults, update, tick, throttling, render path with custom tokens/colors,
+ *   time formatting, terminate, clear) and the createProgressIndicator helper.
+ *   Uses a mock stream so tests don't write to the real stderr.
  */
 
 import { describe, expect, it, vi } from 'vitest'

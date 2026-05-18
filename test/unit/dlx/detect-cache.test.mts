@@ -1,6 +1,6 @@
 /**
- * @fileoverview Tests for the cache eviction + stale-entry paths in
- * src/dlx/detect.ts that aren't covered by the existing detect tests.
+ * @file Tests for the cache eviction + stale-entry paths in src/dlx/detect.ts
+ *   that aren't covered by the existing detect tests.
  */
 
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'

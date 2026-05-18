@@ -1,10 +1,9 @@
 /**
- * @fileoverview Tests for catch branches in src/dlx/packages.ts that
- * fire when filesystem ops fail (EACCES / EPERM / EROFS / generic).
- *
- * Mocks the safeDelete[Sync] exports from ../../../src/fs so the SUT's
- * call surfaces an errno-typed error and exercises the corresponding
- * catch handlers in removeDlxPackage[Sync].
+ * @file Tests for catch branches in src/dlx/packages.ts that fire when
+ *   filesystem ops fail (EACCES / EPERM / EROFS / generic). Mocks the
+ *   safeDelete[Sync] exports from ../../../src/fs so the SUT's call surfaces an
+ *   errno-typed error and exercises the corresponding catch handlers in
+ *   removeDlxPackage[Sync].
  */
 
 import { mkdirSync } from 'node:fs'

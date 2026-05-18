@@ -1,18 +1,16 @@
 /**
- * @fileoverview Single HTTP request attempt — the workhorse beneath
- * the retrying `httpRequest` orchestrator.
- *
- * Split out of `http-request/request.ts` for size hygiene. Handles:
+ * @file Single HTTP request attempt — the workhorse beneath the retrying
+ *   `httpRequest` orchestrator. Split out of `http-request/request.ts` for size
+ *   hygiene. Handles:
  *
  *   - Native `http`/`https` request issuance
- *   - Redirect chasing (with cross-origin auth-header stripping +
- *     HTTPS→HTTP downgrade refusal)
+ *   - Redirect chasing (with cross-origin auth-header stripping + HTTPS→HTTP
+ *     downgrade refusal)
  *   - Stream-mode bodies (Readable / form-data duck-typed)
  *   - `maxResponseSize` enforcement
  *   - Hook lifecycle (`onRequest` pre-issue, `onResponse` settle-or-error)
- *
- * Exported (not private) so `download.ts` can drive it in stream mode
- * for its own download-attempt loop.
+ *     Exported (not private) so `download.ts` can drive it in stream mode for
+ *     its own download-attempt loop.
  */
 
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
@@ -35,8 +33,8 @@ import type {
 import type { HttpResponse } from './response-types'
 
 /**
- * Single HTTP request attempt (used internally by httpRequest with retry logic).
- * Supports hooks (fire per-attempt), maxResponseSize, and rawResponse.
+ * Single HTTP request attempt (used internally by httpRequest with retry
+ * logic). Supports hooks (fire per-attempt), maxResponseSize, and rawResponse.
  */
 export async function httpRequestAttempt(
   url: string,

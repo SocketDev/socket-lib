@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for archive extraction utilities.
+ * @file Unit tests for archive extraction utilities. Tests archive extraction
+ *   with zip, tar, and tar.gz formats:
  *
- * Tests archive extraction with zip, tar, and tar.gz formats:
- * - extractZip() - extracts zip archives with optional path stripping
- * - extractTar() - extracts tar archives with optional path stripping
- * - extractTarGz() - extracts gzipped tar archives with optional path stripping
- * - extractArchive() - auto-detects format and extracts
- * - detectArchiveFormat() - identifies archive format from file extension
+ *   - extractZip() - extracts zip archives with optional path stripping
+ *   - extractTar() - extracts tar archives with optional path stripping
+ *   - extractTarGz() - extracts gzipped tar archives with optional path stripping
+ *   - extractArchive() - auto-detects format and extracts
+ *   - detectArchiveFormat() - identifies archive format from file extension
  */
 
 import { createWriteStream, promises as fs } from 'node:fs'

@@ -1,8 +1,8 @@
 /**
- * @fileoverview `onExit` — register a callback for process exit /
- * signal. Triggers `load()` on first call. Returns a remover that
- * unregisters the callback and calls `unload()` once both `exit` and
- * `afterexit` listener lists empty out.
+ * @file `onExit` — register a callback for process exit / signal. Triggers
+ *   `load()` on first call. Returns a remover that unregisters the callback and
+ *   calls `unload()` once both `exit` and `afterexit` listener lists empty
+ *   out.
  */
 
 import { TypeErrorCtor } from '../primordials/error'
@@ -16,13 +16,13 @@ import type { OnExitOptions } from './types'
  * Register a callback to run on process exit or signal.
  *
  * @example
- * ```typescript
- * const remove = onExit((code, signal) => {
+ *   ```typescript
+ *   const remove = onExit((code, signal) => {
  *   console.log(`Exiting with code ${code}, signal ${signal}`)
- * })
- * // Later, to unregister:
- * remove()
- * ```
+ *   })
+ *   // Later, to unregister:
+ *   remove()
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function onExit(

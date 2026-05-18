@@ -1,14 +1,12 @@
 /**
- * @fileoverview Smoke tests for `socket-lib check primordials` handler.
- *
- * Exercises the CLI handler at the export-function boundary. End-to-end
- * primordial-drift correctness is covered by `test/unit/checks/primordials.test.mts`
- * — this file just verifies the CLI plumbing (arg parsing, config
- * loading, output rendering, exit codes) is wired up correctly.
- *
- * Tests pass absolute config paths via --config / -c so they never
- * depend on `process.cwd()`. Mutating cwd from a test causes flakes
- * under vitest's parallel pool — workers share process state.
+ * @file Smoke tests for `socket-lib check primordials` handler. Exercises the
+ *   CLI handler at the export-function boundary. End-to-end primordial-drift
+ *   correctness is covered by `test/unit/checks/primordials.test.mts` — this
+ *   file just verifies the CLI plumbing (arg parsing, config loading, output
+ *   rendering, exit codes) is wired up correctly. Tests pass absolute config
+ *   paths via --config / -c so they never depend on `process.cwd()`. Mutating
+ *   cwd from a test causes flakes under vitest's parallel pool — workers share
+ *   process state.
  */
 
 import { mkdtempSync, promises as fs } from 'node:fs'

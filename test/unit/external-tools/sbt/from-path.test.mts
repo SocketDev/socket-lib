@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for sbtFromPath().
+ * @file Unit tests for sbtFromPath().
  */
 
 import path from 'node:path'

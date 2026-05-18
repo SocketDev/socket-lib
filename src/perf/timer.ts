@@ -1,9 +1,9 @@
 /**
- * @fileoverview Recording-side helpers — `perfTimer` (returns a stop()
- * closure), `measure` / `measureSync` (timed wrappers around an
- * async / sync function), `perfCheckpoint` (zero-duration marker),
- * and `trackMemory` (records heap-used at a label). All push rows
- * into the shared metrics array when `isPerfEnabled()` is true.
+ * @file Recording-side helpers — `perfTimer` (returns a stop() closure),
+ *   `measure` / `measureSync` (timed wrappers around an async / sync function),
+ *   `perfCheckpoint` (zero-duration marker), and `trackMemory` (records
+ *   heap-used at a label). All push rows into the shared metrics array when
+ *   `isPerfEnabled()` is true.
  */
 
 import process from 'node:process'
@@ -21,18 +21,19 @@ import type { PerformanceMetrics } from './types'
 /**
  * Measure execution time of an async function.
  *
- * @param operation - Name of the operation
- * @param fn - Async function to measure
- * @param metadata - Optional metadata
- * @returns Result of the function and duration
- *
  * @example
- * import { measure } from '@socketsecurity/lib/perf/timer'
+ *   import { measure } from '@socketsecurity/lib/perf/timer'
  *
- * const { result, duration } = await measure('fetch-packages', async () => {
- *   return await fetchPackages()
- * })
- * console.log(`Fetched packages in ${duration}ms`)
+ *   const { result, duration } = await measure('fetch-packages', async () => {
+ *     return await fetchPackages()
+ *   })
+ *   console.log(`Fetched packages in ${duration}ms`)
+ *
+ * @param operation - Name of the operation.
+ * @param fn - Async function to measure.
+ * @param metadata - Optional metadata.
+ *
+ * @returns Result of the function and duration
  */
 export async function measure<T>(
   operation: string,
@@ -59,17 +60,18 @@ export async function measure<T>(
 /**
  * Measure synchronous function execution time.
  *
- * @param operation - Name of the operation
- * @param fn - Synchronous function to measure
- * @param metadata - Optional metadata
- * @returns Result of the function and duration
- *
  * @example
- * import { measureSync } from '@socketsecurity/lib/perf/timer'
+ *   import { measureSync } from '@socketsecurity/lib/perf/timer'
  *
- * const { result, duration } = measureSync('parse-json', () => {
- *   return JSON.parse(data)
- * })
+ *   const { result, duration } = measureSync('parse-json', () => {
+ *     return JSON.parse(data)
+ *   })
+ *
+ * @param operation - Name of the operation.
+ * @param fn - Synchronous function to measure.
+ * @param metadata - Optional metadata.
+ *
+ * @returns Result of the function and duration
  */
 export function measureSync<T>(
   operation: string,
@@ -94,21 +96,21 @@ export function measureSync<T>(
 }
 
 /**
- * Mark a checkpoint in performance tracking.
- * Useful for tracking progress through complex operations.
- *
- * @param checkpoint - Name of the checkpoint
- * @param metadata - Optional metadata
+ * Mark a checkpoint in performance tracking. Useful for tracking progress
+ * through complex operations.
  *
  * @example
- * import { perfCheckpoint } from '@socketsecurity/lib/perf/timer'
+ *   import { perfCheckpoint } from '@socketsecurity/lib/perf/timer'
  *
- * perfCheckpoint('start-scan')
- * // ... do work ...
- * perfCheckpoint('fetch-packages', { count: 50 })
- * // ... do work ...
- * perfCheckpoint('analyze-issues', { issueCount: 10 })
- * perfCheckpoint('end-scan')
+ *   perfCheckpoint('start-scan')
+ *   // ... do work ...
+ *   perfCheckpoint('fetch-packages', { count: 50 })
+ *   // ... do work ...
+ *   perfCheckpoint('analyze-issues', { issueCount: 10 })
+ *   perfCheckpoint('end-scan')
+ *
+ * @param checkpoint - Name of the checkpoint.
+ * @param metadata - Optional metadata.
  */
 export function perfCheckpoint(
   checkpoint: string,
@@ -130,19 +132,20 @@ export function perfCheckpoint(
 }
 
 /**
- * Start a performance timer for an operation.
- * Returns a stop function that records the duration.
- *
- * @param operation - Name of the operation being timed
- * @param metadata - Optional metadata to attach to the metric
- * @returns Stop function that completes the timing
+ * Start a performance timer for an operation. Returns a stop function that
+ * records the duration.
  *
  * @example
- * import { perfTimer } from '@socketsecurity/lib/perf/timer'
+ *   import { perfTimer } from '@socketsecurity/lib/perf/timer'
  *
- * const stop = perfTimer('api-call')
- * await fetchData()
- * stop({ endpoint: '/npm/lodash/score' })
+ *   const stop = perfTimer('api-call')
+ *   await fetchData()
+ *   stop({ endpoint: '/npm/lodash/score' })
+ *
+ * @param operation - Name of the operation being timed.
+ * @param metadata - Optional metadata to attach to the metric.
+ *
+ * @returns Stop function that completes the timing
  */
 export function perfTimer(
   operation: string,
@@ -172,19 +175,20 @@ export function perfTimer(
 }
 
 /**
- * Track memory usage at a specific point.
- * Only available when DEBUG=perf is enabled.
- *
- * @param label - Label for this memory snapshot
- * @returns Memory usage in MB
+ * Track memory usage at a specific point. Only available when DEBUG=perf is
+ * enabled.
  *
  * @example
- * import { trackMemory } from '@socketsecurity/lib/perf/timer'
+ *   import { trackMemory } from '@socketsecurity/lib/perf/timer'
  *
- * const memBefore = trackMemory('before-operation')
- * await heavyOperation()
- * const memAfter = trackMemory('after-operation')
- * console.log(`Memory increased by ${memAfter - memBefore}MB`)
+ *   const memBefore = trackMemory('before-operation')
+ *   await heavyOperation()
+ *   const memAfter = trackMemory('after-operation')
+ *   console.log(`Memory increased by ${memAfter - memBefore}MB`)
+ *
+ * @param label - Label for this memory snapshot.
+ *
+ * @returns Memory usage in MB
  */
 export function trackMemory(label: string): number {
   if (!isPerfEnabled()) {

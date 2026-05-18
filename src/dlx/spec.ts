@@ -1,9 +1,8 @@
 /**
- * @fileoverview Parse `package@version` specs into `{name, version}`.
- *
- * Split out of `dlx/package.ts` for size hygiene. Uses npm-package-arg
- * for the full grammar; falls back to a hand-rolled last-`@` parser
- * when npm-package-arg can't handle the input.
+ * @file Parse `package@version` specs into `{name, version}`. Split out of
+ *   `dlx/package.ts` for size hygiene. Uses npm-package-arg for the full
+ *   grammar; falls back to a hand-rolled last-`@` parser when npm-package-arg
+ *   can't handle the input.
  */
 
 import npmPackageArg from '../external/npm-package-arg'
@@ -14,20 +13,19 @@ import {
 } from '../primordials/string'
 
 /**
- * Parse package spec into name and version using npm-package-arg.
- * Examples:
- * - 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' }
- * - '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' }
- * - 'lodash' → { name: 'lodash', version: undefined }
+ * Parse package spec into name and version using npm-package-arg. Examples: -
+ * 'lodash@4.17.21' → { name: 'lodash', version: '4.17.21' } -
+ * '@scope/pkg@1.0.0' → { name: '@scope/pkg', version: '1.0.0' } - 'lodash' → {
+ * name: 'lodash', version: undefined }
  *
  * @example
- * ```typescript
- * parsePackageSpec('lodash@4.17.21')
- * // { name: 'lodash', version: '4.17.21' }
+ *   ;```typescript
+ *   parsePackageSpec('lodash@4.17.21')
+ *   // { name: 'lodash', version: '4.17.21' }
  *
- * parsePackageSpec('@scope/pkg')
- * // { name: '@scope/pkg', version: undefined }
- * ```
+ *   parsePackageSpec('@scope/pkg')
+ *   // { name: '@scope/pkg', version: undefined }
+ *   ```
  */
 export function parsePackageSpec(spec: string): {
   name: string

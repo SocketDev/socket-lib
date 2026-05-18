@@ -1,8 +1,7 @@
 /**
- * @fileoverview Unit tests for src/eco/npm/parse-package-json.ts.
- *
- * On stock Node these exercise the JS impl; on the smol binary they
- * exercise `node:smol-manifest`. Both paths return the same shapes.
+ * @file Unit tests for src/eco/npm/parse-package-json.ts. On stock Node these
+ *   exercise the JS impl; on the smol binary they exercise
+ *   `node:smol-manifest`. Both paths return the same shapes.
  */
 
 import { describe, expect, it } from 'vitest'

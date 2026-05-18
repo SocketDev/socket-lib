@@ -1,7 +1,6 @@
 /**
- * @fileoverview Path conversion utilities — MSYS↔native bridging and
- * string-shape helpers. Split out of `paths/normalize.ts` for size
- * hygiene.
+ * @file Path conversion utilities — MSYS↔native bridging and string-shape
+ *   helpers. Split out of `paths/normalize.ts` for size hygiene.
  *
  *   - `fromUnixPath` / `toUnixPath` — MSYS↔native conversion
  *   - `splitPath` — segment-array view of a path
@@ -18,19 +17,21 @@ import { normalizePath } from './normalize'
 /**
  * Convert Unix-style POSIX paths to native Windows paths.
  *
- * This is the inverse of {@link toUnixPath}. On Windows, MSYS-style paths
- * use `/c/` notation for drive letters and forward slashes, which PowerShell
- * and cmd.exe cannot resolve. This function converts them to native Windows
- * format with backslashes and proper drive letters.
- *
- * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to convert
- * @returns {string} Native Windows path or normalized Unix path
+ * This is the inverse of {@link toUnixPath}. On Windows, MSYS-style paths use
+ * `/c/` notation for drive letters and forward slashes, which PowerShell and
+ * cmd.exe cannot resolve. This function converts them to native Windows format
+ * with backslashes and proper drive letters.
  *
  * @example
- * ```typescript
- * fromUnixPath('/c/projects/app/file.txt')    // 'C:\\projects\\app\\file.txt' on Windows
- * fromUnixPath('/tmp/build/output')           // '/tmp/build/output'
- * ```
+ *   ;```typescript
+ *   fromUnixPath('/c/projects/app/file.txt') // 'C:\\projects\\app\\file.txt' on Windows
+ *   fromUnixPath('/tmp/build/output') // '/tmp/build/output'
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to
+ *   convert.
+ *
+ * @returns {string} Native Windows path or normalized Unix path
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function fromUnixPath(pathLike: string | Buffer | URL): string {
@@ -50,15 +51,16 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  * Divides a path into individual components by splitting on path separators
  * (both forward slashes and backslashes).
  *
- * @param {string | Buffer | URL} pathLike - The path to split
- * @returns {string[]} Array of path segments, or empty array for empty paths
- *
  * @example
- * ```typescript
- * splitPath('/home/user/file.txt')      // ['', 'home', 'user', 'file.txt']
- * splitPath('C:\\Users\\John')          // ['C:', 'Users', 'John']
- * splitPath('')                         // []
- * ```
+ *   ;```typescript
+ *   splitPath('/home/user/file.txt') // ['', 'home', 'user', 'file.txt']
+ *   splitPath('C:\\Users\\John') // ['C:', 'Users', 'John']
+ *   splitPath('') // []
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to split.
+ *
+ * @returns {string[]} Array of path segments, or empty array for empty paths
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function splitPath(pathLike: string | Buffer | URL): string[] {
@@ -72,19 +74,20 @@ export function splitPath(pathLike: string | Buffer | URL): string[] {
 /**
  * Convert Windows paths to MSYS/Unix-style POSIX paths for Git Bash tools.
  *
- * Git for Windows and MSYS2 tools expect POSIX-style paths with forward
- * slashes and Unix drive letter notation (`/c/` instead of `C:\`).
+ * Git for Windows and MSYS2 tools expect POSIX-style paths with forward slashes
+ * and Unix drive letter notation (`/c/` instead of `C:\`).
  *
  * This is the inverse of {@link fromUnixPath}.
  *
- * @param {string | Buffer | URL} pathLike - The path to convert
- * @returns {string} Unix-style POSIX path
- *
  * @example
- * ```typescript
- * toUnixPath('C:\\path\\to\\file.txt')     // '/c/path/to/file.txt' on Windows
- * toUnixPath('/home/user/file')            // '/home/user/file'
- * ```
+ *   ;```typescript
+ *   toUnixPath('C:\\path\\to\\file.txt') // '/c/path/to/file.txt' on Windows
+ *   toUnixPath('/home/user/file') // '/home/user/file'
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to convert.
+ *
+ * @returns {string} Unix-style POSIX path
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function toUnixPath(pathLike: string | Buffer | URL): string {
@@ -110,15 +113,16 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
  *
  * Only removes a single leading `./` or `.\`. Does not touch `../` prefixes.
  *
- * @param {string | Buffer | URL} pathLike - The path to process
- * @returns {string} The path without leading `./` / `.\`, or unchanged
- *
  * @example
- * ```typescript
- * trimLeadingDotSlash('./src/index.js')     // 'src/index.js'
- * trimLeadingDotSlash('../lib/util.js')     // '../lib/util.js'
- * trimLeadingDotSlash('/absolute/path')     // '/absolute/path'
- * ```
+ *   ;```typescript
+ *   trimLeadingDotSlash('./src/index.js') // 'src/index.js'
+ *   trimLeadingDotSlash('../lib/util.js') // '../lib/util.js'
+ *   trimLeadingDotSlash('/absolute/path') // '/absolute/path'
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to process.
+ *
+ * @returns {string} The path without leading `./` / `.\`, or unchanged
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function trimLeadingDotSlash(pathLike: string | Buffer | URL): string {

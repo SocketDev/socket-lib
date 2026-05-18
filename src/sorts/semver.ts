@@ -1,7 +1,6 @@
 /**
- * @fileoverview Semver-aware string comparison. Wraps the vendored
- * `external/semver` accessor so callers don't have to thread the
- * lazy-load themselves.
+ * @file Semver-aware string comparison. Wraps the vendored `external/semver`
+ *   accessor so callers don't have to thread the lazy-load themselves.
  */
 
 import { getSemver } from './_internal'
@@ -10,11 +9,11 @@ import { getSemver } from './_internal'
  * Compare semantic versions.
  *
  * @example
- * ```typescript
- * compareSemver('1.0.0', '2.0.0')  // -1
- * compareSemver('2.0.0', '1.0.0')  // 1
- * compareSemver('1.0.0', '1.0.0')  // 0
- * ```
+ *   ;```typescript
+ *   compareSemver('1.0.0', '2.0.0') // -1
+ *   compareSemver('2.0.0', '1.0.0') // 1
+ *   compareSemver('1.0.0', '1.0.0') // 0
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {

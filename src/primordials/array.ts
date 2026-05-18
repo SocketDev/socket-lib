@@ -1,10 +1,8 @@
 /**
- * @fileoverview Safe references to `Array`, typed-array, `ArrayBuffer`,
- * `DataView`, `Atomics`, and shared iterator-prototype primordials.
- *
- * `Array.fromAsync` and `Array.prototype.with` are ES2024 / ES2023; the
- * primordial captures the live reference at module load so consumers
- * never see a tampered global.
+ * @file Safe references to `Array`, typed-array, `ArrayBuffer`, `DataView`,
+ *   `Atomics`, and shared iterator-prototype primordials. `Array.fromAsync` and
+ *   `Array.prototype.with` are ES2024 / ES2023; the primordial captures the
+ *   live reference at module load so consumers never see a tampered global.
  */
 
 import { getSmolPrimordial } from '../smol/primordial'

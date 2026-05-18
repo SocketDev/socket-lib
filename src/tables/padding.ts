@@ -1,10 +1,9 @@
 /**
- * @fileoverview Cell padding + display-width measurement — shared
- * helpers used by both the simple and bordered table renderers.
- *
- * `displayWidth` routes through `stringWidth` so multi-cell glyphs
- * (full-width CJK, emoji, combined code points) contribute their
- * actual terminal column count rather than a naive `.length`.
+ * @file Cell padding + display-width measurement — shared helpers used by both
+ *   the simple and bordered table renderers. `displayWidth` routes through
+ *   `stringWidth` so multi-cell glyphs (full-width CJK, emoji, combined code
+ *   points) contribute their actual terminal column count rather than a naive
+ *   `.length`.
  */
 
 import { MathMax } from '../primordials/math'
@@ -13,9 +12,9 @@ import { stringWidth } from '../strings/width'
 import type { ColumnAlignment } from './types'
 
 /**
- * Calculate display width accounting for ANSI codes, CJK, and emoji.
- * Uses `stringWidth` so multi-cell glyphs (full-width CJK, emoji, combined
- * code points) contribute their actual terminal column count to padding.
+ * Calculate display width accounting for ANSI codes, CJK, and emoji. Uses
+ * `stringWidth` so multi-cell glyphs (full-width CJK, emoji, combined code
+ * points) contribute their actual terminal column count to padding.
  */
 export function displayWidth(text: string): number {
   return stringWidth(text)

@@ -1,12 +1,10 @@
 /* oxlint-disable socket/sort-source-methods -- functions ordered by call graph (compress/decompress variants share helpers); type / const declarations between them block autofix. */
 /**
- * @fileoverview Gzip compression / decompression — same calling shapes
- * as brotli: in-memory, file-to-file, and raw-stream variants. Default
- * level is 6 (zlib default). The decompress-file helper recognises
- * `.gz` / `.gzip` / `.tgz`, and special-cases `.tgz` back to `.tar` on
- * inPlace decompress so a round-trip stays lossless.
- *
- *   await compressGzip(JSON.stringify(payload))
+ * @file Gzip compression / decompression — same calling shapes as brotli:
+ *   in-memory, file-to-file, and raw-stream variants. Default level is 6 (zlib
+ *   default). The decompress-file helper recognises `.gz` / `.gzip` / `.tgz`,
+ *   and special-cases `.tgz` back to `.tar` on inPlace decompress so a
+ *   round-trip stays lossless. await compressGzip(JSON.stringify(payload))
  *   await compressGzipFile('input.json', 'input.json.gz')
  *   readable.pipe(createGzipCompressor()).pipe(writable)
  */
@@ -36,10 +34,10 @@ const gzipAsync = promisify(gzip)
 const gunzipAsync = promisify(gunzip)
 
 /**
- * Translate `CompressOptions` into the `ZlibOptions` zlib expects.
- * Returns an empty options object when no `level` is given (zlib uses
- * its default, level 6). Exposed for parity with
- * `resolveBrotliOptions` and for unit-test coverage.
+ * Translate `CompressOptions` into the `ZlibOptions` zlib expects. Returns an
+ * empty options object when no `level` is given (zlib uses its default, level
+ * 6). Exposed for parity with `resolveBrotliOptions` and for unit-test
+ * coverage.
  */
 export function resolveGzipOptions(
   options: CompressOptions | undefined,
@@ -52,8 +50,8 @@ export function resolveGzipOptions(
 }
 
 /**
- * Compress a string or Buffer with gzip. Strings are encoded as UTF-8
- * before compression. Default level is 6 (zlib default).
+ * Compress a string or Buffer with gzip. Strings are encoded as UTF-8 before
+ * compression. Default level is 6 (zlib default).
  */
 export async function compressGzip(
   input: string | Buffer,
@@ -73,12 +71,11 @@ export async function decompressGzip(input: Buffer): Promise<Buffer> {
 /**
  * Stream-compress a file with gzip. Two call shapes:
  *
- *   compressGzipFile(src, dest, options?)
- *     Writes compressed output to `dest`. Source is left intact.
+ * CompressGzipFile(src, dest, options?) Writes compressed output to `dest`.
+ * Source is left intact.
  *
- *   compressGzipFile(src, { inPlace: true, ...options })
- *     Writes to `<src>.gz` and deletes `src` after the write
- *     succeeds. Returns the new path.
+ * CompressGzipFile(src, { inPlace: true, ...options }) Writes to `<src>.gz` and
+ * deletes `src` after the write succeeds. Returns the new path.
  */
 export async function compressGzipFile(
   srcPath: string,
@@ -115,13 +112,12 @@ export async function compressGzipFile(
 /**
  * Stream-decompress a gzip file. Two call shapes:
  *
- *   decompressGzipFile(src, dest)
- *     Writes decompressed output to `dest`. Source is left intact.
+ * DecompressGzipFile(src, dest) Writes decompressed output to `dest`. Source is
+ * left intact.
  *
- *   decompressGzipFile(src, { inPlace: true })
- *     Strips the `.gz`/`.gzip`/`.tgz` suffix to derive the
- *     destination, then deletes the compressed source after the
- *     write succeeds. Throws if `src` has no recognizable extension.
+ * DecompressGzipFile(src, { inPlace: true }) Strips the `.gz`/`.gzip`/`.tgz`
+ * suffix to derive the destination, then deletes the compressed source after
+ * the write succeeds. Throws if `src` has no recognizable extension.
  */
 export async function decompressGzipFile(
   srcPath: string,
@@ -184,8 +180,8 @@ const GZIP_MAGIC_0 = 0x1f
 const GZIP_MAGIC_1 = 0x8b
 
 /**
- * Magic-byte check for gzip. Reads the first two bytes and matches
- * the gzip spec's 0x1f 0x8b signature. Authoritative.
+ * Magic-byte check for gzip. Reads the first two bytes and matches the gzip
+ * spec's 0x1f 0x8b signature. Authoritative.
  */
 export function isGzipCompressed(input: Buffer): boolean {
   return (

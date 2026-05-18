@@ -1,10 +1,8 @@
 /**
- * @fileoverview Smoke tests for the `socket-lib check` dispatcher.
- *
- * The CLI's surface is small — print help, route a name to its
- * handler, error on unknown names. Each path is tested through the
- * exported `runCheck` function rather than spawning the CLI binary,
- * since that's where the dispatch logic lives.
+ * @file Smoke tests for the `socket-lib check` dispatcher. The CLI's surface is
+ *   small — print help, route a name to its handler, error on unknown names.
+ *   Each path is tested through the exported `runCheck` function rather than
+ *   spawning the CLI binary, since that's where the dispatch logic lives.
  */
 
 import { describe, expect, it } from 'vitest'

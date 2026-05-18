@@ -1,14 +1,14 @@
 /**
- * @fileoverview Unit tests for GitHub API integration utilities.
+ * @file Unit tests for GitHub API integration utilities. Tests GitHub API
+ *   helpers and authentication:
  *
- * Tests GitHub API helpers and authentication:
- * - getGitHubToken(), getGitHubTokenFromGitConfig() token retrieval
- * - getGitHubTokenWithFallback() multi-source token resolution
- * - getGhsaUrl() constructs GitHub Security Advisory URLs
- * - clearRefCache() clears git reference cache
- * - Environment variable handling (GITHUB_TOKEN, GH_TOKEN)
- * - Note: HTTP tests limited due to module resolution constraints
- * Used by Socket tools for GitHub API authentication and GHSA lookups.
+ *   - getGitHubToken(), getGitHubTokenFromGitConfig() token retrieval
+ *   - getGitHubTokenWithFallback() multi-source token resolution
+ *   - getGhsaUrl() constructs GitHub Security Advisory URLs
+ *   - clearRefCache() clears git reference cache
+ *   - Environment variable handling (GITHUB_TOKEN, GH_TOKEN)
+ *   - Note: HTTP tests limited due to module resolution constraints Used by
+ *     Socket tools for GitHub API authentication and GHSA lookups.
  */
 
 import process from 'node:process'

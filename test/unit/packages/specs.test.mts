@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for package spec parsing and GitHub URL utilities.
+ * @file Unit tests for package spec parsing and GitHub URL utilities. Tests
+ *   npm-package-arg integration for parsing package specifiers:
  *
- * Tests npm-package-arg integration for parsing package specifiers:
- * - getRepoUrlDetails() extracts user/project from GitHub URLs
- * - gitHubTagRefUrl() generates GitHub API URLs for tag references
- * - gitHubTgzUrl() generates tarball download URLs
- * - isGitHubTgzSpec() identifies GitHub tarball specifiers
- * - isGitHubUrlSpec() identifies GitHub URL specifiers with committish
- * Used by Socket CLI for package installation and validation.
+ *   - getRepoUrlDetails() extracts user/project from GitHub URLs
+ *   - gitHubTagRefUrl() generates GitHub API URLs for tag references
+ *   - gitHubTgzUrl() generates tarball download URLs
+ *   - isGitHubTgzSpec() identifies GitHub tarball specifiers
+ *   - isGitHubUrlSpec() identifies GitHub URL specifiers with committish Used by
+ *     Socket CLI for package installation and validation.
  */
 
 import {

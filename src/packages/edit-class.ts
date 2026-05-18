@@ -1,10 +1,9 @@
 /**
- * @fileoverview The `EditablePackageJson` class factory.
- *
- * Split out of `packages/edit.ts` for size hygiene. Wraps
- * `@npmcli/package-json` with Socket-specific knobs: path tracking,
- * a `_canSave` guard for content-only instances, async + sync save
- * paths that honor `EditablePackageJsonOptions` formatting.
+ * @file The `EditablePackageJson` class factory. Split out of
+ *   `packages/edit.ts` for size hygiene. Wraps `@npmcli/package-json` with
+ *   Socket-specific knobs: path tracking, a `_canSave` guard for content-only
+ *   instances, async + sync save paths that honor `EditablePackageJsonOptions`
+ *   formatting.
  *
  *   - `getEditablePackageJsonClass` — lazy class accessor (Webpack-safe)
  */
@@ -42,9 +41,9 @@ import type {
 import type { EditablePackageJsonInstance } from './edit'
 
 /**
- * Private constructor interface for the lazily-built
- * `EditablePackageJson` class. Not exported because consumers go
- * through `getEditablePackageJsonClass()`.
+ * Private constructor interface for the lazily-built `EditablePackageJson`
+ * class. Not exported because consumers go through
+ * `getEditablePackageJsonClass()`.
  */
 interface EditablePackageJsonConstructor {
   new (): EditablePackageJsonInstance
@@ -73,11 +72,11 @@ let _EditablePackageJsonClass: EditablePackageJsonConstructor | undefined
  * Get the EditablePackageJson class for package.json manipulation.
  *
  * @example
- * ```typescript
- * const EditablePackageJson = getEditablePackageJsonClass()
- * const pkg = await EditablePackageJson.load('/tmp/my-project')
- * console.log(pkg.content.name)
- * ```
+ *   ;```typescript
+ *   const EditablePackageJson = getEditablePackageJsonClass()
+ *   const pkg = await EditablePackageJson.load('/tmp/my-project')
+ *   console.log(pkg.content.name)
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {

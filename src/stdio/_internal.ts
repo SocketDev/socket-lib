@@ -1,11 +1,12 @@
 /**
- * @fileoverview Shared TTY primitives for stdio/stdout.ts + stdio/stderr.ts.
  * @private
+ *
+ * @file Shared TTY primitives for stdio/stdout.ts + stdio/stderr.ts.
  */
 
 /**
- * Clear the current line on the given stream.
- * Only works in TTY environments.
+ * Clear the current line on the given stream. Only works in TTY environments.
+ *
  * @private
  */
 export function clearLineOn(stream: NodeJS.WriteStream): void {
@@ -16,8 +17,9 @@ export function clearLineOn(stream: NodeJS.WriteStream): void {
 }
 
 /**
- * Move cursor to specific position on the given stream.
- * Only works in TTY environments.
+ * Move cursor to specific position on the given stream. Only works in TTY
+ * environments.
+ *
  * @private
  */
 export function cursorToOn(
@@ -32,6 +34,7 @@ export function cursorToOn(
 
 /**
  * Get the number of columns on the given stream (or 80 fallback).
+ *
  * @private
  */
 export function getColumnsOf(stream: NodeJS.WriteStream): number {
@@ -40,6 +43,7 @@ export function getColumnsOf(stream: NodeJS.WriteStream): number {
 
 /**
  * Get the number of rows on the given stream (or 24 fallback).
+ *
  * @private
  */
 export function getRowsOf(stream: NodeJS.WriteStream): number {
@@ -48,6 +52,7 @@ export function getRowsOf(stream: NodeJS.WriteStream): number {
 
 /**
  * Check if the given stream is connected to a TTY.
+ *
  * @private
  */
 export function isTTYOf(stream: NodeJS.WriteStream): boolean {

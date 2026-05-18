@@ -1,9 +1,9 @@
 /**
- * @fileoverview Real unit coverage for the pure parts of src/dlx/binary.ts:
- * executeBinary (routing) and getBinaryCacheMetadataPath (path construction).
- *
- * Existing dlx/binary.test.mts covers dlxBinary / cleanDlxCache / listDlxCache /
- * getDlxCachePath. This file fills in the rest of the public surface.
+ * @file Real unit coverage for the pure parts of src/dlx/binary.ts:
+ *   executeBinary (routing) and getBinaryCacheMetadataPath (path construction).
+ *   Existing dlx/binary.test.mts covers dlxBinary / cleanDlxCache /
+ *   listDlxCache / getDlxCachePath. This file fills in the rest of the public
+ *   surface.
  */
 
 import path from 'node:path'

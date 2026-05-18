@@ -1,8 +1,7 @@
 /**
- * @fileoverview Package extensions for compatibility adjustments.
- *
- * Package extensions allow modifying package.json fields of dependencies
- * to fix compatibility issues, missing peer dependencies, etc.
+ * @file Package extensions for compatibility adjustments. Package extensions
+ *   allow modifying package.json fields of dependencies to fix compatibility
+ *   issues, missing peer dependencies, etc.
  */
 
 import * as yarnPkgExtensions from '../external/@yarnpkg/extensions'

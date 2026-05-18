@@ -1,6 +1,6 @@
 /**
- * @fileoverview Socket CLI environment variables.
- * Provides typed getters for SOCKET_CLI_* environment variables (excluding shadow).
+ * @file Socket CLI environment variables. Provides typed getters for
+ *   SOCKET_CLI_* environment variables (excluding shadow).
  */
 
 import { envAsBoolean } from './boolean'
@@ -10,16 +10,16 @@ import { getEnvValue } from './rewire'
 /**
  * Whether to accept all Socket CLI risks (alternative name).
  *
- * @returns Whether to accept all risks
- *
  * @example
- * ```typescript
- * import { getSocketCliAcceptRisks } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliAcceptRisks } from '@socketsecurity/lib/env/socket-cli'
  *
- * if (getSocketCliAcceptRisks()) {
- *   console.log('All risks accepted')
- * }
- * ```
+ *   if (getSocketCliAcceptRisks()) {
+ *     console.log('All risks accepted')
+ *   }
+ *   ```
+ *
+ * @returns Whether to accept all risks
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliAcceptRisks(): boolean {
@@ -27,18 +27,18 @@ export function getSocketCliAcceptRisks(): boolean {
 }
 
 /**
- * Socket CLI API base URL (alternative name).
- * Checks SOCKET_CLI_API_BASE_URL first, then falls back to legacy SOCKET_SECURITY_API_BASE_URL.
- *
- * @returns API base URL or undefined
+ * Socket CLI API base URL (alternative name). Checks SOCKET_CLI_API_BASE_URL
+ * first, then falls back to legacy SOCKET_SECURITY_API_BASE_URL.
  *
  * @example
- * ```typescript
- * import { getSocketCliApiBaseUrl } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliApiBaseUrl } from '@socketsecurity/lib/env/socket-cli'
  *
- * const baseUrl = getSocketCliApiBaseUrl()
- * // e.g. 'https://api.socket.dev' or undefined
- * ```
+ *   const baseUrl = getSocketCliApiBaseUrl()
+ *   // e.g. 'https://api.socket.dev' or undefined
+ *   ```
+ *
+ * @returns API base URL or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiBaseUrl(): string | undefined {
@@ -49,19 +49,20 @@ export function getSocketCliApiBaseUrl(): string | undefined {
 }
 
 /**
- * Proxy URL for Socket CLI API requests (alternative name).
- * Checks SOCKET_CLI_API_PROXY, SOCKET_SECURITY_API_PROXY, then standard proxy env vars.
- * Follows the same precedence as v1.x: HTTPS_PROXY → https_proxy → HTTP_PROXY → http_proxy.
- *
- * @returns API proxy URL or undefined
+ * Proxy URL for Socket CLI API requests (alternative name). Checks
+ * SOCKET_CLI_API_PROXY, SOCKET_SECURITY_API_PROXY, then standard proxy env
+ * vars. Follows the same precedence as v1.x: HTTPS_PROXY → https_proxy →
+ * HTTP_PROXY → http_proxy.
  *
  * @example
- * ```typescript
- * import { getSocketCliApiProxy } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliApiProxy } from '@socketsecurity/lib/env/socket-cli'
  *
- * const proxy = getSocketCliApiProxy()
- * // e.g. 'http://proxy.example.com:8080' or undefined
- * ```
+ *   const proxy = getSocketCliApiProxy()
+ *   // e.g. 'http://proxy.example.com:8080' or undefined
+ *   ```
+ *
+ * @returns API proxy URL or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiProxy(): string | undefined {
@@ -78,15 +79,15 @@ export function getSocketCliApiProxy(): string | undefined {
 /**
  * Timeout in milliseconds for Socket CLI API requests (alternative name).
  *
- * @returns API timeout in milliseconds
- *
  * @example
- * ```typescript
- * import { getSocketCliApiTimeout } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliApiTimeout } from '@socketsecurity/lib/env/socket-cli'
  *
- * const timeout = getSocketCliApiTimeout()
- * // e.g. 30000 or 0 if not set
- * ```
+ *   const timeout = getSocketCliApiTimeout()
+ *   // e.g. 30000 or 0 if not set
+ *   ```
+ *
+ * @returns API timeout in milliseconds
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiTimeout(): number {
@@ -94,18 +95,18 @@ export function getSocketCliApiTimeout(): number {
 }
 
 /**
- * Bootstrap cache directory path.
- * Set by bootstrap wrappers to pass dlx cache location to CLI.
- *
- * @returns Bootstrap cache directory or undefined
+ * Bootstrap cache directory path. Set by bootstrap wrappers to pass dlx cache
+ * location to CLI.
  *
  * @example
- * ```typescript
- * import { getSocketCliBootstrapCacheDir } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliBootstrapCacheDir } from '@socketsecurity/lib/env/socket-cli'
  *
- * const cacheDir = getSocketCliBootstrapCacheDir()
- * // e.g. '/tmp/.socket-cli-cache' or undefined
- * ```
+ *   const cacheDir = getSocketCliBootstrapCacheDir()
+ *   // e.g. '/tmp/.socket-cli-cache' or undefined
+ *   ```
+ *
+ * @returns Bootstrap cache directory or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliBootstrapCacheDir(): string | undefined {
@@ -113,18 +114,18 @@ export function getSocketCliBootstrapCacheDir(): string | undefined {
 }
 
 /**
- * Bootstrap package spec (e.g., @socketsecurity/cli@^2.0.11).
- * Set by bootstrap wrappers (SEA/smol/npm) to pass package spec to CLI.
- *
- * @returns Bootstrap package spec or undefined
+ * Bootstrap package spec (e.g., @socketsecurity/cli@^2.0.11). Set by bootstrap
+ * wrappers (SEA/smol/npm) to pass package spec to CLI.
  *
  * @example
- * ```typescript
- * import { getSocketCliBootstrapSpec } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliBootstrapSpec } from '@socketsecurity/lib/env/socket-cli'
  *
- * const spec = getSocketCliBootstrapSpec()
- * // e.g. '@socketsecurity/cli@^2.0.11' or undefined
- * ```
+ *   const spec = getSocketCliBootstrapSpec()
+ *   // e.g. '@socketsecurity/cli@^2.0.11' or undefined
+ *   ```
+ *
+ * @returns Bootstrap package spec or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliBootstrapSpec(): string | undefined {
@@ -134,15 +135,15 @@ export function getSocketCliBootstrapSpec(): string | undefined {
 /**
  * Socket CLI configuration file path (alternative name).
  *
- * @returns Config file path or undefined
- *
  * @example
- * ```typescript
- * import { getSocketCliConfig } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliConfig } from '@socketsecurity/lib/env/socket-cli'
  *
- * const config = getSocketCliConfig()
- * // e.g. '/tmp/project/socket.yml' or undefined
- * ```
+ *   const config = getSocketCliConfig()
+ *   // e.g. '/tmp/project/socket.yml' or undefined
+ *   ```
+ *
+ * @returns Config file path or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliConfig(): string | undefined {
@@ -152,15 +153,15 @@ export function getSocketCliConfig(): string | undefined {
 /**
  * Controls Socket CLI fix mode.
  *
- * @returns Fix mode value or undefined
- *
  * @example
- * ```typescript
- * import { getSocketCliFix } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliFix } from '@socketsecurity/lib/env/socket-cli'
  *
- * const fix = getSocketCliFix()
- * // e.g. 'true' or undefined
- * ```
+ *   const fix = getSocketCliFix()
+ *   // e.g. 'true' or undefined
+ *   ```
+ *
+ * @returns Fix mode value or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliFix(): string | undefined {
@@ -168,18 +169,18 @@ export function getSocketCliFix(): string | undefined {
 }
 
 /**
- * Socket CLI GitHub authentication token.
- * Checks SOCKET_CLI_GITHUB_TOKEN, SOCKET_SECURITY_GITHUB_PAT, then falls back to GITHUB_TOKEN.
- *
- * @returns GitHub token or undefined
+ * Socket CLI GitHub authentication token. Checks SOCKET_CLI_GITHUB_TOKEN,
+ * SOCKET_SECURITY_GITHUB_PAT, then falls back to GITHUB_TOKEN.
  *
  * @example
- * ```typescript
- * import { getSocketCliGithubToken } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliGithubToken } from '@socketsecurity/lib/env/socket-cli'
  *
- * const token = getSocketCliGithubToken()
- * // e.g. 'ghp_abc123...' or undefined
- * ```
+ *   const token = getSocketCliGithubToken()
+ *   // e.g. 'ghp_abc123...' or undefined
+ *   ```
+ *
+ * @returns GitHub token or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliGithubToken(): string | undefined {
@@ -193,16 +194,16 @@ export function getSocketCliGithubToken(): string | undefined {
 /**
  * Whether to skip Socket CLI API token requirement (alternative name).
  *
- * @returns Whether to skip API token requirement
- *
  * @example
- * ```typescript
- * import { getSocketCliNoApiToken } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliNoApiToken } from '@socketsecurity/lib/env/socket-cli'
  *
- * if (getSocketCliNoApiToken()) {
- *   console.log('API token requirement skipped')
- * }
- * ```
+ *   if (getSocketCliNoApiToken()) {
+ *     console.log('API token requirement skipped')
+ *   }
+ *   ```
+ *
+ * @returns Whether to skip API token requirement
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliNoApiToken(): boolean {
@@ -212,16 +213,16 @@ export function getSocketCliNoApiToken(): boolean {
 /**
  * Controls Socket CLI optimization mode.
  *
- * @returns Whether optimization mode is enabled
- *
  * @example
- * ```typescript
- * import { getSocketCliOptimize } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliOptimize } from '@socketsecurity/lib/env/socket-cli'
  *
- * if (getSocketCliOptimize()) {
- *   console.log('Optimization mode enabled')
- * }
- * ```
+ *   if (getSocketCliOptimize()) {
+ *     console.log('Optimization mode enabled')
+ *   }
+ *   ```
+ *
+ * @returns Whether optimization mode is enabled
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliOptimize(): boolean {
@@ -229,18 +230,18 @@ export function getSocketCliOptimize(): boolean {
 }
 
 /**
- * Socket CLI organization slug identifier (alternative name).
- * Checks SOCKET_CLI_ORG_SLUG first, then falls back to SOCKET_ORG_SLUG.
- *
- * @returns Organization slug or undefined
+ * Socket CLI organization slug identifier (alternative name). Checks
+ * SOCKET_CLI_ORG_SLUG first, then falls back to SOCKET_ORG_SLUG.
  *
  * @example
- * ```typescript
- * import { getSocketCliOrgSlug } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliOrgSlug } from '@socketsecurity/lib/env/socket-cli'
  *
- * const slug = getSocketCliOrgSlug()
- * // e.g. 'my-org' or undefined
- * ```
+ *   const slug = getSocketCliOrgSlug()
+ *   // e.g. 'my-org' or undefined
+ *   ```
+ *
+ * @returns Organization slug or undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliOrgSlug(): string | undefined {
@@ -250,16 +251,16 @@ export function getSocketCliOrgSlug(): string | undefined {
 /**
  * Whether to view all Socket CLI risks (alternative name).
  *
- * @returns Whether to view all risks
- *
  * @example
- * ```typescript
- * import { getSocketCliViewAllRisks } from '@socketsecurity/lib/env/socket-cli'
+ *   ;```typescript
+ *   import { getSocketCliViewAllRisks } from '@socketsecurity/lib/env/socket-cli'
  *
- * if (getSocketCliViewAllRisks()) {
- *   console.log('Viewing all risks')
- * }
- * ```
+ *   if (getSocketCliViewAllRisks()) {
+ *     console.log('Viewing all risks')
+ *   }
+ *   ```
+ *
+ * @returns Whether to view all risks
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliViewAllRisks(): boolean {

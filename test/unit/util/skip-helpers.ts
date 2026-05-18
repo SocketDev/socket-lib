@@ -1,24 +1,22 @@
 /**
- * @fileoverview Platform / capability-gated test wrappers.
+ * @file Platform / capability-gated test wrappers. Wrap `it` / `describe` so
+ *   that:
  *
- * Wrap `it` / `describe` so that:
- *  1. The condition is encoded in the helper name (no inline `skipIf`
- *     boolean to misread).
- *  2. The skip reason is prefixed onto the test title (`[windows] ...`),
- *     so any reporter — and any post-run aggregator — can group by tag
- *     without parsing source code.
- *
- * Use these instead of raw `it.skipIf(...)` / `describe.skipIf(...)` for
- * platform / network / engine-feature gates.
+ *   1. The condition is encoded in the helper name (no inline `skipIf` boolean to
+ *      misread).
+ *   2. The skip reason is prefixed onto the test title (`[windows] ...`), so any
+ *      reporter — and any post-run aggregator — can group by tag without
+ *      parsing source code. Use these instead of raw `it.skipIf(...)` /
+ *      `describe.skipIf(...)` for platform / network / engine-feature gates.
  *
  * @example
- * ```ts
- * import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/skip-helpers'
+ *   ;```ts
+ *   import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/skip-helpers'
  *
- * itWindowsOnly('should convert MSYS drive letter paths', () => { ... })
- * itUnixOnly('should not convert MSYS-like paths on Unix', () => { ... })
- * itNetworkOnly('should resolve a real npm package', async () => { ... })
- * ```
+ *   itWindowsOnly('should convert MSYS drive letter paths', () => { ... })
+ *   itUnixOnly('should not convert MSYS-like paths on Unix', () => { ... })
+ *   itNetworkOnly('should resolve a real npm package', async () => { ... })
+ *   ```
  */
 
 import process from 'node:process'
@@ -44,22 +42,22 @@ export function describeNetworkOnly(name: string, fn: SuiteFn): void {
 }
 
 /**
- * Describe block gated on a runtime capability (engine version, native
- * builtin, environment variable, etc.). Pass `available: true` to run,
- * `false` to skip. The `capability` is shown in the test title as
- * `[needs:<capability>]` so reporters can surface the reason.
+ * Describe block gated on a runtime capability (engine version, native builtin,
+ * environment variable, etc.). Pass `available: true` to run, `false` to skip.
+ * The `capability` is shown in the test title as `[needs:<capability>]` so
+ * reporters can surface the reason.
  *
  * @example
- * ```ts
- * describeRequires(
+ *   ;```ts
+ *   describeRequires(
  *   'Error.isError',
  *   typeof Error.isError === 'function',
  *   'isErrorBuiltin',
  *   () => {
- *     it('uses the native builtin', () => { ... })
+ *   it('uses the native builtin', () => { ... })
  *   }
- * )
- * ```
+ *   )
+ *   ```
  */
 export function describeRequires(
   capability: string,
@@ -85,8 +83,8 @@ export function describeWindowsOnly(name: string, fn: SuiteFn): void {
 }
 
 /**
- * Test that hits the live network. Skipped when
- * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
+ * Test that hits the live network. Skipped when `SOCKET_LIB_SKIP_NETWORK_TESTS`
+ * env var is set.
  */
 export function itNetworkOnly(name: string, fn: TestFn): void {
   it.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)

@@ -1,4 +1,7 @@
-/** @fileoverview Update registry package.json with exports, browser fields, and Node.js engine range. */
+/**
+ * @file Update registry package.json with exports, browser fields, and Node.js
+ *   engine range.
+ */
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'

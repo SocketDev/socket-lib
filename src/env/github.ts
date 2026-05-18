@@ -1,23 +1,23 @@
 /**
- * @fileoverview GitHub Actions environment variable getters.
- * Provides access to GitHub Actions CI/CD environment variables.
+ * @file GitHub Actions environment variable getters. Provides access to GitHub
+ *   Actions CI/CD environment variables.
  */
 
 import { getEnvValue } from './rewire'
 
 /**
- * GH_TOKEN environment variable.
- * Alternative GitHub authentication token for API access (used by GitHub CLI).
- *
- * @returns The GH CLI token, or `undefined` if not set
+ * GH_TOKEN environment variable. Alternative GitHub authentication token for
+ * API access (used by GitHub CLI).
  *
  * @example
- * ```typescript
- * import { getGhToken } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGhToken } from '@socketsecurity/lib/env/github'
  *
- * const token = getGhToken()
- * // e.g. 'gho_abc123...' or undefined
- * ```
+ *   const token = getGhToken()
+ *   // e.g. 'gho_abc123...' or undefined
+ *   ```
+ *
+ * @returns The GH CLI token, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGhToken(): string | undefined {
@@ -25,18 +25,18 @@ export function getGhToken(): string | undefined {
 }
 
 /**
- * GITHUB_API_URL environment variable.
- * GitHub API URL (e.g., https://api.github.com).
- *
- * @returns The GitHub API URL, or `undefined` if not set
+ * GITHUB_API_URL environment variable. GitHub API URL (e.g.,
+ * https://api.github.com).
  *
  * @example
- * ```typescript
- * import { getGithubApiUrl } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubApiUrl } from '@socketsecurity/lib/env/github'
  *
- * const apiUrl = getGithubApiUrl()
- * // e.g. 'https://api.github.com' or undefined
- * ```
+ *   const apiUrl = getGithubApiUrl()
+ *   // e.g. 'https://api.github.com' or undefined
+ *   ```
+ *
+ * @returns The GitHub API URL, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubApiUrl(): string | undefined {
@@ -44,18 +44,17 @@ export function getGithubApiUrl(): string | undefined {
 }
 
 /**
- * GITHUB_BASE_REF environment variable.
- * GitHub pull request base branch.
- *
- * @returns The pull request base branch name, or `undefined` if not set
+ * GITHUB_BASE_REF environment variable. GitHub pull request base branch.
  *
  * @example
- * ```typescript
- * import { getGithubBaseRef } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubBaseRef } from '@socketsecurity/lib/env/github'
  *
- * const baseRef = getGithubBaseRef()
- * // e.g. 'main' or undefined
- * ```
+ *   const baseRef = getGithubBaseRef()
+ *   // e.g. 'main' or undefined
+ *   ```
+ *
+ * @returns The pull request base branch name, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubBaseRef(): string | undefined {
@@ -63,18 +62,17 @@ export function getGithubBaseRef(): string | undefined {
 }
 
 /**
- * GITHUB_REF_NAME environment variable.
- * GitHub branch or tag name.
- *
- * @returns The branch or tag name, or `undefined` if not set
+ * GITHUB_REF_NAME environment variable. GitHub branch or tag name.
  *
  * @example
- * ```typescript
- * import { getGithubRefName } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubRefName } from '@socketsecurity/lib/env/github'
  *
- * const refName = getGithubRefName()
- * // e.g. 'feature/my-branch' or 'v1.0.0'
- * ```
+ *   const refName = getGithubRefName()
+ *   // e.g. 'feature/my-branch' or 'v1.0.0'
+ *   ```
+ *
+ * @returns The branch or tag name, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubRefName(): string | undefined {
@@ -82,18 +80,17 @@ export function getGithubRefName(): string | undefined {
 }
 
 /**
- * GITHUB_REF_TYPE environment variable.
- * GitHub ref type (branch or tag).
- *
- * @returns The ref type ('branch' or 'tag'), or `undefined` if not set
+ * GITHUB_REF_TYPE environment variable. GitHub ref type (branch or tag).
  *
  * @example
- * ```typescript
- * import { getGithubRefType } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubRefType } from '@socketsecurity/lib/env/github'
  *
- * const refType = getGithubRefType()
- * // e.g. 'branch' or 'tag'
- * ```
+ *   const refType = getGithubRefType()
+ *   // e.g. 'branch' or 'tag'
+ *   ```
+ *
+ * @returns The ref type ('branch' or 'tag'), or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubRefType(): string | undefined {
@@ -101,18 +98,18 @@ export function getGithubRefType(): string | undefined {
 }
 
 /**
- * GITHUB_REPOSITORY environment variable.
- * GitHub repository name in owner/repo format.
- *
- * @returns The repository name, or `undefined` if not set
+ * GITHUB_REPOSITORY environment variable. GitHub repository name in owner/repo
+ * format.
  *
  * @example
- * ```typescript
- * import { getGithubRepository } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubRepository } from '@socketsecurity/lib/env/github'
  *
- * const repo = getGithubRepository()
- * // e.g. 'SocketDev/socket-cli' or undefined
- * ```
+ *   const repo = getGithubRepository()
+ *   // e.g. 'SocketDev/socket-cli' or undefined
+ *   ```
+ *
+ * @returns The repository name, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubRepository(): string | undefined {
@@ -120,18 +117,18 @@ export function getGithubRepository(): string | undefined {
 }
 
 /**
- * GITHUB_SERVER_URL environment variable.
- * GitHub server URL (e.g., https://github.com).
- *
- * @returns The GitHub server URL, or `undefined` if not set
+ * GITHUB_SERVER_URL environment variable. GitHub server URL (e.g.,
+ * https://github.com).
  *
  * @example
- * ```typescript
- * import { getGithubServerUrl } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubServerUrl } from '@socketsecurity/lib/env/github'
  *
- * const serverUrl = getGithubServerUrl()
- * // e.g. 'https://github.com' or undefined
- * ```
+ *   const serverUrl = getGithubServerUrl()
+ *   // e.g. 'https://github.com' or undefined
+ *   ```
+ *
+ * @returns The GitHub server URL, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubServerUrl(): string | undefined {
@@ -139,18 +136,18 @@ export function getGithubServerUrl(): string | undefined {
 }
 
 /**
- * GITHUB_TOKEN environment variable.
- * GitHub authentication token for API access.
- *
- * @returns The GitHub token, or `undefined` if not set
+ * GITHUB_TOKEN environment variable. GitHub authentication token for API
+ * access.
  *
  * @example
- * ```typescript
- * import { getGithubToken } from '@socketsecurity/lib/env/github'
+ *   ;```typescript
+ *   import { getGithubToken } from '@socketsecurity/lib/env/github'
  *
- * const token = getGithubToken()
- * // e.g. 'ghp_abc123...' or undefined
- * ```
+ *   const token = getGithubToken()
+ *   // e.g. 'ghp_abc123...' or undefined
+ *   ```
+ *
+ * @returns The GitHub token, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGithubToken(): string | undefined {

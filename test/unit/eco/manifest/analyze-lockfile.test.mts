@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for analyzeLockfile.
+ * @file Unit tests for analyzeLockfile.
  */
 
 import { describe, expect, it } from 'vitest'

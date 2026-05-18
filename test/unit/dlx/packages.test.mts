@@ -1,9 +1,7 @@
 /**
- * @fileoverview Unit tests for dlx/packages — DLX package management.
- *
- * Uses a real tmpdir and overrides SOCKET_DLX_DIR via env so we can
- * inspect actual filesystem state. Each test isolates with its own
- * tmpdir.
+ * @file Unit tests for dlx/packages — DLX package management. Uses a real
+ *   tmpdir and overrides SOCKET_DLX_DIR via env so we can inspect actual
+ *   filesystem state. Each test isolates with its own tmpdir.
  */
 
 import {

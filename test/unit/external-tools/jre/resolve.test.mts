@@ -1,9 +1,7 @@
 /**
- * @fileoverview Unit tests for resolveJre() — the JRE resolver
- * orchestrator + memoization.
- *
- * Uses `vi.stubEnv` so env mutation is per-test scoped under
- * vitest's `isolate: false` config.
+ * @file Unit tests for resolveJre() — the JRE resolver orchestrator +
+ *   memoization. Uses `vi.stubEnv` so env mutation is per-test scoped under
+ *   vitest's `isolate: false` config.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

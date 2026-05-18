@@ -1,11 +1,10 @@
 /**
- * @fileoverview Output entrypoints — `debug` / `debugCache` /
- * `debugDir` / `debugLog` and their `*Ns` namespace variants, plus
- * `debuglog` (node-util-compatible) and `debugtime` (start/end
- * timers). Each output function gates through `isEnabled`,
- * prefixes the caller name from `getCallerInfo`, pauses any active
- * spinner across the write, and uses the lazy `pointingTriangle`
- * glyph for the divider.
+ * @file Output entrypoints — `debug` / `debugCache` / `debugDir` / `debugLog`
+ *   and their `*Ns` namespace variants, plus `debuglog` (node-util-compatible)
+ *   and `debugtime` (start/end timers). Each output function gates through
+ *   `isEnabled`, prefixes the caller name from `getCallerInfo`, pauses any
+ *   active spinner across the write, and uses the lazy `pointingTriangle` glyph
+ *   for the divider.
  */
 
 import debugJs from '../external/debug'
@@ -34,10 +33,10 @@ export function debug(...args: unknown[]): void {
  * Cache debug function with caller info.
  *
  * @example
- * ```typescript
- * debugCache('hit', 'socket-sdk:scans:abc123')
- * debugCache('miss', 'socket-sdk:scans:xyz', { ttl: 60000 })
- * ```
+ *   ;```typescript
+ *   debugCache('hit', 'socket-sdk:scans:abc123')
+ *   debugCache('miss', 'socket-sdk:scans:xyz', { ttl: 60000 })
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function debugCache(
@@ -63,10 +62,9 @@ export function debugCache(
 }
 
 /**
- * Debug output for cache operations with caller info.
- * First argument is the operation type (hit/miss/set/clear).
- * Second argument is the cache key or message.
- * Optional third argument is metadata object.
+ * Debug output for cache operations with caller info. First argument is the
+ * operation type (hit/miss/set/clear). Second argument is the cache key or
+ * message. Optional third argument is metadata object.
  */
 export function debugCacheNs(
   namespacesOrOpts: NamespacesOrOptions,
@@ -99,7 +97,8 @@ export function debugCacheNs(
 }
 
 /**
- * Debug output for object inspection (wrapper for debugDirNs with default namespace).
+ * Debug output for object inspection (wrapper for debugDirNs with default
+ * namespace).
  */
 export function debugDir(
   obj: unknown,
@@ -244,8 +243,8 @@ export function debugNs(
 }
 
 /**
- * Create a Node.js util.debuglog compatible function.
- * Returns a function that conditionally writes debug messages to stderr.
+ * Create a Node.js util.debuglog compatible function. Returns a function that
+ * conditionally writes debug messages to stderr.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function debuglog(section: string) {
@@ -254,8 +253,8 @@ export function debuglog(section: string) {
 }
 
 /**
- * Create timing functions for measuring code execution time.
- * Returns an object with start() and end() methods, plus a callable function.
+ * Create timing functions for measuring code execution time. Returns an object
+ * with start() and end() methods, plus a callable function.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function debugtime(label: string) {

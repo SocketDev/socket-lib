@@ -1,17 +1,20 @@
 /**
- * @fileoverview Unit tests for file system utility functions.
+ * @file Unit tests for file system utility functions. Tests comprehensive file
+ *   system operations with both async and sync variants:
  *
- * Tests comprehensive file system operations with both async and sync variants:
- * - File search: findUp(), findUpSync() for locating files up directory tree
- * - Directory operations: isDir(), isDirSync(), isDirEmptySync(), safeMkdir/Sync()
- * - File reading: readFileUtf8/Sync(), readFileBinary/Sync(), safeReadFile/Sync()
- * - JSON operations: readJson/Sync(), writeJson/Sync() with proper encoding
- * - Directory listing: readDirNames/Sync() for directory contents
- * - Safe operations: safeStat/Sync(), safeDelete/Sync() with error handling
- * - Utilities: isSymlinkSync(), uniqueSync(), validateFiles()
- * - Encoding: normalizeEncoding(), normalizeEncodingSlow() for encoding normalization
- * Tests use temporary directories (runWithTempDir) for isolated filesystem operations.
- * Validates cross-platform behavior, error handling, and edge cases (missing files, permissions).
+ *   - File search: findUp(), findUpSync() for locating files up directory tree
+ *   - Directory operations: isDir(), isDirSync(), isDirEmptySync(),
+ *     safeMkdir/Sync()
+ *   - File reading: readFileUtf8/Sync(), readFileBinary/Sync(),
+ *     safeReadFile/Sync()
+ *   - JSON operations: readJson/Sync(), writeJson/Sync() with proper encoding
+ *   - Directory listing: readDirNames/Sync() for directory contents
+ *   - Safe operations: safeStat/Sync(), safeDelete/Sync() with error handling
+ *   - Utilities: isSymlinkSync(), uniqueSync(), validateFiles()
+ *   - Encoding: normalizeEncoding(), normalizeEncodingSlow() for encoding
+ *     normalization Tests use temporary directories (runWithTempDir) for
+ *     isolated filesystem operations. Validates cross-platform behavior, error
+ *     handling, and edge cases (missing files, permissions).
  */
 
 /* oxlint-disable socket/prefer-exists-sync -- tests verify stat() output (isDirectory, isFile, mtime, size) — not existence checks. */

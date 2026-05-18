@@ -1,9 +1,7 @@
 /**
- * @fileoverview Unit tests for jreFromVfs().
- *
- * On stock Node, `getSmolVfs()` returns `undefined`, so `jreFromVfs()`
- * must return `undefined` without throwing. The smol-binary path is
- * covered by socket-btm's integration tests.
+ * @file Unit tests for jreFromVfs(). On stock Node, `getSmolVfs()` returns
+ *   `undefined`, so `jreFromVfs()` must return `undefined` without throwing.
+ *   The smol-binary path is covered by socket-btm's integration tests.
  */
 
 import { describe, expect, it } from 'vitest'

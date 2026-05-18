@@ -1,11 +1,9 @@
 /**
- * @fileoverview Unit tests for time-related constants.
+ * @file Unit tests for time-related constants. Tests time conversion constants:
  *
- * Tests time conversion constants:
- * - MS_PER_SECOND (1000), MS_PER_MINUTE (60000), MS_PER_HOUR, MS_PER_DAY
- * - Timeout defaults for various operations
- * - Date/time format constants
- * Frozen constants for time calculations.
+ *   - MS_PER_SECOND (1000), MS_PER_MINUTE (60000), MS_PER_HOUR, MS_PER_DAY
+ *   - Timeout defaults for various operations
+ *   - Date/time format constants Frozen constants for time calculations.
  */
 
 import { describe, expect, it } from 'vitest'

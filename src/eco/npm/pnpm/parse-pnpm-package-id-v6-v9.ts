@@ -1,13 +1,11 @@
 /**
- * @fileoverview `parsePnpmPackageIdV6V9(pkgId)` — extracts
- * `{ name, version }` from a pnpm v6/v9 package key.
+ * @file `parsePnpmPackageIdV6V9(pkgId)` — extracts `{ name, version }` from a
+ *   pnpm v6/v9 package key. Spec forms handled:
  *
- * Spec forms handled:
- *   - `name@version`                → unscoped
- *   - `@scope/name@version`         → scoped (last `@` is the splitter)
- *   - `name@version(peer)`          → peer-dep suffix stripped
- *
- * Returns `{ name: pkgId, version: '0.0.0' }` for unparseable input.
+ *   - `name@version` → unscoped
+ *   - `@scope/name@version` → scoped (last `@` is the splitter)
+ *   - `name@version(peer)` → peer-dep suffix stripped Returns `{ name: pkgId,
+ *     version: '0.0.0' }` for unparseable input.
  */
 
 import {

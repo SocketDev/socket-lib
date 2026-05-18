@@ -1,10 +1,9 @@
 /**
- * @fileoverview Unit tests for HOME environment variable getter.
- *
- * Tests getHome(), which resolves the user's home directory. It reads $HOME
- * first (POSIX + most shells), then falls back to $USERPROFILE for Windows
- * environments where $HOME is typically unset. Uses rewire for isolated
- * testing. Critical for resolving user-specific paths cross-platform.
+ * @file Unit tests for HOME environment variable getter. Tests getHome(), which
+ *   resolves the user's home directory. It reads $HOME first (POSIX + most
+ *   shells), then falls back to $USERPROFILE for Windows environments where
+ *   $HOME is typically unset. Uses rewire for isolated testing. Critical for
+ *   resolving user-specific paths cross-platform.
  */
 
 import process from 'node:process'

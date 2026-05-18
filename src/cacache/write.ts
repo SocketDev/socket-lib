@@ -1,7 +1,7 @@
 /**
- * @fileoverview Cache write entrypoints — `put` (insert/replace by
- * key) and `remove` (single-key delete). Both reject wildcards; for
- * pattern deletes use `clear({ prefix: 'foo*' })`.
+ * @file Cache write entrypoints — `put` (insert/replace by key) and `remove`
+ *   (single-key delete). Both reject wildcards; for pattern deletes use
+ *   `clear({ prefix: 'foo*' })`.
  */
 
 import { getSocketCacacheDir } from '../paths/socket'
@@ -15,12 +15,12 @@ import type { PutOptions } from './types'
 /**
  * Put data into the Socket shared cache with a key.
  *
- * @throws {TypeError} If key contains wildcards (*)
- *
  * @example
- * ```typescript
- * await put('socket-sdk:scans:abc123', Buffer.from('result data'))
- * ```
+ *   ;```typescript
+ *   await put('socket-sdk:scans:abc123', Buffer.from('result data'))
+ *   ```
+ *
+ * @throws {TypeError} If key contains wildcards (*)
  */
 export async function put(
   key: string,
@@ -40,12 +40,12 @@ export async function put(
 /**
  * Remove an entry from the Socket shared cache by key.
  *
- * @throws {TypeError} If key contains wildcards (*)
- *
  * @example
- * ```typescript
- * await remove('socket-sdk:scans:abc123')
- * ```
+ *   ;```typescript
+ *   await remove('socket-sdk:scans:abc123')
+ *   ```
+ *
+ * @throws {TypeError} If key contains wildcards (*)
  */
 export async function remove(key: string): Promise<unknown> {
   if (StringPrototypeIncludes(key, '*')) {

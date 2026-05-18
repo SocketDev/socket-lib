@@ -1,15 +1,15 @@
 /* oxlint-disable socket/sort-source-methods -- validator helpers interleaved with module-level config they consume; reordering would split state from its consumers. */
 /**
- * @fileoverview Comprehensive ESM/CJS validator for dist/external/* exports
- * Validates that bundled dependencies work correctly with both CommonJS require()
- * and ESM import, including proper handling of default exports and named exports.
+ * @file Comprehensive ESM/CJS validator for dist/external/* exports Validates
+ *   that bundled dependencies work correctly with both CommonJS require() and
+ *   ESM import, including proper handling of default exports and named exports.
+ *   Key validations:
  *
- * Key validations:
- * - CJS require() returns usable values without .default wrappers
- * - ESM default imports work correctly
- * - Named exports (like Separator) are accessible from both CJS and ESM
- * - Function exports are directly callable without .default
- * - Object exports preserve all named properties
+ *   - CJS require() returns usable values without .default wrappers
+ *   - ESM default imports work correctly
+ *   - Named exports (like Separator) are accessible from both CJS and ESM
+ *   - Function exports are directly callable without .default
+ *   - Object exports preserve all named properties
  */
 
 import { createRequire } from 'node:module'

@@ -1,9 +1,9 @@
 /**
- * @fileoverview Private internals for `memo/*` modules — the
- * shared `cacheRegistry` (each memoize variant registers its
- * per-instance clear function here so `clearAllMemoizationCaches`
- * can fan out). `defaultKeyGen` is co-located because both `memoize`
- * and `memoizeAsync` use it as the default cache-key encoder.
+ * @file Private internals for `memo/*` modules — the shared `cacheRegistry`
+ *   (each memoize variant registers its per-instance clear function here so
+ *   `clearAllMemoizationCaches` can fan out). `defaultKeyGen` is co-located
+ *   because both `memoize` and `memoizeAsync` use it as the default cache-key
+ *   encoder.
  */
 
 import { JSONStringify } from '../primordials/json'

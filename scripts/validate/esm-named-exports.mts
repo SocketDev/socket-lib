@@ -1,7 +1,8 @@
 /**
- * @fileoverview Validate that dist/* files export named exports compatible with ESM imports
- * Ensures that module.exports = { foo, bar } pattern is used (not module.exports.default)
- * so that ESM code can do: import { foo, bar } from '@socketsecurity/lib-stable/module'
+ * @file Validate that dist/* files export named exports compatible with ESM
+ *   imports Ensures that module.exports = { foo, bar } pattern is used (not
+ *   module.exports.default) so that ESM code can do: import { foo, bar } from
+ *   '@socketsecurity/lib-stable/module'
  */
 
 import { readFileSync, readdirSync } from 'node:fs'
@@ -23,9 +24,9 @@ const { pluralize } = require('@socketsecurity/lib-stable/words')
 const logger = getDefaultLogger()
 
 /**
- * Check if a module exports named exports in an ESM-compatible way.
- * Good: module.exports = { foo, bar, baz }
- * Bad: module.exports = value or module.exports.default = value
+ * Check if a module exports named exports in an ESM-compatible way. Good:
+ * module.exports = { foo, bar, baz } Bad: module.exports = value or
+ * module.exports.default = value.
  */
 export function checkEsmNamedExports(filePath) {
   // Skip external packages - they are bundled dependencies

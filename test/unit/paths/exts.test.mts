@@ -1,14 +1,14 @@
 /**
- * @fileoverview Unit tests for file extension constants.
+ * @file Unit tests for file extension constants. Tests file extension constants
+ *   used throughout Socket tooling:
  *
- * Tests file extension constants used throughout Socket tooling:
- * - JavaScript variants (.js, .mjs, .cjs, .mts, .cts)
- * - TypeScript (.d.ts)
- * - Configuration formats (.json, .yaml, .yml)
- * - Lock files (.lock, .lockb)
- * - Documentation (.md)
- * - Shell scripts (.cmd, .ps1)
- * Used for consistent extension handling across file operations.
+ *   - JavaScript variants (.js, .mjs, .cjs, .mts, .cts)
+ *   - TypeScript (.d.ts)
+ *   - Configuration formats (.json, .yaml, .yml)
+ *   - Lock files (.lock, .lockb)
+ *   - Documentation (.md)
+ *   - Shell scripts (.cmd, .ps1) Used for consistent extension handling across
+ *     file operations.
  */
 
 import {

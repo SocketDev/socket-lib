@@ -1,8 +1,7 @@
 /**
- * @fileoverview Private internals for `sorts/*` modules — lazy
- * module accessors for fast-sort + semver, and the cached
- * Intl.Collator instances. Used by the locale / natural / semver
- * comparison entrypoints.
+ * @file Private internals for `sorts/*` modules — lazy module accessors for
+ *   fast-sort + semver, and the cached Intl.Collator instances. Used by the
+ *   locale / natural / semver comparison entrypoints.
  */
 
 import type * as fastSortType from '../external/fast-sort'

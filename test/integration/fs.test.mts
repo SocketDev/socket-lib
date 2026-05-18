@@ -1,12 +1,12 @@
 /**
- * @fileoverview Integration tests for filesystem utilities.
+ * @file Integration tests for filesystem utilities. Tests real filesystem
+ *   operations:
  *
- * Tests real filesystem operations:
- * - readJsonFile() / writeJsonFile() for JSON persistence
- * - copyFile() / moveFile() for file operations
- * - ensureDir() for directory creation
- * - File existence checks and permissions
- * Used by Socket CLI for config files, package.json manipulation, and cache.
+ *   - readJsonFile() / writeJsonFile() for JSON persistence
+ *   - copyFile() / moveFile() for file operations
+ *   - ensureDir() for directory creation
+ *   - File existence checks and permissions Used by Socket CLI for config files,
+ *     package.json manipulation, and cache.
  */
 
 /* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */

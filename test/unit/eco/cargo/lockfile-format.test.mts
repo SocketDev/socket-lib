@@ -1,6 +1,6 @@
 /**
- * @fileoverview Unit tests for cargo lockfile-format + manifest-format
- * descriptors and their wiring in detectFormat.
+ * @file Unit tests for cargo lockfile-format + manifest-format descriptors and
+ *   their wiring in detectFormat.
  */
 
 import { describe, expect, it } from 'vitest'

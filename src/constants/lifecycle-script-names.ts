@@ -1,8 +1,7 @@
 /**
- * @fileoverview NPM lifecycle script names.
- *
- * Standard npm lifecycle hooks that can be defined in package.json scripts.
- * https://docs.npmjs.com/cli/v10/using-npm/scripts#life-cycle-scripts
+ * @file NPM lifecycle script names. Standard npm lifecycle hooks that can be
+ *   defined in package.json scripts.
+ *   https://docs.npmjs.com/cli/v10/using-npm/scripts#life-cycle-scripts.
  */
 
 import { SetCtor } from '../primordials/map-set'

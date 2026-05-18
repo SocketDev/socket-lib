@@ -1,8 +1,8 @@
 /**
- * @fileoverview Cross-leaf diff machinery for `git/*`. Owns the LRU+TTL
- * git-diff cache, the spawn-args builder, the porcelain-output parser, and
- * the async/sync `innerDiff` runners. Public-surface leaves (`changed.ts`,
- * `staged.ts`, `unstaged.ts`) call into these helpers; nothing else should.
+ * @file Cross-leaf diff machinery for `git/*`. Owns the LRU+TTL git-diff cache,
+ *   the spawn-args builder, the porcelain-output parser, and the async/sync
+ *   `innerDiff` runners. Public-surface leaves (`changed.ts`, `staged.ts`,
+ *   `unstaged.ts`) call into these helpers; nothing else should.
  */
 
 import { whichSync } from '../bin/which'
@@ -65,16 +65,19 @@ export function getCachedGitDiff(key: string): string[] | undefined {
 /**
  * Get spawn arguments for different git diff operations.
  *
- * Prepares argument arrays for `spawn()`/`spawnSync()` calls that retrieve:
- * - `all`: All changed files (staged, unstaged, untracked) via `git status --porcelain`
- * - `unstaged`: Unstaged modifications via `git diff --name-only`
+ * Prepares argument arrays for `spawn()`/`spawnSync()` calls that retrieve: -
+ * `all`: All changed files (staged, unstaged, untracked) via `git status
+ * --porcelain` - `unstaged`: Unstaged modifications via `git diff --name-only`
  * - `staged`: Staged changes via `git diff --cached --name-only`
  *
- * Automatically resolves symlinks in the provided `cwd` and enables shell
- * mode on Windows for proper command execution.
+ * Automatically resolves symlinks in the provided `cwd` and enables shell mode
+ * on Windows for proper command execution.
  *
- * @param cwd - Working directory for git operations, defaults to `process.cwd()`.
- * @returns Object containing spawn arguments for all, unstaged, and staged operations.
+ * @param cwd - Working directory for git operations, defaults to
+ *   `process.cwd()`.
+ *
+ * @returns Object containing spawn arguments for all, unstaged, and staged
+ *   operations.
  */
 export function getGitDiffSpawnArgs(
   cwd?: string | undefined,
@@ -108,16 +111,16 @@ export function getGitDiffSpawnArgs(
 /**
  * Get the git executable path.
  *
- * Resolves the git binary path via PATH on first call and caches it.
- * Falls back to 'git' if not found in PATH.
- *
- * @returns The git executable path (resolved from PATH on first call).
+ * Resolves the git binary path via PATH on first call and caches it. Falls back
+ * to 'git' if not found in PATH.
  *
  * @example
- * ```typescript
- * const git = getGitPath()
- * // => '/usr/bin/git' or 'git' if not found
- * ```
+ *   ;```typescript
+ *   const git = getGitPath()
+ *   // => '/usr/bin/git' or 'git' if not found
+ *   ```
+ *
+ * @returns The git executable path (resolved from PATH on first call).
  */
 export function getGitPath(): string {
   // Lazy-init second-call + 'git' fallback when which fails.
@@ -138,6 +141,7 @@ export function getGitPath(): string {
  *
  * @param args - Spawn arguments tuple `[command, args, options]`.
  * @param options - Git diff options for caching and parsing.
+ *
  * @returns Promise resolving to array of file paths.
  */
 export async function innerDiff(
@@ -197,6 +201,7 @@ export async function innerDiff(
  *
  * @param args - Spawn arguments tuple `[command, args, options]`.
  * @param options - Git diff options for caching and parsing.
+ *
  * @returns Array of file paths.
  */
 export function innerDiffSync(
@@ -251,20 +256,20 @@ export function innerDiffSync(
 /**
  * Parse git diff stdout output into file path array.
  *
- * Internal helper that processes raw git command output by:
- * 1. Finding git repository root from spawn cwd
- * 2. Stripping ANSI codes and splitting into lines
- * 3. Parsing porcelain format status codes if requested
- * 4. Normalizing and optionally making paths absolute
- * 5. Filtering paths based on cwd and glob options
+ * Internal helper that processes raw git command output by: 1. Finding git
+ * repository root from spawn cwd 2. Stripping ANSI codes and splitting into
+ * lines 3. Parsing porcelain format status codes if requested 4. Normalizing
+ * and optionally making paths absolute 5. Filtering paths based on cwd and glob
+ * options.
  *
- * Git always returns paths relative to the repository root, regardless of
- * where the command was executed. This function handles the path resolution
- * correctly by finding the repo root and adjusting paths accordingly.
+ * Git always returns paths relative to the repository root, regardless of where
+ * the command was executed. This function handles the path resolution correctly
+ * by finding the repo root and adjusting paths accordingly.
  *
  * @param stdout - Raw stdout from git command.
  * @param options - Git diff options for path processing.
  * @param spawnCwd - Working directory where git command was executed.
+ *
  * @returns Array of processed file paths.
  */
 export function parseGitDiffStdout(
@@ -351,8 +356,8 @@ export function setCachedGitDiff(key: string, result: string[]): void {
 
 /**
  * Build a stable cache key that is insensitive to object-property insertion
- * order, so callers passing the same options with different shapes hit the
- * same cache slot.
+ * order, so callers passing the same options with different shapes hit the same
+ * cache slot.
  */
 export function stableKey(value: unknown): string {
   return JSONStringify(value, (_key, val) => {

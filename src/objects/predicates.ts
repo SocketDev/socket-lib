@@ -1,7 +1,7 @@
 /**
- * @fileoverview Object type guards: `hasKeys`, `hasOwn`, `isObject`,
- * `isPlainObject`. All four narrow `unknown` to a typed shape and
- * tolerate `null` / `undefined` without throwing.
+ * @file Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`.
+ *   All four narrow `unknown` to a typed shape and tolerate `null` /
+ *   `undefined` without throwing.
  */
 
 import { isArray } from '../arrays/predicates'
@@ -19,19 +19,20 @@ import type { PropertyBag } from './types'
  * Returns `true` if the object has at least one enumerable own property,
  * `false` otherwise. Also returns `false` for null/undefined.
  *
- * @param obj - The value to check
- * @returns `true` if obj has enumerable own properties, `false` otherwise
- *
  * @example
- * ```ts
- * hasKeys({ a: 1 })                              // true
- * hasKeys({})                                    // false
- * hasKeys([])                                    // false
- * hasKeys([1, 2])                                // true
- * hasKeys(null)                                  // false
- * hasKeys(undefined)                             // false
- * hasKeys(Object.create({ inherited: true }))   // false
- * ```
+ *   ;```ts
+ *   hasKeys({ a: 1 }) // true
+ *   hasKeys({}) // false
+ *   hasKeys([]) // false
+ *   hasKeys([1, 2]) // true
+ *   hasKeys(null) // false
+ *   hasKeys(undefined) // false
+ *   hasKeys(Object.create({ inherited: true })) // false
+ *   ```
+ *
+ * @param obj - The value to check.
+ *
+ * @returns `true` if obj has enumerable own properties, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function hasKeys(obj: unknown): obj is PropertyBag {
@@ -50,21 +51,22 @@ export function hasKeys(obj: unknown): obj is PropertyBag {
  * Check if an object has an own property.
  *
  * Type-safe wrapper around `Object.hasOwn()` that returns `false` for
- * null/undefined instead of throwing. Only checks own properties, not
- * inherited ones from the prototype chain.
- *
- * @param obj - The value to check
- * @param propKey - The property key to look for
- * @returns `true` if obj has the property as an own property, `false` otherwise
+ * null/undefined instead of throwing. Only checks own properties, not inherited
+ * ones from the prototype chain.
  *
  * @example
- * ```ts
- * const obj = { name: 'Alice' }
- * hasOwn(obj, 'name')         // true
- * hasOwn(obj, 'age')          // false
- * hasOwn(obj, 'toString')     // false (inherited)
- * hasOwn(null, 'name')        // false
- * ```
+ *   ;```ts
+ *   const obj = { name: 'Alice' }
+ *   hasOwn(obj, 'name') // true
+ *   hasOwn(obj, 'age') // false
+ *   hasOwn(obj, 'toString') // false (inherited)
+ *   hasOwn(null, 'name') // false
+ *   ```
+ *
+ * @param obj - The value to check.
+ * @param propKey - The property key to look for.
+ *
+ * @returns `true` if obj has the property as an own property, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function hasOwn(
@@ -80,21 +82,22 @@ export function hasOwn(
 /**
  * Check if a value is an object (including arrays).
  *
- * Returns `true` for any object type including arrays, dates, etc.
- * Returns `false` for primitives and `null`. Functions are not
- * considered objects here (typeof functions === 'function').
- *
- * @param value - The value to check
- * @returns `true` if value is an object (including arrays), `false` otherwise
+ * Returns `true` for any object type including arrays, dates, etc. Returns
+ * `false` for primitives and `null`. Functions are not considered objects here
+ * (typeof functions === 'function').
  *
  * @example
- * ```ts
- * isObject({})           // true
- * isObject([])           // true
- * isObject(new Date())   // true
- * isObject(() => {})     // false
- * isObject(null)         // false
- * ```
+ *   ;```ts
+ *   isObject({}) // true
+ *   isObject([]) // true
+ *   isObject(new Date()) // true
+ *   isObject(() => {}) // false
+ *   isObject(null) // false
+ *   ```
+ *
+ * @param value - The value to check.
+ *
+ * @returns `true` if value is an object (including arrays), `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isObject(
@@ -106,20 +109,22 @@ export function isObject(
 /**
  * Check if a value is a plain object (not an array, not a built-in).
  *
- * Returns `true` only for plain objects created with `{}` or `Object.create(null)`.
- * Returns `false` for arrays, built-in objects (Date, RegExp, etc.), and primitives.
- *
- * @param value - The value to check
- * @returns `true` if value is a plain object, `false` otherwise
+ * Returns `true` only for plain objects created with `{}` or
+ * `Object.create(null)`. Returns `false` for arrays, built-in objects (Date,
+ * RegExp, etc.), and primitives.
  *
  * @example
- * ```ts
- * isPlainObject({})                     // true
- * isPlainObject({ a: 1 })               // true
- * isPlainObject(Object.create(null))    // true
- * isPlainObject([])                     // false
- * isPlainObject(new Date())             // false
- * ```
+ *   ;```ts
+ *   isPlainObject({}) // true
+ *   isPlainObject({ a: 1 }) // true
+ *   isPlainObject(Object.create(null)) // true
+ *   isPlainObject([]) // false
+ *   isPlainObject(new Date()) // false
+ *   ```
+ *
+ * @param value - The value to check.
+ *
+ * @returns `true` if value is a plain object, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPlainObject(

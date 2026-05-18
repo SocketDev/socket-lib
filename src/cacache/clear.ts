@@ -1,8 +1,7 @@
 /**
- * @fileoverview Bulk-clear entries from the Socket shared cacache —
- * `clear()` plus its wildcard helper `createPatternMatcher`. The
- * helper is exported because callers occasionally compose their own
- * filtering pipelines.
+ * @file Bulk-clear entries from the Socket shared cacache — `clear()` plus its
+ *   wildcard helper `createPatternMatcher`. The helper is exported because
+ *   callers occasionally compose their own filtering pipelines.
  */
 
 import { getSocketCacacheDir } from '../paths/socket'
@@ -19,27 +18,28 @@ import type { RemoveOptions } from './types'
 /**
  * Clear entries from the Socket shared cache.
  *
- * Supports wildcard patterns (*) in prefix for flexible matching.
- * For simple prefixes without wildcards, uses efficient streaming.
- * For wildcard patterns, iterates and matches each entry.
+ * Supports wildcard patterns (*) in prefix for flexible matching. For simple
+ * prefixes without wildcards, uses efficient streaming. For wildcard patterns,
+ * iterates and matches each entry.
  *
- * @param options - Optional configuration for selective clearing
+ * @example
+ *   // Clear all entries
+ *   await clear()
+ *
+ * @example
+ *   // Clear entries with simple prefix
+ *   const removed = await clear({ prefix: 'socket-sdk:scans' })
+ *   console.log(`Removed ${removed} scan cache entries`)
+ *
+ * @example
+ *   // Clear entries with wildcard pattern
+ *   await clear({ prefix: 'socket-sdk:scans:abc*' })
+ *   await clear({ prefix: 'socket-sdk:npm/lodash/*' })
+ *
+ * @param options - Optional configuration for selective clearing.
  * @param options.prefix - Prefix or pattern to match (supports * wildcards)
+ *
  * @returns Number of entries removed (only when prefix is specified)
- *
- * @example
- * // Clear all entries
- * await clear()
- *
- * @example
- * // Clear entries with simple prefix
- * const removed = await clear({ prefix: 'socket-sdk:scans' })
- * console.log(`Removed ${removed} scan cache entries`)
- *
- * @example
- * // Clear entries with wildcard pattern
- * await clear({ prefix: 'socket-sdk:scans:abc*' })
- * await clear({ prefix: 'socket-sdk:npm/lodash/*' })
  */
 export async function clear(
   options?: RemoveOptions | undefined,
@@ -89,13 +89,13 @@ export async function clear(
 }
 
 /**
- * Build a key→boolean matcher for `pattern`. For non-wildcard patterns
- * this returns a prefix-startsWith predicate (no regex allocation); for
- * wildcard patterns it compiles the regex *once* and closes over it so
- * the caller can apply the same matcher across N keys in O(1)-per-key.
+ * Build a key→boolean matcher for `pattern`. For non-wildcard patterns this
+ * returns a prefix-startsWith predicate (no regex allocation); for wildcard
+ * patterns it compiles the regex _once_ and closes over it so the caller can
+ * apply the same matcher across N keys in O(1)-per-key.
  *
- * Anchors both ends — `foo*bar` matches exactly `foo<anything>bar`,
- * not `foo<anything>bar<more>`.
+ * Anchors both ends — `foo*bar` matches exactly `foo<anything>bar`, not
+ * `foo<anything>bar<more>`.
  */
 export function createPatternMatcher(
   pattern: string,

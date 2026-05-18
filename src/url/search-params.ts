@@ -1,8 +1,8 @@
 /**
- * @fileoverview URL search-param coercion helpers — `urlSearchParamsAs*`
- * normalise a raw `string | null | undefined` value into a typed shape
- * (array / boolean / number / string) with a default. `urlSearchParamsGet*`
- * take a `URLSearchParams` instance and a key.
+ * @file URL search-param coercion helpers — `urlSearchParamsAs*` normalise a
+ *   raw `string | null | undefined` value into a typed shape (array / boolean /
+ *   number / string) with a default. `urlSearchParamsGet*` take a
+ *   `URLSearchParams` instance and a key.
  */
 
 import { NumberIsNaN } from '../primordials/number'
@@ -20,10 +20,10 @@ const BooleanCtor = Boolean
  * Convert a URL search parameter to an array.
  *
  * @example
- * ```typescript
- * urlSearchParamsAsArray('a, b, c') // ['a', 'b', 'c']
- * urlSearchParamsAsArray(null)      // []
- * ```
+ *   ;```typescript
+ *   urlSearchParamsAsArray('a, b, c') // ['a', 'b', 'c']
+ *   urlSearchParamsAsArray(null) // []
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsArray(
@@ -42,11 +42,11 @@ export function urlSearchParamsAsArray(
  * Convert a URL search parameter to a boolean.
  *
  * @example
- * ```typescript
- * urlSearchParamsAsBoolean('true') // true
- * urlSearchParamsAsBoolean('0')    // false
- * urlSearchParamsAsBoolean(null)   // false
- * ```
+ *   ;```typescript
+ *   urlSearchParamsAsBoolean('true') // true
+ *   urlSearchParamsAsBoolean('0') // false
+ *   urlSearchParamsAsBoolean(null) // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsBoolean(
@@ -85,11 +85,11 @@ export function urlSearchParamsAsBoolean(
  * Get number value from URLSearchParams with a default.
  *
  * @example
- * ```typescript
- * const params = new URLSearchParams('limit=10')
- * urlSearchParamsAsNumber(params, 'limit') // 10
- * urlSearchParamsAsNumber(params, 'other') // 0
- * ```
+ *   ;```typescript
+ *   const params = new URLSearchParams('limit=10')
+ *   urlSearchParamsAsNumber(params, 'limit') // 10
+ *   urlSearchParamsAsNumber(params, 'other') // 0
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsNumber(
@@ -115,11 +115,11 @@ export function urlSearchParamsAsNumber(
  * Get string value from URLSearchParams with a default.
  *
  * @example
- * ```typescript
- * const params = new URLSearchParams('name=socket')
- * urlSearchParamsAsString(params, 'name')  // 'socket'
- * urlSearchParamsAsString(params, 'other') // ''
- * ```
+ *   ;```typescript
+ *   const params = new URLSearchParams('name=socket')
+ *   urlSearchParamsAsString(params, 'name') // 'socket'
+ *   urlSearchParamsAsString(params, 'other') // ''
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsString(
@@ -142,10 +142,10 @@ export function urlSearchParamsAsString(
  * Helper to get array from URLSearchParams.
  *
  * @example
- * ```typescript
- * const params = new URLSearchParams('tags=a,b,c')
- * urlSearchParamsGetArray(params, 'tags') // ['a', 'b', 'c']
- * ```
+ *   ;```typescript
+ *   const params = new URLSearchParams('tags=a,b,c')
+ *   urlSearchParamsGetArray(params, 'tags') // ['a', 'b', 'c']
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsGetArray(
@@ -168,11 +168,11 @@ export function urlSearchParamsGetArray(
  * Helper to get boolean from URLSearchParams.
  *
  * @example
- * ```typescript
- * const params = new URLSearchParams('debug=true')
- * urlSearchParamsGetBoolean(params, 'debug') // true
- * urlSearchParamsGetBoolean(params, 'other') // false
- * ```
+ *   ;```typescript
+ *   const params = new URLSearchParams('debug=true')
+ *   urlSearchParamsGetBoolean(params, 'debug') // true
+ *   urlSearchParamsGetBoolean(params, 'other') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsGetBoolean(

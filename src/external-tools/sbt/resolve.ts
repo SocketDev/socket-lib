@@ -1,19 +1,14 @@
 /**
- * @fileoverview `resolveSbt()` — SBT resolution entry point.
+ * @file `resolveSbt()` — SBT resolution entry point. Tries each source in
+ *   order:
  *
- * Tries each source in order:
- *
- *   1. VFS  — smol binary's embedded `sbt-launch.jar` (if packed)
+ *   1. VFS — smol binary's embedded `sbt-launch.jar` (if packed)
  *   2. PATH — `sbt` script on the system PATH
- *   3. download — upstream GitHub release tgz (only when
- *      `downloadIfMissing` is passed)
- *
- * VFS-sourced SBT is a `.jar` that must be invoked as
- * `java -jar <path>` using the JRE resolved separately via
- * `resolveJre()`. PATH- and download-sourced SBT is the `sbt` script,
- * which finds its own JRE.
- *
- * Memoized per option-shape.
+ *   3. download — upstream GitHub release tgz (only when `downloadIfMissing` is
+ *      passed) VFS-sourced SBT is a `.jar` that must be invoked as `java -jar
+ *      <path>` using the JRE resolved separately via `resolveJre()`. PATH- and
+ *      download-sourced SBT is the `sbt` script, which finds its own JRE.
+ *      Memoized per option-shape.
  */
 
 import { sbtFromDownload } from './from-download'
@@ -26,9 +21,8 @@ import type { ResolvedSbt } from './types'
 
 export interface ResolveSbtOptions {
   /**
-   * When set, the resolver falls through to a GitHub release
-   * download after the local-discovery tiers miss. Omit to keep
-   * the resolver read-only.
+   * When set, the resolver falls through to a GitHub release download after the
+   * local-discovery tiers miss. Omit to keep the resolver read-only.
    */
   downloadIfMissing?:
     | {

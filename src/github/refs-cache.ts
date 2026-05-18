@@ -1,11 +1,9 @@
 /**
- * @fileoverview TtlCache singleton for github/refs.
+ * @file TtlCache singleton for github/refs. Split out of `github/refs.ts` for
+ *   size hygiene. Owns the lazy `_githubCache` slot, the accessor
+ *   (`getGithubCache`), and the in-memory-only clear (`clearRefCache`). Caching
+ *   strategy:
  *
- * Split out of `github/refs.ts` for size hygiene. Owns the lazy
- * `_githubCache` slot, the accessor (`getGithubCache`), and the
- * in-memory-only clear (`clearRefCache`).
- *
- * Caching strategy:
  *   - In-memory cache (Map) for immediate lookups
  *   - Persistent disk cache (cacache) for durability across runs
  *   - Default TTL: 5 minutes
@@ -21,22 +19,23 @@ import type { TtlCache } from '../ttl-cache/types'
 let _githubCache: TtlCache | undefined
 
 /**
- * Clear the ref resolution cache (in-memory only).
- * Clears the in-memory memoization cache without affecting the persistent disk cache.
- * Useful for testing or when you need fresh data from the API.
+ * Clear the ref resolution cache (in-memory only). Clears the in-memory
+ * memoization cache without affecting the persistent disk cache. Useful for
+ * testing or when you need fresh data from the API.
  *
  * Note: This only clears the in-memory cache. The persistent cacache storage
- * remains intact and will be used to rebuild the in-memory cache on next access.
- *
- * @returns Promise that resolves when cache is cleared
+ * remains intact and will be used to rebuild the in-memory cache on next
+ * access.
  *
  * @example
- * ```ts
- * // Clear cache to force fresh API calls
- * await clearRefCache()
- * const sha = await resolveRefToSha('owner', 'repo', 'main')
- * // This will hit the persistent cache or API, not in-memory cache
- * ```
+ *   ;```ts
+ *   // Clear cache to force fresh API calls
+ *   await clearRefCache()
+ *   const sha = await resolveRefToSha('owner', 'repo', 'main')
+ *   // This will hit the persistent cache or API, not in-memory cache
+ *   ```
+ *
+ * @returns Promise that resolves when cache is cleared
  */
 export async function clearRefCache(): Promise<void> {
   if (_githubCache) {
@@ -45,9 +44,9 @@ export async function clearRefCache(): Promise<void> {
 }
 
 /**
- * Get or create the GitHub cache instance.
- * Lazy initializes the cache with default TTL and memoization enabled.
- * Used internally for caching GitHub API responses.
+ * Get or create the GitHub cache instance. Lazy initializes the cache with
+ * default TTL and memoization enabled. Used internally for caching GitHub API
+ * responses.
  *
  * @returns The singleton cache instance
  */

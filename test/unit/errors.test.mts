@@ -1,10 +1,8 @@
 /**
- * @fileoverview Unit tests for error utilities.
- *
- * Tests `errorMessage` / `errorStack` helpers that normalize caught values
- * (Error, string, plain object, null, undefined) into readable strings
- * with a stable `Unknown error` fallback, plus the spec-compliant
- * `isError` cross-realm predicate.
+ * @file Unit tests for error utilities. Tests `errorMessage` / `errorStack`
+ *   helpers that normalize caught values (Error, string, plain object, null,
+ *   undefined) into readable strings with a stable `Unknown error` fallback,
+ *   plus the spec-compliant `isError` cross-realm predicate.
  */
 
 import vm from 'node:vm'

@@ -1,17 +1,13 @@
 /**
- * @fileoverview `uncurryThis` and the cluster of helpers built atop it.
- *
- * Mirrors Node.js's internal/per_context/primordials.js. Every other
- * primordials leaf depends on `uncurryThis` to expose prototype-method
- * primordials, so this file must be import-safe before any of them.
- *
- * Smol fast paths (`node:smol-util`) replace the JS forms when running
- * on socket-btm's smol Node binary; stock Node and other runtimes fall
- * back to the standard `bind.bind(call)` shape.
- *
- * **IMPORTANT**: do not destructure on `globalThis` or `Reflect` here.
- * tsgo has a bug that mis-transpiles destructured exports.
- * See: https://github.com/SocketDev/socket-packageurl-js/issues/3
+ * @file `uncurryThis` and the cluster of helpers built atop it. Mirrors
+ *   Node.js's internal/per_context/primordials.js. Every other primordials leaf
+ *   depends on `uncurryThis` to expose prototype-method primordials, so this
+ *   file must be import-safe before any of them. Smol fast paths
+ *   (`node:smol-util`) replace the JS forms when running on socket-btm's smol
+ *   Node binary; stock Node and other runtimes fall back to the standard
+ *   `bind.bind(call)` shape. **IMPORTANT**: do not destructure on `globalThis`
+ *   or `Reflect` here. tsgo has a bug that mis-transpiles destructured exports.
+ *   See: https://github.com/SocketDev/socket-packageurl-js/issues/3.
  */
 
 import { getSmolUtil } from '../smol/detect'

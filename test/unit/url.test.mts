@@ -1,13 +1,14 @@
 /**
- * @fileoverview Unit tests for URL parsing and validation utilities.
+ * @file Unit tests for URL parsing and validation utilities. Tests URL
+ *   manipulation and query parameter utilities:
  *
- * Tests URL manipulation and query parameter utilities:
- * - isUrl() validates URL strings
- * - parseUrl() parses URLs with error handling
- * - createRelativeUrl() constructs relative URLs
- * - urlSearchParamsAs*() typed query parameter extractors (String, Number, Boolean, Array)
- * - urlSearchParamsGet*() URLSearchParams helper methods
- * Used by Socket tools for API URL construction and query parameter parsing.
+ *   - isUrl() validates URL strings
+ *   - parseUrl() parses URLs with error handling
+ *   - createRelativeUrl() constructs relative URLs
+ *   - urlSearchParamsAs_() typed query parameter extractors (String, Number,
+ *     Boolean, Array)
+ *   - urlSearchParamsGet_() URLSearchParams helper methods Used by Socket tools
+ *     for API URL construction and query parameter parsing.
  */
 
 import { createRelativeUrl, parseUrl } from '@socketsecurity/lib/url/parse'

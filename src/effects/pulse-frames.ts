@@ -1,7 +1,7 @@
 /**
- * @fileoverview Socket pulse animation frames generator.
- * Generates themeable pulsing animation frames using sparkles (✧ ✦) and lightning (⚡).
- * Follows the cli-spinners format: https://github.com/sindresorhus/cli-spinners
+ * @file Socket pulse animation frames generator. Generates themeable pulsing
+ *   animation frames using sparkles (✧ ✦) and lightning (⚡). Follows the
+ *   cli-spinners format: https://github.com/sindresorhus/cli-spinners.
  */
 
 import { ANSI_BOLD, ANSI_DIM, ANSI_RESET } from '../ansi/constants'
@@ -10,10 +10,9 @@ export type SocketFramesOptions = {
   readonly baseColor?: readonly [number, number, number] | undefined
   readonly interval?: number | undefined
   /**
-   * Theme to use for pulse colors.
-   * Can be a theme name ('socket', 'sunset', etc.) or a Theme object.
-   * Note: Currently frames only contain brightness modifiers.
-   * Colors are applied by yocto-spinner based on spinner.color.
+   * Theme to use for pulse colors. Can be a theme name ('socket', 'sunset',
+   * etc.) or a Theme object. Note: Currently frames only contain brightness
+   * modifiers. Colors are applied by yocto-spinner based on spinner.color.
    */
   readonly theme?:
     | import('../themes/types').Theme
@@ -22,20 +21,20 @@ export type SocketFramesOptions = {
 }
 
 /**
- * Generate Socket pulse animation frames.
- * Creates a pulsing throbber using Unicode sparkles and lightning symbols.
- * Frames use brightness modifiers (bold/dim) but no embedded colors.
- * Yocto-spinner applies the current spinner color to each frame.
+ * Generate Socket pulse animation frames. Creates a pulsing throbber using
+ * Unicode sparkles and lightning symbols. Frames use brightness modifiers
+ * (bold/dim) but no embedded colors. Yocto-spinner applies the current spinner
+ * color to each frame.
  *
  * Returns a spinner definition compatible with cli-spinners format.
  *
- * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
- *
  * @example
- * ```typescript
- * const { frames, interval } = generateSocketSpinnerFrames()
- * console.log(frames.length, interval) // 18 50
- * ```
+ *   ;```typescript
+ *   const { frames, interval } = generateSocketSpinnerFrames()
+ *   console.log(frames.length, interval) // 18 50
+ *   ```
+ *
+ * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
  */
 export function generateSocketSpinnerFrames(
   options?: SocketFramesOptions | undefined,

@@ -1,24 +1,21 @@
 /**
- * @fileoverview `execBin` — spawn a binary with PATH resolution,
- * wrapper-script unwrapping, and Windows shell handling.
+ * @file `execBin` — spawn a binary with PATH resolution, wrapper-script
+ *   unwrapping, and Windows shell handling. Order of operations:
  *
- * Order of operations:
- *
- *   1. If the input looks like a path (absolute or relative),
- *      `resolveRealBinSync` it directly so we can spawn the underlying
- *      script rather than a wrapper.
- *
+ *   1. If the input looks like a path (absolute or relative), `resolveRealBinSync`
+ *      it directly so we can spawn the underlying script rather than a
+ *      wrapper.
  *   2. Otherwise treat it as a binary name and:
- *      - Hit `binPathCache`. If valid (`existsSync`), use the cached
- *        path; if stale, evict.
- *      - Fall through to `whichReal` for a fresh PATH search; cache
- *        the result on success.
  *
- *   3. Spawn with `shell: WIN32` so `.cmd` wrappers work on Windows;
- *      POSIX bypass since direct `execve` is faster.
+ *   - Hit `binPathCache`. If valid (`existsSync`), use the cached path; if stale,
+ *     evict.
+ *   - Fall through to `whichReal` for a fresh PATH search; cache the result on
+ *     success.
  *
- *   4. On not-found, throw a typed `ENOENT` error with operator
- *      guidance — far more useful than a bare "command not found".
+ *   3. Spawn with `shell: WIN32` so `.cmd` wrappers work on Windows; POSIX bypass
+ *      since direct `execve` is faster.
+ *   4. On not-found, throw a typed `ENOENT` error with operator guidance — far
+ *      more useful than a bare "command not found".
  */
 
 import { WIN32 } from '../constants/platform'
@@ -37,10 +34,10 @@ import type { SpawnOptions } from '../spawn/types'
  * Execute a binary with the given arguments.
  *
  * @example
- * ```typescript
- * await execBin('pnpm', ['install'])
- * await execBin('/usr/local/bin/node', ['script.js'], { cwd: '/tmp' })
- * ```
+ *   ;```typescript
+ *   await execBin('pnpm', ['install'])
+ *   await execBin('/usr/local/bin/node', ['script.js'], { cwd: '/tmp' })
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function execBin(

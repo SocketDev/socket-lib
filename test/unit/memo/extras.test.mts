@@ -1,7 +1,6 @@
 /**
- * @fileoverview Tests for memoize TTL-expiration + memoizeAsync dedup
- * branches in src/memoization.ts that aren't exercised by the existing
- * tests.
+ * @file Tests for memoize TTL-expiration + memoizeAsync dedup branches in
+ *   src/memoization.ts that aren't exercised by the existing tests.
  */
 
 import { describe, expect, it, vi } from 'vitest'

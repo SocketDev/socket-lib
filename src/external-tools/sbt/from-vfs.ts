@@ -1,13 +1,10 @@
 /**
- * @fileoverview `sbtFromVfs()` — extracts the SBT launcher jar from
- * the smol binary's VFS.
- *
- * Uses the post-alignment `getSmolVfs()` API. The smol-btm builder
- * packs only the launcher (~1.5 MB); the actual SBT distribution
- * downloads into the user's `~/.sbt/boot/` on first run when the
- * launcher reads `project/build.properties`.
- *
- * Returns `undefined` when the binary doesn't have SBT bundled.
+ * @file `sbtFromVfs()` — extracts the SBT launcher jar from the smol binary's
+ *   VFS. Uses the post-alignment `getSmolVfs()` API. The smol-btm builder packs
+ *   only the launcher (~1.5 MB); the actual SBT distribution downloads into the
+ *   user's `~/.sbt/boot/` on first run when the launcher reads
+ *   `project/build.properties`. Returns `undefined` when the binary doesn't
+ *   have SBT bundled.
  */
 
 import { getSmolVfs } from '../../smol/vfs'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package operations including extraction, packing, and I/O.
+ * @file Package operations including extraction, packing, and I/O.
  */
 
 import {
@@ -65,9 +65,9 @@ const fetcher = makeFetchHappen.defaults({
  * Extract a package to a destination directory.
  *
  * @example
- * ```typescript
- * await extractPackage('lodash@4.17.21', { dest: '/tmp/lodash' })
- * ```
+ *   ;```typescript
+ *   await extractPackage('lodash@4.17.21', { dest: '/tmp/lodash' })
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function extractPackage(
@@ -120,9 +120,9 @@ export async function extractPackage(
  * Find package extensions for a given package.
  *
  * @example
- * ```typescript
- * const extensions = findPackageExtensions('my-pkg', '1.0.0')
- * ```
+ *   ;```typescript
+ *   const extensions = findPackageExtensions('my-pkg', '1.0.0')
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function findPackageExtensions(
@@ -155,11 +155,11 @@ export function findPackageExtensions(
  * Get the release tag for a version.
  *
  * @example
- * ```typescript
- * getReleaseTag('lodash@latest')    // 'latest'
- * getReleaseTag('@scope/pkg@beta')  // 'beta'
- * getReleaseTag('lodash')           // ''
- * ```
+ *   ;```typescript
+ *   getReleaseTag('lodash@latest') // 'latest'
+ *   getReleaseTag('@scope/pkg@beta') // 'beta'
+ *   getReleaseTag('lodash') // ''
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getReleaseTag(spec: string): string {
@@ -185,9 +185,9 @@ export function getReleaseTag(spec: string): string {
  * Pack a package tarball using pacote.
  *
  * @example
- * ```typescript
- * const tarball = await packPackage('lodash@4.17.21')
- * ```
+ *   ;```typescript
+ *   const tarball = await packPackage('lodash@4.17.21')
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function packPackage(
@@ -210,10 +210,10 @@ export async function packPackage(
  * Read and parse a package.json file asynchronously.
  *
  * @example
- * ```typescript
- * const pkgJson = await readPackageJson('/tmp/my-project')
- * console.log(pkgJson?.name)
- * ```
+ *   ;```typescript
+ *   const pkgJson = await readPackageJson('/tmp/my-project')
+ *   console.log(pkgJson?.name)
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readPackageJson(
@@ -244,10 +244,10 @@ export async function readPackageJson(
  * Read and parse package.json from a file path synchronously.
  *
  * @example
- * ```typescript
- * const pkgJson = readPackageJsonSync('/tmp/my-project')
- * console.log(pkgJson?.name)
- * ```
+ *   ;```typescript
+ *   const pkgJson = readPackageJsonSync('/tmp/my-project')
+ *   console.log(pkgJson?.name)
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readPackageJsonSync(
@@ -282,9 +282,9 @@ export function readPackageJsonSync(
  * Resolve GitHub tarball URL for a package specifier.
  *
  * @example
- * ```typescript
- * const url = await resolveGitHubTgzUrl('my-pkg@1.0.0', '/tmp/my-project')
- * ```
+ *   ;```typescript
+ *   const url = await resolveGitHubTgzUrl('my-pkg@1.0.0', '/tmp/my-project')
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function resolveGitHubTgzUrl(
@@ -360,10 +360,10 @@ export async function resolveGitHubTgzUrl(
  * Resolve full package name from a PURL object with custom delimiter.
  *
  * @example
- * ```typescript
- * resolvePackageName({ name: 'core', namespace: '@babel' })  // '@babel/core'
- * resolvePackageName({ name: 'lodash' })                     // 'lodash'
- * ```
+ *   ;```typescript
+ *   resolvePackageName({ name: 'core', namespace: '@babel' }) // '@babel/core'
+ *   resolvePackageName({ name: 'lodash' }) // 'lodash'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageName(
@@ -378,10 +378,10 @@ export function resolvePackageName(
  * Convert npm package name to Socket registry format with delimiter.
  *
  * @example
- * ```typescript
- * resolveRegistryPackageName('@babel/core') // 'babel__core'
- * resolveRegistryPackageName('lodash')      // 'lodash'
- * ```
+ *   ;```typescript
+ *   resolveRegistryPackageName('@babel/core') // 'babel__core'
+ *   resolveRegistryPackageName('lodash') // 'lodash'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveRegistryPackageName(pkgName: string): string {

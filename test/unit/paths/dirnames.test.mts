@@ -1,11 +1,11 @@
 /**
- * @fileoverview Unit tests for directory name and path pattern constants.
+ * @file Unit tests for directory name and path pattern constants. Tests
+ *   directory name constants used throughout Socket tooling:
  *
- * Tests directory name constants used throughout Socket tooling:
- * - Directory names (node_modules, .git, .github, .socket, cache, ttl)
- * - Path patterns for globbing and matching
- * - Constants for consistent directory references
- * Used for path operations, file system traversal, and caching throughout Socket tools.
+ *   - Directory names (node_modules, .git, .github, .socket, cache, ttl)
+ *   - Path patterns for globbing and matching
+ *   - Constants for consistent directory references Used for path operations,
+ *     file system traversal, and caching throughout Socket tools.
  */
 
 import {

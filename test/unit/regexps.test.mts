@@ -1,26 +1,24 @@
 /**
- * @fileoverview Unit tests for `escapeRegExp`.
+ * @file Unit tests for `escapeRegExp`. Tests align with the TC39 RegExp.escape
+ *   spec: https://tc39.es/ecma262/#sec-regexp.escape Assertions are
+ *   BEHAVIOR-based (the escaped output produces a regex that matches the
+ *   original input exactly) plus targeted SPEC-SHAPE checks for the two
+ *   invariants that matter for safe concatenation:
  *
- * Tests align with the TC39 RegExp.escape spec:
- * https://tc39.es/ecma262/#sec-regexp.escape
- *
- * Assertions are BEHAVIOR-based (the escaped output produces a regex that
- * matches the original input exactly) plus targeted SPEC-SHAPE checks for
- * the two invariants that matter for safe concatenation:
- *   1. Leading `[0-9A-Za-z]` is encoded as `\xHH` so it can't merge with
- *      a preceding `\0..\9` / `\c` in a larger pattern.
- *   2. `/` is backslash-escaped so the result is safe inside a `/.../`
- *      literal.
- *
- * We verify the same guarantees hold whether `escapeRegExp` is bound to
- * native `RegExp.escape` (Node 24+) or our hand-rolled fallback.
+ *   1. Leading `[0-9A-Za-z]` is encoded as `\xHH` so it can't merge with a
+ *      preceding `\0..\9` / `\c` in a larger pattern.
+ *   2. `/` is backslash-escaped so the result is safe inside a `/.../` literal. We
+ *      verify the same guarantees hold whether `escapeRegExp` is bound to
+ *      native `RegExp.escape` (Node 24+) or our hand-rolled fallback.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { escapeRegExp } from '@socketsecurity/lib/regexps/escape'
 
-/** `new RegExp(escapeRegExp(input))` must match exactly `input`. */
+/**
+ * `new RegExp(escapeRegExp(input))` must match exactly `input`.
+ */
 export function expectLiteralRoundtrip(input: string): void {
   const re = new RegExp(`^${escapeRegExp(input)}$`)
   expect(re.test(input)).toBe(true)

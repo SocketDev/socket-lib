@@ -1,17 +1,17 @@
 /**
- * @fileoverview Unit tests for primordials (safe built-in references).
+ * @file Unit tests for primordials (safe built-in references). Primordials
+ *   capture references to built-ins at module load time so prototype-pollution
+ *   attacks on the caller realm can't redirect library internals. These tests
+ *   verify:
  *
- * Primordials capture references to built-ins at module load time so
- * prototype-pollution attacks on the caller realm can't redirect library
- * internals. These tests verify:
  *   - every exported symbol resolves to the expected built-in;
- *   - uncurried prototype methods preserve semantics when called with
- *     `self` as the first argument;
+ *   - uncurried prototype methods preserve semantics when called with `self` as
+ *     the first argument;
  *   - captures persist even after `Array.prototype.map`, `Array.isArray`,
- *     `Object.keys`, `String.prototype.slice`, or `JSON.parse` are
- *     clobbered on globalThis;
- *   - the `uncurryThis` / `applyBind` helpers are exposed for callers
- *     building their own captures.
+ *     `Object.keys`, `String.prototype.slice`, or `JSON.parse` are clobbered on
+ *     globalThis;
+ *   - the `uncurryThis` / `applyBind` helpers are exposed for callers building
+ *     their own captures.
  */
 
 import {

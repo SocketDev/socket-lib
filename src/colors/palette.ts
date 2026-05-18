@@ -1,8 +1,7 @@
 /**
- * @fileoverview Named-color palette — maps each `ColorName` to its
- * canonical RGB tuple. Consumed by `colors/convert` and surfaced to
- * downstream renderers (shimmer, gradient, pulse) that need numeric
- * channel values for color blending.
+ * @file Named-color palette — maps each `ColorName` to its canonical RGB tuple.
+ *   Consumed by `colors/convert` and surfaced to downstream renderers (shimmer,
+ *   gradient, pulse) that need numeric channel values for color blending.
  */
 
 import type { ColorName, ColorRgb } from './types'

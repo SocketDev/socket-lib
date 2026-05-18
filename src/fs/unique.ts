@@ -1,8 +1,7 @@
 /**
- * @fileoverview Generate a unique filepath by appending `-1`, `-2`, …
- * before the extension until the path is free. Useful for "save next
- * to existing" flows where overwriting silently would be wrong (PDF
- * reports, exports, etc.).
+ * @file Generate a unique filepath by appending `-1`, `-2`, … before the
+ *   extension until the path is free. Useful for "save next to existing" flows
+ *   where overwriting silently would be wrong (PDF reports, exports, etc.).
  */
 
 import { getNodeFs } from '../node/fs'
@@ -13,23 +12,25 @@ import type { PathLike } from 'node:fs'
 
 /**
  * Generate a unique filepath by adding number suffix if the path exists.
- * Appends `-1`, `-2`, etc. before the file extension until a non-existent path is found.
- * Useful for creating files without overwriting existing ones.
- *
- * @param filepath - Desired file path
- * @returns Normalized unique filepath (original if it doesn't exist, or with number suffix)
+ * Appends `-1`, `-2`, etc. before the file extension until a non-existent path
+ * is found. Useful for creating files without overwriting existing ones.
  *
  * @example
- * ```ts
- * // If 'report.pdf' exists, returns 'report-1.pdf'
- * const uniquePath = uniqueSync('./report.pdf')
+ *   ;```ts
+ *   // If 'report.pdf' exists, returns 'report-1.pdf'
+ *   const uniquePath = uniqueSync('./report.pdf')
  *
- * // If 'data.json' and 'data-1.json' exist, returns 'data-2.json'
- * const path = uniqueSync('./data.json')
+ *   // If 'data.json' and 'data-1.json' exist, returns 'data-2.json'
+ *   const path = uniqueSync('./data.json')
  *
- * // If 'backup' doesn't exist, returns 'backup' unchanged
- * const backupPath = uniqueSync('./backup')
- * ```
+ *   // If 'backup' doesn't exist, returns 'backup' unchanged
+ *   const backupPath = uniqueSync('./backup')
+ *   ```
+ *
+ * @param filepath - Desired file path.
+ *
+ * @returns Normalized unique filepath (original if it doesn't exist, or with
+ *   number suffix)
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function uniqueSync(filepath: PathLike): string {

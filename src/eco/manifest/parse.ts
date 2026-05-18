@@ -1,10 +1,8 @@
 /**
- * @fileoverview `parse(filename, content)` — auto-detects format
- * from filename then dispatches to `parseManifest` or
- * `parseLockfile`.
- *
- * Throws `ManifestError(ERR_UNKNOWN_FORMAT)` when the filename
- * doesn't match any recognized manifest or lockfile basename.
+ * @file `parse(filename, content)` — auto-detects format from filename then
+ *   dispatches to `parseManifest` or `parseLockfile`. Throws
+ *   `ManifestError(ERR_UNKNOWN_FORMAT)` when the filename doesn't match any
+ *   recognized manifest or lockfile basename.
  */
 
 import { ManifestError } from './manifest-error'

@@ -1,8 +1,7 @@
 /**
- * @fileoverview Private internals for `archives/*` modules — defaults,
- * lazy module accessors (adm-zip, tar-fs, node:path), shared
- * pre-extraction validators (`assertArchiveExists`,
- * `validatePathWithinBase`).
+ * @file Private internals for `archives/*` modules — defaults, lazy module
+ *   accessors (adm-zip, tar-fs, node:path), shared pre-extraction validators
+ *   (`assertArchiveExists`, `validatePathWithinBase`).
  */
 
 import { existsSync } from 'node:fs'
@@ -32,15 +31,16 @@ export { getNodePath as getPath } from '../node/path'
 
 /**
  * Assert that an archive file exists on disk before handing it to the
- * underlying extractor. Normalizes the "missing archive" surface across
- * all three extractors (zip/tar/tar.gz): each now throws a Node-style
- * `ENOENT` error with the archive path. Without this preflight, `zip`
- * goes through adm-zip and surfaces as `"Invalid filename"`, while
- * `tar`/`tar.gz` surface the raw Node `ENOENT` — inconsistent, and
- * adm-zip's message didn't include the path.
+ * underlying extractor. Normalizes the "missing archive" surface across all
+ * three extractors (zip/tar/tar.gz): each now throws a Node-style `ENOENT`
+ * error with the archive path. Without this preflight, `zip` goes through
+ * adm-zip and surfaces as `"Invalid filename"`, while `tar`/`tar.gz` surface
+ * the raw Node `ENOENT` — inconsistent, and adm-zip's message didn't include
+ * the path.
+ *
+ * @private
  *
  * @throws Error with `code: 'ENOENT'` if archivePath doesn't exist.
- * @private
  */
 export function assertArchiveExists(archivePath: string): void {
   if (!existsSync(archivePath)) {
@@ -70,14 +70,16 @@ export function getTarFs() {
 }
 
 /**
- * Validate that a resolved path is within the target directory.
- * Prevents path traversal attacks.
+ * Validate that a resolved path is within the target directory. Prevents path
+ * traversal attacks.
  *
- * @param targetPath - The resolved path to validate
- * @param baseDir - The base directory that should contain the path
- * @param entryName - Original entry name for error reporting
- * @throws Error if path is outside the base directory
  * @private
+ *
+ * @param targetPath - The resolved path to validate.
+ * @param baseDir - The base directory that should contain the path.
+ * @param entryName - Original entry name for error reporting.
+ *
+ * @throws Error if path is outside the base directory
  */
 export function validatePathWithinBase(
   targetPath: string,

@@ -1,23 +1,20 @@
 /**
- * @fileoverview Load the set of primordials currently exported by
- * `@socketsecurity/lib/primordials` (or any primordials-shaped source
- * file passed via --surface).
+ * @file Load the set of primordials currently exported by
+ *   `@socketsecurity/lib/primordials` (or any primordials-shaped source file
+ *   passed via --surface). Three ways to resolve the surface:
  *
- * Three ways to resolve the surface:
- *   1. Explicit `--surface <path>` flag — overrides everything else.
- *      Use this to point at Node.js's `lib/internal/per_context/primordials.js`,
- *      a vendored copy, or any other primordials file.
- *   2. From a sibling socket-lib checkout
- *      (`../socket-lib/src/primordials/` after the split, with a
- *      `../socket-lib/src/primordials.ts` legacy fallback).
+ *   1. Explicit `--surface <path>` flag — overrides everything else. Use this to
+ *      point at Node.js's `lib/internal/per_context/primordials.js`, a vendored
+ *      copy, or any other primordials file.
+ *   2. From a sibling socket-lib checkout (`../socket-lib/src/primordials/` after
+ *      the split, with a `../socket-lib/src/primordials.ts` legacy fallback).
  *      Used during fleet development — picks up unreleased exports.
- *   3. From the installed `@socketsecurity/lib/dist/primordials/` (or
- *      legacy `dist/primordials.js`). Used when running the audit on a
- *      target that has lib as a dep.
- *
- * Either way, we parse out the `export const Foo` symbol names — no
- * type info needed. For non-ESM surfaces (Node's per_context primordials
- * use `primordials.X = ...` assignments), we also recognize that form.
+ *   3. From the installed `@socketsecurity/lib/dist/primordials/` (or legacy
+ *      `dist/primordials.js`). Used when running the audit on a target that has
+ *      lib as a dep. Either way, we parse out the `export const Foo` symbol
+ *      names — no type info needed. For non-ESM surfaces (Node's per_context
+ *      primordials use `primordials.X = ...` assignments), we also recognize
+ *      that form.
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
@@ -25,6 +22,7 @@ import path from 'node:path'
 
 /**
  * @param {string} sourcePath - Path to a primordials source file (.ts or .js).
+ *
  * @returns {Set<string>}
  */
 // Globals whose static + prototype methods get reflectively copied
@@ -90,12 +88,12 @@ export function capitalize(s) {
 }
 
 /**
- * Compute the full set of primordials Node's bootstrap installs by
- * enumerating the static + prototype methods of the upstream globals.
- * This mirrors what `lib/internal/per_context/primordials.js` does at
- * runtime via `copyPropsRenamed` + `copyPrototype` helpers — names like
- * `ArrayPrototypeMap` aren't directly assigned in the source (they're
- * installed by reflection), so name-only regex parsing misses them.
+ * Compute the full set of primordials Node's bootstrap installs by enumerating
+ * the static + prototype methods of the upstream globals. This mirrors what
+ * `lib/internal/per_context/primordials.js` does at runtime via
+ * `copyPropsRenamed` + `copyPrototype` helpers — names like `ArrayPrototypeMap`
+ * aren't directly assigned in the source (they're installed by reflection), so
+ * name-only regex parsing misses them.
  */
 export function deriveNodeBootstrapSurface() {
   const exports = new Set()
@@ -187,18 +185,20 @@ export function deriveNodeBootstrapSurface() {
  * Find a usable primordials source.
  *
  * Lookup order:
- *   1. Explicit `surfacePath` argument (from `--surface <path>` CLI flag).
- *   2. `<targetRoot>/../socket-lib/src/primordials/` (sibling, post-split
- *      directory layout).
- *   3. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling, legacy
- *      single-file layout).
- *   4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/`
- *      (installed, post-split).
- *   5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`
- *      (installed, legacy).
+ *
+ * 1. Explicit `surfacePath` argument (from `--surface <path>` CLI flag).
+ * 2. `<targetRoot>/../socket-lib/src/primordials/` (sibling, post-split directory
+ *    layout).
+ * 3. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling, legacy single-file
+ *    layout).
+ * 4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/` (installed,
+ *    post-split).
+ * 5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`
+ *    (installed, legacy).
  *
  * @param {string} targetRoot - The repo being audited.
  * @param {string} [surfacePath] - Explicit path to a primordials source file.
+ *
  * @returns {{ source: string; exports: Set<string> }}
  */
 export function loadPrimordialsSurface(targetRoot, surfacePath) {

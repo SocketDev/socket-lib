@@ -1,13 +1,10 @@
 /**
- * @fileoverview Tests for the Volta-cache resolution branch in
- * src/bin.ts resolveRealBinSync.
- *
- * Materializes a fake Volta directory tree under tmp:
+ * @file Tests for the Volta-cache resolution branch in src/bin.ts
+ *   resolveRealBinSync. Materializes a fake Volta directory tree under tmp:
  *   <root>/.volta/tools/image/{node,npm,packages}/...
  *   <root>/.volta/tools/user/platform.json
- *   <root>/.volta/tools/user/bin/<binary>.json
- * Then passes a "binary path" containing /.volta/ so the SUT enters
- * the Volta resolution branch.
+ *   <root>/.volta/tools/user/bin/<binary>.json Then passes a "binary path"
+ *   containing /.volta/ so the SUT enters the Volta resolution branch.
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'

@@ -1,19 +1,15 @@
 /**
- * @fileoverview `resolveBazel()` — Bazel resolution entry point.
+ * @file `resolveBazel()` — Bazel resolution entry point. Tries each source in
+ *   order:
  *
- * Tries each source in order:
- *
- *   1. VFS  — smol binary's embedded Bazel (if packed)
+ *   1. VFS — smol binary's embedded Bazel (if packed)
  *   2. PATH — `bazelisk` (preferred) or `bazel` on the system PATH
- *   3. download — upstream GitHub release binary (only when
- *      `downloadIfMissing` is passed)
- *
- * Returns `undefined` if all of the enabled sources miss.
- *
- * Memoized per option-shape: calls with identical options return the
- * same cached promise. Calling without `downloadIfMissing` and then
- * with `downloadIfMissing` produces two distinct cache entries so
- * the second call can fall through to the download tier.
+ *   3. download — upstream GitHub release binary (only when `downloadIfMissing` is
+ *      passed) Returns `undefined` if all of the enabled sources miss. Memoized
+ *      per option-shape: calls with identical options return the same cached
+ *      promise. Calling without `downloadIfMissing` and then with
+ *      `downloadIfMissing` produces two distinct cache entries so the second
+ *      call can fall through to the download tier.
  */
 
 import { bazelFromDownload } from './from-download'
@@ -26,9 +22,8 @@ import type { ResolvedBazel } from './types'
 
 export interface ResolveBazelOptions {
   /**
-   * When set, the resolver falls through to a GitHub release
-   * download after the local-discovery tiers miss. Omit to keep the
-   * resolver read-only.
+   * When set, the resolver falls through to a GitHub release download after the
+   * local-discovery tiers miss. Omit to keep the resolver read-only.
    */
   downloadIfMissing?:
     | {

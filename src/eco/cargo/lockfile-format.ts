@@ -1,9 +1,7 @@
 /**
- * @fileoverview Format descriptor for `Cargo.lock` — Rust's
- * Cargo-managed lockfile.
- *
- * Returned by `src/eco/manifest/detect-format.ts` when a filename
- * matches `Cargo.lock`.
+ * @file Format descriptor for `Cargo.lock` — Rust's Cargo-managed lockfile.
+ *   Returned by `src/eco/manifest/detect-format.ts` when a filename matches
+ *   `Cargo.lock`.
  */
 
 import { ObjectFreeze } from '../../primordials/object'

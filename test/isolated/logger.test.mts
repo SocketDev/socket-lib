@@ -1,14 +1,14 @@
 /**
- * @fileoverview Comprehensive isolated tests for logger module with 99%+ coverage.
+ * @file Comprehensive isolated tests for logger module with 99%+ coverage.
+ *   Tests Logger class in isolation with full coverage:
  *
- * Tests Logger class in isolation with full coverage:
- * - All logging levels (log, info, warn, error, debug, success, fail)
- * - LOG_SYMBOLS constants and lazy initialization
- * - Stream handling (stdout/stderr), indentation, method chaining
- * - Task management, assertions, object inspection
- * - Theme integration and color support
- * - Internal state tracking (logCallCount, lastWasBlank)
- * Uses custom Writable streams to capture output without console pollution.
+ *   - All logging levels (log, info, warn, error, debug, success, fail)
+ *   - LOG_SYMBOLS constants and lazy initialization
+ *   - Stream handling (stdout/stderr), indentation, method chaining
+ *   - Task management, assertions, object inspection
+ *   - Theme integration and color support
+ *   - Internal state tracking (logCallCount, lastWasBlank) Uses custom Writable
+ *     streams to capture output without console pollution.
  */
 
 /* oxlint-disable socket/no-status-emoji -- tests assert on emoji output. */

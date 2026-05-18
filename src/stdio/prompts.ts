@@ -1,6 +1,6 @@
 /**
- * @fileoverview User prompt utilities for interactive scripts.
- * Provides inquirer.js integration with spinner support, context handling, and theming.
+ * @file User prompt utilities for interactive scripts. Provides inquirer.js
+ *   integration with spinner support, context handling, and theming.
  */
 
 import { getAbortSignal } from '../process/abort'
@@ -45,62 +45,81 @@ const ActualSeparator = selectModule.Separator
 /**
  * Choice option for select and search prompts.
  *
- * @template Value - Type of the choice value
+ * @template Value - Type of the choice value.
  */
 export interface Choice<Value = unknown> {
-  /** The value returned when this choice is selected */
+  /**
+   * The value returned when this choice is selected.
+   */
   value: Value
-  /** Display name for the choice (defaults to value.toString()) */
+  /**
+   * Display name for the choice (defaults to value.toString())
+   */
   name?: string | undefined
-  /** Additional description text shown below the choice */
+  /**
+   * Additional description text shown below the choice.
+   */
   description?: string | undefined
-  /** Short text shown after selection (defaults to name) */
+  /**
+   * Short text shown after selection (defaults to name)
+   */
   short?: string | undefined
-  /** Whether this choice is disabled, or a reason string */
+  /**
+   * Whether this choice is disabled, or a reason string.
+   */
   disabled?: boolean | string | undefined
 }
 
 /**
- * Context for inquirer prompts.
- * Minimal context interface used by Inquirer prompts.
- * Duplicated from `@inquirer/type` - InquirerContext.
+ * Context for inquirer prompts. Minimal context interface used by Inquirer
+ * prompts. Duplicated from `@inquirer/type` - InquirerContext.
  */
 interface InquirerContext {
-  /** Abort signal for cancelling the prompt */
+  /**
+   * Abort signal for cancelling the prompt.
+   */
   signal?: AbortSignal | undefined
-  /** Input stream (defaults to process.stdin) */
+  /**
+   * Input stream (defaults to process.stdin)
+   */
   input?: NodeJS.ReadableStream | undefined
-  /** Output stream (defaults to process.stdout) */
+  /**
+   * Output stream (defaults to process.stdout)
+   */
   output?: NodeJS.WritableStream | undefined
-  /** Clear the prompt from terminal when done */
+  /**
+   * Clear the prompt from terminal when done.
+   */
   clearPromptOnDone?: boolean | undefined
 }
 
 /**
- * Extended context with spinner support.
- * Allows passing a spinner instance to be managed during prompts.
+ * Extended context with spinner support. Allows passing a spinner instance to
+ * be managed during prompts.
  */
 export type Context = import('../objects/types').Remap<
   InquirerContext & {
-    /** Optional spinner to stop/start during prompt display */
+    /**
+     * Optional spinner to stop/start during prompt display.
+     */
     spinner?: import('../spinner/types').SpinnerInstance | undefined
   }
 >
 
 /**
- * Separator for visual grouping in select/checkbox prompts.
- * Creates a non-selectable visual separator line.
- * Duplicated from `@inquirer/select` - Separator.
- * This type definition ensures the Separator type is available in published packages.
+ * Separator for visual grouping in select/checkbox prompts. Creates a
+ * non-selectable visual separator line. Duplicated from `@inquirer/select` -
+ * Separator. This type definition ensures the Separator type is available in
+ * published packages.
  *
  * @example
- * import { Separator } from './prompts'
+ *   import { Separator } from './prompts'
  *
- * const choices = [
- *   { name: 'Option 1', value: 1 },
- *   new Separator(),
- *   { name: 'Option 2', value: 2 }
- * ]
+ *   const choices = [
+ *     { name: 'Option 1', value: 1 },
+ *     new Separator(),
+ *     { name: 'Option 2', value: 2 },
+ *   ]
  */
 declare class SeparatorType {
   readonly separator: string
@@ -111,8 +130,9 @@ declare class SeparatorType {
 export type Separator = SeparatorType
 
 /**
- * Apply a color to text using yoctocolors.
- * Handles both named colors and RGB tuples.
+ * Apply a color to text using yoctocolors. Handles both named colors and RGB
+ * tuples.
+ *
  * @private
  */
 export function applyColor(text: string, color: ColorValue): string {
@@ -127,24 +147,25 @@ export function applyColor(text: string, color: ColorValue): string {
 }
 
 /**
- * Convert Socket theme to @inquirer theme format.
- * Maps our theme colors to inquirer's style functions.
- * Handles theme names, Theme objects, and passes through @inquirer themes.
- *
- * @param theme - Socket theme name, Theme object, or @inquirer theme
- * @returns @inquirer theme object
+ * Convert Socket theme to @inquirer theme format. Maps our theme colors to
+ * inquirer's style functions. Handles theme names, Theme objects, and passes
+ * through @inquirer themes.
  *
  * @example
- * ```ts
- * // Socket theme name
- * createInquirerTheme('sunset')
+ *   ;```ts
+ *   // Socket theme name
+ *   createInquirerTheme('sunset')
  *
- * // Socket Theme object
- * createInquirerTheme(SUNSET_THEME)
+ *   // Socket Theme object
+ *   createInquirerTheme(SUNSET_THEME)
  *
- * // @inquirer theme (passes through)
- * createInquirerTheme({ style: {...}, icon: {...} })
- * ```
+ *   // @inquirer theme (passes through)
+ *   createInquirerTheme({ style: {...}, icon: {...} })
+ *   ```
+ *
+ * @param theme - Socket theme name, Theme object, or @inquirer theme.
+ *
+ * @returns @inquirer theme object
  */
 export function createInquirerTheme(
   theme: Theme | ThemeName | unknown,
@@ -200,23 +221,24 @@ export function createInquirerTheme(
 }
 
 /**
- * Create a separator for select prompts.
- * Creates a visual separator line in choice lists.
- *
- * @param text - Optional separator text (defaults to '───────')
- * @returns Separator instance
+ * Create a separator for select prompts. Creates a visual separator line in
+ * choice lists.
  *
  * @example
- * import { select, createSeparator } from '@socketsecurity/lib/stdio/prompts'
+ *   import { select, createSeparator } from '@socketsecurity/lib/stdio/prompts'
  *
- * const choice = await select({
- *   message: 'Choose an option:',
- *   choices: [
- *     { name: 'Option 1', value: 1 },
- *     createSeparator(),
- *     { name: 'Option 2', value: 2 }
- *   ]
- * })
+ *   const choice = await select({
+ *     message: 'Choose an option:',
+ *     choices: [
+ *       { name: 'Option 1', value: 1 },
+ *       createSeparator(),
+ *       { name: 'Option 2', value: 2 },
+ *     ],
+ *   })
+ *
+ * @param text - Optional separator text (defaults to '───────')
+ *
+ * @returns Separator instance
  */
 export function createSeparator(
   text?: string,
@@ -226,7 +248,9 @@ export function createSeparator(
 
 /**
  * Check if value is a Socket Theme object.
- * @param value - Value to check
+ *
+ * @param value - Value to check.
+ *
  * @returns True if value is a Socket Theme
  */
 export function isSocketTheme(value: unknown): value is Theme {
@@ -240,7 +264,9 @@ export function isSocketTheme(value: unknown): value is Theme {
 
 /**
  * Resolve theme name or object to Theme.
- * @param theme - Theme name or object
+ *
+ * @param theme - Theme name or object.
+ *
  * @returns Resolved Theme
  */
 export function resolveTheme(theme: Theme | ThemeName): Theme {
@@ -248,17 +274,20 @@ export function resolveTheme(theme: Theme | ThemeName): Theme {
 }
 
 /**
- * Wrap an inquirer prompt with spinner handling, theme injection, and signal injection.
- * Automatically stops/starts spinners during prompt display, injects the current theme,
- * and injects abort signals. Trims string results and handles cancellation gracefully.
- *
- * @template T - Type of the prompt result
- * @param inquirerPrompt - The inquirer prompt function to wrap
- * @returns Wrapped prompt function with spinner, theme, and signal handling
+ * Wrap an inquirer prompt with spinner handling, theme injection, and signal
+ * injection. Automatically stops/starts spinners during prompt display, injects
+ * the current theme, and injects abort signals. Trims string results and
+ * handles cancellation gracefully.
  *
  * @example
- * const myPrompt = wrapPrompt(rawInquirerPrompt)
- * const result = await myPrompt({ message: 'Enter name:' })
+ *   const myPrompt = wrapPrompt(rawInquirerPrompt)
+ *   const result = await myPrompt({ message: 'Enter name:' })
+ *
+ * @template T - Type of the prompt result.
+ *
+ * @param inquirerPrompt - The inquirer prompt function to wrap.
+ *
+ * @returns Wrapped prompt function with spinner, theme, and signal handling
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function wrapPrompt<T = unknown>(
@@ -316,74 +345,73 @@ export function wrapPrompt<T = unknown>(
 }
 
 /**
- * Prompt to select multiple items from a list of choices.
- * Wrapped with spinner handling and abort signal support.
+ * Prompt to select multiple items from a list of choices. Wrapped with spinner
+ * handling and abort signal support.
  *
  * @example
- * const choices = await checkbox({
- *   message: 'Select options:',
- *   choices: [
- *     { name: 'Option 1', value: 'opt1' },
- *     { name: 'Option 2', value: 'opt2' },
- *     { name: 'Option 3', value: 'opt3' }
- *   ]
- * })
+ *   const choices = await checkbox({
+ *     message: 'Select options:',
+ *     choices: [
+ *       { name: 'Option 1', value: 'opt1' },
+ *       { name: 'Option 2', value: 'opt2' },
+ *       { name: 'Option 3', value: 'opt3' },
+ *     ],
+ *   })
  */
 export const checkbox: typeof checkboxRaw = wrapPrompt(checkboxRaw)
 
 /**
- * Prompt for a yes/no confirmation.
- * Wrapped with spinner handling and abort signal support.
+ * Prompt for a yes/no confirmation. Wrapped with spinner handling and abort
+ * signal support.
  *
  * @example
- * const answer = await confirm({ message: 'Continue?' })
- * if (answer) { // user confirmed }
+ *   const answer = await confirm({ message: 'Continue?' })
+ *   if (answer) { // user confirmed }
  */
 export const confirm: typeof confirmRaw = wrapPrompt(confirmRaw)
 
 /**
- * Prompt for text input.
- * Wrapped with spinner handling and abort signal support.
- * Result is automatically trimmed.
+ * Prompt for text input. Wrapped with spinner handling and abort signal
+ * support. Result is automatically trimmed.
  *
  * @example
- * const name = await input({ message: 'Enter your name:' })
+ *   const name = await input({ message: 'Enter your name:' })
  */
 export const input: typeof inputRaw = wrapPrompt(inputRaw)
 
 /**
- * Prompt for password input (hidden characters).
- * Wrapped with spinner handling and abort signal support.
+ * Prompt for password input (hidden characters). Wrapped with spinner handling
+ * and abort signal support.
  *
  * @example
- * const token = await password({ message: 'Enter API token:' })
+ *   const token = await password({ message: 'Enter API token:' })
  */
 export const password: typeof passwordRaw = wrapPrompt(passwordRaw)
 
 /**
- * Prompt with searchable/filterable choices.
- * Wrapped with spinner handling and abort signal support.
+ * Prompt with searchable/filterable choices. Wrapped with spinner handling and
+ * abort signal support.
  *
  * @example
- * const result = await search({
- *   message: 'Select a package:',
- *   source: async (input) => fetchPackages(input)
- * })
+ *   const result = await search({
+ *     message: 'Select a package:',
+ *     source: async input => fetchPackages(input),
+ *   })
  */
 export const search: typeof searchRaw = wrapPrompt(searchRaw)
 
 /**
- * Prompt to select from a list of choices.
- * Wrapped with spinner handling and abort signal support.
+ * Prompt to select from a list of choices. Wrapped with spinner handling and
+ * abort signal support.
  *
  * @example
- * const choice = await select({
- *   message: 'Choose an option:',
- *   choices: [
- *     { name: 'Option 1', value: 'opt1' },
- *     { name: 'Option 2', value: 'opt2' }
- *   ]
- * })
+ *   const choice = await select({
+ *     message: 'Choose an option:',
+ *     choices: [
+ *       { name: 'Option 1', value: 'opt1' },
+ *       { name: 'Option 2', value: 'opt2' },
+ *     ],
+ *   })
  */
 export const select: typeof selectRaw = wrapPrompt(selectRaw)
 

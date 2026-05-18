@@ -1,11 +1,9 @@
 /**
- * @fileoverview Safe references to `Symbol`, well-known symbols, and
- * `Symbol.prototype`.
- *
- * `Symbol.asyncDispose` and `Symbol.dispose` are ES2024 (Node 20.4+);
- * older engines lack them and the references resolve to `undefined`.
- * `SymbolPrototypeDescription` wraps the accessor since `description`
- * is a getter on `Symbol.prototype`, not a method.
+ * @file Safe references to `Symbol`, well-known symbols, and
+ *   `Symbol.prototype`. `Symbol.asyncDispose` and `Symbol.dispose` are ES2024
+ *   (Node 20.4+); older engines lack them and the references resolve to
+ *   `undefined`. `SymbolPrototypeDescription` wraps the accessor since
+ *   `description` is a getter on `Symbol.prototype`, not a method.
  */
 
 import { uncurryThis } from './uncurry'

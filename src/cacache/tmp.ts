@@ -1,9 +1,8 @@
 /**
- * @fileoverview `withTmp` — run a callback with a freshly-created
- * temp directory under the cacache root. Wraps cacache's `tmp.withTmp`
- * with a corrected type signature (the DefinitelyTyped definition
- * incorrectly declares `void` even though the function forwards the
- * callback's return value).
+ * @file `withTmp` — run a callback with a freshly-created temp directory under
+ *   the cacache root. Wraps cacache's `tmp.withTmp` with a corrected type
+ *   signature (the DefinitelyTyped definition incorrectly declares `void` even
+ *   though the function forwards the callback's return value).
  */
 
 import { getSocketCacacheDir } from '../paths/socket'
@@ -14,12 +13,12 @@ import { getCacache } from './_internal'
  * Execute a callback with a temporary directory for cache operations.
  *
  * @example
- * ```typescript
- * const result = await withTmp(async (tmpDir) => {
- *   // Use tmpDir for temporary cache work
- *   return 'done'
- * })
- * ```
+ *   ;```typescript
+ *   const result = await withTmp(async tmpDir => {
+ *     // Use tmpDir for temporary cache work
+ *     return 'done'
+ *   })
+ *   ```
  */
 export async function withTmp<T>(
   callback: (tmpDirPath: string) => Promise<T>,

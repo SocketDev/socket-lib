@@ -1,8 +1,7 @@
 /**
- * @fileoverview `globStreamLicenses` — license-file discovery as an
- * async stream. Specialized for the npm-packlist-style license file
- * search (`LICENSE*`, `COPYING*`, etc.) with optional originals
- * inclusion.
+ * @file `globStreamLicenses` — license-file discovery as an async stream.
+ *   Specialized for the npm-packlist-style license file search (`LICENSE*`,
+ *   `COPYING*`, etc.) with optional originals inclusion.
  */
 
 import {
@@ -24,12 +23,12 @@ import type { GlobOptions } from './types'
  * Create a stream of license file paths matching glob patterns.
  *
  * @example
- * ```typescript
- * const stream = globStreamLicenses('/tmp/my-package')
- * for await (const licensePath of stream) {
- *   console.log(licensePath)
- * }
- * ```
+ *   ;```typescript
+ *   const stream = globStreamLicenses('/tmp/my-package')
+ *   for await (const licensePath of stream) {
+ *     console.log(licensePath)
+ *   }
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function globStreamLicenses(

@@ -1,11 +1,9 @@
 /**
- * @fileoverview Lazy-loader for `node:child_process`. See `node/fs.ts`
- * for the design rationale shared across all `node/*.ts` lazy-loaders.
- *
- * Filename uses `child-process` (kebab-case) to match the rest of
- * socket-lib's filename convention. The exported getter name is
- * `getNodeChildProcess` (camelCase, prefixed with `Node` to match
- * every other `node/*` lazy-loader).
+ * @file Lazy-loader for `node:child_process`. See `node/fs.ts` for the design
+ *   rationale shared across all `node/*.ts` lazy-loaders. Filename uses
+ *   `child-process` (kebab-case) to match the rest of socket-lib's filename
+ *   convention. The exported getter name is `getNodeChildProcess` (camelCase,
+ *   prefixed with `Node` to match every other `node/*` lazy-loader).
  */
 
 // eslint-disable-next-line n/prefer-node-protocol

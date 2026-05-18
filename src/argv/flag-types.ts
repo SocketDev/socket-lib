@@ -1,9 +1,7 @@
 /**
- * @fileoverview Types + `COMMON_FLAGS` table for argv flag parsing.
- *
- * Split out of `argv/flags.ts` for size hygiene. Pure values + types
- * only; no I/O or runtime side effects so this module stays cheap to
- * import everywhere.
+ * @file Types + `COMMON_FLAGS` table for argv flag parsing. Split out of
+ *   `argv/flags.ts` for size hygiene. Pure values + types only; no I/O or
+ *   runtime side effects so this module stays cheap to import everywhere.
  */
 
 /**
@@ -30,14 +28,14 @@ export interface FlagValues {
 }
 
 /**
- * Accepted input types for flag checking functions.
- * Can be parsed flag values, process.argv array, or undefined (uses process.argv).
+ * Accepted input types for flag checking functions. Can be parsed flag values,
+ * process.argv array, or undefined (uses process.argv).
  */
 export type FlagInput = FlagValues | string[] | readonly string[] | undefined
 
 /**
- * Common flag definitions for parseArgs configuration.
- * Can be spread into parseArgs options for consistency.
+ * Common flag definitions for parseArgs configuration. Can be spread into
+ * parseArgs options for consistency.
  */
 export const COMMON_FLAGS = {
   all: {

@@ -1,58 +1,67 @@
 /**
- * @fileoverview Shared types for schema validation.
- *
- * `Schema<T>` is the Zod-shaped duck-type contract — any validator with
- * a `.safeParse(data)` method returning `{ success, data?, error? }`
- * satisfies it. socket-lib detects Zod (v3 and v4) structurally via this
- * interface; consumers bring their own Zod.
- *
- * `ValidateResult<T>` / `ValidationIssue` / `Infer<S>` / `AnySchema` are
- * the normalized shapes produced by `@socketsecurity/lib/schema/validate`
- * and `@socketsecurity/lib/schema/parse`.
+ * @file Shared types for schema validation. `Schema<T>` is the Zod-shaped
+ *   duck-type contract — any validator with a `.safeParse(data)` method
+ *   returning `{ success, data?, error? }` satisfies it. socket-lib detects Zod
+ *   (v3 and v4) structurally via this interface; consumers bring their own Zod.
+ *   `ValidateResult<T>` / `ValidationIssue` / `Infer<S>` / `AnySchema` are the
+ *   normalized shapes produced by `@socketsecurity/lib/schema/validate` and
+ *   `@socketsecurity/lib/schema/parse`.
  */
 
 /**
  * Result of a Zod-shaped schema's `.safeParse()` call.
  *
- * @template T - The expected type of the parsed data
+ * @template T - The expected type of the parsed data.
  */
 export interface ParseResult<T> {
-  /** Indicates whether parsing was successful */
+  /**
+   * Indicates whether parsing was successful.
+   */
   success: boolean
-  /** Parsed and validated data (only present when `success` is `true`) */
+  /**
+   * Parsed and validated data (only present when `success` is `true`)
+   */
   data?: T | undefined
-  /** Error information (only present when `success` is `false`) */
+  /**
+   * Error information (only present when `success` is `false`)
+   */
   error?: unknown
 }
 
 /**
  * Zod-shaped duck-type for any validator exposing `safeParse` / `parse`.
  *
- * @template T - The expected output type after validation
- *
  * @example
- * ```ts
- * import { z } from 'zod'
+ *   ;```ts
+ *   import { z } from 'zod'
  *
- * const userSchema = z.object({ name: z.string(), age: z.number() })
+ *   const userSchema = z.object({ name: z.string(), age: z.number() })
  *
- * // Schema satisfies this interface
- * const schema: Schema<User> = userSchema
- * const result = schema.safeParse({ name: 'Alice', age: 30 })
- * ```
+ *   // Schema satisfies this interface
+ *   const schema: Schema<User> = userSchema
+ *   const result = schema.safeParse({ name: 'Alice', age: 30 })
+ *   ```
+ *
+ * @template T - The expected output type after validation.
  */
 export interface Schema<T = unknown> {
-  /** Non-throwing parse. */
+  /**
+   * Non-throwing parse.
+   */
   safeParse(data: unknown): ParseResult<T>
-  /** Throwing parse. */
+  /**
+   * Throwing parse.
+   */
   parse(data: unknown): T
-  /** Optional schema name for debugging. */
+  /**
+   * Optional schema name for debugging.
+   */
   _name?: string | undefined
 }
 
 /**
- * Internal structural shape of a Zod v4 schema — carries the inferred
- * output type on `_zod.output`. Used for type-only detection in `Infer<S>`.
+ * Internal structural shape of a Zod v4 schema — carries the inferred output
+ * type on `_zod.output`. Used for type-only detection in `Infer<S>`.
  *
  * @internal
  */
@@ -62,8 +71,8 @@ interface ZodV4LikeSchema<O = unknown> {
 }
 
 /**
- * Internal structural shape of a Zod v3 schema — carries the inferred
- * output type on `_output`. Used for type-only detection in `Infer<S>`.
+ * Internal structural shape of a Zod v3 schema — carries the inferred output
+ * type on `_output`. Used for type-only detection in `Infer<S>`.
  *
  * @internal
  */
@@ -74,9 +83,8 @@ interface ZodV3LikeSchema<O = unknown> {
 
 /**
  * Internal structural shape of a TypeBox `TSchema` — carries the inferred
- * output type on the phantom `static` field. Only used inside socket-lib
- * for type-only detection in `Infer<S>`; external callers should pass
- * Zod schemas.
+ * output type on the phantom `static` field. Only used inside socket-lib for
+ * type-only detection in `Infer<S>`; external callers should pass Zod schemas.
  *
  * @internal
  */
@@ -96,8 +104,8 @@ export type AnySchema =
 /**
  * Infer the validated output type from any supported schema kind.
  *
- * Order matters: TypeBox schemas carry a phantom `static` field, so we
- * check for TypeBox before falling through to Zod and the duck-type.
+ * Order matters: TypeBox schemas carry a phantom `static` field, so we check
+ * for TypeBox before falling through to Zod and the duck-type.
  */
 export type Infer<S> = S extends { static: infer Static }
   ? Static
@@ -113,9 +121,13 @@ export type Infer<S> = S extends { static: infer Static }
  * A single normalized validation error.
  */
 export interface ValidationIssue {
-  /** Array path into the value (e.g. `['user', 'age']`). */
+  /**
+   * Array path into the value (e.g. `['user', 'age']`).
+   */
   path: Array<string | number>
-  /** Human-readable description of the failure. */
+  /**
+   * Human-readable description of the failure.
+   */
   message: string
 }
 

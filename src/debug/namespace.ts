@@ -1,10 +1,10 @@
 /**
- * @fileoverview Namespace-handling helpers — `extractOptions`
- * normalises the polymorphic first argument that every `*Ns`
- * function takes, `getDebugJsInstance` per-namespace caches the
- * underlying `debug-js` instance with `customLog` patched in, and
- * `isEnabled` / `isDebug` / `isDebugNs` are the gate predicates
- * every output function consults before writing.
+ * @file Namespace-handling helpers — `extractOptions` normalises the
+ *   polymorphic first argument that every `*Ns` function takes,
+ *   `getDebugJsInstance` per-namespace caches the underlying `debug-js`
+ *   instance with `customLog` patched in, and `isEnabled` / `isDebug` /
+ *   `isDebugNs` are the gate predicates every output function consults before
+ *   writing.
  */
 
 import { getDebug } from '../env/debug'
@@ -18,6 +18,7 @@ import type { DebugOptions, NamespacesOrOptions } from './types'
 
 /**
  * Extract options from namespaces parameter.
+ *
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -29,6 +30,7 @@ export function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
 
 /**
  * Get or create a debug instance for a namespace.
+ *
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -73,6 +75,7 @@ export function isDebugNs(namespaces: string | undefined): boolean {
 
 /**
  * Check if debug is enabled for given namespaces.
+ *
  * @private
  */
 /*@__NO_SIDE_EFFECTS__*/

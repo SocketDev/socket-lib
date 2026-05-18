@@ -1,11 +1,10 @@
 /**
- * @fileoverview Private internals for `debug/*` modules — the
- * cached logger instance, lazy `node:util` accessor, the
- * `debugByNamespace` cache that `namespace.getDebugJsInstance`
- * fills, the lazy `pointingTriangle` glyph used by every output
- * function, and `customLog` (the `debug-js` log-writer override).
- * Co-located so the namespace / output / caller-info leaves don't
- * fragment ownership of this shared module state.
+ * @file Private internals for `debug/*` modules — the cached logger instance,
+ *   lazy `node:util` accessor, the `debugByNamespace` cache that
+ *   `namespace.getDebugJsInstance` fills, the lazy `pointingTriangle` glyph
+ *   used by every output function, and `customLog` (the `debug-js` log-writer
+ *   override). Co-located so the namespace / output / caller-info leaves don't
+ *   fragment ownership of this shared module state.
  */
 
 import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
@@ -28,6 +27,7 @@ let _pointingTriangle: string | undefined
 
 /**
  * Custom log function for debug output.
+ *
  * @private
  */
 /* c8 ignore start - customLog is assigned to debugJs instances and
@@ -58,9 +58,10 @@ export function customLog(...args: unknown[]) {
 /* c8 ignore stop */
 
 /**
- * Lazily resolve the "pointing triangle" glyph — `▸` on terminals
- * with unicode support, `>` everywhere else. Initialised on first
- * call by the output functions.
+ * Lazily resolve the "pointing triangle" glyph — `▸` on terminals with unicode
+ * support, `>` everywhere else. Initialised on first call by the output
+ * functions.
+ *
  * @private
  */
 /* c8 ignore start - First-call init for module-level glyph; only

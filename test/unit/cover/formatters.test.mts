@@ -1,8 +1,7 @@
 /**
- * @fileoverview Unit tests for coverage output formatters.
- *
- * Covers `formatCoverage` (default/simple/json formats) and
- * `getCoverageEmoji` (every threshold band).
+ * @file Unit tests for coverage output formatters. Covers `formatCoverage`
+ *   (default/simple/json formats) and `getCoverageEmoji` (every threshold
+ *   band).
  */
 
 /* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */

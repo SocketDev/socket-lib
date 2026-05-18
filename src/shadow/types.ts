@@ -1,7 +1,6 @@
 /**
- * @fileoverview Public type surface for `shadow/*` modules — the
- * `ShadowInstallationOptions` record. Pure types, no runtime side
- * effects.
+ * @file Public type surface for `shadow/*` modules — the
+ *   `ShadowInstallationOptions` record. Pure types, no runtime side effects.
  */
 
 export interface ShadowInstallationOptions {

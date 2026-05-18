@@ -1,9 +1,9 @@
 /**
- * @fileoverview Unit tests for NODE_AUTH_TOKEN environment variable getter.
- *
- * Tests getNodeAuthToken() for Node.js registry authentication.
- * Returns NODE_AUTH_TOKEN value or undefined. Used for private npm registry access.
- * Uses rewire for test isolation. Critical for authenticated package operations.
+ * @file Unit tests for NODE_AUTH_TOKEN environment variable getter. Tests
+ *   getNodeAuthToken() for Node.js registry authentication. Returns
+ *   NODE_AUTH_TOKEN value or undefined. Used for private npm registry access.
+ *   Uses rewire for test isolation. Critical for authenticated package
+ *   operations.
  */
 
 import process from 'node:process'

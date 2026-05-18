@@ -1,8 +1,9 @@
 /* oxlint-disable socket/sort-source-methods -- validator helpers interleaved with module-level config they consume; reordering would split state from its consumers. */
 /**
- * @fileoverview Validate that all dist/external/* exports work correctly for internal use
- * Ensures require('./dist/external/foo') returns usable values without .default wrappers
- * These are bundled dependencies used internally by socket-lib modules.
+ * @file Validate that all dist/external/* exports work correctly for internal
+ *   use Ensures require('./dist/external/foo') returns usable values without
+ *   .default wrappers These are bundled dependencies used internally by
+ *   socket-lib modules.
  */
 
 import { createRequire } from 'node:module'

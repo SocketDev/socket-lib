@@ -1,21 +1,19 @@
 /**
- * @fileoverview `createTtlCache` — generic TTL-based cache built on
- * top of cacache (persistent) plus an in-memory LRU memo layer.
+ * @file `createTtlCache` — generic TTL-based cache built on top of cacache
+ *   (persistent) plus an in-memory LRU memo layer. Two-tier caching: hot data
+ *   lives in `memoCache` (Map<string, TtlCacheEntry>) capped at `memoMaxSize`
+ *   entries with LRU eviction via Map insertion-order semantics. Persistent
+ *   storage uses cacache so cached values survive process restarts. Key
+ *   features:
  *
- * Two-tier caching: hot data lives in `memoCache` (Map<string,
- * TtlCacheEntry>) capped at `memoMaxSize` entries with LRU eviction
- * via Map insertion-order semantics. Persistent storage uses cacache
- * so cached values survive process restarts.
- *
- * Key features:
- * - Per-key namespacing via `prefix` so multiple caches share one
- *   cacache directory without conflicting.
- * - `getOrFetch` deduplicates concurrent requests for the same key
- *   (thundering-herd protection via `inflightRequests` map).
- * - Wildcard support for `getAll` / `deleteAll` (single-key methods
- *   throw on `*`).
- * - Clock-skew detection: entries with suspiciously-far-future
- *   `expiresAt` are treated as expired.
+ *   - Per-key namespacing via `prefix` so multiple caches share one cacache
+ *     directory without conflicting.
+ *   - `getOrFetch` deduplicates concurrent requests for the same key
+ *     (thundering-herd protection via `inflightRequests` map).
+ *   - Wildcard support for `getAll` / `deleteAll` (single-key methods throw on
+ *     `*`).
+ *   - Clock-skew detection: entries with suspiciously-far-future `expiresAt` are
+ *     treated as expired.
  */
 
 import { clear as cacacheClear } from '../cacache/clear'
@@ -54,11 +52,11 @@ const DEFAULT_MEMO_MAX_SIZE = 1000
  * Create a TTL-based cache instance.
  *
  * @example
- * ```typescript
- * const cache = createTtlCache({ ttl: 60_000, prefix: 'my-app' })
- * await cache.set('key', { value: 42 })
- * const data = await cache.get('key') // { value: 42 }
- * ```
+ *   ;```typescript
+ *   const cache = createTtlCache({ ttl: 60_000, prefix: 'my-app' })
+ *   await cache.set('key', { value: 42 })
+ *   const data = await cache.get('key') // { value: 42 }
+ *   ```
  */
 export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   const opts = {
@@ -114,8 +112,8 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   /**
-   * Check if entry is expired.
-   * Also detects clock skew by treating suspiciously far-future expiresAt as expired.
+   * Check if entry is expired. Also detects clock skew by treating suspiciously
+   * far-future expiresAt as expired.
    */
   function isExpired(entry: TtlCacheEntry<unknown>): boolean {
     const now = DateNow()
@@ -129,8 +127,8 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   /**
-   * Create a matcher function for a pattern (with wildcard support).
-   * Returns a function that tests if a key matches the pattern.
+   * Create a matcher function for a pattern (with wildcard support). Returns a
+   * function that tests if a key matches the pattern.
    */
   function createMatcher(pattern: string): (key: string) => boolean {
     const fullPattern = buildKey(pattern)

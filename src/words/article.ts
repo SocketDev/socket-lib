@@ -1,16 +1,16 @@
 /**
- * @fileoverview Indefinite-article picker — `determineArticle()`
- * returns `'a'` or `'an'` based on the leading vowel of a word.
+ * @file Indefinite-article picker — `determineArticle()` returns `'a'` or
+ *   `'an'` based on the leading vowel of a word.
  */
 
 /**
  * Determine the appropriate article (a/an) for a word.
  *
  * @example
- * ```typescript
- * determineArticle('apple')   // 'an'
- * determineArticle('banana')  // 'a'
- * ```
+ *   ;```typescript
+ *   determineArticle('apple') // 'an'
+ *   determineArticle('banana') // 'a'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function determineArticle(word: string): string {

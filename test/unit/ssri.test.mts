@@ -1,14 +1,14 @@
 /**
- * @fileoverview Unit tests for Subresource Integrity (SSRI) hash utilities.
+ * @file Unit tests for Subresource Integrity (SSRI) hash utilities. Tests SSRI
+ *   (Subresource Integrity) hash format utilities:
  *
- * Tests SSRI (Subresource Integrity) hash format utilities:
- * - ssriToHex() converts SSRI format to hex string
- * - hexToSsri() converts hex string to SSRI format
- * - parseSsri() parses SSRI strings into components
- * - isValidSsri() validates SSRI format strings
- * - isValidHex() validates hex hash strings
- * - Supports sha256, sha384, sha512 algorithms
- * Used by Socket tools for package integrity verification.
+ *   - ssriToHex() converts SSRI format to hex string
+ *   - hexToSsri() converts hex string to SSRI format
+ *   - parseSsri() parses SSRI strings into components
+ *   - isValidSsri() validates SSRI format strings
+ *   - isValidHex() validates hex hash strings
+ *   - Supports sha256, sha384, sha512 algorithms Used by Socket tools for package
+ *     integrity verification.
  */
 
 import { describe, expect, it } from 'vitest'

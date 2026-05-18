@@ -1,21 +1,15 @@
 /**
- * @fileoverview Linux Secret Service backend via `secret-tool`.
- *
- * `secret-tool` is the user-facing CLI for libsecret, which talks to
- * any running Secret Service provider (gnome-keyring, kwallet5,
- * KeePassXC's Secret Service integration, etc.). Most desktop Linux
- * installs have one; headless / containerized hosts do not.
- *
- * Storage shape: each item has a `service=<svc> user=<account>`
- * attribute pair plus the password body. Reads + writes use those
- * two attributes as the lookup key. The label (`--label`) is what
- * shows up in the user's keyring UI; we set it to the same string
- * passed in by the caller.
- *
- * No backing-file fallback. If `secret-tool` isn't on PATH or no
- * Secret Service provider is running, reads return `undefined` and
- * writes throw with an actionable hint — callers fall back to env
- * variables for that session.
+ * @file Linux Secret Service backend via `secret-tool`. `secret-tool` is the
+ *   user-facing CLI for libsecret, which talks to any running Secret Service
+ *   provider (gnome-keyring, kwallet5, KeePassXC's Secret Service integration,
+ *   etc.). Most desktop Linux installs have one; headless / containerized hosts
+ *   do not. Storage shape: each item has a `service=<svc> user=<account>`
+ *   attribute pair plus the password body. Reads + writes use those two
+ *   attributes as the lookup key. The label (`--label`) is what shows up in the
+ *   user's keyring UI; we set it to the same string passed in by the caller. No
+ *   backing-file fallback. If `secret-tool` isn't on PATH or no Secret Service
+ *   provider is running, reads return `undefined` and writes throw with an
+ *   actionable hint — callers fall back to env variables for that session.
  */
 
 import { spawn, spawnSync } from 'node:child_process'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Shared types for Bazel resolution.
+ * @file Shared types for Bazel resolution.
  */
 
 export type BazelSource = 'vfs' | 'path' | 'download'
@@ -8,8 +8,12 @@ export type BazelSource = 'vfs' | 'path' | 'download'
  * A resolved Bazel installation.
  */
 export interface ResolvedBazel {
-  /** Absolute path to the `bazel` (or `bazelisk`) executable. */
+  /**
+   * Absolute path to the `bazel` (or `bazelisk`) executable.
+   */
   readonly path: string
-  /** Which resolver tier found this. */
+  /**
+   * Which resolver tier found this.
+   */
   readonly source: BazelSource
 }

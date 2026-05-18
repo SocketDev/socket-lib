@@ -1,5 +1,5 @@
 /**
- * @fileoverview TypeScript type coverage utilities.
+ * @file TypeScript type coverage utilities.
  */
 
 import process from 'node:process'
@@ -14,7 +14,8 @@ import { NumberParseInt } from '../primordials/number'
 /**
  * Get TypeScript type coverage metrics.
  *
- * @throws {Error} When type-coverage command fails (if generateIfMissing is false).
+ * @throws {Error} When type-coverage command fails (if generateIfMissing is
+ *   false).
  */
 export async function getTypeCoverage(
   options?: GetTypeCoverageOptions | undefined,

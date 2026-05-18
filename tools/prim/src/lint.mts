@@ -1,21 +1,17 @@
 /* oxlint-disable socket/sort-source-methods -- lint-rule helpers ordered by visit order; rule config tables between them block autofix. */
 /**
- * @fileoverview `prim lint` — structural lint rules for primordials usage.
+ * @file `prim lint` — structural lint rules for primordials usage. Currently
+ *   encoded rules:
  *
- * Currently encoded rules:
- *   - **ctor-rename**: constructor-shaped primordials (`Array`, `Set`,
- *     `Map`, `TypeError`, etc.) imported from `primordials` MUST be
- *     aliased `<Name>: <Name>Ctor` to avoid shadowing the global:
- *
- *       const { Array: ArrayCtor, Set: SetCtor } = primordials   // OK
- *       const { Array, Set } = primordials                       // VIOLATION
- *
- *     Same idea for any other alias (`Array: A`, `Set: MySet`) — the
- *     local name must be exactly `<Name>Ctor`.
- *
- * The file walks source code, parses every `const { ... } = primordials`
- * destructure, and reports violations with file:line:column locations.
- * Future lint rules slot into the same visitor.
+ *   - **ctor-rename**: constructor-shaped primordials (`Array`, `Set`, `Map`,
+ *     `TypeError`, etc.) imported from `primordials` MUST be aliased `<Name>:
+ *     <Name>Ctor` to avoid shadowing the global: const { Array: ArrayCtor, Set:
+ *     SetCtor } = primordials // OK const { Array, Set } = primordials //
+ *     VIOLATION Same idea for any other alias (`Array: A`, `Set: MySet`) — the
+ *     local name must be exactly `<Name>Ctor`. The file walks source code,
+ *     parses every `const { ... } = primordials` destructure, and reports
+ *     violations with file:line:column locations. Future lint rules slot into
+ *     the same visitor.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
@@ -83,14 +79,15 @@ const PARSE_OPTIONS = {
 
 /**
  * @typedef {Object} LintFinding
- * @property {string} rule        The lint rule that fired (e.g. `ctor-rename`).
+ *
+ * @property {string} rule The lint rule that fired (e.g. `ctor-rename`).
  * @property {string} file
  * @property {number} line
  * @property {number} column
- * @property {string} name        The identifier that violated the rule.
- * @property {string} expected    The expected name/alias.
- * @property {string} source      Where it was destructured from
- *                                (`primordials`, `require('foo')`, etc.).
+ * @property {string} name The identifier that violated the rule.
+ * @property {string} expected The expected name/alias.
+ * @property {string} source Where it was destructured from (`primordials`,
+ *   `require('foo')`, etc.).
  */
 
 export function buildLineStarts(src) {
@@ -118,17 +115,17 @@ export function lineColumnAt(lineStarts, offset) {
 }
 
 /**
- * Default set of source identifiers / require specifiers that we
- * consider "primordials-shaped" — destructures from these sources are
- * subject to ctor-rename and other primordials lint rules. The user
- * can extend this via `--primordials-source <name>` (CLI flag,
- * repeatable).
+ * Default set of source identifiers / require specifiers that we consider
+ * "primordials-shaped" — destructures from these sources are subject to
+ * ctor-rename and other primordials lint rules. The user can extend this via
+ * `--primordials-source <name>` (CLI flag, repeatable).
  *
  * Defaults cover the patterns we know about today:
- *   - `primordials` — Node bootstrap global (in `lib/internal/...`).
- *   - `internal/socketsecurity/safe-references` — socket-btm's curated
- *     re-export of cached primordial references.
- *   - `safe-references` — short form (when require resolution allows).
+ *
+ * - `primordials` — Node bootstrap global (in `lib/internal/...`).
+ * - `internal/socketsecurity/safe-references` — socket-btm's curated re-export of
+ *   cached primordial references.
+ * - `safe-references` — short form (when require resolution allows).
  */
 const DEFAULT_PRIMORDIAL_SOURCES = [
   'primordials',
@@ -137,9 +134,9 @@ const DEFAULT_PRIMORDIAL_SOURCES = [
 ]
 
 /**
- * Identifies the "kind" of a destructuring init expression. Returns
- * the canonical source name (e.g. `primordials`, `internal/foo`) for
- * sources we recognize, or `null` for everything else.
+ * Identifies the "kind" of a destructuring init expression. Returns the
+ * canonical source name (e.g. `primordials`, `internal/foo`) for sources we
+ * recognize, or `null` for everything else.
  */
 export function classifySource(node, primordialSources) {
   if (!node) {
@@ -173,7 +170,9 @@ export function classifySource(node, primordialSources) {
   return undefined
 }
 
-/** Pretty-print the source for finding output. */
+/**
+ * Pretty-print the source for finding output.
+ */
 export function describeSource(node) {
   if (!node) {
     return '<unknown>'
@@ -198,9 +197,9 @@ export function describeSource(node) {
  * @param {string} opts.scanDir
  * @param {string[]} [opts.skipDirs]
  * @param {string[]} [opts.skipFiles]
- * @param {string[]} [opts.primordialSources]   Override default
- *        ['primordials', 'safe-references', ...]. Use to add custom
- *        primordials-shaped modules.
+ * @param {string[]} [opts.primordialSources] Override default ['primordials',
+ *   'safe-references', ...]. Use to add custom primordials-shaped modules.
+ *
  * @returns {LintFinding[]}
  */
 export function lintSource({

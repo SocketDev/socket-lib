@@ -1,16 +1,19 @@
 /**
- * @fileoverview Additional comprehensive tests for file system utilities to increase coverage.
+ * @file Additional comprehensive tests for file system utilities to increase
+ *   coverage. Extends fs.test.ts with additional edge cases and coverage
+ *   scenarios:
  *
- * Extends fs.test.ts with additional edge cases and coverage scenarios:
- * - findUp edge cases: onlyFiles/onlyDirectories combinations, deeply nested paths
- * - Error handling: non-existent paths, permission errors, invalid JSON
- * - Binary file operations: non-UTF8 content, Buffer handling
- * - Directory operations: empty directories, nested structures
- * - Sync vs async consistency: validates both APIs behave identically
- * - Platform-specific scenarios: Windows vs Unix path handling
- * - Safe operations: graceful handling of missing files, concurrent access
- * Uses runWithTempDir for isolated test environments to avoid filesystem pollution.
- * Complements primary fs.test.ts by focusing on uncommon code paths and error conditions.
+ *   - findUp edge cases: onlyFiles/onlyDirectories combinations, deeply nested
+ *     paths
+ *   - Error handling: non-existent paths, permission errors, invalid JSON
+ *   - Binary file operations: non-UTF8 content, Buffer handling
+ *   - Directory operations: empty directories, nested structures
+ *   - Sync vs async consistency: validates both APIs behave identically
+ *   - Platform-specific scenarios: Windows vs Unix path handling
+ *   - Safe operations: graceful handling of missing files, concurrent access Uses
+ *     runWithTempDir for isolated test environments to avoid filesystem
+ *     pollution. Complements primary fs.test.ts by focusing on uncommon code
+ *     paths and error conditions.
  */
 
 /* oxlint-disable socket/prefer-safe-delete, socket/prefer-exists-sync -- tests verify raw fs behavior (unlink semantics, stat output) — not the lib wrappers. */

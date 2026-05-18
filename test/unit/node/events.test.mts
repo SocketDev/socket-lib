@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/node/events.ts.
+ * @file Unit tests for src/node/events.ts.
  */
 
 import { describe, expect, it } from 'vitest'

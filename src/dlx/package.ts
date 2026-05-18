@@ -1,40 +1,31 @@
 /**
- * @fileoverview DLX package execution — install and execute npm packages.
+ * @file DLX package execution — install and execute npm packages. This module
+ *   provides functionality to install and execute npm packages in the
+ *   ~/.socket/_dlx directory, similar to npx but with Socket's own cache. Uses
+ *   content-addressed storage like npm's _npx:
  *
- * This module provides functionality to install and execute npm packages
- * in the ~/.socket/_dlx directory, similar to npx but with Socket's own cache.
- *
- * Uses content-addressed storage like npm's _npx:
- * - Hash is generated from package spec (name@version)
- * - Each unique spec gets its own directory: ~/.socket/_dlx/<hash>/
- * - Allows caching multiple versions of the same package
- *
- * Concurrency protection:
- * - Uses process-lock to prevent concurrent installation corruption
- * - Lock file created at ~/.socket/_dlx/<hash>/concurrency.lock
- * - Uses npm npx's concurrency.lock naming convention (5s stale, 2s touching)
- * - Prevents multiple processes from corrupting the same package installation
- *
- * Version range handling:
- * - Exact versions (1.0.0) use cache if available
- * - Range versions (^1.0.0, ~1.0.0) auto-force to get latest within range
- * - User can override with explicit force: false
- *
- * Key difference from dlx/binary.ts:
- * - dlx/binary.ts: Downloads standalone binaries from URLs
- * - dlx/package.ts: Installs npm packages from registries
- *
- * Implementation:
- * - Uses Arborist for package installation (like npx, no npm CLI required)
- * - Split into downloadPackage() and executePackage() for flexibility
- * - dlxPackage() combines both for convenience
- *
- * Module shape: this file holds the three async orchestrators
- * (`dlxPackage`, `downloadPackage`, `ensurePackageInstalled`) and the
- * synchronous `executePackage`. The supporting surface lives in
- * sibling leaves and is re-exported here so existing
- * `dlx/package` importers keep working unchanged:
- *
+ *   - Hash is generated from package spec (name@version)
+ *   - Each unique spec gets its own directory: ~/.socket/_dlx/<hash>/
+ *   - Allows caching multiple versions of the same package Concurrency
+ *     protection:
+ *   - Uses process-lock to prevent concurrent installation corruption
+ *   - Lock file created at ~/.socket/_dlx/<hash>/concurrency.lock
+ *   - Uses npm npx's concurrency.lock naming convention (5s stale, 2s touching)
+ *   - Prevents multiple processes from corrupting the same package installation
+ *     Version range handling:
+ *   - Exact versions (1.0.0) use cache if available
+ *   - Range versions (^1.0.0, ~1.0.0) auto-force to get latest within range
+ *   - User can override with explicit force: false Key difference from
+ *     dlx/binary.ts:
+ *   - dlx/binary.ts: Downloads standalone binaries from URLs
+ *   - dlx/package.ts: Installs npm packages from registries Implementation:
+ *   - Uses Arborist for package installation (like npx, no npm CLI required)
+ *   - Split into downloadPackage() and executePackage() for flexibility
+ *   - dlxPackage() combines both for convenience Module shape: this file holds
+ *     the three async orchestrators (`dlxPackage`, `downloadPackage`,
+ *     `ensurePackageInstalled`) and the synchronous `executePackage`. The
+ *     supporting surface lives in sibling leaves and is re-exported here so
+ *     existing `dlx/package` importers keep working unchanged:
  *   - types — `./types`
  *   - PURL + firewall — `./firewall`
  *   - spec parsing — `./spec`
@@ -71,28 +62,27 @@ import { ErrorCtor } from '../primordials/error'
 import { RegExpPrototypeTest } from '../primordials/regexp'
 
 /**
- * Regex to check if a version string contains range operators.
- * Matches any version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
+ * Regex to check if a version string contains range operators. Matches any
+ * version with range operators: ~, ^, >, <, =, x, X, *, spaces, or ||.
  */
 const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
 
 /**
  * Execute a package via DLX - install if needed and run its binary.
  *
- * This is the Socket equivalent of npx/pnpm dlx/yarn dlx, but using
- * our own cache directory (~/.socket/_dlx) and installation logic.
+ * This is the Socket equivalent of npx/pnpm dlx/yarn dlx, but using our own
+ * cache directory (~/.socket/_dlx) and installation logic.
  *
  * Auto-forces reinstall for version ranges to get latest within range.
  *
  * @example
- * ```typescript
- * // Download and execute cdxgen
- * const result = await dlxPackage(
- *   ['--version'],
- *   { package: '@cyclonedx/cdxgen@10.0.0' }
- * )
- * await result.spawnPromise
- * ```
+ *   ;```typescript
+ *   // Download and execute cdxgen
+ *   const result = await dlxPackage(['--version'], {
+ *     package: '@cyclonedx/cdxgen@10.0.0',
+ *   })
+ *   await result.spawnPromise
+ *   ```
  */
 export async function dlxPackage(
   args: readonly string[] | string[],
@@ -117,20 +107,20 @@ export async function dlxPackage(
 }
 
 /**
- * Download and install a package without executing it.
- * This is useful for self-update or when you need the package files
- * but don't want to run the binary immediately.
+ * Download and install a package without executing it. This is useful for
+ * self-update or when you need the package files but don't want to run the
+ * binary immediately.
  *
  * @example
- * ```typescript
- * // Install @socketsecurity/cli without running it
- * const result = await downloadPackage({
- *   package: '@socketsecurity/cli@1.2.0',
- *   force: true
- * })
- * console.log('Installed to:', result.packageDir)
- * console.log('Binary at:', result.binaryPath)
- * ```
+ *   ;```typescript
+ *   // Install @socketsecurity/cli without running it
+ *   const result = await downloadPackage({
+ *     package: '@socketsecurity/cli@1.2.0',
+ *     force: true,
+ *   })
+ *   console.log('Installed to:', result.packageDir)
+ *   console.log('Binary at:', result.binaryPath)
+ *   ```
  */
 export async function downloadPackage(
   options: DlxPackageOptions,
@@ -189,19 +179,19 @@ export async function downloadPackage(
 }
 
 /**
- * Install package to ~/.socket/_dlx/<hash>/ if not already installed.
- * Uses pacote for installation (no npm CLI required).
- * Protected by process lock to prevent concurrent installation corruption.
+ * Install package to ~/.socket/_dlx/<hash>/ if not already installed. Uses
+ * pacote for installation (no npm CLI required). Protected by process lock to
+ * prevent concurrent installation corruption.
  *
  * @example
- * ```typescript
- * const { installed, packageDir } = await ensurePackageInstalled(
+ *   ```typescript
+ *   const { installed, packageDir } = await ensurePackageInstalled(
  *   'prettier',
  *   'prettier@3.0.0',
- *   false
- * )
- * console.log(`Installed: ${installed}, dir: ${packageDir}`)
- * ```
+ *   false,
+ *   )
+ *   console.log(`Installed: ${installed}, dir: ${packageDir}`)
+ *   ```
  */
 export async function ensurePackageInstalled(
   packageName: string,
@@ -376,22 +366,22 @@ export async function ensurePackageInstalled(
 }
 
 /**
- * Execute a package's binary with cross-platform shell handling.
- * The package must already be installed (use downloadPackage first).
+ * Execute a package's binary with cross-platform shell handling. The package
+ * must already be installed (use downloadPackage first).
  *
- * On Windows, script files (.bat, .cmd, .ps1) require shell: true.
- * Matches npm/npx execution behavior.
+ * On Windows, script files (.bat, .cmd, .ps1) require shell: true. Matches
+ * npm/npx execution behavior.
  *
  * @example
- * ```typescript
- * // Execute an already-installed package
- * const downloaded = await downloadPackage({ package: 'cowsay@1.5.0' })
- * const result = await executePackage(
- *   downloaded.binaryPath,
- *   ['Hello World'],
- *   { stdio: 'inherit' }
- * )
- * ```
+ *   ;```typescript
+ *   // Execute an already-installed package
+ *   const downloaded = await downloadPackage({ package: 'cowsay@1.5.0' })
+ *   const result = await executePackage(
+ *     downloaded.binaryPath,
+ *     ['Hello World'],
+ *     { stdio: 'inherit' },
+ *   )
+ *   ```
  */
 export function executePackage(
   binaryPath: string,

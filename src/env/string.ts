@@ -1,8 +1,7 @@
 /**
- * @fileoverview `envAsString` — coerce an env-var-shaped value into
- * a string. Defaults to trimming whitespace; `trim: false` preserves
- * the value as-is. Positional second argument is back-compat for the
- * legacy `defaultValue` form.
+ * @file `envAsString` — coerce an env-var-shaped value into a string. Defaults
+ *   to trimming whitespace; `trim: false` preserves the value as-is. Positional
+ *   second argument is back-compat for the legacy `defaultValue` form.
  */
 
 import { ArrayIsArray } from '../primordials/array'
@@ -21,19 +20,20 @@ const StringCtor = String
  * Back-compat overload: passing a bare string as the second argument is
  * equivalent to `{ defaultValue: S }`.
  *
- * @param value - The value to convert
- * @param defaultValueOrOptions - Default (string) or options object
- * @returns The string value, or the default value
- *
  * @example
- * ```typescript
- * import { envAsString } from '@socketsecurity/lib/env/string'
+ *   ;```typescript
+ *   import { envAsString } from '@socketsecurity/lib/env/string'
  *
- * envAsString('  hello  ')                    // 'hello' (trimmed)
- * envAsString('  hello  ', { trim: false })   // '  hello  '
- * envAsString(undefined)                      // ''
- * envAsString(null, 'n/a')                    // 'n/a' (legacy positional)
- * ```
+ *   envAsString('  hello  ') // 'hello' (trimmed)
+ *   envAsString('  hello  ', { trim: false }) // '  hello  '
+ *   envAsString(undefined) // ''
+ *   envAsString(null, 'n/a') // 'n/a' (legacy positional)
+ *   ```
+ *
+ * @param value - The value to convert.
+ * @param defaultValueOrOptions - Default (string) or options object.
+ *
+ * @returns The string value, or the default value
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function envAsString(

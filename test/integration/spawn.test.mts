@@ -1,13 +1,13 @@
 /**
- * @fileoverview Integration tests for spawn process utilities.
+ * @file Integration tests for spawn process utilities. Tests real process
+ *   spawning with actual commands:
  *
- * Tests real process spawning with actual commands:
- * - spawn() executes commands and captures output
- * - spawnSync() executes commands synchronously
- * - Process exit codes, stdout, stderr handling
- * - Environment variable passing
- * - Working directory changes
- * Used by Socket CLI for running npm, git, and other external commands.
+ *   - spawn() executes commands and captures output
+ *   - spawnSync() executes commands synchronously
+ *   - Process exit codes, stdout, stderr handling
+ *   - Environment variable passing
+ *   - Working directory changes Used by Socket CLI for running npm, git, and
+ *     other external commands.
  */
 
 import process from 'node:process'

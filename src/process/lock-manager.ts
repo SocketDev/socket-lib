@@ -1,45 +1,45 @@
 /**
- * @fileoverview `ProcessLockManager` — the class that owns active
- * locks, touch timers, and the exit-handler registration. Provides
- * `acquire` / `release` / `withLock`. Co-located with the touch and
- * staleness helpers because they share private state (`activeLocks`
- * + `touchTimers`).
+ * @file `ProcessLockManager` — the class that owns active locks, touch timers,
+ *   and the exit-handler registration. Provides `acquire` / `release` /
+ *   `withLock`. Co-located with the touch and staleness helpers because they
+ *   share private state (`activeLocks` + `touchTimers`).
  *
- * ## Why directories instead of files?
+ *   ## Why directories instead of files?
  *
- * This implementation uses `mkdir()` to create lock directories (not files) because:
+ *   This implementation uses `mkdir()` to create lock directories (not files)
+ *   because:
  *
- * 1. **Atomic guarantee**: `mkdir()` is guaranteed atomic across ALL filesystems,
- *    including NFS. Only ONE process can successfully create the directory. If it
- *    exists, `mkdir()` fails with EEXIST instantly with no race conditions.
+ *   1. **Atomic guarantee**: `mkdir()` is guaranteed atomic across ALL
+ *      filesystems, including NFS. Only ONE process can successfully create the
+ *      directory. If it exists, `mkdir()` fails with EEXIST instantly with no
+ *      race conditions.
+ *   2. **File-based locking issues**:
  *
- * 2. **File-based locking issues**:
- *    - `writeFile()` with `flag: 'wx'` - atomicity can fail on NFS
- *    - `open()` with `O_EXCL` - not guaranteed atomic on older NFS
- *    - Traditional lockfiles - can have race conditions on network filesystems
+ *   - `writeFile()` with `flag: 'wx'` - atomicity can fail on NFS
+ *   - `open()` with `O_EXCL` - not guaranteed atomic on older NFS
+ *   - Traditional lockfiles - can have race conditions on network filesystems
  *
- * 3. **Simplicity**: No need to write/read file content, track PIDs, or manage
- *    file descriptors. Just create/delete directory and check mtime.
+ *   3. **Simplicity**: No need to write/read file content, track PIDs, or manage
+ *      file descriptors. Just create/delete directory and check mtime.
+ *   4. **Historical precedent**: Well-known Unix locking pattern used by package
+ *      managers for decades. Git uses similar approach for `.git/index.lock`.
  *
- * 4. **Historical precedent**: Well-known Unix locking pattern used by package
- *    managers for decades. Git uses similar approach for `.git/index.lock`.
+ *   ## The mtime trick
  *
- * ## The mtime trick
+ *   We periodically update the lock directory's mtime (modification time) by
+ *   "touching" it to signal "I'm still actively working". This prevents other
+ *   processes from treating the lock as stale and removing it. **The lock
+ *   directory remains empty** - it's just a sentinel that signals "locked". The
+ *   mtime is the only data needed to track lock freshness.
  *
- * We periodically update the lock directory's mtime (modification time) by
- * "touching" it to signal "I'm still actively working". This prevents other
- * processes from treating the lock as stale and removing it.
+ *   ## npm npx compatibility
  *
- * **The lock directory remains empty** - it's just a sentinel that signals
- * "locked". The mtime is the only data needed to track lock freshness.
+ *   This implementation matches npm npx's concurrency.lock approach:
  *
- * ## npm npx compatibility
- *
- * This implementation matches npm npx's concurrency.lock approach:
- * - Lock created via `mkdir(path.join(installDir, 'concurrency.lock'))`
- * - 5-second stale timeout (if mtime is older than 5s, lock is stale)
- * - 2-second touching interval (updates mtime every 2s to keep lock fresh)
- * - Automatic cleanup on process exit
+ *   - Lock created via `mkdir(path.join(installDir, 'concurrency.lock'))`
+ *   - 5-second stale timeout (if mtime is older than 5s, lock is stale)
+ *   - 2-second touching interval (updates mtime every 2s to keep lock fresh)
+ *   - Automatic cleanup on process exit
  */
 
 import { errorMessage } from '../errors/message'
@@ -59,9 +59,8 @@ import type { ProcessLockOptions } from './lock-types'
 const logger = getDefaultLogger()
 
 /**
- * Process lock manager with stale detection and exit cleanup.
- * Provides cross-platform inter-process synchronization using file-system
- * based locks.
+ * Process lock manager with stale detection and exit cleanup. Provides
+ * cross-platform inter-process synchronization using file-system based locks.
  */
 export class ProcessLockManager {
   private activeLocks = new SetCtor<string>()
@@ -69,8 +68,8 @@ export class ProcessLockManager {
   private exitHandlerRegistered = false
 
   /**
-   * Ensure process exit handler is registered for cleanup.
-   * Registers a handler that cleans up all active locks when the process exits.
+   * Ensure process exit handler is registered for cleanup. Registers a handler
+   * that cleans up all active locks when the process exits.
    */
   private ensureExitHandler() {
     if (this.exitHandlerRegistered) {
@@ -104,10 +103,10 @@ export class ProcessLockManager {
   }
 
   /**
-   * Touch a lock file to update its mtime.
-   * This prevents the lock from being detected as stale during long operations.
+   * Touch a lock file to update its mtime. This prevents the lock from being
+   * detected as stale during long operations.
    *
-   * @param lockPath - Path to the lock directory
+   * @param lockPath - Path to the lock directory.
    */
   private touchLock(lockPath: string): void {
     try {
@@ -126,11 +125,11 @@ export class ProcessLockManager {
   }
 
   /**
-   * Start periodic touching of a lock file.
-   * Aligned with npm npx strategy to prevent false stale detection.
+   * Start periodic touching of a lock file. Aligned with npm npx strategy to
+   * prevent false stale detection.
    *
-   * @param lockPath - Path to the lock directory
-   * @param intervalMs - Touch interval in milliseconds
+   * @param lockPath - Path to the lock directory.
+   * @param intervalMs - Touch interval in milliseconds.
    */
   private startTouchTimer(lockPath: string, intervalMs: number): void {
     if (intervalMs <= 0 || this.touchTimers.has(lockPath)) {
@@ -150,7 +149,7 @@ export class ProcessLockManager {
   /**
    * Stop periodic touching of a lock file.
    *
-   * @param lockPath - Path to the lock directory
+   * @param lockPath - Path to the lock directory.
    */
   private stopTouchTimer(lockPath: string): void {
     const timer = this.touchTimers.get(lockPath)
@@ -161,12 +160,13 @@ export class ProcessLockManager {
   }
 
   /**
-   * Check if a lock is stale based on mtime.
-   * Uses second-level granularity to avoid APFS floating-point precision issues.
-   * Aligned with npm's npx locking strategy.
+   * Check if a lock is stale based on mtime. Uses second-level granularity to
+   * avoid APFS floating-point precision issues. Aligned with npm's npx locking
+   * strategy.
    *
-   * @param lockPath - Path to the lock directory
-   * @param staleMs - Stale timeout in milliseconds
+   * @param lockPath - Path to the lock directory.
+   * @param staleMs - Stale timeout in milliseconds.
+   *
    * @returns True if lock exists and is stale
    */
   private isStale(lockPath: string, staleMs: number): boolean {
@@ -195,27 +195,29 @@ export class ProcessLockManager {
   }
 
   /**
-   * Acquire a lock using mkdir for atomic operation.
-   * Handles stale locks and includes exit cleanup.
+   * Acquire a lock using mkdir for atomic operation. Handles stale locks and
+   * includes exit cleanup.
    *
    * This method attempts to create a lock directory atomically. If the lock
    * already exists, it checks if it's stale and removes it before retrying.
    * Uses exponential backoff with jitter for retry attempts.
    *
-   * @param lockPath - Path to the lock directory
-   * @param options - Lock acquisition options
-   * @returns Release function to unlock
-   * @throws Error if lock cannot be acquired after all retries
-   *
    * @example
-   * ```typescript
-   * const release = await processLock.acquire('/tmp/my-lock')
-   * try {
-   *   // Critical section
-   * } finally {
-   *   release()
-   * }
-   * ```
+   *   ;```typescript
+   *   const release = await processLock.acquire('/tmp/my-lock')
+   *   try {
+   *     // Critical section
+   *   } finally {
+   *     release()
+   *   }
+   *   ```
+   *
+   * @param lockPath - Path to the lock directory.
+   * @param options - Lock acquisition options.
+   *
+   * @returns Release function to unlock
+   *
+   * @throws Error if lock cannot be acquired after all retries
    */
   async acquire(
     lockPath: string,
@@ -353,15 +355,15 @@ export class ProcessLockManager {
   }
 
   /**
-   * Release a lock and remove from tracking.
-   * Stops periodic touching and removes the lock directory.
-   *
-   * @param lockPath - Path to the lock directory
+   * Release a lock and remove from tracking. Stops periodic touching and
+   * removes the lock directory.
    *
    * @example
-   * ```typescript
-   * processLock.release('/tmp/my-lock')
-   * ```
+   *   ;```typescript
+   *   processLock.release('/tmp/my-lock')
+   *   ```
+   *
+   * @param lockPath - Path to the lock directory.
    */
   release(lockPath: string): void {
     // Stop periodic touching.
@@ -378,25 +380,27 @@ export class ProcessLockManager {
   }
 
   /**
-   * Execute a function with exclusive lock protection.
-   * Automatically handles lock acquisition, execution, and cleanup.
+   * Execute a function with exclusive lock protection. Automatically handles
+   * lock acquisition, execution, and cleanup.
    *
-   * This is the recommended way to use process locks, as it guarantees
-   * cleanup even if the callback throws an error.
-   *
-   * @param lockPath - Path to the lock directory
-   * @param fn - Function to execute while holding the lock
-   * @param options - Lock acquisition options
-   * @returns Result of the callback function
-   * @throws Error from callback or lock acquisition failure
+   * This is the recommended way to use process locks, as it guarantees cleanup
+   * even if the callback throws an error.
    *
    * @example
-   * ```typescript
-   * const result = await processLock.withLock('/tmp/my-lock', async () => {
-   *   // Critical section
-   *   return someValue
-   * })
-   * ```
+   *   ;```typescript
+   *   const result = await processLock.withLock('/tmp/my-lock', async () => {
+   *     // Critical section
+   *     return someValue
+   *   })
+   *   ```
+   *
+   * @param lockPath - Path to the lock directory.
+   * @param fn - Function to execute while holding the lock.
+   * @param options - Lock acquisition options.
+   *
+   * @returns Result of the callback function
+   *
+   * @throws Error from callback or lock acquisition failure
    */
   async withLock<T>(
     lockPath: string,

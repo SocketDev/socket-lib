@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for findPackages.
+ * @file Unit tests for findPackages.
  */
 
 import { describe, expect, it } from 'vitest'

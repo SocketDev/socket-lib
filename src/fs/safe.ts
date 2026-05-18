@@ -1,10 +1,9 @@
 /**
- * @fileoverview Safe deletion + idempotent directory creation. The
- * delete helpers gate destructive operations behind an "allowed
- * directories" allow-list (temp dir, cacache dir, ~/.socket); paths
- * outside those need an explicit `force: true`. The mkdir helpers
- * default to `recursive: true` and swallow `EEXIST` so concurrent
- * callers don't race-condition each other.
+ * @file Safe deletion + idempotent directory creation. The delete helpers gate
+ *   destructive operations behind an "allowed directories" allow-list (temp
+ *   dir, cacache dir, ~/.socket); paths outside those need an explicit `force:
+ *   true`. The mkdir helpers default to `recursive: true` and swallow `EEXIST`
+ *   so concurrent callers don't race-condition each other.
  */
 
 import { isArray } from '../arrays/predicates'
@@ -57,32 +56,38 @@ export function getDel() {
 /**
  * Safely delete a file or directory asynchronously with built-in protections.
  *
- * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer deletion with these safety features:
+ * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer
+ * deletion with these safety features:
+ *
  * - By default, prevents deleting the current working directory (cwd) and above
  * - Allows deleting within cwd (descendant paths) without force option
- * - Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories
+ * - Automatically uses force: true for temp directory, cacache, and ~/.socket
+ *   subdirectories
  * - Protects against accidental deletion of parent directories via `../` paths
  *
- * @param filepath - Path or array of paths to delete (supports glob patterns)
- * @param options - Deletion options including force, retries, and recursion
- * @param options.force - Set to true to allow deleting cwd and above (use with caution)
- * @throws {Error} When attempting to delete protected paths without force option
- *
  * @example
- * ```ts
- * // Delete files within cwd (safe by default)
- * await safeDelete('./build')
- * await safeDelete('./dist')
+ *   ;```ts
+ *   // Delete files within cwd (safe by default)
+ *   await safeDelete('./build')
+ *   await safeDelete('./dist')
  *
- * // Delete with glob patterns
- * await safeDelete(['./temp/**', '!./temp/keep.txt'])
+ *   // Delete with glob patterns
+ *   await safeDelete(['./temp/**', '!./temp/keep.txt'])
  *
- * // Delete with custom retry settings
- * await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
+ *   // Delete with custom retry settings
+ *   await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
  *
- * // Force delete cwd or above (requires explicit force: true)
- * await safeDelete('../parent-dir', { force: true })
- * ```
+ *   // Force delete cwd or above (requires explicit force: true)
+ *   await safeDelete('../parent-dir', { force: true })
+ *   ```
+ *
+ * @param filepath - Path or array of paths to delete (supports glob patterns)
+ * @param options - Deletion options including force, retries, and recursion.
+ * @param options.force - Set to true to allow deleting cwd and above (use with
+ *   caution)
+ *
+ * @throws {Error} When attempting to delete protected paths without force
+ *   option.
  */
 export async function safeDelete(
   filepath: PathLike | PathLike[],
@@ -152,32 +157,38 @@ export async function safeDelete(
 /**
  * Safely delete a file or directory synchronously with built-in protections.
  *
- * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer deletion with these safety features:
+ * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer
+ * deletion with these safety features:
+ *
  * - By default, prevents deleting the current working directory (cwd) and above
  * - Allows deleting within cwd (descendant paths) without force option
- * - Automatically uses force: true for temp directory, cacache, and ~/.socket subdirectories
+ * - Automatically uses force: true for temp directory, cacache, and ~/.socket
+ *   subdirectories
  * - Protects against accidental deletion of parent directories via `../` paths
  *
- * @param filepath - Path or array of paths to delete (supports glob patterns)
- * @param options - Deletion options including force, retries, and recursion
- * @param options.force - Set to true to allow deleting cwd and above (use with caution)
- * @throws {Error} When attempting to delete protected paths without force option
- *
  * @example
- * ```ts
- * // Delete files within cwd (safe by default)
- * safeDeleteSync('./build')
- * safeDeleteSync('./dist')
+ *   ;```ts
+ *   // Delete files within cwd (safe by default)
+ *   safeDeleteSync('./build')
+ *   safeDeleteSync('./dist')
  *
- * // Delete with glob patterns
- * safeDeleteSync(['./temp/**', '!./temp/keep.txt'])
+ *   // Delete with glob patterns
+ *   safeDeleteSync(['./temp/**', '!./temp/keep.txt'])
  *
- * // Delete multiple paths
- * safeDeleteSync(['./coverage', './reports'])
+ *   // Delete multiple paths
+ *   safeDeleteSync(['./coverage', './reports'])
  *
- * // Force delete cwd or above (requires explicit force: true)
- * safeDeleteSync('../parent-dir', { force: true })
- * ```
+ *   // Force delete cwd or above (requires explicit force: true)
+ *   safeDeleteSync('../parent-dir', { force: true })
+ *   ```
+ *
+ * @param filepath - Path or array of paths to delete (supports glob patterns)
+ * @param options - Deletion options including force, retries, and recursion.
+ * @param options.force - Set to true to allow deleting cwd and above (use with
+ *   caution)
+ *
+ * @throws {Error} When attempting to delete protected paths without force
+ *   option.
  */
 export function safeDeleteSync(
   filepath: PathLike | PathLike[],
@@ -259,34 +270,36 @@ export function safeDeleteSync(
 }
 
 /**
- * Safely create a directory asynchronously, ignoring EEXIST errors.
- * This function wraps fs.promises.mkdir and handles the race condition where
- * the directory might already exist, which is common in concurrent code.
+ * Safely create a directory asynchronously, ignoring EEXIST errors. This
+ * function wraps fs.promises.mkdir and handles the race condition where the
+ * directory might already exist, which is common in concurrent code.
  *
- * Unlike fs.promises.mkdir with recursive:true, this function:
- * - Silently ignores EEXIST errors (directory already exists)
- * - Re-throws all other errors (permissions, invalid path, etc.)
- * - Works reliably in multi-process/concurrent scenarios
- * - Defaults to recursive: true for convenient nested directory creation
- *
- * @param path - Directory path to create
- * @param options - Options including recursive (default: true) and mode settings
- * @returns Promise that resolves when directory is created or already exists
+ * Unlike fs.promises.mkdir with recursive:true, this function: - Silently
+ * ignores EEXIST errors (directory already exists) - Re-throws all other errors
+ * (permissions, invalid path, etc.) - Works reliably in
+ * multi-process/concurrent scenarios - Defaults to recursive: true for
+ * convenient nested directory creation.
  *
  * @example
- * ```ts
- * // Create a directory recursively by default, no error if it exists
- * await safeMkdir('./config')
+ *   ;```ts
+ *   // Create a directory recursively by default, no error if it exists
+ *   await safeMkdir('./config')
  *
- * // Create nested directories (recursive: true is the default)
- * await safeMkdir('./data/cache/temp')
+ *   // Create nested directories (recursive: true is the default)
+ *   await safeMkdir('./data/cache/temp')
  *
- * // Create with specific permissions
- * await safeMkdir('./secure', { mode: 0o700 })
+ *   // Create with specific permissions
+ *   await safeMkdir('./secure', { mode: 0o700 })
  *
- * // Explicitly disable recursive behavior
- * await safeMkdir('./single-level', { recursive: false })
- * ```
+ *   // Explicitly disable recursive behavior
+ *   await safeMkdir('./single-level', { recursive: false })
+ *   ```
+ *
+ * @param path - Directory path to create.
+ * @param options - Options including recursive (default: true) and mode
+ *   settings.
+ *
+ * @returns Promise that resolves when directory is created or already exists
  */
 export async function safeMkdir(
   path: PathLike,
@@ -310,33 +323,34 @@ export async function safeMkdir(
 }
 
 /**
- * Safely create a directory synchronously, ignoring EEXIST errors.
- * This function wraps fs.mkdirSync and handles the race condition where
- * the directory might already exist, which is common in concurrent code.
+ * Safely create a directory synchronously, ignoring EEXIST errors. This
+ * function wraps fs.mkdirSync and handles the race condition where the
+ * directory might already exist, which is common in concurrent code.
  *
- * Unlike fs.mkdirSync with recursive:true, this function:
- * - Silently ignores EEXIST errors (directory already exists)
- * - Re-throws all other errors (permissions, invalid path, etc.)
- * - Works reliably in multi-process/concurrent scenarios
- * - Defaults to recursive: true for convenient nested directory creation
- *
- * @param path - Directory path to create
- * @param options - Options including recursive (default: true) and mode settings
+ * Unlike fs.mkdirSync with recursive:true, this function: - Silently ignores
+ * EEXIST errors (directory already exists) - Re-throws all other errors
+ * (permissions, invalid path, etc.) - Works reliably in
+ * multi-process/concurrent scenarios - Defaults to recursive: true for
+ * convenient nested directory creation.
  *
  * @example
- * ```ts
- * // Create a directory recursively by default, no error if it exists
- * safeMkdirSync('./config')
+ *   ;```ts
+ *   // Create a directory recursively by default, no error if it exists
+ *   safeMkdirSync('./config')
  *
- * // Create nested directories (recursive: true is the default)
- * safeMkdirSync('./data/cache/temp')
+ *   // Create nested directories (recursive: true is the default)
+ *   safeMkdirSync('./data/cache/temp')
  *
- * // Create with specific permissions
- * safeMkdirSync('./secure', { mode: 0o700 })
+ *   // Create with specific permissions
+ *   safeMkdirSync('./secure', { mode: 0o700 })
  *
- * // Explicitly disable recursive behavior
- * safeMkdirSync('./single-level', { recursive: false })
- * ```
+ *   // Explicitly disable recursive behavior
+ *   safeMkdirSync('./single-level', { recursive: false })
+ *   ```
+ *
+ * @param path - Directory path to create.
+ * @param options - Options including recursive (default: true) and mode
+ *   settings.
  */
 export function safeMkdirSync(
   path: PathLike,

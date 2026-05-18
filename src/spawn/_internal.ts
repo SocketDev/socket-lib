@@ -1,9 +1,8 @@
 /**
- * @fileoverview Private internals for `spawn/*` modules — the
- * `@npmcli/promise-spawn` lazy loader, the per-spawn ANSI-stripping
- * helper, the WeakMap stack cache, and the binary-path cache shared
- * between `spawn` and `spawnSync`. Underscore prefix excludes this
- * file from the public exports map.
+ * @file Private internals for `spawn/*` modules — the `@npmcli/promise-spawn`
+ *   lazy loader, the per-spawn ANSI-stripping helper, the WeakMap stack cache,
+ *   and the binary-path cache shared between `spawn` and `spawnSync`.
+ *   Underscore prefix excludes this file from the public exports map.
  */
 
 import { stripAnsi } from '../ansi/strip'
@@ -23,9 +22,9 @@ export const windowsScriptExtRegExp = /\.(?:cmd|bat|ps1)$/i
 let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
 
 /**
- * Lazily load the `@npmcli/promise-spawn` module to avoid Webpack
- * bundling issues. Required because the upstream module uses CJS
- * dynamic-require patterns that Webpack flags.
+ * Lazily load the `@npmcli/promise-spawn` module to avoid Webpack bundling
+ * issues. Required because the upstream module uses CJS dynamic-require
+ * patterns that Webpack flags.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getNpmCliPromiseSpawn() {
@@ -36,10 +35,11 @@ export function getNpmCliPromiseSpawn() {
 }
 
 /**
- * Strip ANSI escape codes from spawn result stdout and stderr.
- * Modifies the result object in place to remove color codes and formatting.
+ * Strip ANSI escape codes from spawn result stdout and stderr. Modifies the
+ * result object in place to remove color codes and formatting.
  *
- * @param {unknown} result - Spawn result object with stdout/stderr properties
+ * @param {unknown} result - Spawn result object with stdout/stderr properties.
+ *
  * @returns {unknown} The modified result object
  */
 /*@__NO_SIDE_EFFECTS__*/

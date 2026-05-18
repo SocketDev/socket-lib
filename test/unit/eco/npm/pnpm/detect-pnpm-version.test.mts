@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for detect-pnpm-version.ts.
+ * @file Unit tests for detect-pnpm-version.ts.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,17 +1,15 @@
 /**
- * @fileoverview Spec-compliant fallback for the TC39 `RegExp.escape`
- * (https://tc39.es/ecma262/#sec-regexp.escape). Implements
- * `escapeRegExpFallback` plus the `isSpecHexEscapeCp` classifier used
- * by both the fallback and downstream callers.
- *
- * The fallback handles every branch of the spec
- * `EncodeForRegExpEscape` algorithm: leading [0-9A-Za-z] are always
- * `\xHH`-escaped (guards against `\0..\9` / `\c` merging in a larger
- * pattern), syntax characters (and `/`) get a plain backslash prefix,
- * the `ControlEscape` set maps to its `\t \n \v \f \r` names, the
- * other punctuators and the whitespace / line-terminator / lone-surrogate
- * code points route through `\xHH` or `\uHHHH`. Every other code
- * point is emitted verbatim.
+ * @file Spec-compliant fallback for the TC39 `RegExp.escape`
+ *   (https://tc39.es/ecma262/#sec-regexp.escape). Implements
+ *   `escapeRegExpFallback` plus the `isSpecHexEscapeCp` classifier used by both
+ *   the fallback and downstream callers. The fallback handles every branch of
+ *   the spec `EncodeForRegExpEscape` algorithm: leading [0-9A-Za-z] are always
+ *   `\xHH`-escaped (guards against `\0..\9` / `\c` merging in a larger
+ *   pattern), syntax characters (and `/`) get a plain backslash prefix, the
+ *   `ControlEscape` set maps to its `\t \n \v \f \r` names, the other
+ *   punctuators and the whitespace / line-terminator / lone-surrogate code
+ *   points route through `\xHH` or `\uHHHH`. Every other code point is emitted
+ *   verbatim.
  */
 
 import { MapCtor, SetCtor } from '../primordials/map-set'

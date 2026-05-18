@@ -1,17 +1,19 @@
 /**
- * @fileoverview Validates that all require() calls in dist/ resolve to valid dependencies or files.
+ * @file Validates that all require() calls in dist/ resolve to valid
+ *   dependencies or files. Uses @babel/parser to accurately detect require()
+ *   specifiers and validates:
  *
- * Uses @babel/parser to accurately detect require() specifiers and validates:
- * - Bare specifiers (package names) must be Node.js built-ins or in dependencies/peerDependencies
- * - Relative specifiers (./file or ../file) must point to existing files
- *
- * Rules:
- * - External packages (require() calls in dist/) must be in dependencies or peerDependencies
- * - Bundled packages should NOT appear as require() calls (code is bundled/inlined)
- * - devDependencies should NOT be required from dist/ (not installed by consumers)
- * - Relative imports must resolve to existing files in dist/
- *
- * This ensures consumers can run the published package.
+ *   - Bare specifiers (package names) must be Node.js built-ins or in
+ *     dependencies/peerDependencies
+ *   - Relative specifiers (./file or ../file) must point to existing files Rules:
+ *   - External packages (require() calls in dist/) must be in dependencies or
+ *     peerDependencies
+ *   - Bundled packages should NOT appear as require() calls (code is
+ *     bundled/inlined)
+ *   - devDependencies should NOT be required from dist/ (not installed by
+ *     consumers)
+ *   - Relative imports must resolve to existing files in dist/ This ensures
+ *     consumers can run the published package.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
@@ -41,7 +43,7 @@ const BUILTIN_MODULES = new Set([
 ])
 
 /**
- * Check if a relative require path resolves to an existing file
+ * Check if a relative require path resolves to an existing file.
  */
 export function checkFileExists(specifier, fromFile) {
   const fromDir = path.dirname(fromFile)
@@ -73,7 +75,7 @@ export function checkFileExists(specifier, fromFile) {
 }
 
 /**
- * Extract all require() specifiers from a file using Babel AST
+ * Extract all require() specifiers from a file using Babel AST.
  */
 export async function extractRequireSpecifiers(filePath) {
   const content = await fs.readFile(filePath, 'utf8')
@@ -105,7 +107,7 @@ export async function extractRequireSpecifiers(filePath) {
 }
 
 /**
- * Find all JavaScript files in dist directory recursively
+ * Find all JavaScript files in dist directory recursively.
  */
 export async function findDistFiles(distPath) {
   const files = []
@@ -161,7 +163,7 @@ export function isBareSpecifier(specifier) {
 }
 
 /**
- * Parse JavaScript code into AST
+ * Parse JavaScript code into AST.
  */
 export function parseCode(code, filePath) {
   try {
@@ -176,7 +178,7 @@ export function parseCode(code, filePath) {
 }
 
 /**
- * Read and parse package.json
+ * Read and parse package.json.
  */
 export async function readPackageJson() {
   const packageJsonPath = path.join(rootPath, 'package.json')
@@ -185,7 +187,7 @@ export async function readPackageJson() {
 }
 
 /**
- * Validate require() calls in dist/ files
+ * Validate require() calls in dist/ files.
  */
 export async function validateNoExtraneousDependencies() {
   const pkg = await readPackageJson()

@@ -1,16 +1,15 @@
 /**
- * @fileoverview Unit tests for the secrets/ module — both the
- * keychain backend (per-platform OS credential store) and the
- * rc-file writer (literal-export shell-rc block).
+ * @file Unit tests for the secrets/ module — both the keychain backend
+ *   (per-platform OS credential store) and the rc-file writer (literal-export
+ *   shell-rc block). Strategy:
  *
- * Strategy:
- *   - Keychain tests round-trip a unique throwaway value through
- *     the real OS backend, then clean up. Platform-gated: the test
- *     skips when the backend isn't available (libsecret missing on
- *     Linux, etc.). Service name is `socket-lib-test-<rand>` so we
- *     never collide with real socket-cli / socket-mcp entries.
- *   - rc tests drive `write` / `clear` against a fake HOME and
- *     assert the on-disk shape (no real ~/.zshenv touched).
+ *   - Keychain tests round-trip a unique throwaway value through the real OS
+ *     backend, then clean up. Platform-gated: the test skips when the backend
+ *     isn't available (libsecret missing on Linux, etc.). Service name is
+ *     `socket-lib-test-<rand>` so we never collide with real socket-cli /
+ *     socket-mcp entries.
+ *   - rc tests drive `write` / `clear` against a fake HOME and assert the on-disk
+ *     shape (no real ~/.zshenv touched).
  */
 
 import {

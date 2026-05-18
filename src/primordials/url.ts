@@ -1,6 +1,6 @@
 /**
- * @fileoverview Safe references to `URL`, `URLSearchParams`, and the
- * `URLSearchParams.prototype` methods.
+ * @file Safe references to `URL`, `URLSearchParams`, and the
+ *   `URLSearchParams.prototype` methods.
  */
 
 import { uncurryThis } from './uncurry'

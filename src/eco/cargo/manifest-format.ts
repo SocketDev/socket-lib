@@ -1,7 +1,6 @@
 /**
- * @fileoverview Format descriptor for `Cargo.toml` — Rust's package
- * manifest. Currently only used for `detectFormat` recognition; no
- * parser is wired yet.
+ * @file Format descriptor for `Cargo.toml` — Rust's package manifest. Currently
+ *   only used for `detectFormat` recognition; no parser is wired yet.
  */
 
 import { ObjectFreeze } from '../../primordials/object'

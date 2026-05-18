@@ -1,9 +1,9 @@
 /**
- * @fileoverview Stateless helpers shared by `spinner/*` modules — the
- * `ciSpinner` constant for non-interactive output, the `COLOR_INHERIT`
- * sentinel for shimmer color references, plus pure formatters
- * (`desc`, `formatProgress`, `normalizeText`, `renderProgressBar`)
- * used by both the factory and the `withSpinner*` wrappers.
+ * @file Stateless helpers shared by `spinner/*` modules — the `ciSpinner`
+ *   constant for non-interactive output, the `COLOR_INHERIT` sentinel for
+ *   shimmer color references, plus pure formatters (`desc`, `formatProgress`,
+ *   `normalizeText`, `renderProgressBar`) used by both the factory and the
+ *   `withSpinner*` wrappers.
  */
 
 import colors from '../external/yoctocolors-cjs'
@@ -12,14 +12,14 @@ import { MathMax, MathRound } from '../primordials/math'
 import type { ProgressInfo, SpinnerStyle } from './types'
 
 /**
- * Sentinel value indicating the shimmer should track the spinner's
- * current color rather than holding its own palette reference.
+ * Sentinel value indicating the shimmer should track the spinner's current
+ * color rather than holding its own palette reference.
  */
 export const COLOR_INHERIT = 'inherit'
 
 /**
- * Minimal spinner style for CI environments.
- * Uses empty frame and max interval to effectively disable animation in CI.
+ * Minimal spinner style for CI environments. Uses empty frame and max interval
+ * to effectively disable animation in CI.
  */
 export const ciSpinner: SpinnerStyle = {
   frames: [''],
@@ -27,9 +27,11 @@ export const ciSpinner: SpinnerStyle = {
 }
 
 /**
- * Create a property descriptor for defining non-enumerable properties.
- * Used for adding aliased methods to the Spinner prototype.
- * @param value - Value for the property
+ * Create a property descriptor for defining non-enumerable properties. Used for
+ * adding aliased methods to the Spinner prototype.
+ *
+ * @param value - Value for the property.
+ *
  * @returns Property descriptor object
  */
 export function desc(value: unknown) {
@@ -42,10 +44,15 @@ export function desc(value: unknown) {
 }
 
 /**
- * Format progress information as a visual progress bar with percentage and count.
- * @param progress - Progress tracking information
+ * Format progress information as a visual progress bar with percentage and
+ * count.
+ *
+ * @example
+ *   '███████░░░░░░░░░░░░░ 35% (7/20 files)'
+ *
+ * @param progress - Progress tracking information.
+ *
  * @returns Formatted string with colored progress bar, percentage, and count
- * @example "███████░░░░░░░░░░░░░ 35% (7/20 files)"
  */
 export function formatProgress(progress: ProgressInfo): string {
   const { current, total, unit } = progress
@@ -60,9 +67,11 @@ export function formatProgress(progress: ProgressInfo): string {
 }
 
 /**
- * Normalize text input by trimming leading whitespace.
- * Non-string values are converted to empty string.
- * @param value - Text to normalize
+ * Normalize text input by trimming leading whitespace. Non-string values are
+ * converted to empty string.
+ *
+ * @param value - Text to normalize.
+ *
  * @returns Normalized string with leading whitespace removed
  */
 export function normalizeText(value: unknown) {
@@ -73,10 +82,13 @@ export function normalizeText(value: unknown) {
 
 /**
  * Render a progress bar using block characters (█ for filled, ░ for empty).
- * @param percentage - Progress percentage (0-100)
- * @param width - Total width of progress bar in characters
- * @returns Colored progress bar string
+ *
  * @default width=20
+ *
+ * @param percentage - Progress percentage (0-100)
+ * @param width - Total width of progress bar in characters.
+ *
+ * @returns Colored progress bar string
  */
 export function renderProgressBar(
   percentage: number,

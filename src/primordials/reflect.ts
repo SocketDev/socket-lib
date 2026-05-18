@@ -1,9 +1,7 @@
 /**
- * @fileoverview Safe references to `Reflect.*`.
- *
- * **IMPORTANT**: do not destructure on `Reflect` here. tsgo has a bug
- * that mis-transpiles destructured exports.
- * See: https://github.com/SocketDev/socket-packageurl-js/issues/3
+ * @file Safe references to `Reflect.*`. **IMPORTANT**: do not destructure on
+ *   `Reflect` here. tsgo has a bug that mis-transpiles destructured exports.
+ *   See: https://github.com/SocketDev/socket-packageurl-js/issues/3.
  */
 
 export const ReflectApply = Reflect.apply

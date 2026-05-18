@@ -1,27 +1,21 @@
 /* oxlint-disable socket/sort-source-methods -- top-level order in this folder is spec-section order (TC39 Temporal clause numbering), not alphabetical, so a reader can scan the file alongside the spec PDF. See README.md "Adding a new operation". */
 /**
- * @fileoverview Spec clause 8 — Temporal.Instant Objects.
- *
- * Implements the class, constructor, and the validity predicate. Pass
- * 1 of the rollout; statics (`from`, `fromEpochMilliseconds`,
- * `compare`) and prototype operations (`epochMilliseconds`,
- * `toString`, arithmetic) follow in pass 2.
- *
- * Spec:    https://tc39.es/proposal-temporal/#sec-temporal-instant-objects
- * Ref:     js-temporal/temporal-polyfill `lib/instant.ts`
- *
- * Operations implemented (✓) and intentionally absent (✗), in section
- * order so a reader can scan against the spec:
- *
- *   ✓ 8.1.1   Temporal.Instant ( epochNanoseconds )                  — constructor
- *   ✓ 8.1.1.x IsValidEpochNanoseconds ( epochNanoseconds )           — abstract op
- *   ✓ 8.5.6   get Temporal.Instant.prototype.epochNanoseconds        — prototype
- *   ✗ 8.4.2   Temporal.Instant.from ( item )                         — pass 2
- *   ✗ 8.4.3   Temporal.Instant.fromEpochMilliseconds ( ms )          — pass 2
- *   ✗ 8.4.7   Temporal.Instant.compare ( one, two )                  — pass 2
- *   ✗ 8.5.5   get Temporal.Instant.prototype.epochMilliseconds       — pass 2
- *   ✗ 8.5.13  Temporal.Instant.prototype.toString ( [ options ] )    — pass 2
- *   ✗ 8.5.x   add / subtract / until / since / round / equals / etc. — later
+ * @file Spec clause 8 — Temporal.Instant Objects. Implements the class,
+ *   constructor, and the validity predicate. Pass 1 of the rollout; statics
+ *   (`from`, `fromEpochMilliseconds`, `compare`) and prototype operations
+ *   (`epochMilliseconds`, `toString`, arithmetic) follow in pass 2. Spec:
+ *   https://tc39.es/proposal-temporal/#sec-temporal-instant-objects Ref:
+ *   js-temporal/temporal-polyfill `lib/instant.ts` Operations implemented (✓)
+ *   and intentionally absent (✗), in section order so a reader can scan against
+ *   the spec: ✓ 8.1.1 Temporal.Instant ( epochNanoseconds ) — constructor ✓
+ *   8.1.1.x IsValidEpochNanoseconds ( epochNanoseconds ) — abstract op ✓ 8.5.6
+ *   get Temporal.Instant.prototype.epochNanoseconds — prototype ✗ 8.4.2
+ *   Temporal.Instant.from ( item ) — pass 2 ✗ 8.4.3
+ *   Temporal.Instant.fromEpochMilliseconds ( ms ) — pass 2 ✗ 8.4.7
+ *   Temporal.Instant.compare ( one, two ) — pass 2 ✗ 8.5.5 get
+ *   Temporal.Instant.prototype.epochMilliseconds — pass 2 ✗ 8.5.13
+ *   Temporal.Instant.prototype.toString ( [ options ] ) — pass 2 ✗ 8.5.x add /
+ *   subtract / until / since / round / equals / etc. — later.
  */
 
 import { BigIntCtor } from '../primordials/globals'
@@ -48,7 +42,9 @@ import { getInstantNanoseconds, hasInstantSlot, setInstantSlots } from './slots'
 const NS_MAX_INSTANT = 8_640_000_000_000_000_000_000n
 const NS_MIN_INSTANT = -NS_MAX_INSTANT
 
-/** Spec's IsValidEpochNanoseconds. Exported for testability. */
+/**
+ * Spec's IsValidEpochNanoseconds. Exported for testability.
+ */
 export function isValidEpochNanoseconds(epochNanoseconds: bigint): boolean {
   // Step 1.
   if (epochNanoseconds < NS_MIN_INSTANT || epochNanoseconds > NS_MAX_INSTANT) {
@@ -79,12 +75,12 @@ export function isValidEpochNanoseconds(epochNanoseconds: bigint): boolean {
 // ─────────────────────────────────────────────────────────────────
 
 /**
- * Temporal.Instant — an exact, nanosecond-resolution point on the
- * UTC timeline. Backed by a `bigint` `[[Nanoseconds]]` slot in the
- * range ±8.64e21 (±100 million days from the Unix epoch).
+ * Temporal.Instant — an exact, nanosecond-resolution point on the UTC timeline.
+ * Backed by a `bigint` `[[Nanoseconds]]` slot in the range ±8.64e21 (±100
+ * million days from the Unix epoch).
  *
- * Construct via `new Temporal.Instant(epochNanoseconds)` or, in pass
- * 2, the various `from*` statics.
+ * Construct via `new Temporal.Instant(epochNanoseconds)` or, in pass 2, the
+ * various `from*` statics.
  */
 export class Instant {
   // Prototype getter installed at module load via Object.defineProperty
@@ -167,7 +163,9 @@ Object.defineProperty(Instant.prototype, 'epochNanoseconds', {
 // Local helpers
 // ─────────────────────────────────────────────────────────────────
 
-/** One-line description of an arbitrary value for error messages. */
+/**
+ * One-line description of an arbitrary value for error messages.
+ */
 export function describe(value: unknown): string {
   if (value === null) {
     return 'null'

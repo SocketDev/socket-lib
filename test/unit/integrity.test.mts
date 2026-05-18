@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for integrity helpers.
+ * @file Unit tests for integrity helpers.
  */
 
 import { describe, expect, it } from 'vitest'

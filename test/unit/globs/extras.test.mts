@@ -1,7 +1,6 @@
 /**
- * @fileoverview Tests for the matcher cache LRU eviction + the
- * path.matchesGlob fast-path activation in src/globs.ts that the
- * existing tests don't cover.
+ * @file Tests for the matcher cache LRU eviction + the path.matchesGlob
+ *   fast-path activation in src/globs.ts that the existing tests don't cover.
  */
 
 import { describe, expect, it } from 'vitest'

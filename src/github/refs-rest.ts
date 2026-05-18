@@ -1,10 +1,9 @@
 /**
- * @fileoverview Resolve a GitHub git ref via REST tier-cascade.
- *
- * Split out of `github/refs.ts` for size hygiene. Walks tag → branch →
- * commit endpoints in sequence; the first 200 OK wins. If any tier
- * hits the documented 200-OK-empty-body incident shape, falls back to
- * the GraphQL transport in `./refs-graphql`.
+ * @file Resolve a GitHub git ref via REST tier-cascade. Split out of
+ *   `github/refs.ts` for size hygiene. Walks tag → branch → commit endpoints in
+ *   sequence; the first 200 OK wins. If any tier hits the documented
+ *   200-OK-empty-body incident shape, falls back to the GraphQL transport in
+ *   `./refs-graphql`.
  */
 
 import { errorMessage } from '../errors/message'
@@ -25,14 +24,15 @@ import type {
 } from './types'
 
 /**
- * Fetch the SHA for a git ref from GitHub API.
- * Internal helper that implements the multi-strategy ref resolution logic.
- * Tries tags, branches, and direct commit lookups in sequence.
+ * Fetch the SHA for a git ref from GitHub API. Internal helper that implements
+ * the multi-strategy ref resolution logic. Tries tags, branches, and direct
+ * commit lookups in sequence.
  *
- * @param owner - Repository owner
- * @param repo - Repository name
- * @param ref - Git reference to resolve
- * @param options - Resolution options with authentication token
+ * @param owner - Repository owner.
+ * @param repo - Repository name.
+ * @param ref - Git reference to resolve.
+ * @param options - Resolution options with authentication token.
+ *
  * @returns The full commit SHA
  *
  * @throws {Error} When ref cannot be resolved after all strategies fail

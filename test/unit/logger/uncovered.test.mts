@@ -1,10 +1,8 @@
 /**
- * @fileoverview Tests for uncovered Logger methods: done(), progress(),
- * clearLine() (TTY + non-TTY paths), resetIndent() (bound + unbound),
- * logNewline() blank-skip.
- *
- * Each test creates a Logger with custom Writable streams so we can
- * capture output without polluting the real stdout/stderr.
+ * @file Tests for uncovered Logger methods: done(), progress(), clearLine()
+ *   (TTY + non-TTY paths), resetIndent() (bound + unbound), logNewline()
+ *   blank-skip. Each test creates a Logger with custom Writable streams so we
+ *   can capture output without polluting the real stdout/stderr.
  */
 
 import { Writable } from 'node:stream'

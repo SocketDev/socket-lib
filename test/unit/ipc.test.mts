@@ -1,10 +1,9 @@
 /**
- * @fileoverview Unit tests for Inter-Process Communication utilities.
+ * @file Unit tests for Inter-Process Communication utilities. Tests:
  *
- * Tests:
- * - getIpcStubPath() resolves IPC stub file paths
- * - writeIpcStub() writes restricted-perm stub files
- * Used by Socket CLI for parent-child process communication.
+ *   - getIpcStubPath() resolves IPC stub file paths
+ *   - writeIpcStub() writes restricted-perm stub files Used by Socket CLI for
+ *     parent-child process communication.
  */
 
 /* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */

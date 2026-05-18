@@ -1,7 +1,7 @@
 /**
- * @fileoverview Tests for catch branches in src/process-lock.ts that
- * fire when lock-file fs ops fail. Each test covers a distinct catch
- * handler whose only purpose is "log and continue / log and rethrow."
+ * @file Tests for catch branches in src/process-lock.ts that fire when
+ *   lock-file fs ops fail. Each test covers a distinct catch handler whose only
+ *   purpose is "log and continue / log and rethrow."
  */
 
 import { mkdirSync, mkdtempSync, utimesSync } from 'node:fs'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview GitHub release archive download + extraction.
+ * @file GitHub release archive download + extraction.
  */
 
 import { detectArchiveFormat } from '../archives/detect'
@@ -18,28 +18,34 @@ import type { AssetPattern, RepoConfig } from './github-types'
 const logger = getDefaultLogger()
 
 /**
- * Download and extract an archive from a GitHub release.
- * Supports zip, tar, tar.gz, and tgz formats.
- * Automatically handles downloading, extracting, and cleanup.
- *
- * @param tag - Release tag name
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
- * @param outputDir - Directory to extract the archive contents to
- * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
- * @param options.quiet - Suppress log messages
- * @param options.cleanup - Remove downloaded archive after extraction (default: true)
- * @param options.strip - Strip leading path components (like tar --strip-components)
- * @param options.format - Archive format (auto-detected if not specified)
- * @returns Path to the extraction directory
+ * Download and extract an archive from a GitHub release. Supports zip, tar,
+ * tar.gz, and tgz formats. Automatically handles downloading, extracting, and
+ * cleanup.
  *
  * @example
- * ```typescript
- * const outputDir = await downloadAndExtractArchive(
- *   'v1.0.0', 'data-*.tar.gz', '/tmp/data',
- *   { owner: 'SocketDev', repo: 'socket-btm' },
- * )
- * ```
+ *   ;```typescript
+ *   const outputDir = await downloadAndExtractArchive(
+ *     'v1.0.0',
+ *     'data-*.tar.gz',
+ *     '/tmp/data',
+ *     { owner: 'SocketDev', repo: 'socket-btm' },
+ *   )
+ *   ```
+ *
+ * @param tag - Release tag name.
+ * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
+ *   object, or RegExp)
+ * @param outputDir - Directory to extract the archive contents to.
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options.
+ * @param options.quiet - Suppress log messages.
+ * @param options.cleanup - Remove downloaded archive after extraction (default:
+ *   true)
+ * @param options.strip - Strip leading path components (like tar
+ *   --strip-components)
+ * @param options.format - Archive format (auto-detected if not specified)
+ *
+ * @returns Path to the extraction directory
  */
 export async function downloadAndExtractArchive(
   tag: string,
@@ -121,25 +127,30 @@ export async function downloadAndExtractArchive(
 }
 
 /**
- * Download and extract a zip file from a GitHub release.
- * Automatically handles downloading, extracting, and cleanup.
- *
- * @param tag - Release tag name
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
- * @param outputDir - Directory to extract the zip contents to
- * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
- * @param options.quiet - Suppress log messages
- * @param options.cleanup - Remove downloaded zip file after extraction (default: true)
- * @returns Path to the extraction directory
+ * Download and extract a zip file from a GitHub release. Automatically handles
+ * downloading, extracting, and cleanup.
  *
  * @example
- * ```typescript
- * const outputDir = await downloadAndExtractZip(
- *   'v1.0.0', 'models-*.zip', '/tmp/models',
- *   { owner: 'SocketDev', repo: 'socket-btm' },
- * )
- * ```
+ *   ;```typescript
+ *   const outputDir = await downloadAndExtractZip(
+ *     'v1.0.0',
+ *     'models-*.zip',
+ *     '/tmp/models',
+ *     { owner: 'SocketDev', repo: 'socket-btm' },
+ *   )
+ *   ```
+ *
+ * @param tag - Release tag name.
+ * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
+ *   object, or RegExp)
+ * @param outputDir - Directory to extract the zip contents to.
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options.
+ * @param options.quiet - Suppress log messages.
+ * @param options.cleanup - Remove downloaded zip file after extraction
+ *   (default: true)
+ *
+ * @returns Path to the extraction directory
  */
 export async function downloadAndExtractZip(
   tag: string,

@@ -1,20 +1,16 @@
 /**
- * @fileoverview Inject fs-operation errors at specific paths so tests
- * can exercise catch branches that only fire on EACCES / EPERM / EROFS /
- * EBUSY / ENOENT / ENOTEMPTY.
+ * @file Inject fs-operation errors at specific paths so tests can exercise
+ *   catch branches that only fire on EACCES / EPERM / EROFS / EBUSY / ENOENT /
+ *   ENOTEMPTY. Two flavors:
  *
- * Two flavors:
- *   - mockFsError({ path, op, code }) — set up a vi.spy that throws on the
- *     next call matching path + op, restore afterward.
- *   - mockFsErrorOnce(...) — same but only intercepts the FIRST call.
- *
- * Reset is automatic via afterEach if `withFsErrors` describe-helper is
- * used, otherwise call the returned `restore` function from a finally
- * block.
- *
- * Why path-scoped: blanket `vi.spyOn(fs, 'unlinkSync')` breaks every
- * unrelated unlink in the SUT (logger setup, tmp-dir cleanup, etc.).
- * Filter on the first arg so only the targeted path errors out.
+ *   - mockFsError({ path, op, code }) — set up a vi.spy that throws on the next
+ *     call matching path + op, restore afterward.
+ *   - mockFsErrorOnce(...) — same but only intercepts the FIRST call. Reset is
+ *     automatic via afterEach if `withFsErrors` describe-helper is used,
+ *     otherwise call the returned `restore` function from a finally block. Why
+ *     path-scoped: blanket `vi.spyOn(fs, 'unlinkSync')` breaks every unrelated
+ *     unlink in the SUT (logger setup, tmp-dir cleanup, etc.). Filter on the
+ *     first arg so only the targeted path errors out.
  */
 
 import * as fsBuiltin from 'node:fs'
@@ -48,16 +44,23 @@ export type FsErrorCode =
   | 'EROFS'
 
 export interface FsErrorSpec {
-  /** Absolute path to fail on (string match against the first arg of the fs call). */
+  /**
+   * Absolute path to fail on (string match against the first arg of the fs
+   * call).
+   */
   path: string
-  /** fs sync method name (e.g. 'unlinkSync', 'writeFileSync'). */
+  /**
+   * Fs sync method name (e.g. 'unlinkSync', 'writeFileSync').
+   */
   op: SyncOp
-  /** errno code to attach to the thrown error. */
+  /**
+   * Errno code to attach to the thrown error.
+   */
   code: FsErrorCode
   /**
-   * If true, only intercept the first call. Subsequent calls fall
-   * through to the real implementation. Default: false (every call
-   * matching the path errors until restore).
+   * If true, only intercept the first call. Subsequent calls fall through to
+   * the real implementation. Default: false (every call matching the path
+   * errors until restore).
    */
   once?: boolean
 }
@@ -90,8 +93,8 @@ export function makeErrnoError(
 }
 
 /**
- * Async variant — spies on `fs.promises.<op>`. Same path-scoped match,
- * but throws via a rejected Promise.
+ * Async variant — spies on `fs.promises.<op>`. Same path-scoped match, but
+ * throws via a rejected Promise.
  */
 export function mockFsAsyncError(spec: FsAsyncErrorSpec): () => void {
   const target = fsPromisesBuiltin as unknown as Record<string, unknown>
@@ -119,9 +122,9 @@ export function mockFsAsyncError(spec: FsAsyncErrorSpec): () => void {
 }
 
 /**
- * Spy on a sync fs method so calls matching `spec.path` throw an
- * errno-typed Error. Returns a restore function the caller must invoke
- * (in a finally block or afterEach) to undo the spy.
+ * Spy on a sync fs method so calls matching `spec.path` throw an errno-typed
+ * Error. Returns a restore function the caller must invoke (in a finally block
+ * or afterEach) to undo the spy.
  */
 export function mockFsError(spec: FsErrorSpec): () => void {
   const target = fsBuiltin as unknown as Record<string, unknown>

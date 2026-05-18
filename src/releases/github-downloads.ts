@@ -1,5 +1,5 @@
 /**
- * @fileoverview GitHub release asset downloads.
+ * @file GitHub release asset downloads.
  */
 
 import process from 'node:process'
@@ -31,18 +31,22 @@ const logger = getDefaultLogger()
 /**
  * Download a binary from any GitHub repository with version caching.
  *
- * @param config - Download configuration
- * @returns Path to the downloaded binary
- *
  * @example
- * ```typescript
- * const binaryPath = await downloadGitHubRelease({
- *   owner: 'SocketDev', repo: 'socket-btm',
- *   toolName: 'lief', toolPrefix: 'lief-',
- *   assetName: 'lief-linux-x64', binaryName: 'lief',
- *   platformArch: 'linux-x64',
- * })
- * ```
+ *   ;```typescript
+ *   const binaryPath = await downloadGitHubRelease({
+ *     owner: 'SocketDev',
+ *     repo: 'socket-btm',
+ *     toolName: 'lief',
+ *     toolPrefix: 'lief-',
+ *     assetName: 'lief-linux-x64',
+ *     binaryName: 'lief',
+ *     platformArch: 'linux-x64',
+ *   })
+ *   ```
+ *
+ * @param config - Download configuration.
+ *
+ * @returns Path to the downloaded binary
  */
 export async function downloadGitHubRelease(
   config: DownloadGitHubReleaseConfig,
@@ -146,22 +150,23 @@ export async function downloadGitHubRelease(
 }
 
 /**
- * Download a specific release asset.
- * Supports pattern matching for dynamic asset discovery.
- *
- * @param tag - Release tag name
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
- * @param outputPath - Path to write the downloaded file
- * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
+ * Download a specific release asset. Supports pattern matching for dynamic
+ * asset discovery.
  *
  * @example
- * ```typescript
- * await downloadReleaseAsset(
- *   'v1.0.0', 'tool-linux-x64', '/tmp/tool',
- *   { owner: 'SocketDev', repo: 'socket-btm' },
- * )
- * ```
+ *   ;```typescript
+ *   await downloadReleaseAsset('v1.0.0', 'tool-linux-x64', '/tmp/tool', {
+ *     owner: 'SocketDev',
+ *     repo: 'socket-btm',
+ *   })
+ *   ```
+ *
+ * @param tag - Release tag name.
+ * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
+ *   object, or RegExp)
+ * @param outputPath - Path to write the downloaded file.
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options.
  */
 export async function downloadReleaseAsset(
   tag: string,

@@ -1,11 +1,9 @@
 /**
- * @fileoverview Tests for catch branches in src/dlx/manifest.ts that
- * fire when filesystem ops fail (safeMkdirSync / safeDeleteSync /
- * readFileUtf8Sync / fs.writeFileSync / fs.renameSync).
- *
- * Mocks the resolved helper exports so the SUT's call surfaces the
- * intended failure and exercises the corresponding catch / cleanup
- * paths.
+ * @file Tests for catch branches in src/dlx/manifest.ts that fire when
+ *   filesystem ops fail (safeMkdirSync / safeDeleteSync / readFileUtf8Sync /
+ *   fs.writeFileSync / fs.renameSync). Mocks the resolved helper exports so the
+ *   SUT's call surfaces the intended failure and exercises the corresponding
+ *   catch / cleanup paths.
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'

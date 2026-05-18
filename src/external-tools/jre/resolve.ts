@@ -1,26 +1,21 @@
 /**
- * @fileoverview `resolveJre()` — the JRE resolution entry point.
+ * @file `resolveJre()` — the JRE resolution entry point. Tries each source in
+ *   order:
  *
- * Tries each source in order:
- *
- *   1. VFS  — smol binary's embedded JRE (zero network, fast)
+ *   1. VFS — smol binary's embedded JRE (zero network, fast)
  *   2. JAVA_HOME — user-pinned via env var
  *   3. PATH — `java` (or `java.exe`) on the system PATH
- *   4. download — Adoptium fetch + extract (only when
- *      `downloadIfMissing` is passed)
- *
- * Returns `undefined` if all of the enabled sources miss. The caller
- * decides what to do then — typically prompt the user, surface an
- * install instruction, or fail with an actionable error.
- *
- * Memoized per option-shape: calls with identical options return the
- * same cached promise. Calling without `downloadIfMissing` and then
- * with `downloadIfMissing` produces two distinct cache entries so the
- * second call can fall through to the download tier even after the
- * first call's "all local tiers missed → undefined" memoized.
- *
- * Test-only escape hatch: `_resetJreResolution()` clears the cache
- * so tests can exercise the resolver fresh.
+ *   4. download — Adoptium fetch + extract (only when `downloadIfMissing` is
+ *      passed) Returns `undefined` if all of the enabled sources miss. The
+ *      caller decides what to do then — typically prompt the user, surface an
+ *      install instruction, or fail with an actionable error. Memoized per
+ *      option-shape: calls with identical options return the same cached
+ *      promise. Calling without `downloadIfMissing` and then with
+ *      `downloadIfMissing` produces two distinct cache entries so the second
+ *      call can fall through to the download tier even after the first call's
+ *      "all local tiers missed → undefined" memoized. Test-only escape hatch:
+ *      `_resetJreResolution()` clears the cache so tests can exercise the
+ *      resolver fresh.
  */
 
 import { jreFromDownload } from './from-download'
@@ -34,9 +29,9 @@ import type { ResolvedJre } from './types'
 
 export interface ResolveJreOptions {
   /**
-   * When set, the resolver falls through to an Adoptium download
-   * after the local-discovery tiers miss. Omit to keep the resolver
-   * read-only (no network).
+   * When set, the resolver falls through to an Adoptium download after the
+   * local-discovery tiers miss. Omit to keep the resolver read-only (no
+   * network).
    */
   downloadIfMissing?:
     | {

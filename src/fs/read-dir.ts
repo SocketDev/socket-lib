@@ -1,8 +1,8 @@
 /**
- * @fileoverview Async/sync directory listing — returns directory names
- * only (filtering out files), with optional emptiness suppression and
- * natural-order sorting. Glob-based ignore patterns are evaluated only
- * when `includeEmpty: false` triggers a per-entry emptiness probe.
+ * @file Async/sync directory listing — returns directory names only (filtering
+ *   out files), with optional emptiness suppression and natural-order sorting.
+ *   Glob-based ignore patterns are evaluated only when `includeEmpty: false`
+ *   triggers a per-entry emptiness probe.
  */
 
 import { getNodeFs } from '../node/fs'
@@ -16,13 +16,14 @@ import type { Dirent, ObjectEncodingOptions, PathLike } from 'node:fs'
 import type { ReadDirOptions } from './types'
 
 /**
- * Process directory entries and filter for directories.
- * Filters entries to include only directories, optionally excluding empty ones.
- * Applies ignore patterns and natural sorting.
+ * Process directory entries and filter for directories. Filters entries to
+ * include only directories, optionally excluding empty ones. Applies ignore
+ * patterns and natural sorting.
  *
- * @param dirents - Directory entries from readdir
- * @param dirname - Parent directory path
- * @param options - Filtering and sorting options
+ * @param dirents - Directory entries from readdir.
+ * @param dirname - Parent directory path.
+ * @param options - Filtering and sorting options.
+ *
  * @returns Array of directory names, optionally sorted
  */
 /*@__NO_SIDE_EFFECTS__*/
@@ -51,25 +52,26 @@ export function innerReadDirNames(
 }
 
 /**
- * Read directory names asynchronously with filtering and sorting.
- * Returns only directory names (not files), with optional filtering for empty directories
+ * Read directory names asynchronously with filtering and sorting. Returns only
+ * directory names (not files), with optional filtering for empty directories
  * and glob-based ignore patterns. Results are naturally sorted by default.
  *
- * @param dirname - Directory path to read
- * @param options - Options for filtering and sorting
- * @returns Array of directory names, empty array on error
- *
  * @example
- * ```ts
- * // Get all subdirectories, sorted naturally
- * const dirs = await readDirNames('./packages')
+ *   ;```ts
+ *   // Get all subdirectories, sorted naturally
+ *   const dirs = await readDirNames('./packages')
  *
- * // Get non-empty directories only
- * const nonEmpty = await readDirNames('./cache', { includeEmpty: false })
+ *   // Get non-empty directories only
+ *   const nonEmpty = await readDirNames('./cache', { includeEmpty: false })
  *
- * // Get directories without sorting
- * const unsorted = await readDirNames('./src', { sort: false })
- * ```
+ *   // Get directories without sorting
+ *   const unsorted = await readDirNames('./src', { sort: false })
+ *   ```
+ *
+ * @param dirname - Directory path to read.
+ * @param options - Options for filtering and sorting.
+ *
+ * @returns Array of directory names, empty array on error
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readDirNames(
@@ -92,25 +94,26 @@ export async function readDirNames(
 }
 
 /**
- * Read directory names synchronously with filtering and sorting.
- * Returns only directory names (not files), with optional filtering for empty directories
+ * Read directory names synchronously with filtering and sorting. Returns only
+ * directory names (not files), with optional filtering for empty directories
  * and glob-based ignore patterns. Results are naturally sorted by default.
  *
- * @param dirname - Directory path to read
- * @param options - Options for filtering and sorting
- * @returns Array of directory names, empty array on error
- *
  * @example
- * ```ts
- * // Get all subdirectories, sorted naturally
- * const dirs = readDirNamesSync('./packages')
+ *   ;```ts
+ *   // Get all subdirectories, sorted naturally
+ *   const dirs = readDirNamesSync('./packages')
  *
- * // Get non-empty directories only, ignoring node_modules
- * const nonEmpty = readDirNamesSync('./src', {
- *   includeEmpty: false,
- *   ignore: ['node_modules']
- * })
- * ```
+ *   // Get non-empty directories only, ignoring node_modules
+ *   const nonEmpty = readDirNamesSync('./src', {
+ *     includeEmpty: false,
+ *     ignore: ['node_modules'],
+ *   })
+ *   ```
+ *
+ * @param dirname - Directory path to read.
+ * @param options - Options for filtering and sorting.
+ *
+ * @returns Array of directory names, empty array on error
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readDirNamesSync(dirname: PathLike, options?: ReadDirOptions) {

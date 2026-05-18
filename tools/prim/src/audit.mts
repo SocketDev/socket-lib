@@ -1,13 +1,11 @@
 /* oxlint-disable socket/sort-source-methods -- AST-walk helpers ordered by call graph; state / config constants between them block autofix. */
 /**
- * @fileoverview Walk a directory of JavaScript/TypeScript and emit
- * findings: every site where a primordial would (or already does)
- * apply.
+ * @file Walk a directory of JavaScript/TypeScript and emit findings: every site
+ *   where a primordial would (or already does) apply. Each finding records:
  *
- * Each finding records:
  *   - The primordial that maps to the call site (e.g. `ArrayPrototypeMap`).
- *   - Whether that primordial is currently exported from socket-lib
- *     (`covered`) or not yet (`gap`).
+ *   - Whether that primordial is currently exported from socket-lib (`covered`)
+ *     or not yet (`gap`).
  *   - File / line / column / source pattern for human inspection.
  */
 
@@ -67,7 +65,9 @@ export function isDeclarationFile(absPath) {
   return /\.d\.[mc]?ts$/.test(base)
 }
 
-/** Returns true if the file's extension is one we walk. */
+/**
+ * Returns true if the file's extension is one we walk.
+ */
 export function isSourceFile(absPath) {
   if (isDeclarationFile(absPath)) {
     return false
@@ -86,11 +86,10 @@ const PARSE_OPTIONS = {
 }
 
 /**
- * Build a (start-of-line offset → 1-based line number) lookup for a
- * source string. acorn-wasm's `node.loc` is unreliable in our build
- * (locations come back undefined despite `locations: true`), so we
- * compute line/column from `node.start` (a 0-based byte offset)
- * ourselves.
+ * Build a (start-of-line offset → 1-based line number) lookup for a source
+ * string. acorn-wasm's `node.loc` is unreliable in our build (locations come
+ * back undefined despite `locations: true`), so we compute line/column from
+ * `node.start` (a 0-based byte offset) ourselves.
  */
 export function lineColumnAt(lineStarts, offset) {
   // Binary search for the largest lineStarts entry ≤ offset.
@@ -122,25 +121,27 @@ export function buildLineStarts(src) {
 
 /**
  * @typedef {Object} Finding
- * @property {string} primordial    Name of the matching primordial.
- * @property {string} pattern       Source-level pattern, e.g. `Object.keys(...)`.
- * @property {string} file          Path relative to the target root.
+ *
+ * @property {string} primordial Name of the matching primordial.
+ * @property {string} pattern Source-level pattern, e.g. `Object.keys(...)`.
+ * @property {string} file Path relative to the target root.
  * @property {number} line
  * @property {number} column
- * @property {'covered'|'gap'} kind Whether the primordial exists today.
+ * @property {'covered' | 'gap'} kind Whether the primordial exists today.
  */
 
 /**
  * @param {Object} opts
  * @param {string} opts.targetRoot
- * @param {string} opts.scanDir              Directory to walk.
- * @param {Set<string>} opts.exported        Currently-exported primordials.
- * @param {string[]} [opts.skipDirs]         Directories to skip during walk.
- * @param {string[]} [opts.skipFiles]        Files to skip (basename match).
- * @param {boolean} [opts.aiDisambiguate]    When true, defer ambiguous
- *   prototype methods (.test, .then, etc.) to Claude with a locked-down
- *   read-only tool surface. Off by default — opt-in via CLI flag.
- *   Requires ANTHROPIC_API_KEY in env.
+ * @param {string} opts.scanDir Directory to walk.
+ * @param {Set<string>} opts.exported Currently-exported primordials.
+ * @param {string[]} [opts.skipDirs] Directories to skip during walk.
+ * @param {string[]} [opts.skipFiles] Files to skip (basename match).
+ * @param {boolean} [opts.aiDisambiguate] When true, defer ambiguous prototype
+ *   methods (.test, .then, etc.) to Claude with a locked-down read-only tool
+ *   surface. Off by default — opt-in via CLI flag. Requires ANTHROPIC_API_KEY
+ *   in env.
+ *
  * @returns {Promise<Finding[]>}
  */
 export async function auditDirectory({
@@ -188,12 +189,12 @@ export async function auditDirectory({
   }
 
   /**
-   * Record a `redeclaration` finding — a top-level `const NAME = expr`
-   * where `NAME` matches a primordials export and `expr` reaches a
-   * built-in (Error, JSON.parse, Array.isArray, etc.). This is the
-   * shape consumers fall back to when they don't know they can
-   * import from `./primordials`. The codemod (eventually) rewrites
-   * these to a single `import { NAME } from './primordials'` line.
+   * Record a `redeclaration` finding — a top-level `const NAME = expr` where
+   * `NAME` matches a primordials export and `expr` reaches a built-in (Error,
+   * JSON.parse, Array.isArray, etc.). This is the shape consumers fall back to
+   * when they don't know they can import from `./primordials`. The codemod
+   * (eventually) rewrites these to a single `import { NAME } from
+   * './primordials'` line.
    */
   function recordRedeclaration(file, offset, name, pattern) {
     const lineStarts = currentFile.lineStarts
@@ -223,22 +224,32 @@ export async function auditDirectory({
   // after the walk by an async pass that defers to Claude (read-only
   // tool surface) when `aiDisambiguate` is on. Snapshots the snippet
   // up-front because the AST is freed after walk completes.
-  /** @type {Array<{file:string, offset:number, line:number, column:number, methodName:string, receiverName:string, snippet:string}>} */
+  /**
+   * @type {{
+   *   file: string
+   *   offset: number
+   *   line: number
+   *   column: number
+   *   methodName: string
+   *   receiverName: string
+   *   snippet: string
+   * }[]}
+   */
   const pendingAmbiguous = []
 
   /**
    * Recognize esbuild's CJS-output boilerplate — the helper-variable
-   * assignments at the top of every esbuild-bundled file:
-   *   var __defProp = Object.defineProperty;
-   *   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-   *   var __getOwnPropNames = Object.getOwnPropertyNames;
-   *   var __hasOwnProp = Object.prototype.hasOwnProperty;
+   * assignments at the top of every esbuild-bundled file: var __defProp =
+   * Object.defineProperty; var __getOwnPropDesc =
+   * Object.getOwnPropertyDescriptor; var __getOwnPropNames =
+   * Object.getOwnPropertyNames; var __hasOwnProp =
+   * Object.prototype.hasOwnProperty;
    *
-   * These are machine-generated bundler plumbing, not user code. The
-   * tell is that they're being assigned to a `__`-prefixed identifier
-   * inside a `VariableDeclarator`. The helpers themselves use those
-   * locals, not the original `Object.X` references — flagging the
-   * assignment is misleading because there's nothing to migrate.
+   * These are machine-generated bundler plumbing, not user code. The tell is
+   * that they're being assigned to a `__`-prefixed identifier inside a
+   * `VariableDeclarator`. The helpers themselves use those locals, not the
+   * original `Object.X` references — flagging the assignment is misleading
+   * because there's nothing to migrate.
    */
   function isBundlerHelperAssignment(ancestors) {
     // ancestors are listed root-first; the immediate parent is the last entry.
@@ -270,8 +281,8 @@ export async function auditDirectory({
    * Recognize the safe `Object.prototype.hasOwnProperty.call(target, key)`
    * idiom — that's already-correct hardening, not a migration target.
    *
-   * Pattern: `Object.prototype.<method>.call(...)` where `<method>` is
-   * a method on `Object.prototype` (`hasOwnProperty`, `propertyIsEnumerable`,
+   * Pattern: `Object.prototype.<method>.call(...)` where `<method>` is a method
+   * on `Object.prototype` (`hasOwnProperty`, `propertyIsEnumerable`,
    * `isPrototypeOf`, `toString`, etc.). Reporting these as "Object.prototype"
    * findings is noise.
    */
@@ -288,11 +299,10 @@ export async function auditDirectory({
   }
 
   /**
-   * Recognize esbuild/tsc CommonJS interop glue:
-   *   Object.defineProperty(exports, "__esModule", { value: true })
-   *   Object.defineProperty(module.exports, ...)
-   * These are machine-generated by every bundler that emits CJS from
-   * ESM. They aren't migration candidates — they're plumbing.
+   * Recognize esbuild/tsc CommonJS interop glue: Object.defineProperty(exports,
+   * "__esModule", { value: true }) Object.defineProperty(module.exports, ...)
+   * These are machine-generated by every bundler that emits CJS from ESM. They
+   * aren't migration candidates — they're plumbing.
    */
   function isExportsInteropGlue(node) {
     if (node.callee?.type !== 'MemberExpression') {

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for resolve-asset-url.ts.
+ * @file Unit tests for resolve-asset-url.ts.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,39 +1,38 @@
 /**
- * @fileoverview Error type-guard predicates — `isError` (with the
- * `isErrorBuiltin` / `isErrorShim` building blocks) and the libuv
- * errno-code narrower `isErrnoException`. Both are cross-realm-safe
- * (they use `[[ErrorData]]` slot semantics rather than
- * `instanceof Error`).
+ * @file Error type-guard predicates — `isError` (with the `isErrorBuiltin` /
+ *   `isErrorShim` building blocks) and the libuv errno-code narrower
+ *   `isErrnoException`. Both are cross-realm-safe (they use `[[ErrorData]]`
+ *   slot semantics rather than `instanceof Error`).
  */
 
 import { ObjectPrototypeToString } from '../primordials/object'
 import { StringPrototypeCharCodeAt } from '../primordials/string'
 
 /**
- * Reference to the native ES2025 `Error.isError` when the running
- * engine ships it, otherwise `undefined`. Exposed separately so tests
- * and callers can detect the fast-path without re-probing.
+ * Reference to the native ES2025 `Error.isError` when the running engine ships
+ * it, otherwise `undefined`. Exposed separately so tests and callers can detect
+ * the fast-path without re-probing.
  */
 export const isErrorBuiltin: ((value: unknown) => value is Error) | undefined =
   (Error as unknown as { isError?: (v: unknown) => v is Error }).isError
 
 /**
- * Narrow a caught value to a Node.js `ErrnoException` — an Error with a
- * `.code` string set by libuv/syscall failures (e.g. `'ENOENT'`,
- * `'EACCES'`, `'EBUSY'`, `'EPERM'`). Cross-realm safe (builds on
- * {@link isError}), and checks that `code` is a string so a merely
- * branded Error without a real errno code returns `false`.
+ * Narrow a caught value to a Node.js `ErrnoException` — an Error with a `.code`
+ * string set by libuv/syscall failures (e.g. `'ENOENT'`, `'EACCES'`, `'EBUSY'`,
+ * `'EPERM'`). Cross-realm safe (builds on {@link isError}), and checks that
+ * `code` is a string so a merely branded Error without a real errno code
+ * returns `false`.
  *
  * @example
- * try {
- *   await fsPromises.readFile(path)
- * } catch (e) {
- *   if (isErrnoException(e) && e.code === 'ENOENT') {
- *     // … retry, or return default …
- *   } else {
- *     throw e
+ *   try {
+ *     await fsPromises.readFile(path)
+ *   } catch (e) {
+ *     if (isErrnoException(e) && e.code === 'ENOENT') {
+ *       // … retry, or return default …
+ *     } else {
+ *       throw e
+ *     }
  *   }
- * }
  */
 export function isErrnoException(
   value: unknown,
@@ -57,12 +56,12 @@ export function isErrnoException(
 }
 
 /**
- * `Error.isError` fallback shim — the in-language approximation used
- * when the native ES2025 method isn't available.
+ * `Error.isError` fallback shim — the in-language approximation used when the
+ * native ES2025 method isn't available.
  *
- * Exported separately so test suites on engines that ship the native
- * method can still exercise the shim branch directly. Consumers should
- * prefer {@link isError}, which picks the native method when present.
+ * Exported separately so test suites on engines that ship the native method can
+ * still exercise the shim branch directly. Consumers should prefer
+ * {@link isError}, which picks the native method when present.
  */
 export function isErrorShim(value: unknown): value is Error {
   if (value === null || typeof value !== 'object') {

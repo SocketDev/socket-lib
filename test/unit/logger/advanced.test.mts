@@ -1,15 +1,15 @@
 /**
- * @fileoverview Advanced tests for Logger class - task management, assertions, and advanced features.
+ * @file Advanced tests for Logger class - task management, assertions, and
+ *   advanced features. Tests advanced Logger functionality including:
  *
- * Tests advanced Logger functionality including:
- * - createTask() for tracking async operations with start/completion messages
- * - assert() for conditional logging based on truthy/falsy values
- * - logCallCount tracking across all logging methods
- * - dir/dirxml for object inspection
- * - trace() for stack traces
- * - success/fail methods with symbol stripping
- * - step() for progress indicators
- * - Complex indentation scenarios and edge cases
+ *   - createTask() for tracking async operations with start/completion messages
+ *   - assert() for conditional logging based on truthy/falsy values
+ *   - logCallCount tracking across all logging methods
+ *   - dir/dirxml for object inspection
+ *   - trace() for stack traces
+ *   - success/fail methods with symbol stripping
+ *   - step() for progress indicators
+ *   - Complex indentation scenarios and edge cases
  */
 
 /* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */

@@ -1,12 +1,16 @@
 /**
- * @fileoverview Unit tests for Node.js constants and feature detection.
+ * @file Unit tests for Node.js constants and feature detection. Tests Node.js
+ *   version detection and feature support:
  *
- * Tests Node.js version detection and feature support:
- * - Version getters: getNodeVersion(), getNodeMajorVersion(), getMaintainedNodeVersions()
- * - Feature detection: supportsNodeRun(), supportsNodePermissionFlag(), supportsNodeCompileCacheApi()
- * - Flag builders: getNodeHardenFlags(), getNodePermissionFlags(), getNodeNoWarningsFlags()
- * - Runtime detection: NODE_SEA_FUSE, ESNEXT, getExecPath(), supportsProcessSend()
- * Critical for Node.js version-specific behavior and compatibility.
+ *   - Version getters: getNodeVersion(), getNodeMajorVersion(),
+ *     getMaintainedNodeVersions()
+ *   - Feature detection: supportsNodeRun(), supportsNodePermissionFlag(),
+ *     supportsNodeCompileCacheApi()
+ *   - Flag builders: getNodeHardenFlags(), getNodePermissionFlags(),
+ *     getNodeNoWarningsFlags()
+ *   - Runtime detection: NODE_SEA_FUSE, ESNEXT, getExecPath(),
+ *     supportsProcessSend() Critical for Node.js version-specific behavior and
+ *     compatibility.
  */
 
 import process from 'node:process'

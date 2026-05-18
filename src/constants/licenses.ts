@@ -1,7 +1,7 @@
 /**
- * @fileoverview License identifier constants.
- * Exports common SPDX license strings (MIT, UNLICENSED) and a lazily-built
- * set of copy-left SPDX identifiers used when classifying package licenses.
+ * @file License identifier constants. Exports common SPDX license strings (MIT,
+ *   UNLICENSED) and a lazily-built set of copy-left SPDX identifiers used when
+ *   classifying package licenses.
  */
 
 import { SetCtor } from '../primordials/map-set'
@@ -13,8 +13,8 @@ export const UNLICENSED = 'UNLICENSED'
 // Copy-left licenses.
 let _copyLeftLicenses: Set<string>
 /**
- * Get the set of SPDX identifiers considered copy-left (AGPL, GPL, EPL,
- * EUPL, CC-BY-SA variants). The set is lazily built and cached on first call.
+ * Get the set of SPDX identifiers considered copy-left (AGPL, GPL, EPL, EUPL,
+ * CC-BY-SA variants). The set is lazily built and cached on first call.
  *
  * @returns A `Set` of SPDX license identifier strings.
  */

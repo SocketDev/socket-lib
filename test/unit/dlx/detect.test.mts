@@ -1,18 +1,17 @@
 /**
- * @fileoverview Unit tests for DLX executable type detection.
+ * @file Unit tests for DLX executable type detection. Tests executable type
+ *   detection for DLX cache and local filesystem paths:
  *
- * Tests executable type detection for DLX cache and local filesystem paths:
- * - detectExecutableType() generic entry point routing
- * - detectDlxExecutableType() detects packages vs binaries in DLX cache
- * - detectLocalExecutableType() detects via package.json and file extensions
- * - isJsFilePath() validates .js, .mjs, .cjs file paths
- * - isNodePackage() simplified helper for package detection
- * - isNativeBinary() simplified helper for binary detection
- *
- * Detection strategies:
- * - DLX cache: Check for node_modules/ directory presence
- * - Local paths: Check for package.json with bin field, then file extension
- * Critical for proper execution of downloaded packages and binaries.
+ *   - detectExecutableType() generic entry point routing
+ *   - detectDlxExecutableType() detects packages vs binaries in DLX cache
+ *   - detectLocalExecutableType() detects via package.json and file extensions
+ *   - isJsFilePath() validates .js, .mjs, .cjs file paths
+ *   - isNodePackage() simplified helper for package detection
+ *   - isNativeBinary() simplified helper for binary detection Detection
+ *     strategies:
+ *   - DLX cache: Check for node_modules/ directory presence
+ *   - Local paths: Check for package.json with bin field, then file extension
+ *     Critical for proper execution of downloaded packages and binaries.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

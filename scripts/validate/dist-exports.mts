@@ -1,6 +1,7 @@
 /**
- * @fileoverview Validate that all dist/* exports work correctly without .default
- * Ensures require('./dist/foo') returns the actual value, not wrapped in { default: value }
+ * @file Validate that all dist/* exports work correctly without .default
+ *   Ensures require('./dist/foo') returns the actual value, not wrapped in {
+ *   default: value }
  */
 
 import { readdirSync } from 'node:fs'

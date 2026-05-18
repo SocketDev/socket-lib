@@ -1,25 +1,23 @@
 /**
- * @fileoverview Lazy `Console` construction + dynamic prototype
- * mirroring for `Logger`. Both helpers exist as free functions
- * (rather than `Logger` static methods) because:
- *   - `constructConsole` caches the resolved `node:console` module
- *     so multiple `new Logger()` calls don't pay the require cost
- *     more than once. Caching at the function level is simpler than
- *     a class field that has to thread through all callers.
- *   - `ensurePrototypeInitialized` walks `globalConsole` once at
- *     first use and copies any console method that isn't already on
- *     `Logger.prototype`. Doing this lazily (rather than at module
- *     load) is what lets the logger be imported during early
- *     Node.js bootstrap before stdout is ready, which would
- *     otherwise crash with `ERR_CONSOLE_WRITABLE_STREAM`.
+ * @file Lazy `Console` construction + dynamic prototype mirroring for `Logger`.
+ *   Both helpers exist as free functions (rather than `Logger` static methods)
+ *   because:
  *
- * Note on the apparent circular import with `core.ts`:
- *   `ensurePrototypeInitialized` mutates `Logger.prototype`, so it
- *   imports `Logger` from `./core`. `core.ts` calls
- *   `ensurePrototypeInitialized()` from inside a method body, so the
- *   import cycle never resolves at module-load time — by the time
- *   `ensurePrototypeInitialized` actually runs, both modules are
- *   fully evaluated. Same pattern as `fs/path-cache` ↔ `fs/_internal`.
+ *   - `constructConsole` caches the resolved `node:console` module so multiple
+ *     `new Logger()` calls don't pay the require cost more than once. Caching
+ *     at the function level is simpler than a class field that has to thread
+ *     through all callers.
+ *   - `ensurePrototypeInitialized` walks `globalConsole` once at first use and
+ *     copies any console method that isn't already on `Logger.prototype`. Doing
+ *     this lazily (rather than at module load) is what lets the logger be
+ *     imported during early Node.js bootstrap before stdout is ready, which
+ *     would otherwise crash with `ERR_CONSOLE_WRITABLE_STREAM`. Note on the
+ *     apparent circular import with `core.ts`: `ensurePrototypeInitialized`
+ *     mutates `Logger.prototype`, so it imports `Logger` from `./core`.
+ *     `core.ts` calls `ensurePrototypeInitialized()` from inside a method body,
+ *     so the import cycle never resolves at module-load time — by the time
+ *     `ensurePrototypeInitialized` actually runs, both modules are fully
+ *     evaluated. Same pattern as `fs/path-cache` ↔ `fs/_internal`.
  */
 
 import process from 'node:process'
@@ -65,8 +63,9 @@ export function constructConsole(...args: unknown[]) {
 /**
  * Lazily add dynamic console methods to Logger prototype.
  *
- * This is deferred until first access to avoid calling Object.entries(globalConsole)
- * during early Node.js bootstrap before stdout is ready.
+ * This is deferred until first access to avoid calling
+ * Object.entries(globalConsole) during early Node.js bootstrap before stdout is
+ * ready.
  */
 export function ensurePrototypeInitialized() {
   if (_prototypeInitialized) {

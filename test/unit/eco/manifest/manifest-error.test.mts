@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/eco/manifest/manifest-error.ts.
+ * @file Unit tests for src/eco/manifest/manifest-error.ts.
  */
 
 import { describe, expect, it } from 'vitest'

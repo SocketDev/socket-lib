@@ -1,15 +1,14 @@
 /**
- * @fileoverview `resolveBazelVersion({ cwd })` — picks the Bazel
- * version to run for a project, matching the bazelisk precedence:
+ * @file `resolveBazelVersion({ cwd })` — picks the Bazel version to run for a
+ *   project, matching the bazelisk precedence:
  *
  *   1. `USE_BAZEL_VERSION` env var
  *   2. `.bazelversion` walking up from `cwd`
- *   3. Fallback to the latest stable release queried from GitHub
- *      Releases (via socket-lib's `getLatestRelease`, which already
- *      handles GH_TOKEN auth, retry, and the REST/GraphQL fallback).
- *
- * Returns `undefined` only if both steps 2 and 3 fail with no env
- * override — in that case the caller surfaces an actionable error.
+ *   3. Fallback to the latest stable release queried from GitHub Releases (via
+ *      socket-lib's `getLatestRelease`, which already handles GH_TOKEN auth,
+ *      retry, and the REST/GraphQL fallback). Returns `undefined` only if both
+ *      steps 2 and 3 fail with no env override — in that case the caller
+ *      surfaces an actionable error.
  */
 
 import process from 'node:process'
@@ -18,7 +17,9 @@ import { getLatestRelease } from '../../releases/github-listing'
 import { readBazelVersionFile } from './read-bazel-version-file'
 
 export interface ResolveBazelVersionOptions {
-  /** Working directory to walk up from for `.bazelversion`. */
+  /**
+   * Working directory to walk up from for `.bazelversion`.
+   */
   readonly cwd?: string | undefined
 }
 

@@ -1,13 +1,16 @@
 /**
- * @fileoverview Unit tests for Socket environment variable getters.
+ * @file Unit tests for Socket environment variable getters. Tests
+ *   Socket-specific environment variable accessors (SOCKET_* prefix):
  *
- * Tests Socket-specific environment variable accessors (SOCKET_* prefix):
- * - API config: getSocketApiBaseUrl(), getSocketApiToken(), getSocketApiProxy(), getSocketApiTimeout()
- * - Paths: getSocketHome(), getSocketCacacheDirEnv(), getSocketDlxDirEnv(), getSocketConfig()
- * - Registry: getSocketNpmRegistry(), getSocketRegistryUrl()
- * - Behavior: getSocketDebug(), getSocketAcceptRisks(), getSocketViewAllRisks(), getSocketNoApiToken()
- * - Organization: getSocketOrgSlug()
- * Uses rewire for test isolation. Critical for Socket tool configuration.
+ *   - API config: getSocketApiBaseUrl(), getSocketApiToken(),
+ *     getSocketApiProxy(), getSocketApiTimeout()
+ *   - Paths: getSocketHome(), getSocketCacacheDirEnv(), getSocketDlxDirEnv(),
+ *     getSocketConfig()
+ *   - Registry: getSocketNpmRegistry(), getSocketRegistryUrl()
+ *   - Behavior: getSocketDebug(), getSocketAcceptRisks(),
+ *     getSocketViewAllRisks(), getSocketNoApiToken()
+ *   - Organization: getSocketOrgSlug() Uses rewire for test isolation. Critical
+ *     for Socket tool configuration.
  */
 
 import {

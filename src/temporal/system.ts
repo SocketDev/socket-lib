@@ -1,19 +1,15 @@
 /**
- * @fileoverview Spec clause 21.x host hook — wallclock reader.
- *
- * Implements `SystemUTCEpochNanoseconds()`, the spec's nanosecond-
- * resolution wallclock read. Hosts may use any source they like
- * provided the result is non-decreasing across calls. On Node we
- * combine `Date.now()` (millisecond wallclock) with
- * `process.hrtime.bigint()` (sub-millisecond monotonic counter)
- * anchored at module load to deliver real nanosecond resolution.
- *
- * Fallback path (non-Node hosts without `process.hrtime.bigint`): we
- * multiply `Date.now()` by 1_000_000n to fill the field with zeros.
- * This trades sub-millisecond precision for portability and is the
- * same compromise the polyfill makes for browser hosts.
- *
- * Spec: https://tc39.es/proposal-temporal/#sec-temporal-systemutcepochnanoseconds
+ * @file Spec clause 21.x host hook — wallclock reader. Implements
+ *   `SystemUTCEpochNanoseconds()`, the spec's nanosecond- resolution wallclock
+ *   read. Hosts may use any source they like provided the result is
+ *   non-decreasing across calls. On Node we combine `Date.now()` (millisecond
+ *   wallclock) with `process.hrtime.bigint()` (sub-millisecond monotonic
+ *   counter) anchored at module load to deliver real nanosecond resolution.
+ *   Fallback path (non-Node hosts without `process.hrtime.bigint`): we multiply
+ *   `Date.now()` by 1_000_000n to fill the field with zeros. This trades
+ *   sub-millisecond precision for portability and is the same compromise the
+ *   polyfill makes for browser hosts. Spec:
+ *   https://tc39.es/proposal-temporal/#sec-temporal-systemutcepochnanoseconds.
  */
 
 import { BigIntCtor } from '../primordials/globals'
@@ -60,8 +56,8 @@ const _NS_PER_MS = 1_000_000n
 /**
  * Returns the current UTC time as nanoseconds since 1970-01-01T00:00:00Z.
  *
- * Resolution is nanosecond on Node (via `process.hrtime.bigint`
- * anchored at module load), millisecond elsewhere.
+ * Resolution is nanosecond on Node (via `process.hrtime.bigint` anchored at
+ * module load), millisecond elsewhere.
  */
 export function systemUTCEpochNanoseconds(): bigint {
   // Step 1.

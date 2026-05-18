@@ -1,15 +1,11 @@
 /**
- * @fileoverview Lazy-loader for socket-btm's `node:smol-http`.
- *
- * `node:smol-http` is the C++-accelerated HTTP server + client
- * binding shipped by socket-btm's smol Node binary. It backs a
- * pipelined HTTP/1.1 + HTTP/2 client (`request`), a uWS-backed
- * server (`serve`), and a family of fast-path response writers
- * (`fastJsonResponse`, `fastErrorResponse`, etc.) that bypass the
- * `http.ServerResponse` allocation hot path.
- *
- * Returns `undefined` on stock Node + non-Node runtimes. Result is
- * cached across calls.
+ * @file Lazy-loader for socket-btm's `node:smol-http`. `node:smol-http` is the
+ *   C++-accelerated HTTP server + client binding shipped by socket-btm's smol
+ *   Node binary. It backs a pipelined HTTP/1.1 + HTTP/2 client (`request`), a
+ *   uWS-backed server (`serve`), and a family of fast-path response writers
+ *   (`fastJsonResponse`, `fastErrorResponse`, etc.) that bypass the
+ *   `http.ServerResponse` allocation hot path. Returns `undefined` on stock
+ *   Node + non-Node runtimes. Result is cached across calls.
  *
  * @internal — `src/http-request/` is the natural consumer. Most
  *   callers should use the standard `httpRequest` / `httpJson` /
@@ -20,9 +16,9 @@
 import { isNodeBuiltin } from '../node/module'
 
 /**
- * Options accepted by `smol-http`'s `request()`. The full surface is
- * larger; socket-lib types only the fields it actually reads. Callers
- * needing more can widen the type at the callsite.
+ * Options accepted by `smol-http`'s `request()`. The full surface is larger;
+ * socket-lib types only the fields it actually reads. Callers needing more can
+ * widen the type at the callsite.
  */
 export interface SmolHttpRequestOptions {
   readonly method?: string | undefined
@@ -34,14 +30,13 @@ export interface SmolHttpRequestOptions {
 /**
  * Surface of `node:smol-http`. See socket-btm's
  * additions/source-patched/lib/smol-http.js (and the
- * `internal/socketsecurity/http/core.js` barrel it re-exports) for
- * the canonical shape.
+ * `internal/socketsecurity/http/core.js` barrel it re-exports) for the
+ * canonical shape.
  *
- * Only the entries socket-lib's `http-request/` module needs are
- * typed here. The full surface (server-side `serve`, uWS-backed
- * `fast*Response` writers, `withCork`, `setPipelining`, etc.) is
- * available as `Record<string, unknown>` for callers that need it
- * without expanding the contract here.
+ * Only the entries socket-lib's `http-request/` module needs are typed here.
+ * The full surface (server-side `serve`, uWS-backed `fast*Response` writers,
+ * `withCork`, `setPipelining`, etc.) is available as `Record<string, unknown>`
+ * for callers that need it without expanding the contract here.
  */
 export interface SmolHttpBinding {
   /**
@@ -67,8 +62,8 @@ let _smolHttp: SmolHttpBinding | undefined
 let _smolHttpProbed = false
 
 /**
- * Returns `node:smol-http` when running on the smol Node binary,
- * otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-http` when running on the smol Node binary, otherwise
+ * `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolHttp(): SmolHttpBinding | undefined {

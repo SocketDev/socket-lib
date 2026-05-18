@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for
+ * @file Unit tests for
  * src/eco/npm/npm/extract-package-name-from-path.ts.
  */
 

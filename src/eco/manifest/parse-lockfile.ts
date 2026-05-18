@@ -1,17 +1,12 @@
 /**
- * @fileoverview `parseLockfile(content, ecosystem, format?)` —
- * dispatches to the right per-PM lockfile parser. When `format` is
- * omitted, the content is sniffed (npm `lockfileVersion`, yarn
- * `__metadata:` or `yarn lockfile`, pnpm `lockfileVersion:`).
- *
- * On socket-btm's smol Node binary this routes to
- * `node:smol-manifest`'s native `parseLockfile`; on stock Node it
- * dispatches to one of the `src/eco/npm/<pm>/parse-lockfile.ts`
- * leaves.
- *
- * Throws `ManifestError(ERR_UNSUPPORTED)` for unrecognized
- * ecosystems, and `ManifestError(ERR_UNKNOWN_FORMAT)` when content
- * can't be sniffed.
+ * @file `parseLockfile(content, ecosystem, format?)` — dispatches to the right
+ *   per-PM lockfile parser. When `format` is omitted, the content is sniffed
+ *   (npm `lockfileVersion`, yarn `__metadata:` or `yarn lockfile`, pnpm
+ *   `lockfileVersion:`). On socket-btm's smol Node binary this routes to
+ *   `node:smol-manifest`'s native `parseLockfile`; on stock Node it dispatches
+ *   to one of the `src/eco/npm/<pm>/parse-lockfile.ts` leaves. Throws
+ *   `ManifestError(ERR_UNSUPPORTED)` for unrecognized ecosystems, and
+ *   `ManifestError(ERR_UNKNOWN_FORMAT)` when content can't be sniffed.
  */
 
 import { ManifestError } from './manifest-error'

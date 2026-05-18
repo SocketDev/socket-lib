@@ -1,25 +1,37 @@
 /**
- * @fileoverview Public type surface for `memo/*` modules —
- * `MemoizeOptions` is the user-facing options bag accepted by every
- * memoize entrypoint, `CacheEntry<T>` is the internal row stored in
- * each per-function cache. Pure types, no runtime side effects.
+ * @file Public type surface for `memo/*` modules — `MemoizeOptions` is the
+ *   user-facing options bag accepted by every memoize entrypoint,
+ *   `CacheEntry<T>` is the internal row stored in each per-function cache. Pure
+ *   types, no runtime side effects.
  */
 
 /**
  * Options for memoization behavior.
  */
 export type MemoizeOptions<Args extends unknown[]> = {
-  /** Custom cache key generator (defaults to JSON.stringify) */
+  /**
+   * Custom cache key generator (defaults to JSON.stringify)
+   */
   keyGen?: (...args: Args) => string
-  /** Maximum cache size (LRU eviction when exceeded) */
+  /**
+   * Maximum cache size (LRU eviction when exceeded)
+   */
   maxSize?: number
-  /** TTL in milliseconds (cache entries expire after this time) */
+  /**
+   * TTL in milliseconds (cache entries expire after this time)
+   */
   ttl?: number
-  /** Cache name for debugging */
+  /**
+   * Cache name for debugging.
+   */
   name?: string
-  /** Weak cache for object keys (enables GC) */
+  /**
+   * Weak cache for object keys (enables GC)
+   */
   weak?: boolean
-  /** Custom equality check for cache hits */
+  /**
+   * Custom equality check for cache hits.
+   */
   equals?: (a: Args, b: Args) => boolean
 }
 

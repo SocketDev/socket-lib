@@ -1,8 +1,7 @@
 /**
- * @fileoverview Zip extraction with security limits and path
- * traversal validation. Uses adm-zip under the hood; pre-validates
- * every entry before extraction so the disk-write phase can't be
- * tricked into escaping the target directory.
+ * @file Zip extraction with security limits and path traversal validation. Uses
+ *   adm-zip under the hood; pre-validates every entry before extraction so the
+ *   disk-write phase can't be tricked into escaping the target directory.
  */
 
 import { safeMkdir } from '../fs/safe'
@@ -27,15 +26,15 @@ import type { ExtractOptions } from './types'
 /**
  * Extract a zip archive to a directory.
  *
- * @param archivePath - Path to zip file
- * @param outputDir - Directory to extract to
- * @param options - Extraction options
- *
  * @example
- * ```typescript
- * await extractZip('/tmp/archive.zip', '/tmp/output')
- * await extractZip('/tmp/archive.zip', '/tmp/output', { strip: 1 })
- * ```
+ *   ;```typescript
+ *   await extractZip('/tmp/archive.zip', '/tmp/output')
+ *   await extractZip('/tmp/archive.zip', '/tmp/output', { strip: 1 })
+ *   ```
+ *
+ * @param archivePath - Path to zip file.
+ * @param outputDir - Directory to extract to.
+ * @param options - Extraction options.
  */
 export async function extractZip(
   archivePath: string,

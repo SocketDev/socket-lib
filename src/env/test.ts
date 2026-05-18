@@ -1,6 +1,6 @@
 /**
- * @fileoverview Test environment variable getters and detection.
- * Provides access to test framework environment variables and utilities.
+ * @file Test environment variable getters and detection. Provides access to
+ *   test framework environment variables and utilities.
  */
 
 import { envAsBoolean } from './boolean'
@@ -9,18 +9,17 @@ import { getNodeEnv } from './node-env'
 import { getEnvValue } from './rewire'
 
 /**
- * JEST_WORKER_ID environment variable.
- * Set when running tests with Jest.
- *
- * @returns The Jest worker ID string, or empty string if not set
+ * JEST_WORKER_ID environment variable. Set when running tests with Jest.
  *
  * @example
- * ```typescript
- * import { getJestWorkerId } from '@socketsecurity/lib/env/test'
+ *   ;```typescript
+ *   import { getJestWorkerId } from '@socketsecurity/lib/env/test'
  *
- * const workerId = getJestWorkerId()
- * // e.g. '1' when running in Jest, or ''
- * ```
+ *   const workerId = getJestWorkerId()
+ *   // e.g. '1' when running in Jest, or ''
+ *   ```
+ *
+ * @returns The Jest worker ID string, or empty string if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getJestWorkerId(): string {
@@ -28,19 +27,18 @@ export function getJestWorkerId(): string {
 }
 
 /**
- * VITEST environment variable.
- * Set when running tests with Vitest.
- *
- * @returns `true` if running in Vitest, `false` otherwise
+ * VITEST environment variable. Set when running tests with Vitest.
  *
  * @example
- * ```typescript
- * import { getVitest } from '@socketsecurity/lib/env/test'
+ *   ;```typescript
+ *   import { getVitest } from '@socketsecurity/lib/env/test'
  *
- * if (getVitest()) {
- *   console.log('Running in Vitest')
- * }
- * ```
+ *   if (getVitest()) {
+ *     console.log('Running in Vitest')
+ *   }
+ *   ```
+ *
+ * @returns `true` if running in Vitest, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getVitest(): boolean {
@@ -48,19 +46,19 @@ export function getVitest(): boolean {
 }
 
 /**
- * Check if code is running in a test environment.
- * Checks NODE_ENV, VITEST, and JEST_WORKER_ID.
- *
- * @returns `true` if running in a test environment, `false` otherwise
+ * Check if code is running in a test environment. Checks NODE_ENV, VITEST, and
+ * JEST_WORKER_ID.
  *
  * @example
- * ```typescript
- * import { isTest } from '@socketsecurity/lib/env/test'
+ *   ;```typescript
+ *   import { isTest } from '@socketsecurity/lib/env/test'
  *
- * if (isTest()) {
- *   console.log('Running in test environment')
- * }
- * ```
+ *   if (isTest()) {
+ *     console.log('Running in test environment')
+ *   }
+ *   ```
+ *
+ * @returns `true` if running in a test environment, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isTest(): boolean {

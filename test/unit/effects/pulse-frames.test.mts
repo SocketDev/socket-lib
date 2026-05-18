@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for Socket pulse animation frames generator.
+ * @file Unit tests for Socket pulse animation frames generator. Tests Socket
+ *   pulse animation frame generation:
  *
- * Tests Socket pulse animation frame generation:
- * - generateSocketSpinnerFrames() creates 18-frame pulse animation
- * - ANSI color codes for bold/dim effects
- * - Unicode sparkle characters (✦✧⋆⚡) with variation selectors
- * - Symmetrical build-up and fade-down animation pattern
- * Used by Socket CLI for /ultrathink mode spinner and progress indicators.
+ *   - generateSocketSpinnerFrames() creates 18-frame pulse animation
+ *   - ANSI color codes for bold/dim effects
+ *   - Unicode sparkle characters (✦✧⋆⚡) with variation selectors
+ *   - Symmetrical build-up and fade-down animation pattern Used by Socket CLI for
+ *     /ultrathink mode spinner and progress indicators.
  */
 
 import { describe, expect, it } from 'vitest'

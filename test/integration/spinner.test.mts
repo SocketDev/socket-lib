@@ -1,12 +1,12 @@
 /**
- * @fileoverview Integration tests for spinner in real terminal environments.
+ * @file Integration tests for spinner in real terminal environments. Tests
+ *   spinner behavior with actual terminal output:
  *
- * Tests spinner behavior with actual terminal output:
- * - Spinner starts and stops correctly
- * - Progress updates display properly
- * - withSpinner() wraps async operations
- * - CI environment detection disables spinners
- * Used by Socket CLI for user-facing progress indicators.
+ *   - Spinner starts and stops correctly
+ *   - Progress updates display properly
+ *   - withSpinner() wraps async operations
+ *   - CI environment detection disables spinners Used by Socket CLI for
+ *     user-facing progress indicators.
  */
 
 import process from 'node:process'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Vitest configuration for socket-lib
+ * @file Vitest configuration for socket-lib
  */
 
 import { readFileSync } from 'node:fs'

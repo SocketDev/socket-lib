@@ -1,6 +1,6 @@
 /**
- * @fileoverview Run tests with coverage reporting.
- * Sets COVERAGE=true so vitest config enables source resolution.
+ * @file Run tests with coverage reporting. Sets COVERAGE=true so vitest config
+ *   enables source resolution.
  */
 
 import path from 'node:path'

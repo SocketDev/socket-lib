@@ -1,10 +1,10 @@
 /**
- * @fileoverview Socket CLI child-process IPC object getter.
- * Lazily builds an `IpcObject` from `SOCKET_CLI_*` environment variables so
- * child processes can read flags and tokens forwarded by the parent Socket
- * CLI without re-parsing `process.env` each call. Complements the filesystem
- * stub IPC in `@socketsecurity/lib/ipc` (`getIpcStubPath`, `writeIpcStub`)
- * for cases where data exceeds env-var size limits.
+ * @file Socket CLI child-process IPC object getter. Lazily builds an
+ *   `IpcObject` from `SOCKET_CLI_*` environment variables so child processes
+ *   can read flags and tokens forwarded by the parent Socket CLI without
+ *   re-parsing `process.env` each call. Complements the filesystem stub IPC in
+ *   `@socketsecurity/lib/ipc` (`getIpcStubPath`, `writeIpcStub`) for cases
+ *   where data exceeds env-var size limits.
  */
 
 import { ObjectFreeze } from '../primordials/object'
@@ -15,11 +15,12 @@ let _ipcObject: IpcObject | undefined
 
 /**
  * Get IPC data forwarded by a parent Socket CLI via `SOCKET_CLI_*` env vars.
- * Call without arguments to receive the full frozen `IpcObject`, or pass a
- * key to read a single field. The object is lazily built and cached; keys
- * that weren't set in the environment are returned as `undefined`.
+ * Call without arguments to receive the full frozen `IpcObject`, or pass a key
+ * to read a single field. The object is lazily built and cached; keys that
+ * weren't set in the environment are returned as `undefined`.
  *
- * @param key - Optional `IpcObject` field name to read
+ * @param key - Optional `IpcObject` field name to read.
+ *
  * @returns The full `IpcObject` or the value at `key` (possibly `undefined`).
  */
 export async function getIpc(): Promise<IpcObject>

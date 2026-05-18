@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for NPM lifecycle script names.
+ * @file Unit tests for NPM lifecycle script names.
  */
 
 import { lifecycleScriptNames } from '@socketsecurity/lib/constants/lifecycle-script-names'

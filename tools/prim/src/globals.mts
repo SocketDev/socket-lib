@@ -1,13 +1,10 @@
 /* oxlint-disable socket/sort-source-methods -- helper functions interleaved with module-level Set / Map constants of global identifiers they consume. */
 /**
- * @fileoverview Built-in JavaScript globals the audit tracks.
- *
- * Anything not in this set is treated as a user-defined identifier and
- * skipped. Keep alphabetical so additions are easy to spot.
- *
- * Source of truth: TC39 spec globals (https://tc39.es/ecma262/) plus
- * the WHATWG / Web-platform globals that Node ships
- * (`URL`, `URLSearchParams`, `Buffer`).
+ * @file Built-in JavaScript globals the audit tracks. Anything not in this set
+ *   is treated as a user-defined identifier and skipped. Keep alphabetical so
+ *   additions are easy to spot. Source of truth: TC39 spec globals
+ *   (https://tc39.es/ecma262/) plus the WHATWG / Web-platform globals that Node
+ *   ships (`URL`, `URLSearchParams`, `Buffer`).
  */
 
 export const TRACKED_GLOBALS = new Set([
@@ -62,8 +59,8 @@ export const TRACKED_GLOBALS = new Set([
 ])
 
 /**
- * Bare global functions (not on a namespace). Tracked separately because
- * they can't be detected as `Foo.bar(...)` member-call patterns.
+ * Bare global functions (not on a namespace). Tracked separately because they
+ * can't be detected as `Foo.bar(...)` member-call patterns.
  */
 export const TRACKED_GLOBAL_FUNCTIONS = new Set([
   'decodeURI',
@@ -79,16 +76,15 @@ export const TRACKED_GLOBAL_FUNCTIONS = new Set([
 ])
 
 /**
- * Method names that are unambiguously prototype methods on a single
- * built-in type. Used as a stronger signal than name heuristics.
+ * Method names that are unambiguously prototype methods on a single built-in
+ * type. Used as a stronger signal than name heuristics.
  *
- * If a method appears here, a `.method(...)` call on ANY identifier
- * is treated as a candidate for that type's primordial — provided
- * the method doesn't also appear on other built-ins. Methods that
- * collide across types (e.g. `.has` lives on Set, Map, WeakSet,
- * WeakMap, URLSearchParams; `.forEach` lives on Array, Map, Set,
- * NodeList, …) are intentionally excluded — they require type info
- * we don't have.
+ * If a method appears here, a `.method(...)` call on ANY identifier is treated
+ * as a candidate for that type's primordial — provided the method doesn't also
+ * appear on other built-ins. Methods that collide across types (e.g. `.has`
+ * lives on Set, Map, WeakSet, WeakMap, URLSearchParams; `.forEach` lives on
+ * Array, Map, Set, NodeList, …) are intentionally excluded — they require type
+ * info we don't have.
  */
 export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
   // ─── String only ────────────────────────────────────────────────────
@@ -195,14 +191,14 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
 ])
 
 /**
- * Property names we know are static methods on Node built-in modules,
- * NOT prototype methods on a builtin type. When the called member name
- * is one of these, the type-guess heuristic should skip — the receiver
- * is a module object regardless of what its identifier name suggests.
+ * Property names we know are static methods on Node built-in modules, NOT
+ * prototype methods on a builtin type. When the called member name is one of
+ * these, the type-guess heuristic should skip — the receiver is a module object
+ * regardless of what its identifier name suggests.
  *
  * Without this set, `path.isAbsolute(...)` gets classified as
- * "String.prototype.isAbsolute" because `path` matches the String hint
- * regex. Same for `path.join`, `path.dirname`, etc.
+ * "String.prototype.isAbsolute" because `path` matches the String hint regex.
+ * Same for `path.join`, `path.dirname`, etc.
  */
 export const NODE_MODULE_STATIC_METHODS = new Set([
   'access',
@@ -252,14 +248,13 @@ export const NODE_MODULE_STATIC_METHODS = new Set([
 ])
 
 /**
- * Heuristic: when a method call's receiver isn't a known global AND the
- * method name isn't unambiguous, guess what built-in type it is from
- * the identifier name. Returns the global name (e.g. `'Array'`) or
- * `undefined` if no guess.
+ * Heuristic: when a method call's receiver isn't a known global AND the method
+ * name isn't unambiguous, guess what built-in type it is from the identifier
+ * name. Returns the global name (e.g. `'Array'`) or `undefined` if no guess.
  *
  * Conservative — only fires on conventional names. False positives are
- * acceptable for an audit; they show up as `[guessed: …]` so the
- * reader can dismiss them.
+ * acceptable for an audit; they show up as `[guessed: …]` so the reader can
+ * dismiss them.
  */
 export function guessReceiverType(name) {
   // ─── Array hints ────────────────────────────────────────────────────
@@ -333,34 +328,29 @@ export function guessReceiverType(name) {
 }
 
 /**
- * Statics on tracked globals that are known to be data properties or
- * accessors — NOT callable functions — and therefore cannot be wrapped
- * as a primordial. The audit and codemod skip them so they don't show
- * up as actionable gaps.
+ * Statics on tracked globals that are known to be data properties or accessors
+ * — NOT callable functions — and therefore cannot be wrapped as a primordial.
+ * The audit and codemod skip them so they don't show up as actionable gaps.
  *
- * Each entry is `<Global>.<member>` joined by a dot. The notes point
- * at the spec or platform doc that defines the property (so it's clear
- * this is intentional, not an oversight). Entries are sorted
- * alphanumerically.
+ * Each entry is `<Global>.<member>` joined by a dot. The notes point at the
+ * spec or platform doc that defines the property (so it's clear this is
+ * intentional, not an oversight). Entries are sorted alphanumerically.
  *
- *   Error.captureStackTrace
- *     V8 method but it MUTATES the target (`err`) in place rather than
- *     being safely curryable. Wrapping as a primordial would still be
- *     correct in principle; callers wanting deterministic stack capture
- *     usually want the realm-anchored Error constructor instead.
- *     https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions
+ * Error.captureStackTrace V8 method but it MUTATES the target (`err`) in place
+ * rather than being safely curryable. Wrapping as a primordial would still be
+ * correct in principle; callers wanting deterministic stack capture usually
+ * want the realm-anchored Error constructor instead.
+ * https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions.
  *
- *   Error.prepareStackTrace
- *     V8 setter property; user code assigns a `(err, frames) => string`
- *     to override the default stack-formatting on `err.stack` access.
- *     Not standardized — V8 (Node, Chromium) only.
- *     https://v8.dev/docs/stack-trace-api#customizing-stack-traces
+ * Error.prepareStackTrace V8 setter property; user code assigns a `(err,
+ * frames) => string` to override the default stack-formatting on `err.stack`
+ * access. Not standardized — V8 (Node, Chromium) only.
+ * https://v8.dev/docs/stack-trace-api#customizing-stack-traces.
  *
- *   Error.stackTraceLimit
- *     V8 number property — the global cap on stack frames retained.
- *     Setting it from a primordial would have no effect; reading it
- *     returns the live value.
- *     https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions
+ * Error.stackTraceLimit V8 number property — the global cap on stack frames
+ * retained. Setting it from a primordial would have no effect; reading it
+ * returns the live value.
+ * https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions.
  */
 export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
   'Error.captureStackTrace',
@@ -369,22 +359,21 @@ export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
 ])
 
 /**
- * Static-method calls whose return type narrows based on the literal
- * call site, in a way that breaks when the call is rewritten through an
- * aliased variable. Specifically: `Symbol.for(literal)` returns
- * `unique symbol`, so `class C { [Symbol.for('x')]() {} }` defines a
- * named member; rewriting to `SymbolFor('x')` returns plain `symbol`,
- * collapsing the keyed member into the unindexed-symbol bucket and
- * making `c[Symbol.for('x')]()` ambiguous against any other
- * symbol-keyed method on the class. The audit + codemod skip these
- * sites entirely — both reading and writing them through a primordial
- * would change the static type.
+ * Static-method calls whose return type narrows based on the literal call site,
+ * in a way that breaks when the call is rewritten through an aliased variable.
+ * Specifically: `Symbol.for(literal)` returns `unique symbol`, so `class C {
+ * [Symbol.for('x')]() {} }` defines a named member; rewriting to
+ * `SymbolFor('x')` returns plain `symbol`, collapsing the keyed member into the
+ * unindexed-symbol bucket and making `c[Symbol.for('x')]()` ambiguous against
+ * any other symbol-keyed method on the class. The audit + codemod skip these
+ * sites entirely — both reading and writing them through a primordial would
+ * change the static type.
  */
 export const TYPE_NARROWING_STATIC_CALLS = new Set(['Symbol.for'])
 
 /**
- * Map a tracked global + property name to the corresponding primordial
- * export name in `@socketsecurity/lib/primordials`.
+ * Map a tracked global + property name to the corresponding primordial export
+ * name in `@socketsecurity/lib/primordials`.
  */
 export function staticPrimordialName(global, member) {
   return global + member[0].toUpperCase() + member.slice(1)
@@ -428,11 +417,10 @@ export function getPrototypeMethods(globalName) {
 }
 
 /**
- * Returns the primordial name for `<global>.prototype.<method>` if the
- * method actually exists on the global's prototype. Returns `undefined`
- * when it doesn't — prevents fabricating names like
- * `PromisePrototypeLoad` when `p` is just a variable named `p` that
- * isn't actually a Promise.
+ * Returns the primordial name for `<global>.prototype.<method>` if the method
+ * actually exists on the global's prototype. Returns `undefined` when it
+ * doesn't — prevents fabricating names like `PromisePrototypeLoad` when `p` is
+ * just a variable named `p` that isn't actually a Promise.
  */
 export function prototypePrimordialName(global, method) {
   if (!getPrototypeMethods(global).has(method)) {

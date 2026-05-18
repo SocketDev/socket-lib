@@ -1,11 +1,9 @@
 /**
- * @fileoverview Integration tests for src/external-tools/from-download.ts.
- *
- * Exercises the chain end-to-end with the `downloader?` injection point —
- * no network, no real Adoptium fetch. The fake downloader writes a
- * pre-built tar archive to disk and returns the dlx-shape `{binaryPath,
- * downloaded, integrity}` so `downloadAndExtractTool` can hand the
- * archive to `extractArchive`.
+ * @file Integration tests for src/external-tools/from-download.ts. Exercises
+ *   the chain end-to-end with the `downloader?` injection point — no network,
+ *   no real Adoptium fetch. The fake downloader writes a pre-built tar archive
+ *   to disk and returns the dlx-shape `{binaryPath, downloaded, integrity}` so
+ *   `downloadAndExtractTool` can hand the archive to `extractArchive`.
  */
 
 import {
@@ -72,10 +70,9 @@ describe('external-tools/from-download', () => {
 
   describe('downloadAndExtractTool', () => {
     /**
-     * Build a real tar archive containing `source/hello.txt`. Packs
-     * the parent dir so the entry name is `source/hello.txt` (with
-     * the `source/` wrapper), which mirrors how Adoptium / Bazel /
-     * SBT archives are shaped.
+     * Build a real tar archive containing `source/hello.txt`. Packs the parent
+     * dir so the entry name is `source/hello.txt` (with the `source/` wrapper),
+     * which mirrors how Adoptium / Bazel / SBT archives are shaped.
      */
     async function buildTarFixture(scratchDir: string): Promise<string> {
       const fs = require('node:fs') as typeof import('node:fs')

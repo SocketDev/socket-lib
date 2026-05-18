@@ -1,14 +1,13 @@
 /**
- * @fileoverview PURL (Package URL) ecosystem identifiers shared across
- * every package manager Socket understands.
+ * @file PURL (Package URL) ecosystem identifiers shared across every package
+ *   manager Socket understands.
  *
- *   - `PURL_Type` — runtime const mapping uppercase keys to lowercase
- *     ecosystem slugs (e.g. `PURL_Type.NPM === 'npm'`)
+ *   - `PURL_Type` — runtime const mapping uppercase keys to lowercase ecosystem
+ *     slugs (e.g. `PURL_Type.NPM === 'npm'`)
  *   - `PURLString` — string-union of every PURL ecosystem slug
- *   - `EcosystemString` — semantic alias of `PURLString` for places
- *     where "ecosystem" reads more naturally than "PURL string"
- *
- * Based on SocketPURL_Type from socket-sdk-js.
+ *   - `EcosystemString` — semantic alias of `PURLString` for places where
+ *     "ecosystem" reads more naturally than "PURL string" Based on
+ *     SocketPURL_Type from socket-sdk-js.
  */
 
 export const PURL_Type = {
@@ -81,7 +80,7 @@ export type PURLString =
   | 'vscode'
 
 /**
- * Semantic alias of `PURLString` — same string union, used where
- * "ecosystem" reads more naturally than "PURL".
+ * Semantic alias of `PURLString` — same string union, used where "ecosystem"
+ * reads more naturally than "PURL".
  */
 export type EcosystemString = PURLString

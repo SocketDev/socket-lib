@@ -1,11 +1,11 @@
 /**
- * @fileoverview Unit tests for package manager detection utilities.
+ * @file Unit tests for package manager detection utilities. Tests package
+ *   manager detection from environment:
  *
- * Tests package manager detection from environment:
- * - detectPackageManager() - Detect npm/pnpm/yarn/bun from env
- * - getPackageManagerInfo() - Get name and version from user agent
- * - getPackageManagerUserAgent() - Get user agent string
- * Used for adapting behavior based on the running package manager.
+ *   - detectPackageManager() - Detect npm/pnpm/yarn/bun from env
+ *   - getPackageManagerInfo() - Get name and version from user agent
+ *   - getPackageManagerUserAgent() - Get user agent string Used for adapting
+ *     behavior based on the running package manager.
  */
 
 import {

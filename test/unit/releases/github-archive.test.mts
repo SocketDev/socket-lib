@@ -1,11 +1,10 @@
 /**
- * @fileoverview Unit tests for GitHub release archive utilities.
+ * @file Unit tests for GitHub release archive utilities. Tests archive-related
+ *   utilities in releases/github module:
  *
- * Tests archive-related utilities in releases/github module:
- * - Format auto-detection from file patterns
- * - Integration with archive extraction (tested via archive tests)
- *
- * Note: Full download tests are in integration tests due to GitHub API dependency.
+ *   - Format auto-detection from file patterns
+ *   - Integration with archive extraction (tested via archive tests) Note: Full
+ *     download tests are in integration tests due to GitHub API dependency.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,10 +1,9 @@
 /**
- * @fileoverview Tests for the Claude-deferred disambiguation layer.
+ * @file Tests for the Claude-deferred disambiguation layer. Run via: `node
+ *   --experimental-strip-types --test tools/prim/test/disambiguate.test.mts`
+ *   Mocks the SDK via a self-contained queue file so no network hits.
+ *   Coverage:
  *
- * Run via: `node --experimental-strip-types --test tools/prim/test/disambiguate.test.mts`
- *
- * Mocks the SDK via a self-contained queue file so no network hits.
- * Coverage:
  *   - "ai-defer-not-enabled" short-circuit (no SDK loaded)
  *   - "ANTHROPIC_API_KEY not set" short-circuit (no SDK loaded)
  *   - cache hit → no SDK call

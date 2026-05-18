@@ -1,10 +1,9 @@
 /**
- * @fileoverview Tests for the which / whichSync exports of src/bin.ts.
- *
- * The existing bin.test.mts covers execBin / findReal* / isShadowBinPath /
- * resolveRealBinSync / whichReal / whichRealSync. This file fills in the
- * raw which/whichSync wrappers (which return null on miss, no real-bin
- * resolution).
+ * @file Tests for the which / whichSync exports of src/bin.ts. The existing
+ *   bin.test.mts covers execBin / findReal* / isShadowBinPath /
+ *   resolveRealBinSync / whichReal / whichRealSync. This file fills in the raw
+ *   which/whichSync wrappers (which return null on miss, no real-bin
+ *   resolution).
  */
 
 import { describe, expect, it } from 'vitest'

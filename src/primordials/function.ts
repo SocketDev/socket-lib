@@ -1,10 +1,8 @@
 /**
- * @fileoverview Safe references to `Function.prototype` methods.
- *
- * `apply`, `bind`, `call`, `toString` — used by reflection-heavy code
- * paths (logger sinks, lazy bindings, debug formatters) where calling
- * the global builtin without a captured reference would expose to
- * prototype tampering.
+ * @file Safe references to `Function.prototype` methods. `apply`, `bind`,
+ *   `call`, `toString` — used by reflection-heavy code paths (logger sinks,
+ *   lazy bindings, debug formatters) where calling the global builtin without a
+ *   captured reference would expose to prototype tampering.
  */
 
 import { uncurryThis } from './uncurry'

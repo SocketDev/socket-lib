@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for process spawn utilities.
+ * @file Unit tests for process spawn utilities. Tests child process spawning
+ *   utilities:
  *
- * Tests child process spawning utilities:
- * - spawn() async process execution with options
- * - spawnSync() synchronous process execution
- * - isSpawnError() type guard for spawn errors
- * - isStdioType() validates stdio option values
- * - Error handling, exit codes, and output capture
- * Used by Socket tools for git operations, npm commands, and external process execution.
+ *   - spawn() async process execution with options
+ *   - spawnSync() synchronous process execution
+ *   - isSpawnError() type guard for spawn errors
+ *   - isStdioType() validates stdio option values
+ *   - Error handling, exit codes, and output capture Used by Socket tools for git
+ *     operations, npm commands, and external process execution.
  */
 
 import process from 'node:process'

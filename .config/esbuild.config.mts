@@ -1,7 +1,7 @@
 /* oxlint-disable socket/sort-source-methods -- build-config helpers interleaved with esbuild plugin objects / option constants; reordering would split state from its consumers. */
 /**
- * @fileoverview esbuild configuration for socket-lib
- * Fast JS compilation with esbuild, declarations with tsgo
+ * @file Esbuild configuration for socket-lib Fast JS compilation with esbuild,
+ *   declarations with tsgo.
  */
 
 import fs from 'node:fs'
@@ -203,11 +203,10 @@ export function createPathShorteningPlugin() {
 }
 
 /**
- * Plugin to strip `.mts` / `.cts` source extensions from runtime
- * relative imports in compiled JS output. We keep the extensions in
- * source (Node erasable-syntax support, deterministic resolution),
- * but at runtime `dist/` only has `.js`, so the literal `./foo.mts`
- * references would fail to resolve.
+ * Plugin to strip `.mts` / `.cts` source extensions from runtime relative
+ * imports in compiled JS output. We keep the extensions in source (Node
+ * erasable-syntax support, deterministic resolution), but at runtime `dist/`
+ * only has `.js`, so the literal `./foo.mts` references would fail to resolve.
  */
 export function createSourceExtensionStripPlugin() {
   return {
@@ -294,7 +293,7 @@ export const watchConfig = {
 }
 
 /**
- * Analyze build output for size information
+ * Analyze build output for size information.
  */
 export function analyzeMetafile(metafile) {
   const outputs = Object.keys(metafile.outputs)

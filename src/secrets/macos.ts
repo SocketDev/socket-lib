@@ -1,27 +1,22 @@
 /**
- * @fileoverview macOS Keychain backend via `security(1)`.
- *
- * The native `security` CLI ships with macOS — no install step. We
- * use generic-password items, which are the simplest credential
- * shape Keychain supports (service + account → password string).
- *
- * Process model: each call spawns `security`. Read returns the
- * password on stdout; write uses `-w <value>` (we accept that the
- * value briefly appears in argv — `security` is local-only and runs
- * in the user's session, so the leakage surface is `ps(1)` for one
- * other process on the same user). Delete is best-effort.
- *
- * ACL: writes use `-A -T ''` so any application on the user's
- * account can read the entry without an extra Keychain prompt. The
- * first write still prompts once (creating / updating the entry
- * requires the user to authorize that one action), but every later
- * read is silent — sfw, socket-cli, MCP servers, and the bash shell
- * itself all read the same value with no UI. The trust model: the
- * user explicitly authorized the install flow that wrote this; the
- * value is theirs to use across their tooling, not a credential
- * earmarked for a single binary path. Revocable in Keychain Access.app
- * if the user changes their mind. This restores the original
- * wheelhouse `token-storage.mts` behavior dropped in v6's first cut.
+ * @file MacOS Keychain backend via `security(1)`. The native `security` CLI
+ *   ships with macOS — no install step. We use generic-password items, which
+ *   are the simplest credential shape Keychain supports (service + account →
+ *   password string). Process model: each call spawns `security`. Read returns
+ *   the password on stdout; write uses `-w <value>` (we accept that the value
+ *   briefly appears in argv — `security` is local-only and runs in the user's
+ *   session, so the leakage surface is `ps(1)` for one other process on the
+ *   same user). Delete is best-effort. ACL: writes use `-A -T ''` so any
+ *   application on the user's account can read the entry without an extra
+ *   Keychain prompt. The first write still prompts once (creating / updating
+ *   the entry requires the user to authorize that one action), but every later
+ *   read is silent — sfw, socket-cli, MCP servers, and the bash shell itself
+ *   all read the same value with no UI. The trust model: the user explicitly
+ *   authorized the install flow that wrote this; the value is theirs to use
+ *   across their tooling, not a credential earmarked for a single binary path.
+ *   Revocable in Keychain Access.app if the user changes their mind. This
+ *   restores the original wheelhouse `token-storage.mts` behavior dropped in
+ *   v6's first cut.
  */
 
 import { spawn, spawnSync } from 'node:child_process'

@@ -1,23 +1,16 @@
 /**
- * @fileoverview Look up binaries on PATH.
- *
- * Two pairs of public functions:
- *
- *   `which` / `whichSync` — wrap the upstream `which` package, returning
- *   the first matching path (or array with `{ all: true }`). Path-like
- *   inputs (absolute paths, `./relative`, `../relative`) bypass PATH
- *   resolution and pass through unchanged. Both are tolerant — they
- *   return `null` for not-found instead of throwing.
- *
- *   `whichReal` / `whichRealSync` — same but resolve the result through
- *   `resolveRealBinSync` so the caller gets the underlying script path
- *   (e.g., `npm-cli.js`) rather than the wrapper. Default `nothrow: true`
- *   so a missing binary returns `undefined` instead of bubbling a
- *   `which` package error.
- *
- * Caching matches `_internal.binPathCache` and `binPathAllCache`. Both
- * caches validate hits with `existsSync` so a tool reinstall mid-session
- * doesn't return a stale path.
+ * @file Look up binaries on PATH. Two pairs of public functions: `which` /
+ *   `whichSync` — wrap the upstream `which` package, returning the first
+ *   matching path (or array with `{ all: true }`). Path-like inputs (absolute
+ *   paths, `./relative`, `../relative`) bypass PATH resolution and pass through
+ *   unchanged. Both are tolerant — they return `null` for not-found instead of
+ *   throwing. `whichReal` / `whichRealSync` — same but resolve the result
+ *   through `resolveRealBinSync` so the caller gets the underlying script path
+ *   (e.g., `npm-cli.js`) rather than the wrapper. Default `nothrow: true` so a
+ *   missing binary returns `undefined` instead of bubbling a `which` package
+ *   error. Caching matches `_internal.binPathCache` and `binPathAllCache`. Both
+ *   caches validate hits with `existsSync` so a tool reinstall mid-session
+ *   doesn't return a stale path.
  */
 
 import whichModule from '../external/which'
@@ -31,30 +24,35 @@ import type { WhichOptions } from './types'
 /**
  * Find an executable in the system PATH asynchronously.
  *
- * This function resolves binary names to their full paths by searching the system PATH.
- * It should only be used for binary names (not paths). If the input is already a path
- * (absolute or relative), it will be returned as-is without PATH resolution.
+ * This function resolves binary names to their full paths by searching the
+ * system PATH. It should only be used for binary names (not paths). If the
+ * input is already a path (absolute or relative), it will be returned as-is
+ * without PATH resolution.
  *
  * Binary name vs. path detection:
+ *
  * - Binary names: 'npm', 'git', 'node' - will be resolved via PATH
- * - Absolute paths: '/usr/bin/node', 'C:\\Program Files\\nodejs\\node.exe' - returned as-is
+ * - Absolute paths: '/usr/bin/node', 'C:\Program Files\nodejs\node.exe' -
+ *   returned as-is
  * - Relative paths: './node', '../bin/npm' - returned as-is
  *
- * @param {string} binName - The binary name to resolve (e.g., 'npm', 'git')
- * @param {WhichOptions | undefined} options - Options for resolution
- * @returns {Promise<string | string[] | null>} Promise resolving to the full path, the original path, or null if not found
- *
  * @example
- * ```typescript
- * // Resolve binary names
- * await which('node')              // '/usr/local/bin/node'
- * await which('npm')               // '/usr/local/bin/npm'
- * await which('nonexistent')       // null
+ *   ;```typescript
+ *   // Resolve binary names
+ *   await which('node') // '/usr/local/bin/node'
+ *   await which('npm') // '/usr/local/bin/npm'
+ *   await which('nonexistent') // null
  *
- * // Paths are returned as-is
- * await which('/usr/bin/node')     // '/usr/bin/node'
- * await which('./local-script')    // './local-script'
- * ```
+ *   // Paths are returned as-is
+ *   await which('/usr/bin/node') // '/usr/bin/node'
+ *   await which('./local-script') // './local-script'
+ *   ```
+ *
+ * @param {string} binName - The binary name to resolve (e.g., 'npm', 'git')
+ * @param {WhichOptions | undefined} options - Options for resolution.
+ *
+ * @returns {Promise<string | string[] | null>} Promise resolving to the full
+ *   path, the original path, or null if not found.
  */
 export async function which(
   binName: string,
@@ -85,15 +83,17 @@ export async function which(
 }
 
 /**
- * Find a binary in the system PATH and resolve to the real underlying script asynchronously.
- * Resolves wrapper scripts (.cmd, .ps1, shell scripts) to the actual .js files they execute.
- * @throws {Error} If the binary is not found and nothrow is false.
+ * Find a binary in the system PATH and resolve to the real underlying script
+ * asynchronously. Resolves wrapper scripts (.cmd, .ps1, shell scripts) to the
+ * actual .js files they execute.
  *
  * @example
- * ```typescript
- * const npmPath = await whichReal('npm')
- * // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
- * ```
+ *   ;```typescript
+ *   const npmPath = await whichReal('npm')
+ *   // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
+ *   ```
+ *
+ * @throws {Error} If the binary is not found and nothrow is false.
  */
 export async function whichReal(
   binName: string,
@@ -162,15 +162,17 @@ export async function whichReal(
 }
 
 /**
- * Find a binary in the system PATH and resolve to the real underlying script synchronously.
- * Resolves wrapper scripts (.cmd, .ps1, shell scripts) to the actual .js files they execute.
- * @throws {Error} If the binary is not found and nothrow is false.
+ * Find a binary in the system PATH and resolve to the real underlying script
+ * synchronously. Resolves wrapper scripts (.cmd, .ps1, shell scripts) to the
+ * actual .js files they execute.
  *
  * @example
- * ```typescript
- * const npmPath = whichRealSync('npm')
- * // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
- * ```
+ *   ;```typescript
+ *   const npmPath = whichRealSync('npm')
+ *   // e.g. '/usr/local/lib/node_modules/npm/bin/npm-cli.js'
+ *   ```
+ *
+ * @throws {Error} If the binary is not found and nothrow is false.
  */
 export function whichRealSync(
   binName: string,
@@ -234,30 +236,35 @@ export function whichRealSync(
 /**
  * Find an executable in the system PATH synchronously.
  *
- * This function resolves binary names to their full paths by searching the system PATH.
- * It should only be used for binary names (not paths). If the input is already a path
- * (absolute or relative), it will be returned as-is without PATH resolution.
+ * This function resolves binary names to their full paths by searching the
+ * system PATH. It should only be used for binary names (not paths). If the
+ * input is already a path (absolute or relative), it will be returned as-is
+ * without PATH resolution.
  *
  * Binary name vs. path detection:
+ *
  * - Binary names: 'npm', 'git', 'node' - will be resolved via PATH
- * - Absolute paths: '/usr/bin/node', 'C:\\Program Files\\nodejs\\node.exe' - returned as-is
+ * - Absolute paths: '/usr/bin/node', 'C:\Program Files\nodejs\node.exe' -
+ *   returned as-is
  * - Relative paths: './node', '../bin/npm' - returned as-is
  *
- * @param {string} binName - The binary name to resolve (e.g., 'npm', 'git')
- * @param {WhichOptions | undefined} options - Options for resolution
- * @returns {string | string[] | null} The full path to the binary, the original path if input is a path, or null if not found
- *
  * @example
- * ```typescript
- * // Resolve binary names
- * whichSync('node')              // '/usr/local/bin/node'
- * whichSync('npm')               // '/usr/local/bin/npm'
- * whichSync('nonexistent')       // null
+ *   ;```typescript
+ *   // Resolve binary names
+ *   whichSync('node') // '/usr/local/bin/node'
+ *   whichSync('npm') // '/usr/local/bin/npm'
+ *   whichSync('nonexistent') // null
  *
- * // Paths are returned as-is
- * whichSync('/usr/bin/node')     // '/usr/bin/node'
- * whichSync('./local-script')    // './local-script'
- * ```
+ *   // Paths are returned as-is
+ *   whichSync('/usr/bin/node') // '/usr/bin/node'
+ *   whichSync('./local-script') // './local-script'
+ *   ```
+ *
+ * @param {string} binName - The binary name to resolve (e.g., 'npm', 'git')
+ * @param {WhichOptions | undefined} options - Options for resolution.
+ *
+ * @returns {string | string[] | null} The full path to the binary, the original
+ *   path if input is a path, or null if not found.
  */
 export function whichSync(
   binName: string,

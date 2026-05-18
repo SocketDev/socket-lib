@@ -1,12 +1,9 @@
 /**
- * @fileoverview Read a raw Node `IncomingMessage` into our `HttpResponse`
- * shape.
- *
- * Split out of `http-request/request.ts` for size hygiene. Useful when
- * a caller already has an `IncomingMessage` from code that bypasses
- * `httpRequest()` (e.g., multipart uploads via `http.request()`
- * directly, or third-party HTTP libraries) and wants the same
- * fetch-like body accessors.
+ * @file Read a raw Node `IncomingMessage` into our `HttpResponse` shape. Split
+ *   out of `http-request/request.ts` for size hygiene. Useful when a caller
+ *   already has an `IncomingMessage` from code that bypasses `httpRequest()`
+ *   (e.g., multipart uploads via `http.request()` directly, or third-party HTTP
+ *   libraries) and wants the same fetch-like body accessors.
  */
 
 import { BufferConcat } from '../primordials/buffer'
@@ -18,17 +15,17 @@ import type { HttpResponse } from './response-types'
 /**
  * Read and buffer a client-side IncomingResponse into an HttpResponse.
  *
- * Useful when you have a raw response from code that bypasses
- * `httpRequest()` (e.g., multipart form-data uploads via `http.request()`,
- * or responses from third-party HTTP libraries) and need to convert it
- * into the standard HttpResponse interface.
+ * Useful when you have a raw response from code that bypasses `httpRequest()`
+ * (e.g., multipart form-data uploads via `http.request()`, or responses from
+ * third-party HTTP libraries) and need to convert it into the standard
+ * HttpResponse interface.
  *
  * @example
- * ```typescript
- * const raw = await makeRawRequest('https://example.com/api')
- * const response = await readIncomingResponse(raw)
- * console.log(response.status, response.body.toString('utf8'))
- * ```
+ *   ;```typescript
+ *   const raw = await makeRawRequest('https://example.com/api')
+ *   const response = await readIncomingResponse(raw)
+ *   console.log(response.status, response.body.toString('utf8'))
+ *   ```
  */
 export async function readIncomingResponse(
   msg: IncomingResponse,

@@ -1,8 +1,7 @@
 /**
- * @fileoverview Unit tests for src/smol/https.ts.
- *
- * On stock Node, `getSmolHttps()` returns `undefined`. The smol-binary
- * path is exercised by socket-btm's own tests.
+ * @file Unit tests for src/smol/https.ts. On stock Node, `getSmolHttps()`
+ *   returns `undefined`. The smol-binary path is exercised by socket-btm's own
+ *   tests.
  */
 
 import { describe, expect, it } from 'vitest'

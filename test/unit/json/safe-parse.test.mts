@@ -1,10 +1,11 @@
 /**
- * @fileoverview Unit tests for safe JSON parsing.
+ * @file Unit tests for safe JSON parsing.
  *
- * - parseJsonSafe() blocks prototype pollution attacks (__proto__, constructor, prototype)
- * - Size limit enforcement to prevent DoS attacks via massive JSON payloads
- * - Schema validation via Zod-compatible schemas
- * - Handles malformed JSON, nested objects, and edge cases
+ *   - parseJsonSafe() blocks prototype pollution attacks (**proto**, constructor,
+ *     prototype)
+ *   - Size limit enforcement to prevent DoS attacks via massive JSON payloads
+ *   - Schema validation via Zod-compatible schemas
+ *   - Handles malformed JSON, nested objects, and edge cases
  */
 
 import { describe, expect, it } from 'vitest'

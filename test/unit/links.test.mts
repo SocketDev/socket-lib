@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for themed link utilities.
+ * @file Unit tests for themed link utilities.
  */
 
 import { describe, expect, it } from 'vitest'

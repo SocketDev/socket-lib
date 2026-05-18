@@ -1,17 +1,14 @@
 /**
- * @fileoverview Spawn error classification and enhancement.
- *
- * `isSpawnError` is a type-guard for shaping unknown errors that
- * crossed an `await spawn(...)`. It checks for the
- * `code` / `errno` / `syscall` properties that Node's child_process
- * tags onto `ENOENT` / `EACCES` / process-exit failures.
- *
- * `enhanceSpawnError` rewrites the upstream `@npmcli/promise-spawn`
- * "command failed" placeholder message into something the operator can
- * actually act on: command + args (truncated at 100 chars), exit code
- * or signal, and the first stderr line (truncated at 200 chars). The
- * stack is computed lazily on first access via a per-error WeakMap so
- * non-error paths don't pay the `stackWithCauses` cost.
+ * @file Spawn error classification and enhancement. `isSpawnError` is a
+ *   type-guard for shaping unknown errors that crossed an `await spawn(...)`.
+ *   It checks for the `code` / `errno` / `syscall` properties that Node's
+ *   child_process tags onto `ENOENT` / `EACCES` / process-exit failures.
+ *   `enhanceSpawnError` rewrites the upstream `@npmcli/promise-spawn` "command
+ *   failed" placeholder message into something the operator can actually act
+ *   on: command + args (truncated at 100 chars), exit code or signal, and the
+ *   first stderr line (truncated at 200 chars). The stack is computed lazily on
+ *   first access via a per-error WeakMap so non-error paths don't pay the
+ *   `stackWithCauses` cost.
  */
 
 import { stackWithCauses } from '../errors/stack'
@@ -28,17 +25,17 @@ import { stackCache } from './_internal'
 import type { SpawnError } from './types'
 
 /**
- * Enhances spawn error with better context.
- * Converts generic "command failed" to detailed error with command, exit code, and stderr.
+ * Enhances spawn error with better context. Converts generic "command failed"
+ * to detailed error with command, exit code, and stderr.
  *
  * @example
- * ```typescript
- * try {
- *   await spawn('git', ['status'])
- * } catch (e) {
- *   throw enhanceSpawnError(e)
- * }
- * ```
+ *   ;```typescript
+ *   try {
+ *     await spawn('git', ['status'])
+ *   } catch (e) {
+ *     throw enhanceSpawnError(e)
+ *   }
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function enhanceSpawnError(error: unknown): unknown {
@@ -143,20 +140,21 @@ export function enhanceSpawnError(error: unknown): unknown {
 }
 
 /**
- * Check if a value is a spawn error with expected error properties.
- * Tests for common error properties from child process failures.
- *
- * @param {unknown} value - Value to check
- * @returns {boolean} `true` if the value has spawn error properties
+ * Check if a value is a spawn error with expected error properties. Tests for
+ * common error properties from child process failures.
  *
  * @example
- * try {
- *   await spawn('nonexistent-command')
- * } catch (e) {
- *   if (isSpawnError(e)) {
- *     console.error(`Spawn failed: ${e.code}`)
+ *   try {
+ *     await spawn('nonexistent-command')
+ *   } catch (e) {
+ *     if (isSpawnError(e)) {
+ *       console.error(`Spawn failed: ${e.code}`)
+ *     }
  *   }
- * }
+ *
+ * @param {unknown} value - Value to check.
+ *
+ * @returns {boolean} `true` if the value has spawn error properties
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isSpawnError(value: unknown): value is SpawnError {

@@ -1,13 +1,13 @@
 /**
- * @fileoverview Validate that external .d.ts files use proper module export patterns.
- * Ensures type definitions are compatible with static ES6 imports and don't require
- * ESLint disables or @ts-expect-error comments.
+ * @file Validate that external .d.ts files use proper module export patterns.
+ *   Ensures type definitions are compatible with static ES6 imports and don't
+ *   require ESLint disables or @ts-expect-error comments. Key validations:
  *
- * Key validations:
- * - No `declare module` patterns (should use direct exports)
- * - No `export = ` (CommonJS style - should use `export` or `export const/function`)
- * - Files are proper TypeScript modules (have at least one export)
- * - Type definitions match the actual module structure
+ *   - No `declare module` patterns (should use direct exports)
+ *   - No `export = ` (CommonJS style - should use `export` or `export
+ *     const/function`)
+ *   - Files are proper TypeScript modules (have at least one export)
+ *   - Type definitions match the actual module structure
  */
 
 import { readdirSync, readFileSync } from 'node:fs'

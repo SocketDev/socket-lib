@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for the JVM Adoptium asset-names mapping.
+ * @file Unit tests for the JVM Adoptium asset-names mapping.
  */
 
 import { describe, expect, it } from 'vitest'

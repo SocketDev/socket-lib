@@ -1,6 +1,6 @@
 /**
- * @fileoverview Abort signal utilities — composite signal construction
- * from multiple sources and timeout-driven signal creation.
+ * @file Abort signal utilities — composite signal construction from multiple
+ *   sources and timeout-driven signal creation.
  */
 
 import { TypeErrorCtor } from '../primordials/error'
@@ -11,11 +11,11 @@ import { NumberIsFinite, NumberIsNaN } from '../primordials/number'
  * Create a composite AbortSignal from multiple signals.
  *
  * @example
- * ```typescript
- * const ac1 = new AbortController()
- * const ac2 = new AbortController()
- * const signal = createCompositeAbortSignal(ac1.signal, ac2.signal)
- * ```
+ *   ;```typescript
+ *   const ac1 = new AbortController()
+ *   const ac2 = new AbortController()
+ *   const signal = createCompositeAbortSignal(ac1.signal, ac2.signal)
+ *   ```
  */
 export function createCompositeAbortSignal(
   ...signals: Array<AbortSignal | null | undefined>
@@ -46,14 +46,14 @@ export function createCompositeAbortSignal(
 /**
  * Create an AbortSignal that triggers after a timeout.
  *
+ * @example
+ *   ;```typescript
+ *   const signal = createTimeoutSignal(5000) // aborts after 5 seconds
+ *   fetch('https://example.com', { signal })
+ *   ```
+ *
  * @throws {TypeError} If `ms` is not a number, is NaN, is not finite, or is not
  *   positive.
- *
- * @example
- * ```typescript
- * const signal = createTimeoutSignal(5000) // aborts after 5 seconds
- * fetch('https://example.com', { signal })
- * ```
  */
 export function createTimeoutSignal(ms: number): AbortSignal {
   if (typeof ms !== 'number' || NumberIsNaN(ms)) {

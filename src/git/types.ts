@@ -1,7 +1,7 @@
 /**
- * @fileoverview Public type surface for `git/*` modules — the
- * `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration
- * records. Pure types, no runtime side effects.
+ * @file Public type surface for `git/*` modules — the
+ *   `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration
+ *   records. Pure types, no runtime side effects.
  */
 
 /**
@@ -10,19 +10,18 @@
  * Used to determine which packages in a monorepo have changed files.
  *
  * @example
- * ```typescript
- * // Filter packages with changes
- * const changed = filterPackagesByChanges(packages)
+ *   ;```typescript
+ *   // Filter packages with changes
+ *   const changed = filterPackagesByChanges(packages)
  *
- * // Force include all packages
- * const all = filterPackagesByChanges(packages, { force: true })
+ *   // Force include all packages
+ *   const all = filterPackagesByChanges(packages, { force: true })
  *
- * // Use custom package key
- * const changed = filterPackagesByChanges(
- *   packages,
- *   { packageKey: 'directory' }
- * )
- * ```
+ *   // Use custom package key
+ *   const changed = filterPackagesByChanges(packages, {
+ *     packageKey: 'directory',
+ *   })
+ *   ```
  */
 export interface FilterPackagesByChangesOptions {
   /**
@@ -49,18 +48,18 @@ export interface FilterPackagesByChangesOptions {
  * Controls how git diff results are processed and returned.
  *
  * @example
- * ```typescript
- * // Get absolute file paths
- * const files = await getChangedFiles({ absolute: true })
- * // => ['/path/to/repo/src/file.ts']
+ *   ;```typescript
+ *   // Get absolute file paths
+ *   const files = await getChangedFiles({ absolute: true })
+ *   // => ['/path/to/repo/src/file.ts']
  *
- * // Get relative paths with caching disabled
- * const files = await getChangedFiles({ cache: false })
- * // => ['src/file.ts']
+ *   // Get relative paths with caching disabled
+ *   const files = await getChangedFiles({ cache: false })
+ *   // => ['src/file.ts']
  *
- * // Get files from specific directory
- * const files = await getChangedFiles({ cwd: '/path/to/repo/src' })
- * ```
+ *   // Get files from specific directory
+ *   const files = await getChangedFiles({ cwd: '/path/to/repo/src' })
+ *   ```
  */
 export interface GitDiffOptions {
   /**
@@ -78,8 +77,8 @@ export interface GitDiffOptions {
   /**
    * Cache git diff results to avoid repeated git subprocess calls.
    *
-   * Caching is keyed by the git command and options used, so different
-   * option combinations maintain separate cache entries.
+   * Caching is keyed by the git command and options used, so different option
+   * combinations maintain separate cache entries.
    *
    * @default true
    */
@@ -87,9 +86,9 @@ export interface GitDiffOptions {
   /**
    * Working directory for git operations.
    *
-   * Git operations will be run from this directory, and returned paths
-   * will be relative to the git repository root. Symlinks are resolved
-   * using `fs.realpathSync()`.
+   * Git operations will be run from this directory, and returned paths will be
+   * relative to the git repository root. Symlinks are resolved using
+   * `fs.realpathSync()`.
    *
    * @default process.cwd()
    */

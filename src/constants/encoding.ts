@@ -1,7 +1,7 @@
 /**
- * @fileoverview Character encoding and character code constants.
- * Exports the default UTF-8 encoding name and numeric char codes for common
- * ASCII characters used by path and parsing utilities.
+ * @file Character encoding and character code constants. Exports the default
+ *   UTF-8 encoding name and numeric char codes for common ASCII characters used
+ *   by path and parsing utilities.
  */
 
 // Encoding.

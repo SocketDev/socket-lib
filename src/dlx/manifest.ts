@@ -1,34 +1,26 @@
 /**
- * @fileoverview DLX manifest storage utilities.
- * Manages persistent caching of DLX package and binary metadata with TTL support
- * and atomic file operations.
+ * @file DLX manifest storage utilities. Manages persistent caching of DLX
+ *   package and binary metadata with TTL support and atomic file operations.
+ *   Primary API (on {@link DlxManifest}):
  *
- * Primary API (on {@link DlxManifest}):
- * - `getManifestEntry(spec)` — retrieve a manifest entry by spec
- * - `setPackageEntry(spec, key, details)` — store npm package metadata
- * - `setBinaryEntry(spec, key, details)` — store binary download metadata
- * - `getAllPackages()` — enumerate cached package names
- * - `clear(name)` / `clearAll()` — eviction
- * - `isFresh(record, ttlMs)` — TTL check
- *
- * The bare `get(name)` / `set(name, record)` methods are deprecated
- * legacy shims kept for backward compatibility with pre-5.x callers.
- *
- * Features:
- * - TTL-based cache expiration
- * - Atomic file operations with locking
- * - JSON-based persistent storage
- * - Error-resistant implementation
- *
- * Storage Format:
- * - Stores in ~/.socket/_dlx/.dlx-manifest.json
- * - Per-spec manifest entries with timestamps
- * - Thread-safe operations using process lock utility
- *
- * Usage:
- * - Update check caching
- * - Binary metadata tracking
- * - Rate limiting registry requests
+ *   - `getManifestEntry(spec)` — retrieve a manifest entry by spec
+ *   - `setPackageEntry(spec, key, details)` — store npm package metadata
+ *   - `setBinaryEntry(spec, key, details)` — store binary download metadata
+ *   - `getAllPackages()` — enumerate cached package names
+ *   - `clear(name)` / `clearAll()` — eviction
+ *   - `isFresh(record, ttlMs)` — TTL check The bare `get(name)` / `set(name,
+ *     record)` methods are deprecated legacy shims kept for backward
+ *     compatibility with pre-5.x callers. Features:
+ *   - TTL-based cache expiration
+ *   - Atomic file operations with locking
+ *   - JSON-based persistent storage
+ *   - Error-resistant implementation Storage Format:
+ *   - Stores in ~/.socket/_dlx/.dlx-manifest.json
+ *   - Per-spec manifest entries with timestamps
+ *   - Thread-safe operations using process lock utility Usage:
+ *   - Update check caching
+ *   - Binary metadata tracking
+ *   - Rate limiting registry requests
  */
 
 import { errorMessage } from '../errors/message'
@@ -72,7 +64,9 @@ export interface PackageDetails {
  * Details for binary download entries.
  */
 export interface BinaryDetails {
-  /** SRI integrity hash (sha512-<base64>, aligned with npm). */
+  /**
+   * SRI integrity hash (sha512-<base64>, aligned with npm).
+   */
   integrity: string
   platform: string
   arch: string
@@ -82,7 +76,9 @@ export interface BinaryDetails {
     url?: string
     path?: string
   }
-  /** Update check metadata (same structure as packages). */
+  /**
+   * Update check metadata (same structure as packages).
+   */
   update_check?: {
     last_check: number
     last_notification: number
@@ -91,8 +87,8 @@ export interface BinaryDetails {
 }
 
 /**
- * Unified manifest entry for all cached items (packages and binaries).
- * Shared fields at root, type-specific fields in details.
+ * Unified manifest entry for all cached items (packages and binaries). Shared
+ * fields at root, type-specific fields in details.
  */
 export interface DlxManifestEntry {
   type: 'package' | 'binary'
@@ -119,12 +115,12 @@ export interface DlxManifestOptions {
  * Type guard for binary entries.
  *
  * @example
- * ```typescript
- * const entry = manifest.getManifestEntry('https://example.com/tool')
- * if (entry && isBinaryEntry(entry)) {
- *   console.log(entry.details.integrity)
- * }
- * ```
+ *   ;```typescript
+ *   const entry = manifest.getManifestEntry('https://example.com/tool')
+ *   if (entry && isBinaryEntry(entry)) {
+ *     console.log(entry.details.integrity)
+ *   }
+ *   ```
  */
 export function isBinaryEntry(
   entry: DlxManifestEntry,
@@ -136,12 +132,12 @@ export function isBinaryEntry(
  * Type guard for package entries.
  *
  * @example
- * ```typescript
- * const entry = manifest.getManifestEntry('@socketsecurity/cli@^2.0.0')
- * if (entry && isPackageEntry(entry)) {
- *   console.log(entry.details.installed_version)
- * }
- * ```
+ *   ;```typescript
+ *   const entry = manifest.getManifestEntry('@socketsecurity/cli@^2.0.0')
+ *   if (entry && isPackageEntry(entry)) {
+ *     console.log(entry.details.installed_version)
+ *   }
+ *   ```
  */
 export function isPackageEntry(
   entry: DlxManifestEntry,
@@ -150,8 +146,8 @@ export function isPackageEntry(
 }
 
 /**
- * DLX manifest storage manager with atomic operations.
- * Supports both legacy format (package name keys) and new unified manifest format (spec keys).
+ * DLX manifest storage manager with atomic operations. Supports both legacy
+ * format (package name keys) and new unified manifest format (spec keys).
  */
 export class DlxManifest {
   private readonly manifestPath: string
@@ -165,6 +161,7 @@ export class DlxManifest {
 
   /**
    * Read the entire manifest file.
+   *
    * @private
    */
   private readManifest(): Record<string, DlxManifestEntry | StoreRecord> {
@@ -206,6 +203,7 @@ export class DlxManifest {
 
   /**
    * Write the manifest file atomically.
+   *
    * @private
    */
   private async writeManifest(
@@ -285,6 +283,7 @@ export class DlxManifest {
 
   /**
    * Get cached update information for a package (legacy format).
+   *
    * @deprecated Use getManifestEntry() for new code.
    */
   get(name: string): StoreRecord | undefined {
@@ -356,6 +355,7 @@ export class DlxManifest {
 
   /**
    * Store update information for a package (legacy format).
+   *
    * @deprecated Use setPackageEntry() for new code.
    */
   async set(name: string, record: StoreRecord): Promise<void> {

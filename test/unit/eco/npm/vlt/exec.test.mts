@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for src/eco/npm/vlt/exec.ts.
- *
- * The function is a stub that throws to signal "not yet implemented".
- * The test asserts the documented behavior so future implementers
- * see this fail when they wire up the real implementation.
+ * @file Unit tests for src/eco/npm/vlt/exec.ts. The function is a stub that
+ *   throws to signal "not yet implemented". The test asserts the documented
+ *   behavior so future implementers see this fail when they wire up the real
+ *   implementation.
  */
 
 import { describe, expect, it } from 'vitest'

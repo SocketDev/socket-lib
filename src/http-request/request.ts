@@ -1,15 +1,14 @@
 /**
- * @fileoverview Core HTTP/HTTPS request loop — the retry orchestrator.
+ * @file Core HTTP/HTTPS request loop — the retry orchestrator. `httpRequest` is
+ *   the main entry point: it wraps `httpRequestAttempt` with retry /
+ *   exponential-backoff logic and an optional `onRetry` callback. Heavy lifting
+ *   lives in sibling leaves and is re-exported here so existing
+ *   `http-request/request` importers keep working unchanged:
  *
- * `httpRequest` is the main entry point: it wraps `httpRequestAttempt`
- * with retry / exponential-backoff logic and an optional `onRetry`
- * callback.
- *
- * Heavy lifting lives in sibling leaves and is re-exported here so
- * existing `http-request/request` importers keep working unchanged:
- *
- *   - `httpRequestAttempt` — single attempt + redirect chasing — `./request-attempt`
- *   - `readIncomingResponse` — IncomingMessage → HttpResponse — `./response-reader`
+ *   - `httpRequestAttempt` — single attempt + redirect chasing —
+ *     `./request-attempt`
+ *   - `readIncomingResponse` — IncomingMessage → HttpResponse —
+ *     `./response-reader`
  */
 
 import { setTimeout as delay } from 'node:timers/promises'
@@ -25,43 +24,46 @@ import type { HttpRequestOptions } from './request-types'
 import type { HttpResponse } from './response-types'
 
 /**
- * Make an HTTP/HTTPS request with retry logic and redirect support.
- * Provides a fetch-like API using Node.js native http/https modules.
+ * Make an HTTP/HTTPS request with retry logic and redirect support. Provides a
+ * fetch-like API using Node.js native http/https modules.
  *
  * This is the main entry point for making HTTP requests. It handles retries,
  * redirects, timeouts, and provides a fetch-compatible response interface.
  *
- * @param url - The URL to request (must start with http:// or https://)
- * @param options - Request configuration options
- * @returns Promise resolving to response object with `.json()`, `.text()`, etc.
- * @throws {Error} When all retries are exhausted, timeout occurs, or non-retryable error happens
- *
  * @example
- * ```ts
- * // Simple GET request
- * const response = await httpRequest('https://api.example.com/data')
- * const data = response.json()
+ *   ;```ts
+ *   // Simple GET request
+ *   const response = await httpRequest('https://api.example.com/data')
+ *   const data = response.json()
  *
- * // POST with JSON body
- * const response = await httpRequest('https://api.example.com/users', {
- *   method: 'POST',
- *   headers: { 'Content-Type': 'application/json' },
- *   body: JSON.stringify({ name: 'Alice', email: 'alice@example.com' })
- * })
+ *   // POST with JSON body
+ *   const response = await httpRequest('https://api.example.com/users', {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ name: 'Alice', email: 'alice@example.com' }),
+ *   })
  *
- * // With retries and timeout
- * const response = await httpRequest('https://api.example.com/data', {
- *   retries: 3,
- *   retryDelay: 1000,
- *   timeout: 60000
- * })
+ *   // With retries and timeout
+ *   const response = await httpRequest('https://api.example.com/data', {
+ *     retries: 3,
+ *     retryDelay: 1000,
+ *     timeout: 60000,
+ *   })
  *
- * // Don't follow redirects
- * const response = await httpRequest('https://example.com/redirect', {
- *   followRedirects: false
- * })
- * console.log(response.status) // 301, 302, etc.
- * ```
+ *   // Don't follow redirects
+ *   const response = await httpRequest('https://example.com/redirect', {
+ *     followRedirects: false,
+ *   })
+ *   console.log(response.status) // 301, 302, etc.
+ *   ```
+ *
+ * @param url - The URL to request (must start with http:// or https://)
+ * @param options - Request configuration options.
+ *
+ * @returns Promise resolving to response object with `.json()`, `.text()`, etc.
+ *
+ * @throws {Error} When all retries are exhausted, timeout occurs, or
+ *   non-retryable error happens.
  */
 export async function httpRequest(
   url: string,

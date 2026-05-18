@@ -1,7 +1,6 @@
 /**
- * @fileoverview Tests for src/external-tools/bazel/from-download.ts —
- * URL construction from BAZEL_ASSET_MAP, cache name, and the
- * ResolvedBazel return shape.
+ * @file Tests for src/external-tools/bazel/from-download.ts — URL construction
+ *   from BAZEL_ASSET_MAP, cache name, and the ResolvedBazel return shape.
  */
 
 import { describe, expect, it } from 'vitest'

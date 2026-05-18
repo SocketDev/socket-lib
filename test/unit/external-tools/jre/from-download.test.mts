@@ -1,8 +1,7 @@
 /**
- * @fileoverview Tests for src/external-tools/jre/from-download.ts —
- * Adoptium URL construction, default cache layout, archive-extension
- * dispatch (.tar.gz vs .zip), strip:1 unwrap, and the macOS
- * `Contents/Home/` javaHome quirk.
+ * @file Tests for src/external-tools/jre/from-download.ts — Adoptium URL
+ *   construction, default cache layout, archive-extension dispatch (.tar.gz vs
+ *   .zip), strip:1 unwrap, and the macOS `Contents/Home/` javaHome quirk.
  */
 
 import {
@@ -27,8 +26,8 @@ import { safeDelete } from '../../../../src/fs/safe'
 import { makeFakeDownloader } from '../../../lib/fake-downloader'
 
 /**
- * Build a JRE-shape tarball: top-level `jdk-21/bin/java`. After
- * strip:1 the extracted dir contains `bin/java` directly.
+ * Build a JRE-shape tarball: top-level `jdk-21/bin/java`. After strip:1 the
+ * extracted dir contains `bin/java` directly.
  */
 export async function buildJreTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')

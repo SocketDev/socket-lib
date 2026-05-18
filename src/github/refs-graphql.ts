@@ -1,11 +1,9 @@
 /**
- * @fileoverview Resolve a GitHub git ref via GraphQL.
- *
- * Split out of `github/refs.ts` for size hygiene. The fallback the
- * REST tier-cascade calls when it detects the documented "200 + empty
- * body" incident shape — GraphQL hits a different backend at GitHub
- * (not the same Elasticsearch index as REST listings) and stays
- * consistent through those incidents.
+ * @file Resolve a GitHub git ref via GraphQL. Split out of `github/refs.ts` for
+ *   size hygiene. The fallback the REST tier-cascade calls when it detects the
+ *   documented "200 + empty body" incident shape — GraphQL hits a different
+ *   backend at GitHub (not the same Elasticsearch index as REST listings) and
+ *   stays consistent through those incidents.
  */
 
 import { httpRequest } from '../http-request/request'
@@ -20,40 +18,35 @@ import type { GitHubFetchOptions } from './types'
 /**
  * Resolve a ref to its commit SHA via GraphQL.
  *
- * Why this function exists:
- *   This is the fallback that `fetchRefSha` calls when the REST
- *   tier-cascade detects the "GitHub returned 200 + empty body"
- *   incident shape. GraphQL hits a different backend than REST
- *   listings, so it stays consistent through the kinds of incidents
- *   that produce empty REST responses.
+ * Why this function exists: This is the fallback that `fetchRefSha` calls when
+ * the REST tier-cascade detects the "GitHub returned 200 + empty body" incident
+ * shape. GraphQL hits a different backend than REST listings, so it stays
+ * consistent through the kinds of incidents that produce empty REST responses.
  *
- * What it does:
- *   The REST cascade needs three separate calls (tag, branch,
- *   commit) because REST has no single "resolve any ref" endpoint.
- *   GraphQL DOES — `Repository.ref(qualifiedName)` resolves
- *   tags AND branches by their fully-qualified name, and
- *   `Repository.object(oid)` resolves a raw commit SHA. We bundle
- *   all three into ONE query using GraphQL aliases (`tagRef`,
- *   `branchRef`, `commit`) and pick whichever resolved.
+ * What it does: The REST cascade needs three separate calls (tag, branch,
+ * commit) because REST has no single "resolve any ref" endpoint. GraphQL DOES —
+ * `Repository.ref(qualifiedName)` resolves tags AND branches by their
+ * fully-qualified name, and `Repository.object(oid)` resolves a raw commit SHA.
+ * We bundle all three into ONE query using GraphQL aliases (`tagRef`,
+ * `branchRef`, `commit`) and pick whichever resolved.
  *
- * Annotated vs lightweight tags:
- *   In Git, a "lightweight tag" is just a name that points directly
- *   at a commit. An "annotated tag" is a separate object (with
- *   tagger info, message, etc.) that itself points at the commit.
- *   GraphQL's `Tag.target` field gives us the commit SHA for
- *   annotated tags in one shot — REST needs a *second* HTTP call
- *   to dereference. The `... on Tag { target { oid } }` /
- *   `... on Commit { oid }` inline-fragments handle both shapes.
+ * Annotated vs lightweight tags: In Git, a "lightweight tag" is just a name
+ * that points directly at a commit. An "annotated tag" is a separate object
+ * (with tagger info, message, etc.) that itself points at the commit. GraphQL's
+ * `Tag.target` field gives us the commit SHA for annotated tags in one shot —
+ * REST needs a _second_ HTTP call to dereference. The `... on Tag { target {
+ * oid } }` / `... on Commit { oid }` inline-fragments handle both shapes.
  *
  * Return contract:
- *   - Returns the SHA string when any form matches.
- *   - Returns `undefined` when the ref genuinely doesn't exist as a
- *     tag, branch, OR commit. The caller treats `undefined` the same
- *     as "REST cascade also failed" — a real "ref not found".
- *   - Returns `undefined` (not throws) on transport-level failures too:
- *     non-OK HTTP, empty GraphQL body, or JSON parse error. The
- *     REST cascade's "ref not found" message is more useful to the
- *     end user than a GraphQL transport error.
+ *
+ * - Returns the SHA string when any form matches.
+ * - Returns `undefined` when the ref genuinely doesn't exist as a tag, branch, OR
+ *   commit. The caller treats `undefined` the same as "REST cascade also
+ *   failed" — a real "ref not found".
+ * - Returns `undefined` (not throws) on transport-level failures too: non-OK
+ *   HTTP, empty GraphQL body, or JSON parse error. The REST cascade's "ref not
+ *   found" message is more useful to the end user than a GraphQL transport
+ *   error.
  */
 export async function fetchRefShaViaGraphQL(
   owner: string,

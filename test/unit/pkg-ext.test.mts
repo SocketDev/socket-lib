@@ -1,12 +1,11 @@
 /**
- * @fileoverview Unit tests for package extensions.
+ * @file Unit tests for package extensions. Tests package extension utilities:
  *
- * Tests package extension utilities:
- * - packageExtensions - frozen array of package compatibility adjustments
- * - Includes extensions from @yarnpkg/extensions
- * - Custom extensions for Socket-specific compatibility fixes
- * - Array is sorted alphabetically by package name
- * Used by Socket package manager for applying compatibility patches to dependencies.
+ *   - packageExtensions - frozen array of package compatibility adjustments
+ *   - Includes extensions from @yarnpkg/extensions
+ *   - Custom extensions for Socket-specific compatibility fixes
+ *   - Array is sorted alphabetically by package name Used by Socket package
+ *     manager for applying compatibility patches to dependencies.
  */
 
 import { packageExtensions } from '@socketsecurity/lib/pkg-ext/data'

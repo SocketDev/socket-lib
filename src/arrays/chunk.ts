@@ -1,6 +1,6 @@
 /**
- * @fileoverview Split an array into fixed-size chunks. The last
- * chunk holds the leftover when length is not evenly divisible.
+ * @file Split an array into fixed-size chunks. The last chunk holds the
+ *   leftover when length is not evenly divisible.
  */
 
 import { ErrorCtor } from '../primordials/error'
@@ -8,31 +8,34 @@ import { ErrorCtor } from '../primordials/error'
 /**
  * Split an array into chunks of a specified size.
  *
- * Divides an array into smaller arrays of the specified chunk size.
- * The last chunk may contain fewer elements if the array length is not
- * evenly divisible by the chunk size.
+ * Divides an array into smaller arrays of the specified chunk size. The last
+ * chunk may contain fewer elements if the array length is not evenly divisible
+ * by the chunk size.
+ *
+ * @example
+ *   ;```ts
+ *   // Split into pairs (default)
+ *   arrayChunk([1, 2, 3, 4, 5])
+ *   // Returns: [[1, 2], [3, 4], [5]]
+ *
+ *   // Split into groups of 3
+ *   arrayChunk(['a', 'b', 'c', 'd', 'e', 'f', 'g'], 3)
+ *   // Returns: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g']]
+ *
+ *   // Works with readonly arrays
+ *   const readonlyArr = [1, 2, 3] as const
+ *   arrayChunk(readonlyArr)
+ *   // Returns: [[1, 2], [3]]
+ *   ```
+ *
+ * @default 2
  *
  * @param arr - The array to split into chunks (can be readonly)
  * @param size - Size of each chunk. Must be greater than 0.
- * @default 2
+ *
  * @returns Array of chunks, where each chunk is an array of elements
+ *
  * @throws {Error} If chunk size is less than or equal to 0
- *
- * @example
- * ```ts
- * // Split into pairs (default)
- * arrayChunk([1, 2, 3, 4, 5])
- * // Returns: [[1, 2], [3, 4], [5]]
- *
- * // Split into groups of 3
- * arrayChunk(['a', 'b', 'c', 'd', 'e', 'f', 'g'], 3)
- * // Returns: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g']]
- *
- * // Works with readonly arrays
- * const readonlyArr = [1, 2, 3] as const
- * arrayChunk(readonlyArr)
- * // Returns: [[1, 2], [3]]
- * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function arrayChunk<T>(

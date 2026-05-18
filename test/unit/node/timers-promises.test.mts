@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/node/timers-promises.ts.
+ * @file Unit tests for src/node/timers-promises.ts.
  */
 
 import { describe, expect, it } from 'vitest'

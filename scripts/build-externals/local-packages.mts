@@ -1,18 +1,19 @@
 /**
- * @fileoverview Local package resolution for development.
- * Checks for local workspace or sibling project versions.
+ * @file Local package resolution for development. Checks for local workspace or
+ *   sibling project versions.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
 /**
- * Check if local workspace or sibling project versions exist.
- * Used for development to use local changes instead of published packages.
+ * Check if local workspace or sibling project versions exist. Used for
+ * development to use local changes instead of published packages.
  *
- * @param {string} packageName - The package name to search for
- * @param {string} rootDir - The root directory of the project
- * @returns {Promise<string|null>} Path to local package or null
+ * @param {string} packageName - The package name to search for.
+ * @param {string} rootDir - The root directory of the project.
+ *
+ * @returns {Promise<string | null>} Path to local package or null
  */
 export async function getLocalPackagePath(packageName, rootDir) {
   const checks = []
@@ -54,7 +55,8 @@ export async function getLocalPackagePath(packageName, rootDir) {
 /**
  * Resolve the entry point for a local package.
  *
- * @param {string} localPath - Path to the local package
+ * @param {string} localPath - Path to the local package.
+ *
  * @returns {Promise<string>} Entry point path
  */
 export async function resolveLocalEntryPoint(localPath) {

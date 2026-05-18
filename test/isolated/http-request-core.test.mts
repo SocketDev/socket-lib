@@ -1,14 +1,11 @@
 /**
- * @fileoverview Unit tests for HTTP/HTTPS request utilities — core surface.
- *
- * Half-split of the original test/isolated/http-request.test.mts to keep
- * each test file under the 4 GB per-worker heap ceiling. This file
- * covers the core surface: httpRequest, httpDownload, parseChecksums,
- * fetchChecksums, httpJson, httpText. Advanced topics (edge cases,
- * options, retries, error handling) live in
- * http-request-advanced.test.mts.
- *
- * Both files share the same test server via http-request-fixtures.mts.
+ * @file Unit tests for HTTP/HTTPS request utilities — core surface. Half-split
+ *   of the original test/isolated/http-request.test.mts to keep each test file
+ *   under the 4 GB per-worker heap ceiling. This file covers the core surface:
+ *   httpRequest, httpDownload, parseChecksums, fetchChecksums, httpJson,
+ *   httpText. Advanced topics (edge cases, options, retries, error handling)
+ *   live in http-request-advanced.test.mts. Both files share the same test
+ *   server via http-request-fixtures.mts.
  */
 
 import { createHash } from 'node:crypto'

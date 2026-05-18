@@ -1,7 +1,6 @@
 /**
- * @fileoverview ANSI escape code constants. Commonly used terminal
- * formatting sequences for bold, dim, italic, reset, strikethrough,
- * and underline.
+ * @file ANSI escape code constants. Commonly used terminal formatting sequences
+ *   for bold, dim, italic, reset, strikethrough, and underline.
  */
 
 // ANSI escape codes - commonly used sequences.

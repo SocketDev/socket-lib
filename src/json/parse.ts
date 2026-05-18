@@ -1,8 +1,8 @@
 /**
- * @fileoverview JSON parsing utilities with Buffer detection and BOM stripping.
- * Provides safe JSON parsing with automatic encoding handling, plus
- * `parseJsonSafe` for untrusted input (prototype-pollution protection +
- * size limits + optional schema validation).
+ * @file JSON parsing utilities with Buffer detection and BOM stripping.
+ *   Provides safe JSON parsing with automatic encoding handling, plus
+ *   `parseJsonSafe` for untrusted input (prototype-pollution protection + size
+ *   limits + optional schema validation).
  */
 
 import { validateSchema } from '../schema/validate'
@@ -20,18 +20,19 @@ import type {
 } from './types'
 
 /**
- * Check if a value is a Buffer instance.
- * Uses duck-typing to detect Buffer without requiring Node.js Buffer in type system.
- *
- * @param x - Value to check
- * @returns `true` if value is a Buffer, `false` otherwise
+ * Check if a value is a Buffer instance. Uses duck-typing to detect Buffer
+ * without requiring Node.js Buffer in type system.
  *
  * @example
- * ```ts
- * isBuffer(Buffer.from('hello')) // => true
- * isBuffer('hello') // => false
- * isBuffer({ length: 5 }) // => false
- * ```
+ *   ;```ts
+ *   isBuffer(Buffer.from('hello')) // => true
+ *   isBuffer('hello') // => false
+ *   isBuffer({ length: 5 }) // => false
+ *   ```
+ *
+ * @param x - Value to check.
+ *
+ * @returns `true` if value is a Buffer, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isBuffer(x: unknown): x is Buffer {
@@ -60,22 +61,23 @@ export function isBuffer(x: unknown): x is Buffer {
 }
 
 /**
- * Check if a value is a JSON primitive type.
- * JSON primitives are: `null`, `boolean`, `number`, or `string`.
- *
- * @param value - Value to check
- * @returns `true` if value is a JSON primitive, `false` otherwise
+ * Check if a value is a JSON primitive type. JSON primitives are: `null`,
+ * `boolean`, `number`, or `string`.
  *
  * @example
- * ```ts
- * isJsonPrimitive(null) // => true
- * isJsonPrimitive(true) // => true
- * isJsonPrimitive(42) // => true
- * isJsonPrimitive('hello') // => true
- * isJsonPrimitive({}) // => false
- * isJsonPrimitive([]) // => false
- * isJsonPrimitive(undefined) // => false
- * ```
+ *   ;```ts
+ *   isJsonPrimitive(null) // => true
+ *   isJsonPrimitive(true) // => true
+ *   isJsonPrimitive(42) // => true
+ *   isJsonPrimitive('hello') // => true
+ *   isJsonPrimitive({}) // => false
+ *   isJsonPrimitive([]) // => false
+ *   isJsonPrimitive(undefined) // => false
+ *   ```
+ *
+ * @param value - Value to check.
+ *
+ * @returns `true` if value is a JSON primitive, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
@@ -88,57 +90,58 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
 }
 
 /**
- * Parse JSON content with automatic Buffer handling and BOM stripping.
- * Provides safer JSON parsing with helpful error messages and optional error suppression.
+ * Parse JSON content with automatic Buffer handling and BOM stripping. Provides
+ * safer JSON parsing with helpful error messages and optional error
+ * suppression.
  *
- * Features:
- * - Automatic UTF-8 Buffer conversion
- * - BOM (Byte Order Mark) stripping for cross-platform compatibility
- * - Enhanced error messages with filepath context
- * - Optional error suppression (returns `undefined` instead of throwing)
- * - Optional reviver for transforming parsed values
- *
- * @param content - JSON string or Buffer to parse
- * @param options - Optional parsing configuration
- * @returns Parsed JSON value, or `undefined` if parsing fails and `throws` is `false`
- *
- * @throws {SyntaxError} When JSON is invalid and `throws` is `true` (default)
+ * Features: - Automatic UTF-8 Buffer conversion - BOM (Byte Order Mark)
+ * stripping for cross-platform compatibility - Enhanced error messages with
+ * filepath context - Optional error suppression (returns `undefined` instead of
+ * throwing) - Optional reviver for transforming parsed values.
  *
  * @example
- * ```ts
- * // Basic usage
- * const data = parseJson('{"name":"example"}')
- * console.log(data.name) // => 'example'
+ *   ;```ts
+ *   // Basic usage
+ *   const data = parseJson('{"name":"example"}')
+ *   console.log(data.name) // => 'example'
  *
- * // Parse Buffer with UTF-8 BOM
- * const buffer = Buffer.from('\uFEFF{"value":42}')
- * const data = parseJson(buffer)
- * console.log(data.value) // => 42
+ *   // Parse Buffer with UTF-8 BOM
+ *   const buffer = Buffer.from('\uFEFF{"value":42}')
+ *   const data = parseJson(buffer)
+ *   console.log(data.value) // => 42
  *
- * // Enhanced error messages with filepath
- * try {
- *   parseJson('invalid', { filepath: 'config.json' })
- * } catch (e) {
- *   console.error(e.message)
- *   // => "config.json: Unexpected token i in JSON at position 0"
- * }
- *
- * // Suppress errors
- * const result = parseJson('invalid', { throws: false })
- * console.log(result) // => undefined
- *
- * // Transform values with reviver
- * const json = '{"created":"2024-01-15T10:30:00Z"}'
- * const data = parseJson(json, {
- *   reviver: (key, value) => {
- *     if (key === 'created' && typeof value === 'string') {
- *       return new Date(value)
- *     }
- *     return value
+ *   // Enhanced error messages with filepath
+ *   try {
+ *     parseJson('invalid', { filepath: 'config.json' })
+ *   } catch (e) {
+ *     console.error(e.message)
+ *     // => "config.json: Unexpected token i in JSON at position 0"
  *   }
- * })
- * console.log(data.created instanceof Date) // => true
- * ```
+ *
+ *   // Suppress errors
+ *   const result = parseJson('invalid', { throws: false })
+ *   console.log(result) // => undefined
+ *
+ *   // Transform values with reviver
+ *   const json = '{"created":"2024-01-15T10:30:00Z"}'
+ *   const data = parseJson(json, {
+ *     reviver: (key, value) => {
+ *       if (key === 'created' && typeof value === 'string') {
+ *         return new Date(value)
+ *       }
+ *       return value
+ *     },
+ *   })
+ *   console.log(data.created instanceof Date) // => true
+ *   ```
+ *
+ * @param content - JSON string or Buffer to parse.
+ * @param options - Optional parsing configuration.
+ *
+ * @returns Parsed JSON value, or `undefined` if parsing fails and `throws` is
+ *   `false`
+ *
+ * @throws {SyntaxError} When JSON is invalid and `throws` is `true` (default)
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseJson(
@@ -174,9 +177,10 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  *
  * Recommended for parsing untrusted JSON (user input, network payloads,
  * anything beyond a trust boundary). Layers:
+ *
  * 1. Size cap (default 10 MB) prevents memory exhaustion.
- * 2. Prototype-pollution reviver rejects `__proto__` / `constructor` /
- *    `prototype` keys at any depth (unless `allowPrototype: true`).
+ * 2. Prototype-pollution reviver rejects `__proto__` / `constructor` / `prototype`
+ *    keys at any depth (unless `allowPrototype: true`).
  * 3. Optional Zod-shaped schema validation via
  *    `@socketsecurity/lib/schema/validate`.
  *
@@ -184,30 +188,30 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  * `parseJson()` — it offers Buffer/BOM handling and filepath-aware error
  * messages, without the untrusted-input overhead.
  *
+ * @example
+ *   ;```ts
+ *   // Basic parsing with type inference.
+ *   const data = parseJsonSafe<User>('{"name":"Alice","age":30}')
+ *
+ *   // With schema validation.
+ *   import { z } from 'zod'
+ *   const userSchema = z.object({ name: z.string(), age: z.number() })
+ *   const user = parseJsonSafe('{"name":"Alice","age":30}', userSchema)
+ *
+ *   // With size limit.
+ *   const data = parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
+ *
+ *   // Allow prototype keys (DANGEROUS — only for trusted sources).
+ *   const data = parseJsonSafe('{"__proto__":{}}', undefined, {
+ *     allowPrototype: true,
+ *   })
+ *   ```
+ *
  * @throws {Error} When `jsonString` exceeds `maxSize`.
  * @throws {Error} When JSON parsing fails.
  * @throws {Error} When prototype-pollution keys are detected (and
  *   `allowPrototype` is not `true`).
  * @throws {Error} When schema validation fails.
- *
- * @example
- * ```ts
- * // Basic parsing with type inference.
- * const data = parseJsonSafe<User>('{"name":"Alice","age":30}')
- *
- * // With schema validation.
- * import { z } from 'zod'
- * const userSchema = z.object({ name: z.string(), age: z.number() })
- * const user = parseJsonSafe('{"name":"Alice","age":30}', userSchema)
- *
- * // With size limit.
- * const data = parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
- *
- * // Allow prototype keys (DANGEROUS — only for trusted sources).
- * const data = parseJsonSafe('{"__proto__":{}}', undefined, {
- *   allowPrototype: true,
- * })
- * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseJsonSafe<T = unknown>(

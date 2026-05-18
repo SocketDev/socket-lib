@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/node/async-hooks.ts.
+ * @file Unit tests for src/node/async-hooks.ts.
  */
 
 import { describe, expect, it } from 'vitest'

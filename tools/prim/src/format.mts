@@ -1,10 +1,17 @@
 /**
- * @fileoverview Output formatters for prim findings.
+ * @file Output formatters for prim findings.
  */
 
 /**
- * @param {Array<{ primordial: string; pattern: string; file: string; line: number; kind: 'covered'|'gap'|'redeclaration' }>} findings
- * @param {{ mode: 'coverage'|'gaps'|'audit'; targetName: string }} ctx
+ * @param {{
+ *   primordial: string
+ *   pattern: string
+ *   file: string
+ *   line: number
+ *   kind: 'covered' | 'gap' | 'redeclaration'
+ * }[]} findings
+ * @param {{ mode: 'coverage' | 'gaps' | 'audit'; targetName: string }} ctx
+ *
  * @returns {string}
  */
 export function formatHuman(findings, ctx) {
@@ -58,6 +65,7 @@ export function formatHuman(findings, ctx) {
 
 /**
  * @param {object} payload
+ *
  * @returns {string}
  */
 export function formatJson(payload) {

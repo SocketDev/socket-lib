@@ -1,12 +1,10 @@
 /**
- * @fileoverview Integration tests for ESM imports from CommonJS modules.
- * Tests that Node.js ESM loader can properly detect named exports from
- * esbuild-compiled CommonJS modules.
- *
- * After commit b7a7d4bf, `src/globs.ts` was split into per-leaf files
- * (`globs/glob`, `globs/defaults`, `globs/matcher`, etc.) and the
- * `./globs` barrel export was removed. These tests target the leaf
- * subpaths directly.
+ * @file Integration tests for ESM imports from CommonJS modules. Tests that
+ *   Node.js ESM loader can properly detect named exports from esbuild-compiled
+ *   CommonJS modules. After commit b7a7d4bf, `src/globs.ts` was split into
+ *   per-leaf files (`globs/glob`, `globs/defaults`, `globs/matcher`, etc.) and
+ *   the `./globs` barrel export was removed. These tests target the leaf
+ *   subpaths directly.
  */
 
 // oxlint-disable socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.

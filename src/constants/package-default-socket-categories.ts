@@ -1,5 +1,5 @@
 /**
- * @fileoverview Default Socket security categories for packages.
+ * @file Default Socket security categories for packages.
  */
 
 import { ObjectFreeze } from '../primordials/object'

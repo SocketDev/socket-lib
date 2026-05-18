@@ -1,8 +1,7 @@
 /**
- * @fileoverview URL parsing helpers — `parseUrl` (safe `new URL(...)`
- * wrapper that returns `undefined` instead of throwing) and
- * `createRelativeUrl` (compose a relative path against an optional
- * base).
+ * @file URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that
+ *   returns `undefined` instead of throwing) and `createRelativeUrl` (compose a
+ *   relative path against an optional base).
  */
 
 import {
@@ -18,10 +17,10 @@ const UrlCtor = URL
  * Create a relative URL for testing.
  *
  * @example
- * ```typescript
- * createRelativeUrl('/api/test')                                    // 'api/test'
- * createRelativeUrl('/api/test', { base: 'https://example.com' })  // 'https://example.com/api/test'
- * ```
+ *   ;```typescript
+ *   createRelativeUrl('/api/test') // 'api/test'
+ *   createRelativeUrl('/api/test', { base: 'https://example.com' }) // 'https://example.com/api/test'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function createRelativeUrl(
@@ -50,10 +49,10 @@ export function createRelativeUrl(
  * Parse a value as a URL.
  *
  * @example
- * ```typescript
- * parseUrl('https://example.com')  // URL { href: 'https://example.com/' }
- * parseUrl('invalid')              // undefined
- * ```
+ *   ;```typescript
+ *   parseUrl('https://example.com') // URL { href: 'https://example.com/' }
+ *   parseUrl('invalid') // undefined
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseUrl(value: string | URL): URL | undefined {

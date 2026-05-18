@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for default Node.js version range.
+ * @file Unit tests for default Node.js version range.
  */
 
 import { packageDefaultNodeRange } from '@socketsecurity/lib/constants/package-default-node-range'

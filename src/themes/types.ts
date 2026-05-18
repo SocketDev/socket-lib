@@ -1,6 +1,6 @@
 /**
- * @fileoverview Elegant theme type system.
- * Type-safe theming for spinners, loggers, prompts, and links.
+ * @file Elegant theme type system. Type-safe theming for spinners, loggers,
+ *   prompts, and links.
  */
 
 import type { ColorValue } from '../colors/types'
@@ -8,8 +8,8 @@ import type { ShimmerDirection } from '../effects/shimmer'
 import type { SpinnerStyle } from '../spinner/types'
 
 /**
- * Color reference — direct value or semantic keyword.
- * Keywords: 'primary', 'secondary', 'inherit', 'rainbow'
+ * Color reference — direct value or semantic keyword. Keywords: 'primary',
+ * 'secondary', 'inherit', 'rainbow'
  */
 export type ColorReference =
   | ColorValue
@@ -22,29 +22,51 @@ export type ColorReference =
  * Theme color palette — semantic colors for visual harmony.
  */
 export type ThemeColors = {
-  /** Primary brand identity */
+  /**
+   * Primary brand identity.
+   */
   primary: ColorValue
-  /** Secondary accent (optional) */
+  /**
+   * Secondary accent (optional)
+   */
   secondary?: ColorValue | undefined
 
-  /** Success indicator ✓ */
+  /**
+   * Success indicator ✓
+   */
   success: ColorValue
-  /** Error indicator ✗ */
+  /**
+   * Error indicator ✗
+   */
   error: ColorValue
-  /** Warning indicator ⚠ */
+  /**
+   * Warning indicator ⚠
+   */
   warning: ColorValue
-  /** Information indicator ℹ */
+  /**
+   * Information indicator ℹ.
+   */
   info: ColorValue
-  /** Progress indicator → */
+  /**
+   * Progress indicator →
+   */
   step: ColorValue
 
-  /** Primary text */
+  /**
+   * Primary text.
+   */
   text: ColorValue
-  /** Dimmed text */
+  /**
+   * Dimmed text.
+   */
   textDim: ColorValue
-  /** Hyperlinks */
+  /**
+   * Hyperlinks.
+   */
   link: ColorReference
-  /** Interactive prompts */
+  /**
+   * Interactive prompts.
+   */
   prompt: ColorReference
 }
 
@@ -52,29 +74,49 @@ export type ThemeColors = {
  * Theme effects — animations and visual enhancements.
  */
 export type ThemeEffects = {
-  /** Spinner configuration */
+  /**
+   * Spinner configuration.
+   */
   spinner?: {
-    /** Color (supports theme references) */
+    /**
+     * Color (supports theme references)
+     */
     color?: ColorReference | undefined
-    /** Animation style */
+    /**
+     * Animation style.
+     */
     style?: SpinnerStyle | string | undefined
   }
 
-  /** Shimmer configuration */
+  /**
+   * Shimmer configuration.
+   */
   shimmer?: {
-    /** Enable shimmer */
+    /**
+     * Enable shimmer.
+     */
     enabled?: boolean | undefined
-    /** Color (single, gradient, or keyword) */
+    /**
+     * Color (single, gradient, or keyword)
+     */
     color?: ColorReference | ColorValue[] | undefined
-    /** Direction */
+    /**
+     * Direction.
+     */
     direction?: ShimmerDirection | undefined
-    /** Speed (steps per frame) */
+    /**
+     * Speed (steps per frame)
+     */
     speed?: number | undefined
   }
 
-  /** Pulse configuration */
+  /**
+   * Pulse configuration.
+   */
   pulse?: {
-    /** Speed (milliseconds) */
+    /**
+     * Speed (milliseconds)
+     */
     speed?: number | undefined
   }
 }
@@ -83,11 +125,17 @@ export type ThemeEffects = {
  * Theme metadata — descriptive information.
  */
 export type ThemeMeta = {
-  /** Description */
+  /**
+   * Description.
+   */
   description?: string | undefined
-  /** Author */
+  /**
+   * Author.
+   */
   author?: string | undefined
-  /** Version */
+  /**
+   * Version.
+   */
   version?: string | undefined
 }
 
@@ -95,17 +143,27 @@ export type ThemeMeta = {
  * Theme definition — complete visual identity.
  */
 export type Theme = {
-  /** Unique identifier (kebab-case) */
+  /**
+   * Unique identifier (kebab-case)
+   */
   name: string
-  /** Display name */
+  /**
+   * Display name.
+   */
   displayName: string
 
-  /** Color palette */
+  /**
+   * Color palette.
+   */
   colors: ThemeColors
 
-  /** Visual effects (optional) */
+  /**
+   * Visual effects (optional)
+   */
   effects?: ThemeEffects | undefined
 
-  /** Metadata (optional) */
+  /**
+   * Metadata (optional)
+   */
   meta?: ThemeMeta | undefined
 }

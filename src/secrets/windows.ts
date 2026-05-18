@@ -1,24 +1,18 @@
 /**
- * @fileoverview Windows backend via PowerShell CredentialManager
- * module, with a DPAPI-encrypted file fallback.
+ * @file Windows backend via PowerShell CredentialManager module, with a
+ *   DPAPI-encrypted file fallback. Two paths, tried in order:
  *
- * Two paths, tried in order:
- *
- *   1. CredentialManager PowerShell module
- *      (`New-StoredCredential` / `Get-StoredCredential` /
- *      `Remove-StoredCredential`). The cleanest path — stored
- *      credentials live in the Windows Credential Manager, the same
- *      place `cmdkey` writes to. Requires the module to be
- *      installed (`Install-Module CredentialManager -Scope CurrentUser`).
- *
- *   2. DPAPI-encrypted file under `%APPDATA%\<service>\<account>.enc`.
- *      Used when the CredentialManager module isn't available.
- *      `System.Security.Cryptography.ProtectedData` encrypts under
- *      the current-user machine key — readable only by this user on
- *      this machine, never plaintext.
- *
- * The target name composed for CredentialManager is `service:account`
- * (matching `cmdkey /generic:<target>` convention).
+ *   1. CredentialManager PowerShell module (`New-StoredCredential` /
+ *      `Get-StoredCredential` / `Remove-StoredCredential`). The cleanest path —
+ *      stored credentials live in the Windows Credential Manager, the same
+ *      place `cmdkey` writes to. Requires the module to be installed
+ *      (`Install-Module CredentialManager -Scope CurrentUser`).
+ *   2. DPAPI-encrypted file under `%APPDATA%\<service>\<account>.enc`. Used when
+ *      the CredentialManager module isn't available.
+ *      `System.Security.Cryptography.ProtectedData` encrypts under the
+ *      current-user machine key — readable only by this user on this machine,
+ *      never plaintext. The target name composed for CredentialManager is
+ *      `service:account` (matching `cmdkey /generic:<target>` convention).
  */
 
 import { spawn, spawnSync } from 'node:child_process'

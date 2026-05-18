@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for Socket Registry type definitions.
+ * @file Unit tests for Socket Registry type definitions.
  */
 
 import { describe, expect, it } from 'vitest'

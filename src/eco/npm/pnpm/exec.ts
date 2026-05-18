@@ -1,8 +1,7 @@
 /**
- * @fileoverview Execute pnpm commands with optimized flags and security defaults.
- *
- * SECURITY: Array-based arguments prevent command injection. All elements
- * in the args array are properly escaped by Node.js when passed to execBin().
+ * @file Execute pnpm commands with optimized flags and security defaults.
+ *   SECURITY: Array-based arguments prevent command injection. All elements in
+ *   the args array are properly escaped by Node.js when passed to execBin().
  */
 
 import { execBin } from '../../../bin/exec'
@@ -32,10 +31,10 @@ export interface PnpmOptions extends SpawnOptions {
  * Execute pnpm commands with optimized flags and settings.
  *
  * @example
- * ```typescript
- * await execPnpm(['install'])
- * await execPnpm(['add', 'lodash'], { allowLockfileUpdate: true })
- * ```
+ *   ;```typescript
+ *   await execPnpm(['install'])
+ *   await execPnpm(['add', 'lodash'], { allowLockfileUpdate: true })
+ *   ```
  */
 export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
   const { allowLockfileUpdate, ...extBinOpts } = {

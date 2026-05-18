@@ -1,20 +1,15 @@
 /**
- * @fileoverview Locked-down spawn for AI agent CLIs (Claude / Codex /
- * Gemini / OpenCode).
- *
- * Per the CLAUDE.md "Programmatic Claude calls" rule: every headless
- * invocation MUST set the four lockdown flags (tools / disallow /
- * permissionMode / no-session-persistence). The helper enforces this
- * at the type level (`SpawnAiAgentOptions` requires the relevant
- * fields) AND at the spawn site (per-agent flag translator).
- *
- * Why CLI subprocess instead of an SDK call: the fleet's contract
- * matches what the local user sees when invoking the CLI — same auth
- * config, same model availability, same tool permissions. SDK calls
- * would diverge on auth handling and force per-agent SDK installs.
- *
- * Retry: 3 attempts on overload (HTTP 529 / "Overloaded"), exp.
- * backoff (5s / 15s / 45s). Each retry is a fresh subprocess.
+ * @file Locked-down spawn for AI agent CLIs (Claude / Codex / Gemini /
+ *   OpenCode). Per the CLAUDE.md "Programmatic Claude calls" rule: every
+ *   headless invocation MUST set the four lockdown flags (tools / disallow /
+ *   permissionMode / no-session-persistence). The helper enforces this at the
+ *   type level (`SpawnAiAgentOptions` requires the relevant fields) AND at the
+ *   spawn site (per-agent flag translator). Why CLI subprocess instead of an
+ *   SDK call: the fleet's contract matches what the local user sees when
+ *   invoking the CLI — same auth config, same model availability, same tool
+ *   permissions. SDK calls would diverge on auth handling and force per-agent
+ *   SDK installs. Retry: 3 attempts on overload (HTTP 529 / "Overloaded"), exp.
+ *   backoff (5s / 15s / 45s). Each retry is a fresh subprocess.
  */
 
 import { errorMessage } from '../errors/message'
@@ -38,15 +33,13 @@ export function backoffFor(attempt: number): number {
 }
 
 /**
- * Build CLI arg list for a given agent. The flag names differ across
- * agents but the conceptual surface is the same: "here are the
- * allowed tools, here are the denied tools, here is the permission
- * mode, do not persist a session." This translator is the single
- * source of truth for how each agent's flags map.
+ * Build CLI arg list for a given agent. The flag names differ across agents but
+ * the conceptual surface is the same: "here are the allowed tools, here are the
+ * denied tools, here is the permission mode, do not persist a session." This
+ * translator is the single source of truth for how each agent's flags map.
  *
- * Update sites (when an agent changes its flag surface):
- *   1. The relevant case below.
- *   2. The agent's docs link (cited inline).
+ * Update sites (when an agent changes its flag surface): 1. The relevant case
+ * below. 2. The agent's docs link (cited inline).
  */
 export function buildArgs(
   agent: AiAgentName,
@@ -183,22 +176,22 @@ export async function pickAgent(
  * Spawn an AI agent CLI subprocess with the locked-down flag set.
  *
  * @example
- * ```ts
- * import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
- * import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
+ *   ```ts
+ *   import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
+ *   import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
  *
- * const result = await spawnAiAgent({
+ *   const result = await spawnAiAgent({
  *   ...EDIT_ONLY_PROFILE,
  *   prompt: 'Fix the lint findings in src/foo.ts',
  *   cwd: process.cwd(),
  *   model: 'claude-sonnet-4-6',
  *   timeoutMs: 5 * 60 * 1000,
- * })
- * if (result.exitCode !== 0) { ... }
- * ```
+ *   })
+ *   if (result.exitCode !== 0) { ... }
+ *   ```
  *
- * Throws when the requested agent isn't on PATH (or, when no agent
- * is requested, when none of the known agents are on PATH).
+ *   Throws when the requested agent isn't on PATH (or, when no agent
+ *   is requested, when none of the known agents are on PATH).
  */
 export async function spawnAiAgent(
   opts: SpawnAiAgentOptions,

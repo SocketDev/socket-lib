@@ -1,14 +1,14 @@
 /**
- * @fileoverview Isolated tests for color theme system.
+ * @file Isolated tests for color theme system. Tests theme management system
+ *   for CLI color schemes:
  *
- * Tests theme management system for CLI color schemes:
- * - THEMES constant with predefined themes (socket, claude, etc.)
- * - SOCKET_THEME default theme configuration
- * - createTheme(), extendTheme() theme builders
- * - setTheme(), getTheme() global theme management
- * - withTheme(), withThemeSync() scoped theme execution
- * - resolveColor() color name resolution
- * Used by Socket CLI for customizable terminal color output.
+ *   - THEMES constant with predefined themes (socket, claude, etc.)
+ *   - SOCKET_THEME default theme configuration
+ *   - createTheme(), extendTheme() theme builders
+ *   - setTheme(), getTheme() global theme management
+ *   - withTheme(), withThemeSync() scoped theme execution
+ *   - resolveColor() color name resolution Used by Socket CLI for customizable
+ *     terminal color output.
  */
 
 import {

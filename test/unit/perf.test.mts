@@ -1,15 +1,16 @@
 /**
- * @fileoverview Unit tests for performance measurement utilities.
+ * @file Unit tests for performance measurement utilities. Tests high-resolution
+ *   time measurement via the Performance API:
  *
- * Tests high-resolution time measurement via the Performance API:
- * - performance.now() provides monotonic timestamps in milliseconds
- * - Validates timing accuracy for elapsed time measurements
- * - Tests module import and basic functionality
- * - Ensures compatibility with Node.js performance hooks
- * - Tests performance tracking utilities (perfTimer, measure, measureSync)
- * - Tests metrics collection and reporting (getPerformanceMetrics, getPerformanceSummary)
- * - Tests checkpoints and memory tracking
- * Used for benchmarking, profiling, and timing operations in Socket tools.
+ *   - performance.now() provides monotonic timestamps in milliseconds
+ *   - Validates timing accuracy for elapsed time measurements
+ *   - Tests module import and basic functionality
+ *   - Ensures compatibility with Node.js performance hooks
+ *   - Tests performance tracking utilities (perfTimer, measure, measureSync)
+ *   - Tests metrics collection and reporting (getPerformanceMetrics,
+ *     getPerformanceSummary)
+ *   - Tests checkpoints and memory tracking Used for benchmarking, profiling, and
+ *     timing operations in Socket tools.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for asset-names.ts (Bazel).
+ * @file Unit tests for asset-names.ts (Bazel).
  */
 
 import { describe, expect, it } from 'vitest'

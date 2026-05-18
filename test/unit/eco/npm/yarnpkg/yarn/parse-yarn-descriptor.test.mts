@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for parse-yarn-descriptor.ts.
+ * @file Unit tests for parse-yarn-descriptor.ts.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Editable JSON file manipulation with formatting preservation.
+ * @file Editable JSON file manipulation with formatting preservation.
  */
 
 import process from 'node:process'
@@ -37,14 +37,14 @@ let _EditableJsonClass: EditableJsonConstructor | undefined
  * Get the EditableJson class for JSON file manipulation.
  *
  * @example
- * ```ts
- * import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
+ *   ;```ts
+ *   import { getEditableJsonClass } from '@socketsecurity/lib/json/edit'
  *
- * const EditableJson = getEditableJsonClass<MyConfigType>()
- * const config = await EditableJson.load('./config.json')
- * config.update({ someField: 'newValue' })
- * await config.save({ sort: true })
- * ```
+ *   const EditableJson = getEditableJsonClass<MyConfigType>()
+ *   const config = await EditableJson.load('./config.json')
+ *   config.update({ someField: 'newValue' })
+ *   await config.save({ sort: true })
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getEditableJsonClass<
@@ -252,6 +252,7 @@ export function getEditableJsonClass<
 
 /**
  * Read file content from disk with retry logic for ENOENT errors.
+ *
  * @private
  */
 export async function readFile(filepath: string): Promise<string> {
@@ -289,8 +290,10 @@ export async function readFile(filepath: string): Promise<string> {
 }
 
 /**
- * Retry a file write operation with exponential backoff on Windows EPERM errors.
- * Windows can have transient file locking issues with temp directories.
+ * Retry a file write operation with exponential backoff on Windows EPERM
+ * errors. Windows can have transient file locking issues with temp
+ * directories.
+ *
  * @private
  */
 export async function retryWrite(

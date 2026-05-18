@@ -1,8 +1,8 @@
 /**
- * @fileoverview Public type surface for `packages/*` modules — the
- * `PackageJson` shape (npm-extended with a `socket` field) plus option
- * bags consumed across `edit` / `manifest` / `normalize` / `operations`
- * / `provenance` / `licenses`. Pure types, no runtime side effects.
+ * @file Public type surface for `packages/*` modules — the `PackageJson` shape
+ *   (npm-extended with a `socket` field) plus option bags consumed across
+ *   `edit` / `manifest` / `normalize` / `operations` / `provenance` /
+ *   `licenses`. Pure types, no runtime side effects.
  */
 
 import type { CategoryString } from '../eco/types'
@@ -16,9 +16,12 @@ type PackageExports = {
 export type EditablePackageJson = import('./edit').EditablePackageJsonInstance
 
 /**
- * Extended PackageJson type based on NPMCliPackageJson.Content with Socket-specific additions.
+ * Extended PackageJson type based on NPMCliPackageJson.Content with
+ * Socket-specific additions.
+ *
  * @extends NPMCliPackageJson.Content (from @npmcli/package-json)
- * @property socket - Optional Socket.dev specific configuration
+ *
+ * @property socket - Optional Socket.dev specific configuration.
  */
 export type PackageJson = {
   // Core npm fields

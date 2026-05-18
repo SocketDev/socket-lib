@@ -1,16 +1,16 @@
 /**
- * @fileoverview Simplified signal exit handler for build scripts.
- *
- * This is intentionally separate from src/lib/signal-exit.ts to avoid circular
- * dependencies where build scripts depend on the built dist output.
+ * @file Simplified signal exit handler for build scripts. This is intentionally
+ *   separate from src/lib/signal-exit.ts to avoid circular dependencies where
+ *   build scripts depend on the built dist output.
  */
 
 import process from 'node:process'
 
 /**
- * Register a callback to run when process exits
+ * Register a callback to run when process exits.
  *
  * @param {(code: number, signal: string | null) => void} callback
+ *
  * @returns {() => void} Cleanup function
  */
 export function onExit(callback) {

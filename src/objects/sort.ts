@@ -1,10 +1,9 @@
 /**
- * @fileoverview Sorted-object helpers: `entryKeyComparator`,
- * `objectEntries`, `toSortedObject`, `toSortedObjectFromEntries`.
- *
- * Symbol keys sort separately from string keys (placed first in the
- * resulting object) — this matters for serialization stability since
- * `Object.keys` and `JSON.stringify` will iterate insertion order.
+ * @file Sorted-object helpers: `entryKeyComparator`, `objectEntries`,
+ *   `toSortedObject`, `toSortedObjectFromEntries`. Symbol keys sort separately
+ *   from string keys (placed first in the resulting object) — this matters for
+ *   serialization stability since `Object.keys` and `JSON.stringify` will
+ *   iterate insertion order.
  */
 
 import { ObjectFromEntries } from '../primordials/object'
@@ -16,19 +15,24 @@ import type { SortedObject } from './types'
 /**
  * Compare two entry arrays by their keys for sorting.
  *
- * Used internally for alphabetically sorting object entries.
- * String keys are compared directly, non-string keys are converted to strings first.
+ * Used internally for alphabetically sorting object entries. String keys are
+ * compared directly, non-string keys are converted to strings first.
+ *
+ * @example
+ *   ;```ts
+ *   const entries = [
+ *     ['zebra', 1],
+ *     ['apple', 2],
+ *     ['banana', 3],
+ *   ]
+ *   entries.sort(entryKeyComparator)
+ *   // [['apple', 2], ['banana', 3], ['zebra', 1]]
+ *   ```
  *
  * @param a - First entry tuple [key, value]
  * @param b - Second entry tuple [key, value]
- * @returns Negative if a < b, positive if a > b, zero if equal
  *
- * @example
- * ```ts
- * const entries = [['zebra', 1], ['apple', 2], ['banana', 3]]
- * entries.sort(entryKeyComparator)
- * // [['apple', 2], ['banana', 3], ['zebra', 1]]
- * ```
+ * @returns Negative if a < b, positive if a > b, zero if equal
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function entryKeyComparator(
@@ -45,18 +49,19 @@ export function entryKeyComparator(
 /**
  * Get all own property entries (key-value pairs) from an object.
  *
- * Unlike `Object.entries()`, this includes non-enumerable properties and
- * symbol keys. Returns an empty array for null/undefined.
- *
- * @param obj - The object to get entries from
- * @returns Array of [key, value] tuples, or empty array for null/undefined
+ * Unlike `Object.entries()`, this includes non-enumerable properties and symbol
+ * keys. Returns an empty array for null/undefined.
  *
  * @example
- * ```ts
- * objectEntries({ a: 1, b: 2 })                    // [['a', 1], ['b', 2]]
- * objectEntries({ [Symbol('k')]: 'v', x: 10 })      // [[Symbol(k), 'v'], ['x', 10]]
- * objectEntries(null)                               // []
- * ```
+ *   ;```ts
+ *   objectEntries({ a: 1, b: 2 }) // [['a', 1], ['b', 2]]
+ *   objectEntries({ [Symbol('k')]: 'v', x: 10 }) // [[Symbol(k), 'v'], ['x', 10]]
+ *   objectEntries(null) // []
+ *   ```
+ *
+ * @param obj - The object to get entries from.
+ *
+ * @returns Array of [key, value] tuples, or empty array for null/undefined
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function objectEntries(obj: unknown): Array<[PropertyKey, unknown]> {
@@ -81,13 +86,14 @@ export function objectEntries(obj: unknown): Array<[PropertyKey, unknown]> {
  * sorted alphabetically. Symbol keys are sorted separately and placed first.
  * This is useful for consistent key ordering in serialization or comparisons.
  *
- * @param obj - The object to sort
- * @returns A new object with sorted keys
- *
  * @example
- * ```ts
- * toSortedObject({ z: 1, a: 2, m: 3 })   // { a: 2, m: 3, z: 1 }
- * ```
+ *   ;```ts
+ *   toSortedObject({ z: 1, a: 2, m: 3 }) // { a: 2, m: 3, z: 1 }
+ *   ```
+ *
+ * @param obj - The object to sort.
+ *
+ * @returns A new object with sorted keys
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function toSortedObject<T extends object>(obj: T): T {
@@ -97,18 +103,23 @@ export function toSortedObject<T extends object>(obj: T): T {
 /**
  * Create an object from entries with sorted keys.
  *
- * Takes an iterable of [key, value] entries and creates a new object with
- * keys sorted alphabetically. Symbol keys are sorted separately and placed
- * first in the resulting object.
- *
- * @param entries - Iterable of [key, value] tuples
- * @returns A new object with sorted keys
+ * Takes an iterable of [key, value] entries and creates a new object with keys
+ * sorted alphabetically. Symbol keys are sorted separately and placed first in
+ * the resulting object.
  *
  * @example
- * ```ts
- * toSortedObjectFromEntries([['z', 1], ['a', 2], ['m', 3]])
- * // { a: 2, m: 3, z: 1 }
- * ```
+ *   ;```ts
+ *   toSortedObjectFromEntries([
+ *     ['z', 1],
+ *     ['a', 2],
+ *     ['m', 3],
+ *   ])
+ *   // { a: 2, m: 3, z: 1 }
+ *   ```
+ *
+ * @param entries - Iterable of [key, value] tuples.
+ *
+ * @returns A new object with sorted keys
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function toSortedObjectFromEntries<T = unknown>(

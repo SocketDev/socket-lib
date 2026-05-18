@@ -1,14 +1,10 @@
 /**
- * @fileoverview Lazy-loader for socket-btm's `node:smol-https`.
- *
- * `node:smol-https` is the HTTPS-flavored server entry shipped by
- * socket-btm's smol Node binary. It wraps `node:smol-http`'s `serve`
- * with performance-oriented TLS defaults (X25519+P-256 curves,
- * pre-vetted cipher list, 24-hour session timeout) and validates
- * that TLS options are present.
- *
- * Returns `undefined` on stock Node + non-Node runtimes. Result is
- * cached across calls.
+ * @file Lazy-loader for socket-btm's `node:smol-https`. `node:smol-https` is
+ *   the HTTPS-flavored server entry shipped by socket-btm's smol Node binary.
+ *   It wraps `node:smol-http`'s `serve` with performance-oriented TLS defaults
+ *   (X25519+P-256 curves, pre-vetted cipher list, 24-hour session timeout) and
+ *   validates that TLS options are present. Returns `undefined` on stock Node +
+ *   non-Node runtimes. Result is cached across calls.
  *
  * @internal — `src/http-request/` is the natural consumer. Most
  *   callers should use the standard server-side helpers, which
@@ -19,8 +15,8 @@ import { isNodeBuiltin } from '../node/module'
 
 /**
  * TLS options accepted by `smol-https`'s `serve()`. Mirrors Node's
- * `tls.TlsOptions` for the fields socket-lib reads; callers needing
- * more can widen the type at the callsite.
+ * `tls.TlsOptions` for the fields socket-lib reads; callers needing more can
+ * widen the type at the callsite.
  */
 export interface SmolHttpsTlsOptions {
   readonly key?: Buffer | string | undefined
@@ -34,8 +30,8 @@ export interface SmolHttpsTlsOptions {
 }
 
 /**
- * Options accepted by `smol-https`'s `serve()`. Mirrors
- * `smol-http`'s `serve` options + TLS extensions.
+ * Options accepted by `smol-https`'s `serve()`. Mirrors `smol-http`'s `serve`
+ * options + TLS extensions.
  */
 export interface SmolHttpsServeOptions {
   readonly port?: number | undefined
@@ -50,14 +46,14 @@ export interface SmolHttpsServeOptions {
 
 /**
  * Surface of `node:smol-https`. See socket-btm's
- * additions/source-patched/lib/smol-https.js for the canonical
- * shape — a single `serve()` factory backed by `smol-http.serve()`
- * plus injected fast-TLS defaults.
+ * additions/source-patched/lib/smol-https.js for the canonical shape — a single
+ * `serve()` factory backed by `smol-http.serve()` plus injected fast-TLS
+ * defaults.
  */
 export interface SmolHttpsBinding {
   /**
-   * Create an HTTPS server. Throws `TypeError` when no TLS options
-   * are provided (use `node:smol-http`'s `serve()` for plain HTTP).
+   * Create an HTTPS server. Throws `TypeError` when no TLS options are provided
+   * (use `node:smol-http`'s `serve()` for plain HTTP).
    */
   serve(options: SmolHttpsServeOptions): unknown
 }
@@ -66,8 +62,8 @@ let _smolHttps: SmolHttpsBinding | undefined
 let _smolHttpsProbed = false
 
 /**
- * Returns `node:smol-https` when running on the smol Node binary,
- * otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-https` when running on the smol Node binary, otherwise
+ * `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolHttps(): SmolHttpsBinding | undefined {

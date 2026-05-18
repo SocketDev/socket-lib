@@ -1,8 +1,8 @@
 /**
- * @fileoverview Shared internals for the `paths/` module — the leaf-level
- * primitives every other path leaf depends on. Kept as a single file so
- * `normalize`, `predicates`, `conversion`, and `resolve` can layer above
- * it without circular imports.
+ * @file Shared internals for the `paths/` module — the leaf-level primitives
+ *   every other path leaf depends on. Kept as a single file so `normalize`,
+ *   `predicates`, `conversion`, and `resolve` can layer above it without
+ *   circular imports.
  *
  *   - char-code constants + shared regexps
  *   - `getUrl` — lazy `node:url` loader
@@ -65,16 +65,19 @@ export function getUrl() {
  * string representation. Handles different input formats and provides
  * consistent string output for path operations.
  *
- * @param {string | Buffer | URL | null | undefined} pathLike - The value to convert
- * @returns {string} The string representation, or empty string for null/undefined
- *
  * @example
- * ```typescript
- * pathLikeToString('/home/user')                       // '/home/user'
- * pathLikeToString(Buffer.from('/tmp/file'))           // '/tmp/file'
- * pathLikeToString(new URL('file:///home/user'))       // '/home/user'
- * pathLikeToString(null)                               // ''
- * ```
+ *   ;```typescript
+ *   pathLikeToString('/home/user') // '/home/user'
+ *   pathLikeToString(Buffer.from('/tmp/file')) // '/tmp/file'
+ *   pathLikeToString(new URL('file:///home/user')) // '/home/user'
+ *   pathLikeToString(null) // ''
+ *   ```
+ *
+ * @param {string | Buffer | URL | null | undefined} pathLike - The value to
+ *   convert.
+ *
+ * @returns {string} The string representation, or empty string for
+ *   null/undefined.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function pathLikeToString(

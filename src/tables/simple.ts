@@ -1,9 +1,8 @@
 /**
- * @fileoverview Borderless table renderer — columns separated by
- * two spaces, header underlined with `─`. Lighter weight than
- * `formatTable` (no box-drawing characters); the right choice when
- * the surface is rendering to a context that doesn't reliably
- * support box-drawing glyphs.
+ * @file Borderless table renderer — columns separated by two spaces, header
+ *   underlined with `─`. Lighter weight than `formatTable` (no box-drawing
+ *   characters); the right choice when the surface is rendering to a context
+ *   that doesn't reliably support box-drawing glyphs.
  */
 
 import colors from '../external/yoctocolors-cjs'
@@ -15,31 +14,32 @@ import { displayWidth, padText } from './padding'
 import type { TableColumn } from './types'
 
 /**
- * Format data as a simple table without borders.
- * Lighter weight alternative to formatTable().
- *
- * @param data - Array of data objects
- * @param columns - Column configuration
- * @returns Formatted table string
+ * Format data as a simple table without borders. Lighter weight alternative to
+ * formatTable().
  *
  * @example
- * import { formatSimpleTable } from '@socketsecurity/lib/tables/simple'
- * import colors from 'yoctocolors-cjs'
+ *   import { formatSimpleTable } from '@socketsecurity/lib/tables/simple'
+ *   import colors from 'yoctocolors-cjs'
  *
- * const data = [
- *   { name: 'lodash', version: '4.17.21' },
- *   { name: 'react', version: '18.2.0' },
- * ]
- * const columns = [
- *   { key: 'name', header: 'Package' },
- *   { key: 'version', header: 'Version' },
- * ]
- * console.log(formatSimpleTable(data, columns))
- * // Output:
- * // Package  Version
- * // ───────  ───────
- * // lodash   4.17.21
- * // react    18.2.0
+ *   const data = [
+ *     { name: 'lodash', version: '4.17.21' },
+ *     { name: 'react', version: '18.2.0' },
+ *   ]
+ *   const columns = [
+ *     { key: 'name', header: 'Package' },
+ *     { key: 'version', header: 'Version' },
+ *   ]
+ *   console.log(formatSimpleTable(data, columns))
+ *   // Output:
+ *   // Package  Version
+ *   // ───────  ───────
+ *   // lodash   4.17.21
+ *   // react    18.2.0
+ *
+ * @param data - Array of data objects.
+ * @param columns - Column configuration.
+ *
+ * @returns Formatted table string
  */
 export function formatSimpleTable(
   data: Array<Record<string, unknown>>,

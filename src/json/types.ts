@@ -1,14 +1,14 @@
 /**
- * @fileoverview JSON type definitions and interfaces.
+ * @file JSON type definitions and interfaces.
  */
 
 /**
  * JSON primitive types: `null`, `boolean`, `number`, or `string`.
  *
  * @example
- * ```ts
- * const primitives: JsonPrimitive[] = [null, true, 42, 'hello']
- * ```
+ *   ;```ts
+ *   const primitives: JsonPrimitive[] = [null, true, 42, 'hello']
+ *   ```
  */
 export type JsonPrimitive = null | boolean | number | string
 
@@ -16,9 +16,9 @@ export type JsonPrimitive = null | boolean | number | string
  * A JSON array containing JSON values.
  *
  * @example
- * ```ts
- * const arr: JsonArray = [1, 'two', { three: 3 }, [4, 5]]
- * ```
+ *   ;```ts
+ *   const arr: JsonArray = [1, 'two', { three: 3 }, [4, 5]]
+ *   ```
  */
 export interface JsonArray extends Array<JsonValue> {}
 
@@ -26,14 +26,14 @@ export interface JsonArray extends Array<JsonValue> {}
  * A JSON object with string keys and JSON values.
  *
  * @example
- * ```ts
- * const obj: JsonObject = {
- *   name: 'example',
- *   count: 42,
- *   active: true,
- *   nested: { key: 'value' }
- * }
- * ```
+ *   ;```ts
+ *   const obj: JsonObject = {
+ *     name: 'example',
+ *     count: 42,
+ *     active: true,
+ *     nested: { key: 'value' },
+ *   }
+ *   ```
  */
 export interface JsonObject {
   [key: string]: JsonValue
@@ -43,87 +43,87 @@ export interface JsonObject {
  * Any valid JSON value: primitive, object, or array.
  *
  * @example
- * ```ts
- * const values: JsonValue[] = [
- *   null,
- *   true,
- *   42,
- *   'hello',
- *   { key: 'value' },
- *   [1, 2, 3]
- * ]
- * ```
+ *   ;```ts
+ *   const values: JsonValue[] = [
+ *     null,
+ *     true,
+ *     42,
+ *     'hello',
+ *     { key: 'value' },
+ *     [1, 2, 3],
+ *   ]
+ *   ```
  */
 export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 
 /**
- * Reviver function for transforming parsed JSON values.
- * Called for each key-value pair during parsing.
- *
- * @param key - The object key or array index being parsed
- * @param value - The parsed value
- * @returns The transformed value (or original if no transform needed)
+ * Reviver function for transforming parsed JSON values. Called for each
+ * key-value pair during parsing.
  *
  * @example
- * ```ts
- * // Convert date strings to Date objects
- * const reviver: JsonReviver = (key, value) => {
- *   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
- *     return new Date(value)
+ *   ;```ts
+ *   // Convert date strings to Date objects
+ *   const reviver: JsonReviver = (key, value) => {
+ *     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+ *       return new Date(value)
+ *     }
+ *     return value
  *   }
- *   return value
- * }
- * ```
+ *   ```
+ *
+ * @param key - The object key or array index being parsed.
+ * @param value - The parsed value.
+ *
+ * @returns The transformed value (or original if no transform needed)
  */
 export type JsonReviver = (key: string, value: unknown) => unknown
 
 /**
  * Options for `parseJsonSafe`: security controls for untrusted JSON.
  *
- * Distinct from `ParseJsonOptions` (which is scoped to reviver /
- * error-handling for trusted-source fs reads). Use this type when
- * parsing user input, network payloads, or anything beyond a trust
- * boundary.
+ * Distinct from `ParseJsonOptions` (which is scoped to reviver / error-handling
+ * for trusted-source fs reads). Use this type when parsing user input, network
+ * payloads, or anything beyond a trust boundary.
  *
  * @example
- * ```ts
- * const options: ParseJsonSafeOptions = {
- *   maxSize: 1024 * 1024, // 1MB limit
- *   allowPrototype: false // Block prototype pollution
- * }
- * ```
+ *   ;```ts
+ *   const options: ParseJsonSafeOptions = {
+ *     maxSize: 1024 * 1024, // 1MB limit
+ *     allowPrototype: false, // Block prototype pollution
+ *   }
+ *   ```
  */
 export interface ParseJsonSafeOptions {
   /**
-   * Allow dangerous prototype pollution keys (`__proto__`, `constructor`, `prototype`).
-   * Set to `true` only if you trust the JSON source completely.
-   *
-   * @default false
+   * Allow dangerous prototype pollution keys (`__proto__`, `constructor`,
+   * `prototype`). Set to `true` only if you trust the JSON source completely.
    *
    * @example
-   * ```ts
-   * // Will throw error by default
-   * parseJsonSafe('{"__proto__": {"polluted": true}}')
+   *   ;```ts
+   *   // Will throw error by default
+   *   parseJsonSafe('{"__proto__": {"polluted": true}}')
    *
-   * // Allows the parse (dangerous!)
-   * parseJsonSafe('{"__proto__": {"polluted": true}}', undefined, {
-   *   allowPrototype: true
-   * })
-   * ```
+   *   // Allows the parse (dangerous!)
+   *   parseJsonSafe('{"__proto__": {"polluted": true}}', undefined, {
+   *     allowPrototype: true,
+   *   })
+   *   ```
+   *
+   * @default false
    */
   allowPrototype?: boolean | undefined
 
   /**
-   * Maximum allowed size of JSON string in bytes.
-   * Prevents memory exhaustion from extremely large payloads.
-   *
-   * @default 10_485_760 (10 MB)
+   * Maximum allowed size of JSON string in bytes. Prevents memory exhaustion
+   * from extremely large payloads.
    *
    * @example
-   * ```ts
-   * // Limit to 1KB
-   * parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
-   * ```
+   *   ;```ts
+   *   // Limit to 1KB
+   *   parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
+   *   ```
+   *
+   * @default 10_485_760 (10 MB)
    */
   maxSize?: number | undefined
 }
@@ -133,48 +133,48 @@ export interface ParseJsonSafeOptions {
  */
 export interface ParseJsonOptions {
   /**
-   * Optional filepath for improved error messages.
-   * When provided, errors will be prefixed with the filepath.
+   * Optional filepath for improved error messages. When provided, errors will
+   * be prefixed with the filepath.
    *
    * @example
-   * ```ts
-   * // Error message will be: "config.json: Unexpected token } in JSON"
-   * parseJson('invalid', { filepath: 'config.json' })
-   * ```
+   *   ;```ts
+   *   // Error message will be: "config.json: Unexpected token } in JSON"
+   *   parseJson('invalid', { filepath: 'config.json' })
+   *   ```
    */
   filepath?: string | undefined
   /**
-   * Optional reviver function to transform parsed values.
-   * Called for each key-value pair during parsing.
+   * Optional reviver function to transform parsed values. Called for each
+   * key-value pair during parsing.
    *
    * @example
-   * ```ts
-   * // Convert ISO date strings to Date objects
-   * const options = {
-   *   reviver: (key, value) => {
-   *     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
-   *       return new Date(value)
-   *     }
-   *     return value
+   *   ;```ts
+   *   // Convert ISO date strings to Date objects
+   *   const options = {
+   *     reviver: (key, value) => {
+   *       if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+   *         return new Date(value)
+   *       }
+   *       return value
+   *     },
    *   }
-   * }
-   * ```
+   *   ```
    */
   reviver?: JsonReviver | undefined
   /**
-   * Whether to throw on parse errors.
-   * When `false`, returns `undefined` instead of throwing.
-   *
-   * @default true
+   * Whether to throw on parse errors. When `false`, returns `undefined` instead
+   * of throwing.
    *
    * @example
-   * ```ts
-   * // Throws error
-   * parseJson('invalid', { throws: true })
+   *   ;```ts
+   *   // Throws error
+   *   parseJson('invalid', { throws: true })
    *
-   * // Returns undefined
-   * const result = parseJson('invalid', { throws: false })
-   * ```
+   *   // Returns undefined
+   *   const result = parseJson('invalid', { throws: false })
+   *   ```
+   *
+   * @default true
    */
   throws?: boolean | undefined
 }
@@ -184,12 +184,15 @@ export interface ParseJsonOptions {
  */
 export interface EditableJsonSaveOptions {
   /**
-   * Whether to ignore whitespace-only changes when determining if save is needed.
+   * Whether to ignore whitespace-only changes when determining if save is
+   * needed.
+   *
    * @default false
    */
   ignoreWhitespace?: boolean | undefined
   /**
    * Whether to sort object keys alphabetically before saving.
+   *
    * @default false
    */
   sort?: boolean | undefined
@@ -205,6 +208,7 @@ export interface EditableJsonOptions<T = Record<string, unknown>> {
   path?: string | undefined
   /**
    * Whether to create the file if it doesn't exist during load.
+   *
    * @default false
    */
   create?: boolean | undefined
@@ -215,76 +219,87 @@ export interface EditableJsonOptions<T = Record<string, unknown>> {
 }
 
 /**
- * EditableJson instance interface for JSON file manipulation.
- * Provides core functionality for loading, editing, and saving JSON files
- * while preserving formatting (indentation and line endings).
+ * EditableJson instance interface for JSON file manipulation. Provides core
+ * functionality for loading, editing, and saving JSON files while preserving
+ * formatting (indentation and line endings).
  */
 export interface EditableJsonInstance<T = Record<string, unknown>> {
   /**
    * The parsed JSON content as a readonly object.
+   *
    * @readonly
    */
   content: Readonly<T>
 
   /**
    * Create a new JSON file at the specified path.
-   * @param path - The file path where JSON will be created
+   *
+   * @param path - The file path where JSON will be created.
    */
   create(path: string): this
 
   /**
-   * Initialize the instance from a content object.
-   * Note: Disables saving when used (no file path associated).
-   * @param content - The JSON content object
+   * Initialize the instance from a content object. Note: Disables saving when
+   * used (no file path associated).
+   *
+   * @param content - The JSON content object.
    */
   fromContent(content: unknown): this
 
   /**
    * Initialize the instance from a JSON string.
-   * @param json - The JSON content as a string
+   *
+   * @param json - The JSON content as a string.
    */
   fromJSON(json: string): this
 
   /**
-   * Load a JSON file from the specified path. Throws on read or parse
-   * errors. The static `EditableJson.load(path, { create: true })`
-   * surface handles ENOENT recovery.
-   * @param path - The file path to load
+   * Load a JSON file from the specified path. Throws on read or parse errors.
+   * The static `EditableJson.load(path, { create: true })` surface handles
+   * ENOENT recovery.
+   *
+   * @param path - The file path to load.
    */
   load(path: string): Promise<this>
 
   /**
    * Update the JSON content with new values.
-   * @param content - Partial object with fields to update
+   *
+   * @param content - Partial object with fields to update.
    */
   update(content: Partial<T>): this
 
   /**
    * Save the JSON file to disk.
-   * @param options - Save options for formatting and sorting
+   *
+   * @param options - Save options for formatting and sorting.
    */
   save(options?: EditableJsonSaveOptions): Promise<boolean>
 
   /**
    * Synchronously save the JSON file to disk.
-   * @param options - Save options for formatting and sorting
+   *
+   * @param options - Save options for formatting and sorting.
    */
   saveSync(options?: EditableJsonSaveOptions): boolean
 
   /**
    * Check if the JSON will be saved based on current changes.
-   * @param options - Save options to evaluate
+   *
+   * @param options - Save options to evaluate.
    */
   willSave(options?: EditableJsonSaveOptions): boolean
 
   /**
    * The full path to the JSON file.
+   *
    * @readonly
    */
   readonly filename: string
 
   /**
    * The directory path containing the JSON file.
+   *
    * @readonly
    */
   readonly path: string | undefined

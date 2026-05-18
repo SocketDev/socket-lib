@@ -1,14 +1,12 @@
 /**
- * @fileoverview Smoke test for the Temporal surface.
- *
- * Conformance is owned by the test262 runner at
- * `scripts/test262/temporal.mts`. This test exists only to prove that
- * the public surface is reachable, that `import * as Temporal` yields
- * the expected namespace shape, and that the end-to-end smoke path
- * (Now.instant → epochNanoseconds getter) returns a sane value
- * without throwing. If this single test fails, every test262 case
- * will fail too — catching it here with a single clear assertion
- * beats decoding thousands of misleading test262 errors.
+ * @file Smoke test for the Temporal surface. Conformance is owned by the
+ *   test262 runner at `scripts/test262/temporal.mts`. This test exists only to
+ *   prove that the public surface is reachable, that `import * as Temporal`
+ *   yields the expected namespace shape, and that the end-to-end smoke path
+ *   (Now.instant → epochNanoseconds getter) returns a sane value without
+ *   throwing. If this single test fails, every test262 case will fail too —
+ *   catching it here with a single clear assertion beats decoding thousands of
+ *   misleading test262 errors.
  */
 
 import { describe, expect, it } from 'vitest'

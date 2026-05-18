@@ -1,6 +1,6 @@
 /**
- * @fileoverview SSRI parser — splits a `<algorithm>-<base64hash>`
- * string into its component fields.
+ * @file SSRI parser — splits a `<algorithm>-<base64hash>` string into its
+ *   component fields.
  */
 
 import { ErrorCtor } from '../primordials/error'
@@ -10,15 +10,19 @@ import { ErrorCtor } from '../primordials/error'
  *
  * Extracts the algorithm and base64 hash from an SSRI string.
  *
- * @param ssri - Hash in SSRI format
- * @returns Object with algorithm and base64Hash properties
- * @throws Error if SSRI format is invalid
- *
  * @example
- * ```typescript
- * const { algorithm, base64Hash } = parseSsri('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')
- * // Returns: { algorithm: 'sha256', base64Hash: 'dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=' }
- * ```
+ *   ;```typescript
+ *   const { algorithm, base64Hash } = parseSsri(
+ *     'sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=',
+ *   )
+ *   // Returns: { algorithm: 'sha256', base64Hash: 'dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=' }
+ *   ```
+ *
+ * @param ssri - Hash in SSRI format.
+ *
+ * @returns Object with algorithm and base64Hash properties
+ *
+ * @throws Error if SSRI format is invalid
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parseSsri(ssri: string): {

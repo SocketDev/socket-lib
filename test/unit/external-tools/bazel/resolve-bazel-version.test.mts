@@ -1,15 +1,11 @@
 /**
- * @fileoverview Unit tests for resolveBazelVersion().
- *
- * Tests the env-override and file branches in isolation. The
- * upstream-GitHub fallback branch is only exercised in CI with a
- * real `GH_TOKEN` available — covering it locally would require
- * either network access or HTTP mocking, neither of which the
- * other lib tests do for resolver branches.
- *
- * Uses `vi.stubEnv` for `USE_BAZEL_VERSION` mutation; per-test
- * tmpdir for `.bazelversion` walk-up coverage. Tests run
- * sequentially because env stubbing is process-scoped.
+ * @file Unit tests for resolveBazelVersion(). Tests the env-override and file
+ *   branches in isolation. The upstream-GitHub fallback branch is only
+ *   exercised in CI with a real `GH_TOKEN` available — covering it locally
+ *   would require either network access or HTTP mocking, neither of which the
+ *   other lib tests do for resolver branches. Uses `vi.stubEnv` for
+ *   `USE_BAZEL_VERSION` mutation; per-test tmpdir for `.bazelversion` walk-up
+ *   coverage. Tests run sequentially because env stubbing is process-scoped.
  */
 
 import fs from 'node:fs/promises'

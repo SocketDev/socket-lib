@@ -1,20 +1,17 @@
 /**
- * @fileoverview The `Logger` class + the shared-default `getDefaultLogger()`
- * accessor — the public class surface for `logger/*`.
+ * @file The `Logger` class + the shared-default `getDefaultLogger()` accessor —
+ *   the public class surface for `logger/*`. Owns the per-instance state
+ *   (parent, bound stream, indent buffers, theme), the symbol-prefixed semantic
+ *   methods (`success`, `fail`, `info`, ...), the chainable wrappers around the
+ *   underlying `Console` methods, AND the module-singleton accessor for the
+ *   shared default instance. Console construction is deliberately lazy: the
+ *   constructor only stashes its args in `_internal.privateConstructorArgs`;
+ *   the actual `node:console` instance is built on first call to
+ *   `#getConsole()`. This lets the logger be imported during early Node.js
+ *   bootstrap before stdout is ready, avoiding `ERR_CONSOLE_WRITABLE_STREAM`.
+ *   Free helpers live in sibling leaves (per `socket-lib`'s
+ *   export-top-level-functions rule):
  *
- * Owns the per-instance state (parent, bound stream, indent buffers, theme),
- * the symbol-prefixed semantic methods (`success`, `fail`, `info`, ...), the
- * chainable wrappers around the underlying `Console` methods, AND the
- * module-singleton accessor for the shared default instance.
- *
- * Console construction is deliberately lazy: the constructor only
- * stashes its args in `_internal.privateConstructorArgs`; the actual
- * `node:console` instance is built on first call to `#getConsole()`.
- * This lets the logger be imported during early Node.js bootstrap
- * before stdout is ready, avoiding `ERR_CONSOLE_WRITABLE_STREAM`.
- *
- * Free helpers live in sibling leaves (per `socket-lib`'s
- * export-top-level-functions rule):
  *   - color helpers — `./colors` (`applyColor`, `getYoctocolors`)
  *   - log symbols + symbol getters — `./symbols`
  *   - lazy console init + prototype mirror — `./console-init`
@@ -60,10 +57,15 @@ import { constructConsole, ensurePrototypeInitialized } from './console'
 
 import type { LogSymbols, Task } from './types'
 
-/** Enhanced console logger with indentation, colored symbols, and stream management. */
+/**
+ * Enhanced console logger with indentation, colored symbols, and stream
+ * management.
+ */
 /*@__PURE__*/
 export class Logger {
-  /** Static reference to log symbols for convenience. */
+  /**
+   * Static reference to log symbols for convenience.
+   */
   static LOG_SYMBOLS = LOG_SYMBOLS
 
   #parent?: Logger
@@ -83,10 +85,10 @@ export class Logger {
    * Creates a new Logger instance.
    *
    * When called without arguments, creates a logger using the default
-   * `process.stdout` and `process.stderr` streams. Can accept custom
-   * console constructor arguments for advanced use cases.
+   * `process.stdout` and `process.stderr` streams. Can accept custom console
+   * constructor arguments for advanced use cases.
    *
-   * @param args - Optional console constructor arguments
+   * @param args - Optional console constructor arguments.
    */
   constructor(...args: unknown[]) {
     // Store constructor args for lazy Console initialization.
@@ -126,6 +128,7 @@ export class Logger {
 
   /**
    * Apply a console method with indentation.
+   *
    * @private
    */
   #apply(
@@ -156,7 +159,8 @@ export class Logger {
   }
 
   /**
-   * Get the Console instance for this logger, creating it lazily on first access.
+   * Get the Console instance for this logger, creating it lazily on first
+   * access.
    *
    * This lazy initialization allows the logger to be imported during early
    * Node.js bootstrap before stdout is ready, avoiding Console initialization
@@ -194,6 +198,7 @@ export class Logger {
 
   /**
    * Get indentation for a specific stream.
+   *
    * @private
    */
   #getIndent(stream: 'stderr' | 'stdout'): string {
@@ -203,6 +208,7 @@ export class Logger {
 
   /**
    * Get lastWasBlank state for a specific stream.
+   *
    * @private
    */
   #getLastWasBlank(stream: 'stderr' | 'stdout'): boolean {
@@ -214,6 +220,7 @@ export class Logger {
 
   /**
    * Get the root logger (for accessing shared indentation state).
+   *
    * @private
    */
   #getRoot(): Logger {
@@ -222,6 +229,7 @@ export class Logger {
 
   /**
    * Get logger-specific symbols using the resolved theme.
+   *
    * @private
    */
   #getSymbols(): LogSymbols {
@@ -230,6 +238,7 @@ export class Logger {
 
   /**
    * Get the target stream for this logger instance.
+   *
    * @private
    */
   #getTargetStream(): 'stderr' | 'stdout' {
@@ -237,8 +246,9 @@ export class Logger {
   }
 
   /**
-   * Get the resolved theme for this logger instance.
-   * Returns instance theme if set, otherwise falls back to context theme.
+   * Get the resolved theme for this logger instance. Returns instance theme if
+   * set, otherwise falls back to context theme.
+   *
    * @private
    */
   #getTheme(): import('../themes/types').Theme {
@@ -247,6 +257,7 @@ export class Logger {
 
   /**
    * Set indentation for a specific stream.
+   *
    * @private
    */
   #setIndent(stream: 'stderr' | 'stdout', value: string): void {
@@ -260,6 +271,7 @@ export class Logger {
 
   /**
    * Set lastWasBlank state for a specific stream.
+   *
    * @private
    */
   #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
@@ -273,6 +285,7 @@ export class Logger {
 
   /**
    * Strip log symbols from the start of text.
+   *
    * @private
    */
   #stripSymbols(text: string): string {
@@ -281,6 +294,7 @@ export class Logger {
 
   /**
    * Apply a method with a symbol prefix.
+   *
    * @private
    */
   #symbolApply(symbolType: string, args: unknown[]): this {
@@ -316,8 +330,8 @@ export class Logger {
    * Gets a logger instance bound exclusively to stderr.
    *
    * All logging operations on this instance will write to stderr only.
-   * Indentation is tracked separately from stdout. The instance is
-   * cached and reused on subsequent accesses.
+   * Indentation is tracked separately from stdout. The instance is cached and
+   * reused on subsequent accesses.
    *
    * @returns A logger instance bound to stderr
    */
@@ -341,8 +355,8 @@ export class Logger {
    * Gets a logger instance bound exclusively to stdout.
    *
    * All logging operations on this instance will write to stdout only.
-   * Indentation is tracked separately from stderr. The instance is
-   * cached and reused on subsequent accesses.
+   * Indentation is tracked separately from stderr. The instance is cached and
+   * reused on subsequent accesses.
    *
    * @returns A logger instance bound to stdout
    */
@@ -366,7 +380,8 @@ export class Logger {
    * Gets the total number of log calls made on this logger instance.
    *
    * Tracks all logging method calls including `log()`, `error()`, `warn()`,
-   * `success()`, `fail()`, etc. Useful for testing and monitoring logging activity.
+   * `success()`, `fail()`, etc. Useful for testing and monitoring logging
+   * activity.
    *
    * @returns The number of times logging methods have been called
    */
@@ -378,8 +393,8 @@ export class Logger {
   /**
    * Increments the internal log call counter.
    *
-   * This is called automatically by logging methods and should not
-   * be called directly in normal usage.
+   * This is called automatically by logging methods and should not be called
+   * directly in normal usage.
    */
   [incLogCallCountSymbol]() {
     const root = this.#getRoot()
@@ -390,11 +405,12 @@ export class Logger {
   /**
    * Sets whether the last logged line was blank.
    *
-   * Used internally to track blank lines and prevent duplicate spacing.
-   * This is called automatically by logging methods.
+   * Used internally to track blank lines and prevent duplicate spacing. This is
+   * called automatically by logging methods.
    *
-   * @param value - Whether the last line was blank
-   * @param stream - Optional stream to update (defaults to both streams if not bound, or target stream if bound)
+   * @param value - Whether the last line was blank.
+   * @param stream - Optional stream to update (defaults to both streams if not
+   *   bound, or target stream if bound)
    */
   [lastWasBlankSymbol](value: unknown, stream?: 'stderr' | 'stdout'): this {
     if (stream) {
@@ -414,12 +430,12 @@ export class Logger {
   /**
    * Logs an assertion failure message if the value is falsy.
    *
-   * Works like `console.assert()` but returns the logger for chaining.
-   * If the value is truthy, nothing is logged. If falsy, logs an error
-   * message with an assertion failure.
+   * Works like `console.assert()` but returns the logger for chaining. If the
+   * value is truthy, nothing is logged. If falsy, logs an error message with an
+   * assertion failure.
    *
-   * @param value - The value to test
-   * @param message - Optional message and additional arguments to log
+   * @param value - The value to test.
+   * @param message - Optional message and additional arguments to log.
    */
   assert(value: unknown, ...message: unknown[]): this {
     const con = this.#getConsole()
@@ -431,13 +447,12 @@ export class Logger {
   /**
    * Clears the current line in the terminal.
    *
-   * Moves the cursor to the beginning of the line and clears all content.
-   * Works in both TTY and non-TTY environments. Useful for clearing
-   * progress indicators created with `progress()`.
+   * Moves the cursor to the beginning of the line and clears all content. Works
+   * in both TTY and non-TTY environments. Useful for clearing progress
+   * indicators created with `progress()`.
    *
-   * The stream to clear (stderr or stdout) depends on whether the logger
-   * is stream-bound.
-   *
+   * The stream to clear (stderr or stdout) depends on whether the logger is
+   * stream-bound.
    */
   clearLine(): this {
     const con = this.#getConsole()
@@ -492,8 +507,9 @@ export class Logger {
    *
    * Each unique label maintains its own counter. Works like `console.count()`.
    *
-   * @param label - Optional label for the counter
    * @default 'default'
+   *
+   * @param label - Optional label for the counter.
    */
   count(label?: string | undefined): this {
     const con = this.#getConsole()
@@ -506,10 +522,11 @@ export class Logger {
    * Creates a task that logs start and completion messages automatically.
    *
    * Returns a task object with a `run()` method that executes the provided
-   * function and logs "Starting task: {name}" before execution and
-   * "Completed task: {name}" after completion.
+   * function and logs "Starting task: {name}" before execution and "Completed
+   * task: {name}" after completion.
    *
-   * @param name - The name of the task
+   * @param name - The name of the task.
+   *
    * @returns A task object with a `run()` method
    */
   createTask(name: string): Task {
@@ -527,8 +544,8 @@ export class Logger {
    * Decreases the indentation level by removing spaces from the prefix.
    *
    * When called on the main logger, affects both stderr and stdout indentation.
-   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects
-   * only that stream's indentation.
+   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects only
+   * that stream's indentation.
    *
    * @default 2
    */
@@ -550,10 +567,10 @@ export class Logger {
   /**
    * Displays an object's properties in a formatted way.
    *
-   * Works like `console.dir()` with customizable options for depth,
-   * colors, etc. Useful for inspecting complex objects.
+   * Works like `console.dir()` with customizable options for depth, colors,
+   * etc. Useful for inspecting complex objects.
    *
-   * @param obj - The object to display
+   * @param obj - The object to display.
    * @param options - Optional formatting options (Node.js inspect options)
    */
   dir(obj: unknown, options?: unknown | undefined): this {
@@ -568,7 +585,7 @@ export class Logger {
    *
    * Works like `console.dirxml()`. In Node.js, behaves the same as `dir()`.
    *
-   * @param data - The data to display
+   * @param data - The data to display.
    */
   dirxml(...data: unknown[]): this {
     const con = this.#getConsole()
@@ -581,9 +598,8 @@ export class Logger {
    * Logs a completion message with a success symbol (alias for `success()`).
    *
    * Provides semantic clarity when marking something as "done". Does NOT
-   * automatically clear the current line - call `clearLine()` first if
-   * needed after using `progress()`.
-   *
+   * automatically clear the current line - call `clearLine()` first if needed
+   * after using `progress()`.
    */
   done(...args: unknown[]): this {
     return this.#symbolApply('success', args)
@@ -592,9 +608,8 @@ export class Logger {
   /**
    * Logs an error message to stderr.
    *
-   * Automatically applies current indentation. All arguments are formatted
-   * and logged like `console.error()`.
-   *
+   * Automatically applies current indentation. All arguments are formatted and
+   * logged like `console.error()`.
    */
   error(...args: unknown[]): this {
     return this.#apply('error', args)
@@ -605,7 +620,6 @@ export class Logger {
    *
    * Prevents multiple consecutive blank lines. Useful for adding spacing
    * between sections without creating excessive whitespace.
-   *
    */
   errorNewline() {
     return this.#getLastWasBlank('stderr') ? this : this.error('')
@@ -614,10 +628,9 @@ export class Logger {
   /**
    * Logs a failure message with a red colored fail symbol.
    *
-   * Automatically prefixes the message with `LOG_SYMBOLS.fail` (red ✖).
-   * Always outputs to stderr. If the message starts with an existing
-   * symbol, it will be stripped and replaced.
-   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.fail` (red ✖). Always
+   * outputs to stderr. If the message starts with an existing symbol, it will
+   * be stripped and replaced.
    */
   fail(...args: unknown[]): this {
     return this.#symbolApply('fail', args)
@@ -626,11 +639,11 @@ export class Logger {
   /**
    * Starts a new indented log group.
    *
-   * If a label is provided, it's logged before increasing indentation.
-   * Groups can be nested. Each group increases indentation by the
-   * `kGroupIndentWidth` (default 2 spaces). Call `groupEnd()` to close.
+   * If a label is provided, it's logged before increasing indentation. Groups
+   * can be nested. Each group increases indentation by the `kGroupIndentWidth`
+   * (default 2 spaces). Call `groupEnd()` to close.
    *
-   * @param label - Optional label to display before the group
+   * @param label - Optional label to display before the group.
    */
   group(...label: unknown[]): this {
     const { length } = label
@@ -648,10 +661,10 @@ export class Logger {
   /**
    * Starts a new collapsed log group (alias for `group()`).
    *
-   * In browser consoles, this creates a collapsed group. In Node.js,
-   * it behaves identically to `group()`.
+   * In browser consoles, this creates a collapsed group. In Node.js, it behaves
+   * identically to `group()`.
    *
-   * @param label - Optional label to display before the group
+   * @param label - Optional label to display before the group.
    */
   // groupCollapsed is an alias of group.
   // https://nodejs.org/api/console.html#consolegroupcollapsed
@@ -662,9 +675,8 @@ export class Logger {
   /**
    * Ends the current log group and decreases indentation.
    *
-   * Must be called once for each `group()` or `groupCollapsed()` call
-   * to properly close the group and restore indentation.
-   *
+   * Must be called once for each `group()` or `groupCollapsed()` call to
+   * properly close the group and restore indentation.
    */
   groupEnd() {
     this.dedent((this as any)[getKGroupIndentationWidthSymbol()])
@@ -675,8 +687,8 @@ export class Logger {
    * Increases the indentation level by adding spaces to the prefix.
    *
    * When called on the main logger, affects both stderr and stdout indentation.
-   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects
-   * only that stream's indentation. Maximum indentation is 1000 spaces.
+   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects only
+   * that stream's indentation. Maximum indentation is 1000 spaces.
    *
    * @default 2
    */
@@ -699,10 +711,9 @@ export class Logger {
   /**
    * Logs an informational message with a blue colored info symbol.
    *
-   * Automatically prefixes the message with `LOG_SYMBOLS.info` (blue ℹ).
-   * Always outputs to stderr. If the message starts with an existing
-   * symbol, it will be stripped and replaced.
-   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.info` (blue ℹ). Always
+   * outputs to stderr. If the message starts with an existing symbol, it will
+   * be stripped and replaced.
    */
   info(...args: unknown[]): this {
     return this.#symbolApply('info', args)
@@ -711,10 +722,9 @@ export class Logger {
   /**
    * Logs a message to stdout.
    *
-   * Automatically applies current indentation. All arguments are formatted
-   * and logged like `console.log()`. This is the primary method for
-   * standard output.
-   *
+   * Automatically applies current indentation. All arguments are formatted and
+   * logged like `console.log()`. This is the primary method for standard
+   * output.
    */
   log(...args: unknown[]): this {
     return this.#apply('log', args)
@@ -725,7 +735,6 @@ export class Logger {
    *
    * Prevents multiple consecutive blank lines. Useful for adding spacing
    * between sections without creating excessive whitespace.
-   *
    */
   logNewline() {
     return this.#getLastWasBlank('stdout') ? this : this.log('')
@@ -739,7 +748,7 @@ export class Logger {
    * The output stream (stderr or stdout) depends on whether the logger is
    * stream-bound.
    *
-   * @param text - The progress message to display
+   * @param text - The progress message to display.
    */
   progress(text: string): this {
     const con = this.#getConsole()
@@ -757,9 +766,8 @@ export class Logger {
    * Resets all indentation to zero.
    *
    * When called on the main logger, resets both stderr and stdout indentation.
-   * When called on a stream-bound logger (`.stderr` or `.stdout`), resets
-   * only that stream's indentation.
-   *
+   * When called on a stream-bound logger (`.stderr` or `.stdout`), resets only
+   * that stream's indentation.
    */
   resetIndent() {
     if (this.#boundStream) {
@@ -776,10 +784,9 @@ export class Logger {
   /**
    * Logs a skip message with a cyan colored skip symbol.
    *
-   * Automatically prefixes the message with `LOG_SYMBOLS.skip` (cyan ↻).
-   * Always outputs to stderr. If the message starts with an existing
-   * symbol, it will be stripped and replaced.
-   *
+   * Automatically prefixes the message with `LOG_SYMBOLS.skip` (cyan ↻). Always
+   * outputs to stderr. If the message starts with an existing symbol, it will
+   * be stripped and replaced.
    */
   skip(...args: unknown[]): this {
     return this.#symbolApply('skip', args)
@@ -789,13 +796,13 @@ export class Logger {
    * Logs a main step message with a cyan arrow symbol and blank line before it.
    *
    * Automatically prefixes the message with `LOG_SYMBOLS.step` (cyan →) and
-   * adds a blank line before the message unless the last line was already blank.
-   * Useful for marking major steps in a process with clear visual separation.
-   * Always outputs to stdout. If the message starts with an existing symbol,
-   * it will be stripped and replaced.
+   * adds a blank line before the message unless the last line was already
+   * blank. Useful for marking major steps in a process with clear visual
+   * separation. Always outputs to stdout. If the message starts with an
+   * existing symbol, it will be stripped and replaced.
    *
-   * @param msg - The step message to log
-   * @param extras - Additional arguments to log
+   * @param msg - The step message to log.
+   * @param extras - Additional arguments to log.
    */
   step(msg: string, ...extras: unknown[]): this {
     // Add blank line before the step message.
@@ -826,8 +833,8 @@ export class Logger {
    * Adds a 2-space indent to the message without affecting the logger's
    * indentation state. Useful for showing sub-items under a main step.
    *
-   * @param msg - The substep message to log
-   * @param extras - Additional arguments to log
+   * @param msg - The substep message to log.
+   * @param extras - Additional arguments to log.
    */
   substep(msg: string, ...extras: unknown[]): this {
     // Add 2-space indent to the message.
@@ -840,9 +847,8 @@ export class Logger {
    * Logs a success message with a green colored success symbol.
    *
    * Automatically prefixes the message with `LOG_SYMBOLS.success` (green ✔).
-   * Always outputs to stderr. If the message starts with an existing
-   * symbol, it will be stripped and replaced.
-   *
+   * Always outputs to stderr. If the message starts with an existing symbol, it
+   * will be stripped and replaced.
    */
   success(...args: unknown[]): this {
     return this.#symbolApply('success', args)
@@ -851,12 +857,12 @@ export class Logger {
   /**
    * Displays data in a table format.
    *
-   * Works like `console.table()`. Accepts arrays of objects or
-   * objects with nested objects. Optionally specify which properties
-   * to include in the table.
+   * Works like `console.table()`. Accepts arrays of objects or objects with
+   * nested objects. Optionally specify which properties to include in the
+   * table.
    *
-   * @param tabularData - The data to display as a table
-   * @param properties - Optional array of property names to include
+   * @param tabularData - The data to display as a table.
+   * @param properties - Optional array of property names to include.
    */
   table(
     tabularData: unknown,
@@ -871,12 +877,13 @@ export class Logger {
   /**
    * Starts a timer for measuring elapsed time.
    *
-   * Creates a timer with the given label. Use `timeEnd()` with the same
-   * label to stop the timer and log the elapsed time, or use `timeLog()`
-   * to check the time without stopping the timer.
+   * Creates a timer with the given label. Use `timeEnd()` with the same label
+   * to stop the timer and log the elapsed time, or use `timeLog()` to check the
+   * time without stopping the timer.
    *
-   * @param label - Optional label for the timer
    * @default 'default'
+   *
+   * @param label - Optional label for the timer.
    */
   time(label?: string | undefined): this {
     const con = this.#getConsole()
@@ -887,11 +894,12 @@ export class Logger {
   /**
    * Ends a timer and logs the elapsed time.
    *
-   * Logs the duration since `console.time()` or `logger.time()` was called
-   * with the same label. The timer is stopped and removed.
+   * Logs the duration since `console.time()` or `logger.time()` was called with
+   * the same label. The timer is stopped and removed.
    *
-   * @param label - Optional label for the timer
    * @default 'default'
+   *
+   * @param label - Optional label for the timer.
    */
   timeEnd(label?: string | undefined): this {
     const con = this.#getConsole()
@@ -903,13 +911,14 @@ export class Logger {
   /**
    * Logs the current value of a timer without stopping it.
    *
-   * Logs the duration since `console.time()` was called with the same
-   * label, but keeps the timer running. Can include additional data
-   * to log alongside the time.
+   * Logs the duration since `console.time()` was called with the same label,
+   * but keeps the timer running. Can include additional data to log alongside
+   * the time.
    *
-   * @param label - Optional label for the timer
-   * @param data - Additional data to log with the time
    * @default 'default'
+   *
+   * @param label - Optional label for the timer.
+   * @param data - Additional data to log with the time.
    */
   timeLog(label?: string | undefined, ...data: unknown[]): this {
     const con = this.#getConsole()
@@ -921,11 +930,11 @@ export class Logger {
   /**
    * Logs a stack trace to the console.
    *
-   * Works like `console.trace()`. Shows the call stack leading to
-   * where this method was called. Useful for debugging.
+   * Works like `console.trace()`. Shows the call stack leading to where this
+   * method was called. Useful for debugging.
    *
-   * @param message - Optional message to display with the trace
-   * @param args - Additional arguments to log
+   * @param message - Optional message to display with the trace.
+   * @param args - Additional arguments to log.
    */
   trace(message?: unknown | undefined, ...args: unknown[]): this {
     const con = this.#getConsole()
@@ -938,9 +947,8 @@ export class Logger {
    * Logs a warning message with a yellow colored warning symbol.
    *
    * Automatically prefixes the message with `LOG_SYMBOLS.warn` (yellow ⚠).
-   * Always outputs to stderr. If the message starts with an existing
-   * symbol, it will be stripped and replaced.
-   *
+   * Always outputs to stderr. If the message starts with an existing symbol, it
+   * will be stripped and replaced.
    */
   warn(...args: unknown[]): this {
     return this.#symbolApply('warn', args)
@@ -952,7 +960,7 @@ export class Logger {
    * Useful for progress indicators or custom formatting where you need
    * low-level control. Does not apply any indentation or formatting.
    *
-   * @param text - The text to write
+   * @param text - The text to write.
    */
   write(text: string): this {
     const con = this.#getConsole()
@@ -976,14 +984,13 @@ export class Logger {
 let _logger: Logger | undefined
 
 /**
- * Get the default logger instance.
- * Lazily creates the logger to avoid circular dependencies during module
- * initialization. Reuses the same instance across calls.
+ * Get the default logger instance. Lazily creates the logger to avoid circular
+ * dependencies during module initialization. Reuses the same instance across
+ * calls.
  *
- * Construction is lazy so that importing this module during early
- * Node.js bootstrap doesn't try to resolve `node:console` before
- * stdout is ready (mirrors the lazy `Console` init inside `Logger`
- * itself).
+ * Construction is lazy so that importing this module during early Node.js
+ * bootstrap doesn't try to resolve `node:console` before stdout is ready
+ * (mirrors the lazy `Console` init inside `Logger` itself).
  *
  * @returns Shared default logger instance
  */

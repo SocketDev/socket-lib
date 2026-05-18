@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for JSON formatting utilities.
+ * @file Unit tests for JSON formatting utilities. Tests shared utilities for
+ *   JSON formatting preservation including:
  *
- * Tests shared utilities for JSON formatting preservation including:
- * - Indentation detection (spaces, tabs, counts)
- * - Newline detection (LF, CRLF)
- * - Formatting extraction and application
- * - Key sorting
- * - Save determination logic with ignoreWhitespace and sort options
- * - Symbol-based metadata handling
+ *   - Indentation detection (spaces, tabs, counts)
+ *   - Newline detection (LF, CRLF)
+ *   - Formatting extraction and application
+ *   - Key sorting
+ *   - Save determination logic with ignoreWhitespace and sort options
+ *   - Symbol-based metadata handling
  */
 
 import {

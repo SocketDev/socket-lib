@@ -1,6 +1,6 @@
 /**
- * @fileoverview Progress bar utilities for CLI applications.
- * Provides various progress indicators including bars, percentages, and spinners.
+ * @file Progress bar utilities for CLI applications. Provides various progress
+ *   indicators including bars, percentages, and spinners.
  */
 
 import process from 'node:process'
@@ -19,53 +19,62 @@ import { StringPrototypeReplace } from '../primordials/string'
 export interface ProgressBarOptions {
   /**
    * Width of the progress bar in characters.
+   *
    * @default 40
    */
   width?: number | undefined
   /**
-   * Format template for progress bar display.
-   * Available tokens: `:bar`, `:percent`, `:current`, `:total`, `:elapsed`, `:eta`.
-   * Custom tokens can be passed via the `tokens` parameter in `update()` or `tick()`.
-   * @default ':bar :percent :current/:total'
+   * Format template for progress bar display. Available tokens: `:bar`,
+   * `:percent`, `:current`, `:total`, `:elapsed`, `:eta`. Custom tokens can be
+   * passed via the `tokens` parameter in `update()` or `tick()`.
+   *
    * @example
-   * ```ts
-   * format: ':bar :percent :current/:total :eta'
-   * ```
+   *   ;```ts
+   *   format: ':bar :percent :current/:total :eta'
+   *   ```
+   *
+   * @default ':bar :percent :current/:total'
    */
   format?: string | undefined
   /**
    * Character(s) to use for completed portion of bar.
+   *
    * @default '█'
    */
   complete?: string | undefined
   /**
    * Character(s) to use for incomplete portion of bar.
+   *
    * @default '░'
    */
   incomplete?: string | undefined
   /**
    * Character(s) to use for the head of the progress bar.
+   *
    * @default ''
    */
   head?: string | undefined
   /**
    * Clear the progress bar when complete.
+   *
    * @default false
    */
   clear?: boolean | undefined
   /**
-   * Minimum time between renders in milliseconds.
-   * ~60fps = 16ms throttle.
+   * Minimum time between renders in milliseconds. ~60fps = 16ms throttle.
+   *
    * @default 16
    */
   renderThrottle?: number | undefined
   /**
    * Stream to write progress bar output to.
+   *
    * @default process.stderr
    */
   stream?: NodeJS.WriteStream | undefined
   /**
    * Color to apply to the completed portion of the bar.
+   *
    * @default 'cyan'
    */
   color?: 'cyan' | 'green' | 'yellow' | 'blue' | 'magenta' | undefined
@@ -84,17 +93,17 @@ export class ProgressBar {
   /**
    * Create a new progress bar instance.
    *
-   * @param total - Total number of units for the progress bar
-   * @param options - Configuration options for the progress bar
-   *
    * @example
-   * ```ts
-   * const bar = new ProgressBar(100, {
-   *   width: 50,
-   *   format: ':bar :percent :current/:total :eta',
-   *   color: 'green'
-   * })
-   * ```
+   *   ;```ts
+   *   const bar = new ProgressBar(100, {
+   *     width: 50,
+   *     format: ':bar :percent :current/:total :eta',
+   *     color: 'green',
+   *   })
+   *   ```
+   *
+   * @param total - Total number of units for the progress bar.
+   * @param options - Configuration options for the progress bar.
    */
   constructor(total: number, options?: ProgressBarOptions) {
     this.total = total
@@ -116,17 +125,17 @@ export class ProgressBar {
   }
 
   /**
-   * Update progress to a specific value and redraw the bar.
-   * Updates are throttled to prevent excessive rendering (default ~60fps).
-   *
-   * @param current - Current progress value (will be clamped to total)
-   * @param tokens - Optional custom tokens to replace in format string
+   * Update progress to a specific value and redraw the bar. Updates are
+   * throttled to prevent excessive rendering (default ~60fps).
    *
    * @example
-   * ```ts
-   * bar.update(50)
-   * bar.update(75, { status: 'Processing...' })
-   * ```
+   *   ;```ts
+   *   bar.update(50)
+   *   bar.update(75, { status: 'Processing...' })
+   *   ```
+   *
+   * @param current - Current progress value (will be clamped to total)
+   * @param tokens - Optional custom tokens to replace in format string.
    */
   update(current: number, tokens?: Record<string, unknown>): void {
     if (this.terminated) {
@@ -157,19 +166,20 @@ export class ProgressBar {
   }
 
   /**
-   * Increment progress by a specified amount.
-   * Convenience method for `update(current + amount)`.
-   *
-   * @param amount - Amount to increment by
-   * @param tokens - Optional custom tokens to replace in format string
-   * @default amount 1
+   * Increment progress by a specified amount. Convenience method for
+   * `update(current + amount)`.
    *
    * @example
-   * ```ts
-   * bar.tick() // Increment by 1
-   * bar.tick(5) // Increment by 5
-   * bar.tick(1, { file: 'data.json' })
-   * ```
+   *   ;```ts
+   *   bar.tick() // Increment by 1
+   *   bar.tick(5) // Increment by 5
+   *   bar.tick(1, { file: 'data.json' })
+   *   ```
+   *
+   * @default amount 1
+   *
+   * @param amount - Amount to increment by.
+   * @param tokens - Optional custom tokens to replace in format string.
    */
   tick(amount: number = 1, tokens?: Record<string, unknown>): void {
     this.update(this.current + amount, tokens)
@@ -259,10 +269,9 @@ export class ProgressBar {
   }
 
   /**
-   * Terminate the progress bar and optionally clear it.
-   * Called automatically when progress reaches 100%.
-   * If `clear` option is true, removes the bar from terminal.
-   * Otherwise, moves to next line to preserve the final state.
+   * Terminate the progress bar and optionally clear it. Called automatically
+   * when progress reaches 100%. If `clear` option is true, removes the bar from
+   * terminal. Otherwise, moves to next line to preserve the final state.
    */
   terminate(): void {
     // Idempotent guard fires on second terminate() call; clear-option
@@ -283,22 +292,23 @@ export class ProgressBar {
 }
 
 /**
- * Create a simple progress indicator without a graphical bar.
- * Returns a formatted string showing progress as percentage and fraction.
- *
- * @param current - Current progress value
- * @param total - Total progress value
- * @param label - Optional label prefix
- * @returns Formatted progress indicator string
+ * Create a simple progress indicator without a graphical bar. Returns a
+ * formatted string showing progress as percentage and fraction.
  *
  * @example
- * ```ts
- * createProgressIndicator(50, 100)
- * // Returns: '[50%] 50/100'
+ *   ;```ts
+ *   createProgressIndicator(50, 100)
+ *   // Returns: '[50%] 50/100'
  *
- * createProgressIndicator(3, 10, 'Files')
- * // Returns: 'Files: [30%] 3/10'
- * ```
+ *   createProgressIndicator(3, 10, 'Files')
+ *   // Returns: 'Files: [30%] 3/10'
+ *   ```
+ *
+ * @param current - Current progress value.
+ * @param total - Total progress value.
+ * @param label - Optional label prefix.
+ *
+ * @returns Formatted progress indicator string
  */
 export function createProgressIndicator(
   current: number,

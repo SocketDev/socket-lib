@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for src/eco/manifest/detect-format.ts.
- *
- * On stock Node the JS impl is exercised; on socket-btm's smol binary
- * the native `detectFormat` is exercised. Both paths return the same
- * shapes, so these assertions hold either way.
+ * @file Unit tests for src/eco/manifest/detect-format.ts. On stock Node the JS
+ *   impl is exercised; on socket-btm's smol binary the native `detectFormat` is
+ *   exercised. Both paths return the same shapes, so these assertions hold
+ *   either way.
  */
 
 import { describe, expect, it } from 'vitest'

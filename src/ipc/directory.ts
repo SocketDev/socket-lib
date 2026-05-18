@@ -1,10 +1,9 @@
 /**
- * @fileoverview Stub-directory creation + permission audit. The
- * IPC directory is created with 0o700 so other users can't read or
- * plant files; on POSIX we also verify ownership and permission
- * bits before any write, since a pre-existing directory could
- * belong to a different user or have permissive modes inherited
- * from umask.
+ * @file Stub-directory creation + permission audit. The IPC directory is
+ *   created with 0o700 so other users can't read or plant files; on POSIX we
+ *   also verify ownership and permission bits before any write, since a
+ *   pre-existing directory could belong to a different user or have permissive
+ *   modes inherited from umask.
  */
 
 import process from 'node:process'
@@ -14,13 +13,13 @@ import { ErrorCtor } from '../primordials/error'
 import { getFs, getPath } from './_internal'
 
 /**
- * Ensure IPC directory exists for stub file creation.
- * Uses restrictive (0o700) permissions so other users cannot read or write
- * stub files. On POSIX, after `mkdir` we verify the directory is owned by
- * the current user and not world/group-writable — protects against a
- * prior local attacker pre-creating `.socket-ipc/<app>/` with permissive
- * modes and planting symlinks for stub filenames. Throws if the directory
- * fails the check.
+ * Ensure IPC directory exists for stub file creation. Uses restrictive (0o700)
+ * permissions so other users cannot read or write stub files. On POSIX, after
+ * `mkdir` we verify the directory is owned by the current user and not
+ * world/group-writable — protects against a prior local attacker pre-creating
+ * `.socket-ipc/<app>/` with permissive modes and planting symlinks for stub
+ * filenames. Throws if the directory fails the check.
+ *
  * @internal
  */
 export async function ensureIpcDirectory(filePath: string): Promise<void> {

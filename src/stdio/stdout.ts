@@ -1,6 +1,6 @@
 /**
- * @fileoverview Standard output stream utilities.
- * Provides utilities for writing to stdout with formatting and control.
+ * @file Standard output stream utilities. Provides utilities for writing to
+ *   stdout with formatting and control.
  */
 
 import process from 'node:process'
@@ -21,29 +21,28 @@ const stdout: NodeJS.WriteStream = process.stdout
 let _cursorExitRegistered = false
 
 /**
- * Clear the current line on stdout.
- * Only works in TTY environments.
+ * Clear the current line on stdout. Only works in TTY environments.
  *
  * @example
- * ```ts
- * write('Processing...')
- * clearLine()
- * write('Done!')
- * ```
+ *   ;```ts
+ *   write('Processing...')
+ *   clearLine()
+ *   write('Done!')
+ *   ```
  */
 export function clearLine(): void {
   clearLineOn(stdout)
 }
 
 /**
- * Clear screen from cursor position down to bottom.
- * Only works in TTY environments.
+ * Clear screen from cursor position down to bottom. Only works in TTY
+ * environments.
  *
  * @example
- * ```ts
- * cursorTo(0, 5)
- * clearScreenDown() // Clear from row 5 to bottom
- * ```
+ *   ;```ts
+ *   cursorTo(0, 5)
+ *   clearScreenDown() // Clear from row 5 to bottom
+ *   ```
  */
 export function clearScreenDown(): void {
   if (stdout.isTTY) {
@@ -52,33 +51,32 @@ export function clearScreenDown(): void {
 }
 
 /**
- * Move cursor to specific position on stdout.
- * Only works in TTY environments.
+ * Move cursor to specific position on stdout. Only works in TTY environments.
+ *
+ * @example
+ *   ;```ts
+ *   cursorTo(0) // Move to start of line
+ *   cursorTo(10, 5) // Move to column 10, row 5
+ *   ```
  *
  * @param x - Column position (0-based)
  * @param y - Row position (0-based, optional)
- *
- * @example
- * ```ts
- * cursorTo(0) // Move to start of line
- * cursorTo(10, 5) // Move to column 10, row 5
- * ```
  */
 export function cursorTo(x: number, y?: number | undefined): void {
   cursorToOn(stdout, x, y)
 }
 
 /**
- * Register handlers to ensure cursor is shown on process exit.
- * Prevents hidden cursor after abnormal termination.
- * Handles SIGINT (Ctrl+C) and SIGTERM signals.
+ * Register handlers to ensure cursor is shown on process exit. Prevents hidden
+ * cursor after abnormal termination. Handles SIGINT (Ctrl+C) and SIGTERM
+ * signals.
  *
  * @example
- * ```ts
- * ensureCursorOnExit()
- * hideCursor()
- * // Even if process crashes, cursor will be restored
- * ```
+ *   ;```ts
+ *   ensureCursorOnExit()
+ *   hideCursor()
+ *   // Even if process crashes, cursor will be restored
+ *   ```
  */
 export function ensureCursorOnExit(): void {
   if (_cursorExitRegistered) {
@@ -101,14 +99,15 @@ export function ensureCursorOnExit(): void {
 /**
  * Get the number of columns (width) in the terminal.
  *
- * @returns Terminal width in characters
+ * @example
+ *   ```ts
+ *   const width = getColumns()
+ *   console.log(`Terminal is ${width} characters wide`)
+ *   ```
+ *
  * @default 80
  *
- * @example
- * ```ts
- * const width = getColumns()
- * console.log(`Terminal is ${width} characters wide`)
- * ```
+ * @returns Terminal width in characters
  */
 export function getColumns(): number {
   return getColumnsOf(stdout)
@@ -117,29 +116,29 @@ export function getColumns(): number {
 /**
  * Get the number of rows (height) in the terminal.
  *
- * @returns Terminal height in lines
+ * @example
+ *   ```ts
+ *   const height = getRows()
+ *   console.log(`Terminal is ${height} lines tall`)
+ *   ```
+ *
  * @default 24
  *
- * @example
- * ```ts
- * const height = getRows()
- * console.log(`Terminal is ${height} lines tall`)
- * ```
+ * @returns Terminal height in lines
  */
 export function getRows(): number {
   return getRowsOf(stdout)
 }
 
 /**
- * Hide the cursor on stdout.
- * Useful for cleaner output during animations.
+ * Hide the cursor on stdout. Useful for cleaner output during animations.
  *
  * @example
- * ```ts
- * hideCursor()
- * // Show animation
- * showCursor()
- * ```
+ *   ;```ts
+ *   hideCursor()
+ *   // Show animation
+ *   showCursor()
+ *   ```
  */
 export function hideCursor(): void {
   if (stdout.isTTY && stdout instanceof WriteStream) {
@@ -150,31 +149,30 @@ export function hideCursor(): void {
 /**
  * Check if stdout is connected to a TTY (terminal).
  *
- * @returns `true` if stdout is a TTY, `false` if piped/redirected
- *
  * @example
- * ```ts
- * if (isTTY()) {
- *   // Show interactive UI
- * } else {
- *   // Use simple text output
- * }
- * ```
+ *   ;```ts
+ *   if (isTTY()) {
+ *     // Show interactive UI
+ *   } else {
+ *     // Use simple text output
+ *   }
+ *   ```
+ *
+ * @returns `true` if stdout is a TTY, `false` if piped/redirected
  */
 export function isTTY(): boolean {
   return isTTYOf(stdout)
 }
 
 /**
- * Show the cursor on stdout.
- * Should be called after `hideCursor()`.
+ * Show the cursor on stdout. Should be called after `hideCursor()`.
  *
  * @example
- * ```ts
- * hideCursor()
- * // Show animation
- * showCursor()
- * ```
+ *   ;```ts
+ *   hideCursor()
+ *   // Show animation
+ *   showCursor()
+ *   ```
  */
 export function showCursor(): void {
   if (stdout.isTTY && stdout instanceof WriteStream) {
@@ -185,13 +183,13 @@ export function showCursor(): void {
 /**
  * Write text to stdout without adding a newline.
  *
- * @param text - Text to write
- *
  * @example
- * ```ts
- * write('Loading...')
- * // Later: clear and update
- * ```
+ *   ;```ts
+ *   write('Loading...')
+ *   // Later: clear and update
+ *   ```
+ *
+ * @param text - Text to write.
  */
 export function write(text: string): void {
   stdout.write(text)
@@ -200,14 +198,15 @@ export function write(text: string): void {
 /**
  * Write a line to stdout with trailing newline.
  *
- * @param text - Text to write
+ * @example
+ *   ;```ts
+ *   writeLine('Hello, world!')
+ *   writeLine() // Write empty line
+ *   ```
+ *
  * @default text ''
  *
- * @example
- * ```ts
- * writeLine('Hello, world!')
- * writeLine() // Write empty line
- * ```
+ * @param text - Text to write.
  */
 export function writeLine(text: string = ''): void {
   stdout.write(`${text}\n`)

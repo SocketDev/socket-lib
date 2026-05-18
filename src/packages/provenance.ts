@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package provenance and attestation verification utilities.
+ * @file Package provenance and attestation verification utilities.
  */
 
 import { NPM_REGISTRY_URL } from '../constants/agents'
@@ -34,9 +34,9 @@ let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
  * Fetch package provenance information from npm registry.
  *
  * @example
- * ```typescript
- * const provenance = await fetchPackageProvenance('lodash', '4.17.21')
- * ```
+ *   ;```typescript
+ *   const provenance = await fetchPackageProvenance('lodash', '4.17.21')
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackageProvenance(
@@ -163,10 +163,10 @@ export function getFetcher() {
  * Convert raw attestation data to user-friendly provenance details.
  *
  * @example
- * ```typescript
- * const details = getProvenanceDetails(attestationData)
- * // { level: 'trusted', repository: '...', commitSha: '...' }
- * ```
+ *   ;```typescript
+ *   const details = getProvenanceDetails(attestationData)
+ *   // { level: 'trusted', repository: '...', commitSha: '...' }
+ *   ```
  */
 export function getProvenanceDetails(attestationData: unknown): unknown {
   const attestations = getAttestations(attestationData)

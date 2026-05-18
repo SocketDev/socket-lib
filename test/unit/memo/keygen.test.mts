@@ -1,7 +1,7 @@
 /**
- * @fileoverview Tests for the special-handling key-gen branches in
- * src/memoization.ts: bigint, function, Map, Set arguments — types
- * JSON.stringify drops or collapses by default.
+ * @file Tests for the special-handling key-gen branches in src/memoization.ts:
+ *   bigint, function, Map, Set arguments — types JSON.stringify drops or
+ *   collapses by default.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,11 +1,10 @@
 /**
- * @fileoverview Safe references to top-level globals that don't fit a
- * larger primordials leaf — primitive constructors (`Boolean`, `BigInt`),
- * `Proxy`, `SharedArrayBuffer`, language-level constants (`Infinity`,
- * `NaN`, `globalThis`), and the encode/decode helpers.
- *
- * Every reference is captured once at module load so consumers reading
- * adversarial input never see a tampered global.
+ * @file Safe references to top-level globals that don't fit a larger
+ *   primordials leaf — primitive constructors (`Boolean`, `BigInt`), `Proxy`,
+ *   `SharedArrayBuffer`, language-level constants (`Infinity`, `NaN`,
+ *   `globalThis`), and the encode/decode helpers. Every reference is captured
+ *   once at module load so consumers reading adversarial input never see a
+ *   tampered global.
  */
 
 export const BigIntCtor: BigIntConstructor = BigInt

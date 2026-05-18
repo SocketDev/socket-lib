@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for resolveBazel() — orchestrator +
+ * @file Unit tests for resolveBazel() — orchestrator +
  * memoization.
  */
 

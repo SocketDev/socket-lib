@@ -1,12 +1,14 @@
 /**
- * @fileoverview Unit tests for console footer formatting utilities.
+ * @file Unit tests for console footer formatting utilities. Tests footer
+ *   formatting utilities:
  *
- * Tests footer formatting utilities:
- * - createFooter() generates bordered footers with messages, timestamps, duration
- * - createSummaryFooter() creates summary footers with stats (passed/failed/skipped)
- * - Custom styling: colors, widths, border characters
- * - Duration formatting and timestamp display
- * Used by Socket CLI for command completion reports and test result summaries.
+ *   - createFooter() generates bordered footers with messages, timestamps,
+ *     duration
+ *   - createSummaryFooter() creates summary footers with stats
+ *     (passed/failed/skipped)
+ *   - Custom styling: colors, widths, border characters
+ *   - Duration formatting and timestamp display Used by Socket CLI for command
+ *     completion reports and test result summaries.
  */
 
 /* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */

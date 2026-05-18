@@ -1,14 +1,11 @@
 /**
- * @fileoverview Lazy-loader for socket-btm's `node:smol-manifest`.
- *
- * `node:smol-manifest` is the manifest + lockfile parser exposed by
- * socket-btm's smol Node binary. It parses package.json, package-lock
- * (npm v1/v2/v3), yarn.lock (classic + berry), and pnpm-lock.yaml
- * (v5/v6/v9) with internal primordial-hardened parsing.
- *
- * Returns `undefined` on stock Node + non-Node runtimes. Result is
- * cached across calls. Callers fall back to the JS parsers under
- * `src/eco/<pm>/parse-*` on the undefined path.
+ * @file Lazy-loader for socket-btm's `node:smol-manifest`. `node:smol-manifest`
+ *   is the manifest + lockfile parser exposed by socket-btm's smol Node binary.
+ *   It parses package.json, package-lock (npm v1/v2/v3), yarn.lock (classic +
+ *   berry), and pnpm-lock.yaml (v5/v6/v9) with internal primordial-hardened
+ *   parsing. Returns `undefined` on stock Node + non-Node runtimes. Result is
+ *   cached across calls. Callers fall back to the JS parsers under
+ *   `src/eco/<pm>/parse-*` on the undefined path.
  *
  * @internal — used by `src/eco/manifest/*` leaves to resolve the
  *   smol-aware parsers. Most callers should import the specific leaf
@@ -23,17 +20,17 @@ import type { EcosystemString } from '../eco/purl'
 /**
  * Dependency-relationship tag on a parsed package reference.
  *
- *   - `prod`     — runtime dependency
- *   - `dev`      — devDependency
- *   - `optional` — optionalDependency
- *   - `peer`     — peerDependency
+ * - `prod` — runtime dependency
+ * - `dev` — devDependency
+ * - `optional` — optionalDependency
+ * - `peer` — peerDependency
  */
 export type DepType = 'prod' | 'dev' | 'optional' | 'peer'
 
 /**
- * A single package entry inside a parsed lockfile. Frozen plain
- * object with `__proto__: null` on smol; JS-fallback parsers return
- * the same shape so consumers can't tell which impl ran.
+ * A single package entry inside a parsed lockfile. Frozen plain object with
+ * `__proto__: null` on smol; JS-fallback parsers return the same shape so
+ * consumers can't tell which impl ran.
  */
 export interface PackageRef {
   readonly name: string
@@ -78,8 +75,8 @@ export interface ParsedManifest {
 
 /**
  * Result of parsing a lockfile (npm/yarn/pnpm). `_index` is a private
- * name→index map (or `name→number[]` for multi-version) used by
- * `getPackage` / `getPackageVersions` for O(1) lookup.
+ * name→index map (or `name→number[]` for multi-version) used by `getPackage` /
+ * `getPackageVersions` for O(1) lookup.
  */
 export interface ParsedLockfile {
   readonly type: 'lockfile'
@@ -120,12 +117,12 @@ export interface LockfileStats {
 }
 
 /**
- * Error class thrown by every parser on invalid / unsupported input.
- * The `code` field is one of:
+ * Error class thrown by every parser on invalid / unsupported input. The `code`
+ * field is one of:
  *
- *   - `ERR_INVALID_JSON`    — JSON.parse failure
- *   - `ERR_UNKNOWN_FORMAT`  — filename or content didn't match a parser
- *   - `ERR_UNSUPPORTED`     — ecosystem not yet implemented
+ * - `ERR_INVALID_JSON` — JSON.parse failure
+ * - `ERR_UNKNOWN_FORMAT` — filename or content didn't match a parser
+ * - `ERR_UNSUPPORTED` — ecosystem not yet implemented
  */
 export interface ManifestErrorLike extends Error {
   readonly name: 'ManifestError'
@@ -134,8 +131,7 @@ export interface ManifestErrorLike extends Error {
 
 /**
  * Surface of `node:smol-manifest`. See socket-btm's
- * additions/source-patched/lib/smol-manifest.js for the canonical
- * shape.
+ * additions/source-patched/lib/smol-manifest.js for the canonical shape.
  */
 export interface SmolManifestBinding {
   parse(filename: string, content: string): ParsedManifest | ParsedLockfile
@@ -171,8 +167,8 @@ let _smolManifest: SmolManifestBinding | undefined
 let _smolManifestProbed = false
 
 /**
- * Returns `node:smol-manifest` when running on the smol Node binary,
- * otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-manifest` when running on the smol Node binary, otherwise
+ * `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolManifest(): SmolManifestBinding | undefined {

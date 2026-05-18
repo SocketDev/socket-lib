@@ -1,4 +1,6 @@
-/** @fileoverview Platform detection and OS-specific constants. */
+/**
+ * @file Platform detection and OS-specific constants.
+ */
 
 import { getNodeOs } from '../node/os'
 

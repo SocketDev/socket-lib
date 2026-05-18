@@ -1,14 +1,12 @@
 /**
- * @fileoverview `parsePnpmPackageIdV5(pkgId)` — extracts
- * `{ name, version }` from a pnpm v5 package key.
+ * @file `parsePnpmPackageIdV5(pkgId)` — extracts `{ name, version }` from a
+ *   pnpm v5 package key. Spec forms handled:
  *
- * Spec forms handled:
- *   - `/name/version`               → unscoped
- *   - `/@scope/name/version`        → scoped
- *   - `/name/version_peer-suffix`   → peer-dep suffix stripped
- *
- * Returns `{ name: pkgId, version: '0.0.0' }` for unparseable input
- * — matches socket-btm's smol-manifest leniency.
+ *   - `/name/version` → unscoped
+ *   - `/@scope/name/version` → scoped
+ *   - `/name/version_peer-suffix` → peer-dep suffix stripped Returns `{ name:
+ *     pkgId, version: '0.0.0' }` for unparseable input — matches socket-btm's
+ *     smol-manifest leniency.
  */
 
 import {

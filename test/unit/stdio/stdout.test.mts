@@ -1,12 +1,11 @@
 /**
- * @fileoverview Unit tests for stdout stream utilities.
+ * @file Unit tests for stdout stream utilities. Tests stdout output utilities:
  *
- * Tests stdout output utilities:
- * - writeStdout() writes to stdout stream
- * - Output formatting and buffering
- * - Stream detection (TTY vs pipe)
- * - Color support detection for stdout
- * Used by Socket tools for standard output and interactive CLI features.
+ *   - writeStdout() writes to stdout stream
+ *   - Output formatting and buffering
+ *   - Stream detection (TTY vs pipe)
+ *   - Color support detection for stdout Used by Socket tools for standard output
+ *     and interactive CLI features.
  */
 
 /* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */

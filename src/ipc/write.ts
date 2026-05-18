@@ -1,10 +1,9 @@
 /**
- * @fileoverview Atomic stub write — `O_CREAT|O_WRONLY|O_EXCL|
- * O_NOFOLLOW` so we refuse to overwrite a pre-existing stub
- * (collision with attacker-planted file or PID reuse) and refuse
- * to follow symlinks at the final path component. One retry on
- * EEXIST after `safeDelete` to handle the legitimate stale-stub
- * case where the previous owner exited ungracefully.
+ * @file Atomic stub write — `O_CREAT|O_WRONLY|O_EXCL| O_NOFOLLOW` so we refuse
+ *   to overwrite a pre-existing stub (collision with attacker-planted file or
+ *   PID reuse) and refuse to follow symlinks at the final path component. One
+ *   retry on EEXIST after `safeDelete` to handle the legitimate stale-stub case
+ *   where the previous owner exited ungracefully.
  */
 
 import process from 'node:process'
@@ -25,10 +24,11 @@ import type { IpcStub } from './types'
  * Write IPC data to a stub file for inter-process data transfer.
  *
  * Creates a stub file containing data that needs to be passed between
- * processes. The file is written with 0o600 permissions so only the
- * invoking user can read it.
+ * processes. The file is written with 0o600 permissions so only the invoking
+ * user can read it.
  *
  * ## File Structure:
+ *
  * ```json
  * {
  *   "pid": 12345,
@@ -37,18 +37,19 @@ import type { IpcStub } from './types'
  * }
  * ```
  *
- * @param appName - The application identifier
- * @param data - The data to write to the stub file
- * @returns Promise resolving to the stub file path
- *
  * @example
- * ```typescript
- * const stubPath = await writeIpcStub('socket-cli', {
+ *   ;```typescript
+ *   const stubPath = await writeIpcStub('socket-cli', {
  *   apiToken: 'secret-token',
  *   config: { ... }
- * })
- * // Pass stubPath to child process for reading
- * ```
+ *   })
+ *   // Pass stubPath to child process for reading
+ *   ```
+ *
+ * @param appName - The application identifier.
+ * @param data - The data to write to the stub file.
+ *
+ * @returns Promise resolving to the stub file path
  */
 export async function writeIpcStub(
   appName: string,

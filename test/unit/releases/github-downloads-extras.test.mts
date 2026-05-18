@@ -1,10 +1,8 @@
 /**
- * @fileoverview Tests for the toolPrefix tag-resolution branch and the
- * asset-not-found throw in src/releases/github-downloads.ts that the
- * existing releases-github-downloads.test.mts doesn't cover.
- *
- * Mocks getLatestRelease + getReleaseAssetUrl + httpDownload so the
- * tests run hermetically.
+ * @file Tests for the toolPrefix tag-resolution branch and the asset-not-found
+ *   throw in src/releases/github-downloads.ts that the existing
+ *   releases-github-downloads.test.mts doesn't cover. Mocks getLatestRelease +
+ *   getReleaseAssetUrl + httpDownload so the tests run hermetically.
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'

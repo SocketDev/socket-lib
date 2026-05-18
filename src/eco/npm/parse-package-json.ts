@@ -1,17 +1,12 @@
 /**
- * @fileoverview `parsePackageJson(content)` — parses a `package.json`
- * string into a `ParsedManifest`.
- *
- * On socket-btm's smol Node binary this routes to
- * `node:smol-manifest`'s native `parseManifest(content, 'npm')`; on
- * stock Node it runs the JS impl below. Both return byte-equivalent
- * frozen shapes.
- *
- * Throws `ManifestError` with code `ERR_INVALID_JSON` on JSON parse
- * failure. Anything else is non-throwing: missing/extra fields, weird
- * types in dep-record values, etc. are accepted — `package.json` in
- * the wild is messy, and downstream consumers can re-validate if
- * they care.
+ * @file `parsePackageJson(content)` — parses a `package.json` string into a
+ *   `ParsedManifest`. On socket-btm's smol Node binary this routes to
+ *   `node:smol-manifest`'s native `parseManifest(content, 'npm')`; on stock
+ *   Node it runs the JS impl below. Both return byte-equivalent frozen shapes.
+ *   Throws `ManifestError` with code `ERR_INVALID_JSON` on JSON parse failure.
+ *   Anything else is non-throwing: missing/extra fields, weird types in
+ *   dep-record values, etc. are accepted — `package.json` in the wild is messy,
+ *   and downstream consumers can re-validate if they care.
  */
 
 import { ManifestError } from '../manifest/manifest-error'

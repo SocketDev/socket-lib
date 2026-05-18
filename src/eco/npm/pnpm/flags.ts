@@ -1,9 +1,7 @@
 /**
- * @fileoverview pnpm CLI flag predicates.
- *
- * pnpm reuses npm's `--loglevel` flag verbatim, so isPnpmLoglevelFlag
- * is an explicit alias of isNpmLoglevelFlag rather than a separate
- * implementation.
+ * @file Pnpm CLI flag predicates. pnpm reuses npm's `--loglevel` flag verbatim,
+ *   so isPnpmLoglevelFlag is an explicit alias of isNpmLoglevelFlag rather than
+ *   a separate implementation.
  */
 
 import { SetCtor } from '../../../primordials/map-set'
@@ -25,11 +23,11 @@ const pnpmInstallCommands = new SetCtor(['install', 'i'])
  * Check if a command argument is a pnpm frozen-lockfile flag.
  *
  * @example
- * ```typescript
- * isPnpmFrozenLockfileFlag('--frozen-lockfile')     // true
- * isPnpmFrozenLockfileFlag('--no-frozen-lockfile')  // true
- * isPnpmFrozenLockfileFlag('--save')                // false
- * ```
+ *   ;```typescript
+ *   isPnpmFrozenLockfileFlag('--frozen-lockfile') // true
+ *   isPnpmFrozenLockfileFlag('--no-frozen-lockfile') // true
+ *   isPnpmFrozenLockfileFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
@@ -40,11 +38,11 @@ export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
  * Check if a command argument is a pnpm ignore-scripts flag.
  *
  * @example
- * ```typescript
- * isPnpmIgnoreScriptsFlag('--ignore-scripts')     // true
- * isPnpmIgnoreScriptsFlag('--no-ignore-scripts')  // true
- * isPnpmIgnoreScriptsFlag('--save')               // false
- * ```
+ *   ;```typescript
+ *   isPnpmIgnoreScriptsFlag('--ignore-scripts') // true
+ *   isPnpmIgnoreScriptsFlag('--no-ignore-scripts') // true
+ *   isPnpmIgnoreScriptsFlag('--save') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
@@ -55,11 +53,11 @@ export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
  * Check if a command argument is a pnpm install command.
  *
  * @example
- * ```typescript
- * isPnpmInstallCommand('install')  // true
- * isPnpmInstallCommand('i')        // true
- * isPnpmInstallCommand('run')      // false
- * ```
+ *   ;```typescript
+ *   isPnpmInstallCommand('install') // true
+ *   isPnpmInstallCommand('i') // true
+ *   isPnpmInstallCommand('run') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPnpmInstallCommand(cmdArg: string): boolean {

@@ -1,11 +1,9 @@
 /**
- * @fileoverview `analyzeLockfile(lockfile)` — returns a
- * `LockfileStats` summary (counts by dep type, total packages,
- * per-ecosystem breakdown).
- *
- * `maxDepth` + `avgDepth` are reported as 0 — the JS-side
- * `ParsedLockfile` shape doesn't preserve a dep-tree, only the flat
- * package list. Matches socket-btm's smol behavior exactly.
+ * @file `analyzeLockfile(lockfile)` — returns a `LockfileStats` summary (counts
+ *   by dep type, total packages, per-ecosystem breakdown). `maxDepth` +
+ *   `avgDepth` are reported as 0 — the JS-side `ParsedLockfile` shape doesn't
+ *   preserve a dep-tree, only the flat package list. Matches socket-btm's smol
+ *   behavior exactly.
  */
 
 import { ObjectFreeze } from '../../primordials/object'

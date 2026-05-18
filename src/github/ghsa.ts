@@ -1,15 +1,13 @@
 /**
- * @fileoverview GitHub Security Advisory (GHSA) lookups.
+ * @file GitHub Security Advisory (GHSA) lookups. Three layers, narrowest first:
  *
- * Three layers, narrowest first:
- *
- *   - `cacheFetchGhsa` — caches GHSA fetches in the same `TtlCache`
- *     used by ref resolution (5-minute TTL, two-tier).
- *   - `fetchGhsaDetails` — REST `/advisories/:id` with the same
- *     empty-body fallback to GraphQL that ref resolution uses.
- *   - `fetchGhsaDetailsViaGraphQL` — GraphQL `securityAdvisory(...)`
- *     with shape normalization back to the REST surface so callers
- *     don't have to know which transport ran.
+ *   - `cacheFetchGhsa` — caches GHSA fetches in the same `TtlCache` used by ref
+ *     resolution (5-minute TTL, two-tier).
+ *   - `fetchGhsaDetails` — REST `/advisories/:id` with the same empty-body
+ *     fallback to GraphQL that ref resolution uses.
+ *   - `fetchGhsaDetailsViaGraphQL` — GraphQL `securityAdvisory(...)` with shape
+ *     normalization back to the REST surface so callers don't have to know
+ *     which transport ran.
  */
 
 import process from 'node:process'
@@ -26,39 +24,41 @@ import { GitHubEmptyBodyError } from './errors'
 import type { GhsaDetails, GitHubFetchOptions } from './types'
 
 /**
- * Fetch GitHub Security Advisory details with caching.
- * Retrieves advisory information with two-tier caching (in-memory + persistent).
- * Cached results are stored with the default TTL (5 minutes).
+ * Fetch GitHub Security Advisory details with caching. Retrieves advisory
+ * information with two-tier caching (in-memory + persistent). Cached results
+ * are stored with the default TTL (5 minutes).
  *
  * Caching behavior:
+ *
  * - Checks in-memory cache first for immediate response
  * - Falls back to persistent disk cache if not in memory
  * - Fetches from API only if not cached
  * - Stores result in both cache tiers
  * - Respects `DISABLE_GITHUB_CACHE` env var
  *
- * @param ghsaId - GHSA identifier to fetch
- * @param options - Fetch options including authentication token
+ * @example
+ *   ;```ts
+ *   // First call hits API
+ *   const advisory = await cacheFetchGhsa('GHSA-1234-5678-90ab')
+ *
+ *   // Second call within 5 minutes returns cached data
+ *   const cached = await cacheFetchGhsa('GHSA-1234-5678-90ab')
+ *   ```
+ *
+ * @example
+ *   ;```ts
+ *   // Disable caching for fresh data
+ *   process.env.DISABLE_GITHUB_CACHE = '1'
+ *   const advisory = await cacheFetchGhsa('GHSA-xxxx-yyyy-zzzz')
+ *   ```
+ *
+ * @param ghsaId - GHSA identifier to fetch.
+ * @param options - Fetch options including authentication token.
+ *
  * @returns Complete advisory details
  *
  * @throws {Error} If advisory cannot be found or API request fails
  * @throws {GitHubRateLimitError} When API rate limit is exceeded
- *
- * @example
- * ```ts
- * // First call hits API
- * const advisory = await cacheFetchGhsa('GHSA-1234-5678-90ab')
- *
- * // Second call within 5 minutes returns cached data
- * const cached = await cacheFetchGhsa('GHSA-1234-5678-90ab')
- * ```
- *
- * @example
- * ```ts
- * // Disable caching for fresh data
- * process.env.DISABLE_GITHUB_CACHE = '1'
- * const advisory = await cacheFetchGhsa('GHSA-xxxx-yyyy-zzzz')
- * ```
  */
 export async function cacheFetchGhsa(
   ghsaId: string,
@@ -80,39 +80,40 @@ export async function cacheFetchGhsa(
 }
 
 /**
- * Fetch GitHub Security Advisory details from the API.
- * Retrieves complete advisory information including severity, affected packages,
- * CVSS scores, and CWE classifications.
+ * Fetch GitHub Security Advisory details from the API. Retrieves complete
+ * advisory information including severity, affected packages, CVSS scores, and
+ * CWE classifications.
+ *
+ * @example
+ *   ```ts
+ *   const advisory = await fetchGhsaDetails('GHSA-1234-5678-90ab')
+ *   console.log(`Severity: ${advisory.severity}`)
+ *   console.log(`Affects: ${advisory.vulnerabilities.length} packages`)
+ *   if (advisory.cvss) {
+ *   console.log(`CVSS Score: ${advisory.cvss.score}`)
+ *   }
+ *   ```
+ *
+ * @example
+ *   ```ts
+ *   // Check if vulnerability is patched
+ *   const advisory = await fetchGhsaDetails('GHSA-xxxx-yyyy-zzzz')
+ *   for (const vuln of advisory.vulnerabilities) {
+ *   if (vuln.firstPatchedVersion) {
+ *   console.log(
+ *   `Patched in ${vuln.package.name}@${vuln.firstPatchedVersion.identifier}`,
+ *   )
+ *   }
+ *   }
+ *   ```
  *
  * @param ghsaId - GHSA identifier to fetch (e.g., 'GHSA-xxxx-yyyy-zzzz')
- * @param options - Fetch options including authentication token
+ * @param options - Fetch options including authentication token.
+ *
  * @returns Complete advisory details with normalized field names
  *
  * @throws {Error} If advisory cannot be found or API request fails
  * @throws {GitHubRateLimitError} When API rate limit is exceeded
- *
- * @example
- * ```ts
- * const advisory = await fetchGhsaDetails('GHSA-1234-5678-90ab')
- * console.log(`Severity: ${advisory.severity}`)
- * console.log(`Affects: ${advisory.vulnerabilities.length} packages`)
- * if (advisory.cvss) {
- *   console.log(`CVSS Score: ${advisory.cvss.score}`)
- * }
- * ```
- *
- * @example
- * ```ts
- * // Check if vulnerability is patched
- * const advisory = await fetchGhsaDetails('GHSA-xxxx-yyyy-zzzz')
- * for (const vuln of advisory.vulnerabilities) {
- *   if (vuln.firstPatchedVersion) {
- *     console.log(
- *       `Patched in ${vuln.package.name}@${vuln.firstPatchedVersion.identifier}`
- *     )
- *   }
- * }
- * ```
  */
 export async function fetchGhsaDetails(
   ghsaId: string,
@@ -191,40 +192,32 @@ export async function fetchGhsaDetails(
 /**
  * GraphQL counterpart for `fetchGhsaDetails`.
  *
- * What it does:
- *   Queries the GraphQL `securityAdvisory(ghsaId)` connection and
- *   reshapes the response to match the REST `/advisories/:id` JSON
- *   so callers don't have to know which transport ran.
+ * What it does: Queries the GraphQL `securityAdvisory(ghsaId)` connection and
+ * reshapes the response to match the REST `/advisories/:id` JSON so callers
+ * don't have to know which transport ran.
  *
  * Three normalizations the REST shape differs from GraphQL on:
  *
- *   1. Severity case
- *      REST returns lowercase strings like "moderate", "high".
- *      GraphQL returns SCREAMING_CASE enum values: "MODERATE",
- *      "HIGH", "CRITICAL". We `.toLowerCase()` so callers can
- *      compare against a single canonical form.
+ * 1. Severity case REST returns lowercase strings like "moderate", "high". GraphQL
+ *    returns SCREAMING_CASE enum values: "MODERATE", "HIGH", "CRITICAL". We
+ *    `.toLowerCase()` so callers can compare against a single canonical form.
+ * 2. Identifiers vs. aliases REST has an `aliases: ["CVE-2024-..."]` array — a
+ *    flat list of non-GHSA IDs (CVEs, etc.) for the same vulnerability. GraphQL
+ *    has `identifiers: [{type, value}]` which INCLUDES the advisory's own GHSA
+ *    id alongside CVE ids. We filter out the GHSA self-reference so the list
+ *    matches REST.
+ * 3. Connection wrapping GraphQL wraps array fields in `{ nodes: [...] }`
+ *    connection objects (it's how pagination works in GraphQL). REST returns
+ *    plain arrays. We unwrap with `?.nodes ?? []`.
  *
- *   2. Identifiers vs. aliases
- *      REST has an `aliases: ["CVE-2024-..."]` array — a flat list
- *      of non-GHSA IDs (CVEs, etc.) for the same vulnerability.
- *      GraphQL has `identifiers: [{type, value}]` which INCLUDES
- *      the advisory's own GHSA id alongside CVE ids. We filter
- *      out the GHSA self-reference so the list matches REST.
+ * `description` (GraphQL) maps to `details` (REST) — same data, different field
+ * name. The mapping below renames it.
  *
- *   3. Connection wrapping
- *      GraphQL wraps array fields in `{ nodes: [...] }` connection
- *      objects (it's how pagination works in GraphQL). REST
- *      returns plain arrays. We unwrap with `?.nodes ?? []`.
- *
- *   `description` (GraphQL) maps to `details` (REST) — same data,
- *   different field name. The mapping below renames it.
- *
- * Token handling:
- *   We re-derive the token from `options.token || getGitHubToken()`
- *   because this function may be called from places that didn't
- *   thread an explicit token through. GraphQL queries to private
- *   data require auth even when the equivalent REST GET works
- *   anonymously, so the auth header is mandatory in practice.
+ * Token handling: We re-derive the token from `options.token ||
+ * getGitHubToken()` because this function may be called from places that didn't
+ * thread an explicit token through. GraphQL queries to private data require
+ * auth even when the equivalent REST GET works anonymously, so the auth header
+ * is mandatory in practice.
  */
 export async function fetchGhsaDetailsViaGraphQL(
   ghsaId: string,

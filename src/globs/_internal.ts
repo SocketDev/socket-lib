@@ -1,9 +1,8 @@
 /**
- * @fileoverview Private internals for `globs/*` modules — lazy module
- * accessors, normalization helpers, and the matcher LRU cache. The
- * `defaultIgnore` list lives in the public `defaults.ts` file; this
- * file re-exports it so co-located helpers can import everything
- * through one path.
+ * @file Private internals for `globs/*` modules — lazy module accessors,
+ *   normalization helpers, and the matcher LRU cache. The `defaultIgnore` list
+ *   lives in the public `defaults.ts` file; this file re-exports it so
+ *   co-located helpers can import everything through one path.
  */
 
 import { ArrayCtor, ArrayIsArray } from '../primordials/array'
@@ -50,12 +49,11 @@ export function getPicomatch() {
 }
 
 /**
- * Glob results are normalized to forward slashes regardless of the
- * backend (node:fs.glob returns native-OS separators on Windows;
- * fast-glob already returns forward slashes). Single contract:
- * callers don't have to think about separators per platform. Routes
- * through `paths/normalize.normalizePath` so this stays consistent
- * with every other path-shaped string in the lib.
+ * Glob results are normalized to forward slashes regardless of the backend
+ * (node:fs.glob returns native-OS separators on Windows; fast-glob already
+ * returns forward slashes). Single contract: callers don't have to think about
+ * separators per platform. Routes through `paths/normalize.normalizePath` so
+ * this stays consistent with every other path-shaped string in the lib.
  */
 export function normalizeGlobResults(out: string[]): string[] {
   for (let i = 0; i < out.length; i += 1) {
@@ -65,15 +63,14 @@ export function normalizeGlobResults(out: string[]): string[] {
 }
 
 /**
- * Normalize a user-provided ignore array by running every entry
- * through stripTrailingSlash. Returns undefined when `ignore` is not
- * an array so callers can skip merging the option entirely.
+ * Normalize a user-provided ignore array by running every entry through
+ * stripTrailingSlash. Returns undefined when `ignore` is not an array so
+ * callers can skip merging the option entirely.
  *
- * Uses a pre-sized for-loop instead of `.map`: socket-lib uses
- * primordials (the prototype `Array.prototype.map` can be intercepted
- * or replaced by user code at module load), and a hand-rolled loop is
- * also marginally faster — no callback indirection, no growth of the
- * result array.
+ * Uses a pre-sized for-loop instead of `.map`: socket-lib uses primordials (the
+ * prototype `Array.prototype.map` can be intercepted or replaced by user code
+ * at module load), and a hand-rolled loop is also marginally faster — no
+ * callback indirection, no growth of the result array.
  */
 export function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
   if (!ArrayIsArray(ignore)) {
@@ -89,15 +86,14 @@ export function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
 }
 
 /**
- * Strip a trailing `/` from a glob pattern so fast-glob's deep filter
- * matches it. See header comment in `glob.ts` for the full rationale —
- * shortest summary: a `dist/` ignore pattern lets fast-glob walk the
- * whole subtree before filtering, while `dist` (no slash) skips the
- * walk entirely.
+ * Strip a trailing `/` from a glob pattern so fast-glob's deep filter matches
+ * it. See header comment in `glob.ts` for the full rationale — shortest
+ * summary: a `dist/` ignore pattern lets fast-glob walk the whole subtree
+ * before filtering, while `dist` (no slash) skips the walk entirely.
  *
- * charCode 47 is `/`. Reading it that way avoids a per-call string
- * allocation for the literal — primordials-friendly, no behavior
- * change vs. `pattern.endsWith('/')`.
+ * CharCode 47 is `/`. Reading it that way avoids a per-call string allocation
+ * for the literal — primordials-friendly, no behavior change vs.
+ * `pattern.endsWith('/')`.
  */
 export function stripTrailingSlash(pattern: string): string {
   if (

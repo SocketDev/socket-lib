@@ -1,13 +1,12 @@
 /**
- * @fileoverview Unit tests for src/smol/detect.ts.
+ * @file Unit tests for src/smol/detect.ts. Tests both responsibilities of the
+ *   file:
  *
- * Tests both responsibilities of the file:
  *   - `isSmol()` — memoized boolean detector
- *   - `getSmolUtil()` — lazy-loader for the `node:smol-util` binding
- *
- * On stock Node (the test runtime), `isSmol()` returns `false` and
- * `getSmolUtil()` returns `undefined`. The integration story is
- * verified by socket-btm's own tests running inside the smol binary.
+ *   - `getSmolUtil()` — lazy-loader for the `node:smol-util` binding On stock
+ *     Node (the test runtime), `isSmol()` returns `false` and `getSmolUtil()`
+ *     returns `undefined`. The integration story is verified by socket-btm's
+ *     own tests running inside the smol binary.
  */
 
 import { describe, expect, it } from 'vitest'

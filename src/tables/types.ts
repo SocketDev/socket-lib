@@ -1,7 +1,6 @@
 /**
- * @fileoverview Public type surface for `tables/*` modules — the
- * `ColumnAlignment` union + `TableColumn` config record. Pure
- * types, no runtime side effects.
+ * @file Public type surface for `tables/*` modules — the `ColumnAlignment`
+ *   union + `TableColumn` config record. Pure types, no runtime side effects.
  */
 
 export type ColumnAlignment = 'left' | 'right' | 'center'

@@ -1,14 +1,14 @@
 /**
- * @fileoverview Unit tests for Socket ecosystem path utilities.
+ * @file Unit tests for Socket ecosystem path utilities. Tests Socket directory
+ *   path resolution:
  *
- * Tests Socket directory path resolution:
- * - getUserHomeDir() - Get user home directory
- * - getSocketUserDir() - Get ~/.socket directory
- * - getSocketAppDir() - Get app-specific directories
- * - getSocketCacacheDir() - Get cacache directory
- * - getSocketDlxDir() - Get DLX directory
- * - App-specific paths (CLI, Registry, caches)
- * Used for consistent path resolution across Socket tools.
+ *   - getUserHomeDir() - Get user home directory
+ *   - getSocketUserDir() - Get ~/.socket directory
+ *   - getSocketAppDir() - Get app-specific directories
+ *   - getSocketCacacheDir() - Get cacache directory
+ *   - getSocketDlxDir() - Get DLX directory
+ *   - App-specific paths (CLI, Registry, caches) Used for consistent path
+ *     resolution across Socket tools.
  */
 
 import {

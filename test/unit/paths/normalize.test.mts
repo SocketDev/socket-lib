@@ -1,20 +1,21 @@
 /**
- * @fileoverview Unit tests for path normalization and manipulation utilities.
+ * @file Unit tests for path normalization and manipulation utilities. Tests
+ *   cross-platform path utilities:
  *
- * Tests cross-platform path utilities:
- * - normalizePath() converts paths to forward slashes
- * - isAbsolute() detects absolute paths (Unix/Windows)
- * - isRelative() detects relative paths
- * - isUnixPath() detects MSYS/Git Bash drive letter paths
- * - isPath() validates path-like inputs
- * - isNodeModules() detects node_modules paths
- * - splitPath() splits paths into segments
- * - trimLeadingDotSlash() removes ./ prefix
- * - pathLikeToString() converts Buffer/URL to string
- * - relativeResolve() resolves relative paths
- * - toUnixPath() converts Windows paths to Unix-style POSIX paths for Git Bash tools
- * - fromUnixPath() converts MSYS/Unix-style paths back to native Windows paths
- * Used throughout Socket tools for cross-platform path handling.
+ *   - normalizePath() converts paths to forward slashes
+ *   - isAbsolute() detects absolute paths (Unix/Windows)
+ *   - isRelative() detects relative paths
+ *   - isUnixPath() detects MSYS/Git Bash drive letter paths
+ *   - isPath() validates path-like inputs
+ *   - isNodeModules() detects node_modules paths
+ *   - splitPath() splits paths into segments
+ *   - trimLeadingDotSlash() removes ./ prefix
+ *   - pathLikeToString() converts Buffer/URL to string
+ *   - relativeResolve() resolves relative paths
+ *   - toUnixPath() converts Windows paths to Unix-style POSIX paths for Git Bash
+ *     tools
+ *   - fromUnixPath() converts MSYS/Unix-style paths back to native Windows paths
+ *     Used throughout Socket tools for cross-platform path handling.
  */
 
 import { WIN32 } from '@socketsecurity/lib/constants/platform'

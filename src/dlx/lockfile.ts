@@ -1,14 +1,11 @@
 /**
- * @fileoverview Package pin generation for dlx installs.
- *
- * `generatePackagePin` resolves an npm package against the registry
- * using Arborist's lockfile-only mode and fetches its top-level tarball
- * to return both hash formats plus the lockfile content — everything
- * needed to vendor a reproducible install.
- *
- * The `LockfileSpec` type is also exported here for use as the
- * `lockfile` option on `downloadPackage`. Sniff/write handling lives
- * inline in `./package.ts` — no helper.
+ * @file Package pin generation for dlx installs. `generatePackagePin` resolves
+ *   an npm package against the registry using Arborist's lockfile-only mode and
+ *   fetches its top-level tarball to return both hash formats plus the lockfile
+ *   content — everything needed to vendor a reproducible install. The
+ *   `LockfileSpec` type is also exported here for use as the `lockfile` option
+ *   on `downloadPackage`. Sniff/write handling lives inline in `./package.ts` —
+ *   no helper.
  */
 
 import os from 'node:os'
@@ -36,18 +33,18 @@ import { getNodePath } from '../node/path'
 /**
  * Lockfile source for the `lockfile` option on `downloadPackage`.
  *
- * Bare strings are sniffed: a leading `{` (after whitespace) means
- * JSON content, anything else is treated as a filesystem path. Pass the
- * explicit `{ type, value }` form to override sniffing.
+ * Bare strings are sniffed: a leading `{` (after whitespace) means JSON
+ * content, anything else is treated as a filesystem path. Pass the explicit `{
+ * type, value }` form to override sniffing.
  *
  * @example
- * // Sniffed as path:
- * './scripts/dlx/claude/package-lock.json'
- * // Sniffed as content:
- * '{ "lockfileVersion": 3, ... }'
- * // Explicit:
- * { type: 'path', value: '/abs/package-lock.json' }
- * { type: 'content', value: '{ ... }' }
+ *   // Sniffed as path:
+ *   './scripts/dlx/claude/package-lock.json'
+ *   // Sniffed as content:
+ *   '{ "lockfileVersion": 3, ... }'
+ *   // Explicit:
+ *   { type: 'path', value: '/abs/package-lock.json' }
+ *   { type: 'content', value: '{ ... }' }
  */
 export type LockfileSpec =
   | string
@@ -55,9 +52,9 @@ export type LockfileSpec =
   | { type: 'content'; value: string }
 
 /**
- * Default minimum release age in days applied when a caller passes
- * neither `minReleaseDays` nor `minReleaseMins`. Pass `minReleaseDays: 0`
- * to disable the cutoff explicitly.
+ * Default minimum release age in days applied when a caller passes neither
+ * `minReleaseDays` nor `minReleaseMins`. Pass `minReleaseDays: 0` to disable
+ * the cutoff explicitly.
  */
 export const DEFAULT_MIN_RELEASE_DAYS = 7
 
@@ -65,21 +62,22 @@ export const DEFAULT_MIN_RELEASE_DAYS = 7
  * Options for generating a vendorable pin for an npm package.
  */
 export interface GeneratePackagePinOptions {
-  /** Package spec, e.g. `'@anthropic-ai/claude-code@2.1.92'`. */
+  /**
+   * Package spec, e.g. `'@anthropic-ai/claude-code@2.1.92'`.
+   */
   package: string
   /**
-   * Minimum release age in days. Refuses to resolve any version (direct
-   * or transitive) published more recently than `Date.now() - N days`.
+   * Minimum release age in days. Refuses to resolve any version (direct or
+   * transitive) published more recently than `Date.now() - N days`.
    *
-   * Matches npm's `min-release-age` config (unit: days). Mutually
-   * exclusive with {@link minReleaseMins}. Defaults to
-   * {@link DEFAULT_MIN_RELEASE_DAYS} (7) when neither field is set.
-   * Pass `0` to disable.
+   * Matches npm's `min-release-age` config (unit: days). Mutually exclusive
+   * with {@link minReleaseMins}. Defaults to {@link DEFAULT_MIN_RELEASE_DAYS}
+   * (7) when neither field is set. Pass `0` to disable.
    */
   minReleaseDays?: number | undefined
   /**
-   * Minimum release age in minutes. Refuses to resolve any version
-   * published more recently than `Date.now() - N minutes`.
+   * Minimum release age in minutes. Refuses to resolve any version published
+   * more recently than `Date.now() - N minutes`.
    *
    * Matches pnpm's `minimumReleaseAge` config (unit: minutes). Mutually
    * exclusive with {@link minReleaseDays}.
@@ -88,25 +86,35 @@ export interface GeneratePackagePinOptions {
 }
 
 /**
- * Result of {@link generatePackagePin}. All file data is returned as
- * content — the caller decides whether/where to write it.
+ * Result of {@link generatePackagePin}. All file data is returned as content —
+ * the caller decides whether/where to write it.
  */
 export interface PinDetails {
-  /** Resolved package name. */
+  /**
+   * Resolved package name.
+   */
   name: string
-  /** Resolved package version. */
+  /**
+   * Resolved package version.
+   */
   version: string
-  /** Both hash formats of the top-level tarball. */
+  /**
+   * Both hash formats of the top-level tarball.
+   */
   hash: ComputedHashes
-  /** `package.json` JSON content, ready to write to disk. */
+  /**
+   * `package.json` JSON content, ready to write to disk.
+   */
   packageJson: string
-  /** `package-lock.json` JSON content, ready to write to disk. */
+  /**
+   * `package-lock.json` JSON content, ready to write to disk.
+   */
   lockfile: string
 }
 
 /**
- * Thrown when a lockfile spec is malformed (unrecognized string, missing
- * file, invalid JSON) or drifts from its package.json.
+ * Thrown when a lockfile spec is malformed (unrecognized string, missing file,
+ * invalid JSON) or drifts from its package.json.
  */
 export class DlxLockfileError extends Error {
   constructor(message: string, options?: { cause?: unknown } | undefined) {
@@ -119,23 +127,23 @@ export class DlxLockfileError extends Error {
  * Generate a vendorable pin for an npm package without installing it.
  *
  * Runs Arborist in lockfile-only mode (`packageLockOnly: true`) against a
- * temporary directory, fetches the top-level tarball once to compute
- * sha256 hex (since Arborist only exposes SRI from the registry), then
- * tears the tmp directory down before returning.
+ * temporary directory, fetches the top-level tarball once to compute sha256 hex
+ * (since Arborist only exposes SRI from the registry), then tears the tmp
+ * directory down before returning.
  *
- * The result contains everything a caller needs to pin the package for
- * future installs: the exact resolved name/version, both hash formats,
- * and the lockfile content (ready to commit).
+ * The result contains everything a caller needs to pin the package for future
+ * installs: the exact resolved name/version, both hash formats, and the
+ * lockfile content (ready to commit).
  *
  * @example
- * ```ts
- * const pin = await generatePackagePin({
- *   package: '@anthropic-ai/claude-code@2.1.92',
- * })
- * await fs.writeFile('./claude.lock.json', pin.lockfile, 'utf8')
- * // pin.hash.integrity → 'sha512-…'
- * // pin.hash.checksum  → hex
- * ```
+ *   ;```ts
+ *   const pin = await generatePackagePin({
+ *     package: '@anthropic-ai/claude-code@2.1.92',
+ *   })
+ *   await fs.writeFile('./claude.lock.json', pin.lockfile, 'utf8')
+ *   // pin.hash.integrity → 'sha512-…'
+ *   // pin.hash.checksum  → hex
+ *   ```
  */
 export async function generatePackagePin(
   options: GeneratePackagePinOptions,

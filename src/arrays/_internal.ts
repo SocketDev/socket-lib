@@ -1,8 +1,7 @@
 /**
- * @fileoverview Private internals for `arrays/*` modules — cached
- * `Intl.ListFormat` instances for conjunction (and) and disjunction
- * (or) joins. Constructed lazily because `new Intl.ListFormat(...)`
- * is a measurable startup cost.
+ * @file Private internals for `arrays/*` modules — cached `Intl.ListFormat`
+ *   instances for conjunction (and) and disjunction (or) joins. Constructed
+ *   lazily because `new Intl.ListFormat(...)` is a measurable startup cost.
  */
 
 let _conjunctionFormatter: Intl.ListFormat | undefined
@@ -14,16 +13,17 @@ let _disjunctionFormatter: Intl.ListFormat | undefined
  * Creates a singleton formatter for English "and" lists using the long style.
  * The formatter is lazily initialized on first use and reused for performance.
  *
- * @returns Cached Intl.ListFormat instance configured for conjunction formatting
+ * @private
  *
  * @example
- * ```ts
- * const formatter = getConjunctionFormatter()
- * formatter.format(['apple', 'banana', 'cherry'])
- * // Returns: "apple, banana, and cherry"
- * ```
+ *   ;```ts
+ *   const formatter = getConjunctionFormatter()
+ *   formatter.format(['apple', 'banana', 'cherry'])
+ *   // Returns: "apple, banana, and cherry"
+ *   ```
  *
- * @private
+ * @returns Cached Intl.ListFormat instance configured for conjunction
+ *   formatting.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getConjunctionFormatter() {
@@ -46,16 +46,17 @@ export function getConjunctionFormatter() {
  * Creates a singleton formatter for English "or" lists using the long style.
  * The formatter is lazily initialized on first use and reused for performance.
  *
- * @returns Cached Intl.ListFormat instance configured for disjunction formatting
+ * @private
  *
  * @example
- * ```ts
- * const formatter = getDisjunctionFormatter()
- * formatter.format(['red', 'blue', 'green'])
- * // Returns: "red, blue, or green"
- * ```
+ *   ;```ts
+ *   const formatter = getDisjunctionFormatter()
+ *   formatter.format(['red', 'blue', 'green'])
+ *   // Returns: "red, blue, or green"
+ *   ```
  *
- * @private
+ * @returns Cached Intl.ListFormat instance configured for disjunction
+ *   formatting.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getDisjunctionFormatter() {

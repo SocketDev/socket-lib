@@ -1,28 +1,20 @@
 /**
- * @fileoverview Find specific package-manager binaries with platform-
- * aware fallbacks.
- *
- * `findRealBin` tries common platform paths in order, then falls back
- * to a `which` PATH search filtered to skip shadow-bin directories
- * (any path containing `node_modules/.bin`). The shadow-bin filter
- * matters because tools like ts-node and tsx install fake `npm` /
- * `pnpm` / `yarn` shims into the project's `.bin` to intercept the
- * call — those aren't the user's real package manager.
- *
- * Per-tool helpers (`findRealNpm`, `findRealPnpm`, `findRealYarn`)
- * encode the canonical install layouts:
+ * @file Find specific package-manager binaries with platform- aware fallbacks.
+ *   `findRealBin` tries common platform paths in order, then falls back to a
+ *   `which` PATH search filtered to skip shadow-bin directories (any path
+ *   containing `node_modules/.bin`). The shadow-bin filter matters because
+ *   tools like ts-node and tsx install fake `npm` / `pnpm` / `yarn` shims into
+ *   the project's `.bin` to intercept the call — those aren't the user's real
+ *   package manager. Per-tool helpers (`findRealNpm`, `findRealPnpm`,
+ *   `findRealYarn`) encode the canonical install layouts:
  *
  *   - npm: alongside `process.execPath` first (Node bundles it), then
- *     `%APPDATA%\npm` on Windows or `/usr/local/bin` / `/usr/bin` on
- *     POSIX.
- *
+ *     `%APPDATA%\npm` on Windows or `/usr/local/bin` / `/usr/bin` on POSIX.
  *   - pnpm: `~/.local/share/pnpm` (XDG) or `~/.pnpm` on POSIX,
  *     `%APPDATA%\npm\pnpm` or `%LOCALAPPDATA%\pnpm\pnpm` on Windows.
- *
- *   - yarn: similar to npm but also `~/.yarn/bin/yarn` on POSIX.
- *
- * Each helper returns an empty string when no candidate exists so the
- * caller can fall through to `which` on PATH.
+ *   - yarn: similar to npm but also `~/.yarn/bin/yarn` on POSIX. Each helper
+ *     returns an empty string when no candidate exists so the caller can fall
+ *     through to `which` on PATH.
  */
 
 import process from 'node:process'
@@ -41,10 +33,10 @@ import { whichRealSync } from './which'
  * Find the real executable for a binary, bypassing shadow bins.
  *
  * @example
- * ```typescript
- * const npmPath = findRealBin('npm', ['/usr/local/bin/npm'])
- * const gitPath = findRealBin('git')
- * ```
+ *   ;```typescript
+ *   const npmPath = findRealBin('npm', ['/usr/local/bin/npm'])
+ *   const gitPath = findRealBin('git')
+ *   ```
  */
 export function findRealBin(
   binName: string,
@@ -94,10 +86,10 @@ export function findRealBin(
  * Find the real npm executable, bypassing any aliases and shadow bins.
  *
  * @example
- * ```typescript
- * const npmPath = findRealNpm()
- * // e.g. '/usr/local/bin/npm'
- * ```
+ *   ;```typescript
+ *   const npmPath = findRealNpm()
+ *   // e.g. '/usr/local/bin/npm'
+ *   ```
  */
 export function findRealNpm(): string {
   const fs = getFs()
@@ -157,10 +149,10 @@ export function findRealNpm(): string {
  * Find the real pnpm executable, bypassing any aliases and shadow bins.
  *
  * @example
- * ```typescript
- * const pnpmPath = findRealPnpm()
- * // e.g. '/usr/local/bin/pnpm'
- * ```
+ *   ;```typescript
+ *   const pnpmPath = findRealPnpm()
+ *   // e.g. '/usr/local/bin/pnpm'
+ *   ```
  */
 export function findRealPnpm(): string {
   const path = getPath()
@@ -202,10 +194,10 @@ export function findRealPnpm(): string {
  * Find the real yarn executable, bypassing any aliases and shadow bins.
  *
  * @example
- * ```typescript
- * const yarnPath = findRealYarn()
- * // e.g. '/usr/local/bin/yarn'
- * ```
+ *   ;```typescript
+ *   const yarnPath = findRealYarn()
+ *   // e.g. '/usr/local/bin/yarn'
+ *   ```
  */
 export function findRealYarn(): string {
   const path = getPath()

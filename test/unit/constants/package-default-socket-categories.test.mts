@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for default Socket security categories.
+ * @file Unit tests for default Socket security categories.
  */
 
 import { packageDefaultSocketCategories } from '@socketsecurity/lib/constants/package-default-socket-categories'

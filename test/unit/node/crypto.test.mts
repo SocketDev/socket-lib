@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/node/crypto.ts.
+ * @file Unit tests for src/node/crypto.ts.
  */
 
 import { describe, expect, it } from 'vitest'

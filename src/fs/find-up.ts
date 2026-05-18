@@ -1,9 +1,9 @@
 /**
- * @fileoverview Walk parent directories to locate a file or directory
- * by name. The traversal includes the filesystem root (or the
- * caller-supplied `stopAt` boundary) — historically the loop exited at
- * `dir === root` *before* visiting root itself, so a match at e.g.
- * `/.foo` was never found. The current shape visits root, then breaks.
+ * @file Walk parent directories to locate a file or directory by name. The
+ *   traversal includes the filesystem root (or the caller-supplied `stopAt`
+ *   boundary) — historically the loop exited at `dir === root` _before_
+ *   visiting root itself, so a match at e.g. `/.foo` was never found. The
+ *   current shape visits root, then breaks.
  */
 
 /* oxlint-disable socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory(). */
@@ -21,25 +21,26 @@ import type { FindUpOptions, FindUpSyncOptions } from './types'
 const abortSignal = getAbortSignal()
 
 /**
- * Find a file or directory by traversing up parent directories.
- * Searches from the starting directory upward to the filesystem root.
- * Useful for finding configuration files or project roots.
- *
- * @param name - Filename(s) to search for
- * @param options - Search options including cwd and type filters
- * @returns Normalized absolute path if found, undefined otherwise
+ * Find a file or directory by traversing up parent directories. Searches from
+ * the starting directory upward to the filesystem root. Useful for finding
+ * configuration files or project roots.
  *
  * @example
- * ```ts
- * // Find package.json starting from current directory
- * const pkgPath = await findUp('package.json')
+ *   ;```ts
+ *   // Find package.json starting from current directory
+ *   const pkgPath = await findUp('package.json')
  *
- * // Find any of multiple config files
- * const configPath = await findUp(['.config.js', '.config.json'])
+ *   // Find any of multiple config files
+ *   const configPath = await findUp(['.config.js', '.config.json'])
  *
- * // Find a directory instead of file
- * const nodeModules = await findUp('node_modules', { onlyDirectories: true })
- * ```
+ *   // Find a directory instead of file
+ *   const nodeModules = await findUp('node_modules', { onlyDirectories: true })
+ *   ```
+ *
+ * @param name - Filename(s) to search for.
+ * @param options - Search options including cwd and type filters.
+ *
+ * @returns Normalized absolute path if found, undefined otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function findUp(
@@ -95,27 +96,29 @@ export async function findUp(
 
 /**
  * Synchronously find a file or directory by traversing up parent directories.
- * Searches from the starting directory upward to the filesystem root or `stopAt` directory.
- * Useful for finding configuration files or project roots in synchronous contexts.
- *
- * @param name - Filename(s) to search for
- * @param options - Search options including cwd, stopAt, and type filters
- * @returns Normalized absolute path if found, undefined otherwise
+ * Searches from the starting directory upward to the filesystem root or
+ * `stopAt` directory. Useful for finding configuration files or project roots
+ * in synchronous contexts.
  *
  * @example
- * ```ts
- * // Find package.json starting from current directory
- * const pkgPath = findUpSync('package.json')
+ *   ;```ts
+ *   // Find package.json starting from current directory
+ *   const pkgPath = findUpSync('package.json')
  *
- * // Find .git directory but stop at home directory
- * const gitPath = findUpSync('.git', {
- *   onlyDirectories: true,
- *   stopAt: process.env.HOME
- * })
+ *   // Find .git directory but stop at home directory
+ *   const gitPath = findUpSync('.git', {
+ *     onlyDirectories: true,
+ *     stopAt: process.env.HOME,
+ *   })
  *
- * // Find any of multiple config files
- * const configPath = findUpSync(['.eslintrc.js', '.eslintrc.json'])
- * ```
+ *   // Find any of multiple config files
+ *   const configPath = findUpSync(['.eslintrc.js', '.eslintrc.json'])
+ *   ```
+ *
+ * @param name - Filename(s) to search for.
+ * @param options - Search options including cwd, stopAt, and type filters.
+ *
+ * @returns Normalized absolute path if found, undefined otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function findUpSync(

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Socket-btm release download utilities.
+ * @file Socket-btm release download utilities.
  */
 
 import {
@@ -32,27 +32,49 @@ export const SOCKET_BTM_REPO = {
  * Configuration for downloading socket-btm generic assets.
  */
 export interface SocketBtmAssetConfig {
-  /** Asset name or pattern on GitHub. */
+  /**
+   * Asset name or pattern on GitHub.
+   */
   asset: string | AssetPattern
-  /** @internal Discriminator fields */
+  /**
+   * @internal Discriminator fields
+   */
   bin?: never
-  /** Working directory (defaults to process.cwd()). */
+  /**
+   * Working directory (defaults to process.cwd()).
+   */
   cwd?: string | undefined
-  /** Download destination directory. @default 'build/downloaded' */
+  /**
+   * Download destination directory. @default 'build/downloaded'
+   */
   downloadDir?: string | undefined
-  /** @internal Discriminator fields */
+  /**
+   * @internal Discriminator fields
+   */
   libc?: never
-  /** Output filename. @default resolved asset name */
+  /**
+   * Output filename. @default resolved asset name.
+   */
   output?: string | undefined
-  /** Suppress log messages. @default false */
+  /**
+   * Suppress log messages. @default false.
+   */
   quiet?: boolean | undefined
-  /** Remove macOS quarantine attribute after download. @default false */
+  /**
+   * Remove macOS quarantine attribute after download. @default false.
+   */
   removeMacOSQuarantine?: boolean | undefined
-  /** Specific release tag to download. */
+  /**
+   * Specific release tag to download.
+   */
   tag?: string | undefined
-  /** @internal Discriminator fields */
+  /**
+   * @internal Discriminator fields
+   */
   targetArch?: never
-  /** @internal Discriminator fields */
+  /**
+   * @internal Discriminator fields
+   */
   targetPlatform?: never
 }
 
@@ -60,25 +82,45 @@ export interface SocketBtmAssetConfig {
  * Configuration for downloading socket-btm binary releases.
  */
 export interface SocketBtmBinaryConfig {
-  /** @internal Discriminator field */
+  /**
+   * @internal Discriminator field
+   */
   asset?: never
-  /** Binary/executable name (without extension). @default tool */
+  /**
+   * Binary/executable name (without extension). @default tool.
+   */
   bin?: string | undefined
-  /** Working directory (defaults to process.cwd()). */
+  /**
+   * Working directory (defaults to process.cwd()).
+   */
   cwd?: string | undefined
-  /** Download destination directory. @default 'build/downloaded' */
+  /**
+   * Download destination directory. @default 'build/downloaded'
+   */
   downloadDir?: string | undefined
-  /** Linux libc variant. Auto-detected if not specified. */
+  /**
+   * Linux libc variant. Auto-detected if not specified.
+   */
   libc?: Libc | undefined
-  /** Suppress log messages. @default false */
+  /**
+   * Suppress log messages. @default false.
+   */
   quiet?: boolean | undefined
-  /** Remove macOS quarantine attribute after download. @default true */
+  /**
+   * Remove macOS quarantine attribute after download. @default true.
+   */
   removeMacOSQuarantine?: boolean | undefined
-  /** Specific release tag to download. */
+  /**
+   * Specific release tag to download.
+   */
   tag?: string | undefined
-  /** Target architecture (defaults to current arch). */
+  /**
+   * Target architecture (defaults to current arch).
+   */
   targetArch?: Arch | undefined
-  /** Target platform (defaults to current platform). */
+  /**
+   * Target platform (defaults to current platform).
+   */
   targetPlatform?: Platform | undefined
 }
 
@@ -90,11 +132,10 @@ export type SocketBtmReleaseConfig =
   | SocketBtmAssetConfig
 
 /**
- * Map Node.js platform to socket-btm asset platform naming.
- * Identity mapping: asset names use `process.platform` verbatim
- * (`darwin`, `linux`, `win32`) to align with pnpm's pack-app, the
- * `--os` / `supportedArchitectures.os` config keys, and the
- * `@pnpm/exe.<os>-<arch>` package convention.
+ * Map Node.js platform to socket-btm asset platform naming. Identity mapping:
+ * asset names use `process.platform` verbatim (`darwin`, `linux`, `win32`) to
+ * align with pnpm's pack-app, the `--os` / `supportedArchitectures.os` config
+ * keys, and the `@pnpm/exe.<os>-<arch>` package convention.
  */
 const PLATFORM_MAP = {
   __proto__: null,
@@ -113,16 +154,16 @@ const ARCH_MAP = {
 } as unknown as Record<string, string>
 
 /**
- * Detect the libc variant (musl or glibc) on Linux systems.
- * Returns undefined for non-Linux platforms.
- *
- * @returns 'musl', 'glibc', or undefined (for non-Linux)
+ * Detect the libc variant (musl or glibc) on Linux systems. Returns undefined
+ * for non-Linux platforms.
  *
  * @example
- * ```typescript
- * const libc = detectLibc()
- * console.log(libc) // 'glibc', 'musl', or undefined
- * ```
+ *   ;```typescript
+ *   const libc = detectLibc()
+ *   console.log(libc) // 'glibc', 'musl', or undefined
+ *   ```
+ *
+ * @returns 'musl', 'glibc', or undefined (for non-Linux)
  */
 export function detectLibc(): Libc | undefined {
   // Non-linux early-return arm fires on macOS/Windows (the test
@@ -163,16 +204,17 @@ export function detectLibc(): Libc | undefined {
 /**
  * Download a release from socket-btm.
  *
- * @param tool - Tool/package name for release matching (e.g., 'lief', 'curl')
- * @param options - Download configuration
- * @returns Path to the downloaded file
- *
  * @example
- * ```typescript
- * const binPath = await downloadSocketBtmRelease('lief', {
- *   downloadDir: '/tmp/build/downloaded',
- * })
- * ```
+ *   ;```typescript
+ *   const binPath = await downloadSocketBtmRelease('lief', {
+ *     downloadDir: '/tmp/build/downloaded',
+ *   })
+ *   ```
+ *
+ * @param tool - Tool/package name for release matching (e.g., 'lief', 'curl')
+ * @param options - Download configuration.
+ *
+ * @returns Path to the downloaded file
  */
 export async function downloadSocketBtmRelease(
   tool: string,
@@ -316,17 +358,18 @@ export async function downloadSocketBtmRelease(
 /**
  * Get asset name for a socket-btm binary.
  *
- * @param binaryBaseName - Binary basename (e.g., 'binject', 'node')
- * @param platform - Target platform
- * @param arch - Target architecture
- * @param libc - Linux libc variant (optional)
- * @returns Asset name (e.g., 'binject-darwin-arm64', 'node-linux-x64-musl')
- *
  * @example
- * ```typescript
- * getBinaryAssetName('lief', 'linux', 'x64', 'musl')
- * // 'lief-linux-x64-musl'
- * ```
+ *   ;```typescript
+ *   getBinaryAssetName('lief', 'linux', 'x64', 'musl')
+ *   // 'lief-linux-x64-musl'
+ *   ```
+ *
+ * @param binaryBaseName - Binary basename (e.g., 'binject', 'node')
+ * @param platform - Target platform.
+ * @param arch - Target architecture.
+ * @param libc - Linux libc variant (optional)
+ *
+ * @returns Asset name (e.g., 'binject-darwin-arm64', 'node-linux-x64-musl')
  */
 export function getBinaryAssetName(
   binaryBaseName: string,
@@ -358,15 +401,16 @@ export function getBinaryAssetName(
 /**
  * Get binary filename for output.
  *
- * @param binaryBaseName - Binary basename (e.g., 'node', 'binject')
- * @param platform - Target platform
- * @returns Binary filename (e.g., 'node', 'node.exe')
- *
  * @example
- * ```typescript
- * getBinaryName('node', 'win32')  // 'node.exe'
- * getBinaryName('node', 'linux')  // 'node'
- * ```
+ *   ;```typescript
+ *   getBinaryName('node', 'win32') // 'node.exe'
+ *   getBinaryName('node', 'linux') // 'node'
+ *   ```
+ *
+ * @param binaryBaseName - Binary basename (e.g., 'node', 'binject')
+ * @param platform - Target platform.
+ *
+ * @returns Binary filename (e.g., 'node', 'node.exe')
  */
 export function getBinaryName(
   binaryBaseName: string,
@@ -376,8 +420,8 @@ export function getBinaryName(
 }
 
 /**
- * Lazily load the fs module to avoid Webpack errors.
- * Uses non-'node:' prefixed require to prevent Webpack bundling issues.
+ * Lazily load the fs module to avoid Webpack errors. Uses non-'node:' prefixed
+ * require to prevent Webpack bundling issues.
  *
  * @private
  */
@@ -387,71 +431,70 @@ export function getBinaryName(
  *
  * # Format: `<os>-<arch>[-<libc>]`
  *
- * The OS segment is `process.platform` verbatim: `darwin` / `linux` /
- * `win32`. The arch segment is `process.arch` verbatim: `x64` / `arm64`.
- * The optional libc suffix is `-musl` (Linux only; the glibc default is
- * unsuffixed to match Node.js's own linuxstatic convention).
+ * The OS segment is `process.platform` verbatim: `darwin` / `linux` / `win32`.
+ * The arch segment is `process.arch` verbatim: `x64` / `arm64`. The optional
+ * libc suffix is `-musl` (Linux only; the glibc default is unsuffixed to match
+ * Node.js's own linuxstatic convention).
  *
  * # Why these specific conventions
  *
  * ## Why `win32`, not `win`
  *
- * `win32` is what `process.platform` returns on every Windows host. Every
- * npm package whose install-time platform filter uses the standard
- * `os` / `cpu` / `libc` manifest fields must match `process.platform`
- * strings exactly (npm compares them verbatim — there's no shorthand
- * layer). Using `win` internally here would have forced a translation
- * every time we constructed an install filter or a target triple, and
- * reviewers would have to remember "we abbreviate on disk but not in
- * package filters." Since the two now match, there's no translation
- * step to get wrong.
+ * `win32` is what `process.platform` returns on every Windows host. Every npm
+ * package whose install-time platform filter uses the standard `os` / `cpu` /
+ * `libc` manifest fields must match `process.platform` strings exactly (npm
+ * compares them verbatim — there's no shorthand layer). Using `win` internally
+ * here would have forced a translation every time we constructed an install
+ * filter or a target triple, and reviewers would have to remember "we
+ * abbreviate on disk but not in package filters." Since the two now match,
+ * there's no translation step to get wrong.
  *
- * pnpm's pack-app (v11+) accepts `<os>-<arch>[-<libc>]` target strings
- * and its shards are `@pnpm/exe.<os>-<arch>` (with `win32`, not `win` —
- * see pnpm#11314). Our naming matches so asset names we emit can flow
- * directly into pack-app's `--target` arg, `pnpm.app.targets` config,
- * and sibling-package-name construction without a translation map.
+ * Pnpm's pack-app (v11+) accepts `<os>-<arch>[-<libc>]` target strings and its
+ * shards are `@pnpm/exe.<os>-<arch>` (with `win32`, not `win` — see
+ * pnpm#11314). Our naming matches so asset names we emit can flow directly into
+ * pack-app's `--target` arg, `pnpm.app.targets` config, and
+ * sibling-package-name construction without a translation map.
  *
  * ## Why `-musl` is the suffix (and glibc is unsuffixed)
  *
- * Node.js's own linuxstatic tarballs historically used the unqualified
- * `linux` for glibc and a separate download channel for musl. The pnpm
- * ecosystem codified that as `linux-<arch>` (glibc, default) and
- * `linux-<arch>-musl` (the libc outlier), matching the asymmetric
- * reality of Linux distros — glibc is the majority case, musl is
- * Alpine-and-similar. Adding `-glibc` for the default would be
- * redundant noise in the name.
+ * Node.js's own linuxstatic tarballs historically used the unqualified `linux`
+ * for glibc and a separate download channel for musl. The pnpm ecosystem
+ * codified that as `linux-<arch>` (glibc, default) and `linux-<arch>-musl` (the
+ * libc outlier), matching the asymmetric reality of Linux distros — glibc is
+ * the majority case, musl is Alpine-and-similar. Adding `-glibc` for the
+ * default would be redundant noise in the name.
  *
  * ## Why libc is only appended for Linux
  *
- * macOS and Windows have exactly one system libc each (Apple libSystem,
+ * MacOS and Windows have exactly one system libc each (Apple libSystem,
  * Microsoft UCRT). A hypothetical `darwin-arm64-libsystem` conveys no
- * information. Node.js, npm, and pnpm all treat libc as a Linux-only
- * axis; we follow the same convention so callers don't have to special-
- * case `'darwin-arm64'.startsWith('darwin-arm64')` style matches.
+ * information. Node.js, npm, and pnpm all treat libc as a Linux-only axis; we
+ * follow the same convention so callers don't have to special- case
+ * `'darwin-arm64'.startsWith('darwin-arm64')` style matches.
  *
  * ## Why this function exists at all (vs. inlining)
  *
- * Two upstream APIs that socket-btm consumers end up calling — the
- * npm manifest filter (`os`/`cpu`/`libc`) and pnpm's pack-app
- * `--target` — both need the exact same triple format. Centralizing
- * the construction here means a future schema change (e.g. Node
- * introducing `riscv64`) gets one edit, and the error message for an
- * unsupported platform is uniform across downloaders, pack-app
+ * Two upstream APIs that socket-btm consumers end up calling — the npm manifest
+ * filter (`os`/`cpu`/`libc`) and pnpm's pack-app `--target` — both need the
+ * exact same triple format. Centralizing the construction here means a future
+ * schema change (e.g. Node introducing `riscv64`) gets one edit, and the error
+ * message for an unsupported platform is uniform across downloaders, pack-app
  * invocations, and the `@socketbin/*` resolver logic.
  *
- * @param platform - Target platform
- * @param arch - Target architecture
- * @param libc - Linux libc variant (optional; non-linux platforms ignore)
- * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl', 'win32-x64')
- *
  * @example
- * ```typescript
- * getPlatformArch('linux', 'x64', 'musl')  // 'linux-x64-musl'
- * getPlatformArch('darwin', 'arm64')       // 'darwin-arm64'
- * getPlatformArch('win32', 'x64')          // 'win32-x64'
- * getPlatformArch('darwin', 'x64', 'musl') // 'darwin-x64' — libc ignored
- * ```
+ *   ;```typescript
+ *   getPlatformArch('linux', 'x64', 'musl') // 'linux-x64-musl'
+ *   getPlatformArch('darwin', 'arm64') // 'darwin-arm64'
+ *   getPlatformArch('win32', 'x64') // 'win32-x64'
+ *   getPlatformArch('darwin', 'x64', 'musl') // 'darwin-x64' — libc ignored
+ *   ```
+ *
+ * @param platform - Target platform.
+ * @param arch - Target architecture.
+ * @param libc - Linux libc variant (optional; non-linux platforms ignore)
+ *
+ * @returns Platform-arch identifier (e.g., 'darwin-arm64', 'linux-x64-musl',
+ *   'win32-x64')
  */
 export function getPlatformArch(
   platform: Platform,

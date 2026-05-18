@@ -1,16 +1,13 @@
 /**
- * @fileoverview Unit tests for HTTP/HTTPS request utilities — advanced surface (part 3 of 3).
- *
- * Covers streaming body bodies, additional onRetry / throwOnError /
- * parseRetryAfterHeader / sanitizeHeaders edge cases, maxResponseSize
- * settle guards, Uint8Array bodies, redirect hook / cleanup paths,
- * stream-body cleanup on failure, and hook error resilience. Split
- * from the original advanced surface to keep each worker within the
- * v8 heap ceiling — cumulative HTTP state retains memory faster than
- * GC can reclaim it within a single test file.
- *
- * Shares the test server with the sibling http-request-*.test.mts
- * files via http-request-fixtures.mts.
+ * @file Unit tests for HTTP/HTTPS request utilities — advanced surface (part 3
+ *   of 3). Covers streaming body bodies, additional onRetry / throwOnError /
+ *   parseRetryAfterHeader / sanitizeHeaders edge cases, maxResponseSize settle
+ *   guards, Uint8Array bodies, redirect hook / cleanup paths, stream-body
+ *   cleanup on failure, and hook error resilience. Split from the original
+ *   advanced surface to keep each worker within the v8 heap ceiling —
+ *   cumulative HTTP state retains memory faster than GC can reclaim it within a
+ *   single test file. Shares the test server with the sibling
+ *   http-request-*.test.mts files via http-request-fixtures.mts.
  */
 
 import http from 'node:http'

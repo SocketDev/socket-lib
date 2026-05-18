@@ -1,5 +1,5 @@
 /**
- * @fileoverview File extension constants.
+ * @file File extension constants.
  */
 
 // File extensions.

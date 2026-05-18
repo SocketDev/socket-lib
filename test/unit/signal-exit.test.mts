@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for process signal handling utilities.
+ * @file Unit tests for process signal handling utilities. Tests signal-exit
+ *   event handling:
  *
- * Tests signal-exit event handling:
- * - load() initializes signal handlers
- * - unload() removes signal handlers
- * - onExit() registers cleanup callbacks for process termination
- * - signals() returns current signal handler state
- * - SIGINT, SIGTERM, SIGHUP signal handling
- * Used by Socket CLI for graceful shutdown and cleanup on process exit.
+ *   - load() initializes signal handlers
+ *   - unload() removes signal handlers
+ *   - onExit() registers cleanup callbacks for process termination
+ *   - signals() returns current signal handler state
+ *   - SIGINT, SIGTERM, SIGHUP signal handling Used by Socket CLI for graceful
+ *     shutdown and cleanup on process exit.
  */
 
 import process from 'node:process'

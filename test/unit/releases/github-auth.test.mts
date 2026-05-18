@@ -1,11 +1,10 @@
 /**
- * @fileoverview Unit tests for GitHub release auth headers + asset matchers.
+ * @file Unit tests for GitHub release auth headers + asset matchers. Covers:
  *
- * Covers:
- * - getAuthHeaders (GH_TOKEN / GITHUB_TOKEN handling)
- * - SOCKET_BTM_REPO constant
- * - picomatch integration (verifies the glob library behavior the
- *   asset-matcher relies on)
+ *   - getAuthHeaders (GH_TOKEN / GITHUB_TOKEN handling)
+ *   - SOCKET_BTM_REPO constant
+ *   - picomatch integration (verifies the glob library behavior the asset-matcher
+ *     relies on)
  */
 
 import process from 'node:process'

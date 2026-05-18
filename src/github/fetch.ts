@@ -1,24 +1,19 @@
 /**
- * @fileoverview Authenticated GitHub REST fetch.
+ * @file Authenticated GitHub REST fetch. `fetchGitHub` is the single entry
+ *   point that the rest of the github/ modules go through for REST calls. It
+ *   handles four things the callers shouldn't have to repeat:
  *
- * `fetchGitHub` is the single entry point that the rest of the
- * github/ modules go through for REST calls. It handles four things
- * the callers shouldn't have to repeat:
- *
- *   1. Token resolution (env → git config) when the caller doesn't
- *      pass an explicit token.
- *   2. Standard headers (Accept, User-Agent) merged with caller-
- *      supplied headers.
- *   3. Rate-limit detection — when GitHub returns 403 with
- *      `x-ratelimit-remaining: 0`, throw a typed `GitHubRateLimitError`
- *      so callers can react (set GITHUB_TOKEN, retry after reset).
- *   4. Empty-body detection — 200 OK + zero-byte body is the
- *      documented incident shape (see GitHubEmptyBodyError JSDoc).
- *      Raised as a typed error so the ref / GHSA modules can fall
- *      back to GraphQL on a different backend.
- *
- * `getGhsaUrl` lives here because it's the URL counterpart to the
- * GHSA fetch path — the only other consumer is the GHSA module.
+ *   1. Token resolution (env → git config) when the caller doesn't pass an
+ *      explicit token.
+ *   2. Standard headers (Accept, User-Agent) merged with caller- supplied headers.
+ *   3. Rate-limit detection — when GitHub returns 403 with `x-ratelimit-remaining:
+ *      0`, throw a typed `GitHubRateLimitError` so callers can react (set
+ *      GITHUB_TOKEN, retry after reset).
+ *   4. Empty-body detection — 200 OK + zero-byte body is the documented incident
+ *      shape (see GitHubEmptyBodyError JSDoc). Raised as a typed error so the
+ *      ref / GHSA modules can fall back to GraphQL on a different backend.
+ *      `getGhsaUrl` lives here because it's the URL counterpart to the GHSA
+ *      fetch path — the only other consumer is the GHSA module.
  */
 
 import { errorMessage } from '../errors/message'
@@ -32,60 +27,59 @@ import { GitHubEmptyBodyError } from './errors'
 import type { GitHubFetchOptions, GitHubRateLimitError } from './types'
 
 /**
- * Fetch data from GitHub API with automatic authentication and rate limit handling.
- * Makes authenticated requests to the GitHub REST API with proper error handling.
+ * Fetch data from GitHub API with automatic authentication and rate limit
+ * handling. Makes authenticated requests to the GitHub REST API with proper
+ * error handling.
  *
- * Features:
- * - Automatic token injection from environment if not provided
- * - Rate limit detection with helpful error messages
- * - Standard GitHub API headers (Accept, User-Agent)
- * - JSON response parsing
+ * Features: - Automatic token injection from environment if not provided - Rate
+ * limit detection with helpful error messages - Standard GitHub API headers
+ * (Accept, User-Agent) - JSON response parsing.
+ *
+ * @example
+ *   ```ts
+ *   // Fetch repository information
+ *   interface Repo {
+ *   name: string
+ *   full_name: string
+ *   default_branch: string
+ *   }
+ *   const repo = await fetchGitHub<Repo>(
+ *   'https://api.github.com/repos/owner/repo',
+ *   )
+ *   console.log(`Default branch: ${repo.default_branch}`)
+ *   ```
+ *
+ * @example
+ *   ;```ts
+ *   // With custom token and headers
+ *   const data = await fetchGitHub('https://api.github.com/user', {
+ *     token: 'ghp_customtoken',
+ *     headers: { 'X-Custom-Header': 'value' },
+ *   })
+ *   ```
+ *
+ * @example
+ *   ```ts
+ *   // Handle rate limit errors
+ *   try {
+ *   await fetchGitHub('https://api.github.com/repos/owner/repo')
+ *   } catch (e) {
+ *   if (e.status === 403 && e.resetTime) {
+ *   console.error(`Rate limited until ${e.resetTime}`)
+ *   }
+ *   }
+ *   ```
  *
  * @template T - Expected response type (defaults to `unknown`)
- * @param url - Full GitHub API URL (e.g., 'https://api.github.com/repos/owner/repo')
- * @param options - Fetch options including token and custom headers
+ *
+ * @param url - Full GitHub API URL (e.g.,
+ *   'https://api.github.com/repos/owner/repo')
+ * @param options - Fetch options including token and custom headers.
+ *
  * @returns Parsed JSON response of type `T`
  *
  * @throws {GitHubRateLimitError} When API rate limit is exceeded (status 403)
  * @throws {Error} For other API errors with status code and message
- *
- * @example
- * ```ts
- * // Fetch repository information
- * interface Repo {
- *   name: string
- *   full_name: string
- *   default_branch: string
- * }
- * const repo = await fetchGitHub<Repo>(
- *   'https://api.github.com/repos/owner/repo'
- * )
- * console.log(`Default branch: ${repo.default_branch}`)
- * ```
- *
- * @example
- * ```ts
- * // With custom token and headers
- * const data = await fetchGitHub(
- *   'https://api.github.com/user',
- *   {
- *     token: 'ghp_customtoken',
- *     headers: { 'X-Custom-Header': 'value' }
- *   }
- * )
- * ```
- *
- * @example
- * ```ts
- * // Handle rate limit errors
- * try {
- *   await fetchGitHub('https://api.github.com/repos/owner/repo')
- * } catch (e) {
- *   if (e.status === 403 && e.resetTime) {
- *     console.error(`Rate limited until ${e.resetTime}`)
- *   }
- * }
- * ```
  */
 export async function fetchGitHub<T = unknown>(
   url: string,
@@ -157,17 +151,18 @@ export async function fetchGitHub<T = unknown>(
 }
 
 /**
- * Generate GitHub Security Advisory URL from GHSA ID.
- * Constructs the public advisory URL for a given GHSA identifier.
- *
- * @param ghsaId - GHSA identifier (e.g., 'GHSA-xxxx-yyyy-zzzz')
- * @returns Full URL to the advisory page
+ * Generate GitHub Security Advisory URL from GHSA ID. Constructs the public
+ * advisory URL for a given GHSA identifier.
  *
  * @example
- * ```ts
- * const url = getGhsaUrl('GHSA-1234-5678-90ab')
- * console.log(url) // 'https://github.com/advisories/GHSA-1234-5678-90ab'
- * ```
+ *   ;```ts
+ *   const url = getGhsaUrl('GHSA-1234-5678-90ab')
+ *   console.log(url) // 'https://github.com/advisories/GHSA-1234-5678-90ab'
+ *   ```
+ *
+ * @param ghsaId - GHSA identifier (e.g., 'GHSA-xxxx-yyyy-zzzz')
+ *
+ * @returns Full URL to the advisory page
  */
 export function getGhsaUrl(ghsaId: string): string {
   return `https://github.com/advisories/${ghsaId}`

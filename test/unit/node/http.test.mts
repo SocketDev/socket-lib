@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/node/http.ts.
+ * @file Unit tests for src/node/http.ts.
  */
 
 import { describe, expect, it } from 'vitest'

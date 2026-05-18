@@ -1,27 +1,22 @@
 /* oxlint-disable socket/sort-source-methods -- codemod helpers ordered by AST walk phase; module-level config / pattern tables between them block autofix. */
 /**
- * @fileoverview Codemod: rewrite call sites to use primordials.
+ * @file Codemod: rewrite call sites to use primordials. Strategy: collect all
+ *   rewrite spans (start/end positions in source) per file, then apply them
+ *   back-to-front so earlier positions don't shift after replacement. After
+ *   rewriting, prepend an import block for every primordial introduced. What
+ *   gets rewritten:
  *
- * Strategy: collect all rewrite spans (start/end positions in source)
- * per file, then apply them back-to-front so earlier positions don't
- * shift after replacement. After rewriting, prepend an import block
- * for every primordial introduced.
- *
- * What gets rewritten:
  *   - `Object.keys(x)` → `ObjectKeys(x)` (static method)
- *   - `Math.ceil(n)`   → `MathCeil(n)`  (static method)
- *   - `JSON.parse(s)`  → `JSONParse(s)` (static method)
+ *   - `Math.ceil(n)` → `MathCeil(n)` (static method)
+ *   - `JSON.parse(s)` → `JSONParse(s)` (static method)
  *   - `new TypeError(msg)` → `new TypeErrorCtor(msg)` (constructor)
- *   - With `--include-guessed` or unambiguous-method match:
- *     `arr.map(fn)` → `ArrayPrototypeMap(arr, fn)` (prototype method)
- *
- * What is NOT rewritten:
- *   - Patterns whose primordial isn't exported yet — they show up in
- *     `prim gaps` and need a surface addition first.
- *   - Property-only access (`Symbol.iterator`) — out of scope; it's a
- *     constant reference, not a call.
- *
- * Default mode is dry-run. `--apply` actually writes the files.
+ *   - With `--include-guessed` or unambiguous-method match: `arr.map(fn)` →
+ *     `ArrayPrototypeMap(arr, fn)` (prototype method) What is NOT rewritten:
+ *   - Patterns whose primordial isn't exported yet — they show up in `prim gaps`
+ *     and need a surface addition first.
+ *   - Property-only access (`Symbol.iterator`) — out of scope; it's a constant
+ *     reference, not a call. Default mode is dry-run. `--apply` actually writes
+ *     the files.
  */
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
@@ -47,46 +42,54 @@ import {
 const DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
 
 /**
- * Output format for the inserted primordials import:
- *   { kind: 'esm' }: emits `import { X, Y } from '<specifier>'`. Default;
- *     used when the target is ESM source code.
- *   { kind: 'cjs' }: emits `const { X, Y } = require('<specifier>')`.
- *     Used when the target is CJS bundled output (dist/external/*.js).
+ * Output format for the inserted primordials import: { kind: 'esm' }: emits
+ * `import { X, Y } from '<specifier>'`. Default; used when the target is ESM
+ * source code. { kind: 'cjs' }: emits `const { X, Y } =
+ * require('<specifier>')`. Used when the target is CJS bundled output
+ * (dist/external/*.js).
  *
  * `specifier` is either a static string or a `(absFilePath) => string`
- * function. The function form lets callers compute a per-file relative
- * path to the primordials module — e.g.
- *   absFile === '.../dist/external/tar-fs.js' → '../primordials.js'
- *   absFile === '.../dist/external/@npmcli/x/y.js' → '../../../primordials.js'
+ * function. The function form lets callers compute a per-file relative path to
+ * the primordials module — e.g. absFile === '.../dist/external/tar-fs.js' →
+ * '../primordials.js' absFile === '.../dist/external/@npmcli/x/y.js' →
+ * '../../../primordials.js'
  *
- * `aliasPrefix` (optional) renames the imported identifiers in the
- * destructure list. Useful for the bundle-transform path: bundled
- * externals frequently declare local `var ObjectDefineProperty = …`
- * shadows from esbuild's CJS interop runtime, which would collide
- * with a top-level `const { ObjectDefineProperty } = require(…)`.
- * Setting `aliasPrefix: '_p_'` rewrites all primordial references in
- * the file to `_p_ObjectDefineProperty(…)` and emits the require as
- * `const { ObjectDefineProperty: _p_ObjectDefineProperty } = …`,
- * avoiding any clash with the bundle's own identifiers.
+ * `aliasPrefix` (optional) renames the imported identifiers in the destructure
+ * list. Useful for the bundle-transform path: bundled externals frequently
+ * declare local `var ObjectDefineProperty = …` shadows from esbuild's CJS
+ * interop runtime, which would collide with a top-level `const {
+ * ObjectDefineProperty } = require(…)`. Setting `aliasPrefix: '_p_'` rewrites
+ * all primordial references in the file to `_p_ObjectDefineProperty(…)` and
+ * emits the require as `const { ObjectDefineProperty: _p_ObjectDefineProperty }
+ * = …`, avoiding any clash with the bundle's own identifiers.
  *
- * `splitByLeaf` (optional) groups identifiers by leaf name and emits
- * one import / require per leaf. Used after the primordials split,
- * where consumers no longer share a single barrel — instead each
- * primordial lives in `@socketsecurity/lib/primordials/<leaf>`.
- * `exportToLeaf` maps every export name to its leaf; `leafSpecifier`
- * receives the consumer's absolute path plus the leaf name and
- * returns the import target. When `splitByLeaf` is set, the top-level
- * `specifier` is ignored.
+ * `splitByLeaf` (optional) groups identifiers by leaf name and emits one import
+ * / require per leaf. Used after the primordials split, where consumers no
+ * longer share a single barrel — instead each primordial lives in
+ * `@socketsecurity/lib/primordials/<leaf>`. `exportToLeaf` maps every export
+ * name to its leaf; `leafSpecifier` receives the consumer's absolute path plus
+ * the leaf name and returns the import target. When `splitByLeaf` is set, the
+ * top-level `specifier` is ignored.
  *
- * @typedef {{ kind: 'esm' | 'cjs', specifier: string | ((absFile: string) => string), aliasPrefix?: string, splitByLeaf?: { exportToLeaf: Map<string, string>, leafSpecifier: (absFile: string, leaf: string) => string } }} ImportStyle
+ * @typedef {{
+ *   kind: 'esm' | 'cjs'
+ *   specifier: string | ((absFile: string) => string)
+ *   aliasPrefix?: string
+ *   splitByLeaf?: {
+ *     exportToLeaf: Map<string, string>
+ *     leafSpecifier: (absFile: string, leaf: string) => string
+ *   }
+ * }} ImportStyle
  */
 
 /**
  * @typedef {Object} CodemodResult
+ *
  * @property {number} filesChanged
  * @property {number} rewriteCount
- * @property {number} skipped         Rewrites declined (e.g. guessed-receiver without --include-guessed).
- * @property {Array<{ file: string; rewrites: number; importAdded: boolean }>} files
+ * @property {number} skipped Rewrites declined (e.g. guessed-receiver without
+ *   --include-guessed).
+ * @property {{ file: string; rewrites: number; importAdded: boolean }[]} files
  */
 
 /**
@@ -96,12 +99,13 @@ const DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER = '@socketsecurity/lib/primordials'
  * @param {Set<string>} opts.exported
  * @param {boolean} opts.apply
  * @param {boolean} opts.includeGuessed
- * @param {boolean} [opts.aiDisambiguate]    When true, defer ambiguous
- *   prototype methods (.test, .then, etc.) to Claude with a locked-down
- *   read-only tool surface. Off by default — opt-in via CLI flag.
- *   Requires ANTHROPIC_API_KEY in env.
+ * @param {boolean} [opts.aiDisambiguate] When true, defer ambiguous prototype
+ *   methods (.test, .then, etc.) to Claude with a locked-down read-only tool
+ *   surface. Off by default — opt-in via CLI flag. Requires ANTHROPIC_API_KEY
+ *   in env.
  * @param {ImportStyle} [opts.importStyle] Defaults to ESM with the
  *   '@socketsecurity/lib/primordials' specifier.
+ *
  * @returns {Promise<CodemodResult>}
  */
 export async function applyCodemod({
@@ -202,9 +206,9 @@ export function* walkDir(
  * Each rewrite is recorded as a `{ start, end, replacement, primordial }`
  * tuple, then applied right-to-left so positions stay valid.
  *
- * Async because the AI-deferred disambiguation pass for ambiguous
- * methods (.test, .then, etc.) calls into the locked-down Claude SDK.
- * Sync codepath when `aiDisambiguate` is false — same behavior as before.
+ * Async because the AI-deferred disambiguation pass for ambiguous methods
+ * (.test, .then, etc.) calls into the locked-down Claude SDK. Sync codepath
+ * when `aiDisambiguate` is false — same behavior as before.
  */
 export async function rewriteFile({
   absPath,
@@ -290,7 +294,19 @@ export async function rewriteFile({
   // an async pass that calls the locked-down Claude disambiguator.
   // Snapshots the byte ranges up-front because the AST is freed
   // when the walk ends.
-  /** @type {Array<{methodName:string, receiverName:string, calleeStart:number, calleeEnd:number, firstArgStart:number, lastArgEnd:number, objectStart:number, objectEnd:number, offset:number}>} */
+  /**
+   * @type {{
+   *   methodName: string
+   *   receiverName: string
+   *   calleeStart: number
+   *   calleeEnd: number
+   *   firstArgStart: number
+   *   lastArgEnd: number
+   *   objectStart: number
+   *   objectEnd: number
+   *   offset: number
+   * }[]}
+   */
   const pendingAmbiguous = []
 
   walkAst(ast, node => {
@@ -638,13 +654,12 @@ export async function rewriteFile({
 }
 
 /**
- * Scan `src` forward from `from` (exclusive) until we hit the matching
- * `)` for an open call. Returns the char index AFTER the `)`, or -1
- * if no `)` is found before EOF. Tolerates whitespace, line comments,
- * block comments, and trailing commas. Doesn't try to handle
- * arbitrarily-nested expressions — callers pass `from` set to the
- * known end of the last argument, so we're scanning within the
- * remaining `<ws>* (,)? <ws>* )` slice.
+ * Scan `src` forward from `from` (exclusive) until we hit the matching `)` for
+ * an open call. Returns the char index AFTER the `)`, or -1 if no `)` is found
+ * before EOF. Tolerates whitespace, line comments, block comments, and trailing
+ * commas. Doesn't try to handle arbitrarily-nested expressions — callers pass
+ * `from` set to the known end of the last argument, so we're scanning within
+ * the remaining `<ws>* (,)? <ws>* )` slice.
  */
 export function findClosingParen(src: string, from: number): number {
   let i = from
@@ -691,19 +706,18 @@ export function findClosingParen(src: string, from: number): number {
 }
 
 /**
- * Repair AST end positions in place. Walks depth-first; for each node
- * whose `end` is missing or smaller than the computed end of its
- * children, replaces it with the maximum end seen across descendants.
+ * Repair AST end positions in place. Walks depth-first; for each node whose
+ * `end` is missing or smaller than the computed end of its children, replaces
+ * it with the maximum end seen across descendants.
  *
- * Workaround for acorn-wasm's compact_serialize emitting `0` (or other
- * stale data-field bits) as `end` for node kinds whose data field
- * doesn't pack the end position in its high 32 bits. Inner expression
- * nodes (Identifier, Literal, MemberExpression after the fix in this
- * file's earlier session, etc.) have correct ends; this function
- * propagates those upward.
+ * Workaround for acorn-wasm's compact_serialize emitting `0` (or other stale
+ * data-field bits) as `end` for node kinds whose data field doesn't pack the
+ * end position in its high 32 bits. Inner expression nodes (Identifier,
+ * Literal, MemberExpression after the fix in this file's earlier session, etc.)
+ * have correct ends; this function propagates those upward.
  *
- * Returns the (possibly repaired) end of `node` so parents can fold it
- * into their own computation.
+ * Returns the (possibly repaired) end of `node` so parents can fold it into
+ * their own computation.
  */
 export function repairEndPositions(node) {
   if (!node || typeof node !== 'object') {
@@ -765,13 +779,13 @@ export function repairEndPositions(node) {
 }
 
 /**
- * Build a sparse byte-offset → char-offset map for `src`. Returns
- * `null` when the source is pure ASCII (every byte == every char) so
- * the caller can fast-path identity translation.
+ * Build a sparse byte-offset → char-offset map for `src`. Returns `null` when
+ * the source is pure ASCII (every byte == every char) so the caller can
+ * fast-path identity translation.
  *
- * The returned array has one entry per UTF-8 byte position: arr[B]
- * gives the char index that byte starts. Bytes inside a multi-byte
- * codepoint share the char index of the codepoint's lead byte.
+ * The returned array has one entry per UTF-8 byte position: arr[B] gives the
+ * char index that byte starts. Bytes inside a multi-byte codepoint share the
+ * char index of the codepoint's lead byte.
  */
 export function buildByteToCharMap(src: string): number[] | undefined {
   // Scan: any code unit ≥ 0x80 implies a multi-byte UTF-8 representation.
@@ -820,9 +834,9 @@ export function buildByteToCharMap(src: string): number[] | undefined {
 }
 
 /**
- * Walk an AST manually since acorn-wasm's `simple` walker can't pass
- * structured visitors that we want to share with codemod. This walker
- * visits every node depth-first.
+ * Walk an AST manually since acorn-wasm's `simple` walker can't pass structured
+ * visitors that we want to share with codemod. This walker visits every node
+ * depth-first.
  */
 export function walkAst(node, visit) {
   if (!node || typeof node !== 'object') {
@@ -855,15 +869,15 @@ export function escapeRegex(s) {
 /**
  * Insert (or merge into) the primordials import statement.
  *
- * In ESM mode emits `import { X, Y } from '<specifier>'`. In CJS mode
- * emits `const { X, Y } = require('<specifier>')`. If a matching import
- * (same shape, same specifier) already exists in `src`, the new
- * identifiers are merged into its destructure list and we re-sort the
- * keys; otherwise the new statement is inserted after the last existing
- * import/require, or prepended if neither exists.
+ * In ESM mode emits `import { X, Y } from '<specifier>'`. In CJS mode emits
+ * `const { X, Y } = require('<specifier>')`. If a matching import (same shape,
+ * same specifier) already exists in `src`, the new identifiers are merged into
+ * its destructure list and we re-sort the keys; otherwise the new statement is
+ * inserted after the last existing import/require, or prepended if neither
+ * exists.
  *
- * Returns the rewritten source and a boolean indicating whether anything
- * was added/changed (vs already-present-and-complete).
+ * Returns the rewritten source and a boolean indicating whether anything was
+ * added/changed (vs already-present-and-complete).
  */
 export function ensureImports(src, identifiers, importStyle) {
   const { kind, specifier } = importStyle
@@ -932,11 +946,10 @@ export function ensureImports(src, identifiers, importStyle) {
 }
 
 /**
- * Find the byte offset right after the last import / require statement
- * at module scope. Returns the byte offset right after the leading
- * file-level JSDoc / shebang block when no import/require is found, so
- * callers prepend BELOW the `@fileoverview` block instead of clobbering
- * it.
+ * Find the byte offset right after the last import / require statement at
+ * module scope. Returns the byte offset right after the leading file-level
+ * JSDoc / shebang block when no import/require is found, so callers prepend
+ * BELOW the `@fileoverview` block instead of clobbering it.
  */
 export function findInsertionPoint(src) {
   // ESM: `import ... from '...'`.

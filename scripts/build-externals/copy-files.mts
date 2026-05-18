@@ -1,5 +1,5 @@
 /**
- * @fileoverview File copying utilities for external dependencies.
+ * @file File copying utilities for external dependencies.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
@@ -10,8 +10,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 const logger = getDefaultLogger()
 
 /**
- * Copy local TypeScript declaration files only.
- * JavaScript files are either bundled by esbuild or manually vendored (handled separately).
+ * Copy local TypeScript declaration files only. JavaScript files are either
+ * bundled by esbuild or manually vendored (handled separately).
  */
 export async function copyLocalFiles(
   srcDir: string,

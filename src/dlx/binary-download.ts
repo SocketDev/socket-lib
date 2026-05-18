@@ -1,11 +1,10 @@
 /**
- * @fileoverview Download helpers for dlx binaries — fetch tarballs from
- * URLs, verify integrity, cache to disk with concurrency locking.
+ * @file Download helpers for dlx binaries — fetch tarballs from URLs, verify
+ *   integrity, cache to disk with concurrency locking.
  *
  *   - `downloadBinary` — high-level URL→cached-binary flow
- *   - `downloadBinaryFile` — low-level fetch+verify with processLock
- *
- * Split out of `dlx/binary.ts` for size hygiene.
+ *   - `downloadBinaryFile` — low-level fetch+verify with processLock Split out of
+ *     `dlx/binary.ts` for size hygiene.
  */
 
 import process from 'node:process'
@@ -36,34 +35,33 @@ import {
 import type { DlxBinaryOptions } from './binary-types'
 
 /**
- * Download a binary from a URL with caching (without execution).
- * Similar to downloadPackage from dlx/package.
+ * Download a binary from a URL with caching (without execution). Similar to
+ * downloadPackage from dlx/package.
  *
- * Returns `{binaryPath, downloaded, integrity}`. The `integrity` field
- * is the SRI-formatted `sha512-<base64>` hash of the cached file —
- * computed by the downloader on first fetch, persisted to cache
- * metadata, and re-read on subsequent cache hits. This supports the
- * trust-on-first-use pattern:
+ * Returns `{binaryPath, downloaded, integrity}`. The `integrity` field is the
+ * SRI-formatted `sha512-<base64>` hash of the cached file — computed by the
+ * downloader on first fetch, persisted to cache metadata, and re-read on
+ * subsequent cache hits. This supports the trust-on-first-use pattern:
  *
- *   // 1. First call — caller has no pinned integrity yet.
- *   const { integrity } = await downloadBinary({ url, name: 'tool' })
- *   // Caller writes `integrity` back to external-tools.json or similar.
+ * // 1. First call — caller has no pinned integrity yet. const { integrity } =
+ * await downloadBinary({ url, name: 'tool' }) // Caller writes `integrity` back
+ * to external-tools.json or similar.
  *
- *   // 2. Subsequent calls — caller pins the integrity for verification.
- *   await downloadBinary({ url, name: 'tool', hash: integrity })
- *
- * @returns `{binaryPath, downloaded, integrity}` — binary location,
- *   whether this call fetched (vs. cache-hit), and the computed SRI
- *   integrity for future pinning.
+ * // 2. Subsequent calls — caller pins the integrity for verification. await
+ * downloadBinary({ url, name: 'tool', hash: integrity })
  *
  * @example
- * ```typescript
- * const { binaryPath, integrity } = await downloadBinary({
+ *   ```typescript
+ *   const { binaryPath, integrity } = await downloadBinary({
  *   url: 'https://example.com/tool-linux-x64',
  *   name: 'tool',
- * })
- * console.log(`Binary at: ${binaryPath}, pin: ${integrity}`)
- * ```
+ *   })
+ *   console.log(`Binary at: ${binaryPath}, pin: ${integrity}`)
+ *   ```
+ *
+ * @returns `{binaryPath, downloaded, integrity}` — binary location, whether
+ *   this call fetched (vs. cache-hit), and the computed SRI integrity for
+ *   future pinning.
  */
 export async function downloadBinary(
   options: Omit<DlxBinaryOptions, 'spawnOptions'>,
@@ -175,23 +173,27 @@ export async function downloadBinary(
 }
 
 /**
- * Download a file from a URL with integrity checking and concurrent download protection.
- * Uses processLock to prevent multiple processes from downloading the same binary simultaneously.
+ * Download a file from a URL with integrity checking and concurrent download
+ * protection. Uses processLock to prevent multiple processes from downloading
+ * the same binary simultaneously.
  *
  * Supports two integrity verification methods:
- * - sha256: Hex SHA-256 checksum (verified inline during download via httpDownload)
- * - integrity: SRI format sha512-<base64> (verified post-download)
  *
- * The sha256 option is preferred as it fails early during download if the checksum doesn't match.
+ * - Sha256: Hex SHA-256 checksum (verified inline during download via
+ *   httpDownload)
+ * - Integrity: SRI format sha512-<base64> (verified post-download)
+ *
+ * The sha256 option is preferred as it fails early during download if the
+ * checksum doesn't match.
  *
  * @example
- * ```typescript
- * const integrity = await downloadBinaryFile(
+ *   ```typescript
+ *   const integrity = await downloadBinaryFile(
  *   'https://example.com/tool-linux-x64',
- *   '/tmp/dlx-cache/tool'
- * )
- * console.log(`Integrity: ${integrity}`)
- * ```
+ *   '/tmp/dlx-cache/tool',
+ *   )
+ *   console.log(`Integrity: ${integrity}`)
+ *   ```
  */
 export async function downloadBinaryFile(
   url: string,

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Temporary file and directory utilities for tests.
+ * @file Temporary file and directory utilities for tests.
  */
 
 import { randomUUID } from 'node:crypto'
@@ -13,8 +13,8 @@ import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { resetPaths } from '@socketsecurity/lib/paths/rewire'
 
 /**
- * Creates a unique temporary directory for testing.
- * The directory is created in the system's temp directory with a unique name.
+ * Creates a unique temporary directory for testing. The directory is created in
+ * the system's temp directory with a unique name.
  */
 export async function createTempDir(prefix: string): Promise<string> {
   const tempBaseDir = os.tmpdir()
@@ -26,10 +26,8 @@ export async function createTempDir(prefix: string): Promise<string> {
 }
 
 /**
- * Mock the home directory for cross-platform testing.
- * Uses env rewiring for thread-safe test isolation.
- * On Unix: Sets HOME
- * On Windows: Sets USERPROFILE
+ * Mock the home directory for cross-platform testing. Uses env rewiring for
+ * thread-safe test isolation. On Unix: Sets HOME On Windows: Sets USERPROFILE
  * Also sets SOCKET_DLX_DIR for DLX cache isolation.
  */
 export function mockHomeDir(homeDir: string): () => void {
@@ -87,8 +85,9 @@ export function mockHomeDir(homeDir: string): () => void {
 }
 
 /**
- * Helper to run a callback with a temporary directory that's automatically cleaned up.
- * Useful for tests that need a temp directory for the duration of a test case.
+ * Helper to run a callback with a temporary directory that's automatically
+ * cleaned up. Useful for tests that need a temp directory for the duration of a
+ * test case.
  */
 export async function runWithTempDir(
   callback: (tempDir: string) => Promise<void>,
@@ -103,8 +102,8 @@ export async function runWithTempDir(
 }
 
 /**
- * Helper to create a temporary directory with automatic cleanup.
- * Returns an object with the temp directory path and cleanup function.
+ * Helper to create a temporary directory with automatic cleanup. Returns an
+ * object with the temp directory path and cleanup function.
  */
 export async function withTempDir(prefix: string): Promise<{
   cleanup: () => Promise<void>

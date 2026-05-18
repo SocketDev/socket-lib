@@ -1,6 +1,6 @@
 /**
- * @fileoverview Vitest configuration for isolated tests
- * Tests that require full isolation due to shared module state
+ * @file Vitest configuration for isolated tests Tests that require full
+ *   isolation due to shared module state.
  */
 
 import path from 'node:path'

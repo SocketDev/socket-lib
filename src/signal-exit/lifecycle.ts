@@ -1,8 +1,8 @@
 /**
- * @fileoverview `load` and `unload` — install and remove the
- * `signal-exit` listeners. Co-located with `getSignalListeners`
- * because the per-signal listener body calls `unload()`; keeping
- * them in the same leaf avoids an inter-leaf import cycle.
+ * @file `load` and `unload` — install and remove the `signal-exit` listeners.
+ *   Co-located with `getSignalListeners` because the per-signal listener body
+ *   calls `unload()`; keeping them in the same leaf avoids an inter-leaf import
+ *   cycle.
  */
 
 import {
@@ -59,10 +59,10 @@ export function getSignalListeners() {
  * Load signal handlers and hook into process exit events.
  *
  * @example
- * ```typescript
- * load()
- * // Signal handlers are now active
- * ```
+ *   ;```typescript
+ *   load()
+ *   // Signal handlers are now active
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function load(): void {
@@ -108,10 +108,10 @@ export function load(): void {
  * Unload signal handlers and restore original process behavior.
  *
  * @example
- * ```typescript
- * unload()
- * // Signal handlers are now removed
- * ```
+ *   ;```typescript
+ *   unload()
+ *   // Signal handlers are now removed
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function unload(): void {

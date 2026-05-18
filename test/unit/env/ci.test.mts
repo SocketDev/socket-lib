@@ -1,11 +1,10 @@
 /**
- * @fileoverview Unit tests for CI environment variable getter.
- *
- * Tests getCI() which detects CI/CD environments via the CI environment variable.
- * Returns true when the CI key exists in the environment, regardless of value.
- * Returns false only when CI is unset/undefined.
- * Uses rewire for test isolation (setEnv/clearEnv/resetEnv) without polluting process.env.
- * Critical for conditional behavior in CI environments (GitHub Actions, GitLab CI, etc.).
+ * @file Unit tests for CI environment variable getter. Tests getCI() which
+ *   detects CI/CD environments via the CI environment variable. Returns true
+ *   when the CI key exists in the environment, regardless of value. Returns
+ *   false only when CI is unset/undefined. Uses rewire for test isolation
+ *   (setEnv/clearEnv/resetEnv) without polluting process.env. Critical for
+ *   conditional behavior in CI environments (GitHub Actions, GitLab CI, etc.).
  */
 
 import { getCI } from '@socketsecurity/lib/env/ci'

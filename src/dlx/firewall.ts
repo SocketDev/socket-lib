@@ -1,13 +1,11 @@
 /**
- * @fileoverview Socket Firewall integration for dlx installs.
+ * @file Socket Firewall integration for dlx installs.
  *
  *   - `npmPurl` — build a PURL string for an npm package
- *   - `checkFirewallPurls` — scan an Arborist ideal tree against the
- *     public Socket Firewall API; throws if any dep is critical/high
- *
- * Split out of `dlx/package.ts` so the firewall logic + PURL helper
- * can be reused by other dlx flows without dragging in the install
- * orchestrator.
+ *   - `checkFirewallPurls` — scan an Arborist ideal tree against the public
+ *     Socket Firewall API; throws if any dep is critical/high Split out of
+ *     `dlx/package.ts` so the firewall logic + PURL helper can be reused by
+ *     other dlx flows without dragging in the install orchestrator.
  */
 
 import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
@@ -44,13 +42,14 @@ interface FirewallResponse {
 }
 
 /**
- * Check all resolved packages in an Arborist ideal tree against the
- * Socket Firewall API (public, no auth required).
- * Throws if any dependency has critical or high severity alerts.
+ * Check all resolved packages in an Arborist ideal tree against the Socket
+ * Firewall API (public, no auth required). Throws if any dependency has
+ * critical or high severity alerts.
  *
- * @param arb - Arborist instance with populated idealTree
- * @param requestedPackage - Top-level package name (for error messages)
  * @private
+ *
+ * @param arb - Arborist instance with populated idealTree.
+ * @param requestedPackage - Top-level package name (for error messages)
  */
 export async function checkFirewallPurls(
   arb: InstanceType<typeof Arborist>,
@@ -127,10 +126,9 @@ export async function checkFirewallPurls(
 }
 
 /**
- * Build a PURL string for an npm package.
- * Follows the PURL spec for the npm type:
- *   - Scoped: `@scope/pkg` → `pkg:npm/%40scope/pkg@version`
- *   - Unscoped: `pkg` → `pkg:npm/pkg@version`
+ * Build a PURL string for an npm package. Follows the PURL spec for the npm
+ * type: - Scoped: `@scope/pkg` → `pkg:npm/%40scope/pkg@version` - Unscoped:
+ * `pkg` → `pkg:npm/pkg@version`
  */
 export function npmPurl(name: string, version: string): string {
   const encoded = StringPrototypeStartsWith(name, '@')

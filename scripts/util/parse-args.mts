@@ -1,9 +1,8 @@
 /**
- * @fileoverview Simplified argument parsing for build scripts.
- * Uses Node.js built-in util.parseArgs (available in Node 22+).
- *
- * This is intentionally separate from src/argv/parse.ts to avoid circular
- * dependencies where build scripts depend on the built dist output.
+ * @file Simplified argument parsing for build scripts. Uses Node.js built-in
+ *   util.parseArgs (available in Node 22+). This is intentionally separate from
+ *   src/argv/parse.ts to avoid circular dependencies where build scripts depend
+ *   on the built dist output.
  */
 
 import process from 'node:process'
@@ -42,8 +41,8 @@ export function hasFlag(flag: string, argv: string[] = process.argv): boolean {
 }
 
 /**
- * Parse command-line arguments using Node.js built-in parseArgs.
- * Simplified version for build scripts that don't need yargs-parser features.
+ * Parse command-line arguments using Node.js built-in parseArgs. Simplified
+ * version for build scripts that don't need yargs-parser features.
  */
 export function parseArgs(
   config: Partial<ParseArgsConfig> = {},

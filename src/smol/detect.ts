@@ -1,23 +1,19 @@
 /**
- * @fileoverview Smol detection + lazy-loader for `node:smol-util`.
+ * @file Smol detection + lazy-loader for `node:smol-util`. Two
+ *   responsibilities:
  *
- * Two responsibilities:
- *
- *   1. `isSmol()` — memoized boolean detector for socket-btm's smol
- *      Node binary. Mirrors `isSeaBinary()` from `src/sea.ts`. Probes
- *      via `node:module.isBuiltin('node:smol-util')` since only the
- *      smol binary registers any `node:smol-*` builtins.
- *
- *   2. `getSmolUtil()` — lazy-loader for the `node:smol-util` binding,
- *      which provides native `uncurryThis` and `applyBind` (single
- *      V8 dispatch via `args.Data()` + `v8::Function::Call`, skipping
- *      the BoundFunction adapter + `Function.prototype.call` trampoline
- *      that the JS form `bind.bind(call)(fn)` hits twice per invocation).
- *      ~2x faster on hot uncurried-call sites.
- *
- * `getSmolUtil()` returns `undefined` on stock Node + non-Node
- * runtimes. Result is cached across calls; the lazy-loader follows
- * the same shape as `src/node/fs.ts` etc.
+ *   1. `isSmol()` — memoized boolean detector for socket-btm's smol Node binary.
+ *      Mirrors `isSeaBinary()` from `src/sea.ts`. Probes via
+ *      `node:module.isBuiltin('node:smol-util')` since only the smol binary
+ *      registers any `node:smol-*` builtins.
+ *   2. `getSmolUtil()` — lazy-loader for the `node:smol-util` binding, which
+ *      provides native `uncurryThis` and `applyBind` (single V8 dispatch via
+ *      `args.Data()` + `v8::Function::Call`, skipping the BoundFunction adapter
+ *      + `Function.prototype.call` trampoline that the JS form
+ *      `bind.bind(call)(fn)` hits twice per invocation). ~2x faster on hot
+ *      uncurried-call sites. `getSmolUtil()` returns `undefined` on stock Node
+ *      + non-Node runtimes. Result is cached across calls; the lazy-loader
+ *      follows the same shape as `src/node/fs.ts` etc.
  *
  * @see https://github.com/SocketDev/socket-btm — socket-btm builds
  *   the smol binary that exposes the `node:smol-util` binding.
@@ -39,21 +35,19 @@ export interface SmolUtilBinding {
     fn: (this: T, ...args: A) => R,
   ) => (self: T, args: A) => R
   /**
-   * Native equivalent of:
-   *   `(self, args) => { try { return fn.apply(self, args) } catch {} }`.
-   * Returns a function that swallows synchronous throws and returns
-   * `undefined`. Avoids JS-level throw construction on the swallow
-   * path — useful for logger sinks, debug hooks, abort handlers, etc.
+   * Native equivalent of: `(self, args) => { try { return fn.apply(self, args)
+   * } catch {} }`. Returns a function that swallows synchronous throws and
+   * returns `undefined`. Avoids JS-level throw construction on the swallow path
+   * — useful for logger sinks, debug hooks, abort handlers, etc.
    */
   applySafe: <T, A extends readonly unknown[], R>(
     fn: (this: T, ...args: A) => R,
   ) => (self: T, args: A) => R | undefined
   /**
-   * Native equivalent of:
-   *   `(...newArgs) => fn.call(thisArg, ...presetArgs, ...newArgs)`.
-   * Same shape as `Function.prototype.bind` but with a single C++
-   * dispatch instead of going through V8's BoundFunction adapter.
-   * Useful where `bind` would be hot — captured callbacks fed to
+   * Native equivalent of: `(...newArgs) => fn.call(thisArg, ...presetArgs,
+   * ...newArgs)`. Same shape as `Function.prototype.bind` but with a single C++
+   * dispatch instead of going through V8's BoundFunction adapter. Useful where
+   * `bind` would be hot — captured callbacks fed to
    * `setImmediate`/`setTimeout`/promise continuations.
    */
   bindCall: <T, P extends readonly unknown[], A extends readonly unknown[], R>(
@@ -62,17 +56,16 @@ export interface SmolUtilBinding {
     ...presetArgs: P
   ) => (...newArgs: A) => R
   /**
-   * Native equivalent of `Function.prototype.bind.bind(call)(fn)`.
-   * Single C++ dispatch via `args.Data()` + `v8::Function::Call`.
+   * Native equivalent of `Function.prototype.bind.bind(call)(fn)`. Single C++
+   * dispatch via `args.Data()` + `v8::Function::Call`.
    */
   uncurryThis: <T, A extends readonly unknown[], R>(
     fn: (this: T, ...args: A) => R,
   ) => (self: T, ...args: A) => R
   /**
-   * Native equivalent of:
-   *   `try { return new WeakRef(target) } catch { return undefined }`.
-   * Returns `undefined` for non-Object, non-Symbol inputs that would
-   * make the constructor throw. The Safe suffix follows the project's
+   * Native equivalent of: `try { return new WeakRef(target) } catch { return
+   * undefined }`. Returns `undefined` for non-Object, non-Symbol inputs that
+   * would make the constructor throw. The Safe suffix follows the project's
    * non-throwing-wrapper convention.
    */
   weakRefSafe: <T extends object | symbol>(target: T) => WeakRef<T> | undefined
@@ -86,9 +79,9 @@ export interface SmolUtilBinding {
 let _isSmol: boolean | undefined
 
 /**
- * Cached `node:smol-util` binding. `null` = probed and unavailable;
- * `undefined` = not yet probed. JS truthiness collapses both to "no
- * binding" at the call site.
+ * Cached `node:smol-util` binding. `null` = probed and unavailable; `undefined`
+ * = not yet probed. JS truthiness collapses both to "no binding" at the call
+ * site.
  */
 let _smolUtil: SmolUtilBinding | undefined
 let _smolUtilProbed = false
@@ -96,8 +89,8 @@ let _smolUtilProbed = false
 // ─── exports (alphabetical) ────────────────────────────────────────────
 
 /**
- * Returns `node:smol-util` when running on the smol Node binary,
- * otherwise `undefined`. Result is cached across calls.
+ * Returns `node:smol-util` when running on the smol Node binary, otherwise
+ * `undefined`. Result is cached across calls.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSmolUtil(): SmolUtilBinding | undefined {
@@ -113,21 +106,21 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
 }
 
 /**
- * Detect if the current process is running on socket-btm's smol Node
- * binary. Memoized on first call.
+ * Detect if the current process is running on socket-btm's smol Node binary.
+ * Memoized on first call.
  *
- * Defensive across runtimes: returns `false` on stock Node, browsers
- * (no `node:module`), Deno / Bun (different module resolution), and
- * worker threads (each has its own builtin table).
+ * Defensive across runtimes: returns `false` on stock Node, browsers (no
+ * `node:module`), Deno / Bun (different module resolution), and worker threads
+ * (each has its own builtin table).
  *
  * @example
- * ```ts
- * import { isSmol } from '@socketsecurity/lib/smol/detect'
+ *   ;```ts
+ *   import { isSmol } from '@socketsecurity/lib/smol/detect'
  *
- * if (isSmol()) {
- *   // running on the smol binary; native fast paths available
- * }
- * ```
+ *   if (isSmol()) {
+ *     // running on the smol binary; native fast paths available
+ *   }
+ *   ```
  */
 export function isSmol(): boolean {
   if (_isSmol === undefined) {

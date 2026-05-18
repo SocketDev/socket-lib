@@ -1,7 +1,7 @@
 /**
- * @fileoverview SSRI ↔ hex digest conversion helpers — `hexToSsri`
- * wraps a hex digest in `<algorithm>-<base64>` form, `ssriToHex`
- * decodes the base64 half back to hex.
+ * @file SSRI ↔ hex digest conversion helpers — `hexToSsri` wraps a hex digest
+ *   in `<algorithm>-<base64>` form, `ssriToHex` decodes the base64 half back to
+ *   hex.
  */
 
 import { BufferFrom, BufferPrototypeToString } from '../primordials/buffer'
@@ -13,16 +13,20 @@ import { ErrorCtor } from '../primordials/error'
  * Takes a hash in hex format and converts it to SSRI format with the specified
  * algorithm prefix (defaults to sha256).
  *
- * @param hex - Hash in hex format
- * @param algorithm - Hash algorithm (default: 'sha256')
- * @returns SSRI format hash (algorithm-base64)
- * @throws Error if hex format is invalid
- *
  * @example
- * ```typescript
- * const ssri = hexToSsri('76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856')
- * // Returns: 'sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY='
- * ```
+ *   ;```typescript
+ *   const ssri = hexToSsri(
+ *     '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856',
+ *   )
+ *   // Returns: 'sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY='
+ *   ```
+ *
+ * @param hex - Hash in hex format.
+ * @param algorithm - Hash algorithm (default: 'sha256')
+ *
+ * @returns SSRI format hash (algorithm-base64)
+ *
+ * @throws Error if hex format is invalid
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function hexToSsri(hex: string, algorithm = 'sha256'): string {
@@ -41,15 +45,19 @@ export function hexToSsri(hex: string, algorithm = 'sha256'): string {
  * Takes a hash in SSRI format (e.g., "sha256-base64hash") and converts it to
  * standard hex format (e.g., "hexstring").
  *
- * @param ssri - Hash in SSRI format (algorithm-base64)
- * @returns Hex string representation of the hash
- * @throws Error if SSRI format is invalid
- *
  * @example
- * ```typescript
- * const hex = ssriToHex('sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=')
- * // Returns: '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856'
- * ```
+ *   ;```typescript
+ *   const hex = ssriToHex(
+ *     'sha256-dmgqn8O75il1F24lQfOagWiHfYKNXK2LVkYfw2rCuFY=',
+ *   )
+ *   // Returns: '76682a9fc3bbe62975176e2541f39a8168877d828d5cad8b56461fc36ac2b856'
+ *   ```
+ *
+ * @param ssri - Hash in SSRI format (algorithm-base64)
+ *
+ * @returns Hex string representation of the hash
+ *
+ * @throws Error if SSRI format is invalid
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function ssriToHex(ssri: string): string {

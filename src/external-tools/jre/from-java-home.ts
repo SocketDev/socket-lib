@@ -1,12 +1,10 @@
 /**
- * @fileoverview `jreFromJavaHome()` — checks `$JAVA_HOME` for an
- * existing JRE/JDK. Returns the resolved-shape object if the env var
- * is set; otherwise `undefined`.
- *
- * Does NOT verify that the path actually contains a working `bin/java`
- * — that's the caller's job (or the spawn will fail loudly at the
- * use site). Keeping this leaf cheap means socket-cli can call it
- * unconditionally without paying a stat per resolution.
+ * @file `jreFromJavaHome()` — checks `$JAVA_HOME` for an existing JRE/JDK.
+ *   Returns the resolved-shape object if the env var is set; otherwise
+ *   `undefined`. Does NOT verify that the path actually contains a working
+ *   `bin/java` — that's the caller's job (or the spawn will fail loudly at the
+ *   use site). Keeping this leaf cheap means socket-cli can call it
+ *   unconditionally without paying a stat per resolution.
  */
 
 import path from 'node:path'

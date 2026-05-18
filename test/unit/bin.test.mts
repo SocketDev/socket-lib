@@ -1,14 +1,16 @@
 /**
- * @fileoverview Unit tests for binary path resolution and execution utilities.
+ * @file Unit tests for binary path resolution and execution utilities. Tests
+ *   binary discovery and execution helpers:
  *
- * Tests binary discovery and execution helpers:
- * - whichReal(), whichRealSync() find binaries in PATH and resolve to real script files
- * - resolveRealBinSync() resolves wrapper scripts to underlying .js files
- * - findRealNpm(), findRealPnpm(), findRealYarn() locate real package manager binaries
- * - findRealBin() generic real binary locator (bypasses shadow bins)
- * - execBin() executes binaries with options
- * - isShadowBinPath() detects Socket shadow binary paths
- * Used by Socket CLI for package manager operations and binary interception.
+ *   - whichReal(), whichRealSync() find binaries in PATH and resolve to real
+ *     script files
+ *   - resolveRealBinSync() resolves wrapper scripts to underlying .js files
+ *   - findRealNpm(), findRealPnpm(), findRealYarn() locate real package manager
+ *     binaries
+ *   - findRealBin() generic real binary locator (bypasses shadow bins)
+ *   - execBin() executes binaries with options
+ *   - isShadowBinPath() detects Socket shadow binary paths Used by Socket CLI for
+ *     package manager operations and binary interception.
  */
 
 import { promises as fs } from 'node:fs'

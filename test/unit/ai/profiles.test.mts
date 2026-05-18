@@ -1,6 +1,6 @@
 /**
- * @fileoverview Tests for ai/ profiles — verifies the lockdown
- * shapes are what callers expect.
+ * @file Tests for ai/ profiles — verifies the lockdown shapes are what callers
+ *   expect.
  */
 
 import { describe, expect, it } from 'vitest'

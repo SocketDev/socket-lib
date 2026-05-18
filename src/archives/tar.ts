@@ -1,18 +1,15 @@
 /**
- * @fileoverview Tar / tar.gz extraction with security limits and
- * symlink rejection. Both functions share a `map(header)` callback
- * that enforces:
+ * @file Tar / tar.gz extraction with security limits and symlink rejection.
+ *   Both functions share a `map(header)` callback that enforces:
  *
  *   - max entry count (inode-exhaustion DoS guard)
  *   - max single-file size
  *   - max total extracted size
  *   - rejection of null bytes in entry names
- *   - rejection of symlink / hardlink entries
- *
- * The duplicate map() bodies are intentional: the surrounding state
- * (entryCount, totalExtractedSize, destroyScheduled) is per-call, so
- * a shared helper would require threading state through closures and
- * obscure the security-defense intent.
+ *   - rejection of symlink / hardlink entries The duplicate map() bodies are
+ *     intentional: the surrounding state (entryCount, totalExtractedSize,
+ *     destroyScheduled) is per-call, so a shared helper would require threading
+ *     state through closures and obscure the security-defense intent.
  */
 
 import { createReadStream } from 'node:fs'
@@ -37,15 +34,15 @@ import type { ExtractOptions } from './types'
 /**
  * Extract a tar archive to a directory.
  *
- * @param archivePath - Path to tar file
- * @param outputDir - Directory to extract to
- * @param options - Extraction options
- *
  * @example
- * ```typescript
- * await extractTar('/tmp/archive.tar', '/tmp/output')
- * await extractTar('/tmp/archive.tar', '/tmp/output', { strip: 1 })
- * ```
+ *   ;```typescript
+ *   await extractTar('/tmp/archive.tar', '/tmp/output')
+ *   await extractTar('/tmp/archive.tar', '/tmp/output', { strip: 1 })
+ *   ```
+ *
+ * @param archivePath - Path to tar file.
+ * @param outputDir - Directory to extract to.
+ * @param options - Extraction options.
  */
 export async function extractTar(
   archivePath: string,
@@ -182,15 +179,15 @@ export async function extractTar(
 /**
  * Extract a gzipped tar archive to a directory.
  *
- * @param archivePath - Path to tar.gz or tgz file
- * @param outputDir - Directory to extract to
- * @param options - Extraction options
- *
  * @example
- * ```typescript
- * await extractTarGz('/tmp/archive.tar.gz', '/tmp/output')
- * await extractTarGz('/tmp/archive.tgz', '/tmp/output', { strip: 1 })
- * ```
+ *   ;```typescript
+ *   await extractTarGz('/tmp/archive.tar.gz', '/tmp/output')
+ *   await extractTarGz('/tmp/archive.tgz', '/tmp/output', { strip: 1 })
+ *   ```
+ *
+ * @param archivePath - Path to tar.gz or tgz file.
+ * @param outputDir - Directory to extract to.
+ * @param options - Extraction options.
  */
 export async function extractTarGz(
   archivePath: string,

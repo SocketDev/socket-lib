@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for getPackage / getPackageVersions.
+ * @file Unit tests for getPackage / getPackageVersions.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,11 +1,9 @@
 /**
- * @fileoverview Safe references to `Error` and its subclass constructors,
- * plus V8's stack-trace API.
- *
- * `Error.isError` is ES2025; `captureStackTrace` / `prepareStackTrace` /
- * `stackTraceLimit` are V8 extensions absent on JavaScriptCore and
- * SpiderMonkey. Each is typed `Function | undefined` so non-V8 importers
- * stay safe.
+ * @file Safe references to `Error` and its subclass constructors, plus V8's
+ *   stack-trace API. `Error.isError` is ES2025; `captureStackTrace` /
+ *   `prepareStackTrace` / `stackTraceLimit` are V8 extensions absent on
+ *   JavaScriptCore and SpiderMonkey. Each is typed `Function | undefined` so
+ *   non-V8 importers stay safe.
  */
 
 export const ErrorCtor: ErrorConstructor = Error

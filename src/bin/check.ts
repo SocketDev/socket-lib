@@ -1,16 +1,10 @@
 /**
- * @fileoverview `socket-lib check <name>` subcommand group.
- *
- * Routes to per-check handlers by name. Each check resolves its
- * config file and runs its check; the group itself just dispatches
- * and prints help.
- *
- * Available checks:
- *   primordials   Drift between a repo's `primordials` destructures
- *                 and socket-lib's userland mirror.
- *
- * Aliases let callers shorten the common ones:
- *   prim          → primordials
+ * @file `socket-lib check <name>` subcommand group. Routes to per-check
+ *   handlers by name. Each check resolves its config file and runs its check;
+ *   the group itself just dispatches and prints help. Available checks:
+ *   primordials Drift between a repo's `primordials` destructures and
+ *   socket-lib's userland mirror. Aliases let callers shorten the common ones:
+ *   prim → primordials.
  */
 
 import { getDefaultLogger } from '../logger/logger'

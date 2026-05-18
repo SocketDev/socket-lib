@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for socket-btm release utilities.
+ * @file Unit tests for socket-btm release utilities.
  */
 
 import process from 'node:process'

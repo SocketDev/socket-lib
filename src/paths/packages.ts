@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package.json path resolution utilities.
+ * @file Package.json path resolution utilities.
  */
 
 import { normalizePath } from './normalize'

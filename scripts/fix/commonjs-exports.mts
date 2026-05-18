@@ -1,6 +1,6 @@
 /**
- * @fileoverview Fix CommonJS exports for Node.js ESM compatibility.
- * Transforms esbuild's minified exports to clear module.exports = { ... } format.
+ * @file Fix CommonJS exports for Node.js ESM compatibility. Transforms
+ *   esbuild's minified exports to clear module.exports = { ... } format.
  */
 
 import { promises as fs } from 'node:fs'
@@ -40,8 +40,8 @@ export async function fixConstantExports() {
 }
 
 /**
- * Process files in a directory and fix CommonJS exports.
- * Handles files with `export default` by transforming __toCommonJS patterns.
+ * Process files in a directory and fix CommonJS exports. Handles files with
+ * `export default` by transforming __toCommonJS patterns.
  */
 export async function processDirectory(
   dir: string,

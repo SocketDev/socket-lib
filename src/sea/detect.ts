@@ -1,20 +1,15 @@
 /**
- * @fileoverview SEA (Single Executable Application) binary detection +
- * path accessor.
+ * @file SEA (Single Executable Application) binary detection + path accessor.
+ *   Two responsibilities (mirror of `src/smol/detect.ts` shape):
  *
- * Two responsibilities (mirror of `src/smol/detect.ts` shape):
- *
- *   1. `isSeaBinary()` — memoized boolean detector for whether the
- *      current process is running as a Node.js Single Executable
- *      Application. Probes via Node 24+'s `node:sea.isSea()` native
- *      API; falls back to `false` on older runtimes.
- *
+ *   1. `isSeaBinary()` — memoized boolean detector for whether the current process
+ *      is running as a Node.js Single Executable Application. Probes via Node
+ *      24+'s `node:sea.isSea()` native API; falls back to `false` on older
+ *      runtimes.
  *   2. `getSeaBinaryPath()` — returns the path of the SEA binary
  *      (`process.argv[0]` normalized) when running as SEA, otherwise
- *      `undefined`.
- *
- * Defensive across runtimes: returns `false` / `undefined` cleanly on
- * stock Node < 24, browsers, Deno, Bun.
+ *      `undefined`. Defensive across runtimes: returns `false` / `undefined`
+ *      cleanly on stock Node < 24, browsers, Deno, Bun.
  */
 
 import process from 'node:process'
@@ -27,16 +22,15 @@ import { normalizePath } from '../paths/normalize'
 let _isSea: boolean | undefined
 
 /**
- * Get the current SEA binary path.
- * Only valid when running as a SEA binary.
+ * Get the current SEA binary path. Only valid when running as a SEA binary.
  *
  * @example
- * ```typescript
- * const binPath = getSeaBinaryPath()
- * if (binPath) {
+ *   ```typescript
+ *   const binPath = getSeaBinaryPath()
+ *   if (binPath) {
  *   console.log(`Running as SEA binary: ${binPath}`)
- * }
- * ```
+ *   }
+ *   ```
  */
 export function getSeaBinaryPath(): string | undefined {
   return isSeaBinary() && process.argv[0]
@@ -45,15 +39,15 @@ export function getSeaBinaryPath(): string | undefined {
 }
 
 /**
- * Detect if the current process is running as a SEA binary.
- * Uses Node.js 24+ native API with caching for performance.
+ * Detect if the current process is running as a SEA binary. Uses Node.js 24+
+ * native API with caching for performance.
  *
  * @example
- * ```typescript
- * if (isSeaBinary()) {
- *   console.log('Running as a Single Executable Application')
- * }
- * ```
+ *   ;```typescript
+ *   if (isSeaBinary()) {
+ *     console.log('Running as a Single Executable Application')
+ *   }
+ *   ```
  */
 export function isSeaBinary(): boolean {
   if (_isSea === undefined) {

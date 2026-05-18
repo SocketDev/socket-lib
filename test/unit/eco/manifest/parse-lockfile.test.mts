@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for parse-lockfile dispatcher.
+ * @file Unit tests for parse-lockfile dispatcher.
  */
 
 import { describe, expect, it } from 'vitest'

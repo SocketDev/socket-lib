@@ -1,6 +1,6 @@
 /**
- * @fileoverview Console footer/summary formatting utilities.
- * Provides consistent footer and summary formatting for CLI applications.
+ * @file Console footer/summary formatting utilities. Provides consistent footer
+ *   and summary formatting for CLI applications.
  */
 
 import colors from '../external/yoctocolors-cjs'
@@ -16,31 +16,36 @@ const logger = getDefaultLogger()
 export interface FooterOptions {
   /**
    * Width of the footer border in characters.
+   *
    * @default 80
    */
   width?: number | undefined
   /**
    * Character to use for the border line.
+   *
    * @default '='
    */
   borderChar?: string | undefined
   /**
    * Include ISO timestamp in footer.
+   *
    * @default false
    */
   showTimestamp?: boolean | undefined
   /**
    * Show duration since start time.
+   *
    * @default false
    */
   showDuration?: boolean | undefined
   /**
-   * Start time in milliseconds (from Date.now()).
-   * Required when `showDuration` is true.
+   * Start time in milliseconds (from Date.now()). Required when `showDuration`
+   * is true.
    */
   startTime?: number | undefined
   /**
    * Color to apply to the footer message.
+   *
    * @default 'gray'
    */
   color?:
@@ -55,19 +60,33 @@ export interface FooterOptions {
 }
 
 export interface SummaryStats {
-  /** Total number of items processed */
+  /**
+   * Total number of items processed.
+   */
   total?: number | undefined
-  /** Number of successful items */
+  /**
+   * Number of successful items.
+   */
   success?: number | undefined
-  /** Number of failed items */
+  /**
+   * Number of failed items.
+   */
   failed?: number | undefined
-  /** Number of skipped items */
+  /**
+   * Number of skipped items.
+   */
   skipped?: number | undefined
-  /** Number of warnings */
+  /**
+   * Number of warnings.
+   */
   warnings?: number | undefined
-  /** Number of errors */
+  /**
+   * Number of errors.
+   */
   errors?: number | undefined
-  /** Duration in milliseconds (timestamp value, not elapsed time) */
+  /**
+   * Duration in milliseconds (timestamp value, not elapsed time)
+   */
   duration?: number | undefined
 }
 
@@ -75,21 +94,24 @@ export interface SummaryStats {
  * Create a formatted footer with optional message, timestamp, and duration.
  * Useful for marking the end of CLI output or showing completion status.
  *
- * @param message - Optional message to display in footer
- * @param options - Footer formatting options
- * @returns Formatted footer string with border and optional info
- *
  * @example
- * ```ts
- * const startTime = Date.now()
- * // ... do work
- * console.log(createFooter('Build complete', {
- *   width: 60,
- *   color: 'green',
- *   showDuration: true,
- *   startTime
- * }))
- * ```
+ *   ;```ts
+ *   const startTime = Date.now()
+ *   // ... do work
+ *   console.log(
+ *     createFooter('Build complete', {
+ *       width: 60,
+ *       color: 'green',
+ *       showDuration: true,
+ *       startTime,
+ *     }),
+ *   )
+ *   ```
+ *
+ * @param message - Optional message to display in footer.
+ * @param options - Footer formatting options.
+ *
+ * @returns Formatted footer string with border and optional info
  */
 export function createFooter(
   message?: string | undefined,
@@ -132,22 +154,25 @@ export function createFooter(
  * Automatically formats success/failure/warning counts with appropriate colors.
  * Useful for test results, build summaries, or batch operation reports.
  *
- * @param stats - Statistics to display in the summary
- * @param options - Footer formatting options
- * @returns Formatted summary footer string with colored indicators
- *
  * @example
- * ```ts
- * console.log(createSummaryFooter({
- *   total: 150,
- *   success: 145,
- *   failed: 3,
- *   skipped: 2,
- *   warnings: 5
- * }))
- * // Output: Total: 150 | ✓ 145 passed | ✗ 3 failed | ○ 2 skipped | ⚠ 5 warnings
- * // ========================================
- * ```
+ *   ;```ts
+ *   console.log(
+ *     createSummaryFooter({
+ *       total: 150,
+ *       success: 145,
+ *       failed: 3,
+ *       skipped: 2,
+ *       warnings: 5,
+ *     }),
+ *   )
+ *   // Output: Total: 150 | ✓ 145 passed | ✗ 3 failed | ○ 2 skipped | ⚠ 5 warnings
+ *   // ========================================
+ *   ```
+ *
+ * @param stats - Statistics to display in the summary.
+ * @param options - Footer formatting options.
+ *
+ * @returns Formatted summary footer string with colored indicators
  */
 export function createSummaryFooter(
   stats: SummaryStats,
@@ -194,19 +219,18 @@ export function createSummaryFooter(
 }
 
 /**
- * Print a footer with optional success message.
- * Uses `─` border character for a lighter appearance.
- * Fixed width of 55 characters to match `printHeader()`.
- *
- * @param message - Optional message to display (shown in green)
+ * Print a footer with optional success message. Uses `─` border character for a
+ * lighter appearance. Fixed width of 55 characters to match `printHeader()`.
  *
  * @example
- * ```ts
- * printFooter('Analysis complete')
- * // Output:
- * // ───────────────────────────────────────────────────
- * // Analysis complete (in green)
- * ```
+ *   ;```ts
+ *   printFooter('Analysis complete')
+ *   // Output:
+ *   // ───────────────────────────────────────────────────
+ *   // Analysis complete (in green)
+ *   ```
+ *
+ * @param message - Optional message to display (shown in green)
  */
 export function printFooter(message?: string | undefined): void {
   const border = repeatString('─', 55)

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Glob pattern constants.
+ * @file Glob pattern constants.
  */
 
 // Glob patterns.

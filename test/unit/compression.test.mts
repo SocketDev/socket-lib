@@ -1,13 +1,11 @@
 /**
- * @fileoverview Unit tests for compression helpers (brotli + gzip).
+ * @file Unit tests for compression helpers (brotli + gzip). Covers all three
+ *   calling shapes:
  *
- * Covers all three calling shapes:
  *   1. In-memory (Buffer/string round-trip)
  *   2. File-to-file (stream pipeline)
- *   3. Raw transform stream (composition)
- *
- * Plus detection helpers (magic bytes, filename extensions) and the
- * replace-in-place wrappers.
+ *   3. Raw transform stream (composition) Plus detection helpers (magic bytes,
+ *      filename extensions) and the replace-in-place wrappers.
  */
 
 /* oxlint-disable socket/prefer-safe-delete, socket/prefer-exists-sync -- tests verify raw fs behavior (unlink semantics, stat output) — not the lib wrappers. */

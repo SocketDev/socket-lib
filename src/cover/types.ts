@@ -1,5 +1,5 @@
 /**
- * @fileoverview Type definitions for coverage utilities.
+ * @file Type definitions for coverage utilities.
  */
 
 /**

@@ -1,7 +1,7 @@
 /**
- * @fileoverview Tests for withEnv and withEnvSync — context-isolated env
- * overrides via AsyncLocalStorage. These exercise the isolated-overrides
- * branches of getEnvValue / hasOverride / isInEnv.
+ * @file Tests for withEnv and withEnvSync — context-isolated env overrides via
+ *   AsyncLocalStorage. These exercise the isolated-overrides branches of
+ *   getEnvValue / hasOverride / isInEnv.
  */
 
 import { describe, expect, it } from 'vitest'

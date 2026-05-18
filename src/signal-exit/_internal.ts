@@ -1,14 +1,12 @@
 /**
- * @fileoverview Private internals for `signal-exit/*` modules — the
- * shared module-singleton state plus the lazy accessors that read
- * and mutate it. Owns the emitter, signal list, and `loaded` flag.
- * `lifecycle` (load/unload/getSignalListeners) and `intercept`
- * (processEmit/processReallyExit) share state through this leaf.
- *
- * Inlined signal-exit:
- *   https://socket.dev/npm/package/signal-exit/overview/4.1.0
- * ISC License — Copyright (c) 2015-2023 Benjamin Coe,
- * Isaac Z. Schlueter, and Contributors.
+ * @file Private internals for `signal-exit/*` modules — the shared
+ *   module-singleton state plus the lazy accessors that read and mutate it.
+ *   Owns the emitter, signal list, and `loaded` flag. `lifecycle`
+ *   (load/unload/getSignalListeners) and `intercept`
+ *   (processEmit/processReallyExit) share state through this leaf. Inlined
+ *   signal-exit: https://socket.dev/npm/package/signal-exit/overview/4.1.0 ISC
+ *   License — Copyright (c) 2015-2023 Benjamin Coe, Isaac Z. Schlueter, and
+ *   Contributors.
  */
 
 import type { EmittedSignals, SignalExitEmitter } from './types'
@@ -113,9 +111,9 @@ export function getEvents() {
 }
 
 /**
- * Get the cached signal list. Triggers lazy init on first call;
- * after `load()` runs it returns the filtered subset of successfully
- * registered signals instead of the full default list.
+ * Get the cached signal list. Triggers lazy init on first call; after `load()`
+ * runs it returns the filtered subset of successfully registered signals
+ * instead of the full default list.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSignals(): string[] {
@@ -146,6 +144,7 @@ export function getSignals(): string[] {
 
 /**
  * Read the loaded flag from a sibling leaf (lifecycle / on-exit).
+ *
  * @private
  */
 export function isLoaded(): boolean {
@@ -154,6 +153,7 @@ export function isLoaded(): boolean {
 
 /**
  * Set the `loaded` flag from a sibling leaf (load / unload).
+ *
  * @private
  */
 export function setLoaded(value: boolean): void {
@@ -162,6 +162,7 @@ export function setLoaded(value: boolean): void {
 
 /**
  * Replace the cached signal list (used by `load()`'s filter step).
+ *
  * @private
  */
 export function setSignals(value: string[]): void {

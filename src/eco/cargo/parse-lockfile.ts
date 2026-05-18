@@ -1,55 +1,43 @@
 /**
- * @fileoverview `parseCargoLock(content)` — parses a Rust `Cargo.lock`
- * (v1/v2/v3/v4) into a `ParsedLockfile`.
+ * @file `parseCargoLock(content)` — parses a Rust `Cargo.lock` (v1/v2/v3/v4)
+ *   into a `ParsedLockfile`. Cargo.lock uses a constrained TOML dialect: a
+ *   top-level `version = N` scalar plus repeating `[[package]]` array-of-table
+ *   entries. We line-scan it instead of pulling in a full TOML parser — the
+ *   spec for the lockfile is stable and small (`name`, `version`, `source`,
+ *   `checksum`, `dependencies = [ ... ]`), and a hand-rolled scanner is ~100×
+ *   cheaper than dragging in `@iarna/toml` for one use case. `dependencies`
+ *   entries come in two forms (cargo strips redundant versions when they're
+ *   unambiguous):
  *
- * Cargo.lock uses a constrained TOML dialect: a top-level `version = N`
- * scalar plus repeating `[[package]]` array-of-table entries. We
- * line-scan it instead of pulling in a full TOML parser — the spec
- * for the lockfile is stable and small (`name`, `version`, `source`,
- * `checksum`, `dependencies = [ ... ]`), and a hand-rolled scanner is
- * ~100× cheaper than dragging in `@iarna/toml` for one use case.
- *
- * `dependencies` entries come in two forms (cargo strips redundant
- * versions when they're unambiguous):
- *   - `"name 1.2.3"`            — name + space-separated version
- *   - `"name"`                  — name only (when only one version
- *                                 of that crate is in the graph)
+ *   - `"name 1.2.3"` — name + space-separated version
+ *   - `"name"` — name only (when only one version of that crate is in the graph)
  *   - `"name 1.2.3 (registry+…)"` — name + version + source spec
- *
- * `parseGitUrl`-style detection here treats `source = "git+…"` as the
- * git VCS source, with `#<rev>` as the commit pin.
- *
- * The parser is forgiving — unknown keys ignored, missing fields
- * default to empty. It never throws.
- *
- * Source material (in lock-step order, newest → oldest):
+ *     `parseGitUrl`-style detection here treats `source = "git+…"` as the git
+ *     VCS source, with `#<rev>` as the commit pin. The parser is forgiving —
+ *     unknown keys ignored, missing fields default to empty. It never throws.
+ *     Source material (in lock-step order, newest → oldest):
  *
  *   1. **C++ native parser** in socket-btm/node-smol-builder:
  *      additions/source-patched/src/socketsecurity/manifest/parser_cargo.cc
  *      Same algorithm — keep the two in lock-step.
- *
  *   2. **socket-sdxgen** — algorithm oracle, broader coverage:
  *      socket-sdxgen/src/parsers/cargo/index.mts (851 lines)
- *
  *   3. **cdxgen** (pinned v11.11.0):
  *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/rust.js
  *      (parseCargoLock)
- *
- *   4. **Cargo's own lockfile encoder** — the source of truth for
- *      the format we're parsing:
+ *   4. **Cargo's own lockfile encoder** — the source of truth for the format we're
+ *      parsing:
  *      https://github.com/rust-lang/cargo/blob/master/src/cargo/core/resolver/encode.rs
  *      Lockfile format docs:
- *        https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
- *        https://doc.rust-lang.org/cargo/reference/resolver.html#lockfile-format
+ *      https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
+ *      https://doc.rust-lang.org/cargo/reference/resolver.html#lockfile-format
+ *      Regression guard:
  *
- * Regression guard:
- *
- *   - `[[patch.unused]]` blocks must NOT materialize as PackageRefs.
- *     Only `[[package]]` opens an entry; any other section header
- *     (including `[[patch.unused]]`, `[metadata]`, `[patch.crates-io]`,
- *     …) closes the current entry to undefined. See the fixture under
- *     socket-btm's test/fixtures/sdxgen-bug-regressions/
- *     cargo-patch-unused-no-leak/.
+ *   - `[[patch.unused]]` blocks must NOT materialize as PackageRefs. Only
+ *     `[[package]]` opens an entry; any other section header (including
+ *     `[[patch.unused]]`, `[metadata]`, `[patch.crates-io]`, …) closes the
+ *     current entry to undefined. See the fixture under socket-btm's
+ *     test/fixtures/sdxgen-bug-regressions/ cargo-patch-unused-no-leak/.
  */
 
 import { ArrayPrototypePush } from '../../primordials/array'
@@ -90,10 +78,10 @@ export function addToCargoIndex(
 }
 
 /**
- * Strip Cargo's `name version (source)` dependency entry down to just
- * the crate name. The version/source are advisory for cycle-breaking
- * and not part of `PackageRef.dependencies` (which is a flat list of
- * names, matching the npm/yarn/pnpm convention).
+ * Strip Cargo's `name version (source)` dependency entry down to just the crate
+ * name. The version/source are advisory for cycle-breaking and not part of
+ * `PackageRef.dependencies` (which is a flat list of names, matching the
+ * npm/yarn/pnpm convention).
  */
 export function extractCargoDepName(entry: string): string {
   // Strip surrounding quotes if present.
@@ -274,9 +262,9 @@ export function parseCargoGitSource(source: string):
 }
 
 /**
- * Parse a TOML array of strings on a single line:
- * `dependencies = [ "foo 1.0", "bar 2.0" ]`. Returns the strings as
- * raw entries (each callsite runs `extractCargoDepName`).
+ * Parse a TOML array of strings on a single line: `dependencies = [ "foo 1.0",
+ * "bar 2.0" ]`. Returns the strings as raw entries (each callsite runs
+ * `extractCargoDepName`).
  */
 export function parseInlineArray(value: string): string[] {
   const start = StringPrototypeIndexOf(value, '[')
@@ -338,9 +326,9 @@ export function stripTomlString(value: string): string {
 }
 
 /**
- * Read the value half of a `key = value` TOML line. Returns the raw
- * value text (no quote stripping); callers run `stripTomlString` if
- * they want the inner string.
+ * Read the value half of a `key = value` TOML line. Returns the raw value text
+ * (no quote stripping); callers run `stripTomlString` if they want the inner
+ * string.
  */
 export function valueAfterEquals(line: string): string {
   const eq = StringPrototypeIndexOf(line, '=')

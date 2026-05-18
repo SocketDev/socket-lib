@@ -1,7 +1,7 @@
 /**
- * @fileoverview Streaming transform helper — `transform()` wraps
- * `streaming-iterables.transform` with the project's `pRetry`
- * per-item retry policy.
+ * @file Streaming transform helper — `transform()` wraps
+ *   `streaming-iterables.transform` with the project's `pRetry` per-item retry
+ *   policy.
  */
 
 import { transform as siTransform } from '../external/streaming-iterables'
@@ -14,14 +14,14 @@ import type { IterationOptions } from '../promises/types'
  * Transform an iterable with a function.
  *
  * @example
- * ```typescript
- * const lines = ['hello', 'world']
- * for await (const upper of transform(lines, async (line) => {
- *   return line.toUpperCase()
- * })) {
- *   console.log(upper)  // 'HELLO', 'WORLD'
- * }
- * ```
+ *   ;```typescript
+ *   const lines = ['hello', 'world']
+ *   for await (const upper of transform(lines, async line => {
+ *     return line.toUpperCase()
+ *   })) {
+ *     console.log(upper) // 'HELLO', 'WORLD'
+ *   }
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function transform<T, U>(

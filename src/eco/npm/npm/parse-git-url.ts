@@ -1,13 +1,10 @@
 /**
- * @fileoverview `parseGitUrl(resolved)` — extracts `{ url, commit }`
- * from a `resolved` field on an npm lockfile entry when it points to
- * a git source (`git+…` or `git://…`).
- *
- * Returns `undefined` when the resolved string is not a git URL.
- * When the URL has no `#<commit>` suffix, `commit` is `undefined`.
- *
- * Shape matches socket-btm's smol-manifest internal `parseGitUrl` so
- * smol-vs-JS consumers see the same output.
+ * @file `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved`
+ *   field on an npm lockfile entry when it points to a git source (`git+…` or
+ *   `git://…`). Returns `undefined` when the resolved string is not a git URL.
+ *   When the URL has no `#<commit>` suffix, `commit` is `undefined`. Shape
+ *   matches socket-btm's smol-manifest internal `parseGitUrl` so smol-vs-JS
+ *   consumers see the same output.
  */
 
 import {

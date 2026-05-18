@@ -1,19 +1,14 @@
 /**
- * @fileoverview Per-worker test setup.
- *
- * Locks down network access in the test runtime so no test
- * accidentally hits a real host. Every test that exercises HTTP must
- * register a `nock(...)` interceptor; anything else throws inside
- * the test rather than escaping to the network and getting blocked
- * by Socket Firewall mid-pre-commit (which manifested as
- * "Blocked Hostnames (1): api.github.com" during release-script
- * runs that incidentally re-ran an HTTP-touching test).
- *
- * Loopback (127.0.0.1, localhost) is allowed for the few tests
- * that spin up a local server (e.g. uSockets integration tests).
- *
- * Per-test teardown clears interceptors so a missing `.cleanAll()`
- * in one test doesn't leak into the next.
+ * @file Per-worker test setup. Locks down network access in the test runtime so
+ *   no test accidentally hits a real host. Every test that exercises HTTP must
+ *   register a `nock(...)` interceptor; anything else throws inside the test
+ *   rather than escaping to the network and getting blocked by Socket Firewall
+ *   mid-pre-commit (which manifested as "Blocked Hostnames (1): api.github.com"
+ *   during release-script runs that incidentally re-ran an HTTP-touching test).
+ *   Loopback (127.0.0.1, localhost) is allowed for the few tests that spin up a
+ *   local server (e.g. uSockets integration tests). Per-test teardown clears
+ *   interceptors so a missing `.cleanAll()` in one test doesn't leak into the
+ *   next.
  */
 
 import { afterEach, beforeAll } from 'vitest'

@@ -1,19 +1,16 @@
 /**
- * @fileoverview `stringWidth` — calculate visual terminal width.
+ * @file `stringWidth` — calculate visual terminal width. Based on string-width
+ *   by Sindre Sorhus
+ *   (https://socket.dev/npm/package/string-width/overview/7.2.0, MIT). Why this
+ *   lives in its own leaf:
  *
- * Based on string-width by Sindre Sorhus
- * (https://socket.dev/npm/package/string-width/overview/7.2.0, MIT).
- *
- * Why this lives in its own leaf:
- * - It carries a heavy module-level setup: `Intl.Segmenter` instance,
- *   feature-detected regex patterns (with `'v'` flag fallback to `'u'`),
- *   and a lazy `eastAsianWidth` accessor.
- * - The function body is ~150 lines of carefully-commented Unicode
- *   handling — keeping it isolated makes it easy to review changes
- *   without touching the rest of the strings surface.
- *
- * See the comments inside for the algorithm details and Unicode
- * Standard Annex #11 references.
+ *   - It carries a heavy module-level setup: `Intl.Segmenter` instance,
+ *     feature-detected regex patterns (with `'v'` flag fallback to `'u'`), and
+ *     a lazy `eastAsianWidth` accessor.
+ *   - The function body is ~150 lines of carefully-commented Unicode handling —
+ *     keeping it isolated makes it easy to review changes without touching the
+ *     rest of the strings surface. See the comments inside for the algorithm
+ *     details and Unicode Standard Annex #11 references.
  */
 
 import { stripAnsi } from '../ansi/strip'
@@ -94,27 +91,27 @@ try {
 /**
  * Get the visual width of a string in terminal columns.
  *
- * Calculates how many columns a string will occupy when displayed in a terminal,
- * accounting for:
- * - ANSI escape codes (stripped before calculation)
- * - Wide characters (CJK ideographs, fullwidth forms) that take 2 columns
- * - Emoji (including complex sequences) that take 2 columns
- * - Combining marks and zero-width characters (take 0 columns)
- * - East Asian Width properties (Fullwidth, Wide, Halfwidth, Narrow, etc.)
- *
- * @param text - The string to measure
- * @returns The visual width in terminal columns
+ * Calculates how many columns a string will occupy when displayed in a
+ * terminal, accounting for: - ANSI escape codes (stripped before calculation) -
+ * Wide characters (CJK ideographs, fullwidth forms) that take 2 columns - Emoji
+ * (including complex sequences) that take 2 columns - Combining marks and
+ * zero-width characters (take 0 columns) - East Asian Width properties
+ * (Fullwidth, Wide, Halfwidth, Narrow, etc.)
  *
  * @example
- * ```ts
- * stringWidth('hello')                  // 5
- * stringWidth('⚡')                     // 2 (lightning bolt is wide)
- * stringWidth('✦')                      // 1 (star is narrow)
- * stringWidth('漢字')                    // 4 (CJK × 2 cols each)
- * stringWidth('\x1b[31mred\x1b[0m')     // 3 (ANSI stripped)
- * stringWidth('👍🏽')                    // 2 (emoji + skin tone = 1 cluster)
- * stringWidth('é')                      // 1 (combining accent = 0 width)
- * ```
+ *   ;```ts
+ *   stringWidth('hello') // 5
+ *   stringWidth('⚡') // 2 (lightning bolt is wide)
+ *   stringWidth('✦') // 1 (star is narrow)
+ *   stringWidth('漢字') // 4 (CJK × 2 cols each)
+ *   stringWidth('\x1b[31mred\x1b[0m') // 3 (ANSI stripped)
+ *   stringWidth('👍🏽') // 2 (emoji + skin tone = 1 cluster)
+ *   stringWidth('é') // 1 (combining accent = 0 width)
+ *   ```
+ *
+ * @param text - The string to measure.
+ *
+ * @returns The visual width in terminal columns
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function stringWidth(text: string): number {

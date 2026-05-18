@@ -1,6 +1,6 @@
 /**
- * @fileoverview Orchestrates all post-build fix scripts.
- * Runs generate-package-exports and fix-external-imports in sequence.
+ * @file Orchestrates all post-build fix scripts. Runs generate-package-exports
+ *   and fix-external-imports in sequence.
  */
 
 import process from 'node:process'

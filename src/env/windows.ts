@@ -1,23 +1,23 @@
 /**
- * @fileoverview Windows environment variable getters.
- * Provides access to Windows-specific user directory paths.
+ * @file Windows environment variable getters. Provides access to
+ *   Windows-specific user directory paths.
  */
 
 import { getEnvValue } from './rewire'
 
 /**
- * APPDATA environment variable.
- * Points to the Application Data directory on Windows.
- *
- * @returns The Windows AppData roaming directory, or `undefined` if not set
+ * APPDATA environment variable. Points to the Application Data directory on
+ * Windows.
  *
  * @example
- * ```typescript
- * import { getAppdata } from '@socketsecurity/lib/env/windows'
+ *   ;```typescript
+ *   import { getAppdata } from '@socketsecurity/lib/env/windows'
  *
- * const appdata = getAppdata()
- * // e.g. 'C:\\Users\\Public\\AppData\\Roaming' or undefined
- * ```
+ *   const appdata = getAppdata()
+ *   // e.g. 'C:\\Users\\Public\\AppData\\Roaming' or undefined
+ *   ```
+ *
+ * @returns The Windows AppData roaming directory, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getAppdata(): string | undefined {
@@ -25,18 +25,18 @@ export function getAppdata(): string | undefined {
 }
 
 /**
- * COMSPEC environment variable.
- * Points to the Windows command processor (typically cmd.exe).
- *
- * @returns The path to the command processor, or `undefined` if not set
+ * COMSPEC environment variable. Points to the Windows command processor
+ * (typically cmd.exe).
  *
  * @example
- * ```typescript
- * import { getComspec } from '@socketsecurity/lib/env/windows'
+ *   ;```typescript
+ *   import { getComspec } from '@socketsecurity/lib/env/windows'
  *
- * const comspec = getComspec()
- * // e.g. 'C:\\Windows\\system32\\cmd.exe' or undefined
- * ```
+ *   const comspec = getComspec()
+ *   // e.g. 'C:\\Windows\\system32\\cmd.exe' or undefined
+ *   ```
+ *
+ * @returns The path to the command processor, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getComspec(): string | undefined {
@@ -44,18 +44,18 @@ export function getComspec(): string | undefined {
 }
 
 /**
- * LOCALAPPDATA environment variable.
- * Points to the Local Application Data directory on Windows.
- *
- * @returns The Windows local AppData directory, or `undefined` if not set
+ * LOCALAPPDATA environment variable. Points to the Local Application Data
+ * directory on Windows.
  *
  * @example
- * ```typescript
- * import { getLocalappdata } from '@socketsecurity/lib/env/windows'
+ *   ;```typescript
+ *   import { getLocalappdata } from '@socketsecurity/lib/env/windows'
  *
- * const localAppdata = getLocalappdata()
- * // e.g. 'C:\\Users\\Public\\AppData\\Local' or undefined
- * ```
+ *   const localAppdata = getLocalappdata()
+ *   // e.g. 'C:\\Users\\Public\\AppData\\Local' or undefined
+ *   ```
+ *
+ * @returns The Windows local AppData directory, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getLocalappdata(): string | undefined {
@@ -63,18 +63,17 @@ export function getLocalappdata(): string | undefined {
 }
 
 /**
- * USERPROFILE environment variable.
- * Windows user home directory path.
- *
- * @returns The Windows user profile directory, or `undefined` if not set
+ * USERPROFILE environment variable. Windows user home directory path.
  *
  * @example
- * ```typescript
- * import { getUserprofile } from '@socketsecurity/lib/env/windows'
+ *   ;```typescript
+ *   import { getUserprofile } from '@socketsecurity/lib/env/windows'
  *
- * const userprofile = getUserprofile()
- * // e.g. 'C:\\Users\\Public' or undefined
- * ```
+ *   const userprofile = getUserprofile()
+ *   // e.g. 'C:\\Users\\Public' or undefined
+ *   ```
+ *
+ * @returns The Windows user profile directory, or `undefined` if not set
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getUserprofile(): string | undefined {

@@ -1,9 +1,9 @@
 /**
- * @fileoverview Read-and-parse helpers for JSON files. Wraps fs reads
- * in actionable error messages keyed off `ENOENT` / `EACCES` / `EPERM`
- * so callers see "JSON file not found" / "Permission denied" rather
- * than the bare errno. Both variants honor `throws: false` to fall
- * back to `undefined` on parse or read failure.
+ * @file Read-and-parse helpers for JSON files. Wraps fs reads in actionable
+ *   error messages keyed off `ENOENT` / `EACCES` / `EPERM` so callers see "JSON
+ *   file not found" / "Permission denied" rather than the bare errno. Both
+ *   variants honor `throws: false` to fall back to `undefined` on parse or read
+ *   failure.
  */
 
 import { parseJson } from '../json/parse'
@@ -14,33 +14,35 @@ import type { PathLike } from 'node:fs'
 import type { ReadJsonOptions } from './types'
 
 /**
- * Read and parse a JSON file asynchronously.
- * Reads the file as UTF-8 text and parses it as JSON.
- * Optionally accepts a reviver function to transform parsed values.
- *
- * @param filepath - Path to JSON file
- * @param options - Read and parse options
- * @returns Promise resolving to parsed JSON value, or undefined if throws is false and an error occurs
+ * Read and parse a JSON file asynchronously. Reads the file as UTF-8 text and
+ * parses it as JSON. Optionally accepts a reviver function to transform parsed
+ * values.
  *
  * @example
- * ```ts
- * // Read and parse package.json
- * const pkg = await readJson('./package.json')
+ *   ;```ts
+ *   // Read and parse package.json
+ *   const pkg = await readJson('./package.json')
  *
- * // Read JSON with custom reviver
- * const data = await readJson('./data.json', {
- *   reviver: (key, value) => {
- *     if (key === 'date') return new Date(value)
- *     return value
+ *   // Read JSON with custom reviver
+ *   const data = await readJson('./data.json', {
+ *     reviver: (key, value) => {
+ *       if (key === 'date') return new Date(value)
+ *       return value
+ *     },
+ *   })
+ *
+ *   // Don't throw on parse errors
+ *   const config = await readJson('./config.json', { throws: false })
+ *   if (config === undefined) {
+ *     console.log('Failed to parse config')
  *   }
- * })
+ *   ```
  *
- * // Don't throw on parse errors
- * const config = await readJson('./config.json', { throws: false })
- * if (config === undefined) {
- *   console.log('Failed to parse config')
- * }
- * ```
+ * @param filepath - Path to JSON file.
+ * @param options - Read and parse options.
+ *
+ * @returns Promise resolving to parsed JSON value, or undefined if throws is
+ *   false and an error occurs.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readJson(
@@ -96,32 +98,34 @@ export async function readJson(
 }
 
 /**
- * Read and parse a JSON file synchronously.
- * Reads the file as UTF-8 text and parses it as JSON.
- * Optionally accepts a reviver function to transform parsed values.
- *
- * @param filepath - Path to JSON file
- * @param options - Read and parse options
- * @returns Parsed JSON value, or undefined if throws is false and an error occurs
+ * Read and parse a JSON file synchronously. Reads the file as UTF-8 text and
+ * parses it as JSON. Optionally accepts a reviver function to transform parsed
+ * values.
  *
  * @example
- * ```ts
- * // Read and parse tsconfig.json
- * const tsconfig = readJsonSync('./tsconfig.json')
+ *   ;```ts
+ *   // Read and parse tsconfig.json
+ *   const tsconfig = readJsonSync('./tsconfig.json')
  *
- * // Read JSON with custom reviver
- * const data = readJsonSync('./data.json', {
- *   reviver: (key, value) => {
- *     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
- *       return new Date(value)
- *     }
- *     return value
- *   }
- * })
+ *   // Read JSON with custom reviver
+ *   const data = readJsonSync('./data.json', {
+ *     reviver: (key, value) => {
+ *       if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+ *         return new Date(value)
+ *       }
+ *       return value
+ *     },
+ *   })
  *
- * // Don't throw on parse errors
- * const config = readJsonSync('./config.json', { throws: false })
- * ```
+ *   // Don't throw on parse errors
+ *   const config = readJsonSync('./config.json', { throws: false })
+ *   ```
+ *
+ * @param filepath - Path to JSON file.
+ * @param options - Read and parse options.
+ *
+ * @returns Parsed JSON value, or undefined if throws is false and an error
+ *   occurs.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readJsonSync(

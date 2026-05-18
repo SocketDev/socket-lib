@@ -1,6 +1,6 @@
 /**
- * @fileoverview `extractArchive` — format-detecting dispatcher that
- * routes to `extractTar` / `extractTarGz` / `extractZip`.
+ * @file `extractArchive` — format-detecting dispatcher that routes to
+ *   `extractTar` / `extractTarGz` / `extractZip`.
  */
 
 import { ErrorCtor } from '../primordials/error'
@@ -13,19 +13,20 @@ import { extractZip } from './zip'
 import type { ExtractOptions } from './types'
 
 /**
- * Extract an archive to a directory.
- * Automatically detects format from file extension.
- *
- * @param archivePath - Path to archive file
- * @param outputDir - Directory to extract to
- * @param options - Extraction options
- * @throws Error if archive format is not supported
+ * Extract an archive to a directory. Automatically detects format from file
+ * extension.
  *
  * @example
- * ```typescript
- * await extractArchive('/tmp/package.tar.gz', '/tmp/output')
- * await extractArchive('/tmp/release.zip', '/tmp/output', { strip: 1 })
- * ```
+ *   ;```typescript
+ *   await extractArchive('/tmp/package.tar.gz', '/tmp/output')
+ *   await extractArchive('/tmp/release.zip', '/tmp/output', { strip: 1 })
+ *   ```
+ *
+ * @param archivePath - Path to archive file.
+ * @param outputDir - Directory to extract to.
+ * @param options - Extraction options.
+ *
+ * @throws Error if archive format is not supported
  */
 export async function extractArchive(
   archivePath: string,

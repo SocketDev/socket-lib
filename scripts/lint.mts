@@ -1,7 +1,7 @@
 /* oxlint-disable socket/sort-source-methods -- lint-runner helpers interleaved with module-level config (CORE_FILES, CONFIG_PATTERNS) consumed by them; reordering would split state from its consumers. */
 /**
- * @fileoverview Unified lint runner with flag-based configuration.
- * Provides smart linting that can target affected files or lint everything.
+ * @file Unified lint runner with flag-based configuration. Provides smart
+ *   linting that can target affected files or lint everything.
  */
 
 import { existsSync, readFileSync } from 'node:fs'

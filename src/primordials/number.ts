@@ -1,10 +1,8 @@
 /**
- * @fileoverview Safe references to `Number`, its constants, predicates,
- * and parse helpers.
- *
- * Predicates prefer the smol fast-path (`node:smol-primordial`); static
- * `parseFloat` / `parseInt` use the FastOneByteString-typed bindings
- * for ASCII inputs and fall back to stock `Number.parse*` otherwise.
+ * @file Safe references to `Number`, its constants, predicates, and parse
+ *   helpers. Predicates prefer the smol fast-path (`node:smol-primordial`);
+ *   static `parseFloat` / `parseInt` use the FastOneByteString-typed bindings
+ *   for ASCII inputs and fall back to stock `Number.parse*` otherwise.
  */
 
 import { getSmolPrimordial } from '../smol/primordial'

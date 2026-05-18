@@ -1,6 +1,6 @@
 /**
- * @fileoverview Lazy-loader for `node:crypto`. See `node/fs.ts` for
- * the design rationale shared across all `node/*.ts` lazy-loaders.
+ * @file Lazy-loader for `node:crypto`. See `node/fs.ts` for the design
+ *   rationale shared across all `node/*.ts` lazy-loaders.
  */
 
 // eslint-disable-next-line n/prefer-node-protocol

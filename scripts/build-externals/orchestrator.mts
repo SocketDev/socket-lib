@@ -1,6 +1,6 @@
 /**
- * @fileoverview Main entry point for bundling external dependencies.
- * Orchestrates bundling and reporting.
+ * @file Main entry point for bundling external dependencies. Orchestrates
+ *   bundling and reporting.
  */
 
 import { promises as fs } from 'node:fs'
@@ -23,9 +23,10 @@ const distExternalDir = path.join(rootDir, 'dist', 'external')
 /**
  * Main build function.
  *
- * @param {object} options - Build options
- * @param {boolean} options.verbose - Show detailed output
- * @param {boolean} options.quiet - Suppress all output
+ * @param {object} options - Build options.
+ * @param {boolean} options.verbose - Show detailed output.
+ * @param {boolean} options.quiet - Suppress all output.
+ *
  * @returns {Promise<void>}
  */
 export async function buildExternals(options = {}) {
@@ -63,9 +64,10 @@ export async function buildExternals(options = {}) {
 /**
  * Bundle all external packages.
  *
- * @param {object} options - Options
- * @param {boolean} options.quiet - Suppress individual package output
- * @returns {Promise<{bundledCount: number, totalSize: number}>}
+ * @param {object} options - Options.
+ * @param {boolean} options.quiet - Suppress individual package output.
+ *
+ * @returns {Promise<{ bundledCount: number; totalSize: number }>}
  */
 export async function bundleAllPackages(options = {}) {
   const { quiet = false } = options
@@ -213,12 +215,13 @@ export async function bundleAllPackages(options = {}) {
 }
 
 /**
- * Post-process bundled files to break node-gyp require.resolve strings.
- * This prevents consumers trying to bundle socket-lib from having issues with node-gyp.
+ * Post-process bundled files to break node-gyp require.resolve strings. This
+ * prevents consumers trying to bundle socket-lib from having issues with
+ * node-gyp.
  *
- * @param {string} dir - Directory to process
- * @param {object} options - Options
- * @param {boolean} options.quiet - Suppress output
+ * @param {string} dir - Directory to process.
+ * @param {object} options - Options.
+ * @param {boolean} options.quiet - Suppress output.
  */
 export async function fixNodeGypStrings(dir, options = {}) {
   const { quiet = false } = options

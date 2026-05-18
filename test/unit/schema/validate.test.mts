@@ -1,14 +1,13 @@
 /**
- * @fileoverview Unit tests for `validateSchema` — the non-throwing universal
- * validator exported from `@socketsecurity/lib/schema/validate`.
+ * @file Unit tests for `validateSchema` — the non-throwing universal validator
+ *   exported from `@socketsecurity/lib/schema/validate`. Exercises all three
+ *   supported schema kinds:
  *
- * Exercises all three supported schema kinds:
- * - Zod v3 (via `zod@3`)
- * - Zod v4 (via `zod@4`)
- * - TypeBox (via the bundled `src/external/@sinclair/typebox` runtime)
- *
- * Plus error normalization (Zod issue shape + TypeBox ValueError path
- * conversion) and the unsupported-schema TypeError branch.
+ *   - Zod v3 (via `zod@3`)
+ *   - Zod v4 (via `zod@4`)
+ *   - TypeBox (via the bundled `src/external/@sinclair/typebox` runtime) Plus
+ *     error normalization (Zod issue shape + TypeBox ValueError path
+ *     conversion) and the unsupported-schema TypeError branch.
  */
 
 import * as zodV3 from 'zod/v3'

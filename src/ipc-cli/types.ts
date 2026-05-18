@@ -1,8 +1,7 @@
 /**
- * @fileoverview Public type surface for `ipc-cli/*` modules — the
- * `IpcObject` record describing the `SOCKET_CLI_*` env-var shape
- * forwarded from a parent Socket CLI to a child process. Pure types,
- * no runtime side effects.
+ * @file Public type surface for `ipc-cli/*` modules — the `IpcObject` record
+ *   describing the `SOCKET_CLI_*` env-var shape forwarded from a parent Socket
+ *   CLI to a child process. Pure types, no runtime side effects.
  */
 
 export interface IpcObject {

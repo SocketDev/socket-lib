@@ -1,8 +1,8 @@
 /**
- * @fileoverview Tests for catch branches in src/ttl-cache.ts that
- * fire when persistent-cache reads or writes fail. Mocks the cacache
- * helpers (`safeGet`, `remove`, `safePut`) so the SUT exercises the
- * try/catch around JSON.parse and cacache.remove.
+ * @file Tests for catch branches in src/ttl-cache.ts that fire when
+ *   persistent-cache reads or writes fail. Mocks the cacache helpers
+ *   (`safeGet`, `remove`, `safePut`) so the SUT exercises the try/catch around
+ *   JSON.parse and cacache.remove.
  */
 
 import os from 'node:os'

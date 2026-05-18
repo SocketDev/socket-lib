@@ -1,8 +1,7 @@
 /**
- * @fileoverview Unit tests for src/eco/npm/yarnpkg/yarn/parse-lockfile.ts.
- *
- * Exercises Yarn Classic (v1) + Berry (v6) lockfile parsing, plus
- * helper exports (stripQuotes, valueAfterKey, etc.).
+ * @file Unit tests for src/eco/npm/yarnpkg/yarn/parse-lockfile.ts. Exercises
+ *   Yarn Classic (v1) + Berry (v6) lockfile parsing, plus helper exports
+ *   (stripQuotes, valueAfterKey, etc.).
  */
 
 import { describe, expect, it } from 'vitest'

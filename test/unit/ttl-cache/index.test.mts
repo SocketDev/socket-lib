@@ -1,15 +1,15 @@
 /**
- * @fileoverview Unit tests for time-to-live (TTL) cache utilities.
+ * @file Unit tests for time-to-live (TTL) cache utilities. Tests TTL-based file
+ *   caching system:
  *
- * Tests TTL-based file caching system:
- * - createTtlCache() creates cache instance with configurable TTL
- * - get() retrieves cached values if not expired
- * - set() stores values with automatic expiration
- * - has() checks cache key existence without extending TTL
- * - delete() removes cached entries
- * - clear() purges all cache entries
- * - Automatic expiration based on TTL (time-to-live)
- * Used by Socket tools for temporary data caching with expiration (API responses, metadata).
+ *   - createTtlCache() creates cache instance with configurable TTL
+ *   - get() retrieves cached values if not expired
+ *   - set() stores values with automatic expiration
+ *   - has() checks cache key existence without extending TTL
+ *   - delete() removes cached entries
+ *   - clear() purges all cache entries
+ *   - Automatic expiration based on TTL (time-to-live) Used by Socket tools for
+ *     temporary data caching with expiration (API responses, metadata).
  */
 
 import os from 'node:os'

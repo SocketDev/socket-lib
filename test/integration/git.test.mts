@@ -1,12 +1,12 @@
 /**
- * @fileoverview Integration tests for git utilities.
+ * @file Integration tests for git utilities. Tests real git operations in
+ *   temporary repositories:
  *
- * Tests real git operations in temporary repositories:
- * - getGitRoot() finds repository root
- * - isGitRepo() checks if directory is a git repo
- * - getCurrentBranch() gets active branch name
- * - getGitRemoteUrl() retrieves remote URL
- * Used by Socket CLI for repository detection and git operations.
+ *   - getGitRoot() finds repository root
+ *   - isGitRepo() checks if directory is a git repo
+ *   - getCurrentBranch() gets active branch name
+ *   - getGitRemoteUrl() retrieves remote URL Used by Socket CLI for repository
+ *     detection and git operations.
  */
 
 import fs from 'node:fs/promises'

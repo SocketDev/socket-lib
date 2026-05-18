@@ -1,8 +1,7 @@
 /**
- * @fileoverview Node.js runtime version and capability helpers.
- * Provides getters for the current Node version (major/minor/patch), the
- * maintained-versions list, and feature-detection flags for APIs that vary
- * across Node releases.
+ * @file Node.js runtime version and capability helpers. Provides getters for
+ *   the current Node version (major/minor/patch), the maintained-versions list,
+ *   and feature-detection flags for APIs that vary across Node releases.
  */
 
 import process from 'node:process'
@@ -36,9 +35,9 @@ export function getMaintainedNodeVersions() {
 }
 
 /**
- * Get the flags used to block Node.js debugger attachment via SIGUSR1.
- * Returns `['--disable-sigusr1']` on runtimes that support it and falls back
- * to `['--no-inspect']` on older versions.
+ * Get the flags used to block Node.js debugger attachment via SIGUSR1. Returns
+ * `['--disable-sigusr1']` on runtimes that support it and falls back to
+ * `['--no-inspect']` on older versions.
  *
  * @returns A non-empty array of CLI flags suitable for passing to `node`.
  */
@@ -156,9 +155,9 @@ export function getNodePatchVersion(): number {
 
 /**
  * Get the permission-grant flags needed to run npm under Node.js 24+'s
- * `--permission` model. The array is non-empty only on Node.js 24+ and
- * includes `--allow-fs-read=*`, `--allow-fs-write=*`, and
- * `--allow-child-process`. Older versions return an empty array.
+ * `--permission` model. The array is non-empty only on Node.js 24+ and includes
+ * `--allow-fs-read=*`, `--allow-fs-write=*`, and `--allow-child-process`. Older
+ * versions return an empty array.
  *
  * @returns The permission flag list (possibly empty) for the current runtime.
  */
@@ -197,8 +196,8 @@ export function getNodeVersion(): string {
 }
 
 /**
- * Check whether the current runtime exposes the `module.enableCompileCache()` API.
- * The API is available on Node.js 24+.
+ * Check whether the current runtime exposes the `module.enableCompileCache()`
+ * API. The API is available on Node.js 24+.
  *
  * @returns `true` when the current runtime is Node.js 24 or newer.
  */
@@ -220,7 +219,8 @@ export function supportsNodeCompileCacheEnvVar(): boolean {
 
 /**
  * Check whether the current runtime supports the `--disable-sigusr1` CLI flag.
- * Flag landed in v22.14.0 and v23.7.0 and was stabilized in v22.20.0 / v24.8.0.
+ * Flag landed in v22.14.0 and v23.7.0 and was stabilized in v22.20.0 /
+ * v24.8.0.
  *
  * @returns `true` when the runtime exposes `--disable-sigusr1`.
  */
@@ -270,8 +270,8 @@ export function supportsNodePermissionFlag(): boolean {
 }
 
 /**
- * Check whether `require()` can synchronously load ESM modules.
- * Requires Node.js 22.12+ or Node.js 23+.
+ * Check whether `require()` can synchronously load ESM modules. Requires
+ * Node.js 22.12+ or Node.js 23+.
  *
  * @returns `true` when the runtime supports `require()`-ing ES modules.
  */
@@ -284,10 +284,11 @@ export function supportsNodeRequireModule(): boolean {
 }
 
 /**
- * Check whether the current runtime supports `node --run <script>`.
- * Requires Node.js 22.11+ or Node.js 23+.
+ * Check whether the current runtime supports `node --run <script>`. Requires
+ * Node.js 22.11+ or Node.js 23+.
  *
- * @returns `true` when the runtime can execute package.json scripts via `--run`.
+ * @returns `true` when the runtime can execute package.json scripts via
+ *   `--run`.
  */
 export function supportsNodeRun(): boolean {
   const major = getNodeMajorVersion()
@@ -298,8 +299,8 @@ export function supportsNodeRun(): boolean {
 }
 
 /**
- * Check whether this process was spawned with an IPC channel.
- * When `true`, `process.send()` is callable to message the parent process.
+ * Check whether this process was spawned with an IPC channel. When `true`,
+ * `process.send()` is callable to message the parent process.
  *
  * @returns `true` when the current process has an IPC channel to its parent.
  */

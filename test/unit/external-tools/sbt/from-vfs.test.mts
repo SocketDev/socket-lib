@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for sbtFromVfs().
+ * @file Unit tests for sbtFromVfs().
  */
 
 import { describe, expect, it } from 'vitest'

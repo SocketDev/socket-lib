@@ -1,32 +1,23 @@
 /**
- * @fileoverview Cross-platform secret-storage helper. Reads / writes
- * to the native OS credential store (Keychain on macOS, Secret
- * Service via libsecret on Linux, Credential Manager + DPAPI on
- * Windows). Consumers pick their own `{ service, account }` pair.
- *
- * API shape:
- *
- *   readSecret({ service, account })         → Promise<string | undefined>
- *   readSecretSync({ service, account })     → string | undefined
- *   writeSecret({ service, account, value })  → Promise<void>
- *   writeSecretSync({ service, account, value }) → void
- *   deleteSecret({ service, account })       → Promise<'removed' | 'absent'>
- *   deleteSecretSync({ service, account })   → 'removed' | 'absent'
- *
- * Multi-slot helpers exist for the common case of writing the same
- * value under multiple account names (e.g. SOCKET_API_TOKEN +
- * SOCKET_API_KEY for backwards compatibility):
- *
- *   readSecretFromSlots({ service, accounts })
- *   writeSecretToSlots({ service, accounts, value })
- *   deleteSecretFromSlots({ service, accounts })
- *
- * IMPORTANT: do NOT invoke these helpers from a shell rc / .zshenv
- * file (or any other always-on-startup hook). On macOS each call
- * triggers a Keychain auth prompt; piling that into per-shell
- * startup floods the user with prompts. Use `write` from `./rc`
- * to write a one-time literal `export` block into the user's shell
- * rc file instead. (Incident memory: socket-cli session 2026-05-15.)
+ * @file Cross-platform secret-storage helper. Reads / writes to the native OS
+ *   credential store (Keychain on macOS, Secret Service via libsecret on Linux,
+ *   Credential Manager + DPAPI on Windows). Consumers pick their own `{
+ *   service, account }` pair. API shape: readSecret({ service, account }) →
+ *   Promise<string | undefined> readSecretSync({ service, account }) → string |
+ *   undefined writeSecret({ service, account, value }) → Promise<void>
+ *   writeSecretSync({ service, account, value }) → void deleteSecret({ service,
+ *   account }) → Promise<'removed' | 'absent'> deleteSecretSync({ service,
+ *   account }) → 'removed' | 'absent' Multi-slot helpers exist for the common
+ *   case of writing the same value under multiple account names (e.g.
+ *   SOCKET_API_TOKEN + SOCKET_API_KEY for backwards compatibility):
+ *   readSecretFromSlots({ service, accounts }) writeSecretToSlots({ service,
+ *   accounts, value }) deleteSecretFromSlots({ service, accounts }) IMPORTANT:
+ *   do NOT invoke these helpers from a shell rc / .zshenv file (or any other
+ *   always-on-startup hook). On macOS each call triggers a Keychain auth
+ *   prompt; piling that into per-shell startup floods the user with prompts.
+ *   Use `write` from `./rc` to write a one-time literal `export` block into the
+ *   user's shell rc file instead. (Incident memory: socket-cli session
+ *   2026-05-15.)
  */
 
 import { platform } from 'node:os'
@@ -73,10 +64,10 @@ import type {
 } from './types'
 
 /**
- * Drop the in-process read cache. Tests use this between cases to
- * force a fresh OS call; production code generally doesn't need it
- * (process exit drops the cache anyway, and `writeSecret` /
- * `deleteSecret` already invalidate per-key entries automatically).
+ * Drop the in-process read cache. Tests use this between cases to force a fresh
+ * OS call; production code generally doesn't need it (process exit drops the
+ * cache anyway, and `writeSecret` / `deleteSecret` already invalidate per-key
+ * entries automatically).
  */
 export function clearCache(): void {
   invalidateAll()
@@ -88,10 +79,9 @@ export interface DeleteOptions {
 }
 
 /**
- * Remove a secret from the OS credential store. Idempotent —
- * succeeds whether the entry exists or not. Returns the per-slot
- * outcome so callers can log "actually removed X" vs "X was
- * already absent."
+ * Remove a secret from the OS credential store. Idempotent — succeeds whether
+ * the entry exists or not. Returns the per-slot outcome so callers can log
+ * "actually removed X" vs "X was already absent."
  */
 export async function deleteSecret({
   service,
@@ -178,11 +168,10 @@ type Platform = 'darwin' | 'linux' | 'win32' | 'other'
 /**
  * Resolve the current OS to one of our four backend categories.
  *
- * Exported only because the fleet's `export-top-level-functions`
- * lint rule requires top-level functions to be exported for
- * testability. Not part of the public `secrets/keychain` API
- * surface — consumers should call `readSecret` / `writeSecret` /
- * `getBackendAvailability` instead, which handle the dispatch
+ * Exported only because the fleet's `export-top-level-functions` lint rule
+ * requires top-level functions to be exported for testability. Not part of the
+ * public `secrets/keychain` API surface — consumers should call `readSecret` /
+ * `writeSecret` / `getBackendAvailability` instead, which handle the dispatch
  * internally.
  *
  * @internal
@@ -196,10 +185,9 @@ export function detectPlatform(): Platform {
 }
 
 /**
- * Diagnostic: tell the operator whether the OS credential backend
- * is reachable. Used by installers to report up-front (before any
- * prompt fires) when libsecret-tools or the CredentialManager
- * module aren't installed.
+ * Diagnostic: tell the operator whether the OS credential backend is reachable.
+ * Used by installers to report up-front (before any prompt fires) when
+ * libsecret-tools or the CredentialManager module aren't installed.
  */
 export function getBackendAvailability(): BackendAvailability {
   const platform_ = detectPlatform()
@@ -244,10 +232,10 @@ export interface ReadOptions {
 }
 
 /**
- * Read a single secret value from the OS credential store. Returns
- * `undefined` when the entry doesn't exist OR when the backend tool
- * isn't available — read paths never throw, so callers can fall
- * through to env / .env / prompt cleanly.
+ * Read a single secret value from the OS credential store. Returns `undefined`
+ * when the entry doesn't exist OR when the backend tool isn't available — read
+ * paths never throw, so callers can fall through to env / .env / prompt
+ * cleanly.
  */
 export async function readSecret({
   service,
@@ -276,10 +264,10 @@ export interface ReadFromSlotsOptions {
 }
 
 /**
- * Read from the first matching account. Used when multiple env-var
- * names map to the same logical secret (e.g. SOCKET_API_TOKEN
- * canonical + SOCKET_API_KEY legacy). Returns the value AND the
- * account it came from so callers can warn on legacy hits.
+ * Read from the first matching account. Used when multiple env-var names map to
+ * the same logical secret (e.g. SOCKET_API_TOKEN canonical + SOCKET_API_KEY
+ * legacy). Returns the value AND the account it came from so callers can warn
+ * on legacy hits.
  */
 export async function readSecretFromSlots({
   service,
@@ -339,24 +327,22 @@ export interface WriteOptions {
   account: string
   value: string
   /**
-   * Display label shown in Keychain Access.app / GNOME keyring etc.
-   * Defaults to `<service> credential`. Per-secret labels make the
-   * keyring UI navigable when a service has multiple entries.
+   * Display label shown in Keychain Access.app / GNOME keyring etc. Defaults to
+   * `<service> credential`. Per-secret labels make the keyring UI navigable
+   * when a service has multiple entries.
    */
   label?: string | undefined
 }
 
 /**
- * Persist a single secret to the OS credential store. Throws on
- * write failure — the caller is in a setup flow and should see why
- * persistence failed, not silently continue.
+ * Persist a single secret to the OS credential store. Throws on write failure —
+ * the caller is in a setup flow and should see why persistence failed, not
+ * silently continue.
  *
- * Returns the outcome:
- *   - `'written'`   — value persisted (entry was absent or differed).
- *   - `'unchanged'` — current stored value already matches; no OS
- *                     write performed. Useful for idempotent flows
- *                     (re-running an installer shouldn't show "rewrote
- *                     N secrets" when nothing actually changed).
+ * Returns the outcome: - `'written'` — value persisted (entry was absent or
+ * differed). - `'unchanged'` — current stored value already matches; no OS
+ * write performed. Useful for idempotent flows (re-running an installer
+ * shouldn't show "rewrote N secrets" when nothing actually changed).
  */
 export async function writeSecret({
   service,
@@ -443,15 +429,14 @@ export interface WriteToSlotsOptions {
 }
 
 /**
- * Persist the same value under each account name in `accounts`.
- * Useful when a value needs to be reachable under several env-var
- * names (legacy aliases, sibling tools). Each slot gets its own
- * keychain entry — they all hold the same string.
+ * Persist the same value under each account name in `accounts`. Useful when a
+ * value needs to be reachable under several env-var names (legacy aliases,
+ * sibling tools). Each slot gets its own keychain entry — they all hold the
+ * same string.
  *
- * If any individual write throws, prior writes have already
- * persisted. Failures aren't rolled back (the half-state is at
- * worst a stale legacy alias, which the next successful write
- * cleans up).
+ * If any individual write throws, prior writes have already persisted. Failures
+ * aren't rolled back (the half-state is at worst a stale legacy alias, which
+ * the next successful write cleans up).
  */
 export async function writeSecretToSlots({
   service,

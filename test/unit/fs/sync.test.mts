@@ -1,13 +1,12 @@
 /**
- * @fileoverview Tests for synchronous fs utilities.
+ * @file Tests for synchronous fs utilities. Tests sync fs functions:
  *
- * Tests sync fs functions:
- * - isSymlinkSync() for checking symlinks synchronously
- * - readJsonSync() for reading JSON files synchronously
- * - writeJsonSync() for writing JSON files synchronously
- * - safeReadFileSync() for safe file reading synchronously
- * - safeStatSync() for safe stat calls synchronously
- * - readFileBinary() for reading binary files
+ *   - isSymlinkSync() for checking symlinks synchronously
+ *   - readJsonSync() for reading JSON files synchronously
+ *   - writeJsonSync() for writing JSON files synchronously
+ *   - safeReadFileSync() for safe file reading synchronously
+ *   - safeStatSync() for safe stat calls synchronously
+ *   - readFileBinary() for reading binary files
  */
 
 import { randomUUID } from 'node:crypto'

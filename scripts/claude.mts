@@ -1,8 +1,8 @@
 /* oxlint-disable socket/sort-source-methods -- 5700-line CLI tool with helper functions organized by command grouping (run*, validate*, etc.); module-level const config sandwiched between groups blocks autofix and manual reorder would either split state or change initialization order. */
 /**
- * @fileoverview Claude Code-powered utilities for Socket projects.
- * Provides various AI-assisted development tools and automations using Claude Code CLI.
- * Requires Claude Code (claude) CLI to be installed.
+ * @file Claude Code-powered utilities for Socket projects. Provides various
+ *   AI-assisted development tools and automations using Claude Code CLI.
+ *   Requires Claude Code (claude) CLI to be installed.
  */
 
 /* oxlint-disable socket/no-status-emoji, socket/prefer-exists-sync -- custom logger wrapper with color-coded prefixes; stat() calls read mtime for cleanup decisions. */
@@ -992,8 +992,8 @@ setInterval(() => {
 }, CACHE_TTL).unref()
 
 /**
- * Run Claude Code with a prompt.
- * Handles caching, model tracking, and retry logic.
+ * Run Claude Code with a prompt. Handles caching, model tracking, and retry
+ * logic.
  */
 export async function runClaude(claudeCmd, prompt, options = {}) {
   const opts = { __proto__: null, ...options }
@@ -1294,8 +1294,8 @@ export async function ensureClaudeAuthenticated(claudeCmd) {
 }
 
 /**
- * Ensure GitHub CLI is authenticated, prompting for login if needed.
- * Returns true if authenticated, false if unable to authenticate.
+ * Ensure GitHub CLI is authenticated, prompting for login if needed. Returns
+ * true if authenticated, false if unable to authenticate.
  */
 export async function ensureGitHubAuthenticated() {
   let attempts = 0
@@ -1353,10 +1353,12 @@ export async function ensureGitHubAuthenticated() {
 
 /**
  * Check if a commit SHA is part of a pull request.
- * @param {string} sha - The commit SHA to check
- * @param {string} owner - The repository owner
- * @param {string} repo - The repository name
- * @returns {Promise<{isPR: boolean, prNumber?: number, prTitle?: string}>}
+ *
+ * @param {string} sha - The commit SHA to check.
+ * @param {string} owner - The repository owner.
+ * @param {string} repo - The repository name.
+ *
+ * @returns {Promise<{ isPR: boolean; prNumber?: number; prTitle?: string }>}
  */
 export async function checkIfCommitIsPartOfPR(sha, owner, repo) {
   try {
@@ -1396,8 +1398,11 @@ export async function checkIfCommitIsPartOfPR(sha, owner, repo) {
 
 /**
  * Create a semantic hash of error output for tracking duplicate errors.
- * Normalizes errors to catch semantically identical issues with different line numbers.
- * @param {string} errorOutput - The error output to hash
+ * Normalizes errors to catch semantically identical issues with different line
+ * numbers.
+ *
+ * @param {string} errorOutput - The error output to hash.
+ *
  * @returns {string} A hex hash of the normalized error
  */
 export function hashError(errorOutput) {
@@ -1429,9 +1434,9 @@ export function hashError(errorOutput) {
 }
 
 /**
- * Model strategy for intelligent Pinky/Brain switching.
- * "Gee, Brain, what do you want to do tonight?"
- * "The same thing we do every night, Pinky - try to take over the world!"
+ * Model strategy for intelligent Pinky/Brain switching. "Gee, Brain, what do
+ * you want to do tonight?" "The same thing we do every night, Pinky - try to
+ * take over the world!"
  */
 class ModelStrategy {
   constructor() {
@@ -1802,8 +1807,8 @@ export async function buildEnhancedPrompt(template, basePrompt, options = {}) {
 }
 
 /**
- * Filter CI logs to extract only relevant failure information
- * Removes runner setup noise and focuses on actual errors
+ * Filter CI logs to extract only relevant failure information Removes runner
+ * setup noise and focuses on actual errors.
  */
 export function filterCILogs(rawLogs) {
   const lines = rawLogs.split('\n')
@@ -1862,9 +1867,9 @@ export function filterCILogs(rawLogs) {
 }
 
 /**
- * Prepare Claude command arguments for Claude Code.
- * Claude Code uses natural language prompts, not the same flags.
- * We'll translate our flags into appropriate context.
+ * Prepare Claude command arguments for Claude Code. Claude Code uses natural
+ * language prompts, not the same flags. We'll translate our flags into
+ * appropriate context.
  */
 export function prepareClaudeArgs(args = [], options = {}) {
   const _opts = { __proto__: null, ...options }
@@ -1902,8 +1907,8 @@ export function prepareClaudeArgs(args = [], options = {}) {
 }
 
 /**
- * Execute tasks in parallel with multiple workers.
- * Default: 3 workers (balanced performance without overwhelming system)
+ * Execute tasks in parallel with multiple workers. Default: 3 workers (balanced
+ * performance without overwhelming system)
  */
 export async function executeParallel(tasks, workers = 3) {
   if (workers === 1 || tasks.length === 1) {
@@ -1976,10 +1981,11 @@ export function shouldRunParallel(options = {}) {
 }
 
 /**
- * Run tasks in parallel with progress tracking.
- * NOTE: When running Claude agents in parallel, they must use stdio: 'pipe' to avoid
- * conflicting interactive prompts. If agents need user interaction, they would queue
- * and block each other. Use --seq flag for sequential execution with full interactivity.
+ * Run tasks in parallel with progress tracking. NOTE: When running Claude
+ * agents in parallel, they must use stdio: 'pipe' to avoid conflicting
+ * interactive prompts. If agents need user interaction, they would queue and
+ * block each other. Use --seq flag for sequential execution with full
+ * interactivity.
  */
 export async function runParallel(
   tasks,
@@ -2930,11 +2936,12 @@ export async function runSecurityScan(claudeCmd, options = {}) {
 }
 
 /**
- * Run Claude-assisted commits across Socket projects.
- * Default: operates on current project only. Use --cross-repo for all Socket projects.
- * IMPORTANT: When running in parallel mode (--cross-repo), Claude agents run silently (stdio: 'pipe').
- * Interactive prompts would conflict if multiple agents needed user input simultaneously.
- * Use --seq flag if you need interactive debugging across multiple repos.
+ * Run Claude-assisted commits across Socket projects. Default: operates on
+ * current project only. Use --cross-repo for all Socket projects. IMPORTANT:
+ * When running in parallel mode (--cross-repo), Claude agents run silently
+ * (stdio: 'pipe'). Interactive prompts would conflict if multiple agents needed
+ * user input simultaneously. Use --seq flag if you need interactive debugging
+ * across multiple repos.
  */
 export async function runClaudeCommit(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }
@@ -3689,9 +3696,11 @@ Be specific and actionable.`
 
 /**
  * Generate a commit message using Claude non-interactively.
- * @param {string} claudeCmd - Path to Claude CLI
- * @param {string} cwd - Working directory
- * @param {object} options - Options from parent command
+ *
+ * @param {string} claudeCmd - Path to Claude CLI.
+ * @param {string} cwd - Working directory.
+ * @param {object} options - Options from parent command.
+ *
  * @returns {Promise<string>} Generated commit message
  */
 export async function generateCommitMessage(claudeCmd, cwd, options = {}) {
@@ -3795,8 +3804,8 @@ Commit message:`
 }
 
 /**
- * Calculate adaptive poll delay based on CI state.
- * Polls faster when jobs are running, slower when queued.
+ * Calculate adaptive poll delay based on CI state. Polls faster when jobs are
+ * running, slower when queued.
  */
 export function calculatePollDelay(status, attempt, hasActiveJobs = false) {
   // If jobs are actively running, poll more frequently
@@ -3815,8 +3824,8 @@ export function calculatePollDelay(status, attempt, hasActiveJobs = false) {
 }
 
 /**
- * Priority levels for different CI job types.
- * Higher priority jobs are fixed first since they often block other jobs.
+ * Priority levels for different CI job types. Higher priority jobs are fixed
+ * first since they often block other jobs.
  */
 const JOB_PRIORITIES = {
   build: 100,
@@ -3840,7 +3849,9 @@ const JOB_PRIORITIES = {
 
 /**
  * Get priority for a CI job based on its name.
- * @param {string} jobName - The name of the CI job
+ *
+ * @param {string} jobName - The name of the CI job.
+ *
  * @returns {number} Priority level (higher = more important)
  */
 export function getJobPriority(jobName) {
@@ -3859,8 +3870,10 @@ export function getJobPriority(jobName) {
 
 /**
  * Validate changes before pushing to catch common mistakes.
- * @param {string} cwd - Working directory
- * @returns {Promise<{valid: boolean, warnings: string[]}>} Validation result
+ *
+ * @param {string} cwd - Working directory.
+ *
+ * @returns {Promise<{ valid: boolean; warnings: string[] }>} Validation result
  */
 export async function validateBeforePush(cwd) {
   const warnings = []
@@ -3912,9 +3925,9 @@ export async function validateBeforePush(cwd) {
 }
 
 /**
- * Run all checks, push, and monitor CI until green.
- * NOTE: This operates on the current repo by default. Use --cross-repo for all Socket projects.
- * Multi-repo parallel execution would conflict with interactive prompts if fixes fail.
+ * Run all checks, push, and monitor CI until green. NOTE: This operates on the
+ * current repo by default. Use --cross-repo for all Socket projects. Multi-repo
+ * parallel execution would conflict with interactive prompts if fixes fail.
  */
 export async function runGreen(claudeCmd, options = {}) {
   const opts = { __proto__: null, ...options }

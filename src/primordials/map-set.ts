@@ -1,10 +1,8 @@
 /**
- * @fileoverview Safe references to `Map`, `Set`, `WeakMap`, `WeakSet`,
- * and `WeakRef`.
- *
- * Constructors plus uncurried prototype methods. `WeakRef` exposes only
- * its constructor — there's a separate `weakRefSafe` wrapper in
- * `./uncurry` for the throws-on-non-Object case.
+ * @file Safe references to `Map`, `Set`, `WeakMap`, `WeakSet`, and `WeakRef`.
+ *   Constructors plus uncurried prototype methods. `WeakRef` exposes only its
+ *   constructor — there's a separate `weakRefSafe` wrapper in `./uncurry` for
+ *   the throws-on-non-Object case.
  */
 
 import { uncurryThis } from './uncurry'

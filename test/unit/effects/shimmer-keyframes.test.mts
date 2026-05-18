@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for the shimmer keyframes adapter.
+ * @file Unit tests for the shimmer keyframes adapter.
  */
 
 import { describe, expect, it } from 'vitest'

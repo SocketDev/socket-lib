@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package manifest and packument fetching utilities.
+ * @file Package manifest and packument fetching utilities.
  */
 
 import {
@@ -37,12 +37,12 @@ const pkgScopePrefixRegExp = /^@socketregistry\//
  * Create a package.json object for a Socket registry package.
  *
  * @example
- * ```typescript
- * const pkgJson = createPackageJson('is-number', 'packages/npm/is-number', {
- *   version: '1.0.0',
- *   description: 'Check if a value is a number'
- * })
- * ```
+ *   ;```typescript
+ *   const pkgJson = createPackageJson('is-number', 'packages/npm/is-number', {
+ *     version: '1.0.0',
+ *     description: 'Check if a value is a number',
+ *   })
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function createPackageJson(
@@ -138,9 +138,9 @@ export function createPackageJson(
  * Fetch the manifest for a package.
  *
  * @example
- * ```typescript
- * const manifest = await fetchPackageManifest('lodash@4.17.21')
- * ```
+ *   ;```typescript
+ *   const manifest = await fetchPackageManifest('lodash@4.17.21')
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackageManifest(
@@ -188,9 +188,9 @@ export async function fetchPackageManifest(
  * Fetch the packument (package document) for a package.
  *
  * @example
- * ```typescript
- * const packument = await fetchPackagePackument('lodash')
- * ```
+ *   ;```typescript
+ *   const packument = await fetchPackagePackument('lodash')
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackagePackument(

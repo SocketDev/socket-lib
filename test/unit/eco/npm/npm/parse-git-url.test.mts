@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/eco/npm/npm/parse-git-url.ts.
+ * @file Unit tests for src/eco/npm/npm/parse-git-url.ts.
  */
 
 import { describe, expect, it } from 'vitest'

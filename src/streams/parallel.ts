@@ -1,8 +1,7 @@
 /**
- * @fileoverview Parallel iteration helpers — `parallelMap()` and the
- * fire-and-forget `parallelEach()`. Built on top of
- * `streaming-iterables.parallelMap` with the project's `pRetry`
- * wrapper applied per item.
+ * @file Parallel iteration helpers — `parallelMap()` and the fire-and-forget
+ *   `parallelEach()`. Built on top of `streaming-iterables.parallelMap` with
+ *   the project's `pRetry` wrapper applied per item.
  */
 
 import { parallelMap as siParallelMap } from '../external/streaming-iterables'
@@ -15,12 +14,16 @@ import type { IterationOptions } from '../promises/types'
  * Execute a function for each item in an iterable in parallel.
  *
  * @example
- * ```typescript
- * const urls = ['https://a.io', 'https://b.io']
- * await parallelEach(urls, async (url) => {
- *   await fetch(url)
- * }, { concurrency: 4 })
- * ```
+ *   ;```typescript
+ *   const urls = ['https://a.io', 'https://b.io']
+ *   await parallelEach(
+ *     urls,
+ *     async url => {
+ *       await fetch(url)
+ *     },
+ *     { concurrency: 4 },
+ *   )
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function parallelEach<T>(
@@ -37,14 +40,18 @@ export async function parallelEach<T>(
  * Map over an iterable in parallel with concurrency control.
  *
  * @example
- * ```typescript
- * const ids = [1, 2, 3]
- * for await (const result of parallelMap(ids, async (id) => {
- *   return await fetchData(id)
- * }, 4)) {
- *   console.log(result)
- * }
- * ```
+ *   ;```typescript
+ *   const ids = [1, 2, 3]
+ *   for await (const result of parallelMap(
+ *     ids,
+ *     async id => {
+ *       return await fetchData(id)
+ *     },
+ *     4,
+ *   )) {
+ *     console.log(result)
+ *   }
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function parallelMap<T, U>(

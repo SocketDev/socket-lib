@@ -1,11 +1,9 @@
 /**
- * @fileoverview `getPackage(lockfile, name)` — O(1) lookup of the
- * first matching `PackageRef` by name in a `ParsedLockfile`.
- * Returns `undefined` when no match exists.
- *
- * For multi-version names (where `_index[name]` is an array of
- * indices), returns the first occurrence. Use `getPackageVersions`
- * to get all of them.
+ * @file `getPackage(lockfile, name)` — O(1) lookup of the first matching
+ *   `PackageRef` by name in a `ParsedLockfile`. Returns `undefined` when no
+ *   match exists. For multi-version names (where `_index[name]` is an array of
+ *   indices), returns the first occurrence. Use `getPackageVersions` to get all
+ *   of them.
  */
 
 import { getSmolManifest } from '../../smol/manifest'

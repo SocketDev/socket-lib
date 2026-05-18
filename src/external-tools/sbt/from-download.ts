@@ -1,17 +1,12 @@
 /**
- * @fileoverview `sbtFromDownload()` — fetches the SBT launcher
- * tarball, extracts it, and returns a `ResolvedSbt` pointing at the
- * `bin/sbt` script.
- *
- * SBT distributes a single platform-agnostic tgz containing a
- * `bin/sbt` script plus `bin/sbt-launch.jar`. The `bin/sbt` form is
- * directly invocable (it shells out to `java -jar` internally), so
- * `isJar: false` even though the underlying machinery is a JAR.
- *
- * Default cache layout: `<dlxDir>/sbt/<version>/`.
- *
- * Trust-on-first-use: pass `integrity` from `external-tools.json`
- * when available.
+ * @file `sbtFromDownload()` — fetches the SBT launcher tarball, extracts it,
+ *   and returns a `ResolvedSbt` pointing at the `bin/sbt` script. SBT
+ *   distributes a single platform-agnostic tgz containing a `bin/sbt` script
+ *   plus `bin/sbt-launch.jar`. The `bin/sbt` form is directly invocable (it
+ *   shells out to `java -jar` internally), so `isJar: false` even though the
+ *   underlying machinery is a JAR. Default cache layout:
+ *   `<dlxDir>/sbt/<version>/`. Trust-on-first-use: pass `integrity` from
+ *   `external-tools.json` when available.
  */
 
 import path from 'node:path'
@@ -26,12 +21,17 @@ import type { HashSpec } from '../../integrity'
 import type { ResolvedSbt } from './types'
 
 export interface SbtFromDownloadOptions {
-  /** SBT release version, e.g. `'1.10.7'`. */
+  /**
+   * SBT release version, e.g. `'1.10.7'`.
+   */
   version: string
-  /** Optional pinned integrity from `external-tools.json`. */
+  /**
+   * Optional pinned integrity from `external-tools.json`.
+   */
   integrity?: HashSpec | undefined
   /**
-   * Override the cache directory. Default: `<getSocketDlxDir()>/sbt/<version>/`.
+   * Override the cache directory. Default:
+   * `<getSocketDlxDir()>/sbt/<version>/`.
    */
   cacheDir?: string | undefined
   /**
@@ -42,14 +42,14 @@ export interface SbtFromDownloadOptions {
 }
 
 /**
- * Resolve SBT by downloading and extracting the upstream tgz.
- * Returns the standard `ResolvedSbt` shape with `source: 'download'`.
+ * Resolve SBT by downloading and extracting the upstream tgz. Returns the
+ * standard `ResolvedSbt` shape with `source: 'download'`.
  *
  * @example
- * ```typescript
- * const sbt = await sbtFromDownload({ version: '1.10.7' })
- * // → { path: '/.../bin/sbt', isJar: false, source: 'download' }
- * ```
+ *   ;```typescript
+ *   const sbt = await sbtFromDownload({ version: '1.10.7' })
+ *   // → { path: '/.../bin/sbt', isJar: false, source: 'download' }
+ *   ```
  */
 export async function sbtFromDownload(
   opts: SbtFromDownloadOptions,

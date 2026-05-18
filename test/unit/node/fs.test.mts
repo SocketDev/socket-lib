@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for src/node/fs.ts.
+ * @file Unit tests for src/node/fs.ts. Verifies the lazy-loader contract:
  *
- * Verifies the lazy-loader contract:
- *   - getNodeFs() returns the real `node:fs` module (functional check
- *     via known exports like `existsSync`, not just typeof)
+ *   - getNodeFs() returns the real `node:fs` module (functional check via known
+ *     exports like `existsSync`, not just typeof)
  *   - Repeated calls return the same reference (single require, cached)
  *   - The getter is non-throwing on Node
  */

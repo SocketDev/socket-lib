@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for English word manipulation utilities.
+ * @file Unit tests for English word manipulation utilities. Tests text
+ *   transformation helpers for natural language:
  *
- * Tests text transformation helpers for natural language:
- * - capitalize() capitalizes first letter of words
- * - pluralize() handles English pluralization rules (singular ↔ plural)
- * - determineArticle() chooses correct indefinite article (a/an)
- * - Special case handling: irregular plurals, acronyms, vowel sounds
- * Used by Socket CLI for grammatically correct user-facing messages.
+ *   - capitalize() capitalizes first letter of words
+ *   - pluralize() handles English pluralization rules (singular ↔ plural)
+ *   - determineArticle() chooses correct indefinite article (a/an)
+ *   - Special case handling: irregular plurals, acronyms, vowel sounds Used by
+ *     Socket CLI for grammatically correct user-facing messages.
  */
 
 import { capitalize } from '@socketsecurity/lib/words/capitalize'

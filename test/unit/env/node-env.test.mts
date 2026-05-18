@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for NODE_ENV environment variable getter.
- *
- * Tests getNodeEnv() for Node.js environment mode (development, production, test).
- * Returns NODE_ENV string or undefined. Standard Node.js convention.
- * Uses rewire for test isolation. Critical for environment-specific behavior.
+ * @file Unit tests for NODE_ENV environment variable getter. Tests getNodeEnv()
+ *   for Node.js environment mode (development, production, test). Returns
+ *   NODE_ENV string or undefined. Standard Node.js convention. Uses rewire for
+ *   test isolation. Critical for environment-specific behavior.
  */
 
 import process from 'node:process'

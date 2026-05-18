@@ -1,10 +1,9 @@
 /**
- * @fileoverview Real unit coverage for the pure / cacheable parts of
- * src/dlx/package.ts: parsePackageSpec, npmPurl, findBinaryPath,
- * executePackage routing, resolveBinaryPath cross-platform behavior.
- *
- * The existing dlx/package.test.mts is mostly string assertions about
- * paths. This file covers the actual exports.
+ * @file Real unit coverage for the pure / cacheable parts of
+ *   src/dlx/package.ts: parsePackageSpec, npmPurl, findBinaryPath,
+ *   executePackage routing, resolveBinaryPath cross-platform behavior. The
+ *   existing dlx/package.test.mts is mostly string assertions about paths. This
+ *   file covers the actual exports.
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'

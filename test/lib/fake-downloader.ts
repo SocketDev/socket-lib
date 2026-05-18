@@ -1,9 +1,8 @@
 /**
- * @fileoverview Shared test helper — builds a fake `BinaryDownloader`
- * that writes a caller-supplied payload to the binaryPath dlx would
- * produce, then returns the dlx-shape `{binaryPath, downloaded,
- * integrity}` result. Lets tests exercise the from-download chain
- * end-to-end without hitting the network.
+ * @file Shared test helper — builds a fake `BinaryDownloader` that writes a
+ *   caller-supplied payload to the binaryPath dlx would produce, then returns
+ *   the dlx-shape `{binaryPath, downloaded, integrity}` result. Lets tests
+ *   exercise the from-download chain end-to-end without hitting the network.
  */
 
 import { mkdtempSync, writeFileSync } from 'node:fs'
@@ -16,8 +15,8 @@ const FAKE_INTEGRITY =
   'sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='
 
 /**
- * Build a fake-downloader factory that writes the given payload to
- * a fresh scratch dir per call.
+ * Build a fake-downloader factory that writes the given payload to a fresh
+ * scratch dir per call.
  */
 export function makeFakeDownloader(payload: Buffer | string): {
   downloader: BinaryDownloader

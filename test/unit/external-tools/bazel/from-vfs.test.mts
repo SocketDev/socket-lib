@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for bazelFromVfs().
+ * @file Unit tests for bazelFromVfs().
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,11 +1,8 @@
 /**
- * @fileoverview `bazelFromVfs()` — extracts the Bazel binary from
- * the smol binary's VFS.
- *
- * Uses the post-alignment `getSmolVfs()` API. Returns `undefined`
- * when the binary doesn't have Bazel bundled (e.g. the linux-musl
- * SEAs don't carry Bazel because there's no native build for that
- * platform).
+ * @file `bazelFromVfs()` — extracts the Bazel binary from the smol binary's
+ *   VFS. Uses the post-alignment `getSmolVfs()` API. Returns `undefined` when
+ *   the binary doesn't have Bazel bundled (e.g. the linux-musl SEAs don't carry
+ *   Bazel because there's no native build for that platform).
  */
 
 import { getSmolVfs } from '../../smol/vfs'

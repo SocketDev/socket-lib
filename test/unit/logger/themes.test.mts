@@ -1,11 +1,11 @@
 /**
- * @fileoverview Tests for Logger theme handling and LOG_SYMBOLS.
+ * @file Tests for Logger theme handling and LOG_SYMBOLS. Tests theme-related
+ *   Logger functionality including:
  *
- * Tests theme-related Logger functionality including:
- * - Logger initialization with theme options (string and object)
- * - Theme changes and LOG_SYMBOLS updates
- * - Theme color application to symbols
- * - LOG_SYMBOLS access triggers initialization
+ *   - Logger initialization with theme options (string and object)
+ *   - Theme changes and LOG_SYMBOLS updates
+ *   - Theme color application to symbols
+ *   - LOG_SYMBOLS access triggers initialization
  */
 
 import { Writable } from 'node:stream'

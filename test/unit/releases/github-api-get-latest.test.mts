@@ -1,7 +1,6 @@
 /**
- * @fileoverview Unit tests for GitHub `getLatestRelease`.
- *
- * Covers REST + GraphQL fallback, asset filtering, and date-sorting.
+ * @file Unit tests for GitHub `getLatestRelease`. Covers REST + GraphQL
+ *   fallback, asset filtering, and date-sorting.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

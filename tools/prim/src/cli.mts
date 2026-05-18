@@ -1,52 +1,30 @@
 /* oxlint-disable socket/sort-source-methods -- subcommand handlers ordered by user-facing command grouping; module-level config between them blocks autofix. */
 /**
- * @fileoverview `prim` CLI entry point.
- *
- * Subcommands:
- *   audit       — find call sites where primordials apply. Shows both
- *                 migration candidates (covered) and surface gaps (gap)
- *                 by default. Filter with `--coverage` or `--gaps` to
- *                 narrow output.
- *   mod         — rewrite call sites to use primordials. Dry-run by
- *                 default; `--apply` to write. .js/.mjs/.cjs/.jsx only.
- *   lint        — structural lint rules for primordials usage. Currently:
- *                 ctor-rename (constructor primordials must be aliased
- *                 `<Name>: <Name>Ctor` when destructured from
- *                 `primordials` or any configured primordials-shaped
- *                 source). Exits 1 if violations are found.
- *
- * Common flags:
- *   --target <path>     The repo to audit. Defaults to cwd.
- *   --dir <name>        Subdirectory to scan inside the target. Defaults
- *                       to `dist`. Use `src` to scan source instead.
- *   --json              Emit JSON instead of human-readable text.
- *   --help, -h          Print help and exit.
- *
- * `audit`-only flags (filter the unified findings list):
- *   --coverage          Show only call sites covered by an existing
- *                       primordial (migration candidates).
- *   --gaps              Show only call sites whose primordial doesn't
- *                       exist yet (surface-expansion candidates).
- *                       Both omitted = both shown.
- *
- * `audit`/`mod`-only flag:
- *   --surface <path>    Explicit primordials source file. Overrides
- *                       the default sibling/installed lookup.
- *
- * `mod`-only flags:
- *   --apply             Actually write file changes (default is dry-run).
- *   --include-guessed   Also rewrite prototype-method calls where the
- *                       receiver type was guessed from the identifier
- *                       name (e.g. `arr.map(fn)` → ArrayPrototypeMap).
- *                       Off by default — requires manual review.
- *
- * `lint`-only flag:
- *   --primordials-source <name>   (repeatable) Identifier or require()
- *                       specifier to treat as a primordials-shaped source.
- *                       Defaults: `primordials`,
- *                       `internal/socketsecurity/primordials`,
- *                       `internal/socketsecurity/safe-references`,
- *                       `safe-references`.
+ * @file `prim` CLI entry point. Subcommands: audit — find call sites where
+ *   primordials apply. Shows both migration candidates (covered) and surface
+ *   gaps (gap) by default. Filter with `--coverage` or `--gaps` to narrow
+ *   output. mod — rewrite call sites to use primordials. Dry-run by default;
+ *   `--apply` to write. .js/.mjs/.cjs/.jsx only. lint — structural lint rules
+ *   for primordials usage. Currently: ctor-rename (constructor primordials must
+ *   be aliased `<Name>: <Name>Ctor` when destructured from `primordials` or any
+ *   configured primordials-shaped source). Exits 1 if violations are found.
+ *   Common flags: --target <path> The repo to audit. Defaults to cwd. --dir
+ *   <name> Subdirectory to scan inside the target. Defaults to `dist`. Use
+ *   `src` to scan source instead. --json Emit JSON instead of human-readable
+ *   text. --help, -h Print help and exit. `audit`-only flags (filter the
+ *   unified findings list): --coverage Show only call sites covered by an
+ *   existing primordial (migration candidates). --gaps Show only call sites
+ *   whose primordial doesn't exist yet (surface-expansion candidates). Both
+ *   omitted = both shown. `audit`/`mod`-only flag: --surface <path> Explicit
+ *   primordials source file. Overrides the default sibling/installed lookup.
+ *   `mod`-only flags: --apply Actually write file changes (default is dry-run).
+ *   --include-guessed Also rewrite prototype-method calls where the receiver
+ *   type was guessed from the identifier name (e.g. `arr.map(fn)` →
+ *   ArrayPrototypeMap). Off by default — requires manual review. `lint`-only
+ *   flag: --primordials-source <name> (repeatable) Identifier or require()
+ *   specifier to treat as a primordials-shaped source. Defaults: `primordials`,
+ *   `internal/socketsecurity/primordials`,
+ *   `internal/socketsecurity/safe-references`, `safe-references`.
  */
 
 import { existsSync } from 'node:fs'
@@ -358,15 +336,16 @@ export async function runCli(argv) {
 const PRIMORDIALS_FILE_EXTS = ['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts']
 
 /**
- * Walk up from `scanDir` looking for a sibling `primordials.{ts,mts,cts,js,mjs,cjs}`
- * file. Returns the absolute path to it, or `undefined` if none is found
- * within the scan root. The codemod uses this to decide whether to insert
- * relative-path imports (when the project owns primordials) vs. the
- * package-name specifier (when consuming `@socketsecurity/lib`).
+ * Walk up from `scanDir` looking for a sibling
+ * `primordials.{ts,mts,cts,js,mjs,cjs}` file. Returns the absolute path to it,
+ * or `undefined` if none is found within the scan root. The codemod uses this
+ * to decide whether to insert relative-path imports (when the project owns
+ * primordials) vs. the package-name specifier (when consuming
+ * `@socketsecurity/lib`).
  *
- * Search order: scanDir itself, then a single level up. Beyond that we
- * assume any primordials.* found is unrelated (avoid drifting up to a
- * monorepo-root primordials owned by a sibling package).
+ * Search order: scanDir itself, then a single level up. Beyond that we assume
+ * any primordials.* found is unrelated (avoid drifting up to a monorepo-root
+ * primordials owned by a sibling package).
  */
 export function findLocalPrimordials(scanDir): string | undefined {
   const candidates = [scanDir, path.dirname(scanDir)]

@@ -1,6 +1,6 @@
 /**
- * @fileoverview Package isolation utilities for testing.
- * Provides tools to set up isolated test environments for packages.
+ * @file Package isolation utilities for testing. Provides tools to set up
+ *   isolated test environments for packages.
  */
 
 import npmPackageArg from '../external/npm-package-arg'
@@ -56,10 +56,9 @@ import { getNodePath } from '../node/path'
 /**
  * Isolates a package in a temporary test environment.
  *
- * Supports multiple input types:
- * 1. File system path (absolute or relative)
- * 2. Package name with optional version spec
- * 3. npm package spec (parsed via npm-package-arg)
+ * Supports multiple input types: 1. File system path (absolute or relative) 2.
+ * Package name with optional version spec 3. npm package spec (parsed via
+ * npm-package-arg)
  *
  * @throws {Error} When package installation or setup fails.
  */
@@ -278,10 +277,9 @@ export async function mergePackageJson(
 }
 
 /**
- * Resolve a path to its real location, handling symlinks. Falls
- * back to a non-realpath resolution if the OS rejects the lookup
- * (ENOENT, EACCES, etc.) — caller still gets a usable absolute
- * path either way.
+ * Resolve a path to its real location, handling symlinks. Falls back to a
+ * non-realpath resolution if the OS rejects the lookup (ENOENT, EACCES, etc.) —
+ * caller still gets a usable absolute path either way.
  */
 export async function resolveRealPath(pathStr: string): Promise<string> {
   const fs = getNodeFs()

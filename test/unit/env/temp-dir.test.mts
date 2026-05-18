@@ -1,9 +1,8 @@
 /**
- * @fileoverview Unit tests for temporary directory environment variable getters.
- *
- * Tests getTempdir() / getTmpdir() for system temporary directory paths.
- * Returns TMPDIR, TEMP, or TMP env var value, or os.tmpdir() fallback.
- * Uses rewire for test isolation. Critical for temporary file operations.
+ * @file Unit tests for temporary directory environment variable getters. Tests
+ *   getTempdir() / getTmpdir() for system temporary directory paths. Returns
+ *   TMPDIR, TEMP, or TMP env var value, or os.tmpdir() fallback. Uses rewire
+ *   for test isolation. Critical for temporary file operations.
  */
 
 import process from 'node:process'

@@ -1,9 +1,9 @@
 /**
- * @fileoverview Git repository discovery + foundational lazy fs/path/cwd
- * helpers shared across `git/*` leaves. Owns `findGitRoot`, the realpath
- * cache, the cwd resolver, and the lazy `node:fs` / `node:path` loaders
- * — pulling these together keeps the dependency direction one-way:
- * `_internal.ts` and the public-surface leaves all import from here.
+ * @file Git repository discovery + foundational lazy fs/path/cwd helpers shared
+ *   across `git/*` leaves. Owns `findGitRoot`, the realpath cache, the cwd
+ *   resolver, and the lazy `node:fs` / `node:path` loaders — pulling these
+ *   together keeps the dependency direction one-way: `_internal.ts` and the
+ *   public-surface leaves all import from here.
  */
 
 import process from 'node:process'
@@ -29,17 +29,18 @@ export const gitRootCache = new MapCtor<string, string>()
  *
  * This function is exported primarily for testing purposes.
  *
- * @param startPath - Directory path to start searching from.
- * @returns Git repository root path, or `startPath` if not found.
- *
  * @example
- * ```typescript
- * const root = findGitRoot('/path/to/repo/src/subdir')
- * // => '/path/to/repo'
+ *   ;```typescript
+ *   const root = findGitRoot('/path/to/repo/src/subdir')
+ *   // => '/path/to/repo'
  *
- * const notFound = findGitRoot('/not/a/repo')
- * // => '/not/a/repo'
- * ```
+ *   const notFound = findGitRoot('/not/a/repo')
+ *   // => '/not/a/repo'
+ *   ```
+ *
+ * @param startPath - Directory path to start searching from.
+ *
+ * @returns Git repository root path, or `startPath` if not found.
  */
 export function findGitRoot(startPath: string): string {
   const fs = getNodeFs()
@@ -82,14 +83,14 @@ export function findGitRoot(startPath: string): string {
 }
 
 /**
- * Get the real path with caching to avoid repeated filesystem calls.
- * Validates cache with existsSync() which is cheaper than realpathSync().
+ * Get the real path with caching to avoid repeated filesystem calls. Validates
+ * cache with existsSync() which is cheaper than realpathSync().
  *
- * ENOENT/ENOTDIR are re-thrown because the caller explicitly passed a path
- * they expect to exist — swallowing these would turn "file not found" into
- * a silent no-op. Other errors (EACCES, EPERM, EIO) fall back to the input
- * path since they can happen on container/overlay filesystems where the
- * path exists but realpath resolution is restricted.
+ * ENOENT/ENOTDIR are re-thrown because the caller explicitly passed a path they
+ * expect to exist — swallowing these would turn "file not found" into a silent
+ * no-op. Other errors (EACCES, EPERM, EIO) fall back to the input path since
+ * they can happen on container/overlay filesystems where the path exists but
+ * realpath resolution is restricted.
  */
 export function getCachedRealpath(pathname: string): string {
   const fs = getNodeFs()
@@ -126,18 +127,18 @@ export function getCachedRealpath(pathname: string): string {
 /**
  * Get the current working directory for git operations.
  *
- * Returns the real path to handle symlinks correctly. This is important
- * because symlinked directories like `/tmp -> /private/tmp` can cause
- * path mismatches when comparing git output.
- *
- * @returns The resolved real path of `process.cwd()`.
+ * Returns the real path to handle symlinks correctly. This is important because
+ * symlinked directories like `/tmp -> /private/tmp` can cause path mismatches
+ * when comparing git output.
  *
  * @example
- * ```typescript
- * const cwd = getCwd()
- * // In /tmp (symlink to /private/tmp):
- * // => '/private/tmp'
- * ```
+ *   ;```typescript
+ *   const cwd = getCwd()
+ *   // In /tmp (symlink to /private/tmp):
+ *   // => '/private/tmp'
+ *   ```
+ *
+ * @returns The resolved real path of `process.cwd()`.
  */
 export function getCwd(): string {
   return getCachedRealpath(process.cwd())

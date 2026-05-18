@@ -1,11 +1,11 @@
 /**
- * @fileoverview Path rewiring utilities for testing.
- * Allows tests to override os.tmpdir() and os.homedir() without directly modifying them.
+ * @file Path rewiring utilities for testing. Allows tests to override
+ *   os.tmpdir() and os.homedir() without directly modifying them. Features:
  *
- * Features:
- * - Test-friendly setPath/clearPath/resetPaths that work in beforeEach/afterEach
- * - Automatic cache invalidation for path-dependent modules
- * - Thread-safe for concurrent test execution
+ *   - Test-friendly setPath/clearPath/resetPaths that work in
+ *     beforeEach/afterEach
+ *   - Automatic cache invalidation for path-dependent modules
+ *   - Thread-safe for concurrent test execution
  */
 
 import { MapCtor } from '../primordials/map-set'
@@ -56,10 +56,9 @@ export function clearPath(key: string): void {
 /**
  * Get a path value, checking overrides first.
  *
- * Resolution order:
- * 1. Test overrides (set via setPath in beforeEach)
- * 2. Cached value (for performance)
- * 3. Original function call (cached for subsequent calls)
+ * Resolution order: 1. Test overrides (set via setPath in beforeEach) 2. Cached
+ * value (for performance) 3. Original function call (cached for subsequent
+ * calls)
  *
  * @internal Used by path getters to support test rewiring
  */
@@ -88,9 +87,9 @@ export function hasOverride(key: string): boolean {
 }
 
 /**
- * Invalidate all cached paths.
- * Called automatically when setPath/clearPath/resetPaths are used.
- * Can also be called manually for advanced testing scenarios.
+ * Invalidate all cached paths. Called automatically when
+ * setPath/clearPath/resetPaths are used. Can also be called manually for
+ * advanced testing scenarios.
  *
  * @internal Primarily for internal use, but exported for advanced testing
  */
@@ -109,8 +108,8 @@ export function invalidateCaches(): void {
 }
 
 /**
- * Register a cache invalidation callback.
- * Called by modules that need to clear their caches when paths change.
+ * Register a cache invalidation callback. Called by modules that need to clear
+ * their caches when paths change.
  *
  * @internal Used by paths.ts and fs.ts
  */
@@ -119,17 +118,17 @@ export function registerCacheInvalidation(callback: () => void): void {
 }
 
 /**
- * Clear all path overrides and reset caches.
- * Useful in afterEach hooks to ensure clean test state.
+ * Clear all path overrides and reset caches. Useful in afterEach hooks to
+ * ensure clean test state.
  *
  * @example
- * ```typescript
- * import { resetPaths } from '#paths/rewire'
+ *   ;```typescript
+ *   import { resetPaths } from '#paths/rewire'
  *
- * afterEach(() => {
- *   resetPaths()
- * })
- * ```
+ *   afterEach(() => {
+ *     resetPaths()
+ *   })
+ *   ```
  */
 export function resetPaths(): void {
   testOverrides.clear()
@@ -138,26 +137,26 @@ export function resetPaths(): void {
 }
 
 /**
- * Set a path override for testing.
- * This triggers cache invalidation for path-dependent modules.
+ * Set a path override for testing. This triggers cache invalidation for
+ * path-dependent modules.
  *
  * @example
- * ```typescript
- * import { setPath, resetPaths } from '#paths/rewire'
- * import { getOsTmpDir } from './'
+ *   ;```typescript
+ *   import { setPath, resetPaths } from '#paths/rewire'
+ *   import { getOsTmpDir } from './'
  *
- * beforeEach(() => {
- *   setPath('tmpdir', '/custom/tmp')
- * })
+ *   beforeEach(() => {
+ *     setPath('tmpdir', '/custom/tmp')
+ *   })
  *
- * afterEach(() => {
- *   resetPaths()
- * })
+ *   afterEach(() => {
+ *     resetPaths()
+ *   })
  *
- * it('should use custom temp directory', () => {
- *   expect(getOsTmpDir()).toBe('/custom/tmp')
- * })
- * ```
+ *   it('should use custom temp directory', () => {
+ *     expect(getOsTmpDir()).toBe('/custom/tmp')
+ *   })
+ *   ```
  */
 export function setPath(key: string, value: string | undefined): void {
   testOverrides.set(key, value)

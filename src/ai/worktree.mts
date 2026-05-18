@@ -1,23 +1,17 @@
 /**
- * @fileoverview Run AI agents in parallel, each in its own git
- * worktree, and merge results back to the base branch.
- *
- * The fleet's CLAUDE.md "Parallel Claude sessions" rule mandates
- * worktree isolation when multiple agents touch the same checkout.
- * This helper enforces that contract: each item gets a fresh
- * worktree branched from the base, the per-item function runs
- * inside it, then the helper either fast-forward-merges the worktree
- * branch back into the base (when changes were committed) or removes
- * the worktree silently (when no changes happened).
- *
- * Concurrency: caller-controlled with a default cap of 4. Per the
- * "Programmatic Claude calls" CLAUDE.md rule, very high concurrency
- * saturates the API rate limits; 4 is safe headroom for most
- * accounts. The hard cap of 8 prevents accidental flag-finger
- * disasters.
- *
- * Cleanup policy: see `WorktreeCleanup` in types.mts. Default
- * 'always' — fail-or-pass, the worktree is removed.
+ * @file Run AI agents in parallel, each in its own git worktree, and merge
+ *   results back to the base branch. The fleet's CLAUDE.md "Parallel Claude
+ *   sessions" rule mandates worktree isolation when multiple agents touch the
+ *   same checkout. This helper enforces that contract: each item gets a fresh
+ *   worktree branched from the base, the per-item function runs inside it, then
+ *   the helper either fast-forward-merges the worktree branch back into the
+ *   base (when changes were committed) or removes the worktree silently (when
+ *   no changes happened). Concurrency: caller-controlled with a default cap of
+ *   4. Per the "Programmatic Claude calls" CLAUDE.md rule, very high
+ *   concurrency saturates the API rate limits; 4 is safe headroom for most
+ *   accounts. The hard cap of 8 prevents accidental flag-finger disasters.
+ *   Cleanup policy: see `WorktreeCleanup` in types.mts. Default 'always' —
+ *   fail-or-pass, the worktree is removed.
  */
 
 import { existsSync } from 'node:fs'
@@ -33,26 +27,44 @@ const DEFAULT_CONCURRENCY = 4
 const MAX_CONCURRENCY = 8
 
 export interface WorktreeRunOptions {
-  /** Base repo path (the primary checkout). */
+  /**
+   * Base repo path (the primary checkout).
+   */
   readonly baseRepo: string
-  /** Branch to merge results into. Default: current branch of baseRepo. */
+  /**
+   * Branch to merge results into. Default: current branch of baseRepo.
+   */
   readonly branch?: string
-  /** Cleanup policy. Default 'always'. */
+  /**
+   * Cleanup policy. Default 'always'.
+   */
   readonly cleanup?: WorktreeCleanup
-  /** Parallel cap. Default 4, max 8. */
+  /**
+   * Parallel cap. Default 4, max 8.
+   */
   readonly concurrency?: number
-  /** Prefix for worktree branch + dir names. Default 'agent-task'. */
+  /**
+   * Prefix for worktree branch + dir names. Default 'agent-task'.
+   */
   readonly namePrefix?: string
-  /** Where worktrees live on disk. Default: `${tmpdir}/${prefix}-<n>`. */
+  /**
+   * Where worktrees live on disk. Default: `${tmpdir}/${prefix}-<n>`.
+   */
   readonly worktreeRoot?: string
 }
 
 export interface WorktreeRunContext {
-  /** Worktree dir on disk. */
+  /**
+   * Worktree dir on disk.
+   */
   readonly cwd: string
-  /** Branch name created for this worktree. */
+  /**
+   * Branch name created for this worktree.
+   */
   readonly branch: string
-  /** 0-indexed item position. */
+  /**
+   * 0-indexed item position.
+   */
   readonly index: number
 }
 
@@ -179,30 +191,34 @@ export async function runOne<I, T>(
 }
 
 /**
- * Run `fn` for each item in parallel, each invocation isolated in
- * its own git worktree. Results are merged back into the base branch
- * with `git merge --ff-only`; non-FF merges are reported as failures
- * and the worktree is preserved (regardless of cleanup policy).
+ * Run `fn` for each item in parallel, each invocation isolated in its own git
+ * worktree. Results are merged back into the base branch with `git merge
+ * --ff-only`; non-FF merges are reported as failures and the worktree is
+ * preserved (regardless of cleanup policy).
  *
  * @example
- * ```ts
- * import { spawnAiAgentsInWorktrees } from '@socketsecurity/lib/ai/worktree'
- * import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
- * import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
+ *   ;```ts
+ *   import { spawnAiAgentsInWorktrees } from '@socketsecurity/lib/ai/worktree'
+ *   import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
+ *   import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
  *
- * const repos = ['socket-addon', 'socket-btm', 'socket-lib']
- * const settled = await spawnAiAgentsInWorktrees(repos, async ({ cwd }) => {
- *   return await spawnAiAgent({
- *     ...EDIT_ONLY_PROFILE,
- *     prompt: 'Run the cleanup task',
- *     cwd,
- *   })
- * }, {
- *   baseRepo: '/Users/<user>/projects/socket-wheelhouse',
- *   concurrency: 3,
- *   cleanup: 'on-empty',
- * })
- * ```
+ *   const repos = ['socket-addon', 'socket-btm', 'socket-lib']
+ *   const settled = await spawnAiAgentsInWorktrees(
+ *     repos,
+ *     async ({ cwd }) => {
+ *       return await spawnAiAgent({
+ *         ...EDIT_ONLY_PROFILE,
+ *         prompt: 'Run the cleanup task',
+ *         cwd,
+ *       })
+ *     },
+ *     {
+ *       baseRepo: '/Users/<user>/projects/socket-wheelhouse',
+ *       concurrency: 3,
+ *       cleanup: 'on-empty',
+ *     },
+ *   )
+ *   ```
  */
 export async function spawnAiAgentsInWorktrees<I, T>(
   items: readonly I[],

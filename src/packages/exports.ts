@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package exports field utilities.
+ * @file Package exports field utilities.
  */
 
 import { isArray } from '../arrays/predicates'
@@ -22,11 +22,13 @@ import {
  * Find types definition for a specific subpath in package exports.
  *
  * @example
- * ```typescript
- * const exports = { '.': { types: './dist/index.d.ts', import: './dist/index.js' } }
- * const types = findTypesForSubpath(exports, './dist/index.js')
- * // types === './dist/index.d.ts'
- * ```
+ *   ;```typescript
+ *   const exports = {
+ *     '.': { types: './dist/index.d.ts', import: './dist/index.js' },
+ *   }
+ *   const types = findTypesForSubpath(exports, './dist/index.js')
+ *   // types === './dist/index.d.ts'
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function findTypesForSubpath(
@@ -73,10 +75,10 @@ export function findTypesForSubpath(
  * Get file paths from package exports.
  *
  * @example
- * ```typescript
- * const exports = { '.': './dist/index.js', './utils': './dist/utils.js' }
- * getExportFilePaths(exports) // ['./dist/index.js', './dist/utils.js']
- * ```
+ *   ;```typescript
+ *   const exports = { '.': './dist/index.js', './utils': './dist/utils.js' }
+ *   getExportFilePaths(exports) // ['./dist/index.js', './dist/utils.js']
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getExportFilePaths(entryExports: unknown): string[] {
@@ -131,10 +133,10 @@ export function getExportFilePaths(entryExports: unknown): string[] {
  * Get subpaths from package exports.
  *
  * @example
- * ```typescript
- * const exports = { '.': './index.js', './utils': './utils.js' }
- * getSubpaths(exports) // ['.', './utils']
- * ```
+ *   ;```typescript
+ *   const exports = { '.': './index.js', './utils': './utils.js' }
+ *   getSubpaths(exports) // ['.', './utils']
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getSubpaths(entryExports: unknown): string[] {
@@ -151,10 +153,10 @@ export function getSubpaths(entryExports: unknown): string[] {
  * Check if package exports use conditional patterns (e.g., import/require).
  *
  * @example
- * ```typescript
- * isConditionalExports({ import: './index.mjs', require: './index.cjs' }) // true
- * isConditionalExports({ '.': './index.js' })                            // false
- * ```
+ *   ;```typescript
+ *   isConditionalExports({ import: './index.mjs', require: './index.cjs' }) // true
+ *   isConditionalExports({ '.': './index.js' }) // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isConditionalExports(entryExports: unknown): boolean {
@@ -183,10 +185,10 @@ export function isConditionalExports(entryExports: unknown): boolean {
  * Check if package exports use subpath patterns (keys starting with '.').
  *
  * @example
- * ```typescript
- * isSubpathExports({ '.': './index.js', './utils': './utils.js' }) // true
- * isSubpathExports({ import: './index.mjs' })                     // false
- * ```
+ *   ;```typescript
+ *   isSubpathExports({ '.': './index.js', './utils': './utils.js' }) // true
+ *   isSubpathExports({ import: './index.mjs' }) // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isSubpathExports(entryExports: unknown): boolean {
@@ -209,13 +211,13 @@ export function isSubpathExports(entryExports: unknown): boolean {
  * Normalize package.json exports field to canonical format.
  *
  * @example
- * ```typescript
- * resolvePackageJsonEntryExports('./index.js')
- * // { '.': './index.js' }
+ *   ;```typescript
+ *   resolvePackageJsonEntryExports('./index.js')
+ *   // { '.': './index.js' }
  *
- * resolvePackageJsonEntryExports({ '.': './index.js' })
- * // { '.': './index.js' }
- * ```
+ *   resolvePackageJsonEntryExports({ '.': './index.js' })
+ *   // { '.': './index.js' }
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageJsonEntryExports(entryExports: unknown): unknown {

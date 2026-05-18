@@ -1,16 +1,20 @@
 /**
- * @fileoverview Unit tests for JSON parsing utilities.
+ * @file Unit tests for JSON parsing utilities. Tests JSON parsing with Buffer
+ *   support and BOM handling:
  *
- * Tests JSON parsing with Buffer support and BOM handling:
- * - parseJson() parses JSON strings or UTF-8 Buffers with automatic BOM stripping
- * - isJsonPrimitive() type guard for null, boolean, number, string
- * - Buffer detection via duck-typing (checks length, copy, slice, constructor.isBuffer)
- * - BOM (Byte Order Mark U+FEFF) stripped from beginning of input
- * - Optional filepath for enhanced error messages ("/path/to/file.json: Unexpected token...")
- * - Optional reviver function for custom value transformations
- * - Optional throws flag to return undefined instead of throwing on errors
- * Tests cover valid/invalid JSON, Buffer encoding, error handling, revivers, and edge cases
- * including empty strings, special characters, unicode, and very large JSON payloads.
+ *   - parseJson() parses JSON strings or UTF-8 Buffers with automatic BOM
+ *     stripping
+ *   - isJsonPrimitive() type guard for null, boolean, number, string
+ *   - Buffer detection via duck-typing (checks length, copy, slice,
+ *     constructor.isBuffer)
+ *   - BOM (Byte Order Mark U+FEFF) stripped from beginning of input
+ *   - Optional filepath for enhanced error messages ("/path/to/file.json:
+ *     Unexpected token...")
+ *   - Optional reviver function for custom value transformations
+ *   - Optional throws flag to return undefined instead of throwing on errors
+ *     Tests cover valid/invalid JSON, Buffer encoding, error handling,
+ *     revivers, and edge cases including empty strings, special characters,
+ *     unicode, and very large JSON payloads.
  */
 
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises'

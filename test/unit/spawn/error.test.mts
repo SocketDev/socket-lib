@@ -1,7 +1,6 @@
 /**
- * @fileoverview Tests for enhanceSpawnError, isSpawnError, and spinner-
- * restart branch in src/spawn.ts that the existing spawn.test.mts
- * doesn't cover.
+ * @file Tests for enhanceSpawnError, isSpawnError, and spinner- restart branch
+ *   in src/spawn.ts that the existing spawn.test.mts doesn't cover.
  */
 
 import { describe, expect, it } from 'vitest'

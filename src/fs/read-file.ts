@@ -1,12 +1,10 @@
 /**
- * @fileoverview File-content readers — UTF-8 / binary / safe variants
- * (sync + async). The `safe*` versions trap errors and return
- * `undefined` (or a caller-supplied `defaultValue`) so they fit the
- * non-throwing-fallback shape used elsewhere in the lib.
- *
- * The encoding `null` overload returns a `Buffer`; the default and any
- * string encoding return a string. The runtime fast-path normalizes
- * encoding once and forwards untouched options to `node:fs`.
+ * @file File-content readers — UTF-8 / binary / safe variants (sync + async).
+ *   The `safe*` versions trap errors and return `undefined` (or a
+ *   caller-supplied `defaultValue`) so they fit the non-throwing-fallback shape
+ *   used elsewhere in the lib. The encoding `null` overload returns a `Buffer`;
+ *   the default and any string encoding return a string. The runtime fast-path
+ *   normalizes encoding once and forwards untouched options to `node:fs`.
  */
 
 import { getAbortSignal } from '../process/abort'
@@ -22,22 +20,22 @@ import type { ReadFileOptions, ReadOptions, SafeReadOptions } from './types'
 const abortSignal = getAbortSignal()
 
 /**
- * Read a file as binary data asynchronously.
- * Returns a Buffer without encoding the contents.
- * Useful for reading images, archives, or other binary formats.
- *
- * @param filepath - Path to file
- * @param options - Read options (encoding is forced to null for binary)
- * @returns Promise resolving to Buffer containing file contents
+ * Read a file as binary data asynchronously. Returns a Buffer without encoding
+ * the contents. Useful for reading images, archives, or other binary formats.
  *
  * @example
- * ```ts
- * // Read an image file
- * const imageBuffer = await readFileBinary('./image.png')
+ *   ;```ts
+ *   // Read an image file
+ *   const imageBuffer = await readFileBinary('./image.png')
  *
- * // Read with abort signal
- * const buffer = await readFileBinary('./data.bin', { signal: abortSignal })
- * ```
+ *   // Read with abort signal
+ *   const buffer = await readFileBinary('./data.bin', { signal: abortSignal })
+ *   ```
+ *
+ * @param filepath - Path to file.
+ * @param options - Read options (encoding is forced to null for binary)
+ *
+ * @returns Promise resolving to Buffer containing file contents
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readFileBinary(
@@ -55,22 +53,22 @@ export async function readFileBinary(
 }
 
 /**
- * Read a file as binary data synchronously.
- * Returns a Buffer without encoding the contents.
- * Useful for reading images, archives, or other binary formats.
- *
- * @param filepath - Path to file
- * @param options - Read options (encoding is forced to null for binary)
- * @returns Buffer containing file contents
+ * Read a file as binary data synchronously. Returns a Buffer without encoding
+ * the contents. Useful for reading images, archives, or other binary formats.
  *
  * @example
- * ```ts
- * // Read an image file
- * const imageBuffer = readFileBinarySync('./logo.png')
+ *   ;```ts
+ *   // Read an image file
+ *   const imageBuffer = readFileBinarySync('./logo.png')
  *
- * // Read a compressed file
- * const gzipData = readFileBinarySync('./archive.gz')
- * ```
+ *   // Read a compressed file
+ *   const gzipData = readFileBinarySync('./archive.gz')
+ *   ```
+ *
+ * @param filepath - Path to file.
+ * @param options - Read options (encoding is forced to null for binary)
+ *
+ * @returns Buffer containing file contents
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readFileBinarySync(
@@ -87,22 +85,22 @@ export function readFileBinarySync(
 }
 
 /**
- * Read a file as UTF-8 text asynchronously.
- * Returns a string with the file contents decoded as UTF-8.
- * This is the most common way to read text files.
- *
- * @param filepath - Path to file
- * @param options - Read options including encoding and abort signal
- * @returns Promise resolving to string containing file contents
+ * Read a file as UTF-8 text asynchronously. Returns a string with the file
+ * contents decoded as UTF-8. This is the most common way to read text files.
  *
  * @example
- * ```ts
- * // Read a text file
- * const content = await readFileUtf8('./README.md')
+ *   ;```ts
+ *   // Read a text file
+ *   const content = await readFileUtf8('./README.md')
  *
- * // Read with custom encoding
- * const content = await readFileUtf8('./data.txt', { encoding: 'utf-8' })
- * ```
+ *   // Read with custom encoding
+ *   const content = await readFileUtf8('./data.txt', { encoding: 'utf-8' })
+ *   ```
+ *
+ * @param filepath - Path to file.
+ * @param options - Read options including encoding and abort signal.
+ *
+ * @returns Promise resolving to string containing file contents
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function readFileUtf8(
@@ -119,22 +117,23 @@ export async function readFileUtf8(
 }
 
 /**
- * Read a file as UTF-8 text synchronously.
- * Returns a string with the file contents decoded as UTF-8.
- * This is the most common way to read text files synchronously.
- *
- * @param filepath - Path to file
- * @param options - Read options including encoding
- * @returns String containing file contents
+ * Read a file as UTF-8 text synchronously. Returns a string with the file
+ * contents decoded as UTF-8. This is the most common way to read text files
+ * synchronously.
  *
  * @example
- * ```ts
- * // Read a configuration file
- * const config = readFileUtf8Sync('./config.txt')
+ *   ;```ts
+ *   // Read a configuration file
+ *   const config = readFileUtf8Sync('./config.txt')
  *
- * // Read with custom options
- * const data = readFileUtf8Sync('./data.txt', { encoding: 'utf8' })
- * ```
+ *   // Read with custom options
+ *   const data = readFileUtf8Sync('./data.txt', { encoding: 'utf8' })
+ *   ```
+ *
+ * @param filepath - Path to file.
+ * @param options - Read options including encoding.
+ *
+ * @returns String containing file contents
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function readFileUtf8Sync(
@@ -150,29 +149,32 @@ export function readFileUtf8Sync(
 }
 
 /**
- * Safely read a file asynchronously, returning undefined on error.
- * Useful when you want to attempt reading a file without handling errors explicitly.
+ * Safely read a file asynchronously, returning undefined on error. Useful when
+ * you want to attempt reading a file without handling errors explicitly.
  * Returns undefined for any error (file not found, permission denied, etc.).
- * Defaults to UTF-8 encoding, returning a string unless encoding is explicitly set to null.
- *
- * @param filepath - Path to file
- * @param options - Read options including encoding and default value
- * @returns Promise resolving to file contents (string by default), or undefined on error
+ * Defaults to UTF-8 encoding, returning a string unless encoding is explicitly
+ * set to null.
  *
  * @example
- * ```ts
- * // Try to read a file as UTF-8 string (default), get undefined if it doesn't exist
- * const content = await safeReadFile('./optional-config.txt')
- * if (content) {
- *   console.log('Config found:', content)
- * }
+ *   ;```ts
+ *   // Try to read a file as UTF-8 string (default), get undefined if it doesn't exist
+ *   const content = await safeReadFile('./optional-config.txt')
+ *   if (content) {
+ *     console.log('Config found:', content)
+ *   }
  *
- * // Read with specific encoding
- * const data = await safeReadFile('./data.txt', { encoding: 'utf8' })
+ *   // Read with specific encoding
+ *   const data = await safeReadFile('./data.txt', { encoding: 'utf8' })
  *
- * // Read as Buffer by setting encoding to null
- * const buffer = await safeReadFile('./binary.dat', { encoding: null })
- * ```
+ *   // Read as Buffer by setting encoding to null
+ *   const buffer = await safeReadFile('./binary.dat', { encoding: null })
+ *   ```
+ *
+ * @param filepath - Path to file.
+ * @param options - Read options including encoding and default value.
+ *
+ * @returns Promise resolving to file contents (string by default), or undefined
+ *   on error.
  */
 /*@__NO_SIDE_EFFECTS__*/
 export async function safeReadFile(
@@ -223,29 +225,31 @@ export async function safeReadFile(
 }
 
 /**
- * Safely read a file synchronously, returning undefined on error.
- * Useful when you want to attempt reading a file without handling errors explicitly.
+ * Safely read a file synchronously, returning undefined on error. Useful when
+ * you want to attempt reading a file without handling errors explicitly.
  * Returns undefined for any error (file not found, permission denied, etc.).
- * Defaults to UTF-8 encoding, returning a string unless encoding is explicitly set to null.
- *
- * @param filepath - Path to file
- * @param options - Read options including encoding and default value
- * @returns File contents (string by default), or undefined on error
+ * Defaults to UTF-8 encoding, returning a string unless encoding is explicitly
+ * set to null.
  *
  * @example
- * ```ts
- * // Try to read a config file as UTF-8 string (default)
- * const config = safeReadFileSync('./config.txt')
- * if (config) {
- *   console.log('Config loaded successfully')
- * }
+ *   ;```ts
+ *   // Try to read a config file as UTF-8 string (default)
+ *   const config = safeReadFileSync('./config.txt')
+ *   if (config) {
+ *     console.log('Config loaded successfully')
+ *   }
  *
- * // Read with explicit encoding
- * const data = safeReadFileSync('./data.txt', { encoding: 'utf8' })
+ *   // Read with explicit encoding
+ *   const data = safeReadFileSync('./data.txt', { encoding: 'utf8' })
  *
- * // Read binary file by setting encoding to null
- * const buffer = safeReadFileSync('./image.png', { encoding: null })
- * ```
+ *   // Read binary file by setting encoding to null
+ *   const buffer = safeReadFileSync('./image.png', { encoding: null })
+ *   ```
+ *
+ * @param filepath - Path to file.
+ * @param options - Read options including encoding and default value.
+ *
+ * @returns File contents (string by default), or undefined on error
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function safeReadFileSync(

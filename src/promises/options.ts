@@ -1,10 +1,9 @@
 /**
- * @fileoverview Option-shape normalizers for the iteration / retry
- * helpers. Three free functions — kept together because they're a tiny
- * cluster of pure transforms that callers cycle through:
- * `resolveRetryOptions` (number-shorthand → minimal object) →
- * `normalizeRetryOptions` (defaults + signal binding) →
- * `normalizeIterationOptions` (concurrency + retries combined).
+ * @file Option-shape normalizers for the iteration / retry helpers. Three free
+ *   functions — kept together because they're a tiny cluster of pure transforms
+ *   that callers cycle through: `resolveRetryOptions` (number-shorthand →
+ *   minimal object) → `normalizeRetryOptions` (defaults + signal binding) →
+ *   `normalizeIterationOptions` (concurrency + retries combined).
  */
 
 import { MathMax } from '../primordials/math'
@@ -15,21 +14,23 @@ import type { IterationOptions, RetryOptions } from './types'
 /**
  * Normalize options for iteration functions.
  *
- * Converts various option formats into a consistent structure with defaults applied.
- * Handles number shorthand for concurrency and ensures minimum values.
+ * Converts various option formats into a consistent structure with defaults
+ * applied. Handles number shorthand for concurrency and ensures minimum
+ * values.
  *
- * @param options - Concurrency as number, or full options object, or undefined
+ * @example
+ *   // Number shorthand for concurrency
+ *   normalizeIterationOptions(5)
+ *   // => { concurrency: 5, retries: {...}, signal: AbortSignal }
+ *
+ * @example
+ *   // Full options
+ *   normalizeIterationOptions({ concurrency: 3, retries: 2 })
+ *   // => { concurrency: 3, retries: {...}, signal: AbortSignal }
+ *
+ * @param options - Concurrency as number, or full options object, or undefined.
+ *
  * @returns Normalized options with concurrency, retries, and signal
- *
- * @example
- * // Number shorthand for concurrency
- * normalizeIterationOptions(5)
- * // => { concurrency: 5, retries: {...}, signal: AbortSignal }
- *
- * @example
- * // Full options
- * normalizeIterationOptions({ concurrency: 3, retries: 2 })
- * // => { concurrency: 3, retries: {...}, signal: AbortSignal }
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizeIterationOptions(
@@ -61,22 +62,23 @@ export function normalizeIterationOptions(
 /**
  * Normalize options for retry functionality.
  *
- * Converts various retry option formats into a complete configuration with all defaults.
- * Handles legacy property names (`factor`, `minTimeout`, `maxTimeout`) and merges them
- * with modern equivalents.
+ * Converts various retry option formats into a complete configuration with all
+ * defaults. Handles legacy property names (`factor`, `minTimeout`,
+ * `maxTimeout`) and merges them with modern equivalents.
  *
- * @param options - Retry count as number, or full options object, or undefined
+ * @example
+ *   // Number shorthand
+ *   normalizeRetryOptions(3)
+ *   // => { retries: 3, baseDelayMs: 200, backoffFactor: 2, ... }
+ *
+ * @example
+ *   // Full options with defaults filled in
+ *   normalizeRetryOptions({ retries: 5, baseDelayMs: 500 })
+ *   // => { retries: 5, baseDelayMs: 500, backoffFactor: 2, jitter: true, ... }
+ *
+ * @param options - Retry count as number, or full options object, or undefined.
+ *
  * @returns Normalized retry options with all properties set
- *
- * @example
- * // Number shorthand
- * normalizeRetryOptions(3)
- * // => { retries: 3, baseDelayMs: 200, backoffFactor: 2, ... }
- *
- * @example
- * // Full options with defaults filled in
- * normalizeRetryOptions({ retries: 5, baseDelayMs: 500 })
- * // => { retries: 5, baseDelayMs: 500, backoffFactor: 2, jitter: true, ... }
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizeRetryOptions(
@@ -126,16 +128,18 @@ export function normalizeRetryOptions(
  * Converts shorthand and partial options into a base configuration that can be
  * further normalized. This is an internal helper for option processing.
  *
- * @param options - Retry count as number, or partial options object, or undefined
+ * @example
+ *   resolveRetryOptions(3)
+ *   // => { retries: 3, minTimeout: 200, maxTimeout: 10000, factor: 2 }
+ *
+ * @example
+ *   resolveRetryOptions({ retries: 5, maxTimeout: 5000 })
+ *   // => { retries: 5, minTimeout: 200, maxTimeout: 5000, factor: 2 }
+ *
+ * @param options - Retry count as number, or partial options object, or
+ *   undefined.
+ *
  * @returns Resolved retry options with defaults for basic properties
- *
- * @example
- * resolveRetryOptions(3)
- * // => { retries: 3, minTimeout: 200, maxTimeout: 10000, factor: 2 }
- *
- * @example
- * resolveRetryOptions({ retries: 5, maxTimeout: 5000 })
- * // => { retries: 5, minTimeout: 200, maxTimeout: 5000, factor: 2 }
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolveRetryOptions(

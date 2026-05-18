@@ -1,16 +1,13 @@
 /**
- * @fileoverview `detectFormat(filename)` — maps a filename (or path)
- * to its `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile
- * format), or returns `undefined` if nothing matched.
- *
- * On socket-btm's smol Node binary this routes to
- * `node:smol-manifest`'s native `detectFormat`; on stock Node it does
- * a basename switch over the format descriptors exported by each
- * PM-specific dir under `src/eco/<eco>/<pm>/`. The two paths return
- * byte-equivalent shapes so the swap is invisible.
- *
- * `supportedFiles` is exported alongside for callers that want to
- * enumerate the recognized filenames (e.g. for file-globbing).
+ * @file `detectFormat(filename)` — maps a filename (or path) to its
+ *   `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile format), or
+ *   returns `undefined` if nothing matched. On socket-btm's smol Node binary
+ *   this routes to `node:smol-manifest`'s native `detectFormat`; on stock Node
+ *   it does a basename switch over the format descriptors exported by each
+ *   PM-specific dir under `src/eco/<eco>/<pm>/`. The two paths return
+ *   byte-equivalent shapes so the swap is invisible. `supportedFiles` is
+ *   exported alongside for callers that want to enumerate the recognized
+ *   filenames (e.g. for file-globbing).
  */
 
 import {

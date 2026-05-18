@@ -1,11 +1,9 @@
 /**
- * @fileoverview Tests for the wildcard-pattern getAll() path in
- * src/ttl-cache.ts that walks cacache.ls.stream.
- *
- * Mocks the cacache module's `getCacache().ls.stream` to yield fake
- * entries so we can exercise: prefix-mismatch skip, pattern-match
- * filter, in-memory-dedupe skip, expired-entry remove, and the
- * memoize-update branch.
+ * @file Tests for the wildcard-pattern getAll() path in src/ttl-cache.ts that
+ *   walks cacache.ls.stream. Mocks the cacache module's
+ *   `getCacache().ls.stream` to yield fake entries so we can exercise:
+ *   prefix-mismatch skip, pattern-match filter, in-memory-dedupe skip,
+ *   expired-entry remove, and the memoize-update branch.
  */
 
 import os from 'node:os'

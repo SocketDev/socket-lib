@@ -1,12 +1,10 @@
 /**
- * @fileoverview Safe references to `RegExp` and its prototype methods.
- *
- * `RegExp.escape` is ES2025; the primordial is typed `Function |
- * undefined` so older runtimes still load. The Symbol-keyed
- * `[Symbol.match]` / `[Symbol.replace]` slots are exposed alongside
- * the named methods because some callers use them via dynamic
- * dispatch (e.g. `String.prototype.match` invokes
- * `RegExp.prototype[Symbol.match]` internally).
+ * @file Safe references to `RegExp` and its prototype methods. `RegExp.escape`
+ *   is ES2025; the primordial is typed `Function | undefined` so older runtimes
+ *   still load. The Symbol-keyed `[Symbol.match]` / `[Symbol.replace]` slots
+ *   are exposed alongside the named methods because some callers use them via
+ *   dynamic dispatch (e.g. `String.prototype.match` invokes
+ *   `RegExp.prototype[Symbol.match]` internally).
  */
 
 import { uncurryThis } from './uncurry'

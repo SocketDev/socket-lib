@@ -1,20 +1,17 @@
 /**
- * @fileoverview Detect which AI agent CLIs are installed on PATH.
+ * @file Detect which AI agent CLIs are installed on PATH. Strategy:
+ *   which()-based lookup with a two-tier cache:
  *
- * Strategy: which()-based lookup with a two-tier cache:
  *   1. In-process Map — survives until the Node process exits.
- *   2. On-disk JSON at `<repo>/.cache/agent-discovery.json`, TTL 1h
- *      — survives across subprocess invocations (per-file ai-lint-fix
- *      batches) without re-running which().
- *
- * Cache invalidation: stale on-disk cache is detected by mtime
- * comparison; missing or expired → fresh which() pass + rewrite.
- *
- * Why two tiers: hooks and skills spawn dozens of short-lived Node
- * processes per session. In-process alone misses the cross-process
- * speedup; on-disk alone hits the filesystem on every call. The
- * combination keeps repeated lookups under a millisecond after the
- * cold-start cost.
+ *   2. On-disk JSON at `<repo>/.cache/agent-discovery.json`, TTL 1h — survives
+ *      across subprocess invocations (per-file ai-lint-fix batches) without
+ *      re-running which(). Cache invalidation: stale on-disk cache is detected
+ *      by mtime comparison; missing or expired → fresh which() pass + rewrite.
+ *      Why two tiers: hooks and skills spawn dozens of short-lived Node
+ *      processes per session. In-process alone misses the cross-process
+ *      speedup; on-disk alone hits the filesystem on every call. The
+ *      combination keeps repeated lookups under a millisecond after the
+ *      cold-start cost.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -37,7 +34,9 @@ const KNOWN_AGENTS: readonly AiAgentName[] = [
   'opencode',
 ]
 
-/** Cache TTL in milliseconds (1 hour). */
+/**
+ * Cache TTL in milliseconds (1 hour).
+ */
 const CACHE_TTL_MS = 60 * 60 * 1000
 
 let inProcessCache: DiscoveredAgents | undefined
@@ -54,15 +53,14 @@ export function cachePathFor(repoRoot: string): string {
 /**
  * Discover which AI agent CLIs are installed.
  *
- * @param options.repoRoot - Where to read/write the on-disk cache.
- *   Defaults to process.cwd(). Skill runners typically pass the
- *   target repo's root.
- * @param options.refresh - When true, bypass both caches and re-run
- *   which(). Useful after `npm i -g <agent>` mid-session.
+ * @param options.repoRoot - Where to read/write the on-disk cache. Defaults to
+ *   process.cwd(). Skill runners typically pass the target repo's root.
+ * @param options.refresh - When true, bypass both caches and re-run which().
+ *   Useful after `npm i -g <agent>` mid-session.
  *
- * Returns a map of agent → absolute binary path. Agents that aren't
- * installed are absent from the map (not present-with-undefined),
- * so callers can use `'claude' in agents` for the existence check.
+ *   Returns a map of agent → absolute binary path. Agents that aren't installed
+ *   are absent from the map (not present-with-undefined), so callers can use
+ *   `'claude' in agents` for the existence check.
  */
 export async function discoverAiAgents(
   options: { readonly refresh?: boolean; readonly repoRoot?: string } = {},
@@ -101,12 +99,12 @@ export function discoverFresh(): DiscoveredAgents {
 }
 
 /**
- * Synchronous in-process lookup. Skips disk cache + which(). Returns
- * undefined if discoverAiAgents() hasn't been called yet in this
- * process, OR returns the most recent discovery result.
+ * Synchronous in-process lookup. Skips disk cache + which(). Returns undefined
+ * if discoverAiAgents() hasn't been called yet in this process, OR returns the
+ * most recent discovery result.
  *
- * Useful in fast paths where the caller has already populated the
- * cache and just wants to read it back.
+ * Useful in fast paths where the caller has already populated the cache and
+ * just wants to read it back.
  */
 export function getDiscoveredAiAgents(): DiscoveredAgents | undefined {
   return inProcessCache
@@ -135,8 +133,8 @@ export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
 }
 
 /**
- * Reset the in-process cache. Tests use this; production callers
- * shouldn't need it (use `refresh: true` on discoverAiAgents()).
+ * Reset the in-process cache. Tests use this; production callers shouldn't need
+ * it (use `refresh: true` on discoverAiAgents()).
  */
 export function resetAiAgentDiscoveryCache(): void {
   inProcessCache = undefined

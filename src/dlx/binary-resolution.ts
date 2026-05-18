@@ -1,13 +1,12 @@
 /**
- * @fileoverview Binary resolution for installed dlx packages.
+ * @file Binary resolution for installed dlx packages.
  *
  *   - `findBinaryPath` — pick the right binary entry from package.json `bin`
  *   - `makePackageBinsExecutable` — chmod all bin entries to 0o755 on Unix
- *   - `resolveBinaryPath` — Windows wrapper (.cmd/.bat/.ps1/.exe) lookup
- *
- * Split out of `dlx/package.ts` for size hygiene. The cache used by
- * `resolveBinaryPath` lives in `_internal.ts` so both this leaf and
- * any direct consumers (`binaryPathCacheSet`) share one source.
+ *   - `resolveBinaryPath` — Windows wrapper (.cmd/.bat/.ps1/.exe) lookup Split
+ *     out of `dlx/package.ts` for size hygiene. The cache used by
+ *     `resolveBinaryPath` lives in `_internal.ts` so both this leaf and any
+ *     direct consumers (`binaryPathCacheSet`) share one source.
  */
 
 import { WIN32 } from '../constants/platform'
@@ -25,24 +24,20 @@ import { getNodePath } from '../node/path'
 import { binaryPathCache, binaryPathCacheSet } from './_internal'
 
 /**
- * Find the binary path for an installed package.
- * Uses npm's bin resolution strategy with user-friendly fallbacks.
- * Resolves platform-specific wrappers (.cmd, .ps1, etc.) on Windows.
+ * Find the binary path for an installed package. Uses npm's bin resolution
+ * strategy with user-friendly fallbacks. Resolves platform-specific wrappers
+ * (.cmd, .ps1, etc.) on Windows.
  *
- * Resolution strategy (cherry-picked from libnpmexec):
- * 1. Use npm's getBinFromManifest (handles aliases and standard cases)
- * 2. Fall back to user-provided binaryName if npm's strategy fails
- * 3. Try last segment of package name as final fallback
- * 4. Use first binary as last resort
+ * Resolution strategy (cherry-picked from libnpmexec): 1. Use npm's
+ * getBinFromManifest (handles aliases and standard cases) 2. Fall back to
+ * user-provided binaryName if npm's strategy fails 3. Try last segment of
+ * package name as final fallback 4. Use first binary as last resort.
  *
  * @example
- * ```typescript
- * const binPath = findBinaryPath(
- *   '/tmp/.socket/_dlx/a1b2c3d4',
- *   'prettier'
- * )
- * console.log(`Binary: ${binPath}`)
- * ```
+ *   ```typescript
+ *   const binPath = findBinaryPath('/tmp/.socket/_dlx/a1b2c3d4', 'prettier')
+ *   console.log(`Binary: ${binPath}`)
+ *   ```
  */
 export function findBinaryPath(
   packageDir: string,
@@ -126,26 +121,23 @@ export function findBinaryPath(
 }
 
 /**
- * Make all binaries in an installed package executable.
- * Reads the package.json bin field and makes all binaries executable (chmod 0o755).
- * Handles both single binary (string) and multiple binaries (object) formats.
+ * Make all binaries in an installed package executable. Reads the package.json
+ * bin field and makes all binaries executable (chmod 0o755). Handles both
+ * single binary (string) and multiple binaries (object) formats.
  *
- * Aligns with npm's approach:
- * - Uses 0o755 permission (matches npm's cmd-shim)
+ * Aligns with npm's approach: - Uses 0o755 permission (matches npm's cmd-shim)
  * - Reads bin field from package.json (matches npm's bin-links and libnpmexec)
- * - Handles both string and object bin formats
+ * - Handles both string and object bin formats.
  *
- * References:
- * - npm cmd-shim: https://github.com/npm/cmd-shim/blob/main/lib/index.js
- * - npm getBinFromManifest: https://github.com/npm/libnpmexec/blob/main/lib/get-bin-from-manifest.js
+ * References: - npm cmd-shim:
+ * https://github.com/npm/cmd-shim/blob/main/lib/index.js - npm
+ * getBinFromManifest:
+ * https://github.com/npm/libnpmexec/blob/main/lib/get-bin-from-manifest.js.
  *
  * @example
- * ```typescript
- * makePackageBinsExecutable(
- *   '/tmp/.socket/_dlx/a1b2c3d4',
- *   'prettier'
- * )
- * ```
+ *   ;```typescript
+ *   makePackageBinsExecutable('/tmp/.socket/_dlx/a1b2c3d4', 'prettier')
+ *   ```
  */
 export function makePackageBinsExecutable(
   packageDir: string,
@@ -200,18 +192,17 @@ export function makePackageBinsExecutable(
 }
 
 /**
- * Resolve binary path with cross-platform wrapper support.
- * On Windows, checks for .cmd, .bat, .ps1, .exe wrappers in order.
- * On Unix, uses path directly.
+ * Resolve binary path with cross-platform wrapper support. On Windows, checks
+ * for .cmd, .bat, .ps1, .exe wrappers in order. On Unix, uses path directly.
  *
  * Aligns with npm/npx binary resolution strategy.
  *
  * @example
- * ```typescript
- * const resolved = resolveBinaryPath('/tmp/.socket/_dlx/a1b2c3d4/prettier')
- * // On Windows: may resolve to '.cmd' or '.ps1' wrapper
- * // On Unix: returns the path unchanged
- * ```
+ *   ;```typescript
+ *   const resolved = resolveBinaryPath('/tmp/.socket/_dlx/a1b2c3d4/prettier')
+ *   // On Windows: may resolve to '.cmd' or '.ps1' wrapper
+ *   // On Unix: returns the path unchanged
+ *   ```
  */
 export function resolveBinaryPath(basePath: string): string {
   if (!WIN32) {

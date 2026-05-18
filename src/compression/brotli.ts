@@ -1,12 +1,10 @@
 /* oxlint-disable socket/sort-source-methods -- functions ordered by call graph (compress/decompress variants share helpers); type / const declarations between them block autofix. */
 /**
- * @fileoverview Brotli compression / decompression — in-memory,
- * file-to-file, and raw-stream variants. Default quality is 11 (max
- * compression, slow) on the assumption these are one-shot CLI calls.
- * Override via `options.level` for hot paths.
- *
- *   await compressBrotli(JSON.stringify(payload))
- *   await compressBrotliFile('input.json', 'input.json.br')
+ * @file Brotli compression / decompression — in-memory, file-to-file, and
+ *   raw-stream variants. Default quality is 11 (max compression, slow) on the
+ *   assumption these are one-shot CLI calls. Override via `options.level` for
+ *   hot paths. await compressBrotli(JSON.stringify(payload)) await
+ *   compressBrotliFile('input.json', 'input.json.br')
  *   readable.pipe(createBrotliCompressor()).pipe(writable)
  */
 
@@ -40,10 +38,10 @@ interface ResolvedBrotliOptions extends BrotliOptions {
 }
 
 /**
- * Translate `CompressOptions` into the `BrotliOptions` zlib expects.
- * Defaults `quality` to 11 (max) when not provided, and forwards a
- * positive `size` hint. Exposed for callers building their own zlib
- * pipelines and for unit-test coverage.
+ * Translate `CompressOptions` into the `BrotliOptions` zlib expects. Defaults
+ * `quality` to 11 (max) when not provided, and forwards a positive `size` hint.
+ * Exposed for callers building their own zlib pipelines and for unit-test
+ * coverage.
  */
 export function resolveBrotliOptions(
   options: CompressOptions | undefined,
@@ -59,9 +57,8 @@ export function resolveBrotliOptions(
 }
 
 /**
- * Compress a string or Buffer with brotli. Strings are encoded as UTF-8
- * before compression — pass an explicit Buffer if you have non-UTF-8
- * input.
+ * Compress a string or Buffer with brotli. Strings are encoded as UTF-8 before
+ * compression — pass an explicit Buffer if you have non-UTF-8 input.
  */
 export async function compressBrotli(
   input: string | Buffer,
@@ -87,15 +84,14 @@ export async function decompressBrotli(input: Buffer): Promise<Buffer> {
 /**
  * Stream-compress a file with brotli. Two call shapes:
  *
- *   compressBrotliFile(src, dest, options?)
- *     Writes compressed output to `dest`. Source is left intact.
+ * CompressBrotliFile(src, dest, options?) Writes compressed output to `dest`.
+ * Source is left intact.
  *
- *   compressBrotliFile(src, { inPlace: true, ...options })
- *     Writes to `<src>.br` and deletes `src` after the write
- *     succeeds. Returns the new path.
+ * CompressBrotliFile(src, { inPlace: true, ...options }) Writes to `<src>.br`
+ * and deletes `src` after the write succeeds. Returns the new path.
  *
- * Returns the destination path in both shapes — same string the
- * caller passed in or the computed `.br` path for inPlace.
+ * Returns the destination path in both shapes — same string the caller passed
+ * in or the computed `.br` path for inPlace.
  */
 export async function compressBrotliFile(
   srcPath: string,
@@ -132,13 +128,12 @@ export async function compressBrotliFile(
 /**
  * Stream-decompress a brotli file. Two call shapes:
  *
- *   decompressBrotliFile(src, dest)
- *     Writes decompressed output to `dest`. Source is left intact.
+ * DecompressBrotliFile(src, dest) Writes decompressed output to `dest`. Source
+ * is left intact.
  *
- *   decompressBrotliFile(src, { inPlace: true })
- *     Strips the `.br`/`.brotli` suffix to derive the destination,
- *     then deletes the compressed source after the write succeeds.
- *     Throws if `src` has no recognizable extension.
+ * DecompressBrotliFile(src, { inPlace: true }) Strips the `.br`/`.brotli`
+ * suffix to derive the destination, then deletes the compressed source after
+ * the write succeeds. Throws if `src` has no recognizable extension.
  *
  * Returns the destination path in both shapes.
  */
@@ -180,9 +175,9 @@ export async function decompressBrotliFile(
 }
 
 /**
- * Create a brotli compress transform stream. Compose into your own
- * pipeline. The `pipeline` from `node:stream/promises` is the safe
- * way to wire it up — it handles error propagation across all stages.
+ * Create a brotli compress transform stream. Compose into your own pipeline.
+ * The `pipeline` from `node:stream/promises` is the safe way to wire it up — it
+ * handles error propagation across all stages.
  */
 export function createBrotliCompressor(options?: CompressOptions | undefined) {
   return createBrotliCompress(resolveBrotliOptions(options))
@@ -206,11 +201,10 @@ export function createBrotliDecompressor() {
 const BROTLI_MIN_LEN = 4
 
 /**
- * Cheap pre-flight check: does the buffer look like it could be
- * brotli? Returns false for inputs too short to be valid. Brotli has
- * no fixed magic bytes, so this is intentionally permissive — the
- * authoritative test is `decompressBrotli(buf)` succeeding. Use for
- * UI hints, not correctness.
+ * Cheap pre-flight check: does the buffer look like it could be brotli? Returns
+ * false for inputs too short to be valid. Brotli has no fixed magic bytes, so
+ * this is intentionally permissive — the authoritative test is
+ * `decompressBrotli(buf)` succeeding. Use for UI hints, not correctness.
  */
 export function isBrotliCompressed(input: Buffer): boolean {
   return Buffer.isBuffer(input) && input.byteLength >= BROTLI_MIN_LEN

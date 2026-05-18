@@ -1,12 +1,10 @@
 /**
- * @fileoverview `extractPackageNameFromPath(pkgPath)` — given an npm
- * v2/v3 lockfile entry key like `node_modules/a/node_modules/b`,
- * returns the final package name (`b`), preserving scoped-package
- * boundaries (`@scope/name` stays joined).
- *
- * Windows-generated lockfiles may use `\\` separators; the impl
- * normalizes first so both forms are handled. Behavior matches
- * socket-btm's smol-manifest internal `extractPackageNameFromPath`.
+ * @file `extractPackageNameFromPath(pkgPath)` — given an npm v2/v3 lockfile
+ *   entry key like `node_modules/a/node_modules/b`, returns the final package
+ *   name (`b`), preserving scoped-package boundaries (`@scope/name` stays
+ *   joined). Windows-generated lockfiles may use `\\` separators; the impl
+ *   normalizes first so both forms are handled. Behavior matches socket-btm's
+ *   smol-manifest internal `extractPackageNameFromPath`.
  */
 
 import {

@@ -1,7 +1,6 @@
 /**
- * @fileoverview Public type surface for `sorts/*` modules — the
- * `FastSortFunction` shape returned by `naturalSorter`. Pure types,
- * no runtime side effects.
+ * @file Public type surface for `sorts/*` modules — the `FastSortFunction`
+ *   shape returned by `naturalSorter`. Pure types, no runtime side effects.
  */
 
 import type * as fastSortType from '../external/fast-sort'

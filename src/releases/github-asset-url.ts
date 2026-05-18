@@ -1,15 +1,13 @@
 /**
- * @fileoverview Per-release asset-URL discovery for GitHub releases.
+ * @file Per-release asset-URL discovery for GitHub releases. Split out of
+ *   `releases/github-api.ts` for size hygiene. Holds the "fetch this specific
+ *   tag's downloadable asset URL" path (REST with GraphQL fallback for ES-index
+ *   incidents):
  *
- * Split out of `releases/github-api.ts` for size hygiene. Holds the
- * "fetch this specific tag's downloadable asset URL" path (REST with
- * GraphQL fallback for ES-index incidents):
- *
- *   - `fetchReleaseAssetsViaGraphQL` — GraphQL fallback when REST's
- *     per-tag endpoint returns 200 + empty body
- *   - `getReleaseAssetUrl` — REST per-tag lookup + pattern matcher + GraphQL fallback
- *
- * The list-all-releases path lives in `./github-listing`.
+ *   - `fetchReleaseAssetsViaGraphQL` — GraphQL fallback when REST's per-tag
+ *     endpoint returns 200 + empty body
+ *   - `getReleaseAssetUrl` — REST per-tag lookup + pattern matcher + GraphQL
+ *     fallback The list-all-releases path lives in `./github-listing`.
  */
 
 import { httpRequest } from '../http-request/request'
@@ -26,8 +24,8 @@ import { getAuthHeaders } from './github-auth'
 import type { AssetPattern, RepoConfig } from './github-types'
 
 /**
- * Retry configuration for GitHub API requests.
- * Uses exponential backoff to handle transient failures and rate limiting.
+ * Retry configuration for GitHub API requests. Uses exponential backoff to
+ * handle transient failures and rate limiting.
  */
 const RETRY_CONFIG = ObjectFreeze({
   __proto__: null,
@@ -42,33 +40,30 @@ const RETRY_CONFIG = ObjectFreeze({
 /**
  * Fetch the assets of a single release identified by tag via GraphQL.
  *
- * Why this exists:
- *   `getReleaseAssetUrl` uses REST `/releases/tags/:tag` to look
- *   up a single release and find a downloadable asset. During
- *   GitHub incidents that endpoint can return 200 + empty body
- *   the same way the listing endpoint does (the per-tag lookup
- *   joins against the same listing index for asset discovery).
- *   This helper hits GraphQL `repository.release(tagName)` which
- *   uses a different backend.
+ * Why this exists: `getReleaseAssetUrl` uses REST `/releases/tags/:tag` to look
+ * up a single release and find a downloadable asset. During GitHub incidents
+ * that endpoint can return 200 + empty body the same way the listing endpoint
+ * does (the per-tag lookup joins against the same listing index for asset
+ * discovery). This helper hits GraphQL `repository.release(tagName)` which uses
+ * a different backend.
  *
- * Field shape diff we normalize:
- *   GraphQL returns                       REST equivalent
- *   `releaseAssets.nodes[].downloadUrl`   `assets[].browser_download_url`
+ * Field shape diff we normalize: GraphQL returns REST equivalent
+ * `releaseAssets.nodes[].downloadUrl` `assets[].browser_download_url`
  *
- *   Same URL, different field name and one extra connection-wrapper
- *   level. The mapping at the bottom converts so the asset-matcher
- *   in `getReleaseAssetUrl` can run unchanged.
+ * Same URL, different field name and one extra connection-wrapper level. The
+ * mapping at the bottom converts so the asset-matcher in `getReleaseAssetUrl`
+ * can run unchanged.
  *
  * Return contract:
- *   - Array of assets (REST shape) when the release exists.
- *   - `undefined` when the release with that tag genuinely doesn't
- *     exist (GraphQL returned `release: null` over the wire — we
- *     translate that to undefined per the codebase convention). The
- *     caller throws a clean "tag not found" error in that case.
- *   - Throws on transport errors (non-OK HTTP, GraphQL errors[],
- *     or even the GraphQL backend ALSO returning empty body — at
- *     that point both transports are degraded and we want the
- *     pRetry wrapper to back off and retry).
+ *
+ * - Array of assets (REST shape) when the release exists.
+ * - `undefined` when the release with that tag genuinely doesn't exist (GraphQL
+ *   returned `release: null` over the wire — we translate that to undefined per
+ *   the codebase convention). The caller throws a clean "tag not found" error
+ *   in that case.
+ * - Throws on transport errors (non-OK HTTP, GraphQL errors[], or even the
+ *   GraphQL backend ALSO returning empty body — at that point both transports
+ *   are degraded and we want the pRetry wrapper to back off and retry).
  */
 export async function fetchReleaseAssetsViaGraphQL(
   owner: string,
@@ -142,24 +137,29 @@ export async function fetchReleaseAssetsViaGraphQL(
 }
 
 /**
- * Get download URL for a specific release asset.
- * Supports pattern matching for dynamic asset discovery.
- *
- * @param tag - Release tag name
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix object, or RegExp)
- * @param repoConfig - Repository configuration (owner/repo)
- * @param options - Additional options
- * @param options.nothrow - If true, return undefined instead of throwing when both REST and GraphQL backends are degraded. Default: false.
- * @returns Browser download URL for the asset, or undefined when not found.
- * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is false.
+ * Get download URL for a specific release asset. Supports pattern matching for
+ * dynamic asset discovery.
  *
  * @example
- * ```typescript
- * const url = await getReleaseAssetUrl(
- *   'v1.0.0', 'tool-linux-x64',
- *   { owner: 'SocketDev', repo: 'socket-btm' },
- * )
- * ```
+ *   ;```typescript
+ *   const url = await getReleaseAssetUrl('v1.0.0', 'tool-linux-x64', {
+ *     owner: 'SocketDev',
+ *     repo: 'socket-btm',
+ *   })
+ *   ```
+ *
+ * @param tag - Release tag name.
+ * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
+ *   object, or RegExp)
+ * @param repoConfig - Repository configuration (owner/repo)
+ * @param options - Additional options.
+ * @param options.nothrow - If true, return undefined instead of throwing when
+ *   both REST and GraphQL backends are degraded. Default: false.
+ *
+ * @returns Browser download URL for the asset, or undefined when not found.
+ *
+ * @throws {Error} If both REST and GraphQL backends are degraded and nothrow is
+ *   false.
  */
 export async function getReleaseAssetUrl(
   tag: string,

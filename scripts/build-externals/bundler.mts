@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package bundling logic using esbuild.
+ * @file Package bundling logic using esbuild.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
@@ -24,12 +24,13 @@ const logger = getDefaultLogger()
 /**
  * Bundle a single package with esbuild.
  *
- * @param {string} packageName - Name of the package to bundle
- * @param {string} outputPath - Output file path
- * @param {object} options - Bundling options
- * @param {boolean} options.quiet - Suppress output
- * @param {string} options.rootDir - Root directory
- * @returns {Promise<number|undefined>} Size in KB or undefined on error
+ * @param {string} packageName - Name of the package to bundle.
+ * @param {string} outputPath - Output file path.
+ * @param {object} options - Bundling options.
+ * @param {boolean} options.quiet - Suppress output.
+ * @param {string} options.rootDir - Root directory.
+ *
+ * @returns {Promise<number | undefined>} Size in KB or undefined on error
  */
 export async function bundlePackage(packageName, outputPath, options = {}) {
   const { quiet = false, rootDir } = options

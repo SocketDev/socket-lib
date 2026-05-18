@@ -1,6 +1,6 @@
 /**
- * @fileoverview Shadow binary installation utilities for Socket ecosystem.
- * Provides logic to determine when shadow binary installation should be skipped.
+ * @file Shadow binary installation utilities for Socket ecosystem. Provides
+ *   logic to determine when shadow binary installation should be skipped.
  */
 
 import process from 'node:process'
@@ -10,23 +10,23 @@ import { normalizePath } from '../paths/normalize'
 import type { ShadowInstallationOptions } from './types'
 
 /**
- * Determines if shadow binaries should be installed.
- * Shadows should NOT be installed when:
- * - Running in a temporary execution context (exec/npx/dlx)
- * - On Windows with an existing binary path (required for Windows to function)
- *
- * @param binPath - Path to the binary being shadowed
- * @param options - Configuration options
- * @param options.cwd - Current working directory path to check
- * @param options.win32 - Whether running on Windows
- * @returns true if shadow installation should be skipped
+ * Determines if shadow binaries should be installed. Shadows should NOT be
+ * installed when: - Running in a temporary execution context (exec/npx/dlx) -
+ * On Windows with an existing binary path (required for Windows to function)
  *
  * @example
- * ```typescript
- * if (shouldSkipShadow(binPath, { cwd: process.cwd() })) {
- *   console.log('Skipping shadow binary installation')
- * }
- * ```
+ *   ;```typescript
+ *   if (shouldSkipShadow(binPath, { cwd: process.cwd() })) {
+ *     console.log('Skipping shadow binary installation')
+ *   }
+ *   ```
+ *
+ * @param binPath - Path to the binary being shadowed.
+ * @param options - Configuration options.
+ * @param options.cwd - Current working directory path to check.
+ * @param options.win32 - Whether running on Windows.
+ *
+ * @returns True if shadow installation should be skipped
  */
 export function shouldSkipShadow(
   binPath: string,

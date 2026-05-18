@@ -1,10 +1,9 @@
 /**
- * @fileoverview Unit tests for code-coverage parsing.
- *
- * Mocks `readJson` from `@socketsecurity/lib/fs/read-json` and `spawn`
- * from `@socketsecurity/lib/spawn` so tests don't touch the real
- * filesystem or run external commands. Uses tmpdir + a real file when
- * needed for existsSync paths.
+ * @file Unit tests for code-coverage parsing. Mocks `readJson` from
+ *   `@socketsecurity/lib/fs/read-json` and `spawn` from
+ *   `@socketsecurity/lib/spawn` so tests don't touch the real filesystem or run
+ *   external commands. Uses tmpdir + a real file when needed for existsSync
+ *   paths.
  */
 
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'

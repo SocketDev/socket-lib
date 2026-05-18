@@ -1,11 +1,9 @@
 /**
- * @fileoverview Safe references to `Object` static methods and prototype
- * methods.
- *
- * Annex B legacy accessor methods (`__defineGetter__`, `__lookupGetter__`,
- * etc.) are exposed alongside the canonical static methods —
- * implementations exist in V8, SpiderMonkey, and JavaScriptCore even
- * though the spec calls them "normative optional".
+ * @file Safe references to `Object` static methods and prototype methods. Annex
+ *   B legacy accessor methods (`__defineGetter__`, `__lookupGetter__`, etc.)
+ *   are exposed alongside the canonical static methods — implementations exist
+ *   in V8, SpiderMonkey, and JavaScriptCore even though the spec calls them
+ *   "normative optional".
  */
 
 import { uncurryThis } from './uncurry'

@@ -1,16 +1,13 @@
 /**
- * @fileoverview DLX binary execution utilities for Socket ecosystem.
- *
- * High-level entry points for downloading standalone URL-hosted
- * binaries (not npm packages — see `./package` for those) and
- * executing them with cross-platform shell handling.
+ * @file DLX binary execution utilities for Socket ecosystem. High-level entry
+ *   points for downloading standalone URL-hosted binaries (not npm packages —
+ *   see `./package` for those) and executing them with cross-platform shell
+ *   handling.
  *
  *   - `dlxBinary` — download (if needed) + execute
- *   - `executeBinary` — execute an already-cached binary
- *
- * Supporting surface lives in sibling leaves and is re-exported here
- * so existing `dlx/binary` importers keep working unchanged:
- *
+ *   - `executeBinary` — execute an already-cached binary Supporting surface lives
+ *     in sibling leaves and is re-exported here so existing `dlx/binary`
+ *     importers keep working unchanged:
  *   - lazy `node:fs` / `node:path` / `node:crypto` + LRU cache — `./_internal`
  *   - types — `./binary-types`
  *   - on-disk cache metadata — `./binary-cache`
@@ -50,13 +47,13 @@ import type { SpawnExtra, SpawnOptions } from '../spawn/types'
  * Download and execute a binary from a URL with caching.
  *
  * @example
- * ```typescript
- * const result = await dlxBinary(['--version'], {
- *   url: 'https://example.com/tool-linux-x64',
- *   name: 'tool',
- * })
- * await result.spawnPromise
- * ```
+ *   ;```typescript
+ *   const result = await dlxBinary(['--version'], {
+ *     url: 'https://example.com/tool-linux-x64',
+ *     name: 'tool',
+ *   })
+ *   await result.spawnPromise
+ *   ```
  */
 export async function dlxBinary(
   args: readonly string[] | string[],
@@ -216,24 +213,25 @@ export async function dlxBinary(
 }
 
 /**
- * Execute a cached binary without re-downloading.
- * Similar to executePackage from dlx/package.
- * Binary must have been previously downloaded via downloadBinary or dlxBinary.
- *
- * @param binaryPath Path to the cached binary (from downloadBinary result)
- * @param args Arguments to pass to the binary
- * @param spawnOptions Spawn options for execution
- * @param spawnExtra Extra spawn configuration
- * @returns The spawn promise for the running process
+ * Execute a cached binary without re-downloading. Similar to executePackage
+ * from dlx/package. Binary must have been previously downloaded via
+ * downloadBinary or dlxBinary.
  *
  * @example
- * ```typescript
- * const { binaryPath } = await downloadBinary({
- *   url: 'https://example.com/tool-linux-x64',
- *   name: 'tool',
- * })
- * const result = executeBinary(binaryPath, ['--help'])
- * ```
+ *   ;```typescript
+ *   const { binaryPath } = await downloadBinary({
+ *     url: 'https://example.com/tool-linux-x64',
+ *     name: 'tool',
+ *   })
+ *   const result = executeBinary(binaryPath, ['--help'])
+ *   ```
+ *
+ * @param binaryPath Path to the cached binary (from downloadBinary result)
+ * @param args Arguments to pass to the binary.
+ * @param spawnOptions Spawn options for execution.
+ * @param spawnExtra Extra spawn configuration.
+ *
+ * @returns The spawn promise for the running process
  */
 export function executeBinary(
   binaryPath: string,

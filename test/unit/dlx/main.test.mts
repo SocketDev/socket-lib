@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for DLX (Download and Execute) cache management utilities.
+ * @file Unit tests for DLX (Download and Execute) cache management utilities.
+ *   Tests DLX cache directory and package management:
  *
- * Tests DLX cache directory and package management:
- * - getDlxPackageDir(), getDlxPackageJsonPath() path resolution
- * - ensureDlxDir(), ensureDlxDirSync() cache directory creation
- * - clearDlx(), clearDlxSync() cache cleanup
- * - dlxDirExists() cache existence checks
- * - generateCacheKey() creates unique cache keys for packages
- * Used by Socket CLI for pnpm dlx / npx-style package execution.
+ *   - getDlxPackageDir(), getDlxPackageJsonPath() path resolution
+ *   - ensureDlxDir(), ensureDlxDirSync() cache directory creation
+ *   - clearDlx(), clearDlxSync() cache cleanup
+ *   - dlxDirExists() cache existence checks
+ *   - generateCacheKey() creates unique cache keys for packages Used by Socket
+ *     CLI for pnpm dlx / npx-style package execution.
  */
 
 import { randomUUID } from 'node:crypto'

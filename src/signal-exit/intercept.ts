@@ -1,9 +1,8 @@
 /**
- * @fileoverview Process-method interceptors — `processEmit` replaces
- * `process.emit` and `processReallyExit` replaces `process.reallyExit`
- * while `load()` is active. Both forward to the originals captured in
- * `_internal` and broadcast `exit` / `afterexit` through the
- * signal-exit emitter.
+ * @file Process-method interceptors — `processEmit` replaces `process.emit` and
+ *   `processReallyExit` replaces `process.reallyExit` while `load()` is active.
+ *   Both forward to the originals captured in `_internal` and broadcast `exit`
+ *   / `afterexit` through the signal-exit emitter.
  */
 
 import { ErrorCtor } from '../primordials/error'

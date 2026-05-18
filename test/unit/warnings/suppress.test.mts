@@ -1,13 +1,13 @@
 /**
- * @fileoverview Unit tests for process warning suppression utilities.
+ * @file Unit tests for process warning suppression utilities. Tests warning
+ *   suppression utilities:
  *
- * Tests warning suppression utilities:
- * - suppressMaxListenersWarning() - suppress MaxListenersExceededWarning
- * - suppressWarningType() - suppress specific warning types
- * - setMaxEventTargetListeners() - configure EventTarget max listeners
- * - restoreWarnings() - restore original warning behavior
- * - withSuppressedWarnings() - temporarily suppress warnings
- * Used in tests and scripts to control noisy or expected warnings.
+ *   - suppressMaxListenersWarning() - suppress MaxListenersExceededWarning
+ *   - suppressWarningType() - suppress specific warning types
+ *   - setMaxEventTargetListeners() - configure EventTarget max listeners
+ *   - restoreWarnings() - restore original warning behavior
+ *   - withSuppressedWarnings() - temporarily suppress warnings Used in tests and
+ *     scripts to control noisy or expected warnings.
  */
 
 import process from 'node:process'

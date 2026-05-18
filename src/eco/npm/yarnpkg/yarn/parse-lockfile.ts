@@ -1,56 +1,40 @@
 /**
- * @fileoverview `parseYarnLock(content)` — parses a `yarn.lock`
- * (Classic v1 or Berry v6) into a `ParsedLockfile`.
- *
- * On socket-btm's smol Node binary this routes to
- * `node:smol-manifest`'s native `parseLockfile(content, 'npm',
- * 'yarn')`; on stock Node it runs the line-scanning JS impl below.
- *
- * Both Classic + Berry share the same outer shape (top-level block
- * with `name@spec:` header + indented properties). Berry is detected
- * via the presence of `__metadata:` and additionally honors
- * `linkType: soft` (workspace links are skipped) and
- * `dependenciesMeta:` blocks (which can mark deps optional).
- *
- * The parser is forgiving — unknown lines are ignored, missing
- * versions skip the entry. It never throws.
- *
- * Source material (in lock-step order, newest → oldest):
+ * @file `parseYarnLock(content)` — parses a `yarn.lock` (Classic v1 or Berry
+ *   v6) into a `ParsedLockfile`. On socket-btm's smol Node binary this routes
+ *   to `node:smol-manifest`'s native `parseLockfile(content, 'npm', 'yarn')`;
+ *   on stock Node it runs the line-scanning JS impl below. Both Classic + Berry
+ *   share the same outer shape (top-level block with `name@spec:` header +
+ *   indented properties). Berry is detected via the presence of `__metadata:`
+ *   and additionally honors `linkType: soft` (workspace links are skipped) and
+ *   `dependenciesMeta:` blocks (which can mark deps optional). The parser is
+ *   forgiving — unknown lines are ignored, missing versions skip the entry. It
+ *   never throws. Source material (in lock-step order, newest → oldest):
  *
  *   1. **C++ native parser** in socket-btm/node-smol-builder:
- *      additions/source-patched/src/socketsecurity/manifest/parser_yarn.cc
- *      Same algorithm, same fixes — keep the two in lock-step.
- *
+ *      additions/source-patched/src/socketsecurity/manifest/parser_yarn.cc Same
+ *      algorithm, same fixes — keep the two in lock-step.
  *   2. **socket-sdxgen** — algorithm oracle:
  *      socket-sdxgen/src/parsers/yarn-classic/yarn-lock-v1.mts
- *      socket-sdxgen/src/parsers/yarn-berry/yarn-lock-v2.mts
- *      sdxgen uses `@yarnpkg/parsers.parseSyml`; this TS port + the
- *      C++ port both use a line walker (yarn's syml-as-it-uses-it is
- *      a strict subset).
- *
+ *      socket-sdxgen/src/parsers/yarn-berry/yarn-lock-v2.mts sdxgen uses
+ *      `@yarnpkg/parsers.parseSyml`; this TS port + the C++ port both use a
+ *      line walker (yarn's syml-as-it-uses-it is a strict subset).
  *   3. **cdxgen** (pinned v11.11.0):
  *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
  *      (parseYarnLock)
+ *   4. **yarn format docs**: classic (v1):
+ *      https://github.com/yarnpkg/yarn/blob/master/src/lockfile/parse.js berry
+ *      (v2+): https://yarnpkg.com/configuration/yarnrc#lockfileVersion
+ *      protocols: https://yarnpkg.com/protocol/ Bug fixes implemented here (and
+ *      in the native parser):
  *
- *   4. **yarn format docs**:
- *      classic (v1): https://github.com/yarnpkg/yarn/blob/master/src/lockfile/parse.js
- *      berry (v2+):  https://yarnpkg.com/configuration/yarnrc#lockfileVersion
- *      protocols:    https://yarnpkg.com/protocol/
- *
- * Bug fixes implemented here (and in the native parser):
- *
- *   - Fix 4  `dependenciesMeta` block consume-only. Earlier impls
- *            were doing two wrong things at once:
- *            (a) synthesizing phantom PackageRefs for children, and
- *            (b) flipping the PARENT's `isOptional` based on any
- *                child's `optional: true` flag — inverted semantics.
- *            The fix consumes the block for position only; metadata
- *            flags refer to a child's relationship from the parent's
- *            view, never the parent itself.
- *
- * Regression fixtures live under socket-btm's test/fixtures/
- * sdxgen-bug-regressions/ — every shipped fix has a matching
- * fixture directory there.
+ *   - Fix 4 `dependenciesMeta` block consume-only. Earlier impls were doing two
+ *     wrong things at once: (a) synthesizing phantom PackageRefs for children,
+ *     and (b) flipping the PARENT's `isOptional` based on any child's
+ *     `optional: true` flag — inverted semantics. The fix consumes the block
+ *     for position only; metadata flags refer to a child's relationship from
+ *     the parent's view, never the parent itself. Regression fixtures live
+ *     under socket-btm's test/fixtures/ sdxgen-bug-regressions/ — every shipped
+ *     fix has a matching fixture directory there.
  */
 
 import { ArrayPrototypePush } from '../../../../primordials/array'

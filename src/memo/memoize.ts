@@ -1,8 +1,8 @@
 /**
- * @fileoverview `memoize` — synchronous function memoizer with LRU
- * eviction (Map insertion-order based), optional TTL, and optional
- * custom key generator. Each instance registers itself with the
- * shared `cacheRegistry` so `clearAllMemoizationCaches` can sweep it.
+ * @file `memoize` — synchronous function memoizer with LRU eviction (Map
+ *   insertion-order based), optional TTL, and optional custom key generator.
+ *   Each instance registers itself with the shared `cacheRegistry` so
+ *   `clearAllMemoizationCaches` can sweep it.
  */
 
 import { debugLog } from '../debug/output'
@@ -15,23 +15,29 @@ import { cacheRegistry, defaultKeyGen } from './_internal'
 import type { CacheEntry, MemoizeOptions } from './types'
 
 /**
- * Memoize a function with configurable caching behavior.
- * Caches function results to avoid repeated computation.
- *
- * @param fn - Function to memoize
- * @param options - Memoization options
- * @returns Memoized version of the function
+ * Memoize a function with configurable caching behavior. Caches function
+ * results to avoid repeated computation.
  *
  * @example
- * import { memoize } from '@socketsecurity/lib/memo/memoize'
+ *   import { memoize } from '@socketsecurity/lib/memo/memoize'
  *
- * const expensiveOperation = memoize((n: number) => {
- *   // Heavy computation
- *   return Array(n).fill(0).reduce((a, _, i) => a + i, 0)
- * }, { maxSize: 100, ttl: 60000, name: 'sum' })
+ *   const expensiveOperation = memoize(
+ *     (n: number) => {
+ *       // Heavy computation
+ *       return Array(n)
+ *         .fill(0)
+ *         .reduce((a, _, i) => a + i, 0)
+ *     },
+ *     { maxSize: 100, ttl: 60000, name: 'sum' },
+ *   )
  *
- * expensiveOperation(1000) // Computed
- * expensiveOperation(1000) // Cached
+ *   expensiveOperation(1000) // Computed
+ *   expensiveOperation(1000) // Cached
+ *
+ * @param fn - Function to memoize.
+ * @param options - Memoization options.
+ *
+ * @returns Memoized version of the function
  */
 export function memoize<Args extends unknown[], Result>(
   fn: (...args: Args) => Result,

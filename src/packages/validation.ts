@@ -1,5 +1,5 @@
 /**
- * @fileoverview Package name validation utilities.
+ * @file Package name validation utilities.
  */
 
 import validateNpmPackageName from '../external/validate-npm-package-name'
@@ -9,10 +9,10 @@ import { StringPrototypeStartsWith } from '../primordials/string'
  * Check if package name is a blessed Socket.dev package.
  *
  * @example
- * ```typescript
- * isBlessedPackageName('@socketregistry/is-number') // true
- * isBlessedPackageName('lodash')                    // false
- * ```
+ *   ;```typescript
+ *   isBlessedPackageName('@socketregistry/is-number') // true
+ *   isBlessedPackageName('lodash') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isBlessedPackageName(name: unknown): boolean {
@@ -30,10 +30,10 @@ export function isBlessedPackageName(name: unknown): boolean {
  * Check if a type string represents a registry fetcher type.
  *
  * @example
- * ```typescript
- * isRegistryFetcherType('range')   // true
- * isRegistryFetcherType('git')     // false
- * ```
+ *   ;```typescript
+ *   isRegistryFetcherType('range') // true
+ *   isRegistryFetcherType('git') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isRegistryFetcherType(type: string): boolean {
@@ -48,10 +48,10 @@ export function isRegistryFetcherType(type: string): boolean {
  * Check if a package name is valid according to npm naming rules.
  *
  * @example
- * ```typescript
- * isValidPackageName('my-package')   // true
- * isValidPackageName('.invalid')     // false
- * ```
+ *   ;```typescript
+ *   isValidPackageName('my-package') // true
+ *   isValidPackageName('.invalid') // false
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isValidPackageName(name: string): boolean {

@@ -1,31 +1,31 @@
 /**
- * @fileoverview `memoizeWeak` — memoizer keyed by an object reference
- * via `WeakMap`. Cache entries are eligible for GC as soon as the
- * keying object becomes unreachable, so there's no need for explicit
- * eviction. First (and only) argument must be an object.
+ * @file `memoizeWeak` — memoizer keyed by an object reference via `WeakMap`.
+ *   Cache entries are eligible for GC as soon as the keying object becomes
+ *   unreachable, so there's no need for explicit eviction. First (and only)
+ *   argument must be an object.
  */
 
 import { debugLog } from '../debug/output'
 import { WeakMapCtor } from '../primordials/map-set'
 
 /**
- * Memoize with WeakMap for object keys.
- * Allows garbage collection when objects are no longer referenced.
- * Only works when first argument is an object.
- *
- * @param fn - Function to memoize
- * @returns Memoized version using WeakMap
+ * Memoize with WeakMap for object keys. Allows garbage collection when objects
+ * are no longer referenced. Only works when first argument is an object.
  *
  * @example
- * import { memoizeWeak } from '@socketsecurity/lib/memo/weak'
+ *   import { memoizeWeak } from '@socketsecurity/lib/memo/weak'
  *
- * const processConfig = memoizeWeak((config: Config) => {
- *   return expensiveTransform(config)
- * })
+ *   const processConfig = memoizeWeak((config: Config) => {
+ *     return expensiveTransform(config)
+ *   })
  *
- * processConfig(config1) // Computed
- * processConfig(config1) // Cached
- * // When config1 is no longer referenced, cache entry is GC'd
+ *   processConfig(config1) // Computed
+ *   processConfig(config1) // Cached
+ *   // When config1 is no longer referenced, cache entry is GC'd
+ *
+ * @param fn - Function to memoize.
+ *
+ * @returns Memoized version using WeakMap
  */
 export function memoizeWeak<K extends object, Result>(
   fn: (key: K) => Result,

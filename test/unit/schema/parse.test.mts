@@ -1,6 +1,6 @@
 /**
- * @fileoverview Unit tests for `parseSchema` — the throwing twin of
- * `validateSchema`, used for fail-fast trust boundaries.
+ * @file Unit tests for `parseSchema` — the throwing twin of `validateSchema`,
+ *   used for fail-fast trust boundaries.
  */
 
 import * as zodV3 from 'zod/v3'

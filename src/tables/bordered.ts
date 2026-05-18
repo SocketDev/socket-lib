@@ -1,11 +1,9 @@
 /**
- * @fileoverview Bordered table renderer using Unicode box-drawing
- * characters (`┌`, `─`, `│`, `┴`, …). The right choice when the
- * output context renders box-drawing reliably (modern terminals,
- * GitHub markdown, most CI runners).
- *
- * Shares column-width calculation, alignment, and padding with the
- * simple renderer via `./padding`.
+ * @file Bordered table renderer using Unicode box-drawing characters (`┌`, `─`,
+ *   `│`, `┴`, …). The right choice when the output context renders box-drawing
+ *   reliably (modern terminals, GitHub markdown, most CI runners). Shares
+ *   column-width calculation, alignment, and padding with the simple renderer
+ *   via `./padding`.
  */
 
 import colors from '../external/yoctocolors-cjs'
@@ -19,31 +17,37 @@ import type { TableColumn } from './types'
 /**
  * Format data as an ASCII table with borders.
  *
- * @param data - Array of data objects
- * @param columns - Column configuration
- * @returns Formatted table string
- *
  * @example
- * import { formatTable } from '@socketsecurity/lib/tables/bordered'
- * import colors from 'yoctocolors-cjs'
+ *   import { formatTable } from '@socketsecurity/lib/tables/bordered'
+ *   import colors from 'yoctocolors-cjs'
  *
- * const data = [
- *   { name: 'lodash', version: '4.17.21', issues: 0 },
- *   { name: 'react', version: '18.2.0', issues: 2 },
- * ]
- * const columns = [
- *   { key: 'name', header: 'Package' },
- *   { key: 'version', header: 'Version', align: 'center' },
- *   { key: 'issues', header: 'Issues', align: 'right', color: (v) => v === '0' ? colors.green(v) : colors.red(v) },
- * ]
- * console.log(formatTable(data, columns))
- * // Output:
- * // ┌─────────┬─────────┬────────┐
- * // │ Package │ Version │ Issues │
- * // ├─────────┼─────────┼────────┤
- * // │ lodash  │ 4.17.21 │      0 │
- * // │ react   │ 18.2.0  │      2 │
- * // └─────────┴─────────┴────────┘
+ *   const data = [
+ *     { name: 'lodash', version: '4.17.21', issues: 0 },
+ *     { name: 'react', version: '18.2.0', issues: 2 },
+ *   ]
+ *   const columns = [
+ *     { key: 'name', header: 'Package' },
+ *     { key: 'version', header: 'Version', align: 'center' },
+ *     {
+ *       key: 'issues',
+ *       header: 'Issues',
+ *       align: 'right',
+ *       color: v => (v === '0' ? colors.green(v) : colors.red(v)),
+ *     },
+ *   ]
+ *   console.log(formatTable(data, columns))
+ *   // Output:
+ *   // ┌─────────┬─────────┬────────┐
+ *   // │ Package │ Version │ Issues │
+ *   // ├─────────┼─────────┼────────┤
+ *   // │ lodash  │ 4.17.21 │      0 │
+ *   // │ react   │ 18.2.0  │      2 │
+ *   // └─────────┴─────────┴────────┘
+ *
+ * @param data - Array of data objects.
+ * @param columns - Column configuration.
+ *
+ * @returns Formatted table string
  */
 export function formatTable(
   data: Array<Record<string, unknown>>,

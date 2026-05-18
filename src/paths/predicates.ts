@@ -1,8 +1,7 @@
 /**
- * @fileoverview Path predicates — `is*` checks for path shape and kind.
- *
- * Split out of `paths/normalize.ts` for file-size hygiene. Pure boolean
- * predicates over paths and character codes.
+ * @file Path predicates — `is*` checks for path shape and kind. Split out of
+ *   `paths/normalize.ts` for file-size hygiene. Pure boolean predicates over
+ *   paths and character codes.
  *
  *   - `isAbsolute`, `isRelative` — root-anchoring shape
  *   - `isPath` — file-path vs package-spec vs URL discriminator
@@ -38,15 +37,16 @@ import {
  * Handles both POSIX (`/...`) and Windows (drive-letter, UNC, device) absolute
  * path shapes.
  *
- * @param {string | Buffer | URL} pathLike - The path to check
- * @returns {boolean} `true` if absolute, `false` otherwise
- *
  * @example
- * ```typescript
- * isAbsolute('/home/user')           // true
- * isAbsolute('C:\\Windows')          // true on Windows
- * isAbsolute('../relative')          // false
- * ```
+ *   ;```typescript
+ *   isAbsolute('/home/user') // true
+ *   isAbsolute('C:\\Windows') // true on Windows
+ *   isAbsolute('../relative') // false
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to check.
+ *
+ * @returns {boolean} `true` if absolute, `false` otherwise
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isAbsolute(pathLike: string | Buffer | URL): boolean {
@@ -90,14 +90,15 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
  *
  * Matches `node_modules` only as a complete path segment.
  *
- * @param {string | Buffer | URL} pathLike - The path to check
- * @returns {boolean} `true` if the path contains `node_modules`
- *
  * @example
- * ```typescript
- * isNodeModules('/project/node_modules/package')    // true
- * isNodeModules('/src/my_node_modules_backup')      // false
- * ```
+ *   ;```typescript
+ *   isNodeModules('/project/node_modules/package') // true
+ *   isNodeModules('/src/my_node_modules_backup') // false
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to check.
+ *
+ * @returns {boolean} `true` if the path contains `node_modules`
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isNodeModules(pathLike: string | Buffer | URL): boolean {
@@ -108,20 +109,21 @@ export function isNodeModules(pathLike: string | Buffer | URL): boolean {
 /**
  * Check if a value is a valid file path (absolute or relative).
  *
- * Distinguishes between file paths and other string formats like package
- * names, URLs, or bare module specifiers.
- *
- * @param {string | Buffer | URL} pathLike - The value to check
- * @returns {boolean} `true` if the value is a valid file path
+ * Distinguishes between file paths and other string formats like package names,
+ * URLs, or bare module specifiers.
  *
  * @example
- * ```typescript
- * isPath('/absolute/path')           // true
- * isPath('./relative/path')          // true
- * isPath('@scope/name/subpath')      // true
- * isPath('lodash')                   // false
- * isPath('http://example.com')       // false
- * ```
+ *   ;```typescript
+ *   isPath('/absolute/path') // true
+ *   isPath('./relative/path') // true
+ *   isPath('@scope/name/subpath') // true
+ *   isPath('lodash') // false
+ *   isPath('http://example.com') // false
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The value to check.
+ *
+ * @returns {boolean} `true` if the value is a valid file path
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPath(pathLike: string | Buffer | URL): boolean {
@@ -168,15 +170,16 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
 /**
  * Check if a character code is a path separator (`/` or `\`).
  *
- * @param {number} code - The character code to check
- * @returns {boolean} `true` if separator
- *
  * @example
- * ```typescript
- * isPathSeparator(47)  // true — '/'
- * isPathSeparator(92)  // true — '\'
- * isPathSeparator(65)  // false — 'A'
- * ```
+ *   ;```typescript
+ *   isPathSeparator(47) // true — '/'
+ *   isPathSeparator(92) // true — '\'
+ *   isPathSeparator(65) // false — 'A'
+ *   ```
+ *
+ * @param {number} code - The character code to check.
+ *
+ * @returns {boolean} `true` if separator
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isPathSeparator(code: number): boolean {
@@ -188,15 +191,16 @@ export function isPathSeparator(code: number): boolean {
  *
  * Empty strings are treated as relative.
  *
- * @param {string | Buffer | URL} pathLike - The path to check
- * @returns {boolean} `true` if the path is relative
- *
  * @example
- * ```typescript
- * isRelative('./src/index.js')       // true
- * isRelative('src/file.js')          // true
- * isRelative('/home/user')           // false
- * ```
+ *   ;```typescript
+ *   isRelative('./src/index.js') // true
+ *   isRelative('src/file.js') // true
+ *   isRelative('/home/user') // false
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to check.
+ *
+ * @returns {boolean} `true` if the path is relative
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isRelative(pathLike: string | Buffer | URL): boolean {
@@ -215,18 +219,19 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
 /**
  * Check if a path uses MSYS/Git Bash Unix-style drive letter notation.
  *
- * Detects paths in the format `/c/...` where a single letter after the
- * leading slash represents a Windows drive letter.
- *
- * @param {string | Buffer | URL} pathLike - The path to check
- * @returns {boolean} `true` if the path uses MSYS drive letter notation
+ * Detects paths in the format `/c/...` where a single letter after the leading
+ * slash represents a Windows drive letter.
  *
  * @example
- * ```typescript
- * isUnixPath('/c/tools/bin')         // true
- * isUnixPath('/tmp/build')           // false
- * isUnixPath('C:/Windows')           // false
- * ```
+ *   ;```typescript
+ *   isUnixPath('/c/tools/bin') // true
+ *   isUnixPath('/tmp/build') // false
+ *   isUnixPath('C:/Windows') // false
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The path to check.
+ *
+ * @returns {boolean} `true` if the path uses MSYS drive letter notation
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isUnixPath(pathLike: string | Buffer | URL): boolean {
@@ -240,15 +245,16 @@ export function isUnixPath(pathLike: string | Buffer | URL): boolean {
 /**
  * Check if a character code is a Windows device root letter (A-Z / a-z).
  *
- * @param {number} code - The character code to check
- * @returns {boolean} `true` if valid drive-letter code
- *
  * @example
- * ```typescript
- * isWindowsDeviceRoot(67)  // true  — 'C'
- * isWindowsDeviceRoot(99)  // true  — 'c'
- * isWindowsDeviceRoot(58)  // false — ':'
- * ```
+ *   ;```typescript
+ *   isWindowsDeviceRoot(67) // true  — 'C'
+ *   isWindowsDeviceRoot(99) // true  — 'c'
+ *   isWindowsDeviceRoot(58) // false — ':'
+ *   ```
+ *
+ * @param {number} code - The character code to check.
+ *
+ * @returns {boolean} `true` if valid drive-letter code
  */
 /* c8 ignore start - Only called from Windows-only branches. */
 /*@__NO_SIDE_EFFECTS__*/

@@ -1,7 +1,7 @@
 /**
- * @fileoverview Shared utilities for JSON formatting preservation and manipulation.
- * Provides functions for detecting and preserving indentation, line endings, and
- * determining when JSON files should be saved based on content changes.
+ * @file Shared utilities for JSON formatting preservation and manipulation.
+ *   Provides functions for detecting and preserving indentation, line endings,
+ *   and determining when JSON files should be saved based on content changes.
  */
 
 import { JSONStringify } from '../primordials/json'
@@ -33,18 +33,20 @@ export interface ShouldSaveOptions {
 }
 
 /**
- * Detect indentation from a JSON string.
- * Supports space-based indentation (returns count) or mixed indentation (returns string).
- *
- * @param json - JSON string to analyze
- * @returns Number of spaces or indentation string, defaults to 2 if not detected
+ * Detect indentation from a JSON string. Supports space-based indentation
+ * (returns count) or mixed indentation (returns string).
  *
  * @example
- * ```ts
- * detectIndent('{\n  "key": "value"\n}')  // => 2
- * detectIndent('{\n    "key": "value"\n}')  // => 4
- * detectIndent('{\n\t"key": "value"\n}')  // => '\t'
- * ```
+ *   ;```ts
+ *   detectIndent('{\n  "key": "value"\n}') // => 2
+ *   detectIndent('{\n    "key": "value"\n}') // => 4
+ *   detectIndent('{\n\t"key": "value"\n}') // => '\t'
+ *   ```
+ *
+ * @param json - JSON string to analyze.
+ *
+ * @returns Number of spaces or indentation string, defaults to 2 if not
+ *   detected.
  */
 export function detectIndent(json: string): string | number {
   const match = json.match(/^[{[][\r\n]+(\s+)/m)
@@ -61,17 +63,19 @@ export function detectIndent(json: string): string | number {
 }
 
 /**
- * Detect newline character(s) from a JSON string.
- * Supports LF (\n) and CRLF (\r\n) line endings.
- *
- * @param json - JSON string to analyze
- * @returns Line ending string ('\n' or '\r\n'), defaults to '\n' if not detected
+ * Detect newline character(s) from a JSON string. Supports LF (\n) and CRLF
+ * (\r\n) line endings.
  *
  * @example
- * ```ts
- * detectNewline('{\n  "key": "value"\n}')  // => '\n'
- * detectNewline('{\r\n  "key": "value"\r\n}')  // => '\r\n'
- * ```
+ *   ;```ts
+ *   detectNewline('{\n  "key": "value"\n}') // => '\n'
+ *   detectNewline('{\r\n  "key": "value"\r\n}') // => '\r\n'
+ *   ```
+ *
+ * @param json - JSON string to analyze.
+ *
+ * @returns Line ending string ('\n' or '\r\n'), defaults to '\n' if not
+ *   detected.
  */
 export function detectNewline(json: string): string {
   const match = json.match(/\r?\n/)
@@ -81,14 +85,15 @@ export function detectNewline(json: string): string {
 /**
  * Extract formatting metadata from a JSON string.
  *
- * @param json - JSON string to analyze
- * @returns Object containing indent and newline formatting
- *
  * @example
- * ```ts
- * const formatting = extractFormatting('{\n  "key": "value"\n}')
- * // => { indent: 2, newline: '\n' }
- * ```
+ *   ;```ts
+ *   const formatting = extractFormatting('{\n  "key": "value"\n}')
+ *   // => { indent: 2, newline: '\n' }
+ *   ```
+ *
+ * @param json - JSON string to analyze.
+ *
+ * @returns Object containing indent and newline formatting
  */
 export function extractFormatting(json: string): JsonFormatting {
   return {
@@ -100,13 +105,13 @@ export function extractFormatting(json: string): JsonFormatting {
 /**
  * Get default formatting for JSON files.
  *
- * @returns Default formatting (2 spaces, LF line endings)
- *
  * @example
- * ```typescript
- * const fmt = getDefaultFormatting()
- * // { indent: 2, newline: '\n' }
- * ```
+ *   ;```typescript
+ *   const fmt = getDefaultFormatting()
+ *   // { indent: 2, newline: '\n' }
+ *   ```
+ *
+ * @returns Default formatting (2 spaces, LF line endings)
  */
 export function getDefaultFormatting(): JsonFormatting {
   return {
@@ -118,14 +123,19 @@ export function getDefaultFormatting(): JsonFormatting {
 /**
  * Extract formatting from content object that has symbol-based metadata.
  *
- * @param content - Content object with Symbol.for('indent') and Symbol.for('newline')
- * @returns Formatting metadata, or defaults if symbols not present
- *
  * @example
- * ```typescript
- * const content = { [Symbol.for("indent")]: 4, [Symbol.for("newline")]: "\r\n" }
- * getFormattingFromContent(content)  // { indent: 4, newline: "\r\n" }
- * ```
+ *   ;```typescript
+ *   const content = {
+ *     [Symbol.for('indent')]: 4,
+ *     [Symbol.for('newline')]: '\r\n',
+ *   }
+ *   getFormattingFromContent(content) // { indent: 4, newline: "\r\n" }
+ *   ```
+ *
+ * @param content - Content object with Symbol.for('indent') and
+ *   Symbol.for('newline')
+ *
+ * @returns Formatting metadata, or defaults if symbols not present
  */
 export function getFormattingFromContent(
   content: Record<string | symbol, unknown>,
@@ -142,23 +152,27 @@ export function getFormattingFromContent(
 }
 
 /**
- * Determine if content should be saved based on changes and options.
- * Compares current content with original content and respects options like
+ * Determine if content should be saved based on changes and options. Compares
+ * current content with original content and respects options like
  * ignoreWhitespace and sort.
  *
- * @param currentContent - Current content object (may include formatting symbols)
- * @param originalContent - Original content for comparison (may include formatting symbols)
- * @param originalFileContent - Original file content as string (for whitespace comparison)
- * @param options - Options controlling save behavior
- * @returns true if content should be saved, false otherwise
- *
  * @example
- * ```ts
- * const current = { key: 'new-value', [Symbol.for('indent')]: 2 }
- * const original = { key: 'old-value', [Symbol.for('indent')]: 2 }
- * shouldSave(current, original, '{\n  "key": "old-value"\n}\n')
- * // => true
- * ```
+ *   ;```ts
+ *   const current = { key: 'new-value', [Symbol.for('indent')]: 2 }
+ *   const original = { key: 'old-value', [Symbol.for('indent')]: 2 }
+ *   shouldSave(current, original, '{\n  "key": "old-value"\n}\n')
+ *   // => true
+ *   ```
+ *
+ * @param currentContent - Current content object (may include formatting
+ *   symbols)
+ * @param originalContent - Original content for comparison (may include
+ *   formatting symbols)
+ * @param originalFileContent - Original file content as string (for whitespace
+ *   comparison)
+ * @param options - Options controlling save behavior.
+ *
+ * @returns True if content should be saved, false otherwise
  */
 export function shouldSave(
   currentContent: Record<string | symbol, unknown>,
@@ -200,17 +214,18 @@ export function shouldSave(
 }
 
 /**
- * Sort object keys alphabetically.
- * Creates a new object with sorted keys (does not mutate input).
- *
- * @param obj - Object to sort
- * @returns New object with alphabetically sorted keys
+ * Sort object keys alphabetically. Creates a new object with sorted keys (does
+ * not mutate input).
  *
  * @example
- * ```ts
- * sortKeys({ z: 3, a: 1, m: 2 })
- * // => { a: 1, m: 2, z: 3 }
- * ```
+ *   ;```ts
+ *   sortKeys({ z: 3, a: 1, m: 2 })
+ *   // => { a: 1, m: 2, z: 3 }
+ *   ```
+ *
+ * @param obj - Object to sort.
+ *
+ * @returns New object with alphabetically sorted keys
  */
 export function sortKeys(
   obj: Record<string, unknown>,
@@ -224,21 +239,19 @@ export function sortKeys(
 }
 
 /**
- * Stringify JSON with specific formatting.
- * Applies indentation and line ending preferences.
- *
- * @param content - Object to stringify
- * @param formatting - Formatting preferences (indent and newline)
- * @returns Formatted JSON string with trailing newline
+ * Stringify JSON with specific formatting. Applies indentation and line ending
+ * preferences.
  *
  * @example
- * ```ts
- * stringifyWithFormatting(
- *   { key: 'value' },
- *   { indent: 4, newline: '\r\n' }
- * )
- * // => '{\r\n    "key": "value"\r\n}\r\n'
- * ```
+ *   ;```ts
+ *   stringifyWithFormatting({ key: 'value' }, { indent: 4, newline: '\r\n' })
+ *   // => '{\r\n    "key": "value"\r\n}\r\n'
+ *   ```
+ *
+ * @param content - Object to stringify.
+ * @param formatting - Formatting preferences (indent and newline)
+ *
+ * @returns Formatted JSON string with trailing newline
  */
 export function stringifyWithFormatting(
   content: Record<string, unknown>,
@@ -252,17 +265,18 @@ export function stringifyWithFormatting(
 }
 
 /**
- * Strip formatting symbols from content object.
- * Removes Symbol.for('indent') and Symbol.for('newline') from the object.
- *
- * @param content - Content object with potential symbol properties
- * @returns Object with symbols removed
+ * Strip formatting symbols from content object. Removes Symbol.for('indent')
+ * and Symbol.for('newline') from the object.
  *
  * @example
- * ```typescript
- * const obj = { key: "value", [Symbol.for("indent")]: 2 }
- * stripFormattingSymbols(obj)  // { key: "value" }
- * ```
+ *   ;```typescript
+ *   const obj = { key: 'value', [Symbol.for('indent')]: 2 }
+ *   stripFormattingSymbols(obj) // { key: "value" }
+ *   ```
+ *
+ * @param content - Content object with potential symbol properties.
+ *
+ * @returns Object with symbols removed
  */
 export function stripFormattingSymbols(
   content: Record<string | symbol, unknown>,

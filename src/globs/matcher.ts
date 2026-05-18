@@ -1,8 +1,8 @@
 /**
- * @fileoverview `getGlobMatcher` — picomatch-backed sync predicate
- * with an LRU-memoized matcher cache. `getMatchesGlob` exposes
- * Node 22+'s native `path.matchesGlob` for the rare case where the
- * caller wants strict (`nocase: false`, `dot: false`) matching.
+ * @file `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized
+ *   matcher cache. `getMatchesGlob` exposes Node 22+'s native
+ *   `path.matchesGlob` for the rare case where the caller wants strict
+ *   (`nocase: false`, `dot: false`) matching.
  */
 
 import { ArrayIsArray } from '../primordials/array'
@@ -25,25 +25,25 @@ let _matchesGlobProbed = false
  * Return a glob-matcher function, memoized by pattern + options.
  *
  * The returned function is a fast synchronous predicate built on picomatch.
- * Results are memoized — calling `getGlobMatcher(['*.ts'])` a thousand times
- * in a loop returns the same compiled matcher each time, so callers do not
- * need to hoist it themselves.
+ * Results are memoized — calling `getGlobMatcher(['*.ts'])` a thousand times in
+ * a loop returns the same compiled matcher each time, so callers do not need to
+ * hoist it themselves.
  *
  * The cache is LRU with a cap of 100 entries. Cache keys fold together the
- * (sorted) pattern list and (sorted) option set, so arguments that differ
- * only in ordering share a matcher.
+ * (sorted) pattern list and (sorted) option set, so arguments that differ only
+ * in ordering share a matcher.
  *
  * Default options: `dot: true`, `nocase: true`. Patterns starting with `!`
  * become ignore patterns.
  *
  * @example
- * ```typescript
- * const isMatch = getGlobMatcher('*.ts')
- * isMatch('index.ts')  // true
- * isMatch('index.js')  // false
+ *   ;```typescript
+ *   const isMatch = getGlobMatcher('*.ts')
+ *   isMatch('index.ts') // true
+ *   isMatch('index.js') // false
  *
- * const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
- * ```
+ *   const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
+ *   ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getGlobMatcher(
@@ -147,11 +147,11 @@ export function getGlobMatcher(
 }
 
 /**
- * Resolve `path.matchesGlob` (or `undefined` if the runtime predates
- * it). Probes once and caches the result for every subsequent call.
+ * Resolve `path.matchesGlob` (or `undefined` if the runtime predates it).
+ * Probes once and caches the result for every subsequent call.
  *
- * Used by `getGlobMatcher`'s narrow fast-path — see the conditions
- * spelled out at the call site. Exported for unit tests.
+ * Used by `getGlobMatcher`'s narrow fast-path — see the conditions spelled out
+ * at the call site. Exported for unit tests.
  *
  * @internal
  */

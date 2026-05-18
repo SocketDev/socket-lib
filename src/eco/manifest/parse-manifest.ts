@@ -1,14 +1,10 @@
 /**
- * @fileoverview `parseManifest(content, ecosystem)` — dispatches to
- * the right per-ecosystem manifest parser.
- *
- * On socket-btm's smol Node binary this routes to
- * `node:smol-manifest`'s native `parseManifest`; on stock Node it
- * dispatches to `src/eco/<eco>/parse-manifest.ts` (or
- * `parse-package-json.ts` for npm).
- *
- * Throws `ManifestError(ERR_UNSUPPORTED)` for ecosystems with no
- * parser yet (e.g. `'composer'`).
+ * @file `parseManifest(content, ecosystem)` — dispatches to the right
+ *   per-ecosystem manifest parser. On socket-btm's smol Node binary this routes
+ *   to `node:smol-manifest`'s native `parseManifest`; on stock Node it
+ *   dispatches to `src/eco/<eco>/parse-manifest.ts` (or `parse-package-json.ts`
+ *   for npm). Throws `ManifestError(ERR_UNSUPPORTED)` for ecosystems with no
+ *   parser yet (e.g. `'composer'`).
  */
 
 import { ManifestError } from './manifest-error'

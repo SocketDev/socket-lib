@@ -1,12 +1,13 @@
 /**
- * @fileoverview Unit tests for file name constants.
+ * @file Unit tests for file name constants. Tests file name constants used
+ *   throughout Socket tooling:
  *
- * Tests file name constants used throughout Socket tooling:
- * - Common project files (package.json, tsconfig.json, LICENSE, README.md, etc.)
- * - Configuration files (.gitignore, eslint.config.js)
- * - Socket-specific files (manifest.json, extensions.json)
- * - Lock files (.package-lock.json)
- * Used for consistent file name references across the Socket codebase.
+ *   - Common project files (package.json, tsconfig.json, LICENSE, README.md,
+ *     etc.)
+ *   - Configuration files (.gitignore, eslint.config.js)
+ *   - Socket-specific files (manifest.json, extensions.json)
+ *   - Lock files (.package-lock.json) Used for consistent file name references
+ *     across the Socket codebase.
  */
 
 import {

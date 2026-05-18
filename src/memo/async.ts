@@ -1,9 +1,9 @@
 /**
- * @fileoverview `memoizeAsync` — async-aware memoizer with the same
- * LRU+TTL contract as `memoize`, plus thundering-herd dedup. Concurrent
- * callers join an in-flight promise instead of starting fresh fetches,
- * and the cache timestamp is refreshed on resolution so a slow fn can't
- * land a value that's already "expired".
+ * @file `memoizeAsync` — async-aware memoizer with the same LRU+TTL contract as
+ *   `memoize`, plus thundering-herd dedup. Concurrent callers join an in-flight
+ *   promise instead of starting fresh fetches, and the cache timestamp is
+ *   refreshed on resolution so a slow fn can't land a value that's already
+ *   "expired".
  */
 
 import { debugLog } from '../debug/output'
@@ -16,23 +16,27 @@ import { cacheRegistry, defaultKeyGen } from './_internal'
 import type { CacheEntry, MemoizeOptions } from './types'
 
 /**
- * Memoize an async function.
- * Similar to memoize() but handles promises properly.
- *
- * @param fn - Async function to memoize
- * @param options - Memoization options
- * @returns Memoized version of the async function
+ * Memoize an async function. Similar to memoize() but handles promises
+ * properly.
  *
  * @example
- * import { memoizeAsync } from '@socketsecurity/lib/memo/async'
+ *   import { memoizeAsync } from '@socketsecurity/lib/memo/async'
  *
- * const fetchUser = memoizeAsync(async (id: string) => {
- *   const response = await fetch(`/api/users/${id}`)
- *   return response.json()
- * }, { ttl: 300000, name: 'fetchUser' })
+ *   const fetchUser = memoizeAsync(
+ *     async (id: string) => {
+ *       const response = await fetch(`/api/users/${id}`)
+ *       return response.json()
+ *     },
+ *     { ttl: 300000, name: 'fetchUser' },
+ *   )
  *
- * await fetchUser('123') // Fetches from API
- * await fetchUser('123') // Returns cached result
+ *   await fetchUser('123') // Fetches from API
+ *   await fetchUser('123') // Returns cached result
+ *
+ * @param fn - Async function to memoize.
+ * @param options - Memoization options.
+ *
+ * @returns Memoized version of the async function
  */
 export function memoizeAsync<Args extends unknown[], Result>(
   fn: (...args: Args) => Promise<Result>,

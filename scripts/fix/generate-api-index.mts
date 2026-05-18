@@ -1,8 +1,8 @@
 /**
- * @fileoverview Generate docs/api-index.md from package.json exports.
- * Walks every subpath export, finds the matching source file under src/, and
- * emits a grouped markdown table with the first line of each module's
- * `@fileoverview`. Regenerate whenever exports change.
+ * @file Generate docs/api-index.md from package.json exports. Walks every
+ *   subpath export, finds the matching source file under src/, and emits a
+ *   grouped markdown table with the first line of each module's
+ *   `@fileoverview`. Regenerate whenever exports change.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs'

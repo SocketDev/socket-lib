@@ -1,11 +1,9 @@
 /**
- * @fileoverview Shared internals for the `dlx/*` module — the bounded
- * LRU cache used by `resolveBinaryPath` on Windows.
- *
- * Webpack-safe lazy `node:fs` / `node:path` / `node:crypto` loaders
- * live in the canonical `@socketsecurity/lib/node/{fs,path,crypto}`
- * helpers — import `getNodeFs` / `getNodePath` / `getNodeCrypto`
- * directly from there.
+ * @file Shared internals for the `dlx/*` module — the bounded LRU cache used by
+ *   `resolveBinaryPath` on Windows. Webpack-safe lazy `node:fs` / `node:path` /
+ *   `node:crypto` loaders live in the canonical
+ *   `@socketsecurity/lib/node/{fs,path,crypto}` helpers — import `getNodeFs` /
+ *   `getNodePath` / `getNodeCrypto` directly from there.
  */
 
 import { MapCtor } from '../primordials/map-set'

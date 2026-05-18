@@ -1,18 +1,13 @@
 /**
- * @fileoverview Streaming file downloads with retries, progress
- * callbacks, and SHA-256 verification.
- *
- * `httpDownload` is the public entry — it writes to a randomly-named
- * sibling temp file first, then atomic-renames into place on success
- * so a failed run never leaves a half-written file at `destPath`.
- * `httpDownloadAttempt` is one streaming pass; the retry / hash-check
- * loop sits in `httpDownload`.
- *
- * `httpDownloadAttempt` is exported (not private) per
- * `export-top-level-functions` — it lives here next to the only
- * caller, and it uses `httpRequestAttempt(... { stream: true })` from
- * `request.ts` to obtain the unconsumed `rawResponse` it pipes to
- * disk.
+ * @file Streaming file downloads with retries, progress callbacks, and SHA-256
+ *   verification. `httpDownload` is the public entry — it writes to a
+ *   randomly-named sibling temp file first, then atomic-renames into place on
+ *   success so a failed run never leaves a half-written file at `destPath`.
+ *   `httpDownloadAttempt` is one streaming pass; the retry / hash-check loop
+ *   sits in `httpDownload`. `httpDownloadAttempt` is exported (not private) per
+ *   `export-top-level-functions` — it lives here next to the only caller, and
+ *   it uses `httpRequestAttempt(... { stream: true })` from `request.ts` to
+ *   obtain the unconsumed `rawResponse` it pipes to disk.
  */
 
 import { setTimeout as delay } from 'node:timers/promises'
@@ -30,60 +25,58 @@ import { HttpResponseError } from './response-types'
 import type { HttpDownloadOptions, HttpDownloadResult } from './download-types'
 
 /**
- * Download a file from a URL to a local path with redirect support, retry logic, and progress callbacks.
- * Uses streaming to avoid loading entire file in memory.
+ * Download a file from a URL to a local path with redirect support, retry
+ * logic, and progress callbacks. Uses streaming to avoid loading entire file in
+ * memory.
  *
- * The download is streamed directly to disk, making it memory-efficient even for
- * large files. Progress callbacks allow for real-time download status updates.
+ * The download is streamed directly to disk, making it memory-efficient even
+ * for large files. Progress callbacks allow for real-time download status
+ * updates.
  *
- * Automatically follows HTTP redirects (3xx status codes) by default, making it suitable
- * for downloading from services like GitHub releases that redirect to CDN URLs.
- *
- * @param url - The URL to download from (must start with http:// or https://)
- * @param destPath - Absolute path where the file should be saved
- * @param options - Download configuration options
- * @returns Promise resolving to download result with path and size
- * @throws {Error} When all retries are exhausted, download fails, or file cannot be written
+ * Automatically follows HTTP redirects (3xx status codes) by default, making it
+ * suitable for downloading from services like GitHub releases that redirect to
+ * CDN URLs.
  *
  * @example
- * ```ts
- * // Simple download
- * const result = await httpDownload(
+ *   ```ts
+ *   // Simple download
+ *   const result = await httpDownload(
  *   'https://example.com/file.zip',
- *   '/tmp/file.zip'
- * )
- * console.log(`Downloaded ${result.size} bytes to ${result.path}`)
+ *   '/tmp/file.zip',
+ *   )
+ *   console.log(`Downloaded ${result.size} bytes to ${result.path}`)
  *
- * // Download from GitHub releases (handles 302 redirect automatically)
- * await httpDownload(
+ *   // Download from GitHub releases (handles 302 redirect automatically)
+ *   await httpDownload(
  *   'https://github.com/org/repo/releases/download/v1.0.0/binary.tar.gz',
- *   '/tmp/binary.tar.gz'
- * )
+ *   '/tmp/binary.tar.gz',
+ *   )
  *
- * // With progress tracking
- * await httpDownload(
- *   'https://example.com/large-file.zip',
- *   '/tmp/file.zip',
- *   {
- *     onProgress: (downloaded, total) => {
- *       const percent = ((downloaded / total) * 100).toFixed(1)
- *       console.log(`Progress: ${percent}% (${downloaded}/${total} bytes)`)
- *     }
- *   }
- * )
+ *   // With progress tracking
+ *   await httpDownload('https://example.com/large-file.zip', '/tmp/file.zip', {
+ *   onProgress: (downloaded, total) => {
+ *   const percent = ((downloaded / total) * 100).toFixed(1)
+ *   console.log(`Progress: ${percent}% (${downloaded}/${total} bytes)`)
+ *   },
+ *   })
  *
- * // With retries and custom timeout
- * await httpDownload(
- *   'https://example.com/file.zip',
- *   '/tmp/file.zip',
- *   {
- *     retries: 3,
- *     retryDelay: 2000,
- *     timeout: 300000, // 5 minutes
- *     headers: { 'Authorization': 'Bearer token123' }
- *   }
- * )
- * ```
+ *   // With retries and custom timeout
+ *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
+ *   retries: 3,
+ *   retryDelay: 2000,
+ *   timeout: 300000, // 5 minutes
+ *   headers: { Authorization: 'Bearer token123' },
+ *   })
+ *   ```
+ *
+ * @param url - The URL to download from (must start with http:// or https://)
+ * @param destPath - Absolute path where the file should be saved.
+ * @param options - Download configuration options.
+ *
+ * @returns Promise resolving to download result with path and size
+ *
+ * @throws {Error} When all retries are exhausted, download fails, or file
+ *   cannot be written.
  */
 export async function httpDownload(
   url: string,

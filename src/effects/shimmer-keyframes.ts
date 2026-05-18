@@ -1,27 +1,24 @@
 /**
- * @fileoverview SVG keyframe batcher for the shimmer engine.
- *
- * Pre-renders N frames of the engine and emits per-character keyTimes /
- * values arrays suitable for SVG SMIL `<animate>` elements. The output is
- * deduplicated (consecutive identical colors collapse to a single
- * keyframe) and closed with a `t=1` anchor so the animation loops cleanly.
- *
- * Use with `calcMode="discrete"` to reproduce the engine's output exactly
- * — no SMIL interpolation between frames, each frame holds until the
- * next changes.
+ * @file SVG keyframe batcher for the shimmer engine. Pre-renders N frames of
+ *   the engine and emits per-character keyTimes / values arrays suitable for
+ *   SVG SMIL `<animate>` elements. The output is deduplicated (consecutive
+ *   identical colors collapse to a single keyframe) and closed with a `t=1`
+ *   anchor so the animation loops cleanly. Use with `calcMode="discrete"` to
+ *   reproduce the engine's output exactly — no SMIL interpolation between
+ *   frames, each frame holds until the next changes.
  *
  * @example
- * ```ts
- * import { configToSpec } from '@socketsecurity/lib/effects/shimmer'
- * import { toShimmerKeyframes } from '@socketsecurity/lib/effects/shimmer-keyframes'
- * const spec = configToSpec({ color: RAINBOW_GRADIENT, dir: 'ltr' }, 10)
- * const tracks = toShimmerKeyframes(spec, 10, 60)
- * // Emit one <animate> per char in your SVG:
- * //   <animate attributeName="fill" calcMode="discrete"
- * //            keyTimes={tracks[i].times.join(';')}
- * //            values={tracks[i].values.join(';')}
- * //            dur="3s" repeatCount="indefinite" />
- * ```
+ *   ;```ts
+ *   import { configToSpec } from '@socketsecurity/lib/effects/shimmer'
+ *   import { toShimmerKeyframes } from '@socketsecurity/lib/effects/shimmer-keyframes'
+ *   const spec = configToSpec({ color: RAINBOW_GRADIENT, dir: 'ltr' }, 10)
+ *   const tracks = toShimmerKeyframes(spec, 10, 60)
+ *   // Emit one <animate> per char in your SVG:
+ *   //   <animate attributeName="fill" calcMode="discrete"
+ *   //            keyTimes={tracks[i].times.join(';')}
+ *   //            values={tracks[i].values.join(';')}
+ *   //            dur="3s" repeatCount="indefinite" />
+ *   ```
  */
 
 import { frameColors, type ShimmerSpec } from './shimmer'
@@ -29,12 +26,12 @@ import { frameColors, type ShimmerSpec } from './shimmer'
 // === Types ===
 
 /**
- * Keyframe track for a single character. `times[i]` is in [0, 1] and
- * pairs with `values[i]` (an `rgb(R,G,B)` string). Use directly as SMIL
- * `<animate>` attributes:
+ * Keyframe track for a single character. `times[i]` is in [0, 1] and pairs with
+ * `values[i]` (an `rgb(R,G,B)` string). Use directly as SMIL `<animate>`
+ * attributes:
  *
  * ```jsx
- * <animate
+ * ;<animate
  *   keyTimes={track.times.join(';')}
  *   values={track.values.join(';')}
  *   calcMode="discrete"
@@ -42,9 +39,13 @@ import { frameColors, type ShimmerSpec } from './shimmer'
  * ```
  */
 export type Keyframes = {
-  /** Normalized timestamps in [0, 1], monotonically non-decreasing. */
+  /**
+   * Normalized timestamps in [0, 1], monotonically non-decreasing.
+   */
   readonly times: readonly number[]
-  /** `rgb(R,G,B)` color strings, paired by index with `times`. */
+  /**
+   * `rgb(R,G,B)` color strings, paired by index with `times`.
+   */
   readonly values: readonly string[]
 }
 
@@ -53,18 +54,19 @@ export type Keyframes = {
 /**
  * Render N frames of a shimmer spec into per-character keyframe tracks.
  *
- * Output is one {@link Keyframes} object per char. Consecutive identical
- * colors collapse — only the first occurrence emits a keyframe, the rest
- * are implicit (SMIL holds the previous value). A final keyframe at `t=1`
- * closes the loop with the same value as `t=0` so playback wraps cleanly.
+ * Output is one {@link Keyframes} object per char. Consecutive identical colors
+ * collapse — only the first occurrence emits a keyframe, the rest are implicit
+ * (SMIL holds the previous value). A final keyframe at `t=1` closes the loop
+ * with the same value as `t=0` so playback wraps cleanly.
  *
- * Use with `calcMode="discrete"` to reproduce the engine's per-frame
- * output exactly (no SMIL interpolation between frames).
+ * Use with `calcMode="discrete"` to reproduce the engine's per-frame output
+ * exactly (no SMIL interpolation between frames).
  *
- * @param spec functional shimmer specification
- * @param textLength number of chars to colorize
- * @param frames total frame count to bake into the loop
- * @returns one Keyframes track per char index, in order
+ * @param spec Functional shimmer specification.
+ * @param textLength Number of chars to colorize.
+ * @param frames Total frame count to bake into the loop.
+ *
+ * @returns One Keyframes track per char index, in order
  */
 export function toShimmerKeyframes(
   spec: ShimmerSpec,

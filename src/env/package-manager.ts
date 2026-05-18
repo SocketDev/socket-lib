@@ -1,6 +1,6 @@
 /**
- * @fileoverview Package manager environment detection.
- * Provides utilities to detect which package manager (npm/pnpm/yarn/bun) is running.
+ * @file Package manager environment detection. Provides utilities to detect
+ *   which package manager (npm/pnpm/yarn/bun) is running.
  */
 
 import process from 'node:process'
@@ -13,29 +13,30 @@ import { getEnvValue } from './rewire'
 export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined
 
 /**
- * Detect which package manager is currently running based on environment variables.
- * Checks npm_config_user_agent which all package managers set.
+ * Detect which package manager is currently running based on environment
+ * variables. Checks npm_config_user_agent which all package managers set.
  *
  * Detection priority:
- * 1. npm_config_user_agent (most reliable, set by all package managers)
+ *
+ * 1. Npm_config_user_agent (most reliable, set by all package managers)
  * 2. Binary path analysis (fallback for non-standard environments)
  *
- * @returns The detected package manager or null if unable to determine
- *
  * @example
- * ```typescript
- * // During: npm install
- * detectPackageManager() // 'npm'
+ *   ;```typescript
+ *   // During: npm install
+ *   detectPackageManager() // 'npm'
  *
- * // During: pnpm install
- * detectPackageManager() // 'pnpm'
+ *   // During: pnpm install
+ *   detectPackageManager() // 'pnpm'
  *
- * // During: yarn install
- * detectPackageManager() // 'yarn'
+ *   // During: yarn install
+ *   detectPackageManager() // 'yarn'
  *
- * // Outside package manager context
- * detectPackageManager() // undefined
- * ```
+ *   // Outside package manager context
+ *   detectPackageManager() // undefined
+ *   ```
+ *
+ * @returns The detected package manager or null if unable to determine
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function detectPackageManager(): PackageManagerType {
@@ -86,12 +87,13 @@ export function detectPackageManager(): PackageManagerType {
 /**
  * Get the package manager name and version from user agent.
  *
- * @returns Object with name and version, or null if not available
  * @example
- * ```typescript
- * getPackageManagerInfo()
- * // { name: 'pnpm', version: '8.15.1' }
- * ```
+ *   ;```typescript
+ *   getPackageManagerInfo()
+ *   // { name: 'pnpm', version: '8.15.1' }
+ *   ```
+ *
+ * @returns Object with name and version, or null if not available
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getPackageManagerInfo():
@@ -118,17 +120,18 @@ export function getPackageManagerInfo():
 }
 
 /**
- * Get the package manager user agent from environment.
- * Package managers set npm_config_user_agent with format: "npm/8.19.2 node/v18.12.0 darwin arm64"
+ * Get the package manager user agent from environment. Package managers set
+ * npm_config_user_agent with format: "npm/8.19.2 node/v18.12.0 darwin arm64"
+ *
+ * @example
+ *   ;```typescript
+ *   getPackageManagerUserAgent()
+ *   // npm: "npm/10.2.4 node/v20.11.0 darwin arm64 workspaces/false"
+ *   // pnpm: "pnpm/8.15.1 npm/? node/v20.11.0 darwin arm64"
+ *   // yarn: "yarn/1.22.19 npm/? node/v20.11.0 darwin arm64"
+ *   ```
  *
  * @returns The user agent string or undefined
- * @example
- * ```typescript
- * getPackageManagerUserAgent()
- * // npm: "npm/10.2.4 node/v20.11.0 darwin arm64 workspaces/false"
- * // pnpm: "pnpm/8.15.1 npm/? node/v20.11.0 darwin arm64"
- * // yarn: "yarn/1.22.19 npm/? node/v20.11.0 darwin arm64"
- * ```
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function getPackageManagerUserAgent(): string | undefined {

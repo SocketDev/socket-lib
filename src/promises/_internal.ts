@@ -1,7 +1,7 @@
 /**
- * @fileoverview Private internals for `promises/*` modules — the lazy
- * `node:timers/promises` accessor + the shared abort signal. Underscore
- * prefix excludes from public exports.
+ * @file Private internals for `promises/*` modules — the lazy
+ *   `node:timers/promises` accessor + the shared abort signal. Underscore
+ *   prefix excludes from public exports.
  */
 
 import { getAbortSignal } from '../process/abort'
@@ -11,10 +11,11 @@ export const abortSignal = getAbortSignal()
 let _timers: typeof import('node:timers/promises') | undefined
 
 /**
- * Get the timers/promises module.
- * Uses lazy loading to avoid Webpack bundling issues.
+ * Get the timers/promises module. Uses lazy loading to avoid Webpack bundling
+ * issues.
  *
  * @private
+ *
  * @returns The Node.js timers/promises module
  */
 /*@__NO_SIDE_EFFECTS__*/

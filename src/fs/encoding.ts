@@ -1,30 +1,32 @@
 /**
- * @fileoverview Encoding-name normalization. Maps user-supplied encoding
- * strings (case- and dash-variant) to the canonical Node Buffer
- * encoding tokens. Mirrors `internal/util.js#normalizeEncoding` so the
- * common-case fast path is identical to Node's, and slow cases delegate
- * to a separate function so v8 will inline the hot one.
+ * @file Encoding-name normalization. Maps user-supplied encoding strings (case-
+ *   and dash-variant) to the canonical Node Buffer encoding tokens. Mirrors
+ *   `internal/util.js#normalizeEncoding` so the common-case fast path is
+ *   identical to Node's, and slow cases delegate to a separate function so v8
+ *   will inline the hot one.
  */
 
 import type { BufferEncoding } from './types'
 
 /**
- * Normalize encoding string to canonical form.
- * Handles common encodings inline for performance, delegates to slowCases for others.
+ * Normalize encoding string to canonical form. Handles common encodings inline
+ * for performance, delegates to slowCases for others.
  *
  * Based on Node.js internal/util.js normalizeEncoding implementation.
- * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
- *
- * @param enc - Encoding to normalize (can be null/undefined)
- * @returns Normalized encoding string, defaults to 'utf8'
  *
  * @example
- * ```ts
- * normalizeEncoding('UTF-8') // Returns 'utf8'
- * normalizeEncoding('binary') // Returns 'latin1'
- * normalizeEncoding('ucs-2') // Returns 'utf16le'
- * normalizeEncoding(null) // Returns 'utf8'
- * ```
+ *   ;```ts
+ *   normalizeEncoding('UTF-8') // Returns 'utf8'
+ *   normalizeEncoding('binary') // Returns 'latin1'
+ *   normalizeEncoding('ucs-2') // Returns 'utf16le'
+ *   normalizeEncoding(null) // Returns 'utf8'
+ *   ```
+ *
+ * @param enc - Encoding to normalize (can be null/undefined)
+ *
+ * @returns Normalized encoding string, defaults to 'utf8'
+ *
+ * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizeEncoding(
@@ -40,17 +42,19 @@ export function normalizeEncoding(
  * inlined properly. That prioritizes the common case.
  *
  * Based on Node.js internal/util.js normalizeEncoding implementation.
- * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
- *
- * @param enc - Encoding to normalize
- * @returns Normalized encoding string, defaults to 'utf8' for unknown encodings
  *
  * @example
- * ```typescript
- * normalizeEncodingSlow('ucs2')    // 'utf16le'
- * normalizeEncodingSlow('LATIN1')  // 'latin1'
- * normalizeEncodingSlow('binary')  // 'latin1'
- * ```
+ *   ;```typescript
+ *   normalizeEncodingSlow('ucs2') // 'utf16le'
+ *   normalizeEncodingSlow('LATIN1') // 'latin1'
+ *   normalizeEncodingSlow('binary') // 'latin1'
+ *   ```
+ *
+ * @param enc - Encoding to normalize.
+ *
+ * @returns Normalized encoding string, defaults to 'utf8' for unknown encodings
+ *
+ * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function normalizeEncodingSlow(enc: string): BufferEncoding {

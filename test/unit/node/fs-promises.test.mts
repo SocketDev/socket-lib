@@ -1,5 +1,5 @@
 /**
- * @fileoverview Unit tests for src/node/fs-promises.ts.
+ * @file Unit tests for src/node/fs-promises.ts.
  */
 
 import { describe, expect, it } from 'vitest'

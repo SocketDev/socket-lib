@@ -1,14 +1,12 @@
 /**
- * @fileoverview Cross-tool resolver tests — exercises the
- * option-shape memoization and downloadIfMissing fall-through
- * shared by resolveJre / resolveBazel / resolveSbt.
- *
- * The local-discovery tiers (VFS / JAVA_HOME / PATH / etc.) are
- * skipped on the test machine in practice (no smol binary, often no
- * java/bazel/sbt on PATH), so we exercise the download tier via
- * the injectable `downloader?`. When the test machine DOES have a
- * local tool, the "local tier short-circuits download" case is
- * implicitly covered; tests assert behavior in both shapes.
+ * @file Cross-tool resolver tests — exercises the option-shape memoization and
+ *   downloadIfMissing fall-through shared by resolveJre / resolveBazel /
+ *   resolveSbt. The local-discovery tiers (VFS / JAVA_HOME / PATH / etc.) are
+ *   skipped on the test machine in practice (no smol binary, often no
+ *   java/bazel/sbt on PATH), so we exercise the download tier via the
+ *   injectable `downloader?`. When the test machine DOES have a local tool, the
+ *   "local tier short-circuits download" case is implicitly covered; tests
+ *   assert behavior in both shapes.
  */
 
 import {

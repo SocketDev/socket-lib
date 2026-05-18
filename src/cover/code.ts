@@ -1,5 +1,5 @@
 /**
- * @fileoverview Code coverage utilities for parsing v8 coverage data.
+ * @file Code coverage utilities for parsing v8 coverage data.
  */
 
 import process from 'node:process'
@@ -45,7 +45,8 @@ export function calculateMetric(data: {
 /**
  * Get code coverage metrics from v8 coverage-final.json.
  *
- * @throws {Error} When coverage file doesn't exist and generateIfMissing is false.
+ * @throws {Error} When coverage file doesn't exist and generateIfMissing is
+ *   false.
  * @throws {Error} When coverage data format is invalid.
  */
 export async function getCodeCoverage(

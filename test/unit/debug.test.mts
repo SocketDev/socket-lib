@@ -1,10 +1,9 @@
 /**
- * @fileoverview Unit tests for src/debug.ts — namespace-gated debug output.
- *
- * The functions are gated by SOCKET_DEBUG (and DEBUG for the debug-js
- * library's own namespace machinery). Tests rewire env vars per case and
- * spy on logger.info / logger.dir / console.log. Spinner pause+resume is
- * exercised via a mock spinner option.
+ * @file Unit tests for src/debug.ts — namespace-gated debug output. The
+ *   functions are gated by SOCKET_DEBUG (and DEBUG for the debug-js library's
+ *   own namespace machinery). Tests rewire env vars per case and spy on
+ *   logger.info / logger.dir / console.log. Spinner pause+resume is exercised
+ *   via a mock spinner option.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

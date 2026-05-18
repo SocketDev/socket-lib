@@ -1,12 +1,12 @@
 /**
- * @fileoverview Unit tests for IPC object lazy loader utility.
+ * @file Unit tests for IPC object lazy loader utility. Tests IPC object getter
+ *   for worker thread communication:
  *
- * Tests IPC object getter for worker thread communication:
- * - getIpc() returns IpcObject with sendMessage(), disconnect()
- * - Lazy-loads worker_threads module
- * - Type-safe IPC message passing
- * - Worker thread detection and initialization
- * Used by Socket CLI for parent-worker communication in multi-threaded operations.
+ *   - getIpc() returns IpcObject with sendMessage(), disconnect()
+ *   - Lazy-loads worker_threads module
+ *   - Type-safe IPC message passing
+ *   - Worker thread detection and initialization Used by Socket CLI for
+ *     parent-worker communication in multi-threaded operations.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
