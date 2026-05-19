@@ -39,7 +39,7 @@ export async function opengrepFromDownload(
     cacheDir ?? path.join(getSocketDlxDir(), 'opengrep', version, platformArch)
 
   if (entry.isArchive) {
-    await downloadAndExtractTool({
+    const archive = await downloadAndExtractTool({
       url,
       name: `opengrep-${version}-${platformArch}-${entry.asset}`,
       integrity,
@@ -49,6 +49,7 @@ export async function opengrepFromDownload(
     return {
       path: path.join(targetDir, entry.binaryInArchive!),
       source: 'download',
+      integrity: archive.integrity,
     }
   }
 
@@ -68,5 +69,6 @@ export async function opengrepFromDownload(
   return {
     path: finalPath,
     source: 'download',
+    integrity: archive.integrity,
   }
 }

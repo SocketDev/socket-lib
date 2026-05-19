@@ -56,7 +56,7 @@ export async function trufflehogFromDownload(
   const extractedDir =
     cacheDir ??
     path.join(getSocketDlxDir(), 'trufflehog', version, platformArch)
-  await downloadAndExtractTool({
+  const archive = await downloadAndExtractTool({
     url,
     name: `trufflehog-${version}-${platformArch}.tar.gz`,
     integrity,
@@ -67,5 +67,6 @@ export async function trufflehogFromDownload(
   return {
     path: path.join(extractedDir, binary),
     source: 'download',
+    integrity: archive.integrity,
   }
 }

@@ -18,4 +18,10 @@ export interface ResolvedOpengrep {
    * Which resolver tier found this.
    */
   readonly source: OpengrepSource
+  /**
+   * SRI integrity (`sha512-<base64>`) of the downloaded binary or archive. Set
+   * ONLY when `source === 'download'`; vfs / path tiers don't compute it. Use
+   * for trust-on-first-use pinning.
+   */
+  readonly integrity?: string | undefined
 }

@@ -40,7 +40,7 @@ export async function trivyFromDownload(
   const archiveExt = entry?.suffix.endsWith('.zip') ? '.zip' : '.tar.gz'
   const extractedDir =
     cacheDir ?? path.join(getSocketDlxDir(), 'trivy', version, platformArch)
-  await downloadAndExtractTool({
+  const archive = await downloadAndExtractTool({
     url,
     name: `trivy-${version}-${platformArch}${archiveExt}`,
     integrity,
@@ -51,5 +51,6 @@ export async function trivyFromDownload(
   return {
     path: path.join(extractedDir, binary),
     source: 'download',
+    integrity: archive.integrity,
   }
 }

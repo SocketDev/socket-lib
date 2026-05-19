@@ -59,7 +59,7 @@ export async function sbtFromDownload(
   const extractedDir = cacheDir ?? path.join(getSocketDlxDir(), 'sbt', version)
   // strip:1 unwraps the top-level `sbt/` directory the tgz contains,
   // so `bin/sbt` lands at extractedDir/bin/sbt.
-  await downloadAndExtractTool({
+  const archive = await downloadAndExtractTool({
     url,
     // `.tgz` suffix is load-bearing: extractArchive auto-detects
     // format from the cached filename's extension.
@@ -73,5 +73,6 @@ export async function sbtFromDownload(
     path: path.join(extractedDir, 'bin', 'sbt'),
     isJar: false,
     source: 'download',
+    integrity: archive.integrity,
   }
 }

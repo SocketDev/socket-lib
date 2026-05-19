@@ -88,7 +88,7 @@ export async function jreFromDownload(
   // strip:1 unwraps the top-level `jdk-21.0.x-jre/` directory that
   // Adoptium archives include, so the resulting tree has `bin/` etc.
   // at extractedDir root.
-  await downloadAndExtractTool({
+  const archive = await downloadAndExtractTool({
     url,
     name: `adoptium-jre-${version}-${platformArch}${archiveExt}`,
     integrity,
@@ -105,5 +105,6 @@ export async function jreFromDownload(
     javaPath: path.join(javaHome, 'bin', javaBinary),
     javaHome,
     source: 'download',
+    integrity: archive.integrity,
   }
 }

@@ -27,4 +27,10 @@ export interface ResolvedCdxgen {
    * Which resolver tier found this.
    */
   readonly source: CdxgenSource
+  /**
+   * SRI integrity (`sha512-<base64>`) of the downloaded SEA binary. Set ONLY
+   * when `source === 'download'`; vfs / path tiers don't compute it. Use for
+   * trust-on-first-use pinning.
+   */
+  readonly integrity?: string | undefined
 }

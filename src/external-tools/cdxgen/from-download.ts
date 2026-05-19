@@ -95,5 +95,6 @@ export async function cdxgenFromDownload(
   return {
     path: finalPath,
     source: 'download',
+    integrity: archive.integrity,
   }
 }

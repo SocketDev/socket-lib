@@ -39,7 +39,7 @@ export async function uvFromDownload(
     cacheDir ?? path.join(getSocketDlxDir(), 'uv', version, platformArch)
   // strip:1 unwraps the upstream `<triple>/` directory so `uv[.exe]`
   // lands at extractedDir root.
-  await downloadAndExtractTool({
+  const archive = await downloadAndExtractTool({
     url,
     name: `uv-${version}-${platformArch}${archiveExt}`,
     integrity,
@@ -51,5 +51,6 @@ export async function uvFromDownload(
   return {
     path: path.join(extractedDir, binary),
     source: 'download',
+    integrity: archive.integrity,
   }
 }

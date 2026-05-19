@@ -45,7 +45,7 @@ export async function janusFromDownload(
   const extractedDir =
     cacheDir ??
     path.join(getSocketWheelhouseDir(), 'janus', version, platformArch)
-  await downloadAndExtractTool({
+  const archive = await downloadAndExtractTool({
     url,
     name: `janus-${version}-${platformArch}.tar.gz`,
     integrity,
@@ -56,5 +56,6 @@ export async function janusFromDownload(
   return {
     path: path.join(extractedDir, binary),
     source: 'download',
+    integrity: archive.integrity,
   }
 }

@@ -70,5 +70,6 @@ export async function bazelFromDownload(
   return {
     path: archive.archivePath,
     source: 'download',
+    integrity: archive.integrity,
   }
 }

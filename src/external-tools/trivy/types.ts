@@ -18,4 +18,10 @@ export interface ResolvedTrivy {
    * Which resolver tier found this.
    */
   readonly source: TrivySource
+  /**
+   * SRI integrity (`sha512-<base64>`) of the downloaded archive. Set ONLY when
+   * `source === 'download'`; vfs / path tiers don't compute it. Use for
+   * trust-on-first-use pinning.
+   */
+  readonly integrity?: string | undefined
 }

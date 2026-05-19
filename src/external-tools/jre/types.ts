@@ -22,6 +22,14 @@ export interface ResolvedJre {
   readonly javaPath: string
   readonly javaHome: string
   readonly source: JreSource
+  /**
+   * SRI integrity (`sha512-<base64>`) of the downloaded archive. Set ONLY when
+   * `source === 'download'` — the local-discovery tiers (vfs / java-home /
+   * path) point at bytes already on disk and don't compute a fresh hash. Use
+   * this for trust-on-first-use: write back to `external-tools.json` after the
+   * first download so subsequent calls verify against the pin.
+   */
+  readonly integrity?: string | undefined
 }
 
 export type { AdoptiumAssetQuery }
