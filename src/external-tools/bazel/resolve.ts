@@ -2,11 +2,14 @@
  * @file `resolveBazel()` — Bazel resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded Bazel (if packed)
- *   2. PATH — `bazelisk` (preferred) or `bazel` on the system PATH
- *   3. download — upstream GitHub release binary (only when `downloadIfMissing` is
- *      passed) Returns `undefined` if all of the enabled sources miss. Memoized
- *      per option-shape: calls with identical options return the same cached
+ *   1. PATH — `bazelisk` (preferred) or `bazel` on the system PATH
+ *   2. download — upstream GitHub release binary (only when `downloadIfMissing` is
+ *      passed) No VFS tier: Bazel's version comes from the project's
+ *      `.bazelversion`, not from a global pin, so a smol-bundled Bazel would
+ *      always be the wrong version for any project that pinned a different one.
+ *      Every Bazel use must go through the project-specific download path.
+ *      Returns `undefined` if all of the enabled sources miss. Memoized per
+ *      option-shape: calls with identical options return the same cached
  *      promise. Calling without `downloadIfMissing` and then with
  *      `downloadIfMissing` produces two distinct cache entries so the second
  *      call can fall through to the download tier.
@@ -14,7 +17,6 @@
 
 import { bazelFromDownload } from './from-download'
 import { bazelFromPath } from './from-path'
-import { bazelFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
@@ -60,12 +62,6 @@ export function cacheKey(opts: ResolveBazelOptions | undefined): string {
 export async function doResolveBazel(
   opts?: ResolveBazelOptions | undefined,
 ): Promise<ResolvedBazel | undefined> {
-  const fromVfs = await bazelFromVfs()
-  /* c8 ignore start - smol Node binary only. */
-  if (fromVfs) {
-    return fromVfs
-  }
-  /* c8 ignore stop */
   const fromPath = await bazelFromPath()
   if (fromPath) {
     return fromPath

@@ -12,7 +12,7 @@
 
 import type { AdoptiumAssetQuery } from './asset-names'
 
-export type JreSource = 'vfs' | 'java-home' | 'path' | 'download'
+export type JreSource = 'download' | 'java-home' | 'path' | 'vfs'
 
 /**
  * A resolved JRE installation. Either embedded in the smol binary's VFS,
