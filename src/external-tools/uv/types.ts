@@ -4,6 +4,8 @@
  *   archives that wrap the `uv` binary one level deep.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
+
 export type UvSource = 'download' | 'path' | 'vfs'
 
 /**
@@ -19,9 +21,7 @@ export interface ResolvedUv {
    */
   readonly source: UvSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded archive. Set ONLY when
-   * `source === 'download'`; vfs / path tiers don't compute it. Use for
-   * trust-on-first-use pinning.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }

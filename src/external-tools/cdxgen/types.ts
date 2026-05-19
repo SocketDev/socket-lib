@@ -9,6 +9,8 @@
  *   API stays `resolveCdxgen()` for backward compatibility either way.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
+
 export type CdxgenSource = 'download' | 'path' | 'vfs'
 
 /**
@@ -28,9 +30,7 @@ export interface ResolvedCdxgen {
    */
   readonly source: CdxgenSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded SEA binary. Set ONLY
-   * when `source === 'download'`; vfs / path tiers don't compute it. Use for
-   * trust-on-first-use pinning.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }

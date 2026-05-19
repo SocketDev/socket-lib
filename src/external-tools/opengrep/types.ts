@@ -4,6 +4,8 @@
  *   archive wrapper) and as a zip on Windows.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
+
 export type OpengrepSource = 'download' | 'path' | 'vfs'
 
 /**
@@ -19,9 +21,7 @@ export interface ResolvedOpengrep {
    */
   readonly source: OpengrepSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded binary or archive. Set
-   * ONLY when `source === 'download'`; vfs / path tiers don't compute it. Use
-   * for trust-on-first-use pinning.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }

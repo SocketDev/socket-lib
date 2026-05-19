@@ -112,6 +112,16 @@ export async function downloadAndExtractTool(
 }
 
 /**
+ * SRI integrity (`sha512-<base64>`) of a downloaded archive, surfaced on the
+ * per-tool `Resolved*` shapes. Set ONLY when `source === 'download'`; the
+ * local-discovery tiers (vfs / env-pointer / path) reference bytes already on
+ * disk and don't compute a fresh hash. Use for trust-on-first-use: capture
+ * after the first download and write back to `external-tools.json` so
+ * subsequent calls verify against the pin.
+ */
+export type ResolvedToolIntegrity = string | undefined
+
+/**
  * Result of a from-download tier call. `source: 'download'` mirrors the
  * discriminator convention used by the per-tool `Resolved*` shapes so callers
  * can detect this branch in a `switch (source)`.

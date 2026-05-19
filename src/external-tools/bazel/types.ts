@@ -2,6 +2,8 @@
  * @file Shared types for Bazel resolution.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
+
 export type BazelSource = 'download' | 'path'
 
 /**
@@ -17,9 +19,7 @@ export interface ResolvedBazel {
    */
   readonly source: BazelSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded archive. Set ONLY when
-   * `source === 'download'`; PATH-tier resolutions don't compute it. Use for
-   * trust-on-first-use pinning.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }

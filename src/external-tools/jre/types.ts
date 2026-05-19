@@ -10,6 +10,7 @@
  *     need it — they assume the JRE is compatible with their launcher.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
 import type { AdoptiumAssetQuery } from './asset-names'
 
 export type JreSource = 'download' | 'java-home' | 'path' | 'vfs'
@@ -23,13 +24,9 @@ export interface ResolvedJre {
   readonly javaHome: string
   readonly source: JreSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded archive. Set ONLY when
-   * `source === 'download'` — the local-discovery tiers (vfs / java-home /
-   * path) point at bytes already on disk and don't compute a fresh hash. Use
-   * this for trust-on-first-use: write back to `external-tools.json` after the
-   * first download so subsequent calls verify against the pin.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }
 
 export type { AdoptiumAssetQuery }

@@ -5,6 +5,8 @@
  *   `resolveTrufflehog()`.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
+
 export type TrufflehogSource = 'download' | 'path' | 'vfs'
 
 /**
@@ -20,9 +22,7 @@ export interface ResolvedTrufflehog {
    */
   readonly source: TrufflehogSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded archive. Set ONLY when
-   * `source === 'download'`; vfs / path tiers don't compute it. Use for
-   * trust-on-first-use pinning.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }

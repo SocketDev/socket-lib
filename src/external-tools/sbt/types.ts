@@ -6,6 +6,8 @@
  *   -jar <launcherPath>` using the JRE resolved via `resolveJre()`.
  */
 
+import type { ResolvedToolIntegrity } from '../from-download'
+
 export type SbtSource = 'download' | 'path' | 'vfs'
 
 /**
@@ -27,9 +29,7 @@ export interface ResolvedSbt {
   readonly isJar: boolean
   readonly source: SbtSource
   /**
-   * SRI integrity (`sha512-<base64>`) of the downloaded launcher. Set ONLY when
-   * `source === 'download'`; vfs / path tiers don't compute it. Use for
-   * trust-on-first-use pinning.
+   * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: string | undefined
+  readonly integrity?: ResolvedToolIntegrity
 }
