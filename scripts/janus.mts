@@ -33,16 +33,12 @@ const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export function getPlatformKey(): string {
-  return `${process.platform === 'win32' ? 'win' : process.platform}-${process.arch}`
-}
-
 type ToolEntry = {
   version?: string | undefined
   checksums?: Record<string, unknown> | undefined
 }
 
-export function readJanusEntry(): ToolEntry {
+function readJanusEntry(): ToolEntry {
   // The hook's external-tools.json is the single source of truth for
   // version + supported-platform list. Read it directly rather than
   // pinning a version here — drift between the installer and this
@@ -65,6 +61,10 @@ export function readJanusEntry(): ToolEntry {
     )
   }
   return entry
+}
+
+function getPlatformKey(): string {
+  return `${process.platform === 'win32' ? 'win' : process.platform}-${process.arch}`
 }
 
 async function main(): Promise<void> {
