@@ -909,6 +909,36 @@
       "types": "./dist/external-tools/bazel/types.d.ts",
       "default": "./dist/external-tools/bazel/types.js"
     },
+    "./external-tools/cdxgen/asset-names": {
+      "source": "./src/external-tools/cdxgen/asset-names.ts",
+      "types": "./dist/external-tools/cdxgen/asset-names.d.ts",
+      "default": "./dist/external-tools/cdxgen/asset-names.js"
+    },
+    "./external-tools/cdxgen/from-download": {
+      "source": "./src/external-tools/cdxgen/from-download.ts",
+      "types": "./dist/external-tools/cdxgen/from-download.d.ts",
+      "default": "./dist/external-tools/cdxgen/from-download.js"
+    },
+    "./external-tools/cdxgen/from-path": {
+      "source": "./src/external-tools/cdxgen/from-path.ts",
+      "types": "./dist/external-tools/cdxgen/from-path.d.ts",
+      "default": "./dist/external-tools/cdxgen/from-path.js"
+    },
+    "./external-tools/cdxgen/from-vfs": {
+      "source": "./src/external-tools/cdxgen/from-vfs.ts",
+      "types": "./dist/external-tools/cdxgen/from-vfs.d.ts",
+      "default": "./dist/external-tools/cdxgen/from-vfs.js"
+    },
+    "./external-tools/cdxgen/resolve": {
+      "source": "./src/external-tools/cdxgen/resolve.ts",
+      "types": "./dist/external-tools/cdxgen/resolve.d.ts",
+      "default": "./dist/external-tools/cdxgen/resolve.js"
+    },
+    "./external-tools/cdxgen/types": {
+      "source": "./src/external-tools/cdxgen/types.ts",
+      "types": "./dist/external-tools/cdxgen/types.d.ts",
+      "default": "./dist/external-tools/cdxgen/types.js"
+    },
     "./external-tools/from-download": {
       "source": "./src/external-tools/from-download.ts",
       "types": "./dist/external-tools/from-download.d.ts",
@@ -1048,6 +1078,36 @@
       "source": "./src/external-tools/sbt/types.ts",
       "types": "./dist/external-tools/sbt/types.d.ts",
       "default": "./dist/external-tools/sbt/types.js"
+    },
+    "./external-tools/synp/asset-names": {
+      "source": "./src/external-tools/synp/asset-names.ts",
+      "types": "./dist/external-tools/synp/asset-names.d.ts",
+      "default": "./dist/external-tools/synp/asset-names.js"
+    },
+    "./external-tools/synp/from-download": {
+      "source": "./src/external-tools/synp/from-download.ts",
+      "types": "./dist/external-tools/synp/from-download.d.ts",
+      "default": "./dist/external-tools/synp/from-download.js"
+    },
+    "./external-tools/synp/from-path": {
+      "source": "./src/external-tools/synp/from-path.ts",
+      "types": "./dist/external-tools/synp/from-path.d.ts",
+      "default": "./dist/external-tools/synp/from-path.js"
+    },
+    "./external-tools/synp/from-vfs": {
+      "source": "./src/external-tools/synp/from-vfs.ts",
+      "types": "./dist/external-tools/synp/from-vfs.d.ts",
+      "default": "./dist/external-tools/synp/from-vfs.js"
+    },
+    "./external-tools/synp/resolve": {
+      "source": "./src/external-tools/synp/resolve.ts",
+      "types": "./dist/external-tools/synp/resolve.d.ts",
+      "default": "./dist/external-tools/synp/resolve.js"
+    },
+    "./external-tools/synp/types": {
+      "source": "./src/external-tools/synp/types.ts",
+      "types": "./dist/external-tools/synp/types.d.ts",
+      "default": "./dist/external-tools/synp/types.js"
     },
     "./external-tools/trivy/asset-names": {
       "source": "./src/external-tools/trivy/asset-names.ts",
