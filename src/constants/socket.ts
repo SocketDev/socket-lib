@@ -39,6 +39,7 @@ export const SOCKET_CLI_APP_NAME = 'socket'
 export const SOCKET_DLX_APP_NAME = 'dlx'
 export const SOCKET_FIREWALL_APP_NAME = 'sfw'
 export const SOCKET_REGISTRY_APP_NAME = 'registry'
+export const SOCKET_WHEELHOUSE_APP_NAME = 'wheelhouse'
 export const SOCKET_APP_PREFIX = '_'
 
 // Socket.dev lib.

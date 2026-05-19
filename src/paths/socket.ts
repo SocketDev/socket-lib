@@ -15,6 +15,7 @@ import {
   SOCKET_CLI_APP_NAME,
   SOCKET_DLX_APP_NAME,
   SOCKET_REGISTRY_APP_NAME,
+  SOCKET_WHEELHOUSE_APP_NAME,
 } from '../constants/socket'
 import { getHome } from '../env/home'
 import {
@@ -209,16 +210,19 @@ export function getSocketRegistryGithubCacheDir(): string {
   )
 }
 /**
- * Get the Socket user directory (~/.socket). Can be overridden with SOCKET_HOME
- * environment variable or via setPath() for testing. Result is cached via
- * getPathValue for performance.
+ * Get the Socket Wheelhouse directory (~/.socket/_wheelhouse). Shared
+ * cross-fleet location for binaries that every fleet member can reach without
+ * each one re-downloading and re-extracting per-repo. Tool installers (janus,
+ * sfw, etc.) drop their resolved executables under
+ * `<wheelhouse>/<tool>/<version>/<platform-arch>/`; consumers add the
+ * appropriate `bin/` to PATH or invoke the binary by absolute path.
  *
  * Priority order:
  *
- * 1. Test override via setPath('socket-user-dir', ...)
- * 2. SOCKET_HOME - Base directory override
- * 3. Default: $HOME/.socket
- * 4. Fallback: /tmp/.socket (Unix) or %TEMP%.socket (Windows)
+ * 1. Test override via setPath('socket-wheelhouse-dir', ...)
+ * 2. SOCKET_HOME/_wheelhouse - Base directory override (inherits from
+ *    getSocketUserDir)
+ * 3. Default: $HOME/.socket/_wheelhouse
  */
 
 /**
@@ -249,6 +253,44 @@ export function getSocketUserDir(): string {
  * Priority order: 1. HOME environment variable (Unix) 2. USERPROFILE
  * environment variable (Windows) 3. getNodeOs().homedir() 4. Fallback:
  * getNodeOs().tmpdir() (rarely used, for restricted environments)
+ */
+
+/**
+ * Get the Socket Wheelhouse directory (~/.socket/_wheelhouse). Shared
+ * cross-fleet location for binaries that every fleet member can reach without
+ * each one re-downloading and re-extracting per-repo. Tool installers (janus,
+ * sfw, etc.) drop their resolved executables under
+ * `<wheelhouse>/<tool>/<version>/<platform-arch>/`; consumers add the
+ * appropriate `bin/` to PATH or invoke the binary by absolute path.
+ *
+ * Priority order:
+ *
+ * 1. Test override via setPath('socket-wheelhouse-dir', ...)
+ * 2. SOCKET_HOME/_wheelhouse - Base directory override (inherits from
+ *    getSocketUserDir)
+ * 3. Default: $HOME/.socket/_wheelhouse
+ */
+export function getSocketWheelhouseDir(): string {
+  return getPathValue('socket-wheelhouse-dir', () => {
+    return normalizePath(
+      getNodePath().join(
+        getSocketUserDir(),
+        `${SOCKET_APP_PREFIX}${SOCKET_WHEELHOUSE_APP_NAME}`,
+      ),
+    )
+  })
+}
+/**
+ * Get the Socket user directory (~/.socket). Can be overridden with SOCKET_HOME
+ * environment variable or via setPath() for testing. Result is cached via
+ * getPathValue for performance.
+ *
+ * Priority order:
+ *
+ * 1. Test override via setPath('socket-user-dir', ...)
+ * 2. SOCKET_HOME - Base directory override
+ * 3. Default: $HOME/.socket
+ * 4. Fallback: /tmp/.socket (Unix) or %TEMP%.socket (Windows)
  */
 
 /**
