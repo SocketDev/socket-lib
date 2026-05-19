@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  _resetJreResolution,
+  resetJreResolution,
   resolveJre,
 } from '@socketsecurity/lib/external-tools/jre/resolve'
 
@@ -16,11 +16,11 @@ import {
 // isolate: false / concurrent: true config.
 describe.sequential('external-tools/jre/resolve', () => {
   beforeEach(() => {
-    _resetJreResolution()
+    resetJreResolution()
   })
   afterEach(() => {
     vi.unstubAllEnvs()
-    _resetJreResolution()
+    resetJreResolution()
   })
 
   it('memoizes across calls', () => {
@@ -29,7 +29,7 @@ describe.sequential('external-tools/jre/resolve', () => {
 
   it('returns the JAVA_HOME path when set (skipping VFS on stock Node)', async () => {
     vi.stubEnv('JAVA_HOME', '/opt/jdk')
-    _resetJreResolution()
+    resetJreResolution()
     const result = await resolveJre()
     expect(result?.javaHome).toBe('/opt/jdk')
     expect(result?.source).toBe('java-home')
@@ -37,18 +37,18 @@ describe.sequential('external-tools/jre/resolve', () => {
 
   it('falls through to PATH when JAVA_HOME is empty', async () => {
     vi.stubEnv('JAVA_HOME', '')
-    _resetJreResolution()
+    resetJreResolution()
     const result = await resolveJre()
     if (result !== undefined) {
       expect(result.source).toBe('path')
     }
   })
 
-  it('_resetJreResolution clears the memo slot', async () => {
+  it('resetJreResolution clears the memo slot', async () => {
     vi.stubEnv('JAVA_HOME', '/opt/jdk')
-    _resetJreResolution()
+    resetJreResolution()
     const first = await resolveJre()
-    _resetJreResolution()
+    resetJreResolution()
     const second = await resolveJre()
     expect(second).toEqual(first)
   })

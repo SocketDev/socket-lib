@@ -37,11 +37,11 @@ export interface ResolveBazelOptions {
     | undefined
 }
 
-const _resolutionCache = new Map<string, Promise<ResolvedBazel | undefined>>()
+const resolutionCache = new Map<string, Promise<ResolvedBazel | undefined>>()
 
 /* c8 ignore start - test-only escape hatch. */
-export function _resetBazelResolution(): void {
-  _resolutionCache.clear()
+export function resetBazelResolution(): void {
+  resolutionCache.clear()
 }
 /* c8 ignore stop */
 
@@ -76,10 +76,10 @@ export function resolveBazel(
   opts?: ResolveBazelOptions | undefined,
 ): Promise<ResolvedBazel | undefined> {
   const key = cacheKey(opts)
-  let cached = _resolutionCache.get(key)
+  let cached = resolutionCache.get(key)
   if (!cached) {
     cached = doResolveBazel(opts)
-    _resolutionCache.set(key, cached)
+    resolutionCache.set(key, cached)
   }
   return cached
 }

@@ -24,11 +24,11 @@ export interface ResolveSynpOptions {
     | undefined
 }
 
-const _resolutionCache = new Map<string, Promise<ResolvedSynp | undefined>>()
+const resolutionCache = new Map<string, Promise<ResolvedSynp | undefined>>()
 
 /* c8 ignore start - test-only escape hatch. */
-export function _resetSynpResolution(): void {
-  _resolutionCache.clear()
+export function resetSynpResolution(): void {
+  resolutionCache.clear()
 }
 /* c8 ignore stop */
 
@@ -63,10 +63,10 @@ export function resolveSynp(
   opts?: ResolveSynpOptions | undefined,
 ): Promise<ResolvedSynp | undefined> {
   const key = cacheKey(opts)
-  let cached = _resolutionCache.get(key)
+  let cached = resolutionCache.get(key)
   if (!cached) {
     cached = doResolveSynp(opts)
-    _resolutionCache.set(key, cached)
+    resolutionCache.set(key, cached)
   }
   return cached
 }

@@ -35,11 +35,11 @@ export interface ResolveCdxgenOptions {
     | undefined
 }
 
-const _resolutionCache = new Map<string, Promise<ResolvedCdxgen | undefined>>()
+const resolutionCache = new Map<string, Promise<ResolvedCdxgen | undefined>>()
 
 /* c8 ignore start - test-only escape hatch. */
-export function _resetCdxgenResolution(): void {
-  _resolutionCache.clear()
+export function resetCdxgenResolution(): void {
+  resolutionCache.clear()
 }
 /* c8 ignore stop */
 
@@ -81,10 +81,10 @@ export function resolveCdxgen(
   opts?: ResolveCdxgenOptions | undefined,
 ): Promise<ResolvedCdxgen | undefined> {
   const key = cacheKey(opts)
-  let cached = _resolutionCache.get(key)
+  let cached = resolutionCache.get(key)
   if (!cached) {
     cached = doResolveCdxgen(opts)
-    _resolutionCache.set(key, cached)
+    resolutionCache.set(key, cached)
   }
   return cached
 }

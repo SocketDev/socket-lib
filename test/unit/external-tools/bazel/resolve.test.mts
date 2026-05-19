@@ -6,16 +6,16 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
-  _resetBazelResolution,
+  resetBazelResolution,
   resolveBazel,
 } from '@socketsecurity/lib/external-tools/bazel/resolve'
 
 describe('external-tools/bazel/resolve', () => {
   beforeEach(() => {
-    _resetBazelResolution()
+    resetBazelResolution()
   })
   afterEach(() => {
-    _resetBazelResolution()
+    resetBazelResolution()
   })
 
   it('memoizes across calls', () => {
@@ -29,9 +29,9 @@ describe('external-tools/bazel/resolve', () => {
     }
   })
 
-  it('_resetBazelResolution clears the memo slot', async () => {
+  it('resetBazelResolution clears the memo slot', async () => {
     const first = await resolveBazel()
-    _resetBazelResolution()
+    resetBazelResolution()
     const second = await resolveBazel()
     expect(second).toEqual(first)
   })

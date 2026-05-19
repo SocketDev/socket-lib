@@ -14,7 +14,7 @@
  *      `downloadIfMissing` produces two distinct cache entries so the second
  *      call can fall through to the download tier even after the first call's
  *      "all local tiers missed → undefined" memoized. Test-only escape hatch:
- *      `_resetJreResolution()` clears the cache so tests can exercise the
+ *      `resetJreResolution()` clears the cache so tests can exercise the
  *      resolver fresh.
  */
 
@@ -44,11 +44,11 @@ export interface ResolveJreOptions {
     | undefined
 }
 
-const _resolutionCache = new Map<string, Promise<ResolvedJre | undefined>>()
+const resolutionCache = new Map<string, Promise<ResolvedJre | undefined>>()
 
 /* c8 ignore start - test-only escape hatch. */
-export function _resetJreResolution(): void {
-  _resolutionCache.clear()
+export function resetJreResolution(): void {
+  resolutionCache.clear()
 }
 /* c8 ignore stop */
 
@@ -93,10 +93,10 @@ export function resolveJre(
   opts?: ResolveJreOptions | undefined,
 ): Promise<ResolvedJre | undefined> {
   const key = cacheKey(opts)
-  let cached = _resolutionCache.get(key)
+  let cached = resolutionCache.get(key)
   if (!cached) {
     cached = doResolveJre(opts)
-    _resolutionCache.set(key, cached)
+    resolutionCache.set(key, cached)
   }
   return cached
 }

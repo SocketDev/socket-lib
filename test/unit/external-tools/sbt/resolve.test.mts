@@ -5,16 +5,16 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
-  _resetSbtResolution,
+  resetSbtResolution,
   resolveSbt,
 } from '@socketsecurity/lib/external-tools/sbt/resolve'
 
 describe('external-tools/sbt/resolve', () => {
   beforeEach(() => {
-    _resetSbtResolution()
+    resetSbtResolution()
   })
   afterEach(() => {
-    _resetSbtResolution()
+    resetSbtResolution()
   })
 
   it('memoizes across calls', () => {
@@ -28,9 +28,9 @@ describe('external-tools/sbt/resolve', () => {
     }
   })
 
-  it('_resetSbtResolution clears the memo slot', async () => {
+  it('resetSbtResolution clears the memo slot', async () => {
     const first = await resolveSbt()
-    _resetSbtResolution()
+    resetSbtResolution()
     const second = await resolveSbt()
     expect(second).toEqual(first)
   })

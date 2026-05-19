@@ -24,15 +24,15 @@ import tarFs from 'tar-fs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
-  _resetBazelResolution,
+  resetBazelResolution,
   resolveBazel,
 } from '../../../src/external-tools/bazel/resolve'
 import {
-  _resetJreResolution,
+  resetJreResolution,
   resolveJre,
 } from '../../../src/external-tools/jre/resolve'
 import {
-  _resetSbtResolution,
+  resetSbtResolution,
   resolveSbt,
 } from '../../../src/external-tools/sbt/resolve'
 import { safeDelete } from '../../../src/fs/safe'
@@ -76,9 +76,9 @@ describe('external-tools resolver memoization', () => {
 
   beforeEach(() => {
     scratch = mkdtempSync(path.join(os.tmpdir(), 'resolver-test-'))
-    _resetJreResolution()
-    _resetBazelResolution()
-    _resetSbtResolution()
+    resetJreResolution()
+    resetBazelResolution()
+    resetSbtResolution()
   })
 
   afterEach(async () => {
@@ -149,7 +149,7 @@ describe('external-tools resolver memoization', () => {
       }
     })
 
-    it('_resetJreResolution clears the memoization', async () => {
+    it('resetJreResolution clears the memoization', async () => {
       const tarBytes = await buildJreTarball(scratch)
       const { downloader } = makeFakeDownloader(tarBytes)
       const opts = {
@@ -166,7 +166,7 @@ describe('external-tools resolver memoization', () => {
       const p1b = resolveJre(opts)
       expect(p1).toBe(p1b)
       await p1
-      _resetJreResolution()
+      resetJreResolution()
       // After reset, a same-shape call returns a FRESH Promise
       // (different object identity than p1).
       const p2 = resolveJre(opts)

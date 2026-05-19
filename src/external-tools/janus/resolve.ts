@@ -31,11 +31,11 @@ export interface ResolveJanusOptions {
     | undefined
 }
 
-const _resolutionCache = new Map<string, Promise<ResolvedJanus | undefined>>()
+const resolutionCache = new Map<string, Promise<ResolvedJanus | undefined>>()
 
 /* c8 ignore start - test-only escape hatch. */
-export function _resetJanusResolution(): void {
-  _resolutionCache.clear()
+export function resetJanusResolution(): void {
+  resolutionCache.clear()
 }
 /* c8 ignore stop */
 
@@ -76,10 +76,10 @@ export function resolveJanus(
   opts?: ResolveJanusOptions | undefined,
 ): Promise<ResolvedJanus | undefined> {
   const key = cacheKey(opts)
-  let cached = _resolutionCache.get(key)
+  let cached = resolutionCache.get(key)
   if (!cached) {
     cached = doResolveJanus(opts)
-    _resolutionCache.set(key, cached)
+    resolutionCache.set(key, cached)
   }
   return cached
 }

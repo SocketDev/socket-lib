@@ -34,11 +34,11 @@ export interface ResolveSbtOptions {
     | undefined
 }
 
-const _resolutionCache = new Map<string, Promise<ResolvedSbt | undefined>>()
+const resolutionCache = new Map<string, Promise<ResolvedSbt | undefined>>()
 
 /* c8 ignore start - test-only escape hatch. */
-export function _resetSbtResolution(): void {
-  _resolutionCache.clear()
+export function resetSbtResolution(): void {
+  resolutionCache.clear()
 }
 /* c8 ignore stop */
 
@@ -79,10 +79,10 @@ export function resolveSbt(
   opts?: ResolveSbtOptions | undefined,
 ): Promise<ResolvedSbt | undefined> {
   const key = cacheKey(opts)
-  let cached = _resolutionCache.get(key)
+  let cached = resolutionCache.get(key)
   if (!cached) {
     cached = doResolveSbt(opts)
-    _resolutionCache.set(key, cached)
+    resolutionCache.set(key, cached)
   }
   return cached
 }
