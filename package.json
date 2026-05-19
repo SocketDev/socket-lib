@@ -919,6 +919,11 @@
       "types": "./dist/external-tools/cdxgen/from-download.d.ts",
       "default": "./dist/external-tools/cdxgen/from-download.js"
     },
+    "./external-tools/cdxgen/from-npm": {
+      "source": "./src/external-tools/cdxgen/from-npm.ts",
+      "types": "./dist/external-tools/cdxgen/from-npm.d.ts",
+      "default": "./dist/external-tools/cdxgen/from-npm.js"
+    },
     "./external-tools/cdxgen/from-path": {
       "source": "./src/external-tools/cdxgen/from-path.ts",
       "types": "./dist/external-tools/cdxgen/from-path.d.ts",

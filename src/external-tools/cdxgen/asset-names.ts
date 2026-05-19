@@ -1,23 +1,128 @@
 /**
- * @file Upstream cdxgen package coordinates. Unlike GitHub-release tools (jre,
- *   uv, trivy, etc.), cdxgen ships exclusively as an npm package — no
- *   per-platform binaries — so the "asset" surface is just the package spec.
- *   The resolver hands it to `dlx/package` which delegates to npm's resolver.
+ * @file Upstream cdxgen release asset-name mapping per `platform-arch`. cdxgen
+ *   ships per-platform SEA binaries starting in v12.0.x — bare executables, no
+ *   archive wrapper, with companion `.sha256` sidecars. Each platform has both
+ *   a "full" variant (bundles bun + deno runtimes for those project types) and
+ *   a "slim" variant (no bundled runtimes; relies on the host having them when
+ *   needed). We ship the slim variants by default: socket-lib consumers run
+ *   cdxgen for npm/pip/maven/etc. SBOM generation where the bundled runtimes
+ *   aren't on the hot path, and the slim binary is ~3× smaller. Consumers that
+ *   need full (bun/deno project scanning) can override by passing `variant:
+ *   'full'`. Asset URLs:
+ *   https://github.com/CycloneDX/cdxgen/releases/download/v<X.Y.Z>/cdxgen-<os>-<arch>[-musl][-slim][.exe]
+ *   Reference: https://github.com/CycloneDX/cdxgen/releases.
  */
 
+import { ObjectFreeze } from '../../primordials/object'
+
+export interface CdxgenAssetEntry {
+  /**
+   * Full asset filename. Version-free — the release tag is the version.
+   */
+  readonly asset: string
+}
+
+/**
+ * Pull `variant: 'slim'` (default — no bundled runtimes) or `'full'` (bundles
+ * bun + deno runtimes; ~3× larger).
+ */
+export type CdxgenVariant = 'full' | 'slim'
+
+export interface CdxgenDownloadOptions {
+  /**
+   * Cdxgen release version, e.g. `'12.4.1'`. Bare semver; the helper prepends
+   * `v` for the release tag.
+   */
+  version: string
+  /**
+   * Fleet platform-arch token — looked up in the asset map. Returns `undefined`
+   * when no entry exists for the target.
+   */
+  platformArch: string
+  /**
+   * Slim (no bundled bun/deno) or full (bundles both). Defaults to slim.
+   */
+  variant?: CdxgenVariant | undefined
+}
+
+/**
+ * Legacy npm-package fallback. cdxgen historically only shipped as an npm
+ * package; some consumers still wire that path. Use the SEA binary (via
+ * `getCdxgenDownloadUrl`) when available — the npm path is platform-agnostic
+ * but pulls in the full Node runtime + the cdxgen tarball.
+ */
 export interface CdxgenPackageOptions {
   /**
-   * Cdxgen release version, e.g. `'12.0.0'`. Bare semver; npm accepts it
-   * verbatim as `@cyclonedx/cdxgen@<version>`.
+   * Cdxgen release version, e.g. `'12.4.1'`.
    */
   version: string
 }
 
+export function buildAssetName(
+  baseTriple: string,
+  variant: CdxgenVariant,
+  ext: '' | '.exe',
+): string {
+  const slim = variant === 'slim' ? '-slim' : ''
+  return `cdxgen-${baseTriple}${slim}${ext}`
+}
+
+export function getCdxgenAssetEntry(
+  platformArch: string,
+  variant: CdxgenVariant = 'slim',
+): CdxgenAssetEntry | undefined {
+  const map = variant === 'full' ? CDXGEN_FULL_ASSET_MAP : CDXGEN_SLIM_ASSET_MAP
+  return map[platformArch]
+}
+
 /**
- * Build the npm package spec string for the requested cdxgen version. Always
- * returns a defined value — cdxgen has no per-platform fan-out, so there's no
- * `undefined`-on-unsupported case the way GitHub-asset tools have.
+ * Build the GitHub release-asset download URL for an upstream cdxgen binary.
+ * Returns `undefined` when no entry exists for the requested platform-arch.
  */
+export function getCdxgenDownloadUrl(
+  opts: CdxgenDownloadOptions,
+): string | undefined {
+  const { platformArch, variant = 'slim', version } = opts
+  const entry = getCdxgenAssetEntry(platformArch, variant)
+  if (!entry) {
+    return undefined
+  }
+  return (
+    `https://github.com/CycloneDX/cdxgen/releases/download/v${version}/` +
+    entry.asset
+  )
+}
+
 export function getCdxgenPackageSpec(opts: CdxgenPackageOptions): string {
   return `@cyclonedx/cdxgen@${opts.version}`
 }
+
+export function makeEntry(
+  baseTriple: string,
+  variant: CdxgenVariant,
+  ext: '' | '.exe' = '',
+): CdxgenAssetEntry {
+  return ObjectFreeze({
+    __proto__: null,
+    asset: buildAssetName(baseTriple, variant, ext),
+  }) as unknown as CdxgenAssetEntry
+}
+
+export function makePlatformMap(
+  variant: CdxgenVariant,
+): Readonly<Record<string, CdxgenAssetEntry>> {
+  return ObjectFreeze({
+    __proto__: null,
+    'darwin-arm64': makeEntry('darwin-arm64', variant),
+    'darwin-x64': makeEntry('darwin-amd64', variant),
+    'linux-arm64': makeEntry('linux-arm64', variant),
+    'linux-arm64-musl': makeEntry('linux-arm64-musl', variant),
+    'linux-x64': makeEntry('linux-amd64', variant),
+    'linux-x64-musl': makeEntry('linux-amd64-musl', variant),
+    'win-arm64': makeEntry('windows-arm64', variant, '.exe'),
+    'win-x64': makeEntry('windows-amd64', variant, '.exe'),
+  }) as unknown as Readonly<Record<string, CdxgenAssetEntry>>
+}
+
+export const CDXGEN_SLIM_ASSET_MAP = makePlatformMap('slim')
+export const CDXGEN_FULL_ASSET_MAP = makePlatformMap('full')

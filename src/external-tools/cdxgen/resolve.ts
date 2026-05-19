@@ -4,22 +4,44 @@
  *
  *   1. VFS — smol binary's embedded cdxgen (if packed)
  *   2. PATH — `cdxgen` on the system PATH
- *   3. download — pinned npm package via dlx (only when `downloadIfMissing` is
- *      passed) Returns `undefined` if all of the enabled sources miss. Memoized
- *      per option-shape — same caching semantics as `resolveJre()`.
+ *   3. download — upstream SEA binary from the GitHub release (slim by default;
+ *      pass `variant: 'full'` for the bun+deno-bundled flavor)
+ *   4. npm — `@cyclonedx/cdxgen` npm package as a fallback (only when
+ *      `downloadIfMissing.npmFallback` is set AND the SEA download didn't
+ *      satisfy the request) Returns `undefined` if all of the enabled sources
+ *      miss. Memoized per option-shape.
  */
 
 import { cdxgenFromDownload } from './from-download'
+import { cdxgenFromNpm } from './from-npm'
 import { cdxgenFromPath } from './from-path'
 import { cdxgenFromVfs } from './from-vfs'
 
+import type { BinaryDownloader } from '../from-download'
+import type { HashSpec } from '../../integrity'
+import type { CdxgenVariant } from './asset-names'
 import type { ResolvedCdxgen } from './types'
 
 export interface ResolveCdxgenOptions {
   downloadIfMissing?:
     | {
         version: string
-        integrity?: string | undefined
+        platformArch: string
+        variant?: CdxgenVariant | undefined
+        integrity?: HashSpec | undefined
+        cacheDir?: string | undefined
+        downloader?: BinaryDownloader | undefined
+        /**
+         * When the SEA download doesn't cover the requested platform-arch (none
+         * today, future-proofing), fall through to the npm package. Defaults to
+         * false — explicit opt-in only.
+         */
+        npmFallback?:
+          | {
+              integrity?: string | undefined
+            }
+          | true
+          | undefined
       }
     | undefined
 }
@@ -36,8 +58,15 @@ export function cacheKey(opts: ResolveCdxgenOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
-  const { integrity, version } = opts.downloadIfMissing
-  return `dl:${version}:${integrity ?? ''}`
+  const { cacheDir, integrity, npmFallback, platformArch, variant, version } =
+    opts.downloadIfMissing
+  const integrityKey =
+    typeof integrity === 'string'
+      ? integrity
+      : integrity
+        ? `${integrity.type}:${integrity.value}`
+        : ''
+  return `dl:${version}:${platformArch}:${variant ?? 'slim'}:${integrityKey}:${cacheDir ?? ''}:${npmFallback ? '+npm' : ''}`
 }
 
 export async function doResolveCdxgen(
@@ -53,8 +82,23 @@ export async function doResolveCdxgen(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return cdxgenFromDownload(opts.downloadIfMissing)
+  const dl = opts?.downloadIfMissing
+  if (!dl) {
+    return undefined
+  }
+  const fromDownload = await cdxgenFromDownload(dl)
+  if (fromDownload) {
+    return fromDownload
+  }
+  if (dl.npmFallback) {
+    const npmIntegrity =
+      typeof dl.npmFallback === 'object' && dl.npmFallback?.integrity
+        ? dl.npmFallback.integrity
+        : undefined
+    return cdxgenFromNpm({
+      version: dl.version,
+      ...(npmIntegrity ? { integrity: npmIntegrity } : {}),
+    })
   }
   return undefined
 }
