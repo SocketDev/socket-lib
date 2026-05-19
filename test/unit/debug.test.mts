@@ -46,6 +46,12 @@ describe.sequential('debug', () => {
     infoSpy = vi.spyOn(logger, 'info').mockImplementation(() => logger)
     dirSpy = vi.spyOn(logger, 'dir').mockImplementation(() => logger)
     logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    // CI runners export `SOCKET_DEBUG=0` so getEnvValue would fall
+    // back to that (truthy non-empty string) after a clearEnv() — the
+    // test's "unset" semantics relies on process.env being empty too.
+    // Mask the var for every test; individual tests that need it set
+    // call setEnv() (rewire override beats stubbed process.env).
+    vi.stubEnv('SOCKET_DEBUG', '')
   })
 
   afterEach(() => {
@@ -53,6 +59,7 @@ describe.sequential('debug', () => {
     dirSpy.mockRestore()
     logSpy.mockRestore()
     resetEnv()
+    vi.unstubAllEnvs()
   })
 
   describe('isDebug / isDebugNs', () => {
