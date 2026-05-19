@@ -10,7 +10,13 @@
  *   need full (bun/deno project scanning) can override by passing `variant:
  *   'full'`. Asset URLs:
  *   https://github.com/CycloneDX/cdxgen/releases/download/v<X.Y.Z>/cdxgen-<os>-<arch>[-musl][-slim][.exe]
- *   Reference: https://github.com/CycloneDX/cdxgen/releases.
+ *   Reference: https://github.com/CycloneDX/cdxgen/releases. Single source of
+ *   truth: the SEA binary IS the install path. The legacy `@cyclonedx/cdxgen`
+ *   npm package is not used as a fallback — every platform-arch the fleet
+ *   supports has a SEA build, and routing through npm for unsupported targets
+ *   would silently use a different distribution (different bundle composition,
+ *   different startup cost, different version-pin surface). One install path;
+ *   one cached binary.
  */
 
 import { ObjectFreeze } from '../../primordials/object'
@@ -43,19 +49,6 @@ export interface CdxgenDownloadOptions {
    * Slim (no bundled bun/deno) or full (bundles both). Defaults to slim.
    */
   variant?: CdxgenVariant | undefined
-}
-
-/**
- * Legacy npm-package fallback. cdxgen historically only shipped as an npm
- * package; some consumers still wire that path. Use the SEA binary (via
- * `getCdxgenDownloadUrl`) when available — the npm path is platform-agnostic
- * but pulls in the full Node runtime + the cdxgen tarball.
- */
-export interface CdxgenPackageOptions {
-  /**
-   * Cdxgen release version, e.g. `'12.4.1'`.
-   */
-  version: string
 }
 
 export function buildCdxgenAssetName(
@@ -91,10 +84,6 @@ export function getCdxgenDownloadUrl(
     `https://github.com/CycloneDX/cdxgen/releases/download/v${version}/` +
     entry.asset
   )
-}
-
-export function getCdxgenPackageSpec(opts: CdxgenPackageOptions): string {
-  return `@cyclonedx/cdxgen@${opts.version}`
 }
 
 export function makeCdxgenEntry(
