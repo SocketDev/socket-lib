@@ -58,7 +58,7 @@ export interface CdxgenPackageOptions {
   version: string
 }
 
-export function buildAssetName(
+export function buildCdxgenAssetName(
   baseTriple: string,
   variant: CdxgenVariant,
   ext: '' | '.exe',
@@ -97,32 +97,32 @@ export function getCdxgenPackageSpec(opts: CdxgenPackageOptions): string {
   return `@cyclonedx/cdxgen@${opts.version}`
 }
 
-export function makeEntry(
+export function makeCdxgenEntry(
   baseTriple: string,
   variant: CdxgenVariant,
   ext: '' | '.exe' = '',
 ): CdxgenAssetEntry {
   return ObjectFreeze({
     __proto__: null,
-    asset: buildAssetName(baseTriple, variant, ext),
+    asset: buildCdxgenAssetName(baseTriple, variant, ext),
   }) as unknown as CdxgenAssetEntry
 }
 
-export function makePlatformMap(
+export function makeCdxgenPlatformMap(
   variant: CdxgenVariant,
 ): Readonly<Record<string, CdxgenAssetEntry>> {
   return ObjectFreeze({
     __proto__: null,
-    'darwin-arm64': makeEntry('darwin-arm64', variant),
-    'darwin-x64': makeEntry('darwin-amd64', variant),
-    'linux-arm64': makeEntry('linux-arm64', variant),
-    'linux-arm64-musl': makeEntry('linux-arm64-musl', variant),
-    'linux-x64': makeEntry('linux-amd64', variant),
-    'linux-x64-musl': makeEntry('linux-amd64-musl', variant),
-    'win-arm64': makeEntry('windows-arm64', variant, '.exe'),
-    'win-x64': makeEntry('windows-amd64', variant, '.exe'),
+    'darwin-arm64': makeCdxgenEntry('darwin-arm64', variant),
+    'darwin-x64': makeCdxgenEntry('darwin-amd64', variant),
+    'linux-arm64': makeCdxgenEntry('linux-arm64', variant),
+    'linux-arm64-musl': makeCdxgenEntry('linux-arm64-musl', variant),
+    'linux-x64': makeCdxgenEntry('linux-amd64', variant),
+    'linux-x64-musl': makeCdxgenEntry('linux-amd64-musl', variant),
+    'win-arm64': makeCdxgenEntry('windows-arm64', variant, '.exe'),
+    'win-x64': makeCdxgenEntry('windows-amd64', variant, '.exe'),
   }) as unknown as Readonly<Record<string, CdxgenAssetEntry>>
 }
 
-export const CDXGEN_SLIM_ASSET_MAP = makePlatformMap('slim')
-export const CDXGEN_FULL_ASSET_MAP = makePlatformMap('full')
+export const CDXGEN_SLIM_ASSET_MAP = makeCdxgenPlatformMap('slim')
+export const CDXGEN_FULL_ASSET_MAP = makeCdxgenPlatformMap('full')
