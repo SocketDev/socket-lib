@@ -292,16 +292,21 @@ export async function httpDownloadAttempt(
       }
     })
 
-    res.on('end', () => {
-      fileStream.close(() => {
-        resolve({
-          headers: response.headers,
-          ok: true,
-          path: destPath,
-          size: downloadedSize,
-          status: response.status,
-          statusText: response.statusText,
-        })
+    // Settle on `fileStream` 'finish', NOT `res` 'end'. `res.pipe`
+    // calls `fileStream.end()` on res-end, but the buffered writes
+    // may still be draining to disk when that happens. `'finish'`
+    // fires after the final write callback completes — that's the
+    // correct settle point. Resolving on `res.end` can return a
+    // truncated file when the network is fast and the disk is slow
+    // (or backpressure builds on `fileStream.write`).
+    fileStream.on('finish', () => {
+      resolve({
+        headers: response.headers,
+        ok: true,
+        path: destPath,
+        size: downloadedSize,
+        status: response.status,
+        statusText: response.statusText,
       })
     })
 
