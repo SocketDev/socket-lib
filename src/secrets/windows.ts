@@ -109,6 +109,7 @@ export async function readDpapi(filePath: string): Promise<string | undefined> {
     return undefined
   }
   const script = `
+    Add-Type -AssemblyName System.Security
     $bytes = [Convert]::FromBase64String((Get-Content -Raw ${quotePs(filePath)}))
     $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($bytes, $null, 'CurrentUser')
     [System.Text.Encoding]::UTF8.GetString($plain)
@@ -126,6 +127,7 @@ export function readDpapiSync(filePath: string): string | undefined {
     return undefined
   }
   const script = `
+    Add-Type -AssemblyName System.Security
     $bytes = [Convert]::FromBase64String((Get-Content -Raw ${quotePs(filePath)}))
     $plain = [System.Security.Cryptography.ProtectedData]::Unprotect($bytes, $null, 'CurrentUser')
     [System.Text.Encoding]::UTF8.GetString($plain)
@@ -237,6 +239,7 @@ export async function writeDpapi(
     mkdirSync(dir, { recursive: true })
   }
   const script = `
+    Add-Type -AssemblyName System.Security
     $token = $input | Out-String
     $token = $token.Trim()
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
@@ -259,6 +262,7 @@ export function writeDpapiSync(filePath: string, value: string): void {
     mkdirSync(dir, { recursive: true })
   }
   const script = `
+    Add-Type -AssemblyName System.Security
     $token = $input | Out-String
     $token = $token.Trim()
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
