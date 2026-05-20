@@ -64,12 +64,14 @@ const ANNOTATION_RE =
   /^\s*#\s+published:\s+(\d{4}-\d{2}-\d{2})\s+\|\s+removable:\s+(\d{4}-\d{2}-\d{2})\s*$/
 
 interface Hook {
-  tool_name?: string
-  tool_input?: {
-    file_path?: string
-    new_string?: string
-    content?: string
-  }
+  tool_name?: string | undefined
+  tool_input?:
+    | {
+        file_path?: string | undefined
+        new_string?: string | undefined
+        content?: string | undefined
+      }
+    | undefined
 }
 
 interface OrphanReport {
@@ -83,7 +85,7 @@ interface OrphanReport {
  * inside the soak-exclude block that lacks the canonical `# published: ... |
  * removable: ...` annotation immediately above it.
  */
-function findOrphanEntries(text: string): OrphanReport[] {
+export function findOrphanEntries(text: string): OrphanReport[] {
   const lines = text.split('\n')
   const orphans: OrphanReport[] = []
   let inBlock = false

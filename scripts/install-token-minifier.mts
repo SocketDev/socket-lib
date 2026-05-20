@@ -100,7 +100,8 @@ function readNeededCatalogEntries(): CatalogYamlMap {
   const lines = text.split('\n')
   let inCatalog = false
   const out: Record<string, string> = {}
-  for (const line of lines) {
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
     // Match the `catalog:` top-level key. Sub-catalogs (`catalogs.default:`)
     // are uncommon in the fleet — wheelhouse uses the top-level form.
     if (/^catalog:\s*$/.test(line)) {

@@ -1,7 +1,10 @@
 // Tests for soak-exclude-date-annotation-guard.
 
 import assert from 'node:assert/strict'
-import { spawn } from 'node:child_process'
+// prefer-async-spawn: streaming-stdio-required — test spawns child
+// subprocess and pipes stdin/stdout/stderr; Node spawn returns the
+// ChildProcess streaming surface the lib promise wrapper does not.
+import { spawn } from '@socketsecurity/lib-stable/spawn'
 import path from 'node:path'
 import { describe, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -18,15 +21,15 @@ function runHook(payload: object): Promise<RunResult> {
   return new Promise((resolve, reject) => {
     const child = spawn('node', [HOOK], { stdio: ['pipe', 'pipe', 'pipe'] })
     let stderr = ''
-    child.stderr.on('data', d => {
+    child.process.stderr!.on('data', d => {
       stderr += d.toString()
     })
-    child.on('error', reject)
-    child.on('close', code => {
+    child.process.on('error', reject)
+    child.process.on('close', code => {
       resolve({ code: code ?? 0, stderr })
     })
-    child.stdin.write(JSON.stringify(payload))
-    child.stdin.end()
+    child.stdin!.write(JSON.stringify(payload))
+    child.stdin!.end()
   })
 }
 
@@ -118,12 +121,14 @@ describe('soak-exclude-date-annotation-guard', () => {
   test('fails open on a malformed payload', async () => {
     const child = spawn('node', [HOOK], { stdio: ['pipe', 'pipe', 'pipe'] })
     let exitCode = 0
-    child.on('close', code => {
+    child.process.on('close', code => {
       exitCode = code ?? 0
     })
-    child.stdin.write('not-json')
-    child.stdin.end()
-    await new Promise<void>(resolve => child.on('close', () => resolve()))
+    child.stdin!.write('not-json')
+    child.stdin!.end()
+    await new Promise<void>(resolve =>
+      child.process.on('close', () => resolve()),
+    )
     assert.equal(exitCode, 0)
   })
 })

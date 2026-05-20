@@ -76,9 +76,9 @@ const SFW_BIN_DIR = WHEELHOUSE_BIN_DIR
 
 interface ToolEntry {
   version: string
-  repository?: string
-  release?: string
-  checksums?: Record<string, { asset: string; sha256: string }>
+  repository?: string | undefined
+  release?: string | undefined
+  checksums?: Record<string, { asset: string; sha256: string }> | undefined
 }
 
 interface ExternalToolsFile {
