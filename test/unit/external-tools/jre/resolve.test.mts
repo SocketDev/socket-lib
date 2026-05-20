@@ -35,14 +35,22 @@ describe.sequential('external-tools/jre/resolve', () => {
     expect(result?.source).toBe('java-home')
   })
 
-  it('falls through to PATH when JAVA_HOME is empty', async () => {
-    vi.stubEnv('JAVA_HOME', '')
-    resetJreResolution()
-    const result = await resolveJre()
-    if (result !== undefined) {
-      expect(result.source).toBe('path')
-    }
-  })
+  // PATH-fallback walks `where java` (Windows) / `which java` (POSIX);
+  // Windows CI agents can take >10s to return when the cache is cold,
+  // so bump the per-test timeout to match the async-which non-existent-
+  // binary fix in test/unit/which.test.mts.
+  it(
+    'falls through to PATH when JAVA_HOME is empty',
+    { timeout: 30_000 },
+    async () => {
+      vi.stubEnv('JAVA_HOME', '')
+      resetJreResolution()
+      const result = await resolveJre()
+      if (result !== undefined) {
+        expect(result.source).toBe('path')
+      }
+    },
+  )
 
   it('resetJreResolution clears the memo slot', async () => {
     vi.stubEnv('JAVA_HOME', '/opt/jdk')
