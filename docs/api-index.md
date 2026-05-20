@@ -275,13 +275,24 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts)                         | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/from-vfs`](../src/external-tools/bazel/from-vfs.ts)                               | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/resolve`](../src/external-tools/bazel/resolve.ts)                                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts)             | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts)     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/types`](../src/external-tools/bazel/types.ts)                                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/asset-names`](../src/external-tools/cdxgen/asset-names.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-download`](../src/external-tools/cdxgen/from-download.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-path`](../src/external-tools/cdxgen/from-path.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-vfs`](../src/external-tools/cdxgen/from-vfs.ts)                             | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/resolve`](../src/external-tools/cdxgen/resolve.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/types`](../src/external-tools/cdxgen/types.ts)                                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/from-download`](../src/external-tools/from-download.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/asset-names`](../src/external-tools/janus/asset-names.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/from-download`](../src/external-tools/janus/from-download.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/from-path`](../src/external-tools/janus/from-path.ts)                             | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/from-vfs`](../src/external-tools/janus/from-vfs.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/resolve`](../src/external-tools/janus/resolve.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/types`](../src/external-tools/janus/types.ts)                                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts)                             | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts)           | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/jre/from-download`](../src/external-tools/jre/from-download.ts)                         | _(no description)_ |
@@ -291,12 +302,42 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/jre/resolve`](../src/external-tools/jre/resolve.ts)                                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/jre/types`](../src/external-tools/jre/types.ts)                                         | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/manifest`](../src/external-tools/manifest.ts)                                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/asset-names`](../src/external-tools/opengrep/asset-names.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/from-download`](../src/external-tools/opengrep/from-download.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/from-path`](../src/external-tools/opengrep/from-path.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/from-vfs`](../src/external-tools/opengrep/from-vfs.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/resolve`](../src/external-tools/opengrep/resolve.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/types`](../src/external-tools/opengrep/types.ts)                               | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts)                             | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts)                         | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts)                                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts)                                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts)                                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/types`](../src/external-tools/sbt/types.ts)                                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/asset-names`](../src/external-tools/synp/asset-names.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/from-download`](../src/external-tools/synp/from-download.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/from-path`](../src/external-tools/synp/from-path.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/from-vfs`](../src/external-tools/synp/from-vfs.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/resolve`](../src/external-tools/synp/resolve.ts)                                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/types`](../src/external-tools/synp/types.ts)                                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/asset-names`](../src/external-tools/trivy/asset-names.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/from-download`](../src/external-tools/trivy/from-download.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/from-path`](../src/external-tools/trivy/from-path.ts)                             | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/from-vfs`](../src/external-tools/trivy/from-vfs.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/resolve`](../src/external-tools/trivy/resolve.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/types`](../src/external-tools/trivy/types.ts)                                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/asset-names`](../src/external-tools/trufflehog/asset-names.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-download`](../src/external-tools/trufflehog/from-download.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-path`](../src/external-tools/trufflehog/from-path.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-vfs`](../src/external-tools/trufflehog/from-vfs.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/resolve`](../src/external-tools/trufflehog/resolve.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/types`](../src/external-tools/trufflehog/types.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/asset-names`](../src/external-tools/uv/asset-names.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/from-download`](../src/external-tools/uv/from-download.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/from-path`](../src/external-tools/uv/from-path.ts)                                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/from-vfs`](../src/external-tools/uv/from-vfs.ts)                                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/resolve`](../src/external-tools/uv/resolve.ts)                                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/types`](../src/external-tools/uv/types.ts)                                           | _(no description)_ |
 
 ## fs/
 
@@ -365,6 +406,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/http-request/request-types`](../src/http-request/request-types.ts)     | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/response-reader`](../src/http-request/response-reader.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/response-types`](../src/http-request/response-types.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/user-agent`](../src/http-request/user-agent.ts)           | _(no description)_ |
 
 ## ipc-cli/
 
