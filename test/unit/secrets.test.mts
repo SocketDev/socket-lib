@@ -21,6 +21,7 @@ import {
 } from 'node:fs'
 import { platform, tmpdir } from 'node:os'
 import path from 'node:path'
+import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
@@ -40,7 +41,16 @@ import { resolve, resolveSync } from '../../src/secrets/find'
 import * as rc from '../../src/secrets/rc'
 
 const IS_MACOS = platform() === 'darwin'
-const BACKEND_OK = getBackendAvailability().available
+const IS_WINDOWS = platform() === 'win32'
+const IS_CI = process.env['CI'] === 'true' || process.env['CI'] === '1'
+// Windows CI runners (GitHub Actions windows-latest) ship a PowerShell session
+// that cant reliably invoke DPAPI from inside vitest workers — the runPsAsync
+// child either hangs at stdin or fails to load System.Security in CI. The
+// round-trip test passes on local Windows installs but flakes on CI runners.
+// Skip the live-keychain tests in that environment; the mocked branches
+// elsewhere cover the code paths.
+const SKIP_KEYCHAIN_LIVE = IS_WINDOWS && IS_CI
+const BACKEND_OK = !SKIP_KEYCHAIN_LIVE && getBackendAvailability().available
 
 export function rng(): string {
   return Math.random().toString(36).slice(2, 10)

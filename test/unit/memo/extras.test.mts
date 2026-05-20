@@ -18,18 +18,22 @@ describe('memoization — extras', () => {
 
     it('drops expired entries on next read', async () => {
       let calls = 0
+      // TTL must be long enough that two synchronous calls land within the
+      // window even on a slow CI runner (was 10ms — flaked on macOS-latest
+      // when scheduling delay between the two `fn(1)` calls exceeded it).
+      const TTL_MS = 100
       const fn = memoize(
         (x: number) => {
           calls += 1
           return x * 2
         },
-        { ttl: 10 } as never,
+        { ttl: TTL_MS } as never,
       )
       fn(1)
       fn(1)
       expect(calls).toBe(1) // hit cache
-      // Wait for TTL to expire.
-      await new Promise(r => setTimeout(r, 20))
+      // Wait long enough for TTL to expire even with timer-jitter.
+      await new Promise(r => setTimeout(r, TTL_MS * 2 + 20))
       fn(1) // expired, recompute
       expect(calls).toBe(2)
     })
