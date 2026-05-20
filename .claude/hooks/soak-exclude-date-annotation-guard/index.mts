@@ -79,9 +79,9 @@ interface OrphanReport {
 }
 
 /**
- * Walk the proposed file content and find every per-package
- * exact-pin entry inside the soak-exclude block that lacks the canonical
- * `# published: ... | removable: ...` annotation immediately above it.
+ * Walk the proposed file content and find every per-package exact-pin entry
+ * inside the soak-exclude block that lacks the canonical `# published: ... |
+ * removable: ...` annotation immediately above it.
  */
 function findOrphanEntries(text: string): OrphanReport[] {
   const lines = text.split('\n')
@@ -168,12 +168,12 @@ function main(): void {
             .map(o => `    line ${o.line}: ${o.name}@${o.version}`)
             .join('\n') +
           '\n\n' +
-          'Fix: prepend a comment line directly above each `- \'<pkg>@<version>\'` bullet:\n' +
+          "Fix: prepend a comment line directly above each `- '<pkg>@<version>'` bullet:\n" +
           '\n' +
           '  # published: <YYYY-MM-DD> | removable: <YYYY-MM-DD>\n' +
           "  - 'pkg@1.2.3'\n" +
           '\n' +
-          '`published` is the version\'s npm publish date (`npm view pkg@1.2.3 time`).\n' +
+          "`published` is the version's npm publish date (`npm view pkg@1.2.3 time`).\n" +
           '`removable` is `published + 7d` — the natural soak-clear date.\n' +
           `\nExample for an entry added today (${today}):\n` +
           `  # published: ${today} | removable: ${exampleRemovable}\n` +

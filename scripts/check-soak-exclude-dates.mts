@@ -3,18 +3,15 @@
  * @file Whole-file commit-time gate that mirrors the edit-time
  *   `.claude/hooks/soak-exclude-date-annotation-guard/`. Scans the repo's
  *   `pnpm-workspace.yaml` `minimumReleaseAgeExclude:` block and reports any
- *   per-package exact-pin entry missing the canonical
- *   `# published: YYYY-MM-DD | removable: YYYY-MM-DD` annotation.
+ *   per-package exact-pin entry missing the canonical `# published: YYYY-MM-DD
+ *   | removable: YYYY-MM-DD` annotation. Why the second surface (hook +
+ *   script): defense in depth. The hook blocks Edit/Write in-session; this
+ *   script catches anything that lands via a non-Claude path (manual `git
+ *   checkout`, external editor, etc.). Reports stale entries too — any line
+ *   whose `removable:` date is in the past is a cleanup candidate. Reporting is
+ *   informational only (exit 0 on stale entries; exit 1 only on missing
+ *   annotation). Exit codes:
  *
- *   Why the second surface (hook + script): defense in depth. The hook
- *   blocks Edit/Write in-session; this script catches anything that lands
- *   via a non-Claude path (manual `git checkout`, external editor, etc.).
- *
- *   Reports stale entries too — any line whose `removable:` date is in the
- *   past is a cleanup candidate. Reporting is informational only (exit 0
- *   on stale entries; exit 1 only on missing annotation).
- *
- *   Exit codes:
  *   - 0 — clean (no missing annotations; stale entries logged as warnings)
  *   - 1 — at least one missing annotation
  */

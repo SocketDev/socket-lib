@@ -45,14 +45,14 @@ throws on "not found" — finding the absence is a valid outcome.
 
 Every tool's directory holds the same five-file template:
 
-| File | Purpose |
-| --- | --- |
-| `types.ts` | `ResolvedX` shape + `XSource` union |
-| `asset-names.ts` | Per-platform release asset map + URL builder |
-| `from-vfs.ts` | Tier 1 — extracts from smol binary's VFS |
-| `from-path.ts` | Tier 3 — `which <tool>` |
+| File               | Purpose                                                                           |
+| ------------------ | --------------------------------------------------------------------------------- |
+| `types.ts`         | `ResolvedX` shape + `XSource` union                                               |
+| `asset-names.ts`   | Per-platform release asset map + URL builder                                      |
+| `from-vfs.ts`      | Tier 1 — extracts from smol binary's VFS                                          |
+| `from-path.ts`     | Tier 3 — `which <tool>`                                                           |
 | `from-download.ts` | Tier 4 — GitHub release fetch (per-tool wrapper around shared `from-download.ts`) |
-| `resolve.ts` | Orchestrator: tries tiers in order, memoizes per option shape |
+| `resolve.ts`       | Orchestrator: tries tiers in order, memoizes per option shape                     |
 
 The JRE adds `from-java-home.ts` (tier 2) and `detect-platform-arch.ts`.
 Bazel adds `read-bazel-version-file.ts` + `resolve-asset-url.ts` +
