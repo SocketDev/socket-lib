@@ -25,8 +25,8 @@ import { makeFakeDownloader } from '../../../lib/fake-downloader'
  *
  * Collects the tar/gzip output into a Buffer directly rather than round-
  * tripping through the filesystem. The previous round-trip (write file →
- * readFileSync) raced under vitest's vm-context where the post-`close`
- * file wasn't always visible to the subsequent sync read on macOS APFS.
+ * readFileSync) raced under vitest's vm-context where the post-`close` file
+ * wasn't always visible to the subsequent sync read on macOS APFS.
  */
 export function buildJreTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')

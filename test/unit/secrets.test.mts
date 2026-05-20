@@ -237,24 +237,27 @@ SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_T
     }
   })
 
-  it.skipIf(!IS_MACOS)('returns a skipped result on non-existent rc location', () => {
-    const { cleanup } = withFakeHome()
-    try {
-      // Force an "other" shell so pickRcFile returns undefined.
-      process.env['SHELL'] = '/bin/exotic-shell'
-      const r = rc.write({
-        service: 'test-svc',
-        exports: { TEST: 'v' },
-      })
-      expect(r).toEqual({
-        rcPath: undefined,
-        outcome: 'skipped',
-        reason: 'unknown-shell',
-      })
-    } finally {
-      cleanup()
-    }
-  })
+  it.skipIf(!IS_MACOS)(
+    'returns a skipped result on non-existent rc location',
+    () => {
+      const { cleanup } = withFakeHome()
+      try {
+        // Force an "other" shell so pickRcFile returns undefined.
+        process.env['SHELL'] = '/bin/exotic-shell'
+        const r = rc.write({
+          service: 'test-svc',
+          exports: { TEST: 'v' },
+        })
+        expect(r).toEqual({
+          rcPath: undefined,
+          outcome: 'skipped',
+          reason: 'unknown-shell',
+        })
+      } finally {
+        cleanup()
+      }
+    },
+  )
 
   // Verify existsSync of the temp file (sanity).
   it('temp-home fixture sets up correctly', () => {
