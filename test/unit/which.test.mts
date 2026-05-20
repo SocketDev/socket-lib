@@ -101,12 +101,13 @@ describe('which', () => {
       expect(result).toBe(relativePath)
     })
 
+    // Bumped from default 10s because Windows runners take longer to scan
+    // PATH negatively (a long PATH with many CredentialManager / shim
+    // entries) — flaked on windows-latest at 10020ms.
     it('should return null for non-existent binary', async () => {
       const result = await which('this-binary-definitely-does-not-exist-12345')
       expect(result).toBeNull()
-    }, // scan PATH negatively (a long PATH with many CredentialManager / // Bumped from default 10s because Windows runners take longer to
-    // shim entries) — flaked on windows-latest at 10020ms.
-    30_000)
+    }, 30_000)
 
     it('should handle Windows-style paths', async () => {
       if (process.platform === 'win32') {
