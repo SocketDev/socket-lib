@@ -38,7 +38,7 @@
  *   and would miss the export.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { platform } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -111,7 +111,7 @@ export function clear(
   }
 
   if (removedAny) {
-    writeFileSync(rcPath, existing.replace(/\n{3,}/g, '\n\n'))
+    writeRcFile(rcPath, existing.replace(/\n{3,}/g, '\n\n'))
   }
   return removedAny
 }
@@ -292,7 +292,7 @@ export function write(opts: WriteOptions): WriteResult {
       working.slice(0, match.index) +
       desiredBlock +
       working.slice(match.index + match[0].length)
-    writeFileSync(rcPath, rewritten.replace(/\n{3,}/g, '\n\n'))
+    writeRcFile(rcPath, rewritten.replace(/\n{3,}/g, '\n\n'))
     return { rcPath, outcome: 'updated' }
   }
 
@@ -306,10 +306,30 @@ export function write(opts: WriteOptions): WriteResult {
       : '\n\n'
     : ''
   const next = `${working}${prefix}${desiredBlock}\n`.replace(/\n{3,}/g, '\n\n')
-  writeFileSync(rcPath, next)
+  writeRcFile(rcPath, next)
   // If we scrubbed a legacy block, the outcome is logically an
   // "updated" (replaced the old shape) — but the API only has
   // 'inserted' / 'updated' / 'unchanged', and the new BEGIN/END
   // sentinel didn't exist on disk before, so 'inserted' is honest.
   return { rcPath, outcome: 'inserted' }
+}
+
+/**
+ * Internal: write an rc file with 0o600 (owner-only). The rc file embeds a
+ * literal SOCKET_API_KEY value so the shell rc can `export` it on session start
+ * without re-prompting the keychain. The file must NEVER be readable by other
+ * local users — `writeFileSync` with no `mode:` lands at `0o644` on first
+ * create (default umask 022), exposing the token on multi-user macOS / Linux
+ * machines. We unconditionally chmod after write so existing files with looser
+ * permissions also get tightened.
+ */
+export function writeRcFile(rcPath: string, contents: string): void {
+  writeFileSync(rcPath, contents, { mode: 0o600 })
+  try {
+    chmodSync(rcPath, 0o600)
+  } catch {
+    // chmod may fail on a filesystem that doesn't support POSIX modes
+    // (FAT32-on-USB, some network mounts). The writeFileSync mode is
+    // already the best we can do there.
+  }
 }
