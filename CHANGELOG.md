@@ -7,124 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.0) - 2026-05-20
 
-The v6 line is a public-surface reshape. Every top-level barrel module is gone — what was `@socketsecurity/lib/fs` is now imported leaf-by-leaf as `@socketsecurity/lib/fs/safe`, `@socketsecurity/lib/fs/read-json`, etc. This makes tree-shaking work properly, makes types load faster, and surfaces what each consumer actually depends on.
-
-The vast majority of consumer updates are mechanical import-path rewrites; the runtime behavior is unchanged. Two fleet-compat aliases (`@socketsecurity/lib/logger` and `@socketsecurity/lib/errors`) are kept for the fleet's git-hook templates.
+Public-surface reshape. All top-level barrels are gone; import from named leaf subpaths instead. `@socketsecurity/lib/logger` and `@socketsecurity/lib/errors` stay as aliases.
 
 ### Removed (breaking)
 
-- **Top-level barrel modules.** The following barrels no longer ship — import from the named leaf subpath instead. Each was a re-export module that defeated tree-shaking and made TypeScript resolve far more than callers actually used.
-  - `fs` → import from `fs/safe`, `fs/read-json`, `fs/write-json`, `fs/atomic`, `fs/types`, etc.
-  - `http-request` → import from `http-request/request`, `http-request/convenience` (`httpJson` / `httpText`), `http-request/response-types`, `http-request/retry`, etc.
-  - `logger` (kept as fleet-compat alias to `logger/logger`) — leaves: `logger/logger`, `logger/colors`, `logger/console`, `logger/symbols`
-  - `spinner` → `spinner/spinner`, `spinner/predicates`
-  - `git` → `git/repo`, `git/status`, `git/refs`, `git/diff`, `git/blame`, `git/commit`, etc.
-  - `github` → `github/fetch`, `github/refs-rest`, `github/refs-graphql`, `github/ghsa`, `github/token`, `github/types`, `github/constants`, `github/errors`
-  - `spawn` → `spawn/spawn`, `spawn/predicates`, `spawn/errors`, `spawn/types`
-  - `bin` → `bin/which`, `bin/exec`, etc.
-  - `primordials` → import each constructor / prototype-method reference from its category leaf (`primordials/array`, `primordials/string`, `primordials/json`, `primordials/object`, etc.)
-  - `objects` → `objects/predicates`, `objects/mutate`, `objects/inspect`, `objects/sort`, `objects/getters`
-  - `strings` → `strings/case`, `strings/transform`, `strings/predicates`, `strings/normalize`, `strings/util`
-  - `promises` → `promises/sleep`, `promises/race`, `promises/retry`, `promises/timeout`, `promises/queue` (was `promise-queue`)
-  - `arrays` → `arrays/predicates`, `arrays/transform`, `arrays/join`, `arrays/dedupe`
-  - `url` → `url/parse`, `url/normalize`, `url/predicates`
-  - `packages` → `packages/edit`, `packages/normalize`, `packages/manifest`, `packages/operations`, `packages/provenance`, `packages/licenses`, `packages/types`, `packages/isolation`
-  - `cacache` → `cacache/read`, `cacache/write`, `cacache/clear`
-  - `signal-exit`, `compression`, `archives`, `globs`, `regexps`, `ssri`, `colors`, `ansi`, `crypto`, `abort`, `streams`, `links`, `shadow`, `ipc`, `ipc-cli`, `errors`, `words`, `tables`, `sorts`, `env`, `debug`, `versions`, `types` — all delivered as leaf subpaths under their respective dirs.
+- **All top-level barrel modules.** Replace with leaf subpaths — e.g. `fs` → `fs/safe`, `http-request` → `http-request/convenience`, `packages` → `packages/operations`, `versions` → `versions/compare`. Affects `fs`, `http-request`, `spinner`, `git`, `github`, `spawn`, `bin`, `primordials`, `objects`, `strings`, `promises`, `arrays`, `url`, `packages`, `cacache`, `signal-exit`, `compression`, `archives`, `globs`, `regexps`, `ssri`, `colors`, `ansi`, `crypto`, `abort`, `streams`, `links`, `shadow`, `ipc`, `ipc-cli`, `errors`, `words`, `tables`, `sorts`, `env`, `debug`, `versions`, `types`.
+- **`agent` removed.** Per-tool helpers under `eco/npm/<tool>/{exec,flags}` (`bun`, `npm`, `pnpm`, `vlt`, `yarnpkg/yarn`).
+- **`types/` removed.** Schema types under `eco/purl` and `eco/types`.
+- **Subdir renames.** `memoization/` → `memo/`, `performance/` → `perf/`, `suppress-warnings/` → `warnings/`, `cache-with-ttl/` → `ttl-cache/`, `process-lock/` → `process/`, `package-extensions/` → `pkg-ext/`, `temporary-executor/` → `process/transient` (`isRunningInTemporaryExecutor` → `isTransientProcess`).
+- **`SOCKET_LIB_USER_AGENT` + `SOCKET_LIB_URL` removed.** Use `getSocketCallerUserAgent()` from `http-request/user-agent` — see Added.
 
-- **`src/agent.ts` removed.** Package-manager exec/flags helpers split into `eco/npm/<tool>/{exec,flags}` (`bun`, `npm`, `pnpm`, `vlt`, `yarnpkg/yarn`). Import e.g. `@socketsecurity/lib/eco/npm/pnpm/exec` instead of `@socketsecurity/lib/agent`.
+### Changed (breaking)
 
-- **`src/types/` removed.** Schema types are now under `eco/`:
-  - `PURL_Type` / `PURLString` / `EcosystemString` → `eco/purl`
-  - `CategoryString` / `InteropString` / `Manifest` / `ManifestEntry` / `ManifestEntryData` → `eco/types`
-
-- **`memoization/` directory renamed to `memo/`.** `memoize-*` leaf prefixes dropped. Import from `memo/cache`, `memo/clear`, `memo/_internal` etc.
-
-- **Subdir renames for clarity / brevity:**
-  - `performance/` → `perf/`
-  - `suppress-warnings/` → `warnings/`
-  - `cache-with-ttl/` → `ttl-cache/`
-  - `process-lock/` → `process/` (consolidated with the new `process/transient` + `process/abort` leaves)
-  - `package-extensions/` → `pkg-ext/`
-  - `temporary-executor/` → `process/transient` (`isRunningInTemporaryExecutor` → `isTransientProcess`)
-
-- **`SOCKET_LIB_USER_AGENT` + `SOCKET_LIB_URL` removed.** The old parenthesized User-Agent shape (`socketsecurity-lib/<version> (<url>)`) is replaced by the three-token form `socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` — aligned with `socket-cli`'s `getCliUserAgent` and coana-tech-cli's `configureAxiosUserAgent` so the fleet emits one canonical UA shape. Read the new value via `getSocketCallerUserAgent()` from `http-request/user-agent`. `SOCKET_LIB_URL` had no remaining consumers after this swap and was dropped.
-
-### Renamed (breaking)
-
-- **`versions` API aligned with `node:smol-versions` native binding.** When socket-btm's smol Node binary is present, version comparisons run through the C++-accelerated binding; otherwise the vendored `semver` JS impl is used. Both expose identical names + signatures, picked once at module load:
-  - `compareVersions` → `compare`
-  - `isEqual` → `eq` (added `neq` to match the smol surface)
-  - `isLessThan` / `isLessThanOrEqual` → `lt` / `lte`
-  - `isGreaterThan` / `isGreaterThanOrEqual` → `gt` / `gte`
-  - `sortVersions` → `sort`
-  - `sortVersionsDesc` → `rsort`
-
-- **`dlx/manifest` type rename.** `ManifestEntry` (the dlx-local install record) → `DlxManifestEntry` to disambiguate from the unrelated `eco/types` `ManifestEntry` (the registry manifest tuple).
-
-- **`dlx/arborist` `getBaseArboristOptions` signature.** The second positional `quiet: boolean` argument is now an options object: `getBaseArboristOptions(installPath, { quiet })`.
-
-- **Misnamed predicates renamed for clarity.** Predicates that scanned the _current_ process / cwd were named as if they were generic — they now carry the scope in the name. Tests aligned to match.
+- **`versions` API renamed.** `compareVersions` → `compare`, `isEqual` → `eq` (+ new `neq`), `isLessThan(OrEqual)` → `lt`/`lte`, `isGreaterThan(OrEqual)` → `gt`/`gte`, `sortVersions` → `sort`, `sortVersionsDesc` → `rsort`. Runs through `node:smol-versions` when present, falls back to `semver`.
+- **`dlx/manifest` `ManifestEntry` → `DlxManifestEntry`** (disambiguates from `eco/types` `ManifestEntry`).
+- **`dlx/arborist getBaseArboristOptions`** second arg is now `{ quiet }` instead of positional `quiet: boolean`.
+- **Predicates renamed for scope clarity** — cwd/process-scoped predicates now carry the scope in the name.
+- **Default `User-Agent` header** now `socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` (was `socketsecurity-lib/<version> (<url>)`).
 
 ### Added
 
-- **`ai` module — locked-down AI agent spawn helpers.** New `ai/discover` + `ai/spawn` leaves for invoking Claude / Codex / Gemini / OpenCode CLIs from headless contexts with the four mandatory lockdown flags enforced at the type level (`tools`, `allowedTools`, `disallowedTools`, `permissionMode: 'dontAsk'`). Retries 3 attempts on HTTP 529 / "Overloaded" with 5s / 15s / 45s exponential backoff. Each retry is a fresh subprocess. Sibling `ai/types` exports `AiAgentName`, `DiscoveredAgents`, `SpawnAiAgentOptions`, `AgentSpawnResult`.
-
-- **`socket-lib check primordials --fix` flag** — for codebases tracking primordials drift via `.socket-lib.json`, the CLI's existing `check primordials` command now supports `--fix` (and `--write`) to apply the suggested rewrites in place.
-
-- **Fleet-compat exports-map aliases:** `@socketsecurity/lib/logger` resolves to `logger/logger`; `@socketsecurity/lib/errors` resolves to `errors/message`. These exist so the canonical socket-wheelhouse hook templates resolve in socket-lib's own checkout; they're not source-level barrels.
-
-- **`secrets/socket-api-token` convenience helper.** New `readSocketApiToken()` + `readSocketApiTokenSync()` exports wrap `secrets/find` with the fleet-canonical Socket API token lookup: keychain service `socket-cli`, env-var precedence `SOCKET_API_TOKEN` (canonical) → `SOCKET_API_KEY` (legacy alias). Consumers (firewall, wheelhouse hooks, ad-hoc scripts) no longer need to hard-code those constants. Accepts `{ allowEnvOnly }` to suppress the keychain fallback in headless contexts where a Keychain auth prompt is unacceptable.
-
-- **`http-request/user-agent` leaf with `SOCKET_CALLER_USER_AGENT` env-var support.** New `buildUserAgent({ name, version }, caller?)` composes the fleet-canonical three-token UA; new `getSocketCallerUserAgent()` is what socket-lib's own outbound HTTP requests (and the public Socket Firewall scan in `dlx/firewall`) send as `User-Agent`. Downstream callers (sdxgen SEA, fleet CLIs, ad-hoc tools) can identify themselves by setting `SOCKET_CALLER_USER_AGENT` — the value is appended to socket-lib's base UA so the server still sees the lib token. Empty / whitespace-only values are treated as unset. Re-read per call so child processes and tests propagate changes; the lib's base UA is cached after first call.
-
-- **`packages/operations` `pkgNameToSlug(pkgName)` helper.** Converts an npm package name to a hyphenated slug suitable for User-Agent tokens, log namespaces, and file paths — `@socketsecurity/lib` → `socketsecurity-lib`, `lodash` → `lodash`. Existed inline at three+ call sites across the fleet (`socket-sdk-js`, `socket-cli`, coana-tech-cli, this lib); now one canonical implementation.
-
-### Performance
-
-- **Version operations are bound once at module load.** The smol-vs-semver branch was previously redone on every `compare` / `lt` / `gt` / `sort` call. v6 picks the impl once when the module first loads; each export forwards to the resolved binding directly with no per-call branching or wrapper closure.
-
-- **Native lockfile parsing via `node:smol-manifest`.** When running on socket-btm's smol Node binary, every `parseLockfile` call routes through the C++ `smol_manifest_native` binding instead of the TS fallback. Covers npm v1/v2/v3, yarn classic + Berry, pnpm v5/v6/v9, and cargo. The TS impl under `src/eco/<pm>/parse-*` remains the stock-Node fallback and the equivalence oracle for the native impl. Consumers who target both runtimes import unchanged from `@socketsecurity/lib/eco/manifest/parse-lockfile` — the dispatch is internal.
+- **`http-request/user-agent`** — `buildUserAgent({ name, version }, caller?)` for the canonical three-token UA, and `getSocketCallerUserAgent()` for the lib's own outbound requests. Set `SOCKET_CALLER_USER_AGENT` to append your own identifier to the lib UA (empty/whitespace is ignored).
+- **`packages/operations#pkgNameToSlug(name)`** — `@scope/name` → `scope-name`, plain names unchanged.
+- **`secrets/socket-api-token`** — `readSocketApiToken()` / `readSocketApiTokenSync()` resolve the Socket API token from keychain → `SOCKET_API_TOKEN` (canonical) → `SOCKET_API_KEY` (legacy). Pass `{ allowEnvOnly }` to skip keychain in headless contexts.
+- **`ai/discover` + `ai/spawn`** — locked-down spawn helpers for Claude / Codex / Gemini / OpenCode CLIs. Type-level enforcement of the four lockdown flags (`tools`, `allowedTools`, `disallowedTools`, `permissionMode: 'dontAsk'`). Retries HTTP 529 / "Overloaded" with 5 s / 15 s / 45 s backoff.
+- **`socket-lib check primordials --fix`** — applies suggested rewrites for `.socket-lib.json`-tracked drift.
 
 ### Fixed
 
-- **pnpm v9 `isDev` derivation.** Previously the parser left every snapshot entry as `depType: 'prod'` regardless of which importer section it appeared under, because pnpm v9 removed the per-snapshot `dev: true` marker that v5/v6 used. The TS parser (and the new native parser) now derive `isDev` per-package by collecting `prod` and `dev-only` name sets from every importer's `dependencies` / `devDependencies` / `optionalDependencies` blocks, then post-pass classifying each snapshot: a package is `dev` iff it appears only in dev across all importers. Tiebreak goes to prod, matching pnpm's own resolver semantics.
-
-- **yarn `dependenciesMeta` inversion.** Previously a `dependenciesMeta.<child>.optional = true` flag flipped the PARENT's `isOptional`, surfacing every package with `fsevents`-shaped optional peers as optional itself. The parser now consumes the block for position only — `dependenciesMeta` flags refer to a child's relationship from the parent's view, never the parent itself.
-
-- **pnpm v9 importer block-shape empty version.** A block-shape importer entry (`pkg:` line + nested `specifier:` / `version:` properties) was emitting a phantom PackageRef for the parent line with `version: ''` before the indented `version:` line was consumed. The parent line is now skipped via an empty-version guard.
-
-- **pnpm v9 workspace / file / link protocol filter.** Importer dep values like `workspace:^1.0.0`, `file:./local.tgz`, and `link:packages/foo` are workspace-local references, not registry artifacts. They are now filtered before PackageRef emission.
-
-- **npm v1 alias extraction.** Aliased installs encoded as `"alias-name": { "version": "npm:<real>@<ver>" }` now surface the real registry identity on the PackageRef (`name`, `version`); `_index` keeps the alias key so consumers can still look up by the declared name.
-
-- **npm v2/v3 workspace + alias name preference.** Workspace entries keyed by relative path (`packages/ui` rather than `node_modules/...`) and aliased installs (`node_modules/<alias>` with a `name: "<real>"` field) now prefer the explicit `pkg.name` over the path-derived fallback.
+- **pnpm v9 `isDev` derivation.** Snapshot entries were stuck at `depType: 'prod'` because v9 dropped the per-snapshot `dev` marker. Now derived per-package across all importer blocks; ties go to prod, matching pnpm's resolver.
+- **yarn `dependenciesMeta` inversion.** A child's `optional: true` was flipping the parent's `isOptional`; flags now refer to the child as declared.
+- **pnpm v9 phantom PackageRef.** Block-shape importer entries emitted a parent ref with `version: ''` before the indented `version:` was consumed.
+- **pnpm v9 protocol filter.** `workspace:`, `file:`, and `link:` importer values are no longer surfaced as registry refs.
+- **npm v1 alias extraction.** Aliased installs (`"alias": { "version": "npm:<real>@<ver>" }`) now surface the real `{ name, version }`; the alias key is preserved on `_index`.
+- **npm v2/v3 workspace + alias name preference.** Path-keyed workspace entries and aliased installs honor the explicit `pkg.name` over the path-derived fallback.
 
 ### Migration
 
-A near-total mechanical rewrite of imports. Two patterns cover ~95% of consumer migrations:
-
 ```diff
-- import { safeDelete, readJson, writeJson } from '@socketsecurity/lib/fs'
+- import { safeDelete, readJson } from '@socketsecurity/lib/fs'
 + import { safeDelete } from '@socketsecurity/lib/fs/safe'
 + import { readJson } from '@socketsecurity/lib/fs/read-json'
-+ import { writeJson } from '@socketsecurity/lib/fs/write-json'
 
 - import { httpJson } from '@socketsecurity/lib/http-request'
 + import { httpJson } from '@socketsecurity/lib/http-request/convenience'
-```
 
-For the versions API, name + parameter rewrites:
-
-```diff
 - import { compareVersions, isLessThan, sortVersions } from '@socketsecurity/lib/versions'
-- compareVersions(version1, version2)
-- isLessThan(version1, version2)
-- sortVersions(arr)
+- compareVersions(a, b); isLessThan(a, b); sortVersions(arr)
 + import { compare, lt, sort } from '@socketsecurity/lib/versions/compare'
-+ compare(a, b)
-+ lt(a, b)
-+ sort(arr)
++ compare(a, b); lt(a, b); sort(arr)
 ```
 
 ## [5.28.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.28.0) - 2026-05-06
