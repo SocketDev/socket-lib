@@ -1,0 +1,15 @@
+# Read by oxfmt (in addition to .gitignore) per `oxfmt --help`.
+# Keeps oxfmt out of vendored upstream code that should track upstream
+# byte-for-byte — every byte oxfmt touches under vendor/ is a future
+# re-vendor diff that has to be undone.
+
+# Vendored upstream trees.
+vendor/
+
+# Build artifacts.
+dist/
+coverage/
+coverage-isolated/
+
+# Generated reports / schemas.
+docs/api-index.md
