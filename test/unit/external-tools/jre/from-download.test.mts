@@ -139,7 +139,8 @@ describe.sequential('external-tools/jre/from-download', () => {
       expect(result?.javaHome).toBe(path.join(cacheDir, 'Contents', 'Home'))
     } else {
       expect(result?.javaHome).toBe(cacheDir)
-      expect(result?.javaPath).toBe(path.join(cacheDir, 'bin', 'java'))
+      const javaBinary = process.platform === 'win32' ? 'java.exe' : 'java'
+      expect(result?.javaPath).toBe(path.join(cacheDir, 'bin', javaBinary))
     }
   })
 })
