@@ -1,4 +1,4 @@
-name: 📦 Publish
+name: 📦 Publish to npm
 
 # Dependencies:
 #   - SocketDev/socket-registry/.github/workflows/provenance.yml
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       dry-run:
-        description: 'Stage everything but pass --dry-run to npm publish; nothing reaches the registry. Default: true — uncheck to opt into a real publish.'
+        description: 'Dry run (--dry-run on npm publish, default: true)'
         required: false
         default: true
         type: boolean
