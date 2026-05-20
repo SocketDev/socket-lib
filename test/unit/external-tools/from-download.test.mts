@@ -25,7 +25,10 @@ import {
   makeFakeDownloader,
 } from '../../lib/fake-downloader'
 
-describe('external-tools/from-download', () => {
+// Sequential, not concurrent — the `scratch` mkdtemp is shared by
+// closure into the describe-scoped `let`. Local vitest config has
+// `sequence.concurrent: true`, which would interleave beforeEach calls.
+describe.sequential('external-tools/from-download', () => {
   let scratch: string
   beforeEach(() => {
     scratch = mkdtempSync(path.join(os.tmpdir(), 'from-download-test-'))

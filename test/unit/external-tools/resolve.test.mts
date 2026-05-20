@@ -64,7 +64,12 @@ export function buildSbtTarball(scratchDir: string): Promise<Buffer> {
   return buildGzipTarball(packRoot)
 }
 
-describe('external-tools resolver memoization', () => {
+// Sequential, not concurrent — the `scratch` mkdtemp and the
+// `reset<Tool>Resolution` reseed beforeEach share state across tests
+// in this file. Local vitest config has `sequence.concurrent: true`,
+// which would interleave beforeEach calls and racing concurrent tests
+// would clobber each other's scratch + memoization-cache state.
+describe.sequential('external-tools resolver memoization', () => {
   let scratch: string
 
   beforeEach(() => {

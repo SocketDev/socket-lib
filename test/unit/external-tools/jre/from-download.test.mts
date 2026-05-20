@@ -44,7 +44,12 @@ export function buildJreTarball(scratchDir: string): Promise<Buffer> {
   })
 }
 
-describe('external-tools/jre/from-download', () => {
+// Sequential, not concurrent — the `scratch` mkdtemp is captured by closure
+// into the describe-scoped `let`, so concurrent tests interleave and overwrite
+// each other's value. Local vitest config has `sequence.concurrent: true`,
+// which would make tests in this file race their afterEach(safeDelete) against
+// each other's bodies.
+describe.sequential('external-tools/jre/from-download', () => {
   let scratch: string
   beforeEach(() => {
     scratch = mkdtempSync(path.join(os.tmpdir(), 'jre-from-download-test-'))
