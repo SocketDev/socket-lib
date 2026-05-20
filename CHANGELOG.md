@@ -48,6 +48,8 @@ The vast majority of consumer updates are mechanical import-path rewrites; the r
   - `package-extensions/` → `pkg-ext/`
   - `temporary-executor/` → `process/transient` (`isRunningInTemporaryExecutor` → `isTransientProcess`)
 
+- **`SOCKET_LIB_USER_AGENT` + `SOCKET_LIB_URL` removed.** The old parenthesized User-Agent shape (`socketsecurity-lib/<version> (<url>)`) is replaced by the three-token form `socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` — aligned with `socket-cli`'s `getCliUserAgent` and coana-tech-cli's `configureAxiosUserAgent` so the fleet emits one canonical UA shape. Read the new value via `getSocketCallerUserAgent()` from `http-request/user-agent`. `SOCKET_LIB_URL` had no remaining consumers after this swap and was dropped.
+
 ### Renamed (breaking)
 
 - **`versions` API aligned with `node:smol-versions` native binding.** When socket-btm's smol Node binary is present, version comparisons run through the C++-accelerated binding; otherwise the vendored `semver` JS impl is used. Both expose identical names + signatures, picked once at module load:
@@ -73,6 +75,10 @@ The vast majority of consumer updates are mechanical import-path rewrites; the r
 - **Fleet-compat exports-map aliases:** `@socketsecurity/lib/logger` resolves to `logger/logger`; `@socketsecurity/lib/errors` resolves to `errors/message`. These exist so the canonical socket-wheelhouse hook templates resolve in socket-lib's own checkout; they're not source-level barrels.
 
 - **`secrets/socket-api-token` convenience helper.** New `readSocketApiToken()` + `readSocketApiTokenSync()` exports wrap `secrets/find` with the fleet-canonical Socket API token lookup: keychain service `socket-cli`, env-var precedence `SOCKET_API_TOKEN` (canonical) → `SOCKET_API_KEY` (legacy alias). Consumers (firewall, wheelhouse hooks, ad-hoc scripts) no longer need to hard-code those constants. Accepts `{ allowEnvOnly }` to suppress the keychain fallback in headless contexts where a Keychain auth prompt is unacceptable.
+
+- **`http-request/user-agent` leaf with `SOCKET_CALLER_USER_AGENT` env-var support.** New `buildUserAgent({ name, version }, caller?)` composes the fleet-canonical three-token UA; new `getSocketCallerUserAgent()` is what socket-lib's own outbound HTTP requests (and the public Socket Firewall scan in `dlx/firewall`) send as `User-Agent`. Downstream callers (sdxgen SEA, fleet CLIs, ad-hoc tools) can identify themselves by setting `SOCKET_CALLER_USER_AGENT` — the value is appended to socket-lib's base UA so the server still sees the lib token. Empty / whitespace-only values are treated as unset. Re-read per call so child processes and tests propagate changes; the lib's base UA is cached after first call.
+
+- **`packages/operations` `pkgNameToSlug(pkgName)` helper.** Converts an npm package name to a hyphenated slug suitable for User-Agent tokens, log namespaces, and file paths — `@socketsecurity/lib` → `socketsecurity-lib`, `lodash` → `lodash`. Existed inline at three+ call sites across the fleet (`socket-sdk-js`, `socket-cli`, coana-tech-cli, this lib); now one canonical implementation.
 
 ### Performance
 

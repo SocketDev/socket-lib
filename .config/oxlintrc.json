@@ -1,13 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "unicorn",
-    "import"
-  ],
-  "jsPlugins": [
-    "./oxlint-plugin/index.mts"
-  ],
+  "plugins": ["typescript", "unicorn", "import"],
+  "jsPlugins": ["./oxlint-plugin/index.mts"],
   "categories": {
     "correctness": "error",
     "suspicious": "error"
@@ -26,10 +20,7 @@
     "socket/prefer-undefined-over-null": "error",
     "socket/sort-set-args": "error",
     "socket/sort-source-methods": "error",
-    "eslint/curly": [
-      "error",
-      "all"
-    ],
+    "eslint/curly": ["error", "all"],
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
     "eslint/no-control-regex": "off",
@@ -86,6 +77,35 @@
     "unicorn/prefer-node-protocol": "error",
     "unicorn/prefer-spread": "off"
   },
+  "overrides": [
+    {
+      "files": [
+        "**/scripts/**",
+        "**/test/**",
+        "**/tests/**",
+        "**/.config/**",
+        "**/.git-hooks/**",
+        "**/.github/**"
+      ],
+      "rules": {
+        "socket/export-top-level-functions": "off",
+        "socket/inclusive-language": "off",
+        "socket/no-default-export": "off",
+        "socket/no-dynamic-import-outside-bundle": "off",
+        "socket/no-npx-dlx": "off",
+        "socket/no-placeholders": "off",
+        "socket/no-status-emoji": "off",
+        "socket/prefer-function-declaration": "off",
+        "socket/sort-source-methods": "off"
+      }
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "rules": {
+        "eslint/no-unused-vars": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "**/.cache",
     "**/.claude",

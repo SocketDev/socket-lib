@@ -29,16 +29,7 @@ export interface ResolveOpengrepOptions {
     | undefined
 }
 
-const resolutionCache = new Map<
-  string,
-  Promise<ResolvedOpengrep | undefined>
->()
-
-/* c8 ignore start - test-only escape hatch. */
-export function resetOpengrepResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
+const resolutionCache = new Map<string, Promise<ResolvedOpengrep | undefined>>()
 
 export function cacheKey(opts: ResolveOpengrepOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
@@ -72,6 +63,12 @@ export async function doResolveOpengrep(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetOpengrepResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveOpengrep(
   opts?: ResolveOpengrepOptions | undefined,

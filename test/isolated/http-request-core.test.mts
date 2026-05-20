@@ -16,12 +16,12 @@ import { Writable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import { SOCKET_LIB_USER_AGENT } from '../../src/constants/socket'
 import {
   fetchChecksums,
   parseChecksums,
 } from '../../src/http-request/checksums'
 import { httpJson, httpText } from '../../src/http-request/convenience'
+import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
 import { httpDownload } from '../../src/http-request/download'
 import { httpRequest } from '../../src/http-request/request'
 import { Logger } from '../../src/logger/logger'
@@ -137,7 +137,7 @@ describe('http-request', () => {
 
       const headers = response.json<Record<string, string>>()
       expect(headers['x-custom-header']).toBe('custom-value')
-      expect(headers['user-agent']).toBe(SOCKET_LIB_USER_AGENT)
+      expect(headers['user-agent']).toBe(getSocketCallerUserAgent())
     })
 
     it('should handle custom User-Agent', async () => {

@@ -13,8 +13,6 @@
  *     its own download-attempt loop.
  */
 
-import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
-
 import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
@@ -24,6 +22,7 @@ import { URLCtor } from '../primordials/url'
 
 import { getHttp, getHttps } from './_internal'
 import { enrichErrorMessage } from './errors'
+import { getSocketCallerUserAgent } from './user-agent'
 
 import type {
   HttpHookResponseInfo,
@@ -65,7 +64,7 @@ export async function httpRequestAttempt(
       : undefined
 
   const mergedHeaders = {
-    'User-Agent': SOCKET_LIB_USER_AGENT,
+    'User-Agent': getSocketCallerUserAgent(),
     ...streamHeaders,
     ...headers,
   }

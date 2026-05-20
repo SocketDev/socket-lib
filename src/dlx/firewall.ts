@@ -8,9 +8,9 @@
  *     other dlx flows without dragging in the install orchestrator.
  */
 
-import { SOCKET_LIB_USER_AGENT } from '../constants/socket'
 import Arborist from '../external/@npmcli/arborist'
 import { httpJson } from '../http-request/convenience'
+import { getSocketCallerUserAgent } from '../http-request/user-agent'
 
 import { ErrorCtor } from '../primordials/error'
 
@@ -89,7 +89,7 @@ export async function checkFirewallPurls(
         const data = await httpJson<FirewallResponse>(
           `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`,
           {
-            headers: { 'User-Agent': SOCKET_LIB_USER_AGENT },
+            headers: { 'User-Agent': getSocketCallerUserAgent() },
             timeout: FIREWALL_TIMEOUT,
             retries: 1,
             retryDelay: 500,

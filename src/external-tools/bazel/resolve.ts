@@ -39,12 +39,6 @@ export interface ResolveBazelOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedBazel | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetBazelResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveBazelOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -71,6 +65,12 @@ export async function doResolveBazel(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetBazelResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveBazel(
   opts?: ResolveBazelOptions | undefined,

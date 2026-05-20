@@ -31,12 +31,6 @@ export interface ResolveTrivyOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedTrivy | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetTrivyResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveTrivyOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -69,6 +63,12 @@ export async function doResolveTrivy(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetTrivyResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveTrivy(
   opts?: ResolveTrivyOptions | undefined,

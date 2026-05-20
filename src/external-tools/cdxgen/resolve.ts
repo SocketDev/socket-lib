@@ -37,12 +37,6 @@ export interface ResolveCdxgenOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedCdxgen | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetCdxgenResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveCdxgenOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -76,6 +70,12 @@ export async function doResolveCdxgen(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetCdxgenResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveCdxgen(
   opts?: ResolveCdxgenOptions | undefined,

@@ -46,12 +46,6 @@ export interface ResolveJreOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedJre | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetJreResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveJreOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -88,6 +82,12 @@ export async function doResolveJre(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetJreResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveJre(
   opts?: ResolveJreOptions | undefined,

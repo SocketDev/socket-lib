@@ -38,12 +38,6 @@ const resolutionCache = new Map<
   Promise<ResolvedTrufflehog | undefined>
 >()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetTrufflehogResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveTrufflehogOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -76,6 +70,12 @@ export async function doResolveTrufflehog(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetTrufflehogResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveTrufflehog(
   opts?: ResolveTrufflehogOptions | undefined,

@@ -33,12 +33,6 @@ export interface ResolveJanusOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedJanus | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetJanusResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveJanusOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -71,6 +65,12 @@ export async function doResolveJanus(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetJanusResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveJanus(
   opts?: ResolveJanusOptions | undefined,

@@ -1414,6 +1414,11 @@
       "types": "./dist/http-request/response-types.d.ts",
       "default": "./dist/http-request/response-types.js"
     },
+    "./http-request/user-agent": {
+      "source": "./src/http-request/user-agent.ts",
+      "types": "./dist/http-request/user-agent.d.ts",
+      "default": "./dist/http-request/user-agent.js"
+    },
     "./integrity": {
       "source": "./src/integrity.ts",
       "types": "./dist/integrity.d.ts",

@@ -26,12 +26,6 @@ export interface ResolveSynpOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedSynp | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetSynpResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveSynpOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -58,6 +52,12 @@ export async function doResolveSynp(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetSynpResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveSynp(
   opts?: ResolveSynpOptions | undefined,

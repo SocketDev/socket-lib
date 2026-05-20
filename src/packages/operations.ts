@@ -207,6 +207,25 @@ export async function packPackage(
 }
 
 /**
+ * Slugify an npm package name into a hyphenated identifier suitable for
+ * User-Agent tokens, log namespaces, file paths, and other contexts where `@`
+ * and `/` are not welcome.
+ *
+ * @example
+ *   ;```typescript
+ *   pkgNameToSlug('@socketsecurity/lib') // 'socketsecurity-lib'
+ *   pkgNameToSlug('@cyclonedx/cdxgen') // 'cyclonedx-cdxgen'
+ *   pkgNameToSlug('lodash') // 'lodash'
+ *   ```
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function pkgNameToSlug(pkgName: string): string {
+  return pkgName.charCodeAt(0) === 64 /* '@' */
+    ? `${pkgName.slice(1).replace('/', '-')}`
+    : pkgName
+}
+
+/**
  * Read and parse a package.json file asynchronously.
  *
  * @example

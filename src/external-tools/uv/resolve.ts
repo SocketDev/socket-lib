@@ -30,12 +30,6 @@ export interface ResolveUvOptions {
 
 const resolutionCache = new Map<string, Promise<ResolvedUv | undefined>>()
 
-/* c8 ignore start - test-only escape hatch. */
-export function resetUvResolution(): void {
-  resolutionCache.clear()
-}
-/* c8 ignore stop */
-
 export function cacheKey(opts: ResolveUvOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return 'local-only'
@@ -68,6 +62,12 @@ export async function doResolveUv(
   }
   return undefined
 }
+
+/* c8 ignore start - test-only escape hatch. */
+export function resetUvResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
 
 export function resolveUv(
   opts?: ResolveUvOptions | undefined,

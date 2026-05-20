@@ -19,6 +19,7 @@ import {
   findPackageExtensions,
   getReleaseTag,
   packPackage,
+  pkgNameToSlug,
   readPackageJson,
   readPackageJsonSync,
   resolveGitHubTgzUrl,
@@ -130,6 +131,34 @@ describe('packages/operations', () => {
     it('should use default / delimiter when not specified', () => {
       const purlObj = { name: 'mypackage', namespace: '@myorg' }
       expect(resolvePackageName(purlObj)).toBe('@myorg/mypackage')
+    })
+  })
+
+  describe('pkgNameToSlug', () => {
+    it('should slugify a scoped package name', () => {
+      expect(pkgNameToSlug('@socketsecurity/lib')).toBe('socketsecurity-lib')
+    })
+
+    it('should slugify a scoped package name with multi-token scope', () => {
+      expect(pkgNameToSlug('@cyclonedx/cdxgen')).toBe('cyclonedx-cdxgen')
+    })
+
+    it('should pass an unscoped package name through unchanged', () => {
+      expect(pkgNameToSlug('lodash')).toBe('lodash')
+    })
+
+    it('should pass a sentinel CLI-style name through unchanged', () => {
+      expect(pkgNameToSlug('sdxgen')).toBe('sdxgen')
+    })
+
+    it('should only replace the first slash (the scope separator)', () => {
+      // Real npm names cannot contain a second slash, but document the boundary.
+      expect(pkgNameToSlug('@scope/name/sub')).toBe('scope-name/sub')
+    })
+
+    it('should leave bare names that start with non-@ alone even if they contain a slash', () => {
+      // Defensive: not a valid npm name, but ensures we never strip mid-string.
+      expect(pkgNameToSlug('weird/name')).toBe('weird/name')
     })
   })
 

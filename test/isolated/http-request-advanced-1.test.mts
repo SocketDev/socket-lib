@@ -14,11 +14,11 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { SOCKET_LIB_USER_AGENT } from '../../src/constants/socket'
 import { fetchChecksums } from '../../src/http-request/checksums'
 import { httpJson, httpText } from '../../src/http-request/convenience'
 import { httpDownload } from '../../src/http-request/download'
 import { enrichErrorMessage } from '../../src/http-request/errors'
+import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
 import { httpRequest } from '../../src/http-request/request'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
@@ -236,7 +236,9 @@ describe('http-request', () => {
       expect(requestInfos[0]!.method).toBe('GET')
       expect(requestInfos[0]!.url).toBe(`${fixture.baseUrl}/json`)
       expect(requestInfos[0]!.timeout).toBe(30_000)
-      expect(requestInfos[0]!.headers['User-Agent']).toBe(SOCKET_LIB_USER_AGENT)
+      expect(requestInfos[0]!.headers['User-Agent']).toBe(
+        getSocketCallerUserAgent(),
+      )
       expect(requestInfos[0]!.headers['X-Custom']).toBe('test-value')
     })
 
