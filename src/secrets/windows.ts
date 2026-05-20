@@ -240,8 +240,7 @@ export async function writeDpapi(
   }
   const script = `
     Add-Type -AssemblyName System.Security
-    $token = $input | Out-String
-    $token = $token.Trim()
+    $token = [Console]::In.ReadToEnd().Trim()
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
     $protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, 'CurrentUser')
     [Convert]::ToBase64String($protected) | Set-Content -Path ${quotePs(filePath)} -NoNewline
@@ -263,8 +262,7 @@ export function writeDpapiSync(filePath: string, value: string): void {
   }
   const script = `
     Add-Type -AssemblyName System.Security
-    $token = $input | Out-String
-    $token = $token.Trim()
+    $token = [Console]::In.ReadToEnd().Trim()
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
     $protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, 'CurrentUser')
     [Convert]::ToBase64String($protected) | Set-Content -Path ${quotePs(filePath)} -NoNewline
