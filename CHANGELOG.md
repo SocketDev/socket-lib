@@ -32,6 +32,7 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - **`secrets/socket-api-token`** — `readSocketApiToken()` / `readSocketApiTokenSync()` resolve the Socket API token from keychain → `SOCKET_API_TOKEN` (canonical) → `SOCKET_API_KEY` (legacy). Pass `{ allowEnvOnly }` to skip keychain in headless contexts.
 - **`ai/discover` + `ai/spawn`** — locked-down spawn helpers for Claude / Codex / Gemini / OpenCode CLIs. Type-level enforcement of the four lockdown flags (`tools`, `allowedTools`, `disallowedTools`, `permissionMode: 'dontAsk'`). Retries HTTP 529 / "Overloaded" with 5 s / 15 s / 45 s backoff.
 - **`socket-lib check primordials --fix`** — applies suggested rewrites for `.socket-lib.json`-tracked drift.
+- **9 new primordial exports** (305 total) — Array.prototype: `ToLocaleString`, `ToString`. String.prototype: `IsWellFormed` (ES2024), `ToString`, `ToWellFormed` (ES2024), `ValueOf`. Number.prototype: `ToExponential`, `ToPrecision`, `ValueOf`. `StringPrototypeIsWellFormed` routes through `node:smol-primordial` on the smol Node binary — ASCII strings short-circuit to `true` without an O(n) lone-surrogate scan.
 
 ### Fixed
 
