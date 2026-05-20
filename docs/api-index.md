@@ -9,801 +9,801 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## Top-level
 
-| Subpath                                                         | Description        |
-| --------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/errors`](../src/errors/message.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/integrity`](../src/integrity.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger`](../src/logger/logger.ts)  | _(no description)_ |
+| [`@socketsecurity/lib-stable/integrity`](../src/integrity.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger`](../src/logger/logger.ts) | _(no description)_ |
 
 ## abort/
 
-| Subpath                                                             | Description        |
-| ------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/abort/signal`](../src/abort/signal.ts) | _(no description)_ |
 
 ## ai/
 
-| Subpath                                                           | Description        |
-| ----------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/ai/discover`](../src/ai/discover.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/profiles`](../src/ai/profiles.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/spawn`](../src/ai/spawn.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/types`](../src/ai/types.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/spawn`](../src/ai/spawn.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/types`](../src/ai/types.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/worktree`](../src/ai/worktree.ts) | _(no description)_ |
 
 ## ansi/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/ansi/constants`](../src/ansi/constants.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/ansi/strip`](../src/ansi/strip.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/ansi/strip`](../src/ansi/strip.ts) | _(no description)_ |
 
 ## archives/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/archives/detect`](../src/archives/detect.ts)   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/archives/detect`](../src/archives/detect.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/archives/extract`](../src/archives/extract.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/archives/tar`](../src/archives/tar.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/archives/types`](../src/archives/types.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/archives/zip`](../src/archives/zip.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/archives/tar`](../src/archives/tar.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/archives/types`](../src/archives/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/archives/zip`](../src/archives/zip.ts) | _(no description)_ |
 
 ## argv/
 
-| Subpath                                                                             | Description        |
-| ----------------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/argv/flag-predicates`](../src/argv/flag-predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/argv/flag-types`](../src/argv/flag-types.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/argv/parse`](../src/argv/parse.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/argv/flag-types`](../src/argv/flag-types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/argv/parse`](../src/argv/parse.ts) | _(no description)_ |
 
 ## arrays/
 
-| Subpath                                                                       | Description        |
-| ----------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/arrays/chunk`](../src/arrays/chunk.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/arrays/join`](../src/arrays/join.ts)             | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/arrays/chunk`](../src/arrays/chunk.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/arrays/join`](../src/arrays/join.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/arrays/predicates`](../src/arrays/predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/arrays/unique`](../src/arrays/unique.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/arrays/unique`](../src/arrays/unique.ts) | _(no description)_ |
 
 ## bin/
 
-| Subpath                                                                               | Description        |
-| ------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/bin/check`](../src/bin/check.ts)                         | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/bin/check`](../src/bin/check.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/bin/check-primordials`](../src/bin/check-primordials.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/exec`](../src/bin/exec.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/find`](../src/bin/find.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/resolve`](../src/bin/resolve.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/shadow`](../src/bin/shadow.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/socket-lib`](../src/bin/socket-lib.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/types`](../src/bin/types.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/bin/which`](../src/bin/which.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/exec`](../src/bin/exec.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/find`](../src/bin/find.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/resolve`](../src/bin/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/shadow`](../src/bin/shadow.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/socket-lib`](../src/bin/socket-lib.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/types`](../src/bin/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/bin/which`](../src/bin/which.ts) | _(no description)_ |
 
 ## cacache/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/cacache/clear`](../src/cacache/clear.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/cacache/read`](../src/cacache/read.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/cacache/tmp`](../src/cacache/tmp.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/cacache/read`](../src/cacache/read.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/cacache/tmp`](../src/cacache/tmp.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/cacache/types`](../src/cacache/types.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/cacache/write`](../src/cacache/write.ts) | _(no description)_ |
 
 ## checks/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/checks/primordials`](../src/checks/primordials.ts) | _(no description)_ |
 
 ## colors/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/colors/convert`](../src/colors/convert.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/colors/palette`](../src/colors/palette.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/colors/types`](../src/colors/types.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/colors/types`](../src/colors/types.ts) | _(no description)_ |
 
 ## compression/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/compression/brotli`](../src/compression/brotli.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/compression/gzip`](../src/compression/gzip.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/compression/types`](../src/compression/types.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/compression/gzip`](../src/compression/gzip.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/compression/types`](../src/compression/types.ts) | _(no description)_ |
 
 ## constants/
 
-| Subpath                                                                                                                           | Description        |
-| --------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/constants/agents`](../src/constants/agents.ts)                                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/encoding`](../src/constants/encoding.ts)                                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/github`](../src/constants/github.ts)                                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/licenses`](../src/constants/licenses.ts)                                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/lifecycle-script-names`](../src/constants/lifecycle-script-names.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/maintained-node-versions`](../src/constants/maintained-node-versions.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/node`](../src/constants/node.ts)                                                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/package-default-node-range`](../src/constants/package-default-node-range.ts)               | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/constants/agents`](../src/constants/agents.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/encoding`](../src/constants/encoding.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/github`](../src/constants/github.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/licenses`](../src/constants/licenses.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/lifecycle-script-names`](../src/constants/lifecycle-script-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/maintained-node-versions`](../src/constants/maintained-node-versions.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/node`](../src/constants/node.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/package-default-node-range`](../src/constants/package-default-node-range.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/constants/package-default-socket-categories`](../src/constants/package-default-socket-categories.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/packages`](../src/constants/packages.ts)                                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/platform`](../src/constants/platform.ts)                                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/sentinels`](../src/constants/sentinels.ts)                                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/socket`](../src/constants/socket.ts)                                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/testing`](../src/constants/testing.ts)                                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/time`](../src/constants/time.ts)                                                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/constants/typescript`](../src/constants/typescript.ts)                                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/packages`](../src/constants/packages.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/platform`](../src/constants/platform.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/sentinels`](../src/constants/sentinels.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/socket`](../src/constants/socket.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/testing`](../src/constants/testing.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/time`](../src/constants/time.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/constants/typescript`](../src/constants/typescript.ts) | _(no description)_ |
 
 ## cover/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/cover/code`](../src/cover/code.ts)             | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/cover/code`](../src/cover/code.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/cover/formatters`](../src/cover/formatters.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/cover/type`](../src/cover/type.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/cover/types`](../src/cover/types.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/cover/type`](../src/cover/type.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/cover/types`](../src/cover/types.ts) | _(no description)_ |
 
 ## crypto/
 
-| Subpath                                                           | Description        |
-| ----------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/crypto/hash`](../src/crypto/hash.ts) | _(no description)_ |
 
 ## debug/
 
-| Subpath                                                                       | Description        |
-| ----------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/debug/caller-info`](../src/debug/caller-info.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/debug/namespace`](../src/debug/namespace.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/debug/output`](../src/debug/output.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/debug/types`](../src/debug/types.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/debug/namespace`](../src/debug/namespace.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/debug/output`](../src/debug/output.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/debug/types`](../src/debug/types.ts) | _(no description)_ |
 
 ## dlx/
 
-| Subpath                                                                               | Description        |
-| ------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/dlx/arborist`](../src/dlx/arborist.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/binary`](../src/dlx/binary.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/binary-cache`](../src/dlx/binary-cache.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/binary-download`](../src/dlx/binary-download.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/dlx/arborist`](../src/dlx/arborist.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/binary`](../src/dlx/binary.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/binary-cache`](../src/dlx/binary-cache.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/binary-download`](../src/dlx/binary-download.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/dlx/binary-resolution`](../src/dlx/binary-resolution.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/binary-types`](../src/dlx/binary-types.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/cache`](../src/dlx/cache.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/detect`](../src/dlx/detect.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/dir`](../src/dlx/dir.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/firewall`](../src/dlx/firewall.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/lockfile`](../src/dlx/lockfile.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/manifest`](../src/dlx/manifest.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/package`](../src/dlx/package.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/packages`](../src/dlx/packages.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/paths`](../src/dlx/paths.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/spec`](../src/dlx/spec.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/dlx/types`](../src/dlx/types.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/binary-types`](../src/dlx/binary-types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/cache`](../src/dlx/cache.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/detect`](../src/dlx/detect.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/dir`](../src/dlx/dir.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/firewall`](../src/dlx/firewall.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/lockfile`](../src/dlx/lockfile.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/manifest`](../src/dlx/manifest.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/package`](../src/dlx/package.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/packages`](../src/dlx/packages.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/paths`](../src/dlx/paths.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/spec`](../src/dlx/spec.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/dlx/types`](../src/dlx/types.ts) | _(no description)_ |
 
 ## eco/
 
-| Subpath                                                                                                                         | Description        |
-| ------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/eco/cargo/lockfile-format`](../src/eco/cargo/lockfile-format.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/cargo/manifest-format`](../src/eco/cargo/manifest-format.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/cargo/parse-lockfile`](../src/eco/cargo/parse-lockfile.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/analyze-lockfile`](../src/eco/manifest/analyze-lockfile.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/detect-format`](../src/eco/manifest/detect-format.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/find-packages`](../src/eco/manifest/find-packages.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/get-package`](../src/eco/manifest/get-package.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/get-package-versions`](../src/eco/manifest/get-package-versions.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/manifest-error`](../src/eco/manifest/manifest-error.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/parse`](../src/eco/manifest/parse.ts)                                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/parse-lockfile`](../src/eco/manifest/parse-lockfile.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/parse-manifest`](../src/eco/manifest/parse-manifest.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/manifest/types`](../src/eco/manifest/types.ts)                                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/bun/exec`](../src/eco/npm/bun/exec.ts)                                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/manifest-format`](../src/eco/npm/manifest-format.ts)                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/npm/exec`](../src/eco/npm/npm/exec.ts)                                                     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/eco/cargo/lockfile-format`](../src/eco/cargo/lockfile-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/cargo/manifest-format`](../src/eco/cargo/manifest-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/cargo/parse-lockfile`](../src/eco/cargo/parse-lockfile.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/analyze-lockfile`](../src/eco/manifest/analyze-lockfile.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/detect-format`](../src/eco/manifest/detect-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/find-packages`](../src/eco/manifest/find-packages.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/get-package`](../src/eco/manifest/get-package.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/get-package-versions`](../src/eco/manifest/get-package-versions.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/manifest-error`](../src/eco/manifest/manifest-error.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/parse`](../src/eco/manifest/parse.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/parse-lockfile`](../src/eco/manifest/parse-lockfile.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/parse-manifest`](../src/eco/manifest/parse-manifest.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/manifest/types`](../src/eco/manifest/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/bun/exec`](../src/eco/npm/bun/exec.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/manifest-format`](../src/eco/npm/manifest-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/npm/exec`](../src/eco/npm/npm/exec.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/eco/npm/npm/extract-package-name-from-path`](../src/eco/npm/npm/extract-package-name-from-path.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/npm/flags`](../src/eco/npm/npm/flags.ts)                                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/npm/lockfile-format`](../src/eco/npm/npm/lockfile-format.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/npm/parse-git-url`](../src/eco/npm/npm/parse-git-url.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/npm/parse-lockfile`](../src/eco/npm/npm/parse-lockfile.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/parse-package-json`](../src/eco/npm/parse-package-json.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/detect-pnpm-version`](../src/eco/npm/pnpm/detect-pnpm-version.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/exec`](../src/eco/npm/pnpm/exec.ts)                                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/flags`](../src/eco/npm/pnpm/flags.ts)                                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/lockfile-format`](../src/eco/npm/pnpm/lockfile-format.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/parse-lockfile`](../src/eco/npm/pnpm/parse-lockfile.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/parse-pnpm-package-id-v5`](../src/eco/npm/pnpm/parse-pnpm-package-id-v5.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/pnpm/parse-pnpm-package-id-v6-v9`](../src/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/script`](../src/eco/npm/script.ts)                                                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/vlt/exec`](../src/eco/npm/vlt/exec.ts)                                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/exec`](../src/eco/npm/yarnpkg/yarn/exec.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/lockfile-format`](../src/eco/npm/yarnpkg/yarn/lockfile-format.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/parse-lockfile`](../src/eco/npm/yarnpkg/yarn/parse-lockfile.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/npm/flags`](../src/eco/npm/npm/flags.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/npm/lockfile-format`](../src/eco/npm/npm/lockfile-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/npm/parse-git-url`](../src/eco/npm/npm/parse-git-url.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/npm/parse-lockfile`](../src/eco/npm/npm/parse-lockfile.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/parse-package-json`](../src/eco/npm/parse-package-json.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/detect-pnpm-version`](../src/eco/npm/pnpm/detect-pnpm-version.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/exec`](../src/eco/npm/pnpm/exec.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/flags`](../src/eco/npm/pnpm/flags.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/lockfile-format`](../src/eco/npm/pnpm/lockfile-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/parse-lockfile`](../src/eco/npm/pnpm/parse-lockfile.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/parse-pnpm-package-id-v5`](../src/eco/npm/pnpm/parse-pnpm-package-id-v5.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/pnpm/parse-pnpm-package-id-v6-v9`](../src/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/script`](../src/eco/npm/script.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/vlt/exec`](../src/eco/npm/vlt/exec.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/exec`](../src/eco/npm/yarnpkg/yarn/exec.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/lockfile-format`](../src/eco/npm/yarnpkg/yarn/lockfile-format.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/parse-lockfile`](../src/eco/npm/yarnpkg/yarn/parse-lockfile.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/eco/npm/yarnpkg/yarn/parse-yarn-descriptor`](../src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/purl`](../src/eco/purl.ts)                                                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/eco/types`](../src/eco/types.ts)                                                                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/purl`](../src/eco/purl.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/eco/types`](../src/eco/types.ts) | _(no description)_ |
 
 ## effects/
 
-| Subpath                                                                                       | Description        |
-| --------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/effects/pulse-frames`](../src/effects/pulse-frames.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/effects/shimmer`](../src/effects/shimmer.ts)                     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/effects/pulse-frames`](../src/effects/pulse-frames.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/effects/shimmer`](../src/effects/shimmer.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/effects/shimmer-keyframes`](../src/effects/shimmer-keyframes.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/effects/shimmer-terminal`](../src/effects/shimmer-terminal.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/effects/shimmer-terminal`](../src/effects/shimmer-terminal.ts) | _(no description)_ |
 
 ## env/
 
-| Subpath                                                                             | Description        |
-| ----------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/env/boolean`](../src/env/boolean.ts)                   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/env/boolean`](../src/env/boolean.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/case-insensitive`](../src/env/case-insensitive.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/ci`](../src/env/ci.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/debug`](../src/env/debug.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/github`](../src/env/github.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/home`](../src/env/home.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/locale`](../src/env/locale.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/node-auth-token`](../src/env/node-auth-token.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/node-env`](../src/env/node-env.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/npm`](../src/env/npm.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/number`](../src/env/number.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/package-manager`](../src/env/package-manager.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/path`](../src/env/path.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/pre-commit`](../src/env/pre-commit.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/proxy`](../src/env/proxy.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/rewire`](../src/env/rewire.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/shell`](../src/env/shell.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/socket`](../src/env/socket.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/socket-cli`](../src/env/socket-cli.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/string`](../src/env/string.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/temp-dir`](../src/env/temp-dir.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/term`](../src/env/term.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/test`](../src/env/test.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/types`](../src/env/types.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/windows`](../src/env/windows.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/env/xdg`](../src/env/xdg.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/ci`](../src/env/ci.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/debug`](../src/env/debug.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/github`](../src/env/github.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/home`](../src/env/home.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/locale`](../src/env/locale.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/node-auth-token`](../src/env/node-auth-token.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/node-env`](../src/env/node-env.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/npm`](../src/env/npm.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/number`](../src/env/number.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/package-manager`](../src/env/package-manager.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/path`](../src/env/path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/pre-commit`](../src/env/pre-commit.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/proxy`](../src/env/proxy.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/rewire`](../src/env/rewire.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/shell`](../src/env/shell.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/socket`](../src/env/socket.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/socket-cli`](../src/env/socket-cli.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/string`](../src/env/string.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/temp-dir`](../src/env/temp-dir.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/term`](../src/env/term.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/test`](../src/env/test.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/types`](../src/env/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/windows`](../src/env/windows.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/xdg`](../src/env/xdg.ts) | _(no description)_ |
 
 ## errors/
 
-| Subpath                                                                       | Description        |
-| ----------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/errors/message`](../src/errors/message.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/errors/message`](../src/errors/message.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/errors/predicates`](../src/errors/predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/errors/stack`](../src/errors/stack.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/errors/stack`](../src/errors/stack.ts) | _(no description)_ |
 
 ## external-tools/
 
-| Subpath                                                                                                                             | Description        |
-| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts)                             | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/resolve`](../src/external-tools/bazel/resolve.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/bazel/types`](../src/external-tools/bazel/types.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/cdxgen/asset-names`](../src/external-tools/cdxgen/asset-names.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-download`](../src/external-tools/cdxgen/from-download.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-path`](../src/external-tools/cdxgen/from-path.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-vfs`](../src/external-tools/cdxgen/from-vfs.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/cdxgen/resolve`](../src/external-tools/cdxgen/resolve.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/cdxgen/types`](../src/external-tools/cdxgen/types.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/from-download`](../src/external-tools/from-download.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/janus/asset-names`](../src/external-tools/janus/asset-names.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/janus/from-download`](../src/external-tools/janus/from-download.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/janus/from-path`](../src/external-tools/janus/from-path.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/janus/from-vfs`](../src/external-tools/janus/from-vfs.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/janus/resolve`](../src/external-tools/janus/resolve.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/janus/types`](../src/external-tools/janus/types.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/from-download`](../src/external-tools/jre/from-download.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/from-java-home`](../src/external-tools/jre/from-java-home.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/from-path`](../src/external-tools/jre/from-path.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/from-vfs`](../src/external-tools/jre/from-vfs.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/resolve`](../src/external-tools/jre/resolve.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/jre/types`](../src/external-tools/jre/types.ts)                                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/manifest`](../src/external-tools/manifest.ts)                                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/opengrep/asset-names`](../src/external-tools/opengrep/asset-names.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/opengrep/from-download`](../src/external-tools/opengrep/from-download.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/opengrep/from-path`](../src/external-tools/opengrep/from-path.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/opengrep/from-vfs`](../src/external-tools/opengrep/from-vfs.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/opengrep/resolve`](../src/external-tools/opengrep/resolve.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/opengrep/types`](../src/external-tools/opengrep/types.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/sbt/types`](../src/external-tools/sbt/types.ts)                                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/synp/asset-names`](../src/external-tools/synp/asset-names.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/synp/from-download`](../src/external-tools/synp/from-download.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/synp/from-path`](../src/external-tools/synp/from-path.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/synp/from-vfs`](../src/external-tools/synp/from-vfs.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/synp/resolve`](../src/external-tools/synp/resolve.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/synp/types`](../src/external-tools/synp/types.ts)                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trivy/asset-names`](../src/external-tools/trivy/asset-names.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trivy/from-download`](../src/external-tools/trivy/from-download.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trivy/from-path`](../src/external-tools/trivy/from-path.ts)                             | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trivy/from-vfs`](../src/external-tools/trivy/from-vfs.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trivy/resolve`](../src/external-tools/trivy/resolve.ts)                                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trivy/types`](../src/external-tools/trivy/types.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trufflehog/asset-names`](../src/external-tools/trufflehog/asset-names.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-download`](../src/external-tools/trufflehog/from-download.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-path`](../src/external-tools/trufflehog/from-path.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-vfs`](../src/external-tools/trufflehog/from-vfs.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trufflehog/resolve`](../src/external-tools/trufflehog/resolve.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/trufflehog/types`](../src/external-tools/trufflehog/types.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/asset-names`](../src/external-tools/uv/asset-names.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/from-download`](../src/external-tools/uv/from-download.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/from-path`](../src/external-tools/uv/from-path.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/from-vfs`](../src/external-tools/uv/from-vfs.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/resolve`](../src/external-tools/uv/resolve.ts)                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/types`](../src/external-tools/uv/types.ts)                                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/bazel/resolve`](../src/external-tools/bazel/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/bazel/types`](../src/external-tools/bazel/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/asset-names`](../src/external-tools/cdxgen/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-download`](../src/external-tools/cdxgen/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-path`](../src/external-tools/cdxgen/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/from-vfs`](../src/external-tools/cdxgen/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/resolve`](../src/external-tools/cdxgen/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/cdxgen/types`](../src/external-tools/cdxgen/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/from-download`](../src/external-tools/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/asset-names`](../src/external-tools/janus/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/from-download`](../src/external-tools/janus/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/from-path`](../src/external-tools/janus/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/from-vfs`](../src/external-tools/janus/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/resolve`](../src/external-tools/janus/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/janus/types`](../src/external-tools/janus/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/asset-names`](../src/external-tools/jre/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/detect-platform-arch`](../src/external-tools/jre/detect-platform-arch.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/from-download`](../src/external-tools/jre/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/from-java-home`](../src/external-tools/jre/from-java-home.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/from-path`](../src/external-tools/jre/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/from-vfs`](../src/external-tools/jre/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/resolve`](../src/external-tools/jre/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/jre/types`](../src/external-tools/jre/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/manifest`](../src/external-tools/manifest.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/asset-names`](../src/external-tools/opengrep/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/from-download`](../src/external-tools/opengrep/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/from-path`](../src/external-tools/opengrep/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/from-vfs`](../src/external-tools/opengrep/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/resolve`](../src/external-tools/opengrep/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/opengrep/types`](../src/external-tools/opengrep/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/sbt/types`](../src/external-tools/sbt/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/asset-names`](../src/external-tools/synp/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/from-download`](../src/external-tools/synp/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/from-path`](../src/external-tools/synp/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/from-vfs`](../src/external-tools/synp/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/resolve`](../src/external-tools/synp/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/synp/types`](../src/external-tools/synp/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/asset-names`](../src/external-tools/trivy/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/from-download`](../src/external-tools/trivy/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/from-path`](../src/external-tools/trivy/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/from-vfs`](../src/external-tools/trivy/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/resolve`](../src/external-tools/trivy/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trivy/types`](../src/external-tools/trivy/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/asset-names`](../src/external-tools/trufflehog/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-download`](../src/external-tools/trufflehog/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-path`](../src/external-tools/trufflehog/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/from-vfs`](../src/external-tools/trufflehog/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/resolve`](../src/external-tools/trufflehog/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/trufflehog/types`](../src/external-tools/trufflehog/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/asset-names`](../src/external-tools/uv/asset-names.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/from-download`](../src/external-tools/uv/from-download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/from-path`](../src/external-tools/uv/from-path.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/from-vfs`](../src/external-tools/uv/from-vfs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/resolve`](../src/external-tools/uv/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/uv/types`](../src/external-tools/uv/types.ts) | _(no description)_ |
 
 ## fs/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/fs/encoding`](../src/fs/encoding.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/find-up`](../src/fs/find-up.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/inspect`](../src/fs/inspect.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/fs/encoding`](../src/fs/encoding.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/find-up`](../src/fs/find-up.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/inspect`](../src/fs/inspect.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/fs/path-cache`](../src/fs/path-cache.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/read-dir`](../src/fs/read-dir.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/read-file`](../src/fs/read-file.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/read-json`](../src/fs/read-json.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/safe`](../src/fs/safe.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/types`](../src/fs/types.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/unique`](../src/fs/unique.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/validate`](../src/fs/validate.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-dir`](../src/fs/read-dir.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-file`](../src/fs/read-file.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-json`](../src/fs/read-json.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/safe`](../src/fs/safe.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/types`](../src/fs/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/unique`](../src/fs/unique.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/validate`](../src/fs/validate.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/fs/write-json`](../src/fs/write-json.ts) | _(no description)_ |
 
 ## git/
 
-| Subpath                                                             | Description        |
-| ------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/git/changed`](../src/git/changed.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/git/repo`](../src/git/repo.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/git/staged`](../src/git/staged.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/git/types`](../src/git/types.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/git/changed`](../src/git/changed.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/git/repo`](../src/git/repo.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/git/staged`](../src/git/staged.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/git/types`](../src/git/types.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/git/unstaged`](../src/git/unstaged.ts) | _(no description)_ |
 
 ## github/
 
-| Subpath                                                                           | Description        |
-| --------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/github/constants`](../src/github/constants.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/errors`](../src/github/errors.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/fetch`](../src/github/fetch.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/ghsa`](../src/github/ghsa.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/refs`](../src/github/refs.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/refs-cache`](../src/github/refs-cache.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/github/constants`](../src/github/constants.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/errors`](../src/github/errors.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/fetch`](../src/github/fetch.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/ghsa`](../src/github/ghsa.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/refs`](../src/github/refs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/refs-cache`](../src/github/refs-cache.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs-graphql`](../src/github/refs-graphql.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/refs-rest`](../src/github/refs-rest.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/token`](../src/github/token.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/types`](../src/github/types.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/refs-rest`](../src/github/refs-rest.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/token`](../src/github/token.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/types`](../src/github/types.ts) | _(no description)_ |
 
 ## globs/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/globs/defaults`](../src/globs/defaults.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/globs/glob`](../src/globs/glob.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/globs/matcher`](../src/globs/matcher.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/globs/stream`](../src/globs/stream.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/globs/types`](../src/globs/types.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/globs/glob`](../src/globs/glob.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/globs/matcher`](../src/globs/matcher.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/globs/stream`](../src/globs/stream.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/globs/types`](../src/globs/types.ts) | _(no description)_ |
 
 ## http-request/
 
-| Subpath                                                                                             | Description        |
-| --------------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/http-request/checksums`](../src/http-request/checksums.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/convenience`](../src/http-request/convenience.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/download`](../src/http-request/download.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/download-types`](../src/http-request/download-types.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/errors`](../src/http-request/errors.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/headers`](../src/http-request/headers.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/request`](../src/http-request/request.ts)                 | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/http-request/checksums`](../src/http-request/checksums.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/convenience`](../src/http-request/convenience.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/download`](../src/http-request/download.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/download-types`](../src/http-request/download-types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/errors`](../src/http-request/errors.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/headers`](../src/http-request/headers.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/request`](../src/http-request/request.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/request-attempt`](../src/http-request/request-attempt.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/request-types`](../src/http-request/request-types.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/request-types`](../src/http-request/request-types.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/response-reader`](../src/http-request/response-reader.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/response-types`](../src/http-request/response-types.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/user-agent`](../src/http-request/user-agent.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/response-types`](../src/http-request/response-types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/user-agent`](../src/http-request/user-agent.ts) | _(no description)_ |
 
 ## ipc-cli/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/ipc-cli/get`](../src/ipc-cli/get.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/ipc-cli/get`](../src/ipc-cli/get.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ipc-cli/types`](../src/ipc-cli/types.ts) | _(no description)_ |
 
 ## ipc/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/ipc/directory`](../src/ipc/directory.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/ipc/paths`](../src/ipc/paths.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/ipc/types`](../src/ipc/types.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/ipc/write`](../src/ipc/write.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/ipc/paths`](../src/ipc/paths.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/ipc/types`](../src/ipc/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/ipc/write`](../src/ipc/write.ts) | _(no description)_ |
 
 ## json/
 
-| Subpath                                                           | Description        |
-| ----------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/json/edit`](../src/json/edit.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/json/edit`](../src/json/edit.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/json/format`](../src/json/format.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/json/parse`](../src/json/parse.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/json/types`](../src/json/types.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/json/parse`](../src/json/parse.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/json/types`](../src/json/types.ts) | _(no description)_ |
 
 ## links/
 
-| Subpath                                                           | Description        |
-| ----------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/links/link`](../src/links/link.ts)   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/links/link`](../src/links/link.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/links/types`](../src/links/types.ts) | _(no description)_ |
 
 ## logger/
 
-| Subpath                                                                                 | Description        |
-| --------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/logger/colors`](../src/logger/colors.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/console`](../src/logger/console.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/logger`](../src/logger/logger.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/symbols`](../src/logger/symbols.ts)                 | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/logger/colors`](../src/logger/colors.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/console`](../src/logger/console.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/logger`](../src/logger/logger.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/symbols`](../src/logger/symbols.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/symbols-builder`](../src/logger/symbols-builder.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/types`](../src/logger/types.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/types`](../src/logger/types.ts) | _(no description)_ |
 
 ## memo/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/memo/async`](../src/memo/async.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/memo/clear`](../src/memo/clear.ts)         | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/memo/async`](../src/memo/async.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/memo/clear`](../src/memo/clear.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/memo/decorator`](../src/memo/decorator.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/memo/memoize`](../src/memo/memoize.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/memo/once`](../src/memo/once.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/memo/types`](../src/memo/types.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/memo/weak`](../src/memo/weak.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/memo/memoize`](../src/memo/memoize.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/memo/once`](../src/memo/once.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/memo/types`](../src/memo/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/memo/weak`](../src/memo/weak.ts) | _(no description)_ |
 
 ## node/
 
-| Subpath                                                                             | Description        |
-| ----------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/node/async-hooks`](../src/node/async-hooks.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/child-process`](../src/node/child-process.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/crypto`](../src/node/crypto.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/events`](../src/node/events.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/fs`](../src/node/fs.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/fs-promises`](../src/node/fs-promises.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/http`](../src/node/http.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/https`](../src/node/https.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/module`](../src/node/module.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/os`](../src/node/os.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/path`](../src/node/path.ts)                       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/node/async-hooks`](../src/node/async-hooks.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/child-process`](../src/node/child-process.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/crypto`](../src/node/crypto.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/events`](../src/node/events.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/fs`](../src/node/fs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/fs-promises`](../src/node/fs-promises.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/http`](../src/node/http.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/https`](../src/node/https.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/module`](../src/node/module.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/os`](../src/node/os.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/path`](../src/node/path.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/node/timers-promises`](../src/node/timers-promises.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/url`](../src/node/url.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/node/util`](../src/node/util.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/url`](../src/node/url.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/node/util`](../src/node/util.ts) | _(no description)_ |
 
 ## objects/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/objects/getters`](../src/objects/getters.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/objects/inspect`](../src/objects/inspect.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/objects/mutate`](../src/objects/mutate.ts)         | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/objects/getters`](../src/objects/getters.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/objects/inspect`](../src/objects/inspect.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/objects/mutate`](../src/objects/mutate.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/objects/predicates`](../src/objects/predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/objects/sort`](../src/objects/sort.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/objects/types`](../src/objects/types.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/objects/sort`](../src/objects/sort.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/objects/types`](../src/objects/types.ts) | _(no description)_ |
 
 ## packages/
 
-| Subpath                                                                           | Description        |
-| --------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/packages/edit`](../src/packages/edit.ts)             | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/packages/edit`](../src/packages/edit.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/packages/edit-class`](../src/packages/edit-class.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/exports`](../src/packages/exports.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/isolation`](../src/packages/isolation.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/licenses`](../src/packages/licenses.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/manifest`](../src/packages/manifest.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/normalize`](../src/packages/normalize.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/exports`](../src/packages/exports.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/isolation`](../src/packages/isolation.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/licenses`](../src/packages/licenses.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/manifest`](../src/packages/manifest.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/normalize`](../src/packages/normalize.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/packages/operations`](../src/packages/operations.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/packages/provenance`](../src/packages/provenance.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/specs`](../src/packages/specs.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/packages/types`](../src/packages/types.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/specs`](../src/packages/specs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/packages/types`](../src/packages/types.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/packages/validation`](../src/packages/validation.ts) | _(no description)_ |
 
 ## paths/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/paths/conversion`](../src/paths/conversion.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/dirnames`](../src/paths/dirnames.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/exts`](../src/paths/exts.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/filenames`](../src/paths/filenames.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/globs`](../src/paths/globs.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/normalize`](../src/paths/normalize.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/packages`](../src/paths/packages.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/dirnames`](../src/paths/dirnames.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/exts`](../src/paths/exts.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/filenames`](../src/paths/filenames.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/globs`](../src/paths/globs.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/normalize`](../src/paths/normalize.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/packages`](../src/paths/packages.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/paths/predicates`](../src/paths/predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/resolve`](../src/paths/resolve.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/rewire`](../src/paths/rewire.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/paths/socket`](../src/paths/socket.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/resolve`](../src/paths/resolve.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/rewire`](../src/paths/rewire.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/paths/socket`](../src/paths/socket.ts) | _(no description)_ |
 
 ## perf/
 
-| Subpath                                                             | Description        |
-| ------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/perf/enabled`](../src/perf/enabled.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/perf/metrics`](../src/perf/metrics.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/perf/report`](../src/perf/report.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/perf/timer`](../src/perf/timer.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/perf/types`](../src/perf/types.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/perf/report`](../src/perf/report.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/perf/timer`](../src/perf/timer.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/perf/types`](../src/perf/types.ts) | _(no description)_ |
 
 ## pkg-ext/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/pkg-ext/data`](../src/pkg-ext/data.ts)   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/pkg-ext/data`](../src/pkg-ext/data.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/pkg-ext/types`](../src/pkg-ext/types.ts) | _(no description)_ |
 
 ## primordials/
 
-| Subpath                                                                             | Description        |
-| ----------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/primordials/array`](../src/primordials/array.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/buffer`](../src/primordials/buffer.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/date`](../src/primordials/date.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/error`](../src/primordials/error.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/primordials/array`](../src/primordials/array.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/buffer`](../src/primordials/buffer.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/date`](../src/primordials/date.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/error`](../src/primordials/error.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/function`](../src/primordials/function.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/globals`](../src/primordials/globals.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/json`](../src/primordials/json.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/map-set`](../src/primordials/map-set.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/math`](../src/primordials/math.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/number`](../src/primordials/number.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/object`](../src/primordials/object.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/promise`](../src/primordials/promise.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/reflect`](../src/primordials/reflect.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/regexp`](../src/primordials/regexp.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/string`](../src/primordials/string.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/symbol`](../src/primordials/symbol.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/uncurry`](../src/primordials/uncurry.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/primordials/url`](../src/primordials/url.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/globals`](../src/primordials/globals.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/json`](../src/primordials/json.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/map-set`](../src/primordials/map-set.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/math`](../src/primordials/math.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/number`](../src/primordials/number.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/object`](../src/primordials/object.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/promise`](../src/primordials/promise.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/reflect`](../src/primordials/reflect.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/regexp`](../src/primordials/regexp.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/string`](../src/primordials/string.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/symbol`](../src/primordials/symbol.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/uncurry`](../src/primordials/uncurry.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/url`](../src/primordials/url.ts) | _(no description)_ |
 
 ## process/
 
-| Subpath                                                                               | Description        |
-| ------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/process/abort`](../src/process/abort.ts)                 | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/process/abort`](../src/process/abort.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/process/lock-instance`](../src/process/lock-instance.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/process/lock-manager`](../src/process/lock-manager.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/process/lock-types`](../src/process/lock-types.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/process/transient`](../src/process/transient.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/process/lock-manager`](../src/process/lock-manager.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/process/lock-types`](../src/process/lock-types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/process/transient`](../src/process/transient.ts) | _(no description)_ |
 
 ## promise-queue/
 
-| Subpath                                                                           | Description        |
-| --------------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/promise-queue/queue`](../src/promise-queue/queue.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/promise-queue/types`](../src/promise-queue/types.ts) | _(no description)_ |
 
 ## promises/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/promises/iterate`](../src/promises/iterate.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/promises/options`](../src/promises/options.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/promises/iterate`](../src/promises/iterate.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/promises/options`](../src/promises/options.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/promises/resolvers`](../src/promises/resolvers.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/promises/retry`](../src/promises/retry.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/promises/types`](../src/promises/types.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/promises/retry`](../src/promises/retry.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/promises/types`](../src/promises/types.ts) | _(no description)_ |
 
 ## regexps/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/regexps/escape`](../src/regexps/escape.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/regexps/hex`](../src/regexps/hex.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/regexps/spec`](../src/regexps/spec.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/regexps/hex`](../src/regexps/hex.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/regexps/spec`](../src/regexps/spec.ts) | _(no description)_ |
 
 ## releases/
 
-| Subpath                                                                                       | Description        |
-| --------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/releases/github-archives`](../src/releases/github-archives.ts)   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/releases/github-archives`](../src/releases/github-archives.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/releases/github-asset-url`](../src/releases/github-asset-url.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-assets`](../src/releases/github-assets.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-auth`](../src/releases/github-auth.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-assets`](../src/releases/github-assets.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-auth`](../src/releases/github-auth.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/releases/github-downloads`](../src/releases/github-downloads.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-listing`](../src/releases/github-listing.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-types`](../src/releases/github-types.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/socket-btm`](../src/releases/socket-btm.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-listing`](../src/releases/github-listing.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-types`](../src/releases/github-types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/socket-btm`](../src/releases/socket-btm.ts) | _(no description)_ |
 
 ## schema/
 
-| Subpath                                                                   | Description        |
-| ------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/schema/parse`](../src/schema/parse.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/schema/types`](../src/schema/types.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/schema/parse`](../src/schema/parse.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/schema/types`](../src/schema/types.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/schema/validate`](../src/schema/validate.ts) | _(no description)_ |
 
 ## sea/
 
-| Subpath                                                         | Description        |
-| --------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/sea/detect`](../src/sea/detect.ts) | _(no description)_ |
 
 ## secrets/
 
-| Subpath                                                                                     | Description        |
-| ------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/secrets/find`](../src/secrets/find.ts)                         | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/keychain`](../src/secrets/keychain.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/linux`](../src/secrets/linux.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/macos`](../src/secrets/macos.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/rc`](../src/secrets/rc.ts)                             | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/secrets/find`](../src/secrets/find.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/keychain`](../src/secrets/keychain.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/linux`](../src/secrets/linux.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/macos`](../src/secrets/macos.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/rc`](../src/secrets/rc.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/secrets/socket-api-token`](../src/secrets/socket-api-token.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/types`](../src/secrets/types.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/secrets/windows`](../src/secrets/windows.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/types`](../src/secrets/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/secrets/windows`](../src/secrets/windows.ts) | _(no description)_ |
 
 ## shadow/
 
-| Subpath                                                             | Description        |
-| ------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/shadow/skip`](../src/shadow/skip.ts)   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/shadow/skip`](../src/shadow/skip.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/shadow/types`](../src/shadow/types.ts) | _(no description)_ |
 
 ## signal-exit/
 
-| Subpath                                                                               | Description        |
-| ------------------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/signal-exit/intercept`](../src/signal-exit/intercept.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/signal-exit/lifecycle`](../src/signal-exit/lifecycle.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/signal-exit/register`](../src/signal-exit/register.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/signal-exit/signals`](../src/signal-exit/signals.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/signal-exit/types`](../src/signal-exit/types.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/signal-exit/register`](../src/signal-exit/register.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/signal-exit/signals`](../src/signal-exit/signals.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/signal-exit/types`](../src/signal-exit/types.ts) | _(no description)_ |
 
 ## smol/
 
-| Subpath                                                                   | Description        |
-| ------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/smol/detect`](../src/smol/detect.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/smol/http`](../src/smol/http.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/smol/https`](../src/smol/https.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/smol/manifest`](../src/smol/manifest.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/smol/detect`](../src/smol/detect.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/http`](../src/smol/http.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/https`](../src/smol/https.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/manifest`](../src/smol/manifest.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/smol/primordial`](../src/smol/primordial.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/smol/purl`](../src/smol/purl.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/smol/versions`](../src/smol/versions.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/smol/vfs`](../src/smol/vfs.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/purl`](../src/smol/purl.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/versions`](../src/smol/versions.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/vfs`](../src/smol/vfs.ts) | _(no description)_ |
 
 ## sorts/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/sorts/natural`](../src/sorts/natural.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/sorts/semver`](../src/sorts/semver.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/sorts/semver`](../src/sorts/semver.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/sorts/strings`](../src/sorts/strings.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/sorts/types`](../src/sorts/types.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/sorts/types`](../src/sorts/types.ts) | _(no description)_ |
 
 ## spawn/
 
-| Subpath                                                             | Description        |
-| ------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/spawn/errors`](../src/spawn/errors.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/spawn/spawn`](../src/spawn/spawn.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/spawn/stdio`](../src/spawn/stdio.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/spawn/types`](../src/spawn/types.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/spawn/spawn`](../src/spawn/spawn.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/spawn/stdio`](../src/spawn/stdio.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/spawn/types`](../src/spawn/types.ts) | _(no description)_ |
 
 ## spinner/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/spinner/format`](../src/spinner/format.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/spinner/format`](../src/spinner/format.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/spinner/registry`](../src/spinner/registry.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/spinner`](../src/spinner/spinner.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/types`](../src/spinner/types.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/with`](../src/spinner/with.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/spinner`](../src/spinner/spinner.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/types`](../src/spinner/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/with`](../src/spinner/with.ts) | _(no description)_ |
 
 ## ssri/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/ssri/convert`](../src/ssri/convert.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/ssri/parse`](../src/ssri/parse.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/ssri/convert`](../src/ssri/convert.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/ssri/parse`](../src/ssri/parse.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ssri/validate`](../src/ssri/validate.ts) | _(no description)_ |
 
 ## stdio/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/stdio/clear`](../src/stdio/clear.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/stdio/divider`](../src/stdio/divider.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/stdio/footer`](../src/stdio/footer.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/stdio/header`](../src/stdio/header.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/stdio/clear`](../src/stdio/clear.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/stdio/divider`](../src/stdio/divider.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/stdio/footer`](../src/stdio/footer.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/stdio/header`](../src/stdio/header.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/stdio/progress`](../src/stdio/progress.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/stdio/prompts`](../src/stdio/prompts.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/stdio/stderr`](../src/stdio/stderr.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/stdio/stdout`](../src/stdio/stdout.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/stdio/prompts`](../src/stdio/prompts.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/stdio/stderr`](../src/stdio/stderr.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/stdio/stdout`](../src/stdio/stdout.ts) | _(no description)_ |
 
 ## streams/
 
-| Subpath                                                                       | Description        |
-| ----------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/streams/parallel`](../src/streams/parallel.ts)   | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/streams/parallel`](../src/streams/parallel.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/streams/transform`](../src/streams/transform.ts) | _(no description)_ |
 
 ## strings/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/strings/format`](../src/strings/format.ts)         | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/strings/format`](../src/strings/format.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/strings/predicates`](../src/strings/predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/strings/search`](../src/strings/search.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/strings/transform`](../src/strings/transform.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/strings/types`](../src/strings/types.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/strings/width`](../src/strings/width.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/strings/search`](../src/strings/search.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/strings/transform`](../src/strings/transform.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/strings/types`](../src/strings/types.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/strings/width`](../src/strings/width.ts) | _(no description)_ |
 
 ## tables/
 
-| Subpath                                                                   | Description        |
-| ------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/tables/bordered`](../src/tables/bordered.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/tables/padding`](../src/tables/padding.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/tables/simple`](../src/tables/simple.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/tables/types`](../src/tables/types.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/tables/padding`](../src/tables/padding.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/tables/simple`](../src/tables/simple.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/tables/types`](../src/tables/types.ts) | _(no description)_ |
 
 ## temporal/
 
-| Subpath                                                                       | Description        |
-| ----------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/temporal/instant`](../src/temporal/instant.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/temporal/now`](../src/temporal/now.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/temporal/slots`](../src/temporal/slots.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/temporal/system`](../src/temporal/system.ts)     | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/temporal/instant`](../src/temporal/instant.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/temporal/now`](../src/temporal/now.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/temporal/slots`](../src/temporal/slots.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/temporal/system`](../src/temporal/system.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/temporal/temporal`](../src/temporal/temporal.ts) | _(no description)_ |
 
 ## themes/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/themes/context`](../src/themes/context.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/themes/resolve`](../src/themes/resolve.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/themes/themes`](../src/themes/themes.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/themes/types`](../src/themes/types.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/themes/themes`](../src/themes/themes.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/themes/types`](../src/themes/types.ts) | _(no description)_ |
 
 ## ttl-cache/
 
-| Subpath                                                                   | Description        |
-| ------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/ttl-cache/cache`](../src/ttl-cache/cache.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ttl-cache/types`](../src/ttl-cache/types.ts) | _(no description)_ |
 
 ## url/
 
-| Subpath                                                                       | Description        |
-| ----------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/url/parse`](../src/url/parse.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/url/predicates`](../src/url/predicates.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/url/parse`](../src/url/parse.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/url/predicates`](../src/url/predicates.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/url/search-params`](../src/url/search-params.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/url/types`](../src/url/types.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/url/types`](../src/url/types.ts) | _(no description)_ |
 
 ## versions/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/versions/compare`](../src/versions/compare.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/versions/modify`](../src/versions/modify.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/versions/parse`](../src/versions/parse.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/versions/range`](../src/versions/range.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/versions/types`](../src/versions/types.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/versions/modify`](../src/versions/modify.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/versions/parse`](../src/versions/parse.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/versions/range`](../src/versions/range.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/versions/types`](../src/versions/types.ts) | _(no description)_ |
 
 ## warnings/
 
-| Subpath                                                                               | Description        |
-| ------------------------------------------------------------------------------------- | ------------------ |
+| Subpath | Description |
+| --- | --- |
 | [`@socketsecurity/lib-stable/warnings/event-target`](../src/warnings/event-target.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/warnings/suppress`](../src/warnings/suppress.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/warnings/suppress`](../src/warnings/suppress.ts) | _(no description)_ |
 
 ## words/
 
-| Subpath                                                                     | Description        |
-| --------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/words/article`](../src/words/article.ts)       | _(no description)_ |
+| Subpath | Description |
+| --- | --- |
+| [`@socketsecurity/lib-stable/words/article`](../src/words/article.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/words/capitalize`](../src/words/capitalize.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/words/pluralize`](../src/words/pluralize.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/words/types`](../src/words/types.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/words/pluralize`](../src/words/pluralize.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/words/types`](../src/words/types.ts) | _(no description)_ |
