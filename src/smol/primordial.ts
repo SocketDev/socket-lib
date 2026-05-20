@@ -80,6 +80,12 @@ export interface SmolPrimordialBinding {
   // spec. The smol-aware export in `primordials.ts` does this
   // translation transparently.
   stringCharCodeAt(s: string, i: number): number
+  // ES2024 — `String.prototype.isWellFormed`. ASCII / Latin-1 strings
+  // are well-formed by definition (surrogate range unreachable in
+  // one-byte storage), so the fast path returns `true`
+  // unconditionally; UTF-16 strings hit the slow path's lone-surrogate
+  // scan. See socket-btm primordial_binding.cc.
+  stringIsWellFormed(s: string): boolean
 }
 
 let _smolPrimordial: SmolPrimordialBinding | undefined

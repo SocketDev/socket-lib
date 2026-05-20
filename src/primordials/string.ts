@@ -74,9 +74,11 @@ export const StringPrototypeEndsWith = uncurryThis(String.prototype.endsWith)
 export const StringPrototypeIncludes = uncurryThis(String.prototype.includes)
 export const StringPrototypeIndexOf = uncurryThis(String.prototype.indexOf)
 // ES2024 — validates that the string contains no lone surrogates.
-export const StringPrototypeIsWellFormed = uncurryThis(
-  String.prototype.isWellFormed,
-)
+// Routes through `node:smol-primordial` on the smol Node binary (ASCII
+// fast path returns true unconditionally without an O(n) scan).
+export const StringPrototypeIsWellFormed: (s: string) => boolean =
+  _smolPrimordial?.stringIsWellFormed ??
+  uncurryThis(String.prototype.isWellFormed)
 export const StringPrototypeLastIndexOf = uncurryThis(
   String.prototype.lastIndexOf,
 )
