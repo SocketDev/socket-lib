@@ -62,42 +62,17 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ### Added
 
-- **`compression` (new export)** — brotli + gzip helpers with three calling shapes (in-memory `Buffer`, file-to-file, raw streams) and a single `{ inPlace: true }` option for compress/decompress-in-place. 28 named exports total:
-  - In-memory: `compressBrotli`, `decompressBrotli`, `compressGzip`, `decompressGzip`
-  - File-to-file: `compressBrotliFile`, `decompressBrotliFile`, `compressGzipFile`, `decompressGzipFile` — each with three overloads (explicit dest, in-place, options object). The gzip in-place path follows `.tgz` → `.tar` convention so a round-trip is lossless
-  - Streams: `createBrotliCompressor`, `createBrotliDecompressor`, `createGzipCompressor`, `createGzipDecompressor`
-  - Detection: `isBrotliCompressed(buffer)` / `isGzipCompressed(buffer)` (magic-byte sniffing)
-  - Path classification: `hasBrotliExt(filePath)` / `hasGzipExt(filePath)` — case-insensitive `path.extname` match against `.br` / `.brotli` / `.gz` / `.gzip` / `.tgz`
-  - Helpers: `BROTLI_EXTS` / `GZIP_EXTS` `ReadonlySet<string>` constants; `stripExt(filePath, exts)` for trimming a recognized extension from a path; `resolveBrotliOptions` / `resolveGzipOptions` for translating `CompressOptions` into the underlying zlib option shapes
-  - `CompressOptions` / `CompressFileOptions` interfaces
-- **`socket-lib` CLI (new `bin` entry)** — fleet-wide static-analysis dispatcher invoked via `pnpm exec socket-lib <command>`. Initial subcommand: `check primordials` (alias `check prim`) — diffs every name destructured from `primordials` in scanned source against `@socketsecurity/lib`'s exposed primordials set, emitting unmapped or missing-from-lib findings. Reads sectional config from `.socket-lib.json` (with `.config/socket-lib.json` as a fallback) or a bare object for single-check setups. Flags: `--config / -c <path>` (defaults to `.socket-lib.json`, falls back to `.config/socket-lib.json`), `--explain`, `--json`, `--silent`, `--help`. Lifted from socket-btm's `scripts/check-primordials-coverage.mts` so the same drift gate now ships to every consumer.
-- **`dlx/package` `installRoot` option** — new `EnsurePackageInstallOptions` (and `DlxPackageOptions`) field overriding the install root passed to Arborist. Default remains `~/.socket/_dlx/<cacheKey>/`; when set, the value is used verbatim. Lets build pipelines colocate the install with their own gitignored outputs (e.g. ink-builder bundling ink via esbuild). Caller owns per-spec separation; see JSDoc for the full contract.
+- **`compression` (new)** — brotli + gzip helpers with in-memory `Buffer`, file-to-file (with `{ inPlace: true }`), and stream-creator shapes. Detection (`isBrotliCompressed` / `isGzipCompressed` magic-byte sniffing), extension classification (`hasBrotliExt` / `hasGzipExt`), `BROTLI_EXTS` / `GZIP_EXTS` constants, `stripExt(path, exts)`, and `CompressOptions` / `CompressFileOptions` types.
+- **`socket-lib` CLI** — `pnpm exec socket-lib <command>` dispatcher. First subcommand: `check primordials` (alias `check prim`) diffs source-destructured primordials against the lib's set. Reads `.socket-lib.json` (or `.config/socket-lib.json`). Flags: `--config`, `--explain`, `--json`, `--silent`, `--help`.
+- **`dlx/package` `installRoot`** option overrides the Arborist install root (default `~/.socket/_dlx/<cacheKey>/`). Useful for colocating installs with consumer-owned build outputs.
 
 ## [5.27.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.27.0) - 2026-05-04
 
 ### Added
 
-- **45 new `primordials` exports** rounding out the surface to 296 total:
-  - `BigIntCtor`
-  - Math: 24 methods (Acos, Atan2, Hypot, Pow, etc.) + 8 constants (E, PI, SQRT2, etc.); `MathF16round` typed `| undefined` for ES2025
-  - Number constants: `EPSILON`, `MAX_SAFE_INTEGER`, `MAX_VALUE`, `MIN_SAFE_INTEGER`, `MIN_VALUE`, `NEGATIVE_INFINITY`, `POSITIVE_INFINITY`
-  - Symbol: 10 well-knowns (`HasInstance`, `KeyFor`, `Match`, `Species`, etc.); `SymbolAsyncDispose` / `SymbolDispose` typed `| undefined` for ES2024; prototype helpers (`Description`, `ToString`, `ValueOf`)
-  - Function: `FunctionPrototypeToString`
-  - Array (ES2023 Change Array By Copy): `ArrayPrototypeToSpliced`, `ArrayPrototypeWith`
-  - Globals: `InfinityValue`, `NaNValue`, `globalThisRef`
-  - Object (annex B): `ObjectPrototype{Define,Lookup}{Getter,Setter}`
-  - Error (V8 stack-trace API, `| undefined`): `ErrorCaptureStackTrace`, `ErrorPrepareStackTrace`, `ErrorStackTraceLimit` (function-shaped, reads live value)
-
-- **`smol/*` (new exports)** — feature-detect + lazy-loaders for socket-btm's smol Node binary:
-  - `smol/detect` — `isSmol()`: memoized boolean, mirrors `isSeaBinary()`
-  - `smol/util` — `getSmolUtil()`: native `uncurryThis` / `applyBind` (~2x faster), or `undefined`
-  - `smol/primordial` — `getSmolPrimordial()`: V8 Fast API typed `Math.*` / `Number.is*` (~30-50% faster on hot loops), or `undefined`
-  - `primordials` transparently routes through these on smol; **zero call-site changes**, identical behavior on stock Node, smol, browsers, Deno, Bun
-
-- **`node/*` (new exports)** — per-builtin lazy-loaders for `node:*` modules. Each is `/*@__NO_SIDE_EFFECTS__*/`-marked so bundlers tree-shake the `require()` when unused:
-  - `node/fs` (`getNodeFs`), `node/path` (`getNodePath`), `node/crypto` (`getNodeCrypto`), `node/http` (`getNodeHttp`), `node/https` (`getNodeHttps`), `node/os` (`getNodeOs`), `node/util` (`getNodeUtil`), `node/url` (`getNodeUrl`), `node/events` (`getNodeEvents`)
-  - `node/child-process` (`getNodeChildProcess`), `node/async-hooks` (`getNodeAsyncHooks`), `node/fs-promises` (`getNodeFsPromises`), `node/timers-promises` (`getNodeTimersPromises`)
-  - Replaces ~30 ad-hoc copies of the same lazy-loader boilerplate previously scattered across `http-request.ts`, `spawn.ts`, `fs.ts`, `crypto.ts`, etc.
+- **45 new `primordials` exports** (296 total) — `BigIntCtor`; 24 `Math.*` methods + 8 constants (`MathF16round` typed `| undefined` for ES2025); 7 `Number` constants; 10 `Symbol` well-knowns + 3 prototype helpers (`SymbolAsyncDispose` / `SymbolDispose` typed `| undefined`); `FunctionPrototypeToString`; ES2023 array-copy (`ArrayPrototypeToSpliced`, `ArrayPrototypeWith`); `InfinityValue` / `NaNValue` / `globalThisRef`; `ObjectPrototype{Define,Lookup}{Getter,Setter}`; V8 stack-trace API.
+- **`smol/*`** — feature-detect for socket-btm's smol Node binary. `smol/detect` (`isSmol()`), `smol/util` (`getSmolUtil()` — native `uncurryThis` / `applyBind`), `smol/primordial` (`getSmolPrimordial()` — V8 Fast API typed `Math.*` / `Number.is*`). `primordials` routes through these on smol transparently; no call-site changes.
+- **`node/*`** — per-builtin lazy-loaders, side-effect-free for tree-shaking: `node/fs`, `node/path`, `node/crypto`, `node/http`, `node/https`, `node/os`, `node/util`, `node/url`, `node/events`, `node/child-process`, `node/async-hooks`, `node/fs-promises`, `node/timers-promises`.
 
 ## [5.26.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.1) - 2026-05-01
 
@@ -131,12 +106,10 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ### Fixed
 
-- `globs` `getGlobMatcher` — narrow the `path.matchesGlob` fast-path that an earlier draft introduced. `path.matchesGlob` doesn't honor the picomatch defaults (`dot: true`, `nocase: true`) that callers expect, so taking the fast-path under those defaults silently changed observable behavior — including breaking the case-insensitive default everywhere a single-pattern matcher was used. The fast-path now activates only when the caller has explicitly opted out of both defaults (`nocase: false` AND `dot: false`), signaling "I want strict, case-sensitive, no-dotfile-match" — exactly what `path.matchesGlob` provides
-- `globs` `glob` / `globSync` — normalize results to forward slashes via `paths/normalize.normalizePath` regardless of which backend (`node:fs.glob` or `fast-glob`) was used. Restores fast-glob's forward-slash contract on Windows, where `node:fs.glob` returns native-OS separators
-- `globs` `glob` / `globSync` / `globStreamLicenses` — strip a trailing `/` from `ignore` patterns before passing them to fast-glob. The gitignore convention of writing directory entries as `dist/` was silently dropped at the deep-filter level (fast-glob walked the entire subtree before discarding results), which on a large `dist/` could push memory past the limit. fast-glob v3.3.3 and the unreleased v4 both have the bug; tracked at [mrmlnc/fast-glob#437](https://github.com/mrmlnc/fast-glob/issues/437). Same workaround as [SocketDev/socket-cli#1288](https://github.com/SocketDev/socket-cli/pull/1288).
-- `releases/github-api` `getLatestRelease` and `getReleaseAssetUrl` transparently fall back to GraphQL when GitHub REST returns 200 + empty body (search-degraded incident shape)
-- `github` `resolveRefToSha` and `fetchGhsaDetails` get the same GraphQL fallback for the same incident shape
-- All fallbacks only fire on the empty-body signature; real 404s, rate-limits, and 5xx still propagate
+- `globs` `getGlobMatcher` — `path.matchesGlob` fast-path only activates when the caller opts out of both picomatch defaults (`nocase: false` AND `dot: false`); previously took the fast-path under default options and silently broke case-insensitive matching.
+- `globs` `glob` / `globSync` — results normalized to forward slashes on Windows regardless of backend (`node:fs.glob` returns native-OS separators).
+- `globs` `glob` / `globSync` / `globStreamLicenses` — trailing `/` stripped from `ignore` patterns before passing to fast-glob (gitignore-style `dist/` was silently dropped at the deep-filter level). Workaround for [mrmlnc/fast-glob#437](https://github.com/mrmlnc/fast-glob/issues/437).
+- GitHub helpers (`releases/github-api`, `github/resolveRefToSha`, `fetchGhsaDetails`) fall back to GraphQL on the "search-degraded" 200 OK + empty body shape. Real 404s / rate-limits / 5xx still propagate.
 
 ## [5.26.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.0) - 2026-04-27
 
