@@ -72,6 +72,14 @@ export async function extractTar(
 
   const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
+    // Skip restoring per-entry utimes. tar-fs queues utime calls per
+    // entry (and once more on the implicit `./` root that strip:1
+    // collapses to empty-name). The utime on the empty-name entry hits
+    // the output dir itself, racing with subsequent test cleanup —
+    // surfacing as `ENOENT utime outputDir/`. For our use case
+    // (downloading + extracting fresh archives) we don't need original
+    // timestamps preserved on the extracted tree.
+    utimes: false,
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
       /* c8 ignore next 3 - destroyScheduled is set by the same map()
@@ -215,6 +223,14 @@ export async function extractTarGz(
 
   const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
+    // Skip restoring per-entry utimes. tar-fs queues utime calls per
+    // entry (and once more on the implicit `./` root that strip:1
+    // collapses to empty-name). The utime on the empty-name entry hits
+    // the output dir itself, racing with subsequent test cleanup —
+    // surfacing as `ENOENT utime outputDir/`. For our use case
+    // (downloading + extracting fresh archives) we don't need original
+    // timestamps preserved on the extracted tree.
+    utimes: false,
     map: (header: { name: string; size?: number; type?: string }) => {
       // Skip if destroy already scheduled
       /* c8 ignore next 3 - destroyScheduled is set by the same map()
