@@ -209,6 +209,53 @@ export async function downloadBinaryFile(
   const cacheEntryDir = path.dirname(destPath)
   const lockPath = path.join(cacheEntryDir, 'concurrency.lock')
 
+  // Verify a freshly-computed SRI integrity matches caller pinning.
+  // Used by both the cached-file path and the fresh-download path:
+  // without the cached-file call, an integrity-pinned second caller
+  // would silently trust whatever an earlier unpinned caller deposited
+  // at destPath. Throws on mismatch + safeDeletes so the next call
+  // re-downloads fresh.
+  const verifyIntegrity = async (actualIntegrity: string): Promise<void> => {
+    if (!integrity) {
+      return
+    }
+    const integrityMatch =
+      actualIntegrity.length === integrity.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(actualIntegrity),
+        Buffer.from(integrity),
+      )
+    if (!integrityMatch) {
+      await safeDelete(destPath)
+      throw new ErrorCtor(
+        `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
+      )
+    }
+  }
+
+  // Verify a buffer's sha256 matches caller pinning. ONLY called on the
+  // cached-file path — the fresh-download path delegates sha256 to
+  // httpDownload's inline verification (which fails early during the
+  // download itself, before the byte stream finishes).
+  const verifyCachedSha256 = async (fileBuffer: Buffer): Promise<void> => {
+    if (!sha256) {
+      return
+    }
+    const actualSha256 = hash('sha256', fileBuffer, 'hex')
+    const sha256Match =
+      actualSha256.length === sha256.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(actualSha256),
+        Buffer.from(sha256.toLowerCase()),
+      )
+    if (!sha256Match) {
+      await safeDelete(destPath)
+      throw new ErrorCtor(
+        `SHA-256 mismatch: expected ${sha256}, got ${actualSha256}`,
+      )
+    }
+  }
+
   return await processLock.withLock(
     lockPath,
     async () => {
@@ -218,9 +265,12 @@ export async function downloadBinaryFile(
         // oxlint-disable-next-line socket/prefer-exists-sync
         const stats = await fs.promises.stat(destPath)
         if (stats.size > 0) {
-          // File exists, compute and return SRI integrity hash.
           const fileBuffer = await fs.promises.readFile(destPath)
-          return `sha512-${hash('sha512', fileBuffer, 'base64')}`
+          const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
+          // Verify the cached file against caller pinning.
+          await verifyIntegrity(actualIntegrity)
+          await verifyCachedSha256(fileBuffer)
+          return actualIntegrity
         }
       }
 
@@ -238,26 +288,12 @@ export async function downloadBinaryFile(
         )
       }
 
-      // Compute SRI integrity hash of downloaded file.
+      // Compute SRI integrity hash of downloaded file + verify against
+      // caller pinning. sha256 was already verified inline by
+      // httpDownload during the stream, so we don't re-check it here.
       const fileBuffer = await fs.promises.readFile(destPath)
       const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
-
-      // Verify integrity if provided (constant-time comparison).
-      if (integrity) {
-        const integrityMatch =
-          actualIntegrity.length === integrity.length &&
-          crypto.timingSafeEqual(
-            Buffer.from(actualIntegrity),
-            Buffer.from(integrity),
-          )
-        if (!integrityMatch) {
-          // Clean up invalid file.
-          await safeDelete(destPath)
-          throw new ErrorCtor(
-            `Integrity mismatch: expected ${integrity}, got ${actualIntegrity}`,
-          )
-        }
-      }
+      await verifyIntegrity(actualIntegrity)
 
       // Make executable on POSIX systems.
       if (!WIN32) {
