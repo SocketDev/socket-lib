@@ -166,12 +166,26 @@ async function main(): Promise<void> {
   writeFileSync(outPath, markdown)
   // Run oxfmt so the checked-in file matches the formatter's expectations
   // (table column alignment, etc.) — otherwise lint fails on every build.
+  // Must pass -c so the fleet's oxfmtrc.json (single-quote, no-semi, table
+  // alignment behaviour) wins over oxfmt's built-in default config.
   try {
-    await spawn('pnpm', ['exec', 'oxfmt', outPath], {
-      cwd: rootPath,
-      shell: WIN32,
-      stdio: 'ignore',
-    })
+    await spawn(
+      'pnpm',
+      [
+        'exec',
+        'oxfmt',
+        '-c',
+        '.config/oxfmtrc.json',
+        '--ignore-path',
+        '.config/.prettierignore',
+        outPath,
+      ],
+      {
+        cwd: rootPath,
+        shell: WIN32,
+        stdio: 'ignore',
+      },
+    )
   } catch {
     // Formatting is best-effort — don't fail the build if oxfmt is missing.
   }
