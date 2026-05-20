@@ -2,12 +2,7 @@
  * @file Maintained Node.js versions without external dependencies.
  */
 
-import { ObjectAssign } from '../primordials/object'
-// IMPORTANT: Do not use destructuring here - use direct assignment instead.
-// tsgo has a bug that incorrectly transpiles destructured exports, resulting in
-// `exports.SomeName = void 0;` which causes runtime errors.
-// See: https://github.com/SocketDev/socket-packageurl-js/issues/3
-const ObjectFreeze = Object.freeze
+import { ObjectAssign, ObjectFreeze } from '../primordials/object'
 
 // Manually maintained Node.js version list.
 // https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch

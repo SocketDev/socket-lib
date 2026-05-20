@@ -21,6 +21,7 @@
 import { readJson } from '../fs/read-json'
 import { isIntegrityString } from '../integrity'
 
+import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 
 /**
@@ -137,7 +138,7 @@ interface RawToolEntry {
 }
 
 export function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
+  return typeof value === 'object' && value !== null && !ArrayIsArray(value)
 }
 
 export function parseChecksum(
@@ -205,7 +206,7 @@ export function parseToolEntry(raw: unknown, toolName: string): ManifestEntry {
         release: r.release,
         repository: r.repository,
         binaryName: typeof r.binaryName === 'string' ? r.binaryName : undefined,
-        notes: Array.isArray(r.notes) ? (r.notes as string[]) : undefined,
+        notes: ArrayIsArray(r.notes) ? (r.notes as string[]) : undefined,
         checksums: parseChecksums(r.checksums, toolName),
       },
     }
@@ -275,7 +276,7 @@ export function tryParseFlavored(
     description: String(raw['description'] ?? ''),
     version: String(raw['version'] ?? ''),
     release: String(raw['release'] ?? ''),
-    notes: Array.isArray(raw['notes']) ? (raw['notes'] as string[]) : undefined,
+    notes: ArrayIsArray(raw['notes']) ? (raw['notes'] as string[]) : undefined,
     flavors,
   }
 }
