@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.0) - 2026-05-12
+## [6.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.0) - 2026-05-20
 
 The v6 line is a public-surface reshape. Every top-level barrel module is gone — what was `@socketsecurity/lib/fs` is now imported leaf-by-leaf as `@socketsecurity/lib/fs/safe`, `@socketsecurity/lib/fs/read-json`, etc. This makes tree-shaking work properly, makes types load faster, and surfaces what each consumer actually depends on.
 
