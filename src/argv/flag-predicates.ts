@@ -14,9 +14,7 @@
 
 import process from 'node:process'
 
-import { ArrayIsArray } from '../primordials/array'
-
-import { StringPrototypeIncludes } from '../primordials/string'
+import { ArrayIsArray, ArrayPrototypeIncludes } from '../primordials/array'
 
 import type { FlagInput, FlagValues } from './flag-types'
 
@@ -50,7 +48,7 @@ export function makeFlagPredicate(
     }
     /* c8 ignore stop */
     if (ArrayIsArray(input)) {
-      return argvForms.some(f => StringPrototypeIncludes(input, f))
+      return argvForms.some(f => ArrayPrototypeIncludes(input, f))
     }
     return keys.some(k => !!(input as FlagValues)[k])
   }
