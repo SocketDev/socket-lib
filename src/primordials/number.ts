@@ -54,5 +54,12 @@ export const NumberParseInt: typeof Number.parseInt = _smolParseInt10
         : Number.parseInt(s, radix)
   : Number.parseInt
 /* c8 ignore stop */
+export const NumberPrototypeToExponential = uncurryThis(
+  Number.prototype.toExponential,
+)
 export const NumberPrototypeToFixed = uncurryThis(Number.prototype.toFixed)
+export const NumberPrototypeToPrecision = uncurryThis(
+  Number.prototype.toPrecision,
+)
 export const NumberPrototypeToString = uncurryThis(Number.prototype.toString)
+export const NumberPrototypeValueOf = uncurryThis(Number.prototype.valueOf)

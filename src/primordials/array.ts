@@ -110,12 +110,16 @@ export const ArrayPrototypeSplice = uncurryThis(Array.prototype.splice) as <T>(
   deleteCount?: number,
   ...items: T[]
 ) => T[]
+export const ArrayPrototypeToLocaleString = uncurryThis(
+  Array.prototype.toLocaleString,
+)
 export const ArrayPrototypeToReversed = uncurryThis(Array.prototype.toReversed)
 export const ArrayPrototypeToSorted = uncurryThis(Array.prototype.toSorted)
 // `toSpliced` is a copying variant of `splice`; same `(start, deleteCount, ...items)` signature.
 export const ArrayPrototypeToSpliced = uncurryThis(
   Array.prototype.toSpliced,
 ) as <T>(self: T[], start: number, deleteCount?: number, ...items: T[]) => T[]
+export const ArrayPrototypeToString = uncurryThis(Array.prototype.toString)
 export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
   T,
 >(

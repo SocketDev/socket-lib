@@ -73,6 +73,10 @@ export const StringPrototypeConcat = uncurryThis(String.prototype.concat) as (
 export const StringPrototypeEndsWith = uncurryThis(String.prototype.endsWith)
 export const StringPrototypeIncludes = uncurryThis(String.prototype.includes)
 export const StringPrototypeIndexOf = uncurryThis(String.prototype.indexOf)
+// ES2024 — validates that the string contains no lone surrogates.
+export const StringPrototypeIsWellFormed = uncurryThis(
+  String.prototype.isWellFormed,
+)
 export const StringPrototypeLastIndexOf = uncurryThis(
   String.prototype.lastIndexOf,
 )
@@ -129,9 +133,15 @@ export const StringPrototypeToLocaleUpperCase = uncurryThis(
 export const StringPrototypeToLowerCase = uncurryThis(
   String.prototype.toLowerCase,
 )
+export const StringPrototypeToString = uncurryThis(String.prototype.toString)
 export const StringPrototypeToUpperCase = uncurryThis(
   String.prototype.toUpperCase,
+)
+// ES2024 — returns a copy of the string with lone surrogates replaced by U+FFFD.
+export const StringPrototypeToWellFormed = uncurryThis(
+  String.prototype.toWellFormed,
 )
 export const StringPrototypeTrim = uncurryThis(String.prototype.trim)
 export const StringPrototypeTrimEnd = uncurryThis(String.prototype.trimEnd)
 export const StringPrototypeTrimStart = uncurryThis(String.prototype.trimStart)
+export const StringPrototypeValueOf = uncurryThis(String.prototype.valueOf)
