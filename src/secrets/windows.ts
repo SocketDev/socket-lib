@@ -84,6 +84,8 @@ export function deleteWindowsSync(
 }
 
 export function getDpapiFilePath(service: string, account: string): string {
+  validateKeychainComponent(service, 'service')
+  validateKeychainComponent(account, 'account')
   const appData =
     process.env['APPDATA'] ?? path.join(homedir(), 'AppData', 'Roaming')
   return path.join(appData, service, `${account}.enc`)
@@ -228,6 +230,29 @@ export function runPsSync(
     stdio: ['pipe', 'pipe', 'pipe'],
   })
   return { status: r.status, stdout: r.stdout, stderr: r.stderr }
+}
+
+/**
+ * Reject identifier components (service / account names) that contain path
+ * separators, `..` segments, or NUL bytes. These would escape the intended
+ * `%APPDATA%\<service>\<account>.enc` layout and let a caller read or overwrite
+ * arbitrary files under the user's profile.
+ *
+ * Throws on bad input rather than sanitizing — callers should pass logical
+ * identifiers (e.g. `socket-cli`, `SOCKET_API_KEY`), not paths.
+ */
+export function validateKeychainComponent(value: string, name: string): void {
+  if (
+    /[\\/]/.test(value) ||
+    value.includes('..') ||
+    value.includes('\0') ||
+    value === '' ||
+    value === '.'
+  ) {
+    throw new Error(
+      `secrets/windows: ${name} contains path-traversal characters: ${JSON.stringify(value)}. Use a plain identifier (no \\\\, /, .., or NUL).`,
+    )
+  }
 }
 
 export async function writeDpapi(
