@@ -9,12 +9,7 @@
  *   assert behavior in both shapes.
  */
 
-import {
-  createWriteStream,
-  mkdirSync,
-  mkdtempSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { createGzip } from 'node:zlib'
@@ -39,36 +34,34 @@ import { safeDelete } from '../../../src/fs/safe'
 
 import { makeFakeDownloader } from '../../lib/fake-downloader'
 
+// Collect the gzip output into a Buffer directly. Round-tripping through
+// the filesystem (createWriteStream + readFileSync) raced under vitest's
+// vm-context where post-`close` reads sometimes hit ENOENT on macOS APFS.
+function buildGzipTarball(packRoot: string): Promise<Buffer> {
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = []
+    const pack = tarFs.pack(packRoot)
+    const gzip = createGzip()
+    pack.on('error', reject)
+    gzip.on('error', reject)
+    gzip.on('data', chunk => chunks.push(chunk as Buffer))
+    gzip.on('end', () => resolve(Buffer.concat(chunks)))
+    pack.pipe(gzip)
+  })
+}
+
 export function buildJreTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')
   mkdirSync(path.join(packRoot, 'jdk-21', 'bin'), { recursive: true })
   writeFileSync(path.join(packRoot, 'jdk-21', 'bin', 'java'), '#!/bin/sh\n')
-  const archivePath = path.join(scratchDir, 'jre.tar.gz')
-  return new Promise<Buffer>((resolve, reject) => {
-    const out = createWriteStream(archivePath)
-    tarFs.pack(packRoot).pipe(createGzip()).pipe(out)
-    out.on('finish', () => {
-      const fs = require('node:fs') as typeof import('node:fs')
-      resolve(fs.readFileSync(archivePath))
-    })
-    out.on('error', reject)
-  })
+  return buildGzipTarball(packRoot)
 }
 
 export function buildSbtTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')
   mkdirSync(path.join(packRoot, 'sbt', 'bin'), { recursive: true })
   writeFileSync(path.join(packRoot, 'sbt', 'bin', 'sbt'), '#!/bin/sh\n')
-  const archivePath = path.join(scratchDir, 'sbt.tgz')
-  return new Promise<Buffer>((resolve, reject) => {
-    const out = createWriteStream(archivePath)
-    tarFs.pack(packRoot).pipe(createGzip()).pipe(out)
-    out.on('finish', () => {
-      const fs = require('node:fs') as typeof import('node:fs')
-      resolve(fs.readFileSync(archivePath))
-    })
-    out.on('error', reject)
-  })
+  return buildGzipTarball(packRoot)
 }
 
 describe('external-tools resolver memoization', () => {

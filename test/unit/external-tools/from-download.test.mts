@@ -6,12 +6,7 @@
  *   `downloadAndExtractTool` can hand the archive to `extractArchive`.
  */
 
-import {
-  createWriteStream,
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-} from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -73,25 +68,26 @@ describe('external-tools/from-download', () => {
      * Build a real tar archive containing `source/hello.txt`. Packs the parent
      * dir so the entry name is `source/hello.txt` (with the `source/` wrapper),
      * which mirrors how Adoptium / Bazel / SBT archives are shaped.
+     *
+     * Returns the tar bytes directly. Round-tripping through the FS
+     * (createWriteStream + readFileSync) raced under vitest's vm-context.
      */
-    async function buildTarFixture(scratchDir: string): Promise<string> {
+    function buildTarFixture(scratchDir: string): Promise<Buffer> {
       const fs = require('node:fs') as typeof import('node:fs')
       const packRoot = path.join(scratchDir, 'pack-root')
       fs.mkdirSync(path.join(packRoot, 'source'), { recursive: true })
       fs.writeFileSync(path.join(packRoot, 'source', 'hello.txt'), 'world')
-      const archivePath = path.join(scratchDir, 'fixture.tar')
-      await new Promise<void>((resolve, reject) => {
-        const out = createWriteStream(archivePath)
-        tarFs.pack(packRoot).pipe(out)
-        out.on('finish', () => resolve())
-        out.on('error', reject)
+      return new Promise<Buffer>((resolve, reject) => {
+        const chunks: Buffer[] = []
+        const pack = tarFs.pack(packRoot)
+        pack.on('error', reject)
+        pack.on('data', chunk => chunks.push(chunk as Buffer))
+        pack.on('end', () => resolve(Buffer.concat(chunks)))
       })
-      return archivePath
     }
 
     it('extracts a tar archive into the target dir on first call', async () => {
-      const tarPath = await buildTarFixture(scratch)
-      const tarBytes = require('node:fs').readFileSync(tarPath) as Buffer
+      const tarBytes = await buildTarFixture(scratch)
       const { downloader } = makeFakeDownloader(tarBytes)
       const extractedDir = path.join(scratch, 'extracted')
 
@@ -110,8 +106,7 @@ describe('external-tools/from-download', () => {
     })
 
     it('is idempotent: re-running with a populated target dir skips extraction', async () => {
-      const tarPath = await buildTarFixture(scratch)
-      const tarBytes = require('node:fs').readFileSync(tarPath) as Buffer
+      const tarBytes = await buildTarFixture(scratch)
       const { downloader } = makeFakeDownloader(tarBytes)
       const extractedDir = path.join(scratch, 'extracted')
 
@@ -141,14 +136,13 @@ describe('external-tools/from-download', () => {
       const packRoot = path.join(scratch, 'strip-pack')
       fs.mkdirSync(path.join(packRoot, 'top'), { recursive: true })
       fs.writeFileSync(path.join(packRoot, 'top', 'inner.txt'), 'hi')
-      const archivePath = path.join(scratch, 'wrap.tar')
-      await new Promise<void>((resolve, reject) => {
-        const out = createWriteStream(archivePath)
-        tarFs.pack(packRoot).pipe(out)
-        out.on('finish', () => resolve())
-        out.on('error', reject)
+      const tarBytes = await new Promise<Buffer>((resolve, reject) => {
+        const chunks: Buffer[] = []
+        const pack = tarFs.pack(packRoot)
+        pack.on('error', reject)
+        pack.on('data', chunk => chunks.push(chunk as Buffer))
+        pack.on('end', () => resolve(Buffer.concat(chunks)))
       })
-      const tarBytes = fs.readFileSync(archivePath)
       const { downloader } = makeFakeDownloader(tarBytes)
       const extractedDir = path.join(scratch, 'extracted')
 

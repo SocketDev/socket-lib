@@ -4,13 +4,7 @@
  *   .zip), strip:1 unwrap, and the macOS `Contents/Home/` javaHome quirk.
  */
 
-import {
-  createWriteStream,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  writeFileSync,
-} from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -28,20 +22,26 @@ import { makeFakeDownloader } from '../../../lib/fake-downloader'
 /**
  * Build a JRE-shape tarball: top-level `jdk-21/bin/java`. After strip:1 the
  * extracted dir contains `bin/java` directly.
+ *
+ * Collects the tar/gzip output into a Buffer directly rather than round-
+ * tripping through the filesystem. The previous round-trip (write file →
+ * readFileSync) raced under vitest's vm-context where the post-`close`
+ * file wasn't always visible to the subsequent sync read on macOS APFS.
  */
-export async function buildJreTarball(scratchDir: string): Promise<Buffer> {
+export function buildJreTarball(scratchDir: string): Promise<Buffer> {
   const packRoot = path.join(scratchDir, 'pack-root')
   mkdirSync(path.join(packRoot, 'jdk-21', 'bin'), { recursive: true })
   writeFileSync(path.join(packRoot, 'jdk-21', 'bin', 'java'), '#!/bin/sh\n')
-  const archivePath = path.join(scratchDir, 'jre.tar.gz')
-  await new Promise<void>((resolve, reject) => {
-    const out = createWriteStream(archivePath)
-    tarFs.pack(packRoot).pipe(createGzip()).pipe(out)
-    out.on('finish', () => resolve())
-    out.on('error', reject)
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = []
+    const pack = tarFs.pack(packRoot)
+    const gzip = createGzip()
+    pack.on('error', reject)
+    gzip.on('error', reject)
+    gzip.on('data', chunk => chunks.push(chunk as Buffer))
+    gzip.on('end', () => resolve(Buffer.concat(chunks)))
+    pack.pipe(gzip)
   })
-  const fs = require('node:fs') as typeof import('node:fs')
-  return fs.readFileSync(archivePath)
 }
 
 describe('external-tools/jre/from-download', () => {
