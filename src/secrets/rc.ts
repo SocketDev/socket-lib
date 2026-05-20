@@ -39,9 +39,11 @@
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { homedir, platform } from 'node:os'
+import { platform } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
+
+import { getHome } from '../env/home'
 
 export function buildBlock(opts: WriteOptions): {
   begin: string
@@ -180,7 +182,10 @@ export type WriteResult =
 export function pickRcFile(
   shellOverride?: 'zsh' | 'bash' | 'fish',
 ): string | undefined {
-  const home = homedir()
+  const home = getHome()
+  if (!home) {
+    return undefined
+  }
   const shellPath = process.env['SHELL'] ?? ''
   const shell: 'zsh' | 'bash' | 'fish' | undefined =
     shellOverride ??

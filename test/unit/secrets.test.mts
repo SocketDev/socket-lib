@@ -237,7 +237,7 @@ SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_T
     }
   })
 
-  it.skipIf(!IS_MACOS)('returns undefined on non-existent rc location', () => {
+  it.skipIf(!IS_MACOS)('returns a skipped result on non-existent rc location', () => {
     const { cleanup } = withFakeHome()
     try {
       // Force an "other" shell so pickRcFile returns undefined.
@@ -246,7 +246,11 @@ SOCKET_API_TOKEN="$(security find-generic-password -s socket-cli -a SOCKET_API_T
         service: 'test-svc',
         exports: { TEST: 'v' },
       })
-      expect(r).toBeUndefined()
+      expect(r).toEqual({
+        rcPath: undefined,
+        outcome: 'skipped',
+        reason: 'unknown-shell',
+      })
     } finally {
       cleanup()
     }

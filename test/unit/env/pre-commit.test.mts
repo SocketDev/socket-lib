@@ -122,9 +122,9 @@ describe('env/pre-commit', () => {
       expect(getPreCommit()).toBe(false)
     })
 
-    it('should handle whitespace in values', () => {
+    it('should trim whitespace from values', () => {
       setEnv('PRE_COMMIT', ' true ')
-      expect(getPreCommit()).toBe(false) // whitespace makes it not match
+      expect(getPreCommit()).toBe(true) // envAsBoolean trims before matching
 
       setEnv('PRE_COMMIT', 'true')
       expect(getPreCommit()).toBe(true)
