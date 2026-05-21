@@ -40,8 +40,11 @@ describe.sequential('isObject', () => {
     expect(isObject([1, 2])).toBe(false)
   })
 
-  test('false for null', () => {
-    expect(isObject(null)).toBe(false)
+  test('false for null (and undefined)', () => {
+    // The fleet's no-null rule prefers undefined; isObject correctly rejects both.
+    // socket-hook: allow null-literal
+    expect(isObject(null as unknown)).toBe(false)
+    expect(isObject(undefined)).toBe(false)
   })
 
   test('false for primitives', () => {
@@ -114,12 +117,16 @@ describe.sequential('parseChecksums', () => {
     expect(result['linux-x64']!.asset).toBe('a.tar.gz')
   })
 
-  test('throws when raw is not an object', () => {
-    expect(() => parseChecksums(null, 'mytool')).toThrow(/missing a 'checksums' object/)
+  test('throws when raw is not an object (undefined)', () => {
+    expect(() => parseChecksums(undefined, 'mytool')).toThrow(
+      /missing a 'checksums' object/,
+    )
   })
 
   test('throws when raw is an array', () => {
-    expect(() => parseChecksums([], 'mytool')).toThrow(/missing a 'checksums' object/)
+    expect(() => parseChecksums([], 'mytool')).toThrow(
+      /missing a 'checksums' object/,
+    )
   })
 
   test('returns empty when input has no platforms', () => {
@@ -237,7 +244,9 @@ describe.sequential('parseToolEntry', () => {
 
 describe.sequential('tryParseFlavored', () => {
   test('returns undefined when no inner objects have checksums', () => {
-    expect(tryParseFlavored({ description: 'x', version: '1' }, 'rust')).toBeUndefined()
+    expect(
+      tryParseFlavored({ description: 'x', version: '1' }, 'rust'),
+    ).toBeUndefined()
   })
 
   test('returns a flavored entry with version/description/release strings', () => {
@@ -266,7 +275,9 @@ describe.sequential('tryParseFlavored', () => {
       {
         // free has no `repository` so it is NOT recognized as a flavor.
         free: {
-          checksums: { 'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY } },
+          checksums: {
+            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
+          },
         },
       },
       'sfw',
@@ -279,7 +290,9 @@ describe.sequential('tryParseFlavored', () => {
       {
         free: {
           repository: 'github:socket/sfw-free',
-          checksums: { 'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY } },
+          checksums: {
+            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
+          },
         },
       },
       'sfw',
@@ -296,7 +309,9 @@ describe.sequential('tryParseFlavored', () => {
         notes: ['n1'],
         free: {
           repository: 'r',
-          checksums: { 'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY } },
+          checksums: {
+            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
+          },
         },
       },
       'sfw',
@@ -331,7 +346,7 @@ describe.sequential('getTool', () => {
   })
 
   test('returns undefined for kind="other"', () => {
-    const m = manifestWith({ kind: 'other', raw: null })
+    const m = manifestWith({ kind: 'other', raw: undefined })
     expect(getTool(m, 'mytool')).toBeUndefined()
   })
 
