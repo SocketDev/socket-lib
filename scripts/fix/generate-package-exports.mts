@@ -12,8 +12,8 @@ import builtinNames from '@socketregistry/packageurl-js-stable/data/npm/builtin-
 import fastGlob from 'fast-glob'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { toSortedObject } from '@socketsecurity/lib-stable/objects'
-import { readPackageJson } from '@socketsecurity/lib-stable/packages'
+import { toSortedObject } from '@socketsecurity/lib-stable/objects/sort'
+import { readPackageJson } from '@socketsecurity/lib-stable/packages/operations'
 
 const logger = getDefaultLogger()
 

@@ -5,12 +5,12 @@
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn'
+import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn/spawn'
 
 import type {
   SpawnOptions,
   SpawnSyncOptions,
-} from '@socketsecurity/lib-stable/spawn'
+} from '@socketsecurity/lib-stable/spawn/spawn'
 
 interface CommandEntry {
   command: string

@@ -17,10 +17,10 @@ const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
-const { isQuiet } = require('@socketsecurity/lib-stable/argv/flags')
+const { isQuiet } = require('@socketsecurity/lib-stable/argv/flag-predicates')
 const { getDefaultLogger } = require('@socketsecurity/lib-stable/logger')
 const { normalizePath } = require('@socketsecurity/lib-stable/paths/normalize')
-const { pluralize } = require('@socketsecurity/lib-stable/words')
+const { pluralize } = require('@socketsecurity/lib-stable/words/pluralize')
 
 const logger = getDefaultLogger()
 

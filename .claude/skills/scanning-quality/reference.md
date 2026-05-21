@@ -625,7 +625,7 @@ Import style conventions (Socket Security standards):
   - For `path`, `os`, `url`, `crypto`: use default imports
   - Examples:
     - `import { existsSync, promises as fs } from 'node:fs'` ✅
-    - `import { spawn } from '@socketsecurity/lib/spawn'` ✅ (preferred over node:child_process)
+    - `import { spawn } from '@socketsecurity/lib/spawn/spawn'` ✅ (preferred over node:child_process)
     - `import path from 'node:path'` ✅
     - `import os from 'node:os'` ✅
     - `import { fileURLToPath } from 'node:url'` ✅ (exception: cherry-pick specific exports from url)
@@ -635,7 +635,7 @@ Examples of what to flag:
 
 - Custom log functions: `function log(msg) { console.log(msg) }` → use `@socketsecurity/lib/logger`
 - Direct child_process usage (except in additions/):
-  - `import { execSync } from 'node:child_process'` → use `import { spawn } from '@socketsecurity/lib/spawn'`
+  - `import { execSync } from 'node:child_process'` → use `import { spawn } from '@socketsecurity/lib/spawn/spawn'`
   - `execSync('cmd arg1')` → use `await spawn('cmd', ['arg1'])`
 - Default imports for fs:
   - `import fs from 'node:fs'` → use `import { existsSync, promises as fs } from 'node:fs'`
@@ -1595,7 +1595,7 @@ Issue: Missing "Getting Started" section with minimal working example
 Severity: High
 Pattern: Extensive API documentation but no simple end-to-end example
 Actual: Junior devs need: "How do I scan my first package? Step 1, Step 2, Step 3"
-Fix: Add "Quick Start" section: "(1) Install: npm install @socketsecurity/lib, (2) Import utilities: import { safeDelete } from '@socketsecurity/lib/fs', (3) Use safely: await safeDelete('/path/to/dir')"
+Fix: Add "Quick Start" section: "(1) Install: npm install @socketsecurity/lib, (2) Import utilities: import { safeDelete } from '@socketsecurity/lib/fs/safe', (3) Use safely: await safeDelete('/path/to/dir')"
 Impact: Without concrete starting point, juniors struggle to use SDK effectively
 </output_format>
 

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
