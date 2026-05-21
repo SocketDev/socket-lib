@@ -15,7 +15,8 @@ vi.mock('../../../../src/external-tools/synp/from-download', () => ({
 async function loadFresh() {
   const vfsMod = await import('../../../../src/external-tools/synp/from-vfs')
   const pathMod = await import('../../../../src/external-tools/synp/from-path')
-  const dlMod = await import('../../../../src/external-tools/synp/from-download')
+  const dlMod =
+    await import('../../../../src/external-tools/synp/from-download')
   const mod = await import('../../../../src/external-tools/synp/resolve')
   return {
     fromVfs: vfsMod.synpFromVfs as ReturnType<typeof vi.fn>,
@@ -122,7 +123,10 @@ describe.sequential('external-tools/synp/resolve — resolveSynp memoization', (
       await loadFresh()
     fromVfs.mockResolvedValue(undefined)
     const first = { binaryPath: '/usr/bin/synp', source: 'path' as const }
-    const second = { binaryPath: '/usr/local/bin/synp', source: 'path' as const }
+    const second = {
+      binaryPath: '/usr/local/bin/synp',
+      source: 'path' as const,
+    }
     fromPath.mockResolvedValueOnce(first).mockResolvedValueOnce(second)
     expect(await resolveSynp()).toBe(first)
     resetSynpResolution()

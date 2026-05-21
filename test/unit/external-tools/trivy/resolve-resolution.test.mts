@@ -13,9 +13,8 @@ vi.mock('../../../../src/external-tools/trivy/from-download', () => ({
 async function loadFresh() {
   const vfsMod = await import('../../../../src/external-tools/trivy/from-vfs')
   const pathMod = await import('../../../../src/external-tools/trivy/from-path')
-  const dlMod = await import(
-    '../../../../src/external-tools/trivy/from-download'
-  )
+  const dlMod =
+    await import('../../../../src/external-tools/trivy/from-download')
   const mod = await import('../../../../src/external-tools/trivy/resolve')
   return {
     fromVfs: vfsMod.trivyFromVfs as ReturnType<typeof vi.fn>,

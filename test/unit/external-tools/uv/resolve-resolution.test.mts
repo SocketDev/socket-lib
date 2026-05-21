@@ -13,9 +13,7 @@ vi.mock('../../../../src/external-tools/uv/from-download', () => ({
 async function loadFresh() {
   const vfsMod = await import('../../../../src/external-tools/uv/from-vfs')
   const pathMod = await import('../../../../src/external-tools/uv/from-path')
-  const dlMod = await import(
-    '../../../../src/external-tools/uv/from-download'
-  )
+  const dlMod = await import('../../../../src/external-tools/uv/from-download')
   const mod = await import('../../../../src/external-tools/uv/resolve')
   return {
     fromVfs: vfsMod.uvFromVfs as ReturnType<typeof vi.fn>,
@@ -52,8 +50,7 @@ describe.sequential('external-tools/uv/resolve — doResolveUv', () => {
   })
 
   test('falls through to download when PATH misses and opts.downloadIfMissing is set', async () => {
-    const { doResolveUv, fromDownload, fromPath, fromVfs } =
-      await loadFresh()
+    const { doResolveUv, fromDownload, fromPath, fromVfs } = await loadFresh()
     fromVfs.mockResolvedValueOnce(undefined)
     fromPath.mockResolvedValueOnce(undefined)
     const expected = { binaryPath: '/cache/uv', source: 'download' as const }

@@ -12,10 +12,10 @@ vi.mock('../../../../src/external-tools/cdxgen/from-download', () => ({
 
 async function loadFresh() {
   const vfsMod = await import('../../../../src/external-tools/cdxgen/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/cdxgen/from-path')
-  const dlMod = await import(
-    '../../../../src/external-tools/cdxgen/from-download'
-  )
+  const pathMod =
+    await import('../../../../src/external-tools/cdxgen/from-path')
+  const dlMod =
+    await import('../../../../src/external-tools/cdxgen/from-download')
   const mod = await import('../../../../src/external-tools/cdxgen/resolve')
   return {
     fromVfs: vfsMod.cdxgenFromVfs as ReturnType<typeof vi.fn>,
@@ -56,7 +56,10 @@ describe.sequential('external-tools/cdxgen/resolve — doResolveCdxgen', () => {
       await loadFresh()
     fromVfs.mockResolvedValueOnce(undefined)
     fromPath.mockResolvedValueOnce(undefined)
-    const expected = { binaryPath: '/cache/cdxgen', source: 'download' as const }
+    const expected = {
+      binaryPath: '/cache/cdxgen',
+      source: 'download' as const,
+    }
     fromDownload.mockResolvedValueOnce(expected)
     const opts = {
       downloadIfMissing: { platformArch: 'darwin-arm64', version: '1.22.0' },

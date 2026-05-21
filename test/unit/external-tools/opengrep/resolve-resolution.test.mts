@@ -11,11 +11,12 @@ vi.mock('../../../../src/external-tools/opengrep/from-download', () => ({
 }))
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/opengrep/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/opengrep/from-path')
-  const dlMod = await import(
-    '../../../../src/external-tools/opengrep/from-download'
-  )
+  const vfsMod =
+    await import('../../../../src/external-tools/opengrep/from-vfs')
+  const pathMod =
+    await import('../../../../src/external-tools/opengrep/from-path')
+  const dlMod =
+    await import('../../../../src/external-tools/opengrep/from-download')
   const mod = await import('../../../../src/external-tools/opengrep/resolve')
   return {
     fromVfs: vfsMod.opengrepFromVfs as ReturnType<typeof vi.fn>,
@@ -39,7 +40,10 @@ describe.sequential('external-tools/opengrep/resolve — doResolveOpengrep', () 
   test('returns the PATH result when opengrep is on PATH', async () => {
     const { doResolveOpengrep, fromPath, fromVfs } = await loadFresh()
     fromVfs.mockResolvedValueOnce(undefined)
-    const expected = { binaryPath: '/usr/bin/opengrep', source: 'path' as const }
+    const expected = {
+      binaryPath: '/usr/bin/opengrep',
+      source: 'path' as const,
+    }
     fromPath.mockResolvedValueOnce(expected)
     expect(await doResolveOpengrep()).toBe(expected)
   })
@@ -56,7 +60,10 @@ describe.sequential('external-tools/opengrep/resolve — doResolveOpengrep', () 
       await loadFresh()
     fromVfs.mockResolvedValueOnce(undefined)
     fromPath.mockResolvedValueOnce(undefined)
-    const expected = { binaryPath: '/cache/opengrep', source: 'download' as const }
+    const expected = {
+      binaryPath: '/cache/opengrep',
+      source: 'download' as const,
+    }
     fromDownload.mockResolvedValueOnce(expected)
     const opts = {
       downloadIfMissing: { platformArch: 'darwin-arm64', version: '1.22.0' },
@@ -70,7 +77,10 @@ describe.sequential('external-tools/opengrep/resolve — resolveOpengrep memoiza
   test('memoizes by cacheKey within one module instance', async () => {
     const { fromPath, fromVfs, resolveOpengrep } = await loadFresh()
     fromVfs.mockResolvedValue(undefined)
-    const expected = { binaryPath: '/usr/bin/opengrep', source: 'path' as const }
+    const expected = {
+      binaryPath: '/usr/bin/opengrep',
+      source: 'path' as const,
+    }
     fromPath.mockResolvedValueOnce(expected)
     const a = await resolveOpengrep()
     const b = await resolveOpengrep()
@@ -80,7 +90,8 @@ describe.sequential('external-tools/opengrep/resolve — resolveOpengrep memoiza
   })
 
   test('uses separate cache slots for different option shapes', async () => {
-    const { fromDownload, fromPath, fromVfs, resolveOpengrep } = await loadFresh()
+    const { fromDownload, fromPath, fromVfs, resolveOpengrep } =
+      await loadFresh()
     fromVfs.mockResolvedValue(undefined)
     fromPath.mockResolvedValue(undefined)
     const dl = { binaryPath: '/cache/opengrep', source: 'download' as const }
