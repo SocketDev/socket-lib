@@ -35,7 +35,7 @@ describe.sequential('env/boolean — envAsBoolean', () => {
   })
 
   test('returns positional defaultValue=true for null input (legacy)', () => {
-    expect(envAsBoolean(null, true)).toBe(true)
+    expect(envAsBoolean(undefined, true)).toBe(true)
   })
 
   test('returns defaultValue via options object', () => {

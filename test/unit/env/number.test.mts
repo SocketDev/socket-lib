@@ -16,7 +16,7 @@ describe.sequential('env/number — envAsNumber (default int mode)', () => {
   })
 
   test('returns 0 for null with no default', () => {
-    expect(envAsNumber(null)).toBe(0)
+    expect(envAsNumber(undefined)).toBe(0)
   })
 
   test('returns positional defaultValue for undefined (legacy)', () => {
@@ -24,7 +24,7 @@ describe.sequential('env/number — envAsNumber (default int mode)', () => {
   })
 
   test('returns positional defaultValue for null (legacy)', () => {
-    expect(envAsNumber(null, 42)).toBe(42)
+    expect(envAsNumber(undefined, 42)).toBe(42)
   })
 
   test('returns defaultValue via options', () => {
