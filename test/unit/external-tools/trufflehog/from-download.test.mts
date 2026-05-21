@@ -12,7 +12,8 @@ vi.mock('../../../../src/paths/socket', () => ({
 async function loadFresh() {
   const fdMod = await import('../../../../src/external-tools/from-download')
   const downloadMock = fdMod.downloadAndExtractTool as ReturnType<typeof vi.fn>
-  const mod = await import('../../../../src/external-tools/trufflehog/from-download')
+  const mod =
+    await import('../../../../src/external-tools/trufflehog/from-download')
   return { downloadMock, trufflehogFromDownload: mod.trufflehogFromDownload }
 }
 
@@ -44,7 +45,9 @@ describe.sequential('external-tools/trufflehog/from-download', () => {
     })
     expect(result?.source).toBe('download')
     expect(result?.integrity).toBe('sha512-fake==')
-    expect(result?.path).toContain(path.join('/fake/dlx', 'trufflehog', '1.0.0', 'linux-x64'))
+    expect(result?.path).toContain(
+      path.join('/fake/dlx', 'trufflehog', '1.0.0', 'linux-x64'),
+    )
   })
 
   test('passes a custom cacheDir', async () => {
@@ -87,7 +90,10 @@ describe.sequential('external-tools/trufflehog/from-download', () => {
       platformArch: 'linux-x64',
       version: '1.0.0',
     })
-    const callArg = downloadMock.mock.calls[0]![0] as { downloader: unknown; integrity: unknown }
+    const callArg = downloadMock.mock.calls[0]![0] as {
+      downloader: unknown
+      integrity: unknown
+    }
     expect(callArg.downloader).toBe(downloader)
     expect(callArg.integrity).toBe('sha512-input==')
   })

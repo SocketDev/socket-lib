@@ -44,7 +44,9 @@ describe.sequential('external-tools/uv/from-download', () => {
     })
     expect(result?.source).toBe('download')
     expect(result?.integrity).toBe('sha512-fake==')
-    expect(result?.path).toContain(path.join('/fake/dlx', 'uv', '1.0.0', 'linux-x64'))
+    expect(result?.path).toContain(
+      path.join('/fake/dlx', 'uv', '1.0.0', 'linux-x64'),
+    )
   })
 
   test('passes a custom cacheDir', async () => {
@@ -87,7 +89,10 @@ describe.sequential('external-tools/uv/from-download', () => {
       platformArch: 'linux-x64',
       version: '1.0.0',
     })
-    const callArg = downloadMock.mock.calls[0]![0] as { downloader: unknown; integrity: unknown }
+    const callArg = downloadMock.mock.calls[0]![0] as {
+      downloader: unknown
+      integrity: unknown
+    }
     expect(callArg.downloader).toBe(downloader)
     expect(callArg.integrity).toBe('sha512-input==')
   })
