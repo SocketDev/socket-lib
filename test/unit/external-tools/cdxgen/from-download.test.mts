@@ -27,7 +27,8 @@ vi.mock('node:fs', async () => {
 async function loadFresh() {
   const fdMod = await import('../../../../src/external-tools/from-download')
   const archiveMock = fdMod.downloadToolArchive as ReturnType<typeof vi.fn>
-  const mod = await import('../../../../src/external-tools/cdxgen/from-download')
+  const mod =
+    await import('../../../../src/external-tools/cdxgen/from-download')
   return { archiveMock, cdxgenFromDownload: mod.cdxgenFromDownload }
 }
 
@@ -62,7 +63,10 @@ describe.sequential('external-tools/cdxgen/from-download', () => {
       version: '12.4.1',
     })
     // Default install dir layout: <dlx>/cdxgen/<version>/<platformArch>-<variant>
-    const callArg = archiveMock.mock.calls[0]![0] as { name: string; url: string }
+    const callArg = archiveMock.mock.calls[0]![0] as {
+      name: string
+      url: string
+    }
     expect(callArg.name).toContain('slim')
     expect(callArg.url).toContain('-slim')
   })
@@ -79,7 +83,10 @@ describe.sequential('external-tools/cdxgen/from-download', () => {
       variant: 'full',
       version: '12.4.1',
     })
-    const callArg = archiveMock.mock.calls[0]![0] as { name: string; url: string }
+    const callArg = archiveMock.mock.calls[0]![0] as {
+      name: string
+      url: string
+    }
     expect(callArg.name).not.toContain('-slim')
     expect(callArg.url).not.toContain('-slim')
   })

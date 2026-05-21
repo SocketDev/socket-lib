@@ -34,7 +34,10 @@ describe.sequential('external-tools/synp/from-download', () => {
     const { synpFromDownload, downloadMock } = await loadFresh()
     downloadMock.mockResolvedValueOnce({ binaryPath: '/dlx/synp' })
     await synpFromDownload({ version: '1.9.14' })
-    const callArg = downloadMock.mock.calls[0]![0] as { package: string; binaryName: string }
+    const callArg = downloadMock.mock.calls[0]![0] as {
+      package: string
+      binaryName: string
+    }
     expect(callArg.package).toBe('synp@1.9.14')
     expect(callArg.binaryName).toBe('synp')
   })
