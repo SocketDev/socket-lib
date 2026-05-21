@@ -144,13 +144,7 @@ describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () =>
       packageName: 'tool',
       bin: './bin/tool.js',
     })
-    const binPath = path.join(
-      tmpRoot,
-      'node_modules',
-      'tool',
-      'bin',
-      'tool.js',
-    )
+    const binPath = path.join(tmpRoot, 'node_modules', 'tool', 'bin', 'tool.js')
     mkdirSync(path.dirname(binPath), { recursive: true })
     writeFileSync(binPath, '#!/usr/bin/env node\n')
     makePackageBinsExecutable(tmpRoot, 'tool')
