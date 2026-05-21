@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../../../src/bin/which', () => ({
-  which: vi.fn<(name: string, opts?: { nothrow?: boolean }) => Promise<string | null>>(),
+  which:
+    vi.fn<
+      (name: string, opts?: { nothrow?: boolean }) => Promise<string | null>
+    >(),
   whichSync: vi.fn(),
 }))
 
@@ -30,14 +33,14 @@ describe.sequential('external-tools/opengrep/from-path', () => {
 
   test('returns undefined when which returns null (not on PATH)', async () => {
     const { opengrepFromPath, whichMock } = await loadFresh()
-    whichMock.mockResolvedValueOnce(null)
+    whichMock.mockResolvedValueOnce(undefined)
     const result = await opengrepFromPath()
     expect(result).toBeUndefined()
   })
 
   test('passes nothrow:true to which', async () => {
     const { opengrepFromPath, whichMock } = await loadFresh()
-    whichMock.mockResolvedValueOnce(null)
+    whichMock.mockResolvedValueOnce(undefined)
     await opengrepFromPath()
     expect(whichMock).toHaveBeenCalledWith('opengrep', { nothrow: true })
   })
