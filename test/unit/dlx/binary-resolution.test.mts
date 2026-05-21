@@ -1,9 +1,19 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
-import { findBinaryPath } from '../../../src/dlx/binary-resolution'
+import {
+  findBinaryPath,
+  makePackageBinsExecutable,
+  resolveBinaryPath,
+} from '../../../src/dlx/binary-resolution'
 
 let tmpRoot: string
 
@@ -117,5 +127,87 @@ describe.sequential('dlx/binary-resolution — findBinaryPath', () => {
     })
     const result = findBinaryPath(tmpRoot, '@scope/mypkg')
     expect(result).toContain('@scope/mypkg/cli.js')
+  })
+})
+
+const IS_WIN = os.platform() === 'win32'
+
+describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () => {
+  if (IS_WIN) {
+    test.skip('unix-only', () => {})
+    return
+  }
+
+  test('chmods the single bin entry to 0o755', () => {
+    makePackage({
+      packageDir: tmpRoot,
+      packageName: 'tool',
+      bin: './bin/tool.js',
+    })
+    const binPath = path.join(
+      tmpRoot,
+      'node_modules',
+      'tool',
+      'bin',
+      'tool.js',
+    )
+    mkdirSync(path.dirname(binPath), { recursive: true })
+    writeFileSync(binPath, '#!/usr/bin/env node\n')
+    makePackageBinsExecutable(tmpRoot, 'tool')
+    expect(statSync(binPath).mode & 0o777).toBe(0o755)
+  })
+
+  test('chmods every entry of a multi-bin object', () => {
+    makePackage({
+      packageDir: tmpRoot,
+      packageName: 'tool',
+      bin: { primary: './bin/a.js', secondary: './bin/b.js' },
+    })
+    const dir = path.join(tmpRoot, 'node_modules', 'tool', 'bin')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(path.join(dir, 'a.js'), '')
+    writeFileSync(path.join(dir, 'b.js'), '')
+    makePackageBinsExecutable(tmpRoot, 'tool')
+    expect(statSync(path.join(dir, 'a.js')).mode & 0o777).toBe(0o755)
+    expect(statSync(path.join(dir, 'b.js')).mode & 0o777).toBe(0o755)
+  })
+
+  test('returns silently when the package has no bin field', () => {
+    makePackage({ packageDir: tmpRoot, packageName: 'no-bin' })
+    expect(() => makePackageBinsExecutable(tmpRoot, 'no-bin')).not.toThrow()
+  })
+
+  test('returns silently when the bin path does not exist on disk', () => {
+    makePackage({
+      packageDir: tmpRoot,
+      packageName: 'tool',
+      bin: './bin/missing.js',
+    })
+    expect(() => makePackageBinsExecutable(tmpRoot, 'tool')).not.toThrow()
+  })
+
+  test('returns silently when package.json is missing', () => {
+    expect(() =>
+      makePackageBinsExecutable(tmpRoot, 'never-installed'),
+    ).not.toThrow()
+  })
+})
+
+describe.sequential('dlx/binary-resolution — resolveBinaryPath', () => {
+  test('returns the path verbatim on Unix', () => {
+    if (IS_WIN) {
+      return
+    }
+    expect(resolveBinaryPath('/usr/local/bin/anything')).toBe(
+      '/usr/local/bin/anything',
+    )
+  })
+
+  test('handles paths that do not exist on Unix (returned as-is)', () => {
+    if (IS_WIN) {
+      return
+    }
+    const made = path.join(tmpRoot, 'does-not-exist')
+    expect(resolveBinaryPath(made)).toBe(made)
   })
 })
