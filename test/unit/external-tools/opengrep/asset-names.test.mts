@@ -18,7 +18,12 @@ describe('external-tools/opengrep/asset-names', () => {
   })
 
   test('flags unix targets as bare binaries (not archives)', () => {
-    for (const key of ['darwin-arm64', 'darwin-x64', 'linux-arm64', 'linux-x64']) {
+    for (const key of [
+      'darwin-arm64',
+      'darwin-x64',
+      'linux-arm64',
+      'linux-x64',
+    ]) {
       const entry = getOpengrepAssetEntry(key)!
       expect(entry.isArchive).toBe(false)
       expect(entry.binaryInArchive).toBeUndefined()
@@ -33,11 +38,15 @@ describe('external-tools/opengrep/asset-names', () => {
   })
 
   test('darwin-arm64 maps to opengrep_osx_arm64', () => {
-    expect(getOpengrepAssetEntry('darwin-arm64')!.asset).toBe('opengrep_osx_arm64')
+    expect(getOpengrepAssetEntry('darwin-arm64')!.asset).toBe(
+      'opengrep_osx_arm64',
+    )
   })
 
   test('linux-x64 maps to opengrep_manylinux_x86', () => {
-    expect(getOpengrepAssetEntry('linux-x64')!.asset).toBe('opengrep_manylinux_x86')
+    expect(getOpengrepAssetEntry('linux-x64')!.asset).toBe(
+      'opengrep_manylinux_x86',
+    )
   })
 
   test('returns undefined for unsupported platforms', () => {

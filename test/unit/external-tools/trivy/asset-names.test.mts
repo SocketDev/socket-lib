@@ -18,7 +18,9 @@ describe('external-tools/trivy/asset-names', () => {
   })
 
   test('macOS uses macOS-* tarballs', () => {
-    expect(getTrivyAssetEntry('darwin-arm64')!.suffix).toBe('macOS-ARM64.tar.gz')
+    expect(getTrivyAssetEntry('darwin-arm64')!.suffix).toBe(
+      'macOS-ARM64.tar.gz',
+    )
     expect(getTrivyAssetEntry('darwin-x64')!.suffix).toBe('macOS-64bit.tar.gz')
   })
 

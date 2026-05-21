@@ -51,7 +51,9 @@ describe('external-tools/uv/asset-names', () => {
     expect(getUvAssetEntry('win-x64')!.asset.endsWith('.zip')).toBe(true)
     expect(getUvAssetEntry('win-arm64')!.asset.endsWith('.zip')).toBe(true)
     expect(getUvAssetEntry('linux-x64')!.asset.endsWith('.tar.gz')).toBe(true)
-    expect(getUvAssetEntry('darwin-arm64')!.asset.endsWith('.tar.gz')).toBe(true)
+    expect(getUvAssetEntry('darwin-arm64')!.asset.endsWith('.tar.gz')).toBe(
+      true,
+    )
   })
 
   test('returns undefined for unsupported platforms', () => {
