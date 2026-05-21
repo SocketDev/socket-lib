@@ -39,7 +39,9 @@ vi.mock('../../../src/secrets/windows', () => ({
   writeWindowsSync: vi.fn(),
 }))
 
-async function loadFresh(plat: 'darwin' | 'linux' | 'win32' | 'other' = 'darwin') {
+async function loadFresh(
+  plat: 'darwin' | 'linux' | 'win32' | 'other' = 'darwin',
+) {
   mockPlatform.mockReturnValue(plat)
   const macos = await import('../../../src/secrets/macos')
   const linux = await import('../../../src/secrets/linux')
@@ -168,7 +170,9 @@ describe.sequential('secrets/keychain — readSecretSync', () => {
   test('routes to readLinuxSync on linux', async () => {
     const { linux, mod } = await loadFresh('linux')
     linux['readLinuxSync']!.mockReturnValueOnce('linux-sync')
-    expect(mod.readSecretSync({ service: 's', account: 'a' })).toBe('linux-sync')
+    expect(mod.readSecretSync({ service: 's', account: 'a' })).toBe(
+      'linux-sync',
+    )
   })
 
   test('routes to readWindowsSync on win32', async () => {
@@ -218,7 +222,12 @@ describe.sequential('secrets/keychain — writeSecret', () => {
     expect(
       await mod.writeSecret({ service: 's', account: 'a', value: 'new' }),
     ).toBe('written')
-    expect(macos['writeMacOS']).toHaveBeenCalledWith('s', 'a', 'new', 's credential')
+    expect(macos['writeMacOS']).toHaveBeenCalledWith(
+      's',
+      'a',
+      'new',
+      's credential',
+    )
   })
 
   test('uses an explicit label when provided', async () => {
@@ -324,9 +333,7 @@ describe.sequential('secrets/keychain — deleteSecret + deleteSecretSync', () =
   test('sync: routes to deleteMacOSSync on darwin', async () => {
     const { macos, mod } = await loadFresh('darwin')
     macos['deleteMacOSSync']!.mockReturnValueOnce('removed')
-    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe(
-      'removed',
-    )
+    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('removed')
   })
 
   test('sync: returns "absent" on unsupported platforms', async () => {
@@ -338,9 +345,9 @@ describe.sequential('secrets/keychain — deleteSecret + deleteSecretSync', () =
 describe.sequential('secrets/keychain — slot helpers', () => {
   test('readSecretFromSlots returns first matching account', async () => {
     const { macos, mod } = await loadFresh('darwin')
-    macos['readMacOS']!
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce("found")
+    macos['readMacOS']!.mockResolvedValueOnce(undefined).mockResolvedValueOnce(
+      'found',
+    )
     expect(
       await mod.readSecretFromSlots({
         service: 's',
@@ -362,9 +369,9 @@ describe.sequential('secrets/keychain — slot helpers', () => {
 
   test('readSecretFromSlotsSync returns first matching account', async () => {
     const { macos, mod } = await loadFresh('darwin')
-    macos['readMacOSSync']!
-      .mockReturnValueOnce(undefined)
-      .mockReturnValueOnce('found-sync')
+    macos['readMacOSSync']!.mockReturnValueOnce(undefined).mockReturnValueOnce(
+      'found-sync',
+    )
     expect(
       mod.readSecretFromSlotsSync({
         service: 's',
@@ -399,9 +406,9 @@ describe.sequential('secrets/keychain — slot helpers', () => {
 
   test('deleteSecretFromSlots deletes each account', async () => {
     const { macos, mod } = await loadFresh('darwin')
-    macos['deleteMacOS']!
-      .mockResolvedValueOnce('removed')
-      .mockResolvedValueOnce('absent')
+    macos['deleteMacOS']!.mockResolvedValueOnce(
+      'removed',
+    ).mockResolvedValueOnce('absent')
     const results = await mod.deleteSecretFromSlots({
       service: 's',
       accounts: ['a', 'b'],
@@ -414,9 +421,9 @@ describe.sequential('secrets/keychain — slot helpers', () => {
 
   test('deleteSecretFromSlotsSync deletes each account', async () => {
     const { macos, mod } = await loadFresh('darwin')
-    macos['deleteMacOSSync']!
-      .mockReturnValueOnce('removed')
-      .mockReturnValueOnce('absent')
+    macos['deleteMacOSSync']!.mockReturnValueOnce(
+      'removed',
+    ).mockReturnValueOnce('absent')
     const results = mod.deleteSecretFromSlotsSync({
       service: 's',
       accounts: ['a', 'b'],
@@ -431,9 +438,9 @@ describe.sequential('secrets/keychain — slot helpers', () => {
 describe.sequential('secrets/keychain — clearCache', () => {
   test('drops the in-process cache so subsequent reads hit the backend', async () => {
     const { macos, mod } = await loadFresh('darwin')
-    macos['readMacOS']!
-      .mockResolvedValueOnce('first')
-      .mockResolvedValueOnce('second')
+    macos['readMacOS']!.mockResolvedValueOnce('first').mockResolvedValueOnce(
+      'second',
+    )
     expect(await mod.readSecret({ service: 's', account: 'a' })).toBe('first')
     mod.clearCache()
     expect(await mod.readSecret({ service: 's', account: 'a' })).toBe('second')
