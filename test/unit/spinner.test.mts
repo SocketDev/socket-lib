@@ -15,7 +15,7 @@ import process from 'node:process'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
-import { getCliSpinners } from '@socketsecurity/lib/spinner/registry'
+import { getCliSpinners } from '@socketsecurity/lib/spinner/default'
 import { withSpinner, withSpinnerSync } from '@socketsecurity/lib/spinner/with'
 
 describe('spinner', () => {

@@ -8,7 +8,7 @@
 
 import { Writable } from 'node:stream'
 
-import { Logger } from '../../src/logger/logger'
+import { Logger } from '../../src/logger/default'
 import { LOG_SYMBOLS } from '../../src/logger/symbols'
 import { describe, expect, it, beforeEach } from 'vitest'
 

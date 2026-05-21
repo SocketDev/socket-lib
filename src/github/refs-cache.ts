@@ -10,11 +10,11 @@
  *   - Disable everything with the `DISABLE_GITHUB_CACHE` env var
  */
 
-import { createTtlCache } from '../ttl-cache/cache'
+import { createTtlCache } from '../cache/ttl/store'
 
 import { DEFAULT_CACHE_TTL_MS } from './constants'
 
-import type { TtlCache } from '../ttl-cache/types'
+import type { TtlCache } from '../cache/ttl/types'
 
 let _githubCache: TtlCache | undefined
 

@@ -9,7 +9,7 @@
 import os from 'node:os'
 import path from 'node:path'
 
-import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
+import { createTtlCache } from '@socketsecurity/lib/cache/ttl/store'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'

@@ -240,7 +240,7 @@ async function main(): Promise<void> {
   // would violate the "no barrel files" CLAUDE.md rule; an exports-map
   // alias is just a re-pointer with no source file behind it.
   const fleetCompatAliases: Array<[string, string]> = [
-    ['./logger', './logger/logger'],
+    ['./logger', './logger/default'],
     ['./errors', './errors/message'],
   ]
   for (const { 0: alias, 1: target } of fleetCompatAliases) {

@@ -1,5 +1,5 @@
 /**
- * @file Public type surface for `ttl-cache/*` modules — the `TtlCache`
+ * @file Public type surface for `cache/ttl/*` modules — the `TtlCache`
  *   interface (the seven-method API returned by `createTtlCache`), the
  *   `TtlCacheEntry` storage shape, and the `TtlCacheOptions` / `ClearOptions`
  *   configuration records. Pure types, no runtime side effects.

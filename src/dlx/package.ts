@@ -40,7 +40,7 @@ import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process/lock-instance'
-import { spawn } from '../spawn/spawn'
+import { spawn } from '../process/spawn/child'
 import { generateCacheKey } from './cache'
 
 import { getNodeFs } from '../node/fs'
@@ -55,7 +55,7 @@ import type {
   DownloadPackageResult,
   EnsurePackageInstallOptions,
 } from './types'
-import type { SpawnExtra, SpawnOptions } from '../spawn/types'
+import type { SpawnExtra, SpawnOptions } from '../process/spawn/types'
 
 import { ErrorCtor } from '../primordials/error'
 

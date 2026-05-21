@@ -351,9 +351,10 @@ describe('git', () => {
     })
 
     it('should handle files in subdirectories', async () => {
-      // src/logger.ts was reshaped into src/logger/logger.ts as part
-      // of the v6.0.0 sub-leaf split.
-      const result = await isChanged('src/logger/logger.ts', {
+      // src/logger.ts was reshaped into src/logger/default.ts (v6.1
+      // renamed the leaf from `logger` to `default` so it lines up
+      // with `getDefaultLogger`).
+      const result = await isChanged('src/logger/default.ts', {
         cwd: projectRoot,
       })
       expect(typeof result).toBe('boolean')

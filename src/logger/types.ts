@@ -5,7 +5,7 @@
  *   effects so this module stays cheap to import everywhere.
  */
 
-import type { Logger } from './logger'
+import type { Logger } from './default'
 
 /**
  * Log symbols for terminal output with colored indicators.

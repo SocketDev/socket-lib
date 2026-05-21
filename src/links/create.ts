@@ -23,7 +23,7 @@ import type { LinkOptions } from './types'
  *
  * @example
  *   ;```ts
- *   import { link } from '@socketsecurity/lib/links/link'
+ *   import { link } from '@socketsecurity/lib/links/create'
  *
  *   // Use current theme
  *   console.log(link('Documentation', 'https://socket.dev'))
@@ -87,7 +87,7 @@ export function link(text: string, url: string, options?: LinkOptions): string {
  *
  * @example
  *   ;```ts
- *   import { links } from '@socketsecurity/lib/links/link'
+ *   import { links } from '@socketsecurity/lib/links/create'
  *
  *   const formatted = links([
  *     ['Documentation', 'https://socket.dev'],

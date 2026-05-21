@@ -14,8 +14,8 @@
 
 import { errorMessage } from '../errors/message'
 import { ObjectKeys } from '../primordials/object'
-import { spawn } from '../spawn/spawn'
-import { isSpawnError } from '../spawn/errors'
+import { spawn } from '../process/spawn/child'
+import { isSpawnError } from '../process/spawn/errors'
 
 import { discoverAiAgents } from './discover.mts'
 

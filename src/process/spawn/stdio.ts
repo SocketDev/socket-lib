@@ -13,7 +13,7 @@
  *     where all three streams use the same mode.
  */
 
-import { isArray } from '../arrays/predicates'
+import { isArray } from '../../arrays/predicates'
 
 import type { StdioType } from './types'
 

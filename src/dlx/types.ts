@@ -11,8 +11,8 @@
 
 import type { HashSpec } from '../integrity'
 import type { LockfileSpec } from './lockfile'
-import type { spawn } from '../spawn/spawn'
-import type { SpawnOptions } from '../spawn/types'
+import type { spawn } from '../process/spawn/child'
+import type { SpawnOptions } from '../process/spawn/types'
 
 export interface DownloadPackageResult {
   /**

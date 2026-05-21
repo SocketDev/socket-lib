@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -268,6 +268,16 @@
       "source": "./src/cacache/write.ts",
       "types": "./dist/cacache/write.d.ts",
       "default": "./dist/cacache/write.js"
+    },
+    "./cache/ttl/store": {
+      "source": "./src/cache/ttl/store.ts",
+      "types": "./dist/cache/ttl/store.d.ts",
+      "default": "./dist/cache/ttl/store.js"
+    },
+    "./cache/ttl/types": {
+      "source": "./src/cache/ttl/types.ts",
+      "types": "./dist/cache/ttl/types.d.ts",
+      "default": "./dist/cache/ttl/types.js"
     },
     "./checks/primordials": {
       "source": "./src/checks/primordials.ts",
@@ -869,6 +879,41 @@
       "types": "./dist/errors/stack.d.ts",
       "default": "./dist/errors/stack.js"
     },
+    "./events/exit/handler": {
+      "source": "./src/events/exit/handler.ts",
+      "types": "./dist/events/exit/handler.d.ts",
+      "default": "./dist/events/exit/handler.js"
+    },
+    "./events/exit/intercept": {
+      "source": "./src/events/exit/intercept.ts",
+      "types": "./dist/events/exit/intercept.d.ts",
+      "default": "./dist/events/exit/intercept.js"
+    },
+    "./events/exit/lifecycle": {
+      "source": "./src/events/exit/lifecycle.ts",
+      "types": "./dist/events/exit/lifecycle.d.ts",
+      "default": "./dist/events/exit/lifecycle.js"
+    },
+    "./events/exit/signals": {
+      "source": "./src/events/exit/signals.ts",
+      "types": "./dist/events/exit/signals.d.ts",
+      "default": "./dist/events/exit/signals.js"
+    },
+    "./events/exit/types": {
+      "source": "./src/events/exit/types.ts",
+      "types": "./dist/events/exit/types.d.ts",
+      "default": "./dist/events/exit/types.js"
+    },
+    "./events/warning/handler": {
+      "source": "./src/events/warning/handler.ts",
+      "types": "./dist/events/warning/handler.d.ts",
+      "default": "./dist/events/warning/handler.js"
+    },
+    "./events/warning/suppress": {
+      "source": "./src/events/warning/suppress.ts",
+      "types": "./dist/events/warning/suppress.d.ts",
+      "default": "./dist/events/warning/suppress.js"
+    },
     "./external-tools/bazel/asset-names": {
       "source": "./src/external-tools/bazel/asset-names.ts",
       "types": "./dist/external-tools/bazel/asset-names.d.ts",
@@ -1339,10 +1384,10 @@
       "types": "./dist/globs/defaults.d.ts",
       "default": "./dist/globs/defaults.js"
     },
-    "./globs/glob": {
-      "source": "./src/globs/glob.ts",
-      "types": "./dist/globs/glob.d.ts",
-      "default": "./dist/globs/glob.js"
+    "./globs/match": {
+      "source": "./src/globs/match.ts",
+      "types": "./dist/globs/match.d.ts",
+      "default": "./dist/globs/match.js"
     },
     "./globs/matcher": {
       "source": "./src/globs/matcher.ts",
@@ -1474,10 +1519,10 @@
       "types": "./dist/json/types.d.ts",
       "default": "./dist/json/types.js"
     },
-    "./links/link": {
-      "source": "./src/links/link.ts",
-      "types": "./dist/links/link.d.ts",
-      "default": "./dist/links/link.js"
+    "./links/create": {
+      "source": "./src/links/create.ts",
+      "types": "./dist/links/create.d.ts",
+      "default": "./dist/links/create.js"
     },
     "./links/types": {
       "source": "./src/links/types.ts",
@@ -1485,9 +1530,9 @@
       "default": "./dist/links/types.js"
     },
     "./logger": {
-      "source": "./src/logger/logger.ts",
-      "types": "./dist/logger/logger.d.ts",
-      "default": "./dist/logger/logger.js"
+      "source": "./src/logger/default.ts",
+      "types": "./dist/logger/default.d.ts",
+      "default": "./dist/logger/default.js"
     },
     "./logger/colors": {
       "source": "./src/logger/colors.ts",
@@ -1499,10 +1544,10 @@
       "types": "./dist/logger/console.d.ts",
       "default": "./dist/logger/console.js"
     },
-    "./logger/logger": {
-      "source": "./src/logger/logger.ts",
-      "types": "./dist/logger/logger.d.ts",
-      "default": "./dist/logger/logger.js"
+    "./logger/default": {
+      "source": "./src/logger/default.ts",
+      "types": "./dist/logger/default.d.ts",
+      "default": "./dist/logger/default.js"
     },
     "./logger/symbols": {
       "source": "./src/logger/symbols.ts",
@@ -1914,20 +1959,30 @@
       "types": "./dist/process/lock-types.d.ts",
       "default": "./dist/process/lock-types.js"
     },
+    "./process/spawn/child": {
+      "source": "./src/process/spawn/child.ts",
+      "types": "./dist/process/spawn/child.d.ts",
+      "default": "./dist/process/spawn/child.js"
+    },
+    "./process/spawn/errors": {
+      "source": "./src/process/spawn/errors.ts",
+      "types": "./dist/process/spawn/errors.d.ts",
+      "default": "./dist/process/spawn/errors.js"
+    },
+    "./process/spawn/stdio": {
+      "source": "./src/process/spawn/stdio.ts",
+      "types": "./dist/process/spawn/stdio.d.ts",
+      "default": "./dist/process/spawn/stdio.js"
+    },
+    "./process/spawn/types": {
+      "source": "./src/process/spawn/types.ts",
+      "types": "./dist/process/spawn/types.d.ts",
+      "default": "./dist/process/spawn/types.js"
+    },
     "./process/transient": {
       "source": "./src/process/transient.ts",
       "types": "./dist/process/transient.d.ts",
       "default": "./dist/process/transient.js"
-    },
-    "./promise-queue/queue": {
-      "source": "./src/promise-queue/queue.ts",
-      "types": "./dist/promise-queue/queue.d.ts",
-      "default": "./dist/promise-queue/queue.js"
-    },
-    "./promise-queue/types": {
-      "source": "./src/promise-queue/types.ts",
-      "types": "./dist/promise-queue/types.d.ts",
-      "default": "./dist/promise-queue/types.js"
     },
     "./promises/iterate": {
       "source": "./src/promises/iterate.ts",
@@ -1938,6 +1993,11 @@
       "source": "./src/promises/options.ts",
       "types": "./dist/promises/options.d.ts",
       "default": "./dist/promises/options.js"
+    },
+    "./promises/queue": {
+      "source": "./src/promises/queue.ts",
+      "types": "./dist/promises/queue.d.ts",
+      "default": "./dist/promises/queue.js"
     },
     "./promises/resolvers": {
       "source": "./src/promises/resolvers.ts",
@@ -2079,31 +2139,6 @@
       "types": "./dist/shadow/types.d.ts",
       "default": "./dist/shadow/types.js"
     },
-    "./signal-exit/intercept": {
-      "source": "./src/signal-exit/intercept.ts",
-      "types": "./dist/signal-exit/intercept.d.ts",
-      "default": "./dist/signal-exit/intercept.js"
-    },
-    "./signal-exit/lifecycle": {
-      "source": "./src/signal-exit/lifecycle.ts",
-      "types": "./dist/signal-exit/lifecycle.d.ts",
-      "default": "./dist/signal-exit/lifecycle.js"
-    },
-    "./signal-exit/register": {
-      "source": "./src/signal-exit/register.ts",
-      "types": "./dist/signal-exit/register.d.ts",
-      "default": "./dist/signal-exit/register.js"
-    },
-    "./signal-exit/signals": {
-      "source": "./src/signal-exit/signals.ts",
-      "types": "./dist/signal-exit/signals.d.ts",
-      "default": "./dist/signal-exit/signals.js"
-    },
-    "./signal-exit/types": {
-      "source": "./src/signal-exit/types.ts",
-      "types": "./dist/signal-exit/types.d.ts",
-      "default": "./dist/signal-exit/types.js"
-    },
     "./smol/detect": {
       "source": "./src/smol/detect.ts",
       "types": "./dist/smol/detect.d.ts",
@@ -2164,35 +2199,15 @@
       "types": "./dist/sorts/types.d.ts",
       "default": "./dist/sorts/types.js"
     },
-    "./spawn/errors": {
-      "source": "./src/spawn/errors.ts",
-      "types": "./dist/spawn/errors.d.ts",
-      "default": "./dist/spawn/errors.js"
-    },
-    "./spawn/spawn": {
-      "source": "./src/spawn/spawn.ts",
-      "types": "./dist/spawn/spawn.d.ts",
-      "default": "./dist/spawn/spawn.js"
-    },
-    "./spawn/stdio": {
-      "source": "./src/spawn/stdio.ts",
-      "types": "./dist/spawn/stdio.d.ts",
-      "default": "./dist/spawn/stdio.js"
-    },
-    "./spawn/types": {
-      "source": "./src/spawn/types.ts",
-      "types": "./dist/spawn/types.d.ts",
-      "default": "./dist/spawn/types.js"
+    "./spinner/default": {
+      "source": "./src/spinner/default.ts",
+      "types": "./dist/spinner/default.d.ts",
+      "default": "./dist/spinner/default.js"
     },
     "./spinner/format": {
       "source": "./src/spinner/format.ts",
       "types": "./dist/spinner/format.d.ts",
       "default": "./dist/spinner/format.js"
-    },
-    "./spinner/registry": {
-      "source": "./src/spinner/registry.ts",
-      "types": "./dist/spinner/registry.d.ts",
-      "default": "./dist/spinner/registry.js"
     },
     "./spinner/spinner": {
       "source": "./src/spinner/spinner.ts",
@@ -2372,16 +2387,6 @@
       "types": "./dist/themes/types.d.ts",
       "default": "./dist/themes/types.js"
     },
-    "./ttl-cache/cache": {
-      "source": "./src/ttl-cache/cache.ts",
-      "types": "./dist/ttl-cache/cache.d.ts",
-      "default": "./dist/ttl-cache/cache.js"
-    },
-    "./ttl-cache/types": {
-      "source": "./src/ttl-cache/types.ts",
-      "types": "./dist/ttl-cache/types.d.ts",
-      "default": "./dist/ttl-cache/types.js"
-    },
     "./url/parse": {
       "source": "./src/url/parse.ts",
       "types": "./dist/url/parse.d.ts",
@@ -2426,16 +2431,6 @@
       "source": "./src/versions/types.ts",
       "types": "./dist/versions/types.d.ts",
       "default": "./dist/versions/types.js"
-    },
-    "./warnings/event-target": {
-      "source": "./src/warnings/event-target.ts",
-      "types": "./dist/warnings/event-target.d.ts",
-      "default": "./dist/warnings/event-target.js"
-    },
-    "./warnings/suppress": {
-      "source": "./src/warnings/suppress.ts",
-      "types": "./dist/warnings/suppress.d.ts",
-      "default": "./dist/warnings/suppress.js"
     },
     "./words/article": {
       "source": "./src/words/article.ts",

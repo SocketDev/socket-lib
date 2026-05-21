@@ -15,7 +15,7 @@
 import os from 'node:os'
 import * as path from 'node:path'
 
-import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
+import { createTtlCache } from '@socketsecurity/lib/cache/ttl/store'
 import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
 import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

@@ -6,7 +6,7 @@
 import colors from '../external/yoctocolors-cjs'
 import { centerText, repeatString } from '../strings/format'
 
-import { getDefaultLogger } from '../logger/logger'
+import { getDefaultLogger } from '../logger/default'
 import { ArrayPrototypePush } from '../primordials/array'
 
 const logger = getDefaultLogger()

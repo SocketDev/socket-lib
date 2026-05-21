@@ -28,13 +28,13 @@ import {
 import { findUpSync } from '../../fs/find-up'
 import { getOwn } from '../../objects/inspect'
 import { ArrayIsArray } from '../../primordials/array'
-import { spawn } from '../../spawn/spawn'
+import { spawn } from '../../process/spawn/child'
 
 import { execNpm } from './npm/exec'
 import { execPnpm } from './pnpm/exec'
 import { execYarn } from './yarnpkg/yarn/exec'
 
-import type { SpawnOptions } from '../../spawn/types'
+import type { SpawnOptions } from '../../process/spawn/types'
 
 export interface ExecScriptOptions extends SpawnOptions {
   prepost?: boolean | undefined

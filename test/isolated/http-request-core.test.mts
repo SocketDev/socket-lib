@@ -24,7 +24,7 @@ import { httpJson, httpText } from '../../src/http-request/convenience'
 import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
 import { httpDownload } from '../../src/http-request/download'
 import { httpRequest } from '../../src/http-request/request'
-import { Logger } from '../../src/logger/logger'
+import { Logger } from '../../src/logger/default'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
 import { runWithTempDir } from '../unit/util/temp-file-helper'

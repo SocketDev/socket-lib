@@ -16,8 +16,8 @@ import {
   suppressMaxListenersWarning,
   suppressWarningType,
   withSuppressedWarnings,
-} from '@socketsecurity/lib/warnings/suppress'
-import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
+} from '@socketsecurity/lib/events/warning/suppress'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('warnings/suppress', () => {

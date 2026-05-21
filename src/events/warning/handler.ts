@@ -6,7 +6,7 @@
  *   `process.emitWarning` wrapping involved.
  */
 
-import { ObjectGetOwnPropertySymbols } from '../primordials/object'
+import { ObjectGetOwnPropertySymbols } from '../../primordials/object'
 
 /**
  * Set max listeners on an EventTarget (like AbortSignal) to avoid TypeError.
@@ -22,7 +22,7 @@ import { ObjectGetOwnPropertySymbols } from '../primordials/object'
  * property directly to avoid depending on 'node:events' module.
  *
  * @example
- *   import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
+ *   import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
  *
  *   const controller = new AbortController()
  *   setMaxEventTargetListeners(controller.signal)

@@ -21,7 +21,7 @@ import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { readJson } from '../fs/read-json'
 import { safeMkdir } from '../fs/safe'
 import { normalizePath } from '../paths/normalize'
-import { spawn } from '../spawn/spawn'
+import { spawn } from '../process/spawn/child'
 import { generateCacheKey } from './cache'
 
 import { normalizeHash } from '../integrity'
@@ -41,7 +41,7 @@ import {
 import { downloadBinaryFile } from './binary-download'
 
 import type { DlxBinaryOptions, DlxBinaryResult } from './binary-types'
-import type { SpawnExtra, SpawnOptions } from '../spawn/types'
+import type { SpawnExtra, SpawnOptions } from '../process/spawn/types'
 
 /**
  * Download and execute a binary from a URL with caching.
