@@ -58,7 +58,10 @@ describe.sequential('dlx/firewall — checkFirewallPurls', () => {
       idealTree: {
         inventory: {
           values: () => [
-            { isProjectRoot: true, package: { name: 'root', version: '1.0.0' } },
+            {
+              isProjectRoot: true,
+              package: { name: 'root', version: '1.0.0' },
+            },
           ],
         },
       },
@@ -73,9 +76,18 @@ describe.sequential('dlx/firewall — checkFirewallPurls', () => {
       idealTree: {
         inventory: {
           values: () => [
-            { isProjectRoot: false, package: { name: undefined, version: '1.0.0' } },
-            { isProjectRoot: false, package: { name: 'pkg', version: undefined } },
-            { isProjectRoot: false, package: { name: undefined, version: undefined } },
+            {
+              isProjectRoot: false,
+              package: { name: undefined, version: '1.0.0' },
+            },
+            {
+              isProjectRoot: false,
+              package: { name: 'pkg', version: undefined },
+            },
+            {
+              isProjectRoot: false,
+              package: { name: undefined, version: undefined },
+            },
           ],
         },
       },
