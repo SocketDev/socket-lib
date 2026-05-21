@@ -80,10 +80,8 @@ describe.sequential('external-tools/opengrep/from-download', () => {
   })
 
   test('linux uses downloadToolArchive + chmod (bare-binary path)', async () => {
-    const { mkdtempSync, rmSync } =
-      await import('node:fs')
-    const { statSync, readFileSync, writeFileSync } =
-      await import('node:fs')
+    const { mkdtempSync, rmSync } = await import('node:fs')
+    const { statSync, readFileSync, writeFileSync } = await import('node:fs')
     const os = await import('node:os')
     const path = await import('node:path')
     const tmp = mkdtempSync(path.join(os.tmpdir(), 'og-download-test-'))
@@ -160,17 +158,14 @@ describe.sequential('external-tools/opengrep/from-download', () => {
       }))
       const archivePath = path.join(tmp, 'bare-bin')
       writeFileSync(archivePath, 'x')
-      const fdMod = await import(
-        '../../../../src/external-tools/from-download'
-      )
+      const fdMod = await import('../../../../src/external-tools/from-download')
       const archiveMock = fdMod.downloadToolArchive as ReturnType<typeof vi.fn>
       archiveMock.mockResolvedValueOnce({
         archivePath,
         integrity: 'sha512-def==',
       })
-      const mod = await import(
-        '../../../../src/external-tools/opengrep/from-download'
-      )
+      const mod =
+        await import('../../../../src/external-tools/opengrep/from-download')
       const result = await mod.opengrepFromDownload({
         platformArch: 'linux-x64',
         version: '1.16.5',
