@@ -1,8 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../../src/secrets/keychain', () => ({
-  readSecret: vi.fn<(opts: { service: string; account: string }) => Promise<string | undefined>>(),
-  readSecretSync: vi.fn<(opts: { service: string; account: string }) => string | undefined>(),
+  readSecret:
+    vi.fn<
+      (opts: {
+        service: string
+        account: string
+      }) => Promise<string | undefined>
+    >(),
+  readSecretSync:
+    vi.fn<(opts: { service: string; account: string }) => string | undefined>(),
 }))
 
 async function loadFresh() {

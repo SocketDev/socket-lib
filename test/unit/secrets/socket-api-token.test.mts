@@ -91,7 +91,9 @@ describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () =>
     const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
     resolveSyncMock.mockReturnValueOnce(undefined)
     readSocketApiTokenSync({ allowEnvOnly: true })
-    const callArg = resolveSyncMock.mock.calls[0]![0] as { allowEnvOnly: unknown }
+    const callArg = resolveSyncMock.mock.calls[0]![0] as {
+      allowEnvOnly: unknown
+    }
     expect(callArg.allowEnvOnly).toBe(true)
   })
 
