@@ -20,8 +20,8 @@
 import type { SendHandle, Serializable, StdioOptions } from 'node:child_process'
 import type { EventEmitter } from 'node:events'
 
-import type { Remap } from '../objects/types'
-import type { SpinnerInstance } from '../spinner/types'
+import type { Remap } from '../../objects/types'
+import type { SpinnerInstance } from '../../spinner/types'
 
 // Define BufferEncoding type for TypeScript compatibility.
 export type BufferEncoding = globalThis.BufferEncoding
@@ -315,7 +315,7 @@ export interface WritableStreamType {
  * @property {number | undefined} gid - Group identity (POSIX)
  * @property {boolean | string | undefined} shell - Run command in shell.
  * @property {AbortSignal | undefined} signal - Abort signal.
- * @property {import('../spinner/types').SpinnerInstance | undefined} spinner -
+ * @property {import('../../spinner/types').SpinnerInstance | undefined} spinner -
  *   Spinner instance to pause during execution.
  * @property {StdioType | undefined} stdio - Stdio configuration.
  * @property {boolean | undefined} stdioString - Convert output to strings

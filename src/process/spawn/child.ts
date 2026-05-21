@@ -20,15 +20,15 @@
 
 import process from 'node:process'
 
-import { whichSync } from '../bin/which'
-import { getAbortSignal } from '../process/abort'
-import { getNodeChildProcess } from '../node/child-process'
-import { getNodeFs } from '../node/fs'
-import { getNodePath } from '../node/path'
-import { getOwn } from '../objects/inspect'
-import { isPath } from '../paths/normalize'
-import { RegExpPrototypeTest } from '../primordials/regexp'
-import { getDefaultSpinner } from '../spinner/registry'
+import { whichSync } from '../../bin/which'
+import { getAbortSignal } from '../../process/abort'
+import { getNodeChildProcess } from '../../node/child-process'
+import { getNodeFs } from '../../node/fs'
+import { getNodePath } from '../../node/path'
+import { getOwn } from '../../objects/inspect'
+import { isPath } from '../../paths/normalize'
+import { RegExpPrototypeTest } from '../../primordials/regexp'
+import { getDefaultSpinner } from '../../spinner/default'
 
 import {
   getNpmCliPromiseSpawn,
@@ -51,7 +51,7 @@ import type {
   SpawnSyncReturns,
 } from './types'
 // @ts-expect-error - external vendored module
-import type npmCliPromiseSpawnType from '../external/@npmcli/promise-spawn'
+import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn'
 
 const abortSignal = getAbortSignal()
 const spinner = getDefaultSpinner()

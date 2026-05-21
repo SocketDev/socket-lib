@@ -5,8 +5,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { spawn } from '../../../src/spawn/spawn'
-import { enhanceSpawnError, isSpawnError } from '../../../src/spawn/errors'
+import { spawn } from '../../../src/process/spawn/child'
+import {
+  enhanceSpawnError,
+  isSpawnError,
+} from '../../../src/process/spawn/errors'
 
 describe('spawn — enhanceSpawnError', () => {
   it('returns undefined inputs unchanged', () => {

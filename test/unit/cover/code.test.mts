@@ -12,9 +12,9 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@socketsecurity/lib/spawn/spawn')
+vi.mock('@socketsecurity/lib/process/spawn/child')
 
-import { spawn } from '@socketsecurity/lib/spawn/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 import { getCodeCoverage } from '@socketsecurity/lib/cover/code'
 
 let tmpDir: string

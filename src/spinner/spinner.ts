@@ -23,7 +23,7 @@ import { configToSpec, frameColors } from '../effects/shimmer'
 import { colorsToAnsi } from '../effects/shimmer-terminal'
 import { getCI } from '../env/ci'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
-import { getDefaultLogger } from '../logger/logger'
+import { getDefaultLogger } from '../logger/default'
 import {
   LOG_SYMBOLS,
   incLogCallCountSymbol,
@@ -43,7 +43,7 @@ import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
 import { resolveColor } from '../themes/resolve'
 
-import { getCliSpinners } from './registry'
+import { getCliSpinners } from './default'
 import {
   COLOR_INHERIT,
   ciSpinner,

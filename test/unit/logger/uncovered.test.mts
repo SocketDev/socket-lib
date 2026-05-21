@@ -9,7 +9,7 @@ import { Writable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import { Logger } from '../../../src/logger/logger'
+import { Logger } from '../../../src/logger/default'
 
 class CaptureStream extends Writable {
   chunks: string[] = []

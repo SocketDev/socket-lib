@@ -5,8 +5,8 @@
  *   / `afterexit` through the signal-exit emitter.
  */
 
-import { ErrorCtor } from '../primordials/error'
-import { ReflectApply } from '../primordials/reflect'
+import { ErrorCtor } from '../../primordials/error'
+import { ReflectApply } from '../../primordials/reflect'
 
 import {
   emit,

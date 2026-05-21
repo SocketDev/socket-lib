@@ -1,7 +1,8 @@
 /**
  * @file Public type surface for `promises/*` modules: `RetryOptions`,
- *   `IterationOptions`, and `PromiseWithResolvers`. Pure types, no runtime side
- *   effects.
+ *   `IterationOptions`, `PromiseWithResolvers`, and the `QueuedTask` storage
+ *   shape used by the bounded-concurrency `PromiseQueue`. Pure types, no
+ *   runtime side effects.
  */
 
 /**
@@ -216,4 +217,17 @@ export interface PromiseWithResolvers<T> {
    * Rejects {@link promise} with the given reason.
    */
   reject: (reason?: unknown) => void
+}
+
+/**
+ * Queued-task storage shape for the bounded-concurrency `PromiseQueue`.
+ *
+ * Each entry pairs a deferred task function with the resolver / rejecter for
+ * the promise returned to the caller, so the queue can run tasks under a
+ * concurrency cap and forward results when they settle.
+ */
+export type QueuedTask<T> = {
+  fn: () => Promise<T>
+  resolve: (value: T) => void
+  reject: (error: unknown) => void
 }

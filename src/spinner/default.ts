@@ -72,7 +72,7 @@ export function getCliSpinners(
  *
  * @example
  *   ;```ts
- *   import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
+ *   import { getDefaultSpinner } from '@socketsecurity/lib/spinner/default'
  *
  *   const spinner = getDefaultSpinner()
  *   spinner.start('Loading…')

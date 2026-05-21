@@ -5,10 +5,10 @@
  *   Underscore prefix excludes this file from the public exports map.
  */
 
-import { stripAnsi } from '../ansi/strip'
-import { MapCtor, WeakMapCtor } from '../primordials/map-set'
+import { stripAnsi } from '../../ansi/strip'
+import { MapCtor, WeakMapCtor } from '../../primordials/map-set'
 // @ts-expect-error - external vendored module
-import type npmCliPromiseSpawnType from '../external/@npmcli/promise-spawn'
+import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn'
 
 // Cache for lazy stack trace computation.
 export const stackCache = new WeakMapCtor<Error, string>()
@@ -29,7 +29,7 @@ let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
 /*@__NO_SIDE_EFFECTS__*/
 export function getNpmCliPromiseSpawn() {
   if (_npmCliPromiseSpawn === undefined) {
-    _npmCliPromiseSpawn = /*@__PURE__*/ require('../external/@npmcli/promise-spawn')
+    _npmCliPromiseSpawn = /*@__PURE__*/ require('../../external/@npmcli/promise-spawn')
   }
   return _npmCliPromiseSpawn!
 }

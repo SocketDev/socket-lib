@@ -14,12 +14,12 @@ import { describe, expect, it } from 'vitest'
 describe('ESM imports from CommonJS', () => {
   describe('globs module', () => {
     it('should import glob function', async () => {
-      const { glob } = await import('@socketsecurity/lib/globs/glob')
+      const { glob } = await import('@socketsecurity/lib/globs/match')
       expect(typeof glob).toBe('function')
     })
 
     it('should import globSync function', async () => {
-      const { globSync } = await import('@socketsecurity/lib/globs/glob')
+      const { globSync } = await import('@socketsecurity/lib/globs/match')
       expect(typeof globSync).toBe('function')
     })
 
@@ -37,7 +37,7 @@ describe('ESM imports from CommonJS', () => {
 
     it('should import all leaves together', async () => {
       const [globMod, defaultsMod, matcherMod] = await Promise.all([
-        import('@socketsecurity/lib/globs/glob'),
+        import('@socketsecurity/lib/globs/match'),
         import('@socketsecurity/lib/globs/defaults'),
         import('@socketsecurity/lib/globs/matcher'),
       ])

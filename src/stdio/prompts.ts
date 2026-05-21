@@ -20,7 +20,7 @@ import * as selectModuleImport from '../external/@inquirer/select'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 import type { ColorValue } from '../colors/types'
-import { getDefaultSpinner } from '../spinner/registry'
+import { getDefaultSpinner } from '../spinner/default'
 import { getTheme } from '../themes/context'
 import { THEMES, type ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'

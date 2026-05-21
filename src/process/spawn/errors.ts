@@ -11,15 +11,15 @@
  *   `stackWithCauses` cost.
  */
 
-import { stackWithCauses } from '../errors/stack'
-import { hasOwn } from '../objects/predicates'
-import { ErrorCtor } from '../primordials/error'
+import { stackWithCauses } from '../../errors/stack'
+import { hasOwn } from '../../objects/predicates'
+import { ErrorCtor } from '../../primordials/error'
 import {
   ObjectDefineProperties,
   ObjectDefineProperty,
   ObjectGetOwnPropertyDescriptors,
-} from '../primordials/object'
-import { ReflectDeleteProperty } from '../primordials/reflect'
+} from '../../primordials/object'
+import { ReflectDeleteProperty } from '../../primordials/reflect'
 import { stackCache } from './_internal'
 
 import type { SpawnError } from './types'

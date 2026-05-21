@@ -22,7 +22,7 @@ import {
   debugtime,
 } from '../../src/debug/output'
 import { clearEnv, resetEnv, setEnv } from '../../src/env/rewire'
-import { getDefaultLogger } from '../../src/logger/logger'
+import { getDefaultLogger } from '../../src/logger/default'
 
 const logger = getDefaultLogger()
 

@@ -36,7 +36,7 @@ import {
   privateConsole,
   privateConstructorArgs,
 } from './_internal'
-import { Logger } from './logger'
+import { Logger } from './default'
 import { getKGroupIndentationWidthSymbol } from './symbols'
 
 let _Console: typeof import('node:console').Console | undefined

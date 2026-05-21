@@ -6,8 +6,8 @@
 
 import process from 'node:process'
 
-import { SetCtor } from '../primordials/map-set'
-import { ReflectApply } from '../primordials/reflect'
+import { SetCtor } from '../../primordials/map-set'
+import { ReflectApply } from '../../primordials/reflect'
 
 // Store the original emitWarning function to avoid repeat wrapping.
 let originalEmitWarning: typeof process.emitWarning | undefined
@@ -80,7 +80,7 @@ export function setupSuppression(): void {
  * so repeat invocations are cheap.
  *
  * @example
- *   import { suppressMaxListenersWarning } from '@socketsecurity/lib/warnings/suppress'
+ *   import { suppressMaxListenersWarning } from '@socketsecurity/lib/events/warning/suppress'
  *
  *   suppressMaxListenersWarning()
  */
@@ -93,7 +93,7 @@ export function suppressMaxListenersWarning(): void {
  * Suppress all process warnings of a specific type.
  *
  * @example
- *   import { suppressWarningType } from '@socketsecurity/lib/warnings/suppress'
+ *   import { suppressWarningType } from '@socketsecurity/lib/events/warning/suppress'
  *
  *   suppressWarningType('ExperimentalWarning')
  *
@@ -109,7 +109,7 @@ export function suppressWarningType(warningType: string): void {
  * Suppress warnings temporarily within a callback.
  *
  * @example
- *   import { withSuppressedWarnings } from '@socketsecurity/lib/warnings/suppress'
+ *   import { withSuppressedWarnings } from '@socketsecurity/lib/events/warning/suppress'
  *
  *   const result = await withSuppressedWarnings(
  *     'ExperimentalWarning',

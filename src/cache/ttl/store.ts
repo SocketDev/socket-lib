@@ -16,21 +16,21 @@
  *     treated as expired.
  */
 
-import { clear as cacacheClear } from '../cacache/clear'
-import { safeGet as cacacheSafeGet } from '../cacache/read'
-import { put as cacachePut, remove as cacacheRemove } from '../cacache/write'
-import { DateNow } from '../primordials/date'
-import { TypeErrorCtor } from '../primordials/error'
-import { JSONParse, JSONStringify } from '../primordials/json'
-import { MapCtor } from '../primordials/map-set'
-import { MathMax } from '../primordials/math'
-import { RegExpCtor, RegExpPrototypeTest } from '../primordials/regexp'
+import { clear as cacacheClear } from '../../cacache/clear'
+import { safeGet as cacacheSafeGet } from '../../cacache/read'
+import { put as cacachePut, remove as cacacheRemove } from '../../cacache/write'
+import { DateNow } from '../../primordials/date'
+import { TypeErrorCtor } from '../../primordials/error'
+import { JSONParse, JSONStringify } from '../../primordials/json'
+import { MapCtor } from '../../primordials/map-set'
+import { MathMax } from '../../primordials/math'
+import { RegExpCtor, RegExpPrototypeTest } from '../../primordials/regexp'
 import {
   StringPrototypeIncludes,
   StringPrototypeReplaceAll,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../primordials/string'
+} from '../../primordials/string'
 
 import type {
   ClearOptions,
@@ -233,8 +233,8 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     /* c8 ignore stop */
 
     // Check persistent cache for entries not in memory.
-    const cacheDir = (await import('../paths/socket')).getSocketCacacheDir()
-    const cacacheModule = await import('../cacache/_internal')
+    const cacheDir = (await import('../../paths/socket')).getSocketCacacheDir()
+    const cacacheModule = await import('../../cacache/_internal')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 
     for await (const cacheEntry of stream) {

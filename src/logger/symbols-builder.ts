@@ -1,6 +1,6 @@
 /**
  * @file Free-function helpers for per-instance log-symbol construction + symbol
- *   stripping. Extracted from `logger/logger.ts` (the `Logger` class) so the
+ *   stripping. Extracted from `logger/default.ts` (the `Logger` class) so the
  *   class stays under the 1000-line hard cap and so other callers (alt loggers,
  *   format helpers) can reuse the same logic without instantiating a `Logger`.
  *

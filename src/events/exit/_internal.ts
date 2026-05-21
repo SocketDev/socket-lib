@@ -1,5 +1,5 @@
 /**
- * @file Private internals for `signal-exit/*` modules — the shared
+ * @file Private internals for `events/exit/*` modules — the shared
  *   module-singleton state plus the lazy accessors that read and mutate it.
  *   Owns the emitter, signal list, and `loaded` flag. `lifecycle`
  *   (load/unload/getSignalListeners) and `intercept`

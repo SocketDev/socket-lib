@@ -11,9 +11,9 @@
  */
 
 import process from 'node:process'
-import { load, unload } from '@socketsecurity/lib/signal-exit/lifecycle'
-import { onExit } from '@socketsecurity/lib/signal-exit/register'
-import { signals } from '@socketsecurity/lib/signal-exit/signals'
+import { load, unload } from '@socketsecurity/lib/events/exit/lifecycle'
+import { onExit } from '@socketsecurity/lib/events/exit/handler'
+import { signals } from '@socketsecurity/lib/events/exit/signals'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('signal-exit', () => {

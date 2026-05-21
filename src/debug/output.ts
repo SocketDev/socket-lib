@@ -11,7 +11,7 @@ import debugJs from '../external/debug'
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
 import { DateNow } from '../primordials/date'
 import { ReflectApply } from '../primordials/reflect'
-import { getDefaultSpinner } from '../spinner/registry'
+import { getDefaultSpinner } from '../spinner/default'
 import { applyLinePrefix } from '../strings/format'
 
 import { getPointingTriangle, getUtil, logger } from './_internal'

@@ -132,7 +132,7 @@ export async function withSpinner<T>(
  *
  * @example
  *   ;```ts
- *   import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
+ *   import { getDefaultSpinner } from '@socketsecurity/lib/spinner/default'
  *   import { withSpinnerRestore } from '@socketsecurity/lib/spinner/with'
  *
  *   const spinner = getDefaultSpinner()

@@ -5,7 +5,7 @@
  *   out.
  */
 
-import { TypeErrorCtor } from '../primordials/error'
+import { TypeErrorCtor } from '../../primordials/error'
 
 import { getEmitter, globalProcess, isLoaded } from './_internal'
 import { load, unload } from './lifecycle'
