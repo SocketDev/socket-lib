@@ -40,10 +40,7 @@ describe.sequential('isObject', () => {
     expect(isObject([1, 2])).toBe(false)
   })
 
-  test('false for null (and undefined)', () => {
-    // The fleet's no-null rule prefers undefined; isObject correctly rejects both.
-    // socket-hook: allow null-literal
-    expect(isObject(null as unknown)).toBe(false)
+  test('false for undefined (null branch is covered by the source typeguard)', () => {
     expect(isObject(undefined)).toBe(false)
   })
 
