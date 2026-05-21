@@ -1,6 +1,34 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { parseChecksums } from '../../../src/http-request/checksums'
+
+vi.mock('../../../src/http-request/request', () => ({
+  httpRequest: vi.fn(),
+}))
+
+async function loadFresh() {
+  const reqMod = await import('../../../src/http-request/request')
+  const mod = await import('../../../src/http-request/checksums')
+  return {
+    httpRequest: reqMod.httpRequest as ReturnType<typeof vi.fn>,
+    fetchChecksums: mod.fetchChecksums,
+  }
+}
+
+function makeResponse(opts: { ok: boolean; status?: number; body: string }) {
+  const { body, ok, status = ok ? 200 : 500 } = opts
+  return {
+    ok,
+    status,
+    statusText: ok ? 'OK' : 'Error',
+    headers: {},
+    body: Buffer.from(body),
+    text: () => body,
+    json: <T,>() => JSON.parse(body) as T,
+    arrayBuffer: () => new ArrayBuffer(0),
+    rawResponse: undefined,
+  }
+}
 
 const HASH_A =
   'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
@@ -78,5 +106,56 @@ describe.sequential('http-request/checksums — parseChecksums', () => {
   test('ignores hashes that are not 64 hex chars', () => {
     // Too short, too long, or contains non-hex.
     expect(parseChecksums('abc123  short.zip\n')).toEqual({})
+  })
+})
+
+beforeEach(() => {
+  vi.resetModules()
+})
+
+afterEach(() => {
+  vi.clearAllMocks()
+})
+
+describe.sequential('http-request/checksums — fetchChecksums', () => {
+  test('parses the response body into a checksums map', async () => {
+    const { fetchChecksums, httpRequest } = await loadFresh()
+    httpRequest.mockResolvedValueOnce(
+      makeResponse({ ok: true, body: `${HASH_A}  file.zip\n` }),
+    )
+    const result = await fetchChecksums('https://example.com/checksums.txt')
+    expect(result).toEqual({ 'file.zip': HASH_A })
+  })
+
+  test('passes ca / headers / timeout through to httpRequest', async () => {
+    const { fetchChecksums, httpRequest } = await loadFresh()
+    httpRequest.mockResolvedValueOnce(makeResponse({ ok: true, body: '' }))
+    await fetchChecksums('https://example.com/checksums.txt', {
+      ca: ['fake-ca'],
+      headers: { Authorization: 'Bearer x' },
+      timeout: 5000,
+    })
+    const [, opts] = httpRequest.mock.calls[0]!
+    expect(opts.ca).toEqual(['fake-ca'])
+    expect(opts.headers).toEqual({ Authorization: 'Bearer x' })
+    expect(opts.timeout).toBe(5000)
+  })
+
+  test('throws when the response is not ok', async () => {
+    const { fetchChecksums, httpRequest } = await loadFresh()
+    httpRequest.mockResolvedValueOnce(
+      makeResponse({ ok: false, status: 404, body: '' }),
+    )
+    await expect(
+      fetchChecksums('https://example.com/checksums.txt'),
+    ).rejects.toThrow(/Failed to fetch checksums.*404 Error/)
+  })
+
+  test('returns empty object when response body is empty', async () => {
+    const { fetchChecksums, httpRequest } = await loadFresh()
+    httpRequest.mockResolvedValueOnce(makeResponse({ ok: true, body: '' }))
+    expect(await fetchChecksums('https://example.com/checksums.txt')).toEqual(
+      {},
+    )
   })
 })
