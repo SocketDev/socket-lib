@@ -1,4 +1,11 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 // `describe.sequential` because the source uses module-scoped state
@@ -79,14 +86,20 @@ describe.sequential('readDiskCache', () => {
   test('returns undefined when writtenAt is missing', () => {
     const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
     mkdirSync(path.dirname(cachePath), { recursive: true })
-    writeFileSync(cachePath, JSON.stringify({ agents: { claude: '/bin/claude' } }))
+    writeFileSync(
+      cachePath,
+      JSON.stringify({ agents: { claude: '/bin/claude' } }),
+    )
     expect(readDiskCache(cachePath)).toBeUndefined()
   })
 
   test('returns undefined when writtenAt is not a number', () => {
     const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
     mkdirSync(path.dirname(cachePath), { recursive: true })
-    writeFileSync(cachePath, JSON.stringify({ agents: {}, writtenAt: 'yesterday' }))
+    writeFileSync(
+      cachePath,
+      JSON.stringify({ agents: {}, writtenAt: 'yesterday' }),
+    )
     expect(readDiskCache(cachePath)).toBeUndefined()
   })
 

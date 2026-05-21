@@ -31,10 +31,7 @@ afterEach(() => {
 function primeCache(agents: Record<string, string>): void {
   const cachePath = cachePathFor(tmpRoot)
   mkdirSync(path.dirname(cachePath), { recursive: true })
-  writeFileSync(
-    cachePath,
-    JSON.stringify({ agents, writtenAt: Date.now() }),
-  )
+  writeFileSync(cachePath, JSON.stringify({ agents, writtenAt: Date.now() }))
 }
 
 function baseOpts(
@@ -174,10 +171,7 @@ describe.sequential('buildArgs — codex', () => {
   })
 
   test('joins disallow with comma', () => {
-    const args = buildArgs(
-      'codex',
-      baseOpts({ disallow: ['Write', 'Edit'] }),
-    )
+    const args = buildArgs('codex', baseOpts({ disallow: ['Write', 'Edit'] }))
     const idx = args.indexOf('--disallow-tools')
     expect(idx).toBeGreaterThanOrEqual(0)
     expect(args[idx + 1]).toBe('Write,Edit')
