@@ -12,15 +12,11 @@ describe.sequential('logger/colors — applyColor', () => {
   })
 
   test('emits a 24-bit ANSI escape for RGB tuples', () => {
-    expect(applyColor('hi', [255, 0, 0], colors)).toBe(
-      '[38;2;255;0;0mhi[39m',
-    )
+    expect(applyColor('hi', [255, 0, 0], colors)).toBe('[38;2;255;0;0mhi[39m')
   })
 
   test('handles zero-component RGB tuples', () => {
-    expect(applyColor('x', [0, 0, 0], colors)).toBe(
-      '[38;2;0;0;0mx[39m',
-    )
+    expect(applyColor('x', [0, 0, 0], colors)).toBe('[38;2;0;0;0mx[39m')
   })
 
   test('handles 8-bit max RGB tuples', () => {
@@ -31,9 +27,7 @@ describe.sequential('logger/colors — applyColor', () => {
 
   test('round-trips empty text through both branches without throwing', () => {
     expect(applyColor('', 'green', colors)).toBe(colors.green(''))
-    expect(applyColor('', [10, 20, 30], colors)).toBe(
-      '[38;2;10;20;30m[39m',
-    )
+    expect(applyColor('', [10, 20, 30], colors)).toBe('[38;2;10;20;30m[39m')
   })
 })
 
