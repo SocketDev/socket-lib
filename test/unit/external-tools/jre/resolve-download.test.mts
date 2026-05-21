@@ -15,13 +15,10 @@ vi.mock('../../../../src/external-tools/jre/from-download', () => ({
 
 async function loadFresh() {
   const vfsMod = await import('../../../../src/external-tools/jre/from-vfs')
-  const jhMod = await import(
-    '../../../../src/external-tools/jre/from-java-home'
-  )
+  const jhMod =
+    await import('../../../../src/external-tools/jre/from-java-home')
   const pathMod = await import('../../../../src/external-tools/jre/from-path')
-  const dlMod = await import(
-    '../../../../src/external-tools/jre/from-download'
-  )
+  const dlMod = await import('../../../../src/external-tools/jre/from-download')
   const mod = await import('../../../../src/external-tools/jre/resolve')
   return {
     fromVfs: vfsMod.jreFromVfs as ReturnType<typeof vi.fn>,
@@ -89,13 +86,8 @@ describe.sequential('external-tools/jre/resolve — doResolveJre download tier',
 
 describe.sequential('external-tools/jre/resolve — resolveJre memoization isolation', () => {
   test('local-only and downloadIfMissing options memoize separately', async () => {
-    const {
-      fromDownload,
-      fromJavaHome,
-      fromPath,
-      fromVfs,
-      resolveJre,
-    } = await loadFresh()
+    const { fromDownload, fromJavaHome, fromPath, fromVfs, resolveJre } =
+      await loadFresh()
     fromVfs.mockResolvedValue(undefined)
     fromJavaHome.mockReturnValue(undefined)
     fromPath.mockResolvedValue(undefined)
