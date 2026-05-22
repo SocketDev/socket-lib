@@ -102,4 +102,63 @@ describe('eco/npm/parse-package-json', () => {
     expect(Object.isFrozen(result)).toBe(true)
     expect(Object.isFrozen(result.dependencies)).toBe(true)
   })
+
+  it('coerces non-string dependency version range', () => {
+    const result = parsePackageJson(
+      JSON.stringify({
+        name: 'foo',
+        dependencies: {
+          'numeric-range': 1.5,
+          'bool-range': true,
+        },
+      }),
+    )
+    const numericDep = result.dependencies.find(
+      d => d.name === 'numeric-range',
+    )
+    const boolDep = result.dependencies.find(d => d.name === 'bool-range')
+    expect(numericDep?.versionRange).toBe('1.5')
+    expect(boolDep?.versionRange).toBe('true')
+  })
+
+  it('resolves repository from a string field', () => {
+    const result = parsePackageJson(
+      JSON.stringify({
+        name: 'foo',
+        repository: 'https://github.com/owner/repo',
+      }),
+    )
+    expect(result.repository).toBe('https://github.com/owner/repo')
+  })
+
+  it('resolves repository from an object { url }', () => {
+    const result = parsePackageJson(
+      JSON.stringify({
+        name: 'foo',
+        repository: {
+          type: 'git',
+          url: 'git+https://github.com/owner/repo.git',
+        },
+      }),
+    )
+    expect(result.repository).toBe('git+https://github.com/owner/repo.git')
+  })
+
+  it('ignores empty-string repository fields', () => {
+    const result = parsePackageJson(
+      JSON.stringify({ name: 'foo', repository: '' }),
+    )
+    expect(result.repository).toBeUndefined()
+  })
+
+  it('ignores repository object with empty/non-string url', () => {
+    const result = parsePackageJson(
+      JSON.stringify({ name: 'foo', repository: { url: '' } }),
+    )
+    expect(result.repository).toBeUndefined()
+    const result2 = parsePackageJson(
+      JSON.stringify({ name: 'foo', repository: { url: 42 } }),
+    )
+    expect(result2.repository).toBeUndefined()
+  })
 })
