@@ -58,7 +58,9 @@ describe.sequential('env/number — float mode', () => {
   test('treats null defaultValueOrOptions as no-options', () => {
     // Explicit null exercises the `defaultValueOrOptions ?? {}` branch.
     const nullValue = JSON.parse('null') as unknown
-    expect(envAsNumber('42', nullValue as Parameters<typeof envAsNumber>[1])).toBe(42)
+    expect(
+      envAsNumber('42', nullValue as Parameters<typeof envAsNumber>[1]),
+    ).toBe(42)
   })
 
   test('treats null value as undefined (returns defaultValue)', () => {
