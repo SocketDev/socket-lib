@@ -415,6 +415,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                                                             | Description        |
 | --------------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/http-request/browser`](../src/http-request/browser.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/checksums`](../src/http-request/checksums.ts)             | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/convenience`](../src/http-request/convenience.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/download`](../src/http-request/download.ts)               | _(no description)_ |

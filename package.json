@@ -1409,6 +1409,11 @@
       "types": "./dist/globs/types.d.ts",
       "default": "./dist/globs/types.js"
     },
+    "./http-request/browser": {
+      "source": "./src/http-request/browser.ts",
+      "types": "./dist/http-request/browser.d.ts",
+      "default": "./dist/http-request/browser.js"
+    },
     "./http-request/checksums": {
       "source": "./src/http-request/checksums.ts",
       "types": "./dist/http-request/checksums.d.ts",
