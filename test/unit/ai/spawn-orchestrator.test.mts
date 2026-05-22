@@ -77,6 +77,47 @@ describe.sequential('ai/spawn — spawnAiAgent happy path', () => {
     expect(typeof result.durationMs).toBe('number')
   })
 
+  test('coerces missing stdout/stderr/code from successful child to ""/""/0', async () => {
+    const { discoverAiAgents, spawnAiAgent } = await loadFresh()
+    discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
+    // Child returns an object with NO stdout/stderr/code — exercises
+    // each `?? ''` / `?? 0` fallback.
+    mockChildSpawn.mockReturnValueOnce(
+      makeSpawnReturn({} as unknown as Parameters<typeof makeSpawnReturn>[0]),
+    )
+    const result = await spawnAiAgent(baseOpts)
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toBe('')
+    expect(result.stderr).toBe('')
+  })
+
+  test('coerces missing fields from a spawn-error throw', async () => {
+    const { discoverAiAgents, spawnAiAgent } = await loadFresh()
+    discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
+    // SpawnError-shaped (stdout/stderr/code keys present but field-only
+    // identification suffices for isSpawnError). Set all to undefined to
+    // exercise the catch-arm `?? ''` / `?? 1` fallbacks.
+    const spawnErr = { stdout: undefined, stderr: undefined, code: undefined }
+    mockChildSpawn.mockImplementationOnce(() => {
+      const t: PromiseLike<unknown> & { stdin: { end: () => void } } = {
+        stdin: { end: () => {} },
+        // oxlint-disable-next-line unicorn/no-thenable -- intentional, matches source await target
+        then(_o, r) {
+          return Promise.resolve().then(() => {
+            if (r) {
+              return r(spawnErr)
+            }
+            throw spawnErr
+          })
+        },
+      }
+      return t
+    })
+    const result = await spawnAiAgent(baseOpts)
+    // Generic catch arm: stderr from errorMessage(), exitCode 1.
+    expect(result.exitCode).toBe(1)
+  })
+
   test('pipes prompt to child.stdin', async () => {
     const { discoverAiAgents, spawnAiAgent } = await loadFresh()
     discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
