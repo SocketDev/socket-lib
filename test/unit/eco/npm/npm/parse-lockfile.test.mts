@@ -200,7 +200,7 @@ describe('eco/npm/npm/parse-lockfile', () => {
         parsePackageLock('not json')
         expect.fail('should have thrown')
       } catch (e) {
-        expect(e).toBeInstanceOf(ManifestError)
+        expect((e as Error).name).toBe('ManifestError')
         expect((e as ManifestError).code).toBe('ERR_INVALID_JSON')
       }
     })

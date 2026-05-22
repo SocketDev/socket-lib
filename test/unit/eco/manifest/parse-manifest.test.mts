@@ -22,7 +22,7 @@ describe('eco/manifest/parse-manifest', () => {
       parseManifest('{}', 'composer' as 'npm')
       expect.fail('should have thrown')
     } catch (e) {
-      expect(e).toBeInstanceOf(ManifestError)
+      expect((e as Error).name).toBe('ManifestError')
       expect((e as ManifestError).code).toBe('ERR_UNSUPPORTED')
     }
   })

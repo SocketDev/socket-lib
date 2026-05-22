@@ -105,7 +105,7 @@ describe('eco/manifest/parse-lockfile', () => {
         parseLockfile('', 'composer' as 'npm')
         expect.fail('should have thrown')
       } catch (e) {
-        expect(e).toBeInstanceOf(ManifestError)
+        expect((e as Error).name).toBe('ManifestError')
         expect((e as ManifestError).code).toBe('ERR_UNSUPPORTED')
       }
     })
@@ -115,7 +115,7 @@ describe('eco/manifest/parse-lockfile', () => {
         parseLockfile('no markers here', 'npm')
         expect.fail('should have thrown')
       } catch (e) {
-        expect(e).toBeInstanceOf(ManifestError)
+        expect((e as Error).name).toBe('ManifestError')
         expect((e as ManifestError).code).toBe('ERR_UNKNOWN_FORMAT')
       }
     })
