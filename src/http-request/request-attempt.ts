@@ -48,6 +48,7 @@ export async function httpRequestAttempt(
     maxRedirects = 5,
     maxResponseSize,
     method = 'GET',
+    signal,
     stream = false,
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
@@ -122,6 +123,13 @@ export async function httpRequestAttempt(
     /* c8 ignore next 3 */
     if (ca && isHttps) {
       requestOptions['ca'] = ca
+    }
+
+    // AbortSignal supported by node:http request options (Node 22+).
+    // Passes through to the underlying ClientRequest which listens
+    // for `abort` and tears down the socket.
+    if (signal) {
+      requestOptions['signal'] = signal
     }
 
     const emitResponse = (info: Partial<HttpHookResponseInfo>) => {

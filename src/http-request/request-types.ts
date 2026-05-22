@@ -220,6 +220,21 @@ export interface HttpRequestOptions {
    */
   retryDelay?: number | undefined
   /**
+   * AbortSignal forwarded to the underlying `http.request` / `https.request`
+   * call. Supported in Node 22+ via `node:http` request options. When both
+   * `signal` and `timeout` are provided, either can cancel the in-flight
+   * request (whichever fires first). Aborts are NOT retried — an external
+   * cancel is treated as an explicit caller decision.
+   *
+   * @example
+   *   ;```ts
+   *   const ac = new AbortController()
+   *   setTimeout(() => ac.abort(), 5000)
+   *   await httpRequest('https://api.example.com/x', { signal: ac.signal })
+   *   ```
+   */
+  signal?: AbortSignal | undefined
+  /**
    * When true, resolve with an HttpResponse whose body is NOT buffered. The
    * `rawResponse` property contains the unconsumed IncomingResponse stream for
    * piping to files or other destinations.

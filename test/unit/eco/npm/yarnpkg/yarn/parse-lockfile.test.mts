@@ -313,4 +313,52 @@ describe('parse-lockfile — EOL=-1 + Berry soft-link edge cases', () => {
     expect(result.packages.length).toBe(1)
     expect(result.packages[0]!.name).toBe('hard-pkg')
   })
+
+  it('skips dep lines with no colon and no space separator', () => {
+    // A "dep line" inside a classic dependencies: block that has no
+    // separator gets ignored (sepIdx === -1 branch).
+    const content = `
+"host@^1":
+  version "1.0.0"
+  resolved "https://example.com/host.tgz"
+  integrity sha512-host
+  dependencies:
+    noseparatorhere
+    real-dep "^2.0.0"
+`
+    const result = parseYarnLock(content)
+    const host = result.packages.find(p => p.name === 'host')
+    expect(host?.dependencies).toContain('real-dep')
+    expect(host?.dependencies).not.toContain('noseparatorhere')
+  })
+
+  it('ignores linkType property without a colon (defensive)', () => {
+    const content = `__metadata:
+  version: 6
+
+"pkg@npm:1.0.0":
+  version: 1.0.0
+  resolution: "pkg@npm:1.0.0"
+  linkType
+  checksum: sha512-x
+`
+    const result = parseYarnLock(content)
+    expect(result.packages.length).toBe(1)
+    expect(result.packages[0]!.name).toBe('pkg')
+  })
+
+  it('ignores resolution property without a colon (defensive)', () => {
+    const content = `__metadata:
+  version: 6
+
+"pkg@npm:1.0.0":
+  version: 1.0.0
+  resolution
+  checksum: sha512-x
+  linkType: hard
+`
+    const result = parseYarnLock(content)
+    expect(result.packages.length).toBe(1)
+    expect(result.packages[0]!.name).toBe('pkg')
+  })
 })

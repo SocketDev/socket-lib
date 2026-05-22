@@ -81,6 +81,7 @@ export async function httpRequest(
     onRetry,
     retries = 0,
     retryDelay = 1000,
+    signal,
     stream = false,
     throwOnError = false,
     timeout = 30_000,
@@ -112,6 +113,7 @@ export async function httpRequest(
     maxRedirects,
     maxResponseSize,
     method,
+    signal,
     stream,
     timeout,
   }
@@ -135,6 +137,12 @@ export async function httpRequest(
 
       // Last attempt - throw error
       if (attempt === retries) {
+        break
+      }
+
+      // Honor caller-initiated abort. If the signal fired, don't retry —
+      // the caller explicitly cancelled.
+      if (signal?.aborted) {
         break
       }
 

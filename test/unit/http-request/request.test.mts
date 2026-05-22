@@ -64,6 +64,15 @@ describe.sequential('http-request/request — happy path', () => {
     expect(opts.body).toBe('payload')
     expect(opts.timeout).toBe(5000)
   })
+
+  test('passes AbortSignal through to httpRequestAttempt', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    httpRequestAttempt.mockResolvedValueOnce(makeResponse({ ok: true }))
+    const controller = new AbortController()
+    await httpRequest('https://example.com', { signal: controller.signal })
+    const [, opts] = httpRequestAttempt.mock.calls[0]!
+    expect(opts.signal).toBe(controller.signal)
+  })
 })
 
 describe.sequential('http-request/request — stream body guard', () => {
