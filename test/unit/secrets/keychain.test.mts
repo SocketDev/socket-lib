@@ -296,6 +296,24 @@ describe.sequential('secrets/keychain — writeSecretSync', () => {
       's credential',
     )
   })
+
+  test('routes to writeLinuxSync on linux', async () => {
+    const { linux, mod } = await loadFresh('linux')
+    linux['readLinuxSync']!.mockReturnValueOnce(undefined)
+    expect(
+      mod.writeSecretSync({ service: 's', account: 'a', value: 'v' }),
+    ).toBe('written')
+    expect(linux['writeLinuxSync']).toHaveBeenCalled()
+  })
+
+  test('routes to writeWindowsSync on win32', async () => {
+    const { mod, windows } = await loadFresh('win32')
+    windows['readWindowsSync']!.mockReturnValueOnce(undefined)
+    expect(
+      mod.writeSecretSync({ service: 's', account: 'a', value: 'v' }),
+    ).toBe('written')
+    expect(windows['writeWindowsSync']).toHaveBeenCalled()
+  })
 })
 
 describe.sequential('secrets/keychain — deleteSecret + deleteSecretSync', () => {
@@ -334,6 +352,18 @@ describe.sequential('secrets/keychain — deleteSecret + deleteSecretSync', () =
     const { macos, mod } = await loadFresh('darwin')
     macos['deleteMacOSSync']!.mockReturnValueOnce('removed')
     expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('removed')
+  })
+
+  test('sync: routes to deleteLinuxSync on linux', async () => {
+    const { linux, mod } = await loadFresh('linux')
+    linux['deleteLinuxSync']!.mockReturnValueOnce('removed')
+    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('removed')
+  })
+
+  test('sync: routes to deleteWindowsSync on win32', async () => {
+    const { mod, windows } = await loadFresh('win32')
+    windows['deleteWindowsSync']!.mockReturnValueOnce('absent')
+    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('absent')
   })
 
   test('sync: returns "absent" on unsupported platforms', async () => {
