@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'vitest'
 
-import { Instant, isValidEpochNanoseconds } from '../../../src/temporal/instant'
+import {
+  describe as describeValue,
+  Instant,
+  isValidEpochNanoseconds,
+} from '../../../src/temporal/instant'
 
 const NS_MAX_INSTANT = 8_640_000_000_000_000_000_000n
 const NS_MIN_INSTANT = -NS_MAX_INSTANT
@@ -87,5 +91,36 @@ describe.sequential('temporal/instant — epochNanoseconds getter', () => {
       'epochNanoseconds',
     )!
     expect(() => desc.get!.call({})).toThrow(/InitializedTemporalInstant/)
+  })
+})
+
+describe.sequential('temporal/instant — describe (value formatter)', () => {
+  test('returns "null" for null', () => {
+    // Avoid `null` literal in source (no-null rule) by deriving it via JSON.parse.
+    const nullValue = JSON.parse('null') as unknown
+    expect(describeValue(nullValue)).toBe('null')
+  })
+
+  test('appends "n" to bigint values', () => {
+    expect(describeValue(42n)).toBe('42n')
+  })
+
+  test('returns <ConstructorName> for object instances with a named constructor', () => {
+    class MyClass {}
+    expect(describeValue(new MyClass())).toBe('<MyClass>')
+  })
+
+  test('returns <object> for a plain object created via Object.create(null)', () => {
+    expect(describeValue(Object.create(null))).toBe('<object>')
+  })
+
+  test('JSON-encodes strings', () => {
+    expect(describeValue('hi')).toBe('"hi"')
+  })
+
+  test('String-coerces numbers', () => {
+    expect(describeValue(42)).toBe('42')
+    expect(describeValue(true)).toBe('true')
+    expect(describeValue(undefined)).toBe('undefined')
   })
 })
