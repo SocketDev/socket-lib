@@ -313,3 +313,131 @@ describe('printHelp', () => {
     expect(() => printHelp()).not.toThrow()
   })
 })
+
+describe('renderHuman', () => {
+  it('emits success when no findings + silent=false', async () => {
+    const { renderHuman } = await import(
+      '../../../src/bin/check-primordials'
+    )
+    expect(() =>
+      renderHuman(
+        {
+          findings: [],
+          used: new Set(['Foo']),
+          unused: new Set(),
+        } as unknown as Parameters<typeof renderHuman>[0],
+        {
+          config: undefined,
+          json: false,
+          explain: false,
+          silent: false,
+          help: false,
+        },
+      ),
+    ).not.toThrow()
+  })
+
+  it('emits nothing when silent + no findings', async () => {
+    const { renderHuman } = await import(
+      '../../../src/bin/check-primordials'
+    )
+    expect(() =>
+      renderHuman(
+        {
+          findings: [],
+          used: new Set(),
+          unused: new Set(),
+        } as unknown as Parameters<typeof renderHuman>[0],
+        {
+          config: undefined,
+          json: false,
+          explain: false,
+          silent: true,
+          help: false,
+        },
+      ),
+    ).not.toThrow()
+  })
+
+  it('renders findings with hint when --explain is set', async () => {
+    const { renderHuman } = await import(
+      '../../../src/bin/check-primordials'
+    )
+    expect(() =>
+      renderHuman(
+        {
+          findings: [
+            {
+              kind: 'unmapped',
+              name: 'BadName',
+              hint: 'no mapping; pick one of A/B/C',
+              files: ['src/a.js', 'src/b.js'],
+            },
+          ],
+          used: new Set(['BadName']),
+          unused: new Set(),
+        } as unknown as Parameters<typeof renderHuman>[0],
+        {
+          config: undefined,
+          json: false,
+          explain: true,
+          silent: false,
+          help: false,
+        },
+      ),
+    ).not.toThrow()
+  })
+
+  it('renders findings without files when files list is empty', async () => {
+    const { renderHuman } = await import(
+      '../../../src/bin/check-primordials'
+    )
+    expect(() =>
+      renderHuman(
+        {
+          findings: [
+            {
+              kind: 'unmapped',
+              name: 'Name',
+              hint: 'h',
+              files: [],
+            },
+          ],
+          used: new Set(['Name']),
+          unused: new Set(),
+        } as unknown as Parameters<typeof renderHuman>[0],
+        {
+          config: undefined,
+          json: false,
+          explain: true,
+          silent: false,
+          help: false,
+        },
+      ),
+    ).not.toThrow()
+  })
+
+  it('emits trailing "run with --explain" hint when not explaining', async () => {
+    const { renderHuman } = await import(
+      '../../../src/bin/check-primordials'
+    )
+    expect(() =>
+      renderHuman(
+        {
+          findings: [
+            { kind: 'unmapped', name: 'X', hint: 'h', files: [] },
+          ],
+          used: new Set(['X']),
+          unused: new Set(),
+        } as unknown as Parameters<typeof renderHuman>[0],
+        {
+          config: undefined,
+          json: false,
+          explain: false,
+          silent: false,
+          help: false,
+        },
+      ),
+    ).not.toThrow()
+  })
+})
