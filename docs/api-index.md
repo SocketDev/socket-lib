@@ -104,11 +104,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## colors/
 
-| Subpath                                                                 | Description        |
-| ----------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/colors/convert`](../src/colors/convert.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/colors/palette`](../src/colors/palette.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/colors/types`](../src/colors/types.ts)     | _(no description)_ |
+| Subpath                                                                               | Description        |
+| ------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/colors/convert`](../src/colors/convert.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/colors/palette`](../src/colors/palette.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/colors/socket-palette`](../src/colors/socket-palette.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/colors/types`](../src/colors/types.ts)                   | _(no description)_ |
 
 ## compression/
 

@@ -294,6 +294,11 @@
       "types": "./dist/colors/palette.d.ts",
       "default": "./dist/colors/palette.js"
     },
+    "./colors/socket-palette": {
+      "source": "./src/colors/socket-palette.ts",
+      "types": "./dist/colors/socket-palette.d.ts",
+      "default": "./dist/colors/socket-palette.js"
+    },
     "./colors/types": {
       "source": "./src/colors/types.ts",
       "types": "./dist/colors/types.d.ts",
