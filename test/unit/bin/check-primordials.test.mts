@@ -316,9 +316,7 @@ describe('printHelp', () => {
 
 describe('renderHuman', () => {
   it('emits success when no findings + silent=false', async () => {
-    const { renderHuman } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { renderHuman } = await import('../../../src/bin/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -338,9 +336,7 @@ describe('renderHuman', () => {
   })
 
   it('emits nothing when silent + no findings', async () => {
-    const { renderHuman } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { renderHuman } = await import('../../../src/bin/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -360,9 +356,7 @@ describe('renderHuman', () => {
   })
 
   it('renders findings with hint when --explain is set', async () => {
-    const { renderHuman } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { renderHuman } = await import('../../../src/bin/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -389,9 +383,7 @@ describe('renderHuman', () => {
   })
 
   it('renders findings without files when files list is empty', async () => {
-    const { renderHuman } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { renderHuman } = await import('../../../src/bin/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -418,15 +410,11 @@ describe('renderHuman', () => {
   })
 
   it('emits trailing "run with --explain" hint when not explaining', async () => {
-    const { renderHuman } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { renderHuman } = await import('../../../src/bin/check-primordials')
     expect(() =>
       renderHuman(
         {
-          findings: [
-            { kind: 'unmapped', name: 'X', hint: 'h', files: [] },
-          ],
+          findings: [{ kind: 'unmapped', name: 'X', hint: 'h', files: [] }],
           used: new Set(['X']),
           unused: new Set(),
         } as unknown as Parameters<typeof renderHuman>[0],
