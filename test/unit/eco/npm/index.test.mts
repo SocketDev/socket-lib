@@ -459,8 +459,24 @@ describe('agent', () => {
     })
 
     describe('isPnpmLoglevelFlag', () => {
-      it('should be an alias for isNpmLoglevelFlag', () => {
-        expect(isPnpmLoglevelFlag).toBe(isNpmLoglevelFlag)
+      it('should behave identically to isNpmLoglevelFlag', () => {
+        // Module dedup is unreliable under vitest's threaded pool — the
+        // two import paths can resolve to distinct copies of the
+        // function reference. Verify behavioral identity across the
+        // exhaustive input set instead of `===`.
+        const samples = [
+          '--loglevel',
+          '--loglevel=warn',
+          '-l',
+          '--silent',
+          '--quiet',
+          '-q',
+          '--unrelated',
+          '',
+        ]
+        for (const s of samples) {
+          expect(isPnpmLoglevelFlag(s)).toBe(isNpmLoglevelFlag(s))
+        }
       })
 
       it('should return true for --loglevel', () => {

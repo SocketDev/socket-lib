@@ -128,4 +128,35 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const args = vi.mocked(httpDownload).mock.calls[0]!
     expect(args[2]).toEqual({ sha256: 'a'.repeat(64) })
   })
+
+  it('verifies sha256 on cached file and accepts a matching hash', async () => {
+    const payload = Buffer.from('cached-payload')
+    const sha256 = createHash('sha256').update(payload).digest('hex')
+    const destPath = path.join(testDir, 'cached-ok')
+    writeFileSync(destPath, payload)
+    const result = await downloadBinaryFile(
+      'https://example.com/x',
+      destPath,
+      undefined,
+      sha256,
+    )
+    expect(result.startsWith('sha512-')).toBe(true)
+    expect(httpDownload).not.toHaveBeenCalled()
+  })
+
+  it('throws SHA-256 mismatch on cached file and removes the bad file', async () => {
+    const payload = Buffer.from('cached-bad')
+    const destPath = path.join(testDir, 'cached-mismatch')
+    writeFileSync(destPath, payload)
+    const wrongSha256 = 'f'.repeat(64)
+    await expect(
+      downloadBinaryFile(
+        'https://example.com/x',
+        destPath,
+        undefined,
+        wrongSha256,
+      ),
+    ).rejects.toThrow(/SHA-256 mismatch/)
+    expect(existsSync(destPath)).toBe(false)
+  })
 })
