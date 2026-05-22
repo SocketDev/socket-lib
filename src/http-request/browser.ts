@@ -1,5 +1,7 @@
 /// <reference lib="dom" />
 
+import { doFetch } from './browser-fetch'
+
 /**
  * @file Browser-safe HTTP request layer — mirrors the public surface of
  *   `@socketsecurity/lib/http-request` (`httpJson`, `httpText`, `httpRequest`,
@@ -104,8 +106,7 @@ export async function attempt(
     })
   }
   try {
-    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- browser entrypoint; fetch IS the underlying API
-    const response = await fetch(url, init)
+    const response = await doFetch(url, init)
     const buffer = await response.arrayBuffer()
     if (
       options.maxResponseSize !== undefined &&

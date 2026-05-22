@@ -1,15 +1,14 @@
 /**
- * @file Unit tests for browser-safe http-request layer.
+ * @file Unit tests for browser-safe http-request layer. Mocks the `doFetch`
+ *   helper module (not globalThis.fetch) so the project's nock-based test setup
+ *   doesn't interfere.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  HttpResponseError,
-  httpJson,
-  httpRequest,
-  httpText,
-} from '../../../src/http-request/browser'
+vi.mock('../../../src/http-request/browser-fetch', () => ({
+  doFetch: vi.fn(),
+}))
 
 interface MockResponseInit {
   status?: number
@@ -26,22 +25,40 @@ function mockFetchResponse(init: MockResponseInit = {}): Response {
   })
 }
 
-// Tests run sequentially because they share globalThis.fetch state — vi.spyOn
-// can't reliably intercept due to nock's monkey-patch from the global test
-// setup, so we replace fetch wholesale each beforeEach.
-describe.sequential('http-request/browser', () => {
-  let fetchSpy: import('vitest').MockInstance
-  let originalFetch: typeof globalThis.fetch
+async function loadFresh() {
+  const fetchMod = await import('../../../src/http-request/browser-fetch')
+  const mod = await import('../../../src/http-request/browser')
+  return {
+    fetchSpy: fetchMod.doFetch as ReturnType<typeof vi.fn>,
+    HttpResponseError: mod.HttpResponseError,
+    httpJson: mod.httpJson,
+    httpRequest: mod.httpRequest,
+    httpText: mod.httpText,
+  }
+}
 
-  beforeEach(() => {
-    originalFetch = globalThis.fetch
-    const mock = vi.fn(async () => mockFetchResponse({ body: '{}' }))
-    globalThis.fetch = mock as unknown as typeof globalThis.fetch
-    fetchSpy = mock as unknown as import('vitest').MockInstance
+describe.sequential('http-request/browser', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>
+  let HttpResponseError: Awaited<
+    ReturnType<typeof loadFresh>
+  >['HttpResponseError']
+  let httpJson: Awaited<ReturnType<typeof loadFresh>>['httpJson']
+  let httpRequest: Awaited<ReturnType<typeof loadFresh>>['httpRequest']
+  let httpText: Awaited<ReturnType<typeof loadFresh>>['httpText']
+
+  beforeEach(async () => {
+    vi.resetModules()
+    const fresh = await loadFresh()
+    fetchSpy = fresh.fetchSpy
+    fetchSpy.mockImplementation(async () => mockFetchResponse({ body: '{}' }))
+    HttpResponseError = fresh.HttpResponseError
+    httpJson = fresh.httpJson
+    httpRequest = fresh.httpRequest
+    httpText = fresh.httpText
   })
 
   afterEach(() => {
-    globalThis.fetch = originalFetch
+    vi.clearAllMocks()
   })
 
   describe('httpRequest', () => {
@@ -180,7 +197,7 @@ describe.sequential('http-request/browser', () => {
         expect.fail('expected throw')
       } catch (e) {
         expect(e).toBeInstanceOf(HttpResponseError)
-        const err = e as HttpResponseError
+        const err = e as InstanceType<typeof HttpResponseError>
         expect(err.response.status).toBe(418)
         expect(err.response.statusText).toBe("I'm a teapot")
         expect(err.name).toBe('HttpResponseError')
@@ -286,6 +303,88 @@ describe.sequential('http-request/browser', () => {
       )
       await expect(
         httpRequest('https://api.example.com/x', { timeout: 10 }),
+      ).rejects.toThrow()
+    })
+
+    it('combines an already-aborted external signal with a timeout', async () => {
+      const controller = new AbortController()
+      controller.abort()
+      fetchSpy.mockImplementationOnce(
+        (_input, init) =>
+          new Promise((_, reject) => {
+            const signal = init?.signal as AbortSignal
+            if (signal.aborted) {
+              reject(new Error('AbortError'))
+              return
+            }
+            signal.addEventListener('abort', () =>
+              reject(new Error('AbortError')),
+            )
+          }),
+      )
+      await expect(
+        httpRequest('https://api.example.com/x', {
+          signal: controller.signal,
+          timeout: 1000,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('combines an active external signal with a timeout (cleanup path)', async () => {
+      const controller = new AbortController()
+      fetchSpy.mockResolvedValueOnce(mockFetchResponse({ body: 'ok' }))
+      const result = await httpRequest('https://api.example.com/x', {
+        signal: controller.signal,
+        timeout: 1000,
+      })
+      expect(result.body).toBeInstanceOf(Uint8Array)
+    })
+
+    it('aborts external signal mid-flight (registers listener path)', async () => {
+      const controller = new AbortController()
+      fetchSpy.mockImplementationOnce(
+        (_input, init) =>
+          new Promise((_, reject) => {
+            const signal = init?.signal as AbortSignal
+            signal.addEventListener('abort', () => reject(new Error('aborted')))
+            setTimeout(() => controller.abort(), 5)
+          }),
+      )
+      await expect(
+        httpRequest('https://api.example.com/x', {
+          signal: controller.signal,
+          timeout: 5000,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('coerces non-Error throwables in onResponse hook', async () => {
+      fetchSpy.mockImplementationOnce(() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw 'string-error'
+      })
+      const onResponse = vi.fn()
+      await expect(
+        httpRequest('https://api.example.com/x', { hooks: { onResponse } }),
+      ).rejects.toBeDefined()
+      // onResponse was called with an Error wrapping the string
+      expect(onResponse).toHaveBeenCalled()
+      const arg = onResponse.mock.calls[0]![0] as { error?: Error }
+      expect(arg.error).toBeInstanceOf(Error)
+      expect(arg.error?.message).toBe('string-error')
+    })
+
+    it('falls back to generic Error when lastError is non-Error after exhausted retries', async () => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      fetchSpy.mockImplementation(() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw 'literal-error'
+      })
+      await expect(
+        httpRequest('https://api.example.com/x', {
+          retries: 1,
+          retryDelay: 1,
+        }),
       ).rejects.toThrow()
     })
   })
