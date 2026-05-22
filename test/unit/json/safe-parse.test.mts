@@ -106,6 +106,13 @@ describe('json/safe-parse', () => {
       )
     })
 
+    it('includes byte-count detail in error when maxSize differs from default', () => {
+      const large = JSON.stringify({ data: 'x'.repeat(1000) })
+      expect(() => parseJsonSafe(large, undefined, { maxSize: 100 })).toThrow(
+        /of 100 bytes/,
+      )
+    })
+
     it('should succeed within maxSize', () => {
       const small = JSON.stringify({ data: 'x'.repeat(10) })
       expect(parseJsonSafe(small, undefined, { maxSize: 100 })).toEqual({

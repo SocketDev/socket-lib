@@ -480,3 +480,45 @@ describe.sequential('readExternalToolsManifest', () => {
     expect(manifest.tools['rust']?.kind).toBe('other')
   })
 })
+
+describe.sequential('tryParseFlavored — skip invalid flavor candidates', () => {
+  test('skips a flavor candidate whose checksums field is not an object', () => {
+    const result = tryParseFlavored(
+      {
+        description: 'sfw',
+        // free has bad checksums shape → skipped.
+        free: {
+          repository: 'github:socket/sfw-free',
+          checksums: 'not-an-object',
+        },
+        // enterprise is valid → kept.
+        enterprise: {
+          repository: 'github:socket/sfw-enterprise',
+          checksums: {
+            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
+          },
+        },
+      },
+      'sfw',
+    )
+    expect(result?.flavors['free']).toBeUndefined()
+    expect(result?.flavors['enterprise']).toBeDefined()
+  })
+
+  test('omits binaryName when the field is not a string', () => {
+    const result = tryParseFlavored(
+      {
+        description: 'sfw',
+        free: {
+          repository: 'github:socket/sfw-free',
+          binaryName: 42,
+          checksums: {
+            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
+          },
+        },
+      },
+      'sfw',
+    )
+    expect(result?.flavors['free']?.binaryName).toBeUndefined()
+  })
+})
