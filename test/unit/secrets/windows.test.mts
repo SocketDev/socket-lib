@@ -328,6 +328,18 @@ describe.sequential('secrets/windows — readDpapiSync', () => {
     const { readDpapiSync } = await loadFresh()
     expect(readDpapiSync(filePath)).toBeUndefined()
   })
+
+  test('returns undefined when sync decoded stdout is empty after trim', async () => {
+    const filePath = path.join(tmpRoot, 'empty-sync.enc')
+    writeFileSync(filePath, 'b')
+    mockSpawnSync.mockReturnValueOnce({
+      status: 0,
+      stdout: '   ',
+      stderr: '',
+    })
+    const { readDpapiSync } = await loadFresh()
+    expect(readDpapiSync(filePath)).toBeUndefined()
+  })
 })
 
 describe.sequential('secrets/windows — readWindows', () => {
@@ -358,6 +370,22 @@ describe.sequential('secrets/windows — readWindows', () => {
     const { readWindows } = await loadFresh()
     expect(await readWindows('svc', 'acc')).toBeUndefined()
   })
+
+  test('falls back to DPAPI when CM returns status=0 but empty stdout', async () => {
+    // CM exited 0 but stdout was whitespace-only — must still try DPAPI.
+    const filePath = path.join(tmpRoot, 'svc', 'acc.enc')
+    require('node:fs').mkdirSync(path.dirname(filePath), { recursive: true })
+    writeFileSync(filePath, 'b64')
+    mockSpawn
+      .mockImplementationOnce(() =>
+        makeFakeChild({ stdout: '   \n', exitCode: 0 }),
+      )
+      .mockImplementationOnce(() =>
+        makeFakeChild({ stdout: 'dpapi-value\n', exitCode: 0 }),
+      )
+    const { readWindows } = await loadFresh()
+    expect(await readWindows('svc', 'acc')).toBe('dpapi-value')
+  })
 })
 
 describe.sequential('secrets/windows — readWindowsSync', () => {
@@ -384,6 +412,21 @@ describe.sequential('secrets/windows — readWindowsSync', () => {
       })
     const { readWindowsSync } = await loadFresh()
     expect(readWindowsSync('svc', 'acc')).toBe('dpapi-sync')
+  })
+
+  test('falls back to DPAPI sync when CM returns status=0 but empty stdout', async () => {
+    const filePath = path.join(tmpRoot, 'svc', 'acc.enc')
+    require('node:fs').mkdirSync(path.dirname(filePath), { recursive: true })
+    writeFileSync(filePath, 'b64')
+    mockSpawnSync
+      .mockReturnValueOnce({ status: 0, stdout: '   \n', stderr: '' })
+      .mockReturnValueOnce({
+        status: 0,
+        stdout: 'dpapi-sync-fallback\n',
+        stderr: '',
+      })
+    const { readWindowsSync } = await loadFresh()
+    expect(readWindowsSync('svc', 'acc')).toBe('dpapi-sync-fallback')
   })
 })
 
