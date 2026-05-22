@@ -215,6 +215,24 @@ describe.sequential('http-request/request — retry loop', () => {
     })
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
+
+  test('honors a mid-retry caller abort (signal.aborted between attempts)', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    const controller = new AbortController()
+    httpRequestAttempt.mockImplementation(async () => {
+      controller.abort()
+      throw new Error('transient')
+    })
+    await expect(
+      httpRequest('https://example.com', {
+        retries: 5,
+        retryDelay: 0,
+        signal: controller.signal,
+      }),
+    ).rejects.toThrow(/transient/)
+    // Only one attempt: signal.aborted short-circuits retries.
+    expect(httpRequestAttempt).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe.sequential('http-request/request — re-exports', () => {
