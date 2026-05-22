@@ -252,5 +252,62 @@ describe('eco/npm/npm/parse-lockfile', () => {
       expect(Object.isFrozen(result.packages)).toBe(true)
       expect(Object.isFrozen(result.packages[0])).toBe(true)
     })
+
+    it('defaults version to "0.0.0" when pkg.version is missing or non-string', () => {
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            'node_modules/no-version': { license: 'MIT' },
+            'node_modules/numeric-version': { version: 42 },
+          },
+        }),
+      )
+      const pkgs = result.packages as ReadonlyArray<{
+        name: string
+        version: string
+      }>
+      const noVer = pkgs.find(p => p.name === 'no-version')
+      const numVer = pkgs.find(p => p.name === 'numeric-version')
+      expect(noVer?.version).toBe('0.0.0')
+      expect(numVer?.version).toBe('0.0.0')
+    })
+
+    it('defaults lockVersion to "1" when lockfileVersion is missing', () => {
+      const result = parsePackageLock(
+        JSON.stringify({
+          packages: { 'node_modules/x': { version: '1.0.0' } },
+        }),
+      )
+      expect(result.lockVersion).toBe('1')
+    })
+
+    it('ignores non-string license fields (defensive type guard)', () => {
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            'node_modules/structured-license': {
+              version: '1.0.0',
+              license: { type: 'MIT', url: 'https://example.com' },
+            },
+          },
+        }),
+      )
+      const pkg = result.packages[0] as { license?: string }
+      expect(pkg.license).toBeUndefined()
+    })
+
+    it('falls through when pkg.version starts with "npm:" but has no "@" separator', () => {
+      const result = parsePackageLock(
+        JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            'node_modules/foo': { version: 'npm:noatdelim' },
+          },
+        }),
+      )
+      expect(result.packages[0]!.name).toBe('foo')
+    })
   })
 })
