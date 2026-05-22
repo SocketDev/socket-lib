@@ -211,4 +211,49 @@ describe('eco/cargo/parse-lockfile', () => {
       expect(parseInlineArray('[ "a", "unterminated ]')).toEqual(['a'])
     })
   })
+
+  describe('edge cases', () => {
+    it('parses a Cargo.lock without a trailing newline (EOL=-1 branch)', () => {
+      const content = `version = 3
+
+[[package]]
+name = "foo"
+version = "1.0.0"
+source = "registry+https://example.com"`
+      const result = parseCargoLock(content)
+      expect(result.packages.length).toBe(1)
+      expect(result.packages[0]!.name).toBe('foo')
+    })
+
+    it('parses an inline single-line dependencies array', () => {
+      const content = `version = 3
+
+[[package]]
+name = "host"
+version = "1.0.0"
+dependencies = [ "dep-a", "dep-b" ]
+`
+      const result = parseCargoLock(content)
+      const host = result.packages.find(p => p.name === 'host')
+      expect(host?.dependencies).toContain('dep-a')
+      expect(host?.dependencies).toContain('dep-b')
+    })
+
+    it('parses multi-line dependencies without trailing commas on the last entry', () => {
+      const content = `version = 3
+
+[[package]]
+name = "host"
+version = "1.0.0"
+dependencies = [
+ "dep-a",
+ "dep-b"
+]
+`
+      const result = parseCargoLock(content)
+      const host = result.packages.find(p => p.name === 'host')
+      expect(host?.dependencies).toContain('dep-a')
+      expect(host?.dependencies).toContain('dep-b')
+    })
+  })
 })
