@@ -12,12 +12,15 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Mock spawn at the package specifier — src resolution is enabled in
-// vitest.config.mts via the 'source' export condition.
-vi.mock('@socketsecurity/lib/process/spawn/child')
+// Mock via the src/ relative path so vitest intercepts the same
+// module instance that src/cover/type.ts imports (which uses
+// relative paths internally). Package-specifier mocks don't survive
+// vitest's threaded-pool dedup gaps. See:
+// test/unit/releases/*.test.mts for the canonical pattern.
+vi.mock('../../../src/process/spawn/child')
 
-import { spawn } from '@socketsecurity/lib/process/spawn/child'
-import { getTypeCoverage } from '@socketsecurity/lib/cover/type'
+import { spawn } from '../../../src/process/spawn/child'
+import { getTypeCoverage } from '../../../src/cover/type'
 
 describe('cover/type', () => {
   beforeEach(() => {

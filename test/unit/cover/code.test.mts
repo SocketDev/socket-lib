@@ -12,10 +12,14 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@socketsecurity/lib/process/spawn/child')
+// Mock via the src/ relative path so vitest intercepts the same
+// module instance that src/cover/code.ts imports (which uses
+// relative paths internally). Package-specifier mocks don't survive
+// vitest's threaded-pool dedup gaps.
+vi.mock('../../../src/process/spawn/child')
 
-import { spawn } from '@socketsecurity/lib/process/spawn/child'
-import { getCodeCoverage } from '@socketsecurity/lib/cover/code'
+import { spawn } from '../../../src/process/spawn/child'
+import { getCodeCoverage } from '../../../src/cover/code'
 
 let tmpDir: string
 
