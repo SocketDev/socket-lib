@@ -143,9 +143,8 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
 
   describe('packageJsonPathCacheSet', () => {
     it('refreshes a cached entry when the key already exists', async () => {
-      const { packageJsonPathCacheSet } = await import(
-        '../../../src/dlx/detect'
-      )
+      const { packageJsonPathCacheSet } =
+        await import('../../../src/dlx/detect')
       // Set, then re-set the same key — exercises the delete-when-present branch.
       packageJsonPathCacheSet('/some/key', '/path/v1')
       packageJsonPathCacheSet('/some/key', '/path/v2')
@@ -155,9 +154,8 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
     })
 
     it('handles many distinct keys without throwing (LRU eviction path)', async () => {
-      const { packageJsonPathCacheSet } = await import(
-        '../../../src/dlx/detect'
-      )
+      const { packageJsonPathCacheSet } =
+        await import('../../../src/dlx/detect')
       // Push enough entries to exceed the cache cap and force eviction.
       for (let i = 0; i < 200; i++) {
         packageJsonPathCacheSet(`/key-${i}`, `/path-${i}`)

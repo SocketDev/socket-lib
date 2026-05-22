@@ -13,9 +13,7 @@ vi.mock('../../../../src/external-tools/sbt/from-download', () => ({
 async function loadFresh() {
   const vfsMod = await import('../../../../src/external-tools/sbt/from-vfs')
   const pathMod = await import('../../../../src/external-tools/sbt/from-path')
-  const dlMod = await import(
-    '../../../../src/external-tools/sbt/from-download'
-  )
+  const dlMod = await import('../../../../src/external-tools/sbt/from-download')
   const mod = await import('../../../../src/external-tools/sbt/resolve')
   return {
     fromVfs: vfsMod.sbtFromVfs as ReturnType<typeof vi.fn>,
