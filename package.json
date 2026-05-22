@@ -1414,6 +1414,11 @@
       "types": "./dist/http-request/browser.d.ts",
       "default": "./dist/http-request/browser.js"
     },
+    "./http-request/browser-fetch": {
+      "source": "./src/http-request/browser-fetch.ts",
+      "types": "./dist/http-request/browser-fetch.d.ts",
+      "default": "./dist/http-request/browser-fetch.js"
+    },
     "./http-request/checksums": {
       "source": "./src/http-request/checksums.ts",
       "types": "./dist/http-request/checksums.d.ts",
