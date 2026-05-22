@@ -26,20 +26,22 @@ function mockFetchResponse(init: MockResponseInit = {}): Response {
   })
 }
 
-// Browser tests use fetch directly; the project's test setup uses nock to
-// disallow net connects, so spying on globalThis.fetch is unreliable.
-// Skip until the test setup decouples nock from browser-mode entries.
-describe.skip('http-request/browser', () => {
+// Tests run sequentially because they share globalThis.fetch state — vi.spyOn
+// can't reliably intercept due to nock's monkey-patch from the global test
+// setup, so we replace fetch wholesale each beforeEach.
+describe.sequential('http-request/browser', () => {
   let fetchSpy: import('vitest').MockInstance
+  let originalFetch: typeof globalThis.fetch
 
   beforeEach(() => {
-    fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockImplementation(async () => mockFetchResponse({ body: '{}' }))
+    originalFetch = globalThis.fetch
+    const mock = vi.fn(async () => mockFetchResponse({ body: '{}' }))
+    globalThis.fetch = mock as unknown as typeof globalThis.fetch
+    fetchSpy = mock as unknown as import('vitest').MockInstance
   })
 
   afterEach(() => {
-    fetchSpy.mockRestore()
+    globalThis.fetch = originalFetch
   })
 
   describe('httpRequest', () => {
