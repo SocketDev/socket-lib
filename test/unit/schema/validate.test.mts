@@ -227,3 +227,137 @@ describe('schema/validate', () => {
     })
   })
 })
+
+describe('isTypeBoxSchema', () => {
+  it('returns false for null', async () => {
+    const { isTypeBoxSchema } = await import('../../../src/schema/validate')
+    expect(isTypeBoxSchema(undefined)).toBe(false)
+  })
+
+  it('returns false for non-object inputs', async () => {
+    const { isTypeBoxSchema } = await import('../../../src/schema/validate')
+    expect(isTypeBoxSchema(42)).toBe(false)
+    expect(isTypeBoxSchema('string')).toBe(false)
+    expect(isTypeBoxSchema(undefined)).toBe(false)
+  })
+
+  it('returns false for plain object without TypeBox.Kind symbol', async () => {
+    const { isTypeBoxSchema } = await import('../../../src/schema/validate')
+    expect(isTypeBoxSchema({})).toBe(false)
+    expect(isTypeBoxSchema({ type: 'string' })).toBe(false)
+  })
+
+  it('returns false when TypeBox.Kind symbol value is not a string', async () => {
+    const { isTypeBoxSchema } = await import('../../../src/schema/validate')
+    const kind = Symbol('TypeBox.Kind')
+    expect(isTypeBoxSchema({ [kind]: 42 })).toBe(false)
+  })
+
+  it('returns true for object with TypeBox.Kind symbol → string value', async () => {
+    const { isTypeBoxSchema } = await import('../../../src/schema/validate')
+    const kind = Symbol('TypeBox.Kind')
+    expect(isTypeBoxSchema({ [kind]: 'String' })).toBe(true)
+  })
+
+  it('ignores symbols with other descriptions', async () => {
+    const { isTypeBoxSchema } = await import('../../../src/schema/validate')
+    const other = Symbol('NotTypeBox')
+    expect(isTypeBoxSchema({ [other]: 'String' })).toBe(false)
+  })
+})
+
+describe('normalizeTypeBoxErrors', () => {
+  it('returns empty array for empty input', async () => {
+    const { normalizeTypeBoxErrors } =
+      await import('../../../src/schema/validate')
+    expect(normalizeTypeBoxErrors([])).toEqual([])
+  })
+
+  it('converts JSON Pointer path to array, preserving strings', async () => {
+    const { normalizeTypeBoxErrors } =
+      await import('../../../src/schema/validate')
+    const issues = normalizeTypeBoxErrors([
+      { path: '/user/name', message: 'Expected string' },
+    ])
+    expect(issues).toEqual([
+      { path: ['user', 'name'], message: 'Expected string' },
+    ])
+  })
+
+  it('converts numeric segments to numbers', async () => {
+    const { normalizeTypeBoxErrors } =
+      await import('../../../src/schema/validate')
+    const issues = normalizeTypeBoxErrors([
+      { path: '/items/0/id', message: 'Expected number' },
+    ])
+    expect(issues).toEqual([
+      { path: ['items', 0, 'id'], message: 'Expected number' },
+    ])
+  })
+
+  it('preserves non-canonical numeric strings as strings', async () => {
+    const { normalizeTypeBoxErrors } =
+      await import('../../../src/schema/validate')
+    const issues = normalizeTypeBoxErrors([{ path: '/a/01/b', message: 'x' }])
+    expect(issues[0]!.path).toEqual(['a', '01', 'b'])
+  })
+
+  it('handles empty path', async () => {
+    const { normalizeTypeBoxErrors } =
+      await import('../../../src/schema/validate')
+    const issues = normalizeTypeBoxErrors([{ path: '', message: 'root' }])
+    expect(issues).toEqual([{ path: [], message: 'root' }])
+  })
+})
+
+describe('normalizeZodError', () => {
+  it('returns single issue when err is undefined (stringified)', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    // The non-object branch returns `String(err)` as the message —
+    // `String(undefined)` → 'undefined'.
+    expect(normalizeZodError(undefined)).toEqual([
+      { path: [], message: 'undefined' },
+    ])
+  })
+
+  it('returns single issue for primitive error', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    expect(normalizeZodError('boom')).toEqual([{ path: [], message: 'boom' }])
+  })
+
+  it('returns "Unknown validation error" for object without issues array', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    expect(normalizeZodError({ foo: 'bar' })).toEqual([
+      { path: [], message: 'Unknown validation error' },
+    ])
+  })
+
+  it('returns "Unknown validation error" when issues is not an array', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    expect(normalizeZodError({ issues: 'not-an-array' })).toEqual([
+      { path: [], message: 'Unknown validation error' },
+    ])
+  })
+
+  it('maps issues with valid path + message', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    const out = normalizeZodError({
+      issues: [{ path: ['x', 'y'], message: 'Expected string' }],
+    })
+    expect(out).toEqual([{ path: ['x', 'y'], message: 'Expected string' }])
+  })
+
+  it('falls back to "Invalid value" when message is missing', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    const out = normalizeZodError({ issues: [{ path: ['x'] }] })
+    expect(out).toEqual([{ path: ['x'], message: 'Invalid value' }])
+  })
+
+  it('falls back to empty path when path is not an array', async () => {
+    const { normalizeZodError } = await import('../../../src/schema/validate')
+    const out = normalizeZodError({
+      issues: [{ path: 'not-array', message: 'x' }],
+    })
+    expect(out).toEqual([{ path: [], message: 'x' }])
+  })
+})
