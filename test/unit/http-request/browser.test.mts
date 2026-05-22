@@ -388,4 +388,100 @@ describe.sequential('http-request/browser', () => {
       ).rejects.toThrow()
     })
   })
+
+  describe('BrowserHttpResponse methods', () => {
+    it('arrayBuffer() returns the underlying ArrayBuffer', async () => {
+      fetchSpy.mockResolvedValueOnce(mockFetchResponse({ body: 'hello' }))
+      const r = await httpRequest('https://api.example.com/x')
+      const buf = r.arrayBuffer()
+      expect(buf).toBeInstanceOf(ArrayBuffer)
+      expect(buf.byteLength).toBe(5)
+      expect(new TextDecoder().decode(new Uint8Array(buf))).toBe('hello')
+    })
+
+    it('arrayBuffer() returns the same buffer across calls', async () => {
+      fetchSpy.mockResolvedValueOnce(mockFetchResponse({ body: 'stable' }))
+      const r = await httpRequest('https://api.example.com/x')
+      expect(r.arrayBuffer()).toBe(r.arrayBuffer())
+    })
+
+    it('json() throws when body is not valid JSON', async () => {
+      fetchSpy.mockResolvedValueOnce(
+        mockFetchResponse({ body: '{not valid json' }),
+      )
+      const r = await httpRequest('https://api.example.com/x')
+      expect(() => r.json()).toThrow()
+    })
+
+    it('text() decodes UTF-8 multi-byte sequences', async () => {
+      fetchSpy.mockResolvedValueOnce(mockFetchResponse({ body: 'héllo 🌍' }))
+      const r = await httpRequest('https://api.example.com/x')
+      expect(r.text()).toBe('héllo 🌍')
+    })
+  })
+
+  describe('HttpResponseError message construction', () => {
+    it('uses default message when none provided', async () => {
+      fetchSpy.mockResolvedValueOnce(
+        mockFetchResponse({ status: 503, statusText: 'Service Unavailable' }),
+      )
+      try {
+        await httpJson('https://api.example.com/x')
+        expect.fail('expected throw')
+      } catch (e) {
+        const err = e as InstanceType<typeof HttpResponseError>
+        expect(err.message).toBe('HTTP 503: Service Unavailable')
+      }
+    })
+
+    it('uses provided message when constructed manually', () => {
+      const fakeResp = {
+        body: new Uint8Array(),
+        headers: {},
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+        url: 'https://x',
+        arrayBuffer: () => new ArrayBuffer(0),
+        json: <T,>() => undefined as T,
+        text: () => '',
+      }
+      const err = new HttpResponseError(fakeResp, 'custom message')
+      expect(err.message).toBe('custom message')
+      expect(err.response).toBe(fakeResp)
+    })
+
+    it('falls back to "No status message" when statusText is empty', () => {
+      const fakeResp = {
+        body: new Uint8Array(),
+        headers: {},
+        ok: false,
+        status: 500,
+        statusText: '',
+        url: 'https://x',
+        arrayBuffer: () => new ArrayBuffer(0),
+        json: <T,>() => undefined as T,
+        text: () => '',
+      }
+      const err = new HttpResponseError(fakeResp)
+      expect(err.message).toBe('HTTP 500: No status message')
+    })
+
+    it('falls back to "unknown" when status is undefined', () => {
+      const fakeResp = {
+        body: new Uint8Array(),
+        headers: {},
+        ok: false,
+        // Status nulled to exercise the `?? 'unknown'` branch.
+        status: undefined as unknown as number,
+        statusText: 'Mystery',
+        url: 'https://x',
+        arrayBuffer: () => new ArrayBuffer(0),
+        json: <T,>() => undefined as T,
+        text: () => '',
+      }
+      const err = new HttpResponseError(fakeResp)
+      expect(err.message).toBe('HTTP unknown: Mystery')
+    })
+  })
 })
