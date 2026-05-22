@@ -216,3 +216,60 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     expect(result.binaryPath).toMatch(/binary-[a-z0-9]+-[a-z0-9]+$/)
   })
 })
+
+describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
+  // These tests need a fresh-mocked safeMkdir per test; isolate via
+  // resetModules + doMock + unmock to avoid leaking into siblings.
+  async function loadWithMkdirError(code: string | undefined) {
+    vi.resetModules()
+    vi.doMock('../../../src/fs/safe', async () => {
+      const actual =
+        await vi.importActual<typeof import('../../../src/fs/safe')>(
+          '../../../src/fs/safe',
+        )
+      const err = new Error(code ?? 'generic')
+      if (code) {
+        Object.assign(err, { code })
+      }
+      return { ...actual, safeMkdir: vi.fn().mockRejectedValue(err) }
+    })
+    const bcMod = await import('../../../src/dlx/binary-cache')
+    ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(
+      tmpRoot,
+    )
+    const mod = await import('../../../src/dlx/binary-download')
+    return { downloadBinary: mod.downloadBinary }
+  }
+
+  afterEach(() => {
+    vi.doUnmock('../../../src/fs/safe')
+  })
+
+  test('wraps EACCES with a permission-denied message', async () => {
+    const { downloadBinary } = await loadWithMkdirError('EACCES')
+    await expect(
+      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+    ).rejects.toThrow(/Permission denied creating binary cache directory/)
+  })
+
+  test('wraps EPERM with a permission-denied message', async () => {
+    const { downloadBinary } = await loadWithMkdirError('EPERM')
+    await expect(
+      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+    ).rejects.toThrow(/Permission denied/)
+  })
+
+  test('wraps EROFS with a read-only-filesystem message', async () => {
+    const { downloadBinary } = await loadWithMkdirError('EROFS')
+    await expect(
+      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+    ).rejects.toThrow(/read-only filesystem/)
+  })
+
+  test('wraps unknown errors with a generic "Failed to create" message', async () => {
+    const { downloadBinary } = await loadWithMkdirError(undefined)
+    await expect(
+      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+    ).rejects.toThrow(/Failed to create binary cache directory/)
+  })
+})
