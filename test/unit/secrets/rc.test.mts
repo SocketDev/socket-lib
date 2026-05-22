@@ -161,6 +161,11 @@ describe.sequential('pickRcFile', () => {
     vi.stubEnv('SHELL', '/usr/local/bin/exotic-shell')
     expect(pickRcFile()).toBeUndefined()
   })
+
+  test('returns undefined when HOME is unset', () => {
+    vi.stubEnv('HOME', '')
+    expect(pickRcFile('zsh')).toBeUndefined()
+  })
 })
 
 describe.sequential('writeRcFile', () => {
