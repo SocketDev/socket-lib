@@ -345,4 +345,29 @@ describe('themes/context', () => {
       expect(getTheme().name).toBe('socket')
     })
   })
+
+  describe('unknown-theme fallback', () => {
+    it('setTheme falls back to current theme when name is unknown', () => {
+      const before = getTheme()
+      // @ts-expect-error — exercise the unknown-name branch.
+      setTheme('does-not-exist-in-registry')
+      expect(getTheme().name).toBe(before.name)
+    })
+
+    it('withTheme falls back to current theme when name is unknown', async () => {
+      const before = getTheme()
+      // @ts-expect-error — exercise the unknown-name branch.
+      await withTheme('made-up-theme', async () => {
+        expect(getTheme().name).toBe(before.name)
+      })
+    })
+
+    it('withThemeSync falls back to current theme when name is unknown', () => {
+      const before = getTheme()
+      // @ts-expect-error — exercise the unknown-name branch.
+      withThemeSync('not-a-real-theme', () => {
+        expect(getTheme().name).toBe(before.name)
+      })
+    })
+  })
 })
