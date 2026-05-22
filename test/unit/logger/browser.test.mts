@@ -10,12 +10,14 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { MockInstance } from 'vitest'
+
 import { getDefaultLogger } from '../../../src/logger/browser'
 
 describe('logger/browser → getDefaultLogger', () => {
-  let logSpy: ReturnType<typeof vi.spyOn>
-  let warnSpy: ReturnType<typeof vi.spyOn>
-  let errorSpy: ReturnType<typeof vi.spyOn>
+  let logSpy: MockInstance
+  let warnSpy: MockInstance
+  let errorSpy: MockInstance
 
   beforeEach(() => {
     logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})

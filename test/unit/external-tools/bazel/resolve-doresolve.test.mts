@@ -8,12 +8,9 @@ vi.mock('../../../../src/external-tools/bazel/from-download', () => ({
 }))
 
 async function loadFresh() {
-  const pathMod = await import(
-    '../../../../src/external-tools/bazel/from-path'
-  )
-  const dlMod = await import(
-    '../../../../src/external-tools/bazel/from-download'
-  )
+  const pathMod = await import('../../../../src/external-tools/bazel/from-path')
+  const dlMod =
+    await import('../../../../src/external-tools/bazel/from-download')
   const mod = await import('../../../../src/external-tools/bazel/resolve')
   return {
     fromPath: pathMod.bazelFromPath as ReturnType<typeof vi.fn>,

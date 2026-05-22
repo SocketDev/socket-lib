@@ -49,4 +49,34 @@ describe('eco/manifest/get-package-versions', () => {
   it('returns an empty array for unknown names', () => {
     expect(getPackageVersions(LOCK, 'nope')).toEqual([])
   })
+
+  it('returns empty array when single-number index points past packages', () => {
+    const forged = {
+      type: 'lockfile' as const,
+      lockVersion: '3',
+      ecosystem: 'npm' as const,
+      packages: [],
+      _index: { ghost: 5 },
+    }
+    const result = getPackageVersions(
+      forged as unknown as Parameters<typeof getPackageVersions>[0],
+      'ghost',
+    )
+    expect(result).toEqual([])
+  })
+
+  it('skips out-of-bounds index entries in array form', () => {
+    const forged = {
+      type: 'lockfile' as const,
+      lockVersion: '3',
+      ecosystem: 'npm' as const,
+      packages: [],
+      _index: { ghost: [99] as readonly number[] },
+    }
+    const result = getPackageVersions(
+      forged as unknown as Parameters<typeof getPackageVersions>[0],
+      'ghost',
+    )
+    expect(result).toEqual([])
+  })
 })
