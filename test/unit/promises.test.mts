@@ -188,6 +188,53 @@ describe('promises', () => {
       expect(result).toBe('success')
       expect(fn).toHaveBeenCalledTimes(1)
     })
+
+    it('returns undefined immediately for a pre-aborted signal', async () => {
+      const controller = new AbortController()
+      controller.abort()
+      const fn = vi.fn().mockResolvedValue('never called')
+      const result = await pRetry(fn, {
+        retries: 3,
+        signal: controller.signal,
+      })
+      expect(result).toBeUndefined()
+      expect(fn).not.toHaveBeenCalled()
+    })
+
+    it('uses non-jittered fixed delay when jitter is false', async () => {
+      let attempts = 0
+      const fn = vi.fn().mockImplementation(async () => {
+        attempts += 1
+        if (attempts < 2) {
+          throw new Error('fail')
+        }
+        return 'success'
+      })
+      const result = await pRetry(fn, {
+        retries: 2,
+        baseDelayMs: 10,
+        jitter: false,
+      })
+      expect(result).toBe('success')
+    })
+
+    it('caps delay growth at maxDelayMs', async () => {
+      let attempts = 0
+      const fn = vi.fn().mockImplementation(async () => {
+        attempts += 1
+        if (attempts < 4) {
+          throw new Error('fail')
+        }
+        return 'ok'
+      })
+      const result = await pRetry(fn, {
+        retries: 5,
+        baseDelayMs: 10,
+        backoffFactor: 10_000,
+        maxDelayMs: 15,
+      })
+      expect(result).toBe('ok')
+    })
   })
 
   describe('pEach', () => {
