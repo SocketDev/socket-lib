@@ -1539,6 +1539,11 @@
       "types": "./dist/logger/default.d.ts",
       "default": "./dist/logger/default.js"
     },
+    "./logger/browser": {
+      "source": "./src/logger/browser.ts",
+      "types": "./dist/logger/browser.d.ts",
+      "default": "./dist/logger/browser.js"
+    },
     "./logger/colors": {
       "source": "./src/logger/colors.ts",
       "types": "./dist/logger/colors.d.ts",

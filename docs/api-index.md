@@ -464,6 +464,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                                                 | Description        |
 | --------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/logger/browser`](../src/logger/browser.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/colors`](../src/logger/colors.ts)                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/console`](../src/logger/console.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/default`](../src/logger/default.ts)                 | _(no description)_ |
