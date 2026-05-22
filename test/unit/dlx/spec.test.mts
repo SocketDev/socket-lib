@@ -75,4 +75,17 @@ describe.sequential('dlx/spec — parsePackageSpec', () => {
     // version is undefined either through "*" coercion or empty-slice normalize.
     expect(['*', undefined]).toContain(result.version)
   })
+
+  test('falls back when input has @ only at position 0 (scoped-no-version)', () => {
+    // Force the catch path by giving npm-package-arg an invalid scope.
+    // '@' at position 0 with whitespace → catch + atIndex===0 → name=spec, version=undefined.
+    const result = parsePackageSpec('@ invalid scope')
+    expect(result.version).toBeUndefined()
+  })
+
+  test('falls back with input containing spaces (catch + trailing @ produces empty slice)', () => {
+    const result = parsePackageSpec('not-a-valid-spec with-spaces@')
+    expect(result.name).toBeTruthy()
+    expect(result.version).toBeUndefined()
+  })
 })
