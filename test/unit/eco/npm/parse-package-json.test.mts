@@ -113,9 +113,7 @@ describe('eco/npm/parse-package-json', () => {
         },
       }),
     )
-    const numericDep = result.dependencies.find(
-      d => d.name === 'numeric-range',
-    )
+    const numericDep = result.dependencies.find(d => d.name === 'numeric-range')
     const boolDep = result.dependencies.find(d => d.name === 'bool-range')
     expect(numericDep?.versionRange).toBe('1.5')
     expect(boolDep?.versionRange).toBe('true')
