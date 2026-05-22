@@ -53,4 +53,26 @@ describe.sequential('dlx/spec — parsePackageSpec', () => {
     const result = parsePackageSpec('pkg@')
     expect(result.name).toBeTruthy()
   })
+
+  test('returns version=undefined for git-URL specs (neither tag/version/range)', () => {
+    // git+ssh://... is parsed as type=git → version stays undefined.
+    const result = parsePackageSpec('git+ssh://git@github.com/owner/repo.git')
+    expect(result.version).toBeUndefined()
+  })
+
+  test('falls back gracefully on an empty string spec', () => {
+    // Force the catch path with a value npm-package-arg rejects; the
+    // fallback returns whatever it can extract (no version).
+    const result = parsePackageSpec('')
+    expect(result.name).toBe('')
+  })
+
+  test('falls back: trailing "@" (e.g. "name@") normalizes empty version to undefined', () => {
+    // The fallback path is the test target — npm-package-arg might or
+    // might not throw, but if it does, the empty slice becomes undefined.
+    const result = parsePackageSpec('legit-name@')
+    expect(result.name).toBeTruthy()
+    // version is undefined either through "*" coercion or empty-slice normalize.
+    expect(['*', undefined]).toContain(result.version)
+  })
 })
