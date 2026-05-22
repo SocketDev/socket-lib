@@ -223,10 +223,9 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
   async function loadWithMkdirError(code: string | undefined) {
     vi.resetModules()
     vi.doMock('../../../src/fs/safe', async () => {
-      const actual =
-        await vi.importActual<typeof import('../../../src/fs/safe')>(
-          '../../../src/fs/safe',
-        )
+      const actual = await vi.importActual<
+        typeof import('../../../src/fs/safe')
+      >('../../../src/fs/safe')
       const err = new Error(code ?? 'generic')
       if (code) {
         Object.assign(err, { code })
