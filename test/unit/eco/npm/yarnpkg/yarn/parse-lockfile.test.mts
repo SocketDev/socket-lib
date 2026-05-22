@@ -250,5 +250,67 @@ describe('eco/npm/yarnpkg/yarn/parse-lockfile', () => {
       const content = `flat\nnext\n`
       expect(skipIndentedBlock(content, 0)).toBe(0)
     })
+
+    it('skipIndentedBlock handles no-trailing-newline content (EOL=-1 branch)', () => {
+      // Last line has no \n — exercises the `eol === -1 ? content.length : eol`
+      // branch on the false side. The walker advances PAST end-of-content
+      // (end + 1), so position can exceed content.length by 1.
+      const content = `  one\n  two`
+      const pos = skipIndentedBlock(content, 0)
+      expect(pos).toBeGreaterThanOrEqual(content.length)
+    })
+  })
+})
+
+describe('parse-lockfile — EOL=-1 + Berry soft-link edge cases', () => {
+  it('parses a Classic lockfile without a trailing newline (last line has no \\n)', () => {
+    const content = `
+# yarn lockfile v1
+
+
+"x@^1":
+  version "1.0.0"
+  resolved "https://example.com/x.tgz"
+  integrity sha512-abc`
+    const result = parseYarnLock(content)
+    expect(result.packages.length).toBe(1)
+    expect(result.packages[0]!.name).toBe('x')
+  })
+
+  it('skips Berry soft-link entries when linkType === "soft"', () => {
+    const content = `__metadata:
+  version: 6
+  cacheKey: 8
+
+"workspace-pkg@workspace:packages/pkg":
+  version: 0.0.0-use.local
+  resolution: "workspace-pkg@workspace:packages/pkg"
+  linkType: soft
+
+"real-pkg@npm:1.0.0":
+  version: 1.0.0
+  resolution: "real-pkg@npm:1.0.0"
+  checksum: sha512-deadbeef
+  linkType: hard
+`
+    const result = parseYarnLock(content)
+    // The soft-linked workspace entry is dropped; only the hard entry survives.
+    expect(result.packages.map(r => r.name)).toContain('real-pkg')
+    expect(result.packages.map(r => r.name)).not.toContain('workspace-pkg')
+  })
+
+  it('parses a Berry lockfile without a trailing newline', () => {
+    const content = `__metadata:
+  version: 6
+  cacheKey: 8
+
+"hard-pkg@npm:1.0.0":
+  version: 1.0.0
+  resolution: "hard-pkg@npm:1.0.0"
+  checksum: sha512-xxx
+  linkType: hard`
+    const result = parseYarnLock(content)
+    expect(result.packages.length).toBe(1)
+    expect(result.packages[0]!.name).toBe('hard-pkg')
   })
 })
