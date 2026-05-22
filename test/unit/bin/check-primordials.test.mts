@@ -290,16 +290,14 @@ describe('runCheckPrimordials', () => {
 
 describe('resolveConfigPath', () => {
   it('returns the explicit path verbatim when provided', async () => {
-    const { resolveConfigPath } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { resolveConfigPath } =
+      await import('../../../src/bin/check-primordials')
     expect(resolveConfigPath('/explicit/path.json')).toBe('/explicit/path.json')
   })
 
   it('returns the first fallback when no explicit path is given', async () => {
-    const { resolveConfigPath } = await import(
-      '../../../src/bin/check-primordials'
-    )
+    const { resolveConfigPath } =
+      await import('../../../src/bin/check-primordials')
     // No explicit + none of the fallback paths exist → returns the head
     // of FALLBACK_CONFIG_PATHS so the "config file not found" error
     // names the canonical default.
