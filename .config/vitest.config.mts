@@ -114,7 +114,19 @@ const vitestConfig = defineConfig({
         // `CI=0` / `CI=false` setups.
         maxThreads: 'CI' in process.env ? 4 : 16,
         minThreads: 'CI' in process.env ? 2 : 4,
-        isolate: false,
+        // isolate: false is the speed knob for the non-coverage path.
+        // Under coverage (--coverage), the v8 provider needs per-file
+        // module reset for accurate attribution — without isolation,
+        // module-level state from earlier tests in the thread bleeds
+        // into later tests' instrumentation (vi.mock targets leak
+        // across files, primordial init runs only once, etc.).
+        // Detection: vitest sets process.env.VITEST + the CLI passes
+        // --coverage. Check both — argv from the parent CLI, the env
+        // var visible to workers.
+        isolate:
+          process.argv.includes('--coverage') ||
+          process.env['npm_lifecycle_event']?.includes('cover') === true ||
+          process.env['COVERAGE'] === '1',
         useAtomics: true,
       },
     },

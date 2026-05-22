@@ -79,6 +79,13 @@
   },
   "overrides": [
     {
+      "files": ["**/src/logger/**"],
+      "rules": {
+        "socket/no-console-prefer-logger": "off",
+        "socket/no-inline-logger": "off"
+      }
+    },
+    {
       "files": [
         "**/scripts/**",
         "**/test/**",
