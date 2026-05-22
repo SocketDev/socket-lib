@@ -188,6 +188,53 @@ async function main(): Promise<void> {
     return o
   }, {})
 
+  // Browser-safe subpath prefixes — modules with zero Node-built-in
+  // imports (audited per docs/browser-compatibility.md). Bundlers that
+  // resolve the `browser` export condition (rolldown, vite, esbuild
+  // with platform: 'browser') will pick the same files as the default
+  // condition — the conditional's purpose is to SIGNAL that the entry
+  // is safe, not to route to alternate code.
+  //
+  // Browser-incompatible modules (fs, archives, bin, ...) deliberately
+  // omit the condition. Modules with a dedicated browser implementation
+  // (./logger, ./http-request) carry an explicit `browser` condition
+  // pointing at the alternate file — those are added by the dedicated
+  // section below, NOT by this loop.
+  const BROWSER_SAFE_PREFIXES = [
+    './arrays/',
+    './colors/',
+    './errors/',
+    './objects/',
+    './regexps/',
+    './strings/',
+    './url/',
+    './versions/',
+    './words/',
+  ]
+  for (const { 0: exportPath, 1: exportValue } of Object.entries(
+    subpathExports,
+  )) {
+    if (!BROWSER_SAFE_PREFIXES.some(p => exportPath.startsWith(p))) {
+      continue
+    }
+    if (
+      exportValue &&
+      typeof exportValue === 'object' &&
+      !('browser' in exportValue)
+    ) {
+      // Splice `browser` in BEFORE the other conditions per the
+      // node-conditions-order convention (most-specific first).
+      const { source, types, default: def } = exportValue
+      const next: Record<string, unknown> = {
+        browser: { source, types, default: def },
+      }
+      for (const { 0: k, 1: v } of Object.entries(exportValue)) {
+        next[k] = v
+      }
+      subpathExports[exportPath] = next
+    }
+  }
+
   // Add kebab-case variants for all SCREAMING_SNAKE_CASE constant paths.
   // Map both kebab-case and SCREAMING_SNAKE_CASE paths to the same files.
   const aliasesToAdd = []
