@@ -15,16 +15,15 @@ vi.mock('../../../src/http-request/download', () => ({
 }))
 vi.mock('../../../src/process/lock-instance', () => ({
   processLock: {
-    withLock: vi.fn(
-      async (_lockPath: string, fn: () => Promise<unknown>) => fn(),
+    withLock: vi.fn(async (_lockPath: string, fn: () => Promise<unknown>) =>
+      fn(),
     ),
   },
 }))
 vi.mock('../../../src/dlx/binary-cache', async () => {
-  const actual =
-    await vi.importActual<typeof import('../../../src/dlx/binary-cache')>(
-      '../../../src/dlx/binary-cache',
-    )
+  const actual = await vi.importActual<
+    typeof import('../../../src/dlx/binary-cache')
+  >('../../../src/dlx/binary-cache')
   return { ...actual, getDlxCachePath: vi.fn() }
 })
 
@@ -35,9 +34,7 @@ let tmpRoot: string
 async function loadFresh() {
   const httpMod = await import('../../../src/http-request/download')
   const bcMod = await import('../../../src/dlx/binary-cache')
-  ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(
-    tmpRoot,
-  )
+  ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(tmpRoot)
   const mod = await import('../../../src/dlx/binary-download')
   const cacheMod = await import('../../../src/dlx/cache')
   return {
@@ -59,8 +56,7 @@ afterEach(() => {
 
 describe.sequential('dlx/binary-download — downloadBinary cache hit', () => {
   test('reuses a valid cached binary and reads integrity from metadata', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } =
-      await loadFresh()
+    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
     const url = 'https://example.com/tool-xyz'
     const name = 'mytool'
     const cacheKey = generateCacheKey(`${url}:${name}`)
@@ -85,8 +81,7 @@ describe.sequential('dlx/binary-download — downloadBinary cache hit', () => {
   })
 
   test('falls back to recomputing integrity from disk when metadata lacks integrity', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } =
-      await loadFresh()
+    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
     const url = 'https://example.com/tool-no-meta'
     const name = 'mytool'
     const cacheKey = generateCacheKey(`${url}:${name}`)
@@ -131,8 +126,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
   })
 
   test('force: true bypasses cache validation (downloaded: true even with valid cache)', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } =
-      await loadFresh()
+    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
     const url = 'https://example.com/tool-force'
     const name = 'mytool'
     const cacheKey = generateCacheKey(`${url}:${name}`)
@@ -150,8 +144,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
   })
 
   test('expired cache (TTL exceeded) is treated as invalid and triggers fresh-path', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } =
-      await loadFresh()
+    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
     const url = 'https://example.com/tool-ttl'
     const name = 'mytool'
     const cacheKey = generateCacheKey(`${url}:${name}`)
