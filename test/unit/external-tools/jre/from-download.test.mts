@@ -143,4 +143,65 @@ describe.sequential('external-tools/jre/from-download', () => {
       expect(result?.javaPath).toBe(path.join(cacheDir, 'bin', javaBinary))
     }
   })
+
+  it('falls back to socket dlx dir when cacheDir is omitted', async () => {
+    const tarBytes = await buildJreTarball(scratch)
+    const { downloader } = makeFakeDownloader(tarBytes)
+    const result = await jreFromDownload({
+      version: 21,
+      platformArch: 'linux-x64',
+      downloader,
+    })
+    expect(result?.source).toBe('download')
+    expect(result?.javaPath).toMatch(/jre[/\\]21[/\\]linux-x64/)
+  })
+
+  it('uses .exe suffix on win32', async () => {
+    const tarBytes = await buildJreTarball(scratch)
+    const { downloader } = makeFakeDownloader(tarBytes)
+    const cacheDir = path.join(scratch, 'jre-cache-stubbed-win')
+    const originalPlatform = Object.getOwnPropertyDescriptor(
+      process,
+      'platform',
+    )!
+    Object.defineProperty(process, 'platform', { value: 'win32' })
+    try {
+      const result = await jreFromDownload({
+        version: 21,
+        platformArch: 'linux-x64',
+        cacheDir,
+        downloader,
+      })
+      expect(result?.javaPath).toMatch(/java\.exe$/)
+      // Non-darwin: javaHome is cacheDir directly.
+      expect(result?.javaHome).toBe(cacheDir)
+    } finally {
+      Object.defineProperty(process, 'platform', originalPlatform)
+    }
+  })
+
+  it('nests javaHome under Contents/Home on darwin', async () => {
+    const tarBytes = await buildJreTarball(scratch)
+    const { downloader } = makeFakeDownloader(tarBytes)
+    const cacheDir = path.join(scratch, 'jre-cache-stubbed-mac')
+    const originalPlatform = Object.getOwnPropertyDescriptor(
+      process,
+      'platform',
+    )!
+    Object.defineProperty(process, 'platform', { value: 'darwin' })
+    try {
+      const result = await jreFromDownload({
+        version: 21,
+        platformArch: 'linux-x64',
+        cacheDir,
+        downloader,
+      })
+      expect(result?.javaHome).toBe(path.join(cacheDir, 'Contents', 'Home'))
+      expect(result?.javaPath).toBe(
+        path.join(cacheDir, 'Contents', 'Home', 'bin', 'java'),
+      )
+    } finally {
+      Object.defineProperty(process, 'platform', originalPlatform)
+    }
+  })
 })
