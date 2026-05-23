@@ -32,7 +32,11 @@ import {
   stringifyWithFormatting,
   stripFormattingSymbols,
 } from '@socketsecurity/lib/json/format'
-import { isJsonPrimitive, parseJson } from '@socketsecurity/lib/json/parse'
+import {
+  isJsonPrimitive,
+  parseJson,
+  prototypePollutionReviver,
+} from '@socketsecurity/lib/json/parse'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('json', () => {
@@ -1444,6 +1448,46 @@ describe('json', () => {
         const instance = await EditableJson.load(filepath)
         expect(instance.content).toMatchObject(data)
       })
+    })
+  })
+
+  describe('prototypePollutionReviver', () => {
+    it('throws on __proto__ key', () => {
+      expect(() => prototypePollutionReviver('__proto__', {})).toThrow(
+        /prototype pollution/,
+      )
+    })
+
+    it('throws on constructor key', () => {
+      expect(() => prototypePollutionReviver('constructor', {})).toThrow(
+        /prototype pollution/,
+      )
+    })
+
+    it('throws on prototype key', () => {
+      expect(() => prototypePollutionReviver('prototype', {})).toThrow(
+        /prototype pollution/,
+      )
+    })
+
+    it('passes through safe keys', () => {
+      expect(prototypePollutionReviver('name', 'Alice')).toBe('Alice')
+      expect(prototypePollutionReviver('age', 42)).toBe(42)
+      expect(prototypePollutionReviver('', { x: 1 })).toEqual({ x: 1 })
+    })
+
+    it('catches dangerous keys when used as JSON.parse reviver', () => {
+      expect(() =>
+        JSON.parse('{"__proto__": {"polluted": true}}', prototypePollutionReviver),
+      ).toThrow(/prototype pollution/)
+    })
+
+    it('does not block legitimate JSON via JSON.parse reviver', () => {
+      const data = JSON.parse(
+        '{"name": "Alice", "items": [1, 2, 3]}',
+        prototypePollutionReviver,
+      )
+      expect(data).toEqual({ name: 'Alice', items: [1, 2, 3] })
     })
   })
 })

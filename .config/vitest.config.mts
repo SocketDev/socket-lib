@@ -78,16 +78,24 @@ const vitestConfig = defineConfig({
       '**/dist/**',
       '**/dist/external/**',
       // The `include` whitelist above only matches test/unit/** and
-      // test/integration/**, so these excludes are defense-in-depth
-      // for runs that bypass the whitelist (e.g. `vitest run <path>`
-      // pointed outside the whitelist). The dirs listed here all use
-      // `node --test` not vitest; their suites produce zero vitest
-      // describe/it blocks and would be reported as failures.
+      // test/integration/**, but vitest's discovery still walks
+      // workspace-wide and matches some patterns despite the
+      // whitelist. The excludes below are absolute-path forms so they
+      // match regardless of glob resolution root. Dirs listed here
+      // all use `node --test` not vitest; their suites produce zero
+      // vitest describe/it blocks AND emit node-test runner output
+      // (the `ℹ tests N` lines + uncaughtException-on-process.exit
+      // teardown noise) that vitest reports as file-level failures.
       // Mirrors socket-wheelhouse template/.config/vitest.config.mts.
-      '.git-hooks/**',
-      '.config/oxlint-plugin/test/**',
-      'scripts/**/test/**',
-      '.claude/hooks/**/test/**',
+      toGlobPath(path.resolve(projectRoot, '.git-hooks/**')),
+      toGlobPath(
+        path.resolve(projectRoot, '.config/oxlint-plugin/test/**'),
+      ),
+      toGlobPath(path.resolve(projectRoot, 'scripts/**/test/**')),
+      toGlobPath(path.resolve(projectRoot, '.claude/hooks/**/test/**')),
+      toGlobPath(
+        path.resolve(projectRoot, 'template/.claude/hooks/**/test/**'),
+      ),
       toGlobPath(path.resolve(projectRoot, 'test/isolated/**')),
       ...(process.env.INCLUDE_NPM_TESTS
         ? []
