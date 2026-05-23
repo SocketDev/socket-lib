@@ -20,9 +20,12 @@ import {
   createBinaryOperationNode,
   createLicenseNode,
   parseSpdxExp,
-  type SpdxLicenseNode,
-  type SpdxBinaryOperationNode,
+  resolvePackageLicenses,
+  visitLicenses,
+  type InternalBinaryOperationNode,
   type InternalLicenseNode,
+  type SpdxBinaryOperationNode,
+  type SpdxLicenseNode,
 } from '../../../src/packages/licenses'
 import type { LicenseNode } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
@@ -303,6 +306,121 @@ describe('packages/licenses', () => {
       ]
       const result = collectIncompatibleLicenses(nodes)
       expect(result).toEqual([])
+    })
+  })
+
+  describe('resolvePackageLicenses', () => {
+    it('returns UNLICENSED for "UNLICENSED"', () => {
+      expect(resolvePackageLicenses('UNLICENSED', '/repo')).toEqual([
+        { license: 'UNLICENSED' },
+      ])
+    })
+
+    it('returns UNLICENSED for "UNLICENCED" (British spelling)', () => {
+      expect(resolvePackageLicenses('UNLICENCED', '/repo')).toEqual([
+        { license: 'UNLICENSED' },
+      ])
+    })
+
+    it('extracts the file reference from "SEE LICENSE IN <path>"', () => {
+      const result = resolvePackageLicenses(
+        'SEE LICENSE IN LICENSE.txt',
+        '/repo',
+      )
+      expect(result).toHaveLength(1)
+      expect(result[0]!.license).toBe('SEE LICENSE IN LICENSE.txt')
+      // path.relative('/repo', 'LICENSE.txt') resolves the inFile relative
+      // to where; assert it ends with the bare filename to stay
+      // cross-platform agnostic.
+      expect(result[0]!.inFile?.endsWith('LICENSE.txt')).toBe(true)
+    })
+
+    it('parses a simple SPDX expression', () => {
+      const result = resolvePackageLicenses('MIT', '/repo')
+      expect(result).toHaveLength(1)
+      expect(result[0]!.license).toBe('MIT')
+    })
+
+    it('walks an OR expression and emits both nodes', () => {
+      const result = resolvePackageLicenses('MIT OR Apache-2.0', '/repo')
+      const licenses = result.map(n => n.license)
+      expect(licenses).toContain('MIT')
+      expect(licenses).toContain('Apache-2.0')
+    })
+
+    it('returns [] for a LicenseRef expression (deliberately rejected)', () => {
+      const result = resolvePackageLicenses('LicenseRef-Custom', '/repo')
+      expect(result).toEqual([])
+    })
+
+    it('returns [] for a DocumentRef expression (deliberately rejected)', () => {
+      const result = resolvePackageLicenses('DocumentRef-X:LicenseRef-Y', '/repo')
+      expect(result).toEqual([])
+    })
+
+    it('returns [] for an unparseable expression', () => {
+      const result = resolvePackageLicenses('not a valid spdx', '/repo')
+      expect(result).toEqual([])
+    })
+  })
+
+  describe('visitLicenses', () => {
+    it('invokes License visitor for each leaf in an OR expression', () => {
+      const ast = parseSpdxExp('MIT OR Apache-2.0')
+      expect(ast).toBeDefined()
+      const licenses: string[] = []
+      visitLicenses(ast as SpdxLicenseNode, {
+        License(node: InternalLicenseNode) {
+          licenses.push(node.license)
+        },
+      })
+      expect(licenses.sort()).toEqual(['Apache-2.0', 'MIT'])
+    })
+
+    it('invokes BinaryOperation visitor for the AND node', () => {
+      const ast = parseSpdxExp('MIT AND Apache-2.0')
+      const ops: string[] = []
+      visitLicenses(ast as SpdxLicenseNode, {
+        BinaryOperation(node: InternalBinaryOperationNode) {
+          ops.push(node.conjunction)
+        },
+      })
+      // The parser lowercases the conjunction.
+      expect(ops).toContain('and')
+    })
+
+    it('stops crawl when License visitor returns false', () => {
+      const ast = parseSpdxExp('MIT OR Apache-2.0 OR ISC')
+      const seen: string[] = []
+      visitLicenses(ast as SpdxLicenseNode, {
+        License(node: InternalLicenseNode) {
+          seen.push(node.license)
+          if (node.license === 'MIT') {
+            return false
+          }
+          return undefined
+        },
+      })
+      expect(seen[0]).toBe('MIT')
+      expect(seen.length).toBe(1)
+    })
+
+    it('handles a single-license AST without binary op', () => {
+      const ast = parseSpdxExp('MIT')
+      const seen: string[] = []
+      visitLicenses(ast as SpdxLicenseNode, {
+        License(node: InternalLicenseNode) {
+          seen.push(node.license)
+        },
+      })
+      expect(seen).toEqual(['MIT'])
+    })
+
+    it('skips when visitor doesn\'t implement the node type', () => {
+      const ast = parseSpdxExp('MIT')
+      // Visitor with neither License nor BinaryOperation set: nothing fires,
+      // call must not throw.
+      expect(() => visitLicenses(ast as SpdxLicenseNode, {})).not.toThrow()
     })
   })
 })
