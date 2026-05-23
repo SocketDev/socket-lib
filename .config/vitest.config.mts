@@ -88,9 +88,7 @@ const vitestConfig = defineConfig({
       // teardown noise) that vitest reports as file-level failures.
       // Mirrors socket-wheelhouse template/.config/vitest.config.mts.
       toGlobPath(path.resolve(projectRoot, '.git-hooks/**')),
-      toGlobPath(
-        path.resolve(projectRoot, '.config/oxlint-plugin/test/**'),
-      ),
+      toGlobPath(path.resolve(projectRoot, '.config/oxlint-plugin/test/**')),
       toGlobPath(path.resolve(projectRoot, 'scripts/**/test/**')),
       toGlobPath(path.resolve(projectRoot, '.claude/hooks/**/test/**')),
       toGlobPath(

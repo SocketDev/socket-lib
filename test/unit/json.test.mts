@@ -1478,7 +1478,10 @@ describe('json', () => {
 
     it('catches dangerous keys when used as JSON.parse reviver', () => {
       expect(() =>
-        JSON.parse('{"__proto__": {"polluted": true}}', prototypePollutionReviver),
+        JSON.parse(
+          '{"__proto__": {"polluted": true}}',
+          prototypePollutionReviver,
+        ),
       ).toThrow(/prototype pollution/)
     })
 
