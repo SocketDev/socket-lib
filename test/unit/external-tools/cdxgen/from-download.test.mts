@@ -112,4 +112,39 @@ describe.sequential('external-tools/cdxgen/from-download', () => {
     expect(callArg.downloader).toBe(downloader)
     expect(callArg.integrity).toBe('sha512-input==')
   })
+
+  test('falls back to socket dlx dir when cacheDir is omitted', async () => {
+    const { cdxgenFromDownload, archiveMock } = await loadFresh()
+    archiveMock.mockResolvedValueOnce({
+      archivePath: '/tmp/cdxgen-blob',
+      integrity: 'sha512-fake==',
+    })
+    const result = await cdxgenFromDownload({
+      platformArch: 'linux-x64',
+      version: '12.4.1',
+    })
+    expect(result?.path).toMatch(
+      /\/fake\/dlx[/\\]cdxgen[/\\]12\.4\.1[/\\]linux-x64-slim/,
+    )
+  })
+
+  test('appends .exe suffix on win32', async () => {
+    const { cdxgenFromDownload, archiveMock } = await loadFresh()
+    archiveMock.mockResolvedValueOnce({
+      archivePath: '/tmp/cdxgen-blob',
+      integrity: 'sha512-fake==',
+    })
+    const original = Object.getOwnPropertyDescriptor(process, 'platform')!
+    Object.defineProperty(process, 'platform', { value: 'win32' })
+    try {
+      const result = await cdxgenFromDownload({
+        cacheDir: '/c',
+        platformArch: 'linux-x64',
+        version: '12.4.1',
+      })
+      expect(result?.path).toMatch(/cdxgen\.exe$/)
+    } finally {
+      Object.defineProperty(process, 'platform', original)
+    }
+  })
 })
