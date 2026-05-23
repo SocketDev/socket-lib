@@ -108,6 +108,28 @@ describe.sequential('external-tools/from-download', () => {
       )
     })
 
+    it('extracts when target dir exists but is empty (half-created mkdir)', async () => {
+      const tarBytes = await buildTarFixture(scratch)
+      const { downloader } = makeFakeDownloader(tarBytes)
+      const extractedDir = path.join(scratch, 'pre-empty')
+      const fs = require('node:fs') as typeof import('node:fs')
+      // Pre-create the dir empty (simulates a prior interrupted setup).
+      fs.mkdirSync(extractedDir, { recursive: true })
+      expect(existsSync(extractedDir)).toBe(true)
+      expect(readdirSync(extractedDir).length).toBe(0)
+
+      const result = await downloadAndExtractTool({
+        url: 'https://example.com/fixture.tar',
+        name: 'fixture-empty.tar',
+        extractedDir,
+        downloader,
+      })
+      expect(result.extracted).toBe(true)
+      expect(
+        existsSync(path.join(extractedDir, 'source', 'hello.txt')),
+      ).toBe(true)
+    })
+
     it('is idempotent: re-running with a populated target dir skips extraction', async () => {
       const tarBytes = await buildTarFixture(scratch)
       const { downloader } = makeFakeDownloader(tarBytes)
