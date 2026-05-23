@@ -12,7 +12,7 @@
 import {
   getPalette,
   type SocketPaletteTheme,
-} from '@socketsecurity/lib/colors/socket-palette'
+} from '../../../src/colors/socket-palette'
 import { describe, expect, it } from 'vitest'
 
 describe('socket-palette', () => {

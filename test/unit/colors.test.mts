@@ -9,12 +9,12 @@
  *     color handling in spinners, loggers, and UI.
  */
 
-import { isRgbTuple, toRgb } from '@socketsecurity/lib/colors/convert'
+import { isRgbTuple, toRgb } from '../../src/colors/convert'
 import type {
   ColorName,
   ColorRgb,
   ColorValue,
-} from '@socketsecurity/lib/colors/types'
+} from '../../src/colors/types'
 import { describe, expect, it } from 'vitest'
 
 describe('colors', () => {
