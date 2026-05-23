@@ -8,7 +8,7 @@ import path from 'node:path'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { jreFromJavaHome } from '@socketsecurity/lib/external-tools/jre/from-java-home'
+import { jreFromJavaHome } from '../../../../src/external-tools/jre/from-java-home'
 
 // Run sequentially — stubEnv is process-scoped, races concurrently.
 describe.sequential('external-tools/jre/from-java-home', () => {

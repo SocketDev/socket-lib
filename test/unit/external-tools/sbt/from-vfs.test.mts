@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   SBT_VFS_KEY,
   sbtFromVfs,
-} from '@socketsecurity/lib/external-tools/sbt/from-vfs'
+} from '../../../../src/external-tools/sbt/from-vfs'
 
 describe('external-tools/sbt/from-vfs', () => {
   it('returns undefined on stock Node (no node:smol-vfs)', async () => {

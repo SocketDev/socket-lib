@@ -125,9 +125,9 @@ describe.sequential('external-tools/from-download', () => {
         downloader,
       })
       expect(result.extracted).toBe(true)
-      expect(
-        existsSync(path.join(extractedDir, 'source', 'hello.txt')),
-      ).toBe(true)
+      expect(existsSync(path.join(extractedDir, 'source', 'hello.txt'))).toBe(
+        true,
+      )
     })
 
     it('is idempotent: re-running with a populated target dir skips extraction', async () => {

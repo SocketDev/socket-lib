@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   resetJreResolution,
   resolveJre,
-} from '@socketsecurity/lib/external-tools/jre/resolve'
+} from '../../../../src/external-tools/jre/resolve'
 
 // Run sequentially because tests mutate process.env and the JRE
 // resolver's memo cache — both global state under vitest's
