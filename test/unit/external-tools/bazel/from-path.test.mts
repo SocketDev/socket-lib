@@ -6,7 +6,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { bazelFromPath } from '@socketsecurity/lib/external-tools/bazel/from-path'
+import { bazelFromPath } from '../../../../src/external-tools/bazel/from-path'
 
 describe('external-tools/bazel/from-path', () => {
   it('returns either a resolved shape or undefined', async () => {

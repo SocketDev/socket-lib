@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   resetBazelResolution,
   resolveBazel,
-} from '@socketsecurity/lib/external-tools/bazel/resolve'
+} from '../../../../src/external-tools/bazel/resolve'
 
 describe('external-tools/bazel/resolve', () => {
   beforeEach(() => {
