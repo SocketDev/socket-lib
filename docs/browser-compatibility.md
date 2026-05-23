@@ -14,70 +14,70 @@ If you're an agent wiring up a browser/extension consumer, the short version:
 
 ## Subpath matrix
 
-| Subpath | Browser | Notes |
-|---|---|---|
-| `./logger` | ✅ via `./logger/browser` | Bundler `browser` condition resolves automatically. Singleton + `success`/`fail`/`warn`/`error`/`info`/`log` surface backed by `console.*`. No Node deps. |
-| `./logger/browser` | ✅ explicit | Use this if your bundler doesn't honor conditions. |
-| `./http-request/browser` | ✅ explicit | `fetch()`-based `httpJson` / `httpText` / `httpRequest`. Full Node-parity options (`signal`, `timeout`, `followRedirects`, `maxResponseSize`, `hooks.onRequest`/`hooks.onResponse`, `retries`, `retryDelay`, `throwOnError`). |
-| `./http-request` (parent) | ⚠️ via bundler only | Resolves to `./http-request/browser` when the `browser` condition fires. Direct `require()` falls through to the Node entry which imports `node:http`. |
-| `./arrays/*` | ✅ | All 5 files. Zero Node deps. |
-| `./strings/*` | ✅ | All 6 files. Zero Node deps. |
-| `./objects/*` | ✅ | All 6 files. Zero Node deps. |
-| `./errors/*` | ✅ | All 3 files. Zero Node deps. |
-| `./url/*` | ✅ | All 4 files. Zero Node deps. |
-| `./regexps/*` | ✅ | All 3 files. Zero Node deps. |
-| `./versions/*` | ✅ | All 6 files. Zero Node deps. |
-| `./words/*` | ✅ | All 4 files. Zero Node deps. |
-| `./colors/*` | ✅ | All 4 files. Zero Node deps. |
-| `./themes/*` | ⚠️ likely | All 4 files. No direct Node deps, but `themes/types.ts` re-exports from `spinner/types` which has a `node:stream` type-only import (stripped at compile time). Should bundle clean. Not yet flagged via `"browser"` condition. |
-| `./primordials/*` | ✅ | All 18 files. Zero Node deps. Not yet flagged. |
-| `./effects/*` | ✅ | All 4 files. Zero Node deps. Not yet flagged. |
-| `./ansi/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./cache/*` | ✅ | TTL store + types. Zero Node deps. Not yet flagged. |
-| `./crypto/*` | ✅ | Zero Node deps (uses Web Crypto API + primordials). Not yet flagged. |
-| `./debug/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./globs/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./json/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./links/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./memo/*` | ✅ | Memoization helpers. Zero Node deps. Not yet flagged. |
-| `./packages/*` | ✅ | Package metadata helpers. Zero Node deps. Not yet flagged. |
-| `./paths/*` | ⚠️ | Path-string helpers, but the file you want is OS-aware (POSIX vs Windows separators). Mostly browser-safe; case-by-case. |
-| `./promises/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./schema/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./smol/*` | ✅ | Lightweight versions of larger lib helpers. Zero Node deps. Not yet flagged. |
-| `./sorts/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./ssri/*` | ✅ | Subresource Integrity helpers. Zero Node deps. Not yet flagged. |
-| `./streams/*` | ✅ via Web Streams | Zero Node deps. Not yet flagged. |
-| `./tables/*` | ✅ | Zero Node deps. Not yet flagged. |
-| `./temporal/*` | ✅ | Time-string helpers. Zero Node deps. Not yet flagged. |
-| `./pkg-ext/*` | ✅ | File-extension constants. Zero Node deps. Not yet flagged. |
-| `./abort/*` | ✅ | `AbortSignal` helpers. Zero Node deps. Not yet flagged. |
-| `./checks/primordials` | ❌ | `node:assert` import. Test helper. |
-| `./fs/*` | ❌ | `node:fs` throughout. No browser equivalent — use `chrome.storage` / `IndexedDB` directly. |
-| `./bin/*` | ❌ | Executable discovery — `node:child_process`, `node:path`. N/A in browser. |
-| `./spawn/*` (in lib-stable as `./spawn`) | ❌ | Subprocess spawning. N/A in browser. |
-| `./process/*` | ❌ | `node:process` lifecycle, signals. N/A. |
-| `./ipc/*` | ❌ | Node's IPC channel. N/A. |
-| `./ipc-cli/*` | ❌ | Subprocess IPC over CLI. N/A. |
-| `./archives/*` (zip, tar) | ❌ | `node:zlib`, `node:stream`. Use `CompressionStream` / `DecompressionStream` browser APIs instead. |
-| `./compression/*` | ⚠️ | Some entries use `node:zlib`; some are pure. |
-| `./git/*` | ❌ | Subprocess git calls. N/A. |
-| `./github/*` | ❌ | Some entries shell out via `gh` CLI. |
-| `./external-tools/*` | ❌ | Per-tool installers (cargo, bazel, etc). N/A. |
-| `./secrets/*` | ❌ | OS keychain — macOS Security framework, Linux libsecret, Windows CredentialManager. N/A in browser; use `chrome.storage.session` for ephemeral secrets. |
-| `./sea/*` | ❌ | Node Single-Executable-Application packaging. N/A. |
-| `./eco/*` | ⚠️ | Ecosystem helpers (npm/pip/etc) — mixed. Pure metadata helpers may work; ones that read filesystem don't. |
-| `./node/*` | ❌ | Direct Node.js runtime helpers (version detection, etc). N/A. |
-| `./env/*` | ⚠️ | Environment-variable helpers — some read `process.env`, browser equivalent doesn't exist. |
-| `./argv/*` | ❌ | CLI argv parsing. N/A in browser. |
-| `./cacache/*` | ❌ | Filesystem cache via npm's cacache lib. N/A. |
-| `./stdio/*` | ❌ | stdout/stderr stream control. N/A. |
-| `./shadow/*` | ❌ | npm shadow registry. N/A. |
-| `./perf/*` | ⚠️ | Some use `node:perf_hooks`; browser equivalent is `performance.now()`. |
-| `./events/*` | ⚠️ | Some use Node's `EventEmitter`; browser has `EventTarget`. |
-| `./spinner/*` | ❌ | Terminal spinner. N/A in browser. |
-| `./dlx/*` | ❌ | `npx`-equivalent. N/A. |
-| `./constants/*` | ⚠️ | Mostly browser-safe constants, but the umbrella entry pulls in Node-dependent modules. Import individual leaf files. |
+| Subpath                                  | Browser                   | Notes                                                                                                                                                                                                                          |
+| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `./logger`                               | ✅ via `./logger/browser` | Bundler `browser` condition resolves automatically. Singleton + `success`/`fail`/`warn`/`error`/`info`/`log` surface backed by `console.*`. No Node deps.                                                                      |
+| `./logger/browser`                       | ✅ explicit               | Use this if your bundler doesn't honor conditions.                                                                                                                                                                             |
+| `./http-request/browser`                 | ✅ explicit               | `fetch()`-based `httpJson` / `httpText` / `httpRequest`. Full Node-parity options (`signal`, `timeout`, `followRedirects`, `maxResponseSize`, `hooks.onRequest`/`hooks.onResponse`, `retries`, `retryDelay`, `throwOnError`).  |
+| `./http-request` (parent)                | ⚠️ via bundler only       | Resolves to `./http-request/browser` when the `browser` condition fires. Direct `require()` falls through to the Node entry which imports `node:http`.                                                                         |
+| `./arrays/*`                             | ✅                        | All 5 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./strings/*`                            | ✅                        | All 6 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./objects/*`                            | ✅                        | All 6 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./errors/*`                             | ✅                        | All 3 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./url/*`                                | ✅                        | All 4 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./regexps/*`                            | ✅                        | All 3 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./versions/*`                           | ✅                        | All 6 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./words/*`                              | ✅                        | All 4 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./colors/*`                             | ✅                        | All 4 files. Zero Node deps.                                                                                                                                                                                                   |
+| `./themes/*`                             | ⚠️ likely                 | All 4 files. No direct Node deps, but `themes/types.ts` re-exports from `spinner/types` which has a `node:stream` type-only import (stripped at compile time). Should bundle clean. Not yet flagged via `"browser"` condition. |
+| `./primordials/*`                        | ✅                        | All 18 files. Zero Node deps. Not yet flagged.                                                                                                                                                                                 |
+| `./effects/*`                            | ✅                        | All 4 files. Zero Node deps. Not yet flagged.                                                                                                                                                                                  |
+| `./ansi/*`                               | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./cache/*`                              | ✅                        | TTL store + types. Zero Node deps. Not yet flagged.                                                                                                                                                                            |
+| `./crypto/*`                             | ✅                        | Zero Node deps (uses Web Crypto API + primordials). Not yet flagged.                                                                                                                                                           |
+| `./debug/*`                              | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./globs/*`                              | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./json/*`                               | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./links/*`                              | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./memo/*`                               | ✅                        | Memoization helpers. Zero Node deps. Not yet flagged.                                                                                                                                                                          |
+| `./packages/*`                           | ✅                        | Package metadata helpers. Zero Node deps. Not yet flagged.                                                                                                                                                                     |
+| `./paths/*`                              | ⚠️                        | Path-string helpers, but the file you want is OS-aware (POSIX vs Windows separators). Mostly browser-safe; case-by-case.                                                                                                       |
+| `./promises/*`                           | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./schema/*`                             | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./smol/*`                               | ✅                        | Lightweight versions of larger lib helpers. Zero Node deps. Not yet flagged.                                                                                                                                                   |
+| `./sorts/*`                              | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./ssri/*`                               | ✅                        | Subresource Integrity helpers. Zero Node deps. Not yet flagged.                                                                                                                                                                |
+| `./streams/*`                            | ✅ via Web Streams        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./tables/*`                             | ✅                        | Zero Node deps. Not yet flagged.                                                                                                                                                                                               |
+| `./temporal/*`                           | ✅                        | Time-string helpers. Zero Node deps. Not yet flagged.                                                                                                                                                                          |
+| `./pkg-ext/*`                            | ✅                        | File-extension constants. Zero Node deps. Not yet flagged.                                                                                                                                                                     |
+| `./abort/*`                              | ✅                        | `AbortSignal` helpers. Zero Node deps. Not yet flagged.                                                                                                                                                                        |
+| `./checks/primordials`                   | ❌                        | `node:assert` import. Test helper.                                                                                                                                                                                             |
+| `./fs/*`                                 | ❌                        | `node:fs` throughout. No browser equivalent — use `chrome.storage` / `IndexedDB` directly.                                                                                                                                     |
+| `./bin/*`                                | ❌                        | Executable discovery — `node:child_process`, `node:path`. N/A in browser.                                                                                                                                                      |
+| `./spawn/*` (in lib-stable as `./spawn`) | ❌                        | Subprocess spawning. N/A in browser.                                                                                                                                                                                           |
+| `./process/*`                            | ❌                        | `node:process` lifecycle, signals. N/A.                                                                                                                                                                                        |
+| `./ipc/*`                                | ❌                        | Node's IPC channel. N/A.                                                                                                                                                                                                       |
+| `./ipc-cli/*`                            | ❌                        | Subprocess IPC over CLI. N/A.                                                                                                                                                                                                  |
+| `./archives/*` (zip, tar)                | ❌                        | `node:zlib`, `node:stream`. Use `CompressionStream` / `DecompressionStream` browser APIs instead.                                                                                                                              |
+| `./compression/*`                        | ⚠️                        | Some entries use `node:zlib`; some are pure.                                                                                                                                                                                   |
+| `./git/*`                                | ❌                        | Subprocess git calls. N/A.                                                                                                                                                                                                     |
+| `./github/*`                             | ❌                        | Some entries shell out via `gh` CLI.                                                                                                                                                                                           |
+| `./external-tools/*`                     | ❌                        | Per-tool installers (cargo, bazel, etc). N/A.                                                                                                                                                                                  |
+| `./secrets/*`                            | ❌                        | OS keychain — macOS Security framework, Linux libsecret, Windows CredentialManager. N/A in browser; use `chrome.storage.session` for ephemeral secrets.                                                                        |
+| `./sea/*`                                | ❌                        | Node Single-Executable-Application packaging. N/A.                                                                                                                                                                             |
+| `./eco/*`                                | ⚠️                        | Ecosystem helpers (npm/pip/etc) — mixed. Pure metadata helpers may work; ones that read filesystem don't.                                                                                                                      |
+| `./node/*`                               | ❌                        | Direct Node.js runtime helpers (version detection, etc). N/A.                                                                                                                                                                  |
+| `./env/*`                                | ⚠️                        | Environment-variable helpers — some read `process.env`, browser equivalent doesn't exist.                                                                                                                                      |
+| `./argv/*`                               | ❌                        | CLI argv parsing. N/A in browser.                                                                                                                                                                                              |
+| `./cacache/*`                            | ❌                        | Filesystem cache via npm's cacache lib. N/A.                                                                                                                                                                                   |
+| `./stdio/*`                              | ❌                        | stdout/stderr stream control. N/A.                                                                                                                                                                                             |
+| `./shadow/*`                             | ❌                        | npm shadow registry. N/A.                                                                                                                                                                                                      |
+| `./perf/*`                               | ⚠️                        | Some use `node:perf_hooks`; browser equivalent is `performance.now()`.                                                                                                                                                         |
+| `./events/*`                             | ⚠️                        | Some use Node's `EventEmitter`; browser has `EventTarget`.                                                                                                                                                                     |
+| `./spinner/*`                            | ❌                        | Terminal spinner. N/A in browser.                                                                                                                                                                                              |
+| `./dlx/*`                                | ❌                        | `npx`-equivalent. N/A.                                                                                                                                                                                                         |
+| `./constants/*`                          | ⚠️                        | Mostly browser-safe constants, but the umbrella entry pulls in Node-dependent modules. Import individual leaf files.                                                                                                           |
 
 ## Opting in as a consumer
 
@@ -140,12 +140,12 @@ If you're authoring a script tag that loads directly into a browser via ESM impo
 
 ```html
 <script type="importmap">
-{
-  "imports": {
-    "@socketsecurity/lib/logger": "/node_modules/@socketsecurity/lib/dist/logger/browser.js",
-    "@socketsecurity/lib/http-request": "/node_modules/@socketsecurity/lib/dist/http-request/browser.js"
+  {
+    "imports": {
+      "@socketsecurity/lib/logger": "/node_modules/@socketsecurity/lib/dist/logger/browser.js",
+      "@socketsecurity/lib/http-request": "/node_modules/@socketsecurity/lib/dist/http-request/browser.js"
+    }
   }
-}
 </script>
 ```
 
@@ -170,13 +170,13 @@ If you've audited a subpath and confirmed it's browser-safe (no `node:*` imports
       "browser": {
         "source": "./src/my-subpath.ts",
         "types": "./dist/my-subpath.d.ts",
-        "default": "./dist/my-subpath.js"
+        "default": "./dist/my-subpath.js",
       },
       "source": "./src/my-subpath.ts",
       "types": "./dist/my-subpath.d.ts",
-      "default": "./dist/my-subpath.js"
-    }
-  }
+      "default": "./dist/my-subpath.js",
+    },
+  },
 }
 ```
 
