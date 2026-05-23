@@ -95,4 +95,15 @@ describe('external-tools/sbt/from-download', () => {
       path: path.join(cacheDir, 'bin', 'sbt'),
     })
   })
+
+  it('falls back to socket dlx dir when cacheDir is omitted', async () => {
+    const tarBytes = await buildSbtTarball(scratch)
+    const { downloader } = makeFakeDownloader(tarBytes)
+    const result = await sbtFromDownload({
+      version: '1.10.7',
+      downloader,
+    })
+    expect(result?.source).toBe('download')
+    expect(result?.path).toMatch(/sbt[/\\]1\.10\.7[/\\]bin[/\\]sbt$/)
+  })
 })
