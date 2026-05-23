@@ -10,8 +10,8 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { getNodeAuthToken } from '@socketsecurity/lib/env/node-auth-token'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getNodeAuthToken } from '../../../src/env/node-auth-token'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 
 describe('env/node-auth-token', () => {
   afterEach(() => {

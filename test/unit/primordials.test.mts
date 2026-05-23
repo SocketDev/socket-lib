@@ -59,13 +59,13 @@ import {
   AtomicsWait,
   IteratorPrototypeNext,
   IteratorPrototypeReturn,
-} from '@socketsecurity/lib/primordials/array'
+} from '../../src/primordials/array'
 
 import {
   BufferCtor,
   BufferPrototypeSlice,
   BufferPrototypeToString,
-} from '@socketsecurity/lib/primordials/buffer'
+} from '../../src/primordials/buffer'
 
 import {
   DateCtor,
@@ -73,21 +73,21 @@ import {
   DatePrototypeToISOString,
   DatePrototypeToLocaleString,
   DatePrototypeValueOf,
-} from '@socketsecurity/lib/primordials/date'
+} from '../../src/primordials/date'
 
 import {
   ErrorCaptureStackTrace,
   ErrorCtor,
   ErrorPrepareStackTrace,
   ErrorStackTraceLimit,
-} from '@socketsecurity/lib/primordials/error'
+} from '../../src/primordials/error'
 
 import {
   FunctionPrototypeApply,
   FunctionPrototypeBind,
   FunctionPrototypeCall,
   FunctionPrototypeToString,
-} from '@socketsecurity/lib/primordials/function'
+} from '../../src/primordials/function'
 
 import {
   BigIntCtor,
@@ -99,9 +99,9 @@ import {
   decodeComponent,
   encodeComponent,
   globalThisRef,
-} from '@socketsecurity/lib/primordials/globals'
+} from '../../src/primordials/globals'
 
-import { JSONParse, JSONStringify } from '@socketsecurity/lib/primordials/json'
+import { JSONParse, JSONStringify } from '../../src/primordials/json'
 
 import {
   MapCtor,
@@ -133,7 +133,7 @@ import {
   WeakSetPrototypeAdd,
   WeakSetPrototypeDelete,
   WeakSetPrototypeHas,
-} from '@socketsecurity/lib/primordials/map-set'
+} from '../../src/primordials/map-set'
 
 import {
   MathAbs,
@@ -180,7 +180,7 @@ import {
   MathTan,
   MathTanh,
   MathTrunc,
-} from '@socketsecurity/lib/primordials/math'
+} from '../../src/primordials/math'
 
 import {
   NumberCtor,
@@ -199,7 +199,7 @@ import {
   NumberParseInt,
   NumberPrototypeToFixed,
   NumberPrototypeToString,
-} from '@socketsecurity/lib/primordials/number'
+} from '../../src/primordials/number'
 
 import {
   ObjectAssign,
@@ -235,14 +235,14 @@ import {
   ObjectSeal,
   ObjectSetPrototypeOf,
   ObjectValues,
-} from '@socketsecurity/lib/primordials/object'
+} from '../../src/primordials/object'
 
 import {
   PromiseCtor,
   PromisePrototypeCatch,
   PromisePrototypeFinally,
   PromisePrototypeThen,
-} from '@socketsecurity/lib/primordials/promise'
+} from '../../src/primordials/promise'
 
 import {
   ReflectApply,
@@ -258,7 +258,7 @@ import {
   ReflectPreventExtensions,
   ReflectSet,
   ReflectSetPrototypeOf,
-} from '@socketsecurity/lib/primordials/reflect'
+} from '../../src/primordials/reflect'
 
 import {
   RegExpCtor,
@@ -266,7 +266,7 @@ import {
   RegExpPrototypeSymbolMatch,
   RegExpPrototypeSymbolReplace,
   RegExpPrototypeTest,
-} from '@socketsecurity/lib/primordials/regexp'
+} from '../../src/primordials/regexp'
 
 import {
   StringCtor,
@@ -303,7 +303,7 @@ import {
   StringPrototypeTrimEnd,
   StringPrototypeTrimStart,
   StringRaw,
-} from '@socketsecurity/lib/primordials/string'
+} from '../../src/primordials/string'
 
 import {
   SymbolAsyncDispose,
@@ -327,7 +327,7 @@ import {
   SymbolToPrimitive,
   SymbolToStringTag,
   SymbolUnscopables,
-} from '@socketsecurity/lib/primordials/symbol'
+} from '../../src/primordials/symbol'
 
 import {
   applyBind,
@@ -335,7 +335,7 @@ import {
   bindCall,
   uncurryThis,
   weakRefSafe,
-} from '@socketsecurity/lib/primordials/uncurry'
+} from '../../src/primordials/uncurry'
 
 import {
   URLCtor,
@@ -347,7 +347,7 @@ import {
   URLSearchParamsPrototypeGetAll,
   URLSearchParamsPrototypeHas,
   URLSearchParamsPrototypeSet,
-} from '@socketsecurity/lib/primordials/url'
+} from '../../src/primordials/url'
 import { describe, expect, it } from 'vitest'
 
 describe('primordials', () => {

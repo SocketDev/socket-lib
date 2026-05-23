@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
-import { parseJsonSafe } from '@socketsecurity/lib/json/parse'
+import { parseJsonSafe } from '../../../src/json/parse'
 
 describe('json/safe-parse', () => {
   describe('parseJsonSafe', () => {

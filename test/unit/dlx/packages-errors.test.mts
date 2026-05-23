@@ -11,8 +11,8 @@ import os from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
-import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { invalidateCaches } from '@socketsecurity/lib/paths/rewire'
+import { resetEnv, setEnv } from '../../../src/env/rewire'
+import { invalidateCaches } from '../../../src/paths/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {

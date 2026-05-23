@@ -24,31 +24,31 @@ import {
   defineGetter,
   defineLazyGetter,
   defineLazyGetters,
-} from '@socketsecurity/lib/objects/getters'
+} from '../../src/objects/getters'
 import {
   getKeys,
   getOwn,
   getOwnPropertyValues,
-} from '@socketsecurity/lib/objects/inspect'
+} from '../../src/objects/inspect'
 import {
   merge,
   objectAssign,
   objectFreeze,
-} from '@socketsecurity/lib/objects/mutate'
+} from '../../src/objects/mutate'
 import {
   hasKeys,
   hasOwn,
   isObject,
   isPlainObject,
-} from '@socketsecurity/lib/objects/predicates'
+} from '../../src/objects/predicates'
 import {
   entryKeyComparator,
   objectEntries,
   toSortedObject,
   toSortedObjectFromEntries,
-} from '@socketsecurity/lib/objects/sort'
+} from '../../src/objects/sort'
 
-import type { GetterDefObj } from '@socketsecurity/lib/objects/types'
+import type { GetterDefObj } from '../../src/objects/types'
 import { describe, expect, it } from 'vitest'
 
 describe('objects', () => {

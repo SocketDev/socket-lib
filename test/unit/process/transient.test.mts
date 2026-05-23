@@ -12,7 +12,7 @@
 import process from 'node:process'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { isTransientProcess } from '@socketsecurity/lib/process/transient'
+import { isTransientProcess } from '../../../src/process/transient'
 
 describe('process/transient', () => {
   describe('isTransientProcess', () => {

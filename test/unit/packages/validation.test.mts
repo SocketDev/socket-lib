@@ -17,7 +17,7 @@ import {
   isBlessedPackageName,
   isRegistryFetcherType,
   isValidPackageName,
-} from '@socketsecurity/lib/packages/validation'
+} from '../../../src/packages/validation'
 
 describe('packages/validation', () => {
   describe('isBlessedPackageName', () => {

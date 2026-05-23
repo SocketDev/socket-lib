@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeUtil } from '@socketsecurity/lib/node/util'
+import { getNodeUtil } from '../../../src/node/util'
 
 describe('node/util', () => {
   it('returns the node:util module', () => {

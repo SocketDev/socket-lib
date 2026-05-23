@@ -14,7 +14,7 @@ import * as zodV3 from 'zod/v3'
 import * as zodV4 from 'zod/v4'
 import { describe, expect, it } from 'vitest'
 
-import { validateSchema } from '@socketsecurity/lib/schema/validate'
+import { validateSchema } from '../../../src/schema/validate'
 
 // TypeBox is bundled under src/external/. Tests run against the
 // compiled dist externals path.

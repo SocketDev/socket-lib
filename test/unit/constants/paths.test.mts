@@ -24,7 +24,7 @@ import {
   PACKAGE_JSON,
   README_MD,
   TSCONFIG_JSON,
-} from '@socketsecurity/lib/paths/filenames'
+} from '../../../src/paths/filenames'
 
 // Directory names
 import {
@@ -36,7 +36,7 @@ import {
   NODE_MODULES,
   NODE_MODULES_GLOB_RECURSIVE,
   SLASH_NODE_MODULES_SLASH,
-} from '@socketsecurity/lib/paths/dirnames'
+} from '../../../src/paths/dirnames'
 
 // File extensions
 import {
@@ -54,7 +54,7 @@ import {
   EXT_PS1,
   EXT_YAML,
   EXT_YML,
-} from '@socketsecurity/lib/paths/exts'
+} from '../../../src/paths/exts'
 
 // Glob patterns
 import {
@@ -64,7 +64,7 @@ import {
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
   README_GLOB,
   README_GLOB_RECURSIVE,
-} from '@socketsecurity/lib/paths/globs'
+} from '../../../src/paths/globs'
 
 describe('constants/paths', () => {
   describe('file names', () => {

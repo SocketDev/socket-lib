@@ -11,12 +11,12 @@
  *     optimize expensive operations and API calls.
  */
 
-import { clearAllMemoizationCaches } from '@socketsecurity/lib/memo/clear'
-import { Memoize } from '@socketsecurity/lib/memo/decorator'
-import { memoize } from '@socketsecurity/lib/memo/memoize'
-import { memoizeAsync } from '@socketsecurity/lib/memo/async'
-import { memoizeWeak } from '@socketsecurity/lib/memo/weak'
-import { once } from '@socketsecurity/lib/memo/once'
+import { clearAllMemoizationCaches } from '../../src/memo/clear'
+import { Memoize } from '../../src/memo/decorator'
+import { memoize } from '../../src/memo/memoize'
+import { memoizeAsync } from '../../src/memo/async'
+import { memoizeWeak } from '../../src/memo/weak'
+import { once } from '../../src/memo/once'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('memoization', () => {

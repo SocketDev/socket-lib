@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseYarnDescriptor } from '@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-yarn-descriptor'
+import { parseYarnDescriptor } from '../../../../../../src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor'
 
 describe('eco/npm/yarnpkg/yarn/parse-yarn-descriptor', () => {
   it('handles a classic spec', () => {

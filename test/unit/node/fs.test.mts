@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeFs } from '@socketsecurity/lib/node/fs'
+import { getNodeFs } from '../../../src/node/fs'
 
 describe('node/fs', () => {
   it('returns the node:fs module', () => {

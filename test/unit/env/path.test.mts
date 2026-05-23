@@ -9,8 +9,8 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { getPath } from '@socketsecurity/lib/env/path'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getPath } from '../../../src/env/path'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 
 describe('env/path', () => {
   afterEach(() => {

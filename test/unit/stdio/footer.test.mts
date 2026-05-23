@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest'
 import {
   createFooter,
   createSummaryFooter,
-} from '@socketsecurity/lib/stdio/footer'
+} from '../../../src/stdio/footer'
 
 // footer.ts captures `DateNow` from primordials at module init. ESM live
 // bindings make that capture immune to `Date.now = vi.fn()` and to

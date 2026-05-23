@@ -35,7 +35,7 @@ import {
   resolveSocketLibPrimordials,
   type PrimordialsCheckConfig,
 } from '../../../src/checks/primordials'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 let tmpDir: string
 

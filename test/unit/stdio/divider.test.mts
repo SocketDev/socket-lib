@@ -20,7 +20,7 @@ import {
   printThickDivider,
   printThinDivider,
   sectionBreak,
-} from '@socketsecurity/lib/stdio/divider'
+} from '../../../src/stdio/divider'
 import { describe, expect, it } from 'vitest'
 
 describe('stdio/divider', () => {

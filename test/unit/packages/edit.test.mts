@@ -16,12 +16,12 @@ import path from 'node:path'
 import type {
   EditablePackageJson,
   PackageJson,
-} from '@socketsecurity/lib/packages/types'
+} from '../../../src/packages/types'
 import {
   getEditablePackageJsonClass,
   toEditablePackageJson,
   toEditablePackageJsonSync,
-} from '@socketsecurity/lib/packages/edit'
+} from '../../../src/packages/edit'
 import { describe, expect, it } from 'vitest'
 
 import { runWithTempDir } from '../util/temp-file-helper'

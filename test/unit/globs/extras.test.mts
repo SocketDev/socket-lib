@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getGlobMatcher,
   getMatchesGlob,
-} from '@socketsecurity/lib/globs/matcher'
+} from '../../../src/globs/matcher'
 
 describe('globs — extra coverage', () => {
   describe('getMatchesGlob', () => {

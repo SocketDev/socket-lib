@@ -19,8 +19,8 @@ import {
   getSocketCliOptimize,
   getSocketCliOrgSlug,
   getSocketCliViewAllRisks,
-} from '@socketsecurity/lib/env/socket-cli'
-import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '../../../src/env/socket-cli'
+import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('socket-cli env', () => {

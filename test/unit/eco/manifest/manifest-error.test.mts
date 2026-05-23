@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '@socketsecurity/lib/eco/manifest/manifest-error'
+import { ManifestError } from '../../../../src/eco/manifest/manifest-error'
 
 describe('eco/manifest/manifest-error', () => {
   it('has name "ManifestError"', () => {

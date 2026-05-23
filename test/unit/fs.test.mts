@@ -28,16 +28,16 @@ import { describe, expect, it } from 'vitest'
 import {
   normalizeEncoding,
   normalizeEncodingSlow,
-} from '@socketsecurity/lib/fs/encoding'
-import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
+} from '../../src/fs/encoding'
+import { findUp, findUpSync } from '../../src/fs/find-up'
 import {
   isDirEmptySync,
   isDirSync,
   isSymlinkSync,
   safeStat,
   safeStatSync,
-} from '@socketsecurity/lib/fs/inspect'
-import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
+} from '../../src/fs/inspect'
+import { readDirNames, readDirNamesSync } from '../../src/fs/read-dir'
 import {
   readFileBinary,
   readFileBinarySync,
@@ -45,21 +45,21 @@ import {
   readFileUtf8Sync,
   safeReadFile,
   safeReadFileSync,
-} from '@socketsecurity/lib/fs/read-file'
-import { readJson, readJsonSync } from '@socketsecurity/lib/fs/read-json'
+} from '../../src/fs/read-file'
+import { readJson, readJsonSync } from '../../src/fs/read-json'
 import {
   safeDelete,
   safeDeleteSync,
   safeMkdir,
   safeMkdirSync,
-} from '@socketsecurity/lib/fs/safe'
-import { uniqueSync } from '@socketsecurity/lib/fs/unique'
-import { validateFiles } from '@socketsecurity/lib/fs/validate'
-import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
+} from '../../src/fs/safe'
+import { uniqueSync } from '../../src/fs/unique'
+import { validateFiles } from '../../src/fs/validate'
+import { writeJson, writeJsonSync } from '../../src/fs/write-json'
 
 import { runWithTempDir } from './util/temp-file-helper'
 
-import type { SafeReadOptions } from '@socketsecurity/lib/fs/types'
+import type { SafeReadOptions } from '../../src/fs/types'
 
 describe('fs', () => {
   describe('findUp', () => {

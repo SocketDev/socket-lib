@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseGitUrl } from '@socketsecurity/lib/eco/npm/npm/parse-git-url'
+import { parseGitUrl } from '../../../../../src/eco/npm/npm/parse-git-url'
 
 describe('eco/npm/npm/parse-git-url', () => {
   it('extracts url + commit from git+https with hash', () => {

@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolVfs } from '@socketsecurity/lib/smol/vfs'
+import { getSmolVfs } from '../../../src/smol/vfs'
 
 describe('smol/vfs', () => {
   describe('getSmolVfs', () => {

@@ -25,13 +25,13 @@ import {
   getSocketRegistryGithubCacheDir,
   getSocketUserDir,
   getUserHomeDir,
-} from '@socketsecurity/lib/paths/socket'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '../../../src/paths/socket'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import {
   clearPath,
   resetPaths,
   setPath,
-} from '@socketsecurity/lib/paths/rewire'
+} from '../../../src/paths/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('paths/socket', () => {

@@ -23,8 +23,8 @@ import {
   type SpdxLicenseNode,
   type SpdxBinaryOperationNode,
   type InternalLicenseNode,
-} from '@socketsecurity/lib/packages/licenses'
-import type { LicenseNode } from '@socketsecurity/lib/packages/types'
+} from '../../../src/packages/licenses'
+import type { LicenseNode } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
 
 describe('packages/licenses', () => {

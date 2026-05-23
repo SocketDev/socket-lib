@@ -10,7 +10,7 @@ import {
   DEFAULT_MIN_RELEASE_DAYS,
   DlxLockfileError,
   generatePackagePin,
-} from '@socketsecurity/lib/dlx/lockfile'
+} from '../../../src/dlx/lockfile'
 
 import { describeNetworkOnly } from '../util/skip-helpers'
 

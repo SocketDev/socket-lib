@@ -11,7 +11,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '../../../../src/fs/safe'
 import { readBazelVersionFile } from '../../../../src/external-tools/bazel/read-bazel-version-file'
 
 export async function withTmpDir(

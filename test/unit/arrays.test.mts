@@ -15,10 +15,10 @@
  *     and formatter caching behavior.
  */
 
-import { arrayChunk } from '@socketsecurity/lib/arrays/chunk'
-import { joinAnd, joinOr } from '@socketsecurity/lib/arrays/join'
-import { isArray } from '@socketsecurity/lib/arrays/predicates'
-import { arrayUnique } from '@socketsecurity/lib/arrays/unique'
+import { arrayChunk } from '../../src/arrays/chunk'
+import { joinAnd, joinOr } from '../../src/arrays/join'
+import { isArray } from '../../src/arrays/predicates'
+import { arrayUnique } from '../../src/arrays/unique'
 import { describe, expect, it } from 'vitest'
 
 describe('arrays', () => {

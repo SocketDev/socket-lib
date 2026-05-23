@@ -9,9 +9,9 @@
  *     Socket CLI for grammatically correct user-facing messages.
  */
 
-import { capitalize } from '@socketsecurity/lib/words/capitalize'
-import { determineArticle } from '@socketsecurity/lib/words/article'
-import { pluralize } from '@socketsecurity/lib/words/pluralize'
+import { capitalize } from '../../src/words/capitalize'
+import { determineArticle } from '../../src/words/article'
+import { pluralize } from '../../src/words/pluralize'
 import { describe, expect, it } from 'vitest'
 
 describe('words', () => {

@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatCoverage,
   getCoverageEmoji,
-} from '@socketsecurity/lib/cover/formatters'
+} from '../../../src/cover/formatters'
 
 const sampleCode = {
   statements: { covered: 85, total: 100, percent: '85.00' },

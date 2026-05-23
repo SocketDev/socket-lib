@@ -9,12 +9,12 @@ import {
   computeHashes,
   normalizeHash,
   verifyHash,
-} from '@socketsecurity/lib/integrity'
+} from '../../src/integrity'
 
 import type {
   ComputedHashes,
   NormalizedHash,
-} from '@socketsecurity/lib/integrity'
+} from '../../src/integrity'
 
 describe('integrity', () => {
   describe('normalizeHash', () => {

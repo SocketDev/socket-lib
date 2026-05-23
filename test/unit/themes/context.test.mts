@@ -21,9 +21,9 @@ import {
   setTheme,
   withTheme,
   withThemeSync,
-} from '@socketsecurity/lib/themes/context'
+} from '../../../src/themes/context'
 
-import type { Theme } from '@socketsecurity/lib/themes/types'
+import type { Theme } from '../../../src/themes/types'
 
 describe('themes/context', () => {
   describe('getTheme', () => {

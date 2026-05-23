@@ -19,8 +19,8 @@ import {
   password,
   search,
   select,
-} from '@socketsecurity/lib/stdio/prompts'
-import type { Choice } from '@socketsecurity/lib/stdio/prompts'
+} from '../../src/stdio/prompts'
+import type { Choice } from '../../src/stdio/prompts'
 import { describe, expect, it } from 'vitest'
 
 describe('prompts', () => {

@@ -35,7 +35,7 @@ import {
   supportsNodeRequireModule,
   supportsNodeRun,
   supportsProcessSend,
-} from '@socketsecurity/lib/constants/node'
+} from '../../../src/constants/node'
 import { describe, expect, it } from 'vitest'
 
 describe('node constants', () => {

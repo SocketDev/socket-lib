@@ -14,23 +14,23 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { execNpm } from '@socketsecurity/lib/eco/npm/npm/exec'
+import { execNpm } from '../../../../src/eco/npm/npm/exec'
 import {
   isNpmAuditFlag,
   isNpmFundFlag,
   isNpmLoglevelFlag,
   isNpmNodeOptionsFlag,
   isNpmProgressFlag,
-} from '@socketsecurity/lib/eco/npm/npm/flags'
-import { execPnpm } from '@socketsecurity/lib/eco/npm/pnpm/exec'
+} from '../../../../src/eco/npm/npm/flags'
+import { execPnpm } from '../../../../src/eco/npm/pnpm/exec'
 import {
   isPnpmFrozenLockfileFlag,
   isPnpmIgnoreScriptsFlag,
   isPnpmInstallCommand,
   isPnpmLoglevelFlag,
-} from '@socketsecurity/lib/eco/npm/pnpm/flags'
-import { execScript } from '@socketsecurity/lib/eco/npm/script'
-import { execYarn } from '@socketsecurity/lib/eco/npm/yarnpkg/yarn/exec'
+} from '../../../../src/eco/npm/pnpm/flags'
+import { execScript } from '../../../../src/eco/npm/script'
+import { execYarn } from '../../../../src/eco/npm/yarnpkg/yarn/exec'
 
 describe('agent', () => {
   describe('Flag checking functions', () => {

@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 import {
   generateSocketSpinnerFrames,
   type SocketFramesOptions,
-} from '@socketsecurity/lib/effects/pulse-frames'
+} from '../../../src/effects/pulse-frames'
 
 describe('effects/pulse-frames', () => {
   describe('generateSocketSpinnerFrames', () => {

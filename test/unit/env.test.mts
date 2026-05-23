@@ -10,11 +10,11 @@
  *     functions and proxy creation.
  */
 
-import { envAsBoolean } from '@socketsecurity/lib/env/boolean'
-import { findCaseInsensitiveEnvKey } from '@socketsecurity/lib/env/case-insensitive'
-import { envAsNumber } from '@socketsecurity/lib/env/number'
-import { createEnvProxy } from '@socketsecurity/lib/env/proxy'
-import { envAsString } from '@socketsecurity/lib/env/string'
+import { envAsBoolean } from '../../src/env/boolean'
+import { findCaseInsensitiveEnvKey } from '../../src/env/case-insensitive'
+import { envAsNumber } from '../../src/env/number'
+import { createEnvProxy } from '../../src/env/proxy'
+import { envAsString } from '../../src/env/string'
 import { describe, expect, it } from 'vitest'
 
 describe('env', () => {

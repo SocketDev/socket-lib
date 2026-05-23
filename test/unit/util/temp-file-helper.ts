@@ -8,9 +8,9 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-import { clearEnv, setEnv } from '@socketsecurity/lib/env/rewire'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
-import { resetPaths } from '@socketsecurity/lib/paths/rewire'
+import { clearEnv, setEnv } from '../../../src/env/rewire'
+import { safeDelete } from '../../../src/fs/safe'
+import { resetPaths } from '../../../src/paths/rewire'
 
 /**
  * Creates a unique temporary directory for testing. The directory is created in

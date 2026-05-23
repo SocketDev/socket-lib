@@ -23,7 +23,7 @@ import {
   PACKAGE_JSON,
   README_MD,
   TSCONFIG_JSON,
-} from '@socketsecurity/lib/paths/filenames'
+} from '../../../src/paths/filenames'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/filenames', () => {

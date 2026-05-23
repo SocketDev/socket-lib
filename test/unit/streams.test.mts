@@ -10,8 +10,8 @@
  *     large datasets and streaming operations.
  */
 
-import { parallelEach, parallelMap } from '@socketsecurity/lib/streams/parallel'
-import { transform } from '@socketsecurity/lib/streams/transform'
+import { parallelEach, parallelMap } from '../../src/streams/parallel'
+import { transform } from '../../src/streams/transform'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create async iterable from array

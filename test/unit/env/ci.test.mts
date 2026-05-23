@@ -7,8 +7,8 @@
  *   conditional behavior in CI environments (GitHub Actions, GitLab CI, etc.).
  */
 
-import { getCI } from '@socketsecurity/lib/env/ci'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getCI } from '../../../src/env/ci'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('env/ci', () => {

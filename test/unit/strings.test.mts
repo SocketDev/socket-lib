@@ -16,25 +16,25 @@
  *     (MIT).
  */
 
-import { ansiRegex, stripAnsi } from '@socketsecurity/lib/ansi/strip'
+import { ansiRegex, stripAnsi } from '../../src/ansi/strip'
 import {
   applyLinePrefix,
   centerText,
   fromCharCode,
   indentString,
   repeatString,
-} from '@socketsecurity/lib/strings/format'
+} from '../../src/strings/format'
 import {
   isBlankString,
   isNonEmptyString,
-} from '@socketsecurity/lib/strings/predicates'
-import { search } from '@socketsecurity/lib/strings/search'
+} from '../../src/strings/predicates'
+import { search } from '../../src/strings/search'
 import {
   stripBom,
   toKebabCase,
   trimNewlines,
-} from '@socketsecurity/lib/strings/transform'
-import { stringWidth } from '@socketsecurity/lib/strings/width'
+} from '../../src/strings/transform'
+import { stringWidth } from '../../src/strings/width'
 import { describe, expect, it } from 'vitest'
 
 describe('strings', () => {

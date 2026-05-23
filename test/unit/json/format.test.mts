@@ -22,7 +22,7 @@ import {
   sortKeys,
   stringifyWithFormatting,
   stripFormattingSymbols,
-} from '@socketsecurity/lib/json/format'
+} from '../../../src/json/format'
 import { describe, expect, it } from 'vitest'
 
 // Helper type for objects with formatting symbols

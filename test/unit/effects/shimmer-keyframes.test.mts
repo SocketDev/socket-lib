@@ -9,8 +9,8 @@ import {
   frameColors,
   type RGB,
   type ShimmerSpec,
-} from '@socketsecurity/lib/effects/shimmer'
-import { toShimmerKeyframes } from '@socketsecurity/lib/effects/shimmer-keyframes'
+} from '../../../src/effects/shimmer'
+import { toShimmerKeyframes } from '../../../src/effects/shimmer-keyframes'
 
 describe('effects/shimmer-keyframes', () => {
   describe('toShimmerKeyframes', () => {

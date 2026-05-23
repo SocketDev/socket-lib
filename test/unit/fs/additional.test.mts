@@ -22,14 +22,14 @@ import { existsSync, promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import { findUp, findUpSync } from '@socketsecurity/lib/fs/find-up'
+import { findUp, findUpSync } from '../../../src/fs/find-up'
 import {
   isDirEmptySync,
   isDirSync,
   safeStat,
   safeStatSync,
-} from '@socketsecurity/lib/fs/inspect'
-import { readDirNames, readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
+} from '../../../src/fs/inspect'
+import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir'
 import {
   readFileBinary,
   readFileBinarySync,
@@ -37,11 +37,11 @@ import {
   readFileUtf8Sync,
   safeReadFile,
   safeReadFileSync,
-} from '@socketsecurity/lib/fs/read-file'
-import { readJson, readJsonSync } from '@socketsecurity/lib/fs/read-json'
-import { safeDelete, safeDeleteSync } from '@socketsecurity/lib/fs/safe'
-import { uniqueSync } from '@socketsecurity/lib/fs/unique'
-import { writeJson, writeJsonSync } from '@socketsecurity/lib/fs/write-json'
+} from '../../../src/fs/read-file'
+import { readJson, readJsonSync } from '../../../src/fs/read-json'
+import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
+import { uniqueSync } from '../../../src/fs/unique'
+import { writeJson, writeJsonSync } from '../../../src/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-file-helper'
 

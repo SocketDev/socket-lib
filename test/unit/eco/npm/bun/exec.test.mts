@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { execBun } from '@socketsecurity/lib/eco/npm/bun/exec'
+import { execBun } from '../../../../../src/eco/npm/bun/exec'
 
 describe('eco/npm/bun/exec', () => {
   it('throws with a not-implemented message', () => {

@@ -9,7 +9,7 @@ import {
   EDIT_ONLY_PROFILE,
   FULL_FIX_PROFILE,
   READ_ONLY_PROFILE,
-} from '@socketsecurity/lib/ai/profiles'
+} from '../../../src/ai/profiles'
 
 describe('READ_ONLY_PROFILE', () => {
   it('has bash explicitly denied', () => {

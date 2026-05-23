@@ -26,7 +26,7 @@ import {
   stdout,
   write,
   writeLine,
-} from '@socketsecurity/lib/stdio/stdout'
+} from '../../../src/stdio/stdout'
 import { setupStdioTestSuite } from '../util/stdio-test-helper'
 
 describe('stdio/stdout', () => {

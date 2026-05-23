@@ -9,8 +9,8 @@ import {
   getJestWorkerId,
   getVitest,
   isTest,
-} from '@socketsecurity/lib/env/test'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '../../../src/env/test'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/test', () => {

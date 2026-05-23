@@ -9,11 +9,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { detectArchiveFormat } from '@socketsecurity/lib/archives/detect'
+import { detectArchiveFormat } from '../../../src/archives/detect'
 import {
   downloadAndExtractArchive,
   downloadAndExtractZip,
-} from '@socketsecurity/lib/releases/github-archives'
+} from '../../../src/releases/github-archives'
 
 describe('releases-github-archive', () => {
   describe('archive format detection', () => {

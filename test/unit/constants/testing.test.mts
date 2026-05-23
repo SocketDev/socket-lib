@@ -16,7 +16,7 @@ import {
   PRE_COMMIT,
   TEST,
   VITEST,
-} from '@socketsecurity/lib/constants/testing'
+} from '../../../src/constants/testing'
 
 describe('constants/testing', () => {
   describe('testing frameworks', () => {

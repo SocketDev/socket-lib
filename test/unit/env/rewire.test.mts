@@ -10,16 +10,16 @@
  */
 
 import process from 'node:process'
-import { getCI } from '@socketsecurity/lib/env/ci'
-import { getHome } from '@socketsecurity/lib/env/home'
-import { getSocketDebug } from '@socketsecurity/lib/env/socket'
+import { getCI } from '../../../src/env/ci'
+import { getHome } from '../../../src/env/home'
+import { getSocketDebug } from '../../../src/env/socket'
 import {
   clearEnv,
   hasOverride,
   isInEnv,
   resetEnv,
   setEnv,
-} from '@socketsecurity/lib/env/rewire'
+} from '../../../src/env/rewire'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('env rewiring', () => {

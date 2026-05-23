@@ -9,14 +9,14 @@ import vm from 'node:vm'
 
 import { describe, expect, it } from 'vitest'
 
-import { UNKNOWN_ERROR, errorMessage } from '@socketsecurity/lib/errors/message'
+import { UNKNOWN_ERROR, errorMessage } from '../../src/errors/message'
 import {
   isErrnoException,
   isError,
   isErrorBuiltin,
   isErrorShim,
-} from '@socketsecurity/lib/errors/predicates'
-import { errorStack } from '@socketsecurity/lib/errors/stack'
+} from '../../src/errors/predicates'
+import { errorStack } from '../../src/errors/stack'
 
 import { describeRequires } from './util/skip-helpers'
 

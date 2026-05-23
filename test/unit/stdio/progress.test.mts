@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   ProgressBar,
   createProgressIndicator,
-} from '@socketsecurity/lib/stdio/progress'
+} from '../../../src/stdio/progress'
 
 export function createMockStream(isTTY = true): NodeJS.WriteStream {
   const writes: string[] = []

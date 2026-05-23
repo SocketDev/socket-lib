@@ -11,8 +11,8 @@
  *     for API URL construction and query parameter parsing.
  */
 
-import { createRelativeUrl, parseUrl } from '@socketsecurity/lib/url/parse'
-import { isUrl } from '@socketsecurity/lib/url/predicates'
+import { createRelativeUrl, parseUrl } from '../../src/url/parse'
+import { isUrl } from '../../src/url/predicates'
 import {
   urlSearchParamsAsArray,
   urlSearchParamsAsBoolean,
@@ -20,7 +20,7 @@ import {
   urlSearchParamsAsString,
   urlSearchParamsGetArray,
   urlSearchParamsGetBoolean,
-} from '@socketsecurity/lib/url/search-params'
+} from '../../src/url/search-params'
 import { describe, expect, it } from 'vitest'
 
 describe('url', () => {

@@ -23,7 +23,7 @@ import {
   writeErrorLine,
   writeStackTrace,
   writeWarning,
-} from '@socketsecurity/lib/stdio/stderr'
+} from '../../../src/stdio/stderr'
 import { setupStdioTestSuite } from '../util/stdio-test-helper'
 
 describe('stdio/stderr', () => {

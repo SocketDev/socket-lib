@@ -25,12 +25,12 @@ import {
   dlxBinary,
   getDlxCachePath,
   listDlxCache,
-} from '@socketsecurity/lib/dlx/binary'
+} from '../../../src/dlx/binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { itWindowsOnly } from '../util/skip-helpers'
 import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
-import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 // Test server setup
 let httpServer: http.Server

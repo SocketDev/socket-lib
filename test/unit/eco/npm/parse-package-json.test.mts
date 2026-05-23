@@ -6,8 +6,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '@socketsecurity/lib/eco/manifest/manifest-error'
-import { parsePackageJson } from '@socketsecurity/lib/eco/npm/parse-package-json'
+import { ManifestError } from '../../../../src/eco/manifest/manifest-error'
+import { parsePackageJson } from '../../../../src/eco/npm/parse-package-json'
 
 describe('eco/npm/parse-package-json', () => {
   it('parses a minimal manifest', () => {

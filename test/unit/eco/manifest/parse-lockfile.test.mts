@@ -4,11 +4,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '@socketsecurity/lib/eco/manifest/manifest-error'
+import { ManifestError } from '../../../../src/eco/manifest/manifest-error'
 import {
   parseLockfile,
   sniffLockfileFormat,
-} from '@socketsecurity/lib/eco/manifest/parse-lockfile'
+} from '../../../../src/eco/manifest/parse-lockfile'
 
 describe('eco/manifest/parse-lockfile', () => {
   describe('sniffLockfileFormat', () => {

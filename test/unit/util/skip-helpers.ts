@@ -21,7 +21,7 @@
 
 import process from 'node:process'
 
-import { WIN32 } from '@socketsecurity/lib/constants/platform'
+import { WIN32 } from '../../../src/constants/platform'
 import { describe, it } from 'vitest'
 
 const skipNetwork = !!process.env['SOCKET_LIB_SKIP_NETWORK_TESTS']

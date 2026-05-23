@@ -10,7 +10,7 @@
 import {
   resolvePackageJsonDirname,
   resolvePackageJsonPath,
-} from '@socketsecurity/lib/paths/packages'
+} from '../../../src/paths/packages'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/packages', () => {

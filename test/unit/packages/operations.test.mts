@@ -24,8 +24,8 @@ import {
   readPackageJsonSync,
   resolveGitHubTgzUrl,
   resolvePackageName,
-} from '@socketsecurity/lib/packages/operations'
-import type { PackageJson } from '@socketsecurity/lib/packages/types'
+} from '../../../src/packages/operations'
+import type { PackageJson } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
 import { describeNetworkOnly } from '../util/skip-helpers'
 import { runWithTempDir } from '../util/temp-file-helper'

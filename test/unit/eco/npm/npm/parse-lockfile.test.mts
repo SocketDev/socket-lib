@@ -6,8 +6,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '@socketsecurity/lib/eco/manifest/manifest-error'
-import { parsePackageLock } from '@socketsecurity/lib/eco/npm/npm/parse-lockfile'
+import { ManifestError } from '../../../../../src/eco/manifest/manifest-error'
+import { parsePackageLock } from '../../../../../src/eco/npm/npm/parse-lockfile'
 
 describe('eco/npm/npm/parse-lockfile', () => {
   describe('v2/v3', () => {

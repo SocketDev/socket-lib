@@ -45,8 +45,8 @@ import {
   getSocketRepositoryName,
   getSocketViewAllRisks,
   getTrustProxy,
-} from '@socketsecurity/lib/env/socket'
-import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '../../../src/env/socket'
+import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('socket env', () => {

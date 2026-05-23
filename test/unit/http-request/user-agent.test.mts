@@ -12,8 +12,8 @@ import process from 'node:process'
 import {
   buildUserAgent,
   getSocketCallerUserAgent,
-} from '@socketsecurity/lib/http-request/user-agent'
-import { resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+} from '../../../src/http-request/user-agent'
+import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('http-request/user-agent', () => {

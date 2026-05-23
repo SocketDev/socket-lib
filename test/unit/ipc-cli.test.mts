@@ -11,11 +11,11 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getIpc } from '@socketsecurity/lib/ipc-cli/get'
+import { getIpc } from '../../src/ipc-cli/get'
 
 import { FAKE_SOCKET_TOKEN } from './util/fake-tokens'
 
-import type { IpcObject } from '@socketsecurity/lib/ipc-cli/types'
+import type { IpcObject } from '../../src/ipc-cli/types'
 
 describe('ipc-cli', () => {
   describe('getIpc()', () => {
@@ -353,7 +353,7 @@ describe('ipc-cli', () => {
 
     async function freshGetIpc(): Promise<IpcObject> {
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- pick up a fresh module instance after vi.resetModules.
-      const mod = (await import('@socketsecurity/lib/ipc-cli/get')) as {
+      const mod = (await import('../../src/ipc-cli/get')) as {
         getIpc: () => Promise<IpcObject>
       }
       return await mod.getIpc()

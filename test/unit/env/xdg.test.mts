@@ -13,12 +13,12 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import {
   getXdgCacheHome,
   getXdgConfigHome,
   getXdgDataHome,
-} from '@socketsecurity/lib/env/xdg'
+} from '../../../src/env/xdg'
 
 describe('env/xdg', () => {
   afterEach(() => {

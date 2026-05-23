@@ -11,7 +11,7 @@ import {
   isInEnv,
   withEnv,
   withEnvSync,
-} from '@socketsecurity/lib/env/rewire'
+} from '../../../src/env/rewire'
 
 describe('env/rewire — withEnv / withEnvSync', () => {
   describe('withEnvSync', () => {

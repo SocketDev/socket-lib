@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSeaBinaryPath, isSeaBinary } from '@socketsecurity/lib/sea/detect'
+import { getSeaBinaryPath, isSeaBinary } from '../../../src/sea/detect'
 
 describe('sea/detect', () => {
   describe('isSeaBinary', () => {

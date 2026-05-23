@@ -34,7 +34,7 @@ import {
   YARN_BERRY,
   YARN_CLASSIC,
   YARN_LOCK,
-} from '@socketsecurity/lib/constants/agents'
+} from '../../../src/constants/agents'
 
 describe('constants/agents', () => {
   describe('agent names', () => {

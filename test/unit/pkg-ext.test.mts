@@ -8,7 +8,7 @@
  *     manager for applying compatibility patches to dependencies.
  */
 
-import { packageExtensions } from '@socketsecurity/lib/pkg-ext/data'
+import { packageExtensions } from '../../src/pkg-ext/data'
 import { describe, expect, it } from 'vitest'
 
 describe('pkg-ext', () => {

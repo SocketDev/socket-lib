@@ -11,8 +11,8 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { getDebug } from '@socketsecurity/lib/env/debug'
-import { clearEnv, resetEnv, setEnv } from '@socketsecurity/lib/env/rewire'
+import { getDebug } from '../../../src/env/debug'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 
 describe('env/debug', () => {
   afterEach(() => {

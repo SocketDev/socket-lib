@@ -14,9 +14,9 @@ import {
   localeCompare,
   naturalCompare,
   naturalSorter,
-} from '@socketsecurity/lib/sorts/natural'
-import { compareSemver } from '@socketsecurity/lib/sorts/semver'
-import { compareStr } from '@socketsecurity/lib/sorts/strings'
+} from '../../src/sorts/natural'
+import { compareSemver } from '../../src/sorts/semver'
+import { compareStr } from '../../src/sorts/strings'
 import { describe, expect, it } from 'vitest'
 
 describe('sorts', () => {

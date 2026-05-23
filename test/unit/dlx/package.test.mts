@@ -29,7 +29,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type {
   DlxPackageOptions,
   DlxPackageResult,
-} from '@socketsecurity/lib/dlx/package'
+} from '../../../src/dlx/package'
 import {
   ensurePackageInstalled,
   executePackage,
@@ -37,8 +37,8 @@ import {
   makePackageBinsExecutable,
   npmPurl,
   resolveBinaryPath,
-} from '@socketsecurity/lib/dlx/package'
-import { setPath } from '@socketsecurity/lib/paths/rewire'
+} from '../../../src/dlx/package'
+import { setPath } from '../../../src/paths/rewire'
 import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('dlx-package', () => {
