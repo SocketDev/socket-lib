@@ -5,10 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  getGlobMatcher,
-  getMatchesGlob,
-} from '../../../src/globs/matcher'
+import { getGlobMatcher, getMatchesGlob } from '../../../src/globs/matcher'
 
 describe('globs — extra coverage', () => {
   describe('getMatchesGlob', () => {

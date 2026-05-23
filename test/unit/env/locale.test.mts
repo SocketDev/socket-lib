@@ -9,11 +9,7 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import {
-  getLang,
-  getLcAll,
-  getLcMessages,
-} from '../../../src/env/locale'
+import { getLang, getLcAll, getLcMessages } from '../../../src/env/locale'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 
 describe('env/locale', () => {

@@ -27,10 +27,7 @@ import {
   isVerbose,
   isWatch,
 } from '../../../src/argv/flag-predicates'
-import {
-  COMMON_FLAGS,
-  type FlagValues,
-} from '../../../src/argv/flag-types'
+import { COMMON_FLAGS, type FlagValues } from '../../../src/argv/flag-types'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/flags', () => {

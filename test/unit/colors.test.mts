@@ -10,11 +10,7 @@
  */
 
 import { isRgbTuple, toRgb } from '../../src/colors/convert'
-import type {
-  ColorName,
-  ColorRgb,
-  ColorValue,
-} from '../../src/colors/types'
+import type { ColorName, ColorRgb, ColorValue } from '../../src/colors/types'
 import { describe, expect, it } from 'vitest'
 
 describe('colors', () => {

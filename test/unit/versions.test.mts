@@ -20,10 +20,7 @@ import {
   sort,
   rsort,
 } from '../../src/versions/compare'
-import {
-  incrementVersion,
-  versionDiff,
-} from '../../src/versions/modify'
+import { incrementVersion, versionDiff } from '../../src/versions/modify'
 import {
   coerceVersion,
   getMajorVersion,

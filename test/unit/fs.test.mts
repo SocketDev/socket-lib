@@ -25,10 +25,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  normalizeEncoding,
-  normalizeEncodingSlow,
-} from '../../src/fs/encoding'
+import { normalizeEncoding, normalizeEncodingSlow } from '../../src/fs/encoding'
 import { findUp, findUpSync } from '../../src/fs/find-up'
 import {
   isDirEmptySync,

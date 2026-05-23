@@ -13,10 +13,7 @@
 
 import process from 'node:process'
 import { fetchGitHub, getGhsaUrl } from '../../src/github/fetch'
-import {
-  cacheFetchGhsa,
-  fetchGhsaDetails,
-} from '../../src/github/ghsa'
+import { cacheFetchGhsa, fetchGhsaDetails } from '../../src/github/ghsa'
 import { clearRefCache, resolveRefToSha } from '../../src/github/refs'
 import {
   getGitHubToken,

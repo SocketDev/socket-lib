@@ -24,10 +24,7 @@ import {
   indentString,
   repeatString,
 } from '../../src/strings/format'
-import {
-  isBlankString,
-  isNonEmptyString,
-} from '../../src/strings/predicates'
+import { isBlankString, isNonEmptyString } from '../../src/strings/predicates'
 import { search } from '../../src/strings/search'
 import {
   stripBom,

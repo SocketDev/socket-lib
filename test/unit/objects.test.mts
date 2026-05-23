@@ -30,11 +30,7 @@ import {
   getOwn,
   getOwnPropertyValues,
 } from '../../src/objects/inspect'
-import {
-  merge,
-  objectAssign,
-  objectFreeze,
-} from '../../src/objects/mutate'
+import { merge, objectAssign, objectFreeze } from '../../src/objects/mutate'
 import {
   hasKeys,
   hasOwn,

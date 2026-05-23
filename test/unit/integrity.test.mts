@@ -11,10 +11,7 @@ import {
   verifyHash,
 } from '../../src/integrity'
 
-import type {
-  ComputedHashes,
-  NormalizedHash,
-} from '../../src/integrity'
+import type { ComputedHashes, NormalizedHash } from '../../src/integrity'
 
 describe('integrity', () => {
   describe('normalizeHash', () => {

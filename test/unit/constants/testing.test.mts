@@ -11,12 +11,7 @@
 import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
-import {
-  CI,
-  PRE_COMMIT,
-  TEST,
-  VITEST,
-} from '../../../src/constants/testing'
+import { CI, PRE_COMMIT, TEST, VITEST } from '../../../src/constants/testing'
 
 describe('constants/testing', () => {
   describe('testing frameworks', () => {

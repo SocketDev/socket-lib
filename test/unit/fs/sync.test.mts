@@ -23,10 +23,7 @@ import { join } from 'node:path'
 import type { SafeReadOptions } from '../../../src/fs/types'
 
 import { isSymlinkSync, safeStatSync } from '../../../src/fs/inspect'
-import {
-  readFileBinary,
-  safeReadFileSync,
-} from '../../../src/fs/read-file'
+import { readFileBinary, safeReadFileSync } from '../../../src/fs/read-file'
 import { readJsonSync } from '../../../src/fs/read-json'
 import { writeJsonSync } from '../../../src/fs/write-json'
 import { beforeEach, describe, expect, it, afterEach } from 'vitest'

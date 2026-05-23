@@ -10,10 +10,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  getAbortController,
-  getAbortSignal,
-} from '../../../src/process/abort'
+import { getAbortController, getAbortSignal } from '../../../src/process/abort'
 
 describe('constants/process', () => {
   describe('getAbortController', () => {
