@@ -12,10 +12,7 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import {
-  findPackageJson,
-  readPackageJson,
-} from '../../../src/dlx/detect'
+import { findPackageJson, readPackageJson } from '../../../src/dlx/detect'
 
 let tmp: string
 

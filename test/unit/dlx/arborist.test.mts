@@ -85,10 +85,7 @@ describe('dlx/arborist — readSingleDependency', () => {
 
   it('throws on multiple dependencies', () => {
     const pkgPath = path.join(tmp, 'package.json')
-    writeFileSync(
-      pkgPath,
-      JSON.stringify({ dependencies: { a: '1', b: '2' } }),
-    )
+    writeFileSync(pkgPath, JSON.stringify({ dependencies: { a: '1', b: '2' } }))
     expect(() => readSingleDependency(pkgPath)).toThrow(
       /expects exactly one top-level dependency/,
     )
@@ -159,18 +156,14 @@ describe('dlx/arborist — readTopLevelFromIdealTree', () => {
   })
 
   it('throws when the depth=1 match is missing version', () => {
-    const tree = makeTree([
-      { name: 'pkg', integrity: 'x', depth: 1 },
-    ])
+    const tree = makeTree([{ name: 'pkg', integrity: 'x', depth: 1 }])
     expect(() => readTopLevelFromIdealTree(tree, 'pkg')).toThrow(
       /missing version\/integrity/,
     )
   })
 
   it('throws when the depth=1 match is missing integrity', () => {
-    const tree = makeTree([
-      { name: 'pkg', version: '1.0.0', depth: 1 },
-    ])
+    const tree = makeTree([{ name: 'pkg', version: '1.0.0', depth: 1 }])
     expect(() => readTopLevelFromIdealTree(tree, 'pkg')).toThrow(
       /missing version\/integrity/,
     )
