@@ -4,8 +4,11 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import {
+  cleanDlxCache,
   getBinaryCacheMetadataPath,
+  getDlxCachePath,
   isBinaryCacheValid,
+  listDlxCache,
   readBinaryCacheMetadata,
   writeBinaryCacheMetadata,
 } from '../../../src/dlx/binary-cache'
@@ -149,5 +152,94 @@ describe.sequential('dlx/binary-cache — readBinaryCacheMetadata', () => {
       url: 'https://example.com/tool.tar.gz',
     })
     expect(typeof read.timestamp).toBe('number')
+  })
+
+  test('returns undefined when metadata file contains invalid JSON', async () => {
+    const entryPath = path.join(tmpRoot, 'bad-json')
+    mkdirSync(entryPath, { recursive: true })
+    writeFileSync(path.join(entryPath, '.dlx-metadata.json'), '{not json')
+    expect(await readBinaryCacheMetadata(entryPath)).toBeUndefined()
+  })
+
+  test('returns undefined when metadata is JSON but not a plain object', async () => {
+    const entryPath = path.join(tmpRoot, 'arr-meta')
+    writeMeta(entryPath, ['not', 'an', 'object'])
+    expect(await readBinaryCacheMetadata(entryPath)).toBeUndefined()
+  })
+})
+
+describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
+  // These exercise the global dlx dir (`getDlxCachePath()`), which lives
+  // under $HOME/.socket/_dlx. We use stubEnv to point HOME → tmpRoot so
+  // the global helpers operate against an isolated tree.
+  function withMockHome<T>(fn: () => T): T {
+    const originalHome = process.env['HOME']
+    process.env['HOME'] = tmpRoot
+    try {
+      return fn()
+    } finally {
+      if (originalHome === undefined) {
+        delete process.env['HOME']
+      } else {
+        process.env['HOME'] = originalHome
+      }
+    }
+  }
+
+  test('returns 0 when the cache dir does not exist', async () => {
+    await withMockHome(async () => {
+      // Fresh tmp HOME → no .socket/_dlx dir yet.
+      const cleaned = await cleanDlxCache()
+      expect(cleaned).toBe(0)
+    })
+  })
+
+  test('listDlxCache returns [] when the cache dir does not exist', async () => {
+    await withMockHome(async () => {
+      const entries = await listDlxCache()
+      expect(entries).toEqual([])
+    })
+  })
+
+  test('cleanDlxCache removes expired entries based on metadata timestamp', async () => {
+    await withMockHome(async () => {
+      const cachePath = getDlxCachePath()
+      const entryPath = path.join(cachePath, 'expired-entry')
+      mkdirSync(entryPath, { recursive: true })
+      // Old timestamp → far in the past.
+      writeFileSync(
+        path.join(entryPath, '.dlx-metadata.json'),
+        JSON.stringify({ timestamp: 1 }),
+      )
+      // maxAge=0 means any age is expired.
+      const cleaned = await cleanDlxCache(0)
+      expect(cleaned).toBe(1)
+    })
+  })
+
+  test('cleanDlxCache keeps fresh entries', async () => {
+    await withMockHome(async () => {
+      const cachePath = getDlxCachePath()
+      const entryPath = path.join(cachePath, 'fresh-entry')
+      mkdirSync(entryPath, { recursive: true })
+      writeFileSync(
+        path.join(entryPath, '.dlx-metadata.json'),
+        JSON.stringify({ timestamp: Date.now() }),
+      )
+      const cleaned = await cleanDlxCache(60 * 60 * 1000) // 1h TTL
+      expect(cleaned).toBe(0)
+    })
+  })
+
+  test('cleanDlxCache catch-arm: cleans up an empty entry dir with no metadata', async () => {
+    await withMockHome(async () => {
+      const cachePath = getDlxCachePath()
+      const entryPath = path.join(cachePath, 'empty-no-meta')
+      mkdirSync(entryPath, { recursive: true })
+      // No metadata file → readJson throws (caught) → fallback inspects
+      // empty dir → removes it.
+      const cleaned = await cleanDlxCache(0)
+      expect(cleaned).toBe(1)
+    })
   })
 })
