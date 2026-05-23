@@ -85,7 +85,7 @@ describe('fs/read-json-cache — set/get round-trip', () => {
 })
 
 describe('fs/read-json-cache — defensive cloning', () => {
-  it('returns a clone on hit so caller mutations don\'t poison the cache', () => {
+  it("returns a clone on hit so caller mutations don't poison the cache", () => {
     setCachedJson('/a', 1, 1, 1, { nested: { count: 0 } })
     const a = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
     a.nested.count = 999
@@ -93,7 +93,7 @@ describe('fs/read-json-cache — defensive cloning', () => {
     expect(b.nested.count).toBe(0)
   })
 
-  it('stores a clone on insert so caller mutations after set don\'t bleed in', () => {
+  it("stores a clone on insert so caller mutations after set don't bleed in", () => {
     const original = { nested: { count: 0 } }
     setCachedJson('/a', 1, 1, 1, original)
     original.nested.count = 999
@@ -153,9 +153,9 @@ describe('fs/read-json-cache — TTL eviction', () => {
 
   it('setReadJsonCacheTtlMs rejects negative / non-finite values', () => {
     expect(() => setReadJsonCacheTtlMs(-1)).toThrow(/non-negative finite/)
-    expect(() =>
-      setReadJsonCacheTtlMs(Number.POSITIVE_INFINITY),
-    ).toThrow(/non-negative finite/)
+    expect(() => setReadJsonCacheTtlMs(Number.POSITIVE_INFINITY)).toThrow(
+      /non-negative finite/,
+    )
     expect(() => setReadJsonCacheTtlMs(Number.NaN)).toThrow(
       /non-negative finite/,
     )

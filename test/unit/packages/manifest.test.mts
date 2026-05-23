@@ -23,7 +23,9 @@ describe('packages/manifest — createPackageJson', () => {
     // Default files when none provided.
     expect(pkg.files).toEqual(['*.d.ts', '*.js'])
     // Default categories when no `socket` block provided.
-    expect((pkg.socket as { categories: string[] }).categories.length).toBeGreaterThan(0)
+    expect(
+      (pkg.socket as { categories: string[] }).categories.length,
+    ).toBeGreaterThan(0)
   })
 
   it('strips a leading @scope/ prefix from sockRegPkgName', () => {
@@ -78,8 +80,9 @@ describe('packages/manifest — createPackageJson', () => {
     ).toBe(false)
     // Truthy non-boolean → true
     expect(
-      createPackageJson('a', 'p', { sideEffects: 'maybe' as unknown as boolean })
-        .sideEffects,
+      createPackageJson('a', 'p', {
+        sideEffects: 'maybe' as unknown as boolean,
+      }).sideEffects,
     ).toBe(true)
   })
 

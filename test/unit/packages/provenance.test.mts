@@ -153,7 +153,8 @@ describe('packages/provenance — getProvenanceDetails', () => {
           predicate: {
             buildDefinition: {
               externalParameters: {
-                workflow_ref: 'https://gitlab.com/group/proj/.gitlab-ci.yml@main',
+                workflow_ref:
+                  'https://gitlab.com/group/proj/.gitlab-ci.yml@main',
               },
             },
           },

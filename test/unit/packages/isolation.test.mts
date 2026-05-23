@@ -36,10 +36,7 @@ describe('packages/isolation — mergePackageJson', () => {
 
   it('merges original on top of parsed pkgJson (parsed wins on conflict)', async () => {
     const pkgPath = path.join(tmp, 'package.json')
-    writeFileSync(
-      pkgPath,
-      JSON.stringify({ name: 'parsed', version: '2.0.0' }),
-    )
+    writeFileSync(pkgPath, JSON.stringify({ name: 'parsed', version: '2.0.0' }))
     const original = {
       name: 'original',
       description: 'kept',

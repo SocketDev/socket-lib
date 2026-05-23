@@ -354,7 +354,10 @@ describe('packages/licenses', () => {
     })
 
     it('returns [] for a DocumentRef expression (deliberately rejected)', () => {
-      const result = resolvePackageLicenses('DocumentRef-X:LicenseRef-Y', '/repo')
+      const result = resolvePackageLicenses(
+        'DocumentRef-X:LicenseRef-Y',
+        '/repo',
+      )
       expect(result).toEqual([])
     })
 
@@ -416,7 +419,7 @@ describe('packages/licenses', () => {
       expect(seen).toEqual(['MIT'])
     })
 
-    it('skips when visitor doesn\'t implement the node type', () => {
+    it("skips when visitor doesn't implement the node type", () => {
       const ast = parseSpdxExp('MIT')
       // Visitor with neither License nor BinaryOperation set: nothing fires,
       // call must not throw.
