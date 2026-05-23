@@ -156,8 +156,22 @@ export type ReadJsonOptions = Remap<
     /**
      * JSON reviver function to transform parsed values. Same as the second
      * parameter to `JSON.parse()`.
+     *
+     * Note: when a `reviver` is passed, the read-result cache is bypassed —
+     * function identity isn't safely hashable and the reviver can transform the
+     * same bytes into a different shape.
      */
     reviver?: Parameters<typeof JSON.parse>[1] | undefined
+    /**
+     * Opt out of the process-scoped read-result cache. Default `true` (cache
+     * ON). Set to `false` when staleness must be observed — e.g. file-watcher
+     * tooling that wants to see live disk state on every call. The cache
+     * validates entries with a `stat()` (inode + size + mtime) on every hit, so
+     * the default-on path is safe for everyday use.
+     *
+     * @default true
+     */
+    cache?: boolean | undefined
   }
 >
 

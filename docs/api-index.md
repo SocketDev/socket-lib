@@ -361,20 +361,21 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## fs/
 
-| Subpath                                                               | Description        |
-| --------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/fs/encoding`](../src/fs/encoding.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/find-up`](../src/fs/find-up.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/inspect`](../src/fs/inspect.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/path-cache`](../src/fs/path-cache.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/read-dir`](../src/fs/read-dir.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/read-file`](../src/fs/read-file.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/read-json`](../src/fs/read-json.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/safe`](../src/fs/safe.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/types`](../src/fs/types.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/unique`](../src/fs/unique.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/validate`](../src/fs/validate.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/fs/write-json`](../src/fs/write-json.ts) | _(no description)_ |
+| Subpath                                                                         | Description        |
+| ------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/fs/encoding`](../src/fs/encoding.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/find-up`](../src/fs/find-up.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/inspect`](../src/fs/inspect.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/path-cache`](../src/fs/path-cache.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-dir`](../src/fs/read-dir.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-file`](../src/fs/read-file.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-json`](../src/fs/read-json.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/read-json-cache`](../src/fs/read-json-cache.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/safe`](../src/fs/safe.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/types`](../src/fs/types.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/unique`](../src/fs/unique.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/validate`](../src/fs/validate.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/fs/write-json`](../src/fs/write-json.ts)           | _(no description)_ |
 
 ## git/
 

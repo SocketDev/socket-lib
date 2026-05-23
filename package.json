@@ -1344,6 +1344,11 @@
       "types": "./dist/fs/read-json.d.ts",
       "default": "./dist/fs/read-json.js"
     },
+    "./fs/read-json-cache": {
+      "source": "./src/fs/read-json-cache.ts",
+      "types": "./dist/fs/read-json-cache.d.ts",
+      "default": "./dist/fs/read-json-cache.js"
+    },
     "./fs/safe": {
       "source": "./src/fs/safe.ts",
       "types": "./dist/fs/safe.d.ts",

@@ -3,12 +3,31 @@
  *   error messages keyed off `ENOENT` / `EACCES` / `EPERM` so callers see "JSON
  *   file not found" / "Permission denied" rather than the bare errno. Both
  *   variants honor `throws: false` to fall back to `undefined` on parse or read
- *   failure.
+ *   failure. Both variants cache parse results by default — keyed on `path +
+ *   ino + size \+ mtimeMs`, with a defensive `structuredClone` on every hit so
+ *   callers can mutate the returned object freely. See `_read-json-cache.ts`
+ *   for the safety rationale + opt-out controls.
  */
 
+import {
+  clearReadJsonCache,
+  getCachedJson,
+  getReadJsonCacheStats,
+  setCachedJson,
+  setReadJsonCacheMax,
+  setReadJsonCacheTtlMs,
+} from './read-json-cache'
 import { parseJson } from '../json/parse'
+
+export {
+  clearReadJsonCache,
+  getReadJsonCacheStats,
+  setReadJsonCacheMax,
+  setReadJsonCacheTtlMs,
+}
 import { getNodeFs } from '../node/fs'
 import { ErrorCtor } from '../primordials/error'
+import { NumberCtor } from '../primordials/number'
 import type { PathLike } from 'node:fs'
 
 import type { ReadJsonOptions } from './types'
@@ -50,12 +69,35 @@ export async function readJson(
   options?: ReadJsonOptions | string | undefined,
 ) {
   const opts = typeof options === 'string' ? { encoding: options } : options
-  const { reviver, throws, ...fsOptions } = {
+  const { cache, reviver, throws, ...fsOptions } = {
     __proto__: null,
     ...opts,
   } as unknown as ReadJsonOptions
   const shouldThrow = throws === undefined || !!throws
+  const cacheEnabled = cache !== false && reviver === undefined
   const fs = getNodeFs()
+  const pathStr = String(filepath)
+  // Cache-hit fast path: stat, then if the stat matches a cached entry,
+  // return a structuredClone of the parsed value. The clone is what makes
+  // default-on caching safe under caller mutation.
+  if (cacheEnabled) {
+    try {
+      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      const stat = await fs.promises.stat(filepath)
+      const cached = getCachedJson(
+        pathStr,
+        NumberCtor(stat.ino),
+        NumberCtor(stat.size),
+        NumberCtor(stat.mtimeMs),
+      )
+      if (cached !== undefined) {
+        return cached
+      }
+    } catch {
+      // Stat failed (ENOENT etc.) — fall through to the read path so the
+      // existing error-message logic surfaces the original errno.
+    }
+  }
   let content = ''
   try {
     content = await fs.promises.readFile(filepath, {
@@ -90,11 +132,33 @@ export async function readJson(
     }
     return undefined
   }
-  return parseJson(content, {
-    filepath: String(filepath),
+  const parsed = parseJson(content, {
+    filepath: pathStr,
     reviver,
     throws: shouldThrow,
   })
+  // Cache the successful parse. Run a fresh stat AFTER the read so the
+  // cached key reflects the actual on-disk state at parse time. A concurrent
+  // writer between read and stat would write a slightly-stale entry, which
+  // self-heals on the very next call (the next stat differs from the
+  // entry's mtime → miss → re-read).
+  if (cacheEnabled && parsed !== undefined) {
+    try {
+      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      const stat = await fs.promises.stat(filepath)
+      setCachedJson(
+        pathStr,
+        NumberCtor(stat.ino),
+        NumberCtor(stat.size),
+        NumberCtor(stat.mtimeMs),
+        parsed,
+      )
+    } catch {
+      // Stat-after-read failed — skip the cache store rather than poison
+      // it with no validity key. The read result is still returned.
+    }
+  }
+  return parsed
 }
 
 /**
@@ -133,12 +197,31 @@ export function readJsonSync(
   options?: ReadJsonOptions | string | undefined,
 ) {
   const opts = typeof options === 'string' ? { encoding: options } : options
-  const { reviver, throws, ...fsOptions } = {
+  const { cache, reviver, throws, ...fsOptions } = {
     __proto__: null,
     ...opts,
   } as unknown as ReadJsonOptions
   const shouldThrow = throws === undefined || !!throws
+  const cacheEnabled = cache !== false && reviver === undefined
   const fs = getNodeFs()
+  const pathStr = String(filepath)
+  if (cacheEnabled) {
+    try {
+      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      const stat = fs.statSync(filepath)
+      const cached = getCachedJson(
+        pathStr,
+        NumberCtor(stat.ino),
+        NumberCtor(stat.size),
+        NumberCtor(stat.mtimeMs),
+      )
+      if (cached !== undefined) {
+        return cached
+      }
+    } catch {
+      // Fall through to the read path so error messages stay consistent.
+    }
+  }
   let content = ''
   try {
     content = fs.readFileSync(filepath, {
@@ -173,9 +256,26 @@ export function readJsonSync(
     }
     return undefined
   }
-  return parseJson(content, {
-    filepath: String(filepath),
+  const parsed = parseJson(content, {
+    filepath: pathStr,
     reviver,
     throws: shouldThrow,
   })
+  if (cacheEnabled && parsed !== undefined) {
+    try {
+      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      const stat = fs.statSync(filepath)
+      setCachedJson(
+        pathStr,
+        NumberCtor(stat.ino),
+        NumberCtor(stat.size),
+        NumberCtor(stat.mtimeMs),
+        parsed,
+      )
+    } catch {
+      // Skip caching when stat-after-read fails — the read result still
+      // returns to the caller.
+    }
+  }
+  return parsed
 }
