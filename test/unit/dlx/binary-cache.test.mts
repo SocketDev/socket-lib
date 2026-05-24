@@ -255,14 +255,37 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
     })
   })
 
-  test('readBinaryCacheMetadata returns undefined when entry path is unreadable', async () => {
-    // existsSync on a path with an unreadable parent throws → the function's
-    // outer try/catch returns undefined.
-    const entryPath = path.join(tmpRoot, '\0invalid')
-    expect(await readBinaryCacheMetadata(entryPath)).toBeUndefined()
+  test('readBinaryCacheMetadata returns undefined when getNodeFs().existsSync throws', async () => {
+    // Spy on getNodeFs() so the next existsSync call throws — exercises the
+    // outer try/catch in readBinaryCacheMetadata (L289-291).
+    const { getNodeFs } = await import('../../../src/node/fs')
+    const realFs = getNodeFs()
+    const origExists = realFs.existsSync
+    ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = (() => {
+      throw new Error('synthetic existsSync failure')
+    }) as typeof realFs.existsSync
+    try {
+      expect(
+        await readBinaryCacheMetadata(path.join(tmpRoot, 'unreadable')),
+      ).toBeUndefined()
+    } finally {
+      ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = origExists
+    }
   })
 
-  test('isBinaryCacheValid returns false when an unreadable path throws', async () => {
-    expect(await isBinaryCacheValid(path.join(tmpRoot, '\0bad'))).toBe(false)
+  test('isBinaryCacheValid returns false when getNodeFs().existsSync throws', async () => {
+    const { getNodeFs } = await import('../../../src/node/fs')
+    const realFs = getNodeFs()
+    const origExists = realFs.existsSync
+    ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = (() => {
+      throw new Error('synthetic existsSync failure')
+    }) as typeof realFs.existsSync
+    try {
+      expect(
+        await isBinaryCacheValid(path.join(tmpRoot, 'unreadable-valid')),
+      ).toBe(false)
+    } finally {
+      ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = origExists
+    }
   })
 })
