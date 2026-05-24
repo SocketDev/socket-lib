@@ -188,6 +188,15 @@ describe.sequential('debug', () => {
       debugNs('*', { obj: true })
       expect(infoSpy).toHaveBeenCalled()
     })
+
+    it('debugNs pauses + resumes spinner when one is running', () => {
+      setEnv('SOCKET_DEBUG', '*')
+      const spinner = makeMockSpinner()
+      spinner.isSpinning = true
+      debugNs({ namespaces: '*', spinner }, 'msg')
+      expect(spinner.stop).toHaveBeenCalled()
+      expect(spinner.start).toHaveBeenCalled()
+    })
   })
 
   describe('debugDir / debugDirNs', () => {
