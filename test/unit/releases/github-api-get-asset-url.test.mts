@@ -260,12 +260,23 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
       )
     })
 
-    await expect(
-      getReleaseAssetUrl('v9.9.9', 'x-*.bin', SOCKET_BTM_REPO),
+    vi.useFakeTimers()
+    try {
+      const promise = getReleaseAssetUrl(
+        'v9.9.9',
+        'x-*.bin',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
       // GraphQL errors[] wraps in the "both transports failed"
       // surface error per the new spec.
-    ).rejects.toThrow(/both REST and GraphQL backends degraded/)
-  }, 60_000)
+      await expect(promise).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should retry via pRetry when both REST and GraphQL return empty', async () => {
     // Worst case: REST returns empty body, GraphQL ALSO returns
@@ -299,16 +310,22 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
         ),
       )
 
-    const url = await getReleaseAssetUrl(
-      'v1.0.0',
-      'recovered.bin',
-      SOCKET_BTM_REPO,
-    )
-
-    expect(url).toBe(
-      'https://github.com/test/repo/releases/download/v1.0.0/recovered.bin',
-    )
-  }, 120_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getReleaseAssetUrl(
+        'v1.0.0',
+        'recovered.bin',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
+      const url = await promise
+      expect(url).toBe(
+        'https://github.com/test/repo/releases/download/v1.0.0/recovered.bin',
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw informative error when both REST and GraphQL transport fail', async () => {
     // REST returns 200 + empty body (incident), GraphQL transport
@@ -328,10 +345,24 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
       )
     })
 
-    await expect(
-      getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
-    ).rejects.toThrow(/both REST and GraphQL backends degraded/)
-  }, 60_000)
+    // Use fake timers so pRetry's 5s/10s exponential backoff doesn't
+    // burn wallclock — production retries take ~15s real time;
+    // tests assert error shape, not timing.
+    vi.useFakeTimers()
+    try {
+      const promise = getReleaseAssetUrl(
+        'v1.0.0',
+        'whatever-*.bin',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw on GraphQL fallback malformed JSON body', async () => {
     // REST empty (incident) → GraphQL responds 200 OK but with
@@ -345,14 +376,25 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
       return createMockHttpResponse(Buffer.from('not json at all'), true, 200)
     })
 
-    await expect(
-      getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
+    vi.useFakeTimers()
+    try {
+      const promise = getReleaseAssetUrl(
+        'v1.0.0',
+        'whatever-*.bin',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
       // Parse error inside fetchReleaseAssetsViaGraphQL is treated
       // as a transport failure → wrapped in the "both transports
       // failed" surface error. The original SyntaxError is in
       // .cause for callers who want to drill down.
-    ).rejects.toThrow(/both REST and GraphQL backends degraded/)
-  }, 60_000)
+      await expect(promise).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw on REST per-tag malformed JSON body', async () => {
     // REST returns 200 OK with non-empty but unparseable body.
@@ -362,12 +404,21 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
       createMockHttpResponse(Buffer.from('<html>not json</html>'), true, 200),
     )
 
-    await expect(
-      getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
-    ).rejects.toThrow(
-      /Failed to parse SocketDev\/socket-btm release v1\.0\.0 response/,
-    )
-  }, 60_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getReleaseAssetUrl(
+        'v1.0.0',
+        'whatever-*.bin',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /Failed to parse SocketDev\/socket-btm release v1\.0\.0 response/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw on REST per-tag release missing assets', async () => {
     // REST returns 200 OK with valid JSON but no `assets` array.
@@ -380,8 +431,19 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
       ),
     )
 
-    await expect(
-      getReleaseAssetUrl('v1.0.0', 'whatever-*.bin', SOCKET_BTM_REPO),
-    ).rejects.toThrow(/Release v1\.0\.0 has no assets in SocketDev\/socket-btm/)
-  }, 60_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getReleaseAssetUrl(
+        'v1.0.0',
+        'whatever-*.bin',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /Release v1\.0\.0 has no assets in SocketDev\/socket-btm/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 })

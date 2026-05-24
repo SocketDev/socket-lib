@@ -446,14 +446,20 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
       )
     })
 
-    await expect(
-      getLatestRelease('whatever-', SOCKET_BTM_REPO),
+    // Use fake timers so pRetry's exponential backoff doesn't burn wallclock.
+    vi.useFakeTimers()
+    try {
+      const promise = getLatestRelease('whatever-', SOCKET_BTM_REPO)
+      await vi.runAllTimersAsync()
       // GraphQL errors[] now wraps in the "both transports failed"
       // surface error. The original GraphQL message lives in .cause.
-    ).rejects.toThrow(
-      /Failed to list SocketDev\/socket-btm releases: both REST and GraphQL backends degraded/,
-    )
-  }, 60_000)
+      await expect(promise).rejects.toThrow(
+        /Failed to list SocketDev\/socket-btm releases: both REST and GraphQL backends degraded/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should NOT call GraphQL when REST returns a populated array', async () => {
     // Healthy GitHub: REST returns a populated list. The fallback
@@ -490,10 +496,17 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
       createMockHttpResponse(Buffer.from('Internal Server Error'), false, 503),
     )
 
-    await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
-      /Failed to fetch SocketDev\/socket-btm releases: 503/,
-    )
-  }, 60_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getLatestRelease('curl-', SOCKET_BTM_REPO)
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /Failed to fetch SocketDev\/socket-btm releases: 503/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw on REST malformed JSON body', async () => {
     // 200 OK but the body isn't valid JSON. The helper wraps the
@@ -502,10 +515,17 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
       createMockHttpResponse(Buffer.from('<html>not json</html>'), true, 200),
     )
 
-    await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
-      /Failed to parse SocketDev\/socket-btm releases response/,
-    )
-  }, 60_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getLatestRelease('curl-', SOCKET_BTM_REPO)
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /Failed to parse SocketDev\/socket-btm releases response/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw informative error when both REST and GraphQL transport fail', async () => {
     // REST returns 200 + empty (incident shape) → fall back to GraphQL.
@@ -527,10 +547,17 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
       )
     })
 
-    await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
-      /both REST and GraphQL backends degraded/,
-    )
-  }, 60_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getLatestRelease('curl-', SOCKET_BTM_REPO)
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 
   it('should throw on GraphQL fallback malformed JSON', async () => {
     // REST empty (incident) → GraphQL returns 200 with unparseable
@@ -547,8 +574,15 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
       return createMockHttpResponse(Buffer.from('not valid json {'), true, 200)
     })
 
-    await expect(getLatestRelease('curl-', SOCKET_BTM_REPO)).rejects.toThrow(
-      /both REST and GraphQL backends degraded/,
-    )
-  }, 60_000)
+    vi.useFakeTimers()
+    try {
+      const promise = getLatestRelease('curl-', SOCKET_BTM_REPO)
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(
+        /both REST and GraphQL backends degraded/,
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
 })
