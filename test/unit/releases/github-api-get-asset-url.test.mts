@@ -262,11 +262,7 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
 
     vi.useFakeTimers()
     try {
-      const promise = getReleaseAssetUrl(
-        'v9.9.9',
-        'x-*.bin',
-        SOCKET_BTM_REPO,
-      )
+      const promise = getReleaseAssetUrl('v9.9.9', 'x-*.bin', SOCKET_BTM_REPO)
       await vi.runAllTimersAsync()
       // GraphQL errors[] wraps in the "both transports failed"
       // surface error per the new spec.

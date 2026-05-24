@@ -13,9 +13,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the platform constant BEFORE importing the SUT so it sees WIN32=true.
 vi.mock('../../../src/constants/platform', async importOriginal => {
-  const actual = await importOriginal<
-    typeof import('../../../src/constants/platform')
-  >()
+  const actual =
+    await importOriginal<typeof import('../../../src/constants/platform')>()
   return { ...actual, WIN32: true }
 })
 

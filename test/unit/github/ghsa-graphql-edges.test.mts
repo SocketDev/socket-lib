@@ -77,9 +77,7 @@ describe.sequential('github/ghsa — fetchGhsaDetailsViaGraphQL edges', () => {
   it('throws when securityAdvisory is null (not found)', async () => {
     vi.mocked(httpRequest).mockResolvedValueOnce(
       mkResponse(
-        Buffer.from(
-          JSONStringify({ data: { securityAdvisory: null } }),
-        ),
+        Buffer.from(JSONStringify({ data: { securityAdvisory: null } })),
         true,
         200,
       ),
@@ -104,7 +102,9 @@ describe.sequential('github/ghsa — fetchGhsaDetailsViaGraphQL edges', () => {
                 updatedAt: '2026-01-02T00:00:00Z',
                 withdrawnAt: null,
                 cvss: { score: 7.5, vectorString: 'CVSS:3.1/AV:N' },
-                cwes: { nodes: [{ cweId: 'CWE-79', name: 'XSS', description: 'd' }] },
+                cwes: {
+                  nodes: [{ cweId: 'CWE-79', name: 'XSS', description: 'd' }],
+                },
                 references: [{ url: 'https://example.com/advisory' }],
                 vulnerabilities: {
                   nodes: [

@@ -5,12 +5,7 @@
  *   end-to-end pnpm-install behavior is covered by integration tests.
  */
 
-import {
-  mkdirSync,
-  mkdtempSync,
-  promises as fsp,
-  writeFileSync,
-} from 'node:fs'
+import { mkdirSync, mkdtempSync, promises as fsp, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -134,9 +129,9 @@ describe('packages/isolation — isolatePackage', () => {
     // Use `install: noop` to skip the spawn but still hit the codepath.
     // Then the readPackageJson on the (empty) installedPath should throw.
     const install = vi.fn(async () => undefined)
-    await expect(
-      isolatePackage('lodash@^4.17.0', { install }),
-    ).rejects.toThrow(/JSON file not found|Could not read package.json/)
+    await expect(isolatePackage('lodash@^4.17.0', { install })).rejects.toThrow(
+      /JSON file not found|Could not read package.json/,
+    )
     expect(install).toHaveBeenCalledTimes(1)
   })
 
@@ -211,7 +206,7 @@ describe('packages/isolation — isolatePackage', () => {
     ).rejects.toThrow(/Source path does not exist/)
   })
 
-  it('reads package name from package.json when parser doesn\'t supply one', async () => {
+  it("reads package name from package.json when parser doesn't supply one", async () => {
     // Build an anonymous package — npmPackageArg with a directory path
     // sometimes returns a parsed.name that's missing/empty when the
     // path doesn't follow the spec form. We test this branch by passing

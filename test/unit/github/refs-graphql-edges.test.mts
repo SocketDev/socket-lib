@@ -1,8 +1,7 @@
 /**
- * @file Unit tests for github/refs-graphql.ts edge cases. httpRequest is
- *   mocked so no network is touched. Covers non-OK response, empty body,
- *   malformed JSON, branch-OID resolution path, and the tagRef-with-token
- *   header branch.
+ * @file Unit tests for github/refs-graphql.ts edge cases. httpRequest is mocked
+ *   so no network is touched. Covers non-OK response, empty body, malformed
+ *   JSON, branch-OID resolution path, and the tagRef-with-token header branch.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -36,27 +35,21 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
     vi.mocked(httpRequest).mockResolvedValueOnce(
       mkResponse(Buffer.from(''), false, 503),
     )
-    expect(
-      await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {}),
-    ).toBeUndefined()
+    expect(await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {})).toBeUndefined()
   })
 
   it('returns undefined when GraphQL returns empty body', async () => {
     vi.mocked(httpRequest).mockResolvedValueOnce(
       mkResponse(Buffer.from(''), true, 200),
     )
-    expect(
-      await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {}),
-    ).toBeUndefined()
+    expect(await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {})).toBeUndefined()
   })
 
   it('returns undefined on malformed JSON body', async () => {
     vi.mocked(httpRequest).mockResolvedValueOnce(
       mkResponse(Buffer.from('<html>not json</html>'), true, 200),
     )
-    expect(
-      await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {}),
-    ).toBeUndefined()
+    expect(await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {})).toBeUndefined()
   })
 
   it('returns branch OID when tagRef is null but branchRef resolves', async () => {
@@ -98,9 +91,7 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
         200,
       ),
     )
-    expect(
-      await fetchRefShaViaGraphQL('o', 'r', 'unknown', {}),
-    ).toBeUndefined()
+    expect(await fetchRefShaViaGraphQL('o', 'r', 'unknown', {})).toBeUndefined()
   })
 
   it('sends Authorization header when token option is provided', async () => {
