@@ -1,13 +1,22 @@
 /**
- * @file Unit tests for packages/provenance.ts — pure helpers for parsing and
- *   classifying SLSA attestation data. fetchPackageProvenance() hits the npm
- *   registry and is exercised via the integration suite; this file targets the
- *   synchronous parse/classify path used by the trusted-publisher gate.
+ * @file Unit tests for packages/provenance.ts. Covers the pure helpers
+ *   (findProvenance / getAttestations / getProvenanceDetails / isTrustedPublisher)
+ *   + fetchPackageProvenance via a make-fetch-happen mock (no network).
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+// Mock make-fetch-happen BEFORE importing provenance so the SUT picks up
+// the mocked fetcher factory.
+const mockFetcher = vi.fn()
+vi.mock('../../../src/external/make-fetch-happen', () => ({
+  default: {
+    defaults: vi.fn(() => mockFetcher),
+  },
+}))
 
 import {
+  fetchPackageProvenance,
   findProvenance,
   getAttestations,
   getProvenanceDetails,
@@ -244,5 +253,80 @@ describe('packages/provenance — isTrustedPublisher', () => {
 
   it('returns false for malformed-but-known-bad strings', () => {
     expect(isTrustedPublisher('not a url not even close')).toBe(false)
+  })
+})
+
+describe('packages/provenance — fetchPackageProvenance', () => {
+  beforeEach(() => {
+    mockFetcher.mockReset()
+  })
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns details when the registry responds with attestation data', async () => {
+    const attestationData = {
+      attestations: [
+        {
+          predicateType: 'https://slsa.dev/provenance/v1',
+          predicate: {
+            buildDefinition: {
+              externalParameters: {
+                workflow: {
+                  ref: 'https://github.com/o/r/.github/workflows/ci.yml@refs/heads/main',
+                  repository: 'o/r',
+                },
+                ref: 'refs/heads/main',
+                sha: 'abc',
+                run_id: '99',
+              },
+            },
+          },
+        },
+      ],
+    }
+    mockFetcher.mockResolvedValueOnce({
+      ok: true,
+      json: async () => attestationData,
+    })
+    const result = (await fetchPackageProvenance('lodash', '4.17.21')) as {
+      level: string
+      commitSha: string
+    }
+    expect(result.level).toBe('trusted')
+    expect(result.commitSha).toBe('abc')
+    expect(mockFetcher).toHaveBeenCalledTimes(1)
+    const call = mockFetcher.mock.calls[0]
+    expect(String(call?.[0])).toContain('attestations/lodash')
+  })
+
+  it('returns undefined when response is not ok', async () => {
+    mockFetcher.mockResolvedValueOnce({ ok: false, status: 404 })
+    expect(
+      await fetchPackageProvenance('does-not-exist', '1.0.0'),
+    ).toBeUndefined()
+  })
+
+  it('returns undefined when fetcher throws', async () => {
+    mockFetcher.mockRejectedValueOnce(new Error('network'))
+    expect(await fetchPackageProvenance('lodash', '4.17.21')).toBeUndefined()
+  })
+
+  it('returns undefined when caller-supplied signal is already aborted', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const result = await fetchPackageProvenance('lodash', '4.17.21', {
+      signal: controller.signal,
+    } as unknown as Parameters<typeof fetchPackageProvenance>[2])
+    expect(result).toBeUndefined()
+    expect(mockFetcher).not.toHaveBeenCalled()
+  })
+
+  it('URL-encodes the package name + version', async () => {
+    mockFetcher.mockResolvedValueOnce({ ok: false, status: 404 })
+    await fetchPackageProvenance('@scope/with space', '1.0.0+meta')
+    const url = String(mockFetcher.mock.calls[0]?.[0])
+    expect(url).toContain('%40scope%2Fwith%20space')
+    expect(url).toContain('1.0.0%2Bmeta')
   })
 })
