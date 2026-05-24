@@ -26,6 +26,8 @@ import {
 import { resolveRealBinSync } from '../../src/bin/resolve'
 import { isShadowBinPath } from '../../src/bin/shadow'
 import { whichReal, whichRealSync } from '../../src/bin/which'
+// Async whichReal covers the resolveRealBinSync + cache.set happy path that
+// the sync variant doesn't reach.
 import { isError } from '../../src/errors/predicates'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from './util/temp-file-helper'
@@ -81,6 +83,22 @@ describe('bin', () => {
     it('should return false for node_modules without .bin', () => {
       const result = isShadowBinPath('/path/to/node_modules')
       expect(result).toBe(false)
+    })
+  })
+
+  describe('whichReal (async)', () => {
+    it('resolves node to a real path and caches it', async () => {
+      const result = await whichReal('node')
+      expect(typeof result).toBe('string')
+      expect(result as string).toContain('node')
+      // Second call should hit the cache fast-path; result must match.
+      const again = await whichReal('node')
+      expect(again).toBe(result)
+    })
+
+    it('returns undefined for a binary that does not exist', async () => {
+      const result = await whichReal('totally-nonexistent-binary-zxy-12345')
+      expect(result).toBeUndefined()
     })
   })
 
