@@ -230,4 +230,39 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
       expect(cleaned).toBe(0)
     })
   })
+
+  test('listDlxCache returns entries with metadata', async () => {
+    await withMockHome(async () => {
+      const cachePath = getDlxCachePath()
+      const entryPath = path.join(cachePath, 'listed-entry')
+      mkdirSync(entryPath, { recursive: true })
+      writeFileSync(path.join(entryPath, 'some-bin'), 'x'.repeat(42))
+      writeFileSync(
+        path.join(entryPath, '.dlx-metadata.json'),
+        JSON.stringify({
+          timestamp: Date.now() - 5_000,
+          integrity: 'sha512-abc',
+          url: 'https://example.com/bin',
+        }),
+      )
+      const entries = await listDlxCache()
+      const listed = entries.find(e => e.name === 'some-bin')
+      expect(listed).toBeDefined()
+      expect(listed?.integrity).toBe('sha512-abc')
+      expect(listed?.url).toBe('https://example.com/bin')
+      expect(listed?.size).toBeGreaterThan(0)
+      expect(listed?.age).toBeGreaterThanOrEqual(0)
+    })
+  })
+
+  test('readBinaryCacheMetadata returns undefined when entry path is unreadable', async () => {
+    // existsSync on a path with an unreadable parent throws → the function's
+    // outer try/catch returns undefined.
+    const entryPath = path.join(tmpRoot, '\0invalid')
+    expect(await readBinaryCacheMetadata(entryPath)).toBeUndefined()
+  })
+
+  test('isBinaryCacheValid returns false when an unreadable path throws', async () => {
+    expect(await isBinaryCacheValid(path.join(tmpRoot, '\0bad'))).toBe(false)
+  })
 })

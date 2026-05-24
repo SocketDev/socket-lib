@@ -24,6 +24,7 @@ import {
   getSocketRegistryDir,
   getSocketRegistryGithubCacheDir,
   getSocketUserDir,
+  getSocketWheelhouseDir,
   getUserHomeDir,
 } from '../../../src/paths/socket'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
@@ -197,6 +198,19 @@ describe('paths/socket', () => {
       clearEnv('SOCKET_CACACHE_DIR')
       const result = getSocketCacacheDir()
       expect(result.includes('\\')).toBe(false)
+    })
+  })
+
+  describe('getSocketWheelhouseDir', () => {
+    it('returns the _wheelhouse directory under the user dir', () => {
+      clearPath('socket-wheelhouse-dir')
+      const result = getSocketWheelhouseDir()
+      expect(result).toContain('.socket/_wheelhouse')
+    })
+
+    it('honors a setPath override', () => {
+      setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
+      expect(getSocketWheelhouseDir()).toBe('/custom/wheelhouse')
     })
   })
 

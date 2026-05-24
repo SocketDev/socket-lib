@@ -250,3 +250,64 @@ describe.sequential('http-request/download — option pass-through', () => {
     expect(o.timeout).toBe(120_000)
   })
 })
+
+describe.sequential('http-request/download — temp/stream cleanup branches', () => {
+  test('cleans up a leftover temp file from a failed attempt before retrying', async () => {
+    const dest = path.join(tmpRoot, 'retry-cleanup.bin')
+    // First attempt: response succeeds, but checksum mismatch leaves temp
+    // file pending — the catch arm at L192-195 runs.
+    // Then second attempt succeeds with the correct content.
+    mockHttpRequestAttempt
+      .mockResolvedValueOnce(makeFakeResponse({ body: 'wrong' }))
+      .mockResolvedValueOnce(makeFakeResponse({ body: 'right' }))
+    const expected = sha256Hex('right')
+    const { httpDownload } = await loadFresh()
+    const result = await httpDownload('https://example.com/x', dest, {
+      retries: 1,
+      retryDelay: 0,
+      sha256: expected,
+    })
+    expect(result.path).toBe(dest)
+    expect(readFileSync(dest, 'utf8')).toBe('right')
+  })
+
+  test('rejects when rawResponse emits an error mid-stream', async () => {
+    const dest = path.join(tmpRoot, 'res-error.bin')
+    const rawResponse = new PassThrough()
+    // Attach an error listener BEFORE the function runs to consume the error
+    // event we'll emit. The download fn also attaches one inside the Promise
+    // executor; both consume the same emit.
+    rawResponse.on('error', () => {})
+    mockHttpRequestAttempt.mockResolvedValueOnce({
+      body: Buffer.from(''),
+      headers: { 'content-length': '0' },
+      ok: true,
+      rawResponse,
+      status: 200,
+      statusText: 'OK',
+      text: () => '',
+      json: () => ({}),
+      arrayBuffer: () => new ArrayBuffer(0),
+    })
+    const { httpDownload } = await loadFresh()
+    setTimeout(() => rawResponse.emit('error', new Error('network-blip')), 10)
+    await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
+      /network-blip/,
+    )
+  })
+
+  test('reports onProgress with downloaded/total when content-length is set', async () => {
+    const dest = path.join(tmpRoot, 'progress.bin')
+    const body = 'abcdefghij'
+    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+    const progress: Array<[number, number]> = []
+    const { httpDownload } = await loadFresh()
+    await httpDownload('https://example.com/x', dest, {
+      onProgress: (downloaded, total) => progress.push([downloaded, total]),
+    })
+    expect(progress.length).toBeGreaterThan(0)
+    const last = progress[progress.length - 1]!
+    expect(last[0]).toBe(body.length)
+    expect(last[1]).toBe(body.length)
+  })
+})

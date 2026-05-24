@@ -185,6 +185,22 @@ describe.sequential('secrets/keychain — readSecretSync', () => {
     const { mod } = await loadFresh('other')
     expect(mod.readSecretSync({ service: 's', account: 'a' })).toBeUndefined()
   })
+
+  test('returns the cached value on the second sync read', async () => {
+    const { macos, mod } = await loadFresh('darwin')
+    macos['readMacOSSync']!.mockReturnValueOnce('cached-sync')
+    const a = mod.readSecretSync({
+      service: 'svc-cached-sync',
+      account: 'acc-cached-sync',
+    })
+    const b = mod.readSecretSync({
+      service: 'svc-cached-sync',
+      account: 'acc-cached-sync',
+    })
+    expect(a).toBe('cached-sync')
+    expect(b).toBe('cached-sync')
+    expect(macos['readMacOSSync']).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe.sequential('secrets/keychain — writeSecret', () => {
