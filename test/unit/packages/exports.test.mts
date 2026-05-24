@@ -16,7 +16,7 @@ import {
   resolvePackageJsonEntryExports,
 } from '../../../src/packages/exports'
 
-describe('packages/exports — isConditionalExports', () => {
+describe.sequential('packages/exports — isConditionalExports', () => {
   it('returns false for non-objects', () => {
     expect(isConditionalExports(null)).toBe(false)
     expect(isConditionalExports(undefined)).toBe(false)
@@ -48,7 +48,7 @@ describe('packages/exports — isConditionalExports', () => {
   })
 })
 
-describe('packages/exports — isSubpathExports', () => {
+describe.sequential('packages/exports — isSubpathExports', () => {
   it('returns false for non-objects', () => {
     expect(isSubpathExports(null)).toBe(false)
     expect(isSubpathExports('./index.js')).toBe(false)
@@ -70,7 +70,7 @@ describe('packages/exports — isSubpathExports', () => {
   })
 })
 
-describe('packages/exports — getSubpaths', () => {
+describe.sequential('packages/exports — getSubpaths', () => {
   it('returns [] for non-objects', () => {
     expect(getSubpaths(null)).toEqual([])
     expect(getSubpaths('./index.js')).toEqual([])
@@ -91,7 +91,7 @@ describe('packages/exports — getSubpaths', () => {
   })
 })
 
-describe('packages/exports — getExportFilePaths', () => {
+describe.sequential('packages/exports — getExportFilePaths', () => {
   it('returns [] for non-objects', () => {
     expect(getExportFilePaths(null)).toEqual([])
     expect(getExportFilePaths('./index.js')).toEqual([])
@@ -132,7 +132,7 @@ describe('packages/exports — getExportFilePaths', () => {
   })
 })
 
-describe('packages/exports — resolvePackageJsonEntryExports', () => {
+describe.sequential('packages/exports — resolvePackageJsonEntryExports', () => {
   it('wraps a string in canonical "." form', () => {
     expect(resolvePackageJsonEntryExports('./index.js')).toEqual({
       '.': './index.js',
@@ -162,7 +162,7 @@ describe('packages/exports — resolvePackageJsonEntryExports', () => {
   })
 })
 
-describe('packages/exports — findTypesForSubpath', () => {
+describe.sequential('packages/exports — findTypesForSubpath', () => {
   it('returns undefined when subpath is not present', () => {
     expect(
       findTypesForSubpath(

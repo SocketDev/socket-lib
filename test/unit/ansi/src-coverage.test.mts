@@ -18,7 +18,7 @@ import {
 } from '../../../src/ansi/constants'
 import { ansiRegex, stripAnsi } from '../../../src/ansi/strip'
 
-describe('ansi/constants (src)', () => {
+describe.sequential('ansi/constants (src)', () => {
   it('exports the canonical ANSI escape sequences', () => {
     expect(ANSI_RESET).toBe('\x1b[0m')
     expect(ANSI_BOLD).toBe('\x1b[1m')
@@ -29,7 +29,7 @@ describe('ansi/constants (src)', () => {
   })
 })
 
-describe('ansi/strip (src) — ansiRegex', () => {
+describe.sequential('ansi/strip (src) — ansiRegex', () => {
   it('returns a fresh RegExp each call (global flag avoids shared lastIndex)', () => {
     const a = ansiRegex()
     const b = ansiRegex()
@@ -53,7 +53,7 @@ describe('ansi/strip (src) — ansiRegex', () => {
   })
 })
 
-describe('ansi/strip (src) — stripAnsi', () => {
+describe.sequential('ansi/strip (src) — stripAnsi', () => {
   it('strips a simple color sequence', () => {
     expect(stripAnsi('\x1b[31mhello\x1b[0m')).toBe('hello')
   })

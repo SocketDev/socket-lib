@@ -33,7 +33,7 @@ afterEach(() => {
   rmSync(tmp, { force: true, recursive: true })
 })
 
-describe('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', () => {
+describe.sequential('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', () => {
   it('returns the .cmd wrapper when present', () => {
     const base = path.join(tmp, 'tool')
     writeFileSync(`${base}.cmd`, 'rem cmd wrapper')
@@ -89,7 +89,7 @@ describe('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', () => {
   })
 })
 
-describe('dlx/binary-resolution — makePackageBinsExecutable (WIN32 stub)', () => {
+describe.sequential('dlx/binary-resolution — makePackageBinsExecutable (WIN32 stub)', () => {
   it('early-returns without touching the filesystem on Windows', () => {
     // No package.json need exist; the Win32 path returns before any I/O.
     expect(() =>

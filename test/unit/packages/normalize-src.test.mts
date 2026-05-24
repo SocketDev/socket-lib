@@ -18,7 +18,7 @@ import {
 
 import type { PackageJson } from '../../../src/packages/types'
 
-describe('packages/normalize (src) — getEscapedScopeRegExp', () => {
+describe.sequential('packages/normalize (src) — getEscapedScopeRegExp', () => {
   it('returns a fresh RegExp', () => {
     const a = getEscapedScopeRegExp()
     const b = getEscapedScopeRegExp()
@@ -34,7 +34,7 @@ describe('packages/normalize (src) — getEscapedScopeRegExp', () => {
   })
 })
 
-describe('packages/normalize (src) — resolveEscapedScope', () => {
+describe.sequential('packages/normalize (src) — resolveEscapedScope', () => {
   it('returns the escaped scope when present', () => {
     expect(resolveEscapedScope('babel__core')).toBe('babel__')
   })
@@ -44,7 +44,7 @@ describe('packages/normalize (src) — resolveEscapedScope', () => {
   })
 })
 
-describe('packages/normalize (src) — resolveOriginalPackageName', () => {
+describe.sequential('packages/normalize (src) — resolveOriginalPackageName', () => {
   it('strips the @socketregistry/ prefix and unescapes the scope', () => {
     expect(resolveOriginalPackageName('@socketregistry/babel__core')).toBe(
       '@babel/core',
@@ -66,7 +66,7 @@ describe('packages/normalize (src) — resolveOriginalPackageName', () => {
   })
 })
 
-describe('packages/normalize (src) — unescapeScope', () => {
+describe.sequential('packages/normalize (src) — unescapeScope', () => {
   it('strips the delimiter from a normal escaped scope', () => {
     expect(unescapeScope('babel__')).toBe('@babel')
   })
@@ -77,7 +77,7 @@ describe('packages/normalize (src) — unescapeScope', () => {
   })
 })
 
-describe('packages/normalize (src) — normalizePackageJson', () => {
+describe.sequential('packages/normalize (src) — normalizePackageJson', () => {
   it('adds default version when missing', () => {
     const pkg = { name: 'test-package' }
     const normalized = normalizePackageJson(pkg as PackageJson)

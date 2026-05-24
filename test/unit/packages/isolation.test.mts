@@ -28,7 +28,7 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe('packages/isolation — mergePackageJson', () => {
+describe.sequential('packages/isolation — mergePackageJson', () => {
   it('returns the parsed pkgJson as-is when originalPkgJson is undefined', async () => {
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(pkgPath, JSON.stringify({ name: 'a', version: '1' }))
@@ -67,7 +67,7 @@ describe('packages/isolation — mergePackageJson', () => {
   })
 })
 
-describe('packages/isolation — resolveRealPath', () => {
+describe.sequential('packages/isolation — resolveRealPath', () => {
   it('returns the realpath of an existing file', async () => {
     const filePath = path.join(tmp, 'file.txt')
     writeFileSync(filePath, 'hi')
@@ -100,7 +100,7 @@ describe('packages/isolation — resolveRealPath', () => {
   })
 })
 
-describe('packages/isolation — isolatePackage', () => {
+describe.sequential('packages/isolation — isolatePackage', () => {
   // Build a tiny local source package under tmp. The shape:
   //   tmp/src-pkg/package.json
   //   tmp/src-pkg/index.js

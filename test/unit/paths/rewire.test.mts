@@ -25,7 +25,7 @@ afterEach(() => {
   resetPaths()
 })
 
-describe('paths/rewire — getPathValue', () => {
+describe.sequential('paths/rewire — getPathValue', () => {
   it('returns the override when one is set', () => {
     setPath('test-key-x', '/override/path')
     expect(getPathValue('test-key-x', () => '/computed')).toBe('/override/path')
@@ -48,7 +48,7 @@ describe('paths/rewire — getPathValue', () => {
   })
 })
 
-describe('paths/rewire — hasOverride', () => {
+describe.sequential('paths/rewire — hasOverride', () => {
   it('returns true after setPath', () => {
     setPath('h-key-1', '/v')
     expect(hasOverride('h-key-1')).toBe(true)
@@ -65,7 +65,7 @@ describe('paths/rewire — hasOverride', () => {
   })
 })
 
-describe('paths/rewire — invalidateCaches', () => {
+describe.sequential('paths/rewire — invalidateCaches', () => {
   it('drops cached values (next get recomputes via originalFn)', () => {
     const fn = vi.fn(() => '/v1')
     getPathValue('inv-key', fn) // primes cache

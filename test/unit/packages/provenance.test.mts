@@ -24,7 +24,7 @@ import {
   isTrustedPublisher,
 } from '../../../src/packages/provenance'
 
-describe('packages/provenance — getAttestations', () => {
+describe.sequential('packages/provenance — getAttestations', () => {
   it('returns [] when input has no attestations field', () => {
     expect(getAttestations({})).toEqual([])
   })
@@ -51,7 +51,7 @@ describe('packages/provenance — getAttestations', () => {
   })
 })
 
-describe('packages/provenance — findProvenance', () => {
+describe.sequential('packages/provenance — findProvenance', () => {
   it('returns undefined for an empty list', () => {
     expect(findProvenance([])).toBeUndefined()
   })
@@ -103,7 +103,7 @@ describe('packages/provenance — findProvenance', () => {
   })
 })
 
-describe('packages/provenance — getProvenanceDetails', () => {
+describe.sequential('packages/provenance — getProvenanceDetails', () => {
   it('returns undefined when no SLSA attestations present', () => {
     expect(getProvenanceDetails({ attestations: [] })).toBeUndefined()
   })
@@ -195,7 +195,7 @@ describe('packages/provenance — getProvenanceDetails', () => {
   })
 })
 
-describe('packages/provenance — isTrustedPublisher', () => {
+describe.sequential('packages/provenance — isTrustedPublisher', () => {
   it('returns false for non-string or empty input', () => {
     expect(isTrustedPublisher(null)).toBe(false)
     expect(isTrustedPublisher(undefined)).toBe(false)
@@ -257,7 +257,7 @@ describe('packages/provenance — isTrustedPublisher', () => {
   })
 })
 
-describe('packages/provenance — fetchPackageProvenance', () => {
+describe.sequential('packages/provenance — fetchPackageProvenance', () => {
   beforeEach(() => {
     mockFetcher.mockReset()
   })

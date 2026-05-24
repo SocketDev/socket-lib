@@ -31,7 +31,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('fs/read-json-cache — clearReadJsonCache', () => {
+describe.sequential('fs/read-json-cache — clearReadJsonCache', () => {
   it('drops all entries and resets hits/misses', () => {
     setCachedJson('/a', 1, 1, 1, { x: 1 })
     getCachedJson('/a', 1, 1, 1)
@@ -49,7 +49,7 @@ describe('fs/read-json-cache — clearReadJsonCache', () => {
   })
 })
 
-describe('fs/read-json-cache — set/get round-trip', () => {
+describe.sequential('fs/read-json-cache — set/get round-trip', () => {
   it('round-trips a value when the stat signature matches', () => {
     setCachedJson('/a', 1, 100, 200, { name: 'a' })
     const result = getCachedJson('/a', 1, 100, 200)
@@ -84,7 +84,7 @@ describe('fs/read-json-cache — set/get round-trip', () => {
   })
 })
 
-describe('fs/read-json-cache — defensive cloning', () => {
+describe.sequential('fs/read-json-cache — defensive cloning', () => {
   it("returns a clone on hit so caller mutations don't poison the cache", () => {
     setCachedJson('/a', 1, 1, 1, { nested: { count: 0 } })
     const a = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
@@ -102,7 +102,7 @@ describe('fs/read-json-cache — defensive cloning', () => {
   })
 })
 
-describe('fs/read-json-cache — LRU eviction', () => {
+describe.sequential('fs/read-json-cache — LRU eviction', () => {
   it('evicts the oldest entry when max is reached', () => {
     setReadJsonCacheMax(2)
     setCachedJson('/a', 1, 1, 1, { v: 'a' })
@@ -133,7 +133,7 @@ describe('fs/read-json-cache — LRU eviction', () => {
   })
 })
 
-describe('fs/read-json-cache — TTL eviction', () => {
+describe.sequential('fs/read-json-cache — TTL eviction', () => {
   it('ttlMs=0 disables time-based eviction', () => {
     setReadJsonCacheTtlMs(0)
     setCachedJson('/a', 1, 1, 1, { v: 'a' })
@@ -162,7 +162,7 @@ describe('fs/read-json-cache — TTL eviction', () => {
   })
 })
 
-describe('fs/read-json-cache — env-var config', () => {
+describe.sequential('fs/read-json-cache — env-var config', () => {
   it('readMaxFromEnv returns default when env is unset', () => {
     vi.stubEnv('SOCKET_LIB_READ_JSON_CACHE_MAX', '')
     expect(readMaxFromEnv()).toBe(256)
@@ -204,7 +204,7 @@ describe('fs/read-json-cache — env-var config', () => {
   })
 })
 
-describe('fs/read-json-cache — getReadJsonCacheStats', () => {
+describe.sequential('fs/read-json-cache — getReadJsonCacheStats', () => {
   it('reports size + max + ttlMs + hits + misses', () => {
     setReadJsonCacheMax(10)
     setReadJsonCacheTtlMs(2000)

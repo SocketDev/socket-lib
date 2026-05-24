@@ -47,7 +47,7 @@ afterEach(() => {
   rmSync(tmp, { force: true, recursive: true })
 })
 
-describe('dlx/binary-download — Windows branch (WIN32=true stub)', () => {
+describe.sequential('dlx/binary-download — Windows branch (WIN32=true stub)', () => {
   it('skips chmod on Windows (downloadBinaryFile returns integrity)', async () => {
     const destPath = path.join(tmp, 'win-binary.exe')
     const result = await downloadBinaryFile('https://example.com/x', destPath)

@@ -24,7 +24,7 @@ import {
 } from '../../../src/packages/manifest'
 import pacote from '../../../src/external/pacote'
 
-describe('packages/manifest — createPackageJson', () => {
+describe.sequential('packages/manifest — createPackageJson', () => {
   it('builds the canonical shape from minimal input', () => {
     const pkg = createPackageJson('is-number', 'packages/npm/is-number')
     expect(pkg.name).toBe('@socketregistry/is-number')
@@ -159,7 +159,7 @@ describe('packages/manifest — createPackageJson', () => {
   })
 })
 
-describe('packages/manifest — fetchPackageManifest', () => {
+describe.sequential('packages/manifest — fetchPackageManifest', () => {
   beforeEach(() => {
     vi.mocked(pacote.manifest).mockReset()
   })
@@ -225,7 +225,7 @@ describe('packages/manifest — fetchPackageManifest', () => {
   })
 })
 
-describe('packages/manifest — fetchPackagePackument', () => {
+describe.sequential('packages/manifest — fetchPackagePackument', () => {
   beforeEach(() => {
     vi.mocked(pacote.packument).mockReset()
   })

@@ -35,7 +35,7 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe('dlx/arborist — getBaseArboristOptions', () => {
+describe.sequential('dlx/arborist — getBaseArboristOptions', () => {
   it('pins the security-hardened flags', () => {
     const opts = getBaseArboristOptions('/install', { quiet: true }) as Record<
       string,
@@ -65,7 +65,7 @@ describe('dlx/arborist — getBaseArboristOptions', () => {
   })
 })
 
-describe('dlx/arborist — readSingleDependency', () => {
+describe.sequential('dlx/arborist — readSingleDependency', () => {
   it('returns the only dependency name', () => {
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(
@@ -100,7 +100,7 @@ describe('dlx/arborist — readSingleDependency', () => {
   })
 })
 
-describe('dlx/arborist — readTopLevelFromIdealTree', () => {
+describe.sequential('dlx/arborist — readTopLevelFromIdealTree', () => {
   const makeTree = (
     nodes: Array<{
       name?: string
@@ -201,7 +201,7 @@ describe('dlx/arborist — readTopLevelFromIdealTree', () => {
   })
 })
 
-describe('dlx/arborist — writeSafeNpmrc', () => {
+describe.sequential('dlx/arborist — writeSafeNpmrc', () => {
   async function read(installPath: string) {
     return readFileSync(path.join(installPath, '.npmrc'), 'utf8')
   }

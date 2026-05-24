@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 
 import { specName, specRange } from '../../../src/dlx/lockfile'
 
-describe('dlx/lockfile — specName', () => {
+describe.sequential('dlx/lockfile — specName', () => {
   it('returns the name from a versioned spec', () => {
     expect(specName('lodash@4.17.21')).toBe('lodash')
   })
@@ -35,7 +35,7 @@ describe('dlx/lockfile — specName', () => {
   })
 })
 
-describe('dlx/lockfile — specRange', () => {
+describe.sequential('dlx/lockfile — specRange', () => {
   it('returns the range from a versioned spec', () => {
     expect(specRange('lodash@4.17.21')).toBe('4.17.21')
   })

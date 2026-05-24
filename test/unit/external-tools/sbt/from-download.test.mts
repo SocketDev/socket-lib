@@ -43,7 +43,7 @@ export async function buildSbtTarball(scratchDir: string): Promise<Buffer> {
   return fs.readFileSync(archivePath)
 }
 
-describe('external-tools/sbt/from-download', () => {
+describe.sequential('external-tools/sbt/from-download', () => {
   let scratch: string
   beforeEach(() => {
     scratch = mkdtempSync(path.join(os.tmpdir(), 'sbt-from-download-test-'))

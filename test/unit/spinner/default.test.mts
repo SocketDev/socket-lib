@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getCliSpinners, getDefaultSpinner } from '../../../src/spinner/default'
 
-describe('spinner/default — getCliSpinners', () => {
+describe.sequential('spinner/default — getCliSpinners', () => {
   it('returns the full spinner registry when no name is passed', () => {
     const all = getCliSpinners()
     expect(typeof all).toBe('object')
@@ -33,7 +33,7 @@ describe('spinner/default — getCliSpinners', () => {
   })
 })
 
-describe('spinner/default — getDefaultSpinner', () => {
+describe.sequential('spinner/default — getDefaultSpinner', () => {
   it('returns a SpinnerInstance', () => {
     const sp = getDefaultSpinner()
     expect(typeof sp).toBe('object')
