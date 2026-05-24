@@ -352,5 +352,29 @@ describe('releases/socket-btm', () => {
         }),
       ).rejects.toThrow(/No models release with matching asset pattern/)
     })
+
+    it('forwards an explicit cwd through to downloadGitHubRelease config', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x')
+      await downloadSocketBtmRelease('bin', {
+        cwd: '/my/repo/root',
+        quiet: true,
+        targetPlatform: 'darwin',
+        targetArch: 'arm64',
+      })
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg.cwd).toBe('/my/repo/root')
+    })
+
+    it('forwards an explicit downloadDir through to downloadGitHubRelease config', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/x/dl/y')
+      await downloadSocketBtmRelease('bin', {
+        downloadDir: '/x/dl',
+        quiet: true,
+        targetPlatform: 'darwin',
+        targetArch: 'arm64',
+      })
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg.downloadDir).toBe('/x/dl')
+    })
   })
 })
