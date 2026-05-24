@@ -1,13 +1,28 @@
 /**
- * @file Unit tests for packages/manifest.ts — pure helper `createPackageJson`.
- *   fetchPackageManifest / fetchPackagePackument hit the npm registry and are
- *   covered by the integration suite; this file targets the synchronous shape
- *   builder used to scaffold Socket-registry package.json files.
+ * @file Unit tests for packages/manifest.ts. Covers the pure helper
+ *   `createPackageJson` + the network fns `fetchPackageManifest` /
+ *   `fetchPackagePackument` via pacote mocks (no real network).
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createPackageJson } from '../../../src/packages/manifest'
+// Mock pacote BEFORE importing src/packages/manifest so the mocked
+// pacote.manifest / pacote.packument are seen by the SUT.
+vi.mock('../../../src/external/pacote', () => ({
+  default: {
+    manifest: vi.fn(),
+    packument: vi.fn(),
+    tarball: vi.fn(),
+    extract: vi.fn(),
+  },
+}))
+
+import {
+  createPackageJson,
+  fetchPackageManifest,
+  fetchPackagePackument,
+} from '../../../src/packages/manifest'
+import pacote from '../../../src/external/pacote'
 
 describe('packages/manifest — createPackageJson', () => {
   it('builds the canonical shape from minimal input', () => {
@@ -141,5 +156,93 @@ describe('packages/manifest — createPackageJson', () => {
       socket: socket as unknown as Record<string, unknown>,
     })
     expect(pkg.socket).toEqual({ categories: ['cleanup'] })
+  })
+})
+
+describe('packages/manifest — fetchPackageManifest', () => {
+  beforeEach(() => {
+    vi.mocked(pacote.manifest).mockReset()
+  })
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns the pacote result directly when spec is a registry type', async () => {
+    vi.mocked(pacote.manifest).mockResolvedValueOnce({
+      name: 'lodash',
+      version: '4.17.21',
+    } as unknown as ReturnType<typeof pacote.manifest>)
+    const result = await fetchPackageManifest('lodash@4.17.21')
+    expect(result).toEqual({ name: 'lodash', version: '4.17.21' })
+    expect(pacote.manifest).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns undefined when pacote throws', async () => {
+    vi.mocked(pacote.manifest).mockRejectedValueOnce(new Error('boom'))
+    const result = await fetchPackageManifest('does-not-exist@1.0.0')
+    expect(result).toBeUndefined()
+  })
+
+  it('returns undefined when signal is already aborted', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const result = await fetchPackageManifest('lodash@4.17.21', {
+      signal: controller.signal,
+    } as unknown as Parameters<typeof fetchPackageManifest>[1])
+    expect(result).toBeUndefined()
+    expect(pacote.manifest).not.toHaveBeenCalled()
+  })
+
+  it('returns undefined when pacote returns falsy', async () => {
+    vi.mocked(pacote.manifest).mockResolvedValueOnce(
+      undefined as unknown as ReturnType<typeof pacote.manifest>,
+    )
+    const result = await fetchPackageManifest('lodash@4.17.21')
+    expect(result).toBeUndefined()
+  })
+
+  it('re-fetches with name@version when spec is non-registry (file path)', async () => {
+    // First call: pacote returns a manifest for the file path spec.
+    // Second call: pacote returns the manifest for the resolved name@version.
+    const resolved = { name: 'pkg-from-path', version: '1.2.3' }
+    vi.mocked(pacote.manifest)
+      .mockResolvedValueOnce(
+        resolved as unknown as ReturnType<typeof pacote.manifest>,
+      )
+      .mockResolvedValueOnce({
+        ...resolved,
+        registryFetched: true,
+      } as unknown as ReturnType<typeof pacote.manifest>)
+    const result = (await fetchPackageManifest('./local-pkg')) as {
+      name: string
+      registryFetched?: boolean
+    }
+    // Second pacote call should be against name@version form.
+    const secondCallArg = vi.mocked(pacote.manifest).mock.calls[1]?.[0]
+    expect(typeof secondCallArg).toBe('string')
+    expect(secondCallArg).toContain('pkg-from-path@1.2.3')
+    expect(result.registryFetched).toBe(true)
+  })
+})
+
+describe('packages/manifest — fetchPackagePackument', () => {
+  beforeEach(() => {
+    vi.mocked(pacote.packument).mockReset()
+  })
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns the packument from pacote.packument', async () => {
+    const packument = { name: 'lodash', 'dist-tags': { latest: '4.17.21' } }
+    vi.mocked(pacote.packument).mockResolvedValueOnce(
+      packument as unknown as ReturnType<typeof pacote.packument>,
+    )
+    expect(await fetchPackagePackument('lodash')).toEqual(packument)
+  })
+
+  it('returns undefined when pacote.packument throws', async () => {
+    vi.mocked(pacote.packument).mockRejectedValueOnce(new Error('network'))
+    expect(await fetchPackagePackument('does-not-exist')).toBeUndefined()
   })
 })
