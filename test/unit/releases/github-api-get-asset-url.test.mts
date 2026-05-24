@@ -142,6 +142,25 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
     )
   })
 
+  it('should throw when REST per-tag returns non-ok status', async () => {
+    // Force pRetry to bypass timing for this test.
+    vi.useFakeTimers()
+    try {
+      vi.mocked(httpRequest).mockResolvedValue(
+        createMockHttpResponse(Buffer.from(''), false, 404, 'Not Found'),
+      )
+      const promise = getReleaseAssetUrl(
+        'v1.0.0',
+        '*.tar.gz',
+        SOCKET_BTM_REPO,
+      )
+      await vi.runAllTimersAsync()
+      await expect(promise).rejects.toThrow(/Failed to fetch.*release v1\.0\.0/)
+    } finally {
+      vi.useRealTimers()
+    }
+  }, 30_000)
+
   it('should throw error when pattern does not match any asset', async () => {
     vi.mocked(httpRequest).mockResolvedValue(
       createMockHttpResponse(

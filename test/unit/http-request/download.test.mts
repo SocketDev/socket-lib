@@ -296,6 +296,19 @@ describe.sequential('http-request/download — temp/stream cleanup branches', ()
     )
   })
 
+  test('rejects with a wrapped error when the destination write stream errors', async () => {
+    // Point destPath at a non-existent parent dir — createWriteStream emits an
+    // ENOENT error on the open. fileStream.on('error') wraps and rejects.
+    const dest = path.join(tmpRoot, 'no-such-dir', 'file.bin')
+    mockHttpRequestAttempt.mockResolvedValueOnce(
+      makeFakeResponse({ body: 'data' }),
+    )
+    const { httpDownload } = await loadFresh()
+    await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
+      /Failed to write file/,
+    )
+  })
+
   test('reports onProgress with downloaded/total when content-length is set', async () => {
     const dest = path.join(tmpRoot, 'progress.bin')
     const body = 'abcdefghij'
