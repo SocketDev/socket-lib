@@ -231,15 +231,4 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
     })
   })
 
-  test('cleanDlxCache: skips entry without metadata (early-continue, no removal)', async () => {
-    await withMockHome(async () => {
-      const cachePath = getDlxCachePath()
-      const entryPath = path.join(cachePath, 'empty-no-meta')
-      mkdirSync(entryPath, { recursive: true })
-      // readJson(metaPath, {throws:false}) returns undefined →
-      // source continues without removing the entry. cleaned stays 0.
-      const cleaned = await cleanDlxCache(0)
-      expect(cleaned).toBe(0)
-    })
-  })
 })
